@@ -58,8 +58,9 @@ def test_snapshot_sync_noop(temporary_table: IcebergTable) -> None:
     # No Changeset identifier is returned
     assert changeset is None
     # The data is the same as before the update
+    expected_field_names = tuple(field.name for field in ARROW_SCHEMA)
     assert (
-        temporary_table.scan(selected_fields=("namespace", "id", "content"))
+        temporary_table.scan(selected_fields=expected_field_names)
         .to_arrow()
         .cast(ARROW_SCHEMA)
         .equals(data)
@@ -544,3 +545,35 @@ def test_snapshot_sync_get_all_records_include_deleted(
     rows = {row["id"]: row for row in all_with_deleted.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0002", "eb0003", "eb0004"}
     assert rows["eb0002"]["content"] is None  # deleted present
+
+
+def test_snapshot_sync_raises_on_non_castable_schema(
+    temporary_table: IcebergTable,
+) -> None:
+    """snapshot_sync should fail fast if the adapter hands us a table with the wrong schema."""
+    import pytest
+
+    # Missing the required 'deleted' field from ARROW_SCHEMA.
+    bad_fields: list[pa.Field] = [
+        pa.field("namespace", pa.string(), nullable=False),
+        pa.field("id", pa.string(), nullable=False),
+        pa.field("content", pa.string(), nullable=True),
+        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
+    ]
+    bad_schema = pa.schema(bad_fields)
+
+    bad_table = pa.Table.from_pylist(
+        [
+            {
+                "namespace": "test_namespace",
+                "id": "eb0001",
+                "content": "hello",
+                "last_modified": None,
+            }
+        ],
+        schema=bad_schema,
+    )
+
+    client = AdapterStore(temporary_table)
+    with pytest.raises(ValueError, match=r"snapshot_sync.*ARROW_SCHEMA"):
+        client.snapshot_sync(bad_table, "test_namespace")

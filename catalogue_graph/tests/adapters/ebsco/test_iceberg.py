@@ -35,8 +35,9 @@ def test_noop(temporary_table: IcebergTable) -> None:
     # No Changeset identifier is returned
     assert changeset is None
     # The data is the same as before the update
+    expected_field_names = tuple(field.name for field in ARROW_SCHEMA)
     assert (
-        temporary_table.scan(selected_fields=("namespace", "id", "content"))
+        temporary_table.scan(selected_fields=expected_field_names)
         .to_arrow()
         .cast(ARROW_SCHEMA)
         .equals(data)
@@ -261,7 +262,7 @@ def test_delete_records(temporary_table: IcebergTable) -> None:
 def test_all_actions(temporary_table: IcebergTable) -> None:
     """
     Given an existing Iceberg table
-    And an update file with new, changed, absent and unchanged  records
+    And an update file with new, changed, absent and unchanged records
     When the update is applied
     Then all the appropriate actions are taken
     And all the new, changed and deleted rows are identifiably grouped by a changeset property

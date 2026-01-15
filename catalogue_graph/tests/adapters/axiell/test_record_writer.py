@@ -7,7 +7,7 @@ from oai_pmh_client.models import Header, Record
 
 from adapters.axiell.record_writer import WindowRecordWriter
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA_WITH_TIMESTAMP
+from adapters.utils.schemata import ARROW_SCHEMA
 
 
 def test_writes_records_to_store() -> None:
@@ -50,7 +50,7 @@ def test_writes_records_to_store() -> None:
     table = call_args[0][0]
 
     assert isinstance(table, pa.Table)
-    assert table.schema.equals(ARROW_SCHEMA_WITH_TIMESTAMP)
+    assert table.schema.equals(ARROW_SCHEMA)
     assert table.num_rows == 1
 
     row = table.to_pylist()[0]
