@@ -158,8 +158,8 @@ class SameAsConceptsTest(GraphQueryTest):
 
         if diff_ratio <= 0.2:
             warnings.warn(
-                f"SameAsConceptsTest difference {diff_ratio:.0%} for ids: "
-                f"missing {expected_set - returned_set}, extra {returned_set - expected_set}",
+                f"SameAsConceptsTest difference {diff_ratio:.0%}. "
+                f"Missing IDs: {list(expected_set - returned_set)}. Extra IDs: {list(returned_set - expected_set)}",
                 stacklevel=2,
             )
             return True
