@@ -180,8 +180,9 @@ def test_relations_are_set_from_parents(marc_record: Record) -> None:
         build_relations=lambda r: WorkRelations(ancestors=get_parents(r)),
     )
 
-    work = transformer.transform_marc_record(
-        marc_record, source_modified_time=datetime.now()
+    work_id = transformer.extract_work_id(marc_record)
+    work = transformer.transform_record(
+        work_id, marc_record, source_modified_time=datetime.now()
     )
 
     assert work.state.relations == WorkRelations(

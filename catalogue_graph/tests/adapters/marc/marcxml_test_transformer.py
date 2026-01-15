@@ -58,16 +58,6 @@ class MarcXmlTransformerForTests(MarcXmlTransformer):
             data=work_data,
         )
 
-    def transform_marc_record(
-        self, marc_record: Record, source_modified_time: datetime
-    ) -> VisibleSourceWork:
-        """Convenience method for tests that extracts work_id and calls transform_record.
-
-        This allows existing tests to avoid extracting work_id manually.
-        """
-        work_id = self.extract_work_id(marc_record)
-        return self.transform_record(work_id, marc_record, source_modified_time)
-
 
 class MarcFieldTransformerForTests(MarcXmlTransformerForTests):
     """Backwards-compatible helper used by existing MARC title tests."""

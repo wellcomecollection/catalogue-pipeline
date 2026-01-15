@@ -1,6 +1,4 @@
 import json
-from collections.abc import Mapping
-from datetime import datetime
 
 import pytest
 from pyiceberg.table import Table as IcebergTable
@@ -9,60 +7,8 @@ import adapters.axiell.config as adapter_config
 from adapters.axiell.steps.loader import AXIELL_NAMESPACE
 from adapters.transformers.manifests import TransformerManifest
 from adapters.transformers.transformer import TransformerEvent, handler
-from adapters.utils.adapter_store import AdapterStore
-from tests.adapters.ebsco.helpers import data_to_namespaced_table
+from tests.adapters.ebsco.helpers import prepare_changeset
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
-
-
-def _prepare_changeset(
-    temporary_table: IcebergTable,
-    monkeypatch: pytest.MonkeyPatch,
-    records_by_id: Mapping[str, tuple[str, bool] | str | None],
-) -> str:
-    """Insert XML records into the temporary Iceberg table.
-
-    Args:
-        records_by_id: Mapping of id -> content. Content can be:
-            - str: visible record with that XML content
-            - (str, True): deleted record with that XML content preserved
-            - None: legacy format, treated as error (no content)
-
-    Returns the new changeset_id.
-    """
-    rows = []
-    for rid, data in records_by_id.items():
-        if isinstance(data, tuple):
-            content: str | None = data[0]
-            deleted = data[1]
-        else:
-            content = data
-            deleted = False
-        rows.append(
-            {
-                "id": rid,
-                "content": content,
-                "deleted": deleted,
-                "last_modified": datetime.now(),
-            }
-        )
-    pa_table_initial = data_to_namespaced_table(
-        rows, namespace=AXIELL_NAMESPACE, add_timestamp=True
-    )
-
-    client = AdapterStore(temporary_table)
-
-    store_update = client.incremental_update(pa_table_initial, AXIELL_NAMESPACE)
-    assert store_update is not None
-    changeset_id = store_update.changeset_id
-
-    assert changeset_id, "Expected a changeset_id to be returned"
-
-    # Ensure transformer uses our temporary table
-    monkeypatch.setattr(
-        "adapters.axiell.helpers.build_adapter_table",
-        lambda use_rest_api_table, create_if_not_exists: temporary_table,
-    )
-    return changeset_id
 
 
 def _run_transform(
@@ -90,7 +36,13 @@ def test_transformer_end_to_end_with_local_table(
         "ax00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield></record>",
         "ax00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title Two</subfield></datafield></record>",
     }
-    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=AXIELL_NAMESPACE,
+        build_adapter_table_path="adapters.axiell.helpers.build_adapter_table",
+    )
 
     MockElasticsearchClient.inputs.clear()
 
@@ -136,7 +88,13 @@ def test_transformer_end_to_end_includes_deletions(
             True,
         ),
     }
-    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=AXIELL_NAMESPACE,
+        build_adapter_table_path="adapters.axiell.helpers.build_adapter_table",
+    )
 
     MockElasticsearchClient.inputs.clear()
 

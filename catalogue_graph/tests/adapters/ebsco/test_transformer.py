@@ -1,70 +1,15 @@
 import json
-from collections.abc import Mapping
-from datetime import datetime
 
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.ebsco.config as adapter_config
+from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.transformers.manifests import TransformerManifest
 from adapters.transformers.transformer import TransformerEvent, handler
-from adapters.utils.adapter_store import AdapterStore
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 
-from .helpers import data_to_namespaced_table
-
-# --------------------------------------------------------------------------------------
-# Helpers
-# --------------------------------------------------------------------------------------
-
-
-def _prepare_changeset(
-    temporary_table: IcebergTable,
-    monkeypatch: pytest.MonkeyPatch,
-    records_by_id: Mapping[str, tuple[str, bool] | str | None],
-) -> str:
-    """Insert XML records into the temporary Iceberg table.
-
-    Args:
-        records_by_id: Mapping of id -> content. Content can be:
-            - str: visible record with that XML content
-            - (str, True): deleted record with that XML content preserved
-            - None: legacy format, treated as error (no content)
-
-    Returns the new changeset_id.
-    """
-    rows = []
-    for rid, data in records_by_id.items():
-        if isinstance(data, tuple):
-            content: str | None = data[0]
-            deleted = data[1]
-        else:
-            content = data
-            deleted = False
-        rows.append(
-            {
-                "id": rid,
-                "content": content,
-                "deleted": deleted,
-                "last_modified": datetime.now(),
-            }
-        )
-    pa_table_initial = data_to_namespaced_table(rows, add_timestamp=True)
-
-    client = AdapterStore(temporary_table)
-
-    store_update = client.incremental_update(pa_table_initial, "ebsco")
-    assert store_update is not None
-    changeset_id = store_update.changeset_id
-
-    assert changeset_id, "Expected a changeset_id to be returned"
-
-    # Ensure transformer uses our temporary table
-    monkeypatch.setattr(
-        "adapters.ebsco.helpers.build_adapter_table",
-        lambda use_rest_api_table, create_if_not_exists: temporary_table,
-    )
-    return changeset_id
+from .helpers import prepare_changeset
 
 
 def _run_transform(
@@ -85,11 +30,6 @@ def _run_transform(
     return handler(event=event, es_mode="local", use_rest_api_table=False)
 
 
-# --------------------------------------------------------------------------------------
-# Tests
-# --------------------------------------------------------------------------------------
-
-
 def test_transformer_end_to_end_with_local_table(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -97,7 +37,13 @@ def test_transformer_end_to_end_with_local_table(
         "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
         "ebs00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Parasites, hosts and diseases</subfield></datafield></record>",
     }
-    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=EBSCO_NAMESPACE,
+        build_adapter_table_path="adapters.ebsco.helpers.build_adapter_table",
+    )
 
     MockElasticsearchClient.inputs.clear()
 
@@ -144,7 +90,13 @@ def test_transformer_end_to_end_includes_deletions(
             True,
         ),
     }
-    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=EBSCO_NAMESPACE,
+        build_adapter_table_path="adapters.ebsco.helpers.build_adapter_table",
+    )
 
     MockElasticsearchClient.inputs.clear()
 
