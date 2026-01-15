@@ -7,38 +7,12 @@ are left unchanged (not deleted). Timestamp-based conflict resolution
 ensures newer data isn't overwritten by older data.
 """
 
-from typing import Any
-
 import pyarrow as pa
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
-
-
-def data_to_namespaced_table(
-    unqualified_data: list[dict[str, Any]],
-    namespace: str = "test_namespace",
-    add_timestamp: bool = False,
-) -> pa.Table:
-    """
-    Create an Arrow table with the repo-standard schema.
-
-    If add_timestamp=True, include a last_modified timestamp column and preserve
-    any provided last_modified values from unqualified_data; otherwise, use now (UTC).
-    """
-    from datetime import UTC, datetime
-
-    data: list[dict[str, Any]] = []
-    for item in unqualified_data:
-        new_item = item.copy()
-        new_item["namespace"] = namespace
-        if add_timestamp:
-            # Preserve provided last_modified or default to current time
-            new_item.setdefault("last_modified", datetime.now(UTC))
-        data.append(new_item)
-
-    return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
+from tests.adapters.conftest import records_to_table
 
 
 def test_incremental_update_does_not_delete_missing_records(
@@ -51,7 +25,7 @@ def test_incremental_update_does_not_delete_missing_records(
     """
     # Initial state: 2 records
     temporary_table.append(
-        data_to_namespaced_table(
+        records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "world"},
@@ -60,7 +34,7 @@ def test_incremental_update_does_not_delete_missing_records(
     )
 
     # Incremental update: only updates eb0001, does not include eb0002
-    new_data = data_to_namespaced_table(
+    new_data = records_to_table(
         [
             {"id": "eb0001", "content": "hello updated"},
         ],
@@ -86,14 +60,14 @@ def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> N
     Then the new records are inserted
     """
     temporary_table.append(
-        data_to_namespaced_table(
+        records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
             ]
         )
     )
 
-    new_data = data_to_namespaced_table(
+    new_data = records_to_table(
         [
             {"id": "eb0002", "content": "world"},
         ],
@@ -119,7 +93,7 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
     Then updates are applied and new records are inserted
     """
     temporary_table.append(
-        data_to_namespaced_table(
+        records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "world"},
@@ -127,7 +101,7 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
         )
     )
 
-    new_data = data_to_namespaced_table(
+    new_data = records_to_table(
         [
             {"id": "eb0001", "content": "hello updated"},
             {"id": "eb0003", "content": "new record"},
@@ -157,17 +131,17 @@ def test_incremental_update_does_not_touch_other_namespaces(
     Then data in other namespaces is unaffected
     """
     # Add data for another namespace
-    other_data = data_to_namespaced_table(
+    other_data = records_to_table(
         [{"id": "ax0001", "content": "axiell data"}], "axiell_test"
     )
     temporary_table.append(other_data)
 
     # Add data for ebsco namespace
-    ebsco_data = data_to_namespaced_table([{"id": "eb0001", "content": "ebsco data"}])
+    ebsco_data = records_to_table([{"id": "eb0001", "content": "ebsco data"}])
     temporary_table.append(ebsco_data)
 
     # Update ebsco data
-    new_ebsco_data = data_to_namespaced_table(
+    new_ebsco_data = records_to_table(
         [{"id": "eb0001", "content": "ebsco updated"}],
         add_timestamp=True,
     )
@@ -395,9 +369,7 @@ def test_incremental_update_with_null_existing_timestamp(
     from datetime import UTC, datetime
 
     # Add initial record without timestamp (legacy data)
-    initial_data = data_to_namespaced_table(
-        [{"id": "eb0001", "content": "legacy content"}]
-    )
+    initial_data = records_to_table([{"id": "eb0001", "content": "legacy content"}])
     temporary_table.append(initial_data)
 
     # Update with a timestamp
@@ -572,7 +544,7 @@ def test_incremental_update_null_timestamp_on_timestamped_record(
     """
     # Initial data
     temporary_table.append(
-        data_to_namespaced_table(
+        records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
             ]
@@ -580,7 +552,7 @@ def test_incremental_update_null_timestamp_on_timestamped_record(
     )
 
     # Incremental update without last_modified column
-    new_data = data_to_namespaced_table(
+    new_data = records_to_table(
         [
             {"id": "eb0001", "content": "updated"},
         ]
