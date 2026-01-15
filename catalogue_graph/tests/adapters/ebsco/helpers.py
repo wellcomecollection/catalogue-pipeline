@@ -10,7 +10,7 @@ import pyarrow as pa
 
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
-from adapters.utils.schemata import ARROW_SCHEMA, ARROW_SCHEMA_WITH_TIMESTAMP
+from adapters.utils.schemata import ARROW_SCHEMA
 
 
 def lone_element(list_of_one: list) -> Any:
@@ -63,8 +63,7 @@ def data_to_namespaced_table(
         for row in rows:
             row.setdefault("last_modified", now)
 
-    schema = ARROW_SCHEMA_WITH_TIMESTAMP if add_timestamp else ARROW_SCHEMA
-    file_loader = MarcXmlFileLoader(schema=schema, namespace=namespace)
+    file_loader = MarcXmlFileLoader(schema=ARROW_SCHEMA, namespace=namespace)
 
     return file_loader.data_to_pa_table(rows)
 

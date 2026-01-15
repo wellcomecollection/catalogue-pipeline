@@ -7,7 +7,7 @@ from oai_pmh_client.models import Header, Record
 
 from adapters.axiell.record_writer import WindowRecordWriter
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA_WITH_TIMESTAMP
+from adapters.utils.schemata import ARROW_SCHEMA
 
 
 def test_writes_records_to_store() -> None:
@@ -50,7 +50,7 @@ def test_writes_records_to_store() -> None:
     table = call_args[0][0]
 
     assert isinstance(table, pa.Table)
-    assert table.schema.equals(ARROW_SCHEMA_WITH_TIMESTAMP)
+    assert table.schema.equals(ARROW_SCHEMA)
     assert table.num_rows == 1
 
     row = table.to_pylist()[0]
@@ -60,6 +60,7 @@ def test_writes_records_to_store() -> None:
         2023, 1, 1, 12, 0, 0, tzinfo=datetime.UTC
     )
     assert "<payload>some content</payload>" in row["content"]
+    assert row["deleted"] is False
 
 
 def test_handles_empty_records() -> None:
@@ -112,3 +113,4 @@ def test_handles_deleted_records() -> None:
     row = table.to_pylist()[0]
 
     assert row["content"] is None
+    assert row["deleted"] is True
