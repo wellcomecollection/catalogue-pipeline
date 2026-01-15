@@ -54,7 +54,7 @@ def marc_record() -> Record:
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceWork:
     transformer = EbscoTransformerForTests()
-    work = transformer.transform_record(
+    work = transformer.transform_marc_record(
         marc_record, source_modified_time=datetime(2020, 1, 1)
     )
     context["result"] = work

@@ -17,16 +17,34 @@ from tests.mocks import MockElasticsearchClient, MockSmartOpen
 def _prepare_changeset(
     temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
-    records_by_id: Mapping[str, str | None],
+    records_by_id: Mapping[str, tuple[str, bool] | str | None],
 ) -> str:
-    """Insert XML records (mapping of id -> MARC XML) into the temporary Iceberg table.
+    """Insert XML records into the temporary Iceberg table.
+
+    Args:
+        records_by_id: Mapping of id -> content. Content can be:
+            - str: visible record with that XML content
+            - (str, True): deleted record with that XML content preserved
+            - None: legacy format, treated as error (no content)
 
     Returns the new changeset_id.
     """
-    rows = [
-        {"id": rid, "content": data, "last_modified": datetime.now()}
-        for rid, data in records_by_id.items()
-    ]
+    rows = []
+    for rid, data in records_by_id.items():
+        if isinstance(data, tuple):
+            content: str | None = data[0]
+            deleted = data[1]
+        else:
+            content = data
+            deleted = False
+        rows.append(
+            {
+                "id": rid,
+                "content": content,
+                "deleted": deleted,
+                "last_modified": datetime.now(),
+            }
+        )
     pa_table_initial = data_to_namespaced_table(
         rows, namespace=AXIELL_NAMESPACE, add_timestamp=True
     )
@@ -110,10 +128,13 @@ def test_transformer_end_to_end_with_local_table(
 def test_transformer_end_to_end_includes_deletions(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    records_by_id: dict[str, str | None] = {
+    records_by_id: dict[str, tuple[str, bool] | str] = {
         "ax00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield></record>",
-        # Deleted records are represented by empty/None content in the adapter store.
-        "ax00003": None,
+        # Deleted records now retain content with a deleted flag
+        "ax00003": (
+            "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Axiell Work</subfield></datafield></record>",
+            True,
+        ),
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 

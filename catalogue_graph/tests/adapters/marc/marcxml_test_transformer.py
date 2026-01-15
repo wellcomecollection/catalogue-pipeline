@@ -5,7 +5,6 @@ from datetime import datetime
 
 from pymarc.record import Record
 
-from adapters.marc.transformers.identifier import extract_id
 from adapters.marc.transformers.title import extract_title
 from adapters.transformers.base_transformer import BaseTransformer
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
@@ -22,7 +21,7 @@ class MarcXmlTransformerForTests(MarcXmlTransformer):
     The production MarcXmlTransformer requires an AdapterStore; in tests we only need
     record-level transformation plus the consistent WorkState behaviour.
 
-    This transformer always uses `extract_id()` for the source identifier, and delegates
+    This transformer always uses `extract_work_id()` for the source identifier, and delegates
     building the `WorkData` to the supplied callable.
     """
 
@@ -39,9 +38,8 @@ class MarcXmlTransformerForTests(MarcXmlTransformer):
         self._build_relations = build_relations
 
     def transform_record(
-        self, marc_record: Record, source_modified_time: datetime
+        self, work_id: str, marc_record: Record, source_modified_time: datetime
     ) -> VisibleSourceWork:
-        work_id = extract_id(marc_record)
         work_data = self._build_work_data(marc_record)
 
         relations: WorkRelations | None = None
@@ -59,6 +57,16 @@ class MarcXmlTransformerForTests(MarcXmlTransformer):
             state=work_state,
             data=work_data,
         )
+
+    def transform_marc_record(
+        self, marc_record: Record, source_modified_time: datetime
+    ) -> VisibleSourceWork:
+        """Convenience method for tests that extracts work_id and calls transform_record.
+
+        This allows existing tests to avoid extracting work_id manually.
+        """
+        work_id = self.extract_work_id(marc_record)
+        return self.transform_record(work_id, marc_record, source_modified_time)
 
 
 class MarcFieldTransformerForTests(MarcXmlTransformerForTests):
@@ -96,9 +104,8 @@ class MarcXmlTransformerWithStoreForTests(MarcXmlTransformer):
         self._build_relations = build_relations
 
     def transform_record(
-        self, marc_record: Record, source_modified_time: datetime
+        self, work_id: str, marc_record: Record, source_modified_time: datetime
     ) -> VisibleSourceWork:
-        work_id = extract_id(marc_record)
         work_data = self._build_work_data(marc_record)
 
         relations: WorkRelations | None = None

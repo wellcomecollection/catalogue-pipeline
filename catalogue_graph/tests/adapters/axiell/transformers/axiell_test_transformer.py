@@ -26,6 +26,13 @@ class AxiellTransformerForTests(AxiellTransformer):
         BaseTransformer.__init__(self)
         self.identifier_type = Id(id="axiell-priref")
 
+    def transform_marc_record(
+        self, marc_record: Record, source_modified_time: datetime
+    ) -> InvisibleSourceWork:
+        """Convenience method for tests that extracts work_id and calls transform_record."""
+        work_id = self.extract_work_id(marc_record)
+        return self.transform_record(work_id, marc_record, source_modified_time)
+
 
 def transform_axiell_record(
     marc_record: Record,
@@ -34,6 +41,6 @@ def transform_axiell_record(
 ) -> InvisibleSourceWork:
     """Convenience helper for tests."""
 
-    return AxiellTransformerForTests().transform_record(
+    return AxiellTransformerForTests().transform_marc_record(
         marc_record, source_modified_time=source_modified_time
     )

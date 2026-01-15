@@ -17,9 +17,8 @@ from adapters.ebsco.transformers.parents import get_parents
 from adapters.ebsco.transformers.production import extract_production
 from adapters.ebsco.transformers.subjects import extract_subjects
 from adapters.marc.transformers.alternative_titles import extract_alternative_titles
-from adapters.marc.transformers.identifier import extract_id
 from adapters.marc.transformers.title import extract_title
-from adapters.transformers.axiell_transformer import MarcXmlTransformer
+from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Id
 from models.pipeline.source.work import VisibleSourceWork
@@ -36,9 +35,8 @@ class EbscoTransformer(MarcXmlTransformer):
         )
 
     def transform_record(
-        self, marc_record: Record, source_modified_time: datetime
+        self, work_id: str, marc_record: Record, source_modified_time: datetime
     ) -> VisibleSourceWork:
-        work_id = extract_id(marc_record)
         work_data = WorkData(
             title=extract_title(marc_record),
             alternative_titles=extract_alternative_titles(marc_record),

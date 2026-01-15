@@ -26,7 +26,7 @@ def _transform_current_frequency(marc_record: Record) -> str | None:
             current_frequency=extract_current_frequency(r)
         )
     )
-    work = transformer.transform_record(
+    work = transformer.transform_marc_record(
         marc_record, source_modified_time=datetime.now()
     )
     return work.data.current_frequency
