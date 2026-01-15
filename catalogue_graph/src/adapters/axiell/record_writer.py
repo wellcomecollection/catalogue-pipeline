@@ -38,12 +38,14 @@ class WindowRecordWriter:
         rows: list[dict[str, Any]] = []
 
         for identifier, record in records:
+            content = _serialize_metadata(record)
             rows.append(
                 {
                     "namespace": self.namespace,
                     "id": identifier,
-                    "content": _serialize_metadata(record),
+                    "content": content,
                     "last_modified": record.header.datestamp,
+                    "deleted": content is None,
                 }
             )
 

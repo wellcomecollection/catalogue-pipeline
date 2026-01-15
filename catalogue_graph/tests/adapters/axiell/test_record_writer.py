@@ -60,6 +60,7 @@ def test_writes_records_to_store() -> None:
         2023, 1, 1, 12, 0, 0, tzinfo=datetime.UTC
     )
     assert "<payload>some content</payload>" in row["content"]
+    assert row["deleted"] is False
 
 
 def test_handles_empty_records() -> None:
@@ -112,3 +113,4 @@ def test_handles_deleted_records() -> None:
     row = table.to_pylist()[0]
 
     assert row["content"] is None
+    assert row["deleted"] is True

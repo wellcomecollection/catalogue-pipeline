@@ -5,7 +5,7 @@ from typing import cast
 import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
-from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Not
+from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Not, Or
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
@@ -98,7 +98,7 @@ class AdapterStore:
             existing_data = existing_data.sort_by("id")
             new_data = new_data.sort_by("id")
 
-            deletes = self._get_deletes(existing_data, new_data, namespace)
+            deletes = self._find_snapshot_deletes(existing_data, new_data, namespace)
             updates = self._find_updates(existing_data, new_data)
             inserts = self._find_inserts(existing_data, new_data, namespace)
 
@@ -163,7 +163,7 @@ class AdapterStore:
     def get_all_records(self, include_deleted: bool = False) -> pa.Table:
         """Return all records in the table.
 
-        By default, rows whose content field is null (i.e. soft-deleted) are excluded.
+        By default, rows marked as deleted are excluded.
 
         During a full reindex we are writing into an empty index,
         so no need to include deleted rows to overwrite documents.
@@ -172,7 +172,10 @@ class AdapterStore:
         """
         if include_deleted:
             return self.table.scan().to_arrow()
-        return self.table.scan(row_filter=Not(IsNull("content"))).to_arrow()
+
+        return self.table.scan(
+            row_filter=Or(EqualTo("deleted", False), IsNull("deleted"))
+        ).to_arrow()
 
     def _upsert_with_markers(
         self,
@@ -362,28 +365,27 @@ class AdapterStore:
         return updates.take(rows_to_keep)
 
     @staticmethod
-    def _get_deletes(
+    def _find_snapshot_deletes(
         existing_data: pa.Table, new_data: pa.Table, record_namespace: str
     ) -> pa.Table:
         """
         Find records in `existing_data` that are not in `new_data`, and produce a
-        pyarrow Table that can be used to update those records by emptying their content.
+        pyarrow Table that can be used to update those records by marking them as deleted.
         """
         new_ids = new_data.column("id")
+        # Check for records that are not already deleted (deleted is null or False)
+        not_deleted = pc.field("deleted").is_null() | (pc.field("deleted") == False)  # noqa: E712
         missing_ids = existing_data.filter(
-            # records that have already been "deleted" do not need to be deleted again.
-            (~pc.field("content").is_null())
+            ~pc.field("id").isin(new_ids)
             & (pc.field("namespace") == record_namespace)
-            & ~pc.field("id").isin(new_ids)
-        ).column("id")
-        return pa.Table.from_pylist(
-            [
-                {
-                    "namespace": record_namespace,
-                    "id": id.as_py(),
-                    "deleted": True,
-                }
-                for id in missing_ids
-            ],
-            schema=ARROW_SCHEMA,
+            & not_deleted
+        )
+
+        num_rows = missing_ids.num_rows
+        deleted_array = pa.array([True] * num_rows, type=pa.bool_())
+
+        return missing_ids.set_column(
+            missing_ids.schema.get_field_index("deleted"),
+            "deleted",
+            deleted_array
         )

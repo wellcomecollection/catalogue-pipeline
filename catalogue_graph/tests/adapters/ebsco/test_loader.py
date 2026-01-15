@@ -136,7 +136,9 @@ def test_execute_loader_soft_deletes_missing_records(
     all_rows = runtime.adapter_store.get_all_records(include_deleted=True).to_pylist()
     deleted_record = next(row for row in all_rows if row["id"] == "ebs00002")
 
-    assert deleted_record["content"] is None
+    # Deleted records preserve content but are marked deleted
+    assert deleted_record["deleted"] is True
+    assert deleted_record["content"] is not None
     assert deleted_record["changeset"] in delete_response.changeset_ids
     assert delete_response.changed_record_count == 1
 
@@ -220,7 +222,9 @@ def test_last_modified_on_delete_marks_removed_records_newer(
 
     assert kept["last_modified"] == ts1  # unchanged record retains original timestamp
     assert deleted["last_modified"] == ts2  # delete marker stamped later
-    assert deleted["content"] is None
+    # Deleted records preserve content but are marked deleted
+    assert deleted["deleted"] is True
+    assert deleted["content"] is not None
     assert delete_response.changed_record_count == 1
 
 
