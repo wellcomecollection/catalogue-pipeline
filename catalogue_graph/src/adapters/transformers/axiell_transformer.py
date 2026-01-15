@@ -4,7 +4,6 @@ from pymarc.record import Record
 
 from adapters.axiell.transformers.other_identifiers import extract_other_identifiers
 from adapters.marc.transformers.alternative_titles import extract_alternative_titles
-from adapters.marc.transformers.identifier import extract_id
 from adapters.marc.transformers.last_transaction_time import (
     extract_last_transaction_time_to_datetime,
 )
@@ -23,9 +22,8 @@ class AxiellTransformer(MarcXmlTransformer):
         super().__init__(adapter_store, changeset_ids, Id(id="axiell-priref"))
 
     def transform_record(
-        self, marc_record: Record, source_modified_time: datetime
+        self, work_id: str, marc_record: Record, source_modified_time: datetime
     ) -> InvisibleSourceWork:
-        work_id = extract_id(marc_record)
         work_data = WorkData(
             title=extract_title(marc_record),
             alternative_titles=extract_alternative_titles(marc_record),
