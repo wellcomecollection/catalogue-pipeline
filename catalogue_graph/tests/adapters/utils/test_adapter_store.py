@@ -7,6 +7,7 @@ These tests cover methods that are not specific to either incremental_update or 
 """
 
 from datetime import UTC, datetime
+from typing import cast
 
 import pyarrow as pa
 from pyiceberg.table import Table as IcebergTable
@@ -72,9 +73,8 @@ def test_get_all_records_returns_all_non_deleted(
     client = AdapterStore(temporary_table)
     all_records = client.get_all_records()
 
-    assert all_records.num_rows == 2
-    ids = set(all_records.column("id").to_pylist())
-    assert ids == {"rec001", "rec002"}
+    ids = cast(list[str], all_records.column("id").to_pylist())
+    assert sorted(ids) == ["rec001", "rec002"]
 
 
 def test_get_all_records_include_deleted_true(
