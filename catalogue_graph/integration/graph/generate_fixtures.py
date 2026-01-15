@@ -32,8 +32,8 @@ FIXTURE_SAMPLE_SIZE = 20
 ID_POOL_SIZE = 10_000
 
 
-def write_fixture(file_name: str, data: dict[str, Any] | list[str]) -> None:
-    path = Path(__file__).parent / "fixtures" / file_name
+def write_fixture(name: str, data: dict[str, Any] | list[str]) -> None:
+    path = Path(__file__).parent / "fixtures" / f"{name}.json"
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 
@@ -41,10 +41,9 @@ def sample_ids(*, client: Any, label: str) -> list[str]:
     query = f"MATCH (n: {label}) RETURN id(n) AS id"
     results = client.run_open_cypher_query(query)
     ids = [item["id"] for item in results]
-    print(f"Retrieved {len(ids)} IDs of type {label}.")
 
-    pool_size = min(ID_POOL_SIZE, len(ids))
-    return random.sample(ids, pool_size)
+    print(f"Retrieved {len(ids)} IDs of type {label}.")
+    return random.sample(ids, ID_POOL_SIZE)
 
 
 def generate_fixture_set(
@@ -52,15 +51,20 @@ def generate_fixture_set(
     client: Any,
     query: str,
     ids: list[str],
-    extractor: Callable[[dict[str, Any]], list[str]],
-    expected_mapping_file: str,
-    empty_ids_file: str | None,
+    row_to_values: Callable[[dict[str, Any]], list[str]],
+    expected_fixture_name: str,
+    empty_ids_fixture_name: str | None,
 ) -> None:
+    """Generate two fixtures for each query:
+
+    - expected_fixture_name: a mapping of id -> extracted value (e.g. related concept IDs)
+    - empty_ids_fixture_name: a list of IDs for which the query should be empty
+    """
     response = client.run_open_cypher_query(query, {"ids": ids, **CONCEPT_QUERY_PARAMS})
 
     mappings: dict[str, list[str]] = {}
     for item in response:
-        extracted = extractor(item)
+        extracted = row_to_values(item)
         if extracted:
             mappings[item["id"]] = extracted
 
@@ -69,43 +73,44 @@ def generate_fixture_set(
     sample_size = min(FIXTURE_SAMPLE_SIZE, len(mappings))
     sampled_ids = set(random.sample(sorted(mappings), sample_size))
     sampled_mappings = {k: v for k, v in mappings.items() if k in sampled_ids}
-    write_fixture(expected_mapping_file, sampled_mappings)
+    write_fixture(expected_fixture_name, sampled_mappings)
 
-    if empty_ids_file is None:
+    if empty_ids_fixture_name is None:
         return
 
     if not missing_ids:
-        write_fixture(empty_ids_file, [])
+        write_fixture(empty_ids_fixture_name, [])
         return
 
     random_missing = random.sample(
         sorted(missing_ids),
         min(FIXTURE_SAMPLE_SIZE, len(missing_ids)),
     )
-    write_fixture(empty_ids_file, random_missing)
+    write_fixture(empty_ids_fixture_name, random_missing)
 
 
-def types_extractor(item: dict[str, Any]) -> list[str]:
+def row_to_types(item: dict[str, Any]) -> list[str]:
     types: list[str] = item["types"]
     return types
 
 
-def related_extractor(item: dict[str, Any]) -> list[str]:
+def row_to_related_ids(item: dict[str, Any]) -> list[str]:
     return [r["id"] for r in item["related"]]
 
 
-def same_as_extractor(item: dict[str, Any]) -> list[str]:
+def row_to_same_as_ids(item: dict[str, Any]) -> list[str]:
     same_as_ids: list[str] = item["same_as_ids"]
     return same_as_ids
 
 
-def ancestors_extractor(item: dict[str, Any]) -> list[str]:
+def row_to_ancestor_work_ids(item: dict[str, Any]) -> list[str]:
     return [a["work"]["~id"] for a in item["ancestors"]]
 
 
 def main() -> None:
     client = get_neptune_client(True)
 
+    # Get a sample of `ID_POOL_SIZE` random concept and work IDs.
     random_concept_ids = sample_ids(client=client, label="Concept")
     random_work_ids = sample_ids(client=client, label="Work")
 
@@ -113,95 +118,89 @@ def main() -> None:
         client=client,
         query=CONCEPT_TYPE_QUERY,
         ids=random_concept_ids,
-        extractor=types_extractor,
-        expected_mapping_file="concept_types_by_concept_id.json",
-        empty_ids_file=None,
+        row_to_values=row_to_types,
+        expected_fixture_name="concept_types_by_concept_id",
+        empty_ids_fixture_name=None,
     )
     generate_fixture_set(
         client=client,
         query=FREQUENT_COLLABORATORS_QUERY,
         ids=random_concept_ids,
-        extractor=related_extractor,
-        expected_mapping_file="concept_frequent_collaborators_by_concept_id.json",
-        empty_ids_file="concept_ids_without_frequent_collaborators.json",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_frequent_collaborators_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_frequent_collaborators",
     )
     generate_fixture_set(
         client=client,
         query=SAME_AS_CONCEPT_QUERY,
         ids=random_concept_ids,
-        extractor=same_as_extractor,
-        expected_mapping_file="concept_same_as_by_concept_id.json",
-        empty_ids_file="concept_ids_without_same_as.json",
+        row_to_values=row_to_same_as_ids,
+        expected_fixture_name="concept_same_as_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_same_as",
     )
     generate_fixture_set(
         client=client,
         query=RELATED_TO_QUERY,
         ids=random_concept_ids,
-        extractor=related_extractor,
-        expected_mapping_file="concept_related_to_by_concept_id.json",
-        empty_ids_file="concept_ids_without_related_to.json",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_related_to_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_related_to",
     )
-
     generate_fixture_set(
         client=client,
         query=RELATED_TOPICS_QUERY,
         ids=random_concept_ids,
-        extractor=related_extractor,
-        expected_mapping_file="concept_related_topics_by_concept_id.json",
-        empty_ids_file="concept_ids_without_related_topics.json",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_related_topics_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_related_topics",
     )
-
     generate_fixture_set(
         client=client,
         query=FIELDS_OF_WORK_QUERY,
         ids=random_concept_ids,
-        extractor=related_extractor,
-        expected_mapping_file="concept_fields_of_work_by_concept_id.json",
-        empty_ids_file="concept_ids_without_fields_of_work.json",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_fields_of_work_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_fields_of_work",
     )
-
     generate_fixture_set(
         client=client,
         query=NARROWER_THAN_QUERY,
         ids=random_concept_ids,
-        extractor=related_extractor,
-        expected_mapping_file="concept_narrower_than_by_concept_id.json",
-        empty_ids_file="concept_ids_without_narrower_than.json",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_narrower_than_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_narrower_than",
     )
-
     generate_fixture_set(
         client=client,
         query=BROADER_THAN_QUERY,
         ids=random_concept_ids,
-        extractor=related_extractor,
-        expected_mapping_file="concept_broader_than_by_concept_id.json",
-        empty_ids_file="concept_ids_without_broader_than.json",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_broader_than_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_broader_than",
     )
-
     generate_fixture_set(
         client=client,
         query=PEOPLE_QUERY,
         ids=random_concept_ids,
-        extractor=related_extractor,
-        expected_mapping_file="concept_people_by_concept_id.json",
-        empty_ids_file="concept_ids_without_people.json",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_people_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_people",
     )
-
     generate_fixture_set(
         client=client,
         query=HAS_FOUNDER_QUERY,
         ids=random_concept_ids,
-        extractor=related_extractor,
-        expected_mapping_file="concept_has_founder_by_concept_id.json",
-        empty_ids_file="concept_ids_without_has_founder.json",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_has_founder_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_has_founder",
     )
     generate_fixture_set(
         client=client,
         query=WORK_ANCESTORS_QUERY,
         ids=random_work_ids,
-        extractor=ancestors_extractor,
-        expected_mapping_file="work_ancestors_by_work_id.json",
-        empty_ids_file="work_ids_without_ancestors.json",
+        row_to_values=row_to_ancestor_work_ids,
+        expected_fixture_name="work_ancestors_by_work_id",
+        empty_ids_fixture_name="work_ids_without_ancestors",
     )
 
 
