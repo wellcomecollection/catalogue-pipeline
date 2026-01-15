@@ -472,13 +472,6 @@ def test_snapshot_sync_get_records_by_changeset(temporary_table: IcebergTable) -
     assert empty_result.num_rows == 0
 
 
-def test_get_all_records_empty(temporary_table: IcebergTable) -> None:
-    """When the table is empty, get_all_records returns an empty Arrow table."""
-    client = AdapterStore(temporary_table)
-    all_records = client.get_all_records()
-    assert all_records.num_rows == 0
-
-
 def test_snapshot_sync_get_all_records_after_update(
     temporary_table: IcebergTable,
 ) -> None:

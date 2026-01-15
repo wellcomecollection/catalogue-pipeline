@@ -630,3 +630,59 @@ def test_incremental_update_raises_on_non_castable_schema(
     client = AdapterStore(temporary_table)
     with pytest.raises(ValueError, match=r"incremental_update.*ARROW_SCHEMA"):
         client.incremental_update(bad_table, "test_namespace")
+
+
+def test_incremental_update_preserves_content_on_deletion(
+    temporary_table: IcebergTable,
+) -> None:
+    """
+    Given an existing record with content
+    When incremental_update marks it as deleted with content=None
+    Then the existing content is preserved and deleted=True is set
+    """
+    from datetime import UTC, datetime
+
+    old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
+    new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
+
+    # Initial record with content
+    initial_data = pa.Table.from_pylist(
+        [
+            {
+                "namespace": "test_namespace",
+                "id": "eb0001",
+                "content": "original content",
+                "last_modified": old_time,
+                "deleted": None,
+            }
+        ],
+        schema=ARROW_SCHEMA,
+    )
+    temporary_table.append(initial_data)
+
+    # Mark as deleted with content=None (simulating OAI-PMH deletion)
+    deletion_data = pa.Table.from_pylist(
+        [
+            {
+                "namespace": "test_namespace",
+                "id": "eb0001",
+                "content": None,
+                "last_modified": new_time,
+                "deleted": True,
+            }
+        ],
+        schema=ARROW_SCHEMA,
+    )
+
+    client = AdapterStore(temporary_table)
+    result = client.incremental_update(deletion_data, "test_namespace")
+
+    assert result is not None
+    assert "eb0001" in result.updated_record_ids
+
+    # Verify the content was preserved and deleted flag is set
+    records = temporary_table.scan().to_arrow()
+    row = records.to_pylist()[0]
+    assert row["content"] == "original content"  # Content preserved!
+    assert row["deleted"] is True
+    assert row["last_modified"] == new_time

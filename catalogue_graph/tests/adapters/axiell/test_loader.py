@@ -354,6 +354,70 @@ def test_window_record_writer_handles_deleted_record(
     assert active_records.num_rows == 0
 
 
+def test_window_record_writer_preserves_content_on_deletion(
+    temporary_table: IcebergTable,
+) -> None:
+    """Test that when an existing record is marked as deleted, its content is preserved."""
+    table_client = AdapterStore(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
+    writer = loader.WindowRecordWriter(
+        namespace=loader.AXIELL_NAMESPACE,
+        table_client=table_client,
+        job_id="job-123",
+        window_range=WINDOW_RANGE,
+    )
+
+    last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+    original_content = "<metadata>original content</metadata>"
+
+    # 1. Write initial data with content
+    writer(
+        records=[
+            (
+                "id-1",
+                SimpleNamespace(
+                    metadata=etree.fromstring(original_content),
+                    header=SimpleNamespace(datestamp=last_modified),
+                ),
+            )
+        ],
+    )
+
+    # Verify initial record exists with content
+    all_records = table_client.get_all_records(include_deleted=True)
+    assert all_records.num_rows == 1
+    initial_row = all_records.to_pylist()[0]
+    assert initial_row["content"] == original_content
+    assert initial_row["deleted"] is not True
+
+    # 2. Mark the record as deleted (metadata=None)
+    deletion_time = last_modified + timedelta(minutes=1)
+    writer(
+        records=[
+            (
+                "id-1",
+                SimpleNamespace(
+                    metadata=None,
+                    header=SimpleNamespace(datestamp=deletion_time),
+                ),
+            )
+        ],
+    )
+
+    # 3. Verify: record is marked deleted but content is PRESERVED
+    all_records_after = table_client.get_all_records(include_deleted=True)
+    assert all_records_after.num_rows == 1
+    row = all_records_after.to_pylist()[0]
+    assert row["deleted"] is True
+    assert row["content"] == original_content  # Content should be preserved
+    assert row["last_modified"] == deletion_time
+
+    # 4. Verify excluded from active records
+    active_records = table_client.get_all_records(include_deleted=False)
+    assert active_records.num_rows == 0
+
+
 def test_window_record_writer_skips_changeset_for_duplicate_data(
     temporary_table: IcebergTable,
 ) -> None:

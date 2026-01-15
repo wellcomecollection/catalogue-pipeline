@@ -5,7 +5,7 @@ from typing import cast
 import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
-from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Not, Or
+from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Or
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
@@ -67,6 +67,8 @@ class AdapterStore:
             updates = self._find_updates(existing_data, new_data)
             # Filter updates to only include records with newer timestamps
             updates = self._filter_by_timestamp(updates, existing_data)
+            # Preserve content for records being marked as deleted
+            updates = self._preserve_content_for_deletions(updates, existing_data)
             inserts = self._find_inserts(existing_data, new_data, namespace)
             changes = updates
         else:
@@ -365,6 +367,48 @@ class AdapterStore:
         return updates.take(rows_to_keep)
 
     @staticmethod
+    def _preserve_content_for_deletions(
+        updates: pa.Table, existing_data: pa.Table
+    ) -> pa.Table:
+        """
+        Preserve existing content for records being marked as deleted.
+
+        When a record is marked as deleted (deleted=True) with content=None,
+        replace the null content with the existing content from the table.
+        This ensures we can replay deletions downstream if needed.
+
+        Args:
+            updates: Table of updates to apply (may include deletions)
+            existing_data: Table of existing records
+
+        Returns:
+            Updated table with preserved content for deletions
+        """
+        if updates.num_rows == 0:
+            return updates
+
+        # Build lookup of existing content by id
+        existing_content = {
+            row["id"]: row["content"] for row in existing_data.to_pylist()
+        }
+
+        # Check if any records need content preservation
+        rows = updates.to_pylist()
+        needs_update = False
+        for row in rows:
+            if row.get("deleted") is True and row.get("content") is None:
+                existing = existing_content.get(row["id"])
+                if existing is not None:
+                    row["content"] = existing
+                    needs_update = True
+
+        if not needs_update:
+            return updates
+
+        # Rebuild table with preserved content
+        return pa.Table.from_pylist(rows, schema=updates.schema)
+
+    @staticmethod
     def _find_snapshot_deletes(
         existing_data: pa.Table, new_data: pa.Table, record_namespace: str
     ) -> pa.Table:
@@ -385,7 +429,5 @@ class AdapterStore:
         deleted_array = pa.array([True] * num_rows, type=pa.bool_())
 
         return missing_ids.set_column(
-            missing_ids.schema.get_field_index("deleted"),
-            "deleted",
-            deleted_array
+            missing_ids.schema.get_field_index("deleted"), "deleted", deleted_array
         )

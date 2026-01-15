@@ -218,8 +218,8 @@ def test_delete_records(temporary_table: IcebergTable) -> None:
     And the content of those records will NOT have been removed
     And the changed rows are identifiably grouped by a changeset property
 
-    Deletion must be at soft, as deleted records are simply absent in the data 
-    from the supplier, but the pipeline model downstream of here operates by 
+    Deletion must be at soft, as deleted records are simply absent in the data
+    from the supplier, but the pipeline model downstream of here operates by
     being told which records have changed.
 
     Those records are then consulted and an appropriate action taken.
@@ -227,10 +227,10 @@ def test_delete_records(temporary_table: IcebergTable) -> None:
     This also allows us to replay a deletion if something fails
     downstream of here.
 
-    If the row is completely deleted, then we have no way of knowing what 
+    If the row is completely deleted, then we have no way of knowing what
     action to take in the ongoing pipeline.
     """
-    
+
     temporary_table.append(
         data_to_namespaced_table(
             [
