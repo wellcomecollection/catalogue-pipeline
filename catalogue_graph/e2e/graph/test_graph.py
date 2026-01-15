@@ -3,6 +3,8 @@ import os
 import warnings
 from typing import Any
 
+from pydantic import BaseModel, computed_field
+
 from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     CONCEPT_TYPE_QUERY,
@@ -13,7 +15,6 @@ from ingestor.queries.concept_queries import (
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
 )
-from pydantic import BaseModel, computed_field
 from utils.aws import get_neptune_client
 
 NEPTUNE_CLIENT = get_neptune_client(True)
@@ -26,16 +27,19 @@ def load_json_fixture(file_name: str) -> Any:
         return json.loads(f.read())
 
 
-WORK_ANCESTORS_EXPECTED = load_json_fixture("work_ancestors.json")
-WORK_NO_ANCESTORS = load_json_fixture("work_no_ancestors.json")
-CONCEPT_SAME_AS_EXPECTED = load_json_fixture("concept_same_as.json")
-CONCEPT_NO_SAME_AS = load_json_fixture("concept_no_same_as.json")
-CONCEPT_TYPES_EXPECTED = load_json_fixture("concept_types.json")
-CONCEPT_RELATED_TO_EXPECTED = {"eva7r2dw": ["zvpgcgjv", "sjxv6uys", "kx79h6jm"]}
-CONCEPT_FREQUENT_COLLABORATORS_EXPECTED = {
-    "eva7r2dw": [],
-    "gk2eca5r": ["m78s9aek", "ar4dsxxw", "xcmmxsp2"],
-}
+WORK_ANCESTORS_EXPECTED = load_json_fixture("works_ancestors.json")
+WORK_NO_ANCESTORS = load_json_fixture("works_ancestors_none.json")
+CONCEPT_SAME_AS_EXPECTED = load_json_fixture("concepts_same_as.json")
+CONCEPT_NO_SAME_AS = load_json_fixture("concepts_same_as_none.json")
+CONCEPT_TYPES_EXPECTED = load_json_fixture("concepts_types.json")
+CONCEPT_RELATED_TO_EXPECTED = load_json_fixture("concepts_related_to.json")
+CONCEPT_NO_RELATED_TO = load_json_fixture("concepts_related_to_none.json")
+CONCEPT_FREQUENT_COLLABORATORS_EXPECTED = load_json_fixture(
+    "concepts_frequent_collaborators.json"
+)
+CONCEPT_NO_FREQUENT_COLLABORATORS = load_json_fixture(
+    "concepts_frequent_collaborators_none.json"
+)
 
 
 class GraphQueryTest(BaseModel):
@@ -79,7 +83,7 @@ class GraphQueryTest(BaseModel):
 
         self._show_warnings(mismatches_expected, mismatches_returned)
 
-    def _show_warnings(self, expected: dict, returned: dict):
+    def _show_warnings(self, expected: dict, returned: dict) -> None:
         for item_id, expected_item in expected.items():
             returned_item = returned[item_id]
 
@@ -99,7 +103,7 @@ class GraphQueryTest(BaseModel):
         raise NotImplementedError()
 
     def compare_single(self, expected_data: Any, returned_data: Any) -> bool:
-        return expected_data == returned_data
+        return bool(expected_data == returned_data)
 
 
 class WorkAncestorsTest(GraphQueryTest):
@@ -109,7 +113,8 @@ class WorkAncestorsTest(GraphQueryTest):
 
 class SameAsConceptsTest(GraphQueryTest):
     def extract_single(self, raw_returned_data: dict) -> list[str]:
-        return raw_returned_data["same_as_ids"]
+        same_as: list[str] = raw_returned_data["same_as_ids"]
+        return same_as
 
     def compare_single(self, expected_data: list[str], returned_data: dict) -> bool:
         expected_set = set(expected_data)
@@ -143,10 +148,18 @@ class RelatedConceptsTest(GraphQueryTest):
 
 class ConceptTypesTest(GraphQueryTest):
     def extract_single(self, raw_returned_data: dict) -> list[str]:
-        return raw_returned_data["types"]
+        types: list[str] = raw_returned_data["types"]
+        return types
 
     def compare_single(self, expected_data: list[str], returned_data: dict) -> bool:
         return sorted(expected_data) == sorted(returned_data)
+
+
+def assert_empty_response(query: str, ids: list[str]) -> None:
+    response = NEPTUNE_CLIENT.run_open_cypher_query(
+        query, {"ids": ids, **CONCEPT_QUERY_PARAMS}
+    )
+    assert len(response) == 0
 
 
 def test_work_ancestors() -> None:
@@ -159,20 +172,6 @@ def test_same_as_concepts() -> None:
     SameAsConceptsTest(
         query=SAME_AS_CONCEPT_QUERY, expected_results=CONCEPT_SAME_AS_EXPECTED
     ).run()
-
-
-def test_work_no_ancestors() -> None:
-    response = NEPTUNE_CLIENT.run_open_cypher_query(
-        WORK_ANCESTORS_QUERY, {"ids": WORK_NO_ANCESTORS}
-    )
-    assert len(response) == 0
-
-
-def test_no_same_as_concepts() -> None:
-    response = NEPTUNE_CLIENT.run_open_cypher_query(
-        SAME_AS_CONCEPT_QUERY, {"ids": CONCEPT_NO_SAME_AS}
-    )
-    assert len(response) == 0
 
 
 def test_concept_types() -> None:
@@ -192,3 +191,23 @@ def test_frequent_collaborator_concepts() -> None:
         query=FREQUENT_COLLABORATORS_QUERY,
         expected_results=CONCEPT_FREQUENT_COLLABORATORS_EXPECTED,
     ).run()
+
+
+def test_work_no_ancestors() -> None:
+    assert_empty_response(WORK_ANCESTORS_QUERY, WORK_NO_ANCESTORS)
+
+
+def test_no_same_as_concepts() -> None:
+    assert_empty_response(SAME_AS_CONCEPT_QUERY, CONCEPT_NO_SAME_AS)
+
+
+def test_no_related_to_concepts() -> None:
+    assert_empty_response(RELATED_TO_QUERY, CONCEPT_NO_RELATED_TO)
+
+
+def test_no_frequent_collaborators() -> None:
+    response = NEPTUNE_CLIENT.run_open_cypher_query(
+        FREQUENT_COLLABORATORS_QUERY,
+        {"ids": CONCEPT_NO_FREQUENT_COLLABORATORS, **CONCEPT_QUERY_PARAMS},
+    )
+    assert all(len(item["related"]) == 0 for item in response)
