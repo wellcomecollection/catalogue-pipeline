@@ -8,7 +8,7 @@ import json
 import warnings
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import pytest
 from pydantic import BaseModel
@@ -32,6 +32,7 @@ from ingestor.queries.work_queries import (
 )
 from utils.aws import get_neptune_client
 
+# Add the 'integration' marker to ensure that integration tests are not included in regular unit test runs.
 pytestmark = pytest.mark.integration
 
 
@@ -40,65 +41,16 @@ def neptune_client() -> BaseNeptuneClient:
     return get_neptune_client(True)
 
 
-def load_json_fixture(file_name: str) -> Any:
-    path = Path(__file__).parent / "fixtures" / f"{file_name}.json"
-    with path.open() as f:
-        return json.loads(f.read())
+@lru_cache(maxsize=None)
+def load_json_fixture(name: str) -> Any:
+    path = Path(__file__).parent / "fixtures" / f"{name}.json"
+    return json.loads(path.read_text())
 
 
+# The graph is not static (e.g. works/concepts can be deleted). Small divergence over time is expected,
+# so we allow a tolerance threshold and only fail when drift becomes significant.
+# All mismatches are still logged as warnings for visibility.
 MIN_MATCH_RATIO = 0.9
-
-WORK_ANCESTORS_BY_WORK_ID = load_json_fixture("work_ancestors_by_work_id")
-WORK_IDS_WITHOUT_ANCESTORS = load_json_fixture("work_ids_without_ancestors")
-
-CONCEPT_SAME_AS_BY_CONCEPT_ID = load_json_fixture("concept_same_as_by_concept_id")
-CONCEPT_IDS_WITHOUT_SAME_AS = load_json_fixture("concept_ids_without_same_as")
-
-CONCEPT_TYPES_BY_CONCEPT_ID = load_json_fixture("concept_types_by_concept_id")
-
-CONCEPT_RELATED_TO_BY_CONCEPT_ID = load_json_fixture("concept_related_to_by_concept_id")
-CONCEPT_IDS_WITHOUT_RELATED_TO = load_json_fixture("concept_ids_without_related_to")
-
-CONCEPT_FREQUENT_COLLABORATORS_BY_CONCEPT_ID = load_json_fixture(
-    "concept_frequent_collaborators_by_concept_id"
-)
-CONCEPT_IDS_WITHOUT_FREQUENT_COLLABORATORS = load_json_fixture(
-    "concept_ids_without_frequent_collaborators"
-)
-
-CONCEPT_RELATED_TOPICS_BY_CONCEPT_ID = load_json_fixture(
-    "concept_related_topics_by_concept_id"
-)
-CONCEPT_IDS_WITHOUT_RELATED_TOPICS = load_json_fixture(
-    "concept_ids_without_related_topics"
-)
-
-CONCEPT_FIELDS_OF_WORK_BY_CONCEPT_ID = load_json_fixture(
-    "concept_fields_of_work_by_concept_id"
-)
-CONCEPT_IDS_WITHOUT_FIELDS_OF_WORK = load_json_fixture(
-    "concept_ids_without_fields_of_work"
-)
-
-CONCEPT_NARROWER_THAN_BY_CONCEPT_ID = load_json_fixture(
-    "concept_narrower_than_by_concept_id"
-)
-CONCEPT_IDS_WITHOUT_NARROWER_THAN = load_json_fixture(
-    "concept_ids_without_narrower_than"
-)
-
-CONCEPT_BROADER_THAN_BY_CONCEPT_ID = load_json_fixture(
-    "concept_broader_than_by_concept_id"
-)
-CONCEPT_IDS_WITHOUT_BROADER_THAN = load_json_fixture("concept_ids_without_broader_than")
-
-CONCEPT_PEOPLE_BY_CONCEPT_ID = load_json_fixture("concept_people_by_concept_id")
-CONCEPT_IDS_WITHOUT_PEOPLE = load_json_fixture("concept_ids_without_people")
-
-CONCEPT_HAS_FOUNDER_BY_CONCEPT_ID = load_json_fixture(
-    "concept_has_founder_by_concept_id"
-)
-CONCEPT_IDS_WITHOUT_HAS_FOUNDER = load_json_fixture("concept_ids_without_has_founder")
 
 
 class GraphQueryTest(BaseModel):
@@ -110,14 +62,18 @@ class GraphQueryTest(BaseModel):
         return list(self.expected_results.keys())
 
     def run(self) -> None:
+        # Run the selected query against the live graph using the fixture IDs.
         query_params = {"ids": self.ids, **CONCEPT_QUERY_PARAMS}
         response = neptune_client().run_open_cypher_query(self.query, query_params)
         response_by_id = {item["id"]: item for item in response}
 
+        # Compare each fixture item to the corresponding row returned by Neptune.
         mismatches_returned: dict[str, Any] = {}
         mismatches_expected: dict[str, Any] = {}
 
         for item_id, expected_item in self.expected_results.items():
+            # Record mismatches either when Neptune returns no row for an ID, or when
+            # the returned row (after extraction) doesn't match the fixture.
             raw_returned_item = response_by_id.get(item_id)
             if raw_returned_item is None:
                 mismatches_expected[item_id] = expected_item
@@ -129,6 +85,7 @@ class GraphQueryTest(BaseModel):
                 mismatches_returned[item_id] = returned_item
                 mismatches_expected[item_id] = expected_item
 
+        # Fail only when drift exceeds the configured threshold.
         matched_count = len(self.ids) - len(mismatches_returned)
         matched_ratio = matched_count / len(self.ids)
 
@@ -139,6 +96,7 @@ class GraphQueryTest(BaseModel):
             )
             assert mismatches_returned == mismatches_expected, message
 
+        # Otherwise, emit warnings for any mismatches.
         self._show_warnings(mismatches_expected, mismatches_returned)
 
     def _show_warnings(self, expected: dict, returned: dict) -> None:
@@ -158,9 +116,20 @@ class GraphQueryTest(BaseModel):
                 )
 
     def extract_single(self, raw_returned_data: Any) -> Any:
+        """
+        Take a raw item returned by Neptune (e.g. a row containing `related` concepts)
+        and return the specific data we want to compare against the JSON fixture
+        (e.g. a list of related concept IDs).
+        """
         raise NotImplementedError()
 
     def compare_single(self, expected_data: Any, returned_data: Any) -> bool:
+        """
+        Compare a fixture value to the corresponding value extracted from Neptune.
+
+        Subclasses can override this to apply case-specific normalisation before
+        comparing (e.g. applying tolerance thresholds, ignoring ordering).
+        """
         return bool(expected_data == returned_data)
 
 
@@ -219,133 +188,174 @@ class ConceptTypesTest(GraphQueryTest):
         return sorted(expected_data) == sorted(returned_data)
 
 
-def assert_query_returns_no_rows(query: str, ids: list[str]) -> None:
+class MatchCase(NamedTuple):
+    name: str
+    query: str
+    test_cls: type[GraphQueryTest]
+    expected_fixture: str
+
+
+MATCH_CASES: list[MatchCase] = [
+    MatchCase(
+        name="work_ancestors",
+        query=WORK_ANCESTORS_QUERY,
+        test_cls=WorkAncestorsTest,
+        expected_fixture="work_ancestors_by_work_id",
+    ),
+    MatchCase(
+        name="concept_same_as",
+        query=SAME_AS_CONCEPT_QUERY,
+        test_cls=SameAsConceptsTest,
+        expected_fixture="concept_same_as_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_types",
+        query=CONCEPT_TYPE_QUERY,
+        test_cls=ConceptTypesTest,
+        expected_fixture="concept_types_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_related_to",
+        query=RELATED_TO_QUERY,
+        test_cls=RelatedConceptsTest,
+        expected_fixture="concept_related_to_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_frequent_collaborators",
+        query=FREQUENT_COLLABORATORS_QUERY,
+        test_cls=RelatedConceptsTest,
+        expected_fixture="concept_frequent_collaborators_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_related_topics",
+        query=RELATED_TOPICS_QUERY,
+        test_cls=RelatedConceptsTest,
+        expected_fixture="concept_related_topics_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_fields_of_work",
+        query=FIELDS_OF_WORK_QUERY,
+        test_cls=RelatedConceptsTest,
+        expected_fixture="concept_fields_of_work_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_narrower_than",
+        query=NARROWER_THAN_QUERY,
+        test_cls=RelatedConceptsTest,
+        expected_fixture="concept_narrower_than_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_broader_than",
+        query=BROADER_THAN_QUERY,
+        test_cls=RelatedConceptsTest,
+        expected_fixture="concept_broader_than_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_people",
+        query=PEOPLE_QUERY,
+        test_cls=RelatedConceptsTest,
+        expected_fixture="concept_people_by_concept_id",
+    ),
+    MatchCase(
+        name="concept_has_founder",
+        query=HAS_FOUNDER_QUERY,
+        test_cls=RelatedConceptsTest,
+        expected_fixture="concept_has_founder_by_concept_id",
+    ),
+]
+
+
+class EmptyCase(NamedTuple):
+    name: str
+    query: str
+    empty_fixture: str
+
+
+# These queries should return *zero rows* for the provided IDs.
+NO_ROWS_EMPTY_CASES: list[EmptyCase] = [
+    EmptyCase(
+        name="work_ancestors",
+        query=WORK_ANCESTORS_QUERY,
+        empty_fixture="work_ids_without_ancestors",
+    ),
+    EmptyCase(
+        name="concept_same_as",
+        query=SAME_AS_CONCEPT_QUERY,
+        empty_fixture="concept_ids_without_same_as",
+    ),
+    EmptyCase(
+        name="concept_related_to",
+        query=RELATED_TO_QUERY,
+        empty_fixture="concept_ids_without_related_to",
+    ),
+    EmptyCase(
+        name="concept_fields_of_work",
+        query=FIELDS_OF_WORK_QUERY,
+        empty_fixture="concept_ids_without_fields_of_work",
+    ),
+    EmptyCase(
+        name="concept_narrower_than",
+        query=NARROWER_THAN_QUERY,
+        empty_fixture="concept_ids_without_narrower_than",
+    ),
+    EmptyCase(
+        name="concept_broader_than",
+        query=BROADER_THAN_QUERY,
+        empty_fixture="concept_ids_without_broader_than",
+    ),
+    EmptyCase(
+        name="concept_people",
+        query=PEOPLE_QUERY,
+        empty_fixture="concept_ids_without_people",
+    ),
+    EmptyCase(
+        name="concept_has_founder",
+        query=HAS_FOUNDER_QUERY,
+        empty_fixture="concept_ids_without_has_founder",
+    ),
+]
+
+
+# These queries still return rows, but with `related=[]`.
+EMPTY_RELATED_LIST_CASES: list[EmptyCase] = [
+    EmptyCase(
+        name="concept_frequent_collaborators",
+        query=FREQUENT_COLLABORATORS_QUERY,
+        empty_fixture="concept_ids_without_frequent_collaborators",
+    ),
+    EmptyCase(
+        name="concept_related_topics",
+        query=RELATED_TOPICS_QUERY,
+        empty_fixture="concept_ids_without_related_topics",
+    ),
+]
+
+
+@pytest.mark.parametrize("case", MATCH_CASES, ids=lambda c: c.name)
+def test_graph_query_matches_fixture(case: MatchCase) -> None:
+    expected_results = load_json_fixture(case.expected_fixture)
+    case.test_cls(query=case.query, expected_results=expected_results).run()
+
+
+@pytest.mark.parametrize("case", NO_ROWS_EMPTY_CASES, ids=lambda c: f"{c.name}_empty")
+def test_graph_query_returns_no_rows_for_known_empty_ids(case: EmptyCase) -> None:
+    ids = load_json_fixture(case.empty_fixture)
     response = neptune_client().run_open_cypher_query(
-        query, {"ids": ids, **CONCEPT_QUERY_PARAMS}
+        case.query, {"ids": ids, **CONCEPT_QUERY_PARAMS}
     )
     assert len(response) == 0
 
 
-def test_work_ancestors() -> None:
-    WorkAncestorsTest(
-        query=WORK_ANCESTORS_QUERY, expected_results=WORK_ANCESTORS_BY_WORK_ID
-    ).run()
-
-
-def test_same_as_concepts() -> None:
-    SameAsConceptsTest(
-        query=SAME_AS_CONCEPT_QUERY, expected_results=CONCEPT_SAME_AS_BY_CONCEPT_ID
-    ).run()
-
-
-def test_concept_types() -> None:
-    ConceptTypesTest(
-        query=CONCEPT_TYPE_QUERY, expected_results=CONCEPT_TYPES_BY_CONCEPT_ID
-    ).run()
-
-
-def test_related_to_concepts() -> None:
-    RelatedConceptsTest(
-        query=RELATED_TO_QUERY, expected_results=CONCEPT_RELATED_TO_BY_CONCEPT_ID
-    ).run()
-
-
-def test_frequent_collaborator_concepts() -> None:
-    RelatedConceptsTest(
-        query=FREQUENT_COLLABORATORS_QUERY,
-        expected_results=CONCEPT_FREQUENT_COLLABORATORS_BY_CONCEPT_ID,
-    ).run()
-
-
-def test_related_topics_concepts() -> None:
-    RelatedConceptsTest(
-        query=RELATED_TOPICS_QUERY,
-        expected_results=CONCEPT_RELATED_TOPICS_BY_CONCEPT_ID,
-    ).run()
-
-
-def test_fields_of_work_concepts() -> None:
-    RelatedConceptsTest(
-        query=FIELDS_OF_WORK_QUERY,
-        expected_results=CONCEPT_FIELDS_OF_WORK_BY_CONCEPT_ID,
-    ).run()
-
-
-def test_narrower_than_concepts() -> None:
-    RelatedConceptsTest(
-        query=NARROWER_THAN_QUERY,
-        expected_results=CONCEPT_NARROWER_THAN_BY_CONCEPT_ID,
-    ).run()
-
-
-def test_broader_than_concepts() -> None:
-    RelatedConceptsTest(
-        query=BROADER_THAN_QUERY,
-        expected_results=CONCEPT_BROADER_THAN_BY_CONCEPT_ID,
-    ).run()
-
-
-def test_people_concepts() -> None:
-    RelatedConceptsTest(
-        query=PEOPLE_QUERY,
-        expected_results=CONCEPT_PEOPLE_BY_CONCEPT_ID,
-    ).run()
-
-
-def test_has_founder_concepts() -> None:
-    RelatedConceptsTest(
-        query=HAS_FOUNDER_QUERY,
-        expected_results=CONCEPT_HAS_FOUNDER_BY_CONCEPT_ID,
-    ).run()
-
-
-def test_work_ancestors_empty_for_works_without_ancestors() -> None:
-    assert_query_returns_no_rows(WORK_ANCESTORS_QUERY, WORK_IDS_WITHOUT_ANCESTORS)
-
-
-def test_same_as_empty_for_concepts_without_same_as() -> None:
-    assert_query_returns_no_rows(SAME_AS_CONCEPT_QUERY, CONCEPT_IDS_WITHOUT_SAME_AS)
-
-
-def test_related_to_empty_for_concepts_without_related_to() -> None:
-    assert_query_returns_no_rows(RELATED_TO_QUERY, CONCEPT_IDS_WITHOUT_RELATED_TO)
-
-
-def test_frequent_collaborators_empty_for_concepts_without_frequent_collaborators() -> (
-    None
-):
+@pytest.mark.parametrize(
+    "case",
+    EMPTY_RELATED_LIST_CASES,
+    ids=lambda c: f"{c.name}_empty_related",
+)
+def test_graph_query_returns_empty_related_list_for_known_empty_ids(
+    case: EmptyCase,
+) -> None:
+    ids = load_json_fixture(case.empty_fixture)
     response = neptune_client().run_open_cypher_query(
-        FREQUENT_COLLABORATORS_QUERY,
-        {"ids": CONCEPT_IDS_WITHOUT_FREQUENT_COLLABORATORS, **CONCEPT_QUERY_PARAMS},
+        case.query, {"ids": ids, **CONCEPT_QUERY_PARAMS}
     )
     assert all(len(item["related"]) == 0 for item in response)
-
-
-def test_related_topics_empty_for_concepts_without_related_topics() -> None:
-    response = neptune_client().run_open_cypher_query(
-        RELATED_TOPICS_QUERY,
-        {"ids": CONCEPT_IDS_WITHOUT_RELATED_TOPICS, **CONCEPT_QUERY_PARAMS},
-    )
-    assert all(len(item["related"]) == 0 for item in response)
-
-
-def test_fields_of_work_empty_for_concepts_without_fields_of_work() -> None:
-    assert_query_returns_no_rows(
-        FIELDS_OF_WORK_QUERY, CONCEPT_IDS_WITHOUT_FIELDS_OF_WORK
-    )
-
-
-def test_narrower_than_empty_for_concepts_without_narrower_than() -> None:
-    assert_query_returns_no_rows(NARROWER_THAN_QUERY, CONCEPT_IDS_WITHOUT_NARROWER_THAN)
-
-
-def test_broader_than_empty_for_concepts_without_broader_than() -> None:
-    assert_query_returns_no_rows(BROADER_THAN_QUERY, CONCEPT_IDS_WITHOUT_BROADER_THAN)
-
-
-def test_people_empty_for_concepts_without_people() -> None:
-    assert_query_returns_no_rows(PEOPLE_QUERY, CONCEPT_IDS_WITHOUT_PEOPLE)
-
-
-def test_has_founder_empty_for_concepts_without_has_founder() -> None:
-    assert_query_returns_no_rows(HAS_FOUNDER_QUERY, CONCEPT_IDS_WITHOUT_HAS_FOUNDER)
