@@ -5,7 +5,7 @@ from typing import cast
 import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
-from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Not
+from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Or
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
@@ -67,6 +67,8 @@ class AdapterStore:
             updates = self._find_updates(existing_data, new_data)
             # Filter updates to only include records with newer timestamps
             updates = self._filter_by_timestamp(updates, existing_data)
+            # Preserve content for records being marked as deleted
+            updates = self._preserve_content_for_deletions(updates, existing_data)
             inserts = self._find_inserts(existing_data, new_data, namespace)
             changes = updates
         else:
@@ -98,7 +100,7 @@ class AdapterStore:
             existing_data = existing_data.sort_by("id")
             new_data = new_data.sort_by("id")
 
-            deletes = self._get_deletes(existing_data, new_data, namespace)
+            deletes = self._find_snapshot_deletes(existing_data, new_data, namespace)
             updates = self._find_updates(existing_data, new_data)
             inserts = self._find_inserts(existing_data, new_data, namespace)
 
@@ -144,6 +146,7 @@ class AdapterStore:
             "namespace",
             "id",
             "content",
+            "changeset",
             "last_modified",
             "deleted",
         )
@@ -163,7 +166,7 @@ class AdapterStore:
     def get_all_records(self, include_deleted: bool = False) -> pa.Table:
         """Return all records in the table.
 
-        By default, rows whose content field is null (i.e. soft-deleted) are excluded.
+        By default, rows marked as deleted are excluded.
 
         During a full reindex we are writing into an empty index,
         so no need to include deleted rows to overwrite documents.
@@ -172,7 +175,10 @@ class AdapterStore:
         """
         if include_deleted:
             return self.table.scan().to_arrow()
-        return self.table.scan(row_filter=Not(IsNull("content"))).to_arrow()
+
+        return self.table.scan(
+            row_filter=Or(EqualTo("deleted", False), IsNull("deleted"))
+        ).to_arrow()
 
     def _upsert_with_markers(
         self,
@@ -223,14 +229,14 @@ class AdapterStore:
     def _append_change_columns(
         changeset: pa.Table, changeset_id: str, timestamp: pa.Scalar | None = None
     ) -> pa.Table:
-        # Build correctly-typed Arrow arrays for the metadata columns we're appending.
+        # Build correctly-typed Arrow arrays for the metadata columns we're replacing.
         num_rows = changeset.num_rows
         changeset_array = pa.array([changeset_id] * num_rows, type=pa.string())
+        changeset_field = pa.field("changeset", type=pa.string(), nullable=True)
 
-        changeset = changeset.append_column(
-            pa.field("changeset", type=pa.string(), nullable=True),
-            changeset_array,
-        )
+        # Replace changeset column with the new changeset_id
+        idx = changeset.schema.get_field_index("changeset")
+        changeset = changeset.set_column(idx, changeset_field, changeset_array)
 
         # Replace last_modified column if timestamp provided
         if timestamp is not None:
@@ -362,28 +368,67 @@ class AdapterStore:
         return updates.take(rows_to_keep)
 
     @staticmethod
-    def _get_deletes(
+    def _preserve_content_for_deletions(
+        updates: pa.Table, existing_data: pa.Table
+    ) -> pa.Table:
+        """
+        Preserve existing content for records being marked as deleted.
+
+        When a record is marked as deleted (deleted=True) with content=None,
+        replace the null content with the existing content from the table.
+        This ensures we can replay deletions downstream if needed.
+
+        Args:
+            updates: Table of updates to apply (may include deletions)
+            existing_data: Table of existing records
+
+        Returns:
+            Updated table with preserved content for deletions
+        """
+        if updates.num_rows == 0:
+            return updates
+
+        # Build lookup of existing content by id
+        existing_content = {
+            row["id"]: row["content"] for row in existing_data.to_pylist()
+        }
+
+        # Check if any records need content preservation
+        rows = updates.to_pylist()
+        needs_update = False
+        for row in rows:
+            if row.get("deleted") is True and row.get("content") is None:
+                existing = existing_content.get(row["id"])
+                if existing is not None:
+                    row["content"] = existing
+                    needs_update = True
+
+        if not needs_update:
+            return updates
+
+        # Rebuild table with preserved content
+        return pa.Table.from_pylist(rows, schema=updates.schema)
+
+    @staticmethod
+    def _find_snapshot_deletes(
         existing_data: pa.Table, new_data: pa.Table, record_namespace: str
     ) -> pa.Table:
         """
         Find records in `existing_data` that are not in `new_data`, and produce a
-        pyarrow Table that can be used to update those records by emptying their content.
+        pyarrow Table that can be used to update those records by marking them as deleted.
         """
         new_ids = new_data.column("id")
+        # Check for records that are not already deleted (deleted is null or False)
+        not_deleted = pc.field("deleted").is_null() | (pc.field("deleted") == False)  # noqa: E712
         missing_ids = existing_data.filter(
-            # records that have already been "deleted" do not need to be deleted again.
-            (~pc.field("content").is_null())
+            ~pc.field("id").isin(new_ids)
             & (pc.field("namespace") == record_namespace)
-            & ~pc.field("id").isin(new_ids)
-        ).column("id")
-        return pa.Table.from_pylist(
-            [
-                {
-                    "namespace": record_namespace,
-                    "id": id.as_py(),
-                    "deleted": True,
-                }
-                for id in missing_ids
-            ],
-            schema=ARROW_SCHEMA,
+            & not_deleted
+        )
+
+        num_rows = missing_ids.num_rows
+        deleted_array = pa.array([True] * num_rows, type=pa.bool_())
+
+        return missing_ids.set_column(
+            missing_ids.schema.get_field_index("deleted"), "deleted", deleted_array
         )

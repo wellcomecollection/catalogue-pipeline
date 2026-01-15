@@ -36,6 +36,7 @@ ARROW_FIELDS: list[pa.Field] = [
     pa.field("namespace", type=pa.string(), nullable=False),
     pa.field("id", type=pa.string(), nullable=False),
     pa.field("content", type=pa.string(), nullable=True),
+    pa.field("changeset", type=pa.string(), nullable=True),
     pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
     pa.field("deleted", type=pa.bool_(), nullable=True),
 ]
