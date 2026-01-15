@@ -320,6 +320,7 @@ def test_all_actions(temporary_table: IcebergTable) -> None:
             "content": "hello",
             "changeset": None,
             "last_modified": None,
+            "deleted": None,
             "namespace": "ebsco_test",
         }
     ]

@@ -312,6 +312,7 @@ def test_snapshot_sync_all_actions(temporary_table: IcebergTable) -> None:
             "content": "hello",
             "changeset": None,
             "last_modified": None,
+            "deleted": None,
             "namespace": "test_namespace",
         }
     ]
