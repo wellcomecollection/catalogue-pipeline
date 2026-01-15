@@ -29,7 +29,7 @@ from ingestor.queries.work_queries import WORK_ANCESTORS_QUERY
 from utils.aws import get_neptune_client
 
 FIXTURE_SAMPLE_SIZE = 20
-ID_POOL_SIZE = 10_000
+ID_POOL_SIZE = 20_000
 
 
 def write_fixture(name: str, data: dict[str, Any] | list[str]) -> None:
