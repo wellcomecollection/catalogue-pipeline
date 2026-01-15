@@ -195,9 +195,9 @@ class AdapterStore:
         changeset_id = str(uuid.uuid1())
 
         if changes is not None:
-            changes = self._append_change_columns(changes, changeset_id, timestamp)
+            changes = self._set_change_columns(changes, changeset_id, timestamp)
         if inserts is not None:
-            inserts = self._append_change_columns(inserts, changeset_id, timestamp)
+            inserts = self._set_change_columns(inserts, changeset_id, timestamp)
         with self.table.transaction() as tx:
             # Because we already know which records to overwrite and which ones to append,
             # we can avoid all the extra processing that happens inside table.upsert to find
@@ -226,7 +226,7 @@ class AdapterStore:
         return In("id", change_ids)
 
     @staticmethod
-    def _append_change_columns(
+    def _set_change_columns(
         changeset: pa.Table, changeset_id: str, timestamp: pa.Scalar | None = None
     ) -> pa.Table:
         # Build correctly-typed Arrow arrays for the metadata columns we're replacing.
