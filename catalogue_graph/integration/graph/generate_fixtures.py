@@ -35,6 +35,7 @@ ID_POOL_SIZE = 10_000
 def write_fixture(name: str, data: dict[str, Any] | list[str]) -> None:
     path = Path(__file__).parent / "fixtures" / f"{name}.json"
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+    print(f"Wrote fixture: {path}")
 
 
 def sample_ids(*, client: Any, label: str) -> list[str]:
@@ -57,8 +58,8 @@ def generate_fixture_set(
 ) -> None:
     """Generate two fixtures for each query:
 
-    - expected_fixture_name: a mapping of id -> extracted value (e.g. related concept IDs)
-    - empty_ids_fixture_name: a list of IDs for which the query should be empty
+    - 'expected fixture': a mapping of id -> extracted value (e.g. related concept IDs)
+    - 'empty IDs fixture': a list of IDs for which the query should be empty
     """
     response = client.run_open_cypher_query(query, {"ids": ids, **CONCEPT_QUERY_PARAMS})
 
@@ -70,22 +71,14 @@ def generate_fixture_set(
 
     missing_ids = {expected_id for expected_id in ids if expected_id not in mappings}
 
-    sample_size = min(FIXTURE_SAMPLE_SIZE, len(mappings))
-    sampled_ids = set(random.sample(sorted(mappings), sample_size))
+    sampled_ids = set(random.sample(sorted(mappings), FIXTURE_SAMPLE_SIZE))
     sampled_mappings = {k: v for k, v in mappings.items() if k in sampled_ids}
     write_fixture(expected_fixture_name, sampled_mappings)
 
     if empty_ids_fixture_name is None:
         return
-
-    if not missing_ids:
-        write_fixture(empty_ids_fixture_name, [])
-        return
-
-    random_missing = random.sample(
-        sorted(missing_ids),
-        min(FIXTURE_SAMPLE_SIZE, len(missing_ids)),
-    )
+    
+    random_missing = random.sample(sorted(missing_ids), FIXTURE_SAMPLE_SIZE)
     write_fixture(empty_ids_fixture_name, random_missing)
 
 
