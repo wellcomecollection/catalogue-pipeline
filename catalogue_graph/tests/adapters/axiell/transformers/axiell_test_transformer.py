@@ -33,7 +33,8 @@ def transform_axiell_record(
     source_modified_time: datetime = DEFAULT_SOURCE_MODIFIED_TIME,
 ) -> InvisibleSourceWork:
     """Convenience helper for tests."""
-
-    return AxiellTransformerForTests().transform_record(
-        marc_record, source_modified_time=source_modified_time
+    transformer = AxiellTransformerForTests()
+    work_id = transformer.extract_work_id(marc_record)
+    return transformer.transform_record(
+        work_id, marc_record, source_modified_time=source_modified_time
     )

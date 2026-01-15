@@ -16,8 +16,9 @@ from .marcxml_test_transformer import MarcFieldTransformerForTests
 
 def _transform_title(marc_record: Record) -> str:
     transformer = MarcFieldTransformerForTests()
+    work_id = transformer.extract_work_id(marc_record)
     work = transformer.transform_record(
-        marc_record, source_modified_time=datetime.now()
+        work_id, marc_record, source_modified_time=datetime.now()
     )
     assert work.data.title is not None
     return work.data.title
