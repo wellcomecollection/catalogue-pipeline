@@ -146,6 +146,7 @@ class AdapterStore:
             "namespace",
             "id",
             "content",
+            "changeset",
             "last_modified",
             "deleted",
         )
@@ -228,14 +229,14 @@ class AdapterStore:
     def _append_change_columns(
         changeset: pa.Table, changeset_id: str, timestamp: pa.Scalar | None = None
     ) -> pa.Table:
-        # Build correctly-typed Arrow arrays for the metadata columns we're appending.
+        # Build correctly-typed Arrow arrays for the metadata columns we're replacing.
         num_rows = changeset.num_rows
         changeset_array = pa.array([changeset_id] * num_rows, type=pa.string())
+        changeset_field = pa.field("changeset", type=pa.string(), nullable=True)
 
-        changeset = changeset.append_column(
-            pa.field("changeset", type=pa.string(), nullable=True),
-            changeset_array,
-        )
+        # Replace changeset column with the new changeset_id
+        idx = changeset.schema.get_field_index("changeset")
+        changeset = changeset.set_column(idx, changeset_field, changeset_array)
 
         # Replace last_modified column if timestamp provided
         if timestamp is not None:
