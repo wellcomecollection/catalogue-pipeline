@@ -16,9 +16,15 @@ from pydantic import BaseModel
 from clients.base_neptune_client import BaseNeptuneClient
 from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
+    BROADER_THAN_QUERY,
     CONCEPT_TYPE_QUERY,
+    FIELDS_OF_WORK_QUERY,
     FREQUENT_COLLABORATORS_QUERY,
+    HAS_FOUNDER_QUERY,
+    NARROWER_THAN_QUERY,
+    PEOPLE_QUERY,
     RELATED_TO_QUERY,
+    RELATED_TOPICS_QUERY,
     SAME_AS_CONCEPT_QUERY,
 )
 from ingestor.queries.work_queries import (
@@ -34,36 +40,65 @@ def neptune_client() -> BaseNeptuneClient:
     return get_neptune_client(True)
 
 
-MIN_MATCH_RATIO = 0.9
-
-
 def load_json_fixture(file_name: str) -> Any:
-    path = Path(__file__).parent / "fixtures" / file_name
+    path = Path(__file__).parent / "fixtures" / f"{file_name}.json"
     with path.open() as f:
         return json.loads(f.read())
 
 
-WORK_ANCESTORS_BY_WORK_ID = load_json_fixture("work_ancestors_by_work_id.json")
-WORK_IDS_WITHOUT_ANCESTORS = load_json_fixture("work_ids_without_ancestors.json")
+MIN_MATCH_RATIO = 0.9
 
-CONCEPT_SAME_AS_BY_CONCEPT_ID = load_json_fixture("concept_same_as_by_concept_id.json")
-CONCEPT_IDS_WITHOUT_SAME_AS = load_json_fixture("concept_ids_without_same_as.json")
+WORK_ANCESTORS_BY_WORK_ID = load_json_fixture("work_ancestors_by_work_id")
+WORK_IDS_WITHOUT_ANCESTORS = load_json_fixture("work_ids_without_ancestors")
 
-CONCEPT_TYPES_BY_CONCEPT_ID = load_json_fixture("concept_types_by_concept_id.json")
+CONCEPT_SAME_AS_BY_CONCEPT_ID = load_json_fixture("concept_same_as_by_concept_id")
+CONCEPT_IDS_WITHOUT_SAME_AS = load_json_fixture("concept_ids_without_same_as")
 
-CONCEPT_RELATED_TO_BY_CONCEPT_ID = load_json_fixture(
-    "concept_related_to_by_concept_id.json"
-)
-CONCEPT_IDS_WITHOUT_RELATED_TO = load_json_fixture(
-    "concept_ids_without_related_to.json"
-)
+CONCEPT_TYPES_BY_CONCEPT_ID = load_json_fixture("concept_types_by_concept_id")
+
+CONCEPT_RELATED_TO_BY_CONCEPT_ID = load_json_fixture("concept_related_to_by_concept_id")
+CONCEPT_IDS_WITHOUT_RELATED_TO = load_json_fixture("concept_ids_without_related_to")
 
 CONCEPT_FREQUENT_COLLABORATORS_BY_CONCEPT_ID = load_json_fixture(
-    "concept_frequent_collaborators_by_concept_id.json"
+    "concept_frequent_collaborators_by_concept_id"
 )
 CONCEPT_IDS_WITHOUT_FREQUENT_COLLABORATORS = load_json_fixture(
-    "concept_ids_without_frequent_collaborators.json"
+    "concept_ids_without_frequent_collaborators"
 )
+
+CONCEPT_RELATED_TOPICS_BY_CONCEPT_ID = load_json_fixture(
+    "concept_related_topics_by_concept_id"
+)
+CONCEPT_IDS_WITHOUT_RELATED_TOPICS = load_json_fixture(
+    "concept_ids_without_related_topics"
+)
+
+CONCEPT_FIELDS_OF_WORK_BY_CONCEPT_ID = load_json_fixture(
+    "concept_fields_of_work_by_concept_id"
+)
+CONCEPT_IDS_WITHOUT_FIELDS_OF_WORK = load_json_fixture(
+    "concept_ids_without_fields_of_work"
+)
+
+CONCEPT_NARROWER_THAN_BY_CONCEPT_ID = load_json_fixture(
+    "concept_narrower_than_by_concept_id"
+)
+CONCEPT_IDS_WITHOUT_NARROWER_THAN = load_json_fixture(
+    "concept_ids_without_narrower_than"
+)
+
+CONCEPT_BROADER_THAN_BY_CONCEPT_ID = load_json_fixture(
+    "concept_broader_than_by_concept_id"
+)
+CONCEPT_IDS_WITHOUT_BROADER_THAN = load_json_fixture("concept_ids_without_broader_than")
+
+CONCEPT_PEOPLE_BY_CONCEPT_ID = load_json_fixture("concept_people_by_concept_id")
+CONCEPT_IDS_WITHOUT_PEOPLE = load_json_fixture("concept_ids_without_people")
+
+CONCEPT_HAS_FOUNDER_BY_CONCEPT_ID = load_json_fixture(
+    "concept_has_founder_by_concept_id"
+)
+CONCEPT_IDS_WITHOUT_HAS_FOUNDER = load_json_fixture("concept_ids_without_has_founder")
 
 
 class GraphQueryTest(BaseModel):
@@ -222,6 +257,48 @@ def test_frequent_collaborator_concepts() -> None:
     ).run()
 
 
+def test_related_topics_concepts() -> None:
+    RelatedConceptsTest(
+        query=RELATED_TOPICS_QUERY,
+        expected_results=CONCEPT_RELATED_TOPICS_BY_CONCEPT_ID,
+    ).run()
+
+
+def test_fields_of_work_concepts() -> None:
+    RelatedConceptsTest(
+        query=FIELDS_OF_WORK_QUERY,
+        expected_results=CONCEPT_FIELDS_OF_WORK_BY_CONCEPT_ID,
+    ).run()
+
+
+def test_narrower_than_concepts() -> None:
+    RelatedConceptsTest(
+        query=NARROWER_THAN_QUERY,
+        expected_results=CONCEPT_NARROWER_THAN_BY_CONCEPT_ID,
+    ).run()
+
+
+def test_broader_than_concepts() -> None:
+    RelatedConceptsTest(
+        query=BROADER_THAN_QUERY,
+        expected_results=CONCEPT_BROADER_THAN_BY_CONCEPT_ID,
+    ).run()
+
+
+def test_people_concepts() -> None:
+    RelatedConceptsTest(
+        query=PEOPLE_QUERY,
+        expected_results=CONCEPT_PEOPLE_BY_CONCEPT_ID,
+    ).run()
+
+
+def test_has_founder_concepts() -> None:
+    RelatedConceptsTest(
+        query=HAS_FOUNDER_QUERY,
+        expected_results=CONCEPT_HAS_FOUNDER_BY_CONCEPT_ID,
+    ).run()
+
+
 def test_work_ancestors_empty_for_works_without_ancestors() -> None:
     assert_query_returns_no_rows(WORK_ANCESTORS_QUERY, WORK_IDS_WITHOUT_ANCESTORS)
 
@@ -242,3 +319,33 @@ def test_frequent_collaborators_empty_for_concepts_without_frequent_collaborator
         {"ids": CONCEPT_IDS_WITHOUT_FREQUENT_COLLABORATORS, **CONCEPT_QUERY_PARAMS},
     )
     assert all(len(item["related"]) == 0 for item in response)
+
+
+def test_related_topics_empty_for_concepts_without_related_topics() -> None:
+    response = neptune_client().run_open_cypher_query(
+        RELATED_TOPICS_QUERY,
+        {"ids": CONCEPT_IDS_WITHOUT_RELATED_TOPICS, **CONCEPT_QUERY_PARAMS},
+    )
+    assert all(len(item["related"]) == 0 for item in response)
+
+
+def test_fields_of_work_empty_for_concepts_without_fields_of_work() -> None:
+    assert_query_returns_no_rows(
+        FIELDS_OF_WORK_QUERY, CONCEPT_IDS_WITHOUT_FIELDS_OF_WORK
+    )
+
+
+def test_narrower_than_empty_for_concepts_without_narrower_than() -> None:
+    assert_query_returns_no_rows(NARROWER_THAN_QUERY, CONCEPT_IDS_WITHOUT_NARROWER_THAN)
+
+
+def test_broader_than_empty_for_concepts_without_broader_than() -> None:
+    assert_query_returns_no_rows(BROADER_THAN_QUERY, CONCEPT_IDS_WITHOUT_BROADER_THAN)
+
+
+def test_people_empty_for_concepts_without_people() -> None:
+    assert_query_returns_no_rows(PEOPLE_QUERY, CONCEPT_IDS_WITHOUT_PEOPLE)
+
+
+def test_has_founder_empty_for_concepts_without_has_founder() -> None:
+    assert_query_returns_no_rows(HAS_FOUNDER_QUERY, CONCEPT_IDS_WITHOUT_HAS_FOUNDER)

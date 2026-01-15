@@ -14,9 +14,15 @@ from typing import Any
 
 from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
+    BROADER_THAN_QUERY,
     CONCEPT_TYPE_QUERY,
+    FIELDS_OF_WORK_QUERY,
     FREQUENT_COLLABORATORS_QUERY,
+    HAS_FOUNDER_QUERY,
+    NARROWER_THAN_QUERY,
+    PEOPLE_QUERY,
     RELATED_TO_QUERY,
+    RELATED_TOPICS_QUERY,
     SAME_AS_CONCEPT_QUERY,
 )
 from ingestor.queries.work_queries import WORK_ANCESTORS_QUERY
@@ -68,11 +74,15 @@ def generate_fixture_set(
     if empty_ids_file is None:
         return
 
-    if len(missing_ids) >= sample_size:
-        random_missing = random.sample(sorted(missing_ids), sample_size)
-        write_fixture(empty_ids_file, random_missing)
-    else:
-        print(f"Not enough missing data for '{empty_ids_file}'.")
+    if not missing_ids:
+        write_fixture(empty_ids_file, [])
+        return
+
+    random_missing = random.sample(
+        sorted(missing_ids),
+        min(FIXTURE_SAMPLE_SIZE, len(missing_ids)),
+    )
+    write_fixture(empty_ids_file, random_missing)
 
 
 def types_extractor(item: dict[str, Any]) -> list[str]:
@@ -130,6 +140,60 @@ def main() -> None:
         extractor=related_extractor,
         expected_mapping_file="concept_related_to_by_concept_id.json",
         empty_ids_file="concept_ids_without_related_to.json",
+    )
+
+    generate_fixture_set(
+        client=client,
+        query=RELATED_TOPICS_QUERY,
+        ids=random_concept_ids,
+        extractor=related_extractor,
+        expected_mapping_file="concept_related_topics_by_concept_id.json",
+        empty_ids_file="concept_ids_without_related_topics.json",
+    )
+
+    generate_fixture_set(
+        client=client,
+        query=FIELDS_OF_WORK_QUERY,
+        ids=random_concept_ids,
+        extractor=related_extractor,
+        expected_mapping_file="concept_fields_of_work_by_concept_id.json",
+        empty_ids_file="concept_ids_without_fields_of_work.json",
+    )
+
+    generate_fixture_set(
+        client=client,
+        query=NARROWER_THAN_QUERY,
+        ids=random_concept_ids,
+        extractor=related_extractor,
+        expected_mapping_file="concept_narrower_than_by_concept_id.json",
+        empty_ids_file="concept_ids_without_narrower_than.json",
+    )
+
+    generate_fixture_set(
+        client=client,
+        query=BROADER_THAN_QUERY,
+        ids=random_concept_ids,
+        extractor=related_extractor,
+        expected_mapping_file="concept_broader_than_by_concept_id.json",
+        empty_ids_file="concept_ids_without_broader_than.json",
+    )
+
+    generate_fixture_set(
+        client=client,
+        query=PEOPLE_QUERY,
+        ids=random_concept_ids,
+        extractor=related_extractor,
+        expected_mapping_file="concept_people_by_concept_id.json",
+        empty_ids_file="concept_ids_without_people.json",
+    )
+
+    generate_fixture_set(
+        client=client,
+        query=HAS_FOUNDER_QUERY,
+        ids=random_concept_ids,
+        extractor=related_extractor,
+        expected_mapping_file="concept_has_founder_by_concept_id.json",
+        empty_ids_file="concept_ids_without_has_founder.json",
     )
     generate_fixture_set(
         client=client,
