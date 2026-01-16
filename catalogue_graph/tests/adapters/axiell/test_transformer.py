@@ -65,7 +65,7 @@ def test_transformer_end_to_end_with_local_table(
 
     assert lines == [
         {
-            "sourceIdentifiers": [f"Work[axiell-priref/{i}]" for i in records_by_id],
+            "sourceIdentifiers": [f"Work[axiell-guid/{i}]" for i in records_by_id],
             "jobId": "20250101T1200",
         }
     ]
@@ -114,12 +114,12 @@ def test_transformer_end_to_end_includes_deletions(
 
     assert len(lines) == 1
     assert set(lines[0]["sourceIdentifiers"]) == {
-        "Work[axiell-priref/ax00001]",
-        "Work[axiell-priref/ax00003]",
+        "Work[axiell-guid/ax00001]",
+        "Work[axiell-guid/ax00003]",
     }
 
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
-    deleted = by_id["Work[axiell-priref/ax00003]"]["_source"]
+    deleted = by_id["Work[axiell-guid/ax00003]"]["_source"]
     assert deleted["type"] == "Deleted"
     assert deleted["deletedReason"]["type"] == "DeletedFromSource"
     assert deleted["deletedReason"]["info"] == "Marked as deleted from source"
