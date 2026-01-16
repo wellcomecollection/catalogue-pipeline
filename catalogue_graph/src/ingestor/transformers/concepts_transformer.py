@@ -23,16 +23,16 @@ from .raw_related_concepts import RawNeptuneRelatedConcept
 
 class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
     def __init__(
-        self,
-        event: BasePipelineEvent,
-        es_mode: ElasticsearchMode,
-        overrides: TextIO | None = None,
+            self,
+            event: BasePipelineEvent,
+            es_mode: ElasticsearchMode,
+            overrides: TextIO | None = None,
     ) -> None:
         self.source = GraphConceptsExtractor(event, es_mode)
         self.override_provider = ConceptTextOverrideProvider(overrides)
 
     def _transform_related_concept(
-        self, related_concept: RawNeptuneRelatedConcept
+            self, related_concept: RawNeptuneRelatedConcept
     ) -> ConceptRelatedTo | None:
         try:
             return ConceptRelatedTo(
@@ -46,7 +46,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
             return None
 
     def _transform_related_concepts(
-        self, raw_related_concepts: list[RawNeptuneRelatedConcept]
+            self, raw_related_concepts: list[RawNeptuneRelatedConcept]
     ) -> list[ConceptRelatedTo]:
         return [
             concept
@@ -67,9 +67,9 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         )
 
     def _get_display(
-        self,
-        neptune_concept: RawNeptuneConcept,
-        neptune_related: RawNeptuneRelatedConcepts,
+            self,
+            neptune_concept: RawNeptuneConcept,
+            neptune_related: RawNeptuneRelatedConcepts,
     ) -> ConceptDisplay:
         return ConceptDisplay(
             id=neptune_concept.wellcome_id,
@@ -80,6 +80,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
             type=neptune_concept.concept_type,
             description=self.override_provider.description_of(neptune_concept),
             sameAs=neptune_concept.same_as,
+            # TODO get this from the nepture concept directly
             displayImages=self.override_provider.display_images(neptune_concept),
             relatedConcepts=RelatedConcepts(
                 relatedTo=self._transform_related_concepts(neptune_related.related_to),
@@ -104,7 +105,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         )
 
     def transform_document(
-        self, raw_item: tuple[ExtractedConcept, dict[ConceptRelatedQuery, list]]
+            self, raw_item: tuple[ExtractedConcept, dict[ConceptRelatedQuery, list]]
     ) -> IndexableConcept | None:
         neptune_concept = RawNeptuneConcept(raw_item[0])
         neptune_related = RawNeptuneRelatedConcepts(raw_item[1])

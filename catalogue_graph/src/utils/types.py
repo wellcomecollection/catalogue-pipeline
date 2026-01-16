@@ -58,6 +58,7 @@ ConceptSource = Literal[
     "viaf",
     "fihrist",
     "wikidata",
+    "weco_concepts",
 ]
 
 WorkType = Literal["Standard", "Series", "Section", "Collection"]

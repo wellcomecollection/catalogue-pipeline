@@ -1,18 +1,18 @@
-from catalogue_graph.src.transformers.base_transformer import BaseTransformer
+from transformers.base_transformer import BaseTransformer
+from sources.weco_concepts.concepts_source import WeCoConceptsSource
+from models.graph_node import SourceConcept
 
 
 class WeCoConceptsTransformer(BaseTransformer):
+    def __init__(self):
+        self.source = WeCoConceptsSource()
 
-    def transform_node(self, data):
-        # Implement transformation logic for WeCo concepts here
-        transformed_data = {}
-        # Example transformation (to be replaced with actual logic)
-        for item in data:
-            transformed_item = {
-                "id": item.get("id"),
-                "label": item.get("label"),
-                "description": item.get("description"),
-                "source": "weco-concepts"
-            }
-            transformed_data[item.get("id")] = transformed_item
-        return transformed_data
+    def transform_node(self, data) -> SourceConcept:
+        return SourceConcept(
+            id=data["id"],
+            label=data["label"],
+            source="weco_concepts",
+            description=data["description"]
+            # TODO also images - once model supports it
+
+        )

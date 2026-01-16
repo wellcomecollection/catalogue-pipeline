@@ -56,8 +56,8 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str:
 
 
 def get_priority_label(
-    raw_concept: ExtractedConcept,
-    source_priority: list[ConceptSource],
+        raw_concept: ExtractedConcept,
+        source_priority: list[ConceptSource],
 ) -> tuple[str, str]:
     """
     Given a concept and its source concepts, extract the corresponding labels and return the highest-priority one.

@@ -37,6 +37,7 @@ IDENTIFIER_LABEL_MAPPING = {
     "label-derived": "Identifier derived from the label of the referent",
     "wellcome-accession-number": "Accession number",
     "wikidata": "Wikidata",
+    "weco_concepts": "Wellcome Concepts",
 }
 
 
@@ -61,7 +62,7 @@ class DisplayIdentifier(BaseModel):
 
     @staticmethod
     def from_all_identifiers(
-        identifier: Identified | Unidentifiable | Identifiable,
+            identifier: Identified | Unidentifiable | Identifiable,
     ) -> Generator["DisplayIdentifier"]:
         for i in identifier.get_identifiers():
             yield DisplayIdentifier.from_source_identifier(i)
