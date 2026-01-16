@@ -55,12 +55,12 @@ def test_manifest_writer_writes_failures() -> None:
 
     errors = [
         TransformationError(
-            work_id="Work[ebsco-alt-lookup/e1]",
+            row_id="e1",
             stage="transform",
             detail="reason=parse_error",
         ),
         TransformationError(
-            work_id="Work[ebsco-alt-lookup/e2]",
+            row_id="e2",
             stage="index",
             detail="status=400; error_type=mapper_parsing_exception",
         ),
@@ -86,13 +86,13 @@ def test_manifest_writer_writes_failures() -> None:
         f"{manifest.failures.error_file_location.key}"
     )
     failure_lines = _read_ndjson(failure_uri)
-    assert {line["work_id"] for line in failure_lines} == {
-        "Work[ebsco-alt-lookup/e1]",
-        "Work[ebsco-alt-lookup/e2]",
+    assert {line["row_id"] for line in failure_lines} == {
+        "e1",
+        "e2",
     }
-    details = {line["work_id"]: line["detail"] for line in failure_lines}
-    assert "reason=parse_error" in details["Work[ebsco-alt-lookup/e1]"]
-    assert "error_type=mapper_parsing_exception" in details["Work[ebsco-alt-lookup/e2]"]
+    details = {line["row_id"]: line["detail"] for line in failure_lines}
+    assert "reason=parse_error" in details["e1"]
+    assert "error_type=mapper_parsing_exception" in details["e2"]
     # Naming pattern for reindex without changeset
     assert manifest.successes.batch_file_location.key.startswith(
         f"{adapter_config.BATCH_S3_PREFIX}/reindex.job999.ids"
@@ -151,7 +151,7 @@ def test_manifest_file_naming_patterns(
         successful_ids=["Work[ebsco-alt-lookup/only1]"],
         errors=[
             TransformationError(
-                work_id="Work[ebsco-alt-lookup/only1]",
+                row_id="only1",
                 stage="transform",
                 detail="reason=parse_error",
             )
