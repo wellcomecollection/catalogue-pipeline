@@ -12,7 +12,7 @@ ES_BULK_INDEX_BATCH_SIZE = 10_000
 
 
 class TransformationError(BaseModel):
-    work_id: str
+    row_id: str
     stage: str
     detail: str
 
@@ -29,21 +29,21 @@ class BaseTransformer:
         self.successful_ids: list[str] = []
         self.errors: list[TransformationError] = []
 
-    def _add_error(self, exception: Exception | dict, stage: str, work_id: str) -> None:
+    def _add_error(self, exception: Exception | dict, stage: str, row_id: str) -> None:
         error = TransformationError(
-            stage=stage, work_id=work_id, detail=str(exception)[:500]
+            stage=stage, row_id=row_id, detail=str(exception)[:500]
         )
         # Only keep track of the first 1000 errors to cap manifest file sizes
         if len(self.errors) < 1_000:
             self.errors.append(error)
 
-    def transform(self, raw_nodes: Iterable[Any]) -> Generator[SourceWork]:
-        """Transform a batch of raw works into SourceWork instances."""
+    def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, SourceWork]]:
+        """Transform a batch of raw works into (row_id, SourceWork) tuples."""
         raise NotImplementedError(
             "Each transformer must implement a `transform` method."
         )
 
-    def _stream_works(self) -> Generator[SourceWork]:
+    def _stream_works(self) -> Generator[tuple[str, SourceWork]]:
         """
         Extracts work documents from the specified source and transforms them. The `source` must define
         a `stream_raw` method.
@@ -58,14 +58,15 @@ class BaseTransformer:
             yield from transformed
 
     def _generate_bulk_load_actions(
-        self, records: Iterable[SourceWork], index_name: str
-    ) -> Generator[dict[str, Any]]:
-        for record in records:
-            yield {
+        self, records: Iterable[tuple[str, SourceWork]], index_name: str
+    ) -> Generator[tuple[str, dict[str, Any]]]:
+        for row_id, record in records:
+            action = {
                 "_index": index_name,
                 "_id": record.state.id(),
                 "_source": record.model_dump(),
             }
+            yield (row_id, action)
 
     def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
         # Reset run-specific state so manifests reflect the current execution only
@@ -76,9 +77,16 @@ class BaseTransformer:
         actions = self._generate_bulk_load_actions(transformed, index_name)
 
         for batch in batched(actions, ES_BULK_INDEX_BATCH_SIZE):
+            # Split row_ids from actions for ES bulk helper
+            batch_list = list(batch)
+            row_ids_by_source_id = {
+                action["_id"]: row_id for row_id, action in batch_list
+            }
+            es_actions = [action for _, action in batch_list]
+
             success_count, es_errors = elasticsearch.helpers.bulk(
                 es_client,
-                batch,
+                es_actions,
                 raise_on_error=False,
                 stats_only=False,
             )
@@ -87,15 +95,21 @@ class BaseTransformer:
             es_errors = cast(list[dict[str, Any]], es_errors)
 
             print(
-                f"Successfully indexed {success_count} documents from a batch of {len(batch)}..."
+                f"Successfully indexed {success_count} documents from a batch of {len(es_actions)}..."
             )
 
             error_ids = set()
             for e in es_errors:
-                error_id = e["index"]["_id"]
-                error_ids.add(error_id)
-                self._add_error(e, "index", error_id)
+                source_id = e["index"]["_id"]
+                error_ids.add(source_id)
 
-            for action in batch:
-                if action["_id"] not in error_ids:
-                    self.successful_ids.append(action["_id"])
+                if source_id not in row_ids_by_source_id:
+                    raise KeyError(f"No row_id found for source_id={source_id}!")
+
+                row_id = row_ids_by_source_id[source_id]
+                print(f"Indexing error for row_id={row_id}, source_id={source_id}: {e}")
+                self._add_error(e, "index", row_id)
+
+            for source_id in row_ids_by_source_id:
+                if source_id not in error_ids:
+                    self.successful_ids.append(source_id)

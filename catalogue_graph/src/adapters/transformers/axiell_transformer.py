@@ -19,7 +19,7 @@ from models.pipeline.work_data import WorkData
 
 class AxiellTransformer(MarcXmlTransformer):
     def __init__(self, adapter_store: AdapterStore, changeset_ids: list[str]) -> None:
-        super().__init__(adapter_store, changeset_ids, Id(id="axiell-priref"))
+        super().__init__(adapter_store, changeset_ids, Id(id="axiell-guid"))
 
     def transform_record(
         self, work_id: str, marc_record: Record, source_modified_time: datetime
