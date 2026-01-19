@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import json
 import random
-from datetime import datetime, timezone
-from getpass import getuser
 from collections.abc import Callable
+from datetime import UTC, datetime
+from getpass import getuser
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +45,7 @@ def append_regeneration_log(*, reason: str) -> None:
     fixtures_dir = Path(__file__).parent / "fixtures"
     path = fixtures_dir / REGENERATION_LOG_NAME
 
-    timestamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    timestamp = datetime.now(UTC).isoformat(timespec="seconds")
     username = getuser()
 
     fixtures_dir.mkdir(parents=True, exist_ok=True)
