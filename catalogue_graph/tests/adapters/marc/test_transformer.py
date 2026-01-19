@@ -57,7 +57,7 @@ def test_transform_invalid_xml_records_error(adapter_store: AdapterStore) -> Non
     assert works == []
     assert transformer.errors
     assert transformer.errors[0].stage == "parse"
-    assert transformer.errors[0].work_id == "work2"
+    assert transformer.errors[0].row_id == "work2"
 
 
 def test_transform_valid_marcxml_returns_work(adapter_store: AdapterStore) -> None:
@@ -80,8 +80,10 @@ def test_transform_valid_marcxml_returns_work(adapter_store: AdapterStore) -> No
     )
 
     assert len(works) == 1
-    assert isinstance(works[0], VisibleSourceWork)
-    assert works[0].data.title == "A Useful Title"
+    row_id, work = works[0]
+    assert row_id == "marc12345"
+    assert isinstance(work, VisibleSourceWork)
+    assert work.data.title == "A Useful Title"
 
 
 def test_transform_handles_transform_record_exception(
@@ -185,5 +187,5 @@ def test_stream_to_index_with_errors(
 
     assert transformer.errors
     assert transformer.errors[0].stage == "index"
-    assert transformer.errors[0].work_id == "Work[marc-test/id1]"
+    assert transformer.errors[0].row_id == "id1"
     assert "mapper_parsing_exception" in transformer.errors[0].detail

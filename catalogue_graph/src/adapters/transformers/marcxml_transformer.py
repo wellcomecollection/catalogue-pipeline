@@ -118,7 +118,9 @@ class MarcXmlTransformer(BaseTransformer):
             state=state,
         )
 
-    def transform(self, rows: Iterable[dict[str, Any]]) -> Generator[SourceWork]:
+    def transform(
+        self, rows: Iterable[dict[str, Any]]
+    ) -> Generator[tuple[str, SourceWork]]:
         for row in rows:
             row_id, content, last_modified, is_deleted = (
                 row["id"],
@@ -135,6 +137,7 @@ class MarcXmlTransformer(BaseTransformer):
                 continue
 
             if is_deleted:
-                yield self._transform_deleted(content, last_modified)
+                yield (row_id, self._transform_deleted(content, last_modified))
             else:
-                yield from self._transform_visible(row_id, content, last_modified)
+                for work in self._transform_visible(row_id, content, last_modified):
+                    yield (row_id, work)
