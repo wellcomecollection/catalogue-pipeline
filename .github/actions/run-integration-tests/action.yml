@@ -46,4 +46,4 @@ runs:
         payload: |
           username: "Catalogue graph CI"
           icon_emoji: ":gh-check-failed:"
-          text: "*Catalogue graph integration tests failed* \n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          text: "*Catalogue graph integration tests failed:* \n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
