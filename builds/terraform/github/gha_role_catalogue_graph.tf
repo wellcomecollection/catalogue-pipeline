@@ -56,4 +56,27 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "arn:aws:lambda:eu-west-1:760097843905:function:axiell-adapter-*",
     ]
   }
+
+  statement {
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+    ]
+    resources = [
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_nlb_url_secret_arn,
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_endpoint_secret_arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "neptune-db:Read*",
+      "neptune-db:Get*",
+      "neptune-db:List*"
+    ]
+
+    resources = [
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
+    ]
+  }
 }
