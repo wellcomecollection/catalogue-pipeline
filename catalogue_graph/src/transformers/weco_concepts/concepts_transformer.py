@@ -11,8 +11,7 @@ class WeCoConceptsTransformer(BaseTransformer):
         return SourceConcept(
             id=data["id"],
             label=data["label"],
-            source="weco_concepts",
-            description=data["description"]
-            # TODO also images - once model supports it
-
+            source="weco-authority",
+            description=data["description"],
+            image_urls=data.get("image_url", "").split("||"),
         )

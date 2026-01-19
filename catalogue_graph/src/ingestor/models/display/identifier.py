@@ -37,7 +37,7 @@ IDENTIFIER_LABEL_MAPPING = {
     "label-derived": "Identifier derived from the label of the referent",
     "wellcome-accession-number": "Accession number",
     "wikidata": "Wikidata",
-    "weco_concepts": "Wellcome Concepts",
+    "weco-authority": "Wellcome Concepts",
 }
 
 
