@@ -1,0 +1,28 @@
+name: "Run integration tests"
+description: "Runs integration tests against the catalogue graph database"
+inputs:
+  role_to_assume:
+    description: "Role to assume when running integration tests"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: eu-west-1
+        role-to-assume: ${{ inputs.role_to_assume }}
+    - uses: actions/setup-python@v5
+      with:
+        python-version-file: catalogue_graph/.python-version
+    - name: setup dependencies
+      run: |
+        pip install uv
+        uv sync --all-groups
+      working-directory: catalogue_graph
+      shell: bash
+    - name: test
+      run: |
+        uv run pytest
+      working-directory: catalogue_graph
+      shell: bash

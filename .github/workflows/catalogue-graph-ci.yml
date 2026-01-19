@@ -28,7 +28,7 @@ jobs:
 
   build-unified-pipeline-task-image:
     runs-on: ubuntu-latest
-    needs: [python-checks]
+    needs: [ python-checks ]
     steps:
       - uses: actions/checkout@v3
       - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
@@ -43,7 +43,7 @@ jobs:
 
   build-unified-pipeline-lambda-image:
     runs-on: ubuntu-latest
-    needs: [python-checks]
+    needs: [ python-checks ]
     steps:
       - uses: actions/checkout@v3
       - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
@@ -56,9 +56,15 @@ jobs:
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
+  integration:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    uses: ./.github/actions/run-integration-tests
+    with:
+      role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [build-unified-pipeline-task-image, build-unified-pipeline-lambda-image]
+    needs: [ build-unified-pipeline-task-image, build-unified-pipeline-lambda-image ]
     uses: ./.github/workflows/catalogue-graph-deploy.yml
     with:
       deploy_tag: ${{ github.sha }}
