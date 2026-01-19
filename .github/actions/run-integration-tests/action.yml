@@ -23,6 +23,6 @@ runs:
       shell: bash
     - name: test
       run: |
-        uv run pytest
+        uv run pytest -m "integration"
       working-directory: catalogue_graph
       shell: bash
