@@ -2,6 +2,9 @@
 
 These tests use the live database, so they are marked as `integration` and
 deselected by default in pytest config.
+
+Usage:
+    AWS_PROFILE=platform-developer uv run pytest -m "integration"
 """
 
 import json
