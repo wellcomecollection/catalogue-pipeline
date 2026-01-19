@@ -44,4 +44,6 @@ runs:
         webhook: ${{ env.SLACK_WEBHOOK_URL }}
         webhook-type: incoming-webhook
         payload: |
-          text: "*Catalogue Graph integration tests failed* (${{ job.status }})\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          username: "Catalogue graph CI"
+          icon_emoji: ":gh-check-failed:"
+          text: "*Catalogue graph integration tests failed* \n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
