@@ -9,6 +9,8 @@ from __future__ import annotations
 import json
 import random
 from collections.abc import Callable
+from datetime import UTC, datetime
+from getpass import getuser
 from pathlib import Path
 from typing import Any
 
@@ -30,12 +32,31 @@ from utils.aws import get_neptune_client
 
 FIXTURE_SAMPLE_SIZE = 20
 ID_POOL_SIZE = 20_000
+REGENERATION_LOG_NAME = "REGENERATION_LOG.md"
 
 
 def write_fixture(name: str, data: dict[str, Any] | list[str]) -> None:
     path = Path(__file__).parent / "fixtures" / f"{name}.json"
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
     print(f"Wrote fixture: {path}")
+
+
+def append_regeneration_log(*, reason: str) -> None:
+    fixtures_dir = Path(__file__).parent / "fixtures"
+    path = fixtures_dir / REGENERATION_LOG_NAME
+
+    timestamp = datetime.now(UTC).isoformat(timespec="seconds")
+    username = getuser()
+
+    fixtures_dir.mkdir(parents=True, exist_ok=True)
+    is_new_or_empty = (not path.exists()) or path.stat().st_size == 0
+
+    cleaned_reason = " ".join(reason.splitlines()).strip()
+
+    with path.open("a", encoding="utf-8") as f:
+        if is_new_or_empty:
+            f.write("# Fixture regeneration log\n\n")
+        f.write(f"- {timestamp} ({username}): {cleaned_reason}\n")
 
 
 def sample_ids(*, client: Any, label: str) -> list[str]:
@@ -100,7 +121,7 @@ def row_to_ancestor_work_ids(item: dict[str, Any]) -> list[str]:
     return [a["work"]["~id"] for a in item["ancestors"]]
 
 
-def confirm_regeneration() -> None:
+def confirm_regeneration() -> str:
     print(
         "\n".join(
             [
@@ -115,9 +136,15 @@ def confirm_regeneration() -> None:
     if answer not in {"y", "yes"}:
         raise SystemExit("Aborted.")
 
+    while True:
+        reason = input("Briefly describe why you're regenerating fixtures: ").strip()
+        if reason:
+            return reason
+
 
 def main() -> None:
-    confirm_regeneration()
+    reason = confirm_regeneration()
+    append_regeneration_log(reason=reason)
 
     client = get_neptune_client(True)
 
