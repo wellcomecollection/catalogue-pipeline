@@ -27,7 +27,7 @@ data "terraform_remote_state" "aws_account_infrastructure" {
 
 data "terraform_remote_state" "catalogue_graph" {
   backend = "s3"
-  config  = {
+  config = {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
