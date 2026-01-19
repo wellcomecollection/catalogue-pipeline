@@ -4,6 +4,9 @@ inputs:
   role_to_assume:
     description: "Role to assume when running integration tests"
     required: true
+  slack_webhook_secret_id:
+    description: "Secrets Manager secret id/name for the Slack failure alert webhook"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -26,3 +29,19 @@ runs:
         uv run pytest -m "integration"
       working-directory: catalogue_graph
       shell: bash
+
+    - name: Get Slack webhook URL
+      if: ${{ failure() }}
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          SLACK_WEBHOOK_URL,${{ inputs.slack_webhook_secret_id }}
+
+    - name: Notify Slack on failure
+      if: ${{ failure() }}
+      uses: slackapi/slack-github-action@v2.1.1
+      with:
+        webhook: ${{ env.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+        payload: |
+          text: "*Catalogue Graph integration tests failed* (${{ job.status }})\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
