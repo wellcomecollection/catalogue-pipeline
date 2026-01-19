@@ -57,10 +57,12 @@ jobs:
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
   integration:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    uses: ./.github/actions/run-integration-tests
-    with:
-      role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/run-integration-tests
+        with:
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
