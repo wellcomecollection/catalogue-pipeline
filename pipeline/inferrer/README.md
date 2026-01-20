@@ -4,7 +4,7 @@ Each inferrer service is a named build stage in the top-level Dockerfile in this
 
 ## Building a single service
 
-From this directory:
+From this directory (change platform as needed):
 
 ```bash
 docker build \
@@ -17,6 +17,7 @@ docker build \
 ```
 
 Replace `palette_inferrer` with one of:
+
 - `palette_inferrer`
 - `feature_inferrer`
 - `aspect_ratio_inferrer`
@@ -26,7 +27,7 @@ Replace `palette_inferrer` with one of:
 After building an image, you can run it like this:
 
 ```bash
-docker run --rm -p 80:80 palette_inferrer
+docker run --platform linux/amd64 --rm -p 80:80 palette_inferrer
 ```
 
 Healthcheck:
