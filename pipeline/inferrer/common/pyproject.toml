@@ -4,9 +4,9 @@ version = "0.1.0"
 description = "Common code for the catalogue pipeline image inferrers"
 requires-python = ">=3.10,<3.20"
 dependencies = [
-    "fastapi==0.109.1",
+    "fastapi==0.128.0",
     "gunicorn==22.0.0",
-    "uvicorn==0.11.7",
+    "uvicorn==0.40.0",
     "aiofile>=3.8.8",
     "aiohttp[speedups]>=3.9.5",
     "Pillow>=10.3.0",
