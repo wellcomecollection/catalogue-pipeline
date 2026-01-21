@@ -172,7 +172,7 @@ def test_lambda_handler(
         "loc_concepts": [LOC_SUBJECT_HEADINGS_URL],
         "loc_locations": [LOC_NAMES_URL, LOC_SUBJECT_HEADINGS_URL],
         "loc_names": [LOC_NAMES_URL],
-        "weco_concepts": [],  # TODO: What should this be?
+        "weco_concepts": [],
         "wikidata_linked_loc_names": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_loc_concepts": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_loc_locations": [WIKIDATA_SPARQL_URL],
