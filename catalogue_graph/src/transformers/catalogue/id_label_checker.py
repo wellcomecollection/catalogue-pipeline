@@ -6,7 +6,7 @@ from utils.aws import get_csv_from_s3
 from utils.types import ConceptSource, ConceptType, TransformerType
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")
-SOURCES_BY_PRIORITY: list[ConceptSource] = ["nlm-mesh", "lc-subjects", "lc-names"]
+SOURCES_BY_PRIORITY: list[ConceptSource] = ["weco-authority", "nlm-mesh", "lc-subjects", "lc-names"]
 AMBIGUITY_THRESHOLD = 1
 
 with open(f"{os.path.dirname(__file__)}/data/concept_label_deny_list.txt") as f:
@@ -67,13 +67,13 @@ class IdLabelChecker:
                 )
 
     def _add_label_mapping(
-        self, label: str, source_id: str, concept_source: ConceptSource
+            self, label: str, source_id: str, concept_source: ConceptSource
     ) -> None:
         self.ids_to_labels[concept_source][source_id] = label
         self.labels_to_ids[concept_source][label].append(source_id)
 
     def _add_alternative_label_mappings(
-        self, labels: list[str], source_id: str, concept_source: ConceptSource
+            self, labels: list[str], source_id: str, concept_source: ConceptSource
     ) -> None:
         self.ids_to_alternative_labels[concept_source][source_id] = labels
         for label in labels:
@@ -107,8 +107,8 @@ class IdLabelChecker:
 
                 # Try not to match people/organisations to things
                 if concept_type in AGENT_TYPES and source in (
-                    "nlm-mesh",
-                    "lc-subjects",
+                        "nlm-mesh",
+                        "lc-subjects",
                 ):
                     continue
 
@@ -125,7 +125,7 @@ class IdLabelChecker:
         return self.ids_to_labels[source].get(source_id, None)
 
     def get_alternative_labels(
-        self, source_id: str, source: ConceptSource
+            self, source_id: str, source: ConceptSource
     ) -> list[str]:
         """Given a source id from a specific source (e.g. nlm-mesh, lc-subjects), return its alternative labels."""
         return self.ids_to_alternative_labels[source][source_id]

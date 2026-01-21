@@ -15,3 +15,7 @@ class WeCoConceptsTransformer(BaseTransformer):
             description=data["description"],
             image_urls=data.get("image_url", "").split("||"),
         )
+
+    def extract_edges(self, data):
+        """There are no edges to extract from WeCo Concepts."""
+        yield from ()
