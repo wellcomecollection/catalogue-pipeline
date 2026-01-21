@@ -380,97 +380,6 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
     assert result == expected_result
 
 
-def test_catalogue_concept_overridden_related_concepts() -> None:
-    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
-
-    mock_related_to = [
-        ng.a_related_concept_with_no_label(),
-        ng.a_related_concept(),
-        ng.a_related_concept_with_two_source_nodes(),
-    ]
-
-    related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
-        "related_to": mock_related_to,
-    }
-
-    expected_result = IndexableConcept(
-        query=ConceptQuery(
-            id="a2584ttj",
-            identifiers=[
-                ConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
-            ],
-            label="Waves",
-            alternativeLabels=["Mechanical waves", "Waves"],
-            type="Concept",
-        ),
-        display=ConceptDisplay(
-            id="a2584ttj",
-            identifiers=[
-                DisplayIdentifier(
-                    value="sh85145789",
-                    identifierType=DisplayIdentifierType(
-                        id="lc-subjects",
-                        label="Library of Congress Subject Headings (LCSH)",
-                        type="IdentifierType",
-                    ),
-                )
-            ],
-            label="Waves",
-            displayLabel="Waves",
-            alternativeLabels=["Mechanical waves", "Waves"],
-            description=ConceptDescription(
-                text="Repeated oscillation about a stable equilibrium",
-                sourceLabel="wikidata",
-                sourceUrl="https://www.wikidata.org/wiki/Q37172",
-            ),
-            type="Concept",
-            sameAs=["a2584ttj", "gcmn66yk"],
-            displayImages=[],
-            relatedConcepts=RelatedConcepts(
-                relatedTo=[
-                    ConceptRelatedTo(
-                        label="Roland le Petour",
-                        id="aaaaaaaa",
-                        relationshipType="has_sibling",
-                        conceptType="Person",
-                    ),
-                    ConceptRelatedTo(
-                        label="Hilton, Violet, 1908-1969",
-                        id="tzrtx26u",
-                        relationshipType="has_sibling",
-                        conceptType="Person",
-                    ),
-                    ConceptRelatedTo(
-                        label="Le Pétomane",
-                        id="abcd2345",
-                        relationshipType="has_sibling",
-                        conceptType="Person",
-                    ),
-                ],
-                fieldsOfWork=[],
-                narrowerThan=[],
-                broaderThan=[],
-                people=[],
-                frequentCollaborators=[],
-                relatedTopics=[],
-                foundedBy=[],
-            ),
-        ),
-    )
-
-    overrides = io.StringIO("""id,label,description,image_url
-        id, Wellcome Label, Wellcome Description
-        aaaaaaaa,Roland le Petour,
-        abcd2345,Le Pétomane,
-        """)
-    transformer = ElasticsearchConceptsTransformer(
-        MOCK_EVENT, "private", overrides=overrides
-    )
-    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
-    result = transformer.transform_document(raw_data)
-    assert result == expected_result
-
-
 def test_concept_type_agent_precedence() -> None:
     # Person is more specific than Agent
     assert get_most_specific_concept_type(["Agent", "Person"]) == "Person"
@@ -485,8 +394,8 @@ def test_concept_type_agent_precedence() -> None:
     # Person/Agent/Organisation take precedence over general Concept/Subject types
     assert get_most_specific_concept_type(["Person", "Concept", "Subject"]) == "Person"
     assert (
-        get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
-        == "Organisation"
+            get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
+            == "Organisation"
     )
     assert get_most_specific_concept_type(["Concept", "Subject", "Agent"]) == "Agent"
 
@@ -499,39 +408,39 @@ def test_concept_type_genre_precedence() -> None:
     assert get_most_specific_concept_type(["Agent", "Genre", "Person"]) == "Genre"
     assert get_most_specific_concept_type(["Genre", "Place"]) == "Genre"
     assert (
-        get_most_specific_concept_type(
-            [
-                "Genre",
-                "Place",
-                "Person",
-                "Organisation",
-                "Period",
-                "Meeting",
-                "Agent",
-                "Subject",
-                "Concept",
-            ]
-        )
-        == "Genre"
+            get_most_specific_concept_type(
+                [
+                    "Genre",
+                    "Place",
+                    "Person",
+                    "Organisation",
+                    "Period",
+                    "Meeting",
+                    "Agent",
+                    "Subject",
+                    "Concept",
+                ]
+            )
+            == "Genre"
     )
 
 
 def test_concept_type_place_precedence() -> None:
     # Place has precedence over everything (except for Genre).
     assert (
-        get_most_specific_concept_type(
-            [
-                "Place",
-                "Person",
-                "Organisation",
-                "Period",
-                "Meeting",
-                "Agent",
-                "Subject",
-                "Concept",
-            ]
-        )
-        == "Place"
+            get_most_specific_concept_type(
+                [
+                    "Place",
+                    "Person",
+                    "Organisation",
+                    "Period",
+                    "Meeting",
+                    "Agent",
+                    "Subject",
+                    "Concept",
+                ]
+            )
+            == "Place"
     )
 
     assert get_most_specific_concept_type(["Concept", "Subject", "Place"]) == "Place"
@@ -541,15 +450,15 @@ def test_concept_type_place_precedence() -> None:
     assert get_most_specific_concept_type(["Place", "Person"]) == "Place"
     assert get_most_specific_concept_type(["Place", "Organisation"]) == "Place"
     assert (
-        get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
-        == "Place"
+            get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
+            == "Place"
     )
 
 
 def test_catalogue_concept_from_neptune_result_with_overridden_label_description_and_image() -> (
-    None
+        None
 ):
-    mock_concept = load_json_fixture("ingestor/extractor/concept_single.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_with_weco_authority.json")
 
     expected_result = IndexableConcept(
         query=ConceptQuery(
@@ -602,12 +511,9 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
             ),
         ),
     )
-    overrides = io.StringIO("""id,label,description,image_url
-        id, Wellcome Label, Wellcome Description,www.image.info.json
-        """)
 
     transformer = ElasticsearchConceptsTransformer(
-        MOCK_EVENT, "private", overrides=overrides
+        MOCK_EVENT, "private"
     )
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)

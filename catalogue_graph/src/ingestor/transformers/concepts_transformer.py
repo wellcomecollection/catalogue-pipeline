@@ -10,7 +10,6 @@ from ingestor.models.indexable_concept import (
     RelatedConcepts,
 )
 from ingestor.models.neptune.query_result import ExtractedConcept
-from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 from ingestor.transformers.raw_concept import RawNeptuneConcept
 from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
 from models.events import BasePipelineEvent
@@ -25,11 +24,9 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
     def __init__(
             self,
             event: BasePipelineEvent,
-            es_mode: ElasticsearchMode,
-            overrides: TextIO | None = None,
+            es_mode: ElasticsearchMode
     ) -> None:
         self.source = GraphConceptsExtractor(event, es_mode)
-        self.override_provider = ConceptTextOverrideProvider(overrides)
 
     def _transform_related_concept(
             self, related_concept: RawNeptuneRelatedConcept
@@ -39,7 +36,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
                 id=related_concept.wellcome_id,
                 relationshipType=related_concept.relationship_type,
                 conceptType=related_concept.concept_type,
-                label=self.override_provider.display_label_of(related_concept),
+                label=related_concept.display_label,
             )
         except MissingLabelError:
             # If a related concept does not have a label, do not include it
@@ -75,13 +72,12 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
             id=neptune_concept.wellcome_id,
             identifiers=neptune_concept.display_identifiers,
             label=neptune_concept.label,
-            displayLabel=self.override_provider.display_label_of(neptune_concept),
+            displayLabel=neptune_concept.display_label,
             alternativeLabels=neptune_concept.alternative_labels,
             type=neptune_concept.concept_type,
-            description=self.override_provider.description_of(neptune_concept),
+            description=neptune_concept.description,
             sameAs=neptune_concept.same_as,
-            # TODO get this from the nepture concept directly
-            displayImages=self.override_provider.display_images(neptune_concept),
+            displayImages=neptune_concept.display_images,
             relatedConcepts=RelatedConcepts(
                 relatedTo=self._transform_related_concepts(neptune_related.related_to),
                 fieldsOfWork=self._transform_related_concepts(

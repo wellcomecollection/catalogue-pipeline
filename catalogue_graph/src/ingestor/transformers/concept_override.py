@@ -44,44 +44,10 @@ class ConceptTextOverrideProvider:
         return None
 
     def display_label_of(
-        self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept
+            self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept
     ) -> str:
         override = self.get_label_override(raw_concept.wellcome_id)
         if override:
             return override
 
         return raw_concept.display_label
-
-    def description_of(
-        self, raw_concept: RawNeptuneConcept
-    ) -> ConceptDescription | None:
-        override = self.overrides.get(raw_concept.wellcome_id)
-        if override:
-            override_description = override["description"].strip()
-            if override_description.lower() == "empty":
-                return None
-            if override_description:
-                return ConceptDescription(
-                    text=override_description,
-                    sourceUrl=None,
-                    sourceLabel="weco-authority",
-                )
-        return raw_concept.description
-
-    def display_images(
-        self, raw_concept: RawNeptuneConcept
-    ) -> list[DisplayDigitalLocation]:
-        override = self.overrides.get(raw_concept.wellcome_id)
-        if override and (override_image_urls := override["image_url"].split("||")):
-            return [
-                DisplayDigitalLocation(
-                    url=url.strip(),
-                    locationType=DisplayIdLabel(
-                        id="iiif-image", label="IIIF Image API", type="LocationType"
-                    ),
-                    accessConditions=[],
-                )
-                for url in override_image_urls
-                if url.strip()  # Filter out empty URLs
-            ]
-        return []

@@ -41,7 +41,7 @@ def create_transformer(
             f"The {transformer_type} transformer does not support incremental mode. "
             "Only catalogue transformers support incremental (window-based) processing."
         )
-    if transformer_type == "weco-authority":
+    if transformer_type == "weco_concepts":
         return WeCoConceptsTransformer()
     if transformer_type == "loc_concepts":
         return LibraryOfCongressConceptsTransformer(LOC_SUBJECT_HEADINGS_URL)

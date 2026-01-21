@@ -8,6 +8,11 @@ from models.pipeline.id_label import Id
 from models.pipeline.identifier import SourceIdentifier
 from utils.types import ConceptSource, ConceptType
 
+from ingestor.models.display.location import DisplayDigitalLocation
+from ingestor.models.display.id_label import DisplayIdLabel
+
+from models.graph_node import SourceConcept
+
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY: list[ConceptSource] = [
     "nlm-mesh",
@@ -20,6 +25,7 @@ QUERY_SOURCE_PRIORITY: list[ConceptSource] = [
 # Sources sorted by priority for display purposes. Wikidata is prioritised over Library of Congress Names since Wikidata
 # person names work better as theme page titles (e.g. 'Florence Nightingale' vs 'Nightingale, Florence, 1820-1910').
 DISPLAY_SOURCE_PRIORITY: list[ConceptSource] = [
+    "weco-authority",
     "nlm-mesh",
     "lc-subjects",
     "wikidata",
@@ -42,7 +48,7 @@ def standardise_label(label: str | None) -> str | None:
     return capitalised.replace("--", " - ")
 
 
-def get_source_concept_url(source_concept_id: str, source: str) -> str:
+def get_source_concept_url(source_concept_id: str, source: str) -> str | None:
     if source == "nlm-mesh":
         return f"https://meshb.nlm.nih.gov/record/ui?ui={source_concept_id}"
     if source == "lc-subjects":
@@ -51,7 +57,8 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str:
         return f"https://id.loc.gov/authorities/names/{source_concept_id}.html"
     if source == "wikidata":
         return f"https://www.wikidata.org/wiki/{source_concept_id}"
-
+    if source == "weco-authority":
+        return None
     raise ValueError(f"Unknown source: {source}")
 
 
@@ -180,21 +187,65 @@ class RawNeptuneConcept:
 
     @property
     def description(self) -> ConceptDescription | None:
+        # Only extract descriptions from Wikidata  or weco-authority (MeSH also stores descriptions, but we should not surface them).
+        description_sources = (
+            source_concept for source_concept in self.raw_concept.source_concepts if
+            source_concept.properties.source in ["weco-authority", "wikidata"]
+        )
+        # TODO: Prefer weco-authority descriptions when they exist.
+        # Set to None if weco-authority has the blanking keyword.
+        # Fall through to wikidata if empty.
+        candidate_descriptions = {
+            k: v for k, v in (
+                self._description_from_concept(source_concept.properties)
+                for source_concept in description_sources
+            )
+        }
+        preferred_description = candidate_descriptions.get("weco-authority")
+        if preferred_description == "empty":
+            return None
+        if preferred_description is None:
+            preferred_description = candidate_descriptions.get("wikidata")
+        return preferred_description
+
+    @staticmethod
+    def _description_from_concept(source_concept: SourceConcept) -> (str, ConceptDescription | None):
+        description_text = standardise_label(source_concept.description)
+
+        description_source = source_concept.source
+        source_concept_id = source_concept.id
+
+        description = ConceptDescription(
+            text=description_text,
+            sourceLabel=description_source,
+            sourceUrl=get_source_concept_url(
+                source_concept_id, description_source
+            )
+        ) if description_text else None
+
+        return description_source, description
+
+    @staticmethod
+    def _display_images_from_concept(source_concept: SourceConcept) -> list[DisplayDigitalLocation]:
+        return [
+            DisplayDigitalLocation(
+                url=url.strip(),
+                locationType=DisplayIdLabel(
+                    id="iiif-image", label="IIIF Image API", type="LocationType"
+                ),
+                accessConditions=[],
+            )
+            for url in source_concept.image_urls
+            if url.strip()  # Filter out empty URLs
+        ]
+
+    @property
+    def display_images(self):
+        # Currently, weco-authority is the only source that has images
+        # so only extract from there to avoid surprises if we eventually
+        # add others
         for source_concept in self.raw_concept.source_concepts:
             properties = source_concept.properties
-            description_text = standardise_label(properties.description)
-
-            description_source = properties.source
-            source_concept_id = properties.id
-
-            # Only extract descriptions from Wikidata (MeSH also stores descriptions, but we should not surface them).
-            if description_text is not None and description_source == "wikidata":
-                return ConceptDescription(
-                    text=description_text,
-                    sourceLabel=description_source,
-                    sourceUrl=get_source_concept_url(
-                        source_concept_id, description_source
-                    ),
-                )
-
-        return None
+            if properties.source == "weco-authority":
+                return self._display_images_from_concept(properties)
+        return []
