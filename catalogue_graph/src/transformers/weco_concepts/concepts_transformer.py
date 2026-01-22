@@ -8,6 +8,7 @@ from transformers.base_transformer import BaseTransformer
 
 class WeCoConceptsTransformer(BaseTransformer):
     def __init__(self) -> None:
+        super().__init__()
         self.source = WeCoConceptsSource()
 
     def transform_node(self, data: dict) -> SourceConcept:
