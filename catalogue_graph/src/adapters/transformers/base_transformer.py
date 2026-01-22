@@ -3,10 +3,13 @@ from itertools import batched
 from typing import Any, cast
 
 import elasticsearch.helpers
+import structlog
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 from models.pipeline.source.work import SourceWork
+
+logger = structlog.get_logger(__name__)
 
 ES_BULK_INDEX_BATCH_SIZE = 10_000
 
@@ -51,8 +54,10 @@ class BaseTransformer:
         raw_works = self.source.stream_raw()
         for batch in batched(raw_works, 10_000):
             transformed = list(self.transform(batch))
-            print(
-                f"Successfully transformed {len(transformed)} works from a batch of {(len(batch))}..."
+            logger.info(
+                "Transformed batch",
+                transformed_count=len(transformed),
+                batch_size=len(batch),
             )
 
             yield from transformed
@@ -94,8 +99,10 @@ class BaseTransformer:
             # Since we called `bulk` with `stats_only=False`, we know that es_errors is a list of dicts
             es_errors = cast(list[dict[str, Any]], es_errors)
 
-            print(
-                f"Successfully indexed {success_count} documents from a batch of {len(es_actions)}..."
+            logger.info(
+                "Indexed batch",
+                success_count=success_count,
+                batch_size=len(es_actions),
             )
 
             error_ids = set()
@@ -107,7 +114,12 @@ class BaseTransformer:
                     raise KeyError(f"No row_id found for source_id={source_id}!")
 
                 row_id = row_ids_by_source_id[source_id]
-                print(f"Indexing error for row_id={row_id}, source_id={source_id}: {e}")
+                logger.warning(
+                    "Indexing error",
+                    row_id=row_id,
+                    source_id=source_id,
+                    error=e,
+                )
                 self._add_error(e, "index", row_id)
 
             for source_id in row_ids_by_source_id:
