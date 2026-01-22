@@ -24,7 +24,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         self.source = GraphConceptsExtractor(event, es_mode)
 
     def _transform_related_concept(
-            self, related_concept: RawNeptuneRelatedConcept
+        self, related_concept: RawNeptuneRelatedConcept
     ) -> ConceptRelatedTo | None:
         try:
             return ConceptRelatedTo(
@@ -38,7 +38,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
             return None
 
     def _transform_related_concepts(
-            self, raw_related_concepts: list[RawNeptuneRelatedConcept]
+        self, raw_related_concepts: list[RawNeptuneRelatedConcept]
     ) -> list[ConceptRelatedTo]:
         return [
             concept
@@ -59,9 +59,9 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         )
 
     def _get_display(
-            self,
-            neptune_concept: RawNeptuneConcept,
-            neptune_related: RawNeptuneRelatedConcepts,
+        self,
+        neptune_concept: RawNeptuneConcept,
+        neptune_related: RawNeptuneRelatedConcepts,
     ) -> ConceptDisplay:
         return ConceptDisplay(
             id=neptune_concept.wellcome_id,
@@ -96,7 +96,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         )
 
     def transform_document(
-            self, raw_item: tuple[ExtractedConcept, dict[ConceptRelatedQuery, list]]
+        self, raw_item: tuple[ExtractedConcept, dict[ConceptRelatedQuery, list]]
     ) -> IndexableConcept | None:
         neptune_concept = RawNeptuneConcept(raw_item[0])
         neptune_related = RawNeptuneRelatedConcepts(raw_item[1])

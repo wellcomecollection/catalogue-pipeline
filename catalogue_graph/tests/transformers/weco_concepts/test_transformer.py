@@ -28,7 +28,7 @@ def test_stream_weco_nodes() -> None:
     ]
 
 
-def test_node_without_label_or_description():
+def test_node_without_label_or_description() -> None:
     """a node without image URLs should have an empty list for image_urls."""
     source_data = io.StringIO("""id,label,description,image_url
         aaaaaaaa,,,
@@ -42,7 +42,7 @@ def test_node_without_label_or_description():
     assert only_node.image_urls == []
 
 
-def test_node_without_images():
+def test_node_without_images() -> None:
     """a node without image URLs should have an empty list for image_urls."""
     source_data = io.StringIO("""id,label,description,image_url
         aaaaaaaa,Roland le Petour, flatulist to the court of Henry II,
