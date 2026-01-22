@@ -62,7 +62,7 @@ locals {
     },
     {
       "label" : "Wellcome Concepts",
-      "transformer_type" : "weco-authority-concepts",
+      "transformer_type" : "weco_concepts",
       "entity_type" : "nodes"
     },
     {
