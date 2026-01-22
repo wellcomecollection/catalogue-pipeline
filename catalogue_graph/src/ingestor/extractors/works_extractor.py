@@ -1,6 +1,7 @@
 from collections.abc import Generator, Iterator
 from itertools import batched
 
+import structlog
 from pydantic import BaseModel
 
 from ingestor.models.merged.work import (
@@ -13,6 +14,8 @@ from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
 
 from .base_extractor import GraphBaseExtractor
+
+logger = structlog.get_logger(__name__)
 
 WORKS_BATCH_SIZE = 40_000
 
@@ -131,7 +134,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
         # Before processing related works, filter out works which were already processed above
         related_ids = self.related_ids.difference(self.streamed_ids)
-        print(f"Will process a total of {len(related_ids)} related works.")
+        logger.info("Will process related works", count=len(related_ids))
 
         related_works_source = self.get_related_works_source(list(related_ids))
         related_works_stream = (
