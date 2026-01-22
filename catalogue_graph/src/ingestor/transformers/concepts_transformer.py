@@ -20,6 +20,7 @@ from .raw_related_concepts import RawNeptuneRelatedConcept
 
 class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
     def __init__(self, event: BasePipelineEvent, es_mode: ElasticsearchMode) -> None:
+        super().__init__(event, es_mode)
         self.source = GraphConceptsExtractor(event, es_mode)
 
     def _transform_related_concept(
