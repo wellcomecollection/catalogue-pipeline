@@ -60,7 +60,6 @@ locals {
       "transformer_type" : "mesh_concepts",
       "entity_type" : "edges"
     },
-    ,
     {
       "label" : "Wellcome Concepts",
       "transformer_type" : "weco-authority-concepts",
