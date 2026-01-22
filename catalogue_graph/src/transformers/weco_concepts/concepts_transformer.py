@@ -12,12 +12,13 @@ class WeCoConceptsTransformer(BaseTransformer):
         self.source = WeCoConceptsSource()
 
     def transform_node(self, data: dict) -> SourceConcept:
+        image_url = data.get("image_url")
         return SourceConcept(
             id=data["id"],
             label=data["label"],
             source="weco-authority",
             description=data["description"],
-            image_urls=data.get("image_url", "").split("||"),
+            image_urls=image_url.split("||") if image_url else [],
         )
 
     def extract_edges(self, data: dict) -> Generator[BaseEdge]:
