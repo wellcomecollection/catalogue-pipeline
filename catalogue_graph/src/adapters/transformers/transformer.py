@@ -5,9 +5,9 @@ indexes transformed documents into Elasticsearch.
 """
 
 import argparse
-import json
 from typing import Any, Literal, Protocol, cast
 
+import structlog
 from pydantic import BaseModel, Field
 
 from adapters.axiell import config as axiell_config
@@ -20,6 +20,9 @@ from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.manifests import ManifestWriter, TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
+
+logger = structlog.get_logger(__name__)
 
 
 class TransformerEvent(BaseModel):
@@ -46,12 +49,14 @@ class AdapterHelpers(Protocol):
 
 def handler(
     event: TransformerEvent,
+    execution_context: ExecutionContext,
     es_mode: ElasticsearchMode = "private",
     use_rest_api_table: bool = False,
     create_if_not_exists: bool = False,
 ) -> TransformerManifest:
-    print(f"Processing event: {event}")
-    print(f"Received job_id: {event.job_id}")
+    setup_logging(execution_context)
+    logger.info("Processing transformer event", transformer_event=event.model_dump())
+    logger.info("Received job_id", job_id=event.job_id)
 
     config: AdapterConfig
     helpers: AdapterHelpers
@@ -74,8 +79,10 @@ def handler(
 
     index_date = config.INDEX_DATE or config.PIPELINE_DATE
     index_name = get_standard_index_name(config.ES_INDEX_NAME, index_date)
-    print(
-        f"Writing to Elasticsearch index: {index_name} in pipeline {config.PIPELINE_DATE} ..."
+    logger.info(
+        "Writing to Elasticsearch index",
+        index_name=index_name,
+        pipeline_date=config.PIPELINE_DATE,
     )
 
     es_client = get_client(
@@ -98,8 +105,14 @@ def handler(
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="adapter_transformer",
+    )
     transformer_event = TransformerEvent.model_validate(event)
-    return handler(transformer_event, use_rest_api_table=True).model_dump(mode="json")
+    return handler(
+        transformer_event, execution_context, use_rest_api_table=True
+    ).model_dump(mode="json")
 
 
 def main() -> None:
@@ -147,13 +160,18 @@ def main() -> None:
         changeset_ids=args.changeset_ids,
         job_id=args.job_id,
     )
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="adapter_transformer",
+    )
     response = handler(
         event,
+        execution_context,
         use_rest_api_table=args.use_rest_api_table,
         create_if_not_exists=args.create_if_not_exists,
         es_mode=args.es_mode,
     )
-    print(json.dumps(response.model_dump(mode="json"), indent=2))
+    logger.info("Transformer response", response=response.model_dump(mode="json"))
 
 
 if __name__ == "__main__":

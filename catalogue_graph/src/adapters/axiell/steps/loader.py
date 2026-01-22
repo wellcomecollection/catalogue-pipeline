@@ -6,10 +6,10 @@ Iceberg, and emits a changeset identifier for the transformer step.
 
 import argparse
 import json
-import logging
 from datetime import datetime
 from typing import Any
 
+import structlog
 from oai_pmh_client.client import OAIClient
 from pydantic import BaseModel, ConfigDict
 
@@ -27,10 +27,11 @@ from adapters.utils.window_harvester import (
     WindowHarvestManager,
 )
 from adapters.utils.window_store import WindowStore
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 AXIELL_NAMESPACE = "axiell"
 
-logging.basicConfig(level=logging.INFO)
+logger = structlog.get_logger(__name__)
 
 
 class AxiellAdapterLoaderConfig(BaseModel):
@@ -142,8 +143,11 @@ def execute_loader(
 
 
 def handler(
-    event: AxiellAdapterLoaderEvent, runtime: LoaderRuntime | None = None
+    event: AxiellAdapterLoaderEvent,
+    execution_context: ExecutionContext,
+    runtime: LoaderRuntime | None = None,
 ) -> LoaderResponse:
+    setup_logging(execution_context)
     response = execute_loader(event, runtime=runtime)
 
     report = AxiellLoaderReport.from_loader(event, response)
@@ -153,9 +157,13 @@ def handler(
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="axiell_adapter_loader",
+    )
     request = AxiellAdapterLoaderEvent.model_validate(event)
     runtime = build_runtime()
-    response = handler(request, runtime=runtime)
+    response = handler(request, execution_context, runtime=runtime)
     return response.model_dump(mode="json")
 
 
@@ -213,9 +221,13 @@ def main() -> None:
             ),
         )
     )
-    response = handler(event, runtime=runtime)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="axiell_adapter_loader",
+    )
+    response = handler(event, execution_context, runtime=runtime)
 
-    print(json.dumps(response.model_dump(mode="json"), indent=2))
+    logger.info("Loader response", response=response.model_dump(mode="json"))
 
 
 if __name__ == "__main__":
