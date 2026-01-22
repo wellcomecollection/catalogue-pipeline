@@ -103,8 +103,8 @@ variable "fargate_service_boilerplate" {
     cluster_name = optional(string, null)
     cluster_arn  = optional(string, null)
 
-    scale_down_adjustment = optional(number, null)
-    scale_up_adjustment   = optional(number, null)
+    scale_down_adjustment = optional(number, -1)
+    scale_up_adjustment   = optional(number, 1)
 
     dlq_alarm_topic_arn          = optional(string, null)
     main_q_age_alarm_action_arns = optional(list(string), null)
