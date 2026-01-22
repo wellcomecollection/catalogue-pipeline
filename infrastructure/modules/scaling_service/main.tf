@@ -71,7 +71,7 @@ module "task_definition" {
   task_name    = var.name
 
   volumes = var.volumes
-  
+
   container_definitions = concat(
     [module.log_router_container.container_definition],
     var.container_definitions

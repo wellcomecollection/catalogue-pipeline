@@ -31,7 +31,7 @@ module "task_definition" {
     module.log_router_container.container_definition,
     module.app_container_definition.container_definition
   ]
-  
+
   launch_types = ["FARGATE"]
   task_name    = var.task_name
 }

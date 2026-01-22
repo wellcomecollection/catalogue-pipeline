@@ -35,7 +35,7 @@ module "tei_adapter_w" {
     elastic_cloud_vpce_security_group_id = local.elastic_cloud_vpce_sg_id
 
     egress_security_group_id = aws_security_group.egress.id
-    namespace = local.namespace
+    namespace                = local.namespace
   }
 
   security_group_ids = [
