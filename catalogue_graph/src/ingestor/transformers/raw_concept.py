@@ -1,17 +1,15 @@
+from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier
+from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
 from ingestor.models.neptune.query_result import ExtractedConcept
+from models.graph_node import SourceConcept
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import SourceIdentifier
 from utils.types import ConceptSource, ConceptType
-
-from ingestor.models.display.location import DisplayDigitalLocation
-from ingestor.models.display.id_label import DisplayIdLabel
-
-from models.graph_node import SourceConcept
 
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY: list[ConceptSource] = [
@@ -63,8 +61,8 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str | None:
 
 
 def get_priority_label(
-        raw_concept: ExtractedConcept,
-        source_priority: list[ConceptSource],
+    raw_concept: ExtractedConcept,
+    source_priority: list[ConceptSource],
 ) -> tuple[str, str]:
     """
     Given a concept and its source concepts, extract the corresponding labels and return the highest-priority one.
@@ -189,44 +187,54 @@ class RawNeptuneConcept:
     def description(self) -> ConceptDescription | None:
         # Only extract descriptions from Wikidata  or weco-authority (MeSH also stores descriptions, but we should not surface them).
         description_sources = (
-            source_concept for source_concept in self.raw_concept.source_concepts if
-            source_concept.properties.source in ["weco-authority", "wikidata"]
+            source_concept
+            for source_concept in self.raw_concept.source_concepts
+            if source_concept.properties.source in ["weco-authority", "wikidata"]
         )
         # TODO: Prefer weco-authority descriptions when they exist.
         # Set to None if weco-authority has the blanking keyword.
         # Fall through to wikidata if empty.
         candidate_descriptions = {
-            k: v for k, v in (
+            k: v
+            for k, v in (
                 self._description_from_concept(source_concept.properties)
                 for source_concept in description_sources
             )
         }
-        preferred_description = candidate_descriptions.get("weco-authority")
-        if preferred_description == "empty":
+        weco_description = candidate_descriptions.get("weco-authority")
+
+        if weco_description is None:
+            return candidate_descriptions.get("wikidata")
+
+        if weco_description.text == "empty":
             return None
-        if preferred_description is None:
-            preferred_description = candidate_descriptions.get("wikidata")
-        return preferred_description
+        return weco_description
 
     @staticmethod
-    def _description_from_concept(source_concept: SourceConcept) -> (str, ConceptDescription | None):
+    def _description_from_concept(
+        source_concept: SourceConcept,
+    ) -> tuple[str, ConceptDescription | None]:
         description_text = standardise_label(source_concept.description)
 
         description_source = source_concept.source
         source_concept_id = source_concept.id
 
-        description = ConceptDescription(
-            text=description_text,
-            sourceLabel=description_source,
-            sourceUrl=get_source_concept_url(
-                source_concept_id, description_source
+        description = (
+            ConceptDescription(
+                text=description_text,
+                sourceLabel=description_source,
+                sourceUrl=get_source_concept_url(source_concept_id, description_source),
             )
-        ) if description_text else None
+            if description_text
+            else None
+        )
 
         return description_source, description
 
     @staticmethod
-    def _display_images_from_concept(source_concept: SourceConcept) -> list[DisplayDigitalLocation]:
+    def _display_images_from_concept(
+        source_concept: SourceConcept,
+    ) -> list[DisplayDigitalLocation]:
         return [
             DisplayDigitalLocation(
                 url=url.strip(),
@@ -240,7 +248,7 @@ class RawNeptuneConcept:
         ]
 
     @property
-    def display_images(self):
+    def display_images(self) -> list[DisplayDigitalLocation]:
         # Currently, weco-authority is the only source that has images
         # so only extract from there to avoid surprises if we eventually
         # add others

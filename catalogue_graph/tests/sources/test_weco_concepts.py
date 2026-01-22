@@ -16,5 +16,7 @@ def test_weco_concepts_source() -> None:
     # If the data for AIDS changes significantly, we'll have to update this test
     assert first_record["label"] == "Acquired Immunodeficiency Syndrome (AIDS)"
     assert first_record["id"] == "zbus63qt"
-    assert first_record["description"].startswith('Thousands of images, texts and films')
+    assert first_record["description"].startswith(
+        "Thousands of images, texts and films"
+    )
     assert "b16692342_l0052826.jp2" in first_record["image_url"]

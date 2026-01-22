@@ -92,7 +92,7 @@ TransformerType = Literal[
     MeshTransformerType,
     WikidataTransformerType,
     CatalogueTransformerType,
-    "weco_concepts"
+    "weco_concepts",
 ]
 
 FullGraphRemoverType = Literal[

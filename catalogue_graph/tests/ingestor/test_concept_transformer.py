@@ -1,5 +1,3 @@
-import io
-
 from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.display.location import DisplayDigitalLocation
@@ -394,8 +392,8 @@ def test_concept_type_agent_precedence() -> None:
     # Person/Agent/Organisation take precedence over general Concept/Subject types
     assert get_most_specific_concept_type(["Person", "Concept", "Subject"]) == "Person"
     assert (
-            get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
-            == "Organisation"
+        get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
+        == "Organisation"
     )
     assert get_most_specific_concept_type(["Concept", "Subject", "Agent"]) == "Agent"
 
@@ -408,39 +406,39 @@ def test_concept_type_genre_precedence() -> None:
     assert get_most_specific_concept_type(["Agent", "Genre", "Person"]) == "Genre"
     assert get_most_specific_concept_type(["Genre", "Place"]) == "Genre"
     assert (
-            get_most_specific_concept_type(
-                [
-                    "Genre",
-                    "Place",
-                    "Person",
-                    "Organisation",
-                    "Period",
-                    "Meeting",
-                    "Agent",
-                    "Subject",
-                    "Concept",
-                ]
-            )
-            == "Genre"
+        get_most_specific_concept_type(
+            [
+                "Genre",
+                "Place",
+                "Person",
+                "Organisation",
+                "Period",
+                "Meeting",
+                "Agent",
+                "Subject",
+                "Concept",
+            ]
+        )
+        == "Genre"
     )
 
 
 def test_concept_type_place_precedence() -> None:
     # Place has precedence over everything (except for Genre).
     assert (
-            get_most_specific_concept_type(
-                [
-                    "Place",
-                    "Person",
-                    "Organisation",
-                    "Period",
-                    "Meeting",
-                    "Agent",
-                    "Subject",
-                    "Concept",
-                ]
-            )
-            == "Place"
+        get_most_specific_concept_type(
+            [
+                "Place",
+                "Person",
+                "Organisation",
+                "Period",
+                "Meeting",
+                "Agent",
+                "Subject",
+                "Concept",
+            ]
+        )
+        == "Place"
     )
 
     assert get_most_specific_concept_type(["Concept", "Subject", "Place"]) == "Place"
@@ -450,15 +448,17 @@ def test_concept_type_place_precedence() -> None:
     assert get_most_specific_concept_type(["Place", "Person"]) == "Place"
     assert get_most_specific_concept_type(["Place", "Organisation"]) == "Place"
     assert (
-            get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
-            == "Place"
+        get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
+        == "Place"
     )
 
 
 def test_catalogue_concept_from_neptune_result_with_overridden_label_description_and_image() -> (
-        None
+    None
 ):
-    mock_concept = load_json_fixture("ingestor/extractor/concept_with_weco_authority.json")
+    mock_concept = load_json_fixture(
+        "ingestor/extractor/concept_with_weco_authority.json"
+    )
 
     expected_result = IndexableConcept(
         query=ConceptQuery(
@@ -512,9 +512,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(
-        MOCK_EVENT, "private"
-    )
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result

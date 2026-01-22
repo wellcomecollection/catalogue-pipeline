@@ -20,22 +20,22 @@ from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
 from .loc.names_transformer import LibraryOfCongressNamesTransformer
 from .mesh.concepts_transformer import MeSHConceptsTransformer
 from .mesh.locations_transformer import MeSHLocationsTransformer
+from .weco_concepts.concepts_transformer import WeCoConceptsTransformer
 from .wikidata.concepts_transformer import WikidataConceptsTransformer
 from .wikidata.locations_transformer import WikidataLocationsTransformer
 from .wikidata.names_transformer import WikidataNamesTransformer
-from .weco_concepts.concepts_transformer import WeCoConceptsTransformer
 
 
 def create_transformer(
-        event: ExtractorEvent,
-        es_mode: ElasticsearchMode,
+    event: ExtractorEvent,
+    es_mode: ElasticsearchMode,
 ) -> BaseTransformer:
     transformer_type = event.transformer_type
     entity_type = event.entity_type
     pipeline_date = event.pipeline_date
 
     if event.window is not None and transformer_type not in get_args(
-            CatalogueTransformerType
+        CatalogueTransformerType
     ):
         raise ValueError(
             f"The {transformer_type} transformer does not support incremental mode. "

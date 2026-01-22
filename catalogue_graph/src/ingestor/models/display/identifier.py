@@ -62,7 +62,7 @@ class DisplayIdentifier(BaseModel):
 
     @staticmethod
     def from_all_identifiers(
-            identifier: Identified | Unidentifiable | Identifiable,
+        identifier: Identified | Unidentifiable | Identifiable,
     ) -> Generator["DisplayIdentifier"]:
         for i in identifier.get_identifiers():
             yield DisplayIdentifier.from_source_identifier(i)

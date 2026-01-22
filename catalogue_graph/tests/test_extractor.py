@@ -100,8 +100,8 @@ SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[MockResponseInput]] = {
 
 
 def mock_requests_lookup_table(
-        destination: StreamDestination,
-        transformer_type: TransformerType,
+    destination: StreamDestination,
+    transformer_type: TransformerType,
 ) -> Any:
     mocked_responses: list[MockResponseInput] = []
 
@@ -154,8 +154,8 @@ def get_test_id(argvalue: Any) -> str:
     ids=get_test_id,
 )
 def test_lambda_handler(
-        lambda_event: dict,
-        mock_responses: list[MockResponseInput],
+    lambda_event: dict,
+    mock_responses: list[MockResponseInput],
 ) -> None:
     MockRequest.mock_responses(mock_responses)
     add_mock_transformer_outputs_for_ontologies(["loc", "mesh"])
@@ -194,8 +194,8 @@ def test_lambda_handler(
         concept_retrieval_url in called_urls
         for concept_retrieval_url in concept_retrieval_urls
     ), (
-            f"Unexpected requests found for ({transformer_type}, {entity_type}, {destination}): "
-            + f"Expected concept retrieval URLs: {concept_retrieval_urls}, got: {called_urls}"
+        f"Unexpected requests found for ({transformer_type}, {entity_type}, {destination}): "
+        + f"Expected concept retrieval URLs: {concept_retrieval_urls}, got: {called_urls}"
     )
 
 
