@@ -29,8 +29,9 @@ def _transform_other_identifiers(marc_record: Record) -> list[SourceIdentifier]:
             other_identifiers=extract_other_identifiers(r)
         )
     )
+    work_id = transformer.extract_work_id(marc_record)
     work = transformer.transform_record(
-        marc_record, source_modified_time=datetime.now()
+        work_id, marc_record, source_modified_time=datetime.now()
     )
     return work.data.other_identifiers
 

@@ -2,15 +2,18 @@
 Common helper functions for tests.
 """
 
-from collections.abc import Collection
+from collections.abc import Collection, Mapping
 from datetime import UTC, datetime
 from typing import Any
 
 import pyarrow as pa
+import pytest
+from pyiceberg.table import Table as IcebergTable
 
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
-from adapters.utils.schemata import ARROW_SCHEMA, ARROW_SCHEMA_WITH_TIMESTAMP
+from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.schemata import ARROW_SCHEMA
 
 
 def lone_element(list_of_one: list) -> Any:
@@ -63,8 +66,7 @@ def data_to_namespaced_table(
         for row in rows:
             row.setdefault("last_modified", now)
 
-    schema = ARROW_SCHEMA_WITH_TIMESTAMP if add_timestamp else ARROW_SCHEMA
-    file_loader = MarcXmlFileLoader(schema=schema, namespace=namespace)
+    file_loader = MarcXmlFileLoader(schema=ARROW_SCHEMA, namespace=namespace)
 
     return file_loader.data_to_pa_table(rows)
 
@@ -79,3 +81,61 @@ def assert_row_identifiers(rows: pa.Table, expected_ids: Collection[str]) -> Non
     """
     actual_ids = set(rows.column("id").to_pylist())
     assert actual_ids == set(expected_ids)
+
+
+def prepare_changeset(
+    temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+    records_by_id: Mapping[str, tuple[str, bool] | str | None],
+    *,
+    namespace: str,
+    build_adapter_table_path: str,
+) -> str:
+    """Insert XML records into the temporary Iceberg table.
+
+    Args:
+        temporary_table: The temporary Iceberg table to insert into.
+        monkeypatch: pytest monkeypatch fixture.
+        records_by_id: Mapping of id -> content. Content can be:
+            - str: visible record with that XML content
+            - (str, True): deleted record with that XML content preserved
+            - None: legacy format, treated as error (no content)
+        namespace: The namespace for the records (e.g., EBSCO_NAMESPACE, AXIELL_NAMESPACE).
+        build_adapter_table_path: The module path to monkeypatch for build_adapter_table.
+
+    Returns the new changeset_id.
+    """
+    rows = []
+    for rid, data in records_by_id.items():
+        if isinstance(data, tuple):
+            content: str | None = data[0]
+            deleted = data[1]
+        else:
+            content = data
+            deleted = False
+        rows.append(
+            {
+                "id": rid,
+                "content": content,
+                "deleted": deleted,
+                "last_modified": datetime.now(UTC),
+            }
+        )
+    pa_table_initial = data_to_namespaced_table(
+        rows, namespace=namespace, add_timestamp=True
+    )
+
+    client = AdapterStore(temporary_table)
+
+    store_update = client.incremental_update(pa_table_initial, namespace)
+    assert store_update is not None
+    changeset_id = store_update.changeset_id
+
+    assert changeset_id, "Expected a changeset_id to be returned"
+
+    # Ensure transformer uses our temporary table
+    monkeypatch.setattr(
+        build_adapter_table_path,
+        lambda use_rest_api_table, create_if_not_exists: temporary_table,
+    )
+    return changeset_id
