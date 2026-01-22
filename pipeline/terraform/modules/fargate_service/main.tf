@@ -70,7 +70,7 @@ module "scaling_service" {
 }
 
 module "app_container" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v4.1.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v4.3.0"
 
   name  = local.name
   image = var.container_image
@@ -90,7 +90,7 @@ module "app_container" {
 }
 
 module "app_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.1.0"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.3.0"
   secrets   = var.secret_env_vars
   role_name = module.scaling_service.task_execution_role_name
 }

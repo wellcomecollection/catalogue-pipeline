@@ -17,6 +17,9 @@ module "scaling_service" {
 
   elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_security_group_id
 
+  # Tasks using the EC2 launch type do not support EphemeralStorage
+  ephemeral_storage_size = null
+
   security_group_ids = concat(
     var.security_group_ids,
     [var.egress_security_group_id]
@@ -62,7 +65,7 @@ locals {
 }
 
 module "app_container" {
-  source   = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.13.1"
+  source   = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v4.3.0"
   for_each = var.apps
 
   name  = each.key
@@ -82,13 +85,13 @@ module "app_container" {
 }
 
 module "app_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.13.1"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.3.0"
   secrets   = local.all_secret_env_vars
   role_name = module.scaling_service.task_execution_role_name
 }
 
 module "sidecar_container" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.13.1"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v4.3.0"
 
   name  = var.manager_container_name
   image = var.manager_container_image
@@ -116,7 +119,7 @@ module "sidecar_container" {
 }
 
 module "sidecar_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.13.1"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.3.0"
   secrets   = var.manager_secret_env_vars
   role_name = module.scaling_service.task_execution_role_name
 }
