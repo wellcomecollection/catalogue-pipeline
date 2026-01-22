@@ -6,12 +6,15 @@ from threading import Thread
 from typing import Any
 
 import backoff
+import structlog
 from pydantic import BaseModel
 
 import config
 from models.events import BasePipelineEvent, IncrementalWindow
 from sources.base_source import BaseSource
 from utils.elasticsearch import ElasticsearchMode, get_client, get_merged_index_name
+
+logger = structlog.get_logger(__name__)
 
 ES_MGET_BATCH_SIZE = 10_000
 ES_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
@@ -24,7 +27,9 @@ class ErrorSentinel(BaseModel):
 
 def on_request_backoff(backoff_details: Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
-    print(f"Elasticsearch request failed due to '{exception_name}'. Retrying...")
+    logger.warning(
+        "Elasticsearch request failed, retrying", exception_name=exception_name
+    )
 
 
 def build_merged_index_query(
@@ -101,8 +106,11 @@ class MergedWorksSource(BaseSource):
         if result.get("pit_id"):
             self.pit_id = result["pit_id"]
 
-        print(
-            f"Ran Elasticsearch query (slice {slice_index}) in {duration} seconds, retrieving {len(hits)} records."
+        logger.info(
+            "Ran Elasticsearch query",
+            slice_index=slice_index,
+            duration_seconds=duration,
+            record_count=len(hits),
         )
 
         return hits
