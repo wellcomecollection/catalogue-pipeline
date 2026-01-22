@@ -1,4 +1,5 @@
 import io
+
 from models.graph_node import SourceConcept
 from transformers.weco_concepts.concepts_transformer import WeCoConceptsTransformer
 
