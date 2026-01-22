@@ -1,3 +1,4 @@
+import io
 from models.graph_node import SourceConcept
 from transformers.weco_concepts.concepts_transformer import WeCoConceptsTransformer
 
@@ -24,3 +25,31 @@ def test_stream_weco_nodes() -> None:
         "https://iiif.wellcomecollection.org/image/b28669411_0001.jp2/info.json",
         "https://iiif.wellcomecollection.org/image/b16706274_l0052728.jp2/info.json",
     ]
+
+
+def test_node_without_label_or_description():
+    """a node without image URLs should have an empty list for image_urls."""
+    source_data = io.StringIO("""id,label,description,image_url
+        aaaaaaaa,,,
+        """)
+    transformer = WeCoConceptsTransformer(source_data)
+    batches = list(transformer.stream("nodes", 1))
+    only_node = batches[0][0]
+    assert only_node.id == "aaaaaaaa"
+    assert only_node.label == ""
+    assert only_node.description == ""
+    assert only_node.image_urls == []
+
+
+def test_node_without_images():
+    """a node without image URLs should have an empty list for image_urls."""
+    source_data = io.StringIO("""id,label,description,image_url
+        aaaaaaaa,Roland le Petour, flatulist to the court of Henry II,
+        """)
+    transformer = WeCoConceptsTransformer(source_data)
+    batches = list(transformer.stream("nodes", 1))
+    only_node = batches[0][0]
+    assert only_node.id == "aaaaaaaa"
+    assert only_node.label == "Roland le Petour"
+    assert only_node.description == "flatulist to the court of Henry II"
+    assert only_node.image_urls == []

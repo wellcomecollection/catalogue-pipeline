@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from typing import TextIO
 
 from models.graph_edge import BaseEdge
 from models.graph_node import SourceConcept
@@ -7,9 +8,9 @@ from transformers.base_transformer import BaseTransformer
 
 
 class WeCoConceptsTransformer(BaseTransformer):
-    def __init__(self) -> None:
+    def __init__(self, source_csv: TextIO | None = None) -> None:
         super().__init__()
-        self.source = WeCoConceptsSource()
+        self.source = WeCoConceptsSource(source_csv)
 
     def transform_node(self, data: dict) -> SourceConcept:
         image_url = data.get("image_url")
