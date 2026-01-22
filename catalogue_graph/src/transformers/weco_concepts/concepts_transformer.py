@@ -15,10 +15,10 @@ class WeCoConceptsTransformer(BaseTransformer):
     def transform_node(self, data: dict) -> SourceConcept:
         image_url = data.get("image_url")
         return SourceConcept(
-            id=data["id"],
-            label=data["label"],
+            id=data["id"].strip(),
+            label=data["label"].strip(),
             source="weco-authority",
-            description=data["description"],
+            description=data["description"].strip(),
             image_urls=image_url.split("||") if image_url else [],
         )
 
