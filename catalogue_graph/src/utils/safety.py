@@ -1,3 +1,7 @@
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 DEFAULT_THRESHOLD = 0.2
 
 
@@ -12,7 +16,9 @@ def validate_fractional_change(
     If not, raise an error unless `force_pass` is enabled.
     """
     if total_size == 0:
-        print("Cannot perform fractional change check due to a total size of 0.")
+        logger.warning(
+            "Cannot perform fractional change check due to a total size of 0"
+        )
         return
 
     fractional_diff = abs(modified_size) / total_size
@@ -25,10 +31,16 @@ def validate_fractional_change(
         if not force_pass:
             raise ValueError(error_message)
 
-        print(f"Force pass enabled: {error_message}, but continuing.")
+        logger.warning(
+            "Force pass enabled, continuing despite threshold exceeded",
+            fractional_change=f"{fractional_diff:.2}",
+            threshold=f"{fractional_threshold:.2}",
+        )
     else:
-        print(
-            f"Fractional change {fractional_diff:.2} "
-            f"({modified_size}/{total_size}) is within threshold "
-            f"{fractional_threshold:.2}."
+        logger.info(
+            "Fractional change within threshold",
+            fractional_change=f"{fractional_diff:.2}",
+            modified_size=modified_size,
+            total_size=total_size,
+            threshold=f"{fractional_threshold:.2}",
         )

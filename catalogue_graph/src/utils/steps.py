@@ -5,7 +5,10 @@ from datetime import datetime
 from typing import Concatenate, ParamSpec, Protocol, TypeVar
 
 import boto3
+import structlog
 from pydantic import BaseModel
+
+logger = structlog.get_logger(__name__)
 
 Params = ParamSpec("Params")
 EventModel = TypeVar("EventModel", bound=BaseModel)
@@ -36,13 +39,13 @@ class StepFunctionOutput:
         output = self._dump_result(result)
 
         if self.stepfunctions_client is not None and self.task_token is not None:
-            print("Sending task success to Step Functions.")
+            logger.info("Sending task success to Step Functions")
             self.stepfunctions_client.send_task_success(
                 taskToken=self.task_token,
                 output=output,
             )
         else:
-            print(f"Result: {output}")
+            logger.info("Task result", output=output)
 
     def send_failure(self, error: Exception) -> None:
         error_output = json.dumps(
@@ -54,14 +57,16 @@ class StepFunctionOutput:
         )
 
         if self.stepfunctions_client is not None and self.task_token is not None:
-            print(f"Sending task failure to Step Functions: {error_output}")
+            logger.error(
+                "Sending task failure to Step Functions", error_output=error_output
+            )
             self.stepfunctions_client.send_task_failure(
                 taskToken=self.task_token,
                 error="IngestorLoaderError",
                 cause=error_output,
             )
         else:
-            print(f"Error: {error_output}")
+            logger.error("Task error", error_output=error_output)
 
 
 def run_ecs_handler(
