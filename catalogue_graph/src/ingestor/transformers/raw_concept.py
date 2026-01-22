@@ -185,7 +185,7 @@ class RawNeptuneConcept:
 
     @property
     def description(self) -> ConceptDescription | None:
-        # Only extract descriptions from Wikidata  or weco-authority (MeSH also stores descriptions, but we should not surface them).
+        # Only extract descriptions from Wikidata or weco-authority (MeSH also stores descriptions, but we should not surface them).
         description_sources = (
             source_concept
             for source_concept in self.raw_concept.source_concepts
