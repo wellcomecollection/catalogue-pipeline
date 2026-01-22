@@ -241,9 +241,12 @@ def test_snapshot_sync_delete_records(temporary_table: IcebergTable) -> None:
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0099"}
     expected_deletions = {"eb0002", "eb0099"}
     deleted_rows = temporary_table.scan(
-        row_filter=IsNull("content"), selected_fields=("id",)
+        row_filter=EqualTo("deleted", True), selected_fields=("id", "content")
     ).to_arrow()
     assert_row_identifiers(deleted_rows, expected_deletions)
+    # Verify content is preserved on deleted records
+    deleted_content = {row["id"]: row["content"] for row in deleted_rows.to_pylist()}
+    assert deleted_content == {"eb0002": "bonjour", "eb0099": "tout le monde"}
     changeset_rows = temporary_table.scan(
         row_filter=EqualTo("changeset", changeset.changeset_id),
         selected_fields=("id",),
@@ -293,7 +296,9 @@ def test_snapshot_sync_all_actions(temporary_table: IcebergTable) -> None:
     ).to_arrow()
     assert len(changeset_rows) == 3
     rows_by_key = {row["id"]: row for row in changeset_rows.to_pylist()}
-    assert rows_by_key[expected_deletion]["content"] is None
+    # Deleted records preserve content but are marked deleted
+    assert rows_by_key[expected_deletion]["deleted"] is True
+    assert rows_by_key[expected_deletion]["content"] == "byebye"
     assert rows_by_key[expected_update]["content"] == "god aften"
     assert rows_by_key[expected_insert]["content"] == "noswaith dda"
     # all rows in the changeset have the same last modified time
@@ -544,7 +549,9 @@ def test_snapshot_sync_get_all_records_include_deleted(
     assert all_with_deleted.num_rows == 4
     rows = {row["id"]: row for row in all_with_deleted.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0002", "eb0003", "eb0004"}
-    assert rows["eb0002"]["content"] is None  # deleted present
+    # Deleted records preserve content but are marked deleted
+    assert rows["eb0002"]["deleted"] is True
+    assert rows["eb0002"]["content"] == "byebye"
 
 
 def test_snapshot_sync_raises_on_non_castable_schema(
