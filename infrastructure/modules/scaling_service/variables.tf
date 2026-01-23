@@ -127,6 +127,6 @@ variable "trigger_values" {
 }
 
 variable "ephemeral_storage_size" {
-  type = number
+  type    = number
   default = 21
 }
