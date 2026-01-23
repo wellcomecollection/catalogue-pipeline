@@ -49,5 +49,6 @@ module "mets_adapter" {
     elastic_cloud_vpce_security_group_id = data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id
 
     egress_security_group_id = aws_security_group.egress.id
+    namespace                = local.namespace
   }
 }
