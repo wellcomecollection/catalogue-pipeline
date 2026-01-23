@@ -125,3 +125,8 @@ variable "trigger_values" {
   type    = list(string)
   default = ["default"]
 }
+
+variable "ephemeral_storage_size" {
+  type = number
+  default = 21
+}
