@@ -29,6 +29,7 @@ RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
     "works": IndexableWork,
 }
 
+# getting loaded docs from S3
 
 def _get_objects_to_index(
     base_event: IngestorStepEvent,

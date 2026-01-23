@@ -468,6 +468,7 @@
             "concepts": {
               "properties": {
                 "label": {
+                  "copy_to": "genresVector",
                   "type": "text",
                   "analyzer": "english",
                   "search_analyzer": "english_token_limited"
@@ -815,7 +816,7 @@
               "properties": {
                 "label": {
                   "type": "text",
-                  "copy_to": "subjectsVector",
+                  "copy_to": "genresVector",
                   "analyzer": "english",
                   "search_analyzer": "english_token_limited"
                 }
