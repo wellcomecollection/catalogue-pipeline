@@ -62,3 +62,12 @@ def get_client(
     host_config = f"{config.scheme}://{config.host}:{config.port}"
     print(f"Creating Elasticsearch client in '{es_mode}' mode ({host_config})")
     return elasticsearch.Elasticsearch(host_config, api_key=config.apikey, timeout=60)
+
+def get_serverless_client(
+    es_mode: ElasticsearchMode = "public"
+) -> elasticsearch.Elasticsearch:
+    api_key = get_secret("agnes/elasticsearch/semantic-playground")
+
+    endpoint = "https://semantic-playground-b28f61.es.eu-west-1.aws.elastic.cloud:443"
+    print(f"Creating Elasticsearch client in '{es_mode}' mode ({endpoint})")
+    return elasticsearch.Elasticsearch(endpoint, api_key=api_key, timeout=60)
