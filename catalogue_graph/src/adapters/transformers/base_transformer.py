@@ -110,9 +110,6 @@ class BaseTransformer:
                 source_id = e["index"]["_id"]
                 error_ids.add(source_id)
 
-                if source_id not in row_ids_by_source_id:
-                    raise KeyError(f"No row_id found for source_id={source_id}!")
-
                 row_id = row_ids_by_source_id[source_id]
                 logger.warning(
                     "Indexing error",
@@ -121,6 +118,9 @@ class BaseTransformer:
                     error=e,
                 )
                 self._add_error(e, "index", row_id)
+
+                if source_id not in row_ids_by_source_id:
+                    raise KeyError(f"No row_id found for source_id={source_id}!")
 
             for source_id in row_ids_by_source_id:
                 if source_id not in error_ids:
