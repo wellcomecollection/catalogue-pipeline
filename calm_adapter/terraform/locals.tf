@@ -29,7 +29,10 @@ locals {
 
     dlq_alarm_topic_arn = local.dlq_alarm_arn
 
-    subnets = local.private_subnets
+    egress_security_group_id = aws_security_group.egress.id
+
+    namespace = local.namespace
+    subnets   = local.private_subnets
 
     shared_logging_secrets = local.shared_logging_secrets
   }

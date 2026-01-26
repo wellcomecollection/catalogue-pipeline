@@ -13,7 +13,7 @@ resource "aws_ecs_cluster_capacity_providers" "cluster" {
 }
 
 module "inference_capacity_provider" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/ec2_capacity_provider?ref=v3.13.1"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/ec2_capacity_provider?ref=v4.3.0"
 
   name = "${local.namespace}_inferrer"
 

@@ -103,5 +103,7 @@ locals {
     shared_logging_secrets = var.shared_logging_secrets
 
     egress_security_group_id = var.egress_security_group_id
+    # Empty namespace, prevents exceeding name length limits
+    namespace = ""
   }
 }
