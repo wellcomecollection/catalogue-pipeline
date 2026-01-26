@@ -20,7 +20,6 @@ from ingestor.models.step_events import (
 )
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode
-from utils.reporting import IndexerReport
 from utils.steps import create_job_id
 from utils.types import IngestorType
 
@@ -30,6 +29,7 @@ RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
 }
 
 # getting loaded docs from S3
+
 
 def _get_objects_to_index(
     base_event: IngestorStepEvent,
@@ -85,32 +85,36 @@ def get_indexable_data(
 
 
 def handler(
-    event: IngestorIndexerLambdaEvent, 
+    event: IngestorIndexerLambdaEvent,
     es_mode: ElasticsearchMode = "private",
-    create_index_mapping: str | None = None
+    create_index_mapping: str | None = None,
 ) -> IngestorIndexerMonitorLambdaEvent:
     print(f"Received event: {event}.")
-    
+
     if not event.index_dates.works:
         raise ValueError("Destination index for works must be specified in the event.")
-    
+
     objects_to_index = event.objects_to_index or _get_objects_to_index(event)
-    
+
     es_client = utils.elasticsearch.get_serverless_client(es_mode)
-    
+
     index_name = event.index_dates.works
-    
+
     # Create index if mapping file provided
     if create_index_mapping:
-        print(f"Creating index '{index_name}' with mapping from '{create_index_mapping}'...")
-        with open(create_index_mapping, 'r') as f:
+        print(
+            f"Creating index '{index_name}' with mapping from '{create_index_mapping}'..."
+        )
+        with open(create_index_mapping) as f:
             mapping = json.load(f)
-        
+
         es_client.indices.create(index=index_name, body=mapping)
-        
+
         # Wait for index to be ready (yellow = all primary shards allocated and ready for writes)
         print(f"Waiting for index '{index_name}' to be ready...")
-        es_client.cluster.health(index=index_name, wait_for_status='yellow', timeout='30s')
+        es_client.cluster.health(
+            index=index_name, wait_for_status="yellow", timeout="30s"
+        )
         print(f"Index '{index_name}' created and ready.")
 
     total_success_count = 0
@@ -236,5 +240,5 @@ if __name__ == "__main__":
 # --works-destination-index="works-semantic-v1" \
 # --load-format=parquet
 
-# optional: 
+# optional:
 # --create-index="path/to/mapping.json"

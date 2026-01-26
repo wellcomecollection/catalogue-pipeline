@@ -63,8 +63,9 @@ def get_client(
     print(f"Creating Elasticsearch client in '{es_mode}' mode ({host_config})")
     return elasticsearch.Elasticsearch(host_config, api_key=config.apikey, timeout=60)
 
+
 def get_serverless_client(
-    es_mode: ElasticsearchMode = "public"
+    es_mode: ElasticsearchMode = "public",
 ) -> elasticsearch.Elasticsearch:
     api_key = get_secret("agnes/elasticsearch/semantic-playground")
 
