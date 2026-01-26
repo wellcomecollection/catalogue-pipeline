@@ -17,29 +17,10 @@ def run_index(loader_result: IngestorIndexerLambdaEvent) -> None:
     result = indexer_handler(loader_result, es_mode="public")
     print(f"Indexed {result.success_count} documents.")
 
-def write_loader_result_to_jsonl(loader_result: IngestorIndexerLambdaEvent, filename: str) -> None:
-    import json
-    objs = loader_result.objects_to_index or []
-    with open(filename, "w") as f:
-        for obj in objs:
-            f.write(json.dumps(obj.model_dump()) + "\n")
-
-def read_jsonl_and_index(filename: str, loader_event: IngestorLoaderLambdaEvent) -> None:
-    import json
-    from ingestor.models.step_events import IngestorIndexerObject, IngestorIndexerLambdaEvent
-    objects = []
-    with open(filename) as f:
-        for line in f:
-            obj = IngestorIndexerObject.model_validate(json.loads(line))
-            objects.append(obj)
-    event = IngestorIndexerLambdaEvent(**loader_event.model_dump(), objects_to_index=objects)
-    run_index(event)
-
 
 # Run the whole pipeline locally.
 # Usage: AWS_PROFILE=platform-developer uv run src/ingestor/run_local.py --ingestor-type=concepts
 # Alternative usage: AWS_PROFILE=platform-developer python -m ingestor.run_local --ingestor-type=concepts --pipeline-date=2025-05-01
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
@@ -98,24 +79,9 @@ def main() -> None:
     args = parser.parse_args()
     loader_event = IngestorLoaderLambdaEvent.from_argparser(args)
 
-    loader_result = loader_handler(loader_event, es_mode="public", load_destination="local")
-    write_loader_result_to_jsonl(loader_result, "loader_result.jsonl")
-    read_jsonl_and_index("loader_result.jsonl", loader_event)
+    loader_result = loader_handler(loader_event, es_mode="public")
+    run_index(loader_result)
 
 
 if __name__ == "__main__":
     main()
-
-# AWS_PROFILE=platform-developer python -m ingestor.run_local 
-# --ingestor-type=works 
-# --pipeline-date=2025-10-02 
-# --index-date-merged=2025-10-02
-# --index-date -> TBD serverless 
-# --window-start
-# --window-end
-# --job-id
-# --limit
-
-# Fixed set of works
-# Visible
-# 

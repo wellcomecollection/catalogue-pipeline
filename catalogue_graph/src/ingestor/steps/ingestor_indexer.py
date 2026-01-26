@@ -153,6 +153,7 @@ def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--ingestor-type",
         type=str,
+        choices=["works"],
         help="The type of the records being ingested",
         required=False,
         default="works",
@@ -198,9 +199,9 @@ def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--job-id",
         type=str,
-        help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
+        help="The ID of the job to process, will default to 'dev'. Full reindex mode only.",
         required=False,
-        default=create_job_id(),
+        default="dev",
     )
     parser.add_argument(
         "--load-format",
