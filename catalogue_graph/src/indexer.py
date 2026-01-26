@@ -24,7 +24,7 @@ def extract_sns_messages_from_sqs_event(event: dict) -> list[str]:
 
 def handler(
     queries: list[str],
-    execution_context: ExecutionContext,
+    execution_context: ExecutionContext | None = None,
     is_local: bool = False,
 ) -> None:
     setup_logging(execution_context)

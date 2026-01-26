@@ -81,7 +81,7 @@ def bulk_loader_event_from_s3_uri(s3_uri: str) -> BulkLoaderEvent:
 
 def handler(
     event: BulkLoadPollerEvent,
-    execution_context: ExecutionContext,
+    execution_context: ExecutionContext | None = None,
     is_local: bool = False,
 ) -> BulkLoadPollerResponse:
     setup_logging(execution_context)

@@ -9,7 +9,6 @@ from adapters.transformers.manifests import TransformerManifest
 from adapters.transformers.transformer import TransformerEvent, handler
 from tests.adapters.ebsco.helpers import prepare_changeset
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
-from utils.logger import ExecutionContext
 
 
 def _run_transform(
@@ -27,13 +26,9 @@ def _run_transform(
         job_id="20250101T1200",
         changeset_ids=changeset_ids or [],
     )
-    execution_context = ExecutionContext(
-        trace_id="test-trace-id",
-        pipeline_step="test_adapter_transformer",
-    )
+
     return handler(
         event=event,
-        execution_context=execution_context,
         es_mode="local",
         use_rest_api_table=False,
     )

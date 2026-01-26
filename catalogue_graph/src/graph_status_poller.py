@@ -20,7 +20,7 @@ def check_cluster_status() -> str:
     return status
 
 
-def handler(execution_context: ExecutionContext) -> dict:
+def handler(execution_context: ExecutionContext | None = None) -> dict:
     setup_logging(execution_context)
 
     status = check_cluster_status()

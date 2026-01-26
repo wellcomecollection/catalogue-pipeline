@@ -14,7 +14,6 @@ from adapters.axiell.steps.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
 from adapters.utils.window_summary import WindowSummary
-from utils.logger import ExecutionContext
 
 
 def _window_row(
@@ -67,15 +66,10 @@ def test_handler_with_no_gaps(
         loader_runtime=_mock_loader_runtime(),
     )
 
-    execution_context = ExecutionContext(
-        trace_id="test-trace-id",
-        pipeline_step="test_axiell_adapter_reloader",
-    )
     response = reloader.handler(
         job_id="test-job",
         window_start=now - timedelta(minutes=30),
         window_end=now,
-        execution_context=execution_context,
         runtime=runtime,
     )
 
@@ -130,15 +124,10 @@ def test_handler_with_single_gap(
         loader_runtime=_mock_loader_runtime(),
     )
 
-    execution_context = ExecutionContext(
-        trace_id="test-trace-id",
-        pipeline_step="test_axiell_adapter_reloader",
-    )
     response = reloader.handler(
         job_id="test-job",
         window_start=gap_start,
         window_end=now,
-        execution_context=execution_context,
         runtime=runtime,
     )
 
@@ -198,15 +187,10 @@ def test_handler_with_multiple_gaps(
         loader_runtime=_mock_loader_runtime(),
     )
 
-    execution_context = ExecutionContext(
-        trace_id="test-trace-id",
-        pipeline_step="test_axiell_adapter_reloader",
-    )
     response = reloader.handler(
         job_id="test-job",
         window_start=now - timedelta(minutes=45),
         window_end=now,
-        execution_context=execution_context,
         runtime=runtime,
     )
 
@@ -233,15 +217,10 @@ def test_handler_dry_run_mode(
         loader_runtime=_mock_loader_runtime(),
     )
 
-    execution_context = ExecutionContext(
-        trace_id="test-trace-id",
-        pipeline_step="test_axiell_adapter_reloader",
-    )
     response = reloader.handler(
         job_id="test-job",
         window_start=gap_start,
         window_end=now,
-        execution_context=execution_context,
         runtime=runtime,
         dry_run=True,
     )
@@ -279,15 +258,10 @@ def test_handler_with_error_during_reload(
         loader_runtime=_mock_loader_runtime(),
     )
 
-    execution_context = ExecutionContext(
-        trace_id="test-trace-id",
-        pipeline_step="test_axiell_adapter_reloader",
-    )
     response = reloader.handler(
         job_id="test-job",
         window_start=gap_start,
         window_end=now,
-        execution_context=execution_context,
         runtime=runtime,
     )
 
@@ -383,15 +357,10 @@ def test_handler_constructs_correct_loader_event(
         loader_runtime=_mock_loader_runtime(),
     )
 
-    execution_context = ExecutionContext(
-        trace_id="test-trace-id",
-        pipeline_step="test_axiell_adapter_reloader",
-    )
     reloader.handler(
         job_id="test-job",
         window_start=gap_start,
         window_end=now,
-        execution_context=execution_context,
         runtime=runtime,
     )
 

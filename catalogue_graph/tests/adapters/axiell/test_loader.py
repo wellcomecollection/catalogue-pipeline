@@ -17,7 +17,6 @@ from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStore
 from adapters.utils.window_summary import WindowSummary
 from models.incremental_window import IncrementalWindow
-from utils.logger import ExecutionContext
 
 WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
 
@@ -245,11 +244,7 @@ def test_handler_publishes_loader_report(
         mock_harvest.return_value = [summary]
         mock_from_loader.return_value = mock_report
 
-        execution_context = ExecutionContext(
-            trace_id="test-trace-id",
-            pipeline_step="test_axiell_adapter_loader",
-        )
-        response = loader.handler(req, execution_context, runtime=runtime)
+        response = loader.handler(req, runtime=runtime)
 
     mock_harvest.assert_called_once_with(
         start_time=req.window.start_time,

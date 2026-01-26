@@ -83,7 +83,7 @@ def log_ids(
 
 def handler(
     event: FullGraphRemoverEvent,
-    execution_context: ExecutionContext,
+    execution_context: ExecutionContext | None = None,
     is_local: bool = False,
 ) -> None:
     setup_logging(execution_context)

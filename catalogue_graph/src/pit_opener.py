@@ -12,7 +12,7 @@ logger = structlog.get_logger(__name__)
 
 def handler(
     event: BasePipelineEvent,
-    execution_context: ExecutionContext,
+    execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
 ) -> dict:
     """Create a point in time (PIT) on the merged index and return its PIT ID."""
