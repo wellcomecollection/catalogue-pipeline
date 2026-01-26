@@ -3,6 +3,8 @@ import json
 import typing
 from argparse import ArgumentParser
 
+import structlog
+
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -14,9 +16,12 @@ from ingestor.transformers.base_transformer import (
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 from utils.elasticsearch import ElasticsearchMode
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
 from utils.steps import create_job_id, run_ecs_handler
 from utils.types import IngestorType
+
+logger = structlog.get_logger(__name__)
 
 
 def create_transformer(
@@ -32,10 +37,18 @@ def create_transformer(
 
 def handler(
     event: IngestorLoaderLambdaEvent,
+    execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
     load_destination: LoadDestination = "s3",
 ) -> IngestorIndexerLambdaEvent:
-    print(f"Received event: {event}")
+    setup_logging(execution_context)
+
+    logger.info(
+        "Received event",
+        ingestor_type=event.ingestor_type,
+        pipeline_date=event.pipeline_date,
+        job_id=event.job_id,
+    )
 
     transformer = create_transformer(event, es_mode)
     objects_to_index = transformer.load_documents(event, load_destination)
@@ -89,12 +102,21 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
         es_mode=es_mode,
     )
 
+    logger.info("ECS ingestor loader task completed successfully")
+
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="ingestor_loader",
+    )
+
     if "job_id" not in event:
         event["job_id"] = create_job_id()
 
-    return handler(IngestorLoaderLambdaEvent(**event)).model_dump(mode="json")
+    return handler(IngestorLoaderLambdaEvent(**event), execution_context).model_dump(
+        mode="json"
+    )
 
 
 def local_handler(parser: ArgumentParser) -> None:

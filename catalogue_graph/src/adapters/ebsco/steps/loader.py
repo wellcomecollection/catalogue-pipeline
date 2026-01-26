@@ -80,8 +80,8 @@ def execute_loader(
 
 def handler(
     event: EbscoAdapterLoaderEvent,
-    execution_context: ExecutionContext,
     runtime: LoaderRuntime | None = None,
+    execution_context: ExecutionContext | None = None,
 ) -> LoaderResponse:
     setup_logging(execution_context)
     loader_response = execute_loader(event, runtime=runtime)
@@ -99,7 +99,7 @@ def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, An
     )
     request = EbscoAdapterLoaderEvent.model_validate(event)
     runtime = build_runtime()
-    response = handler(request, execution_context, runtime=runtime)
+    response = handler(request, runtime=runtime, execution_context=execution_context)
     return response.model_dump()
 
 

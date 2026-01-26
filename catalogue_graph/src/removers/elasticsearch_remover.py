@@ -1,6 +1,10 @@
+import structlog
+
 import utils.elasticsearch
 from ingestor.models.step_events import IngestorStepEvent
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
+
+logger = structlog.get_logger(__name__)
 
 
 class ElasticsearchRemover:
@@ -25,5 +29,9 @@ class ElasticsearchRemover:
         response = self.client.delete_by_query(index=self.index_name, body=query)
 
         deleted_count: int = response["deleted"]
-        print(f"Deleted {deleted_count} documents from the {self.index_name} index.")
+        logger.info(
+            "Deleted documents from index",
+            count=deleted_count,
+            index=self.index_name,
+        )
         return deleted_count

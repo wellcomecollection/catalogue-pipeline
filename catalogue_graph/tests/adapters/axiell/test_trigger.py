@@ -205,8 +205,8 @@ def test_lambda_handler_uses_rest_api_table_by_default(
 
     def fake_handler(
         event: AxiellAdapterTriggerEvent,
-        execution_context: ExecutionContext,
         runtime: trigger.TriggerRuntime,
+        execution_context: ExecutionContext | None = None,
         *,
         enforce_lag: bool = True,
     ) -> AxiellAdapterLoaderEvent:

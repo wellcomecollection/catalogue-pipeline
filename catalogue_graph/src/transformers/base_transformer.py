@@ -7,6 +7,7 @@ from typing import Any, TextIO
 
 import boto3
 import smart_open
+import structlog
 
 from clients.base_neptune_client import BaseNeptuneClient
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
@@ -17,6 +18,7 @@ from query_builders.cypher import construct_upsert_cypher_query
 from sources.base_source import BaseSource
 from utils.aws import publish_batch_to_sns
 
+logger = structlog.get_logger(__name__)
 CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))
 
 
@@ -51,11 +53,11 @@ class BaseTransformer:
                 counter += 1
 
                 if counter % 10000 == 0:
-                    print(f"Streamed {counter} nodes...")
+                    logger.info("Streaming nodes progress", count=counter)
             if counter == number:
                 return
 
-        print(f"Streamed all {counter} nodes.")
+        logger.info("Streamed all nodes", count=counter)
 
     def _stream_edges(self, number: int | None = None) -> Generator[BaseEdge]:
         """
@@ -72,11 +74,11 @@ class BaseTransformer:
 
                 counter += 1
                 if counter % 10000 == 0:
-                    print(f"Streamed {counter} edges...")
+                    logger.info("Streaming edges progress", count=counter)
                 if counter == number:
                     return
 
-        print(f"Streamed all {counter} edges.")
+        logger.info("Streamed all edges", count=counter)
 
     def _stream_entities(
         self, entity_type: EntityType, sample_size: int | None = None
@@ -186,7 +188,7 @@ class BaseTransformer:
                 queries = []
 
             if (i + 1) % 100 == 0:
-                print(f"Published {i + 1} messages to SNS.")
+                logger.info("Published messages to SNS", count=i + 1)
 
         # Publish remaining messages (if any)
         if len(queries) > 0:
