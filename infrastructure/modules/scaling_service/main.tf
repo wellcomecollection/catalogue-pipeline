@@ -77,6 +77,8 @@ module "task_definition" {
     var.container_definitions
   )
 
+  ephemeral_storage_size = var.ephemeral_storage_size
+
   depends_on = [null_resource.task_replacement_trigger]
 }
 
