@@ -30,7 +30,6 @@ transformer_types = get_args(TransformerType)
 entity_types = get_args(EntityType)
 stream_destinations = get_args(StreamDestination)
 
-
 MESH_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
     "url": MESH_URL,
@@ -57,7 +56,6 @@ LOC_NAMES_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "content_bytes": load_fixture("loc/raw_names.jsonld"),
     "json_data": None,
 }
-
 
 WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
@@ -89,6 +87,7 @@ SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[MockResponseInput]] = {
     "loc_concepts": [LOC_SH_SOURCE_MOCK_RESPONSE],
     "loc_locations": [LOC_SH_SOURCE_MOCK_RESPONSE, LOC_NAMES_SOURCE_MOCK_RESPONSE],
     "loc_names": [LOC_NAMES_SOURCE_MOCK_RESPONSE],
+    "weco_concepts": [],
     "wikidata_linked_loc_names": [WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE],
     "wikidata_linked_loc_concepts": [WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE],
     "wikidata_linked_loc_locations": [WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE],
@@ -173,6 +172,7 @@ def test_lambda_handler(
         "loc_concepts": [LOC_SUBJECT_HEADINGS_URL],
         "loc_locations": [LOC_NAMES_URL, LOC_SUBJECT_HEADINGS_URL],
         "loc_names": [LOC_NAMES_URL],
+        "weco_concepts": [],
         "wikidata_linked_loc_names": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_loc_concepts": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_loc_locations": [WIKIDATA_SPARQL_URL],

@@ -58,6 +58,7 @@ ConceptSource = Literal[
     "viaf",
     "fihrist",
     "wikidata",
+    "weco-authority",
 ]
 
 WorkType = Literal["Standard", "Series", "Section", "Collection"]
@@ -91,6 +92,7 @@ TransformerType = Literal[
     MeshTransformerType,
     WikidataTransformerType,
     CatalogueTransformerType,
+    "weco_concepts",
 ]
 
 FullGraphRemoverType = Literal[
