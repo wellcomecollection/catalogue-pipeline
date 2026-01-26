@@ -144,7 +144,7 @@ def execute_loader(
 
 def handler(
     event: AxiellAdapterLoaderEvent,
-    execution_context: ExecutionContext,
+    execution_context: ExecutionContext | None = None,
     runtime: LoaderRuntime | None = None,
 ) -> LoaderResponse:
     setup_logging(execution_context)

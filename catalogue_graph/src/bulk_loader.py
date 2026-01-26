@@ -18,7 +18,7 @@ logger = structlog.get_logger(__name__)
 
 def handler(
     event: BulkLoaderEvent,
-    execution_context: ExecutionContext,
+    execution_context: ExecutionContext | None = None,
     is_local: bool = False,
 ) -> BulkLoadPollerEvent:
     setup_logging(execution_context)

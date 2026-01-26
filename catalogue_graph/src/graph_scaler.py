@@ -25,7 +25,7 @@ def scale_cluster(min_capacity: float, max_capacity: float) -> None:
 def handler(
     min_capacity: float,
     max_capacity: float,
-    execution_context: ExecutionContext,
+    execution_context: ExecutionContext | None = None,
 ) -> None:
     setup_logging(execution_context)
 

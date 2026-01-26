@@ -127,7 +127,7 @@ def sync_files(
 
 
 def handler(
-    event: EbscoAdapterTriggerEvent, execution_context: ExecutionContext
+    event: EbscoAdapterTriggerEvent, execution_context: ExecutionContext | None = None
 ) -> EbscoAdapterLoaderEvent:
     setup_logging(execution_context)
     logger.info("Processing trigger event", trigger_event=event.model_dump())

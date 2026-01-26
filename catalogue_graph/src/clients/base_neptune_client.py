@@ -8,12 +8,15 @@ from collections.abc import Iterable, Iterator
 import backoff
 import boto3
 import requests
+import structlog
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.streaming import process_stream_in_parallel
 from utils.types import EntityType
+
+logger = structlog.get_logger(__name__)
 
 NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
 NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
@@ -31,7 +34,7 @@ NEPTUNE_QUERY_THREAD_COUNT = 5
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
-    print(f"Neptune request failed due to '{exception_name}'. Retrying...")
+    logger.warning("Neptune request failed, retrying", exception_name=exception_name)
 
 
 class BaseNeptuneClient:
@@ -108,8 +111,11 @@ class BaseNeptuneClient:
         """Runs an openCypher query, measures its execution time, and prints a summary."""
         t = time.time()
         results = self.run_open_cypher_query(query, parameters)
-        print(
-            f"Ran '{query_label}' query in {round(time.time() - t)} seconds, retrieving {len(results)} records."
+        logger.info(
+            "Ran query",
+            query_label=query_label,
+            duration_seconds=round(time.time() - t),
+            record_count=len(results),
         )
         return results
 
@@ -133,7 +139,7 @@ class BaseNeptuneClient:
             data = {"action": "performDatabaseReset", "token": reset_token}
             return self._make_request("POST", "/system", data)
 
-        print("Cannot reset the database due to an active safety switch.")
+        logger.warning("Cannot reset the database due to an active safety switch")
         return None
 
     def initiate_bulk_load(self, s3_file_uri: str) -> str:
@@ -189,13 +195,13 @@ class BaseNeptuneClient:
     def delete_all_nodes_with_label(self, label: str) -> None:
         """Removes all nodes with the specified label from the graph in batches."""
         while (c := self.count_nodes_wih_label(label)) > 0:
-            print(f"Remaining nodes with label '{label}': {c}.")
+            logger.info("Remaining nodes with label", label=label, count=c)
             delete_query = f"""
                 MATCH (n:{label}) WITH n ORDER BY n.id LIMIT {DELETE_BATCH_SIZE} DETACH DELETE n;
             """
             self.run_open_cypher_query(delete_query)
 
-        print(f"Removed all nodes with label '{label}'.")
+        logger.info("Removed all nodes with label", label=label)
 
     def get_existing_ids(self, ids: list[str], entity_type: EntityType) -> list[str]:
         if entity_type == "nodes":

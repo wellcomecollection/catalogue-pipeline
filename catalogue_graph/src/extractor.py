@@ -27,13 +27,7 @@ def handler(
     execution_context: ExecutionContext | None = None,
     is_local: bool = False,
 ) -> None:
-    setup_logging(
-        execution_context
-        or ExecutionContext(
-            trace_id=get_trace_id(),
-            pipeline_step="graph_extractor",
-        )
-    )
+    setup_logging(execution_context)
 
     logger.info(
         f"ECS extractor task starting for {event.sample_size or 'all'} entities.",

@@ -3,6 +3,8 @@
 import argparse
 import typing
 
+import structlog
+
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -12,10 +14,12 @@ from ingestor.steps.ingestor_loader import create_job_id
 from ingestor.steps.ingestor_loader import handler as loader_handler
 from utils.types import IngestorType
 
+logger = structlog.get_logger(__name__)
+
 
 def run_index(loader_result: IngestorIndexerLambdaEvent) -> None:
     result = indexer_handler(loader_result, es_mode="public")
-    print(f"Indexed {result.success_count} documents.")
+    logger.info("Indexed documents", count=result.success_count)
 
 
 # Run the whole pipeline locally.

@@ -182,7 +182,7 @@ def handler(
     job_id: str,
     window_start: datetime,
     window_end: datetime,
-    execution_context: ExecutionContext,
+    execution_context: ExecutionContext | None = None,
     runtime: ReloaderRuntime | None = None,
     dry_run: bool = False,
 ) -> ReloaderResponse:

@@ -140,8 +140,8 @@ def build_window_request(
 
 def handler(
     event: AxiellAdapterTriggerEvent,
-    execution_context: ExecutionContext,
     runtime: TriggerRuntime,
+    execution_context: ExecutionContext | None = None,
 ) -> AxiellAdapterLoaderEvent:
     setup_logging(execution_context)
     now = event.now or datetime.now(tz=UTC)
@@ -208,8 +208,8 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             now=event_time,
             job_id=_generate_job_id(event_time),
         ),
-        execution_context,
         runtime=runtime,
+        execution_context=execution_context,
     )
     return loader_event.model_dump(mode="json")
 
@@ -268,7 +268,6 @@ def main() -> None:
             now=now,
             job_id=job_id,
         ),
-        execution_context,
         runtime=build_runtime(
             AxiellAdapterTriggerConfig(
                 use_rest_api_table=args.use_rest_api_table,
@@ -277,6 +276,7 @@ def main() -> None:
                 window_lookback_days=args.lookback_days or config.WINDOW_LOOKBACK_DAYS,
             )
         ),
+        execution_context=execution_context,
     )
     logger.info("Loader event", event=loader_event.model_dump(mode="json"))
 
