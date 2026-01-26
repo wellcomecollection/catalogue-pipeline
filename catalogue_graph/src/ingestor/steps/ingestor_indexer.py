@@ -95,13 +95,7 @@ def handler(
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
 ) -> IngestorIndexerMonitorLambdaEvent:
-    setup_logging(
-        execution_context
-        or ExecutionContext(
-            trace_id=get_trace_id(),
-            pipeline_step="ingestor_indexer",
-        )
-    )
+    setup_logging(execution_context)
 
     logger.info(
         "Received event",

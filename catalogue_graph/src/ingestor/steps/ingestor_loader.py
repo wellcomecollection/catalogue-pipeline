@@ -41,13 +41,7 @@ def handler(
     es_mode: ElasticsearchMode = "private",
     load_destination: LoadDestination = "s3",
 ) -> IngestorIndexerLambdaEvent:
-    setup_logging(
-        execution_context
-        or ExecutionContext(
-            trace_id=get_trace_id(),
-            pipeline_step="ingestor_loader",
-        )
-    )
+    setup_logging(execution_context)
 
     logger.info(
         "Received event",

@@ -105,7 +105,7 @@ def bind_execution_context(context: ExecutionContext) -> None:
     )
 
 
-def setup_logging(context: ExecutionContext) -> None:
+def setup_logging(context: ExecutionContext | None = None) -> None:
     """
     Set up structlog with execution context.
     Args:
@@ -114,5 +114,11 @@ def setup_logging(context: ExecutionContext) -> None:
     setup_structlog()
     # Force the root logger to desired level to override any AWS Lambda defaults
     logging.getLogger().setLevel(log_level)
+
+    if context is None:
+        context = ExecutionContext(
+            trace_id=get_trace_id(),
+            pipeline_step="not_specified",
+        )
 
     bind_execution_context(context)
