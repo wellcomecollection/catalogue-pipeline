@@ -9,10 +9,10 @@ from __future__ import annotations
 
 import argparse
 import json
-import logging
 from datetime import UTC, datetime
 from typing import Any
 
+import structlog
 from pydantic import BaseModel, ConfigDict
 
 from adapters.axiell import config, helpers
@@ -23,8 +23,9 @@ from adapters.axiell.steps.loader import LoaderResponse, LoaderRuntime, build_ha
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.incremental_window import IncrementalWindow
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
-logging.basicConfig(level=logging.INFO)
+logger = structlog.get_logger(__name__)
 
 
 class AxiellAdapterReloaderConfig(BaseModel):
@@ -102,8 +103,10 @@ def _process_gap(
         GapReloadResult with processing status and any errors.
     """
     if dry_run:
-        logging.info(
-            f"[DRY RUN] Would reload gap: {gap_start.isoformat()} -> {gap_end.isoformat()}"
+        logger.info(
+            "[DRY RUN] Would reload gap",
+            gap_start=gap_start.isoformat(),
+            gap_end=gap_end.isoformat(),
         )
         return GapReloadResult(
             gap_start=gap_start,
@@ -122,7 +125,11 @@ def _process_gap(
             window_minutes=runtime.loader_runtime.window_generator.window_minutes,
         )
 
-        logging.info(f"Reloading gap: {gap_start.isoformat()} -> {gap_end.isoformat()}")
+        logger.info(
+            "Reloading gap",
+            gap_start=gap_start.isoformat(),
+            gap_end=gap_end.isoformat(),
+        )
 
         # Use the harvester directly to avoid recreating runtime
         harvester = build_harvester(loader_event, runtime.loader_runtime)
@@ -162,7 +169,7 @@ def _process_gap(
         )
 
     except Exception as e:
-        logging.exception(f"Failed to reload gap: {e}")
+        logger.exception("Failed to reload gap", error=str(e))
         return GapReloadResult(
             gap_start=gap_start,
             gap_end=gap_end,
@@ -175,6 +182,7 @@ def handler(
     job_id: str,
     window_start: datetime,
     window_end: datetime,
+    execution_context: ExecutionContext | None = None,
     runtime: ReloaderRuntime | None = None,
     dry_run: bool = False,
 ) -> ReloaderResponse:
@@ -184,12 +192,14 @@ def handler(
         job_id: Unique identifier for this reload operation.
         window_start: Start of the time range to analyze.
         window_end: End of the time range to analyze.
+        execution_context: Logging context for tracing.
         runtime: Runtime dependencies (if None, will be built).
         dry_run: If True, report gaps without actually reloading them.
 
     Returns:
         ReloaderResponse with gap processing results.
     """
+    setup_logging(execution_context)
     runtime = runtime or build_runtime()
 
     # Generate coverage report for the specified range
@@ -200,15 +210,17 @@ def handler(
     report = reporter.coverage_report(range_start=window_start, range_end=window_end)
 
     # Log window coverage report
-    logging.info(report.summary())
+    logger.info("Window coverage report", summary=report.summary())
 
-    logging.info(
-        f"Found {len(report.coverage_gaps)} gap(s) in range "
-        f"{window_start.isoformat()} -> {window_end.isoformat()}"
+    logger.info(
+        "Gap analysis complete",
+        gap_count=len(report.coverage_gaps),
+        range_start=window_start.isoformat(),
+        range_end=window_end.isoformat(),
     )
 
     if not report.coverage_gaps:
-        logging.info("No coverage gaps detected - nothing to reload")
+        logger.info("No coverage gaps detected - nothing to reload")
         return ReloaderResponse(
             job_id=job_id,
             window_start=window_start,
@@ -221,7 +233,11 @@ def handler(
     # Process each gap sequentially
     gaps_processed: list[GapReloadResult] = []
     for i, gap in enumerate(report.coverage_gaps, 1):
-        logging.info(f"Processing gap {i}/{len(report.coverage_gaps)}")
+        logger.info(
+            "Processing gap",
+            gap_number=i,
+            total_gaps=len(report.coverage_gaps),
+        )
         result = _process_gap(
             gap_start=gap.start,
             gap_end=gap.end,
@@ -243,6 +259,10 @@ def handler(
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     """AWS Lambda handler (converts dict to typed event)."""
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="axiell_adapter_reloader",
+    )
     job_id = event["job_id"]
     window_start = datetime.fromisoformat(event["window_start"].replace("Z", "+00:00"))
     window_end = datetime.fromisoformat(event["window_end"].replace("Z", "+00:00"))
@@ -254,6 +274,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         job_id=job_id,
         window_start=window_start,
         window_end=window_end,
+        execution_context=execution_context,
         runtime=runtime,
         dry_run=dry_run,
     )
@@ -314,16 +335,21 @@ def main() -> None:
             window_minutes=args.window_minutes,
         )
     )
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="axiell_adapter_reloader",
+    )
 
     response = handler(
         job_id=args.job_id,
         window_start=window_start,
         window_end=window_end,
+        execution_context=execution_context,
         runtime=runtime,
         dry_run=args.dry_run,
     )
 
-    print(json.dumps(response.model_dump(mode="json"), indent=2))
+    logger.info("Reloader response", response=response.model_dump(mode="json"))
 
 
 if __name__ == "__main__":

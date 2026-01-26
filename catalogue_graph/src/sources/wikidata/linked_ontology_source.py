@@ -2,6 +2,8 @@ from collections.abc import Callable, Generator, Iterator
 from functools import lru_cache
 from typing import cast
 
+import structlog
+
 from models.events import EntityType
 from sources.base_source import BaseSource
 from utils.ontology import get_extracted_ids, is_id_in_ontology
@@ -10,6 +12,8 @@ from utils.types import NodeType, OntologyType, TransformerType
 
 from .sparql_client import SPARQL_MAX_PARALLEL_QUERIES, WikidataSparqlClient
 from .sparql_query_builder import SparqlQueryBuilder, WikidataEdgeQueryType
+
+logger = structlog.get_logger(__name__)
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
 
@@ -52,7 +56,7 @@ def extract_wikidata_id(item: dict, key: str = "item") -> str | None:
     # Very rarely, Wikidata returns an invalid ID in the format
     # http://www.wikidata.org/.well-known/genid/<some hexadecimal string>.
     # Log when this happens and return 'None'.
-    print(f"Encountered an invalid Wikidata id: {wikidata_id}")
+    logger.warning("Encountered an invalid Wikidata id", wikidata_id=wikidata_id)
     return None
 
 
@@ -90,10 +94,9 @@ class WikidataLinkedOntologySource(BaseSource):
         Return all Wikidata ids corresponding to Wikidata items referencing the selected linked ontology.
         All ids are returned, no matter whether we categorise them as concepts, names, or locations.
         """
-        print(
-            f"Retrieving Wikidata ids linked to {self.linked_ontology} items.",
-            end=" ",
-            flush=True,
+        logger.info(
+            "Retrieving Wikidata ids linked to ontology",
+            linked_ontology=self.linked_ontology,
         )
         ids_query = SparqlQueryBuilder.get_all_ids_query(self.linked_ontology)
         id_items = self.client.run_query(ids_query)
@@ -103,7 +106,7 @@ class WikidataLinkedOntologySource(BaseSource):
         all_ids = set(extract_wikidata_id(item) for item in id_items)
         all_valid_ids = [i for i in all_ids if i is not None]
 
-        print(f"({len(all_valid_ids)} ids retrieved.)")
+        logger.info("Retrieved Wikidata ids", count=len(all_valid_ids))
         return list(all_valid_ids)
 
     def _get_wikidata_items(self, wikidata_ids: list[str]) -> list:
@@ -195,7 +198,7 @@ class WikidataLinkedOntologySource(BaseSource):
         """
         Stream SAME_AS edges followed by HAS_PARENT edges for the selected `linked_ontology` and `node_type`.
         """
-        print("Streaming SAME_AS edges...")
+        logger.info("Streaming SAME_AS edges")
         streamed_wikidata_ids = set()
         for edge in self._stream_all_same_as_edges():
             # Filter for mappings which are part of the selected `node_type`, as determined by the linked ontology.
@@ -209,7 +212,7 @@ class WikidataLinkedOntologySource(BaseSource):
                 streamed_wikidata_ids.add(edge["from_id"])
                 yield {**edge, "type": "SAME_AS"}
 
-        print("Streaming HAS_PARENT edges...")
+        logger.info("Streaming HAS_PARENT edges")
         for edge in self._stream_all_has_parent_edges():
             # Only include an edge if its `from_id` was already streamed in a SAME_AS edge, indicating that
             # the child item belongs under the selected `node_type`.
@@ -217,14 +220,14 @@ class WikidataLinkedOntologySource(BaseSource):
                 streamed_wikidata_ids.add(edge["to_id"])
                 yield {**edge, "type": "HAS_PARENT"}
 
-        print("Streaming HAS_INDUSTRY edges...")
+        logger.info("Streaming HAS_INDUSTRY edges")
         for edge in self._stream_all_has_industry_edges():
             if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
                 edge["to_id"], "wikidata", self.pipeline_date
             ):
                 yield {**edge, "type": "HAS_INDUSTRY"}
 
-        print("Streaming HAS_FOUNDER edges...")
+        logger.info("Streaming HAS_FOUNDER edges")
         for edge in self._stream_all_has_founder_edges():
             if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
                 edge["to_id"], "wikidata", self.pipeline_date
@@ -233,7 +236,7 @@ class WikidataLinkedOntologySource(BaseSource):
 
         # The following edges only apply to people (SourceName) nodes
         if self.node_type == "names":
-            print("Streaming HAS_FIELD_OF_WORK edges...")
+            logger.info("Streaming HAS_FIELD_OF_WORK edges")
             for edge in self._stream_all_edges_by_type("has_field_of_work"):
                 # Only include an edge if its `to_id` has a corresponding concept node in the graph
                 if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
@@ -241,7 +244,7 @@ class WikidataLinkedOntologySource(BaseSource):
                 ):
                     yield {**edge, "type": "HAS_FIELD_OF_WORK"}
 
-            print("Streaming RELATED_TO edges...")
+            logger.info("Streaming RELATED_TO edges")
             for relationship_type in PEOPLE_RELATIONSHIP_TYPES:
                 for edge in self._stream_all_edges_by_type(relationship_type):
                     if (

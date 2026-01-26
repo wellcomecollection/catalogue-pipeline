@@ -5,8 +5,11 @@ import typing
 
 import backoff
 import requests
+import structlog
 
 from config import WIKIDATA_SPARQL_URL
+
+logger = structlog.get_logger(__name__)
 
 # Wikidata limits the number of parallel queries from a single IP address to 5.
 # See: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
@@ -18,7 +21,7 @@ SPARQL_REQUESTS_BACKOFF_INTERVAL = 10
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
-    print(f"SPARQL request failed due to '{exception_name}'. Retrying...")
+    logger.warning("SPARQL request failed, retrying", exception=exception_name)
 
 
 class WikidataSparqlClient:
@@ -74,9 +77,14 @@ class WikidataSparqlClient:
             with self.too_many_requests_lock:
                 self.too_many_requests = True
 
-            print("Too many SPARQL requests. Sleeping...")
             retry_after = int(r.headers["Retry-After"])
-            time.sleep(max(60, retry_after))
+            sleep_time = max(60, retry_after)
+            logger.warning(
+                "Too many SPARQL requests, sleeping",
+                retry_after=retry_after,
+                sleep_seconds=sleep_time,
+            )
+            time.sleep(sleep_time)
 
             with self.too_many_requests_lock:
                 self.too_many_requests = False

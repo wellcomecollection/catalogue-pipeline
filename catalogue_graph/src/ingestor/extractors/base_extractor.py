@@ -2,6 +2,8 @@ import time
 from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
+import structlog
+
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
     CONCEPT_QUERY,
@@ -22,6 +24,8 @@ from ingestor.queries.work_queries import (
     WORK_CONCEPTS_QUERY,
 )
 from utils.aws import get_neptune_client
+
+logger = structlog.get_logger(__name__)
 
 ConceptRelatedQuery = Literal[
     "related_to",
@@ -96,9 +100,11 @@ class GraphBaseExtractor:
             parameters=self.neptune_params,
             chunk_size=chunk_size,
         )
-        print(
-            f"Ran a set of '{query_type}' queries in {round(time.time() - start)}s, "
-            f"retrieving {len(results)} records."
+        logger.info(
+            "Ran Neptune queries",
+            query_type=query_type,
+            duration_seconds=round(time.time() - start),
+            records_retrieved=len(results),
         )
 
         return results

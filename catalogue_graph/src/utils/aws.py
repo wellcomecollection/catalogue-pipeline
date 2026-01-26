@@ -6,11 +6,14 @@ from typing import Any
 import boto3
 import polars as pl
 import smart_open
+import structlog
 from pydantic import BaseModel
 
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
+
+logger = structlog.get_logger(__name__)
 
 LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
 INSTANCE_ENDPOINT_SECRET_NAME = "catalogue-graph/neptune-cluster-endpoint"
@@ -70,7 +73,7 @@ def get_neptune_client(use_public_endpoint: bool) -> BaseNeptuneClient:
 
 
 def get_csv_from_s3(s3_uri: str) -> Generator[Any]:
-    print(f"Downloading '{s3_uri}'...")
+    logger.info("Downloading from S3", s3_uri=s3_uri)
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
         csv_reader = csv.DictReader(f)
@@ -129,7 +132,7 @@ def pydantic_from_s3_json[T: BaseModel](
     except (OSError, KeyError) as e:
         # if file does not exist, ignore
         if ignore_missing:
-            print(f"S3 file not found: {e}")
+            logger.info("S3 file not found", error=str(e))
             return None
 
         raise FileNotFoundError(f"S3 file not found: {e}") from e

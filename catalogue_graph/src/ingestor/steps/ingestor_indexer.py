@@ -6,6 +6,7 @@ from collections.abc import Generator
 
 import boto3
 import elasticsearch.helpers
+import structlog
 
 import config
 import utils.elasticsearch
@@ -20,9 +21,12 @@ from ingestor.models.step_events import (
 )
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import IndexerReport
 from utils.steps import create_job_id, run_ecs_handler
 from utils.types import IngestorType
+
+logger = structlog.get_logger(__name__)
 
 RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
     "concepts": IndexableConcept,
@@ -33,13 +37,16 @@ RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
 def _get_objects_to_index(
     base_event: IngestorStepEvent,
 ) -> Generator[IngestorIndexerObject]:
-    print("Listing S3 objects to index...")
+    logger.info("Listing S3 objects to index")
     bucket_name = config.CATALOGUE_GRAPH_S3_BUCKET
     prefix = base_event.get_path_prefix()
     load_format = base_event.load_format
 
-    print(
-        f"Will process all {load_format} files prefixed with 's3://{bucket_name}/{prefix}/*'."
+    logger.info(
+        "Processing files from S3",
+        bucket=bucket_name,
+        prefix=prefix,
+        load_format=load_format,
     )
 
     paginator = boto3.client("s3").get_paginator("list_objects_v2")
@@ -79,14 +86,23 @@ def get_indexable_data(
     else:
         data = dicts_from_s3_jsonl(s3_uri)
 
-    print(f"Extracted {len(data)} records from {s3_uri}.")
+    logger.info("Extracted records from S3", count=len(data), s3_uri=s3_uri)
     return [record_class.from_raw_document(row) for row in data]
 
 
 def handler(
-    event: IngestorIndexerLambdaEvent, es_mode: ElasticsearchMode = "private"
+    event: IngestorIndexerLambdaEvent,
+    execution_context: ExecutionContext | None = None,
+    es_mode: ElasticsearchMode = "private",
 ) -> IngestorIndexerMonitorLambdaEvent:
-    print(f"Received event: {event}.")
+    setup_logging(execution_context)
+
+    logger.info(
+        "Received event",
+        ingestor_type=event.ingestor_type,
+        pipeline_date=event.pipeline_date,
+        job_id=event.job_id,
+    )
 
     objects_to_index = event.objects_to_index or _get_objects_to_index(event)
     es_client = utils.elasticsearch.get_client(
@@ -100,21 +116,24 @@ def handler(
     for s3_object in objects_to_index:
         indexable_data = get_indexable_data(event, s3_object.s3_uri)
 
-        print(
-            f"Loading {len(indexable_data)} {event.ingestor_type} to ES index '{index_name}'..."
+        logger.info(
+            "Loading documents to ES index",
+            count=len(indexable_data),
+            ingestor_type=event.ingestor_type,
+            index_name=index_name,
         )
 
         success_count, _ = elasticsearch.helpers.bulk(
             es_client, generate_operations(index_name, indexable_data)
         )
 
-        print(f"Successfully indexed {success_count} documents.")
+        logger.info("Successfully indexed documents", count=success_count)
 
         total_success_count += success_count
 
     event_payload = event.model_dump(exclude={"objects_to_index"})
 
-    print("Preparing indexer pipeline report ...")
+    logger.info("Preparing indexer pipeline report")
     report = IndexerReport(**event_payload, success_count=total_success_count)
     report.publish()
 
@@ -125,7 +144,13 @@ def handler(
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
-    return handler(IngestorIndexerLambdaEvent(**event)).model_dump(mode="json")
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="ingestor_indexer",
+    )
+    return handler(IngestorIndexerLambdaEvent(**event), execution_context).model_dump(
+        mode="json"
+    )
 
 
 def event_validator(raw_input: str) -> IngestorIndexerLambdaEvent:
@@ -155,6 +180,8 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
         event_validator=event_validator,
         es_mode=es_mode,
     )
+
+    logger.info("ECS ingestor indexer task completed successfully")
 
 
 def local_handler(parser: ArgumentParser) -> None:

@@ -27,7 +27,12 @@ def _run_transform(
         job_id="20250101T1200",
         changeset_ids=changeset_ids or [],
     )
-    return handler(event=event, es_mode="local", use_rest_api_table=False)
+
+    return handler(
+        event=event,
+        es_mode="local",
+        use_rest_api_table=False,
+    )
 
 
 def test_transformer_end_to_end_with_local_table(

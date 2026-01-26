@@ -12,10 +12,13 @@ Rules replicated from Scala implementation (MarcTitle.scala):
 
 import re
 
+import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.marc.transformers.common import mandatory_field
+
+logger = structlog.get_logger(__name__)
 
 _SUBFIELD_TAGS = {"a", "b", "c", "h", "n", "p"}
 _BRACKETED_SEGMENT = re.compile(r"\[[^\]]+\]")
@@ -27,9 +30,9 @@ def _get_245_field(marc_record: Record) -> Field:
         # Let mandatory_field decorator handle missing field error messaging.
         raise ValueError("Missing title field (245)")
     if len(fields_245) > 1:
-        print(
-            "Multiple instances of non-repeatable varfield with tag 245: %d (using first)",
-            len(fields_245),
+        logger.warning(
+            "Multiple instances of non-repeatable varfield with tag 245",
+            count=len(fields_245),
         )
     return fields_245[0]
 

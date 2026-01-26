@@ -15,6 +15,7 @@ from adapters.axiell.models.step_events import (
 from adapters.axiell.steps import trigger
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
 from models.incremental_window import IncrementalWindow
+from utils.logger import ExecutionContext
 
 
 def _window_row(start: datetime, end: datetime) -> WindowStatusRecord:
@@ -205,6 +206,7 @@ def test_lambda_handler_uses_rest_api_table_by_default(
     def fake_handler(
         event: AxiellAdapterTriggerEvent,
         runtime: trigger.TriggerRuntime,
+        execution_context: ExecutionContext | None = None,
         *,
         enforce_lag: bool = True,
     ) -> AxiellAdapterLoaderEvent:

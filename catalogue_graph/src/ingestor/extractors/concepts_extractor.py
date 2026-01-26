@@ -4,6 +4,8 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
 from typing import get_args
 
+import structlog
+
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,
@@ -20,6 +22,8 @@ from .base_extractor import (
     ConceptRelatedQuery,
     GraphBaseExtractor,
 )
+
+logger = structlog.get_logger(__name__)
 
 CONCEPT_QUERY_PARAMS = {
     # There are a few Wikidata supernodes which cause performance issues in queries.
@@ -207,7 +211,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
     def extract_raw(self) -> Generator[tuple]:
         for concept_ids in self.get_concept_stream():
-            print(f"Will process a batch of {len(concept_ids)} concepts.")
+            logger.info("Processing batch of concepts", count=len(concept_ids))
             concepts = self.get_concepts(concept_ids).items()
 
             # Run related concept queries in parallel

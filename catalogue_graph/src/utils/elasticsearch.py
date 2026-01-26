@@ -1,6 +1,7 @@
 from typing import Literal
 
 import elasticsearch
+import structlog
 from pydantic import BaseModel
 
 from config import (
@@ -12,6 +13,8 @@ from config import (
 )
 from models.events import BasePipelineEvent
 from utils.aws import get_secret
+
+logger = structlog.get_logger(__name__)
 
 # private: Connect to the production cluster via the private endpoint (production runs only)
 # public: Connect to the production cluster via the public endpoint (local runs only)
@@ -60,5 +63,7 @@ def get_client(
     config = get_pipeline_config(pipeline_date, es_mode, api_key_name)
 
     host_config = f"{config.scheme}://{config.host}:{config.port}"
-    print(f"Creating Elasticsearch client in '{es_mode}' mode ({host_config})")
+    logger.info(
+        "Creating Elasticsearch client", es_mode=es_mode, host_config=host_config
+    )
     return elasticsearch.Elasticsearch(host_config, api_key=config.apikey, timeout=60)

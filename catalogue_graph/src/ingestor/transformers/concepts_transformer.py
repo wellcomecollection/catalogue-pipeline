@@ -1,5 +1,7 @@
 from typing import TextIO
 
+import structlog
+
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.extractors.concepts_extractor import GraphConceptsExtractor
 from ingestor.models.indexable_concept import (
@@ -19,6 +21,8 @@ from utils.elasticsearch import ElasticsearchMode
 from .base_transformer import ElasticsearchBaseTransformer
 from .raw_concept import MissingLabelError
 from .raw_related_concepts import RawNeptuneRelatedConcept
+
+logger = structlog.get_logger(__name__)
 
 
 class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
@@ -115,8 +119,9 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
             return IndexableConcept(query=query, display=display)
         except MissingLabelError:
             # There is currently one concept which does not have a label ('k6p2u5fh')
-            print(
-                f"Concept {neptune_concept.wellcome_id} does not have a label and will not be indexed."
+            logger.warning(
+                "Concept does not have a label and will not be indexed",
+                concept_id=neptune_concept.wellcome_id,
             )
 
         return None

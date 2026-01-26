@@ -4,6 +4,8 @@ import re
 import typing
 from typing import Literal, cast
 
+import structlog
+
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
     BulkLoaderEvent,
@@ -12,8 +14,11 @@ from models.events import (
 from models.incremental_window import IncrementalWindow
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.aws import get_neptune_client
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import BulkLoaderReport
 from utils.types import EntityType, TransformerType
+
+logger = structlog.get_logger(__name__)
 
 BulkLoadStatus = Literal["IN_PROGRESS", "SUCCEEDED"]
 
@@ -33,18 +38,20 @@ def print_detailed_bulk_load_errors(payload: BulkLoadStatusResponse) -> None:
     failed_feeds = payload.failed_feeds
 
     if error_logs:
-        print("    First 10 errors:")
+        logger.info("First 10 errors from bulk load")
 
     for error_log in error_logs:
-        code = error_log.error_code
-        message = error_log.error_message
-        record_num = error_log.record_num
-        print(f"         {code}: {message}. (Row number: {record_num})")
+        logger.warning(
+            "Bulk load error",
+            error_code=error_log.error_code,
+            error_message=error_log.error_message,
+            record_num=error_log.record_num,
+        )
 
     if failed_feeds:
-        print("    Failed feed statuses:")
+        logger.info("Failed feed statuses")
         for failed_feed in failed_feeds:
-            print(f"         {failed_feed.status}")
+            logger.warning("Failed feed", status=failed_feed.status)
 
 
 def bulk_loader_event_from_s3_uri(s3_uri: str) -> BulkLoaderEvent:
@@ -73,8 +80,12 @@ def bulk_loader_event_from_s3_uri(s3_uri: str) -> BulkLoaderEvent:
 
 
 def handler(
-    event: BulkLoadPollerEvent, is_local: bool = False
+    event: BulkLoadPollerEvent,
+    execution_context: ExecutionContext | None = None,
+    is_local: bool = False,
 ) -> BulkLoadPollerResponse:
+    setup_logging(execution_context)
+
     payload = get_neptune_client(is_local).get_bulk_load_status(event.load_id)
     overall_status = payload.overall_status
 
@@ -82,7 +93,11 @@ def handler(
     status: str = overall_status.status
     processed_count = overall_status.total_records
 
-    print(f"Bulk load status: {status}. (Processed {processed_count:,} records.)")
+    logger.info(
+        "Bulk load status",
+        status=status,
+        processed_count=processed_count,
+    )
 
     if status in ("LOAD_NOT_STARTED", "LOAD_IN_QUEUE", "LOAD_IN_PROGRESS"):
         return BulkLoadPollerResponse.from_event(event, "IN_PROGRESS")
@@ -92,10 +107,13 @@ def handler(
     data_type_error_count = overall_status.datatype_mismatch_errors
     formatted_time = datetime.timedelta(seconds=overall_status.total_time_spent)
 
-    print(f"    Insert errors: {insert_error_count:,}")
-    print(f"    Parsing errors: {parsing_error_count:,}")
-    print(f"    Data type mismatch errors: {data_type_error_count:,}")
-    print(f"    Total time spent: {formatted_time}")
+    logger.info(
+        "Bulk load completed",
+        insert_errors=insert_error_count,
+        parsing_errors=parsing_error_count,
+        data_type_mismatch_errors=data_type_error_count,
+        total_time_spent=str(formatted_time),
+    )
 
     print_detailed_bulk_load_errors(payload)
 
@@ -118,7 +136,11 @@ def handler(
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
-    return handler(BulkLoadPollerEvent(**event)).model_dump()
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="graph_bulk_load_poller",
+    )
+    return handler(BulkLoadPollerEvent(**event), execution_context).model_dump()
 
 
 def local_handler() -> None:
@@ -139,7 +161,11 @@ def local_handler() -> None:
     args = parser.parse_args()
     event = BulkLoadPollerEvent(**args.__dict__)
 
-    handler(event, is_local=True)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="graph_bulk_load_poller",
+    )
+    handler(event, execution_context, is_local=True)
 
 
 if __name__ == "__main__":
