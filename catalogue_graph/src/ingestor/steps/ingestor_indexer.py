@@ -85,15 +85,33 @@ def get_indexable_data(
 
 
 def handler(
-    event: IngestorIndexerLambdaEvent, es_mode: ElasticsearchMode = "private"
+    event: IngestorIndexerLambdaEvent, 
+    es_mode: ElasticsearchMode = "private",
+    create_index_mapping: str | None = None
 ) -> IngestorIndexerMonitorLambdaEvent:
     print(f"Received event: {event}.")
-
+    
+    if not event.index_dates.works:
+        raise ValueError("Destination index for works must be specified in the event.")
+    
     objects_to_index = event.objects_to_index or _get_objects_to_index(event)
     
-    # es_client = utils.elasticsearch.get_serverless_client(es_mode)
+    es_client = utils.elasticsearch.get_serverless_client(es_mode)
     
     index_name = event.index_dates.works
+    
+    # Create index if mapping file provided
+    if create_index_mapping:
+        print(f"Creating index '{index_name}' with mapping from '{create_index_mapping}'...")
+        with open(create_index_mapping, 'r') as f:
+            mapping = json.load(f)
+        
+        es_client.indices.create(index=index_name, body=mapping)
+        
+        # Wait for index to be ready (yellow = all primary shards allocated and ready for writes)
+        print(f"Waiting for index '{index_name}' to be ready...")
+        es_client.cluster.health(index=index_name, wait_for_status='yellow', timeout='30s')
+        print(f"Index '{index_name}' created and ready.")
 
     total_success_count = 0
     for s3_object in objects_to_index:
@@ -103,19 +121,15 @@ def handler(
             f"Loading {len(indexable_data)} {event.ingestor_type} to ES index '{index_name}'..."
         )
 
-        # success_count, _ = elasticsearch.helpers.bulk(
-        #     es_client, generate_operations(index_name, indexable_data)
-        # )
+        success_count, _ = elasticsearch.helpers.bulk(
+            es_client, generate_operations(index_name, indexable_data)
+        )
 
-        # print(f"Successfully indexed {success_count} documents.")
+        print(f"Successfully indexed {success_count} documents.")
 
-        # total_success_count += success_count
+        total_success_count += success_count
 
     event_payload = event.model_dump(exclude={"objects_to_index"})
-
-    # print("Preparing indexer pipeline report ...")
-    # report = IndexerReport(**event_payload, success_count=total_success_count)
-    # report.publish()
 
     return IngestorIndexerMonitorLambdaEvent(
         **event_payload,
@@ -196,12 +210,18 @@ def local_handler(parser: ArgumentParser) -> None:
         choices=["parquet", "jsonl"],
         default="parquet",
     )
+    parser.add_argument(
+        "--create-index",
+        type=str,
+        help="Path to index mapping JSON file. If provided, creates the index before ingestion.",
+        required=False,
+    )
 
     args = parser.parse_args()
     base_event = IngestorStepEvent.from_argparser(args)
 
     event = IngestorIndexerLambdaEvent(**base_event.model_dump())
-    handler(event, es_mode="public")
+    handler(event, es_mode="public", create_index_mapping=args.create_index)
 
 
 if __name__ == "__main__":
@@ -214,3 +234,6 @@ if __name__ == "__main__":
 # --works-source="ingestor_works/2025-10-02/2025-11-20/20260113T1300-20260113T1315" \
 # --works-destination-index="works-semantic-v1" \
 # --load-format=parquet
+
+# optional: 
+# --create-index="path/to/mapping.json"
