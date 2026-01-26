@@ -15,6 +15,7 @@ from adapters.ebsco.steps.loader import EBSCO_NAMESPACE, LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
 from tests.mocks import MockSmartOpen
+from utils.logger import ExecutionContext
 
 
 def _register_mock_open(path: str) -> None:
@@ -243,7 +244,11 @@ def test_handler_publishes_loader_report(
     with patch.object(loader.EbscoLoaderReport, "from_loader") as mock_from_loader:
         mock_from_loader.return_value = mock_report
 
-        loader_response = loader.handler(req, runtime=runtime)
+        execution_context = ExecutionContext(
+            trace_id="test-trace-id",
+            pipeline_step="test_ebsco_adapter_loader",
+        )
+        loader_response = loader.handler(req, execution_context, runtime=runtime)
 
     assert mock_from_loader.call_count == 1
     called_event, response_for_report = mock_from_loader.call_args.args

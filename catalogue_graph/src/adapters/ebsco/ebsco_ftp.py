@@ -1,6 +1,10 @@
 import os
 from ftplib import FTP
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 
 class EbscoFtp:
     def __init__(
@@ -27,7 +31,7 @@ class EbscoFtp:
 
     def download_file(self, file: str, temp_dir: str) -> str:
         with open(os.path.join(temp_dir, file), "wb") as f:
-            print(f"Downloading {file}...")
+            logger.info("Downloading file", file=file)
             self.ftp.retrbinary(f"RETR {file}", f.write)
 
         return os.path.join(temp_dir, file)

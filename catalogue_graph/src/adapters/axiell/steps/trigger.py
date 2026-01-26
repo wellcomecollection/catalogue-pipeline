@@ -7,12 +7,11 @@ configured lag tolerance, and emits a WindowRequest payload for the loader.
 from __future__ import annotations
 
 import argparse
-import json
-import logging
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import boto3
+import structlog
 from pydantic import BaseModel, ConfigDict, Field
 
 from adapters.axiell import config, helpers
@@ -25,8 +24,9 @@ from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from clients.chatbot_notifier import ChatbotNotifier
 from models.events import EventBridgeScheduledEvent, IncrementalWindow
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
-logging.basicConfig(level=logging.INFO)
+logger = structlog.get_logger(__name__)
 
 
 class AxiellAdapterTriggerConfig(BaseModel):
@@ -107,7 +107,7 @@ def build_window_request(
     # before start_time are true historical gaps that need attention.
     if notifier:
         notification_report = reporter.coverage_report(range_end=start_time)
-        logging.info(notification_report.summary())
+        logger.info("Window coverage report", summary=notification_report.summary())
         notifier.notify_if_gaps(
             report=notification_report,
             job_id=job_id,
@@ -115,7 +115,7 @@ def build_window_request(
         )
     else:
         # Log the preliminary report summary when no notifier
-        logging.info(preliminary_report.summary())
+        logger.info("Window coverage report", summary=preliminary_report.summary())
 
     if start_time >= end_time:
         raise RuntimeError(
@@ -140,8 +140,10 @@ def build_window_request(
 
 def handler(
     event: AxiellAdapterTriggerEvent,
+    execution_context: ExecutionContext,
     runtime: TriggerRuntime,
 ) -> AxiellAdapterLoaderEvent:
+    setup_logging(execution_context)
     now = event.now or datetime.now(tz=UTC)
     return build_window_request(
         store=runtime.store,
@@ -197,11 +199,16 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     scheduled_event = EventBridgeScheduledEvent.model_validate(event)
     event_time = datetime.fromisoformat(scheduled_event.time.replace("Z", "+00:00"))
     runtime = build_runtime()
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="axiell_adapter_trigger",
+    )
     loader_event = handler(
         AxiellAdapterTriggerEvent(
             now=event_time,
             job_id=_generate_job_id(event_time),
         ),
+        execution_context,
         runtime=runtime,
     )
     return loader_event.model_dump(mode="json")
@@ -252,11 +259,16 @@ def main() -> None:
         else datetime.now(tz=UTC)
     )
     job_id = args.job_id or _generate_job_id(now)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="axiell_adapter_trigger",
+    )
     loader_event = handler(
         AxiellAdapterTriggerEvent(
             now=now,
             job_id=job_id,
         ),
+        execution_context,
         runtime=build_runtime(
             AxiellAdapterTriggerConfig(
                 use_rest_api_table=args.use_rest_api_table,
@@ -266,7 +278,7 @@ def main() -> None:
             )
         ),
     )
-    print(json.dumps(loader_event.model_dump(mode="json"), indent=2))
+    logger.info("Loader event", event=loader_event.model_dump(mode="json"))
 
 
 if __name__ == "__main__":
