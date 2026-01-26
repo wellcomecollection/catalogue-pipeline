@@ -3,6 +3,7 @@ import typing
 from datetime import datetime, timedelta
 
 import polars as pl
+import structlog
 
 from models.events import BulkLoaderEvent, FullGraphRemoverEvent
 from utils.aws import (
@@ -11,8 +12,11 @@ from utils.aws import (
     get_csv_from_s3,
     get_neptune_client,
 )
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.safety import validate_fractional_change
 from utils.types import EntityType, FullGraphRemoverType, GraphRemoverFolder
+
+logger = structlog.get_logger(__name__)
 
 IDS_LOG_SCHEMA: dict = {"timestamp": pl.Date(), "id": pl.Utf8}
 
@@ -23,7 +27,10 @@ def get_previous_ids(event: FullGraphRemoverEvent) -> set[str]:
     df = df_from_s3_parquet(s3_file_uri)
 
     ids = pl.Series(df.select(pl.first())).to_list()
-    print(f"Retrieved {len(ids)} ids archived from a previous bulk loader file.")
+    logger.info(
+        "Retrieved archived IDs from previous bulk loader file",
+        count=len(ids),
+    )
     return set(ids)
 
 
@@ -33,7 +40,10 @@ def get_current_ids(event: FullGraphRemoverEvent) -> set[str]:
     s3_file_uri = bulk_loader_event.get_s3_uri()
 
     ids = set(row[":ID"] for row in get_csv_from_s3(s3_file_uri))
-    print(f"Retrieved {len(ids)} ids from the current bulk loader file.")
+    logger.info(
+        "Retrieved IDs from current bulk loader file",
+        count=len(ids),
+    )
     return ids
 
 
@@ -53,8 +63,9 @@ def log_ids(
     try:
         df = df_from_s3_parquet(s3_file_uri)
     except (OSError, KeyError):
-        print(
-            "File storing previously added/deleted ids not found. This should only happen on the first run."
+        logger.info(
+            "File storing previously added/deleted IDs not found",
+            note="This should only happen on the first run",
         )
         df = pl.DataFrame(schema=IDS_LOG_SCHEMA)
 
@@ -70,14 +81,21 @@ def log_ids(
     df_to_s3_parquet(df, s3_file_uri)
 
 
-def handler(event: FullGraphRemoverEvent, is_local: bool = False) -> None:
+def handler(
+    event: FullGraphRemoverEvent,
+    execution_context: ExecutionContext,
+    is_local: bool = False,
+) -> None:
+    setup_logging(execution_context)
+
     try:
         # Retrieve a list of all ids which were loaded into the graph as part of the previous run
         previous_ids = get_previous_ids(event)
         is_first_run = False
     except (OSError, KeyError):
-        print(
-            "File storing archived ids not found. This should only happen on the first run."
+        logger.info(
+            "File storing archived IDs not found",
+            note="This should only happen on the first run",
         )
         previous_ids = set()
         is_first_run = True
@@ -92,10 +110,10 @@ def handler(event: FullGraphRemoverEvent, is_local: bool = False) -> None:
         deleted_ids = previous_ids.difference(current_ids)
         added_ids = current_ids.difference(previous_ids)
 
-        print(
-            "Bulk loader file changes since the last run:\n",
-            f"   Deleted ids: {len(deleted_ids)}\n",
-            f"   Added ids: {len(added_ids)}",
+        logger.info(
+            "Bulk loader file changes since last run",
+            deleted_ids=len(deleted_ids),
+            added_ids=len(added_ids),
         )
 
     # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
@@ -114,15 +132,19 @@ def handler(event: FullGraphRemoverEvent, is_local: bool = False) -> None:
     # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
     log_ids(event, deleted_ids, "deleted_ids")
     log_ids(event, added_ids, "added_ids")
-    print("Successfully logged added and deleted ids.")
+    logger.info("Successfully logged added and deleted IDs")
 
     # Update the list of all ids which have been loaded into the graph
     update_node_ids_snapshot(event, current_ids)
-    print("Successfully updated bulk loaded ids snapshot.")
+    logger.info("Successfully updated bulk loaded IDs snapshot")
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    handler(FullGraphRemoverEvent.model_validate(event))
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="graph_remover",
+    )
+    handler(FullGraphRemoverEvent.model_validate(event), execution_context)
 
 
 def local_handler() -> None:
@@ -158,7 +180,11 @@ def local_handler() -> None:
     args = parser.parse_args()
     event = FullGraphRemoverEvent(**args.__dict__)
 
-    handler(event, is_local=True)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="graph_remover",
+    )
+    handler(event, execution_context, is_local=True)
 
 
 if __name__ == "__main__":

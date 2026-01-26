@@ -2,8 +2,12 @@ import argparse
 import typing
 
 import boto3
+import structlog
 
 import config
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
+
+logger = structlog.get_logger(__name__)
 
 
 def scale_cluster(min_capacity: float, max_capacity: float) -> None:
@@ -18,14 +22,29 @@ def scale_cluster(min_capacity: float, max_capacity: float) -> None:
     )
 
 
-def handler(min_capacity: float, max_capacity: float) -> None:
+def handler(
+    min_capacity: float,
+    max_capacity: float,
+    execution_context: ExecutionContext,
+) -> None:
+    setup_logging(execution_context)
+
     scale_cluster(min_capacity, max_capacity)
+    logger.info(
+        "Cluster scaling initiated",
+        min_capacity=min_capacity,
+        max_capacity=max_capacity,
+    )
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
     min_capacity = event["min_capacity"]
     max_capacity = event["max_capacity"]
-    handler(min_capacity, max_capacity)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="graph_scaler",
+    )
+    handler(min_capacity, max_capacity, execution_context)
 
 
 def local_handler() -> None:
@@ -45,7 +64,11 @@ def local_handler() -> None:
 
     args = parser.parse_args()
 
-    handler(**args.__dict__)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="graph_scaler",
+    )
+    handler(args.min_capacity, args.max_capacity, execution_context)
 
 
 if __name__ == "__main__":
