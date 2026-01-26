@@ -37,7 +37,7 @@ ECR_RESPONSE=$(
 
 EXISTING_IMAGES=$(echo "$ECR_RESPONSE" | jq '.images | length')
 
-if (( EXISTING_IMAGES == 2 ))
+if (( EXISTING_IMAGES == 1 ))
 then
   echo "There are already images with tag $ENV_TAG, nothing to do"
   exit 0
