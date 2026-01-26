@@ -96,9 +96,9 @@ def get_indexable_data(
 
 def handler(
     event: IngestorIndexerLambdaEvent,
+    execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
     create_index_mapping: str | None = None,
-    execution_context: ExecutionContext | None = None,
 ) -> IngestorIndexerMonitorLambdaEvent:
     setup_logging(execution_context)
 
@@ -146,13 +146,13 @@ def handler(
             index_name=index_name,
         )
 
-        success_count, _ = elasticsearch.helpers.bulk(
-            es_client, generate_operations(index_name, indexable_data)
-        )
+        # success_count, _ = elasticsearch.helpers.bulk(
+        #     es_client, generate_operations(index_name, indexable_data)
+        # )
 
-        logger.info("Successfully indexed documents", count=success_count)
+        # logger.info("Successfully indexed documents", count=success_count)
 
-        total_success_count += success_count
+        # total_success_count += success_count
 
     event_payload = event.model_dump(exclude={"objects_to_index"})
 
