@@ -2,10 +2,23 @@ module "pipeline" {
   source = "../modules/pipeline"
 
   reindexing_state = {
-    listen_to_reindexer      = true
+    listen_to_reindexer      = false
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_matcher_db      = false
+  }
+
+  # Default values for a new pipeline
+  # graph_index_dates = {
+  #   merged   = local.pipeline_date
+  #   works    = local.pipeline_date
+  #   concepts = local.pipeline_date
+  # }
+
+  graph_index_dates = {
+    merged   = "2025-10-02"
+    works    = "2025-11-20"
+    concepts = "2025-10-09"
   }
 
   index_config = {
