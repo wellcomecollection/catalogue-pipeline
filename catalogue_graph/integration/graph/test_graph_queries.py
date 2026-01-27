@@ -41,7 +41,7 @@ pytestmark = pytest.mark.integration
 
 @lru_cache(maxsize=1)
 def neptune_client() -> BaseNeptuneClient:
-    return get_neptune_client(True)
+    return get_neptune_client(use_public_endpoint=True)
 
 
 @cache
