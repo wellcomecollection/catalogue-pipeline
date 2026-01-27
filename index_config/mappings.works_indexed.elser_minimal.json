@@ -900,7 +900,7 @@
       "dynamic": "false"
     },
     "type": {
-      "type": "keyword"
+      "type": "keyword" 
     }
   }
 }

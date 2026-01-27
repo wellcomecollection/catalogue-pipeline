@@ -263,9 +263,9 @@ if __name__ == "__main__":
 
 # AWS_PROFILE=platform-developer uv run ingestor_indexer.py \
 # --ingestor-type=works \
-# --works-source="ingestor_works/2025-10-02/2025-11-20/20260113T1300-20260113T1315" \
+# --works-source="ingestor_works/dev/dev" \
 # --works-destination-index="works-semantic-v1" \
-# --load-format=parquet
+# --load-format=jsonl
 
 # optional:
 # --create-index="path/to/mapping.json"
