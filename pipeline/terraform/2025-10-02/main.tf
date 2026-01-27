@@ -8,6 +8,13 @@ module "pipeline" {
     scale_up_matcher_db      = false
   }
 
+  # Default values for a new pipeline
+  # graph_index_dates = {
+  #   merged   = local.pipeline_date
+  #   works    = local.pipeline_date
+  #   concepts = local.pipeline_date
+  # }
+
   graph_index_dates = {
     merged   = "2025-10-02"
     works    = "2025-11-20"
