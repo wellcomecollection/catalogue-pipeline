@@ -83,10 +83,16 @@ def event_validator(raw_input: str) -> ExtractorEvent:
 
 
 def ecs_handler(arg_parser: ArgumentParser) -> None:
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="graph_extractor",
+    )
+
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,
         event_validator=event_validator,
+        execution_context=execution_context,
     )
 
     logger.info("ECS extractor task completed successfully")
