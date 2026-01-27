@@ -9,7 +9,7 @@ import pytest
 from pydantic import BaseModel
 
 from tests.mocks import MockStepFunctionsClient
-from utils.logger import setup_structlog
+from utils.logger import ExecutionContext, setup_structlog
 from utils.steps import StepFunctionOutput, run_ecs_handler
 
 
@@ -37,7 +37,10 @@ def test_run_ecs_handler_reports_success(
 
     handler_calls: list[ExampleEvent] = []
 
-    def handler(event: ExampleEvent) -> ExampleResult:
+    def handler(
+        event: ExampleEvent,
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult:
         handler_calls.append(event)
         return ExampleResult(status=f"processed-{event.message}")
 
@@ -58,6 +61,10 @@ def test_run_ecs_handler_reports_success(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
         )
 
     assert handler_calls == [ExampleEvent(message="hello")]
@@ -80,7 +87,10 @@ def test_run_ecs_handler_reports_failure(
     token = "token-456"
     parser = ArgumentParser(prog="test-handler")
 
-    def handler(event: ExampleEvent) -> ExampleResult:  # noqa: ARG001
+    def handler(
+        event: ExampleEvent,  # noqa: ARG001
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult:
         raise RuntimeError("unexpected kaboom")
 
     monkeypatch.setattr(
@@ -100,6 +110,10 @@ def test_run_ecs_handler_reports_failure(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
         )
 
     assert MockStepFunctionsClient.task_successes == []
@@ -125,7 +139,10 @@ def test_run_ecs_handler_handles_none_result(
     token = "token-789"
     parser = ArgumentParser(prog="test-handler")
 
-    def handler(event: ExampleEvent) -> ExampleResult | None:  # noqa: ARG001
+    def handler(
+        event: ExampleEvent,  # noqa: ARG001
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult | None:
         return None
 
     monkeypatch.setattr(
@@ -145,6 +162,10 @@ def test_run_ecs_handler_handles_none_result(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
         )
 
     assert MockStepFunctionsClient.task_failures == []
@@ -165,7 +186,10 @@ def test_run_ecs_handler_without_task_token(
     event_payload = ExampleEvent(message="no-token").model_dump_json()
     parser = ArgumentParser(prog="test-handler")
 
-    def handler(event: ExampleEvent) -> ExampleResult:
+    def handler(
+        event: ExampleEvent,
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult:
         return ExampleResult(status=f"processed-{event.message}")
 
     monkeypatch.setattr(
@@ -183,6 +207,10 @@ def test_run_ecs_handler_without_task_token(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
         )
 
     assert MockStepFunctionsClient.task_successes == []
@@ -198,7 +226,10 @@ def test_run_ecs_handler_without_task_token_none_result(
     event_payload = ExampleEvent(message="no-token").model_dump_json()
     parser = ArgumentParser(prog="test-handler")
 
-    def handler(event: ExampleEvent) -> ExampleResult | None:  # noqa: ARG001
+    def handler(
+        event: ExampleEvent,  # noqa: ARG001
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult | None:
         return None
 
     monkeypatch.setattr(
@@ -216,6 +247,10 @@ def test_run_ecs_handler_without_task_token_none_result(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
         )
 
     assert MockStepFunctionsClient.task_successes == []

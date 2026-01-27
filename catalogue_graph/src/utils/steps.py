@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from argparse import ArgumentParser
 from collections.abc import Callable
@@ -7,6 +9,8 @@ from typing import Concatenate, ParamSpec, Protocol, TypeVar
 import boto3
 import structlog
 from pydantic import BaseModel
+
+from utils.logger import ExecutionContext
 
 logger = structlog.get_logger(__name__)
 
@@ -73,6 +77,7 @@ def run_ecs_handler(
     arg_parser: ArgumentParser,
     handler: HandlerFunction,
     event_validator: EventValidator,
+    execution_context: ExecutionContext,
     *handler_args: Params.args,  # type: ignore[valid-type]
     **handler_kwargs: Params.kwargs,  # type: ignore[valid-type]
 ) -> None:
@@ -97,7 +102,12 @@ def run_ecs_handler(
     step_output = StepFunctionOutput(task_token, stepfunctions_client)
 
     try:
-        result = handler(event=event, *handler_args, **handler_kwargs)  # noqa: B026
+        result = handler(
+            event=event,
+            execution_context=execution_context,
+            *handler_args,  # noqa: B026
+            **handler_kwargs,
+        )
         step_output.send_success(result)
 
     except Exception as exc:
