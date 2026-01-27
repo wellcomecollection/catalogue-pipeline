@@ -95,10 +95,16 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
     args, _ = arg_parser.parse_known_args()
     es_mode = args.es_mode
 
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="ingestor_loader",
+    )
+
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,
         event_validator=event_validator,
+        execution_context=execution_context,
         es_mode=es_mode,
     )
 
