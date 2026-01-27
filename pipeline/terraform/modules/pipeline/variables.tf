@@ -88,3 +88,12 @@ variable "ami_id" {
 variable "version_regex" {
   type = string
 }
+
+
+variable "graph_index_dates" {
+  type = object({
+    merged   = string
+    works    = string
+    concepts = string
+  })
+}
