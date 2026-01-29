@@ -310,6 +310,12 @@
     },
     "query": {
       "properties": {
+        "descriptionSemantic": {
+          "type": "semantic_text"
+        },
+        "titleSemantic": {
+          "type": "semantic_text"
+        },
         "alternativeTitles": {
           "type": "text",
           "fields": {
@@ -407,7 +413,7 @@
         },
         "description": {
           "type": "text",
-          "copy_to": "vectorQuery.descriptionVector",
+          "copy_to": "query.descriptionSemantic",
           "fields": {
             "arabic": {
               "type": "text",
@@ -824,7 +830,7 @@
         },
         "title": {
           "type": "text",
-          "copy_to": "vectorQuery.titleVector",
+          "copy_to": "query.titleSemantic",
           "fields": {
             "arabic": {
               "type": "text",
@@ -885,22 +891,12 @@
         }
       }
     },
-    "vectorQuery": {
-      "properties": {
-        "descriptionVector": {
-          "type": "semantic_text"
-        },
-        "titleVector": {
-          "type": "semantic_text"
-        }
-      }
-    },
     "redirectTarget": {
       "type": "object",
       "dynamic": "false"
     },
     "type": {
-      "type": "keyword" 
+      "type": "keyword"
     }
   }
 }
