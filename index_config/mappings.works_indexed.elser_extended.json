@@ -310,9 +310,39 @@
     },
     "query": {
       "properties": {
+        "descriptionSemantic": {
+          "type": "semantic_text"
+        },
+        "titleSemantic": {
+          "type": "semantic_text"
+        },
+        "alternativeTitlesSemantic": { 
+          "type": "semantic_text"
+        },
+        "contributorsSemantic": {
+          "type": "semantic_text"
+        },
+        "genresSemantic": {
+          "type": "semantic_text"
+        },
+        "languagesSemantic": {
+          "type": "semantic_text"
+        },
+        "letteringSemantic": {
+          "type": "semantic_text"
+        },
+        "notesSemantic": {
+          "type": "semantic_text"
+        },
+        "physicalDescriptionSemantic": {
+          "type": "semantic_text"
+        },
+        "subjectsSemantic": {
+          "type": "semantic_text"
+        },
         "alternativeTitles": {
           "type": "text",
-          "copy_to": "alternativeTitlesVector",
+          "copy_to": "query.alternativeTitlesSemantic",
           "fields": {
             "arabic": {
               "type": "text",
@@ -399,6 +429,7 @@
               "properties": {
                 "label": {
                   "type": "text",
+                  "copy_to": "query.contributorsSemantic",
                   "analyzer": "english",
                   "search_analyzer": "english_token_limited"
                 }
@@ -408,6 +439,7 @@
         },
         "description": {
           "type": "text",
+          "copy_to": "query.descriptionSemantic",
           "fields": {
             "arabic": {
               "type": "text",
@@ -468,8 +500,8 @@
             "concepts": {
               "properties": {
                 "label": {
-                  "copy_to": "genresVector",
                   "type": "text",
+                  "copy_to": "query.genresSemantic",
                   "analyzer": "english",
                   "search_analyzer": "english_token_limited"
                 }
@@ -545,6 +577,7 @@
           "properties": {
             "label": {
               "type": "text",
+              "copy_to": "query.languagesSemantic",
               "analyzer": "lowercase",
               "search_analyzer": "lowercase_token_limited"
             }
@@ -552,6 +585,7 @@
         },
         "lettering": {
           "type": "text",
+          "copy_to": "query.letteringSemantic",
           "fields": {
             "arabic": {
               "type": "text",
@@ -610,6 +644,7 @@
           "properties": {
             "contents": {
               "type": "text",
+              "copy_to": "query.notesSemantic",
               "fields": {
                 "arabic": {
                   "type": "text",
@@ -728,6 +763,7 @@
         },
         "physicalDescription": {
           "type": "text",
+          "copy_to": "query.physicalDescriptionSemantic",
           "analyzer": "english",
           "search_analyzer": "english_token_limited"
         },
@@ -816,7 +852,7 @@
               "properties": {
                 "label": {
                   "type": "text",
-                  "copy_to": "genresVector",
+                  "copy_to": "query.subjectsSemantic",
                   "analyzer": "english",
                   "search_analyzer": "english_token_limited"
                 }
@@ -826,345 +862,7 @@
         },
         "title": {
           "type": "text",
-          "fields": {
-            "arabic": {
-              "type": "text",
-              "analyzer": "arabic"
-            },
-            "base": {
-              "type": "text",
-              "analyzer": "base"
-            },
-            "bengali": {
-              "type": "text",
-              "analyzer": "bengali"
-            },
-            "cased": {
-              "type": "text",
-              "analyzer": "cased"
-            },
-            "english": {
-              "type": "text",
-              "analyzer": "english",
-              "search_analyzer": "english_token_limited"
-            },
-            "french": {
-              "type": "text",
-              "analyzer": "french"
-            },
-            "german": {
-              "type": "text",
-              "analyzer": "german"
-            },
-            "hindi": {
-              "type": "text",
-              "analyzer": "hindi"
-            },
-            "italian": {
-              "type": "text",
-              "analyzer": "italian"
-            },
-            "normalized_whole_phrase": {
-              "type": "text",
-              "analyzer": "normalized_whole_phrase"
-            },
-            "persian": {
-              "type": "text",
-              "analyzer": "persian"
-            },
-            "spanish": {
-              "type": "text",
-              "analyzer": "spanish"
-            },
-            "swappable_characters": {
-              "type": "text",
-              "analyzer": "swappable_characters"
-            }
-          },
-          "analyzer": "lowercase",
-          "search_analyzer": "lowercase_token_limited"
-        }
-      }
-    },
-    "vectorQuery": {
-      "properties": {
-        "alternativeTitlesVector": {
-          "type": "semantic_text",
-          "inference_id": "elser-embeddings"
-        },
-        "contributorsVector": {
-          "properties": {
-            "agent": {
-              "properties": {
-                "label": {
-                  "type": "text",
-                  "analyzer": "english",
-                  "search_analyzer": "english_token_limited"
-                }
-              }
-            }
-          }
-        },
-        "descriptionVector": {
-          "type": "text",
-          "fields": {
-            "arabic": {
-              "type": "text",
-              "analyzer": "arabic"
-            },
-            "base": {
-              "type": "text",
-              "analyzer": "base"
-            },
-            "bengali": {
-              "type": "text",
-              "analyzer": "bengali"
-            },
-            "cased": {
-              "type": "text",
-              "analyzer": "cased"
-            },
-            "english": {
-              "type": "text",
-              "analyzer": "english",
-              "search_analyzer": "english_token_limited"
-            },
-            "french": {
-              "type": "text",
-              "analyzer": "french"
-            },
-            "german": {
-              "type": "text",
-              "analyzer": "german"
-            },
-            "hindi": {
-              "type": "text",
-              "analyzer": "hindi"
-            },
-            "italian": {
-              "type": "text",
-              "analyzer": "italian"
-            },
-            "persian": {
-              "type": "text",
-              "analyzer": "persian"
-            },
-            "spanish": {
-              "type": "text",
-              "analyzer": "spanish"
-            }
-          },
-          "analyzer": "lowercase",
-          "search_analyzer": "lowercase_token_limited"
-        },
-        "genresVector": {
-          "properties": {
-            "concepts": {
-              "properties": {
-                "label": {
-                  "type": "text",
-                  "analyzer": "english",
-                  "search_analyzer": "english_token_limited"
-                }
-              }
-            }
-          }
-        },
-        "languagesVector": {
-          "properties": {
-            "label": {
-              "type": "text",
-              "analyzer": "lowercase",
-              "search_analyzer": "lowercase_token_limited"
-            }
-          }
-        },
-        "letteringVector": {
-          "type": "text",
-          "fields": {
-            "arabic": {
-              "type": "text",
-              "analyzer": "arabic"
-            },
-            "base": {
-              "type": "text",
-              "analyzer": "base"
-            },
-            "bengali": {
-              "type": "text",
-              "analyzer": "bengali"
-            },
-            "cased": {
-              "type": "text",
-              "analyzer": "cased"
-            },
-            "english": {
-              "type": "text",
-              "analyzer": "english",
-              "search_analyzer": "english_token_limited"
-            },
-            "french": {
-              "type": "text",
-              "analyzer": "french"
-            },
-            "german": {
-              "type": "text",
-              "analyzer": "german"
-            },
-            "hindi": {
-              "type": "text",
-              "analyzer": "hindi"
-            },
-            "italian": {
-              "type": "text",
-              "analyzer": "italian"
-            },
-            "persian": {
-              "type": "text",
-              "analyzer": "persian"
-            },
-            "spanish": {
-              "type": "text",
-              "analyzer": "spanish"
-            },
-            "swappable_characters": {
-              "type": "text",
-              "analyzer": "swappable_characters"
-            }
-          },
-          "analyzer": "lowercase",
-          "search_analyzer": "lowercase_token_limited"
-        },
-        "notesVector": {
-          "properties": {
-            "contents": {
-              "type": "text",
-              "fields": {
-                "arabic": {
-                  "type": "text",
-                  "analyzer": "arabic"
-                },
-                "base": {
-                  "type": "text",
-                  "analyzer": "base"
-                },
-                "bengali": {
-                  "type": "text",
-                  "analyzer": "bengali"
-                },
-                "cased": {
-                  "type": "text",
-                  "analyzer": "cased"
-                },
-                "english": {
-                  "type": "text",
-                  "analyzer": "english",
-                  "search_analyzer": "english_token_limited"
-                },
-                "french": {
-                  "type": "text",
-                  "analyzer": "french"
-                },
-                "german": {
-                  "type": "text",
-                  "analyzer": "german"
-                },
-                "hindi": {
-                  "type": "text",
-                  "analyzer": "hindi"
-                },
-                "italian": {
-                  "type": "text",
-                  "analyzer": "italian"
-                },
-                "persian": {
-                  "type": "text",
-                  "analyzer": "persian"
-                },
-                "spanish": {
-                  "type": "text",
-                  "analyzer": "spanish"
-                },
-                "swappable_characters": {
-                  "type": "text",
-                  "analyzer": "swappable_characters"
-                }
-              },
-              "analyzer": "lowercase",
-              "search_analyzer": "lowercase_token_limited"
-            }
-          }
-        },
-        "physicalDescriptionVector": {
-          "type": "text",
-          "analyzer": "english",
-          "search_analyzer": "english_token_limited"
-        },
-        "productionVector": {
-          "properties": {
-            "label": {
-              "type": "text",
-              "fields": {
-                "arabic": {
-                  "type": "text",
-                  "analyzer": "arabic"
-                },
-                "base": {
-                  "type": "text",
-                  "analyzer": "base"
-                },
-                "bengali": {
-                  "type": "text",
-                  "analyzer": "bengali"
-                },
-                "cased": {
-                  "type": "text",
-                  "analyzer": "cased"
-                },
-                "english": {
-                  "type": "text",
-                  "analyzer": "english",
-                  "search_analyzer": "english_token_limited"
-                },
-                "french": {
-                  "type": "text",
-                  "analyzer": "french"
-                },
-                "german": {
-                  "type": "text",
-                  "analyzer": "german"
-                },
-                "hindi": {
-                  "type": "text",
-                  "analyzer": "hindi"
-                },
-                "italian": {
-                  "type": "text",
-                  "analyzer": "italian"
-                },
-                "persian": {
-                  "type": "text",
-                  "analyzer": "persian"
-                },
-                "spanish": {
-                  "type": "text",
-                  "analyzer": "spanish"
-                },
-                "swappable_characters": {
-                  "type": "text",
-                  "analyzer": "swappable_characters"
-                }
-              },
-              "analyzer": "lowercase",
-              "search_analyzer": "lowercase_token_limited"
-            }
-          }
-        },
-        "subjectsVector": {
-          "type": "semantic_text"
-        },
-        "titleVector": {
-          "type": "text",
+          "copy_to": "query.titleSemantic",
           "fields": {
             "arabic": {
               "type": "text",
