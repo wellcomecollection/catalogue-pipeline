@@ -45,7 +45,7 @@ def build_window_request(
         max_pending_windows=config.MAX_PENDING_WINDOWS,
         oai_metadata_prefix=config.OAI_METADATA_PREFIX,
         oai_set_spec=config.OAI_SET_SPEC,
-        adapter_name=AXIELL_CONFIG.adapter_name,
+        adapter_name=AXIELL_CONFIG.config.adapter_name,
     )
     generic_event = base_trigger.build_window_request(
         runtime=runtime,

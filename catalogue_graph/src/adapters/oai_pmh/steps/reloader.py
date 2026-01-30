@@ -10,12 +10,13 @@ from __future__ import annotations
 import argparse
 import json
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import structlog
 from pydantic import BaseModel, ConfigDict
 
 from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHLoaderResponse
+from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.oai_pmh.steps.loader import (
     LoaderRuntime,
     LoaderStepConfig,
@@ -26,9 +27,6 @@ from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.incremental_window import IncrementalWindow
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
-
-if TYPE_CHECKING:
-    from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
 
 logger = structlog.get_logger(__name__)
 
@@ -86,7 +84,7 @@ def build_runtime(
     """
     cfg = step_config or ReloaderStepConfig()
     store = adapter_config.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
-    window_minutes = cfg.window_minutes or adapter_config.window_minutes
+    window_minutes = cfg.window_minutes or adapter_config.config.window_minutes
 
     loader_runtime = _build_loader_runtime(
         adapter_config,
@@ -141,8 +139,8 @@ def _process_gap(
         loader_event = OAIPMHLoaderEvent(
             job_id=job_id,
             window=IncrementalWindow(start_time=gap_start, end_time=gap_end),
-            metadata_prefix=adapter_config.oai_metadata_prefix,
-            set_spec=adapter_config.oai_set_spec,
+            metadata_prefix=adapter_config.config.oai_metadata_prefix,
+            set_spec=adapter_config.config.oai_set_spec,
             max_windows=None,  # Process all windows in the gap
             window_minutes=runtime.loader_runtime.window_generator.window_minutes,
         )

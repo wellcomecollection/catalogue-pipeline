@@ -76,7 +76,7 @@ def build_runtime(
     oai_client = config.build_oai_client()
 
     window_generator = WindowGenerator(
-        window_minutes=cfg.window_minutes or config.window_minutes,
+        window_minutes=cfg.window_minutes or config.config.window_minutes,
         allow_partial_final_window=cfg.allow_partial_final_window,
     )
 
@@ -85,8 +85,8 @@ def build_runtime(
         table_client=table_client,
         oai_client=oai_client,
         window_generator=window_generator,
-        adapter_namespace=config.adapter_namespace,
-        adapter_name=config.adapter_name,
+        adapter_namespace=config.config.adapter_namespace,
+        adapter_name=config.config.adapter_name,
     )
 
 
@@ -221,7 +221,7 @@ def lambda_handler(
     """
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
-        pipeline_step=f"{config.pipeline_step_prefix}_loader",
+        pipeline_step=f"{config.config.pipeline_step_prefix}_loader",
     )
     request = OAIPMHLoaderEvent.model_validate(event)
     runtime = build_runtime(config)
@@ -239,7 +239,7 @@ def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
         ArgumentParser with common loader arguments.
     """
     parser = argparse.ArgumentParser(
-        description=f"Run the {config.adapter_name} loader step locally"
+        description=f"Run the {config.config.adapter_name} loader step locally"
     )
     parser.add_argument(
         "--event",
@@ -295,7 +295,7 @@ def run_cli(
     )
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
-        pipeline_step=f"{config.pipeline_step_prefix}_loader",
+        pipeline_step=f"{config.config.pipeline_step_prefix}_loader",
     )
     response = handler(event, runtime, execution_context=execution_context)
 

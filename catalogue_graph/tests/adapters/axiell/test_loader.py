@@ -21,7 +21,7 @@ from adapters.utils.window_summary import WindowSummary
 from models.incremental_window import IncrementalWindow
 
 WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
-AXIELL_NAMESPACE = AXIELL_CONFIG.adapter_namespace
+AXIELL_NAMESPACE = AXIELL_CONFIG.config.adapter_namespace
 
 
 class StubOAIClient(OAIClient):

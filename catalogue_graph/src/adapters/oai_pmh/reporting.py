@@ -6,16 +6,14 @@ dimensions, enabling reuse across Axiell, FOLIO, and other adapters.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar
 
+from adapters.oai_pmh.models.step_events import (
+    OAIPMHLoaderEvent,
+    OAIPMHLoaderResponse,
+)
 from models.events import IncrementalWindow
 from utils.reporting import PipelineMetric, PipelineReport
-
-if TYPE_CHECKING:
-    from adapters.oai_pmh.models.step_events import (
-        OAIPMHLoaderEvent,
-        OAIPMHLoaderResponse,
-    )
 
 
 class OAIPMHReport(PipelineReport):

@@ -332,6 +332,9 @@ def test_handler_constructs_correct_loader_event(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     """Test that reloader constructs AxiellAdapterLoaderEvent with correct defaults."""
+    from adapters.axiell.config import AXIELL_ADAPTER_CONFIG
+    from adapters.axiell.runtime import AxiellRuntimeConfig
+
     now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
     gap_start = now - timedelta(minutes=30)
 
@@ -343,30 +346,39 @@ def test_handler_constructs_correct_loader_event(
         captured_event["event"] = event
         return SimpleNamespace(
             harvest_range=lambda *args, **kwargs: [
-                {
-                    "window_key": "test",
-                    "window_start": gap_start,
-                    "window_end": now,
-                    "state": "success",
-                    "attempts": 1,
-                    "record_ids": [],
-                    "tags": {},
-                    "last_error": None,
-                }
+                WindowSummary(
+                    window_key="test",
+                    window_start=gap_start,
+                    window_end=now,
+                    state="success",
+                    attempts=1,
+                    record_ids=[],
+                    tags={},
+                    last_error=None,
+                )
             ]
         )
 
     monkeypatch.setattr(
         "adapters.oai_pmh.steps.reloader.build_harvester", mock_build_harvester
     )
-    monkeypatch.setattr(config, "OAI_METADATA_PREFIX", "oai_test")
-    monkeypatch.setattr(config, "OAI_SET_SPEC", "test_set")
-    monkeypatch.setattr(config, "WINDOW_MINUTES", 15)
+
+    # Create test config with override values
+    test_adapter_config = AXIELL_ADAPTER_CONFIG.model_copy(
+        update={
+            "oai_metadata_prefix": "oai_test",
+            "oai_set_spec": "test_set",
+            "window_minutes": 15,
+        }
+    )
+
+    # Create test runtime with custom config
+    test_runtime_config = AxiellRuntimeConfig(config=test_adapter_config)
 
     runtime = ReloaderRuntime(
         store=store,
-        loader_runtime=_mock_loader_runtime(),
-        adapter_config=AXIELL_CONFIG,
+        loader_runtime=_mock_loader_runtime(window_minutes=15),
+        adapter_config=test_runtime_config,
     )
 
     handler(

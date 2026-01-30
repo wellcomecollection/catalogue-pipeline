@@ -201,11 +201,11 @@ def build_runtime(
 
     # Initialize notifier if chatbot topic is configured
     notifier = None
-    if config.chatbot_topic_arn:
+    if config.config.chatbot_topic_arn:
         sns_client = boto3.client("sns")
         chatbot_notifier = ChatbotNotifier(
             sns_client=sns_client,
-            topic_arn=config.chatbot_topic_arn,
+            topic_arn=config.config.chatbot_topic_arn,
         )
 
         # Extract table name for display
@@ -227,13 +227,14 @@ def build_runtime(
         store=store,
         notifier=notifier,
         enforce_lag=cfg.enforce_lag,
-        window_minutes=cfg.window_minutes or config.window_minutes,
-        window_lookback_days=cfg.window_lookback_days or config.window_lookback_days,
-        max_lag_minutes=config.max_lag_minutes,
-        max_pending_windows=config.max_pending_windows,
-        oai_metadata_prefix=config.oai_metadata_prefix,
-        oai_set_spec=config.oai_set_spec,
-        adapter_name=config.adapter_name,
+        window_minutes=cfg.window_minutes or config.config.window_minutes,
+        window_lookback_days=cfg.window_lookback_days
+        or config.config.window_lookback_days,
+        max_lag_minutes=config.config.max_lag_minutes,
+        max_pending_windows=config.config.max_pending_windows,
+        oai_metadata_prefix=config.config.oai_metadata_prefix,
+        oai_set_spec=config.config.oai_set_spec,
+        adapter_name=config.config.adapter_name,
     )
 
 
@@ -258,7 +259,7 @@ def lambda_handler(
     runtime = build_runtime(config)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
-        pipeline_step=f"{config.pipeline_step_prefix}_trigger",
+        pipeline_step=f"{config.config.pipeline_step_prefix}_trigger",
     )
     loader_event = handler(
         OAIPMHTriggerEvent(
@@ -281,7 +282,7 @@ def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
         ArgumentParser with common trigger arguments.
     """
     parser = argparse.ArgumentParser(
-        description=f"Run the {config.adapter_name} trigger step locally"
+        description=f"Run the {config.config.adapter_name} trigger step locally"
     )
     parser.add_argument(
         "--at",
@@ -303,7 +304,7 @@ def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
         type=int,
         help=(
             "Number of minutes per harvesting window request "
-            f"(default: {config.window_minutes})"
+            f"(default: {config.config.window_minutes})"
         ),
     )
     parser.add_argument(
@@ -311,7 +312,7 @@ def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
         type=int,
         help=(
             "Number of days to look back when no successful windows exist "
-            f"(default: {config.window_lookback_days})"
+            f"(default: {config.config.window_lookback_days})"
         ),
     )
     parser.add_argument(
@@ -343,7 +344,7 @@ def run_cli(
     job_id = args.job_id or generate_job_id(now)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
-        pipeline_step=f"{config.pipeline_step_prefix}_trigger",
+        pipeline_step=f"{config.config.pipeline_step_prefix}_trigger",
     )
     loader_event = handler(
         OAIPMHTriggerEvent(
