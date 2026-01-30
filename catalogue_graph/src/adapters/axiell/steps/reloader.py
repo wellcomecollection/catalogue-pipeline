@@ -16,8 +16,8 @@ import structlog
 from pydantic import BaseModel, ConfigDict
 
 from adapters.axiell import config, helpers
-from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent, LoaderResponse
 from adapters.axiell.runtime import AXIELL_CONFIG
+from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHLoaderResponse
 from adapters.oai_pmh.steps.loader import (
     LoaderRuntime,
     LoaderStepConfig,
@@ -47,7 +47,7 @@ class ReloaderRuntime(BaseModel):
 class GapReloadResult(BaseModel):
     gap_start: datetime
     gap_end: datetime
-    loader_response: LoaderResponse | None = None
+    loader_response: OAIPMHLoaderResponse | None = None
     skipped: bool = False
     error: str | None = None
 
@@ -113,7 +113,7 @@ def _process_gap(
 
     try:
         # Construct loader event with sensible defaults from config
-        loader_event = AxiellAdapterLoaderEvent(
+        loader_event = OAIPMHLoaderEvent(
             job_id=job_id,
             window=IncrementalWindow(start_time=gap_start, end_time=gap_end),
             metadata_prefix=config.OAI_METADATA_PREFIX,
@@ -151,7 +151,7 @@ def _process_gap(
                 changed_ids = json.loads(summary.tags["record_ids_changed"])
                 changed_record_count += len(changed_ids)
 
-        loader_response = LoaderResponse(
+        loader_response = OAIPMHLoaderResponse(
             summaries=summaries,
             changeset_ids=list(changeset_ids),
             changed_record_count=changed_record_count,

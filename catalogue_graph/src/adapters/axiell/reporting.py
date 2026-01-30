@@ -12,9 +12,9 @@ from adapters.oai_pmh.reporting import OAIPMHLoaderReport, OAIPMHReport
 from utils.reporting import PipelineMetric
 
 if TYPE_CHECKING:
-    from adapters.axiell.models.step_events import (
-        AxiellAdapterLoaderEvent,
-        LoaderResponse,
+    from adapters.oai_pmh.models.step_events import (
+        OAIPMHLoaderEvent,
+        OAIPMHLoaderResponse,
     )
 
 
@@ -41,7 +41,7 @@ class AxiellLoaderReport(AxiellReport):
 
     @classmethod
     def from_loader(
-        cls, event: AxiellAdapterLoaderEvent, response: LoaderResponse
+        cls, event: OAIPMHLoaderEvent, response: OAIPMHLoaderResponse
     ) -> AxiellLoaderReport:
         """Create a report from loader event and response."""
         window_success_count = sum(

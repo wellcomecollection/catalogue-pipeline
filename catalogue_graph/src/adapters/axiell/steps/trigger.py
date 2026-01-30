@@ -12,11 +12,8 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from adapters.axiell import config
-from adapters.axiell.models.step_events import (
-    AxiellAdapterLoaderEvent,
-    AxiellAdapterTriggerEvent,
-)
 from adapters.axiell.runtime import AXIELL_CONFIG
+from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHTriggerEvent
 from adapters.oai_pmh.steps import trigger as base_trigger
 from adapters.oai_pmh.steps.trigger import TriggerRuntime, TriggerStepConfig
 from adapters.oai_pmh.steps.trigger import build_runtime as _build_runtime
@@ -46,7 +43,7 @@ def build_window_request(
     window_minutes: int | None = None,
     window_lookback_days: int | None = None,
     notifier: WindowNotifier | None = None,
-) -> AxiellAdapterLoaderEvent:
+) -> OAIPMHLoaderEvent:
     """Build a loader event for the Axiell adapter."""
     runtime = TriggerRuntime(
         store=store,
@@ -66,17 +63,17 @@ def build_window_request(
         job_id=job_id,
     )
     # Convert to Axiell-specific type for backwards compatibility
-    return AxiellAdapterLoaderEvent.model_validate(generic_event.model_dump())
+    return OAIPMHLoaderEvent.model_validate(generic_event.model_dump())
 
 
 def handler(
-    event: AxiellAdapterTriggerEvent,
+    event: OAIPMHTriggerEvent,
     runtime: TriggerRuntime,
     execution_context: ExecutionContext | None = None,
-) -> AxiellAdapterLoaderEvent:
+) -> OAIPMHLoaderEvent:
     """Execute the Axiell trigger step."""
     generic_event = _handler(event, runtime, execution_context)
-    return AxiellAdapterLoaderEvent.model_validate(generic_event.model_dump())
+    return OAIPMHLoaderEvent.model_validate(generic_event.model_dump())
 
 
 def build_runtime(

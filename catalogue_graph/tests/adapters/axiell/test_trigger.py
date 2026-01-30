@@ -8,11 +8,8 @@ from _pytest.monkeypatch import MonkeyPatch
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.axiell import config, helpers
-from adapters.axiell.models.step_events import (
-    AxiellAdapterLoaderEvent,
-    AxiellAdapterTriggerEvent,
-)
 from adapters.axiell.steps import trigger
+from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHTriggerEvent
 from adapters.oai_pmh.steps.trigger import TriggerRuntime
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
 from models.incremental_window import IncrementalWindow
@@ -205,16 +202,16 @@ def test_lambda_handler_uses_rest_api_table_by_default(
         return stub_store
 
     def fake_handler(
-        event: AxiellAdapterTriggerEvent,
+        event: OAIPMHTriggerEvent,
         runtime: TriggerRuntime,
         execution_context: ExecutionContext | None = None,
         *,
         enforce_lag: bool = True,
-    ) -> AxiellAdapterLoaderEvent:
+    ) -> OAIPMHLoaderEvent:
         assert runtime.store is stub_store
         assert enforce_lag is True
         now = event.now or datetime.now(tz=UTC)
-        return AxiellAdapterLoaderEvent(
+        return OAIPMHLoaderEvent(
             job_id=event.job_id,
             window=IncrementalWindow(
                 start_time=now - timedelta(minutes=random.randint(2, 40)),

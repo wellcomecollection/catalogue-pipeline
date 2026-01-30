@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from adapters.axiell.models.step_events import LoaderResponse
 from adapters.axiell.runtime import AXIELL_CONFIG
+from adapters.oai_pmh.models.step_events import OAIPMHLoaderResponse
 from adapters.oai_pmh.steps import loader as base_loader
 from adapters.oai_pmh.steps.loader import LoaderRuntime
 from adapters.oai_pmh.steps.loader import (
@@ -30,10 +30,10 @@ def handler(
     event: Any,
     runtime: LoaderRuntime,
     execution_context: Any = None,
-) -> LoaderResponse:
+) -> OAIPMHLoaderResponse:
     """Execute the loader step (backwards-compatible wrapper)."""
     response = _handler(event, runtime, execution_context)
-    return LoaderResponse.model_validate(response.model_dump())
+    return OAIPMHLoaderResponse.model_validate(response.model_dump())
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:

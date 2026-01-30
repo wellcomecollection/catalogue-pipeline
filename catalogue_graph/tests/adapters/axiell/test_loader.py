@@ -10,8 +10,8 @@ from lxml import etree
 from oai_pmh_client.client import OAIClient
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent, LoaderResponse
 from adapters.axiell.runtime import AXIELL_CONFIG
+from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHLoaderResponse
 from adapters.oai_pmh.record_writer import WindowRecordWriter
 from adapters.oai_pmh.steps import loader
 from adapters.utils.adapter_store import AdapterStore
@@ -29,9 +29,9 @@ class StubOAIClient(OAIClient):
         pass
 
 
-def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
+def _request(now: datetime | None = None) -> OAIPMHLoaderEvent:
     now = now or datetime.now(tz=UTC)
-    return AxiellAdapterLoaderEvent(
+    return OAIPMHLoaderEvent(
         job_id="job-123",
         window=IncrementalWindow(
             start_time=now - timedelta(minutes=15),
@@ -99,7 +99,7 @@ def test_execute_loader_updates_iceberg(
 
         response = loader.execute_loader(req, runtime=runtime)
 
-        assert isinstance(response, LoaderResponse)
+        assert isinstance(response, OAIPMHLoaderResponse)
         assert response.changeset_ids == ["changeset-123"]
         assert response.changed_record_count == 1
         assert response.job_id == req.job_id
