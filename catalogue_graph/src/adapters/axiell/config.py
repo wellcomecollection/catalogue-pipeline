@@ -3,13 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    pass
-
-# Import at module level - used at end of file after constants are defined
-# This avoids E402 while still allowing the config to be constructed
 from adapters.oai_pmh.runtime import OAIPMHAdapterConfig
 
 # ---------------------------------------------------------------------------
