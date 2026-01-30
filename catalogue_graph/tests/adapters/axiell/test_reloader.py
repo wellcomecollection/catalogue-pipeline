@@ -11,6 +11,7 @@ from pyiceberg.table import Table as IcebergTable
 from adapters.axiell import config
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.axiell.steps import reloader
+from adapters.axiell.steps.reloader import AxiellAdapterReloaderConfig
 from adapters.oai_pmh.steps.loader import LoaderRuntime
 from adapters.oai_pmh.steps.reloader import ReloaderRuntime, handler
 from adapters.utils.adapter_store import AdapterStore
@@ -312,7 +313,7 @@ def test_build_runtime_uses_config(
         mock_build_loader_runtime,
     )
 
-    config_obj = reloader.AxiellAdapterReloaderConfig(
+    config_obj = AxiellAdapterReloaderConfig(
         use_rest_api_table=True, window_minutes=60
     )
     runtime = reloader.build_runtime(config_obj)

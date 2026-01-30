@@ -7,18 +7,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel
-
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.oai_pmh.steps import reloader as base_reloader
-from adapters.oai_pmh.steps.reloader import ReloaderRuntime, ReloaderStepConfig
-
-
-class AxiellAdapterReloaderConfig(BaseModel):
-    """Axiell-specific reloader configuration."""
-
-    use_rest_api_table: bool = True
-    window_minutes: int | None = None
+from adapters.oai_pmh.steps.reloader import (
+    ReloaderRuntime,
+)
+from adapters.oai_pmh.steps.reloader import (
+    ReloaderStepConfig as AxiellAdapterReloaderConfig,
+)
 
 
 def build_runtime(
@@ -26,13 +22,7 @@ def build_runtime(
 ) -> ReloaderRuntime:
     """Build Axiell reloader runtime from config."""
     cfg = config_obj or AxiellAdapterReloaderConfig()
-    return base_reloader.build_runtime(
-        AXIELL_CONFIG,
-        ReloaderStepConfig(
-            use_rest_api_table=cfg.use_rest_api_table,
-            window_minutes=cfg.window_minutes,
-        ),
-    )
+    return base_reloader.build_runtime(AXIELL_CONFIG, cfg)
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:

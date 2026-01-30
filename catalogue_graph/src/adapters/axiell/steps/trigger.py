@@ -9,29 +9,19 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
-
 from adapters.axiell import config
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHTriggerEvent
 from adapters.oai_pmh.steps import trigger as base_trigger
-from adapters.oai_pmh.steps.trigger import TriggerRuntime, TriggerStepConfig
+from adapters.oai_pmh.steps.trigger import TriggerRuntime
+from adapters.oai_pmh.steps.trigger import (
+    TriggerStepConfig as AxiellAdapterTriggerConfig,
+)
 from adapters.oai_pmh.steps.trigger import build_runtime as _build_runtime
 from adapters.oai_pmh.steps.trigger import handler as _handler
 from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_store import WindowStore
 from utils.logger import ExecutionContext
-
-
-class AxiellAdapterTriggerConfig(BaseModel):
-    """Configuration for Axiell trigger step."""
-
-    use_rest_api_table: bool = True
-    enforce_lag: bool = True
-    window_minutes: int = Field(default_factory=lambda: config.WINDOW_MINUTES)
-    window_lookback_days: int = Field(
-        default_factory=lambda: config.WINDOW_LOOKBACK_DAYS
-    )
 
 
 def build_window_request(
@@ -81,15 +71,7 @@ def build_runtime(
 ) -> TriggerRuntime:
     """Build runtime for the Axiell trigger step."""
     cfg = config_obj or AxiellAdapterTriggerConfig()
-    return _build_runtime(
-        AXIELL_CONFIG,
-        TriggerStepConfig(
-            use_rest_api_table=cfg.use_rest_api_table,
-            enforce_lag=cfg.enforce_lag,
-            window_minutes=cfg.window_minutes,
-            window_lookback_days=cfg.window_lookback_days,
-        ),
-    )
+    return _build_runtime(AXIELL_CONFIG, cfg)
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
