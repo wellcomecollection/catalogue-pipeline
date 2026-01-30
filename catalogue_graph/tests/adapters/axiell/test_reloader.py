@@ -9,8 +9,10 @@ from _pytest.monkeypatch import MonkeyPatch
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.axiell import config
+from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.axiell.steps import reloader
 from adapters.oai_pmh.steps.loader import LoaderRuntime
+from adapters.oai_pmh.steps.reloader import ReloaderRuntime, handler
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
 from adapters.utils.window_summary import WindowSummary
@@ -61,12 +63,13 @@ def test_handler_with_no_gaps(
         ],
     )
 
-    runtime = reloader.ReloaderRuntime(
+    runtime = ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
+        adapter_config=AXIELL_CONFIG,
     )
 
-    response = reloader.handler(
+    response = handler(
         job_id="test-job",
         window_start=now - timedelta(minutes=30),
         window_end=now,
@@ -115,16 +118,17 @@ def test_handler_with_single_gap(
         ]
 
     monkeypatch.setattr(
-        "adapters.axiell.steps.reloader.build_harvester",
+        "adapters.oai_pmh.steps.reloader.build_harvester",
         lambda event, runtime: SimpleNamespace(harvest_range=mock_harvest_range),
     )
 
-    runtime = reloader.ReloaderRuntime(
+    runtime = ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
+        adapter_config=AXIELL_CONFIG,
     )
 
-    response = reloader.handler(
+    response = handler(
         job_id="test-job",
         window_start=gap_start,
         window_end=now,
@@ -178,16 +182,17 @@ def test_handler_with_multiple_gaps(
         ]
 
     monkeypatch.setattr(
-        "adapters.axiell.steps.reloader.build_harvester",
+        "adapters.oai_pmh.steps.reloader.build_harvester",
         lambda event, runtime: SimpleNamespace(harvest_range=mock_harvest_range),
     )
 
-    runtime = reloader.ReloaderRuntime(
+    runtime = ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
+        adapter_config=AXIELL_CONFIG,
     )
 
-    response = reloader.handler(
+    response = handler(
         job_id="test-job",
         window_start=now - timedelta(minutes=45),
         window_end=now,
@@ -212,12 +217,13 @@ def test_handler_dry_run_mode(
         [_window_row(now - timedelta(minutes=15), now)],
     )
 
-    runtime = reloader.ReloaderRuntime(
+    runtime = ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
+        adapter_config=AXIELL_CONFIG,
     )
 
-    response = reloader.handler(
+    response = handler(
         job_id="test-job",
         window_start=gap_start,
         window_end=now,
@@ -249,16 +255,17 @@ def test_handler_with_error_during_reload(
         raise RuntimeError("OAI-PMH endpoint unavailable")
 
     monkeypatch.setattr(
-        "adapters.axiell.steps.reloader.build_harvester",
+        "adapters.oai_pmh.steps.reloader.build_harvester",
         lambda event, runtime: SimpleNamespace(harvest_range=mock_harvest_range_error),
     )
 
-    runtime = reloader.ReloaderRuntime(
+    runtime = ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
+        adapter_config=AXIELL_CONFIG,
     )
 
-    response = reloader.handler(
+    response = handler(
         job_id="test-job",
         window_start=gap_start,
         window_end=now,
@@ -297,10 +304,11 @@ def test_build_runtime_uses_config(
         return _mock_loader_runtime(window_minutes=60)
 
     monkeypatch.setattr(
-        "adapters.axiell.helpers.build_window_store", mock_build_window_store
+        "adapters.axiell.runtime.AXIELL_CONFIG.build_window_store",
+        lambda use_rest_api_table: mock_build_window_store(use_rest_api_table),
     )
     monkeypatch.setattr(
-        "adapters.axiell.steps.reloader._build_loader_runtime",
+        "adapters.oai_pmh.steps.reloader._build_loader_runtime",
         mock_build_loader_runtime,
     )
 
@@ -313,7 +321,7 @@ def test_build_runtime_uses_config(
     loader_config = captured_config["loader_config"]
     assert loader_config is not None
     assert loader_config.use_rest_api_table is True
-    assert isinstance(runtime, reloader.ReloaderRuntime)
+    assert isinstance(runtime, ReloaderRuntime)
     assert runtime.loader_runtime.window_generator.window_minutes == 60
     assert loader_config.window_minutes == 60
 
@@ -348,18 +356,19 @@ def test_handler_constructs_correct_loader_event(
         )
 
     monkeypatch.setattr(
-        "adapters.axiell.steps.reloader.build_harvester", mock_build_harvester
+        "adapters.oai_pmh.steps.reloader.build_harvester", mock_build_harvester
     )
     monkeypatch.setattr(config, "OAI_METADATA_PREFIX", "oai_test")
     monkeypatch.setattr(config, "OAI_SET_SPEC", "test_set")
     monkeypatch.setattr(config, "WINDOW_MINUTES", 15)
 
-    runtime = reloader.ReloaderRuntime(
+    runtime = ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
+        adapter_config=AXIELL_CONFIG,
     )
 
-    reloader.handler(
+    handler(
         job_id="test-job",
         window_start=gap_start,
         window_end=now,
@@ -386,13 +395,14 @@ def test_lambda_handler_deserializes_event(
     store = _populate_store(temporary_window_status_table, [])
 
     def mock_build_runtime(*args, **kwargs):  # type: ignore[no-untyped-def]
-        return reloader.ReloaderRuntime(
+        return ReloaderRuntime(
             store=store,
             loader_runtime=_mock_loader_runtime(),
+            adapter_config=AXIELL_CONFIG,
         )
 
     monkeypatch.setattr(
-        "adapters.axiell.steps.reloader.build_runtime", mock_build_runtime
+        "adapters.oai_pmh.steps.reloader.build_runtime", mock_build_runtime
     )
 
     event = {
