@@ -8,7 +8,6 @@ from unittest.mock import MagicMock
 from _pytest.monkeypatch import MonkeyPatch
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.axiell import config
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.axiell.steps import reloader
 from adapters.axiell.steps.reloader import AxiellAdapterReloaderConfig
@@ -313,9 +312,7 @@ def test_build_runtime_uses_config(
         mock_build_loader_runtime,
     )
 
-    config_obj = AxiellAdapterReloaderConfig(
-        use_rest_api_table=True, window_minutes=60
-    )
+    config_obj = AxiellAdapterReloaderConfig(use_rest_api_table=True, window_minutes=60)
     runtime = reloader.build_runtime(config_obj)
 
     assert captured_config["use_rest_api_table"] is True
