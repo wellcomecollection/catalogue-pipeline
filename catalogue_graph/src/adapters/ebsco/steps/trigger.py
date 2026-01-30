@@ -13,6 +13,7 @@ from typing import Any
 
 import boto3
 import smart_open
+import structlog
 
 from adapters.ebsco.config import (
     FTP_S3_PREFIX,
@@ -26,6 +27,9 @@ from adapters.ebsco.models.step_events import (
 )
 from models.events import EventBridgeScheduledEvent
 from utils.aws import get_ssm_parameter
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
+
+logger = structlog.get_logger(__name__)
 
 
 def _list_s3_keys(bucket: str, prefix: str) -> list[str]:
@@ -69,14 +73,17 @@ def sync_files(
     if most_recent_ftp_file is None:
         raise ValueError("No valid files found on FTP server")
 
-    print(f"Most recent ftp file: {most_recent_ftp_file}")
+    logger.info("Most recent FTP file", file=most_recent_ftp_file)
 
     existing_keys = _list_s3_keys(s3_bucket, s3_prefix)
     existing_filenames = {key.split("/")[-1] for key in existing_keys}
 
     if most_recent_ftp_file in existing_filenames:
-        print(
-            f"File {most_recent_ftp_file} already exists in s3://{s3_bucket}/{s3_prefix}; reusing."
+        logger.info(
+            "File already exists in S3; reusing",
+            file=most_recent_ftp_file,
+            bucket=s3_bucket,
+            prefix=s3_prefix,
         )
         most_recent_s3_object = get_most_recent_valid_file(
             [key.split("/")[-1] for key in existing_keys]
@@ -101,7 +108,11 @@ def sync_files(
             smart_open.open(destination_uri, "wb") as dst,
         ):
             dst.write(src.read())
-        print(f"Successfully uploaded {most_recent_ftp_file} to {destination_uri}")
+        logger.info(
+            "Successfully uploaded file",
+            file=most_recent_ftp_file,
+            destination=destination_uri,
+        )
     except Exception as e:  # noqa: BLE001
         raise RuntimeError(
             f"Failed to upload {most_recent_ftp_file} to {destination_uri}: {e}"
@@ -115,8 +126,11 @@ def sync_files(
     return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
 
 
-def handler(event: EbscoAdapterTriggerEvent) -> EbscoAdapterLoaderEvent:
-    print(f"Processing event: {event}")
+def handler(
+    event: EbscoAdapterTriggerEvent, execution_context: ExecutionContext | None = None
+) -> EbscoAdapterLoaderEvent:
+    setup_logging(execution_context)
+    logger.info("Processing trigger event", trigger_event=event.model_dump())
 
     job_id = event.job_id
 
@@ -136,7 +150,7 @@ def handler(event: EbscoAdapterTriggerEvent) -> EbscoAdapterLoaderEvent:
             s3_prefix=FTP_S3_PREFIX,
         )
 
-    print(f"Sending S3 location downstream: {s3_location}")
+    logger.info("Sending S3 location downstream", s3_location=s3_location)
 
     return EbscoAdapterLoaderEvent(job_id=job_id, file_location=s3_location)
 
@@ -149,7 +163,11 @@ def lambda_handler(event: EventBridgeScheduledEvent, context: Any) -> dict[str, 
         eventbridge_event.time.replace("Z", "+00:00")
     ).strftime("%Y%m%dT%H%M")
     internal_event = EbscoAdapterTriggerEvent(job_id=job_id)
-    return handler(internal_event).model_dump()
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="ebsco_adapter_trigger",
+    )
+    return handler(internal_event, execution_context).model_dump()
 
 
 def local_handler() -> None:
@@ -166,11 +184,15 @@ def local_handler() -> None:
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
 
     event = EbscoAdapterTriggerEvent(job_id=job_id)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="ebsco_adapter_trigger",
+    )
 
-    handler(event=event)
+    handler(event=event, execution_context=execution_context)
 
 
 if __name__ == "__main__":
     """Entry point for the trigger script"""
-    print("Running local handler...")
+    logger.info("Running local handler")
     local_handler()

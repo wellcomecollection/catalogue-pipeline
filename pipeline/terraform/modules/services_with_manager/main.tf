@@ -17,7 +17,8 @@ module "scaling_service" {
 
   elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_security_group_id
 
-  # Tasks using the EC2 launch type do not support EphemeralStorage
+  # Tasks using the EC2 launch type do not support EphemeralStorage,
+  # Set to null to prevent use of this feature.
   ephemeral_storage_size = null
 
   security_group_ids = concat(

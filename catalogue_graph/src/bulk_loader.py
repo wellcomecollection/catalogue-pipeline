@@ -11,20 +11,21 @@ from models.events import (
     TransformerType,
 )
 from utils.aws import get_neptune_client
-from utils.logger import ExecutionContext, setup_logging
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
+
+logger = structlog.get_logger(__name__)
 
 
-def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEvent:
-    setup_logging(
-        ExecutionContext(
-            trace_id="logging test",
-            pipeline_step="graph_bulk_loader",
-        ),
-    )
+def handler(
+    event: BulkLoaderEvent,
+    execution_context: ExecutionContext | None = None,
+    is_local: bool = False,
+) -> BulkLoadPollerEvent:
+    setup_logging(execution_context)
 
     s3_file_uri = event.get_s3_uri()
 
-    structlog.get_logger(__name__).info(
+    logger.info(
         "Starting bulk load",
         s3_file_uri=s3_file_uri,
         transformer_type=event.transformer_type,
@@ -40,7 +41,11 @@ def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEve
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
-    return handler(BulkLoaderEvent(**event)).model_dump()
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="graph_bulk_loader",
+    )
+    return handler(BulkLoaderEvent(**event), execution_context).model_dump()
 
 
 def local_handler() -> None:
@@ -89,7 +94,12 @@ def local_handler() -> None:
     args = parser.parse_args()
     event = BulkLoaderEvent.from_argparser(args)
 
-    print(handler(event, is_local=True))
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="graph_bulk_loader",
+    )
+    result = handler(event, execution_context, is_local=True)
+    logger.info("Bulk load initiated", load_id=result.load_id)
 
 
 if __name__ == "__main__":

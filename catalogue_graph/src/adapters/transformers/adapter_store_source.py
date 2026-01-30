@@ -1,9 +1,13 @@
 from collections.abc import Generator
 from typing import Any
 
+import structlog
+
 from adapters.utils.adapter_store import AdapterStore
 
 from .base_transformer import BaseSource
+
+logger = structlog.get_logger(__name__)
 
 
 class AdapterStoreSource(BaseSource):
@@ -17,6 +21,6 @@ class AdapterStoreSource(BaseSource):
                 table = self.adapter_store.get_records_by_changeset(changeset_id)
                 yield from table.to_pylist()
         else:
-            print("No changeset_id provided; performing full reindex of records.")
+            logger.info("No changeset_id provided; performing full reindex of records.")
             table = self.adapter_store.get_all_records()
             yield from table.to_pylist()

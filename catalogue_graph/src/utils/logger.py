@@ -5,7 +5,9 @@ Contextual logging implementation using structlog.
 import logging
 import os
 import sys
+import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 import structlog
 from pydantic import BaseModel
@@ -14,6 +16,21 @@ from pydantic import BaseModel
 class ExecutionContext(BaseModel):
     trace_id: str
     pipeline_step: str
+
+
+def get_trace_id(context: Any | None = None) -> str:
+    """
+    Get a trace ID from the Lambda context or generate a UUID.
+
+    Args:
+        context: Lambda context object (may have aws_request_id attribute)
+
+    Returns:
+        The AWS request ID if available, otherwise a generated UUID
+    """
+    if context is not None and hasattr(context, "aws_request_id"):
+        return str(context.aws_request_id)
+    return str(uuid.uuid4())
 
 
 log_level = os.environ.get(
@@ -88,7 +105,7 @@ def bind_execution_context(context: ExecutionContext) -> None:
     )
 
 
-def setup_logging(context: ExecutionContext) -> None:
+def setup_logging(context: ExecutionContext | None = None) -> None:
     """
     Set up structlog with execution context.
     Args:
@@ -97,5 +114,11 @@ def setup_logging(context: ExecutionContext) -> None:
     setup_structlog()
     # Force the root logger to desired level to override any AWS Lambda defaults
     logging.getLogger().setLevel(log_level)
+
+    if context is None:
+        context = ExecutionContext(
+            trace_id=get_trace_id(),
+            pipeline_step="not_specified",
+        )
 
     bind_execution_context(context)

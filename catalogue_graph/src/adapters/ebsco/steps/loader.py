@@ -6,11 +6,11 @@ identifier used by the transformer; skips work if the file was already loaded.
 """
 
 import argparse
-import json
 from datetime import datetime
 from typing import Any
 
 import pyarrow as pa
+import structlog
 from pydantic import BaseModel, ConfigDict
 
 from adapters.ebsco import helpers
@@ -22,6 +22,9 @@ from adapters.ebsco.models.step_events import (
 from adapters.ebsco.reporting import EbscoLoaderReport
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
+
+logger = structlog.get_logger(__name__)
 
 EBSCO_NAMESPACE = "ebsco"
 
@@ -76,8 +79,11 @@ def execute_loader(
 
 
 def handler(
-    event: EbscoAdapterLoaderEvent, runtime: LoaderRuntime | None = None
+    event: EbscoAdapterLoaderEvent,
+    runtime: LoaderRuntime | None = None,
+    execution_context: ExecutionContext | None = None,
 ) -> LoaderResponse:
+    setup_logging(execution_context)
     loader_response = execute_loader(event, runtime=runtime)
 
     report = EbscoLoaderReport.from_loader(event, loader_response)
@@ -87,9 +93,13 @@ def handler(
 
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="ebsco_adapter_loader",
+    )
     request = EbscoAdapterLoaderEvent.model_validate(event)
     runtime = build_runtime()
-    response = handler(request, runtime=runtime)
+    response = handler(request, runtime=runtime, execution_context=execution_context)
     return response.model_dump()
 
 
@@ -119,9 +129,15 @@ def main() -> None:
     event = EbscoAdapterLoaderEvent(file_location=args.xmlfile, job_id=job_id)
     config_obj = EbscoAdapterLoaderConfig(use_rest_api_table=args.use_rest_api_table)
     runtime = build_runtime(config_obj)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="ebsco_adapter_loader",
+    )
 
-    response = handler(event=event, runtime=runtime)
-    print(json.dumps(response.model_dump(mode="json"), indent=2))
+    response = handler(
+        event=event, execution_context=execution_context, runtime=runtime
+    )
+    logger.info("Loader response", response=response.model_dump(mode="json"))
 
 
 if __name__ == "__main__":

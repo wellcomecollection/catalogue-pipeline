@@ -2,6 +2,7 @@ import argparse
 import typing
 
 import polars as pl
+import structlog
 
 from ingestor.models.step_events import IngestorDeletionsLambdaEvent
 from models.events import (
@@ -10,8 +11,11 @@ from models.events import (
 from removers.elasticsearch_remover import ElasticsearchRemover
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import ElasticsearchMode
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
+
+logger = structlog.get_logger(__name__)
 
 
 def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
@@ -35,8 +39,18 @@ def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
 
 
 def handler(
-    event: IngestorDeletionsLambdaEvent, es_mode: ElasticsearchMode = "private"
+    event: IngestorDeletionsLambdaEvent,
+    execution_context: ExecutionContext | None = None,
+    es_mode: ElasticsearchMode = "private",
 ) -> None:
+    setup_logging(execution_context)
+
+    logger.info(
+        "Received event",
+        pipeline_date=event.pipeline_date,
+        index_date=event.index_date,
+    )
+
     es_remover = ElasticsearchRemover(event, es_mode)
     ids_to_delete = get_ids_to_delete(event)
     current_id_count = es_remover.get_document_count()
@@ -55,7 +69,11 @@ def handler(
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    handler(IngestorDeletionsLambdaEvent.model_validate(event))
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="ingestor_deletions",
+    )
+    handler(IngestorDeletionsLambdaEvent.model_validate(event), execution_context)
 
 
 def local_handler() -> None:
