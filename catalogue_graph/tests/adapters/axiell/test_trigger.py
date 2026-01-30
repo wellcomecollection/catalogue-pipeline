@@ -13,6 +13,7 @@ from adapters.axiell.models.step_events import (
     AxiellAdapterTriggerEvent,
 )
 from adapters.axiell.steps import trigger
+from adapters.oai_pmh.steps.trigger import TriggerRuntime
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
 from models.incremental_window import IncrementalWindow
 from utils.logger import ExecutionContext
@@ -205,7 +206,7 @@ def test_lambda_handler_uses_rest_api_table_by_default(
 
     def fake_handler(
         event: AxiellAdapterTriggerEvent,
-        runtime: trigger.TriggerRuntime,
+        runtime: TriggerRuntime,
         execution_context: ExecutionContext | None = None,
         *,
         enforce_lag: bool = True,

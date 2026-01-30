@@ -4,11 +4,13 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.axiell.config as adapter_config
-from adapters.axiell.steps.loader import AXIELL_NAMESPACE
+from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.transformers.manifests import TransformerManifest
 from adapters.transformers.transformer import TransformerEvent, handler
 from tests.adapters.ebsco.helpers import prepare_changeset
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
+
+AXIELL_NAMESPACE = AXIELL_CONFIG.adapter_namespace
 
 
 def _run_transform(

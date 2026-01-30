@@ -16,10 +16,14 @@ import structlog
 from pydantic import BaseModel, ConfigDict
 
 from adapters.axiell import config, helpers
-from adapters.axiell.models.step_events import (
-    AxiellAdapterLoaderEvent,
+from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent, LoaderResponse
+from adapters.axiell.runtime import AXIELL_CONFIG
+from adapters.oai_pmh.steps.loader import (
+    LoaderRuntime,
+    LoaderStepConfig,
+    build_harvester,
 )
-from adapters.axiell.steps.loader import LoaderResponse, LoaderRuntime, build_harvester
+from adapters.oai_pmh.steps.loader import build_runtime as _build_loader_runtime
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.incremental_window import IncrementalWindow
@@ -64,20 +68,13 @@ def build_runtime(
     store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
     window_minutes = cfg.window_minutes or config.WINDOW_MINUTES
 
-    # Import loader runtime dependencies
-    from adapters.axiell.steps.loader import (
-        AxiellAdapterLoaderConfig,
-    )
-    from adapters.axiell.steps.loader import (
-        build_runtime as build_loader_runtime,
-    )
-
-    loader_runtime = build_loader_runtime(
-        AxiellAdapterLoaderConfig(
+    loader_runtime = _build_loader_runtime(
+        AXIELL_CONFIG,
+        LoaderStepConfig(
             use_rest_api_table=cfg.use_rest_api_table,
             window_minutes=window_minutes,
             allow_partial_final_window=True,
-        )
+        ),
     )
 
     return ReloaderRuntime(store=store, loader_runtime=loader_runtime)

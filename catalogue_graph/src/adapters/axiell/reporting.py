@@ -1,31 +1,38 @@
+"""Axiell adapter reporting.
+
+Re-exports from the generic OAI-PMH reporting module for backwards compatibility.
+New code should use the generic classes from adapters.oai_pmh.reporting directly.
+"""
+
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
-from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent, LoaderResponse
-from models.events import IncrementalWindow
-from utils.reporting import PipelineMetric, PipelineReport
+from adapters.oai_pmh.reporting import OAIPMHLoaderReport, OAIPMHReport
+from utils.reporting import PipelineMetric
+
+if TYPE_CHECKING:
+    from adapters.axiell.models.step_events import (
+        AxiellAdapterLoaderEvent,
+        LoaderResponse,
+    )
 
 
-class AxiellReport(PipelineReport):
-    # These overrides ensure that Axiell reports do not attempt to publish to S3 by default
-    # And that window is required
-    window: IncrementalWindow
-    publish_to_s3: bool = False
+class AxiellReport(OAIPMHReport):
+    """Axiell-specific report base class.
 
-    @property
-    def metric_namespace(self) -> str:
-        return "catalogue_adapters"
+    Deprecated: Use OAIPMHReport directly with adapter_type='axiell'.
+    """
 
-    @property
-    def metric_dimensions(self) -> dict:
-        return {
-            "adapter_type": "axiell",
-            "adapter_step": self.label,
-        }
+    adapter_type: str = "axiell"
 
 
 class AxiellLoaderReport(AxiellReport):
+    """Loader step report for the Axiell adapter.
+
+    Deprecated: Use OAIPMHLoaderReport directly with adapter_type='axiell'.
+    """
+
     label: ClassVar[str] = "adapter_loader"
     window_success_count: int
     window_failure_count: int = 0
@@ -36,6 +43,7 @@ class AxiellLoaderReport(AxiellReport):
     def from_loader(
         cls, event: AxiellAdapterLoaderEvent, response: LoaderResponse
     ) -> AxiellLoaderReport:
+        """Create a report from loader event and response."""
         window_success_count = sum(
             1 for summary in response.summaries if summary.state == "success"
         )
@@ -62,3 +70,12 @@ class AxiellLoaderReport(AxiellReport):
             ),
             PipelineMetric(name="changeset_count", value=self.changeset_count),
         ]
+
+
+__all__ = [
+    "AxiellReport",
+    "AxiellLoaderReport",
+    # Re-export generic classes
+    "OAIPMHReport",
+    "OAIPMHLoaderReport",
+]

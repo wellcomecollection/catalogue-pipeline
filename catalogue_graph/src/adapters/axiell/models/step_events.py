@@ -1,27 +1,22 @@
-from datetime import datetime
+"""Axiell adapter step event models.
 
-from pydantic import Field
+These are type aliases to the generic OAI-PMH models for backwards compatibility.
+New code should use the generic models from adapters.oai_pmh.models directly.
+"""
 
-from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
-from adapters.utils.window_summary import WindowSummary
-from models.events import IncrementalWindow
+from adapters.oai_pmh.models.step_events import (
+    OAIPMHLoaderEvent,
+    OAIPMHLoaderResponse,
+    OAIPMHTriggerEvent,
+)
 
+# Type aliases for backwards compatibility
+AxiellAdapterTriggerEvent = OAIPMHTriggerEvent
+AxiellAdapterLoaderEvent = OAIPMHLoaderEvent
+LoaderResponse = OAIPMHLoaderResponse
 
-class AxiellAdapterTriggerEvent(BaseAdapterEvent):
-    now: datetime | None = None
-
-
-class AxiellAdapterLoaderEvent(BaseAdapterEvent):
-    window: IncrementalWindow
-    metadata_prefix: str | None = None
-    set_spec: str | None = None
-    max_windows: int | None = None
-    window_minutes: int | None = None
-    allow_partial_final_window: bool | None = None
-
-
-class LoaderResponse(BaseLoaderResponse):
-    summaries: list[WindowSummary]
-    changeset_ids: list[str] = Field(default_factory=list)
-    changed_record_count: int
-    job_id: str
+__all__ = [
+    "AxiellAdapterTriggerEvent",
+    "AxiellAdapterLoaderEvent",
+    "LoaderResponse",
+]

@@ -10,7 +10,7 @@ from pyiceberg.table import Table as IcebergTable
 
 from adapters.axiell import config
 from adapters.axiell.steps import reloader
-from adapters.axiell.steps.loader import LoaderRuntime
+from adapters.oai_pmh.steps.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
 from adapters.utils.window_summary import WindowSummary
@@ -280,6 +280,8 @@ def test_build_runtime_uses_config(
     # Use a typed dict to avoid mypy inferring a single value type
     from typing import Any
 
+    from adapters.oai_pmh.steps.loader import LoaderStepConfig
+
     captured_config: dict[str, Any] = {}
 
     def mock_build_window_store(use_rest_api_table: bool) -> WindowStore:
@@ -287,8 +289,10 @@ def test_build_runtime_uses_config(
         return WindowStore(temporary_window_status_table)
 
     def mock_build_loader_runtime(
-        config_obj: reloader.AxiellAdapterReloaderConfig,
+        runtime_config: Any,
+        config_obj: LoaderStepConfig | None = None,
     ) -> LoaderRuntime:
+        captured_config["runtime_config"] = runtime_config
         captured_config["loader_config"] = config_obj
         return _mock_loader_runtime(window_minutes=60)
 
@@ -296,7 +300,8 @@ def test_build_runtime_uses_config(
         "adapters.axiell.helpers.build_window_store", mock_build_window_store
     )
     monkeypatch.setattr(
-        "adapters.axiell.steps.loader.build_runtime", mock_build_loader_runtime
+        "adapters.axiell.steps.reloader._build_loader_runtime",
+        mock_build_loader_runtime,
     )
 
     config_obj = reloader.AxiellAdapterReloaderConfig(
@@ -305,15 +310,12 @@ def test_build_runtime_uses_config(
     runtime = reloader.build_runtime(config_obj)
 
     assert captured_config["use_rest_api_table"] is True
-    assert (
-        cast(
-            reloader.AxiellAdapterReloaderConfig, captured_config["loader_config"]
-        ).use_rest_api_table
-        is True
-    )
+    loader_config = captured_config["loader_config"]
+    assert loader_config is not None
+    assert loader_config.use_rest_api_table is True
     assert isinstance(runtime, reloader.ReloaderRuntime)
     assert runtime.loader_runtime.window_generator.window_minutes == 60
-    assert captured_config["loader_config"].window_minutes == 60
+    assert loader_config.window_minutes == 60
 
 
 def test_handler_constructs_correct_loader_event(
