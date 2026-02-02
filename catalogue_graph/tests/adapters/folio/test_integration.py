@@ -175,5 +175,3 @@ class TestFolioReloaderIntegration:
 
         assert isinstance(runtime, ReloaderRuntime)
         assert runtime.adapter_config is FOLIO_CONFIG
-
-

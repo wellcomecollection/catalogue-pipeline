@@ -6,9 +6,9 @@ from unittest.mock import patch
 
 import httpx
 
-from adapters.folio.clients import FolioHTTPXClient
 from adapters.folio.config import FOLIO_ADAPTER_CONFIG
 from adapters.folio.runtime import FOLIO_CONFIG, FolioRuntimeConfig
+from adapters.oai_pmh.http_client import OAIPMHHTTPClient
 from adapters.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
 
 
@@ -40,12 +40,12 @@ def test_folio_adapter_config_is_frozen() -> None:
 
 
 def test_folio_runtime_build_http_client() -> None:
-    """Test that build_http_client returns a FolioHTTPXClient."""
+    """Test that build_http_client returns an OAIPMHHTTPClient."""
     with patch("adapters.folio.clients._oai_token", return_value="test-token"):
         client = FOLIO_CONFIG.build_http_client()
 
     assert isinstance(client, httpx.Client)
-    assert isinstance(client, FolioHTTPXClient)
+    assert isinstance(client, OAIPMHHTTPClient)
     client.close()
 
 
