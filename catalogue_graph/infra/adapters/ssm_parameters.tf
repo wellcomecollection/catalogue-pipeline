@@ -25,6 +25,33 @@ resource "aws_ssm_parameter" "axiell_collections_oai_api_url" {
 }
 
 
+resource "aws_ssm_parameter" "folio_oai_api_token" {
+  name        = "/catalogue_pipeline/folio/oai_api_token"
+  description = "The API token for the FOLIO OAI-PMH endpoint"
+  type        = "SecureString"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
+
+resource "aws_ssm_parameter" "folio_oai_api_url" {
+  name        = "/catalogue_pipeline/folio/oai_api_url"
+  description = "The URL for the FOLIO OAI-PMH endpoint"
+  type        = "String"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
+
+
 resource "aws_ssm_parameter" "ebsco_adapter_ftp_server" {
   name        = "/catalogue_pipeline/ebsco_adapter/ftp_server"
   description = "The FTP server to connect to"
