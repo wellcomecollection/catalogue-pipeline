@@ -175,5 +175,3 @@ class TestAxiellReloaderIntegration:
 
         assert isinstance(runtime, ReloaderRuntime)
         assert runtime.adapter_config is AXIELL_CONFIG
-
-
