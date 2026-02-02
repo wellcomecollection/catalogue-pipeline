@@ -1,0 +1,1 @@
+"""FOLIO adapter tests."""
