@@ -84,11 +84,7 @@ def build_runtime(
     """
     cfg = step_config or ReloaderStepConfig()
     store = adapter_config.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
-<<<<<<< HEAD
     window_minutes = cfg.window_minutes or adapter_config.config.window_minutes
-=======
-    window_minutes = cfg.window_minutes or adapter_config.window_minutes
->>>>>>> fd236ee3d (remove some more unused stuff)
 
     loader_runtime = _build_loader_runtime(
         adapter_config,
@@ -143,13 +139,8 @@ def _process_gap(
         loader_event = OAIPMHLoaderEvent(
             job_id=job_id,
             window=IncrementalWindow(start_time=gap_start, end_time=gap_end),
-<<<<<<< HEAD
             metadata_prefix=adapter_config.config.oai_metadata_prefix,
             set_spec=adapter_config.config.oai_set_spec,
-=======
-            metadata_prefix=adapter_config.oai_metadata_prefix,
-            set_spec=adapter_config.oai_set_spec,
->>>>>>> fd236ee3d (remove some more unused stuff)
             max_windows=None,  # Process all windows in the gap
             window_minutes=runtime.loader_runtime.window_generator.window_minutes,
         )
