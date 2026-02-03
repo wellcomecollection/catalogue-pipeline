@@ -1,6 +1,10 @@
 """Axiell adapter runtime configuration.
 
+<<<<<<< HEAD
 Extends OAIPMHRuntimeConfig base class for the Axiell OAI-PMH adapter.
+=======
+Implements OAIPMHRuntimeConfig protocol for the Axiell OAI-PMH adapter.
+>>>>>>> 29c9124d3 (extract generic OAI-PMH stuff)
 """
 
 from __future__ import annotations
