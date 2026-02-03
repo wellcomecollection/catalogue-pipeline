@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 
+from adapters.oai_pmh.runtime import OAIPMHAdapterConfig
+
 # ---------------------------------------------------------------------------
 # AWS account / region context
 # ---------------------------------------------------------------------------
@@ -107,3 +109,39 @@ S3_BUCKET = os.getenv(
 )
 S3_PREFIX = os.getenv("AXIELL_TRANSFORMER_S3_PREFIX", "dev")
 BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")
+
+
+# ---------------------------------------------------------------------------
+# OAI-PMH Adapter Config (Pydantic model for runtime)
+# ---------------------------------------------------------------------------
+AXIELL_ADAPTER_CONFIG = OAIPMHAdapterConfig(
+    # Identity
+    adapter_name="axiell",
+    adapter_namespace="axiell",
+    pipeline_step_prefix="axiell_adapter",
+    # Window harvesting
+    window_minutes=WINDOW_MINUTES,
+    window_lookback_days=WINDOW_LOOKBACK_DAYS,
+    max_lag_minutes=MAX_LAG_MINUTES,
+    max_pending_windows=MAX_PENDING_WINDOWS,
+    # OAI-PMH
+    oai_metadata_prefix=OAI_METADATA_PREFIX,
+    oai_set_spec=OAI_SET_SPEC,
+    # Notifications
+    chatbot_topic_arn=CHATBOT_TOPIC_ARN,
+    # Tables - REST API
+    s3_tables_bucket=S3_TABLES_BUCKET,
+    rest_api_table_name=REST_API_TABLE_NAME,
+    rest_api_namespace=REST_API_NAMESPACE,
+    window_status_table=WINDOW_STATUS_TABLE,
+    window_status_namespace=WINDOW_STATUS_NAMESPACE,
+    aws_region=AWS_REGION,
+    aws_account_id=AWS_ACCOUNT_ID,
+    # Tables - Local
+    local_db_name=LOCAL_DB_NAME,
+    local_table_name=LOCAL_TABLE_NAME,
+    local_namespace=LOCAL_NAMESPACE,
+    local_window_status_db_name=LOCAL_WINDOW_STATUS_DB_NAME,
+    local_window_status_table=LOCAL_WINDOW_STATUS_TABLE,
+    local_window_status_namespace=LOCAL_WINDOW_STATUS_NAMESPACE,
+)

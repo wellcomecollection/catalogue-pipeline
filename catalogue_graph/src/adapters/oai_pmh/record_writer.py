@@ -1,3 +1,11 @@
+"""Generic record writer callback for OAI-PMH harvesting.
+
+Persists harvested OAI-PMH records to an Iceberg adapter store and returns
+metadata about the changes for downstream processing.
+"""
+
+from __future__ import annotations
+
 import json
 from typing import Any
 
@@ -11,6 +19,7 @@ from adapters.utils.window_harvester import WindowCallbackResult
 
 
 def _serialize_metadata(record: Record) -> str | None:
+    """Serialize OAI-PMH metadata element to XML string."""
     metadata = getattr(record, "metadata", None)
     if metadata is None:
         return None
@@ -18,6 +27,12 @@ def _serialize_metadata(record: Record) -> str | None:
 
 
 class WindowRecordWriter:
+    """Callback for persisting harvested records to an adapter store.
+
+    This callback is invoked by WindowHarvestManager for each batch of records
+    and handles serialization, storage, and change tracking.
+    """
+
     def __init__(
         self,
         *,
@@ -26,6 +41,14 @@ class WindowRecordWriter:
         job_id: str,
         window_range: str,
     ) -> None:
+        """Initialize the record writer.
+
+        Args:
+            namespace: Namespace for records in the adapter store.
+            table_client: AdapterStore instance for persisting records.
+            job_id: Job identifier for tagging records.
+            window_range: Human-readable window range for tagging.
+        """
         self.namespace = namespace
         self.table_client = table_client
         self.job_id = job_id
@@ -35,6 +58,14 @@ class WindowRecordWriter:
         self,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
+        """Persist records and return change metadata.
+
+        Args:
+            records: List of (identifier, Record) tuples from OAI-PMH.
+
+        Returns:
+            Dictionary with tags including changeset_id and record_ids_changed.
+        """
         rows: list[dict[str, Any]] = []
 
         for identifier, record in records:
