@@ -8,6 +8,10 @@ from unittest.mock import MagicMock
 from _pytest.monkeypatch import MonkeyPatch
 from pyiceberg.table import Table as IcebergTable
 
+<<<<<<< HEAD
+=======
+from adapters.axiell import config
+>>>>>>> 01fcd0e45 (also do generic reloader)
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.axiell.steps import reloader
 from adapters.axiell.steps.reloader import AxiellAdapterReloaderConfig
