@@ -7,51 +7,11 @@ are left unchanged (not deleted). Timestamp-based conflict resolution
 ensures newer data isn't overwritten by older data.
 """
 
-from typing import Any
-
 import pyarrow as pa
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
-
-
-def data_to_namespaced_table(
-    unqualified_data: list[dict[str, Any]],
-    namespace: str = "test_namespace",
-    add_timestamp: bool = False,
-) -> pa.Table:
-    """
-    Create an Arrow table with the repo-standard schema.
-
-    If add_timestamp=True, include a last_modified timestamp column and preserve
-    any provided last_modified values from unqualified_data; otherwise, use now (UTC).
-    """
-    from datetime import UTC, datetime
-
-    data: list[dict[str, Any]] = []
-    for item in unqualified_data:
-        new_item = item.copy()
-        new_item["namespace"] = namespace
-        if add_timestamp:
-            # Preserve provided last_modified or default to current time
-            new_item.setdefault("last_modified", datetime.now(UTC))
-        data.append(new_item)
-
-    if add_timestamp:
-        # Help mypy understand the type of fields passed to pa.schema
-        fields: list[pa.Field] = [
-            pa.field("namespace", pa.string(), nullable=False),
-            pa.field("id", pa.string(), nullable=False),
-            pa.field("content", pa.string(), nullable=True),
-            pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-        ]
-        return pa.Table.from_pylist(
-            data,
-            schema=pa.schema(fields),
-        )
-    else:
-        return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
+from tests.adapters.conftest import records_to_table
 
 
 def test_incremental_update_does_not_delete_missing_records(
@@ -64,7 +24,7 @@ def test_incremental_update_does_not_delete_missing_records(
     """
     # Initial state: 2 records
     temporary_table.append(
-        data_to_namespaced_table(
+        records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "world"},
@@ -73,7 +33,7 @@ def test_incremental_update_does_not_delete_missing_records(
     )
 
     # Incremental update: only updates eb0001, does not include eb0002
-    new_data = data_to_namespaced_table(
+    new_data = records_to_table(
         [
             {"id": "eb0001", "content": "hello updated"},
         ],
@@ -99,14 +59,14 @@ def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> N
     Then the new records are inserted
     """
     temporary_table.append(
-        data_to_namespaced_table(
+        records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
             ]
         )
     )
 
-    new_data = data_to_namespaced_table(
+    new_data = records_to_table(
         [
             {"id": "eb0002", "content": "world"},
         ],
@@ -132,7 +92,7 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
     Then updates are applied and new records are inserted
     """
     temporary_table.append(
-        data_to_namespaced_table(
+        records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "world"},
@@ -140,7 +100,7 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
         )
     )
 
-    new_data = data_to_namespaced_table(
+    new_data = records_to_table(
         [
             {"id": "eb0001", "content": "hello updated"},
             {"id": "eb0003", "content": "new record"},
@@ -170,17 +130,17 @@ def test_incremental_update_does_not_touch_other_namespaces(
     Then data in other namespaces is unaffected
     """
     # Add data for another namespace
-    other_data = data_to_namespaced_table(
+    other_data = records_to_table(
         [{"id": "ax0001", "content": "axiell data"}], "axiell_test"
     )
     temporary_table.append(other_data)
 
     # Add data for ebsco namespace
-    ebsco_data = data_to_namespaced_table([{"id": "eb0001", "content": "ebsco data"}])
+    ebsco_data = records_to_table([{"id": "eb0001", "content": "ebsco data"}])
     temporary_table.append(ebsco_data)
 
     # Update ebsco data
-    new_ebsco_data = data_to_namespaced_table(
+    new_ebsco_data = records_to_table(
         [{"id": "eb0001", "content": "ebsco updated"}],
         add_timestamp=True,
     )
@@ -208,43 +168,15 @@ def test_incremental_update_with_newer_timestamp(temporary_table: IcebergTable) 
     old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
 
-    # Add initial record with old timestamp
-    fields_initial: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    initial_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "old content",
-                "last_modified": old_time,
-            }
-        ],
-        schema=pa.schema(fields_initial),
+    temporary_table.append(
+        records_to_table(
+            [{"id": "eb0001", "content": "old content", "last_modified": old_time}]
+        )
     )
-    temporary_table.append(initial_data)
 
     # Update with newer timestamp
-    fields_update: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    new_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "new content",
-                "last_modified": new_time,
-            }
-        ],
-        schema=pa.schema(fields_update),
+    new_data = records_to_table(
+        [{"id": "eb0001", "content": "new content", "last_modified": new_time}]
     )
 
     client = AdapterStore(temporary_table)
@@ -271,43 +203,15 @@ def test_incremental_update_with_older_timestamp(temporary_table: IcebergTable) 
     new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
     old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
-    # Add initial record with newer timestamp
-    fields_initial_newer: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    initial_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "current content",
-                "last_modified": new_time,
-            }
-        ],
-        schema=pa.schema(fields_initial_newer),
+    temporary_table.append(
+        records_to_table(
+            [{"id": "eb0001", "content": "current content", "last_modified": new_time}]
+        )
     )
-    temporary_table.append(initial_data)
 
     # Try to update with older timestamp
-    fields_old: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    old_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "old content",
-                "last_modified": old_time,
-            }
-        ],
-        schema=pa.schema(fields_old),
+    old_data = records_to_table(
+        [{"id": "eb0001", "content": "old content", "last_modified": old_time}]
     )
 
     client = AdapterStore(temporary_table)
@@ -333,43 +237,21 @@ def test_incremental_update_with_equal_timestamp(temporary_table: IcebergTable) 
 
     same_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
-    # Add initial record
-    fields_initial_same: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    initial_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "original content",
-                "last_modified": same_time,
-            }
-        ],
-        schema=pa.schema(fields_initial_same),
+    temporary_table.append(
+        records_to_table(
+            [
+                {
+                    "id": "eb0001",
+                    "content": "original content",
+                    "last_modified": same_time,
+                }
+            ]
+        )
     )
-    temporary_table.append(initial_data)
 
     # Try to update with same timestamp but different content
-    fields_update_same: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    update_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "modified content",
-                "last_modified": same_time,
-            }
-        ],
-        schema=pa.schema(fields_update_same),
+    update_data = records_to_table(
+        [{"id": "eb0001", "content": "modified content", "last_modified": same_time}]
     )
 
     client = AdapterStore(temporary_table)
@@ -397,43 +279,21 @@ def test_incremental_update_newer_timestamp_same_content(
     base_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     newer_time = base_time + timedelta(days=1)
 
-    # Add initial record
-    fields_initial_same_content: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    initial_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0002",
-                "content": "the same content",
-                "last_modified": base_time,
-            }
-        ],
-        schema=pa.schema(fields_initial_same_content),
+    temporary_table.append(
+        records_to_table(
+            [
+                {
+                    "id": "eb0002",
+                    "content": "the same content",
+                    "last_modified": base_time,
+                }
+            ]
+        )
     )
-    temporary_table.append(initial_data)
 
     # Attempt update with newer timestamp but identical content
-    fields_update_same_content: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    update_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0002",
-                "content": "the same content",
-                "last_modified": newer_time,
-            }
-        ],
-        schema=pa.schema(fields_update_same_content),
+    update_data = records_to_table(
+        [{"id": "eb0002", "content": "the same content", "last_modified": newer_time}]
     )
 
     client = AdapterStore(temporary_table)
@@ -460,29 +320,14 @@ def test_incremental_update_with_null_existing_timestamp(
     from datetime import UTC, datetime
 
     # Add initial record without timestamp (legacy data)
-    initial_data = data_to_namespaced_table(
-        [{"id": "eb0001", "content": "legacy content"}]
+    temporary_table.append(
+        records_to_table([{"id": "eb0001", "content": "legacy content"}])
     )
-    temporary_table.append(initial_data)
 
     # Update with a timestamp
     new_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
-    fields_with_timestamp: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    new_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "updated content",
-                "last_modified": new_time,
-            }
-        ],
-        schema=pa.schema(fields_with_timestamp),
+    new_data = records_to_table(
+        [{"id": "eb0001", "content": "updated content", "last_modified": new_time}]
     )
 
     client = AdapterStore(temporary_table)
@@ -510,79 +355,49 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
     time_current = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
     time_new = datetime(2025, 1, 3, 12, 0, 0, tzinfo=UTC)
 
-    # Add initial records with various timestamps
-    fields_mixed_initial: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    initial_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "record 1 old",
-                "last_modified": time_old,
-            },
-            {
-                "namespace": "test_namespace",
-                "id": "eb0002",
-                "content": "record 2 current",
-                "last_modified": time_current,
-            },
-            {
-                "namespace": "test_namespace",
-                "id": "eb0003",
-                "content": "record 3 current",
-                "last_modified": time_current,
-            },
-            {
-                "namespace": "test_namespace",
-                "id": "eb0004",
-                "content": "record 4 legacy",
-                "last_modified": None,
-            },
-        ],
-        schema=pa.schema(fields_mixed_initial),
+    temporary_table.append(
+        records_to_table(
+            [
+                {"id": "eb0001", "content": "record 1 old", "last_modified": time_old},
+                {
+                    "id": "eb0002",
+                    "content": "record 2 current",
+                    "last_modified": time_current,
+                },
+                {
+                    "id": "eb0003",
+                    "content": "record 3 current",
+                    "last_modified": time_current,
+                },
+                {"id": "eb0004", "content": "record 4 legacy", "last_modified": None},
+            ]
+        )
     )
-    temporary_table.append(initial_data)
 
     # Update with mixed timestamps
-    fields_mixed_update: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    update_data = pa.Table.from_pylist(
+    update_data = records_to_table(
         [
             {
-                "namespace": "test_namespace",
                 "id": "eb0001",
-                "content": "record 1 NEW",  # Newer timestamp - SHOULD update
+                "content": "record 1 NEW",
                 "last_modified": time_current,
-            },
+            },  # Newer - SHOULD update
             {
-                "namespace": "test_namespace",
                 "id": "eb0002",
-                "content": "record 2 OLD",  # Older timestamp - should NOT update
+                "content": "record 2 OLD",
                 "last_modified": time_old,
-            },
+            },  # Older - should NOT update
             {
-                "namespace": "test_namespace",
                 "id": "eb0003",
-                "content": "record 3 SAME",  # Same timestamp - should NOT update
+                "content": "record 3 SAME",
                 "last_modified": time_current,
-            },
+            },  # Same - should NOT update
             {
-                "namespace": "test_namespace",
                 "id": "eb0004",
-                "content": "record 4 NEW",  # Null existing - SHOULD update
+                "content": "record 4 NEW",
                 "last_modified": time_new,
-            },
-        ],
-        schema=pa.schema(fields_mixed_update),
+            },  # Null existing - SHOULD update
+        ]
     )
 
     client = AdapterStore(temporary_table)
@@ -621,23 +436,8 @@ def test_incremental_update_with_new_record_with_timestamp(
 
     new_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
-    # Insert new record with timestamp
-    fields_new_record_timestamp: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    new_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "new record",
-                "last_modified": new_time,
-            }
-        ],
-        schema=pa.schema(fields_new_record_timestamp),
+    new_data = records_to_table(
+        [{"id": "eb0001", "content": "new record", "last_modified": new_time}]
     )
 
     client = AdapterStore(temporary_table)
@@ -661,72 +461,9 @@ def test_incremental_update_null_timestamp_on_timestamped_record(
     When incremental_update has null timestamp
     Then the update is rejected (can't downgrade to null)
     """
-    from datetime import UTC, datetime
-
-    existing_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
-
-    # Add initial record with timestamp
-    fields_timestamped_initial: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    initial_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "timestamped content",
-                "last_modified": existing_time,
-            }
-        ],
-        schema=pa.schema(fields_timestamped_initial),
-    )
-    temporary_table.append(initial_data)
-
-    # Try to update with null timestamp
-    fields_null_timestamp_update: list[pa.Field] = [
-        pa.field("namespace", pa.string(), nullable=False),
-        pa.field("id", pa.string(), nullable=False),
-        pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
-    ]
-    update_data = pa.Table.from_pylist(
-        [
-            {
-                "namespace": "test_namespace",
-                "id": "eb0001",
-                "content": "new content without timestamp",
-                "last_modified": None,
-            }
-        ],
-        schema=pa.schema(fields_null_timestamp_update),
-    )
-
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(update_data, "test_namespace")
-
-    # No update should occur
-    assert result is None
-
-    # Verify the content was NOT updated
-    records = temporary_table.scan().to_arrow()
-    row = records.to_pylist()[0]
-    assert row["content"] == "timestamped content"
-    assert row["last_modified"] == existing_time
-
-
-def test_incremental_update_requires_last_modified_column(
-    temporary_table: IcebergTable,
-) -> None:
-    """
-    When incremental_update is called without a last_modified column
-    Then a ValueError is raised to enforce the strict requirement
-    """
     # Initial data
     temporary_table.append(
-        data_to_namespaced_table(
+        records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
             ]
@@ -734,7 +471,7 @@ def test_incremental_update_requires_last_modified_column(
     )
 
     # Incremental update without last_modified column
-    new_data = data_to_namespaced_table(
+    new_data = records_to_table(
         [
             {"id": "eb0001", "content": "updated"},
         ]
@@ -745,3 +482,81 @@ def test_incremental_update_requires_last_modified_column(
 
     with pytest.raises(ValueError):
         client.incremental_update(new_data, "test_namespace")
+
+    # Verify the content was NOT updated
+    records = temporary_table.scan().to_arrow()
+    row = records.to_pylist()[0]
+    assert row["content"] == "hello"
+
+
+def test_incremental_update_raises_on_non_castable_schema(
+    temporary_table: IcebergTable,
+) -> None:
+    """incremental_update should fail fast if the adapter hands us a table with the wrong schema."""
+    from datetime import UTC, datetime
+
+    import pytest
+
+    # Missing the required 'deleted' field from ARROW_SCHEMA.
+    bad_fields: list[pa.Field] = [
+        pa.field("namespace", pa.string(), nullable=False),
+        pa.field("id", pa.string(), nullable=False),
+        pa.field("content", pa.string(), nullable=True),
+        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
+    ]
+    bad_schema = pa.schema(bad_fields)
+
+    bad_table = pa.Table.from_pylist(
+        [
+            {
+                "namespace": "test_namespace",
+                "id": "eb0001",
+                "content": "hello",
+                "last_modified": datetime.now(UTC),
+            }
+        ],
+        schema=bad_schema,
+    )
+
+    client = AdapterStore(temporary_table)
+    with pytest.raises(ValueError, match=r"incremental_update.*ARROW_SCHEMA"):
+        client.incremental_update(bad_table, "test_namespace")
+
+
+def test_incremental_update_preserves_content_on_deletion(
+    temporary_table: IcebergTable,
+) -> None:
+    """
+    Given an existing record with content
+    When incremental_update marks it as deleted with content=None
+    Then the existing content is preserved and deleted=True is set
+    """
+    from datetime import UTC, datetime
+
+    old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
+    new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
+
+    # Initial record with content
+    temporary_table.append(
+        records_to_table(
+            [{"id": "eb0001", "content": "original content", "last_modified": old_time}]
+        )
+    )
+
+    # Mark as deleted with content=None (simulating OAI-PMH deletion)
+    deletion_data = records_to_table(
+        [{"id": "eb0001", "content": None, "last_modified": new_time, "deleted": True}]
+    )
+
+    client = AdapterStore(temporary_table)
+    result = client.incremental_update(deletion_data, "test_namespace")
+
+    assert result is not None
+    assert "eb0001" in result.updated_record_ids
+
+    # Verify the content was preserved and deleted flag is set
+    records = temporary_table.scan().to_arrow()
+    row = records.to_pylist()[0]
+    assert row["content"] == "original content"  # Content preserved!
+    assert row["deleted"] is True
+    assert row["last_modified"] == new_time

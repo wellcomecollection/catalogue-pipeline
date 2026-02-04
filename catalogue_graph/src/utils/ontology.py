@@ -1,6 +1,8 @@
 from functools import lru_cache
 from typing import get_args
 
+import structlog
+
 from models.events import BulkLoaderEvent
 from utils.aws import get_csv_from_s3
 from utils.types import (
@@ -13,6 +15,8 @@ from utils.types import (
     WikidataLinkedMeshTransformerType,
     WikidataTransformerType,
 )
+
+logger = structlog.get_logger(__name__)
 
 TRANSFORMERS_BY_ONTOLOGY: dict[OntologyType, tuple[TransformerType, ...]] = {
     "wikidata": get_args(WikidataTransformerType),
@@ -37,14 +41,14 @@ def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerTy
 @lru_cache
 def get_extracted_ids(transformer: TransformerType, pipeline_date: str) -> set[str]:
     """Return all ids extracted as part of the specified transformer."""
-    print(f"Retrieving ids of type '{transformer}' from S3.", end=" ", flush=True)
+    logger.info("Retrieving ids from S3", transformer=transformer)
 
     event = BulkLoaderEvent(
         transformer_type=transformer, entity_type="nodes", pipeline_date=pipeline_date
     )
     ids = {row[":ID"] for row in get_csv_from_s3(event.get_s3_uri())}
 
-    print(f"({len(ids)} ids retrieved.)")
+    logger.info("Retrieved ids", transformer=transformer, count=len(ids))
 
     return ids
 

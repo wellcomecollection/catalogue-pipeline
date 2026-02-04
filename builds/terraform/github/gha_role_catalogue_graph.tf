@@ -7,6 +7,10 @@ module "gha_catalogue_graph_ci_role" {
   github_oidc_provider_arn = data.terraform_remote_state.aws_account_infrastructure.outputs.github_openid_connect_provider_arn
 }
 
+data "aws_secretsmanager_secret" "wc_platform_alerts_slack_webhook" {
+  name = "monitoring/critical_slack_webhook"
+}
+
 data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
   statement {
     actions = [
@@ -54,6 +58,39 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-*",
       "arn:aws:lambda:eu-west-1:760097843905:function:ebsco-adapter-*",
       "arn:aws:lambda:eu-west-1:760097843905:function:axiell-adapter-*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+    ]
+    resources = [
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_nlb_url_secret_arn,
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_endpoint_secret_arn,
+      data.aws_secretsmanager_secret.wc_platform_alerts_slack_webhook.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "secretsmanager:ListSecrets",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "neptune-db:Read*",
+      "neptune-db:Get*",
+      "neptune-db:List*"
+    ]
+
+    resources = [
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
     ]
   }
 }

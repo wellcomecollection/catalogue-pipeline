@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from argparse import ArgumentParser
 
@@ -8,6 +9,7 @@ import pytest
 from pydantic import BaseModel
 
 from tests.mocks import MockStepFunctionsClient
+from utils.logger import ExecutionContext, setup_structlog
 from utils.steps import StepFunctionOutput, run_ecs_handler
 
 
@@ -19,9 +21,15 @@ class ExampleResult(BaseModel):
     status: str
 
 
+@pytest.fixture(autouse=True)
+def configure_structlog() -> None:
+    """Ensure structlog is configured to use stdlib logging for caplog capture."""
+    setup_structlog()
+
+
 def test_run_ecs_handler_reports_success(
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     event_payload = ExampleEvent(message="hello").model_dump_json()
     token = "token-123"
@@ -29,7 +37,10 @@ def test_run_ecs_handler_reports_success(
 
     handler_calls: list[ExampleEvent] = []
 
-    def handler(event: ExampleEvent) -> ExampleResult:
+    def handler(
+        event: ExampleEvent,
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult:
         handler_calls.append(event)
         return ExampleResult(status=f"processed-{event.message}")
 
@@ -45,11 +56,16 @@ def test_run_ecs_handler_reports_success(
         ],
     )
 
-    run_ecs_handler(
-        arg_parser=parser,
-        handler=handler,
-        event_validator=ExampleEvent.model_validate_json,
-    )
+    with caplog.at_level(logging.INFO):
+        run_ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
+        )
 
     assert handler_calls == [ExampleEvent(message="hello")]
     assert MockStepFunctionsClient.task_failures == []
@@ -60,19 +76,21 @@ def test_run_ecs_handler_reports_success(
         }
     ]
 
-    captured = capsys.readouterr()
-    assert "Sending task success to Step Functions." in captured.out
+    assert "Sending task success to Step Functions" in caplog.text
 
 
 def test_run_ecs_handler_reports_failure(
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     event_payload = ExampleEvent(message="boom").model_dump_json()
     token = "token-456"
     parser = ArgumentParser(prog="test-handler")
 
-    def handler(event: ExampleEvent) -> ExampleResult:  # noqa: ARG001
+    def handler(
+        event: ExampleEvent,  # noqa: ARG001
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult:
         raise RuntimeError("unexpected kaboom")
 
     monkeypatch.setattr(
@@ -87,11 +105,16 @@ def test_run_ecs_handler_reports_failure(
         ],
     )
 
-    run_ecs_handler(
-        arg_parser=parser,
-        handler=handler,
-        event_validator=ExampleEvent.model_validate_json,
-    )
+    with caplog.at_level(logging.ERROR):
+        run_ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
+        )
 
     assert MockStepFunctionsClient.task_successes == []
     assert len(MockStepFunctionsClient.task_failures) == 1
@@ -102,8 +125,7 @@ def test_run_ecs_handler_reports_failure(
     assert cause["message"] == "unexpected kaboom"
     assert cause["type"] == "RuntimeError"
 
-    captured = capsys.readouterr()
-    assert "Sending task failure to Step Functions" in captured.out
+    assert "Sending task failure to Step Functions" in caplog.text
 
 
 # run_ecs_handler tests
@@ -111,13 +133,16 @@ def test_run_ecs_handler_reports_failure(
 
 def test_run_ecs_handler_handles_none_result(
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     event_payload = ExampleEvent(message="hello").model_dump_json()
     token = "token-789"
     parser = ArgumentParser(prog="test-handler")
 
-    def handler(event: ExampleEvent) -> ExampleResult | None:  # noqa: ARG001
+    def handler(
+        event: ExampleEvent,  # noqa: ARG001
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult | None:
         return None
 
     monkeypatch.setattr(
@@ -132,11 +157,16 @@ def test_run_ecs_handler_handles_none_result(
         ],
     )
 
-    run_ecs_handler(
-        arg_parser=parser,
-        handler=handler,
-        event_validator=ExampleEvent.model_validate_json,
-    )
+    with caplog.at_level(logging.INFO):
+        run_ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
+        )
 
     assert MockStepFunctionsClient.task_failures == []
     assert MockStepFunctionsClient.task_successes == [
@@ -146,18 +176,20 @@ def test_run_ecs_handler_handles_none_result(
         }
     ]
 
-    captured = capsys.readouterr()
-    assert "Sending task success to Step Functions." in captured.out
+    assert "Sending task success to Step Functions" in caplog.text
 
 
 def test_run_ecs_handler_without_task_token(
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     event_payload = ExampleEvent(message="no-token").model_dump_json()
     parser = ArgumentParser(prog="test-handler")
 
-    def handler(event: ExampleEvent) -> ExampleResult:
+    def handler(
+        event: ExampleEvent,
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult:
         return ExampleResult(status=f"processed-{event.message}")
 
     monkeypatch.setattr(
@@ -170,28 +202,34 @@ def test_run_ecs_handler_without_task_token(
         ],
     )
 
-    run_ecs_handler(
-        arg_parser=parser,
-        handler=handler,
-        event_validator=ExampleEvent.model_validate_json,
-    )
+    with caplog.at_level(logging.INFO):
+        run_ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
+        )
 
     assert MockStepFunctionsClient.task_successes == []
     assert MockStepFunctionsClient.task_failures == []
 
-    captured = capsys.readouterr()
-    expected_output = ExampleResult(status="processed-no-token").model_dump_json()
-    assert f"Result: {expected_output}" in captured.out
+    assert "Task result" in caplog.text
 
 
 def test_run_ecs_handler_without_task_token_none_result(
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     event_payload = ExampleEvent(message="no-token").model_dump_json()
     parser = ArgumentParser(prog="test-handler")
 
-    def handler(event: ExampleEvent) -> ExampleResult | None:  # noqa: ARG001
+    def handler(
+        event: ExampleEvent,  # noqa: ARG001
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult | None:
         return None
 
     monkeypatch.setattr(
@@ -204,17 +242,21 @@ def test_run_ecs_handler_without_task_token_none_result(
         ],
     )
 
-    run_ecs_handler(
-        arg_parser=parser,
-        handler=handler,
-        event_validator=ExampleEvent.model_validate_json,
-    )
+    with caplog.at_level(logging.INFO):
+        run_ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=ExampleEvent.model_validate_json,
+            execution_context=ExecutionContext(
+                trace_id="test-trace-id",
+                pipeline_step="test_step",
+            ),
+        )
 
     assert MockStepFunctionsClient.task_successes == []
     assert MockStepFunctionsClient.task_failures == []
 
-    captured = capsys.readouterr()
-    assert "Result: Result is None" in captured.out
+    assert "Task result" in caplog.text
 
 
 # StepFunctionOutput tests
@@ -234,17 +276,16 @@ def test_step_function_output_send_success_reports() -> None:
     ]
 
 
-def test_step_function_output_send_success_without_token_prints(
-    capsys: pytest.CaptureFixture[str],
+def test_step_function_output_send_success_without_token_logs(
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     output = StepFunctionOutput(None, None)
 
-    output.send_success(ExampleResult(status="ok"))
+    with caplog.at_level(logging.INFO):
+        output.send_success(ExampleResult(status="ok"))
 
     assert MockStepFunctionsClient.task_successes == []
-    captured = capsys.readouterr()
-    expected = ExampleResult(status="ok").model_dump_json()
-    assert f"Result: {expected}" in captured.out
+    assert "Task result" in caplog.text
 
 
 def test_step_function_output_send_success_none_result_records() -> None:
@@ -261,11 +302,12 @@ def test_step_function_output_send_success_none_result_records() -> None:
 
 
 def test_step_function_output_send_failure_reports(
-    capsys: pytest.CaptureFixture[str],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     output = StepFunctionOutput("token-555", MockStepFunctionsClient())
 
-    output.send_failure(RuntimeError("boom"))
+    with caplog.at_level(logging.ERROR):
+        output.send_failure(RuntimeError("boom"))
 
     assert MockStepFunctionsClient.task_successes == []
     assert len(MockStepFunctionsClient.task_failures) == 1
@@ -275,17 +317,16 @@ def test_step_function_output_send_failure_reports(
     cause = json.loads(failure["cause"])
     assert cause["message"] == "boom"
     assert cause["type"] == "RuntimeError"
-    captured = capsys.readouterr()
-    assert "Sending task failure to Step Functions" in captured.out
+    assert "Sending task failure to Step Functions" in caplog.text
 
 
-def test_step_function_output_send_failure_without_token_prints(
-    capsys: pytest.CaptureFixture[str],
+def test_step_function_output_send_failure_without_token_logs(
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     output = StepFunctionOutput(None, None)
 
-    output.send_failure(RuntimeError("boom"))
+    with caplog.at_level(logging.ERROR):
+        output.send_failure(RuntimeError("boom"))
 
     assert MockStepFunctionsClient.task_failures == []
-    captured = capsys.readouterr()
-    assert "Error: {" in captured.out
+    assert "Task error" in caplog.text

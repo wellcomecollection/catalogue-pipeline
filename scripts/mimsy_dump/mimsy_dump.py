@@ -162,6 +162,7 @@ def main():
             "VW_OTHER_MEASUREMENTS",
             "VW_OTHER_NUMBERS",
             "VW_PEOPLE_DATES",
+            "VW_PEOPLE_VARIATIONS",
             "VW_REPORTS",
             "VW_SOURCE_DETAILS",
             "VW_TIMELINE",

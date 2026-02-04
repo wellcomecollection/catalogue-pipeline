@@ -1,9 +1,13 @@
 from collections.abc import Iterable, Iterator
 from itertools import batched
 
+import structlog
+
 from utils.aws import get_neptune_client
 from utils.safety import validate_fractional_change
 from utils.types import EntityType
+
+logger = structlog.get_logger(__name__)
 
 ES_QUERY_NON_VISIBLE_WORKS = {"bool": {"must_not": {"match": {"type": "Visible"}}}}
 
@@ -73,8 +77,10 @@ class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
                 list(batch), self.entity_type
             )
 
-        print(
-            f"Will delete a total of {len(existing_ids)} {self.entity_type} from the graph."
+        logger.info(
+            "Will delete entities from graph",
+            count=len(existing_ids),
+            entity_type=self.entity_type,
         )
 
         # This is part of a safety mechanism. If the fraction of removed nodes/edges of the given type exceeds
@@ -87,6 +93,10 @@ class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
 
         self.neptune_client.delete_entities_by_id(existing_ids, self.entity_type)
 
-        print(f"Deleted {len(existing_ids)} {self.entity_type} from the graph.")
+        logger.info(
+            "Deleted entities from graph",
+            count=len(existing_ids),
+            entity_type=self.entity_type,
+        )
 
         return existing_ids

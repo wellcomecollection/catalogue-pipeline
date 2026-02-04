@@ -1,3 +1,11 @@
+"""Generic record writer callback for OAI-PMH harvesting.
+
+Persists harvested OAI-PMH records to an Iceberg adapter store and returns
+metadata about the changes for downstream processing.
+"""
+
+from __future__ import annotations
+
 import json
 from typing import Any
 
@@ -9,12 +17,9 @@ from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
 from adapters.utils.window_harvester import WindowCallbackResult
 
-WINDOW_RECORD_WRITER_SCHEMA = ARROW_SCHEMA.append(
-    pa.field("last_modified", pa.timestamp("us", "UTC"))
-)
-
 
 def _serialize_metadata(record: Record) -> str | None:
+    """Serialize OAI-PMH metadata element to XML string."""
     metadata = getattr(record, "metadata", None)
     if metadata is None:
         return None
@@ -22,6 +27,12 @@ def _serialize_metadata(record: Record) -> str | None:
 
 
 class WindowRecordWriter:
+    """Callback for persisting harvested records to an adapter store.
+
+    This callback is invoked by WindowHarvestManager for each batch of records
+    and handles serialization, storage, and change tracking.
+    """
+
     def __init__(
         self,
         *,
@@ -30,6 +41,14 @@ class WindowRecordWriter:
         job_id: str,
         window_range: str,
     ) -> None:
+        """Initialize the record writer.
+
+        Args:
+            namespace: Namespace for records in the adapter store.
+            table_client: AdapterStore instance for persisting records.
+            job_id: Job identifier for tagging records.
+            window_range: Human-readable window range for tagging.
+        """
         self.namespace = namespace
         self.table_client = table_client
         self.job_id = job_id
@@ -39,15 +58,25 @@ class WindowRecordWriter:
         self,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
+        """Persist records and return change metadata.
+
+        Args:
+            records: List of (identifier, Record) tuples from OAI-PMH.
+
+        Returns:
+            Dictionary with tags including changeset_id and record_ids_changed.
+        """
         rows: list[dict[str, Any]] = []
 
         for identifier, record in records:
+            content = _serialize_metadata(record)
             rows.append(
                 {
                     "namespace": self.namespace,
                     "id": identifier,
-                    "content": _serialize_metadata(record),
+                    "content": content,
                     "last_modified": record.header.datestamp,
+                    "deleted": content is None,
                 }
             )
 
@@ -59,7 +88,7 @@ class WindowRecordWriter:
         updated_record_ids: list[str] | None = None
 
         if rows:
-            table = pa.Table.from_pylist(rows, schema=WINDOW_RECORD_WRITER_SCHEMA)
+            table = pa.Table.from_pylist(rows, schema=ARROW_SCHEMA)
             update = self.table_client.incremental_update(table)
             if update:
                 changeset_id = update.changeset_id

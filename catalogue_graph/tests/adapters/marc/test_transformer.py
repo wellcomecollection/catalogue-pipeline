@@ -9,7 +9,7 @@ from elasticsearch import Elasticsearch
 
 from adapters.transformers.base_transformer import BaseSource
 from adapters.utils.adapter_store import AdapterStore
-from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
+from models.pipeline.source.work import VisibleSourceWork
 from tests.mocks import MockElasticsearchClient
 
 from .marcxml_test_transformer import MarcXmlTransformerWithStoreForTests
@@ -23,7 +23,8 @@ class _StubSource(BaseSource):
         yield from self.rows
 
 
-def test_transform_empty_content_returns_deleted(adapter_store: AdapterStore) -> None:
+def test_transform_missing_content_logs_error(adapter_store: AdapterStore) -> None:
+    """Records without content should log an error and be skipped."""
     transformer = MarcXmlTransformerWithStoreForTests(adapter_store, [])
 
     works = list(
@@ -32,10 +33,10 @@ def test_transform_empty_content_returns_deleted(adapter_store: AdapterStore) ->
         )
     )
 
-    assert len(works) == 1
-    assert isinstance(works[0], DeletedSourceWork)
-    assert works[0].deleted_reason.type == "DeletedFromSource"
-    assert not transformer.errors
+    assert len(works) == 0
+    assert len(transformer.errors) == 1
+    assert transformer.errors[0].stage == "transform"
+    assert "Missing content" in transformer.errors[0].detail
 
 
 def test_transform_invalid_xml_records_error(adapter_store: AdapterStore) -> None:
@@ -56,7 +57,7 @@ def test_transform_invalid_xml_records_error(adapter_store: AdapterStore) -> Non
     assert works == []
     assert transformer.errors
     assert transformer.errors[0].stage == "parse"
-    assert transformer.errors[0].work_id == "work2"
+    assert transformer.errors[0].row_id == "work2"
 
 
 def test_transform_valid_marcxml_returns_work(adapter_store: AdapterStore) -> None:
@@ -79,8 +80,10 @@ def test_transform_valid_marcxml_returns_work(adapter_store: AdapterStore) -> No
     )
 
     assert len(works) == 1
-    assert isinstance(works[0], VisibleSourceWork)
-    assert works[0].data.title == "A Useful Title"
+    row_id, work = works[0]
+    assert row_id == "marc12345"
+    assert isinstance(work, VisibleSourceWork)
+    assert work.data.title == "A Useful Title"
 
 
 def test_transform_handles_transform_record_exception(
@@ -184,5 +187,5 @@ def test_stream_to_index_with_errors(
 
     assert transformer.errors
     assert transformer.errors[0].stage == "index"
-    assert transformer.errors[0].work_id == "Work[marc-test/id1]"
+    assert transformer.errors[0].row_id == "id1"
     assert "mapper_parsing_exception" in transformer.errors[0].detail

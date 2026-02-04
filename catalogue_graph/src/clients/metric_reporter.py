@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 
 import boto3
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class MetricReporter:
@@ -21,8 +24,9 @@ class MetricReporter:
         # CloudWatch does not support sending metrics older than 2 weeks
         two_weeks_ago = datetime.now(tz=timestamp.tzinfo) - timedelta(weeks=2)
         if two_weeks_ago > timestamp:
-            print(
-                "Did not publish CloudWatch metrics. Provided timestamp is too far in the past."
+            logger.warning(
+                "Did not publish CloudWatch metrics, timestamp is too far in the past",
+                timestamp=timestamp.isoformat(),
             )
             return
 

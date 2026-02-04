@@ -62,9 +62,12 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = "src"
-testpaths = "tests"
-addopts = "--cov src --cov-report term --cov-report xml:coverage.xml"
+testpaths = ["tests", "integration"]
+addopts = "--cov src --cov-report term --cov-report xml:coverage.xml -m 'not integration'"
 filterwarnings = "ignore::DeprecationWarning"
+markers = [
+    "integration: integration tests (using production graph database)",
+]
 
 [tool.ruff]
 line-length = 88

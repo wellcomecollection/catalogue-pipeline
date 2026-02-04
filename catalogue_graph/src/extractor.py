@@ -16,19 +16,20 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
-from utils.logger import ExecutionContext, setup_logging
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import run_ecs_handler
 
+logger = structlog.get_logger(__name__)
 
-def handler(event: ExtractorEvent, is_local: bool = False) -> None:
-    setup_logging(
-        ExecutionContext(
-            trace_id="logging test",
-            pipeline_step="graph_extractor",
-        )
-    )
 
-    structlog.get_logger(__name__).info(
+def handler(
+    event: ExtractorEvent,
+    execution_context: ExecutionContext | None = None,
+    is_local: bool = False,
+) -> None:
+    setup_logging(execution_context)
+
+    logger.info(
         f"ECS extractor task starting for {event.sample_size or 'all'} entities.",
         transformer_type=event.transformer_type,
         entity_type=event.entity_type,
@@ -46,7 +47,7 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
     elif event.stream_destination == "s3":
         s3_uri = event.get_s3_uri()
         transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
-        print(f"Data streamed to S3 file: '{s3_uri}'.")
+        logger.info("Data streamed to S3", s3_uri=s3_uri)
     elif event.stream_destination == "sns":
         topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
         if topic_arn is None:
@@ -60,7 +61,7 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
         full_file_path = transformer.stream_to_local_file(
             file_path, event.entity_type, event.sample_size
         )
-        print(f"Data streamed to local file: '{full_file_path}'.")
+        logger.info("Data streamed to local file", file_path=full_file_path)
     elif event.stream_destination == "void":
         for _ in transformer.stream(event.entity_type, event.sample_size):
             pass
@@ -69,7 +70,11 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    handler(ExtractorEvent(**event))
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="graph_extractor",
+    )
+    handler(ExtractorEvent(**event), execution_context)
 
 
 def event_validator(raw_input: str) -> ExtractorEvent:
@@ -78,13 +83,19 @@ def event_validator(raw_input: str) -> ExtractorEvent:
 
 
 def ecs_handler(arg_parser: ArgumentParser) -> None:
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="graph_extractor",
+    )
+
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,
         event_validator=event_validator,
+        execution_context=execution_context,
     )
 
-    structlog.get_logger(__name__).info("ECS extractor task completed successfully.")
+    logger.info("ECS extractor task completed successfully")
 
 
 def local_handler(parser: ArgumentParser) -> None:

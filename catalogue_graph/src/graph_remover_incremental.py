@@ -2,6 +2,7 @@ import argparse
 import typing
 
 import polars as pl
+import structlog
 
 from models.events import IncrementalGraphRemoverEvent
 from removers.base_graph_remover_incremental import BaseGraphRemoverIncremental
@@ -14,8 +15,11 @@ from utils.aws import (
     df_to_s3_parquet,
 )
 from utils.elasticsearch import ElasticsearchMode
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import IncrementalGraphRemoverReport
 from utils.types import CatalogueTransformerType, EntityType
+
+logger = structlog.get_logger(__name__)
 
 
 def get_remover(
@@ -33,7 +37,13 @@ def get_remover(
     raise ValueError(f"Unknown remover type: '{event.transformer_type}'")
 
 
-def handler(event: IncrementalGraphRemoverEvent, is_local: bool = False) -> None:
+def handler(
+    event: IncrementalGraphRemoverEvent,
+    execution_context: ExecutionContext | None = None,
+    is_local: bool = False,
+) -> None:
+    setup_logging(execution_context)
+
     remover = get_remover(event, is_local)
     deleted_ids = remover.remove(event.force_pass)
 
@@ -46,11 +56,19 @@ def handler(event: IncrementalGraphRemoverEvent, is_local: bool = False) -> None
     )
     report.publish()
 
-    print(f"List of deleted IDs saved to '{s3_file_uri}'.")
+    logger.info(
+        "List of deleted IDs saved",
+        s3_uri=s3_file_uri,
+        deleted_count=len(deleted_ids),
+    )
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    handler(IncrementalGraphRemoverEvent.model_validate(event))
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(context),
+        pipeline_step="graph_remover_incremental",
+    )
+    handler(IncrementalGraphRemoverEvent.model_validate(event), execution_context)
 
 
 def local_handler() -> None:
@@ -91,7 +109,11 @@ def local_handler() -> None:
     args = parser.parse_args()
     event = IncrementalGraphRemoverEvent.from_argparser(args)
 
-    handler(event, is_local=True)
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="graph_remover_incremental",
+    )
+    handler(event, execution_context, is_local=True)
 
 
 if __name__ == "__main__":

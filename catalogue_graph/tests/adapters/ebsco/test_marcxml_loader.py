@@ -133,6 +133,9 @@ def test_loads_one_record_into_pa_table(
                 </record>
                 """
             ),
+            "changeset": None,
+            "last_modified": None,
+            "deleted": None,
         }
     ]
 
@@ -169,6 +172,9 @@ def test_loads_multiple_records_preserving_content_and_order(
                 </record>
                 """
             ),
+            "changeset": None,
+            "last_modified": None,
+            "deleted": None,
         },
         {
             "namespace": EBSCO_NAMESPACE,
@@ -184,6 +190,9 @@ def test_loads_multiple_records_preserving_content_and_order(
                 </record>
                 """
             ),
+            "changeset": None,
+            "last_modified": None,
+            "deleted": None,
         },
         {
             "namespace": EBSCO_NAMESPACE,
@@ -199,6 +208,9 @@ def test_loads_multiple_records_preserving_content_and_order(
                 </record>
                 """
             ),
+            "changeset": None,
+            "last_modified": None,
+            "deleted": None,
         },
     ]
 

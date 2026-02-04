@@ -23,7 +23,7 @@ resource "null_resource" "task_replacement_trigger" {
 }
 
 module "service" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v4.1.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v4.3.0"
 
   task_definition_arn            = module.task_definition.arn
   service_name                   = local.service_name
@@ -47,7 +47,7 @@ module "service" {
 }
 
 module "autoscaling" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v4.1.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v4.3.0"
 
   name = var.name
 
@@ -62,7 +62,7 @@ module "autoscaling" {
 }
 
 module "task_definition" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v4.1.0"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v4.3.0"
 
   cpu    = var.cpu
   memory = var.memory
@@ -77,18 +77,20 @@ module "task_definition" {
     var.container_definitions
   )
 
+  ephemeral_storage_size = var.ephemeral_storage_size
+
   depends_on = [null_resource.task_replacement_trigger]
 }
 
 module "log_router_container" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v4.1.0"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v4.3.0"
   namespace = var.name
 
   use_privatelink_endpoint = true
 }
 
 module "log_router_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.1.0"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.3.0"
   secrets   = var.shared_logging_secrets
   role_name = module.task_definition.task_execution_role_name
 }

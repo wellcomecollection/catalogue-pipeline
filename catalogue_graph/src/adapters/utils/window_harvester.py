@@ -269,7 +269,10 @@ class WindowHarvestManager:
             identifier = getattr(header, "identifier", None)
             if isinstance(identifier, str):
                 return identifier
-        return f"no-header-{window_start.isoformat()}-{idx}"
+        raise ValueError(
+            "Cannot harvest record without header.identifier "
+            f"(window_start={window_start.isoformat()}, idx={idx})"
+        )
 
     def _merge_tags(self, custom_tags: dict[str, str] | None) -> dict[str, str] | None:
         base = dict(self.default_tags) if self.default_tags else {}

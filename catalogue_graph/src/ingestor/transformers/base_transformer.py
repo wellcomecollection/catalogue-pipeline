@@ -7,6 +7,7 @@ import boto3
 import polars as pl
 import pyarrow as pa
 import smart_open
+import structlog
 from pydantic import BaseModel
 
 from ingestor.extractors.base_extractor import GraphBaseExtractor
@@ -20,6 +21,8 @@ from ingestor.models.indexable_work import (
 from ingestor.models.step_events import IngestorIndexerObject, IngestorLoaderLambdaEvent
 from utils.arrow import pydantic_to_pyarrow_schema
 from utils.types import IngestorType
+
+logger = structlog.get_logger(__name__)
 
 S3_BATCH_SIZE = 10_000
 
@@ -130,6 +133,6 @@ class ElasticsearchBaseTransformer:
                 )
             )
 
-            print(f"{len(documents)} items loaded to '{full_path}'.")
+            logger.info("Items loaded", count=len(documents), path=full_path)
 
         return loaded_objects

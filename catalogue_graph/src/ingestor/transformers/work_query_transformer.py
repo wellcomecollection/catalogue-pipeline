@@ -1,5 +1,6 @@
 from collections.abc import Generator, Iterable
 
+import structlog
 from dateutil import parser
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
@@ -7,6 +8,8 @@ from ingestor.models.display.access_status import DisplayAccessStatus
 from models.pipeline.location import DigitalLocation, PhysicalLocation
 
 from .work_base_transformer import WorkBaseTransformer
+
+logger = structlog.get_logger(__name__)
 
 # The Scala pipeline uses the date `-9999-01-01T00:00:00Z` as 'negative infinity'. The Python standard library doesn't
 # support dates with negative years, and so we hardcode the corresponding Unix timestamp here instead of installing
@@ -169,8 +172,9 @@ class QueryWorkTransformer(WorkBaseTransformer):
                                 parser.parse(date.range.from_time).timestamp() * 1000
                             )
                         except parser.ParserError:
-                            print(
-                                f"Could not parse a production date of work {self.state.canonical_id}"
+                            logger.warning(
+                                "Could not parse production date",
+                                work_id=self.state.canonical_id,
                             )
 
     @property

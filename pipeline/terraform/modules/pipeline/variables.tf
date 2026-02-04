@@ -82,10 +82,18 @@ variable "allow_delete_indices" {
 
 variable "ami_id" {
   type        = string
-  default     = null // Uses the latest ECS-optimised AMI by default
   description = "AMI to use for the ECS EC2 cluster host"
 }
 
 variable "version_regex" {
   type = string
+}
+
+
+variable "graph_index_dates" {
+  type = object({
+    merged   = string
+    works    = string
+    concepts = string
+  })
 }
