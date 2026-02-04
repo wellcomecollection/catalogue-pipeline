@@ -11,7 +11,7 @@ import structlog
 from pydantic import BaseModel, Field
 
 from adapters.axiell import config as axiell_config
-from adapters.axiell import helpers as axiell_helpers
+from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.ebsco import config as ebsco_config
 from adapters.ebsco import helpers as ebsco_helpers
 from adapters.transformers.axiell_transformer import AxiellTransformer
@@ -40,11 +40,21 @@ class AdapterConfig(Protocol):
     BATCH_S3_PREFIX: str
 
 
-class AdapterHelpers(Protocol):
+class AdapterTableBuilder(Protocol):
     def build_adapter_table(
-        self, use_rest_api_table: bool, create_if_not_exists: bool = True
+        self, *, use_rest_api_table: bool, create_if_not_exists: bool = True
     ) -> Any:
         """Construct the Iceberg table containing adapter output."""
+
+
+# Wrapper for EBSCO helpers to match the AdapterTableBuilder protocol
+class EbscoTableBuilder:
+    def build_adapter_table(
+        self, *, use_rest_api_table: bool, create_if_not_exists: bool = True
+    ) -> Any:
+        return ebsco_helpers.build_adapter_table(
+            use_rest_api_table, create_if_not_exists
+        )
 
 
 def handler(
@@ -59,21 +69,24 @@ def handler(
     logger.info("Received job_id", job_id=event.job_id)
 
     config: AdapterConfig
-    helpers: AdapterHelpers
+    table_builder: AdapterTableBuilder
     transformer_class: type[BaseTransformer]
 
     if event.transformer_type == "axiell":
         config = cast(AdapterConfig, axiell_config)
-        helpers = cast(AdapterHelpers, axiell_helpers)
+        table_builder = cast(AdapterTableBuilder, AXIELL_CONFIG)
         transformer_class = AxiellTransformer
     elif event.transformer_type == "ebsco":
         config = cast(AdapterConfig, ebsco_config)
-        helpers = cast(AdapterHelpers, ebsco_helpers)
+        table_builder = EbscoTableBuilder()
         transformer_class = EbscoTransformer
     else:
         raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
-    table = helpers.build_adapter_table(use_rest_api_table, create_if_not_exists)
+    table = table_builder.build_adapter_table(
+        use_rest_api_table=use_rest_api_table,
+        create_if_not_exists=create_if_not_exists,
+    )
     table_client = AdapterStore(table)
     transformer = transformer_class(table_client, event.changeset_ids)
 

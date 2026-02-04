@@ -10,15 +10,18 @@ from lxml import etree
 from oai_pmh_client.client import OAIClient
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent
-from adapters.axiell.steps import loader
-from adapters.axiell.steps.loader import LoaderResponse
+from adapters.axiell.runtime import AXIELL_CONFIG
+from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHLoaderResponse
+from adapters.oai_pmh.record_writer import WindowRecordWriter
+from adapters.oai_pmh.steps import loader
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.window_harvester import WindowHarvestManager
 from adapters.utils.window_store import WindowStore
 from adapters.utils.window_summary import WindowSummary
 from models.incremental_window import IncrementalWindow
 
 WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
+AXIELL_NAMESPACE = AXIELL_CONFIG.config.adapter_namespace
 
 
 class StubOAIClient(OAIClient):
@@ -26,9 +29,9 @@ class StubOAIClient(OAIClient):
         pass
 
 
-def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
+def _request(now: datetime | None = None) -> OAIPMHLoaderEvent:
     now = now or datetime.now(tz=UTC)
-    return AxiellAdapterLoaderEvent(
+    return OAIPMHLoaderEvent(
         job_id="job-123",
         window=IncrementalWindow(
             start_time=now - timedelta(minutes=15),
@@ -58,6 +61,8 @@ def _runtime_with(
         table_client=cast(AdapterStore, table_client),
         oai_client=cast(OAIClient, oai_client or StubOAIClient()),
         window_generator=window_generator,
+        adapter_namespace=AXIELL_NAMESPACE,
+        adapter_name="axiell",
     )
 
 
@@ -85,18 +90,16 @@ def test_execute_loader_updates_iceberg(
             "changeset_id": "changeset-123",
         }
     )
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
+    with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
 
         response = loader.execute_loader(req, runtime=runtime)
 
-        assert isinstance(response, LoaderResponse)
+        assert isinstance(response, OAIPMHLoaderResponse)
         assert response.changeset_ids == ["changeset-123"]
         assert response.changed_record_count == 1
         assert response.job_id == req.job_id
@@ -116,9 +119,7 @@ def test_execute_loader_counts_only_changed_records(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
@@ -141,7 +142,7 @@ def test_execute_loader_counts_only_changed_records(
         }
     )
 
-    with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
+    with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
 
         response = loader.execute_loader(req, runtime=runtime)
@@ -156,9 +157,7 @@ def test_execute_loader_handles_no_new_records(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
@@ -177,7 +176,7 @@ def test_execute_loader_handles_no_new_records(
         }
     )
 
-    with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
+    with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
 
         response = loader.execute_loader(req, runtime=runtime)
@@ -193,13 +192,11 @@ def test_execute_loader_errors_when_no_windows(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
+    with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = []
 
         with pytest.raises(RuntimeError):
@@ -229,17 +226,17 @@ def test_handler_publishes_loader_report(
             "changeset_id": "changeset-123",
         }
     )
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
     mock_report = MagicMock()
 
     with (
-        patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest,
-        patch.object(loader.AxiellLoaderReport, "from_loader") as mock_from_loader,
+        patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
+        patch(
+            "adapters.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+        ) as mock_from_loader,
     ):
         mock_harvest.return_value = [summary]
         mock_from_loader.return_value = mock_report
@@ -252,18 +249,16 @@ def test_handler_publishes_loader_report(
         max_windows=req.max_windows,
         reprocess_successful_windows=False,
     )
-    mock_from_loader.assert_called_once_with(req, response)
+    mock_from_loader.assert_called_once_with(req, response, adapter_type="axiell")
     mock_report.publish.assert_called_once()
     assert response.changed_record_count == 1
     assert response.changeset_ids == ["changeset-123"]
 
 
 def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> None:
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
-    writer = loader.WindowRecordWriter(
-        namespace=loader.AXIELL_NAMESPACE,
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
+    writer = WindowRecordWriter(
+        namespace=AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
         window_range=WINDOW_RANGE,
@@ -295,11 +290,9 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
 def test_window_record_writer_handles_empty_window(
     temporary_table: IcebergTable,
 ) -> None:
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
-    writer = loader.WindowRecordWriter(
-        namespace=loader.AXIELL_NAMESPACE,
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
+    writer = WindowRecordWriter(
+        namespace=AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
         window_range=WINDOW_RANGE,
@@ -319,11 +312,9 @@ def test_window_record_writer_handles_empty_window(
 def test_window_record_writer_handles_deleted_record(
     temporary_table: IcebergTable,
 ) -> None:
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
-    writer = loader.WindowRecordWriter(
-        namespace=loader.AXIELL_NAMESPACE,
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
+    writer = WindowRecordWriter(
+        namespace=AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
         window_range=WINDOW_RANGE,
@@ -358,11 +349,9 @@ def test_window_record_writer_preserves_content_on_deletion(
     temporary_table: IcebergTable,
 ) -> None:
     """Test that when an existing record is marked as deleted, its content is preserved."""
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
-    writer = loader.WindowRecordWriter(
-        namespace=loader.AXIELL_NAMESPACE,
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
+    writer = WindowRecordWriter(
+        namespace=AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
         window_range=WINDOW_RANGE,
@@ -421,11 +410,9 @@ def test_window_record_writer_preserves_content_on_deletion(
 def test_window_record_writer_skips_changeset_for_duplicate_data(
     temporary_table: IcebergTable,
 ) -> None:
-    table_client = AdapterStore(
-        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
-    )
-    writer = loader.WindowRecordWriter(
-        namespace=loader.AXIELL_NAMESPACE,
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
+    writer = WindowRecordWriter(
+        namespace=AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
         window_range=WINDOW_RANGE,

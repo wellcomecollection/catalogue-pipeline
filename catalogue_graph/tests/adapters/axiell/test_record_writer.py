@@ -5,7 +5,7 @@ import pyarrow as pa
 from lxml import etree
 from oai_pmh_client.models import Header, Record
 
-from adapters.axiell.record_writer import WindowRecordWriter
+from adapters.oai_pmh.record_writer import WindowRecordWriter
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
 

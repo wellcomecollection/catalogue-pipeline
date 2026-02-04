@@ -180,6 +180,35 @@ def event_validator(raw_input: str) -> IngestorIndexerLambdaEvent:
     return IngestorIndexerLambdaEvent.model_validate(event)
 
 
+def ecs_handler(arg_parser: ArgumentParser) -> None:
+    arg_parser.add_argument(
+        "--es-mode",
+        type=str,
+        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
+        required=False,
+        choices=["private", "local", "public"],
+        default="private",
+    )
+
+    args, _ = arg_parser.parse_known_args()
+    es_mode = args.es_mode
+
+    execution_context = ExecutionContext(
+        trace_id=get_trace_id(),
+        pipeline_step="ingestor_indexer",
+    )
+
+    run_ecs_handler(
+        arg_parser=arg_parser,
+        handler=handler,
+        event_validator=event_validator,
+        execution_context=execution_context,
+        es_mode=es_mode,
+    )
+
+    logger.info("ECS ingestor indexer task completed successfully")
+
+
 def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--ingestor-type",

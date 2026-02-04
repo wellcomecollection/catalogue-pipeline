@@ -4,11 +4,13 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.axiell.config as adapter_config
-from adapters.axiell.steps.loader import AXIELL_NAMESPACE
+from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.transformers.manifests import TransformerManifest
 from adapters.transformers.transformer import TransformerEvent, handler
 from tests.adapters.ebsco.helpers import prepare_changeset
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
+
+AXIELL_NAMESPACE = AXIELL_CONFIG.config.adapter_namespace
 
 
 def _run_transform(
@@ -46,7 +48,7 @@ def test_transformer_end_to_end_with_local_table(
         monkeypatch,
         records_by_id,
         namespace=AXIELL_NAMESPACE,
-        build_adapter_table_path="adapters.axiell.helpers.build_adapter_table",
+        build_adapter_table_path="adapters.axiell.runtime.AXIELL_CONFIG.build_adapter_table",
     )
 
     MockElasticsearchClient.inputs.clear()
@@ -98,7 +100,7 @@ def test_transformer_end_to_end_includes_deletions(
         monkeypatch,
         records_by_id,
         namespace=AXIELL_NAMESPACE,
-        build_adapter_table_path="adapters.axiell.helpers.build_adapter_table",
+        build_adapter_table_path="adapters.axiell.runtime.AXIELL_CONFIG.build_adapter_table",
     )
 
     MockElasticsearchClient.inputs.clear()

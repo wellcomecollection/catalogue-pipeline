@@ -1,10 +1,10 @@
 locals {
-  lock_timeout = 1 * 60
-
+  lock_timeout   = 1 * 60
+  lambda_timeout = var.reindexing_state.scale_up_matcher_db ? 300 : 30 # 5 minutes vs 30 seconds
   # The records in the locktable expire after local.lock_timeout
   # The matcher is able to override locks that have expired
   # Wait slightly longer to make sure locks are expired
-  queue_visibility_timeout_seconds = local.lock_timeout + 30
+  queue_visibility_timeout_seconds = max(local.lock_timeout, local.lambda_timeout) + 30
 
   # Epistemic status of this comment: somewhat speculative.
   #
@@ -83,6 +83,6 @@ module "matcher_lambda" {
     ]
   }
 
-  timeout     = var.reindexing_state.scale_up_matcher_db ? 300 : 30    # 5 minutes vs 30 seconds
+  timeout     = local.lambda_timeout
   memory_size = var.reindexing_state.scale_up_matcher_db ? 4096 : 1024 # 4GB vs 1GB
 }
