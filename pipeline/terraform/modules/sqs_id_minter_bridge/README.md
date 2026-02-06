@@ -1,4 +1,4 @@
-# Legacy ID Minter State Machine
+# SQS ID Minter Bridge
 
 This module provides a bridge between the older Scala SQS-based transformers and the new state machine-based pipeline flow.
 
@@ -83,10 +83,10 @@ The state machine transforms batched SQS messages (containing SNS envelopes) int
 ## Usage
 
 ```hcl
-module "legacy_id_minter" {
-  source = "../modules/legacy_id_minter_state_machine"
+module "sqs_id_minter_bridge" {
+  source = "../modules/sqs_id_minter_bridge"
 
-  name           = "legacy-id-minter-${var.pipeline_date}"
+  name           = "catalogue-${var.pipeline_date}_sqs_id_minter_bridge"
   sns_topic_arns = [
     module.sierra_transformer_output_topic.arn,
     module.calm_transformer_output_topic.arn,
