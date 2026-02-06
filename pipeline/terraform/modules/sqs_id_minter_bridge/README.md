@@ -8,51 +8,56 @@ The legacy Scala transformers (Sierra, CALM, METS, TEI) publish source identifie
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        Legacy Scala Transformers                            │
-│         (Sierra, CALM, METS, TEI - SQS-based processing)                    │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-                           ┌────────────────┐
-                           │  SNS Topics    │
-                           │  (N topics)    │
-                           └────────────────┘
-                                    │
-                    ┌───────────────┼───────────────┐
-                    ▼               ▼               ▼
-             ┌───────────┐   ┌───────────┐   ┌───────────┐
-             │ SQS Queue │   │ SQS Queue │   │ SQS Queue │
-             └───────────┘   └───────────┘   └───────────┘
-                    │               │               │
-                    ▼               ▼               ▼
-             ┌─────────────────────────────────────────────┐
-             │         EventBridge Pipes (N pipes)         │
-             │    (batch messages from each SQS queue)     │
-             └─────────────────────────────────────────────┘
-                                    │
-                                    ▼
-             ┌─────────────────────────────────────────────┐
-             │              State Machine                  │
-             │                                             │
-             │  ┌─────────────────────────────────────┐    │
-             │  │      TransformAndMint (JSONata)     │    │
-             │  │                                     │    │
-             │  │  Input: SQS batch messages          │    │
-             │  │  [{ body: "{SNS envelope}" }, ...]  │    │
-             │  │                                     │    │
-             │  │  Output: StepFunctionMintingRequest │    │
-             │  │  { sourceIdentifiers: [...],        │    │
-             │  │    jobId: "execution-name" }        │    │
-             │  └─────────────────────────────────────┘    │
-             └─────────────────────────────────────────────┘
-                                    │
-                                    ▼
-             ┌─────────────────────────────────────────────┐
-             │      id_minter_lambda_step_function         │
-             │   (shared with new pipeline transformers)   │
-             └─────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph Transformers["Legacy Scala Transformers"]
+        Sierra["Sierra"]
+        CALM["CALM"]
+        METS["METS"]
+        TEI["TEI"]
+    end
+
+    subgraph Topics["SNS Topics (N topics)"]
+        SNS1["SNS Topic"]
+        SNS2["SNS Topic"]
+        SNS3["SNS Topic"]
+    end
+
+    Sierra --> SNS1
+    CALM --> SNS2
+    METS & TEI --> SNS3
+
+    subgraph Queues["SQS Queues"]
+        SQS1["SQS Queue"]
+        SQS2["SQS Queue"]
+        SQS3["SQS Queue"]
+    end
+
+    SNS1 --> SQS1
+    SNS2 --> SQS2
+    SNS3 --> SQS3
+
+    subgraph Pipes["EventBridge Pipes (N pipes)"]
+        Pipe1["Pipe — batch messages"]
+        Pipe2["Pipe — batch messages"]
+        Pipe3["Pipe — batch messages"]
+    end
+
+    SQS1 --> Pipe1
+    SQS2 --> Pipe2
+    SQS3 --> Pipe3
+
+    subgraph SM["State Machine"]
+        Transform["TransformAndMint (JSONata)<br/><br/>Input: SQS batch messages<br/>Output: StepFunctionMintingRequest<br/>{sourceIdentifiers: [...], jobId}"]
+    end
+
+    Pipe1 --> Transform
+    Pipe2 --> Transform
+    Pipe3 --> Transform
+
+    Lambda["id_minter_lambda_step_function<br/>(shared with new pipeline transformers)"]
+
+    Transform --> Lambda
 ```
 
 ## Message Transformation
