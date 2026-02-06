@@ -86,3 +86,20 @@ module "transformers" {
 
   fargate_service_boilerplate = local.fargate_service_boilerplate
 }
+
+module "sqs_id_minter_bridge" {
+  source = "../sqs_id_minter_bridge"
+
+  name           = "catalogue-${var.pipeline_date}_sqs_id_minter_bridge"
+  sns_topic_arns = [module.transformers["miro"].output_topic_arn]
+  #
+  # Uncomment the above and delete the below when we're ready to switch the id minter to be state 
+  # machine driven instead of being triggered directly by the transformer output topic.
+  #
+  # sns_topic_arns  = local.transformer_output_topic_arns
+  lambda_arn     = module.id_minter_lambda_step_function.lambda_arn
+
+  batch_size                         = 75
+  maximum_batching_window_in_seconds = 60
+  queue_visibility_timeout_seconds   = 60 * 5 # 5 minutes, matches Lambda timeout
+}
