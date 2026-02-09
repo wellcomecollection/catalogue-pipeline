@@ -4,7 +4,7 @@ locals {
 
 module "input_queue" {
   count  = local.create_queue ? 1 : 0
-  source = "github.com/wellcomecollection/terraform-aws-sqs.git//queue?ref=v1.4.0"
+  source = "github.com/wellcomecollection/terraform-aws-sqs.git//queue?ref=v1.5.1"
 
   queue_name = local.queue_name
 
