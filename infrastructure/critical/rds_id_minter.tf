@@ -57,9 +57,11 @@ module "identifiers_serverless_rds_cluster" {
   db_security_group_id     = aws_security_group.database_sg.id
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
 
+  max_scaling_capacity = 16
+
   snapshot_identifier = "aurora-mysql-v3-pre-migration-24-10-08"
 
-  engine_version = "8.0.mysql_aurora.3.07.1"
+  engine_version = "8.0.mysql_aurora.3.08.2"
 }
 
 
