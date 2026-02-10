@@ -1,10 +1,3 @@
-module "id_minter_output_topic" {
-  source = "../topic"
-
-  name       = "${local.namespace}_id_minter_output"
-  role_names = [module.id_minter_lambda.lambda_role_name]
-}
-
 module "id_minter_step_function_output_topic" {
   source = "../topic"
 
@@ -13,13 +6,6 @@ module "id_minter_step_function_output_topic" {
 }
 
 locals {
-  id_minter_environment_variables = {
-    topic_arn           = module.id_minter_output_topic.arn
-    max_connections     = local.id_minter_task_max_connections
-    es_source_index     = local.es_works_source_index
-    es_identified_index = local.es_works_identified_index
-  }
-
   id_minter_step_function_environment_variables = {
     topic_arn           = module.id_minter_step_function_output_topic.arn
     max_connections     = local.id_minter_task_max_connections
@@ -55,33 +41,6 @@ locals {
       es_upstream_apikey   = module.elastic.pipeline_storage_es_service_secrets["id_minter"]["es_apikey"]
     }
   )
-}
-
-# This can be removed once the id minter is fully switched over to being driven by the state machine 
-# instead of being triggered directly by the transformer output topic.
-module "id_minter_lambda" {
-  source = "../pipeline_lambda"
-
-  pipeline_date = var.pipeline_date
-  service_name  = "id_minter"
-
-  environment_variables = local.id_minter_environment_variables
-  vpc_config            = local.id_minter_vpc_config
-  secret_env_vars       = local.id_minter_secret_env_vars
-
-  timeout = 60 * 5 # 10 Minutes
-
-  queue_config = {
-    topic_arns          = local.transformer_output_topic_arns
-    max_receive_count   = 3
-    maximum_concurrency = 30
-    batch_size          = 75
-
-    visibility_timeout_seconds = 60 * 5 # 10 Minutes, same or higher than lambda timeout
-    batching_window_seconds    = 60     # How long to wait to accumulate message: 1 minute
-  }
-
-  ecr_repository_name = "uk.ac.wellcome/id_minter"
 }
 
 module "id_minter_lambda_step_function" {
