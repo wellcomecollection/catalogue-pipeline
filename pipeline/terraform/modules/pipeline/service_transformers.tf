@@ -99,3 +99,15 @@ module "sqs_id_minter_bridge" {
   maximum_batching_window_in_seconds = 60
   queue_visibility_timeout_seconds   = 60 * 5 # 5 minutes, matches Lambda timeout
 }
+
+module "sqs_id_minter_bridge_state_machine_alarms" {
+  source = "../state_machine_alarms"
+
+  state_machine_arn = module.sqs_id_minter_bridge.state_machine_arn
+  alarm_name_prefix = "sqs-id-minter-bridge"
+  alarm_name_suffix = "-${var.pipeline_date}"
+
+  default_alarm_configuration = {
+    alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+  }
+}
