@@ -187,6 +187,18 @@ module "transformer_state_machine" {
   }
 }
 
+module "transformer_state_machine_alarms" {
+  source = "../state_machine_alarms"
+
+  state_machine_arn = module.transformer_state_machine.state_machine_arn
+  alarm_name_prefix = "transformer-state-machine"
+  alarm_name_suffix = "-${var.pipeline_date}"
+
+  default_alarm_configuration = {
+    alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+  }
+}
+
 # Trigger State Machine on adapter completed events
 module "adapter_transformer_trigger" {
   for_each = local.transformer_types
