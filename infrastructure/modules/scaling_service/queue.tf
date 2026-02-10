@@ -1,5 +1,5 @@
 module "input_queue" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.5.0"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.5.1"
 
   queue_name = var.queue_config.name
 
@@ -18,7 +18,7 @@ resource "aws_iam_role_policy" "read_from_q" {
 }
 
 module "scaling_alarm" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.3.0"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.5.1"
 
   queue_name = module.input_queue.name
 

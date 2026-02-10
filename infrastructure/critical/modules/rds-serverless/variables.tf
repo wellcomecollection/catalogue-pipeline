@@ -24,7 +24,8 @@ variable "aws_db_subnet_group_name" {
 }
 
 variable "snapshot_identifier" {
-  type = string
+  type    = string
+  default = null
 }
 
 
