@@ -7,7 +7,7 @@
 #
 #   aws stepfunctions start-execution \
 #     --state-machine-arn <arn> \
-#     --input '{"detail":{"recoveryPointArn":"arn:aws:rds:eu-west-1:ACCOUNT:cluster-snapshot:awsbackup:job-XXXX"}}'
+#     --input '{"resources":["arn:aws:rds:eu-west-1:ACCOUNT:cluster-snapshot:awsbackup:job-XXXX"]}'
 # -------------------------------------------------------
 
 data "aws_caller_identity" "current" {}
@@ -187,7 +187,7 @@ locals {
         Resource = "arn:aws:states:::aws-sdk:rds:startExportTask"
         Parameters = {
           "ExportTaskIdentifier.$" = "States.Format('identifiers-export-{}', $$.Execution.Name)"
-          "SourceArn.$"            = "$.detail.recoveryPointArn"
+          "SourceArn.$"            = "$.resources[0]"
           S3BucketName             = local.export_s3_bucket
           "S3Prefix.$"             = "States.Format('exports/identifiers/{}', States.ArrayGetItem(States.StringSplit($$.Execution.StartTime, 'T'), 0))"
           IamRoleArn               = aws_iam_role.rds_s3_export.arn

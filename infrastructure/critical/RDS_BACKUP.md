@@ -44,12 +44,12 @@ Each export is encrypted with the `alias/id-minter-rds-export` KMS key.
 
 ## Manual trigger
 
-The state machine accepts the same input shape as the EventBridge event, so you can trigger an export for any known recovery point:
+The state machine reads the snapshot ARN from the `resources` array in the EventBridge event. For manual triggers, provide the recovery point ARN in the same field:
 
 ```bash
 aws stepfunctions start-execution \
   --state-machine-arn arn:aws:states:eu-west-1:760097843905:stateMachine:id-minter-rds-export \
-  --input '{"detail":{"recoveryPointArn":"arn:aws:rds:eu-west-1:760097843905:cluster-snapshot:awsbackup:job-XXXX"}}'
+  --input '{"resources":["arn:aws:rds:eu-west-1:760097843905:cluster-snapshot:awsbackup:job-XXXX"]}'
 ```
 
 To find available recovery points:
