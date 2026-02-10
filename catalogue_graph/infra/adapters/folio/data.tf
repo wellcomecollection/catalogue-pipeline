@@ -1,3 +1,11 @@
+data "aws_s3_bucket" "folio_adapter" {
+  bucket = "wellcomecollection-platform-folio-adapter"
+}
+
+data "aws_cloudwatch_event_bus" "event_bus" {
+  name = "catalogue-pipeline-adapter-event-bus"
+}
+
 data "aws_region" "current" {}
 
 data "terraform_remote_state" "platform_monitoring" {
@@ -10,4 +18,8 @@ data "terraform_remote_state" "platform_monitoring" {
     key    = "terraform/monitoring.tfstate"
     region = "eu-west-1"
   }
+}
+
+locals {
+  chatbot_topic_arn = data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn
 }
