@@ -57,6 +57,8 @@ locals {
   )
 }
 
+# This can be removed once the id minter is fully switched over to being driven by the state machine 
+# instead of being triggered directly by the transformer output topic.
 module "id_minter_lambda" {
   source = "../pipeline_lambda"
 
