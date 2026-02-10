@@ -1,5 +1,3 @@
-
-
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
     StepFunctionMintingResponse,

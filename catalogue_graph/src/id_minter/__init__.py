@@ -9,7 +9,7 @@ This module is a Python port of the Scala id_minter service. It:
 
 Structure:
 - config.py: Runtime configuration (RDS, Elasticsearch, downstream targets)
+- database.py: Database connection and migration management
 - models/: Pydantic event models (StepFunctionMintingRequest/Response)
-- steps/: Lambda function handler
-- run_local.py: Script to run the id_minter locally for testing
+- steps/: Lambda handler and CLI entry point
 """

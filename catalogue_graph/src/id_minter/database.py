@@ -1,8 +1,7 @@
 """Database access layer for the ID Minter.
 
-Provides connection management and the IDMinter class that implements
-batch lookup, minting with predecessor inheritance, and pre-generated
-ID pool claiming — following the design in RFC 083.
+Provides connection management and yoyo migration support for the
+identifiers database — following the schema defined in RFC 083.
 """
 
 from __future__ import annotations
