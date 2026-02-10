@@ -1,12 +1,13 @@
 from collections.abc import Generator
 from typing import TextIO
 
-from models.graph_edge import BaseEdge
+from models.graph_edge import (
+    SourceConceptSameAs,
+    SourceConceptSameAsAttributes,
+)
 from models.graph_node import SourceConcept
 from sources.weco_concepts.concepts_source import WeCoConceptsSource
 from transformers.base_transformer import BaseTransformer
-
-from models.graph_edge import SourceConceptSameAs, SourceConceptSameAsAttributes
 
 
 class WeCoConceptsTransformer(BaseTransformer):
@@ -46,6 +47,8 @@ class WeCoConceptsTransformer(BaseTransformer):
         """
         yield SourceConceptSameAs(
             from_id=self._prefixed_id_of(raw_data),  # This record's source id
-            to_id=str(raw_data['id'].strip()),  # lookup the id elsewhere and find the corresponding source concept
-            attributes=SourceConceptSameAsAttributes(source="weco-authority")
+            to_id=str(
+                raw_data["id"].strip()
+            ),  # lookup the id elsewhere and find the corresponding source concept
+            attributes=SourceConceptSameAsAttributes(source="weco-authority"),
         )

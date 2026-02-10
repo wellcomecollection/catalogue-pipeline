@@ -55,9 +55,9 @@ SAME_AS_CONCEPT_QUERY = """
 # As above, we don't need to worry about direct Concept-SAME_AS->SourceConcept
 # conncetions, because there's no way to reach another Concept through that route.
 def get_related_query(
-        edge_type: str,
-        direction: str = "from",
-        source_concept_label_types: list[str] | None = None,
+    edge_type: str,
+    direction: str = "from",
+    source_concept_label_types: list[str] | None = None,
 ) -> str:
     """Return a parameterized Neptune query to fetch related Wellcome concepts."""
     label_filter = ""
@@ -117,7 +117,7 @@ def get_related_query(
 
 
 def _get_referenced_together_filter(
-        property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
+    property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
 ) -> str:
     """Return a Cypher filter in the form `AND property_key IN ['some allowed value', 'another value']`."""
     if allowed_values is not None and len(allowed_values) > 0:
@@ -128,10 +128,10 @@ def _get_referenced_together_filter(
 
 
 def get_referenced_together_query(
-        source_referenced_types: list[ConceptType] | None = None,
-        related_referenced_types: list[ConceptType] | None = None,
-        source_referenced_in: list[WorkConceptKey] | None = None,
-        related_referenced_in: list[WorkConceptKey] | None = None,
+    source_referenced_types: list[ConceptType] | None = None,
+    related_referenced_types: list[ConceptType] | None = None,
+    source_referenced_in: list[WorkConceptKey] | None = None,
+    related_referenced_in: list[WorkConceptKey] | None = None,
 ) -> str:
     """
     Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works.
