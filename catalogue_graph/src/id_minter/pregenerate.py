@@ -26,8 +26,6 @@ class DBCursor(Protocol):
 class DBConnection[T: DBCursor](Protocol):
     def cursor(self) -> T: ...
 
-    def commit(self) -> None: ...
-
 
 def top_up_ids(conn: DBConnection, desired_count: int) -> None:
     """
@@ -76,4 +74,4 @@ def save_new_ids(conn: DBConnection, new_ids: Iterable[str]) -> None:
         """,
         [(new_id,) for new_id in new_ids],
     )
-    conn.commit()
+    cursor.commit()
