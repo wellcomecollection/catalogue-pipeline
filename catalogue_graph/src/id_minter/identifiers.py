@@ -1,5 +1,5 @@
 """
-Geneerates a series of Wellcome Canonical Identifiers.
+Generates a series of Wellcome Canonical Identifiers.
 
 A canonical identifier is a unique identifier for anything in the Wellcome catalogue.
 
