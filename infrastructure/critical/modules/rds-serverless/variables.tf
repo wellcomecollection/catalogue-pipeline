@@ -16,7 +16,7 @@ variable "master_password" {
 }
 
 variable "manage_master_user_password" {
-  type = bool
+  type    = bool
   default = null
 }
 

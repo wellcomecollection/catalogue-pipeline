@@ -7,7 +7,7 @@ output "rds_cluster_arn" {
 }
 
 locals {
-  manage_password = var.manage_master_user_password != null ? var.manage_master_user_password : false
+  manage_password        = var.manage_master_user_password != null ? var.manage_master_user_password : false
   master_user_secret_arn = local.manage_password ? aws_rds_cluster.serverless.master_user_secret[0].secret_arn : null
 }
 
