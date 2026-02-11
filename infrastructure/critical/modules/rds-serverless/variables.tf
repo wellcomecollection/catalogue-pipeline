@@ -15,6 +15,11 @@ variable "master_password" {
   type = string
 }
 
+variable "manage_master_user_password" {
+  type = bool
+  default = null
+}
+
 variable "db_security_group_id" {
   type = string
 }
