@@ -6,7 +6,12 @@ from utils.aws import get_csv_from_s3
 from utils.types import ConceptSource, ConceptType, TransformerType
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")
-SOURCES_BY_PRIORITY: list[ConceptSource] = ["nlm-mesh", "lc-subjects", "lc-names"]
+SOURCES_BY_PRIORITY: list[ConceptSource] = [
+    "weco-authority",
+    "nlm-mesh",
+    "lc-subjects",
+    "lc-names",
+]
 AMBIGUITY_THRESHOLD = 1
 
 with open(f"{os.path.dirname(__file__)}/data/concept_label_deny_list.txt") as f:

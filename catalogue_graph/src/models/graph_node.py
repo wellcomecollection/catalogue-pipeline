@@ -25,6 +25,8 @@ class SourceConcept(BaseNode):
     alternative_labels: list[str] = []
     # Concept description, such as MeSH scope note or Wikidata description
     description: str | None = None
+    # URLs of images associated with this concept from the source
+    image_urls: list[str] = []
 
 
 # Represents a LoC or Wikidata location. Inherits all fields from SourceConcept, plus optional coordinates.

@@ -20,6 +20,7 @@ from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
 from .loc.names_transformer import LibraryOfCongressNamesTransformer
 from .mesh.concepts_transformer import MeSHConceptsTransformer
 from .mesh.locations_transformer import MeSHLocationsTransformer
+from .weco_concepts.concepts_transformer import WeCoConceptsTransformer
 from .wikidata.concepts_transformer import WikidataConceptsTransformer
 from .wikidata.locations_transformer import WikidataLocationsTransformer
 from .wikidata.names_transformer import WikidataNamesTransformer
@@ -40,7 +41,8 @@ def create_transformer(
             f"The {transformer_type} transformer does not support incremental mode. "
             "Only catalogue transformers support incremental (window-based) processing."
         )
-
+    if transformer_type == "weco_concepts":
+        return WeCoConceptsTransformer()
     if transformer_type == "loc_concepts":
         return LibraryOfCongressConceptsTransformer(LOC_SUBJECT_HEADINGS_URL)
     if transformer_type == "loc_names":

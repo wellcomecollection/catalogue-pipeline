@@ -85,7 +85,7 @@ The `start_time` property is optional. If not specified, it will automatically b
 When running a full reindex from source data (i.e. fully populating the denormalised index), the incremental pipeline
 can keep running as usual, processing the latest 15-minute window every 15 minutes.
 
-To reprocess all works or concepts *without* repopulating the denormalised index, run the relevant state machine or 
+To reprocess all works or concepts *without* repopulating the denormalised index, run the relevant state machine or
 Lambda function in *full reindex* mode by leaving out the `window` property from the input. At the moment, some services
 (e.g. `ingestor_loader` when processing concepts, or `ingestor_indexer` when processing works) only support full reindex
 mode locally, since they are deployed as Lambda functions and processing all records would exceed the 15-minute
@@ -98,6 +98,7 @@ The pipeline consists of several Lambda functions, all of which run from a singl
 `image_config.command` in Terraform.
 
 Graph Lambda functions:
+
 * `extractor`: Extracts a single entity type (nodes or edges) from a single source (e.g. LoC Names) and streams the
   transformed entities into the specified destination. To support longer execution times, the `extractor` is also
   available as an ECS task.
@@ -117,6 +118,7 @@ Graph Lambda functions:
   and added nodes/edges (with a retention period of one year) for debugging purposes.
 
 Elasticsearch ingestor Lambda functions:
+
 * `ingestor_loader`: Queries the denormalised index for all works which changed within a given time window,
   supplementing returned documents with data from the catalogue graph, creating final work or concept
   documents, and loading the results into parquet files in S3. The loader also writes pipeline reports and publishes
@@ -237,7 +239,8 @@ python3.13 extractor.py \
   --transformer-type=wikidata_linked_loc_concepts \
   --entity-type=nodes \
   --stream-destination=void \
-  --sample-size=10
+  --sample-size=10 \
+  --is-local
 ```
 
 ## Local Neptune experimentation
@@ -263,18 +266,18 @@ at it via the normal env vars.
 
 ## Container entrypoints summary
 
-| Lambda (logical name)    | image_config.command                                   |
-|--------------------------|--------------------------------------------------------|
-| bulk_loader              | bulk_loader.lambda_handler                             |
-| bulk_load_poller         | bulk_load_poller.lambda_handler                        |
-| graph_remover            | graph_remover.lambda_handler                           |
-| graph_status_poller      | graph_status_poller.lambda_handler                     |
-| graph_scaler             | graph_scaler.lambda_handler                            |
-| indexer                  | indexer.lambda_handler                                 |
-| ingestor_loader          | ingestor.steps.ingestor_loader.lambda_handler          |
-| ingestor_indexer         | ingestor.steps.ingestor_indexer.lambda_handler         |
-| ingestor_deletions       | ingestor.steps.ingestor_deletions.lambda_handler       |
-| pit_opener               | pit_opener.lambda_handler                              |
+| Lambda (logical name) | image_config.command                             |
+|-----------------------|--------------------------------------------------|
+| bulk_loader           | bulk_loader.lambda_handler                       |
+| bulk_load_poller      | bulk_load_poller.lambda_handler                  |
+| graph_remover         | graph_remover.lambda_handler                     |
+| graph_status_poller   | graph_status_poller.lambda_handler               |
+| graph_scaler          | graph_scaler.lambda_handler                      |
+| indexer               | indexer.lambda_handler                           |
+| ingestor_loader       | ingestor.steps.ingestor_loader.lambda_handler    |
+| ingestor_indexer      | ingestor.steps.ingestor_indexer.lambda_handler   |
+| ingestor_deletions    | ingestor.steps.ingestor_deletions.lambda_handler |
+| pit_opener            | pit_opener.lambda_handler                        |
 
 All use the same ECR image tagged `:prod` in Terraform (promotion strategy can be revised later to use digests or staged
 tags).
