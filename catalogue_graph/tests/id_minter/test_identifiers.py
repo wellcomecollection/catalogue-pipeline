@@ -1,20 +1,19 @@
-import pytest
-from itertools import chain
 from id_minter import identifiers
-
 
 # Tests as documentation for the properties of the generated ids
 # Because id generation is random, testing the output of a single call to generate_id() is not very useful,
 # as any success might just be due to luck.  However, these tests document the nature of the expected output
 # as a form of double-entry bookkeeping.
 
-def assert_first_character_valid(generated_id: str):
-    assert generated_id[0] in "abcdefghjkmnpqrstuvwxyz", \
+
+def assert_first_character_valid(generated_id: str) -> bool:
+    assert generated_id[0] in "abcdefghjkmnpqrstuvwxyz", (
         f"first character of id {generated_id} is not an acceptable letter"
+    )
     return True
 
 
-def assert_all_characters_valid(generated_id: str):
+def assert_all_characters_valid(generated_id: str) -> bool:
     for c in generated_id:
         # check that no forbidden characters are present
         # not exactly necessary, as the next assertion would fail if there were forbidden characters
@@ -26,29 +25,30 @@ def assert_all_characters_valid(generated_id: str):
     return True
 
 
-def test_generate_id_length():
+def test_generate_id_length() -> None:
     id = identifiers.generate_id()
     assert len(id) == 8
 
 
-def test_generate_id_first_char_is_unambiguous_letter():
+def test_generate_id_first_char_is_unambiguous_letter() -> None:
     assert_first_character_valid(identifiers.generate_id())
 
 
-def test_generate_id_allowed_chars():
+def test_generate_id_allowed_chars() -> None:
     assert_all_characters_valid(identifiers.generate_id())
 
 
 # Testing the generation of multiple ids.  If we choose to generate a large enough number of ids
 # we can be fairly confident that generate_id is not creating ids that violate the properties we expect
 
-def test_generate_ids_count():
+
+def test_generate_ids_count() -> None:
     count = 10
     ids = list(identifiers.generate_ids(count))
     assert len(ids) == count
 
 
-def test_generate_ids_unique():
+def test_generate_ids_unique() -> None:
     count = 10000
     ids = list(identifiers.generate_ids(count))
     # Not guaranteed, but should be highly likely
@@ -56,9 +56,15 @@ def test_generate_ids_unique():
     assert len(set(ids)) == len(ids)
 
 
-def test_generate_ids_first_char_is_letter():
-    all((assert_first_character_valid(generated_id) for generated_id in identifiers.generate_ids(500)))
+def test_generate_ids_first_char_is_letter() -> None:
+    all(
+        assert_first_character_valid(generated_id)
+        for generated_id in identifiers.generate_ids(500)
+    )
 
 
-def test_generate_ids_valid_characters():
-    all((assert_all_characters_valid(generated_id) for generated_id in identifiers.generate_ids(500)))
+def test_generate_ids_valid_characters() -> None:
+    all(
+        assert_all_characters_valid(generated_id)
+        for generated_id in identifiers.generate_ids(500)
+    )

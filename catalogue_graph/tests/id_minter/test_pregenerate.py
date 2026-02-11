@@ -1,10 +1,14 @@
-from unittest import mock
+from sqlite3 import Connection
+from unittest.mock import Mock
+
 import pytest
-from id_minter.pregenerate import top_up_ids, get_free_id_count
-from id_minter import identifiers
+
+from id_minter.pregenerate import get_free_id_count, top_up_ids
 
 
-def preload_ids(ids_db, free_ids, assigned_ids):
+def preload_ids(
+    ids_db: Connection, free_ids: list[str], assigned_ids: list[str]
+) -> None:
     """
     Set up the database with a given set of free and assigned ids.
     """
@@ -13,13 +17,14 @@ def preload_ids(ids_db, free_ids, assigned_ids):
         """
         INSERT INTO canonical_ids (CanonicalId, Status) VALUES (?, ?)
         """,
-        [(id, "free") for id in free_ids] +
-        [(id, "assigned") for id in assigned_ids]
+        [(id, "free") for id in free_ids] + [(id, "assigned") for id in assigned_ids],
     )
     ids_db.commit()
 
 
-def assert_table_looks_like(ids_db, rows: list[tuple[str, str]], where_clause: str = ""):
+def assert_table_looks_like(
+    ids_db: Connection, rows: list[tuple[str, str]], where_clause: str = ""
+) -> None:
     cursor = ids_db.cursor()
     # ignore createdAt, as this allows us to define exact expectations at compile time,
     # without having to worry about the dynamic nature of createdAt values.
@@ -36,7 +41,9 @@ def assert_table_looks_like(ids_db, rows: list[tuple[str, str]], where_clause: s
     assert actual_rows == sorted(rows)
 
 
-def test_adequate_free_ids_does_nothing(ids_db, free_ids, assigned_ids):
+def test_adequate_free_ids_does_nothing(
+    ids_db: Connection, free_ids: list[str], assigned_ids: list[str]
+) -> None:
     preload_ids(ids_db, free_ids, assigned_ids)
     cursor = ids_db.cursor()
 
@@ -51,10 +58,15 @@ def test_adequate_free_ids_does_nothing(ids_db, free_ids, assigned_ids):
     assert before == after
 
 
-@pytest.mark.parametrize('mock_generate_ids', [
-    {2: ["vssjb422", "yp8psp82"]}
-], indirect=["mock_generate_ids"])
-def test_inadequate_free_ids_generates_more(ids_db, mock_generate_ids, free_ids, assigned_ids):
+@pytest.mark.parametrize(
+    "mock_generate_ids", [{2: ["vssjb422", "yp8psp82"]}], indirect=["mock_generate_ids"]
+)
+def test_inadequate_free_ids_generates_more(
+    ids_db: Connection,
+    mock_generate_ids: Mock,
+    free_ids: list[str],
+    assigned_ids: list[str],
+) -> None:
     preload_ids(ids_db, free_ids, assigned_ids)
     assert get_free_id_count(ids_db) < 5
     top_up_ids(ids_db, 5)
@@ -62,22 +74,33 @@ def test_inadequate_free_ids_generates_more(ids_db, mock_generate_ids, free_ids,
 
     assert_table_looks_like(
         ids_db,
-        [(id, "free") for id in free_ids + ["vssjb422", "yp8psp82"]] +
-        [(id, "assigned") for id in assigned_ids]
+        [(id, "free") for id in free_ids + ["vssjb422", "yp8psp82"]]
+        + [(id, "assigned") for id in assigned_ids],
     )
 
 
-@pytest.mark.parametrize('mock_generate_ids', [{
-    5: [
-        "aaaaaaa3",  # this id clashes with an existing free id
-        "aaaaaaa4",  # this id clashes with an existing free id
-        "bbbbbbb4",  # this id clashes with an existing assigned id
-        "aaaaaaa6",  # this id is new and should be added to the database
-        "aaaaaaa7",  # this id is new and should be added to the database
+@pytest.mark.parametrize(
+    "mock_generate_ids",
+    [
+        {
+            5: [
+                "aaaaaaa3",  # this id clashes with an existing free id
+                "aaaaaaa4",  # this id clashes with an existing free id
+                "bbbbbbb4",  # this id clashes with an existing assigned id
+                "aaaaaaa6",  # this id is new and should be added to the database
+                "aaaaaaa7",  # this id is new and should be added to the database
+            ],
+            3: ["njn9f485", "vssjb422", "yp8psp82"],  # All new ids
+        }
     ],
-    3: ["njn9f485", "vssjb422", "yp8psp82"]  # All new ids
-}], indirect=["mock_generate_ids"])
-def test_clashes(ids_db, mock_generate_ids, free_ids, assigned_ids):
+    indirect=["mock_generate_ids"],
+)
+def test_clashes(
+    ids_db: Connection,
+    mock_generate_ids: Mock,
+    free_ids: list[str],
+    assigned_ids: list[str],
+) -> None:
     preload_ids(ids_db, free_ids, assigned_ids)
 
     assert get_free_id_count(ids_db) < 8
@@ -85,22 +108,37 @@ def test_clashes(ids_db, mock_generate_ids, free_ids, assigned_ids):
     assert get_free_id_count(ids_db) == 8
     assert_table_looks_like(
         ids_db,
-        [(id, "free") for id in free_ids + ["aaaaaaa6", "aaaaaaa7", "njn9f485", "vssjb422", "yp8psp82"]] +
-        [(id, "assigned") for id in assigned_ids]
+        [
+            (id, "free")
+            for id in free_ids
+            + ["aaaaaaa6", "aaaaaaa7", "njn9f485", "vssjb422", "yp8psp82"]
+        ]
+        + [(id, "assigned") for id in assigned_ids],
     )
 
 
-@pytest.mark.parametrize('mock_generate_ids', [{
-    5: [
-        "aaaaaaa3",  # this id clashes with an existing free id
-        "aaaaaaa4",  # this id clashes with an existing free id
-        "bbbbbbb4",  # this id clashes with an existing assigned id
-        "aaaaaaa6",  # this id is new and should be added to the database
-        "aaaaaaa7",  # this id is new and should be added to the database
+@pytest.mark.parametrize(
+    "mock_generate_ids",
+    [
+        {
+            5: [
+                "aaaaaaa3",  # this id clashes with an existing free id
+                "aaaaaaa4",  # this id clashes with an existing free id
+                "bbbbbbb4",  # this id clashes with an existing assigned id
+                "aaaaaaa6",  # this id is new and should be added to the database
+                "aaaaaaa7",  # this id is new and should be added to the database
+            ],
+            3: ["aaaaaaa3", "vssjb422", "yp8psp82"],  # Only two of these are new
+        }
     ],
-    3: ["aaaaaaa3", "vssjb422", "yp8psp82"]  # Only two of these are new
-}], indirect=["mock_generate_ids"])
-def test_persistent_clashes(ids_db, mock_generate_ids, free_ids, assigned_ids):
+    indirect=["mock_generate_ids"],
+)
+def test_persistent_clashes(
+    ids_db: Connection,
+    mock_generate_ids: Mock,
+    free_ids: list[str],
+    assigned_ids: list[str],
+) -> None:
     """
     top_up_ids makes two attempts to top up to the desired count of free ids.
     It is possible that the second attempt could also generate clashing ids.
@@ -121,12 +159,15 @@ def test_persistent_clashes(ids_db, mock_generate_ids, free_ids, assigned_ids):
     assert get_free_id_count(ids_db) == 7
     assert_table_looks_like(
         ids_db,
-        [(id, "free") for id in free_ids + ["aaaaaaa6", "aaaaaaa7", "vssjb422", "yp8psp82"]] +
-        [(id, "assigned") for id in assigned_ids]
+        [
+            (id, "free")
+            for id in free_ids + ["aaaaaaa6", "aaaaaaa7", "vssjb422", "yp8psp82"]
+        ]
+        + [(id, "assigned") for id in assigned_ids],
     )
 
 
-def test_created_at_is_set(ids_db):
+def test_created_at(ids_db: Connection) -> None:
     preload_ids(ids_db, ["edcaa6qa"], [])
     top_up_ids(ids_db, 2)
     cursor = ids_db.cursor()
