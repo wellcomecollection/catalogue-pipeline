@@ -7,7 +7,11 @@
 #
 #   aws stepfunctions start-execution \
 #     --state-machine-arn <arn> \
-#     --input '{"resources":["arn:aws:rds:eu-west-1:ACCOUNT:cluster-snapshot:awsbackup:job-XXXX"]}'
+#     --input '{"id":"manual-2026-02-11","resources":["arn:aws:rds:eu-west-1:ACCOUNT:cluster-snapshot:awsbackup:job-XXXX"]}'
+#
+# The "id" field is used to build the ExportTaskIdentifier
+# (id-exp-{id}), which must be <= 60 characters. When triggered
+# by EventBridge the event ID (a UUID) is used automatically.
 # -------------------------------------------------------
 
 data "aws_caller_identity" "current" {}
@@ -186,7 +190,7 @@ locals {
         Type     = "Task"
         Resource = "arn:aws:states:::aws-sdk:rds:startExportTask"
         Parameters = {
-          "ExportTaskIdentifier.$" = "States.Format('identifiers-export-{}', $$.Execution.Name)"
+          "ExportTaskIdentifier.$" = "States.Format('id-exp-{}', $.id)"
           "SourceArn.$"            = "$.resources[0]"
           S3BucketName             = local.export_s3_bucket
           "S3Prefix.$"             = "States.Format('exports/identifiers/{}', States.ArrayGetItem(States.StringSplit($$.Execution.StartTime, 'T'), 0))"
