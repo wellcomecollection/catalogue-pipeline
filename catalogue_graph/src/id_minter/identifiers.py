@@ -9,7 +9,7 @@ Canonical IDs are chosen for the following properties:
 *   They should be **unambiguous**, so they don't use characters which can look ambiguous (e.g. letter `O` and numeral `0`)
 *   They should be **URL safe**
 
-A canonical id is an 8-character string, made up of lowercase letters and digits, excluding `O`, O`, `I`, `L` and `1`(to avoid ambiguity).
+A canonical id is an 8-character string, made up of lowercase letters and digits, excluding `O`, `0`, `I`, `L` and `1` (to avoid ambiguity).
 8 characters allows for 32^8 = 1 trillion unique identifiers, which should be enough for the foreseeable future.
 """
 
