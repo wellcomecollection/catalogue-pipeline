@@ -7,8 +7,7 @@ from unittest import mock
 
 @pytest.fixture(scope="function")
 def ids_db(tmp_path) -> sqlite3.Connection:
-    db_path = tmp_path / "test.db"
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(":memory:")
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE canonical_ids (
@@ -27,7 +26,10 @@ def ids_db(tmp_path) -> sqlite3.Connection:
 
 @pytest.fixture(scope="function")
 def mock_generate_ids(request) -> None:
-    with mock.patch("id_minter.identifiers.generate_ids", side_effect=lambda count: request.param[count]):
+    # the request parameter should be a dict mapping from the count of ids to generate, to a list of ids to return.
+    # the lambda looks up the count in the dict and, in order to more closely mimic the
+    # real behaviour of the generate_ids function, returns a generator that yields the corresponding ids.
+    with mock.patch("id_minter.identifiers.generate_ids", side_effect=lambda count: (i for i in request.param[count])):
         yield
 
 

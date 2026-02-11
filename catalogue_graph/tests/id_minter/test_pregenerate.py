@@ -21,6 +21,8 @@ def preload_ids(ids_db, free_ids, assigned_ids):
 
 def assert_table_looks_like(ids_db, rows: list[tuple[str, str]], where_clause: str = ""):
     cursor = ids_db.cursor()
+    # ignore createdAt, as this allows us to define exact expectations at compile time,
+    # without having to worry about the dynamic nature of createdAt values.
     cursor.execute(
         f"""
         SELECT CanonicalId, Status FROM canonical_ids ORDER BY CanonicalId {where_clause}
@@ -36,34 +38,31 @@ def assert_table_looks_like(ids_db, rows: list[tuple[str, str]], where_clause: s
 
 def test_adequate_free_ids_does_nothing(ids_db, free_ids, assigned_ids):
     preload_ids(ids_db, free_ids, assigned_ids)
-    # WHEN
+    cursor = ids_db.cursor()
+
+    cursor.execute("SELECT * FROM canonical_ids ORDER BY CanonicalId")
+    before = cursor.fetchall()
+
     top_up_ids(ids_db, 3)
-    # THEN
-    assert_table_looks_like(
-        ids_db,
-        [(id, "free") for id in free_ids] +
-        [(id, "assigned") for id in assigned_ids]
-    )
+
+    cursor.execute("SELECT * FROM canonical_ids ORDER BY CanonicalId")
+    after = cursor.fetchall()
+
+    assert before == after
 
 
-def test_inadequate_free_ids_generates_more(ids_db):
-    # GIVEN there are only three free ids
-    free_ids = [
-        f"aaaaaaa{i}" for i in range(2, 5)
-    ]
-    assigned_ids = [
-        f"bbbbbbb{i}" for i in range(2, 5)
-    ]
-
+@pytest.mark.parametrize('mock_generate_ids', [
+    {2: ["vssjb422", "yp8psp82"]}
+], indirect=["mock_generate_ids"])
+def test_inadequate_free_ids_generates_more(ids_db, mock_generate_ids, free_ids, assigned_ids):
     preload_ids(ids_db, free_ids, assigned_ids)
     assert get_free_id_count(ids_db) < 5
-    # WHEN
-    new_ids = top_up_ids(ids_db, 5)
+    top_up_ids(ids_db, 5)
     assert get_free_id_count(ids_db) == 5
-    # THEN
+
     assert_table_looks_like(
         ids_db,
-        [(id, "free") for id in free_ids + new_ids] +
+        [(id, "free") for id in free_ids + ["vssjb422", "yp8psp82"]] +
         [(id, "assigned") for id in assigned_ids]
     )
 
@@ -125,3 +124,18 @@ def test_persistent_clashes(ids_db, mock_generate_ids, free_ids, assigned_ids):
         [(id, "free") for id in free_ids + ["aaaaaaa6", "aaaaaaa7", "vssjb422", "yp8psp82"]] +
         [(id, "assigned") for id in assigned_ids]
     )
+
+
+def test_created_at_is_set(ids_db):
+    preload_ids(ids_db, ["edcaa6qa"], [])
+    top_up_ids(ids_db, 2)
+    cursor = ids_db.cursor()
+    cursor.execute(
+        """
+        SELECT CanonicalId, CreatedAt FROM canonical_ids WHERE Status = 'free' ORDER BY CreatedAt DESC 
+        """
+    )
+    rows = cursor.fetchall()
+    assert len(rows) == 2
+    assert rows[1][1] is not None
+    assert rows[1][1] >= rows[0][1]

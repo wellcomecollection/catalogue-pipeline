@@ -20,7 +20,8 @@ def top_up_ids(conn, desired_count: int) -> list[str]:
     # So if there are still not enough free ids after two attempts,
     # it's likely that there is a deeper issue that needs to be investigated.
     # If the first attempt has no clashes, then the second is a NOOP
-    return _top_up_ids(conn, desired_count) + _top_up_ids(conn, desired_count)
+    _top_up_ids(conn, desired_count)
+    _top_up_ids(conn, desired_count)
 
 
 def _top_up_ids(conn, desired_count: int) -> list[str]:
@@ -28,16 +29,12 @@ def _top_up_ids(conn, desired_count: int) -> list[str]:
     current_free_id_count = get_free_id_count(conn)
 
     # If there are already enough free ids, do nothing.
-    if current_free_id_count >= desired_count:
-        return []
+    if current_free_id_count < desired_count:
+        # Otherwise, generate new ids until we have enough.
+        ids_to_generate = desired_count - current_free_id_count
 
-    # Otherwise, generate new ids until we have enough.
-    ids_to_generate = desired_count - current_free_id_count
-    new_ids = list(identifiers.generate_ids(ids_to_generate))
-
-    # Save the new ids to the database.
-    save_new_ids(conn, new_ids)
-    return new_ids
+        # Save the new ids to the database.
+        save_new_ids(conn, identifiers.generate_ids(ids_to_generate))
 
 
 def get_free_id_count(conn) -> int:
