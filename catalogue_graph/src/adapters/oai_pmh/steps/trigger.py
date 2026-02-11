@@ -362,4 +362,4 @@ def run_cli(
         ),
         execution_context=execution_context,
     )
-    logger.info("Loader event", event=loader_event.model_dump(mode="json"))
+    logger.info("Loader event", loader_event=loader_event.model_dump(mode="json"))

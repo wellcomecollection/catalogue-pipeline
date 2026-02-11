@@ -1,8 +1,3 @@
-"""Axiell adapter runtime configuration.
-
-Extends OAIPMHRuntimeConfig base class for the Axiell OAI-PMH adapter.
-"""
-
 from __future__ import annotations
 
 import httpx

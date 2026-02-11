@@ -1,8 +1,8 @@
-"""Axiell adapter-specific tests.
+"""FOLIO adapter-specific tests.
 
-This package contains tests for Axiell-specific functionality:
+This package contains tests for FOLIO-specific functionality:
 - Configuration and runtime setup
-- HTTP client authentication
+- HTTP client authentication (Authorization header)
 - Integration tests for adapter wiring
 
 For core OAI-PMH implementation tests (loader, trigger, reloader logic),
