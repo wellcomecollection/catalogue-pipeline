@@ -50,6 +50,12 @@ def test_generate_ids_count() -> None:
 
 def test_generate_ids_unique() -> None:
     count = 10000
+    import random
+
+    # to make this test deterministic, as it relies on the randomness of id generation.
+    # With a fixed seed, we can be confident that if the test fails,
+    # it's because of a change to the code, not just bad luck with random generation.
+    random.seed(1)
     ids = list(identifiers.generate_ids(count))
     # Not guaranteed, but should be highly likely
     # With 32^8 possible ids, the probability of a collision when generating 10000 ids is about 0.

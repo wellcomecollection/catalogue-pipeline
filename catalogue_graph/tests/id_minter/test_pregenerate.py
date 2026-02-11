@@ -7,7 +7,7 @@ from id_minter.pregenerate import get_free_id_count, top_up_ids
 
 
 def preload_ids(
-        ids_db: Connection, free_ids: list[str], assigned_ids: list[str]
+    ids_db: Connection, free_ids: list[str], assigned_ids: list[str]
 ) -> None:
     """
     Set up the database with a given set of free and assigned ids.
@@ -23,7 +23,7 @@ def preload_ids(
 
 
 def assert_table_looks_like(
-        ids_db: Connection, rows: list[tuple[str, str]], where_clause: str = ""
+    ids_db: Connection, rows: list[tuple[str, str]], where_clause: str = ""
 ) -> None:
     cursor = ids_db.cursor()
     # ignore createdAt, as this allows us to define exact expectations at compile time,
@@ -42,7 +42,7 @@ def assert_table_looks_like(
 
 
 def test_adequate_free_ids_does_nothing(
-        ids_db: Connection, free_ids: list[str], assigned_ids: list[str]
+    ids_db: Connection, free_ids: list[str], assigned_ids: list[str]
 ) -> None:
     preload_ids(ids_db, free_ids, assigned_ids)
     cursor = ids_db.cursor()
@@ -62,10 +62,10 @@ def test_adequate_free_ids_does_nothing(
     "mock_generate_ids", [{2: ["vssjb422", "yp8psp82"]}], indirect=["mock_generate_ids"]
 )
 def test_inadequate_free_ids_generates_more(
-        ids_db: Connection,
-        mock_generate_ids: Mock,
-        free_ids: list[str],
-        assigned_ids: list[str],
+    ids_db: Connection,
+    mock_generate_ids: Mock,
+    free_ids: list[str],
+    assigned_ids: list[str],
 ) -> None:
     preload_ids(ids_db, free_ids, assigned_ids)
     assert get_free_id_count(ids_db) < 5
@@ -96,10 +96,10 @@ def test_inadequate_free_ids_generates_more(
     indirect=["mock_generate_ids"],
 )
 def test_clashes(
-        ids_db: Connection,
-        mock_generate_ids: Mock,
-        free_ids: list[str],
-        assigned_ids: list[str],
+    ids_db: Connection,
+    mock_generate_ids: Mock,
+    free_ids: list[str],
+    assigned_ids: list[str],
 ) -> None:
     preload_ids(ids_db, free_ids, assigned_ids)
 
@@ -111,7 +111,7 @@ def test_clashes(
         [
             (id, "free")
             for id in free_ids
-                      + ["aaaaaaa6", "aaaaaaa7", "njn9f485", "vssjb422", "yp8psp82"]
+            + ["aaaaaaa6", "aaaaaaa7", "njn9f485", "vssjb422", "yp8psp82"]
         ]
         + [(id, "assigned") for id in assigned_ids],
     )
@@ -134,10 +134,10 @@ def test_clashes(
     indirect=["mock_generate_ids"],
 )
 def test_persistent_clashes(
-        ids_db: Connection,
-        mock_generate_ids: Mock,
-        free_ids: list[str],
-        assigned_ids: list[str],
+    ids_db: Connection,
+    mock_generate_ids: Mock,
+    free_ids: list[str],
+    assigned_ids: list[str],
 ) -> None:
     """
     top_up_ids makes two attempts to top up to the desired count of free ids.

@@ -17,17 +17,17 @@ import random
 import string
 from collections.abc import Generator
 
-forbidden_letters = {"o", "i", "l"}
+FORBIDDEN_LETTERS = {"o", "i", "l"}
 
-number_range = [str(n) for n in range(2, 10)]
-letter_range = [c for c in string.ascii_lowercase if c not in forbidden_letters]
-allowed_character_set = letter_range + number_range
+NUMBER_RANGE = [str(n) for n in range(2, 10)]
+LETTER_RANGE = [c for c in string.ascii_lowercase if c not in FORBIDDEN_LETTERS]
+ALLOWED_CHARACTER_SET = LETTER_RANGE + NUMBER_RANGE
 IDENTIFIER_LENGTH = 8
 
 
 def generate_id() -> str:
     chars = [
-        random.choice(letter_range) if i == 0 else random.choice(allowed_character_set)
+        random.choice(LETTER_RANGE) if i == 0 else random.choice(ALLOWED_CHARACTER_SET)
         for i in range(IDENTIFIER_LENGTH)
     ]
     return "".join(chars)
