@@ -28,7 +28,7 @@ SOURCE_CONCEPT_QUERY = """
     OPTIONAL MATCH (concept)-[:SAME_AS]->(direct_match)
     
     WITH concept, linked_source_concept,
-         collect(DISTINCT coalesce(sameas_linked_source_concept, direct_match)) AS all_source_concepts
+         collect(DISTINCT sameas_linked_source_concept) + [direct_match] AS all_source_concepts
 
     RETURN 
         concept.id AS id, 
