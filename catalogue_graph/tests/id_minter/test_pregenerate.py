@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from id_minter.pregenerate import get_free_id_count, top_up_ids
+from id_minter.pregenerate import ShortfallError, get_free_id_count, top_up_ids
 
 
 def preload_ids(
@@ -155,7 +155,8 @@ def test_persistent_clashes(
     """
     preload_ids(ids_db, free_ids, assigned_ids)
     assert get_free_id_count(ids_db) < 8
-    top_up_ids(ids_db, 8)
+    with pytest.raises(ShortfallError):
+        top_up_ids(ids_db, 8)
     assert get_free_id_count(ids_db) == 7
     assert_table_looks_like(
         ids_db,

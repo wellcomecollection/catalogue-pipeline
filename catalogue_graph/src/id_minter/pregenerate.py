@@ -7,18 +7,25 @@ for the id minter to assign to new works and concepts.
 This allows the minter to operate without having to worry about id clashes.
 """
 
+import logging
 from collections.abc import Iterable
 from typing import Protocol
 
 from id_minter import identifiers
 
+logger = logging.getLogger(__name__)
+
+
+class ShortfallError(RuntimeError):
+    pass
+
 
 class DBCursor(Protocol):
-    def execute(self) -> None: ...
+    def execute(self, q: str) -> None: ...
 
     def fetchone(self) -> tuple[int]: ...
 
-    def executemany(self) -> None: ...
+    def executemany(self, q: str, args: list[tuple]) -> None: ...
 
 
 class DBConnection[T: DBCursor](Protocol):
@@ -37,21 +44,37 @@ def top_up_ids(conn: DBConnection, desired_count: int) -> None:
     # So if there are still not enough free ids after two attempts,
     # it's likely that there is a deeper issue that needs to be investigated.
     # If the first attempt has no clashes, then the second is a NOOP
-    _top_up_ids(conn, desired_count)
-    _top_up_ids(conn, desired_count)
+    _add_new_ids(conn, _get_id_shortfall(conn, desired_count))
+    second_shortfall = _get_id_shortfall(conn, desired_count)
+    if second_shortfall:
+        logger.info(
+            f"first attempt to top up ids resulted in a shortfall of {second_shortfall} ids, retrying"
+        )
+
+        _add_new_ids(conn, second_shortfall)
+        final_shortfall = _get_id_shortfall(conn, desired_count)
+
+        if final_shortfall:
+            raise ShortfallError(
+                f"After two attempts to top up ids, there are still only {desired_count - final_shortfall} free ids available, which is less than the desired {desired_count}."
+            )
 
 
-def _top_up_ids(conn: DBConnection, desired_count: int) -> None:
+def _get_id_shortfall(conn: DBConnection, desired_count: int) -> int:
     # Get the current count of free ids from the database.
     current_free_id_count = get_free_id_count(conn)
 
     # If there are already enough free ids, do nothing.
     if current_free_id_count < desired_count:
         # Otherwise, generate new ids until we have enough.
-        ids_to_generate = desired_count - current_free_id_count
+        return desired_count - current_free_id_count
+    # more than enough is enough, don't return negative numbers
+    return 0
 
-        # Save the new ids to the database.
-        save_new_ids(conn, identifiers.generate_ids(ids_to_generate))
+
+def _add_new_ids(conn: DBConnection, ids_to_generate: int) -> None:
+    logger.info(f"Generating {ids_to_generate} new ids")
+    save_new_ids(conn, identifiers.generate_ids(ids_to_generate))
 
 
 def get_free_id_count(conn: DBConnection) -> int:
@@ -67,11 +90,12 @@ def get_free_id_count(conn: DBConnection) -> int:
 
 
 def save_new_ids(conn: DBConnection, new_ids: Iterable[str]) -> None:
-    cursor = conn.cursor()
-    cursor.executemany(
-        """
-        INSERT OR IGNORE INTO canonical_ids (CanonicalId, Status) VALUES (?, 'free')
-        """,
-        [(new_id,) for new_id in new_ids],
-    )
-    conn.commit()
+    if new_ids:
+        cursor = conn.cursor()
+        cursor.executemany(
+            """
+            INSERT OR IGNORE INTO canonical_ids (CanonicalId, Status) VALUES (?, 'free')
+            """,
+            [(new_id,) for new_id in new_ids],
+        )
+        conn.commit()
