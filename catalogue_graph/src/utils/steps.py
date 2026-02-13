@@ -73,10 +73,10 @@ class StepFunctionOutput:
             logger.error("Task error", error_output=error_output)
 
 
-def run_ecs_handler(
+def run_ecs_handler[H: HandlerFunction, E: EventValidator](
     arg_parser: ArgumentParser,
-    handler: HandlerFunction,
-    event_validator: EventValidator,
+    handler: H,
+    event_validator: E,
     execution_context: ExecutionContext,
     *handler_args: Params.args,  # type: ignore[valid-type]
     **handler_kwargs: Params.kwargs,  # type: ignore[valid-type]

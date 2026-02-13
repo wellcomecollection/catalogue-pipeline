@@ -1,13 +1,9 @@
 import concurrent.futures
 from collections.abc import Callable, Generator, Iterable
 from itertools import batched, islice
-from typing import TypeVar
-
-T = TypeVar("T")
-S = TypeVar("S")
 
 
-def process_stream_in_parallel(
+def process_stream_in_parallel[T, S](
     stream: Iterable[T],
     process: Callable[[list[T]], list[S]],
     chunk_size: int,
