@@ -43,7 +43,6 @@ def top_up_ids(conn: DBConnection, desired_count: int) -> None:
     # As the overall id space is very large, the likelihood of clashes should be very low,
     # So if there are still not enough free ids after two attempts,
     # it's likely that there is a deeper issue that needs to be investigated.
-    # If the first attempt has no clashes, then the second is a NOOP
     _add_new_ids(conn, _get_id_shortfall(conn, desired_count))
     second_shortfall = _get_id_shortfall(conn, desired_count)
     if second_shortfall:
