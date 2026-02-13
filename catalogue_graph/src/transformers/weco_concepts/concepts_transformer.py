@@ -45,10 +45,15 @@ class WeCoConceptsTransformer(BaseTransformer):
         All records in this set are expected to have a Wellcome ID that refers
         to the record it is intended to override.
         """
+
+        # lookup the id elsewhere and find the corresponding source concept
+        source_id = self._prefixed_id_of(raw_data)
+        concept_id = str(raw_data["id"].strip())
+        attributes = SourceConceptSameAsAttributes(source="weco-authority")
+
         yield SourceConceptSameAs(
-            from_id=self._prefixed_id_of(raw_data),  # This record's source id
-            to_id=str(
-                raw_data["id"].strip()
-            ),  # lookup the id elsewhere and find the corresponding source concept
-            attributes=SourceConceptSameAsAttributes(source="weco-authority"),
+            from_id=source_id, to_id=concept_id, attributes=attributes
+        )
+        yield SourceConceptSameAs(
+            from_id=concept_id, to_id=source_id, attributes=attributes
         )
