@@ -17,6 +17,8 @@ resource "aws_rds_cluster" "serverless" {
   enable_http_endpoint = true
   deletion_protection  = true
 
+  manage_master_user_password = var.manage_master_user_password
+
   serverlessv2_scaling_configuration {
     max_capacity = var.max_scaling_capacity
     min_capacity = var.min_scaling_capacity
