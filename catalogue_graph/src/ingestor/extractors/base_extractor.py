@@ -3,7 +3,6 @@ from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
 import structlog
-from utils.aws import get_neptune_client
 
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
@@ -25,6 +24,7 @@ from ingestor.queries.work_queries import (
     WORK_CHILDREN_QUERY,
     WORK_CONCEPTS_QUERY,
 )
+from utils.aws import get_neptune_client
 
 logger = structlog.get_logger(__name__)
 

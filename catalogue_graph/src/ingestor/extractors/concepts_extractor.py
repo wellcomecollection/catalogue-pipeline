@@ -5,17 +5,17 @@ from itertools import batched
 from typing import get_args
 
 import structlog
+
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    ExtractedRelatedConcept,
+)
 from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
 )
 from utils.elasticsearch import ElasticsearchMode
 from utils.types import ConceptType
-
-from ingestor.models.neptune.query_result import (
-    ExtractedConcept,
-    ExtractedRelatedConcept,
-)
 
 from .base_extractor import (
     ConceptQuery,
@@ -113,7 +113,8 @@ class GraphConceptsExtractor(GraphBaseExtractor):
                 types=list(concept_types[concept_id]),
                 same_as=list(same_as),
                 linked_source_concept=linked_source_concept,
-                source_concepts=source.get("source_concepts", []) + weco_source.get("weco_source_concepts", []),
+                source_concepts=source.get("source_concepts", [])
+                + weco_source.get("weco_source_concepts", []),
             )
 
         return concepts
