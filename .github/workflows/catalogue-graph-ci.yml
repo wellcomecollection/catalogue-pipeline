@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - rk/test-d3b7f50af4dd183b283c28775395bf6d1f71205b
     paths:
       - "catalogue_graph/**"
       - ".github/workflows/catalogue-graph-ci.yml"
@@ -31,7 +32,7 @@ jobs:
     needs: [ python-checks ]
     steps:
       - uses: actions/checkout@v3
-      - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
+      - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@d3b7f50af4dd183b283c28775395bf6d1f71205b
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           folder: catalogue_graph
@@ -46,7 +47,7 @@ jobs:
     needs: [ python-checks ]
     steps:
       - uses: actions/checkout@v3
-      - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
+      - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@d3b7f50af4dd183b283c28775395bf6d1f71205b
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           folder: catalogue_graph
