@@ -5,17 +5,17 @@ from itertools import batched
 from typing import get_args
 
 import structlog
-
-from ingestor.models.neptune.query_result import (
-    ExtractedConcept,
-    ExtractedRelatedConcept,
-)
 from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
 )
 from utils.elasticsearch import ElasticsearchMode
 from utils.types import ConceptType
+
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    ExtractedRelatedConcept,
+)
 
 from .base_extractor import (
     ConceptQuery,
@@ -91,11 +91,13 @@ class GraphConceptsExtractor(GraphBaseExtractor):
     def get_concepts(self, ids: Iterable[str]) -> dict[str, ExtractedConcept]:
         concept_result = self.make_neptune_query("concept", ids)
         source_concept_result = self.make_neptune_query("source_concept", ids)
+        weco_source_concept_result = self.make_neptune_query("weco_source_concept", ids)
         concept_types = self.get_concept_types(ids)
 
         concepts = {}
         for concept_id, concept in concept_result.items():
             source = source_concept_result.get(concept_id, {})
+            weco_source = weco_source_concept_result.get(concept_id, {})
 
             # Remove `concept_id` from the list of 'same as' concepts
             same_as = set(self.get_same_as(concept_id)).difference([concept_id])
@@ -111,7 +113,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
                 types=list(concept_types[concept_id]),
                 same_as=list(same_as),
                 linked_source_concept=linked_source_concept,
-                source_concepts=source.get("source_concepts", []),
+                source_concepts=source.get("source_concepts", []) + weco_source.get("weco_source_concepts", []),
             )
 
         return concepts

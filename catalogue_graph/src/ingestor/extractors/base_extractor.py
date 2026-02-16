@@ -3,6 +3,7 @@ from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
 import structlog
+from utils.aws import get_neptune_client
 
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
@@ -17,13 +18,13 @@ from ingestor.queries.concept_queries import (
     RELATED_TOPICS_QUERY,
     SAME_AS_CONCEPT_QUERY,
     SOURCE_CONCEPT_QUERY,
+    WECO_SOURCE_CONCEPT_QUERY,
 )
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
     WORK_CHILDREN_QUERY,
     WORK_CONCEPTS_QUERY,
 )
-from utils.aws import get_neptune_client
 
 logger = structlog.get_logger(__name__)
 
@@ -41,6 +42,7 @@ ConceptQuery = Literal[
     "concept",
     "concept_type",
     "source_concept",
+    "weco_source_concept",
     "same_as_concept",
     ConceptRelatedQuery,
 ]
@@ -59,6 +61,7 @@ NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
     "concept": CONCEPT_QUERY,
     "concept_type": CONCEPT_TYPE_QUERY,
     "source_concept": SOURCE_CONCEPT_QUERY,
+    "weco_source_concept": WECO_SOURCE_CONCEPT_QUERY,
     "same_as_concept": SAME_AS_CONCEPT_QUERY,
     "related_to": RELATED_TO_QUERY,
     "fields_of_work": FIELDS_OF_WORK_QUERY,
