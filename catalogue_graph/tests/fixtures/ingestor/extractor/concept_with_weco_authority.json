@@ -57,7 +57,7 @@
         "source": "weco-authority",
         "label": "Wellcome Label",
         "description": "Wellcome Description",
-        "image_urls": "www.image.info.json"
+        "image_urls": "www.image.info.json||www.image2.info.json"
       }
     }
   ],
