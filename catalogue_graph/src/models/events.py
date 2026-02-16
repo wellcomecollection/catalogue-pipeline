@@ -36,7 +36,8 @@ class BasePipelineEvent(BaseModel):
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
         window = IncrementalWindow.from_argparser(args)
-        index_dates = PipelineIndexDates(merged=args.index_date_merged)
+        merged = getattr(args, "index_date_merged", None)
+        index_dates = PipelineIndexDates(merged=merged)
         return cls(**args.__dict__, window=window, index_dates=index_dates)
 
 

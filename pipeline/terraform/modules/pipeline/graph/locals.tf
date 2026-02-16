@@ -61,9 +61,14 @@ locals {
       "entity_type" : "edges"
     },
     {
-      "label" : "Wellcome Concepts",
+      "label" : "Wellcome Concept Nodes",
       "transformer_type" : "weco_concepts",
       "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wellcome Concept Edges",
+      "transformer_type" : "weco_concepts",
+      "entity_type" : "edges"
     },
     {
       "label" : "Wikidata Linked LoC Concept Nodes",
