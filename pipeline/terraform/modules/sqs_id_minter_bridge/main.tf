@@ -16,9 +16,13 @@ locals {
         Type    = "Pass"
         Comment = "Parse SQS messages and extract source identifiers from SNS envelopes"
         Output = {
-          # Parse each SQS message body (SNS envelope JSON) and extract the Message field
-          # $states.input is the array of SQS records from EventBridge Pipe
-          "sourceIdentifiers" = "{% $map($states.input, function($r) { $parse($r.body).Message }) %}"
+          # Parse each SQS message body (SNS envelope JSON) and extract the Message field.
+          # $states.input is the array of SQS records from EventBridge Pipe.
+          # We wrap in $append([], ...) to guarantee an array even when there's
+          # only one message in the batch — JSONata's $map returns a scalar for
+          # single-element inputs, which would cause the id_minter to fail with
+          # "expecting array".
+          "sourceIdentifiers" = "{% $append([], $map($states.input, function($r) { $parse($r.body).Message })) %}"
           # Use the execution name as the jobId
           "jobId" = "{% $states.context.Execution.Name %}"
         }
