@@ -30,6 +30,9 @@ dependencies = [
     "oai-pmh-client",
     "structlog>=24.1.0",
     "pip-system-certs>=5.3",
+    "pymysql>=1.0.0",
+    "cryptography>=46.0.0",
+    "yoyo-migrations>=8.2.0",
 ]
 
 [tool.uv]
@@ -107,5 +110,5 @@ exclude = ["build/.*"]
 
 # Ignore untyped imports for external libraries without stubs
 [[tool.mypy.overrides]]
-module = ["pyarrow.*", "boto3.*", "smart_open.*", "pymarc.*", "oai_pmh_client.*"]
+module = ["pyarrow.*", "boto3.*", "smart_open.*", "pymarc.*", "oai_pmh_client.*", "pymysql.*", "yoyo.*"]
 ignore_missing_imports = true
