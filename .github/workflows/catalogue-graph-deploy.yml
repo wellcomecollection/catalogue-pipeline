@@ -81,6 +81,8 @@ jobs:
             ebsco-adapter-loader,
             axiell-adapter-trigger,
             axiell-adapter-loader,
+            folio-adapter-trigger,
+            folio-adapter-loader,
           ]
     steps:
       - uses: actions/checkout@v3
