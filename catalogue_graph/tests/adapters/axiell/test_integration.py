@@ -19,10 +19,7 @@ from tests.adapters.oai_pmh.conftest import create_window_row, populate_window_s
 
 
 class TestAxiellConfig:
-    """Test that Axiell adapter has correct configuration."""
-
     def test_axiell_config_values(self) -> None:
-        """Verify all Axiell-specific configuration is correct."""
         cfg = AXIELL_CONFIG.config
 
         # Adapter identity
@@ -43,13 +40,10 @@ class TestAxiellConfig:
 
 
 class TestAxiellTriggerIntegration:
-    """Integration tests for the Axiell trigger step."""
-
     def test_trigger_builds_valid_loader_event(
         self,
         temporary_window_status_table: IcebergTable,
     ) -> None:
-        """Test trigger step produces a valid loader event using local table."""
         from adapters.axiell.steps import trigger
 
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
@@ -73,7 +67,6 @@ class TestAxiellTriggerIntegration:
         self,
         temporary_window_status_table: IcebergTable,
     ) -> None:
-        """Test trigger resumes from last successful window in local table."""
         from adapters.axiell.steps import trigger
 
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
@@ -95,15 +88,12 @@ class TestAxiellTriggerIntegration:
 
 
 class TestAxiellLoaderIntegration:
-    """Integration tests for the Axiell loader step."""
-
     def test_loader_runtime_builds_with_local_table(
         self,
         monkeypatch: pytest.MonkeyPatch,
         temporary_table: IcebergTable,
         temporary_window_status_table: IcebergTable,
     ) -> None:
-        """Test loader runtime builds correctly with local tables."""
         from adapters.axiell.steps import loader
         from adapters.oai_pmh.steps.loader import LoaderRuntime, LoaderStepConfig
         from adapters.utils.window_store import WindowStore
@@ -136,15 +126,12 @@ class TestAxiellLoaderIntegration:
 
 
 class TestAxiellReloaderIntegration:
-    """Integration tests for the Axiell reloader step."""
-
     def test_reloader_runtime_builds_with_local_table(
         self,
         monkeypatch: pytest.MonkeyPatch,
         temporary_table: IcebergTable,
         temporary_window_status_table: IcebergTable,
     ) -> None:
-        """Test reloader runtime builds correctly with local tables."""
         from adapters.axiell.steps import reloader
         from adapters.oai_pmh.steps.reloader import ReloaderRuntime, ReloaderStepConfig
         from adapters.utils.window_store import WindowStore
