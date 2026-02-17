@@ -1,7 +1,7 @@
-"""Trigger step for the Axiell adapter.
+"""Trigger step for the FOLIO adapter.
 
 Thin wrapper around the generic OAI-PMH trigger step, configured with
-Axiell-specific settings.
+FOLIO-specific settings.
 """
 
 from __future__ import annotations
@@ -9,8 +9,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from adapters.axiell import config
-from adapters.axiell.runtime import AXIELL_CONFIG
+from adapters.folio import config
+from adapters.folio.runtime import FOLIO_CONFIG
 from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHTriggerEvent
 from adapters.oai_pmh.steps import trigger as base_trigger
 from adapters.oai_pmh.steps.trigger import TriggerRuntime, TriggerStepConfig
@@ -31,7 +31,7 @@ def build_window_request(
     window_lookback_days: int | None = None,
     notifier: WindowNotifier | None = None,
 ) -> OAIPMHLoaderEvent:
-    """Build a loader event for the Axiell adapter."""
+    """Build a loader event for the FOLIO adapter."""
     runtime = TriggerRuntime(
         store=store,
         notifier=notifier,
@@ -42,14 +42,13 @@ def build_window_request(
         max_pending_windows=config.MAX_PENDING_WINDOWS,
         oai_metadata_prefix=config.OAI_METADATA_PREFIX,
         oai_set_spec=config.OAI_SET_SPEC,
-        adapter_name=AXIELL_CONFIG.config.adapter_name,
+        adapter_name=FOLIO_CONFIG.config.adapter_name,
     )
     generic_event = base_trigger.build_window_request(
         runtime=runtime,
         now=now,
         job_id=job_id,
     )
-    # Convert to Axiell-specific type for backwards compatibility
     return OAIPMHLoaderEvent.model_validate(generic_event.model_dump())
 
 
@@ -58,7 +57,7 @@ def handler(
     runtime: TriggerRuntime,
     execution_context: ExecutionContext | None = None,
 ) -> OAIPMHLoaderEvent:
-    """Execute the Axiell trigger step."""
+    """Execute the FOLIO trigger step."""
     generic_event = _handler(event, runtime, execution_context)
     return OAIPMHLoaderEvent.model_validate(generic_event.model_dump())
 
@@ -66,19 +65,19 @@ def handler(
 def build_runtime(
     config_obj: TriggerStepConfig | None = None,
 ) -> TriggerRuntime:
-    """Build runtime for the Axiell trigger step."""
+    """Build runtime for the FOLIO trigger step."""
     cfg = config_obj or TriggerStepConfig()
-    return _build_runtime(AXIELL_CONFIG, cfg)
+    return _build_runtime(FOLIO_CONFIG, cfg)
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    """Lambda entry point for the Axiell trigger step."""
-    return base_trigger.lambda_handler(event, context, config=AXIELL_CONFIG)
+    """Lambda entry point for the FOLIO trigger step."""
+    return base_trigger.lambda_handler(event, context, config=FOLIO_CONFIG)
 
 
 def main() -> None:
-    """CLI entry point for the Axiell trigger step."""
-    base_trigger.run_cli(AXIELL_CONFIG)
+    """CLI entry point for the FOLIO trigger step."""
+    base_trigger.run_cli(FOLIO_CONFIG)
 
 
 if __name__ == "__main__":
