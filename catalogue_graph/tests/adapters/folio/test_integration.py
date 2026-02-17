@@ -146,8 +146,7 @@ class TestFolioReloaderIntegration:
     ) -> None:
         """Test reloader runtime builds correctly with local tables."""
         from adapters.folio.steps import reloader
-        from adapters.folio.steps.reloader import FolioAdapterReloaderConfig
-        from adapters.oai_pmh.steps.reloader import ReloaderRuntime
+        from adapters.oai_pmh.steps.reloader import ReloaderRuntime, ReloaderStepConfig
         from adapters.utils.window_store import WindowStore
         from tests.adapters.oai_pmh.conftest import StubOAIClient
 
@@ -168,9 +167,7 @@ class TestFolioReloaderIntegration:
             lambda http_client=None: StubOAIClient(),
         )
 
-        config_obj = FolioAdapterReloaderConfig(
-            use_rest_api_table=False, window_minutes=15
-        )
+        config_obj = ReloaderStepConfig(use_rest_api_table=False, window_minutes=15)
         runtime = reloader.build_runtime(config_obj)
 
         assert isinstance(runtime, ReloaderRuntime)

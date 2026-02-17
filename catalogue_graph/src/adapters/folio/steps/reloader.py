@@ -9,17 +9,14 @@ from typing import Any
 
 from adapters.folio.runtime import FOLIO_CONFIG
 from adapters.oai_pmh.steps import reloader as base_reloader
-from adapters.oai_pmh.steps.reloader import ReloaderRuntime
-from adapters.oai_pmh.steps.reloader import (
-    ReloaderStepConfig as FolioAdapterReloaderConfig,
-)
+from adapters.oai_pmh.steps.reloader import ReloaderRuntime, ReloaderStepConfig
 
 
 def build_runtime(
-    config_obj: FolioAdapterReloaderConfig | None = None,
+    config_obj: ReloaderStepConfig | None = None,
 ) -> ReloaderRuntime:
     """Build FOLIO reloader runtime from config."""
-    cfg = config_obj or FolioAdapterReloaderConfig()
+    cfg = config_obj or ReloaderStepConfig()
     return base_reloader.build_runtime(FOLIO_CONFIG, cfg)
 
 

@@ -13,10 +13,7 @@ from adapters.folio import config
 from adapters.folio.runtime import FOLIO_CONFIG
 from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHTriggerEvent
 from adapters.oai_pmh.steps import trigger as base_trigger
-from adapters.oai_pmh.steps.trigger import TriggerRuntime
-from adapters.oai_pmh.steps.trigger import (
-    TriggerStepConfig as FolioAdapterTriggerConfig,
-)
+from adapters.oai_pmh.steps.trigger import TriggerRuntime, TriggerStepConfig
 from adapters.oai_pmh.steps.trigger import build_runtime as _build_runtime
 from adapters.oai_pmh.steps.trigger import handler as _handler
 from adapters.utils.window_notifier import WindowNotifier
@@ -66,10 +63,10 @@ def handler(
 
 
 def build_runtime(
-    config_obj: FolioAdapterTriggerConfig | None = None,
+    config_obj: TriggerStepConfig | None = None,
 ) -> TriggerRuntime:
     """Build runtime for the FOLIO trigger step."""
-    cfg = config_obj or FolioAdapterTriggerConfig()
+    cfg = config_obj or TriggerStepConfig()
     return _build_runtime(FOLIO_CONFIG, cfg)
 
 

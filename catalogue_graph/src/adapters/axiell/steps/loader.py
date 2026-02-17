@@ -11,16 +11,13 @@ from typing import Any
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.oai_pmh.models.step_events import OAIPMHLoaderResponse
 from adapters.oai_pmh.steps import loader as base_loader
-from adapters.oai_pmh.steps.loader import LoaderRuntime
-from adapters.oai_pmh.steps.loader import (
-    LoaderStepConfig as AxiellAdapterLoaderConfig,
-)
+from adapters.oai_pmh.steps.loader import LoaderRuntime, LoaderStepConfig
 from adapters.oai_pmh.steps.loader import build_runtime as _build_runtime
 from adapters.oai_pmh.steps.loader import handler as _handler
 
 
 def build_runtime(
-    config_obj: AxiellAdapterLoaderConfig | None = None,
+    config_obj: LoaderStepConfig | None = None,
 ) -> LoaderRuntime:
     """Build runtime using Axiell config (backwards compatible)."""
     return _build_runtime(AXIELL_CONFIG, config_obj)
