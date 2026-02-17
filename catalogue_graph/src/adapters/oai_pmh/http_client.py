@@ -39,7 +39,10 @@ class OAIPMHHTTPClient(httpx.Client):
         super().__init__(timeout=timeout, **kwargs)
 
     def build_request(self, method: str, url: URLTypes, **kwargs: Any) -> Request:
-        headers = kwargs.pop("headers", {})
-        headers.setdefault(self._auth_header, self._token)
+        # Normalise headers to an httpx.Headers instance so we can safely mutate it,
+        # regardless of whether the caller passed None, a mapping, or a sequence.
+        headers = httpx.Headers(kwargs.pop("headers", None))
+        if self._auth_header not in headers:
+            headers[self._auth_header] = self._token
         kwargs["headers"] = headers
         return super().build_request(method, url, **kwargs)
