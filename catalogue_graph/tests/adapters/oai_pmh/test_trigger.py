@@ -260,8 +260,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        MockSNSClient.reset_mocks()
-
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
 
         # Create a gap: two successful windows with a 2-hour gap between them
@@ -308,8 +306,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        MockSNSClient.reset_mocks()
-
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
 
         # Create recent successful window (5 minutes ago)
@@ -367,8 +363,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        MockSNSClient.reset_mocks()
-
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
 
         # Create old successful window that will trigger lag error
@@ -407,9 +401,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """These gaps are about to be processed by the current batch."""
-        MockSNSClient.reset_mocks()
-
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
 
         # Single successful window that ended 3 hours ago.
@@ -454,8 +445,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        MockSNSClient.reset_mocks()
-
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
 
         # Create windows with a historical gap:
