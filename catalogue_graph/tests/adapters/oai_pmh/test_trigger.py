@@ -54,14 +54,11 @@ def _create_trigger_runtime(
 # build_window_request tests (parameterized across adapters)
 # ---------------------------------------------------------------------------
 class TestBuildWindowRequest:
-    """Tests for the build_window_request function."""
-
     def test_uses_lookback_when_no_history(
         self,
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that lookback is used when no successful windows exist."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         store = populate_window_store(temporary_window_status_table, [])
         runtime = _create_trigger_runtime(
@@ -85,7 +82,6 @@ class TestBuildWindowRequest:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that custom lookback days is respected."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         store = populate_window_store(temporary_window_status_table, [])
         runtime = _create_trigger_runtime(
@@ -104,7 +100,6 @@ class TestBuildWindowRequest:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that window_minutes is embedded in the request."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         store = populate_window_store(temporary_window_status_table, [])
         runtime = _create_trigger_runtime(
@@ -122,7 +117,6 @@ class TestBuildWindowRequest:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that last successful window end time is used as start."""
         now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
         minutes_ago = random.randint(2, 40)
         last_success_end = now - timedelta(minutes=minutes_ago)
@@ -146,7 +140,6 @@ class TestBuildWindowRequest:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that the latest successful window is used when multiple exist."""
         now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
 
         # Create windows with different end times
@@ -180,7 +173,6 @@ class TestBuildWindowRequest:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that an error is raised when lag exceeds the limit."""
         now = datetime(2025, 11, 17, 13, 0, tzinfo=UTC)
         old_end = now - timedelta(hours=2)
         store = populate_window_store(
@@ -206,7 +198,6 @@ class TestBuildWindowRequest:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that lag enforcement can be disabled."""
         now = datetime(2025, 11, 17, 13, 0, tzinfo=UTC)
         old_end = now - timedelta(hours=2)
         store = populate_window_store(
@@ -234,7 +225,6 @@ class TestBuildWindowRequest:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that max_pending_windows is applied."""
         now = datetime(2025, 11, 17, 12, 45, tzinfo=UTC)
         store = populate_window_store(temporary_window_status_table, [])
         runtime = _create_trigger_runtime(
@@ -252,7 +242,6 @@ class TestBuildWindowRequest:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that custom job_id is used when provided."""
         now = datetime(2025, 11, 17, 12, 45, tzinfo=UTC)
         store = populate_window_store(temporary_window_status_table, [])
         runtime = _create_trigger_runtime(store, adapter_runtime_config)
@@ -266,14 +255,11 @@ class TestBuildWindowRequest:
 # Window gap notification tests (parameterized across adapters)
 # ---------------------------------------------------------------------------
 class TestWindowGapNotifications:
-    """Tests for window gap detection and notification."""
-
     def test_notifies_when_gaps_detected(
         self,
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that notifier is called when coverage gaps are detected."""
         MockSNSClient.reset_mocks()
 
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
@@ -322,7 +308,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that notifier is not called when no coverage gaps exist."""
         MockSNSClient.reset_mocks()
 
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
@@ -364,7 +349,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that build_window_request works when notifier is None."""
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
         store = populate_window_store(temporary_window_status_table, [])
         runtime = _create_trigger_runtime(
@@ -383,7 +367,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that notifier is not called when lag enforcement raises an error."""
         MockSNSClient.reset_mocks()
 
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
@@ -424,10 +407,7 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that gaps between start_time and now are NOT reported.
-
-        These gaps are about to be processed by the current batch.
-        """
+        """These gaps are about to be processed by the current batch."""
         MockSNSClient.reset_mocks()
 
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
@@ -474,7 +454,6 @@ class TestWindowGapNotifications:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that only historical gaps (before start_time) are reported."""
         MockSNSClient.reset_mocks()
 
         now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
@@ -527,14 +506,11 @@ class TestWindowGapNotifications:
 # handler tests
 # ---------------------------------------------------------------------------
 class TestHandler:
-    """Tests for the handler function."""
-
     def test_handler_creates_loader_event(
         self,
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that handler returns a properly formatted loader event."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         store = populate_window_store(temporary_window_status_table, [])
         runtime = _create_trigger_runtime(store, adapter_runtime_config)

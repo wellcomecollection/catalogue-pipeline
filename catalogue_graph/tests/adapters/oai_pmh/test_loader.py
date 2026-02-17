@@ -78,14 +78,11 @@ def _create_success_summary(
 # execute_loader tests (parameterized across adapters)
 # ---------------------------------------------------------------------------
 class TestExecuteLoader:
-    """Tests for the execute_loader function."""
-
     def test_updates_iceberg(
         self,
         loader_runtime: LoaderRuntime,
         adapter_name: str,
     ) -> None:
-        """Test that execute_loader updates the Iceberg table."""
         req = _create_loader_event()
         summary = _create_success_summary(req, record_ids=["id-1"])
 
@@ -111,7 +108,6 @@ class TestExecuteLoader:
         self,
         loader_runtime: LoaderRuntime,
     ) -> None:
-        """Test that only changed records are counted, not all records."""
         req = _create_loader_event()
         # 2 records seen, but only 1 changed
         summary = _create_success_summary(
@@ -133,7 +129,6 @@ class TestExecuteLoader:
         loader_runtime: LoaderRuntime,
         adapter_store_client: AdapterStore,
     ) -> None:
-        """Test that empty windows are handled gracefully."""
         req = _create_loader_event()
         summary = _create_success_summary(
             req, record_ids=[], changed_record_ids=[], changeset_id=None
@@ -154,7 +149,6 @@ class TestExecuteLoader:
         self,
         loader_runtime: LoaderRuntime,
     ) -> None:
-        """Test that an error is raised when no windows are processed."""
         req = _create_loader_event()
 
         with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
@@ -168,14 +162,11 @@ class TestExecuteLoader:
 # handler tests (parameterized across adapters)
 # ---------------------------------------------------------------------------
 class TestHandler:
-    """Tests for the handler function."""
-
     def test_publishes_loader_report(
         self,
         loader_runtime: LoaderRuntime,
         adapter_name: str,
     ) -> None:
-        """Test that handler publishes a loader report with correct adapter type."""
         req = _create_loader_event()
         summary = _create_success_summary(req, record_ids=["id-1"])
 
@@ -208,14 +199,11 @@ WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
 
 
 class TestWindowRecordWriter:
-    """Tests for the WindowRecordWriter class."""
-
     def test_persists_window(
         self,
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        """Test that WindowRecordWriter persists records correctly."""
         writer = WindowRecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
@@ -250,7 +238,6 @@ class TestWindowRecordWriter:
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        """Test that empty windows are handled correctly."""
         writer = WindowRecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
@@ -271,7 +258,6 @@ class TestWindowRecordWriter:
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        """Test that deleted records are handled correctly (soft delete)."""
         writer = WindowRecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
@@ -308,7 +294,6 @@ class TestWindowRecordWriter:
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        """Test that when a record is deleted, its content is preserved."""
         writer = WindowRecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
@@ -370,7 +355,6 @@ class TestWindowRecordWriter:
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        """Test that duplicate data doesn't create a new changeset."""
         writer = WindowRecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,

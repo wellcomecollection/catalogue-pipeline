@@ -1,9 +1,3 @@
-"""Tests for the OAI-PMH WindowRecordWriter with mocked dependencies.
-
-These tests verify the record writing logic in isolation using mocks.
-See test_loader.py for integration tests with real Iceberg tables.
-"""
-
 from __future__ import annotations
 
 import datetime
@@ -19,10 +13,7 @@ from adapters.utils.schemata import ARROW_SCHEMA
 
 
 class TestWindowRecordWriterMocked:
-    """Tests for WindowRecordWriter using mocked dependencies."""
-
     def test_writes_records_to_store(self) -> None:
-        """Test that records are written correctly to the store."""
         mock_store = Mock(spec=AdapterStore)
         mock_store.incremental_update.return_value = Mock(
             changeset_id="123", updated_record_ids=["rec1"]
@@ -75,7 +66,6 @@ class TestWindowRecordWriterMocked:
         assert row["deleted"] is False
 
     def test_handles_empty_records(self) -> None:
-        """Test that empty record lists are handled correctly."""
         mock_store = Mock(spec=AdapterStore)
 
         writer = WindowRecordWriter(
@@ -95,7 +85,6 @@ class TestWindowRecordWriterMocked:
         mock_store.incremental_update.assert_not_called()
 
     def test_handles_deleted_records(self) -> None:
-        """Test that deleted records are marked correctly."""
         mock_store = Mock(spec=AdapterStore)
         mock_store.incremental_update.return_value = Mock(
             changeset_id="456", updated_record_ids=["rec1"]

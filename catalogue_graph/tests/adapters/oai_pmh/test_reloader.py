@@ -37,14 +37,11 @@ def _mock_loader_runtime(window_minutes: int = 15) -> LoaderRuntime:
 # handler tests (parameterized across adapters)
 # ---------------------------------------------------------------------------
 class TestHandler:
-    """Tests for the reloader handler function."""
-
     def test_with_no_gaps(
         self,
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that reloader handles ranges with complete coverage."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         store = populate_window_store(
             temporary_window_status_table,
@@ -80,7 +77,6 @@ class TestHandler:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that reloader identifies and processes a single gap."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         gap_start = now - timedelta(minutes=30)
         gap_end = now - timedelta(minutes=15)
@@ -145,7 +141,6 @@ class TestHandler:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that reloader processes multiple gaps sequentially."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
 
         # Create windows with two gaps
@@ -207,7 +202,6 @@ class TestHandler:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that dry-run mode identifies gaps without processing them."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         gap_start = now - timedelta(minutes=30)
         gap_end = now - timedelta(minutes=15)
@@ -246,7 +240,6 @@ class TestHandler:
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """Test that reloader captures and reports errors during gap processing."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         gap_start = now - timedelta(minutes=30)
 
@@ -289,7 +282,6 @@ class TestHandler:
         oai_metadata_prefix: str,
         oai_set_spec: str | None,
     ) -> None:
-        """Test that reloader constructs loader event with correct adapter settings."""
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
         gap_start = now - timedelta(minutes=30)
 
