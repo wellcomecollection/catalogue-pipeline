@@ -6,7 +6,6 @@ from typing import Any
 
 import httpx
 from httpx import Request
-from httpx._types import URLTypes
 
 
 class OAIPMHHTTPClient(httpx.Client):
@@ -38,7 +37,9 @@ class OAIPMHHTTPClient(httpx.Client):
         self._auth_header = auth_header
         super().__init__(timeout=timeout, **kwargs)
 
-    def build_request(self, method: str, url: URLTypes, **kwargs: Any) -> Request:
+    def build_request(
+        self, method: str, url: httpx.URL | str, **kwargs: Any
+    ) -> Request:
         # Normalise headers to an httpx.Headers instance so we can safely mutate it,
         # regardless of whether the caller passed None, a mapping, or a sequence.
         headers = httpx.Headers(kwargs.pop("headers", None))
