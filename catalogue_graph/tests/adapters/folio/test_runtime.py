@@ -1,5 +1,3 @@
-"""Tests for the FOLIO adapter runtime configuration."""
-
 from __future__ import annotations
 
 from unittest.mock import patch
@@ -13,34 +11,28 @@ from adapters.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
 
 
 def test_folio_runtime_config_extends_base() -> None:
-    """Test that FolioRuntimeConfig extends OAIPMHRuntimeConfig."""
     assert isinstance(FOLIO_CONFIG, OAIPMHRuntimeConfig)
     assert isinstance(FOLIO_CONFIG, FolioRuntimeConfig)
 
 
 def test_folio_runtime_config_has_correct_adapter_name() -> None:
-    """Test that FOLIO config has the correct adapter name."""
     assert FOLIO_CONFIG.config.adapter_name == "folio"
     assert FOLIO_CONFIG.config.adapter_namespace == "folio"
 
 
 def test_folio_runtime_config_has_correct_metadata_prefix() -> None:
-    """Test that FOLIO config uses marc21_withholdings metadata prefix."""
     assert FOLIO_CONFIG.config.oai_metadata_prefix == "marc21_withholdings"
 
 
 def test_folio_runtime_config_has_no_set_spec_by_default() -> None:
-    """Test that FOLIO config has no OAI set spec by default."""
     assert FOLIO_CONFIG.config.oai_set_spec is None
 
 
 def test_folio_adapter_config_is_frozen() -> None:
-    """Test that the adapter config is immutable."""
     assert FOLIO_ADAPTER_CONFIG.model_config.get("frozen") is True
 
 
 def test_folio_runtime_build_http_client() -> None:
-    """Test that build_http_client returns an OAIPMHHTTPClient."""
     with patch("adapters.folio.clients._oai_token", return_value="test-token"):
         client = FOLIO_CONFIG.build_http_client()
 
@@ -50,7 +42,6 @@ def test_folio_runtime_build_http_client() -> None:
 
 
 def test_folio_runtime_get_oai_endpoint() -> None:
-    """Test that get_oai_endpoint retrieves from SSM."""
     expected_url = "https://edge-wellcome.folio.ebsco.com/oai"
 
     with patch("adapters.folio.clients._oai_endpoint", return_value=expected_url):
@@ -60,7 +51,6 @@ def test_folio_runtime_get_oai_endpoint() -> None:
 
 
 def test_folio_runtime_accepts_custom_config() -> None:
-    """Test that FolioRuntimeConfig accepts a custom OAIPMHAdapterConfig."""
     custom_config = OAIPMHAdapterConfig(
         adapter_name="folio-custom",
         adapter_namespace="folio_custom",
@@ -95,7 +85,6 @@ def test_folio_runtime_accepts_custom_config() -> None:
 
 
 def test_folio_config_singleton_is_consistent() -> None:
-    """Test that FOLIO_CONFIG singleton has consistent values."""
     # Access multiple times, should be same instance
     from adapters.folio.runtime import FOLIO_CONFIG as config_import_1
     from adapters.folio.runtime import FOLIO_CONFIG as config_import_2
@@ -105,7 +94,6 @@ def test_folio_config_singleton_is_consistent() -> None:
 
 
 def test_folio_runtime_build_oai_client() -> None:
-    """Test that build_oai_client returns an OAIClient."""
     from oai_pmh_client.client import OAIClient
 
     with (

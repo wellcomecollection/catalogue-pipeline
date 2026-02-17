@@ -19,10 +19,7 @@ from tests.adapters.oai_pmh.conftest import create_window_row, populate_window_s
 
 
 class TestFolioConfig:
-    """Test that FOLIO adapter has correct configuration."""
-
     def test_folio_config_values(self) -> None:
-        """Verify all FOLIO-specific configuration is correct."""
         cfg = FOLIO_CONFIG.config
 
         # Adapter identity
@@ -43,13 +40,10 @@ class TestFolioConfig:
 
 
 class TestFolioTriggerIntegration:
-    """Integration tests for the FOLIO trigger step."""
-
     def test_trigger_builds_valid_loader_event(
         self,
         temporary_window_status_table: IcebergTable,
     ) -> None:
-        """Test trigger step produces a valid loader event using local table."""
         from adapters.folio.steps import trigger
 
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
@@ -73,7 +67,6 @@ class TestFolioTriggerIntegration:
         self,
         temporary_window_status_table: IcebergTable,
     ) -> None:
-        """Test trigger resumes from last successful window in local table."""
         from adapters.folio.steps import trigger
 
         now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
@@ -95,15 +88,12 @@ class TestFolioTriggerIntegration:
 
 
 class TestFolioLoaderIntegration:
-    """Integration tests for the FOLIO loader step."""
-
     def test_loader_runtime_builds_with_local_table(
         self,
         monkeypatch: pytest.MonkeyPatch,
         temporary_table: IcebergTable,
         temporary_window_status_table: IcebergTable,
     ) -> None:
-        """Test loader runtime builds correctly with local tables."""
         from adapters.folio.steps import loader
         from adapters.oai_pmh.steps.loader import LoaderRuntime, LoaderStepConfig
         from adapters.utils.window_store import WindowStore
@@ -136,15 +126,12 @@ class TestFolioLoaderIntegration:
 
 
 class TestFolioReloaderIntegration:
-    """Integration tests for the FOLIO reloader step."""
-
     def test_reloader_runtime_builds_with_local_table(
         self,
         monkeypatch: pytest.MonkeyPatch,
         temporary_table: IcebergTable,
         temporary_window_status_table: IcebergTable,
     ) -> None:
-        """Test reloader runtime builds correctly with local tables."""
         from adapters.folio.steps import reloader
         from adapters.oai_pmh.steps.reloader import ReloaderRuntime, ReloaderStepConfig
         from adapters.utils.window_store import WindowStore
