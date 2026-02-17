@@ -24,7 +24,7 @@ CONCEPT_TYPE_QUERY = """
 SOURCE_CONCEPT_QUERY = """
     UNWIND $ids AS id
     MATCH (concept:Concept {`~id`: id})
-    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(sameas_linked_source_concept)
+    OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(sameas_linked_source_concept)
     OPTIONAL MATCH (concept)-[:SAME_AS]->(direct_match)
     
     WITH concept, linked_source_concept,
