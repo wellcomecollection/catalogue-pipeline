@@ -7,8 +7,8 @@ data "aws_ssm_parameter" "rds_password" {
 }
 
 locals {
-  rds_username = data.aws_ssm_parameter.rds_username.value
-  rds_password = data.aws_ssm_parameter.rds_password.value
+  username = data.aws_ssm_parameter.rds_username.value
+  password = data.aws_ssm_parameter.rds_password.value
 }
 
 resource "aws_db_subnet_group" "default" {
@@ -51,8 +51,8 @@ module "identifiers_serverless_rds_cluster" {
 
   cluster_identifier = "identifiers-serverless"
   database_name      = "identifiers"
-  master_username    = local.rds_username
-  master_password    = local.rds_password
+  master_username    = local.username
+  master_password    = local.password
 
   db_security_group_id     = aws_security_group.database_sg.id
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
@@ -100,8 +100,10 @@ module "identifiers_v2_serverless_rds_cluster" {
 
   cluster_identifier = "identifiers-v2-serverless"
   database_name      = "identifiers"
-  master_username    = local.rds_username
-  master_password    = local.rds_password
+  master_username    = local.username
+  master_password    = null
+
+  manage_master_user_password = true
 
   db_security_group_id     = aws_security_group.database_v2_sg.id
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
