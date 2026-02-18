@@ -9,7 +9,7 @@ import boto3
 import smart_open
 import structlog
 
-from clients.base_neptune_client import BaseNeptuneClient
+from clients.neptune_client import NeptuneClient
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 from models.events import EntityType
 from models.graph_edge import BaseEdge
@@ -136,7 +136,7 @@ class BaseTransformer:
 
     def stream_to_graph(
         self,
-        neptune_client: BaseNeptuneClient,
+        neptune_client: NeptuneClient,
         entity_type: EntityType,
         sample_size: int | None = None,
     ) -> None:

@@ -7,17 +7,20 @@ from collections.abc import Iterable, Iterator
 
 import backoff
 import boto3
-import config
 import requests
 import structlog
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
+
+import config
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.aws import get_secret
 from utils.streaming import process_stream_in_parallel
 from utils.types import EntityType
 
 logger = structlog.get_logger(__name__)
+
+NeptuneEnvironment = typing.Literal["prod", "dev"]
 
 NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
 NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
@@ -44,16 +47,18 @@ class NeptuneClient:
     Communicates with the Neptune cluster. Makes openCypher queries, triggers bulk load operations, etc.
     """
 
-    def __init__(self, cluster: typing.Literal["prod", "dev"] = "prod") -> None:
+    def __init__(self, environment: NeptuneEnvironment = "prod") -> None:
         self.session = boto3.Session()
-        
-        if cluster == "prod":
+
+        if environment == "prod":
             endpoint_secret_name = config.NEPTUNE_PROD_HOST_SECRET_NAME
         else:
             endpoint_secret_name = config.NEPTUNE_DEV_HOST_SECRET_NAME
-        
+
+        logger.info("Creating Neptune client", environment=environment)
+
         self.neptune_endpoint: str = get_secret(endpoint_secret_name)
-            
+
         # Throttle the number of parallel requests to prevent overwhelming the cluster
         self.parallel_query_semaphore = threading.Semaphore(
             NEPTUNE_MAX_PARALLEL_QUERIES

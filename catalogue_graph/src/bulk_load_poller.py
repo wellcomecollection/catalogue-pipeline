@@ -6,6 +6,7 @@ from typing import Literal, cast
 
 import structlog
 
+from clients.neptune_client import NeptuneClient, NeptuneEnvironment
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
     BulkLoaderEvent,
@@ -13,7 +14,6 @@ from models.events import (
 )
 from models.incremental_window import IncrementalWindow
 from models.neptune_bulk_loader import BulkLoadStatusResponse
-from utils.aws import get_neptune_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import BulkLoaderReport
 from utils.types import EntityType, TransformerType
@@ -82,11 +82,12 @@ def bulk_loader_event_from_s3_uri(s3_uri: str) -> BulkLoaderEvent:
 def handler(
     event: BulkLoadPollerEvent,
     execution_context: ExecutionContext | None = None,
-    is_local: bool = False,
+    neptune_environment: NeptuneEnvironment = "prod",
 ) -> BulkLoadPollerResponse:
     setup_logging(execution_context)
 
-    payload = get_neptune_client(is_local).get_bulk_load_status(event.load_id)
+    neptune_client = NeptuneClient(neptune_environment)
+    payload = neptune_client.get_bulk_load_status(event.load_id)
     overall_status = payload.overall_status
 
     # Statuses: https://docs.aws.amazon.com/neptune/latest/userguide/loader-message.html
@@ -124,7 +125,7 @@ def handler(
         and (insert_error_count / processed_count <= event.insert_error_threshold)
     )
 
-    if not is_local:
+    if neptune_environment == "prod":
         bulk_loader_event = bulk_loader_event_from_s3_uri(overall_status.full_uri)
         report = BulkLoaderReport(**bulk_loader_event.model_dump(), status=payload)
         report.publish()
@@ -158,6 +159,14 @@ def local_handler() -> None:
         default=DEFAULT_INSERT_ERROR_THRESHOLD,
         required=False,
     )
+    parser.add_argument(
+        "--neptune-environment",
+        type=str,
+        help="Which Neptune cluster to connect to.",
+        required=False,
+        choices=["prod", "dev"],
+        default="dev",
+    )
     args = parser.parse_args()
     event = BulkLoadPollerEvent(**args.__dict__)
 
@@ -165,7 +174,11 @@ def local_handler() -> None:
         trace_id=get_trace_id(),
         pipeline_step="graph_bulk_load_poller",
     )
-    handler(event, execution_context, is_local=True)
+    handler(
+        event,
+        execution_context,
+        neptune_environment=args.neptune_environment,
+    )
 
 
 if __name__ == "__main__":

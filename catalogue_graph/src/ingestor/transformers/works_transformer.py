@@ -1,3 +1,6 @@
+from elasticsearch import Elasticsearch
+
+from clients.neptune_client import NeptuneClient
 from ingestor.extractors.works_extractor import (
     ExtractedWork,
     GraphWorksExtractor,
@@ -16,7 +19,6 @@ from ingestor.models.merged.work import (
     RedirectedMergedWork,
 )
 from models.events import BasePipelineEvent
-from utils.elasticsearch import ElasticsearchMode
 
 from .base_transformer import ElasticsearchBaseTransformer
 
@@ -25,9 +27,10 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
     def __init__(
         self,
         event: BasePipelineEvent,
-        es_mode: ElasticsearchMode,
+        es_client: Elasticsearch,
+        neptune_client: NeptuneClient,
     ) -> None:
-        self.source = GraphWorksExtractor(event, es_mode)
+        self.source = GraphWorksExtractor(event, es_client, neptune_client)
 
     def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
         work = extracted.work

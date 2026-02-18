@@ -7,13 +7,9 @@ import boto3
 import polars as pl
 import smart_open
 import structlog
-from clients.neptune_client import NeptuneClient
 from pydantic import BaseModel
 
 logger = structlog.get_logger(__name__)
-
-PROD_INSTANCE_ENDPOINT_SECRET_NAME = "catalogue-graph/neptune-cluster-endpoint"
-DEV_INSTANCE_ENDPOINT_SECRET_NAME = "catalogue-graph-dev/neptune-cluster-endpoint"
 
 
 def get_secret(secret_name: str) -> str:
@@ -53,14 +49,6 @@ def publish_batch_to_sns(topic_arn: str, messages: list[str]) -> None:
         TopicArn=topic_arn,
         PublishBatchRequestEntries=request_entries,
     )
-
-
-def get_neptune_client(use_public_endpoint: bool) -> NeptuneClient:
-    """
-    Returns an instance of LambdaNeptuneClient or LocalNeptuneClient (if `use_public_endpoint` is True).
-    LocalNeptuneClient should only be used when connecting to the cluster from outside the VPC.
-    """
-    return NeptuneClient(get_secret(DEV_INSTANCE_ENDPOINT_SECRET_NAME))
 
 
 def get_csv_from_s3(s3_uri: str) -> Generator[Any]:

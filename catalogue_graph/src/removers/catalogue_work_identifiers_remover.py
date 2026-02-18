@@ -1,5 +1,8 @@
 from collections.abc import Generator, Iterable, Iterator
 
+from elasticsearch import Elasticsearch
+
+from clients.neptune_client import NeptuneClient
 from models.events import IncrementalGraphRemoverEvent
 from models.graph_edge import (
     WorkHasPathIdentifier,
@@ -7,16 +10,20 @@ from models.graph_edge import (
 from sources.merged_works_source import MergedWorksSource
 from transformers.catalogue.raw_work import RawCatalogueWork
 from transformers.catalogue.work_identifiers_transformer import ES_FIELDS, ES_QUERY
-from utils.elasticsearch import ElasticsearchMode
 
 from .base_graph_remover_incremental import BaseGraphRemoverIncremental
 
 
 class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemoverIncremental):
-    def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
-        super().__init__(event.entity_type, es_mode != "private")
+    def __init__(
+        self,
+        event: IncrementalGraphRemoverEvent,
+        es_client: Elasticsearch,
+        neptune_client: NeptuneClient,
+    ):
+        super().__init__(event.entity_type, neptune_client)
         self.work_source = MergedWorksSource(
-            event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
+            event, query=ES_QUERY, fields=ES_FIELDS, es_client=es_client
         )
 
     def get_total_node_count(self) -> int:

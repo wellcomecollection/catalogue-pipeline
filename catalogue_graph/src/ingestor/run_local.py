@@ -79,11 +79,23 @@ def main() -> None:
         help="The number of shards to process, will process all if not specified.",
         required=False,
     )
+    parser.add_argument(
+        "--neptune-environment",
+        type=str,
+        help="Which Neptune cluster to connect to.",
+        required=False,
+        choices=["prod", "dev"],
+        default="dev",
+    )
 
     args = parser.parse_args()
     loader_event = IngestorLoaderLambdaEvent.from_argparser(args)
 
-    loader_result = loader_handler(loader_event, es_mode="public")
+    loader_result = loader_handler(
+        loader_event,
+        es_mode="public",
+        neptune_environment=args.neptune_environment,
+    )
     run_index(loader_result)
 
 

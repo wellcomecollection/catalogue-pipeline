@@ -4,7 +4,9 @@ import typing
 from argparse import ArgumentParser
 
 import structlog
+from elasticsearch import Elasticsearch
 
+from clients.neptune_client import NeptuneClient, NeptuneEnvironment
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -15,7 +17,7 @@ from ingestor.transformers.base_transformer import (
 )
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.elasticsearch import ElasticsearchMode
+from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
 from utils.steps import create_job_id, run_ecs_handler
@@ -25,12 +27,14 @@ logger = structlog.get_logger(__name__)
 
 
 def create_transformer(
-    event: IngestorLoaderLambdaEvent, es_mode: ElasticsearchMode
+    event: IngestorLoaderLambdaEvent,
+    es_client: Elasticsearch,
+    neptune_client: NeptuneClient,
 ) -> ElasticsearchBaseTransformer:
     if event.ingestor_type == "concepts":
-        return ElasticsearchConceptsTransformer(event, es_mode)
+        return ElasticsearchConceptsTransformer(event, es_client, neptune_client)
     if event.ingestor_type == "works":
-        return ElasticsearchWorksTransformer(event, es_mode)
+        return ElasticsearchWorksTransformer(event, es_client, neptune_client)
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
@@ -40,6 +44,7 @@ def handler(
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
     load_destination: LoadDestination = "s3",
+    neptune_environment: NeptuneEnvironment = "prod",
 ) -> IngestorIndexerLambdaEvent:
     setup_logging(execution_context)
 
@@ -50,7 +55,11 @@ def handler(
         job_id=event.job_id,
     )
 
-    transformer = create_transformer(event, es_mode)
+    es_client = get_client(
+        f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
+    )
+    neptune_client = NeptuneClient(neptune_environment)
+    transformer = create_transformer(event, es_client, neptune_client)
     objects_to_index = transformer.load_documents(event, load_destination)
 
     event_payload = event.model_dump(exclude={"pass_objects_to_index"})
@@ -197,6 +206,14 @@ def local_handler(parser: ArgumentParser) -> None:
         default="local",
     )
     parser.add_argument(
+        "--neptune-environment",
+        type=str,
+        help="Which Neptune cluster to connect to.",
+        required=False,
+        choices=["prod", "dev"],
+        default="dev",
+    )
+    parser.add_argument(
         "--pass-objects-to-index",
         action="store_true",
         help="Return the list of generated objects in the loader response.",
@@ -204,7 +221,13 @@ def local_handler(parser: ArgumentParser) -> None:
 
     args = parser.parse_args()
     event = IngestorLoaderLambdaEvent.from_argparser(args)
-    handler(event, None, args.es_mode, args.load_destination)
+    handler(
+        event,
+        None,
+        args.es_mode,
+        args.load_destination,
+        args.neptune_environment,
+    )
 
 
 if __name__ == "__main__":

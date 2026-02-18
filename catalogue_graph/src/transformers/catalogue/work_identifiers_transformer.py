@@ -1,5 +1,7 @@
 from collections.abc import Generator
 
+from elasticsearch import Elasticsearch
+
 from models.events import BasePipelineEvent
 from models.graph_edge import (
     PathIdentifierHasParent,
@@ -8,7 +10,6 @@ from models.graph_edge import (
 from models.graph_node import PathIdentifier
 from sources.merged_works_source import MergedWorksSource
 from transformers.base_transformer import BaseTransformer
-from utils.elasticsearch import ElasticsearchMode
 
 from .raw_work import RawCatalogueWork
 
@@ -34,10 +35,10 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
     def __init__(
         self,
         event: BasePipelineEvent,
-        es_mode: ElasticsearchMode,
+        es_client: Elasticsearch,
     ) -> None:
         self.source = MergedWorksSource(
-            event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
+            event, query=ES_QUERY, fields=ES_FIELDS, es_client=es_client
         )
 
     def transform_node(self, raw_data: dict) -> PathIdentifier | None:

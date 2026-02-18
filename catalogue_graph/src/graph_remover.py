@@ -5,12 +5,12 @@ from datetime import datetime, timedelta
 import polars as pl
 import structlog
 
+from clients.neptune_client import NeptuneClient, NeptuneEnvironment
 from models.events import BulkLoaderEvent, FullGraphRemoverEvent
 from utils.aws import (
     df_from_s3_parquet,
     df_to_s3_parquet,
     get_csv_from_s3,
-    get_neptune_client,
 )
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.safety import validate_fractional_change
@@ -84,7 +84,7 @@ def log_ids(
 def handler(
     event: FullGraphRemoverEvent,
     execution_context: ExecutionContext | None = None,
-    is_local: bool = False,
+    neptune_environment: NeptuneEnvironment = "prod",
 ) -> None:
     setup_logging(execution_context)
 
@@ -126,7 +126,7 @@ def handler(
 
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
-        client = get_neptune_client(is_local)
+        client = NeptuneClient(neptune_environment)
         client.delete_entities_by_id(list(deleted_ids), event.entity_type)
 
     # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
@@ -176,6 +176,14 @@ def local_handler() -> None:
         help="Whether to override a safety check which prevents node/edge removal if the percentage of removed entities is above a certain threshold.",
         default=False,
     )
+    parser.add_argument(
+        "--neptune-environment",
+        type=str,
+        help="Which Neptune cluster to connect to.",
+        required=False,
+        choices=["prod", "dev"],
+        default="dev",
+    )
 
     args = parser.parse_args()
     event = FullGraphRemoverEvent(**args.__dict__)
@@ -184,7 +192,11 @@ def local_handler() -> None:
         trace_id=get_trace_id(),
         pipeline_step="graph_remover",
     )
-    handler(event, execution_context, is_local=True)
+    handler(
+        event,
+        execution_context,
+        neptune_environment=args.neptune_environment,
+    )
 
 
 if __name__ == "__main__":

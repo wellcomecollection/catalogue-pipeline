@@ -1,5 +1,7 @@
 import structlog
+from elasticsearch import Elasticsearch
 
+from clients.neptune_client import NeptuneClient
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.extractors.concepts_extractor import GraphConceptsExtractor
 from ingestor.models.indexable_concept import (
@@ -13,7 +15,6 @@ from ingestor.models.neptune.query_result import ExtractedConcept
 from ingestor.transformers.raw_concept import RawNeptuneConcept
 from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
 from models.events import BasePipelineEvent
-from utils.elasticsearch import ElasticsearchMode
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .raw_concept import MissingLabelError
@@ -23,9 +24,14 @@ logger = structlog.get_logger(__name__)
 
 
 class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
-    def __init__(self, event: BasePipelineEvent, es_mode: ElasticsearchMode) -> None:
+    def __init__(
+        self,
+        event: BasePipelineEvent,
+        es_client: Elasticsearch,
+        neptune_client: NeptuneClient,
+    ) -> None:
         super().__init__()
-        self.source = GraphConceptsExtractor(event, es_mode)
+        self.source = GraphConceptsExtractor(event, es_client, neptune_client)
 
     def _transform_related_concept(
         self, related_concept: RawNeptuneRelatedConcept

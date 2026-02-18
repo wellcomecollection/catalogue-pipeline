@@ -5,7 +5,9 @@ from itertools import batched
 from typing import get_args
 
 import structlog
+from elasticsearch import Elasticsearch
 
+from clients.neptune_client import NeptuneClient
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,
@@ -14,7 +16,6 @@ from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
 )
-from utils.elasticsearch import ElasticsearchMode
 from utils.types import ConceptType
 
 from .base_extractor import (
@@ -45,12 +46,13 @@ class GraphConceptsExtractor(GraphBaseExtractor):
     def __init__(
         self,
         event: BasePipelineEvent,
-        es_mode: ElasticsearchMode,
+        es_client: Elasticsearch,
+        neptune_client: NeptuneClient,
     ):
-        super().__init__(es_mode != "private")
+        super().__init__(neptune_client)
         self.es_source = CatalogueConceptsSource(
             event,
-            es_mode=es_mode,
+            es_client=es_client,
         )
 
         self.primary_map: dict[str, str] = {}

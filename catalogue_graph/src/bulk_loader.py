@@ -3,6 +3,7 @@ import typing
 
 import structlog
 
+from clients.neptune_client import NeptuneClient, NeptuneEnvironment
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
     BulkLoaderEvent,
@@ -10,7 +11,6 @@ from models.events import (
     EntityType,
     TransformerType,
 )
-from utils.aws import get_neptune_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
@@ -19,7 +19,7 @@ logger = structlog.get_logger(__name__)
 def handler(
     event: BulkLoaderEvent,
     execution_context: ExecutionContext | None = None,
-    is_local: bool = False,
+    neptune_environment: NeptuneEnvironment = "prod",
 ) -> BulkLoadPollerEvent:
     setup_logging(execution_context)
 
@@ -32,7 +32,7 @@ def handler(
         entity_type=event.entity_type,
     )
 
-    neptune_client = get_neptune_client(is_local)
+    neptune_client = NeptuneClient(neptune_environment)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
 
     return BulkLoadPollerEvent(
@@ -90,6 +90,14 @@ def local_handler() -> None:
         default=DEFAULT_INSERT_ERROR_THRESHOLD,
         required=False,
     )
+    parser.add_argument(
+        "--neptune-environment",
+        type=str,
+        help="Which Neptune cluster to connect to.",
+        required=False,
+        choices=["prod", "dev"],
+        default="dev",
+    )
 
     args = parser.parse_args()
     event = BulkLoaderEvent.from_argparser(args)
@@ -98,7 +106,11 @@ def local_handler() -> None:
         trace_id=get_trace_id(),
         pipeline_step="graph_bulk_loader",
     )
-    result = handler(event, execution_context, is_local=True)
+    result = handler(
+        event,
+        execution_context,
+        neptune_environment=args.neptune_environment,
+    )
     logger.info("Bulk load initiated", load_id=result.load_id)
 
 

@@ -14,9 +14,9 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 import pytest
+from clients.base_neptune_client import BaseNeptuneClient
 from pydantic import BaseModel
 
-from clients.base_neptune_client import BaseNeptuneClient
 from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,

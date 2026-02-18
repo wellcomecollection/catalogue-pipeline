@@ -6,7 +6,7 @@ import typing
 
 import structlog
 
-from utils.aws import get_neptune_client
+from clients.neptune_client import NeptuneClient, NeptuneEnvironment
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
@@ -25,11 +25,11 @@ def extract_sns_messages_from_sqs_event(event: dict) -> list[str]:
 def handler(
     queries: list[str],
     execution_context: ExecutionContext | None = None,
-    is_local: bool = False,
+    neptune_environment: NeptuneEnvironment = "prod",
 ) -> None:
     setup_logging(execution_context)
 
-    neptune_client = get_neptune_client(is_local)
+    neptune_client = NeptuneClient(neptune_environment)
 
     logger.info("Received queries", query_count=len(queries))
 
@@ -54,13 +54,25 @@ def local_handler() -> None:
         help="An openCypher query to run against the Neptune cluster.",
         required=True,
     )
+    parser.add_argument(
+        "--neptune-environment",
+        type=str,
+        help="Which Neptune cluster to connect to.",
+        required=False,
+        choices=["prod", "dev"],
+        default="dev",
+    )
     args = parser.parse_args()
 
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
         pipeline_step="graph_indexer",
     )
-    handler([args.cypher_query], execution_context, is_local=True)
+    handler(
+        [args.cypher_query],
+        execution_context,
+        neptune_environment=args.neptune_environment,
+    )
 
 
 if __name__ == "__main__":
