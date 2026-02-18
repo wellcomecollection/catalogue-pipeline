@@ -1,12 +1,12 @@
 resource "aws_neptune_cluster" "catalogue_graph_cluster" {
   cluster_identifier                   = var.namespace
   engine                               = "neptune"
-  engine_version                       = "1.4.5.1"
+  engine_version                       = "1.4.6.3"
   neptune_cluster_parameter_group_name = "default.neptune1.4"
   iam_database_authentication_enabled  = true
   apply_immediately                    = true
   storage_encrypted                    = true
-  vpc_security_group_ids = [
+  vpc_security_group_ids               = [
     aws_security_group.neptune_security_group.id
   ]
   neptune_subnet_group_name = aws_db_subnet_group.neptune_subnet_group.name
@@ -23,11 +23,12 @@ resource "aws_neptune_cluster_instance" "catalogue_graph_instance" {
   cluster_identifier           = aws_neptune_cluster.catalogue_graph_cluster.cluster_identifier
   instance_class               = "db.serverless"
   neptune_parameter_group_name = "default.neptune1.4"
+  publicly_accessible          = true
 }
 
 resource "aws_db_subnet_group" "neptune_subnet_group" {
   name       = var.namespace
-  subnet_ids = var.private_subnets
+  subnet_ids = var.public_subnets
 }
 
 resource "aws_iam_role_policy" "s3_read_only_policy_attachment" {
