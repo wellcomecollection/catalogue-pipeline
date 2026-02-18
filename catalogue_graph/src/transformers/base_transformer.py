@@ -1,22 +1,18 @@
-import concurrent.futures
 import csv
 import os
 from collections.abc import Generator
-from itertools import batched, islice
+from itertools import batched
 from typing import Any, TextIO
 
 import boto3
 import smart_open
 import structlog
 
-from clients.base_neptune_client import BaseNeptuneClient
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 from models.events import EntityType
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
-from query_builders.cypher import construct_upsert_cypher_query
 from sources.base_source import BaseSource
-from utils.aws import publish_batch_to_sns
 
 logger = structlog.get_logger(__name__)
 CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))
@@ -133,66 +129,6 @@ class BaseTransformer:
         transport_params = {"client": boto3.client("s3")}
         with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
             self._stream_to_bulk_load_file(f, entity_type, sample_size)
-
-    def stream_to_graph(
-        self,
-        neptune_client: BaseNeptuneClient,
-        entity_type: EntityType,
-        sample_size: int | None = None,
-    ) -> None:
-        """
-        Streams transformed entities (nodes or edges) directly into Neptune using multiple threads for parallel
-        processing. Suitable for local testing. Not recommended for indexing large numbers of entities.
-        """
-        chunks = self._stream_chunks(entity_type, sample_size)
-
-        def run_query(chunk: list[BaseNode | BaseEdge]) -> None:
-            query = construct_upsert_cypher_query(chunk, entity_type)
-            neptune_client.run_open_cypher_query(query)
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Run the first 10 queries in parallel
-            futures = {
-                executor.submit(run_query, chunk)
-                for i, chunk in enumerate(islice(chunks, 10))
-            }
-
-            while futures:
-                # Wait for one or more queries to complete
-                done, futures = concurrent.futures.wait(
-                    futures, return_when=concurrent.futures.FIRST_COMPLETED
-                )
-
-                for future in done:
-                    future.result()
-
-                # Top up with new queries to keep the total number of parallel queries at 10
-                for chunk in islice(chunks, len(done)):
-                    futures.add(executor.submit(run_query, chunk))
-
-    def stream_to_sns(
-        self, topic_arn: str, entity_type: EntityType, sample_size: int | None = None
-    ) -> None:
-        """
-        Streams transformed entities (nodes or edges) into an SNS topic as openCypher queries, where they will be
-        consumed by the `indexer` Lambda function.
-        """
-        queries = []
-
-        for i, chunk in enumerate(self._stream_chunks(entity_type, sample_size)):
-            queries.append(construct_upsert_cypher_query(chunk, entity_type))
-
-            # SNS supports a maximum batch size of 10
-            if len(queries) >= 10:
-                publish_batch_to_sns(topic_arn, queries)
-                queries = []
-
-            if (i + 1) % 100 == 0:
-                logger.info("Published messages to SNS", count=i + 1)
-
-        # Publish remaining messages (if any)
-        if len(queries) > 0:
-            publish_batch_to_sns(topic_arn, queries)
 
     def stream(
         self, entity_type: EntityType, sample_size: int | None = None

@@ -6,7 +6,6 @@ from argparse import ArgumentParser
 
 import structlog
 
-import config
 from models.events import (
     EntityType,
     ExtractorEvent,
@@ -15,7 +14,6 @@ from models.events import (
 )
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
-from utils.aws import get_neptune_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import run_ecs_handler
 
@@ -41,21 +39,10 @@ def handler(
         es_mode="public" if is_local else "private",
     )
 
-    if event.stream_destination == "graph":
-        client = get_neptune_client(is_local)
-        transformer.stream_to_graph(client, event.entity_type, event.sample_size)
-    elif event.stream_destination == "s3":
+    if event.stream_destination == "s3":
         s3_uri = event.get_s3_uri()
         transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
         logger.info("Data streamed to S3", s3_uri=s3_uri)
-    elif event.stream_destination == "sns":
-        topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
-        if topic_arn is None:
-            raise ValueError(
-                "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
-            )
-
-        transformer.stream_to_sns(topic_arn, event.entity_type, event.sample_size)
     elif event.stream_destination == "local":
         file_path = event.get_file_path()
         full_file_path = transformer.stream_to_local_file(

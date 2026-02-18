@@ -12,7 +12,6 @@ from config import (
 from extractor import lambda_handler
 from models.events import EntityType, StreamDestination
 from tests.mocks import (
-    MOCK_INSTANCE_ENDPOINT,
     MockElasticsearchClient,
     MockRequest,
     MockResponseInput,
@@ -110,19 +109,6 @@ def mock_requests_lookup_table(
         transformer_type
     ]
     mocked_responses.extend(source_mock_responses)
-
-    if destination == "graph":
-        mocked_responses.append(
-            {
-                "method": "POST",
-                "url": f"https://{MOCK_INSTANCE_ENDPOINT}:8182/openCypher",
-                "status_code": 200,
-                "params": None,
-                "content_bytes": None,
-                "json_data": {"results": {}},
-            }
-        )
-
     return mocked_responses
 
 
