@@ -11,7 +11,6 @@ import requests
 import structlog
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
-
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.streaming import process_stream_in_parallel
 from utils.types import EntityType
@@ -37,16 +36,13 @@ def on_request_backoff(backoff_details: typing.Any) -> None:
     logger.warning("Neptune request failed, retrying", exception_name=exception_name)
 
 
-class BaseNeptuneClient:
+class NeptuneClient:
     """
     Communicates with the Neptune cluster. Makes openCypher queries, triggers bulk load operations, etc.
-
-    Do not use this base class directly. Use either LambdaNeptuneClient (when running in the same VPC as the Neptune
-    cluster) or LocalNeptuneClient (when connecting to the cluster from outside the VPC).
     """
 
     def __init__(self, neptune_endpoint: str) -> None:
-        self.session: boto3.Session | None = None
+        self.session = boto3.Session()
         self.neptune_endpoint: str = neptune_endpoint
 
         # Throttle the number of parallel requests to prevent overwhelming the cluster
@@ -55,7 +51,7 @@ class BaseNeptuneClient:
         )
 
     def _get_client_url(self) -> str:
-        raise NotImplementedError()
+        return f"https://{self.neptune_endpoint}:8182"
 
     @backoff.on_exception(
         backoff.constant,
@@ -82,7 +78,7 @@ class BaseNeptuneClient:
 
         with self.parallel_query_semaphore:
             raw_response = requests.request(
-                method, url, data=data, headers=dict(request.headers)
+                method, url, data=data, headers=request.headers
             )
 
         if raw_response.status_code != 200:

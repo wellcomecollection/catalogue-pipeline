@@ -3,10 +3,10 @@ resource "aws_security_group" "neptune_security_group" {
   vpc_id = data.aws_vpc.vpc.id
 }
 
-# Only allow ingress traffic from the VPC containing the cluster
+# Allow any ingress traffic so that we can reach the cluster via its public endpoint.
 resource "aws_vpc_security_group_ingress_rule" "neptune_ingress" {
   security_group_id = aws_security_group.neptune_security_group.id
-  cidr_ipv4         = data.aws_vpc.vpc.cidr_block
+  cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
 }
 
