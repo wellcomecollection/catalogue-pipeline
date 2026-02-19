@@ -97,6 +97,12 @@ LOADER_DETAIL_TYPE = os.getenv("FOLIO_LOADER_DETAIL_TYPE", "FolioWindowLoaded")
 # ---------------------------------------------------------------------------
 CHATBOT_TOPIC_ARN = os.getenv("FOLIO_CHATBOT_TOPIC_ARN")
 
+# ---------------------------------------------------------------------------
+# S3 storage
+# ---------------------------------------------------------------------------
+S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-folio-adapter")
+S3_PREFIX = os.getenv("S3_PREFIX", "dev")
+
 
 # ---------------------------------------------------------------------------
 # OAI-PMH Adapter Config (Pydantic model for runtime)
@@ -131,4 +137,7 @@ FOLIO_ADAPTER_CONFIG = OAIPMHAdapterConfig(
     local_window_status_db_name=LOCAL_WINDOW_STATUS_DB_NAME,
     local_window_status_table=LOCAL_WINDOW_STATUS_TABLE,
     local_window_status_namespace=LOCAL_WINDOW_STATUS_NAMESPACE,
+    # Reporting
+    report_s3_bucket=S3_BUCKET,
+    report_s3_prefix=S3_PREFIX,
 )
