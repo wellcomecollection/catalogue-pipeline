@@ -13,6 +13,13 @@ module "loader_lambda" {
 
   memory_size = 10240
   timeout     = 900
+
+  environment = {
+    variables = {
+      S3_BUCKET = data.aws_s3_bucket.folio_adapter.id
+      S3_PREFIX = "prod"
+    }
+  }
 }
 
 # IAM policy for writing to Iceberg table

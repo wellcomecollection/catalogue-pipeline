@@ -104,10 +104,10 @@ ES_MODE = os.getenv("ES_MODE", "private")
 
 # Manifest storage configuration
 S3_BUCKET = os.getenv(
-    "AXIELL_TRANSFORMER_S3_BUCKET",
+    "S3_BUCKET",
     "wellcomecollection-platform-axiell-adapter",
 )
-S3_PREFIX = os.getenv("AXIELL_TRANSFORMER_S3_PREFIX", "dev")
+S3_PREFIX = os.getenv("S3_PREFIX", "dev")
 BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")
 
 
@@ -144,4 +144,7 @@ AXIELL_ADAPTER_CONFIG = OAIPMHAdapterConfig(
     local_window_status_db_name=LOCAL_WINDOW_STATUS_DB_NAME,
     local_window_status_table=LOCAL_WINDOW_STATUS_TABLE,
     local_window_status_namespace=LOCAL_WINDOW_STATUS_NAMESPACE,
+    # Reporting
+    report_s3_bucket=S3_BUCKET,
+    report_s3_prefix=S3_PREFIX,
 )
