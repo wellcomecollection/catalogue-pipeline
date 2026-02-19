@@ -5,8 +5,6 @@ NEPTUNE_CLUSTER_IDENTIFIER = os.environ.get(
     "NEPTUNE_CLUSTER_IDENTIFIER", NEPTUNE_CLUSTER_IDENTIFIER_DEFAULT
 )
 
-GRAPH_QUERIES_SNS_TOPIC_ARN = os.environ.get("GRAPH_QUERIES_SNS_TOPIC_ARN")
-
 LOC_SUBJECT_HEADINGS_URL = (
     "https://id.loc.gov/download/authorities/subjects.madsrdf.jsonld.gz"
 )
