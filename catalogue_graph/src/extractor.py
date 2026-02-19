@@ -86,7 +86,7 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 
 
 def local_handler(parser: ArgumentParser) -> None:
-    add_pipeline_event_args(parser, {"pipeline_date", "window", "pit_id"})
+    add_pipeline_event_args(parser, {"pipeline_date", "window", "pit_id", "es_mode"})
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -124,7 +124,7 @@ def local_handler(parser: ArgumentParser) -> None:
     local_args = parser.parse_args()
     event = ExtractorEvent.from_argparser(local_args)
 
-    handler(event)
+    handler(event, es_mode=args.es_mode)
 
 
 if __name__ == "__main__":
