@@ -5,9 +5,6 @@ import typing
 from argparse import ArgumentParser
 
 import structlog
-
-import config
-from clients.neptune_client import NeptuneClient, NeptuneEnvironment
 from models.events import (
     EntityType,
     ExtractorEvent,
@@ -26,8 +23,7 @@ logger = structlog.get_logger(__name__)
 def handler(
     event: ExtractorEvent,
     execution_context: ExecutionContext | None = None,
-    es_mode: ElasticsearchMode = "private",
-    neptune_environment: NeptuneEnvironment = "prod",
+    es_mode: ElasticsearchMode = "private"
 ) -> None:
     setup_logging(execution_context)
 
@@ -41,23 +37,10 @@ def handler(
     es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
     transformer: BaseTransformer = create_transformer(event, es_client)
 
-    if event.stream_destination == "graph":
-        neptune_client = NeptuneClient(neptune_environment)
-        transformer.stream_to_graph(
-            neptune_client, event.entity_type, event.sample_size
-        )
-    elif event.stream_destination == "s3":
+    if event.stream_destination == "s3":
         s3_uri = event.get_s3_uri()
         transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
         logger.info("Data streamed to S3", s3_uri=s3_uri)
-    elif event.stream_destination == "sns":
-        topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
-        if topic_arn is None:
-            raise ValueError(
-                "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
-            )
-
-        transformer.stream_to_sns(topic_arn, event.entity_type, event.sample_size)
     elif event.stream_destination == "local":
         file_path = event.get_file_path()
         full_file_path = transformer.stream_to_local_file(
@@ -159,22 +142,11 @@ def local_handler(parser: ArgumentParser) -> None:
         help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
         required=False,
     )
-    parser.add_argument(
-        "--neptune-environment",
-        type=str,
-        help="Which Neptune cluster to connect to.",
-        required=False,
-        choices=["prod", "dev"],
-        default="dev",
-    )
 
     local_args = parser.parse_args()
     event = ExtractorEvent.from_argparser(local_args)
 
-    handler(
-        event,
-        neptune_environment=local_args.neptune_environment,
-    )
+    handler(event,)
 
 
 if __name__ == "__main__":
