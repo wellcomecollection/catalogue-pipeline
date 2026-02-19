@@ -120,8 +120,7 @@ def local_handler(parser: ArgumentParser) -> None:
 
     local_args = parser.parse_args()
     event = ExtractorEvent.from_argparser(local_args)
-
-    handler(event, es_mode=args.es_mode)
+    handler(event, es_mode=local_args.es_mode)
 
 
 if __name__ == "__main__":
