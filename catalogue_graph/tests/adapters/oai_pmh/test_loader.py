@@ -185,11 +185,57 @@ class TestHandler:
 
         mock_harvest.assert_called_once()
         mock_from_loader.assert_called_once_with(
-            req, response, adapter_type=adapter_name
+            req,
+            response,
+            adapter_type=adapter_name,
+            report_s3_bucket=None,
+            report_s3_prefix="dev",
         )
         mock_report.publish.assert_called_once()
         assert response.changed_record_count == 1
         assert response.changeset_ids == ["changeset-123"]
+
+    def test_suppresses_summaries_by_default(
+        self,
+        loader_runtime: LoaderRuntime,
+    ) -> None:
+        req = _create_loader_event()
+        summary = _create_success_summary(req, record_ids=["id-1"])
+
+        with (
+            patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
+            patch(
+                "adapters.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+            ) as mock_from_loader,
+        ):
+            mock_harvest.return_value = [summary]
+            mock_from_loader.return_value = MagicMock()
+
+            response = loader.handler(req, runtime=loader_runtime)
+
+        assert response.summaries == []
+
+    def test_keeps_summaries_when_suppression_disabled(
+        self,
+        loader_runtime: LoaderRuntime,
+    ) -> None:
+        req = _create_loader_event()
+        summary = _create_success_summary(req, record_ids=["id-1"])
+
+        loader_runtime.suppress_summaries = False
+
+        with (
+            patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
+            patch(
+                "adapters.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+            ) as mock_from_loader,
+        ):
+            mock_harvest.return_value = [summary]
+            mock_from_loader.return_value = MagicMock()
+
+            response = loader.handler(req, runtime=loader_runtime)
+
+        assert len(response.summaries) == 1
 
 
 # ---------------------------------------------------------------------------
