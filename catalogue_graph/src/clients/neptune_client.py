@@ -49,6 +49,7 @@ class NeptuneClient:
 
     def __init__(self, environment: NeptuneEnvironment = "prod") -> None:
         self.session = boto3.Session()
+        self.environment = environment
 
         if environment == "prod":
             endpoint_secret_name = config.NEPTUNE_PROD_HOST_SECRET_NAME
@@ -156,13 +157,19 @@ class NeptuneClient:
         Initiates a Neptune bulk load from an S3 file.
         See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-load.html for more info.
         """
+        role_name = (
+            "catalogue-graph-cluster"
+            if self.environment == "prod"
+            else "catalogue-graph-dev-cluster"
+        )
+
         response = self._make_request(
             "POST",
             "/loader",
             {
                 "source": s3_file_uri,
                 "format": "opencypher",
-                "iamRoleArn": "arn:aws:iam::760097843905:role/catalogue-graph-cluster",
+                "iamRoleArn": f"arn:aws:iam::760097843905:role/{role_name}",
                 "region": "eu-west-1",
                 "failOnError": "FALSE",
                 "parallelism": "MEDIUM",
