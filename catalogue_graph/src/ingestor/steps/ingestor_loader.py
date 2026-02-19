@@ -68,12 +68,13 @@ def handler(
     record_count = sum(o.record_count for o in objects_to_index)
     total_file_size = sum(o.content_length for o in objects_to_index)
 
-    report = LoaderReport(
-        **event_payload,
-        record_count=record_count,
-        total_file_size=total_file_size,
-    )
-    report.publish()
+    if es_mode != "local":
+        report = LoaderReport(
+            **event_payload,
+            record_count=record_count,
+            total_file_size=total_file_size,
+        )
+        report.publish()
 
     if event.pass_objects_to_index:
         return IngestorIndexerLambdaEvent(

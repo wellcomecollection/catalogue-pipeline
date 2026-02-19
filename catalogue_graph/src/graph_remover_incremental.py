@@ -57,10 +57,11 @@ def handler(
     s3_file_uri = event.get_s3_uri("parquet", "deleted_ids")
     df_to_s3_parquet(pl.DataFrame(deleted_ids), s3_file_uri)
 
-    report = IncrementalGraphRemoverReport(
-        **event.model_dump(), deleted_count=len(deleted_ids)
-    )
-    report.publish()
+    if neptune_environment == "prod":
+        report = IncrementalGraphRemoverReport(
+            **event.model_dump(), deleted_count=len(deleted_ids)
+        )
+        report.publish()
 
     logger.info(
         "List of deleted IDs saved",

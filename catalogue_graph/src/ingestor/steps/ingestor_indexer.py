@@ -134,9 +134,10 @@ def handler(
 
     event_payload = event.model_dump(exclude={"objects_to_index"})
 
-    logger.info("Preparing indexer pipeline report")
-    report = IndexerReport(**event_payload, success_count=total_success_count)
-    report.publish()
+    if es_mode != "local":
+        logger.info("Preparing indexer pipeline report")
+        report = IndexerReport(**event_payload, success_count=total_success_count)
+        report.publish()
 
     return IngestorIndexerMonitorLambdaEvent(
         **event_payload,

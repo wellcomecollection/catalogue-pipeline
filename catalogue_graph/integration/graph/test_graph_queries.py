@@ -40,7 +40,7 @@ pytestmark = pytest.mark.integration
 
 @lru_cache(maxsize=1)
 def neptune_client() -> NeptuneClient:
-    return NeptuneClient()
+    return NeptuneClient("prod")
 
 
 @cache
