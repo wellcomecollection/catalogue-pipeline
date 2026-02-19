@@ -19,7 +19,7 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
     IngestorStepEvent,
 )
-from utils.argparse import add_pipeline_event_args
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -181,19 +181,14 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 
 
 def local_handler(parser: ArgumentParser) -> None:
-    add_pipeline_event_args(parser, {"pipeline_date", "window", "es_mode"})
+    add_pipeline_event_args(parser, {"pipeline_date", "index_date_merged", "window"})
+    add_cluster_connection_args(parser, {"es_mode"})
     parser.add_argument(
         "--ingestor-type",
         type=str,
         choices=["concepts", "works"],
         help="The type of the records being ingested",
         required=True,
-    )
-    parser.add_argument(
-        "--index-date-merged",
-        type=str,
-        help="The merged index date to read from, will default to pipeline date.",
-        required=False,
     )
     parser.add_argument(
         "--index-date",

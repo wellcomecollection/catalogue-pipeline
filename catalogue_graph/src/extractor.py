@@ -14,7 +14,7 @@ from models.events import (
 )
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
-from utils.argparse import add_pipeline_event_args
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import run_ecs_handler
@@ -86,7 +86,10 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 
 
 def local_handler(parser: ArgumentParser) -> None:
-    add_pipeline_event_args(parser, {"pipeline_date", "window", "pit_id", "es_mode"})
+    add_pipeline_event_args(
+        parser, {"pipeline_date", "index_date_merged", "window", "pit_id"}
+    )
+    add_cluster_connection_args(parser, {"es_mode"})
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -107,12 +110,6 @@ def local_handler(parser: ArgumentParser) -> None:
         choices=typing.get_args(StreamDestination),
         help="Where to stream the transformed entities.",
         default="s3",
-        required=False,
-    )
-    parser.add_argument(
-        "--index-date-merged",
-        type=str,
-        help="The merged index date to read from, will default to pipeline date.",
         required=False,
     )
     parser.add_argument(

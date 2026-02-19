@@ -17,7 +17,7 @@ from ingestor.transformers.base_transformer import (
 )
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.argparse import add_pipeline_event_args
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
@@ -137,20 +137,16 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
-        parser, {"pipeline_date", "window", "es_mode", "pit_id", "neptune_environment"}
+        parser, {"pipeline_date", "index_date_merged", "window", "pit_id"}
     )
+    add_cluster_connection_args(parser, {"es_mode", "neptune_environment"})
+
     parser.add_argument(
         "--ingestor-type",
         type=str,
         choices=typing.get_args(IngestorType),
         help="Which ingestor to run (works or concepts).",
         required=True,
-    )
-    parser.add_argument(
-        "--index-date-merged",
-        type=str,
-        help="The merged index date to read from, will default to pipeline date.",
-        required=False,
     )
     parser.add_argument(
         "--index-date",

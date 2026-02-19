@@ -14,7 +14,7 @@ from models.events import (
 )
 from models.incremental_window import IncrementalWindow
 from models.neptune_bulk_loader import BulkLoadStatusResponse
-from utils.argparse import add_pipeline_event_args
+from utils.argparse import add_cluster_connection_args
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import BulkLoaderReport
 from utils.types import EntityType, TransformerType
@@ -147,7 +147,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"neptune_environment"})
+    add_cluster_connection_args(parser, {"neptune_environment"})
     parser.add_argument(
         "--load-id",
         type=str,

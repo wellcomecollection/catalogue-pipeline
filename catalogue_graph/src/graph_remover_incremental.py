@@ -12,7 +12,7 @@ from removers.catalogue_work_identifiers_remover import (
     CatalogueWorkIdentifiersGraphRemover,
 )
 from removers.catalogue_works_remover import CatalogueWorksGraphRemover
-from utils.argparse import add_pipeline_event_args
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.aws import (
     df_to_s3_parquet,
 )
@@ -79,9 +79,8 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(
-        parser, {"pipeline_date", "neptune_environment", "window", "es_mode", "pit_id"}
-    )
+    add_pipeline_event_args(parser, {"pipeline_date", "window", "pit_id"})
+    add_cluster_connection_args(parser, {"es_mode", "neptune_environment"})
     parser.add_argument(
         "--transformer-type",
         type=str,

@@ -9,7 +9,7 @@ from models.events import (
     IncrementalGraphRemoverEvent,
 )
 from removers.elasticsearch_remover import ElasticsearchRemover
-from utils.argparse import add_pipeline_event_args
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -79,13 +79,9 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date", "window", "es_mode"})
-    parser.add_argument(
-        "--index-date-merged",
-        type=str,
-        help="The merged index date to read from, will default to pipeline date.",
-        required=False,
-    )
+    add_pipeline_event_args(parser, {"pipeline_date", "index_date_merged", "window"})
+    add_cluster_connection_args(parser, {"es_mode"})
+
     parser.add_argument(
         "--index-date",
         type=str,

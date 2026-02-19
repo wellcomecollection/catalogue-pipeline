@@ -4,7 +4,7 @@ import typing
 import structlog
 
 from models.events import BasePipelineEvent
-from utils.argparse import add_pipeline_event_args
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client, get_merged_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -44,7 +44,8 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date", "es_mode"})
+    add_pipeline_event_args(parser, {"pipeline_date"})
+    add_cluster_connection_args(parser, {"es_mode"})
 
     args = parser.parse_args()
     event = BasePipelineEvent(**args.__dict__)
