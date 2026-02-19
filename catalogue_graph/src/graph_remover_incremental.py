@@ -12,6 +12,7 @@ from removers.catalogue_work_identifiers_remover import (
     CatalogueWorkIdentifiersGraphRemover,
 )
 from removers.catalogue_works_remover import CatalogueWorksGraphRemover
+from utils.argparse import add_pipeline_event_args
 from utils.aws import (
     df_to_s3_parquet,
 )
@@ -78,6 +79,9 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
+    add_pipeline_event_args(
+        parser, {"pipeline_date", "neptune_environment", "window", "es_mode", "pit_id"}
+    )
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -91,40 +95,6 @@ def local_handler() -> None:
         choices=typing.get_args(EntityType),
         help="Which entity type to remove using the specified remover (nodes or edges).",
         required=True,
-    )
-    parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help="The pipeline date associated with the removed items.",
-        required=True,
-    )
-    parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Which Elasticsearch instance to connect to. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["local", "public"],
-        default="local",
-    )
-    parser.add_argument(
-        "--neptune-environment",
-        type=str,
-        help="Which Neptune cluster to connect to.",
-        required=False,
-        choices=["prod", "dev"],
-        default="dev",
     )
 
     args = parser.parse_args()

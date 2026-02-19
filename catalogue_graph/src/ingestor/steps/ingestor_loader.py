@@ -17,6 +17,7 @@ from ingestor.transformers.base_transformer import (
 )
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
+from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
@@ -135,19 +136,15 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 
 def local_handler(parser: ArgumentParser) -> None:
+    add_pipeline_event_args(
+        parser, {"pipeline_date", "window", "es_mode", "pit_id", "neptune_environment"}
+    )
     parser.add_argument(
         "--ingestor-type",
         type=str,
         choices=typing.get_args(IngestorType),
         help="Which ingestor to run (works or concepts).",
         required=True,
-    )
-    parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help='The pipeline that is being ingested to, will default to "dev".',
-        required=False,
-        default="dev",
     )
     parser.add_argument(
         "--index-date-merged",
@@ -161,18 +158,6 @@ def local_handler(parser: ArgumentParser) -> None:
         help='The index date that is being ingested to, will default to "dev".',
         required=False,
         default="dev",
-    )
-    parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
     )
     parser.add_argument(
         "--job-id",
@@ -196,22 +181,6 @@ def local_handler(parser: ArgumentParser) -> None:
         required=False,
         choices=["parquet", "jsonl"],
         default="parquet",
-    )
-    parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["local", "public"],
-        default="local",
-    )
-    parser.add_argument(
-        "--neptune-environment",
-        type=str,
-        help="Which Neptune cluster to connect to.",
-        required=False,
-        choices=["prod", "dev"],
-        default="dev",
     )
     parser.add_argument(
         "--pass-objects-to-index",

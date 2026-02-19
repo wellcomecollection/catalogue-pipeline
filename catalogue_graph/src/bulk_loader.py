@@ -11,6 +11,7 @@ from models.events import (
     EntityType,
     TransformerType,
 )
+from utils.argparse import add_pipeline_event_args
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
@@ -50,6 +51,9 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
+    add_pipeline_event_args(
+        parser, {"pipeline_date", "window", "es_mode", "neptune_environment"}
+    )
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -65,38 +69,11 @@ def local_handler() -> None:
         required=True,
     )
     parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help="The pipeline date associated with the loaded items.",
-        default="dev",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
         "--insert-error-threshold",
         type=float,
         help="Maximum insert errors as a fraction of total records to still consider the bulk load successful.",
         default=DEFAULT_INSERT_ERROR_THRESHOLD,
         required=False,
-    )
-    parser.add_argument(
-        "--neptune-environment",
-        type=str,
-        help="Which Neptune cluster to connect to.",
-        required=False,
-        choices=["prod", "dev"],
-        default="dev",
     )
 
     args = parser.parse_args()

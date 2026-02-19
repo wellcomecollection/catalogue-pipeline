@@ -19,6 +19,7 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
     IngestorStepEvent,
 )
+from utils.argparse import add_pipeline_event_args
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -180,19 +181,13 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 
 
 def local_handler(parser: ArgumentParser) -> None:
+    add_pipeline_event_args(parser, {"pipeline_date", "window", "es_mode"})
     parser.add_argument(
         "--ingestor-type",
         type=str,
         choices=["concepts", "works"],
         help="The type of the records being ingested",
         required=True,
-    )
-    parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help='The pipeline that is being ingested to, will default to "dev".',
-        required=False,
-        default="dev",
     )
     parser.add_argument(
         "--index-date-merged",
@@ -208,18 +203,6 @@ def local_handler(parser: ArgumentParser) -> None:
         default="dev",
     )
     parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
         "--job-id",
         type=str,
         help="The ID of the job to process, will default to 'dev'. Full reindex mode only.",
@@ -233,14 +216,6 @@ def local_handler(parser: ArgumentParser) -> None:
         required=False,
         choices=["parquet", "jsonl"],
         default="parquet",
-    )
-    parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Where to index documents. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["local", "public"],
-        default="local",
     )
 
     args = parser.parse_args()

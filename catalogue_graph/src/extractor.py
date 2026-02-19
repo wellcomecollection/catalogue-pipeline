@@ -14,6 +14,7 @@ from models.events import (
 )
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
+from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import run_ecs_handler
@@ -85,6 +86,7 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 
 
 def local_handler(parser: ArgumentParser) -> None:
+    add_pipeline_event_args(parser, {"pipeline_date", "window", "pit_id"})
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -108,40 +110,15 @@ def local_handler(parser: ArgumentParser) -> None:
         required=False,
     )
     parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help="The pipeline to extract data from. Will default to 'dev'.",
-        default="dev",
-        required=False,
-    )
-    parser.add_argument(
         "--index-date-merged",
         type=str,
         help="The merged index date to read from, will default to pipeline date.",
         required=False,
     )
     parser.add_argument(
-        "--pit-id",
-        type=str,
-        help="An Elasticsearch point in time ID to use when extracting data from the merged index.",
-        required=False,
-    )
-    parser.add_argument(
         "--sample-size",
         type=int,
         help="How many entities to stream. If not specified, streaming will continue until the source is exhausted.",
-    )
-    parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
     )
 
     local_args = parser.parse_args()

@@ -4,6 +4,7 @@ import typing
 import structlog
 
 from models.events import BasePipelineEvent
+from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client, get_merged_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -43,21 +44,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help='The pipeline date of the Elasticsearch cluster to connect to, will default to "dev".',
-        required=False,
-        default="dev",
-    )
-    parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Which Elasticsearch cluster to connect to. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["local", "public"],
-        default="local",
-    )
+    add_pipeline_event_args(parser, {"pipeline_date", "es_mode"})
 
     args = parser.parse_args()
     event = BasePipelineEvent(**args.__dict__)
