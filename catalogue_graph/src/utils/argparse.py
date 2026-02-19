@@ -32,7 +32,7 @@ def add_pipeline_event_args(
         parser.add_argument(
             "--pipeline-date",
             type=str,
-            help="Which pipeline date to use. Will default to 'dev'.",
+            help="Which pipeline date to use when connecting to ES and reading/writing S3 files. Will default to 'dev'.",
             required=False,
             default="dev",
         )
