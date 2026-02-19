@@ -22,7 +22,7 @@ from ingestor.transformers.raw_concept import (
 )
 from models.events import BasePipelineEvent
 from tests import neptune_generators as ng
-from tests.mocks import mock_es_secrets
+from tests.mocks import get_mock_es_client, get_mock_neptune_client
 from tests.test_utils import load_json_fixture
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
@@ -39,8 +39,15 @@ MOCK_EMPTY_RELATED_CONCEPTS: dict = {
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 
+def get_transformer() -> ElasticsearchConceptsTransformer:
+    return ElasticsearchConceptsTransformer(
+        MOCK_EVENT,
+        get_mock_es_client("graph_extractor", MOCK_EVENT.pipeline_date),
+        get_mock_neptune_client(),
+    )
+
+
 def test_catalogue_concept_from_neptune_result() -> None:
-    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture(
         "ingestor/extractor/concept_single_alternative_labels.json"
     )
@@ -91,14 +98,12 @@ def test_catalogue_concept_from_neptune_result() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
-    result = transformer.transform_document(raw_data)
+    result = get_transformer().transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> None:
-    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture("ingestor/extractor/concept_single.json")
 
     expected_result = IndexableConcept(
@@ -145,14 +150,12 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
-    result = transformer.transform_document(raw_data)
+    result = get_transformer().transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
-    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
     mock_related_to = load_json_fixture("ingestor/extractor/related_to_single.json")[
         "related"
@@ -215,14 +218,12 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
-    result = transformer.transform_document(raw_data)
+    result = get_transformer().transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() -> None:
-    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
 
     mock_related_to = [
@@ -293,9 +294,8 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
-    result = transformer.transform_document(raw_data)
+    result = get_transformer().transform_document(raw_data)
     assert result == expected_result
 
 
@@ -372,9 +372,8 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
-    result = transformer.transform_document(raw_data)
+    result = get_transformer().transform_document(raw_data)
     assert result == expected_result
 
 
@@ -519,7 +518,6 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
-    result = transformer.transform_document(raw_data)
+    result = get_transformer().transform_document(raw_data)
     assert result == expected_result

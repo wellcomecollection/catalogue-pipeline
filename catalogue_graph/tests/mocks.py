@@ -10,23 +10,20 @@ from collections import defaultdict
 from collections.abc import Generator
 from typing import Any, TypedDict
 
+import elasticsearch
 import polars as pl
 from botocore.credentials import Credentials
 from polars import DataFrame as PolarsDataFrame
 
-from utils.aws import (
-    INSTANCE_ENDPOINT_SECRET_NAME,
-    LOAD_BALANCER_SECRET_NAME,
-)
+from clients.neptune_client import NeptuneClient
+from utils.elasticsearch import get_client
 
-MOCK_PUBLIC_ENDPOINT = "test-public-host.com"
-MOCK_INSTANCE_ENDPOINT = "test-host.com"
-MOCK_API_KEY = "TEST_SECRET_API_KEY_123"  # legacy constant retained
 MOCK_CREDENTIALS = Credentials(
     access_key="test_access_key",
     secret_key="test",
     token="test_token",
 )
+MOCK_NEPTUNE_ENDPOINT = "test-public-host.com"
 
 
 class MockSmartOpen:
@@ -94,11 +91,7 @@ class MockSecretsManagerClient(MockAwsService):
         cls.secrets[secret_id] = value
 
     def get_secret_value(self, SecretId: str) -> dict:
-        if SecretId == LOAD_BALANCER_SECRET_NAME:
-            secret_value = MOCK_PUBLIC_ENDPOINT
-        elif SecretId == INSTANCE_ENDPOINT_SECRET_NAME:
-            secret_value = MOCK_INSTANCE_ENDPOINT
-        elif SecretId in self.secrets:
+        if SecretId in self.secrets:
             secret_value = self.secrets[SecretId]
         else:
             raise KeyError(f"Secret value '{SecretId}' does not exist.")
@@ -486,6 +479,24 @@ def mock_es_secrets(
     MockSecretsManagerClient.add_mock_secret(f"{prefix}/{service_name}/api_key", "")
 
 
+def mock_neptune_secrets() -> None:
+    MockSecretsManagerClient.add_mock_secret(
+        "catalogue-graph/neptune-cluster-endpoint", "test-public-host.com"
+    )
+
+
+def get_mock_es_client(
+    service_name: str, pipeline_date: str
+) -> elasticsearch.Elasticsearch:
+    mock_es_secrets(service_name, pipeline_date)
+    return get_client(service_name, pipeline_date, "private")
+
+
+def get_mock_neptune_client() -> NeptuneClient:
+    mock_neptune_secrets()
+    return NeptuneClient()
+
+
 def add_neptune_mock_response(
     expected_query: str, expected_params: dict | None, mock_results: list[dict]
 ) -> None:
@@ -497,7 +508,7 @@ def add_neptune_mock_response(
 
     MockRequest.mock_response(
         method="POST",
-        url="https://test-host.com:8182/openCypher",
+        url=f"https://{MOCK_NEPTUNE_ENDPOINT}:8182/openCypher",
         json_data={"results": mock_results},
         body=json.dumps(body),
     )

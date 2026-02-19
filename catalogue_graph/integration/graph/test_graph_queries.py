@@ -14,9 +14,9 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 import pytest
-from clients.base_neptune_client import BaseNeptuneClient
 from pydantic import BaseModel
 
+from clients.neptune_client import NeptuneClient
 from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
@@ -33,15 +33,14 @@ from ingestor.queries.concept_queries import (
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
 )
-from utils.aws import get_neptune_client
 
 # Add the 'integration' marker to ensure that integration tests are not included in regular unit test runs.
 pytestmark = pytest.mark.integration
 
 
 @lru_cache(maxsize=1)
-def neptune_client() -> BaseNeptuneClient:
-    return get_neptune_client(use_public_endpoint=True)
+def neptune_client() -> NeptuneClient:
+    return NeptuneClient()
 
 
 @cache

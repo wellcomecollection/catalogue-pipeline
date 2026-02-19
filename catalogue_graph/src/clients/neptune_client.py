@@ -91,7 +91,7 @@ class NeptuneClient:
 
         with self.parallel_query_semaphore:
             raw_response = requests.request(
-                method, url, data=data, headers=request.headers
+                method, url, data=data, headers=dict(request.headers)
             )
 
         if raw_response.status_code != 200:

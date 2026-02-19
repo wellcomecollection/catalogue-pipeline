@@ -5,6 +5,7 @@ import typing
 from argparse import ArgumentParser
 
 import structlog
+
 from models.events import (
     EntityType,
     ExtractorEvent,
@@ -23,7 +24,7 @@ logger = structlog.get_logger(__name__)
 def handler(
     event: ExtractorEvent,
     execution_context: ExecutionContext | None = None,
-    es_mode: ElasticsearchMode = "private"
+    es_mode: ElasticsearchMode = "private",
 ) -> None:
     setup_logging(execution_context)
 
@@ -146,7 +147,7 @@ def local_handler(parser: ArgumentParser) -> None:
     local_args = parser.parse_args()
     event = ExtractorEvent.from_argparser(local_args)
 
-    handler(event,)
+    handler(event)
 
 
 if __name__ == "__main__":

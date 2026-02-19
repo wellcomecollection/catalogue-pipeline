@@ -1,15 +1,15 @@
 from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import CatalogueConceptsSource
-from tests.mocks import mock_es_secrets
+from tests.mocks import get_mock_es_client
 from tests.test_utils import add_mock_merged_documents
 
 
 def test_catalogue_concepts_source() -> None:
     add_mock_merged_documents("2025-05-05", work_status="Visible")
-    mock_es_secrets("graph_extractor", "2025-05-05")
 
     catalogue_concepts_source = CatalogueConceptsSource(
-        BasePipelineEvent(pipeline_date="2025-05-05")
+        BasePipelineEvent(pipeline_date="2025-05-05"),
+        get_mock_es_client("graph_extractor", "2025-05-05"),
     )
     stream_result = list(catalogue_concepts_source.stream_raw())
 

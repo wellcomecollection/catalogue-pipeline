@@ -30,7 +30,7 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
         es_client: Elasticsearch,
         neptune_client: NeptuneClient,
     ) -> None:
-        self.source = GraphWorksExtractor(event, es_client, neptune_client)
+        super().__init__(GraphWorksExtractor(event, es_client, neptune_client))
 
     def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
         work = extracted.work

@@ -7,6 +7,7 @@ from typing import Any, TextIO
 import boto3
 import smart_open
 import structlog
+
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 from models.events import EntityType
 from models.graph_edge import BaseEdge

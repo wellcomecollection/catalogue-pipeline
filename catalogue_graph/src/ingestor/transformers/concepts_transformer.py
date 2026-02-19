@@ -30,8 +30,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         es_client: Elasticsearch,
         neptune_client: NeptuneClient,
     ) -> None:
-        super().__init__()
-        self.source = GraphConceptsExtractor(event, es_client, neptune_client)
+        super().__init__(GraphConceptsExtractor(event, es_client, neptune_client))
 
     def _transform_related_concept(
         self, related_concept: RawNeptuneRelatedConcept
