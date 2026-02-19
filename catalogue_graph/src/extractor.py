@@ -15,7 +15,7 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
-from utils.elasticsearch import ElasticsearchMode, get_client
+from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import run_ecs_handler
 
@@ -36,8 +36,7 @@ def handler(
         stream_destination=event.stream_destination,
     )
 
-    es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
-    transformer: BaseTransformer = create_transformer(event, es_client)
+    transformer: BaseTransformer = create_transformer(event, es_mode)
 
     if event.stream_destination == "s3":
         s3_uri = event.get_s3_uri()

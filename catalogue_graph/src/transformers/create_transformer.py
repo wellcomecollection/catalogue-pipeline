@@ -1,7 +1,5 @@
 from typing import get_args
 
-from elasticsearch import Elasticsearch
-
 from config import (
     LOC_NAMES_URL,
     LOC_SUBJECT_HEADINGS_URL,
@@ -10,6 +8,7 @@ from config import (
 from models.events import (
     ExtractorEvent,
 )
+from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.types import CatalogueTransformerType
 
 from .base_transformer import BaseTransformer
@@ -29,7 +28,7 @@ from .wikidata.names_transformer import WikidataNamesTransformer
 
 def create_transformer(
     event: ExtractorEvent,
-    es_client: Elasticsearch | None,
+    es_mode: ElasticsearchMode,
 ) -> BaseTransformer:
     transformer_type = event.transformer_type
     entity_type = event.entity_type
@@ -69,22 +68,13 @@ def create_transformer(
             "mesh_locations", entity_type, pipeline_date
         )
     if transformer_type == "catalogue_concepts":
-        if es_client is None:
-            raise ValueError(
-                "Elasticsearch client is required for catalogue transformers."
-            )
+        es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
         return CatalogueConceptsTransformer(event, es_client)
     if transformer_type == "catalogue_works":
-        if es_client is None:
-            raise ValueError(
-                "Elasticsearch client is required for catalogue transformers."
-            )
+        es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
         return CatalogueWorksTransformer(event, es_client)
     if transformer_type == "catalogue_work_identifiers":
-        if es_client is None:
-            raise ValueError(
-                "Elasticsearch client is required for catalogue transformers."
-            )
+        es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
         return CatalogueWorkIdentifiersTransformer(event, es_client)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")
