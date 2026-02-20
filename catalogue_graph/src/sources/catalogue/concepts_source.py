@@ -1,5 +1,6 @@
 from collections.abc import Generator
 
+from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 from models.events import BasePipelineEvent
@@ -10,7 +11,6 @@ from models.pipeline.concept import (
 from models.pipeline.work_data import WorkData
 from sources.base_source import BaseSource
 from sources.merged_works_source import MergedWorksSource
-from utils.elasticsearch import ElasticsearchMode
 from utils.types import WorkConceptKey
 
 
@@ -67,10 +67,10 @@ class CatalogueConceptsSource(BaseSource):
     def __init__(
         self,
         event: BasePipelineEvent,
-        es_mode: ElasticsearchMode = "private",
+        es_client: Elasticsearch,
     ):
         self.es_source = MergedWorksSource(
-            event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
+            event, query=ES_QUERY, fields=ES_FIELDS, es_client=es_client
         )
 
     def stream_raw(self) -> Generator[ExtractedWorkConcept]:

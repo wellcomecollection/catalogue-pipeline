@@ -7,7 +7,7 @@ from models.neptune_bulk_loader import (
     BulkLoadFeed,
     BulkLoadStatusResponse,
 )
-from tests.mocks import MockCloudwatchClient, MockRequest
+from tests.mocks import MOCK_NEPTUNE_ENDPOINT, MockCloudwatchClient, MockRequest
 
 LOAD_ID = "123"
 BULK_LOADER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader"
@@ -62,7 +62,7 @@ def add_mock_status_response(
 
     MockRequest.mock_response(
         method="GET",
-        url=f"https://test-host.com:8182/loader?loadId={LOAD_ID}&errors=TRUE&details=TRUE",
+        url=f"https://{MOCK_NEPTUNE_ENDPOINT}:8182/loader?loadId={LOAD_ID}&errors=TRUE&details=TRUE",
         json_data={"payload": mock_status.model_dump()},
     )
 

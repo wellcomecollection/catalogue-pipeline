@@ -9,6 +9,7 @@ from models.events import (
     IncrementalGraphRemoverEvent,
 )
 from removers.elasticsearch_remover import ElasticsearchRemover
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -78,19 +79,9 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help="The pipeline date corresponding to the concepts index to remove from.",
-        required=False,
-        default="dev",
-    )
-    parser.add_argument(
-        "--index-date-merged",
-        type=str,
-        help="The merged index date to read from, will default to pipeline date.",
-        required=False,
-    )
+    add_pipeline_event_args(parser, {"pipeline_date", "index_date_merged", "window"})
+    add_cluster_connection_args(parser, {"es_mode"})
+
     parser.add_argument(
         "--index-date",
         type=str,
@@ -104,26 +95,6 @@ def local_handler() -> None:
         help="The job ID for the current run.",
         required=False,
         default="dev",
-    )
-    parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Which ES instance to connect to. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["local", "public"],
-        default="local",
     )
     parser.add_argument(
         "--force-pass",

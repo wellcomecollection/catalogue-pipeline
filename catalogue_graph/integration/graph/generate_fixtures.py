@@ -14,6 +14,7 @@ from getpass import getuser
 from pathlib import Path
 from typing import Any
 
+from clients.neptune_client import NeptuneClient
 from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
@@ -28,7 +29,6 @@ from ingestor.queries.concept_queries import (
     SAME_AS_CONCEPT_QUERY,
 )
 from ingestor.queries.work_queries import WORK_ANCESTORS_QUERY
-from utils.aws import get_neptune_client
 
 FIXTURE_SAMPLE_SIZE = 20
 ID_POOL_SIZE = 20_000
@@ -146,7 +146,7 @@ def main() -> None:
     reason = confirm_regeneration()
     append_regeneration_log(reason=reason)
 
-    client = get_neptune_client(True)
+    client = NeptuneClient()
 
     # Get a sample of `ID_POOL_SIZE` random concept and work IDs.
     random_concept_ids = sample_ids(client=client, label="Concept")

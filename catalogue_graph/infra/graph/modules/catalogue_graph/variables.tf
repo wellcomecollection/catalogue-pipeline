@@ -18,11 +18,6 @@ variable "private_subnets" {
   description = "List of private subnets associated with the VPC."
 }
 
-variable "public_url" {
-  type        = string
-  description = "URL for accessing the graph outside of the VPC. Must be part of wellcomecollection.org domain."
-}
-
 variable "bulk_loader_s3_bucket_name" {
   type        = string
   description = "Name of the S3 bucket storing Neptune bulk load files."

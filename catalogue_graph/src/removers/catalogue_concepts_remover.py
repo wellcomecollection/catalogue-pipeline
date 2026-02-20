@@ -1,14 +1,16 @@
 from collections.abc import Iterator
 
+from clients.neptune_client import NeptuneClient
 from models.events import IncrementalGraphRemoverEvent
-from utils.elasticsearch import ElasticsearchMode
 
 from .base_graph_remover_incremental import BaseGraphRemoverIncremental
 
 
 class CatalogueConceptsGraphRemover(BaseGraphRemoverIncremental):
-    def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
-        super().__init__(event.entity_type, es_mode != "private")
+    def __init__(
+        self, event: IncrementalGraphRemoverEvent, neptune_client: NeptuneClient
+    ):
+        super().__init__(event.entity_type, neptune_client)
 
     def get_total_node_count(self) -> int:
         return self.neptune_client.get_total_node_count("Concept")

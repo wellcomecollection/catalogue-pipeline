@@ -4,6 +4,7 @@ from typing import Any, Literal
 
 import structlog
 
+from clients.neptune_client import NeptuneClient
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
     CONCEPT_QUERY,
@@ -23,7 +24,6 @@ from ingestor.queries.work_queries import (
     WORK_CHILDREN_QUERY,
     WORK_CONCEPTS_QUERY,
 )
-from utils.aws import get_neptune_client
 
 logger = structlog.get_logger(__name__)
 
@@ -72,8 +72,8 @@ NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
 
 
 class GraphBaseExtractor:
-    def __init__(self, use_public_endpoint: bool = False):
-        self.neptune_client = get_neptune_client(use_public_endpoint)
+    def __init__(self, neptune_client: NeptuneClient):
+        self.neptune_client = neptune_client
         self.neptune_params: dict[str, Any] = {}
 
     def extract_raw(self) -> Generator[Any]:

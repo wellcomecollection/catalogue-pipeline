@@ -20,6 +20,10 @@ RUN apt-get update && apt-get install -y ca-certificates git && rm -rf /var/lib/
 COPY certs/* /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
+# Install pip-system-certs so Python uses the system CA store (including the Sectigo certs above).
+# This is installed separately from the main package to avoid affecting local development.
+RUN pip install pip-system-certs
+
 # Install dependencies and the package using uv pip install
 # uv pip install works with the system Python environment and installs from uv.lock
 # --system installs to system Python instead of requiring a virtual environment  

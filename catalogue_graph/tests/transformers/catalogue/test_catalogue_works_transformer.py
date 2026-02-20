@@ -1,17 +1,22 @@
 from models.events import BasePipelineEvent
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
+from tests.mocks import get_mock_es_client
 from tests.test_utils import add_mock_merged_documents, check_bulk_load_edge
 from transformers.catalogue.works_transformer import CatalogueWorksTransformer
 
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 
+def get_transformer() -> CatalogueWorksTransformer:
+    es_client = get_mock_es_client("graph_extractor", MOCK_EVENT.pipeline_date)
+    return CatalogueWorksTransformer(MOCK_EVENT, es_client)
+
+
 def test_catalogue_works_transformer_nodes() -> None:
     add_mock_merged_documents(work_status="Visible")
 
-    transformer = CatalogueWorksTransformer(MOCK_EVENT, "local")
-    nodes = list(transformer._stream_nodes())
+    nodes = list(get_transformer()._stream_nodes())
 
     assert len(nodes) == 3
     expected_work = Work(
@@ -28,8 +33,7 @@ def test_catalogue_works_transformer_nodes() -> None:
 def test_catalogue_works_transformer_edges() -> None:
     add_mock_merged_documents(work_status="Visible")
 
-    transformer = CatalogueWorksTransformer(MOCK_EVENT, "local")
-    edges = list(transformer._stream_edges())
+    edges = list(get_transformer()._stream_edges())
 
     assert len(edges) == 15
 

@@ -4,7 +4,7 @@ from models.graph_edge import (
     WorkHasPathIdentifier,
 )
 from models.graph_node import PathIdentifier
-from tests.mocks import mock_es_secrets
+from tests.mocks import get_mock_es_client
 from tests.test_utils import add_mock_merged_documents, check_bulk_load_edge
 from transformers.catalogue.work_identifiers_transformer import (
     CatalogueWorkIdentifiersTransformer,
@@ -13,12 +13,15 @@ from transformers.catalogue.work_identifiers_transformer import (
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 
+def get_transformer() -> CatalogueWorkIdentifiersTransformer:
+    es_client = get_mock_es_client("graph_extractor", MOCK_EVENT.pipeline_date)
+    return CatalogueWorkIdentifiersTransformer(MOCK_EVENT, es_client)
+
+
 def test_catalogue_work_identifiers_transformer_nodes() -> None:
-    mock_es_secrets("graph_extractor", "dev")
     add_mock_merged_documents(work_status="Visible")
 
-    transformer = CatalogueWorkIdentifiersTransformer(MOCK_EVENT, "public")
-    nodes = list(transformer._stream_nodes())
+    nodes = list(get_transformer()._stream_nodes())
 
     assert len(nodes) == 3
 
@@ -33,12 +36,9 @@ def test_catalogue_work_identifiers_transformer_nodes() -> None:
 
 
 def test_catalogue_work_identifiers_transformer_edges() -> None:
-    mock_es_secrets("graph_extractor", "dev")
-
     add_mock_merged_documents(work_status="Visible")
 
-    transformer = CatalogueWorkIdentifiersTransformer(MOCK_EVENT, "public")
-    edges = list(transformer._stream_edges())
+    edges = list(get_transformer()._stream_edges())
 
     assert len(edges) == 6
 
