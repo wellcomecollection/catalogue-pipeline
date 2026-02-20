@@ -127,6 +127,15 @@ class OAIPMHAdapterConfig(BaseModel):
     local_window_status_namespace: str
     """Namespace for window status (local)."""
 
+    # ---------------------------------------------------------------------------
+    # Reporting
+    # ---------------------------------------------------------------------------
+    report_s3_bucket: str | None = None
+    """S3 bucket for report storage (None to disable S3 report publishing)."""
+
+    report_s3_prefix: str = "dev"
+    """S3 key prefix for report paths."""
+
 
 class OAIPMHRuntimeConfig(ABC):
     """Base class for OAI-PMH adapter runtime configuration.

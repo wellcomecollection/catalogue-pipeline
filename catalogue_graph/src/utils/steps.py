@@ -73,13 +73,15 @@ class StepFunctionOutput:
             logger.error("Task error", error_output=error_output)
 
 
-def run_ecs_handler[H: HandlerFunction, E: EventValidator](
+def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
     arg_parser: ArgumentParser,
-    handler: H,
-    event_validator: E,
+    handler: Callable[
+        Concatenate[EventModel, ExecutionContext, Params], ResultModel | None
+    ],
+    event_validator: Callable[[str], EventModel],
     execution_context: ExecutionContext,
-    *handler_args: Params.args,  # type: ignore[valid-type]
-    **handler_kwargs: Params.kwargs,  # type: ignore[valid-type]
+    *handler_args: Params.args,
+    **handler_kwargs: Params.kwargs,
 ) -> None:
     arg_parser.add_argument(
         "--event",
@@ -103,8 +105,8 @@ def run_ecs_handler[H: HandlerFunction, E: EventValidator](
 
     try:
         result = handler(
-            event=event,
-            execution_context=execution_context,
+            event,
+            execution_context,
             *handler_args,  # noqa: B026
             **handler_kwargs,
         )

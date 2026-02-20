@@ -37,6 +37,7 @@ class LoaderStepConfig(BaseModel):
     use_rest_api_table: bool = True
     window_minutes: int | None = None
     allow_partial_final_window: bool = False
+    suppress_summaries: bool = True
 
 
 class LoaderRuntime(BaseModel):
@@ -48,6 +49,9 @@ class LoaderRuntime(BaseModel):
     window_generator: WindowGenerator
     adapter_namespace: str
     adapter_name: str
+    suppress_summaries: bool = True
+    report_s3_bucket: str | None = None
+    report_s3_prefix: str = "dev"
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -87,6 +91,9 @@ def build_runtime(
         window_generator=window_generator,
         adapter_namespace=config.config.adapter_namespace,
         adapter_name=config.config.adapter_name,
+        suppress_summaries=cfg.suppress_summaries,
+        report_s3_bucket=config.config.report_s3_bucket,
+        report_s3_prefix=config.config.report_s3_prefix,
     )
 
 
@@ -196,9 +203,16 @@ def handler(
     response = execute_loader(event, runtime=runtime)
 
     report = OAIPMHLoaderReport.from_loader(
-        event, response, adapter_type=runtime.adapter_name
+        event,
+        response,
+        adapter_type=runtime.adapter_name,
+        report_s3_bucket=runtime.report_s3_bucket,
+        report_s3_prefix=runtime.report_s3_prefix,
     )
     report.publish()
+
+    if runtime.suppress_summaries:
+        response.summaries = []
 
     return response
 
@@ -291,6 +305,7 @@ def run_cli(
                 if event.allow_partial_final_window is not None
                 else args.allow_partial_final_window
             ),
+            suppress_summaries=False,
         ),
     )
     execution_context = ExecutionContext(

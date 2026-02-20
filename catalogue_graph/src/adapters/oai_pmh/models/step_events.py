@@ -59,7 +59,7 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
     Contains summaries of processed windows and identifiers for downstream steps.
     """
 
-    summaries: list[WindowSummary]
+    summaries: list[WindowSummary] = Field(default_factory=list)
     """Status summaries for each processed sub-window."""
 
     changeset_ids: list[str] = Field(default_factory=list)

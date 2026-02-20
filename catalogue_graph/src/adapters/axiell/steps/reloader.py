@@ -9,19 +9,14 @@ from typing import Any
 
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.oai_pmh.steps import reloader as base_reloader
-from adapters.oai_pmh.steps.reloader import (
-    ReloaderRuntime,
-)
-from adapters.oai_pmh.steps.reloader import (
-    ReloaderStepConfig as AxiellAdapterReloaderConfig,
-)
+from adapters.oai_pmh.steps.reloader import ReloaderRuntime, ReloaderStepConfig
 
 
 def build_runtime(
-    config_obj: AxiellAdapterReloaderConfig | None = None,
+    config_obj: ReloaderStepConfig | None = None,
 ) -> ReloaderRuntime:
     """Build Axiell reloader runtime from config."""
-    cfg = config_obj or AxiellAdapterReloaderConfig()
+    cfg = config_obj or ReloaderStepConfig()
     return base_reloader.build_runtime(AXIELL_CONFIG, cfg)
 
 

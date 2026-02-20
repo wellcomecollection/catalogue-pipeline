@@ -204,7 +204,7 @@ def local_handler(parser: ArgumentParser) -> None:
 
     args = parser.parse_args()
     event = IngestorLoaderLambdaEvent.from_argparser(args)
-    handler(event, args.es_mode, args.load_destination)
+    handler(event, None, args.es_mode, args.load_destination)
 
 
 if __name__ == "__main__":

@@ -404,3 +404,6 @@ reindexer/scripts/ids
 
 # Ignore output miro links script
 scripts/mirolinks.csv
+
+# Ignore documents added for agent context
+catalogue_graph/.context

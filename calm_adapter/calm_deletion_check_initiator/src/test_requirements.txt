@@ -16,7 +16,7 @@ botocore==1.34.60
     #   s3transfer
 certifi==2024.2.2
     # via requests
-cffi==1.16.0
+cffi==2.0.0
     # via cryptography
 charset-normalizer==3.3.2
     # via requests
@@ -24,7 +24,7 @@ click==8.1.7
     # via -r requirements.txt
 coverage==7.4.3
     # via -r test_requirements.in
-cryptography==42.0.5
+cryptography==46.0.5
     # via moto
 docker==7.0.0
     # via -r test_requirements.in
@@ -85,7 +85,9 @@ tomli==2.0.1
     # via pytest
 tqdm==4.66.2
     # via -r requirements.txt
-urllib3==2.0.7
+typing-extensions==4.15.0
+    # via cryptography
+urllib3==1.26.18
     # via
     #   -r requirements.txt
     #   botocore

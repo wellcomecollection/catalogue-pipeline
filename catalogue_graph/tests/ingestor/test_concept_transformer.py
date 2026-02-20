@@ -497,7 +497,14 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
                         id="iiif-image", label="IIIF Image API", type="LocationType"
                     ),
                     accessConditions=[],
-                )
+                ),
+                DisplayDigitalLocation(
+                    url="www.image2.info.json",
+                    locationType=DisplayIdLabel(
+                        id="iiif-image", label="IIIF Image API", type="LocationType"
+                    ),
+                    accessConditions=[],
+                ),
             ],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],

@@ -1,5 +1,3 @@
-"""Tests for the ChatbotNotifier client."""
-
 from __future__ import annotations
 
 import json
@@ -10,32 +8,22 @@ from clients.chatbot_notifier import ChatbotMessage, ChatbotNotifier, ChatbotRes
 from tests.mocks import MockSNSClient
 
 
-@pytest.fixture(autouse=True)
-def reset_mocks() -> None:
-    """Reset mock state before each test."""
-    MockSNSClient.reset_mocks()
-
-
 @pytest.fixture
 def mock_sns_client() -> MockSNSClient:
-    """Provide a mock SNS client."""
     return MockSNSClient()
 
 
 @pytest.fixture
 def topic_arn() -> str:
-    """Provide a test topic ARN."""
     return "arn:aws:sns:eu-west-1:123456789012:test-chatbot-topic"
 
 
 @pytest.fixture
 def notifier(mock_sns_client: MockSNSClient, topic_arn: str) -> ChatbotNotifier:
-    """Provide a ChatbotNotifier instance with mock client."""
     return ChatbotNotifier(sns_client=mock_sns_client, topic_arn=topic_arn)
 
 
 def test_send_simple_message(notifier: ChatbotNotifier, topic_arn: str) -> None:
-    """Test sending a simple message without threading."""
     message = ChatbotMessage(
         text="Hello from the pipeline!",
         thread_id=None,
@@ -82,7 +70,6 @@ def test_send_simple_message(notifier: ChatbotNotifier, topic_arn: str) -> None:
 
 
 def test_send_message_with_thread_id(notifier: ChatbotNotifier, topic_arn: str) -> None:
-    """Test sending a message with a thread ID for conversation context."""
     message = ChatbotMessage(
         text="Follow-up message",
         thread_id="previous-message-id-123",
@@ -112,7 +99,6 @@ def test_send_message_with_thread_id(notifier: ChatbotNotifier, topic_arn: str) 
 
 
 def test_send_message_with_metadata(notifier: ChatbotNotifier, topic_arn: str) -> None:
-    """Test sending a message with additional context metadata."""
     message = ChatbotMessage(
         text="Message with context",
         thread_id=None,
@@ -146,7 +132,6 @@ def test_send_message_with_metadata(notifier: ChatbotNotifier, topic_arn: str) -
 
 
 def test_send_markdown_message(notifier: ChatbotNotifier) -> None:
-    """Test sending a message with markdown formatting."""
     message = ChatbotMessage(
         text="# Alert\n\n**Status:** Failed\n\n- Item 1\n- Item 2",
         thread_id=None,
@@ -175,7 +160,6 @@ def test_send_markdown_message(notifier: ChatbotNotifier) -> None:
 
 
 def test_threading_conversation(notifier: ChatbotNotifier) -> None:
-    """Test a threaded conversation with multiple messages."""
     # Send initial message
     first_message = ChatbotMessage(
         text="Starting a new job",
@@ -243,8 +227,6 @@ def test_threading_conversation(notifier: ChatbotNotifier) -> None:
 def test_publish_failure_raises_error(
     mock_sns_client: MockSNSClient, topic_arn: str
 ) -> None:
-    """Test that a failed SNS publish raises a RuntimeError."""
-
     # Override the mock to return a failure response
     def failing_publish(**kwargs: dict) -> dict:
         MockSNSClient.publish_calls.append(kwargs)
@@ -275,8 +257,6 @@ def test_publish_failure_raises_error(
 def test_publish_exception_propagates(
     mock_sns_client: MockSNSClient, topic_arn: str
 ) -> None:
-    """Test that exceptions from the SNS client are propagated."""
-
     # Override the mock to raise an exception
     def exception_publish(**kwargs: dict) -> dict:
         raise ValueError("Network error")
@@ -301,7 +281,6 @@ def test_publish_exception_propagates(
 
 
 def test_send_message_with_all_fields(notifier: ChatbotNotifier) -> None:
-    """Test sending a message with all optional fields populated."""
     message = ChatbotMessage(
         text="Comprehensive notification with all fields",
         thread_id="test-thread-123",
