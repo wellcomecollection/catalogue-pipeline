@@ -58,6 +58,7 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-*",
       "arn:aws:lambda:eu-west-1:760097843905:function:ebsco-adapter-*",
       "arn:aws:lambda:eu-west-1:760097843905:function:axiell-adapter-*",
+      "arn:aws:lambda:eu-west-1:760097843905:function:folio-adapter-*",
     ]
   }
 
