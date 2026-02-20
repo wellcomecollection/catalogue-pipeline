@@ -1,0 +1,17 @@
+[project]
+name = "semantic-search-local"
+version = "0.1.0"
+description = "Local semantic search experimentation with sentence-transformers"
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.31.0",
+    "eland[pytorch]>=8.15.0,<9.0.0",
+    "ijson>=3.4.0.post0",
+    "boto3>=1.34.0",
+]
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.0.0",
+    "ipykernel>=6.29.0",
+]

@@ -20,6 +20,8 @@ from ingestor.models.step_events import (
     IngestorStepEvent,
 )
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
+from utils.elasticsearch import ElasticsearchMode
+from utils.steps import create_job_id
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import IndexerReport
@@ -33,13 +35,15 @@ RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
     "works": IndexableWork,
 }
 
+# getting loaded docs from S3
+
 
 def _get_objects_to_index(
     base_event: IngestorStepEvent,
 ) -> Generator[IngestorIndexerObject]:
     logger.info("Listing S3 objects to index")
     bucket_name = config.CATALOGUE_GRAPH_S3_BUCKET
-    prefix = base_event.get_path_prefix()
+    prefix = base_event.works_source
     load_format = base_event.load_format
 
     logger.info(
@@ -94,6 +98,7 @@ def handler(
     event: IngestorIndexerLambdaEvent,
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
+    create_index_mapping: str | None = None,
 ) -> IngestorIndexerMonitorLambdaEvent:
     setup_logging(execution_context)
 
@@ -104,13 +109,31 @@ def handler(
         job_id=event.job_id,
     )
 
+    if not event.index_dates.works:
+        raise ValueError("Destination index for works must be specified in the event.")
+
     objects_to_index = event.objects_to_index or _get_objects_to_index(event)
-    es_client = utils.elasticsearch.get_client(
-        f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
-    )
-    index_name = get_standard_index_name(
-        f"{event.ingestor_type}-indexed", event.index_date
-    )
+
+    es_client = utils.elasticsearch.get_serverless_client(es_mode)
+
+    index_name = event.index_dates.works
+
+    # Create index if mapping file provided
+    if create_index_mapping:
+        print(
+            f"Creating index '{index_name}' with mapping from '{create_index_mapping}'..."
+        )
+        with open(create_index_mapping) as f:
+            mapping = json.load(f)
+
+        es_client.indices.create(index=index_name, body=mapping)
+
+        # Wait for index to be ready (yellow = all primary shards allocated and ready for writes)
+        print(f"Waiting for index '{index_name}' to be ready...")
+        es_client.cluster.health(
+            index=index_name, wait_for_status="yellow", timeout="30s"
+        )
+        print(f"Index '{index_name}' created and ready.")
 
     total_success_count = 0
     for s3_object in objects_to_index:
@@ -123,19 +146,15 @@ def handler(
             index_name=index_name,
         )
 
-        success_count, _ = elasticsearch.helpers.bulk(
-            es_client, generate_operations(index_name, indexable_data)
-        )
+        # success_count, _ = elasticsearch.helpers.bulk(
+        #     es_client, generate_operations(index_name, indexable_data)
+        # )
 
-        logger.info("Successfully indexed documents", count=success_count)
+        # logger.info("Successfully indexed documents", count=success_count)
 
-        total_success_count += success_count
+        # total_success_count += success_count
 
     event_payload = event.model_dump(exclude={"objects_to_index"})
-
-    logger.info("Preparing indexer pipeline report")
-    report = IndexerReport(**event_payload, success_count=total_success_count)
-    report.publish()
 
     return IngestorIndexerMonitorLambdaEvent(
         **event_payload,
@@ -194,29 +213,36 @@ def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--ingestor-type",
         type=str,
-        choices=["concepts", "works"],
+        choices=["works"],
         help="The type of the records being ingested",
-        required=True,
+        required=False,
+        default="works",
     )
     parser.add_argument(
         "--pipeline-date",
         type=str,
-        help='The pipeline that is being ingested to, will default to "dev".',
+        help="The pipeline that is being ingested to, will default to 'dev'.",
         required=False,
         default="dev",
     )
     parser.add_argument(
         "--index-date-merged",
         type=str,
-        help="The merged index date to read from, will default to pipeline date.",
-        required=False,
-    )
-    parser.add_argument(
-        "--index-date",
-        type=str,
-        help="The index date that is being ingested to, will default to 'dev'.",
+        help="The merged index to read from. Only for model parity, not used in prototype",
         required=False,
         default="dev",
+    )
+    parser.add_argument(
+        "--works-source",
+        type=str,
+        help='The S3 prefix where the source file(s) are located, e.g. "s3://bucket/prefix"',
+        required=True,
+    )
+    parser.add_argument(
+        "--works-destination-index",
+        type=str,
+        help="The index that is being ingested to.",
+        required=True,
     )
     parser.add_argument(
         "--window-start",
@@ -246,31 +272,29 @@ def local_handler(parser: ArgumentParser) -> None:
         default="parquet",
     )
     parser.add_argument(
-        "--es-mode",
+        "--create-index",
         type=str,
-        help="Where to index documents. Use 'public' to connect to the production cluster.",
+        help="Path to index mapping JSON file. If provided, creates the index before ingestion.",
         required=False,
-        choices=["local", "public"],
-        default="local",
     )
 
     args = parser.parse_args()
     base_event = IngestorStepEvent.from_argparser(args)
 
     event = IngestorIndexerLambdaEvent(**base_event.model_dump())
-    handler(event, es_mode=args.es_mode)
+    handler(event, es_mode="public", create_index_mapping=args.create_index)
 
 
 if __name__ == "__main__":
     parser: ArgumentParser = ArgumentParser()
-    parser.add_argument(
-        "--use-cli",
-        action="store_true",
-        help="Whether to invoke the local CLI handler instead of the ECS handler.",
-    )
-    args, _ = parser.parse_known_args()
+    local_handler(parser)
 
-    if args.use_cli:
-        local_handler(parser)
-    else:
-        ecs_handler(parser)
+
+# AWS_PROFILE=platform-developer uv run ingestor_indexer.py \
+# --ingestor-type=works \
+# --works-source="ingestor_works/dev/dev" \
+# --works-destination-index="works-semantic-v1" \
+# --load-format=jsonl
+
+# optional:
+# --create-index="path/to/mapping.json"

@@ -13,6 +13,7 @@ class IngestorStepEvent(BasePipelineEvent):
     ingestor_type: IngestorType
     job_id: str
     load_format: IngestorLoadFormat = "parquet"
+    works_source: str | None = None
 
     @property
     def index_date(self) -> str:
@@ -49,15 +50,15 @@ class IngestorStepEvent(BasePipelineEvent):
     def from_argparser(cls, args: argparse.Namespace) -> Self:
         window = IncrementalWindow.from_argparser(args)
 
-        index_date_works, index_date_concepts = None, None
+        index_works, index_date_concepts = None, None
         if args.ingestor_type == "works":
-            index_date_works = args.index_date
+            index_works = args.works_destination_index
         elif args.ingestor_type == "concepts":
             index_date_concepts = args.index_date
 
         index_dates = PipelineIndexDates(
             merged=args.index_date_merged,
-            works=index_date_works,
+            works=index_works,
             concepts=index_date_concepts,
         )
         return cls(**args.__dict__, window=window, index_dates=index_dates)

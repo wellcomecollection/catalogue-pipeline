@@ -1,0 +1,72 @@
+{
+  "dynamic": "strict",
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "title": {
+      "type": "text",
+      "analyzer": "english"
+    },
+    "description": {
+      "type": "text",
+      "analyzer": "english"
+    },
+    "subjects": {
+      "type": "nested",
+      "properties": {
+        "label": {
+          "type": "text"
+        },
+        "concepts": {
+          "type": "nested",
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "label": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "contributors": {
+      "type": "nested",
+      "properties": {
+        "agent": {
+          "properties": {
+            "label": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "production": {
+      "type": "nested",
+      "properties": {
+        "dates": {
+          "type": "nested",
+          "properties": {
+            "label": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "titleSemantic": {
+      "type": "semantic_text",
+      "inference_id": "elser-embeddings"
+    },
+    "descriptionSemantic": {
+      "type": "semantic_text",
+      "inference_id": "elser-embeddings"
+    },
+    "titleDescriptionSemantic": {
+      "type": "semantic_text",
+      "inference_id": "elser-embeddings"
+    }
+  }
+}

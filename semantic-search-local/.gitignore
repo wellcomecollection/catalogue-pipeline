@@ -1,0 +1,7 @@
+*.jsonl
+*.json.gz
+embeddings/
+data/
+*.pyc
+__pycache__/
+.env
