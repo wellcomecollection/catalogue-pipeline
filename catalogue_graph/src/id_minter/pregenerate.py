@@ -9,29 +9,15 @@ This allows the minter to operate without having to worry about id clashes.
 
 import logging
 from collections.abc import Iterable
-from typing import Protocol
 
 from id_minter import identifiers
+from id_minter.database import DBConnection
 
 logger = logging.getLogger(__name__)
 
 
 class ShortfallError(RuntimeError):
     pass
-
-
-class DBCursor(Protocol):
-    def execute(self, q: str) -> None: ...
-
-    def fetchone(self) -> tuple[int]: ...
-
-    def executemany(self, q: str, args: list[tuple]) -> None: ...
-
-
-class DBConnection[T: DBCursor](Protocol):
-    def cursor(self) -> T: ...
-
-    def commit(self) -> None: ...
 
 
 def top_up_ids(conn: DBConnection, desired_count: int) -> None:
