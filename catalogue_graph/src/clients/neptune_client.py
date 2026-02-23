@@ -129,6 +129,15 @@ class NeptuneClient:
         )
         return results
 
+    def refresh_graph_summary(self) -> None:
+        """
+        Asynchronously refresh property graph statistics.
+        See https://docs.aws.amazon.com/neptune/latest/data-api/API_ManagePropertygraphStatistics.html for more info.
+        """
+        self._make_request(
+            "POST", "/propertygraph/statistics", payload={"mode": "refresh"}
+        )
+
     def get_graph_summary(self) -> dict:
         """
         Returns a Neptune summary report about the graph.
