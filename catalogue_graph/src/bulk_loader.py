@@ -52,7 +52,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(parser, {"pipeline_date", "window"})
-    add_cluster_connection_args(parser, {"es_mode", "neptune_environment"})
+    add_cluster_connection_args(parser, {"neptune_environment"})
     parser.add_argument(
         "--transformer-type",
         type=str,
