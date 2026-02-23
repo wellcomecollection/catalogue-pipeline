@@ -109,5 +109,5 @@ def test_mismatched_pipeline_date() -> None:
     # Works exist in an index with a different pipeline date
     add_mock_merged_documents("2025-01-01", work_status="Visible")
 
-    edges = list(get_transformer()._stream_edges())
+    edges = list(get_transformer(pipeline_date=pipeline_date)._stream_edges())
     assert len(edges) == 0
