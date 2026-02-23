@@ -4,7 +4,7 @@ import typing
 import polars as pl
 import structlog
 
-from clients.neptune_client import NeptuneClient, NeptuneEnvironment
+from clients.neptune_client import NeptuneClient
 from models.events import IncrementalGraphRemoverEvent
 from removers.base_graph_remover_incremental import BaseGraphRemoverIncremental
 from removers.catalogue_concepts_remover import CatalogueConceptsGraphRemover
@@ -12,7 +12,11 @@ from removers.catalogue_work_identifiers_remover import (
     CatalogueWorkIdentifiersGraphRemover,
 )
 from removers.catalogue_works_remover import CatalogueWorksGraphRemover
-from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.argparse import (
+    add_cluster_connection_args,
+    add_pipeline_event_args,
+    validate_cluster_connection_args,
+)
 from utils.aws import (
     df_to_s3_parquet,
 )
@@ -27,10 +31,9 @@ logger = structlog.get_logger(__name__)
 def get_remover(
     event: IncrementalGraphRemoverEvent,
     es_mode: ElasticsearchMode,
-    neptune_environment: NeptuneEnvironment,
 ) -> BaseGraphRemoverIncremental:
     es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
-    neptune_client = NeptuneClient(neptune_environment)
+    neptune_client = NeptuneClient(event.environment)
 
     if event.transformer_type == "catalogue_works":
         return CatalogueWorksGraphRemover(event, es_client, neptune_client)
@@ -46,18 +49,17 @@ def handler(
     event: IncrementalGraphRemoverEvent,
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
-    neptune_environment: NeptuneEnvironment = "prod",
 ) -> None:
     setup_logging(execution_context)
 
-    remover = get_remover(event, es_mode, neptune_environment)
+    remover = get_remover(event, es_mode)
     deleted_ids = remover.remove(event.force_pass)
 
     # Write removed IDs to a parquet file
     s3_file_uri = event.get_s3_uri("parquet", "deleted_ids")
     df_to_s3_parquet(pl.DataFrame(deleted_ids), s3_file_uri)
 
-    if neptune_environment == "prod":
+    if event.environment == "prod":
         report = IncrementalGraphRemoverReport(
             **event.model_dump(), deleted_count=len(deleted_ids)
         )
@@ -81,7 +83,7 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(parser, {"pipeline_date", "window", "pit_id"})
-    add_cluster_connection_args(parser, {"es_mode", "neptune_environment"})
+    add_cluster_connection_args(parser, {"es_mode", "environment"})
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -98,6 +100,7 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
+    validate_cluster_connection_args(parser, args)
     event = IncrementalGraphRemoverEvent.from_argparser(args)
 
     execution_context = ExecutionContext(
@@ -108,7 +111,6 @@ def local_handler() -> None:
         event,
         execution_context,
         es_mode=args.es_mode,
-        neptune_environment=args.neptune_environment,
     )
 
 

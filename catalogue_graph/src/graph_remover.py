@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import polars as pl
 import structlog
 
-from clients.neptune_client import NeptuneClient, NeptuneEnvironment
+from clients.neptune_client import NeptuneClient
 from models.events import BulkLoaderEvent, FullGraphRemoverEvent
 from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.aws import (
@@ -85,7 +85,6 @@ def log_ids(
 def handler(
     event: FullGraphRemoverEvent,
     execution_context: ExecutionContext | None = None,
-    neptune_environment: NeptuneEnvironment = "prod",
 ) -> None:
     setup_logging(execution_context)
 
@@ -127,7 +126,7 @@ def handler(
 
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
-        client = NeptuneClient(neptune_environment)
+        client = NeptuneClient(event.environment)
         client.delete_entities_by_id(list(deleted_ids), event.entity_type)
 
     # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
@@ -151,7 +150,7 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(parser, {"pipeline_date"})
-    add_cluster_connection_args(parser, {"neptune_environment"})
+    add_cluster_connection_args(parser, {"environment"})
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -183,7 +182,6 @@ def local_handler() -> None:
     handler(
         event,
         execution_context,
-        neptune_environment=args.neptune_environment,
     )
 
 

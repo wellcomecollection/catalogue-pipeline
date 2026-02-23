@@ -2,17 +2,18 @@ import argparse
 from pathlib import PurePosixPath
 from typing import Self
 
-from pydantic import BaseModel
-
 import config
-from models.incremental_window import IncrementalWindow
+from pydantic import BaseModel
 from utils.types import (
     CatalogueTransformerType,
     EntityType,
+    Environment,
     FullGraphRemoverType,
     StreamDestination,
     TransformerType,
 )
+
+from models.incremental_window import IncrementalWindow
 
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
@@ -31,6 +32,7 @@ class BasePipelineEvent(BaseModel):
     window: IncrementalWindow | None = None
     pipeline_date: str
     pit_id: str | None = None
+    environment: Environment = "prod"
     index_dates: PipelineIndexDates = PipelineIndexDates()
 
     @classmethod
@@ -70,7 +72,8 @@ class GraphPipelineEvent(BasePipelineEvent):
 
     def get_s3_uri(self, file_format: str = "csv", folder: str | None = None) -> str:
         file_path = self.get_file_path(file_format, folder)
-        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{file_path}"
+        bucket = config.get_catalogue_graph_s3_bucket(self.environment)
+        return f"s3://{bucket}/{file_path}"
 
 
 class ExtractorEvent(GraphPipelineEvent):
@@ -93,6 +96,7 @@ class BulkLoaderEvent(GraphPipelineEvent):
 class BulkLoadPollerEvent(BaseModel):
     load_id: str
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
+    environment: Environment = "prod"
 
 
 class GraphRemoverEvent(GraphPipelineEvent):

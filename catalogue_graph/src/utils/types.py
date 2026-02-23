@@ -1,6 +1,8 @@
 from typing import Literal, get_args
 
 # Reason type Literal aliases & derived tuples (single source of truth for values).
+Environment = Literal["prod", "dev"]
+
 InvisibleReasonType = Literal[
     "CopyrightNotCleared",
     "SourceFieldMissing",

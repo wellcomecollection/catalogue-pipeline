@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 import structlog
 from elasticsearch import Elasticsearch
 
-from clients.neptune_client import NeptuneClient, NeptuneEnvironment
+from clients.neptune_client import NeptuneClient
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -17,7 +17,11 @@ from ingestor.transformers.base_transformer import (
 )
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.argparse import (
+    add_cluster_connection_args,
+    add_pipeline_event_args,
+    validate_cluster_connection_args,
+)
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
@@ -45,7 +49,6 @@ def handler(
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
     load_destination: LoadDestination = "s3",
-    neptune_environment: NeptuneEnvironment = "prod",
 ) -> IngestorIndexerLambdaEvent:
     setup_logging(execution_context)
 
@@ -59,7 +62,7 @@ def handler(
     es_client = get_client(
         f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
     )
-    neptune_client = NeptuneClient(neptune_environment)
+    neptune_client = NeptuneClient(event.environment)
     transformer = create_transformer(event, es_client, neptune_client)
     objects_to_index = transformer.load_documents(event, load_destination)
 
@@ -130,7 +133,7 @@ def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
         parser, {"pipeline_date", "index_date_merged", "window", "pit_id"}
     )
-    add_cluster_connection_args(parser, {"es_mode", "neptune_environment"})
+    add_cluster_connection_args(parser, {"es_mode", "environment"})
 
     parser.add_argument(
         "--ingestor-type",
@@ -176,13 +179,13 @@ def local_handler(parser: ArgumentParser) -> None:
     )
 
     args = parser.parse_args()
+    validate_cluster_connection_args(parser, args)
     event = IngestorLoaderLambdaEvent.from_argparser(args)
     handler(
         event,
         None,
         args.es_mode,
         args.load_destination,
-        args.neptune_environment,
     )
 
 

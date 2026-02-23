@@ -5,7 +5,7 @@ from typing import Literal
 BasePipelineEventArgument = Literal[
     "window", "pipeline_date", "index_date_merged", "pit_id"
 ]
-ClusterConnectionArgument = Literal["es_mode", "neptune_environment"]
+ClusterConnectionArgument = Literal["es_mode", "environment"]
 
 
 def add_pipeline_event_args(
@@ -68,12 +68,22 @@ def add_cluster_connection_args(
             choices=["local", "public"],
             default="local",
         )
-    if "neptune_environment" in args:
+    if "environment" in args:
         parser.add_argument(
-            "--neptune-environment",
+            "--environment",
             type=str,
-            help="Which Neptune cluster to connect to. Will default to 'dev'.",
+            help="Which environment to connect to (used for Neptune and S3 bucket selection).",
             required=False,
             choices=["prod", "dev"],
-            default="dev",
+            default="prod",
         )
+
+
+def validate_cluster_connection_args(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
+    environment = getattr(args, "environment", None)
+    es_mode = getattr(args, "es_mode", None)
+
+    if environment == "dev" and es_mode == "public":
+        parser.error("--es-mode=public cannot be used with --environment=dev")

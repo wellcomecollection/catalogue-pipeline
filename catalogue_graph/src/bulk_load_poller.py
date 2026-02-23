@@ -6,7 +6,7 @@ from typing import Literal, cast
 
 import structlog
 
-from clients.neptune_client import NeptuneClient, NeptuneEnvironment
+from clients.neptune_client import NeptuneClient
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
     BulkLoaderEvent,
@@ -83,11 +83,10 @@ def bulk_loader_event_from_s3_uri(s3_uri: str) -> BulkLoaderEvent:
 def handler(
     event: BulkLoadPollerEvent,
     execution_context: ExecutionContext | None = None,
-    neptune_environment: NeptuneEnvironment = "prod",
 ) -> BulkLoadPollerResponse:
     setup_logging(execution_context)
 
-    neptune_client = NeptuneClient(neptune_environment)
+    neptune_client = NeptuneClient(event.environment)
     payload = neptune_client.get_bulk_load_status(event.load_id)
     overall_status = payload.overall_status
 
@@ -126,8 +125,11 @@ def handler(
         and (insert_error_count / processed_count <= event.insert_error_threshold)
     )
 
-    if neptune_environment == "prod":
+    if event.environment == "prod":
         bulk_loader_event = bulk_loader_event_from_s3_uri(overall_status.full_uri)
+        bulk_loader_event = bulk_loader_event.model_copy(
+            update={"environment": event.environment}
+        )
         report = BulkLoaderReport(**bulk_loader_event.model_dump(), status=payload)
         report.publish()
 
@@ -147,7 +149,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_cluster_connection_args(parser, {"neptune_environment"})
+    add_cluster_connection_args(parser, {"environment"})
     parser.add_argument(
         "--load-id",
         type=str,
@@ -171,7 +173,6 @@ def local_handler() -> None:
     handler(
         event,
         execution_context,
-        neptune_environment=args.neptune_environment,
     )
 
 

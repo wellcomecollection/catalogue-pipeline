@@ -3,7 +3,7 @@ import typing
 
 import structlog
 
-from clients.neptune_client import NeptuneClient, NeptuneEnvironment
+from clients.neptune_client import NeptuneClient
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
     BulkLoaderEvent,
@@ -20,7 +20,6 @@ logger = structlog.get_logger(__name__)
 def handler(
     event: BulkLoaderEvent,
     execution_context: ExecutionContext | None = None,
-    neptune_environment: NeptuneEnvironment = "prod",
 ) -> BulkLoadPollerEvent:
     setup_logging(execution_context)
 
@@ -33,11 +32,12 @@ def handler(
         entity_type=event.entity_type,
     )
 
-    neptune_client = NeptuneClient(neptune_environment)
+    neptune_client = NeptuneClient(event.environment)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
 
     return BulkLoadPollerEvent(
-        load_id=load_id, insert_error_threshold=event.insert_error_threshold
+        load_id=load_id,
+        insert_error_threshold=event.insert_error_threshold
     )
 
 
@@ -52,7 +52,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(parser, {"pipeline_date", "window"})
-    add_cluster_connection_args(parser, {"neptune_environment"})
+    add_cluster_connection_args(parser, {"environment"})
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -85,7 +85,6 @@ def local_handler() -> None:
     result = handler(
         event,
         execution_context,
-        neptune_environment=args.neptune_environment,
     )
     logger.info("Bulk load initiated", load_id=result.load_id)
 

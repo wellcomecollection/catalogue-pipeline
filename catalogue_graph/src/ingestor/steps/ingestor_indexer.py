@@ -19,7 +19,11 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
     IngestorStepEvent,
 )
-from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.argparse import (
+    add_cluster_connection_args,
+    add_pipeline_event_args,
+    validate_cluster_connection_args,
+)
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -39,7 +43,7 @@ def _get_objects_to_index(
     base_event: IngestorStepEvent,
 ) -> Generator[IngestorIndexerObject]:
     logger.info("Listing S3 objects to index")
-    bucket_name = config.CATALOGUE_GRAPH_S3_BUCKET
+    bucket_name = config.get_catalogue_graph_s3_bucket(base_event.environment)
     prefix = base_event.get_path_prefix()
     load_format = base_event.load_format
 
@@ -184,7 +188,7 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(parser, {"pipeline_date", "index_date_merged", "window"})
-    add_cluster_connection_args(parser, {"es_mode"})
+    add_cluster_connection_args(parser, {"es_mode", "environment"})
     parser.add_argument(
         "--ingestor-type",
         type=str,
@@ -216,6 +220,7 @@ def local_handler(parser: ArgumentParser) -> None:
     )
 
     args = parser.parse_args()
+    validate_cluster_connection_args(parser, args)
     base_event = IngestorStepEvent.from_argparser(args)
 
     event = IngestorIndexerLambdaEvent(**base_event.model_dump())
