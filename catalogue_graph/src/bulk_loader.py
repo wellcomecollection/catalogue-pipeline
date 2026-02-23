@@ -36,8 +36,7 @@ def handler(
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
 
     return BulkLoadPollerEvent(
-        load_id=load_id,
-        insert_error_threshold=event.insert_error_threshold
+        load_id=load_id, insert_error_threshold=event.insert_error_threshold
     )
 
 

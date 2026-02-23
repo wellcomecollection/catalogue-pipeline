@@ -8,7 +8,7 @@ from utils.logger import ExecutionContext, get_trace_id, setup_logging
 logger = structlog.get_logger(__name__)
 
 S3_DATA_QUALITY_CHECKS_PREFIX = (
-    f"s3://{config.get_catalogue_graph_s3_bucket('prod')}/data_quality_checks"
+    f"s3://{config.CATALOGUE_GRAPH_S3_BUCKETS['prod']}/data_quality_checks"
 )
 
 
