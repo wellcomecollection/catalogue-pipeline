@@ -10,7 +10,8 @@ Canonical IDs are chosen for the following properties:
 *   They should be **URL safe**
 
 A canonical id is an 8-character string, made up of lowercase letters and digits, excluding `O`, `0`, `I`, `L` and `1` (to avoid ambiguity).
-8 characters allows for 32^8 = 1 trillion unique identifiers, which should be enough for the foreseeable future.
+The first character is always a letter (not a digit), so that identifiers are safe to use as XML identifiers.
+This gives 23 * 31^7 ≈ 0.6 trillion unique identifiers, which should be enough for the foreseeable future.
 """
 
 import random
