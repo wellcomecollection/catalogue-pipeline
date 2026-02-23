@@ -171,6 +171,7 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
         pipeline_step="ingestor_indexer",
     )
 
+    # This will automatically use `es_mode=private`
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,
