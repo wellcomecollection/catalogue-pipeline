@@ -14,6 +14,8 @@ from models.events import (
 )
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import run_ecs_handler
 
@@ -23,7 +25,7 @@ logger = structlog.get_logger(__name__)
 def handler(
     event: ExtractorEvent,
     execution_context: ExecutionContext | None = None,
-    is_local: bool = False,
+    es_mode: ElasticsearchMode = "private",
 ) -> None:
     setup_logging(execution_context)
 
@@ -34,10 +36,7 @@ def handler(
         stream_destination=event.stream_destination,
     )
 
-    transformer: BaseTransformer = create_transformer(
-        event,
-        es_mode="public" if is_local else "private",
-    )
+    transformer: BaseTransformer = create_transformer(event, es_mode)
 
     if event.stream_destination == "s3":
         s3_uri = event.get_s3_uri()
@@ -75,6 +74,7 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
         pipeline_step="graph_extractor",
     )
 
+    # This will automatically use `es_mode=private`
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,
@@ -86,6 +86,10 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 
 
 def local_handler(parser: ArgumentParser) -> None:
+    add_pipeline_event_args(
+        parser, {"pipeline_date", "index_date_merged", "window", "pit_id"}
+    )
+    add_cluster_connection_args(parser, {"es_mode"})
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -109,58 +113,26 @@ def local_handler(parser: ArgumentParser) -> None:
         required=False,
     )
     parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help="The pipeline to extract data from. Will default to 'dev'.",
-        default="dev",
-        required=False,
-    )
-    parser.add_argument(
-        "--index-date-merged",
-        type=str,
-        help="The merged index date to read from, will default to pipeline date.",
-        required=False,
-    )
-    parser.add_argument(
-        "--pit-id",
-        type=str,
-        help="An Elasticsearch point in time ID to use when extracting data from the merged index.",
-        required=False,
-    )
-    parser.add_argument(
         "--sample-size",
         type=int,
         help="How many entities to stream. If not specified, streaming will continue until the source is exhausted.",
     )
-    parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
 
     local_args = parser.parse_args()
     event = ExtractorEvent.from_argparser(local_args)
-
-    handler(event, is_local=args.is_local)
+    handler(event, es_mode=local_args.es_mode)
 
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="")
     parser.add_argument(
-        "--is-local",
+        "--use-cli",
         action="store_true",
-        help="Whether to run the handler in local mode",
+        help="Whether to invoke the local CLI handler instead of the ECS handler.",
     )
     args, _ = parser.parse_known_args()
 
-    if args.is_local:
+    if args.use_cli:
         local_handler(parser)
     else:
         ecs_handler(parser)

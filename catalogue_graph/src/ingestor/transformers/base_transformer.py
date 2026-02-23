@@ -43,8 +43,8 @@ def get_pydantic_classes(ingestor_type: IngestorType) -> list[type[BaseModel]]:
 
 
 class ElasticsearchBaseTransformer:
-    def __init__(self) -> None:
-        self.source: GraphBaseExtractor = GraphBaseExtractor()
+    def __init__(self, source: GraphBaseExtractor) -> None:
+        self.source = source
 
     def transform_document(self, raw_item: Any) -> BaseModel | None:
         """

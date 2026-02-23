@@ -8,7 +8,7 @@ from config import (
 from models.events import (
     ExtractorEvent,
 )
-from utils.elasticsearch import ElasticsearchMode
+from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.types import CatalogueTransformerType
 
 from .base_transformer import BaseTransformer
@@ -68,10 +68,13 @@ def create_transformer(
             "mesh_locations", entity_type, pipeline_date
         )
     if transformer_type == "catalogue_concepts":
-        return CatalogueConceptsTransformer(event, es_mode)
+        es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
+        return CatalogueConceptsTransformer(event, es_client)
     if transformer_type == "catalogue_works":
-        return CatalogueWorksTransformer(event, es_mode)
+        es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
+        return CatalogueWorksTransformer(event, es_client)
     if transformer_type == "catalogue_work_identifiers":
-        return CatalogueWorkIdentifiersTransformer(event, es_mode)
+        es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
+        return CatalogueWorkIdentifiersTransformer(event, es_client)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")

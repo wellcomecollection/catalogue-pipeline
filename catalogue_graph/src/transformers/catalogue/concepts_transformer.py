@@ -1,5 +1,7 @@
 from collections.abc import Generator
 
+from elasticsearch import Elasticsearch
+
 from models.events import BasePipelineEvent
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
@@ -8,7 +10,6 @@ from sources.catalogue.concepts_source import (
     ExtractedWorkConcept,
 )
 from transformers.base_transformer import BaseTransformer
-from utils.elasticsearch import ElasticsearchMode
 from utils.ontology import get_transformers_from_ontology
 
 from .id_label_checker import IdLabelChecker
@@ -19,9 +20,9 @@ class CatalogueConceptsTransformer(BaseTransformer):
     def __init__(
         self,
         event: BasePipelineEvent,
-        es_mode: ElasticsearchMode,
+        es_client: Elasticsearch,
     ):
-        self.source = CatalogueConceptsSource(event, es_mode=es_mode)
+        self.source = CatalogueConceptsSource(event, es_client=es_client)
 
         self.id_label_checker: IdLabelChecker | None = None
         self.id_lookup: set = set()

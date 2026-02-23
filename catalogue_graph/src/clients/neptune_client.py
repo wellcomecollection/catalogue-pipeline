@@ -12,14 +12,19 @@ import structlog
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 
+import config
 from models.neptune_bulk_loader import BulkLoadStatusResponse
+from utils.aws import get_secret
 from utils.streaming import process_stream_in_parallel
 from utils.types import EntityType
 
 logger = structlog.get_logger(__name__)
 
+NeptuneEnvironment = typing.Literal["prod", "dev"]
+
 NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
 NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
+NEPTUNE_PORT = 8182
 
 DELETE_BATCH_SIZE = 10000
 
@@ -37,17 +42,23 @@ def on_request_backoff(backoff_details: typing.Any) -> None:
     logger.warning("Neptune request failed, retrying", exception_name=exception_name)
 
 
-class BaseNeptuneClient:
+class NeptuneClient:
     """
     Communicates with the Neptune cluster. Makes openCypher queries, triggers bulk load operations, etc.
-
-    Do not use this base class directly. Use either LambdaNeptuneClient (when running in the same VPC as the Neptune
-    cluster) or LocalNeptuneClient (when connecting to the cluster from outside the VPC).
     """
 
-    def __init__(self, neptune_endpoint: str) -> None:
-        self.session: boto3.Session | None = None
-        self.neptune_endpoint: str = neptune_endpoint
+    def __init__(self, environment: NeptuneEnvironment = "prod") -> None:
+        self.session = boto3.Session()
+        self.environment = environment
+
+        if environment == "prod":
+            endpoint_secret_name = config.NEPTUNE_PROD_HOST_SECRET_NAME
+        else:
+            endpoint_secret_name = config.NEPTUNE_DEV_HOST_SECRET_NAME
+
+        logger.info("Creating Neptune client", environment=environment)
+
+        self.neptune_endpoint: str = get_secret(endpoint_secret_name)
 
         # Throttle the number of parallel requests to prevent overwhelming the cluster
         self.parallel_query_semaphore = threading.Semaphore(
@@ -55,7 +66,7 @@ class BaseNeptuneClient:
         )
 
     def _get_client_url(self) -> str:
-        raise NotImplementedError()
+        return f"https://{self.neptune_endpoint}:{NEPTUNE_PORT}"
 
     @backoff.on_exception(
         backoff.constant,
@@ -67,7 +78,6 @@ class BaseNeptuneClient:
     def _make_request(
         self, method: str, relative_url: str, payload: dict | None = None
     ) -> dict:
-        assert self.session
         credentials = self.session.get_credentials()
         assert credentials is not None
 
@@ -119,6 +129,15 @@ class BaseNeptuneClient:
         )
         return results
 
+    def refresh_graph_summary(self) -> None:
+        """
+        Asynchronously refresh property graph statistics.
+        See https://docs.aws.amazon.com/neptune/latest/data-api/API_ManagePropertygraphStatistics.html for more info.
+        """
+        self._make_request(
+            "POST", "/propertygraph/statistics", payload={"mode": "refresh"}
+        )
+
     def get_graph_summary(self) -> dict:
         """
         Returns a Neptune summary report about the graph.
@@ -147,13 +166,19 @@ class BaseNeptuneClient:
         Initiates a Neptune bulk load from an S3 file.
         See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-load.html for more info.
         """
+        role_name = (
+            "catalogue-graph-cluster"
+            if self.environment == "prod"
+            else "catalogue-graph-dev-cluster"
+        )
+
         response = self._make_request(
             "POST",
             "/loader",
             {
                 "source": s3_file_uri,
                 "format": "opencypher",
-                "iamRoleArn": "arn:aws:iam::760097843905:role/catalogue-graph-cluster",
+                "iamRoleArn": f"arn:aws:iam::760097843905:role/{role_name}",
                 "region": "eu-west-1",
                 "failOnError": "FALSE",
                 "parallelism": "MEDIUM",

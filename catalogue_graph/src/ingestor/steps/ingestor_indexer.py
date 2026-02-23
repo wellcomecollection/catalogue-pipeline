@@ -19,6 +19,7 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
     IngestorStepEvent,
 )
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -133,9 +134,10 @@ def handler(
 
     event_payload = event.model_dump(exclude={"objects_to_index"})
 
-    logger.info("Preparing indexer pipeline report")
-    report = IndexerReport(**event_payload, success_count=total_success_count)
-    report.publish()
+    if es_mode != "local":
+        logger.info("Preparing indexer pipeline report")
+        report = IndexerReport(**event_payload, success_count=total_success_count)
+        report.publish()
 
     return IngestorIndexerMonitorLambdaEvent(
         **event_payload,
@@ -162,35 +164,27 @@ def event_validator(raw_input: str) -> IngestorIndexerLambdaEvent:
 
 
 def ecs_handler(arg_parser: ArgumentParser) -> None:
-    arg_parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["private", "local", "public"],
-        default="private",
-    )
-
     args, _ = arg_parser.parse_known_args()
-    es_mode = args.es_mode
 
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
         pipeline_step="ingestor_indexer",
     )
 
+    # This will automatically use `es_mode=private`
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,
         event_validator=event_validator,
         execution_context=execution_context,
-        es_mode=es_mode,
     )
 
     logger.info("ECS ingestor indexer task completed successfully")
 
 
 def local_handler(parser: ArgumentParser) -> None:
+    add_pipeline_event_args(parser, {"pipeline_date", "index_date_merged", "window"})
+    add_cluster_connection_args(parser, {"es_mode"})
     parser.add_argument(
         "--ingestor-type",
         type=str,
@@ -199,36 +193,11 @@ def local_handler(parser: ArgumentParser) -> None:
         required=True,
     )
     parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help='The pipeline that is being ingested to, will default to "dev".',
-        required=False,
-        default="dev",
-    )
-    parser.add_argument(
-        "--index-date-merged",
-        type=str,
-        help="The merged index date to read from, will default to pipeline date.",
-        required=False,
-    )
-    parser.add_argument(
         "--index-date",
         type=str,
         help="The index date that is being ingested to, will default to 'dev'.",
         required=False,
         default="dev",
-    )
-    parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
     )
     parser.add_argument(
         "--job-id",
@@ -244,14 +213,6 @@ def local_handler(parser: ArgumentParser) -> None:
         required=False,
         choices=["parquet", "jsonl"],
         default="parquet",
-    )
-    parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Where to index documents. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["local", "public"],
-        default="local",
     )
 
     args = parser.parse_args()

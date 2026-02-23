@@ -5,11 +5,21 @@ NEPTUNE_CLUSTER_IDENTIFIER = os.environ.get(
     "NEPTUNE_CLUSTER_IDENTIFIER", NEPTUNE_CLUSTER_IDENTIFIER_DEFAULT
 )
 
+NEPTUNE_PROD_HOST_SECRET_NAME_DEFAULT = "catalogue-graph/neptune-cluster-endpoint"
+NEPTUNE_PROD_HOST_SECRET_NAME = os.environ.get(
+    "NEPTUNE_PROD_HOST_SECRET_NAME", NEPTUNE_PROD_HOST_SECRET_NAME_DEFAULT
+)
+
+NEPTUNE_DEV_HOST_SECRET_NAME_DEFAULT = "catalogue-graph-dev/neptune-cluster-endpoint"
+NEPTUNE_DEV_HOST_SECRET_NAME = os.environ.get(
+    "NEPTUNE_DEV_HOST_SECRET_NAME", NEPTUNE_DEV_HOST_SECRET_NAME_DEFAULT
+)
+
 LOC_SUBJECT_HEADINGS_URL = (
     "https://id.loc.gov/download/authorities/subjects.madsrdf.jsonld.gz"
 )
 LOC_NAMES_URL = "https://id.loc.gov/download/authorities/names.madsrdf.jsonld.gz"
-MESH_URL = "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2025.gz"
+MESH_URL = "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz"
 WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql"
 
 SLACK_SECRET_ID = os.environ.get("SLACK_SECRET_ID", "")

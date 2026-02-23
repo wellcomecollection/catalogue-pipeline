@@ -2,8 +2,10 @@ from collections.abc import Generator, Iterator
 from itertools import batched
 
 import structlog
+from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
+from clients.neptune_client import NeptuneClient
 from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
@@ -11,7 +13,6 @@ from ingestor.models.merged.work import (
 from ingestor.models.neptune.query_result import ExtractedConcept, WorkHierarchy
 from models.events import BasePipelineEvent
 from sources.merged_works_source import MergedWorksSource
-from utils.elasticsearch import ElasticsearchMode
 
 from .base_extractor import GraphBaseExtractor
 
@@ -46,15 +47,16 @@ class GraphWorksExtractor(GraphBaseExtractor):
     def __init__(
         self,
         event: BasePipelineEvent,
-        es_mode: ElasticsearchMode,
+        es_client: Elasticsearch,
+        neptune_client: NeptuneClient,
     ):
-        super().__init__(es_mode != "private")
+        super().__init__(neptune_client)
         self.es_source = MergedWorksSource(
             event,
-            es_mode=es_mode,
+            es_client=es_client,
         )
         self.event = event
-        self.es_mode = es_mode
+        self.es_client = es_client
 
         self.streamed_ids: set[str] = set()
         self.related_ids: set[str] = set()
@@ -68,7 +70,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
         return MergedWorksSource(
             event=event,
             query=get_related_works_query(related_ids),
-            es_mode=self.es_mode,
+            es_client=self.es_client,
         )
 
     def _get_work_ancestors(self, ids: list[str]) -> dict:

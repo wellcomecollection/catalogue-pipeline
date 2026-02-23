@@ -16,7 +16,8 @@ from models.events import BasePipelineEvent
 from tests.mocks import (
     MockElasticsearchClient,
     add_neptune_mock_response,
-    mock_es_secrets,
+    get_mock_es_client,
+    get_mock_neptune_client,
 )
 from tests.test_utils import load_json_fixture
 
@@ -26,6 +27,14 @@ MERGED_FIXTURE = load_json_fixture("ingestor/single_merged.json")
 ANCESTORS_FIXTURE = load_json_fixture("neptune/work_ancestors_single.json")
 CHILDREN_FIXTURE = load_json_fixture("neptune/work_children_single.json")
 CONCEPTS_FIXTURE = load_json_fixture("neptune/work_concepts_single.json")
+
+
+def get_extractor() -> GraphWorksExtractor:
+    return GraphWorksExtractor(
+        MOCK_EVENT,
+        get_mock_es_client("graph_extractor", MOCK_EVENT.pipeline_date),
+        get_mock_neptune_client(),
+    )
 
 
 def _get_work_fixture(work_id: str) -> VisibleMergedWork:
@@ -62,13 +71,10 @@ def mock_graph_relationships(
 
 
 def test_with_ancestors() -> None:
-    mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
-
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], ["ancestors", "children"])
 
-    extracted_items = list(extractor.extract_raw())
+    extracted_items = list(get_extractor().extract_raw())
     assert len(extracted_items) == 1
     assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
@@ -80,13 +86,10 @@ def test_with_ancestors() -> None:
 
 
 def test_with_concepts() -> None:
-    mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
-
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], ["concepts"])
 
-    extracted_items = list(extractor.extract_raw())
+    extracted_items = list(get_extractor().extract_raw())
     assert len(extracted_items) == 1
     assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
@@ -96,13 +99,10 @@ def test_with_concepts() -> None:
 
 
 def test_without_graph_relationships() -> None:
-    mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
-
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], [])
 
-    extracted_items = list(extractor.extract_raw())
+    extracted_items = list(get_extractor().extract_raw())
     assert len(extracted_items) == 1
     assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
@@ -112,22 +112,16 @@ def test_without_graph_relationships() -> None:
 
 
 def test_missing_in_merged_index() -> None:
-    mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
-
     mock_graph_relationships(
         "a24esypq", ["a24esypq"], ["concepts", "ancestors", "children"]
     )
 
     # Items which exist in the catalogue graph but do not exist in the merged index should not be extracted
-    extracted_items = list(extractor.extract_raw())
+    extracted_items = list(get_extractor().extract_raw())
     assert len(extracted_items) == 0
 
 
 def test_multiple_works() -> None:
-    mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
-
     for work_id in ["123", "456"]:
         mock_es_work(work_id)
 
@@ -151,6 +145,6 @@ def test_multiple_works() -> None:
         ),
     ]
 
-    extracted_items = list(extractor.extract_raw())
+    extracted_items = list(get_extractor().extract_raw())
     for result in expected_results:
         assert result in extracted_items

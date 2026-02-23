@@ -62,6 +62,7 @@ from tests.mocks import (
     MockSmartOpen,
     add_neptune_mock_response,
     mock_es_secrets,
+    mock_neptune_secrets,
 )
 from tests.test_utils import (
     add_mock_merged_documents,
@@ -440,7 +441,7 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
 
     monkeypatch.setattr(
         "ingestor.steps.ingestor_loader.create_transformer",
-        lambda event, es_mode: DummyTransformer(),
+        lambda event, es_client, neptune_client: DummyTransformer(),
     )
 
     loader_event = make_loader_event(pass_objects_to_index, "concepts", "123")
@@ -484,6 +485,7 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
 @freeze_time("2025-01-02")
 def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> None:
     mock_merged_work()
+
     mock_neptune_responses([])
 
     loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
@@ -644,6 +646,7 @@ def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
         record_count=3,
         include_objects=pass_objects_to_index,
     )
+    mock_neptune_secrets()
 
     result = handler(loader_event)
 

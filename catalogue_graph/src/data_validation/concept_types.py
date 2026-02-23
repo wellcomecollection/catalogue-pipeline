@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from utils.aws import get_neptune_client
+from clients.neptune_client import NeptuneClient
 from utils.types import ConceptType
 
 CONCEPT_TYPES_QUERY_LIMIT = 20000
@@ -34,14 +34,14 @@ def _are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
 
 def _get_concepts_count() -> int:
     count_query = "MATCH (c:Concept) RETURN count(c) AS count"
-    response = get_neptune_client(True).run_open_cypher_query(count_query)
+    response = NeptuneClient().run_open_cypher_query(count_query)
     count: int = response[0]["count"]
     return count
 
 
 def get_concepts_with_inconsistent_types() -> Generator[dict]:
     """Return all concepts whose combination of types is not consistent."""
-    client = get_neptune_client(True)
+    client = NeptuneClient()
 
     start_offset = 0
     concepts_count = _get_concepts_count()

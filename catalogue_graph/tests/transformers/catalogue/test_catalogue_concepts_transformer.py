@@ -4,7 +4,7 @@ from models.graph_edge import (
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
-from tests.mocks import mock_es_secrets
+from tests.mocks import get_mock_es_client
 from tests.test_utils import (
     add_mock_merged_documents,
     add_mock_transformer_outputs_for_ontologies,
@@ -13,15 +13,18 @@ from tests.test_utils import (
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
+def get_transformer(pipeline_date: str = "dev") -> CatalogueConceptsTransformer:
+    es_client = get_mock_es_client("graph_extractor", pipeline_date)
+    return CatalogueConceptsTransformer(
+        BasePipelineEvent(pipeline_date=pipeline_date), es_client
+    )
+
+
 def test_catalogue_concepts_transformer_nodes() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc", "mesh"])
     add_mock_merged_documents(work_status="Visible")
 
-    mock_es_secrets("graph_extractor", "dev", is_public=True)
-    transformer = CatalogueConceptsTransformer(
-        BasePipelineEvent(pipeline_date="dev"), "public"
-    )
-    nodes = list(transformer._stream_nodes())
+    nodes = list(get_transformer()._stream_nodes())
 
     assert len(nodes) == 12
     assert any(
@@ -34,12 +37,8 @@ def test_catalogue_concepts_transformer_edges() -> None:
     pipeline_date = "2027-12-24"
     add_mock_transformer_outputs_for_ontologies(["loc", "mesh"], pipeline_date)
     add_mock_merged_documents(pipeline_date, work_status="Visible")
-    mock_es_secrets("graph_extractor", pipeline_date)
-    transformer = CatalogueConceptsTransformer(
-        BasePipelineEvent(pipeline_date=pipeline_date), "private"
-    )
 
-    edges = list(transformer._stream_edges())
+    edges = list(get_transformer(pipeline_date)._stream_edges())
     assert len(edges) == 7
 
     check_bulk_load_edge(
@@ -106,13 +105,9 @@ def test_catalogue_concepts_transformer_edges() -> None:
 def test_mismatched_pipeline_date() -> None:
     pipeline_date = "2027-12-24"
     add_mock_transformer_outputs_for_ontologies(["loc", "mesh"], pipeline_date)
-    mock_es_secrets("graph_extractor", pipeline_date, True)
-    transformer = CatalogueConceptsTransformer(
-        BasePipelineEvent(pipeline_date=pipeline_date), "private"
-    )
 
     # Works exist in an index with a different pipeline date
     add_mock_merged_documents("2025-01-01", work_status="Visible")
 
-    edges = list(transformer._stream_edges())
+    edges = list(get_transformer(pipeline_date=pipeline_date)._stream_edges())
     assert len(edges) == 0

@@ -4,7 +4,9 @@ import typing
 from argparse import ArgumentParser
 
 import structlog
+from elasticsearch import Elasticsearch
 
+from clients.neptune_client import NeptuneClient, NeptuneEnvironment
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -15,7 +17,8 @@ from ingestor.transformers.base_transformer import (
 )
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.elasticsearch import ElasticsearchMode
+from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
 from utils.steps import create_job_id, run_ecs_handler
@@ -25,12 +28,14 @@ logger = structlog.get_logger(__name__)
 
 
 def create_transformer(
-    event: IngestorLoaderLambdaEvent, es_mode: ElasticsearchMode
+    event: IngestorLoaderLambdaEvent,
+    es_client: Elasticsearch,
+    neptune_client: NeptuneClient,
 ) -> ElasticsearchBaseTransformer:
     if event.ingestor_type == "concepts":
-        return ElasticsearchConceptsTransformer(event, es_mode)
+        return ElasticsearchConceptsTransformer(event, es_client, neptune_client)
     if event.ingestor_type == "works":
-        return ElasticsearchWorksTransformer(event, es_mode)
+        return ElasticsearchWorksTransformer(event, es_client, neptune_client)
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
@@ -40,6 +45,7 @@ def handler(
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
     load_destination: LoadDestination = "s3",
+    neptune_environment: NeptuneEnvironment = "prod",
 ) -> IngestorIndexerLambdaEvent:
     setup_logging(execution_context)
 
@@ -50,7 +56,11 @@ def handler(
         job_id=event.job_id,
     )
 
-    transformer = create_transformer(event, es_mode)
+    es_client = get_client(
+        f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
+    )
+    neptune_client = NeptuneClient(neptune_environment)
+    transformer = create_transformer(event, es_client, neptune_client)
     objects_to_index = transformer.load_documents(event, load_destination)
 
     event_payload = event.model_dump(exclude={"pass_objects_to_index"})
@@ -58,12 +68,13 @@ def handler(
     record_count = sum(o.record_count for o in objects_to_index)
     total_file_size = sum(o.content_length for o in objects_to_index)
 
-    report = LoaderReport(
-        **event_payload,
-        record_count=record_count,
-        total_file_size=total_file_size,
-    )
-    report.publish()
+    if es_mode != "local":
+        report = LoaderReport(
+            **event_payload,
+            record_count=record_count,
+            total_file_size=total_file_size,
+        )
+        report.publish()
 
     if event.pass_objects_to_index:
         return IngestorIndexerLambdaEvent(
@@ -83,29 +94,19 @@ def event_validator(raw_input: str) -> IngestorLoaderLambdaEvent:
 
 
 def ecs_handler(arg_parser: ArgumentParser) -> None:
-    arg_parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["private", "local", "public"],
-        default="private",
-    )
-
     args, _ = arg_parser.parse_known_args()
-    es_mode = args.es_mode
 
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
         pipeline_step="ingestor_loader",
     )
 
+    # This will automatically use `es_mode=private`
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,
         event_validator=event_validator,
         execution_context=execution_context,
-        es_mode=es_mode,
     )
 
     logger.info("ECS ingestor loader task completed successfully")
@@ -126,6 +127,11 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 
 def local_handler(parser: ArgumentParser) -> None:
+    add_pipeline_event_args(
+        parser, {"pipeline_date", "index_date_merged", "window", "pit_id"}
+    )
+    add_cluster_connection_args(parser, {"es_mode", "neptune_environment"})
+
     parser.add_argument(
         "--ingestor-type",
         type=str,
@@ -134,36 +140,11 @@ def local_handler(parser: ArgumentParser) -> None:
         required=True,
     )
     parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help='The pipeline that is being ingested to, will default to "dev".',
-        required=False,
-        default="dev",
-    )
-    parser.add_argument(
-        "--index-date-merged",
-        type=str,
-        help="The merged index date to read from, will default to pipeline date.",
-        required=False,
-    )
-    parser.add_argument(
         "--index-date",
         type=str,
         help='The index date that is being ingested to, will default to "dev".',
         required=False,
         default="dev",
-    )
-    parser.add_argument(
-        "--window-start",
-        type=str,
-        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
-        required=False,
     )
     parser.add_argument(
         "--job-id",
@@ -189,14 +170,6 @@ def local_handler(parser: ArgumentParser) -> None:
         default="parquet",
     )
     parser.add_argument(
-        "--es-mode",
-        type=str,
-        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
-        required=False,
-        choices=["local", "public"],
-        default="local",
-    )
-    parser.add_argument(
         "--pass-objects-to-index",
         action="store_true",
         help="Return the list of generated objects in the loader response.",
@@ -204,7 +177,13 @@ def local_handler(parser: ArgumentParser) -> None:
 
     args = parser.parse_args()
     event = IngestorLoaderLambdaEvent.from_argparser(args)
-    handler(event, None, args.es_mode, args.load_destination)
+    handler(
+        event,
+        None,
+        args.es_mode,
+        args.load_destination,
+        args.neptune_environment,
+    )
 
 
 if __name__ == "__main__":

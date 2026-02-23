@@ -1,12 +1,14 @@
 from collections.abc import Generator, Iterable, Iterator
 
+from elasticsearch import Elasticsearch
+
+from clients.neptune_client import NeptuneClient
 from models.events import IncrementalGraphRemoverEvent
 from models.graph_edge import WorkHasConcept
 from sources.catalogue.concepts_source import ES_FIELDS as ES_FIELDS_WORK_CONCEPTS
 from sources.catalogue.concepts_source import ES_QUERY as ES_QUERY_WORK_CONCEPTS
 from sources.merged_works_source import MergedWorksSource
 from transformers.catalogue.raw_work import RawCatalogueWork
-from utils.elasticsearch import ElasticsearchMode
 
 from .base_graph_remover_incremental import BaseGraphRemoverIncremental
 
@@ -14,10 +16,15 @@ ES_QUERY_NON_VISIBLE = {"bool": {"must_not": {"match": {"type": "Visible"}}}}
 
 
 class CatalogueWorksGraphRemover(BaseGraphRemoverIncremental):
-    def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
-        super().__init__(event.entity_type, es_mode != "private")
+    def __init__(
+        self,
+        event: IncrementalGraphRemoverEvent,
+        es_client: Elasticsearch,
+        neptune_client: NeptuneClient,
+    ):
+        super().__init__(event.entity_type, neptune_client)
         self.event = event
-        self.es_mode = es_mode
+        self.es_client = es_client
 
     def get_total_node_count(self) -> int:
         return self.neptune_client.get_total_node_count("Work")
@@ -31,9 +38,9 @@ class CatalogueWorksGraphRemover(BaseGraphRemoverIncremental):
         """
         source = MergedWorksSource(
             self.event,
+            es_client=self.es_client,
             query=ES_QUERY_NON_VISIBLE,
             fields=["state.canonicalId"],
-            es_mode=self.es_mode,
         )
         for work in source.stream_raw():
             yield work["state"]["canonicalId"]
@@ -42,9 +49,9 @@ class CatalogueWorksGraphRemover(BaseGraphRemoverIncremental):
         """Return a dictionary mapping each work ID to a set of concept IDs based on data from the merged index."""
         source = MergedWorksSource(
             self.event,
+            es_client=self.es_client,
             query=ES_QUERY_WORK_CONCEPTS,
             fields=ES_FIELDS_WORK_CONCEPTS,
-            es_mode=self.es_mode,
         )
         for work_document in source.stream_raw():
             raw_work = RawCatalogueWork(work_document)

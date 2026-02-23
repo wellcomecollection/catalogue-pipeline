@@ -3,7 +3,7 @@ from itertools import batched
 
 import structlog
 
-from utils.aws import get_neptune_client
+from clients.neptune_client import NeptuneClient
 from utils.safety import validate_fractional_change
 from utils.types import EntityType
 
@@ -56,8 +56,8 @@ class BaseGraphEdgeRemover:
 
 
 class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
-    def __init__(self, entity_type: EntityType, use_public_endpoint: bool):
-        self.neptune_client = get_neptune_client(use_public_endpoint)
+    def __init__(self, entity_type: EntityType, neptune_client: NeptuneClient):
+        self.neptune_client = neptune_client
         self.entity_type = entity_type
 
     def remove(self, force_pass: bool = False) -> list[str]:

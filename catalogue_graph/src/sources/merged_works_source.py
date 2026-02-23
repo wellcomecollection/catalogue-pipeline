@@ -7,12 +7,13 @@ from typing import Any
 
 import backoff
 import structlog
+from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 import config
 from models.events import BasePipelineEvent, IncrementalWindow
 from sources.base_source import BaseSource
-from utils.elasticsearch import ElasticsearchMode, get_client, get_merged_index_name
+from utils.elasticsearch import get_merged_index_name
 
 logger = structlog.get_logger(__name__)
 
@@ -55,11 +56,11 @@ class MergedWorksSource(BaseSource):
     def __init__(
         self,
         event: BasePipelineEvent,
+        es_client: Elasticsearch,
         query: dict | None = None,
         fields: list | None = None,
-        es_mode: ElasticsearchMode = "private",
     ):
-        self.es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
+        self.es_client = es_client
         self.window = event.window
         self.fields = fields
         self.query = query
