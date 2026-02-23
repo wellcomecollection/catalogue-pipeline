@@ -125,13 +125,13 @@ def local_handler(parser: ArgumentParser) -> None:
 if __name__ == "__main__":
     parser = ArgumentParser(description="")
     parser.add_argument(
-        "--is-local",
+        "--use-cli",
         action="store_true",
-        help="Whether to run the handler in local mode",
+        help="Whether to invoke the local CLI handler instead of the ECS handler.",
     )
     args, _ = parser.parse_known_args()
 
-    if args.is_local:
+    if args.use_cli:
         local_handler(parser)
     else:
         ecs_handler(parser)
