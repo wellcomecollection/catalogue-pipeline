@@ -18,6 +18,20 @@ from tests.mocks import (
 )
 
 
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption("--skip-db", action="store_true", help="Skip database tests")
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item]
+) -> None:
+    if config.getoption("--skip-db"):
+        skip = pytest.mark.skip(reason="--skip-db flag set")
+        for item in items:
+            if "database" in item.keywords:
+                item.add_marker(skip)
+
+
 @pytest.fixture(autouse=True)
 def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     # Replaces boto3 and Elasticsearch with fake clients

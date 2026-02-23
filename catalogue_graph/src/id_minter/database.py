@@ -7,6 +7,7 @@ identifiers database — following the schema defined in RFC 083.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Protocol, cast
 
 import pymysql
 import pymysql.cursors
@@ -20,16 +21,33 @@ logger = structlog.get_logger(__name__)
 MIGRATIONS_DIR = str(Path(__file__).parent / "migrations")
 
 
-def get_connection(config: IdMinterConfig) -> pymysql.connections.Connection:
+class DBCursor(Protocol):
+    def execute(self, q: str) -> None: ...
+
+    def fetchone(self) -> tuple[int]: ...
+
+    def executemany(self, q: str, args: list[tuple]) -> None: ...
+
+
+class DBConnection[T: DBCursor](Protocol):
+    def cursor(self) -> T: ...
+
+    def commit(self) -> None: ...
+
+
+def get_connection(config: IdMinterConfig) -> DBConnection:
     """Open a new pymysql connection using the ID Minter config."""
-    return pymysql.connect(
-        host=config.rds_client.primary_host,
-        port=config.rds_client.port,
-        user=config.rds_client.username,
-        password=config.rds_client.password,
-        database=config.identifiers_table.database,
-        cursorclass=pymysql.cursors.DictCursor,
-        autocommit=False,
+    return cast(
+        DBConnection,
+        pymysql.connect(
+            host=config.rds_client.primary_host,
+            port=config.rds_client.port,
+            user=config.rds_client.username,
+            password=config.rds_client.password,
+            database=config.identifiers_table.database,
+            cursorclass=pymysql.cursors.DictCursor,
+            autocommit=False,
+        ),
     )
 
 
