@@ -1,8 +1,6 @@
 from typing import Literal, get_args
 
 # Reason type Literal aliases & derived tuples (single source of truth for values).
-Environment = Literal["prod", "dev"]
-
 InvisibleReasonType = Literal[
     "CopyrightNotCleared",
     "SourceFieldMissing",
@@ -104,3 +102,5 @@ GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"
 
 EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["s3", "local", "void"]
+
+Environment = Literal["prod", "dev"]
