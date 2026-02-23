@@ -63,14 +63,14 @@ def test_generate_ids_unique() -> None:
 
 
 def test_generate_ids_first_char_is_letter() -> None:
-    all(
+    assert all(
         assert_first_character_valid(generated_id)
         for generated_id in identifiers.generate_ids(500)
     )
 
 
 def test_generate_ids_valid_characters() -> None:
-    all(
+    assert all(
         assert_all_characters_valid(generated_id)
         for generated_id in identifiers.generate_ids(500)
     )

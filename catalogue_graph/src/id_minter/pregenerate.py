@@ -93,7 +93,7 @@ def save_new_ids(conn: DBConnection, new_ids: Iterable[str]) -> None:
         cursor = conn.cursor()
         cursor.executemany(
             """
-            INSERT OR IGNORE INTO canonical_ids (CanonicalId, Status) VALUES (?, 'free')
+            INSERT IGNORE INTO canonical_ids (CanonicalId, Status) VALUES (%s, 'free')
             """,
             [(new_id,) for new_id in new_ids],
         )

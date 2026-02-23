@@ -1,9 +1,11 @@
-from sqlite3 import Connection
 from unittest.mock import Mock
 
 import pytest
+from pymysql.connections import Connection
 
 from id_minter.pregenerate import ShortfallError, get_free_id_count, top_up_ids
+
+pytestmark = pytest.mark.database
 
 
 def preload_ids(
@@ -15,7 +17,7 @@ def preload_ids(
     cursor = ids_db.cursor()
     cursor.executemany(
         """
-        INSERT INTO canonical_ids (CanonicalId, Status) VALUES (?, ?)
+        INSERT INTO canonical_ids (CanonicalId, Status) VALUES (%s, %s)
         """,
         [(id, "free") for id in free_ids] + [(id, "assigned") for id in assigned_ids],
     )
@@ -33,7 +35,7 @@ def assert_table_looks_like(
         SELECT CanonicalId, Status FROM canonical_ids ORDER BY CanonicalId {where_clause}
         """
     )
-    actual_rows = cursor.fetchall()
+    actual_rows = list(cursor.fetchall())
     # this doesn't have to be a separate assertion,
     # but it's nice to have a clear error message if the number of rows is wrong,
     # rather than just a mismatch in the contents of the rows.
