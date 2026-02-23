@@ -1,6 +1,7 @@
 import csv
 import json
 from collections.abc import Generator
+from functools import lru_cache
 from typing import Any
 
 import boto3
@@ -12,6 +13,7 @@ from pydantic import BaseModel
 logger = structlog.get_logger(__name__)
 
 
+@lru_cache
 def get_secret(secret_name: str) -> str:
     """Returns an AWS Secrets Manager secret string associated with a given secret name."""
     secrets_manager_client = boto3.Session().client("secretsmanager")
