@@ -43,6 +43,12 @@ def assert_table_looks_like(
     assert actual_rows == sorted(rows)
 
 
+@pytest.mark.parametrize("desired_count", [0, -1, -100])
+def test_desired_count_must_be_positive(ids_db: Connection, desired_count: int) -> None:
+    with pytest.raises(AssertionError, match="desired_count must be positive"):
+        top_up_ids(ids_db, desired_count)
+
+
 def test_adequate_free_ids_does_nothing(
     ids_db: Connection, free_ids: list[str], assigned_ids: list[str]
 ) -> None:

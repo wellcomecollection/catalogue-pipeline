@@ -39,24 +39,31 @@ def top_up_ids(conn: DBConnection, desired_count: int) -> None:
     Generate new ids until there are at least `desired_count` free ids available for minting,
     or until we've tried twice.
     """
+    assert desired_count > 0, f"desired_count must be positive, got {desired_count}"
+
+    first_shortfall = _get_id_shortfall(conn, desired_count)
+    if not first_shortfall:
+        return
+
     # Try it twice in case of id clashes.
     # As the overall id space is very large, the likelihood of clashes should be very low,
     # So if there are still not enough free ids after two attempts,
     # it's likely that there is a deeper issue that needs to be investigated.
-    _add_new_ids(conn, _get_id_shortfall(conn, desired_count))
+    _add_new_ids(conn, first_shortfall)
     second_shortfall = _get_id_shortfall(conn, desired_count)
-    if second_shortfall:
-        logger.info(
-            f"first attempt to top up ids resulted in a shortfall of {second_shortfall} ids, retrying"
+    if not second_shortfall:
+        return
+
+    logger.info(
+        f"first attempt to top up ids resulted in a shortfall of {second_shortfall} ids, retrying"
+    )
+    _add_new_ids(conn, second_shortfall)
+    final_shortfall = _get_id_shortfall(conn, desired_count)
+
+    if final_shortfall:
+        raise ShortfallError(
+            f"After two attempts to top up ids, there are still only {desired_count - final_shortfall} free ids available, which is less than the desired {desired_count}."
         )
-
-        _add_new_ids(conn, second_shortfall)
-        final_shortfall = _get_id_shortfall(conn, desired_count)
-
-        if final_shortfall:
-            raise ShortfallError(
-                f"After two attempts to top up ids, there are still only {desired_count - final_shortfall} free ids available, which is less than the desired {desired_count}."
-            )
 
 
 def _get_id_shortfall(conn: DBConnection, desired_count: int) -> int:
@@ -89,12 +96,13 @@ def get_free_id_count(conn: DBConnection) -> int:
 
 
 def save_new_ids(conn: DBConnection, new_ids: Iterable[str]) -> None:
-    if new_ids:
+    ids_list = [(new_id,) for new_id in new_ids]
+    if ids_list:
         cursor = conn.cursor()
         cursor.executemany(
             """
             INSERT IGNORE INTO canonical_ids (CanonicalId, Status) VALUES (%s, 'free')
             """,
-            [(new_id,) for new_id in new_ids],
+            ids_list,
         )
         conn.commit()
