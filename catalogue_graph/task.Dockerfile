@@ -22,7 +22,7 @@ RUN update-ca-certificates
 
 # Install pip-system-certs so Python uses the system CA store (including the Sectigo certs above).
 # This is installed separately from the main package to avoid affecting local development.
-RUN pip install pip-system-certs
+RUN pip install pip-system-certs==5.3
 
 # Install dependencies and the package using uv pip install
 # uv pip install works with the system Python environment and installs from uv.lock
