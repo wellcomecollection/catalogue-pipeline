@@ -28,7 +28,9 @@ IDENTIFIER_LENGTH = 8
 
 def generate_id() -> str:
     first = random.choice(LETTER_RANGE)
-    rest = "".join(random.choice(ALLOWED_CHARACTER_SET) for _ in range(IDENTIFIER_LENGTH - 1))
+    rest = "".join(
+        random.choice(ALLOWED_CHARACTER_SET) for _ in range(IDENTIFIER_LENGTH - 1)
+    )
     return first + rest
 
 
