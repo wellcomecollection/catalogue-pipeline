@@ -27,15 +27,11 @@ IDENTIFIER_LENGTH = 8
 
 
 def generate_id() -> str:
-    chars = [
-        random.choice(LETTER_RANGE) if i == 0 else random.choice(ALLOWED_CHARACTER_SET)
-        for i in range(IDENTIFIER_LENGTH)
-    ]
-    return "".join(chars)
+    first = random.choice(LETTER_RANGE)
+    rest = "".join(random.choice(ALLOWED_CHARACTER_SET) for _ in range(IDENTIFIER_LENGTH - 1))
+    return first + rest
 
 
 def generate_ids(count: int) -> Generator[str]:
-    i = 0
-    while i < count:
+    for _ in range(count):
         yield generate_id()
-        i += 1
