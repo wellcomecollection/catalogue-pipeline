@@ -166,7 +166,7 @@ resource "aws_scheduler_schedule" "folio_adapter_15_minute_run" {
 
   schedule_expression = "rate(15 minutes)"
   # Enable this to turn on regular harvest
-  state = "DISABLED"
+  state = "ENABLED"
 
   target {
     arn      = aws_sfn_state_machine.state_machine.arn
