@@ -48,7 +48,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date", "environment", "es_mode"})
+    add_pipeline_event_args(parser, {"pipeline_date", "es_mode"})
 
     args = parser.parse_args()
     event = BasePipelineEvent(**args.__dict__)

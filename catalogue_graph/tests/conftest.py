@@ -11,6 +11,7 @@ from tests.mocks import (
     MockElasticsearchClient,
     MockRequest,
     MockS3Client,
+    MockSecretsManagerClient,
     MockSmartOpen,
     MockSNSClient,
     MockStepFunctionsClient,
@@ -48,6 +49,7 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     monkeypatch.setattr("config.ES_SOURCE_SLICE_COUNT", 1)
 
     MockRequest.reset_mocks()
+    MockSecretsManagerClient.reset_mocks()
     MockSmartOpen.reset_mocks()
     MockSNSClient.reset_mocks()
     MockElasticsearchClient.reset_mocks()
