@@ -3,7 +3,12 @@ from collections.abc import Iterable
 from typing import Literal
 
 BasePipelineEventArgument = Literal[
-    "window", "pipeline_date", "index_date_merged", "pit_id", "environment"
+    "window",
+    "pipeline_date",
+    "index_date_merged",
+    "pit_id",
+    "environment",
+    "es_mode",
 ]
 
 
@@ -56,5 +61,30 @@ def add_pipeline_event_args(
             help="Which environment to connect to (used for Neptune, Elasticsearch and S3 bucket selection).",
             required=False,
             choices=["prod", "dev"],
-            default="prod",
+            default="dev",
         )
+    if "es_mode" in args:
+        parser.add_argument(
+            "--es-mode",
+            type=str,
+            help="Which Elasticsearch cluster to connect to. Use 'public' to connect to the production cluster.",
+            required=False,
+            choices=["local", "public"],
+            default="local",
+        )
+
+
+def validate_es_mode_for_writes(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
+    """
+    When running services which write to an Elasticsearch index locally, we disallow combining
+    the production Elasticsearch cluster (`es_mode=public` or `es_mode=private`) with the development
+    Neptune cluster (`environment=dev`) so that we cannot accidentally write non-production data to
+    production indexes.
+    """
+    environment = getattr(args, "environment", None)
+    es_mode = getattr(args, "es_mode", None)
+
+    if environment == "dev" and es_mode == "public":
+        parser.error("--es-mode=public cannot be used with --environment=dev")

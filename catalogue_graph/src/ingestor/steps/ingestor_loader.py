@@ -18,7 +18,7 @@ from ingestor.transformers.base_transformer import (
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 from utils.argparse import add_pipeline_event_args
-from utils.elasticsearch import ElasticsearchMode, get_client, get_local_es_mode
+from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
 from utils.steps import create_job_id, run_ecs_handler
@@ -128,7 +128,14 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
         parser,
-        {"pipeline_date", "index_date_merged", "window", "pit_id", "environment"},
+        {
+            "pipeline_date",
+            "index_date_merged",
+            "window",
+            "pit_id",
+            "environment",
+            "es_mode",
+        },
     )
 
     parser.add_argument(
@@ -179,7 +186,7 @@ def local_handler(parser: ArgumentParser) -> None:
     handler(
         event,
         None,
-        es_mode=get_local_es_mode(event.environment),
+        es_mode=args.es_mode,
         load_destination=args.load_destination,
     )
 

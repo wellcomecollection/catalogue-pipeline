@@ -16,7 +16,7 @@ from utils.argparse import add_pipeline_event_args
 from utils.aws import (
     df_to_s3_parquet,
 )
-from utils.elasticsearch import ElasticsearchMode, get_client, get_local_es_mode
+from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import IncrementalGraphRemoverReport
 from utils.types import CatalogueTransformerType, EntityType
@@ -79,7 +79,7 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(
-        parser, {"pipeline_date", "window", "pit_id", "environment"}
+        parser, {"pipeline_date", "window", "pit_id", "environment", "es_mode"}
     )
     parser.add_argument(
         "--transformer-type",
@@ -106,7 +106,7 @@ def local_handler() -> None:
     handler(
         event,
         execution_context,
-        es_mode=get_local_es_mode(event.environment),
+        es_mode=args.es_mode,
     )
 
 

@@ -61,7 +61,7 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
     )
 
     prefix = event.get_path_prefix()
-    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
+    bucket = config.CATALOGUE_GRAPH_S3_BUCKETS["prod"]
     key = f"{prefix}/00000000-00000010.parquet"
     s3_uri = f"s3://{bucket}/{key}"
 
@@ -94,6 +94,7 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
         },
         "ingestor_type": record_type,
         "job_id": job_id,
+        "environment": "prod",
         "load_format": "parquet",
         "publish_to_s3": True,
         "window": None,
@@ -111,7 +112,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
         f"{config.INGESTOR_S3_PREFIX}_{record_type}/"
         f"{pipeline_date}/{index_date}/{job_id}"
     )
-    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
+    bucket = config.CATALOGUE_GRAPH_S3_BUCKETS["prod"]
     key = f"{prefix}/00000000-00000010.parquet"
     s3_uri = f"s3://{bucket}/{key}"
 
@@ -154,6 +155,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
         },
         "ingestor_type": record_type,
         "job_id": job_id,
+        "environment": "prod",
         "load_format": "parquet",
         "publish_to_s3": True,
         "window": None,

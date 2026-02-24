@@ -15,7 +15,7 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.argparse import add_pipeline_event_args
-from utils.elasticsearch import ElasticsearchMode, get_local_es_mode
+from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import run_ecs_handler
 
@@ -30,7 +30,7 @@ def handler(
     setup_logging(execution_context)
 
     logger.info(
-        f"ECS extractor task starting for {event.sample_size or 'all'} entities.",
+        f"Extractor starting for {event.sample_size or 'all'} entities.",
         transformer_type=event.transformer_type,
         entity_type=event.entity_type,
         stream_destination=event.stream_destination,
@@ -88,7 +88,14 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
         parser,
-        {"pipeline_date", "index_date_merged", "window", "pit_id", "environment"},
+        {
+            "pipeline_date",
+            "index_date_merged",
+            "window",
+            "pit_id",
+            "environment",
+            "es_mode",
+        },
     )
     parser.add_argument(
         "--transformer-type",
@@ -120,7 +127,7 @@ def local_handler(parser: ArgumentParser) -> None:
 
     local_args = parser.parse_args()
     event = ExtractorEvent.from_argparser(local_args)
-    handler(event, es_mode=get_local_es_mode(event.environment))
+    handler(event, es_mode=local_args.es_mode)
 
 
 if __name__ == "__main__":

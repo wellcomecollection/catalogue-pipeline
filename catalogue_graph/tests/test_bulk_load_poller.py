@@ -78,6 +78,7 @@ def test_bulk_load_in_progress(status: str) -> None:
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
+        "environment": "prod",
         "status": "IN_PROGRESS",
     }
 
@@ -97,6 +98,7 @@ def test_bulk_load_succeeded() -> None:
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
+        "environment": "prod",
         "status": "SUCCEEDED",
     }
 
@@ -148,5 +150,6 @@ def test_bulk_load_failed_below_error_threshold() -> None:
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
+        "environment": "prod",
         "status": "SUCCEEDED",
     }

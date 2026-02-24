@@ -12,14 +12,16 @@ from ingestor.models.step_events import (
 from ingestor.steps.ingestor_indexer import handler as indexer_handler
 from ingestor.steps.ingestor_loader import create_job_id
 from ingestor.steps.ingestor_loader import handler as loader_handler
-from utils.argparse import add_pipeline_event_args
-from utils.elasticsearch import get_local_es_mode
+from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
+from utils.elasticsearch import ElasticsearchMode
 from utils.types import IngestorType
 
 logger = structlog.get_logger(__name__)
 
 
-def run_index(loader_result: IngestorIndexerLambdaEvent, es_mode: str) -> None:
+def run_index(
+    loader_result: IngestorIndexerLambdaEvent, es_mode: ElasticsearchMode
+) -> None:
     result = indexer_handler(loader_result, es_mode=es_mode)
     logger.info("Indexed documents", count=result.success_count)
 
@@ -30,7 +32,8 @@ def run_index(loader_result: IngestorIndexerLambdaEvent, es_mode: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(
-        parser, {"pipeline_date", "index_date_merged", "window", "environment"}
+        parser,
+        {"pipeline_date", "index_date_merged", "window", "environment", "es_mode"},
     )
     parser.add_argument(
         "--ingestor-type",
@@ -61,8 +64,9 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+    validate_es_mode_for_writes(parser, args)
     loader_event = IngestorLoaderLambdaEvent.from_argparser(args)
-    es_mode = get_local_es_mode(loader_event.environment)
+    es_mode = args.es_mode
 
     loader_result = loader_handler(
         loader_event,

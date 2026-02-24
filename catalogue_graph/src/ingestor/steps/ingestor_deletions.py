@@ -9,9 +9,9 @@ from models.events import (
     IncrementalGraphRemoverEvent,
 )
 from removers.elasticsearch_remover import ElasticsearchRemover
-from utils.argparse import add_pipeline_event_args
+from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.aws import df_from_s3_parquet
-from utils.elasticsearch import ElasticsearchMode, get_local_es_mode
+from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
@@ -81,7 +81,8 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(
-        parser, {"pipeline_date", "index_date_merged", "window", "environment"}
+        parser,
+        {"pipeline_date", "index_date_merged", "window", "environment", "es_mode"},
     )
 
     parser.add_argument(
@@ -106,8 +107,9 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
+    validate_es_mode_for_writes(parser, args)
     event = IngestorDeletionsLambdaEvent.from_argparser(args)
-    handler(event, es_mode=get_local_es_mode(event.environment))
+    handler(event, es_mode=args.es_mode)
 
 
 if __name__ == "__main__":
