@@ -13,7 +13,6 @@ from config import (
 )
 from models.events import BasePipelineEvent
 from utils.aws import get_secret
-from utils.types import Environment
 
 logger = structlog.get_logger(__name__)
 
@@ -21,13 +20,6 @@ logger = structlog.get_logger(__name__)
 # public: Connect to the production cluster via the public endpoint (local runs only)
 # local: Connect to a local (dev) instance (local runs only)
 ElasticsearchMode = Literal["private", "public", "local"]
-
-
-def get_local_es_mode(environment: Environment) -> ElasticsearchMode:
-    if environment == "prod":
-        return "public"
-
-    return "local"
 
 
 def get_standard_index_name(prefix: str, date: str | None) -> str:
