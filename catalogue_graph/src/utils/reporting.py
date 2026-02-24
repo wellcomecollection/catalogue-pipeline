@@ -67,7 +67,8 @@ class PipelineReport(BaseModel):
 class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
     @property
     def metric_namespace(self) -> str:
-        return "catalogue_graph_pipeline"
+        env_suffix = "_dev" if self.environment == "dev" else ""
+        return f"catalogue_graph_pipeline{env_suffix}"
 
     @property
     def event_key(self) -> str:
@@ -90,7 +91,8 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
 class IngestorReport(PipelineReport, IngestorStepEvent):
     @property
     def metric_namespace(self) -> str:
-        return "catalogue_graph_pipeline"
+        env_suffix = "_dev" if self.environment == "dev" else ""
+        return f"catalogue_graph_pipeline{env_suffix}"
 
     @property
     def s3_uri(self) -> str:
