@@ -83,8 +83,5 @@ def validate_es_mode_for_writes(
     Neptune cluster (`environment=dev`) so that we cannot accidentally write non-production data to
     production indexes.
     """
-    environment = getattr(args, "environment", None)
-    es_mode = getattr(args, "es_mode", None)
-
-    if environment == "dev" and es_mode == "public":
-        parser.error("--es-mode=public cannot be used with --environment=dev")
+    if args.environment == "dev" and args.es_mode != "local":
+        parser.error(f"--es-mode={args.es_mode} cannot be used with --environment=dev")
