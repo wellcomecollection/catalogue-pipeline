@@ -3,9 +3,8 @@ from collections.abc import Iterable
 from typing import Literal
 
 BasePipelineEventArgument = Literal[
-    "window", "pipeline_date", "index_date_merged", "pit_id"
+    "window", "pipeline_date", "index_date_merged", "pit_id", "environment"
 ]
-ClusterConnectionArgument = Literal["es_mode", "environment"]
 
 
 def add_pipeline_event_args(
@@ -50,40 +49,12 @@ def add_pipeline_event_args(
             help="An Elasticsearch point in time ID to use when extracting data from the merged index.",
             required=False,
         )
-
-
-def add_cluster_connection_args(
-    parser: argparse.ArgumentParser, args: Iterable[ClusterConnectionArgument]
-) -> None:
-    """
-    Add selected commonly used arguments to the given ArgumentParser
-    so local handlers can choose Elasticsearch and Neptune environments.
-    """
-    if "es_mode" in args:
-        parser.add_argument(
-            "--es-mode",
-            type=str,
-            help="Which Elasticsearch cluster to connect to. Use 'public' to connect to the production cluster.",
-            required=False,
-            choices=["local", "public"],
-            default="local",
-        )
     if "environment" in args:
         parser.add_argument(
             "--environment",
             type=str,
-            help="Which environment to connect to (used for Neptune and S3 bucket selection).",
+            help="Which environment to connect to (used for Neptune, Elasticsearch and S3 bucket selection).",
             required=False,
             choices=["prod", "dev"],
             default="prod",
         )
-
-
-def validate_cluster_connection_args(
-    parser: argparse.ArgumentParser, args: argparse.Namespace
-) -> None:
-    environment = getattr(args, "environment", None)
-    es_mode = getattr(args, "es_mode", None)
-
-    if environment == "dev" and es_mode == "public":
-        parser.error("--es-mode=public cannot be used with --environment=dev")

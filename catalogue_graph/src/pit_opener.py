@@ -4,8 +4,13 @@ import typing
 import structlog
 
 from models.events import BasePipelineEvent
-from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
-from utils.elasticsearch import ElasticsearchMode, get_client, get_merged_index_name
+from utils.argparse import add_pipeline_event_args
+from utils.elasticsearch import (
+    ElasticsearchMode,
+    get_client,
+    get_local_es_mode,
+    get_merged_index_name,
+)
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
@@ -44,8 +49,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date"})
-    add_cluster_connection_args(parser, {"es_mode"})
+    add_pipeline_event_args(parser, {"pipeline_date", "environment"})
 
     args = parser.parse_args()
     event = BasePipelineEvent(**args.__dict__)
@@ -54,7 +58,9 @@ def local_handler() -> None:
         trace_id=get_trace_id(),
         pipeline_step="graph_pit_opener",
     )
-    result = handler(event, execution_context, es_mode=args.es_mode)
+    result = handler(
+        event, execution_context, es_mode=get_local_es_mode(event.environment)
+    )
     logger.info("PIT opened", pit_id=result["pit_id"])
 
 

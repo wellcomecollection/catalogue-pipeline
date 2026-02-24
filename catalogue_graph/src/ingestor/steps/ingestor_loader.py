@@ -17,12 +17,8 @@ from ingestor.transformers.base_transformer import (
 )
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.argparse import (
-    add_cluster_connection_args,
-    add_pipeline_event_args,
-    validate_cluster_connection_args,
-)
-from utils.elasticsearch import ElasticsearchMode, get_client
+from utils.argparse import add_pipeline_event_args
+from utils.elasticsearch import ElasticsearchMode, get_client, get_local_es_mode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
 from utils.steps import create_job_id, run_ecs_handler
@@ -131,9 +127,9 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
-        parser, {"pipeline_date", "index_date_merged", "window", "pit_id"}
+        parser,
+        {"pipeline_date", "index_date_merged", "window", "pit_id", "environment"},
     )
-    add_cluster_connection_args(parser, {"es_mode", "environment"})
 
     parser.add_argument(
         "--ingestor-type",
@@ -179,13 +175,12 @@ def local_handler(parser: ArgumentParser) -> None:
     )
 
     args = parser.parse_args()
-    validate_cluster_connection_args(parser, args)
     event = IngestorLoaderLambdaEvent.from_argparser(args)
     handler(
         event,
         None,
-        args.es_mode,
-        args.load_destination,
+        es_mode=get_local_es_mode(event.environment),
+        load_destination=args.load_destination,
     )
 
 

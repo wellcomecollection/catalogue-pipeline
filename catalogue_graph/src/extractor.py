@@ -14,12 +14,8 @@ from models.events import (
 )
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
-from utils.argparse import (
-    add_cluster_connection_args,
-    add_pipeline_event_args,
-    validate_cluster_connection_args,
-)
-from utils.elasticsearch import ElasticsearchMode
+from utils.argparse import add_pipeline_event_args
+from utils.elasticsearch import ElasticsearchMode, get_local_es_mode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import run_ecs_handler
 
@@ -91,9 +87,9 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
 
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
-        parser, {"pipeline_date", "index_date_merged", "window", "pit_id"}
+        parser,
+        {"pipeline_date", "index_date_merged", "window", "pit_id", "environment"},
     )
-    add_cluster_connection_args(parser, {"es_mode", "environment"})
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -123,9 +119,8 @@ def local_handler(parser: ArgumentParser) -> None:
     )
 
     local_args = parser.parse_args()
-    validate_cluster_connection_args(parser, local_args)
     event = ExtractorEvent.from_argparser(local_args)
-    handler(event, es_mode=local_args.es_mode)
+    handler(event, es_mode=get_local_es_mode(event.environment))
 
 
 if __name__ == "__main__":

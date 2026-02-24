@@ -12,15 +12,11 @@ from removers.catalogue_work_identifiers_remover import (
     CatalogueWorkIdentifiersGraphRemover,
 )
 from removers.catalogue_works_remover import CatalogueWorksGraphRemover
-from utils.argparse import (
-    add_cluster_connection_args,
-    add_pipeline_event_args,
-    validate_cluster_connection_args,
-)
+from utils.argparse import add_pipeline_event_args
 from utils.aws import (
     df_to_s3_parquet,
 )
-from utils.elasticsearch import ElasticsearchMode, get_client
+from utils.elasticsearch import ElasticsearchMode, get_client, get_local_es_mode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import IncrementalGraphRemoverReport
 from utils.types import CatalogueTransformerType, EntityType
@@ -82,8 +78,9 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date", "window", "pit_id"})
-    add_cluster_connection_args(parser, {"es_mode", "environment"})
+    add_pipeline_event_args(
+        parser, {"pipeline_date", "window", "pit_id", "environment"}
+    )
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -100,7 +97,6 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
-    validate_cluster_connection_args(parser, args)
     event = IncrementalGraphRemoverEvent.from_argparser(args)
 
     execution_context = ExecutionContext(
@@ -110,7 +106,7 @@ def local_handler() -> None:
     handler(
         event,
         execution_context,
-        es_mode=args.es_mode,
+        es_mode=get_local_es_mode(event.environment),
     )
 
 

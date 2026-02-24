@@ -7,7 +7,7 @@ import structlog
 
 from clients.neptune_client import NeptuneClient
 from models.events import BulkLoaderEvent, FullGraphRemoverEvent
-from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.argparse import add_pipeline_event_args
 from utils.aws import (
     df_from_s3_parquet,
     df_to_s3_parquet,
@@ -149,8 +149,7 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date"})
-    add_cluster_connection_args(parser, {"environment"})
+    add_pipeline_event_args(parser, {"pipeline_date", "environment"})
     parser.add_argument(
         "--transformer-type",
         type=str,
