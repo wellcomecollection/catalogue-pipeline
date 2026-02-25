@@ -28,10 +28,8 @@ SLACK_SECRET_ID = os.environ.get("SLACK_SECRET_ID", "")
 
 CATALOGUE_GRAPH_S3_BUCKET_DEFAULT = "wellcomecollection-catalogue-graph"
 CATALOGUE_GRAPH_S3_BUCKET = os.environ.get(
-    "CATALOGUE_GRAPH_S3_BUCKET",
-    os.environ.get("CATALOGUE_GRAPH_S3_BUCKET", CATALOGUE_GRAPH_S3_BUCKET_DEFAULT),
+    "CATALOGUE_GRAPH_S3_BUCKET", CATALOGUE_GRAPH_S3_BUCKET_DEFAULT
 )
-
 # The dev S3 bucket is used in combination with the Neptune dev cluster
 CATALOGUE_GRAPH_S3_BUCKET_DEV_DEFAULT = "wellcomecollection-catalogue-graph-dev"
 CATALOGUE_GRAPH_S3_BUCKET_DEV = os.environ.get(
