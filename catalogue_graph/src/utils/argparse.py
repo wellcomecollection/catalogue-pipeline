@@ -58,7 +58,7 @@ def add_pipeline_event_args(
         parser.add_argument(
             "--environment",
             type=str,
-            help="Which environment to connect to (used for Neptune, Elasticsearch and S3 bucket selection).",
+            help="Which environment to connect to (used for Neptune and S3 bucket selection).",
             required=False,
             choices=["prod", "dev"],
             default="dev",
