@@ -11,7 +11,7 @@ import json
 import warnings
 from functools import cache, lru_cache
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any
 
 import pytest
 from pydantic import BaseModel
@@ -190,7 +190,7 @@ class ConceptTypesTest(GraphQueryTest):
         return sorted(expected_data) == sorted(returned_data)
 
 
-class MatchCase(NamedTuple):
+class MatchCase(BaseModel):
     name: str
     query: str
     test_cls: type[GraphQueryTest]
@@ -267,7 +267,7 @@ MATCH_CASES: list[MatchCase] = [
 ]
 
 
-class EmptyCase(NamedTuple):
+class EmptyCase(BaseModel):
     name: str
     query: str
     empty_fixture: str
@@ -333,6 +333,57 @@ EMPTY_RELATED_LIST_CASES: list[EmptyCase] = [
 ]
 
 
+class EdgePatternCase(BaseModel):
+    name: str
+    from_label: str
+    to_label: str
+    edge_label: str
+
+
+UNWANTED_CYCLE_CASES: list[EdgePatternCase] = [
+    EdgePatternCase(
+        name="path_identifier_parent_cycle",
+        from_label="PathIdentifier",
+        to_label="PathIdentifier",
+        edge_label="HAS_PARENT",
+    ),
+    EdgePatternCase(
+        name="source_concept_parent_cycle",
+        from_label="SourceConcept",
+        to_label="SourceConcept",
+        edge_label="HAS_PARENT",
+    ),
+    EdgePatternCase(
+        name="source_concept_narrower_than_cycle",
+        from_label="SourceConcept",
+        to_label="SourceConcept",
+        edge_label="NARROWER_THAN",
+    ),
+]
+
+
+ILLEGAL_EDGE_CASES: list[EdgePatternCase] = [
+    EdgePatternCase(
+        name="concept_has_concept_edge",
+        from_label="Concept",
+        to_label="Work",
+        edge_label="HAS_CONCEPT",
+    ),
+    EdgePatternCase(
+        name="path_identifier_has_path_identifier_edge",
+        from_label="PathIdentifier",
+        to_label="Work",
+        edge_label="HAS_PATH_IDENTIFIER",
+    ),
+    EdgePatternCase(
+        name="source_concept_has_source_concept_edge",
+        from_label="SourceConcept",
+        to_label="Concept",
+        edge_label="HAS_SOURCE_CONCEPT",
+    )
+]
+
+
 @pytest.mark.parametrize("case", MATCH_CASES, ids=lambda c: c.name)
 def test_graph_query_matches_fixture(case: MatchCase) -> None:
     expected_results = load_json_fixture(case.expected_fixture)
@@ -361,3 +412,30 @@ def test_graph_query_returns_empty_related_list_for_known_empty_ids(
         case.query, {"ids": ids, **CONCEPT_QUERY_PARAMS}
     )
     assert all(len(item["related"]) == 0 for item in response)
+
+
+@pytest.mark.parametrize("case", UNWANTED_CYCLE_CASES, ids=lambda c: c.name)
+def test_graph_has_no_unwanted_cycles(case: EdgePatternCase) -> None:
+    query = f"""
+        MATCH (source: {case.from_label})-[:{case.edge_label}]->(target: {case.to_label})-[:{case.edge_label}]->(source)
+        RETURN source, target
+        LIMIT 1000
+    """
+    response = neptune_client().run_open_cypher_query(query)
+    print(response)
+    assert (
+        len(response) == 0
+    ), f"Found {len(response)} unwanted cycle(s) for {case.name}."
+
+
+@pytest.mark.parametrize("case", ILLEGAL_EDGE_CASES, ids=lambda c: c.name)
+def test_graph_has_no_illegal_edges(case: EdgePatternCase) -> None:
+    query = f"""
+        MATCH (source:{case.from_label})-[:{case.edge_label}]->(target:{case.to_label})
+        RETURN source, target
+        LIMIT 1000
+    """
+    response = neptune_client().run_open_cypher_query(query)
+    assert (
+        len(response) == 0
+    ), f"Found {len(response)} illegal {case.edge_label} edge(s) for {case.name}."
