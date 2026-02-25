@@ -7,6 +7,7 @@ Usage:
     AWS_PROFILE=platform-developer uv run pytest -m "integration"
 """
 
+import csv
 import json
 import warnings
 from functools import cache, lru_cache
@@ -53,6 +54,16 @@ def load_json_fixture(name: str) -> Any:
 # so we allow a tolerance threshold and only fail when drift becomes significant.
 # All mismatches are still logged as warnings for visibility.
 MIN_MATCH_RATIO = 0.9
+WECO_AUTHORITY_CSV_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "src/sources/weco_concepts/wellcome_collection_authority.csv"
+)
+
+
+def load_weco_authority_ids() -> list[str]:
+    with WECO_AUTHORITY_CSV_PATH.open(newline="") as handle:
+        reader = csv.DictReader(handle)
+        return [row["id"].strip() for row in reader if row.get("id")]
 
 
 class GraphQueryTest(BaseModel):
@@ -368,7 +379,7 @@ ILLEGAL_EDGE_CASES: list[EdgePatternCase] = [
         from_label="SourceConcept",
         to_label="Concept",
         edge_label="HAS_SOURCE_CONCEPT",
-    )
+    ),
 ]
 
 
@@ -411,9 +422,9 @@ def test_graph_has_no_unwanted_cycles(case: EdgePatternCase) -> None:
     """
     response = neptune_client().run_open_cypher_query(query)
     print(response)
-    assert (
-        len(response) == 0
-    ), f"Found {len(response)} unwanted cycle(s) for {case.name}."
+    assert len(response) == 0, (
+        f"Found {len(response)} unwanted cycle(s) for {case.name}."
+    )
 
 
 @pytest.mark.parametrize("case", ILLEGAL_EDGE_CASES, ids=lambda c: c.name)
@@ -424,6 +435,46 @@ def test_graph_has_no_illegal_edges(case: EdgePatternCase) -> None:
         LIMIT 1000
     """
     response = neptune_client().run_open_cypher_query(query)
-    assert (
-        len(response) == 0
-    ), f"Found {len(response)} illegal {case.edge_label} edge(s) for {case.name}."
+    assert len(response) == 0, (
+        f"Found {len(response)} illegal {case.edge_label} edge(s) for {case.name}."
+    )
+
+
+def test_weco_authority_nodes_exist_in_graph() -> None:
+    concept_ids = load_weco_authority_ids()
+    weco_ids = [f"weco:{concept_id}" for concept_id in concept_ids]
+    response = neptune_client().run_open_cypher_query(
+        """
+        UNWIND $ids AS id
+        MATCH (sc: SourceConcept {id: id, source: 'weco-authority'})
+        RETURN sc.id AS id
+        """,
+        {"ids": weco_ids},
+    )
+    found_ids = {row["id"] for row in response}
+    missing = sorted(set(weco_ids) - found_ids)
+    assert not missing, (
+        "Missing weco-authority SourceConcept nodes for ids: " + ", ".join(missing)
+    )
+
+
+def test_weco_authority_nodes_link_to_concepts() -> None:
+    concept_ids = load_weco_authority_ids()
+    rows = [
+        {"concept_id": concept_id, "weco_id": f"weco:{concept_id}"}
+        for concept_id in concept_ids
+    ]
+    response = neptune_client().run_open_cypher_query(
+        """
+        UNWIND $rows AS row
+        MATCH (concept:Concept {id: row.concept_id})-[:SAME_AS]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
+        RETURN row.concept_id AS id
+        """,
+        {"rows": rows},
+    )
+    matched_ids = {row["id"] for row in response}
+    missing = sorted(set(concept_ids) - matched_ids)
+    assert not missing, (
+        "Missing Concept -> weco-authority SourceConcept linkage for ids: "
+        + ", ".join(missing)
+    )
