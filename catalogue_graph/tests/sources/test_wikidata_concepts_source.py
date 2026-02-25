@@ -2,6 +2,7 @@ import json
 from typing import Literal
 
 from config import WIKIDATA_SPARQL_URL
+from models.events import ExtractorEvent
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from tests.mocks import MockRequest
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
@@ -48,10 +49,14 @@ def test_wikidata_concepts_source_edges() -> None:
     )
     _add_mock_wikidata_requests("edges", "concepts")
 
-    loc_concepts_source = WikidataLinkedOntologySource(
-        linked_transformer="loc_concepts",
-        entity_type="edges",
+    source_event = ExtractorEvent(
         pipeline_date="dev",
+        environment="prod",
+        transformer_type="wikidata_linked_loc_concepts",
+        entity_type="edges",
+    )
+    loc_concepts_source = WikidataLinkedOntologySource(
+        linked_transformer="loc_concepts", event=source_event
     )
     stream_result = list(loc_concepts_source.stream_raw())
 
@@ -93,8 +98,14 @@ def test_wikidata_concepts_source_nodes() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("nodes", "concepts")
 
+    source_event = ExtractorEvent(
+        pipeline_date="dev",
+        environment="prod",
+        transformer_type="wikidata_linked_loc_concepts",
+        entity_type="nodes",
+    )
     mesh_concepts_source = WikidataLinkedOntologySource(
-        linked_transformer="loc_concepts", entity_type="nodes", pipeline_date="dev"
+        linked_transformer="loc_concepts", event=source_event
     )
 
     stream_result = list(mesh_concepts_source.stream_raw())
@@ -110,9 +121,9 @@ def test_wikidata_concepts_source_nodes() -> None:
 def test_wikidata_linked_ontology_id_checker() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc"], "1900-01-01")
 
-    assert is_id_in_ontology("sh00000001", "loc", "1900-01-01")
-    assert not is_id_in_ontology("sh00000001000", "loc", "1900-01-01")
+    assert is_id_in_ontology("sh00000001", "loc", "1900-01-01", "prod")
+    assert not is_id_in_ontology("sh00000001000", "loc", "1900-01-01", "prod")
 
-    assert "sh00000001" not in get_extracted_ids("loc_locations", "1900-01-01")
-    assert "tgrefwdw" not in get_extracted_ids("loc_locations", "1900-01-01")
-    assert "sh00000015" in get_extracted_ids("loc_locations", "1900-01-01")
+    assert "sh00000001" not in get_extracted_ids("loc_locations", "1900-01-01", "prod")
+    assert "tgrefwdw" not in get_extracted_ids("loc_locations", "1900-01-01", "prod")
+    assert "sh00000015" in get_extracted_ids("loc_locations", "1900-01-01", "prod")

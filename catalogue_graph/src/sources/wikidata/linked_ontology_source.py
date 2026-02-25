@@ -4,7 +4,7 @@ from typing import cast
 
 import structlog
 
-from models.events import EntityType
+from models.events import ExtractorEvent
 from sources.base_source import BaseSource
 from utils.ontology import get_extracted_ids, is_id_in_ontology
 from utils.streaming import process_stream_in_parallel
@@ -73,16 +73,10 @@ class WikidataLinkedOntologySource(BaseSource):
     to optimise SPARQL queries.
     """
 
-    def __init__(
-        self,
-        linked_transformer: TransformerType,
-        entity_type: EntityType,
-        pipeline_date: str,
-    ):
+    def __init__(self, linked_transformer: TransformerType, event: ExtractorEvent):
         self.client = WikidataSparqlClient()
         self.linked_transformer = linked_transformer
-        self.entity_type = entity_type
-        self.pipeline_date = pipeline_date
+        self.event = event
 
         # Transformer type strings are always in the format `<ontology_type>_<node_type>`
         self.linked_ontology = cast(OntologyType, self.linked_transformer.split("_")[0])
@@ -162,6 +156,19 @@ class WikidataLinkedOntologySource(BaseSource):
     def _stream_all_has_industry_edges(self) -> Generator[dict]:
         yield from self._stream_all_edges_by_type("has_industry")
 
+    def is_valid_wikidata_id(self, wikidata_id: str) -> bool:
+        return is_id_in_ontology(
+            wikidata_id, "wikidata", self.event.pipeline_date, self.event.environment
+        )
+
+    def is_valid_linked_id(self, linked_id: str) -> bool:
+        return is_id_in_ontology(
+            linked_id,
+            self.linked_ontology,
+            self.event.pipeline_date,
+            self.event.environment,
+        )
+
     def _stream_filtered_wikidata_ids(self) -> Generator[str]:
         """Streams all wikidata ids to be processed as nodes given the selected `node_type`."""
         seen = set()
@@ -170,16 +177,15 @@ class WikidataLinkedOntologySource(BaseSource):
         # (a given Wikidata id can appear in more than one edge).
         for edge in self._stream_all_same_as_edges():
             wikidata_id, linked_id = edge["from_id"], edge["to_id"]
-            linked_id_is_valid = is_id_in_ontology(
-                linked_id, self.linked_ontology, self.pipeline_date
-            )
-            if linked_id_is_valid and wikidata_id not in seen:
+            if self.is_valid_linked_id(linked_id) and wikidata_id not in seen:
                 # Add Wikidata id to `seen` no matter if it's part of the selected node type
                 # to make sure it is not processed again as a parent below.
                 seen.add(wikidata_id)
 
                 if linked_id in get_extracted_ids(
-                    self.linked_transformer, self.pipeline_date
+                    self.linked_transformer,
+                    self.event.pipeline_date,
+                    self.event.environment,
                 ):
                     yield wikidata_id
 
@@ -207,7 +213,9 @@ class WikidataLinkedOntologySource(BaseSource):
             # include invalid LoC ids (of which there are several thousand).
 
             if edge["to_id"] in get_extracted_ids(
-                self.linked_transformer, self.pipeline_date
+                self.linked_transformer,
+                self.event.pipeline_date,
+                self.event.environment,
             ):
                 streamed_wikidata_ids.add(edge["from_id"])
                 yield {**edge, "type": "SAME_AS"}
@@ -222,15 +230,15 @@ class WikidataLinkedOntologySource(BaseSource):
 
         logger.info("Streaming HAS_INDUSTRY edges")
         for edge in self._stream_all_has_industry_edges():
-            if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
-                edge["to_id"], "wikidata", self.pipeline_date
+            if edge["from_id"] in streamed_wikidata_ids and self.is_valid_wikidata_id(
+                edge["to_id"]
             ):
                 yield {**edge, "type": "HAS_INDUSTRY"}
 
         logger.info("Streaming HAS_FOUNDER edges")
         for edge in self._stream_all_has_founder_edges():
-            if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
-                edge["to_id"], "wikidata", self.pipeline_date
+            if edge["from_id"] in streamed_wikidata_ids and self.is_valid_wikidata_id(
+                edge["to_id"]
             ):
                 yield {**edge, "type": "HAS_FOUNDER"}
 
@@ -239,9 +247,9 @@ class WikidataLinkedOntologySource(BaseSource):
             logger.info("Streaming HAS_FIELD_OF_WORK edges")
             for edge in self._stream_all_edges_by_type("has_field_of_work"):
                 # Only include an edge if its `to_id` has a corresponding concept node in the graph
-                if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
-                    edge["to_id"], "wikidata", self.pipeline_date
-                ):
+                if edge[
+                    "from_id"
+                ] in streamed_wikidata_ids and self.is_valid_wikidata_id(edge["to_id"]):
                     yield {**edge, "type": "HAS_FIELD_OF_WORK"}
 
             logger.info("Streaming RELATED_TO edges")
@@ -268,9 +276,9 @@ class WikidataLinkedOntologySource(BaseSource):
         yield from _parallelise_sparql_requests(all_ids, self._get_wikidata_items)
 
     def stream_raw(self) -> Generator[dict]:
-        if self.entity_type == "nodes":
+        if self.event.entity_type == "nodes":
             return self._stream_raw_nodes()
-        elif self.entity_type == "edges":
+        elif self.event.entity_type == "edges":
             return self._stream_raw_edges()
         else:
-            raise ValueError(f"Invalid entity type: {self.entity_type}")
+            raise ValueError(f"Invalid entity type: {self.event.entity_type}")

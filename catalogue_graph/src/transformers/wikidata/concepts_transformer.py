@@ -1,5 +1,6 @@
 from collections.abc import Generator
 
+from models.events import ExtractorEvent
 from models.graph_edge import (
     BaseEdge,
     SourceConceptHasFieldOfWork,
@@ -10,22 +11,15 @@ from models.graph_edge import (
 )
 from models.graph_node import SourceConcept
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from transformers.base_transformer import BaseTransformer, EntityType
+from transformers.base_transformer import BaseTransformer
 from utils.types import TransformerType
 
 from .raw_concept import RawWikidataConcept
 
 
 class WikidataConceptsTransformer(BaseTransformer):
-    def __init__(
-        self,
-        linked_transformer: TransformerType,
-        entity_type: EntityType,
-        pipeline_date: str,
-    ):
-        self.source = WikidataLinkedOntologySource(
-            linked_transformer, entity_type, pipeline_date
-        )
+    def __init__(self, linked_transformer: TransformerType, event: ExtractorEvent):
+        self.source = WikidataLinkedOntologySource(linked_transformer, event)
 
     def transform_node(self, raw_node: dict) -> SourceConcept | None:
         raw_concept = RawWikidataConcept(raw_node)
