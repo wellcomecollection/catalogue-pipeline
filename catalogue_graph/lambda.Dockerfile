@@ -3,11 +3,8 @@ FROM public.ecr.aws/lambda/python:${PYTHON_IMAGE_VERSION} AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
-# Install AWS CLI for use in the Lambda extensions (e.g. fetching secrets)
-RUN dnf install -y awscli && dnf clean all
-
 # Copy extensions for Lambda (e.g. for secrets)
-COPY infra/lambda_extensions/bash_secrets_extension.sh /opt/extensions/bash_secrets_extension.sh
+COPY infra/lambda_extensions/secrets_extension.py /opt/extensions/secrets_extension.py
 
 FROM base AS python_lambda_with_extensions
 
