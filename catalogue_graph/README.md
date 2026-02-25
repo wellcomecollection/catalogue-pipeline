@@ -243,6 +243,12 @@ python3.13 extractor.py \
   --is-local
 ```
 
+## Environments
+
+The pipeline runs against two environments: `prod` and `dev`. Each environment has its own Neptune cluster and S3 bucket
+for pipeline outputs. Every pipeline service accepts an `--environment` argument and every pipeline event has a
+corresponding `environment` field. Local runs use `dev` by default while deployed services default to `prod`.
+
 ## Local Neptune experimentation
 
 To run experimental Neptune queries locally, you can use the notebook in the `notebooks` directory. This notebook
