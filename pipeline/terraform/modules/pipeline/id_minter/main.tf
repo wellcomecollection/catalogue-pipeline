@@ -31,5 +31,9 @@ variable "id_minter_env_vars" {
 variable "id_minter_secret_env_vars" {
   type = object({
     RDS_PRIMARY_HOST = string
+    RDS_REPLICA_HOST = string
+    RDS_PORT         = string
+    RDS_USERNAME     = string
+    RDS_PASSWORD     = string
   })
 }

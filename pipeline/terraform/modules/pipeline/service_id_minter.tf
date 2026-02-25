@@ -79,8 +79,21 @@ locals {
     LOG_LEVEL           = "DEBUG"
   }
 
+  # Extract the secret name from the full ARN.
+  # ARN format: arn:aws:secretsmanager:region:account:secret:NAME-RANDOM
+  # We strip the 6-char random suffix so the name works with GetSecretValue
+  # and the pipeline_lambda IAM policy pattern (secret:NAME-*).
+  rds_v2_master_secret_name = regex(
+    "arn:aws:secretsmanager:[^:]+:[^:]+:secret:(.+)-.{6}$",
+    local.infra_critical.rds_v2_master_user_secret_arn
+  )[0]
+
   id_minter_v2_secret_env_vars = {
     RDS_PRIMARY_HOST = "rds/identifiers-v2-serverless/endpoint"
+    RDS_REPLICA_HOST = "rds/identifiers-v2-serverless/reader_endpoint"
+    RDS_PORT         = "rds/identifiers-v2-serverless/port"
+    RDS_USERNAME     = "${local.rds_v2_master_secret_name}:username"
+    RDS_PASSWORD     = "${local.rds_v2_master_secret_name}:password"
   }
 }
 
