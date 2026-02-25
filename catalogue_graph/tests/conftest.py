@@ -17,6 +17,7 @@ from tests.mocks import (
     MockStepFunctionsClient,
     mock_boto3_client,
 )
+from utils.aws import get_secret
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -56,5 +57,6 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     MockCloudwatchClient.reset_mocks()
     MockS3Client.reset_mocks()
     MockStepFunctionsClient.reset_mocks()
+    get_secret.cache_clear()  # Clear cached SecretsManager secrets after each test
     yield
     # Run any cleanup code here

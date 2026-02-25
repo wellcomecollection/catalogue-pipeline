@@ -211,6 +211,7 @@ def test_ingestor_indexer_failure_invalid_parquet(record_type: IngestorType) -> 
 
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
 def test_ingestor_indexer_failure_missing_file(record_type: IngestorType) -> None:
+    mock_es_secrets(service_name=f"{record_type}_ingestor", pipeline_date="2021-07-01")
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date="2021-07-01",

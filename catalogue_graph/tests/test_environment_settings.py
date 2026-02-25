@@ -4,6 +4,7 @@ import sys
 import pytest
 
 import config
+from clients.neptune_client import NeptuneClient
 from ingestor.steps import ingestor_deletions, ingestor_indexer
 from models.events import BulkLoaderEvent
 from pit_opener import lambda_handler as pit_opener_lambda
@@ -157,3 +158,29 @@ def test_metric_namespace_for_ingestor_reports() -> None:
 
     assert prod_report.metric_namespace == "catalogue_graph_pipeline"
     assert dev_report.metric_namespace == "catalogue_graph_pipeline_dev"
+
+
+def test_neptune_environment_selection_prod() -> None:
+    MockSecretsManagerClient.add_mock_secret(
+        config.NEPTUNE_PROD_HOST_SECRET_NAME,
+        "prod-endpoint",
+    )
+
+    prod_client = NeptuneClient("prod")
+    assert MockSecretsManagerClient.calls == [
+        config.NEPTUNE_PROD_HOST_SECRET_NAME,
+    ]
+    assert prod_client.neptune_endpoint == "prod-endpoint"
+
+
+def test_neptune_environment_selection_dev() -> None:
+    MockSecretsManagerClient.add_mock_secret(
+        config.NEPTUNE_DEV_HOST_SECRET_NAME,
+        "dev-endpoint",
+    )
+
+    dev_client = NeptuneClient("dev")
+    assert MockSecretsManagerClient.calls == [
+        config.NEPTUNE_DEV_HOST_SECRET_NAME,
+    ]
+    assert dev_client.neptune_endpoint == "dev-endpoint"
