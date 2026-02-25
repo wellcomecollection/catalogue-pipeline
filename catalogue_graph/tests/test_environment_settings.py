@@ -64,7 +64,7 @@ def test_ingestor_deletions_rejects_dev_public_es(
 
 def test_ingestor_indexer_rejects_dev_public_es(
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     parser = argparse.ArgumentParser()
     monkeypatch.setattr(
         sys,
