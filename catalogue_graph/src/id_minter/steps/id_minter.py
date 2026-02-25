@@ -24,38 +24,26 @@ from utils.logger import ExecutionContext, get_trace_id, setup_logging
 logger = structlog.get_logger(__name__)
 
 
-# ---------------------------------------------------------------------------
-# Runtime — injectable dependencies (mirrors LoaderRuntime pattern)
-# ---------------------------------------------------------------------------
 class IdMinterRuntime(BaseModel):
-    """Container for runtime dependencies.
-
-    Populated by ``build_runtime``; can be replaced in tests.
-    """
-
     config: IdMinterConfig = ID_MINTER_CONFIG
 
 
 def build_runtime(
     config_obj: IdMinterConfig | None = None,
 ) -> IdMinterRuntime:
-    """Construct the runtime from configuration."""
     cfg = config_obj or ID_MINTER_CONFIG
     return IdMinterRuntime(config=cfg)
 
 
-# ---------------------------------------------------------------------------
-# Core logic
-# ---------------------------------------------------------------------------
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime | None = None,
 ) -> StepFunctionMintingResponse:
-    """Process a minting request and return a response.
-
-    This is the pure-logic entry point, free of Lambda/logging concerns.
-    """
     runtime = runtime or build_runtime()
+
+    logger.debug(
+        "ID minter runtime configuration", config=runtime.config.model_dump(mode="json")
+    )
 
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
@@ -82,9 +70,6 @@ def execute(
     )
 
 
-# ---------------------------------------------------------------------------
-# Handler (adds logging / reporting around execute)
-# ---------------------------------------------------------------------------
 def handler(
     event: StepFunctionMintingRequest,
     runtime: IdMinterRuntime | None = None,
@@ -103,9 +88,6 @@ def handler(
     return response
 
 
-# ---------------------------------------------------------------------------
-# Lambda entry point
-# ---------------------------------------------------------------------------
 def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
@@ -117,9 +99,6 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
     return response.model_dump()
 
 
-# ---------------------------------------------------------------------------
-# Local CLI entry point
-# ---------------------------------------------------------------------------
 def local_handler(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--source-identifiers",
