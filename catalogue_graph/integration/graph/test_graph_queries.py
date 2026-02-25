@@ -347,18 +347,6 @@ UNWANTED_CYCLE_CASES: list[EdgePatternCase] = [
         to_label="PathIdentifier",
         edge_label="HAS_PARENT",
     ),
-    EdgePatternCase(
-        name="source_concept_parent_cycle",
-        from_label="SourceConcept",
-        to_label="SourceConcept",
-        edge_label="HAS_PARENT",
-    ),
-    EdgePatternCase(
-        name="source_concept_narrower_than_cycle",
-        from_label="SourceConcept",
-        to_label="SourceConcept",
-        edge_label="NARROWER_THAN",
-    ),
 ]
 
 
