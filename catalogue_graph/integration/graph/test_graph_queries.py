@@ -468,6 +468,7 @@ def test_weco_authority_nodes_link_to_concepts() -> None:
         """
         UNWIND $rows AS row
         MATCH (concept:Concept {id: row.concept_id})-[:SAME_AS]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
+        MATCH (weco)-[:SAME_AS]->(concept)
         RETURN row.concept_id AS id
         """,
         {"rows": rows},
