@@ -14,8 +14,6 @@ from functools import cache, lru_cache
 from pathlib import Path
 from typing import Any
 
-from sources.weco_concepts.concepts_source import DEFAULT_PATH as WECO_AUTHORITY_CSV_PATH
-
 import pytest
 from pydantic import BaseModel
 
@@ -35,6 +33,9 @@ from ingestor.queries.concept_queries import (
 )
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
+)
+from sources.weco_concepts.concepts_source import (
+    DEFAULT_PATH as WECO_AUTHORITY_CSV_PATH,
 )
 
 # Add the 'integration' marker to ensure that integration tests are not included in regular unit test runs.
@@ -56,6 +57,7 @@ def load_json_fixture(name: str) -> Any:
 # so we allow a tolerance threshold and only fail when drift becomes significant.
 # All mismatches are still logged as warnings for visibility.
 MIN_MATCH_RATIO = 0.9
+
 
 def load_weco_authority_ids() -> list[str]:
     with open(WECO_AUTHORITY_CSV_PATH) as handle:
