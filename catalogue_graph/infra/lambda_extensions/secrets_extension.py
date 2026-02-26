@@ -19,6 +19,7 @@ import json
 import os
 import signal
 import sys
+from typing import Any, cast
 from urllib.request import Request, urlopen
 
 import boto3
@@ -43,10 +44,10 @@ def resolve_secret(secret_ref: str) -> tuple[str, str | None]:
     return secret_name, json_key
 
 
-def fetch_secret(client, secret_name: str, json_key: str | None) -> str:
+def fetch_secret(client: Any, secret_name: str, json_key: str | None) -> str:
     """Fetch a secret value from Secrets Manager."""
     response = client.get_secret_value(SecretId=secret_name)
-    secret_string = response["SecretString"]
+    secret_string: str = response["SecretString"]
 
     if json_key is not None:
         parsed = json.loads(secret_string)
@@ -91,19 +92,19 @@ def register() -> str:
     req.add_header("Content-Type", "application/json")
 
     with urlopen(req) as resp:
-        extension_id = resp.headers["Lambda-Extension-Identifier"]
+        extension_id = str(resp.headers["Lambda-Extension-Identifier"])
         log(f"Registered with extension ID: {extension_id}")
         return extension_id
 
 
-def next_event(extension_id: str) -> dict:
+def next_event(extension_id: str) -> dict[str, Any]:
     """Block until the next event from the Extensions API."""
     url = f"http://{RUNTIME_API}/2020-01-01/extension/event/next"
     req = Request(url, method="GET")
     req.add_header("Lambda-Extension-Identifier", extension_id)
 
     with urlopen(req) as resp:
-        return json.loads(resp.read())
+        return cast(dict[str, Any], json.loads(resp.read()))
 
 
 def main() -> None:
@@ -113,7 +114,7 @@ def main() -> None:
 
     extension_id = register()
 
-    def handle_sigterm(signum, frame):
+    def handle_sigterm(signum: int, frame: Any) -> None:
         log("Received SIGTERM, exiting")
         sys.exit(0)
 
