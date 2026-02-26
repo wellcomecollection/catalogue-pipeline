@@ -12,21 +12,23 @@
       "type": "Subject"
     }
   },
-  "linked_source_concept": {
-    "~id": "D008288",
-    "~entityType": "node",
-    "~labels": [
-      "SourceConcept"
-    ],
-    "~properties": {
-      "id": "D008288",
-      "label": "Malaria",
-      "source": "nlm-mesh",
-      "alternative_ids": "C01.610.752.530||C01.920.852.750",
-      "alternative_labels": "Infections, Plasmodium||Infection, Plasmodium||Plasmodium Infection||Plasmodium Infections||Paludism||Remittent Fever||Fever, Remittent||Marsh Fever||Fever, Marsh",
-      "description": "A protozoan disease caused in humans by four species of the PLASMODIUM genus: PLASMODIUM FALCIPARUM; PLASMODIUM VIVAX; PLASMODIUM OVALE; and PLASMODIUM MALARIAE; and transmitted by the bite of an infected female mosquito of the genus ANOPHELES. Malaria is endemic in parts of Asia, Africa, Central and South America, Oceania, and certain Caribbean islands. It is characterized by extreme exhaustion associated with paroxysms of high FEVER; SWEATING; shaking CHILLS; and ANEMIA. Malaria in ANIMALS is caused by other species of plasmodia.\n    "
+  "linked_source_concepts": [
+    {
+      "~id": "D008288",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "D008288",
+        "label": "Malaria",
+        "source": "nlm-mesh",
+        "alternative_ids": "C01.610.752.530||C01.920.852.750",
+        "alternative_labels": "Infections, Plasmodium||Infection, Plasmodium||Plasmodium Infection||Plasmodium Infections||Paludism||Remittent Fever||Fever, Remittent||Marsh Fever||Fever, Marsh",
+        "description": "A protozoan disease caused in humans by four species of the PLASMODIUM genus: PLASMODIUM FALCIPARUM; PLASMODIUM VIVAX; PLASMODIUM OVALE; and PLASMODIUM MALARIAE; and transmitted by the bite of an infected female mosquito of the genus ANOPHELES. Malaria is endemic in parts of Asia, Africa, Central and South America, Oceania, and certain Caribbean islands. It is characterized by extreme exhaustion associated with paroxysms of high FEVER; SWEATING; shaking CHILLS; and ANEMIA. Malaria in ANIMALS is caused by other species of plasmodia.\n    "
+      }
     }
-  },
+  ],
   "source_concepts": [
     {
       "~id": "D008288",

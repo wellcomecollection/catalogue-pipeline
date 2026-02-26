@@ -13,21 +13,23 @@
         "type": "Concept"
       }
     },
-    "linked_source_concept": {
-      "~id": "D013287",
-      "~entityType": "node",
-      "~labels": [
-        "SourceConcept"
-      ],
-      "~properties": {
-        "id": "D013287",
-        "label": "Illicit Drugs",
-        "source": "nlm-mesh",
-        "alternative_ids": "D26.878",
-        "alternative_labels": "Drugs, Illicit||Illicit Drug||Drug, Illicit||Illegal Drug||Drug, Illegal||Illegal Drugs||Drugs, Illegal||Street Drugs||Drugs, Street||Street Drug||Drug, Street||Recreational Drugs||Drugs, Recreational||Recreational Drug||Drug, Recreational||Club Drugs||Drugs, Club||Club Drug||Drug, Club",
-        "description": "Drugs that are manufactured, obtained, or sold illegally. They include prescription drugs obtained or sold without prescription and non-prescription drugs. Illicit drugs are widely distributed, tend to be grossly impure and may cause unexpected toxicity.\n    "
+    "linked_source_concepts": [
+      {
+        "~id": "D013287",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "D013287",
+          "label": "Illicit Drugs",
+          "source": "nlm-mesh",
+          "alternative_ids": "D26.878",
+          "alternative_labels": "Drugs, Illicit||Illicit Drug||Drug, Illicit||Illegal Drug||Drug, Illegal||Illegal Drugs||Drugs, Illegal||Street Drugs||Drugs, Street||Street Drug||Drug, Street||Recreational Drugs||Drugs, Recreational||Recreational Drug||Drug, Recreational||Club Drugs||Drugs, Club||Club Drug||Drug, Club",
+          "description": "Drugs that are manufactured, obtained, or sold illegally. They include prescription drugs obtained or sold without prescription and non-prescription drugs. Illicit drugs are widely distributed, tend to be grossly impure and may cause unexpected toxicity.\n    "
+        }
       }
-    },
+    ],
     "source_concepts": [
       {
         "~id": "Q10268802",
@@ -59,21 +61,23 @@
         "type": "Concept"
       }
     },
-    "linked_source_concept": {
-      "~id": "D008694",
-      "~entityType": "node",
-      "~labels": [
-        "SourceConcept"
-      ],
-      "~properties": {
-        "id": "D008694",
-        "label": "Methamphetamine",
-        "source": "nlm-mesh",
-        "alternative_ids": "D02.092.471.683.152.619",
-        "alternative_labels": "Deoxyephedrine||Desoxyephedrine||Methylamphetamine||N-Methylamphetamine||N Methylamphetamine||Metamfetamine||Methamphetamine Hydrochloride||Hydrochloride, Methamphetamine||Desoxyn||Madrine",
-        "description": "A central nervous system stimulant and sympathomimetic with actions and uses similar to DEXTROAMPHETAMINE. The smokable form is a drug of abuse and is referred to as crank, crystal, crystal meth, ice, and speed.\n    "
+    "linked_source_concepts": [
+      {
+        "~id": "D008694",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "D008694",
+          "label": "Methamphetamine",
+          "source": "nlm-mesh",
+          "alternative_ids": "D02.092.471.683.152.619",
+          "alternative_labels": "Deoxyephedrine||Desoxyephedrine||Methylamphetamine||N-Methylamphetamine||N Methylamphetamine||Metamfetamine||Methamphetamine Hydrochloride||Hydrochloride, Methamphetamine||Desoxyn||Madrine",
+          "description": "A central nervous system stimulant and sympathomimetic with actions and uses similar to DEXTROAMPHETAMINE. The smokable form is a drug of abuse and is referred to as crank, crystal, crystal meth, ice, and speed.\n    "
+        }
       }
-    },
+    ],
     "source_concepts": [
       {
         "~id": "sh85084377",
@@ -118,19 +122,21 @@
         "type": "Concept"
       }
     },
-    "linked_source_concept": {
-      "~id": "sh88000332",
-      "~entityType": "node",
-      "~labels": [
-        "SourceConcept"
-      ],
-      "~properties": {
-        "id": "sh88000332",
-        "label": "Drug traffic",
-        "source": "lc-subjects",
-        "alternative_labels": "Drugs--Prices and sale||Trafficking in narcotics||Trafficking in drugs||Traffic, Drug||Drug smuggling||Drug production, Illicit||Drug trafficking||Illicit drug production||Narcotic trafficking||Drug trade, Illicit||Smuggling of drugs||Narcotic traffic||Smuggling of narcotics||Illicit drug trade||Drug dealing||Narcotic trade"
+    "linked_source_concepts": [
+      {
+        "~id": "sh88000332",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "sh88000332",
+          "label": "Drug traffic",
+          "source": "lc-subjects",
+          "alternative_labels": "Drugs--Prices and sale||Trafficking in narcotics||Trafficking in drugs||Traffic, Drug||Drug smuggling||Drug production, Illicit||Drug trafficking||Illicit drug production||Narcotic trafficking||Drug trade, Illicit||Smuggling of drugs||Narcotic traffic||Smuggling of narcotics||Illicit drug trade||Drug dealing||Narcotic trade"
+        }
       }
-    },
+    ],
     "source_concepts": [
       {
         "~id": "D064423",
@@ -177,18 +183,20 @@
         "type": "Organisation"
       }
     },
-    "linked_source_concept": {
-      "~id": "nb2005005340",
-      "~entityType": "node",
-      "~labels": [
-        "SourceName"
-      ],
-      "~properties": {
-        "id": "nb2005005340",
-        "label": "DrugScope (Organization)",
-        "source": "lc-names"
+    "linked_source_concepts": [
+      {
+        "~id": "nb2005005340",
+        "~entityType": "node",
+        "~labels": [
+          "SourceName"
+        ],
+        "~properties": {
+          "id": "nb2005005340",
+          "label": "DrugScope (Organization)",
+          "source": "lc-names"
+        }
       }
-    },
+    ],
     "source_concepts": []
   },
   {
@@ -205,19 +213,21 @@
         "type": "Subject"
       }
     },
-    "linked_source_concept": {
-      "~id": "sh85084377",
-      "~entityType": "node",
-      "~labels": [
-        "SourceConcept"
-      ],
-      "~properties": {
-        "id": "sh85084377",
-        "label": "Methamphetamine",
-        "source": "lc-subjects",
-        "alternative_labels": "Methylamphetamine||Deoxyephedrine||Speed (Drug)||Phenylmethylaminopropane||Dimethylphenethylamine||Meth (Drug)"
+    "linked_source_concepts": [
+      {
+        "~id": "sh85084377",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "sh85084377",
+          "label": "Methamphetamine",
+          "source": "lc-subjects",
+          "alternative_labels": "Methylamphetamine||Deoxyephedrine||Speed (Drug)||Phenylmethylaminopropane||Dimethylphenethylamine||Meth (Drug)"
+        }
       }
-    },
+    ],
     "source_concepts": [
       {
         "~id": "D008694",
@@ -264,19 +274,21 @@
         "type": "Person"
       }
     },
-    "linked_source_concept": {
-      "~id": "n88157141",
-      "~entityType": "node",
-      "~labels": [
-        "SourceName"
-      ],
-      "~properties": {
-        "id": "n88157141",
-        "label": "Fester, Uncle",
-        "source": "lc-names",
-        "alternative_labels": "Uncle Fester"
+    "linked_source_concepts": [
+      {
+        "~id": "n88157141",
+        "~entityType": "node",
+        "~labels": [
+          "SourceName"
+        ],
+        "~properties": {
+          "id": "n88157141",
+          "label": "Fester, Uncle",
+          "source": "lc-names",
+          "alternative_labels": "Uncle Fester"
+        }
       }
-    },
+    ],
     "source_concepts": [
       {
         "~id": "Q664975",
