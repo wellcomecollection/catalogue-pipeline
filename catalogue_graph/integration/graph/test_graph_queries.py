@@ -343,15 +343,15 @@ EMPTY_RELATED_LIST_CASES: list[EmptyCase] = [
 ]
 
 
-class IllegalCycleCase(BaseModel):
+class DisallowedCycleCase(BaseModel):
     name: str
     node_label: str
     edge_label: str
 
 
 # Test for cycles between nodes with a given label
-UNWANTED_CYCLE_CASES: list[IllegalCycleCase] = [
-    IllegalCycleCase(
+DISALLOWED_CYCLE_CASES: list[DisallowedCycleCase] = [
+    DisallowedCycleCase(
         name="path_identifier_parent_cycle",
         node_label="PathIdentifier",
         edge_label="HAS_PARENT",
@@ -359,7 +359,7 @@ UNWANTED_CYCLE_CASES: list[IllegalCycleCase] = [
 ]
 
 
-class IllegalEdgeCase(BaseModel):
+class DisallowedEdgeCase(BaseModel):
     name: str
     from_label: str
     to_label: str
@@ -367,20 +367,20 @@ class IllegalEdgeCase(BaseModel):
 
 
 # Test for node/edge combinations which should not exist in the graph
-ILLEGAL_EDGE_CASES: list[IllegalEdgeCase] = [
-    IllegalEdgeCase(
+DISALLOWED_EDGE_CASES: list[DisallowedEdgeCase] = [
+    DisallowedEdgeCase(
         name="concept_has_concept_edge",
         from_label="Concept",
         to_label="Work",
         edge_label="HAS_CONCEPT",
     ),
-    IllegalEdgeCase(
+    DisallowedEdgeCase(
         name="path_identifier_has_path_identifier_edge",
         from_label="PathIdentifier",
         to_label="Work",
         edge_label="HAS_PATH_IDENTIFIER",
     ),
-    IllegalEdgeCase(
+    DisallowedEdgeCase(
         name="source_concept_has_source_concept_edge",
         from_label="SourceConcept",
         to_label="Concept",
@@ -419,8 +419,8 @@ def test_graph_query_returns_empty_related_list_for_known_empty_ids(
     assert all(len(item["related"]) == 0 for item in response)
 
 
-@pytest.mark.parametrize("case", UNWANTED_CYCLE_CASES, ids=lambda c: c.name)
-def test_graph_has_no_unwanted_cycles(case: IllegalCycleCase) -> None:
+@pytest.mark.parametrize("case", DISALLOWED_CYCLE_CASES, ids=lambda c: c.name)
+def test_graph_has_no_disallowed_cycles(case: DisallowedCycleCase) -> None:
     query = f"""
         MATCH path = (source:{case.node_label})-[:{case.edge_label}*1..]->(source)
         RETURN source, length(path) AS cycle_length
@@ -428,12 +428,12 @@ def test_graph_has_no_unwanted_cycles(case: IllegalCycleCase) -> None:
     """
     response = neptune_client().run_open_cypher_query(query)
     assert len(response) == 0, (
-        f"Found {len(response)} unwanted cycle(s) for {case.name}."
+        f"Found {len(response)} disallowed cycle(s) for {case.name}."
     )
 
 
-@pytest.mark.parametrize("case", ILLEGAL_EDGE_CASES, ids=lambda c: c.name)
-def test_graph_has_no_illegal_edges(case: IllegalEdgeCase) -> None:
+@pytest.mark.parametrize("case", DISALLOWED_CYCLE_CASES, ids=lambda c: c.name)
+def test_graph_has_no_disallowed_edges(case: DisallowedEdgeCase) -> None:
     query = f"""
         MATCH (source:{case.from_label})-[:{case.edge_label}]->(target:{case.to_label})
         RETURN source, target
@@ -441,7 +441,7 @@ def test_graph_has_no_illegal_edges(case: IllegalEdgeCase) -> None:
     """
     response = neptune_client().run_open_cypher_query(query)
     assert len(response) == 0, (
-        f"Found {len(response)} illegal {case.edge_label} edge(s) for {case.name}."
+        f"Found {len(response)} disallowed {case.edge_label} edge(s) for {case.name}."
     )
 
 
