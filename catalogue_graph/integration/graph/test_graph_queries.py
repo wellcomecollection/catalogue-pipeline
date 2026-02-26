@@ -427,7 +427,6 @@ def test_graph_has_no_unwanted_cycles(case: IllegalCycleCase) -> None:
         LIMIT 1000
     """
     response = neptune_client().run_open_cypher_query(query)
-    print(response)
     assert len(response) == 0, (
         f"Found {len(response)} unwanted cycle(s) for {case.name}."
     )
