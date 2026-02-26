@@ -432,7 +432,7 @@ def test_graph_has_no_disallowed_cycles(case: DisallowedCycleCase) -> None:
     )
 
 
-@pytest.mark.parametrize("case", DISALLOWED_CYCLE_CASES, ids=lambda c: c.name)
+@pytest.mark.parametrize("case", DISALLOWED_EDGE_CASES, ids=lambda c: c.name)
 def test_graph_has_no_disallowed_edges(case: DisallowedEdgeCase) -> None:
     query = f"""
         MATCH (source:{case.from_label})-[:{case.edge_label}]->(target:{case.to_label})
