@@ -108,7 +108,7 @@ def make_expected_indexer_event(
         objects_to_index=[
             IngestorIndexerObject(
                 s3_uri=(
-                    f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/"
+                    f"s3://{config.CATALOGUE_GRAPH_S3_BUCKETS['prod']}/"
                     f"{loader_event.get_path_prefix()}/{s3_filename}"
                 ),
                 content_length=1,
@@ -144,8 +144,6 @@ def mock_merged_work() -> None:
 
     index_name = f"works-denormalised-{MOCK_PIPELINE_DATE}"
     MockElasticsearchClient.index(index_name, "123", fixture)
-
-    mock_es_secrets("graph_extractor", MOCK_PIPELINE_DATE)
 
 
 def add_mock_related(ids: list[str], related_ids: list[str], query: str) -> None:
@@ -336,7 +334,7 @@ def _get_result_s3_uri(
         return result.objects_to_index[0].s3_uri
 
     prefix = loader_event.get_path_prefix()
-    uri_prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/"
+    uri_prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKETS['prod']}/{prefix}/"
 
     matches = [
         uri
@@ -444,6 +442,8 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
         lambda event, es_client, neptune_client: DummyTransformer(),
     )
 
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="concepts_ingestor", pipeline_date=MOCK_PIPELINE_DATE)
     loader_event = make_loader_event(pass_objects_to_index, "concepts", "123")
     result = handler(loader_event)
 
@@ -484,8 +484,9 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
 @freeze_time("2025-01-02")
 def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> None:
+    mock_neptune_secrets()
+    mock_es_secrets("concepts_ingestor", MOCK_PIPELINE_DATE)
     mock_merged_work()
-
     mock_neptune_responses([])
 
     loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
@@ -521,6 +522,8 @@ def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> Non
 def test_ingestor_loader_with_broader_than_concepts(
     pass_objects_to_index: bool,
 ) -> None:
+    mock_neptune_secrets()
+    mock_es_secrets("concepts_ingestor", MOCK_PIPELINE_DATE)
     mock_merged_work()
     mock_neptune_responses(["broader_than"])
 
@@ -552,6 +555,8 @@ def test_ingestor_loader_with_broader_than_concepts(
 def test_ingestor_loader_with_related_to_concepts(
     pass_objects_to_index: bool,
 ) -> None:
+    mock_es_secrets("concepts_ingestor", MOCK_PIPELINE_DATE)
+    mock_neptune_secrets()
     mock_merged_work()
     mock_neptune_responses(["related_to", "people"])
 
@@ -578,6 +583,8 @@ def test_ingestor_loader_with_related_to_concepts(
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
 @freeze_time("2025-01-02")
 def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> None:
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="concepts_ingestor", pipeline_date=MOCK_PIPELINE_DATE)
     loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
     result = handler(loader_event)
 
@@ -588,7 +595,7 @@ def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> 
 
     assert len(MockRequest.calls) == 0
 
-    prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{loader_event.get_path_prefix()}"
+    prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKETS['prod']}/{loader_event.get_path_prefix()}"
     parquet_matches = [
         uri
         for uri in MockSmartOpen.file_lookup
@@ -636,6 +643,8 @@ def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
     add_mock_merged_documents(
         pipeline_date=MOCK_PIPELINE_DATE, work_status="Redirected"
     )
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="works_ingestor", pipeline_date=MOCK_PIPELINE_DATE)
 
     loader_event = make_loader_event(
         pass_objects_to_index=pass_objects_to_index, ingestor_type="works"
@@ -646,7 +655,6 @@ def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
         record_count=3,
         include_objects=pass_objects_to_index,
     )
-    mock_neptune_secrets()
 
     result = handler(loader_event)
 

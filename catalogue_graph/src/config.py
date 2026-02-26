@@ -1,5 +1,7 @@
 import os
 
+from utils.types import Environment
+
 NEPTUNE_CLUSTER_IDENTIFIER_DEFAULT = "catalogue-graph"
 NEPTUNE_CLUSTER_IDENTIFIER = os.environ.get(
     "NEPTUNE_CLUSTER_IDENTIFIER", NEPTUNE_CLUSTER_IDENTIFIER_DEFAULT
@@ -28,6 +30,19 @@ CATALOGUE_GRAPH_S3_BUCKET_DEFAULT = "wellcomecollection-catalogue-graph"
 CATALOGUE_GRAPH_S3_BUCKET = os.environ.get(
     "CATALOGUE_GRAPH_S3_BUCKET", CATALOGUE_GRAPH_S3_BUCKET_DEFAULT
 )
+# The dev S3 bucket is used in combination with the Neptune dev cluster
+CATALOGUE_GRAPH_S3_BUCKET_DEV_DEFAULT = "wellcomecollection-catalogue-graph-dev"
+CATALOGUE_GRAPH_S3_BUCKET_DEV = os.environ.get(
+    "CATALOGUE_GRAPH_S3_BUCKET_DEV", CATALOGUE_GRAPH_S3_BUCKET_DEV_DEFAULT
+)
+
+CATALOGUE_GRAPH_S3_BUCKETS: dict[Environment, str] = {
+    "prod": CATALOGUE_GRAPH_S3_BUCKET,
+    "dev": CATALOGUE_GRAPH_S3_BUCKET_DEV,
+}
+CATALOGUE_GRAPH_S3_BUCKETS_BY_NAME: dict[str, Environment] = {
+    bucket: environment for environment, bucket in CATALOGUE_GRAPH_S3_BUCKETS.items()
+}
 
 INGESTOR_S3_PREFIX_DEFAULT = "ingestor"
 INGESTOR_S3_PREFIX = os.environ.get("INGESTOR_S3_PREFIX", INGESTOR_S3_PREFIX_DEFAULT)

@@ -64,9 +64,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
     def get_related_works_source(self, related_ids: list[str]) -> MergedWorksSource:
         # Remove `window` from event before retrieving related works. (All related works should be processed
         # even if they aren't part of the current window.)
-        event = BasePipelineEvent(
-            pipeline_date=self.event.pipeline_date, pit_id=self.event.pit_id
-        )
+        event = self.event.copy(update={"window": None})
         return MergedWorksSource(
             event=event,
             query=get_related_works_query(related_ids),
@@ -120,7 +118,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
                     c.work.properties.id for c in hierarchy.ancestors
                 )
 
-                # Only visible works story hierarchy and concepts
+                # Only visible works store hierarchy and concepts
                 if isinstance(es_work, VisibleMergedWork):
                     yield VisibleExtractedWork(
                         work=es_work, hierarchy=hierarchy, concepts=concepts

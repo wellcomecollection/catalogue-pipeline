@@ -1,3 +1,4 @@
+from models.events import ExtractorEvent
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from tests.sources.test_wikidata_concepts_source import _add_mock_wikidata_requests
 from tests.test_utils import (
@@ -10,8 +11,14 @@ def test_wikidata_names_source_edges() -> None:
 
     _add_mock_wikidata_requests("edges", "names")
 
+    source_event = ExtractorEvent(
+        pipeline_date="dev",
+        environment="prod",
+        transformer_type="wikidata_linked_loc_names",
+        entity_type="edges",
+    )
     mesh_concepts_source = WikidataLinkedOntologySource(
-        linked_transformer="loc_names", entity_type="edges", pipeline_date="dev"
+        linked_transformer="loc_names", event=source_event
     )
     stream_result = list(mesh_concepts_source.stream_raw())
     assert len(stream_result) == 6
@@ -51,8 +58,14 @@ def test_wikidata_names_source_nodes() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("nodes", "names")
 
+    source_event = ExtractorEvent(
+        pipeline_date="dev",
+        environment="prod",
+        transformer_type="wikidata_linked_loc_names",
+        entity_type="nodes",
+    )
     mesh_concepts_source = WikidataLinkedOntologySource(
-        linked_transformer="loc_names", entity_type="nodes", pipeline_date="dev"
+        linked_transformer="loc_names", event=source_event
     )
     stream_result = list(mesh_concepts_source.stream_raw())
 

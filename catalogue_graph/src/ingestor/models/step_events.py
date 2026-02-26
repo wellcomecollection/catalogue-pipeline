@@ -43,7 +43,8 @@ class IngestorStepEvent(BasePipelineEvent):
 
     def get_s3_uri(self, file_name: str, file_format: str | None = None) -> str:
         prefix = self.get_path_prefix()
-        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}.{file_format or self.load_format}"
+        bucket = config.CATALOGUE_GRAPH_S3_BUCKETS[self.environment]
+        return f"s3://{bucket}/{prefix}/{file_name}.{file_format or self.load_format}"
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:

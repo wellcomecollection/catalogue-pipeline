@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 
-from models.events import BulkLoaderEvent
+from models.events import BasePipelineEvent, BulkLoaderEvent
 from utils.aws import get_csv_from_s3
 from utils.types import ConceptSource, ConceptType, TransformerType
 
@@ -34,7 +34,7 @@ class IdLabelChecker:
     A set of methods for checking catalogue concepts against data from source ontologies.
     """
 
-    def __init__(self, transformers: list[TransformerType], pipeline_date: str):
+    def __init__(self, transformers: list[TransformerType], event: BasePipelineEvent):
         # Nested dictionaries mapping source ids to labels/alternative labels and vice versa.
         # The dictionaries are nested to group ids/labels by source ontology.
         self.ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(
@@ -54,7 +54,8 @@ class IdLabelChecker:
             event = BulkLoaderEvent(
                 transformer_type=transformer,
                 entity_type="nodes",
-                pipeline_date=pipeline_date,
+                pipeline_date=event.pipeline_date,
+                environment=event.environment,
             )
             for row in get_csv_from_s3(event.get_s3_uri()):
                 source_id = row[":ID"]

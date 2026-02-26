@@ -26,7 +26,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
 
         self.id_label_checker: IdLabelChecker | None = None
         self.id_lookup: set = set()
-        self.pipeline_date = event.pipeline_date
+        self.event = event
 
     def transform_node(self, extracted: ExtractedWorkConcept) -> Concept | None:
         raw_concept = RawCatalogueConcept(extracted.concept, self.id_label_checker)
@@ -50,7 +50,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
             for ontology in ("mesh", "loc"):
                 transformers += get_transformers_from_ontology(ontology)
 
-            self.id_label_checker = IdLabelChecker(transformers, self.pipeline_date)
+            self.id_label_checker = IdLabelChecker(transformers, self.event)
 
         raw_concept = RawCatalogueConcept(raw_data.concept, self.id_label_checker)
 

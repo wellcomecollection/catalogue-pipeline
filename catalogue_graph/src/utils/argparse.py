@@ -3,9 +3,13 @@ from collections.abc import Iterable
 from typing import Literal
 
 BasePipelineEventArgument = Literal[
-    "window", "pipeline_date", "index_date_merged", "pit_id"
+    "window",
+    "pipeline_date",
+    "index_date_merged",
+    "pit_id",
+    "environment",
+    "es_mode",
 ]
-ClusterConnectionArgument = Literal["es_mode", "neptune_environment"]
 
 
 def add_pipeline_event_args(
@@ -50,15 +54,15 @@ def add_pipeline_event_args(
             help="An Elasticsearch point in time ID to use when extracting data from the merged index.",
             required=False,
         )
-
-
-def add_cluster_connection_args(
-    parser: argparse.ArgumentParser, args: Iterable[ClusterConnectionArgument]
-) -> None:
-    """
-    Add selected commonly used arguments to the given ArgumentParser
-    so local handlers can choose Elasticsearch and Neptune environments.
-    """
+    if "environment" in args:
+        parser.add_argument(
+            "--environment",
+            type=str,
+            help="Which environment to connect to (used for Neptune and S3 bucket selection).",
+            required=False,
+            choices=["prod", "dev"],
+            default="dev",
+        )
     if "es_mode" in args:
         parser.add_argument(
             "--es-mode",
@@ -68,12 +72,16 @@ def add_cluster_connection_args(
             choices=["local", "public"],
             default="local",
         )
-    if "neptune_environment" in args:
-        parser.add_argument(
-            "--neptune-environment",
-            type=str,
-            help="Which Neptune cluster to connect to. Will default to 'dev'.",
-            required=False,
-            choices=["prod", "dev"],
-            default="dev",
-        )
+
+
+def validate_es_mode_for_writes(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
+    """
+    When running services which write to an Elasticsearch index locally, we disallow combining
+    the production Elasticsearch cluster (`es_mode=public` or `es_mode=private`) with the development
+    Neptune cluster (`environment=dev`) so that we cannot accidentally write non-production data to
+    production indexes.
+    """
+    if args.environment == "dev" and args.es_mode != "local":
+        parser.error(f"--es-mode={args.es_mode} cannot be used with --environment=dev")

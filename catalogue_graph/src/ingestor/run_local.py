@@ -12,14 +12,17 @@ from ingestor.models.step_events import (
 from ingestor.steps.ingestor_indexer import handler as indexer_handler
 from ingestor.steps.ingestor_loader import create_job_id
 from ingestor.steps.ingestor_loader import handler as loader_handler
-from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
+from utils.elasticsearch import ElasticsearchMode
 from utils.types import IngestorType
 
 logger = structlog.get_logger(__name__)
 
 
-def run_index(loader_result: IngestorIndexerLambdaEvent) -> None:
-    result = indexer_handler(loader_result, es_mode="public")
+def run_index(
+    loader_result: IngestorIndexerLambdaEvent, es_mode: ElasticsearchMode
+) -> None:
+    result = indexer_handler(loader_result, es_mode=es_mode)
     logger.info("Indexed documents", count=result.success_count)
 
 
@@ -28,8 +31,10 @@ def run_index(loader_result: IngestorIndexerLambdaEvent) -> None:
 # Alternative usage: AWS_PROFILE=platform-developer python -m ingestor.run_local --ingestor-type=concepts --pipeline-date=2025-05-01
 def main() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date", "index_date_merged", "window"})
-    add_cluster_connection_args(parser, {"neptune_environment"})
+    add_pipeline_event_args(
+        parser,
+        {"pipeline_date", "index_date_merged", "window", "environment", "es_mode"},
+    )
     parser.add_argument(
         "--ingestor-type",
         type=str,
@@ -59,14 +64,15 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+    validate_es_mode_for_writes(parser, args)
     loader_event = IngestorLoaderLambdaEvent.from_argparser(args)
+    es_mode = args.es_mode
 
     loader_result = loader_handler(
         loader_event,
-        es_mode="public",
-        neptune_environment=args.neptune_environment,
+        es_mode=es_mode,
     )
-    run_index(loader_result)
+    run_index(loader_result, es_mode)
 
 
 if __name__ == "__main__":

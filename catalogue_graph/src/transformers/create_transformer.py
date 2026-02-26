@@ -31,8 +31,6 @@ def create_transformer(
     es_mode: ElasticsearchMode,
 ) -> BaseTransformer:
     transformer_type = event.transformer_type
-    entity_type = event.entity_type
-    pipeline_date = event.pipeline_date
 
     if event.window is not None and transformer_type not in get_args(
         CatalogueTransformerType
@@ -56,17 +54,15 @@ def create_transformer(
     if transformer_type == "mesh_locations":
         return MeSHLocationsTransformer(MESH_URL)
     if transformer_type == "wikidata_linked_loc_concepts":
-        return WikidataConceptsTransformer("loc_concepts", entity_type, pipeline_date)
+        return WikidataConceptsTransformer("loc_concepts", event)
     if transformer_type == "wikidata_linked_loc_locations":
-        return WikidataLocationsTransformer("loc_locations", entity_type, pipeline_date)
+        return WikidataLocationsTransformer("loc_locations", event)
     if transformer_type == "wikidata_linked_loc_names":
-        return WikidataNamesTransformer("loc_names", entity_type, pipeline_date)
+        return WikidataNamesTransformer("loc_names", event)
     if transformer_type == "wikidata_linked_mesh_concepts":
-        return WikidataConceptsTransformer("mesh_concepts", entity_type, pipeline_date)
+        return WikidataConceptsTransformer("mesh_concepts", event)
     if transformer_type == "wikidata_linked_mesh_locations":
-        return WikidataLocationsTransformer(
-            "mesh_locations", entity_type, pipeline_date
-        )
+        return WikidataLocationsTransformer("mesh_locations", event)
     if transformer_type == "catalogue_concepts":
         es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
         return CatalogueConceptsTransformer(event, es_client)

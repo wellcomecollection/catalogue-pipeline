@@ -9,7 +9,7 @@ from models.events import (
     IncrementalGraphRemoverEvent,
 )
 from removers.elasticsearch_remover import ElasticsearchRemover
-from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -28,6 +28,7 @@ def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
         entity_type="nodes",
         pipeline_date=event.pipeline_date,
         window=event.window,
+        environment=event.environment,
     )
 
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
@@ -79,8 +80,10 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date", "index_date_merged", "window"})
-    add_cluster_connection_args(parser, {"es_mode"})
+    add_pipeline_event_args(
+        parser,
+        {"pipeline_date", "index_date_merged", "window", "environment", "es_mode"},
+    )
 
     parser.add_argument(
         "--index-date",
@@ -104,6 +107,7 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
+    validate_es_mode_for_writes(parser, args)
     event = IngestorDeletionsLambdaEvent.from_argparser(args)
     handler(event, es_mode=args.es_mode)
 

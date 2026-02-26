@@ -9,6 +9,7 @@ from models.incremental_window import IncrementalWindow
 from utils.types import (
     CatalogueTransformerType,
     EntityType,
+    Environment,
     FullGraphRemoverType,
     StreamDestination,
     TransformerType,
@@ -32,6 +33,7 @@ class BasePipelineEvent(BaseModel):
     pipeline_date: str
     pit_id: str | None = None
     index_dates: PipelineIndexDates = PipelineIndexDates()
+    environment: Environment = "prod"
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
@@ -70,7 +72,8 @@ class GraphPipelineEvent(BasePipelineEvent):
 
     def get_s3_uri(self, file_format: str = "csv", folder: str | None = None) -> str:
         file_path = self.get_file_path(file_format, folder)
-        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{file_path}"
+        bucket = config.CATALOGUE_GRAPH_S3_BUCKETS[self.environment]
+        return f"s3://{bucket}/{file_path}"
 
 
 class ExtractorEvent(GraphPipelineEvent):
@@ -93,6 +96,7 @@ class BulkLoaderEvent(GraphPipelineEvent):
 class BulkLoadPollerEvent(BaseModel):
     load_id: str
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
+    environment: Environment = "prod"
 
 
 class GraphRemoverEvent(GraphPipelineEvent):

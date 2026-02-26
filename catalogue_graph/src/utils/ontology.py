@@ -7,6 +7,7 @@ from models.events import BulkLoaderEvent
 from utils.aws import get_csv_from_s3
 from utils.types import (
     CatalogueTransformerType,
+    Environment,
     LocTransformerType,
     MeshTransformerType,
     OntologyType,
@@ -39,12 +40,17 @@ def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerTy
 
 
 @lru_cache
-def get_extracted_ids(transformer: TransformerType, pipeline_date: str) -> set[str]:
+def get_extracted_ids(
+    transformer: TransformerType, pipeline_date: str, environment: Environment
+) -> set[str]:
     """Return all ids extracted as part of the specified transformer."""
     logger.info("Retrieving ids from S3", transformer=transformer)
 
     event = BulkLoaderEvent(
-        transformer_type=transformer, entity_type="nodes", pipeline_date=pipeline_date
+        transformer_type=transformer,
+        entity_type="nodes",
+        pipeline_date=pipeline_date,
+        environment=environment,
     )
     ids = {row[":ID"] for row in get_csv_from_s3(event.get_s3_uri())}
 
@@ -54,8 +60,14 @@ def get_extracted_ids(transformer: TransformerType, pipeline_date: str) -> set[s
 
 
 def is_id_in_ontology(
-    item_id: str, item_ontology: OntologyType, pipeline_date: str
+    item_id: str,
+    item_ontology: OntologyType,
+    pipeline_date: str,
+    environment: Environment,
 ) -> bool:
     """Return 'True' if the given ID exists in the catalogue graph under the specified ontology."""
     transformers = get_transformers_from_ontology(item_ontology)
-    return any(item_id in get_extracted_ids(t, pipeline_date) for t in transformers)
+    return any(
+        item_id in get_extracted_ids(t, pipeline_date, environment)
+        for t in transformers
+    )

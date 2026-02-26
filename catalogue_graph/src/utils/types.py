@@ -102,3 +102,5 @@ GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"
 
 EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["s3", "local", "void"]
+
+Environment = Literal["prod", "dev"]
