@@ -7,11 +7,12 @@ Usage:
     AWS_PROFILE=platform-developer uv run pytest -m "integration"
 """
 
+import csv
 import json
 import warnings
 from functools import cache, lru_cache
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any
 
 import pytest
 from pydantic import BaseModel
@@ -33,6 +34,9 @@ from ingestor.queries.concept_queries import (
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
 )
+from sources.weco_concepts.concepts_source import (
+    DEFAULT_PATH as WECO_AUTHORITY_CSV_PATH,
+)
 
 # Add the 'integration' marker to ensure that integration tests are not included in regular unit test runs.
 pytestmark = pytest.mark.integration
@@ -53,6 +57,12 @@ def load_json_fixture(name: str) -> Any:
 # so we allow a tolerance threshold and only fail when drift becomes significant.
 # All mismatches are still logged as warnings for visibility.
 MIN_MATCH_RATIO = 0.9
+
+
+def load_weco_authority_ids() -> list[str]:
+    with open(WECO_AUTHORITY_CSV_PATH) as handle:
+        reader = csv.DictReader(handle)
+        return [row["id"].strip() for row in reader if row.get("id")]
 
 
 class GraphQueryTest(BaseModel):
@@ -190,7 +200,7 @@ class ConceptTypesTest(GraphQueryTest):
         return sorted(expected_data) == sorted(returned_data)
 
 
-class MatchCase(NamedTuple):
+class MatchCase(BaseModel):
     name: str
     query: str
     test_cls: type[GraphQueryTest]
@@ -267,7 +277,7 @@ MATCH_CASES: list[MatchCase] = [
 ]
 
 
-class EmptyCase(NamedTuple):
+class EmptyCase(BaseModel):
     name: str
     query: str
     empty_fixture: str
@@ -333,6 +343,52 @@ EMPTY_RELATED_LIST_CASES: list[EmptyCase] = [
 ]
 
 
+class DisallowedCycleCase(BaseModel):
+    name: str
+    node_label: str
+    edge_label: str
+
+
+# Test for cycles between nodes with a given label
+DISALLOWED_CYCLE_CASES: list[DisallowedCycleCase] = [
+    DisallowedCycleCase(
+        name="path_identifier_parent_cycle",
+        node_label="PathIdentifier",
+        edge_label="HAS_PARENT",
+    ),
+]
+
+
+class DisallowedEdgeCase(BaseModel):
+    name: str
+    from_label: str
+    to_label: str
+    edge_label: str
+
+
+# Test for node/edge combinations which should not exist in the graph
+DISALLOWED_EDGE_CASES: list[DisallowedEdgeCase] = [
+    DisallowedEdgeCase(
+        name="concept_has_concept_edge",
+        from_label="Concept",
+        to_label="Work",
+        edge_label="HAS_CONCEPT",
+    ),
+    DisallowedEdgeCase(
+        name="path_identifier_has_path_identifier_edge",
+        from_label="PathIdentifier",
+        to_label="Work",
+        edge_label="HAS_PATH_IDENTIFIER",
+    ),
+    DisallowedEdgeCase(
+        name="source_concept_has_source_concept_edge",
+        from_label="SourceConcept",
+        to_label="Concept",
+        edge_label="HAS_SOURCE_CONCEPT",
+    ),
+]
+
+
 @pytest.mark.parametrize("case", MATCH_CASES, ids=lambda c: c.name)
 def test_graph_query_matches_fixture(case: MatchCase) -> None:
     expected_results = load_json_fixture(case.expected_fixture)
@@ -361,3 +417,70 @@ def test_graph_query_returns_empty_related_list_for_known_empty_ids(
         case.query, {"ids": ids, **CONCEPT_QUERY_PARAMS}
     )
     assert all(len(item["related"]) == 0 for item in response)
+
+
+@pytest.mark.parametrize("case", DISALLOWED_CYCLE_CASES, ids=lambda c: c.name)
+def test_graph_has_no_disallowed_cycles(case: DisallowedCycleCase) -> None:
+    query = f"""
+        MATCH path = (source:{case.node_label})-[:{case.edge_label}*1..]->(source)
+        RETURN source, length(path) AS cycle_length
+        LIMIT 1000
+    """
+    response = neptune_client().run_open_cypher_query(query)
+    assert len(response) == 0, (
+        f"Found {len(response)} disallowed cycle(s) for {case.name}."
+    )
+
+
+@pytest.mark.parametrize("case", DISALLOWED_EDGE_CASES, ids=lambda c: c.name)
+def test_graph_has_no_disallowed_edges(case: DisallowedEdgeCase) -> None:
+    query = f"""
+        MATCH (source:{case.from_label})-[:{case.edge_label}]->(target:{case.to_label})
+        RETURN source, target
+        LIMIT 1000
+    """
+    response = neptune_client().run_open_cypher_query(query)
+    assert len(response) == 0, (
+        f"Found {len(response)} disallowed {case.edge_label} edge(s) for {case.name}."
+    )
+
+
+def test_weco_authority_nodes_exist_in_graph() -> None:
+    concept_ids = load_weco_authority_ids()
+    weco_ids = [f"weco:{concept_id}" for concept_id in concept_ids]
+    response = neptune_client().run_open_cypher_query(
+        """
+        UNWIND $ids AS id
+        MATCH (sc: SourceConcept {id: id, source: 'weco-authority'})
+        RETURN sc.id AS id
+        """,
+        {"ids": weco_ids},
+    )
+    found_ids = {row["id"] for row in response}
+    missing = sorted(set(weco_ids) - found_ids)
+    assert not missing, (
+        "Missing weco-authority SourceConcept nodes for ids: " + ", ".join(missing)
+    )
+
+
+def test_weco_authority_nodes_link_to_concepts() -> None:
+    concept_ids = load_weco_authority_ids()
+    rows = [
+        {"concept_id": concept_id, "weco_id": f"weco:{concept_id}"}
+        for concept_id in concept_ids
+    ]
+    response = neptune_client().run_open_cypher_query(
+        """
+        UNWIND $rows AS row
+        MATCH (concept:Concept {id: row.concept_id})-[:SAME_AS]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
+        MATCH (weco)-[:SAME_AS]->(concept)
+        RETURN row.concept_id AS id
+        """,
+        {"rows": rows},
+    )
+    matched_ids = {row["id"] for row in response}
+    missing = sorted(set(concept_ids) - matched_ids)
+    assert not missing, (
+        "Missing Concept -> weco-authority SourceConcept linkage for ids: "
+        + ", ".join(missing)
+    )

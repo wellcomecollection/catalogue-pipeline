@@ -12,24 +12,24 @@ from secrets_extension import (
 
 
 class TestResolveSecret:
-    def test_plain_secret(self):
+    def test_plain_secret(self) -> None:
         name, json_key = resolve_secret("secret:rds/my-cluster/endpoint")
         assert name == "rds/my-cluster/endpoint"
         assert json_key is None
 
-    def test_json_key_secret(self):
+    def test_json_key_secret(self) -> None:
         name, json_key = resolve_secret("secret:rds!cluster-abc123:password")
         assert name == "rds!cluster-abc123"
         assert json_key == "password"
 
-    def test_json_key_with_colons(self):
+    def test_json_key_with_colons(self) -> None:
         name, json_key = resolve_secret("secret:my-secret:key:with:colons")
         assert name == "my-secret"
         assert json_key == "key:with:colons"
 
 
 class TestFetchSecret:
-    def test_plain_string(self):
+    def test_plain_string(self) -> None:
         client = MagicMock()
         client.get_secret_value.return_value = {"SecretString": "db.example.com"}
 
@@ -40,7 +40,7 @@ class TestFetchSecret:
             SecretId="rds/my-cluster/endpoint"
         )
 
-    def test_json_key_extraction(self):
+    def test_json_key_extraction(self) -> None:
         client = MagicMock()
         client.get_secret_value.return_value = {
             "SecretString": json.dumps({"username": "admin", "password": "s3cret!"})
@@ -48,7 +48,7 @@ class TestFetchSecret:
 
         assert fetch_secret(client, "rds!cluster-abc", "password") == "s3cret!"
 
-    def test_json_key_username(self):
+    def test_json_key_username(self) -> None:
         client = MagicMock()
         client.get_secret_value.return_value = {
             "SecretString": json.dumps({"username": "admin", "password": "s3cret!"})
@@ -56,7 +56,7 @@ class TestFetchSecret:
 
         assert fetch_secret(client, "rds!cluster-abc", "username") == "admin"
 
-    def test_missing_json_key_raises(self):
+    def test_missing_json_key_raises(self) -> None:
         client = MagicMock()
         client.get_secret_value.return_value = {
             "SecretString": json.dumps({"username": "admin"})
@@ -65,7 +65,7 @@ class TestFetchSecret:
         with pytest.raises(KeyError):
             fetch_secret(client, "rds!cluster-abc", "password")
 
-    def test_numeric_json_value_returned_as_string(self):
+    def test_numeric_json_value_returned_as_string(self) -> None:
         client = MagicMock()
         client.get_secret_value.return_value = {
             "SecretString": json.dumps({"port": 3306})
@@ -76,10 +76,10 @@ class TestFetchSecret:
 
 class TestCreateDotenv:
     @pytest.fixture()
-    def dotenv_path(self, tmp_path):
+    def dotenv_path(self, tmp_path: Path) -> str:
         return str(tmp_path / ".env")
 
-    def test_writes_only_secret_vars(self, dotenv_path):
+    def test_writes_only_secret_vars(self, dotenv_path: str) -> None:
         mock_client = MagicMock()
         mock_client.get_secret_value.return_value = {"SecretString": "db.example.com"}
 
@@ -100,7 +100,7 @@ class TestCreateDotenv:
         assert 'RDS_HOST="db.example.com"' in content
         assert "PLAIN_VAR" not in content
 
-    def test_resolves_json_secrets(self, dotenv_path):
+    def test_resolves_json_secrets(self, dotenv_path: str) -> None:
         mock_client = MagicMock()
         mock_client.get_secret_value.return_value = {
             "SecretString": json.dumps({"username": "admin", "password": "s3cret!"})
@@ -123,7 +123,7 @@ class TestCreateDotenv:
         assert 'RDS_USERNAME="admin"' in content
         assert 'RDS_PASSWORD="s3cret!"' in content
 
-    def test_escapes_special_characters(self, dotenv_path):
+    def test_escapes_special_characters(self, dotenv_path: str) -> None:
         mock_client = MagicMock()
         mock_client.get_secret_value.return_value = {
             "SecretString": 'pass"word\\with\\special'
@@ -142,7 +142,7 @@ class TestCreateDotenv:
         content = Path(dotenv_path).read_text()
         assert 'DB_PASS="pass\\"word\\\\with\\\\special"' in content
 
-    def test_exits_on_secret_fetch_failure(self, dotenv_path):
+    def test_exits_on_secret_fetch_failure(self, dotenv_path: str) -> None:
         mock_client = MagicMock()
         mock_client.get_secret_value.side_effect = Exception("Access denied")
 
@@ -159,7 +159,7 @@ class TestCreateDotenv:
 
         assert exc_info.value.code == 1
 
-    def test_empty_env_writes_empty_file(self, dotenv_path):
+    def test_empty_env_writes_empty_file(self, dotenv_path: str) -> None:
         with (
             patch.dict(os.environ, {}, clear=True),
             patch("secrets_extension.boto3") as mock_boto3,
