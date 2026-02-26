@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Protocol, cast
+from urllib.parse import quote
 
 import pymysql
 import pymysql.cursors
@@ -54,8 +55,8 @@ def get_connection(config: IdMinterConfig) -> DBConnection:
 def apply_migrations(config: IdMinterConfig) -> None:
     """Apply yoyo migrations against the configured database."""
     dsn = (
-        f"mysql://{config.rds_client.username}"
-        f":{config.rds_client.password}"
+        f"mysql://{quote(config.rds_client.username, safe='')}"
+        f":{quote(config.rds_client.password, safe='')}"
         f"@{config.rds_client.primary_host}"
         f":{config.rds_client.port}"
         f"/{config.identifiers_table.database}"

@@ -41,10 +41,6 @@ def execute(
 ) -> StepFunctionMintingResponse:
     runtime = runtime or build_runtime()
 
-    logger.debug(
-        "ID minter runtime configuration", config=runtime.config.model_dump(mode="json")
-    )
-
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
