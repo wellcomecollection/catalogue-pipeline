@@ -420,8 +420,8 @@ def test_graph_query_returns_empty_related_list_for_known_empty_ids(
 @pytest.mark.parametrize("case", UNWANTED_CYCLE_CASES, ids=lambda c: c.name)
 def test_graph_has_no_unwanted_cycles(case: IllegalCycleCase) -> None:
     query = f"""
-        MATCH (source: {case.node_label})-[:{case.edge_label}]->(target: {case.node_label})-[:{case.edge_label}]->(source)
-        RETURN source, target
+        MATCH path = (source:{case.node_label})-[:{case.edge_label}*1..]->(source)
+        RETURN source, length(path) AS cycle_length
         LIMIT 1000
     """
     response = neptune_client().run_open_cypher_query(query)
