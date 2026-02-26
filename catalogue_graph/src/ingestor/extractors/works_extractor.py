@@ -118,7 +118,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
                     c.work.properties.id for c in hierarchy.ancestors
                 )
 
-                # Only visible works story hierarchy and concepts
+                # Only visible works store hierarchy and concepts
                 if isinstance(es_work, VisibleMergedWork):
                     yield VisibleExtractedWork(
                         work=es_work, hierarchy=hierarchy, concepts=concepts
