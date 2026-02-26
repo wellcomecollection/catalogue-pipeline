@@ -2,19 +2,20 @@ from collections.abc import Generator, Iterator
 from itertools import batched
 
 import structlog
-from elasticsearch import Elasticsearch
-from pydantic import BaseModel
-
 from clients.neptune_client import NeptuneClient
+from elasticsearch import Elasticsearch
+from models.events import BasePipelineEvent
+from pydantic import BaseModel
+from sources.merged_works_source import MergedWorksSource
+
 from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
 )
 from ingestor.models.neptune.query_result import ExtractedConcept, WorkHierarchy
-from models.events import BasePipelineEvent
-from sources.merged_works_source import MergedWorksSource
 
 from .base_extractor import GraphBaseExtractor
+from .work_concepts_extractor import GraphWorkConceptsExtractor
 
 logger = structlog.get_logger(__name__)
 
@@ -79,9 +80,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         """Return all children of each work in the current batch."""
         return self.make_neptune_query("work_children", ids)
 
-    def _get_work_concepts(self, ids: list[str]) -> dict:
-        """Return all concepts of each work in the current batch."""
-        return self.make_neptune_query("work_concepts", ids)
+    def _get_work_concept_ids(self, ids: list[str]) -> dict:
+        """Return all concept IDs of each work in the current batch."""
+        return self.make_neptune_query("work_concept_ids", ids)
 
     def process_es_works(
         self, es_works: Iterator[MergedWork]
@@ -93,22 +94,38 @@ class GraphWorksExtractor(GraphBaseExtractor):
                 for w in es_batch
                 if isinstance(w, VisibleMergedWork)
             ]
-            all_ancestors = self._get_work_ancestors(visible_work_ids)
-            all_children = self._get_work_children(visible_work_ids)
-            all_concepts = self._get_work_concepts(visible_work_ids)
+            ancestors_batch = self._get_work_ancestors(visible_work_ids)
+            children_batch = self._get_work_children(visible_work_ids)
+            concept_ids_batch = self._get_work_concept_ids(visible_work_ids)
+            
+            concept_ids = set()
+            for result in concept_ids_batch.values():
+                concept_ids |= set(result['concept_ids'])
+            e = GraphWorkConceptsExtractor(
+                self.event, self.es_client, self.neptune_client, concept_ids
+            )
+            concepts_d = {}
+            for concept_id, concept in e.extract_raw():
+                concepts_d[concept_id] = concept
 
             for es_work in es_batch:
                 work_id = es_work.state.canonical_id
                 self.streamed_ids.add(work_id)
 
+                # Only visible works store hierarchy and concepts
+                if not isinstance(es_work, VisibleMergedWork):
+                    yield ExtractedWork(work=es_work)
+                    continue
+
                 hierarchy = WorkHierarchy(
                     id=work_id,
-                    ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
-                    children=all_children.get(work_id, {}).get("children", []),
+                    ancestors=ancestors_batch.get(work_id, {}).get("ancestors", []),
+                    children=children_batch.get(work_id, {}).get("children", []),
                 )
-                concepts = all_concepts.get(work_id, {}).get("concepts", [])
+                concept_ids = concept_ids_batch.get(work_id, {}).get("concept_ids", [])
+                concepts = [concepts_d[concept_id] for concept_id in concept_ids]
 
-                # When a work is reprocessed, all of its children and ancestors must be reprocessed too for consistency.
+                # When a work is processed, all of its children and ancestors must be processed too for consistency.
                 # (For example, if the title of a parent work changes, all of its children must be processed
                 # and reindexed to store the new title.)
                 self.related_ids.update(
@@ -118,13 +135,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
                     c.work.properties.id for c in hierarchy.ancestors
                 )
 
-                # Only visible works store hierarchy and concepts
-                if isinstance(es_work, VisibleMergedWork):
-                    yield VisibleExtractedWork(
-                        work=es_work, hierarchy=hierarchy, concepts=concepts
-                    )
-                else:
-                    yield ExtractedWork(work=es_work)
+                yield VisibleExtractedWork(
+                    work=es_work, hierarchy=hierarchy, concepts=concepts
+                )
 
     def extract_raw(self) -> Generator[ExtractedWork]:
         works_stream = (

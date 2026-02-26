@@ -38,18 +38,20 @@
       }
     }
   ],
-  "linked_source_concept": {
-    "~id": "123",
-    "~labels": [
-      "SourceConcept"
-    ],
-    "~properties": {
-      "id": "123",
-      "source": "lc-names",
-      "description": "description",
-      "label": "LoC label"
+  "linked_source_concepts": [
+    {
+      "~id": "123",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "123",
+        "source": "lc-names",
+        "description": "description",
+        "label": "LoC label"
+      }
     }
-  },
+  ],
   "same_as": [],
   "types": [
     "Concept",

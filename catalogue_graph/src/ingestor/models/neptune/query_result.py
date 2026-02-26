@@ -37,7 +37,9 @@ class WorkHierarchy(BaseModel):
 
 class ExtractedConcept(BaseModel):
     concept: ConceptNode
-    linked_source_concept: SourceConceptNode | None
+    # stores source concept nodes directly connected to the extracted concept node via HAS_SOURCE_CONCEPT edges
+    linked_source_concepts: list[SourceConceptNode]
+    # stores the same nodes as `linked_source_concepts` *plus* any other nodes connected to them via SAME_AS edges
     source_concepts: list[SourceConceptNode]
     types: list[ConceptType] = []
     same_as: list[str] = []

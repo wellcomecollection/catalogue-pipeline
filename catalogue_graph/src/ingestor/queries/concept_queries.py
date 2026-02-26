@@ -15,30 +15,18 @@ CONCEPT_TYPE_QUERY = """
     RETURN concept.id AS id, COLLECT(concept_type) AS types
 """
 
-# For each concept in a list of Concept ids, for each, return the concept and all its equivalent source concepts
-# 1) find the source concept linked via the HAS_SOURCE_CONCEPT relationship (linked_source_concept)
-# 2) find all concepts linked to the linked_source_concept via SAME_AS relationships (sameas_linked_source_concept)
-# 3) find all concepts directly linked to the original concept via SAME_AS relationships (direct_match)
-# 4) combine the results of steps 2 and 3 to get a list of all source concepts linked to the original concept (source_concepts)
-
 SOURCE_CONCEPT_QUERY = """
     UNWIND $ids AS id
     MATCH (concept:Concept {`~id`: id})
-    OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(sameas_linked_source_concept)
-    OPTIONAL MATCH (concept)-[:SAME_AS]->(direct_match)
-    
-    WITH concept, linked_source_concept,
-         collect(DISTINCT sameas_linked_source_concept) + [direct_match] AS all_source_concepts
+    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
 
     RETURN 
         concept.id AS id, 
         collect(DISTINCT linked_source_concept) AS linked_source_concepts,
-        [x IN all_source_concepts WHERE x IS NOT NULL] AS source_concepts
-
+        collect(DISTINCT source_concept) AS source_concepts
 """
+
 # Return a list of Concepts that represent the same concept as the input Concept
-# Because Wellcome Authority source concepts are only linked to a single Concept,
-# We do not need to consider direct SAME_AS relationships from the original Concept here.
 SAME_AS_CONCEPT_QUERY = """
     UNWIND $ids AS id
     MATCH (concept:Concept {`~id`: id})
@@ -52,8 +40,6 @@ SAME_AS_CONCEPT_QUERY = """
 """
 
 
-# As above, we don't need to worry about direct Concept-SAME_AS->SourceConcept
-# conncetions, because there's no way to reach another Concept through that route.
 def get_related_query(
     edge_type: str,
     direction: str = "from",
