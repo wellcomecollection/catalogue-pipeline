@@ -14,6 +14,8 @@ from functools import cache, lru_cache
 from pathlib import Path
 from typing import Any
 
+from sources.weco_concepts.concepts_source import DEFAULT_PATH as WECO_AUTHORITY_CSV_PATH
+
 import pytest
 from pydantic import BaseModel
 
@@ -54,14 +56,9 @@ def load_json_fixture(name: str) -> Any:
 # so we allow a tolerance threshold and only fail when drift becomes significant.
 # All mismatches are still logged as warnings for visibility.
 MIN_MATCH_RATIO = 0.9
-WECO_AUTHORITY_CSV_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "src/sources/weco_concepts/wellcome_collection_authority.csv"
-)
-
 
 def load_weco_authority_ids() -> list[str]:
-    with WECO_AUTHORITY_CSV_PATH.open(newline="") as handle:
+    with open(WECO_AUTHORITY_CSV_PATH) as handle:
         reader = csv.DictReader(handle)
         return [row["id"].strip() for row in reader if row.get("id")]
 
@@ -344,37 +341,44 @@ EMPTY_RELATED_LIST_CASES: list[EmptyCase] = [
 ]
 
 
-class EdgePatternCase(BaseModel):
+class IllegalCycleCase(BaseModel):
+    name: str
+    node_label: str
+    edge_label: str
+
+
+# Test for cycles between nodes with a given label
+UNWANTED_CYCLE_CASES: list[IllegalCycleCase] = [
+    IllegalCycleCase(
+        name="path_identifier_parent_cycle",
+        node_label="PathIdentifier",
+        edge_label="HAS_PARENT",
+    ),
+]
+
+
+class IllegalEdgeCase(BaseModel):
     name: str
     from_label: str
     to_label: str
     edge_label: str
 
 
-UNWANTED_CYCLE_CASES: list[EdgePatternCase] = [
-    EdgePatternCase(
-        name="path_identifier_parent_cycle",
-        from_label="PathIdentifier",
-        to_label="PathIdentifier",
-        edge_label="HAS_PARENT",
-    ),
-]
-
-
-ILLEGAL_EDGE_CASES: list[EdgePatternCase] = [
-    EdgePatternCase(
+# Test for node/edge combinations which should not exist in the graph
+ILLEGAL_EDGE_CASES: list[IllegalEdgeCase] = [
+    IllegalEdgeCase(
         name="concept_has_concept_edge",
         from_label="Concept",
         to_label="Work",
         edge_label="HAS_CONCEPT",
     ),
-    EdgePatternCase(
+    IllegalEdgeCase(
         name="path_identifier_has_path_identifier_edge",
         from_label="PathIdentifier",
         to_label="Work",
         edge_label="HAS_PATH_IDENTIFIER",
     ),
-    EdgePatternCase(
+    IllegalEdgeCase(
         name="source_concept_has_source_concept_edge",
         from_label="SourceConcept",
         to_label="Concept",
@@ -414,9 +418,9 @@ def test_graph_query_returns_empty_related_list_for_known_empty_ids(
 
 
 @pytest.mark.parametrize("case", UNWANTED_CYCLE_CASES, ids=lambda c: c.name)
-def test_graph_has_no_unwanted_cycles(case: EdgePatternCase) -> None:
+def test_graph_has_no_unwanted_cycles(case: IllegalCycleCase) -> None:
     query = f"""
-        MATCH (source: {case.from_label})-[:{case.edge_label}]->(target: {case.to_label})-[:{case.edge_label}]->(source)
+        MATCH (source: {case.node_label})-[:{case.edge_label}]->(target: {case.node_label})-[:{case.edge_label}]->(source)
         RETURN source, target
         LIMIT 1000
     """
@@ -428,7 +432,7 @@ def test_graph_has_no_unwanted_cycles(case: EdgePatternCase) -> None:
 
 
 @pytest.mark.parametrize("case", ILLEGAL_EDGE_CASES, ids=lambda c: c.name)
-def test_graph_has_no_illegal_edges(case: EdgePatternCase) -> None:
+def test_graph_has_no_illegal_edges(case: IllegalEdgeCase) -> None:
     query = f"""
         MATCH (source:{case.from_label})-[:{case.edge_label}]->(target:{case.to_label})
         RETURN source, target
