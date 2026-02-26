@@ -10,7 +10,7 @@ from ingestor.models.neptune.query_result import WorkHierarchy
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
     WORK_CHILDREN_QUERY,
-    WORK_CONCEPTS_QUERY,
+    WORK_CONCEPT_IDS_QUERY,
 )
 from models.events import BasePipelineEvent
 from tests.mocks import (
@@ -67,7 +67,7 @@ def mock_graph_relationships(
     expected_params = {"ids": all_indexed_work_ids}
     add_neptune_mock_response(WORK_ANCESTORS_QUERY, expected_params, ancestors)
     add_neptune_mock_response(WORK_CHILDREN_QUERY, expected_params, children)
-    add_neptune_mock_response(WORK_CONCEPTS_QUERY, expected_params, concepts)
+    add_neptune_mock_response(WORK_CONCEPT_IDS_QUERY, expected_params, concepts)
 
 
 def test_with_ancestors() -> None:

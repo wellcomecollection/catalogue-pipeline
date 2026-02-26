@@ -5,18 +5,18 @@ from itertools import batched
 from typing import get_args
 
 import structlog
-from elasticsearch import Elasticsearch
-
 from clients.neptune_client import NeptuneClient
-from ingestor.models.neptune.query_result import (
-    ExtractedConcept,
-    ExtractedRelatedConcept,
-)
+from elasticsearch import Elasticsearch
 from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
 )
 from utils.types import ConceptType
+
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    ExtractedRelatedConcept,
+)
 
 from .base_extractor import (
     ConceptQuery,
@@ -90,29 +90,43 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
         return concept_types
 
-    def get_concepts(self, ids: Iterable[str]) -> dict[str, ExtractedConcept]:
-        concept_result = self.make_neptune_query("concept", ids)
-        source_concept_result = self.make_neptune_query("source_concept", ids)
-        concept_types = self.get_concept_types(ids)
+    def _resolve_source_concepts(
+        self, concept_id: str, source_concepts_batch: dict[str, dict]
+    ) -> list[dict]:
+        resolved_source_concepts = {}
+        for same_as_id in self.get_same_as(concept_id):
+            source = source_concepts_batch.get(same_as_id, {})
+            for linked_sc in source.get("source_concepts", []):
+                resolved_source_concepts[linked_sc["~id"]] = linked_sc
+        
+        return list(resolved_source_concepts.values())
 
+    def get_concepts(self, ids: Iterable[str]) -> dict[str, ExtractedConcept]:
+        concepts_batch = self.make_neptune_query("concept", ids)
+        source_concepts_batch = self.make_neptune_query("source_concept", ids)
+        concept_types_batch = self.get_concept_types(ids)
+        
         concepts = {}
-        for concept_id, concept in concept_result.items():
-            source = source_concept_result.get(concept_id, {})
+        for concept_id, concept in concepts_batch.items():
+            source = source_concepts_batch.get(concept_id, {})
 
             # Remove `concept_id` from the list of 'same as' concepts
             same_as = set(self.get_same_as(concept_id)).difference([concept_id])
 
             concepts[concept_id] = ExtractedConcept(
                 concept=concept["concept"],
-                types=list(concept_types[concept_id]),
+                types=list(concept_types_batch[concept_id]),
                 same_as=list(same_as),
                 linked_source_concepts=source.get("linked_source_concepts", []),
-                source_concepts=source.get("source_concepts", []),
+                source_concepts=self._resolve_source_concepts(
+                    concept_id, source_concepts_batch
+                ),
             )
 
         return concepts
 
     def _update_same_as_map(self, concept_ids: Iterable[str]) -> None:
+        """Given a list of concept IDs, retrieve all synonymous ('same as') concepts and store them in a lookup table"""
         # Remove concepts whose 'same as' IDs were already calculated as part of a previous batch
         concept_ids = set(concept_ids).difference(self.primary_map.keys())
 
@@ -184,10 +198,12 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         return full_result
 
     def extract_concept_ids(self) -> Generator[str]:
+        """Stream works from the merged index and yield all concept IDs referenced from each work"""
         for extracted in self.es_source.stream_raw():
             yield extracted.concept.id.canonical_id
 
-    def get_concept_stream(self) -> Generator[set[str]]:
+    def get_concept_id_batches(self) -> Generator[set[str]]:
+        """Yield batches of concept IDs. Each batch contains synonymous concepts, which must be processed together."""
         processed_ids: set[str] = set()
 
         extracted_ids = self.extract_concept_ids()
@@ -196,7 +212,8 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             batch = set(extracted_batch).difference(processed_ids)
             self._update_same_as_map(batch)
 
-            # All 'same as' concepts must be processed as part of the same batch to get consistent results
+            # All 'same as' concepts must always be processed as part of the same batch
+            # to keep the production concepts index consistent
             full_batch = set()
             for concept_id in batch:
                 for same_as_id in self.get_same_as(concept_id):
@@ -206,7 +223,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             yield full_batch
 
     def extract_raw(self) -> Generator[tuple]:
-        for concept_ids in self.get_concept_stream():
+        for concept_ids in self.get_concept_id_batches():
             logger.info("Processing batch of concepts", count=len(concept_ids))
             concepts = self.get_concepts(concept_ids).items()
 
