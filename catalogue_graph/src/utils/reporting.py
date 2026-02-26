@@ -28,6 +28,10 @@ class PipelineReport(BaseModel):
     label: ClassVar[str]
 
     @property
+    def publish_to_cloudwatch(self) -> bool:
+        return True
+
+    @property
     def metric_namespace(self) -> str:
         raise NotImplementedError()
 
@@ -61,14 +65,19 @@ class PipelineReport(BaseModel):
         if self.publish_to_s3:
             pydantic_to_s3_json(self, self.s3_uri)
 
-        self.put_metrics()
+        if self.publish_to_cloudwatch:
+            self.put_metrics()
 
 
 class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
     @property
+    def publish_to_cloudwatch(self) -> bool:
+        # Do not publish metrics for runs in the dev environment
+        return self.environment == "prod"
+
+    @property
     def metric_namespace(self) -> str:
-        env_suffix = "_dev" if self.environment == "dev" else ""
-        return f"catalogue_graph_pipeline{env_suffix}"
+        return "catalogue_graph_pipeline"
 
     @property
     def event_key(self) -> str:
@@ -90,9 +99,13 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
 
 class IngestorReport(PipelineReport, IngestorStepEvent):
     @property
+    def publish_to_cloudwatch(self) -> bool:
+        # Do not publish metrics for runs in the dev environment
+        return self.environment == "prod"
+
+    @property
     def metric_namespace(self) -> str:
-        env_suffix = "_dev" if self.environment == "dev" else ""
-        return f"catalogue_graph_pipeline{env_suffix}"
+        return "catalogue_graph_pipeline"
 
     @property
     def s3_uri(self) -> str:

@@ -126,16 +126,29 @@ def test_metric_namespace_for_graph_reports() -> None:
         environment="prod",
         deleted_count=1,
     )
-    dev_event = IncrementalGraphRemoverReport(
+    assert prod_event.metric_namespace == "catalogue_graph_pipeline"
+    assert prod_event.publish_to_cloudwatch is True
+
+
+def test_metrics_not_published_in_dev_environment() -> None:
+    remover_dev_report = IncrementalGraphRemoverReport(
         pipeline_date="2025-01-01",
         transformer_type="catalogue_concepts",
         entity_type="nodes",
         environment="dev",
         deleted_count=1,
     )
+    assert remover_dev_report.publish_to_cloudwatch is False
 
-    assert prod_event.metric_namespace == "catalogue_graph_pipeline"
-    assert dev_event.metric_namespace == "catalogue_graph_pipeline_dev"
+    ingestor_dev_report = LoaderReport(
+        pipeline_date="2025-01-01",
+        ingestor_type="concepts",
+        job_id="20250101T0101",
+        environment="dev",
+        record_count=1,
+        total_file_size=1,
+    )
+    assert ingestor_dev_report.publish_to_cloudwatch is False
 
 
 def test_metric_namespace_for_ingestor_reports() -> None:
@@ -147,17 +160,8 @@ def test_metric_namespace_for_ingestor_reports() -> None:
         record_count=1,
         total_file_size=1,
     )
-    dev_report = LoaderReport(
-        pipeline_date="2025-01-01",
-        ingestor_type="concepts",
-        job_id="20250101T0101",
-        environment="dev",
-        record_count=1,
-        total_file_size=1,
-    )
-
     assert prod_report.metric_namespace == "catalogue_graph_pipeline"
-    assert dev_report.metric_namespace == "catalogue_graph_pipeline_dev"
+    assert prod_report.publish_to_cloudwatch is True
 
 
 def test_neptune_environment_selection_prod() -> None:
