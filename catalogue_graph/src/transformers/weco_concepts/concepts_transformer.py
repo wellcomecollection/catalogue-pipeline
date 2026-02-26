@@ -4,11 +4,9 @@ from typing import TextIO
 from models.graph_edge import (
     ConceptHasSourceConcept,
     ConceptHasSourceConceptAttributes,
-    SourceConceptSameAs,
 )
 from models.graph_node import SourceConcept
 from sources.weco_concepts.concepts_source import WeCoConceptsSource
-
 from transformers.base_transformer import BaseTransformer
 
 
@@ -40,7 +38,7 @@ class WeCoConceptsTransformer(BaseTransformer):
             image_urls=image_url.split("||") if image_url else [],
         )
 
-    def extract_edges(self, raw_data: dict) -> Generator[SourceConceptSameAs]:
+    def extract_edges(self, raw_data: dict) -> Generator[ConceptHasSourceConcept]:
         """
         The Wellcome name authority exists mostly to override names and descriptions
         found in other authorities.
@@ -53,4 +51,6 @@ class WeCoConceptsTransformer(BaseTransformer):
         concept_id = str(raw_data["id"].strip())
 
         attributes = ConceptHasSourceConceptAttributes(matched_by="identifier")
-        yield ConceptHasSourceConcept(from_id=concept_id, to_id=source_id, attributes=attributes)
+        yield ConceptHasSourceConcept(
+            from_id=concept_id, to_id=source_id, attributes=attributes
+        )

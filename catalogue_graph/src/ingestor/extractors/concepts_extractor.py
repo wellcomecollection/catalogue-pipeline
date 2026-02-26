@@ -102,17 +102,11 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             # Remove `concept_id` from the list of 'same as' concepts
             same_as = set(self.get_same_as(concept_id)).difference([concept_id])
 
-            # Each concept should have at most one linked source concept
-            if len(source.get("linked_source_concepts", [])) == 0:
-                linked_source_concept = None
-            else:
-                linked_source_concept = source["linked_source_concepts"][0]
-
             concepts[concept_id] = ExtractedConcept(
                 concept=concept["concept"],
                 types=list(concept_types[concept_id]),
                 same_as=list(same_as),
-                linked_source_concept=linked_source_concept,
+                linked_source_concepts=source.get("linked_source_concepts", []),
                 source_concepts=source.get("source_concepts", []),
             )
 
