@@ -4,6 +4,7 @@ module "app_container_definition" {
   image  = var.image
 
   environment = var.environment
+  secrets     = var.secret_env_vars
 
   log_configuration = module.log_router_container.container_log_configuration
 }
@@ -18,6 +19,12 @@ module "log_router_container" {
 module "log_router_container_secrets_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.3.1"
   secrets   = module.log_router_container.shared_secrets_logging
+  role_name = module.task_definition.task_execution_role_name
+}
+
+module "app_secrets_permissions" {
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.3.1"
+  secrets   = var.secret_env_vars
   role_name = module.task_definition.task_execution_role_name
 }
 
