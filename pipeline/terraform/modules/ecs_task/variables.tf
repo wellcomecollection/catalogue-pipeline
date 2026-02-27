@@ -22,3 +22,9 @@ variable "task_name" {
   type        = string
   description = "The name of the task"
 }
+
+variable "secret_env_vars" {
+  type        = map(string)
+  default     = {}
+  description = "A map of secret environment variables (name => secret ARN or secret name)"
+}

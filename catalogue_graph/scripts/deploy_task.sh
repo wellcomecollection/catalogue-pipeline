@@ -24,7 +24,7 @@ docker buildx build --platform linux/amd64 \
 --provenance=false \
 -t 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/unified_pipeline_task:dev \
 --build-arg PYTHON_IMAGE_VERSION=$(cat .python-version) \
--f Dockerfile .
+-f task.Dockerfile .
 
 # Push the built image to ECR
 docker push 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/unified_pipeline_task:dev
