@@ -1,12 +1,17 @@
 import copy
 from typing import Literal
 
+import pytest
+
 from ingestor.extractors.works_extractor import (
     GraphWorksExtractor,
     VisibleExtractedWork,
 )
 from ingestor.models.merged.work import VisibleMergedWork
-from ingestor.models.neptune.query_result import WorkHierarchy
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    WorkHierarchy,
+)
 from ingestor.queries.work_queries import WORK_ANCESTORS_QUERY, WORK_CHILDREN_QUERY
 from models.events import BasePipelineEvent
 from tests.mocks import (
@@ -15,6 +20,7 @@ from tests.mocks import (
     get_mock_es_client,
     get_mock_neptune_client,
 )
+from tests.test_ingestor_loader import MOCK_CONCEPT_ID, add_mock_responses_for_ids
 from tests.test_utils import load_json_fixture
 
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
@@ -22,7 +28,9 @@ MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 MERGED_FIXTURE = load_json_fixture("ingestor/single_merged.json")
 ANCESTORS_FIXTURE = load_json_fixture("neptune/work_ancestors_single.json")
 CHILDREN_FIXTURE = load_json_fixture("neptune/work_children_single.json")
-CONCEPTS_FIXTURE = load_json_fixture("neptune/work_concepts_single.json")
+EXTRACTED_CONCEPT_FIXTURE = load_json_fixture("neptune/full_extracted_concept.json")
+
+EXPECTED_EXTRACTED_CONCEPT = ExtractedConcept.model_validate(EXTRACTED_CONCEPT_FIXTURE)
 
 
 def get_extractor() -> GraphWorksExtractor:
@@ -48,26 +56,34 @@ def mock_es_work(work_id: str) -> None:
 
 
 def mock_graph_relationships(
+    monkeypatch: pytest.MonkeyPatch,
     work_id: str,
     all_indexed_work_ids: list[str],
     include: list[Literal["ancestors", "children", "concepts"]],
 ) -> None:
-    ancestors, children, concepts = [], [], []
+    ancestors, children = [], []
     if "ancestors" in include:
         ancestors = [{"id": work_id, "ancestors": ANCESTORS_FIXTURE}]
     if "children" in include:
         children = [{"id": work_id, "children": CHILDREN_FIXTURE}]
     if "concepts" in include:
-        concepts = [{"id": work_id, "concepts": CONCEPTS_FIXTURE}]
+        concept_ids = [MOCK_CONCEPT_ID]
+        monkeypatch.setattr(
+            "ingestor.extractors.works_extractor.extract_identified_concept_ids",
+            lambda _: concept_ids,
+        )
+        add_mock_responses_for_ids([MOCK_CONCEPT_ID])
 
     expected_params = {"ids": all_indexed_work_ids}
     add_neptune_mock_response(WORK_ANCESTORS_QUERY, expected_params, ancestors)
     add_neptune_mock_response(WORK_CHILDREN_QUERY, expected_params, children)
 
 
-def test_with_ancestors() -> None:
+def test_with_ancestors(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_es_work("a24esypq")
-    mock_graph_relationships("a24esypq", ["a24esypq"], ["ancestors", "children"])
+    mock_graph_relationships(
+        monkeypatch, "a24esypq", ["a24esypq"], ["ancestors", "children"]
+    )
 
     extracted_items = list(get_extractor().extract_raw())
     assert len(extracted_items) == 1
@@ -80,22 +96,22 @@ def test_with_ancestors() -> None:
     )
 
 
-def test_with_concepts() -> None:
+def test_with_concepts(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_es_work("a24esypq")
-    mock_graph_relationships("a24esypq", ["a24esypq"], ["concepts"])
+    mock_graph_relationships(monkeypatch, "a24esypq", ["a24esypq"], ["concepts"])
 
     extracted_items = list(get_extractor().extract_raw())
     assert len(extracted_items) == 1
     assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
         hierarchy=WorkHierarchy(id="a24esypq", ancestors=[], children=[]),
-        concepts=CONCEPTS_FIXTURE,
+        concepts=[EXPECTED_EXTRACTED_CONCEPT],
     )
 
 
-def test_without_graph_relationships() -> None:
+def test_without_graph_relationships(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_es_work("a24esypq")
-    mock_graph_relationships("a24esypq", ["a24esypq"], [])
+    mock_graph_relationships(monkeypatch, "a24esypq", ["a24esypq"], [])
 
     extracted_items = list(get_extractor().extract_raw())
     assert len(extracted_items) == 1
@@ -106,9 +122,9 @@ def test_without_graph_relationships() -> None:
     )
 
 
-def test_missing_in_merged_index() -> None:
+def test_missing_in_merged_index(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_graph_relationships(
-        "a24esypq", ["a24esypq"], ["concepts", "ancestors", "children"]
+        monkeypatch, "a24esypq", ["a24esypq"], ["concepts", "ancestors", "children"]
     )
 
     # Items which exist in the catalogue graph but do not exist in the merged index should not be extracted
@@ -116,27 +132,27 @@ def test_missing_in_merged_index() -> None:
     assert len(extracted_items) == 0
 
 
-def test_multiple_works() -> None:
+def test_multiple_works(monkeypatch: pytest.MonkeyPatch) -> None:
     for work_id in ["123", "456"]:
         mock_es_work(work_id)
 
     # Add mock graph relationships to one of the works
     mock_graph_relationships(
-        "456", ["123", "456"], ["concepts", "ancestors", "children"]
+        monkeypatch, "456", ["123", "456"], ["concepts", "ancestors", "children"]
     )
 
     expected_results = [
         VisibleExtractedWork(
             work=_get_work_fixture("123"),
             hierarchy=WorkHierarchy(id="123", ancestors=[], children=[]),
-            concepts=[],
+            concepts=[EXPECTED_EXTRACTED_CONCEPT],
         ),
         VisibleExtractedWork(
             work=_get_work_fixture("456"),
             hierarchy=WorkHierarchy(
                 id="456", ancestors=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE
             ),
-            concepts=CONCEPTS_FIXTURE,
+            concepts=[EXPECTED_EXTRACTED_CONCEPT],
         ),
     ]
 

@@ -23,6 +23,11 @@ logger = structlog.get_logger(__name__)
 WORKS_BATCH_SIZE = 40_000
 
 
+def extract_identified_concept_ids(work: VisibleMergedWork) -> list[str]:
+    work_concepts = extract_identified_concepts(work.data)
+    return [c.id.canonical_id for c, _ in work_concepts]
+
+
 def get_related_works_query(related_ids: list[str]) -> dict:
     """Return an ES query retrieving all visible works with the given IDs"""
     return {
@@ -86,8 +91,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
         concept_ids_by_work = {}
         all_concept_ids = set()
         for work in works:
-            work_concepts = extract_identified_concepts(work.data)
-            work_concept_ids = [c.id.canonical_id for c, _ in work_concepts]
+            work_concept_ids = extract_identified_concept_ids(work)
             concept_ids_by_work[work.state.canonical_id] = work_concept_ids
             all_concept_ids |= set(work_concept_ids)
 

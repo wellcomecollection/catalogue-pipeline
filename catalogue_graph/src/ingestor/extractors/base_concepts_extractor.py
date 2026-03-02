@@ -207,8 +207,8 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor):
 
             concepts[concept_id] = ExtractedConcept(
                 concept=concept["concept"],
-                types=list(concept_types_batch[concept_id]),
-                same_as=list(same_as),
+                types=list(sorted(concept_types_batch[concept_id])),
+                same_as=list(sorted(same_as)),
                 linked_source_concepts=source.get("linked_source_concepts", []),
                 source_concepts=self._resolve_source_concepts(
                     concept_id, source_concepts_batch
