@@ -71,7 +71,7 @@ def _get_id_shortfall(conn: DBConnection, desired_count: int) -> int:
 
 
 def _add_new_ids(conn: DBConnection, ids_to_generate: int) -> None:
-    logger.info("Generating new ids", count=ids_to_generate)
+    logger.info("Adding new ids", count=ids_to_generate)
     save_new_ids(conn, identifiers.generate_ids(ids_to_generate))
 
 

@@ -97,7 +97,7 @@ locals {
   }
 }
 
-# This is , that uses the V2 RDS cluster
+# This is the new version of the id_minter, that uses the V2 RDS cluster
 module "id_minter_lambda" {
   source = "./id_minter"
 
