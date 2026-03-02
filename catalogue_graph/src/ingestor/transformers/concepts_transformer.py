@@ -2,8 +2,10 @@ import structlog
 from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
-from ingestor.extractors.base_extractor import ConceptRelatedQuery
-from ingestor.extractors.concepts_extractor import GraphConceptsExtractor
+from ingestor.extractors.concepts_extractor import (
+    ExtractedRelatedConcepts,
+    GraphConceptsExtractor,
+)
 from ingestor.models.indexable_concept import (
     ConceptDisplay,
     ConceptQuery,
@@ -105,7 +107,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         )
 
     def transform_document(
-        self, raw_item: tuple[ExtractedConcept, dict[ConceptRelatedQuery, list]]
+        self, raw_item: tuple[ExtractedConcept, ExtractedRelatedConcepts]
     ) -> IndexableConcept | None:
         neptune_concept = RawNeptuneConcept(raw_item[0])
         neptune_related = RawNeptuneRelatedConcepts(raw_item[1])

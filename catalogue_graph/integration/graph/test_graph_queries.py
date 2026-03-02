@@ -18,7 +18,7 @@ import pytest
 from pydantic import BaseModel
 
 from clients.neptune_client import NeptuneClient
-from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
+from ingestor.extractors.base_concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
     CONCEPT_TYPE_QUERY,

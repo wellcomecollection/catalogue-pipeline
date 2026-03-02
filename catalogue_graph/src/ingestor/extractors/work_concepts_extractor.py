@@ -1,31 +1,30 @@
 from collections.abc import Generator, Iterable
 
 import structlog
-from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
-from models.events import BasePipelineEvent
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+)
 
-from .concepts_extractor import GraphConceptsExtractor
+from .base_concepts_extractor import GraphBaseConceptsExtractor
 
 logger = structlog.get_logger(__name__)
 
 
-class GraphWorkConceptsExtractor(GraphConceptsExtractor):
+class GraphWorkConceptsExtractor(GraphBaseConceptsExtractor):
     def __init__(
         self,
-        event: BasePipelineEvent,
-        es_client: Elasticsearch,
         neptune_client: NeptuneClient,
         concept_ids: Iterable[str],
     ):
-        super().__init__(event, es_client, neptune_client)
+        super().__init__(neptune_client)
         self.concept_ids = concept_ids
 
-    def extract_concept_ids(self) -> Generator[str]:
+    def get_concept_ids_to_process(self) -> Generator[str]:
         yield from self.concept_ids
 
-    def extract_raw(self) -> Generator[tuple]:
-        for concept_ids in self.get_concept_id_batches():
+    def extract_raw(self) -> Generator[tuple[str, ExtractedConcept]]:
+        for concept_ids in self.get_consistent_batches():
             logger.info("Processing batch of concepts", count=len(concept_ids))
             yield from self.get_concepts(concept_ids).items()

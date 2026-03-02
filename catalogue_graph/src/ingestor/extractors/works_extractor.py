@@ -82,7 +82,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
         return self.make_neptune_query("work_children", ids)
 
     def _get_work_concepts(self, works: list[VisibleMergedWork]) -> dict:
-        """Return all concept IDs of each work in the current batch."""
+        """Return all concepts of each work in the current batch."""
         concept_ids_by_work = {}
         all_concept_ids = set()
         for work in works:
@@ -91,14 +91,10 @@ class GraphWorksExtractor(GraphBaseExtractor):
             concept_ids_by_work[work.state.canonical_id] = work_concept_ids
             all_concept_ids |= set(work_concept_ids)
 
-        e = GraphWorkConceptsExtractor(
-            self.event, self.es_client, self.neptune_client, all_concept_ids
-        )
+        e = GraphWorkConceptsExtractor(self.neptune_client, all_concept_ids)
 
         # Map concept IDs to concepts
-        concepts = {}
-        for concept_id, concept in e.extract_raw():
-            concepts[concept_id] = concept
+        concepts = dict(e.extract_raw())
 
         concepts_by_work = {}
         for work in works:
