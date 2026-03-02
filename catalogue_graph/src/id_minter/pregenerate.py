@@ -82,9 +82,8 @@ def get_free_id_count(conn: DBConnection) -> int:
         SELECT COUNT(*) FROM canonical_ids WHERE Status = 'free'
         """
     )
-    (count,) = cursor.fetchone()
-    assert isinstance(count, int)
-    return count
+    row = cursor.fetchone()  # type dict, eg. {'COUNT(*)': 1234}
+    return int(row["COUNT(*)"])  # ensure we return a plain old int
 
 
 def save_new_ids(conn: DBConnection, new_ids: Iterable[str]) -> None:

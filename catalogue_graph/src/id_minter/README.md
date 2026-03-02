@@ -64,12 +64,12 @@ docker compose -f mysql.docker-compose.yml down -v
 The ID Generator pre-generates canonical IDs to maintain a pool of free IDs for the id_minter.
 
 ```bash
-uv run python -m id_minter.ids_generator --apply-migrations
+uv run python -m id_minter.ids_generator --apply-migrations --desired-free-ids-count 10
 ```
 
 Environment variables are set as default in `config.py`. The generator will:
 - Apply migrations (creates the `canonical_ids` table if it doesn't exist)
-- Generate IDs until there are 1000 free IDs available (configurable via `IDS_GENERATOR_DESIRED_FREE_IDS_COUNT`)
+- Generate IDs until the count reaches `--desired-free-ids-count`. If omitted, defaults to  `IDS_GENERATOR_DESIRED_FREE_IDS_COUNT` in config
 
 #### 2. Verify the ID pool
 

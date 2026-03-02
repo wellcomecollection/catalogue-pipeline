@@ -19,7 +19,7 @@ RDS_PRIMARY_HOST = os.getenv("RDS_PRIMARY_HOST", "localhost")
 RDS_REPLICA_HOST = os.getenv("RDS_REPLICA_HOST", RDS_PRIMARY_HOST)
 RDS_PORT = int(os.getenv("RDS_PORT", "3306"))
 RDS_USERNAME = os.getenv("RDS_USERNAME", "id_minter")
-RDS_PASSWORD = os.getenv("RDS_PASSWORD", "")
+RDS_PASSWORD = os.getenv("RDS_PASSWORD", "id_minter")
 RDS_MAX_CONNECTIONS = int(os.getenv("RDS_MAX_CONNECTIONS", "8"))
 
 # ---------------------------------------------------------------------------

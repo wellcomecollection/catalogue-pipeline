@@ -39,7 +39,8 @@ def assert_table_looks_like(
         SELECT CanonicalId, Status FROM canonical_ids ORDER BY CanonicalId {where_clause}
         """
     )
-    actual_rows = list(cursor.fetchall())
+    actual_rows = [(row["CanonicalId"], row["Status"]) for row in cursor.fetchall()]
+
     # this doesn't have to be a separate assertion,
     # but it's nice to have a clear error message if the number of rows is wrong,
     # rather than just a mismatch in the contents of the rows.
@@ -192,10 +193,10 @@ def test_created_at(ids_db: Connection) -> None:
     rows = cursor.fetchall()
     assert len(rows) == 2
     # this is the preloaded id, and is alphabetically first, so should be the first row
-    assert rows[0][0] == "aaaaaaaa"
-    assert rows[1][1] is not None
+    assert rows[0]["CanonicalId"] == "aaaaaaaa"
+    assert rows[1]["CreatedAt"] is not None
     # the id added by the topup should have a newer createdAt timestamp than the preloaded id
     # given that the granularity of the timestamp is seconds, and the test runs pretty quickly,
     # it's quite likely that they end up with the same timestamp.
     # The point of this test is mainly to check that createdAt is being set at all
-    assert rows[1][1] >= rows[0][1]
+    assert rows[1]["CreatedAt"] >= rows[0]["CreatedAt"]
