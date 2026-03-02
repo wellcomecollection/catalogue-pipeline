@@ -96,7 +96,7 @@ TransformerType = Literal[
 ]
 
 FullGraphRemoverType = Literal[
-    LocTransformerType, MeshTransformerType, WikidataTransformerType
+    LocTransformerType, MeshTransformerType, WikidataTransformerType, "weco_concepts"
 ]
 GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"]
 
