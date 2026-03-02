@@ -12,11 +12,7 @@ import typing
 import structlog
 from pydantic import BaseModel
 
-from id_minter.config import (
-    ID_GENERATOR_CONFIG,
-    IDS_GENERATOR_DESIRED_FREE_IDS_COUNT,
-    IdGeneratorConfig,
-)
+from id_minter.config import ID_GENERATOR_CONFIG, IdGeneratorConfig
 from id_minter.database import apply_migrations, get_connection
 from id_minter.pregenerate import top_up_ids
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -53,7 +49,7 @@ def handler(
 
     top_up_ids(
         conn=get_connection(runtime.config),
-        desired_count=IDS_GENERATOR_DESIRED_FREE_IDS_COUNT,
+        desired_count=runtime.config.desired_free_ids_count,
     )
     return {"status": "success"}
 
@@ -75,12 +71,20 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         default=False,
         help="Apply database migrations before running.",
     )
+    parser.add_argument(
+        "--desired-free-ids-count",
+        type=int,
+        default=ID_GENERATOR_CONFIG.desired_free_ids_count,
+        help="Number of free IDs to maintain in the pool.",
+    )
 
     args = parser.parse_args()
 
     overrides: dict = {}
     if args.apply_migrations:
         overrides["apply_migrations"] = True
+    if args.desired_free_ids_count is not None:
+        overrides["desired_free_ids_count"] = args.desired_free_ids_count
 
     config_obj = IdGeneratorConfig(**overrides) if overrides else None
     runtime = build_runtime(config_obj)

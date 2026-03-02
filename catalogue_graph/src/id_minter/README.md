@@ -28,7 +28,7 @@ All commands run from `catalogue_graph/`.
 docker compose -f mysql.docker-compose.yml up -d
 ```
 
-This starts a MySQL 8.0 container with an `identifiers` database and an `id_minter` user.
+This starts a MySQL 8.0 container with an `identifiers` database and an `id_minter` user.  
 It can be used to locally run the id_minter and ids_generator, see below
 
 #### 1. Run the id_minter

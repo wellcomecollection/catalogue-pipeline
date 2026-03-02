@@ -95,6 +95,7 @@ class IdGeneratorConfig(BaseModel):
     db_table: CanonicalIdsTableConfig = CanonicalIdsTableConfig()
     pipeline_date: str = PIPELINE_DATE
     apply_migrations: bool = APPLY_MIGRATIONS
+    desired_free_ids_count: int = IDS_GENERATOR_DESIRED_FREE_IDS_COUNT
 
 
 # Default id_generator config instance, built from environment variables.
