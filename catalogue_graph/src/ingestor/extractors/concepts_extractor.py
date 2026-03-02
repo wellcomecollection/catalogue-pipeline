@@ -5,18 +5,18 @@ from itertools import batched
 from typing import get_args
 
 import structlog
-from clients.neptune_client import NeptuneClient
 from elasticsearch import Elasticsearch
+
+from clients.neptune_client import NeptuneClient
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    ExtractedRelatedConcept,
+)
 from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
 )
 from utils.types import ConceptType
-
-from ingestor.models.neptune.query_result import (
-    ExtractedConcept,
-    ExtractedRelatedConcept,
-)
 
 from .base_extractor import (
     ConceptQuery,
@@ -98,14 +98,14 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             source = source_concepts_batch.get(same_as_id, {})
             for linked_sc in source.get("source_concepts", []):
                 resolved_source_concepts[linked_sc["~id"]] = linked_sc
-        
+
         return list(resolved_source_concepts.values())
 
     def get_concepts(self, ids: Iterable[str]) -> dict[str, ExtractedConcept]:
         concepts_batch = self.make_neptune_query("concept", ids)
         source_concepts_batch = self.make_neptune_query("source_concept", ids)
         concept_types_batch = self.get_concept_types(ids)
-        
+
         concepts = {}
         for concept_id, concept in concepts_batch.items():
             source = source_concepts_batch.get(concept_id, {})

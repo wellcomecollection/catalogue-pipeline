@@ -2,17 +2,18 @@ from collections.abc import Generator, Iterator
 from itertools import batched
 
 import structlog
-from clients.neptune_client import NeptuneClient
 from elasticsearch import Elasticsearch
-from models.events import BasePipelineEvent
 from pydantic import BaseModel
-from sources.merged_works_source import MergedWorksSource
 
+from clients.neptune_client import NeptuneClient
 from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
 )
 from ingestor.models.neptune.query_result import ExtractedConcept, WorkHierarchy
+from models.events import BasePipelineEvent
+from sources.catalogue.concepts_source import extract_identified_concepts
+from sources.merged_works_source import MergedWorksSource
 
 from .base_extractor import GraphBaseExtractor
 from .work_concepts_extractor import GraphWorkConceptsExtractor
@@ -80,50 +81,62 @@ class GraphWorksExtractor(GraphBaseExtractor):
         """Return all children of each work in the current batch."""
         return self.make_neptune_query("work_children", ids)
 
-    def _get_work_concept_ids(self, ids: list[str]) -> dict:
+    def _get_work_concepts(self, works: list[VisibleMergedWork]) -> dict:
         """Return all concept IDs of each work in the current batch."""
-        return self.make_neptune_query("work_concept_ids", ids)
+        concept_ids_by_work = {}
+        all_concept_ids = set()
+        for work in works:
+            work_concepts = extract_identified_concepts(work.data)
+            work_concept_ids = [c.id.canonical_id for c, _ in work_concepts]
+            concept_ids_by_work[work.state.canonical_id] = work_concept_ids
+            all_concept_ids |= set(work_concept_ids)
+
+        e = GraphWorkConceptsExtractor(
+            self.event, self.es_client, self.neptune_client, all_concept_ids
+        )
+
+        # Map concept IDs to concepts
+        concepts = {}
+        for concept_id, concept in e.extract_raw():
+            concepts[concept_id] = concept
+
+        concepts_by_work = {}
+        for work in works:
+            w_id = work.state.canonical_id
+            concepts_by_work[w_id] = [
+                concepts[c_id] for c_id in concept_ids_by_work[w_id]
+            ]
+
+        return concepts_by_work
 
     def process_es_works(
         self, es_works: Iterator[MergedWork]
     ) -> Generator[ExtractedWork]:
         for es_batch in batched(es_works, WORKS_BATCH_SIZE):
-            # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
-            visible_work_ids = [
-                w.state.canonical_id
+            # Yield all non-visible works first. They do not include hierarchies or concepts.
+            yield from (
+                ExtractedWork(work=w)
                 for w in es_batch
-                if isinstance(w, VisibleMergedWork)
-            ]
+                if not isinstance(w, VisibleMergedWork)
+            )
+
+            visible_works = [w for w in es_batch if isinstance(w, VisibleMergedWork)]
+            visible_work_ids = [w.state.canonical_id for w in visible_works]
+
+            # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
             ancestors_batch = self._get_work_ancestors(visible_work_ids)
             children_batch = self._get_work_children(visible_work_ids)
-            concept_ids_batch = self._get_work_concept_ids(visible_work_ids)
-            
-            concept_ids = set()
-            for result in concept_ids_batch.values():
-                concept_ids |= set(result['concept_ids'])
-            e = GraphWorkConceptsExtractor(
-                self.event, self.es_client, self.neptune_client, concept_ids
-            )
-            concepts_d = {}
-            for concept_id, concept in e.extract_raw():
-                concepts_d[concept_id] = concept
+            concepts_batch = self._get_work_concepts(visible_works)
 
-            for es_work in es_batch:
+            for es_work in visible_works:
                 work_id = es_work.state.canonical_id
                 self.streamed_ids.add(work_id)
-
-                # Only visible works store hierarchy and concepts
-                if not isinstance(es_work, VisibleMergedWork):
-                    yield ExtractedWork(work=es_work)
-                    continue
 
                 hierarchy = WorkHierarchy(
                     id=work_id,
                     ancestors=ancestors_batch.get(work_id, {}).get("ancestors", []),
                     children=children_batch.get(work_id, {}).get("children", []),
                 )
-                concept_ids = concept_ids_batch.get(work_id, {}).get("concept_ids", [])
-                concepts = [concepts_d[concept_id] for concept_id in concept_ids]
 
                 # When a work is processed, all of its children and ancestors must be processed too for consistency.
                 # (For example, if the title of a parent work changes, all of its children must be processed
@@ -136,7 +149,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
                 )
 
                 yield VisibleExtractedWork(
-                    work=es_work, hierarchy=hierarchy, concepts=concepts
+                    work=es_work, hierarchy=hierarchy, concepts=concepts_batch[work_id]
                 )
 
     def extract_raw(self) -> Generator[ExtractedWork]:

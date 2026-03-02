@@ -24,11 +24,3 @@ WORK_CHILDREN_QUERY = """
         WITH work, child_work, COUNT(grandchild_identifier) AS child_work_parts
         RETURN work.id AS id, COLLECT({ work: child_work, parts: child_work_parts }) AS children
 """
-
-WORK_CONCEPT_IDS_QUERY = """
-        UNWIND $ids AS id
-        MATCH (work:Work {`~id`: id})-[:HAS_CONCEPT]->(concept)
-        RETURN
-            work.id AS id,
-            COLLECT(concept.id) AS concept_ids
-"""

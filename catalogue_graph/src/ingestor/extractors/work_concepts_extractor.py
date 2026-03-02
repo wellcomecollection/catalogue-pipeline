@@ -1,8 +1,9 @@
 from collections.abc import Generator, Iterable
 
 import structlog
-from clients.neptune_client import NeptuneClient
 from elasticsearch import Elasticsearch
+
+from clients.neptune_client import NeptuneClient
 from models.events import BasePipelineEvent
 
 from .concepts_extractor import GraphConceptsExtractor
