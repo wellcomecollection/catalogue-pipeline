@@ -472,8 +472,8 @@ def test_weco_authority_nodes_link_to_concepts() -> None:
     response = neptune_client().run_open_cypher_query(
         """
         UNWIND $rows AS row
-        MATCH (concept:Concept {id: row.concept_id})-[:SAME_AS]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
-        MATCH (weco)-[:SAME_AS]->(concept)
+        MATCH (concept:Concept {id: row.concept_id})
+        MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
         RETURN row.concept_id AS id
         """,
         {"rows": rows},
