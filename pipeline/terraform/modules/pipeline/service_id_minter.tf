@@ -123,8 +123,8 @@ module "ids_generator_lambda" {
     PIPELINE_DATE                        = var.pipeline_date
   }
 
-  vpc_config      = local.id_minter_v2_vpc_config
-  
+  vpc_config = local.id_minter_v2_vpc_config
+
   secret_env_vars = local.id_minter_v2_secret_env_vars
 
   memory_size = 1024
