@@ -181,6 +181,47 @@ class TestMigrateFromParquet:
         assert result.canonical_ids_inserted == 3
         assert result.identifiers_inserted == 4
 
+    def test_source_id_with_newlines(
+        self,
+        ids_db_local_infile: pymysql.connections.Connection,
+        tmp_path: Path,
+    ) -> None:
+        """SourceId values containing newlines/tabs should be loaded correctly."""
+        rows = [
+            {
+                "CanonicalId": "aaaa1111",
+                "OntologyType": "Concept",
+                "SourceSystem": "label-derived",
+                "SourceId": "wilkins, maurice\nasimov, isaac\nbenn, anthony",
+            },
+            {
+                "CanonicalId": "bbbb2222",
+                "OntologyType": "Concept",
+                "SourceSystem": "label-derived",
+                "SourceId": "col1\tcol2",
+            },
+        ]
+        out = tmp_path / "parquet"
+        out.mkdir()
+        pl.DataFrame(rows).write_parquet(out / "part-00000.parquet")
+
+        result = migrate_from_parquet(ids_db_local_infile, out)
+
+        assert result.identifiers_inserted == 2
+
+        cursor = ids_db_local_infile.cursor()
+        cursor.execute(
+            "SELECT SourceId FROM identifiers WHERE CanonicalId = 'aaaa1111'"
+        )
+        (source_id,) = cursor.fetchone()
+        assert source_id == "wilkins, maurice\nasimov, isaac\nbenn, anthony"
+
+        cursor.execute(
+            "SELECT SourceId FROM identifiers WHERE CanonicalId = 'bbbb2222'"
+        )
+        (source_id,) = cursor.fetchone()
+        assert source_id == "col1\tcol2"
+
 
 # ===================================================================
 # truncate_tables tests

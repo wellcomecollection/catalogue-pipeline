@@ -2,29 +2,12 @@
 # ECS migration task — bulk-loads a parquet S3 export into
 # the identifiers-v2 RDS cluster (RFC 083 two-table schema).
 #
-# Run manually with:
+# Triggered via Step Functions state machine. Start an execution
+# with:
 #
-#   aws ecs run-task \
-#     --cluster id-minter-migration \
-#     --task-definition id-minter-migration \
-#     --launch-type FARGATE \
-#     --network-configuration '{
-#       "awsvpcConfiguration": {
-#         "subnets": ["<private-subnet-id>"],
-#         "securityGroups": ["<migration-sg-id>", "<rds-v2-ingress-sg-id>"],
-#         "assignPublicIp": "DISABLED"
-#       }
-#     }' \
-#     --overrides '{
-#       "containerOverrides": [{
-#         "name": "id-minter-migration",
-#         "command": [
-#           "/app/src/id_minter/steps/migration.py",
-#           "--use-ecs",
-#           "--event", "{\"export_date\":\"2026-02-26\",\"truncate\":true}"
-#         ]
-#       }]
-#     }' \
+#   aws stepfunctions start-execution \
+#     --state-machine-arn <arn> \
+#     --input '{"export_date":"2026-02-26","truncate":true}' \
 #     --profile platform-developer
 # -------------------------------------------------------
 
@@ -63,7 +46,6 @@ module "migration_ecs_task" {
 
   environment = {
     IDENTIFIERS_DATABASE = "identifiers"
-    APPLY_MIGRATIONS     = "true"
   }
 
   secret_env_vars = {
@@ -76,6 +58,8 @@ module "migration_ecs_task" {
 
   cpu    = 4096
   memory = 16384
+
+  ephemeral_storage_size = 100
 }
 
 # -------------------------------------------------------
@@ -92,6 +76,16 @@ data "aws_iam_policy_document" "migration_s3_read" {
     resources = [
       aws_s3_bucket.id_minter.arn,
       "${aws_s3_bucket.id_minter.arn}/*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+    ]
+    resources = [
+      aws_kms_key.rds_export.arn,
     ]
   }
 }
@@ -143,12 +137,63 @@ resource "aws_security_group" "migration_task" {
   }
 }
 
-# Allow the migration task to reach the v2 RDS cluster
-resource "aws_security_group_rule" "migration_to_rds_v2" {
-  type                     = "ingress"
-  from_port                = 3306
-  to_port                  = 3306
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.migration_task.id
-  security_group_id        = aws_security_group.database_v2_sg.id
+# -------------------------------------------------------
+# Step Functions state machine
+# -------------------------------------------------------
+
+module "migration_state_machine" {
+  source = "../../pipeline/terraform/modules/state_machine"
+  name   = "id-minter-migration"
+
+  state_machine_definition = jsonencode({
+    Comment       = "Run the id-minter migration ECS task."
+    QueryLanguage = "JSONata"
+    StartAt       = "Migrate"
+    States = {
+      Migrate = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::ecs:runTask.sync"
+        Next = "Success"
+        Arguments = {
+          Cluster        = aws_ecs_cluster.migration.arn
+          TaskDefinition = module.migration_ecs_task.task_definition_arn
+          LaunchType     = "FARGATE"
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              AssignPublicIp = "DISABLED"
+              Subnets        = local.private_subnets_new
+              SecurityGroups = [
+                aws_security_group.migration_task.id,
+                aws_security_group.rds_v2_ingress_security_group.id,
+                data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id,
+              ]
+            }
+          }
+          Overrides = {
+            ContainerOverrides = [
+              {
+                Name = "id-minter-migration"
+                # The Dockerfile ENTRYPOINT is "python", so we pass
+                # "-m id_minter.steps.migration" as args (not a file path
+                # like the extractor) because the migration module lives
+                # inside the id_minter package and must be invoked with -m
+                # to resolve intra-package imports correctly.
+                Command = [
+                  "-m", "id_minter.steps.migration",
+                  "--event", "{% $string($states.input) %}",
+                ]
+              }
+            ]
+          }
+        }
+      }
+      Success = {
+        Type = "Succeed"
+      }
+    }
+  })
+
+  policies_to_attach = {
+    "migration_ecs_task_invoke_policy" = module.migration_ecs_task.invoke_policy_document
+  }
 }

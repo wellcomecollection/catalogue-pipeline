@@ -5,11 +5,12 @@ Downloads a parquet export from S3 and bulk-loads it into the new
 two-table identifier schema (RFC 083) using LOAD DATA LOCAL INFILE.
 
 Locally:
-    python -m id_minter.steps.migration --export-date 2026-02-26 --truncate
+    python -m id_minter.steps.migration \
+        --use-cli --export-date 2026-02-26 --truncate
 
 ECS (Step Functions):
     python -m id_minter.steps.migration \
-        --use-ecs --event '{"export_date":"2026-02-26","truncate":true}'
+        --event '{"export_date":"2026-02-26","truncate":true}'
 """
 
 from __future__ import annotations
@@ -291,13 +292,13 @@ if __name__ == "__main__":
         description="Migrate identifiers from S3 parquet export to the new schema."
     )
     parser.add_argument(
-        "--use-ecs",
+        "--use-cli",
         action="store_true",
-        help="Run in ECS mode (expects --event and optional --task-token).",
+        help="Whether to invoke the local CLI handler instead of the ECS handler.",
     )
     args, _ = parser.parse_known_args()
 
-    if args.use_ecs:
-        ecs_handler(argparse.ArgumentParser(description="ECS migration handler."))
-    else:
+    if args.use_cli:
         local_handler(argparse.ArgumentParser(description="Run migration locally."))
+    else:
+        ecs_handler(argparse.ArgumentParser(description="ECS migration handler."))

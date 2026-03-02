@@ -141,9 +141,20 @@ def _load_identifiers(conn: DBConnection, df: pl.DataFrame, batch_size: int) -> 
     for start in range(0, total, batch_size):
         batch_df = df.slice(start, batch_size)
 
+        # Escape special characters so LOAD DATA LOCAL INFILE parses correctly.
+        # MySQL's default ESCAPED BY '\\' will convert \\n back to a real newline, etc.
+        escaped_df = batch_df.select(cols).with_columns(
+            pl.col(col)
+            .str.replace_all("\\", "\\\\", literal=True)
+            .str.replace_all("\n", "\\n", literal=True)
+            .str.replace_all("\t", "\\t", literal=True)
+            .str.replace_all("\r", "\\r", literal=True)
+            for col in cols
+        )
+
         with tempfile.NamedTemporaryFile(suffix=".tsv", delete=False) as f:
             tsv_path = f.name
-        batch_df.select(cols).write_csv(tsv_path, separator="\t", include_header=False)
+        escaped_df.write_csv(tsv_path, separator="\t", include_header=False)
 
         try:
             cursor = conn.cursor()

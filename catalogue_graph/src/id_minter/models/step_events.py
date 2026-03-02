@@ -40,7 +40,9 @@ class StepFunctionMintingResponse(BaseModel):
     failures: list[StepFunctionMintingFailure]
     job_id: str
 
-# These will be removed once the migration is complete and the step is no longer needed. 
+
+# These will be removed once the migration is complete and the step is no longer needed.
+
 
 class MigrationRequest(BaseModel):
     """Request to migrate identifiers from a parquet S3 export into the new schema."""

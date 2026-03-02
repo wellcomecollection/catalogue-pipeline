@@ -29,6 +29,20 @@ locals {
   catalogue_vpcs = data.terraform_remote_state.accounts_catalogue.outputs
 }
 
+data "terraform_remote_state" "shared_infra" {
+  backend = "s3"
+
+  config = {
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/platform-infrastructure/shared.tfstate"
+    region = "eu-west-1"
+
+    assume_role = {
+      role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+    }
+  }
+}
+
 provider "aws" {
   region = "eu-west-1"
 

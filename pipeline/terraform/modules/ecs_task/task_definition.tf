@@ -34,6 +34,8 @@ module "task_definition" {
   cpu    = var.cpu
   memory = var.memory
 
+  ephemeral_storage_size = var.ephemeral_storage_size
+
   container_definitions = [
     module.log_router_container.container_definition,
     module.app_container_definition.container_definition

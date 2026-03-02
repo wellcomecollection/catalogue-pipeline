@@ -28,3 +28,9 @@ variable "secret_env_vars" {
   default     = {}
   description = "A map of secret environment variables (name => secret ARN or secret name)"
 }
+
+variable "ephemeral_storage_size" {
+  type        = number
+  default     = null
+  description = "The size of ephemeral storage (in GiB) for the task. Minimum 21, max 200. Null uses the Fargate default (20 GiB)."
+}
