@@ -87,6 +87,9 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
     def _resolve_source_concepts(
         self, concept_id: str, source_concepts_batch: dict[str, dict]
     ) -> list[Any]:
+        """
+        If a source concept `SC` is connected to some concept `C`, `SC` is included on all concepts synonymous with `C`.
+        """
         resolved_source_concepts = {}
         for same_as_id in self.get_same_as(concept_id):
             source = source_concepts_batch.get(same_as_id, {})
