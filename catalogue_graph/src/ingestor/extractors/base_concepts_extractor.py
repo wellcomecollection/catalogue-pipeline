@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor
@@ -37,7 +38,7 @@ RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
 CONCEPTS_BATCH_SIZE = 40_000
 
 
-class GraphBaseConceptsExtractor(GraphBaseExtractor):
+class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
     """Abstract base class for concept extraction from the catalogue graph.
 
     Provides shared infrastructure used by all concept extractors: consistent batching of concept IDs, synonymous
@@ -166,8 +167,9 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor):
 
         return full_result
 
+    @abstractmethod
     def get_concept_ids_to_process(self) -> Generator[str]:
-        raise NotImplementedError()
+        pass
 
     def get_consistent_batches(self) -> Generator[set[str]]:
         """

@@ -95,9 +95,8 @@ class GraphWorksExtractor(GraphBaseExtractor):
             concept_ids_by_work[work.state.canonical_id] = work_concept_ids
             all_concept_ids |= set(work_concept_ids)
 
+        # Map concept IDs to extracted concepts
         concepts_extractor = WorkConceptsExtractor(self.neptune_client, all_concept_ids)
-
-        # Map concept IDs to concepts
         concepts = dict(concepts_extractor.extract_raw())
 
         concepts_by_work: dict[str, list[ExtractedConcept]] = {}

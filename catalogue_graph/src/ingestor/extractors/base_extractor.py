@@ -1,4 +1,5 @@
 import time
+from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
@@ -66,16 +67,15 @@ NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
 }
 
 
-class GraphBaseExtractor:
+class GraphBaseExtractor(ABC):
     def __init__(self, neptune_client: NeptuneClient):
         self.neptune_client = neptune_client
         self.neptune_params: dict[str, Any] = {}
 
+    @abstractmethod
     def extract_raw(self) -> Generator[Any]:
         """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
-        raise NotImplementedError(
-            "Each extractor must implement an `extract_raw` method."
-        )
+        pass
 
     def make_neptune_query(
         self, query_type: ConceptQuery | WorkQuery, ids: Iterable[str]
