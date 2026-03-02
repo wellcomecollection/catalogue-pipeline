@@ -3,7 +3,11 @@ from unittest.mock import Mock
 import pytest
 from pymysql.connections import Connection
 
-from id_minter.pregenerate import ShortfallError, get_free_id_count, top_up_ids
+from id_minter.pregenerate import (
+    ShortfallError,
+    get_free_id_count,
+    top_up_ids,
+)
 
 pytestmark = pytest.mark.database
 

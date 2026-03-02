@@ -63,3 +63,38 @@ module "id_minter_lambda_step_function" {
 
   ecr_repository_name = "uk.ac.wellcome/id_minter"
 }
+
+module "ids_generator_lambda" {
+  source = "../pipeline_lambda"
+
+  description   = "Lambda to pre-generate canonical IDs"
+  pipeline_date = var.pipeline_date
+  service_name  = "ids_generator"
+
+  environment_variables = {
+    IDENTIFIERS_DATABASE                 = "identifiers"
+    CANONICAL_IDS_TABLE_NAME             = "canonical_ids"
+    IDS_GENERATOR_DESIRED_FREE_IDS_COUNT = "10000"
+    APPLY_MIGRATIONS                     = "false"
+    PIPELINE_DATE                        = var.pipeline_date
+  }
+
+  vpc_config      = local.id_minter_vpc_config
+  secret_env_vars = {
+    cluster_url = "rds/identifiers-serverless/endpoint"
+    db_port     = "rds/identifiers-serverless/port"
+    db_username = "catalogue/id_minter/rds_user"
+    db_password = "catalogue/id_minter/rds_password"
+  }
+
+  memory_size = 1024
+
+  timeout = 60 * 5 # 5 Minutes
+
+  image_config = {
+    command = ["id_minter.ids_generator.ids_generator.lambda_handler"]
+  }
+
+  ecr_repository_name = "uk.ac.wellcome/unified_pipeline_lambda"
+
+}
