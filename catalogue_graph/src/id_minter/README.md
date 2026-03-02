@@ -22,15 +22,16 @@ src/id_minter/
 
 All commands run from `catalogue_graph/`.
 
-### 1. Start the local MySQL database
+### Start the local MySQL database
 
 ```bash
 docker compose -f mysql.docker-compose.yml up -d
 ```
 
 This starts a MySQL 8.0 container with an `identifiers` database and an `id_minter` user.
+It can be used to locally run the id_minter and ids_generator, see below
 
-### 2. Run the id_minter
+#### 1. Run the id_minter
 
 ```bash
 RDS_USERNAME=id_minter RDS_PASSWORD=id_minter \
@@ -45,21 +46,47 @@ RDS_USERNAME=id_minter RDS_PASSWORD=id_minter \
 - `--job-id` is optional — defaults to the current timestamp if omitted.
 - `--source-index` / `--target-index` optionally override the upstream/downstream ES index names.
 
-### 3. Verify the database schema
+#### 2. Verify the database schema
 
 ```bash
 docker exec id-minter-mysql mysql -u id_minter -pid_minter identifiers \
   -e "SHOW TABLES; DESCRIBE canonical_ids; DESCRIBE identifiers;"
 ```
 
-### 4. Clean up
+#### 3. Clean up
 
 ```bash
 docker compose -f mysql.docker-compose.yml down -v
 ```
 
-## Lambda handler
+#### 1. Run the ids_generator
 
+The ID Generator pre-generates canonical IDs to maintain a pool of free IDs for the id_minter.
+
+```bash
+uv run python -m id_minter.ids_generator --apply-migrations
+```
+
+Environment variables are set as default in `config.py`. The generator will:
+- Apply migrations (creates the `canonical_ids` table if it doesn't exist)
+- Generate IDs until there are 1000 free IDs available (configurable via `IDS_GENERATOR_DESIRED_FREE_IDS_COUNT`)
+
+#### 2. Verify the ID pool
+
+```bash
+docker exec id-minter-mysql mysql -u id_minter -pid_minter identifiers \
+  -e "SELECT COUNT(*) FROM canonical_ids WHERE Status='free';"
+```
+
+#### 3. Clean up
+
+```bash
+docker compose -f mysql.docker-compose.yml down -v
+```
+
+## Lambda handlers
+
+### id_minter
 The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects a `StepFunctionMintingRequest` payload:
 
 ```json
@@ -68,6 +95,18 @@ The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects
   "job_id": "20260210T1500"
 }
 ```
+
+### ids_generator
+
+The Lambda entry point is `id_minter.ids_generator.lambda_handler`. It takes an empty event payload and returns:
+
+```json
+{
+  "status": "success"
+}
+```
+
+The generator runs on a schedule (Mon-Fri at 3am UTC) to maintain the ID pool.
 
 ## Configuration
 
