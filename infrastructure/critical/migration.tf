@@ -153,7 +153,7 @@ module "migration_state_machine" {
       Migrate = {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.sync"
-        Next = "Success"
+        Next     = "Success"
         Arguments = {
           Cluster        = aws_ecs_cluster.migration.arn
           TaskDefinition = module.migration_ecs_task.task_definition_arn

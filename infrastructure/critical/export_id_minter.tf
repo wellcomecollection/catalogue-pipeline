@@ -270,9 +270,9 @@ locals {
       PrepareExportEvent = {
         Type = "Pass"
         Parameters = {
-          "export_date.$"   = "States.ArrayGetItem(States.StringSplit($$.Execution.StartTime, 'T'), 0)"
+          "export_date.$"  = "States.ArrayGetItem(States.StringSplit($$.Execution.StartTime, 'T'), 0)"
           "cluster_name.$" = "$.detail.resourceName"
-          truncate          = true
+          truncate         = true
         }
         ResultPath = "$.migrationInput"
         Next       = "NotifyExportCompleted"
