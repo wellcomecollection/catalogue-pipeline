@@ -2,7 +2,7 @@ from collections import defaultdict
 from collections.abc import Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
-from typing import get_args
+from typing import Any, get_args
 
 import structlog
 
@@ -38,6 +38,14 @@ CONCEPTS_BATCH_SIZE = 40_000
 
 
 class GraphBaseConceptsExtractor(GraphBaseExtractor):
+    """Abstract base class for concept extraction from the catalogue graph.
+
+    Provides shared infrastructure used by all concept extractors: consistent batching of concept IDs, synonymous
+    concept resolution, concept type lookup, and related concept merging.
+
+    Subclasses must implement `get_concept_ids_to_process` to supply the stream of concept IDs that should be extracted.
+    """
+
     def __init__(self, neptune_client: NeptuneClient):
         super().__init__(neptune_client)
 
@@ -77,7 +85,7 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor):
 
     def _resolve_source_concepts(
         self, concept_id: str, source_concepts_batch: dict[str, dict]
-    ) -> list[dict]:
+    ) -> list[Any]:
         resolved_source_concepts = {}
         for same_as_id in self.get_same_as(concept_id):
             source = source_concepts_batch.get(same_as_id, {})

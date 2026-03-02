@@ -16,7 +16,7 @@ from sources.catalogue.concepts_source import extract_identified_concepts
 from sources.merged_works_source import MergedWorksSource
 
 from .base_extractor import GraphBaseExtractor
-from .work_concepts_extractor import GraphWorkConceptsExtractor
+from .work_concepts_extractor import WorkConceptsExtractor
 
 logger = structlog.get_logger(__name__)
 
@@ -91,10 +91,10 @@ class GraphWorksExtractor(GraphBaseExtractor):
             concept_ids_by_work[work.state.canonical_id] = work_concept_ids
             all_concept_ids |= set(work_concept_ids)
 
-        e = GraphWorkConceptsExtractor(self.neptune_client, all_concept_ids)
+        concepts_extractor = WorkConceptsExtractor(self.neptune_client, all_concept_ids)
 
         # Map concept IDs to concepts
-        concepts = dict(e.extract_raw())
+        concepts = dict(concepts_extractor.extract_raw())
 
         concepts_by_work = {}
         for work in works:

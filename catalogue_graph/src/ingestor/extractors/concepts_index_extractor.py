@@ -22,7 +22,11 @@ logger = structlog.get_logger(__name__)
 ExtractedRelatedConcepts = dict[ConceptRelatedQuery, list[ExtractedRelatedConcept]]
 
 
-class GraphConceptsExtractor(GraphBaseConceptsExtractor):
+class ConceptsIndexExtractor(GraphBaseConceptsExtractor):
+    """
+    Extracts concepts and their related concepts to produce standalone documents for the concepts index.
+    """
+
     def __init__(
         self,
         event: BasePipelineEvent,

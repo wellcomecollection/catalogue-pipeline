@@ -12,7 +12,9 @@ from .base_concepts_extractor import GraphBaseConceptsExtractor
 logger = structlog.get_logger(__name__)
 
 
-class GraphWorkConceptsExtractor(GraphBaseConceptsExtractor):
+class WorkConceptsExtractor(GraphBaseConceptsExtractor):
+    """Extracts basic concept data for enriching work documents."""
+
     def __init__(
         self,
         neptune_client: NeptuneClient,
