@@ -193,7 +193,7 @@ locals {
           "ExportTaskIdentifier.$" = "States.Format('id-exp-{}', $.id)"
           "SourceArn.$"            = "$.resources[0]"
           S3BucketName             = local.export_s3_bucket
-          "S3Prefix.$"             = "States.Format('exports/identifiers/{}', States.ArrayGetItem(States.StringSplit($$.Execution.StartTime, 'T'), 0))"
+          "S3Prefix.$"             = "States.Format('exports/{}/{}', $.detail.resourceName, States.ArrayGetItem(States.StringSplit($$.Execution.StartTime, 'T'), 0))"
           IamRoleArn               = aws_iam_role.rds_s3_export.arn
           KmsKeyId                 = aws_kms_key.rds_export.arn
         }

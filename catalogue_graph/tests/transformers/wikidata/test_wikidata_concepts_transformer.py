@@ -3,6 +3,7 @@ import math
 
 import pytest
 
+from models.events import ExtractorEvent
 from models.graph_edge import SourceConceptSameAs, SourceConceptSameAsAttributes
 from models.graph_node import SourceConcept
 from tests.sources.test_wikidata_concepts_source import _add_mock_wikidata_requests
@@ -15,7 +16,13 @@ def test_wikidata_concepts_nodes_transformer() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("nodes", "concepts")
 
-    transformer = WikidataConceptsTransformer("loc_concepts", "nodes", "dev")
+    source_event = ExtractorEvent(
+        pipeline_date="dev",
+        environment="prod",
+        transformer_type="wikidata_linked_loc_concepts",
+        entity_type="nodes",
+    )
+    transformer = WikidataConceptsTransformer("loc_concepts", source_event)
 
     nodes = list(transformer._stream_entities(entity_type="nodes"))
 
@@ -35,7 +42,13 @@ def test_wikidata_concepts_edges_transformer() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("edges", "concepts")
 
-    transformer = WikidataConceptsTransformer("loc_concepts", "edges", "dev")
+    source_event = ExtractorEvent(
+        pipeline_date="dev",
+        environment="prod",
+        transformer_type="wikidata_linked_loc_concepts",
+        entity_type="edges",
+    )
+    transformer = WikidataConceptsTransformer("loc_concepts", source_event)
 
     edges = list(transformer._stream_entities(entity_type="edges"))
     assert len(list(edges)) == 9

@@ -16,11 +16,9 @@ import config
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.aws import get_secret
 from utils.streaming import process_stream_in_parallel
-from utils.types import EntityType
+from utils.types import EntityType, Environment
 
 logger = structlog.get_logger(__name__)
-
-NeptuneEnvironment = typing.Literal["prod", "dev"]
 
 NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
 NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
@@ -47,7 +45,7 @@ class NeptuneClient:
     Communicates with the Neptune cluster. Makes openCypher queries, triggers bulk load operations, etc.
     """
 
-    def __init__(self, environment: NeptuneEnvironment = "prod") -> None:
+    def __init__(self, environment: Environment = "prod") -> None:
         self.session = boto3.Session()
         self.environment = environment
 

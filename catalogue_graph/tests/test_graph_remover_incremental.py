@@ -10,6 +10,8 @@ from tests.mocks import (
     MockCloudwatchClient,
     MockSmartOpen,
     add_neptune_mock_response,
+    mock_es_secrets,
+    mock_neptune_secrets,
 )
 from tests.test_utils import add_mock_merged_documents
 
@@ -96,6 +98,8 @@ def test_graph_remover_incremental_concept_nodes() -> None:
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_concepts",
@@ -109,6 +113,8 @@ def test_graph_remover_incremental_concept_nodes() -> None:
 
 
 def test_graph_remover_incremental_concept_edges() -> None:
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
     event = {
         "transformer_type": "catalogue_concepts",
         "entity_type": "edges",
@@ -129,6 +135,8 @@ def test_graph_remover_incremental_work_edges() -> None:
     # Add three visible works to the merged index.
     add_mock_merged_documents("2024-06-06", work_status="Visible")
     mock_neptune_get_total_edge_count("HAS_CONCEPT", 12345)
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
 
     # Mock HAS_CONCEPT graph relationships for all three works, some of which also exist in the merged index,
     # and some of which only exist in the graph (and should be removed).
@@ -186,6 +194,8 @@ def test_graph_remover_incremental_work_nodes() -> None:
     mock_neptune_get_existing_nodes_response(["sghsneca"])
     mock_neptune_delete_nodes_response(["sghsneca"])
     mock_neptune_get_total_node_count("Work", 100)
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_works",
@@ -216,6 +226,8 @@ def test_graph_remover_safety_mechanism() -> None:
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event: dict[str, Any] = {
         "transformer_type": "catalogue_concepts",
@@ -243,6 +255,8 @@ def test_metrics() -> None:
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_concepts",

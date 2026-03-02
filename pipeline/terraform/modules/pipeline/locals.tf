@@ -213,6 +213,11 @@ locals {
     security_group_id = local.infra_critical.rds_access_security_group_id
   }
 
+  rds_v2_config = {
+    subnet_group      = local.infra_critical.rds_subnet_group_name
+    security_group_id = local.infra_critical.rds_v2_access_security_group_id
+  }
+
   lambda_vpc_config = {
     subnet_ids = local.network_config.subnets
     security_group_ids = [

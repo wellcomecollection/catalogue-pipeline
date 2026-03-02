@@ -100,6 +100,8 @@ jobs:
     strategy:
       matrix:
         component:
+          # ID Minter V2
+          - id-minter
           # Transformer lambdas
           - transformer
           # Graph subsystem lambdas

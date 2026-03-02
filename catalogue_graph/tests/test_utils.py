@@ -2,6 +2,7 @@ import json
 import os
 from typing import Any
 
+import config
 from models.graph_edge import BaseEdge
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 from utils.ontology import get_transformers_from_ontology
@@ -34,7 +35,7 @@ def add_mock_transformer_outputs(
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
     """
     for transformer in transformers:
-        bucket_name = "wellcomecollection-catalogue-graph"
+        bucket_name = config.CATALOGUE_GRAPH_S3_BUCKETS["prod"]
         s3_uri = f"s3://{bucket_name}/graph_bulk_loader/{pipeline_date}/{transformer}__nodes.csv"
 
         try:

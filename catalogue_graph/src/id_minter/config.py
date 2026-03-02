@@ -10,6 +10,8 @@ import os
 
 from pydantic import BaseModel
 
+import utils.load_env  # noqa: F401
+
 # ---------------------------------------------------------------------------
 # RDS connectivity (identifier store)
 # ---------------------------------------------------------------------------

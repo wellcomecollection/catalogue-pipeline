@@ -11,11 +11,13 @@ from tests.mocks import (
     MockElasticsearchClient,
     MockRequest,
     MockS3Client,
+    MockSecretsManagerClient,
     MockSmartOpen,
     MockSNSClient,
     MockStepFunctionsClient,
     mock_boto3_client,
 )
+from utils.aws import get_secret
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -48,11 +50,13 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     monkeypatch.setattr("config.ES_SOURCE_SLICE_COUNT", 1)
 
     MockRequest.reset_mocks()
+    MockSecretsManagerClient.reset_mocks()
     MockSmartOpen.reset_mocks()
     MockSNSClient.reset_mocks()
     MockElasticsearchClient.reset_mocks()
     MockCloudwatchClient.reset_mocks()
     MockS3Client.reset_mocks()
     MockStepFunctionsClient.reset_mocks()
+    get_secret.cache_clear()  # Clear cached SecretsManager secrets after each test
     yield
     # Run any cleanup code here

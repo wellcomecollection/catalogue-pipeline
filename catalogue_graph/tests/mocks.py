@@ -85,12 +85,19 @@ class MockAwsService:  # pragma: no cover - structural
 
 class MockSecretsManagerClient(MockAwsService):
     secrets: dict[str, Any] = {}
+    calls: list[str] = []
+
+    @classmethod
+    def reset_mocks(cls) -> None:
+        cls.secrets = {}
+        cls.calls = []
 
     @classmethod
     def add_mock_secret(cls, secret_id: str, value: Any) -> None:
         cls.secrets[secret_id] = value
 
     def get_secret_value(self, SecretId: str) -> dict:
+        self.calls.append(SecretId)
         if SecretId in self.secrets:
             secret_value = self.secrets[SecretId]
         else:

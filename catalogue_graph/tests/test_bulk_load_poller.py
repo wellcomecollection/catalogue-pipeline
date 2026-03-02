@@ -7,7 +7,12 @@ from models.neptune_bulk_loader import (
     BulkLoadFeed,
     BulkLoadStatusResponse,
 )
-from tests.mocks import MOCK_NEPTUNE_ENDPOINT, MockCloudwatchClient, MockRequest
+from tests.mocks import (
+    MOCK_NEPTUNE_ENDPOINT,
+    MockCloudwatchClient,
+    MockRequest,
+    mock_neptune_secrets,
+)
 
 LOAD_ID = "123"
 BULK_LOADER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader"
@@ -72,12 +77,14 @@ def add_mock_status_response(
 )
 def test_bulk_load_in_progress(status: str) -> None:
     add_mock_status_response(status)
+    mock_neptune_secrets()
 
     event = {"load_id": LOAD_ID}
     response = lambda_handler(event, None)
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
+        "environment": "prod",
         "status": "IN_PROGRESS",
     }
 
@@ -91,12 +98,14 @@ def test_bulk_load_succeeded() -> None:
     add_mock_status_response(
         "LOAD_COMPLETED", record_count=record_count, duplicate_count=duplicate_count
     )
+    mock_neptune_secrets()
 
     event = {"load_id": LOAD_ID}
     response = lambda_handler(event, None)
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
+        "environment": "prod",
         "status": "SUCCEEDED",
     }
 
@@ -119,6 +128,7 @@ def test_bulk_load_failed() -> None:
         record_count=record_count,
         insert_error_count=insert_error_count,
     )
+    mock_neptune_secrets()
 
     event = {"load_id": LOAD_ID}
     with pytest.raises(Exception, match="Load failed."):
@@ -142,11 +152,13 @@ def test_bulk_load_failed_below_error_threshold() -> None:
         record_count=record_count,
         insert_error_count=insert_error_count,
     )
+    mock_neptune_secrets()
 
     event = {"load_id": LOAD_ID}
     response = lambda_handler(event, None)
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
+        "environment": "prod",
         "status": "SUCCEEDED",
     }

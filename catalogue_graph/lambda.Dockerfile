@@ -3,6 +3,11 @@ FROM public.ecr.aws/lambda/python:${PYTHON_IMAGE_VERSION} AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
+# Copy extensions for Lambda (e.g. for secrets)
+COPY infra/lambda_extensions/secrets_extension.py /opt/extensions/secrets_extension.py
+
+FROM base AS python_lambda_with_extensions
+
 # Set working directory
 WORKDIR /app
 
@@ -31,6 +36,6 @@ RUN uv pip install --system .
 # Copy application source code
 COPY src/ ${LAMBDA_TASK_ROOT}
 
-FROM base AS unified_pipeline_lambda
+FROM python_lambda_with_extensions AS unified_pipeline_lambda
 
 CMD [ "default.lambda_handler" ]

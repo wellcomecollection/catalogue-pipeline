@@ -99,6 +99,7 @@ def test_ingestor_deletions_empty_ids_file() -> None:
 
 
 def test_ingestor_deletions_line_safety_check() -> None:
+    mock_es_secrets(service_name="concepts_ingestor", pipeline_date="dev")
     # Mock a scenario which would result in a significant percentage of IDs being deleted
     mock_deleted_ids_log_file(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], "dev")
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])

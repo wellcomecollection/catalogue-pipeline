@@ -17,6 +17,7 @@ from tests.mocks import (
     MockResponseInput,
     MockSmartOpen,
     mock_es_secrets,
+    mock_neptune_secrets,
 )
 from tests.test_utils import (
     add_mock_merged_documents,
@@ -195,6 +196,8 @@ def test_incremental_mode() -> None:
         "sample_size": 100,
     }
     add_mock_merged_documents("2024-06-06", work_status="Visible")
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
     lambda_handler(event, None)
 
     expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/windows/20250505T1515-20250505T1530/catalogue_works__nodes.csv"

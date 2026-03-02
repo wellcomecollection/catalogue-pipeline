@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 import structlog
 from elasticsearch import Elasticsearch
 
-from clients.neptune_client import NeptuneClient, NeptuneEnvironment
+from clients.neptune_client import NeptuneClient
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -17,7 +17,7 @@ from ingestor.transformers.base_transformer import (
 )
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.argparse import add_cluster_connection_args, add_pipeline_event_args
+from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
@@ -45,7 +45,6 @@ def handler(
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
     load_destination: LoadDestination = "s3",
-    neptune_environment: NeptuneEnvironment = "prod",
 ) -> IngestorIndexerLambdaEvent:
     setup_logging(execution_context)
 
@@ -59,7 +58,7 @@ def handler(
     es_client = get_client(
         f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
     )
-    neptune_client = NeptuneClient(neptune_environment)
+    neptune_client = NeptuneClient(event.environment)
     transformer = create_transformer(event, es_client, neptune_client)
     objects_to_index = transformer.load_documents(event, load_destination)
 
@@ -68,13 +67,12 @@ def handler(
     record_count = sum(o.record_count for o in objects_to_index)
     total_file_size = sum(o.content_length for o in objects_to_index)
 
-    if es_mode != "local":
-        report = LoaderReport(
-            **event_payload,
-            record_count=record_count,
-            total_file_size=total_file_size,
-        )
-        report.publish()
+    report = LoaderReport(
+        **event_payload,
+        record_count=record_count,
+        total_file_size=total_file_size,
+    )
+    report.publish()
 
     if event.pass_objects_to_index:
         return IngestorIndexerLambdaEvent(
@@ -128,9 +126,16 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
 
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
-        parser, {"pipeline_date", "index_date_merged", "window", "pit_id"}
+        parser,
+        {
+            "pipeline_date",
+            "index_date_merged",
+            "window",
+            "pit_id",
+            "environment",
+            "es_mode",
+        },
     )
-    add_cluster_connection_args(parser, {"es_mode", "neptune_environment"})
 
     parser.add_argument(
         "--ingestor-type",
@@ -180,9 +185,8 @@ def local_handler(parser: ArgumentParser) -> None:
     handler(
         event,
         None,
-        args.es_mode,
-        args.load_destination,
-        args.neptune_environment,
+        es_mode=args.es_mode,
+        load_destination=args.load_destination,
     )
 
 

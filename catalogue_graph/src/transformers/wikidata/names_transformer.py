@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from models.events import EntityType
+from models.events import ExtractorEvent
 from models.graph_edge import (
     BaseEdge,
     SourceNameRelatedTo,
@@ -15,15 +15,8 @@ from .raw_concept import RawWikidataName
 
 
 class WikidataNamesTransformer(WikidataConceptsTransformer):
-    def __init__(
-        self,
-        linked_transformer: TransformerType,
-        entity_type: EntityType,
-        pipeline_date: str,
-    ):
-        self.source = WikidataLinkedOntologySource(
-            linked_transformer, entity_type, pipeline_date
-        )
+    def __init__(self, linked_transformer: TransformerType, event: ExtractorEvent):
+        self.source = WikidataLinkedOntologySource(linked_transformer, event)
 
     def transform_node(self, raw_node: dict) -> SourceName | None:
         raw_concept = RawWikidataName(raw_node)
