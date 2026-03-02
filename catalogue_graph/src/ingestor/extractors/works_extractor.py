@@ -96,12 +96,17 @@ class GraphWorksExtractor(GraphBaseExtractor):
         # Map concept IDs to concepts
         concepts = dict(concepts_extractor.extract_raw())
 
-        concepts_by_work = {}
+        concepts_by_work: dict[str, list[ExtractedConcept]] = {}
         for work in works:
-            w_id = work.state.canonical_id
-            concepts_by_work[w_id] = [
-                concepts[c_id] for c_id in concept_ids_by_work[w_id]
-            ]
+            work_id = work.state.canonical_id
+            concepts_by_work[work_id] = []
+            for concept_id in concept_ids_by_work[work_id]:
+                if concept_id in concepts:
+                    concepts_by_work[work_id].append(concepts[concept_id])
+                else:
+                    logger.warning(
+                        "Concept ID does not exist in the graph", concept_id=concept_id
+                    )
 
         return concepts_by_work
 
