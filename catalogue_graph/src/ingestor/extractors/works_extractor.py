@@ -67,6 +67,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
         self.streamed_ids: set[str] = set()
         self.related_ids: set[str] = set()
+        self.extracted_concepts: dict[str, ExtractedConcept] = {}
 
     def get_related_works_source(self, related_ids: list[str]) -> MergedWorksSource:
         # Remove `window` from event before retrieving related works. (All related works should be processed
@@ -77,6 +78,18 @@ class GraphWorksExtractor(GraphBaseExtractor):
             query=get_related_works_query(related_ids),
             es_client=self.es_client,
         )
+
+    def _extract_concepts(self, concept_ids: set[str]) -> None:
+        # Cache extracted concepts to ensure each concept is only processed once,
+        # even if it appears in multiple work batches
+        concept_ids_to_extract = concept_ids.difference(
+            set(self.extracted_concepts.keys())
+        )
+        concepts_extractor = WorkConceptsExtractor(
+            self.neptune_client, concept_ids_to_extract
+        )
+        for concept_id, concept in concepts_extractor.extract_raw():
+            self.extracted_concepts[concept_id] = concept
 
     def _get_work_ancestors(self, ids: list[str]) -> dict:
         """Return all ancestors of each work in the current batch."""
@@ -95,17 +108,17 @@ class GraphWorksExtractor(GraphBaseExtractor):
             concept_ids_by_work[work.state.canonical_id] = work_concept_ids
             all_concept_ids |= set(work_concept_ids)
 
-        # Map concept IDs to extracted concepts
-        concepts_extractor = WorkConceptsExtractor(self.neptune_client, all_concept_ids)
-        concepts = dict(concepts_extractor.extract_raw())
+        self._extract_concepts(all_concept_ids)
 
         concepts_by_work: dict[str, list[ExtractedConcept]] = {}
         for work in works:
             work_id = work.state.canonical_id
             concepts_by_work[work_id] = []
             for concept_id in concept_ids_by_work[work_id]:
-                if concept_id in concepts:
-                    concepts_by_work[work_id].append(concepts[concept_id])
+                if concept_id in self.extracted_concepts:
+                    concepts_by_work[work_id].append(
+                        self.extracted_concepts[concept_id]
+                    )
                 else:
                     logger.warning(
                         "Concept ID does not exist in the graph", concept_id=concept_id
