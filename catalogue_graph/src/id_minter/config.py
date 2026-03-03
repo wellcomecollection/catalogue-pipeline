@@ -66,26 +66,26 @@ class RDSClientConfig(BaseModel):
     max_connections: int = RDS_MAX_CONNECTIONS
 
 
-class IdentifiersTableConfig(BaseModel):
-    database: str = IDENTIFIERS_DATABASE
-    table_name: str = IDENTIFIERS_TABLE_NAME
+# class IdentifiersTableConfig(BaseModel):
+#     database: str = IDENTIFIERS_DATABASE
+#     table_name: str = IDENTIFIERS_TABLE_NAME
 
 
-class CanonicalIdsTableConfig(BaseModel):
-    database: str = IDENTIFIERS_DATABASE
-    table_name: str = CANONICAL_IDS_TABLE_NAME
+# class CanonicalIdsTableConfig(BaseModel):
+#     database: str = IDENTIFIERS_DATABASE
+#     table_name: str = CANONICAL_IDS_TABLE_NAME
 
 
 class DBConfig(BaseModel):
     """Base config for database access."""
 
     rds_client: RDSClientConfig = RDSClientConfig()
-    db_table: IdentifiersTableConfig | CanonicalIdsTableConfig
+    db_name: str = IDENTIFIERS_DATABASE
     apply_migrations: bool = APPLY_MIGRATIONS
 
 
 class IdMinterConfig(DBConfig):
-    db_table: IdentifiersTableConfig = IdentifiersTableConfig()
+    db_table: str = IDENTIFIERS_TABLE_NAME
     source_index: str = ES_SOURCE_INDEX
     target_index: str = ES_TARGET_INDEX
     downstream_sns_topic_arn: str | None = DOWNSTREAM_SNS_TOPIC_ARN
@@ -97,7 +97,7 @@ ID_MINTER_CONFIG = IdMinterConfig()
 
 
 class IdGeneratorConfig(DBConfig):
-    db_table: CanonicalIdsTableConfig = CanonicalIdsTableConfig()
+    db_table: str = CANONICAL_IDS_TABLE_NAME
     pipeline_date: str = PIPELINE_DATE
     desired_free_ids_count: int = IDS_GENERATOR_DESIRED_FREE_IDS_COUNT
 

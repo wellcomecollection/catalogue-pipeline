@@ -45,7 +45,7 @@ def get_connection(config: DBConfig) -> DBConnection:
             port=config.rds_client.port,
             user=config.rds_client.username,
             password=config.rds_client.password,
-            database=config.db_table.database,
+            database=config.db_name,
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=False,
         ),
@@ -59,7 +59,7 @@ def apply_migrations(config: DBConfig) -> None:
         f":{quote(config.rds_client.password, safe='')}"
         f"@{config.rds_client.primary_host}"
         f":{config.rds_client.port}"
-        f"/{config.db_table.database}"
+        f"/{config.db_name}"
     )
     backend = get_backend(dsn)
     migrations = read_migrations(MIGRATIONS_DIR)
