@@ -116,10 +116,6 @@ module "ids_generator_lambda" {
   service_name  = "ids_generator"
 
   environment_variables = {
-    IDENTIFIERS_DATABASE                 = "identifiers"
-    CANONICAL_IDS_TABLE_NAME             = "canonical_ids"
-    IDS_GENERATOR_DESIRED_FREE_IDS_COUNT = "1000"
-    APPLY_MIGRATIONS                     = "false"
     PIPELINE_DATE                        = var.pipeline_date
   }
 

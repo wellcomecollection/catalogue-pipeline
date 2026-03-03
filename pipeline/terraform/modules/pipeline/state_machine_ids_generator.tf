@@ -45,10 +45,10 @@ module "minter_ids_generator_state_machine_alarms" {
 resource "aws_scheduler_schedule" "minter_ids_generator_schedule" {
   name = "minter-ids-generator-schedule-${var.pipeline_date}"
   
-  schedule_expression = "cron(0 3 ? * MON-FRI *)"  # Monday to Friday at 3am UTC
+  schedule_expression = "cron(0 5 ? * MON-FRI *)"  # Monday to Friday at 5am UTC
   
   flexible_time_window {
-    mode = "ON"
+    mode = "FLEXIBLE"
   }
   
   target {

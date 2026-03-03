@@ -50,7 +50,7 @@ APPLY_MIGRATIONS = os.getenv("APPLY_MIGRATIONS", "false").lower() in (
     "yes",
 )
 IDS_GENERATOR_DESIRED_FREE_IDS_COUNT = int(
-    os.getenv("IDS_GENERATOR_DESIRED_FREE_IDS_COUNT", "1000")
+    os.getenv("IDS_GENERATOR_DESIRED_FREE_IDS_COUNT", "10000")
 )
 
 
@@ -71,30 +71,34 @@ class IdentifiersTableConfig(BaseModel):
     table_name: str = IDENTIFIERS_TABLE_NAME
 
 
-class IdMinterConfig(BaseModel):
+class CanonicalIdsTableConfig(BaseModel):
+    database: str = IDENTIFIERS_DATABASE
+    table_name: str = CANONICAL_IDS_TABLE_NAME
+
+
+class DBConfig(BaseModel):
+    """Base config for database access."""
+
     rds_client: RDSClientConfig = RDSClientConfig()
+    db_table: IdentifiersTableConfig | CanonicalIdsTableConfig
+    apply_migrations: bool = APPLY_MIGRATIONS
+
+
+class IdMinterConfig(DBConfig):
     db_table: IdentifiersTableConfig = IdentifiersTableConfig()
     source_index: str = ES_SOURCE_INDEX
     target_index: str = ES_TARGET_INDEX
     downstream_sns_topic_arn: str | None = DOWNSTREAM_SNS_TOPIC_ARN
     pipeline_date: str = PIPELINE_DATE
-    apply_migrations: bool = APPLY_MIGRATIONS
 
 
 # Default id_minter config instance, built from environment variables.
 ID_MINTER_CONFIG = IdMinterConfig()
 
 
-class CanonicalIdsTableConfig(BaseModel):
-    database: str = IDENTIFIERS_DATABASE
-    table_name: str = CANONICAL_IDS_TABLE_NAME
-
-
-class IdGeneratorConfig(BaseModel):
-    rds_client: RDSClientConfig = RDSClientConfig()
+class IdGeneratorConfig(DBConfig):
     db_table: CanonicalIdsTableConfig = CanonicalIdsTableConfig()
     pipeline_date: str = PIPELINE_DATE
-    apply_migrations: bool = APPLY_MIGRATIONS
     desired_free_ids_count: int = IDS_GENERATOR_DESIRED_FREE_IDS_COUNT
 
 
