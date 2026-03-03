@@ -15,7 +15,8 @@ src/id_minter/
 ├── models/
 │   └── step_events.py         # StepFunctionMintingRequest/Response
 └── steps/
-    └── id_minter.py           # Lambda handler + CLI entry point
+    ├── id_minter.py           # Lambda handler + CLI entry point
+    └── ids_generator.py       # ID pre-generation Lambda + CLI entry point
 ```
 
 ## Running locally
@@ -64,7 +65,7 @@ docker compose -f mysql.docker-compose.yml down -v
 The ID Generator pre-generates canonical IDs to maintain a pool of free IDs for the id_minter.
 
 ```bash
-uv run python -m id_minter.ids_generator --apply-migrations --desired-free-ids-count 10
+uv run python -m id_minter.steps.ids_generator --apply-migrations --desired-free-ids-count 10
 ```
 
 Environment variables are set as default in `config.py`. The generator will:
@@ -98,7 +99,7 @@ The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects
 
 ### ids_generator
 
-The Lambda entry point is `id_minter.ids_generator.lambda_handler`. It takes an empty event payload and returns:
+The Lambda entry point is `id_minter.steps.ids_generator.lambda_handler`. It takes an empty event payload and returns:
 
 ```json
 {

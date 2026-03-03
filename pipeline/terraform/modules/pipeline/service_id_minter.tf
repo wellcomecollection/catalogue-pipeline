@@ -128,7 +128,7 @@ module "ids_generator_lambda" {
   timeout = 60 * 5 # 5 Minutes
 
   image_config = {
-    command = ["id_minter.ids_generator.ids_generator.lambda_handler"]
+    command = ["id_minter.steps.ids_generator.lambda_handler"]
   }
 
   ecr_repository_name = "uk.ac.wellcome/unified_pipeline_lambda"
