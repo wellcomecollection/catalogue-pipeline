@@ -136,7 +136,7 @@ def test_multiple_works(monkeypatch: pytest.MonkeyPatch) -> None:
     for work_id in ["123", "456"]:
         mock_es_work(work_id)
 
-    # Add mock graph relationships to one of the works
+    # Add mock graph relationships for both works (concepts for all, hierarchy for 456)
     mock_graph_relationships(
         monkeypatch, "456", ["123", "456"], ["concepts", "ancestors", "children"]
     )
