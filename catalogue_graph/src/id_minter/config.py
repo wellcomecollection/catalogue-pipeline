@@ -19,14 +19,15 @@ RDS_PRIMARY_HOST = os.getenv("RDS_PRIMARY_HOST", "localhost")
 RDS_REPLICA_HOST = os.getenv("RDS_REPLICA_HOST", RDS_PRIMARY_HOST)
 RDS_PORT = int(os.getenv("RDS_PORT", "3306"))
 RDS_USERNAME = os.getenv("RDS_USERNAME", "id_minter")
-RDS_PASSWORD = os.getenv("RDS_PASSWORD", "")
+RDS_PASSWORD = os.getenv("RDS_PASSWORD", "id_minter")
 RDS_MAX_CONNECTIONS = int(os.getenv("RDS_MAX_CONNECTIONS", "8"))
 
 # ---------------------------------------------------------------------------
-# Identifiers table
+# Identifiers database and tables
 # ---------------------------------------------------------------------------
 IDENTIFIERS_DATABASE = os.getenv("IDENTIFIERS_DATABASE", "identifiers")
 IDENTIFIERS_TABLE_NAME = os.getenv("IDENTIFIERS_TABLE_NAME", "identifiers")
+CANONICAL_IDS_TABLE_NAME = os.getenv("CANONICAL_IDS_TABLE_NAME", "canonical_ids")
 
 # ---------------------------------------------------------------------------
 # Elasticsearch indices
@@ -48,6 +49,9 @@ APPLY_MIGRATIONS = os.getenv("APPLY_MIGRATIONS", "false").lower() in (
     "1",
     "yes",
 )
+ID_GENERATOR_DESIRED_FREE_IDS_COUNT = int(
+    os.getenv("ID_GENERATOR_DESIRED_FREE_IDS_COUNT", "10000")
+)
 
 
 # ---------------------------------------------------------------------------
@@ -62,20 +66,41 @@ class RDSClientConfig(BaseModel):
     max_connections: int = RDS_MAX_CONNECTIONS
 
 
-class IdentifiersTableConfig(BaseModel):
-    database: str = IDENTIFIERS_DATABASE
-    table_name: str = IDENTIFIERS_TABLE_NAME
+# class IdentifiersTableConfig(BaseModel):
+#     database: str = IDENTIFIERS_DATABASE
+#     table_name: str = IDENTIFIERS_TABLE_NAME
 
 
-class IdMinterConfig(BaseModel):
+# class CanonicalIdsTableConfig(BaseModel):
+#     database: str = IDENTIFIERS_DATABASE
+#     table_name: str = CANONICAL_IDS_TABLE_NAME
+
+
+class DBConfig(BaseModel):
+    """Base config for database access."""
+
     rds_client: RDSClientConfig = RDSClientConfig()
-    identifiers_table: IdentifiersTableConfig = IdentifiersTableConfig()
+    db_name: str = IDENTIFIERS_DATABASE
+    apply_migrations: bool = APPLY_MIGRATIONS
+
+
+class IdMinterConfig(DBConfig):
+    db_table: str = IDENTIFIERS_TABLE_NAME
     source_index: str = ES_SOURCE_INDEX
     target_index: str = ES_TARGET_INDEX
     downstream_sns_topic_arn: str | None = DOWNSTREAM_SNS_TOPIC_ARN
     pipeline_date: str = PIPELINE_DATE
-    apply_migrations: bool = APPLY_MIGRATIONS
 
 
-# Default config instance, built from environment variables.
+# Default id_minter config instance, built from environment variables.
 ID_MINTER_CONFIG = IdMinterConfig()
+
+
+class IdGeneratorConfig(DBConfig):
+    db_table: str = CANONICAL_IDS_TABLE_NAME
+    pipeline_date: str = PIPELINE_DATE
+    desired_free_ids_count: int = ID_GENERATOR_DESIRED_FREE_IDS_COUNT
+
+
+# Default id_generator config instance, built from environment variables.
+ID_GENERATOR_CONFIG = IdGeneratorConfig()
