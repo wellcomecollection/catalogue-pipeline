@@ -45,6 +45,7 @@ resource "aws_backup_selection" "id_minter" {
 
   resources = [
     module.identifiers_serverless_rds_cluster.rds_cluster_arn,
-    module.identifiers_v2_serverless_rds_cluster.rds_cluster_arn
+    # Backup not needed yet! Enable this when migration related work has been completed.
+    # module.identifiers_v2_serverless_rds_cluster.rds_cluster_arn
   ]
 }

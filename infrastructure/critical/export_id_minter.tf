@@ -500,12 +500,15 @@ resource "aws_cloudwatch_event_bus" "id_minter" {
 
 resource "aws_cloudwatch_event_rule" "export_completed" {
   name           = "id-minter-export-completed"
-  description    = "Fires when the export state machine emits an Export Completed event"
+  description    = "Fires when the old cluster export completes — only identifiers-serverless triggers migration"
   event_bus_name = aws_cloudwatch_event_bus.id_minter.name
 
   event_pattern = jsonencode({
     source      = ["catalogue-pipeline.id-minter"]
     detail-type = ["Export Completed"]
+    detail = {
+      cluster_name = ["identifiers-serverless"]
+    }
   })
 }
 
