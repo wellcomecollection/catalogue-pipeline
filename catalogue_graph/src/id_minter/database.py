@@ -15,7 +15,7 @@ import pymysql.cursors
 import structlog
 from yoyo import get_backend, read_migrations
 
-from id_minter.config import IdMinterConfig
+from id_minter.config import DBConfig
 
 logger = structlog.get_logger(__name__)
 
@@ -36,7 +36,7 @@ class DBConnection[T: DBCursor](Protocol):
     def commit(self) -> None: ...
 
 
-def get_connection(config: IdMinterConfig) -> DBConnection:
+def get_connection(config: DBConfig) -> DBConnection:
     """Open a new pymysql connection using the ID Minter config."""
     return cast(
         DBConnection,
@@ -45,21 +45,21 @@ def get_connection(config: IdMinterConfig) -> DBConnection:
             port=config.rds_client.port,
             user=config.rds_client.username,
             password=config.rds_client.password,
-            database=config.identifiers_table.database,
+            database=config.db_name,
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=False,
         ),
     )
 
 
-def apply_migrations(config: IdMinterConfig) -> None:
+def apply_migrations(config: DBConfig) -> None:
     """Apply yoyo migrations against the configured database."""
     dsn = (
         f"mysql://{quote(config.rds_client.username, safe='')}"
         f":{quote(config.rds_client.password, safe='')}"
         f"@{config.rds_client.primary_host}"
         f":{config.rds_client.port}"
-        f"/{config.identifiers_table.database}"
+        f"/{config.db_name}"
     )
     backend = get_backend(dsn)
     migrations = read_migrations(MIGRATIONS_DIR)

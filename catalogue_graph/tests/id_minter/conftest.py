@@ -59,7 +59,7 @@ def ids_db(mysql_schema: None) -> Generator[pymysql.connections.Connection]:
         user="id_minter",
         password="id_minter",
         database="identifiers",
-        cursorclass=pymysql.cursors.Cursor,
+        cursorclass=pymysql.cursors.DictCursor,
         autocommit=False,
     )
     yield conn
