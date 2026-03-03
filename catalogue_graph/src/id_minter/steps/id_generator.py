@@ -58,7 +58,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
     runtime = build_runtime()
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
-        pipeline_step="ids_generator",
+        pipeline_step="id_generator",
     )
     return handler(runtime, execution_context)
 
@@ -91,7 +91,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
 
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
-        pipeline_step="ids_generator",
+        pipeline_step="id_generator",
     )
 
     handler(runtime, execution_context)

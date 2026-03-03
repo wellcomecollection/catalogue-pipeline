@@ -49,8 +49,8 @@ APPLY_MIGRATIONS = os.getenv("APPLY_MIGRATIONS", "false").lower() in (
     "1",
     "yes",
 )
-IDS_GENERATOR_DESIRED_FREE_IDS_COUNT = int(
-    os.getenv("IDS_GENERATOR_DESIRED_FREE_IDS_COUNT", "10000")
+ID_GENERATOR_DESIRED_FREE_IDS_COUNT = int(
+    os.getenv("ID_GENERATOR_DESIRED_FREE_IDS_COUNT", "10000")
 )
 
 
@@ -99,7 +99,7 @@ ID_MINTER_CONFIG = IdMinterConfig()
 class IdGeneratorConfig(DBConfig):
     db_table: str = CANONICAL_IDS_TABLE_NAME
     pipeline_date: str = PIPELINE_DATE
-    desired_free_ids_count: int = IDS_GENERATOR_DESIRED_FREE_IDS_COUNT
+    desired_free_ids_count: int = ID_GENERATOR_DESIRED_FREE_IDS_COUNT
 
 
 # Default id_generator config instance, built from environment variables.

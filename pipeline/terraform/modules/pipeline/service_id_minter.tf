@@ -108,12 +108,12 @@ module "id_minter_lambda" {
 }
 
 # this is the companion to the new version of the id_minter, which pre-generates canonical IDs
-module "ids_generator_lambda" {
+module "id_generator_lambda" {
   source = "../pipeline_lambda"
 
   description   = "Lambda to pre-generate canonical IDs"
   pipeline_date = var.pipeline_date
-  service_name  = "ids_generator"
+  service_name  = "id_generator"
 
   environment_variables = {
     PIPELINE_DATE = var.pipeline_date
@@ -128,7 +128,7 @@ module "ids_generator_lambda" {
   timeout = 60 * 5 # 5 Minutes
 
   image_config = {
-    command = ["id_minter.steps.ids_generator.lambda_handler"]
+    command = ["id_minter.steps.id_generator.lambda_handler"]
   }
 
   ecr_repository_name = "uk.ac.wellcome/unified_pipeline_lambda"

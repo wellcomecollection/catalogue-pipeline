@@ -16,7 +16,7 @@ src/id_minter/
 │   └── step_events.py         # StepFunctionMintingRequest/Response
 └── steps/
     ├── id_minter.py           # Lambda handler + CLI entry point
-    └── ids_generator.py       # ID pre-generation Lambda + CLI entry point
+    └── id_generator.py       # ID pre-generation Lambda + CLI entry point
 ```
 
 ## Running locally
@@ -30,7 +30,7 @@ docker compose -f mysql.docker-compose.yml up -d
 ```
 
 This starts a MySQL 8.0 container with an `identifiers` database and an `id_minter` user.  
-It can be used to locally run the id_minter and ids_generator, see below
+It can be used to locally run the id_minter and id_generator, see below
 
 #### 1. Run the id_minter
 
@@ -60,17 +60,17 @@ docker exec id-minter-mysql mysql -u id_minter -pid_minter identifiers \
 docker compose -f mysql.docker-compose.yml down -v
 ```
 
-#### 1. Run the ids_generator
+#### 1. Run the id_generator
 
 The ID Generator pre-generates canonical IDs to maintain a pool of free IDs for the id_minter.
 
 ```bash
-uv run python -m id_minter.steps.ids_generator --apply-migrations --desired-free-ids-count 10
+uv run python -m id_minter.steps.id_generator --apply-migrations --desired-free-ids-count 10
 ```
 
 Environment variables are set as default in `config.py`. The generator will:
 - Apply migrations (creates the `canonical_ids` table if it doesn't exist)
-- Generate IDs until the count reaches `--desired-free-ids-count`. If omitted, defaults to  `IDS_GENERATOR_DESIRED_FREE_IDS_COUNT` in config
+- Generate IDs until the count reaches `--desired-free-ids-count`. If omitted, defaults to  `ID_GENERATOR_DESIRED_FREE_IDS_COUNT` in config
 
 #### 2. Verify the ID pool
 
@@ -97,9 +97,9 @@ The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects
 }
 ```
 
-### ids_generator
+### id_generator
 
-The Lambda entry point is `id_minter.steps.ids_generator.lambda_handler`. It takes an empty event payload and returns:
+The Lambda entry point is `id_minter.steps.id_generator.lambda_handler`. It takes an empty event payload and returns:
 
 ```json
 {
