@@ -44,13 +44,13 @@ module "minter_ids_generator_state_machine_alarms" {
 
 resource "aws_scheduler_schedule" "minter_ids_generator_schedule" {
   name = "minter-ids-generator-schedule-${var.pipeline_date}"
-  
-  schedule_expression = "cron(0 5 ? * MON-FRI *)"  # Monday to Friday at 5am UTC
-  
+
+  schedule_expression = "cron(0 5 ? * MON-FRI *)" # Monday to Friday at 5am UTC
+
   flexible_time_window {
     mode = "FLEXIBLE"
   }
-  
+
   target {
     arn      = module.minter_ids_generator_state_machine.state_machine_arn
     role_arn = aws_iam_role.run_minter_ids_generator_role.arn
@@ -59,16 +59,16 @@ resource "aws_scheduler_schedule" "minter_ids_generator_schedule" {
 
 resource "aws_iam_role" "run_minter_ids_generator_role" {
   name = "run-minter-ids-generator-role-${var.pipeline_date}"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Effect    = "Allow"
-        Principal = { 
-          Service = "scheduler.amazonaws.com" 
+        Effect = "Allow"
+        Principal = {
+          Service = "scheduler.amazonaws.com"
         }
-        Action    = "sts:AssumeRole"
+        Action = "sts:AssumeRole"
       }
     ]
   })
@@ -76,7 +76,7 @@ resource "aws_iam_role" "run_minter_ids_generator_role" {
 
 resource "aws_iam_role_policy" "run_minter_ids_generator_policy" {
   role = aws_iam_role.run_minter_ids_generator_role.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
