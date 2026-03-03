@@ -106,30 +106,3 @@ module "id_minter_lambda" {
   id_minter_env_vars        = local.id_minter_v2_env_vars
   id_minter_secret_env_vars = local.id_minter_v2_secret_env_vars
 }
-
-# this is the companion to the new version of the id_minter, which pre-generates canonical IDs
-module "id_generator_lambda" {
-  source = "../pipeline_lambda"
-
-  description   = "Lambda to pre-generate canonical IDs"
-  pipeline_date = var.pipeline_date
-  service_name  = "id_generator"
-
-  environment_variables = {
-    PIPELINE_DATE = var.pipeline_date
-  }
-
-  vpc_config = local.id_minter_v2_vpc_config
-
-  secret_env_vars = local.id_minter_v2_secret_env_vars
-
-  memory_size = 1024
-
-  timeout = 60 * 5 # 5 Minutes
-
-  image_config = {
-    command = ["id_minter.steps.id_generator.lambda_handler"]
-  }
-
-  ecr_repository_name = "uk.ac.wellcome/unified_pipeline_lambda"
-}

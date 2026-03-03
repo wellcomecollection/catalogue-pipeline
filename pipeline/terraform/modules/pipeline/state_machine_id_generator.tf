@@ -3,7 +3,7 @@ module "minter_id_generator_state_machine" {
 
   name                     = "pipeline-${var.pipeline_date}_minter_id_generator"
   state_machine_definition = local.state_machine_definition
-  invokable_lambda_arns    = [module.id_generator_lambda.lambda_arn]
+  invokable_lambda_arns    = [module.id_minter_lambda.id_generator_lambda_arn]
 }
 
 locals {
@@ -17,7 +17,7 @@ locals {
         "Resource" : "arn:aws:states:::lambda:invoke",
         "OutputPath" : "$.Payload",
         "Parameters" : {
-          "FunctionName" : module.id_generator_lambda.lambda_arn,
+          "FunctionName" : module.id_minter_lambda.id_generator_lambda_arn,
           "Payload.$" : "$"
         },
         "Next" : "Success"
