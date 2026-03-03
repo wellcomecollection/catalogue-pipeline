@@ -3,11 +3,12 @@ from collections import defaultdict
 from collections.abc import Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
-from typing import Any, get_args
+from typing import get_args
 
 import structlog
 
 from clients.neptune_client import NeptuneClient
+from ingestor.models.neptune.node import SourceConceptNode
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,
@@ -86,7 +87,7 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
 
     def _resolve_source_concepts(
         self, concept_id: str, source_concepts_batch: dict[str, dict]
-    ) -> list[Any]:
+    ) -> list[SourceConceptNode]:
         """
         If a source concept `SC` is connected to some concept `C`, `SC` is included on all concepts synonymous with `C`.
         """
@@ -94,7 +95,9 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
         for same_as_id in self.get_same_as(concept_id):
             source = source_concepts_batch.get(same_as_id, {})
             for linked_sc in source.get("source_concepts", []):
-                resolved_source_concepts[linked_sc["~id"]] = linked_sc
+                resolved_source_concepts[linked_sc["~id"]] = (
+                    SourceConceptNode.model_validate(linked_sc)
+                )
 
         return list(resolved_source_concepts.values())
 
