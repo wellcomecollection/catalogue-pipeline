@@ -114,6 +114,7 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
 
     except Exception as exc:
         step_output.send_failure(exc)
+        raise
 
 
 def create_job_id() -> str:

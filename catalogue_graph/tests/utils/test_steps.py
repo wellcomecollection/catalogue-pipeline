@@ -105,7 +105,10 @@ def test_run_ecs_handler_reports_failure(
         ],
     )
 
-    with caplog.at_level(logging.ERROR):
+    with (
+        caplog.at_level(logging.ERROR),
+        pytest.raises(RuntimeError, match="unexpected kaboom"),
+    ):
         run_ecs_handler(
             arg_parser=parser,
             handler=handler,

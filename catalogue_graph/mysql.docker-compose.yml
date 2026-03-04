@@ -7,6 +7,7 @@ services:
       MYSQL_DATABASE: identifiers
       MYSQL_USER: id_minter
       MYSQL_PASSWORD: id_minter
+    command: --local-infile=1
     ports:
       - "3306:3306"
     volumes:

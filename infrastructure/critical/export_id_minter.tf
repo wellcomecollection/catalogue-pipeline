@@ -251,7 +251,7 @@ locals {
           {
             Variable     = "$.exportStatus.Status"
             StringEquals = "COMPLETE"
-            Next         = "ExportSucceeded"
+            Next         = "PrepareExportEvent"
           },
           {
             Variable     = "$.exportStatus.Status"
@@ -265,6 +265,41 @@ locals {
           },
         ]
         Default = "WaitForExport"
+      }
+
+      PrepareExportEvent = {
+        Type = "Pass"
+        Parameters = {
+          "export_date.$"  = "States.ArrayGetItem(States.StringSplit($$.Execution.StartTime, 'T'), 0)"
+          "cluster_name.$" = "$.detail.resourceName"
+          truncate         = true
+        }
+        ResultPath = "$.migrationInput"
+        Next       = "NotifyExportCompleted"
+      }
+
+      NotifyExportCompleted = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::events:putEvents"
+        Parameters = {
+          Entries = [
+            {
+              Source       = "catalogue-pipeline.id-minter"
+              DetailType   = "Export Completed"
+              EventBusName = aws_cloudwatch_event_bus.id_minter.name
+              "Detail.$"   = "States.JsonToString($.migrationInput)"
+            }
+          ]
+        }
+        ResultPath = null
+        Next       = "ExportSucceeded"
+        Catch = [
+          {
+            ErrorEquals = ["States.ALL"]
+            Next        = "NotifyFailure"
+            ResultPath  = "$.error"
+          }
+        ]
       }
 
       ExportSucceeded = {
@@ -378,6 +413,20 @@ resource "aws_iam_role_policy" "export_sfn_logging" {
   })
 }
 
+resource "aws_iam_role_policy" "export_sfn_eventbridge" {
+  name = "eventbridge-put-events"
+  role = aws_iam_role.export_state_machine.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "events:PutEvents"
+      Resource = aws_cloudwatch_event_bus.id_minter.arn
+    }]
+  })
+}
+
 resource "aws_sfn_state_machine" "rds_export" {
   name       = "id-minter-rds-export"
   role_arn   = aws_iam_role.export_state_machine.arn
@@ -439,4 +488,61 @@ resource "aws_cloudwatch_event_target" "start_export" {
   rule     = aws_cloudwatch_event_rule.backup_completed.name
   arn      = aws_sfn_state_machine.rds_export.arn
   role_arn = aws_iam_role.eventbridge_export.arn
+}
+
+# -------------------------------------------------------
+# EventBridge – trigger migration after export completes
+# -------------------------------------------------------
+
+resource "aws_cloudwatch_event_bus" "id_minter" {
+  name = "catalogue-pipeline-id-minter"
+}
+
+resource "aws_cloudwatch_event_rule" "export_completed" {
+  name           = "id-minter-export-completed"
+  description    = "Fires when the old cluster export completes — only identifiers-serverless triggers migration"
+  event_bus_name = aws_cloudwatch_event_bus.id_minter.name
+
+  event_pattern = jsonencode({
+    source      = ["catalogue-pipeline.id-minter"]
+    detail-type = ["Export Completed"]
+    detail = {
+      cluster_name = ["identifiers-serverless"]
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "start_migration" {
+  rule           = aws_cloudwatch_event_rule.export_completed.name
+  event_bus_name = aws_cloudwatch_event_bus.id_minter.name
+  arn            = module.migration_state_machine.state_machine_arn
+  role_arn       = aws_iam_role.eventbridge_migration.arn
+  input_path     = "$.detail"
+}
+
+resource "aws_iam_role" "eventbridge_migration" {
+  name = "id-minter-migration-eventbridge"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "events.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "eventbridge_migration_sfn" {
+  name = "start-execution"
+  role = aws_iam_role.eventbridge_migration.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "states:StartExecution"
+      Resource = module.migration_state_machine.state_machine_arn
+    }]
+  })
 }
