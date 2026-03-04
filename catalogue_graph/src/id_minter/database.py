@@ -7,7 +7,7 @@ identifiers database — following the schema defined in RFC 083.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 from urllib.parse import quote
 
 import pymysql
@@ -25,7 +25,7 @@ MIGRATIONS_DIR = str(Path(__file__).parent / "migrations")
 class DBCursor(Protocol):
     def execute(self, q: str) -> None: ...
 
-    def fetchone(self) -> tuple[int]: ...
+    def fetchone(self) -> dict[str, Any]: ...
 
     def executemany(self, q: str, args: list[tuple]) -> None: ...
 
@@ -35,8 +35,10 @@ class DBConnection[T: DBCursor](Protocol):
 
     def commit(self) -> None: ...
 
+    def close(self) -> None: ...
 
-def get_connection(config: DBConfig) -> DBConnection:
+
+def get_connection(config: DBConfig, *, local_infile: bool = False) -> DBConnection:
     """Open a new pymysql connection using the ID Minter config."""
     return cast(
         DBConnection,
@@ -48,6 +50,7 @@ def get_connection(config: DBConfig) -> DBConnection:
             database=config.db_name,
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=False,
+            local_infile=local_infile,
         ),
     )
 

@@ -24,11 +24,10 @@ from pathlib import Path
 from typing import Any
 
 import boto3
-import pymysql
 import structlog
 
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
-from id_minter.database import apply_migrations
+from id_minter.database import DBConnection, apply_migrations, get_connection
 from id_minter.migrate import migrate_from_parquet
 from id_minter.models.step_events import MigrationRequest, MigrationResponse
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -97,7 +96,7 @@ def download_parquet_from_s3(
 
 
 def verify_migration(
-    conn: pymysql.connections.Connection,
+    conn: DBConnection,
 ) -> tuple[int, int, int]:
     """Run post-migration integrity checks.
 
@@ -105,18 +104,18 @@ def verify_migration(
     """
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM canonical_ids")
-    (canonical_count,) = cursor.fetchone()
+    cursor.execute("SELECT COUNT(*) AS cnt FROM canonical_ids")
+    canonical_count = cursor.fetchone()["cnt"]
 
-    cursor.execute("SELECT COUNT(*) FROM identifiers")
-    (identifiers_count,) = cursor.fetchone()
+    cursor.execute("SELECT COUNT(*) AS cnt FROM identifiers")
+    identifiers_count = cursor.fetchone()["cnt"]
 
     cursor.execute(
-        "SELECT COUNT(*) FROM identifiers i "
+        "SELECT COUNT(*) AS cnt FROM identifiers i "
         "LEFT JOIN canonical_ids c ON i.CanonicalId = c.CanonicalId "
         "WHERE c.CanonicalId IS NULL"
     )
-    (orphaned_count,) = cursor.fetchone()
+    orphaned_count = cursor.fetchone()["cnt"]
 
     if orphaned_count > 0:
         raise RuntimeError(
@@ -155,15 +154,7 @@ def handler(
     try:
         parquet_dir = download_parquet_from_s3(event, work_dir)
 
-        conn = pymysql.connect(
-            host=cfg.rds_client.primary_host,
-            port=cfg.rds_client.port,
-            user=cfg.rds_client.username,
-            password=cfg.rds_client.password,
-            database=cfg.identifiers_table.database,
-            autocommit=False,
-            local_infile=True,
-        )
+        conn = get_connection(cfg, local_infile=True)
         try:
             result = migrate_from_parquet(
                 conn,

@@ -106,15 +106,16 @@ def test_run_ecs_handler_reports_failure(
     )
 
     with caplog.at_level(logging.ERROR):
-        run_ecs_handler(
-            arg_parser=parser,
-            handler=handler,
-            event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
-        )
+        with pytest.raises(RuntimeError, match="unexpected kaboom"):
+            run_ecs_handler(
+                arg_parser=parser,
+                handler=handler,
+                event_validator=ExampleEvent.model_validate_json,
+                execution_context=ExecutionContext(
+                    trace_id="test-trace-id",
+                    pipeline_step="test_step",
+                ),
+            )
 
     assert MockStepFunctionsClient.task_successes == []
     assert len(MockStepFunctionsClient.task_failures) == 1
