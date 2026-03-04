@@ -29,15 +29,17 @@ import string
 import pytest
 
 from id_minter.embedder import (
-    CONCEPT_SUBTYPES,
-    SourceId,
-    SourceIdentifierKey,
     embed_canonical_ids,
     extract_source_identifiers,
     make_key,
     normalize_ontology_type,
     process_work,
     scan,
+)
+from id_minter.models.identifier import (
+    CONCEPT_SUBTYPES,
+    SourceId,
+    SourceIdentifierKey,
 )
 
 IDENTIFIER_TYPES = [
