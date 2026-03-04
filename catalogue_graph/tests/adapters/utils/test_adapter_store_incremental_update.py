@@ -8,9 +8,9 @@ ensures newer data isn't overwritten by older data.
 """
 
 import pyarrow as pa
+from adapters.utils.adapter_store import AdapterStore
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.utils.adapter_store import AdapterStore
 from tests.adapters.conftest import records_to_table
 
 
@@ -497,7 +497,7 @@ def test_incremental_update_raises_on_non_castable_schema(
 
     import pytest
 
-    # Missing the required 'deleted' field from ARROW_SCHEMA.
+    # Missing the required 'deleted' field from ADAPTER_STORE_ARROW_SCHEMA.
     bad_fields: list[pa.Field] = [
         pa.field("namespace", pa.string(), nullable=False),
         pa.field("id", pa.string(), nullable=False),
@@ -519,7 +519,7 @@ def test_incremental_update_raises_on_non_castable_schema(
     )
 
     client = AdapterStore(temporary_table)
-    with pytest.raises(ValueError, match=r"incremental_update.*ARROW_SCHEMA"):
+    with pytest.raises(ValueError, match=r"incremental_update.*ADAPTER_STORE_ARROW_SCHEMA"):
         client.incremental_update(bad_table, "test_namespace")
 
 

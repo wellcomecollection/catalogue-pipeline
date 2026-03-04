@@ -12,6 +12,7 @@ from typing import Any
 import pyarrow as pa
 import structlog
 from pydantic import BaseModel, ConfigDict
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 from adapters.ebsco import helpers
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
@@ -21,8 +22,7 @@ from adapters.ebsco.models.step_events import (
 )
 from adapters.ebsco.reporting import EbscoLoaderReport
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
-from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 
 logger = structlog.get_logger(__name__)
 
@@ -32,7 +32,7 @@ EBSCO_NAMESPACE = "ebsco"
 class EbscoAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
     namespace: str = EBSCO_NAMESPACE
-    table_schema: pa.Schema = ARROW_SCHEMA
+    table_schema: pa.Schema = ADAPTER_STORE_ARROW_SCHEMA
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -49,7 +49,7 @@ def build_runtime(
 ) -> LoaderRuntime:
     cfg = config_obj or EbscoAdapterLoaderConfig()
     table = helpers.build_adapter_table(use_rest_api_table=cfg.use_rest_api_table)
-    adapter_store = AdapterStore(table, default_namespace=cfg.namespace)
+    adapter_store = AdapterStore(table, namespace=cfg.namespace)
     marcxml_loader = MarcXmlFileLoader(
         schema=cfg.table_schema,
         namespace=cfg.namespace,

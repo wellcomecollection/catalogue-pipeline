@@ -4,12 +4,11 @@ import datetime
 from unittest.mock import Mock
 
 import pyarrow as pa
-from lxml import etree
-from oai_pmh_client.models import Header, Record
-
 from adapters.oai_pmh.record_writer import WindowRecordWriter
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
+from lxml import etree
+from oai_pmh_client.models import Header, Record
 
 
 class TestWindowRecordWriterMocked:
@@ -53,7 +52,7 @@ class TestWindowRecordWriterMocked:
         table = call_args[0][0]
 
         assert isinstance(table, pa.Table)
-        assert table.schema.equals(ARROW_SCHEMA)
+        assert table.schema.equals(ADAPTER_STORE_ARROW_SCHEMA)
         assert table.num_rows == 1
 
         row = table.to_pylist()[0]

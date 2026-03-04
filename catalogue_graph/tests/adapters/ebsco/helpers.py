@@ -8,12 +8,11 @@ from typing import Any
 
 import pyarrow as pa
 import pytest
-from pyiceberg.table import Table as IcebergTable
-
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
+from pyiceberg.table import Table as IcebergTable
 
 
 def lone_element(list_of_one: list) -> Any:
@@ -66,7 +65,7 @@ def data_to_namespaced_table(
         for row in rows:
             row.setdefault("last_modified", now)
 
-    file_loader = MarcXmlFileLoader(schema=ARROW_SCHEMA, namespace=namespace)
+    file_loader = MarcXmlFileLoader(schema=ADAPTER_STORE_ARROW_SCHEMA, namespace=namespace)
 
     return file_loader.data_to_pa_table(rows)
 

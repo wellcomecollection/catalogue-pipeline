@@ -31,14 +31,24 @@ SCHEMA = Schema(
     ),
 )
 
-# The Arrow schema matching the above Iceberg schema, needs to be kept in sync
-ARROW_FIELDS: list[pa.Field] = [
+PIPELINE_STORE_ARROW_FIELDS = pa.schema([
     pa.field("namespace", type=pa.string(), nullable=False),
     pa.field("id", type=pa.string(), nullable=False),
-    pa.field("content", type=pa.string(), nullable=True),
     pa.field("changeset", type=pa.string(), nullable=True),
-    pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
+    pa.field("last_modified", type=pa.timestamp("us", tz="UTC"), nullable=False),
+])
+
+# The Arrow schema matching the above Iceberg schema, needs to be kept in sync
+ADAPTER_STORE_ARROW_FIELDS: list[pa.Field] = [
+    *PIPELINE_STORE_ARROW_FIELDS,
+    pa.field("content", type=pa.string(), nullable=True),
     pa.field("deleted", type=pa.bool_(), nullable=True),
 ]
 
-ARROW_SCHEMA = pa.schema(ARROW_FIELDS)
+RECONCILER_STORE_ARROW_FIELDS = pa.schema([
+    *PIPELINE_STORE_ARROW_FIELDS,
+    pa.field("guid", pa.string(), nullable=False)
+])
+
+ADAPTER_STORE_ARROW_SCHEMA = pa.schema(ADAPTER_STORE_ARROW_FIELDS)
+RECONCILER_STORE_ARROW_SCHEMA = pa.schema(RECONCILER_STORE_ARROW_FIELDS)

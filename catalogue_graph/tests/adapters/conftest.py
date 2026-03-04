@@ -7,12 +7,11 @@ from uuid import uuid1
 
 import pyarrow as pa
 import pytest
-from pyiceberg.table import Table as IcebergTable
-
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import get_local_table
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
+from pyiceberg.table import Table as IcebergTable
 
 # Type alias for the factory fixture
 AdapterStoreFactory = Callable[[list[dict]], AdapterStore]
@@ -52,7 +51,7 @@ def records_to_table(
             new_item.setdefault("last_modified", None)
         data.append(new_item)
 
-    return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
+    return pa.Table.from_pylist(data, schema=ADAPTER_STORE_ARROW_SCHEMA)
 
 
 @pytest.fixture

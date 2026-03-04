@@ -254,7 +254,7 @@ class OAIPMHRuntimeConfig(ABC):
     def build_adapter_store(self, *, use_rest_api_table: bool = True) -> AdapterStore:
         """Build the adapter store wrapping the Iceberg table."""
         table = self.build_adapter_table(use_rest_api_table=use_rest_api_table)
-        return AdapterStore(table, default_namespace=self.config.adapter_namespace)
+        return AdapterStore(table, namespace=self.config.adapter_namespace)
 
     def build_oai_client(self, *, http_client: httpx.Client | None = None) -> OAIClient:
         """Build the OAI-PMH client for harvesting records."""

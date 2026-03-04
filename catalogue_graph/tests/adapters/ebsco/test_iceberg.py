@@ -5,11 +5,10 @@ Tests covering the update behaviour of the iceberg ebsco adapter
 from typing import Any
 
 import pyarrow as pa
+from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from pyiceberg.expressions import EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
-
-from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
 
 from .helpers import assert_row_identifiers
 from .helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
@@ -35,11 +34,11 @@ def test_noop(temporary_table: IcebergTable) -> None:
     # No Changeset identifier is returned
     assert changeset is None
     # The data is the same as before the update
-    expected_field_names = tuple(field.name for field in ARROW_SCHEMA)
+    expected_field_names = tuple(field.name for field in ADAPTER_STORE_ARROW_SCHEMA)
     assert (
         temporary_table.scan(selected_fields=expected_field_names)
         .to_arrow()
-        .cast(ARROW_SCHEMA)
+        .cast(ADAPTER_STORE_ARROW_SCHEMA)
         .equals(data)
     )
     # No changeset identifiers have been added

@@ -10,11 +10,10 @@ from collections.abc import Collection
 from typing import Any
 
 import pyarrow as pa
+from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from pyiceberg.expressions import EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
-
-from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
 
 
 def data_to_namespaced_table(
@@ -30,7 +29,7 @@ def data_to_namespaced_table(
         new_item["namespace"] = namespace
         data.append(new_item)
 
-    return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
+    return pa.Table.from_pylist(data, schema=ADAPTER_STORE_ARROW_SCHEMA)
 
 
 def assert_row_identifiers(rows: pa.Table, expected_ids: Collection[str]) -> None:
@@ -58,11 +57,11 @@ def test_snapshot_sync_noop(temporary_table: IcebergTable) -> None:
     # No Changeset identifier is returned
     assert changeset is None
     # The data is the same as before the update
-    expected_field_names = tuple(field.name for field in ARROW_SCHEMA)
+    expected_field_names = tuple(field.name for field in ADAPTER_STORE_ARROW_SCHEMA)
     assert (
         temporary_table.scan(selected_fields=expected_field_names)
         .to_arrow()
-        .cast(ARROW_SCHEMA)
+        .cast(ADAPTER_STORE_ARROW_SCHEMA)
         .equals(data)
     )
     # No changeset identifiers have been added
@@ -560,7 +559,7 @@ def test_snapshot_sync_raises_on_non_castable_schema(
     """snapshot_sync should fail fast if the adapter hands us a table with the wrong schema."""
     import pytest
 
-    # Missing the required 'deleted' field from ARROW_SCHEMA.
+    # Missing the required 'deleted' field from ADAPTER_STORE_ARROW_SCHEMA.
     bad_fields: list[pa.Field] = [
         pa.field("namespace", pa.string(), nullable=False),
         pa.field("id", pa.string(), nullable=False),
@@ -582,5 +581,5 @@ def test_snapshot_sync_raises_on_non_castable_schema(
     )
 
     client = AdapterStore(temporary_table)
-    with pytest.raises(ValueError, match=r"snapshot_sync.*ARROW_SCHEMA"):
+    with pytest.raises(ValueError, match=r"snapshot_sync.*ADAPTER_STORE_ARROW_SCHEMA"):
         client.snapshot_sync(bad_table, "test_namespace")
