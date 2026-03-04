@@ -49,6 +49,7 @@ resource "aws_scheduler_schedule" "minter_id_generator_schedule" {
 
   flexible_time_window {
     mode = "FLEXIBLE"
+    maximum_window_in_minutes = 15
   }
 
   target {
