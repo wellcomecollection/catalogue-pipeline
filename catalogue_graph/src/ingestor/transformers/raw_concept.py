@@ -147,16 +147,12 @@ class RawNeptuneConcept:
 
     @property
     def identifiers(self) -> list[ConceptIdentifier]:
-        ids = []
-
-        if self.raw_concept.linked_source_concept is not None:
-            properties = self.raw_concept.linked_source_concept.properties
-            identifier = ConceptIdentifier(
-                value=properties.id, identifierType=properties.source
+        return [
+            ConceptIdentifier(
+                value=linked.properties.id, identifierType=linked.properties.source
             )
-            ids.append(identifier)
-
-        return ids
+            for linked in self.raw_concept.linked_source_concepts
+        ]
 
     @property
     def display_identifiers(self) -> list[DisplayIdentifier]:

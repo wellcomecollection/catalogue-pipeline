@@ -16,7 +16,7 @@ class SourceNameRelatedToAttributes(EdgeAttributes):
 
 
 class ConceptHasSourceConceptAttributes(EdgeAttributes):
-    qualifier: str | None
+    qualifier: str | None = None
     matched_by: str
 
 

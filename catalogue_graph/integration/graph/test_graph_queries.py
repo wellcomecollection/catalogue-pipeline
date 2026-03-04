@@ -18,7 +18,7 @@ import pytest
 from pydantic import BaseModel
 
 from clients.neptune_client import NeptuneClient
-from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
+from ingestor.extractors.base_concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
     CONCEPT_TYPE_QUERY,
@@ -472,8 +472,8 @@ def test_weco_authority_nodes_link_to_concepts() -> None:
     response = neptune_client().run_open_cypher_query(
         """
         UNWIND $rows AS row
-        MATCH (concept:Concept {id: row.concept_id})-[:SAME_AS]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
-        MATCH (weco)-[:SAME_AS]->(concept)
+        MATCH (concept:Concept {id: row.concept_id})
+        MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
         RETURN row.concept_id AS id
         """,
         {"rows": rows},

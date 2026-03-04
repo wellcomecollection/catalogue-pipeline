@@ -29,16 +29,18 @@ def a_related_concept() -> ExtractedRelatedConcept:
                 },
             }
         ],
-        "linked_source_concept": {
-            "~id": "n2006095131",
-            "~entityType": "node",
-            "~labels": ["SourceName"],
-            "~properties": {
-                "id": "n2006095131",
-                "label": "Hilton, Violet, 1908-1969",
-                "source": "lc-names",
-            },
-        },
+        "linked_source_concepts": [
+            {
+                "~id": "n2006095131",
+                "~entityType": "node",
+                "~labels": ["SourceName"],
+                "~properties": {
+                    "id": "n2006095131",
+                    "label": "Hilton, Violet, 1908-1969",
+                    "source": "lc-names",
+                },
+            }
+        ],
         "types": ["Person", "Concept"],
         "same_as": [],
     }
@@ -76,16 +78,18 @@ def a_related_concept_with_no_label() -> ExtractedRelatedConcept:
                 },
             }
         ],
-        "linked_source_concept": {
-            "~id": "n2006095131",
-            "~entityType": "node",
-            "~labels": ["SourceName"],
-            "~properties": {
-                "id": "n2006095131",
-                "label": None,
-                "source": "lc-names",
-            },
-        },
+        "linked_source_concepts": [
+            {
+                "~id": "n2006095131",
+                "~entityType": "node",
+                "~labels": ["SourceName"],
+                "~properties": {
+                    "id": "n2006095131",
+                    "label": None,
+                    "source": "lc-names",
+                },
+            }
+        ],
         "types": ["Person", "Concept"],
         "same_as": [],
     }
@@ -133,16 +137,18 @@ def a_related_concept_with_two_source_nodes() -> ExtractedRelatedConcept:
                 },
             },
         ],
-        "linked_source_concept": {
-            "~id": "n84165387",
-            "~entityType": "node",
-            "~labels": ["SourceName"],
-            "~properties": {
-                "id": "n84165387",
-                "label": "Pujol, Joseph, 1857-1945.",
-                "source": "lc-names",
-            },
-        },
+        "linked_source_concepts": [
+            {
+                "~id": "n84165387",
+                "~entityType": "node",
+                "~labels": ["SourceName"],
+                "~properties": {
+                    "id": "n84165387",
+                    "label": "Pujol, Joseph, 1857-1945.",
+                    "source": "lc-names",
+                },
+            }
+        ],
         "types": ["Person", "Concept"],
         "same_as": [],
     }

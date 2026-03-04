@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor
@@ -5,16 +6,12 @@ from itertools import batched
 from typing import get_args
 
 import structlog
-from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
+from ingestor.models.neptune.node import SourceConceptNode
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,
-)
-from models.events import BasePipelineEvent
-from sources.catalogue.concepts_source import (
-    CatalogueConceptsSource,
 )
 from utils.types import ConceptType
 
@@ -42,22 +39,20 @@ RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
 CONCEPTS_BATCH_SIZE = 40_000
 
 
-class GraphConceptsExtractor(GraphBaseExtractor):
-    def __init__(
-        self,
-        event: BasePipelineEvent,
-        es_client: Elasticsearch,
-        neptune_client: NeptuneClient,
-    ):
+class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
+    """Abstract base class for concept extraction from the catalogue graph.
+
+    Provides shared infrastructure used by all concept extractors: consistent batching of concept IDs, synonymous
+    concept resolution, concept type lookup, and related concept merging.
+
+    Subclasses must implement `get_concept_ids_to_process` to supply the stream of concept IDs that should be extracted.
+    """
+
+    def __init__(self, neptune_client: NeptuneClient):
         super().__init__(neptune_client)
-        self.es_source = CatalogueConceptsSource(
-            event,
-            es_client=es_client,
-        )
 
         self.primary_map: dict[str, str] = {}
         self.same_as_map: dict[str, list[str]] = {}
-
         self.neptune_params = CONCEPT_QUERY_PARAMS
 
     def get_primary(self, concept_id: str) -> str:
@@ -90,35 +85,24 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
         return concept_types
 
-    def get_concepts(self, ids: Iterable[str]) -> dict[str, ExtractedConcept]:
-        concept_result = self.make_neptune_query("concept", ids)
-        source_concept_result = self.make_neptune_query("source_concept", ids)
-        concept_types = self.get_concept_types(ids)
+    def _resolve_source_concepts(
+        self, concept_id: str, source_concepts_batch: dict[str, dict]
+    ) -> list[SourceConceptNode]:
+        """
+        If a source concept `SC` is connected to some concept `C`, `SC` is included on all concepts synonymous with `C`.
+        """
+        resolved_source_concepts = {}
+        for same_as_id in self.get_same_as(concept_id):
+            source = source_concepts_batch.get(same_as_id, {})
+            for linked_sc in source.get("source_concepts", []):
+                resolved_source_concepts[linked_sc["~id"]] = (
+                    SourceConceptNode.model_validate(linked_sc)
+                )
 
-        concepts = {}
-        for concept_id, concept in concept_result.items():
-            source = source_concept_result.get(concept_id, {})
-
-            # Remove `concept_id` from the list of 'same as' concepts
-            same_as = set(self.get_same_as(concept_id)).difference([concept_id])
-
-            # Each concept should have at most one linked source concept
-            if len(source.get("linked_source_concepts", [])) == 0:
-                linked_source_concept = None
-            else:
-                linked_source_concept = source["linked_source_concepts"][0]
-
-            concepts[concept_id] = ExtractedConcept(
-                concept=concept["concept"],
-                types=list(concept_types[concept_id]),
-                same_as=list(same_as),
-                linked_source_concept=linked_source_concept,
-                source_concepts=source.get("source_concepts", []),
-            )
-
-        return concepts
+        return list(resolved_source_concepts.values())
 
     def _update_same_as_map(self, concept_ids: Iterable[str]) -> None:
+        """Given a list of concept IDs, retrieve all synonymous ('same as') concepts and store them in a lookup table"""
         # Remove concepts whose 'same as' IDs were already calculated as part of a previous batch
         concept_ids = set(concept_ids).difference(self.primary_map.keys())
 
@@ -189,20 +173,25 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
         return full_result
 
-    def extract_concept_ids(self) -> Generator[str]:
-        for extracted in self.es_source.stream_raw():
-            yield extracted.concept.id.canonical_id
+    @abstractmethod
+    def get_concept_ids_to_process(self) -> Generator[str]:
+        pass
 
-    def get_concept_stream(self) -> Generator[set[str]]:
+    def get_consistent_batches(self) -> Generator[set[str]]:
+        """
+        Yield consistent batches of concept IDs. Each consistent batch contains full groups of synonymous (same as)
+        concepts, which must always be processed together for consistency.
+        """
         processed_ids: set[str] = set()
 
-        extracted_ids = self.extract_concept_ids()
-        for extracted_batch in batched(extracted_ids, CONCEPTS_BATCH_SIZE):
+        concept_ids_to_process = self.get_concept_ids_to_process()
+        for extracted_batch in batched(concept_ids_to_process, CONCEPTS_BATCH_SIZE):
             # Some concepts might be duplicated (since a concept can appear in multiple works)
             batch = set(extracted_batch).difference(processed_ids)
             self._update_same_as_map(batch)
 
-            # All 'same as' concepts must be processed as part of the same batch to get consistent results
+            # All 'same as' concepts must always be processed as part of the same batch
+            # to keep the production concepts index consistent
             full_batch = set()
             for concept_id in batch:
                 for same_as_id in self.get_same_as(concept_id):
@@ -211,27 +200,43 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
             yield full_batch
 
-    def extract_raw(self) -> Generator[tuple]:
-        for concept_ids in self.get_concept_stream():
-            logger.info("Processing batch of concepts", count=len(concept_ids))
-            concepts = self.get_concepts(concept_ids).items()
+    def get_concepts(self, ids: Iterable[str]) -> dict[str, ExtractedConcept]:
+        """Given a list of concept IDs, return a dictionary mapping each id to its corresponding ExtractedConcept."""
+        concepts_batch = self.make_neptune_query("concept", ids)
+        source_concepts_batch = self.make_neptune_query("source_concept", ids)
+        concept_types_batch = self.get_concept_types(ids)
 
-            # Run related concept queries in parallel
-            with ThreadPoolExecutor() as executor:
-                futures = {}
-                for query in get_args(ConceptRelatedQuery):
-                    target = self._get_related_concepts
-                    futures[query] = executor.submit(target, query, concept_ids)
+        concepts = {}
+        for concept_id, concept in concepts_batch.items():
+            source = source_concepts_batch.get(concept_id, {})
 
-                all_related_concepts: dict[ConceptRelatedQuery, dict] = {
-                    key: future.result() for key, future in futures.items()
-                }
+            # Remove `concept_id` from the list of 'same as' concepts
+            same_as = set(self.get_same_as(concept_id)).difference([concept_id])
 
-            for concept_id, concept in concepts:
-                primary_id = self.get_primary(concept_id)
-                related_concepts = {}
-                for key in all_related_concepts:
-                    if primary_id in all_related_concepts[key]:
-                        related_concepts[key] = all_related_concepts[key][primary_id]
+            concepts[concept_id] = ExtractedConcept(
+                concept=concept["concept"],
+                types=list(sorted(concept_types_batch[concept_id])),
+                same_as=list(sorted(same_as)),
+                linked_source_concepts=source.get("linked_source_concepts", []),
+                source_concepts=self._resolve_source_concepts(
+                    concept_id, source_concepts_batch
+                ),
+            )
 
-                yield concept, related_concepts
+        return concepts
+
+    def get_related_concepts(
+        self, ids: Iterable[str]
+    ) -> dict[ConceptRelatedQuery, RelatedConcepts]:
+        """
+        Given a list of concept IDs, return a nested dictionary of the following shape:
+        {'some_relationship_type': {'some_concept_id': <list of ExtractedRelatedConcept>, ...}, ...}
+        """
+        # Run related concept queries in parallel
+        with ThreadPoolExecutor() as executor:
+            futures = {}
+            for query in get_args(ConceptRelatedQuery):
+                target = self._get_related_concepts
+                futures[query] = executor.submit(target, query, ids)
+
+            return {key: future.result() for key, future in futures.items()}

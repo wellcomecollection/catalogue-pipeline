@@ -2,8 +2,8 @@ from collections.abc import Generator
 from typing import TextIO
 
 from models.graph_edge import (
-    SourceConceptSameAs,
-    SourceConceptSameAsAttributes,
+    ConceptHasSourceConcept,
+    ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import SourceConcept
 from sources.weco_concepts.concepts_source import WeCoConceptsSource
@@ -24,7 +24,7 @@ class WeCoConceptsTransformer(BaseTransformer):
 
         It is the canonical id for an existing record in the graph,
         which may have come from any other source,
-        but it is also the id of this source record in the Wellcome name authority,
+        but it is also the id of this source record in the Wellcome name authority.
         """
         return f"weco:{raw_data['id'].strip()}"
 
@@ -38,7 +38,7 @@ class WeCoConceptsTransformer(BaseTransformer):
             image_urls=image_url.split("||") if image_url else [],
         )
 
-    def extract_edges(self, raw_data: dict) -> Generator[SourceConceptSameAs]:
+    def extract_edges(self, raw_data: dict) -> Generator[ConceptHasSourceConcept]:
         """
         The Wellcome name authority exists mostly to override names and descriptions
         found in other authorities.
@@ -49,11 +49,8 @@ class WeCoConceptsTransformer(BaseTransformer):
         # lookup the id elsewhere and find the corresponding source concept
         source_id = self._prefixed_id_of(raw_data)
         concept_id = str(raw_data["id"].strip())
-        attributes = SourceConceptSameAsAttributes(source="weco-authority")
 
-        yield SourceConceptSameAs(
-            from_id=source_id, to_id=concept_id, attributes=attributes
-        )
-        yield SourceConceptSameAs(
+        attributes = ConceptHasSourceConceptAttributes(matched_by="identifier")
+        yield ConceptHasSourceConcept(
             from_id=concept_id, to_id=source_id, attributes=attributes
         )

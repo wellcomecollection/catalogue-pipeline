@@ -62,8 +62,9 @@ def test_edges() -> None:
         """)
     transformer = WeCoConceptsTransformer(source_data)
     batches = list(transformer.stream("edges", 1))
+    assert len(batches[0]) == 1
+
     only_edge = batches[0][0]
-    assert only_edge.from_id == "weco:aaaaaaaa"
-    assert only_edge.to_id == "aaaaaaaa"
-    assert only_edge.attributes.source == "weco-authority"
-    assert only_edge.relationship == "SAME_AS"
+    assert only_edge.from_id == "aaaaaaaa"
+    assert only_edge.to_id == "weco:aaaaaaaa"
+    assert only_edge.relationship == "HAS_SOURCE_CONCEPT"

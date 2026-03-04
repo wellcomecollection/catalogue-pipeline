@@ -1,0 +1,66 @@
+{
+  "concept": {
+    "~id": "jbxfbpzq",
+    "~entityType": "node",
+    "~labels": [
+      "Concept"
+    ],
+    "~properties": {
+      "id": "jbxfbpzq",
+      "label": "some concept",
+      "source": "lc-subjects",
+      "type": "Concept"
+    }
+  },
+  "linked_source_concepts": [
+    {
+      "~id": "123",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "123",
+        "label": "LoC label",
+        "source": "lc-names",
+        "alternative_labels": "Alternative label||another alternative label",
+        "description": null
+      }
+    }
+  ],
+  "source_concepts": [
+    {
+      "~id": "123",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "123",
+        "label": "LoC label",
+        "source": "lc-names",
+        "alternative_labels": "Alternative label||another alternative label",
+        "description": null
+      }
+    },
+    {
+      "~id": "456",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "456",
+        "label": "Wikidata label",
+        "source": "wikidata",
+        "alternative_labels": "Wikidata alternative label",
+        "description": "Description"
+      }
+    }
+  ],
+  "types": [
+    "Concept",
+    "Person"
+  ],
+  "same_as": []
+}

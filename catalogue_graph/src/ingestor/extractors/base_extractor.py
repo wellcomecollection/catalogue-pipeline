@@ -1,4 +1,5 @@
 import time
+from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
@@ -19,11 +20,7 @@ from ingestor.queries.concept_queries import (
     SAME_AS_CONCEPT_QUERY,
     SOURCE_CONCEPT_QUERY,
 )
-from ingestor.queries.work_queries import (
-    WORK_ANCESTORS_QUERY,
-    WORK_CHILDREN_QUERY,
-    WORK_CONCEPTS_QUERY,
-)
+from ingestor.queries.work_queries import WORK_ANCESTORS_QUERY, WORK_CHILDREN_QUERY
 
 logger = structlog.get_logger(__name__)
 
@@ -44,7 +41,7 @@ ConceptQuery = Literal[
     "same_as_concept",
     ConceptRelatedQuery,
 ]
-WorkQuery = Literal["work_children", "work_ancestors", "work_concepts"]
+WorkQuery = Literal["work_children", "work_ancestors"]
 
 NEPTUNE_CHUNK_SIZE = 5000
 
@@ -55,7 +52,6 @@ NEPTUNE_EXPENSIVE_CHUNK_SIZE = 1000
 NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
     "work_children": WORK_CHILDREN_QUERY,
     "work_ancestors": WORK_ANCESTORS_QUERY,
-    "work_concepts": WORK_CONCEPTS_QUERY,
     "concept": CONCEPT_QUERY,
     "concept_type": CONCEPT_TYPE_QUERY,
     "source_concept": SOURCE_CONCEPT_QUERY,
@@ -71,16 +67,15 @@ NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
 }
 
 
-class GraphBaseExtractor:
+class GraphBaseExtractor(ABC):
     def __init__(self, neptune_client: NeptuneClient):
         self.neptune_client = neptune_client
         self.neptune_params: dict[str, Any] = {}
 
+    @abstractmethod
     def extract_raw(self) -> Generator[Any]:
         """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
-        raise NotImplementedError(
-            "Each extractor must implement an `extract_raw` method."
-        )
+        pass
 
     def make_neptune_query(
         self, query_type: ConceptQuery | WorkQuery, ids: Iterable[str]
