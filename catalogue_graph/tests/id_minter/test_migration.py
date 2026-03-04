@@ -271,9 +271,9 @@ class TestHandler:
         parquet_dir: Path,
     ) -> None:
         """Test the handler end-to-end with S3 download mocked."""
-        from id_minter.config import IdMinterConfig, RDSClientConfig
+        from id_minter.config import DBConfig, RDSClientConfig
 
-        config = IdMinterConfig(
+        config = DBConfig(
             rds_client=RDSClientConfig(password="id_minter"),
         )
         request = MigrationRequest(

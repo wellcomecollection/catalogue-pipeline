@@ -26,7 +26,7 @@ from typing import Any
 import boto3
 import structlog
 
-from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
+from id_minter.config import ID_MINTER_CONFIG, DBConfig
 from id_minter.database import DBConnection, apply_migrations, get_connection
 from id_minter.migrate import migrate_from_parquet
 from id_minter.models.step_events import MigrationRequest, MigrationResponse
@@ -134,7 +134,7 @@ def verify_migration(
 def handler(
     event: MigrationRequest,
     execution_context: ExecutionContext | None = None,
-    config: IdMinterConfig | None = None,
+    config: DBConfig | None = None,
 ) -> MigrationResponse:
     setup_logging(execution_context)
     cfg = config or ID_MINTER_CONFIG
@@ -264,7 +264,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         rds_overrides["password"] = args.rds_password
         overrides["rds_client"] = rds_overrides
 
-    config_obj = IdMinterConfig(**overrides) if overrides else None
+    config_obj = DBConfig(**overrides) if overrides else None
 
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
