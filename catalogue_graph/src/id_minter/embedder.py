@@ -92,9 +92,11 @@ def embed_canonical_ids(
 def process_work(
     work_json: dict,
     resolver: IdResolver,
-    # TODO:
     predecessors: dict[SourceIdentifierKey, SourceIdentifierKey] | None = None,
 ) -> dict:
+    # TODO: We have not yet decided how works will indicate their predecessors.
+    # The `predecessors` parameter is plumbed through but the mechanism for
+    # deriving it from the work JSON needs to be designed and implemented.
     keys = extract_source_identifiers(work_json)
     if not keys:
         return work_json
