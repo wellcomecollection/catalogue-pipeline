@@ -25,13 +25,16 @@ from .adapter_store_source import AdapterStoreSource
 from core.transformer import ElasticBaseTransformer
 
 
-class MarcXmlTransformer(ElasticBaseTransformer):
+class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
     def __init__(
         self, adapter_store: AdapterStore, changeset_ids: list[str], identifier_type: Id
     ) -> None:
         super().__init__()
         self.source = AdapterStoreSource(adapter_store, changeset_ids)
         self.identifier_type = identifier_type
+
+    def _get_document_id(self, record: SourceWork) -> str:
+        return record.state.id()
 
     def extract_work_id(self, marc_record: Record) -> str:
         """Extract the work ID from a MARC record.

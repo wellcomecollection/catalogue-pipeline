@@ -1,6 +1,6 @@
 from collections.abc import Generator, Iterable
 from itertools import batched
-from typing import Any, cast
+from typing import Any, Generic, TypeVar, cast
 
 import elasticsearch.helpers
 import structlog
@@ -8,7 +8,8 @@ from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 from core.source import BaseSource
-from models.pipeline.source.work import SourceWork
+
+T = TypeVar("T", bound=BaseModel)
 
 logger = structlog.get_logger(__name__)
 
@@ -26,7 +27,7 @@ class TransformationError(BaseModel):
     detail: str
 
 
-class ElasticBaseTransformer(BaseTransformer):
+class ElasticBaseTransformer(BaseTransformer, Generic[T]):
     def __init__(self) -> None:
         super().__init__()
         self.successful_ids: list[str] = []
@@ -40,15 +41,21 @@ class ElasticBaseTransformer(BaseTransformer):
         if len(self.errors) < 1_000:
             self.errors.append(error)
 
-    def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, SourceWork]]:
-        """Transform a batch of raw works into (row_id, SourceWork) tuples."""
+    def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, T]]:
+        """Transform a batch of raw items into (row_id, T) tuples."""
         raise NotImplementedError(
             "Each transformer must implement a `transform` method."
         )
 
-    def _stream_works(self) -> Generator[tuple[str, SourceWork]]:
+    def _get_document_id(self, record: T) -> str:
+        """Extract the document ID for Elasticsearch indexing."""
+        raise NotImplementedError(
+            "Each transformer must implement a `_get_document_id` method."
+        )
+
+    def _stream_documents(self) -> Generator[tuple[str, T]]:
         """
-        Extracts work documents from the specified source and transforms them. The `source` must define
+        Extracts documents from the specified source and transforms them. The `source` must define
         a `stream_raw` method.
         """
         raw_works = self.source.stream_raw()
@@ -63,12 +70,12 @@ class ElasticBaseTransformer(BaseTransformer):
             yield from transformed
 
     def _generate_bulk_load_actions(
-        self, records: Iterable[tuple[str, SourceWork]], index_name: str
+        self, records: Iterable[tuple[str, T]], index_name: str
     ) -> Generator[tuple[str, dict[str, Any]]]:
         for row_id, record in records:
             action = {
                 "_index": index_name,
-                "_id": record.state.id(),
+                "_id": self._get_document_id(record),
                 "_source": record.model_dump(),
             }
             yield (row_id, action)
@@ -78,7 +85,7 @@ class ElasticBaseTransformer(BaseTransformer):
         self.successful_ids.clear()
         self.errors.clear()
 
-        transformed = self._stream_works()
+        transformed = self._stream_documents()
         actions = self._generate_bulk_load_actions(transformed, index_name)
 
         for batch in batched(actions, ES_BULK_INDEX_BATCH_SIZE):
