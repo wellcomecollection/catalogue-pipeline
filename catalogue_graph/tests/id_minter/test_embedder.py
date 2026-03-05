@@ -23,8 +23,7 @@ serialization artefact in the verification notebook.
 
 from __future__ import annotations
 
-import random
-import string
+import itertools
 
 import pytest
 
@@ -48,9 +47,12 @@ IDENTIFIER_TYPES = [
     "calm-record-id",
 ]
 
+_identifier_type_cycle = itertools.cycle(IDENTIFIER_TYPES)
+_id_counter = itertools.count(1)
 
-def _random_alnum(length: int) -> str:
-    return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
+
+def _unique_id(prefix: str = "") -> str:
+    return f"{prefix}{next(_id_counter)}"
 
 
 def create_source_identifier(
@@ -59,14 +61,14 @@ def create_source_identifier(
     ontology_type: str = "Work",
 ) -> dict:
     return {
-        "identifierType": {"id": identifier_type or random.choice(IDENTIFIER_TYPES)},
-        "value": value or _random_alnum(10),
+        "identifierType": {"id": identifier_type or next(_identifier_type_cycle)},
+        "value": value or _unique_id("val"),
         "ontologyType": ontology_type,
     }
 
 
 def create_canonical_id() -> str:
-    return _random_alnum(8)
+    return _unique_id("cid")
 
 
 def key_of(si: dict) -> SourceIdentifierKey:
