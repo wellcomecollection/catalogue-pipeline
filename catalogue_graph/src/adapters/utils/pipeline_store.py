@@ -48,7 +48,7 @@ class PipelineStore(ABC):
         # or a plain ValueError (e.g. mismatched field names).
         except (pa.ArrowException, ValueError) as e:
             raise ValueError(
-                f"{operation} requires new_data to be castable to the required schema; "
+                f"{operation} requires new_data to be castable to schema: {self.schema}; "
                 f"got schema: {new_data.schema}"
             ) from e
 
@@ -62,8 +62,7 @@ class PipelineStore(ABC):
         timestamp: datetime | None = None,
     ) -> AdapterStoreUpdate:
         """
-        Insert and update records, adding the timestamp and changeset values to
-        any changed rows.
+        Insert and update records, adding the timestamp and changeset values to any changed rows.
         :param changes: New versions of existing records to change
         :param inserts: New records to insert
         """
@@ -151,6 +150,9 @@ class PipelineStore(ABC):
             new_projected, existing_projected, join_fields
         )
 
+        if len(updates_projected) == 0:
+            return new_data.slice(0, 0)
+
         update_ids = updates_projected.column("id")
         return new_data.filter(pc.field("id").isin(update_ids))
 
@@ -170,24 +172,18 @@ class PipelineStore(ABC):
         Returns:
             Filtered table containing only updates that should be applied
         """
-        # Create a lookup dictionary for existing timestamps
-        existing_timestamps = {
-            row["id"]: row["last_modified"] for row in existing_data.to_pylist()
-        }
-
-        # Filter updates to only include those with newer timestamps
-        rows_to_keep = []
-        for i in range(updates.num_rows):
-            update_row = updates.slice(i, 1).to_pylist()[0]
-            record_id = update_row["id"]
-            new_timestamp = update_row.get("last_modified")
-            existing_timestamp = existing_timestamps.get(record_id)
-
-            if new_timestamp > existing_timestamp:
-                rows_to_keep.append(i)
-
-        # Use PyArrow's take to efficiently select rows by index
-        return updates.take(rows_to_keep)
+        joined = updates.join(existing_data, keys="id", right_suffix="_existing")
+        existing_ts = joined.column("last_modified_existing")
+        last_modified_filter = pc.or_(
+            pc.is_null(existing_ts),
+            pc.fill_null(
+                pc.greater(joined.column("last_modified"), existing_ts), False
+            ),
+        )
+        newer_ids = joined.filter(last_modified_filter).column("id")
+        return updates.filter(
+            pc.field("id").isin(pa.array(newer_ids, type=pa.string()))
+        )
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
         return self.table.scan(row_filter=EqualTo("changeset", changeset_id)).to_arrow()

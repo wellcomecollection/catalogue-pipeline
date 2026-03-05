@@ -28,6 +28,7 @@ def data_to_namespaced_table(
     for item in unqualified_data:
         new_item = item.copy()
         new_item["namespace"] = namespace
+        #   new_item["last_modified"] = datetime.now(UTC)
         data.append(new_item)
 
     return pa.Table.from_pylist(data, schema=ADAPTER_STORE_ARROW_SCHEMA)

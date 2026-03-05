@@ -42,13 +42,6 @@ class AdapterStore(PipelineStore):
         if new_data.num_rows == 0:
             return None
 
-        # Enforce presence of timestamps in incremental updates to avoid overwriting
-        # newer records with untimed data.
-        if pc.any(pc.is_null(new_data.column("last_modified"))).as_py():
-            raise ValueError(
-                "incremental_update requires a non-Null 'last_modified' in new_data"
-            )
-
         # Fetch rows that match the incoming IDs
         incoming_ids = [
             val for val in new_data.column("id").to_pylist() if val is not None

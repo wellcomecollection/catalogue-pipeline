@@ -24,19 +24,17 @@ AdapterStoreFactory = Callable[[list[dict]], AdapterStore]
 def records_to_table(
     records: list[dict[str, Any]],
     namespace: str = "test_namespace",
-    add_timestamp: bool = False,
 ) -> pa.Table:
     """Create an Arrow table with the repo-standard schema from a list of dicts.
 
     Provides sensible defaults for required fields:
     - namespace: "test_namespace" (or as specified)
-    - last_modified: None by default, or datetime.now(UTC) if add_timestamp=True
+    - last_modified: datetime.now(UTC)
     - deleted: None
 
     Args:
         records: List of dicts with at minimum 'id' and 'content' keys
         namespace: Default namespace to apply to records without one
-        add_timestamp: If True, set last_modified to now (UTC) for records without one
 
     Usage:
         table = records_to_table([
@@ -49,10 +47,7 @@ def records_to_table(
         new_item = item.copy()
         new_item.setdefault("namespace", namespace)
         new_item.setdefault("deleted", None)
-        if add_timestamp:
-            new_item.setdefault("last_modified", datetime.now(UTC))
-        else:
-            new_item.setdefault("last_modified", None)
+        new_item.setdefault("last_modified", datetime.now(UTC))
         data.append(new_item)
 
     return pa.Table.from_pylist(data, schema=ADAPTER_STORE_ARROW_SCHEMA)

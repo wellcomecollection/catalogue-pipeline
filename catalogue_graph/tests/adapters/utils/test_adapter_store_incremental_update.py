@@ -7,7 +7,10 @@ are left unchanged (not deleted). Timestamp-based conflict resolution
 ensures newer data isn't overwritten by older data.
 """
 
+from datetime import UTC, datetime, timedelta
+
 import pyarrow as pa
+import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.adapter_store import AdapterStore
@@ -37,7 +40,6 @@ def test_incremental_update_does_not_delete_missing_records(
         [
             {"id": "eb0001", "content": "hello updated"},
         ],
-        add_timestamp=True,
     )
 
     client = AdapterStore(temporary_table, "test_namespace")
@@ -70,7 +72,6 @@ def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> N
         [
             {"id": "eb0002", "content": "world"},
         ],
-        add_timestamp=True,
     )
 
     client = AdapterStore(temporary_table, "test_namespace")
@@ -105,7 +106,6 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
             {"id": "eb0001", "content": "hello updated"},
             {"id": "eb0003", "content": "new record"},
         ],
-        add_timestamp=True,
     )
 
     client = AdapterStore(temporary_table, "test_namespace")
@@ -142,7 +142,6 @@ def test_incremental_update_does_not_touch_other_namespaces(
     # Update ebsco data
     new_ebsco_data = records_to_table(
         [{"id": "eb0001", "content": "ebsco updated"}],
-        add_timestamp=True,
     )
 
     client = AdapterStore(temporary_table, "test_namespace")
@@ -163,8 +162,6 @@ def test_incremental_update_with_newer_timestamp(temporary_table: IcebergTable) 
     When incremental_update has a newer timestamp
     Then the record is updated
     """
-    from datetime import UTC, datetime
-
     old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
 
@@ -198,7 +195,6 @@ def test_incremental_update_with_older_timestamp(temporary_table: IcebergTable) 
     When incremental_update has an older timestamp
     Then the record is NOT updated (newer data wins)
     """
-    from datetime import UTC, datetime
 
     new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
     old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
@@ -233,8 +229,6 @@ def test_incremental_update_with_equal_timestamp(temporary_table: IcebergTable) 
     When incremental_update has the same timestamp
     Then the record is NOT updated (no change needed)
     """
-    from datetime import UTC, datetime
-
     same_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
     temporary_table.append(
@@ -274,7 +268,6 @@ def test_incremental_update_newer_timestamp_same_content(
     When incremental_update has a newer timestamp but identical content
     Then the record is NOT updated (content-based deduplication)
     """
-    from datetime import UTC, datetime, timedelta
 
     base_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     newer_time = base_time + timedelta(days=1)
@@ -309,51 +302,14 @@ def test_incremental_update_newer_timestamp_same_content(
     assert row["last_modified"] == base_time
 
 
-def test_incremental_update_with_null_existing_timestamp(
-    temporary_table: IcebergTable,
-) -> None:
-    """
-    Given an existing record with null last_modified (legacy data)
-    When incremental_update has any timestamp
-    Then the record is updated (null is treated as oldest)
-    """
-    from datetime import UTC, datetime
-
-    # Add initial record without timestamp (legacy data)
-    temporary_table.append(
-        records_to_table([{"id": "eb0001", "content": "legacy content"}])
-    )
-
-    # Update with a timestamp
-    new_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
-    new_data = records_to_table(
-        [{"id": "eb0001", "content": "updated content", "last_modified": new_time}]
-    )
-
-    client = AdapterStore(temporary_table, "test_namespace")
-    result = client.incremental_update(new_data)
-
-    assert result is not None
-    assert "eb0001" in result.updated_record_ids
-
-    # Verify the content was updated
-    records = temporary_table.scan().to_arrow()
-    row = records.to_pylist()[0]
-    assert row["content"] == "updated content"
-    assert row["last_modified"] == new_time
-
-
 def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> None:
     """
     Given multiple existing records with various timestamps
     When incremental_update includes records with newer, older, and equal timestamps
     Then only records with newer timestamps and different content are updated
     """
-    from datetime import UTC, datetime
-
     time_old = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     time_current = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
-    time_new = datetime(2025, 1, 3, 12, 0, 0, tzinfo=UTC)
 
     temporary_table.append(
         records_to_table(
@@ -369,7 +325,6 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
                     "content": "record 3 current",
                     "last_modified": time_current,
                 },
-                {"id": "eb0004", "content": "record 4 legacy", "last_modified": None},
             ]
         )
     )
@@ -392,11 +347,6 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
                 "content": "record 3 SAME",
                 "last_modified": time_current,
             },  # Same - should NOT update
-            {
-                "id": "eb0004",
-                "content": "record 4 NEW",
-                "last_modified": time_new,
-            },  # Null existing - SHOULD update
         ]
     )
 
@@ -404,8 +354,8 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
     result = client.incremental_update(update_data)
 
     assert result is not None
-    # Only eb0001 and eb0004 should be updated
-    assert set(result.updated_record_ids) == {"eb0001", "eb0004"}
+    # Only eb0001 should be updated
+    assert set(result.updated_record_ids) == {"eb0001"}
 
     # Verify the correct records were updated
     records = temporary_table.scan().to_arrow().sort_by("id")
@@ -420,9 +370,6 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
     assert rows["eb0003"]["content"] == "record 3 current"  # NOT updated
     assert rows["eb0003"]["last_modified"] == time_current
 
-    assert rows["eb0004"]["content"] == "record 4 NEW"
-    assert rows["eb0004"]["last_modified"] == time_new
-
 
 def test_incremental_update_with_new_record_with_timestamp(
     temporary_table: IcebergTable,
@@ -432,8 +379,6 @@ def test_incremental_update_with_new_record_with_timestamp(
     When incremental_update includes a new record with a timestamp
     Then the record is inserted with its timestamp preserved
     """
-    from datetime import UTC, datetime
-
     new_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
     new_data = records_to_table(
@@ -473,12 +418,11 @@ def test_incremental_update_null_timestamp_on_timestamped_record(
     # Incremental update without last_modified column
     new_data = records_to_table(
         [
-            {"id": "eb0001", "content": "updated"},
+            {"id": "eb0001", "content": "updated", "last_modified": None},
         ]
     )
 
     client = AdapterStore(temporary_table, "test_namespace")
-    import pytest
 
     with pytest.raises(ValueError):
         client.incremental_update(new_data)
@@ -493,10 +437,6 @@ def test_incremental_update_raises_on_non_castable_schema(
     temporary_table: IcebergTable,
 ) -> None:
     """incremental_update should fail fast if the adapter hands us a table with the wrong schema."""
-    from datetime import UTC, datetime
-
-    import pytest
-
     # Missing the required 'deleted' field from ADAPTER_STORE_ARROW_SCHEMA.
     bad_fields: list[pa.Field] = [
         pa.field("namespace", pa.string(), nullable=False),
@@ -533,8 +473,6 @@ def test_incremental_update_preserves_content_on_deletion(
     When incremental_update marks it as deleted with content=None
     Then the existing content is preserved and deleted=True is set
     """
-    from datetime import UTC, datetime
-
     old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
 

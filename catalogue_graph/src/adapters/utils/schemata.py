@@ -19,7 +19,7 @@ ADAPTER_STORE_ICEBERG_SCHEMA = Schema(
     NestedField(field_id=4, name="changeset", field_type=StringType(), required=False),
     # When a record was last modified.
     NestedField(
-        field_id=5, name="last_modified", field_type=TimestamptzType(), required=False
+        field_id=5, name="last_modified", field_type=TimestamptzType(), required=True
     ),
     # Whether the record has been deleted.
     NestedField(
