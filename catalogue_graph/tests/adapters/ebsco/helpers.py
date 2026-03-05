@@ -41,10 +41,7 @@ def add_namespace(
 
 
 def data_to_namespaced_table(
-    unqualified_data: list[dict[str, Any]],
-    namespace: str | None = None,
-    *,
-    add_timestamp: bool = False,
+    unqualified_data: list[dict[str, Any]], namespace: str | None = None
 ) -> pa.Table:
     """
     Convert a list of data dictionaries to a PyArrow table with namespace added.
@@ -61,10 +58,9 @@ def data_to_namespaced_table(
 
     rows = [add_namespace(entry.copy(), namespace) for entry in unqualified_data]
 
-    if add_timestamp:
-        now = datetime.now(UTC)
-        for row in rows:
-            row.setdefault("last_modified", now)
+    now = datetime.now(UTC)
+    for row in rows:
+        row.setdefault("last_modified", now)
 
     file_loader = MarcXmlFileLoader(
         schema=ADAPTER_STORE_ARROW_SCHEMA, namespace=namespace
@@ -123,9 +119,7 @@ def prepare_changeset(
                 "last_modified": datetime.now(UTC),
             }
         )
-    pa_table_initial = data_to_namespaced_table(
-        rows, namespace=namespace, add_timestamp=True
-    )
+    pa_table_initial = data_to_namespaced_table(rows, namespace=namespace)
 
     client = AdapterStore(temporary_table, namespace)
 

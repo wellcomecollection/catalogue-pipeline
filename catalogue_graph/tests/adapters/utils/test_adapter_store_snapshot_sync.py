@@ -7,6 +7,7 @@ data are marked as deleted.
 """
 
 from collections.abc import Collection
+from datetime import UTC, datetime
 from typing import Any
 
 import pyarrow as pa
@@ -28,7 +29,7 @@ def data_to_namespaced_table(
     for item in unqualified_data:
         new_item = item.copy()
         new_item["namespace"] = namespace
-        #   new_item["last_modified"] = datetime.now(UTC)
+        new_item.setdefault("last_modified", datetime.now(UTC))
         data.append(new_item)
 
     return pa.Table.from_pylist(data, schema=ADAPTER_STORE_ARROW_SCHEMA)
@@ -263,10 +264,11 @@ def test_snapshot_sync_all_actions(temporary_table: IcebergTable) -> None:
     Then inserts, updates, and deletes are all applied correctly
     And all modified rows are tagged with the same changeset
     """
+    some_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     temporary_table.append(
         data_to_namespaced_table(
             [
-                {"id": "eb0001", "content": "hello"},
+                {"id": "eb0001", "content": "hello", "last_modified": some_time},
                 {"id": "eb0002", "content": "byebye"},
                 {"id": "eb0003", "content": "greetings"},
             ]
@@ -318,7 +320,7 @@ def test_snapshot_sync_all_actions(temporary_table: IcebergTable) -> None:
             "id": "eb0001",
             "content": "hello",
             "changeset": None,
-            "last_modified": None,
+            "last_modified": some_time,
             "deleted": None,
             "namespace": "test_namespace",
         }
@@ -566,7 +568,7 @@ def test_snapshot_sync_raises_on_non_castable_schema(
         pa.field("namespace", pa.string(), nullable=False),
         pa.field("id", pa.string(), nullable=False),
         pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
+        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=False),
     ]
     bad_schema = pa.schema(bad_fields)
 

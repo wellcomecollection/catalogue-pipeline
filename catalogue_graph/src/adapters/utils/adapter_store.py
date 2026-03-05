@@ -76,6 +76,7 @@ class AdapterStore(PipelineStore):
         This will insert new records, update changed records, and soft-delete
         records that are no longer present in the snapshot by setting their content to null.
         """
+        new_data = self._set_last_modified(new_data, datetime.now(UTC))
         new_data = self._cast_to_arrow_schema(new_data, operation="snapshot_sync")
 
         row_filter = EqualTo("namespace", self.namespace)
@@ -98,9 +99,7 @@ class AdapterStore(PipelineStore):
 
         if changes or inserts:
             # replace last_modified timestamps with current time for snapshot sync
-            return self._upsert_with_markers(
-                changes, inserts, timestamp=datetime.now(UTC)
-            )
+            return self._upsert_with_markers(changes, inserts)
 
         return None
 

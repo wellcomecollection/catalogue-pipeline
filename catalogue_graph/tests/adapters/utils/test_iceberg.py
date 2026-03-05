@@ -60,13 +60,20 @@ def test_get_table_creates_when_flag_true(local_catalog_params):  # type: ignore
 
 def test_get_table_suppresses_existing_namespace(local_catalog_params):  # type: ignore
     namespace = f"ns_{uuid4().hex[:8]}"
-    first_table = f"tbl_{uuid4().hex[:6]}"
-    second_table = f"tbl_{uuid4().hex[:6]}"
+    first_config = LocalIcebergTableConfig(
+        table_name=f"tbl_{uuid4().hex[:6]}",
+        namespace=namespace,
+        db_name="test_catalog",
+    )
+    second_config = LocalIcebergTableConfig(
+        table_name=f"tbl_{uuid4().hex[:6]}",
+        namespace=namespace,
+        db_name="test_catalog",
+    )
 
     # Create first table (also creates namespace)
     get_table(
-        catalogue_namespace=namespace,
-        table_name=first_table,
+        first_config,
         catalogue_name="local",
         create_if_not_exists=True,
         **local_catalog_params,
@@ -74,8 +81,7 @@ def test_get_table_suppresses_existing_namespace(local_catalog_params):  # type:
 
     # Creating another table in the same existing namespace should not raise
     new_table = get_table(
-        catalogue_namespace=namespace,
-        table_name=second_table,
+        second_config,
         catalogue_name="local",
         create_if_not_exists=True,
         **local_catalog_params,
@@ -86,24 +92,23 @@ def test_get_table_suppresses_existing_namespace(local_catalog_params):  # type:
         else getattr(new_table, "identifier", None)
     )
     fq_new_str = ".".join(fq_new) if isinstance(fq_new, tuple) else str(fq_new)
-    assert fq_new_str == f"{namespace}.{second_table}"
+    assert fq_new_str == f"{namespace}.{second_config.table_name}"
 
 
 def test_get_table_loads_when_flag_false(local_catalog_params):  # type: ignore
-    namespace = f"ns_{uuid4().hex[:8]}"
-    table_name = f"tbl_{uuid4().hex[:8]}"
+    config = LocalIcebergTableConfig(
+        table_name=f"tbl_{uuid4().hex[:8]}", namespace=f"ns_{uuid4().hex[:8]}"
+    )
 
     created = get_table(
-        catalogue_namespace=namespace,
-        table_name=table_name,
+        config,
         catalogue_name="local",
         create_if_not_exists=True,
         **local_catalog_params,
     )
 
     loaded = get_table(
-        catalogue_namespace=namespace,
-        table_name=table_name,
+        config,
         catalogue_name="local",
         create_if_not_exists=False,
         **local_catalog_params,
@@ -128,13 +133,7 @@ def test_get_iceberg_table_local(monkeypatch: pytest.MonkeyPatch) -> None:
 
     result = get_iceberg_table(config)
 
-    mock_get_local_table.assert_called_once_with(
-        table_name=config.table_name,
-        namespace=config.namespace,
-        db_name=config.db_name,
-        schema=mock.ANY,
-        partition_spec=mock.ANY,
-    )
+    mock_get_local_table.assert_called_once_with(config, True)
     assert result == "mock_table"
 
 
@@ -157,14 +156,6 @@ def test_get_iceberg_table_rest(monkeypatch: pytest.MonkeyPatch) -> None:
 
     result = get_iceberg_table(config)
 
-    mock_get_rest_api_table.assert_called_once_with(
-        s3_tables_bucket=config.s3_tables_bucket,
-        table_name=config.table_name,
-        namespace=config.namespace,
-        region=config.region,
-        account_id=config.account_id,
-        schema=mock.ANY,
-        partition_spec=mock.ANY,
-    )
+    mock_get_rest_api_table.assert_called_once_with(config, True)
 
     assert result == "mock_rest_table"

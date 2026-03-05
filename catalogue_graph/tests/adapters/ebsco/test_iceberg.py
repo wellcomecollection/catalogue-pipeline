@@ -2,9 +2,11 @@
 Tests covering the update behaviour of the iceberg ebsco adapter
 """
 
+from datetime import UTC, datetime
 from typing import Any
 
 import pyarrow as pa
+from freezegun import freeze_time
 from pyiceberg.expressions import EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
 
@@ -16,12 +18,8 @@ from .helpers import data_to_namespaced_table as _data_to_namespaced_table_helpe
 
 
 # Override the default namespace for these tests
-def data_to_namespaced_table(
-    unqualified_data: list[dict[str, Any]], *, add_timestamp: bool = False
-) -> pa.Table:
-    return _data_to_namespaced_table_helper(
-        unqualified_data, "ebsco_test", add_timestamp=add_timestamp
-    )
+def data_to_namespaced_table(unqualified_data: list[dict[str, Any]]) -> pa.Table:
+    return _data_to_namespaced_table_helper(unqualified_data, "ebsco_test")
 
 
 def test_noop(temporary_table: IcebergTable) -> None:
@@ -269,6 +267,7 @@ def test_delete_records(temporary_table: IcebergTable) -> None:
     assert_row_identifiers(changeset_rows, expected_deletions)
 
 
+@freeze_time("2025-01-02")
 def test_all_actions(temporary_table: IcebergTable) -> None:
     """
     Given an existing Iceberg table
@@ -332,7 +331,9 @@ def test_all_actions(temporary_table: IcebergTable) -> None:
             "id": "eb0001",
             "content": "hello",
             "changeset": None,
-            "last_modified": None,
+            "last_modified": datetime.strptime("2025-01-02", "%Y-%m-%d").replace(
+                tzinfo=UTC
+            ),
             "deleted": None,
             "namespace": "ebsco_test",
         }

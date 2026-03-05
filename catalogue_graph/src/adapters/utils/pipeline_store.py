@@ -56,22 +56,18 @@ class PipelineStore(ABC):
         return self.table.scan(row_filter=row_filter).to_arrow().cast(self.schema)
 
     def _upsert_with_markers(
-        self,
-        changes: pa.Table | None,
-        inserts: pa.Table | None,
-        timestamp: datetime | None = None,
+        self, changes: pa.Table | None, inserts: pa.Table | None
     ) -> AdapterStoreUpdate:
         """
-        Insert and update records, adding the timestamp and changeset values to any changed rows.
+        Insert and update records, adding changeset values to any changed rows.
         :param changes: New versions of existing records to change
         :param inserts: New records to insert
         """
         changeset_id = str(uuid.uuid1())
-
         if changes is not None:
-            changes = self._set_change_columns(changes, changeset_id, timestamp)
+            changes = self._set_changeset_id(changes, changeset_id)
         if inserts is not None:
-            inserts = self._set_change_columns(inserts, changeset_id, timestamp)
+            inserts = self._set_changeset_id(inserts, changeset_id)
         with self.table.transaction() as tx:
             # Because we already know which records to overwrite and which ones to append,
             # we can avoid all the extra processing that happens inside table.upsert to find
@@ -94,30 +90,23 @@ class PipelineStore(ABC):
 
     @staticmethod
     def _create_match_filter(changes: pa.Table) -> BooleanExpression:
-        # to_pylist returns list[Any | None]; Iceberg In expects a concrete literal type.
-        raw_ids = changes.column("id").to_pylist()
-        change_ids = cast(list[str], [i for i in raw_ids if isinstance(i, str)])
-        return In("id", change_ids)
+        ids = changes.column("id").drop_null().to_pylist()
+        return In("id", ids)
 
     @staticmethod
-    def _set_change_columns(
-        changeset: pa.Table,
-        changeset_id: str,
-        timestamp: datetime | None = None,
-    ) -> pa.Table:
-        # Replace changeset column with the new changeset_id
+    def _set_last_modified(changeset: pa.Table, timestamp: datetime) -> pa.Table:
+        idx = changeset.schema.get_field_index("last_modified")
+        changeset = changeset.set_column(
+            idx, LAST_MODIFIED_FIELD, pa.repeat(timestamp, changeset.num_rows)
+        )
+        return changeset
+
+    @staticmethod
+    def _set_changeset_id(changeset: pa.Table, changeset_id: str) -> pa.Table:
         idx = changeset.schema.get_field_index("changeset")
         changeset = changeset.set_column(
             idx, CHANGESET_FIELD, pa.repeat(changeset_id, changeset.num_rows)
         )
-
-        # Replace last_modified column if timestamp provided
-        if timestamp is not None:
-            idx = changeset.schema.get_field_index("last_modified")
-            changeset = changeset.set_column(
-                idx, LAST_MODIFIED_FIELD, pa.repeat(timestamp, changeset.num_rows)
-            )
-
         return changeset
 
     @staticmethod
