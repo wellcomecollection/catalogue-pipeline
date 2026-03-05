@@ -4,7 +4,7 @@ import polars as pl
 import pydantic
 import pytest
 
-from graph_remover import IDS_LOG_SCHEMA, lambda_handler
+from graph.steps.graph_remover import IDS_LOG_SCHEMA, lambda_handler
 from tests.mocks import MockSmartOpen, add_neptune_mock_response, mock_neptune_secrets
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 

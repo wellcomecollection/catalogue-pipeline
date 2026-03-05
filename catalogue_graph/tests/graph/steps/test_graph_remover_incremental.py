@@ -5,7 +5,7 @@ import pydantic
 import pytest
 from freezegun import freeze_time
 
-from graph_remover_incremental import lambda_handler
+from graph.steps.graph_remover_incremental import lambda_handler
 from tests.mocks import (
     MockCloudwatchClient,
     MockSmartOpen,

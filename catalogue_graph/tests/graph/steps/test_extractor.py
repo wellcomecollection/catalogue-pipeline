@@ -9,7 +9,7 @@ from config import (
     MESH_URL,
     WIKIDATA_SPARQL_URL,
 )
-from extractor import lambda_handler
+from graph.steps.extractor import lambda_handler
 from models.events import EntityType, StreamDestination
 from tests.mocks import (
     MockElasticsearchClient,

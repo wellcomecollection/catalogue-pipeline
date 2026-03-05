@@ -1,7 +1,7 @@
 import pytest
 from freezegun import freeze_time
 
-from bulk_load_poller import lambda_handler
+from graph.steps.bulk_load_poller import lambda_handler
 from models.neptune_bulk_loader import (
     BulkLoadErrors,
     BulkLoadFeed,
