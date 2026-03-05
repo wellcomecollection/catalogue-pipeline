@@ -15,10 +15,10 @@ from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.ebsco import config as ebsco_config
 from adapters.ebsco import helpers as ebsco_helpers
 from adapters.transformers.axiell_transformer import AxiellTransformer
-from adapters.transformers.base_transformer import BaseTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.manifests import ManifestWriter, TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
+from core.transformer import ElasticBaseTransformer as BaseTransformer
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 

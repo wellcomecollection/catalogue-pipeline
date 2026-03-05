@@ -15,7 +15,7 @@ from ingestor.models.neptune.query_result import (
     ExtractedRelatedConcept,
 )
 from ingestor.transformers.concepts_transformer import (
-    ElasticsearchConceptsTransformer,
+    IngestorConceptsTransformer,
 )
 from ingestor.transformers.raw_concept import (
     get_most_specific_concept_type,
@@ -39,8 +39,8 @@ MOCK_EMPTY_RELATED_CONCEPTS: dict = {
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 
-def get_transformer() -> ElasticsearchConceptsTransformer:
-    return ElasticsearchConceptsTransformer(
+def get_transformer() -> IngestorConceptsTransformer:
+    return IngestorConceptsTransformer(
         MOCK_EVENT,
         get_mock_es_client("graph_extractor", MOCK_EVENT.pipeline_date),
         get_mock_neptune_client(),

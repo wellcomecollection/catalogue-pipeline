@@ -4,8 +4,7 @@ from typing import Any
 import structlog
 
 from adapters.utils.adapter_store import AdapterStore
-
-from .base_transformer import BaseSource
+from core.source import BaseSource
 
 logger = structlog.get_logger(__name__)
 
