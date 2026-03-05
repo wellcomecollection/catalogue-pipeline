@@ -4,8 +4,8 @@ from typing import cast
 
 import structlog
 
-from models.events import ExtractorEvent
 from core.source import BaseSource
+from models.events import ExtractorEvent
 from utils.ontology import get_extracted_ids, is_id_in_ontology
 from utils.streaming import process_stream_in_parallel
 from utils.types import NodeType, OntologyType, TransformerType

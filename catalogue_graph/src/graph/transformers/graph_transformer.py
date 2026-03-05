@@ -8,12 +8,11 @@ import boto3
 import smart_open
 import structlog
 
+from core.transformer import BaseTransformer
 from graph.converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 from models.events import EntityType
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
-from core.source import BaseSource
-from core.transformer import BaseTransformer
 
 logger = structlog.get_logger(__name__)
 CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))

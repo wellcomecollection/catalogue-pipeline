@@ -1,5 +1,7 @@
 from collections.abc import Generator
 
+from graph.sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from graph.transformers.graph_transformer import GraphBaseTransformer
 from models.events import ExtractorEvent
 from models.graph_edge import (
     BaseEdge,
@@ -10,8 +12,6 @@ from models.graph_edge import (
     SourceConceptSameAsAttributes,
 )
 from models.graph_node import SourceConcept
-from graph.sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from graph.transformers.graph_transformer import GraphBaseTransformer
 from utils.types import TransformerType
 
 from .raw_concept import RawWikidataConcept

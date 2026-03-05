@@ -3,12 +3,12 @@ from collections.abc import Generator, Iterable, Iterator
 from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
-from models.events import IncrementalGraphRemoverEvent
-from models.graph_edge import WorkHasConcept
 from graph.sources.catalogue.concepts_source import ES_FIELDS as ES_FIELDS_WORK_CONCEPTS
 from graph.sources.catalogue.concepts_source import ES_QUERY as ES_QUERY_WORK_CONCEPTS
 from graph.sources.merged_works_source import MergedWorksSource
 from graph.transformers.catalogue.raw_work import RawCatalogueWork
+from models.events import IncrementalGraphRemoverEvent
+from models.graph_edge import WorkHasConcept
 
 from .base_graph_remover_incremental import BaseGraphRemoverIncremental
 

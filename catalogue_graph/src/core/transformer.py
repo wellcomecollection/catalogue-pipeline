@@ -1,6 +1,6 @@
 from collections.abc import Generator, Iterable
 from itertools import batched
-from typing import Any, Generic, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 import elasticsearch.helpers
 import structlog
@@ -27,7 +27,7 @@ class TransformationError(BaseModel):
     detail: str
 
 
-class ElasticBaseTransformer(BaseTransformer, Generic[T]):
+class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
     def __init__(self) -> None:
         super().__init__()
         self.successful_ids: list[str] = []

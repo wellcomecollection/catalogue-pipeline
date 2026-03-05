@@ -1,13 +1,13 @@
 from collections.abc import Generator
 from typing import TextIO
 
+from graph.sources.weco_concepts.concepts_source import WeCoConceptsSource
+from graph.transformers.graph_transformer import GraphBaseTransformer
 from models.graph_edge import (
     ConceptHasSourceConcept,
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import SourceConcept
-from graph.sources.weco_concepts.concepts_source import WeCoConceptsSource
-from graph.transformers.graph_transformer import GraphBaseTransformer
 
 
 class WeCoConceptsTransformer(GraphBaseTransformer):

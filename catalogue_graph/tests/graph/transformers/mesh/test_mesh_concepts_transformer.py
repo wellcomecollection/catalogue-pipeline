@@ -1,10 +1,10 @@
 from typing import cast
 
+from graph.transformers.mesh.concepts_transformer import MeSHConceptsTransformer
 from models.graph_edge import SourceConceptHasParent, SourceConceptRelatedTo
 from models.graph_node import SourceConcept
 from tests.mocks import MockRequest
 from tests.test_utils import load_fixture
-from graph.transformers.mesh.concepts_transformer import MeSHConceptsTransformer
 
 
 def test_mesh_concepts_transformer() -> None:

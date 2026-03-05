@@ -1,9 +1,9 @@
+from graph.transformers.catalogue.works_transformer import CatalogueWorksTransformer
 from models.events import BasePipelineEvent
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from tests.mocks import get_mock_es_client
 from tests.test_utils import add_mock_merged_documents, check_bulk_load_edge
-from graph.transformers.catalogue.works_transformer import CatalogueWorksTransformer
 
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 

@@ -2,8 +2,8 @@ import json
 from typing import Literal
 
 from config import WIKIDATA_SPARQL_URL
-from models.events import ExtractorEvent
 from graph.sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from models.events import ExtractorEvent
 from tests.mocks import MockRequest
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 from utils.ontology import get_extracted_ids, is_id_in_ontology

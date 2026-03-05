@@ -1,3 +1,6 @@
+from graph.transformers.catalogue.concepts_transformer import (
+    CatalogueConceptsTransformer,
+)
 from models.events import BasePipelineEvent
 from models.graph_edge import (
     ConceptHasSourceConcept,
@@ -10,7 +13,6 @@ from tests.test_utils import (
     add_mock_transformer_outputs_for_ontologies,
     check_bulk_load_edge,
 )
-from graph.transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
 def get_transformer(pipeline_date: str = "dev") -> CatalogueConceptsTransformer:

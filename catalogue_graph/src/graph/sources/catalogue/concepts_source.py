@@ -3,14 +3,14 @@ from collections.abc import Generator
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
+from core.source import BaseSource
+from graph.sources.merged_works_source import MergedWorksSource
 from models.events import BasePipelineEvent
 from models.pipeline.concept import (
     Concept,
     IdentifiedConcept,
 )
 from models.pipeline.work_data import WorkData
-from core.source import BaseSource
-from graph.sources.merged_works_source import MergedWorksSource
 from utils.types import WorkConceptKey
 
 

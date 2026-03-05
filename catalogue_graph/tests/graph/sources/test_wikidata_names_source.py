@@ -1,6 +1,8 @@
-from models.events import ExtractorEvent
 from graph.sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from tests.graph.sources.test_wikidata_concepts_source import _add_mock_wikidata_requests
+from models.events import ExtractorEvent
+from tests.graph.sources.test_wikidata_concepts_source import (
+    _add_mock_wikidata_requests,
+)
 from tests.test_utils import (
     add_mock_transformer_outputs_for_ontologies,
 )

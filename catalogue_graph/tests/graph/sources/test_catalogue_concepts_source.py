@@ -1,5 +1,5 @@
-from models.events import BasePipelineEvent
 from graph.sources.catalogue.concepts_source import CatalogueConceptsSource
+from models.events import BasePipelineEvent
 from tests.mocks import get_mock_es_client
 from tests.test_utils import add_mock_merged_documents
 

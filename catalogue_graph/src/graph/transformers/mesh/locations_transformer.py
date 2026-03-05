@@ -1,9 +1,9 @@
 from collections.abc import Generator
 
-from models.graph_edge import BaseEdge
-from models.graph_node import SourceLocation
 from graph.sources.mesh.concepts_source import MeSHConceptsSource, RawMeshNode
 from graph.transformers.graph_transformer import GraphBaseTransformer
+from models.graph_edge import BaseEdge
+from models.graph_node import SourceLocation
 
 from .raw_concept import RawMeSHConcept
 

@@ -1,3 +1,6 @@
+from graph.transformers.catalogue.work_identifiers_transformer import (
+    CatalogueWorkIdentifiersTransformer,
+)
 from models.events import BasePipelineEvent
 from models.graph_edge import (
     PathIdentifierHasParent,
@@ -6,9 +9,6 @@ from models.graph_edge import (
 from models.graph_node import PathIdentifier
 from tests.mocks import get_mock_es_client
 from tests.test_utils import add_mock_merged_documents, check_bulk_load_edge
-from graph.transformers.catalogue.work_identifiers_transformer import (
-    CatalogueWorkIdentifiersTransformer,
-)
 
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 

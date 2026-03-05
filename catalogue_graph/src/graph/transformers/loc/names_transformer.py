@@ -1,9 +1,9 @@
 from collections.abc import Generator
 
-from models.graph_edge import SourceConceptHasFieldOfWork, SourceConceptRelatedTo
-from models.graph_node import SourceName
 from core.source import GZipSource
 from graph.transformers.graph_transformer import GraphBaseTransformer
+from models.graph_edge import SourceConceptHasFieldOfWork, SourceConceptRelatedTo
+from models.graph_node import SourceName
 
 from .raw_concept import RawLibraryOfCongressConcept
 

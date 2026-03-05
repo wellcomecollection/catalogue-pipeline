@@ -1,9 +1,13 @@
 import json
 
+from graph.transformers.loc.concepts_transformer import (
+    LibraryOfCongressConceptsTransformer,
+)
+from graph.transformers.loc.locations_transformer import (
+    LibraryOfCongressLocationsTransformer,
+)
 from tests.mocks import MockRequest
 from tests.test_utils import load_fixture
-from graph.transformers.loc.concepts_transformer import LibraryOfCongressConceptsTransformer
-from graph.transformers.loc.locations_transformer import LibraryOfCongressLocationsTransformer
 
 
 def jsons_to_ndjson(json_fixtures: list[str]) -> bytes:

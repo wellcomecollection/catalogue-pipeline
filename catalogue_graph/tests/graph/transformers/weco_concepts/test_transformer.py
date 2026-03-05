@@ -1,7 +1,9 @@
 import io
 
+from graph.transformers.weco_concepts.concepts_transformer import (
+    WeCoConceptsTransformer,
+)
 from models.graph_node import SourceConcept
-from graph.transformers.weco_concepts.concepts_transformer import WeCoConceptsTransformer
 
 
 def test_stream_weco_nodes() -> None:

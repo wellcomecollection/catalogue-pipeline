@@ -9,6 +9,7 @@ from pymarc.record import Record
 
 from adapters.marc.transformers.identifier import extract_id
 from adapters.utils.adapter_store import AdapterStore
+from core.transformer import ElasticBaseTransformer
 from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.source.work import (
@@ -22,7 +23,6 @@ from models.pipeline.work_state import WorkRelations
 from utils.timezone import convert_datetime_to_utc_iso
 
 from .adapter_store_source import AdapterStoreSource
-from core.transformer import ElasticBaseTransformer
 
 
 class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):

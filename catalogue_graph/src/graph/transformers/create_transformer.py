@@ -11,10 +11,10 @@ from models.events import (
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.types import CatalogueTransformerType
 
-from .graph_transformer import GraphBaseTransformer
 from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 from .catalogue.work_identifiers_transformer import CatalogueWorkIdentifiersTransformer
 from .catalogue.works_transformer import CatalogueWorksTransformer
+from .graph_transformer import GraphBaseTransformer
 from .loc.concepts_transformer import LibraryOfCongressConceptsTransformer
 from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
 from .loc.names_transformer import LibraryOfCongressNamesTransformer

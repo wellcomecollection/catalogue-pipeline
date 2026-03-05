@@ -3,8 +3,8 @@ import json
 import pytest
 
 import adapters.ebsco.config as adapter_config
-from core.transformer import TransformationError
 from adapters.transformers.manifests import ManifestWriter
+from core.transformer import TransformationError
 from tests.mocks import MockSmartOpen
 
 

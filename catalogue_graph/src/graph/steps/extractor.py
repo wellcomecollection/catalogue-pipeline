@@ -6,14 +6,14 @@ from argparse import ArgumentParser
 
 import structlog
 
+from graph.transformers.create_transformer import create_transformer
+from graph.transformers.graph_transformer import GraphBaseTransformer
 from models.events import (
     EntityType,
     ExtractorEvent,
     StreamDestination,
     TransformerType,
 )
-from graph.transformers.graph_transformer import GraphBaseTransformer
-from graph.transformers.create_transformer import create_transformer
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging

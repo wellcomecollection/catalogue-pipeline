@@ -3,13 +3,15 @@ import math
 
 import pytest
 
+from graph.transformers.wikidata.concepts_transformer import WikidataConceptsTransformer
+from graph.transformers.wikidata.raw_concept import RawWikidataLocation, RawWikidataName
 from models.events import ExtractorEvent
 from models.graph_edge import SourceConceptSameAs, SourceConceptSameAsAttributes
 from models.graph_node import SourceConcept
-from tests.graph.sources.test_wikidata_concepts_source import _add_mock_wikidata_requests
+from tests.graph.sources.test_wikidata_concepts_source import (
+    _add_mock_wikidata_requests,
+)
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
-from graph.transformers.wikidata.concepts_transformer import WikidataConceptsTransformer
-from graph.transformers.wikidata.raw_concept import RawWikidataLocation, RawWikidataName
 
 
 def test_wikidata_concepts_nodes_transformer() -> None:

@@ -2,14 +2,14 @@ from collections.abc import Generator
 
 from elasticsearch import Elasticsearch
 
-from models.events import BasePipelineEvent
-from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
-from models.graph_node import Concept
 from graph.sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
     ExtractedWorkConcept,
 )
 from graph.transformers.graph_transformer import GraphBaseTransformer
+from models.events import BasePipelineEvent
+from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
+from models.graph_node import Concept
 from utils.ontology import get_transformers_from_ontology
 
 from .id_label_checker import IdLabelChecker

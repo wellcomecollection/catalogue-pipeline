@@ -18,6 +18,9 @@ import pytest
 from pydantic import BaseModel
 
 from clients.neptune_client import NeptuneClient
+from graph.sources.weco_concepts.concepts_source import (
+    DEFAULT_PATH as WECO_AUTHORITY_CSV_PATH,
+)
 from ingestor.extractors.base_concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
@@ -33,9 +36,6 @@ from ingestor.queries.concept_queries import (
 )
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
-)
-from graph.sources.weco_concepts.concepts_source import (
-    DEFAULT_PATH as WECO_AUTHORITY_CSV_PATH,
 )
 
 # Add the 'integration' marker to ensure that integration tests are not included in regular unit test runs.

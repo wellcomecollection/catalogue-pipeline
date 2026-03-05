@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from models.pipeline.work_data import WorkData
 from graph.sources.catalogue.concepts_source import extract_identified_concepts
+from models.pipeline.work_data import WorkData
 from utils.types import ConceptType, DisplayWorkType, WorkConceptKey
 
 from .raw_concept import RawCatalogueConcept

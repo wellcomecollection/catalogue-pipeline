@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from tests.test_utils import load_fixture
 from graph.transformers.loc.raw_concept import RawLibraryOfCongressConcept
+from tests.test_utils import load_fixture
 
 
 class TestSourceId:

@@ -3,13 +3,16 @@ from collections.abc import Generator, Iterable, Iterator
 from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
+from graph.sources.merged_works_source import MergedWorksSource
+from graph.transformers.catalogue.raw_work import RawCatalogueWork
+from graph.transformers.catalogue.work_identifiers_transformer import (
+    ES_FIELDS,
+    ES_QUERY,
+)
 from models.events import IncrementalGraphRemoverEvent
 from models.graph_edge import (
     WorkHasPathIdentifier,
 )
-from graph.sources.merged_works_source import MergedWorksSource
-from graph.transformers.catalogue.raw_work import RawCatalogueWork
-from graph.transformers.catalogue.work_identifiers_transformer import ES_FIELDS, ES_QUERY
 
 from .base_graph_remover_incremental import BaseGraphRemoverIncremental
 

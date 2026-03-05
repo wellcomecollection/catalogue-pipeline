@@ -6,14 +6,14 @@ from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 from clients.neptune_client import NeptuneClient
+from graph.sources.catalogue.concepts_source import extract_identified_concepts
+from graph.sources.merged_works_source import MergedWorksSource
 from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
 )
 from ingestor.models.neptune.query_result import ExtractedConcept, WorkHierarchy
 from models.events import BasePipelineEvent
-from graph.sources.catalogue.concepts_source import extract_identified_concepts
-from graph.sources.merged_works_source import MergedWorksSource
 
 from .base_extractor import GraphBaseExtractor
 from .work_concepts_extractor import WorkConceptsExtractor

@@ -2,11 +2,11 @@ from collections.abc import Generator
 
 from elasticsearch import Elasticsearch
 
+from graph.sources.merged_works_source import MergedWorksSource
+from graph.transformers.graph_transformer import GraphBaseTransformer
 from models.events import BasePipelineEvent
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
-from graph.sources.merged_works_source import MergedWorksSource
-from graph.transformers.graph_transformer import GraphBaseTransformer
 
 from .raw_work import RawCatalogueWork
 

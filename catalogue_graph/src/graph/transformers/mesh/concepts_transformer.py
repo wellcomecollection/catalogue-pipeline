@@ -1,9 +1,9 @@
 from collections.abc import Generator
 
-from models.graph_edge import SourceConceptHasParent, SourceConceptRelatedTo
-from models.graph_node import SourceConcept
 from graph.sources.mesh.concepts_source import MeSHConceptsSource, RawMeshNode
 from graph.transformers.graph_transformer import GraphBaseTransformer
+from models.graph_edge import SourceConceptHasParent, SourceConceptRelatedTo
+from models.graph_node import SourceConcept
 
 from .raw_concept import RawMeSHConcept
 
