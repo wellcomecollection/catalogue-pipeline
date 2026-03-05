@@ -16,52 +16,53 @@ Derived from [RFC 083 — Stable identifiers following mass record migration](..
 
 | # | Test | Description |
 |---|------|-------------|
-| 6 | All source IDs already exist | Returns existing canonical IDs, no free IDs claimed |
-| 7 | All source IDs are new, no predecessors | Claims free IDs from pool, inserts mappings, marks as assigned |
-| 8 | Mixed existing and new | Reuses existing canonical IDs; claims from pool only for new ones |
+| 6 | Empty input returns empty | No source IDs provided — returns empty dict |
+| 7 | All source IDs already exist | Returns existing canonical IDs, no free IDs claimed |
+| 8 | All source IDs are new, no predecessors | Claims free IDs from pool, inserts mappings, marks as assigned |
+| 9 | Mixed existing and new | Reuses existing canonical IDs; claims from pool only for new ones |
 
 ## `mint_ids` — Predecessor inheritance
 
 | # | Test | Description |
 |---|------|-------------|
-| 9 | Predecessor found, new source ID not found | Inherits predecessor's canonical ID |
-| 10 | Multiple predecessors in same batch | Each new source ID inherits from its own predecessor |
-| 11 | Cross-type predecessor | e.g. `Image` source ID inherits from a `Work` predecessor |
-| 12 | Re-processing without predecessor | Source ID already has canonical ID from previous predecessor-based mint — returns same ID (idempotent) |
+| 10 | Predecessor found, new source ID not found | Inherits predecessor's canonical ID |
+| 11 | Multiple predecessors in same batch | Each new source ID inherits from its own predecessor |
+| 12 | Cross-type predecessor | e.g. `Image` source ID inherits from a `Work` predecessor |
+| 13 | Re-processing without predecessor | Source ID already has canonical ID from previous predecessor-based mint — returns same ID (idempotent) |
 
 ## `mint_ids` — Idempotency
 
 | # | Test | Description |
 |---|------|-------------|
-| 13 | Identical request processed twice | Same result both times, no extra IDs claimed |
-| 14 | Duplicate source IDs in same batch | Deduplicated — single canonical ID per unique source ID |
+| 14 | Identical request processed twice | Same result both times, no extra IDs claimed |
+| 15 | Duplicate source IDs in same batch | Deduplicated — single canonical ID per unique source ID |
 
 ## `mint_ids` — Error cases
 
 | # | Test | Description |
 |---|------|-------------|
-| 15 | Predecessor specified but not found in DB | Raises `ValueError`, nothing committed |
-| 16 | Free ID pool exhausted | Needs N free IDs but 0 available — raises `RuntimeError`, nothing committed |
-| 17 | Free ID pool partially exhausted | Needs N free IDs but fewer than N available — raises `RuntimeError`, nothing committed |
+| 16 | Predecessor specified but not found in DB | Raises `ValueError`, nothing committed |
+| 17 | Free ID pool exhausted | Needs N free IDs but 0 available — raises `RuntimeError`, nothing committed |
+| 18 | Free ID pool partially exhausted | Needs N free IDs but fewer than N available — raises `RuntimeError`, nothing committed |
 
 ## `mint_ids` — Race conditions
 
 | # | Test | Description |
 |---|------|-------------|
-| 18 | Another process inserts same source ID between lookup and insert | Detects race via `FOR SHARE` re-read, adopts winner's canonical ID |
-| 19 | Race loser returns unused claimed ID to pool | Unused ID remains `free` — pool is not depleted by lost races |
-| 20 | Race with multiple source IDs — partial wins | Some IDs won, some lost — only won IDs marked `assigned` |
+| 19 | Another process inserts same source ID between lookup and insert | Detects race via `FOR SHARE` re-read, adopts winner's canonical ID |
+| 20 | Race loser returns unused claimed ID to pool | Unused ID remains `free` — pool is not depleted by lost races |
+| 21 | Race with multiple source IDs — partial wins | Some IDs won, some lost — only won IDs marked `assigned` |
 
 ## `mint_ids` — Transaction atomicity
 
 | # | Test | Description |
 |---|------|-------------|
-| 21 | Failure mid-batch rolls back everything | e.g. predecessor error after some inserts — no partial commits |
-| 22 | Claimed IDs not marked assigned on rollback | `FOR UPDATE` lock released, IDs remain `free` |
+| 22 | Failure mid-batch rolls back everything | e.g. predecessor error after some inserts — no partial commits |
+| 23 | Pool exhaustion rolls back successor mapping | Successor inherits predecessor's canonical ID, but pool exhaustion for other items rolls back the entire transaction |
 
 ## `mint_ids` — Pool management
 
 | # | Test | Description |
 |---|------|-------------|
-| 23 | Claimed IDs are marked as `assigned` | Status updated in `canonical_ids` table after successful mint |
-| 24 | Only used IDs are marked `assigned` | If batch claims 5 but race means only 3 used, the 2 unused stay `free` |
+| 24 | Claimed IDs are marked as `assigned` | Status updated in `canonical_ids` table after successful mint |
+| 25 | Only used IDs are marked `assigned` | If batch claims 5 but race means only 3 used, the 2 unused stay `free` |

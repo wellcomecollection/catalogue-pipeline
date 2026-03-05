@@ -175,7 +175,7 @@ class TestLookupIds:
 
 
 # ---------------------------------------------------------------------------
-# 6–8  mint_ids — happy paths
+# 6–9  mint_ids — happy paths
 # ---------------------------------------------------------------------------
 
 
@@ -185,12 +185,13 @@ class TestMintNewIds:
     def test_empty_input_returns_empty(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
+        """#6: No source IDs provided → empty dict."""
         assert IDMinter(ids_db).mint_ids([]) == {}
 
     def test_all_existing_returns_without_claiming(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#6: All source IDs already exist → no free IDs consumed."""
+        """#7: All source IDs already exist → no free IDs consumed."""
         identifiers = [
             (("Work", "axiell", f"b{i}"), f"exist{i:03d}") for i in range(1, 4)
         ]
@@ -209,7 +210,7 @@ class TestMintNewIds:
     def test_all_new_claims_from_pool(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#7: All source IDs are new with no predecessors → claims free IDs, inserts mappings."""
+        """#8: All source IDs are new with no predecessors → claims free IDs, inserts mappings."""
         free = [f"newid{i:03d}" for i in range(1, 4)]
         _seed_free_ids(ids_db, free)
         sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
@@ -227,7 +228,7 @@ class TestMintNewIds:
     def test_mixed_existing_and_new(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#8: Inherits if predecessor, claims only for new."""
+        """#9: Inherits if predecessor, claims only for new."""
         existing_sid: SourceId = ("Work", "axiell", "b0001")
         _seed_identifier(ids_db, existing_sid, "existaaa")
         _seed_free_ids(ids_db, ["newbbb01"])
@@ -240,7 +241,7 @@ class TestMintNewIds:
 
 
 # ---------------------------------------------------------------------------
-# 9–13  mint_ids — predecessor inheritance
+# 10–13  mint_ids — predecessor inheritance
 # ---------------------------------------------------------------------------
 
 
@@ -250,7 +251,7 @@ class TestPredecessorInheritance:
     def test_inherits_predecessor_canonical_id(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#9: Predecessor found, new source ID not found → inherits."""
+        """#10: Predecessor found, new source ID not found → inherits."""
         pred: SourceId = ("Work", "sierra", "b1234")
         _seed_identifier(ids_db, pred, "legacy01")
 
