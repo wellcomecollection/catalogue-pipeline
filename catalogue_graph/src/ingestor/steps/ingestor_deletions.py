@@ -8,7 +8,7 @@ from ingestor.models.step_events import IngestorDeletionsLambdaEvent
 from models.events import (
     IncrementalGraphRemoverEvent,
 )
-from removers.elasticsearch_remover import ElasticsearchRemover
+from graph.removers.elasticsearch_remover import ElasticsearchRemover
 from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import ElasticsearchMode

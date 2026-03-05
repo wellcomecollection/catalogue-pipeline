@@ -1,7 +1,7 @@
 import structlog
 
 import config
-from data_validation.concept_types import get_concepts_with_inconsistent_types
+from graph.data_validation.concept_types import get_concepts_with_inconsistent_types
 from utils.aws import write_csv_to_s3
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 

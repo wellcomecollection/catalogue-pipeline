@@ -6,12 +6,12 @@ import structlog
 
 from clients.neptune_client import NeptuneClient
 from models.events import IncrementalGraphRemoverEvent
-from removers.base_graph_remover_incremental import BaseGraphRemoverIncremental
-from removers.catalogue_concepts_remover import CatalogueConceptsGraphRemover
-from removers.catalogue_work_identifiers_remover import (
+from graph.removers.base_graph_remover_incremental import BaseGraphRemoverIncremental
+from graph.removers.catalogue_concepts_remover import CatalogueConceptsGraphRemover
+from graph.removers.catalogue_work_identifiers_remover import (
     CatalogueWorkIdentifiersGraphRemover,
 )
-from removers.catalogue_works_remover import CatalogueWorksGraphRemover
+from graph.removers.catalogue_works_remover import CatalogueWorksGraphRemover
 from utils.argparse import add_pipeline_event_args
 from utils.aws import (
     df_to_s3_parquet,
