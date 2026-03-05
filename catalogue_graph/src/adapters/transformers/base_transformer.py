@@ -7,6 +7,8 @@ import structlog
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
+from core.source import BaseSource
+from core.transformer import BaseTransformer as CoreBaseTransformer
 from models.pipeline.source.work import SourceWork
 
 logger = structlog.get_logger(__name__)
@@ -20,15 +22,9 @@ class TransformationError(BaseModel):
     detail: str
 
 
-class BaseSource:
-    def stream_raw(self) -> Generator[Any]:
-        """Returns a generator of raw data corresponding to an entity extracted from the source."""
-        raise NotImplementedError("Each source must implement a `stream_raw` method.")
-
-
-class BaseTransformer:
+class BaseTransformer(CoreBaseTransformer):
     def __init__(self) -> None:
-        self.source: BaseSource = BaseSource()
+        super().__init__()
         self.successful_ids: list[str] = []
         self.errors: list[TransformationError] = []
 

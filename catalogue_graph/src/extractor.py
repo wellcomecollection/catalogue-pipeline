@@ -12,8 +12,8 @@ from models.events import (
     StreamDestination,
     TransformerType,
 )
-from transformers.base_transformer import BaseTransformer
-from transformers.create_transformer import create_transformer
+from graph.transformers.graph_transformer import GraphBaseTransformer
+from graph.transformers.create_transformer import create_transformer
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -37,7 +37,7 @@ def handler(
         stream_destination=event.stream_destination,
     )
 
-    transformer: BaseTransformer = create_transformer(event, es_mode)
+    transformer: GraphBaseTransformer = create_transformer(event, es_mode)
 
     if event.stream_destination == "s3":
         s3_uri = event.get_s3_uri()

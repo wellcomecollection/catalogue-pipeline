@@ -10,7 +10,7 @@ from ingestor.models.neptune.query_result import (
     ExtractedRelatedConcept,
 )
 from models.events import BasePipelineEvent
-from sources.catalogue.concepts_source import (
+from graph.sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
 )
 

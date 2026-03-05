@@ -34,7 +34,7 @@ from ingestor.queries.concept_queries import (
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
 )
-from sources.weco_concepts.concepts_source import (
+from graph.sources.weco_concepts.concepts_source import (
     DEFAULT_PATH as WECO_AUTHORITY_CSV_PATH,
 )
 
