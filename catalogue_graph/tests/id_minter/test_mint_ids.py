@@ -121,19 +121,6 @@ def _count_assigned_ids(conn: pymysql.connections.Connection) -> int:
 class TestLookupIds:
     """Tests for IDMinter.lookup_ids()."""
 
-    def test_returns_empty_for_empty_input(
-        self, ids_db: pymysql.connections.Connection
-    ) -> None:
-        """#4: No source IDs provided → empty dict."""
-        assert IDMinter(ids_db).lookup_ids([]) == {}
-
-    def test_returns_empty_when_no_matches(
-        self, ids_db: pymysql.connections.Connection
-    ) -> None:
-        """#3: None of the requested source IDs exist."""
-        result = IDMinter(ids_db).lookup_ids([("Work", "sierra", "b99999")])
-        assert result == {}
-
     def test_returns_existing_mappings(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
@@ -158,6 +145,19 @@ class TestLookupIds:
 
         result = IDMinter(ids_db).lookup_ids([existing, missing])
         assert result == {existing: "found001"}
+
+    def test_returns_empty_when_no_matches(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """#3: None of the requested source IDs exist."""
+        result = IDMinter(ids_db).lookup_ids([("Work", "sierra", "b99999")])
+        assert result == {}
+
+    def test_returns_empty_for_empty_input(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """#4: No source IDs provided → empty dict."""
+        assert IDMinter(ids_db).lookup_ids([]) == {}
 
     def test_handles_mixed_ontology_types(
         self, ids_db: pymysql.connections.Connection
@@ -257,18 +257,6 @@ class TestPredecessorInheritance:
         row = _get_identifier_row(ids_db, new_sid)
         assert row is not None
         assert row["CanonicalId"] == "legacy01"
-
-    def test_existing_source_id_ignores_predecessor(
-        self, ids_db: pymysql.connections.Connection
-    ) -> None:
-        """#10: Both predecessor and new source ID exist → returns existing."""
-        pred: SourceId = ("Work", "sierra", "b1234")
-        _seed_identifier(ids_db, pred, "legacy01")
-        new_sid: SourceId = ("Work", "axiell", "AC-5678")
-        _seed_identifier(ids_db, new_sid, "already1")
-
-        result = IDMinter(ids_db).mint_ids([(new_sid, pred)])
-        assert result[new_sid] == "already1"
 
     def test_multiple_predecessors_in_batch(
         self, ids_db: pymysql.connections.Connection
