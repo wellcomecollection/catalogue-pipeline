@@ -1,5 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import cast
 
 import pyarrow as pa
@@ -58,7 +59,7 @@ class PipelineStore(ABC):
         self,
         changes: pa.Table | None,
         inserts: pa.Table | None,
-        timestamp: pa.Scalar | None = None,
+        timestamp: datetime | None = None,
     ) -> AdapterStoreUpdate:
         """
         Insert and update records, adding the timestamp and changeset values to
@@ -101,7 +102,9 @@ class PipelineStore(ABC):
 
     @staticmethod
     def _set_change_columns(
-        changeset: pa.Table, changeset_id: str, timestamp: pa.Scalar | None = None
+        changeset: pa.Table,
+        changeset_id: str,
+        timestamp: datetime | None = None,
     ) -> pa.Table:
         # Replace changeset column with the new changeset_id
         idx = changeset.schema.get_field_index("changeset")

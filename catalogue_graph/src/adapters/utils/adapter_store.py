@@ -105,8 +105,9 @@ class AdapterStore(PipelineStore):
 
         if changes or inserts:
             # replace last_modified timestamps with current time for snapshot sync
-            timestamp = pa.scalar(datetime.now(UTC), pa.timestamp("us", "UTC"))
-            return self._upsert_with_markers(changes, inserts, timestamp=timestamp)
+            return self._upsert_with_markers(
+                changes, inserts, timestamp=datetime.now(UTC)
+            )
 
         return None
 

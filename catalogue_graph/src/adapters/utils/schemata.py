@@ -5,7 +5,7 @@ from pyiceberg.types import BooleanType, NestedField, StringType, TimestamptzTyp
 # namespace - e.g. ebsco - in case we decide to store everything in one table
 # last modified - different from changeset because this allows changeset to be meaningful.
 
-ADAPTER_STORE_SCHEMA = Schema(
+ADAPTER_STORE_ICEBERG_SCHEMA = Schema(
     # We may wish to store similar data from multiple sources in the same table. This allows us to filter appropriately
     NestedField(field_id=1, name="namespace", field_type=StringType(), required=True),
     # Each record has an identifier which is unique within its namespace

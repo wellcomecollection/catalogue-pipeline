@@ -10,7 +10,7 @@ from pyiceberg.partitioning import UNPARTITIONED_PARTITION_SPEC, PartitionSpec
 from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.utils.schemata import ADAPTER_STORE_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA
 
 
 class SharedIcebergTableConfig(BaseModel):
@@ -20,7 +20,7 @@ class SharedIcebergTableConfig(BaseModel):
     namespace: str
 
     # Only used when creating a new table
-    iceberg_schema: Schema = ADAPTER_STORE_SCHEMA
+    iceberg_schema: Schema = ADAPTER_STORE_ICEBERG_SCHEMA
     partition_spec: PartitionSpec = UNPARTITIONED_PARTITION_SPEC
 
 

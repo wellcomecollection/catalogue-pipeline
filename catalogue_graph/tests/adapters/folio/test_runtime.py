@@ -3,13 +3,13 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import httpx
-
 from adapters.folio.config import FOLIO_ADAPTER_CONFIG
 from adapters.folio.runtime import FOLIO_CONFIG, FolioRuntimeConfig
 from adapters.oai_pmh.http_client import OAIPMHHTTPClient
 from adapters.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
 from adapters.utils.iceberg import LocalIcebergTableConfig, RestApiIcebergTableConfig
-from adapters.utils.schemata import ADAPTER_STORE_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA
+from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
 
 
 def test_folio_runtime_config_extends_base() -> None:
@@ -67,7 +67,7 @@ def test_folio_runtime_accepts_custom_config() -> None:
         rest_api_iceberg_config=RestApiIcebergTableConfig(
             table_name="test_table",
             namespace="test_ns",
-            iceberg_schema=ADAPTER_STORE_SCHEMA,
+            iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
             s3_tables_bucket="test-bucket",
             region="us-east-1",
             account_id="123456789012",
@@ -75,7 +75,7 @@ def test_folio_runtime_accepts_custom_config() -> None:
         rest_api_window_status_iceberg_config=RestApiIcebergTableConfig(
             table_name="window_status",
             namespace="test_window_ns",
-            iceberg_schema=ADAPTER_STORE_SCHEMA,
+            iceberg_schema=WINDOW_STATUS_SCHEMA,
             s3_tables_bucket="test-bucket",
             region="us-east-1",
             account_id="123456789012",
@@ -83,13 +83,13 @@ def test_folio_runtime_accepts_custom_config() -> None:
         local_iceberg_config=LocalIcebergTableConfig(
             table_name="test_local",
             namespace="test_local_ns",
-            iceberg_schema=ADAPTER_STORE_SCHEMA,
+            iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
             db_name="test_db",
         ),
         local_window_status_iceberg_config=LocalIcebergTableConfig(
             table_name="window_status",
             namespace="test_window_ns",
-            iceberg_schema=ADAPTER_STORE_SCHEMA,
+            iceberg_schema=WINDOW_STATUS_SCHEMA,
             db_name="test_window_db",
         ),
     )
