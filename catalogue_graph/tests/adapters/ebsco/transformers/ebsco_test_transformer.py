@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pymarc.record import Record
 
-from adapters.transformers.base_transformer import BaseTransformer
+from core.transformer import ElasticBaseTransformer as BaseTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from models.pipeline.identifier import Id
 from models.pipeline.source.work import VisibleSourceWork

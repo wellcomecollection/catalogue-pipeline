@@ -6,7 +6,7 @@ from datetime import datetime
 from pymarc.record import Record
 
 from adapters.marc.transformers.title import extract_title
-from adapters.transformers.base_transformer import BaseTransformer
+from core.transformer import ElasticBaseTransformer as BaseTransformer
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Id

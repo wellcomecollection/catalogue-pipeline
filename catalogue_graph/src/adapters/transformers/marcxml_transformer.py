@@ -22,7 +22,7 @@ from models.pipeline.work_state import WorkRelations
 from utils.timezone import convert_datetime_to_utc_iso
 
 from .adapter_store_source import AdapterStoreSource
-from .base_transformer import BaseTransformer
+from core.transformer import ElasticBaseTransformer as BaseTransformer
 
 
 class MarcXmlTransformer(BaseTransformer):

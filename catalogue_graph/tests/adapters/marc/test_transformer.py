@@ -7,7 +7,7 @@ from typing import Any, cast
 import pytest
 from elasticsearch import Elasticsearch
 
-from adapters.transformers.base_transformer import BaseSource
+from core.source import BaseSource
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.source.work import VisibleSourceWork
 from tests.mocks import MockElasticsearchClient

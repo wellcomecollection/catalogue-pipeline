@@ -8,7 +8,7 @@ from pathlib import PurePosixPath
 
 import smart_open
 
-from adapters.transformers.base_transformer import TransformationError
+from core.transformer import TransformationError
 from adapters.transformers.models.manifests import (
     FailureManifest,
     S3Location,
