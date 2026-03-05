@@ -18,14 +18,14 @@ from ingestor.transformers.raw_concept import RawNeptuneConcept
 from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
 from models.events import BasePipelineEvent
 
-from .base_transformer import ElasticsearchBaseTransformer
+from .base_transformer import IngestorBaseTransformer
 from .raw_concept import MissingLabelError
 from .raw_related_concepts import RawNeptuneRelatedConcept
 
 logger = structlog.get_logger(__name__)
 
 
-class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
+class IngestorConceptsTransformer(IngestorBaseTransformer):
     def __init__(
         self,
         event: BasePipelineEvent,

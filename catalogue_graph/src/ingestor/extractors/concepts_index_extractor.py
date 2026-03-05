@@ -4,15 +4,15 @@ import structlog
 from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
+from graph.sources.catalogue.concepts_source import (
+    CatalogueConceptsSource,
+)
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,
 )
 from models.events import BasePipelineEvent
-from sources.catalogue.concepts_source import (
-    CatalogueConceptsSource,
-)
 
 from .base_concepts_extractor import GraphBaseConceptsExtractor
 
