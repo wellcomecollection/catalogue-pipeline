@@ -1,7 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -10,8 +10,6 @@ from pyiceberg.expressions import BooleanExpression, EqualTo, In
 from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
-
-from adapters.utils.schemata import CHANGESET_FIELD, LAST_MODIFIED_FIELD
 
 
 class AdapterStoreUpdate(BaseModel):
@@ -90,24 +88,22 @@ class PipelineStore(ABC):
 
     @staticmethod
     def _create_match_filter(changes: pa.Table) -> BooleanExpression:
-        ids = changes.column("id").drop_null().to_pylist()
-        return In("id", ids)
+        # to_pylist returns list[Any | None]; Iceberg In expects a concrete literal type.
+        raw_ids = changes.column("id").to_pylist()
+        change_ids = cast(list[str], [i for i in raw_ids if isinstance(i, str)])
+        return In("id", change_ids)
 
-    @staticmethod
-    def _set_last_modified(changeset: pa.Table, timestamp: datetime) -> pa.Table:
-        idx = changeset.schema.get_field_index("last_modified")
-        changeset = changeset.set_column(
-            idx, LAST_MODIFIED_FIELD, pa.repeat(timestamp, changeset.num_rows)
-        )
-        return changeset
+    def _set_value(self, changeset: pa.Table, field_name: str, value: Any) -> pa.Table:
+        idx = changeset.schema.get_field_index(field_name)
+        field = self.schema.field_by_name(field_name)
+        values = pa.repeat(value, changeset.num_rows).cast(field.type)
+        return changeset.set_column(idx, field, values)
 
-    @staticmethod
-    def _set_changeset_id(changeset: pa.Table, changeset_id: str) -> pa.Table:
-        idx = changeset.schema.get_field_index("changeset")
-        changeset = changeset.set_column(
-            idx, CHANGESET_FIELD, pa.repeat(changeset_id, changeset.num_rows)
-        )
-        return changeset
+    def _set_last_modified(self, changeset: pa.Table, timestamp: datetime) -> pa.Table:
+        return self._set_value(changeset, "last_modified", timestamp)
+
+    def _set_changeset_id(self, changeset: pa.Table, changeset_id: str) -> pa.Table:
+        return self._set_value(changeset, "changeset", changeset_id)
 
     @staticmethod
     def _find_inserts(
@@ -145,8 +141,7 @@ class PipelineStore(ABC):
         update_ids = updates_projected.column("id")
         return new_data.filter(pc.field("id").isin(update_ids))
 
-    @staticmethod
-    def _filter_by_timestamp(updates: pa.Table, existing_data: pa.Table) -> pa.Table:
+    def _filter_by_timestamp(self, updates: pa.Table, existing_data: pa.Table) -> pa.Table:
         """
         Filter updates to only include records where the new last_modified is newer than
         the existing last_modified.
@@ -163,15 +158,11 @@ class PipelineStore(ABC):
         """
         joined = updates.join(existing_data, keys="id", right_suffix="_existing")
         existing_ts = joined.column("last_modified_existing")
-        last_modified_filter = pc.or_(
-            pc.is_null(existing_ts),
-            pc.fill_null(
-                pc.greater(joined.column("last_modified"), existing_ts), False
-            ),
-        )
+        last_modified_filter = pc.greater(joined.column("last_modified"), existing_ts)
         newer_ids = joined.filter(last_modified_filter).column("id")
+        
         return updates.filter(
-            pc.field("id").isin(pa.array(newer_ids, type=pa.string()))
+            pc.field("id").isin(pa.array(newer_ids, type=self.schema.field_by_name("id").type))
         )
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
