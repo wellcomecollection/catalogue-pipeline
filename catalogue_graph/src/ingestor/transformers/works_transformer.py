@@ -20,10 +20,10 @@ from ingestor.models.merged.work import (
 )
 from models.events import BasePipelineEvent
 
-from .base_transformer import ElasticsearchBaseTransformer
+from .base_transformer import IngestorBaseTransformer
 
 
-class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
+class IngestorWorksTransformer(IngestorBaseTransformer):
     def __init__(
         self,
         event: BasePipelineEvent,

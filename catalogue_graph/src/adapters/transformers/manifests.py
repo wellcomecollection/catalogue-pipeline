@@ -8,7 +8,6 @@ from pathlib import PurePosixPath
 
 import smart_open
 
-from adapters.transformers.base_transformer import TransformationError
 from adapters.transformers.models.manifests import (
     FailureManifest,
     S3Location,
@@ -16,6 +15,7 @@ from adapters.transformers.models.manifests import (
     SuccessManifest,
     TransformerManifest,
 )
+from core.transformer import TransformationError
 
 # Batch size for converting Arrow tables to Python objects before indexing
 # This must result in batches of output ids that fit in the 256kb item

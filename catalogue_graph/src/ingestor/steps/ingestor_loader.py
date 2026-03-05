@@ -12,11 +12,11 @@ from ingestor.models.step_events import (
     IngestorLoaderLambdaEvent,
 )
 from ingestor.transformers.base_transformer import (
-    ElasticsearchBaseTransformer,
+    IngestorBaseTransformer,
     LoadDestination,
 )
-from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
-from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
+from ingestor.transformers.concepts_transformer import IngestorConceptsTransformer
+from ingestor.transformers.works_transformer import IngestorWorksTransformer
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -31,11 +31,11 @@ def create_transformer(
     event: IngestorLoaderLambdaEvent,
     es_client: Elasticsearch,
     neptune_client: NeptuneClient,
-) -> ElasticsearchBaseTransformer:
+) -> IngestorBaseTransformer:
     if event.ingestor_type == "concepts":
-        return ElasticsearchConceptsTransformer(event, es_client, neptune_client)
+        return IngestorConceptsTransformer(event, es_client, neptune_client)
     if event.ingestor_type == "works":
-        return ElasticsearchWorksTransformer(event, es_client, neptune_client)
+        return IngestorWorksTransformer(event, es_client, neptune_client)
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 

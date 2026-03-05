@@ -9,6 +9,7 @@ from pymarc.record import Record
 
 from adapters.marc.transformers.identifier import extract_id
 from adapters.utils.adapter_store import AdapterStore
+from core.transformer import ElasticBaseTransformer
 from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.source.work import (
@@ -22,16 +23,18 @@ from models.pipeline.work_state import WorkRelations
 from utils.timezone import convert_datetime_to_utc_iso
 
 from .adapter_store_source import AdapterStoreSource
-from .base_transformer import BaseTransformer
 
 
-class MarcXmlTransformer(BaseTransformer):
+class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
     def __init__(
         self, adapter_store: AdapterStore, changeset_ids: list[str], identifier_type: Id
     ) -> None:
         super().__init__()
         self.source = AdapterStoreSource(adapter_store, changeset_ids)
         self.identifier_type = identifier_type
+
+    def _get_document_id(self, record: SourceWork) -> str:
+        return record.state.id()
 
     def extract_work_id(self, marc_record: Record) -> str:
         """Extract the work ID from a MARC record.
