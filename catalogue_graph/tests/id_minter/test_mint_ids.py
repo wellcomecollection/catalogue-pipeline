@@ -125,14 +125,16 @@ class TestLookupIds:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """#1: All source IDs found in DB are returned."""
-        entries = [(("Work", "sierra", f"b{i}"), f"canon{i:03d}") for i in range(1, 6)]
-        for sid, cid in entries:
+        identifiers = [
+            (("Work", "sierra", f"b{i}"), f"canon{i:03d}") for i in range(1, 6)
+        ]
+        for sid, cid in identifiers:
             _seed_identifier(ids_db, sid, cid)
 
-        result = IDMinter(ids_db).lookup_ids([sid for sid, _ in entries])
+        result = IDMinter(ids_db).lookup_ids([sid for sid, _ in identifiers])
 
         assert len(result) == 5
-        for sid, cid in entries:
+        for sid, cid in identifiers:
             assert result[sid] == cid
 
     def test_returns_only_found_ids(
@@ -144,7 +146,7 @@ class TestLookupIds:
         _seed_identifier(ids_db, existing, "found001")
 
         result = IDMinter(ids_db).lookup_ids([existing, missing])
-        assert result == {existing: "found001"}
+        assert result == {("Work", "sierra", "b1234"): "found001"}
 
     def test_returns_empty_when_no_matches(
         self, ids_db: pymysql.connections.Connection
@@ -189,14 +191,16 @@ class TestMintNewIds:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """#6: All source IDs already exist → no free IDs consumed."""
-        entries = [(("Work", "sierra", f"b{i}"), f"exist{i:03d}") for i in range(1, 4)]
-        for sid, cid in entries:
+        identifiers = [
+            (("Work", "axiell", f"b{i}"), f"exist{i:03d}") for i in range(1, 4)
+        ]
+        for sid, cid in identifiers:
             _seed_identifier(ids_db, sid, cid)
         _seed_free_ids(ids_db, ["spare001", "spare002"])
 
-        result = IDMinter(ids_db).mint_ids([(sid, None) for sid, _ in entries])
+        result = IDMinter(ids_db).mint_ids([(sid, None) for sid, _ in identifiers])
 
-        for sid, cid in entries:
+        for sid, cid in identifiers:
             assert result[sid] == cid
         # Free pool untouched
         assert _get_canonical_status(ids_db, "spare001") == "free"
@@ -205,10 +209,10 @@ class TestMintNewIds:
     def test_all_new_claims_from_pool(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#7: All source IDs are new → claims free IDs, inserts mappings."""
+        """#7: All source IDs are new with no predecessors → claims free IDs, inserts mappings."""
         free = [f"newid{i:03d}" for i in range(1, 4)]
         _seed_free_ids(ids_db, free)
-        sids: list[SourceId] = [("Work", "sierra", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
 
         result = IDMinter(ids_db).mint_ids([(s, None) for s in sids])
 
@@ -223,12 +227,12 @@ class TestMintNewIds:
     def test_mixed_existing_and_new(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#8: Reuses existing, claims only for new."""
-        existing_sid: SourceId = ("Work", "sierra", "b0001")
+        """#8: Inherits if predecessor, claims only for new."""
+        existing_sid: SourceId = ("Work", "axiell", "b0001")
         _seed_identifier(ids_db, existing_sid, "existaaa")
         _seed_free_ids(ids_db, ["newbbb01"])
 
-        new_sid: SourceId = ("Work", "sierra", "b0002")
+        new_sid: SourceId = ("Work", "axiell", "b0002")
         result = IDMinter(ids_db).mint_ids([(existing_sid, None), (new_sid, None)])
 
         assert result[existing_sid] == "existaaa"
@@ -278,7 +282,7 @@ class TestPredecessorInheritance:
     def test_cross_type_predecessor(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#12: Image source ID inherits from a Work predecessor."""
+        """#12: Image source ID inherits from a Work predecessor. Unlikely scenario but should work."""
         pred: SourceId = ("Work", "sierra", "b3333")
         _seed_identifier(ids_db, pred, "cross001")
 
@@ -318,7 +322,7 @@ class TestIdempotency:
     ) -> None:
         """#14: Same result both times, no extra IDs claimed."""
         _seed_free_ids(ids_db, ["idem0001", "idem0002"])
-        sid: SourceId = ("Work", "sierra", "b7000")
+        sid: SourceId = ("Work", "axiell", "b7000")
 
         minter = IDMinter(ids_db)
         first = minter.mint_ids([(sid, None)])
@@ -334,8 +338,8 @@ class TestIdempotency:
         """#15: Deduplicated — single canonical ID per unique source ID."""
         _seed_free_ids(ids_db, ["dup00001", "dup00002", "dup00003", "dup00004"])
 
-        sid_a: SourceId = ("Work", "sierra", "b8001")
-        sid_b: SourceId = ("Work", "sierra", "b8002")
+        sid_a: SourceId = ("Work", "axiell", "b8001")
+        sid_b: SourceId = ("Work", "axiell", "b8002")
 
         result = IDMinter(ids_db).mint_ids(
             [(sid_a, None), (sid_b, None), (sid_a, None), (sid_b, None)]
@@ -369,7 +373,7 @@ class TestErrorCases:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """#17: Zero free IDs available → RuntimeError."""
-        sids: list[SourceId] = [("Work", "sierra", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
 
         with pytest.raises(RuntimeError, match="Free ID pool exhausted"):
             IDMinter(ids_db).mint_ids([(s, None) for s in sids])
@@ -379,7 +383,7 @@ class TestErrorCases:
     ) -> None:
         """#18: Fewer free IDs than needed → RuntimeError, nothing committed."""
         _seed_free_ids(ids_db, ["short001"])
-        sids: list[SourceId] = [("Work", "sierra", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
 
         with pytest.raises(RuntimeError, match="Free ID pool exhausted"):
             IDMinter(ids_db).mint_ids([(s, None) for s in sids])
@@ -408,7 +412,7 @@ class TestRaceConditions:
         lookup and our INSERT.  FOR SHARE re-read discovers the winner's
         canonical ID.
         """
-        sid: SourceId = ("Work", "sierra", "b5555")
+        sid: SourceId = ("Work", "axiell", "b5555")
         _seed_free_ids(ids_db, ["loser001"])
 
         original_lookup = IDMinter.lookup_ids
@@ -436,7 +440,7 @@ class TestRaceConditions:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """#20: The free ID claimed by the loser stays 'free'."""
-        sid: SourceId = ("Work", "sierra", "b6666")
+        sid: SourceId = ("Work", "axiell", "b6666")
         _seed_free_ids(ids_db, ["unused01"])
 
         original_lookup = IDMinter.lookup_ids
@@ -467,9 +471,9 @@ class TestRaceConditions:
         process.  Only the 2 IDs we actually won are marked 'assigned';
         the third stays 'free'.
         """
-        won_a: SourceId = ("Work", "sierra", "b7001")
-        won_b: SourceId = ("Work", "sierra", "b7002")
-        lost: SourceId = ("Work", "sierra", "b7003")
+        won_a: SourceId = ("Work", "axiell", "b7001")
+        won_b: SourceId = ("Work", "axiell", "b7002")
+        lost: SourceId = ("Work", "axiell", "b7003")
 
         _seed_free_ids(ids_db, ["pool0001", "pool0002", "pool0003"])
 
@@ -525,9 +529,9 @@ class TestTransactionAtomicity:
         """
         _seed_free_ids(ids_db, ["atom0001"])
 
-        ok_sid: SourceId = ("Work", "sierra", "b9001")
+        ok_sid: SourceId = ("Work", "axiell", "b9001")
         bad_sid: SourceId = ("Work", "axiell", "AC-9002")
-        missing_pred: SourceId = ("Work", "sierra", "b0000")
+        missing_pred: SourceId = ("Work", "axiell", "b0000")
 
         with pytest.raises(ValueError, match="Predecessor not found"):
             IDMinter(ids_db).mint_ids([(ok_sid, None), (bad_sid, missing_pred)])
@@ -536,32 +540,37 @@ class TestTransactionAtomicity:
         assert _get_identifier_row(ids_db, ok_sid) is None
         assert _get_identifier_row(ids_db, bad_sid) is None
 
-    def test_pool_exhaustion_rolls_back_prior_inserts(
+    def test_pool_exhaustion_rolls_back_with_predecessor(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#23: Pool exhaustion after predecessor inserts → everything
-        rolled back, including the predecessor-inherited mappings.
-        Claimed free IDs stay 'free' because the transaction is rolled back.
+        """#23: A successor inherits a predecessor's canonical ID (inserting
+        a new identifiers row), but then pool exhaustion occurs for other
+        source IDs in the batch.  The entire transaction is rolled back,
+        including the successor's inherited mapping.
         """
         pred: SourceId = ("Work", "sierra", "b1234")
         _seed_identifier(ids_db, pred, "legacy01")
 
-        inherited_sid: SourceId = ("Work", "axiell", "AC-1234")
-        new_a: SourceId = ("Work", "sierra", "b9010")
-        new_b: SourceId = ("Work", "sierra", "b9011")
+        successor: SourceId = ("Work", "axiell", "AC-1234")
+        new_a: SourceId = ("Work", "axiell", "b9010")
+        new_b: SourceId = ("Work", "axiell", "b9011")
 
         # Only 1 free ID but need 2 for the new source IDs
         _seed_free_ids(ids_db, ["short001"])
 
         with pytest.raises(RuntimeError, match="Free ID pool exhausted"):
-            IDMinter(ids_db).mint_ids(
-                [(inherited_sid, pred), (new_a, None), (new_b, None)]
-            )
+            IDMinter(ids_db).mint_ids([(successor, pred), (new_a, None), (new_b, None)])
 
-        # The predecessor-inherited mapping should not exist
-        assert _get_identifier_row(ids_db, inherited_sid) is None
+        # The new identifiers rows should not exist — rolled back
+        assert _get_identifier_row(ids_db, successor) is None
+        assert _get_identifier_row(ids_db, new_a) is None
+        assert _get_identifier_row(ids_db, new_b) is None
+
         # The free ID should still be free
         assert _get_canonical_status(ids_db, "short001") == "free"
+        # The predecessor's pre-existing mapping is untouched
+        assert _get_identifier_row(ids_db, pred) is not None
+        assert _get_canonical_status(ids_db, "legacy01") == "assigned"
 
 
 # ---------------------------------------------------------------------------
