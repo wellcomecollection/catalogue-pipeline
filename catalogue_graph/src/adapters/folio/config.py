@@ -5,6 +5,14 @@ from __future__ import annotations
 import os
 
 from adapters.oai_pmh.runtime import OAIPMHAdapterConfig
+from adapters.utils.iceberg import (
+    LocalIcebergTableConfig,
+    RestApiIcebergTableConfig,
+)
+from adapters.utils.schemata import ADAPTER_STORE_SCHEMA
+from adapters.utils.window_store import (
+    WINDOW_STATUS_SCHEMA,
+)
 
 # ---------------------------------------------------------------------------
 # AWS account / region context
@@ -122,21 +130,36 @@ FOLIO_ADAPTER_CONFIG = OAIPMHAdapterConfig(
     oai_set_spec=OAI_SET_SPEC,
     # Notifications
     chatbot_topic_arn=CHATBOT_TOPIC_ARN,
-    # Tables - REST API
-    s3_tables_bucket=S3_TABLES_BUCKET,
-    rest_api_table_name=REST_API_TABLE_NAME,
-    rest_api_namespace=REST_API_NAMESPACE,
-    window_status_table=WINDOW_STATUS_TABLE,
-    window_status_namespace=WINDOW_STATUS_NAMESPACE,
-    aws_region=AWS_REGION,
-    aws_account_id=AWS_ACCOUNT_ID,
-    # Tables - Local
-    local_db_name=LOCAL_DB_NAME,
-    local_table_name=LOCAL_TABLE_NAME,
-    local_namespace=LOCAL_NAMESPACE,
-    local_window_status_db_name=LOCAL_WINDOW_STATUS_DB_NAME,
-    local_window_status_table=LOCAL_WINDOW_STATUS_TABLE,
-    local_window_status_namespace=LOCAL_WINDOW_STATUS_NAMESPACE,
+    # Rest API Iceberg tables
+    rest_api_iceberg_config=RestApiIcebergTableConfig(
+        table_name=REST_API_TABLE_NAME,
+        namespace=REST_API_NAMESPACE,
+        iceberg_schema=ADAPTER_STORE_SCHEMA,
+        s3_tables_bucket=S3_TABLES_BUCKET,
+        region=AWS_REGION,
+        account_id=AWS_ACCOUNT_ID,
+    ),
+    rest_api_window_status_iceberg_config=RestApiIcebergTableConfig(
+        table_name=WINDOW_STATUS_TABLE,
+        namespace=WINDOW_STATUS_NAMESPACE,
+        iceberg_schema=WINDOW_STATUS_SCHEMA,
+        s3_tables_bucket=S3_TABLES_BUCKET,
+        region=AWS_REGION,
+        account_id=AWS_ACCOUNT_ID,
+    ),
+    # Local Iceberg tables
+    local_iceberg_config=LocalIcebergTableConfig(
+        table_name=LOCAL_TABLE_NAME,
+        namespace=LOCAL_NAMESPACE,
+        iceberg_schema=ADAPTER_STORE_SCHEMA,
+        db_name=LOCAL_DB_NAME,
+    ),
+    local_window_status_iceberg_config=LocalIcebergTableConfig(
+        table_name=LOCAL_WINDOW_STATUS_TABLE,
+        namespace=LOCAL_WINDOW_STATUS_NAMESPACE,
+        iceberg_schema=WINDOW_STATUS_SCHEMA,
+        db_name=LOCAL_WINDOW_STATUS_DB_NAME,
+    ),
     # Reporting
     report_s3_bucket=S3_BUCKET,
     report_s3_prefix=S3_PREFIX,

@@ -5,7 +5,7 @@ from pyiceberg.types import BooleanType, NestedField, StringType, TimestamptzTyp
 # namespace - e.g. ebsco - in case we decide to store everything in one table
 # last modified - different from changeset because this allows changeset to be meaningful.
 
-SCHEMA = Schema(
+ADAPTER_STORE_SCHEMA = Schema(
     # We may wish to store similar data from multiple sources in the same table. This allows us to filter appropriately
     NestedField(field_id=1, name="namespace", field_type=StringType(), required=True),
     # Each record has an identifier which is unique within its namespace
@@ -31,24 +31,32 @@ SCHEMA = Schema(
     ),
 )
 
-PIPELINE_STORE_ARROW_FIELDS = pa.schema([
-    pa.field("namespace", type=pa.string(), nullable=False),
-    pa.field("id", type=pa.string(), nullable=False),
-    pa.field("changeset", type=pa.string(), nullable=True),
-    pa.field("last_modified", type=pa.timestamp("us", tz="UTC"), nullable=False),
-])
+ID_FIELD = pa.field("id", type=pa.string(), nullable=False)
+NAMESPACE_FIELD = pa.field("namespace", pa.string(), nullable=False)
+CHANGESET_FIELD = pa.field("changeset", pa.string(), nullable=True)
+LAST_MODIFIED_FIELD = pa.field(
+    "last_modified", pa.timestamp("us", tz="UTC"), nullable=False
+)
+CONTENT_FIELD = pa.field("content", pa.string(), nullable=True)
+DELETED_FIELD = pa.field("deleted", type=pa.bool_(), nullable=True)
+GUID_FIELD = pa.field("guid", pa.string(), nullable=False)
 
 # The Arrow schema matching the above Iceberg schema, needs to be kept in sync
 ADAPTER_STORE_ARROW_FIELDS: list[pa.Field] = [
-    *PIPELINE_STORE_ARROW_FIELDS,
-    pa.field("content", type=pa.string(), nullable=True),
-    pa.field("deleted", type=pa.bool_(), nullable=True),
+    NAMESPACE_FIELD,
+    ID_FIELD,
+    CONTENT_FIELD,
+    CHANGESET_FIELD,
+    LAST_MODIFIED_FIELD,
+    DELETED_FIELD,
 ]
-
-RECONCILER_STORE_ARROW_FIELDS = pa.schema([
-    *PIPELINE_STORE_ARROW_FIELDS,
-    pa.field("guid", pa.string(), nullable=False)
-])
-
 ADAPTER_STORE_ARROW_SCHEMA = pa.schema(ADAPTER_STORE_ARROW_FIELDS)
+
+RECONCILER_STORE_ARROW_FIELDS: list[pa.Field] = [
+    NAMESPACE_FIELD,
+    ID_FIELD,
+    GUID_FIELD,
+    CHANGESET_FIELD,
+    LAST_MODIFIED_FIELD,
+]
 RECONCILER_STORE_ARROW_SCHEMA = pa.schema(RECONCILER_STORE_ARROW_FIELDS)

@@ -1,5 +1,5 @@
-
 from pydantic import BaseModel
+from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.pipeline_store import PipelineStore
@@ -14,7 +14,7 @@ class AdapterStoreUpdate(BaseModel):
 class ReconcilerStore(PipelineStore):
     def __init__(self, table: IcebergTable, namespace: str):
         super().__init__(table, namespace)
-        
+
     @property
-    def schema(self):
+    def schema(self) -> Schema:
         return RECONCILER_STORE_ARROW_SCHEMA

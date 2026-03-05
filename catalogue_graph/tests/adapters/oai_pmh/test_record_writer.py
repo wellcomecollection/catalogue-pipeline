@@ -4,11 +4,12 @@ import datetime
 from unittest.mock import Mock
 
 import pyarrow as pa
+from lxml import etree
+from oai_pmh_client.models import Header, Record
+
 from adapters.oai_pmh.record_writer import WindowRecordWriter
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
-from lxml import etree
-from oai_pmh_client.models import Header, Record
 
 
 class TestWindowRecordWriterMocked:

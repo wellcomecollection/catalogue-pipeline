@@ -6,8 +6,11 @@ import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
 from pyiceberg.expressions import BooleanExpression, EqualTo, In
+from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
+
+from adapters.utils.schemata import CHANGESET_FIELD, LAST_MODIFIED_FIELD
 
 
 class AdapterStoreUpdate(BaseModel):
@@ -26,10 +29,10 @@ class PipelineStore(ABC):
     def __init__(self, table: IcebergTable, namespace: str):
         self.table = table
         self.namespace = namespace
-    
+
     @property
     @abstractmethod
-    def schema(self):
+    def schema(self) -> Schema:
         pass
 
     def _cast_to_arrow_schema(self, new_data: pa.Table, operation: str) -> pa.Table:
@@ -49,11 +52,7 @@ class PipelineStore(ABC):
             ) from e
 
     def _get_existing_data(self, row_filter: BooleanExpression) -> pa.Table:
-        return (
-            self.table.scan(row_filter=row_filter)
-            .to_arrow()
-            .cast(self.schema)
-        )
+        return self.table.scan(row_filter=row_filter).to_arrow().cast(self.schema)
 
     def _upsert_with_markers(
         self,
@@ -104,26 +103,24 @@ class PipelineStore(ABC):
     def _set_change_columns(
         changeset: pa.Table, changeset_id: str, timestamp: pa.Scalar | None = None
     ) -> pa.Table:
-        # Replace changeset column with the new changeset_id 
-        changeset_field = pa.field("changeset", type=pa.string(), nullable=True)
+        # Replace changeset column with the new changeset_id
         idx = changeset.schema.get_field_index("changeset")
-        changeset = changeset.set_column(idx, changeset_field, pa.repeat(changeset_id, changeset.num_rows))
+        changeset = changeset.set_column(
+            idx, CHANGESET_FIELD, pa.repeat(changeset_id, changeset.num_rows)
+        )
 
         # Replace last_modified column if timestamp provided
         if timestamp is not None:
-            last_modified_field = pa.field(
-                "last_modified", type=pa.timestamp("us", "UTC"), nullable=True
-            )
             idx = changeset.schema.get_field_index("last_modified")
             changeset = changeset.set_column(
-                idx, last_modified_field, pa.repeat(timestamp, changeset.num_rows)
+                idx, LAST_MODIFIED_FIELD, pa.repeat(timestamp, changeset.num_rows)
             )
 
         return changeset
 
     @staticmethod
     def _find_inserts(
-            existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+        existing_data: pa.Table, new_data: pa.Table, record_namespace: str
     ) -> pa.Table:
         old_ids = existing_data.column("id")
         missing_records = new_data.filter(
@@ -161,12 +158,7 @@ class PipelineStore(ABC):
         the existing last_modified.
 
         Records are included if:
-        - The existing record has null last_modified (legacy data, always update)
         - The new record has a last_modified that is strictly greater than the existing one
-
-        Records are excluded if:
-        - New last_modified is null but existing has a timestamp (reject untimed updates)
-        - New last_modified <= existing last_modified (don't overwrite newer with older)
 
         Args:
             updates: Table of candidate updates from _find_updates (with last_modified)
@@ -188,25 +180,8 @@ class PipelineStore(ABC):
             new_timestamp = update_row.get("last_modified")
             existing_timestamp = existing_timestamps.get(record_id)
 
-            # Keep the update if:
-            # 1. Existing timestamp is None (legacy data or newly inserted)
-            # 2. New timestamp is not None and is greater than existing timestamp
-            #
-            # Reject the update if:
-            # 3. New timestamp is None but existing has a timestamp (reject updates without timestamps)
-            # 4. New timestamp <= existing timestamp (don't overwrite newer with older)
-            if existing_timestamp is None:
+            if new_timestamp > existing_timestamp:
                 rows_to_keep.append(i)
-            elif new_timestamp is None:
-                # Reject: new record has no timestamp but existing does
-                # Don't accept data without timestamps that could overwrite timestamped data
-                pass
-            elif new_timestamp > existing_timestamp:
-                rows_to_keep.append(i)
-
-        if not rows_to_keep:
-            # Return empty table with same schema
-            return updates.slice(0, 0)
 
         # Use PyArrow's take to efficiently select rows by index
         return updates.take(rows_to_keep)

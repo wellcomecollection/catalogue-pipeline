@@ -7,11 +7,15 @@ from uuid import uuid1
 
 import pyarrow as pa
 import pytest
+from pyiceberg.table import Table as IcebergTable
+
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.iceberg import get_local_table
+from adapters.utils.iceberg import (
+    LocalIcebergTableConfig,
+    get_local_table,
+)
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
-from pyiceberg.table import Table as IcebergTable
 
 # Type alias for the factory fixture
 AdapterStoreFactory = Callable[[list[dict]], AdapterStore]
@@ -80,35 +84,35 @@ def adapter_store_with_records(
         if records:
             table = records_to_table(records, namespace=namespace)
             temporary_table.append(table)
-        return AdapterStore(temporary_table)
+        return AdapterStore(temporary_table, namespace)
 
     return _factory
 
 
 @pytest.fixture
 def temporary_table() -> Generator[IcebergTable, None, None]:
-    table_name = str(uuid1())
-    table = get_local_table(
-        table_name=table_name,
+    config = LocalIcebergTableConfig(
+        table_name=str(uuid1()),
         namespace="test",
         db_name="test_catalog",
     )
+    table = get_local_table(config)
     try:
         yield table
     finally:
-        table.catalog.drop_table(f"test.{table_name}")
+        table.catalog.drop_table(f"test.{config.table_name}")
 
 
 @pytest.fixture
 def temporary_window_status_table() -> Generator[IcebergTable, None, None]:
-    table_name = str(uuid1())
-    table = get_local_table(
-        table_name=table_name,
+    config = LocalIcebergTableConfig(
+        table_name=str(uuid1()),
         namespace="test",
         db_name="test_catalog",
-        schema=WINDOW_STATUS_SCHEMA,
+        iceberg_schema=WINDOW_STATUS_SCHEMA,
     )
+    table = get_local_table(config)
     try:
         yield table
     finally:
-        table.catalog.drop_table(f"test.{table_name}")
+        table.catalog.drop_table(f"test.{config.table_name}")

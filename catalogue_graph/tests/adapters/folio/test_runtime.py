@@ -8,6 +8,8 @@ from adapters.folio.config import FOLIO_ADAPTER_CONFIG
 from adapters.folio.runtime import FOLIO_CONFIG, FolioRuntimeConfig
 from adapters.oai_pmh.http_client import OAIPMHHTTPClient
 from adapters.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
+from adapters.utils.iceberg import LocalIcebergTableConfig, RestApiIcebergTableConfig
+from adapters.utils.schemata import ADAPTER_STORE_SCHEMA
 
 
 def test_folio_runtime_config_extends_base() -> None:
@@ -62,19 +64,34 @@ def test_folio_runtime_accepts_custom_config() -> None:
         oai_metadata_prefix="oai_dc",
         oai_set_spec="test-set",
         chatbot_topic_arn=None,
-        s3_tables_bucket="test-bucket",
-        rest_api_table_name="test_table",
-        rest_api_namespace="test_ns",
-        window_status_table="window_status",
-        window_status_namespace="test_window_ns",
-        aws_region="us-east-1",
-        aws_account_id="123456789012",
-        local_db_name="test_db",
-        local_table_name="test_local",
-        local_namespace="test_local_ns",
-        local_window_status_db_name="test_window_db",
-        local_window_status_table="window_status",
-        local_window_status_namespace="test_window_ns",
+        rest_api_iceberg_config=RestApiIcebergTableConfig(
+            table_name="test_table",
+            namespace="test_ns",
+            iceberg_schema=ADAPTER_STORE_SCHEMA,
+            s3_tables_bucket="test-bucket",
+            region="us-east-1",
+            account_id="123456789012",
+        ),
+        rest_api_window_status_iceberg_config=RestApiIcebergTableConfig(
+            table_name="window_status",
+            namespace="test_window_ns",
+            iceberg_schema=ADAPTER_STORE_SCHEMA,
+            s3_tables_bucket="test-bucket",
+            region="us-east-1",
+            account_id="123456789012",
+        ),
+        local_iceberg_config=LocalIcebergTableConfig(
+            table_name="test_local",
+            namespace="test_local_ns",
+            iceberg_schema=ADAPTER_STORE_SCHEMA,
+            db_name="test_db",
+        ),
+        local_window_status_iceberg_config=LocalIcebergTableConfig(
+            table_name="window_status",
+            namespace="test_window_ns",
+            iceberg_schema=ADAPTER_STORE_SCHEMA,
+            db_name="test_window_db",
+        ),
     )
 
     runtime = FolioRuntimeConfig(custom_config)

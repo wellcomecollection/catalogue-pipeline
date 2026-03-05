@@ -2,18 +2,20 @@ from collections.abc import Callable
 from typing import TextIO
 
 import pytest
+from lxml import etree
+
 from adapters.ebsco.marcxml_loader import (
     MarcXmlFileLoader,
     MissingRecordIdentifierError,
 )
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
-from lxml import etree
-
 from tests.mocks import MockSmartOpen
 
 # -- Tests for MarcXmlFileLoader.extract_record_id ---
-file_loader = MarcXmlFileLoader(schema=ADAPTER_STORE_ARROW_SCHEMA, namespace=EBSCO_NAMESPACE)
+file_loader = MarcXmlFileLoader(
+    schema=ADAPTER_STORE_ARROW_SCHEMA, namespace=EBSCO_NAMESPACE
+)
 
 
 def test_uses_controlfield_001_when_available() -> None:

@@ -8,9 +8,9 @@ ensures newer data isn't overwritten by older data.
 """
 
 import pyarrow as pa
-from adapters.utils.adapter_store import AdapterStore
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.utils.adapter_store import AdapterStore
 from tests.adapters.conftest import records_to_table
 
 
@@ -40,8 +40,8 @@ def test_incremental_update_does_not_delete_missing_records(
         add_timestamp=True,
     )
 
-    client = AdapterStore(temporary_table)
-    update = client.incremental_update(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    update = client.incremental_update(new_data)
     assert update is not None
 
     # Verify eb0002 is still present and not deleted (content is not None)
@@ -73,8 +73,8 @@ def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> N
         add_timestamp=True,
     )
 
-    client = AdapterStore(temporary_table)
-    update = client.incremental_update(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    update = client.incremental_update(new_data)
     assert update is not None
 
     all_records = client.get_all_records()
@@ -108,8 +108,8 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
         add_timestamp=True,
     )
 
-    client = AdapterStore(temporary_table)
-    update = client.incremental_update(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    update = client.incremental_update(new_data)
     assert update is not None
 
     all_records = client.get_all_records()
@@ -145,8 +145,8 @@ def test_incremental_update_does_not_touch_other_namespaces(
         add_timestamp=True,
     )
 
-    client = AdapterStore(temporary_table)
-    client.incremental_update(new_ebsco_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    client.incremental_update(new_ebsco_data)
 
     # Verify axiell data is untouched
     all_records = client.get_all_records()
@@ -179,8 +179,8 @@ def test_incremental_update_with_newer_timestamp(temporary_table: IcebergTable) 
         [{"id": "eb0001", "content": "new content", "last_modified": new_time}]
     )
 
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(new_data)
 
     assert result is not None
     assert "eb0001" in result.updated_record_ids
@@ -214,8 +214,8 @@ def test_incremental_update_with_older_timestamp(temporary_table: IcebergTable) 
         [{"id": "eb0001", "content": "old content", "last_modified": old_time}]
     )
 
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(old_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(old_data)
 
     # No update should occur
     assert result is None
@@ -254,8 +254,8 @@ def test_incremental_update_with_equal_timestamp(temporary_table: IcebergTable) 
         [{"id": "eb0001", "content": "modified content", "last_modified": same_time}]
     )
 
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(update_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(update_data)
 
     # No update should occur
     assert result is None
@@ -296,8 +296,8 @@ def test_incremental_update_newer_timestamp_same_content(
         [{"id": "eb0002", "content": "the same content", "last_modified": newer_time}]
     )
 
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(update_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(update_data)
 
     # No update should occur
     assert result is None
@@ -330,8 +330,8 @@ def test_incremental_update_with_null_existing_timestamp(
         [{"id": "eb0001", "content": "updated content", "last_modified": new_time}]
     )
 
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(new_data)
 
     assert result is not None
     assert "eb0001" in result.updated_record_ids
@@ -400,8 +400,8 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
         ]
     )
 
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(update_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(update_data)
 
     assert result is not None
     # Only eb0001 and eb0004 should be updated
@@ -440,8 +440,8 @@ def test_incremental_update_with_new_record_with_timestamp(
         [{"id": "eb0001", "content": "new record", "last_modified": new_time}]
     )
 
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(new_data)
 
     assert result is not None
     assert "eb0001" in result.updated_record_ids
@@ -477,11 +477,11 @@ def test_incremental_update_null_timestamp_on_timestamped_record(
         ]
     )
 
-    client = AdapterStore(temporary_table)
+    client = AdapterStore(temporary_table, "test_namespace")
     import pytest
 
     with pytest.raises(ValueError):
-        client.incremental_update(new_data, "test_namespace")
+        client.incremental_update(new_data)
 
     # Verify the content was NOT updated
     records = temporary_table.scan().to_arrow()
@@ -518,9 +518,11 @@ def test_incremental_update_raises_on_non_castable_schema(
         schema=bad_schema,
     )
 
-    client = AdapterStore(temporary_table)
-    with pytest.raises(ValueError, match=r"incremental_update.*ADAPTER_STORE_ARROW_SCHEMA"):
-        client.incremental_update(bad_table, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    with pytest.raises(
+        ValueError, match=r"incremental_update.*ADAPTER_STORE_ARROW_SCHEMA"
+    ):
+        client.incremental_update(bad_table)
 
 
 def test_incremental_update_preserves_content_on_deletion(
@@ -548,8 +550,8 @@ def test_incremental_update_preserves_content_on_deletion(
         [{"id": "eb0001", "content": None, "last_modified": new_time, "deleted": True}]
     )
 
-    client = AdapterStore(temporary_table)
-    result = client.incremental_update(deletion_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(deletion_data)
 
     assert result is not None
     assert "eb0001" in result.updated_record_ids

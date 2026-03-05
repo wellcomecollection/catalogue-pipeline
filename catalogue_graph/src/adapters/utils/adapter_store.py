@@ -25,7 +25,7 @@ class AdapterStore(PipelineStore):
 
     def __init__(self, table: IcebergTable, namespace: str):
         super().__init__(table, namespace)
-        
+
     @property
     def schema(self):
         return ADAPTER_STORE_ARROW_SCHEMA
@@ -92,7 +92,9 @@ class AdapterStore(PipelineStore):
             existing_data = existing_data.sort_by("id")
             new_data = new_data.sort_by("id")
 
-            deletes = self._find_snapshot_deletes(existing_data, new_data, self.namespace)
+            deletes = self._find_snapshot_deletes(
+                existing_data, new_data, self.namespace
+            )
             updates = self._find_updates(existing_data, new_data)
             inserts = self._find_inserts(existing_data, new_data, self.namespace)
 

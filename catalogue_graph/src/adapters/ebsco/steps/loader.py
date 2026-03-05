@@ -12,7 +12,6 @@ from typing import Any
 import pyarrow as pa
 import structlog
 from pydantic import BaseModel, ConfigDict
-from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 from adapters.ebsco import helpers
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
@@ -23,6 +22,7 @@ from adapters.ebsco.models.step_events import (
 from adapters.ebsco.reporting import EbscoLoaderReport
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
 

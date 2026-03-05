@@ -4,7 +4,12 @@ from uuid import uuid4
 
 import pytest
 
-from adapters.utils.iceberg import IcebergTableConfig, get_iceberg_table, get_table
+from adapters.utils.iceberg import (
+    LocalIcebergTableConfig,
+    RestApiIcebergTableConfig,
+    get_iceberg_table,
+    get_table,
+)
 
 
 @pytest.fixture()
@@ -25,12 +30,13 @@ def local_catalog_params(tmp_path_factory: pytest.TempPathFactory):  # type: ign
 
 
 def test_get_table_creates_when_flag_true(local_catalog_params):  # type: ignore
-    namespace = f"ns_{uuid4().hex[:8]}"
-    table_name = f"tbl_{uuid4().hex[:8]}"
+    config = LocalIcebergTableConfig(
+        namespace=f"ns_{uuid4().hex[:8]}",
+        table_name=f"tbl_{uuid4().hex[:8]}",
+    )
 
     get_table(
-        catalogue_namespace=namespace,
-        table_name=table_name,
+        config,
         catalogue_name="local",
         create_if_not_exists=True,
         **local_catalog_params,
@@ -38,8 +44,7 @@ def test_get_table_creates_when_flag_true(local_catalog_params):  # type: ignore
 
     # A second call with create_if_not_exists=True should return the same table (not error)
     same_table = get_table(
-        catalogue_namespace=namespace,
-        table_name=table_name,
+        config,
         catalogue_name="local",
         create_if_not_exists=True,
         **local_catalog_params,
@@ -50,7 +55,7 @@ def test_get_table_creates_when_flag_true(local_catalog_params):  # type: ignore
         else getattr(same_table, "identifier", None)
     )
     fq_name2_str = ".".join(fq_name2) if isinstance(fq_name2, tuple) else str(fq_name2)
-    assert fq_name2_str == f"{namespace}.{table_name}"
+    assert fq_name2_str == f"{config.namespace}.{config.table_name}"
 
 
 def test_get_table_suppresses_existing_namespace(local_catalog_params):  # type: ignore
@@ -110,15 +115,10 @@ def test_get_table_loads_when_flag_false(local_catalog_params):  # type: ignore
 
 def test_get_iceberg_table_local(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test get_iceberg_table with local configuration."""
-    namespace = "test_ns"
-    table_name = "test_table"
-    db_name = "test_db"
-
-    config = IcebergTableConfig(
-        table_name=table_name,
-        namespace=namespace,
-        use_rest_api_table=False,
-        db_name=db_name,
+    config = LocalIcebergTableConfig(
+        table_name="test_table",
+        namespace="test_ns",
+        db_name="test_db",
     )
 
     # Mock get_local_table to verify it's called with correct params
@@ -132,7 +132,6 @@ def test_get_iceberg_table_local(monkeypatch: pytest.MonkeyPatch) -> None:
         table_name=config.table_name,
         namespace=config.namespace,
         db_name=config.db_name,
-        create_if_not_exists=config.create_if_not_exists,
         schema=mock.ANY,
         partition_spec=mock.ANY,
     )
@@ -141,19 +140,13 @@ def test_get_iceberg_table_local(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_get_iceberg_table_rest(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test get_iceberg_table with REST API configuration."""
-    namespace = "test_ns"
-    table_name = "test_table"
-    bucket = "test-bucket"
-    region = "us-east-1"
-    account_id = "123456789012"
 
-    config = IcebergTableConfig(
-        table_name=table_name,
-        namespace=namespace,
-        use_rest_api_table=True,
-        s3_tables_bucket=bucket,
-        region=region,
-        account_id=account_id,
+    config = RestApiIcebergTableConfig(
+        namespace="test_ns",
+        table_name="test_table",
+        s3_tables_bucket="test-bucket",
+        region="us-east-1",
+        account_id="123456789012",
     )
 
     mock_get_rest_api_table = mock.Mock(return_value="mock_rest_table")
@@ -168,7 +161,6 @@ def test_get_iceberg_table_rest(monkeypatch: pytest.MonkeyPatch) -> None:
         s3_tables_bucket=config.s3_tables_bucket,
         table_name=config.table_name,
         namespace=config.namespace,
-        create_if_not_exists=config.create_if_not_exists,
         region=config.region,
         account_id=config.account_id,
         schema=mock.ANY,
@@ -176,16 +168,3 @@ def test_get_iceberg_table_rest(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     assert result == "mock_rest_table"
-
-
-def test_get_iceberg_table_rest_missing_bucket() -> None:
-    """Test get_iceberg_table raises ValueError when bucket is missing for REST config."""
-    config = IcebergTableConfig(
-        table_name="test",
-        namespace="test",
-        use_rest_api_table=True,
-        s3_tables_bucket=None,
-    )
-
-    with pytest.raises(ValueError, match="s3_tables_bucket must be provided"):
-        get_iceberg_table(config)

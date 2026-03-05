@@ -89,7 +89,7 @@ def adapter_store_client(
     adapter_namespace: str,
 ) -> AdapterStore:
     """Create an AdapterStore with the current adapter's namespace."""
-    return AdapterStore(temporary_table, default_namespace=adapter_namespace)
+    return AdapterStore(temporary_table, namespace=adapter_namespace)
 
 
 @pytest.fixture

@@ -6,14 +6,14 @@ from typing import TextIO
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pyiceberg.table import Table as IcebergTable
+
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
 from adapters.ebsco.models.step_events import EbscoAdapterLoaderEvent, LoaderResponse
 from adapters.ebsco.steps import loader
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE, LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
-from pyiceberg.table import Table as IcebergTable
-
 from tests.mocks import MockSmartOpen
 
 
@@ -24,7 +24,7 @@ def _register_mock_open(path: str) -> None:
 
 def _runtime_with(table: IcebergTable) -> LoaderRuntime:
     return LoaderRuntime(
-        adapter_store=AdapterStore(table, default_namespace=EBSCO_NAMESPACE),
+        adapter_store=AdapterStore(table, namespace=EBSCO_NAMESPACE),
         marcxml_loader=MarcXmlFileLoader(
             schema=ADAPTER_STORE_ARROW_SCHEMA, namespace=EBSCO_NAMESPACE
         ),

@@ -87,7 +87,7 @@ def handler(
         use_rest_api_table=use_rest_api_table,
         create_if_not_exists=create_if_not_exists,
     )
-    table_client = AdapterStore(table)
+    table_client = AdapterStore(table, namespace=event.transformer_type)
     transformer = transformer_class(table_client, event.changeset_ids)
 
     index_date = config.INDEX_DATE or config.PIPELINE_DATE

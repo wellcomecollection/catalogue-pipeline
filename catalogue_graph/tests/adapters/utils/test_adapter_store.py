@@ -20,7 +20,7 @@ from tests.adapters.conftest import AdapterStoreFactory
 
 def test_get_all_records_empty_table(temporary_table: IcebergTable) -> None:
     """When the table is empty, get_all_records returns an empty Arrow table."""
-    client = AdapterStore(temporary_table)
+    client = AdapterStore(temporary_table, "test_namespace")
     all_records = client.get_all_records()
     assert all_records.num_rows == 0
 
@@ -153,7 +153,7 @@ def test_get_records_by_changeset_empty_table(
     temporary_table: IcebergTable,
 ) -> None:
     """get_records_by_changeset on empty table returns empty result."""
-    client = AdapterStore(temporary_table)
+    client = AdapterStore(temporary_table, "test_namespace")
     result = client.get_records_by_changeset("any-changeset")
 
     assert result.num_rows == 0
