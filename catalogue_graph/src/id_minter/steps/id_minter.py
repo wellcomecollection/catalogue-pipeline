@@ -11,36 +11,54 @@ from datetime import datetime
 from typing import Any
 
 import structlog
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
+from id_minter.id_minting_transformer import IdMintingTransformer
+from id_minter.models.identifier import IdResolver
 from id_minter.models.step_events import (
+    StepFunctionMintingFailure,
     StepFunctionMintingRequest,
     StepFunctionMintingResponse,
 )
+from id_minter.resolvers.data_api_resolver import DataApiIdResolver
+from id_minter.resolvers.lookup_resolver import LookupOnlyIdResolver
+from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
 
 
 class IdMinterRuntime(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     config: IdMinterConfig = ID_MINTER_CONFIG
+    resolver: IdResolver
+    source_es_mode: ElasticsearchMode = "private"
+    target_es_mode: ElasticsearchMode = "private"
 
 
 def build_runtime(
     config_obj: IdMinterConfig | None = None,
+    resolver: IdResolver | None = None,
+    source_es_mode: ElasticsearchMode = "private",
+    target_es_mode: ElasticsearchMode = "private",
 ) -> IdMinterRuntime:
     cfg = config_obj or ID_MINTER_CONFIG
-    return IdMinterRuntime(config=cfg)
+    res = resolver or LookupOnlyIdResolver(cfg)
+    return IdMinterRuntime(
+        config=cfg,
+        resolver=res,
+        source_es_mode=source_es_mode,
+        target_es_mode=target_es_mode,
+    )
 
 
 def execute(
     request: StepFunctionMintingRequest,
-    runtime: IdMinterRuntime | None = None,
+    runtime: IdMinterRuntime,
 ) -> StepFunctionMintingResponse:
-    runtime = runtime or build_runtime()
-
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
@@ -53,22 +71,46 @@ def execute(
         target_index=runtime.config.target_index,
     )
 
-    # TODO: Implement minting logic:
-    #  1. Fetch records from upstream ES (runtime.config.source_index)
-    #  2. Mint canonical IDs via RDS identifier table
-    #  3. Store minted records in downstream ES (runtime.config.target_index)
-    #  4. Notify downstream SNS topic
+    source_index = f"{runtime.config.source_index}-{runtime.config.pipeline_date}"
+    target_index = f"{runtime.config.target_index}-{runtime.config.pipeline_date}"
+
+    source_client = get_client(
+        api_key_name="id_minter",
+        pipeline_date=runtime.config.pipeline_date,
+        es_mode=runtime.source_es_mode,
+    )
+    target_client = get_client(
+        api_key_name="id_minter",
+        pipeline_date=runtime.config.pipeline_date,
+        es_mode=runtime.target_es_mode,
+    )
+
+    transformer = IdMintingTransformer(
+        es_client=source_client,
+        source_index=source_index,
+        source_identifiers=request.source_identifiers,
+        resolver=runtime.resolver,
+    )
+    transformer.stream_to_index(target_client, target_index)
+
+    failures = [
+        StepFunctionMintingFailure(
+            source_identifier=error.row_id,
+            error=error.detail,
+        )
+        for error in transformer.errors
+    ]
 
     return StepFunctionMintingResponse(
-        successes=[],
-        failures=[],
+        successes=transformer.successful_ids,
+        failures=failures,
         job_id=request.job_id,
     )
 
 
 def handler(
     event: StepFunctionMintingRequest,
-    runtime: IdMinterRuntime | None = None,
+    runtime: IdMinterRuntime,
     execution_context: ExecutionContext | None = None,
 ) -> StepFunctionMintingResponse:
     setup_logging(execution_context)
@@ -91,7 +133,11 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
     )
     request = StepFunctionMintingRequest.model_validate(event)
     runtime = build_runtime()
-    response = handler(request, runtime=runtime, execution_context=execution_context)
+    response = handler(
+        request,
+        runtime=runtime,
+        execution_context=execution_context,
+    )
     return response.model_dump()
 
 
@@ -126,6 +172,25 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         default=False,
         help="Apply database migrations before running.",
     )
+    parser.add_argument(
+        "--resolver",
+        choices=["local", "data-api"],
+        default="local",
+        help="ID resolver backend: 'local' (pymysql to local MySQL) "
+        "or 'data-api' (AWS RDS Data API). Default: local.",
+    )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        required=False,
+        help="Override the pipeline date (used for ES index suffixes and secret names).",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Print the resolved configuration and exit without running.",
+    )
 
     args = parser.parse_args()
 
@@ -142,9 +207,44 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         overrides["target_index"] = args.target_index
     if args.apply_migrations:
         overrides["apply_migrations"] = True
+    if args.pipeline_date:
+        overrides["pipeline_date"] = args.pipeline_date
 
     config_obj = IdMinterConfig(**overrides) if overrides else None
-    runtime = build_runtime(config_obj)
+    cfg = config_obj or ID_MINTER_CONFIG
+
+    resolver: IdResolver
+    if args.resolver == "data-api":
+        resolver = DataApiIdResolver(cfg)
+    else:
+        resolver = LookupOnlyIdResolver(cfg)
+
+    runtime = build_runtime(
+        config_obj,
+        resolver=resolver,
+        source_es_mode="public",
+        target_es_mode="local",
+    )
+
+    if args.dry_run:
+        source_index = f"{cfg.source_index}-{cfg.pipeline_date}"
+        target_index = f"{cfg.target_index}-{cfg.pipeline_date}"
+        resolver_name = "data-api" if args.resolver == "data-api" else "local"
+        db_host = (
+            f"{cfg.rds_cluster_id} ({cfg.rds_region})"
+            if resolver_name == "data-api"
+            else f"{cfg.rds_client.primary_host}:{cfg.rds_client.port}"
+        )
+        print(  # noqa: T201
+            f"\n  Resolver:        {resolver_name}\n"
+            f"  Database:        {cfg.db_name} @ {db_host}\n"
+            f"  Pipeline date:   {cfg.pipeline_date}\n"
+            f"  Source ES:       {runtime.source_es_mode} → {source_index}\n"
+            f"  Target ES:       {runtime.target_es_mode} → {target_index}\n"
+            f"  Identifiers:     {request.source_identifiers}\n"
+            f"  Migrations:      {'yes' if cfg.apply_migrations else 'no'}\n"
+        )
+        return
 
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),

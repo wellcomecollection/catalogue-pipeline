@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import NamedTuple, Protocol
+from typing import NamedTuple, Protocol, runtime_checkable
 
 # Concept subtypes that are normalized to "Concept" before DB lookup.
 # Kept in sync with the Scala id_minter's ConceptsSourceIdentifierAdjuster
@@ -18,6 +18,7 @@ class SourceIdentifierKey(NamedTuple):
     source_id: str
 
 
+@runtime_checkable
 class IdResolver(Protocol):
     def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]: ...
 

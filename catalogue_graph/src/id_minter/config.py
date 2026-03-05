@@ -41,6 +41,12 @@ ES_TARGET_INDEX = os.getenv("ES_TARGET_INDEX", "works-identified")
 DOWNSTREAM_SNS_TOPIC_ARN = os.getenv("DOWNSTREAM_SNS_TOPIC_ARN")
 
 # ---------------------------------------------------------------------------
+# RDS Data API (for local/CLI access without direct DB connectivity)
+# ---------------------------------------------------------------------------
+RDS_CLUSTER_ID = os.getenv("RDS_CLUSTER_ID", "identifiers-v2-serverless")
+RDS_REGION = os.getenv("RDS_REGION", "eu-west-1")
+
+# ---------------------------------------------------------------------------
 # General
 # ---------------------------------------------------------------------------
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
@@ -66,16 +72,6 @@ class RDSClientConfig(BaseModel):
     max_connections: int = RDS_MAX_CONNECTIONS
 
 
-# class IdentifiersTableConfig(BaseModel):
-#     database: str = IDENTIFIERS_DATABASE
-#     table_name: str = IDENTIFIERS_TABLE_NAME
-
-
-# class CanonicalIdsTableConfig(BaseModel):
-#     database: str = IDENTIFIERS_DATABASE
-#     table_name: str = CANONICAL_IDS_TABLE_NAME
-
-
 class DBConfig(BaseModel):
     """Base config for database access."""
 
@@ -90,6 +86,8 @@ class IdMinterConfig(DBConfig):
     target_index: str = ES_TARGET_INDEX
     downstream_sns_topic_arn: str | None = DOWNSTREAM_SNS_TOPIC_ARN
     pipeline_date: str = PIPELINE_DATE
+    rds_cluster_id: str = RDS_CLUSTER_ID
+    rds_region: str = RDS_REGION
 
 
 # Default id_minter config instance, built from environment variables.

@@ -34,18 +34,48 @@ It can be used to locally run the id_minter and id_generator, see below
 
 #### 1. Run the id_minter
 
+When run locally the id_minter reads from the **public** Elasticsearch API and writes to a **local** ES container. This means you don't need VPC access to fetch works-source documents.
+
+##### Basic usage (local MySQL resolver)
+
 ```bash
-RDS_USERNAME=id_minter RDS_PASSWORD=id_minter \
-  uv run python -m id_minter.steps.id_minter \
-    --source-identifiers id1 id2 id3 \
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers 'Work[sierra-system-number/b1000001]' \
+    --apply-migrations
+```
+
+##### Using the Data API resolver (no local MySQL needed)
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers 'Work[sierra-system-number/b1000001]' \
+    --resolver data-api
+```
+
+This uses the AWS RDS Data API to look up identifiers remotely — requires valid AWS credentials but no local database.
+
+##### Multiple identifiers with a custom job ID
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers \
+      'Work[sierra-system-number/b1000001]' \
+      'Work[sierra-system-number/b1000002]' \
     --job-id my-test-job \
     --apply-migrations
 ```
 
-- `--apply-migrations` applies the database schema on startup (creates the `canonical_ids` and `identifiers` tables). Only needed on first run or after adding new migrations.
-- `--source-identifiers` takes one or more source identifiers to mint.
-- `--job-id` is optional — defaults to the current timestamp if omitted.
-- `--source-index` / `--target-index` optionally override the upstream/downstream ES index names.
+##### CLI flags
+
+| Flag | Description |
+|---|---|
+| `--source-identifiers` | One or more source identifiers to process (required). |
+| `--job-id` | Optional job ID — defaults to the current timestamp. |
+| `--resolver` | ID resolver backend: `local` (pymysql to local MySQL, default) or `data-api` (AWS RDS Data API). |
+| `--source-index` | Override the upstream ES index name. |
+| `--target-index` | Override the downstream ES index name. |
+| `--pipeline-date` | Override the pipeline date (used for ES index suffixes and secret names). Defaults to `dev`. |
+| `--apply-migrations` | Apply database schema migrations on startup. Only needed on first run or after adding new migrations. |
 
 #### 2. Verify the database schema
 
