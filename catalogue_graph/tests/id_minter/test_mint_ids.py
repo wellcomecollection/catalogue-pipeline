@@ -25,7 +25,7 @@ import pymysql.cursors
 import pytest
 
 from id_minter.mint_ids import IDMinter
-from id_minter.models.identifiers import SourceId
+from id_minter.models.identifier import SourceId
 
 # ---------------------------------------------------------------------------
 # Helpers
