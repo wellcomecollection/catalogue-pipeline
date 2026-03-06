@@ -348,6 +348,8 @@ class TestIdempotency:
 
         assert len(result) == 2
         assert result[sid_a] != result[sid_b]
+        # Only 2 of the 4 pool IDs should have been claimed
+        assert _count_assigned_ids(ids_db) == 2
 
 
 # ---------------------------------------------------------------------------
