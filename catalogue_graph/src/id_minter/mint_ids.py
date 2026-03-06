@@ -176,7 +176,7 @@ class IDMinter:
         # For source IDs not found in the database, determine which minting strategy:
         #   - needs_inheritance: Has a predecessor -> inherit the predecessor's
         #     canonical ID. This preserves stable identifiers during source system
-        #     migrations (e.g., Sierra -> Axiell). The new source ID gets the SAME
+        #     migrations (e.g., Sierra -> Folio). The new source ID gets the SAME
         #     canonical ID, ensuring external URLs remain valid.
         #   - needs_new_id: No predecessor -> claim a fresh ID from the pre-generated
         #     pool. This is for genuinely new records with no prior identity.
