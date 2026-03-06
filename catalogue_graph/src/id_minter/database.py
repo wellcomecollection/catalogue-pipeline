@@ -43,10 +43,12 @@ class DBConnection[T: DBCursor](Protocol):
     def close(self) -> None: ...
 
 
-def get_connection(config: DBConfig, *, local_infile: bool = False) -> DBConnection:
+def get_connection(
+    config: DBConfig, *, local_infile: bool = False
+) -> DBConnection[DBCursor]:
     """Open a new pymysql connection using the ID Minter config."""
     return cast(
-        DBConnection,
+        DBConnection[DBCursor],
         pymysql.connect(
             host=config.rds_client.primary_host,
             port=config.rds_client.port,
