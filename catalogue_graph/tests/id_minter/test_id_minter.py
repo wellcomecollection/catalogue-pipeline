@@ -1,16 +1,18 @@
-"""Integration tests for the id_minter step with a real MintingResolver and MySQL.
+"""Integration tests for the id_minter step.
 
-These tests exercise the full execute() / handler() path with a real database
+These tests exercise the full execute() / handler() path with a database
 connection (via Docker Compose MySQL), while mocking Elasticsearch reads/writes.
 
 Run with:
-    uv run pytest tests/id_minter/test_id_minter_integration.py -v
+    uv run pytest tests/id_minter/test_id_minter.py -v
 
 Skip with:
     uv run pytest --skip-db
 """
 
 from __future__ import annotations
+
+import json
 
 import pymysql
 import pymysql.connections
@@ -20,7 +22,6 @@ from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.models.identifiers import SourceId
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
-    StepFunctionMintingResponse,
 )
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.steps.id_minter import (
@@ -36,7 +37,8 @@ from tests.id_minter.conftest import (
     seed_identifier,
     stub_transformer_source,
 )
-from tests.mocks import MockElasticsearchClient
+from tests.mocks import MockElasticsearchClient, MockSmartOpen
+from utils.models.manifests import StepManifest
 
 pytestmark = pytest.mark.database
 
@@ -49,7 +51,7 @@ pytestmark = pytest.mark.database
 def _build_runtime(
     conn: pymysql.connections.Connection,
 ) -> IdMinterRuntime:
-    """Build a runtime with a real MintingResolver backed by the test DB connection."""
+    """Build a runtime with a MintingResolver backed by the DB connection."""
     resolver = MintingResolver.from_connection(conn)
     config = IdMinterConfig(
         rds_client=RDSClientConfig(password="id_minter"),
@@ -63,20 +65,47 @@ def _build_runtime(
     )
 
 
+def _read_ndjson(uri: str) -> list[dict]:
+    """Read NDJSON lines from a MockSmartOpen-backed S3 URI."""
+    path = MockSmartOpen.file_lookup[uri]
+    with open(path, encoding="utf-8") as f:
+        return [json.loads(line) for line in f if line.strip()]
+
+
+def _read_batch_ids(manifest: StepManifest) -> list[str]:
+    """Extract all canonical IDs from the success batch file."""
+    loc = manifest.successes.batch_file_location
+    uri = f"s3://{loc.bucket}/{loc.key}"
+    lines = _read_ndjson(uri)
+    ids: list[str] = []
+    for line in lines:
+        ids.extend(line["canonicalIds"])
+    return ids
+
+
+def _read_failure_details(manifest: StepManifest) -> list[dict]:
+    """Read failure detail records from the failure batch file."""
+    assert manifest.failures is not None
+    loc = manifest.failures.error_file_location
+    uri = f"s3://{loc.bucket}/{loc.key}"
+    return _read_ndjson(uri)
+
+
 # ---------------------------------------------------------------------------
 # Tests: execute() with real resolver
 # ---------------------------------------------------------------------------
 
 
 class TestExecuteWithRealResolver:
-    """End-to-end tests for execute() using a real MintingResolver + MySQL."""
+    """End-to-end tests for execute() using a MintingResolver + MySQL."""
+
 
     def test_mints_new_ids_for_work(
         self,
         mock_es: None,
         ids_db: pymysql.connections.Connection,
     ) -> None:
-        """A single new work document gets a canonical ID minted from the free pool."""
+        """A new work document gets a canonical ID minted from the free pool."""
         seed_free_ids(ids_db, ["mint0001"])
 
         si = make_source_identifier("Work", "sierra-system-number", "b1000001")
@@ -91,11 +120,11 @@ class TestExecuteWithRealResolver:
         with stub_transformer_source([doc]):
             response = execute(request, runtime=runtime)
 
-        assert isinstance(response, StepFunctionMintingResponse)
+        assert isinstance(response, StepManifest)
         assert response.job_id == "integration-test-1"
-        assert len(response.failures) == 0
-        assert len(response.successes) == 1
-        assert response.successes[0] == "mint0001"
+        assert response.failures is None
+        assert response.successes.count == 1
+        assert _read_batch_ids(response) == ["mint0001"]
 
         # Verify the ID was actually assigned in the database
         assert get_canonical_status(ids_db, "mint0001") == "assigned"
@@ -127,9 +156,9 @@ class TestExecuteWithRealResolver:
             response = execute(request, runtime=runtime)
 
         assert response.job_id == "integration-test-multi"
-        assert len(response.failures) == 0
-        assert len(response.successes) == 3
-        assert set(response.successes) == {"multi001", "multi002", "multi003"}
+        assert response.failures is None
+        assert response.successes.count == 3
+        assert set(_read_batch_ids(response)) == {"multi001", "multi002", "multi003"}
 
         for cid in ["multi001", "multi002", "multi003"]:
             assert get_canonical_status(ids_db, cid) == "assigned"
@@ -156,8 +185,9 @@ class TestExecuteWithRealResolver:
         with stub_transformer_source([doc]):
             response = execute(request, runtime=runtime)
 
-        assert len(response.failures) == 0
-        assert response.successes == ["exist001"]
+        assert response.failures is None
+        assert response.successes.count == 1
+        assert _read_batch_ids(response) == ["exist001"]
         # The spare free ID should still be free
         assert get_canonical_status(ids_db, "spare001") == "free"
 
@@ -182,8 +212,8 @@ class TestExecuteWithRealResolver:
         with stub_transformer_source([doc]):
             response = execute(request, runtime=runtime)
 
-        assert len(response.failures) == 0
-        assert len(response.successes) == 1
+        assert response.failures is None
+        assert response.successes.count == 1
 
         # Verify both IDs were claimed from the pool
         for cid in ["nest0001", "nest0002"]:
@@ -203,7 +233,7 @@ class TestExecuteWithRealResolver:
 
 
 class TestHandlerWithRealResolver:
-    """Tests for the handler() entry point with a real DB backend."""
+    """Tests for the handler() entry point with a DB backend."""
 
     def test_handler_mints_and_returns_response(
         self,
@@ -225,10 +255,10 @@ class TestHandlerWithRealResolver:
         with stub_transformer_source([doc]):
             response = handler(request, runtime=runtime)
 
-        assert isinstance(response, StepFunctionMintingResponse)
+        assert isinstance(response, StepManifest)
         assert response.job_id == "handler-integration"
-        assert len(response.successes) == 1
-        assert len(response.failures) == 0
+        assert response.successes.count == 1
+        assert response.failures is None
         assert get_canonical_status(ids_db, "hand0001") == "assigned"
 
     def test_handler_reports_failures_on_pool_exhaustion(
@@ -253,9 +283,11 @@ class TestHandlerWithRealResolver:
         # The transform step catches the RuntimeError from the resolver
         # and records it as a failure
         assert response.job_id == "handler-exhaustion"
-        assert len(response.successes) == 0
-        assert len(response.failures) == 1
-        assert "Free ID pool exhausted" in response.failures[0].error
+        assert response.successes.count == 0
+        assert response.failures is not None
+        assert response.failures.count == 1
+        failure_records = _read_failure_details(response)
+        assert "Free ID pool exhausted" in failure_records[0]["detail"]
 
     def test_handler_empty_request(
         self,
@@ -273,5 +305,5 @@ class TestHandlerWithRealResolver:
             response = handler(request, runtime=runtime)
 
         assert response.job_id == "handler-empty"
-        assert response.successes == []
-        assert response.failures == []
+        assert response.successes.count == 0
+        assert response.failures is None

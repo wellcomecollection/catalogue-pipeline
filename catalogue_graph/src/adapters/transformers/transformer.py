@@ -16,7 +16,7 @@ from adapters.ebsco import config as ebsco_config
 from adapters.ebsco import helpers as ebsco_helpers
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
-from adapters.transformers.manifests import ManifestWriter, TransformerManifest
+from adapters.transformers.manifests import TransformerManifestWriter, TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 from core.transformer import ElasticBaseTransformer as BaseTransformer
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
@@ -104,7 +104,7 @@ def handler(
         api_key_name=config.ES_API_KEY_NAME,
     )
     transformer.stream_to_index(es_client, index_name)
-    writer = ManifestWriter(
+    writer = TransformerManifestWriter(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
         bucket=config.S3_BUCKET,

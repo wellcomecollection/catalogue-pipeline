@@ -41,6 +41,12 @@ ES_TARGET_INDEX_PREFIX = os.getenv("ES_TARGET_INDEX_PREFIX", "works-identified")
 DOWNSTREAM_SNS_TOPIC_ARN = os.getenv("DOWNSTREAM_SNS_TOPIC_ARN")
 
 # ---------------------------------------------------------------------------
+# S3 manifest output
+# ---------------------------------------------------------------------------
+S3_BUCKET = os.getenv("S3_BUCKET", "")
+BATCH_S3_PREFIX = os.getenv("BATCH_S3_PREFIX", "id_minter")
+
+# ---------------------------------------------------------------------------
 # RDS Data API (for local/CLI access without direct DB connectivity)
 # ---------------------------------------------------------------------------
 RDS_CLUSTER_ID = os.getenv("RDS_CLUSTER_ID", "identifiers-v2-serverless")
@@ -98,6 +104,8 @@ class IdMinterConfig(DBConfig):
     target_index_date_suffix: str | None = ES_TARGET_INDEX_DATE_SUFFIX
     rds_cluster_id: str = RDS_CLUSTER_ID
     rds_region: str = RDS_REGION
+    s3_bucket: str = S3_BUCKET
+    batch_s3_prefix: str = BATCH_S3_PREFIX
 
     @property
     def source_index_name(self) -> str:

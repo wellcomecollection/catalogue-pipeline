@@ -16,16 +16,16 @@ from pydantic import BaseModel, ConfigDict
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
 from id_minter.id_minting_transformer import IdMintingTransformer
+from id_minter.manifests import IdMinterManifestWriter
 from id_minter.models.identifier import IdResolver
 from id_minter.models.step_events import (
-    StepFunctionMintingFailure,
     StepFunctionMintingRequest,
-    StepFunctionMintingResponse,
 )
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from utils.models.manifests import StepManifest
 
 logger = structlog.get_logger(__name__)
 
@@ -58,7 +58,7 @@ def build_runtime(
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
-) -> StepFunctionMintingResponse:
+) -> StepManifest:
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
@@ -93,18 +93,16 @@ def execute(
     )
     transformer.stream_to_index(target_client, target_index)
 
-    failures = [
-        StepFunctionMintingFailure(
-            source_identifier=error.row_id,
-            error=error.detail,
-        )
-        for error in transformer.errors
-    ]
-
-    return StepFunctionMintingResponse(
-        successes=transformer.successful_ids,
-        failures=failures,
+    manifest_writer = IdMinterManifestWriter(
         job_id=request.job_id,
+        label="id_minter",
+        bucket=runtime.config.s3_bucket,
+        prefix=runtime.config.batch_s3_prefix,
+    )
+
+    return manifest_writer.build_manifest(
+        successful_ids=transformer.successful_ids,
+        errors=transformer.errors,
     )
 
 
@@ -142,7 +140,7 @@ def handler(
     event: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
     execution_context: ExecutionContext | None = None,
-) -> StepFunctionMintingResponse:
+) -> StepManifest:
     setup_logging(execution_context)
     log_runtime_config(runtime, event)
     response = execute(event, runtime=runtime)
@@ -150,8 +148,8 @@ def handler(
     logger.info(
         "Minting complete",
         job_id=response.job_id,
-        success_count=len(response.successes),
-        failure_count=len(response.failures),
+        success_count=response.successes.count,
+        failure_count=response.failures.count if response.failures else 0,
     )
 
     return response
