@@ -37,7 +37,7 @@ from id_minter.embedder import (
     scan,
 )
 from id_minter.models.identifier import (
-    CONCEPT_SUBTYPES,
+    TYPES_NORMALIZED_TO_CONCEPT,
     SourceId,
     SourceIdentifierKey,
 )
@@ -227,7 +227,7 @@ class TestEmbedCanonicalIds:
 
 class TestNormalizeOntologyType:
     def test_concept_subtypes_normalize_to_concept(self) -> None:
-        for subtype in CONCEPT_SUBTYPES:
+        for subtype in TYPES_NORMALIZED_TO_CONCEPT:
             assert normalize_ontology_type(subtype) == "Concept"
 
     def test_non_concept_types_unchanged(self) -> None:

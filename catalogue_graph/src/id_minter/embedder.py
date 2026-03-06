@@ -10,7 +10,7 @@ from collections.abc import Callable, Iterator
 from typing import Any, cast
 
 from id_minter.models.identifier import (
-    CONCEPT_SUBTYPES,
+    TYPES_NORMALIZED_TO_CONCEPT,
     IdResolver,
     SourceId,
     SourceIdentifierKey,
@@ -47,7 +47,7 @@ def normalize_ontology_type(ontology_type: str) -> str:
     a given Library of Congress source identifier should have the same ID as a
     'Person' with the same source identifier.
     """
-    if ontology_type in CONCEPT_SUBTYPES:
+    if ontology_type in TYPES_NORMALIZED_TO_CONCEPT:
         return "Concept"
     return ontology_type
 
