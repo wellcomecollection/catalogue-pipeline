@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import NamedTuple, Protocol, runtime_checkable
 
-# Concept subtypes that are normalized to "Concept" before DB lookup.
-# Kept in sync with the Scala id_minter's ConceptsSourceIdentifierAdjuster
-# and catalogue_graph/src/models/graph_node.py.
-CONCEPT_SUBTYPES = frozenset(
+from utils.types import ConceptType
+
+# Ontology types that are normalized to "Concept" before DB lookup.
+# Kept in sync with the Scala id_minter's ConceptsSourceIdentifierAdjuster.
+TYPES_NORMALIZED_TO_CONCEPT: frozenset[ConceptType] = frozenset(
     {"Person", "Organisation", "Place", "Agent", "Meeting", "Genre", "Period"}
 )
 
