@@ -65,7 +65,7 @@ module "pipeline" {
     }
     "2026-03-06" = {
       works = {
-        identified   = "works_identified.2023-05-26"
+        identified = "works_identified.2023-05-26"
       }
     }
   }
