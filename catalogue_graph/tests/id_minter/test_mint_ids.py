@@ -2,10 +2,19 @@
 Tests for IDMinter.lookup_ids() and IDMinter.mint_ids().
 
 Derived from RFC 083 (Stable identifiers following mass record migration),
-specifically the "Batch minting flow" section.  See test_mint_ids.md for
-the full test-case catalogue.
+specifically the "Batch minting flow" section.
 
 Each test uses a real MySQL 8 database via Docker (see conftest.py).
+
+Test categories:
+- lookup_ids: batch lookup of existing canonical IDs
+- mint_ids happy paths: new ID claiming, mixed existing/new
+- Predecessor inheritance: canonical ID inheritance during migrations
+- Idempotency: repeated and duplicate requests
+- Error cases: missing predecessors, pool exhaustion
+- Race conditions: concurrent minter scenarios (monkeypatched)
+- Transaction atomicity: rollback on failure
+- Pool management: free/assigned status transitions
 """
 
 from __future__ import annotations
@@ -114,7 +123,7 @@ def _count_assigned_ids(conn: pymysql.connections.Connection) -> int:
 
 
 # ---------------------------------------------------------------------------
-# 1–5  lookup_ids
+# lookup_ids
 # ---------------------------------------------------------------------------
 
 
@@ -124,7 +133,7 @@ class TestLookupIds:
     def test_returns_existing_mappings(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#1: All source IDs found in DB are returned."""
+        """All source IDs found in DB are returned."""
         identifiers = [
             (("Work", "sierra", f"b{i}"), f"canon{i:03d}") for i in range(1, 6)
         ]
@@ -140,7 +149,7 @@ class TestLookupIds:
     def test_returns_only_found_ids(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#2: Partial match — missing IDs excluded from result."""
+        """Partial match — missing IDs excluded from result."""
         existing: SourceId = ("Work", "sierra", "b1234")
         missing: SourceId = ("Work", "sierra", "b9999")
         _seed_identifier(ids_db, existing, "found001")
@@ -151,20 +160,20 @@ class TestLookupIds:
     def test_returns_empty_when_no_matches(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#3: None of the requested source IDs exist."""
+        """None of the requested source IDs exist."""
         result = IDMinter(ids_db).lookup_ids([("Work", "sierra", "b99999")])
         assert result == {}
 
     def test_returns_empty_for_empty_input(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#4: No source IDs provided → empty dict."""
+        """No source IDs provided → empty dict."""
         assert IDMinter(ids_db).lookup_ids([]) == {}
 
     def test_handles_mixed_ontology_types(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#5: Work and Image source IDs in the same batch."""
+        """Work and Image source IDs in the same batch."""
         work_sid: SourceId = ("Work", "sierra", "b1111")
         image_sid: SourceId = ("Image", "mets", "img-001")
         _seed_identifier(ids_db, work_sid, "wk000001")
@@ -175,7 +184,7 @@ class TestLookupIds:
 
 
 # ---------------------------------------------------------------------------
-# 6–9  mint_ids — happy paths
+# mint_ids — happy paths
 # ---------------------------------------------------------------------------
 
 
@@ -185,13 +194,13 @@ class TestMintNewIds:
     def test_empty_input_returns_empty(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#6: No source IDs provided → empty dict."""
+        """No source IDs provided → empty dict."""
         assert IDMinter(ids_db).mint_ids([]) == {}
 
     def test_all_existing_returns_without_claiming(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#7: All source IDs already exist → no free IDs consumed."""
+        """All source IDs already exist → no free IDs consumed."""
         identifiers = [
             (("Work", "folio", f"b{i}"), f"exist{i:03d}") for i in range(1, 4)
         ]
@@ -210,7 +219,7 @@ class TestMintNewIds:
     def test_all_new_claims_from_pool(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#8: All source IDs are new with no predecessors → claims free IDs, inserts mappings."""
+        """All source IDs are new with no predecessors → claims free IDs, inserts mappings."""
         free = [f"newid{i:03d}" for i in range(1, 4)]
         _seed_free_ids(ids_db, free)
         sids: list[SourceId] = [("Work", "folio", f"b{i}") for i in range(1, 4)]
@@ -228,8 +237,8 @@ class TestMintNewIds:
     def test_mixed_existing_and_new(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#9: Inherits if predecessor, claims only for new."""
-        existing_sid: SourceId = ("Work", "folio", "b0001")
+        """Existing IDs returned as-is; only new IDs claim from pool."""
+        existing_sid: SourceId = ("Work", "axiell", "b0001")
         _seed_identifier(ids_db, existing_sid, "existaaa")
         _seed_free_ids(ids_db, ["newbbb01"])
 
@@ -241,7 +250,7 @@ class TestMintNewIds:
 
 
 # ---------------------------------------------------------------------------
-# 10–13  mint_ids — predecessor inheritance
+# mint_ids — predecessor inheritance
 # ---------------------------------------------------------------------------
 
 
@@ -251,7 +260,7 @@ class TestPredecessorInheritance:
     def test_inherits_predecessor_canonical_id(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#10: Predecessor found, new source ID not found → inherits."""
+        """New source ID inherits predecessor's canonical ID."""
         pred: SourceId = ("Work", "sierra", "b1234")
         _seed_identifier(ids_db, pred, "legacy01")
 
@@ -266,7 +275,7 @@ class TestPredecessorInheritance:
     def test_multiple_predecessors_in_batch(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#11: Each new source ID inherits from its own predecessor."""
+        """Each new source ID inherits from its own predecessor."""
         pred_a: SourceId = ("Work", "sierra", "b1111")
         pred_b: SourceId = ("Work", "sierra", "b2222")
         _seed_identifier(ids_db, pred_a, "legacyaa")
@@ -283,7 +292,7 @@ class TestPredecessorInheritance:
     def test_cross_type_predecessor(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#12: Image source ID inherits from a Work predecessor. Unlikely scenario but should work."""
+        """Cross-type inheritance: Image source ID inherits from a Work predecessor."""
         pred: SourceId = ("Work", "sierra", "b3333")
         _seed_identifier(ids_db, pred, "cross001")
 
@@ -295,7 +304,7 @@ class TestPredecessorInheritance:
     def test_reprocessing_without_predecessor(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#13: Source ID already has canonical ID from a prior predecessor
+        """Source ID already has canonical ID from a prior predecessor
         mint — re-processing without predecessor returns the same ID.
         """
         pred: SourceId = ("Work", "sierra", "b4444")
@@ -311,7 +320,7 @@ class TestPredecessorInheritance:
 
 
 # ---------------------------------------------------------------------------
-# 14–15  mint_ids — idempotency
+# mint_ids — idempotency
 # ---------------------------------------------------------------------------
 
 
@@ -321,7 +330,7 @@ class TestIdempotency:
     def test_identical_request_twice(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#14: Same result both times, no extra IDs claimed."""
+        """Same result both times, no extra IDs claimed."""
         _seed_free_ids(ids_db, ["idem0001", "idem0002"])
         sid: SourceId = ("Work", "folio", "b7000")
 
@@ -336,7 +345,7 @@ class TestIdempotency:
     def test_duplicate_source_ids_in_batch(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#15: Deduplicated — single canonical ID per unique source ID."""
+        """Deduplicated — single canonical ID per unique source ID."""
         _seed_free_ids(ids_db, ["dup00001", "dup00002", "dup00003", "dup00004"])
 
         sid_a: SourceId = ("Work", "folio", "b8001")
@@ -353,7 +362,7 @@ class TestIdempotency:
 
 
 # ---------------------------------------------------------------------------
-# 16–18  mint_ids — error cases
+# mint_ids — error cases
 # ---------------------------------------------------------------------------
 
 
@@ -363,8 +372,8 @@ class TestErrorCases:
     def test_missing_predecessor_raises(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#16: Predecessor not found → ValueError, nothing committed."""
-        new_sid: SourceId = ("Work", "folio", "AC-9999")
+        """Predecessor not found → ValueError, nothing committed."""
+        new_sid: SourceId = ("Work", "axiell", "AC-9999")
         missing_pred: SourceId = ("Work", "sierra", "b0000")
 
         with pytest.raises(ValueError, match="Predecessor not found"):
@@ -375,8 +384,8 @@ class TestErrorCases:
     def test_pool_fully_exhausted_raises(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#17: Zero free IDs available → RuntimeError."""
-        sids: list[SourceId] = [("Work", "folio", f"b{i}") for i in range(1, 4)]
+        """Zero free IDs available → RuntimeError."""
+        sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
 
         with pytest.raises(RuntimeError, match="Free ID pool exhausted"):
             IDMinter(ids_db).mint_ids([(s, None) for s in sids])
@@ -384,7 +393,7 @@ class TestErrorCases:
     def test_pool_partially_exhausted_raises(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#18: Fewer free IDs than needed → RuntimeError, nothing committed."""
+        """Fewer free IDs than needed → RuntimeError, nothing committed."""
         _seed_free_ids(ids_db, ["short001"])
         sids: list[SourceId] = [("Work", "folio", f"b{i}") for i in range(1, 4)]
 
@@ -395,7 +404,7 @@ class TestErrorCases:
 
 
 # ---------------------------------------------------------------------------
-# 19–21  mint_ids — race conditions
+# mint_ids — race conditions
 #
 # We monkeypatch lookup_ids to return empty, then have a second connection
 # insert the winner's mapping *between* our lookup and our INSERT.
@@ -411,7 +420,7 @@ class TestRaceConditions:
         ids_db: pymysql.connections.Connection,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """#19: Another process inserts the same source ID between our
+        """Another process inserts the same source ID between our
         lookup and our INSERT.  FOR SHARE re-read discovers the winner's
         canonical ID.
         """
@@ -442,8 +451,8 @@ class TestRaceConditions:
         ids_db: pymysql.connections.Connection,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """#20: The free ID claimed by the loser stays 'free'."""
-        sid: SourceId = ("Work", "folio", "b6666")
+        """The free ID claimed by the race loser stays 'free'."""
+        sid: SourceId = ("Work", "axiell", "b6666")
         _seed_free_ids(ids_db, ["unused01"])
 
         original_lookup = IDMinter.lookup_ids
@@ -470,7 +479,7 @@ class TestRaceConditions:
         ids_db: pymysql.connections.Connection,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """#21: Batch of 3 new source IDs — one is stolen by a concurrent
+        """Batch of 3 new source IDs — one is stolen by a concurrent
         process.  Only the 2 IDs we actually won are marked 'assigned';
         the third stays 'free'.
         """
@@ -517,7 +526,7 @@ class TestRaceConditions:
 
 
 # ---------------------------------------------------------------------------
-# 22–23  mint_ids — transaction atomicity
+# mint_ids — transaction atomicity
 # ---------------------------------------------------------------------------
 
 
@@ -527,7 +536,7 @@ class TestTransactionAtomicity:
     def test_predecessor_error_rolls_back_prior_inserts(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#22: A predecessor error mid-batch means nothing is committed,
+        """A predecessor error mid-batch means nothing is committed,
         even for source IDs processed before the error.
         """
         _seed_free_ids(ids_db, ["atom0001"])
@@ -546,7 +555,7 @@ class TestTransactionAtomicity:
     def test_pool_exhaustion_rolls_back_with_predecessor(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#23: A successor inherits a predecessor's canonical ID (inserting
+        """A successor inherits a predecessor's canonical ID (inserting
         a new identifiers row), but then pool exhaustion occurs for other
         source IDs in the batch.  The entire transaction is rolled back,
         including the successor's inherited mapping.
@@ -577,7 +586,7 @@ class TestTransactionAtomicity:
 
 
 # ---------------------------------------------------------------------------
-# 24–25  mint_ids — pool management
+# mint_ids — pool management
 # ---------------------------------------------------------------------------
 
 
@@ -587,7 +596,7 @@ class TestPoolManagement:
     def test_used_ids_marked_assigned(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
-        """#24: After a successful mint, claimed IDs are 'assigned'."""
+        """After a successful mint, claimed IDs are 'assigned'."""
         _seed_free_ids(ids_db, ["pool0001", "pool0002"])
         sids: list[SourceId] = [
             ("Work", "sierra", "b6001"),
@@ -604,7 +613,7 @@ class TestPoolManagement:
         ids_db: pymysql.connections.Connection,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """#25: Batch claims 3 free IDs from pool, but a race means only
+        """Batch claims 3 free IDs from pool, but a race means only
         2 are used.  The unused one stays 'free'.
         """
         sid_a: SourceId = ("Work", "sierra", "b6101")
