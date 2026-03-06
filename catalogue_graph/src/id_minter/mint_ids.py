@@ -10,7 +10,7 @@ ID Minter implementation supporting:
 from __future__ import annotations
 
 from id_minter.database import DBConnection, DBCursor
-from id_minter.models.identifiers import SourceId
+from id_minter.models.identifier import SourceId
 
 
 class IDMinter:
