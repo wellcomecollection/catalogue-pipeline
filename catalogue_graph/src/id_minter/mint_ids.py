@@ -235,12 +235,15 @@ class IDMinter:
         # confirmed that our INSERTs won the race against concurrent processes.
         if needs_new_id:
             num_needed = len(needs_new_id)
-            cursor.execute(f"""
+            cursor.execute(
+                """
                 SELECT CanonicalId FROM canonical_ids 
                 WHERE Status = 'free' 
-                LIMIT {num_needed}
+                LIMIT %s
                 FOR UPDATE SKIP LOCKED
-            """)
+            """,
+                (num_needed,),
+            )
 
             free_ids = [row["CanonicalId"] for row in cursor.fetchall()]
             # Pool exhaustion is a critical error - the pre-generation job should
