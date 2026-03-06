@@ -270,9 +270,7 @@ class MintingResolver:
             logger.info(
                 "Inherited predecessor canonical IDs",
                 count=len(needs_inheritance),
-                mappings={
-                    f"{s[1]}/{s[2]}": cid for s, cid in needs_inheritance
-                },
+                mappings={f"{s[1]}/{s[2]}": cid for s, cid in needs_inheritance},
             )
 
         # Step 4: Claim free IDs from pool for new records

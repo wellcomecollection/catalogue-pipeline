@@ -11,14 +11,14 @@ from typing import Any, cast
 
 import structlog
 
-logger = structlog.get_logger(__name__)
-
 from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
     IdResolver,
     SourceId,
     SourceIdentifierKey,
 )
+
+logger = structlog.get_logger(__name__)
 
 
 def scan(obj: Any, predicate: Callable[[dict], bool]) -> Iterator[dict]:
