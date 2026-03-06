@@ -256,12 +256,7 @@ class TestProcessWork:
         doc = {"sourceIdentifier": si}
 
         key = key_of(si)
-        resolver = FakeResolver(ids={})
-        # Simulate a resolver that mints a new ID
-        resolver.mint_ids = lambda reqs: (  # type: ignore[assignment]
-            resolver.mint_calls.append(reqs)  # type: ignore[func-returns-value]
-            or {(key[0], key[1], key[2]): cid}
-        )
+        resolver = FakeResolver(ids={(key[0], key[1], key[2]): cid})
 
         result = process_work(doc, resolver)
 
