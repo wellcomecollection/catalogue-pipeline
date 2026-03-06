@@ -193,7 +193,7 @@ class TestMintNewIds:
     ) -> None:
         """#7: All source IDs already exist → no free IDs consumed."""
         identifiers = [
-            (("Work", "axiell", f"b{i}"), f"exist{i:03d}") for i in range(1, 4)
+            (("Work", "folio", f"b{i}"), f"exist{i:03d}") for i in range(1, 4)
         ]
         for sid, cid in identifiers:
             _seed_identifier(ids_db, sid, cid)
@@ -213,7 +213,7 @@ class TestMintNewIds:
         """#8: All source IDs are new with no predecessors → claims free IDs, inserts mappings."""
         free = [f"newid{i:03d}" for i in range(1, 4)]
         _seed_free_ids(ids_db, free)
-        sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceId] = [("Work", "folio", f"b{i}") for i in range(1, 4)]
 
         result = IDMinter(ids_db).mint_ids([(s, None) for s in sids])
 
@@ -229,11 +229,11 @@ class TestMintNewIds:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """#9: Inherits if predecessor, claims only for new."""
-        existing_sid: SourceId = ("Work", "axiell", "b0001")
+        existing_sid: SourceId = ("Work", "folio", "b0001")
         _seed_identifier(ids_db, existing_sid, "existaaa")
         _seed_free_ids(ids_db, ["newbbb01"])
 
-        new_sid: SourceId = ("Work", "axiell", "b0002")
+        new_sid: SourceId = ("Work", "folio", "b0002")
         result = IDMinter(ids_db).mint_ids([(existing_sid, None), (new_sid, None)])
 
         assert result[existing_sid] == "existaaa"
@@ -255,7 +255,7 @@ class TestPredecessorInheritance:
         pred: SourceId = ("Work", "sierra", "b1234")
         _seed_identifier(ids_db, pred, "legacy01")
 
-        new_sid: SourceId = ("Work", "axiell", "AC-5678")
+        new_sid: SourceId = ("Work", "folio", "AC-5678")
         result = IDMinter(ids_db).mint_ids([(new_sid, pred)])
 
         assert result[new_sid] == "legacy01"
@@ -272,8 +272,8 @@ class TestPredecessorInheritance:
         _seed_identifier(ids_db, pred_a, "legacyaa")
         _seed_identifier(ids_db, pred_b, "legacybb")
 
-        new_a: SourceId = ("Work", "axiell", "AC-1111")
-        new_b: SourceId = ("Work", "axiell", "AC-2222")
+        new_a: SourceId = ("Work", "folio", "AC-1111")
+        new_b: SourceId = ("Work", "folio", "AC-2222")
 
         result = IDMinter(ids_db).mint_ids([(new_a, pred_a), (new_b, pred_b)])
 
@@ -301,7 +301,7 @@ class TestPredecessorInheritance:
         pred: SourceId = ("Work", "sierra", "b4444")
         _seed_identifier(ids_db, pred, "stable01")
 
-        new_sid: SourceId = ("Work", "axiell", "AC-4444")
+        new_sid: SourceId = ("Work", "folio", "AC-4444")
         # First mint with predecessor
         IDMinter(ids_db).mint_ids([(new_sid, pred)])
 
@@ -323,7 +323,7 @@ class TestIdempotency:
     ) -> None:
         """#14: Same result both times, no extra IDs claimed."""
         _seed_free_ids(ids_db, ["idem0001", "idem0002"])
-        sid: SourceId = ("Work", "axiell", "b7000")
+        sid: SourceId = ("Work", "folio", "b7000")
 
         minter = IDMinter(ids_db)
         first = minter.mint_ids([(sid, None)])
@@ -339,8 +339,8 @@ class TestIdempotency:
         """#15: Deduplicated — single canonical ID per unique source ID."""
         _seed_free_ids(ids_db, ["dup00001", "dup00002", "dup00003", "dup00004"])
 
-        sid_a: SourceId = ("Work", "axiell", "b8001")
-        sid_b: SourceId = ("Work", "axiell", "b8002")
+        sid_a: SourceId = ("Work", "folio", "b8001")
+        sid_b: SourceId = ("Work", "folio", "b8002")
 
         result = IDMinter(ids_db).mint_ids(
             [(sid_a, None), (sid_b, None), (sid_a, None), (sid_b, None)]
@@ -364,7 +364,7 @@ class TestErrorCases:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """#16: Predecessor not found → ValueError, nothing committed."""
-        new_sid: SourceId = ("Work", "axiell", "AC-9999")
+        new_sid: SourceId = ("Work", "folio", "AC-9999")
         missing_pred: SourceId = ("Work", "sierra", "b0000")
 
         with pytest.raises(ValueError, match="Predecessor not found"):
@@ -376,7 +376,7 @@ class TestErrorCases:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """#17: Zero free IDs available → RuntimeError."""
-        sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceId] = [("Work", "folio", f"b{i}") for i in range(1, 4)]
 
         with pytest.raises(RuntimeError, match="Free ID pool exhausted"):
             IDMinter(ids_db).mint_ids([(s, None) for s in sids])
@@ -386,7 +386,7 @@ class TestErrorCases:
     ) -> None:
         """#18: Fewer free IDs than needed → RuntimeError, nothing committed."""
         _seed_free_ids(ids_db, ["short001"])
-        sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceId] = [("Work", "folio", f"b{i}") for i in range(1, 4)]
 
         with pytest.raises(RuntimeError, match="Free ID pool exhausted"):
             IDMinter(ids_db).mint_ids([(s, None) for s in sids])
@@ -415,7 +415,7 @@ class TestRaceConditions:
         lookup and our INSERT.  FOR SHARE re-read discovers the winner's
         canonical ID.
         """
-        sid: SourceId = ("Work", "axiell", "b5555")
+        sid: SourceId = ("Work", "folio", "b5555")
         _seed_free_ids(ids_db, ["loser001"])
 
         original_lookup = IDMinter.lookup_ids
@@ -443,7 +443,7 @@ class TestRaceConditions:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """#20: The free ID claimed by the loser stays 'free'."""
-        sid: SourceId = ("Work", "axiell", "b6666")
+        sid: SourceId = ("Work", "folio", "b6666")
         _seed_free_ids(ids_db, ["unused01"])
 
         original_lookup = IDMinter.lookup_ids
@@ -474,9 +474,9 @@ class TestRaceConditions:
         process.  Only the 2 IDs we actually won are marked 'assigned';
         the third stays 'free'.
         """
-        won_a: SourceId = ("Work", "axiell", "b7001")
-        won_b: SourceId = ("Work", "axiell", "b7002")
-        lost: SourceId = ("Work", "axiell", "b7003")
+        won_a: SourceId = ("Work", "folio", "b7001")
+        won_b: SourceId = ("Work", "folio", "b7002")
+        lost: SourceId = ("Work", "folio", "b7003")
 
         _seed_free_ids(ids_db, ["pool0001", "pool0002", "pool0003"])
 
@@ -532,9 +532,9 @@ class TestTransactionAtomicity:
         """
         _seed_free_ids(ids_db, ["atom0001"])
 
-        ok_sid: SourceId = ("Work", "axiell", "b9001")
-        bad_sid: SourceId = ("Work", "axiell", "AC-9002")
-        missing_pred: SourceId = ("Work", "axiell", "b0000")
+        ok_sid: SourceId = ("Work", "folio", "b9001")
+        bad_sid: SourceId = ("Work", "folio", "AC-9002")
+        missing_pred: SourceId = ("Work", "folio", "b0000")
 
         with pytest.raises(ValueError, match="Predecessor not found"):
             IDMinter(ids_db).mint_ids([(ok_sid, None), (bad_sid, missing_pred)])
@@ -554,9 +554,9 @@ class TestTransactionAtomicity:
         pred: SourceId = ("Work", "sierra", "b1234")
         _seed_identifier(ids_db, pred, "legacy01")
 
-        successor: SourceId = ("Work", "axiell", "AC-1234")
-        new_a: SourceId = ("Work", "axiell", "b9010")
-        new_b: SourceId = ("Work", "axiell", "b9011")
+        successor: SourceId = ("Work", "folio", "AC-1234")
+        new_a: SourceId = ("Work", "folio", "b9010")
+        new_b: SourceId = ("Work", "folio", "b9011")
 
         # Only 1 free ID but need 2 for the new source IDs
         _seed_free_ids(ids_db, ["short001"])
