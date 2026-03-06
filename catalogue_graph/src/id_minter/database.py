@@ -6,6 +6,7 @@ identifiers database — following the schema defined in RFC 083.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Protocol, cast
 from urllib.parse import quote
@@ -23,9 +24,11 @@ MIGRATIONS_DIR = str(Path(__file__).parent / "migrations")
 
 
 class DBCursor(Protocol):
-    def execute(self, q: str) -> None: ...
+    def execute(self, q: str, args: Sequence[Any] | None = ...) -> None: ...
 
     def fetchone(self) -> dict[str, Any]: ...
+
+    def fetchall(self) -> list[dict[str, Any]]: ...
 
     def executemany(self, q: str, args: list[tuple]) -> None: ...
 

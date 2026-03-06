@@ -9,7 +9,7 @@ ID Minter implementation supporting:
 
 from __future__ import annotations
 
-from id_minter.database import DBConnection
+from id_minter.database import DBConnection, DBCursor
 from id_minter.models.identifiers import SourceId
 
 
@@ -19,7 +19,7 @@ class IDMinter:
     during source system migrations.
     """
 
-    def __init__(self, conn: DBConnection):
+    def __init__(self, conn: DBConnection[DBCursor]):
         """
         Initialize the ID Minter.
 
