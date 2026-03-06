@@ -36,23 +36,23 @@ It can be used to locally run the id_minter and id_generator, see below
 
 When run locally the id_minter reads from the **public** Elasticsearch API and writes to a **local** ES container. This means you don't need VPC access to fetch works-source documents.
 
-##### Basic usage (local MySQL resolver)
+##### Basic usage (Data API resolver)
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers 'Work[sierra-system-number/b1000001]'
+```
+
+##### Using the local MySQL resolver
 
 ```bash
 uv run python -m id_minter.steps.id_minter \
     --source-identifiers 'Work[sierra-system-number/b1000001]' \
+    --resolver local \
     --apply-migrations
 ```
 
-##### Using the Data API resolver (no local MySQL needed)
-
-```bash
-uv run python -m id_minter.steps.id_minter \
-    --source-identifiers 'Work[sierra-system-number/b1000001]' \
-    --resolver data-api
-```
-
-This uses the AWS RDS Data API to look up identifiers remotely — requires valid AWS credentials but no local database.
+This connects to a local MySQL instance (see docker-compose setup above).
 
 ##### Multiple identifiers with a custom job ID
 
@@ -65,17 +65,32 @@ uv run python -m id_minter.steps.id_minter \
     --apply-migrations
 ```
 
+##### Writing to the public Elasticsearch cluster
+
+By default the CLI reads from the public ES cluster and writes to a local one.
+To write to the public identified index instead:
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers 'Work[sierra-system-number/b1000001]' \
+    --pipeline-date 2025-10-02 \
+    --target-es-mode public
+```
+
 ##### CLI flags
 
 | Flag | Description |
 |---|---|
 | `--source-identifiers` | One or more source identifiers to process (required). |
 | `--job-id` | Optional job ID — defaults to the current timestamp. |
-| `--resolver` | ID resolver backend: `local` (pymysql to local MySQL, default) or `data-api` (AWS RDS Data API). |
+| `--resolver` | ID resolver backend: `local` (pymysql to local MySQL) or `data-api` (AWS RDS Data API, default). |
 | `--source-index` | Override the upstream ES index name. |
 | `--target-index` | Override the downstream ES index name. |
+| `--source-es-mode` | Elasticsearch mode for reading source documents: `public` (default), `private`, or `local`. |
+| `--target-es-mode` | Elasticsearch mode for writing indexed documents: `local` (default), `public`, or `private`. |
 | `--pipeline-date` | Override the pipeline date (used for ES index suffixes and secret names). Defaults to `dev`. |
 | `--apply-migrations` | Apply database schema migrations on startup. Only needed on first run or after adding new migrations. |
+| `--dry-run` | Print the resolved configuration and exit without running. |
 
 #### 2. Verify the database schema
 

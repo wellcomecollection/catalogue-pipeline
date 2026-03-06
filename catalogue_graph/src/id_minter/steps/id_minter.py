@@ -175,9 +175,9 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--resolver",
         choices=["local", "data-api"],
-        default="local",
+        default="data-api",
         help="ID resolver backend: 'local' (pymysql to local MySQL) "
-        "or 'data-api' (AWS RDS Data API). Default: local.",
+        "or 'data-api' (AWS RDS Data API). Default: data-api.",
     )
     parser.add_argument(
         "--pipeline-date",
@@ -190,6 +190,18 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         default=False,
         help="Print the resolved configuration and exit without running.",
+    )
+    parser.add_argument(
+        "--source-es-mode",
+        choices=["public", "private", "local"],
+        default="public",
+        help="Elasticsearch mode for reading source documents. Default: public.",
+    )
+    parser.add_argument(
+        "--target-es-mode",
+        choices=["public", "private", "local"],
+        default="local",
+        help="Elasticsearch mode for writing indexed documents. Default: local.",
     )
 
     args = parser.parse_args()
@@ -222,8 +234,8 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     runtime = build_runtime(
         config_obj,
         resolver=resolver,
-        source_es_mode="public",
-        target_es_mode="local",
+        source_es_mode=args.source_es_mode,
+        target_es_mode=args.target_es_mode,
     )
 
     if args.dry_run:
