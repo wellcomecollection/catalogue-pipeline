@@ -1,6 +1,6 @@
 """Embedder: resolve and embed canonical IDs into work JSON.
 
-Combines recursive JSON traversal with an IdResolver (e.g. IDMinter) to
+Combines recursive JSON traversal with an IdResolver (e.g. MintingResolver) to
 look up or mint canonical IDs for every sourceIdentifier node in a work.
 """
 
@@ -8,6 +8,10 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator
 from typing import Any, cast
+
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
@@ -97,11 +101,30 @@ def process_work(
     # TODO: We have not yet decided how works will indicate their predecessors.
     # The `predecessors` parameter is plumbed through but the mechanism for
     # deriving it from the work JSON needs to be designed and implemented.
-    keys = extract_source_identifiers(work_json)
-    if not keys:
-        return work_json
+    source_id = work_json.get("state", {}).get("sourceIdentifier", {})
+    source_id_str = (
+        f"{source_id.get('ontologyType', '?')}"
+        f"[{source_id.get('identifierType', {}).get('id', '?')}"
+        f"/{source_id.get('value', '?')}]"
+    )
 
     preds = predecessors or {}
+    keys = extract_source_identifiers(work_json)
+    predecessor_count = sum(1 for k in keys if k in preds)
+    logger.info(
+        "Embedding canonical IDs",
+        source_identifier=source_id_str,
+        source_identifier_count=len(keys),
+        predecessor_count=predecessor_count,
+    )
+
+    if not keys:
+        logger.info(
+            "No source identifiers found, skipping",
+            source_identifier=source_id_str,
+        )
+        return work_json
+
     requests: list[tuple[SourceId, SourceId | None]] = [
         (
             (k[0], k[1], k[2]),
@@ -114,4 +137,12 @@ def process_work(
         SourceIdentifierKey(*k): v for k, v in found.items()
     }
 
-    return embed_canonical_ids(work_json, id_map)
+    result = embed_canonical_ids(work_json, id_map)
+
+    logger.info(
+        "Finished embedding canonical IDs",
+        source_identifier=source_id_str,
+        ids_embedded=len(id_map),
+    )
+
+    return result

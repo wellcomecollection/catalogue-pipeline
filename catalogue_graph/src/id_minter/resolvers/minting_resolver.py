@@ -1,5 +1,5 @@
 """
-ID Minter implementation supporting:
+Minting IdResolver implementation supporting:
 - Batch lookup of existing canonical IDs
 - Single-record minting for new IDs
 - Predecessor inheritance for migrated records
@@ -9,26 +9,41 @@ ID Minter implementation supporting:
 
 from __future__ import annotations
 
-from id_minter.database import DBConnection, DBCursor
+import structlog
+
+from id_minter.config import DBConfig
+from id_minter.database import DBConnection, DBCursor, get_connection
 from id_minter.models.identifiers import SourceId
 
+logger = structlog.get_logger(__name__)
 
-class IDMinter:
+
+class MintingResolver:
     """
-    ID Minter that supports predecessor inheritance for stable identifiers
+    IdResolver that supports predecessor inheritance for stable identifiers
     during source system migrations.
     """
 
-    def __init__(self, conn: DBConnection[DBCursor]):
+    def __init__(self, config: DBConfig):
         """
-        Initialize the ID Minter.
+        Initialize the MintingResolver.
 
         Args:
-            conn: A database connection (with DictCursor configured).
+            config: Database configuration for connecting to the identifiers DB.
         """
-        self.conn = conn
+        self.conn: DBConnection[DBCursor] = get_connection(config)
 
-    def __enter__(self) -> IDMinter:
+    @classmethod
+    def from_connection(cls, conn: DBConnection[DBCursor]) -> MintingResolver:
+        """Create a MintingResolver from an existing database connection.
+
+        Useful for testing where the connection is managed externally.
+        """
+        resolver = object.__new__(cls)
+        resolver.conn = conn
+        return resolver
+
+    def __enter__(self) -> MintingResolver:
         return self
 
     def __exit__(self, *exc: object) -> None:
@@ -50,7 +65,7 @@ class IDMinter:
             for all source IDs that were found. Missing IDs are not included.
 
         Example:
-            >>> minter.lookup_ids([
+            >>> resolver.lookup_ids([
             ...     ('Work', 'sierra-system-number', 'b1234'),
             ...     ('Image', 'mets-image', 'xyz'),
             ...     ('Work', 'axiell-collections-id', 'new-record')  # doesn't exist
@@ -121,7 +136,7 @@ class IDMinter:
             RuntimeError: If free ID pool is exhausted
 
         Example:
-            >>> minter.mint_ids([
+            >>> resolver.mint_ids([
             ...     (('Work', 'axiell', 'AC-123'), ('Work', 'sierra', 'b1234')),  # with predecessor
             ...     (('Image', 'mets', 'xyz'), None),  # no predecessor
             ... ])
@@ -170,6 +185,21 @@ class IDMinter:
         for sid in source_ids:
             if sid in found:
                 result[sid] = found[sid]
+                logger.debug(
+                    "Resolved ID",
+                    source_id=f"{sid[0]}[{sid[1]}/{sid[2]}]",
+                    canonical_id=found[sid],
+                    method="looked_up",
+                )
+
+        existing_count = len(result)
+        missing_count = len(source_ids) - existing_count
+        logger.info(
+            "Batch lookup complete",
+            total=len(source_ids),
+            existing=existing_count,
+            missing=missing_count,
+        )
 
         # Step 2: Categorize missing source IDs
         # -------------------------------------------------------------------------
@@ -199,6 +229,13 @@ class IDMinter:
             else:
                 needs_new_id.append(sid)
 
+        if needs_inheritance or needs_new_id:
+            logger.info(
+                "Categorized missing IDs",
+                needs_inheritance=len(needs_inheritance),
+                needs_new_id=len(needs_new_id),
+            )
+
         # Step 3: Batch INSERT for predecessor inheritance
         # -------------------------------------------------------------------------
         # For records inheriting from a predecessor, insert a new row in the
@@ -221,6 +258,22 @@ class IDMinter:
                     (ontology_type, source_system, source_id, canonical_id),
                 )
                 result[source_key] = canonical_id
+                pred = predecessors[source_key]
+                logger.debug(
+                    "Resolved ID",
+                    source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
+                    canonical_id=canonical_id,
+                    method="inherited",
+                    predecessor=f"{pred[0]}[{pred[1]}/{pred[2]}]",
+                )
+
+            logger.info(
+                "Inherited predecessor canonical IDs",
+                count=len(needs_inheritance),
+                mappings={
+                    f"{s[1]}/{s[2]}": cid for s, cid in needs_inheritance
+                },
+            )
 
         # Step 4: Claim free IDs from pool for new records
         # -------------------------------------------------------------------------
@@ -324,9 +377,35 @@ class IDMinter:
                     # Only mark as assigned if we won the race (our claimed ID was used)
                     if actual_canonical == claimed_mapping.get(source_key):
                         used_canonical_ids.add(actual_canonical)
+                        logger.debug(
+                            "Resolved ID",
+                            source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
+                            canonical_id=actual_canonical,
+                            method="minted",
+                        )
+                    else:
+                        logger.debug(
+                            "Resolved ID",
+                            source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
+                            canonical_id=actual_canonical,
+                            method="minted_race_lost",
+                            claimed_id=claimed_mapping.get(source_key),
+                        )
 
             # Batch UPDATE to mark all successfully used IDs as 'assigned' in a
             # single query, rather than one UPDATE per ID.
+            races_lost = sum(
+                1
+                for sk in needs_new_id
+                if actual.get(sk) and actual[sk] != claimed_mapping.get(sk)
+            )
+            logger.info(
+                "Minted new canonical IDs",
+                attempted=len(needs_new_id),
+                assigned=len(used_canonical_ids),
+                races_lost=races_lost,
+            )
+
             if used_canonical_ids:
                 placeholders = ", ".join(["%s"] * len(used_canonical_ids))
                 cursor.execute(

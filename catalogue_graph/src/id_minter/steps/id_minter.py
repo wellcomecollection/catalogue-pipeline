@@ -23,7 +23,7 @@ from id_minter.models.step_events import (
     StepFunctionMintingResponse,
 )
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
-from id_minter.resolvers.lookup_resolver import LookupOnlyIdResolver
+from id_minter.resolvers.minting_resolver import MintingResolver
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -46,7 +46,7 @@ def build_runtime(
     target_es_mode: ElasticsearchMode = "private",
 ) -> IdMinterRuntime:
     cfg = config_obj or ID_MINTER_CONFIG
-    res = resolver or LookupOnlyIdResolver(cfg)
+    res = resolver or MintingResolver(cfg)
     return IdMinterRuntime(
         config=cfg,
         resolver=res,
@@ -67,12 +67,12 @@ def execute(
         "Processing minting request",
         job_id=request.job_id,
         source_identifier_count=len(request.source_identifiers),
-        source_index=runtime.config.source_index,
-        target_index=runtime.config.target_index,
+        source_index_prefix=runtime.config.source_index_prefix,
+        target_index_prefix=runtime.config.target_index_prefix,
     )
 
-    source_index = f"{runtime.config.source_index}-{runtime.config.pipeline_date}"
-    target_index = f"{runtime.config.target_index}-{runtime.config.pipeline_date}"
+    source_index = runtime.config.source_index_name
+    target_index = runtime.config.target_index_name
 
     source_client = get_client(
         api_key_name="id_minter",
@@ -108,12 +108,43 @@ def execute(
     )
 
 
+def log_runtime_config(
+    runtime: IdMinterRuntime,
+    request: StepFunctionMintingRequest,
+    resolver_name: str = "minting",
+) -> None:
+    """Log the resolved runtime configuration as a structured INFO message."""
+    cfg = runtime.config
+    db_host = (
+        f"{cfg.rds_cluster_id} ({cfg.rds_region})"
+        if resolver_name == "data-api"
+        else f"{cfg.rds_client.primary_host}:{cfg.rds_client.port}"
+    )
+    source_date = cfg.source_index_date_suffix or cfg.pipeline_date
+    target_date = cfg.target_index_date_suffix or cfg.pipeline_date
+    date_info = cfg.pipeline_date
+    if source_date != cfg.pipeline_date or target_date != cfg.pipeline_date:
+        date_info += f" (source: {source_date}, target: {target_date})"
+
+    logger.info(
+        "Runtime configuration",
+        resolver=resolver_name,
+        database=f"{cfg.db_name} @ {db_host}",
+        pipeline_date=date_info,
+        source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
+        target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
+        identifiers=request.source_identifiers,
+        migrations="yes" if cfg.apply_migrations else "no",
+    )
+
+
 def handler(
     event: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
     execution_context: ExecutionContext | None = None,
 ) -> StepFunctionMintingResponse:
     setup_logging(execution_context)
+    log_runtime_config(runtime, event)
     response = execute(event, runtime=runtime)
 
     logger.info(
@@ -155,16 +186,16 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         help="Optional job ID (defaults to current time if omitted).",
     )
     parser.add_argument(
-        "--source-index",
+        "--source-index-prefix",
         type=str,
         required=False,
-        help="Override the upstream ES index name.",
+        help="Override the upstream ES index name prefix.",
     )
     parser.add_argument(
-        "--target-index",
+        "--target-index-prefix",
         type=str,
         required=False,
-        help="Override the downstream ES index name.",
+        help="Override the downstream ES index name prefix.",
     )
     parser.add_argument(
         "--apply-migrations",
@@ -183,7 +214,19 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         "--pipeline-date",
         type=str,
         required=False,
-        help="Override the pipeline date (used for ES index suffixes and secret names).",
+        help="Override the pipeline date (used for ES secrets and as default for index suffixes).",
+    )
+    parser.add_argument(
+        "--source-index-date-suffix",
+        type=str,
+        required=False,
+        help="Override the date suffix for the source index. Defaults to --pipeline-date.",
+    )
+    parser.add_argument(
+        "--target-index-date-suffix",
+        type=str,
+        required=False,
+        help="Override the date suffix for the target index. Defaults to --pipeline-date.",
     )
     parser.add_argument(
         "--dry-run",
@@ -213,14 +256,18 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     )
 
     overrides: dict = {}
-    if args.source_index:
-        overrides["source_index"] = args.source_index
-    if args.target_index:
-        overrides["target_index"] = args.target_index
+    if args.source_index_prefix:
+        overrides["source_index_prefix"] = args.source_index_prefix
+    if args.target_index_prefix:
+        overrides["target_index_prefix"] = args.target_index_prefix
     if args.apply_migrations:
         overrides["apply_migrations"] = True
     if args.pipeline_date:
         overrides["pipeline_date"] = args.pipeline_date
+    if args.source_index_date_suffix:
+        overrides["source_index_date_suffix"] = args.source_index_date_suffix
+    if args.target_index_date_suffix:
+        overrides["target_index_date_suffix"] = args.target_index_date_suffix
 
     config_obj = IdMinterConfig(**overrides) if overrides else None
     cfg = config_obj or ID_MINTER_CONFIG
@@ -229,7 +276,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     if args.resolver == "data-api":
         resolver = DataApiIdResolver(cfg)
     else:
-        resolver = LookupOnlyIdResolver(cfg)
+        resolver = MintingResolver(cfg)
 
     runtime = build_runtime(
         config_obj,
@@ -238,24 +285,10 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         target_es_mode=args.target_es_mode,
     )
 
+    resolver_name = "data-api" if args.resolver == "data-api" else "local"
+    log_runtime_config(runtime, request, resolver_name=resolver_name)
+
     if args.dry_run:
-        source_index = f"{cfg.source_index}-{cfg.pipeline_date}"
-        target_index = f"{cfg.target_index}-{cfg.pipeline_date}"
-        resolver_name = "data-api" if args.resolver == "data-api" else "local"
-        db_host = (
-            f"{cfg.rds_cluster_id} ({cfg.rds_region})"
-            if resolver_name == "data-api"
-            else f"{cfg.rds_client.primary_host}:{cfg.rds_client.port}"
-        )
-        print(  # noqa: T201
-            f"\n  Resolver:        {resolver_name}\n"
-            f"  Database:        {cfg.db_name} @ {db_host}\n"
-            f"  Pipeline date:   {cfg.pipeline_date}\n"
-            f"  Source ES:       {runtime.source_es_mode} → {source_index}\n"
-            f"  Target ES:       {runtime.target_es_mode} → {target_index}\n"
-            f"  Identifiers:     {request.source_identifiers}\n"
-            f"  Migrations:      {'yes' if cfg.apply_migrations else 'no'}\n"
-        )
         return
 
     execution_context = ExecutionContext(

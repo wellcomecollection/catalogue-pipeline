@@ -15,7 +15,10 @@ module "id_minter_lambda" {
   memory_size = 256
   timeout     = 60
 
-  environment_variables = var.id_minter_env_vars
+  environment_variables = merge(
+    { for k, v in var.id_minter_env_vars : k => tostring(v) if v != null },
+    { PIPELINE_DATE = var.pipeline_date }
+  )
   secret_env_vars       = var.id_minter_secret_env_vars
 
   vpc_config = var.id_minter_vpc_config
@@ -49,17 +52,16 @@ module "id_generator_lambda" {
 
 variable "id_minter_env_vars" {
   type = object({
-    RDS_MAX_CONNECTIONS = number
-    LOG_LEVEL           = optional(string, "INFO")
+    RDS_MAX_CONNECTIONS   = number
+    LOG_LEVEL             = optional(string, "INFO")
+    ES_SOURCE_INDEX_PREFIX       = optional(string, "works-source")
+    ES_TARGET_INDEX_PREFIX       = optional(string, "works-identified")
+    ES_SOURCE_INDEX_DATE_SUFFIX  = optional(string)
+    ES_TARGET_INDEX_DATE_SUFFIX  = optional(string)
+    APPLY_MIGRATIONS      = optional(string, "false")
   })
 }
 
 variable "id_minter_secret_env_vars" {
-  type = object({
-    RDS_PRIMARY_HOST = string
-    RDS_REPLICA_HOST = string
-    RDS_PORT         = string
-    RDS_USERNAME     = string
-    RDS_PASSWORD     = string
-  })
+  type = map(string)
 }

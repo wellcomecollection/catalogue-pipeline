@@ -84,13 +84,15 @@ uv run python -m id_minter.steps.id_minter \
 | `--source-identifiers` | One or more source identifiers to process (required). |
 | `--job-id` | Optional job ID — defaults to the current timestamp. |
 | `--resolver` | ID resolver backend: `local` (pymysql to local MySQL) or `data-api` (AWS RDS Data API, default). |
-| `--source-index` | Override the upstream ES index name. |
-| `--target-index` | Override the downstream ES index name. |
+| `--source-index-prefix` | Override the upstream ES index name prefix. |
+| `--target-index-prefix` | Override the downstream ES index name prefix. |
 | `--source-es-mode` | Elasticsearch mode for reading source documents: `public` (default), `private`, or `local`. |
 | `--target-es-mode` | Elasticsearch mode for writing indexed documents: `local` (default), `public`, or `private`. |
-| `--pipeline-date` | Override the pipeline date (used for ES index suffixes and secret names). Defaults to `dev`. |
+| `--pipeline-date` | Override the pipeline date (used for ES secrets and as default for index suffixes). Defaults to `dev`. |
+| `--source-index-date-suffix` | Override the date suffix for the source index. Defaults to `--pipeline-date`. |
+| `--target-index-date-suffix` | Override the date suffix for the target index. Defaults to `--pipeline-date`. |
 | `--apply-migrations` | Apply database schema migrations on startup. Only needed on first run or after adding new migrations. |
-| `--dry-run` | Print the resolved configuration and exit without running. |
+| `--dry-run` | Log the resolved configuration and exit without running. |
 
 #### 2. Verify the database schema
 
@@ -166,5 +168,7 @@ All settings are sourced from environment variables with sensible defaults for l
 | `RDS_PASSWORD` | _(empty)_ | Database password |
 | `IDENTIFIERS_DATABASE` | `identifiers` | Database name |
 | `APPLY_MIGRATIONS` | `false` | Apply yoyo migrations on startup |
-| `ES_SOURCE_INDEX` | `works-source` | Upstream ES index |
-| `ES_TARGET_INDEX` | `works-identified` | Downstream ES index |
+| `ES_SOURCE_INDEX_PREFIX` | `works-source` | Upstream ES index prefix |
+| `ES_TARGET_INDEX_PREFIX` | `works-identified` | Downstream ES index prefix |
+| `ES_SOURCE_INDEX_DATE_SUFFIX` | _(unset — uses `PIPELINE_DATE`)_ | Date suffix for the source index |
+| `ES_TARGET_INDEX_DATE_SUFFIX` | _(unset — uses `PIPELINE_DATE`)_ | Date suffix for the target index |
