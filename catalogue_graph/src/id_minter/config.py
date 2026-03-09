@@ -57,14 +57,8 @@ RDS_REGION = os.getenv("RDS_REGION", "eu-west-1")
 # General
 # ---------------------------------------------------------------------------
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
-SOURCE_PIPELINE_DATE = os.getenv("SOURCE_PIPELINE_DATE")
-TARGET_PIPELINE_DATE = os.getenv("TARGET_PIPELINE_DATE")
-ES_SOURCE_INDEX_DATE_SUFFIX = os.getenv(
-    "ES_SOURCE_INDEX_DATE_SUFFIX", SOURCE_PIPELINE_DATE
-)
-ES_TARGET_INDEX_DATE_SUFFIX = os.getenv(
-    "ES_TARGET_INDEX_DATE_SUFFIX", TARGET_PIPELINE_DATE
-)
+ES_SOURCE_INDEX_DATE_SUFFIX = os.getenv("ES_SOURCE_INDEX_DATE_SUFFIX")
+ES_TARGET_INDEX_DATE_SUFFIX = os.getenv("ES_TARGET_INDEX_DATE_SUFFIX")
 APPLY_MIGRATIONS = os.getenv("APPLY_MIGRATIONS", "false").lower() in (
     "true",
     "1",

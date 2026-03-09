@@ -16,7 +16,10 @@ from adapters.ebsco import config as ebsco_config
 from adapters.ebsco import helpers as ebsco_helpers
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
-from adapters.transformers.manifests import TransformerManifestWriter, TransformerManifest
+from adapters.transformers.manifests import (
+    TransformerManifest,
+    TransformerManifestWriter,
+)
 from adapters.utils.adapter_store import AdapterStore
 from core.transformer import ElasticBaseTransformer as BaseTransformer
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name

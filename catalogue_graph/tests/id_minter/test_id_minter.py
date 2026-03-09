@@ -19,7 +19,7 @@ import pymysql.connections
 import pytest
 
 from id_minter.config import IdMinterConfig, RDSClientConfig
-from id_minter.models.identifiers import SourceId
+from id_minter.models.identifier import SourceId
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
 )
@@ -98,7 +98,6 @@ def _read_failure_details(manifest: StepManifest) -> list[dict]:
 
 class TestExecuteWithRealResolver:
     """End-to-end tests for execute() using a MintingResolver + MySQL."""
-
 
     def test_mints_new_ids_for_work(
         self,

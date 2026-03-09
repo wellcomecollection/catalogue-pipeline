@@ -109,13 +109,13 @@ def execute(
 def log_runtime_config(
     runtime: IdMinterRuntime,
     request: StepFunctionMintingRequest,
-    resolver_name: str = "minting",
 ) -> None:
     """Log the resolved runtime configuration as a structured INFO message."""
     cfg = runtime.config
+    resolver_name = type(runtime.resolver).__name__
     db_host = (
         f"{cfg.rds_cluster_id} ({cfg.rds_region})"
-        if resolver_name == "data-api"
+        if isinstance(runtime.resolver, DataApiIdResolver)
         else f"{cfg.rds_client.primary_host}:{cfg.rds_client.port}"
     )
     source_date = cfg.source_index_date_suffix or cfg.pipeline_date
@@ -283,10 +283,8 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         target_es_mode=args.target_es_mode,
     )
 
-    resolver_name = "data-api" if args.resolver == "data-api" else "local"
-    log_runtime_config(runtime, request, resolver_name=resolver_name)
-
     if args.dry_run:
+        log_runtime_config(runtime, request)
         return
 
     execution_context = ExecutionContext(
