@@ -1,8 +1,4 @@
-"""Transformer step for Axiell and EBSCO.
-
-Loads records for a changeset from Iceberg, applies a transform, and
-indexes transformed documents into Elasticsearch.
-"""
+"""Reconciler stub."""
 
 from datetime import UTC, datetime
 
