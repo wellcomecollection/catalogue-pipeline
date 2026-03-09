@@ -236,7 +236,7 @@ class TestNormalizeOntologyType:
 
 
 class TestProcessWork:
-    def test_all_ids_resolved(self) -> None:
+    def test_single_identifier_minted(self) -> None:
         si = create_source_identifier()
         cid = create_canonical_id()
         doc = {"sourceIdentifier": si}
@@ -249,7 +249,8 @@ class TestProcessWork:
         assert result["canonicalId"] == cid
         assert len(resolver.mint_calls) == 1
 
-    def test_passes_no_predecessor_by_default(self) -> None:
+    def test_unknown_identifier_is_minted(self) -> None:
+        """When the resolver doesn't already know an ID, mint_ids creates it."""
         si = create_source_identifier()
         cid = create_canonical_id()
         doc = {"sourceIdentifier": si}
@@ -263,7 +264,7 @@ class TestProcessWork:
         assert len(resolver.mint_calls) == 1
         assert resolver.mint_calls[0][0] == ((key[0], key[1], key[2]), None)
 
-    def test_multiple_identifiers_resolved(self) -> None:
+    def test_multiple_identifiers_minted(self) -> None:
         si1 = create_source_identifier()
         si2 = create_source_identifier()
         cid1 = create_canonical_id()
@@ -286,6 +287,36 @@ class TestProcessWork:
 
         assert result["canonicalId"] == cid1
         assert result["items"][0]["canonicalId"] == cid2
+        assert len(resolver.mint_calls) == 1
+
+    def test_mix_of_existing_and_new_identifiers(self) -> None:
+        """Resolver returns IDs for all — some looked up, some newly minted."""
+        si1 = create_source_identifier()
+        si2 = create_source_identifier()
+        cid1 = create_canonical_id()
+        cid2 = create_canonical_id()
+        doc = {
+            "sourceIdentifier": si1,
+            "items": [{"sourceIdentifier": si2}],
+        }
+
+        k1 = key_of(si1)
+        k2 = key_of(si2)
+        # Simulate a resolver that returns both (one existing, one new)
+        resolver = FakeResolver(ids={})
+        resolver.mint_ids = lambda reqs: (  # type: ignore[assignment]
+            resolver.mint_calls.append(reqs)  # type: ignore[func-returns-value]
+            or {
+                (k1[0], k1[1], k1[2]): cid1,
+                (k2[0], k2[1], k2[2]): cid2,
+            }
+        )
+
+        result = process_work(doc, resolver)
+
+        assert result["canonicalId"] == cid1
+        assert result["items"][0]["canonicalId"] == cid2
+        assert len(resolver.mint_calls) == 1
 
     def test_with_predecessor_inheritance(self) -> None:
         si_new = create_source_identifier(identifier_type="axiell-collections-id")

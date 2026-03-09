@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import NamedTuple, Protocol
+from typing import NamedTuple, Protocol, runtime_checkable
 
 from utils.types import ConceptType
 
@@ -19,6 +19,7 @@ class SourceIdentifierKey(NamedTuple):
     source_id: str
 
 
+@runtime_checkable
 class IdResolver(Protocol):
     def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]: ...
 
