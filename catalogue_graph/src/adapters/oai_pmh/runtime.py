@@ -83,6 +83,9 @@ class OAIPMHAdapterConfig(BaseModel):
     chatbot_topic_arn: str | None
     """SNS topic ARN for chatbot notifications (None to disable)."""
 
+    # ---------------------------------------------------------------------------
+    # Iceberg tables
+    # ---------------------------------------------------------------------------
     rest_api_iceberg_config: RestApiIcebergTableConfig
     rest_api_window_status_iceberg_config: RestApiIcebergTableConfig
     local_iceberg_config: LocalIcebergTableConfig
