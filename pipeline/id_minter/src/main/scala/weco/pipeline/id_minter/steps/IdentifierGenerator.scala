@@ -9,7 +9,7 @@ import weco.pipeline.id_minter.utils.Identifiable
 import scala.util.{Failure, Success, Try}
 
 trait ConceptsSourceIdentifierAdjuster {
-  // This list should be kept in sync with the one defined in `catalogue_graph/src/models/graph_node.py`
+  // This list should be kept in sync with the one defined in `catalogue_graph/src/utils/types.py`
   private val conceptSubTypes = List(
     "Person",
     "Organisation",
