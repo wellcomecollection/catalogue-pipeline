@@ -181,12 +181,12 @@ RECONCILER_LOCAL_TABLE_NAME = os.getenv(
 )
 
 RECONCILER_REST_API_CONFIG = RestApiIcebergTableConfig(
-        table_name=RECONCILER_REST_API_TABLE_NAME,
-        namespace=REST_API_NAMESPACE,
-        iceberg_schema=RECONCILER_STORE_ICEBERG_SCHEMA,
-        s3_tables_bucket=S3_TABLES_BUCKET,
-        region=AWS_REGION,
-        account_id=AWS_ACCOUNT_ID,
+    table_name=RECONCILER_REST_API_TABLE_NAME,
+    namespace=REST_API_NAMESPACE,
+    iceberg_schema=RECONCILER_STORE_ICEBERG_SCHEMA,
+    s3_tables_bucket=S3_TABLES_BUCKET,
+    region=AWS_REGION,
+    account_id=AWS_ACCOUNT_ID,
 )
 
 RECONCILER_LOCAL_CONFIG = LocalIcebergTableConfig(

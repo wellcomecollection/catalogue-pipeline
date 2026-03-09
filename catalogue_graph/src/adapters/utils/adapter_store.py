@@ -35,7 +35,9 @@ class AdapterStore(PipelineStore):
         This will insert new records, update changed records, and soft-delete
         records that are no longer present in the snapshot by setting their content to null.
         """
-        new_data = self._set_last_modified(new_data, datetime.now(UTC))
+        # replace last_modified timestamps with current time for snapshot sync
+        now_timestamp = datetime.now(UTC)
+        new_data = self._set_last_modified(new_data, now_timestamp)
         new_data = self._cast_to_arrow_schema(new_data, operation="snapshot_sync")
 
         existing_data = self.get_records_in_namespace()
@@ -55,11 +57,12 @@ class AdapterStore(PipelineStore):
             inserts = new_data
             changes = None
 
-        if changes or inserts:
-            # replace last_modified timestamps with current time for snapshot sync
-            return self._upsert_with_markers(changes, inserts)
+        if changes:
+            changes = self._set_last_modified(changes, now_timestamp)
+        if inserts:
+            inserts = self._set_last_modified(inserts, now_timestamp)
 
-        return None
+        return self._upsert_with_markers(changes, inserts)
 
     def get_active_records_in_namespace(self) -> pa.Table:
         """Return non-deleted records in the store namespace."""

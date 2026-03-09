@@ -585,5 +585,7 @@ def test_snapshot_sync_raises_on_non_castable_schema(
     )
 
     client = AdapterStore(temporary_table, "test_namespace")
-    with pytest.raises(ValueError, match=r"snapshot_sync.*ADAPTER_STORE_ARROW_SCHEMA"):
+    with pytest.raises(
+        ValueError, match=r"snapshot_sync requires new_data to be castable to schema"
+    ):
         client.snapshot_sync(bad_table)

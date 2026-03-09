@@ -460,7 +460,8 @@ def test_incremental_update_raises_on_non_castable_schema(
 
     client = AdapterStore(temporary_table, "test_namespace")
     with pytest.raises(
-        ValueError, match=r"incremental_update.*ADAPTER_STORE_ARROW_SCHEMA"
+        ValueError,
+        match=r"incremental_update requires new_data to be castable to schema",
     ):
         client.incremental_update(bad_table)
 

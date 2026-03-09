@@ -74,7 +74,7 @@ class PipelineStore(ABC):
 
     def incremental_update(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
         """Apply an incremental update for incoming rows.
-        
+
         Any rows whose IDs do not exist in the current table are inserted. Any updated rows (chosen by comparing
         the subclass's compare columns and filtering for rows with a newer `last_modified` timestamp) are updated.
         Subclasses may apply a final transformation to the update set (e.g. preserving content for deletions)
