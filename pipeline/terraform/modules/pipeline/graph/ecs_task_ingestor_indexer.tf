@@ -18,7 +18,7 @@ module "ingestor_indexer_ecs_task" {
 
 data "aws_iam_policy_document" "allow_ingestor_indexer_task_token" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "states:SendTaskSuccess",
       "states:SendTaskFailure",
