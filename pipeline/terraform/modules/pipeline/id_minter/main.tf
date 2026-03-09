@@ -1,3 +1,10 @@
+module "id_minter_output_topic" {
+  source = "../../../topic"
+
+  name       = "catalogue-${var.pipeline_date}_id_minter_output"
+  role_names = [module.id_minter_lambda.lambda_role_name]
+}
+
 module "id_minter_lambda" {
   source = "../../pipeline_lambda"
 
@@ -17,7 +24,10 @@ module "id_minter_lambda" {
 
   environment_variables = merge(
     { for k, v in var.id_minter_env_vars : k => tostring(v) if v != null },
-    { PIPELINE_DATE = var.pipeline_date }
+    {
+      PIPELINE_DATE              = var.pipeline_date
+      DOWNSTREAM_SNS_TOPIC_ARN   = module.id_minter_output_topic.arn
+    }
   )
   secret_env_vars = var.id_minter_secret_env_vars
 
