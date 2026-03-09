@@ -10,8 +10,9 @@ module "extractor_ecs_task" {
     LOG_LEVEL                 = "INFO" # Set log level to INFO for testing, WARNING later
   }
 
-  cpu    = 4096
-  memory = 16384
+  cpu                    = 4096
+  memory                 = 16384
+  ephemeral_storage_size = 21
 }
 
 resource "aws_iam_role_policy" "ecs_stream_to_s3_policy" {
