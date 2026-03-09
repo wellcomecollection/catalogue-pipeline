@@ -81,9 +81,9 @@ class TestPublishIdsToSns:
         def boom(*args, **kwargs):  # type: ignore[no-untyped-def]
             raise RuntimeError("SNS unavailable")
 
-        MockSNSClient.publish_batch = staticmethod(boom)  # type: ignore[assignment]
+        MockSNSClient.publish_batch = staticmethod(boom)  # type: ignore[method-assign]
         try:
             with pytest.raises(RuntimeError, match="SNS unavailable"):
                 publish_ids_to_sns(TEST_TOPIC, ["fail0001"])
         finally:
-            MockSNSClient.publish_batch = original  # type: ignore[assignment]
+            MockSNSClient.publish_batch = original  # type: ignore[method-assign]
