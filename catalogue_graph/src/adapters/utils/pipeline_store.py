@@ -6,7 +6,8 @@ from typing import Any, cast
 import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
-from pyiceberg.expressions import BooleanExpression, EqualTo, In
+from pyiceberg.expressions import And, BooleanExpression, EqualTo, In
+from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
@@ -33,6 +34,17 @@ class PipelineStore(ABC):
     def schema(self) -> pa.Schema:
         pass
 
+    def get_all_records(self) -> pa.Table:
+        """Return all records in the table from all namespaces."""
+        return self.table.scan().to_arrow().cast(self.schema)
+
+    def get_records_in_namespace(
+        self, iceberg_filter: BooleanExpression = ALWAYS_TRUE
+    ) -> pa.Table:
+        """Return all records in the table under the selected namespace. Takes an optional filter."""
+        full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
+        return self.table.scan(row_filter=full_filter).to_arrow().cast(self.schema)
+
     def _cast_to_arrow_schema(self, new_data: pa.Table, operation: str) -> pa.Table:
         """Ensure the provided Arrow table matches the expected schema.
 
@@ -49,17 +61,17 @@ class PipelineStore(ABC):
                 f"got schema: {new_data.schema}"
             ) from e
 
-    def _get_existing_data(self, row_filter: BooleanExpression) -> pa.Table:
-        return self.table.scan(row_filter=row_filter).to_arrow().cast(self.schema)
-
     def _upsert_with_markers(
         self, changes: pa.Table | None, inserts: pa.Table | None
-    ) -> PipelineStoreUpdate:
+    ) -> PipelineStoreUpdate | None:
         """
         Insert and update records, adding changeset values to any changed rows.
         :param changes: New versions of existing records to change
         :param inserts: New records to insert
         """
+        if not (changes or inserts):
+            return None
+
         changeset_id = str(uuid.uuid1())
         with self.table.transaction() as tx:
             # Because we already know which records to overwrite and which ones to append,

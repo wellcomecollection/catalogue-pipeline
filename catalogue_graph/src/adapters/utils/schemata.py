@@ -40,4 +40,6 @@ RECONCILER_STORE_ICEBERG_SCHEMA = Schema(
         field_id=5, name="last_modified", field_type=TimestamptzType(), required=True
     ),
 )
-RECONCILER_STORE_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(RECONCILER_STORE_ICEBERG_SCHEMA)
+RECONCILER_STORE_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(
+    RECONCILER_STORE_ICEBERG_SCHEMA
+)

@@ -130,10 +130,10 @@ def test_execute_loader_soft_deletes_missing_records(
 
     assert delete_response.changeset_ids != []
 
-    visible_rows = runtime.adapter_store.get_all_records().to_pylist()
+    visible_rows = runtime.adapter_store.get_active_records_in_namespace().to_pylist()
     assert _ids(visible_rows) == {"ebs00001"}
 
-    all_rows = runtime.adapter_store.get_all_records(include_deleted=True).to_pylist()
+    all_rows = runtime.adapter_store.get_all_records().to_pylist()
     deleted_record = next(row for row in all_rows if row["id"] == "ebs00002")
 
     # Deleted records preserve content but are marked deleted
@@ -203,9 +203,7 @@ def test_last_modified_on_delete_marks_removed_records_newer(
         runtime=runtime,
     )
 
-    rows_initial = runtime.adapter_store.get_all_records(
-        include_deleted=True
-    ).to_pylist()
+    rows_initial = runtime.adapter_store.get_all_records().to_pylist()
     assert all(row["last_modified"] == ts1 for row in rows_initial)
 
     _register_mock_open(xml_with_one_record.name)
@@ -216,7 +214,7 @@ def test_last_modified_on_delete_marks_removed_records_newer(
         runtime=runtime,
     )
 
-    rows_after = runtime.adapter_store.get_all_records(include_deleted=True).to_pylist()
+    rows_after = runtime.adapter_store.get_all_records().to_pylist()
     kept = next(row for row in rows_after if row["id"] == "ebs00001")
     deleted = next(row for row in rows_after if row["id"] == "ebs00002")
 

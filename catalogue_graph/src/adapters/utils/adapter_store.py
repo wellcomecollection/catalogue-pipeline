@@ -1,8 +1,9 @@
 from datetime import UTC, datetime
+from typing import cast
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from pyiceberg.expressions import And, EqualTo, In, IsNull, Or
+from pyiceberg.expressions import EqualTo, In, IsNull, Or
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.pipeline_store import PipelineStore, PipelineStoreUpdate
@@ -37,11 +38,8 @@ class AdapterStore(PipelineStore):
             return None
 
         # Fetch rows that match the incoming IDs
-        incoming_ids = [
-            val for val in new_data.column("id").to_pylist() if val is not None
-        ]
-        row_filter = And(EqualTo("namespace", self.namespace), In("id", incoming_ids))
-        existing_data = self._get_existing_data(row_filter)
+        incoming_ids = cast(list[str], new_data.column("id").to_pylist())
+        existing_data = self.get_records_in_namespace(In("id", incoming_ids))
 
         if existing_data.num_rows > 0:
             existing_data = existing_data.sort_by("id")
@@ -60,10 +58,7 @@ class AdapterStore(PipelineStore):
             inserts = new_data
             changes = None
 
-        if changes or inserts:
-            return self._upsert_with_markers(changes, inserts)
-
-        return None
+        return self._upsert_with_markers(changes, inserts)
 
     def snapshot_sync(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
         """
@@ -75,8 +70,7 @@ class AdapterStore(PipelineStore):
         new_data = self._set_last_modified(new_data, datetime.now(UTC))
         new_data = self._cast_to_arrow_schema(new_data, operation="snapshot_sync")
 
-        row_filter = EqualTo("namespace", self.namespace)
-        existing_data = self._get_existing_data(row_filter)
+        existing_data = self.get_records_in_namespace()
 
         if existing_data.num_rows > 0:
             existing_data = existing_data.sort_by("id")
@@ -101,22 +95,10 @@ class AdapterStore(PipelineStore):
 
         return None
 
-    def get_all_records(self, include_deleted: bool = False) -> pa.Table:
-        """Return all records in the table.
-
-        By default, rows marked as deleted are excluded.
-
-        During a full reindex we are writing into an empty index,
-        so no need to include deleted rows to overwrite documents.
-
-        Set include_deleted=True to return them as well.
-        """
-        if include_deleted:
-            return self.table.scan().to_arrow()
-
-        return self.table.scan(
-            row_filter=Or(EqualTo("deleted", False), IsNull("deleted"))
-        ).to_arrow()
+    def get_active_records_in_namespace(self) -> pa.Table:
+        """Return all non-deleted records in the selected namespace."""
+        non_deleted_filter = Or(EqualTo("deleted", False), IsNull("deleted"))
+        return self.get_records_in_namespace(non_deleted_filter)
 
     @staticmethod
     def _preserve_content_for_deletions(

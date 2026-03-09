@@ -324,15 +324,14 @@ class TestWindowRecordWriter:
         )
 
         # Verify soft delete (content is None)
-        all_records = adapter_store_client.get_all_records(include_deleted=True)
+        all_records = adapter_store_client.get_all_records()
         assert all_records.num_rows == 1
         row = all_records.to_pylist()[0]
         assert row["id"] == "id-deleted"
         assert row["content"] is None
         assert row["last_modified"] == last_modified
 
-        # Verify excluded by default
-        active_records = adapter_store_client.get_all_records(include_deleted=False)
+        active_records = adapter_store_client.get_active_records_in_namespace()
         assert active_records.num_rows == 0
 
     def test_preserves_content_on_deletion(
@@ -364,7 +363,7 @@ class TestWindowRecordWriter:
         )
 
         # Verify initial record exists with content
-        all_records = adapter_store_client.get_all_records(include_deleted=True)
+        all_records = adapter_store_client.get_all_records()
         assert all_records.num_rows == 1
         initial_row = all_records.to_pylist()[0]
         assert initial_row["content"] == original_content
@@ -385,7 +384,7 @@ class TestWindowRecordWriter:
         )
 
         # 3. Verify: record is marked deleted but content is PRESERVED
-        all_records_after = adapter_store_client.get_all_records(include_deleted=True)
+        all_records_after = adapter_store_client.get_all_records()
         assert all_records_after.num_rows == 1
         row = all_records_after.to_pylist()[0]
         assert row["deleted"] is True
@@ -393,7 +392,7 @@ class TestWindowRecordWriter:
         assert row["last_modified"] == deletion_time
 
         # 4. Verify excluded from active records
-        active_records = adapter_store_client.get_all_records(include_deleted=False)
+        active_records = adapter_store_client.get_active_records_in_namespace()
         assert active_records.num_rows == 0
 
     def test_skips_changeset_for_duplicate_data(

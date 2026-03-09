@@ -512,8 +512,8 @@ def test_snapshot_sync_get_all_records_after_update(
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0003", "eb0004"}
 
-    # get_all_records should EXCLUDE deleted by default -> eb0002 gone
-    all_records = client.get_all_records()
+    # get_active_records_in_namespace should EXCLUDE deleted -> eb0002 gone
+    all_records = client.get_active_records_in_namespace()
     assert all_records.num_rows == 3
     rows = {row["id"]: row for row in all_records.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0003", "eb0004"}
@@ -548,7 +548,7 @@ def test_snapshot_sync_get_all_records_include_deleted(
     changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0003", "eb0004"}
-    all_with_deleted = client.get_all_records(include_deleted=True)
+    all_with_deleted = client.get_all_records()
     assert all_with_deleted.num_rows == 4
     rows = {row["id"]: row for row in all_with_deleted.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0002", "eb0003", "eb0004"}
