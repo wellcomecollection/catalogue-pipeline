@@ -11,12 +11,7 @@ from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 
 
 class AdapterStore(PipelineStore):
-    """
-    Encapsulates operations on a single Iceberg table.
-
-    Optionally accepts a default_namespace which will be used in update()
-    if a namespace isn't provided at call time.
-    """
+    """Store for adapter content records with incremental updates and snapshot sync."""
 
     def __init__(self, table: IcebergTable, namespace: str):
         super().__init__(table, namespace)
@@ -96,7 +91,7 @@ class AdapterStore(PipelineStore):
         return None
 
     def get_active_records_in_namespace(self) -> pa.Table:
-        """Return all non-deleted records in the selected namespace."""
+        """Return non-deleted records in the store namespace."""
         non_deleted_filter = Or(EqualTo("deleted", False), IsNull("deleted"))
         return self.get_records_in_namespace(non_deleted_filter)
 

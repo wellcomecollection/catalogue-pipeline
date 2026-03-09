@@ -18,11 +18,11 @@ class PipelineStoreUpdate(BaseModel):
 
 
 class PipelineStore(ABC):
-    """
-    Encapsulates operations on a single Iceberg table.
+    """Base class for namespaced Iceberg tables.
 
-    Optionally accepts a default_namespace which will be used in update()
-    if a namespace isn't provided at call time.
+    Expects a schema that includes `id`, `namespace`, `last_modified`, and `changeset` fields.
+    Provides schema casting, namespace filtering, update selection helpers, and
+    changeset tagging. Subclasses define the concrete schema and public update flows.
     """
 
     def __init__(self, table: IcebergTable, namespace: str):
@@ -32,6 +32,7 @@ class PipelineStore(ABC):
     @property
     @abstractmethod
     def schema(self) -> pa.Schema:
+        """Return the Arrow schema for rows in this table."""
         pass
 
     def get_all_records(self) -> pa.Table:
@@ -41,7 +42,7 @@ class PipelineStore(ABC):
     def get_records_in_namespace(
         self, iceberg_filter: BooleanExpression = ALWAYS_TRUE
     ) -> pa.Table:
-        """Return all records in the table under the selected namespace. Takes an optional filter."""
+        """Return records in the store namespace, optionally filtered."""
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
         return self.table.scan(row_filter=full_filter).to_arrow().cast(self.schema)
 
@@ -64,11 +65,7 @@ class PipelineStore(ABC):
     def _upsert_with_markers(
         self, changes: pa.Table | None, inserts: pa.Table | None
     ) -> PipelineStoreUpdate | None:
-        """
-        Insert and update records, adding changeset values to any changed rows.
-        :param changes: New versions of existing records to change
-        :param inserts: New records to insert
-        """
+        """Overwrite changes and append inserts, tagging rows with a changeset ID."""
         if not (changes or inserts):
             return None
 
@@ -151,17 +148,7 @@ class PipelineStore(ABC):
     def _filter_by_timestamp(
         self, updates: pa.Table, existing_data: pa.Table
     ) -> pa.Table:
-        """
-        Filter updates to only include records where the new last_modified is newer than
-        the existing last_modified.
-
-        Args:
-            updates: Table of candidate updates from _find_updates (with last_modified)
-            existing_data: Table of existing records (with last_modified)
-
-        Returns:
-            Filtered table containing only updates that should be applied
-        """
+        """Keep updates whose last_modified is newer than the existing record."""
         joined = updates.join(existing_data, keys="id", right_suffix="_existing")
 
         last_modified_filter = pc.greater(
@@ -173,4 +160,5 @@ class PipelineStore(ABC):
         return updates.filter(pc.field("id").isin(newer_ids))
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
+        """Return rows written under the specified changeset ID."""
         return self.table.scan(row_filter=EqualTo("changeset", changeset_id)).to_arrow()

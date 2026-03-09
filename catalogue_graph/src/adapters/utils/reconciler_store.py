@@ -9,6 +9,8 @@ from adapters.utils.schemata import RECONCILER_STORE_ARROW_SCHEMA
 
 
 class ReconcilerStore(PipelineStore):
+    """Store for reconciler guid mappings with incremental updates."""
+
     def __init__(self, table: IcebergTable, namespace: str):
         super().__init__(table, namespace)
 
@@ -17,9 +19,7 @@ class ReconcilerStore(PipelineStore):
         return RECONCILER_STORE_ARROW_SCHEMA
 
     def incremental_update(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
-        """
-        Apply an incremental update to the table. Insert new records and update changed records.
-        """
+        """Insert new records and update changed guid mappings."""
         new_data = self._cast_to_arrow_schema(new_data, operation="incremental_update")
 
         if new_data.num_rows == 0:
