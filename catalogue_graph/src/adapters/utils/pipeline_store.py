@@ -52,7 +52,8 @@ class PipelineStore(ABC):
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
         """Return rows written under the specified changeset ID."""
-        return self.table.scan(row_filter=EqualTo("changeset", changeset_id)).to_arrow()
+        changeset_filter = EqualTo("changeset", changeset_id)
+        return self.table.scan(row_filter=changeset_filter).to_arrow().cast(self.schema)
 
     def normalise_table(self, table: pa.Table) -> pa.Table:
         """Enforce that the table conforms to the required schema and filter for records in the selected namespace"""
