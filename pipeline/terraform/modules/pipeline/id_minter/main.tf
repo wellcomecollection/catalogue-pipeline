@@ -1,5 +1,5 @@
 module "id_minter_output_topic" {
-  source = "../../../topic"
+  source = "../../topic"
 
   name       = "catalogue-${var.pipeline_date}_id_minter_output"
   role_names = [module.id_minter_lambda.lambda_role_name]
