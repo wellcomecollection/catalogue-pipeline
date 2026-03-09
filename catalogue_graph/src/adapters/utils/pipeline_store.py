@@ -74,11 +74,11 @@ class PipelineStore(ABC):
 
     def incremental_update(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
         """Apply an incremental update for incoming rows.
-
-        Casts input to the store schema, loads existing rows for the incoming IDs,
-        selects updates based on the compare columns and newer timestamps, applies any
-        store-specific update transformations, and appends inserts. Returns a changeset
-        summary or None if no rows are provided.
+        
+        Any rows whose IDs do not exist in the current table are inserted. Any updated rows (chosen by comparing
+        the subclass's compare columns and filtering for rows with a newer `last_modified` timestamp) are updated.
+        Subclasses may apply a final transformation to the update set (e.g. preserving content for deletions)
+        before writes.
         """
         new_data = self._cast_to_arrow_schema(new_data, operation="incremental_update")
 
@@ -139,7 +139,7 @@ class PipelineStore(ABC):
 
     def _set_value(self, changeset: pa.Table, field_name: str, value: Any) -> pa.Table:
         field_index = changeset.schema.get_field_index(field_name)
-        field = self.schema.field_by_name(field_name)
+        field = self.schema.field(field_name)
         values = pa.repeat(value, changeset.num_rows).cast(field.type)
         return changeset.set_column(field_index, field, values)
 
@@ -178,7 +178,7 @@ class PipelineStore(ABC):
         )
 
         filtered_ids = updates_projected.column("id")
-        update_ids = pa.array(filtered_ids, type=self.schema.field_by_name("id").type)
+        update_ids = pa.array(filtered_ids, type=self.schema.field("id").type)
         return new_data.filter(pc.field("id").isin(update_ids))
 
     def _filter_by_timestamp(
@@ -191,7 +191,7 @@ class PipelineStore(ABC):
             joined.column("last_modified"), joined.column("last_modified_existing")
         )
         filtered_ids = joined.filter(last_modified_filter).column("id")
-        newer_ids = pa.array(filtered_ids, type=self.schema.field_by_name("id").type)
+        newer_ids = pa.array(filtered_ids, type=self.schema.field("id").type)
 
         return updates.filter(pc.field("id").isin(newer_ids))
 
