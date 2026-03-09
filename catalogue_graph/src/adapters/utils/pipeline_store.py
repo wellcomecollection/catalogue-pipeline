@@ -33,7 +33,11 @@ class PipelineStore(ABC):
     @abstractmethod
     def schema(self) -> pa.Schema:
         """Return the Arrow schema for rows in this table."""
-        pass
+
+    @property
+    @abstractmethod
+    def _compare_columns(self) -> list[str]:
+        """Return columns used to detect content changes for incremental updates."""
 
     def get_all_records(self) -> pa.Table:
         """Return all records in the table from all namespaces."""
@@ -61,6 +65,40 @@ class PipelineStore(ABC):
                 f"{operation} requires new_data to be castable to schema: {self.schema}; "
                 f"got schema: {new_data.schema}"
             ) from e
+
+    def _transform_incremental_updates(
+        self, updates: pa.Table, existing_data: pa.Table
+    ) -> pa.Table:
+        """Apply store-specific update transformations before writing."""
+        return updates
+
+    def incremental_update(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
+        """Apply an incremental update for incoming rows.
+
+        Casts input to the store schema, loads existing rows for the incoming IDs,
+        selects updates based on the compare columns and newer timestamps, applies any
+        store-specific update transformations, and appends inserts. Returns a changeset
+        summary or None if no rows are provided.
+        """
+        new_data = self._cast_to_arrow_schema(new_data, operation="incremental_update")
+
+        if new_data.num_rows == 0:
+            return None
+
+        incoming_ids = cast(list[str], new_data.column("id").to_pylist())
+        existing_data = self.get_records_in_namespace(In("id", incoming_ids))
+
+        if existing_data.num_rows > 0:
+            updates = self._find_updates(existing_data, new_data)
+            updates = self._filter_by_timestamp(updates, existing_data)
+            updates = self._transform_incremental_updates(updates, existing_data)
+            inserts = self._find_inserts(existing_data, new_data)
+            changes = updates
+        else:
+            inserts = new_data
+            changes = None
+
+        return self._upsert_with_markers(changes, inserts)
 
     def _upsert_with_markers(
         self, changes: pa.Table | None, inserts: pa.Table | None
@@ -118,16 +156,14 @@ class PipelineStore(ABC):
         # Filter for rows which are in the correct namespace and whose IDs do NOT exist in the existing table
         return new_data.filter(namespace_filter & ~existing_ids_filter)
 
-    def _find_updates(
-        self, existing_data: pa.Table, new_data: pa.Table, compare_cols: list[str]
-    ) -> pa.Table:
+    def _find_updates(self, existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
         # Each record is uniquely identified by a combination of `namespace` and `id`
         join_fields = ["namespace", "id"]
 
         # We only consider `compare_cols` changes as a reason to update.
         # Timestamps are used as a gate (must be newer) but should not themselves
         # trigger an update if the content is identical.
-        compare_cols = join_fields + compare_cols
+        compare_cols = join_fields + self._compare_columns
 
         # Handle schema mismatch (e.g. extra columns in new_data)
         common_cols = [c for c in compare_cols if c in new_data.column_names]

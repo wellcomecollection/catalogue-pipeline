@@ -1,9 +1,8 @@
 from datetime import UTC, datetime
-from typing import cast
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from pyiceberg.expressions import EqualTo, In, IsNull, Or
+from pyiceberg.expressions import EqualTo, IsNull, Or
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.pipeline_store import PipelineStore, PipelineStoreUpdate
@@ -20,40 +19,14 @@ class AdapterStore(PipelineStore):
     def schema(self) -> pa.Schema:
         return ADAPTER_STORE_ARROW_SCHEMA
 
-    def incremental_update(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
-        """
-        Apply an incremental update to the table.
+    @property
+    def _compare_columns(self) -> list[str]:
+        return ["content"]
 
-        This will insert new records and update changed records.
-        Records with unchanged content will be left alone.
-        """
-        new_data = self._cast_to_arrow_schema(new_data, operation="incremental_update")
-
-        if new_data.num_rows == 0:
-            return None
-
-        # Fetch rows that match the incoming IDs
-        incoming_ids = cast(list[str], new_data.column("id").to_pylist())
-        existing_data = self.get_records_in_namespace(In("id", incoming_ids))
-
-        if existing_data.num_rows > 0:
-            existing_data = existing_data.sort_by("id")
-            new_data = new_data.sort_by("id")
-
-            updates = self._find_updates(
-                existing_data, new_data, compare_cols=["content"]
-            )
-            # Filter updates to only include records with newer timestamps
-            updates = self._filter_by_timestamp(updates, existing_data)
-            # Preserve content for records being marked as deleted
-            updates = self._preserve_content_for_deletions(updates, existing_data)
-            inserts = self._find_inserts(existing_data, new_data)
-            changes = updates
-        else:
-            inserts = new_data
-            changes = None
-
-        return self._upsert_with_markers(changes, inserts)
+    def _transform_incremental_updates(
+        self, updates: pa.Table, existing_data: pa.Table
+    ) -> pa.Table:
+        return self._preserve_content_for_deletions(updates, existing_data)
 
     def snapshot_sync(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
         """
@@ -74,9 +47,7 @@ class AdapterStore(PipelineStore):
             deletes = self._find_snapshot_deletes(
                 existing_data, new_data, self.namespace
             )
-            updates = self._find_updates(
-                existing_data, new_data, compare_cols=["content"]
-            )
+            updates = self._find_updates(existing_data, new_data)
             inserts = self._find_inserts(existing_data, new_data)
 
             changes = pa.concat_tables([deletes, updates]) if deletes else updates
