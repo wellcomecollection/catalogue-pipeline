@@ -2,17 +2,11 @@ from datetime import UTC, datetime
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from pydantic import BaseModel
 from pyiceberg.expressions import And, EqualTo, In, IsNull, Or
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.utils.pipeline_store import PipelineStore
+from adapters.utils.pipeline_store import PipelineStore, PipelineStoreUpdate
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
-
-
-class AdapterStoreUpdate(BaseModel):
-    changeset_id: str
-    updated_record_ids: list[str]
 
 
 class AdapterStore(PipelineStore):
@@ -27,10 +21,10 @@ class AdapterStore(PipelineStore):
         super().__init__(table, namespace)
 
     @property
-    def schema(self):
+    def schema(self) -> pa.Schema:
         return ADAPTER_STORE_ARROW_SCHEMA
 
-    def incremental_update(self, new_data: pa.Table) -> AdapterStoreUpdate | None:
+    def incremental_update(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
         """
         Apply an incremental update to the table.
 
@@ -53,12 +47,14 @@ class AdapterStore(PipelineStore):
             existing_data = existing_data.sort_by("id")
             new_data = new_data.sort_by("id")
 
-            updates = self._find_updates(existing_data, new_data)
+            updates = self._find_updates(
+                existing_data, new_data, compare_cols=["content"]
+            )
             # Filter updates to only include records with newer timestamps
             updates = self._filter_by_timestamp(updates, existing_data)
             # Preserve content for records being marked as deleted
             updates = self._preserve_content_for_deletions(updates, existing_data)
-            inserts = self._find_inserts(existing_data, new_data, self.namespace)
+            inserts = self._find_inserts(existing_data, new_data)
             changes = updates
         else:
             inserts = new_data
@@ -69,7 +65,7 @@ class AdapterStore(PipelineStore):
 
         return None
 
-    def snapshot_sync(self, new_data: pa.Table) -> AdapterStoreUpdate | None:
+    def snapshot_sync(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
         """
         Sync the table to match the new snapshot.
 
@@ -89,8 +85,10 @@ class AdapterStore(PipelineStore):
             deletes = self._find_snapshot_deletes(
                 existing_data, new_data, self.namespace
             )
-            updates = self._find_updates(existing_data, new_data)
-            inserts = self._find_inserts(existing_data, new_data, self.namespace)
+            updates = self._find_updates(
+                existing_data, new_data, compare_cols=["content"]
+            )
+            inserts = self._find_inserts(existing_data, new_data)
 
             changes = pa.concat_tables([deletes, updates]) if deletes else updates
         else:

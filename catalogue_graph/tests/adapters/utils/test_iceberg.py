@@ -2,6 +2,7 @@ import os
 from uuid import uuid4
 
 import pytest
+
 from adapters.utils.iceberg import (
     LocalIcebergTableConfig,
     get_table,

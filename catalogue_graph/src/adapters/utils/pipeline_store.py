@@ -7,12 +7,11 @@ import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
 from pyiceberg.expressions import BooleanExpression, EqualTo, In
-from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
 
-class AdapterStoreUpdate(BaseModel):
+class PipelineStoreUpdate(BaseModel):
     changeset_id: str
     updated_record_ids: list[str]
 
@@ -31,11 +30,11 @@ class PipelineStore(ABC):
 
     @property
     @abstractmethod
-    def schema(self) -> Schema:
+    def schema(self) -> pa.Schema:
         pass
 
     def _cast_to_arrow_schema(self, new_data: pa.Table, operation: str) -> pa.Table:
-        """Ensure the provided Arrow table matches the repo-standard adapter schema.
+        """Ensure the provided Arrow table matches the expected schema.
 
         We cast inputs for consistency across adapters and to fail fast when an adapter
         produces a table that can't be safely written to the Iceberg table.
@@ -55,26 +54,24 @@ class PipelineStore(ABC):
 
     def _upsert_with_markers(
         self, changes: pa.Table | None, inserts: pa.Table | None
-    ) -> AdapterStoreUpdate:
+    ) -> PipelineStoreUpdate:
         """
         Insert and update records, adding changeset values to any changed rows.
         :param changes: New versions of existing records to change
         :param inserts: New records to insert
         """
         changeset_id = str(uuid.uuid1())
-        if changes is not None:
-            changes = self._set_changeset_id(changes, changeset_id)
-        if inserts is not None:
-            inserts = self._set_changeset_id(inserts, changeset_id)
         with self.table.transaction() as tx:
             # Because we already know which records to overwrite and which ones to append,
             # we can avoid all the extra processing that happens inside table.upsert to find
             # matching records, check them for differences etc.
             # Just overwrite all the `changes` and append all the `inserts`
             if changes is not None:
+                changes = self._set_changeset_id(changes, changeset_id)
                 overwrite_mask_predicate = self._create_match_filter(changes)
                 tx.overwrite(changes, overwrite_filter=overwrite_mask_predicate)
             if inserts is not None:
+                inserts = self._set_changeset_id(inserts, changeset_id)
                 tx.append(inserts)
 
         updated_ids: list[str] = []
@@ -82,7 +79,7 @@ class PipelineStore(ABC):
             if t is not None:
                 updated_ids.extend(cast(list[str], t.column("id").to_pylist()))
 
-        return AdapterStoreUpdate(
+        return PipelineStoreUpdate(
             changeset_id=changeset_id, updated_record_ids=updated_ids
         )
 
@@ -94,10 +91,10 @@ class PipelineStore(ABC):
         return In("id", change_ids)
 
     def _set_value(self, changeset: pa.Table, field_name: str, value: Any) -> pa.Table:
-        idx = changeset.schema.get_field_index(field_name)
+        field_index = changeset.schema.get_field_index(field_name)
         field = self.schema.field_by_name(field_name)
         values = pa.repeat(value, changeset.num_rows).cast(field.type)
-        return changeset.set_column(idx, field, values)
+        return changeset.set_column(field_index, field, values)
 
     def _set_last_modified(self, changeset: pa.Table, timestamp: datetime) -> pa.Table:
         return self._set_value(changeset, "last_modified", timestamp)
@@ -105,23 +102,23 @@ class PipelineStore(ABC):
     def _set_changeset_id(self, changeset: pa.Table, changeset_id: str) -> pa.Table:
         return self._set_value(changeset, "changeset", changeset_id)
 
-    @staticmethod
-    def _find_inserts(
-        existing_data: pa.Table, new_data: pa.Table, record_namespace: str
-    ) -> pa.Table:
-        old_ids = existing_data.column("id")
-        missing_records = new_data.filter(
-            (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(old_ids)
-        )
-        return missing_records
+    def _find_inserts(self, existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
+        namespace_filter = pc.field("namespace") == self.namespace
+        existing_ids_filter = pc.field("id").isin(existing_data.column("id"))
 
-    @staticmethod
-    def _find_updates(existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
-        # We only consider content changes as a reason to update.
+        # Filter for rows which are in the correct namespace and whose IDs do NOT exist in the existing table
+        return new_data.filter(namespace_filter & ~existing_ids_filter)
+
+    def _find_updates(
+        self, existing_data: pa.Table, new_data: pa.Table, compare_cols: list[str]
+    ) -> pa.Table:
+        # Each record is uniquely identified by a combination of `namespace` and `id`
+        join_fields = ["namespace", "id"]
+
+        # We only consider `compare_cols` changes as a reason to update.
         # Timestamps are used as a gate (must be newer) but should not themselves
         # trigger an update if the content is identical.
-        compare_cols = ["namespace", "id", "content"]
-        join_fields = ["namespace", "id"]
+        compare_cols = join_fields + compare_cols
 
         # Handle schema mismatch (e.g. extra columns in new_data)
         common_cols = [c for c in compare_cols if c in new_data.column_names]
@@ -135,10 +132,8 @@ class PipelineStore(ABC):
             new_projected, existing_projected, join_fields
         )
 
-        if len(updates_projected) == 0:
-            return new_data.slice(0, 0)
-
-        update_ids = updates_projected.column("id")
+        filtered_ids = updates_projected.column("id")
+        update_ids = pa.array(filtered_ids, type=self.schema.field_by_name("id").type)
         return new_data.filter(pc.field("id").isin(update_ids))
 
     def _filter_by_timestamp(
@@ -148,9 +143,6 @@ class PipelineStore(ABC):
         Filter updates to only include records where the new last_modified is newer than
         the existing last_modified.
 
-        Records are included if:
-        - The new record has a last_modified that is strictly greater than the existing one
-
         Args:
             updates: Table of candidate updates from _find_updates (with last_modified)
             existing_data: Table of existing records (with last_modified)
@@ -159,15 +151,14 @@ class PipelineStore(ABC):
             Filtered table containing only updates that should be applied
         """
         joined = updates.join(existing_data, keys="id", right_suffix="_existing")
-        existing_ts = joined.column("last_modified_existing")
-        last_modified_filter = pc.greater(joined.column("last_modified"), existing_ts)
-        newer_ids = joined.filter(last_modified_filter).column("id")
 
-        return updates.filter(
-            pc.field("id").isin(
-                pa.array(newer_ids, type=self.schema.field_by_name("id").type)
-            )
+        last_modified_filter = pc.greater(
+            joined.column("last_modified"), joined.column("last_modified_existing")
         )
+        filtered_ids = joined.filter(last_modified_filter).column("id")
+        newer_ids = pa.array(filtered_ids, type=self.schema.field_by_name("id").type)
+
+        return updates.filter(pc.field("id").isin(newer_ids))
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
         return self.table.scan(row_filter=EqualTo("changeset", changeset_id)).to_arrow()

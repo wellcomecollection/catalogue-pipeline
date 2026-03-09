@@ -1,3 +1,4 @@
+import pyarrow as pa
 from pyiceberg.io.pyarrow import schema_to_pyarrow
 from pyiceberg.schema import Schema
 from pyiceberg.types import BooleanType, NestedField, StringType, TimestamptzType
@@ -28,7 +29,7 @@ ADAPTER_STORE_ICEBERG_SCHEMA = Schema(
         default_value=False,
     ),
 )
-ADAPTER_STORE_ARROW_SCHEMA = schema_to_pyarrow(ADAPTER_STORE_ICEBERG_SCHEMA)
+ADAPTER_STORE_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(ADAPTER_STORE_ICEBERG_SCHEMA)
 
 RECONCILER_STORE_ICEBERG_SCHEMA = Schema(
     NestedField(field_id=1, name="namespace", field_type=StringType(), required=True),
@@ -39,4 +40,4 @@ RECONCILER_STORE_ICEBERG_SCHEMA = Schema(
         field_id=5, name="last_modified", field_type=TimestamptzType(), required=True
     ),
 )
-RECONCILER_STORE_ARROW_SCHEMA = schema_to_pyarrow(RECONCILER_STORE_ICEBERG_SCHEMA)
+RECONCILER_STORE_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(RECONCILER_STORE_ICEBERG_SCHEMA)
