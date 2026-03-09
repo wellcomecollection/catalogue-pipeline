@@ -25,8 +25,8 @@ module "id_minter_lambda" {
   environment_variables = merge(
     { for k, v in var.id_minter_env_vars : k => tostring(v) if v != null },
     {
-      PIPELINE_DATE              = var.pipeline_date
-      DOWNSTREAM_SNS_TOPIC_ARN   = module.id_minter_output_topic.arn
+      PIPELINE_DATE            = var.pipeline_date
+      DOWNSTREAM_SNS_TOPIC_ARN = module.id_minter_output_topic.arn
     }
   )
   secret_env_vars = var.id_minter_secret_env_vars
