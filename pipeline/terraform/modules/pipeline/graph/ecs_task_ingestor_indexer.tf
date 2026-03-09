@@ -10,8 +10,10 @@ module "ingestor_indexer_ecs_task" {
     INGESTOR_S3_PREFIX        = "ingestor"
   }
 
-  cpu    = 4096
-  memory = 16384
+  cpu                    = 4096
+  memory                 = 16384
+  ephemeral_storage_size = 21
+
 }
 
 data "aws_iam_policy_document" "allow_ingestor_indexer_task_token" {

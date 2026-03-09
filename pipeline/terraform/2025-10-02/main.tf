@@ -63,6 +63,11 @@ module "pipeline" {
         indexed = "concepts_indexed.2025-06-17"
       }
     }
+    "2026-03-06" = {
+      works = {
+        identified = "works_identified.2023-05-26"
+      }
+    }
   }
 
   allow_delete_indices = false
