@@ -512,8 +512,8 @@ def test_snapshot_sync_get_all_records_after_update(
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0003", "eb0004"}
 
-    # get_active_records_in_namespace should EXCLUDE deleted -> eb0002 gone
-    all_records = client.get_active_records_in_namespace()
+    # get_active_namespace_records should EXCLUDE deleted -> eb0002 gone
+    all_records = client.get_active_namespace_records()
     assert all_records.num_rows == 3
     rows = {row["id"]: row for row in all_records.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0003", "eb0004"}
@@ -586,6 +586,7 @@ def test_snapshot_sync_raises_on_non_castable_schema(
 
     client = AdapterStore(temporary_table, "test_namespace")
     with pytest.raises(
-        ValueError, match=r"snapshot_sync requires new_data to be castable to schema"
+        ValueError,
+        match=r"Target schema's field names are not matching the table's field names",
     ):
         client.snapshot_sync(bad_table)

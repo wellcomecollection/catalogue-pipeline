@@ -496,7 +496,7 @@ def test_get_all_records_empty(temporary_table: IcebergTable) -> None:
 
 
 def test_get_all_records_after_update(temporary_table: IcebergTable) -> None:
-    """After update, get_active_records_in_namespace excludes deleted rows."""
+    """After update, get_active_namespace_records excludes deleted rows."""
     # Initial data
     temporary_table.append(
         data_to_namespaced_table(
@@ -522,7 +522,7 @@ def test_get_all_records_after_update(temporary_table: IcebergTable) -> None:
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0003", "eb0004"}
 
     # Exclude deleted records -> eb0002 gone
-    all_records = client.get_active_records_in_namespace()
+    all_records = client.get_active_namespace_records()
     assert all_records.num_rows == 3
     rows = {row["id"]: row for row in all_records.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0003", "eb0004"}

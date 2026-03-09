@@ -43,34 +43,21 @@ class PipelineStore(ABC):
         """Return all records in the table from all namespaces."""
         return self.table.scan().to_arrow().cast(self.schema)
 
-    def get_records_in_namespace(
+    def get_namespace_records(
         self, iceberg_filter: BooleanExpression = ALWAYS_TRUE
     ) -> pa.Table:
         """Return records in the store namespace, optionally filtered."""
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
         return self.table.scan(row_filter=full_filter).to_arrow().cast(self.schema)
 
-    def _cast_to_arrow_schema(self, new_data: pa.Table, operation: str) -> pa.Table:
-        """Ensure the provided Arrow table matches the expected schema.
+    def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
+        """Return rows written under the specified changeset ID."""
+        return self.table.scan(row_filter=EqualTo("changeset", changeset_id)).to_arrow()
 
-        We cast inputs for consistency across adapters and to fail fast when an adapter
-        produces a table that can't be safely written to the Iceberg table.
-        """
-        try:
-            return new_data.cast(self.schema)
-        # pyarrow.Table.cast can raise either a pyarrow ArrowException subclass
-        # or a plain ValueError (e.g. mismatched field names).
-        except (pa.ArrowException, ValueError) as e:
-            raise ValueError(
-                f"{operation} requires new_data to be castable to schema: {self.schema}; "
-                f"got schema: {new_data.schema}"
-            ) from e
-
-    def _transform_incremental_updates(
-        self, updates: pa.Table, existing_data: pa.Table
-    ) -> pa.Table:
-        """Apply store-specific update transformations before writing."""
-        return updates
+    def normalise_table(self, table: pa.Table) -> pa.Table:
+        """Enforce that the table conforms to the required schema and filter for records in the selected namespace"""
+        table = table.cast(self.schema)
+        return table.filter(pc.field("namespace") == self.namespace)
 
     def incremental_update(self, new_data: pa.Table) -> PipelineStoreUpdate | None:
         """Apply an incremental update for incoming rows.
@@ -80,17 +67,16 @@ class PipelineStore(ABC):
         Subclasses may apply a final transformation to the update set (e.g. preserving content for deletions)
         before writes.
         """
-        new_data = self._cast_to_arrow_schema(new_data, operation="incremental_update")
-
+        new_data = self.normalise_table(new_data)
         if new_data.num_rows == 0:
             return None
 
-        incoming_ids = cast(list[str], new_data.column("id").to_pylist())
-        existing_data = self.get_records_in_namespace(In("id", incoming_ids))
+        new_ids_filter = In("id", self._extract_ids(new_data))
+        existing_data = self.get_namespace_records(new_ids_filter)
 
         if existing_data.num_rows > 0:
             updates = self._find_updates(existing_data, new_data)
-            updates = self._filter_by_timestamp(updates, existing_data)
+            updates = self._filter_updates_by_timestamp(updates, existing_data)
             updates = self._transform_incremental_updates(updates, existing_data)
             inserts = self._find_inserts(existing_data, new_data)
             changes = updates
@@ -98,9 +84,15 @@ class PipelineStore(ABC):
             inserts = new_data
             changes = None
 
-        return self._upsert_with_markers(changes, inserts)
+        return self._commit_changeset(changes, inserts)
 
-    def _upsert_with_markers(
+    def _transform_incremental_updates(
+        self, updates: pa.Table, existing_data: pa.Table
+    ) -> pa.Table:
+        """Apply store-specific update transformations before writing."""
+        return updates
+
+    def _commit_changeset(
         self, changes: pa.Table | None, inserts: pa.Table | None
     ) -> PipelineStoreUpdate | None:
         """Overwrite changes and append inserts, tagging rows with a changeset ID."""
@@ -115,8 +107,11 @@ class PipelineStore(ABC):
             # Just overwrite all the `changes` and append all the `inserts`
             if changes is not None:
                 changes = self._set_changeset_id(changes, changeset_id)
-                overwrite_mask_predicate = self._create_match_filter(changes)
-                tx.overwrite(changes, overwrite_filter=overwrite_mask_predicate)
+                overwrite_filter = And(
+                    EqualTo("namespace", self.namespace),
+                    In("id", self._extract_ids(changes)),
+                )
+                tx.overwrite(changes, overwrite_filter=overwrite_filter)
             if inserts is not None:
                 inserts = self._set_changeset_id(inserts, changeset_id)
                 tx.append(inserts)
@@ -124,30 +119,32 @@ class PipelineStore(ABC):
         updated_ids: list[str] = []
         for t in (changes, inserts):
             if t is not None:
-                updated_ids.extend(cast(list[str], t.column("id").to_pylist()))
+                updated_ids.extend(self._extract_ids(t))
 
         return PipelineStoreUpdate(
             changeset_id=changeset_id, updated_record_ids=updated_ids
         )
 
-    @staticmethod
-    def _create_match_filter(changes: pa.Table) -> BooleanExpression:
-        # to_pylist returns list[Any | None]; Iceberg In expects a concrete literal type.
-        raw_ids = changes.column("id").to_pylist()
-        change_ids = cast(list[str], [i for i in raw_ids if isinstance(i, str)])
-        return In("id", change_ids)
+    def _extract_ids(self, table: pa.Table) -> list[str]:
+        # to_pylist returns `list[Any | None]`, so we need to explicitly cast to `list[str]`.
+        # This is safe, since typing is enforced at the schema level.
+        return cast(list[str], table.column("id").to_pylist())
 
-    def _set_value(self, changeset: pa.Table, field_name: str, value: Any) -> pa.Table:
+    def _set_column_value(
+        self, changeset: pa.Table, field_name: str, value: Any
+    ) -> pa.Table:
         field_index = changeset.schema.get_field_index(field_name)
         field = self.schema.field(field_name)
         values = pa.repeat(value, changeset.num_rows).cast(field.type)
         return changeset.set_column(field_index, field, values)
 
-    def _set_last_modified(self, changeset: pa.Table, timestamp: datetime) -> pa.Table:
-        return self._set_value(changeset, "last_modified", timestamp)
+    def _set_last_modified_timestamp(
+        self, changeset: pa.Table, timestamp: datetime
+    ) -> pa.Table:
+        return self._set_column_value(changeset, "last_modified", timestamp)
 
     def _set_changeset_id(self, changeset: pa.Table, changeset_id: str) -> pa.Table:
-        return self._set_value(changeset, "changeset", changeset_id)
+        return self._set_column_value(changeset, "changeset", changeset_id)
 
     def _find_inserts(self, existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
         namespace_filter = pc.field("namespace") == self.namespace
@@ -181,7 +178,7 @@ class PipelineStore(ABC):
         update_ids = pa.array(filtered_ids, type=self.schema.field("id").type)
         return new_data.filter(pc.field("id").isin(update_ids))
 
-    def _filter_by_timestamp(
+    def _filter_updates_by_timestamp(
         self, updates: pa.Table, existing_data: pa.Table
     ) -> pa.Table:
         """Keep updates whose last_modified is newer than the existing record."""
@@ -194,7 +191,3 @@ class PipelineStore(ABC):
         newer_ids = pa.array(filtered_ids, type=self.schema.field("id").type)
 
         return updates.filter(pc.field("id").isin(newer_ids))
-
-    def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
-        """Return rows written under the specified changeset ID."""
-        return self.table.scan(row_filter=EqualTo("changeset", changeset_id)).to_arrow()

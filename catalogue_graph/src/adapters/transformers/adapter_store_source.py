@@ -24,5 +24,5 @@ class AdapterStoreSource(BaseSource):
 
             # During a full reindex we are writing into an empty index,
             # so no need to include deleted rows to overwrite documents.
-            table = self.adapter_store.get_active_records_in_namespace()
+            table = self.adapter_store.get_active_namespace_records()
             yield from table.to_pylist()

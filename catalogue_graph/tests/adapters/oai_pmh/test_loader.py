@@ -331,7 +331,7 @@ class TestWindowRecordWriter:
         assert row["content"] is None
         assert row["last_modified"] == last_modified
 
-        active_records = adapter_store_client.get_active_records_in_namespace()
+        active_records = adapter_store_client.get_active_namespace_records()
         assert active_records.num_rows == 0
 
     def test_preserves_content_on_deletion(
@@ -392,7 +392,7 @@ class TestWindowRecordWriter:
         assert row["last_modified"] == deletion_time
 
         # 4. Verify excluded from active records
-        active_records = adapter_store_client.get_active_records_in_namespace()
+        active_records = adapter_store_client.get_active_namespace_records()
         assert active_records.num_rows == 0
 
     def test_skips_changeset_for_duplicate_data(

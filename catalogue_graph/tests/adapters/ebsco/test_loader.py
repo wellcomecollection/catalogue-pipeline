@@ -130,7 +130,7 @@ def test_execute_loader_soft_deletes_missing_records(
 
     assert delete_response.changeset_ids != []
 
-    visible_rows = runtime.adapter_store.get_active_records_in_namespace().to_pylist()
+    visible_rows = runtime.adapter_store.get_active_namespace_records().to_pylist()
     assert _ids(visible_rows) == {"ebs00001"}
 
     all_rows = runtime.adapter_store.get_all_records().to_pylist()

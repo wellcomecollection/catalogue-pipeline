@@ -28,7 +28,7 @@ def test_get_all_records_empty_table(temporary_table: IcebergTable) -> None:
 def test_get_all_records_returns_all_non_deleted(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
-    """get_active_records_in_namespace returns all records where deleted is null or False."""
+    """get_active_namespace_records returns all records where deleted is null or False."""
     client = adapter_store_with_records(
         [
             {"id": "rec001", "content": "active record"},
@@ -37,7 +37,7 @@ def test_get_all_records_returns_all_non_deleted(
         ]
     )
 
-    all_records = client.get_active_records_in_namespace()
+    all_records = client.get_active_namespace_records()
 
     ids = cast(list[str], all_records.column("id").to_pylist())
     assert sorted(ids) == ["rec001", "rec002"]
@@ -76,7 +76,7 @@ def test_get_all_records_excludes_deleted_by_default(
         ]
     )
 
-    all_records = client.get_active_records_in_namespace()
+    all_records = client.get_active_namespace_records()
 
     assert all_records.num_rows == 1
     row = all_records.to_pylist()[0]
