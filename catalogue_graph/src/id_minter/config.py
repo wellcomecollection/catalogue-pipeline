@@ -41,6 +41,13 @@ ES_TARGET_INDEX_PREFIX = os.getenv("ES_TARGET_INDEX_PREFIX", "works-identified")
 DOWNSTREAM_SNS_TOPIC_ARN = os.getenv("DOWNSTREAM_SNS_TOPIC_ARN")
 
 # ---------------------------------------------------------------------------
+# S3 manifest output
+# ---------------------------------------------------------------------------
+S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-id-minter")
+S3_PREFIX = os.getenv("S3_PREFIX", "dev")
+BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "id_minter")
+
+# ---------------------------------------------------------------------------
 # RDS Data API (for local/CLI access without direct DB connectivity)
 # ---------------------------------------------------------------------------
 RDS_CLUSTER_ID = os.getenv("RDS_CLUSTER_ID", "identifiers-v2-serverless")
@@ -50,14 +57,8 @@ RDS_REGION = os.getenv("RDS_REGION", "eu-west-1")
 # General
 # ---------------------------------------------------------------------------
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
-SOURCE_PIPELINE_DATE = os.getenv("SOURCE_PIPELINE_DATE")
-TARGET_PIPELINE_DATE = os.getenv("TARGET_PIPELINE_DATE")
-ES_SOURCE_INDEX_DATE_SUFFIX = os.getenv(
-    "ES_SOURCE_INDEX_DATE_SUFFIX", SOURCE_PIPELINE_DATE
-)
-ES_TARGET_INDEX_DATE_SUFFIX = os.getenv(
-    "ES_TARGET_INDEX_DATE_SUFFIX", TARGET_PIPELINE_DATE
-)
+ES_SOURCE_INDEX_DATE_SUFFIX = os.getenv("ES_SOURCE_INDEX_DATE_SUFFIX")
+ES_TARGET_INDEX_DATE_SUFFIX = os.getenv("ES_TARGET_INDEX_DATE_SUFFIX")
 APPLY_MIGRATIONS = os.getenv("APPLY_MIGRATIONS", "false").lower() in (
     "true",
     "1",
@@ -98,6 +99,8 @@ class IdMinterConfig(DBConfig):
     target_index_date_suffix: str | None = ES_TARGET_INDEX_DATE_SUFFIX
     rds_cluster_id: str = RDS_CLUSTER_ID
     rds_region: str = RDS_REGION
+    s3_bucket: str = S3_BUCKET
+    batch_s3_prefix: str = BATCH_S3_PREFIX
 
     @property
     def source_index_name(self) -> str:
