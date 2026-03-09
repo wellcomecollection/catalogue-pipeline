@@ -60,20 +60,21 @@ module "id_generator_lambda" {
   vpc_config = var.id_minter_vpc_config
 }
 
-variable "id_minter_env_vars" {
-  type = object({
-    RDS_MAX_CONNECTIONS         = number
-    LOG_LEVEL                   = optional(string, "INFO")
-    ES_SOURCE_INDEX_PREFIX      = optional(string, "works-source")
-    ES_TARGET_INDEX_PREFIX      = optional(string, "works-identified")
-    ES_SOURCE_INDEX_DATE_SUFFIX = optional(string)
-    ES_TARGET_INDEX_DATE_SUFFIX = optional(string)
-    APPLY_MIGRATIONS            = optional(string, "false")
-    S3_BUCKET                   = optional(string)
-    S3_PREFIX                   = optional(string, "dev")
-  })
+resource "aws_iam_role_policy" "id_minter_lambda_s3_write" {
+  count = var.id_minter_env_vars.S3_BUCKET != null ? 1 : 0
+
+  name   = "id-minter-s3-write"
+  role   = module.id_minter_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.id_minter_s3_write[0].json
 }
 
-variable "id_minter_secret_env_vars" {
-  type = map(string)
+data "aws_iam_policy_document" "id_minter_s3_write" {
+  count = var.id_minter_env_vars.S3_BUCKET != null ? 1 : 0
+
+  statement {
+    actions = ["s3:PutObject"]
+    resources = [
+      "arn:aws:s3:::${var.id_minter_env_vars.S3_BUCKET}/${var.id_minter_env_vars.S3_PREFIX}/id_minter/*",
+    ]
+  }
 }
