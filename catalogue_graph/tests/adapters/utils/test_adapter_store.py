@@ -46,7 +46,7 @@ def test_get_all_records_returns_all_non_deleted(
 def test_get_all_records_include_deleted_true(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
-    """get_all_records with returns all records including deleted ones."""
+    """get_all_records returns all records, including deleted ones."""
     client = adapter_store_with_records(
         [
             {"id": "rec001", "content": "active record"},
