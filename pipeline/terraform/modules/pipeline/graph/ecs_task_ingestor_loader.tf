@@ -10,13 +10,14 @@ module "ingestor_loader_ecs_task" {
     INGESTOR_S3_PREFIX        = "ingestor"
   }
 
-  cpu    = 4096
-  memory = 16384
+  cpu                    = 4096
+  memory                 = 16384
+  ephemeral_storage_size = 21
 }
 
 data "aws_iam_policy_document" "allow_ingestor_loader_task_token" {
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = [
       "states:SendTaskSuccess",
       "states:SendTaskFailure",

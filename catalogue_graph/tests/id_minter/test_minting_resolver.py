@@ -24,7 +24,7 @@ import pymysql.connections
 import pymysql.cursors
 import pytest
 
-from id_minter.models.identifiers import SourceId
+from id_minter.models.identifier import SourceId
 from id_minter.resolvers.minting_resolver import MintingResolver
 from tests.id_minter.conftest import (
     count_assigned_ids,

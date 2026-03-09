@@ -78,6 +78,8 @@ locals {
     LOG_LEVEL                   = "DEBUG"
     RDS_MAX_CONNECTIONS         = local.id_minter_task_max_connections
     ES_TARGET_INDEX_DATE_SUFFIX = "2026-03-06"
+    S3_BUCKET                   = "wellcomecollection-platform-id-minter"
+    S3_PREFIX                   = "prod"
   }
 
   # Extract the secret name from the full ARN.
@@ -109,4 +111,19 @@ module "id_minter_lambda" {
   id_minter_vpc_config      = local.id_minter_v2_vpc_config
   id_minter_env_vars        = local.id_minter_v2_env_vars
   id_minter_secret_env_vars = local.id_minter_v2_secret_env_vars
+}
+
+resource "aws_iam_role_policy" "id_minter_lambda_s3_write" {
+  name   = "id-minter-s3-write"
+  role   = module.id_minter_lambda.id_minter_lambda_role_name
+  policy = data.aws_iam_policy_document.id_minter_s3_write.json
+}
+
+data "aws_iam_policy_document" "id_minter_s3_write" {
+  statement {
+    actions = ["s3:PutObject"]
+    resources = [
+      "arn:aws:s3:::wellcomecollection-platform-id-minter/prod/id_minter/*",
+    ]
+  }
 }

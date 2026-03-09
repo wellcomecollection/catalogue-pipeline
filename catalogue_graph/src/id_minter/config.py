@@ -43,8 +43,9 @@ DOWNSTREAM_SNS_TOPIC_ARN = os.getenv("DOWNSTREAM_SNS_TOPIC_ARN")
 # ---------------------------------------------------------------------------
 # S3 manifest output
 # ---------------------------------------------------------------------------
-S3_BUCKET = os.getenv("S3_BUCKET", "")
-BATCH_S3_PREFIX = os.getenv("BATCH_S3_PREFIX", "id_minter")
+S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-id-minter")
+S3_PREFIX = os.getenv("S3_PREFIX", "dev")
+BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "id_minter")
 
 # ---------------------------------------------------------------------------
 # RDS Data API (for local/CLI access without direct DB connectivity)

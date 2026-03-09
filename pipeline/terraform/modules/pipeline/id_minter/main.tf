@@ -59,6 +59,8 @@ variable "id_minter_env_vars" {
     ES_SOURCE_INDEX_DATE_SUFFIX = optional(string)
     ES_TARGET_INDEX_DATE_SUFFIX = optional(string)
     APPLY_MIGRATIONS            = optional(string, "false")
+    S3_BUCKET                   = optional(string)
+    S3_PREFIX                   = optional(string, "dev")
   })
 }
 
