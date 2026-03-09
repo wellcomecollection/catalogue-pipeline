@@ -141,7 +141,9 @@ class PipelineStore(ABC):
         update_ids = updates_projected.column("id")
         return new_data.filter(pc.field("id").isin(update_ids))
 
-    def _filter_by_timestamp(self, updates: pa.Table, existing_data: pa.Table) -> pa.Table:
+    def _filter_by_timestamp(
+        self, updates: pa.Table, existing_data: pa.Table
+    ) -> pa.Table:
         """
         Filter updates to only include records where the new last_modified is newer than
         the existing last_modified.
@@ -160,9 +162,11 @@ class PipelineStore(ABC):
         existing_ts = joined.column("last_modified_existing")
         last_modified_filter = pc.greater(joined.column("last_modified"), existing_ts)
         newer_ids = joined.filter(last_modified_filter).column("id")
-        
+
         return updates.filter(
-            pc.field("id").isin(pa.array(newer_ids, type=self.schema.field_by_name("id").type))
+            pc.field("id").isin(
+                pa.array(newer_ids, type=self.schema.field_by_name("id").type)
+            )
         )
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:

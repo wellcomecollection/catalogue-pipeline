@@ -151,6 +151,16 @@ def get_local_table(
     config: LocalIcebergTableConfig,
     create_if_not_exists: bool = True,
 ) -> IcebergTable:
+    """
+    Get a table from the local catalog using the .local directory.
+
+    Args:
+        config: LocalIcebergTableConfig object defining the table
+        create_if_not_exists: Whether to create the table if it doesn't exist
+
+    Returns:
+        IcebergTable: The configured table
+    """
     params = get_local_catalog_params(db_name=config.db_name)
     return get_table(
         config=config,
@@ -164,6 +174,16 @@ def get_rest_api_table(
     config: RestApiIcebergTableConfig,
     create_if_not_exists: bool = True,
 ) -> IcebergTable:
+    """
+    Get a table from an S3 Tables Iceberg REST API catalog.
+
+    Args:
+        config: RestApiIcebergTableConfig object defining the table
+        create_if_not_exists: Whether to create the table if it doesn't exist
+
+    Returns:
+        IcebergTable: The configured table
+    """
     params = get_rest_api_catalog_params(
         s3_tables_bucket=config.s3_tables_bucket,
         region=config.region,
@@ -175,13 +195,3 @@ def get_rest_api_table(
         create_if_not_exists=create_if_not_exists,
         **params,
     )
-
-
-def get_iceberg_table(
-    config: IcebergTableConfig,
-    create_if_not_exists: bool = True,
-) -> IcebergTable:
-    if isinstance(config, RestApiIcebergTableConfig):
-        return get_rest_api_table(config, create_if_not_exists)
-
-    return get_local_table(config, create_if_not_exists)

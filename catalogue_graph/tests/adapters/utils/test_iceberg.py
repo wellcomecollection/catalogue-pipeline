@@ -1,13 +1,9 @@
 import os
-from unittest import mock
 from uuid import uuid4
 
 import pytest
-
 from adapters.utils.iceberg import (
     LocalIcebergTableConfig,
-    RestApiIcebergTableConfig,
-    get_iceberg_table,
     get_table,
 )
 
@@ -116,46 +112,3 @@ def test_get_table_loads_when_flag_false(local_catalog_params):  # type: ignore
 
     # Identifiers match and we can assert the metadata location is identical, indicating load not recreate
     assert created.metadata_location == loaded.metadata_location
-
-
-def test_get_iceberg_table_local(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test get_iceberg_table with local configuration."""
-    config = LocalIcebergTableConfig(
-        table_name="test_table",
-        namespace="test_ns",
-        db_name="test_db",
-    )
-
-    # Mock get_local_table to verify it's called with correct params
-    mock_get_local_table = mock.Mock(return_value="mock_table")
-
-    monkeypatch.setattr("adapters.utils.iceberg.get_local_table", mock_get_local_table)
-
-    result = get_iceberg_table(config)
-
-    mock_get_local_table.assert_called_once_with(config, True)
-    assert result == "mock_table"
-
-
-def test_get_iceberg_table_rest(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test get_iceberg_table with REST API configuration."""
-
-    config = RestApiIcebergTableConfig(
-        namespace="test_ns",
-        table_name="test_table",
-        s3_tables_bucket="test-bucket",
-        region="us-east-1",
-        account_id="123456789012",
-    )
-
-    mock_get_rest_api_table = mock.Mock(return_value="mock_rest_table")
-
-    monkeypatch.setattr(
-        "adapters.utils.iceberg.get_rest_api_table", mock_get_rest_api_table
-    )
-
-    result = get_iceberg_table(config)
-
-    mock_get_rest_api_table.assert_called_once_with(config, True)
-
-    assert result == "mock_rest_table"
