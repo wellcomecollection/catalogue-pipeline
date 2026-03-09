@@ -25,4 +25,5 @@ class IdMintingSource(ElasticSource):
             es_client=es_client,
             index_name=index_name,
             query={"ids": {"values": source_identifiers}},
+            slice_count=1,
         )

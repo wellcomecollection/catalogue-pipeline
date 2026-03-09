@@ -75,8 +75,9 @@ locals {
   }
 
   id_minter_v2_env_vars = {
-    RDS_MAX_CONNECTIONS = local.id_minter_task_max_connections
-    LOG_LEVEL           = "DEBUG"
+    LOG_LEVEL                   = "DEBUG"
+    RDS_MAX_CONNECTIONS         = local.id_minter_task_max_connections
+    ES_TARGET_INDEX_DATE_SUFFIX = "2026-03-06"
   }
 
   # Extract the secret name from the full ARN.
@@ -88,13 +89,16 @@ locals {
     local.infra_critical.rds_v2_master_user_secret_arn
   )[0]
 
-  id_minter_v2_secret_env_vars = {
-    RDS_PRIMARY_HOST = "rds/identifiers-v2-serverless/endpoint"
-    RDS_REPLICA_HOST = "rds/identifiers-v2-serverless/reader_endpoint"
-    RDS_PORT         = "rds/identifiers-v2-serverless/port"
-    RDS_USERNAME     = "${local.rds_v2_master_secret_name}:username"
-    RDS_PASSWORD     = "${local.rds_v2_master_secret_name}:password"
-  }
+  id_minter_v2_secret_env_vars = merge(
+    {
+      RDS_PRIMARY_HOST = "rds/identifiers-v2-serverless/endpoint"
+      RDS_REPLICA_HOST = "rds/identifiers-v2-serverless/reader_endpoint"
+      RDS_PORT         = "rds/identifiers-v2-serverless/port"
+      RDS_USERNAME     = "${local.rds_v2_master_secret_name}:username"
+      RDS_PASSWORD     = "${local.rds_v2_master_secret_name}:password"
+    },
+    module.elastic.pipeline_storage_es_service_secrets["id_minter"],
+  )
 }
 
 # This is the new version of the id_minter, that uses the V2 RDS cluster

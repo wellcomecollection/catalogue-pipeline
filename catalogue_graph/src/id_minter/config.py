@@ -32,8 +32,8 @@ CANONICAL_IDS_TABLE_NAME = os.getenv("CANONICAL_IDS_TABLE_NAME", "canonical_ids"
 # ---------------------------------------------------------------------------
 # Elasticsearch indices
 # ---------------------------------------------------------------------------
-ES_SOURCE_INDEX = os.getenv("ES_SOURCE_INDEX", "works-source")
-ES_TARGET_INDEX = os.getenv("ES_TARGET_INDEX", "works-identified")
+ES_SOURCE_INDEX_PREFIX = os.getenv("ES_SOURCE_INDEX_PREFIX", "works-source")
+ES_TARGET_INDEX_PREFIX = os.getenv("ES_TARGET_INDEX_PREFIX", "works-identified")
 
 # ---------------------------------------------------------------------------
 # Downstream notification target
@@ -50,6 +50,14 @@ RDS_REGION = os.getenv("RDS_REGION", "eu-west-1")
 # General
 # ---------------------------------------------------------------------------
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
+SOURCE_PIPELINE_DATE = os.getenv("SOURCE_PIPELINE_DATE")
+TARGET_PIPELINE_DATE = os.getenv("TARGET_PIPELINE_DATE")
+ES_SOURCE_INDEX_DATE_SUFFIX = os.getenv(
+    "ES_SOURCE_INDEX_DATE_SUFFIX", SOURCE_PIPELINE_DATE
+)
+ES_TARGET_INDEX_DATE_SUFFIX = os.getenv(
+    "ES_TARGET_INDEX_DATE_SUFFIX", TARGET_PIPELINE_DATE
+)
 APPLY_MIGRATIONS = os.getenv("APPLY_MIGRATIONS", "false").lower() in (
     "true",
     "1",
@@ -82,12 +90,24 @@ class DBConfig(BaseModel):
 
 class IdMinterConfig(DBConfig):
     db_table: str = IDENTIFIERS_TABLE_NAME
-    source_index: str = ES_SOURCE_INDEX
-    target_index: str = ES_TARGET_INDEX
+    source_index_prefix: str = ES_SOURCE_INDEX_PREFIX
+    target_index_prefix: str = ES_TARGET_INDEX_PREFIX
     downstream_sns_topic_arn: str | None = DOWNSTREAM_SNS_TOPIC_ARN
     pipeline_date: str = PIPELINE_DATE
+    source_index_date_suffix: str | None = ES_SOURCE_INDEX_DATE_SUFFIX
+    target_index_date_suffix: str | None = ES_TARGET_INDEX_DATE_SUFFIX
     rds_cluster_id: str = RDS_CLUSTER_ID
     rds_region: str = RDS_REGION
+
+    @property
+    def source_index_name(self) -> str:
+        date = self.source_index_date_suffix or self.pipeline_date
+        return f"{self.source_index_prefix}-{date}"
+
+    @property
+    def target_index_name(self) -> str:
+        date = self.target_index_date_suffix or self.pipeline_date
+        return f"{self.target_index_prefix}-{date}"
 
 
 # Default id_minter config instance, built from environment variables.
