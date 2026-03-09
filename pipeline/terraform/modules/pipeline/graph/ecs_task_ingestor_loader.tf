@@ -17,7 +17,7 @@ module "ingestor_loader_ecs_task" {
 
 data "aws_iam_policy_document" "allow_ingestor_loader_task_token" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "states:SendTaskSuccess",
       "states:SendTaskFailure",
