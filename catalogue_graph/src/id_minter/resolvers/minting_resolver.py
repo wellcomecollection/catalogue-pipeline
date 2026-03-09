@@ -13,7 +13,7 @@ import structlog
 
 from id_minter.config import DBConfig
 from id_minter.database import DBConnection, DBCursor, get_connection
-from id_minter.models.identifiers import SourceId
+from id_minter.models.identifier import SourceId
 
 logger = structlog.get_logger(__name__)
 

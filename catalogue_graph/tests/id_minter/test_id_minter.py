@@ -17,7 +17,7 @@ import pymysql.connections
 import pytest
 
 from id_minter.config import IdMinterConfig, RDSClientConfig
-from id_minter.models.identifiers import SourceId
+from id_minter.models.identifier import SourceId
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
     StepFunctionMintingResponse,

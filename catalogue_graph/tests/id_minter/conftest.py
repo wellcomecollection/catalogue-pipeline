@@ -11,7 +11,7 @@ import pymysql
 import pymysql.cursors
 import pytest
 
-from id_minter.models.identifiers import SourceId
+from id_minter.models.identifier import SourceId
 
 CATALOGUE_GRAPH_DIR = Path(__file__).resolve().parent.parent.parent
 
