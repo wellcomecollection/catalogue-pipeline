@@ -15,6 +15,8 @@ from pyiceberg.table.upsert_util import get_rows_to_update
 class PipelineStoreUpdate(BaseModel):
     changeset_id: str
     updated_record_ids: list[str]
+    inserted_record_ids: list[str]
+    changed_record_ids: list[str]
 
 
 class PipelineStore(ABC):
@@ -43,12 +45,26 @@ class PipelineStore(ABC):
         """Return all records in the table from all namespaces."""
         return self.table.scan().to_arrow().cast(self.schema)
 
+    def datetime_to_snapshot_id(self, as_of_time: datetime) -> int | None:
+        ts_ms = int(as_of_time.timestamp() * 1000)
+        snapshot = self.table.snapshot_as_of_timestamp(ts_ms)
+        return snapshot.snapshot_id if snapshot else None
+
     def get_namespace_records(
-        self, iceberg_filter: BooleanExpression = ALWAYS_TRUE
+        self,
+        iceberg_filter: BooleanExpression = ALWAYS_TRUE,
+        as_of_time: datetime | None = None,
     ) -> pa.Table:
         """Return records in the store namespace, optionally filtered."""
+        snapshot_id = None
+        if as_of_time:
+            snapshot_id = self.datetime_to_snapshot_id(as_of_time)
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
-        return self.table.scan(row_filter=full_filter).to_arrow().cast(self.schema)
+        return (
+            self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)
+            .to_arrow()
+            .cast(self.schema)
+        )
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
         """Return rows written under the specified changeset ID."""
@@ -117,13 +133,13 @@ class PipelineStore(ABC):
                 inserts = self._set_changeset_id(inserts, changeset_id)
                 tx.append(inserts)
 
-        updated_ids: list[str] = []
-        for t in (changes, inserts):
-            if t is not None:
-                updated_ids.extend(self._extract_ids(t))
-
+        inserted_ids = self._extract_ids(inserts) if inserts else []
+        changed_ids = self._extract_ids(changes) if changes else []
         return PipelineStoreUpdate(
-            changeset_id=changeset_id, updated_record_ids=updated_ids
+            changeset_id=changeset_id,
+            updated_record_ids=inserted_ids + changed_ids,
+            inserted_record_ids=inserted_ids,
+            changed_record_ids=changed_ids,
         )
 
     def _extract_ids(self, table: pa.Table) -> list[str]:
