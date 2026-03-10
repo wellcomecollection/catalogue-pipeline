@@ -16,9 +16,9 @@ Covers the same test cases as the Scala tests:
     - with predecessor inheritance
     - empty work (no sourceIdentifiers)
 
-Note: The Scala embedder also renames identifiedType → type. Our Python
-embedder intentionally does NOT do this — it was classified as a Scala
-serialization artefact in the verification notebook.
+Note: The Python embedder now mirrors the Scala id_minter wire shape for
+minted identifiers by rewriting identifiedType → type when a canonical ID is
+embedded.
 """
 
 from __future__ import annotations
@@ -179,21 +179,20 @@ class TestEmbedCanonicalIds:
 
         assert result["canonicalId"] == cid
 
-    def test_preserves_identified_type(self) -> None:
-        """Scala renames identifiedType → type; we intentionally do not.
-
-        Corresponds to Scala it("replaces identifiedType with type").
-        """
+    def test_replaces_identified_type_with_type(self) -> None:
+        """Minted nodes are promoted to the identified wire shape."""
         si1 = create_source_identifier()
         si2 = create_source_identifier()
         cid1 = create_canonical_id()
         cid2 = create_canonical_id()
         doc = {
             "sourceIdentifier": si1,
+            "type": "Identifiable",
             "identifiedType": "NewType",
             "moreThings": [
                 {
                     "sourceIdentifier": si2,
+                    "type": "Identifiable",
                     "identifiedType": "AnotherNewType",
                 },
             ],
@@ -202,12 +201,51 @@ class TestEmbedCanonicalIds:
         id_map = {key_of(si1): cid1, key_of(si2): cid2}
         result = embed_canonical_ids(doc, id_map)
 
-        assert result["identifiedType"] == "NewType"
-        assert "type" not in result
-        assert result["moreThings"][0]["identifiedType"] == "AnotherNewType"
-        assert "type" not in result["moreThings"][0]
+        assert "identifiedType" not in result
+        assert result["type"] == "NewType"
+        assert "identifiedType" not in result["moreThings"][0]
+        assert result["moreThings"][0]["type"] == "AnotherNewType"
         assert result["canonicalId"] == cid1
         assert result["moreThings"][0]["canonicalId"] == cid2
+
+    def test_promotes_identifiable_without_identified_type_field(self) -> None:
+        si = create_source_identifier()
+        cid = create_canonical_id()
+        doc = {
+            "sourceIdentifier": si,
+            "type": "Identifiable",
+        }
+
+        result = embed_canonical_ids(doc, {key_of(si): cid})
+
+        assert result["canonicalId"] == cid
+        assert result["type"] == "Identified"
+
+    def test_only_promotes_minted_nodes(self) -> None:
+        si1 = create_source_identifier()
+        si2 = create_source_identifier()
+        cid1 = create_canonical_id()
+        doc = {
+            "sourceIdentifier": si1,
+            "type": "Identifiable",
+            "identifiedType": "Identified",
+            "moreThings": [
+                {
+                    "sourceIdentifier": si2,
+                    "type": "Identifiable",
+                    "identifiedType": "Identified",
+                }
+            ],
+        }
+
+        result = embed_canonical_ids(doc, {key_of(si1): cid1})
+
+        assert result["canonicalId"] == cid1
+        assert result["type"] == "Identified"
+        assert "identifiedType" not in result
+        assert result["moreThings"][0]["type"] == "Identifiable"
+        assert result["moreThings"][0]["identifiedType"] == "Identified"
+        assert "canonicalId" not in result["moreThings"][0]
 
     def test_leaves_all_nodes_unchanged_with_empty_id_map(self) -> None:
         """With an empty id_map, no canonicalId is added to any node.
@@ -271,7 +309,8 @@ class TestProcessWork:
         cid2 = create_canonical_id()
         doc = {
             "sourceIdentifier": si1,
-            "items": [{"sourceIdentifier": si2}],
+            "type": "Identifiable",
+            "items": [{"sourceIdentifier": si2, "type": "Identifiable"}],
         }
 
         k1 = key_of(si1)
@@ -286,7 +325,9 @@ class TestProcessWork:
         result = process_work(doc, resolver)
 
         assert result["canonicalId"] == cid1
+        assert result["type"] == "Identified"
         assert result["items"][0]["canonicalId"] == cid2
+        assert result["items"][0]["type"] == "Identified"
         assert len(resolver.mint_calls) == 1
 
     def test_mix_of_existing_and_new_identifiers(self) -> None:
