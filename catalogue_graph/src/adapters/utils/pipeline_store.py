@@ -16,9 +16,9 @@ class PipelineStoreUpdate(BaseModel):
     changeset_id: str
     inserted_record_ids: list[str]
     changed_record_ids: list[str]
-    
+
     @property
-    def updated_record_ids(self):
+    def updated_record_ids(self) -> list[str]:
         return self.changed_record_ids + self.inserted_record_ids
 
 
@@ -48,7 +48,7 @@ class PipelineStore(ABC):
         """Return all records in the table from all namespaces."""
         return self.table.scan().to_arrow().cast(self.schema)
 
-    def datetime_to_snapshot_id(self, as_of_time: datetime) -> int | None:
+    def snapshot_id_as_of(self, as_of_time: datetime) -> int | None:
         ts_ms = int(as_of_time.timestamp() * 1000)
         snapshot = self.table.snapshot_as_of_timestamp(ts_ms)
         return snapshot.snapshot_id if snapshot else None
@@ -59,9 +59,7 @@ class PipelineStore(ABC):
         as_of_time: datetime | None = None,
     ) -> pa.Table:
         """Return records in the store namespace, optionally filtered."""
-        snapshot_id = None
-        if as_of_time:
-            snapshot_id = self.datetime_to_snapshot_id(as_of_time)
+        snapshot_id = self.snapshot_id_as_of(as_of_time) if as_of_time else None
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
         return (
             self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)
@@ -71,8 +69,7 @@ class PipelineStore(ABC):
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
         """Return rows written under the specified changeset ID."""
-        changeset_filter = EqualTo("changeset", changeset_id)
-        return self.table.scan(row_filter=changeset_filter).to_arrow().cast(self.schema)
+        return self.get_namespace_records(EqualTo("changeset", changeset_id))
 
     def normalise_table(self, table: pa.Table) -> pa.Table:
         """Enforce that the table conforms to the required schema and filter for records in the selected namespace"""

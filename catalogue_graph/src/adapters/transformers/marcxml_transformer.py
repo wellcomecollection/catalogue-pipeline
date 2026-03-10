@@ -83,15 +83,8 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         return marc_records[0]
 
     def _transform_visible(
-        self, row_id: str, content: str, source_modified_time: datetime
+        self, row_id: str, marc_record: Record, source_modified_time: datetime
     ) -> Generator[InvisibleSourceWork | VisibleSourceWork]:
-        marc_record: Record | None = None
-        try:
-            marc_record = self._parse_marc_record(content)
-        except Exception as e:
-            self._add_error(e, "parse", row_id)
-            return
-
         try:
             work_id = self.extract_work_id(marc_record)
             yield self.transform_record(work_id, marc_record, source_modified_time)
@@ -100,17 +93,9 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
             self._add_error(e, "transform", row_id)
 
     def _transform_deleted(
-        self, content: str, source_modified_time: datetime
+        self, work_id: str, source_modified_time: datetime
     ) -> DeletedSourceWork:
-        """Transform a deleted record.
-
-        Parses the MARC content to extract the work ID, ensuring deleted records
-        use the same identifier as visible records. Raises an exception if
-        parsing fails.
-        """
-        marc_record = self._parse_marc_record(content)
-        work_id = self.extract_work_id(marc_record)
-
+        """Transform a deleted record."""
         state = self.source_work_state(work_id, source_modified_time)
         version = int(source_modified_time.timestamp())
         return DeletedSourceWork(
@@ -121,26 +106,33 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
             state=state,
         )
 
+    def _row_to_marc_record(self, row: dict[str, Any]) -> Record | None:
+        """Converts the row's content field to a MARC record. Returns `None` if content field empty or parsing fails."""
+        row_id, content = row["id"], row.get("content")
+
+        if not content:
+            logging.error(f"Row {row_id} has no content; cannot transform. Skipping.")
+            self._add_error(Exception("Missing content"), "transform", row_id)
+            return None
+
+        try:
+            return self._parse_marc_record(content)
+        except Exception as e:
+            self._add_error(e, "parse", row["id"])
+            return None
+
     def transform(
         self, rows: Iterable[dict[str, Any]]
     ) -> Generator[tuple[str, SourceWork]]:
         for row in rows:
-            row_id, content, last_modified, is_deleted = (
-                row["id"],
-                row.get("content"),
-                row["last_modified"],
-                row.get("deleted", False),
-            )
-
-            if not content:
-                logging.error(
-                    f"Row {row_id} has no content; cannot transform. Skipping."
-                )
-                self._add_error(Exception("Missing content"), "transform", row_id)
+            marc_record = self._row_to_marc_record(row)
+            if not marc_record:
                 continue
 
-            if is_deleted:
-                yield (row_id, self._transform_deleted(content, last_modified))
+            row_id, last_modified = row["id"], row["last_modified"]
+            if row.get("deleted", False):
+                work_id = self.extract_work_id(marc_record)
+                yield row_id, self._transform_deleted(work_id, last_modified)
             else:
-                for work in self._transform_visible(row_id, content, last_modified):
-                    yield (row_id, work)
+                for work in self._transform_visible(row_id, marc_record, last_modified):
+                    yield row_id, work

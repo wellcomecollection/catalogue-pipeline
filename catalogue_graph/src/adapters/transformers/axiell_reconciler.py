@@ -1,9 +1,9 @@
-import logging
 from collections.abc import Generator, Iterable
 from datetime import UTC, datetime
 from typing import Any
 
 import pyarrow as pa
+import structlog
 from pyiceberg.expressions import In
 
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
@@ -13,6 +13,8 @@ from models.pipeline.identifier import Id
 from models.pipeline.source.work import (
     DeletedSourceWork,
 )
+
+logger = structlog.get_logger(__name__)
 
 
 class AxiellReconciler(MarcXmlTransformer):
@@ -25,51 +27,50 @@ class AxiellReconciler(MarcXmlTransformer):
         self.reconciler_store = reconciler_store
         super().__init__(adapter_store, changeset_ids, Id(id="axiell-guid"))
 
-    def transform(
+    def _rows_to_reconciler_arrow_table(
         self, rows: Iterable[dict[str, Any]]
-    ) -> Generator[tuple[str, DeletedSourceWork]]:
+    ) -> pa.Table:
         data = []
-
         for row in rows:
-            row_id, content, last_modified = (
-                row["id"],
-                row.get("content"),
-                row["last_modified"],
-            )
-
-            if not content:
-                logging.error(f"Row {row_id} has no content; cannot extract GUID.")
-                self._add_error(Exception("Missing content"), "transform", row_id)
+            marc_record = self._row_to_marc_record(row)
+            if not marc_record:
                 continue
 
-            marc_record = self._parse_marc_record(content)
             guid = self.extract_work_id(marc_record)
             data.append(
                 {
                     "namespace": "axiell",
-                    "id": row_id,
+                    "id": row["id"],
                     "guid": guid,
                     "changeset": None,
-                    "last_modified": last_modified,
+                    "last_modified": row["last_modified"],
                 }
             )
 
+        return pa.Table.from_pylist(data, schema=self.reconciler_store.schema)
+
+    def transform(
+        self, rows: Iterable[dict[str, Any]]
+    ) -> Generator[tuple[str, DeletedSourceWork]]:
+        # Take all rows modified as part of the latest Axiell adapter run and turn them into a PyArrow table
+        updated_data = self._rows_to_reconciler_arrow_table(rows)
+
+        # Before updating the reconciler store, save the current time so that use it to retrieve overwritten data
+        # using Iceberg's snapshot functionality
         before_transaction = datetime.now(UTC)
+        logger.info("About to update reconciler store", timestamp=before_transaction)
 
-        updated_data = pa.Table.from_pylist(data, schema=self.reconciler_store.schema)
+        # Perform an incremental update, updating existing collectId to GUID mappings and adding new mappings.
         result = self.reconciler_store.incremental_update(updated_data)
-
         if not result:
             return
 
-        # Get overwritten collectId to GUID mappings using a snapshot
+        # Get *old* mappings which were overwritten as part of the incremental update
         id_filter = In("id", result.changed_record_ids)
         overwritten_data = self.reconciler_store.get_namespace_records(
             id_filter, as_of_time=before_transaction
         )
 
+        # Extract GUIDs (work IDs) from overwritten mappings and emit them as deleted works
         for row in overwritten_data.to_pylist():
-            content, last_modified = row.get("content"), row["last_modified"]
-            if not content:
-                continue
-            yield row["id"], self._transform_deleted(content, last_modified)
+            yield row["id"], self._transform_deleted(row["guid"], row["last_modified"])
