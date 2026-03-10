@@ -23,6 +23,7 @@ from id_minter.models.step_events import (
 )
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
+from id_minter.sns import publish_ids_to_sns
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.models.manifests import StepManifest
@@ -93,6 +94,12 @@ def execute(
     )
     transformer.stream_to_index(target_client, target_index)
 
+    if runtime.config.downstream_sns_topic_arn and transformer.successful_ids:
+        publish_ids_to_sns(
+            runtime.config.downstream_sns_topic_arn,
+            transformer.successful_ids,
+        )
+
     manifest_writer = IdMinterManifestWriter(
         job_id=request.job_id,
         label="id_minter",
@@ -131,6 +138,7 @@ def log_runtime_config(
         pipeline_date=date_info,
         source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
         target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
+        downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
         identifiers=request.source_identifiers,
         migrations="yes" if cfg.apply_migrations else "no",
     )
