@@ -42,7 +42,6 @@ class AxiellReconciler(MarcXmlTransformer):
                     "namespace": "axiell",
                     "id": row["id"],
                     "guid": guid,
-                    "changeset": None,
                     "last_modified": row["last_modified"],
                 }
             )
@@ -55,8 +54,8 @@ class AxiellReconciler(MarcXmlTransformer):
         # Take all rows modified as part of the latest Axiell adapter run and turn them into a PyArrow table
         updated_data = self._rows_to_reconciler_arrow_table(rows)
 
-        # Before updating the reconciler store, save the current time so that use it to retrieve overwritten data
-        # using Iceberg's snapshot functionality
+        # Before updating the reconciler store, save the current time so that we can use it
+        # to retrieve overwritten data using Iceberg's snapshot functionality
         before_transaction = datetime.now(UTC)
         logger.info("About to update reconciler store", timestamp=before_transaction)
 

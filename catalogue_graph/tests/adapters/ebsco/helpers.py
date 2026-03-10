@@ -87,7 +87,7 @@ def prepare_changeset(
     records_by_id: Mapping[str, tuple[str, bool] | str | None],
     *,
     namespace: str,
-    build_adapter_table_path: str,
+    transformer_type: str,
 ) -> str:
     """Insert XML records into the temporary Iceberg table.
 
@@ -99,7 +99,7 @@ def prepare_changeset(
             - (str, True): deleted record with that XML content preserved
             - None: legacy format, treated as error (no content)
         namespace: The namespace for the records (e.g., EBSCO_NAMESPACE, AXIELL_NAMESPACE).
-        build_adapter_table_path: The module path to monkeypatch for build_adapter_table.
+        transformer_type: Which transformer type to use when monkeypatching build_adapter_table.
 
     Returns the new changeset_id.
     """
@@ -131,7 +131,10 @@ def prepare_changeset(
 
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
-        build_adapter_table_path,
-        lambda use_rest_api_table, create_if_not_exists: temporary_table,
+        "adapters.transformers.transformer.ADAPTER_TABLE_BUILDER_BY_TYPE",
+        {
+            transformer_type: lambda use_rest_api_table,
+            create_if_not_exists: temporary_table
+        },
     )
     return changeset_id

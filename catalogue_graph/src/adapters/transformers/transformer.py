@@ -50,33 +50,63 @@ class AdapterConfig(Protocol):
     BATCH_S3_PREFIX: str
 
 
+ICEBERG_NAMESPACE_BY_TYPE: dict[TransformerType, str] = {
+    "axiell": "axiell",
+    "axiell_reconciler": "axiell",
+    "ebsco": "ebsco",
+}
+
+CONFIG_BY_TYPE: dict[TransformerType, AdapterConfig] = {
+    "axiell": cast(AdapterConfig, axiell_config),
+    "axiell_reconciler": cast(AdapterConfig, axiell_config),
+    "ebsco": cast(AdapterConfig, ebsco_config),
+}
+
+ADAPTER_TABLE_BUILDER_BY_TYPE: dict[TransformerType, Callable] = {
+    "axiell": AXIELL_CONFIG.build_adapter_table,
+    "axiell_reconciler": AXIELL_CONFIG.build_adapter_table,
+    "ebsco": ebsco_helpers.build_adapter_table,
+}
+
+
 def get_adapter_store(
     transformer_type: TransformerType,
     use_rest_api_table: bool = False,
     create_if_not_exists: bool = False,
 ) -> AdapterStore:
-    build_adapter_table: Callable
-    if transformer_type in ("axiell", "axiell_reconciler"):
-        build_adapter_table = AXIELL_CONFIG.build_adapter_table
-    elif transformer_type == "ebsco":
-        build_adapter_table = ebsco_helpers.build_adapter_table
-    else:
-        raise ValueError(f"Unknown transformer type: {transformer_type}")
-
+    build_adapter_table = ADAPTER_TABLE_BUILDER_BY_TYPE[transformer_type]
+    namespace = ICEBERG_NAMESPACE_BY_TYPE[transformer_type]
     table = build_adapter_table(
         use_rest_api_table=use_rest_api_table,
         create_if_not_exists=create_if_not_exists,
     )
-    return AdapterStore(table, namespace=transformer_type)
+    return AdapterStore(table, namespace=namespace)
 
 
-def get_axiell_reconciler_store(
-    use_rest_api_table: bool = False, create_if_not_exists: bool = False
-) -> ReconcilerStore:
-    table = axiell_helpers.build_reconciler_table(
-        use_rest_api_table=use_rest_api_table, create_if_not_exists=create_if_not_exists
+def build_transformer(
+    event: TransformerEvent,
+    use_rest_api_table: bool = False,
+    create_if_not_exists: bool = False,
+) -> BaseTransformer:
+    adapter_store = get_adapter_store(
+        event.transformer_type,
+        use_rest_api_table=use_rest_api_table,
+        create_if_not_exists=create_if_not_exists,
     )
-    return ReconcilerStore(table, namespace="axiell")
+
+    if event.transformer_type == "axiell":
+        return AxiellTransformer(adapter_store, event.changeset_ids)
+    if event.transformer_type == "ebsco":
+        return EbscoTransformer(adapter_store, event.changeset_ids)
+    if event.transformer_type == "axiell_reconciler":
+        table = axiell_helpers.build_reconciler_table(
+            use_rest_api_table=use_rest_api_table,
+            create_if_not_exists=create_if_not_exists,
+        )
+        reconciler_store = ReconcilerStore(table, namespace="axiell")
+        return AxiellReconciler(adapter_store, event.changeset_ids, reconciler_store)
+
+    raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
 
 def handler(
@@ -90,28 +120,12 @@ def handler(
     logger.info("Processing transformer event", transformer_event=event.model_dump())
     logger.info("Received job_id", job_id=event.job_id)
 
-    adapter_store = get_adapter_store(
-        event.transformer_type, use_rest_api_table, create_if_not_exists
+    config = CONFIG_BY_TYPE[event.transformer_type]
+    transformer = build_transformer(
+        event,
+        use_rest_api_table=use_rest_api_table,
+        create_if_not_exists=create_if_not_exists,
     )
-
-    config: AdapterConfig
-    transformer: BaseTransformer
-    if event.transformer_type == "axiell":
-        config = cast(AdapterConfig, axiell_config)
-        transformer = AxiellTransformer(adapter_store, event.changeset_ids)
-    elif event.transformer_type == "ebsco":
-        config = cast(AdapterConfig, ebsco_config)
-        transformer = EbscoTransformer(adapter_store, event.changeset_ids)
-    elif event.transformer_type == "axiell_reconciler":
-        config = cast(AdapterConfig, ebsco_config)
-        reconciler_store = get_axiell_reconciler_store(
-            use_rest_api_table, create_if_not_exists
-        )
-        transformer = AxiellReconciler(
-            adapter_store, event.changeset_ids, reconciler_store
-        )
-    else:
-        raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
     index_date = config.INDEX_DATE or config.PIPELINE_DATE
     index_name = get_standard_index_name(config.ES_INDEX_NAME, index_date)
