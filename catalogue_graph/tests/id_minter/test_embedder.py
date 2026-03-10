@@ -16,7 +16,7 @@ Covers the same test cases as the Scala tests:
     - with predecessor inheritance
     - empty work (no sourceIdentifiers)
 
-Note: The Python embedder now mirrors the Scala id_minter wire shape for
+Note: The Python embedder mirrors the Scala id_minter wire shape for
 minted identifiers by rewriting identifiedType → type when a canonical ID is
 embedded.
 """
