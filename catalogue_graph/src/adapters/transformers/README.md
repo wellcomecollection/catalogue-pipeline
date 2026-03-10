@@ -1,6 +1,7 @@
 # Transformers
 
-This module transforms adapter data (stored in Iceberg tables) into `SourceWork` documents and indexes them into Elasticsearch.
+This module transforms adapter data (stored in Iceberg tables) into `SourceWork` documents and indexes them into
+Elasticsearch.
 
 ## Overview
 
@@ -24,6 +25,8 @@ The transformer pipeline consists of:
 
 - **`AxiellTransformer`**: Transforms Axiell/Mimsy records into `InvisibleSourceWork` documents
 - **`EbscoTransformer`**: Transforms EBSCO serial records into `VisibleSourceWork` documents
+- **`AxiellReconciler`**: A special Axiell transformer emitting `DeletedSourceWork` documents.
+  See [Axiell reconciler](#axiell-reconciler) section for more information
 
 Both inherit from `MarcXmlTransformer`, which handles common MARC parsing and deleted record handling.
 
@@ -37,13 +40,16 @@ Both inherit from `MarcXmlTransformer`, which handles common MARC parsing and de
 
 ### Environment Variables
 
-When running locally, set `PIPELINE_DATE` to match the target pipeline date (e.g. `2024-10-30`). This controls which Elasticsearch credentials are used and the index naming. **If not set, it defaults to `dev`, which is incorrect for production runs.**
+When running locally, set `PIPELINE_DATE` to match the target pipeline date (e.g. `2024-10-30`). This controls which
+Elasticsearch credentials are used and the index naming. **If not set, it defaults to `dev`, which is incorrect for
+production runs.**
 
 ```bash
 export PIPELINE_DATE=2024-10-30
 ```
 
-See the adapter config files (`adapters/axiell/config.py`, `adapters/ebsco/config.py`) for other configurable environment variables.
+See the adapter config files (`adapters/axiell/config.py`, `adapters/ebsco/config.py`) for other configurable
+environment variables.
 
 ### Local Development (with local Elasticsearch)
 
@@ -113,14 +119,14 @@ AWS_PROFILE=platform-developer uv run python -m adapters.transformers.transforme
 
 ## CLI Arguments
 
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `--transformer-type` | Yes | Which transformer to run: `axiell` or `ebsco` |
-| `--changeset-id` | No | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records. |
-| `--job-id` | No | Job identifier for manifest tracking. Defaults to `dev`. |
-| `--use-rest-api-table` | No | Use the S3 Tables catalog instead of local storage. |
-| `--es-mode` | No | Elasticsearch target: `local` (default) or `public`. |
-| `--create-if-not-exists` | No | Create the Iceberg table if it does not already exist. |
+| Argument                 | Required | Description                                                                                             |
+|--------------------------|----------|---------------------------------------------------------------------------------------------------------|
+| `--transformer-type`     | Yes      | Which transformer to run: `axiell` or `ebsco`                                                           |
+| `--changeset-id`         | No       | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records. |
+| `--job-id`               | No       | Job identifier for manifest tracking. Defaults to `dev`.                                                |
+| `--use-rest-api-table`   | No       | Use the S3 Tables catalog instead of local storage.                                                     |
+| `--es-mode`              | No       | Elasticsearch target: `local` (default) or `public`.                                                    |
+| `--create-if-not-exists` | No       | Create the Iceberg table if it does not already exist.                                                  |
 
 ## Lambda Invocation
 
@@ -130,13 +136,17 @@ In production, the transformer runs as a Lambda function. The event structure:
 {
   "transformer_type": "ebsco",
   "job_id": "batch-20250116",
-  "changeset_ids": ["changeset-001", "changeset-002"]
+  "changeset_ids": [
+    "changeset-001",
+    "changeset-002"
+  ]
 }
 ```
 
 ## Output
 
 The transformer produces:
+
 - **Elasticsearch documents**: Indexed into the configured source works index
 - **Manifest file**: Written to S3 with lists of successful IDs and any errors
 
@@ -146,3 +156,29 @@ The transformer produces:
 - Transform errors are captured with the work ID and error details
 - Elasticsearch bulk indexing errors are tracked per-document
 - Up to 1,000 errors are recorded in each manifest to cap file sizes
+
+## Axiell reconciler
+
+```mermaid
+---
+title: reconciler
+---
+flowchart TD
+    adapter_store[(Adapter Store<br/>collectId: content)] -.-> read
+    Start((Start)) --> read["read changeset from adapter store"]
+    read --> extract["extract all collectId -> guid pairs"]
+    extract --> check["get_rows_to_update"]
+    reconciler_store[(Reconciler Store<br/>collectId: guid)]
+    check -.- reconciler_store
+    check --> choose{Updates? Inserts?}
+    choose -- inserts only --> write["write to reconciler store"]
+    write -.-> reconciler_store
+    write --> stop(((Stop)))
+    choose -- no changes --> stop
+    choose -- updates --> fork[fork]
+    fork --> delete["write DELETED record to transformer store"]
+    fork --> write
+    delete ==> further_downstream
+    transformer_store[(Transformer Store<br/>guid: Work)]
+    delete -.-> transformer_store
+```
