@@ -20,7 +20,7 @@ from tests.adapters.conftest import AdapterStoreFactory
 
 def test_get_all_records_empty_table(temporary_table: IcebergTable) -> None:
     """When the table is empty, get_all_records returns an empty Arrow table."""
-    client = AdapterStore(temporary_table)
+    client = AdapterStore(temporary_table, "test_namespace")
     all_records = client.get_all_records()
     assert all_records.num_rows == 0
 
@@ -28,7 +28,7 @@ def test_get_all_records_empty_table(temporary_table: IcebergTable) -> None:
 def test_get_all_records_returns_all_non_deleted(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
-    """get_all_records returns all records where deleted is null or False."""
+    """get_active_namespace_records returns all records where deleted is null or False."""
     client = adapter_store_with_records(
         [
             {"id": "rec001", "content": "active record"},
@@ -37,7 +37,7 @@ def test_get_all_records_returns_all_non_deleted(
         ]
     )
 
-    all_records = client.get_all_records()
+    all_records = client.get_active_namespace_records()
 
     ids = cast(list[str], all_records.column("id").to_pylist())
     assert sorted(ids) == ["rec001", "rec002"]
@@ -46,7 +46,7 @@ def test_get_all_records_returns_all_non_deleted(
 def test_get_all_records_include_deleted_true(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
-    """get_all_records with include_deleted=True returns all records including deleted ones."""
+    """get_all_records returns all records, including deleted ones."""
     client = adapter_store_with_records(
         [
             {"id": "rec001", "content": "active record"},
@@ -54,7 +54,7 @@ def test_get_all_records_include_deleted_true(
         ]
     )
 
-    all_records = client.get_all_records(include_deleted=True)
+    all_records = client.get_all_records()
 
     assert all_records.num_rows == 2
     ids = set(all_records.column("id").to_pylist())
@@ -76,7 +76,7 @@ def test_get_all_records_excludes_deleted_by_default(
         ]
     )
 
-    all_records = client.get_all_records()  # Default: include_deleted=False
+    all_records = client.get_active_namespace_records()
 
     assert all_records.num_rows == 1
     row = all_records.to_pylist()[0]
@@ -153,7 +153,7 @@ def test_get_records_by_changeset_empty_table(
     temporary_table: IcebergTable,
 ) -> None:
     """get_records_by_changeset on empty table returns empty result."""
-    client = AdapterStore(temporary_table)
+    client = AdapterStore(temporary_table, "test_namespace")
     result = client.get_records_by_changeset("any-changeset")
 
     assert result.num_rows == 0

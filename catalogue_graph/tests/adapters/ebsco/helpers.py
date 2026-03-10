@@ -13,7 +13,7 @@ from pyiceberg.table import Table as IcebergTable
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 
 
 def lone_element(list_of_one: list) -> Any:
@@ -41,10 +41,7 @@ def add_namespace(
 
 
 def data_to_namespaced_table(
-    unqualified_data: list[dict[str, Any]],
-    namespace: str | None = None,
-    *,
-    add_timestamp: bool = False,
+    unqualified_data: list[dict[str, Any]], namespace: str | None = None
 ) -> pa.Table:
     """
     Convert a list of data dictionaries to a PyArrow table with namespace added.
@@ -61,12 +58,13 @@ def data_to_namespaced_table(
 
     rows = [add_namespace(entry.copy(), namespace) for entry in unqualified_data]
 
-    if add_timestamp:
-        now = datetime.now(UTC)
-        for row in rows:
-            row.setdefault("last_modified", now)
+    now = datetime.now(UTC)
+    for row in rows:
+        row.setdefault("last_modified", now)
 
-    file_loader = MarcXmlFileLoader(schema=ARROW_SCHEMA, namespace=namespace)
+    file_loader = MarcXmlFileLoader(
+        schema=ADAPTER_STORE_ARROW_SCHEMA, namespace=namespace
+    )
 
     return file_loader.data_to_pa_table(rows)
 
@@ -121,13 +119,11 @@ def prepare_changeset(
                 "last_modified": datetime.now(UTC),
             }
         )
-    pa_table_initial = data_to_namespaced_table(
-        rows, namespace=namespace, add_timestamp=True
-    )
+    pa_table_initial = data_to_namespaced_table(rows, namespace=namespace)
 
-    client = AdapterStore(temporary_table)
+    client = AdapterStore(temporary_table, namespace)
 
-    store_update = client.incremental_update(pa_table_initial, namespace)
+    store_update = client.incremental_update(pa_table_initial)
     assert store_update is not None
     changeset_id = store_update.changeset_id
 

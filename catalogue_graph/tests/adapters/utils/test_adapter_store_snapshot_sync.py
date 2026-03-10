@@ -7,6 +7,7 @@ data are marked as deleted.
 """
 
 from collections.abc import Collection
+from datetime import UTC, datetime
 from typing import Any
 
 import pyarrow as pa
@@ -14,7 +15,7 @@ from pyiceberg.expressions import EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 
 
 def data_to_namespaced_table(
@@ -28,9 +29,10 @@ def data_to_namespaced_table(
     for item in unqualified_data:
         new_item = item.copy()
         new_item["namespace"] = namespace
+        new_item.setdefault("last_modified", datetime.now(UTC))
         data.append(new_item)
 
-    return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
+    return pa.Table.from_pylist(data, schema=ADAPTER_STORE_ARROW_SCHEMA)
 
 
 def assert_row_identifiers(rows: pa.Table, expected_ids: Collection[str]) -> None:
@@ -53,16 +55,16 @@ def test_snapshot_sync_noop(temporary_table: IcebergTable) -> None:
     """
     data = data_to_namespaced_table([{"id": "eb0001", "content": "hello"}])
     temporary_table.append(data)
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(data)
     # No Changeset identifier is returned
     assert changeset is None
     # The data is the same as before the update
-    expected_field_names = tuple(field.name for field in ARROW_SCHEMA)
+    expected_field_names = tuple(field.name for field in ADAPTER_STORE_ARROW_SCHEMA)
     assert (
         temporary_table.scan(selected_fields=expected_field_names)
         .to_arrow()
-        .cast(ARROW_SCHEMA)
+        .cast(ADAPTER_STORE_ARROW_SCHEMA)
         .equals(data)
     )
     # No changeset identifiers have been added
@@ -86,8 +88,8 @@ def test_snapshot_sync_undelete(temporary_table: IcebergTable) -> None:
         [{"id": "eb0001", "content": "hello"}, {"id": "eb0002", "content": "world!"}]
     )
 
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002"}
 
@@ -119,8 +121,8 @@ def test_snapshot_sync_new_table(temporary_table: IcebergTable) -> None:
             {"id": "eb0003", "content": "alle sammen"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0001", "eb0002", "eb0003"}
     assert (
@@ -155,8 +157,8 @@ def test_snapshot_sync_update_records(temporary_table: IcebergTable) -> None:
             {"id": "eb0003", "content": "alle sammen"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0001", "eb0003"}
     expected_changes = {"eb0001", "eb0003"}
@@ -195,8 +197,8 @@ def test_snapshot_sync_insert_records(temporary_table: IcebergTable) -> None:
             {"id": "eb0099", "content": "tout le monde"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0099"}
     expected_insertions = {"eb0002", "eb0099"}
@@ -235,8 +237,8 @@ def test_snapshot_sync_delete_records(temporary_table: IcebergTable) -> None:
             {"id": "eb0003", "content": "world"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0099"}
     expected_deletions = {"eb0002", "eb0099"}
@@ -262,10 +264,11 @@ def test_snapshot_sync_all_actions(temporary_table: IcebergTable) -> None:
     Then inserts, updates, and deletes are all applied correctly
     And all modified rows are tagged with the same changeset
     """
+    some_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
     temporary_table.append(
         data_to_namespaced_table(
             [
-                {"id": "eb0001", "content": "hello"},
+                {"id": "eb0001", "content": "hello", "last_modified": some_time},
                 {"id": "eb0002", "content": "byebye"},
                 {"id": "eb0003", "content": "greetings"},
             ]
@@ -283,8 +286,8 @@ def test_snapshot_sync_all_actions(temporary_table: IcebergTable) -> None:
     expected_update = "eb0003"
     expected_insert = "eb0004"
 
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {
         expected_deletion,
@@ -317,7 +320,7 @@ def test_snapshot_sync_all_actions(temporary_table: IcebergTable) -> None:
             "id": "eb0001",
             "content": "hello",
             "changeset": None,
-            "last_modified": None,
+            "last_modified": some_time,
             "deleted": None,
             "namespace": "test_namespace",
         }
@@ -346,11 +349,11 @@ def test_snapshot_sync_idempotent(temporary_table: IcebergTable) -> None:
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0003", "eb0004"}
-    second_changeset = client.snapshot_sync(new_data, "test_namespace")
+    second_changeset = client.snapshot_sync(new_data)
     assert second_changeset is None
 
 
@@ -378,8 +381,8 @@ def test_snapshot_sync_most_recent_changeset_preserved(
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0003", "eb0004"}
     assert {"eb0003", "eb0004"} == set(
@@ -395,7 +398,7 @@ def test_snapshot_sync_most_recent_changeset_preserved(
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    newer_changeset = client.snapshot_sync(newer_data, "test_namespace")
+    newer_changeset = client.snapshot_sync(newer_data)
     assert newer_changeset is not None
     assert set(newer_changeset.updated_record_ids) == {"eb0003"}
     assert {"eb0003"} == set(
@@ -426,8 +429,8 @@ def test_snapshot_sync_get_records_by_changeset(temporary_table: IcebergTable) -
             {"id": "eb0002", "content": "world"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset_1 = client.snapshot_sync(initial_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset_1 = client.snapshot_sync(initial_data)
     assert changeset_1 is not None
     assert set(changeset_1.updated_record_ids) == {"eb0001", "eb0002"}
 
@@ -446,7 +449,7 @@ def test_snapshot_sync_get_records_by_changeset(temporary_table: IcebergTable) -
             {"id": "eb0004", "content": "another new record"},  # New record
         ]
     )
-    changeset_2 = client.snapshot_sync(additional_data, "test_namespace")
+    changeset_2 = client.snapshot_sync(additional_data)
     assert changeset_2 is not None
     assert set(changeset_2.updated_record_ids) == {"eb0003", "eb0004"}
 
@@ -474,7 +477,7 @@ def test_snapshot_sync_get_records_by_changeset(temporary_table: IcebergTable) -
 
 def test_get_all_records_empty(temporary_table: IcebergTable) -> None:
     """When the table is empty, get_all_records returns an empty Arrow table."""
-    client = AdapterStore(temporary_table)
+    client = AdapterStore(temporary_table, "test_namespace")
     all_records = client.get_all_records()
     assert all_records.num_rows == 0
 
@@ -504,13 +507,13 @@ def test_snapshot_sync_get_all_records_after_update(
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0003", "eb0004"}
 
-    # get_all_records should EXCLUDE deleted by default -> eb0002 gone
-    all_records = client.get_all_records()
+    # get_active_namespace_records should EXCLUDE deleted -> eb0002 gone
+    all_records = client.get_active_namespace_records()
     assert all_records.num_rows == 3
     rows = {row["id"]: row for row in all_records.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0003", "eb0004"}
@@ -541,11 +544,11 @@ def test_snapshot_sync_get_all_records_include_deleted(
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(new_data, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    changeset = client.snapshot_sync(new_data)
     assert changeset is not None
     assert set(changeset.updated_record_ids) == {"eb0002", "eb0003", "eb0004"}
-    all_with_deleted = client.get_all_records(include_deleted=True)
+    all_with_deleted = client.get_all_records()
     assert all_with_deleted.num_rows == 4
     rows = {row["id"]: row for row in all_with_deleted.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0002", "eb0003", "eb0004"}
@@ -560,12 +563,12 @@ def test_snapshot_sync_raises_on_non_castable_schema(
     """snapshot_sync should fail fast if the adapter hands us a table with the wrong schema."""
     import pytest
 
-    # Missing the required 'deleted' field from ARROW_SCHEMA.
+    # Missing the required 'deleted' field from ADAPTER_STORE_ARROW_SCHEMA.
     bad_fields: list[pa.Field] = [
         pa.field("namespace", pa.string(), nullable=False),
         pa.field("id", pa.string(), nullable=False),
         pa.field("content", pa.string(), nullable=True),
-        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
+        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=False),
     ]
     bad_schema = pa.schema(bad_fields)
 
@@ -581,6 +584,9 @@ def test_snapshot_sync_raises_on_non_castable_schema(
         schema=bad_schema,
     )
 
-    client = AdapterStore(temporary_table)
-    with pytest.raises(ValueError, match=r"snapshot_sync.*ARROW_SCHEMA"):
-        client.snapshot_sync(bad_table, "test_namespace")
+    client = AdapterStore(temporary_table, "test_namespace")
+    with pytest.raises(
+        ValueError,
+        match=r"Target schema's field names are not matching the table's field names",
+    ):
+        client.snapshot_sync(bad_table)

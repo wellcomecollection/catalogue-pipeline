@@ -21,5 +21,8 @@ class AdapterStoreSource(BaseSource):
                 yield from table.to_pylist()
         else:
             logger.info("No changeset_id provided; performing full reindex of records.")
-            table = self.adapter_store.get_all_records()
+
+            # During a full reindex we are writing into an empty index,
+            # so no need to include deleted rows to overwrite documents.
+            table = self.adapter_store.get_active_namespace_records()
             yield from table.to_pylist()

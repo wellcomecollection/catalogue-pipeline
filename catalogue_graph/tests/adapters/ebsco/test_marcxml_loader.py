@@ -9,11 +9,13 @@ from adapters.ebsco.marcxml_loader import (
     MissingRecordIdentifierError,
 )
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from tests.mocks import MockSmartOpen
 
 # -- Tests for MarcXmlFileLoader.extract_record_id ---
-file_loader = MarcXmlFileLoader(schema=ARROW_SCHEMA, namespace=EBSCO_NAMESPACE)
+file_loader = MarcXmlFileLoader(
+    schema=ADAPTER_STORE_ARROW_SCHEMA, namespace=EBSCO_NAMESPACE
+)
 
 
 def test_uses_controlfield_001_when_available() -> None:
@@ -114,7 +116,7 @@ def test_loads_one_record_into_pa_table(
 
     table = file_loader.load_file(xml_with_one_record.name)
 
-    assert table.schema == ARROW_SCHEMA
+    assert table.schema == ADAPTER_STORE_ARROW_SCHEMA
     rows = [
         {**row, "content": _canonicalize(row["content"])} for row in table.to_pylist()
     ]
@@ -147,7 +149,7 @@ def test_loads_multiple_records_preserving_content_and_order(
     register_mock_open(xml_with_three_records.name)
     table_three = file_loader.load_file(xml_with_three_records.name)
 
-    assert table_three.schema == ARROW_SCHEMA
+    assert table_three.schema == ADAPTER_STORE_ARROW_SCHEMA
 
     rows_three = [
         {**row, "content": _canonicalize(row["content"])}
