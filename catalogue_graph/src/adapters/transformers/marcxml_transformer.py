@@ -107,7 +107,9 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         )
 
     def _row_to_marc_record(self, row: dict[str, Any]) -> Record | None:
-        """Converts the row's content field to a MARC record. Returns `None` if content field empty or parsing fails."""
+        """
+        Convert the row's content field to a MARC record. Return `None` if content field empty or parsing fails.
+        """
         row_id, content = row["id"], row.get("content")
 
         if not content:

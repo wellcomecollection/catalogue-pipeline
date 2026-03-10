@@ -47,7 +47,7 @@ def test_transformer_end_to_end_with_local_table(
         monkeypatch,
         records_by_id,
         namespace=EBSCO_NAMESPACE,
-        build_adapter_table_path="adapters.ebsco.helpers.build_adapter_table",
+        transformer_type="ebsco",
     )
 
     MockElasticsearchClient.inputs.clear()
@@ -100,7 +100,7 @@ def test_transformer_end_to_end_includes_deletions(
         monkeypatch,
         records_by_id,
         namespace=EBSCO_NAMESPACE,
-        build_adapter_table_path="adapters.ebsco.helpers.build_adapter_table",
+        transformer_type="ebsco",
     )
 
     MockElasticsearchClient.inputs.clear()
