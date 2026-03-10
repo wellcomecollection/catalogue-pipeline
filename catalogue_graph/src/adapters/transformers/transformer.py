@@ -5,6 +5,7 @@ indexes transformed documents into Elasticsearch.
 """
 
 import argparse
+import os
 from collections.abc import Callable
 from typing import Any, Literal, Protocol, cast
 
@@ -47,7 +48,7 @@ class AdapterConfig(Protocol):
     ES_INDEX_NAME: str
     ES_API_KEY_NAME: str
     S3_BUCKET: str
-    BATCH_S3_PREFIX: str
+    S3_PREFIX: str
 
 
 ICEBERG_NAMESPACE_BY_TYPE: dict[TransformerType, str] = {
@@ -66,6 +67,12 @@ ADAPTER_TABLE_BUILDER_BY_TYPE: dict[TransformerType, Callable] = {
     "axiell": AXIELL_CONFIG.build_adapter_table,
     "axiell_reconciler": AXIELL_CONFIG.build_adapter_table,
     "ebsco": ebsco_helpers.build_adapter_table,
+}
+
+BATCHES_S3_PREFIX_BY_TYPE: dict[TransformerType, str] = {
+    "axiell": "transformer/batches",
+    "axiell_reconciler": "reconciler/batches",
+    "ebsco": "transformer/batches",
 }
 
 
@@ -141,11 +148,13 @@ def handler(
         api_key_name=config.ES_API_KEY_NAME,
     )
     transformer.stream_to_index(es_client, index_name)
+
+    s3_batches_prefix = BATCHES_S3_PREFIX_BY_TYPE[event.transformer_type]
     writer = TransformerManifestWriter(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
         bucket=config.S3_BUCKET,
-        prefix=config.BATCH_S3_PREFIX,
+        prefix=os.path.join(config.S3_PREFIX, s3_batches_prefix),
     )
     result = writer.build_manifest(
         successful_ids=transformer.successful_ids,
