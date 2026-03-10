@@ -106,6 +106,13 @@ def build_transformer(
     if event.transformer_type == "ebsco":
         return EbscoTransformer(adapter_store, event.changeset_ids)
     if event.transformer_type == "axiell_reconciler":
+        if not event.changeset_ids:
+            # The reconciler doesn't work in the context of a full reindex,
+            # since it doesn't preserve historic deleted work GUIDs (source IDs).
+            raise ValueError(
+                "The reconciler only supports incremental mode. At least one changeset_id required."
+            )
+
         table = axiell_helpers.build_reconciler_table(
             use_rest_api_table=use_rest_api_table,
             create_if_not_exists=create_if_not_exists,

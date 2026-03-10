@@ -42,14 +42,11 @@ def _run_reconciler(
 ) -> TransformerManifest:
     monkeypatch.setattr(
         "adapters.transformers.transformer.ADAPTER_TABLE_BUILDER_BY_TYPE",
-        {
-            "axiell_reconciler": lambda use_rest_api_table,
-            create_if_not_exists: adapter_table
-        },
+        {"axiell_reconciler": lambda **kwargs: adapter_table},
     )
     monkeypatch.setattr(
         "adapters.transformers.transformer.axiell_helpers.build_reconciler_table",
-        lambda use_rest_api_table, create_if_not_exists: reconciler_table,
+        lambda **kwargs: reconciler_table,
     )
 
     event = TransformerEvent(
@@ -315,3 +312,20 @@ def test_reconciler_skips_missing_or_invalid_content(
     assert result.failures is not None
     assert result.failures.count == 2
     assert MockElasticsearchClient.inputs == []
+
+
+def test_reconciler_requires_changeset_id(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match="The reconciler only supports incremental mode. At least one changeset_id required.",
+    ):
+        _run_reconciler(
+            monkeypatch,
+            temporary_table,
+            reconciler_temporary_table,
+            [],
+        )
