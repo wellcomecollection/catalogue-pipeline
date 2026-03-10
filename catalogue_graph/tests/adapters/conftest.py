@@ -14,14 +14,18 @@ from adapters.utils.iceberg import (
     LocalIcebergTableConfig,
     get_local_table,
 )
-from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
+from adapters.utils.schemata import (
+    ADAPTER_STORE_ARROW_SCHEMA,
+    RECONCILER_STORE_ARROW_SCHEMA,
+    RECONCILER_STORE_ICEBERG_SCHEMA,
+)
 from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
 
 # Type alias for the factory fixture
 AdapterStoreFactory = Callable[[list[dict]], AdapterStore]
 
 
-def records_to_table(
+def adapter_records_to_table(
     records: list[dict[str, Any]],
     namespace: str = "test_namespace",
 ) -> pa.Table:
@@ -37,7 +41,7 @@ def records_to_table(
         namespace: Default namespace to apply to records without one
 
     Usage:
-        table = records_to_table([
+        table = adapter_records_to_table([
             {"id": "rec001", "content": "hello"},
             {"id": "rec002", "content": "world", "deleted": True},
         ])
@@ -51,6 +55,30 @@ def records_to_table(
         data.append(new_item)
 
     return pa.Table.from_pylist(data, schema=ADAPTER_STORE_ARROW_SCHEMA)
+
+
+def reconciler_records_to_table(
+    records: list[dict[str, Any]],
+    namespace: str = "test_namespace",
+) -> pa.Table:
+    """Create an Arrow table with the reconciler schema from a list of dicts.
+
+    Provides sensible defaults for required fields:
+    - namespace: "test_namespace" (or as specified)
+    - last_modified: datetime.now(UTC)
+
+    Args:
+        records: List of dicts with at minimum 'id' and 'guid' keys
+        namespace: Default namespace to apply to records without one
+    """
+    data: list[dict[str, Any]] = []
+    for item in records:
+        new_item = item.copy()
+        new_item.setdefault("namespace", namespace)
+        new_item.setdefault("last_modified", datetime.now(UTC))
+        data.append(new_item)
+
+    return pa.Table.from_pylist(data, schema=RECONCILER_STORE_ARROW_SCHEMA)
 
 
 @pytest.fixture
@@ -77,7 +105,7 @@ def adapter_store_with_records(
         records: list[dict], namespace: str = "test_namespace"
     ) -> AdapterStore:
         if records:
-            table = records_to_table(records, namespace=namespace)
+            table = adapter_records_to_table(records, namespace=namespace)
             temporary_table.append(table)
         return AdapterStore(temporary_table, namespace)
 
@@ -105,6 +133,21 @@ def temporary_window_status_table() -> Generator[IcebergTable, None, None]:
         namespace="test",
         db_name="test_catalog",
         iceberg_schema=WINDOW_STATUS_SCHEMA,
+    )
+    table = get_local_table(config)
+    try:
+        yield table
+    finally:
+        table.catalog.drop_table(f"test.{config.table_name}")
+
+
+@pytest.fixture
+def reconciler_temporary_table() -> Generator[IcebergTable, None, None]:
+    config = LocalIcebergTableConfig(
+        table_name=str(uuid1()),
+        namespace="test",
+        db_name="test_catalog",
+        iceberg_schema=RECONCILER_STORE_ICEBERG_SCHEMA,
     )
     table = get_local_table(config)
     try:

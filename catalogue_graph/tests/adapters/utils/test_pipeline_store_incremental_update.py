@@ -1,5 +1,5 @@
 """
-Tests covering the incremental_update behaviour of the AdapterStore.
+Tests covering the incremental_update behaviour of the PipelineStore.
 
 incremental_update performs selective updates where only the provided
 records are updated or inserted. Records not present in the new data
@@ -14,7 +14,11 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.adapter_store import AdapterStore
-from tests.adapters.conftest import records_to_table
+from adapters.utils.reconciler_store import ReconcilerStore
+from tests.adapters.conftest import (
+    adapter_records_to_table,
+    reconciler_records_to_table,
+)
 
 
 def test_incremental_update_does_not_delete_missing_records(
@@ -27,7 +31,7 @@ def test_incremental_update_does_not_delete_missing_records(
     """
     # Initial state: 2 records
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "world"},
@@ -36,7 +40,7 @@ def test_incremental_update_does_not_delete_missing_records(
     )
 
     # Incremental update: only updates eb0001, does not include eb0002
-    new_data = records_to_table(
+    new_data = adapter_records_to_table(
         [
             {"id": "eb0001", "content": "hello updated"},
         ],
@@ -61,14 +65,14 @@ def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> N
     Then the new records are inserted
     """
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
             ]
         )
     )
 
-    new_data = records_to_table(
+    new_data = adapter_records_to_table(
         [
             {"id": "eb0002", "content": "world"},
         ],
@@ -93,7 +97,7 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
     Then updates are applied and new records are inserted
     """
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "world"},
@@ -101,7 +105,7 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
         )
     )
 
-    new_data = records_to_table(
+    new_data = adapter_records_to_table(
         [
             {"id": "eb0001", "content": "hello updated"},
             {"id": "eb0003", "content": "new record"},
@@ -130,17 +134,17 @@ def test_incremental_update_does_not_touch_other_namespaces(
     Then data in other namespaces is unaffected
     """
     # Add data for another namespace
-    other_data = records_to_table(
+    other_data = adapter_records_to_table(
         [{"id": "ax0001", "content": "axiell data"}], "axiell_test"
     )
     temporary_table.append(other_data)
 
     # Add data for ebsco namespace
-    ebsco_data = records_to_table([{"id": "eb0001", "content": "ebsco data"}])
+    ebsco_data = adapter_records_to_table([{"id": "eb0001", "content": "ebsco data"}])
     temporary_table.append(ebsco_data)
 
     # Update ebsco data
-    new_ebsco_data = records_to_table(
+    new_ebsco_data = adapter_records_to_table(
         [{"id": "eb0001", "content": "ebsco updated"}],
     )
 
@@ -166,13 +170,13 @@ def test_incremental_update_with_newer_timestamp(temporary_table: IcebergTable) 
     new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
 
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [{"id": "eb0001", "content": "old content", "last_modified": old_time}]
         )
     )
 
     # Update with newer timestamp
-    new_data = records_to_table(
+    new_data = adapter_records_to_table(
         [{"id": "eb0001", "content": "new content", "last_modified": new_time}]
     )
 
@@ -200,13 +204,13 @@ def test_incremental_update_with_older_timestamp(temporary_table: IcebergTable) 
     old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [{"id": "eb0001", "content": "current content", "last_modified": new_time}]
         )
     )
 
     # Try to update with older timestamp
-    old_data = records_to_table(
+    old_data = adapter_records_to_table(
         [{"id": "eb0001", "content": "old content", "last_modified": old_time}]
     )
 
@@ -232,7 +236,7 @@ def test_incremental_update_with_equal_timestamp(temporary_table: IcebergTable) 
     same_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [
                 {
                     "id": "eb0001",
@@ -244,7 +248,7 @@ def test_incremental_update_with_equal_timestamp(temporary_table: IcebergTable) 
     )
 
     # Try to update with same timestamp but different content
-    update_data = records_to_table(
+    update_data = adapter_records_to_table(
         [{"id": "eb0001", "content": "modified content", "last_modified": same_time}]
     )
 
@@ -273,7 +277,7 @@ def test_incremental_update_newer_timestamp_same_content(
     newer_time = base_time + timedelta(days=1)
 
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [
                 {
                     "id": "eb0002",
@@ -285,7 +289,7 @@ def test_incremental_update_newer_timestamp_same_content(
     )
 
     # Attempt update with newer timestamp but identical content
-    update_data = records_to_table(
+    update_data = adapter_records_to_table(
         [{"id": "eb0002", "content": "the same content", "last_modified": newer_time}]
     )
 
@@ -312,7 +316,7 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
     time_current = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
 
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [
                 {"id": "eb0001", "content": "record 1 old", "last_modified": time_old},
                 {
@@ -330,7 +334,7 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
     )
 
     # Update with mixed timestamps
-    update_data = records_to_table(
+    update_data = adapter_records_to_table(
         [
             {
                 "id": "eb0001",
@@ -381,7 +385,7 @@ def test_incremental_update_with_new_record_with_timestamp(
     """
     new_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
 
-    new_data = records_to_table(
+    new_data = adapter_records_to_table(
         [{"id": "eb0001", "content": "new record", "last_modified": new_time}]
     )
 
@@ -408,7 +412,7 @@ def test_incremental_update_null_timestamp_on_timestamped_record(
     """
     # Initial data
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [
                 {"id": "eb0001", "content": "hello"},
             ]
@@ -416,7 +420,7 @@ def test_incremental_update_null_timestamp_on_timestamped_record(
     )
 
     # Incremental update without last_modified column
-    new_data = records_to_table(
+    new_data = adapter_records_to_table(
         [
             {"id": "eb0001", "content": "updated", "last_modified": None},
         ]
@@ -479,13 +483,13 @@ def test_incremental_update_preserves_content_on_deletion(
 
     # Initial record with content
     temporary_table.append(
-        records_to_table(
+        adapter_records_to_table(
             [{"id": "eb0001", "content": "original content", "last_modified": old_time}]
         )
     )
 
     # Mark as deleted with content=None (simulating OAI-PMH deletion)
-    deletion_data = records_to_table(
+    deletion_data = adapter_records_to_table(
         [{"id": "eb0001", "content": None, "last_modified": new_time, "deleted": True}]
     )
 
@@ -501,3 +505,83 @@ def test_incremental_update_preserves_content_on_deletion(
     assert row["content"] == "original content"  # Content preserved!
     assert row["deleted"] is True
     assert row["last_modified"] == new_time
+
+
+def test_reconciler_incremental_update_inserts_and_updates(
+    reconciler_temporary_table: IcebergTable,
+) -> None:
+    old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
+    new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
+
+    # Reconciler store with existing records
+    reconciler_temporary_table.append(
+        reconciler_records_to_table(
+            [
+                {"id": "rec001", "guid": "aaa-111", "last_modified": old_time},
+                {"id": "rec002", "guid": "bbb-222", "last_modified": old_time},
+            ]
+        )
+    )
+
+    # Update one of the records and insert another one
+    new_data = reconciler_records_to_table(
+        [
+            {"id": "rec001", "guid": "aaa-updated", "last_modified": new_time},
+            {"id": "rec003", "guid": "ccc-333", "last_modified": new_time},
+        ]
+    )
+
+    client = ReconcilerStore(reconciler_temporary_table, "test_namespace")
+    result = client.incremental_update(new_data)
+
+    assert result is not None
+    assert set(result.updated_record_ids) == {"rec001", "rec003"}
+
+    all_records = client.get_all_records()
+    rows = {row["id"]: row for row in all_records.to_pylist()}
+
+    assert len(rows) == 3
+    assert rows["rec001"]["guid"] == "aaa-updated"
+    assert rows["rec002"]["guid"] == "bbb-222"  # Unchanged
+    assert rows["rec003"]["guid"] == "ccc-333"
+
+
+def test_reconciler_incremental_update_skips_older_and_identical(
+    reconciler_temporary_table: IcebergTable,
+) -> None:
+    time_old = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
+    time_current = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
+
+    # Reconciler store with existing records
+    reconciler_temporary_table.append(
+        reconciler_records_to_table(
+            [
+                {"id": "rec001", "guid": "aaa-111", "last_modified": time_current},
+                {"id": "rec002", "guid": "bbb-222", "last_modified": time_current},
+            ]
+        )
+    )
+
+    update_data = reconciler_records_to_table(
+        [
+            # Older timestamp - should NOT update
+            {"id": "rec001", "guid": "aaa-old", "last_modified": time_old},
+            # Same guid, newer timestamp - should NOT update (no content change)
+            {
+                "id": "rec002",
+                "guid": "bbb-222",
+                "last_modified": time_current + timedelta(days=1),
+            },
+        ]
+    )
+
+    client = ReconcilerStore(reconciler_temporary_table, "test_namespace")
+    result = client.incremental_update(update_data)
+
+    assert result is None
+
+    all_records = client.get_all_records()
+    rows = {row["id"]: row for row in all_records.to_pylist()}
+
+    assert rows["rec001"]["guid"] == "aaa-111"
+    assert rows["rec002"]["guid"] == "bbb-222"
