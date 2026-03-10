@@ -37,10 +37,12 @@ from tests.id_minter.conftest import (
     seed_identifier,
     stub_transformer_source,
 )
-from tests.mocks import MockElasticsearchClient, MockSmartOpen
+from tests.mocks import MockElasticsearchClient, MockSmartOpen, MockSNSClient
 from utils.models.manifests import StepManifest
 
 pytestmark = pytest.mark.database
+
+TEST_SNS_TOPIC_ARN = "arn:aws:sns:eu-west-1:123456789:test-topic"
 
 
 # ---------------------------------------------------------------------------
@@ -50,12 +52,14 @@ pytestmark = pytest.mark.database
 
 def _build_runtime(
     conn: pymysql.connections.Connection,
+    downstream_sns_topic_arn: str | None = None,
 ) -> IdMinterRuntime:
     """Build a runtime with a MintingResolver backed by the DB connection."""
     resolver = MintingResolver.from_connection(conn)
     config = IdMinterConfig(
         rds_client=RDSClientConfig(password="id_minter"),
         apply_migrations=False,
+        downstream_sns_topic_arn=downstream_sns_topic_arn,
     )
     return IdMinterRuntime(
         config=config,
@@ -306,3 +310,126 @@ class TestHandlerWithRealResolver:
         assert response.job_id == "handler-empty"
         assert response.successes.count == 0
         assert response.failures is None
+
+
+# ---------------------------------------------------------------------------
+# Tests: SNS publishing of successful IDs
+# ---------------------------------------------------------------------------
+
+
+class TestSnsPublishing:
+    """Verify that successful canonical IDs are published to SNS."""
+
+    def test_publishes_successful_ids_to_sns(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """Successful canonical IDs are published to the configured SNS topic."""
+        seed_free_ids(ids_db, ["sns00001"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b7001")
+        doc = make_work_doc(si)
+
+        runtime = _build_runtime(ids_db, downstream_sns_topic_arn=TEST_SNS_TOPIC_ARN)
+        request = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b7001]"],
+            job_id="sns-test-1",
+        )
+
+        with stub_transformer_source([doc]):
+            execute(request, runtime=runtime)
+
+        assert len(MockSNSClient.publish_batch_request_entries) == 1
+        call = MockSNSClient.publish_batch_request_entries[0]
+        assert call["TopicArn"] == TEST_SNS_TOPIC_ARN
+
+        entries = call["PublishBatchRequestEntries"]
+        assert len(entries) == 1
+        # The message should be the canonical ID as a plain string
+        # (wrapped in {"default": "<id>"} for SNS MessageStructure=json)
+        msg = json.loads(entries[0]["Message"])
+        assert msg == {"default": "sns00001"}
+
+    def test_publishes_in_batches_of_10(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """IDs are chunked into SNS batches of at most 10."""
+        ids = [f"bt{i:06d}" for i in range(25)]
+        seed_free_ids(ids_db, ids)
+
+        docs = [
+            make_work_doc(
+                make_source_identifier("Work", "sierra-system-number", f"b{i}")
+            )
+            for i in range(25)
+        ]
+
+        runtime = _build_runtime(ids_db, downstream_sns_topic_arn=TEST_SNS_TOPIC_ARN)
+        request = StepFunctionMintingRequest(
+            source_identifiers=[f"Work[sierra-system-number/b{i}]" for i in range(25)],
+            job_id="sns-batch-test",
+        )
+
+        with stub_transformer_source(docs):
+            execute(request, runtime=runtime)
+
+        calls = MockSNSClient.publish_batch_request_entries
+        assert len(calls) == 3  # 10 + 10 + 5
+        assert len(calls[0]["PublishBatchRequestEntries"]) == 10
+        assert len(calls[1]["PublishBatchRequestEntries"]) == 10
+        assert len(calls[2]["PublishBatchRequestEntries"]) == 5
+
+        # Collect all published IDs
+        published_ids = set()
+        for call in calls:
+            for entry in call["PublishBatchRequestEntries"]:
+                msg = json.loads(entry["Message"])
+                published_ids.add(msg["default"])
+        assert published_ids == set(ids)
+
+    def test_no_sns_publish_when_topic_arn_is_none(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """No SNS publishing when downstream_sns_topic_arn is not configured."""
+        seed_free_ids(ids_db, ["nosns001"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b8001")
+        doc = make_work_doc(si)
+
+        runtime = _build_runtime(ids_db)  # No SNS ARN
+        request = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b8001]"],
+            job_id="no-sns-test",
+        )
+
+        with stub_transformer_source([doc]):
+            response = execute(request, runtime=runtime)
+
+        assert response.successes.count == 1
+        assert len(MockSNSClient.publish_batch_request_entries) == 0
+
+    def test_no_sns_publish_when_no_successful_ids(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """No SNS publishing when there are no successful IDs (e.g. all failures)."""
+        # No free IDs seeded — pool is empty, so minting will fail
+        si = make_source_identifier("Work", "sierra-system-number", "b8002")
+        doc = make_work_doc(si)
+
+        runtime = _build_runtime(ids_db, downstream_sns_topic_arn=TEST_SNS_TOPIC_ARN)
+        request = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b8002]"],
+            job_id="no-success-test",
+        )
+
+        with stub_transformer_source([doc]):
+            execute(request, runtime=runtime)
+
+        assert len(MockSNSClient.publish_batch_request_entries) == 0
