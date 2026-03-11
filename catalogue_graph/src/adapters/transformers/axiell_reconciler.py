@@ -70,6 +70,12 @@ class AxiellReconciler(MarcXmlTransformer):
             id_filter, as_of_time=before_transaction
         )
 
+        # Use last_modified from the incoming overwritten rows (not the old snapshot rows)
+        last_modified_by_id = {
+            row["id"]: row["last_modified"] for row in updated_data.to_pylist()
+        }
+
         # Extract GUIDs (work IDs) from overwritten mappings and emit them as deleted works
         for row in overwritten_data.to_pylist():
-            yield row["id"], self._transform_deleted(row["guid"], row["last_modified"])
+            last_modified = last_modified_by_id.get(row["id"], row["last_modified"])
+            yield row["id"], self._transform_deleted(row["guid"], last_modified)

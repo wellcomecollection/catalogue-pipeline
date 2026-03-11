@@ -212,6 +212,60 @@ def test_reconciler_creates_new_mappings_without_emitting_deleted_works(
     assert _read_success_lines(result) == []
 
 
+def test_reconciler_emits_deleted_with_updated_last_modified(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    adapter_store = AdapterStore(temporary_table, namespace="axiell")
+    reconciler_store = ReconcilerStore(reconciler_temporary_table, namespace="axiell")
+
+    old_time = datetime(2024, 1, 1, tzinfo=UTC)
+    new_time = datetime(2025, 1, 1, tzinfo=UTC)
+
+    reconciler_store.incremental_update(
+        _rows_to_reconciler_arrow(
+            [
+                {
+                    "namespace": "axiell",
+                    "id": "collect-1",
+                    "guid": "guid-old-1",
+                    "changeset": None,
+                    "last_modified": old_time,
+                }
+            ]
+        )
+    )
+
+    adapter_changeset = adapter_store.incremental_update(
+        _rows_to_adapter_arrow(
+            [
+                {
+                    "namespace": "axiell",
+                    "id": "collect-1",
+                    "content": _marcxml("guid-new-1"),
+                    "changeset": None,
+                    "last_modified": new_time,
+                    "deleted": False,
+                }
+            ]
+        )
+    )
+    assert adapter_changeset is not None
+
+    result = _run_reconciler(
+        monkeypatch,
+        temporary_table,
+        reconciler_temporary_table,
+        [adapter_changeset.changeset_id],
+    )
+
+    assert result.successes.count == 1
+    deleted = MockElasticsearchClient.inputs[0]["_source"]
+    assert deleted["type"] == "Deleted"
+    assert deleted["version"] == int(new_time.timestamp())
+
+
 def test_reconciler_does_not_update_or_emit_when_adapter_timestamp_is_older(
     temporary_table: IcebergTable,
     reconciler_temporary_table: IcebergTable,
