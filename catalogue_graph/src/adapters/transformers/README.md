@@ -119,14 +119,14 @@ AWS_PROFILE=platform-developer uv run python -m adapters.transformers.transforme
 
 ## CLI Arguments
 
-| Argument                 | Required | Description                                                                                             |
-|--------------------------|----------|---------------------------------------------------------------------------------------------------------|
-| `--transformer-type`     | Yes      | Which transformer to run: `axiell` or `ebsco`                                                           |
-| `--changeset-id`         | No       | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records. |
-| `--job-id`               | No       | Job identifier for manifest tracking. Defaults to `dev`.                                                |
-| `--use-rest-api-table`   | No       | Use the S3 Tables catalog instead of local storage.                                                     |
-| `--es-mode`              | No       | Elasticsearch target: `local` (default) or `public`.                                                    |
-| `--create-if-not-exists` | No       | Create the Iceberg table if it does not already exist.                                                  |
+| Argument                 | Required | Description                                                                                                                               |
+|--------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `--transformer-type`     | Yes      | Which transformer to run: `axiell`, `ebsco`, or `axiell_reconciler`                                                                       |
+| `--changeset-id`         | No       | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records. Required for `axiell_reconciler`. |
+| `--job-id`               | No       | Job identifier for manifest tracking. Defaults to `dev`.                                                                                  |
+| `--use-rest-api-table`   | No       | Use the S3 Tables catalog instead of local storage.                                                                                       |
+| `--es-mode`              | No       | Elasticsearch target: `local` (default) or `public`.                                                                                      |
+| `--create-if-not-exists` | No       | Create the Iceberg table if it does not already exist.                                                                                    |
 
 ## Lambda Invocation
 
