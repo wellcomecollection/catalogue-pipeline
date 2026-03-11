@@ -5,9 +5,9 @@ indexes transformed documents into Elasticsearch.
 """
 
 import argparse
-import os
 import typing
 from collections.abc import Callable
+from pathlib import PurePosixPath
 from typing import Any, Literal, Protocol, cast
 
 import structlog
@@ -162,7 +162,7 @@ def handler(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
         bucket=config.S3_BUCKET,
-        prefix=os.path.join(config.S3_PREFIX, s3_batches_prefix),
+        prefix=str(PurePosixPath(config.S3_PREFIX, s3_batches_prefix)),
     )
     result = writer.build_manifest(
         successful_ids=transformer.successful_ids,
