@@ -49,18 +49,16 @@ class PipelineStore(ABC):
         """Return all records in the table from all namespaces."""
         return self.table.scan().to_arrow().cast(self.schema)
 
-    def snapshot_id_as_of(self, as_of_time: datetime) -> int | None:
-        ts_ms = int(as_of_time.timestamp() * 1000)
-        snapshot = self.table.snapshot_as_of_timestamp(ts_ms)
+    def current_snapshot_id(self) -> int | None:
+        snapshot = self.table.current_snapshot()
         return snapshot.snapshot_id if snapshot else None
 
     def get_namespace_records(
         self,
         iceberg_filter: BooleanExpression = ALWAYS_TRUE,
-        as_of_time: datetime | None = None,
+        snapshot_id: int | None = None,
     ) -> pa.Table:
         """Return records in the store namespace, optionally filtered."""
-        snapshot_id = self.snapshot_id_as_of(as_of_time) if as_of_time else None
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
         return (
             self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)

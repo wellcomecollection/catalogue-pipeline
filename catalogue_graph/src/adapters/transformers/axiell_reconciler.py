@@ -1,5 +1,4 @@
 from collections.abc import Generator, Iterable
-from datetime import UTC, datetime
 from typing import Any
 
 import pyarrow as pa
@@ -54,20 +53,29 @@ class AxiellReconciler(MarcXmlTransformer):
         # Take all rows modified as part of the latest Axiell adapter run and turn them into a PyArrow table
         updated_data = self._rows_to_reconciler_arrow_table(rows)
 
-        # Before updating the reconciler store, save the current time so that we can use it
-        # to retrieve overwritten data using Iceberg's snapshot functionality
-        before_transaction = datetime.now(UTC)
-        logger.info("About to update reconciler store", timestamp=before_transaction)
+        # Before updating the reconciler store, save the ID of the current Iceberg snapshot
+        # so that we can use it to retrieve overwritten data
+        previous_snapshot_id = self.reconciler_store.current_snapshot_id()
+        logger.info(
+            "Preparing reconciler store update",
+            previous_snapshot_id=previous_snapshot_id,
+        )
 
         # Perform an incremental update, updating existing collectId to GUID mappings and adding new mappings.
         result = self.reconciler_store.incremental_update(updated_data)
         if not result:
+            logger.info("Reconciler store update did not produce any changes")
             return
+        logger.info(
+            "Updated reconciler store",
+            inserted_count=len(result.inserted_record_ids),
+            updated_count=len(result.updated_record_ids),
+        )
 
         # Get *old* mappings which were overwritten as part of the incremental update
         id_filter = In("id", result.updated_record_ids)
         overwritten_data = self.reconciler_store.get_namespace_records(
-            id_filter, as_of_time=before_transaction
+            id_filter, snapshot_id=previous_snapshot_id
         )
 
         # Use last_modified from the incoming overwritten rows (not the old snapshot rows)
