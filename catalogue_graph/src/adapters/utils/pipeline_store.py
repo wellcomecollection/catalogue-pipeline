@@ -14,12 +14,13 @@ from pyiceberg.table.upsert_util import get_rows_to_update
 
 class PipelineStoreUpdate(BaseModel):
     changeset_id: str
-    inserted_record_ids: list[str]
-    changed_record_ids: list[str]
+    inserted_record_ids: list[str]  # New records
+    updated_record_ids: list[str]  # Existing updated records
 
     @property
-    def updated_record_ids(self) -> list[str]:
-        return self.changed_record_ids + self.inserted_record_ids
+    def upserted_record_ids(self) -> list[str]:
+        """Return both inserted and updated record IDs"""
+        return self.updated_record_ids + self.inserted_record_ids
 
 
 class PipelineStore(ABC):
@@ -138,7 +139,7 @@ class PipelineStore(ABC):
         return PipelineStoreUpdate(
             changeset_id=changeset_id,
             inserted_record_ids=inserted_ids,
-            changed_record_ids=changed_ids,
+            updated_record_ids=changed_ids,
         )
 
     def _extract_ids(self, table: pa.Table) -> list[str]:

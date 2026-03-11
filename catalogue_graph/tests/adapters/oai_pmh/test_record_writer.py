@@ -16,7 +16,7 @@ class TestWindowRecordWriterMocked:
     def test_writes_records_to_store(self) -> None:
         mock_store = Mock(spec=AdapterStore)
         mock_store.incremental_update.return_value = Mock(
-            changeset_id="123", updated_record_ids=["rec1"]
+            changeset_id="123", upserted_record_ids=["rec1"]
         )
 
         writer = WindowRecordWriter(
@@ -87,7 +87,7 @@ class TestWindowRecordWriterMocked:
     def test_handles_deleted_records(self) -> None:
         mock_store = Mock(spec=AdapterStore)
         mock_store.incremental_update.return_value = Mock(
-            changeset_id="456", updated_record_ids=["rec1"]
+            changeset_id="456", upserted_record_ids=["rec1"]
         )
 
         writer = WindowRecordWriter(

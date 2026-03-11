@@ -65,7 +65,7 @@ class AxiellReconciler(MarcXmlTransformer):
             return
 
         # Get *old* mappings which were overwritten as part of the incremental update
-        id_filter = In("id", result.changed_record_ids)
+        id_filter = In("id", result.updated_record_ids)
         overwritten_data = self.reconciler_store.get_namespace_records(
             id_filter, as_of_time=before_transaction
         )

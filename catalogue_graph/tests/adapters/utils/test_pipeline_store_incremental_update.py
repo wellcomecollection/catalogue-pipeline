@@ -184,7 +184,7 @@ def test_incremental_update_with_newer_timestamp(temporary_table: IcebergTable) 
     result = client.incremental_update(new_data)
 
     assert result is not None
-    assert "eb0001" in result.updated_record_ids
+    assert "eb0001" in result.upserted_record_ids
 
     # Verify the content was updated
     records = temporary_table.scan().to_arrow()
@@ -359,7 +359,7 @@ def test_incremental_update_mixed_timestamps(temporary_table: IcebergTable) -> N
 
     assert result is not None
     # Only eb0001 should be updated
-    assert set(result.updated_record_ids) == {"eb0001"}
+    assert set(result.upserted_record_ids) == {"eb0001"}
 
     # Verify the correct records were updated
     records = temporary_table.scan().to_arrow().sort_by("id")
@@ -393,7 +393,7 @@ def test_incremental_update_with_new_record_with_timestamp(
     result = client.incremental_update(new_data)
 
     assert result is not None
-    assert "eb0001" in result.updated_record_ids
+    assert "eb0001" in result.upserted_record_ids
 
     # Verify the record was inserted with timestamp
     records = temporary_table.scan().to_arrow()
@@ -497,7 +497,7 @@ def test_incremental_update_preserves_content_on_deletion(
     result = client.incremental_update(deletion_data)
 
     assert result is not None
-    assert "eb0001" in result.updated_record_ids
+    assert "eb0001" in result.upserted_record_ids
 
     # Verify the content was preserved and deleted flag is set
     records = temporary_table.scan().to_arrow()
@@ -535,7 +535,7 @@ def test_reconciler_incremental_update_inserts_and_updates(
     result = client.incremental_update(new_data)
 
     assert result is not None
-    assert set(result.updated_record_ids) == {"rec001", "rec003"}
+    assert set(result.upserted_record_ids) == {"rec001", "rec003"}
 
     all_records = client.get_all_records()
     rows = {row["id"]: row for row in all_records.to_pylist()}
