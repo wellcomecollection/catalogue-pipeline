@@ -132,9 +132,6 @@ def prepare_changeset(
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
         "adapters.transformers.transformer.ADAPTER_TABLE_BUILDER_BY_TYPE",
-        {
-            transformer_type: lambda use_rest_api_table,
-            create_if_not_exists: temporary_table
-        },
+        {transformer_type: lambda **kwargs: temporary_table},
     )
     return changeset_id
