@@ -6,6 +6,7 @@ indexes transformed documents into Elasticsearch.
 
 import argparse
 import os
+import typing
 from collections.abc import Callable
 from typing import Any, Literal, Protocol, cast
 
@@ -187,7 +188,7 @@ def main() -> None:
         "--transformer-type",
         required=True,
         help="Which transformer to run.",
-        choices=["axiell", "ebsco"],
+        choices=typing.get_args(TransformerType),
     )
     parser.add_argument(
         "--changeset-id",
