@@ -159,6 +159,16 @@ The transformer produces:
 
 ## Axiell reconciler
 
+The reconciler is a special Axiell transformer which only transforms deleted works. It exists to mitigate the fact that
+primary Axiell identifiers (collectIds) are reusable in the source system. For example, if some identifier `collectId1`
+is assigned to some work `A` and the work gets deleted, `collectId1` can get reassigned to another work `B`. This means
+we can't reliably use collectIds to determine if a given work has been deleted.
+
+The solution involves keeping an Iceberg table (called the reconciler store) mapping collectIds to secondary
+non-reusable GUIDs (stored in the content of each work). The reconciler updates the table after each adapter run,
+detects all cases where a given collectId is reassigned from an old GUID to a new one, and emits the old GUID
+as a deleted work.
+
 ```mermaid
 ---
 title: reconciler
