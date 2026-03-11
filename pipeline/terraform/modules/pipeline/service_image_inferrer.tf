@@ -5,9 +5,9 @@ locals {
   //  High inferrer throughput comes at the cost of the latency distribution
   // having heavy tails - this stops some unfortunate messages from being
   // put on the DLQ when they are consumed but not processed.
-  queue_visibility_timeout   = 60
-  shared_storage_name        = "shared_storage"
-  shared_storage_path        = "/data"
+  queue_visibility_timeout = 60
+  shared_storage_name      = "shared_storage"
+  shared_storage_path      = "/data"
 
   # This is the CPU/memory available on an ECS instance which isn't running
   # any tasks.  You can find it in the ECS console, in the list of
@@ -49,7 +49,7 @@ module "image_inferrer" {
 
   queue_visibility_timeout_seconds = local.queue_visibility_timeout
 
-  launch_type                  = "EC2"
+  launch_type = "EC2"
   capacity_provider_strategies = [
     {
       capacity_provider = module.inference_capacity_provider.name
@@ -76,7 +76,7 @@ module "image_inferrer" {
   manager_container_image = local.inference_manager_image
   manager_cpu             = local.manager_cpu
   manager_memory          = local.manager_memory
-  manager_mount_points    = [
+  manager_mount_points = [
     {
       containerPath = local.shared_storage_path,
       sourceVolume  = local.shared_storage_name
@@ -85,14 +85,14 @@ module "image_inferrer" {
 
   apps = {
     feature_inferrer = {
-      image    = local.feature_inferrer_image
-      cpu      = local.inferrer_cpu
-      memory   = local.inferrer_memory
+      image  = local.feature_inferrer_image
+      cpu    = local.inferrer_cpu
+      memory = local.inferrer_memory
       env_vars = {
         PORT = local.feature_inferrer_port
       }
       secret_env_vars = {}
-      mount_points    = [
+      mount_points = [
         {
           containerPath = local.shared_storage_path,
           sourceVolume  = local.shared_storage_name
@@ -107,14 +107,14 @@ module "image_inferrer" {
       }
     }
     palette_inferrer = {
-      image    = local.palette_inferrer_image
-      cpu      = local.inferrer_cpu
-      memory   = local.inferrer_memory
+      image  = local.palette_inferrer_image
+      cpu    = local.inferrer_cpu
+      memory = local.inferrer_memory
       env_vars = {
         PORT = local.palette_inferrer_port
       }
       secret_env_vars = {}
-      mount_points    = [
+      mount_points = [
         {
           containerPath = local.shared_storage_path,
           sourceVolume  = local.shared_storage_name
@@ -129,14 +129,14 @@ module "image_inferrer" {
       }
     }
     aspect_ratio_inferrer = {
-      image    = local.aspect_ratio_inferrer_image
-      cpu      = local.aspect_ratio_cpu
-      memory   = local.aspect_ratio_memory
+      image  = local.aspect_ratio_inferrer_image
+      cpu    = local.aspect_ratio_cpu
+      memory = local.aspect_ratio_memory
       env_vars = {
         PORT = local.aspect_ratio_inferrer_port
       }
       secret_env_vars = {}
-      mount_points    = [
+      mount_points = [
         {
           containerPath = local.shared_storage_path,
           sourceVolume  = local.shared_storage_name
