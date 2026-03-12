@@ -38,7 +38,7 @@ class AxiellReconciler(MarcXmlTransformer):
             guid = self.extract_work_id(marc_record)
             data.append(
                 {
-                    "namespace": "axiell",
+                    "namespace": self.reconciler_store.namespace,
                     "id": row["id"],
                     "guid": guid,
                     "last_modified": row["last_modified"],
