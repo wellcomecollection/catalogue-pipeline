@@ -178,9 +178,9 @@ object IdentifiedIndexDecodeChecker {
 
   private def decodeDocument(mode: DecodeMode, json: Json): Try[Any] =
     mode match {
-      case DecodeMode.Matcher  => fromJson[WorkStub](json.noSpaces)
-      case DecodeMode.Merger   => fromJson[Work[Identified]](json.noSpaces)
-      case DecodeMode.Compare  => fromJson[Work[Identified]](json.noSpaces)
+      case DecodeMode.Matcher => fromJson[WorkStub](json.noSpaces)
+      case DecodeMode.Merger  => fromJson[Work[Identified]](json.noSpaces)
+      case DecodeMode.Compare => fromJson[Work[Identified]](json.noSpaces)
     }
 
   private def jsonDiff(
@@ -194,27 +194,29 @@ object IdentifiedIndexDecodeChecker {
       val tObj = target.asObject.get
       val bObj = baseline.asObject.get
       val allKeys = (tObj.keys ++ bObj.keys).toSeq.distinct
-      allKeys.flatMap { key =>
-        val childPath = if (path.isEmpty) key else s"$path.$key"
-        (tObj(key), bObj(key)) match {
-          case (Some(tv), Some(bv)) => jsonDiff(tv, bv, childPath)
-          case (Some(tv), None)     => Seq(JsonDiff(childPath, tv, Json.Null))
-          case (None, Some(bv))     => Seq(JsonDiff(childPath, Json.Null, bv))
-          case _                    => Seq.empty
-        }
+      allKeys.flatMap {
+        key =>
+          val childPath = if (path.isEmpty) key else s"$path.$key"
+          (tObj(key), bObj(key)) match {
+            case (Some(tv), Some(bv)) => jsonDiff(tv, bv, childPath)
+            case (Some(tv), None)     => Seq(JsonDiff(childPath, tv, Json.Null))
+            case (None, Some(bv))     => Seq(JsonDiff(childPath, Json.Null, bv))
+            case _                    => Seq.empty
+          }
       }
     } else if (target.isArray && baseline.isArray) {
       val tArr = target.asArray.get
       val bArr = baseline.asArray.get
       val maxLen = math.max(tArr.size, bArr.size)
-      (0 until maxLen).flatMap { i =>
-        val childPath = s"$path[$i]"
-        (tArr.lift(i), bArr.lift(i)) match {
-          case (Some(tv), Some(bv)) => jsonDiff(tv, bv, childPath)
-          case (Some(tv), None)     => Seq(JsonDiff(childPath, tv, Json.Null))
-          case (None, Some(bv))     => Seq(JsonDiff(childPath, Json.Null, bv))
-          case _                    => Seq.empty
-        }
+      (0 until maxLen).flatMap {
+        i =>
+          val childPath = s"$path[$i]"
+          (tArr.lift(i), bArr.lift(i)) match {
+            case (Some(tv), Some(bv)) => jsonDiff(tv, bv, childPath)
+            case (Some(tv), None)     => Seq(JsonDiff(childPath, tv, Json.Null))
+            case (None, Some(bv))     => Seq(JsonDiff(childPath, Json.Null, bv))
+            case _                    => Seq.empty
+          }
       }
     } else {
       Seq(JsonDiff(path, target, baseline))
@@ -277,7 +279,10 @@ object IdentifiedIndexDecodeChecker {
               } else {
                 val summary = diffs
                   .take(10)
-                  .map(d => s"${d.path}: ${d.target.noSpaces} vs ${d.baseline.noSpaces}")
+                  .map(
+                    d =>
+                      s"${d.path}: ${d.target.noSpaces} vs ${d.baseline.noSpaces}"
+                  )
                   .mkString("; ")
                 Some(
                   CompareFailure(
@@ -343,8 +348,7 @@ object IdentifiedIndexDecodeChecker {
       "document"
     )(DecodeInputRecord.apply)
 
-  implicit private val compareInputRecordDecoder
-    : Decoder[CompareInputRecord] =
+  implicit private val compareInputRecordDecoder: Decoder[CompareInputRecord] =
     Decoder.forProduct4(
       "docId",
       "sourceIdentifier",
