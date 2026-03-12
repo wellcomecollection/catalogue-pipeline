@@ -13,6 +13,7 @@ T = TypeVar("T", bound=BaseModel)
 
 logger = structlog.get_logger(__name__)
 
+TRANSFORM_BATCH_SIZE = 10_000
 ES_BULK_INDEX_BATCH_SIZE = 10_000
 
 
@@ -32,13 +33,17 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
         super().__init__()
         self.successful_ids: list[str] = []
         self.errors: list[TransformationError] = []
+        self.error_ids: set[str] = set()
+
+        self.source_id_to_row_id: dict[str, str] = {}
 
     def _add_error(self, exception: Exception | dict, stage: str, row_id: str) -> None:
         error = TransformationError(
             stage=stage, row_id=row_id, detail=str(exception)[:500]
         )
         # Only keep track of the first 1000 errors to cap manifest file sizes
-        if len(self.errors) < 1_000:
+        if len(self.errors) < 1_000 and row_id not in self.error_ids:
+            self.error_ids.add(row_id)
             self.errors.append(error)
 
     def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, T]]:
@@ -53,71 +58,72 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
             "Each transformer must implement a `_get_document_id` method."
         )
 
-    def _stream_documents(self) -> Generator[tuple[str, T]]:
+    def _transform_batches(self) -> Generator[tuple[list[Any], list[T]]]:
         """
         Extracts documents from the specified source and transforms them. The `source` must define
         a `stream_raw` method.
         """
         raw_works = self.source.stream_raw()
-        for batch in batched(raw_works, 10_000):
-            transformed = list(self.transform(batch))
+        for raw_batch in batched(raw_works, TRANSFORM_BATCH_SIZE):
+            transformed_batch = []
+            for row_id, record in self.transform(raw_batch):
+                source_id = self._get_document_id(record)
+                self.source_id_to_row_id[source_id] = row_id
+                transformed_batch.append(record)
+
             logger.info(
                 "Transformed batch",
-                transformed_count=len(transformed),
-                batch_size=len(batch),
+                transformed_count=len(transformed_batch),
+                batch_size=len(raw_batch),
             )
 
-            yield from transformed
+            yield list(raw_batch), transformed_batch
 
     def _generate_bulk_load_actions(
-        self, records: Iterable[tuple[str, T]], index_name: str
-    ) -> Generator[tuple[str, dict[str, Any]]]:
-        for row_id, record in records:
-            action = {
+        self, records: Iterable[T], index_name: str
+    ) -> Generator[dict[str, Any]]:
+        for record in records:
+            yield {
                 "_index": index_name,
                 "_id": self._get_document_id(record),
                 "_source": record.model_dump(),
             }
-            yield (row_id, action)
+
+    def _index_es_batch(
+        self, es_client: Elasticsearch, es_actions: list[dict]
+    ) -> list[dict[str, Any]]:
+        success_count, es_errors = elasticsearch.helpers.bulk(
+            es_client,
+            es_actions,
+            raise_on_error=False,
+            stats_only=False,
+        )
+        logger.info(
+            "Indexed batch",
+            success_count=success_count,
+            batch_size=len(es_actions),
+        )
+
+        # Since we called `bulk` with `stats_only=False`, we know that es_errors is a list of dicts
+        return cast(list[dict[str, Any]], es_errors)
 
     def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
         # Reset run-specific state so manifests reflect the current execution only
         self.successful_ids.clear()
         self.errors.clear()
 
-        transformed = self._stream_documents()
-        actions = self._generate_bulk_load_actions(transformed, index_name)
-
-        for batch in batched(actions, ES_BULK_INDEX_BATCH_SIZE):
-            # Split row_ids from actions for ES bulk helper
-            batch_list = list(batch)
-            row_ids_by_source_id = {
-                action["_id"]: row_id for row_id, action in batch_list
-            }
-            es_actions = [action for _, action in batch_list]
-
-            success_count, es_errors = elasticsearch.helpers.bulk(
-                es_client,
-                es_actions,
-                raise_on_error=False,
-                stats_only=False,
+        for raw_batch, transformed_batch in self._transform_batches():
+            es_actions = list(
+                self._generate_bulk_load_actions(transformed_batch, index_name)
             )
+            es_errors = self._index_es_batch(es_client, es_actions)
 
-            # Since we called `bulk` with `stats_only=False`, we know that es_errors is a list of dicts
-            es_errors = cast(list[dict[str, Any]], es_errors)
-
-            logger.info(
-                "Indexed batch",
-                success_count=success_count,
-                batch_size=len(es_actions),
-            )
-
-            error_ids = set()
+            batch_error_ids = set()
             for e in es_errors:
                 source_id = e["index"]["_id"]
-                error_ids.add(source_id)
+                batch_error_ids.add(source_id)
 
-                row_id = row_ids_by_source_id[source_id]
+                row_id = self.source_id_to_row_id[source_id]
                 logger.warning(
                     "Indexing error",
                     row_id=row_id,
@@ -126,9 +132,19 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
                 )
                 self._add_error(e, "index", row_id)
 
-                if source_id not in row_ids_by_source_id:
-                    raise KeyError(f"No row_id found for source_id={source_id}!")
+            batch_ids = [a["_id"] for a in es_actions]
+            batch_success_ids = [i for i in batch_ids if i not in batch_error_ids]
+            self.successful_ids.extend(batch_success_ids)
+            self._commit(
+                raw_batch,
+                {self.source_id_to_row_id[i] for i in batch_success_ids},
+                {self.source_id_to_row_id[i] for i in batch_error_ids},
+            )
 
-            for source_id in row_ids_by_source_id:
-                if source_id not in error_ids:
-                    self.successful_ids.append(source_id)
+    def _commit(
+        self,
+        raw_batch: Iterable[dict],
+        success_row_ids: set[str],
+        error_row_ids: set[str],
+    ) -> None:
+        """Optional post-index commit hook called once per source batch."""
