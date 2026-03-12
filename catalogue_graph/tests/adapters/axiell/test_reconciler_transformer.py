@@ -321,6 +321,131 @@ def test_reconciler_does_not_update_or_emit_when_adapter_timestamp_is_older(
     assert MockElasticsearchClient.inputs == []
 
 
+def test_reconciler_only_commits_updates_when_deleted_work_is_indexed(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    adapter_store = AdapterStore(temporary_table, namespace="axiell")
+    reconciler_store = ReconcilerStore(reconciler_temporary_table, namespace="axiell")
+
+    old_time = datetime(2024, 1, 1, tzinfo=UTC)
+    new_time = datetime(2025, 1, 1, tzinfo=UTC)
+
+    reconciler_store.incremental_update(
+        _rows_to_reconciler_arrow(
+            [
+                {
+                    "namespace": "axiell",
+                    "id": "collect-1",
+                    "guid": "guid-old-1",
+                    "changeset": None,
+                    "last_modified": old_time,
+                },
+                {
+                    "namespace": "axiell",
+                    "id": "collect-2",
+                    "guid": "guid-old-2",
+                    "changeset": None,
+                    "last_modified": old_time,
+                },
+            ]
+        )
+    )
+
+    adapter_changeset = adapter_store.incremental_update(
+        _rows_to_adapter_arrow(
+            [
+                {
+                    "namespace": "axiell",
+                    "id": "collect-1",
+                    "content": _marcxml("guid-new-1"),
+                    "changeset": None,
+                    "last_modified": new_time,
+                    "deleted": False,
+                },
+                {
+                    "namespace": "axiell",
+                    "id": "collect-2",
+                    "content": _marcxml("guid-new-2"),
+                    "changeset": None,
+                    "last_modified": new_time,
+                    "deleted": False,
+                },
+                {
+                    "namespace": "axiell",
+                    "id": "collect-3",
+                    "content": _marcxml("guid-new-3"),
+                    "changeset": None,
+                    "last_modified": new_time,
+                    "deleted": False,
+                },
+            ]
+        )
+    )
+    assert adapter_changeset is not None
+
+    def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
+        actions_list = list(actions)
+        failed_id = "Work[axiell-guid/guid-old-1]"
+        errors = [
+            {
+                "index": {
+                    "_id": action["_id"],
+                    "status": 400,
+                    "error": {"type": "mapper_parsing_exception"},
+                }
+            }
+            for action in actions_list
+            if action["_id"] == failed_id
+        ]
+        return len(actions_list) - len(errors), errors
+
+    monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+
+    failed_result = _run_reconciler(
+        monkeypatch,
+        temporary_table,
+        reconciler_temporary_table,
+        [adapter_changeset.changeset_id],
+    )
+
+    assert failed_result.successes.count == 1
+    assert failed_result.failures is not None
+    assert failed_result.failures.count == 1
+
+    after_failed = {
+        row["id"]: row["guid"]
+        for row in reconciler_store.get_namespace_records().to_pylist()
+    }
+    assert after_failed == {
+        "collect-1": "guid-old-1",
+        "collect-2": "guid-new-2",
+        "collect-3": "guid-new-3",
+    }
+
+    monkeypatch.setattr("elasticsearch.helpers.bulk", MockElasticsearchClient.bulk)
+
+    successful_result = _run_reconciler(
+        monkeypatch,
+        temporary_table,
+        reconciler_temporary_table,
+        [adapter_changeset.changeset_id],
+    )
+
+    assert successful_result.successes.count == 1
+
+    after_success = {
+        row["id"]: row["guid"]
+        for row in reconciler_store.get_namespace_records().to_pylist()
+    }
+    assert after_success == {
+        "collect-1": "guid-new-1",
+        "collect-2": "guid-new-2",
+        "collect-3": "guid-new-3",
+    }
+
+
 def test_reconciler_skips_missing_or_invalid_content(
     temporary_table: IcebergTable,
     reconciler_temporary_table: IcebergTable,

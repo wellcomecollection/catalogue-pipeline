@@ -84,9 +84,6 @@ class PipelineStore(ABC):
         before writes.
         """
         new_data = self.normalise_table(new_data)
-        if new_data.num_rows == 0:
-            return None
-
         new_ids_filter = In("id", self._extract_ids(new_data))
         existing_data = self.get_namespace_records(new_ids_filter)
 
