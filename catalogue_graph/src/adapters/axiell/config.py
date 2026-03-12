@@ -117,8 +117,6 @@ S3_BUCKET = os.getenv(
     "wellcomecollection-platform-axiell-adapter",
 )
 S3_PREFIX = os.getenv("S3_PREFIX", "dev")
-BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")
-
 
 # ---------------------------------------------------------------------------
 # OAI-PMH Adapter Config (Pydantic model for runtime)

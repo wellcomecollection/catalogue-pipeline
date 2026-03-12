@@ -5,15 +5,20 @@ indexes transformed documents into Elasticsearch.
 """
 
 import argparse
+import typing
+from collections.abc import Callable
+from pathlib import PurePosixPath
 from typing import Any, Literal, Protocol, cast
 
 import structlog
 from pydantic import BaseModel, Field
 
 from adapters.axiell import config as axiell_config
+from adapters.axiell import helpers as axiell_helpers
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.ebsco import config as ebsco_config
 from adapters.ebsco import helpers as ebsco_helpers
+from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.manifests import (
@@ -21,6 +26,7 @@ from adapters.transformers.manifests import (
     TransformerManifestWriter,
 )
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.reconciler_store import ReconcilerStore
 from core.transformer import ElasticBaseTransformer as BaseTransformer
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -28,8 +34,11 @@ from utils.logger import ExecutionContext, get_trace_id, setup_logging
 logger = structlog.get_logger(__name__)
 
 
+TransformerType = Literal["axiell", "ebsco", "axiell_reconciler"]
+
+
 class TransformerEvent(BaseModel):
-    transformer_type: Literal["axiell", "ebsco"]
+    transformer_type: TransformerType
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
 
@@ -40,24 +49,79 @@ class AdapterConfig(Protocol):
     ES_INDEX_NAME: str
     ES_API_KEY_NAME: str
     S3_BUCKET: str
-    BATCH_S3_PREFIX: str
+    S3_PREFIX: str
 
 
-class AdapterTableBuilder(Protocol):
-    def build_adapter_table(
-        self, *, use_rest_api_table: bool, create_if_not_exists: bool = True
-    ) -> Any:
-        """Construct the Iceberg table containing adapter output."""
+ICEBERG_NAMESPACE_BY_TYPE: dict[TransformerType, str] = {
+    "axiell": "axiell",
+    "axiell_reconciler": "axiell",
+    "ebsco": "ebsco",
+}
+
+CONFIG_BY_TYPE: dict[TransformerType, AdapterConfig] = {
+    "axiell": cast(AdapterConfig, axiell_config),
+    "axiell_reconciler": cast(AdapterConfig, axiell_config),
+    "ebsco": cast(AdapterConfig, ebsco_config),
+}
+
+ADAPTER_TABLE_BUILDER_BY_TYPE: dict[TransformerType, Callable] = {
+    "axiell": AXIELL_CONFIG.build_adapter_table,
+    "axiell_reconciler": AXIELL_CONFIG.build_adapter_table,
+    "ebsco": ebsco_helpers.build_adapter_table,
+}
+
+BATCHES_S3_PREFIX_BY_TYPE: dict[TransformerType, str] = {
+    "axiell": "transformer/batches",
+    "axiell_reconciler": "reconciler/batches",
+    "ebsco": "transformer/batches",
+}
 
 
-# Wrapper for EBSCO helpers to match the AdapterTableBuilder protocol
-class EbscoTableBuilder:
-    def build_adapter_table(
-        self, *, use_rest_api_table: bool, create_if_not_exists: bool = True
-    ) -> Any:
-        return ebsco_helpers.build_adapter_table(
-            use_rest_api_table, create_if_not_exists
+def get_adapter_store(
+    transformer_type: TransformerType,
+    use_rest_api_table: bool = False,
+    create_if_not_exists: bool = False,
+) -> AdapterStore:
+    build_adapter_table = ADAPTER_TABLE_BUILDER_BY_TYPE[transformer_type]
+    namespace = ICEBERG_NAMESPACE_BY_TYPE[transformer_type]
+    table = build_adapter_table(
+        use_rest_api_table=use_rest_api_table,
+        create_if_not_exists=create_if_not_exists,
+    )
+    return AdapterStore(table, namespace=namespace)
+
+
+def build_transformer(
+    event: TransformerEvent,
+    use_rest_api_table: bool = False,
+    create_if_not_exists: bool = False,
+) -> BaseTransformer:
+    adapter_store = get_adapter_store(
+        event.transformer_type,
+        use_rest_api_table=use_rest_api_table,
+        create_if_not_exists=create_if_not_exists,
+    )
+
+    if event.transformer_type == "axiell":
+        return AxiellTransformer(adapter_store, event.changeset_ids)
+    if event.transformer_type == "ebsco":
+        return EbscoTransformer(adapter_store, event.changeset_ids)
+    if event.transformer_type == "axiell_reconciler":
+        if not event.changeset_ids:
+            # The reconciler doesn't work in the context of a full reindex,
+            # since it doesn't preserve historic deleted work GUIDs (source IDs).
+            raise ValueError(
+                "The reconciler only supports incremental mode. At least one changeset_id required."
+            )
+
+        table = axiell_helpers.build_reconciler_table(
+            use_rest_api_table=use_rest_api_table,
+            create_if_not_exists=create_if_not_exists,
         )
+        reconciler_store = ReconcilerStore(table, namespace="axiell")
+        return AxiellReconciler(adapter_store, event.changeset_ids, reconciler_store)
+
+    raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
 
 def handler(
@@ -71,27 +135,12 @@ def handler(
     logger.info("Processing transformer event", transformer_event=event.model_dump())
     logger.info("Received job_id", job_id=event.job_id)
 
-    config: AdapterConfig
-    table_builder: AdapterTableBuilder
-    transformer_class: type[BaseTransformer]
-
-    if event.transformer_type == "axiell":
-        config = cast(AdapterConfig, axiell_config)
-        table_builder = cast(AdapterTableBuilder, AXIELL_CONFIG)
-        transformer_class = AxiellTransformer
-    elif event.transformer_type == "ebsco":
-        config = cast(AdapterConfig, ebsco_config)
-        table_builder = EbscoTableBuilder()
-        transformer_class = EbscoTransformer
-    else:
-        raise ValueError(f"Unknown transformer type: {event.transformer_type}")
-
-    table = table_builder.build_adapter_table(
+    config = CONFIG_BY_TYPE[event.transformer_type]
+    transformer = build_transformer(
+        event,
         use_rest_api_table=use_rest_api_table,
         create_if_not_exists=create_if_not_exists,
     )
-    table_client = AdapterStore(table, namespace=event.transformer_type)
-    transformer = transformer_class(table_client, event.changeset_ids)
 
     index_date = config.INDEX_DATE or config.PIPELINE_DATE
     index_name = get_standard_index_name(config.ES_INDEX_NAME, index_date)
@@ -107,11 +156,13 @@ def handler(
         api_key_name=config.ES_API_KEY_NAME,
     )
     transformer.stream_to_index(es_client, index_name)
+
+    s3_batches_prefix = BATCHES_S3_PREFIX_BY_TYPE[event.transformer_type]
     writer = TransformerManifestWriter(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
         bucket=config.S3_BUCKET,
-        prefix=config.BATCH_S3_PREFIX,
+        prefix=str(PurePosixPath(config.S3_PREFIX, s3_batches_prefix)),
     )
     result = writer.build_manifest(
         successful_ids=transformer.successful_ids,
@@ -137,7 +188,7 @@ def main() -> None:
         "--transformer-type",
         required=True,
         help="Which transformer to run.",
-        choices=["axiell", "ebsco"],
+        choices=typing.get_args(TransformerType),
     )
     parser.add_argument(
         "--changeset-id",

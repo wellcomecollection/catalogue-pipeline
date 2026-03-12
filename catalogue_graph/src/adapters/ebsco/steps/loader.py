@@ -69,7 +69,7 @@ def execute_loader(
 
     pa_table = runtime.marcxml_loader.load_file(request.file_location)
     changeset = runtime.adapter_store.snapshot_sync(pa_table)
-    changed_record_count = len(changeset.updated_record_ids) if changeset else 0
+    changed_record_count = len(changeset.upserted_record_ids) if changeset else 0
 
     return LoaderResponse(
         changeset_ids=[changeset.changeset_id] if changeset else [],

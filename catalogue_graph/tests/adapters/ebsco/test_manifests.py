@@ -8,6 +8,7 @@ in tests/utils/test_manifests.py.  These tests cover:
 """
 
 import json
+from pathlib import PurePosixPath
 
 import pytest
 
@@ -31,7 +32,7 @@ def test_batch_lines_use_source_identifiers_field() -> None:
         job_id="job123",
         changeset_ids=["chgABC"],
         bucket=adapter_config.S3_BUCKET,
-        prefix=adapter_config.BATCH_S3_PREFIX,
+        prefix=str(PurePosixPath(adapter_config.S3_PREFIX, "transformer/batches")),
     )
     success_ids = [
         "Work[ebsco-alt-lookup/id1]",
@@ -53,7 +54,7 @@ def test_returns_transformer_manifest_with_changeset_ids() -> None:
         job_id="job1",
         changeset_ids=["chg1", "chg2"],
         bucket=adapter_config.S3_BUCKET,
-        prefix=adapter_config.BATCH_S3_PREFIX,
+        prefix=str(PurePosixPath(adapter_config.S3_PREFIX, "transformer/batches")),
     )
     manifest = writer.build_manifest(successful_ids=["id1"], errors=[])
 
@@ -89,7 +90,7 @@ def test_changeset_naming_patterns(
         job_id=job_id,
         changeset_ids=[changeset_id] if changeset_id else [],
         bucket=adapter_config.S3_BUCKET,
-        prefix=adapter_config.BATCH_S3_PREFIX,
+        prefix=str(PurePosixPath(adapter_config.S3_PREFIX, "transformer/batches")),
     )
     manifest = writer.build_manifest(
         successful_ids=["Work[ebsco-alt-lookup/only1]"],

@@ -13,9 +13,8 @@ AWS_ACCOUNT_ID = os.getenv("AWS_ACCOUNT_ID")
 # Adapter Trigger Configuration (moved from steps/trigger.py)
 SSM_PARAM_PREFIX = "/catalogue_pipeline/ebsco_adapter"
 S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
-S3_PREFIX = os.getenv("S3_PREFIX", "dev")  # corresponds to previous s3_prefix
+S3_PREFIX = os.getenv("S3_PREFIX", "dev")
 FTP_S3_PREFIX = os.path.join(S3_PREFIX, "ftp_v2")
-BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")
 
 # Transform Configuration
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")

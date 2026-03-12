@@ -14,7 +14,13 @@ from pyiceberg.table.upsert_util import get_rows_to_update
 
 class PipelineStoreUpdate(BaseModel):
     changeset_id: str
-    updated_record_ids: list[str]
+    inserted_record_ids: list[str]  # New records
+    updated_record_ids: list[str]  # Existing updated records
+
+    @property
+    def upserted_record_ids(self) -> list[str]:
+        """Return both inserted and updated record IDs"""
+        return self.updated_record_ids + self.inserted_record_ids
 
 
 class PipelineStore(ABC):
@@ -43,17 +49,26 @@ class PipelineStore(ABC):
         """Return all records in the table from all namespaces."""
         return self.table.scan().to_arrow().cast(self.schema)
 
+    def current_snapshot_id(self) -> int | None:
+        snapshot = self.table.current_snapshot()
+        return snapshot.snapshot_id if snapshot else None
+
     def get_namespace_records(
-        self, iceberg_filter: BooleanExpression = ALWAYS_TRUE
+        self,
+        iceberg_filter: BooleanExpression = ALWAYS_TRUE,
+        snapshot_id: int | None = None,
     ) -> pa.Table:
         """Return records in the store namespace, optionally filtered."""
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
-        return self.table.scan(row_filter=full_filter).to_arrow().cast(self.schema)
+        return (
+            self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)
+            .to_arrow()
+            .cast(self.schema)
+        )
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
         """Return rows written under the specified changeset ID."""
-        changeset_filter = EqualTo("changeset", changeset_id)
-        return self.table.scan(row_filter=changeset_filter).to_arrow().cast(self.schema)
+        return self.get_namespace_records(EqualTo("changeset", changeset_id))
 
     def normalise_table(self, table: pa.Table) -> pa.Table:
         """Enforce that the table conforms to the required schema and filter for records in the selected namespace"""
@@ -117,13 +132,12 @@ class PipelineStore(ABC):
                 inserts = self._set_changeset_id(inserts, changeset_id)
                 tx.append(inserts)
 
-        updated_ids: list[str] = []
-        for t in (changes, inserts):
-            if t is not None:
-                updated_ids.extend(self._extract_ids(t))
-
+        inserted_ids = self._extract_ids(inserts) if inserts else []
+        changed_ids = self._extract_ids(changes) if changes else []
         return PipelineStoreUpdate(
-            changeset_id=changeset_id, updated_record_ids=updated_ids
+            changeset_id=changeset_id,
+            inserted_record_ids=inserted_ids,
+            updated_record_ids=changed_ids,
         )
 
     def _extract_ids(self, table: pa.Table) -> list[str]:
