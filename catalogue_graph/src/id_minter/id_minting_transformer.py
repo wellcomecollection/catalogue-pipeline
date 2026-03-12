@@ -68,12 +68,11 @@ class IdMintingTransformer(ElasticBaseTransformer):
         return str(record["state"]["canonicalId"])
 
     def _generate_bulk_load_actions(
-        self, records: Iterable[tuple[str, dict]], index_name: str
-    ) -> Generator[tuple[str, dict[str, Any]]]:
-        for row_id, record in records:
-            action = {
+        self, records: Iterable[dict], index_name: str
+    ) -> Generator[dict[str, Any]]:
+        for record in records:
+            yield {
                 "_index": index_name,
                 "_id": self._get_document_id(record),
                 "_source": record,
             }
-            yield (row_id, action)
