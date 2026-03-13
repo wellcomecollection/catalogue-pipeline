@@ -154,7 +154,9 @@ def _load_identifiers(conn: DBConnection, df: pl.DataFrame, batch_size: int) -> 
 
         with tempfile.NamedTemporaryFile(suffix=".tsv", delete=False) as f:
             tsv_path = f.name
-        escaped_df.write_csv(tsv_path, separator="\t", include_header=False)
+        escaped_df.write_csv(
+            tsv_path, separator="\t", include_header=False, quote_style="never"
+        )
 
         try:
             cursor = conn.cursor()
