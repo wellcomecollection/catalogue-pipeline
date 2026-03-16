@@ -110,6 +110,7 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
         # Reset run-specific state so manifests reflect the current execution only
         self.successful_ids.clear()
         self.errors.clear()
+        self.source_id_to_row_id.clear()
 
         for raw_batch, transformed_batch in self._transform_batches():
             es_actions = list(
