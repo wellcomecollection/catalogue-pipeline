@@ -24,6 +24,7 @@ class TransformerManifest(StepManifest):
     """Manifest specific to the adapter transformer step."""
 
     changeset_ids: list[str]
+    snapshot_id: int | None
 
 
 class TransformerManifestWriter(ManifestWriter):
@@ -33,6 +34,7 @@ class TransformerManifestWriter(ManifestWriter):
         self,
         job_id: str,
         changeset_ids: list[str],
+        snapshot_id: int | None,
         *,
         bucket: str,
         prefix: str,
@@ -40,6 +42,7 @@ class TransformerManifestWriter(ManifestWriter):
         label = "||".join(changeset_ids) or "reindex"
         super().__init__(job_id=job_id, label=label, bucket=bucket, prefix=prefix)
         self.changeset_ids = changeset_ids
+        self.snapshot_id = snapshot_id
 
     def _make_batch_line(self, ids: list[str]) -> SourceIdentifierBatchLine:
         return SourceIdentifierBatchLine(sourceIdentifiers=ids, jobId=self.job_id)
@@ -55,6 +58,7 @@ class TransformerManifestWriter(ManifestWriter):
         )
         return TransformerManifest(
             changeset_ids=self.changeset_ids,
+            snapshot_id=self.snapshot_id,
             job_id=step_manifest.job_id,
             successes=step_manifest.successes,
             failures=step_manifest.failures,

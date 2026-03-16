@@ -34,7 +34,9 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         snapshot_id: int | None = None,
     ) -> None:
         super().__init__()
-        self.source = AdapterStoreSource(adapter_store, changeset_ids, snapshot_id)
+        self.source: AdapterStoreSource = AdapterStoreSource(
+            adapter_store, changeset_ids, snapshot_id
+        )
         self.identifier_type = identifier_type
 
     def _get_document_id(self, record: SourceWork) -> str:
