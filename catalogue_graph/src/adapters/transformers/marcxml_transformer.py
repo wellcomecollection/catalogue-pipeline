@@ -27,10 +27,14 @@ from .adapter_store_source import AdapterStoreSource
 
 class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
     def __init__(
-        self, adapter_store: AdapterStore, changeset_ids: list[str], identifier_type: Id
+        self,
+        adapter_store: AdapterStore,
+        changeset_ids: list[str],
+        identifier_type: Id,
+        snapshot_id: int | None = None,
     ) -> None:
         super().__init__()
-        self.source = AdapterStoreSource(adapter_store, changeset_ids)
+        self.source = AdapterStoreSource(adapter_store, changeset_ids, snapshot_id)
         self.identifier_type = identifier_type
 
     def _get_document_id(self, record: SourceWork) -> str:

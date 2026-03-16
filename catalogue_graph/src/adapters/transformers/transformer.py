@@ -41,6 +41,7 @@ class TransformerEvent(BaseModel):
     transformer_type: TransformerType
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
+    snapshot_id: int | None = None
 
 
 class AdapterConfig(Protocol):
@@ -119,7 +120,9 @@ def build_transformer(
             create_if_not_exists=create_if_not_exists,
         )
         reconciler_store = ReconcilerStore(table, namespace="axiell")
-        return AxiellReconciler(adapter_store, event.changeset_ids, reconciler_store)
+        return AxiellReconciler(
+            adapter_store, event.changeset_ids, reconciler_store, event.snapshot_id
+        )
 
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
@@ -196,6 +199,12 @@ def main() -> None:
         action="append",
         default=[],
         help="Changeset identifier to transform (repeatable)",
+    )
+    parser.add_argument(
+        "--snapshot-id",
+        dest="snapshot_id",
+        default=None,
+        help="An optional Iceberg snapshot ID to use when extracting data from the adapter store",
     )
     parser.add_argument(
         "--job-id",
