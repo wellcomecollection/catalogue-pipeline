@@ -34,8 +34,8 @@ class TransformerManifestWriter(ManifestWriter):
         self,
         job_id: str,
         changeset_ids: list[str],
-        snapshot_id: int | None,
         *,
+        snapshot_id: int | None = None,
         bucket: str,
         prefix: str,
     ) -> None:
