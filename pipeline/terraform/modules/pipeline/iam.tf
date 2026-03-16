@@ -85,7 +85,7 @@ data "aws_iam_policy_document" "adapter_bucket_write" {
     ]
 
     resources = [
-      "arn:aws:s3:::${each.value}/prod/batches/*"
+      "arn:aws:s3:::${each.value}/prod/transformer/batches/*"
     ]
   }
 }
