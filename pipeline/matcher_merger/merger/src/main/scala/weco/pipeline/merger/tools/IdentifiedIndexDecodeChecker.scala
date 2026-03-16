@@ -11,6 +11,7 @@ import weco.pipeline.matcher.models.WorkStub
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
 object IdentifiedIndexDecodeChecker {
@@ -97,7 +98,7 @@ object IdentifiedIndexDecodeChecker {
       case Left(error) =>
         System.err.println(error)
         System.err.println(
-          "Usage: --mode matcher|merger --input /path/to/input.jsonl --output /path/to/output.json"
+          "Usage: --mode matcher|merger|compare --input /path/to/input.jsonl --output /path/to/output.json"
         )
         sys.exit(1)
     }
@@ -138,42 +139,55 @@ object IdentifiedIndexDecodeChecker {
   }
 
   private def decodeFile(config: Config): DecodeSummary = {
-    val lines =
-      Files.readAllLines(config.input, StandardCharsets.UTF_8).asScala.toSeq
-    val records = lines.filter(_.trim.nonEmpty).zipWithIndex.map {
-      case (line, index) =>
-        fromJson[DecodeInputRecord](line) match {
-          case Success(record) => record
-          case Failure(error) =>
-            throw new RuntimeException(
-              s"Failed to parse input line ${index + 1}: ${error.getMessage}",
-              error
-            )
-        }
-    }
+    val lineStream = Files.lines(config.input, StandardCharsets.UTF_8)
 
-    val failures = records.flatMap {
-      record =>
-        decodeDocument(config.mode, record.document) match {
-          case Success(_) => None
-          case Failure(error) =>
-            Some(
-              DecodeFailure(
-                docId = record.docId,
-                sourceIdentifier = record.sourceIdentifier,
-                error = error.getMessage
-              )
-            )
-        }
-    }
+    try {
+      var total = 0
+      var succeeded = 0
+      val failuresBuffer = mutable.ListBuffer[DecodeFailure]()
 
-    DecodeSummary(
-      mode = config.mode.name,
-      total = records.size,
-      succeeded = records.size - failures.size,
-      failed = failures.size,
-      failures = failures
-    )
+      lineStream
+        .iterator()
+        .asScala
+        .filter(_.trim.nonEmpty)
+        .zipWithIndex
+        .foreach {
+          case (line, index) =>
+            val record = fromJson[DecodeInputRecord](line) match {
+              case Success(r) => r
+              case Failure(error) =>
+                throw new RuntimeException(
+                  s"Failed to parse input line ${index + 1}: ${error.getMessage}",
+                  error
+                )
+            }
+
+            total += 1
+
+            decodeDocument(config.mode, record.document) match {
+              case Success(_) =>
+                succeeded += 1
+              case Failure(error) =>
+                failuresBuffer += DecodeFailure(
+                  docId = record.docId,
+                  sourceIdentifier = record.sourceIdentifier,
+                  error = error.getMessage
+                )
+            }
+        }
+
+      val failures = failuresBuffer.toSeq
+
+      DecodeSummary(
+        mode = config.mode.name,
+        total = total,
+        succeeded = succeeded,
+        failed = failures.size,
+        failures = failures
+      )
+    } finally {
+      lineStream.close()
+    }
   }
 
   private def decodeDocument(mode: DecodeMode, json: Json): Try[Any] =
@@ -227,84 +241,104 @@ object IdentifiedIndexDecodeChecker {
     Set("version", "state.sourceModifiedTime")
 
   private def compareFile(config: Config): CompareSummary = {
-    val lines =
-      Files.readAllLines(config.input, StandardCharsets.UTF_8).asScala.toSeq
-    val records = lines.filter(_.trim.nonEmpty).zipWithIndex.map {
-      case (line, index) =>
-        fromJson[CompareInputRecord](line) match {
-          case Success(record) => record
-          case Failure(error) =>
-            throw new RuntimeException(
-              s"Failed to parse compare input line ${index + 1}: ${error.getMessage}",
-              error
-            )
-        }
-    }
+    val lineStream = Files.lines(config.input, StandardCharsets.UTF_8)
 
-    val failures = records.flatMap {
-      record =>
-        val targetResult =
-          fromJson[Work[Identified]](record.targetDocument.noSpaces)
-        val baselineResult =
-          fromJson[Work[Identified]](record.baselineDocument.noSpaces)
+    try {
+      var total = 0
+      var failedCount = 0
+      val failuresBuffer = mutable.ListBuffer[CompareFailure]()
 
-        (targetResult, baselineResult) match {
-          case (Failure(err), _) =>
-            Some(
-              CompareFailure(
-                docId = record.docId,
-                sourceIdentifier = record.sourceIdentifier,
-                failureType = "target_decode",
-                error = err.getMessage
-              )
-            )
-          case (_, Failure(err)) =>
-            Some(
-              CompareFailure(
-                docId = record.docId,
-                sourceIdentifier = record.sourceIdentifier,
-                failureType = "baseline_decode",
-                error = err.getMessage
-              )
-            )
-          case (Success(targetWork), Success(baselineWork)) =>
-            if (targetWork == baselineWork) {
-              None
-            } else {
-              val diffs =
-                jsonDiff(targetWork.asJson, baselineWork.asJson)
-                  .filterNot(d => ignoredDiffPaths.contains(d.path))
-              if (diffs.isEmpty) {
-                None
-              } else {
-                val summary = diffs
-                  .take(10)
-                  .map(
-                    d =>
-                      s"${d.path}: ${d.target.noSpaces} vs ${d.baseline.noSpaces}"
-                  )
-                  .mkString("; ")
-                Some(
-                  CompareFailure(
-                    docId = record.docId,
-                    sourceIdentifier = record.sourceIdentifier,
-                    failureType = "mismatch",
-                    error = summary,
-                    diffs = diffs
-                  )
+      lineStream
+        .iterator()
+        .asScala
+        .filter(_.trim.nonEmpty)
+        .zipWithIndex
+        .foreach {
+          case (line, index) =>
+            val record = fromJson[CompareInputRecord](line) match {
+              case Success(r) => r
+              case Failure(error) =>
+                throw new RuntimeException(
+                  s"Failed to parse compare input line ${index + 1}: ${error.getMessage}",
+                  error
                 )
+            }
+
+            total += 1
+
+            val targetResult =
+              fromJson[Work[Identified]](record.targetDocument.noSpaces)
+            val baselineResult =
+              fromJson[Work[Identified]](record.baselineDocument.noSpaces)
+
+            val maybeFailure: Option[CompareFailure] =
+              (targetResult, baselineResult) match {
+                case (Failure(err), _) =>
+                  Some(
+                    CompareFailure(
+                      docId = record.docId,
+                      sourceIdentifier = record.sourceIdentifier,
+                      failureType = "target_decode",
+                      error = err.getMessage
+                    )
+                  )
+                case (_, Failure(err)) =>
+                  Some(
+                    CompareFailure(
+                      docId = record.docId,
+                      sourceIdentifier = record.sourceIdentifier,
+                      failureType = "baseline_decode",
+                      error = err.getMessage
+                    )
+                  )
+                case (Success(targetWork), Success(baselineWork)) =>
+                  if (targetWork == baselineWork) {
+                    None
+                  } else {
+                    val diffs =
+                      jsonDiff(targetWork.asJson, baselineWork.asJson)
+                        .filterNot(d => ignoredDiffPaths.contains(d.path))
+                    if (diffs.isEmpty) {
+                      None
+                    } else {
+                      val summary = diffs
+                        .take(10)
+                        .map(
+                          d =>
+                            s"${d.path}: ${d.target.noSpaces} vs ${d.baseline.noSpaces}"
+                        )
+                        .mkString("; ")
+                      Some(
+                        CompareFailure(
+                          docId = record.docId,
+                          sourceIdentifier = record.sourceIdentifier,
+                          failureType = "mismatch",
+                          error = summary,
+                          diffs = diffs
+                        )
+                      )
+                    }
+                  }
               }
+
+            maybeFailure.foreach { failure =>
+              failedCount += 1
+              failuresBuffer += failure
             }
         }
-    }
 
-    CompareSummary(
-      mode = config.mode.name,
-      total = records.size,
-      matched = records.size - failures.size,
-      failed = failures.size,
-      failures = failures
-    )
+      val failures = failuresBuffer.toSeq
+
+      CompareSummary(
+        mode = config.mode.name,
+        total = total,
+        matched = total - failedCount,
+        failed = failedCount,
+        failures = failures
+      )
+    } finally {
+      lineStream.close()
+    }
   }
 
   private def writeSummary(path: Path, json: Json): Unit = {
