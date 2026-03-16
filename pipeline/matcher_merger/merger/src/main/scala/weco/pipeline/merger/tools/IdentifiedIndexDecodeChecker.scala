@@ -321,9 +321,10 @@ object IdentifiedIndexDecodeChecker {
                   }
               }
 
-            maybeFailure.foreach { failure =>
-              failedCount += 1
-              failuresBuffer += failure
+            maybeFailure.foreach {
+              failure =>
+                failedCount += 1
+                failuresBuffer += failure
             }
         }
 
