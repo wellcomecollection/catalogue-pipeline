@@ -2,6 +2,7 @@ from collections.abc import Generator, Iterable
 from typing import Any
 
 import pyarrow as pa
+import pyarrow.compute as pc
 import structlog
 from pyiceberg.expressions import In
 
@@ -35,12 +36,11 @@ class AxiellReconciler(MarcXmlTransformer):
             if not marc_record:
                 continue
 
-            guid = self.extract_work_id(marc_record)
             data.append(
                 {
                     "namespace": self.reconciler_store.namespace,
                     "id": row["id"],
-                    "guid": guid,
+                    "guid": self.extract_work_id(marc_record),
                     "last_modified": row["last_modified"],
                 }
             )
@@ -50,40 +50,45 @@ class AxiellReconciler(MarcXmlTransformer):
     def transform(
         self, rows: Iterable[dict[str, Any]]
     ) -> Generator[tuple[str, DeletedSourceWork]]:
-        # Take all rows modified as part of the latest Axiell adapter run and turn them into a PyArrow table
-        updated_data = self._rows_to_reconciler_arrow_table(rows)
+        updated_adapter_mappings = self._rows_to_reconciler_arrow_table(rows)
 
-        # Before updating the reconciler store, save the ID of the current Iceberg snapshot
-        # so that we can use it to retrieve overwritten data
-        previous_snapshot_id = self.reconciler_store.current_snapshot_id()
-        logger.info(
-            "Preparing reconciler store update",
-            previous_snapshot_id=previous_snapshot_id,
+        # Get a list of row IDs whose GUID mappings are about to be updated in the reconciler store
+        record_ids_to_overwrite = self.reconciler_store.get_ids_to_update(
+            updated_adapter_mappings
         )
 
-        # Perform an incremental update, updating existing collectId to GUID mappings and adding new mappings.
-        result = self.reconciler_store.incremental_update(updated_data)
-        if not result:
-            logger.info("Reconciler store update did not produce any changes")
-            return
-        logger.info(
-            "Updated reconciler store",
-            inserted_count=len(result.inserted_record_ids),
-            updated_count=len(result.updated_record_ids),
-        )
+        # Get the corresponding GUID mappings
+        id_filter = In("id", record_ids_to_overwrite)
+        data_to_overwrite = self.reconciler_store.get_namespace_records(id_filter)
 
-        # Get *old* mappings which were overwritten as part of the incremental update
-        id_filter = In("id", result.updated_record_ids)
-        overwritten_data = self.reconciler_store.get_namespace_records(
-            id_filter, snapshot_id=previous_snapshot_id
-        )
-
-        # Use last_modified from the incoming overwritten rows (not the old snapshot rows)
+        # Use last_modified from the incoming rows (not the rows which are about to be overwritten)
         last_modified_by_id = {
-            row["id"]: row["last_modified"] for row in updated_data.to_pylist()
+            row["id"]: row["last_modified"]
+            for row in updated_adapter_mappings.to_pylist()
         }
 
-        # Extract GUIDs (work IDs) from overwritten mappings and emit them as deleted works
-        for row in overwritten_data.to_pylist():
+        # Emit each row as a deleted work
+        for row in data_to_overwrite.to_pylist():
             last_modified = last_modified_by_id.get(row["id"], row["last_modified"])
             yield row["id"], self._transform_deleted(row["guid"], last_modified)
+
+    def _commit(
+        self, rows: Iterable[dict[str, Any]], _: set[str], error_row_ids: set[str]
+    ) -> None:
+        updated_data = self._rows_to_reconciler_arrow_table(rows)
+
+        # If a work corresponding to some row ID wasn't successfully marked as deleted in Elasticsearch,
+        # do not commit the new GUID mapping
+        id_type = self.reconciler_store.schema.field("id").type
+        error_ids = pa.array(error_row_ids, type=id_type)
+        updated_data = updated_data.filter(~pc.field("id").isin(error_ids))
+
+        commit_result = self.reconciler_store.incremental_update(updated_data)
+        if not commit_result:
+            return
+
+        logger.info(
+            "Committed reconciler mappings",
+            inserted_count=len(commit_result.inserted_record_ids),
+            updated_count=len(commit_result.updated_record_ids),
+        )
