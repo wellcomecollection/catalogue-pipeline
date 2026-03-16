@@ -13,7 +13,6 @@ T = TypeVar("T", bound=BaseModel)
 
 logger = structlog.get_logger(__name__)
 
-TRANSFORM_BATCH_SIZE = 10_000
 ES_BULK_INDEX_BATCH_SIZE = 10_000
 
 
@@ -64,7 +63,7 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
         a `stream_raw` method.
         """
         raw_works = self.source.stream_raw()
-        for raw_batch in batched(raw_works, TRANSFORM_BATCH_SIZE):
+        for raw_batch in batched(raw_works, ES_BULK_INDEX_BATCH_SIZE):
             transformed_batch = []
             for row_id, record in self.transform(raw_batch):
                 source_id = self._get_document_id(record)
