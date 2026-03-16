@@ -143,7 +143,7 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
 
     def _commit(
         self,
-        raw_batch: Iterable[dict],
+        raw_batch: Iterable[Any],
         success_row_ids: set[str],
         error_row_ids: set[str],
     ) -> None:
