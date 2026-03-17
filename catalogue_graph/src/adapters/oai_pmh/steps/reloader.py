@@ -232,7 +232,7 @@ def handler(
     logger.info(
         "Window coverage report",
         total_windows=report.total_windows,
-        coverage_hours=f"{report.coverage_hours:.2f}",
+        coverage_hours=round(report.coverage_hours, 2),
         gaps=len(report.coverage_gaps),
         failures=len(report.failures),
         last_success_end=report.last_success_end.isoformat()
@@ -247,7 +247,7 @@ def handler(
             "Coverage gap",
             start=gap.start.isoformat(),
             end=gap.end.isoformat(),
-            duration_hours=f"{duration:.2f}",
+            duration_hours=round(duration, 2),
         )
     for failure in report.failures:
         logger.warning(
