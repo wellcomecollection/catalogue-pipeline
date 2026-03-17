@@ -233,6 +233,7 @@ def handler(
         "Window coverage report",
         total_windows=report.total_windows,
         coverage_hours=round(report.coverage_hours, 2),
+        state_counts=report.state_counts,
         gaps=len(report.coverage_gaps),
         failures=len(report.failures),
         last_success_end=report.last_success_end.isoformat()
