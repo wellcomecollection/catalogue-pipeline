@@ -1,14 +1,14 @@
 module "trigger_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "folio-adapter-trigger"
-  description  = "Lambda function to trigger FOLIO adapter ingestion"
+  name         = "${var.namespace}-adapter-trigger"
+  description  = "Lambda function to trigger adapter ingestion"
   package_type = "Image"
   image_uri    = "${var.repository_url}:prod"
   publish      = true
 
   image_config = {
-    command = ["adapters.folio.steps.trigger.lambda_handler"]
+    command = ["adapters.${var.namespace}.steps.trigger.lambda_handler"]
   }
 
   memory_size = 1024
@@ -16,7 +16,7 @@ module "trigger_lambda" {
 
   environment = {
     variables = {
-      S3_BUCKET         = data.aws_s3_bucket.folio_adapter.id
+      S3_BUCKET         = data.aws_s3_bucket.adapter.id
       S3_PREFIX         = "prod"
       CHATBOT_TOPIC_ARN = local.chatbot_topic_arn
     }
@@ -33,7 +33,7 @@ resource "aws_iam_role_policy" "trigger_lambda_iceberg_write" {
   policy = data.aws_iam_policy_document.iceberg_write.json
 }
 
-# IAM policies for FOLIO adapter S3 bucket
+# IAM policies for adapter S3 bucket
 resource "aws_iam_role_policy" "trigger_lambda_s3_read" {
   role   = module.trigger_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.s3_read.json
