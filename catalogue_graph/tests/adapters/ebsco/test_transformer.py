@@ -6,7 +6,11 @@ from pyiceberg.table import Table as IcebergTable
 import adapters.ebsco.config as adapter_config
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.transformers.manifests import TransformerManifest
-from adapters.transformers.transformer import TransformerEvent, build_transformer, handler
+from adapters.transformers.transformer import (
+    TransformerEvent,
+    build_transformer,
+    handler,
+)
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 
 from .helpers import prepare_changeset
@@ -145,7 +149,9 @@ def test_build_transformer_uses_provided_snapshot_id_for_reads(
         namespace=EBSCO_NAMESPACE,
         transformer_type="ebsco",
     )
-    initial_snapshot_id = temporary_table.current_snapshot().snapshot_id
+    initial_snapshot = temporary_table.current_snapshot()
+    assert initial_snapshot is not None
+    initial_snapshot_id = initial_snapshot.snapshot_id
 
     updated_records = {
         "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Snapshot Two Title</subfield></datafield></record>"
