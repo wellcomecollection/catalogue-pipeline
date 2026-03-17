@@ -4,8 +4,8 @@ resource "aws_scheduler_schedule" "adapter_run" {
   flexible_time_window {
     mode = "OFF"
   }
-  
-  schedule_expression = "${var.schedule_expression}"
+
+  schedule_expression = var.schedule_expression
   state               = "ENABLED"
 
   target {
@@ -25,10 +25,10 @@ resource "aws_iam_role" "eventbridge_state_machine_role" {
   name = "${var.namespace}-adapter-eventbridge-state-machine-role"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17",
+    Version = "2012-10-17",
     Statement = [
       {
-        Effect    = "Allow",
+        Effect = "Allow",
         Principal = {
           Service = [
             "states.amazonaws.com",

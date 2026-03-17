@@ -2,12 +2,12 @@ locals {
   state_machine_definition = jsonencode({
     Comment = "Adapter pipeline (trigger, loader, publish event)"
     StartAt = "Run trigger"
-    States  = {
+    States = {
       "Run trigger" = {
         Type     = "Task"
         Resource = module.trigger_lambda.lambda.arn
         Next     = "Run loader"
-        Retry    = [
+        Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -20,7 +20,7 @@ locals {
         Type     = "Task"
         Resource = module.loader_lambda.lambda.arn
         Next     = "Should publish event?"
-        Retry    = [
+        Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -30,7 +30,7 @@ locals {
         ]
       }
       "Should publish event?" = {
-        Type    = "Choice"
+        Type = "Choice"
         Choices = [
           {
             Variable  = "$.changeset_ids[0]"
@@ -41,8 +41,8 @@ locals {
         Default = "Success"
       }
       "Publish event" = {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::events:putEvents"
+        Type     = "Task"
+        Resource = "arn:aws:states:::events:putEvents"
         Parameters = {
           Entries = [
             {
@@ -59,7 +59,7 @@ locals {
         }
         ResultPath = null
         Next       = "Success"
-        Retry      = [
+        Retry = [
           {
             ErrorEquals     = ["States.ALL"]
             IntervalSeconds = 2
@@ -80,11 +80,11 @@ resource "aws_iam_role" "state_machine_role" {
   name = "${var.namespace}-adapter-state-machine-role"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
         Principal = {
           Service = "states.amazonaws.com"
         }

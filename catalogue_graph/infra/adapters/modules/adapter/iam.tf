@@ -130,7 +130,7 @@ resource "aws_iam_policy" "state_machine_lambda_policy" {
   description = "Allow state machine to invoke adapter Lambda functions"
 
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -152,7 +152,7 @@ resource "aws_iam_policy" "state_machine_eventbridge_put_policy" {
   description = "Allow state machine to put events on the adapter event bus"
 
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -173,7 +173,7 @@ resource "aws_iam_policy" "state_machine_logging_policy" {
   description = "Allow state machine to write logs to CloudWatch"
 
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -199,7 +199,7 @@ resource "aws_iam_policy" "eventbridge_state_machine_policy" {
   description = "Allow EventBridge to start adapter state machine executions"
 
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
