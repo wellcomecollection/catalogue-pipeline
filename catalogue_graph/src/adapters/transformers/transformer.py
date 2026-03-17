@@ -207,6 +207,7 @@ def main() -> None:
     parser.add_argument(
         "--snapshot-id",
         dest="snapshot_id",
+        type=int,
         default=None,
         help="An optional Iceberg snapshot ID to use when extracting data from the adapter store",
     )
@@ -238,6 +239,7 @@ def main() -> None:
     event = TransformerEvent(
         transformer_type=args.transformer_type,
         changeset_ids=args.changeset_ids,
+        snapshot_id=args.snapshot_id,
         job_id=args.job_id,
     )
     execution_context = ExecutionContext(
