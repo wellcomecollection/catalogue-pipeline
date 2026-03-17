@@ -10,7 +10,7 @@ data "aws_s3_bucket" "adapter" {
 
 data "terraform_remote_state" "platform_monitoring" {
   backend = "s3"
-  config  = {
+  config = {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
