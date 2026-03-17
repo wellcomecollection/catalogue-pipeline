@@ -196,6 +196,42 @@ class TestMigrateFromParquet:
         source_id = cursor.fetchone()["SourceId"]
         assert source_id == "col1\tcol2"
 
+    def test_source_id_with_double_quotes(
+        self,
+        ids_db: pymysql.connections.Connection,
+        tmp_path: Path,
+    ) -> None:
+        """SourceId values containing double quotes should be loaded verbatim.
+
+        Polars write_csv will CSV-quote fields containing `"` unless
+        quote_style="never" is set, which would cause MySQL LOAD DATA to
+        store the extra quoting as literal data.
+        """
+        rows = [
+            {
+                "CanonicalId": "cccc3333",
+                "OntologyType": "Concept",
+                "SourceSystem": "label-derived",
+                "SourceId": 'analiticheskii tsentr strategicheskikh issledovanii "sokol"',
+            },
+        ]
+        out = tmp_path / "parquet"
+        out.mkdir()
+        pl.DataFrame(rows).write_parquet(out / "part-00000.parquet")
+
+        result = migrate_from_parquet(ids_db, out)
+
+        assert result.identifiers_inserted == 1
+
+        cursor = ids_db.cursor()
+        cursor.execute(
+            "SELECT SourceId FROM identifiers WHERE CanonicalId = 'cccc3333'"
+        )
+        source_id = cursor.fetchone()["SourceId"]
+        assert (
+            source_id == 'analiticheskii tsentr strategicheskikh issledovanii "sokol"'
+        )
+
 
 # ===================================================================
 # truncate_tables tests
