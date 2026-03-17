@@ -120,10 +120,12 @@ locals {
         Parameters = {
           "StateMachineArn.$" = "$$.StateMachine.Id"
           Input               = {
-            "job_id.$"        = "$$.Execution.Input.detail.job_id"
-            "changeset_ids.$" = "$$.Execution.Input.detail.changeset_ids"
-            transformer_type  = "axiell_reconciler"
-            "snapshot_id.$"   = "$.snapshot_id"
+            detail = {
+              "job_id.$"        = "$$.Execution.Input.detail.job_id"
+              "changeset_ids.$" = "$$.Execution.Input.detail.changeset_ids"
+              transformer_type  = "axiell_reconciler"
+              "snapshot_id.$"   = "$.snapshot_id"
+            }
           }
         },
         Next = "Should run ID minter?"
