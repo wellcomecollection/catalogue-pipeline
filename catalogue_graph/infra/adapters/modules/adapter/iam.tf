@@ -12,8 +12,8 @@ data "aws_iam_policy_document" "iceberg_write" {
       "s3tables:GetTableMetadataLocation",
     ]
     resources = [
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter",
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/*"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${var.s3_bucket_name}",
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${var.s3_bucket_name}/*"
     ]
   }
 
@@ -29,12 +29,12 @@ data "aws_iam_policy_document" "iceberg_write" {
     ]
 
     resources = [
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/table/*"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${var.s3_bucket_name}/table/*"
     ]
   }
 }
 
-# Policy for reading from the EBSCO adapter S3 bucket
+# Policy for reading from the adapter S3 bucket
 data "aws_iam_policy_document" "s3_read" {
   statement {
     actions = [
@@ -43,13 +43,13 @@ data "aws_iam_policy_document" "s3_read" {
     ]
 
     resources = [
-      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter",
-      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/*"
+      "arn:aws:s3:::${var.s3_bucket_name}",
+      "arn:aws:s3:::${var.s3_bucket_name}/*"
     ]
   }
 }
 
-# Policy for writing to the EBSCO adapter S3 bucket
+# Policy for writing to the adapter S3 bucket
 data "aws_iam_policy_document" "s3_write" {
   statement {
     actions = [
@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "s3_write" {
     ]
 
     resources = [
-      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/ftp_v2/*",
+      "arn:aws:s3:::${var.s3_bucket_name}/prod/*",
     ]
   }
 }
@@ -72,7 +72,7 @@ data "aws_iam_policy_document" "ssm_read" {
     ]
 
     resources = [
-      "arn:aws:ssm:eu-west-1:760097843905:parameter/catalogue_pipeline/ebsco_adapter/*"
+      "arn:aws:ssm:eu-west-1:760097843905:parameter/catalogue_pipeline/${var.namespace}*"
     ]
   }
 
@@ -111,13 +111,26 @@ data "aws_iam_policy_document" "cloudwatch_put_metric_data" {
   }
 }
 
+# Allow publish to chatbot topic
+data "aws_iam_policy_document" "chatbot_topic_publish" {
+  statement {
+    actions = [
+      "sns:Publish"
+    ]
+
+    resources = [
+      local.chatbot_topic_arn
+    ]
+  }
+}
+
 # IAM Policy for State Machine to invoke Lambda functions
 resource "aws_iam_policy" "state_machine_lambda_policy" {
-  name        = "ebsco-adapter-state-machine-lambda-policy"
-  description = "Allow state machine to invoke EBSCO adapter Lambda functions"
+  name        = "${var.namespace}-adapter-state-machine-lambda-policy"
+  description = "Allow state machine to invoke adapter Lambda functions"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -135,11 +148,11 @@ resource "aws_iam_policy" "state_machine_lambda_policy" {
 
 # IAM Policy allowing the state machine to put events onto the shared adapter event bus
 resource "aws_iam_policy" "state_machine_eventbridge_put_policy" {
-  name        = "ebsco-adapter-state-machine-eventbridge-put-policy"
+  name        = "${var.namespace}-adapter-state-machine-eventbridge-put-policy"
   description = "Allow state machine to put events on the adapter event bus"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -147,7 +160,7 @@ resource "aws_iam_policy" "state_machine_eventbridge_put_policy" {
           "events:PutEvents"
         ]
         Resource = [
-          aws_cloudwatch_event_bus.event_bus.arn
+          data.aws_cloudwatch_event_bus.event_bus.arn
         ]
       }
     ]
@@ -156,11 +169,11 @@ resource "aws_iam_policy" "state_machine_eventbridge_put_policy" {
 
 # IAM Policy for State Machine CloudWatch Logging
 resource "aws_iam_policy" "state_machine_logging_policy" {
-  name        = "ebsco-adapter-state-machine-logging-policy"
+  name        = "${var.namespace}-adapter-state-machine-logging-policy"
   description = "Allow state machine to write logs to CloudWatch"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -182,11 +195,11 @@ resource "aws_iam_policy" "state_machine_logging_policy" {
 
 # IAM Policy for EventBridge to start State Machine executions
 resource "aws_iam_policy" "eventbridge_state_machine_policy" {
-  name        = "ebsco-adapter-eventbridge-state-machine-policy"
-  description = "Allow EventBridge to start EBSCO adapter state machine executions"
+  name        = "${var.namespace}-adapter-eventbridge-state-machine-policy"
+  description = "Allow EventBridge to start adapter state machine executions"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"

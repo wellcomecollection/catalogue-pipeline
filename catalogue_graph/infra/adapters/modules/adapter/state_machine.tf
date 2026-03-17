@@ -1,14 +1,13 @@
-# State Machine Definition
 locals {
   state_machine_definition = jsonencode({
-    Comment = "Axiell Adapter Pipeline - Trigger -> Loader -> PublishEvent"
-    StartAt = "TriggerStep"
-    States = {
-      TriggerStep = {
+    Comment = "Adapter pipeline (trigger, loader, publish event)"
+    StartAt = "Run trigger"
+    States  = {
+      "Run trigger" = {
         Type     = "Task"
         Resource = module.trigger_lambda.lambda.arn
-        Next     = "LoaderStep"
-        Retry = [
+        Next     = "Run loader"
+        Retry    = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -17,11 +16,11 @@ locals {
           }
         ]
       }
-      LoaderStep = {
+      "Run loader" = {
         Type     = "Task"
         Resource = module.loader_lambda.lambda.arn
-        Next     = "PublishDecision"
-        Retry = [
+        Next     = "Should publish event?"
+        Retry    = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -30,37 +29,37 @@ locals {
           }
         ]
       }
-      PublishDecision = {
-        Type = "Choice"
+      "Should publish event?" = {
+        Type    = "Choice"
         Choices = [
           {
             Variable  = "$.changeset_ids[0]"
             IsPresent = true
-            Next      = "PublishEvent"
+            Next      = "Publish event"
           }
         ]
         Default = "Success"
       }
-      PublishEvent = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::events:putEvents"
+      "Publish event" = {
+        Type       = "Task"
+        Resource   = "arn:aws:states:::events:putEvents"
         Parameters = {
           Entries = [
             {
               Detail = {
-                transformer_type  = "axiell"
+                transformer_type  = var.namespace
                 "job_id.$"        = "$.job_id"
                 "changeset_ids.$" = "$.changeset_ids"
               }
-              DetailType   = "axiell.adapter.completed"
+              DetailType   = "${var.namespace}.adapter.completed"
               EventBusName = data.aws_cloudwatch_event_bus.event_bus.name
-              Source       = "axiell.adapter"
+              Source       = "${var.namespace}.adapter"
             }
           ]
         }
         ResultPath = null
         Next       = "Success"
-        Retry = [
+        Retry      = [
           {
             ErrorEquals     = ["States.ALL"]
             IntervalSeconds = 2
@@ -78,14 +77,14 @@ locals {
 
 # IAM Role for State Machine
 resource "aws_iam_role" "state_machine_role" {
-  name = "axiell-adapter-state-machine-role"
+  name = "${var.namespace}-adapter-state-machine-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
         Principal = {
           Service = "states.amazonaws.com"
         }
@@ -112,7 +111,7 @@ resource "aws_iam_role_policy_attachment" "state_machine_eventbridge_put_policy_
 
 # State Machine
 resource "aws_sfn_state_machine" "state_machine" {
-  name       = "axiell-adapter"
+  name       = "${var.namespace}-adapter"
   role_arn   = aws_iam_role.state_machine_role.arn
   definition = local.state_machine_definition
 
@@ -125,50 +124,6 @@ resource "aws_sfn_state_machine" "state_machine" {
 
 # CloudWatch Log Group for State Machine
 resource "aws_cloudwatch_log_group" "state_machine_logs" {
-  name              = "/aws/stepfunctions/axiell-adapter-pipeline"
+  name              = "/aws/stepfunctions/${var.namespace}-adapter-pipeline"
   retention_in_days = 14
-}
-
-# IAM Role for EventBridge to trigger State Machine
-resource "aws_iam_role" "eventbridge_state_machine_role" {
-  name = "axiell-adapter-eventbridge-state-machine-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = [
-            "states.amazonaws.com",
-            "scheduler.amazonaws.com"
-          ]
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-# Attach the policy to the EventBridge role
-resource "aws_iam_role_policy_attachment" "eventbridge_state_machine_policy_attachment" {
-  role       = aws_iam_role.eventbridge_state_machine_role.name
-  policy_arn = aws_iam_policy.eventbridge_state_machine_policy.arn
-}
-
-# Run every 15 minutes
-resource "aws_scheduler_schedule" "axiell_adapter_15_minute_run" {
-  name = "axiell_adapter_15_minute_run"
-
-  flexible_time_window {
-    mode = "OFF"
-  }
-
-  schedule_expression = "rate(15 minutes)"
-  state               = "ENABLED"
-
-  target {
-    arn      = aws_sfn_state_machine.state_machine.arn
-    role_arn = aws_iam_role.eventbridge_state_machine_role.arn
-  }
 }
