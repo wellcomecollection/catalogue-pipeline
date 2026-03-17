@@ -510,6 +510,8 @@ resource "aws_cloudwatch_event_rule" "export_completed" {
       cluster_name = ["identifiers-serverless"]
     }
   })
+
+  state = "ENABLED"
 }
 
 resource "aws_cloudwatch_event_target" "start_migration" {
