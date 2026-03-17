@@ -19,7 +19,7 @@ module "transformer_lambda" {
   timeout     = 600
 
   vpc_config = {
-    subnet_ids         = local.network_config.subnets
+    subnet_ids = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,
@@ -80,13 +80,13 @@ resource "aws_iam_role_policy" "transformer_axiell_lambda_pipeline_storage_secre
 locals {
   transformer_state_machine_definition = jsonencode({
     StartAt = "Run transformer"
-    States  = {
+    States = {
       "Run transformer" = {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
         Next      = "Should run reconciler?"
-        Retry     = [
+        Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -96,7 +96,7 @@ locals {
         ]
       }
       "Should run reconciler?" = {
-        Type    = "Choice"
+        Type = "Choice"
         Choices = [
           {
             And = [
@@ -115,11 +115,11 @@ locals {
         Default = "Should run ID minter?"
       },
       "Run reconciler" = {
-        Type       = "Task",
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task",
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           "StateMachineArn.$" = "$$.StateMachine.Id"
-          Input               = {
+          Input = {
             detail = {
               "job_id.$"        = "$$.Execution.Input.detail.job_id"
               "changeset_ids.$" = "$$.Execution.Input.detail.changeset_ids"
@@ -131,7 +131,7 @@ locals {
         Next = "Should run ID minter?"
       },
       "Should run ID minter?" = {
-        Type    = "Choice"
+        Type = "Choice"
         Choices = [
           {
             Variable     = "$$.Execution.Input.detail.transformer_type"
@@ -145,8 +145,8 @@ locals {
         Type                  = "Map"
         MaxConcurrency        = 2
         ToleratedFailureCount = 0
-        ItemReader            = {
-          Resource     = "arn:aws:states:::s3:getObject"
+        ItemReader = {
+          Resource = "arn:aws:states:::s3:getObject"
           ReaderConfig = {
             InputType = "JSONL"
           }
@@ -167,10 +167,10 @@ locals {
             ExecutionType = "STANDARD"
           }
           StartAt = "IdMinterStep"
-          States  = {
+          States = {
             IdMinterStep = {
-              Type           = "Task"
-              Resource       = module.id_minter_lambda_step_function.lambda_arn
+              Type     = "Task"
+              Resource = module.id_minter_lambda_step_function.lambda_arn
               ResultSelector = {
                 "failures.$" = "$.failures"
                 "jobId.$"    = "$.jobId"
@@ -217,7 +217,7 @@ module "transformer_state_machine" {
 
   name                     = "transformer-${var.pipeline_date}"
   state_machine_definition = local.transformer_state_machine_definition
-  invokable_lambda_arns    = [
+  invokable_lambda_arns = [
     module.transformer_lambda.lambda.arn,
     module.id_minter_lambda_step_function.lambda_arn
   ]
@@ -287,7 +287,7 @@ module "reindex_transformer_trigger" {
   event_pattern = {
     source        = ["weco.pipeline.reindex"],
     "detail-type" = ["weco.pipeline.reindex.requested"],
-    detail        = {
+    detail = {
       reindex_targets = [each.value.reindex_target_value]
     }
   }
