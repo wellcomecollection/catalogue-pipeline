@@ -52,9 +52,32 @@ data "aws_iam_policy_document" "adapter_s3tables_read" {
   }
 }
 
+data "aws_iam_policy_document" "reconciler_s3tables_write" {
+  statement {
+    actions = [
+      "s3tables:PutTableData",
+    ]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${local.axiell_adapter_bucket}/table/*"
+    ]
+
+    # Restrict write permissions to the reconciler table
+    condition {
+      test     = "StringEquals"
+      variable = "s3tables:namespace"
+      values   = ["wellcomecollection_catalogue"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "s3tables:tableName"
+      values   = ["axiell_reconciler_table"]
+    }
+  }
+}
+
 data "aws_iam_policy_document" "read_ebsco_transformer_pipeline_storage_secrets" {
   statement {
-    actions = ["secretsmanager:GetSecretValue"]
+    actions   = ["secretsmanager:GetSecretValue"]
     resources = [
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
@@ -66,7 +89,7 @@ data "aws_iam_policy_document" "read_ebsco_transformer_pipeline_storage_secrets"
 
 data "aws_iam_policy_document" "read_axiell_transformer_pipeline_storage_secrets" {
   statement {
-    actions = ["secretsmanager:GetSecretValue"]
+    actions   = ["secretsmanager:GetSecretValue"]
     resources = [
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
