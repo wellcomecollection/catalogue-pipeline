@@ -110,7 +110,7 @@ module "identifiers_v2_serverless_rds_cluster" {
 
   max_scaling_capacity = 16
 
-  engine_version = "8.0.mysql_aurora.3.08.2"
+  engine_version = "8.0.mysql_aurora.3.10.3"
 }
 
 resource "aws_security_group" "rds_v2_ingress_security_group" {
