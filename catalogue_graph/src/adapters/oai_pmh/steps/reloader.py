@@ -428,4 +428,14 @@ def run_cli(
         dry_run=args.dry_run,
     )
 
-    logger.info("Reloader response", response=response.model_dump(mode="json"))
+    logger.info(
+        "Reloader complete",
+        job_id=response.job_id,
+        total_gaps=response.total_gaps,
+        dry_run=response.dry_run,
+        gaps_succeeded=sum(
+            1 for g in response.gaps_processed if not g.skipped and g.error is None
+        ),
+        gaps_skipped=sum(1 for g in response.gaps_processed if g.skipped),
+        gaps_failed=sum(1 for g in response.gaps_processed if g.error is not None),
+    )
