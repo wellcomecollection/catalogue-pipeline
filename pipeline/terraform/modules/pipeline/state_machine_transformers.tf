@@ -93,9 +93,17 @@ locals {
         Type = "Choice"
         Choices = [
           {
-            Variable     = "$$.Execution.Input.detail.transformer_type"
-            StringEquals = "axiell"
-            Next         = "Run reconciler"
+            And = [
+              {
+                Variable     = "$$.Execution.Input.detail.transformer_type"
+                StringEquals = "axiell"
+              },
+              {
+                Variable  = "$$.Execution.Input.detail.changeset_ids[0]"
+                IsPresent = true
+              }
+            ]
+            Next = "Run reconciler"
           }
         ]
         Default = "Should run ID minter?"
