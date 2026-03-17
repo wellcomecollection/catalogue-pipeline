@@ -2,7 +2,7 @@ module "trigger_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
   name         = "${var.namespace}-adapter-trigger"
-  description  = "Lambda function to trigger ${var.namespace} adapter ingestion"
+  description  = "Lambda function to trigger adapter ingestion"
   package_type = "Image"
   image_uri    = "${var.repository_url}:prod"
   publish      = true

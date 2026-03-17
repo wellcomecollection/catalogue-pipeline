@@ -2,7 +2,7 @@ module "loader_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
   name         = "${var.namespace}-adapter-loader"
-  description  = "Lambda function to load ${var.namespace} data into Iceberg table"
+  description  = "Lambda function to load source data into Iceberg table"
   package_type = "Image"
   image_uri    = "${var.repository_url}:prod"
   publish      = true
