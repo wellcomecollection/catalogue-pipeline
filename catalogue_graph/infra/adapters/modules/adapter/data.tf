@@ -1,12 +1,12 @@
-data "aws_s3_bucket" "folio_adapter" {
-  bucket = "wellcomecollection-platform-folio-adapter"
-}
+data "aws_region" "current" {}
 
 data "aws_cloudwatch_event_bus" "event_bus" {
-  name = "catalogue-pipeline-adapter-event-bus"
+  name = var.event_bus_name
 }
 
-data "aws_region" "current" {}
+data "aws_s3_bucket" "adapter" {
+  bucket = var.s3_bucket_name
+}
 
 data "terraform_remote_state" "platform_monitoring" {
   backend = "s3"
