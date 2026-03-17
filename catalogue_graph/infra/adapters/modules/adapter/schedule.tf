@@ -31,7 +31,6 @@ resource "aws_iam_role" "eventbridge_state_machine_role" {
         Effect = "Allow",
         Principal = {
           Service = [
-            "states.amazonaws.com",
             "scheduler.amazonaws.com"
           ]
         },
