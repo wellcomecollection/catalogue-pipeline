@@ -407,3 +407,6 @@ scripts/mirolinks.csv
 
 # Ignore documents added for agent context
 catalogue_graph/.context
+
+# Ignore scratch files
+.scratch
