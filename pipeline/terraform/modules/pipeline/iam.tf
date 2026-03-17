@@ -77,7 +77,7 @@ data "aws_iam_policy_document" "reconciler_s3tables_write" {
 
 data "aws_iam_policy_document" "read_ebsco_transformer_pipeline_storage_secrets" {
   statement {
-    actions   = ["secretsmanager:GetSecretValue"]
+    actions = ["secretsmanager:GetSecretValue"]
     resources = [
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
@@ -89,7 +89,7 @@ data "aws_iam_policy_document" "read_ebsco_transformer_pipeline_storage_secrets"
 
 data "aws_iam_policy_document" "read_axiell_transformer_pipeline_storage_secrets" {
   statement {
-    actions   = ["secretsmanager:GetSecretValue"]
+    actions = ["secretsmanager:GetSecretValue"]
     resources = [
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
