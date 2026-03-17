@@ -120,8 +120,14 @@ class TestTransform:
     def test_transforms_document_with_nested_identifiers(self) -> None:
         root_si = _make_source_identifier("Work", "sierra-system-number", "b1000001")
         item_si = _make_source_identifier("Item", "sierra-system-number", "i2000001")
-        item = {"sourceIdentifier": item_si}
+        item = {
+            "sourceIdentifier": item_si,
+            "type": "Identifiable",
+            "identifiedType": "Identified",
+        }
         doc = _make_work_doc(root_si, items=[item])
+        doc["state"]["type"] = "Identifiable"
+        doc["state"]["identifiedType"] = "Identified"
 
         resolver = FakeResolver(
             ids={
@@ -143,7 +149,11 @@ class TestTransform:
         assert len(results) == 1
         _, embedded = results[0]
         assert embedded["state"]["canonicalId"] == "abcd1234"
+        assert embedded["state"]["type"] == "Identified"
+        assert "identifiedType" not in embedded["state"]
         assert embedded["items"][0]["canonicalId"] == "efgh5678"
+        assert embedded["items"][0]["type"] == "Identified"
+        assert "identifiedType" not in embedded["items"][0]
 
     def test_records_error_on_missing_state(self) -> None:
         doc: dict[str, Any] = {"data": {"title": "no state"}}

@@ -74,7 +74,7 @@ def extract_source_identifiers(work_json: dict) -> list[SourceIdentifierKey]:
 def embed_canonical_ids(
     work_json: dict, id_map: dict[SourceIdentifierKey, str]
 ) -> dict:
-    """Add a canonicalId field to every node that has a sourceIdentifier.
+    """Add canonical IDs and promote minted nodes to the identified shape.
 
     ``id_map`` maps SourceIdentifierKey -> canonical ID string.
     Nodes whose sourceIdentifier is not found in ``id_map`` are left unchanged.
@@ -84,7 +84,20 @@ def embed_canonical_ids(
         key = make_key(node["sourceIdentifier"])
         canonical_id = id_map.get(key)
         if canonical_id is not None:
-            return {**node, "canonicalId": canonical_id}
+            updated_node = {**node, "canonicalId": canonical_id}
+
+            identified_type = updated_node.get("identifiedType")
+            if isinstance(identified_type, str):
+                promoted_node = {
+                    k: v for k, v in updated_node.items() if k != "identifiedType"
+                }
+                promoted_node["type"] = identified_type
+                return promoted_node
+
+            if updated_node.get("type") == "Identifiable":
+                return {**updated_node, "type": "Identified"}
+
+            return updated_node
         return node
 
     return cast(
