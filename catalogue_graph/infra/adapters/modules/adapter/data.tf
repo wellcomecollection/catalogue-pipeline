@@ -1,7 +1,7 @@
 data "aws_region" "current" {}
 
 data "aws_cloudwatch_event_bus" "event_bus" {
-  name = "catalogue-pipeline-adapter-event-bus"
+  name = var.event_bus_name
 }
 
 data "aws_s3_bucket" "adapter" {
@@ -10,7 +10,7 @@ data "aws_s3_bucket" "adapter" {
 
 data "terraform_remote_state" "platform_monitoring" {
   backend = "s3"
-  config = {
+  config  = {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }

@@ -8,6 +8,7 @@ module "ebsco" {
   s3_bucket_name      = "wellcomecollection-platform-ebsco-adapter"
   schedule_expression = "cron(0 2 * * ? *)" # Daily at 2 AM UTC
   repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
+  event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
 }
 
 module "axiell" {
@@ -16,6 +17,7 @@ module "axiell" {
   s3_bucket_name      = "wellcomecollection-platform-axiell-adapter"
   schedule_expression = "rate(15 minutes)"
   repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
+  event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
 }
 
 module "folio" {
@@ -24,6 +26,7 @@ module "folio" {
   s3_bucket_name      = "wellcomecollection-platform-folio-adapter"
   schedule_expression = "rate(15 minutes)"
   repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
+  event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
 }
 
 # Event bus to enable communication with the current pipeline

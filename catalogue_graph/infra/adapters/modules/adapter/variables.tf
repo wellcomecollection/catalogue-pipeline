@@ -18,3 +18,8 @@ variable "schedule_expression" {
   type        = string
   description = "Schedule pattern for adapter runs"
 }
+
+variable "event_bus_name" {
+  type        = string
+  description = "Name of the EventBridge event bus associated with the adapter"
+}
