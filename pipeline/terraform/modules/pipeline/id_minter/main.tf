@@ -27,6 +27,7 @@ module "id_minter_lambda" {
     {
       PIPELINE_DATE            = var.pipeline_date
       DOWNSTREAM_SNS_TOPIC_ARN = module.id_minter_output_topic.arn
+      # LOG_LEVEL                = "DEBUG"
     }
   )
   secret_env_vars = var.id_minter_secret_env_vars

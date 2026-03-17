@@ -38,6 +38,11 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
 
   billing_mode = local.graph_table_billing_mode
 
+  point_in_time_recovery {
+    enabled = true
+    # continuous backups are taken and maintained for 35 days (default).
+  }
+
   # These numbers were chosen by running a reindex and seeing when the
   # matcher started throttling.
   read_capacity  = local.graph_table_billing_mode == "PROVISIONED" ? 600 : 0
