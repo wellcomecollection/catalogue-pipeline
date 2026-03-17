@@ -229,14 +229,33 @@ def handler(
     report = reporter.coverage_report(range_start=window_start, range_end=window_end)
 
     # Log window coverage report
-    logger.info("Window coverage report", summary=report.summary())
-
     logger.info(
-        "Gap analysis complete",
-        gap_count=len(report.coverage_gaps),
+        "Window coverage report",
+        total_windows=report.total_windows,
+        coverage_hours=f"{report.coverage_hours:.2f}",
+        gaps=len(report.coverage_gaps),
+        failures=len(report.failures),
+        last_success_end=report.last_success_end.isoformat()
+        if report.last_success_end
+        else None,
         range_start=window_start.isoformat(),
         range_end=window_end.isoformat(),
     )
+    for gap in report.coverage_gaps:
+        duration = (gap.end - gap.start).total_seconds() / 3600
+        logger.info(
+            "Coverage gap",
+            start=gap.start.isoformat(),
+            end=gap.end.isoformat(),
+            duration_hours=f"{duration:.2f}",
+        )
+    for failure in report.failures:
+        logger.warning(
+            "Window failure",
+            window_key=failure.window_key,
+            attempts=failure.attempts,
+            last_error=failure.last_error,
+        )
 
     if not report.coverage_gaps:
         logger.info("No coverage gaps detected - nothing to reload")
