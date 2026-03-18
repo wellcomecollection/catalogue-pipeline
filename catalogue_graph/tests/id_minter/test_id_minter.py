@@ -331,7 +331,7 @@ class TestMetricsPublishing:
         ids_db: pymysql.connections.Connection,
     ) -> None:
         """Metrics are published when pipeline_date is not 'dev'."""
-        seed_free_ids(ids_db, ["metric001"])
+        seed_free_ids(ids_db, ["metr0001"])
 
         si = make_source_identifier("Work", "sierra-system-number", "b6001")
         doc = make_work_doc(si)
@@ -370,7 +370,7 @@ class TestMetricsPublishing:
         ids_db: pymysql.connections.Connection,
     ) -> None:
         """No metrics are emitted when pipeline_date is 'dev'."""
-        seed_free_ids(ids_db, ["metric002"])
+        seed_free_ids(ids_db, ["metr0002"])
 
         si = make_source_identifier("Work", "sierra-system-number", "b6002")
         doc = make_work_doc(si)
