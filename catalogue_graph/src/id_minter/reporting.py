@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from utils.reporting import PipelineMetric, PipelineReport
 
@@ -11,7 +11,7 @@ class IdMinterReport(PipelineReport):
     pipeline_date: str
     success_count: int
     failure_count: int
-    publish_to_s3: bool = False
+    publish_to_s3: Literal[False] = False
 
     @property
     def publish_to_cloudwatch(self) -> bool:
