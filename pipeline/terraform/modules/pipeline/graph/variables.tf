@@ -33,3 +33,8 @@ variable "es_secrets" {
 variable "ecs_cluster_arn" {
   type = string
 }
+
+variable "enable_schedule" {
+  type = bool
+  default = true
+}
