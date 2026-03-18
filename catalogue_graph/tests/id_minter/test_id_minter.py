@@ -13,6 +13,7 @@ Skip with:
 from __future__ import annotations
 
 import json
+from unittest.mock import patch
 
 import pymysql
 import pymysql.connections
@@ -430,6 +431,47 @@ class TestMetricsPublishing:
         metrics = {m["metric_name"]: m for m in MockCloudwatchClient.metrics_reported}
         assert metrics["success_count"]["value"] == 0
         assert metrics["failure_count"]["value"] == 1
+
+    def test_handler_returns_response_when_publish_fails(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """handler() still returns the minting manifest if metrics publishing raises."""
+        seed_free_ids(ids_db, ["metr0003"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b6004")
+        doc = make_work_doc(si)
+
+        resolver = MintingResolver.from_connection(ids_db)
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="2024-01-01",
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=resolver,
+            source_es_mode="local",
+            target_es_mode="local",
+        )
+        request = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b6004]"],
+            job_id="metrics-test-publish-error",
+        )
+
+        with (
+            stub_transformer_source([doc]),
+            patch(
+                "id_minter.steps.id_minter.IdMinterReport.publish",
+                side_effect=RuntimeError("CloudWatch unavailable"),
+            ),
+        ):
+            response = handler(request, runtime=runtime)
+
+        assert response.job_id == "metrics-test-publish-error"
+        assert response.successes.count == 1
+        assert response.failures is None
 
 
 # ---------------------------------------------------------------------------
