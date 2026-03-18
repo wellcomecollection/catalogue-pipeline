@@ -35,6 +35,6 @@ variable "ecs_cluster_arn" {
 }
 
 variable "enable_schedule" {
-  type = bool
+  type    = bool
   default = true
 }
