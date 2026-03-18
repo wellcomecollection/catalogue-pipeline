@@ -11,6 +11,8 @@ class IdMinterReport(PipelineReport):
     pipeline_date: str
     success_count: int
     failure_count: int
+    # S3 publishing is disabled because the manifest writer already writes
+    # successes and failures to S3, from which these counts can be inferred.
     publish_to_s3: Literal[False] = False
 
     @property
