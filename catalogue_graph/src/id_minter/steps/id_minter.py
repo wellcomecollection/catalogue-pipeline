@@ -163,11 +163,14 @@ def handler(
         failure_count=failure_count,
     )
 
-    IdMinterReport(
-        pipeline_date=runtime.config.pipeline_date,
-        success_count=success_count,
-        failure_count=failure_count,
-    ).publish()
+    try:
+        IdMinterReport(
+            pipeline_date=runtime.config.pipeline_date,
+            success_count=success_count,
+            failure_count=failure_count,
+        ).publish()
+    except Exception:
+        logger.warning("Failed to publish metrics", exc_info=True)
 
     return response
 
