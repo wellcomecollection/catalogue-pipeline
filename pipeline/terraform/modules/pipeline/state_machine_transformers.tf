@@ -43,6 +43,12 @@ resource "aws_iam_role_policy" "transformer_lambda_iceberg_read" {
   policy = data.aws_iam_policy_document.adapter_s3tables_read[each.key].json
 }
 
+# Give the transformer Lambda permission to write to the reconciler table
+resource "aws_iam_role_policy" "transformer_lambda_iceberg_reconciler_write" {
+  role   = module.transformer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.reconciler_s3tables_write.json
+}
+
 # Attach S3 read policies to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_s3_read" {
   for_each = local.transformer_types
@@ -73,13 +79,13 @@ resource "aws_iam_role_policy" "transformer_axiell_lambda_pipeline_storage_secre
 # State Machine Definition
 locals {
   transformer_state_machine_definition = jsonencode({
-    StartAt = "TransformerStep"
+    StartAt = "Run transformer"
     States = {
-      TransformerStep = {
+      "Run transformer" = {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
-        Next      = "ShouldRunIdMinter"
+        Next      = "Should run reconciler?"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -89,7 +95,42 @@ locals {
           }
         ]
       }
-      "ShouldRunIdMinter" = {
+      "Should run reconciler?" = {
+        Type = "Choice"
+        Choices = [
+          {
+            And = [
+              {
+                Variable     = "$$.Execution.Input.detail.transformer_type"
+                StringEquals = "axiell"
+              },
+              {
+                Variable  = "$$.Execution.Input.detail.changeset_ids[0]"
+                IsPresent = true
+              }
+            ]
+            Next = "Run reconciler"
+          }
+        ]
+        Default = "Should run ID minter?"
+      },
+      "Run reconciler" = {
+        Type     = "Task",
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Parameters = {
+          "StateMachineArn.$" = "$$.StateMachine.Id"
+          Input = {
+            detail = {
+              "job_id.$"        = "$$.Execution.Input.detail.job_id"
+              "changeset_ids.$" = "$$.Execution.Input.detail.changeset_ids"
+              transformer_type  = "axiell_reconciler"
+              "snapshot_id.$"   = "$.snapshot_id"
+            }
+          }
+        },
+        Next = "Should run ID minter?"
+      },
+      "Should run ID minter?" = {
         Type = "Choice"
         Choices = [
           {
@@ -99,7 +140,7 @@ locals {
           }
         ]
         Default = "Success"
-      }
+      },
       IdMinterMap = {
         Type                  = "Map"
         MaxConcurrency        = 2
@@ -208,7 +249,7 @@ module "adapter_transformer_trigger" {
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.transformer_state_machine.state_machine_arn
 
-  enabled = true
+  enabled = false # Start disabled until we're ready to switch over to the new ID minter
 
   event_pattern = {
     source        = [each.value.adapter_source],
@@ -232,7 +273,7 @@ module "reindex_transformer_trigger" {
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.transformer_state_machine.state_machine_arn
 
-  enabled = var.reindexing_state.listen_to_reindexer
+  enabled = false # Start disabled until we're ready to switch over to the new ID minter
 
   // Expect events like:
   // {

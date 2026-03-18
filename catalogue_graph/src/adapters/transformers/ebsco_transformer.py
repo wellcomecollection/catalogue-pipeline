@@ -27,11 +27,17 @@ from models.pipeline.work_state import WorkRelations
 
 
 class EbscoTransformer(MarcXmlTransformer):
-    def __init__(self, adapter_store: AdapterStore, changeset_ids: list[str]) -> None:
+    def __init__(
+        self,
+        adapter_store: AdapterStore,
+        changeset_ids: list[str],
+        snapshot_id: int | None,
+    ) -> None:
         super().__init__(
             adapter_store,
             changeset_ids=changeset_ids,
             identifier_type=Id(id="ebsco-alt-lookup"),
+            snapshot_id=snapshot_id,
         )
 
     def transform_record(

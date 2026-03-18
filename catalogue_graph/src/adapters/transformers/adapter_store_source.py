@@ -10,19 +10,27 @@ logger = structlog.get_logger(__name__)
 
 
 class AdapterStoreSource(BaseSource):
-    def __init__(self, adapter_store: AdapterStore, changeset_ids: list[str]):
+    def __init__(
+        self,
+        adapter_store: AdapterStore,
+        changeset_ids: list[str],
+        snapshot_id: int | None = None,
+    ):
         self.adapter_store = adapter_store
         self.changeset_ids = changeset_ids
+        self.snapshot_id = snapshot_id
 
     def stream_raw(self) -> Generator[dict[str, Any]]:
         if self.changeset_ids:
             for changeset_id in self.changeset_ids:
-                table = self.adapter_store.get_records_by_changeset(changeset_id)
+                table = self.adapter_store.get_records_by_changeset(
+                    changeset_id, self.snapshot_id
+                )
                 yield from table.to_pylist()
         else:
             logger.info("No changeset_id provided; performing full reindex of records.")
 
             # During a full reindex we are writing into an empty index,
             # so no need to include deleted rows to overwrite documents.
-            table = self.adapter_store.get_active_namespace_records()
+            table = self.adapter_store.get_active_namespace_records(self.snapshot_id)
             yield from table.to_pylist()

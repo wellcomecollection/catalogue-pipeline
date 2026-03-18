@@ -62,6 +62,20 @@ def test_returns_transformer_manifest_with_changeset_ids() -> None:
     assert manifest.changeset_ids == ["chg1", "chg2"]
 
 
+def test_returns_transformer_manifest_with_snapshot_id() -> None:
+    writer = TransformerManifestWriter(
+        job_id="job1",
+        changeset_ids=["chg1", "chg2"],
+        snapshot_id=31415926535,
+        bucket=adapter_config.S3_BUCKET,
+        prefix=str(PurePosixPath(adapter_config.S3_PREFIX, "transformer/batches")),
+    )
+    manifest = writer.build_manifest(successful_ids=["id1"], errors=[])
+
+    assert isinstance(manifest, TransformerManifest)
+    assert manifest.snapshot_id == 31415926535
+
+
 @pytest.mark.parametrize(
     "changeset_id, job_id, expected_success, expected_failure",
     [

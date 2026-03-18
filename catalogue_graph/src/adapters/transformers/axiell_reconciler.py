@@ -23,9 +23,12 @@ class AxiellReconciler(MarcXmlTransformer):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         reconciler_store: ReconcilerStore,
+        snapshot_id: int | None = None,
     ) -> None:
         self.reconciler_store = reconciler_store
-        super().__init__(adapter_store, changeset_ids, Id(id="axiell-guid"))
+        super().__init__(
+            adapter_store, changeset_ids, Id(id="axiell-guid"), snapshot_id
+        )
 
     def _rows_to_reconciler_arrow_table(
         self, rows: Iterable[dict[str, Any]]
