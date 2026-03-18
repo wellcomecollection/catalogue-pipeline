@@ -25,9 +25,9 @@ from adapters.transformers.manifests import (
     TransformerManifest,
     TransformerManifestWriter,
 )
+from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
-from core.transformer import ElasticBaseTransformer as BaseTransformer
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -41,6 +41,7 @@ class TransformerEvent(BaseModel):
     transformer_type: TransformerType
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
+    snapshot_id: int | None = None
 
 
 class AdapterConfig(Protocol):
@@ -95,17 +96,19 @@ def build_transformer(
     event: TransformerEvent,
     use_rest_api_table: bool = False,
     create_if_not_exists: bool = False,
-) -> BaseTransformer:
+) -> MarcXmlTransformer:
     adapter_store = get_adapter_store(
         event.transformer_type,
         use_rest_api_table=use_rest_api_table,
         create_if_not_exists=create_if_not_exists,
     )
 
+    snapshot_id = event.snapshot_id or adapter_store.current_snapshot_id()
+
     if event.transformer_type == "axiell":
-        return AxiellTransformer(adapter_store, event.changeset_ids)
+        return AxiellTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "ebsco":
-        return EbscoTransformer(adapter_store, event.changeset_ids)
+        return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "axiell_reconciler":
         if not event.changeset_ids:
             # The reconciler doesn't work in the context of a full reindex,
@@ -119,7 +122,9 @@ def build_transformer(
             create_if_not_exists=create_if_not_exists,
         )
         reconciler_store = ReconcilerStore(table, namespace="axiell")
-        return AxiellReconciler(adapter_store, event.changeset_ids, reconciler_store)
+        return AxiellReconciler(
+            adapter_store, event.changeset_ids, reconciler_store, snapshot_id
+        )
 
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
@@ -155,12 +160,14 @@ def handler(
         es_mode=es_mode,
         api_key_name=config.ES_API_KEY_NAME,
     )
+
     transformer.stream_to_index(es_client, index_name)
 
     s3_batches_prefix = BATCHES_S3_PREFIX_BY_TYPE[event.transformer_type]
     writer = TransformerManifestWriter(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
+        snapshot_id=transformer.source.snapshot_id,
         bucket=config.S3_BUCKET,
         prefix=str(PurePosixPath(config.S3_PREFIX, s3_batches_prefix)),
     )
@@ -198,6 +205,13 @@ def main() -> None:
         help="Changeset identifier to transform (repeatable)",
     )
     parser.add_argument(
+        "--snapshot-id",
+        dest="snapshot_id",
+        type=int,
+        default=None,
+        help="An optional Iceberg snapshot ID to use when extracting data from the adapter store",
+    )
+    parser.add_argument(
         "--job-id",
         type=str,
         help="Job identifier propagated from the trigger. Will default to 'dev'.",
@@ -225,6 +239,7 @@ def main() -> None:
     event = TransformerEvent(
         transformer_type=args.transformer_type,
         changeset_ids=args.changeset_ids,
+        snapshot_id=args.snapshot_id,
         job_id=args.job_id,
     )
     execution_context = ExecutionContext(

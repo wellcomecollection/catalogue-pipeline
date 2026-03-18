@@ -64,10 +64,10 @@ class AdapterStore(PipelineStore):
 
         return self._commit_changeset(changes, inserts)
 
-    def get_active_namespace_records(self) -> pa.Table:
+    def get_active_namespace_records(self, snapshot_id: int | None = None) -> pa.Table:
         """Return non-deleted records in the store namespace."""
         non_deleted_filter = Or(EqualTo("deleted", False), IsNull("deleted"))
-        return self.get_namespace_records(non_deleted_filter)
+        return self.get_namespace_records(non_deleted_filter, snapshot_id)
 
     @staticmethod
     def _preserve_content_for_deletions(
