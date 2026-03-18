@@ -249,7 +249,7 @@ module "adapter_transformer_trigger" {
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.transformer_state_machine.state_machine_arn
 
-  enabled = true
+  enabled = false # Start disabled until we're ready to switch over to the new ID minter
 
   event_pattern = {
     source        = [each.value.adapter_source],
@@ -273,7 +273,7 @@ module "reindex_transformer_trigger" {
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.transformer_state_machine.state_machine_arn
 
-  enabled = var.reindexing_state.listen_to_reindexer
+  enabled = false # Start disabled until we're ready to switch over to the new ID minter
 
   // Expect events like:
   // {
