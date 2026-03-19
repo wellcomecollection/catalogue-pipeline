@@ -19,8 +19,8 @@ module "id_minter_lambda" {
     command = ["id_minter.steps.id_minter.lambda_handler"]
   }
 
-  memory_size = 256
-  timeout     = 60
+  memory_size = 2048
+  timeout     = 300
 
   environment_variables = merge(
     { for k, v in var.id_minter_env_vars : k => tostring(v) if v != null },
