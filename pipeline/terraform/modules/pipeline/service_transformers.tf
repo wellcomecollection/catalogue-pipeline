@@ -99,7 +99,6 @@ module "sqs_id_minter_bridge" {
   maximum_batching_window_in_seconds = 60
   queue_visibility_timeout_seconds   = 60 * 5 # 5 minutes, matches Lambda timeout
 
-  enabled = false # Start disabled until we're ready to switch over to the new ID minter
 }
 
 module "sqs_id_minter_bridge_state_machine_alarms" {
