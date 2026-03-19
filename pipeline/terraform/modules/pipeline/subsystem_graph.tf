@@ -1,8 +1,6 @@
 module "graph_pipeline" {
   source = "./graph"
 
-  enable_schedule = false
-
   pipeline_date = var.pipeline_date
   index_dates   = var.graph_index_dates
 
