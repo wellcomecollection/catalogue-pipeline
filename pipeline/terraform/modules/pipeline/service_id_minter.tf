@@ -77,7 +77,7 @@ locals {
   id_minter_v2_env_vars = {
     LOG_LEVEL                   = "DEBUG"
     RDS_MAX_CONNECTIONS         = local.id_minter_task_max_connections
-    ES_TARGET_INDEX_DATE_SUFFIX = "2026-03-06"
+    ES_TARGET_INDEX_DATE_SUFFIX = "2025-10-02"
     S3_BUCKET                   = "wellcomecollection-platform-id-minter"
     S3_PREFIX                   = "prod"
   }

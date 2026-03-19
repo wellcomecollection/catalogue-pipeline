@@ -93,7 +93,7 @@ module "sqs_id_minter_bridge" {
   name = "catalogue-${var.pipeline_date}_sqs_id_minter_bridge"
 
   sns_topic_arns = local.transformer_output_topic_arns
-  lambda_arn     = module.id_minter_lambda_step_function.lambda_arn
+  lambda_arn     = module.id_minter_lambda.id_minter_lambda_arn
 
   batch_size                         = 75
   maximum_batching_window_in_seconds = 60

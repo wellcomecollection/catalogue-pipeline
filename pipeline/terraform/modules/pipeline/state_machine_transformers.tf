@@ -170,10 +170,10 @@ locals {
           States = {
             IdMinterStep = {
               Type     = "Task"
-              Resource = module.id_minter_lambda_step_function.lambda_arn
+              Resource = module.id_minter_lambda.id_minter_lambda_arn
               ResultSelector = {
                 "failures.$" = "$.failures"
-                "jobId.$"    = "$.jobId"
+                "jobId.$"    = "$.job_id"
               }
               Retry = [
                 {
@@ -219,7 +219,7 @@ module "transformer_state_machine" {
   state_machine_definition = local.transformer_state_machine_definition
   invokable_lambda_arns = [
     module.transformer_lambda.lambda.arn,
-    module.id_minter_lambda_step_function.lambda_arn
+    module.id_minter_lambda.id_minter_lambda_arn
   ]
 
   policies_to_attach = {
