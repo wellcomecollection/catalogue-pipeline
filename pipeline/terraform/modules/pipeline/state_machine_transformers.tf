@@ -173,7 +173,7 @@ locals {
               Resource = module.id_minter_lambda.id_minter_lambda_arn
               ResultSelector = {
                 "failures.$" = "$.failures"
-                "jobId.$"    = "$.jobId"
+                "jobId.$"    = "$.job_id"
               }
               Retry = [
                 {
