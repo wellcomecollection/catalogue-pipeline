@@ -11,6 +11,8 @@ resource "aws_scheduler_schedule" "graph_pipeline_monthly" {
     arn      = module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn
     role_arn = aws_iam_role.run_graph_pipeline_role.arn
   }
+
+  state = var.enable_schedule ? "ENABLED" : "DISABLED"
 }
 
 resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
@@ -31,6 +33,8 @@ resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
     }
     JSON
   }
+
+  state = var.enable_schedule ? "ENABLED" : "DISABLED"
 }
 
 resource "aws_iam_role" "run_graph_pipeline_role" {

@@ -8,11 +8,18 @@ Direct port of the Scala StepFunctionModels:
 
 from __future__ import annotations
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic.alias_generators import to_camel
 
 
 class StepFunctionMintingRequest(BaseModel):
     """A batch of source identifiers to mint canonical IDs for."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        validate_by_name=True,
+        validate_by_alias=True,
+    )
 
     source_identifiers: list[str]
     job_id: str
