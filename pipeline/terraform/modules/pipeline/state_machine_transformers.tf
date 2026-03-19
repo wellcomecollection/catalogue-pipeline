@@ -249,6 +249,8 @@ module "adapter_transformer_trigger" {
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.transformer_state_machine.state_machine_arn
 
+  enabled = true
+
   event_pattern = {
     source        = [each.value.adapter_source],
     "detail-type" = [each.value.adapter_detail_type]
