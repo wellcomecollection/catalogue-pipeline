@@ -13,6 +13,7 @@ Skip with:
 from __future__ import annotations
 
 import json
+from unittest.mock import patch
 
 import pymysql
 import pymysql.connections
@@ -37,7 +38,12 @@ from tests.id_minter.conftest import (
     seed_identifier,
     stub_transformer_source,
 )
-from tests.mocks import MockElasticsearchClient, MockSmartOpen, MockSNSClient
+from tests.mocks import (
+    MockCloudwatchClient,
+    MockElasticsearchClient,
+    MockSmartOpen,
+    MockSNSClient,
+)
 from utils.models.manifests import StepManifest
 
 pytestmark = pytest.mark.database
@@ -309,6 +315,162 @@ class TestHandlerWithRealResolver:
 
         assert response.job_id == "handler-empty"
         assert response.successes.count == 0
+        assert response.failures is None
+
+
+# ---------------------------------------------------------------------------
+# Tests: CloudWatch metrics publishing
+# ---------------------------------------------------------------------------
+
+
+class TestMetricsPublishing:
+    """Verify that success_count and failure_count metrics are published."""
+
+    def test_publishes_metrics_for_non_dev_pipeline(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """Metrics are published when pipeline_date is not 'dev'."""
+        seed_free_ids(ids_db, ["metr0001"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b6001")
+        doc = make_work_doc(si)
+
+        resolver = MintingResolver.from_connection(ids_db)
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="2024-01-01",
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=resolver,
+            source_es_mode="local",
+            target_es_mode="local",
+        )
+        request = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b6001]"],
+            job_id="metrics-test-1",
+        )
+
+        with stub_transformer_source([doc]):
+            handler(request, runtime=runtime)
+
+        metrics = {m["metric_name"]: m for m in MockCloudwatchClient.metrics_reported}
+        assert "success_count" in metrics
+        assert "failure_count" in metrics
+        assert metrics["success_count"]["value"] == 1
+        assert metrics["failure_count"]["value"] == 0
+        assert metrics["success_count"]["dimensions"] == {"pipeline_date": "2024-01-01"}
+        assert metrics["failure_count"]["dimensions"] == {"pipeline_date": "2024-01-01"}
+
+    def test_does_not_publish_metrics_for_dev_pipeline(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """No metrics are emitted when pipeline_date is 'dev'."""
+        seed_free_ids(ids_db, ["metr0002"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b6002")
+        doc = make_work_doc(si)
+
+        resolver = MintingResolver.from_connection(ids_db)
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="dev",
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=resolver,
+            source_es_mode="local",
+            target_es_mode="local",
+        )
+        request = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b6002]"],
+            job_id="metrics-test-dev",
+        )
+
+        with stub_transformer_source([doc]):
+            handler(request, runtime=runtime)
+
+        assert MockCloudwatchClient.metrics_reported == []
+
+    def test_publishes_failure_count_when_pool_exhausted(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """failure_count metric reflects actual failures."""
+        # No free IDs seeded — pool is empty
+        si = make_source_identifier("Work", "sierra-system-number", "b6003")
+        doc = make_work_doc(si)
+
+        resolver = MintingResolver.from_connection(ids_db)
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="2024-01-01",
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=resolver,
+            source_es_mode="local",
+            target_es_mode="local",
+        )
+        request = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b6003]"],
+            job_id="metrics-test-failure",
+        )
+
+        with stub_transformer_source([doc]):
+            handler(request, runtime=runtime)
+
+        metrics = {m["metric_name"]: m for m in MockCloudwatchClient.metrics_reported}
+        assert metrics["success_count"]["value"] == 0
+        assert metrics["failure_count"]["value"] == 1
+
+    def test_handler_returns_response_when_publish_fails(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """handler() still returns the minting manifest if metrics publishing raises."""
+        seed_free_ids(ids_db, ["metr0003"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b6004")
+        doc = make_work_doc(si)
+
+        resolver = MintingResolver.from_connection(ids_db)
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="2024-01-01",
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=resolver,
+            source_es_mode="local",
+            target_es_mode="local",
+        )
+        request = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b6004]"],
+            job_id="metrics-test-publish-error",
+        )
+
+        with (
+            stub_transformer_source([doc]),
+            patch(
+                "id_minter.steps.id_minter.IdMinterReport.publish",
+                side_effect=RuntimeError("CloudWatch unavailable"),
+            ),
+        ):
+            response = handler(request, runtime=runtime)
+
+        assert response.job_id == "metrics-test-publish-error"
+        assert response.successes.count == 1
         assert response.failures is None
 
 
