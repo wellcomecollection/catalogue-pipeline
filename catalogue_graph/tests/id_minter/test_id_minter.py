@@ -362,8 +362,14 @@ class TestMetricsPublishing:
         assert "failure_count" in metrics
         assert metrics["success_count"]["value"] == 1
         assert metrics["failure_count"]["value"] == 0
-        assert metrics["success_count"]["dimensions"] == {"pipeline_date": "2024-01-01", "pipeline_step": "id_minter"}
-        assert metrics["failure_count"]["dimensions"] == {"pipeline_date": "2024-01-01", "pipeline_step": "id_minter"}
+        assert metrics["success_count"]["dimensions"] == {
+            "pipeline_date": "2024-01-01",
+            "pipeline_step": "id_minter",
+        }
+        assert metrics["failure_count"]["dimensions"] == {
+            "pipeline_date": "2024-01-01",
+            "pipeline_step": "id_minter",
+        }
 
     def test_does_not_publish_metrics_for_dev_pipeline(
         self,

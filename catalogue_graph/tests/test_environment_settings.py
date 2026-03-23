@@ -8,7 +8,12 @@ from clients.neptune_client import NeptuneClient
 from graph.steps.pit_opener import lambda_handler as pit_opener_lambda
 from ingestor.steps import ingestor_deletions, ingestor_indexer
 from models.events import BulkLoaderEvent
-from tests.mocks import MockCloudwatchClient, MockS3Client, MockSecretsManagerClient, mock_es_secrets
+from tests.mocks import (
+    MockCloudwatchClient,
+    MockS3Client,
+    MockSecretsManagerClient,
+    mock_es_secrets,
+)
 from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.reporting import IncrementalGraphRemoverReport, LoaderReport
 
