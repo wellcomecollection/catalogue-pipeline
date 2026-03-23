@@ -78,3 +78,20 @@ data "aws_iam_policy_document" "id_minter_s3_write" {
     ]
   }
 }
+
+resource "aws_iam_role_policy" "id_minter_cloudwatch_write_policy" {
+  role   = module.id_minter_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.id_minter_cloudwatch_write.json
+}
+
+data "aws_iam_policy_document" "id_minter_cloudwatch_write" {
+  statement {
+    actions = [
+      "cloudwatch:PutMetricData"
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
+}

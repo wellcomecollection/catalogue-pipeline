@@ -1,4 +1,5 @@
 import typing
+from datetime import datetime
 from typing import ClassVar
 
 from pydantic import BaseModel
@@ -48,20 +49,19 @@ class PipelineReport(BaseModel):
         raise NotImplementedError()
 
     def put_metrics(self) -> None:
-        if self.window is None:
-            return
+        timestamp = self.window.end_time if self.window is not None else datetime.now()
+        dimensions = {**self.metric_dimensions, "pipeline_step": self.label}
 
         reporter = MetricReporter(self.metric_namespace)
         for metric in self.metrics:
             reporter.put_metric_data(
                 metric_name=metric.name,
                 value=metric.value,
-                dimensions=self.metric_dimensions,
-                timestamp=self.window.end_time,
+                dimensions=dimensions,
+                timestamp=timestamp,
             )
 
     def publish(self) -> None:
-        """Write the report to S3 and publish all metrics."""
         if self.publish_to_s3:
             pydantic_to_s3_json(self, self.s3_uri)
 
@@ -72,7 +72,6 @@ class PipelineReport(BaseModel):
 class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
     @property
     def publish_to_cloudwatch(self) -> bool:
-        # Do not publish metrics for runs in the dev environment
         return self.environment == "prod"
 
     @property
@@ -100,7 +99,6 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
 class IngestorReport(PipelineReport, IngestorStepEvent):
     @property
     def publish_to_cloudwatch(self) -> bool:
-        # Do not publish metrics for runs in the dev environment
         return self.environment == "prod"
 
     @property

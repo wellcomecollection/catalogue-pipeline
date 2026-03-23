@@ -28,6 +28,7 @@ def _get_mock_metric(name: str, value: int) -> dict:
         "pipeline_date": PIPELINE_DATE,
         "transformer_type": TRANSFORMER_TYPE,
         "entity_type": ENTITY_TYPE,
+        "pipeline_step": "bulk_loader",
     }
 
     return {

@@ -240,11 +240,6 @@ object CatalogueDependencies {
 
   val transformerMarcXMLDependencies: Seq[ModuleID] = Nil
 
-  val idminterDependencies: Seq[ModuleID] =
-    ExternalDependencies.mySqlDependencies ++
-      ExternalDependencies.circeOpticsDependencies ++
-      ExternalDependencies.scalatestDependencies
-
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.scalaGraphDependencies ++
       // Matcher requires SSO in order to connect to DynamoDB

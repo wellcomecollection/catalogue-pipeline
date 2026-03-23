@@ -22,7 +22,8 @@ from utils.reporting import PipelineMetric, PipelineReport
 class OAIPMHReport(PipelineReport):
     """Base report class for OAI-PMH adapters.
 
-    Subclasses should set adapter_type and adapter_step to drive metrics dimensions.
+    Subclasses should set adapter_type to drive metrics dimensions.
+    The pipeline_step dimension is automatically injected by PipelineReport.put_metrics().
     Window is required for adapter reports.
     """
 
@@ -56,7 +57,6 @@ class OAIPMHReport(PipelineReport):
     def metric_dimensions(self) -> dict:
         return {
             "adapter_type": self.adapter_type,
-            "adapter_step": self.label,
         }
 
 
