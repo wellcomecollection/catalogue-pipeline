@@ -56,7 +56,6 @@ class OAIPMHReport(PipelineReport):
     def metric_dimensions(self) -> dict:
         return {
             "adapter_type": self.adapter_type,
-            "adapter_step": self.label,
         }
 
 
