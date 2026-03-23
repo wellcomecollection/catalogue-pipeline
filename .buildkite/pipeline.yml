@@ -42,7 +42,6 @@ steps:
       - "calm_adapter"
       - "calm_deletion_checker"
       - "calm_indexer"
-      - "id_minter"
       - "matcher"
       - "merger"
       - "mets_adapter"

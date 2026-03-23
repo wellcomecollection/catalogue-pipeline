@@ -53,7 +53,6 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
   uk.ac.wellcome/feature_inferrer \
   uk.ac.wellcome/palette_inferrer \
   uk.ac.wellcome/aspect_ratio_inferrer \
-  uk.ac.wellcome/id_minter \
   uk.ac.wellcome/matcher \
   uk.ac.wellcome/merger \
   uk.ac.wellcome/ingestor_images \
@@ -78,7 +77,6 @@ then
 
   echo "Deploying λ pipeline services to catalogue-$PIPELINE_DATE"
   "$ROOT/builds/deploy_lambda_services.sh" \
-    id_minter:id_minter_step_function \
     matcher:matcher \
     merger:merger
 fi
