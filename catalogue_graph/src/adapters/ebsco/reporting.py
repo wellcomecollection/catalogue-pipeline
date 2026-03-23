@@ -24,7 +24,6 @@ class EbscoReport(PipelineReport):
     def metric_dimensions(self) -> dict:
         return {
             "adapter_type": "ebsco",
-            "adapter_step": self.label,
         }
 
 

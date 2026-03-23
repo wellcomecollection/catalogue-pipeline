@@ -50,13 +50,14 @@ class PipelineReport(BaseModel):
 
     def put_metrics(self) -> None:
         timestamp = self.window.end_time if self.window is not None else datetime.now()
+        dimensions = {**self.metric_dimensions, "pipeline_step": self.label}
 
         reporter = MetricReporter(self.metric_namespace)
         for metric in self.metrics:
             reporter.put_metric_data(
                 metric_name=metric.name,
                 value=metric.value,
-                dimensions=self.metric_dimensions,
+                dimensions=dimensions,
                 timestamp=timestamp,
             )
 

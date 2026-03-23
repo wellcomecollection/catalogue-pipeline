@@ -8,7 +8,12 @@ from clients.neptune_client import NeptuneClient
 from graph.steps.pit_opener import lambda_handler as pit_opener_lambda
 from ingestor.steps import ingestor_deletions, ingestor_indexer
 from models.events import BulkLoaderEvent
-from tests.mocks import MockS3Client, MockSecretsManagerClient, mock_es_secrets
+from tests.mocks import (
+    MockCloudwatchClient,
+    MockS3Client,
+    MockSecretsManagerClient,
+    mock_es_secrets,
+)
 from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.reporting import IncrementalGraphRemoverReport, LoaderReport
 
@@ -116,6 +121,26 @@ def test_es_mode_validation_allows_expected_pairs() -> None:
 
     dev_args = parser.parse_args(["--environment", "dev", "--es-mode", "local"])
     validate_es_mode_for_writes(parser, dev_args)
+
+
+def test_put_metrics_always_includes_pipeline_step() -> None:
+    """put_metrics injects pipeline_step from the label, even if metric_dimensions omits it."""
+    report = IncrementalGraphRemoverReport(
+        pipeline_date="2025-01-01",
+        transformer_type="catalogue_concepts",
+        entity_type="nodes",
+        environment="prod",
+        deleted_count=5,
+    )
+    assert "pipeline_step" not in report.metric_dimensions
+
+    MockCloudwatchClient.metrics_reported = []
+
+    report.put_metrics()
+
+    assert MockCloudwatchClient.metrics_reported
+    for metric in MockCloudwatchClient.metrics_reported:
+        assert metric["dimensions"]["pipeline_step"] == "incremental_graph_remover"
 
 
 def test_metric_namespace_for_graph_reports() -> None:

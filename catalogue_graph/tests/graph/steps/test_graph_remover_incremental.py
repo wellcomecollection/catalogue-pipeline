@@ -272,6 +272,7 @@ def test_metrics() -> None:
                 "entity_type": "nodes",
                 "pipeline_date": "dev",
                 "transformer_type": "catalogue_concepts",
+                "pipeline_step": "incremental_graph_remover",
             },
             "metric_name": "deleted_count",
             "namespace": "catalogue_graph_pipeline",
