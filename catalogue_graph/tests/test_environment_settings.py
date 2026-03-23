@@ -134,8 +134,11 @@ def test_put_metrics_always_includes_pipeline_step() -> None:
     )
     assert "pipeline_step" not in report.metric_dimensions
 
+    MockCloudwatchClient.metrics_reported = []
+
     report.put_metrics()
 
+    assert MockCloudwatchClient.metrics_reported
     for metric in MockCloudwatchClient.metrics_reported:
         assert metric["dimensions"]["pipeline_step"] == "incremental_graph_remover"
 
