@@ -1,6 +1,8 @@
-from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.display.location import DisplayDigitalLocation
+from ingestor.models.display.location_type import (
+    DisplayLocationType,
+)
 from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
@@ -234,14 +236,27 @@ class RawNeptuneConcept:
         return [
             DisplayDigitalLocation(
                 url=url.strip(),
-                locationType=DisplayIdLabel(
-                    id="iiif-image", label="IIIF Image API", type="LocationType"
-                ),
+                locationType=DisplayLocationType.from_id("iiif-image"),
                 accessConditions=[],
             )
             for url in source_concept.image_urls
             if url.strip()  # Filter out empty URLs
         ]
+
+    @property
+    def portrait_images(self) -> list[DisplayDigitalLocation]:
+        portraits = []
+        for image_node in self.raw_concept.portraits:
+            portraits.append(
+                DisplayDigitalLocation(
+                    url=image_node.properties.location_url,
+                    locationType=DisplayLocationType.from_id(
+                        image_node.properties.location_type
+                    ),
+                    accessConditions=[],
+                )
+            )
+        return portraits
 
     @property
     def display_images(self) -> list[DisplayDigitalLocation]:

@@ -84,6 +84,7 @@ class IngestorConceptsTransformer(IngestorBaseTransformer):
             description=neptune_concept.description,
             sameAs=neptune_concept.same_as,
             displayImages=neptune_concept.display_images,
+            portraitImages=neptune_concept.portrait_images,
             relatedConcepts=RelatedConcepts(
                 relatedTo=self._transform_related_concepts(neptune_related.related_to),
                 fieldsOfWork=self._transform_related_concepts(

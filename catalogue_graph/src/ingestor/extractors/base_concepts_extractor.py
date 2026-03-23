@@ -8,7 +8,7 @@ from typing import get_args
 import structlog
 
 from clients.neptune_client import NeptuneClient
-from ingestor.models.neptune.node import SourceConceptNode
+from ingestor.models.neptune.node import ImageNode, SourceConceptNode
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,
@@ -32,6 +32,7 @@ CONCEPT_QUERY_PARAMS = {
     "related_to_limit": 10,
     # Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
     "shared_works_count_threshold": 3,
+    "portrait_genre_ids": ["vchuk4fs", "gy4433gr", "dhgr6mj5"],
 }
 
 RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
@@ -71,9 +72,6 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
         self, concept_ids: Iterable[str]
     ) -> dict[str, set[ConceptType]]:
         """Given a set of `concept_ids`, return all types associated with each concept via HAS_CONCEPT edges."""
-        # Types are shared across all 'same as' concepts
-        concept_ids = set().union(*(self.get_same_as(i) for i in concept_ids))
-
         result = self.make_neptune_query("concept_type", concept_ids)
 
         concept_types = defaultdict(set)
@@ -84,6 +82,17 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
                 concept_types[concept_id].update(types)
 
         return concept_types
+
+    def _resolve_portraits_concepts(
+        self, concept_id: str, portraits_batch: dict[str, dict]
+    ) -> list[ImageNode]:
+        resolved_portraits = {}
+        for same_as_id in self.get_same_as(concept_id):
+            source = portraits_batch.get(same_as_id, {})
+            for portrait in source.get("portrait_images", []):
+                resolved_portraits[portrait["~id"]] = ImageNode.model_validate(portrait)
+
+        return list(resolved_portraits.values())
 
     def _resolve_source_concepts(
         self, concept_id: str, source_concepts_batch: dict[str, dict]
@@ -205,6 +214,7 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
         concepts_batch = self.make_neptune_query("concept", ids)
         source_concepts_batch = self.make_neptune_query("source_concept", ids)
         concept_types_batch = self.get_concept_types(ids)
+        concept_portraits_batch = self.make_neptune_query("concept_portrait", ids)
 
         concepts = {}
         for concept_id, concept in concepts_batch.items():
@@ -220,6 +230,9 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
                 linked_source_concepts=source.get("linked_source_concepts", []),
                 source_concepts=self._resolve_source_concepts(
                     concept_id, source_concepts_batch
+                ),
+                portraits=self._resolve_portraits_concepts(
+                    concept_id, concept_portraits_batch
                 ),
             )
 

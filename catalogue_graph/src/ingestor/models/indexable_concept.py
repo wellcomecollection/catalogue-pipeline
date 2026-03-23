@@ -54,6 +54,7 @@ class ConceptDisplay(BaseModel):
     relatedConcepts: RelatedConcepts
     sameAs: list[str]
     displayImages: list[DisplayDigitalLocation]
+    portraitImages: list[DisplayDigitalLocation]
 
 
 class IndexableConcept(IndexableRecord):

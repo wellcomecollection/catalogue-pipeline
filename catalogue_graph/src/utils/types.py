@@ -85,7 +85,10 @@ WikidataTransformerType = Literal[
     WikidataLinkedLocTransformerType, WikidataLinkedMeshTransformerType
 ]
 CatalogueTransformerType = Literal[
-    "catalogue_concepts", "catalogue_works", "catalogue_work_identifiers"
+    "catalogue_concepts",
+    "catalogue_works",
+    "catalogue_work_identifiers",
+    "catalogue_images",
 ]
 TransformerType = Literal[
     LocTransformerType,

@@ -5,6 +5,7 @@ import structlog
 from pydantic import BaseModel
 
 from config import (
+    ES_IMAGES_AUGMENTED_INDEX_NAME,
     ES_LOCAL_API_KEY,
     ES_LOCAL_HOST,
     ES_LOCAL_PORT,
@@ -32,6 +33,11 @@ def get_standard_index_name(prefix: str, date: str | None) -> str:
 def get_merged_index_name(event: BasePipelineEvent) -> str:
     index_date = event.index_dates.merged or event.pipeline_date
     return get_standard_index_name(ES_MERGED_INDEX_NAME, index_date)
+
+
+def get_images_augmented_index_name(event: BasePipelineEvent) -> str:
+    index_date = event.index_dates.images_augmented or event.pipeline_date
+    return get_standard_index_name(ES_IMAGES_AUGMENTED_INDEX_NAME, index_date)
 
 
 class ElasticsearchConfig(BaseModel):

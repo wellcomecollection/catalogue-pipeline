@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from utils.types import ConceptType
 
-from .node import ConceptNode, SourceConceptNode, WorkNode
+from .node import ConceptNode, ImageNode, SourceConceptNode, WorkNode
 
 
 def _standardise_work_title(title: str) -> str:
@@ -43,6 +43,7 @@ class ExtractedConcept(BaseModel):
     source_concepts: list[SourceConceptNode]
     types: list[ConceptType] = []
     same_as: list[str] = []
+    portraits: list[ImageNode] = []
 
 
 class ExtractedRelatedConcept(BaseModel):
