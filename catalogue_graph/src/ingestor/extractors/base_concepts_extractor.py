@@ -32,7 +32,7 @@ CONCEPT_QUERY_PARAMS = {
     "related_to_limit": 10,
     # Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
     "shared_works_count_threshold": 3,
-    "portrait_genre_ids": ["vchuk4fs", "gy4433gr", "dhgr6mj5"],
+    "portrait_genre_ids": ["vchuk4fs", "gy4433gr", "dhgr6mj5", "pfm2bqgb"],
 }
 
 RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]

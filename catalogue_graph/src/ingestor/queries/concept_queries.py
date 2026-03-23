@@ -42,11 +42,12 @@ SAME_AS_CONCEPT_QUERY = """
 CONCEPT_PORTRAIT_QUERY = """
     UNWIND $ids AS id
     MATCH (concept:Concept {`~id`: id})
-    MATCH (concept)<-[has_subject:HAS_CONCEPT]-(work)
-        WHERE has_subject.referenced_in = 'subjects'
-    MATCH (work)-[has_genre:HAS_CONCEPT]-(genre)
-        WHERE has_genre.referenced_in = 'genres' AND id(genre) IN $portrait_genre_ids
-    MATCH (work)-[:HAS_IMAGE]-(portrait_image)
+    MATCH (concept)<-[has_person_subject:HAS_CONCEPT]-(work)
+    MATCH (work)-[has_genre:HAS_CONCEPT]->(genre)
+        WHERE has_genre.referenced_in = 'genres' AND id(genre) IN $portrait_genre_ids    
+        AND has_person_subject.referenced_in = 'subjects' AND has_person_subject.referenced_type = 'Person'
+
+    MATCH (work)-[:HAS_IMAGE]->(portrait_image)
 
     RETURN
         concept.id AS id,
