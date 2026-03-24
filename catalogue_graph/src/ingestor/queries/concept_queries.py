@@ -47,6 +47,12 @@ CONCEPT_PORTRAIT_QUERY = """
         WHERE has_genre.referenced_in = 'genres' AND id(genre) IN $portrait_genre_ids    
         AND has_person_subject.referenced_in = 'subjects' AND has_person_subject.referenced_type = 'Person'
 
+    MATCH (work)-[r:HAS_CONCEPT]->(c)
+        WHERE r.referenced_in = 'subjects' 
+        AND r.referenced_type = 'Person'
+    WITH concept, work, count(c) AS person_subject_count
+    WHERE person_subject_count = 1
+
     MATCH (work)-[:HAS_IMAGE]->(portrait_image)
 
     RETURN
