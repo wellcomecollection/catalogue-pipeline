@@ -31,7 +31,7 @@ s3://wellcomecollection-platform-id-minter/
   exports/
     <cluster-name>/
       <date>/
-        id-exp-<execution-id>/
+        id-exp-<id>/
           <table_name>/
             1/
               part-00000.gz.parquet
