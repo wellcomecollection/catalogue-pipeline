@@ -1,8 +1,13 @@
 from pydantic import Field
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
-from ingestor.transformers.work_query_transformer import QueryWorkTransformer
+from ingestor.models.neptune.query_result import ExtractedConcept
+from ingestor.transformers.work_query_transformer import QueryWorkDataTransformer
+from models.pipeline.identifier import (
+    SourceIdentifier,
+)
 from models.pipeline.serialisable import ElasticsearchModel
+from models.pipeline.work_data import WorkData
 
 
 class QueryWork(ElasticsearchModel):
@@ -46,33 +51,47 @@ class QueryWork(ElasticsearchModel):
     collection_path_path: str | None = Field(serialization_alias="collectionPath.path")
 
     @classmethod
-    def from_extracted_work(cls, extracted: VisibleExtractedWork) -> "QueryWork":
-        work = extracted.work
-        transformer = QueryWorkTransformer(extracted)
+    def from_work_data(
+        cls,
+        data: WorkData,
+        concepts: list[ExtractedConcept],
+        work_id: str,
+        source_identifier: SourceIdentifier,
+    ) -> "QueryWork":
+        transformer = QueryWorkDataTransformer(data, concepts, work_id)
 
         return QueryWork(
-            id=work.state.canonical_id,
+            id=work_id,
             collection_path_label=transformer.collection_path_label,
             collection_path_path=transformer.collection_path,
-            alternative_titles=work.data.alternative_titles,
+            alternative_titles=data.alternative_titles,
             contributors_agent_label=transformer.contributor_agent_labels,
             genres_concepts_label=list(transformer.genre_concept_labels),
             subjects_concepts_label=list(transformer.subject_concept_labels),
-            description=work.data.description,
-            edition=work.data.edition,
-            source_identifier_value=work.state.source_identifier.value,
+            description=data.description,
+            edition=data.edition,
+            source_identifier_value=source_identifier.value,
             identifiers_value=list(transformer.identifiers),
             images_id=transformer.image_ids,
             images_identifiers_value=list(transformer.image_source_identifiers),
             items_id=list(transformer.item_ids),
             items_identifiers_value=list(transformer.item_identifiers),
             items_shelfmarks_value=list(transformer.item_shelfmarks),
-            languages_label=[i.label for i in work.data.languages],
-            lettering=work.data.lettering,
-            notes_contents=[n.contents for n in work.data.notes],
+            languages_label=[i.label for i in data.languages],
+            lettering=data.lettering,
+            notes_contents=[n.contents for n in data.notes],
             production_label=list(transformer.production_labels),
             part_of_title=list(transformer.part_of_titles),
-            physical_description=work.data.physical_description,
-            reference_number=work.data.reference_number,
-            title=work.data.title,
+            physical_description=data.physical_description,
+            reference_number=data.reference_number,
+            title=data.title,
+        )
+
+    @classmethod
+    def from_extracted_work(cls, extracted: VisibleExtractedWork) -> "QueryWork":
+        return cls.from_work_data(
+            extracted.work.data,
+            extracted.concepts,
+            extracted.work.state.canonical_id,
+            extracted.work.state.source_identifier,
         )

@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from ingestor.extractors.base_extractor import GraphBaseExtractor
 from ingestor.models.indexable_concept import IndexableConcept
+from ingestor.models.indexable_image import IndexableImage
 from ingestor.models.indexable_work import (
     DeletedIndexableWork,
     InvisibleIndexableWork,
@@ -40,6 +41,8 @@ def get_pydantic_classes(ingestor_type: IngestorType) -> list[type[BaseModel]]:
             RedirectedIndexableWork,
             DeletedIndexableWork,
         ]
+    if ingestor_type == "images":
+        return [IndexableImage]
 
 
 class IngestorBaseTransformer:

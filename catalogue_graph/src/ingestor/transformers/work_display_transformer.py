@@ -23,28 +23,19 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
+from ingestor.models.neptune.query_result import ExtractedConcept
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
+from models.pipeline.work_data import WorkData
 from utils.sort import natural_sort_key
 
 from .work_base_transformer import WorkBaseTransformer
 
 
-class DisplayWorkTransformer(WorkBaseTransformer):
-    def __init__(self, extracted: VisibleExtractedWork):
-        super().__init__(extracted)
-        self.data = extracted.work.data
-        self.state = extracted.work.state
-        self.hierarchy = extracted.hierarchy
-
-    @property
-    def identifiers(self) -> Generator[DisplayIdentifier]:
-        all_ids = Identified(
-            canonical_id=self.state.canonical_id,
-            source_identifier=self.state.source_identifier,
-            other_identifiers=self.data.other_identifiers,
-        )
-        yield from DisplayIdentifier.from_all_identifiers(all_ids)
+class DisplayWorkDataTransformer(WorkBaseTransformer):
+    def __init__(self, data: WorkData, concepts: list[ExtractedConcept]):
+        super().__init__(concepts)
+        self.data = data
 
     @property
     def thumbnail(self) -> DisplayDigitalLocation | None:
@@ -137,33 +128,6 @@ class DisplayWorkTransformer(WorkBaseTransformer):
                 concepts=concepts,
             )
 
-    @property
-    def availabilities(self) -> list[DisplayIdLabel]:
-        return [
-            DisplayAvailability.from_availability(a) for a in self.state.availabilities
-        ]
-
-    @property
-    def part_of(self) -> Generator[DisplayRelation]:
-        if self.state.relations is not None:
-            for series in self.state.relations.ancestors[::-1]:
-                # If the series has the same title as one of the work's ancestors, do not include it
-                if not self.hierarchy.ancestors_include_title(series.title):
-                    yield DisplayRelation.from_work_ancestor(series)
-
-        for ancestor in self.hierarchy.ancestors:
-            yield DisplayRelation.from_neptune_node(ancestor.work, ancestor.parts)
-
-    @property
-    def parts(self) -> Generator[DisplayRelation]:
-        sorted_children = sorted(
-            self.hierarchy.children,
-            key=lambda c: natural_sort_key(c.work.properties.collection_path),
-        )
-
-        for child in sorted_children:
-            yield DisplayRelation.from_neptune_node(child.work, child.parts)
-
     def get_display_concept(self, concept: Concept) -> DisplayConcept:
         identifiers = list(DisplayIdentifier.from_all_identifiers(concept.id))
         return DisplayConcept(
@@ -218,3 +182,46 @@ class DisplayWorkTransformer(WorkBaseTransformer):
                 ],
                 function=function,
             )
+
+
+class DisplayWorkTransformer(DisplayWorkDataTransformer):
+    def __init__(self, extracted: VisibleExtractedWork):
+        super().__init__(extracted.work.data, extracted.concepts)
+        self.state = extracted.work.state
+        self.hierarchy = extracted.hierarchy
+
+    @property
+    def identifiers(self) -> Generator[DisplayIdentifier]:
+        all_ids = Identified(
+            canonical_id=self.state.canonical_id,
+            source_identifier=self.state.source_identifier,
+            other_identifiers=self.data.other_identifiers,
+        )
+        yield from DisplayIdentifier.from_all_identifiers(all_ids)
+
+    @property
+    def part_of(self) -> Generator[DisplayRelation]:
+        if self.state.relations is not None:
+            for series in self.state.relations.ancestors[::-1]:
+                # If the series has the same title as one of the work's ancestors, do not include it
+                if not self.hierarchy.ancestors_include_title(series.title):
+                    yield DisplayRelation.from_work_ancestor(series)
+
+        for ancestor in self.hierarchy.ancestors:
+            yield DisplayRelation.from_neptune_node(ancestor.work, ancestor.parts)
+
+    @property
+    def parts(self) -> Generator[DisplayRelation]:
+        sorted_children = sorted(
+            self.hierarchy.children,
+            key=lambda c: natural_sort_key(c.work.properties.collection_path),
+        )
+
+        for child in sorted_children:
+            yield DisplayRelation.from_neptune_node(child.work, child.parts)
+
+    @property
+    def availabilities(self) -> list[DisplayIdLabel]:
+        return [
+            DisplayAvailability.from_availability(a) for a in self.state.availabilities
+        ]

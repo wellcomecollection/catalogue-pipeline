@@ -5,7 +5,9 @@ from dateutil import parser
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
+from ingestor.models.neptune.query_result import ExtractedConcept
 from models.pipeline.location import DigitalLocation, PhysicalLocation
+from models.pipeline.work_data import WorkData
 
 from .work_base_transformer import WorkBaseTransformer
 
@@ -23,20 +25,11 @@ def get_unique(items: Iterable[str]) -> list[str]:
     return list(dict.fromkeys(items))
 
 
-class QueryWorkTransformer(WorkBaseTransformer):
-    def __init__(self, extracted: VisibleExtractedWork):
-        super().__init__(extracted)
-        self.data = extracted.work.data
-        self.state = extracted.work.state
-        self.hierarchy = extracted.hierarchy
-        self.concepts = extracted.concepts
-
-    @property
-    def identifiers(self) -> Generator[str]:
-        yield self.state.canonical_id
-        yield self.state.source_identifier.value
-        for identifier in self.data.other_identifiers:
-            yield identifier.value
+class QueryWorkDataTransformer(WorkBaseTransformer):
+    def __init__(self, data: WorkData, concepts: list[ExtractedConcept], work_id: str):
+        super().__init__(concepts)
+        self.data = data
+        self.work_id = work_id
 
     @property
     def item_ids(self) -> Generator[str]:
@@ -64,22 +57,6 @@ class QueryWorkTransformer(WorkBaseTransformer):
                 yield concept.label
 
     @property
-    def part_of_titles(self) -> Generator[str]:
-        if self.state.relations is not None:
-            for series_item in self.state.relations.ancestors:
-                if not self.hierarchy.ancestors_include_title(series_item.title):
-                    yield series_item.title
-
-        for collection_item in self.hierarchy.ancestors[::-1]:
-            if collection_item.work.properties.label is not None:
-                yield collection_item.work.properties.label
-
-    @property
-    def part_of_ids(self) -> Generator[str]:
-        for item in self.hierarchy.ancestors[::-1]:
-            yield item.work.properties.id
-
-    @property
     def genre_concept_labels(self) -> list[str]:
         items = []
         for genre in self.data.genres:
@@ -105,24 +82,6 @@ class QueryWorkTransformer(WorkBaseTransformer):
     def image_source_identifiers(self) -> Generator[str]:
         for image in self.data.image_data:
             yield from image.id.get_identifier_values()
-
-    @property
-    def collection_path(self) -> str | None:
-        if self.data.collection_path is None:
-            return None
-
-        # Some works (e.g. works in the Fallaize Collection) store incomplete collection paths which only consist
-        # of <parent ID>/<work ID>. We want to index the full collection path for querying purposes, so we construct
-        # it here using ancestors paths. For example, given the collection path 'C/D' and ancestors collections paths
-        # 'B/C', 'A/B', and 'A', return 'A/B/C/D'.
-        path_fragments = self.data.collection_path.path.split("/")
-        for a in self.hierarchy.ancestors:
-            if ancestor_path := a.work.properties.collection_path:
-                ancestor_path_fragments = ancestor_path.split("/")
-                if ancestor_path_fragments[-1] == path_fragments[0]:
-                    path_fragments = ancestor_path_fragments[:-1] + path_fragments
-
-        return "/".join(path_fragments)
 
     @property
     def collection_path_label(self) -> str | None:
@@ -157,7 +116,6 @@ class QueryWorkTransformer(WorkBaseTransformer):
             if canonical_id is not None:
                 yield canonical_id
 
-    # Filter
     @property
     def production_dates_from(self) -> Generator[int]:
         for event in self.data.production:
@@ -174,7 +132,7 @@ class QueryWorkTransformer(WorkBaseTransformer):
                         except parser.ParserError:
                             logger.warning(
                                 "Could not parse production date",
-                                work_id=self.state.canonical_id,
+                                work_id=self.work_id,
                             )
 
     @property
@@ -244,6 +202,56 @@ class QueryWorkTransformer(WorkBaseTransformer):
     def items_locations_created_date(self) -> Generator[str]:
         for item in self.data.items:
             for loc in item.locations:
-                # items's createdDate are only available on digital locations
+                # created_date is only available on digital locations
                 if isinstance(loc, DigitalLocation) and loc.created_date is not None:
                     yield loc.created_date
+
+
+class QueryWorkTransformer(QueryWorkDataTransformer):
+    def __init__(self, extracted: VisibleExtractedWork):
+        super().__init__(
+            extracted.work.data, extracted.concepts, extracted.work.state.canonical_id
+        )
+        self.state = extracted.work.state
+        self.hierarchy = extracted.hierarchy
+
+    @property
+    def identifiers(self) -> Generator[str]:
+        yield self.state.canonical_id
+        yield self.state.source_identifier.value
+        for identifier in self.data.other_identifiers:
+            yield identifier.value
+
+    @property
+    def part_of_titles(self) -> Generator[str]:
+        if self.state.relations is not None:
+            for series_item in self.state.relations.ancestors:
+                if not self.hierarchy.ancestors_include_title(series_item.title):
+                    yield series_item.title
+
+        for collection_item in self.hierarchy.ancestors[::-1]:
+            if collection_item.work.properties.label is not None:
+                yield collection_item.work.properties.label
+
+    @property
+    def part_of_ids(self) -> Generator[str]:
+        for item in self.hierarchy.ancestors[::-1]:
+            yield item.work.properties.id
+
+    @property
+    def collection_path(self) -> str | None:
+        if self.data.collection_path is None:
+            return None
+
+        # Some works (e.g. works in the Fallaize Collection) store incomplete collection paths which only consist
+        # of <parent ID>/<work ID>. We want to index the full collection path for querying purposes, so we construct
+        # it here using ancestors paths. For example, given the collection path 'C/D' and ancestors collections paths
+        # 'B/C', 'A/B', and 'A', return 'A/B/C/D'.
+        path_fragments = self.data.collection_path.path.split("/")
+        for a in self.hierarchy.ancestors:
+            if ancestor_path := a.work.properties.collection_path:
+                ancestor_path_fragments = ancestor_path.split("/")
+                if ancestor_path_fragments[-1] == path_fragments[0]:
+                    path_fragments = ancestor_path_fragments[:-1] + path_fragments
+
+        return "/".join(path_fragments)
