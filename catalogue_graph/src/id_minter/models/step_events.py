@@ -46,4 +46,3 @@ class StepFunctionMintingResponse(BaseModel):
     successes: list[str]
     failures: list[StepFunctionMintingFailure]
     job_id: str
-
