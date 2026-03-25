@@ -1,7 +1,10 @@
 from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
-from ingestor.extractors.images_extractor import ExtractedImage, GraphImagesExtractor
+from ingestor.extractors.images.images_extractor import (
+    ExtractedImage,
+    GraphImagesExtractor,
+)
 from ingestor.models.indexable_image import IndexableImage
 from models.events import BasePipelineEvent
 

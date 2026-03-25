@@ -2,7 +2,7 @@ import structlog
 from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
-from ingestor.extractors.concepts_index_extractor import (
+from ingestor.extractors.concepts.concepts_index_extractor import (
     ConceptsIndexExtractor,
     ExtractedRelatedConcepts,
 )

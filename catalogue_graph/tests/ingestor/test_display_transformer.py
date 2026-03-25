@@ -1,4 +1,4 @@
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.concept import DisplayConcept, DisplaySubject
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.merged.work import (

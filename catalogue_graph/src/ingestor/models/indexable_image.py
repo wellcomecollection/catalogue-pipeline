@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ingestor.extractors.images_extractor import ExtractedImage
+from ingestor.extractors.images.images_extractor import ExtractedImage
 from ingestor.models.aggregate.image import ImageAggregatableValues
 from ingestor.models.debug.image import ImageDebug
 from ingestor.models.display.image import DisplayImage

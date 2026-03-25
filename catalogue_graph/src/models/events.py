@@ -26,6 +26,7 @@ class PipelineIndexDates(BaseModel):
     merged: str | None = None
     concepts: str | None = None
     works: str | None = None
+    images: str | None = None
     images_augmented: str | None = None
 
 

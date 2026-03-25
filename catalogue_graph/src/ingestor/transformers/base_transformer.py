@@ -10,7 +10,7 @@ import smart_open
 import structlog
 from pydantic import BaseModel
 
-from ingestor.extractors.base_extractor import GraphBaseExtractor
+from ingestor.extractors.base_extractor import StreamingExtractor
 from ingestor.models.indexable_concept import IndexableConcept
 from ingestor.models.indexable_image import IndexableImage
 from ingestor.models.indexable_work import (
@@ -46,7 +46,7 @@ def get_pydantic_classes(ingestor_type: IngestorType) -> list[type[BaseModel]]:
 
 
 class IngestorBaseTransformer:
-    def __init__(self, source: GraphBaseExtractor) -> None:
+    def __init__(self, source: StreamingExtractor) -> None:
         self.source = source
 
     def transform_document(self, raw_item: Any) -> BaseModel | None:

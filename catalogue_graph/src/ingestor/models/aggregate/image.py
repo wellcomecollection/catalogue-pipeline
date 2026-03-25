@@ -1,9 +1,9 @@
 from pydantic import Field
 
-from ingestor.extractors.images_extractor import ExtractedImage
+from ingestor.extractors.images.images_extractor import ExtractedImage
 from ingestor.transformers.work_aggregate_transformer import (
     AggregatableField,
-    AggregateWorkDataTransformer,
+    AggregateWorkTransformer,
 )
 from models.pipeline.serialisable import ElasticsearchModel
 
@@ -20,9 +20,7 @@ class ImageAggregatableValues(ElasticsearchModel):
     def from_extracted_image(
         cls, extracted: ExtractedImage
     ) -> "ImageAggregatableValues":
-        transformer = AggregateWorkDataTransformer(
-            extracted.image.source.data, extracted.concepts
-        )
+        transformer = AggregateWorkTransformer(extracted.work)
         return ImageAggregatableValues(
             genres=list(transformer.genres),
             subjects=list(transformer.subjects),

@@ -70,15 +70,10 @@ NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
 }
 
 
-class GraphBaseExtractor(ABC):
+class GraphBaseExtractor:
     def __init__(self, neptune_client: NeptuneClient):
         self.neptune_client = neptune_client
         self.neptune_params: dict[str, Any] = {}
-
-    @abstractmethod
-    def extract_raw(self) -> Generator[Any]:
-        """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
-        pass
 
     def make_neptune_query(
         self, query_type: ConceptQuery | WorkQuery, ids: Iterable[str]
@@ -106,3 +101,10 @@ class GraphBaseExtractor(ABC):
         )
 
         return results
+
+
+class StreamingExtractor(ABC):
+    @abstractmethod
+    def extract_raw(self) -> Generator[Any]:
+        """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
+        pass

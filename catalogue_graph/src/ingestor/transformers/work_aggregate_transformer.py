@@ -3,19 +3,15 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
-from ingestor.models.neptune.query_result import (
-    ExtractedConcept,
-)
 from lookups.languages import from_code
 from models.pipeline.identifier import (
     Identifiable,
     Identified,
     Unidentifiable,
 )
-from models.pipeline.work_data import WorkData
 
 from .work_base_transformer import WorkBaseTransformer
 
@@ -43,10 +39,11 @@ def get_unique(aggregatable: list[AggregatableField]) -> Generator[AggregatableF
             yield item
 
 
-class AggregateWorkDataTransformer(WorkBaseTransformer):
-    def __init__(self, data: WorkData, concepts: list[ExtractedConcept]):
-        super().__init__(concepts)
-        self.data = data
+class AggregateWorkTransformer(WorkBaseTransformer):
+    def __init__(self, extracted: VisibleExtractedWork):
+        super().__init__(extracted)
+        self.data = extracted.work.data
+        self.state = extracted.work.state
 
     @property
     def genres(self) -> Generator[AggregatableField]:
@@ -95,6 +92,12 @@ class AggregateWorkDataTransformer(WorkBaseTransformer):
                     yield AggregatableField(**display_license.model_dump())
 
     @property
+    def availabilities(self) -> Generator[AggregatableField]:
+        for availability in self.state.availabilities:
+            display_availability = DisplayAvailability.from_availability(availability)
+            yield AggregatableField(**display_availability.model_dump())
+
+    @property
     def production_dates(self) -> Generator[AggregatableField]:
         for event in self.data.production:
             for date in event.dates:
@@ -115,15 +118,3 @@ class AggregateWorkDataTransformer(WorkBaseTransformer):
             # on individual works pages, but for filtering/aggregating we want to use the canonical labels.
             marc_language = from_code(language.id) or language
             yield AggregatableField(**marc_language.model_dump())
-
-
-class AggregateWorkTransformer(AggregateWorkDataTransformer):
-    def __init__(self, extracted: VisibleExtractedWork):
-        super().__init__(extracted.work.data, extracted.concepts)
-        self.state = extracted.work.state
-
-    @property
-    def availabilities(self) -> Generator[AggregatableField]:
-        for availability in self.state.availabilities:
-            display_availability = DisplayAvailability.from_availability(availability)
-            yield AggregatableField(**display_availability.model_dump())

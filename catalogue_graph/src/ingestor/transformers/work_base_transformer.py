@@ -1,4 +1,4 @@
-from ingestor.models.neptune.query_result import ExtractedConcept
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.transformers.raw_concept import (
     DISPLAY_SOURCE_PRIORITY,
     get_priority_label,
@@ -7,8 +7,8 @@ from models.pipeline.concept import Concept
 
 
 class WorkBaseTransformer:
-    def __init__(self, concepts: list[ExtractedConcept]):
-        self.neptune_concepts = {c.concept.id: c for c in concepts}
+    def __init__(self, extracted: VisibleExtractedWork):
+        self.neptune_concepts = {c.concept.id: c for c in extracted.concepts}
 
     def get_standard_concept_label(self, concept: Concept) -> str:
         """Return the highest priority label for the given concept, as determined by the catalogue graph."""

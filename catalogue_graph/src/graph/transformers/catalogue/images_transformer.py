@@ -7,6 +7,7 @@ from graph.transformers.graph_transformer import GraphBaseTransformer
 from models.events import BasePipelineEvent
 from models.graph_edge import WorkHasImage
 from models.graph_node import Image
+from models.pipeline.location import DigitalLocation
 
 ES_FIELDS = ["state.canonicalId", "source.id", "locations"]
 
@@ -21,10 +22,11 @@ class CatalogueImagesTransformer(GraphBaseTransformer):
             event, fields=ES_FIELDS, es_client=es_client
         )
 
-    def _get_location(self, raw_node: dict) -> dict:
+    def _get_location(self, raw_node: dict) -> DigitalLocation:
         # All images have one or two locations, one of which is always of type 'iiif-image'
-        for location in raw_node["locations"]:
-            if location["locationType"]["id"] == "iiif-image":
+        for raw_location in raw_node["locations"]:
+            location = DigitalLocation.model_validate(raw_location)
+            if location.location_type.id == "iiif-image":
                 # All images have exactly one access condition (ViewOnline/Open)
                 # assert location["accessConditions"][0]["method"]["type"] == "ViewOnline", location
                 # assert location["accessConditions"][0]["status"]["type"] == "Open", location
@@ -36,8 +38,8 @@ class CatalogueImagesTransformer(GraphBaseTransformer):
         location = self._get_location(raw_node)
         return Image(
             id=raw_node["state"]["canonicalId"],
-            location_type=location["locationType"]["id"],
-            location_url=location["url"],
+            location_type=location.location_type.id,
+            location_url=location.url,
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[WorkHasImage]:

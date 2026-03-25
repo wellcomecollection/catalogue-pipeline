@@ -85,6 +85,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
             type="Person",
             sameAs=[],
             displayImages=[],
+            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -137,6 +138,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
             type="Person",
             sameAs=[],
             displayImages=[],
+            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -198,6 +200,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
             displayImages=[],
+            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -268,6 +271,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
             displayImages=[],
+            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -346,6 +350,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
             displayImages=[],
+            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -505,6 +510,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
                     accessConditions=[],
                 ),
             ],
+            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],

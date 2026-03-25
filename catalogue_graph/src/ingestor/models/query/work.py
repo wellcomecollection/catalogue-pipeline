@@ -1,13 +1,8 @@
 from pydantic import Field
 
-from ingestor.extractors.works_extractor import VisibleExtractedWork
-from ingestor.models.neptune.query_result import ExtractedConcept
-from ingestor.transformers.work_query_transformer import QueryWorkDataTransformer
-from models.pipeline.identifier import (
-    SourceIdentifier,
-)
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
+from ingestor.transformers.work_query_transformer import QueryWorkTransformer
 from models.pipeline.serialisable import ElasticsearchModel
-from models.pipeline.work_data import WorkData
 
 
 class QueryWork(ElasticsearchModel):
@@ -51,17 +46,13 @@ class QueryWork(ElasticsearchModel):
     collection_path_path: str | None = Field(serialization_alias="collectionPath.path")
 
     @classmethod
-    def from_work_data(
-        cls,
-        data: WorkData,
-        concepts: list[ExtractedConcept],
-        work_id: str,
-        source_identifier: SourceIdentifier,
-    ) -> "QueryWork":
-        transformer = QueryWorkDataTransformer(data, concepts, work_id)
+    def from_extracted_work(cls, extracted: VisibleExtractedWork) -> "QueryWork":
+        work = extracted.work
+        data = work.data
+        transformer = QueryWorkTransformer(extracted)
 
         return QueryWork(
-            id=work_id,
+            id=work.state.canonical_id,
             collection_path_label=transformer.collection_path_label,
             collection_path_path=transformer.collection_path,
             alternative_titles=data.alternative_titles,
@@ -70,7 +61,7 @@ class QueryWork(ElasticsearchModel):
             subjects_concepts_label=list(transformer.subject_concept_labels),
             description=data.description,
             edition=data.edition,
-            source_identifier_value=source_identifier.value,
+            source_identifier_value=work.state.source_identifier.value,
             identifiers_value=list(transformer.identifiers),
             images_id=transformer.image_ids,
             images_identifiers_value=list(transformer.image_source_identifiers),
@@ -85,13 +76,4 @@ class QueryWork(ElasticsearchModel):
             physical_description=data.physical_description,
             reference_number=data.reference_number,
             title=data.title,
-        )
-
-    @classmethod
-    def from_extracted_work(cls, extracted: VisibleExtractedWork) -> "QueryWork":
-        return cls.from_work_data(
-            extracted.work.data,
-            extracted.concepts,
-            extracted.work.state.canonical_id,
-            extracted.work.state.source_identifier,
         )

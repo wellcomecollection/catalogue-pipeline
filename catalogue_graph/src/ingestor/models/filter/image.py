@@ -1,7 +1,7 @@
 from pydantic import Field
 
-from ingestor.extractors.images_extractor import ExtractedImage
-from ingestor.transformers.work_query_transformer import QueryWorkDataTransformer
+from ingestor.extractors.images.images_extractor import ExtractedImage
+from ingestor.transformers.work_query_transformer import QueryWorkTransformer
 from models.pipeline.serialisable import ElasticsearchModel
 
 
@@ -38,11 +38,7 @@ class ImageFilterableValues(ElasticsearchModel):
 
     @classmethod
     def from_extracted_image(cls, extracted: ExtractedImage) -> "ImageFilterableValues":
-        transformer = QueryWorkDataTransformer(
-            extracted.image.source.data,
-            extracted.concepts,
-            extracted.image.source.id.canonical_id,
-        )
+        transformer = QueryWorkTransformer(extracted.work)
 
         return ImageFilterableValues(
             locations_license_id=[

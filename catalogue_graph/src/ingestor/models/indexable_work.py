@@ -1,4 +1,4 @@
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.debug.work import (
     DeletedWorkDebug,

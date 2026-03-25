@@ -14,8 +14,8 @@ class ParentWork(SerialisableModel):
 class InferredData(SerialisableModel):
     features: list[float]
     palette_embedding: list[float]
-    average_color_hex: str | None
-    aspect_ratio: float | None
+    average_color_hex: str | None = None
+    aspect_ratio: float | None = None
 
 
 class AugmentedImageState(ImageState):

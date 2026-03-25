@@ -1,11 +1,11 @@
 from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
-from ingestor.extractors.works_extractor import (
+from ingestor.extractors.works.base_works_extractor import (
     ExtractedWork,
-    GraphWorksExtractor,
     VisibleExtractedWork,
 )
+from ingestor.extractors.works.works_index_extractor import WorksIndexExtractor
 from ingestor.models.indexable_work import (
     DeletedIndexableWork,
     IndexableWork,
@@ -30,7 +30,7 @@ class IngestorWorksTransformer(IngestorBaseTransformer):
         es_client: Elasticsearch,
         neptune_client: NeptuneClient,
     ) -> None:
-        super().__init__(GraphWorksExtractor(event, es_client, neptune_client))
+        super().__init__(WorksIndexExtractor(event, es_client, neptune_client))
 
     def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
         work = extracted.work

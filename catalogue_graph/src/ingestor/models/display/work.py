@@ -1,4 +1,4 @@
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.transformers.work_display_transformer import DisplayWorkTransformer
 from models.pipeline.serialisable import ElasticsearchModel
 from models.pipeline.work_data import WorkData

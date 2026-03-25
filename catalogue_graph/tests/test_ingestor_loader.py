@@ -313,6 +313,7 @@ def get_catalogue_concept_mock(
             ),
             sameAs=[],
             displayImages=[],
+            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=related_to,
                 fieldsOfWork=[],
