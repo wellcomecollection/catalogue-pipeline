@@ -77,7 +77,7 @@ locals {
   works_source_list = [
     for cfg in local.index_config_dates : {
       name             = "works-source-${cfg.date}"
-      default_pipeline = "set-indexed-at"
+      default_pipeline = elasticstack_elasticsearch_ingest_pipeline.set_indexed_at.name
       mappings_name    = cfg.works.source
     } if try(cfg.works.source, null) != null && cfg.works.source != ""
   ]
