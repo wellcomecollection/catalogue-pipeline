@@ -122,7 +122,7 @@ def test_stream_to_index_success_no_errors(
     adapter_store: AdapterStore,
 ) -> None:
     transformer = MarcXmlTransformerWithStoreForTests(adapter_store, [])
-    transformer.source = _StubSource(
+    transformer.source = _StubSource(  # type: ignore[assignment]
         [
             {
                 "id": "id1",
@@ -171,7 +171,7 @@ def test_stream_to_index_with_errors(
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    transformer.source = _StubSource(
+    transformer.source = _StubSource(  # type: ignore[assignment]
         [
             {
                 "id": "id1",

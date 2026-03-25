@@ -1,9 +1,22 @@
+"""Tests for TransformerManifestWriter-specific behaviour.
+
+Base ManifestWriter mechanics (file writing, batching, failures) are tested
+in tests/utils/test_manifests.py.  These tests cover:
+- changeset-based label naming (changeset vs reindex)
+- sourceIdentifiers field in batch lines
+- TransformerManifest return type with changeset_ids
+"""
+
 import json
+from pathlib import PurePosixPath
 
 import pytest
 
 import adapters.ebsco.config as adapter_config
-from adapters.transformers.manifests import ManifestWriter
+from adapters.transformers.manifests import (
+    TransformerManifest,
+    TransformerManifestWriter,
+)
 from core.transformer import TransformationError
 from tests.mocks import MockSmartOpen
 
@@ -14,111 +27,57 @@ def _read_ndjson(uri: str) -> list[dict]:
         return [json.loads(line) for line in f if line.strip()]
 
 
-def test_manifest_writer_writes_success_only() -> None:
-    writer = ManifestWriter(
+def test_batch_lines_use_source_identifiers_field() -> None:
+    writer = TransformerManifestWriter(
         job_id="job123",
         changeset_ids=["chgABC"],
         bucket=adapter_config.S3_BUCKET,
-        prefix=adapter_config.BATCH_S3_PREFIX,
+        prefix=str(PurePosixPath(adapter_config.S3_PREFIX, "transformer/batches")),
     )
     success_ids = [
         "Work[ebsco-alt-lookup/id1]",
         "Work[ebsco-alt-lookup/id2]",
-        "Work[ebsco-alt-lookup/id3]",
     ]
     manifest = writer.build_manifest(successful_ids=success_ids, errors=[])
 
-    assert manifest.failures is None
-    assert manifest.successes.count == len(success_ids)
-    expected_key = f"{adapter_config.BATCH_S3_PREFIX}/chgABC.job123.ids.ndjson"
-    assert manifest.successes.batch_file_location.key == expected_key
-    uri = (
-        f"s3://{manifest.successes.batch_file_location.bucket}/"  # bucket
-        f"{manifest.successes.batch_file_location.key}"
-    )
+    loc = manifest.successes.batch_file_location
+    uri = f"s3://{loc.bucket}/{loc.key}"
     lines = _read_ndjson(uri)
-    assert lines  # at least one batch written
-    assert {line["jobId"] for line in lines} == {"job123"}
     written_ids: list[str] = []
     for line in lines:
         written_ids += line["sourceIdentifiers"]
     assert written_ids == success_ids
 
 
-def test_manifest_writer_writes_failures() -> None:
-    writer = ManifestWriter(
-        job_id="job999",
-        changeset_ids=[],  # triggers 'reindex' naming
+def test_returns_transformer_manifest_with_changeset_ids() -> None:
+    writer = TransformerManifestWriter(
+        job_id="job1",
+        changeset_ids=["chg1", "chg2"],
         bucket=adapter_config.S3_BUCKET,
-        prefix=adapter_config.BATCH_S3_PREFIX,
+        prefix=str(PurePosixPath(adapter_config.S3_PREFIX, "transformer/batches")),
     )
+    manifest = writer.build_manifest(successful_ids=["id1"], errors=[])
 
-    errors = [
-        TransformationError(
-            row_id="e1",
-            stage="transform",
-            detail="reason=parse_error",
-        ),
-        TransformationError(
-            row_id="e2",
-            stage="index",
-            detail="status=400; error_type=mapper_parsing_exception",
-        ),
-    ]
-
-    manifest = writer.build_manifest(
-        successful_ids=["Work[ebsco-alt-lookup/idA]"],
-        errors=errors,
-    )
-    assert manifest.failures is not None
-    assert manifest.failures.count == len(errors)
-    # Check success file still written
-    success_uri = (
-        f"s3://{manifest.successes.batch_file_location.bucket}/"
-        f"{manifest.successes.batch_file_location.key}"
-    )
-    success_lines = _read_ndjson(success_uri)
-    assert success_lines[0]["sourceIdentifiers"] == ["Work[ebsco-alt-lookup/idA]"]
-
-    # Check failure file contents
-    failure_uri = (
-        f"s3://{manifest.failures.error_file_location.bucket}/"
-        f"{manifest.failures.error_file_location.key}"
-    )
-    failure_lines = _read_ndjson(failure_uri)
-    assert {line["row_id"] for line in failure_lines} == {
-        "e1",
-        "e2",
-    }
-    details = {line["row_id"]: line["detail"] for line in failure_lines}
-    assert "reason=parse_error" in details["e1"]
-    assert "error_type=mapper_parsing_exception" in details["e2"]
-    # Naming pattern for reindex without changeset
-    assert manifest.successes.batch_file_location.key.startswith(
-        f"{adapter_config.BATCH_S3_PREFIX}/reindex.job999.ids"
-    )
+    assert isinstance(manifest, TransformerManifest)
+    assert manifest.changeset_ids == ["chg1", "chg2"]
 
 
-def test_manifest_writer_handles_empty_batches() -> None:
-    writer = ManifestWriter(
-        job_id="jobEmpty",
-        changeset_ids=["chgEmpty"],
+def test_returns_transformer_manifest_with_snapshot_id() -> None:
+    writer = TransformerManifestWriter(
+        job_id="job1",
+        changeset_ids=["chg1", "chg2"],
+        snapshot_id=31415926535,
         bucket=adapter_config.S3_BUCKET,
-        prefix=adapter_config.BATCH_S3_PREFIX,
+        prefix=str(PurePosixPath(adapter_config.S3_PREFIX, "transformer/batches")),
     )
-    manifest = writer.build_manifest(successful_ids=[], errors=[])
-    assert manifest.successes.count == 0
-    assert manifest.failures is None
-    uri = (
-        f"s3://{manifest.successes.batch_file_location.bucket}/"
-        f"{manifest.successes.batch_file_location.key}"
-    )
-    lines = _read_ndjson(uri)
-    assert lines == []  # no batch lines written for empty set
+    manifest = writer.build_manifest(successful_ids=["id1"], errors=[])
+
+    assert isinstance(manifest, TransformerManifest)
+    assert manifest.snapshot_id == 31415926535
 
 
 @pytest.mark.parametrize(
-    "changeset_id, job_id, expected_success, expected_failure_prefix",
+    "changeset_id, job_id, expected_success, expected_failure",
     [
         (
             "chgXYZ",
@@ -134,18 +93,18 @@ def test_manifest_writer_handles_empty_batches() -> None:
         ),
     ],
 )
-def test_manifest_file_naming_patterns(
+def test_changeset_naming_patterns(
     changeset_id: str | None,
     job_id: str,
     expected_success: str,
-    expected_failure_prefix: str,
+    expected_failure: str,
 ) -> None:
-    """Ensure naming patterns match spec for both changeset & reindex cases."""
-    writer = ManifestWriter(
+    """Label is derived from changeset_ids; empty list falls back to 'reindex'."""
+    writer = TransformerManifestWriter(
         job_id=job_id,
         changeset_ids=[changeset_id] if changeset_id else [],
         bucket=adapter_config.S3_BUCKET,
-        prefix=adapter_config.BATCH_S3_PREFIX,
+        prefix=str(PurePosixPath(adapter_config.S3_PREFIX, "transformer/batches")),
     )
     manifest = writer.build_manifest(
         successful_ids=["Work[ebsco-alt-lookup/only1]"],
@@ -159,4 +118,4 @@ def test_manifest_file_naming_patterns(
     )
     assert manifest.successes.batch_file_location.key.endswith(expected_success)
     assert manifest.failures is not None
-    assert manifest.failures.error_file_location.key.endswith(expected_failure_prefix)
+    assert manifest.failures.error_file_location.key.endswith(expected_failure)

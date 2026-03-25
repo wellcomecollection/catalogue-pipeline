@@ -21,11 +21,12 @@ from pydantic import BaseModel, ConfigDict
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import (
     IcebergTable,
-    IcebergTableConfig,
-    get_iceberg_table,
+    LocalIcebergTableConfig,
+    RestApiIcebergTableConfig,
+    get_local_table,
+    get_rest_api_table,
 )
 from adapters.utils.window_store import (
-    WINDOW_STATUS_SCHEMA,
     WindowStore,
 )
 
@@ -83,49 +84,12 @@ class OAIPMHAdapterConfig(BaseModel):
     """SNS topic ARN for chatbot notifications (None to disable)."""
 
     # ---------------------------------------------------------------------------
-    # Table configuration - REST API (S3 Tables)
+    # Iceberg tables
     # ---------------------------------------------------------------------------
-    s3_tables_bucket: str
-    """S3 bucket for S3 Tables storage."""
-
-    rest_api_table_name: str
-    """Table name for adapter records (REST API/S3 Tables)."""
-
-    rest_api_namespace: str
-    """Namespace for adapter records (REST API/S3 Tables)."""
-
-    window_status_table: str
-    """Table name for window status (REST API/S3 Tables)."""
-
-    window_status_namespace: str
-    """Namespace for window status (REST API/S3 Tables)."""
-
-    aws_region: str | None = None
-    """AWS region (None for auto-detect)."""
-
-    aws_account_id: str | None = None
-    """AWS account ID (None for auto-detect)."""
-
-    # ---------------------------------------------------------------------------
-    # Table configuration - Local (SQLite)
-    # ---------------------------------------------------------------------------
-    local_db_name: str
-    """SQLite database name for local development."""
-
-    local_table_name: str
-    """Table name for adapter records (local)."""
-
-    local_namespace: str
-    """Namespace for adapter records (local)."""
-
-    local_window_status_db_name: str
-    """SQLite database name for window status (local)."""
-
-    local_window_status_table: str
-    """Table name for window status (local)."""
-
-    local_window_status_namespace: str
-    """Namespace for window status (local)."""
+    rest_api_iceberg_config: RestApiIcebergTableConfig
+    rest_api_window_status_iceberg_config: RestApiIcebergTableConfig
+    local_iceberg_config: LocalIcebergTableConfig
+    local_window_status_iceberg_config: LocalIcebergTableConfig
 
     # ---------------------------------------------------------------------------
     # Reporting
@@ -180,9 +144,6 @@ class OAIPMHRuntimeConfig(ABC):
         """
         ...
 
-    # ---------------------------------------------------------------------------
-    # Factory methods (concrete implementations)
-    # ---------------------------------------------------------------------------
     def build_adapter_table(
         self,
         *,
@@ -190,28 +151,12 @@ class OAIPMHRuntimeConfig(ABC):
         create_if_not_exists: bool = True,
     ) -> IcebergTable:
         """Build the Iceberg table for storing harvested records."""
-        cfg = self._config
         if use_rest_api_table:
-            table_config = IcebergTableConfig(
-                table_name=cfg.rest_api_table_name,
-                namespace=cfg.rest_api_namespace,
-                use_rest_api_table=True,
-                create_if_not_exists=create_if_not_exists,
-                s3_tables_bucket=cfg.s3_tables_bucket,
-                region=cfg.aws_region,
-                account_id=cfg.aws_account_id,
-                db_name=cfg.local_db_name,
-            )
-        else:
-            table_config = IcebergTableConfig(
-                table_name=cfg.local_table_name,
-                namespace=cfg.local_namespace,
-                use_rest_api_table=False,
-                create_if_not_exists=create_if_not_exists,
-                db_name=cfg.local_db_name,
+            return get_rest_api_table(
+                self._config.rest_api_iceberg_config, create_if_not_exists
             )
 
-        return get_iceberg_table(table_config)
+        return get_local_table(self._config.local_iceberg_config, create_if_not_exists)
 
     def _build_window_status_table(
         self,
@@ -220,30 +165,13 @@ class OAIPMHRuntimeConfig(ABC):
         create_if_not_exists: bool = True,
     ) -> IcebergTable:
         """Build the Iceberg table for tracking window status."""
-        cfg = self._config
         if use_rest_api_table:
-            table_config = IcebergTableConfig(
-                table_name=cfg.window_status_table,
-                namespace=cfg.window_status_namespace,
-                use_rest_api_table=True,
-                create_if_not_exists=create_if_not_exists,
-                s3_tables_bucket=cfg.s3_tables_bucket,
-                region=cfg.aws_region,
-                account_id=cfg.aws_account_id,
-            )
-        else:
-            table_config = IcebergTableConfig(
-                table_name=cfg.local_window_status_table,
-                namespace=cfg.local_window_status_namespace,
-                use_rest_api_table=False,
-                create_if_not_exists=create_if_not_exists,
-                db_name=cfg.local_window_status_db_name,
+            return get_rest_api_table(
+                self._config.rest_api_window_status_iceberg_config, create_if_not_exists
             )
 
-        return get_iceberg_table(
-            table_config,
-            schema=WINDOW_STATUS_SCHEMA,
-            partition_spec=None,
+        return get_local_table(
+            self._config.local_window_status_iceberg_config, create_if_not_exists
         )
 
     def build_window_store(self, *, use_rest_api_table: bool = True) -> WindowStore:
@@ -254,7 +182,7 @@ class OAIPMHRuntimeConfig(ABC):
     def build_adapter_store(self, *, use_rest_api_table: bool = True) -> AdapterStore:
         """Build the adapter store wrapping the Iceberg table."""
         table = self.build_adapter_table(use_rest_api_table=use_rest_api_table)
-        return AdapterStore(table, default_namespace=self.config.adapter_namespace)
+        return AdapterStore(table, namespace=self.config.adapter_namespace)
 
     def build_oai_client(self, *, http_client: httpx.Client | None = None) -> OAIClient:
         """Build the OAI-PMH client for harvesting records."""

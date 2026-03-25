@@ -11,36 +11,56 @@ from datetime import datetime
 from typing import Any
 
 import structlog
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
+from id_minter.id_minting_transformer import IdMintingTransformer
+from id_minter.manifests import IdMinterManifestWriter
+from id_minter.models.identifier import IdResolver
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
-    StepFunctionMintingResponse,
 )
+from id_minter.reporting import IdMinterReport
+from id_minter.resolvers.data_api_resolver import DataApiIdResolver
+from id_minter.resolvers.minting_resolver import MintingResolver
+from id_minter.sns import publish_ids_to_sns
+from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from utils.models.manifests import StepManifest
 
 logger = structlog.get_logger(__name__)
 
 
 class IdMinterRuntime(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     config: IdMinterConfig = ID_MINTER_CONFIG
+    resolver: IdResolver
+    source_es_mode: ElasticsearchMode = "private"
+    target_es_mode: ElasticsearchMode = "private"
 
 
 def build_runtime(
     config_obj: IdMinterConfig | None = None,
+    resolver: IdResolver | None = None,
+    source_es_mode: ElasticsearchMode = "private",
+    target_es_mode: ElasticsearchMode = "private",
 ) -> IdMinterRuntime:
     cfg = config_obj or ID_MINTER_CONFIG
-    return IdMinterRuntime(config=cfg)
+    res = resolver or MintingResolver(cfg)
+    return IdMinterRuntime(
+        config=cfg,
+        resolver=res,
+        source_es_mode=source_es_mode,
+        target_es_mode=target_es_mode,
+    )
 
 
 def execute(
     request: StepFunctionMintingRequest,
-    runtime: IdMinterRuntime | None = None,
-) -> StepFunctionMintingResponse:
-    runtime = runtime or build_runtime()
-
+    runtime: IdMinterRuntime,
+) -> StepManifest:
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
@@ -49,37 +69,108 @@ def execute(
         "Processing minting request",
         job_id=request.job_id,
         source_identifier_count=len(request.source_identifiers),
-        source_index=runtime.config.source_index,
-        target_index=runtime.config.target_index,
+        source_index_prefix=runtime.config.source_index_prefix,
+        target_index_prefix=runtime.config.target_index_prefix,
     )
 
-    # TODO: Implement minting logic:
-    #  1. Fetch records from upstream ES (runtime.config.source_index)
-    #  2. Mint canonical IDs via RDS identifier table
-    #  3. Store minted records in downstream ES (runtime.config.target_index)
-    #  4. Notify downstream SNS topic
+    source_index = runtime.config.source_index_name
+    target_index = runtime.config.target_index_name
 
-    return StepFunctionMintingResponse(
-        successes=[],
-        failures=[],
+    source_client = get_client(
+        api_key_name="id_minter",
+        pipeline_date=runtime.config.pipeline_date,
+        es_mode=runtime.source_es_mode,
+    )
+    target_client = get_client(
+        api_key_name="id_minter",
+        pipeline_date=runtime.config.pipeline_date,
+        es_mode=runtime.target_es_mode,
+    )
+
+    transformer = IdMintingTransformer(
+        es_client=source_client,
+        source_index=source_index,
+        source_identifiers=request.source_identifiers,
+        resolver=runtime.resolver,
+    )
+    transformer.stream_to_index(target_client, target_index)
+
+    if runtime.config.downstream_sns_topic_arn and transformer.successful_ids:
+        publish_ids_to_sns(
+            runtime.config.downstream_sns_topic_arn,
+            transformer.successful_ids,
+        )
+
+    manifest_writer = IdMinterManifestWriter(
         job_id=request.job_id,
+        label="id_minter",
+        bucket=runtime.config.s3_bucket,
+        prefix=runtime.config.batch_s3_prefix,
+    )
+
+    return manifest_writer.build_manifest(
+        successful_ids=transformer.successful_ids,
+        errors=transformer.errors,
+    )
+
+
+def log_runtime_config(
+    runtime: IdMinterRuntime,
+    request: StepFunctionMintingRequest,
+) -> None:
+    cfg = runtime.config
+    resolver_name = type(runtime.resolver).__name__
+    db_host = (
+        f"{cfg.rds_cluster_id} ({cfg.rds_region})"
+        if isinstance(runtime.resolver, DataApiIdResolver)
+        else f"{cfg.rds_client.primary_host}:{cfg.rds_client.port}"
+    )
+    source_date = cfg.source_index_date_suffix or cfg.pipeline_date
+    target_date = cfg.target_index_date_suffix or cfg.pipeline_date
+    date_info = cfg.pipeline_date
+    if source_date != cfg.pipeline_date or target_date != cfg.pipeline_date:
+        date_info += f" (source: {source_date}, target: {target_date})"
+
+    logger.info(
+        "Runtime configuration",
+        resolver=resolver_name,
+        database=f"{cfg.db_name} @ {db_host}",
+        pipeline_date=date_info,
+        source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
+        target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
+        downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
+        identifiers=request.source_identifiers,
+        migrations="yes" if cfg.apply_migrations else "no",
     )
 
 
 def handler(
     event: StepFunctionMintingRequest,
-    runtime: IdMinterRuntime | None = None,
+    runtime: IdMinterRuntime,
     execution_context: ExecutionContext | None = None,
-) -> StepFunctionMintingResponse:
+) -> StepManifest:
     setup_logging(execution_context)
+    log_runtime_config(runtime, event)
     response = execute(event, runtime=runtime)
+
+    success_count = response.successes.count
+    failure_count = response.failures.count if response.failures else 0
 
     logger.info(
         "Minting complete",
         job_id=response.job_id,
-        success_count=len(response.successes),
-        failure_count=len(response.failures),
+        success_count=success_count,
+        failure_count=failure_count,
     )
+
+    try:
+        IdMinterReport(
+            pipeline_date=runtime.config.pipeline_date,
+            success_count=success_count,
+            failure_count=failure_count,
+        ).publish()
+    except Exception:
+        logger.warning("Failed to publish metrics", exc_info=True)
 
     return response
 
@@ -91,7 +182,11 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
     )
     request = StepFunctionMintingRequest.model_validate(event)
     runtime = build_runtime()
-    response = handler(request, runtime=runtime, execution_context=execution_context)
+    response = handler(
+        request,
+        runtime=runtime,
+        execution_context=execution_context,
+    )
     return response.model_dump()
 
 
@@ -109,22 +204,65 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         help="Optional job ID (defaults to current time if omitted).",
     )
     parser.add_argument(
-        "--source-index",
+        "--source-index-prefix",
         type=str,
         required=False,
-        help="Override the upstream ES index name.",
+        help="Override the upstream ES index name prefix.",
     )
     parser.add_argument(
-        "--target-index",
+        "--target-index-prefix",
         type=str,
         required=False,
-        help="Override the downstream ES index name.",
+        help="Override the downstream ES index name prefix.",
     )
     parser.add_argument(
         "--apply-migrations",
         action="store_true",
         default=False,
         help="Apply database migrations before running.",
+    )
+    parser.add_argument(
+        "--resolver",
+        choices=["local", "data-api"],
+        default="data-api",
+        help="ID resolver backend: 'local' (pymysql to local MySQL) "
+        "or 'data-api' (AWS RDS Data API). Default: data-api.",
+    )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        required=False,
+        help="Override the pipeline date (used for ES secrets and as default for index suffixes).",
+    )
+    parser.add_argument(
+        "--source-index-date-suffix",
+        type=str,
+        required=False,
+        help="Override the date suffix for the source index. Defaults to --pipeline-date.",
+    )
+    parser.add_argument(
+        "--target-index-date-suffix",
+        type=str,
+        required=False,
+        help="Override the date suffix for the target index. Defaults to --pipeline-date.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Print the resolved configuration and exit without running.",
+    )
+    parser.add_argument(
+        "--source-es-mode",
+        choices=["public", "private", "local"],
+        default="public",
+        help="Elasticsearch mode for reading source documents. Default: public.",
+    )
+    parser.add_argument(
+        "--target-es-mode",
+        choices=["public", "private", "local"],
+        default="local",
+        help="Elasticsearch mode for writing indexed documents. Default: local.",
     )
 
     args = parser.parse_args()
@@ -136,15 +274,38 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     )
 
     overrides: dict = {}
-    if args.source_index:
-        overrides["source_index"] = args.source_index
-    if args.target_index:
-        overrides["target_index"] = args.target_index
+    if args.source_index_prefix:
+        overrides["source_index_prefix"] = args.source_index_prefix
+    if args.target_index_prefix:
+        overrides["target_index_prefix"] = args.target_index_prefix
     if args.apply_migrations:
         overrides["apply_migrations"] = True
+    if args.pipeline_date:
+        overrides["pipeline_date"] = args.pipeline_date
+    if args.source_index_date_suffix:
+        overrides["source_index_date_suffix"] = args.source_index_date_suffix
+    if args.target_index_date_suffix:
+        overrides["target_index_date_suffix"] = args.target_index_date_suffix
 
     config_obj = IdMinterConfig(**overrides) if overrides else None
-    runtime = build_runtime(config_obj)
+    cfg = config_obj or ID_MINTER_CONFIG
+
+    resolver: IdResolver
+    if args.resolver == "data-api":
+        resolver = DataApiIdResolver(cfg)
+    else:
+        resolver = MintingResolver(cfg)
+
+    runtime = build_runtime(
+        config_obj,
+        resolver=resolver,
+        source_es_mode=args.source_es_mode,
+        target_es_mode=args.target_es_mode,
+    )
+
+    if args.dry_run:
+        log_runtime_config(runtime, request)
+        return
 
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),

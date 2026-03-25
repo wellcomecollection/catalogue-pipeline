@@ -1,6 +1,6 @@
 """Embedder: resolve and embed canonical IDs into work JSON.
 
-Combines recursive JSON traversal with an IdResolver (e.g. IDMinter) to
+Combines recursive JSON traversal with an IdResolver (e.g. MintingResolver) to
 look up or mint canonical IDs for every sourceIdentifier node in a work.
 """
 
@@ -9,12 +9,16 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from typing import Any, cast
 
+import structlog
+
 from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
     IdResolver,
     SourceId,
     SourceIdentifierKey,
 )
+
+logger = structlog.get_logger(__name__)
 
 
 def scan(obj: Any, predicate: Callable[[dict], bool]) -> Iterator[dict]:
@@ -70,7 +74,7 @@ def extract_source_identifiers(work_json: dict) -> list[SourceIdentifierKey]:
 def embed_canonical_ids(
     work_json: dict, id_map: dict[SourceIdentifierKey, str]
 ) -> dict:
-    """Add a canonicalId field to every node that has a sourceIdentifier.
+    """Add canonical IDs and promote minted nodes to the identified shape.
 
     ``id_map`` maps SourceIdentifierKey -> canonical ID string.
     Nodes whose sourceIdentifier is not found in ``id_map`` are left unchanged.
@@ -80,7 +84,20 @@ def embed_canonical_ids(
         key = make_key(node["sourceIdentifier"])
         canonical_id = id_map.get(key)
         if canonical_id is not None:
-            return {**node, "canonicalId": canonical_id}
+            updated_node = {**node, "canonicalId": canonical_id}
+
+            identified_type = updated_node.get("identifiedType")
+            if isinstance(identified_type, str):
+                promoted_node = {
+                    k: v for k, v in updated_node.items() if k != "identifiedType"
+                }
+                promoted_node["type"] = identified_type
+                return promoted_node
+
+            if updated_node.get("type") == "Identifiable":
+                return {**updated_node, "type": "Identified"}
+
+            return updated_node
         return node
 
     return cast(
@@ -97,11 +114,30 @@ def process_work(
     # TODO: We have not yet decided how works will indicate their predecessors.
     # The `predecessors` parameter is plumbed through but the mechanism for
     # deriving it from the work JSON needs to be designed and implemented.
-    keys = extract_source_identifiers(work_json)
-    if not keys:
-        return work_json
+    source_id = work_json.get("state", {}).get("sourceIdentifier", {})
+    source_id_str = (
+        f"{source_id.get('ontologyType', '?')}"
+        f"[{source_id.get('identifierType', {}).get('id', '?')}"
+        f"/{source_id.get('value', '?')}]"
+    )
 
     preds = predecessors or {}
+    keys = extract_source_identifiers(work_json)
+    predecessor_count = sum(1 for k in keys if k in preds)
+    logger.info(
+        "Embedding canonical IDs",
+        source_identifier=source_id_str,
+        source_identifier_count=len(keys),
+        predecessor_count=predecessor_count,
+    )
+
+    if not keys:
+        logger.info(
+            "No source identifiers found, skipping",
+            source_identifier=source_id_str,
+        )
+        return work_json
+
     requests: list[tuple[SourceId, SourceId | None]] = [
         (
             (k[0], k[1], k[2]),
@@ -114,4 +150,12 @@ def process_work(
         SourceIdentifierKey(*k): v for k, v in found.items()
     }
 
-    return embed_canonical_ids(work_json, id_map)
+    result = embed_canonical_ids(work_json, id_map)
+
+    logger.info(
+        "Finished embedding canonical IDs",
+        source_identifier=source_id_str,
+        ids_embedded=len(id_map),
+    )
+
+    return result

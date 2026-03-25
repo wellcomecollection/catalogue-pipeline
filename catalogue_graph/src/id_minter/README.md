@@ -34,18 +34,65 @@ It can be used to locally run the id_minter and id_generator, see below
 
 #### 1. Run the id_minter
 
+When run locally the id_minter reads from the **public** Elasticsearch API and writes to a **local** ES container. This means you don't need VPC access to fetch works-source documents.
+
+##### Basic usage (Data API resolver)
+
 ```bash
-RDS_USERNAME=id_minter RDS_PASSWORD=id_minter \
-  uv run python -m id_minter.steps.id_minter \
-    --source-identifiers id1 id2 id3 \
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers 'Work[sierra-system-number/b1000001]'
+```
+
+##### Using the local MySQL resolver
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers 'Work[sierra-system-number/b1000001]' \
+    --resolver local \
+    --apply-migrations
+```
+
+This connects to a local MySQL instance (see docker-compose setup above).
+
+##### Multiple identifiers with a custom job ID
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers \
+      'Work[sierra-system-number/b1000001]' \
+      'Work[sierra-system-number/b1000002]' \
     --job-id my-test-job \
     --apply-migrations
 ```
 
-- `--apply-migrations` applies the database schema on startup (creates the `canonical_ids` and `identifiers` tables). Only needed on first run or after adding new migrations.
-- `--source-identifiers` takes one or more source identifiers to mint.
-- `--job-id` is optional — defaults to the current timestamp if omitted.
-- `--source-index` / `--target-index` optionally override the upstream/downstream ES index names.
+##### Writing to the public Elasticsearch cluster
+
+By default the CLI reads from the public ES cluster and writes to a local one.
+To write to the public identified index instead:
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --source-identifiers 'Work[sierra-system-number/b1000001]' \
+    --pipeline-date 2025-10-02 \
+    --target-es-mode public
+```
+
+##### CLI flags
+
+| Flag | Description |
+|---|---|
+| `--source-identifiers` | One or more source identifiers to process (required). |
+| `--job-id` | Optional job ID — defaults to the current timestamp. |
+| `--resolver` | ID resolver backend: `local` (pymysql to local MySQL) or `data-api` (AWS RDS Data API, default). |
+| `--source-index-prefix` | Override the upstream ES index name prefix. |
+| `--target-index-prefix` | Override the downstream ES index name prefix. |
+| `--source-es-mode` | Elasticsearch mode for reading source documents: `public` (default), `private`, or `local`. |
+| `--target-es-mode` | Elasticsearch mode for writing indexed documents: `local` (default), `public`, or `private`. |
+| `--pipeline-date` | Override the pipeline date (used for ES secrets and as default for index suffixes). Defaults to `dev`. |
+| `--source-index-date-suffix` | Override the date suffix for the source index. Defaults to `--pipeline-date`. |
+| `--target-index-date-suffix` | Override the date suffix for the target index. Defaults to `--pipeline-date`. |
+| `--apply-migrations` | Apply database schema migrations on startup. Only needed on first run or after adding new migrations. |
+| `--dry-run` | Log the resolved configuration and exit without running. |
 
 #### 2. Verify the database schema
 
@@ -121,5 +168,7 @@ All settings are sourced from environment variables with sensible defaults for l
 | `RDS_PASSWORD` | _(empty)_ | Database password |
 | `IDENTIFIERS_DATABASE` | `identifiers` | Database name |
 | `APPLY_MIGRATIONS` | `false` | Apply yoyo migrations on startup |
-| `ES_SOURCE_INDEX` | `works-source` | Upstream ES index |
-| `ES_TARGET_INDEX` | `works-identified` | Downstream ES index |
+| `ES_SOURCE_INDEX_PREFIX` | `works-source` | Upstream ES index prefix |
+| `ES_TARGET_INDEX_PREFIX` | `works-identified` | Downstream ES index prefix |
+| `ES_SOURCE_INDEX_DATE_SUFFIX` | _(unset — uses `PIPELINE_DATE`)_ | Date suffix for the source index |
+| `ES_TARGET_INDEX_DATE_SUFFIX` | _(unset — uses `PIPELINE_DATE`)_ | Date suffix for the target index |

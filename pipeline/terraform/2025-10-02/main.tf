@@ -63,12 +63,17 @@ module "pipeline" {
         indexed = "concepts_indexed.2025-06-17"
       }
     }
+    "2026-03-06" = {
+      works = {
+        identified = "works_identified.2023-05-26"
+      }
+    }
   }
 
   allow_delete_indices = false
 
   # Base AMI for ECS instances
-  ami_id = "ami-0f8e471d509860e85"
+  ami_id = "ami-056dd98084762c908"
 
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date

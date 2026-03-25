@@ -32,8 +32,8 @@ CANONICAL_IDS_TABLE_NAME = os.getenv("CANONICAL_IDS_TABLE_NAME", "canonical_ids"
 # ---------------------------------------------------------------------------
 # Elasticsearch indices
 # ---------------------------------------------------------------------------
-ES_SOURCE_INDEX = os.getenv("ES_SOURCE_INDEX", "works-source")
-ES_TARGET_INDEX = os.getenv("ES_TARGET_INDEX", "works-identified")
+ES_SOURCE_INDEX_PREFIX = os.getenv("ES_SOURCE_INDEX_PREFIX", "works-source")
+ES_TARGET_INDEX_PREFIX = os.getenv("ES_TARGET_INDEX_PREFIX", "works-identified")
 
 # ---------------------------------------------------------------------------
 # Downstream notification target
@@ -41,9 +41,24 @@ ES_TARGET_INDEX = os.getenv("ES_TARGET_INDEX", "works-identified")
 DOWNSTREAM_SNS_TOPIC_ARN = os.getenv("DOWNSTREAM_SNS_TOPIC_ARN")
 
 # ---------------------------------------------------------------------------
+# S3 manifest output
+# ---------------------------------------------------------------------------
+S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-id-minter")
+S3_PREFIX = os.getenv("S3_PREFIX", "dev")
+BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "id_minter")
+
+# ---------------------------------------------------------------------------
+# RDS Data API (for local/CLI access without direct DB connectivity)
+# ---------------------------------------------------------------------------
+RDS_CLUSTER_ID = os.getenv("RDS_CLUSTER_ID", "identifiers-v2-serverless")
+RDS_REGION = os.getenv("RDS_REGION", "eu-west-1")
+
+# ---------------------------------------------------------------------------
 # General
 # ---------------------------------------------------------------------------
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
+ES_SOURCE_INDEX_DATE_SUFFIX = os.getenv("ES_SOURCE_INDEX_DATE_SUFFIX")
+ES_TARGET_INDEX_DATE_SUFFIX = os.getenv("ES_TARGET_INDEX_DATE_SUFFIX")
 APPLY_MIGRATIONS = os.getenv("APPLY_MIGRATIONS", "false").lower() in (
     "true",
     "1",
@@ -66,16 +81,6 @@ class RDSClientConfig(BaseModel):
     max_connections: int = RDS_MAX_CONNECTIONS
 
 
-# class IdentifiersTableConfig(BaseModel):
-#     database: str = IDENTIFIERS_DATABASE
-#     table_name: str = IDENTIFIERS_TABLE_NAME
-
-
-# class CanonicalIdsTableConfig(BaseModel):
-#     database: str = IDENTIFIERS_DATABASE
-#     table_name: str = CANONICAL_IDS_TABLE_NAME
-
-
 class DBConfig(BaseModel):
     """Base config for database access."""
 
@@ -86,10 +91,26 @@ class DBConfig(BaseModel):
 
 class IdMinterConfig(DBConfig):
     db_table: str = IDENTIFIERS_TABLE_NAME
-    source_index: str = ES_SOURCE_INDEX
-    target_index: str = ES_TARGET_INDEX
+    source_index_prefix: str = ES_SOURCE_INDEX_PREFIX
+    target_index_prefix: str = ES_TARGET_INDEX_PREFIX
     downstream_sns_topic_arn: str | None = DOWNSTREAM_SNS_TOPIC_ARN
     pipeline_date: str = PIPELINE_DATE
+    source_index_date_suffix: str | None = ES_SOURCE_INDEX_DATE_SUFFIX
+    target_index_date_suffix: str | None = ES_TARGET_INDEX_DATE_SUFFIX
+    rds_cluster_id: str = RDS_CLUSTER_ID
+    rds_region: str = RDS_REGION
+    s3_bucket: str = S3_BUCKET
+    batch_s3_prefix: str = BATCH_S3_PREFIX
+
+    @property
+    def source_index_name(self) -> str:
+        date = self.source_index_date_suffix or self.pipeline_date
+        return f"{self.source_index_prefix}-{date}"
+
+    @property
+    def target_index_name(self) -> str:
+        date = self.target_index_date_suffix or self.pipeline_date
+        return f"{self.target_index_prefix}-{date}"
 
 
 # Default id_minter config instance, built from environment variables.

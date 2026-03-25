@@ -9,14 +9,14 @@ from oai_pmh_client.models import Header, Record
 
 from adapters.oai_pmh.record_writer import WindowRecordWriter
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 
 
 class TestWindowRecordWriterMocked:
     def test_writes_records_to_store(self) -> None:
         mock_store = Mock(spec=AdapterStore)
         mock_store.incremental_update.return_value = Mock(
-            changeset_id="123", updated_record_ids=["rec1"]
+            changeset_id="123", upserted_record_ids=["rec1"]
         )
 
         writer = WindowRecordWriter(
@@ -53,7 +53,7 @@ class TestWindowRecordWriterMocked:
         table = call_args[0][0]
 
         assert isinstance(table, pa.Table)
-        assert table.schema.equals(ARROW_SCHEMA)
+        assert table.schema.equals(ADAPTER_STORE_ARROW_SCHEMA)
         assert table.num_rows == 1
 
         row = table.to_pylist()[0]
@@ -87,7 +87,7 @@ class TestWindowRecordWriterMocked:
     def test_handles_deleted_records(self) -> None:
         mock_store = Mock(spec=AdapterStore)
         mock_store.incremental_update.return_value = Mock(
-            changeset_id="456", updated_record_ids=["rec1"]
+            changeset_id="456", upserted_record_ids=["rec1"]
         )
 
         writer = WindowRecordWriter(

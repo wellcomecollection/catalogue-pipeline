@@ -1,11 +1,10 @@
 import pyarrow as pa
+from pyiceberg.io.pyarrow import schema_to_pyarrow
 from pyiceberg.schema import Schema
 from pyiceberg.types import BooleanType, NestedField, StringType, TimestamptzType
 
-# namespace - e.g. ebsco - in case we decide to store everything in one table
-# last modified - different from changeset because this allows changeset to be meaningful.
-
-SCHEMA = Schema(
+# Define matching Iceberg and Arrow schemas for the adapter store
+ADAPTER_STORE_ICEBERG_SCHEMA = Schema(
     # We may wish to store similar data from multiple sources in the same table. This allows us to filter appropriately
     NestedField(field_id=1, name="namespace", field_type=StringType(), required=True),
     # Each record has an identifier which is unique within its namespace
@@ -19,7 +18,7 @@ SCHEMA = Schema(
     NestedField(field_id=4, name="changeset", field_type=StringType(), required=False),
     # When a record was last modified.
     NestedField(
-        field_id=5, name="last_modified", field_type=TimestamptzType(), required=False
+        field_id=5, name="last_modified", field_type=TimestamptzType(), required=True
     ),
     # Whether the record has been deleted.
     NestedField(
@@ -30,15 +29,17 @@ SCHEMA = Schema(
         default_value=False,
     ),
 )
+ADAPTER_STORE_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(ADAPTER_STORE_ICEBERG_SCHEMA)
 
-# The Arrow schema matching the above Iceberg schema, needs to be kept in sync
-ARROW_FIELDS: list[pa.Field] = [
-    pa.field("namespace", type=pa.string(), nullable=False),
-    pa.field("id", type=pa.string(), nullable=False),
-    pa.field("content", type=pa.string(), nullable=True),
-    pa.field("changeset", type=pa.string(), nullable=True),
-    pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
-    pa.field("deleted", type=pa.bool_(), nullable=True),
-]
-
-ARROW_SCHEMA = pa.schema(ARROW_FIELDS)
+RECONCILER_STORE_ICEBERG_SCHEMA = Schema(
+    NestedField(field_id=1, name="namespace", field_type=StringType(), required=True),
+    NestedField(field_id=2, name="id", field_type=StringType(), required=True),
+    NestedField(field_id=3, name="guid", field_type=StringType(), required=True),
+    NestedField(field_id=4, name="changeset", field_type=StringType(), required=False),
+    NestedField(
+        field_id=5, name="last_modified", field_type=TimestamptzType(), required=True
+    ),
+)
+RECONCILER_STORE_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(
+    RECONCILER_STORE_ICEBERG_SCHEMA
+)

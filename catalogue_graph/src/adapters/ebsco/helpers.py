@@ -1,8 +1,11 @@
-import adapters.ebsco.config as config
+from adapters.ebsco.config import (
+    LOCAL_ICEBERG_CONFIG,
+    REST_API_ICEBERG_CONFIG,
+)
 from adapters.utils.iceberg import (
     IcebergTable,
-    IcebergTableConfig,
-    get_iceberg_table,
+    get_local_table,
+    get_rest_api_table,
 )
 
 
@@ -10,23 +13,6 @@ def build_adapter_table(
     use_rest_api_table: bool, create_if_not_exists: bool = True
 ) -> IcebergTable:
     if use_rest_api_table:
-        table_config = IcebergTableConfig(
-            table_name=config.REST_API_TABLE_NAME,
-            namespace=config.REST_API_NAMESPACE,
-            use_rest_api_table=True,
-            create_if_not_exists=create_if_not_exists,
-            s3_tables_bucket=config.S3_TABLES_BUCKET,
-            region=config.AWS_REGION,
-            account_id=config.AWS_ACCOUNT_ID,
-            db_name=config.LOCAL_DB_NAME,
-        )
-    else:
-        table_config = IcebergTableConfig(
-            table_name=config.LOCAL_TABLE_NAME,
-            namespace=config.LOCAL_NAMESPACE,
-            use_rest_api_table=False,
-            create_if_not_exists=create_if_not_exists,
-            db_name=config.LOCAL_DB_NAME,
-        )
+        return get_rest_api_table(REST_API_ICEBERG_CONFIG, create_if_not_exists)
 
-    return get_iceberg_table(table_config)
+    return get_local_table(LOCAL_ICEBERG_CONFIG, create_if_not_exists)

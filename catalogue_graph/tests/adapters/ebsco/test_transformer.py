@@ -6,7 +6,11 @@ from pyiceberg.table import Table as IcebergTable
 import adapters.ebsco.config as adapter_config
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.transformers.manifests import TransformerManifest
-from adapters.transformers.transformer import TransformerEvent, handler
+from adapters.transformers.transformer import (
+    TransformerEvent,
+    build_transformer,
+    handler,
+)
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 
 from .helpers import prepare_changeset
@@ -47,7 +51,7 @@ def test_transformer_end_to_end_with_local_table(
         monkeypatch,
         records_by_id,
         namespace=EBSCO_NAMESPACE,
-        build_adapter_table_path="adapters.ebsco.helpers.build_adapter_table",
+        transformer_type="ebsco",
     )
 
     MockElasticsearchClient.inputs.clear()
@@ -100,7 +104,7 @@ def test_transformer_end_to_end_includes_deletions(
         monkeypatch,
         records_by_id,
         namespace=EBSCO_NAMESPACE,
-        build_adapter_table_path="adapters.ebsco.helpers.build_adapter_table",
+        transformer_type="ebsco",
     )
 
     MockElasticsearchClient.inputs.clear()
@@ -130,3 +134,88 @@ def test_transformer_end_to_end_includes_deletions(
     assert deleted["type"] == "Deleted"
     assert deleted["deletedReason"]["type"] == "DeletedFromSource"
     assert deleted["deletedReason"]["info"] == "Marked as deleted from source"
+
+
+def test_build_transformer_uses_provided_snapshot_id_for_reads(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    initial_records = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Snapshot One Title</subfield></datafield></record>"
+    }
+    initial_changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        initial_records,
+        namespace=EBSCO_NAMESPACE,
+        transformer_type="ebsco",
+    )
+    initial_snapshot = temporary_table.current_snapshot()
+    assert initial_snapshot is not None
+    initial_snapshot_id = initial_snapshot.snapshot_id
+
+    updated_records = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Snapshot Two Title</subfield></datafield></record>"
+    }
+    prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        updated_records,
+        namespace=EBSCO_NAMESPACE,
+        transformer_type="ebsco",
+    )
+
+    transformer = build_transformer(
+        TransformerEvent(
+            transformer_type="ebsco",
+            job_id="20250101T1200",
+            changeset_ids=[initial_changeset_id],
+            snapshot_id=initial_snapshot_id,
+        ),
+        use_rest_api_table=False,
+    )
+
+    rows = list(transformer.source.stream_raw())
+    assert len(rows) == 1
+    assert "Snapshot One Title" in rows[0]["content"]
+    assert "Snapshot Two Title" not in rows[0]["content"]
+
+
+def test_build_transformer_uses_latest_snapshot_when_event_has_no_snapshot_id(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    initial_records = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Initial Snapshot Title</subfield></datafield></record>"
+    }
+    initial_changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        initial_records,
+        namespace=EBSCO_NAMESPACE,
+        transformer_type="ebsco",
+    )
+
+    transformer = build_transformer(
+        TransformerEvent(
+            transformer_type="ebsco",
+            job_id="20250101T1200",
+            changeset_ids=[initial_changeset_id],
+        ),
+        use_rest_api_table=False,
+    )
+
+    updated_records = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Later Snapshot Title</subfield></datafield></record>"
+    }
+    prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        updated_records,
+        namespace=EBSCO_NAMESPACE,
+        transformer_type="ebsco",
+    )
+
+    rows = list(transformer.source.stream_raw())
+    assert transformer.source.snapshot_id is not None
+    assert len(rows) == 1
+    assert "Initial Snapshot Title" in rows[0]["content"]
+    assert "Later Snapshot Title" not in rows[0]["content"]

@@ -15,8 +15,8 @@ locals {
   base_2x_total_cpu = 8192
   base_1x_total_cpu = 4096
 
-  base_2x_total_memory = 15463
-  base_1x_total_memory = 7611
+  base_2x_total_memory = 14336
+  base_1x_total_memory = 7168
 
   base_manager_memory      = 2048
   base_manager_cpu         = 1024
@@ -50,18 +50,24 @@ module "image_inferrer" {
   queue_visibility_timeout_seconds = local.queue_visibility_timeout
 
   launch_type = "EC2"
-  capacity_provider_strategies = [{
-    capacity_provider = module.inference_capacity_provider.name
-    weight            = 1
-  }]
-  ordered_placement_strategies = [{
-    type  = "spread"
-    field = "host"
-  }]
-  volumes = [{
-    name      = local.shared_storage_name,
-    host_path = null
-  }]
+  capacity_provider_strategies = [
+    {
+      capacity_provider = module.inference_capacity_provider.name
+      weight            = 1
+    }
+  ]
+  ordered_placement_strategies = [
+    {
+      type  = "spread"
+      field = "host"
+    }
+  ]
+  volumes = [
+    {
+      name      = local.shared_storage_name,
+      host_path = null
+    }
+  ]
 
   host_cpu    = null
   host_memory = null
@@ -70,10 +76,12 @@ module "image_inferrer" {
   manager_container_image = local.inference_manager_image
   manager_cpu             = local.manager_cpu
   manager_memory          = local.manager_memory
-  manager_mount_points = [{
-    containerPath = local.shared_storage_path,
-    sourceVolume  = local.shared_storage_name
-  }]
+  manager_mount_points = [
+    {
+      containerPath = local.shared_storage_path,
+      sourceVolume  = local.shared_storage_name
+    }
+  ]
 
   apps = {
     feature_inferrer = {
@@ -84,10 +92,12 @@ module "image_inferrer" {
         PORT = local.feature_inferrer_port
       }
       secret_env_vars = {}
-      mount_points = [{
-        containerPath = local.shared_storage_path,
-        sourceVolume  = local.shared_storage_name
-      }]
+      mount_points = [
+        {
+          containerPath = local.shared_storage_path,
+          sourceVolume  = local.shared_storage_name
+        }
+      ]
       healthcheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:${local.feature_inferrer_port}/healthcheck"],
         interval    = 30,
@@ -104,10 +114,12 @@ module "image_inferrer" {
         PORT = local.palette_inferrer_port
       }
       secret_env_vars = {}
-      mount_points = [{
-        containerPath = local.shared_storage_path,
-        sourceVolume  = local.shared_storage_name
-      }]
+      mount_points = [
+        {
+          containerPath = local.shared_storage_path,
+          sourceVolume  = local.shared_storage_name
+        }
+      ]
       healthcheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:${local.palette_inferrer_port}/healthcheck"],
         interval    = 30,
@@ -124,10 +136,12 @@ module "image_inferrer" {
         PORT = local.aspect_ratio_inferrer_port
       }
       secret_env_vars = {}
-      mount_points = [{
-        containerPath = local.shared_storage_path,
-        sourceVolume  = local.shared_storage_name
-      }]
+      mount_points = [
+        {
+          containerPath = local.shared_storage_path,
+          sourceVolume  = local.shared_storage_name
+        }
+      ]
       healthcheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:${local.aspect_ratio_inferrer_port}/healthcheck"],
         interval    = 30,

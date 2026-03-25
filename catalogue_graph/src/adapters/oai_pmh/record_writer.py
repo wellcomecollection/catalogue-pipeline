@@ -14,7 +14,7 @@ from lxml import etree
 from oai_pmh_client.models import Record
 
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from adapters.utils.window_harvester import WindowCallbackResult
 
 
@@ -85,19 +85,19 @@ class WindowRecordWriter:
             "window_range": self.window_range,
         }
         changeset_id: str | None = None
-        updated_record_ids: list[str] | None = None
+        upserted_record_ids: list[str] | None = None
 
         if rows:
-            table = pa.Table.from_pylist(rows, schema=ARROW_SCHEMA)
+            table = pa.Table.from_pylist(rows, schema=ADAPTER_STORE_ARROW_SCHEMA)
             update = self.table_client.incremental_update(table)
             if update:
                 changeset_id = update.changeset_id
-                updated_record_ids = update.updated_record_ids
+                upserted_record_ids = update.upserted_record_ids
 
         if changeset_id:
             tags["changeset_id"] = changeset_id
 
-        if updated_record_ids:
-            tags["record_ids_changed"] = json.dumps(updated_record_ids)
+        if upserted_record_ids:
+            tags["record_ids_changed"] = json.dumps(upserted_record_ids)
 
         return {"tags": tags}

@@ -10,65 +10,62 @@ from pyiceberg.partitioning import UNPARTITIONED_PARTITION_SPEC, PartitionSpec
 from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.utils.schemata import SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA
 
 
-class IcebergTableConfig(BaseModel):
+class SharedIcebergTableConfig(BaseModel):
     """Configuration for connecting to an Iceberg table."""
 
-    # Common configuration
     table_name: str
     namespace: str
-    use_rest_api_table: bool = True
-    create_if_not_exists: bool = True
 
-    # REST API configuration (S3 Tables)
-    s3_tables_bucket: str | None = None
+    # Only used when creating a new table
+    iceberg_schema: Schema = ADAPTER_STORE_ICEBERG_SCHEMA
+    partition_spec: PartitionSpec = UNPARTITIONED_PARTITION_SPEC
+
+
+class RestApiIcebergTableConfig(SharedIcebergTableConfig):
+    s3_tables_bucket: str
     region: str | None = None
     account_id: str | None = None
 
-    # Local configuration
-    db_name: str | None = None
+
+class LocalIcebergTableConfig(SharedIcebergTableConfig):
+    db_name: str = "catalog"
+
+
+IcebergTableConfig = RestApiIcebergTableConfig | LocalIcebergTableConfig
 
 
 def get_table(
-    catalogue_namespace: str,
-    table_name: str,
+    config: IcebergTableConfig,
     catalogue_name: str,
     create_if_not_exists: bool,
-    schema: Schema = SCHEMA,
-    partition_spec: PartitionSpec | None = None,
     **params: Any,
 ) -> IcebergTable:
     """
     Generic table getter that can be used by any module.
 
     Args:
+        config: IcebergTableConfig to use when creating/connecting to the table
         catalogue_name: Name of the catalog
-        catalogue_namespace: Namespace for the table
-        table_name: Name of the table
         create_if_not_exists: Whether to create the table if it doesn't exist
-        schema: Schema to use when creating the table
-        partition_spec: Partition spec to use when creating the table
         **params: Additional parameters for loading the catalog
 
     Returns:
         IcebergTable: The configured table
     """
-    catalogue = load_catalog(
-        catalogue_name,
-        **params,
-    )
-    table_fullname = f"{catalogue_namespace}.{table_name}"
+    catalogue = load_catalog(catalogue_name, **params)
+    table_fullname = f"{config.namespace}.{config.table_name}"
 
     if create_if_not_exists:
         with contextlib.suppress(NamespaceAlreadyExistsError):
-            catalogue.create_namespace(catalogue_namespace)
+            catalogue.create_namespace(config.namespace)
 
         return catalogue.create_table_if_not_exists(
             identifier=table_fullname,
-            schema=schema,
-            partition_spec=partition_spec or UNPARTITIONED_PARTITION_SPEC,
+            schema=config.iceberg_schema,
+            partition_spec=config.partition_spec,
         )
 
     return catalogue.load_table(table_fullname)
@@ -123,50 +120,6 @@ def get_rest_api_catalog_params(
     return params
 
 
-def get_rest_api_table(
-    s3_tables_bucket: str,
-    table_name: str,
-    namespace: str,
-    create_if_not_exists: bool = False,
-    schema: Schema = SCHEMA,
-    partition_spec: PartitionSpec | None = None,
-    *,
-    region: str | None = None,
-    account_id: str | None = None,
-) -> IcebergTable:
-    """
-    Get a table from an S3 Tables Iceberg REST API catalog.
-
-    Args:
-        s3_tables_bucket: S3 bucket for the S3 Table
-        table_name: Name of the table
-        namespace: Namespace for the table
-        create_if_not_exists: Whether to create the table if it doesn't exist
-        schema: Schema to use when creating the table
-        partition_spec: Partition spec to use when creating the table
-        region: AWS region where the S3 Table is located
-        account_id: AWS account ID
-
-    Returns:
-        IcebergTable: The configured table
-    """
-    params = get_rest_api_catalog_params(
-        s3_tables_bucket=s3_tables_bucket,
-        region=region,
-        account_id=account_id,
-    )
-
-    return get_table(
-        catalogue_namespace=namespace,
-        table_name=table_name,
-        catalogue_name="s3tablescatalog",
-        create_if_not_exists=create_if_not_exists,
-        schema=schema,
-        partition_spec=partition_spec,
-        **params,
-    )
-
-
 def get_local_catalog_params(
     db_name: str = "catalog",
 ) -> dict[str, str]:
@@ -195,77 +148,50 @@ def get_local_catalog_params(
 
 
 def get_local_table(
-    table_name: str = "mytable",
-    namespace: str = "default",
-    db_name: str = "catalog",
-    schema: Schema = SCHEMA,
-    partition_spec: PartitionSpec | None = None,
+    config: LocalIcebergTableConfig,
     create_if_not_exists: bool = True,
 ) -> IcebergTable:
     """
     Get a table from the local catalog using the .local directory.
 
     Args:
-        table_name: Name of the table (defaults to "mytable")
-        namespace: Namespace for the table (defaults to "default")
-        db_name: Database name (defaults to "catalog", use "test_catalog" for tests)
-        schema: Schema to use when creating the table
-        partition_spec: Partition spec to use when creating the table
+        config: LocalIcebergTableConfig object defining the table
         create_if_not_exists: Whether to create the table if it doesn't exist
 
     Returns:
         IcebergTable: The configured table
     """
-    params = get_local_catalog_params(db_name=db_name)
-
+    params = get_local_catalog_params(db_name=config.db_name)
     return get_table(
-        catalogue_namespace=namespace,
-        table_name=table_name,
+        config=config,
         catalogue_name="local",
         create_if_not_exists=create_if_not_exists,
-        schema=schema,
-        partition_spec=partition_spec,
         **params,
     )
 
 
-def get_iceberg_table(
-    config: IcebergTableConfig,
-    schema: Schema = SCHEMA,
-    partition_spec: PartitionSpec | None = None,
+def get_rest_api_table(
+    config: RestApiIcebergTableConfig,
+    create_if_not_exists: bool = True,
 ) -> IcebergTable:
     """
-    Get an Iceberg table based on the provided configuration.
+    Get a table from an S3 Tables Iceberg REST API catalog.
 
     Args:
-        config: Configuration object containing table details.
-        schema: Schema to use when creating the table.
-        partition_spec: Partition spec to use when creating the table.
+        config: RestApiIcebergTableConfig object defining the table
+        create_if_not_exists: Whether to create the table if it doesn't exist
 
     Returns:
-        IcebergTable: The configured table.
+        IcebergTable: The configured table
     """
-    if config.use_rest_api_table:
-        if not config.s3_tables_bucket:
-            raise ValueError(
-                "s3_tables_bucket must be provided when use_rest_api_table is True"
-            )
-        return get_rest_api_table(
-            s3_tables_bucket=config.s3_tables_bucket,
-            table_name=config.table_name,
-            namespace=config.namespace,
-            create_if_not_exists=config.create_if_not_exists,
-            schema=schema,
-            partition_spec=partition_spec,
-            region=config.region,
-            account_id=config.account_id,
-        )
-
-    return get_local_table(
-        table_name=config.table_name,
-        namespace=config.namespace,
-        db_name=config.db_name or "catalog",
-        schema=schema,
-        partition_spec=partition_spec,
-        create_if_not_exists=config.create_if_not_exists,
+    params = get_rest_api_catalog_params(
+        s3_tables_bucket=config.s3_tables_bucket,
+        region=config.region,
+        account_id=config.account_id,
+    )
+    return get_table(
+        config=config,
+        catalogue_name="s3tablescatalog",
+        create_if_not_exists=create_if_not_exists,
+        **params,
     )
