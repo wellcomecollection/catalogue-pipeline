@@ -58,10 +58,9 @@ def handler(
         job_id=event.job_id,
     )
 
-    es_client = get_client("read_only", event.pipeline_date, es_mode)
-    # es_client = get_client(
-    #     f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
-    # )
+    es_client = get_client(
+        f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
+    )
     neptune_client = NeptuneClient(event.environment)
     transformer = create_transformer(event, es_client, neptune_client)
     objects_to_index = transformer.load_documents(event, load_destination)
