@@ -5,7 +5,7 @@ from ingestor.extractors.images.images_extractor import (
     ExtractedImage,
     GraphImagesExtractor,
 )
-from ingestor.models.indexable_image import IndexableImage
+from ingestor.models.indexable.image import IndexableImage
 from models.events import BasePipelineEvent
 
 from .base_transformer import IngestorBaseTransformer

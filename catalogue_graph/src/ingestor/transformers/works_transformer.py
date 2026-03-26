@@ -6,7 +6,7 @@ from ingestor.extractors.works.base_works_extractor import (
     VisibleExtractedWork,
 )
 from ingestor.extractors.works.works_index_extractor import WorksIndexExtractor
-from ingestor.models.indexable_work import (
+from ingestor.models.indexable.work import (
     DeletedIndexableWork,
     IndexableWork,
     InvisibleIndexableWork,

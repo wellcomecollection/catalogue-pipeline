@@ -9,7 +9,7 @@ from ingestor.models.debug.work import (
 )
 from ingestor.models.display.work import DisplayWork
 from ingestor.models.filter.work import WorkFilterableValues
-from ingestor.models.indexable import IndexableRecord
+from ingestor.models.indexable.record import IndexableRecord
 from ingestor.models.merged.work import (
     DeletedMergedWork,
     InvisibleMergedWork,

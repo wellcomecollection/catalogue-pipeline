@@ -5,7 +5,7 @@ from ingestor.models.aggregate.image import ImageAggregatableValues
 from ingestor.models.debug.image import ImageDebug
 from ingestor.models.display.image import DisplayImage
 from ingestor.models.filter.image import ImageFilterableValues
-from ingestor.models.indexable import IndexableRecord
+from ingestor.models.indexable.record import IndexableRecord
 from ingestor.models.query.image import QueryImage
 from ingestor.models.vector.image import ImageVectorValues
 from utils.timezone import convert_datetime_to_utc_iso

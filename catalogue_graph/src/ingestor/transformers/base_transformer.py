@@ -11,9 +11,9 @@ import structlog
 from pydantic import BaseModel
 
 from ingestor.extractors.base_extractor import StreamingExtractor
-from ingestor.models.indexable_concept import IndexableConcept
-from ingestor.models.indexable_image import IndexableImage
-from ingestor.models.indexable_work import (
+from ingestor.models.indexable.concept import IndexableConcept
+from ingestor.models.indexable.image import IndexableImage
+from ingestor.models.indexable.work import (
     DeletedIndexableWork,
     InvisibleIndexableWork,
     RedirectedIndexableWork,

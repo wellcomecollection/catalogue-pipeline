@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.display.location import DisplayDigitalLocation
-from ingestor.models.indexable import IndexableRecord
+from ingestor.models.indexable.record import IndexableRecord
 from utils.types import ConceptType
 
 

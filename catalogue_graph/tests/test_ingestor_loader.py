@@ -15,7 +15,7 @@ from ingestor.models.debug.work import (
     WorkDebugSource,
 )
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
-from ingestor.models.indexable_concept import (
+from ingestor.models.indexable.concept import (
     ConceptDescription,
     ConceptDisplay,
     ConceptIdentifier,
@@ -24,7 +24,7 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from ingestor.models.indexable_work import (
+from ingestor.models.indexable.work import (
     DeletedIndexableWork,
     InvisibleIndexableWork,
     RedirectedIndexableWork,

@@ -3,7 +3,7 @@ from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.display.location_type import (
     DisplayLocationType,
 )
-from ingestor.models.indexable_concept import (
+from ingestor.models.indexable.concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
