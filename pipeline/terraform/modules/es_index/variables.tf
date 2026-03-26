@@ -21,3 +21,8 @@ variable "allow_delete" {
   type    = bool
   default = false
 }
+
+variable "default_pipeline" {
+  type    = string
+  default = null
+}

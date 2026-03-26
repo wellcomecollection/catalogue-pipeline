@@ -24,7 +24,7 @@ module "pipeline" {
   index_config = {
     (local.pipeline_date) = {
       works = {
-        source       = "works_source.2025-10-02"
+        source       = "works_source.2026-03-25"
         identified   = "works_identified.2023-05-26"
         denormalised = "works_denormalised.2025-08-14"
         indexed      = "works_indexed.2024-11-14"
@@ -52,7 +52,7 @@ module "pipeline" {
     },
     "2026-01-12" = {
       works = {
-        source = "works_source.2025-10-02"
+        source = "works_source.2026-03-25"
       }
     },
     "2026-03-03" = {
@@ -62,7 +62,7 @@ module "pipeline" {
       concepts = {
         indexed = "concepts_indexed.2025-06-17"
       }
-    }
+    },
     "2026-03-06" = {
       works = {
         identified = "works_identified.2023-05-26"

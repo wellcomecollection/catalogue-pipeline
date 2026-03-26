@@ -76,8 +76,9 @@ locals {
   ]
   works_source_list = [
     for cfg in local.index_config_dates : {
-      name          = "works-source-${cfg.date}"
-      mappings_name = cfg.works.source
+      name             = "works-source-${cfg.date}"
+      default_pipeline = elasticstack_elasticsearch_ingest_pipeline.set_indexed_at.name
+      mappings_name    = cfg.works.source
     } if try(cfg.works.source, null) != null && cfg.works.source != ""
   ]
   works_identified_list = [
@@ -127,12 +128,13 @@ locals {
 }
 
 module "indices" {
-  for_each      = local.index_definitions
-  source        = "../../es_index"
-  name          = each.value.name
-  mappings_name = each.value.mappings_name
-  config_path   = local.es_config_path
-  allow_delete  = var.allow_delete_indices
+  for_each         = local.index_definitions
+  source           = "../../es_index"
+  name             = each.value.name
+  mappings_name    = each.value.mappings_name
+  config_path      = local.es_config_path
+  allow_delete     = var.allow_delete_indices
+  default_pipeline = try(each.value.default_pipeline, null)
 }
 
 locals {
@@ -244,6 +246,20 @@ module "pipeline_services" {
   providers = {
     aws.catalogue = aws.catalogue
   }
+}
+
+resource "elasticstack_elasticsearch_ingest_pipeline" "set_indexed_at" {
+  name        = "set-indexed-at"
+  description = "Sets indexed_at to the current timestamp on ingest"
+
+  processors = [
+    jsonencode({
+      set = {
+        field = "indexed_at"
+        value = "{{_ingest.timestamp}}"
+      }
+    })
+  ]
 }
 
 resource "elasticstack_elasticsearch_security_role" "read_only" {
