@@ -90,26 +90,32 @@ class AdapterStore(PipelineStore):
         if updates.num_rows == 0:
             return updates
 
-        # Build lookup of existing content by id
-        existing_content = {
-            row["id"]: row["content"] for row in existing_data.to_pylist()
-        }
+        deleted_col = updates.column("deleted")
+        content_col = updates.column("content")
 
-        # Check if any records need content preservation
-        rows = updates.to_pylist()
-        needs_update = False
-        for row in rows:
-            if row.get("deleted") is True and row.get("content") is None:
-                existing = existing_content.get(row["id"])
-                if existing is not None:
-                    row["content"] = existing
-                    needs_update = True
-
-        if not needs_update:
+        # Quick check: are there any rows where deleted=True AND content is null?
+        needs_fill = pc.and_(
+            pc.equal(deleted_col, pa.scalar(True)),
+            pc.is_null(content_col),
+        )
+        if not pc.any(needs_fill).as_py():
             return updates
 
-        # Rebuild table with preserved content
-        return pa.Table.from_pylist(rows, schema=updates.schema)
+        # Join to get existing content for the affected rows
+        existing_lookup = existing_data.select(["id", "content"]).rename_columns(
+            ["id", "existing_content"]
+        )
+        joined = updates.join(existing_lookup, keys="id")
+
+        # Fill null content from existing where deleted=True
+        existing_content_col = joined.column("existing_content")
+        original_content = joined.column("content")
+        filled_content = pc.if_else(needs_fill, existing_content_col, original_content)
+
+        result = joined.drop("existing_content").set_column(
+            joined.schema.get_field_index("content"), "content", filled_content
+        )
+        return result.select(updates.column_names).cast(updates.schema)
 
     @staticmethod
     def _find_snapshot_deletes(
