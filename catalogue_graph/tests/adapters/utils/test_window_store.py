@@ -180,12 +180,12 @@ def test_load_status_map_filters_by_time_range(tmp_path: Path) -> None:
     assert len(store.load_status_map()) == 3
 
     # Start filter only
-    assert len(store.load_status_map(start=t2)) == 2  # t2, t3
+    assert len(store.load_status_map(start_time=t2)) == 2  # t2, t3
 
     # End filter only
-    assert len(store.load_status_map(end=t2)) == 1  # t1
+    assert len(store.load_status_map(end_time=t2)) == 1  # t1
 
     # Both filters
-    result = store.load_status_map(start=t2, end=t3)
+    result = store.load_status_map(start_time=t2, end_time=t3)
     assert len(result) == 1  # t2 only
     assert t2.isoformat() in result

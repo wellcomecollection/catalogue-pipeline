@@ -97,7 +97,9 @@ class WindowHarvestManager:
         if reprocess_successful_windows:
             pending = list(candidates)
         else:
-            status_map = self.store.load_status_map(start=start_time, end=end_time)
+            status_map = self.store.load_status_map(
+                start_time=start_time, end_time=end_time
+            )
             pending = []
 
             for window in candidates:

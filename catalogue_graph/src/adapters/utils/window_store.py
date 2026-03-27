@@ -98,21 +98,21 @@ class WindowStore:
 
     def load_status_map(
         self,
-        start: datetime | None = None,
-        end: datetime | None = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
     ) -> dict[str, dict[str, Any]]:
         """Load window summaries keyed by their window identifier.
 
         Args:
-            start: If given, only include windows with ``window_start >= start``.
-            end: If given, only include windows with ``window_start < end``.
+            start_time: If given, only include windows with ``window_start >= start_time``.
+            end_time: If given, only include windows with ``window_start < end_time``.
         """
         scan = self._table.scan()
         filters: list[BooleanExpression] = []
-        if start:
-            filters.append(GreaterThanOrEqual("window_start", start))
-        if end:
-            filters.append(LessThan("window_start", end))
+        if start_time:
+            filters.append(GreaterThanOrEqual("window_start", start_time))
+        if end_time:
+            filters.append(LessThan("window_start", end_time))
         if filters:
             scan = scan.filter(And(*filters) if len(filters) > 1 else filters[0])
 
