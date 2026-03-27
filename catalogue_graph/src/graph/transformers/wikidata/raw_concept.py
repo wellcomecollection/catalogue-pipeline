@@ -27,7 +27,7 @@ class RawWikidataConcept:
         return self._extract_field_value(field_name)
 
     def _extract_english_field_value(self, field_name: str) -> str:
-        assert self.raw_concept[field_name]["xml:lang"] == "en"
+        assert self.raw_concept[field_name]["xml:lang"] in ("en", "mul")
         return self._extract_field_value(field_name)
 
     @property
