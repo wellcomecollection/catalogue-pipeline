@@ -107,12 +107,20 @@ class AdapterStore(PipelineStore):
         )
         joined = updates.join(existing_lookup, keys="id")
 
+        # Recompute the mask on the joined table to ensure row alignment
+        needs_fill_joined = pc.and_(
+            pc.equal(joined.column("deleted"), pa.scalar(True)),
+            pc.is_null(joined.column("content")),
+        )
+
         # Fill null content from existing where deleted=True
         existing_content_col = joined.column("existing_content")
         original_content = joined.column("content")
-        filled_content = pc.if_else(needs_fill, existing_content_col, original_content)
+        filled_content = pc.if_else(
+            needs_fill_joined, existing_content_col, original_content
+        )
 
-        result = joined.drop("existing_content").set_column(
+        result = joined.set_column(
             joined.schema.get_field_index("content"), "content", filled_content
         )
         return result.select(updates.column_names).cast(updates.schema)
