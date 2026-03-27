@@ -107,11 +107,14 @@ class AdapterStore(PipelineStore):
         )
         joined = updates.join(existing_lookup, keys="id")
 
-        # Recompute the mask on the joined table to ensure row alignment
-        needs_fill_joined = pc.and_(
-            pc.equal(joined.column("deleted"), pa.scalar(True)),
-            pc.is_null(joined.column("content")),
+        # Recompute the mask on the joined table to ensure row alignment.
+        # The deleted column can be null for non-deleted rows; treat null as False
+        # because PyArrow's and_/if_else propagate nulls (unlike SQL).
+        is_deleted = pc.equal(
+            pc.fill_null(joined.column("deleted"), pa.scalar(False)),
+            pa.scalar(True),
         )
+        needs_fill_joined = pc.and_(is_deleted, pc.is_null(joined.column("content")))
 
         # Fill null content from existing where deleted=True
         existing_content_col = joined.column("existing_content")
