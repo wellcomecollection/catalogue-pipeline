@@ -1,6 +1,9 @@
 {
   "dynamic": "false",
   "properties": {
+    "indexed_at": {
+      "type": "date"
+    },
     "data": {
       "properties": {
         "otherIdentifiers": {

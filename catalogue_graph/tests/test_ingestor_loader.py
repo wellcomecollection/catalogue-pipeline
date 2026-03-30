@@ -394,6 +394,7 @@ def _get_expected_metrics(
     dimensions = {
         "ingestor_type": loader_event.ingestor_type,
         "pipeline_date": loader_event.pipeline_date,
+        "pipeline_step": "loader",
         "index_date": loader_event.index_date,
     }
 

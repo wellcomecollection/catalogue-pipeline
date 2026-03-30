@@ -21,6 +21,7 @@ from id_minter.models.identifier import IdResolver
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
 )
+from id_minter.reporting import IdMinterReport
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
@@ -117,7 +118,6 @@ def log_runtime_config(
     runtime: IdMinterRuntime,
     request: StepFunctionMintingRequest,
 ) -> None:
-    """Log the resolved runtime configuration as a structured INFO message."""
     cfg = runtime.config
     resolver_name = type(runtime.resolver).__name__
     db_host = (
@@ -153,12 +153,24 @@ def handler(
     log_runtime_config(runtime, event)
     response = execute(event, runtime=runtime)
 
+    success_count = response.successes.count
+    failure_count = response.failures.count if response.failures else 0
+
     logger.info(
         "Minting complete",
         job_id=response.job_id,
-        success_count=response.successes.count,
-        failure_count=response.failures.count if response.failures else 0,
+        success_count=success_count,
+        failure_count=failure_count,
     )
+
+    try:
+        IdMinterReport(
+            pipeline_date=runtime.config.pipeline_date,
+            success_count=success_count,
+            failure_count=failure_count,
+        ).publish()
+    except Exception:
+        logger.warning("Failed to publish metrics", exc_info=True)
 
     return response
 

@@ -507,6 +507,73 @@ def test_incremental_update_preserves_content_on_deletion(
     assert row["last_modified"] == new_time
 
 
+def test_incremental_update_preserves_content_mixed_deletes_and_updates(
+    temporary_table: IcebergTable,
+) -> None:
+    """
+    Given multiple existing records with content
+    When an incremental_update batch contains a mix of deletions (content=None)
+    and regular updates (content set), then only the deleted rows get their
+    content back-filled from existing data — non-deleted rows keep their new
+    content unchanged.
+
+    This catches row-misalignment bugs where an Arrow join reorders rows
+    and a boolean mask computed before the join is applied to the wrong rows.
+    """
+    old_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
+    new_time = datetime(2025, 1, 2, 12, 0, 0, tzinfo=UTC)
+
+    # Seed several existing records with distinct content
+    temporary_table.append(
+        adapter_records_to_table(
+            [
+                {"id": "rec-A", "content": "content-A", "last_modified": old_time},
+                {"id": "rec-B", "content": "content-B", "last_modified": old_time},
+                {"id": "rec-C", "content": "content-C", "last_modified": old_time},
+                {"id": "rec-D", "content": "content-D", "last_modified": old_time},
+            ]
+        )
+    )
+
+    # Batch: rec-A updated, rec-B deleted, rec-C updated, rec-D deleted
+    update_data = adapter_records_to_table(
+        [
+            {"id": "rec-A", "content": "new-A", "last_modified": new_time},
+            {
+                "id": "rec-B",
+                "content": None,
+                "last_modified": new_time,
+                "deleted": True,
+            },
+            {"id": "rec-C", "content": "new-C", "last_modified": new_time},
+            {
+                "id": "rec-D",
+                "content": None,
+                "last_modified": new_time,
+                "deleted": True,
+            },
+        ]
+    )
+
+    client = AdapterStore(temporary_table, "test_namespace")
+    result = client.incremental_update(update_data)
+
+    assert result is not None
+    rows = {r["id"]: r for r in temporary_table.scan().to_arrow().to_pylist()}
+
+    # Updated records keep their new content
+    assert rows["rec-A"]["content"] == "new-A"
+    assert rows["rec-A"]["deleted"] is not True
+    assert rows["rec-C"]["content"] == "new-C"
+    assert rows["rec-C"]["deleted"] is not True
+
+    # Deleted records have original content preserved
+    assert rows["rec-B"]["content"] == "content-B"
+    assert rows["rec-B"]["deleted"] is True
+    assert rows["rec-D"]["content"] == "content-D"
+    assert rows["rec-D"]["deleted"] is True
+
+
 def test_reconciler_incremental_update_inserts_and_updates(
     reconciler_temporary_table: IcebergTable,
 ) -> None:

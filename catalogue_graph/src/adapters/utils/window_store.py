@@ -96,9 +96,26 @@ class WindowStore:
     def table(self) -> IcebergTable:
         return self._table
 
-    def load_status_map(self) -> dict[str, dict[str, Any]]:
-        """Load all window summaries keyed by their window identifier."""
+    def load_status_map(
+        self,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        """Load window summaries keyed by their window identifier.
+
+        Args:
+            start_time: If given, only include windows with ``window_start >= start_time``.
+            end_time: If given, only include windows with ``window_start < end_time``.
+        """
         scan = self._table.scan()
+        filters: list[BooleanExpression] = []
+        if start_time:
+            filters.append(GreaterThanOrEqual("window_start", start_time))
+        if end_time:
+            filters.append(LessThan("window_start", end_time))
+        if filters:
+            scan = scan.filter(And(*filters) if len(filters) > 1 else filters[0])
+
         arrow_table = scan.to_arrow()
         if arrow_table is None or arrow_table.num_rows == 0:
             return {}
