@@ -113,7 +113,6 @@ class ElasticSource(BaseSource):
         result = self.es_client.search(body=body)
         hits: list[dict] = result["hits"]["hits"]
         duration = round(time.time() - start_time)
-
         if result.get("pit_id"):
             self.pit_id = result["pit_id"]
 

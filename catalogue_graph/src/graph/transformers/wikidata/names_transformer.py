@@ -21,12 +21,12 @@ class WikidataNamesTransformer(WikidataConceptsTransformer):
     def transform_node(self, raw_node: dict) -> SourceName | None:
         raw_concept = RawWikidataName(raw_node)
 
+        source_concept = super().transform_node(raw_node)
+        if not source_concept:
+            return None
+
         return SourceName(
-            id=raw_concept.source_id,
-            label=raw_concept.label,
-            source=raw_concept.source,
-            alternative_labels=raw_concept.alternative_labels,
-            description=raw_concept.description,
+            **source_concept.model_dump(),
             date_of_birth=raw_concept.date_of_birth,
             date_of_death=raw_concept.date_of_death,
             place_of_birth=raw_concept.place_of_birth,

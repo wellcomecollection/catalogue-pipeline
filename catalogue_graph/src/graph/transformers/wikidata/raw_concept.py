@@ -13,6 +13,13 @@ class RawWikidataConcept:
     def __init__(self, raw_concept: dict):
         self.raw_concept = raw_concept
 
+    def exclude(self) -> bool:
+        """
+        If a concept doesn't have an English label, the Wikidata API returns the concept ID in place of the label.
+        When this happens, exclude the concept from the graph.
+        """
+        return self.source_id == self.label
+
     def _extract_field_value(self, field_name: str) -> str:
         field = self.raw_concept[field_name]
         assert field["type"] == "literal", self.raw_concept
@@ -38,7 +45,6 @@ class RawWikidataConcept:
 
     @property
     def label(self) -> str:
-        # TODO: Handle non-English labels
         return self._extract_field_value("itemLabel")
 
     @property
