@@ -6,7 +6,6 @@ from collections.abc import Generator, Iterable
 from typing import Any
 
 import structlog
-from elasticsearch import Elasticsearch
 
 from core.transformer import ElasticBaseTransformer
 from id_minter.embedder import process_work
@@ -32,19 +31,17 @@ class IdMintingTransformer(ElasticBaseTransformer):
     """Fetches work documents, embeds canonical IDs via an IdResolver, and indexes them.
 
     Uses ``IdMintingSource`` to fetch documents from the works-source index
-    by their composite source identifier strings, runs each through the
+    based on requested mode (IDs, window, or full), runs each through the
     embedder to mint and embed canonical IDs, and writes to the target index.
     """
 
     def __init__(
         self,
-        es_client: Elasticsearch,
-        source_index: str,
-        source_identifiers: list[str],
+        mintingsource: IdMintingSource,
         resolver: IdResolver,
     ):
         super().__init__()
-        self.source = IdMintingSource(es_client, source_index, source_identifiers)
+        self.source = mintingsource
         self.resolver = resolver
 
     def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, dict]]:

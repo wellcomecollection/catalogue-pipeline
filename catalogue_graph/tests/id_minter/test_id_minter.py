@@ -13,11 +13,14 @@ Skip with:
 from __future__ import annotations
 
 import json
+from datetime import datetime
+from typing import cast
 from unittest.mock import patch
 
 import pymysql
 import pymysql.connections
 import pytest
+from elasticsearch import Elasticsearch
 
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.models.identifier import SourceId
@@ -27,6 +30,7 @@ from id_minter.models.step_events import (
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.steps.id_minter import (
     IdMinterRuntime,
+    build_minting_source,
     execute,
     handler,
 )
@@ -48,7 +52,22 @@ from utils.models.manifests import StepManifest
 
 pytestmark = pytest.mark.database
 
+START_TIME = datetime(2025, 3, 25, 14, 45, 0)
+END_TIME = datetime(2025, 3, 25, 15, 0, 0)
 TEST_SNS_TOPIC_ARN = "arn:aws:sns:eu-west-1:123456789:test-topic"
+
+# Requests for each mode, used to parametrize tests across modes.
+WINDOW_REQUEST = StepFunctionMintingRequest(
+    end_time=END_TIME,
+    job_id="mode-test",
+)
+IDS_REQUEST = StepFunctionMintingRequest(
+    source_identifiers=["Work[sierra-system-number/b1000001]"],
+    job_id="mode-test",
+)
+FULL_REPROCESS_REQUEST = StepFunctionMintingRequest(
+    job_id="mode-test",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -109,28 +128,29 @@ def _read_failure_details(manifest: StepManifest) -> list[dict]:
 class TestExecuteWithRealResolver:
     """End-to-end tests for execute() using a MintingResolver + MySQL."""
 
+    @pytest.mark.parametrize(
+        "minting_request",
+        [WINDOW_REQUEST, IDS_REQUEST, FULL_REPROCESS_REQUEST],
+        ids=["window", "ids", "full_reprocess"],
+    )
     def test_mints_new_ids_for_work(
         self,
         mock_es: None,
         ids_db: pymysql.connections.Connection,
+        minting_request: StepFunctionMintingRequest,
     ) -> None:
-        """A new work document gets a canonical ID minted from the free pool."""
+        """A new work document gets a canonical ID minted from the free pool in every mode."""
         seed_free_ids(ids_db, ["mint0001"])
 
         si = make_source_identifier("Work", "sierra-system-number", "b1000001")
         doc = make_work_doc(si)
 
         runtime = _build_runtime(ids_db)
-        request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b1000001]"],
-            job_id="integration-test-1",
-        )
 
         with stub_transformer_source([doc]):
-            response = execute(request, runtime=runtime)
+            response = execute(minting_request, runtime=runtime)
 
         assert isinstance(response, StepManifest)
-        assert response.job_id == "integration-test-1"
         assert response.failures is None
         assert response.successes.count == 1
         assert _read_batch_ids(response) == ["mint0001"]
@@ -155,9 +175,7 @@ class TestExecuteWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            source_identifiers=[
-                f"Work[sierra-system-number/b{i}]" for i in range(1, 4)
-            ],
+            end_time=END_TIME,
             job_id="integration-test-multi",
         )
 
@@ -187,7 +205,7 @@ class TestExecuteWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b5555]"],
+            end_time=END_TIME,
             job_id="integration-test-existing",
         )
 
@@ -214,7 +232,7 @@ class TestExecuteWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b2000]"],
+            end_time=END_TIME,
             job_id="integration-test-nested",
         )
 
@@ -257,7 +275,7 @@ class TestHandlerWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b9000]"],
+            end_time=END_TIME,
             job_id="handler-integration",
         )
 
@@ -282,7 +300,7 @@ class TestHandlerWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b8888]"],
+            end_time=END_TIME,
             job_id="handler-exhaustion",
         )
 
@@ -303,10 +321,10 @@ class TestHandlerWithRealResolver:
         mock_es: None,
         ids_db: pymysql.connections.Connection,
     ) -> None:
-        """Empty source_identifiers produces an empty response."""
+        """An empty time window produces an empty response."""
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            source_identifiers=[],
+            end_time=END_TIME,
             job_id="handler-empty",
         )
 
@@ -350,7 +368,7 @@ class TestMetricsPublishing:
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b6001]"],
+            end_time=END_TIME,
             job_id="metrics-test-1",
         )
 
@@ -395,7 +413,7 @@ class TestMetricsPublishing:
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b6002]"],
+            end_time=END_TIME,
             job_id="metrics-test-dev",
         )
 
@@ -427,7 +445,7 @@ class TestMetricsPublishing:
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b6003]"],
+            end_time=END_TIME,
             job_id="metrics-test-failure",
         )
 
@@ -462,7 +480,7 @@ class TestMetricsPublishing:
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b6004]"],
+            end_time=END_TIME,
             job_id="metrics-test-publish-error",
         )
 
@@ -501,7 +519,7 @@ class TestSnsPublishing:
 
         runtime = _build_runtime(ids_db, downstream_sns_topic_arn=TEST_SNS_TOPIC_ARN)
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b7001]"],
+            end_time=END_TIME,
             job_id="sns-test-1",
         )
 
@@ -537,7 +555,7 @@ class TestSnsPublishing:
 
         runtime = _build_runtime(ids_db, downstream_sns_topic_arn=TEST_SNS_TOPIC_ARN)
         request = StepFunctionMintingRequest(
-            source_identifiers=[f"Work[sierra-system-number/b{i}]" for i in range(25)],
+            end_time=END_TIME,
             job_id="sns-batch-test",
         )
 
@@ -571,7 +589,7 @@ class TestSnsPublishing:
 
         runtime = _build_runtime(ids_db)  # No SNS ARN
         request = StepFunctionMintingRequest(
-            source_identifiers=["Work[sierra-system-number/b8001]"],
+            end_time=END_TIME,
             job_id="no-sns-test",
         )
 
@@ -601,3 +619,57 @@ class TestSnsPublishing:
             execute(request, runtime=runtime)
 
         assert len(MockSNSClient.publish_batch_request_entries) == 0
+
+
+# ---------------------------------------------------------------------------
+# Tests: build_minting_source() mode selection
+# ---------------------------------------------------------------------------
+
+
+class TestBuildMintingSource:
+    """Verify that build_minting_source selects the correct query for each mode."""
+
+    def test_window_mode(self) -> None:
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        mintingRequest = StepFunctionMintingRequest(
+            start_time=START_TIME,
+            end_time=END_TIME,
+            job_id="build-source-window",
+        )
+
+        source = build_minting_source(mintingRequest, es_client, "works-source-dev")
+
+        assert source.query == {
+            "range": {
+                "indexed_at": {
+                    "gte": START_TIME.isoformat(),
+                    "lte": END_TIME.isoformat(),
+                }
+            }
+        }
+        assert source.index_name == "works-source-dev"
+
+    def test_ids_mode(self) -> None:
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        ids = ["Work[sierra-system-number/b1]", "Work[sierra-system-number/b2]"]
+        mintingRequest = StepFunctionMintingRequest(
+            source_identifiers=ids,
+            job_id="build-source-ids",
+        )
+
+        source = build_minting_source(mintingRequest, es_client, "works-source-dev")
+
+        assert source.query == {"ids": {"values": ids}}
+        assert source.slice_count == 1
+        assert source.index_name == "works-source-dev"
+
+    def test_full_reprocess_mode(self) -> None:
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        mintingRequest = StepFunctionMintingRequest(
+            job_id="build-source-full",
+        )
+
+        source = build_minting_source(mintingRequest, es_client, "works-source-dev")
+
+        assert source.query == {"match_all": {}}
+        assert source.index_name == "works-source-dev"

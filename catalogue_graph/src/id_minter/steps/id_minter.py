@@ -11,10 +11,12 @@ from datetime import datetime
 from typing import Any
 
 import structlog
+from elasticsearch import Elasticsearch
 from pydantic import BaseModel, ConfigDict
 
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
+from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import IdMintingTransformer
 from id_minter.manifests import IdMinterManifestWriter
 from id_minter.models.identifier import IdResolver
@@ -57,6 +59,31 @@ def build_runtime(
     )
 
 
+def build_minting_source(
+    request: StepFunctionMintingRequest,
+    es_client: Elasticsearch,
+    index_name: str,
+) -> IdMintingSource:
+    """Build the appropriate IdMintingSource for the request mode.
+
+    - **IDs mode** (``source_identifiers`` set): fetch specific documents by ID.
+    - **Window mode** (``end_time`` set): fetch documents whose ``indexed_at``
+      falls within [start_time, end_time].
+    - **Full reprocess** (neither set): fetch all documents (``match_all``).
+    """
+    if request.source_identifiers is not None:
+        return IdMintingSource.from_identifiers(
+            es_client, index_name, request.source_identifiers
+        )
+    elif request.end_time is not None:
+        assert request.start_time is not None  # guaranteed by model_validator
+        return IdMintingSource.from_window(
+            es_client, index_name, request.start_time, request.end_time
+        )
+    else:
+        return IdMintingSource.from_match_all(es_client, index_name)
+
+
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
@@ -68,7 +95,9 @@ def execute(
     logger.info(
         "Processing minting request",
         job_id=request.job_id,
-        source_identifier_count=len(request.source_identifiers),
+        source_identifiers=request.source_identifiers,
+        start_time=request.start_time.isoformat() if request.start_time else None,
+        end_time=request.end_time.isoformat() if request.end_time else None,
         source_index_prefix=runtime.config.source_index_prefix,
         target_index_prefix=runtime.config.target_index_prefix,
     )
@@ -87,10 +116,9 @@ def execute(
         es_mode=runtime.target_es_mode,
     )
 
+    elastic_source = build_minting_source(request, source_client, source_index)
     transformer = IdMintingTransformer(
-        es_client=source_client,
-        source_index=source_index,
-        source_identifiers=request.source_identifiers,
+        elastic_source,
         resolver=runtime.resolver,
     )
     transformer.stream_to_index(target_client, target_index)
@@ -139,7 +167,19 @@ def log_runtime_config(
         source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
         target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
         downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
+        mode=(
+            "ids"
+            if request.source_identifiers is not None
+            else "window"
+            if request.end_time is not None
+            else "full"
+        ),
         identifiers=request.source_identifiers,
+        window=(
+            f"{request.start_time} → {request.end_time}"
+            if request.end_time is not None
+            else None
+        ),
         migrations="yes" if cfg.apply_migrations else "no",
     )
 
@@ -191,11 +231,27 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
 
 
 def local_handler(parser: argparse.ArgumentParser) -> None:
+    # -- Source selection (mutually exclusive: ids, window, or neither for full) --
     parser.add_argument(
         "--source-identifiers",
         nargs="+",
-        required=True,
-        help="One or more source identifiers to mint.",
+        required=False,
+        default=None,
+        help="One or more source identifiers to mint (IDs mode).",
+    )
+    parser.add_argument(
+        "--end-time",
+        type=datetime.fromisoformat,
+        required=False,
+        default=None,
+        help="End of the time window (ISO 8601). Window mode.",
+    )
+    parser.add_argument(
+        "--start-time",
+        type=datetime.fromisoformat,
+        required=False,
+        default=None,
+        help="Start of the time window (ISO 8601). Defaults to end_time - 15 minutes.",
     )
     parser.add_argument(
         "--job-id",
@@ -270,6 +326,8 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
     request = StepFunctionMintingRequest(
         source_identifiers=args.source_identifiers,
+        end_time=args.end_time,
+        start_time=args.start_time,
         job_id=job_id,
     )
 
