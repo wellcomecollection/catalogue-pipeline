@@ -65,7 +65,7 @@ APPLY_MIGRATIONS = os.getenv("APPLY_MIGRATIONS", "false").lower() in (
     "yes",
 )
 ID_GENERATOR_DESIRED_FREE_IDS_COUNT = int(
-    os.getenv("ID_GENERATOR_DESIRED_FREE_IDS_COUNT", "10000")
+    os.getenv("ID_GENERATOR_DESIRED_FREE_IDS_COUNT", "100000")
 )
 
 
