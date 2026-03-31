@@ -6,6 +6,7 @@ import pytest
 
 from id_minter.models.step_events import (
     DEFAULT_WINDOW_MINUTES,
+    # SourceQueryRequest,
     StepFunctionMintingRequest,
 )
 
@@ -101,7 +102,8 @@ class TestStepFunctionMintingRequestModeExclusivity:
         request = StepFunctionMintingRequest(
             source_identifiers=["sierra/1"], job_id="mode-ids"
         )
-        assert request.source_identifiers == ["sierra/1"]
+        assert request.source_query.mode_label == "identifiers"
+        assert request.source_query.source_identifiers == ["sierra/1"]
         assert request.start_time is None
         assert request.end_time is None
 
@@ -109,12 +111,14 @@ class TestStepFunctionMintingRequestModeExclusivity:
         request = StepFunctionMintingRequest(
             end_time=datetime(2025, 3, 25, 15, 0, 0), job_id="mode-window"
         )
+        assert request.source_query.mode_label == "window"
         assert request.source_identifiers is None
         assert request.end_time is not None
         assert request.start_time is not None
 
     def test_full_reprocess_mode(self) -> None:
         request = StepFunctionMintingRequest(job_id="mode-full")
+        assert request.source_query.mode_label == "match_all"
         assert request.source_identifiers is None
         assert request.start_time is None
         assert request.end_time is None

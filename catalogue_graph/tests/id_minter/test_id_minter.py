@@ -25,6 +25,7 @@ from elasticsearch import Elasticsearch
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.models.identifier import SourceId
 from id_minter.models.step_events import (
+    # SourceQueryRequest,
     StepFunctionMintingRequest,
 )
 from id_minter.resolvers.minting_resolver import MintingResolver
@@ -151,6 +152,7 @@ class TestExecuteWithRealResolver:
             response = execute(minting_request, runtime=runtime)
 
         assert isinstance(response, StepManifest)
+        assert response.job_id == minting_request.job_id
         assert response.failures is None
         assert response.successes.count == 1
         assert _read_batch_ids(response) == ["mint0001"]
@@ -631,13 +633,15 @@ class TestBuildMintingSource:
 
     def test_window_mode(self) -> None:
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
-        mintingRequest = StepFunctionMintingRequest(
+        request = StepFunctionMintingRequest(
             start_time=START_TIME,
             end_time=END_TIME,
             job_id="build-source-window",
         )
 
-        source = build_minting_source(mintingRequest, es_client, "works-source-dev")
+        source = build_minting_source(
+            request.source_query, es_client, "works-source-dev"
+        )
 
         assert source.query == {
             "range": {
@@ -652,12 +656,14 @@ class TestBuildMintingSource:
     def test_ids_mode(self) -> None:
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         ids = ["Work[sierra-system-number/b1]", "Work[sierra-system-number/b2]"]
-        mintingRequest = StepFunctionMintingRequest(
+        request = StepFunctionMintingRequest(
             source_identifiers=ids,
             job_id="build-source-ids",
         )
 
-        source = build_minting_source(mintingRequest, es_client, "works-source-dev")
+        source = build_minting_source(
+            request.source_query, es_client, "works-source-dev"
+        )
 
         assert source.query == {"ids": {"values": ids}}
         assert source.slice_count == 1
@@ -665,11 +671,13 @@ class TestBuildMintingSource:
 
     def test_full_reprocess_mode(self) -> None:
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
-        mintingRequest = StepFunctionMintingRequest(
+        request = StepFunctionMintingRequest(
             job_id="build-source-full",
         )
 
-        source = build_minting_source(mintingRequest, es_client, "works-source-dev")
+        source = build_minting_source(
+            request.source_query, es_client, "works-source-dev"
+        )
 
         assert source.query == {"match_all": {}}
         assert source.index_name == "works-source-dev"

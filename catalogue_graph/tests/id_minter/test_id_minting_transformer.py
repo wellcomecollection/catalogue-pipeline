@@ -103,7 +103,7 @@ class TestTransform:
         )
 
         transformer = IdMintingTransformer(
-            mintingsource=_StubSource([doc]),
+            minting_source=_StubSource([doc]),
             resolver=resolver,
         )
 
@@ -134,7 +134,7 @@ class TestTransform:
         )
 
         transformer = IdMintingTransformer(
-            mintingsource=_StubSource([doc]),
+            minting_source=_StubSource([doc]),
             resolver=resolver,
         )
 
@@ -153,7 +153,7 @@ class TestTransform:
         doc: dict[str, Any] = {"data": {"title": "no state"}}
 
         transformer = IdMintingTransformer(
-            mintingsource=_StubSource([doc]),
+            minting_source=_StubSource([doc]),
             resolver=FakeResolver(),
         )
 
@@ -177,7 +177,7 @@ class TestTransform:
                 raise RuntimeError("DB connection failed")
 
         transformer = IdMintingTransformer(
-            mintingsource=_StubSource([doc]),
+            minting_source=_StubSource([doc]),
             resolver=FailingResolver(),
         )
 
@@ -197,7 +197,7 @@ class TestTransform:
 class TestGetDocumentId:
     def test_returns_canonical_id(self) -> None:
         transformer = IdMintingTransformer(
-            mintingsource=_StubSource([]),
+            minting_source=_StubSource([]),
             resolver=FakeResolver(),
         )
 
@@ -222,7 +222,7 @@ class TestStreamToIndex:
         MockElasticsearchClient.reset_mocks()
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            mintingsource=_StubSource([doc]),
+            minting_source=_StubSource([doc]),
             resolver=resolver,
         )
 
@@ -266,7 +266,7 @@ class TestStreamToIndex:
         MockElasticsearchClient.reset_mocks()
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            mintingsource=_StubSource([doc]),
+            minting_source=_StubSource([doc]),
             resolver=resolver,
         )
 

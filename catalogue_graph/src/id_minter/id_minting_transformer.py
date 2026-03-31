@@ -37,11 +37,11 @@ class IdMintingTransformer(ElasticBaseTransformer):
 
     def __init__(
         self,
-        mintingsource: IdMintingSource,
+        minting_source: IdMintingSource,
         resolver: IdResolver,
     ):
         super().__init__()
-        self.source = mintingsource
+        self.source = minting_source
         self.resolver = resolver
 
     def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, dict]]:
