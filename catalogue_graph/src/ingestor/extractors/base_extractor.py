@@ -4,6 +4,7 @@ from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
 import structlog
+
 from clients.neptune_client import NeptuneClient
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,

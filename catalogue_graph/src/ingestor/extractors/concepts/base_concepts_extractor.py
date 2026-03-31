@@ -6,6 +6,7 @@ from itertools import batched
 from typing import get_args
 
 import structlog
+
 from clients.neptune_client import NeptuneClient
 from ingestor.extractors.base_extractor import (
     ConceptQuery,
@@ -30,7 +31,7 @@ CONCEPT_QUERY_PARAMS = {
     # Maximum number of related nodes to return for each relationship type
     "related_to_limit": 10,
     # Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
-    "shared_works_count_threshold": 3
+    "shared_works_count_threshold": 3,
 }
 
 RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]

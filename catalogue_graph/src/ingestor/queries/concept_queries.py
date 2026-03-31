@@ -39,6 +39,7 @@ SAME_AS_CONCEPT_QUERY = """
         collect(DISTINCT id(same_as_concept)) AS same_as_ids
 """
 
+
 def get_related_query(
     edge_type: str,
     direction: str = "from",

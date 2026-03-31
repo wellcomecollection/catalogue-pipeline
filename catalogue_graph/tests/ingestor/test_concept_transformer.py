@@ -21,7 +21,6 @@ from ingestor.transformers.raw_concept import (
     get_most_specific_concept_type,
 )
 from models.events import BasePipelineEvent
-
 from tests import neptune_generators as ng
 from tests.mocks import get_mock_es_client, get_mock_neptune_client
 from tests.test_utils import load_json_fixture

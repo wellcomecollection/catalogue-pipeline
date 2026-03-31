@@ -1,6 +1,7 @@
 from functools import cached_property
 
 from pydantic import BaseModel
+
 from utils.types import ConceptType
 
 from .node import ConceptNode, SourceConceptNode, WorkNode

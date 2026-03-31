@@ -1,9 +1,3 @@
-
-from models.graph_node import SourceConcept
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import SourceIdentifier
-from utils.types import ConceptSource, ConceptType
-
 from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.display.location_type import (
@@ -14,6 +8,10 @@ from ingestor.models.indexable.concept import (
     ConceptIdentifier,
 )
 from ingestor.models.neptune.query_result import ExtractedConcept
+from models.graph_node import SourceConcept
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import SourceIdentifier
+from utils.types import ConceptSource, ConceptType
 
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY: list[ConceptSource] = [
