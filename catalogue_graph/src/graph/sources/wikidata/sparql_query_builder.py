@@ -83,10 +83,11 @@ class SparqlQueryBuilder:
         if node_type == "names":
             extra_mappings.append("?placeOfBirth rdfs:label ?placeOfBirthLabel.")
 
+        # Only return labels which are in English or which are the same across many languages ('mul')
         label_mappings = f"""
         OPTIONAL {{
             SERVICE wikibase:label {{
-                bd:serviceParam wikibase:language "en".
+                bd:serviceParam wikibase:language "en,mul".
                 ?item rdfs:label ?itemLabel.
                 ?item schema:description ?itemDescription.
                 ?item skos:altLabel ?itemAltLabel.
