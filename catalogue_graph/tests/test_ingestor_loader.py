@@ -2,11 +2,10 @@ import json
 from datetime import datetime
 from typing import Any, cast
 
+import config
 import polars as pl
 import pytest
 from freezegun import freeze_time
-
-import config
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.debug.work import (
     DeletedWorkDebug,
@@ -55,6 +54,9 @@ from ingestor.steps.ingestor_loader import handler
 from models.events import IncrementalWindow, PipelineIndexDates
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import Identified, SourceIdentifier
+from utils.timezone import convert_datetime_to_utc_iso
+from utils.types import IngestorType
+
 from tests.mocks import (
     MockCloudwatchClient,
     MockElasticsearchClient,
@@ -68,8 +70,6 @@ from tests.test_utils import (
     add_mock_merged_documents,
     load_json_fixture,
 )
-from utils.timezone import convert_datetime_to_utc_iso
-from utils.types import IngestorType
 
 MOCK_CONCEPT_ID = "jbxfbpzq"
 MOCK_JOB_ID = "20250929T12:00"
@@ -313,7 +313,6 @@ def get_catalogue_concept_mock(
             ),
             sameAs=[],
             displayImages=[],
-            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=related_to,
                 fieldsOfWork=[],

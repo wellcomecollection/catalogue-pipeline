@@ -21,6 +21,7 @@ from ingestor.transformers.raw_concept import (
     get_most_specific_concept_type,
 )
 from models.events import BasePipelineEvent
+
 from tests import neptune_generators as ng
 from tests.mocks import get_mock_es_client, get_mock_neptune_client
 from tests.test_utils import load_json_fixture
@@ -85,7 +86,6 @@ def test_catalogue_concept_from_neptune_result() -> None:
             type="Person",
             sameAs=[],
             displayImages=[],
-            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -138,7 +138,6 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
             type="Person",
             sameAs=[],
             displayImages=[],
-            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -200,7 +199,6 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
             displayImages=[],
-            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -271,7 +269,6 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
             displayImages=[],
-            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -350,7 +347,6 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
             displayImages=[],
-            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -510,7 +506,6 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
                     accessConditions=[],
                 ),
             ],
-            portraitImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],

@@ -1,5 +1,8 @@
-import json
-from functools import lru_cache
+
+from models.graph_node import SourceConcept
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import SourceIdentifier
+from utils.types import ConceptSource, ConceptType
 
 from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.display.location import DisplayDigitalLocation
@@ -11,10 +14,6 @@ from ingestor.models.indexable.concept import (
     ConceptIdentifier,
 )
 from ingestor.models.neptune.query_result import ExtractedConcept
-from models.graph_node import SourceConcept
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import SourceIdentifier
-from utils.types import ConceptSource, ConceptType
 
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY: list[ConceptSource] = [
@@ -120,17 +119,6 @@ def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptT
             return concept_type
 
     raise ValueError(f"Invalid set of concept types: {concept_types}.")
-
-
-@lru_cache
-def image_face_counts() -> dict[str, int]:
-    face_counts = {}
-    with open("/Users/brychtas/Downloads/buffalo_l.jsonl") as f:
-        for line in f:
-            item = json.loads(line)
-            face_counts[item["id"]] = item["face_count"]
-
-    return face_counts
 
 
 class RawNeptuneConcept:
@@ -256,22 +244,6 @@ class RawNeptuneConcept:
             for url in source_concept.image_urls
             if url.strip()  # Filter out empty URLs
         ]
-
-    @property
-    def portrait_images(self) -> list[DisplayDigitalLocation]:
-        portraits = []
-        for image_node in self.raw_concept.portraits:
-            if image_face_counts().get(image_node.id, 0) == 1:
-                portraits.append(
-                    DisplayDigitalLocation(
-                        url=image_node.properties.location_url,
-                        locationType=DisplayLocationType.from_id(
-                            image_node.properties.location_type
-                        ),
-                        accessConditions=[],
-                    )
-                )
-        return portraits
 
     @property
     def display_images(self) -> list[DisplayDigitalLocation]:

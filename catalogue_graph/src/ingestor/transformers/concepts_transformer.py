@@ -1,7 +1,8 @@
 import structlog
-from elasticsearch import Elasticsearch
-
 from clients.neptune_client import NeptuneClient
+from elasticsearch import Elasticsearch
+from models.events import BasePipelineEvent
+
 from ingestor.extractors.concepts.concepts_index_extractor import (
     ConceptsIndexExtractor,
     ExtractedRelatedConcepts,
@@ -16,7 +17,6 @@ from ingestor.models.indexable.concept import (
 from ingestor.models.neptune.query_result import ExtractedConcept
 from ingestor.transformers.raw_concept import RawNeptuneConcept
 from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
-from models.events import BasePipelineEvent
 
 from .base_transformer import IngestorBaseTransformer
 from .raw_concept import MissingLabelError
@@ -84,7 +84,6 @@ class IngestorConceptsTransformer(IngestorBaseTransformer):
             description=neptune_concept.description,
             sameAs=neptune_concept.same_as,
             displayImages=neptune_concept.display_images,
-            portraitImages=neptune_concept.portrait_images,
             relatedConcepts=RelatedConcepts(
                 relatedTo=self._transform_related_concepts(neptune_related.related_to),
                 fieldsOfWork=self._transform_related_concepts(
