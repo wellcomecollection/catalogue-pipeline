@@ -163,12 +163,20 @@ def handler(
         failure_count=failure_count,
     )
 
-    IdMinterReport(
-        pipeline_date=runtime.config.pipeline_date,
-        success_count=success_count,
-        failure_count=failure_count,
-    ).publish()
-
+    try:
+        IdMinterReport(
+            pipeline_date=runtime.config.pipeline_date,
+            success_count=success_count,
+            failure_count=failure_count,
+        ).publish()
+    # The metric triggers an alarm if failure_count > 0
+    # If publish fails AND we have failure, we raise
+    except Exception as e:
+        logger.warning("Failed to publish metrics", exc_info=True)
+        if failure_count > 0:
+            raise RuntimeError(
+                f"Failed to publish metrics for a run with {failure_count} failures: {response.job_id}"
+            ) from e
     return response
 
 
