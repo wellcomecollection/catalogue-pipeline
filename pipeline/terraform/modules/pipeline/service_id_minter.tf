@@ -48,8 +48,8 @@ module "id_minter_lambda" {
 }
 
 # Rather than failing the whole state machine execution when the id_minter Lambda reports failures
-# we use this alarm triggered by existing CloudWatch metric
-# This will give us better visibility of failures in the id_minter step, we can reassess later if we want to add an automated retry mechanism
+# we use this alarm triggered by an existing CloudWatch metric
+# This will give us visibility of failures in the id_minter step; we can reassess later if we want to add an automated retry mechanism
 resource "aws_cloudwatch_metric_alarm" "id_minter_failures" {
   alarm_name          = "id-minter-failures-${var.pipeline_date}"
   comparison_operator = "GreaterThanThreshold"
