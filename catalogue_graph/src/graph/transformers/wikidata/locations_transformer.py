@@ -14,12 +14,12 @@ class WikidataLocationsTransformer(WikidataConceptsTransformer):
     def transform_node(self, raw_node: dict) -> SourceLocation | None:
         raw_concept = RawWikidataLocation(raw_node)
 
+        source_concept = super().transform_node(raw_node)
+        if not source_concept:
+            return None
+
         return SourceLocation(
-            id=raw_concept.source_id,
-            label=raw_concept.label,
-            source=raw_concept.source,
-            alternative_labels=raw_concept.alternative_labels,
-            description=raw_concept.description,
+            **source_concept.model_dump(),
             latitude=raw_concept.coordinates["latitude"],
             longitude=raw_concept.coordinates["longitude"],
         )
