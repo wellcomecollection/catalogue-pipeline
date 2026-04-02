@@ -25,7 +25,6 @@ from elasticsearch import Elasticsearch
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.models.identifier import SourceId
 from id_minter.models.step_events import (
-    # SourceQueryRequest,
     StepFunctionMintingRequest,
 )
 from id_minter.resolvers.minting_resolver import MintingResolver
@@ -35,6 +34,7 @@ from id_minter.steps.id_minter import (
     execute,
     handler,
 )
+from models.incremental_window import IncrementalWindow
 from tests.id_minter.conftest import (
     get_canonical_status,
     make_source_identifier,
@@ -59,7 +59,7 @@ TEST_SNS_TOPIC_ARN = "arn:aws:sns:eu-west-1:123456789:test-topic"
 
 # Requests for each mode, used to parametrize tests across modes.
 WINDOW_REQUEST = StepFunctionMintingRequest(
-    end_time=END_TIME,
+    window=IncrementalWindow.model_validate({"end_time": END_TIME}),
     job_id="mode-test",
 )
 IDS_REQUEST = StepFunctionMintingRequest(
@@ -177,7 +177,7 @@ class TestExecuteWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="integration-test-multi",
         )
 
@@ -207,7 +207,7 @@ class TestExecuteWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="integration-test-existing",
         )
 
@@ -234,7 +234,7 @@ class TestExecuteWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="integration-test-nested",
         )
 
@@ -277,7 +277,7 @@ class TestHandlerWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="handler-integration",
         )
 
@@ -302,7 +302,7 @@ class TestHandlerWithRealResolver:
 
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="handler-exhaustion",
         )
 
@@ -326,7 +326,7 @@ class TestHandlerWithRealResolver:
         """An empty time window produces an empty response."""
         runtime = _build_runtime(ids_db)
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="handler-empty",
         )
 
@@ -370,7 +370,7 @@ class TestMetricsPublishing:
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="metrics-test-1",
         )
 
@@ -415,7 +415,7 @@ class TestMetricsPublishing:
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="metrics-test-dev",
         )
 
@@ -447,7 +447,7 @@ class TestMetricsPublishing:
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="metrics-test-failure",
         )
 
@@ -482,7 +482,7 @@ class TestMetricsPublishing:
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="metrics-test-publish-error",
         )
 
@@ -521,7 +521,7 @@ class TestSnsPublishing:
 
         runtime = _build_runtime(ids_db, downstream_sns_topic_arn=TEST_SNS_TOPIC_ARN)
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="sns-test-1",
         )
 
@@ -557,7 +557,7 @@ class TestSnsPublishing:
 
         runtime = _build_runtime(ids_db, downstream_sns_topic_arn=TEST_SNS_TOPIC_ARN)
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="sns-batch-test",
         )
 
@@ -591,7 +591,7 @@ class TestSnsPublishing:
 
         runtime = _build_runtime(ids_db)  # No SNS ARN
         request = StepFunctionMintingRequest(
-            end_time=END_TIME,
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
             job_id="no-sns-test",
         )
 
@@ -634,8 +634,7 @@ class TestBuildMintingSource:
     def test_window_mode(self) -> None:
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         request = StepFunctionMintingRequest(
-            start_time=START_TIME,
-            end_time=END_TIME,
+            window=IncrementalWindow(start_time=START_TIME, end_time=END_TIME),
             job_id="build-source-window",
         )
 

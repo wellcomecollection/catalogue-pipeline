@@ -28,6 +28,7 @@ from id_minter.reporting import IdMinterReport
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
+from models.incremental_window import IncrementalWindow
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.models.manifests import StepManifest
@@ -70,12 +71,12 @@ def build_minting_source(
         return IdMintingSource.from_identifiers(
             es_client, index_name, source_query.source_identifiers
         )
-    elif source_query.end_time is not None:
-        assert (
-            source_query.start_time is not None
-        )  # guaranteed by SourceQueryRequest validator
+    elif source_query.window is not None:
         return IdMintingSource.from_window(
-            es_client, index_name, source_query.start_time, source_query.end_time
+            es_client,
+            index_name,
+            source_query.window.start_time,
+            source_query.window.end_time,
         )
     else:
         return IdMintingSource.from_match_all(es_client, index_name)
@@ -95,8 +96,7 @@ def execute(
         source_identifier_count=len(request.source_identifiers)
         if request.source_identifiers
         else None,
-        start_time=request.start_time.isoformat() if request.start_time else None,
-        end_time=request.end_time.isoformat() if request.end_time else None,
+        window=request.window.model_dump() if request.window else None,
         source_index_prefix=runtime.config.source_index_prefix,
         target_index_prefix=runtime.config.target_index_prefix,
     )
@@ -170,11 +170,7 @@ def log_runtime_config(
         downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
         mode=request.source_query.mode_label,
         identifiers=request.source_identifiers,
-        window=(
-            f"{request.start_time} → {request.end_time}"
-            if request.end_time is not None
-            else None
-        ),
+        window=request.window.model_dump() if request.window else None,
         migrations="yes" if cfg.apply_migrations else "no",
     )
 
@@ -326,8 +322,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
     request = StepFunctionMintingRequest(
         source_identifiers=args.source_identifiers,
-        end_time=args.end_time,
-        start_time=args.start_time,
+        window=IncrementalWindow(start_time=args.start_time, end_time=args.end_time),
         job_id=job_id,
     )
 

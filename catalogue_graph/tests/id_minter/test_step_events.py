@@ -6,9 +6,9 @@ import pytest
 
 from id_minter.models.step_events import (
     DEFAULT_WINDOW_MINUTES,
-    # SourceQueryRequest,
     StepFunctionMintingRequest,
 )
+from models.incremental_window import IncrementalWindow
 
 
 class TestStepFunctionMintingRequestCaseHandling:
@@ -51,24 +51,30 @@ class TestStepFunctionMintingRequestCaseHandling:
     def test_accepts_window_camel_case(self) -> None:
         request = StepFunctionMintingRequest.model_validate(
             {
-                "startTime": "2025-03-25T14:45:00",
-                "endTime": "2025-03-25T15:00:00",
+                "window": {
+                    "startTime": "2025-03-25T14:45:00",
+                    "endTime": "2025-03-25T15:00:00",
+                },
                 "jobId": "win-001",
             }
         )
-        assert request.start_time == datetime(2025, 3, 25, 14, 45, 0)
-        assert request.end_time == datetime(2025, 3, 25, 15, 0, 0)
+        assert request.window is not None
+        assert request.window.start_time == datetime(2025, 3, 25, 14, 45, 0)
+        assert request.window.end_time == datetime(2025, 3, 25, 15, 0, 0)
 
     def test_accepts_window_snake_case(self) -> None:
         request = StepFunctionMintingRequest.model_validate(
             {
-                "start_time": "2025-03-25T14:45:00",
-                "end_time": "2025-03-25T15:00:00",
+                "window": {
+                    "start_time": "2025-03-25T14:45:00",
+                    "end_time": "2025-03-25T15:00:00",
+                },
                 "job_id": "win-002",
             }
         )
-        assert request.start_time == datetime(2025, 3, 25, 14, 45, 0)
-        assert request.end_time == datetime(2025, 3, 25, 15, 0, 0)
+        assert request.window is not None
+        assert request.window.start_time == datetime(2025, 3, 25, 14, 45, 0)
+        assert request.window.end_time == datetime(2025, 3, 25, 15, 0, 0)
 
 
 class TestStepFunctionMintingRequestWindowHandling:
@@ -76,21 +82,31 @@ class TestStepFunctionMintingRequestWindowHandling:
 
     def test_defaults_start_time_when_only_end_time_given(self) -> None:
         end = datetime(2025, 3, 25, 15, 0, 0)
-        request = StepFunctionMintingRequest(end_time=end, job_id="win-003")
-        assert request.start_time == end - timedelta(minutes=DEFAULT_WINDOW_MINUTES)
+        request = StepFunctionMintingRequest(
+            window=IncrementalWindow.model_validate({"end_time": end}),
+            job_id="win-003",
+        )
+        assert request.window is not None
+        assert request.window.start_time == end - timedelta(
+            minutes=DEFAULT_WINDOW_MINUTES
+        )
 
     def test_rejects_start_time_after_end_time(self) -> None:
         with pytest.raises(ValueError, match="start_time must be before end_time"):
             StepFunctionMintingRequest(
-                start_time=datetime(2025, 3, 25, 16, 0, 0),
-                end_time=datetime(2025, 3, 25, 15, 0, 0),
+                window=IncrementalWindow(
+                    start_time=datetime(2025, 3, 25, 16, 0, 0),
+                    end_time=datetime(2025, 3, 25, 15, 0, 0),
+                ),
                 job_id="win-005",
             )
 
-    def test_rejects_start_time_without_end_time(self) -> None:
+    def test_rejects_window_without_end_time(self) -> None:
         with pytest.raises(ValueError, match="end_time is required"):
             StepFunctionMintingRequest(
-                start_time=datetime(2025, 3, 25, 14, 0, 0),
+                window=IncrementalWindow.model_validate(
+                    {"start_time": datetime(2025, 3, 25, 14, 0, 0)}
+                ),
                 job_id="win-006",
             )
 
@@ -104,52 +120,50 @@ class TestStepFunctionMintingRequestModeExclusivity:
         )
         assert request.source_query.mode_label == "identifiers"
         assert request.source_query.source_identifiers == ["sierra/1"]
-        assert request.start_time is None
-        assert request.end_time is None
+        assert request.window is None
 
     def test_window_mode(self) -> None:
         request = StepFunctionMintingRequest(
-            end_time=datetime(2025, 3, 25, 15, 0, 0), job_id="mode-window"
+            window=IncrementalWindow.model_validate(
+                {"end_time": datetime(2025, 3, 25, 15, 0, 0)}
+            ),
+            job_id="mode-window",
         )
         assert request.source_query.mode_label == "window"
         assert request.source_identifiers is None
-        assert request.end_time is not None
-        assert request.start_time is not None
+        assert request.window is not None
+        assert request.window.end_time is not None
+        assert request.window.start_time is not None
 
     def test_full_reprocess_mode(self) -> None:
         request = StepFunctionMintingRequest(job_id="mode-full")
         assert request.source_query.mode_label == "match_all"
         assert request.source_identifiers is None
-        assert request.start_time is None
-        assert request.end_time is None
+        assert request.window is None
 
-    def test_rejects_ids_with_end_time(self) -> None:
+    def test_rejects_ids_with_window(self) -> None:
         with pytest.raises(
-            ValueError, match="Cannot specify both source_identifiers and a time window"
+            ValueError,
+            match="Cannot specify both source_identifiers and a time window",
         ):
             StepFunctionMintingRequest(
                 source_identifiers=["sierra/1"],
-                end_time=datetime(2025, 3, 25, 15, 0, 0),
+                window=IncrementalWindow.model_validate(
+                    {"end_time": datetime(2025, 3, 25, 15, 0, 0)}
+                ),
                 job_id="mode-bad-1",
             )
 
-    def test_rejects_ids_with_start_time(self) -> None:
+    def test_rejects_ids_with_window_both_times(self) -> None:
         with pytest.raises(
-            ValueError, match="Cannot specify both source_identifiers and a time window"
+            ValueError,
+            match="Cannot specify both source_identifiers and a time window",
         ):
             StepFunctionMintingRequest(
                 source_identifiers=["sierra/1"],
-                start_time=datetime(2025, 3, 25, 14, 0, 0),
-                job_id="mode-bad-2",
-            )
-
-    def test_rejects_ids_with_both_times(self) -> None:
-        with pytest.raises(
-            ValueError, match="Cannot specify both source_identifiers and a time window"
-        ):
-            StepFunctionMintingRequest(
-                source_identifiers=["sierra/1"],
-                start_time=datetime(2025, 3, 25, 14, 0, 0),
-                end_time=datetime(2025, 3, 25, 15, 0, 0),
+                window=IncrementalWindow(
+                    start_time=datetime(2025, 3, 25, 14, 0, 0),
+                    end_time=datetime(2025, 3, 25, 15, 0, 0),
+                ),
                 job_id="mode-bad-3",
             )
