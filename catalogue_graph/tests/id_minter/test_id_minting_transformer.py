@@ -8,7 +8,7 @@ from typing import Any, cast
 import pytest
 from elasticsearch import Elasticsearch
 
-from core.source import BaseSource
+from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import (
     IdMintingTransformer,
     _build_source_identifier_string,
@@ -64,7 +64,7 @@ def _make_work_doc(
     return doc
 
 
-class _StubSource(BaseSource):
+class _StubSource(IdMintingSource):
     def __init__(self, docs: list[dict]):
         self.docs = docs
 
@@ -102,11 +102,8 @@ class TestTransform:
             ids={("Work", "sierra-system-number", "b1000001"): "abcd1234"}
         )
 
-        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            es_client=es_client,
-            source_index="works-source-dev",
-            source_identifiers=["Work[sierra-system-number/b1000001]"],
+            minting_source=_StubSource([doc]),
             resolver=resolver,
         )
 
@@ -136,11 +133,8 @@ class TestTransform:
             }
         )
 
-        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            es_client=es_client,
-            source_index="works-source-dev",
-            source_identifiers=[],
+            minting_source=_StubSource([doc]),
             resolver=resolver,
         )
 
@@ -158,11 +152,8 @@ class TestTransform:
     def test_records_error_on_missing_state(self) -> None:
         doc: dict[str, Any] = {"data": {"title": "no state"}}
 
-        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            es_client=es_client,
-            source_index="works-source-dev",
-            source_identifiers=[],
+            minting_source=_StubSource([doc]),
             resolver=FakeResolver(),
         )
 
@@ -185,11 +176,8 @@ class TestTransform:
             ) -> dict[SourceId, str]:
                 raise RuntimeError("DB connection failed")
 
-        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            es_client=es_client,
-            source_index="works-source-dev",
-            source_identifiers=[],
+            minting_source=_StubSource([doc]),
             resolver=FailingResolver(),
         )
 
@@ -208,11 +196,8 @@ class TestTransform:
 
 class TestGetDocumentId:
     def test_returns_canonical_id(self) -> None:
-        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            es_client=es_client,
-            source_index="works-source-dev",
-            source_identifiers=[],
+            minting_source=_StubSource([]),
             resolver=FakeResolver(),
         )
 
@@ -237,12 +222,9 @@ class TestStreamToIndex:
         MockElasticsearchClient.reset_mocks()
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            es_client=es_client,
-            source_index="works-source-dev",
-            source_identifiers=["Work[sierra-system-number/b1000001]"],
+            minting_source=_StubSource([doc]),
             resolver=resolver,
         )
-        transformer.source = _StubSource([doc])
 
         transformer.stream_to_index(es_client, "works-identified-dev")
 
@@ -284,12 +266,9 @@ class TestStreamToIndex:
         MockElasticsearchClient.reset_mocks()
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
         transformer = IdMintingTransformer(
-            es_client=es_client,
-            source_index="works-source-dev",
-            source_identifiers=[],
+            minting_source=_StubSource([doc]),
             resolver=resolver,
         )
-        transformer.source = _StubSource([doc])
 
         transformer.stream_to_index(es_client, "works-identified-dev")
 

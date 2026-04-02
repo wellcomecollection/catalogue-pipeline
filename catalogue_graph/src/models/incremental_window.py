@@ -2,24 +2,45 @@ import argparse
 from datetime import datetime, timedelta
 from typing import Self
 
-from pydantic import BaseModel, model_validator, parse_obj_as
+from pydantic import BaseModel, ConfigDict, model_validator, parse_obj_as
+from pydantic.alias_generators import to_camel
 
 DEFAULT_WINDOW_MINUTES = 15
 
 
 class IncrementalWindow(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        validate_by_name=True,
+        validate_by_alias=True,
+    )
+
     start_time: datetime
     end_time: datetime
 
     @model_validator(mode="before")
     @classmethod
-    def calculate_start_time(cls, data: dict) -> dict:
-        # If no `start_time` is provided, calculate it by subtracting `DEFAULT_WINDOW_MINUTES` from `end_time`
-        if data.get("start_time") is None:
-            end_time = parse_obj_as(datetime, data["end_time"])
-            data["start_time"] = end_time - timedelta(minutes=DEFAULT_WINDOW_MINUTES)
+    def calculate_start_time(cls, window: dict) -> dict:
+        end_time = window.get("end_time") or window.get("endTime")
 
-        return data
+        if end_time is None:
+            raise ValueError(
+                "end_time is required when specifying a time window "
+                "(start_time alone is not sufficient)"
+            )
+
+        start_time = window.get("start_time") or window.get("startTime")
+        if start_time is None:
+            end_time = parse_obj_as(datetime, end_time)
+            window["start_time"] = end_time - timedelta(minutes=DEFAULT_WINDOW_MINUTES)
+
+        return window
+
+    @model_validator(mode="after")
+    def validate_window_order(self) -> Self:
+        if self.start_time >= self.end_time:
+            raise ValueError("start_time must be before end_time")
+        return self
 
     def to_formatted_string(self) -> str:
         start = self.start_time.strftime("%Y%m%dT%H%M")
