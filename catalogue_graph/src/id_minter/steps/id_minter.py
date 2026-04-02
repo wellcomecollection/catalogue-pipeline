@@ -204,9 +204,14 @@ def handler(
             success_count=success_count,
             failure_count=failure_count,
         ).publish()
-    except Exception:
+    # The metric triggers an alarm if failure_count > 0
+    # If publish fails AND we have failure, we raise
+    except Exception as e:
         logger.warning("Failed to publish metrics", exc_info=True)
-
+        if failure_count > 0:
+            raise RuntimeError(
+                f"Failed to publish metrics for a run with {failure_count} failures: {response.job_id}"
+            ) from e
     return response
 
 
