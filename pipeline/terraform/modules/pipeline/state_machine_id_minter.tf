@@ -45,6 +45,18 @@ module "id_minter_state_machine" {
   invokable_lambda_arns    = [module.id_minter_lambda.id_minter_lambda_arn]
 }
 
+module "id_minter_state_machine_alarms" {
+  source = "../state_machine_alarms"
+
+  state_machine_arn = module.id_minter_state_machine.state_machine_arn
+  alarm_name_prefix = "id-minter"
+  alarm_name_suffix = "-${var.pipeline_date}"
+
+  default_alarm_configuration = {
+    alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+  }
+}
+
 # EventBridge Scheduler
 resource "aws_scheduler_schedule" "id_minter_schedule" {
   name                = "id-minter-schedule-${var.pipeline_date}"
