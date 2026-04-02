@@ -1,7 +1,9 @@
-from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.display.location import DisplayDigitalLocation
-from ingestor.models.indexable_concept import (
+from ingestor.models.display.location_type import (
+    DisplayLocationType,
+)
+from ingestor.models.indexable.concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
@@ -234,9 +236,7 @@ class RawNeptuneConcept:
         return [
             DisplayDigitalLocation(
                 url=url.strip(),
-                locationType=DisplayIdLabel(
-                    id="iiif-image", label="IIIF Image API", type="LocationType"
-                ),
+                locationType=DisplayLocationType.from_id("iiif-image"),
                 accessConditions=[],
             )
             for url in source_concept.image_urls

@@ -1,7 +1,7 @@
 from collections import defaultdict
 from collections.abc import Generator
 
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.concept import (
     DisplayConcept,

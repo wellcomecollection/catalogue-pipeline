@@ -96,6 +96,7 @@ SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[MockResponseInput]] = {
     "catalogue_concepts": [],
     "catalogue_works": [],
     "catalogue_work_identifiers": [],
+    "catalogue_images": [],
 }
 
 

@@ -1,7 +1,7 @@
 from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.display.location import DisplayDigitalLocation
-from ingestor.models.indexable_concept import (
+from ingestor.models.indexable.concept import (
     ConceptDescription,
     ConceptDisplay,
     ConceptIdentifier,
