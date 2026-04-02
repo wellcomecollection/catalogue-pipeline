@@ -2,8 +2,19 @@ locals {
   id_minter_state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Invoke the id_minter Lambda"
-    StartAt       = "InvokeIdMinter"
+    StartAt       = "ConstructEvent"
     States = {
+      ConstructEvent = {
+        "Type" : "Pass",
+        "Output" : {
+          "pipeline_date" : var.pipeline_date,
+          # window end time is 5 minutes before the scheduled time
+          "window" : {
+            "end_time" : "{% $fromMillis($toMillis($states.input.scheduled_time) - 300000) %}"
+          }
+        },
+        Next = "InvokeIdMinter"
+      }
       InvokeIdMinter = {
         Type     = "Task"
         Resource = "arn:aws:states:::lambda:invoke"
