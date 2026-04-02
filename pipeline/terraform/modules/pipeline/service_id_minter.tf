@@ -47,3 +47,25 @@ module "id_minter_lambda" {
   id_minter_secret_env_vars = local.id_minter_v2_secret_env_vars
 }
 
+# Rather than failing the whole state machine execution when the id_minter Lambda reports failures
+# we use this alarm triggered by an existing CloudWatch metric
+# This will give us visibility of failures in the id_minter step; we can reassess later if we want to add an automated retry mechanism
+resource "aws_cloudwatch_metric_alarm" "id_minter_failures" {
+  alarm_name          = "id-minter-failures-${var.pipeline_date}"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "failure_count"
+  namespace           = "catalogue_graph_pipeline"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 0
+  alarm_description   = "ID minter Lambda reported minting failures"
+
+  dimensions = {
+    pipeline_date = var.pipeline_date
+    pipeline_step = "id_minter"
+  }
+
+  alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+}
+
