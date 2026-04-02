@@ -7,7 +7,6 @@ Follows the runtime / handler pattern used by the EBSCO adapter loader.
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 from typing import Any
 
 import structlog
@@ -32,6 +31,7 @@ from models.incremental_window import IncrementalWindow
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.models.manifests import StepManifest
+from utils.steps import create_job_id
 
 logger = structlog.get_logger(__name__)
 
@@ -216,6 +216,8 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
         trace_id=get_trace_id(context),
         pipeline_step="id_minter",
     )
+    if "job_id" not in event:
+        event["job_id"] = create_job_id()
     request = StepFunctionMintingRequest.model_validate(event)
     runtime = build_runtime()
     response = handler(
@@ -319,7 +321,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
 
     args = parser.parse_args()
 
-    job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
+    job_id = args.job_id or create_job_id()
     request = StepFunctionMintingRequest(
         source_identifiers=args.source_identifiers,
         window=IncrementalWindow.from_argparser(args),
