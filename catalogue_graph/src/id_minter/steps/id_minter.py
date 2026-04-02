@@ -236,15 +236,15 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         help="One or more source identifiers to mint (IDs mode).",
     )
     parser.add_argument(
-        "--end-time",
-        type=datetime.fromisoformat,
+        "--window-end",
+        type=str,
         required=False,
         default=None,
         help="End of the time window (ISO 8601). Window mode.",
     )
     parser.add_argument(
-        "--start-time",
-        type=datetime.fromisoformat,
+        "--window-start",
+        type=str,
         required=False,
         default=None,
         help="Start of the time window (ISO 8601). Defaults to end_time - 15 minutes.",
