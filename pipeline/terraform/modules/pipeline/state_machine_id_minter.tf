@@ -5,8 +5,8 @@ locals {
     StartAt       = "ConstructEvent"
     States = {
       ConstructEvent = {
-        "Type" : "Pass",
-        "Output" : {
+        Type = "Pass",
+        Output = {
           "pipeline_date" : var.pipeline_date,
           # window end time is 5 minutes before the scheduled time
           "window" : {
