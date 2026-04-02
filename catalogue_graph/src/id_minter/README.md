@@ -119,8 +119,8 @@ uv run python -m id_minter.steps.id_minter \
 | Flag | Description |
 |---|---|
 | `--source-identifiers` | One or more source identifiers to process (IDs mode). |
-| `--end-time` | End of the time window, ISO 8601 (window mode). |
-| `--start-time` | Start of the time window, ISO 8601. Defaults to `end_time - 15 minutes`. |
+| ` --window-end` | End of the time window, ISO 8601 (window mode). |
+| ` --window-start` | Start of the time window, ISO 8601. Defaults to `end_time - 15 minutes`. |
 | `--job-id` | Optional job ID — defaults to the current timestamp. |
 | `--resolver` | ID resolver backend: `local` (pymysql to local MySQL) or `data-api` (AWS RDS Data API, default). |
 | `--source-index-prefix` | Override the upstream ES index name prefix. |

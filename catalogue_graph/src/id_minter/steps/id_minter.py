@@ -322,7 +322,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
     request = StepFunctionMintingRequest(
         source_identifiers=args.source_identifiers,
-        window=IncrementalWindow(start_time=args.start_time, end_time=args.end_time),
+        window=IncrementalWindow.from_argparser(args),
         job_id=job_id,
     )
 
