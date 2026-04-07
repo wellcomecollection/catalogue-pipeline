@@ -105,7 +105,7 @@ class TestStepFunctionMintingRequestWindowHandling:
         assert request.window.end_time == end
 
     def test_rejects_start_time_after_end_time(self) -> None:
-        with pytest.raises(ValueError, match="start_time must be before end_time"):
+        with pytest.raises(ValueError, match="start_time must not be after end_time"):
             StepFunctionMintingRequest(
                 window=IncrementalWindow(
                     start_time=datetime(2025, 3, 25, 16, 0, 0),
