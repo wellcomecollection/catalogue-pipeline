@@ -36,7 +36,15 @@ It can be used to locally run the id_minter and id_generator, see below
 
 When run locally the id_minter reads from the **public** Elasticsearch API and writes to a **local** ES container. This means you don't need VPC access to fetch works-source documents.
 
-##### Basic usage (Data API resolver)
+The id_minter supports three modes:
+
+- **IDs mode**: supply `--source-identifiers` for targeted minting of specific works.
+- **Window mode**: supply `--end-time` (and optionally `--start-time`, which defaults to `end_time - 15 min`) to process recently indexed works.
+- **Full reprocess mode**: omit both to process the entire source index.
+
+Supplying both `--source-identifiers` and a time window is invalid.
+
+##### IDs mode
 
 ```bash
 uv run python -m id_minter.steps.id_minter \
@@ -65,6 +73,35 @@ uv run python -m id_minter.steps.id_minter \
     --apply-migrations
 ```
 
+##### Window mode
+
+Process works indexed within a time window:
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --end-time '2025-03-25T15:00:00' \
+    --resolver local \
+    --apply-migrations
+```
+
+With an explicit start time:
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --start-time '2025-03-25T14:45:00' \
+    --end-time '2025-03-25T15:00:00'
+```
+
+##### Full reprocess mode
+
+Process all documents in the source index:
+
+```bash
+uv run python -m id_minter.steps.id_minter \
+    --resolver local \
+    --apply-migrations
+```
+
 ##### Writing to the public Elasticsearch cluster
 
 By default the CLI reads from the public ES cluster and writes to a local one.
@@ -81,7 +118,9 @@ uv run python -m id_minter.steps.id_minter \
 
 | Flag | Description |
 |---|---|
-| `--source-identifiers` | One or more source identifiers to process (required). |
+| `--source-identifiers` | One or more source identifiers to process (IDs mode). |
+| ` --window-end` | End of the time window, ISO 8601 (window mode). |
+| ` --window-start` | Start of the time window, ISO 8601. Defaults to `end_time - 15 minutes`. |
 | `--job-id` | Optional job ID — defaults to the current timestamp. |
 | `--resolver` | ID resolver backend: `local` (pymysql to local MySQL) or `data-api` (AWS RDS Data API, default). |
 | `--source-index-prefix` | Override the upstream ES index name prefix. |
@@ -135,14 +174,37 @@ docker compose -f mysql.docker-compose.yml down -v
 ## Lambda handlers
 
 ### id_minter
-The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects a `StepFunctionMintingRequest` payload:
+The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects a `StepFunctionMintingRequest` payload in one of three modes:
+
+**Window mode** (scheduled runs):
 
 ```json
 {
-  "source_identifiers": ["id1", "id2"],
-  "job_id": "20260210T1500"
+  "endTime": "2026-02-10T15:00:00",
+  "jobId": "20260210T1500"
 }
 ```
+
+An optional `startTime` can be provided; if omitted it defaults to `endTime - 15 minutes`.
+
+**IDs mode** (targeted minting):
+
+```json
+{
+  "sourceIdentifiers": ["Work[sierra-system-number/b1000001]"],
+  "jobId": "targeted-mint"
+}
+```
+
+**Full reprocess mode** (process entire index):
+
+```json
+{
+  "jobId": "full-reprocess-20260210"
+}
+```
+
+Supplying both `sourceIdentifiers` and a time window is invalid.
 
 ### id_generator
 

@@ -4,7 +4,11 @@ import math
 import pytest
 
 from graph.transformers.wikidata.concepts_transformer import WikidataConceptsTransformer
-from graph.transformers.wikidata.raw_concept import RawWikidataLocation, RawWikidataName
+from graph.transformers.wikidata.raw_concept import (
+    RawWikidataConcept,
+    RawWikidataLocation,
+    RawWikidataName,
+)
 from models.events import ExtractorEvent
 from models.graph_edge import SourceConceptSameAs, SourceConceptSameAsAttributes
 from models.graph_node import SourceConcept
@@ -97,6 +101,39 @@ def test_wikidata_raw_name() -> None:
     assert raw_name.place_of_birth == "Queens"
     assert raw_name.label == "Walter McCaffrey"
     assert raw_name.description == "American politician"
+
+
+def test_exclude_concept_where_label_matches_id() -> None:
+    """When Wikidata has no English/mul label, it returns the QID as the label.
+    Such concepts should be excluded."""
+    raw_concept = RawWikidataConcept(
+        {
+            "item": {
+                "type": "uri",
+                "value": "http://www.wikidata.org/entity/Q999",
+            },
+            "itemLabel": {"type": "literal", "value": "Q999"},
+        }
+    )
+    assert raw_concept.exclude() is True
+
+
+@pytest.mark.parametrize("lang", ["en", "mul"])
+def test_do_not_exclude_concept_with_valid_label(lang: str) -> None:
+    raw_concept = RawWikidataConcept(
+        {
+            "item": {
+                "type": "uri",
+                "value": "http://www.wikidata.org/entity/Q999",
+            },
+            "itemLabel": {
+                "xml:lang": lang,
+                "type": "literal",
+                "value": "Some concept",
+            },
+        }
+    )
+    assert raw_concept.exclude() is False
 
 
 def test_wikidata_raw_location_empty_coordinates() -> None:
