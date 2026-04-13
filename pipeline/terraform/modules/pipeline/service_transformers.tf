@@ -45,10 +45,6 @@ locals {
       queue_visibility_timeout_seconds = 90
     }
   }
-
-  transformer_output_topic_arns = [
-    for k, v in module.transformers : v.output_topic_arn
-  ]
 }
 
 module "transformers" {
