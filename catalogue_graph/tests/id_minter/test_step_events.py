@@ -3,12 +3,10 @@
 from datetime import datetime, timedelta
 
 import pytest
-
 from id_minter.models.step_events import (
-    DEFAULT_WINDOW_MINUTES,
     StepFunctionMintingRequest,
 )
-from models.incremental_window import IncrementalWindow
+from models.incremental_window import DEFAULT_WINDOW_MINUTES, IncrementalWindow
 
 
 class TestStepFunctionMintingRequestCaseHandling:

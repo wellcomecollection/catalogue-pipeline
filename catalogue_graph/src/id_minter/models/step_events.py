@@ -10,12 +10,9 @@ from __future__ import annotations
 
 from typing import Literal
 
+from models.incremental_window import IncrementalWindow
 from pydantic import BaseModel, ConfigDict, model_validator
 from pydantic.alias_generators import to_camel
-
-from models.incremental_window import IncrementalWindow
-
-DEFAULT_WINDOW_MINUTES = 15
 
 
 class SourceQueryRequest(BaseModel):
