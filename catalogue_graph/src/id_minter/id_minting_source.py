@@ -8,23 +8,10 @@ Supports three modes via factory classmethods:
 
 from __future__ import annotations
 
-from datetime import datetime
-
 from elasticsearch import Elasticsearch
 
 from core.source import ElasticSource
-
-
-def build_indexed_at_range_query(start_time: datetime, end_time: datetime) -> dict:
-    """Build an ES range query filtering on the ``indexed_at`` field."""
-    return {
-        "range": {
-            "indexed_at": {
-                "gte": start_time.isoformat(),
-                "lte": end_time.isoformat(),
-            }
-        }
-    }
+from models.events import IncrementalWindow
 
 
 class IdMintingSource(ElasticSource):
@@ -53,14 +40,13 @@ class IdMintingSource(ElasticSource):
         cls,
         es_client: Elasticsearch,
         index_name: str,
-        start_time: datetime,
-        end_time: datetime,
+        window: IncrementalWindow,
     ) -> IdMintingSource:
         """Fetch documents whose ``indexed_at`` falls within [start, end]."""
         return cls(
             es_client=es_client,
             index_name=index_name,
-            query=build_indexed_at_range_query(start_time, end_time),
+            query=window.to_elasticsearch_filter(field_name="indexed_at"),
         )
 
     @classmethod

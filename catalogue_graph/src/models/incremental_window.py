@@ -61,3 +61,13 @@ class IncrementalWindow(BaseModel):
             window = cls(start_time=args.window_start, end_time=args.window_end)
 
         return window
+
+    def to_elasticsearch_filter(self, field_name: str) -> dict:
+        return {
+            "range": {
+                field_name: {
+                    "gte": self.start_time.isoformat(),
+                    "lte": self.end_time.isoformat(),
+                }
+            }
+        }

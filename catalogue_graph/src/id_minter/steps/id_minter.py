@@ -71,15 +71,10 @@ def build_minting_source(
         return IdMintingSource.from_identifiers(
             es_client, index_name, source_query.source_identifiers
         )
-    elif source_query.window is not None:
-        return IdMintingSource.from_window(
-            es_client,
-            index_name,
-            source_query.window.start_time,
-            source_query.window.end_time,
-        )
-    else:
-        return IdMintingSource.from_match_all(es_client, index_name)
+    if source_query.window is not None:
+        return IdMintingSource.from_window(es_client, index_name, source_query.window)
+
+    return IdMintingSource.from_match_all(es_client, index_name)
 
 
 def execute(
