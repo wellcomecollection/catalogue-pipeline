@@ -77,7 +77,7 @@ resource "aws_scheduler_schedule" "id_minter_schedule" {
     JSON
   }
 
-  state = "DISABLED"
+  state = "ENABLED"
 }
 
 resource "aws_iam_role" "run_id_minter_role" {
