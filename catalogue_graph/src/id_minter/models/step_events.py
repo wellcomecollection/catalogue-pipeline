@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
 from models.events import IncrementalWindow
-from models.source_document_selection import SourceDocumentSelection
+from models.source_scope import SourceScope
 from utils.types import NonEmptyString
 
 
@@ -29,8 +29,8 @@ class StepFunctionMintingRequest(BaseModel):
     job_id: NonEmptyString
 
     @property
-    def document_selection(self) -> SourceDocumentSelection:
-        return SourceDocumentSelection(ids=self.source_identifiers, window=self.window)
+    def source_scope(self) -> SourceScope:
+        return SourceScope(ids=self.source_identifiers, window=self.window)
 
 
 class StepFunctionMintingFailure(BaseModel):

@@ -27,7 +27,7 @@ from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
 from models.incremental_window import IncrementalWindow
-from models.source_document_selection import SourceDocumentSelection
+from models.source_scope import SourceScope
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.models.manifests import StepManifest
@@ -62,11 +62,11 @@ def build_runtime(
 
 
 def build_minting_source(
-    document_selection: SourceDocumentSelection,
+    source_scope: SourceScope,
     es_client: Elasticsearch,
     index_name: str,
 ) -> IdMintingSource:
-    full_query = document_selection.to_elasticsearch_query(
+    full_query = source_scope.to_elasticsearch_query(
         range_filter_field_name="indexed_at"
     )
 
@@ -74,7 +74,7 @@ def build_minting_source(
         es_client=es_client,
         index_name=index_name,
         query=full_query,
-        slice_count=document_selection.slice_count,
+        slice_count=source_scope.slice_count,
     )
 
 
@@ -112,7 +112,7 @@ def execute(
     )
 
     elastic_source = build_minting_source(
-        request.document_selection, source_client, source_index
+        request.source_scope, source_client, source_index
     )
     transformer = IdMintingTransformer(
         elastic_source,
@@ -164,7 +164,7 @@ def log_runtime_config(
         source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
         target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
         downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
-        mode=request.document_selection.mode_label,
+        mode=request.source_scope.mode_label,
         identifiers=request.source_identifiers,
         window=request.window.model_dump() if request.window else None,
         migrations="yes" if cfg.apply_migrations else "no",

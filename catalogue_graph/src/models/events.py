@@ -6,7 +6,7 @@ from pydantic import BaseModel, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
-from models.source_document_selection import SourceDocumentSelection
+from models.source_scope import SourceScope
 from utils.types import (
     CatalogueTransformerType,
     EntityType,
@@ -29,7 +29,7 @@ class PipelineIndexDates(BaseModel):
     works: str | None = None
 
 
-class BasePipelineEvent(SourceDocumentSelection):
+class BasePipelineEvent(SourceScope):
     pipeline_date: str
     pit_id: str | None = None
     index_dates: PipelineIndexDates = PipelineIndexDates()

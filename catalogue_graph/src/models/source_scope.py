@@ -9,33 +9,35 @@ from models.incremental_window import IncrementalWindow
 from utils.types import NonEmptyString
 
 
-class SourceDocumentSelection(BaseModel):
-    """Describes which documents to fetch from Elasticsearch.
+class SourceScope(BaseModel):
+    """Defines the scope of source data for a pipeline step.
 
-    Three mutually exclusive modes:
+    Controls which documents are fetched from the Elasticsearch source
+    index. Inherited by pipeline events to scope every step's input.
 
-    - **identifiers**: Supply ``source_identifiers`` to fetch specific docs.
-    - **window**: Supply an incremental window for a time-range query.
-    - **match_all**: Omit both to fetch everything.
+    Modes (mutually exclusive):
+      - ids: process specific documents by identifier.
+      - window: process documents modified within a time range (incremental run).
+      - (neither): process all documents (full run).
     """
 
     ids: list[NonEmptyString] | None = None
     window: IncrementalWindow | None = None
 
     @model_validator(mode="after")
-    def validate_mode(self) -> SourceDocumentSelection:
+    def validate_mode(self) -> SourceScope:
         if self.ids and self.window:
             raise ValueError("Cannot specify both ids and a time window")
 
         return self
 
     @property
-    def mode_label(self) -> Literal["identifiers", "window", "match_all"]:
+    def mode_label(self) -> Literal["ids", "window", "full"]:
         if self.ids is not None:
-            return "identifiers"
+            return "ids"
         if self.window is not None:
             return "window"
-        return "match_all"
+        return "full"
 
     def to_elasticsearch_query(
         self, range_filter_field_name: str, query: dict | None = None

@@ -11,7 +11,7 @@ from id_minter.steps.id_minter import (
     build_minting_source,
 )
 from models.incremental_window import IncrementalWindow
-from models.source_document_selection import SourceDocumentSelection
+from models.source_scope import SourceScope
 from tests.mocks import MockElasticsearchClient
 
 START_TIME = datetime(2025, 3, 25, 14, 45, 0)
@@ -21,11 +21,11 @@ END_TIME = datetime(2025, 3, 25, 15, 0, 0)
 def test_builds_range_query_from_time_window() -> None:
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
 
-    document_selection = SourceDocumentSelection(
+    source_scope = SourceScope(
         window=IncrementalWindow(start_time=START_TIME, end_time=END_TIME),
     )
     source = build_minting_source(
-        document_selection, es_client, index_name="works-source-dev"
+        source_scope, es_client, index_name="works-source-dev"
     )
 
     assert source.query == {
@@ -42,14 +42,14 @@ def test_builds_range_query_from_time_window() -> None:
 def test_builds_ids_query_from_identifiers() -> None:
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
 
-    document_selection = SourceDocumentSelection(
+    source_scope = SourceScope(
         ids=[
             "Work[sierra-system-number/b1000001]",
             "Work[sierra-system-number/b1000002]",
         ],
     )
     source = build_minting_source(
-        document_selection, es_client, index_name="works-source-dev"
+        source_scope, es_client, index_name="works-source-dev"
     )
 
     assert source.query == {
@@ -66,9 +66,9 @@ def test_builds_ids_query_from_identifiers() -> None:
 def test_builds_match_all_query() -> None:
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
 
-    document_selection = SourceDocumentSelection()
+    source_scope = SourceScope()
     source = build_minting_source(
-        document_selection, es_client, index_name="works-source-dev"
+        source_scope, es_client, index_name="works-source-dev"
     )
 
     assert source.query == {"match_all": {}}

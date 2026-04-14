@@ -135,8 +135,8 @@ class TestStepFunctionMintingRequestModeExclusivity:
         request = StepFunctionMintingRequest(
             source_identifiers=["sierra/1"], job_id="mode-ids"
         )
-        assert request.document_selection.mode_label == "identifiers"
-        assert request.document_selection.ids == ["sierra/1"]
+        assert request.source_scope.mode_label == "ids"
+        assert request.source_scope.ids == ["sierra/1"]
         assert request.window is None
 
     def test_window_mode(self) -> None:
@@ -146,7 +146,7 @@ class TestStepFunctionMintingRequestModeExclusivity:
             ),
             job_id="mode-window",
         )
-        assert request.document_selection.mode_label == "window"
+        assert request.source_scope.mode_label == "window"
         assert request.source_identifiers is None
         assert request.window is not None
         assert request.window.end_time is not None
@@ -154,7 +154,7 @@ class TestStepFunctionMintingRequestModeExclusivity:
 
     def test_full_reprocess_mode(self) -> None:
         request = StepFunctionMintingRequest(job_id="mode-full")
-        assert request.document_selection.mode_label == "match_all"
+        assert request.source_scope.mode_label == "full"
         assert request.source_identifiers is None
         assert request.window is None
 
@@ -170,7 +170,7 @@ class TestStepFunctionMintingRequestModeExclusivity:
             ValueError,
             match="Cannot specify both ids and a time window",
         ):
-            _ = request.document_selection
+            _ = request.source_scope
 
     def test_rejects_ids_with_window_both_times(self) -> None:
         request = StepFunctionMintingRequest(
@@ -185,4 +185,4 @@ class TestStepFunctionMintingRequestModeExclusivity:
             ValueError,
             match="Cannot specify both ids and a time window",
         ):
-            _ = request.document_selection
+            _ = request.source_scope
