@@ -6,6 +6,7 @@ from pydantic import BaseModel, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
+from models.source_document_selection import SourceDocumentSelection
 from utils.types import (
     CatalogueTransformerType,
     EntityType,
@@ -28,8 +29,7 @@ class PipelineIndexDates(BaseModel):
     works: str | None = None
 
 
-class BasePipelineEvent(BaseModel):
-    window: IncrementalWindow | None = None
+class BasePipelineEvent(SourceDocumentSelection):
     pipeline_date: str
     pit_id: str | None = None
     index_dates: PipelineIndexDates = PipelineIndexDates()
@@ -49,12 +49,15 @@ class GraphPipelineEvent(BasePipelineEvent):
 
     @model_validator(mode="after")
     def validate_incremental_transformer(self) -> Self:
-        if self.window is not None and self.transformer_type not in get_args(
+        is_catalogue_transformer = self.transformer_type in get_args(
             CatalogueTransformerType
-        ):
+        )
+        if (
+            self.window is not None or self.ids is not None
+        ) and is_catalogue_transformer:
             raise ValueError(
                 f"The {self.transformer_type} transformer does not support incremental mode. "
-                "Only catalogue transformers support incremental (window-based) processing."
+                "Only catalogue transformers support incremental (window-based or ID-based) processing."
             )
 
         return self

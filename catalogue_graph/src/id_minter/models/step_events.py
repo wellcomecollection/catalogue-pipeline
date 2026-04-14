@@ -7,10 +7,11 @@
 
 from __future__ import annotations
 
-from models.events import IncrementalWindow
-from models.source_document_selection import SourceDocumentSelection
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+
+from models.events import IncrementalWindow
+from models.source_document_selection import SourceDocumentSelection
 from utils.types import NonEmptyString
 
 

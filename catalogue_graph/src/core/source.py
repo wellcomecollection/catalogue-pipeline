@@ -15,6 +15,7 @@ import structlog
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
+import config
 from models.source_document_selection import SourceDocumentSelection
 
 logger = structlog.get_logger(__name__)
@@ -71,9 +72,9 @@ class ElasticSource(BaseSource):
         query: dict,
         pit_id: str | None = None,
         fields: list | None = None,
-        batch_size: int = 2000,
-        slice_count: int = 30,
-        parallelism: int = 5,
+        batch_size: int = config.ES_SOURCE_BATCH_SIZE,
+        slice_count: int = config.ES_SOURCE_SLICE_COUNT,
+        parallelism: int = config.ES_SOURCE_PARALLELISM,
     ):
         self.es_client = es_client
         self.index_name = index_name
@@ -175,13 +176,18 @@ class ElasticSource(BaseSource):
     @classmethod
     def from_document_selection(
         cls,
-        es_client: Elasticsearch,
         document_selection: SourceDocumentSelection,
-        index_name: str,
         range_filter_field_name: str,
+        query: dict | None = None,
+        **kwargs: Any,
     ) -> Self:
+        query = {"match_all": {}} if query is None else query
+        range_or_id_filter = document_selection.to_elasticsearch_query(
+            range_filter_field_name
+        )
+        full_query = {"bool": {"must": [query, range_or_id_filter]}}
+
         return cls(
-            es_client=es_client,
-            index_name=index_name,
-            query=document_selection.to_elasticsearch_query(range_filter_field_name),
+            query=full_query,
+            **kwargs,
         )

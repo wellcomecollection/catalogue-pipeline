@@ -3,11 +3,12 @@
 from datetime import datetime, timedelta
 
 import pytest
+from pydantic import ValidationError
+
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
 )
 from models.incremental_window import DEFAULT_WINDOW_MINUTES, IncrementalWindow
-from pydantic import ValidationError
 
 
 class TestStepFunctionMintingRequestCaseHandling:
@@ -36,13 +37,17 @@ class TestStepFunctionMintingRequestCaseHandling:
         assert "jobId" not in dumped
 
     def test_rejects_empty_source_identifier_camel_case(self) -> None:
-        with pytest.raises(ValidationError, match="String should have at least 1 character"):
+        with pytest.raises(
+            ValidationError, match="String should have at least 1 character"
+        ):
             StepFunctionMintingRequest.model_validate(
                 {"sourceIdentifiers": ["sierra/1", "  "], "jobId": "job-004"}
             )
 
     def test_rejects_empty_job_id_camel_case(self) -> None:
-        with pytest.raises(ValidationError, match="String should have at least 1 character"):
+        with pytest.raises(
+            ValidationError, match="String should have at least 1 character"
+        ):
             StepFunctionMintingRequest.model_validate(
                 {"sourceIdentifiers": ["sierra/1"], "jobId": "   "}
             )

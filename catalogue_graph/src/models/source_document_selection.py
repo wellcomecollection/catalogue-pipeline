@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Literal
 
 from pydantic import BaseModel, ValidationError, model_validator
-from utils.types import NonEmptyString
 
 from models.incremental_window import IncrementalWindow
+from utils.types import NonEmptyString
 
 
 class SourceDocumentSelection(BaseModel):
