@@ -112,7 +112,7 @@ locals {
             Next = "Run reconciler"
           }
         ]
-        Default = "Should run ID minter?"
+        Default = "Success"
       },
       "Run reconciler" = {
         Type     = "Task",
@@ -128,70 +128,9 @@ locals {
             }
           }
         },
-        Next = "Should run ID minter?"
-      },
-      "Should run ID minter?" = {
-        Type = "Choice"
-        Choices = [
-          {
-            Variable     = "$$.Execution.Input.detail.transformer_type"
-            StringEquals = "ebsco"
-            Next         = "IdMinterMap"
-          }
-        ]
-        Default = "Success"
-      },
-      IdMinterMap = {
-        Type                  = "Map"
-        MaxConcurrency        = 2
-        ToleratedFailureCount = 0
-        ItemReader = {
-          Resource = "arn:aws:states:::s3:getObject"
-          ReaderConfig = {
-            InputType = "JSONL"
-          }
-          Parameters = {
-            "Bucket.$" = "$.successes.batch_file_location.bucket"
-            "Key.$"    = "$.successes.batch_file_location.key"
-          }
-        }
-        ItemSelector = {
-          # Map item value is each JSON object line from the NDJSON file
-          # Provide the event shape expected by the id_minter lambda StepFunctionMintingRequest
-          "sourceIdentifiers.$" = "$$.Map.Item.Value.sourceIdentifiers"
-          "jobId.$"             = "$.job_id"
-        }
-        ItemProcessor = {
-          ProcessorConfig = {
-            Mode          = "DISTRIBUTED"
-            ExecutionType = "STANDARD"
-          }
-          StartAt = "IdMinterStep"
-          States = {
-            IdMinterStep = {
-              Type     = "Task"
-              Resource = module.id_minter_lambda.id_minter_lambda_arn
-              ResultSelector = {
-                "failures.$" = "$.failures"
-                "jobId.$"    = "$.job_id"
-              }
-              Retry = [
-                {
-                  ErrorEquals = [
-                    "Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"
-                  ]
-                  IntervalSeconds = 2
-                  MaxAttempts     = 3
-                  BackoffRate     = 2.0
-                }
-              ]
-              End = true
-            }
-          }
-        }
         Next = "Success"
-      }
-      Success = {
+      },
+      "Success" = {
         Type = "Succeed"
       }
     }
