@@ -28,8 +28,17 @@ class CatalogueImagesTransformer(GraphBaseTransformer):
             location = DigitalLocation.model_validate(raw_location)
             if location.location_type.id == "iiif-image":
                 # All images have exactly one access condition (ViewOnline/Open)
-                # assert location["accessConditions"][0]["method"]["type"] == "ViewOnline", location
-                # assert location["accessConditions"][0]["status"]["type"] == "Open", location
+                access = location.access_conditions
+                if (
+                    len(access) != 1
+                    or access[0].method.type != "ViewOnline"
+                    or access[0].status is None
+                    or access[0].status.type != "Open"
+                ):
+                    raise ValueError(
+                        f"Unexpected access conditions {access} for image {raw_node}"
+                    )
+
                 return location
 
         raise ValueError(f"Image {raw_node} does not have a IIIF image location.")
