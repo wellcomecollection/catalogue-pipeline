@@ -49,12 +49,10 @@ class GraphPipelineEvent(BasePipelineEvent):
 
     @model_validator(mode="after")
     def validate_incremental_transformer(self) -> Self:
-        is_catalogue_transformer = self.transformer_type in get_args(
-            CatalogueTransformerType
-        )
-        if (
-            self.window is not None or self.ids is not None
-        ) and is_catalogue_transformer:
+        catalogue_transformers = get_args(CatalogueTransformerType)
+        is_catalogue_transformer = self.transformer_type in catalogue_transformers
+
+        if (self.window or self.ids) and not is_catalogue_transformer:
             raise ValueError(
                 f"The {self.transformer_type} transformer does not support incremental mode. "
                 "Only catalogue transformers support incremental (window-based or ID-based) processing."

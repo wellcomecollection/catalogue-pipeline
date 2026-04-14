@@ -13,12 +13,11 @@ class MergedWorksSource(ElasticSource):
         query: dict | None = None,
         fields: list | None = None,
     ):
-        super().from_document_selection(
+        super().__init__(
             es_client=es_client,
             index_name=get_merged_index_name(event),
-            document_selection=event,
-            range_filter_field_name="state.mergedTime",
-            query=query,
+            query=event.to_elasticsearch_query("state.mergedTime", query),
             pit_id=event.pit_id,
             fields=fields,
+            slice_count=event.slice_count,
         )

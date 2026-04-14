@@ -7,7 +7,7 @@ import time
 from collections.abc import Generator
 from queue import Queue
 from threading import Thread
-from typing import Any, Self
+from typing import Any
 
 import backoff
 import requests
@@ -16,7 +16,6 @@ from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 import config
-from models.source_document_selection import SourceDocumentSelection
 
 logger = structlog.get_logger(__name__)
 
@@ -172,22 +171,3 @@ class ElasticSource(BaseSource):
                 raise item.exception
             else:
                 yield item
-
-    @classmethod
-    def from_document_selection(
-        cls,
-        document_selection: SourceDocumentSelection,
-        range_filter_field_name: str,
-        query: dict | None = None,
-        **kwargs: Any,
-    ) -> Self:
-        query = {"match_all": {}} if query is None else query
-        range_or_id_filter = document_selection.to_elasticsearch_query(
-            range_filter_field_name
-        )
-        full_query = {"bool": {"must": [query, range_or_id_filter]}}
-
-        return cls(
-            query=full_query,
-            **kwargs,
-        )

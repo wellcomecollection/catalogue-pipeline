@@ -167,7 +167,7 @@ class TestStepFunctionMintingRequestModeExclusivity:
             job_id="mode-bad-1",
         )
         with pytest.raises(
-            ValidationError,
+            ValueError,
             match="Cannot specify both ids and a time window",
         ):
             _ = request.document_selection
@@ -182,7 +182,7 @@ class TestStepFunctionMintingRequestModeExclusivity:
             job_id="mode-bad-3",
         )
         with pytest.raises(
-            ValidationError,
+            ValueError,
             match="Cannot specify both ids and a time window",
         ):
             _ = request.document_selection

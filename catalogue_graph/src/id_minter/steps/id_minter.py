@@ -66,11 +66,15 @@ def build_minting_source(
     es_client: Elasticsearch,
     index_name: str,
 ) -> IdMintingSource:
-    return IdMintingSource.from_document_selection(
+    full_query = document_selection.to_elasticsearch_query(
+        range_filter_field_name="indexed_at"
+    )
+
+    return IdMintingSource(
         es_client=es_client,
-        document_selection=document_selection,
         index_name=index_name,
-        range_filter_field_name="indexed_at",
+        query=full_query,
+        slice_count=document_selection.slice_count,
     )
 
 
