@@ -277,8 +277,6 @@ at it via the normal env vars.
 | bulk_loader           | bulk_loader.lambda_handler                       |
 | bulk_load_poller      | bulk_load_poller.lambda_handler                  |
 | graph_remover         | graph_remover.lambda_handler                     |
-| graph_status_poller   | graph_status_poller.lambda_handler               |
-| graph_scaler          | graph_scaler.lambda_handler                      |
 | indexer               | indexer.lambda_handler                           |
 | ingestor_loader       | ingestor.steps.ingestor_loader.lambda_handler    |
 | ingestor_indexer      | ingestor.steps.ingestor_indexer.lambda_handler   |
