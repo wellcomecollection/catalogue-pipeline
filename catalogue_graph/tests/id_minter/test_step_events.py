@@ -7,6 +7,7 @@ from id_minter.models.step_events import (
     StepFunctionMintingRequest,
 )
 from models.incremental_window import DEFAULT_WINDOW_MINUTES, IncrementalWindow
+from pydantic import ValidationError
 
 
 class TestStepFunctionMintingRequestCaseHandling:
@@ -35,13 +36,13 @@ class TestStepFunctionMintingRequestCaseHandling:
         assert "jobId" not in dumped
 
     def test_rejects_empty_source_identifier_camel_case(self) -> None:
-        with pytest.raises(ValueError, match="cannot contain empty strings"):
+        with pytest.raises(ValidationError, match="String should have at least 1 character"):
             StepFunctionMintingRequest.model_validate(
                 {"sourceIdentifiers": ["sierra/1", "  "], "jobId": "job-004"}
             )
 
     def test_rejects_empty_job_id_camel_case(self) -> None:
-        with pytest.raises(ValueError, match="job_id cannot be empty"):
+        with pytest.raises(ValidationError, match="String should have at least 1 character"):
             StepFunctionMintingRequest.model_validate(
                 {"sourceIdentifiers": ["sierra/1"], "jobId": "   "}
             )
@@ -129,8 +130,8 @@ class TestStepFunctionMintingRequestModeExclusivity:
         request = StepFunctionMintingRequest(
             source_identifiers=["sierra/1"], job_id="mode-ids"
         )
-        assert request.source_query.mode_label == "identifiers"
-        assert request.source_query.source_identifiers == ["sierra/1"]
+        assert request.document_selection.mode_label == "identifiers"
+        assert request.document_selection.ids == ["sierra/1"]
         assert request.window is None
 
     def test_window_mode(self) -> None:
@@ -140,7 +141,7 @@ class TestStepFunctionMintingRequestModeExclusivity:
             ),
             job_id="mode-window",
         )
-        assert request.source_query.mode_label == "window"
+        assert request.document_selection.mode_label == "window"
         assert request.source_identifiers is None
         assert request.window is not None
         assert request.window.end_time is not None
@@ -148,33 +149,35 @@ class TestStepFunctionMintingRequestModeExclusivity:
 
     def test_full_reprocess_mode(self) -> None:
         request = StepFunctionMintingRequest(job_id="mode-full")
-        assert request.source_query.mode_label == "match_all"
+        assert request.document_selection.mode_label == "match_all"
         assert request.source_identifiers is None
         assert request.window is None
 
     def test_rejects_ids_with_window(self) -> None:
+        request = StepFunctionMintingRequest(
+            source_identifiers=["sierra/1"],
+            window=IncrementalWindow.model_validate(
+                {"end_time": datetime(2025, 3, 25, 15, 0, 0)}
+            ),
+            job_id="mode-bad-1",
+        )
         with pytest.raises(
-            ValueError,
-            match="Cannot specify both source_identifiers and a time window",
+            ValidationError,
+            match="Cannot specify both ids and a time window",
         ):
-            StepFunctionMintingRequest(
-                source_identifiers=["sierra/1"],
-                window=IncrementalWindow.model_validate(
-                    {"end_time": datetime(2025, 3, 25, 15, 0, 0)}
-                ),
-                job_id="mode-bad-1",
-            )
+            _ = request.document_selection
 
     def test_rejects_ids_with_window_both_times(self) -> None:
+        request = StepFunctionMintingRequest(
+            source_identifiers=["sierra/1"],
+            window=IncrementalWindow(
+                start_time=datetime(2025, 3, 25, 14, 0, 0),
+                end_time=datetime(2025, 3, 25, 15, 0, 0),
+            ),
+            job_id="mode-bad-3",
+        )
         with pytest.raises(
-            ValueError,
-            match="Cannot specify both source_identifiers and a time window",
+            ValidationError,
+            match="Cannot specify both ids and a time window",
         ):
-            StepFunctionMintingRequest(
-                source_identifiers=["sierra/1"],
-                window=IncrementalWindow(
-                    start_time=datetime(2025, 3, 25, 14, 0, 0),
-                    end_time=datetime(2025, 3, 25, 15, 0, 0),
-                ),
-                job_id="mode-bad-3",
-            )
+            _ = request.document_selection

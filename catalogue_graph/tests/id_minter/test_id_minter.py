@@ -639,7 +639,7 @@ class TestBuildMintingSource:
         )
 
         source = build_minting_source(
-            request.source_query, es_client, "works-source-dev"
+            request.document_selection, es_client, "works-source-dev"
         )
 
         assert source.query == {
@@ -661,7 +661,7 @@ class TestBuildMintingSource:
         )
 
         source = build_minting_source(
-            request.source_query, es_client, "works-source-dev"
+            request.document_selection, es_client, "works-source-dev"
         )
 
         assert source.query == {"ids": {"values": ids}}
@@ -675,7 +675,7 @@ class TestBuildMintingSource:
         )
 
         source = build_minting_source(
-            request.source_query, es_client, "works-source-dev"
+            request.document_selection, es_client, "works-source-dev"
         )
 
         assert source.query == {"match_all": {}}

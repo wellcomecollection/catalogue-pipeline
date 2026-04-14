@@ -20,7 +20,6 @@ from id_minter.id_minting_transformer import IdMintingTransformer
 from id_minter.manifests import IdMinterManifestWriter
 from id_minter.models.identifier import IdResolver
 from id_minter.models.step_events import (
-    SourceQueryRequest,
     StepFunctionMintingRequest,
 )
 from id_minter.reporting import IdMinterReport
@@ -28,6 +27,7 @@ from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
 from models.incremental_window import IncrementalWindow
+from models.source_document_selection import SourceDocumentSelection
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.models.manifests import StepManifest
@@ -62,19 +62,16 @@ def build_runtime(
 
 
 def build_minting_source(
-    source_query: SourceQueryRequest,
+    document_selection: SourceDocumentSelection,
     es_client: Elasticsearch,
     index_name: str,
 ) -> IdMintingSource:
-    """Build the appropriate IdMintingSource from a :class:`SourceQueryRequest`."""
-    if source_query.source_identifiers is not None:
-        return IdMintingSource.from_identifiers(
-            es_client, index_name, source_query.source_identifiers
-        )
-    if source_query.window is not None:
-        return IdMintingSource.from_window(es_client, index_name, source_query.window)
-
-    return IdMintingSource.from_match_all(es_client, index_name)
+    return IdMintingSource.from_document_selection(
+        es_client=es_client,
+        document_selection=document_selection,
+        index_name=index_name,
+        range_filter_field_name="indexed_at",
+    )
 
 
 def execute(
@@ -111,7 +108,7 @@ def execute(
     )
 
     elastic_source = build_minting_source(
-        request.source_query, source_client, source_index
+        request.document_selection, source_client, source_index
     )
     transformer = IdMintingTransformer(
         elastic_source,
@@ -163,7 +160,7 @@ def log_runtime_config(
         source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
         target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
         downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
-        mode=request.source_query.mode_label,
+        mode=request.document_selection.mode_label,
         identifiers=request.source_identifiers,
         window=request.window.model_dump() if request.window else None,
         migrations="yes" if cfg.apply_migrations else "no",

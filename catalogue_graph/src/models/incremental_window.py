@@ -62,7 +62,7 @@ class IncrementalWindow(BaseModel):
 
         return window
 
-    def to_elasticsearch_filter(self, field_name: str) -> dict:
+    def to_elasticsearch_query(self, field_name: str) -> dict:
         return {
             "range": {
                 field_name: {

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gzip
 import json
 import os
@@ -5,13 +7,15 @@ import time
 from collections.abc import Generator
 from queue import Queue
 from threading import Thread
-from typing import Any
+from typing import Any, Self
 
 import backoff
 import requests
 import structlog
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
+
+from models.source_document_selection import SourceDocumentSelection
 
 logger = structlog.get_logger(__name__)
 
@@ -167,3 +171,17 @@ class ElasticSource(BaseSource):
                 raise item.exception
             else:
                 yield item
+
+    @classmethod
+    def from_document_selection(
+        cls,
+        es_client: Elasticsearch,
+        document_selection: SourceDocumentSelection,
+        index_name: str,
+        range_filter_field_name: str,
+    ) -> Self:
+        return cls(
+            es_client=es_client,
+            index_name=index_name,
+            query=document_selection.to_elasticsearch_query(range_filter_field_name),
+        )

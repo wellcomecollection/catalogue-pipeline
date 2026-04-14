@@ -8,7 +8,8 @@ from typing import cast
 from elasticsearch import Elasticsearch
 
 from id_minter.id_minting_source import IdMintingSource
-from models.events import IncrementalWindow
+from models.incremental_window import IncrementalWindow
+from models.source_document_selection import SourceDocumentSelection
 from tests.mocks import MockElasticsearchClient
 
 START_TIME = datetime(2025, 3, 25, 14, 45, 0)
@@ -18,10 +19,13 @@ END_TIME = datetime(2025, 3, 25, 15, 0, 0)
 def test_builds_range_query_from_time_window() -> None:
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
 
-    source = IdMintingSource.from_window(
+    source = IdMintingSource.from_document_selection(
         es_client=es_client,
         index_name="works-source-dev",
-        window=IncrementalWindow(start_time=START_TIME, end_time=END_TIME),
+        document_selection=SourceDocumentSelection(
+            window=IncrementalWindow(start_time=START_TIME, end_time=END_TIME),
+        ),
+        range_filter_field_name="indexed_at",
     )
 
     assert source.query == {
@@ -38,13 +42,16 @@ def test_builds_range_query_from_time_window() -> None:
 def test_builds_ids_query_from_identifiers() -> None:
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
 
-    source = IdMintingSource.from_identifiers(
+    source = IdMintingSource.from_document_selection(
         es_client=es_client,
         index_name="works-source-dev",
-        source_identifiers=[
-            "Work[sierra-system-number/b1000001]",
-            "Work[sierra-system-number/b1000002]",
-        ],
+        document_selection=SourceDocumentSelection(
+            ids=[
+                "Work[sierra-system-number/b1000001]",
+                "Work[sierra-system-number/b1000002]",
+            ],
+        ),
+        range_filter_field_name="indexed_at",
     )
 
     assert source.query == {
@@ -56,15 +63,16 @@ def test_builds_ids_query_from_identifiers() -> None:
         }
     }
     assert source.index_name == "works-source-dev"
-    assert source.slice_count == 1
 
 
 def test_builds_match_all_query() -> None:
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
 
-    source = IdMintingSource.from_match_all(
+    source = IdMintingSource.from_document_selection(
         es_client=es_client,
         index_name="works-source-dev",
+        document_selection=SourceDocumentSelection(),
+        range_filter_field_name="indexed_at",
     )
 
     assert source.query == {"match_all": {}}

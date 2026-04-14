@@ -12,7 +12,7 @@ def build_merged_index_query(
 ) -> dict:
     full_query = {"match_all": {}} if query is None else query
     if window is not None:
-        range_filter = window.to_elasticsearch_filter(field_name="state.mergedTime")
+        range_filter = window.to_elasticsearch_query(field_name="state.mergedTime")
         full_query = {"bool": {"must": [full_query, range_filter]}}
 
     return full_query
