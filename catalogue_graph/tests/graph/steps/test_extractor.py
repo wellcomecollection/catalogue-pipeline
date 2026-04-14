@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from typing import Any, get_args
 
+import pydantic
 import pytest
 
 from config import (
@@ -234,5 +235,5 @@ def test_unsupported_incremental_mode() -> None:
     }
 
     # The loc_concepts transformer does not support incremental mode
-    with pytest.raises(ValueError):
+    with pytest.raises(pydantic.ValidationError):
         lambda_handler(event, None)

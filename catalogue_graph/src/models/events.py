@@ -1,8 +1,8 @@
 import argparse
 from pathlib import PurePosixPath
-from typing import Self
+from typing import Self, get_args
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
@@ -46,6 +46,18 @@ class BasePipelineEvent(BaseModel):
 class GraphPipelineEvent(BasePipelineEvent):
     transformer_type: TransformerType
     entity_type: EntityType
+
+    @model_validator(mode="after")
+    def validate_incremental_transformer(self) -> Self:
+        if self.window is not None and self.transformer_type not in get_args(
+            CatalogueTransformerType
+        ):
+            raise ValueError(
+                f"The {self.transformer_type} transformer does not support incremental mode. "
+                "Only catalogue transformers support incremental (window-based) processing."
+            )
+
+        return self
 
     @property
     def s3_prefix(self) -> str:

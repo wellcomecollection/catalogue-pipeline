@@ -1,5 +1,3 @@
-from typing import get_args
-
 from config import (
     LOC_NAMES_URL,
     LOC_SUBJECT_HEADINGS_URL,
@@ -9,7 +7,6 @@ from models.events import (
     ExtractorEvent,
 )
 from utils.elasticsearch import ElasticsearchMode, get_client
-from utils.types import CatalogueTransformerType
 
 from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 from .catalogue.work_identifiers_transformer import CatalogueWorkIdentifiersTransformer
@@ -31,14 +28,6 @@ def create_transformer(
     es_mode: ElasticsearchMode,
 ) -> GraphBaseTransformer:
     transformer_type = event.transformer_type
-
-    if event.window is not None and transformer_type not in get_args(
-        CatalogueTransformerType
-    ):
-        raise ValueError(
-            f"The {transformer_type} transformer does not support incremental mode. "
-            "Only catalogue transformers support incremental (window-based) processing."
-        )
     if transformer_type == "weco_concepts":
         return WeCoConceptsTransformer()
     if transformer_type == "loc_concepts":
