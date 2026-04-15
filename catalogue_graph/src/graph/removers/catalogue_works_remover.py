@@ -34,7 +34,7 @@ class CatalogueWorksGraphRemover(BaseGraphRemoverIncremental):
 
     def get_node_ids_to_remove(self) -> Iterator[str]:
         """
-        Return the ids of all works which are not 'Visible' and which were modified within the specified time window.
+        Return the ids of all works which are not 'Visible' and which meet SourceScope criteria.
         """
         source = MergedWorksSource(
             self.event,

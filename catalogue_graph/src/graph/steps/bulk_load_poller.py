@@ -15,6 +15,7 @@ from models.events import (
 from models.incremental_window import IncrementalWindow
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.argparse import add_pipeline_event_args
+from utils.aws import get_csv_from_s3
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import BulkLoaderReport
 from utils.types import EntityType, Environment, TransformerType
@@ -63,6 +64,7 @@ def bulk_loader_event_from_s3_uri(
         r"^(?:s3://[^/]+/[^/]+/)"
         r"(?P<pipeline_date>[^/]+)/"
         r"(windows/(?P<window>[^/]+)/)?"
+        r"(by_id/(?P<ids>[^/]+)/)?"
         r"(?P<transformer_type>[^/]+)__(?P<entity_type>[^/]+)\.csv$"
     )
 
@@ -74,12 +76,17 @@ def bulk_loader_event_from_s3_uri(
     if raw_window := m.group("window"):
         window = IncrementalWindow.from_formatted_string(raw_window)
 
+    ids = []
+    if m.group("ids"):
+        ids = [row[":ID"] for row in get_csv_from_s3(s3_uri)]
+
     return BulkLoaderEvent(
         environment=environment,
         pipeline_date=m.group("pipeline_date"),
         transformer_type=cast(TransformerType, m.group("transformer_type")),
         entity_type=cast(EntityType, m.group("entity_type")),
         window=window,
+        ids=ids,
     )
 
 

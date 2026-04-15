@@ -76,7 +76,7 @@ class SourceScope(BaseModel):
         if not self.ids:
             raise ValueError()
 
-        joined_ids = "||".join(sorted(self.ids))
+        joined_ids = "_".join(sorted(self.ids))
         if len(self.ids) <= 5:
             return joined_ids
 
