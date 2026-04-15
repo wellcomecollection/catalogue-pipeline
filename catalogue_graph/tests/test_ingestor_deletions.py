@@ -122,3 +122,17 @@ def test_ingestor_deletions_works() -> None:
 
     with pytest.raises(pydantic.ValidationError):
         lambda_handler(event, None)
+
+
+def test_ingestor_deletions_id_mode() -> None:
+    """In ID mode, the IDs are used directly to delete from ES (no parquet file lookup)."""
+    mock_es_secrets("concepts_ingestor", "dev")
+
+    index_concepts(["concept-1", "concept-2", "concept-3"])
+    assert len(get_indexed_concept_ids()) == 3
+
+    event = {**MOCK_EVENT, "ids": ["concept-1", "concept-2"], "force_pass": True}
+    lambda_handler(event, None)
+
+    indexed_concepts = get_indexed_concept_ids()
+    assert indexed_concepts == ["concept-3"]

@@ -77,8 +77,7 @@ class SourceScope(BaseModel):
             raise ValueError()
 
         joined_ids = "|".join(sorted(self.ids))
-
-        if len(joined_ids) <= 10:
+        if len(self.ids) <= 5:
             return joined_ids
 
         return hashlib.sha256(joined_ids.encode()).hexdigest()[:12]

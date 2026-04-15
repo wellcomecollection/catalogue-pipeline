@@ -81,14 +81,17 @@ def make_loader_event(
     pass_objects_to_index: bool,
     ingestor_type: IngestorType = "concepts",
     job_id: str = MOCK_JOB_ID,
+    ids: list[str] | None = None,
 ) -> IngestorLoaderLambdaEvent:
+    window = IncrementalWindow.model_validate({"end_time": "2025-01-01T12:00"})
     return IngestorLoaderLambdaEvent(
         ingestor_type=ingestor_type,
         pipeline_date=MOCK_PIPELINE_DATE,
         index_dates=PipelineIndexDates.model_validate({ingestor_type: MOCK_INDEX_DATE}),
         job_id=job_id,
         pass_objects_to_index=pass_objects_to_index,
-        window=IncrementalWindow.model_validate({"end_time": "2025-01-01T12:00"}),
+        window=None if ids else window,
+        ids=ids,
     )
 
 
@@ -770,3 +773,25 @@ def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
         ),
         type="Redirected",
     )
+
+
+@freeze_time("2025-01-02")
+def test_ingestor_loader_concepts_id_mode() -> None:
+    """In ID mode, the concept IDs are passed directly (no ES query for merged works)."""
+    mock_neptune_secrets()
+    mock_es_secrets("concepts_ingestor", MOCK_PIPELINE_DATE)
+    mock_merged_work()
+    mock_neptune_responses([])
+
+    loader_event = make_loader_event(pass_objects_to_index=False, ids=[MOCK_CONCEPT_ID])
+    result = handler(loader_event)
+
+    # No ES queries should be made to discover concepts — ID is used directly
+    assert len(MockElasticsearchClient.queries) == 0
+
+    # Neptune should still be called to fetch concept data
+    assert len(MockRequest.calls) == 12
+
+    expected_concept = get_catalogue_concept_mock([])
+    s3_uri = _get_result_s3_uri(result, loader_event)
+    check_processed_concept(s3_uri, expected_concept)
