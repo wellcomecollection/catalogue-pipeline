@@ -76,7 +76,7 @@ def bulk_loader_event_from_s3_uri(
     if raw_window := m.group("window"):
         window = IncrementalWindow.from_formatted_string(raw_window)
 
-    ids = []
+    ids = None
     if m.group("ids"):
         ids = [row[":ID"] for row in get_csv_from_s3(s3_uri)]
 

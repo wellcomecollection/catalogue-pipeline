@@ -27,6 +27,8 @@ class SourceScope(BaseModel):
 
     @model_validator(mode="after")
     def validate_mode(self) -> SourceScope:
+        if self.ids == []:
+            raise ValueError("ids must not be an empty list")
         if self.ids and self.window:
             raise ValueError("Cannot specify both ids and a time window")
 
@@ -34,9 +36,9 @@ class SourceScope(BaseModel):
 
     @property
     def mode_label(self) -> Literal["ids", "window", "full"]:
-        if self.ids is not None:
+        if self.ids:
             return "ids"
-        if self.window is not None:
+        if self.window:
             return "window"
         return "full"
 
@@ -74,7 +76,7 @@ class SourceScope(BaseModel):
         Short ID lists are joined directly, longer lists are hashed.
         """
         if not self.ids:
-            raise ValueError()
+            raise ValueError("ids_path_segment is only valid in `id` mode")
 
         joined_ids = "_".join(sorted(self.ids))
         if len(self.ids) <= 5:
