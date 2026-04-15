@@ -129,6 +129,18 @@ Elasticsearch ingestor Lambda functions:
   the catalogue graph. Uses the append-only log of deleted IDs created by the `graph_remover` to decide which
   documents to remove.
 
+### Processing mode compatibility
+
+| Service                         |                Full mode                 |        Window mode        |      ID mode       |
+|---------------------------------|:----------------------------------------:|:-------------------------:|:------------------:|
+| **Extractor**                   |            ✓ all transformers            | ✓ Wellcome catalogue only |    ✓ works only    |
+| **Bulk Loader**                 |            ✓ all transformers            | ✓ Wellcome catalogue only |    ✓ works only    |
+| **Graph Remover (Full)**        | ✓ external (non-Wellcome catalogue) only |             ✗             |         ✗          |
+| **Graph Remover (Incremental)** |        ✓ Wellcome catalogue only         | ✓ Wellcome catalogue only |    ✓ works only    |
+| **Ingestor Loader**             |            ✓ works + concepts            |    ✓ works + concepts     | ✓ works + concepts |
+| **Ingestor Indexer**            |            ✓ works + concepts            |    ✓ works + concepts     | ✓ works + concepts |
+| **Ingestor Deletions**          |             ✓ concepts only              |      ✓ concepts only      |  ✓ concepts only   |
+
 ## Source code organisation
 
 The `src` directory contains all Python source code for the graph pipeline (Python 3.13). Each Lambda's handler lives
