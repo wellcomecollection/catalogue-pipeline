@@ -38,7 +38,12 @@ class ConceptsIndexExtractor(GraphBaseConceptsExtractor):
         self.es_client = es_client
 
     def get_concept_ids_to_process(self) -> Generator[str]:
-        """Stream works from the merged index and yield all concept IDs referenced from each work"""
+        """Stream concept IDs to process.
+
+        In ID mode, ``event.ids`` are treated as concept IDs (not work IDs)
+        and yielded directly. Otherwise, concepts are discovered by streaming
+        works from the merged index.
+        """
         if self.event.ids:
             yield from self.event.ids
         else:

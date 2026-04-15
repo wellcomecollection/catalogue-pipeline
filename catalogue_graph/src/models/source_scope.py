@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from typing import Literal
 
 from pydantic import BaseModel, model_validator
@@ -80,4 +81,4 @@ class SourceScope(BaseModel):
         if len(joined_ids) <= 10:
             return joined_ids
 
-        return str(hash(joined_ids))
+        return hashlib.sha256(joined_ids.encode()).hexdigest()[:12]
