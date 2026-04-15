@@ -93,6 +93,7 @@ def local_handler(parser: ArgumentParser) -> None:
             "pipeline_date",
             "index_date_merged",
             "window",
+            "ids",
             "pit_id",
             "environment",
             "es_mode",

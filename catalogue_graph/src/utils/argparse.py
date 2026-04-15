@@ -4,6 +4,7 @@ from typing import Literal
 
 BasePipelineEventArgument = Literal[
     "window",
+    "ids",
     "pipeline_date",
     "index_date_merged",
     "pit_id",
@@ -31,6 +32,14 @@ def add_pipeline_event_args(
             type=str,
             help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
             required=False,
+        )
+    if "ids" in args:
+        parser.add_argument(
+            "--ids",
+            nargs="+",
+            required=False,
+            default=None,
+            help="Space-separated IDs to process (e.g. id1 id2 id3). Cannot be used in combination with a time window.",
         )
     if "pipeline_date" in args:
         parser.add_argument(

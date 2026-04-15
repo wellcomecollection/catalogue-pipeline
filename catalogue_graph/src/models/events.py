@@ -77,6 +77,8 @@ class GraphPipelineEvent(BasePipelineEvent):
         parts: list[str] = [self.s3_prefix, self.pipeline_date]
         if self.window is not None:
             parts += ["windows", self.window.to_formatted_string()]
+        if self.ids:
+            parts += ["ids", self.ids_path_segment]
 
         return parts
 

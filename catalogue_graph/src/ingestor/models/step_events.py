@@ -32,6 +32,8 @@ class IngestorStepEvent(BasePipelineEvent):
         job_id = self.job_id
         if self.window is not None:
             job_id = self.window.to_formatted_string()
+        if self.ids is not None:
+            job_id = self.ids_path_segment
 
         parts: list[str] = [
             f"{config.INGESTOR_S3_PREFIX}_{self.ingestor_type}",

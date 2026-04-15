@@ -28,6 +28,7 @@ def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
         entity_type="nodes",
         pipeline_date=event.pipeline_date,
         window=event.window,
+        ids=event.ids,
         environment=event.environment,
     )
 
@@ -82,7 +83,14 @@ def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(
         parser,
-        {"pipeline_date", "index_date_merged", "window", "environment", "es_mode"},
+        {
+            "pipeline_date",
+            "index_date_merged",
+            "window",
+            "ids",
+            "environment",
+            "es_mode",
+        },
     )
 
     parser.add_argument(

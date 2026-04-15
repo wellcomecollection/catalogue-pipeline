@@ -65,3 +65,19 @@ class SourceScope(BaseModel):
             return 1
 
         return config.ES_SOURCE_SLICE_COUNT
+
+    @property
+    def ids_path_segment(self) -> str:
+        """
+        Return a compact, path-safe representation of the selected IDs.
+        Short ID lists are joined directly, longer lists are hashed.
+        """
+        if not self.ids:
+            raise ValueError()
+
+        joined_ids = "|".join(sorted(self.ids))
+
+        if len(joined_ids) <= 10:
+            return joined_ids
+
+        return str(hash(joined_ids))
