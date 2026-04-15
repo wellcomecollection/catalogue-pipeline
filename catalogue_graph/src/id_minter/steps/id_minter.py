@@ -10,7 +10,6 @@ import argparse
 from typing import Any
 
 import structlog
-from elasticsearch import Elasticsearch
 from pydantic import BaseModel, ConfigDict
 
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
@@ -27,7 +26,6 @@ from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
 from models.incremental_window import IncrementalWindow
-from models.source_scope import SourceScope
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.models.manifests import StepManifest
@@ -58,23 +56,6 @@ def build_runtime(
         resolver=res,
         source_es_mode=source_es_mode,
         target_es_mode=target_es_mode,
-    )
-
-
-def build_minting_source(
-    source_scope: SourceScope,
-    es_client: Elasticsearch,
-    index_name: str,
-) -> IdMintingSource:
-    full_query = source_scope.to_elasticsearch_query(
-        range_filter_field_name="indexed_at"
-    )
-
-    return IdMintingSource(
-        es_client=es_client,
-        index_name=index_name,
-        query=full_query,
-        slice_count=source_scope.slice_count,
     )
 
 
@@ -111,8 +92,10 @@ def execute(
         es_mode=runtime.target_es_mode,
     )
 
-    elastic_source = build_minting_source(
-        request.source_scope, source_client, source_index
+    elastic_source = IdMintingSource(
+        source_scope=request.source_scope,
+        es_client=source_client,
+        index_name=source_index,
     )
     transformer = IdMintingTransformer(
         elastic_source,
