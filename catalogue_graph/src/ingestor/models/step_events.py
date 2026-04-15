@@ -27,20 +27,21 @@ class IngestorStepEvent(BasePipelineEvent):
         `ingestor_concepts/2025-05-05/2025-06-06/20250930T0930`
 
         Incremental mode example (job ID corresponds to the processed time window):
-        `ingestor_concepts/2025-05-05/2025-06-06/2025-01-01T00:00-2025-01-01T00:15`
+        `ingestor_concepts/2025-05-05/2025-06-06/20250101T0000-20250101T0015/`
         """
-        job_id = self.job_id
-        if self.window is not None:
-            job_id = self.window.to_formatted_string()
-        if self.ids is not None:
-            job_id = self.ids_path_segment
-
         parts: list[str] = [
             f"{config.INGESTOR_S3_PREFIX}_{self.ingestor_type}",
             self.pipeline_date,
             self.index_date,
-            job_id,
         ]
+
+        if self.window is not None:
+            parts.append(self.window.to_formatted_string())
+        elif self.ids is not None:
+            parts += ["by_id", self.ids_path_segment]
+        else:
+            parts.append(self.job_id)
+
         return str(PurePosixPath(*parts))
 
     def get_s3_uri(self, file_name: str, file_format: str | None = None) -> str:
