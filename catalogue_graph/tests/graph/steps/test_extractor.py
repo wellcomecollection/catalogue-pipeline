@@ -269,7 +269,7 @@ def test_id_mode() -> None:
     lambda_handler(event, None)
 
     # File name contains pipe-separated sorted IDs
-    expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/ids/work-id-1|work-id-2/catalogue_works__nodes.csv"
+    expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/by_id/work-id-1||work-id-2/catalogue_works__nodes.csv"
     assert len(MockSmartOpen.file_lookup) == 1
     assert expected_s3_uri in MockSmartOpen.file_lookup
 

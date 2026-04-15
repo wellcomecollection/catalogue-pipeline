@@ -78,7 +78,7 @@ class GraphPipelineEvent(BasePipelineEvent):
         if self.window is not None:
             parts += ["windows", self.window.to_formatted_string()]
         if self.ids:
-            parts += ["ids", self.ids_path_segment]
+            parts += ["by_id", self.ids_path_segment]
 
         return parts
 
