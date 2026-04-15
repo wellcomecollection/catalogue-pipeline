@@ -82,4 +82,5 @@ class SourceScope(BaseModel):
         if len(self.ids) <= 5:
             return joined_ids
 
-        return hashlib.sha256(joined_ids.encode()).hexdigest()[:12]
+        ids_hash = hashlib.sha256(joined_ids.encode()).hexdigest()
+        return f"hash_{ids_hash[:12]}"

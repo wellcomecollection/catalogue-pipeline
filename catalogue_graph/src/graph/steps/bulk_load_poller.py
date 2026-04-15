@@ -78,7 +78,9 @@ def bulk_loader_event_from_s3_uri(
 
     ids = None
     if m.group("ids"):
-        ids = [row[":ID"] for row in get_csv_from_s3(s3_uri)]
+        ids_column = ":START_ID" if m.group("entity_type") == "edges" else ":ID"
+        # Deduplicate while preserving order
+        ids = list(dict.fromkeys([row[ids_column] for row in get_csv_from_s3(s3_uri)]))
 
     return BulkLoaderEvent(
         environment=environment,
