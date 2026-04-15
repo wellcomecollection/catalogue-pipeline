@@ -1,10 +1,3 @@
-"""Step Function event models for the ID Minter.
-
-- StepFunctionMintingRequest    → input event (wraps SourceQueryRequest + job_id)
-- StepFunctionMintingResponse   → output event
-- StepFunctionMintingFailure    → per-identifier failure detail
-"""
-
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict
