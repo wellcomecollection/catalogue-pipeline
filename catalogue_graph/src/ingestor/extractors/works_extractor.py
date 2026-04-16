@@ -2,12 +2,13 @@ from collections.abc import Generator, Iterator
 from itertools import batched
 
 import structlog
-from elasticsearch import Elasticsearch
-from pydantic import BaseModel
-
 from clients.neptune_client import NeptuneClient
+from elasticsearch import Elasticsearch
 from graph.sources.catalogue.concepts_source import extract_identified_concepts
 from graph.sources.merged_works_source import MergedWorksSource
+from models.events import BasePipelineEvent
+from pydantic import BaseModel
+
 from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
@@ -17,7 +18,6 @@ from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     WorkHierarchy,
 )
-from models.events import BasePipelineEvent
 
 from .base_extractor import GraphBaseExtractor
 from .work_concepts_extractor import WorkConceptsExtractor
@@ -165,7 +165,8 @@ class GraphWorksExtractor(GraphBaseExtractor):
                 )
 
                 # When a work is processed in incremental mode, its parent and descendants must be processed too.
-                # This is because each work document contains references to all its ancestors and children.
+                # This is because each work document stores the IDs of all of its ancestors (`partOf` field)
+                # and children (`parts` field), along with their titles and reference numbers.
                 if self.event.mode_label != "full":
                     raw_desc = descendants_batch.get(work_id, {}).get("descendants", [])
                     descendants = [WorkNode.model_validate(d) for d in raw_desc]
