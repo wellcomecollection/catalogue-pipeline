@@ -24,7 +24,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(
         parser,
-        {"pipeline_date", "index_date_merged", "window", "environment", "es_mode"},
+        {
+            "pipeline_date",
+            "index_date_merged",
+            "window",
+            "ids",
+            "environment",
+            "es_mode",
+        },
     )
     parser.add_argument(
         "--ingestor-type",
