@@ -6,7 +6,6 @@ from collections.abc import Generator, Iterable
 from typing import Any
 
 import structlog
-from pydantic import ValidationError
 
 from core.transformer import ElasticBaseTransformer
 from id_minter.embedder import process_work
@@ -40,7 +39,7 @@ class IdMintingTransformer(ElasticBaseTransformer):
                 si = SourceIdentifier.model_validate(
                     raw_doc["state"]["sourceIdentifier"]
                 )
-            except (ValidationError, KeyError) as e:
+            except Exception as e:
                 self._add_error(e, "extract_id", str(raw_doc.get("state", {})))
                 continue
 
