@@ -151,7 +151,11 @@ class GraphWorksExtractor(GraphBaseExtractor):
             # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
             ancestors_batch = self._get_work_ancestors(visible_work_ids)
             children_batch = self._get_work_children(visible_work_ids)
-            descendants_batch = self._get_work_descendants(visible_work_ids)
+            descendants_batch = (
+                self._get_work_descendants(visible_work_ids)
+                if self.event.mode_label != "full"
+                else {}
+            )
             concepts_batch = self._get_work_concepts(visible_works)
 
             for es_work in visible_works:
