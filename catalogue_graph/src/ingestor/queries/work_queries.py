@@ -24,3 +24,15 @@ WORK_CHILDREN_QUERY = """
         WITH work, child_work, COUNT(grandchild_identifier) AS child_work_parts
         RETURN work.id AS id, COLLECT({ work: child_work, parts: child_work_parts }) AS children
 """
+
+WORK_DESCENDANTS_QUERY = """
+    UNWIND $ids AS id
+    MATCH (work:Work {`~id`: id})
+
+    MATCH (work)-[:HAS_PATH_IDENTIFIER]->(identifier)
+    MATCH (identifier)<-[:HAS_PARENT*]-(descendant_identifier)
+    MATCH (descendant_identifier)<-[:HAS_PATH_IDENTIFIER]-(descendant_work)
+
+    WITH work.id AS id, descendant_work
+    RETURN id, COLLECT(descendant_work) AS descendants;
+"""

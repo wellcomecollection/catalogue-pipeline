@@ -12,7 +12,11 @@ from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
 )
-from ingestor.models.neptune.query_result import ExtractedConcept, WorkHierarchy
+from ingestor.models.neptune.node import WorkNode
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    WorkHierarchy,
+)
 from models.events import BasePipelineEvent
 
 from .base_extractor import GraphBaseExtractor
@@ -99,6 +103,10 @@ class GraphWorksExtractor(GraphBaseExtractor):
         """Return all children of each work in the current batch."""
         return self.make_neptune_query("work_children", ids)
 
+    def _get_work_descendants(self, ids: list[str]) -> dict:
+        """Return all descendants of each work in the current batch."""
+        return self.make_neptune_query("work_descendants", ids)
+
     def _get_work_concepts(self, works: list[VisibleMergedWork]) -> dict:
         """Return all concepts of each work in the current batch."""
         concept_ids_by_work = {}
@@ -145,6 +153,13 @@ class GraphWorksExtractor(GraphBaseExtractor):
             children_batch = self._get_work_children(visible_work_ids)
             concepts_batch = self._get_work_concepts(visible_works)
 
+            # Descendants are only needed in incremental mode
+            descendants_batch = (
+                self._get_work_descendants(visible_work_ids)
+                if self.event.mode_label != "full"
+                else {}
+            )
+
             for es_work in visible_works:
                 work_id = es_work.state.canonical_id
                 self.streamed_ids.add(work_id)
@@ -155,15 +170,15 @@ class GraphWorksExtractor(GraphBaseExtractor):
                     children=children_batch.get(work_id, {}).get("children", []),
                 )
 
-                # When a work is processed, all of its children and ancestors must be processed too for consistency.
-                # (For example, if the title of a parent work changes, all of its children must be processed
-                # and reindexed to store the new title.)
-                self.related_ids.update(
-                    c.work.properties.id for c in hierarchy.children
-                )
-                self.related_ids.update(
-                    c.work.properties.id for c in hierarchy.ancestors
-                )
+                # When a work is processed in incremental mode, its parent and descendants must be processed too.
+                # This is because each work document stores the IDs of all of its ancestors (`partOf` field)
+                # and children (`parts` field), along with their titles and reference numbers.
+                if self.event.mode_label != "full":
+                    raw_desc = descendants_batch.get(work_id, {}).get("descendants", [])
+                    descendants = [WorkNode.model_validate(d) for d in raw_desc]
+                    self.related_ids |= {d.properties.id for d in descendants}
+                    if hierarchy.ancestors:
+                        self.related_ids.add(hierarchy.ancestors[0].work.properties.id)
 
                 yield VisibleExtractedWork(
                     work=es_work, hierarchy=hierarchy, concepts=concepts_batch[work_id]
