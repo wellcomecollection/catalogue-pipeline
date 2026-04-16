@@ -12,7 +12,7 @@ class SourceIdentifier(SerialisableModel):
     value: str
 
     def __str__(self) -> str:
-        return f"Work[{self.identifier_type.id}/{self.value}]"
+        return f"{self.ontology_type}[{self.identifier_type.id}/{self.value}]"
 
 
 IdentifyType = Literal["Identifiable", "Identified", "Unidentifiable"]
