@@ -10,9 +10,10 @@ import structlog
 
 import config
 import utils.elasticsearch
-from ingestor.models.indexable import IndexableRecord
-from ingestor.models.indexable_concept import IndexableConcept
-from ingestor.models.indexable_work import IndexableWork
+from ingestor.models.indexable.concept import IndexableConcept
+from ingestor.models.indexable.image import IndexableImage
+from ingestor.models.indexable.record import IndexableRecord
+from ingestor.models.indexable.work import IndexableWork
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerMonitorLambdaEvent,
@@ -32,6 +33,7 @@ logger = structlog.get_logger(__name__)
 RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
     "concepts": IndexableConcept,
     "works": IndexableWork,
+    "images": IndexableImage,
 }
 
 
@@ -189,7 +191,7 @@ def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--ingestor-type",
         type=str,
-        choices=["concepts", "works"],
+        choices=typing.get_args(IngestorType),
         help="The type of the records being ingested",
         required=True,
     )
