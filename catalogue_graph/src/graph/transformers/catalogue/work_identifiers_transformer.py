@@ -3,6 +3,7 @@ from collections.abc import Generator
 from elasticsearch import Elasticsearch
 
 from graph.sources.merged_works_with_children_source import (
+    COLLECTION_PATH_FIELD,
     MergedWorksWithChildrenSource,
 )
 from graph.transformers.graph_transformer import GraphBaseTransformer
@@ -27,7 +28,7 @@ ES_QUERY = {
     "bool": {
         "must": [
             {"match": {"type": "Visible"}},
-            {"exists": {"field": "data.collectionPath.path"}},
+            {"exists": {"field": COLLECTION_PATH_FIELD}},
         ]
     }
 }
