@@ -6,25 +6,15 @@ from collections.abc import Generator, Iterable
 from typing import Any
 
 import structlog
+from pydantic import ValidationError
 
 from core.transformer import ElasticBaseTransformer
 from id_minter.embedder import process_work
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.models.identifier import IdResolver
+from models.pipeline.identifier import SourceIdentifier
 
 logger = structlog.get_logger(__name__)
-
-
-def _build_source_identifier_string(source_identifier: dict) -> str:
-    """Build the composite source identifier string from a sourceIdentifier dict.
-
-    Format: ``OntologyType[identifierType/value]``
-    e.g. ``Work[sierra-system-number/b1000001]``
-    """
-    ontology_type = source_identifier["ontologyType"]
-    identifier_type = source_identifier["identifierType"]["id"]
-    value = source_identifier["value"]
-    return f"{ontology_type}[{identifier_type}/{value}]"
 
 
 class IdMintingTransformer(ElasticBaseTransformer):
@@ -47,19 +37,20 @@ class IdMintingTransformer(ElasticBaseTransformer):
     def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, dict]]:
         for raw_doc in raw_nodes:
             try:
-                si = raw_doc["state"]["sourceIdentifier"]
-                row_id = _build_source_identifier_string(si)
-            except (KeyError, TypeError) as e:
+                si = SourceIdentifier.model_validate(
+                    raw_doc["state"]["sourceIdentifier"]
+                )
+            except (ValidationError, KeyError) as e:
                 self._add_error(e, "extract_id", str(raw_doc.get("state", {})))
                 continue
 
             try:
                 embedded = process_work(raw_doc, self.resolver)
             except Exception as e:
-                self._add_error(e, "embed", row_id)
+                self._add_error(e, "embed", str(si))
                 continue
 
-            yield (row_id, embedded)
+            yield str(si), embedded
 
     def _get_document_id(self, record: dict) -> str:
         return str(record["state"]["canonicalId"])
