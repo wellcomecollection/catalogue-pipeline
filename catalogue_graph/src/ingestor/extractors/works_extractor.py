@@ -164,13 +164,14 @@ class GraphWorksExtractor(GraphBaseExtractor):
                     children=children_batch.get(work_id, {}).get("children", []),
                 )
 
-                # When a work is processed, all of its descendants and parents must be processed too for consistency.
+                # When a work is processed in incremental mode, its parent and descendants must be processed too.
                 # This is because each work document contains references to all its ancestors and children.
-                raw_desc = descendants_batch.get(work_id, {}).get("descendants", [])
-                descendants = [WorkNode.model_validate(d) for d in raw_desc]
-                self.related_ids |= {d.properties.id for d in descendants}
-                if hierarchy.ancestors:
-                    self.related_ids.add(hierarchy.ancestors[0].work.properties.id)
+                if self.event.mode_label != "full":
+                    raw_desc = descendants_batch.get(work_id, {}).get("descendants", [])
+                    descendants = [WorkNode.model_validate(d) for d in raw_desc]
+                    self.related_ids |= {d.properties.id for d in descendants}
+                    if hierarchy.ancestors:
+                        self.related_ids.add(hierarchy.ancestors[0].work.properties.id)
 
                 yield VisibleExtractedWork(
                     work=es_work, hierarchy=hierarchy, concepts=concepts_batch[work_id]
