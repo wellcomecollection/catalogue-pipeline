@@ -11,9 +11,9 @@ from elasticsearch import Elasticsearch
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import (
     IdMintingTransformer,
-    _build_source_identifier_string,
 )
 from id_minter.models.identifier import SourceId
+from models.pipeline.identifier import SourceIdentifier
 from tests.mocks import MockElasticsearchClient
 
 # ---------------------------------------------------------------------------
@@ -72,21 +72,18 @@ class _StubSource(IdMintingSource):
         yield from self.docs
 
 
-# ---------------------------------------------------------------------------
-# Tests: _build_source_identifier_string
-# ---------------------------------------------------------------------------
-
-
 class TestBuildSourceIdentifierString:
     def test_builds_composite_string(self) -> None:
-        si = _make_source_identifier("Work", "sierra-system-number", "b1000001")
-        assert (
-            _build_source_identifier_string(si) == "Work[sierra-system-number/b1000001]"
+        si = SourceIdentifier.model_validate(
+            _make_source_identifier("Work", "sierra-system-number", "b1000001")
         )
+        assert str(si) == "Work[sierra-system-number/b1000001]"
 
     def test_miro_identifier(self) -> None:
-        si = _make_source_identifier("Work", "miro-image-number", "A0001234")
-        assert _build_source_identifier_string(si) == "Work[miro-image-number/A0001234]"
+        si = SourceIdentifier.model_validate(
+            _make_source_identifier("Work", "miro-image-number", "A0001234")
+        )
+        assert str(si) == "Work[miro-image-number/A0001234]"
 
 
 # ---------------------------------------------------------------------------
