@@ -6,24 +6,15 @@ import typing
 import structlog
 
 from ingestor.models.step_events import (
-    IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
 )
 from ingestor.steps.ingestor_indexer import handler as indexer_handler
 from ingestor.steps.ingestor_loader import create_job_id
 from ingestor.steps.ingestor_loader import handler as loader_handler
 from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
-from utils.elasticsearch import ElasticsearchMode
 from utils.types import IngestorType
 
 logger = structlog.get_logger(__name__)
-
-
-def run_index(
-    loader_result: IngestorIndexerLambdaEvent, es_mode: ElasticsearchMode
-) -> None:
-    result = indexer_handler(loader_result, es_mode=es_mode)
-    logger.info("Indexed documents", count=result.success_count)
 
 
 # Run the whole pipeline locally.
@@ -79,7 +70,8 @@ def main() -> None:
         loader_event,
         es_mode=es_mode,
     )
-    run_index(loader_result, es_mode)
+    result = indexer_handler(loader_result, es_mode=es_mode)
+    logger.info("Indexed documents", count=result.success_count)
 
 
 if __name__ == "__main__":
