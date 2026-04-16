@@ -2,7 +2,9 @@ from collections.abc import Generator
 
 from elasticsearch import Elasticsearch
 
-from graph.sources.merged_works_source import MergedWorksSource
+from graph.sources.merged_works_with_children_source import (
+    MergedWorksWithChildrenSource,
+)
 from graph.transformers.graph_transformer import GraphBaseTransformer
 from models.events import BasePipelineEvent
 from models.graph_edge import (
@@ -37,7 +39,7 @@ class CatalogueWorkIdentifiersTransformer(GraphBaseTransformer):
         event: BasePipelineEvent,
         es_client: Elasticsearch,
     ) -> None:
-        self.source = MergedWorksSource(
+        self.source = MergedWorksWithChildrenSource(
             event, query=ES_QUERY, fields=ES_FIELDS, es_client=es_client
         )
 
