@@ -70,9 +70,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         self.extracted_concepts: dict[str, ExtractedConcept] = {}
 
     def get_related_works_source(self, related_ids: list[str]) -> MergedWorksSource:
-        # Remove `window` from event before retrieving related works. (All related works should be processed
+        # Remove SourceScope filters from event before retrieving related works. (All related works should be processed
         # even if they aren't part of the current window.)
-        event = self.event.copy(update={"window": None})
+        event = self.event.copy(update={"window": None, "ids": None})
         return MergedWorksSource(
             event=event,
             query=get_related_works_query(related_ids),
