@@ -1,11 +1,12 @@
 import argparse
 from pathlib import PurePosixPath
-from typing import Self
+from typing import Self, get_args
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
+from models.source_scope import SourceScope
 from utils.types import (
     CatalogueTransformerType,
     EntityType,
@@ -28,8 +29,7 @@ class PipelineIndexDates(BaseModel):
     works: str | None = None
 
 
-class BasePipelineEvent(BaseModel):
-    window: IncrementalWindow | None = None
+class BasePipelineEvent(SourceScope):
     pipeline_date: str
     pit_id: str | None = None
     index_dates: PipelineIndexDates = PipelineIndexDates()
@@ -47,6 +47,23 @@ class GraphPipelineEvent(BasePipelineEvent):
     transformer_type: TransformerType
     entity_type: EntityType
 
+    @model_validator(mode="after")
+    def validate_incremental_transformer(self) -> Self:
+        catalogue_transformers = get_args(CatalogueTransformerType)
+        is_catalogue_transformer = self.transformer_type in catalogue_transformers
+
+        if self.window and not is_catalogue_transformer:
+            raise ValueError(
+                f"The {self.transformer_type} transformer does not support incremental mode. "
+                "Only catalogue transformers support incremental (window-based) processing."
+            )
+        if self.ids and self.transformer_type != "catalogue_works":
+            raise ValueError(
+                "ID-based processing is only supported by the `catalogue_works` transformer."
+            )
+
+        return self
+
     @property
     def s3_prefix(self) -> str:
         raise NotImplementedError()
@@ -60,6 +77,8 @@ class GraphPipelineEvent(BasePipelineEvent):
         parts: list[str] = [self.s3_prefix, self.pipeline_date]
         if self.window is not None:
             parts += ["windows", self.window.to_formatted_string()]
+        if self.ids:
+            parts += ["by_id", self.ids_path_segment]
 
         return parts
 

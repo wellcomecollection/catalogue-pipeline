@@ -1,28 +1,8 @@
 from elasticsearch import Elasticsearch
 
-import config
 from core.source import ElasticSource
-from models.events import BasePipelineEvent, IncrementalWindow
+from models.events import BasePipelineEvent
 from utils.elasticsearch import get_merged_index_name
-
-
-def build_merged_index_query(
-    query: dict | None,
-    window: IncrementalWindow | None,
-) -> dict:
-    full_query = {"match_all": {}} if query is None else query
-    if window is not None:
-        range_filter = {
-            "range": {
-                "state.mergedTime": {
-                    "gte": window.start_time.isoformat(),
-                    "lte": window.end_time.isoformat(),
-                }
-            }
-        }
-        full_query = {"bool": {"must": [full_query, range_filter]}}
-
-    return full_query
 
 
 class MergedWorksSource(ElasticSource):
@@ -36,10 +16,8 @@ class MergedWorksSource(ElasticSource):
         super().__init__(
             es_client=es_client,
             index_name=get_merged_index_name(event),
-            query=build_merged_index_query(query, event.window),
+            query=event.to_elasticsearch_query("state.mergedTime", query),
             pit_id=event.pit_id,
             fields=fields,
-            batch_size=config.ES_SOURCE_BATCH_SIZE,
-            slice_count=config.ES_SOURCE_SLICE_COUNT,
-            parallelism=config.ES_SOURCE_PARALLELISM,
+            slice_count=event.slice_count,
         )

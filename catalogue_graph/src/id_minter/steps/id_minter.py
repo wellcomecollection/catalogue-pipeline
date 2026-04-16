@@ -10,7 +10,6 @@ import argparse
 from typing import Any
 
 import structlog
-from elasticsearch import Elasticsearch
 from pydantic import BaseModel, ConfigDict
 
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
@@ -20,7 +19,6 @@ from id_minter.id_minting_transformer import IdMintingTransformer
 from id_minter.manifests import IdMinterManifestWriter
 from id_minter.models.identifier import IdResolver
 from id_minter.models.step_events import (
-    SourceQueryRequest,
     StepFunctionMintingRequest,
 )
 from id_minter.reporting import IdMinterReport
@@ -61,27 +59,6 @@ def build_runtime(
     )
 
 
-def build_minting_source(
-    source_query: SourceQueryRequest,
-    es_client: Elasticsearch,
-    index_name: str,
-) -> IdMintingSource:
-    """Build the appropriate IdMintingSource from a :class:`SourceQueryRequest`."""
-    if source_query.source_identifiers is not None:
-        return IdMintingSource.from_identifiers(
-            es_client, index_name, source_query.source_identifiers
-        )
-    elif source_query.window is not None:
-        return IdMintingSource.from_window(
-            es_client,
-            index_name,
-            source_query.window.start_time,
-            source_query.window.end_time,
-        )
-    else:
-        return IdMintingSource.from_match_all(es_client, index_name)
-
-
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
@@ -115,8 +92,10 @@ def execute(
         es_mode=runtime.target_es_mode,
     )
 
-    elastic_source = build_minting_source(
-        request.source_query, source_client, source_index
+    elastic_source = IdMintingSource(
+        source_scope=request.source_scope,
+        es_client=source_client,
+        index_name=source_index,
     )
     transformer = IdMintingTransformer(
         elastic_source,
@@ -168,7 +147,7 @@ def log_runtime_config(
         source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
         target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
         downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
-        mode=request.source_query.mode_label,
+        mode=request.source_scope.mode_label,
         identifiers=request.source_identifiers,
         window=request.window.model_dump() if request.window else None,
         migrations="yes" if cfg.apply_migrations else "no",

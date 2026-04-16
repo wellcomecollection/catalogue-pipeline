@@ -34,15 +34,25 @@ class ConceptsIndexExtractor(GraphBaseConceptsExtractor):
         neptune_client: NeptuneClient,
     ):
         super().__init__(neptune_client)
-        self.es_source = CatalogueConceptsSource(
-            event,
-            es_client=es_client,
-        )
+        self.event = event
+        self.es_client = es_client
 
     def get_concept_ids_to_process(self) -> Generator[str]:
-        """Stream works from the merged index and yield all concept IDs referenced from each work"""
-        for extracted in self.es_source.stream_raw():
-            yield extracted.concept.id.canonical_id
+        """Stream concept IDs to process.
+
+        In ID mode, ``event.ids`` are treated as concept IDs (not work IDs)
+        and yielded directly. Otherwise, concepts are discovered by streaming
+        works from the merged index.
+        """
+        if self.event.ids:
+            yield from self.event.ids
+        else:
+            es_source = CatalogueConceptsSource(
+                self.event,
+                es_client=self.es_client,
+            )
+            for extracted in es_source.stream_raw():
+                yield extracted.concept.id.canonical_id
 
     def extract_raw(
         self,

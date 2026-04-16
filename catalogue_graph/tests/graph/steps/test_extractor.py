@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from typing import Any, get_args
 
+import pydantic
 import pytest
 
 from config import (
@@ -234,5 +235,51 @@ def test_unsupported_incremental_mode() -> None:
     }
 
     # The loc_concepts transformer does not support incremental mode
-    with pytest.raises(ValueError):
+    with pytest.raises(pydantic.ValidationError):
         lambda_handler(event, None)
+
+
+def test_unsupported_id_based_processing() -> None:
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "stream_destination": "local",
+        "pipeline_date": "2024-06-06",
+        "ids": ["abc123"],
+        "sample_size": 1,
+    }
+
+    # ID-based processing is only supported by the catalogue_works transformer
+    with pytest.raises(pydantic.ValidationError):
+        lambda_handler(event, None)
+
+
+def test_id_mode() -> None:
+    event = {
+        "transformer_type": "catalogue_works",
+        "entity_type": "nodes",
+        "stream_destination": "s3",
+        "pipeline_date": "2024-06-06",
+        "ids": ["work-id-2", "work-id-1"],
+        "sample_size": 100,
+    }
+    add_mock_merged_documents("2024-06-06", work_status="Visible")
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
+    lambda_handler(event, None)
+
+    # File name contains underscore-separated sorted IDs
+    expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/by_id/work-id-1_work-id-2/catalogue_works__nodes.csv"
+    assert len(MockSmartOpen.file_lookup) == 1
+    assert expected_s3_uri in MockSmartOpen.file_lookup
+
+    # ID mode should produce an ids query, not a range query
+    assert len(MockElasticsearchClient.queries) >= 1
+    assert MockElasticsearchClient.queries[0] == {
+        "bool": {
+            "must": [
+                {"match": {"type": "Visible"}},
+                {"ids": {"values": ["work-id-2", "work-id-1"]}},
+            ]
+        }
+    }

@@ -54,7 +54,7 @@ def handler(
     )
 
     es_remover = ElasticsearchRemover(event, es_mode)
-    ids_to_delete = get_ids_to_delete(event)
+    ids_to_delete = set(event.ids) if event.ids else get_ids_to_delete(event)
     current_id_count = es_remover.get_document_count()
 
     # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
@@ -82,7 +82,14 @@ def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(
         parser,
-        {"pipeline_date", "index_date_merged", "window", "environment", "es_mode"},
+        {
+            "pipeline_date",
+            "index_date_merged",
+            "window",
+            "ids",
+            "environment",
+            "es_mode",
+        },
     )
 
     parser.add_argument(

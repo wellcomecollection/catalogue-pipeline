@@ -23,6 +23,7 @@ import pytest
 from elasticsearch import Elasticsearch
 
 from id_minter.config import IdMinterConfig, RDSClientConfig
+from id_minter.id_minting_source import IdMintingSource
 from id_minter.models.identifier import SourceId
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
@@ -30,7 +31,6 @@ from id_minter.models.step_events import (
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.steps.id_minter import (
     IdMinterRuntime,
-    build_minting_source,
     execute,
     handler,
 )
@@ -623,11 +623,6 @@ class TestSnsPublishing:
         assert len(MockSNSClient.publish_batch_request_entries) == 0
 
 
-# ---------------------------------------------------------------------------
-# Tests: build_minting_source() mode selection
-# ---------------------------------------------------------------------------
-
-
 class TestBuildMintingSource:
     """Verify that build_minting_source selects the correct query for each mode."""
 
@@ -638,8 +633,8 @@ class TestBuildMintingSource:
             job_id="build-source-window",
         )
 
-        source = build_minting_source(
-            request.source_query, es_client, "works-source-dev"
+        source = IdMintingSource(
+            request.source_scope, es_client, index_name="works-source-dev"
         )
 
         assert source.query == {
@@ -660,8 +655,8 @@ class TestBuildMintingSource:
             job_id="build-source-ids",
         )
 
-        source = build_minting_source(
-            request.source_query, es_client, "works-source-dev"
+        source = IdMintingSource(
+            request.source_scope, es_client, index_name="works-source-dev"
         )
 
         assert source.query == {"ids": {"values": ids}}
@@ -674,8 +669,8 @@ class TestBuildMintingSource:
             job_id="build-source-full",
         )
 
-        source = build_minting_source(
-            request.source_query, es_client, "works-source-dev"
+        source = IdMintingSource(
+            request.source_scope, es_client, index_name="works-source-dev"
         )
 
         assert source.query == {"match_all": {}}
