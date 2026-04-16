@@ -12,7 +12,11 @@ from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     WorkHierarchy,
 )
-from ingestor.queries.work_queries import WORK_ANCESTORS_QUERY, WORK_CHILDREN_QUERY
+from ingestor.queries.work_queries import (
+    WORK_ANCESTORS_QUERY,
+    WORK_CHILDREN_QUERY,
+    WORK_DESCENDANTS_QUERY,
+)
 from models.events import BasePipelineEvent
 from tests.mocks import (
     MockElasticsearchClient,
@@ -77,6 +81,7 @@ def mock_graph_relationships(
     expected_params = {"ids": all_indexed_work_ids}
     add_neptune_mock_response(WORK_ANCESTORS_QUERY, expected_params, ancestors)
     add_neptune_mock_response(WORK_CHILDREN_QUERY, expected_params, children)
+    add_neptune_mock_response(WORK_DESCENDANTS_QUERY, expected_params, [])
 
 
 def test_with_ancestors(monkeypatch: pytest.MonkeyPatch) -> None:

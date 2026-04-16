@@ -20,7 +20,11 @@ from ingestor.queries.concept_queries import (
     SAME_AS_CONCEPT_QUERY,
     SOURCE_CONCEPT_QUERY,
 )
-from ingestor.queries.work_queries import WORK_ANCESTORS_QUERY, WORK_CHILDREN_QUERY
+from ingestor.queries.work_queries import (
+    WORK_ANCESTORS_QUERY,
+    WORK_CHILDREN_QUERY,
+    WORK_DESCENDANTS_QUERY,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -41,7 +45,7 @@ ConceptQuery = Literal[
     "same_as_concept",
     ConceptRelatedQuery,
 ]
-WorkQuery = Literal["work_children", "work_ancestors"]
+WorkQuery = Literal["work_children", "work_ancestors", "work_descendants"]
 
 NEPTUNE_CHUNK_SIZE = 5000
 
@@ -52,6 +56,7 @@ NEPTUNE_EXPENSIVE_CHUNK_SIZE = 1000
 NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
     "work_children": WORK_CHILDREN_QUERY,
     "work_ancestors": WORK_ANCESTORS_QUERY,
+    "work_descendants": WORK_DESCENDANTS_QUERY,
     "concept": CONCEPT_QUERY,
     "concept_type": CONCEPT_TYPE_QUERY,
     "source_concept": SOURCE_CONCEPT_QUERY,
