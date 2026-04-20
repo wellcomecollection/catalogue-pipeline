@@ -97,7 +97,7 @@ class TestScan:
 
         keys = extract_source_identifiers(doc)
 
-        assert keys == [key_of(si)]
+        assert keys == [(key_of(si), None)]
 
     def test_retrieves_multiple_nested_source_identifiers(self) -> None:
         sis = [create_source_identifier() for _ in range(4)]
@@ -116,7 +116,31 @@ class TestScan:
 
         keys = extract_source_identifiers(doc)
 
-        assert set(keys) == {key_of(si) for si in sis}
+        assert set(keys) == {(key_of(si), None) for si in sis}
+
+    def test_retrieves_predecessor_alongside_source_identifier(self) -> None:
+        si = create_source_identifier(identifier_type="axiell-system-number")
+        pred = create_source_identifier(identifier_type="sierra-system-number")
+        doc = {"sourceIdentifier": si, "predecessorIdentifier": pred}
+
+        keys = extract_source_identifiers(doc)
+
+        assert keys == [(key_of(si), key_of(pred))]
+
+    def test_mixed_nodes_with_and_without_predecessors(self) -> None:
+        si1 = create_source_identifier()
+        si2 = create_source_identifier(identifier_type="axiell-system-number")
+        pred2 = create_source_identifier(identifier_type="sierra-system-number")
+        doc = {
+            "sourceIdentifier": si1,
+            "items": [
+                {"sourceIdentifier": si2, "predecessorIdentifier": pred2},
+            ],
+        }
+
+        keys = extract_source_identifiers(doc)
+
+        assert set(keys) == {(key_of(si1), None), (key_of(si2), key_of(pred2))}
 
     def test_raises_on_invalid_source_identifier(self) -> None:
         doc = {"sourceIdentifier": {"something": "something"}}
@@ -277,7 +301,7 @@ class TestProcessWork:
     def test_single_identifier_minted(self) -> None:
         si = create_source_identifier()
         cid = create_canonical_id()
-        doc = {"sourceIdentifier": si}
+        doc = {"state": {"sourceIdentifier": si}, "sourceIdentifier": si}
 
         key = key_of(si)
         resolver = FakeResolver(ids={(key[0], key[1], key[2]): cid})
@@ -291,7 +315,7 @@ class TestProcessWork:
         """When the resolver doesn't already know an ID, mint_ids creates it."""
         si = create_source_identifier()
         cid = create_canonical_id()
-        doc = {"sourceIdentifier": si}
+        doc = {"state": {"sourceIdentifier": si}, "sourceIdentifier": si}
 
         key = key_of(si)
         resolver = FakeResolver(ids={(key[0], key[1], key[2]): cid})
@@ -308,6 +332,7 @@ class TestProcessWork:
         cid1 = create_canonical_id()
         cid2 = create_canonical_id()
         doc = {
+            "state": {"sourceIdentifier": si1},
             "sourceIdentifier": si1,
             "type": "Identifiable",
             "items": [{"sourceIdentifier": si2, "type": "Identifiable"}],
@@ -337,6 +362,7 @@ class TestProcessWork:
         cid1 = create_canonical_id()
         cid2 = create_canonical_id()
         doc = {
+            "state": {"sourceIdentifier": si1},
             "sourceIdentifier": si1,
             "items": [{"sourceIdentifier": si2}],
         }
@@ -363,24 +389,141 @@ class TestProcessWork:
         si_new = create_source_identifier(identifier_type="axiell-collections-id")
         si_pred = create_source_identifier(identifier_type="sierra-system-number")
         cid = create_canonical_id()
-        doc = {"sourceIdentifier": si_new}
+        doc = {
+            "state": {"sourceIdentifier": si_new, "predecessorIdentifier": si_pred},
+        }
 
         k_new = key_of(si_new)
         k_pred = key_of(si_pred)
         resolver = FakeResolver(ids={(k_new[0], k_new[1], k_new[2]): cid})
 
-        result = process_work(doc, resolver, predecessors={k_new: k_pred})
+        result = process_work(doc, resolver)
 
-        assert result["canonicalId"] == cid
+        assert result["state"]["canonicalId"] == cid
         assert len(resolver.mint_calls) == 1
-        assert resolver.mint_calls[0][0][1] == (k_pred[0], k_pred[1], k_pred[2])
+        assert (k_new, k_pred) in resolver.mint_calls[0]
 
-    def test_empty_work_returns_unchanged(self) -> None:
-        doc = {"title": "A work with no identifiers"}
-        resolver = FakeResolver()
+    def test_no_data_identifiers_still_mints_state(self) -> None:
+        """State always has a sourceIdentifier; it gets minted even if nothing else does."""
+        si = create_source_identifier()
+        cid = create_canonical_id()
+        doc = {
+            "state": {"sourceIdentifier": si},
+            "title": "A work with no other sourceIdentifiers",
+        }
+
+        key = key_of(si)
+        resolver = FakeResolver(ids={(key[0], key[1], key[2]): cid})
 
         result = process_work(doc, resolver)
 
-        assert result == doc
-        assert not resolver.lookup_calls
-        assert not resolver.mint_calls
+        assert result["title"] == "A work with no other sourceIdentifiers"
+        assert result["state"]["canonicalId"] == cid
+        assert len(resolver.mint_calls) == 1
+
+    def test_nested_item_with_predecessor(self) -> None:
+        """A data entity's sourceIdentifier, eg. an item, can have its own predecessorIdentifier."""
+        si_work = create_source_identifier()
+        si_item = create_source_identifier(
+            identifier_type="axiell-system-number", ontology_type="Item"
+        )
+        si_item_pred = create_source_identifier(
+            identifier_type="sierra-system-number", ontology_type="Item"
+        )
+        cid_work = create_canonical_id()
+        cid_item = create_canonical_id()
+        doc = {
+            "state": {"sourceIdentifier": si_work},
+            "sourceIdentifier": si_work,
+            "items": [
+                {
+                    "sourceIdentifier": si_item,
+                    "predecessorIdentifier": si_item_pred,
+                }
+            ],
+        }
+
+        k_work = key_of(si_work)
+        k_item = key_of(si_item)
+        k_item_pred = key_of(si_item_pred)
+        resolver = FakeResolver(
+            ids={
+                (k_work[0], k_work[1], k_work[2]): cid_work,
+                (k_item[0], k_item[1], k_item[2]): cid_item,
+            }
+        )
+
+        result = process_work(doc, resolver)
+
+        assert result["canonicalId"] == cid_work
+        assert result["items"][0]["canonicalId"] == cid_item
+        assert (k_work, None) in resolver.mint_calls[0]
+        assert (k_item, k_item_pred) in resolver.mint_calls[0]
+
+    def test_state_with_predecessor(self) -> None:
+        """State's sourceIdentifier can also have a predecessorIdentifier."""
+        si_new = create_source_identifier(identifier_type="axiell-system-number")
+        si_pred = create_source_identifier(identifier_type="sierra-system-number")
+        cid = create_canonical_id()
+        doc = {
+            "state": {
+                "sourceIdentifier": si_new,
+                "predecessorIdentifier": si_pred,
+            },
+            "sourceIdentifier": si_new,
+        }
+
+        k_new = key_of(si_new)
+        k_pred = key_of(si_pred)
+        resolver = FakeResolver(ids={(k_new[0], k_new[1], k_new[2]): cid})
+
+        result = process_work(doc, resolver)
+
+        assert result["state"]["canonicalId"] == cid
+        assert result["canonicalId"] == cid
+        assert (k_new, k_pred) in resolver.mint_calls[0]
+
+    def test_multiple_predecessors_across_doc(self) -> None:
+        """Both state and a nested item have predecessors."""
+        si_work = create_source_identifier(identifier_type="axiell-system-number")
+        si_work_pred = create_source_identifier(identifier_type="sierra-system-number")
+        si_item = create_source_identifier(
+            identifier_type="axiell-system-number", ontology_type="Item"
+        )
+        si_item_pred = create_source_identifier(
+            identifier_type="sierra-system-number", ontology_type="Item"
+        )
+        cid_work = create_canonical_id()
+        cid_item = create_canonical_id()
+        doc = {
+            "state": {
+                "sourceIdentifier": si_work,
+                "predecessorIdentifier": si_work_pred,
+            },
+            "sourceIdentifier": si_work,
+            "predecessorIdentifier": si_work_pred,
+            "items": [
+                {
+                    "sourceIdentifier": si_item,
+                    "predecessorIdentifier": si_item_pred,
+                }
+            ],
+        }
+
+        k_work = key_of(si_work)
+        k_work_pred = key_of(si_work_pred)
+        k_item = key_of(si_item)
+        k_item_pred = key_of(si_item_pred)
+        resolver = FakeResolver(
+            ids={
+                (k_work[0], k_work[1], k_work[2]): cid_work,
+                (k_item[0], k_item[1], k_item[2]): cid_item,
+            }
+        )
+
+        result = process_work(doc, resolver)
+
+        assert result["canonicalId"] == cid_work
+        assert result["items"][0]["canonicalId"] == cid_item
+        assert (k_work, k_work_pred) in resolver.mint_calls[0]
+        assert (k_item, k_item_pred) in resolver.mint_calls[0]

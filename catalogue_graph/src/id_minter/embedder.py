@@ -14,9 +14,9 @@ import structlog
 from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
     IdResolver,
-    SourceId,
     SourceIdentifierKey,
 )
+from models.pipeline.identifier import SourceIdentifier
 
 logger = structlog.get_logger(__name__)
 
@@ -64,10 +64,17 @@ def make_key(source_identifier: dict) -> SourceIdentifierKey:
     )
 
 
-def extract_source_identifiers(work_json: dict) -> list[SourceIdentifierKey]:
+def extract_source_identifiers(
+    work_json: dict,
+) -> list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]:
     return [
-        make_key(node["sourceIdentifier"])
-        for node in scan(work_json, lambda d: "sourceIdentifier" in d)
+        (
+            make_key(node["sourceIdentifier"]),
+            make_key(node["predecessorIdentifier"])
+            if "predecessorIdentifier" in node
+            else None,
+        )
+        for node in scan(work_json, lambda node: "sourceIdentifier" in node)
     ]
 
 
@@ -109,43 +116,21 @@ def embed_canonical_ids(
 def process_work(
     work_json: dict,
     resolver: IdResolver,
-    predecessors: dict[SourceIdentifierKey, SourceIdentifierKey] | None = None,
 ) -> dict:
-    # TODO: We have not yet decided how works will indicate their predecessors.
-    # The `predecessors` parameter is plumbed through but the mechanism for
-    # deriving it from the work JSON needs to be designed and implemented.
-    source_id = work_json.get("state", {}).get("sourceIdentifier", {})
-    source_id_str = (
-        f"{source_id.get('ontologyType', '?')}"
-        f"[{source_id.get('identifierType', {}).get('id', '?')}"
-        f"/{source_id.get('value', '?')}]"
-    )
+    source_id = SourceIdentifier.model_validate(work_json["state"]["sourceIdentifier"])
 
-    preds = predecessors or {}
-    keys = extract_source_identifiers(work_json)
-    predecessor_count = sum(1 for k in keys if k in preds)
+    mint_requests = extract_source_identifiers(work_json)
+    predecessor_count = sum(1 for _, pred in mint_requests if pred is not None)
+
     logger.info(
         "Embedding canonical IDs",
-        source_identifier=source_id_str,
-        source_identifier_count=len(keys),
+        source_identifier=source_id,
+        source_identifier_count=len(mint_requests),
         predecessor_count=predecessor_count,
     )
 
-    if not keys:
-        logger.info(
-            "No source identifiers found, skipping",
-            source_identifier=source_id_str,
-        )
-        return work_json
+    found = resolver.mint_ids(mint_requests)  # type: ignore[arg-type]  # SourceIdentifierKey is a tuple[str, str, str]
 
-    requests: list[tuple[SourceId, SourceId | None]] = [
-        (
-            (k[0], k[1], k[2]),
-            (preds[k][0], preds[k][1], preds[k][2]) if k in preds else None,
-        )
-        for k in keys
-    ]
-    found = resolver.mint_ids(requests)
     id_map: dict[SourceIdentifierKey, str] = {
         SourceIdentifierKey(*k): v for k, v in found.items()
     }
@@ -154,7 +139,7 @@ def process_work(
 
     logger.info(
         "Finished embedding canonical IDs",
-        source_identifier=source_id_str,
+        source_identifier=source_id,
         ids_embedded=len(id_map),
     )
 
