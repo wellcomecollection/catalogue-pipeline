@@ -13,6 +13,7 @@ from pyiceberg.expressions import (
     GreaterThanOrEqual,
     LessThan,
 )
+from pyiceberg.io.pyarrow import schema_to_pyarrow
 from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.types import (
@@ -23,8 +24,6 @@ from pyiceberg.types import (
     StringType,
     TimestamptzType,
 )
-
-__all__ = ["WindowStatusRecord", "WindowStore"]
 
 
 class WindowStatusRecord(BaseModel):
@@ -63,19 +62,7 @@ WINDOW_STATUS_SCHEMA = Schema(
     ),
 )
 
-WINDOW_STATUS_ARROW_FIELDS: list[pa.Field] = [
-    pa.field("window_key", pa.string(), nullable=False),
-    pa.field("window_start", pa.timestamp("us", tz="UTC"), nullable=False),
-    pa.field("window_end", pa.timestamp("us", tz="UTC"), nullable=False),
-    pa.field("state", pa.string(), nullable=False),
-    pa.field("attempts", pa.int32(), nullable=False),
-    pa.field("last_error", pa.string(), nullable=True),
-    pa.field("updated_at", pa.timestamp("us", tz="UTC"), nullable=False),
-    pa.field("record_ids", pa.list_(pa.string()), nullable=True),
-    pa.field("tags", pa.map_(pa.string(), pa.string()), nullable=True),
-]
-
-WINDOW_STATUS_ARROW_SCHEMA = pa.schema(WINDOW_STATUS_ARROW_FIELDS)
+WINDOW_STATUS_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(WINDOW_STATUS_SCHEMA)
 
 
 def _column(value: Any) -> list[Any]:
