@@ -14,6 +14,7 @@ from pyiceberg.expressions import (
 )
 from pyiceberg.io.pyarrow import schema_to_pyarrow
 from pyiceberg.schema import Schema
+from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.types import (
     IntegerType,
@@ -47,7 +48,6 @@ WINDOW_STATUS_SCHEMA = Schema(
         required=False,
     ),
 )
-
 WINDOW_STATUS_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(WINDOW_STATUS_SCHEMA)
 
 
@@ -62,19 +62,15 @@ class WindowStore:
         self, start_time: datetime | None = None, end_time: datetime | None = None
     ) -> list[dict[str, Any]]:
         """Return rows within the given time range."""
-        scan = self.table.scan()
-        filters: list[BooleanExpression] = []
+        filter_expr: BooleanExpression = ALWAYS_TRUE
         if start_time:
-            filters.append(GreaterThanOrEqual("window_start", start_time))
+            filter_expr = And(
+                filter_expr, GreaterThanOrEqual("window_start", start_time)
+            )
         if end_time:
-            filters.append(LessThan("window_start", end_time))
+            filter_expr = And(filter_expr, LessThan("window_start", end_time))
 
-        if len(filters) > 1:
-            scan = scan.filter(And(*filters))
-        elif filters:
-            scan = scan.filter(filters[0])
-
-        arrow_table = scan.to_arrow()
+        arrow_table = self.table.scan().filter(filter_expr).to_arrow()
         return [self._normalize_row(row) for row in arrow_table.to_pylist()]
 
     def load_status_map(
