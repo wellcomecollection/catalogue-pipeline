@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import logging
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Protocol, TypedDict
 
+import structlog
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.exceptions import NoRecordsMatchError
 from oai_pmh_client.models import Record
@@ -18,7 +18,7 @@ from .window_summary import (
     WindowSummary,
 )
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class WindowCallback(Protocol):
@@ -91,11 +91,11 @@ class WindowHarvestManager:
             pending = pending[:max_windows]
 
         logger.info(
-            "Harvesting %d of %d windows between %s and %s",
-            len(pending),
-            len(candidates),
-            start_time.isoformat(),
-            end_time.isoformat(),
+            "Harvesting windows",
+            pending=len(pending),
+            candidates=len(candidates),
+            window_start=start_time.isoformat(),
+            window_end=end_time.isoformat(),
         )
 
         new_summaries = self.harvest_windows(pending)
@@ -113,7 +113,7 @@ class WindowHarvestManager:
         if not windows:
             return []
         summaries: list[WindowSummary] = []
-        logger.info("Processing %d windows sequentially", len(windows))
+        logger.info("Processing windows sequentially", window_count=len(windows))
         for start, end in windows:
             summaries.append(self.process_window(start, end))
 
@@ -130,19 +130,19 @@ class WindowHarvestManager:
         attempts = 1
         record_ids: list[str] = []
         last_error: str | None = None
-        tags: dict[str, str] | None = (
-            dict(self.default_tags) if self.default_tags else None
-        )
+        custom_tags: dict[str, str] = {}
 
-        logger.info("Processing window %s -> %s", start.isoformat(), end.isoformat())
+        logger.info(
+            "Processing window",
+            window_start=start.isoformat(),
+            window_end=end.isoformat(),
+        )
         try:
-            records_in_window = list(
-                self.client.list_records(
-                    metadata_prefix=self.metadata_prefix,
-                    from_date=start,
-                    until_date=end,
-                    set_spec=self.set_spec,
-                )
+            records_in_window = self.client.list_records(
+                metadata_prefix=self.metadata_prefix,
+                from_date=start,
+                until_date=end,
+                set_spec=self.set_spec,
             )
 
             records_with_ids: list[tuple[str, Record]] = []
@@ -151,28 +151,20 @@ class WindowHarvestManager:
                 records_with_ids.append((identifier, record))
                 record_ids.append(identifier)
 
-            callback_result = self.record_callback(records_with_ids)
+            logger.info(
+                "Downloaded raw records from client", record_count=len(record_ids)
+            )
 
-            if callback_result and "tags" in callback_result:
-                tags = self._merge_tags(callback_result["tags"])
+            callback_result = self.record_callback(records_with_ids)
+            custom_tags |= callback_result.get("tags") or {}
 
             state = "success"
-
         except NoRecordsMatchError:
             state = "success"
-            record_ids = []
-            tags = dict(self.default_tags) if self.default_tags else None
-
         except Exception as exc:  # pragma: no cover - generic safety net
             last_error = repr(exc)
             state = "failed"
             record_ids = []
-            logger.warning(
-                "Window %s failed after attempt %d: %s",
-                key,
-                attempts,
-                last_error,
-            )
 
         updated_at = datetime.now(UTC)
         summary = WindowSummary(
@@ -183,14 +175,22 @@ class WindowHarvestManager:
             record_ids=record_ids,
             last_error=last_error,
             updated_at=updated_at,
-            tags=tags,
+            tags=self._merge_tags(custom_tags),
         )
         self.store.upsert(summary)
+
         if state == "success":
             logger.info(
-                "Window %s succeeded with %d record(s)",
-                key,
-                len(record_ids),
+                "Successfully processed window",
+                window_key=key,
+                record_count=len(record_ids),
+            )
+        else:
+            logger.warning(
+                "Failed to process window",
+                window_key=key,
+                attempts=attempts,
+                last_error=last_error,
             )
         return summary
 
@@ -211,9 +211,4 @@ class WindowHarvestManager:
         )
 
     def _merge_tags(self, custom_tags: dict[str, str] | None) -> dict[str, str] | None:
-        base = dict(self.default_tags) if self.default_tags else {}
-        if not custom_tags:
-            return base or None
-        merged = dict(base)
-        merged.update(custom_tags)
-        return merged
+        return {**(self.default_tags or {}), **(custom_tags or {})} or None

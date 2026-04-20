@@ -12,7 +12,7 @@ from adapters.utils.window_store import (
     WINDOW_STATUS_SCHEMA,
     WindowStore,
 )
-from adapters.utils.window_summary import WindowSummary
+from adapters.utils.window_summary import WindowKey, WindowSummary
 
 
 def _create_table(
@@ -190,3 +190,4 @@ def test_load_status_map_filters_by_time_range(tmp_path: Path) -> None:
     # Both filters
     result = store.load_status_map(start_time=t2, end_time=t3)
     assert len(result) == 1  # t2 only
+    assert str(WindowKey.from_dates(start=t2, end=t2 + timedelta(minutes=15))) in result
