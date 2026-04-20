@@ -133,16 +133,18 @@ def test_window_store_list_in_range(tmp_path: Path) -> None:
 
     # Test range queries
     # All
-    assert len(store.list_in_range(start=t1, end=t3 + timedelta(hours=1))) == 3
+    assert (
+        len(store.list_in_range(start_time=t1, end_time=t3 + timedelta(hours=1))) == 3
+    )
 
     # Start filter
-    assert len(store.list_in_range(start=t2)) == 2  # t2, t3
+    assert len(store.list_in_range(start_time=t2)) == 2  # t2, t3
 
     # End filter
-    assert len(store.list_in_range(end=t2)) == 1  # t1 (end is exclusive)
+    assert len(store.list_in_range(end_time=t2)) == 1  # t1 (end is exclusive)
 
     # Both
-    assert len(store.list_in_range(start=t2, end=t3)) == 1  # t2
+    assert len(store.list_in_range(start_time=t2, end_time=t3)) == 1  # t2
 
 
 def test_load_status_map_filters_by_time_range(tmp_path: Path) -> None:

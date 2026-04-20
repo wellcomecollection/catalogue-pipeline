@@ -137,8 +137,6 @@ def _build_harvester(
 
     callback = record_callback or default_callback
 
-    from adapters.utils.window_generator import WindowGenerator
-
     window_generator = WindowGenerator(
         window_minutes=window_minutes or 15,
         allow_partial_final_window=allow_partial_final_window,
@@ -162,7 +160,6 @@ def _window_range(hours: int = 24) -> tuple[datetime, datetime]:
 
 def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
     records = [_make_record("id:1"), _make_record("id:2")]
-    harvester = _build_harvester(tmp_path, records)
     captured: list[str] = []
 
     class CapturingProcessor(StubWindowProcessor):
@@ -174,12 +171,16 @@ def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
                 captured.append(identifier)
             return super().__call__(records)
 
+    harvester = _build_harvester(
+        tmp_path,
+        records,
+        record_callback=CapturingProcessor(),
+    )
     start_time, end_time = _window_range()
     summaries = harvester.harvest_range(
         start_time=start_time,
         end_time=end_time,
         max_windows=1,
-        record_callback=CapturingProcessor(),
     )
 
     assert len(summaries) == 1
@@ -193,7 +194,6 @@ def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
 
 def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
-    harvester = _build_harvester(tmp_path, records)
 
     class FailingProcessor(StubWindowProcessor):
         def __call__(
@@ -202,11 +202,11 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
         ) -> WindowCallbackResult:
             raise RuntimeError("boom")
 
+    harvester = _build_harvester(tmp_path, records, record_callback=FailingProcessor())
     start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_range(
         start_time=start_time,
         end_time=end_time,
-        record_callback=FailingProcessor(),
         max_windows=1,
     )
 
@@ -332,7 +332,6 @@ def test_harvest_range_attaches_default_tags(tmp_path: Path) -> None:
 
 def test_record_callback_persists_changeset(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
-    harvester = _build_harvester(tmp_path, records)
 
     class RecordingCallback:
         def __call__(
@@ -343,11 +342,11 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
                 "tags": {"changeset_id": "cs-500"},
             }
 
+    harvester = _build_harvester(tmp_path, records, record_callback=RecordingCallback())
     start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_range(
         start_time=start_time,
         end_time=end_time,
-        record_callback=RecordingCallback(),
         reprocess_successful_windows=True,
     )
 
@@ -438,21 +437,3 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
         minutes=harvester.window_minutes
     )
     assert len(client.calls) - initial_calls == 1
-
-
-def test_init_with_optional_client(tmp_path: Path) -> None:
-    catalog_path = tmp_path / "catalog.db"
-    warehouse_path = tmp_path / "warehouse"
-    table = _create_table(
-        catalog_uri=f"sqlite:///{catalog_path}",
-        warehouse_path=warehouse_path,
-        namespace="harvest",
-        table_name=f"window_status_{uuid4().hex}",
-        catalog_name=f"catalog_{uuid4().hex}",
-    )
-    store = WindowStore(table)
-    window_generator = WindowGenerator()
-    manager = WindowHarvestManager(
-        store=store, window_generator=window_generator, client=None
-    )
-    assert manager.client is None

@@ -41,11 +41,11 @@ class WindowHarvestManager:
         self,
         store: WindowStore,
         window_generator: WindowGenerator,
-        client: OAIClient | None = None,
+        client: OAIClient,
         metadata_prefix: str | None = None,
         set_spec: str | None = None,
         *,
-        record_callback: WindowCallback | None = None,
+        record_callback: WindowCallback,
         default_tags: dict[str, str] | None = None,
     ) -> None:
         self.client = client
@@ -57,41 +57,17 @@ class WindowHarvestManager:
         self.record_callback = record_callback
         self.default_tags = dict(default_tags) if default_tags else None
 
-    # ------------------------------------------------------------------
-    # Window generation & scheduling
-    # ------------------------------------------------------------------
-    def generate_windows(
-        self, start_time: datetime, end_time: datetime
-    ) -> list[tuple[datetime, datetime]]:
-        """Generate aligned time windows between start_time and end_time.
-
-        Delegates to the WindowGenerator instance.
-
-        Args:
-            start_time: Start of the time range (inclusive).
-            end_time: End of the time range (exclusive).
-
-        Returns:
-            List of (window_start, window_end) tuples.
-
-        Raises:
-            ValueError: If start_time >= end_time.
-        """
-        return self.window_generator.generate_windows(start_time, end_time)
-
     def harvest_range(
         self,
         *,
         start_time: datetime,
         end_time: datetime,
         max_windows: int | None = None,
-        record_callback: WindowCallback | None = None,
         reprocess_successful_windows: bool = False,
     ) -> list[WindowSummary]:
         start_time = ensure_datetime_utc(start_time)
         end_time = ensure_datetime_utc(end_time)
-        candidates = self.generate_windows(start_time=start_time, end_time=end_time)
-        callback = record_callback or self.record_callback
+        candidates = self.window_generator.generate_windows(start_time, end_time)
         reused: list[WindowSummary] = []
 
         if reprocess_successful_windows:
@@ -122,10 +98,7 @@ class WindowHarvestManager:
             end_time.isoformat(),
         )
 
-        new_summaries = self.harvest_windows(
-            pending,
-            record_callback=callback,
-        )
+        new_summaries = self.harvest_windows(pending)
 
         if reprocess_successful_windows:
             return new_summaries
@@ -135,26 +108,14 @@ class WindowHarvestManager:
         return combined
 
     def harvest_windows(
-        self,
-        windows: Sequence[tuple[datetime, datetime]],
-        *,
-        record_callback: WindowCallback | None = None,
+        self, windows: Sequence[tuple[datetime, datetime]]
     ) -> list[WindowSummary]:
         if not windows:
             return []
         summaries: list[WindowSummary] = []
-        callback = record_callback or self.record_callback
         logger.info("Processing %d windows sequentially", len(windows))
         for start, end in windows:
-            summaries.append(
-                WindowSummary.model_validate(
-                    self.process_window(
-                        start,
-                        end,
-                        record_callback=callback,
-                    )
-                )
-            )
+            summaries.append(self.process_window(start, end))
 
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
@@ -162,13 +123,7 @@ class WindowHarvestManager:
     # ------------------------------------------------------------------
     # Core processing
     # ------------------------------------------------------------------
-    def process_window(
-        self,
-        start: datetime,
-        end: datetime,
-        *,
-        record_callback: WindowCallback | None = None,
-    ) -> WindowSummary:
+    def process_window(self, start: datetime, end: datetime) -> WindowSummary:
         start = ensure_datetime_utc(start)
         end = ensure_datetime_utc(end)
         key = WindowKey.from_dates(start, end)
@@ -178,13 +133,9 @@ class WindowHarvestManager:
         tags: dict[str, str] | None = (
             dict(self.default_tags) if self.default_tags else None
         )
-        callback = record_callback or self.record_callback
 
         logger.info("Processing window %s -> %s", start.isoformat(), end.isoformat())
         try:
-            if self.client is None:
-                raise RuntimeError("Cannot process window without an OAIClient")
-
             records_in_window = list(
                 self.client.list_records(
                     metadata_prefix=self.metadata_prefix,
@@ -193,22 +144,17 @@ class WindowHarvestManager:
                     set_spec=self.set_spec,
                 )
             )
-            if not callback and records_in_window:
-                raise RuntimeError(
-                    "A record callback must be supplied via record_callback to persist harvested records."
-                )
 
-            if callback:
-                records_with_ids: list[tuple[str, Record]] = []
-                for idx, record in enumerate(records_in_window, 1):
-                    identifier = self._record_identifier(record, start, idx)
-                    records_with_ids.append((identifier, record))
-                    record_ids.append(identifier)
+            records_with_ids: list[tuple[str, Record]] = []
+            for idx, record in enumerate(records_in_window):
+                identifier = self._record_identifier(record, start, idx)
+                records_with_ids.append((identifier, record))
+                record_ids.append(identifier)
 
-                callback_result = callback(records_with_ids)
+            callback_result = self.record_callback(records_with_ids)
 
-                if callback_result and "tags" in callback_result:
-                    tags = self._merge_tags(callback_result["tags"])
+            if callback_result and "tags" in callback_result:
+                tags = self._merge_tags(callback_result["tags"])
 
             state = "success"
 

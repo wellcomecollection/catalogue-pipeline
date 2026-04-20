@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from threading import Lock
 from typing import Any
 
 import pyarrow as pa
+from pydantic import BaseModel
 from pyiceberg.expressions import (
     And,
     BooleanExpression,
@@ -27,8 +27,7 @@ from pyiceberg.types import (
 __all__ = ["WindowStatusRecord", "WindowStore"]
 
 
-@dataclass(slots=True)
-class WindowStatusRecord:
+class WindowStatusRecord(BaseModel):
     """Represents the persistence payload for a harvesting window."""
 
     window_key: str
@@ -89,12 +88,27 @@ class WindowStore:
     """Persists harvesting window status rows in an Apache Iceberg table."""
 
     def __init__(self, table: IcebergTable) -> None:
-        self._table = table
+        self.table = table
         self._lock = Lock()
 
-    @property
-    def table(self) -> IcebergTable:
-        return self._table
+    def list_in_range(
+        self, start_time: datetime | None = None, end_time: datetime | None = None
+    ) -> list[dict[str, Any]]:
+        """Return rows within the given time range."""
+        scan = self.table.scan()
+        filters: list[BooleanExpression] = []
+        if start_time:
+            filters.append(GreaterThanOrEqual("window_start", start_time))
+        if end_time:
+            filters.append(LessThan("window_start", end_time))
+
+        if len(filters) > 1:
+            scan = scan.filter(And(*filters))
+        elif filters:
+            scan = scan.filter(filters[0])
+
+        arrow_table = scan.to_arrow()
+        return [self._normalize_row(row) for row in arrow_table.to_pylist()]
 
     def load_status_map(
         self,
@@ -107,66 +121,21 @@ class WindowStore:
             start_time: If given, only include windows with ``window_start >= start_time``.
             end_time: If given, only include windows with ``window_start < end_time``.
         """
-        scan = self._table.scan()
-        filters: list[BooleanExpression] = []
-        if start_time:
-            filters.append(GreaterThanOrEqual("window_start", start_time))
-        if end_time:
-            filters.append(LessThan("window_start", end_time))
-        if filters:
-            scan = scan.filter(And(*filters) if len(filters) > 1 else filters[0])
-
-        arrow_table = scan.to_arrow()
-        if arrow_table is None or arrow_table.num_rows == 0:
-            return {}
-        rows = [self._normalize_row(row) for row in arrow_table.to_pylist()]
+        rows = self.list_in_range(start_time, end_time)
         return {row["window_key"]: row for row in rows}
 
     def upsert(self, record: WindowStatusRecord) -> None:
         """Replace any existing row for this window, in a single Iceberg commit."""
-        payload: dict[str, list[Any]] = {
-            "window_key": _column(record.window_key),
-            "window_start": _column(record.window_start),
-            "window_end": _column(record.window_end),
-            "state": _column(record.state),
-            "attempts": _column(record.attempts),
-            "last_error": _column(record.last_error),
-            "updated_at": _column(record.updated_at),
-            "record_ids": _column(list(record.record_ids)),
-            "tags": _column(record.tags),
-        }
-        table = self._table
+        payload = {k: _column(v) for k, v in record.model_dump().items()}
         arrow = pa.Table.from_pydict(payload, schema=WINDOW_STATUS_ARROW_SCHEMA)
-        with self._lock, table.transaction() as tx:
+        with self._lock, self.table.transaction() as tx:
             tx.overwrite(
                 arrow, overwrite_filter=EqualTo("window_key", record.window_key)
             )
 
-    def list_in_range(
-        self, start: datetime | None = None, end: datetime | None = None
-    ) -> list[dict[str, Any]]:
-        """Return rows within the given time range."""
-        scan = self._table.scan()
-        filters: list[BooleanExpression] = []
-        if start:
-            filters.append(GreaterThanOrEqual("window_start", start))
-        if end:
-            filters.append(LessThan("window_start", end))
-
-        if filters:
-            if len(filters) > 1:
-                scan = scan.filter(And(*filters))
-            else:
-                scan = scan.filter(filters[0])
-
-        arrow_table = scan.to_arrow()
-        if arrow_table is None or arrow_table.num_rows == 0:
-            return []
-        return [self._normalize_row(row) for row in arrow_table.to_pylist()]
-
     def list_by_state(self, state: str) -> list[dict[str, Any]]:
         """Return rows filtered by state (e.g. success, failed)."""
-        scan = self._table.scan().filter(EqualTo("state", state))
+        scan = self.table.scan().filter(EqualTo("state", state))
         arrow_table = scan.to_arrow()
         if arrow_table is None or arrow_table.num_rows == 0:
             return []
