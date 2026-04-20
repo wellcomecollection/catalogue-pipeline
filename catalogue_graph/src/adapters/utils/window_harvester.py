@@ -12,7 +12,7 @@ from oai_pmh_client.models import Record
 from utils.timezone import ensure_datetime_utc
 
 from .window_generator import WindowGenerator
-from .window_store import WindowStatusRecord, WindowStore
+from .window_store import WindowStore
 from .window_summary import (
     WindowKey,
     WindowSummary,
@@ -185,19 +185,7 @@ class WindowHarvestManager:
             updated_at=updated_at,
             tags=tags,
         )
-        self.store.upsert(
-            WindowStatusRecord(
-                window_key=key,
-                window_start=start,
-                window_end=end,
-                state=state,
-                attempts=attempts,
-                last_error=last_error,
-                record_ids=tuple(record_ids),
-                updated_at=updated_at,
-                tags=tags,
-            )
-        )
+        self.store.upsert(summary)
         if state == "success":
             logger.info(
                 "Window %s succeeded with %d record(s)",

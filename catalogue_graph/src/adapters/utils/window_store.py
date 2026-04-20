@@ -5,7 +5,6 @@ from threading import Lock
 from typing import Any
 
 import pyarrow as pa
-from pydantic import BaseModel
 from pyiceberg.expressions import (
     And,
     BooleanExpression,
@@ -25,20 +24,7 @@ from pyiceberg.types import (
     TimestamptzType,
 )
 
-
-class WindowStatusRecord(BaseModel):
-    """Represents the persistence payload for a harvesting window."""
-
-    window_key: str
-    window_start: datetime
-    window_end: datetime
-    state: str
-    attempts: int
-    last_error: str | None
-    record_ids: tuple[str, ...]
-    updated_at: datetime
-    tags: dict[str, str] | None = None
-
+from .window_summary import WindowSummary
 
 WINDOW_STATUS_SCHEMA = Schema(
     NestedField(1, "window_key", StringType(), required=True),
@@ -63,12 +49,6 @@ WINDOW_STATUS_SCHEMA = Schema(
 )
 
 WINDOW_STATUS_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(WINDOW_STATUS_SCHEMA)
-
-
-def _column(value: Any) -> list[Any]:
-    """Wrap a value in a single-row list for PyArrow's from_pydict input."""
-
-    return [value]
 
 
 class WindowStore:
@@ -111,13 +91,14 @@ class WindowStore:
         rows = self.list_in_range(start_time, end_time)
         return {row["window_key"]: row for row in rows}
 
-    def upsert(self, record: WindowStatusRecord) -> None:
+    def upsert(self, record: WindowSummary) -> None:
         """Replace any existing row for this window, in a single Iceberg commit."""
-        payload = {k: _column(v) for k, v in record.model_dump().items()}
-        arrow = pa.Table.from_pydict(payload, schema=WINDOW_STATUS_ARROW_SCHEMA)
+        arrow = pa.Table.from_pylist(
+            [record.model_dump()], schema=WINDOW_STATUS_ARROW_SCHEMA
+        )
         with self._lock, self.table.transaction() as tx:
             tx.overwrite(
-                arrow, overwrite_filter=EqualTo("window_key", record.window_key)
+                arrow, overwrite_filter=EqualTo("window_key", str(record.window_key))
             )
 
     def list_by_state(self, state: str) -> list[dict[str, Any]]:

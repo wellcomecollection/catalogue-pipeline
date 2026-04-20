@@ -23,9 +23,9 @@ from adapters.utils.window_harvester import (
 )
 from adapters.utils.window_store import (
     WINDOW_STATUS_SCHEMA,
-    WindowStatusRecord,
     WindowStore,
 )
+from adapters.utils.window_summary import WindowSummary
 
 FAST_OAI_BACKOFF_SECONDS = 1e-3
 
@@ -367,14 +367,13 @@ def test_harvest_range_returns_existing_successful_summary_with_tags(
     end = start + timedelta(minutes=harvester.window_minutes)
     window_key = f"{start.isoformat()}_{end.isoformat()}"
     harvester.store.upsert(
-        WindowStatusRecord(
-            window_key=window_key,
+        WindowSummary(
             window_start=start,
             window_end=end,
             state="success",
             attempts=1,
             last_error=None,
-            record_ids=("existing-1",),
+            record_ids=["existing-1"],
             updated_at=end,
             tags={"job_id": "job-1", "changeset_id": "cs-123"},
         )
