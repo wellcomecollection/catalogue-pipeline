@@ -124,7 +124,7 @@ def process_work(
 
     logger.info(
         "Embedding canonical IDs",
-        source_identifier=source_id,
+        source_identifier=str(source_id),
         source_identifier_count=len(mint_requests),
         predecessor_count=predecessor_count,
     )
@@ -139,7 +139,7 @@ def process_work(
 
     logger.info(
         "Finished embedding canonical IDs",
-        source_identifier=source_id,
+        source_identifier=str(source_id),
         ids_embedded=len(id_map),
     )
 
