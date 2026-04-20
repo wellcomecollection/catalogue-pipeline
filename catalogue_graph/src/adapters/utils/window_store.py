@@ -62,16 +62,14 @@ class WindowStore:
         self, start_time: datetime | None = None, end_time: datetime | None = None
     ) -> list[dict[str, Any]]:
         """Return rows within the given time range."""
-        filter_expr: BooleanExpression = ALWAYS_TRUE
+        expr: BooleanExpression = ALWAYS_TRUE
         if start_time:
-            filter_expr = And(
-                filter_expr, GreaterThanOrEqual("window_start", start_time)
-            )
+            expr = And(expr, GreaterThanOrEqual("window_start", start_time))
         if end_time:
-            filter_expr = And(filter_expr, LessThan("window_start", end_time))
+            expr = And(expr, LessThan("window_start", end_time))
 
-        arrow_table = self.table.scan().filter(filter_expr).to_arrow()
-        return [self._normalize_row(row) for row in arrow_table.to_pylist()]
+        arrow_table = self.table.scan().filter(expr).to_arrow()
+        return arrow_table.to_pylist(maps_as_pydicts="lossy")
 
     def load_status_map(
         self,
@@ -101,15 +99,4 @@ class WindowStore:
         """Return rows filtered by state (e.g. success, failed)."""
         scan = self.table.scan().filter(EqualTo("state", state))
         arrow_table = scan.to_arrow()
-        if arrow_table is None or arrow_table.num_rows == 0:
-            return []
-        return [self._normalize_row(row) for row in arrow_table.to_pylist()]
-
-    @staticmethod
-    def _normalize_row(row: dict[str, Any]) -> dict[str, Any]:
-        tags = row.get("tags")
-        if tags is not None and not isinstance(tags, dict):
-            # Arrow map columns materialize as list[tuple]; coerce to dict for callers.
-            row = dict(row)
-            row["tags"] = dict(tags)
-        return row
+        return arrow_table.to_pylist(maps_as_pydicts="lossy")
