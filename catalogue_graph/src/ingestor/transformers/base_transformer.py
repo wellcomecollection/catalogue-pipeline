@@ -44,6 +44,8 @@ def get_pydantic_classes(ingestor_type: IngestorType) -> list[type[BaseModel]]:
     if ingestor_type == "images":
         return [IndexableImage]
 
+    raise ValueError(f"Unexpected ingestor type {ingestor_type}")
+
 
 class IngestorBaseTransformer:
     def __init__(self, source: StreamingExtractor) -> None:
