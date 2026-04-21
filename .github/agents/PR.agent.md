@@ -36,16 +36,23 @@ Follow the Wellcome Collection PR template: https://github.com/wellcomecollectio
 5. **Write the description** to `/tmp/pr_description_<short_name>.md` (no title line, just the body following the template). If the file already exists from an earlier run, delete it first (`rm /tmp/pr_description_<short_name>.md`) — `create_file` refuses to overwrite.
 6. **Create or update** via the GitHub CLI:
    - Create: `GH_PROMPT_DISABLED=true gh pr create --base <base> --head <branch> --title "<title>" --body-file /tmp/pr_description_<short_name>.md`
-   - Update: `GH_PROMPT_DISABLED=true gh pr edit <n> --body-file /tmp/pr_description_<short_name>.md` (and `--title "<title>"` only if the user agreed to retitle).
+   - Update: prefer the REST PATCH described in *Working with the GitHub CLI* below — `gh pr edit --body-file` fails on this repo. Title-only changes can still go via `gh pr edit --title "<title>"`.
    Prefer the GitHub Pull Request extension if available, falling back to `gh`.
-7. **Confirm** with the URL returned by `gh` and a one-line summary of what changed in the description.
+7. **Confirm** by re-reading the body (`gh pr view <n> --json body -q .body | cat`) and checking the new content is present.
 
 ## Working with the GitHub CLI
 
 - Set `GH_PROMPT_DISABLED=true` on every `gh` invocation to suppress interactive prompts.
 - `gh` commands frequently open the pager and capture the alternate buffer — always append `| cat` (or redirect to a file) when reading output: `gh pr view <n> | cat`, `gh api … | cat`.
 - For raw GraphQL/REST (e.g. fetching review threads, reactions, or fields `gh pr view` doesn't expose), use `gh api graphql -f query='…' -F var=value | cat`.
-- A trailing GraphQL warning like *"Projects (classic) is being deprecated"* from `gh pr edit` is benign — the edit still succeeded.
+- **Beware `gh pr edit` on this repo.** It triggers a `GraphQL: Projects (classic) is being deprecated …` error and silently fails to update the body (exit 1). Use the REST API instead:
+  ```bash
+  jq -Rs '{body: .}' < /tmp/pr_description_<short_name>.md > /tmp/pr_body.json
+  GH_PROMPT_DISABLED=true gh api -X PATCH \
+    repos/<owner>/<repo>/pulls/<n> \
+    --input /tmp/pr_body.json -q '.html_url' | cat
+  ```
+  After any update, verify with `gh pr view <n> --json body -q .body | cat` (or `grep` for an expected string).
 
 ## Updating after new commits
 
