@@ -49,7 +49,7 @@ module "id_generator_lambda" {
   count  = var.include_id_generator ? 1 : 0
 
   service_name = "id-generator${local.dash_namespace}"
-  description  = "Lambda${local.dash_namespace} to pre-generate canonical IDs${local.dash_namespace}"
+  description  = "Lambda${local.dash_namespace} to pre-generate canonical IDs"
 
   pipeline_date = var.pipeline_date
 
