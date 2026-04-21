@@ -8,9 +8,7 @@ variable "admin_cidr_ingress" {}
 
 variable "master_username" {}
 
-variable "engine_version" {
-  default = "8.0.mysql_aurora.3.10.3"
-}
+variable "engine_version" {}
 
 variable "max_scaling_capacity" {
   default = 16
