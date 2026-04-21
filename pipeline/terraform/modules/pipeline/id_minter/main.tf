@@ -20,7 +20,7 @@ module "id_minter_lambda" {
   }
 
   memory_size = 2048
-  timeout     = 300
+  timeout     = 900
 
   environment_variables = merge(
     { for k, v in var.id_minter_env_vars : k => tostring(v) if v != null },
