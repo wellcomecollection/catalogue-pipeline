@@ -1,3 +1,8 @@
+locals {
+  hyphen_suffix     = var.name_suffix == "" ? "" : "-${var.name_suffix}"
+  underscore_suffix = var.name_suffix == "" ? "" : "_${var.name_suffix}"
+}
+
 resource "aws_db_subnet_group" "default" {
   subnet_ids = var.private_subnet_ids
 }
@@ -5,7 +10,7 @@ resource "aws_db_subnet_group" "default" {
 resource "aws_security_group" "database_v2_sg" {
   description = "Allows connection to identifiers-v2 RDS instance via TCP and egress to the world"
   vpc_id      = var.vpc_id
-  name        = "identifiers_v2_database_sg"
+  name        = "identifiers_v2_database_sg${local.underscore_suffix}"
 
   ingress {
     protocol  = "tcp"
@@ -36,10 +41,12 @@ resource "aws_security_group" "database_v2_sg" {
 module "identifiers_v2_serverless_rds_cluster" {
   source = "../rds-serverless"
 
-  cluster_identifier = "identifiers-v2-serverless"
+  cluster_identifier = "identifiers-v2-serverless${local.hyphen_suffix}"
   database_name      = "identifiers"
   master_username    = var.master_username
   master_password    = null
+
+  snapshot_identifier = var.snapshot_identifier
 
   manage_master_user_password = true
 
@@ -52,7 +59,7 @@ module "identifiers_v2_serverless_rds_cluster" {
 }
 
 resource "aws_security_group" "rds_v2_ingress_security_group" {
-  name        = "pipeline_rds_v2_ingress_security_group"
+  name        = "pipeline_rds_v2_ingress_security_group${local.underscore_suffix}"
   description = "Allow traffic to identifiers-v2 rds database"
   vpc_id      = var.vpc_id
 
@@ -64,6 +71,6 @@ resource "aws_security_group" "rds_v2_ingress_security_group" {
   }
 
   tags = {
-    Name = "pipeline-rds-v2-access"
+    Name = "pipeline-rds-v2-access${local.hyphen_suffix}"
   }
 }
