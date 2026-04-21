@@ -178,9 +178,9 @@ def test_multiple_works(monkeypatch: pytest.MonkeyPatch) -> None:
         assert result in extracted_items
 
 
-def get_incremental_extractor(work_ids: list[str]) -> GraphWorksExtractor:
+def get_incremental_extractor(work_ids: list[str]) -> WorksIndexExtractor:
     event = BasePipelineEvent(pipeline_date="dev", ids=work_ids)
-    return GraphWorksExtractor(
+    return WorksIndexExtractor(
         event,
         get_mock_es_client("graph_extractor", event.pipeline_date),
         get_mock_neptune_client(),

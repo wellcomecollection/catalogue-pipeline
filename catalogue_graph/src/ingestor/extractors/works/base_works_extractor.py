@@ -2,6 +2,8 @@ from collections.abc import Generator, Iterator
 from itertools import batched
 
 import structlog
+from pydantic import BaseModel
+
 from clients.neptune_client import NeptuneClient
 from graph.sources.catalogue.concepts_source import extract_identified_concepts
 from ingestor.extractors.base_extractor import (
@@ -12,16 +14,11 @@ from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
 )
-from ingestor.models.neptune.node import WorkNode
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     WorkHierarchy,
 )
 from models.pipeline.work_data import WorkData
-from pydantic import BaseModel
-
-from .base_extractor import GraphBaseExtractor
-from .work_concepts_extractor import WorkConceptsExtractor
 
 logger = structlog.get_logger(__name__)
 
@@ -59,9 +56,7 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
     def __init__(self, neptune_client: NeptuneClient):
         super().__init__(neptune_client)
 
-        self.extracted_concepts: dict[str, ExtractedConcept] = {}
         self.streamed_ids: set[str] = set()
-        self.related_ids: set[str] = set()
         self.extracted_concepts: dict[str, ExtractedConcept] = {}
 
     def _extract_concepts(self, concept_ids: set[str]) -> None:
@@ -114,6 +109,31 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
 
         return concepts_by_work
 
+    def _process_visible_batch(
+        self, visible_works: list[VisibleMergedWork]
+    ) -> Generator[VisibleExtractedWork]:
+        visible_work_ids = [w.state.canonical_id for w in visible_works]
+        work_data = {w.state.canonical_id: w.data for w in visible_works}
+
+        # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
+        ancestors_batch = self._get_work_ancestors(visible_work_ids)
+        children_batch = self._get_work_children(visible_work_ids)
+        concepts_batch = self.get_work_concepts(work_data)
+
+        for es_work in visible_works:
+            work_id = es_work.state.canonical_id
+            self.streamed_ids.add(work_id)
+
+            hierarchy = WorkHierarchy(
+                id=work_id,
+                ancestors=ancestors_batch.get(work_id, {}).get("ancestors", []),
+                children=children_batch.get(work_id, {}).get("children", []),
+            )
+
+            yield VisibleExtractedWork(
+                work=es_work, hierarchy=hierarchy, concepts=concepts_batch[work_id]
+            )
+
     def process_es_works(
         self, es_works: Iterator[MergedWork]
     ) -> Generator[ExtractedWork]:
@@ -126,42 +146,4 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
             )
 
             visible_works = [w for w in es_batch if isinstance(w, VisibleMergedWork)]
-            visible_work_ids = [w.state.canonical_id for w in visible_works]
-
-            # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
-            ancestors_batch = self._get_work_ancestors(visible_work_ids)
-            children_batch = self._get_work_children(visible_work_ids)
-
-            work_data = {w.state.canonical_id: w.data for w in visible_works}
-            concepts_batch = self.get_work_concepts(work_data)
-
-            # Descendants are only needed in incremental mode
-            descendants_batch = (
-                self._get_work_descendants(visible_work_ids)
-                if self.event.mode_label != "full"
-                else {}
-            )
-
-            for es_work in visible_works:
-                work_id = es_work.state.canonical_id
-                self.streamed_ids.add(work_id)
-
-                hierarchy = WorkHierarchy(
-                    id=work_id,
-                    ancestors=ancestors_batch.get(work_id, {}).get("ancestors", []),
-                    children=children_batch.get(work_id, {}).get("children", []),
-                )
-
-                # When a work is processed in incremental mode, its parent and descendants must be processed too.
-                # This is because each work document stores the IDs of all of its ancestors (`partOf` field)
-                # and children (`parts` field), along with their titles and reference numbers.
-                if self.event.mode_label != "full":
-                    raw_desc = descendants_batch.get(work_id, {}).get("descendants", [])
-                    descendants = [WorkNode.model_validate(d) for d in raw_desc]
-                    self.related_ids |= {d.properties.id for d in descendants}
-                    if hierarchy.ancestors:
-                        self.related_ids.add(hierarchy.ancestors[0].work.properties.id)
-
-                yield VisibleExtractedWork(
-                    work=es_work, hierarchy=hierarchy, concepts=concepts_batch[work_id]
-                )
+            yield from self._process_visible_batch(visible_works)
