@@ -9,12 +9,11 @@ from oai_pmh_client.client import OAIClient
 from oai_pmh_client.exceptions import NoRecordsMatchError
 from oai_pmh_client.models import Record
 
-from utils.timezone import ensure_datetime_utc
+from models.incremental_window import IncrementalWindow
 
 from .window_generator import WindowGenerator
 from .window_store import WindowStore
 from .window_summary import (
-    WindowKey,
     WindowSummary,
 )
 
@@ -60,32 +59,28 @@ class WindowHarvestManager:
     def harvest_range(
         self,
         *,
-        start_time: datetime,
-        end_time: datetime,
+        time_range: IncrementalWindow,
         max_windows: int | None = None,
         reprocess_successful_windows: bool = False,
     ) -> list[WindowSummary]:
-        start_time = ensure_datetime_utc(start_time)
-        end_time = ensure_datetime_utc(end_time)
-        candidates = self.window_generator.generate_windows(start_time, end_time)
+        candidates = self.window_generator.generate_windows(time_range)
         reused: list[WindowSummary] = []
 
         if reprocess_successful_windows:
             pending = list(candidates)
         else:
+            # Check which candidate windows were already processed
             status_map = self.store.load_status_map(
-                start_time=start_time, end_time=end_time
+                start_time=time_range.start_time_utc, end_time=time_range.end_time_utc
             )
             pending = []
 
-            for window in candidates:
-                start, end = window
-                key = WindowKey.from_dates(start, end)
-                existing = status_map.get(key)
+            for candidate in candidates:
+                existing = status_map.get(candidate.to_iso_string())
                 if existing and existing.get("state") == "success":
                     reused.append(WindowSummary.model_validate(existing))
-                    continue
-                pending.append(window)
+                else:
+                    pending.append(candidate)
 
         if max_windows is not None:
             pending = pending[:max_windows]
@@ -94,8 +89,7 @@ class WindowHarvestManager:
             "Harvesting windows",
             pending=len(pending),
             candidates=len(candidates),
-            window_start=start_time.isoformat(),
-            window_end=end_time.isoformat(),
+            window_range=time_range.to_formatted_string(),
         )
 
         new_summaries = self.harvest_windows(pending)
@@ -108,25 +102,20 @@ class WindowHarvestManager:
         return combined
 
     def harvest_windows(
-        self, windows: Sequence[tuple[datetime, datetime]]
+        self, windows: Sequence[IncrementalWindow]
     ) -> list[WindowSummary]:
-        if not windows:
-            return []
-        summaries: list[WindowSummary] = []
         logger.info("Processing windows sequentially", window_count=len(windows))
-        for start, end in windows:
-            summaries.append(self.process_window(start, end))
-
+        summaries = [self.process_window(window) for window in windows]
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
 
     # ------------------------------------------------------------------
     # Core processing
     # ------------------------------------------------------------------
-    def process_window(self, start: datetime, end: datetime) -> WindowSummary:
-        start = ensure_datetime_utc(start)
-        end = ensure_datetime_utc(end)
-        key = WindowKey.from_dates(start, end)
+    def process_window(self, window: IncrementalWindow) -> WindowSummary:
+        start = window.start_time_utc
+        end = window.end_time_utc
+        key = window.to_iso_string()
         attempts = 1
         record_ids: list[str] = []
         last_error: str | None = None
@@ -134,8 +123,7 @@ class WindowHarvestManager:
 
         logger.info(
             "Processing window",
-            window_start=start.isoformat(),
-            window_end=end.isoformat(),
+            window=window.to_formatted_string(),
         )
         try:
             records_in_window = self.client.list_records(

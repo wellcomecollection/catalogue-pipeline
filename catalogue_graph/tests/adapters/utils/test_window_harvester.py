@@ -26,6 +26,7 @@ from adapters.utils.window_store import (
     WindowStore,
 )
 from adapters.utils.window_summary import WindowSummary
+from models.incremental_window import IncrementalWindow
 
 FAST_OAI_BACKOFF_SECONDS = 1e-3
 
@@ -153,9 +154,9 @@ def _build_harvester(
     )
 
 
-def _window_range(hours: int = 24) -> tuple[datetime, datetime]:
+def _window_range(hours: int = 24) -> IncrementalWindow:
     start = datetime(2025, 1, 1, tzinfo=UTC)
-    return start, start + timedelta(hours=hours)
+    return IncrementalWindow(start_time=start, end_time=start + timedelta(hours=hours))
 
 
 def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
@@ -176,10 +177,9 @@ def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
         records,
         record_callback=CapturingProcessor(),
     )
-    start_time, end_time = _window_range()
+    window = _window_range()
     summaries = harvester.harvest_range(
-        start_time=start_time,
-        end_time=end_time,
+        time_range=window,
         max_windows=1,
     )
 
@@ -203,10 +203,9 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
             raise RuntimeError("boom")
 
     harvester = _build_harvester(tmp_path, records, record_callback=FailingProcessor())
-    start_time, end_time = _window_range(hours=1)
+    window = _window_range(hours=1)
     summaries = harvester.harvest_range(
-        start_time=start_time,
-        end_time=end_time,
+        time_range=window,
         max_windows=1,
     )
 
@@ -223,10 +222,9 @@ def test_missing_record_identifier_marks_window_failed(tmp_path: Path) -> None:
     records = [cast(Record, object())]
     harvester = _build_harvester(tmp_path, records)
 
-    start_time, end_time = _window_range(hours=1)
+    window = _window_range(hours=1)
     summaries = harvester.harvest_range(
-        start_time=start_time,
-        end_time=end_time,
+        time_range=window,
         max_windows=1,
     )
 
@@ -250,10 +248,9 @@ def test_bad_record_fails_entire_window(tmp_path: Path) -> None:
     records = [_make_record("id:1"), cast(Record, object()), _make_record("id:2")]
     harvester = _build_harvester(tmp_path, records)
 
-    start_time, end_time = _window_range(hours=1)
+    window = _window_range(hours=1)
     summaries = harvester.harvest_range(
-        start_time=start_time,
-        end_time=end_time,
+        time_range=window,
         max_windows=1,
     )
 
@@ -272,7 +269,9 @@ def test_harvest_range_requires_valid_range(tmp_path: Path) -> None:
     harvester = _build_harvester(tmp_path, [])
     end_time = datetime(2025, 1, 1, tzinfo=UTC)
     with pytest.raises(ValueError):
-        harvester.harvest_range(start_time=end_time, end_time=end_time)
+        harvester.harvest_range(
+            time_range=IncrementalWindow(start_time=end_time, end_time=end_time)
+        )
 
 
 def test_harvest_range_skips_successful_windows_by_default(tmp_path: Path) -> None:
@@ -280,13 +279,14 @@ def test_harvest_range_skips_successful_windows_by_default(tmp_path: Path) -> No
     harvester = _build_harvester(tmp_path, records)
     start = datetime(2025, 1, 1, tzinfo=UTC)
     end = start + timedelta(minutes=harvester.window_minutes)
+    window = IncrementalWindow(start_time=start, end_time=end)
 
-    first = harvester.harvest_range(start_time=start, end_time=end)
+    first = harvester.harvest_range(time_range=window)
     assert len(first) == 1
     client = cast(StubOAIClient, harvester.client)
     initial_calls = len(client.calls)
 
-    second = harvester.harvest_range(start_time=start, end_time=end)
+    second = harvester.harvest_range(time_range=window)
     assert len(second) == 1
     assert second[0].window_key == first[0].window_key
     assert second[0].record_ids == first[0].record_ids
@@ -298,11 +298,11 @@ def test_harvest_range_can_reprocess_successful_windows(tmp_path: Path) -> None:
     harvester = _build_harvester(tmp_path, records)
     start = datetime(2025, 1, 1, tzinfo=UTC)
     end = start + timedelta(minutes=harvester.window_minutes)
+    window = IncrementalWindow(start_time=start, end_time=end)
 
-    harvester.harvest_range(start_time=start, end_time=end)
+    harvester.harvest_range(time_range=window)
     reprocessed = harvester.harvest_range(
-        start_time=start,
-        end_time=end,
+        time_range=window,
         reprocess_successful_windows=True,
     )
 
@@ -316,11 +316,10 @@ def test_harvest_range_attaches_default_tags(tmp_path: Path) -> None:
         records,
         default_tags={"job_id": "job-123"},
     )
-    start_time, end_time = _window_range(hours=1)
+    window = _window_range(hours=1)
 
     harvester.harvest_range(
-        start_time=start_time,
-        end_time=end_time,
+        time_range=window,
         max_windows=1,
     )
 
@@ -343,10 +342,9 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
             }
 
     harvester = _build_harvester(tmp_path, records, record_callback=RecordingCallback())
-    start_time, end_time = _window_range(hours=1)
+    window = _window_range(hours=1)
     summaries = harvester.harvest_range(
-        start_time=start_time,
-        end_time=end_time,
+        time_range=window,
         reprocess_successful_windows=True,
     )
 
@@ -380,8 +378,7 @@ def test_harvest_range_returns_existing_successful_summary_with_tags(
     )
 
     summaries = harvester.harvest_range(
-        start_time=start,
-        end_time=end,
+        time_range=IncrementalWindow(start_time=start, end_time=end),
         reprocess_successful_windows=False,
     )
 
@@ -398,17 +395,16 @@ def test_harvest_range_handles_partial_success_across_runs(tmp_path: Path) -> No
     harvester = _build_harvester(tmp_path, records)
     start = datetime(2025, 1, 1, tzinfo=UTC)
     end = start + timedelta(minutes=harvester.window_minutes * 2)
+    window = IncrementalWindow(start_time=start, end_time=end)
 
     first = harvester.harvest_range(
-        start_time=start,
-        end_time=end,
+        time_range=window,
         max_windows=1,
     )
     assert len(first) == 1
 
     second = harvester.harvest_range(
-        start_time=start,
-        end_time=end,
+        time_range=window,
     )
 
     assert len(second) == 2
@@ -423,12 +419,16 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
     aligned_start = datetime(2025, 1, 1, tzinfo=UTC)
     aligned_end = aligned_start + timedelta(minutes=harvester.window_minutes * 3)
 
-    harvester.harvest_range(start_time=aligned_start, end_time=aligned_end)
+    harvester.harvest_range(
+        time_range=IncrementalWindow(start_time=aligned_start, end_time=aligned_end)
+    )
     client = cast(StubOAIClient, harvester.client)
     initial_calls = len(client.calls)
 
     offset_start = aligned_start + timedelta(minutes=5)
-    summaries = harvester.harvest_range(start_time=offset_start, end_time=aligned_end)
+    summaries = harvester.harvest_range(
+        time_range=IncrementalWindow(start_time=offset_start, end_time=aligned_end)
+    )
 
     assert len(summaries) == 3
     assert summaries[0].window_start == offset_start

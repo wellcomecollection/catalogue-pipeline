@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import UTC, datetime, timedelta
 
-from utils.timezone import ensure_datetime_utc
+from models.incremental_window import IncrementalWindow
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +31,7 @@ class WindowGenerator:
         self.window_minutes = window_minutes or DEFAULT_WINDOW_MINUTES
         self.allow_partial_final_window = allow_partial_final_window
 
-    def generate_windows(
-        self, start_time: datetime, end_time: datetime
-    ) -> list[tuple[datetime, datetime]]:
+    def generate_windows(self, window: IncrementalWindow) -> list[IncrementalWindow]:
         """Generate aligned time windows between start_time and end_time.
 
         Windows are aligned to fixed boundaries based on ALIGNMENT_EPOCH and
@@ -41,17 +39,16 @@ class WindowGenerator:
         at :00, :15, :30, :45 of each hour.
 
         Args:
-            start_time: Start of the time range (inclusive).
-            end_time: End of the time range (exclusive).
+            window: The incremental window defining the time range.
 
         Returns:
-            List of (window_start, window_end) tuples.
+            List of IncrementalWindow objects.
 
         Raises:
             ValueError: If start_time >= end_time.
         """
-        start_time = ensure_datetime_utc(start_time)
-        end_time = ensure_datetime_utc(end_time)
+        start_time = window.start_time_utc
+        end_time = window.end_time_utc
 
         if start_time >= end_time:
             raise ValueError("start_time must be earlier than end_time")
@@ -71,7 +68,7 @@ class WindowGenerator:
 
             effective_end_time = aligned_end_time
 
-        windows: list[tuple[datetime, datetime]] = []
+        windows: list[IncrementalWindow] = []
         cursor = start_time
 
         while cursor < effective_end_time:
@@ -79,7 +76,7 @@ class WindowGenerator:
             periods = offset // delta
             aligned_window_end = ALIGNMENT_EPOCH + (periods + 1) * delta
             win_end = min(aligned_window_end, effective_end_time)
-            windows.append((cursor, win_end))
+            windows.append(IncrementalWindow(start_time=cursor, end_time=win_end))
             cursor = win_end
 
         logger.info(
