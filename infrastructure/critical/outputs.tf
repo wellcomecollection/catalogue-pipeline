@@ -1,23 +1,23 @@
 # RDS
 
 output "rds_v2_serverless_cluster_id" {
-  value = module.identifiers_v2_serverless_rds_cluster.rds_cluster_id
+  value = module.id_minter_rds.rds_cluster_id
 }
 
 output "rds_v2_serverless_cluster_arn" {
-  value = module.identifiers_v2_serverless_rds_cluster.rds_cluster_arn
+  value = module.id_minter_rds.rds_cluster_arn
 }
 
 output "rds_v2_access_security_group_id" {
-  value = aws_security_group.rds_v2_ingress_security_group.id
+  value = module.id_minter_rds.ingress_security_group_id
 }
 
 output "rds_v2_master_user_secret_arn" {
-  value = module.identifiers_v2_serverless_rds_cluster.master_user_secret_arn
+  value = module.id_minter_rds.master_user_secret_arn
 }
 
 output "rds_subnet_group_name" {
-  value = aws_db_subnet_group.default.name
+  value = module.id_minter_rds.subnet_group_name
 }
 
 # Miro Hybrid Store
