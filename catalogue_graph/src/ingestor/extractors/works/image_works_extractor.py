@@ -32,7 +32,7 @@ class ImageWorksExtractor(GraphBaseWorksExtractor):
 
     def extract_batch(self, work_ids: Iterable[str]) -> dict[str, VisibleExtractedWork]:
         es_source = MergedWorksSource(
-            event=self.event.copy(update={"window": None}),
+            event=self.event.copy(update={"window": None, "ids": None}),
             query=get_works_by_id_query(list(work_ids)),
             es_client=self.es_client,
         )
