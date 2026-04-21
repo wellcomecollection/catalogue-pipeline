@@ -16,7 +16,7 @@ module "id_minter_rds" {
 module "id_minter_rds_test" {
   source = "./modules/id-minter-rds"
 
-  name_suffix         = "test"
+  name_suffix = "test"
   # Restore from production on April 21, 2026, 04:18 (UTC+01:00)
   snapshot_identifier = "awsbackup:job-349affad-75e5-83a7-5e9b-7c631bdfa39e"
 
