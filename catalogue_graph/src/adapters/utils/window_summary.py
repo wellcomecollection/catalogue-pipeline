@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, computed_field, field_validator
 
-from models.events import IncrementalWindow
+from models.incremental_window import IncrementalWindow
 from utils.timezone import ensure_datetime_utc
 
 

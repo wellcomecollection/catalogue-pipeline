@@ -12,7 +12,7 @@ from pydantic import Field
 
 from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
 from adapters.utils.window_summary import WindowSummary
-from models.events import IncrementalWindow
+from models.incremental_window import IncrementalWindow
 
 
 class OAIPMHTriggerEvent(BaseAdapterEvent):
