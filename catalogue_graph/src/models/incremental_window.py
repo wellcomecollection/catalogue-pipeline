@@ -75,7 +75,7 @@ class IncrementalWindow(BaseModel):
         return window
 
     def to_iso_string(self) -> str:
-        return f"{self.start_time.isoformat()}_{self.end_time.isoformat()}"
+        return f"{self.start_time_utc.isoformat()}_{self.end_time_utc.isoformat()}"
 
     @classmethod
     def from_iso_string(cls, s: str) -> IncrementalWindow:
