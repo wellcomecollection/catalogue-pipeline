@@ -198,5 +198,5 @@ class WindowHarvestManager:
             f"(window_start={window_start.isoformat()}, idx={idx})"
         )
 
-    def _merge_tags(self, custom_tags: dict[str, str] | None) -> dict[str, str] | None:
-        return {**(self.default_tags or {}), **(custom_tags or {})} or None
+    def _merge_tags(self, custom_tags: dict[str, str]) -> dict[str, str] | None:
+        return {**(self.default_tags or {}), **custom_tags} or None
