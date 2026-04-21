@@ -51,6 +51,8 @@ class WindowGenerator:
         """
         start_time = time_range.start_time_utc
         end_time = time_range.end_time_utc
+        if start_time >= end_time:
+            raise ValueError("start_time must be earlier than end_time")
 
         delta = timedelta(minutes=self.window_minutes)
         effective_end_time = end_time
