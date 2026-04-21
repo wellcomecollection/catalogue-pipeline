@@ -4,34 +4,9 @@ from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, computed_field, field_validator
-from pydantic_core import core_schema
 
+from models.incremental_window import IncrementalWindow
 from utils.timezone import ensure_datetime_utc
-
-
-class WindowKey(str):
-    """A typed window key derived from start and end timestamps."""
-
-    @classmethod
-    def from_dates(cls, start: datetime, end: datetime) -> WindowKey:
-        """Create a window key from start and end datetimes."""
-        return cls(f"{start.isoformat()}_{end.isoformat()}")
-
-    @classmethod
-    def parse(cls, key: str) -> tuple[datetime, datetime]:
-        """Parse a window key back into start and end datetimes."""
-        start_str, end_str = key.split("_")
-        return (datetime.fromisoformat(start_str), datetime.fromisoformat(end_str))
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls, source_type: Any, handler: Any
-    ) -> core_schema.CoreSchema:
-        """Implement Pydantic schema to treat WindowKey as a string."""
-        return core_schema.no_info_after_validator_function(
-            cls,
-            core_schema.str_schema(),
-        )
 
 
 class WindowSummary(BaseModel):
@@ -46,8 +21,10 @@ class WindowSummary(BaseModel):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def window_key(self) -> WindowKey:
-        return WindowKey.from_dates(self.window_start, self.window_end)
+    def window_key(self) -> str:
+        return IncrementalWindow(
+            start_time=self.window_start, end_time=self.window_end
+        ).to_iso_string()
 
     @field_validator("window_start", "window_end", "updated_at", mode="before")
     @classmethod

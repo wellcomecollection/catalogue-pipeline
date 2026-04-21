@@ -150,8 +150,7 @@ def execute_loader(
     harvester = build_harvester(request, runtime)
 
     summaries = harvester.harvest_range(
-        start_time=window_start,
-        end_time=window_end,
+        time_range=request.window,
         max_windows=request.max_windows,
         reprocess_successful_windows=False,
     )
