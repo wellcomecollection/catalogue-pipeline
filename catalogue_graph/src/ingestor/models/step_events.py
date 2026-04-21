@@ -62,7 +62,8 @@ class IngestorStepEvent(BasePipelineEvent):
             index_date_images = args.index_date
 
         index_dates = PipelineIndexDates(
-            merged=args.index_date_merged,
+            merged=getattr(args, "index_date_merged", None),
+            augmented=getattr(args, "index_date_augmented", None),
             works=index_date_works,
             concepts=index_date_concepts,
             images=index_date_images,

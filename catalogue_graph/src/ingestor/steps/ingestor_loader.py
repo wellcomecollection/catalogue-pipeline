@@ -133,6 +133,7 @@ def local_handler(parser: ArgumentParser) -> None:
         {
             "pipeline_date",
             "index_date_merged",
+            "index_date_augmented",
             "window",
             "ids",
             "pit_id",
