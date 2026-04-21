@@ -19,7 +19,7 @@ dependencies = [
     "python-dateutil",
     "types-python-dateutil",
     "pyarrow~=20.0",
-    "lxml>=6.0.0",
+    "lxml>=6.1.0",
     # Pin pydantic below 2.12.0 due to pyiceberg TableMetadata validation incompatibility
     # (AttributeError: ValidationInfo has no attribute current_schema_id with pydantic 2.12.0)
     "pydantic>=2.11.7,<2.12.0",
