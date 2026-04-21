@@ -108,7 +108,7 @@ GH_PROMPT_DISABLED=true gh api graphql -f query='
 ' -F o=<o> -F r=<r> -F n=<n> | cat
 ```
 
-If `gh pr edit`-style mutations on this repo trip the *Projects (classic) deprecated* error, fall back to REST as described in `PR.agent.md` / `/memories/repo/`.
+If `gh pr edit`-style mutations on this repo trip the *Projects (classic) deprecated* error, fall back to REST as described in `create-pr.agent.md` / `/memories/repo/`.
 
 ## Output format per drafted comment
 
