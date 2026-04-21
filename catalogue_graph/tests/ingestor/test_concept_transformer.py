@@ -1,6 +1,8 @@
-from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.display.location import DisplayDigitalLocation
+from ingestor.models.display.location_type import (
+    DisplayLocationType,
+)
 from ingestor.models.indexable.concept import (
     ConceptDescription,
     ConceptDisplay,
@@ -492,14 +494,14 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
             displayImages=[
                 DisplayDigitalLocation(
                     url="www.image.info.json",
-                    locationType=DisplayIdLabel(
+                    locationType=DisplayLocationType(
                         id="iiif-image", label="IIIF Image API", type="LocationType"
                     ),
                     accessConditions=[],
                 ),
                 DisplayDigitalLocation(
                     url="www.image2.info.json",
-                    locationType=DisplayIdLabel(
+                    locationType=DisplayLocationType(
                         id="iiif-image", label="IIIF Image API", type="LocationType"
                     ),
                     accessConditions=[],

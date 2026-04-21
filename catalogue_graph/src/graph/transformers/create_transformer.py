@@ -63,7 +63,7 @@ def create_transformer(
         es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
         return CatalogueWorkIdentifiersTransformer(event, es_client)
     if transformer_type == "catalogue_images":
-        es_client = get_client("read_only", event.pipeline_date, es_mode)
+        es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
         return CatalogueImagesTransformer(event, es_client)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")

@@ -42,7 +42,7 @@ class WorksIndexExtractor(GraphBaseWorksExtractor, StreamingExtractor):
     def get_related_works_source(self, related_ids: list[str]) -> MergedWorksSource:
         # Remove `window` from event before retrieving related works. (All related works should be processed
         # even if they aren't part of the current window.)
-        event = self.event.copy(update={"window": None})
+        event = self.event.copy(update={"window": None, "ids": None})
         return MergedWorksSource(
             event=event,
             query=get_works_by_id_query(related_ids),
@@ -56,8 +56,9 @@ class WorksIndexExtractor(GraphBaseWorksExtractor, StreamingExtractor):
         # This is because each work document stores the IDs of all of its ancestors (`partOf` field)
         # and children (`parts` field), along with their titles and reference numbers.
 
-        if self.event.mode_label != "full":
+        if self.event.mode_label == "full":
             yield from super()._process_visible_batch(visible_works)
+            return
 
         visible_work_ids = [w.state.canonical_id for w in visible_works]
         descendants_batch = self._get_work_descendants(visible_work_ids)

@@ -71,6 +71,9 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
         self, concept_ids: Iterable[str]
     ) -> dict[str, set[ConceptType]]:
         """Given a set of `concept_ids`, return all types associated with each concept via HAS_CONCEPT edges."""
+        # Types are shared across all 'same as' concepts
+        concept_ids = set().union(*(self.get_same_as(i) for i in concept_ids))
+
         result = self.make_neptune_query("concept_type", concept_ids)
 
         concept_types = defaultdict(set)

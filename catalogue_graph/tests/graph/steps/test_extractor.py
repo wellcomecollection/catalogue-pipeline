@@ -170,6 +170,7 @@ def test_lambda_handler(
         "catalogue_concepts": [],
         "catalogue_works": [],
         "catalogue_work_identifiers": [],
+        "catalogue_images": [],
     }
 
     assert transformer_type in transformer_types
