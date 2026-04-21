@@ -79,7 +79,7 @@ class IncrementalWindow(BaseModel):
 
     @classmethod
     def from_iso_string(cls, s: str) -> IncrementalWindow:
-        start_str, end_str = s.split("_")
+        start_str, end_str = s.split("_", 1)
         return cls(
             start_time=datetime.fromisoformat(start_str),
             end_time=datetime.fromisoformat(end_str),
