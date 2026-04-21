@@ -83,8 +83,8 @@ go through `utils.manifests.ManifestWriter`. Subclass it and implement
 
 ## Testing
 
-- `pytest` config lives in `pyproject.toml`. Default run **excludes**
-  `integration` and `database` markers (`-m 'not integration'`).
+- `pytest` config lives in `pyproject.toml`. Default run **excludes** the
+  `integration` marker (`-m 'not integration'`).
 - Use `freezegun` for time, `hypothesis` for property tests, `pytest-bdd` for
   the gherkin suites under `tests/gherkin_steps/`.
 - Scope test runs to the area you changed — a full `uv run pytest` is slow:
