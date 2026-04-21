@@ -39,9 +39,6 @@ class GraphImagesExtractor(GraphBaseExtractor, StreamingExtractor):
             event,
             es_client=es_client,
         )
-        self.event = event
-        self.es_client = es_client
-
         self.works_extractor = ImageWorksExtractor(event, es_client, neptune_client)
 
     def process_es_images(

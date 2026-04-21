@@ -9,4 +9,4 @@ class ImageState(SerialisableModel):
     source_identifier: SourceIdentifier
 
     def id(self) -> str:
-        raise NotImplementedError()
+        return self.canonical_id

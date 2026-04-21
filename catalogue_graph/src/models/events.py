@@ -24,11 +24,11 @@ class EventBridgeScheduledEvent(BaseModel):
 
 
 class PipelineIndexDates(BaseModel):
-    merged: str | None = None
-    concepts: str | None = None
-    works: str | None = None
-    images: str | None = None
-    images_augmented: str | None = None
+    merged: str | None = None  # merged works
+    augmented: str | None = None  # augmented images
+    concepts: str | None = None  # final concepts
+    works: str | None = None  # final works
+    images: str | None = None  # final images
 
 
 class BasePipelineEvent(SourceScope):
@@ -41,7 +41,8 @@ class BasePipelineEvent(SourceScope):
     def from_argparser(cls, args: argparse.Namespace) -> Self:
         window = IncrementalWindow.from_argparser(args)
         merged = getattr(args, "index_date_merged", None)
-        index_dates = PipelineIndexDates(merged=merged)
+        augmented = getattr(args, "index_date_augmented", None)
+        index_dates = PipelineIndexDates(merged=merged, augmented=augmented)
         return cls(**args.__dict__, window=window, index_dates=index_dates)
 
 

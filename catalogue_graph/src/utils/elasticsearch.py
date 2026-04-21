@@ -36,7 +36,7 @@ def get_merged_index_name(event: BasePipelineEvent) -> str:
 
 
 def get_images_augmented_index_name(event: BasePipelineEvent) -> str:
-    index_date = event.index_dates.images_augmented or event.pipeline_date
+    index_date = event.index_dates.augmented or event.pipeline_date
     return get_standard_index_name(ES_IMAGES_AUGMENTED_INDEX_NAME, index_date)
 
 
