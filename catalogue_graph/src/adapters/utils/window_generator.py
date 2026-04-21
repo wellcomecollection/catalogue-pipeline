@@ -31,7 +31,9 @@ class WindowGenerator:
         self.window_minutes = window_minutes or DEFAULT_WINDOW_MINUTES
         self.allow_partial_final_window = allow_partial_final_window
 
-    def generate_windows(self, window: IncrementalWindow) -> list[IncrementalWindow]:
+    def generate_windows(
+        self, time_range: IncrementalWindow
+    ) -> list[IncrementalWindow]:
         """Generate aligned time windows between start_time and end_time.
 
         Windows are aligned to fixed boundaries based on ALIGNMENT_EPOCH and
@@ -39,7 +41,7 @@ class WindowGenerator:
         at :00, :15, :30, :45 of each hour.
 
         Args:
-            window: The incremental window defining the time range.
+            time_range: The incremental window defining the time range.
 
         Returns:
             List of IncrementalWindow objects.
@@ -47,11 +49,8 @@ class WindowGenerator:
         Raises:
             ValueError: If start_time >= end_time.
         """
-        start_time = window.start_time_utc
-        end_time = window.end_time_utc
-
-        if start_time >= end_time:
-            raise ValueError("start_time must be earlier than end_time")
+        start_time = time_range.start_time_utc
+        end_time = time_range.end_time_utc
 
         delta = timedelta(minutes=self.window_minutes)
         effective_end_time = end_time
