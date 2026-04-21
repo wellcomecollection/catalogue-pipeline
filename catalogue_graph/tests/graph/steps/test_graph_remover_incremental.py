@@ -8,6 +8,7 @@ from freezegun import freeze_time
 from graph.steps.graph_remover_incremental import lambda_handler
 from tests.mocks import (
     MockCloudwatchClient,
+    MockElasticsearchClient,
     MockSmartOpen,
     add_neptune_mock_response,
     mock_es_secrets,
@@ -279,3 +280,35 @@ def test_metrics() -> None:
             "value": 2,
         }
     ]
+
+
+def test_graph_remover_incremental_id_mode() -> None:
+    """ID mode should scope the ES query and write output to an IDs-specific S3 path."""
+    add_mock_merged_documents("dev", work_status="Invisible")
+    mock_neptune_get_existing_nodes_response(["sghsneca"])
+    mock_neptune_delete_nodes_response(["sghsneca"])
+    mock_neptune_get_total_node_count("Work", 100)
+    mock_neptune_secrets()
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
+
+    event = {
+        "transformer_type": "catalogue_works",
+        "entity_type": "nodes",
+        "pipeline_date": "dev",
+        "ids": ["sghsneca"],
+    }
+    lambda_handler(event, None)
+
+    s3_uri = f"{REMOVER_S3_PREFIX}/dev/by_id/sghsneca/deleted_ids/catalogue_works__nodes.parquet"
+    check_deleted_ids_log(s3_uri, {"sghsneca"})
+
+    # ID mode should produce an ids query filter
+    assert len(MockElasticsearchClient.queries) >= 1
+    assert MockElasticsearchClient.queries[0] == {
+        "bool": {
+            "must": [
+                {"bool": {"must_not": {"match": {"type": "Visible"}}}},
+                {"ids": {"values": ["sghsneca"]}},
+            ]
+        }
+    }

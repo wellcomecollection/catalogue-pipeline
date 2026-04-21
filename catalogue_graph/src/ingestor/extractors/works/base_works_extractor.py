@@ -2,8 +2,6 @@ from collections.abc import Generator, Iterator
 from itertools import batched
 
 import structlog
-from pydantic import BaseModel
-
 from clients.neptune_client import NeptuneClient
 from graph.sources.catalogue.concepts_source import extract_identified_concepts
 from ingestor.extractors.base_extractor import (
@@ -14,8 +12,16 @@ from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
 )
-from ingestor.models.neptune.query_result import ExtractedConcept, WorkHierarchy
+from ingestor.models.neptune.node import WorkNode
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    WorkHierarchy,
+)
 from models.pipeline.work_data import WorkData
+from pydantic import BaseModel
+
+from .base_extractor import GraphBaseExtractor
+from .work_concepts_extractor import WorkConceptsExtractor
 
 logger = structlog.get_logger(__name__)
 
@@ -56,6 +62,7 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
         self.extracted_concepts: dict[str, ExtractedConcept] = {}
         self.streamed_ids: set[str] = set()
         self.related_ids: set[str] = set()
+        self.extracted_concepts: dict[str, ExtractedConcept] = {}
 
     def _extract_concepts(self, concept_ids: set[str]) -> None:
         # Cache extracted concepts to ensure each concept is only processed once,
@@ -68,6 +75,18 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
         )
         for concept_id, concept in concepts_extractor.extract_raw():
             self.extracted_concepts[concept_id] = concept
+
+    def _get_work_ancestors(self, ids: list[str]) -> dict:
+        """Return all ancestors of each work in the current batch."""
+        return self.make_neptune_query("work_ancestors", ids)
+
+    def _get_work_children(self, ids: list[str]) -> dict:
+        """Return all children of each work in the current batch."""
+        return self.make_neptune_query("work_children", ids)
+
+    def _get_work_descendants(self, ids: list[str]) -> dict:
+        """Return all descendants of each work in the current batch."""
+        return self.make_neptune_query("work_descendants", ids)
 
     def get_work_concepts(self, works: dict[str, WorkData]) -> dict:
         """Return all concepts of each work in the current batch."""
@@ -95,14 +114,6 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
 
         return concepts_by_work
 
-    def _get_work_ancestors(self, ids: list[str]) -> dict:
-        """Return all ancestors of each work in the current batch."""
-        return self.make_neptune_query("work_ancestors", ids)
-
-    def _get_work_children(self, ids: list[str]) -> dict:
-        """Return all children of each work in the current batch."""
-        return self.make_neptune_query("work_children", ids)
-
     def process_es_works(
         self, es_works: Iterator[MergedWork]
     ) -> Generator[ExtractedWork]:
@@ -124,6 +135,13 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
             work_data = {w.state.canonical_id: w.data for w in visible_works}
             concepts_batch = self.get_work_concepts(work_data)
 
+            # Descendants are only needed in incremental mode
+            descendants_batch = (
+                self._get_work_descendants(visible_work_ids)
+                if self.event.mode_label != "full"
+                else {}
+            )
+
             for es_work in visible_works:
                 work_id = es_work.state.canonical_id
                 self.streamed_ids.add(work_id)
@@ -134,8 +152,15 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
                     children=children_batch.get(work_id, {}).get("children", []),
                 )
 
-                self.related_ids |= {c.work.properties.id for c in hierarchy.children}
-                self.related_ids |= {c.work.properties.id for c in hierarchy.ancestors}
+                # When a work is processed in incremental mode, its parent and descendants must be processed too.
+                # This is because each work document stores the IDs of all of its ancestors (`partOf` field)
+                # and children (`parts` field), along with their titles and reference numbers.
+                if self.event.mode_label != "full":
+                    raw_desc = descendants_batch.get(work_id, {}).get("descendants", [])
+                    descendants = [WorkNode.model_validate(d) for d in raw_desc]
+                    self.related_ids |= {d.properties.id for d in descendants}
+                    if hierarchy.ancestors:
+                        self.related_ids.add(hierarchy.ancestors[0].work.properties.id)
 
                 yield VisibleExtractedWork(
                     work=es_work, hierarchy=hierarchy, concepts=concepts_batch[work_id]

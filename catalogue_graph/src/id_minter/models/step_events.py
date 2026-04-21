@@ -1,19 +1,15 @@
-"""Step Function event models for the ID Minter.
-
-Direct port of the Scala StepFunctionModels:
-- StepFunctionMintingRequest  → input event
-- StepFunctionMintingResponse → output event
-- StepFunctionMintingFailure  → per-identifier failure detail
-"""
-
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+
+from models.incremental_window import IncrementalWindow
+from models.source_scope import SourceScope
+from utils.types import NonEmptyString
 
 
 class StepFunctionMintingRequest(BaseModel):
-    """A batch of source identifiers to mint canonical IDs for."""
+    """Input event for the ID Minter step function."""
 
     model_config = ConfigDict(
         alias_generator=to_camel,
@@ -21,16 +17,13 @@ class StepFunctionMintingRequest(BaseModel):
         validate_by_alias=True,
     )
 
-    source_identifiers: list[str]
-    job_id: str
+    source_identifiers: list[NonEmptyString] | None = None
+    window: IncrementalWindow | None = None
+    job_id: NonEmptyString
 
-    @model_validator(mode="after")
-    def validate_request(self) -> StepFunctionMintingRequest:
-        if any(sid.strip() == "" for sid in self.source_identifiers):
-            raise ValueError("source_identifiers cannot contain empty strings")
-        if self.job_id.strip() == "":
-            raise ValueError("job_id cannot be empty")
-        return self
+    @property
+    def source_scope(self) -> SourceScope:
+        return SourceScope(ids=self.source_identifiers, window=self.window)
 
 
 class StepFunctionMintingFailure(BaseModel):
@@ -46,27 +39,3 @@ class StepFunctionMintingResponse(BaseModel):
     successes: list[str]
     failures: list[StepFunctionMintingFailure]
     job_id: str
-
-
-# These will be removed once the migration is complete and the step is no longer needed.
-
-
-class MigrationRequest(BaseModel):
-    """Request to migrate identifiers from a parquet S3 export into the new schema."""
-
-    s3_bucket: str = "wellcomecollection-platform-id-minter"
-    cluster_name: str = "identifiers-serverless"
-    export_date: str
-    truncate: bool = True
-    batch_size: int = 1_000_000
-
-
-class MigrationResponse(BaseModel):
-    """Result of a migration run."""
-
-    total_source_rows: int
-    canonical_ids_inserted: int
-    identifiers_inserted: int
-    canonical_ids_verified: int
-    identifiers_verified: int
-    orphaned_identifiers: int

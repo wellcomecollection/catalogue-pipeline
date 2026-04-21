@@ -78,7 +78,7 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     add_pipeline_event_args(
-        parser, {"pipeline_date", "window", "pit_id", "environment", "es_mode"}
+        parser, {"pipeline_date", "window", "ids", "pit_id", "environment", "es_mode"}
     )
     parser.add_argument(
         "--transformer-type",

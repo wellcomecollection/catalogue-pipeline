@@ -98,8 +98,7 @@ class TestExecuteLoader:
             assert len(response.summaries) == 1
 
             mock_harvest.assert_called_once_with(
-                start_time=req.window.start_time,
-                end_time=req.window.end_time,
+                time_range=req.window,
                 max_windows=req.max_windows,
                 reprocess_successful_windows=False,
             )

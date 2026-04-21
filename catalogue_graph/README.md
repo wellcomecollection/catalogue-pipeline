@@ -129,6 +129,18 @@ Elasticsearch ingestor Lambda functions:
   the catalogue graph. Uses the append-only log of deleted IDs created by the `graph_remover` to decide which
   documents to remove.
 
+### Processing mode compatibility
+
+| Service                         |                Full mode                 |        Window mode        |      ID mode       |
+|---------------------------------|:----------------------------------------:|:-------------------------:|:------------------:|
+| **Extractor**                   |            ✓ all transformers            | ✓ Wellcome catalogue only |    ✓ works only    |
+| **Bulk Loader**                 |            ✓ all transformers            | ✓ Wellcome catalogue only |    ✓ works only    |
+| **Graph Remover (Full)**        | ✓ external (non-Wellcome catalogue) only |             ✗             |         ✗          |
+| **Graph Remover (Incremental)** |        ✓ Wellcome catalogue only         | ✓ Wellcome catalogue only |    ✓ works only    |
+| **Ingestor Loader**             |            ✓ works + concepts            |    ✓ works + concepts     | ✓ works + concepts |
+| **Ingestor Indexer**            |            ✓ works + concepts            |    ✓ works + concepts     | ✓ works + concepts |
+| **Ingestor Deletions**          |             ✓ concepts only              |      ✓ concepts only      |  ✓ concepts only   |
+
 ## Source code organisation
 
 The `src` directory contains all Python source code for the graph pipeline (Python 3.13). Each Lambda's handler lives
@@ -277,8 +289,6 @@ at it via the normal env vars.
 | bulk_loader           | bulk_loader.lambda_handler                       |
 | bulk_load_poller      | bulk_load_poller.lambda_handler                  |
 | graph_remover         | graph_remover.lambda_handler                     |
-| graph_status_poller   | graph_status_poller.lambda_handler               |
-| graph_scaler          | graph_scaler.lambda_handler                      |
 | indexer               | indexer.lambda_handler                           |
 | ingestor_loader       | ingestor.steps.ingestor_loader.lambda_handler    |
 | ingestor_indexer      | ingestor.steps.ingestor_indexer.lambda_handler   |

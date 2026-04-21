@@ -7,7 +7,6 @@ Follows the runtime / handler pattern used by the EBSCO adapter loader.
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 from typing import Any
 
 import structlog
@@ -15,6 +14,7 @@ from pydantic import BaseModel, ConfigDict
 
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
+from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import IdMintingTransformer
 from id_minter.manifests import IdMinterManifestWriter
 from id_minter.models.identifier import IdResolver
@@ -25,9 +25,11 @@ from id_minter.reporting import IdMinterReport
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
+from models.incremental_window import IncrementalWindow
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.models.manifests import StepManifest
+from utils.steps import create_job_id
 
 logger = structlog.get_logger(__name__)
 
@@ -68,7 +70,10 @@ def execute(
     logger.info(
         "Processing minting request",
         job_id=request.job_id,
-        source_identifier_count=len(request.source_identifiers),
+        source_identifier_count=len(request.source_identifiers)
+        if request.source_identifiers
+        else None,
+        window=request.window.model_dump() if request.window else None,
         source_index_prefix=runtime.config.source_index_prefix,
         target_index_prefix=runtime.config.target_index_prefix,
     )
@@ -87,10 +92,13 @@ def execute(
         es_mode=runtime.target_es_mode,
     )
 
-    transformer = IdMintingTransformer(
+    elastic_source = IdMintingSource(
+        source_scope=request.source_scope,
         es_client=source_client,
-        source_index=source_index,
-        source_identifiers=request.source_identifiers,
+        index_name=source_index,
+    )
+    transformer = IdMintingTransformer(
+        elastic_source,
         resolver=runtime.resolver,
     )
     transformer.stream_to_index(target_client, target_index)
@@ -139,7 +147,9 @@ def log_runtime_config(
         source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
         target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
         downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
+        mode=request.source_scope.mode_label,
         identifiers=request.source_identifiers,
+        window=request.window.model_dump() if request.window else None,
         migrations="yes" if cfg.apply_migrations else "no",
     )
 
@@ -169,9 +179,14 @@ def handler(
             success_count=success_count,
             failure_count=failure_count,
         ).publish()
-    except Exception:
+    # The metric triggers an alarm if failure_count > 0
+    # If publish fails AND we have failure, we raise
+    except Exception as e:
         logger.warning("Failed to publish metrics", exc_info=True)
-
+        if failure_count > 0:
+            raise RuntimeError(
+                f"Failed to publish metrics for a run with {failure_count} failures: {response.job_id}"
+            ) from e
     return response
 
 
@@ -180,6 +195,8 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
         trace_id=get_trace_id(context),
         pipeline_step="id_minter",
     )
+    if "job_id" not in event:
+        event["job_id"] = create_job_id()
     request = StepFunctionMintingRequest.model_validate(event)
     runtime = build_runtime()
     response = handler(
@@ -191,11 +208,27 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
 
 
 def local_handler(parser: argparse.ArgumentParser) -> None:
+    # -- Source selection (mutually exclusive: ids, window, or neither for full) --
     parser.add_argument(
         "--source-identifiers",
         nargs="+",
-        required=True,
-        help="One or more source identifiers to mint.",
+        required=False,
+        default=None,
+        help="One or more source identifiers to mint (IDs mode).",
+    )
+    parser.add_argument(
+        "--window-end",
+        type=str,
+        required=False,
+        default=None,
+        help="End of the time window (ISO 8601). Window mode.",
+    )
+    parser.add_argument(
+        "--window-start",
+        type=str,
+        required=False,
+        default=None,
+        help="Start of the time window (ISO 8601). Defaults to end_time - 15 minutes.",
     )
     parser.add_argument(
         "--job-id",
@@ -267,9 +300,10 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
 
     args = parser.parse_args()
 
-    job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
+    job_id = args.job_id or create_job_id()
     request = StepFunctionMintingRequest(
         source_identifiers=args.source_identifiers,
+        window=IncrementalWindow.from_argparser(args),
         job_id=job_id,
     )
 

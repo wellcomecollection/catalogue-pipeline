@@ -24,6 +24,9 @@ class WikidataConceptsTransformer(GraphBaseTransformer):
     def transform_node(self, raw_node: dict) -> SourceConcept | None:
         raw_concept = RawWikidataConcept(raw_node)
 
+        if raw_concept.exclude():
+            return None
+
         return SourceConcept(
             id=raw_concept.source_id,
             label=raw_concept.label,

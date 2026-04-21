@@ -386,7 +386,7 @@ class WindowReporter:
             lookback_minutes = max(self.window_minutes * 2, 1440)
             search_start = start_bound - timedelta(minutes=lookback_minutes)
 
-        raw_rows = self.store.list_in_range(start=search_start, end=end_bound)
+        raw_rows = self.store.list_in_range(start_time=search_start, end_time=end_bound)
 
         rows: list[WindowSummary] = []
         for raw_row in raw_rows:

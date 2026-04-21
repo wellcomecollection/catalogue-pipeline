@@ -10,9 +10,10 @@ from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.window_store import (
     WINDOW_STATUS_SCHEMA,
-    WindowStatusRecord,
     WindowStore,
 )
+from adapters.utils.window_summary import WindowSummary
+from models.incremental_window import IncrementalWindow
 
 
 def _create_table(
@@ -57,15 +58,15 @@ def test_window_store_round_trip(tmp_path: Path) -> None:
 
     start = datetime(2025, 11, 14, 6, 0, tzinfo=UTC)
     end = datetime(2025, 11, 14, 6, 15, tzinfo=UTC)
-    record = WindowStatusRecord(
-        window_key="2025-11-14T06:00Z_2025-11-14T06:15Z",
+    record = WindowSummary(
         window_start=start,
         window_end=end,
         state="success",
         attempts=1,
         last_error=None,
-        record_ids=("id:1", "id:2", "id:3"),
+        record_ids=["id:1", "id:2", "id:3"],
         updated_at=datetime.now(UTC),
+        tags=None,
     )
 
     store.upsert(record)
@@ -75,15 +76,15 @@ def test_window_store_round_trip(tmp_path: Path) -> None:
     assert stored[record.window_key]["record_ids"] == ["id:1", "id:2", "id:3"]
 
     # Updating the same window should overwrite the prior row
-    updated_record = WindowStatusRecord(
-        window_key=record.window_key,
+    updated_record = WindowSummary(
         window_start=start,
         window_end=end,
         state="failed",
         attempts=3,
         last_error="Timeout",
-        record_ids=(),
+        record_ids=[],
         updated_at=datetime.now(UTC),
+        tags=None,
     )
     store.upsert(updated_record)
 
@@ -119,27 +120,80 @@ def test_window_store_list_in_range(tmp_path: Path) -> None:
 
     for t in [t1, t2, t3]:
         store.upsert(
-            WindowStatusRecord(
-                window_key=t.isoformat(),
+            WindowSummary(
                 window_start=t,
-                window_end=t,  # dummy
+                window_end=t + timedelta(minutes=15),
                 state="success",
                 attempts=1,
                 last_error=None,
-                record_ids=(),
+                record_ids=[],
                 updated_at=datetime.now(UTC),
+                tags=None,
             )
         )
 
     # Test range queries
     # All
-    assert len(store.list_in_range(start=t1, end=t3 + timedelta(hours=1))) == 3
+    assert (
+        len(store.list_in_range(start_time=t1, end_time=t3 + timedelta(hours=1))) == 3
+    )
 
     # Start filter
-    assert len(store.list_in_range(start=t2)) == 2  # t2, t3
+    assert len(store.list_in_range(start_time=t2)) == 2  # t2, t3
 
     # End filter
-    assert len(store.list_in_range(end=t2)) == 1  # t1 (end is exclusive)
+    assert len(store.list_in_range(end_time=t2)) == 1  # t1 (end is exclusive)
 
     # Both
-    assert len(store.list_in_range(start=t2, end=t3)) == 1  # t2
+    assert len(store.list_in_range(start_time=t2, end_time=t3)) == 1  # t2
+
+
+def test_load_status_map_filters_by_time_range(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog.db"
+    warehouse_path = tmp_path / "warehouse"
+    catalog_uri = f"sqlite:///{catalog_path}"
+    table = _create_table(
+        catalog_uri=catalog_uri,
+        warehouse_path=warehouse_path,
+        namespace="harvest",
+        table_name=f"window_status_{uuid4().hex}",
+        catalog_name=f"catalog_{uuid4().hex}",
+    )
+    store = WindowStore(table)
+
+    t1 = datetime(2025, 1, 1, 10, 0, tzinfo=UTC)
+    t2 = datetime(2025, 1, 1, 11, 0, tzinfo=UTC)
+    t3 = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    for t in [t1, t2, t3]:
+        store.upsert(
+            WindowSummary(
+                window_start=t,
+                window_end=t + timedelta(minutes=15),
+                state="success",
+                attempts=1,
+                last_error=None,
+                record_ids=["a", "b"],
+                updated_at=datetime.now(UTC),
+                tags=None,
+            )
+        )
+
+    # No filters → returns all
+    assert len(store.load_status_map()) == 3
+
+    # Start filter only
+    assert len(store.load_status_map(start_time=t2)) == 2  # t2, t3
+
+    # End filter only
+    assert len(store.load_status_map(end_time=t2)) == 1  # t1
+
+    # Both filters
+    result = store.load_status_map(start_time=t2, end_time=t3)
+    assert len(result) == 1  # t2 only
+    assert (
+        IncrementalWindow(
+            start_time=t2, end_time=t2 + timedelta(minutes=15)
+        ).to_iso_string()
+        in result
+    )

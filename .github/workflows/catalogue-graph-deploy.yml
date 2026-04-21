@@ -102,6 +102,7 @@ jobs:
         component:
           # ID Minter V2
           - id-minter
+          - id-generator
           # Transformer lambdas
           - transformer
           # Graph subsystem lambdas

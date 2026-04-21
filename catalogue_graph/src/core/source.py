@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gzip
 import json
 import os
@@ -12,6 +14,8 @@ import requests
 import structlog
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
+
+import config
 
 logger = structlog.get_logger(__name__)
 
@@ -67,9 +71,9 @@ class ElasticSource(BaseSource):
         query: dict,
         pit_id: str | None = None,
         fields: list | None = None,
-        batch_size: int = 2000,
-        slice_count: int = 30,
-        parallelism: int = 5,
+        batch_size: int = config.ES_SOURCE_BATCH_SIZE,
+        slice_count: int = config.ES_SOURCE_SLICE_COUNT,
+        parallelism: int = config.ES_SOURCE_PARALLELISM,
     ):
         self.es_client = es_client
         self.index_name = index_name

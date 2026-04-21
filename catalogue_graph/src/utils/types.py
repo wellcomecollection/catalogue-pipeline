@@ -1,4 +1,6 @@
-from typing import Literal, get_args
+from typing import Annotated, Literal, get_args
+
+from pydantic import StringConstraints
 
 # Reason type Literal aliases & derived tuples (single source of truth for values).
 InvisibleReasonType = Literal[
@@ -107,3 +109,5 @@ EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["s3", "local", "void"]
 
 Environment = Literal["prod", "dev"]
+
+NonEmptyString = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]

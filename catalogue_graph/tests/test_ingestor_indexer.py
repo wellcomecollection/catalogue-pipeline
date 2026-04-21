@@ -98,6 +98,7 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
         "load_format": "parquet",
         "publish_to_s3": True,
         "window": None,
+        "ids": None,
         "pit_id": None,
         "success_count": len(expected_inputs),
     }
@@ -159,6 +160,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
         "load_format": "parquet",
         "publish_to_s3": True,
         "window": None,
+        "ids": None,
         "pit_id": None,
         "success_count": len(expected_inputs),
     }

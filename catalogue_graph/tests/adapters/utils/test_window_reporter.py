@@ -13,10 +13,9 @@ from pyiceberg.table import Table as IcebergTable
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import (
     WINDOW_STATUS_SCHEMA,
-    WindowStatusRecord,
     WindowStore,
 )
-from adapters.utils.window_summary import WindowKey
+from adapters.utils.window_summary import WindowSummary
 
 
 def _create_table(
@@ -63,16 +62,14 @@ def _insert_window(
     end: datetime,
     state: str = "success",
 ) -> None:
-    key = WindowKey.from_dates(start, end)
     store.upsert(
-        WindowStatusRecord(
-            window_key=key,
+        WindowSummary(
             window_start=start,
             window_end=end,
             state=state,
             attempts=1,
             last_error="Error" if state == "failed" else None,
-            record_ids=(),
+            record_ids=[],
             updated_at=datetime.now(UTC),
             tags=None,
         )
