@@ -16,6 +16,7 @@ from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
+import adapters.utils.window_harvester as harvester_mod
 from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import (
     WindowCallback,
@@ -436,3 +437,278 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
         minutes=harvester.window_minutes
     )
     assert len(client.calls) - initial_calls == 1
+
+
+class BatchTracker:
+    """Callback that records per-batch invocations and returns a changeset per batch."""
+
+    def __init__(self, *, fail_on_batch: int | None = None) -> None:
+        self.batch_calls: list[list[str]] = []
+        self.fail_on_batch = fail_on_batch
+
+    def __call__(
+        self,
+        records: list[tuple[str, Record]],
+    ) -> WindowCallbackResult:
+        batch_index = len(self.batch_calls)
+        ids = [r[0] for r in records]
+        self.batch_calls.append(ids)
+
+        if self.fail_on_batch is not None and batch_index == self.fail_on_batch:
+            raise RuntimeError(f"Simulated failure on batch {batch_index}")
+
+        return WindowCallbackResult(
+            changeset_id=f"cs-{batch_index}",
+            upserted_record_ids=ids,
+        )
+
+
+def test_batching_splits_records_across_callback_invocations(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """With BATCH_SIZE=2 and 5 records we expect 3 callback invocations."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 2)
+
+    records = [_make_record(f"id:{i}") for i in range(5)]
+    tracker = BatchTracker()
+    harvester = _build_harvester(tmp_path, records, record_callback=tracker)
+
+    summaries = harvester.harvest_range(
+        time_range=_window_range(hours=1), max_windows=1
+    )
+
+    assert len(tracker.batch_calls) == 3
+    assert tracker.batch_calls[0] == ["id:0", "id:1"]
+    assert tracker.batch_calls[1] == ["id:2", "id:3"]
+    assert tracker.batch_calls[2] == ["id:4"]
+    assert summaries[0].state == "success"
+
+
+def test_batching_accumulates_all_changeset_ids(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Each batch produces its own changeset_id; the final summary must list them all."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+
+    records = [_make_record(f"id:{i}") for i in range(3)]
+    tracker = BatchTracker()
+    harvester = _build_harvester(tmp_path, records, record_callback=tracker)
+
+    summaries = harvester.harvest_range(
+        time_range=_window_range(hours=1), max_windows=1
+    )
+
+    summary = summaries[0]
+    assert summary.tags is not None
+    changeset_ids = json.loads(summary.tags["changeset_ids"])
+    assert changeset_ids == ["cs-0", "cs-1", "cs-2"]
+
+    # Also verify persisted store
+    stored = next(iter(harvester.store.load_status_map().values()))
+    assert stored.tags is not None
+    assert json.loads(stored.tags["changeset_ids"]) == ["cs-0", "cs-1", "cs-2"]
+
+
+def test_batching_accumulates_record_ids_changed_tag(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """record_ids_changed tag should combine upserted IDs from all batches."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 2)
+
+    records = [_make_record(f"id:{i}") for i in range(4)]
+    tracker = BatchTracker()
+    harvester = _build_harvester(tmp_path, records, record_callback=tracker)
+
+    summaries = harvester.harvest_range(
+        time_range=_window_range(hours=1), max_windows=1
+    )
+
+    summary = summaries[0]
+    assert summary.tags is not None
+    record_ids_changed = json.loads(summary.tags["record_ids_changed"])
+    assert record_ids_changed == ["id:0", "id:1", "id:2", "id:3"]
+
+
+def test_batching_accumulates_record_ids_on_summary(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """The summary's record_ids list should contain IDs from all batches."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 2)
+
+    records = [_make_record(f"id:{i}") for i in range(3)]
+    tracker = BatchTracker()
+    harvester = _build_harvester(tmp_path, records, record_callback=tracker)
+
+    summaries = harvester.harvest_range(
+        time_range=_window_range(hours=1), max_windows=1
+    )
+
+    assert summaries[0].record_ids == ["id:0", "id:1", "id:2"]
+
+
+def test_batching_partial_failure_results_in_partial_success(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """If one batch fails but others succeed, the final state is partial_success."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+
+    records = [_make_record(f"id:{i}") for i in range(3)]
+    tracker = BatchTracker(fail_on_batch=1)
+    harvester = _build_harvester(tmp_path, records, record_callback=tracker)
+
+    summaries = harvester.harvest_range(
+        time_range=_window_range(hours=1), max_windows=1
+    )
+
+    summary = summaries[0]
+    assert summary.state == "partial_success"
+    assert summary.last_error is not None
+    assert "batch 1" in summary.last_error
+
+    # Only successful batches should contribute record_ids
+    assert summary.record_ids == ["id:0", "id:2"]
+
+    # Changeset IDs should only include successful batches
+    assert summary.tags is not None
+    changeset_ids = json.loads(summary.tags["changeset_ids"])
+    assert changeset_ids == ["cs-0", "cs-2"]
+
+
+def test_batching_all_fail_results_in_failed(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """If all batches fail the final state is failed."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+
+    records = [_make_record("id:0"), _make_record("id:1")]
+
+    class AlwaysFail:
+        def __call__(self, records: list[tuple[str, Record]]) -> WindowCallbackResult:
+            raise RuntimeError("boom")
+
+    harvester = _build_harvester(tmp_path, records, record_callback=AlwaysFail())
+
+    summaries = harvester.harvest_range(
+        time_range=_window_range(hours=1), max_windows=1
+    )
+
+    assert summaries[0].state == "failed"
+    assert summaries[0].record_ids == []
+    assert summaries[0].last_error is not None
+
+
+def test_batching_intermediate_writes_to_store(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """After each successful batch the store is updated with partial_success state."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+
+    records = [_make_record(f"id:{i}") for i in range(3)]
+    store_snapshots: list[WindowSummary] = []
+    original_upsert: Any = None
+
+    class SnapshotTracker(BatchTracker):
+        def __call__(
+            self,
+            records: list[tuple[str, Record]],
+        ) -> WindowCallbackResult:
+            result = super().__call__(records)
+            # After each callback returns, _process_single_batch will call
+            # store.upsert. We'll capture snapshots via a patched upsert.
+            return result
+
+    tracker = SnapshotTracker()
+    harvester = _build_harvester(tmp_path, records, record_callback=tracker)
+
+    original_upsert = harvester.store.upsert
+
+    def capturing_upsert(summary: WindowSummary) -> None:
+        store_snapshots.append(summary.model_copy(deep=True))
+        original_upsert(summary)
+
+    harvester.store.upsert = capturing_upsert  # type: ignore[assignment]
+
+    harvester.harvest_range(time_range=_window_range(hours=1), max_windows=1)
+
+    # 3 intermediate writes + 1 final write = 4 total upserts
+    assert len(store_snapshots) == 4
+
+    # Intermediate snapshots should be partial_success
+    assert store_snapshots[0].state == "partial_success"
+    assert store_snapshots[0].record_ids == ["id:0"]
+    assert store_snapshots[0].tags is not None
+    assert json.loads(store_snapshots[0].tags["changeset_ids"]) == ["cs-0"]
+
+    assert store_snapshots[1].state == "partial_success"
+    assert store_snapshots[1].record_ids == ["id:0", "id:1"]
+    assert store_snapshots[1].tags is not None
+    assert json.loads(store_snapshots[1].tags["changeset_ids"]) == ["cs-0", "cs-1"]
+
+    assert store_snapshots[2].state == "partial_success"
+    assert store_snapshots[2].record_ids == ["id:0", "id:1", "id:2"]
+
+    # Final write should be success
+    assert store_snapshots[3].state == "success"
+    assert store_snapshots[3].record_ids == ["id:0", "id:1", "id:2"]
+
+
+def test_batching_record_ids_changed_grows_across_intermediate_writes(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """record_ids_changed tag in each intermediate write should include all
+    IDs from previous batches plus the current one."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+
+    records = [_make_record(f"id:{i}") for i in range(3)]
+    store_snapshots: list[WindowSummary] = []
+    tracker = BatchTracker()
+    harvester = _build_harvester(tmp_path, records, record_callback=tracker)
+
+    original_upsert = harvester.store.upsert
+
+    def capturing_upsert(summary: WindowSummary) -> None:
+        store_snapshots.append(summary.model_copy(deep=True))
+        original_upsert(summary)
+
+    harvester.store.upsert = capturing_upsert  # type: ignore[assignment]
+
+    harvester.harvest_range(time_range=_window_range(hours=1), max_windows=1)
+
+    assert store_snapshots[0].tags is not None
+    assert json.loads(store_snapshots[0].tags["record_ids_changed"]) == ["id:0"]
+    assert store_snapshots[1].tags is not None
+    assert json.loads(store_snapshots[1].tags["record_ids_changed"]) == [
+        "id:0",
+        "id:1",
+    ]
+    assert store_snapshots[2].tags is not None
+    assert json.loads(store_snapshots[2].tags["record_ids_changed"]) == [
+        "id:0",
+        "id:1",
+        "id:2",
+    ]
+
+
+def test_batching_with_default_tags_preserved(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Default tags should be present alongside batching tags in the final summary."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 2)
+
+    records = [_make_record(f"id:{i}") for i in range(3)]
+    tracker = BatchTracker()
+    harvester = _build_harvester(
+        tmp_path,
+        records,
+        record_callback=tracker,
+        default_tags={"job_id": "job-42"},
+    )
+
+    summaries = harvester.harvest_range(
+        time_range=_window_range(hours=1), max_windows=1
+    )
+
+    summary = summaries[0]
+    assert summary.tags is not None
+    assert summary.tags["job_id"] == "job-42"
+    assert json.loads(summary.tags["changeset_ids"]) == ["cs-0", "cs-1"]
