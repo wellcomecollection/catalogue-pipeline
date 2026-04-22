@@ -1,14 +1,14 @@
+# when we destroy this infra, remember to remove the lambda from the deployment matrix
+# .github/workflows/catalogue-graph-deploy.yml -> id-minter-test
+
 locals {
-  # rds_test_config = {
-  #   subnet_group      = local.infra_critical.rds_subnet_group_name
-  #   security_group_id = local.infra_critical.rds_test_access_security_group_id
-  # }
-  
+  id_minter_v2_test_rds_instance = local.infra_critical.id_minter_rds["test"]
+
   id_minter_test_vpc_config = {
     subnet_ids = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
-      # local.rds_test_config.security_group_id,
+      local.id_minter_v2_test_rds_instance.ingress_security_group_id,
       local.network_config.ec_privatelink_security_group_id,
     ]
   }
@@ -22,19 +22,19 @@ locals {
     S3_PREFIX                   = "test"
   }
 
-  # rds_test_master_secret_name = regex(
-  #   "arn:aws:secretsmanager:[^:]+:[^:]+:secret:(.+)-.{6}$",
-  #   local.infra_critical.rds_test_master_user_secret_arn
-  # )[0]
+  rds_test_master_secret_name = regex(
+    "arn:aws:secretsmanager:[^:]+:[^:]+:secret:(.+)-.{6}$",
+    local.id_minter_v2_test_rds_instance.master_user_secret_arn
+  )[0]
 
   id_minter_test_secret_env_vars = merge(
-    # {
-    #   RDS_PRIMARY_HOST = "rds/identifiers-test-serverless/endpoint"
-    #   RDS_REPLICA_HOST = "rds/identifiers-test-serverless/reader_endpoint"
-    #   RDS_PORT         = "rds/identifiers-test-serverless/port"
-    #   RDS_USERNAME     = "${local.rds_test_master_secret_name}:username"
-    #   RDS_PASSWORD     = "${local.rds_test_master_secret_name}:password"
-    # },
+    {
+      RDS_PRIMARY_HOST = "rds/${local.id_minter_v2_test_rds_instance.cluster_id}/endpoint"
+      RDS_REPLICA_HOST = "rds/${local.id_minter_v2_test_rds_instance.cluster_id}/reader_endpoint"
+      RDS_PORT         = "rds/${local.id_minter_v2_test_rds_instance.cluster_id}/port"
+      RDS_USERNAME     = "${local.rds_test_master_secret_name}:username"
+      RDS_PASSWORD     = "${local.rds_test_master_secret_name}:password"
+    },
     module.elastic.pipeline_storage_es_service_secrets["id_minter"],
   )
 
