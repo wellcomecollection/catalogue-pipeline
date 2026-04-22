@@ -1,0 +1,12 @@
+[project]
+name = "sierra-adapter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3>=1.42.93",
+    "click>=8.3.2",
+    "pytz>=2026.1.post1",
+    "tqdm>=4.67.3",
+]
