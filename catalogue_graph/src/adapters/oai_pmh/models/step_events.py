@@ -6,6 +6,7 @@ and can be used directly or extended by specific adapters.
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
 from pydantic import Field
@@ -70,3 +71,30 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
 
     job_id: str
     """Job identifier linking this response to the originating trigger."""
+
+    @classmethod
+    def from_summaries(
+        cls, summaries: list[WindowSummary], job_id: str
+    ) -> OAIPMHLoaderResponse:
+        upserted_record_count = 0
+        changeset_ids = []
+
+        for summary in summaries:
+            if not summary.tags:
+                continue
+
+            # Older rows store a single changeset_id, new rows store a list of changeset_ids
+            if "changeset_id" in summary.tags:
+                changeset_ids.append(summary.tags["changeset_id"])
+            if "changeset_ids" in summary.tags:
+                changeset_ids += json.loads(summary.tags["changeset_ids"])
+            if "record_ids_changed" in summary.tags:
+                changed_ids = json.loads(summary.tags["record_ids_changed"])
+                upserted_record_count += len(changed_ids)
+
+        return cls(
+            summaries=summaries,
+            job_id=job_id,
+            changeset_ids=list(set(changeset_ids)),
+            changed_record_count=upserted_record_count,
+        )

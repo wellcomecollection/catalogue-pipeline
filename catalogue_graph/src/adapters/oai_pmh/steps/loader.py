@@ -136,12 +136,11 @@ def execute_loader(
     Raises:
         RuntimeError: If no windows were ready to harvest.
     """
-    window_start = request.window.start_time
-    window_end = request.window.end_time
+    window = request.window
     harvester = build_harvester(request, runtime)
 
     summaries = harvester.harvest_range(
-        time_range=request.window,
+        time_range=window,
         max_windows=request.max_windows,
         reprocess_successful_windows=False,
     )
@@ -149,32 +148,10 @@ def execute_loader(
     if not summaries:
         raise RuntimeError(
             "No pending windows to harvest for "
-            f"{window_start.isoformat()} -> {window_end.isoformat()}"
+            f"{window.start_time.isoformat()} -> {window.end_time.isoformat()}"
         )
 
-    changed_record_count = 0
-    changeset_ids: set[str] = set()
-
-    for summary in summaries:
-        if not summary.tags:
-            continue
-
-        if "changeset_id" in summary.tags:
-            changeset_ids.add(summary.tags["changeset_id"])
-
-        if "changeset_ids" in summary.tags:
-            changeset_ids.update(json.loads(summary.tags["changeset_ids"]))
-
-        if "record_ids_changed" in summary.tags:
-            changed_ids = json.loads(summary.tags["record_ids_changed"])
-            changed_record_count += len(changed_ids)
-
-    return OAIPMHLoaderResponse(
-        summaries=summaries,
-        changeset_ids=list(changeset_ids),
-        changed_record_count=changed_record_count,
-        job_id=request.job_id,
-    )
+    return OAIPMHLoaderResponse.from_summaries(summaries, job_id=request.job_id)
 
 
 def handler(

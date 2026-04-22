@@ -8,8 +8,7 @@ for local troubleshooting and manual gap remediation.
 from __future__ import annotations
 
 import argparse
-import json
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 
 import structlog
@@ -23,6 +22,7 @@ from adapters.oai_pmh.steps.loader import (
     build_harvester,
 )
 from adapters.oai_pmh.steps.loader import build_runtime as _build_loader_runtime
+from adapters.utils.adapter_events import BaseAdapterEvent
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.incremental_window import IncrementalWindow
@@ -35,6 +35,12 @@ class ReloaderStepConfig(BaseModel):
     """Configuration for the reloader step."""
 
     use_rest_api_table: bool = True
+    window_minutes: int | None = None
+
+
+class ReloaderEvent(BaseAdapterEvent):
+    window: IncrementalWindow
+    dry_run: bool = False
     window_minutes: int | None = None
 
 
@@ -159,27 +165,7 @@ def _process_gap(
             reprocess_successful_windows=False,
         )
 
-        changed_record_count = 0
-        changeset_ids: set[str] = set()
-
-        for summary in summaries:
-            if not summary.tags:
-                continue
-
-            if "changeset_id" in summary.tags:
-                changeset_ids.add(summary.tags["changeset_id"])
-
-            if "record_ids_changed" in summary.tags:
-                changed_ids = json.loads(summary.tags["record_ids_changed"])
-                changed_record_count += len(changed_ids)
-
-        loader_response = OAIPMHLoaderResponse(
-            summaries=summaries,
-            changeset_ids=list(changeset_ids),
-            changed_record_count=changed_record_count,
-            job_id=job_id,
-        )
-
+        loader_response = OAIPMHLoaderResponse.from_summaries(summaries, job_id=job_id)
         return GapReloadResult(
             gap_start=gap_start,
             gap_end=gap_end,
@@ -312,27 +298,23 @@ def lambda_handler(
     Returns:
         Serialized ReloaderResponse.
     """
+    reloader_event = ReloaderEvent.model_validate(event)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
         pipeline_step=pipeline_step,
     )
-    job_id = event["job_id"]
-    window_start = datetime.fromisoformat(event["window_start"].replace("Z", "+00:00"))
-    window_end = datetime.fromisoformat(event["window_end"].replace("Z", "+00:00"))
-    dry_run = event.get("dry_run", False)
-    window_minutes = event.get("window_minutes")
 
     runtime = build_runtime(
         adapter_config,
-        ReloaderStepConfig(window_minutes=window_minutes),
+        ReloaderStepConfig(window_minutes=reloader_event.window_minutes),
     )
     response = handler(
-        job_id=job_id,
-        window_start=window_start,
-        window_end=window_end,
+        job_id=reloader_event.job_id,
+        window_start=reloader_event.window.start_time_utc,
+        window_end=reloader_event.window.end_time_utc,
         execution_context=execution_context,
         runtime=runtime,
-        dry_run=dry_run,
+        dry_run=reloader_event.dry_run,
     )
     return response.model_dump(mode="json")
 
@@ -399,12 +381,7 @@ def run_cli(
         add_cli_args(parser)
         args = parser.parse_args()
 
-    window_start = datetime.fromisoformat(
-        args.window_start.replace("Z", "+00:00")
-    ).astimezone(UTC)
-    window_end = datetime.fromisoformat(
-        args.window_end.replace("Z", "+00:00")
-    ).astimezone(UTC)
+    window = IncrementalWindow(start_time=args.start_time, end_time=args.end_time)
 
     runtime = build_runtime(
         adapter_config,
@@ -420,8 +397,8 @@ def run_cli(
 
     response = handler(
         job_id=args.job_id,
-        window_start=window_start,
-        window_end=window_end,
+        window_start=window.start_time_utc,
+        window_end=window.end_time_utc,
         execution_context=execution_context,
         runtime=runtime,
         dry_run=args.dry_run,
