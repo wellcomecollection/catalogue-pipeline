@@ -70,9 +70,9 @@ class BatchProgress(BaseModel):
 
     def get_summary(self, is_final: bool) -> WindowSummary:
         all_tags = {
+            **self.tags,
             "changeset_ids": json.dumps(self.changeset_ids),
             "record_ids_changed": json.dumps(self.upserted_record_ids),
-            **self.tags,
         }
 
         state = self.final_state if is_final else "partial_success"
@@ -165,9 +165,6 @@ class WindowHarvestManager:
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
 
-    # ------------------------------------------------------------------
-    # Core processing
-    # ------------------------------------------------------------------
     def process_window(self, window: IncrementalWindow) -> WindowSummary:
         logger.info("Processing window", window=window.to_iso_string())
 
@@ -245,12 +242,3 @@ class WindowHarvestManager:
                 )
 
             yield identifier, record
-
-    def _record_identifier(self, record: Record) -> str | None:
-        header = getattr(record, "header", None)
-        if header is not None:
-            identifier = getattr(header, "identifier", None)
-            if isinstance(identifier, str):
-                return identifier
-
-        return None
