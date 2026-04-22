@@ -44,6 +44,6 @@ resource "aws_backup_selection" "id_minter" {
   plan_id      = aws_backup_plan.id_minter_daily.id
 
   resources = [
-    module.identifiers_v2_serverless_rds_cluster.rds_cluster_arn
+    module.id_minter_rds.rds_cluster_arn
   ]
 }
