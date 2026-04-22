@@ -53,6 +53,12 @@ class VisibleExtractedWork(ExtractedWork):
 
 
 class GraphBaseWorksExtractor(GraphBaseExtractor):
+    """Base class for work extraction from the catalogue graph.
+
+    Exposes a `process_es_works` method, which takes a list of merged works and enriches them with data
+    from the catalogue graph.
+    """
+
     def __init__(self, neptune_client: NeptuneClient):
         super().__init__(neptune_client)
 
@@ -83,7 +89,7 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
         """Return all descendants of each work in the current batch."""
         return self.make_neptune_query("work_descendants", ids)
 
-    def get_work_concepts(self, works: dict[str, WorkData]) -> dict:
+    def _get_work_concepts(self, works: dict[str, WorkData]) -> dict:
         """Return all concepts of each work in the current batch."""
         concept_ids_by_work = {}
         all_concept_ids = set()
@@ -118,7 +124,7 @@ class GraphBaseWorksExtractor(GraphBaseExtractor):
         # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
         ancestors_batch = self._get_work_ancestors(visible_work_ids)
         children_batch = self._get_work_children(visible_work_ids)
-        concepts_batch = self.get_work_concepts(work_data)
+        concepts_batch = self._get_work_concepts(work_data)
 
         for es_work in visible_works:
             work_id = es_work.state.canonical_id

@@ -24,6 +24,10 @@ logger = structlog.get_logger(__name__)
 
 
 class WorksIndexExtractor(GraphBaseWorksExtractor, StreamingExtractor):
+    """
+    Extracts works and their related works to produce standalone documents for the works index.
+    """
+
     def __init__(
         self,
         event: BasePipelineEvent,

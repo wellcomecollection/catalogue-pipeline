@@ -20,6 +20,8 @@ logger = structlog.get_logger(__name__)
 
 
 class ImageWorksExtractor(GraphBaseWorksExtractor):
+    """Extracts work data for enriching image documents."""
+
     def __init__(
         self,
         event: BasePipelineEvent,
