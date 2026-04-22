@@ -171,6 +171,9 @@ def execute_loader(
         if "changeset_id" in summary.tags:
             changeset_ids.add(summary.tags["changeset_id"])
 
+        if "changeset_ids" in summary.tags:
+            changeset_ids.update(json.loads(summary.tags["changeset_ids"]))
+
         if "record_ids_changed" in summary.tags:
             changed_ids = json.loads(summary.tags["record_ids_changed"])
             changed_record_count += len(changed_ids)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Sequence
 from contextlib import suppress
 from datetime import UTC, datetime, timedelta
@@ -350,11 +351,11 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
 
     assert summaries[0].record_ids == ["id:1"]
     assert summaries[0].tags is not None
-    assert summaries[0].tags["changeset_id"] == "cs-500"
+    assert json.loads(summaries[0].tags["changeset_ids"]) == ["cs-500"]
     status_map = harvester.store.load_status_map()
     stored = next(iter(status_map.values()))
     assert stored["tags"] is not None
-    assert stored["tags"]["changeset_id"] == "cs-500"
+    assert json.loads(stored["tags"]["changeset_ids"]) == ["cs-500"]
 
 
 def test_harvest_range_returns_existing_successful_summary_with_tags(

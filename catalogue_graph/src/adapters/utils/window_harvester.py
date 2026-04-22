@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+import itertools
+import json
+from collections.abc import Iterable, Sequence
 from datetime import UTC, datetime
 from typing import Protocol, TypedDict
 
@@ -8,6 +10,7 @@ import structlog
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.exceptions import NoRecordsMatchError
 from oai_pmh_client.models import Record
+from pydantic import BaseModel
 
 from models.incremental_window import IncrementalWindow
 
@@ -18,6 +21,13 @@ from .window_summary import (
 )
 
 logger = structlog.get_logger(__name__)
+
+BATCH_SIZE = 10_000
+
+
+def get_record_identifier(record: Record) -> str:
+    """Return the OAI-PMH identifier from a record's header."""
+    return record.header.identifier
 
 
 class WindowCallback(Protocol):
@@ -31,10 +41,49 @@ class WindowCallbackResult(TypedDict, total=False):
     tags: dict[str, str] | None
 
 
+class BatchProgress(BaseModel):
+    """Mutable accumulator for batch processing state within a window."""
+
+    window: IncrementalWindow
+    record_ids: list[str] = []
+    changeset_ids: list[str] = []
+    changed_record_ids: list[str] = []
+    non_batch_tags: dict[str, str] = {}
+    batches_succeeded: int = 0
+    batches_failed: int = 0
+    last_error: str | None = None
+
+    @property
+    def final_state(self) -> str:
+        if self.batches_failed == 0 and self.last_error is None:
+            return "success"
+        if self.batches_succeeded > 0:
+            return "partial_success"
+        return "failed"
+
+    def get_summary(self, is_final: bool) -> WindowSummary:
+        tags = {
+            "changeset_ids": json.dumps(self.changeset_ids),
+            "record_ids_changed": json.dumps(self.changed_record_ids),
+            **self.non_batch_tags,
+        }
+
+        state = self.final_state if is_final else "partial_success"
+
+        return WindowSummary(
+            window_start=self.window.start_time_utc,
+            window_end=self.window.end_time_utc,
+            state=state,
+            attempts=1,
+            record_ids=self.record_ids,
+            last_error=self.last_error,
+            updated_at=datetime.now(UTC),
+            tags=tags or None,
+        )
+
+
 class WindowHarvestManager:
     """Coordinates windowed harvesting and bookkeeping."""
-
-    DEFAULT_WINDOW_MINUTES = 15
 
     def __init__(
         self,
@@ -109,94 +158,98 @@ class WindowHarvestManager:
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
 
+    def _records_with_ids(
+        self, batch: Iterable[Record], progress: BatchProgress
+    ) -> Iterable[tuple[str, Record]]:
+        for record in batch:
+            try:
+                identifier = get_record_identifier(record)
+                yield identifier, record
+            except AttributeError as exc:
+                raise ValueError(
+                    "Cannot harvest record without header.identifier "
+                    f"(window={progress.window.to_iso_string()})"
+                ) from exc
+
     # ------------------------------------------------------------------
     # Core processing
     # ------------------------------------------------------------------
     def process_window(self, window: IncrementalWindow) -> WindowSummary:
-        start = window.start_time_utc
-        end = window.end_time_utc
-        key = window.to_iso_string()
-        attempts = 1
-        record_ids: list[str] = []
-        last_error: str | None = None
-        custom_tags: dict[str, str] = {}
-
         logger.info(
             "Processing window",
             window=window.to_formatted_string(),
         )
+
+        progress = BatchProgress(window=window)
+
         try:
             records_in_window = self.client.list_records(
                 metadata_prefix=self.metadata_prefix,
-                from_date=start,
-                until_date=end,
+                from_date=window.start_time_utc,
+                until_date=window.end_time_utc,
                 set_spec=self.set_spec,
             )
-
-            records_with_ids: list[tuple[str, Record]] = []
-            for idx, record in enumerate(records_in_window):
-                identifier = self._record_identifier(record, start, idx)
-                records_with_ids.append((identifier, record))
-                record_ids.append(identifier)
-
-            logger.info(
-                "Downloaded raw records from client", record_count=len(record_ids)
-            )
-
-            callback_result = self.record_callback(records_with_ids)
-            custom_tags |= callback_result.get("tags") or {}
-
-            state = "success"
+            for batch in itertools.batched(records_in_window, BATCH_SIZE):
+                self._process_single_batch(list(batch), progress)
         except NoRecordsMatchError:
-            state = "success"
+            pass  # No records — fall through to final state
         except Exception as exc:  # pragma: no cover - generic safety net
-            last_error = repr(exc)
-            state = "failed"
-            record_ids = []
+            progress.last_error = repr(exc)
 
-        updated_at = datetime.now(UTC)
-        summary = WindowSummary(
-            window_start=start,
-            window_end=end,
-            state=state,
-            attempts=attempts,
-            record_ids=record_ids,
-            last_error=last_error,
-            updated_at=updated_at,
-            tags=self._merge_tags(custom_tags),
-        )
+        summary = progress.get_summary(is_final=True)
         self.store.upsert(summary)
 
-        if state == "success":
+        if summary.state == "success":
             logger.info(
                 "Successfully processed window",
-                window_key=key,
-                record_count=len(record_ids),
+                window_key=window.to_iso_string(),
+                record_count=len(progress.record_ids),
             )
         else:
             logger.warning(
                 "Failed to process window",
-                window_key=key,
-                attempts=attempts,
-                last_error=last_error,
+                window_key=window.to_iso_string(),
+                state=summary.state,
+                last_error=progress.last_error,
             )
         return summary
 
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
-    def _record_identifier(
-        self, record: Record, window_start: datetime, idx: int
-    ) -> str:
-        header = getattr(record, "header", None)
-        if header is not None:
-            identifier = getattr(header, "identifier", None)
-            if isinstance(identifier, str):
-                return identifier
-        raise ValueError(
-            "Cannot harvest record without header.identifier "
-            f"(window_start={window_start.isoformat()}, idx={idx})"
+    def _process_single_batch(
+        self,
+        batch: list[Record],
+        progress: BatchProgress,
+    ) -> None:
+        logger.info(
+            "Processing batch",
+            batch_size=len(batch),
+            total_records_so_far=len(progress.record_ids) + len(batch),
         )
 
-    def _merge_tags(self, custom_tags: dict[str, str]) -> dict[str, str] | None:
-        return {**(self.default_tags or {}), **custom_tags} or None
+        try:
+            batch_with_ids = list(self._records_with_ids(batch, progress))
+            callback_result = self.record_callback(batch_with_ids)
+            batch_tags = dict(callback_result.get("tags") or {})
+
+            if "changeset_id" in batch_tags:
+                progress.changeset_ids.append(batch_tags.pop("changeset_id"))
+            if "record_ids_changed" in batch_tags:
+                changed_ids = json.loads(batch_tags.pop("record_ids_changed"))
+                progress.changed_record_ids.extend(changed_ids)
+
+            all_tags = self._merge_tags(batch_tags)
+            progress.non_batch_tags.update(all_tags)
+            progress.record_ids.extend([r[0] for r in batch_with_ids])
+            progress.batches_succeeded += 1
+
+            self.store.upsert(progress.get_summary(is_final=False))
+        except Exception as exc:
+            progress.last_error = repr(exc)
+            progress.batches_failed += 1
+            logger.warning(
+                "Batch processing failed",
+                batch_size=len(batch),
+                error=repr(exc),
+            )
+
+    def _merge_tags(self, custom_tags: dict[str, str]) -> dict[str, str]:
+        return {**(self.default_tags or {}), **custom_tags}
