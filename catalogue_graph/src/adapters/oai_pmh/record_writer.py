@@ -6,7 +6,6 @@ metadata about the changes for downstream processing.
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 import pyarrow as pa
@@ -80,7 +79,7 @@ class WindowRecordWriter:
                 }
             )
 
-        tags: dict[str, str] = {
+        tags = {
             "job_id": self.job_id,
             "window_range": self.window_range,
         }
@@ -89,7 +88,12 @@ class WindowRecordWriter:
             table = pa.Table.from_pylist(rows, schema=ADAPTER_STORE_ARROW_SCHEMA)
             update = self.table_client.incremental_update(table)
             if update:
-                tags["changeset_id"] = update.changeset_id
-                tags["record_ids_changed"] = json.dumps(update.upserted_record_ids)
+                return WindowCallbackResult(
+                    tags=tags,
+                    changeset_id=update.changeset_id,
+                    upserted_record_ids=update.upserted_record_ids,
+                )
 
-        return {"tags": tags}
+        return WindowCallbackResult(
+            tags=tags, changeset_id=None, upserted_record_ids=[]
+        )

@@ -4,7 +4,7 @@ import itertools
 import json
 from collections.abc import Iterable, Sequence
 from datetime import UTC, datetime
-from typing import Protocol, TypedDict
+from typing import Protocol
 
 import structlog
 from oai_pmh_client.client import OAIClient
@@ -25,9 +25,20 @@ logger = structlog.get_logger(__name__)
 BATCH_SIZE = 10_000
 
 
-def get_record_identifier(record: Record) -> str:
-    """Return the OAI-PMH identifier from a record's header."""
-    return record.header.identifier
+def get_record_identifier(record: Record) -> str | None:
+    header = getattr(record, "header", None)
+    if header is not None:
+        identifier = getattr(header, "identifier", None)
+        if isinstance(identifier, str):
+            return identifier
+
+    return None
+
+
+class WindowCallbackResult(BaseModel):
+    changeset_id: str | None = None
+    upserted_record_ids: list[str] = []
+    tags: dict[str, str] = {}
 
 
 class WindowCallback(Protocol):
@@ -37,18 +48,14 @@ class WindowCallback(Protocol):
     ) -> WindowCallbackResult: ...
 
 
-class WindowCallbackResult(TypedDict, total=False):
-    tags: dict[str, str] | None
-
-
 class BatchProgress(BaseModel):
     """Mutable accumulator for batch processing state within a window."""
 
     window: IncrementalWindow
     record_ids: list[str] = []
     changeset_ids: list[str] = []
-    changed_record_ids: list[str] = []
-    non_batch_tags: dict[str, str] = {}
+    upserted_record_ids: list[str] = []
+    tags: dict[str, str] = {}
     batches_succeeded: int = 0
     batches_failed: int = 0
     last_error: str | None = None
@@ -62,10 +69,10 @@ class BatchProgress(BaseModel):
         return "failed"
 
     def get_summary(self, is_final: bool) -> WindowSummary:
-        tags = {
+        all_tags = {
             "changeset_ids": json.dumps(self.changeset_ids),
-            "record_ids_changed": json.dumps(self.changed_record_ids),
-            **self.non_batch_tags,
+            "record_ids_changed": json.dumps(self.upserted_record_ids),
+            **self.tags,
         }
 
         state = self.final_state if is_final else "partial_success"
@@ -78,7 +85,7 @@ class BatchProgress(BaseModel):
             record_ids=self.record_ids,
             last_error=self.last_error,
             updated_at=datetime.now(UTC),
-            tags=tags or None,
+            tags=all_tags,
         )
 
 
@@ -103,7 +110,7 @@ class WindowHarvestManager:
         self.set_spec = set_spec
         self.window_minutes = window_generator.window_minutes
         self.record_callback = record_callback
-        self.default_tags = dict(default_tags) if default_tags else None
+        self.default_tags = dict(default_tags or {})
 
     def harvest_range(
         self,
@@ -162,25 +169,22 @@ class WindowHarvestManager:
         self, batch: Iterable[Record], progress: BatchProgress
     ) -> Iterable[tuple[str, Record]]:
         for record in batch:
-            try:
-                identifier = get_record_identifier(record)
-                yield identifier, record
-            except AttributeError as exc:
+            identifier = get_record_identifier(record)
+            if not identifier:
                 raise ValueError(
                     "Cannot harvest record without header.identifier "
                     f"(window={progress.window.to_iso_string()})"
-                ) from exc
+                )
+
+            yield identifier, record
 
     # ------------------------------------------------------------------
     # Core processing
     # ------------------------------------------------------------------
     def process_window(self, window: IncrementalWindow) -> WindowSummary:
-        logger.info(
-            "Processing window",
-            window=window.to_formatted_string(),
-        )
+        logger.info("Processing window", window=window.to_iso_string())
 
-        progress = BatchProgress(window=window)
+        progress = BatchProgress(window=window, tags=self.default_tags)
 
         try:
             records_in_window = self.client.list_records(
@@ -219,25 +223,16 @@ class WindowHarvestManager:
         batch: list[Record],
         progress: BatchProgress,
     ) -> None:
-        logger.info(
-            "Processing batch",
-            batch_size=len(batch),
-            total_records_so_far=len(progress.record_ids) + len(batch),
-        )
+        logger.info("Processing batch", batch_size=len(batch))
 
         try:
             batch_with_ids = list(self._records_with_ids(batch, progress))
-            callback_result = self.record_callback(batch_with_ids)
-            batch_tags = dict(callback_result.get("tags") or {})
+            result = self.record_callback(batch_with_ids)
 
-            if "changeset_id" in batch_tags:
-                progress.changeset_ids.append(batch_tags.pop("changeset_id"))
-            if "record_ids_changed" in batch_tags:
-                changed_ids = json.loads(batch_tags.pop("record_ids_changed"))
-                progress.changed_record_ids.extend(changed_ids)
-
-            all_tags = self._merge_tags(batch_tags)
-            progress.non_batch_tags.update(all_tags)
+            if result.changeset_id:
+                progress.changeset_ids.append(result.changeset_id)
+            progress.upserted_record_ids += result.upserted_record_ids
+            progress.tags.update(result.tags)
             progress.record_ids.extend([r[0] for r in batch_with_ids])
             progress.batches_succeeded += 1
 
@@ -246,10 +241,16 @@ class WindowHarvestManager:
             progress.last_error = repr(exc)
             progress.batches_failed += 1
             logger.warning(
-                "Batch processing failed",
+                "Failed to process batch",
                 batch_size=len(batch),
                 error=repr(exc),
             )
 
-    def _merge_tags(self, custom_tags: dict[str, str]) -> dict[str, str]:
-        return {**(self.default_tags or {}), **custom_tags}
+    def _record_identifier(self, record: Record) -> str | None:
+        header = getattr(record, "header", None)
+        if header is not None:
+            identifier = getattr(header, "identifier", None)
+            if isinstance(identifier, str):
+                return identifier
+
+        return None

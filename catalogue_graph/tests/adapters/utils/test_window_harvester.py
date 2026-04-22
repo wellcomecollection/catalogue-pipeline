@@ -73,7 +73,7 @@ class StubWindowProcessor:
         self,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
-        return {}
+        return WindowCallbackResult()
 
 
 def _create_table(
@@ -327,7 +327,7 @@ def test_harvest_range_attaches_default_tags(tmp_path: Path) -> None:
     status_map = harvester.store.load_status_map()
     assert status_map
     row = next(iter(status_map.values()))
-    assert row["tags"] == {"job_id": "job-123"}
+    assert row["tags"]["job_id"] == "job-123"
 
 
 def test_record_callback_persists_changeset(tmp_path: Path) -> None:
@@ -338,9 +338,7 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
             self,
             records: list[tuple[str, Record]],
         ) -> WindowCallbackResult:
-            return {
-                "tags": {"changeset_id": "cs-500"},
-            }
+            return WindowCallbackResult(changeset_id="cs-500")
 
     harvester = _build_harvester(tmp_path, records, record_callback=RecordingCallback())
     window = _window_range(hours=1)
