@@ -164,6 +164,8 @@ class MintingResolver:
         # mint/lookup). Also build a mapping from source_id -> predecessor for
         # records that have a predecessor specified (used for canonical ID inheritance
         # during migrations from one source system to another).
+        # Note: Duplicate sourceIdentifiers would be collapsed here; upstream guarantees
+        # a 1:1 mapping between sourceIdentifier and predecessorIdentifier, so this is safe
         source_ids = list(dict.fromkeys(req[0] for req in requests))
         predecessors = {req[0]: req[1] for req in requests if req[1] is not None}
         predecessor_ids = list(predecessors.values())
