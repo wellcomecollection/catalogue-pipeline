@@ -58,7 +58,7 @@ class DisplayImage(ElasticsearchModel):
         inferred_data = image.state.inferred_data
 
         return DisplayImage(
-            id=image.source.id.canonical_id,
+            id=image.state.canonical_id,
             locations=[
                 DisplayDigitalLocation.from_digital_location(loc)
                 for loc in image.locations
