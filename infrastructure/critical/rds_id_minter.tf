@@ -2,83 +2,28 @@ data "aws_ssm_parameter" "rds_username" {
   name = "/aws/reference/secretsmanager/catalogue/id_minter/rds_user"
 }
 
-data "aws_ssm_parameter" "rds_password" {
-  name = "/aws/reference/secretsmanager/catalogue/id_minter/rds_password"
+module "id_minter_rds" {
+  source = "./modules/id-minter-rds"
+
+  vpc_id             = local.vpc_id_new
+  private_subnet_ids = local.private_subnets_new
+  admin_cidr_ingress = local.admin_cidr_ingress
+  engine_version     = "8.0.mysql_aurora.3.10.3"
+
+  master_username = data.aws_ssm_parameter.rds_username.value
 }
 
-locals {
-  username = data.aws_ssm_parameter.rds_username.value
-  password = data.aws_ssm_parameter.rds_password.value
+module "id_minter_rds_test" {
+  source = "./modules/id-minter-rds"
+
+  name_suffix = "test"
+  # Restore from production on April 21, 2026, 04:18 (UTC+01:00)
+  snapshot_identifier = "awsbackup:job-349affad-75e5-83a7-5e9b-7c631bdfa39e"
+
+  vpc_id             = local.vpc_id_new
+  private_subnet_ids = local.private_subnets_new
+  admin_cidr_ingress = local.admin_cidr_ingress
+  engine_version     = "8.0.mysql_aurora.3.10.3"
+
+  master_username = data.aws_ssm_parameter.rds_username.value
 }
-
-resource "aws_db_subnet_group" "default" {
-  subnet_ids = local.private_subnets_new
-}
-
-resource "aws_security_group" "database_v2_sg" {
-  description = "Allows connection to identifiers-v2 RDS instance via TCP and egress to the world"
-  vpc_id      = local.vpc_id_new
-  name        = "identifiers_v2_database_sg"
-
-  ingress {
-    protocol  = "tcp"
-    from_port = 3306
-    to_port   = 3306
-
-    cidr_blocks = [
-      local.admin_cidr_ingress,
-    ]
-  }
-
-  ingress {
-    from_port = 3306
-    to_port   = 3306
-    protocol  = "tcp"
-
-    security_groups = [aws_security_group.rds_v2_ingress_security_group.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-module "identifiers_v2_serverless_rds_cluster" {
-  source = "./modules/rds-serverless"
-
-  cluster_identifier = "identifiers-v2-serverless"
-  database_name      = "identifiers"
-  master_username    = local.username
-  master_password    = null
-
-  manage_master_user_password = true
-
-  db_security_group_id     = aws_security_group.database_v2_sg.id
-  aws_db_subnet_group_name = aws_db_subnet_group.default.name
-
-  max_scaling_capacity = 16
-
-  engine_version = "8.0.mysql_aurora.3.10.3"
-}
-
-resource "aws_security_group" "rds_v2_ingress_security_group" {
-  name        = "pipeline_rds_v2_ingress_security_group"
-  description = "Allow traffic to identifiers-v2 rds database"
-  vpc_id      = local.vpc_id_new
-
-  ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    self      = true
-  }
-
-  tags = {
-    Name = "pipeline-rds-v2-access"
-  }
-}
-
-
