@@ -1,6 +1,7 @@
 import copy
 
 from freezegun import freeze_time
+
 from ingestor.extractors.images.images_extractor import ExtractedImage
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.aggregate.image import ImageAggregatableValues
@@ -15,7 +16,6 @@ from ingestor.models.query.work import QueryWork
 from ingestor.models.vector.image import ImageVectorValues
 from ingestor.transformers.images_transformer import IngestorImagesTransformer
 from models.events import BasePipelineEvent
-
 from tests.mocks import get_mock_es_client, get_mock_neptune_client
 from tests.test_utils import load_json_fixture
 

@@ -20,7 +20,11 @@ logger = structlog.get_logger(__name__)
 
 
 class ImageWorksExtractor(GraphBaseWorksExtractor):
-    """Extracts work data for enriching image documents."""
+    """Extracts work data for enriching image documents.
+
+    The final images index includes fields from the source work (concept labels, full collection path),
+    so we need to fetch all concepts/ancestors from the graph to create final image documents.
+    """
 
     def __init__(
         self,
