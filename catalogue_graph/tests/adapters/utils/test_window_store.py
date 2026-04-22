@@ -72,8 +72,8 @@ def test_window_store_round_trip(tmp_path: Path) -> None:
     store.upsert(record)
     stored = store.load_status_map()
     assert record.window_key in stored
-    assert stored[record.window_key]["state"] == "success"
-    assert stored[record.window_key]["record_ids"] == ["id:1", "id:2", "id:3"]
+    assert stored[record.window_key].state == "success"
+    assert stored[record.window_key].record_ids == ["id:1", "id:2", "id:3"]
 
     # Updating the same window should overwrite the prior row
     updated_record = WindowSummary(
@@ -89,10 +89,10 @@ def test_window_store_round_trip(tmp_path: Path) -> None:
     store.upsert(updated_record)
 
     stored_again = store.load_status_map()
-    assert stored_again[record.window_key]["state"] == "failed"
-    assert stored_again[record.window_key]["attempts"] == 3
-    assert stored_again[record.window_key]["last_error"] == "Timeout"
-    assert stored_again[record.window_key]["record_ids"] == []
+    assert stored_again[record.window_key].state == "failed"
+    assert stored_again[record.window_key].attempts == 3
+    assert stored_again[record.window_key].last_error == "Timeout"
+    assert stored_again[record.window_key].record_ids == []
 
     failed_rows = store.list_by_state("failed")
     assert len(failed_rows) == 1

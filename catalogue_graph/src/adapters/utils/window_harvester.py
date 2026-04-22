@@ -133,8 +133,8 @@ class WindowHarvestManager:
 
             for candidate in candidates:
                 existing = status_map.get(candidate.to_iso_string())
-                if existing and existing.get("state") == "success":
-                    reused.append(WindowSummary.model_validate(existing))
+                if existing and existing.state == "success":
+                    reused.append(existing)
                 else:
                     pending.append(candidate)
 
@@ -164,19 +164,6 @@ class WindowHarvestManager:
         summaries = [self.process_window(window) for window in windows]
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
-
-    def _records_with_ids(
-        self, batch: Iterable[Record], progress: BatchProgress
-    ) -> Iterable[tuple[str, Record]]:
-        for record in batch:
-            identifier = get_record_identifier(record)
-            if not identifier:
-                raise ValueError(
-                    "Cannot harvest record without header.identifier "
-                    f"(window={progress.window.to_iso_string()})"
-                )
-
-            yield identifier, record
 
     # ------------------------------------------------------------------
     # Core processing
@@ -245,6 +232,19 @@ class WindowHarvestManager:
                 batch_size=len(batch),
                 error=repr(exc),
             )
+
+    def _records_with_ids(
+        self, batch: Iterable[Record], progress: BatchProgress
+    ) -> Iterable[tuple[str, Record]]:
+        for record in batch:
+            identifier = get_record_identifier(record)
+            if not identifier:
+                raise ValueError(
+                    "Cannot harvest record without header.identifier "
+                    f"(window={progress.window.to_iso_string()})"
+                )
+
+            yield identifier, record
 
     def _record_identifier(self, record: Record) -> str | None:
         header = getattr(record, "header", None)

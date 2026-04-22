@@ -386,19 +386,17 @@ class WindowReporter:
             lookback_minutes = max(self.window_minutes * 2, 1440)
             search_start = start_bound - timedelta(minutes=lookback_minutes)
 
-        raw_rows = self.store.list_in_range(start_time=search_start, end_time=end_bound)
-
-        rows: list[WindowSummary] = []
-        for raw_row in raw_rows:
-            typed_row = WindowSummary.model_validate(raw_row)
+        rows = self.store.list_in_range(start_time=search_start, end_time=end_bound)
+        filtered_rows = []
+        for row in rows:
             if self._within_range(
-                typed_row.window_start,
-                typed_row.window_end,
+                row.window_start,
+                row.window_end,
                 start_bound,
                 end_bound,
             ):
-                rows.append(typed_row)
-        return rows
+                filtered_rows.append(row)
+        return filtered_rows
 
     @staticmethod
     def _within_range(

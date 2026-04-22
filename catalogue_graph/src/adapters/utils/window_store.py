@@ -60,7 +60,7 @@ class WindowStore:
 
     def list_in_range(
         self, start_time: datetime | None = None, end_time: datetime | None = None
-    ) -> list[dict[str, Any]]:
+    ) -> list[WindowSummary]:
         """Return rows within the given time range."""
         expr: BooleanExpression = ALWAYS_TRUE
         if start_time:
@@ -69,13 +69,14 @@ class WindowStore:
             expr = And(expr, LessThan("window_start", end_time))
 
         arrow_table = self.table.scan().filter(expr).to_arrow()
-        return arrow_table.to_pylist(maps_as_pydicts="lossy")
+        pylist = arrow_table.to_pylist(maps_as_pydicts="lossy")
+        return [WindowSummary.model_validate(row) for row in pylist]
 
     def load_status_map(
         self,
         start_time: datetime | None = None,
         end_time: datetime | None = None,
-    ) -> dict[str, dict[str, Any]]:
+    ) -> dict[str, WindowSummary]:
         """Load window summaries keyed by their window identifier.
 
         Args:
@@ -83,7 +84,7 @@ class WindowStore:
             end_time: If given, only include windows with ``window_start < end_time``.
         """
         rows = self.list_in_range(start_time, end_time)
-        return {row["window_key"]: row for row in rows}
+        return {row.window_key: row for row in rows}
 
     def upsert(self, record: WindowSummary) -> None:
         """Replace any existing row for this window, in a single Iceberg commit."""

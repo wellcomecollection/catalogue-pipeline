@@ -188,7 +188,7 @@ def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
     assert captured == ["id:1", "id:2"]
     status_map = harvester.store.load_status_map()
     assert any(
-        row["state"] == "success" and row["record_ids"] == ["id:1", "id:2"]
+        row.state == "success" and row.record_ids == ["id:1", "id:2"]
         for row in status_map.values()
     )
 
@@ -213,8 +213,8 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     assert summaries[0].state == "failed"
     status_map = harvester.store.load_status_map()
     row = next(iter(status_map.values()))
-    assert row["state"] == "failed"
-    assert row["record_ids"] == []
+    assert row.state == "failed"
+    assert row.record_ids == []
 
 
 def test_missing_record_identifier_marks_window_failed(tmp_path: Path) -> None:
@@ -236,10 +236,10 @@ def test_missing_record_identifier_marks_window_failed(tmp_path: Path) -> None:
 
     status_map = harvester.store.load_status_map()
     row = next(iter(status_map.values()))
-    assert row["state"] == "failed"
-    assert row["record_ids"] == []
-    assert row["last_error"] is not None
-    assert "header.identifier" in row["last_error"]
+    assert row.state == "failed"
+    assert row.record_ids == []
+    assert row.last_error is not None
+    assert "header.identifier" in row.last_error
 
 
 def test_bad_record_fails_entire_window(tmp_path: Path) -> None:
@@ -262,8 +262,8 @@ def test_bad_record_fails_entire_window(tmp_path: Path) -> None:
 
     status_map = harvester.store.load_status_map()
     row = next(iter(status_map.values()))
-    assert row["state"] == "failed"
-    assert row["record_ids"] == []
+    assert row.state == "failed"
+    assert row.record_ids == []
 
 
 def test_harvest_range_requires_valid_range(tmp_path: Path) -> None:
@@ -327,7 +327,8 @@ def test_harvest_range_attaches_default_tags(tmp_path: Path) -> None:
     status_map = harvester.store.load_status_map()
     assert status_map
     row = next(iter(status_map.values()))
-    assert row["tags"]["job_id"] == "job-123"
+    assert row.tags is not None
+    assert row.tags["job_id"] == "job-123"
 
 
 def test_record_callback_persists_changeset(tmp_path: Path) -> None:
@@ -352,8 +353,8 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
     assert json.loads(summaries[0].tags["changeset_ids"]) == ["cs-500"]
     status_map = harvester.store.load_status_map()
     stored = next(iter(status_map.values()))
-    assert stored["tags"] is not None
-    assert json.loads(stored["tags"]["changeset_ids"]) == ["cs-500"]
+    assert stored.tags is not None
+    assert json.loads(stored.tags["changeset_ids"]) == ["cs-500"]
 
 
 def test_harvest_range_returns_existing_successful_summary_with_tags(
