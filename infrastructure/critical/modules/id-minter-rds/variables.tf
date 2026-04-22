@@ -1,17 +1,31 @@
-variable "vpc_id" {}
+variable "vpc_id" {
+  description = "ID of the VPC where the RDS resources will be created."
+  type        = string
+}
 
 variable "private_subnet_ids" {
   type = list(string)
 }
 
-variable "admin_cidr_ingress" {}
+variable "admin_cidr_ingress" {
+  description = "CIDR block allowed administrative ingress access."
+  type        = string
+}
 
-variable "master_username" {}
+variable "master_username" {
+  description = "Master username for the RDS cluster."
+  type        = string
+}
 
-variable "engine_version" {}
+variable "engine_version" {
+  description = "Engine version to use for the RDS cluster."
+  type        = string
+}
 
 variable "max_scaling_capacity" {
-  default = 16
+  description = "Maximum Aurora Serverless scaling capacity."
+  type        = number
+  default     = 16
 }
 
 variable "name_suffix" {
