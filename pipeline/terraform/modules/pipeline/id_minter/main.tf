@@ -1,6 +1,6 @@
 locals {
   underscore_namespace = var.namespace != "" ? "_${var.namespace}" : ""
-  dash_namespace = var.namespace != "" ? "-${var.namespace}" : ""
+  dash_namespace       = var.namespace != "" ? "-${var.namespace}" : ""
 }
 
 module "id_minter_output_topic" {
@@ -36,7 +36,7 @@ module "id_minter_lambda" {
     }
   )
   secret_env_vars = var.secret_env_vars
-  vpc_config = var.vpc_config
+  vpc_config      = var.vpc_config
 }
 
 moved {
