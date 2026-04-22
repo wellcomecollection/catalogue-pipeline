@@ -84,20 +84,12 @@ class WindowRecordWriter:
             "job_id": self.job_id,
             "window_range": self.window_range,
         }
-        changeset_id: str | None = None
-        upserted_record_ids: list[str] | None = None
 
         if rows:
             table = pa.Table.from_pylist(rows, schema=ADAPTER_STORE_ARROW_SCHEMA)
             update = self.table_client.incremental_update(table)
             if update:
-                changeset_id = update.changeset_id
-                upserted_record_ids = update.upserted_record_ids
-
-        if changeset_id:
-            tags["changeset_id"] = changeset_id
-
-        if upserted_record_ids:
-            tags["record_ids_changed"] = json.dumps(upserted_record_ids)
+                tags["changeset_id"] = update.changeset_id
+                tags["record_ids_changed"] = json.dumps(update.upserted_record_ids)
 
         return {"tags": tags}

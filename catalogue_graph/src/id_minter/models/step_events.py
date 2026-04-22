@@ -3,7 +3,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
-from models.events import IncrementalWindow
+from models.incremental_window import IncrementalWindow
 from models.source_scope import SourceScope
 from utils.types import NonEmptyString
 

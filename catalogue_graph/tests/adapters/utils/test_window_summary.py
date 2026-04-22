@@ -5,7 +5,8 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from adapters.utils.window_summary import WindowKey, WindowSummary
+from adapters.utils.window_summary import WindowSummary
+from models.events import IncrementalWindow
 
 # Shared test data
 BASE_DT = datetime(2025, 12, 1, 10, 30, 45, tzinfo=UTC)
@@ -162,9 +163,9 @@ def test_window_key_can_be_parsed_back() -> None:
     start = datetime(2025, 12, 1, 10, 0, tzinfo=UTC)
     end = datetime(2025, 12, 1, 12, 0, tzinfo=UTC)
     summary = make_summary(window_start=start, window_end=end)
-    parsed_start, parsed_end = WindowKey.parse(summary.window_key)
-    assert parsed_start == start
-    assert parsed_end == end
+    window = IncrementalWindow.from_iso_string(summary.window_key)
+    assert window.start_time == start
+    assert window.end_time == end
 
 
 def test_mixed_coercion_types() -> None:

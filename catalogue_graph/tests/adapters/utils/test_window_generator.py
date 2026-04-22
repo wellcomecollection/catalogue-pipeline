@@ -5,6 +5,11 @@ from datetime import UTC, datetime
 import pytest
 
 from adapters.utils.window_generator import WindowGenerator
+from models.incremental_window import IncrementalWindow
+
+
+def _w(start: datetime, end: datetime) -> IncrementalWindow:
+    return IncrementalWindow(start_time=start, end_time=end)
 
 
 @pytest.mark.parametrize(
@@ -15,35 +20,35 @@ from adapters.utils.window_generator import WindowGenerator
             15,
             True,
             [
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
                     datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
                     datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
                     datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
                 ),
@@ -54,31 +59,31 @@ from adapters.utils.window_generator import WindowGenerator
             15,
             False,
             [
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
                     datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
                     datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
                     datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
                 ),
@@ -89,19 +94,19 @@ from adapters.utils.window_generator import WindowGenerator
             30,
             True,
             [
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
                     datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
                 ),
@@ -111,15 +116,15 @@ from adapters.utils.window_generator import WindowGenerator
             30,
             False,
             [
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
                     datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
                 ),
@@ -130,11 +135,11 @@ from adapters.utils.window_generator import WindowGenerator
             60,
             True,
             [
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                 ),
-                (
+                _w(
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
                 ),
@@ -144,7 +149,7 @@ from adapters.utils.window_generator import WindowGenerator
             60,
             False,
             [
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
                 ),
@@ -155,7 +160,7 @@ from adapters.utils.window_generator import WindowGenerator
             240,
             True,
             [
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
                     datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
                 ),
@@ -168,7 +173,7 @@ from adapters.utils.window_generator import WindowGenerator
                 # With 240-minute windows, the aligned boundary before 13:55 is 12:00,
                 # which is before start_time 12:07, so we use the next boundary (16:00).
                 # This creates a single window from 12:07 to 16:00.
-                (
+                _w(
                     datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
                     datetime(2025, 1, 1, 16, 0, tzinfo=UTC),
                 ),
@@ -179,7 +184,7 @@ from adapters.utils.window_generator import WindowGenerator
 def test_generate_windows_aligns_to_boundaries(
     window_minutes: int,
     allow_partial: bool,
-    expected: list[tuple[datetime, datetime]],
+    expected: list[IncrementalWindow],
 ) -> None:
     generator = WindowGenerator(
         window_minutes=window_minutes,
@@ -188,7 +193,9 @@ def test_generate_windows_aligns_to_boundaries(
     start = datetime(2025, 1, 1, 12, 7, tzinfo=UTC)
     end = datetime(2025, 1, 1, 13, 55, tzinfo=UTC)
 
-    windows = generator.generate_windows(start, end)
+    windows = generator.generate_windows(
+        IncrementalWindow(start_time=start, end_time=end)
+    )
 
     assert windows == expected
 
@@ -198,7 +205,9 @@ def test_generate_windows_validates_time_range() -> None:
     end_time = datetime(2025, 1, 1, tzinfo=UTC)
 
     with pytest.raises(ValueError, match="start_time must be earlier than end_time"):
-        generator.generate_windows(end_time, end_time)
+        generator.generate_windows(
+            IncrementalWindow(start_time=end_time, end_time=end_time)
+        )
 
 
 def test_generate_windows_with_aligned_boundaries() -> None:
@@ -207,14 +216,16 @@ def test_generate_windows_with_aligned_boundaries() -> None:
     start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
     end = datetime(2025, 1, 1, 13, 0, tzinfo=UTC)
 
-    windows = generator.generate_windows(start, end)
+    windows = generator.generate_windows(
+        IncrementalWindow(start_time=start, end_time=end)
+    )
 
     assert len(windows) == 4
-    assert windows[0] == (
+    assert windows[0] == _w(
         datetime(2025, 1, 1, 12, 0, tzinfo=UTC),
         datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
     )
-    assert windows[-1] == (
+    assert windows[-1] == _w(
         datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
         datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
     )
@@ -226,10 +237,12 @@ def test_generate_windows_single_full_window() -> None:
     start = datetime(2025, 1, 1, 12, 30, tzinfo=UTC)
     end = datetime(2025, 1, 1, 13, 45, tzinfo=UTC)
 
-    windows = generator.generate_windows(start, end)
+    windows = generator.generate_windows(
+        IncrementalWindow(start_time=start, end_time=end)
+    )
 
     assert len(windows) == 1
-    assert windows[0] == (
+    assert windows[0] == _w(
         datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
         datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
     )
