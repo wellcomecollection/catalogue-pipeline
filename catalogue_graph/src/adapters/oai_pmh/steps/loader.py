@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime
 from typing import Any
 
 import structlog
@@ -54,11 +53,6 @@ class LoaderRuntime(BaseModel):
     report_s3_prefix: str = "dev"
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
-def _format_window_range(start: datetime, end: datetime) -> str:
-    """Format a window range as a string for tagging."""
-    return f"{start.isoformat()}-{end.isoformat()}"
 
 
 def build_runtime(
@@ -110,13 +104,11 @@ def build_harvester(
     Returns:
         WindowHarvestManager configured for this request.
     """
-    window_start = request.window.start_time
-    window_end = request.window.end_time
-    callback = WindowRecordWriter(
+    record_writer = WindowRecordWriter(
         namespace=runtime.adapter_namespace,
         table_client=runtime.table_client,
         job_id=request.job_id,
-        window_range=_format_window_range(window_start, window_end),
+        window_range=request.window.to_iso_string(),
     )
     return WindowHarvestManager(
         store=runtime.store,
@@ -124,8 +116,7 @@ def build_harvester(
         client=runtime.oai_client,
         metadata_prefix=request.metadata_prefix,
         set_spec=request.set_spec,
-        record_callback=callback,
-        default_tags={"job_id": request.job_id},
+        record_callback=record_writer,
     )
 
 
