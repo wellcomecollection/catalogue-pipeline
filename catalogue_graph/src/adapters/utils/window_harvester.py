@@ -181,8 +181,8 @@ class WindowHarvestManager:
                 self._process_single_batch(list(batch), progress)
         except NoRecordsMatchError:
             pass  # No records — fall through to final state
-        except Exception as exc:  # pragma: no cover - generic safety net
-            progress.last_error = repr(exc)
+        except Exception as e:
+            progress.last_error = repr(e)
 
         summary = progress.get_summary(is_final=True)
         self.store.upsert(summary)
@@ -219,16 +219,21 @@ class WindowHarvestManager:
             progress.tags.update(result.tags)
             progress.record_ids.extend([r[0] for r in batch_with_ids])
             progress.batches_succeeded += 1
-
-            self.store.upsert(progress.get_summary(is_final=False))
-        except Exception as exc:
-            progress.last_error = repr(exc)
+        except Exception as e:
+            progress.last_error = repr(e)
             progress.batches_failed += 1
             logger.warning(
                 "Failed to process batch",
                 batch_size=len(batch),
-                error=repr(exc),
+                error=repr(e),
             )
+
+        # Failing to persist the window summary for a specific batch is not a critical error. The only window summary
+        # which must be persisted (and whose failure to persist should cause the pipeline to fail) is the final one.
+        try:
+            self.store.upsert(progress.get_summary(is_final=False))
+        except Exception as e:
+            logger.warning("Failed to persist batch window summary", error=repr(e))
 
     def _records_with_ids(
         self, batch: Iterable[Record], progress: BatchProgress
