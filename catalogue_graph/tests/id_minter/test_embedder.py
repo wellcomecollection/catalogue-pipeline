@@ -401,7 +401,7 @@ class TestProcessWork:
 
         assert result["state"]["canonicalId"] == cid
         assert len(resolver.mint_calls) == 1
-        assert (k_new, k_pred) in resolver.mint_calls[0]
+        assert set(resolver.mint_calls[0]) == {(k_new, k_pred)}
 
     def test_no_data_identifiers_still_mints_state(self) -> None:
         """State always has a sourceIdentifier; it gets minted even if nothing else does."""
@@ -457,8 +457,7 @@ class TestProcessWork:
 
         assert result["canonicalId"] == cid_work
         assert result["items"][0]["canonicalId"] == cid_item
-        assert (k_work, None) in resolver.mint_calls[0]
-        assert (k_item, k_item_pred) in resolver.mint_calls[0]
+        assert set(resolver.mint_calls[0]) == {(k_work, None), (k_item, k_item_pred)}
 
     def test_state_with_predecessor(self) -> None:
         """State's sourceIdentifier can also have a predecessorIdentifier."""
@@ -469,8 +468,7 @@ class TestProcessWork:
             "state": {
                 "sourceIdentifier": si_new,
                 "predecessorIdentifier": si_pred,
-            },
-            "sourceIdentifier": si_new,
+            }
         }
 
         k_new = key_of(si_new)
@@ -480,8 +478,7 @@ class TestProcessWork:
         result = process_work(doc, resolver)
 
         assert result["state"]["canonicalId"] == cid
-        assert result["canonicalId"] == cid
-        assert (k_new, k_pred) in resolver.mint_calls[0]
+        assert set(resolver.mint_calls[0]) == {(k_new, k_pred)}
 
     def test_multiple_predecessors_across_doc(self) -> None:
         """Both state and a nested item have predecessors."""
@@ -525,5 +522,7 @@ class TestProcessWork:
 
         assert result["canonicalId"] == cid_work
         assert result["items"][0]["canonicalId"] == cid_item
-        assert (k_work, k_work_pred) in resolver.mint_calls[0]
-        assert (k_item, k_item_pred) in resolver.mint_calls[0]
+        assert set(resolver.mint_calls[0]) == {
+            (k_work, k_work_pred),
+            (k_item, k_item_pred),
+        }

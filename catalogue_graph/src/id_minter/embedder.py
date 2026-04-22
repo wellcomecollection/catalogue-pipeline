@@ -129,8 +129,7 @@ def process_work(
         predecessor_count=predecessor_count,
     )
 
-    found = resolver.mint_ids(mint_requests)  # type: ignore[arg-type]  # SourceIdentifierKey is a tuple[str, str, str]
-
+    found = resolver.mint_ids(mint_requests)  # type: ignore[arg-type]  # list invariance: SourceIdentifierKey is a NamedTuple subtype of SourceId
     id_map: dict[SourceIdentifierKey, str] = {
         SourceIdentifierKey(*k): v for k, v in found.items()
     }
