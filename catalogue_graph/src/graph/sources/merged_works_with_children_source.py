@@ -31,7 +31,7 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
         super().__init__(event, es_client=es_client, query=query, fields=fields)
         self.event = event
 
-    def _get_child_source(self, collection_paths: set) -> MergedWorksSource:
+    def _get_child_source(self, collection_paths: set[str]) -> MergedWorksSource:
         child_clauses = []
         for path in collection_paths:
             # Path needs to be enclosed in double quotes to escape special characters (e.g. '.')
