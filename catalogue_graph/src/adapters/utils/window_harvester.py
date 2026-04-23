@@ -214,7 +214,7 @@ class WindowHarvestManager:
             # Skip records which were already successfully processed in the previous run
             ids_to_skip = set(existing_summary.record_ids)
         else:
-            progress = BatchProgress(window=window, tags=self.default_tags)
+            progress = BatchProgress(window=window, tags=dict(self.default_tags))
             ids_to_skip = set()
 
         try:
