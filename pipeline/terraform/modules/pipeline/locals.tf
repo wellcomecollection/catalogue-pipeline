@@ -208,11 +208,6 @@ locals {
     ]
   }
 
-  rds_config = {
-    subnet_group      = local.infra_critical.rds_subnet_group_name
-    security_group_id = local.infra_critical.rds_access_security_group_id
-  }
-
   rds_v2_config = {
     subnet_group      = local.infra_critical.rds_subnet_group_name
     security_group_id = local.infra_critical.rds_v2_access_security_group_id
