@@ -14,11 +14,9 @@ COLLECTION_PATH_KEYWORD_FIELD = "data.collectionPath.path.keyword"
 
 
 class MergedWorksWithChildrenSource(MergedWorksSource):
-    """A source that streams works matching the event scope, then also
+    """
+    A source that streams works matching the event scope, then also
     retrieves direct children of those works based on their collection paths.
-
-    This ensures that when a work is added to an existing hierarchy, edges between its
-    children's path identifiers and its own path identifier are also created.
     """
 
     def __init__(
@@ -34,6 +32,7 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
     def _get_child_source(self, collection_paths: set) -> MergedWorksSource:
         child_clauses = []
         for path in collection_paths:
+            # Path needs to be enclosed in double quotes to escape special characters (e.g. '.')
             quoted_path = f'"{path.lower()}"'
             child_clauses.append(
                 {"regexp": {COLLECTION_PATH_KEYWORD_FIELD: f"{quoted_path}/[^/]+"}}
