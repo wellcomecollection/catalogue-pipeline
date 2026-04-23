@@ -14,28 +14,23 @@ class DisplayLocation(BaseModel):
     accessConditions: list[DisplayAccessCondition]
 
     @staticmethod
-    def from_location(
+    def _base_from_location(
         location: PhysicalLocation | DigitalLocation,
-    ) -> "DisplayDigitalLocation | DisplayPhysicalLocation":
-        display_location = DisplayLocation(
+    ) -> "DisplayLocation":
+        return DisplayLocation(
             locationType=DisplayLocationType.from_location(location),
             license=DisplayLicense.from_location(location),
             accessConditions=list(DisplayAccessCondition.from_location(location)),
         )
 
+    @staticmethod
+    def from_location(
+        location: PhysicalLocation | DigitalLocation,
+    ) -> "DisplayDigitalLocation | DisplayPhysicalLocation":
         if isinstance(location, DigitalLocation):
-            return DisplayDigitalLocation(
-                **display_location.dict(),
-                url=location.url,
-                credit=location.credit,
-                linkText=location.link_text,
-            )
+            return DisplayDigitalLocation.from_digital_location(location)
 
-        return DisplayPhysicalLocation(
-            **display_location.dict(),
-            label=location.label,
-            shelfmark=location.shelfmark,
-        )
+        return DisplayPhysicalLocation.from_physical_location(location)
 
 
 class DisplayDigitalLocation(DisplayLocation):
@@ -44,8 +39,31 @@ class DisplayDigitalLocation(DisplayLocation):
     linkText: str | None = None
     type: str = "DigitalLocation"
 
+    @classmethod
+    def from_digital_location(
+        cls, location: DigitalLocation
+    ) -> "DisplayDigitalLocation":
+        display_location = cls._base_from_location(location)
+        return DisplayDigitalLocation(
+            **display_location.dict(),
+            url=location.url,
+            credit=location.credit,
+            linkText=location.link_text,
+        )
+
 
 class DisplayPhysicalLocation(DisplayLocation):
     label: str
     shelfmark: str | None = None
     type: str = "PhysicalLocation"
+
+    @classmethod
+    def from_physical_location(
+        cls, location: PhysicalLocation
+    ) -> "DisplayPhysicalLocation":
+        display_location = cls._base_from_location(location)
+        return DisplayPhysicalLocation(
+            **display_location.dict(),
+            label=location.label,
+            shelfmark=location.shelfmark,
+        )

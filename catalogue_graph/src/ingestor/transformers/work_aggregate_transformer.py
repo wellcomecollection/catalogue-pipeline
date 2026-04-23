@@ -3,7 +3,7 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
 from lookups.languages import from_code

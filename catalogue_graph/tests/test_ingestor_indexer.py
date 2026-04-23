@@ -88,8 +88,10 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
         "pipeline_date": pipeline_date,
         "index_dates": {
             "merged": None,
+            "augmented": None,
             "concepts": None,
             "works": None,
+            "images": None,
             **index_dates,
         },
         "ingestor_type": record_type,
@@ -150,8 +152,10 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
         "pipeline_date": pipeline_date,
         "index_dates": {
             "merged": None,
+            "augmented": None,
             "concepts": None,
             "works": None,
+            "images": None,
             **index_dates,
         },
         "ingestor_type": record_type,

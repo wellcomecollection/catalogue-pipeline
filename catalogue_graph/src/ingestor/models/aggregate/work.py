@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.transformers.work_aggregate_transformer import (
     AggregatableField,
     AggregateWorkTransformer,
