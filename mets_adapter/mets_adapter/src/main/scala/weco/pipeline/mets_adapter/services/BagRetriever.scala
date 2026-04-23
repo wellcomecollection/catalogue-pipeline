@@ -98,7 +98,8 @@ class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
             // strip the query parameters from the URI before throwing, contain credentials
             Future.failed(
               new Exception(
-                s"Received error following redirect to ${uri.withQuery(Uri.Query.Empty)}: $status"
+                s"Received error following redirect to ${uri
+                    .withQuery(Uri.Query.Empty)}: $status"
               )
             )
         }
