@@ -3,12 +3,13 @@ package weco.pipeline.mets_adapter.services
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.Uri.Path
 import org.apache.pekko.http.scaladsl.model._
+import org.apache.pekko.http.scaladsl.model.headers.Location
 import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
 import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
 import weco.pipeline.mets_adapter.models._
-import weco.http.client.HttpGet
+import weco.http.client.{HttpClient, HttpGet}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,7 +17,7 @@ trait BagRetriever {
   def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(client: HttpGet)(
+class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
   implicit actorSystem: ActorSystem,
   executionContext: ExecutionContext
 ) extends BagRetriever
@@ -45,6 +46,18 @@ class HttpBagRetriever(client: HttpGet)(
   ): Future[Bag] =
     response.status match {
       case StatusCodes.OK => parseResponseIntoBag(response)
+      case StatusCodes.TemporaryRedirect =>
+        response.header[Location] match {
+          case Some(location) =>
+            debug(s"Following redirect to ${location.uri}")
+            followRedirect(location.uri)
+          case None =>
+            Future.failed(
+              new Exception(
+                "Received 307 redirect from storage service but no Location header"
+              )
+            )
+        }
       case StatusCodes.NotFound =>
         Future.failed(
           new Exception(
@@ -58,6 +71,20 @@ class HttpBagRetriever(client: HttpGet)(
           new Exception(s"Received error from storage service: $status")
         )
     }
+
+  private def followRedirect(uri: Uri): Future[Bag] =
+    for {
+      response <- redirectClient.singleRequest(HttpRequest(uri = uri))
+      bag <- response.status match {
+        case StatusCodes.OK => parseResponseIntoBag(response)
+        case status =>
+          Future.failed(
+            new Exception(
+              s"Received error following redirect to $uri: $status"
+            )
+          )
+      }
+    } yield bag
 
   private def parseResponseIntoBag(response: HttpResponse): Future[Bag] =
     Unmarshal(response.entity).to[Bag].recover {

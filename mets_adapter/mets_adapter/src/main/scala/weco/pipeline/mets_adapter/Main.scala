@@ -49,7 +49,10 @@ object Main extends WellcomeTypesafeApp {
       new MetsAdapterWorkerService(
         SQSBuilder.buildSQSStream(config),
         SNSBuilder.buildSNSMessageSender(config, subject = "METS adapter"),
-        bagRetriever = new HttpBagRetriever(oauthClient),
+        bagRetriever = new HttpBagRetriever(
+          client = oauthClient,
+          redirectClient = new PekkoHttpClient()
+        ),
         metsStore = metsStore
       )
   }

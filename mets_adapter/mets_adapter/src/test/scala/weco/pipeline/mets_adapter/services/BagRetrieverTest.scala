@@ -1,13 +1,14 @@
 package weco.pipeline.mets_adapter.services
 
 import org.apache.pekko.http.scaladsl.model._
+import org.apache.pekko.http.scaladsl.model.headers.Location
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.pipeline.mets_adapter.models._
-import weco.http.client.{HttpGet, MemoryHttpClient}
+import weco.http.client.{HttpClient, HttpGet, MemoryHttpClient}
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -207,8 +208,127 @@ class BagRetrieverTest
     }
   }
 
+  it("follows a 307 redirect to fetch the bag from S3") {
+    val redirectUri = Uri("https://s3.example.com/large-bag-response.json")
+    val bagJson =
+      """
+        |{
+        |  "id": "digitised/b30414726",
+        |  "space": {
+        |    "id": "digitised",
+        |    "type": "Space"
+        |  },
+        |  "info": {
+        |    "externalIdentifier": "b30414726",
+        |    "payloadOxum": "9999999999.999",
+        |    "baggingDate": "2023-01-01",
+        |    "sourceOrganization": "intranda GmbH",
+        |    "externalDescription": "A very large bag",
+        |    "internalSenderIdentifier": "1234",
+        |    "internalSenderDescription": "large_bag_b30414726",
+        |    "type": "BagInfo"
+        |  },
+        |  "manifest": {
+        |    "checksumAlgorithm": "SHA-256",
+        |    "files": [
+        |      {
+        |        "checksum": "abc123",
+        |        "name": "data/b30414726.xml",
+        |        "path": "v1/data/b30414726.xml",
+        |        "size": 1000,
+        |        "type": "File"
+        |      }
+        |    ],
+        |    "type": "BagManifest"
+        |  },
+        |  "tagManifest": {
+        |    "checksumAlgorithm": "SHA-256",
+        |    "files": [],
+        |    "type": "BagManifest"
+        |  },
+        |  "location": {
+        |    "provider": {
+        |      "id": "amazon-s3",
+        |      "type": "Provider"
+        |    },
+        |    "bucket": "wellcomecollection-storage",
+        |    "path": "digitised/b30414726",
+        |    "type": "Location"
+        |  },
+        |  "replicaLocations": [],
+        |  "createdDate": "2023-01-01T12:00:00.000000Z",
+        |  "version": "v1",
+        |  "type": "Bag"
+        |}
+        |""".stripMargin
+
+    val storageResponses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30414726")),
+        HttpResponse(
+          status = StatusCodes.TemporaryRedirect,
+          headers = List(Location(redirectUri))
+        )
+      )
+    )
+
+    val redirectResponses = Seq(
+      (
+        HttpRequest(uri = redirectUri),
+        HttpResponse(
+          entity = HttpEntity(
+            contentType = ContentTypes.`application/json`,
+            bagJson
+          )
+        )
+      )
+    )
+
+    withBagRetriever(storageResponses, redirectResponses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30414726"
+          )
+
+        whenReady(future) {
+          bag =>
+            bag.location.bucket shouldBe "wellcomecollection-storage"
+            bag.location.path shouldBe "digitised/b30414726"
+            bag.manifest.files.head shouldBe BagFile(
+              name = "data/b30414726.xml",
+              path = "v1/data/b30414726.xml"
+            )
+        }
+    }
+  }
+
+  it("fails if a 307 redirect has no Location header") {
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30414726")),
+        HttpResponse(status = StatusCodes.TemporaryRedirect)
+      )
+    )
+
+    withBagRetriever(responses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30414726"
+          )
+
+        whenReady(future.failed) {
+          _.getMessage shouldBe "Received 307 redirect from storage service but no Location header"
+        }
+    }
+  }
+
   def withBagRetriever[R](
-    responses: Seq[(HttpRequest, HttpResponse)]
+    responses: Seq[(HttpRequest, HttpResponse)],
+    redirectResponses: Seq[(HttpRequest, HttpResponse)] = Seq.empty
   )(testWith: TestWith[BagRetriever, R]): R =
     withActorSystem {
       implicit actorSystem =>
@@ -216,6 +336,8 @@ class BagRetrieverTest
           override val baseUri: Uri = Uri("http://storage:1234/bags")
         }
 
-        testWith(new HttpBagRetriever(client))
+        val redClient: HttpClient = new MemoryHttpClient(redirectResponses)
+
+        testWith(new HttpBagRetriever(client, redClient))
     }
 }
