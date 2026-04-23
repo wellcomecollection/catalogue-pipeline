@@ -209,7 +209,7 @@ class BagRetrieverTest
   }
 
   it("follows a 307 redirect to fetch the bag from S3") {
-    val redirectUri = Uri("https://s3.example.com/large-bag-response.json")
+    val redirectUri = Uri("https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/digitised/b30414726/v1")
     val bagJson =
       """
         |{
@@ -300,6 +300,34 @@ class BagRetrieverTest
               name = "data/b30414726.xml",
               path = "v1/data/b30414726.xml"
             )
+        }
+    }
+  }
+
+  it("refuses to follow a 307 redirect to an unexpected URL") {
+    val redirectUri = Uri("https://evil.example.com/steal-data")
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30414726")),
+        HttpResponse(
+          status = StatusCodes.TemporaryRedirect,
+          headers = List(Location(redirectUri))
+        )
+      )
+    )
+
+    withBagRetriever(responses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30414726"
+          )
+
+        whenReady(future.failed) {
+          _.getMessage should startWith(
+            "Refusing to follow redirect to unexpected URL"
+          )
         }
     }
   }

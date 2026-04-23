@@ -78,21 +78,31 @@ class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
         )
     }
 
+  private val allowedRedirectPrefix =
+    "https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/"
+
   private def followRedirect(uri: Uri): Future[Bag] =
-    for {
-      response <- redirectClient.singleRequest(HttpRequest(uri = uri))
-      bag <- response.status match {
-        case StatusCodes.OK => parseResponseIntoBag(response)
-        case status =>
-          response.discardEntityBytes()
-          // strip the query parameters from the URI before throwing, contain credentials
-          Future.failed(
-            new Exception(
-              s"Received error following redirect to ${uri.withQuery(Uri.Query.Empty)}: $status"
+    if (!uri.toString.startsWith(allowedRedirectPrefix))
+      Future.failed(
+        new Exception(
+          s"Refusing to follow redirect to unexpected URL: ${uri.withQuery(Uri.Query.Empty)}"
+        )
+      )
+    else
+      for {
+        response <- redirectClient.singleRequest(HttpRequest(uri = uri))
+        bag <- response.status match {
+          case StatusCodes.OK => parseResponseIntoBag(response)
+          case status =>
+            response.discardEntityBytes()
+            // strip the query parameters from the URI before throwing, contain credentials
+            Future.failed(
+              new Exception(
+                s"Received error following redirect to ${uri.withQuery(Uri.Query.Empty)}: $status"
+              )
             )
-          )
-      }
-    } yield bag
+        }
+      } yield bag
 
   private def parseResponseIntoBag(response: HttpResponse): Future[Bag] =
     Unmarshal(response.entity).to[Bag].recover {
