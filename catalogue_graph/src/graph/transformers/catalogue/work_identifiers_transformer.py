@@ -40,7 +40,7 @@ class CatalogueWorkIdentifiersTransformer(GraphBaseTransformer):
         event: BasePipelineEvent,
         es_client: Elasticsearch,
     ) -> None:
-        source_class = MergedWorksSource
+        source_class: type[MergedWorksSource] = MergedWorksSource
 
         # In incremental mode, we need to process the children of scoped works to ensure that all changes
         # to work hierarchies are reflected in the graph. For example, if path identifier A/B is added to an existing

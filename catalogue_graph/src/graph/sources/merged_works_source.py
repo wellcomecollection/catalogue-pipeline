@@ -12,6 +12,7 @@ class MergedWorksSource(ElasticSource):
         es_client: Elasticsearch,
         query: dict | None = None,
         fields: list | None = None,
+        slice_count: int | None = None,
     ):
         super().__init__(
             es_client=es_client,
@@ -19,5 +20,5 @@ class MergedWorksSource(ElasticSource):
             query=event.to_elasticsearch_query("state.mergedTime", query),
             pit_id=event.pit_id,
             fields=fields,
-            slice_count=event.slice_count,
+            slice_count=slice_count or event.slice_count,
         )

@@ -39,12 +39,15 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
             child_clauses.append(
                 {"regexp": {COLLECTION_PATH_KEYWORD_FIELD: f"{quoted_path}/[^/]+"}}
             )
-        unscoped_event = self.event.model_copy(update={"window": None, "ids": None})
+        unscoped_event = self.event.model_copy(
+            update={"window": None, "ids": None, "pit_id": self.pit_id}
+        )
         return MergedWorksSource(
             unscoped_event,
             es_client=self.es_client,
             query={"bool": {"should": child_clauses}},
             fields=self.fields,
+            slice_count=1,
         )
 
     def stream_raw(self) -> Generator[Any]:
