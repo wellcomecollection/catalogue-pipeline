@@ -381,7 +381,7 @@ def run_cli(
         add_cli_args(parser)
         args = parser.parse_args()
 
-    window = IncrementalWindow(start_time=args.start_time, end_time=args.end_time)
+    window = IncrementalWindow(start_time=args.window_start, end_time=args.window_end)
 
     runtime = build_runtime(
         adapter_config,

@@ -94,7 +94,7 @@ class BatchProgress(BaseModel):
         Create a progress object from an existing partially failed run and pre-populate it
         with successfully processed record IDs and changeset IDs to "resume" processing.
         """
-        tags = summary.tags or {}
+        tags = dict(summary.tags or {})
 
         changeset_ids, upserted_record_ids = [], []
         if "changeset_ids" in tags:
@@ -280,12 +280,13 @@ class WindowHarvestManager:
                 error=repr(e),
             )
 
-        # Failing to persist the window summary for a specific batch is not a critical error. The only window summary
-        # which must be persisted (and whose failure to persist should cause the run to fail) is the final one.
-        try:
-            self.store.upsert(progress.get_summary(is_final=False))
-        except Exception as e:
-            logger.warning("Failed to persist batch window summary", error=repr(e))
+        if progress.batches_succeeded > 0:
+            # Failing to persist the window summary for a specific batch is not a critical error. The only summary
+            # which must be persisted (and whose failure to persist should cause the run to fail) is the final one.
+            try:
+                self.store.upsert(progress.get_summary(is_final=False))
+            except Exception as e:
+                logger.warning("Failed to persist batch window summary", error=repr(e))
 
     def _records_with_ids(
         self, batch: Iterable[Record], progress: BatchProgress
