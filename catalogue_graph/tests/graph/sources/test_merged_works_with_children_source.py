@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+
 from graph.sources.merged_works_source import MergedWorksSource
 from graph.sources.merged_works_with_children_source import (
     COLLECTION_PATH_KEYWORD_FIELD,

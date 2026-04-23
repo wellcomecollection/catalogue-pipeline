@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from itertools import batched
 from typing import Any
 
 import structlog
@@ -11,6 +12,7 @@ logger = structlog.get_logger(__name__)
 
 
 COLLECTION_PATH_KEYWORD_FIELD = "data.collectionPath.path.keyword"
+MAX_BOOL_CLAUSES = 512
 
 
 class MergedWorksWithChildrenSource(MergedWorksSource):
@@ -69,12 +71,14 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
         )
 
         child_count = 0
-        for work in self._get_child_source(collection_paths).stream_raw():
-            work_id = work["state"]["canonicalId"]
-            if work_id not in seen_ids:
-                seen_ids.add(work_id)
-                child_count += 1
-                yield work
+        # Split collection paths into batches so that we don't exceed Elasticsearch's max_clause_count limit
+        for batch in batched(collection_paths, MAX_BOOL_CLAUSES):
+            for work in self._get_child_source(set(batch)).stream_raw():
+                work_id = work["state"]["canonicalId"]
+                if work_id not in seen_ids:
+                    seen_ids.add(work_id)
+                    child_count += 1
+                    yield work
 
         logger.info(
             "Finished streaming children of scoped works",
