@@ -1,8 +1,6 @@
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-
 from graph.sources.merged_works_source import MergedWorksSource
 from graph.sources.merged_works_with_children_source import (
     COLLECTION_PATH_KEYWORD_FIELD,
@@ -18,9 +16,9 @@ def _make_work(canonical_id: str, path: str | None = None) -> dict:
     return work
 
 
-def _make_source(**kwargs: Any) -> MergedWorksWithChildrenSource:
+def _make_source() -> MergedWorksWithChildrenSource:
     event = BasePipelineEvent(pipeline_date="dev")
-    return MergedWorksWithChildrenSource(event=event, es_client=MagicMock(), **kwargs)
+    return MergedWorksWithChildrenSource(event=event, es_client=MagicMock())
 
 
 def _with_primary_works(monkeypatch: pytest.MonkeyPatch, works: list[dict]) -> None:
@@ -100,7 +98,9 @@ def test_stream_raw_skips_child_query_when_no_paths(
 
     source = _make_source()
     mock_get_child = MagicMock()
-    monkeypatch.setattr(MergedWorksWithChildrenSource, "_get_child_source", mock_get_child)
+    monkeypatch.setattr(
+        MergedWorksWithChildrenSource, "_get_child_source", mock_get_child
+    )
 
     assert len(list(source.stream_raw())) == 1
     mock_get_child.assert_not_called()
@@ -114,7 +114,9 @@ def test_stream_raw_strips_trailing_slash_from_paths(
 
     source = _make_source()
     mock_get_child = MagicMock(return_value=MagicMock(stream_raw=lambda: iter([])))
-    monkeypatch.setattr(MergedWorksWithChildrenSource, "_get_child_source", mock_get_child)
+    monkeypatch.setattr(
+        MergedWorksWithChildrenSource, "_get_child_source", mock_get_child
+    )
 
     list(source.stream_raw())
     mock_get_child.assert_called_once_with({"A/B"})

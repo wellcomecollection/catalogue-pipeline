@@ -13,12 +13,9 @@ from tests.test_utils import add_mock_merged_documents, check_bulk_load_edge
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 
-def get_transformer(
-    event: BasePipelineEvent | None = None,
-) -> CatalogueWorkIdentifiersTransformer:
-    event = event or MOCK_EVENT
-    es_client = get_mock_es_client("graph_extractor", event.pipeline_date)
-    return CatalogueWorkIdentifiersTransformer(event, es_client)
+def get_transformer() -> CatalogueWorkIdentifiersTransformer:
+    es_client = get_mock_es_client("graph_extractor", MOCK_EVENT.pipeline_date)
+    return CatalogueWorkIdentifiersTransformer(MOCK_EVENT, es_client)
 
 
 def test_catalogue_work_identifiers_transformer_nodes() -> None:
