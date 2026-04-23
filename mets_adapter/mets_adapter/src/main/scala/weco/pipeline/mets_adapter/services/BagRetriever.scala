@@ -3,12 +3,13 @@ package weco.pipeline.mets_adapter.services
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.Uri.Path
 import org.apache.pekko.http.scaladsl.model._
+import org.apache.pekko.http.scaladsl.model.headers.Location
 import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
 import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
 import weco.pipeline.mets_adapter.models._
-import weco.http.client.HttpGet
+import weco.http.client.{HttpClient, HttpGet}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,7 +17,7 @@ trait BagRetriever {
   def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(client: HttpGet)(
+class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
   implicit actorSystem: ActorSystem,
   executionContext: ExecutionContext
 ) extends BagRetriever
@@ -45,19 +46,64 @@ class HttpBagRetriever(client: HttpGet)(
   ): Future[Bag] =
     response.status match {
       case StatusCodes.OK => parseResponseIntoBag(response)
+      case StatusCodes.TemporaryRedirect =>
+        response.discardEntityBytes()
+        response.header[Location] match {
+          case Some(location) =>
+            val uri = location.uri
+            // strip the query parameters from the URI before logging, contain credentials
+            debug(s"Following redirect to ${uri.withQuery(Uri.Query.Empty)}")
+            followRedirect(uri)
+          case None =>
+            Future.failed(
+              new Exception(
+                "Received 307 redirect from storage service but no Location header"
+              )
+            )
+        }
       case StatusCodes.NotFound =>
+        response.discardEntityBytes()
         Future.failed(
           new Exception(
             s"Bag $space/$externalIdentifier does not exist in storage service"
           )
         )
       case StatusCodes.Unauthorized =>
+        response.discardEntityBytes()
         Future.failed(new Exception("Failed to authorize with storage service"))
       case status =>
+        response.discardEntityBytes()
         Future.failed(
           new Exception(s"Received error from storage service: $status")
         )
     }
+
+  private val allowedRedirectPrefix =
+    "https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/"
+
+  private def followRedirect(uri: Uri): Future[Bag] =
+    if (!uri.toString.startsWith(allowedRedirectPrefix))
+      Future.failed(
+        new Exception(
+          s"Refusing to follow redirect to unexpected URL: ${uri.withQuery(Uri.Query.Empty)}"
+        )
+      )
+    else
+      for {
+        response <- redirectClient.singleRequest(HttpRequest(uri = uri))
+        bag <- response.status match {
+          case StatusCodes.OK => parseResponseIntoBag(response)
+          case status =>
+            response.discardEntityBytes()
+            // strip the query parameters from the URI before throwing, contain credentials
+            Future.failed(
+              new Exception(
+                s"Received error following redirect to ${uri
+                    .withQuery(Uri.Query.Empty)}: $status"
+              )
+            )
+        }
+      } yield bag
 
   private def parseResponseIntoBag(response: HttpResponse): Future[Bag] =
     Unmarshal(response.entity).to[Bag].recover {
