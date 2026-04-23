@@ -77,6 +77,11 @@ class StubWindowProcessor:
         return WindowCallbackResult()
 
 
+class FailingProcessor:
+    def __call__(self, records: list[tuple[str, Record]]) -> WindowCallbackResult:
+        raise RuntimeError("boom")
+
+
 def _create_table(
     catalog_uri: str,
     warehouse_path: Path,
@@ -196,14 +201,6 @@ def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
 
 def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
-
-    class FailingProcessor(StubWindowProcessor):
-        def __call__(
-            self,
-            records: list[tuple[str, Record]],
-        ) -> WindowCallbackResult:
-            raise RuntimeError("boom")
-
     harvester = _build_harvester(tmp_path, records, record_callback=FailingProcessor())
     window = _window_range(hours=1)
     summaries = harvester.harvest_range(
@@ -581,12 +578,7 @@ def test_batching_all_fail_results_in_failed(
     monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
 
     records = [_make_record("id:0"), _make_record("id:1")]
-
-    class AlwaysFail:
-        def __call__(self, records: list[tuple[str, Record]]) -> WindowCallbackResult:
-            raise RuntimeError("boom")
-
-    harvester = _build_harvester(tmp_path, records, record_callback=AlwaysFail())
+    harvester = _build_harvester(tmp_path, records, record_callback=FailingProcessor())
 
     summaries = harvester.harvest_range(
         time_range=_window_range(hours=1), max_windows=1
@@ -607,17 +599,7 @@ def test_batching_intermediate_writes_to_store(
     store_snapshots: list[WindowSummary] = []
     original_upsert: Any = None
 
-    class SnapshotTracker(BatchTracker):
-        def __call__(
-            self,
-            records: list[tuple[str, Record]],
-        ) -> WindowCallbackResult:
-            result = super().__call__(records)
-            # After each callback returns, _process_single_batch will call
-            # store.upsert. We'll capture snapshots via a patched upsert.
-            return result
-
-    tracker = SnapshotTracker()
+    tracker = BatchTracker()
     harvester = _build_harvester(tmp_path, records, record_callback=tracker)
 
     original_upsert = harvester.store.upsert
@@ -712,3 +694,72 @@ def test_batching_with_default_tags_preserved(
     assert summary.tags is not None
     assert summary.tags["job_id"] == "job-42"
     assert json.loads(summary.tags["changeset_ids"]) == ["cs-0", "cs-1"]
+
+
+def test_partial_success_retry_skips_already_processed_records(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Re-harvesting a partial_success window should skip records that were
+    already processed in the previous run, but the final summary should
+    combine record IDs from both runs."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+
+    records = [_make_record(f"id:{i}") for i in range(3)]
+    tracker = BatchTracker(fail_on_batch=1)
+    harvester = _build_harvester(tmp_path, records, record_callback=tracker)
+
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    end = start + timedelta(minutes=harvester.window_minutes)
+    window = IncrementalWindow(start_time=start, end_time=end)
+
+    # First run: batch 0 succeeds (id:0), batch 1 fails, batch 2 succeeds (id:2)
+    first = harvester.harvest_range(time_range=window)
+    assert first[0].state == "partial_success"
+    assert first[0].record_ids == ["id:0", "id:2"]
+
+    # Second run: a fresh tracker that always succeeds
+    tracker2 = BatchTracker()
+    harvester.record_callback = tracker2
+
+    second = harvester.harvest_range(time_range=window)
+    assert second[0].state == "success"
+
+    # Only id:1 should have been sent to the callback (id:0 and id:2 were skipped)
+    assert tracker2.batch_calls == [["id:1"]]
+
+    # Final summary should contain all record IDs (original + retry)
+    assert second[0].record_ids == ["id:0", "id:2", "id:1"]
+
+    # Changeset IDs should include both original and retry changesets
+    assert second[0].tags is not None
+    changeset_ids = json.loads(second[0].tags["changeset_ids"])
+    assert changeset_ids == ["cs-0", "cs-2", "cs-0"]
+
+
+def test_partial_success_retry_processes_all_when_none_succeeded(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """A failed window (no successful batches) should re-process all records."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+
+    records = [_make_record("id:0"), _make_record("id:1")]
+    harvester = _build_harvester(tmp_path, records, record_callback=FailingProcessor())
+
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    end = start + timedelta(minutes=harvester.window_minutes)
+    window = IncrementalWindow(start_time=start, end_time=end)
+
+    first = harvester.harvest_range(time_range=window)
+    assert first[0].state == "failed"
+    assert first[0].record_ids == []
+
+    # Retry with a working callback - all records should be processed
+    tracker = BatchTracker()
+    harvester.record_callback = tracker
+
+    second = harvester.harvest_range(time_range=window)
+    assert second[0].state == "success"
+    assert sorted([rid for batch in tracker.batch_calls for rid in batch]) == [
+        "id:0",
+        "id:1",
+    ]
