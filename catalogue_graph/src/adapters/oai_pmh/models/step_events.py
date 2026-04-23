@@ -83,7 +83,8 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
             if not summary.tags:
                 continue
 
-            # Older rows store a single changeset_id, new rows store a list of changeset_ids
+            # For backwards compatibility, we should look for changeset IDs in two places.
+            # Older rows store a single changeset_id, new rows store a list of changeset_ids.
             if "changeset_id" in summary.tags:
                 changeset_ids.append(summary.tags["changeset_id"])
             if "changeset_ids" in summary.tags:

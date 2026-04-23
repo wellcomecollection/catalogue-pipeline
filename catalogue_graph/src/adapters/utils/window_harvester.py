@@ -89,12 +89,12 @@ class BatchProgress(BaseModel):
         )
 
     @classmethod
-    def from_existing_status(cls, status: WindowSummary) -> BatchProgress:
+    def from_existing_summary(cls, summary: WindowSummary) -> BatchProgress:
         """
         Create a progress object from an existing partially failed run and pre-populate it
         with successfully processed record IDs and changeset IDs to "resume" processing.
         """
-        tags = status.tags or {}
+        tags = summary.tags or {}
 
         changeset_ids, upserted_record_ids = [], []
         if "changeset_ids" in tags:
@@ -104,9 +104,9 @@ class BatchProgress(BaseModel):
 
         return BatchProgress(
             window=IncrementalWindow(
-                start_time=status.window_start, end_time=status.window_end
+                start_time=summary.window_start, end_time=summary.window_end
             ),
-            record_ids=status.record_ids,
+            record_ids=summary.record_ids,
             changeset_ids=changeset_ids,
             upserted_record_ids=upserted_record_ids,
             tags=tags,
@@ -147,18 +147,18 @@ class WindowHarvestManager:
         pending_windows = []
 
         reused_summaries: list[WindowSummary] = []
-        status_map: dict[str, WindowSummary] = {}
+        summary_map: dict[str, WindowSummary] = {}
 
         if reprocess_successful_windows:
             pending_windows = list(candidate_windows)
         else:
             # Check which candidate windows were already processed
-            status_map = self.store.load_status_map(
+            summary_map = self.store.load_status_map(
                 start_time=time_range.start_time_utc, end_time=time_range.end_time_utc
             )
 
             for window in candidate_windows:
-                existing_summary = status_map.get(window.to_iso_string())
+                existing_summary = summary_map.get(window.to_iso_string())
                 if existing_summary and existing_summary.state == "success":
                     reused_summaries.append(existing_summary)
                 else:
@@ -174,7 +174,7 @@ class WindowHarvestManager:
             window_range=time_range.to_formatted_string(),
         )
 
-        new_summaries = self.harvest_windows(pending_windows, status_map=status_map)
+        new_summaries = self.harvest_windows(pending_windows, summary_map=summary_map)
 
         combined_summaries = reused_summaries + new_summaries
         combined_summaries.sort(key=lambda summary: summary.window_start)
@@ -184,16 +184,17 @@ class WindowHarvestManager:
         self,
         windows: Sequence[IncrementalWindow],
         *,
-        status_map: dict[str, WindowSummary] | None = None,
+        summary_map: dict[str, WindowSummary] | None = None,
     ) -> list[WindowSummary]:
         logger.info("Processing windows sequentially", window_count=len(windows))
-        summaries = [
-            self.process_window(
-                window,
-                existing_status=(status_map or {}).get(window.to_iso_string()),
+
+        summaries = []
+        for window in windows:
+            existing_summary = (summary_map or {}).get(window.to_iso_string())
+            summaries.append(
+                self.process_window(window, existing_summary=existing_summary)
             )
-            for window in windows
-        ]
+
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
 
@@ -201,13 +202,17 @@ class WindowHarvestManager:
         self,
         window: IncrementalWindow,
         *,
-        existing_status: WindowSummary | None = None,
+        existing_summary: WindowSummary | None = None,
     ) -> WindowSummary:
         logger.info("Processing window", window=window.to_iso_string())
 
-        if existing_status and existing_status.state == "partial_success":
-            progress = BatchProgress.from_existing_status(existing_status)
-            ids_to_skip = set(existing_status.record_ids)
+        # If we already processed a window but some of its batches failed (state="partial_success"),
+        # reconstruct the progress object from the existing window summary
+        if existing_summary and existing_summary.state == "partial_success":
+            progress = BatchProgress.from_existing_summary(existing_summary)
+
+            # Skip records which were already successfully processed in the previous run
+            ids_to_skip = set(existing_summary.record_ids)
         else:
             progress = BatchProgress(window=window, tags=self.default_tags)
             ids_to_skip = set()
@@ -227,7 +232,7 @@ class WindowHarvestManager:
             for batch in itertools.batched(records_in_window, BATCH_SIZE):
                 self._process_single_batch(list(batch), progress)
         except NoRecordsMatchError:
-            pass  # No records — fall through to final state
+            pass  # Fall through to final state
         except Exception as e:
             progress.last_error = repr(e)
 
@@ -276,7 +281,7 @@ class WindowHarvestManager:
             )
 
         # Failing to persist the window summary for a specific batch is not a critical error. The only window summary
-        # which must be persisted (and whose failure to persist should cause the pipeline to fail) is the final one.
+        # which must be persisted (and whose failure to persist should cause the run to fail) is the final one.
         try:
             self.store.upsert(progress.get_summary(is_final=False))
         except Exception as e:
