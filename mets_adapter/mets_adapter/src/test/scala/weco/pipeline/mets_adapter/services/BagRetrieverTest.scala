@@ -332,6 +332,45 @@ class BagRetrieverTest
     }
   }
 
+  it("fails if fetching the bag from S3 returns an error") {
+    val redirectUri = Uri(
+      "https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/digitised/b30414726/v1?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=abc123secret"
+    )
+    val storageResponses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30414726")),
+        HttpResponse(
+          status = StatusCodes.TemporaryRedirect,
+          headers = List(Location(redirectUri))
+        )
+      )
+    )
+
+    val redirectResponses = Seq(
+      (
+        HttpRequest(uri = redirectUri),
+        HttpResponse(status = StatusCodes.Forbidden)
+      )
+    )
+
+    withBagRetriever(storageResponses, redirectResponses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30414726"
+          )
+
+        whenReady(future.failed) {
+          err =>
+            val msg = err.getMessage
+            msg shouldBe "Received error following redirect to https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/digitised/b30414726/v1: 403 Forbidden"
+            msg should not include "X-Amz-Signature"
+            msg should not include "abc123secret"
+        }
+    }
+  }
+
   it("fails if a 307 redirect has no Location header") {
     val responses = Seq(
       (
