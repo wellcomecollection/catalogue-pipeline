@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import argparse
 from datetime import datetime, timedelta
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, model_validator, parse_obj_as
 from pydantic.alias_generators import to_camel
+
+from utils.timezone import ensure_datetime_utc
 
 DEFAULT_WINDOW_MINUTES = 15
 
@@ -42,13 +46,21 @@ class IncrementalWindow(BaseModel):
             raise ValueError("start_time must not be after end_time")
         return self
 
+    @property
+    def start_time_utc(self) -> datetime:
+        return ensure_datetime_utc(self.start_time)
+
+    @property
+    def end_time_utc(self) -> datetime:
+        return ensure_datetime_utc(self.end_time)
+
     def to_formatted_string(self) -> str:
         start = self.start_time.strftime("%Y%m%dT%H%M")
         end = self.end_time.strftime("%Y%m%dT%H%M")
         return f"{start}-{end}"
 
     @classmethod
-    def from_formatted_string(cls, s: str) -> "IncrementalWindow":
+    def from_formatted_string(cls, s: str) -> IncrementalWindow:
         start_str, end_str = s.split("-")
         start_time = datetime.strptime(start_str, "%Y%m%dT%H%M")
         end_time = datetime.strptime(end_str, "%Y%m%dT%H%M")
@@ -61,6 +73,17 @@ class IncrementalWindow(BaseModel):
             window = cls(start_time=args.window_start, end_time=args.window_end)
 
         return window
+
+    def to_iso_string(self) -> str:
+        return f"{self.start_time_utc.isoformat()}_{self.end_time_utc.isoformat()}"
+
+    @classmethod
+    def from_iso_string(cls, s: str) -> IncrementalWindow:
+        start_str, end_str = s.split("_", 1)
+        return cls(
+            start_time=datetime.fromisoformat(start_str),
+            end_time=datetime.fromisoformat(end_str),
+        )
 
     def to_elasticsearch_query(self, field_name: str) -> dict:
         return {

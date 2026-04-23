@@ -15,7 +15,7 @@ from adapters.oai_pmh.models.step_events import (
     OAIPMHLoaderResponse,
 )
 from adapters.utils.window_summary import WindowSummary
-from models.events import IncrementalWindow
+from models.incremental_window import IncrementalWindow
 from utils.reporting import PipelineMetric, PipelineReport
 
 

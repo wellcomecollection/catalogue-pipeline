@@ -18,6 +18,7 @@ class WorkHierarchyItem(BaseModel):
 
 class WorkHierarchy(BaseModel):
     id: str
+    # Sorted from closest (parent) to furthest (root of work hierarchy)
     ancestors: list[WorkHierarchyItem] = []
     children: list[WorkHierarchyItem] = []
 

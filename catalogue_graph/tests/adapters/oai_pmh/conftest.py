@@ -24,7 +24,8 @@ from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.oai_pmh.steps.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_generator import WindowGenerator
-from adapters.utils.window_store import WindowStatusRecord, WindowStore
+from adapters.utils.window_store import WindowStore
+from adapters.utils.window_summary import WindowSummary
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -127,18 +128,17 @@ def create_window_row(
     start: datetime,
     end: datetime,
     state: str = "success",
-    record_ids: tuple[str, ...] = (),
+    record_ids: list[str] | None = None,
     tags: dict[str, str] | None = None,
-) -> WindowStatusRecord:
-    """Create a WindowStatusRecord for testing."""
-    return WindowStatusRecord(
-        window_key=f"{start.isoformat()}_{end.isoformat()}",
+) -> WindowSummary:
+    """Create a WindowSummary for testing."""
+    return WindowSummary(
         window_start=start,
         window_end=end,
         state=state,
         attempts=1,
         last_error=None,
-        record_ids=record_ids,
+        record_ids=record_ids or [],
         updated_at=end,
         tags=tags,
     )
@@ -146,7 +146,7 @@ def create_window_row(
 
 def populate_window_store(
     table: IcebergTable,
-    rows: list[WindowStatusRecord],
+    rows: list[WindowSummary],
 ) -> WindowStore:
     """Populate a WindowStore with test data."""
     store = WindowStore(table)

@@ -12,7 +12,11 @@ from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     WorkHierarchy,
 )
-from ingestor.queries.work_queries import WORK_ANCESTORS_QUERY, WORK_CHILDREN_QUERY
+from ingestor.queries.work_queries import (
+    WORK_ANCESTORS_QUERY,
+    WORK_CHILDREN_QUERY,
+    WORK_DESCENDANTS_QUERY,
+)
 from models.events import BasePipelineEvent
 from tests.mocks import (
     MockElasticsearchClient,
@@ -31,6 +35,16 @@ CHILDREN_FIXTURE = load_json_fixture("neptune/work_children_single.json")
 EXTRACTED_CONCEPT_FIXTURE = load_json_fixture("neptune/full_extracted_concept.json")
 
 EXPECTED_EXTRACTED_CONCEPT = ExtractedConcept.model_validate(EXTRACTED_CONCEPT_FIXTURE)
+
+DESCENDANT_WORK_NODE = {
+    "~id": "desc1",
+    "~labels": ["Work"],
+    "~properties": {
+        "id": "desc1",
+        "label": "Descendant work",
+        "type": "Work",
+    },
+}
 
 
 def get_extractor() -> GraphWorksExtractor:
@@ -59,13 +73,15 @@ def mock_graph_relationships(
     monkeypatch: pytest.MonkeyPatch,
     work_id: str,
     all_indexed_work_ids: list[str],
-    include: list[Literal["ancestors", "children", "concepts"]],
+    include: list[Literal["ancestors", "children", "concepts", "descendants"]],
 ) -> None:
-    ancestors, children = [], []
+    ancestors, children, descendants = [], [], []
     if "ancestors" in include:
         ancestors = [{"id": work_id, "ancestors": ANCESTORS_FIXTURE}]
     if "children" in include:
         children = [{"id": work_id, "children": CHILDREN_FIXTURE}]
+    if "descendants" in include:
+        descendants = [{"id": work_id, "descendants": [DESCENDANT_WORK_NODE]}]
     if "concepts" in include:
         concept_ids = [MOCK_CONCEPT_ID]
         monkeypatch.setattr(
@@ -77,6 +93,7 @@ def mock_graph_relationships(
     expected_params = {"ids": all_indexed_work_ids}
     add_neptune_mock_response(WORK_ANCESTORS_QUERY, expected_params, ancestors)
     add_neptune_mock_response(WORK_CHILDREN_QUERY, expected_params, children)
+    add_neptune_mock_response(WORK_DESCENDANTS_QUERY, expected_params, descendants)
 
 
 def test_with_ancestors(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -159,3 +176,69 @@ def test_multiple_works(monkeypatch: pytest.MonkeyPatch) -> None:
     extracted_items = list(get_extractor().extract_raw())
     for result in expected_results:
         assert result in extracted_items
+
+
+def get_incremental_extractor(work_ids: list[str]) -> GraphWorksExtractor:
+    event = BasePipelineEvent(pipeline_date="dev", ids=work_ids)
+    return GraphWorksExtractor(
+        event,
+        get_mock_es_client("graph_extractor", event.pipeline_date),
+        get_mock_neptune_client(),
+    )
+
+
+def test_incremental_mode_collects_descendant_related_ids(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """In incremental mode, descendants are collected and processed as related works."""
+    mock_es_work("a24esypq")
+    mock_es_work("desc1")
+
+    # First pass: primary work has a descendant
+    mock_graph_relationships(monkeypatch, "a24esypq", ["a24esypq"], ["descendants"])
+    # Second pass: the descendant is fetched as a related work
+    mock_graph_relationships(monkeypatch, "desc1", ["desc1"], [])
+
+    extractor = get_incremental_extractor(["a24esypq"])
+    extracted_items = list(extractor.extract_raw())
+
+    assert len(extracted_items) == 2
+    extracted_ids = {item.work.state.canonical_id for item in extracted_items}
+    assert extracted_ids == {"a24esypq", "desc1"}
+
+
+def test_incremental_mode_collects_parent_as_related_work(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """In incremental mode, the parent (first ancestor) is collected as a related work."""
+    parent_id = ANCESTORS_FIXTURE[0]["work"]["~properties"]["id"]
+
+    mock_es_work("a24esypq")
+    mock_es_work(parent_id)
+
+    # First pass: primary work has ancestors (parent = first ancestor)
+    mock_graph_relationships(monkeypatch, "a24esypq", ["a24esypq"], ["ancestors"])
+    # Second pass: the parent is fetched as a related work
+    mock_graph_relationships(monkeypatch, parent_id, [parent_id], [])
+
+    extractor = get_incremental_extractor(["a24esypq"])
+    extracted_items = list(extractor.extract_raw())
+
+    assert len(extracted_items) == 2
+    extracted_ids = {item.work.state.canonical_id for item in extracted_items}
+    assert extracted_ids == {"a24esypq", parent_id}
+
+
+def test_full_mode_does_not_collect_related_ids(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """In full mode, no related work IDs are collected even when ancestors exist."""
+    mock_es_work("a24esypq")
+    mock_graph_relationships(
+        monkeypatch, "a24esypq", ["a24esypq"], ["ancestors", "children"]
+    )
+
+    extractor = get_extractor()
+    list(extractor.extract_raw())
+
+    assert extractor.related_ids == set()
