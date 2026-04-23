@@ -8,18 +8,18 @@ from typing import get_args
 import structlog
 
 from clients.neptune_client import NeptuneClient
+from ingestor.extractors.base_extractor import (
+    ConceptQuery,
+    ConceptRelatedQuery,
+    GraphBaseExtractor,
+    StreamingExtractor,
+)
 from ingestor.models.neptune.node import SourceConceptNode
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,
 )
 from utils.types import ConceptType
-
-from .base_extractor import (
-    ConceptQuery,
-    ConceptRelatedQuery,
-    GraphBaseExtractor,
-)
 
 logger = structlog.get_logger(__name__)
 
@@ -39,7 +39,7 @@ RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
 CONCEPTS_BATCH_SIZE = 40_000
 
 
-class GraphBaseConceptsExtractor(GraphBaseExtractor, ABC):
+class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
     """Abstract base class for concept extraction from the catalogue graph.
 
     Provides shared infrastructure used by all concept extractors: consistent batching of concept IDs, synonymous

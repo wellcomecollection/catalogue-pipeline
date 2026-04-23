@@ -30,3 +30,10 @@ class DisplayLocationType(DisplayIdLabel):
             id=location.location_type.id,
             label=LOCATION_LABEL_MAPPING[location.location_type.id],
         )
+
+    @staticmethod
+    def from_id(location_type_id: str) -> "DisplayLocationType":
+        return DisplayLocationType(
+            id=location_type_id,
+            label=LOCATION_LABEL_MAPPING[location_type_id],
+        )

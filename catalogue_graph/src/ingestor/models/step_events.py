@@ -53,16 +53,20 @@ class IngestorStepEvent(BasePipelineEvent):
     def from_argparser(cls, args: argparse.Namespace) -> Self:
         window = IncrementalWindow.from_argparser(args)
 
-        index_date_works, index_date_concepts = None, None
+        index_date_works, index_date_concepts, index_date_images = None, None, None
         if args.ingestor_type == "works":
             index_date_works = args.index_date
         elif args.ingestor_type == "concepts":
             index_date_concepts = args.index_date
+        elif args.ingestor_type == "images":
+            index_date_images = args.index_date
 
         index_dates = PipelineIndexDates(
-            merged=args.index_date_merged,
+            merged=getattr(args, "index_date_merged", None),
+            augmented=getattr(args, "index_date_augmented", None),
             works=index_date_works,
             concepts=index_date_concepts,
+            images=index_date_images,
         )
         return cls(**args.__dict__, window=window, index_dates=index_dates)
 

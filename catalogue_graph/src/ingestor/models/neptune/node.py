@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 
-from models.graph_node import BaseNode, Concept, SourceConcept, Work
+from models.graph_node import BaseNode, Concept, Image, SourceConcept, Work
 
 
 class NeptuneBaseNode(BaseModel):
@@ -27,6 +27,10 @@ class ConceptNode(NeptuneBaseNode):
 
 class SourceConceptNode(NeptuneBaseNode):
     properties: SourceConcept = Field(alias="~properties")
+
+
+class ImageNode(NeptuneBaseNode):
+    properties: Image = Field(alias="~properties")
 
 
 class WorkNode(NeptuneBaseNode):

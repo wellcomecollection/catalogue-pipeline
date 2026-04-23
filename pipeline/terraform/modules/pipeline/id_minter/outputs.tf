@@ -1,5 +1,5 @@
 output "id_generator_lambda_arn" {
-  value = module.id_generator_lambda.lambda_arn
+  value = var.include_id_generator ? module.id_generator_lambda[0].lambda_arn : null
 }
 
 output "id_minter_lambda_arn" {

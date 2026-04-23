@@ -1,4 +1,4 @@
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.merged.work import (
     VisibleMergedWork,
 )
