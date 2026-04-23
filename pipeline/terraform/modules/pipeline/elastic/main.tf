@@ -200,6 +200,12 @@ locals {
       read  = [for idx in local.works_denormalised_list : idx.name]
       write = [for idx in local.works_indexed_list : idx.name]
     }
+    images_ingestor = {
+      read = concat([for idx in local.works_denormalised_list : idx.name], [
+        for idx in local.images_augmented_list : idx.name
+      ])
+      write = ["images-indexed-dev"]
+    }
     snapshot_generator = {
       read = concat([
         for idx in local.works_indexed_list : idx.name

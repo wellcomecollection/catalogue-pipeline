@@ -7,6 +7,7 @@ BasePipelineEventArgument = Literal[
     "ids",
     "pipeline_date",
     "index_date_merged",
+    "index_date_augmented",
     "pit_id",
     "environment",
     "es_mode",
@@ -53,7 +54,14 @@ def add_pipeline_event_args(
         parser.add_argument(
             "--index-date-merged",
             type=str,
-            help="The merged index date to read from, will default to pipeline date.",
+            help="The merged works index date to read from, will default to pipeline date.",
+            required=False,
+        )
+    if "index_date_augmented" in args:
+        parser.add_argument(
+            "--index-date-augmented",
+            type=str,
+            help="The augmented images index date to read from, will default to pipeline date.",
             required=False,
         )
     if "pit_id" in args:

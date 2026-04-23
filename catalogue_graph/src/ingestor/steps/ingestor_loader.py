@@ -16,6 +16,7 @@ from ingestor.transformers.base_transformer import (
     LoadDestination,
 )
 from ingestor.transformers.concepts_transformer import IngestorConceptsTransformer
+from ingestor.transformers.images_transformer import IngestorImagesTransformer
 from ingestor.transformers.works_transformer import IngestorWorksTransformer
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client
@@ -36,6 +37,8 @@ def create_transformer(
         return IngestorConceptsTransformer(event, es_client, neptune_client)
     if event.ingestor_type == "works":
         return IngestorWorksTransformer(event, es_client, neptune_client)
+    if event.ingestor_type == "images":
+        return IngestorImagesTransformer(event, es_client, neptune_client)
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
@@ -130,6 +133,7 @@ def local_handler(parser: ArgumentParser) -> None:
         {
             "pipeline_date",
             "index_date_merged",
+            "index_date_augmented",
             "window",
             "ids",
             "pit_id",

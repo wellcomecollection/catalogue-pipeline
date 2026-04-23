@@ -3,7 +3,7 @@ from collections.abc import Generator, Iterable
 import structlog
 from dateutil import parser
 
-from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
 from models.pipeline.location import DigitalLocation, PhysicalLocation
 

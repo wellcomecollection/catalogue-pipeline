@@ -9,6 +9,7 @@ from models.events import (
 from utils.elasticsearch import ElasticsearchMode, get_client
 
 from .catalogue.concepts_transformer import CatalogueConceptsTransformer
+from .catalogue.images_transformer import CatalogueImagesTransformer
 from .catalogue.work_identifiers_transformer import CatalogueWorkIdentifiersTransformer
 from .catalogue.works_transformer import CatalogueWorksTransformer
 from .graph_transformer import GraphBaseTransformer
@@ -61,5 +62,8 @@ def create_transformer(
     if transformer_type == "catalogue_work_identifiers":
         es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
         return CatalogueWorkIdentifiersTransformer(event, es_client)
+    if transformer_type == "catalogue_images":
+        es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
+        return CatalogueImagesTransformer(event, es_client)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")

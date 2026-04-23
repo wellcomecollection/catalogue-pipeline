@@ -3,10 +3,10 @@ from typing import Literal
 
 import pytest
 
-from ingestor.extractors.works_extractor import (
-    GraphWorksExtractor,
+from ingestor.extractors.works.base_works_extractor import (
     VisibleExtractedWork,
 )
+from ingestor.extractors.works.works_index_extractor import WorksIndexExtractor
 from ingestor.models.merged.work import VisibleMergedWork
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
@@ -47,8 +47,8 @@ DESCENDANT_WORK_NODE = {
 }
 
 
-def get_extractor() -> GraphWorksExtractor:
-    return GraphWorksExtractor(
+def get_extractor() -> WorksIndexExtractor:
+    return WorksIndexExtractor(
         MOCK_EVENT,
         get_mock_es_client("graph_extractor", MOCK_EVENT.pipeline_date),
         get_mock_neptune_client(),
@@ -85,7 +85,7 @@ def mock_graph_relationships(
     if "concepts" in include:
         concept_ids = [MOCK_CONCEPT_ID]
         monkeypatch.setattr(
-            "ingestor.extractors.works_extractor.extract_identified_concept_ids",
+            "ingestor.extractors.works.base_works_extractor.extract_identified_concept_ids",
             lambda _: concept_ids,
         )
         add_mock_responses_for_ids([MOCK_CONCEPT_ID])
@@ -178,9 +178,9 @@ def test_multiple_works(monkeypatch: pytest.MonkeyPatch) -> None:
         assert result in extracted_items
 
 
-def get_incremental_extractor(work_ids: list[str]) -> GraphWorksExtractor:
+def get_incremental_extractor(work_ids: list[str]) -> WorksIndexExtractor:
     event = BasePipelineEvent(pipeline_date="dev", ids=work_ids)
-    return GraphWorksExtractor(
+    return WorksIndexExtractor(
         event,
         get_mock_es_client("graph_extractor", event.pipeline_date),
         get_mock_neptune_client(),
