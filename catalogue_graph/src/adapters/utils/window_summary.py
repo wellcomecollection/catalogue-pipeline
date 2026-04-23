@@ -1,18 +1,20 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, computed_field, field_validator
 
 from models.incremental_window import IncrementalWindow
 from utils.timezone import ensure_datetime_utc
 
+WindowState = Literal["success", "partial_success", "failed"]
+
 
 class WindowSummary(BaseModel):
     window_start: datetime
     window_end: datetime
-    state: str
+    state: WindowState
     attempts: int
     record_ids: list[str]
     last_error: str | None

@@ -16,9 +16,7 @@ from models.incremental_window import IncrementalWindow
 
 from .window_generator import WindowGenerator
 from .window_store import WindowStore
-from .window_summary import (
-    WindowSummary,
-)
+from .window_summary import WindowState, WindowSummary
 
 logger = structlog.get_logger(__name__)
 
@@ -59,9 +57,10 @@ class BatchProgress(BaseModel):
     batches_succeeded: int = 0
     batches_failed: int = 0
     last_error: str | None = None
+    attempts: int = 1
 
     @property
-    def final_state(self) -> str:
+    def final_state(self) -> WindowState:
         if self.batches_failed == 0 and self.last_error is None:
             return "success"
         if self.batches_succeeded > 0:
@@ -81,7 +80,7 @@ class BatchProgress(BaseModel):
             window_start=self.window.start_time_utc,
             window_end=self.window.end_time_utc,
             state=state,
-            attempts=1,
+            attempts=self.attempts,
             record_ids=self.record_ids,
             last_error=self.last_error,
             updated_at=datetime.now(UTC),
@@ -110,6 +109,7 @@ class BatchProgress(BaseModel):
             changeset_ids=changeset_ids,
             upserted_record_ids=upserted_record_ids,
             tags=tags,
+            attempts=summary.attempts + 1,
         )
 
 
@@ -206,9 +206,9 @@ class WindowHarvestManager:
     ) -> WindowSummary:
         logger.info("Processing window", window=window.to_iso_string())
 
-        # If we already processed a window but some of its batches failed (state="partial_success"),
+        # If we already processed a window but some of its batches failed,
         # reconstruct the progress object from the existing window summary
-        if existing_summary and existing_summary.state == "partial_success":
+        if existing_summary and existing_summary.state != "success":
             progress = BatchProgress.from_existing_summary(existing_summary)
 
             # Skip records which were already successfully processed in the previous run

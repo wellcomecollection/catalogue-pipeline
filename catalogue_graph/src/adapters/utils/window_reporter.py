@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from utils.timezone import ensure_datetime_utc
 
 from .window_store import WindowStore
-from .window_summary import WindowSummary
+from .window_summary import WindowState, WindowSummary
 
 
 class CoverageGap(BaseModel):
@@ -28,7 +28,7 @@ class WindowCoverageReport(BaseModel):
     range_start: datetime
     range_end: datetime
     total_windows: int = Field(0, ge=0)
-    state_counts: dict[str, int] = Field(default_factory=dict)
+    state_counts: dict[WindowState, int] = Field(default_factory=dict)
     coverage_hours: float = 0.0
     coverage_gaps: list[CoverageGap] = Field(default_factory=list)
     failures: list[WindowFailure] = Field(default_factory=list)

@@ -185,7 +185,7 @@ def test_mixed_coercion_types() -> None:
 def test_all_none_optional_fields() -> None:
     """Test creating WindowSummary with all optional fields as None."""
     summary = make_summary(
-        state="pending",
+        state="success",
         attempts=0,
         record_ids=None,
         last_error=None,

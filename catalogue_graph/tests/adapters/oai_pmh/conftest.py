@@ -25,7 +25,7 @@ from adapters.oai_pmh.steps.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_store import WindowStore
-from adapters.utils.window_summary import WindowSummary
+from adapters.utils.window_summary import WindowState, WindowSummary
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -127,7 +127,7 @@ def loader_runtime(
 def create_window_row(
     start: datetime,
     end: datetime,
-    state: str = "success",
+    state: WindowState = "success",
     record_ids: list[str] | None = None,
     tags: dict[str, str] | None = None,
 ) -> WindowSummary:
