@@ -29,6 +29,7 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
         fields: list | None = None,
     ):
         super().__init__(event, es_client=es_client, query=query, fields=fields)
+        self.base_query = query
         self.event = event
 
     def _get_child_source(self, collection_paths: set[str]) -> MergedWorksSource:
@@ -39,13 +40,17 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
             child_clauses.append(
                 {"regexp": {COLLECTION_PATH_KEYWORD_FIELD: f"{quoted_path}/[^/]+"}}
             )
+
+        child_query = {"bool": {"should": child_clauses, "minimum_should_match": 1}}
+        full_query = {"bool": {"must": [self.base_query, child_query]}}
+
         unscoped_event = self.event.model_copy(
             update={"window": None, "ids": None, "pit_id": self.pit_id}
         )
         return MergedWorksSource(
             unscoped_event,
             es_client=self.es_client,
-            query={"bool": {"should": child_clauses}},
+            query=full_query,
             fields=self.fields,
             slice_count=1,
         )

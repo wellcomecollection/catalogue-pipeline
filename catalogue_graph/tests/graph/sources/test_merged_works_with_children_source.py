@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock
 
 import pytest
-
 from graph.sources.merged_works_source import MergedWorksSource
 from graph.sources.merged_works_with_children_source import (
     COLLECTION_PATH_KEYWORD_FIELD,
@@ -39,7 +38,7 @@ def test_child_query_quotes_path_with_special_characters() -> None:
     source = _make_source()
     child_source = source._get_child_source({"Well.Jav.8"})
 
-    clauses = child_source.query["bool"]["should"]
+    clauses = child_source.query["bool"]["must"][1]["bool"]["should"]
     assert len(clauses) == 1
     assert clauses[0] == {
         "regexp": {COLLECTION_PATH_KEYWORD_FIELD: '"well.jav.8"/[^/]+'}
@@ -50,7 +49,7 @@ def test_child_query_lowercases_path() -> None:
     source = _make_source()
     child_source = source._get_child_source({"PPDAL/E/2"})
 
-    clauses = child_source.query["bool"]["should"]
+    clauses = child_source.query["bool"]["must"][1]["bool"]["should"]
     assert clauses[0] == {
         "regexp": {COLLECTION_PATH_KEYWORD_FIELD: '"ppdal/e/2"/[^/]+'}
     }
@@ -60,7 +59,7 @@ def test_child_query_builds_one_clause_per_path() -> None:
     source = _make_source()
     child_source = source._get_child_source({"A", "B"})
 
-    clauses = child_source.query["bool"]["should"]
+    clauses = child_source.query["bool"]["must"][1]["bool"]["should"]
     assert len(clauses) == 2
 
 
