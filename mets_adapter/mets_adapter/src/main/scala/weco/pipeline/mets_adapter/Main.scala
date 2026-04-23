@@ -33,8 +33,10 @@ object Main extends WellcomeTypesafeApp {
       implicit val dynamoClient: DynamoDbClient =
         DynamoDbClient.builder().build()
 
+      val httpClient = new PekkoHttpClient()
+
       val oauthClient = new StorageServiceOauthHttpClient(
-        underlying = new PekkoHttpClient(),
+        underlying = httpClient,
         baseUri = Uri(config.requireString("bags.api.url")),
         tokenUri = Uri(config.requireString("bags.oauth.url")),
         credentials = BasicHttpCredentials(
@@ -49,7 +51,10 @@ object Main extends WellcomeTypesafeApp {
       new MetsAdapterWorkerService(
         SQSBuilder.buildSQSStream(config),
         SNSBuilder.buildSNSMessageSender(config, subject = "METS adapter"),
-        bagRetriever = new HttpBagRetriever(oauthClient),
+        bagRetriever = new HttpBagRetriever(
+          client = oauthClient,
+          redirectClient = httpClient
+        ),
         metsStore = metsStore
       )
   }
