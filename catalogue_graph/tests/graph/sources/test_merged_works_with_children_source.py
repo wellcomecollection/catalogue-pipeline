@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+
 from graph.sources.merged_works_source import MergedWorksSource
 from graph.sources.merged_works_with_children_source import (
     COLLECTION_PATH_KEYWORD_FIELD,
@@ -16,9 +17,11 @@ def _make_work(canonical_id: str, path: str | None = None) -> dict:
     return work
 
 
-def _make_source() -> MergedWorksWithChildrenSource:
+def _make_source(query: dict | None = None) -> MergedWorksWithChildrenSource:
     event = BasePipelineEvent(pipeline_date="dev")
-    return MergedWorksWithChildrenSource(event=event, es_client=MagicMock())
+    return MergedWorksWithChildrenSource(
+        event=event, es_client=MagicMock(), query=query
+    )
 
 
 def _with_primary_works(monkeypatch: pytest.MonkeyPatch, works: list[dict]) -> None:
@@ -53,6 +56,13 @@ def test_child_query_lowercases_path() -> None:
     assert clauses[0] == {
         "regexp": {COLLECTION_PATH_KEYWORD_FIELD: '"ppdal/e/2"/[^/]+'}
     }
+
+
+def test_child_query_preserves_base_query() -> None:
+    base_query = {"bool": {"must": {"match": {"type": "Visible"}}}}
+    source = _make_source(query=base_query)
+    child_source = source._get_child_source({"PPDAL/E/2"})
+    assert child_source.query["bool"]["must"][0] == base_query
 
 
 def test_child_query_builds_one_clause_per_path() -> None:
