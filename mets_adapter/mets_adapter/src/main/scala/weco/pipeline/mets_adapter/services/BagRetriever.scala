@@ -47,10 +47,13 @@ class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
     response.status match {
       case StatusCodes.OK => parseResponseIntoBag(response)
       case StatusCodes.TemporaryRedirect =>
+        response.discardEntityBytes()
         response.header[Location] match {
           case Some(location) =>
-            debug(s"Following redirect to ${location.uri}")
-            followRedirect(location.uri)
+            val uri = location.uri
+            // strip the query parameters from the URI before logging, contain credentials
+            debug(s"Following redirect to ${uri.withQuery(Uri.Query.Empty)}")
+            followRedirect(uri)
           case None =>
             Future.failed(
               new Exception(
@@ -59,14 +62,17 @@ class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
             )
         }
       case StatusCodes.NotFound =>
+        response.discardEntityBytes()
         Future.failed(
           new Exception(
             s"Bag $space/$externalIdentifier does not exist in storage service"
           )
         )
       case StatusCodes.Unauthorized =>
+        response.discardEntityBytes()
         Future.failed(new Exception("Failed to authorize with storage service"))
       case status =>
+        response.discardEntityBytes()
         Future.failed(
           new Exception(s"Received error from storage service: $status")
         )
@@ -78,9 +84,11 @@ class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
       bag <- response.status match {
         case StatusCodes.OK => parseResponseIntoBag(response)
         case status =>
+          response.discardEntityBytes()
+          // strip the query parameters from the URI before throwing, contain credentials
           Future.failed(
             new Exception(
-              s"Received error following redirect to $uri: $status"
+              s"Received error following redirect to ${uri.withQuery(Uri.Query.Empty)}: $status"
             )
           )
       }

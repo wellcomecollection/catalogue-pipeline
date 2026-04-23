@@ -336,8 +336,8 @@ class BagRetrieverTest
           override val baseUri: Uri = Uri("http://storage:1234/bags")
         }
 
-        val redClient: HttpClient = new MemoryHttpClient(redirectResponses)
+        val redirectClient: HttpClient = new MemoryHttpClient(redirectResponses)
 
-        testWith(new HttpBagRetriever(client, redClient))
+        testWith(new HttpBagRetriever(client, redirectClient))
     }
 }
