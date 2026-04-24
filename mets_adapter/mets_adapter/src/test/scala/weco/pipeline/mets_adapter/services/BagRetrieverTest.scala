@@ -209,7 +209,9 @@ class BagRetrieverTest
   }
 
   it("follows a 307 redirect to fetch the bag from S3") {
-    val redirectUri = Uri("https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/digitised/b30414726/v1")
+    val redirectUri = Uri(
+      "https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/digitised/b30414726/v1"
+    )
     val bagJson =
       """
         |{
@@ -300,6 +302,143 @@ class BagRetrieverTest
               name = "data/b30414726.xml",
               path = "v1/data/b30414726.xml"
             )
+        }
+    }
+  }
+
+  it(
+    "follows a 307 redirect and parses a bag served as application/octet-stream"
+  ) {
+    val redirectUri = Uri(
+      "https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/digitised/b30414727/v1"
+    )
+    val bagJson =
+      """
+        |{
+        |  "id": "digitised/b30414727",
+        |  "space": { "id": "digitised", "type": "Space" },
+        |  "info": {
+        |    "externalIdentifier": "b30414727",
+        |    "payloadOxum": "1.1",
+        |    "baggingDate": "2023-01-02",
+        |    "sourceOrganization": "intranda GmbH",
+        |    "externalDescription": "A very large bag with a wonky content type",
+        |    "internalSenderIdentifier": "1235",
+        |    "internalSenderDescription": "large_bag_b30414727",
+        |    "type": "BagInfo"
+        |  },
+        |  "manifest": {
+        |    "checksumAlgorithm": "SHA-256",
+        |    "files": [
+        |      {
+        |        "checksum": "def456",
+        |        "name": "data/b30414727.xml",
+        |        "path": "v1/data/b30414727.xml",
+        |        "size": 1000,
+        |        "type": "File"
+        |      }
+        |    ],
+        |    "type": "BagManifest"
+        |  },
+        |  "tagManifest": {
+        |    "checksumAlgorithm": "SHA-256",
+        |    "files": [],
+        |    "type": "BagManifest"
+        |  },
+        |  "location": {
+        |    "provider": { "id": "amazon-s3", "type": "Provider" },
+        |    "bucket": "wellcomecollection-storage",
+        |    "path": "digitised/b30414727",
+        |    "type": "Location"
+        |  },
+        |  "replicaLocations": [],
+        |  "createdDate": "2023-01-02T12:00:00.000000Z",
+        |  "version": "v1",
+        |  "type": "Bag"
+        |}
+        |""".stripMargin
+
+    val storageResponses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30414727")),
+        HttpResponse(
+          status = StatusCodes.TemporaryRedirect,
+          headers = List(Location(redirectUri))
+        )
+      )
+    )
+
+    val redirectResponses = Seq(
+      (
+        HttpRequest(uri = redirectUri),
+        HttpResponse(
+          entity = HttpEntity(
+            contentType = ContentTypes.`application/octet-stream`,
+            bagJson.getBytes("UTF-8")
+          )
+        )
+      )
+    )
+
+    withBagRetriever(storageResponses, redirectResponses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30414727"
+          )
+
+        whenReady(future) {
+          bag =>
+            bag.location.bucket shouldBe "wellcomecollection-storage"
+            bag.location.path shouldBe "digitised/b30414727"
+            bag.manifest.files.head shouldBe BagFile(
+              name = "data/b30414727.xml",
+              path = "v1/data/b30414727.xml"
+            )
+        }
+    }
+  }
+
+  it("fails if a redirected bag response has an unexpected Content-Type") {
+    val redirectUri = Uri(
+      "https://wellcomecollection-storage-prod-large-response-cache.s3.eu-west-1.amazonaws.com/responses/digitised/b30414728/v1"
+    )
+
+    val storageResponses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30414728")),
+        HttpResponse(
+          status = StatusCodes.TemporaryRedirect,
+          headers = List(Location(redirectUri))
+        )
+      )
+    )
+
+    val redirectResponses = Seq(
+      (
+        HttpRequest(uri = redirectUri),
+        HttpResponse(
+          entity = HttpEntity(
+            contentType = ContentTypes.`text/html(UTF-8)`,
+            "<html>not a bag</html>"
+          )
+        )
+      )
+    )
+
+    withBagRetriever(storageResponses, redirectResponses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30414728"
+          )
+
+        whenReady(future.failed) {
+          _.getMessage should startWith(
+            "Unexpected Content-Type from redirected bag response:"
+          )
         }
     }
   }

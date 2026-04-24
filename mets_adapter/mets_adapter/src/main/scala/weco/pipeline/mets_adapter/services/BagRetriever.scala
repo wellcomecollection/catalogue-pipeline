@@ -88,11 +88,14 @@ class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
           s"Refusing to follow redirect to unexpected URL: ${uri.withQuery(Uri.Query.Empty)}"
         )
       )
-    else
+    else {
+      info(
+        s"Following redirect for large bag response to ${uri.withQuery(Uri.Query.Empty)}"
+      )
       for {
         response <- redirectClient.singleRequest(HttpRequest(uri = uri))
         bag <- response.status match {
-          case StatusCodes.OK => parseResponseIntoBag(response)
+          case StatusCodes.OK => parseRedirectedResponseIntoBag(uri, response)
           case status =>
             response.discardEntityBytes()
             // strip the query parameters from the URI before throwing, contain credentials
@@ -104,6 +107,37 @@ class HttpBagRetriever(client: HttpGet, redirectClient: HttpClient)(
             )
         }
       } yield bag
+    }
+
+  // The S3 large-response cache serves the cached body with
+  // `Content-Type: application/octet-stream` even though the body is JSON.
+  // Match on the entity's content type and normalise it before unmarshalling
+  // so the circe unmarshaller (which only accepts application/json) will
+  // accept it. Anything we don't recognise fails loudly.
+  private def parseRedirectedResponseIntoBag(
+    uri: Uri,
+    response: HttpResponse
+  ): Future[Bag] =
+    response.entity.contentType match {
+      case ContentTypes.`application/json` =>
+        parseResponseIntoBag(response)
+      case ct if ct.mediaType == MediaTypes.`application/octet-stream` =>
+        info(
+          s"Redirected bag response from ${uri.withQuery(Uri.Query.Empty)} had Content-Type $ct; treating as application/json"
+        )
+        parseResponseIntoBag(
+          response.withEntity(
+            response.entity.withContentType(ContentTypes.`application/json`)
+          )
+        )
+      case ct =>
+        response.discardEntityBytes()
+        Future.failed(
+          new Exception(
+            s"Unexpected Content-Type from redirected bag response: $ct"
+          )
+        )
+    }
 
   private def parseResponseIntoBag(response: HttpResponse): Future[Bag] =
     Unmarshal(response.entity).to[Bag].recover {
