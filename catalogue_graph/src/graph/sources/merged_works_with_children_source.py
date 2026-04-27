@@ -52,7 +52,7 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
             es_client=self.es_client,
             query=full_query,
             fields=self.fields,
-            slice_count=1,
+            slice_count=1,  # Expected child set is small
         )
 
     def stream_raw(self) -> Generator[Any]:
