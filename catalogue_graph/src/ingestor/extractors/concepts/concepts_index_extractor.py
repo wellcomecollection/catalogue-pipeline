@@ -7,7 +7,9 @@ from clients.neptune_client import NeptuneClient
 from graph.sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
 )
-from ingestor.extractors.base_extractor import ConceptRelatedQuery
+from ingestor.extractors.base_extractor import (
+    ConceptRelatedQuery,
+)
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,

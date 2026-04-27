@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from clients.neptune_client import NeptuneClient
-from ingestor.extractors.base_concepts_extractor import CONCEPT_QUERY_PARAMS
+from ingestor.extractors.concepts.base_concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
     CONCEPT_TYPE_QUERY,

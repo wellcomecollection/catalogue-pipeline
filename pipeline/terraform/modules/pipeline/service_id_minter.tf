@@ -41,31 +41,15 @@ locals {
 module "id_minter_lambda" {
   source = "./id_minter"
 
-  pipeline_date             = var.pipeline_date
-  id_minter_vpc_config      = local.id_minter_v2_vpc_config
-  id_minter_env_vars        = local.id_minter_v2_env_vars
-  id_minter_secret_env_vars = local.id_minter_v2_secret_env_vars
+  pipeline_date   = var.pipeline_date
+  vpc_config      = local.id_minter_v2_vpc_config
+  env_vars        = local.id_minter_v2_env_vars
+  secret_env_vars = local.id_minter_v2_secret_env_vars
+  alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 }
 
-# Rather than failing the whole state machine execution when the id_minter Lambda reports failures
-# we use this alarm triggered by an existing CloudWatch metric
-# This will give us visibility of failures in the id_minter step; we can reassess later if we want to add an automated retry mechanism
-resource "aws_cloudwatch_metric_alarm" "id_minter_failures" {
-  alarm_name          = "id-minter-failures-${var.pipeline_date}"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 1
-  metric_name         = "failure_count"
-  namespace           = "catalogue_graph_pipeline"
-  period              = 300
-  statistic           = "Sum"
-  threshold           = 0
-  alarm_description   = "ID minter Lambda reported minting failures"
-
-  dimensions = {
-    pipeline_date = var.pipeline_date
-    pipeline_step = "id_minter"
-  }
-
-  alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+moved {
+  from = aws_cloudwatch_metric_alarm.id_minter_failures
+  to   = module.id_minter_lambda.aws_cloudwatch_metric_alarm.id_minter_failures
 }
 

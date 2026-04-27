@@ -1,0 +1,144 @@
+{
+  "state": {
+    "sourceIdentifier": {
+      "identifierType": {
+        "id": "miro-image-number"
+      },
+      "ontologyType": "Image",
+      "value": "V0017087"
+    },
+    "canonicalId": "swms7qdx",
+    "inferredData": {
+      "features": [0.1, 0.2, 0.3],
+      "paletteEmbedding": [0.4, 0.5, 0.6],
+      "averageColorHex": "#a1b2c3",
+      "aspectRatio": 1.5
+    }
+  },
+  "source": {
+    "id": {
+      "canonicalId": "a24esypq",
+      "sourceIdentifier": {
+        "identifierType": {
+          "id": "calm-record-id"
+        },
+        "ontologyType": "Work",
+        "value": "20cd370b-76ef-4d92-96b5-2f0cc27292f7"
+      },
+      "otherIdentifiers": [],
+      "type": "Identified"
+    },
+    "data": {
+      "title": "A test work title",
+      "otherIdentifiers": [],
+      "alternativeTitles": [],
+      "subjects": [
+        {
+          "id": {
+            "canonicalId": "s6s24vd7",
+            "sourceIdentifier": {
+              "identifierType": {"id": "lc-subjects"},
+              "ontologyType": "Concept",
+              "value": "sh85004839"
+            },
+            "otherIdentifiers": [],
+            "type": "Identified"
+          },
+          "label": "Human anatomy",
+          "concepts": [
+            {
+              "id": {
+                "canonicalId": "s6s24vd7",
+                "sourceIdentifier": {
+                  "identifierType": {"id": "lc-subjects"},
+                  "ontologyType": "Concept",
+                  "value": "sh85004839"
+                },
+                "otherIdentifiers": [],
+                "type": "Identified"
+              },
+              "label": "Human anatomy",
+              "type": "Concept"
+            }
+          ]
+        }
+      ],
+      "genres": [
+        {
+          "label": "Etching",
+          "concepts": [
+            {
+              "id": {
+                "canonicalId": "yfqryj28",
+                "sourceIdentifier": {
+                  "identifierType": {"id": "label-derived"},
+                  "ontologyType": "Genre",
+                  "value": "etching"
+                },
+                "otherIdentifiers": [],
+                "type": "Identified"
+              },
+              "label": "Etching",
+              "type": "GenreConcept"
+            }
+          ]
+        }
+      ],
+      "contributors": [
+        {
+          "id": {"type": "Unidentifiable"},
+          "agent": {
+            "id": {
+              "canonicalId": "uykuavkt",
+              "sourceIdentifier": {
+                "identifierType": {"id": "label-derived"},
+                "ontologyType": "Person",
+                "value": "gamelin, jacques, 1739-1803"
+              },
+              "otherIdentifiers": [],
+              "type": "Identified"
+            },
+            "label": "Gamelin, Jacques, 1739-1803.",
+            "type": "Person"
+          },
+          "roles": [],
+          "primary": true
+        }
+      ],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "items": [],
+      "holdings": [],
+      "imageData": [],
+      "workType": "Standard",
+      "formerFrequency": [],
+      "designation": []
+    },
+    "version": 1
+  },
+  "locations": [
+    {
+      "url": "https://iiif.wellcomecollection.org/image/V0017087/info.json",
+      "locationType": {
+        "id": "iiif-image"
+      },
+      "license": {
+        "id": "cc-by"
+      },
+      "accessConditions": [
+        {
+          "method": {
+            "type": "ViewOnline"
+          },
+          "status": {
+            "type": "Open"
+          }
+        }
+      ],
+      "type": "DigitalLocation"
+    }
+  ],
+  "version": 3,
+  "modifiedTime": "2025-04-01T10:00:00Z"
+}

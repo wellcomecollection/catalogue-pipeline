@@ -3,6 +3,9 @@ from collections.abc import Generator
 from elasticsearch import Elasticsearch
 
 from graph.sources.merged_works_source import MergedWorksSource
+from graph.sources.merged_works_with_children_source import (
+    MergedWorksWithChildrenSource,
+)
 from graph.transformers.graph_transformer import GraphBaseTransformer
 from models.events import BasePipelineEvent
 from models.graph_edge import (
@@ -37,7 +40,16 @@ class CatalogueWorkIdentifiersTransformer(GraphBaseTransformer):
         event: BasePipelineEvent,
         es_client: Elasticsearch,
     ) -> None:
-        self.source = MergedWorksSource(
+        source_class: type[MergedWorksSource] = MergedWorksSource
+
+        # In incremental mode, we need to process the children of scoped works to ensure that all changes
+        # to work hierarchies are reflected in the graph. For example, if path identifier A/B is added to an existing
+        # hierarchy to form the tree A <-- A/B <-- A/B/C <-- A/B/C/D, the identifier A/B/C must be reprocessed
+        # alongside A/B to create the `(A/B)<-[:HAS_PARENT]-(A/B/C)` edge.
+        if event.mode_label != "full":
+            source_class = MergedWorksWithChildrenSource
+
+        self.source = source_class(
             event, query=ES_QUERY, fields=ES_FIELDS, es_client=es_client
         )
 

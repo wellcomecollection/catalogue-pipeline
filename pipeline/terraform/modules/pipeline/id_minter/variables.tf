@@ -2,14 +2,24 @@ variable "pipeline_date" {
   type = string
 }
 
-variable "id_minter_vpc_config" {
+variable "namespace" {
+  type    = string
+  default = ""
+}
+
+variable "include_id_generator" {
+  type    = bool
+  default = true
+}
+
+variable "vpc_config" {
   type = object({
     subnet_ids         = list(string)
     security_group_ids = list(string)
   })
 }
 
-variable "id_minter_env_vars" {
+variable "env_vars" {
   type = object({
     RDS_MAX_CONNECTIONS         = number
     LOG_LEVEL                   = optional(string, "INFO")
@@ -23,6 +33,10 @@ variable "id_minter_env_vars" {
   })
 }
 
-variable "id_minter_secret_env_vars" {
+variable "secret_env_vars" {
   type = map(string)
+}
+
+variable "alarm_topic_arn" {
+  type = string
 }

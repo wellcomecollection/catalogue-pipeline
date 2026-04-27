@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import os
 from typing import ClassVar, Literal
 
 from utils.reporting import PipelineMetric, PipelineReport
 
 
 class IdMinterReport(PipelineReport):
-    label: ClassVar[str] = "id_minter"
+    label: ClassVar[str] = os.environ.get("PIPELINE_STEP", "id_minter")
 
     pipeline_date: str
     success_count: int

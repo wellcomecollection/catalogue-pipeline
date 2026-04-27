@@ -119,6 +119,13 @@ class WorkHasConcept(BaseEdge):
     directed: bool = True
 
 
+class WorkHasImage(BaseEdge):
+    from_type: str = "Work"
+    to_type: str = "Image"
+    relationship: str = "HAS_IMAGE"
+    directed: bool = True
+
+
 class PathIdentifierHasParent(BaseEdge):
     from_type: str = "PathIdentifier"
     to_type: str = "PathIdentifier"

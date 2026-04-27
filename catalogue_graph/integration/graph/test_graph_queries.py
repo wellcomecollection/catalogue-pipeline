@@ -21,7 +21,7 @@ from clients.neptune_client import NeptuneClient
 from graph.sources.weco_concepts.concepts_source import (
     DEFAULT_PATH as WECO_AUTHORITY_CSV_PATH,
 )
-from ingestor.extractors.base_concepts_extractor import CONCEPT_QUERY_PARAMS
+from ingestor.extractors.concepts.base_concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
     CONCEPT_TYPE_QUERY,

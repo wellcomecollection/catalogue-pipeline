@@ -55,5 +55,10 @@ class Work(BaseNode):
     collection_path_label: str | None = None
 
 
+class Image(BaseNode):
+    location_type: str
+    location_url: str
+
+
 class PathIdentifier(BaseNode):
     pass
