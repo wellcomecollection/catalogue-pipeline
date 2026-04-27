@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime
 from typing import Any
 
 import structlog
@@ -54,11 +53,6 @@ class LoaderRuntime(BaseModel):
     report_s3_prefix: str = "dev"
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
-def _format_window_range(start: datetime, end: datetime) -> str:
-    """Format a window range as a string for tagging."""
-    return f"{start.isoformat()}-{end.isoformat()}"
 
 
 def build_runtime(
@@ -110,13 +104,11 @@ def build_harvester(
     Returns:
         WindowHarvestManager configured for this request.
     """
-    window_start = request.window.start_time
-    window_end = request.window.end_time
-    callback = WindowRecordWriter(
+    record_writer = WindowRecordWriter(
         namespace=runtime.adapter_namespace,
         table_client=runtime.table_client,
         job_id=request.job_id,
-        window_range=_format_window_range(window_start, window_end),
+        window_range=request.window.to_iso_string(),
     )
     return WindowHarvestManager(
         store=runtime.store,
@@ -124,8 +116,7 @@ def build_harvester(
         client=runtime.oai_client,
         metadata_prefix=request.metadata_prefix,
         set_spec=request.set_spec,
-        record_callback=callback,
-        default_tags={"job_id": request.job_id},
+        record_callback=record_writer,
     )
 
 
@@ -145,12 +136,11 @@ def execute_loader(
     Raises:
         RuntimeError: If no windows were ready to harvest.
     """
-    window_start = request.window.start_time
-    window_end = request.window.end_time
+    window = request.window
     harvester = build_harvester(request, runtime)
 
     summaries = harvester.harvest_range(
-        time_range=request.window,
+        time_range=window,
         max_windows=request.max_windows,
         reprocess_successful_windows=False,
     )
@@ -158,29 +148,10 @@ def execute_loader(
     if not summaries:
         raise RuntimeError(
             "No pending windows to harvest for "
-            f"{window_start.isoformat()} -> {window_end.isoformat()}"
+            f"{window.start_time.isoformat()} -> {window.end_time.isoformat()}"
         )
 
-    changed_record_count = 0
-    changeset_ids: set[str] = set()
-
-    for summary in summaries:
-        if not summary.tags:
-            continue
-
-        if "changeset_id" in summary.tags:
-            changeset_ids.add(summary.tags["changeset_id"])
-
-        if "record_ids_changed" in summary.tags:
-            changed_ids = json.loads(summary.tags["record_ids_changed"])
-            changed_record_count += len(changed_ids)
-
-    return OAIPMHLoaderResponse(
-        summaries=summaries,
-        changeset_ids=list(changeset_ids),
-        changed_record_count=changed_record_count,
-        job_id=request.job_id,
-    )
+    return OAIPMHLoaderResponse.from_summaries(summaries, job_id=request.job_id)
 
 
 def handler(

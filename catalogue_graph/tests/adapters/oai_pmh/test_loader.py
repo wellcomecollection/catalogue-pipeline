@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
-from typing import cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -272,11 +271,9 @@ class TestWindowRecordWriter:
         assert all_records.num_rows == 1
         assert all_records.column("last_modified")[0].as_py() == last_modified
 
-        tags = result["tags"]
-        assert tags is not None
-        assert tags["job_id"] == "job-123"
-        assert tags["window_range"] == WINDOW_RANGE
-        assert "changeset_id" in tags
+        assert result.tags["job_id"] == "job-123"
+        assert result.tags["window_range"] == WINDOW_RANGE
+        assert result.changeset_id is not None
 
     def test_handles_empty_window(
         self,
@@ -292,11 +289,9 @@ class TestWindowRecordWriter:
         result = writer(records=[])
 
         assert adapter_store_client.get_all_records().num_rows == 0
-        tags = result["tags"]
-        assert tags is not None
-        assert tags["job_id"] == "job-123"
-        assert tags["window_range"] == WINDOW_RANGE
-        assert "changeset_id" not in tags
+        assert result.tags["job_id"] == "job-123"
+        assert result.tags["window_range"] == WINDOW_RANGE
+        assert result.changeset_id is None
 
     def test_handles_deleted_record(
         self,
@@ -420,7 +415,7 @@ class TestWindowRecordWriter:
                 )
             ],
         )
-        assert "changeset_id" in cast(dict[str, str], result_1["tags"])
+        assert result_1.changeset_id is not None
 
         # 2. Write same data again (no-op)
         result_2 = writer(
@@ -436,8 +431,7 @@ class TestWindowRecordWriter:
         )
 
         # Should have record_ids but NO changeset_id
-        tags_2 = cast(dict[str, str], result_2["tags"])
-        assert "changeset_id" not in tags_2
+        assert result_2.changeset_id is None
 
         # 3. Write new data
         newer_last_modified = last_modified + timedelta(minutes=1)
@@ -454,4 +448,4 @@ class TestWindowRecordWriter:
         )
 
         # Should have changeset_id again
-        assert "changeset_id" in cast(dict[str, str], result_3["tags"])
+        assert result_3.changeset_id is not None

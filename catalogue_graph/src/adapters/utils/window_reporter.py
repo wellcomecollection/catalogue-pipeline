@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from utils.timezone import ensure_datetime_utc
 
 from .window_store import WindowStore
-from .window_summary import WindowSummary
+from .window_summary import WindowState, WindowSummary
 
 
 class CoverageGap(BaseModel):
@@ -28,7 +28,7 @@ class WindowCoverageReport(BaseModel):
     range_start: datetime
     range_end: datetime
     total_windows: int = Field(0, ge=0)
-    state_counts: dict[str, int] = Field(default_factory=dict)
+    state_counts: dict[WindowState, int] = Field(default_factory=dict)
     coverage_hours: float = 0.0
     coverage_gaps: list[CoverageGap] = Field(default_factory=list)
     failures: list[WindowFailure] = Field(default_factory=list)
@@ -386,19 +386,17 @@ class WindowReporter:
             lookback_minutes = max(self.window_minutes * 2, 1440)
             search_start = start_bound - timedelta(minutes=lookback_minutes)
 
-        raw_rows = self.store.list_in_range(start_time=search_start, end_time=end_bound)
-
-        rows: list[WindowSummary] = []
-        for raw_row in raw_rows:
-            typed_row = WindowSummary.model_validate(raw_row)
+        rows = self.store.list_in_range(start_time=search_start, end_time=end_bound)
+        filtered_rows = []
+        for row in rows:
             if self._within_range(
-                typed_row.window_start,
-                typed_row.window_end,
+                row.window_start,
+                row.window_end,
                 start_bound,
                 end_bound,
             ):
-                rows.append(typed_row)
-        return rows
+                filtered_rows.append(row)
+        return filtered_rows
 
     @staticmethod
     def _within_range(

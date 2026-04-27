@@ -41,12 +41,12 @@ class TestWindowRecordWriterMocked:
 
         result = writer([("rec1", record)])
 
-        assert result["tags"] == {
+        assert result.tags == {
             "job_id": "test_job",
             "window_range": "2023-01-01-2023-01-02",
-            "changeset_id": "123",
-            "record_ids_changed": '["rec1"]',
         }
+        assert result.changeset_id == "123"
+        assert result.upserted_record_ids == ["rec1"]
 
         mock_store.incremental_update.assert_called_once()
         call_args = mock_store.incremental_update.call_args
@@ -77,10 +77,12 @@ class TestWindowRecordWriterMocked:
 
         result = writer([])
 
-        assert result["tags"] == {
+        assert result.tags == {
             "job_id": "test_job",
             "window_range": "2023-01-01-2023-01-02",
         }
+        assert result.changeset_id is None
+        assert result.upserted_record_ids == []
 
         mock_store.incremental_update.assert_not_called()
 

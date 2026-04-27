@@ -15,7 +15,7 @@ from adapters.utils.window_store import (
     WINDOW_STATUS_SCHEMA,
     WindowStore,
 )
-from adapters.utils.window_summary import WindowSummary
+from adapters.utils.window_summary import WindowState, WindowSummary
 
 
 def _create_table(
@@ -60,7 +60,7 @@ def _insert_window(
     store: WindowStore,
     start: datetime,
     end: datetime,
-    state: str = "success",
+    state: WindowState = "success",
 ) -> None:
     store.upsert(
         WindowSummary(

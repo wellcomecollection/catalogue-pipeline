@@ -11,6 +11,7 @@ from datetime import datetime
 from pydantic import Field
 
 from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
+from adapters.utils.window_harvester import WindowSummaryTags
 from adapters.utils.window_summary import WindowSummary
 from models.incremental_window import IncrementalWindow
 
@@ -70,3 +71,25 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
 
     job_id: str
     """Job identifier linking this response to the originating trigger."""
+
+    @classmethod
+    def from_summaries(
+        cls, summaries: list[WindowSummary], job_id: str
+    ) -> OAIPMHLoaderResponse:
+        upserted_record_count = 0
+        changeset_ids = []
+
+        for summary in summaries:
+            if not summary.tags:
+                continue
+
+            tags = WindowSummaryTags.parse(summary.tags)
+            upserted_record_count += tags.upserted_record_count
+            changeset_ids += tags.changeset_ids
+
+        return cls(
+            summaries=summaries,
+            job_id=job_id,
+            changeset_ids=list(set(changeset_ids)),
+            changed_record_count=upserted_record_count,
+        )

@@ -1,23 +1,79 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+import itertools
+import json
+from collections.abc import Iterable, Sequence
 from datetime import UTC, datetime
-from typing import Protocol, TypedDict
+from typing import Protocol
 
 import structlog
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.exceptions import NoRecordsMatchError
 from oai_pmh_client.models import Record
+from pydantic import BaseModel
 
 from models.incremental_window import IncrementalWindow
 
 from .window_generator import WindowGenerator
 from .window_store import WindowStore
-from .window_summary import (
-    WindowSummary,
-)
+from .window_summary import WindowState, WindowSummary
 
 logger = structlog.get_logger(__name__)
+
+BATCH_SIZE = 10_000
+
+
+class WindowSummaryTags(BaseModel):
+    changeset_ids: list[str] = []
+    upserted_record_count: int = 0
+    other_tags: dict[str, str] = {}
+
+    @classmethod
+    def parse(cls, tags: dict[str, str] | None) -> WindowSummaryTags:
+        tags = dict(tags or {})
+        changeset_ids, upserted_record_count = [], 0
+
+        # For backward compatibility, we look for changeset IDs in two places.
+        # Older rows store a single changeset_id, new rows store a list of changeset_ids.
+        if "changeset_id" in tags:
+            changeset_ids.append(tags.pop("changeset_id"))
+        if "changeset_ids" in tags:
+            changeset_ids = json.loads(tags.pop("changeset_ids"))
+
+        # Older rows store a list of all upserted IDs, new rows only store how many records were upserted
+        if "record_ids_changed" in tags:
+            upserted_record_count = len(json.loads(tags.pop("record_ids_changed")))
+        if "upserted_record_count" in tags:
+            upserted_record_count = int(tags.pop("upserted_record_count"))
+
+        return cls(
+            changeset_ids=changeset_ids,
+            upserted_record_count=upserted_record_count,
+            other_tags=tags,
+        )
+
+    def dump(self) -> dict[str, str]:
+        return {
+            **self.other_tags,
+            "changeset_ids": json.dumps(self.changeset_ids),
+            "upserted_record_count": str(self.upserted_record_count),
+        }
+
+
+def get_record_identifier(record: Record) -> str | None:
+    header = getattr(record, "header", None)
+    if header is not None:
+        identifier = getattr(header, "identifier", None)
+        if isinstance(identifier, str):
+            return identifier
+
+    return None
+
+
+class WindowCallbackResult(BaseModel):
+    changeset_id: str | None = None
+    upserted_record_ids: list[str] = []
+    tags: dict[str, str] = {}
 
 
 class WindowCallback(Protocol):
@@ -27,14 +83,56 @@ class WindowCallback(Protocol):
     ) -> WindowCallbackResult: ...
 
 
-class WindowCallbackResult(TypedDict, total=False):
-    tags: dict[str, str] | None
+class BatchProgress(BaseModel):
+    """Mutable accumulator for batch processing state within a window."""
+
+    window: IncrementalWindow
+    record_ids: list[str] = []
+    tags: WindowSummaryTags = WindowSummaryTags()
+    batches_succeeded: int = 0
+    batches_failed: int = 0
+    last_error: str | None = None
+    attempts: int = 1
+
+    @property
+    def final_state(self) -> WindowState:
+        if self.batches_failed == 0 and self.last_error is None:
+            return "success"
+        if self.batches_succeeded > 0:
+            return "partial_success"
+        return "failed"
+
+    def to_summary(self, is_final: bool) -> WindowSummary:
+        state = self.final_state if is_final else "partial_success"
+        return WindowSummary(
+            window_start=self.window.start_time_utc,
+            window_end=self.window.end_time_utc,
+            state=state,
+            attempts=self.attempts,
+            record_ids=self.record_ids,
+            last_error=self.last_error,
+            updated_at=datetime.now(UTC),
+            tags=self.tags.dump(),
+        )
+
+    @classmethod
+    def from_summary(cls, summary: WindowSummary) -> BatchProgress:
+        """
+        Create a progress object from an existing partially failed run and pre-populate it
+        with successfully processed record IDs and changeset IDs to "resume" processing.
+        """
+        return BatchProgress(
+            window=IncrementalWindow(
+                start_time=summary.window_start, end_time=summary.window_end
+            ),
+            record_ids=summary.record_ids,
+            tags=WindowSummaryTags.parse(summary.tags),
+            attempts=summary.attempts + 1,
+        )
 
 
 class WindowHarvestManager:
     """Coordinates windowed harvesting and bookkeeping."""
-
-    DEFAULT_WINDOW_MINUTES = 15
 
     def __init__(
         self,
@@ -54,7 +152,7 @@ class WindowHarvestManager:
         self.set_spec = set_spec
         self.window_minutes = window_generator.window_minutes
         self.record_callback = record_callback
-        self.default_tags = dict(default_tags) if default_tags else None
+        self.default_tags = dict(default_tags or {})
 
     def harvest_range(
         self,
@@ -63,140 +161,162 @@ class WindowHarvestManager:
         max_windows: int | None = None,
         reprocess_successful_windows: bool = False,
     ) -> list[WindowSummary]:
-        candidates = self.window_generator.generate_windows(time_range)
-        reused: list[WindowSummary] = []
+        candidate_windows = self.window_generator.generate_windows(time_range)
+        pending_windows = []
+
+        reused_summaries: list[WindowSummary] = []
+        summary_map: dict[str, WindowSummary] = {}
 
         if reprocess_successful_windows:
-            pending = list(candidates)
+            pending_windows = list(candidate_windows)
         else:
             # Check which candidate windows were already processed
-            status_map = self.store.load_status_map(
+            summary_map = self.store.load_status_map(
                 start_time=time_range.start_time_utc, end_time=time_range.end_time_utc
             )
-            pending = []
 
-            for candidate in candidates:
-                existing = status_map.get(candidate.to_iso_string())
-                if existing and existing.get("state") == "success":
-                    reused.append(WindowSummary.model_validate(existing))
+            for window in candidate_windows:
+                existing_summary = summary_map.get(window.to_iso_string())
+                if existing_summary and existing_summary.state == "success":
+                    reused_summaries.append(existing_summary)
                 else:
-                    pending.append(candidate)
+                    pending_windows.append(window)
 
         if max_windows is not None:
-            pending = pending[:max_windows]
+            pending_windows = pending_windows[:max_windows]
 
         logger.info(
             "Harvesting windows",
-            pending=len(pending),
-            candidates=len(candidates),
+            candidate_window_count=len(candidate_windows),
+            pending_window_count=len(pending_windows),
             window_range=time_range.to_formatted_string(),
         )
 
-        new_summaries = self.harvest_windows(pending)
+        new_summaries = self.harvest_windows(pending_windows, summary_map=summary_map)
 
-        if reprocess_successful_windows:
-            return new_summaries
-        combined = reused + new_summaries
-        combined.sort(key=lambda summary: summary.window_start)
-
-        return combined
+        combined_summaries = reused_summaries + new_summaries
+        combined_summaries.sort(key=lambda summary: summary.window_start)
+        return combined_summaries
 
     def harvest_windows(
-        self, windows: Sequence[IncrementalWindow]
+        self,
+        windows: Sequence[IncrementalWindow],
+        *,
+        summary_map: dict[str, WindowSummary] | None = None,
     ) -> list[WindowSummary]:
         logger.info("Processing windows sequentially", window_count=len(windows))
-        summaries = [self.process_window(window) for window in windows]
+
+        summaries = []
+        for window in windows:
+            existing_summary = (summary_map or {}).get(window.to_iso_string())
+            summaries.append(
+                self.process_window(window, existing_summary=existing_summary)
+            )
+
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
 
-    # ------------------------------------------------------------------
-    # Core processing
-    # ------------------------------------------------------------------
-    def process_window(self, window: IncrementalWindow) -> WindowSummary:
-        start = window.start_time_utc
-        end = window.end_time_utc
-        key = window.to_iso_string()
-        attempts = 1
-        record_ids: list[str] = []
-        last_error: str | None = None
-        custom_tags: dict[str, str] = {}
+    def process_window(
+        self,
+        window: IncrementalWindow,
+        *,
+        existing_summary: WindowSummary | None = None,
+    ) -> WindowSummary:
+        logger.info("Processing window", window=window.to_iso_string())
 
-        logger.info(
-            "Processing window",
-            window=window.to_formatted_string(),
-        )
+        # If we already processed a window but some of its batches failed,
+        # reconstruct the progress object from the existing window summary
+        if existing_summary and existing_summary.state != "success":
+            progress = BatchProgress.from_summary(existing_summary)
+
+            # Skip records which were already successfully processed in the previous run
+            ids_to_skip = set(existing_summary.record_ids)
+        else:
+            progress = BatchProgress(
+                window=window, tags=WindowSummaryTags(other_tags=self.default_tags)
+            )
+            ids_to_skip = set()
+
         try:
             records_in_window = self.client.list_records(
                 metadata_prefix=self.metadata_prefix,
-                from_date=start,
-                until_date=end,
+                from_date=window.start_time_utc,
+                until_date=window.end_time_utc,
                 set_spec=self.set_spec,
             )
-
-            records_with_ids: list[tuple[str, Record]] = []
-            for idx, record in enumerate(records_in_window):
-                identifier = self._record_identifier(record, start, idx)
-                records_with_ids.append((identifier, record))
-                record_ids.append(identifier)
-
-            logger.info(
-                "Downloaded raw records from client", record_count=len(record_ids)
+            records_in_window = (
+                r
+                for r in records_in_window
+                if get_record_identifier(r) not in ids_to_skip
             )
-
-            callback_result = self.record_callback(records_with_ids)
-            custom_tags |= callback_result.get("tags") or {}
-
-            state = "success"
+            for batch in itertools.batched(records_in_window, BATCH_SIZE):
+                self._process_single_batch(list(batch), progress)
         except NoRecordsMatchError:
-            state = "success"
-        except Exception as exc:  # pragma: no cover - generic safety net
-            last_error = repr(exc)
-            state = "failed"
-            record_ids = []
+            pass  # Fall through to final state
+        except Exception as e:
+            progress.last_error = repr(e)
 
-        updated_at = datetime.now(UTC)
-        summary = WindowSummary(
-            window_start=start,
-            window_end=end,
-            state=state,
-            attempts=attempts,
-            record_ids=record_ids,
-            last_error=last_error,
-            updated_at=updated_at,
-            tags=self._merge_tags(custom_tags),
-        )
+        summary = progress.to_summary(is_final=True)
         self.store.upsert(summary)
 
-        if state == "success":
+        if summary.state == "success":
             logger.info(
                 "Successfully processed window",
-                window_key=key,
-                record_count=len(record_ids),
+                window_key=window.to_iso_string(),
+                record_count=len(progress.record_ids),
             )
         else:
             logger.warning(
                 "Failed to process window",
-                window_key=key,
-                attempts=attempts,
-                last_error=last_error,
+                window_key=window.to_iso_string(),
+                state=summary.state,
+                last_error=progress.last_error,
             )
         return summary
 
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
-    def _record_identifier(
-        self, record: Record, window_start: datetime, idx: int
-    ) -> str:
-        header = getattr(record, "header", None)
-        if header is not None:
-            identifier = getattr(header, "identifier", None)
-            if isinstance(identifier, str):
-                return identifier
-        raise ValueError(
-            "Cannot harvest record without header.identifier "
-            f"(window_start={window_start.isoformat()}, idx={idx})"
-        )
+    def _process_single_batch(
+        self,
+        batch: list[Record],
+        progress: BatchProgress,
+    ) -> None:
+        logger.info("Processing batch", batch_size=len(batch))
 
-    def _merge_tags(self, custom_tags: dict[str, str]) -> dict[str, str] | None:
-        return {**(self.default_tags or {}), **custom_tags} or None
+        try:
+            batch_with_ids = list(self._records_with_ids(batch, progress))
+            result = self.record_callback(batch_with_ids)
+
+            if result.changeset_id:
+                progress.tags.changeset_ids.append(result.changeset_id)
+            progress.tags.upserted_record_count += len(result.upserted_record_ids)
+            progress.tags.other_tags.update(result.tags)
+            progress.record_ids.extend([r[0] for r in batch_with_ids])
+            progress.batches_succeeded += 1
+        except Exception as e:
+            progress.last_error = repr(e)
+            progress.batches_failed += 1
+            logger.warning(
+                "Failed to process batch",
+                batch_size=len(batch),
+                error=repr(e),
+            )
+
+        if progress.batches_succeeded > 0:
+            # Failing to persist the window summary for a specific batch is not a critical error. The only summary
+            # which must be persisted (and whose failure to persist should cause the run to fail) is the final one.
+            try:
+                self.store.upsert(progress.to_summary(is_final=False))
+            except Exception as e:
+                logger.warning("Failed to persist batch window summary", error=repr(e))
+
+    def _records_with_ids(
+        self, batch: Iterable[Record], progress: BatchProgress
+    ) -> Iterable[tuple[str, Record]]:
+        for record in batch:
+            identifier = get_record_identifier(record)
+            if not identifier:
+                raise ValueError(
+                    "Cannot harvest record without header.identifier "
+                    f"(window={progress.window.to_iso_string()})"
+                )
+
+            yield identifier, record
