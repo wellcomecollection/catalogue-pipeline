@@ -429,7 +429,7 @@ def _make_work(idx: int, n_extra: int, kind: str, items_kind: str = "new") -> di
     ``existing`` to make the whole work lookup-only.
     """
     primary_value = f"{kind}-{idx:08d}"
-    state = {
+    state: dict = {
         "sourceIdentifier": {
             "ontologyType": "Work",
             "identifierType": {"id": "sierra-system-number"},
@@ -437,7 +437,9 @@ def _make_work(idx: int, n_extra: int, kind: str, items_kind: str = "new") -> di
         }
     }
     if kind == "predecessor":
-        state["sourceIdentifier"]["predecessorIdentifier"] = {  # type: ignore[index]
+        # predecessorIdentifier must be a *sibling* of sourceIdentifier, not
+        # nested inside it — that's what extract_source_identifiers() looks for.
+        state["predecessorIdentifier"] = {
             "ontologyType": "Work",
             "identifierType": {"id": "calm-altref-no"},
             "value": f"pred-{idx:08d}",
@@ -458,30 +460,62 @@ def _make_work(idx: int, n_extra: int, kind: str, items_kind: str = "new") -> di
 
 
 WORKLOADS: dict[str, dict] = {
-    # n_works, n_extra, items_kind, split: list of (kind, fraction)
+    # n_works, n_extra, items_kind, split: list of (kind, fraction).
+    # `expected_*_post` are post-transform DB state used by _verify_db_state to
+    # confirm the transformer actually did the work the timing implies.
+    #
+    # canonical_ids accounting:
+    #   total       = pool_size + expected_pre_assigned   (seeded identifier
+    #                                                      mappings allocate
+    #                                                      their own canonical
+    #                                                      ids; they don't draw
+    #                                                      from the free pool)
+    #   assigned    = expected_pre_assigned + expected_minted
+    #   free        = pool_size - expected_minted
     "all-new": {
         "n_works": 1000,
         "n_extra": 5,
         "items_kind": "new",
         "split": [("new", 1.0)],
+        # 1000 primaries + 1000*5 items, all freshly minted from the pool.
+        "expected_pre_assigned": 0,
+        "expected_minted": 6000,
+        "expected_identifiers_post": 6000,
     },
     "all-existing": {
         "n_works": 1000,
         "n_extra": 5,
         "items_kind": "existing",
         "split": [("existing", 1.0)],
+        # Everything pre-seeded; transform should INSERT nothing.
+        "expected_pre_assigned": 6000,
+        "expected_minted": 0,
+        "expected_identifiers_post": 6000,
     },
     "mixed": {
         "n_works": 1000,
         "n_extra": 5,
         "items_kind": "new",
         "split": [("new", 0.5), ("existing", 0.4), ("predecessor", 0.1)],
+        # Pre-seed: 400 existing primary identifier mappings + 100 predecessor
+        # records (calm-altref-no source) = 500 identifier rows + 500 assigned
+        # canonical_ids.
+        # Mint: 500 new primaries (fresh pool ids) + 100 predecessor work
+        # primaries (INHERIT the predecessor's canonical id, no new pool id
+        # consumed) + 5000 items = 5500 ids drawn from the pool, 5600 new
+        # identifier rows.
+        "expected_pre_assigned": 500,
+        "expected_minted": 5500,
+        "expected_identifiers_post": 6100,
     },
     "large-fanout": {
         "n_works": 200,
         "n_extra": 50,
         "items_kind": "new",
         "split": [("new", 1.0)],
+        "expected_pre_assigned": 0,
+        "expected_minted": 10200,
+        "expected_identifiers_post": 10200,
     },
 }
 
@@ -633,6 +667,163 @@ def _count_sql(resolver, counters: dict[str, int]) -> None:
     resolver.conn.cursor = wrapped_cursor  # type: ignore[method-assign]
 
 
+def _verify_db_state(
+    pymysql_mod,
+    workload: str,
+    pool_size: int,
+    results: list,
+) -> dict[str, int]:
+    """Out-of-band check that the transformer actually did the expected work.
+
+    Opens a fresh connection (separate from the resolver's) and counts rows in
+    the identifiers and canonical_ids tables, then compares against the
+    workload's expected post-state. Also samples result rows to confirm
+    canonical IDs were actually assigned and are pulled from the seeded pool.
+
+    Raises AssertionError on mismatch — a failure here means the timing
+    numbers can't be trusted because the transformer didn't do what we think.
+    """
+    spec = WORKLOADS[workload]
+    conn = _connect(pymysql_mod)
+    try:
+        # Use a plain (non-Dict) cursor here so this verification is robust
+        # regardless of how the resolver's connection is configured.
+        cursor = conn.cursor(pymysql_mod.cursors.Cursor)
+        cursor.execute("SELECT COUNT(*) FROM identifiers")
+        identifiers_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM canonical_ids WHERE Status='assigned'")
+        assigned_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM canonical_ids WHERE Status='free'")
+        free_count = cursor.fetchone()[0]
+        # Spot-check: pick the first result's primary canonical id and confirm
+        # it exists in canonical_ids as 'assigned' and joins back to a row in
+        # identifiers for the original source id.
+        # transform() yields (row_id, embedded_doc) tuples.
+        _, sample_doc = results[0]
+        sample_state = sample_doc["state"]
+        sample_canonical = sample_state.get("canonicalId")
+        sample_source = sample_state["sourceIdentifier"]["value"]
+        cursor.execute(
+            "SELECT Status FROM canonical_ids WHERE CanonicalId = %s",
+            (sample_canonical,),
+        )
+        sample_status_row = cursor.fetchone()
+        cursor.execute(
+            "SELECT CanonicalId FROM identifiers WHERE SourceId = %s",
+            (sample_source,),
+        )
+        sample_join_row = cursor.fetchone()
+        # Predecessor-inheritance check: for every workload that contains
+        # `predecessor` records, sample one and assert its identifier row was
+        # given the *predecessor's* canonical id (not a fresh pool id). This
+        # catches synthetic-data bugs that would silently bypass the
+        # inheritance code path.
+        predecessor_pairs: list[tuple[str, str, str | None, str | None]] = []
+        if any(kind == "predecessor" for kind, _ in spec["split"]):
+            # Pick the first index that the split assigns to "predecessor".
+            cursor_pos = 0.0
+            pred_idx: int | None = None
+            for kind, fraction in spec["split"]:
+                if kind == "predecessor":
+                    pred_idx = int(round(cursor_pos * spec["n_works"]))
+                    break
+                cursor_pos += fraction
+            assert pred_idx is not None
+            child_source = f"predecessor-{pred_idx:08d}"
+            parent_source = f"pred-{pred_idx:08d}"
+            cursor.execute(
+                "SELECT CanonicalId FROM identifiers WHERE SourceId = %s",
+                (child_source,),
+            )
+            child_row = cursor.fetchone()
+            cursor.execute(
+                "SELECT CanonicalId FROM identifiers WHERE SourceId = %s",
+                (parent_source,),
+            )
+            parent_row = cursor.fetchone()
+            predecessor_pairs.append(
+                (
+                    child_source,
+                    parent_source,
+                    child_row[0] if child_row else None,
+                    parent_row[0] if parent_row else None,
+                )
+            )
+    finally:
+        conn.close()
+
+    expected_ids = spec["expected_identifiers_post"]
+    expected_pre_assigned = spec["expected_pre_assigned"]
+    expected_minted = spec["expected_minted"]
+    expected_assigned = expected_pre_assigned + expected_minted
+    expected_free = pool_size - expected_minted
+    expected_total_canonical = pool_size + expected_pre_assigned
+
+    errors = []
+    if identifiers_count != expected_ids:
+        errors.append(
+            f"identifiers row count: expected {expected_ids}, got {identifiers_count}"
+        )
+    if assigned_count != expected_assigned:
+        errors.append(
+            f"canonical_ids assigned: expected {expected_assigned} "
+            f"({expected_pre_assigned} pre + {expected_minted} minted), "
+            f"got {assigned_count}"
+        )
+    if free_count != expected_free:
+        errors.append(
+            f"canonical_ids free: expected {expected_free} "
+            f"(pool {pool_size} - minted {expected_minted}), got {free_count}"
+        )
+    if assigned_count + free_count != expected_total_canonical:
+        errors.append(
+            f"canonical_ids total: expected {expected_total_canonical} "
+            f"(pool {pool_size} + pre-assigned {expected_pre_assigned}), "
+            f"got {assigned_count + free_count}"
+        )
+    if sample_canonical is None:
+        errors.append("sample result is missing state.canonicalId")
+    elif sample_status_row is None or sample_status_row[0] != "assigned":
+        errors.append(
+            f"sample canonical id {sample_canonical!r} not 'assigned' in DB "
+            f"(row={sample_status_row})"
+        )
+    elif sample_join_row is None or sample_join_row[0] != sample_canonical:
+        errors.append(
+            f"sample source {sample_source!r} doesn't map to {sample_canonical!r} "
+            f"in identifiers (row={sample_join_row})"
+        )
+
+    for child_source, parent_source, child_cid, parent_cid in predecessor_pairs:
+        if child_cid is None:
+            errors.append(
+                f"predecessor inheritance: child {child_source!r} has no "
+                f"identifiers row"
+            )
+        elif parent_cid is None:
+            errors.append(
+                f"predecessor inheritance: parent {parent_source!r} has no "
+                f"identifiers row (seeding broken?)"
+            )
+        elif child_cid != parent_cid:
+            errors.append(
+                f"predecessor inheritance broken: {child_source!r} got "
+                f"{child_cid!r} but should have inherited {parent_cid!r} from "
+                f"{parent_source!r}"
+            )
+
+    if errors:
+        raise AssertionError(
+            f"DB verification failed for workload={workload}: " + "; ".join(errors)
+        )
+
+    return {
+        "identifiers": identifiers_count,
+        "assigned": assigned_count,
+        "free": free_count,
+    }
+
+
 class _NoopResolver:
     """IdResolver that fabricates canonical IDs without touching the database.
 
@@ -725,6 +916,12 @@ def inner_main(args: argparse.Namespace) -> int:
         if not use_noop:
             resolver.conn.close()  # type: ignore[attr-defined]
 
+        verify_info: dict[str, int] | None = None
+        if not use_noop:
+            verify_info = _verify_db_state(
+                pymysql_mod, args.workload, pool_size, results
+            )
+
         record = {
             "ref": args.ref,
             "workload": args.workload,
@@ -734,7 +931,15 @@ def inner_main(args: argparse.Namespace) -> int:
             "sql_inserts": counters["inserts"],
             "sql_total": counters["total"],
         }
+        if verify_info is not None:
+            record["verify"] = verify_info
         print(json.dumps(record), flush=True)
+        if verify_info is not None:
+            print(
+                f"[verify] {args.workload} identifiers={verify_info['identifiers']} "
+                f"assigned={verify_info['assigned']} free={verify_info['free']}",
+                file=sys.stderr,
+            )
         print(
             f"[inner] {args.ref} {args.workload} resolver={args.resolver} "
             f"iter={iteration} wall={elapsed_ms:.1f}ms "
