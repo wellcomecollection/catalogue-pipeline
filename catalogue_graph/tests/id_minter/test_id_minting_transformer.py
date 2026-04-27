@@ -272,3 +272,164 @@ class TestStreamToIndex:
         assert len(transformer.errors) == 1
         assert transformer.errors[0].stage == "index"
         assert "mapper_parsing_exception" in transformer.errors[0].detail
+
+
+# ---------------------------------------------------------------------------
+# Tests: batched minting across multiple works
+# ---------------------------------------------------------------------------
+
+
+class TestBatchedMinting:
+    def test_combines_requests_from_multiple_works_into_single_call(self) -> None:
+        doc_a = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000001")
+        )
+        doc_b = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000002")
+        )
+        doc_c = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000003")
+        )
+
+        resolver = FakeResolver(
+            ids={
+                ("Work", "sierra-system-number", "b1000001"): "aaaa1111",
+                ("Work", "sierra-system-number", "b1000002"): "bbbb2222",
+                ("Work", "sierra-system-number", "b1000003"): "cccc3333",
+            }
+        )
+
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([doc_a, doc_b, doc_c]),
+            resolver=resolver,
+        )
+
+        results = list(transformer.transform([doc_a, doc_b, doc_c]))
+
+        assert len(results) == 3
+        # A single mint_ids call carrying all three works' source identifiers.
+        assert len(resolver.mint_calls) == 1
+        sids_in_call = {req[0] for req in resolver.mint_calls[0]}
+        assert sids_in_call == {
+            ("Work", "sierra-system-number", "b1000001"),
+            ("Work", "sierra-system-number", "b1000002"),
+            ("Work", "sierra-system-number", "b1000003"),
+        }
+        canonical_ids = {row_id: doc["state"]["canonicalId"] for row_id, doc in results}
+        assert canonical_ids == {
+            "Work[sierra-system-number/b1000001]": "aaaa1111",
+            "Work[sierra-system-number/b1000002]": "bbbb2222",
+            "Work[sierra-system-number/b1000003]": "cccc3333",
+        }
+
+    def test_respects_mint_batch_size_chunking(self) -> None:
+        docs = [
+            _make_work_doc(
+                _make_source_identifier("Work", "sierra-system-number", f"b100000{i}")
+            )
+            for i in range(5)
+        ]
+        resolver = FakeResolver(
+            ids={
+                ("Work", "sierra-system-number", f"b100000{i}"): f"canon{i:04d}"
+                for i in range(5)
+            }
+        )
+
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource(docs),
+            resolver=resolver,
+            mint_batch_size=2,
+        )
+
+        results = list(transformer.transform(docs))
+
+        assert len(results) == 5
+        # 5 works at batch size 2 -> 3 chunks (2 + 2 + 1).
+        assert len(resolver.mint_calls) == 3
+        assert [len(c) for c in resolver.mint_calls] == [2, 2, 1]
+
+    def test_falls_back_to_per_work_when_batch_mint_fails(self) -> None:
+        doc_good = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000001")
+        )
+        doc_bad = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000002")
+        )
+        doc_other = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000003")
+        )
+
+        bad_sid: SourceId = ("Work", "sierra-system-number", "b1000002")
+
+        class FlakyResolver:
+            """Fails when ``bad_sid`` is in the batch; otherwise resolves all."""
+
+            def __init__(self) -> None:
+                self.mint_calls: list[list[tuple[SourceId, SourceId | None]]] = []
+                self.ids = {
+                    ("Work", "sierra-system-number", "b1000001"): "aaaa1111",
+                    ("Work", "sierra-system-number", "b1000003"): "cccc3333",
+                }
+
+            def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]:
+                return {k: v for k, v in self.ids.items() if k in source_ids}
+
+            def mint_ids(
+                self, requests: list[tuple[SourceId, SourceId | None]]
+            ) -> dict[SourceId, str]:
+                self.mint_calls.append(requests)
+                if any(req[0] == bad_sid for req in requests):
+                    raise RuntimeError("simulated batch failure")
+                return {
+                    req[0]: self.ids[req[0]] for req in requests if req[0] in self.ids
+                }
+
+        resolver = FlakyResolver()
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([doc_good, doc_bad, doc_other]),
+            resolver=resolver,
+        )
+
+        results = list(transformer.transform([doc_good, doc_bad, doc_other]))
+
+        # The two good works survive; the bad one is recorded as an embed error.
+        row_ids = {row_id for row_id, _ in results}
+        assert row_ids == {
+            "Work[sierra-system-number/b1000001]",
+            "Work[sierra-system-number/b1000003]",
+        }
+        assert len(transformer.errors) == 1
+        err = transformer.errors[0]
+        assert err.stage == "embed"
+        assert err.row_id == "Work[sierra-system-number/b1000002]"
+
+        # First call is the batched attempt; remaining calls are the per-work
+        # fallback (one per work in the chunk).
+        assert len(resolver.mint_calls) == 1 + 3
+
+    def test_extract_id_failures_do_not_block_batch(self) -> None:
+        good = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000001")
+        )
+        broken: dict[str, Any] = {"data": {"title": "no state"}}
+
+        resolver = FakeResolver(
+            ids={("Work", "sierra-system-number", "b1000001"): "aaaa1111"}
+        )
+
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([good, broken]),
+            resolver=resolver,
+        )
+
+        results = list(transformer.transform([good, broken]))
+
+        assert len(results) == 1
+        assert results[0][0] == "Work[sierra-system-number/b1000001]"
+        assert len(transformer.errors) == 1
+        assert transformer.errors[0].stage == "extract_id"
+        # The broken doc shouldn't have made it into the resolver call.
+        assert len(resolver.mint_calls) == 1
+        sids_in_call = {req[0] for req in resolver.mint_calls[0]}
+        assert sids_in_call == {("Work", "sierra-system-number", "b1000001")}
