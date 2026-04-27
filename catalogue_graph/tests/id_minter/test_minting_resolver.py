@@ -572,3 +572,97 @@ class TestPoolManagement:
         for cid in used:
             assert get_canonical_status(ids_db, cid) == "assigned"
         assert get_canonical_status(ids_db, unused) == "free"
+
+
+# ---------------------------------------------------------------------------
+# mint_ids — round-trip batching
+#
+# Verify that the per-row INSERT loops have been collapsed into single
+# multi-row INSERTs. We count INSERT INTO identifiers statements issued
+# against the DB cursor for a representative batch.
+# ---------------------------------------------------------------------------
+
+
+class TestRoundTripBatching:
+    """Assert that INSERTs are coalesced into a single statement per branch."""
+
+    def _count_insert_statements(
+        self,
+        ids_db: pymysql.connections.Connection,
+        requests: list[tuple[SourceId, SourceId | None]],
+    ) -> int:
+        cursor_factory = ids_db.cursor
+        insert_count = 0
+
+        def counting_cursor() -> object:
+            real_cursor = cursor_factory()
+            real_execute = real_cursor.execute
+
+            def counting_execute(query: str, args: object = None) -> object:
+                nonlocal insert_count
+                if "INSERT INTO identifiers" in query:
+                    insert_count += 1
+                return real_execute(query, args)
+
+            real_cursor.execute = counting_execute
+            return real_cursor
+
+        ids_db.cursor = counting_cursor
+        try:
+            MintingResolver.from_connection(ids_db).mint_ids(requests)
+        finally:
+            ids_db.cursor = cursor_factory
+        return insert_count
+
+    def test_new_ids_use_single_multi_row_insert(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """A batch of N new source IDs should issue exactly ONE INSERT."""
+        seed_free_ids(ids_db, [f"new{i:05d}" for i in range(5)])
+        requests: list[tuple[SourceId, SourceId | None]] = [
+            (("Work", "folio", f"b{i}"), None) for i in range(5)
+        ]
+
+        insert_count = self._count_insert_statements(ids_db, requests)
+
+        assert insert_count == 1
+        # All five mappings should still be persisted.
+        for sid, _ in requests:
+            assert get_identifier_row(ids_db, sid) is not None
+
+    def test_inheritance_uses_single_multi_row_insert(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """A batch of N predecessor-inheriting source IDs → ONE INSERT."""
+        predecessors: list[SourceId] = [("Work", "sierra", f"b{i}") for i in range(5)]
+        for i, pred in enumerate(predecessors):
+            seed_identifier(ids_db, pred, f"legacy{i:02d}")
+
+        requests: list[tuple[SourceId, SourceId | None]] = [
+            (("Work", "folio", f"AC-{i}"), pred) for i, pred in enumerate(predecessors)
+        ]
+
+        insert_count = self._count_insert_statements(ids_db, requests)
+
+        assert insert_count == 1
+        for sid, _ in requests:
+            assert get_identifier_row(ids_db, sid) is not None
+
+    def test_mixed_inheritance_and_new_uses_two_inserts(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """One INSERT for the inheritance branch + one for the new-ID branch."""
+        pred: SourceId = ("Work", "sierra", "b9000")
+        seed_identifier(ids_db, pred, "legacy99")
+        seed_free_ids(ids_db, ["mix00001", "mix00002", "mix00003"])
+
+        requests: list[tuple[SourceId, SourceId | None]] = [
+            (("Work", "folio", "AC-9000"), pred),  # inheritance
+            (("Work", "folio", "b9001"), None),  # new
+            (("Work", "folio", "b9002"), None),  # new
+            (("Work", "folio", "b9003"), None),  # new
+        ]
+
+        insert_count = self._count_insert_statements(ids_db, requests)
+
+        assert insert_count == 2

@@ -179,6 +179,7 @@ def handler(
             success_count=success_count,
             failure_count=failure_count,
         ).publish()
+
     # The metric triggers an alarm if failure_count > 0
     # If publish fails AND we have failure, we raise
     except Exception as e:

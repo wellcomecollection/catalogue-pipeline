@@ -244,21 +244,29 @@ class MintingResolver:
         # identifiers table mapping the new source ID to the predecessor's canonical ID.
         # This creates multiple source IDs pointing to the same canonical ID.
         #
-        # ON DUPLICATE KEY UPDATE is used for idempotency - if a concurrent process
-        # already inserted this mapping, we don't fail. The "CanonicalId = CanonicalId"
-        # is a no-op that prevents the INSERT from failing on duplicates while also
-        # not changing any existing data.
+        # We issue a SINGLE multi-row INSERT rather than one per record - this is
+        # the same number of rows written, but only one network round trip to the
+        # database server. ON DUPLICATE KEY UPDATE is used for idempotency: if a
+        # concurrent process already inserted any of these mappings, the duplicate
+        # rows become no-ops ("CanonicalId = CanonicalId") instead of aborting the
+        # statement. Per-row semantics are unchanged.
         if needs_inheritance:
+            row_placeholder = "(%s, %s, %s, %s)"
+            values_clause = ", ".join([row_placeholder] * len(needs_inheritance))
+            params: list = []
             for source_key, canonical_id in needs_inheritance:
                 ontology_type, source_system, source_id = source_key
-                cursor.execute(
-                    """
-                    INSERT INTO identifiers (OntologyType, SourceSystem, SourceId, CanonicalId)
-                    VALUES (%s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE CanonicalId = CanonicalId
-                """,
-                    (ontology_type, source_system, source_id, canonical_id),
-                )
+                params.extend([ontology_type, source_system, source_id, canonical_id])
+            cursor.execute(
+                f"""
+                INSERT INTO identifiers (OntologyType, SourceSystem, SourceId, CanonicalId)
+                VALUES {values_clause}
+                ON DUPLICATE KEY UPDATE CanonicalId = CanonicalId
+            """,
+                params,
+            )
+
+            for source_key, canonical_id in needs_inheritance:
                 result[source_key] = canonical_id
                 pred = predecessors[source_key]
                 logger.info(
@@ -311,24 +319,31 @@ class MintingResolver:
             # Step 5: Batch INSERT for new IDs
             # ---------------------------------------------------------------------
             # Attempt to insert mappings from each new source ID to its claimed
-            # canonical ID. Using ON DUPLICATE KEY UPDATE for idempotency - if a
-            # concurrent process already inserted a mapping for this source ID
-            # (potentially with a DIFFERENT canonical ID), we don't fail.
+            # canonical ID. As in Step 3, we issue a single multi-row INSERT to
+            # collapse per-row round trips. ON DUPLICATE KEY UPDATE preserves
+            # idempotency: if a concurrent process already inserted a mapping for
+            # any of these source IDs (potentially with a DIFFERENT canonical ID),
+            # those rows become no-ops and Step 6 will detect the lost race when
+            # it re-reads the actual canonical IDs.
             #
-            # We track claimed_mapping to remember which canonical ID we TRIED to
-            # assign to each source ID - this is needed for race detection in Step 6.
+            # We still record claimed_mapping so Step 6 can compare what we tried
+            # to insert against what's actually in the database.
             claimed_mapping: dict[SourceId, str] = {}
+            row_placeholder = "(%s, %s, %s, %s)"
+            values_clause = ", ".join([row_placeholder] * len(needs_new_id))
+            params = []
             for source_key, canonical_id in zip(needs_new_id, free_ids, strict=True):
                 ontology_type, source_system, source_id = source_key
-                cursor.execute(
-                    """
-                    INSERT INTO identifiers (OntologyType, SourceSystem, SourceId, CanonicalId)
-                    VALUES (%s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE CanonicalId = CanonicalId
-                """,
-                    (ontology_type, source_system, source_id, canonical_id),
-                )
+                params.extend([ontology_type, source_system, source_id, canonical_id])
                 claimed_mapping[source_key] = canonical_id
+            cursor.execute(
+                f"""
+                INSERT INTO identifiers (OntologyType, SourceSystem, SourceId, CanonicalId)
+                VALUES {values_clause}
+                ON DUPLICATE KEY UPDATE CanonicalId = CanonicalId
+            """,
+                params,
+            )
 
             # Step 6: Verify which IDs were actually assigned (race detection)
             # ---------------------------------------------------------------------
