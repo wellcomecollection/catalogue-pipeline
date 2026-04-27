@@ -6,12 +6,12 @@ and can be used directly or extended by specific adapters.
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 
 from pydantic import Field
 
 from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
+from adapters.utils.window_harvester import WindowSummaryTags
 from adapters.utils.window_summary import WindowSummary
 from models.incremental_window import IncrementalWindow
 
@@ -83,15 +83,9 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
             if not summary.tags:
                 continue
 
-            # For backwards compatibility, we should look for changeset IDs in two places.
-            # Older rows store a single changeset_id, new rows store a list of changeset_ids.
-            if "changeset_id" in summary.tags:
-                changeset_ids.append(summary.tags["changeset_id"])
-            if "changeset_ids" in summary.tags:
-                changeset_ids += json.loads(summary.tags["changeset_ids"])
-            if "record_ids_changed" in summary.tags:
-                changed_ids = json.loads(summary.tags["record_ids_changed"])
-                upserted_record_count += len(changed_ids)
+            tags = WindowSummaryTags.parse(summary.tags)
+            upserted_record_count += tags.upserted_record_count
+            changeset_ids += tags.changeset_ids
 
         return cls(
             summaries=summaries,

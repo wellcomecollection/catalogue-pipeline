@@ -22,6 +22,7 @@ from adapters.utils.window_harvester import (
     WindowCallback,
     WindowCallbackResult,
     WindowHarvestManager,
+    WindowSummaryTags,
 )
 from adapters.utils.window_store import (
     WINDOW_STATUS_SCHEMA,
@@ -506,10 +507,10 @@ def test_batching_accumulates_all_changeset_ids(
     assert json.loads(stored.tags["changeset_ids"]) == ["cs-0", "cs-1", "cs-2"]
 
 
-def test_batching_accumulates_record_ids_changed_tag(
+def test_batching_accumulates_upserted_record_count_tag(
     tmp_path: Path, monkeypatch: MonkeyPatch
 ) -> None:
-    """record_ids_changed tag should combine upserted IDs from all batches."""
+    """record_ids_changed tag should sum counts from all batches."""
     monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 2)
 
     records = [_make_record(f"id:{i}") for i in range(4)]
@@ -522,8 +523,7 @@ def test_batching_accumulates_record_ids_changed_tag(
 
     summary = summaries[0]
     assert summary.tags is not None
-    record_ids_changed = json.loads(summary.tags["record_ids_changed"])
-    assert record_ids_changed == ["id:0", "id:1", "id:2", "id:3"]
+    assert int(summary.tags["upserted_record_count"]) == 4
 
 
 def test_batching_accumulates_record_ids_on_summary(
@@ -634,10 +634,10 @@ def test_batching_intermediate_writes_to_store(
     assert store_snapshots[3].record_ids == ["id:0", "id:1", "id:2"]
 
 
-def test_batching_record_ids_changed_grows_across_intermediate_writes(
+def test_batching_upserted_record_count_grows_across_intermediate_writes(
     tmp_path: Path, monkeypatch: MonkeyPatch
 ) -> None:
-    """record_ids_changed tag in each intermediate write should include all
+    """upserted_record_count tag in each intermediate write should include all
     IDs from previous batches plus the current one."""
     monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
 
@@ -657,18 +657,11 @@ def test_batching_record_ids_changed_grows_across_intermediate_writes(
     harvester.harvest_range(time_range=_window_range(hours=1), max_windows=1)
 
     assert store_snapshots[0].tags is not None
-    assert json.loads(store_snapshots[0].tags["record_ids_changed"]) == ["id:0"]
+    assert int(store_snapshots[0].tags["upserted_record_count"]) == 1
     assert store_snapshots[1].tags is not None
-    assert json.loads(store_snapshots[1].tags["record_ids_changed"]) == [
-        "id:0",
-        "id:1",
-    ]
+    assert int(store_snapshots[1].tags["upserted_record_count"]) == 2
     assert store_snapshots[2].tags is not None
-    assert json.loads(store_snapshots[2].tags["record_ids_changed"]) == [
-        "id:0",
-        "id:1",
-        "id:2",
-    ]
+    assert int(store_snapshots[2].tags["upserted_record_count"]) == 3
 
 
 def test_batching_with_default_tags_preserved(
@@ -763,3 +756,56 @@ def test_partial_success_retry_processes_all_when_none_succeeded(
         "id:0",
         "id:1",
     ]
+
+
+def test_parse_tags_none_returns_defaults() -> None:
+    result = WindowSummaryTags.parse(None)
+    assert result.changeset_ids == []
+    assert result.upserted_record_count == 0
+    assert result.other_tags == {}
+
+
+def test_parse_tags_only_changeset_id() -> None:
+    result = WindowSummaryTags.parse({"changeset_id": "cs-1"})
+    assert result.changeset_ids == ["cs-1"]
+
+
+def test_parse_tags_only_changeset_ids() -> None:
+    result = WindowSummaryTags.parse({"changeset_ids": json.dumps(["cs-1", "cs-2"])})
+    assert result.changeset_ids == ["cs-1", "cs-2"]
+
+
+def test_parse_tags_changeset_ids_overrides_changeset_id() -> None:
+    result = WindowSummaryTags.parse(
+        {"changeset_id": "cs-0", "changeset_ids": json.dumps(["cs-1", "cs-2"])}
+    )
+    assert result.changeset_ids == ["cs-1", "cs-2"]
+
+
+def test_parse_tags_record_ids_changed() -> None:
+    result = WindowSummaryTags.parse(
+        {"record_ids_changed": json.dumps(["a", "b", "c"])}
+    )
+    assert result.upserted_record_count == 3
+
+
+def test_parse_tags_upserted_record_count() -> None:
+    result = WindowSummaryTags.parse({"upserted_record_count": "7"})
+    assert result.upserted_record_count == 7
+
+
+def test_parse_tags_both_count_formats_prefers_upserted_record_count() -> None:
+    result = WindowSummaryTags.parse(
+        {
+            "record_ids_changed": json.dumps(["a", "b"]),
+            "upserted_record_count": "99",
+        }
+    )
+    assert result.upserted_record_count == 99
+
+
+def test_parse_tags_unknown_keys_passed_through() -> None:
+    result = WindowSummaryTags.parse(
+        {"changeset_ids": json.dumps([]), "extra": "value"}
+    )
+    assert result.other_tags == {"extra": "value"}

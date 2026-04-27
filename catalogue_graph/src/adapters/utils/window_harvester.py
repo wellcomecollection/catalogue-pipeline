@@ -23,6 +23,43 @@ logger = structlog.get_logger(__name__)
 BATCH_SIZE = 10_000
 
 
+class WindowSummaryTags(BaseModel):
+    changeset_ids: list[str] = []
+    upserted_record_count: int = 0
+    other_tags: dict[str, str] = {}
+
+    @classmethod
+    def parse(cls, tags: dict[str, str] | None) -> WindowSummaryTags:
+        tags = dict(tags or {})
+        changeset_ids, upserted_record_count = [], 0
+
+        # For backward compatibility, we look for changeset IDs in two places.
+        # Older rows store a single changeset_id, new rows store a list of changeset_ids.
+        if "changeset_id" in tags:
+            changeset_ids.append(tags.pop("changeset_id"))
+        if "changeset_ids" in tags:
+            changeset_ids = json.loads(tags.pop("changeset_ids"))
+
+        # Older rows store a list of all upserted IDs, new rows only store how many records were upserted
+        if "record_ids_changed" in tags:
+            upserted_record_count = len(json.loads(tags.pop("record_ids_changed")))
+        if "upserted_record_count" in tags:
+            upserted_record_count = int(tags.pop("upserted_record_count"))
+
+        return cls(
+            changeset_ids=changeset_ids,
+            upserted_record_count=upserted_record_count,
+            other_tags=tags,
+        )
+
+    def dump(self) -> dict[str, str]:
+        return {
+            **self.other_tags,
+            "changeset_ids": json.dumps(self.changeset_ids),
+            "upserted_record_count": str(self.upserted_record_count),
+        }
+
+
 def get_record_identifier(record: Record) -> str | None:
     header = getattr(record, "header", None)
     if header is not None:
@@ -51,9 +88,7 @@ class BatchProgress(BaseModel):
 
     window: IncrementalWindow
     record_ids: list[str] = []
-    changeset_ids: list[str] = []
-    upserted_record_ids: list[str] = []
-    tags: dict[str, str] = {}
+    tags: WindowSummaryTags = WindowSummaryTags()
     batches_succeeded: int = 0
     batches_failed: int = 0
     last_error: str | None = None
@@ -67,15 +102,8 @@ class BatchProgress(BaseModel):
             return "partial_success"
         return "failed"
 
-    def get_summary(self, is_final: bool) -> WindowSummary:
-        all_tags = {
-            **self.tags,
-            "changeset_ids": json.dumps(self.changeset_ids),
-            "record_ids_changed": json.dumps(self.upserted_record_ids),
-        }
-
+    def to_summary(self, is_final: bool) -> WindowSummary:
         state = self.final_state if is_final else "partial_success"
-
         return WindowSummary(
             window_start=self.window.start_time_utc,
             window_end=self.window.end_time_utc,
@@ -84,31 +112,21 @@ class BatchProgress(BaseModel):
             record_ids=self.record_ids,
             last_error=self.last_error,
             updated_at=datetime.now(UTC),
-            tags=all_tags,
+            tags=self.tags.dump(),
         )
 
     @classmethod
-    def from_existing_summary(cls, summary: WindowSummary) -> BatchProgress:
+    def from_summary(cls, summary: WindowSummary) -> BatchProgress:
         """
         Create a progress object from an existing partially failed run and pre-populate it
         with successfully processed record IDs and changeset IDs to "resume" processing.
         """
-        tags = dict(summary.tags or {})
-
-        changeset_ids, upserted_record_ids = [], []
-        if "changeset_ids" in tags:
-            changeset_ids = json.loads(tags.pop("changeset_ids"))
-        if "record_ids_changed" in tags:
-            upserted_record_ids = json.loads(tags.pop("record_ids_changed"))
-
         return BatchProgress(
             window=IncrementalWindow(
                 start_time=summary.window_start, end_time=summary.window_end
             ),
             record_ids=summary.record_ids,
-            changeset_ids=changeset_ids,
-            upserted_record_ids=upserted_record_ids,
-            tags=tags,
+            tags=WindowSummaryTags.parse(summary.tags),
             attempts=summary.attempts + 1,
         )
 
@@ -209,12 +227,14 @@ class WindowHarvestManager:
         # If we already processed a window but some of its batches failed,
         # reconstruct the progress object from the existing window summary
         if existing_summary and existing_summary.state != "success":
-            progress = BatchProgress.from_existing_summary(existing_summary)
+            progress = BatchProgress.from_summary(existing_summary)
 
             # Skip records which were already successfully processed in the previous run
             ids_to_skip = set(existing_summary.record_ids)
         else:
-            progress = BatchProgress(window=window, tags=dict(self.default_tags))
+            progress = BatchProgress(
+                window=window, tags=WindowSummaryTags(other_tags=self.default_tags)
+            )
             ids_to_skip = set()
 
         try:
@@ -236,7 +256,7 @@ class WindowHarvestManager:
         except Exception as e:
             progress.last_error = repr(e)
 
-        summary = progress.get_summary(is_final=True)
+        summary = progress.to_summary(is_final=True)
         self.store.upsert(summary)
 
         if summary.state == "success":
@@ -266,9 +286,9 @@ class WindowHarvestManager:
             result = self.record_callback(batch_with_ids)
 
             if result.changeset_id:
-                progress.changeset_ids.append(result.changeset_id)
-            progress.upserted_record_ids += result.upserted_record_ids
-            progress.tags.update(result.tags)
+                progress.tags.changeset_ids.append(result.changeset_id)
+            progress.tags.upserted_record_count += len(result.upserted_record_ids)
+            progress.tags.other_tags.update(result.tags)
             progress.record_ids.extend([r[0] for r in batch_with_ids])
             progress.batches_succeeded += 1
         except Exception as e:
@@ -284,7 +304,7 @@ class WindowHarvestManager:
             # Failing to persist the window summary for a specific batch is not a critical error. The only summary
             # which must be persisted (and whose failure to persist should cause the run to fail) is the final one.
             try:
-                self.store.upsert(progress.get_summary(is_final=False))
+                self.store.upsert(progress.to_summary(is_final=False))
             except Exception as e:
                 logger.warning("Failed to persist batch window summary", error=repr(e))
 
