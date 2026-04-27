@@ -93,6 +93,28 @@ class IdMintingTransformer(ElasticBaseTransformer):
         for _, _, mint_requests in works_in_batch:
             combined_requests.extend(mint_requests)
 
+        # The resolver assumes a 1:1 mapping between sourceIdentifier and
+        # predecessorIdentifier within a single mint_ids call (the dict
+        # comprehension that builds `predecessors` is keyed by source id and
+        # would silently drop conflicts). That invariant is guaranteed by the
+        # source data within a single work, but batching across works extends
+        # it to "across all works in a chunk". If two works in this chunk
+        # disagree on the predecessor for the same source id, fall back to
+        # per-work minting so each work gets its own transaction and the
+        # resolver's intra-work invariant holds.
+        seen_predecessors: dict[SourceIdentifierKey, SourceIdentifierKey | None] = {}
+        for key, predecessor in combined_requests:
+            if key in seen_predecessors and seen_predecessors[key] != predecessor:
+                logger.warning(
+                    "Conflicting predecessors for source id across works in chunk;"
+                    " falling back to per-work minting",
+                    source_id=str(key),
+                    works_in_batch=len(works_in_batch),
+                )
+                yield from self._transform_per_work(works_in_batch)
+                return
+            seen_predecessors[key] = predecessor
+
         try:
             found = self.resolver.mint_ids(combined_requests)  # type: ignore[arg-type]  # SourceIdentifierKey is a NamedTuple subtype of SourceId
         except Exception:

@@ -433,3 +433,69 @@ class TestBatchedMinting:
         assert len(resolver.mint_calls) == 1
         sids_in_call = {req[0] for req in resolver.mint_calls[0]}
         assert sids_in_call == {("Work", "sierra-system-number", "b1000001")}
+
+    def test_falls_back_to_per_work_on_conflicting_predecessors_in_chunk(
+        self,
+    ) -> None:
+        # Two works that both reference the same shared item source id, but
+        # disagree on its predecessorIdentifier. The combined request would
+        # silently drop one predecessor inside the resolver, so the
+        # transformer should detect the conflict and fall back to per-work
+        # minting (one transaction per work) instead.
+        shared_item_si = _make_source_identifier(
+            "Item", "sierra-system-number", "i9000001"
+        )
+        pred_a = _make_source_identifier("Item", "sierra-system-number", "i9000000")
+        pred_b = _make_source_identifier("Item", "sierra-system-number", "i9000099")
+
+        item_with_pred_a = {
+            "sourceIdentifier": shared_item_si,
+            "predecessorIdentifier": pred_a,
+            "type": "Identifiable",
+            "identifiedType": "Identified",
+        }
+        item_with_pred_b = {
+            "sourceIdentifier": shared_item_si,
+            "predecessorIdentifier": pred_b,
+            "type": "Identifiable",
+            "identifiedType": "Identified",
+        }
+
+        doc_a = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000001"),
+            items=[item_with_pred_a],
+        )
+        doc_a["state"]["type"] = "Identifiable"
+        doc_a["state"]["identifiedType"] = "Identified"
+        doc_b = _make_work_doc(
+            _make_source_identifier("Work", "sierra-system-number", "b1000002"),
+            items=[item_with_pred_b],
+        )
+        doc_b["state"]["type"] = "Identifiable"
+        doc_b["state"]["identifiedType"] = "Identified"
+
+        resolver = FakeResolver(
+            ids={
+                ("Work", "sierra-system-number", "b1000001"): "aaaa1111",
+                ("Work", "sierra-system-number", "b1000002"): "bbbb2222",
+                ("Item", "sierra-system-number", "i9000001"): "iiii9999",
+            }
+        )
+
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([doc_a, doc_b]),
+            resolver=resolver,
+        )
+
+        results = list(transformer.transform([doc_a, doc_b]))
+
+        # Both works are still minted, but via the per-work fallback path —
+        # one mint_ids call per work, never the combined batch call.
+        assert {row_id for row_id, _ in results} == {
+            "Work[sierra-system-number/b1000001]",
+            "Work[sierra-system-number/b1000002]",
+        }
+        assert len(resolver.mint_calls) == 2
+        for call in resolver.mint_calls:
+            work_keys = {req[0] for req in call if req[0][0] == "Work"}
+            assert len(work_keys) == 1
