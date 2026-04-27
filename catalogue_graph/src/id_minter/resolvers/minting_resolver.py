@@ -253,7 +253,7 @@ class MintingResolver:
         if needs_inheritance:
             row_placeholder = "(%s, %s, %s, %s)"
             values_clause = ", ".join([row_placeholder] * len(needs_inheritance))
-            params: list = []
+            params: list[str] = []
             for source_key, canonical_id in needs_inheritance:
                 ontology_type, source_system, source_id = source_key
                 params.extend([ontology_type, source_system, source_id, canonical_id])
