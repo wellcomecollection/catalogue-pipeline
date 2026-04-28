@@ -39,6 +39,15 @@ class FakeResolver:
         self, requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]
     ) -> dict[SourceIdentifierKey, str]:
         self.mint_calls.append(requests)
+        # Mirror MintingResolver: enforce a 1:1 mapping between sourceIdentifier
+        # and predecessorIdentifier within a single call.
+        seen: dict[SourceIdentifierKey, SourceIdentifierKey | None] = {}
+        for sid, pred in requests:
+            if sid in seen and seen[sid] != pred:
+                raise ValueError(
+                    f"Conflicting predecessors for {sid[0]}/{sid[1]}/{sid[2]}"
+                )
+            seen[sid] = pred
         return {req[0]: self.ids[req[0]] for req in requests if req[0] in self.ids}
 
 
@@ -543,13 +552,16 @@ class TestBatchedMinting:
 
         results = list(transformer.transform([doc_a, doc_b]))
 
-        # Both works are still minted, but via the per-work fallback path —
-        # one mint_ids call per work, never the combined batch call.
+        # Both works are still minted, but via the per-work fallback path.
+        # The first call is the batched attempt that raises ValueError inside
+        # the resolver (because the chunk references the same source id with
+        # two different predecessors); the next two are the per-work
+        # fallback, one mint_ids call per work.
         assert {row_id for row_id, _ in results} == {
             "Work[sierra-system-number/b1000001]",
             "Work[sierra-system-number/b1000002]",
         }
-        assert len(resolver.mint_calls) == 2
-        for call in resolver.mint_calls:
+        assert len(resolver.mint_calls) == 1 + 2
+        for call in resolver.mint_calls[1:]:
             work_keys = {req[0] for req in call if req[0][0] == "Work"}
             assert len(work_keys) == 1

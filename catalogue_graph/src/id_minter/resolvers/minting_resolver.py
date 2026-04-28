@@ -164,11 +164,26 @@ class MintingResolver:
         # mint/lookup). Also build a mapping from source_id -> predecessor for
         # records that have a predecessor specified (used for canonical ID inheritance
         # during migrations from one source system to another).
-        # Note: Duplicate sourceIdentifiers would be collapsed here; upstream guarantees
-        # a 1:1 mapping between sourceIdentifier and predecessorIdentifier, so this is safe
+        #
+        # We require a 1:1 mapping between sourceIdentifier and
+        # predecessorIdentifier within a single mint_ids call: the predecessor
+        # dict comprehension is keyed by source id and would silently drop
+        # conflicting predecessors otherwise. Within a single work this
+        # invariant is guaranteed by the source data, but a batched mint_ids
+        # call can combine requests from multiple works, so we enforce it
+        # here. A conflict raises ValueError; the outer mint_ids() catches,
+        # rolls back, and re-raises so the caller (e.g. the transformer) can
+        # fall back to per-work minting.
         source_ids = list(dict.fromkeys(req[0] for req in requests))
-        predecessors = {req[0]: req[1] for req in requests if req[1] is not None}
-        predecessor_ids = list(predecessors.values())
+        predecessors: dict[SourceIdentifierKey, SourceIdentifierKey | None] = {}
+        for sid, pred in requests:
+            if sid in predecessors and predecessors[sid] != pred:
+                raise ValueError(
+                    f"Conflicting predecessors for {sid[0]}/{sid[1]}/{sid[2]}: "
+                    f"{predecessors[sid]} vs {pred}"
+                )
+            predecessors[sid] = pred
+        predecessor_ids = [p for p in predecessors.values() if p is not None]
 
         # Step 1: Batch lookup all source IDs + predecessor IDs together
         # -------------------------------------------------------------------------
@@ -271,6 +286,7 @@ class MintingResolver:
             for source_key, canonical_id in needs_inheritance:
                 result[source_key] = canonical_id
                 pred = predecessors[source_key]
+                assert pred is not None  # needs_inheritance only contains source ids with a predecessor
                 logger.info(
                     "Resolved ID",
                     source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",

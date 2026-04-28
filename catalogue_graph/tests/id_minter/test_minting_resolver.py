@@ -330,6 +330,46 @@ class TestErrorCases:
 
         assert count_identifier_rows(ids_db) == 0
 
+    def test_conflicting_predecessors_raise(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """Same source id with two different predecessors → ValueError, nothing committed."""
+        sid = SourceIdentifierKey("Item", "sierra", "i9999")
+        pred_a = SourceIdentifierKey("Item", "sierra", "i0000")
+        pred_b = SourceIdentifierKey("Item", "sierra", "i0001")
+
+        with pytest.raises(ValueError, match="Conflicting predecessors"):
+            MintingResolver.from_connection(ids_db).mint_ids(
+                [(sid, pred_a), (sid, pred_b)]
+            )
+
+        assert count_identifier_rows(ids_db) == 0
+
+    def test_duplicate_request_with_same_predecessor_is_allowed(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """Same (source_id, predecessor) repeated is fine — only conflicting predecessors raise."""
+        pred = SourceIdentifierKey("Work", "sierra", "b1234")
+        seed_identifier(ids_db, pred, "legacy01")
+
+        new_sid = SourceIdentifierKey("Work", "folio", "AC-1234")
+        result = MintingResolver.from_connection(ids_db).mint_ids(
+            [(new_sid, pred), (new_sid, pred)]
+        )
+        assert result[new_sid] == "legacy01"
+
+    def test_same_source_id_with_and_without_predecessor_raises(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """A None predecessor and a real predecessor for the same source id is a conflict."""
+        sid = SourceIdentifierKey("Item", "sierra", "i9999")
+        pred = SourceIdentifierKey("Item", "sierra", "i0000")
+
+        with pytest.raises(ValueError, match="Conflicting predecessors"):
+            MintingResolver.from_connection(ids_db).mint_ids([(sid, None), (sid, pred)])
+
+        assert count_identifier_rows(ids_db) == 0
+
 
 # ---------------------------------------------------------------------------
 # mint_ids — race conditions
