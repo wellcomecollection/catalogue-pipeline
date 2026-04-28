@@ -14,6 +14,7 @@ import structlog
 from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
     IdResolver,
+    MintRequest,
     SourceIdentifierKey,
 )
 from models.pipeline.identifier import SourceIdentifier
@@ -66,7 +67,7 @@ def make_key(source_identifier: dict) -> SourceIdentifierKey:
 
 def extract_source_identifiers(
     work_json: dict,
-) -> list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]:
+) -> list[MintRequest]:
     return [
         (
             make_key(node["sourceIdentifier"]),

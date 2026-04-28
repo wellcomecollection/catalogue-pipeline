@@ -15,7 +15,7 @@ from id_minter.embedder import (
     process_work,
 )
 from id_minter.id_minting_source import IdMintingSource
-from id_minter.models.identifier import IdResolver, SourceIdentifierKey
+from id_minter.models.identifier import IdResolver, MintRequest, SourceIdentifierKey
 from models.pipeline.identifier import SourceIdentifier
 
 logger = structlog.get_logger(__name__)
@@ -29,11 +29,7 @@ DEFAULT_MINT_BATCH_SIZE = 500
 # Per-work data carried through the batched mint pipeline:
 # (row_id, raw_doc, mint_requests) where mint_requests is the list returned by
 # extract_source_identifiers(raw_doc).
-_WorkEntry = tuple[
-    str,
-    dict,
-    list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]],
-]
+_WorkEntry = tuple[str, dict, list[MintRequest]]
 
 
 class IdMintingTransformer(ElasticBaseTransformer):
@@ -87,9 +83,7 @@ class IdMintingTransformer(ElasticBaseTransformer):
         if not works_in_batch:
             return
 
-        combined_requests: list[
-            tuple[SourceIdentifierKey, SourceIdentifierKey | None]
-        ] = []
+        combined_requests: list[MintRequest] = []
         for _, _, mint_requests in works_in_batch:
             combined_requests.extend(mint_requests)
 
