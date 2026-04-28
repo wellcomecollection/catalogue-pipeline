@@ -14,7 +14,7 @@ import boto3
 import structlog
 
 from id_minter.config import IdMinterConfig
-from id_minter.models.identifier import SourceId
+from id_minter.models.identifier import MintRequest, SourceIdentifierKey
 
 logger = structlog.get_logger(__name__)
 
@@ -61,7 +61,9 @@ class DataApiIdResolver:
             rows.append(row)
         return rows
 
-    def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]:
+    def lookup_ids(
+        self, source_ids: list[SourceIdentifierKey]
+    ) -> dict[SourceIdentifierKey, str]:
         if not source_ids:
             return {}
 
@@ -69,7 +71,7 @@ class DataApiIdResolver:
         for ont, sys, val in source_ids:
             batches[(ont, sys)].append(val)
 
-        result: dict[SourceId, str] = {}
+        result: dict[SourceIdentifierKey, str] = {}
         for (ontology_type, source_system), values in batches.items():
             for i in range(0, len(values), _BATCH_SIZE):
                 chunk = values[i : i + _BATCH_SIZE]
@@ -91,7 +93,7 @@ class DataApiIdResolver:
                     f"AND SourceId IN ({placeholders})"
                 )
                 for row in self._execute(sql, params):
-                    key: SourceId = (
+                    key = SourceIdentifierKey(
                         row["OntologyType"],
                         row["SourceSystem"],
                         row["SourceId"],
@@ -105,9 +107,7 @@ class DataApiIdResolver:
         )
         return result
 
-    def mint_ids(
-        self, requests: list[tuple[SourceId, SourceId | None]]
-    ) -> dict[SourceId, str]:
+    def mint_ids(self, requests: list[MintRequest]) -> dict[SourceIdentifierKey, str]:
         source_ids = [src for src, _ in requests]
         result = self.lookup_ids(source_ids)
         missing = set(source_ids) - set(result)

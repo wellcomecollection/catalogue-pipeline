@@ -1,7 +1,9 @@
-"""Embedder: resolve and embed canonical IDs into work JSON.
+"""Embedder: recursive JSON traversal + canonical-ID embedding for work documents.
 
-Combines recursive JSON traversal with an IdResolver (e.g. MintingResolver) to
-look up or mint canonical IDs for every sourceIdentifier node in a work.
+``extract_source_identifiers`` walks a work document and produces one
+``MintRequest`` per ``sourceIdentifier`` node (carrying the predecessor when
+present). ``embed_canonical_ids`` then takes the resulting id_map and writes
+``canonicalId`` / promoted ``type`` fields back onto the same nodes.
 """
 
 from __future__ import annotations
@@ -9,16 +11,11 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from typing import Any, cast
 
-import structlog
-
 from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
-    IdResolver,
+    MintRequest,
     SourceIdentifierKey,
 )
-from models.pipeline.identifier import SourceIdentifier
-
-logger = structlog.get_logger(__name__)
 
 
 def scan(obj: Any, predicate: Callable[[dict], bool]) -> Iterator[dict]:
@@ -66,7 +63,7 @@ def make_key(source_identifier: dict) -> SourceIdentifierKey:
 
 def extract_source_identifiers(
     work_json: dict,
-) -> list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]:
+) -> list[MintRequest]:
     return [
         (
             make_key(node["sourceIdentifier"]),
@@ -111,35 +108,3 @@ def embed_canonical_ids(
         dict,
         transform(work_json, lambda d: "sourceIdentifier" in d, _add_canonical_id),
     )
-
-
-def process_work(
-    work_json: dict,
-    resolver: IdResolver,
-) -> dict:
-    source_id = SourceIdentifier.model_validate(work_json["state"]["sourceIdentifier"])
-
-    mint_requests = extract_source_identifiers(work_json)
-    predecessor_count = sum(1 for _, pred in mint_requests if pred is not None)
-
-    logger.info(
-        "Embedding canonical IDs",
-        source_identifier=str(source_id),
-        source_identifier_count=len(mint_requests),
-        predecessor_count=predecessor_count,
-    )
-
-    found = resolver.mint_ids(mint_requests)  # type: ignore[arg-type]  # list invariance: SourceIdentifierKey is a NamedTuple subtype of SourceId
-    id_map: dict[SourceIdentifierKey, str] = {
-        SourceIdentifierKey(*k): v for k, v in found.items()
-    }
-
-    result = embed_canonical_ids(work_json, id_map)
-
-    logger.info(
-        "Finished embedding canonical IDs",
-        source_identifier=str(source_id),
-        ids_embedded=len(id_map),
-    )
-
-    return result

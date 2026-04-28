@@ -13,7 +13,7 @@ import structlog
 
 from id_minter.config import DBConfig
 from id_minter.database import DBConnection, DBCursor, get_connection
-from id_minter.models.identifier import SourceId
+from id_minter.models.identifier import MintRequest, SourceIdentifierKey
 
 logger = structlog.get_logger(__name__)
 
@@ -49,7 +49,9 @@ class MintingResolver:
     def __exit__(self, *exc: object) -> None:
         self.conn.close()
 
-    def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]:
+    def lookup_ids(
+        self, source_ids: list[SourceIdentifierKey]
+    ) -> dict[SourceIdentifierKey, str]:
         """
         Batch lookup of canonical IDs for multiple source identifiers.
 
@@ -100,15 +102,13 @@ class MintingResolver:
         results = cursor.fetchall()
 
         return {
-            (row["OntologyType"], row["SourceSystem"], row["SourceId"]): row[
-                "CanonicalId"
-            ]
+            SourceIdentifierKey(
+                row["OntologyType"], row["SourceSystem"], row["SourceId"]
+            ): row["CanonicalId"]
             for row in results
         }
 
-    def mint_ids(
-        self, requests: list[tuple[SourceId, SourceId | None]]
-    ) -> dict[SourceId, str]:
+    def mint_ids(self, requests: list[MintRequest]) -> dict[SourceIdentifierKey, str]:
         """
         Batch mint/lookup canonical IDs for multiple source identifiers.
 
@@ -153,10 +153,10 @@ class MintingResolver:
 
     def _mint_ids_with_rollback(
         self,
-        requests: list[tuple[SourceId, SourceId | None]],
-    ) -> dict[SourceId, str]:
+        requests: list[MintRequest],
+    ) -> dict[SourceIdentifierKey, str]:
         cursor = self.conn.cursor()
-        result: dict[SourceId, str] = {}
+        result: dict[SourceIdentifierKey, str] = {}
 
         # Build lookup sets
         # -------------------------------------------------------------------------
@@ -164,11 +164,26 @@ class MintingResolver:
         # mint/lookup). Also build a mapping from source_id -> predecessor for
         # records that have a predecessor specified (used for canonical ID inheritance
         # during migrations from one source system to another).
-        # Note: Duplicate sourceIdentifiers would be collapsed here; upstream guarantees
-        # a 1:1 mapping between sourceIdentifier and predecessorIdentifier, so this is safe
+        #
+        # We require a 1:1 mapping between sourceIdentifier and
+        # predecessorIdentifier within a single mint_ids call: the predecessor
+        # dict comprehension is keyed by source id and would silently drop
+        # conflicting predecessors otherwise. Within a single work this
+        # invariant is guaranteed by the source data, but a batched mint_ids
+        # call can combine requests from multiple works, so we enforce it
+        # here. A conflict raises ValueError; the outer mint_ids() catches,
+        # rolls back, and re-raises so the caller (e.g. the transformer) can
+        # fall back to per-work minting.
         source_ids = list(dict.fromkeys(req[0] for req in requests))
-        predecessors = {req[0]: req[1] for req in requests if req[1] is not None}
-        predecessor_ids = list(predecessors.values())
+        predecessors: dict[SourceIdentifierKey, SourceIdentifierKey | None] = {}
+        for sid, pred in requests:
+            if sid in predecessors and predecessors[sid] != pred:
+                raise ValueError(
+                    f"Conflicting predecessors for {sid[0]}/{sid[1]}/{sid[2]}: "
+                    f"{predecessors[sid]} vs {pred}"
+                )
+            predecessors[sid] = pred
+        predecessor_ids = [p for p in predecessors.values() if p is not None]
 
         # Step 1: Batch lookup all source IDs + predecessor IDs together
         # -------------------------------------------------------------------------
@@ -213,8 +228,10 @@ class MintingResolver:
         #   - needs_new_id: No predecessor -> claim a fresh ID from the pre-generated
         #     pool. This is for genuinely new records with no prior identity.
         missing = [sid for sid in source_ids if sid not in found]
-        needs_inheritance: list[tuple[SourceId, str]] = []  # (source_id, canonical_id)
-        needs_new_id: list[SourceId] = []
+        needs_inheritance: list[
+            tuple[SourceIdentifierKey, str]
+        ] = []  # (source_id, canonical_id)
+        needs_new_id: list[SourceIdentifierKey] = []
 
         for sid in missing:
             pred = predecessors.get(sid)
@@ -244,23 +261,34 @@ class MintingResolver:
         # identifiers table mapping the new source ID to the predecessor's canonical ID.
         # This creates multiple source IDs pointing to the same canonical ID.
         #
-        # ON DUPLICATE KEY UPDATE is used for idempotency - if a concurrent process
-        # already inserted this mapping, we don't fail. The "CanonicalId = CanonicalId"
-        # is a no-op that prevents the INSERT from failing on duplicates while also
-        # not changing any existing data.
+        # We issue a SINGLE multi-row INSERT rather than one per record - this is
+        # the same number of rows written, but only one network round trip to the
+        # database server. ON DUPLICATE KEY UPDATE is used for idempotency: if a
+        # concurrent process already inserted any of these mappings, the duplicate
+        # rows become no-ops ("CanonicalId = CanonicalId") instead of aborting the
+        # statement. Per-row semantics are unchanged.
         if needs_inheritance:
+            row_placeholder = "(%s, %s, %s, %s)"
+            values_clause = ", ".join([row_placeholder] * len(needs_inheritance))
+            params: list[str] = []
             for source_key, canonical_id in needs_inheritance:
                 ontology_type, source_system, source_id = source_key
-                cursor.execute(
-                    """
-                    INSERT INTO identifiers (OntologyType, SourceSystem, SourceId, CanonicalId)
-                    VALUES (%s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE CanonicalId = CanonicalId
-                """,
-                    (ontology_type, source_system, source_id, canonical_id),
-                )
+                params.extend([ontology_type, source_system, source_id, canonical_id])
+            cursor.execute(
+                f"""
+                INSERT INTO identifiers (OntologyType, SourceSystem, SourceId, CanonicalId)
+                VALUES {values_clause}
+                ON DUPLICATE KEY UPDATE CanonicalId = CanonicalId
+            """,
+                params,
+            )
+
+            for source_key, canonical_id in needs_inheritance:
                 result[source_key] = canonical_id
                 pred = predecessors[source_key]
+                assert (
+                    pred is not None
+                )  # needs_inheritance only contains source ids with a predecessor
                 logger.info(
                     "Resolved ID",
                     source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
@@ -311,24 +339,31 @@ class MintingResolver:
             # Step 5: Batch INSERT for new IDs
             # ---------------------------------------------------------------------
             # Attempt to insert mappings from each new source ID to its claimed
-            # canonical ID. Using ON DUPLICATE KEY UPDATE for idempotency - if a
-            # concurrent process already inserted a mapping for this source ID
-            # (potentially with a DIFFERENT canonical ID), we don't fail.
+            # canonical ID. As in Step 3, we issue a single multi-row INSERT to
+            # collapse per-row round trips. ON DUPLICATE KEY UPDATE preserves
+            # idempotency: if a concurrent process already inserted a mapping for
+            # any of these source IDs (potentially with a DIFFERENT canonical ID),
+            # those rows become no-ops and Step 6 will detect the lost race when
+            # it re-reads the actual canonical IDs.
             #
-            # We track claimed_mapping to remember which canonical ID we TRIED to
-            # assign to each source ID - this is needed for race detection in Step 6.
-            claimed_mapping: dict[SourceId, str] = {}
+            # We still record claimed_mapping so Step 6 can compare what we tried
+            # to insert against what's actually in the database.
+            claimed_mapping: dict[SourceIdentifierKey, str] = {}
+            row_placeholder = "(%s, %s, %s, %s)"
+            values_clause = ", ".join([row_placeholder] * len(needs_new_id))
+            params = []
             for source_key, canonical_id in zip(needs_new_id, free_ids, strict=True):
                 ontology_type, source_system, source_id = source_key
-                cursor.execute(
-                    """
-                    INSERT INTO identifiers (OntologyType, SourceSystem, SourceId, CanonicalId)
-                    VALUES (%s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE CanonicalId = CanonicalId
-                """,
-                    (ontology_type, source_system, source_id, canonical_id),
-                )
+                params.extend([ontology_type, source_system, source_id, canonical_id])
                 claimed_mapping[source_key] = canonical_id
+            cursor.execute(
+                f"""
+                INSERT INTO identifiers (OntologyType, SourceSystem, SourceId, CanonicalId)
+                VALUES {values_clause}
+                ON DUPLICATE KEY UPDATE CanonicalId = CanonicalId
+            """,
+                params,
+            )
 
             # Step 6: Verify which IDs were actually assigned (race detection)
             # ---------------------------------------------------------------------
@@ -353,9 +388,9 @@ class MintingResolver:
                 params,
             )
             actual = {
-                (row["OntologyType"], row["SourceSystem"], row["SourceId"]): row[
-                    "CanonicalId"
-                ]
+                SourceIdentifierKey(
+                    row["OntologyType"], row["SourceSystem"], row["SourceId"]
+                ): row["CanonicalId"]
                 for row in cursor.fetchall()
             }
 
