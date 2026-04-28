@@ -11,7 +11,7 @@ import pymysql
 import pymysql.cursors
 import pytest
 
-from id_minter.models.identifier import SourceId
+from id_minter.models.identifier import SourceIdentifierKey
 
 CATALOGUE_GRAPH_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -34,7 +34,7 @@ def seed_free_ids(conn: pymysql.connections.Connection, ids: list[str]) -> None:
 
 def seed_identifier(
     conn: pymysql.connections.Connection,
-    source_id: SourceId,
+    source_id: SourceIdentifierKey,
     canonical_id: str,
 ) -> None:
     """Insert a pre-existing source→canonical mapping.
@@ -70,7 +70,7 @@ def get_canonical_status(
 
 def get_identifier_row(
     conn: pymysql.connections.Connection,
-    source_id: SourceId,
+    source_id: SourceIdentifierKey,
 ) -> dict[str, str] | None:
     """Read back a single identifiers row by composite PK."""
     cursor = conn.cursor()

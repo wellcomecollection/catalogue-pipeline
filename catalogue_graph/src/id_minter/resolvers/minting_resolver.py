@@ -13,7 +13,7 @@ import structlog
 
 from id_minter.config import DBConfig
 from id_minter.database import DBConnection, DBCursor, get_connection
-from id_minter.models.identifier import SourceId
+from id_minter.models.identifier import MintRequest, SourceIdentifierKey
 
 logger = structlog.get_logger(__name__)
 
@@ -49,7 +49,9 @@ class MintingResolver:
     def __exit__(self, *exc: object) -> None:
         self.conn.close()
 
-    def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]:
+    def lookup_ids(
+        self, source_ids: list[SourceIdentifierKey]
+    ) -> dict[SourceIdentifierKey, str]:
         """
         Batch lookup of canonical IDs for multiple source identifiers.
 
@@ -100,15 +102,13 @@ class MintingResolver:
         results = cursor.fetchall()
 
         return {
-            (row["OntologyType"], row["SourceSystem"], row["SourceId"]): row[
-                "CanonicalId"
-            ]
+            SourceIdentifierKey(
+                row["OntologyType"], row["SourceSystem"], row["SourceId"]
+            ): row["CanonicalId"]
             for row in results
         }
 
-    def mint_ids(
-        self, requests: list[tuple[SourceId, SourceId | None]]
-    ) -> dict[SourceId, str]:
+    def mint_ids(self, requests: list[MintRequest]) -> dict[SourceIdentifierKey, str]:
         """
         Batch mint/lookup canonical IDs for multiple source identifiers.
 
@@ -153,10 +153,10 @@ class MintingResolver:
 
     def _mint_ids_with_rollback(
         self,
-        requests: list[tuple[SourceId, SourceId | None]],
-    ) -> dict[SourceId, str]:
+        requests: list[MintRequest],
+    ) -> dict[SourceIdentifierKey, str]:
         cursor = self.conn.cursor()
-        result: dict[SourceId, str] = {}
+        result: dict[SourceIdentifierKey, str] = {}
 
         # Build lookup sets
         # -------------------------------------------------------------------------
@@ -213,8 +213,10 @@ class MintingResolver:
         #   - needs_new_id: No predecessor -> claim a fresh ID from the pre-generated
         #     pool. This is for genuinely new records with no prior identity.
         missing = [sid for sid in source_ids if sid not in found]
-        needs_inheritance: list[tuple[SourceId, str]] = []  # (source_id, canonical_id)
-        needs_new_id: list[SourceId] = []
+        needs_inheritance: list[
+            tuple[SourceIdentifierKey, str]
+        ] = []  # (source_id, canonical_id)
+        needs_new_id: list[SourceIdentifierKey] = []
 
         for sid in missing:
             pred = predecessors.get(sid)
@@ -328,7 +330,7 @@ class MintingResolver:
             #
             # We still record claimed_mapping so Step 6 can compare what we tried
             # to insert against what's actually in the database.
-            claimed_mapping: dict[SourceId, str] = {}
+            claimed_mapping: dict[SourceIdentifierKey, str] = {}
             row_placeholder = "(%s, %s, %s, %s)"
             values_clause = ", ".join([row_placeholder] * len(needs_new_id))
             params = []
@@ -368,9 +370,9 @@ class MintingResolver:
                 params,
             )
             actual = {
-                (row["OntologyType"], row["SourceSystem"], row["SourceId"]): row[
-                    "CanonicalId"
-                ]
+                SourceIdentifierKey(
+                    row["OntologyType"], row["SourceSystem"], row["SourceId"]
+                ): row["CanonicalId"]
                 for row in cursor.fetchall()
             }
 

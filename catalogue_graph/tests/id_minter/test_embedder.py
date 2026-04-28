@@ -38,7 +38,6 @@ from id_minter.embedder import (
 )
 from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
-    SourceId,
     SourceIdentifierKey,
 )
 
@@ -74,18 +73,22 @@ def key_of(si: dict) -> SourceIdentifierKey:
 
 
 class FakeResolver:
-    def __init__(self, ids: dict[SourceId, str] | None = None):
+    def __init__(self, ids: dict[SourceIdentifierKey, str] | None = None):
         self.ids = ids or {}
-        self.lookup_calls: list[list[SourceId]] = []
-        self.mint_calls: list[list[tuple[SourceId, SourceId | None]]] = []
+        self.lookup_calls: list[list[SourceIdentifierKey]] = []
+        self.mint_calls: list[
+            list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]
+        ] = []
 
-    def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]:
+    def lookup_ids(
+        self, source_ids: list[SourceIdentifierKey]
+    ) -> dict[SourceIdentifierKey, str]:
         self.lookup_calls.append(source_ids)
         return {k: v for k, v in self.ids.items() if k in source_ids}
 
     def mint_ids(
-        self, requests: list[tuple[SourceId, SourceId | None]]
-    ) -> dict[SourceId, str]:
+        self, requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]
+    ) -> dict[SourceIdentifierKey, str]:
         self.mint_calls.append(requests)
         return {req[0]: self.ids[req[0]] for req in requests}
 
@@ -304,7 +307,7 @@ class TestProcessWork:
         doc = {"state": {"sourceIdentifier": si}, "sourceIdentifier": si}
 
         key = key_of(si)
-        resolver = FakeResolver(ids={(key[0], key[1], key[2]): cid})
+        resolver = FakeResolver(ids={key: cid})
 
         result = process_work(doc, resolver)
 
@@ -318,13 +321,13 @@ class TestProcessWork:
         doc = {"state": {"sourceIdentifier": si}, "sourceIdentifier": si}
 
         key = key_of(si)
-        resolver = FakeResolver(ids={(key[0], key[1], key[2]): cid})
+        resolver = FakeResolver(ids={key: cid})
 
         result = process_work(doc, resolver)
 
         assert result["canonicalId"] == cid
         assert len(resolver.mint_calls) == 1
-        assert resolver.mint_calls[0][0] == ((key[0], key[1], key[2]), None)
+        assert resolver.mint_calls[0][0] == (key, None)
 
     def test_multiple_identifiers_minted(self) -> None:
         si1 = create_source_identifier()
@@ -342,8 +345,8 @@ class TestProcessWork:
         k2 = key_of(si2)
         resolver = FakeResolver(
             ids={
-                (k1[0], k1[1], k1[2]): cid1,
-                (k2[0], k2[1], k2[2]): cid2,
+                k1: cid1,
+                k2: cid2,
             },
         )
 
@@ -374,8 +377,8 @@ class TestProcessWork:
         resolver.mint_ids = lambda reqs: (  # type: ignore[assignment]
             resolver.mint_calls.append(reqs)  # type: ignore[func-returns-value]
             or {
-                (k1[0], k1[1], k1[2]): cid1,
-                (k2[0], k2[1], k2[2]): cid2,
+                k1: cid1,
+                k2: cid2,
             }
         )
 
@@ -395,7 +398,7 @@ class TestProcessWork:
 
         k_new = key_of(si_new)
         k_pred = key_of(si_pred)
-        resolver = FakeResolver(ids={(k_new[0], k_new[1], k_new[2]): cid})
+        resolver = FakeResolver(ids={k_new: cid})
 
         result = process_work(doc, resolver)
 
@@ -413,7 +416,7 @@ class TestProcessWork:
         }
 
         key = key_of(si)
-        resolver = FakeResolver(ids={(key[0], key[1], key[2]): cid})
+        resolver = FakeResolver(ids={key: cid})
 
         result = process_work(doc, resolver)
 
@@ -448,8 +451,8 @@ class TestProcessWork:
         k_item_pred = key_of(si_item_pred)
         resolver = FakeResolver(
             ids={
-                (k_work[0], k_work[1], k_work[2]): cid_work,
-                (k_item[0], k_item[1], k_item[2]): cid_item,
+                k_work: cid_work,
+                k_item: cid_item,
             }
         )
 
@@ -473,7 +476,7 @@ class TestProcessWork:
 
         k_new = key_of(si_new)
         k_pred = key_of(si_pred)
-        resolver = FakeResolver(ids={(k_new[0], k_new[1], k_new[2]): cid})
+        resolver = FakeResolver(ids={k_new: cid})
 
         result = process_work(doc, resolver)
 
@@ -513,8 +516,8 @@ class TestProcessWork:
         k_item_pred = key_of(si_item_pred)
         resolver = FakeResolver(
             ids={
-                (k_work[0], k_work[1], k_work[2]): cid_work,
-                (k_item[0], k_item[1], k_item[2]): cid_item,
+                k_work: cid_work,
+                k_item: cid_item,
             }
         )
 

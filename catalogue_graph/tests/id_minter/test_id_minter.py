@@ -24,7 +24,7 @@ from elasticsearch import Elasticsearch
 
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.id_minting_source import IdMintingSource
-from id_minter.models.identifier import SourceId
+from id_minter.models.identifier import SourceIdentifierKey
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
 )
@@ -198,7 +198,9 @@ class TestExecuteWithRealResolver:
         ids_db: pymysql.connections.Connection,
     ) -> None:
         """A work that already has a canonical ID reuses it without claiming from pool."""
-        existing_sid: SourceId = ("Work", "sierra-system-number", "b5555")
+        existing_sid: SourceIdentifierKey = SourceIdentifierKey(
+            "Work", "sierra-system-number", "b5555"
+        )
         seed_identifier(ids_db, existing_sid, "exist001")
         seed_free_ids(ids_db, ["spare001"])  # should remain untouched
 

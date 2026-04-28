@@ -12,7 +12,7 @@ from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import (
     IdMintingTransformer,
 )
-from id_minter.models.identifier import SourceId
+from id_minter.models.identifier import SourceIdentifierKey
 from models.pipeline.identifier import SourceIdentifier
 from tests.mocks import MockElasticsearchClient
 
@@ -24,16 +24,20 @@ from tests.mocks import MockElasticsearchClient
 class FakeResolver:
     """Deterministic IdResolver that returns pre-configured canonical IDs."""
 
-    def __init__(self, ids: dict[SourceId, str] | None = None):
+    def __init__(self, ids: dict[SourceIdentifierKey, str] | None = None):
         self.ids = ids or {}
-        self.mint_calls: list[list[tuple[SourceId, SourceId | None]]] = []
+        self.mint_calls: list[
+            list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]
+        ] = []
 
-    def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]:
+    def lookup_ids(
+        self, source_ids: list[SourceIdentifierKey]
+    ) -> dict[SourceIdentifierKey, str]:
         return {k: v for k, v in self.ids.items() if k in source_ids}
 
     def mint_ids(
-        self, requests: list[tuple[SourceId, SourceId | None]]
-    ) -> dict[SourceId, str]:
+        self, requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]
+    ) -> dict[SourceIdentifierKey, str]:
         self.mint_calls.append(requests)
         return {req[0]: self.ids[req[0]] for req in requests if req[0] in self.ids}
 
@@ -96,7 +100,11 @@ class TestTransform:
         si = _make_source_identifier()
         doc = _make_work_doc(si)
         resolver = FakeResolver(
-            ids={("Work", "sierra-system-number", "b1000001"): "abcd1234"}
+            ids={
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "abcd1234"
+            }
         )
 
         transformer = IdMintingTransformer(
@@ -125,8 +133,12 @@ class TestTransform:
 
         resolver = FakeResolver(
             ids={
-                ("Work", "sierra-system-number", "b1000001"): "abcd1234",
-                ("Item", "sierra-system-number", "i2000001"): "efgh5678",
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "abcd1234",
+                SourceIdentifierKey(
+                    "Item", "sierra-system-number", "i2000001"
+                ): "efgh5678",
             }
         )
 
@@ -165,12 +177,15 @@ class TestTransform:
         doc = _make_work_doc(si)
 
         class FailingResolver:
-            def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]:
+            def lookup_ids(
+                self, source_ids: list[SourceIdentifierKey]
+            ) -> dict[SourceIdentifierKey, str]:
                 return {}
 
             def mint_ids(
-                self, requests: list[tuple[SourceId, SourceId | None]]
-            ) -> dict[SourceId, str]:
+                self,
+                requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]],
+            ) -> dict[SourceIdentifierKey, str]:
                 raise RuntimeError("DB connection failed")
 
         transformer = IdMintingTransformer(
@@ -213,7 +228,11 @@ class TestStreamToIndex:
         doc = _make_work_doc(si)
 
         resolver = FakeResolver(
-            ids={("Work", "sierra-system-number", "b1000001"): "abcd1234"}
+            ids={
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "abcd1234"
+            }
         )
 
         MockElasticsearchClient.reset_mocks()
@@ -238,7 +257,11 @@ class TestStreamToIndex:
         doc = _make_work_doc(si)
 
         resolver = FakeResolver(
-            ids={("Work", "sierra-system-number", "b1000001"): "abcd1234"}
+            ids={
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "abcd1234"
+            }
         )
 
         def fake_bulk(
@@ -293,9 +316,15 @@ class TestBatchedMinting:
 
         resolver = FakeResolver(
             ids={
-                ("Work", "sierra-system-number", "b1000001"): "aaaa1111",
-                ("Work", "sierra-system-number", "b1000002"): "bbbb2222",
-                ("Work", "sierra-system-number", "b1000003"): "cccc3333",
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "aaaa1111",
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000002"
+                ): "bbbb2222",
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000003"
+                ): "cccc3333",
             }
         )
 
@@ -311,9 +340,9 @@ class TestBatchedMinting:
         assert len(resolver.mint_calls) == 1
         sids_in_call = {req[0] for req in resolver.mint_calls[0]}
         assert sids_in_call == {
-            ("Work", "sierra-system-number", "b1000001"),
-            ("Work", "sierra-system-number", "b1000002"),
-            ("Work", "sierra-system-number", "b1000003"),
+            SourceIdentifierKey("Work", "sierra-system-number", "b1000001"),
+            SourceIdentifierKey("Work", "sierra-system-number", "b1000002"),
+            SourceIdentifierKey("Work", "sierra-system-number", "b1000003"),
         }
         canonical_ids = {row_id: doc["state"]["canonicalId"] for row_id, doc in results}
         assert canonical_ids == {
@@ -331,7 +360,9 @@ class TestBatchedMinting:
         ]
         resolver = FakeResolver(
             ids={
-                ("Work", "sierra-system-number", f"b100000{i}"): f"canon{i:04d}"
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", f"b100000{i}"
+                ): f"canon{i:04d}"
                 for i in range(5)
             }
         )
@@ -360,24 +391,35 @@ class TestBatchedMinting:
             _make_source_identifier("Work", "sierra-system-number", "b1000003")
         )
 
-        bad_sid: SourceId = ("Work", "sierra-system-number", "b1000002")
+        bad_sid: SourceIdentifierKey = SourceIdentifierKey(
+            "Work", "sierra-system-number", "b1000002"
+        )
 
         class FlakyResolver:
             """Fails when ``bad_sid`` is in the batch; otherwise resolves all."""
 
             def __init__(self) -> None:
-                self.mint_calls: list[list[tuple[SourceId, SourceId | None]]] = []
+                self.mint_calls: list[
+                    list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]]
+                ] = []
                 self.ids = {
-                    ("Work", "sierra-system-number", "b1000001"): "aaaa1111",
-                    ("Work", "sierra-system-number", "b1000003"): "cccc3333",
+                    SourceIdentifierKey(
+                        "Work", "sierra-system-number", "b1000001"
+                    ): "aaaa1111",
+                    SourceIdentifierKey(
+                        "Work", "sierra-system-number", "b1000003"
+                    ): "cccc3333",
                 }
 
-            def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]:
+            def lookup_ids(
+                self, source_ids: list[SourceIdentifierKey]
+            ) -> dict[SourceIdentifierKey, str]:
                 return {k: v for k, v in self.ids.items() if k in source_ids}
 
             def mint_ids(
-                self, requests: list[tuple[SourceId, SourceId | None]]
-            ) -> dict[SourceId, str]:
+                self,
+                requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]],
+            ) -> dict[SourceIdentifierKey, str]:
                 self.mint_calls.append(requests)
                 if any(req[0] == bad_sid for req in requests):
                     raise RuntimeError("simulated batch failure")
@@ -415,7 +457,11 @@ class TestBatchedMinting:
         broken: dict[str, Any] = {"data": {"title": "no state"}}
 
         resolver = FakeResolver(
-            ids={("Work", "sierra-system-number", "b1000001"): "aaaa1111"}
+            ids={
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "aaaa1111"
+            }
         )
 
         transformer = IdMintingTransformer(
@@ -432,7 +478,9 @@ class TestBatchedMinting:
         # The broken doc shouldn't have made it into the resolver call.
         assert len(resolver.mint_calls) == 1
         sids_in_call = {req[0] for req in resolver.mint_calls[0]}
-        assert sids_in_call == {("Work", "sierra-system-number", "b1000001")}
+        assert sids_in_call == {
+            SourceIdentifierKey("Work", "sierra-system-number", "b1000001")
+        }
 
     def test_falls_back_to_per_work_on_conflicting_predecessors_in_chunk(
         self,
@@ -476,9 +524,15 @@ class TestBatchedMinting:
 
         resolver = FakeResolver(
             ids={
-                ("Work", "sierra-system-number", "b1000001"): "aaaa1111",
-                ("Work", "sierra-system-number", "b1000002"): "bbbb2222",
-                ("Item", "sierra-system-number", "i9000001"): "iiii9999",
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "aaaa1111",
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000002"
+                ): "bbbb2222",
+                SourceIdentifierKey(
+                    "Item", "sierra-system-number", "i9000001"
+                ): "iiii9999",
             }
         )
 

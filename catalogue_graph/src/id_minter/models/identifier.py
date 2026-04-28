@@ -10,8 +10,6 @@ TYPES_NORMALIZED_TO_CONCEPT: frozenset[ConceptType] = frozenset(
     {"Person", "Organisation", "Place", "Agent", "Meeting", "Genre", "Period"}
 )
 
-SourceId = tuple[str, str, str]
-
 
 class SourceIdentifierKey(NamedTuple):
     ontology_type: str
@@ -28,8 +26,10 @@ MintRequest = tuple[SourceIdentifierKey, SourceIdentifierKey | None]
 
 @runtime_checkable
 class IdResolver(Protocol):
-    def lookup_ids(self, source_ids: list[SourceId]) -> dict[SourceId, str]: ...
+    def lookup_ids(
+        self, source_ids: list[SourceIdentifierKey]
+    ) -> dict[SourceIdentifierKey, str]: ...
 
     def mint_ids(
-        self, requests: list[tuple[SourceId, SourceId | None]]
-    ) -> dict[SourceId, str]: ...
+        self, requests: list[MintRequest]
+    ) -> dict[SourceIdentifierKey, str]: ...

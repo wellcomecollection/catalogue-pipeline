@@ -24,7 +24,7 @@ import pymysql.connections
 import pymysql.cursors
 import pytest
 
-from id_minter.models.identifier import SourceId
+from id_minter.models.identifier import SourceIdentifierKey
 from id_minter.resolvers.minting_resolver import MintingResolver
 from tests.id_minter.conftest import (
     count_assigned_ids,
@@ -49,7 +49,8 @@ class TestLookupIds:
     ) -> None:
         """All source IDs found in DB are returned."""
         identifiers = [
-            (("Work", "sierra", f"b{i}"), f"canon{i:03d}") for i in range(1, 6)
+            (SourceIdentifierKey("Work", "sierra", f"b{i}"), f"canon{i:03d}")
+            for i in range(1, 6)
         ]
         for sid, cid in identifiers:
             seed_identifier(ids_db, sid, cid)
@@ -66,19 +67,19 @@ class TestLookupIds:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """Partial match — missing IDs excluded from result."""
-        existing: SourceId = ("Work", "sierra", "b1234")
-        missing: SourceId = ("Work", "sierra", "b9999")
+        existing: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b1234")
+        missing: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b9999")
         seed_identifier(ids_db, existing, "found001")
 
         result = MintingResolver.from_connection(ids_db).lookup_ids([existing, missing])
-        assert result == {("Work", "sierra", "b1234"): "found001"}
+        assert result == {SourceIdentifierKey("Work", "sierra", "b1234"): "found001"}
 
     def test_returns_empty_when_no_matches(
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """None of the requested source IDs exist."""
         result = MintingResolver.from_connection(ids_db).lookup_ids(
-            [("Work", "sierra", "b99999")]
+            [SourceIdentifierKey("Work", "sierra", "b99999")]
         )
         assert result == {}
 
@@ -92,8 +93,8 @@ class TestLookupIds:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """Work and Image source IDs in the same batch."""
-        work_sid: SourceId = ("Work", "sierra", "b1111")
-        image_sid: SourceId = ("Image", "mets", "img-001")
+        work_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b1111")
+        image_sid: SourceIdentifierKey = SourceIdentifierKey("Image", "mets", "img-001")
         seed_identifier(ids_db, work_sid, "wk000001")
         seed_identifier(ids_db, image_sid, "im000001")
 
@@ -122,7 +123,8 @@ class TestMintNewIds:
     ) -> None:
         """All source IDs already exist → no free IDs consumed."""
         identifiers = [
-            (("Work", "folio", f"b{i}"), f"exist{i:03d}") for i in range(1, 4)
+            (SourceIdentifierKey("Work", "folio", f"b{i}"), f"exist{i:03d}")
+            for i in range(1, 4)
         ]
         for sid, cid in identifiers:
             seed_identifier(ids_db, sid, cid)
@@ -144,7 +146,9 @@ class TestMintNewIds:
         """All source IDs are new with no predecessors → claims free IDs, inserts mappings."""
         free = [f"newid{i:03d}" for i in range(1, 4)]
         seed_free_ids(ids_db, free)
-        sids: list[SourceId] = [("Work", "folio", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceIdentifierKey] = [
+            SourceIdentifierKey("Work", "folio", f"b{i}") for i in range(1, 4)
+        ]
 
         result = MintingResolver.from_connection(ids_db).mint_ids(
             [(s, None) for s in sids]
@@ -162,11 +166,13 @@ class TestMintNewIds:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """Existing IDs returned as-is; only new IDs claim from pool."""
-        existing_sid: SourceId = ("Work", "axiell", "b0001")
+        existing_sid: SourceIdentifierKey = SourceIdentifierKey(
+            "Work", "axiell", "b0001"
+        )
         seed_identifier(ids_db, existing_sid, "existaaa")
         seed_free_ids(ids_db, ["newbbb01"])
 
-        new_sid: SourceId = ("Work", "folio", "b0002")
+        new_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b0002")
         result = MintingResolver.from_connection(ids_db).mint_ids(
             [(existing_sid, None), (new_sid, None)]
         )
@@ -187,10 +193,10 @@ class TestPredecessorInheritance:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """New source ID inherits predecessor's canonical ID."""
-        pred: SourceId = ("Work", "sierra", "b1234")
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b1234")
         seed_identifier(ids_db, pred, "legacy01")
 
-        new_sid: SourceId = ("Work", "folio", "AC-5678")
+        new_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-5678")
         result = MintingResolver.from_connection(ids_db).mint_ids([(new_sid, pred)])
 
         assert result[new_sid] == "legacy01"
@@ -202,13 +208,13 @@ class TestPredecessorInheritance:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """Each new source ID inherits from its own predecessor."""
-        pred_a: SourceId = ("Work", "sierra", "b1111")
-        pred_b: SourceId = ("Work", "sierra", "b2222")
+        pred_a: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b1111")
+        pred_b: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b2222")
         seed_identifier(ids_db, pred_a, "legacyaa")
         seed_identifier(ids_db, pred_b, "legacybb")
 
-        new_a: SourceId = ("Work", "folio", "AC-1111")
-        new_b: SourceId = ("Work", "folio", "AC-2222")
+        new_a: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-1111")
+        new_b: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-2222")
 
         result = MintingResolver.from_connection(ids_db).mint_ids(
             [(new_a, pred_a), (new_b, pred_b)]
@@ -223,10 +229,10 @@ class TestPredecessorInheritance:
         """Source ID already has canonical ID from a prior predecessor
         mint — re-processing without predecessor returns the same ID.
         """
-        pred: SourceId = ("Work", "sierra", "b4444")
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b4444")
         seed_identifier(ids_db, pred, "stable01")
 
-        new_sid: SourceId = ("Work", "folio", "AC-4444")
+        new_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-4444")
         # First mint with predecessor
         MintingResolver.from_connection(ids_db).mint_ids([(new_sid, pred)])
 
@@ -248,7 +254,7 @@ class TestIdempotency:
     ) -> None:
         """Same result both times, no extra IDs claimed."""
         seed_free_ids(ids_db, ["idem0001", "idem0002"])
-        sid: SourceId = ("Work", "folio", "b7000")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b7000")
 
         minter = MintingResolver.from_connection(ids_db)
         first = minter.mint_ids([(sid, None)])
@@ -264,8 +270,8 @@ class TestIdempotency:
         """Deduplicated — single canonical ID per unique source ID."""
         seed_free_ids(ids_db, ["dup00001", "dup00002", "dup00003", "dup00004"])
 
-        sid_a: SourceId = ("Work", "folio", "b8001")
-        sid_b: SourceId = ("Work", "folio", "b8002")
+        sid_a: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b8001")
+        sid_b: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b8002")
 
         result = MintingResolver.from_connection(ids_db).mint_ids(
             [(sid_a, None), (sid_b, None), (sid_a, None), (sid_b, None)]
@@ -289,8 +295,10 @@ class TestErrorCases:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """Predecessor not found → ValueError, nothing committed."""
-        new_sid: SourceId = ("Work", "axiell", "AC-9999")
-        missing_pred: SourceId = ("Work", "sierra", "b0000")
+        new_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "axiell", "AC-9999")
+        missing_pred: SourceIdentifierKey = SourceIdentifierKey(
+            "Work", "sierra", "b0000"
+        )
 
         with pytest.raises(ValueError, match="Predecessor not found"):
             MintingResolver.from_connection(ids_db).mint_ids([(new_sid, missing_pred)])
@@ -301,7 +309,9 @@ class TestErrorCases:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """Zero free IDs available → RuntimeError."""
-        sids: list[SourceId] = [("Work", "axiell", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceIdentifierKey] = [
+            SourceIdentifierKey("Work", "axiell", f"b{i}") for i in range(1, 4)
+        ]
 
         with pytest.raises(RuntimeError, match="Free ID pool exhausted"):
             MintingResolver.from_connection(ids_db).mint_ids([(s, None) for s in sids])
@@ -311,7 +321,9 @@ class TestErrorCases:
     ) -> None:
         """Fewer free IDs than needed → RuntimeError, nothing committed."""
         seed_free_ids(ids_db, ["short001"])
-        sids: list[SourceId] = [("Work", "folio", f"b{i}") for i in range(1, 4)]
+        sids: list[SourceIdentifierKey] = [
+            SourceIdentifierKey("Work", "folio", f"b{i}") for i in range(1, 4)
+        ]
 
         with pytest.raises(RuntimeError, match="Free ID pool exhausted"):
             MintingResolver.from_connection(ids_db).mint_ids([(s, None) for s in sids])
@@ -340,14 +352,14 @@ class TestRaceConditions:
         lookup and our INSERT.  FOR SHARE re-read discovers the winner's
         canonical ID.
         """
-        sid: SourceId = ("Work", "folio", "b5555")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b5555")
         seed_free_ids(ids_db, ["loser001"])
 
         original_lookup = MintingResolver.lookup_ids
 
         def lookup_then_race(
-            self_: MintingResolver, source_ids: list[SourceId]
-        ) -> dict[SourceId, str]:
+            self_: MintingResolver, source_ids: list[SourceIdentifierKey]
+        ) -> dict[SourceIdentifierKey, str]:
             result = original_lookup(self_, source_ids)
             # Simulate the winner inserting via a separate connection
             winner = open_second_connection()
@@ -368,14 +380,14 @@ class TestRaceConditions:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """The free ID claimed by the race loser stays 'free'."""
-        sid: SourceId = ("Work", "axiell", "b6666")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "axiell", "b6666")
         seed_free_ids(ids_db, ["unused01"])
 
         original_lookup = MintingResolver.lookup_ids
 
         def lookup_then_race(
-            self_: MintingResolver, source_ids: list[SourceId]
-        ) -> dict[SourceId, str]:
+            self_: MintingResolver, source_ids: list[SourceIdentifierKey]
+        ) -> dict[SourceIdentifierKey, str]:
             result = original_lookup(self_, source_ids)
             winner = open_second_connection()
             try:
@@ -399,17 +411,17 @@ class TestRaceConditions:
         process.  Only the 2 IDs we actually won are marked 'assigned';
         the third stays 'free'.
         """
-        won_a: SourceId = ("Work", "folio", "b7001")
-        won_b: SourceId = ("Work", "folio", "b7002")
-        lost: SourceId = ("Work", "folio", "b7003")
+        won_a: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b7001")
+        won_b: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b7002")
+        lost: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b7003")
 
         seed_free_ids(ids_db, ["pool0001", "pool0002", "pool0003"])
 
         original_lookup = MintingResolver.lookup_ids
 
         def lookup_then_race(
-            self_: MintingResolver, source_ids: list[SourceId]
-        ) -> dict[SourceId, str]:
+            self_: MintingResolver, source_ids: list[SourceIdentifierKey]
+        ) -> dict[SourceIdentifierKey, str]:
             result = original_lookup(self_, source_ids)
             # Concurrent winner steals only `lost`
             winner = open_second_connection()
@@ -459,9 +471,11 @@ class TestTransactionAtomicity:
         """
         seed_free_ids(ids_db, ["atom0001"])
 
-        ok_sid: SourceId = ("Work", "folio", "b9001")
-        bad_sid: SourceId = ("Work", "folio", "AC-9002")
-        missing_pred: SourceId = ("Work", "folio", "b0000")
+        ok_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b9001")
+        bad_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-9002")
+        missing_pred: SourceIdentifierKey = SourceIdentifierKey(
+            "Work", "folio", "b0000"
+        )
 
         with pytest.raises(ValueError, match="Predecessor not found"):
             MintingResolver.from_connection(ids_db).mint_ids(
@@ -480,12 +494,12 @@ class TestTransactionAtomicity:
         source IDs in the batch.  The entire transaction is rolled back,
         including the successor's inherited mapping.
         """
-        pred: SourceId = ("Work", "sierra", "b1234")
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b1234")
         seed_identifier(ids_db, pred, "legacy01")
 
-        successor: SourceId = ("Work", "folio", "AC-1234")
-        new_a: SourceId = ("Work", "folio", "b9010")
-        new_b: SourceId = ("Work", "folio", "b9011")
+        successor: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-1234")
+        new_a: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b9010")
+        new_b: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "b9011")
 
         # Only 1 free ID but need 2 for the new source IDs
         seed_free_ids(ids_db, ["short001"])
@@ -520,9 +534,9 @@ class TestPoolManagement:
     ) -> None:
         """After a successful mint, claimed IDs are 'assigned'."""
         seed_free_ids(ids_db, ["pool0001", "pool0002"])
-        sids: list[SourceId] = [
-            ("Work", "sierra", "b6001"),
-            ("Work", "sierra", "b6002"),
+        sids: list[SourceIdentifierKey] = [
+            SourceIdentifierKey("Work", "sierra", "b6001"),
+            SourceIdentifierKey("Work", "sierra", "b6002"),
         ]
 
         result = MintingResolver.from_connection(ids_db).mint_ids(
@@ -540,17 +554,17 @@ class TestPoolManagement:
         """Batch claims 3 free IDs from pool, but a race means only
         2 are used.  The unused one stays 'free'.
         """
-        sid_a: SourceId = ("Work", "sierra", "b6101")
-        sid_b: SourceId = ("Work", "sierra", "b6102")
-        stolen: SourceId = ("Work", "sierra", "b6103")
+        sid_a: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6101")
+        sid_b: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6102")
+        stolen: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6103")
 
         seed_free_ids(ids_db, ["mgmt0001", "mgmt0002", "mgmt0003"])
 
         original_lookup = MintingResolver.lookup_ids
 
         def lookup_then_race(
-            self_: MintingResolver, source_ids: list[SourceId]
-        ) -> dict[SourceId, str]:
+            self_: MintingResolver, source_ids: list[SourceIdentifierKey]
+        ) -> dict[SourceIdentifierKey, str]:
             result = original_lookup(self_, source_ids)
             winner = open_second_connection()
             try:
@@ -589,7 +603,7 @@ class TestRoundTripBatching:
     def _count_insert_statements(
         self,
         ids_db: pymysql.connections.Connection,
-        requests: list[tuple[SourceId, SourceId | None]],
+        requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]],
     ) -> int:
         cursor_factory = ids_db.cursor
         insert_count = 0
@@ -619,8 +633,8 @@ class TestRoundTripBatching:
     ) -> None:
         """A batch of N new source IDs should issue exactly ONE INSERT."""
         seed_free_ids(ids_db, [f"new{i:05d}" for i in range(5)])
-        requests: list[tuple[SourceId, SourceId | None]] = [
-            (("Work", "folio", f"b{i}"), None) for i in range(5)
+        requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]] = [
+            (SourceIdentifierKey("Work", "folio", f"b{i}"), None) for i in range(5)
         ]
 
         insert_count = self._count_insert_statements(ids_db, requests)
@@ -634,12 +648,15 @@ class TestRoundTripBatching:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """A batch of N predecessor-inheriting source IDs → ONE INSERT."""
-        predecessors: list[SourceId] = [("Work", "sierra", f"b{i}") for i in range(5)]
+        predecessors: list[SourceIdentifierKey] = [
+            SourceIdentifierKey("Work", "sierra", f"b{i}") for i in range(5)
+        ]
         for i, pred in enumerate(predecessors):
             seed_identifier(ids_db, pred, f"legacy{i:02d}")
 
-        requests: list[tuple[SourceId, SourceId | None]] = [
-            (("Work", "folio", f"AC-{i}"), pred) for i, pred in enumerate(predecessors)
+        requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]] = [
+            (SourceIdentifierKey("Work", "folio", f"AC-{i}"), pred)
+            for i, pred in enumerate(predecessors)
         ]
 
         insert_count = self._count_insert_statements(ids_db, requests)
@@ -652,15 +669,15 @@ class TestRoundTripBatching:
         self, ids_db: pymysql.connections.Connection
     ) -> None:
         """One INSERT for the inheritance branch + one for the new-ID branch."""
-        pred: SourceId = ("Work", "sierra", "b9000")
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b9000")
         seed_identifier(ids_db, pred, "legacy99")
         seed_free_ids(ids_db, ["mix00001", "mix00002", "mix00003"])
 
-        requests: list[tuple[SourceId, SourceId | None]] = [
-            (("Work", "folio", "AC-9000"), pred),  # inheritance
-            (("Work", "folio", "b9001"), None),  # new
-            (("Work", "folio", "b9002"), None),  # new
-            (("Work", "folio", "b9003"), None),  # new
+        requests: list[tuple[SourceIdentifierKey, SourceIdentifierKey | None]] = [
+            (SourceIdentifierKey("Work", "folio", "AC-9000"), pred),  # inheritance
+            (SourceIdentifierKey("Work", "folio", "b9001"), None),  # new
+            (SourceIdentifierKey("Work", "folio", "b9002"), None),  # new
+            (SourceIdentifierKey("Work", "folio", "b9003"), None),  # new
         ]
 
         insert_count = self._count_insert_statements(ids_db, requests)

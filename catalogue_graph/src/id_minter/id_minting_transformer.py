@@ -110,7 +110,7 @@ class IdMintingTransformer(ElasticBaseTransformer):
             seen_predecessors[key] = predecessor
 
         try:
-            found = self.resolver.mint_ids(combined_requests)  # type: ignore[arg-type]  # SourceIdentifierKey is a NamedTuple subtype of SourceId
+            found = self.resolver.mint_ids(combined_requests)
         except Exception:
             # Preserve per-work error isolation: a failed batch (e.g. a single
             # work with a missing predecessor) shouldn't fail every other work
@@ -125,9 +125,7 @@ class IdMintingTransformer(ElasticBaseTransformer):
             yield from self._transform_per_work(works_in_batch)
             return
 
-        id_map: dict[SourceIdentifierKey, str] = {
-            SourceIdentifierKey(*k): v for k, v in found.items()
-        }
+        id_map = found
 
         logger.info(
             "Batch minted canonical IDs",
