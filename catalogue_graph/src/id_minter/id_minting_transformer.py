@@ -9,11 +9,7 @@ from typing import Any
 import structlog
 
 from core.transformer import ElasticBaseTransformer
-from id_minter.embedder import (
-    embed_canonical_ids,
-    extract_source_identifiers,
-    process_work,
-)
+from id_minter.embedder import embed_canonical_ids, extract_source_identifiers
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.models.identifier import IdResolver, MintRequest
 from models.pipeline.identifier import SourceIdentifier
@@ -83,12 +79,8 @@ class IdMintingTransformer(ElasticBaseTransformer):
         if not works_in_batch:
             return
 
-        combined_requests: list[MintRequest] = []
-        for _, _, mint_requests in works_in_batch:
-            combined_requests.extend(mint_requests)
-
         try:
-            found = self.resolver.mint_ids(combined_requests)
+            yield from self._mint_and_embed(works_in_batch)
         except Exception:
             # Preserve per-work error isolation: a failed batch (e.g. a single
             # work with a missing predecessor, or two works in this chunk
@@ -99,35 +91,39 @@ class IdMintingTransformer(ElasticBaseTransformer):
             logger.warning(
                 "Batch mint failed; falling back to per-work minting",
                 works_in_batch=len(works_in_batch),
-                source_identifiers=len(combined_requests),
                 exc_info=True,
             )
-            yield from self._transform_per_work(works_in_batch)
-            return
+            for work in works_in_batch:
+                row_id, _, _ = work
+                try:
+                    yield from self._mint_and_embed([work])
+                except Exception as e:
+                    self._add_error(e, "embed", row_id)
 
-        id_map = found
+    def _mint_and_embed(self, works: list[_WorkEntry]) -> Generator[tuple[str, dict]]:
+        """Mint canonical IDs for ``works`` in a single resolver call, then embed.
+
+        Used by both the batch path (whole chunk) and the per-work fallback
+        path (one work at a time). Raises whatever ``resolver.mint_ids``
+        raises so callers can decide whether to fall back; ``embed_canonical_ids``
+        errors are reported per-work via ``self._add_error``.
+        """
+        combined_requests: list[MintRequest] = []
+        for _, _, mint_requests in works:
+            combined_requests.extend(mint_requests)
+
+        id_map = self.resolver.mint_ids(combined_requests)
 
         logger.info(
-            "Batch minted canonical IDs",
-            works_in_batch=len(works_in_batch),
+            "Minted canonical IDs",
+            works=len(works),
             source_identifiers=len(combined_requests),
             ids_embedded=len(id_map),
         )
 
-        for row_id, raw_doc, _ in works_in_batch:
+        for row_id, raw_doc, _ in works:
             try:
                 embedded = embed_canonical_ids(raw_doc, id_map)
-            except Exception as e:
-                self._add_error(e, "embed", row_id)
-                continue
-            yield row_id, embedded
-
-    def _transform_per_work(
-        self, works_in_batch: list[_WorkEntry]
-    ) -> Generator[tuple[str, dict]]:
-        for row_id, raw_doc, _ in works_in_batch:
-            try:
-                embedded = process_work(raw_doc, self.resolver)
             except Exception as e:
                 self._add_error(e, "embed", row_id)
                 continue

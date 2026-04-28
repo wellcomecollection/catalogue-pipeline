@@ -286,7 +286,9 @@ class MintingResolver:
             for source_key, canonical_id in needs_inheritance:
                 result[source_key] = canonical_id
                 pred = predecessors[source_key]
-                assert pred is not None  # needs_inheritance only contains source ids with a predecessor
+                assert (
+                    pred is not None
+                )  # needs_inheritance only contains source ids with a predecessor
                 logger.info(
                     "Resolved ID",
                     source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",

@@ -167,6 +167,38 @@ class TestTransform:
         assert embedded["items"][0]["type"] == "Identified"
         assert "identifiedType" not in embedded["items"][0]
 
+    def test_passes_predecessor_through_to_resolver(self) -> None:
+        """A nested item with a predecessorIdentifier reaches the resolver as (sid, pred)."""
+        root_si = _make_source_identifier("Work", "sierra-system-number", "b1000001")
+        item_si = _make_source_identifier("Item", "axiell-system-number", "AC-2000001")
+        item_pred = _make_source_identifier("Item", "sierra-system-number", "i2000001")
+        item = {
+            "sourceIdentifier": item_si,
+            "predecessorIdentifier": item_pred,
+        }
+        doc = _make_work_doc(root_si, items=[item])
+
+        item_key = SourceIdentifierKey("Item", "axiell-system-number", "AC-2000001")
+        pred_key = SourceIdentifierKey("Item", "sierra-system-number", "i2000001")
+        resolver = FakeResolver(
+            ids={
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "abcd1234",
+                item_key: "efgh5678",
+            }
+        )
+
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([doc]),
+            resolver=resolver,
+        )
+
+        list(transformer.transform([doc]))
+
+        assert len(resolver.mint_calls) == 1
+        assert (item_key, pred_key) in resolver.mint_calls[0]
+
     def test_records_error_on_missing_state(self) -> None:
         doc: dict[str, Any] = {"data": {"title": "no state"}}
 
