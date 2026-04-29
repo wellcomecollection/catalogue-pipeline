@@ -4,7 +4,7 @@ from adapters.utils.iceberg import (
     LocalIcebergTableConfig,
     RestApiIcebergTableConfig,
 )
-from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA
+from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA, ADAPTER_STORE_SORT_ORDER
 
 # AWS Configuration
 AWS_REGION = os.getenv("AWS_REGION", "eu-west-1")
@@ -28,6 +28,7 @@ REST_API_ICEBERG_CONFIG = RestApiIcebergTableConfig(
     table_name=os.getenv("REST_API_TABLE_NAME", "ebsco_adapter_table"),
     namespace=os.getenv("REST_API_NAMESPACE", "wellcomecollection_catalogue"),
     iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
+    sort_order=ADAPTER_STORE_SORT_ORDER,
     s3_tables_bucket=os.getenv(
         "S3_TABLES_BUCKET", "wellcomecollection-platform-ebsco-adapter"
     ),
@@ -39,5 +40,6 @@ LOCAL_ICEBERG_CONFIG = LocalIcebergTableConfig(
     table_name=os.getenv("LOCAL_TABLE_NAME", "mytable"),
     namespace=os.getenv("LOCAL_NAMESPACE", "default"),
     iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
+    sort_order=ADAPTER_STORE_SORT_ORDER,
     db_name=os.getenv("LOCAL_DB_NAME", "catalog"),
 )
