@@ -47,7 +47,7 @@ class PipelineStore(ABC):
 
     def get_all_records(self) -> pa.Table:
         """Return all records in the table from all namespaces."""
-        return self.table.scan().to_arrow().cast(self.schema)
+        return self.table.scan().to_arrow_batch_reader().cast(self.schema)
 
     def current_snapshot_id(self) -> int | None:
         snapshot = self.table.current_snapshot()
@@ -62,7 +62,7 @@ class PipelineStore(ABC):
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
         return (
             self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)
-            .to_arrow()
+            .to_arrow_batch_reader()
             .cast(self.schema)
         )
 
