@@ -9,11 +9,11 @@ module "catalogue_graph_extractors_monthly_state_machine" {
     States = merge(tomap({
       for index, task_input in local.concepts_pipeline_inputs_monthly :
       "Extract ${task_input.label}" => {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = module.catalogue_graph_extractor_state_machine.state_machine_arn
-          Input           = {
+          Input = {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
             "pipeline_date" : var.pipeline_date,
@@ -22,7 +22,7 @@ module "catalogue_graph_extractors_monthly_state_machine" {
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Extract ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
       }
-    }), {
+      }), {
       Success = {
         Type = "Succeed"
       }
@@ -63,10 +63,10 @@ module "catalogue_graph_extractors_incremental_state_machine" {
             ExecutionType = "STANDARD"
           },
           StartAt = "Run extractor",
-          States  = {
+          States = {
             "Run extractor" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::states:startExecution.sync:2",
+              Type     = "Task",
+              Resource = "arn:aws:states:::states:startExecution.sync:2",
               Arguments = {
                 StateMachineArn = module.catalogue_graph_extractor_state_machine.state_machine_arn
                 Input           = "{% $states.input %}"
