@@ -92,8 +92,10 @@ variable "version_regex" {
 
 variable "graph_index_dates" {
   type = object({
-    merged   = string
-    works    = string
-    concepts = string
+    merged    = string
+    augmented = string
+    works     = string
+    concepts  = string
+    images    = string
   })
 }
