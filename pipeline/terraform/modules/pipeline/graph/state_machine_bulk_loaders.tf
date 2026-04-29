@@ -5,14 +5,14 @@ module "catalogue_graph_bulk_loaders_monthly_state_machine" {
   state_machine_definition = jsonencode({
     Comment = "Trigger the catalogue-graph-bulk-loader state machine in sequence for each combination of inputs."
     StartAt = "Load ${local.concepts_pipeline_inputs_monthly[0].label}"
-    States  = merge(tomap({
+    States = merge(tomap({
       for index, task_input in local.concepts_pipeline_inputs_monthly :
       "Load ${task_input.label}" => {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = module.catalogue_graph_bulk_loader_state_machine.state_machine_arn
-          Input           = {
+          Input = {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
             "pipeline_date" : var.pipeline_date,
@@ -21,7 +21,7 @@ module "catalogue_graph_bulk_loaders_monthly_state_machine" {
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
       }
-    }), {
+      }), {
       Success = {
         Type = "Succeed"
       }
@@ -41,14 +41,14 @@ module "catalogue_graph_bulk_loaders_incremental_state_machine" {
     QueryLanguage = "JSONata"
     Comment       = "Trigger the catalogue-graph-bulk-loader state machine in sequence for each combination of inputs."
     StartAt       = "Load ${local.graph_pipeline_inputs_incremental[0].label}"
-    States        = merge(tomap({
+    States = merge(tomap({
       for index, task_input in local.graph_pipeline_inputs_incremental :
       "Load ${task_input.label}" => {
-        Type      = "Task"
-        Resource  = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
           StateMachineArn = module.catalogue_graph_bulk_loader_state_machine.state_machine_arn
-          Input           = {
+          Input = {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
             "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
@@ -58,7 +58,7 @@ module "catalogue_graph_bulk_loaders_incremental_state_machine" {
         }
         Next = index == length(local.graph_pipeline_inputs_incremental) - 1 ? "Success" : "Load ${local.graph_pipeline_inputs_incremental[index + 1].label}"
       }
-    }), {
+      }), {
       Success = {
         Type = "Succeed"
       }
