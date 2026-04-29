@@ -67,6 +67,11 @@ module "pipeline" {
       works = {
         identified = "works_identified.2023-05-26"
       }
+    },
+    "2026-04-29" = {
+      images = {
+        augmented = "images_augmented.2026-04-29"
+      }
     }
   }
 
