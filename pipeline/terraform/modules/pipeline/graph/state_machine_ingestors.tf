@@ -4,7 +4,7 @@ module "catalogue_graph_ingestors_state_machine" {
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment       = "Ingest catalogue works and concepts into the pipeline Elasticsearch cluster."
+    Comment       = "Ingest catalogue works, concepts, and images into the pipeline Elasticsearch cluster."
     StartAt       = "Ingestors"
 
     States = {
@@ -27,10 +27,10 @@ module "catalogue_graph_ingestors_state_machine" {
             ExecutionType = "STANDARD"
           },
           StartAt = "Run ingestor",
-          States = {
+          States  = {
             "Run ingestor" = {
-              Type     = "Task",
-              Resource = "arn:aws:states:::states:startExecution.sync:2",
+              Type      = "Task",
+              Resource  = "arn:aws:states:::states:startExecution.sync:2",
               Arguments = {
                 StateMachineArn = module.catalogue_graph_ingestor_state_machine.state_machine_arn
                 Input           = "{% $states.input %}"

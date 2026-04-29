@@ -5,26 +5,26 @@ module "catalogue_graph_pipeline_monthly_state_machine" {
   state_machine_definition = jsonencode({
     Comment = "Transform raw concepts from external sources into nodes and edges and load them into the catalogue graph.",
     StartAt = "Extractors"
-    States = {
+    States  = {
       "Extractors" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type       = "Task"
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = module.catalogue_graph_extractors_monthly_state_machine.state_machine_arn
         }
         Next = "Bulk loaders"
       },
       "Bulk loaders" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type       = "Task"
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = module.catalogue_graph_bulk_loaders_monthly_state_machine.state_machine_arn
         }
         Next = "Graph removers"
       },
       "Graph removers" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type       = "Task"
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = module.catalogue_graph_removers_monthly_state_machine.state_machine_arn
         }
@@ -49,12 +49,12 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment       = "Load catalogue works and concepts them into the graph, and ingests into ES index.",
+    Comment       = "Load catalogue works, concepts, and images into the graph, and ingests into ES index.",
     StartAt       = "Open PIT"
-    States = {
+    States        = {
       "Open PIT" = {
-        Type     = "Task",
-        Resource = "arn:aws:states:::lambda:invoke",
+        Type      = "Task",
+        Resource  = "arn:aws:states:::lambda:invoke",
         Arguments = {
           FunctionName = module.elasticsearch_pit_opener_lambda.lambda_arn,
           Payload      = "{% $states.context.Execution.Input %}"
@@ -64,8 +64,8 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
         Next   = "Extractors"
       },
       "Extractors" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type      = "Task"
+        Resource  = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
           StateMachineArn = module.catalogue_graph_extractors_incremental_state_machine.state_machine_arn
           Input           = "{% $states.input %}"
@@ -74,8 +74,8 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
         Next   = "Bulk loaders"
       },
       "Bulk loaders" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type      = "Task"
+        Resource  = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
           StateMachineArn = module.catalogue_graph_bulk_loaders_incremental_state_machine.state_machine_arn,
           Input           = "{% $states.input %}"
@@ -84,8 +84,8 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
         Next   = "Graph removers"
       },
       "Graph removers" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type      = "Task"
+        Resource  = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
           StateMachineArn = module.catalogue_graph_removers_incremental_state_machine.state_machine_arn
           Input           = "{% $states.input %}"
@@ -94,8 +94,8 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
         Next   = "Ingestors"
       },
       "Ingestors" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type      = "Task"
+        Resource  = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
           StateMachineArn = module.catalogue_graph_ingestors_state_machine.state_machine_arn,
           Input           = "{% $states.input %}"
@@ -127,7 +127,7 @@ module "catalogue_graph_pipeline_incremental_trigger_state_machine" {
   state_machine_definition = jsonencode({
     "QueryLanguage" : "JSONata",
     StartAt = "Construct event"
-    States = {
+    States  = {
       "Construct event" : {
         "Type" : "Pass",
 
@@ -135,8 +135,10 @@ module "catalogue_graph_pipeline_incremental_trigger_state_machine" {
           "pipeline_date" : var.pipeline_date,
           "index_dates" : {
             "merged" : var.index_dates["merged"],
+            "augmented" : var.index_dates["augmented"],
             "concepts" : var.index_dates["concepts"],
-            "works" : var.index_dates["works"]
+            "works" : var.index_dates["works"],
+            "images" : var.index_dates["images"],
           },
           # window end time is 5 minutes before the scheduled time
           "window" : {
@@ -146,8 +148,8 @@ module "catalogue_graph_pipeline_incremental_trigger_state_machine" {
         Next = "Trigger pipeline"
       }
       "Trigger pipeline" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution",
+        Type      = "Task"
+        Resource  = "arn:aws:states:::states:startExecution",
         Arguments = {
           StateMachineArn = module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn,
           Input           = "{% $states.input %}"
