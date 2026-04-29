@@ -8,7 +8,7 @@ locals {
   public_subnets  = data.terraform_remote_state.platform_infra.outputs.catalogue_vpc_delta_public_subnets
 
   lambda_vpc_config = {
-    subnet_ids         = local.private_subnets
+    subnet_ids = local.private_subnets
     security_group_ids = [
       aws_security_group.graph_pipeline_security_group.id,
       local.ec_privatelink_security_group_id
