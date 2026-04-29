@@ -18,7 +18,7 @@ class AugmentedImagesSource(ElasticSource):
             es_client=es_client,
             index_name=get_images_augmented_index_name(event),
             pit_id=event.pit_id,
-            query=query or {"match_all": {}},
+            query=event.to_elasticsearch_query("modifiedTime", query),
             fields=fields,
             batch_size=config.ES_SOURCE_BATCH_SIZE,
             slice_count=config.ES_SOURCE_SLICE_COUNT,
