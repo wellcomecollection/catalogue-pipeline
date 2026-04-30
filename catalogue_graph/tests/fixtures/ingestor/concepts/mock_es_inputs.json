@@ -30,7 +30,9 @@
         "sameAs": [],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "concepts-indexed-2025-01-01",
@@ -56,8 +58,8 @@
             "type": "Identifier",
             "identifierType": {
               "id": "lc-names",
-              "label": "Library of Congress Name authority records",
-              "type": "IdentifierType"
+              "type": "IdentifierType",
+              "label": "Library of Congress Name authority records"
             }
           }
         ],
@@ -80,7 +82,9 @@
         ],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "concepts-indexed-2025-01-01",
@@ -113,7 +117,9 @@
         "sameAs": [],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "concepts-indexed-2025-01-01",
@@ -139,8 +145,8 @@
             "type": "Identifier",
             "identifierType": {
               "id": "lc-names",
-              "label": "Library of Congress Name authority records",
-              "type": "IdentifierType"
+              "type": "IdentifierType",
+              "label": "Library of Congress Name authority records"
             }
           }
         ],
@@ -156,10 +162,10 @@
           "people": [],
           "frequentCollaborators": [
             {
-              "conceptType": "Person",
-              "id": "tgk79tta",
               "label": "Pfeiffer, J. William",
-              "relationshipType": ""
+              "id": "tgk79tta",
+              "relationshipType": "",
+              "conceptType": "Person"
             }
           ],
           "relatedTopics": [],
@@ -170,7 +176,9 @@
         ],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "concepts-indexed-2025-01-01",
@@ -203,7 +211,9 @@
         "sameAs": [],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "concepts-indexed-2025-01-01",
@@ -229,8 +239,8 @@
             "type": "Identifier",
             "identifierType": {
               "id": "lc-names",
-              "label": "Library of Congress Name authority records",
-              "type": "IdentifierType"
+              "type": "IdentifierType",
+              "label": "Library of Congress Name authority records"
             }
           }
         ],
@@ -253,7 +263,9 @@
         ],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "concepts-indexed-2025-01-01",
@@ -281,8 +293,8 @@
             "type": "Identifier",
             "identifierType": {
               "id": "lc-names",
-              "label": "Library of Congress Name authority records",
-              "type": "IdentifierType"
+              "type": "IdentifierType",
+              "label": "Library of Congress Name authority records"
             }
           }
         ],
@@ -307,7 +319,9 @@
         ],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "concepts-indexed-2025-01-01",
@@ -336,8 +350,8 @@
             "type": "Identifier",
             "identifierType": {
               "id": "lc-names",
-              "label": "Library of Congress Name authority records",
-              "type": "IdentifierType"
+              "type": "IdentifierType",
+              "label": "Library of Congress Name authority records"
             }
           }
         ],
@@ -354,6 +368,7 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
+          "frequentCollaborators": [],
           "relatedTopics": [
             {
               "label": "Disease Outbreaks",
@@ -380,7 +395,6 @@
               "conceptType": "Concept"
             }
           ],
-          "frequentCollaborators": [],
           "foundedBy": []
         },
         "sameAs": [
@@ -388,7 +402,9 @@
         ],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "concepts-indexed-2025-01-01",
@@ -414,8 +430,8 @@
             "type": "Identifier",
             "identifierType": {
               "id": "lc-names",
-              "label": "Library of Congress Name authority records",
-              "type": "IdentifierType"
+              "type": "IdentifierType",
+              "label": "Library of Congress Name authority records"
             }
           }
         ],
@@ -438,40 +454,43 @@
         ],
         "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   },
   {
-    "_id": "a22d7muq",
     "_index": "concepts-indexed-2025-01-01",
+    "_id": "a22d7muq",
     "_source": {
-      "display": {
-        "alternativeLabels": [],
-        "displayLabel": "Brown, Bruce, 1942-",
+      "query": {
         "id": "a22d7muq",
         "identifiers": [],
         "label": "Brown, Bruce, 1942-",
+        "alternativeLabels": [],
+        "type": "Person"
+      },
+      "display": {
+        "id": "a22d7muq",
+        "identifiers": [],
+        "label": "Brown, Bruce, 1942-",
+        "displayLabel": "Brown, Bruce, 1942-",
+        "alternativeLabels": [],
+        "type": "Person",
         "relatedConcepts": {
-          "broaderThan": [],
-          "fieldsOfWork": [],
-          "frequentCollaborators": [],
-          "narrowerThan": [],
-          "people": [],
           "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "frequentCollaborators": [],
           "relatedTopics": [],
           "foundedBy": []
         },
         "sameAs": [],
-        "displayImages": [],
-        "type": "Person"
-      },
-      "query": {
-        "alternativeLabels": [],
-        "id": "a22d7muq",
-        "identifiers": [],
-        "label": "Brown, Bruce, 1942-",
-        "type": "Person"
+        "displayImages": []
       }
-    }
+    },
+    "_version": 1735732800000,
+    "_version_type": "external_gte"
   }
-
 ]

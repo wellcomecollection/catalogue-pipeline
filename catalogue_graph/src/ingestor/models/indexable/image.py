@@ -24,6 +24,7 @@ class IndexableImage(IndexableRecord):
         return self.query.id
 
     def get_modified_time(self) -> datetime:
+        # Set by the merger service
         return datetime.fromisoformat(self.modified_time)
 
     @staticmethod

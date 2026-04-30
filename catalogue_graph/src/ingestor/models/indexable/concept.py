@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
@@ -66,7 +66,7 @@ class IndexableConcept(IndexableRecord):
         return self.query.id
 
     def get_modified_time(self) -> datetime:
-        return datetime.now()
+        return datetime.now(UTC)
 
     @staticmethod
     def from_raw_document(concept: dict) -> "IndexableConcept":
