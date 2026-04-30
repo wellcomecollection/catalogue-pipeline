@@ -1,4 +1,3 @@
-
 // This file is used to create an empty zip file for Lambda functions that
 // don't have any code yet. If we move to container images for all Lambdas
 // we can probably delete this.
@@ -31,8 +30,6 @@ locals {
   es_works_source_index       = "works-source-${var.pipeline_date}"
   es_works_identified_index   = "works-identified-${var.pipeline_date}"
   es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
-  es_works_index              = "works-indexed-${var.pipeline_date}"
-  es_concepts_index           = "concepts-indexed-${var.pipeline_date}"
   es_images_initial_index     = "images-initial-${var.pipeline_date}"
   es_images_augmented_index   = "images-augmented-${var.pipeline_date}"
   es_images_index             = "images-indexed-${var.pipeline_date}"
@@ -214,7 +211,7 @@ locals {
   }
 
   lambda_vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,
