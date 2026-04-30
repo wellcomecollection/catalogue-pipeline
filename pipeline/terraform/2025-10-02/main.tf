@@ -20,7 +20,7 @@ module "pipeline" {
     augmented = "2026-04-29"
     works     = "2026-03-03"
     concepts  = "2026-03-03"
-    images    = "dev"
+    images    = "2026-04-29"
   }
 
   index_config = {
