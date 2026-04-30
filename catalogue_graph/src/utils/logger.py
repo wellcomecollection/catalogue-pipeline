@@ -123,9 +123,12 @@ def setup_logging(context: ExecutionContext | None = None) -> None:
     # Force the root logger to desired level to override any AWS Lambda defaults
     logging.getLogger().setLevel(log_level)
 
-    # Clamp noisy third-party loggers so application DEBUG runs are still readable.
+    # Clamp noisy third-party loggers so application DEBUG runs are still
+    # readable. 
+    root_level = logging.getLogger().getEffectiveLevel()
     for logger_name, level in NOISY_LIBRARY_LOGGERS.items():
-        logging.getLogger(logger_name).setLevel(level)
+        clamped = max(root_level, logging.getLevelNamesMapping()[level])
+        logging.getLogger(logger_name).setLevel(clamped)
 
     if context is None:
         context = ExecutionContext(
