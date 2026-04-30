@@ -37,6 +37,14 @@ log_level = os.environ.get(
     "LOG_LEVEL", "INFO"
 )  # we can adjust the log level in tf. Defaults to INFO in local
 
+# Third-party loggers that are excessively chatty at DEBUG level. Each is
+# clamped to its mapped level regardless of the root LOG_LEVEL so that running
+# the app at DEBUG doesn't drown our own logs in library noise.
+NOISY_LIBRARY_LOGGERS: dict[str, str] = {
+    "botocore": "INFO",
+    "urllib3": "INFO",
+}
+
 
 def setup_structlog() -> None:
     """
@@ -114,6 +122,10 @@ def setup_logging(context: ExecutionContext | None = None) -> None:
     setup_structlog()
     # Force the root logger to desired level to override any AWS Lambda defaults
     logging.getLogger().setLevel(log_level)
+
+    # Clamp noisy third-party loggers so application DEBUG runs are still readable.
+    for logger_name, level in NOISY_LIBRARY_LOGGERS.items():
+        logging.getLogger(logger_name).setLevel(level)
 
     if context is None:
         context = ExecutionContext(
