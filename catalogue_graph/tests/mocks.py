@@ -183,6 +183,7 @@ class MockSNSClient(MockAwsService):
                 "PublishBatchRequestEntries": PublishBatchRequestEntries,
             }
         )
+        return {"Successful": [], "Failed": []}
 
     def publish(self, **kwargs: Any) -> dict[str, Any]:
         """Mock SNS publish method for single message publishing."""
@@ -240,7 +241,7 @@ class MockBoto3Session:
             "cloudwatch": MockCloudwatchClient(),
         }
 
-    def client(self, client_name: str) -> MockAwsService:
+    def client(self, client_name: str, **kwargs: Any) -> MockAwsService:
         if client_name not in self.clients:
             raise KeyError("There is no mock client for the specified client_name.")
         return self.clients[client_name]
