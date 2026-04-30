@@ -214,6 +214,34 @@ class InferenceManagerWorkerServiceTest
     }
   }
 
+  it("sets augmentedTime on the augmented image") {
+    val image = createImageData.toInitialImage
+    val beforeAugmentation = java.time.Instant.now()
+    withResponsesAndFixtures(
+      List(image),
+      inferrer = req =>
+        if (req.contains("feature_inferrer")) {
+          Some(Responses.featureInferrer)
+        } else if (req.contains("palette_inferrer")) {
+          Some(Responses.paletteInferrer)
+        } else if (req.contains("aspect_ratio_inferrer")) {
+          Some(Responses.aspectRatioInferrer)
+        } else None,
+      images = _ => Some(Responses.image)
+    ) {
+      case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
+        sendNotificationToSQS(queue = queue, body = image.id)
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+
+          val augmentedImage = augmentedImages(messageSender.messages.head.body)
+          augmentedImage.state.augmentedTime shouldBe defined
+          augmentedImage.state.augmentedTime.get should be >= beforeAugmentation
+        }
+    }
+  }
+
   def withResponsesAndFixtures[R](
     initialImages: List[Image[Initial]],
     inferrer: String => Option[HttpResponse],
