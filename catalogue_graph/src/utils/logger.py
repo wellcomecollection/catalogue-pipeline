@@ -124,7 +124,7 @@ def setup_logging(context: ExecutionContext | None = None) -> None:
     logging.getLogger().setLevel(log_level)
 
     # Clamp noisy third-party loggers so application DEBUG runs are still
-    # readable. 
+    # readable.
     root_level = logging.getLogger().getEffectiveLevel()
     for logger_name, level in NOISY_LIBRARY_LOGGERS.items():
         clamped = max(root_level, logging.getLevelNamesMapping()[level])
