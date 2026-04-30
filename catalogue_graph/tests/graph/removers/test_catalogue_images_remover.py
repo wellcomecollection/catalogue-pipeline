@@ -29,7 +29,6 @@ def test_get_total_node_count() -> None:
 
 def test_get_total_edge_count() -> None:
     remover, _ = _make_remover()
-
     assert remover.get_total_edge_count() == 0
 
 
