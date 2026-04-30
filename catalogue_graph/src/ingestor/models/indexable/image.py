@@ -23,6 +23,9 @@ class IndexableImage(IndexableRecord):
     def get_id(self) -> str:
         return self.query.id
 
+    def get_modified_time(self) -> datetime:
+        return datetime.fromisoformat(self.modified_time)
+
     @staticmethod
     def from_raw_document(image: dict) -> "IndexableImage":
         return IndexableImage.model_validate(image)

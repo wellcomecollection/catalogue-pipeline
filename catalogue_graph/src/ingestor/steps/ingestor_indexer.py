@@ -76,6 +76,10 @@ def generate_operations(
             "_index": index_name,
             "_id": datum.get_id(),
             "_source": source,
+            "_version": int(
+                datum.get_modified_time().timestamp() * 1000
+            ),  # epoch millis
+            "_version_type": "external_gte",
         }
 
 

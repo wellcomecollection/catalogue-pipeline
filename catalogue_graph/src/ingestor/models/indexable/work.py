@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.debug.work import (
@@ -26,6 +28,9 @@ class IndexableWork(IndexableRecord):
 
     def get_id(self) -> str:
         return self.debug.source.id
+
+    def get_modified_time(self) -> datetime:
+        return datetime.fromisoformat(self.debug.source.modified_time)
 
     @staticmethod
     def from_raw_document(work: dict) -> "IndexableWork":
