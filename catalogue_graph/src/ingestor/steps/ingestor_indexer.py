@@ -5,9 +5,20 @@ from argparse import ArgumentParser
 from collections.abc import Generator
 
 import boto3
-import config
 import structlog
+
+import config
 import utils.elasticsearch
+from ingestor.models.indexable.concept import IndexableConcept
+from ingestor.models.indexable.image import IndexableImage
+from ingestor.models.indexable.record import IndexableRecord
+from ingestor.models.indexable.work import IndexableWork
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
+    IngestorIndexerMonitorLambdaEvent,
+    IngestorIndexerObject,
+    IngestorStepEvent,
+)
 from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import (
@@ -19,17 +30,6 @@ from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import IndexerReport
 from utils.steps import create_job_id, run_ecs_handler
 from utils.types import IngestorType
-
-from ingestor.models.indexable.concept import IndexableConcept
-from ingestor.models.indexable.image import IndexableImage
-from ingestor.models.indexable.record import IndexableRecord
-from ingestor.models.indexable.work import IndexableWork
-from ingestor.models.step_events import (
-    IngestorIndexerLambdaEvent,
-    IngestorIndexerMonitorLambdaEvent,
-    IngestorIndexerObject,
-    IngestorStepEvent,
-)
 
 logger = structlog.get_logger(__name__)
 
@@ -78,9 +78,10 @@ def generate_operations(
         version = int(datum.get_modified_time().timestamp() * 1000)  # epoch millis
 
         # Documents whose modified date is set to the start of the Unix epoch will have a version of 0.
-        # We floor this to 1 for backward compatibility with documents which use Elasticsearch's default versioning.
+        # We floor this to 100 for backward compatibility with documents which use Elasticsearch's default versioning
+        # (which increments every time a given document is reindexed).
         # This won't be needed after we do a full reindex.
-        version = max(1, version)
+        version = max(100, version)
 
         yield {
             "_index": index_name,
@@ -157,9 +158,7 @@ def handler(
             total_errors=len(all_es_errors),
             first_errors=all_es_errors[:5],
         )
-        raise RuntimeError(
-            f"Bulk indexing failed with {len(all_es_errors)} error(s)"
-        )
+        raise RuntimeError(f"Bulk indexing failed with {len(all_es_errors)} error(s)")
 
     return IngestorIndexerMonitorLambdaEvent(
         **event_payload,
