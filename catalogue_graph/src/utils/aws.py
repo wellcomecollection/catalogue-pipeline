@@ -52,10 +52,16 @@ def publish_batch_to_sns(
         )
 
     sns_client = client or boto3.Session().client("sns")
-    sns_client.publish_batch(
+    response = sns_client.publish_batch(
         TopicArn=topic_arn,
         PublishBatchRequestEntries=request_entries,
     )
+
+    failed = response.get("Failed", [])
+    if failed:
+        raise RuntimeError(
+            f"Failed to publish {len(failed)}/{len(messages)} SNS messages: {failed}"
+        )
 
 
 def get_csv_from_s3(s3_uri: str) -> Generator[Any]:

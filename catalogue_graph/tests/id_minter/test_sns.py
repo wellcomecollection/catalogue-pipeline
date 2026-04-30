@@ -8,6 +8,7 @@ import pytest
 
 from id_minter.sns import publish_ids_to_sns
 from tests.mocks import MockSNSClient
+from utils.aws import publish_batch_to_sns
 
 TEST_TOPIC = "arn:aws:sns:eu-west-1:123456789:test-topic"
 
@@ -87,3 +88,27 @@ class TestPublishIdsToSns:
                 publish_ids_to_sns(TEST_TOPIC, ["fail0001"])
         finally:
             MockSNSClient.publish_batch = original  # type: ignore[method-assign]
+
+
+class TestPublishBatchToSns:
+    def test_partial_failure_raises(self) -> None:
+        """publish_batch_to_sns raises when the response contains failed entries."""
+
+        class FailingClient:
+            def publish_batch(self, **kwargs):  # type: ignore[no-untyped-def]
+                return {
+                    "Successful": [],
+                    "Failed": [
+                        {
+                            "Id": "batch_message_0",
+                            "Code": "InternalError",
+                            "Message": "something went wrong",
+                            "SenderFault": False,
+                        }
+                    ],
+                }
+
+        with pytest.raises(RuntimeError, match="Failed to publish 1/2 SNS messages"):
+            publish_batch_to_sns(
+                TEST_TOPIC, ["msg1", "msg2"], client=FailingClient()
+            )
