@@ -69,6 +69,12 @@ def get_table(
             schema=config.iceberg_schema,
             partition_spec=config.partition_spec,
             sort_order=config.sort_order,
+            # Our adapter tables are quite small when compressed (under 1 GB), so we use the minimum possible target
+            # file size, as recommended here:
+            # https://docs.aws.amazon.com/prescriptive-guidance/latest/apache-iceberg-on-aws/best-practices-read.html
+            properties={
+                "write.target-file-size-bytes": str(128 * 1024 * 1024), # 128 MB
+            },
         )
 
     return catalogue.load_table(table_fullname)
