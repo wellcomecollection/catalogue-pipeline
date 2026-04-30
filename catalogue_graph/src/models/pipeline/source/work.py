@@ -10,6 +10,7 @@ class SourceWorkState(WorkState):
     # deserialisation in the scala pipeline, we include them here.
     internal_work_stubs: list[str] = Field(default_factory=list)
     merge_candidates: list[MergeCandidate] = Field(default_factory=list)
+    modified_time: str
 
     def id(self) -> str:
         return str(self.source_identifier)

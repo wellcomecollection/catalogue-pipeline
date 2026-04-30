@@ -3,6 +3,66 @@
     "_index": "works-indexed-2025-01-01",
     "_id": "a222zvge",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a222zvge",
+          "identifier": {
+            "identifierType": {
+              "id": "calm-record-id"
+            },
+            "ontologyType": "Work",
+            "value": "e6606c3a-5404-4c5b-8337-3936d3d5f30b"
+          },
+          "version": 13,
+          "modifiedTime": "2025-06-30T16:20:14Z"
+        },
+        "mergedTime": "2025-08-19T19:23:53.532022Z",
+        "indexedTime": "2025-09-08T17:23:33.132490Z",
+        "mergeCandidates": [
+          {
+            "id": {
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "calm-ref-no"
+                },
+                "ontologyType": "Work",
+                "value": "GC176/C/1"
+              },
+              "otherIdentifiers": [],
+              "canonicalId": "jqd7k4sp",
+              "type": "Identified"
+            },
+            "reason": "Archivematica work"
+          }
+        ],
+        "redirectSources": [
+          {
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Work",
+              "value": "b18659135"
+            },
+            "otherIdentifiers": [],
+            "canonicalId": "w4bajds8",
+            "type": "Identified"
+          },
+          {
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "mets"
+              },
+              "ontologyType": "Work",
+              "value": "b18659135"
+            },
+            "otherIdentifiers": [],
+            "canonicalId": "dfcyrkxh",
+            "type": "Identified"
+          }
+        ]
+      },
       "query": {
         "id": "a222zvge",
         "title": "'An Outline'; 'Opening Statement to 1933 only'; 'List of chief scientific writings up to 1940'; 'List of Exhibits'",
@@ -339,6 +399,9 @@
           "closed-stores",
           "iiif-presentation"
         ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
+        ],
         "partOf.id": [
           "rqyum5sv",
           "dkhx5djp"
@@ -350,80 +413,79 @@
         "availabilities.id": [
           "closed-stores",
           "online"
-        ],
-        "items.locations.createdDate": [
-          "2014-02-30T16:20:14Z"
-        ]
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a222zvge",
-          "identifier": {
-            "identifierType": {
-              "id": "calm-record-id"
-            },
-            "ontologyType": "Work",
-            "value": "e6606c3a-5404-4c5b-8337-3936d3d5f30b"
-          },
-          "version": 13,
-          "modifiedTime": "2025-06-30T16:20:14Z"
-        },
-        "mergedTime": "2025-08-19T19:23:53.532022Z",
-        "indexedTime": "2025-09-08T17:23:33.132490Z",
-        "mergeCandidates": [
-          {
-            "id": {
-              "canonicalId": "jqd7k4sp",
-              "type": "Identified",
-              "sourceIdentifier": {
-                "identifierType": {
-                  "id": "calm-ref-no"
-                },
-                "ontologyType": "Work",
-                "value": "GC176/C/1"
-              },
-              "otherIdentifiers": []
-            },
-            "reason": "Archivematica work"
-          }
-        ],
-        "redirectSources": [
-          {
-            "canonicalId": "w4bajds8",
-            "type": "Identified",
-            "sourceIdentifier": {
-              "identifierType": {
-                "id": "sierra-system-number"
-              },
-              "ontologyType": "Work",
-              "value": "b18659135"
-            },
-            "otherIdentifiers": []
-          },
-          {
-            "canonicalId": "dfcyrkxh",
-            "type": "Identified",
-            "sourceIdentifier": {
-              "identifierType": {
-                "id": "mets"
-              },
-              "ontologyType": "Work",
-              "value": "b18659135"
-            },
-            "otherIdentifiers": []
-          }
         ]
       }
-    }
+    },
+    "_version": 1751300414000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a2239muq",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a2239muq",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b15192982"
+          },
+          "version": 58,
+          "modifiedTime": "2025-07-17T13:07:35Z"
+        },
+        "mergedTime": "2025-08-19T18:10:40.041562Z",
+        "indexedTime": "2025-09-08T17:23:33.141933Z",
+        "mergeCandidates": [
+          {
+            "id": {
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "sierra-system-number"
+                },
+                "ontologyType": "Work",
+                "value": "b30598977"
+              },
+              "otherIdentifiers": [],
+              "canonicalId": "hcqs6xp6",
+              "type": "Identified"
+            },
+            "reason": "Physical/digitised Sierra work"
+          }
+        ],
+        "redirectSources": [
+          {
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "mets"
+              },
+              "ontologyType": "Work",
+              "value": "b30598977"
+            },
+            "otherIdentifiers": [],
+            "canonicalId": "jstyg2xn",
+            "type": "Identified"
+          },
+          {
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Work",
+              "value": "b30598977"
+            },
+            "otherIdentifiers": [],
+            "canonicalId": "hcqs6xp6",
+            "type": "Identified"
+          }
+        ]
+      },
       "query": {
         "id": "a2239muq",
-        "title": "Ueber den Krebs der Nasenhöhle ... / vorgelegt von Hermann Wolter.",
+        "title": "Ueber den Krebs der Nasenh\u00f6hle ... / vorgelegt von Hermann Wolter.",
         "physicalDescription": "69 pages ; 23 cm",
         "alternativeTitles": [],
         "languages.label": [
@@ -454,7 +516,7 @@
           "QZ200:276:22"
         ],
         "notes.contents": [
-          "Universität Leipzig."
+          "Universit\u00e4t Leipzig."
         ],
         "partOf.title": [],
         "production.label": [
@@ -467,7 +529,7 @@
         ],
         "contributors.agent.label": [
           "Wolter, Hermann (Wilhelm Victor Hermann), 1868-",
-          "Universität Leipzig (1409-1953)"
+          "Universit\u00e4t Leipzig (1409-1953)"
         ],
         "genres.concepts.label": [
           "Academic dissertations"
@@ -475,7 +537,7 @@
       },
       "display": {
         "id": "a2239muq",
-        "title": "Ueber den Krebs der Nasenhöhle ... / vorgelegt von Hermann Wolter.",
+        "title": "Ueber den Krebs der Nasenh\u00f6hle ... / vorgelegt von Hermann Wolter.",
         "alternativeTitles": [],
         "physicalDescription": "69 pages ; 23 cm",
         "workType": {
@@ -508,7 +570,7 @@
           {
             "agent": {
               "id": "un9788h3",
-              "label": "Universität Leipzig (1409-1953)",
+              "label": "Universit\u00e4t Leipzig (1409-1953)",
               "identifiers": [
                 {
                   "value": "n85086716",
@@ -833,7 +895,7 @@
         "notes": [
           {
             "contents": [
-              "Universität Leipzig."
+              "Universit\u00e4t Leipzig."
             ],
             "noteType": {
               "id": "dissertation-note",
@@ -888,7 +950,7 @@
           },
           {
             "id": "un9788h3",
-            "label": "Universität Leipzig (1409-1953)"
+            "label": "Universit\u00e4t Leipzig (1409-1953)"
           }
         ],
         "items.locations.license": [
@@ -937,7 +999,7 @@
         ],
         "contributors.agent.label": [
           "Wolter, Hermann (Wilhelm Victor Hermann), 1868-",
-          "Universität Leipzig (1409-1953)"
+          "Universit\u00e4t Leipzig (1409-1953)"
         ],
         "contributors.agent.id": [
           "eq9qvtwy",
@@ -976,82 +1038,43 @@
           "closed-stores",
           "iiif-presentation"
         ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
+        ],
         "partOf.id": [],
         "partOf.title": [],
         "availabilities.id": [
           "closed-stores",
           "online"
-        ],
-        "items.locations.createdDate": [
-          "2014-02-30T16:20:14Z"
-        ]
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a2239muq",
-          "identifier": {
-            "identifierType": {
-              "id": "sierra-system-number"
-            },
-            "ontologyType": "Work",
-            "value": "b15192982"
-          },
-          "version": 58,
-          "modifiedTime": "2025-07-17T13:07:35Z"
-        },
-        "mergedTime": "2025-08-19T18:10:40.041562Z",
-        "indexedTime": "2025-09-08T17:23:33.141933Z",
-        "mergeCandidates": [
-          {
-            "id": {
-              "canonicalId": "hcqs6xp6",
-              "type": "Identified",
-              "sourceIdentifier": {
-                "identifierType": {
-                  "id": "sierra-system-number"
-                },
-                "ontologyType": "Work",
-                "value": "b30598977"
-              },
-              "otherIdentifiers": []
-            },
-            "reason": "Physical/digitised Sierra work"
-          }
-        ],
-        "redirectSources": [
-          {
-            "canonicalId": "jstyg2xn",
-            "type": "Identified",
-            "sourceIdentifier": {
-              "identifierType": {
-                "id": "mets"
-              },
-              "ontologyType": "Work",
-              "value": "b30598977"
-            },
-            "otherIdentifiers": []
-          },
-          {
-            "canonicalId": "hcqs6xp6",
-            "type": "Identified",
-            "sourceIdentifier": {
-              "identifierType": {
-                "id": "sierra-system-number"
-              },
-              "ontologyType": "Work",
-              "value": "b30598977"
-            },
-            "otherIdentifiers": []
-          }
         ]
       }
-    }
+    },
+    "_version": 1752757655000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a223k4ra",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a223k4ra",
+          "identifier": {
+            "identifierType": {
+              "id": "ebsco-alt-lookup"
+            },
+            "ontologyType": "Work",
+            "value": "ebs13464940e"
+          },
+          "version": 20250904,
+          "modifiedTime": "2025-09-05T12:35:57.811942Z"
+        },
+        "mergedTime": "2025-09-05T15:04:54.894994Z",
+        "indexedTime": "2025-09-08T17:23:33.142879Z",
+        "mergeCandidates": [],
+        "redirectSources": []
+      },
       "query": {
         "id": "a223k4ra",
         "title": "The danger and mischiefs of popery, set forth by the late Bishop of London, in his fifth pastoral letter",
@@ -1258,40 +1281,83 @@
         "items.id": [],
         "items.identifiers.value": [],
         "items.locations.locationType.id": [],
+        "items.locations.createdDate": [],
         "partOf.id": [],
         "partOf.title": [
           "Eighteenth Century Collections Online"
         ],
         "availabilities.id": [
           "online"
-        ],
-        "items.locations.createdDate": []
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a223k4ra",
-          "identifier": {
-            "identifierType": {
-              "id": "ebsco-alt-lookup"
-            },
-            "ontologyType": "Work",
-            "value": "ebs13464940e"
-          },
-          "version": 20250904,
-          "modifiedTime": "2025-09-05T12:35:57.811942Z"
-        },
-        "mergedTime": "2025-09-05T15:04:54.894994Z",
-        "indexedTime": "2025-09-08T17:23:33.142879Z",
-        "mergeCandidates": [],
-        "redirectSources": []
+        ]
       }
-    }
+    },
+    "_version": 1757075757811,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a2242545",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a2242545",
+          "identifier": {
+            "identifierType": {
+              "id": "calm-record-id"
+            },
+            "ontologyType": "Work",
+            "value": "129b0826-3ac4-4aea-8b0c-490d5889df46"
+          },
+          "version": 7,
+          "modifiedTime": "2023-12-04T12:35:47Z"
+        },
+        "mergedTime": "2025-08-19T20:00:15.198906Z",
+        "indexedTime": "2025-09-08T17:23:33.143605Z",
+        "mergeCandidates": [
+          {
+            "id": {
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "calm-ref-no"
+                },
+                "ontologyType": "Work",
+                "value": "UGC198/8/5/8"
+              },
+              "otherIdentifiers": [],
+              "canonicalId": "hmy2udbf",
+              "type": "Identified"
+            },
+            "reason": "Archivematica work"
+          }
+        ],
+        "redirectSources": [
+          {
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Work",
+              "value": "b19871831"
+            },
+            "otherIdentifiers": [],
+            "canonicalId": "adyxgsj4",
+            "type": "Identified"
+          },
+          {
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "mets"
+              },
+              "ontologyType": "Work",
+              "value": "b19871831"
+            },
+            "otherIdentifiers": [],
+            "canonicalId": "ugpnzjrn",
+            "type": "Identified"
+          }
+        ]
+      },
       "query": {
         "id": "a2242545",
         "title": "Draft manuscript notes for a seminar at the Institute de Biologie Moleculaire, Universite Paris",
@@ -1606,6 +1672,9 @@
         "items.locations.locationType.id": [
           "iiif-presentation"
         ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
+        ],
         "partOf.id": [
           "uad4jhwg",
           "y5tqfx79",
@@ -1618,77 +1687,35 @@
         ],
         "availabilities.id": [
           "online"
-        ],
-        "items.locations.createdDate": [
-          "2014-02-30T16:20:14Z"
-        ]
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a2242545",
-          "identifier": {
-            "identifierType": {
-              "id": "calm-record-id"
-            },
-            "ontologyType": "Work",
-            "value": "129b0826-3ac4-4aea-8b0c-490d5889df46"
-          },
-          "version": 7,
-          "modifiedTime": "2023-12-04T12:35:47Z"
-        },
-        "mergedTime": "2025-08-19T20:00:15.198906Z",
-        "indexedTime": "2025-09-08T17:23:33.143605Z",
-        "mergeCandidates": [
-          {
-            "id": {
-              "canonicalId": "hmy2udbf",
-              "type": "Identified",
-              "sourceIdentifier": {
-                "identifierType": {
-                  "id": "calm-ref-no"
-                },
-                "ontologyType": "Work",
-                "value": "UGC198/8/5/8"
-              },
-              "otherIdentifiers": []
-            },
-            "reason": "Archivematica work"
-          }
-        ],
-        "redirectSources": [
-          {
-            "canonicalId": "adyxgsj4",
-            "type": "Identified",
-            "sourceIdentifier": {
-              "identifierType": {
-                "id": "sierra-system-number"
-              },
-              "ontologyType": "Work",
-              "value": "b19871831"
-            },
-            "otherIdentifiers": []
-          },
-          {
-            "canonicalId": "ugpnzjrn",
-            "type": "Identified",
-            "sourceIdentifier": {
-              "identifierType": {
-                "id": "mets"
-              },
-              "ontologyType": "Work",
-              "value": "b19871831"
-            },
-            "otherIdentifiers": []
-          }
         ]
       }
-    }
+    },
+    "_version": 1701693347000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a22526q9",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a22526q9",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b31012152"
+          },
+          "version": 13,
+          "modifiedTime": "2022-01-12T10:29:21Z"
+        },
+        "mergedTime": "2025-08-19T18:37:10.778558Z",
+        "indexedTime": "2025-09-08T17:23:33.144325Z",
+        "mergeCandidates": [],
+        "redirectSources": []
+      },
       "query": {
         "id": "a22526q9",
         "title": "Prediche quadragesimali dell' anno 1495: Registro della prediche fatte nel 1495",
@@ -2003,6 +2030,9 @@
         "items.locations.locationType.id": [
           "online-resource"
         ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
+        ],
         "partOf.id": [],
         "partOf.title": [
           "Early European Books.",
@@ -2010,36 +2040,35 @@
         ],
         "availabilities.id": [
           "online"
-        ],
-        "items.locations.createdDate": [
-          "2014-02-30T16:20:14Z"
         ]
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a22526q9",
-          "identifier": {
-            "identifierType": {
-              "id": "sierra-system-number"
-            },
-            "ontologyType": "Work",
-            "value": "b31012152"
-          },
-          "version": 13,
-          "modifiedTime": "2022-01-12T10:29:21Z"
-        },
-        "mergedTime": "2025-08-19T18:37:10.778558Z",
-        "indexedTime": "2025-09-08T17:23:33.144325Z",
-        "mergeCandidates": [],
-        "redirectSources": []
       }
-    }
+    },
+    "_version": 1641983361000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a2262ru9",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a2262ru9",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b16699178"
+          },
+          "version": 28,
+          "modifiedTime": "2024-07-03T16:07:56Z"
+        },
+        "mergedTime": "2025-08-19T21:17:47.025238Z",
+        "indexedTime": "2025-09-08T17:23:33.145771Z",
+        "mergeCandidates": [],
+        "redirectSources": []
+      },
       "query": {
         "id": "a2262ru9",
         "title": "\"The parish of St George-the-martyr is a veritable hospital town\" : medical treatment available to the Holborn poor during the second half of the nineteenth century / Jacqueline Watson.",
@@ -2591,38 +2620,40 @@
         "items.locations.locationType.id": [
           "closed-stores"
         ],
+        "items.locations.createdDate": [],
         "partOf.id": [],
         "partOf.title": [],
         "availabilities.id": [
           "closed-stores"
-        ],
-        "items.locations.createdDate": []
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a2262ru9",
-          "identifier": {
-            "identifierType": {
-              "id": "sierra-system-number"
-            },
-            "ontologyType": "Work",
-            "value": "b16699178"
-          },
-          "version": 28,
-          "modifiedTime": "2024-07-03T16:07:56Z"
-        },
-        "mergedTime": "2025-08-19T21:17:47.025238Z",
-        "indexedTime": "2025-09-08T17:23:33.145771Z",
-        "mergeCandidates": [],
-        "redirectSources": []
+        ]
       }
-    }
+    },
+    "_version": 1720022876000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a226rz35",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a226rz35",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b31244361"
+          },
+          "version": 19,
+          "modifiedTime": "2023-08-18T11:38:24Z"
+        },
+        "mergedTime": "2025-08-19T16:26:08.065319Z",
+        "indexedTime": "2025-09-08T17:23:33.147668Z",
+        "mergeCandidates": [],
+        "redirectSources": []
+      },
       "query": {
         "id": "a226rz35",
         "title": "Prodigiorum ac ostentorum chronicon / [Konrad Lykosthenes].",
@@ -2966,6 +2997,7 @@
         "items.locations.locationType.id": [
           "online-resource"
         ],
+        "items.locations.createdDate": [],
         "partOf.id": [],
         "partOf.title": [
           "Early European Books.",
@@ -2973,37 +3005,51 @@
         ],
         "availabilities.id": [
           "online"
-        ],
-        "items.locations.createdDate": []
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a226rz35",
-          "identifier": {
-            "identifierType": {
-              "id": "sierra-system-number"
-            },
-            "ontologyType": "Work",
-            "value": "b31244361"
-          },
-          "version": 19,
-          "modifiedTime": "2023-08-18T11:38:24Z"
-        },
-        "mergedTime": "2025-08-19T16:26:08.065319Z",
-        "indexedTime": "2025-09-08T17:23:33.147668Z",
-        "mergeCandidates": [],
-        "redirectSources": []
+        ]
       }
-    }
+    },
+    "_version": 1692358704000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a227dajt",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a227dajt",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b21053613"
+          },
+          "version": 14,
+          "modifiedTime": "2023-08-18T15:49:59Z"
+        },
+        "mergedTime": "2025-08-19T18:37:19.909853Z",
+        "indexedTime": "2025-09-08T17:23:33.148976Z",
+        "mergeCandidates": [],
+        "redirectSources": [
+          {
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "mets"
+              },
+              "ontologyType": "Work",
+              "value": "b21053613"
+            },
+            "otherIdentifiers": [],
+            "canonicalId": "gqj73sk6",
+            "type": "Identified"
+          }
+        ]
+      },
       "query": {
         "id": "a227dajt",
-        "title": "L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq / par le docteur Gailliard.",
+        "title": "L'homoeopathie \u00e0 l'Acad\u00e9mie de m\u00e9decine de Belgique en 1877 : r\u00e9ponse au d\u00e9fi de M. le professeur Crocq / par le docteur Gailliard.",
         "physicalDescription": "93 pages ; 25 cm",
         "alternativeTitles": [],
         "languages.label": [
@@ -3046,7 +3092,7 @@
       },
       "display": {
         "id": "a227dajt",
-        "title": "L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq / par le docteur Gailliard.",
+        "title": "L'homoeopathie \u00e0 l'Acad\u00e9mie de m\u00e9decine de Belgique en 1877 : r\u00e9ponse au d\u00e9fi de M. le professeur Crocq / par le docteur Gailliard.",
         "alternativeTitles": [],
         "physicalDescription": "93 pages ; 25 cm",
         "workType": {
@@ -3472,53 +3518,71 @@
         "items.locations.locationType.id": [
           "iiif-presentation"
         ],
+        "items.locations.createdDate": [],
         "partOf.id": [],
         "partOf.title": [
           "Medical Heritage Library"
         ],
         "availabilities.id": [
           "online"
-        ],
-        "items.locations.createdDate": []
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a227dajt",
-          "identifier": {
-            "identifierType": {
-              "id": "sierra-system-number"
-            },
-            "ontologyType": "Work",
-            "value": "b21053613"
-          },
-          "version": 14,
-          "modifiedTime": "2023-08-18T15:49:59Z"
-        },
-        "mergedTime": "2025-08-19T18:37:19.909853Z",
-        "indexedTime": "2025-09-08T17:23:33.148976Z",
-        "mergeCandidates": [],
-        "redirectSources": [
-          {
-            "canonicalId": "gqj73sk6",
-            "type": "Identified",
-            "sourceIdentifier": {
-              "identifierType": {
-                "id": "mets"
-              },
-              "ontologyType": "Work",
-              "value": "b21053613"
-            },
-            "otherIdentifiers": []
-          }
         ]
       }
-    }
+    },
+    "_version": 1692373799000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a227y9ye",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a227y9ye",
+          "identifier": {
+            "identifierType": {
+              "id": "calm-record-id"
+            },
+            "ontologyType": "Work",
+            "value": "bff9122c-212a-4dbe-89fe-f355a5185cca"
+          },
+          "version": 13,
+          "modifiedTime": "2025-07-31T10:24:39Z"
+        },
+        "mergedTime": "2025-08-19T19:29:45.995295Z",
+        "indexedTime": "2025-09-08T17:23:33.151936Z",
+        "mergeCandidates": [
+          {
+            "id": {
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "calm-ref-no"
+                },
+                "ontologyType": "Work",
+                "value": "PPRAS/A/2/1"
+              },
+              "otherIdentifiers": [],
+              "canonicalId": "zyphxyta",
+              "type": "Identified"
+            },
+            "reason": "Archivematica work"
+          }
+        ],
+        "redirectSources": [
+          {
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Work",
+              "value": "b19603782"
+            },
+            "otherIdentifiers": [],
+            "canonicalId": "cpmtamr5",
+            "type": "Identified"
+          }
+        ]
+      },
       "query": {
         "id": "a227y9ye",
         "title": "Wartime, bombing",
@@ -3789,6 +3853,7 @@
         "items.locations.locationType.id": [
           "closed-stores"
         ],
+        "items.locations.createdDate": [],
         "partOf.id": [
           "dupg64pv",
           "f5yb28yc",
@@ -3801,63 +3866,35 @@
         ],
         "availabilities.id": [
           "closed-stores"
-        ],
-        "items.locations.createdDate": []
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a227y9ye",
-          "identifier": {
-            "identifierType": {
-              "id": "calm-record-id"
-            },
-            "ontologyType": "Work",
-            "value": "bff9122c-212a-4dbe-89fe-f355a5185cca"
-          },
-          "version": 13,
-          "modifiedTime": "2025-07-31T10:24:39Z"
-        },
-        "mergedTime": "2025-08-19T19:29:45.995295Z",
-        "indexedTime": "2025-09-08T17:23:33.151936Z",
-        "mergeCandidates": [
-          {
-            "id": {
-              "canonicalId": "zyphxyta",
-              "type": "Identified",
-              "sourceIdentifier": {
-                "identifierType": {
-                  "id": "calm-ref-no"
-                },
-                "ontologyType": "Work",
-                "value": "PPRAS/A/2/1"
-              },
-              "otherIdentifiers": []
-            },
-            "reason": "Archivematica work"
-          }
-        ],
-        "redirectSources": [
-          {
-            "canonicalId": "cpmtamr5",
-            "type": "Identified",
-            "sourceIdentifier": {
-              "identifierType": {
-                "id": "sierra-system-number"
-              },
-              "ontologyType": "Work",
-              "value": "b19603782"
-            },
-            "otherIdentifiers": []
-          }
         ]
       }
-    }
+    },
+    "_version": 1753957479000,
+    "_version_type": "external_gte"
   },
   {
     "_index": "works-indexed-2025-01-01",
     "_id": "a2284uhb",
     "_source": {
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a2284uhb",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b30948988"
+          },
+          "version": 15,
+          "modifiedTime": "2022-01-12T10:28:08Z"
+        },
+        "mergedTime": "2025-08-19T20:22:07.952627Z",
+        "indexedTime": "2025-09-08T17:23:33.153066Z",
+        "mergeCandidates": [],
+        "redirectSources": []
+      },
       "query": {
         "id": "a2284uhb",
         "title": "Index locorum in commentario Caesaris Belli gallici descriptorum (Rev: Bonus Accursius)",
@@ -4172,6 +4209,7 @@
         "items.locations.locationType.id": [
           "online-resource"
         ],
+        "items.locations.createdDate": [],
         "partOf.id": [],
         "partOf.title": [
           "Early European Books.",
@@ -4179,28 +4217,10 @@
         ],
         "availabilities.id": [
           "online"
-        ],
-        "items.locations.createdDate": []
-      },
-      "type": "Visible",
-      "debug": {
-        "source": {
-          "id": "a2284uhb",
-          "identifier": {
-            "identifierType": {
-              "id": "sierra-system-number"
-            },
-            "ontologyType": "Work",
-            "value": "b30948988"
-          },
-          "version": 15,
-          "modifiedTime": "2022-01-12T10:28:08Z"
-        },
-        "mergedTime": "2025-08-19T20:22:07.952627Z",
-        "indexedTime": "2025-09-08T17:23:33.153066Z",
-        "mergeCandidates": [],
-        "redirectSources": []
+        ]
       }
-    }
+    },
+    "_version": 1641983288000,
+    "_version_type": "external_gte"
   }
 ]
