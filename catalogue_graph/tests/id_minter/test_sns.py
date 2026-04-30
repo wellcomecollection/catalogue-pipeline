@@ -109,6 +109,4 @@ class TestPublishBatchToSns:
                 }
 
         with pytest.raises(RuntimeError, match="Failed to publish 1/2 SNS messages"):
-            publish_batch_to_sns(
-                TEST_TOPIC, ["msg1", "msg2"], client=FailingClient()
-            )
+            publish_batch_to_sns(TEST_TOPIC, ["msg1", "msg2"], client=FailingClient())
