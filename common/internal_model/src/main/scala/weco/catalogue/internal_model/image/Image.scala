@@ -65,7 +65,7 @@ object ImageState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
     inferredData: InferredData,
-    augmentedTime: Instant
+    augmentedTime: Option[Instant] = None
   ) extends ImageState {
     type TransitionArgs = InferredData
   }
@@ -88,7 +88,7 @@ object ImageFsm {
         sourceIdentifier = self.state.sourceIdentifier,
         canonicalId = self.state.canonicalId,
         inferredData = inferredData,
-        augmentedTime = Instant.now()
+        augmentedTime = Some(Instant.now())
       )
   }
 }
