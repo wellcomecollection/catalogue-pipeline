@@ -3,6 +3,13 @@
   "properties": {
     "modifiedTime": {
       "type": "date"
+    },
+    "state": {
+      "properties": {
+        "augmentedTime": {
+          "type": "date"
+        }
+      }
     }
   }
 }

@@ -64,7 +64,8 @@ object ImageState {
   case class Augmented(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    inferredData: InferredData
+    inferredData: InferredData,
+    augmentedTime: Instant
   ) extends ImageState {
     type TransitionArgs = InferredData
   }
@@ -86,7 +87,8 @@ object ImageFsm {
       Augmented(
         sourceIdentifier = self.state.sourceIdentifier,
         canonicalId = self.state.canonicalId,
-        inferredData = inferredData
+        inferredData = inferredData,
+        augmentedTime = Instant.now()
       )
   }
 }
