@@ -51,7 +51,7 @@ def publish_batch_to_sns(
             }
         )
 
-    sns_client = client or boto3.Session().client("sns")
+    sns_client = boto3.Session().client("sns") if client is None else client
     response = sns_client.publish_batch(
         TopicArn=topic_arn,
         PublishBatchRequestEntries=request_entries,

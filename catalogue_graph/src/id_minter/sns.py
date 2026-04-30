@@ -50,11 +50,12 @@ def publish_ids_to_sns(
     )
 
     published = 0
+    actual_workers = min(max_workers, num_batches)
     sns_client = boto3.Session().client(
         "sns",
-        config=Config(max_pool_connections=max_workers),
+        config=Config(max_pool_connections=actual_workers),
     )
-    with ThreadPoolExecutor(max_workers=min(max_workers, num_batches)) as pool:
+    with ThreadPoolExecutor(max_workers=actual_workers) as pool:
         futures = {
             pool.submit(publish_batch_to_sns, topic_arn, batch, sns_client): idx
             for idx, batch in enumerate(batches)
