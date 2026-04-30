@@ -1,13 +1,15 @@
 from collections.abc import Generator, Iterable
 from itertools import batched
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar
 
-import elasticsearch.helpers
 import structlog
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 from core.source import BaseSource
+from utils.elasticsearch import (
+    index_es_batch,
+)
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -88,24 +90,6 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
                 "_source": record.model_dump(),
             }
 
-    def _index_es_batch(
-        self, es_client: Elasticsearch, es_actions: list[dict]
-    ) -> list[dict[str, Any]]:
-        success_count, es_errors = elasticsearch.helpers.bulk(
-            es_client,
-            es_actions,
-            raise_on_error=False,
-            stats_only=False,
-        )
-        logger.info(
-            "Indexed batch",
-            success_count=success_count,
-            batch_size=len(es_actions),
-        )
-
-        # Since we called `bulk` with `stats_only=False`, we know that es_errors is a list of dicts
-        return cast(list[dict[str, Any]], es_errors)
-
     def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
         # Reset run-specific state so manifests reflect the current execution only
         self.successful_ids.clear()
@@ -116,7 +100,7 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
             es_actions = list(
                 self._generate_bulk_load_actions(transformed_batch, index_name)
             )
-            es_errors = self._index_es_batch(es_client, es_actions)
+            _, es_errors = index_es_batch(es_client, es_actions)
 
             batch_error_ids = set()
             for e in es_errors:
