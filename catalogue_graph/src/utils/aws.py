@@ -32,7 +32,11 @@ def get_ssm_parameter(parameter_name: str) -> str:
     return parameter_value
 
 
-def publish_batch_to_sns(topic_arn: str, messages: list[str]) -> None:
+def publish_batch_to_sns(
+    topic_arn: str,
+    messages: list[str],
+    client: Any | None = None,
+) -> None:
     """Publishes a batch of up to 10 messages to the specified SNS topic."""
 
     assert len(messages) <= 10
@@ -47,10 +51,17 @@ def publish_batch_to_sns(topic_arn: str, messages: list[str]) -> None:
             }
         )
 
-    boto3.Session().client("sns").publish_batch(
+    sns_client = boto3.Session().client("sns") if client is None else client
+    response = sns_client.publish_batch(
         TopicArn=topic_arn,
         PublishBatchRequestEntries=request_entries,
     )
+
+    failed = response.get("Failed", [])
+    if failed:
+        raise RuntimeError(
+            f"Failed to publish {len(failed)}/{len(messages)} SNS messages: {failed}"
+        )
 
 
 def get_csv_from_s3(s3_uri: str) -> Generator[Any]:
