@@ -21,7 +21,6 @@ class WorkRelations(SerialisableModel):
 class WorkState(SerialisableModel):
     source_identifier: SourceIdentifier
     source_modified_time: str
-    modified_time: str
     relations: WorkRelations | None = None
 
     def id(self) -> str:

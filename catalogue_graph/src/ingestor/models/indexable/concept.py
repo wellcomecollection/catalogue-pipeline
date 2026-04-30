@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from pydantic import BaseModel
 
 from ingestor.models.display.identifier import DisplayIdentifier
@@ -62,6 +64,9 @@ class IndexableConcept(IndexableRecord):
 
     def get_id(self) -> str:
         return self.query.id
+
+    def get_modified_time(self) -> datetime:
+        return datetime.now(UTC)
 
     @staticmethod
     def from_raw_document(concept: dict) -> "IndexableConcept":

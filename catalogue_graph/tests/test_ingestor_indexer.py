@@ -4,6 +4,7 @@ from typing import Any, cast
 import polars
 import pydantic_core
 import pytest
+from freezegun import freeze_time
 
 import config
 from ingestor.models.step_events import (
@@ -47,6 +48,7 @@ def get_mock_indexer_event(record_type: IngestorType) -> IngestorIndexerLambdaEv
     )
 
 
+@freeze_time("2025-01-01T12:00:00Z")
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
 def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -> None:
     pipeline_date = "2025-01-01"
@@ -106,6 +108,7 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
     }
 
 
+@freeze_time("2025-01-01T12:00:00Z")
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
 def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) -> None:
     pipeline_date = "2025-01-01"
