@@ -32,7 +32,11 @@ def get_ssm_parameter(parameter_name: str) -> str:
     return parameter_value
 
 
-def publish_batch_to_sns(topic_arn: str, messages: list[str]) -> None:
+def publish_batch_to_sns(
+    topic_arn: str,
+    messages: list[str],
+    client: Any | None = None,
+) -> None:
     """Publishes a batch of up to 10 messages to the specified SNS topic."""
 
     assert len(messages) <= 10
@@ -47,7 +51,8 @@ def publish_batch_to_sns(topic_arn: str, messages: list[str]) -> None:
             }
         )
 
-    boto3.Session().client("sns").publish_batch(
+    sns_client = client or boto3.Session().client("sns")
+    sns_client.publish_batch(
         TopicArn=topic_arn,
         PublishBatchRequestEntries=request_entries,
     )

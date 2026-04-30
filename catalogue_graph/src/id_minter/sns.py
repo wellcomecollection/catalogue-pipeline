@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import boto3
 import structlog
 
 from utils.aws import publish_batch_to_sns
@@ -21,7 +22,7 @@ logger = structlog.get_logger(__name__)
 SNS_BATCH_SIZE = 10
 
 # How many publish_batch calls to run concurrently.
-SNS_MAX_WORKERS = 8
+SNS_MAX_WORKERS = 50
 
 
 def publish_ids_to_sns(
@@ -48,9 +49,10 @@ def publish_ids_to_sns(
     )
 
     published = 0
+    sns_client = boto3.Session().client("sns")
     with ThreadPoolExecutor(max_workers=min(max_workers, num_batches)) as pool:
         futures = {
-            pool.submit(publish_batch_to_sns, topic_arn, batch): idx
+            pool.submit(publish_batch_to_sns, topic_arn, batch, sns_client): idx
             for idx, batch in enumerate(batches)
         }
         for future in as_completed(futures):
