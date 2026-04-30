@@ -73,7 +73,7 @@ def get_table(
             # file size, as recommended here:
             # https://docs.aws.amazon.com/prescriptive-guidance/latest/apache-iceberg-on-aws/best-practices-read.html
             properties={
-                "write.target-file-size-bytes": str(128 * 1024 * 1024), # 128 MB
+                "write.target-file-size-bytes": str(64 * 1024 * 1024),  # 64 MB
             },
         )
 

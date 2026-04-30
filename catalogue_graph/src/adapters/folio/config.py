@@ -9,7 +9,10 @@ from adapters.utils.iceberg import (
     LocalIcebergTableConfig,
     RestApiIcebergTableConfig,
 )
-from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA, ADAPTER_STORE_SORT_ORDER
+from adapters.utils.schemata import (
+    ADAPTER_STORE_ICEBERG_SCHEMA,
+    ADAPTER_STORE_SORT_ORDER,
+)
 from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
 
 # ---------------------------------------------------------------------------
