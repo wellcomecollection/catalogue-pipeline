@@ -61,6 +61,7 @@ dev = [
     "pytest-bdd>=8.1.0",
     "hypothesis>=6.100.0,<7.0.0",
     "jinja2>=3.1.6",
+    "pandas-stubs>=3.0.0.260204",
 ]
 
 [tool.pytest.ini_options]
