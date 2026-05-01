@@ -202,7 +202,7 @@ class MintingResolver:
         for sid in source_ids:
             if sid in found:
                 result[sid] = found[sid]
-                logger.info(
+                logger.debug(
                     "Resolved ID",
                     source_id=f"{sid[0]}[{sid[1]}/{sid[2]}]",
                     canonical_id=found[sid],
@@ -289,7 +289,7 @@ class MintingResolver:
                 assert (
                     pred is not None
                 )  # needs_inheritance only contains source ids with a predecessor
-                logger.info(
+                logger.debug(
                     "Resolved ID",
                     source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
                     canonical_id=canonical_id,
@@ -412,14 +412,14 @@ class MintingResolver:
                     # Only mark as assigned if we won the race (our claimed ID was used)
                     if actual_canonical == claimed_mapping.get(source_key):
                         used_canonical_ids.add(actual_canonical)
-                        logger.info(
+                        logger.debug(
                             "Resolved ID",
                             source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
                             canonical_id=actual_canonical,
                             method="minted",
                         )
                     else:
-                        logger.info(
+                        logger.debug(
                             "Resolved ID",
                             source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
                             canonical_id=actual_canonical,
