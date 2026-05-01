@@ -10,7 +10,7 @@ from ingestor.steps.ingestor_indexer import generate_operations
 from tests.ingestor.test_images_transformer import _build_extracted_image
 
 
-def test_generate_operations_works_version_from_source_modified_time() -> None:
+def test_generate_operations_works_version_from_modified_time() -> None:
     df = pl.read_parquet("tests/fixtures/ingestor/works/00000000-00000010.parquet")
     row = df.to_dicts()[0]
     work = IndexableWork.from_raw_document(row)
@@ -22,7 +22,7 @@ def test_generate_operations_works_version_from_source_modified_time() -> None:
     assert ops[0]["_id"] == work.get_id()
     assert ops[0]["_version_type"] == "external_gte"
 
-    # Version should be epoch millis of source modified_time
+    # Version should be epoch millis of modified_time (set from merged_time)
     expected_dt = datetime.fromisoformat(work.debug.source.modified_time)
     expected_version = int(expected_dt.timestamp() * 1000)
     assert ops[0]["_version"] == expected_version

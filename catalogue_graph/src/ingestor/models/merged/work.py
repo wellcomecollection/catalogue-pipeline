@@ -1,3 +1,5 @@
+from pydantic import model_validator
+
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.id_label import Id
 from models.pipeline.work import (
@@ -15,9 +17,21 @@ class MergedWorkState(WorkState):
     merged_time: str
     availabilities: list[Id]
     merge_candidates: list[MergeCandidate]
+    modified_time: str | None = None
 
     def id(self) -> str:
         return self.canonical_id
+
+    @model_validator(mode="before")
+    @classmethod
+    def _set_modified_time(cls, data: dict) -> dict:
+        if isinstance(data, dict) and ("merged_time" in data or "mergedTime" in data):
+            d = dict(data)
+            # Prefer snake_case if present else camelCase
+            merged_val = d.get("merged_time", d.get("mergedTime"))
+            d["modified_time"] = merged_val
+            return d
+        return data
 
 
 class MergedWork(Work):

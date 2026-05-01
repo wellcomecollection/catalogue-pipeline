@@ -30,12 +30,13 @@ class WorkDebug(ElasticsearchModel):
 
     @classmethod
     def _from_merged_work(cls, work: MergedWork) -> "WorkDebug":
+        assert work.state.modified_time is not None
         return WorkDebug(
             source=WorkDebugSource(
                 id=work.state.canonical_id,
                 identifier=work.state.source_identifier,
                 version=work.version,
-                modified_time=work.state.source_modified_time,
+                modified_time=work.state.modified_time,
             ),
             merged_time=work.state.merged_time,
             indexed_time=convert_datetime_to_utc_iso(datetime.now()),
