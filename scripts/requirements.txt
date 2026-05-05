@@ -4,93 +4,103 @@
 #
 #    pip-compile ./requirements.in
 #
-anyio==3.2.1
-    # via httpx
-boto3==1.17.103
-    # via -r ./requirements.in
-botocore==1.20.103
+anyio==4.13.0
+    # via
+    #   elasticsearch
+    #   httpx
+boto3==1.43.3
+    # via -r requirements.in
+botocore==1.43.3
     # via
     #   boto3
     #   s3transfer
-certifi==2024.8.30
+certifi==2026.4.22
     # via
-    #   elasticsearch
+    #   elastic-transport
     #   httpcore
     #   httpx
     #   requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.7
     # via requests
-click==8.0.1
-    # via -r ./requirements.in
-dateparser==1.0.0
+click==8.3.3
+    # via -r requirements.in
+dateparser==1.4.0
     # via maya
-elasticsearch==7.13.1
-    # via -r ./requirements.in
+elastic-transport==9.2.1
+    # via elasticsearch
+elasticsearch==9.3.0
+    # via -r requirements.in
+exceptiongroup==1.3.1
+    # via anyio
 h11==0.16.0
     # via httpcore
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
-    # via -r ./requirements.in
-humanize==3.9.0
+    # via -r requirements.in
+humanize==4.15.0
     # via maya
 hyperlink==21.0.0
-    # via -r ./requirements.in
-idna==3.2
+    # via -r requirements.in
+idna==3.13
     # via
     #   anyio
     #   httpx
     #   hyperlink
     #   requests
-jmespath==0.10.0
+jmespath==1.1.0
     # via
     #   boto3
     #   botocore
 maya==0.6.1
-    # via -r ./requirements.in
-pendulum==2.1.2
+    # via -r requirements.in
+pendulum==3.2.0
     # via maya
-python-dateutil==2.8.1
+python-dateutil==2.9.0.post0
     # via
     #   botocore
     #   dateparser
+    #   elasticsearch
     #   pendulum
     #   snaptime
-pytz==2021.1
+pytz==2026.2
     # via
     #   dateparser
     #   maya
     #   snaptime
-    #   tzlocal
-pytzdata==2020.1
-    # via pendulum
-regex==2021.4.4
+regex==2026.4.4
     # via dateparser
-requests==2.32.3
-    # via -r ./requirements.in
-s3transfer==0.4.2
+requests==2.33.1
+    # via -r requirements.in
+s3transfer==0.17.0
     # via boto3
-six==1.16.0
+six==1.17.0
     # via python-dateutil
 snaptime==0.2.4
     # via maya
-sniffio==1.2.0
-    # via anyio
-termcolor==1.1.0
+sniffio==1.3.1
+    # via
+    #   elastic-transport
+    #   elasticsearch
+termcolor==3.3.0
     # via yaspin
-tqdm==4.61.1
-    # via -r ./requirements.in
-tzlocal==2.1
+tqdm==4.67.3
+    # via -r requirements.in
+typing-extensions==4.15.0
+    # via
+    #   anyio
+    #   elasticsearch
+    #   exceptiongroup
+tzdata==2026.2
+    # via pendulum
+tzlocal==5.3.1
     # via
     #   dateparser
     #   maya
-urllib3==1.26.6
+urllib3==2.6.3
     # via
     #   botocore
-    #   elasticsearch
+    #   elastic-transport
     #   requests
-yaspin==2.0.0
-    # via -r ./requirements.in
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
+yaspin==3.4.0
+    # via -r requirements.in
