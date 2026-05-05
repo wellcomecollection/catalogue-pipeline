@@ -60,7 +60,7 @@ module "catalogue_graph_removers_incremental_state_machine" {
     States = {
       "Graph removers" = {
         Type           = "Map",
-        Items          = local.concepts_pipeline_inputs_incremental
+        Items          = local.graph_pipeline_inputs_incremental
         MaxConcurrency = 10
 
         ItemSelector = {

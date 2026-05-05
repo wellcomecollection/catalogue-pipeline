@@ -68,6 +68,7 @@ DisplayWorkType = Literal["Work", "Series", "Section", "Collection"]
 WorkStatus = Literal["Visible", "Redirected", "Deleted", "Invisible"]
 
 IngestorType = Literal["works", "concepts", "images"]
+IngestorDeletionsType = Literal["concepts", "images"]
 
 IngestorLoadFormat = Literal["parquet", "jsonl"]
 

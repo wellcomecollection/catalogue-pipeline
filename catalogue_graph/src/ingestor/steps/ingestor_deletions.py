@@ -15,23 +15,38 @@ from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
+from utils.types import (
+    CatalogueTransformerType,
+    IngestorDeletionsType,
+)
 
 logger = structlog.get_logger(__name__)
 
 
+def _get_transformer_type(
+    ingestor_type: IngestorDeletionsType,
+) -> CatalogueTransformerType:
+    if ingestor_type == "concepts":
+        return "catalogue_concepts"
+    if ingestor_type == "images":
+        return "catalogue_images"
+
+    raise ValueError(f"Unknown ingestor deletions type: '{ingestor_type}'")
+
+
 def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
-    """Return a list of concept IDs marked for deletion from the ES index."""
+    """Return a list of concept/image IDs marked for deletion from the ES index."""
 
     # Reconstruct the original incremental graph remover event which wrote the removed IDs to a parquet file
     remover_event = IncrementalGraphRemoverEvent(
-        transformer_type="catalogue_concepts",
+        transformer_type=_get_transformer_type(event.ingestor_type),
         entity_type="nodes",
         pipeline_date=event.pipeline_date,
         window=event.window,
         environment=event.environment,
     )
 
-    # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
+    # Retrieve a log of node IDs which were deleted from the graph (see `graph_remover.py`).
     df = df_from_s3_parquet(remover_event.get_s3_uri("parquet", "deleted_ids"))
 
     ids = []
@@ -93,9 +108,16 @@ def local_handler() -> None:
     )
 
     parser.add_argument(
+        "--ingestor-type",
+        type=str,
+        help="Which ingestor deletions type to run (concepts or images).",
+        choices=typing.get_args(IngestorDeletionsType),
+        required=True,
+    )
+    parser.add_argument(
         "--index-date",
         type=str,
-        help='The concepts index date that is being removed from, will default to "dev".',
+        help='The concepts/images index date that is being removed from, will default to "dev".',
         required=False,
         default="dev",
     )

@@ -77,7 +77,7 @@ module "catalogue_graph_ingestor_state_machine" {
         Type = "Choice"
         Choices = [
           {
-            "Condition" : "{% $states.input.ingestor_type = 'concepts' %}",
+            "Condition" : "{% $states.input.ingestor_type in ['concepts', 'images'] %}",
             "Next" : "Run deletions"
           }
         ]

@@ -40,13 +40,13 @@ module "catalogue_graph_extractors_incremental_state_machine" {
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment       = "Extract catalogue works/concepts, transform them into nodes and edges, and stream them into an S3 bucket."
+    Comment       = "Extract catalogue works/concepts/images, transform them into nodes and edges, and stream them into an S3 bucket."
     StartAt       = "Extractors"
 
     States = {
       "Extractors" = {
         Type           = "Map",
-        Items          = local.concepts_pipeline_inputs_incremental
+        Items          = local.graph_pipeline_inputs_incremental
         MaxConcurrency = 10
 
         ItemSelector = {

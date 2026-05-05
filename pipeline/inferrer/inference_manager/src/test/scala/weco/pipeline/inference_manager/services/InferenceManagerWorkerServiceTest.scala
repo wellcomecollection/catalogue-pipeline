@@ -92,7 +92,7 @@ class InferenceManagerWorkerServiceTest
             id =>
               val image = augmentedImages(id)
               inside(image.state) {
-                case ImageState.Augmented(_, id, inferredData) =>
+                case ImageState.Augmented(_, id, inferredData, _) =>
                   images should contain key id
                   val seed = id.hashCode
                   inside(inferredData) {
@@ -147,7 +147,7 @@ class InferenceManagerWorkerServiceTest
             id =>
               val image = augmentedImages(id)
               inside(image.state) {
-                case ImageState.Augmented(_, _, inferredData) =>
+                case ImageState.Augmented(_, _, inferredData, _) =>
                   inside(inferredData) {
                     case InferredData(
                           features,
@@ -210,6 +210,34 @@ class InferenceManagerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 1)
+        }
+    }
+  }
+
+  it("sets augmentedTime on the augmented image") {
+    val image = createImageData.toInitialImage
+    val beforeAugmentation = java.time.Instant.now()
+    withResponsesAndFixtures(
+      List(image),
+      inferrer = req =>
+        if (req.contains("feature_inferrer")) {
+          Some(Responses.featureInferrer)
+        } else if (req.contains("palette_inferrer")) {
+          Some(Responses.paletteInferrer)
+        } else if (req.contains("aspect_ratio_inferrer")) {
+          Some(Responses.aspectRatioInferrer)
+        } else None,
+      images = _ => Some(Responses.image)
+    ) {
+      case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
+        sendNotificationToSQS(queue = queue, body = image.id)
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+
+          val augmentedImage = augmentedImages(messageSender.messages.head.body)
+          augmentedImage.state.augmentedTime shouldBe defined
+          augmentedImage.state.augmentedTime.get should be >= beforeAugmentation
         }
     }
   }

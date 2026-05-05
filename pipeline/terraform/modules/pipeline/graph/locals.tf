@@ -15,7 +15,7 @@ locals {
     ]
   }
 
-  ingestor_types = ["concepts", "works"]
+  ingestor_types = ["concepts", "works", "images"]
 
   bulk_loader_default_insert_error_threshold = 1 / 10000
 
@@ -127,7 +127,7 @@ locals {
     }
   ]
 
-  concepts_pipeline_inputs_incremental = [
+  graph_pipeline_inputs_incremental = [
     {
       "label" : "Catalogue Work Nodes",
       "transformer_type" : "catalogue_works",
@@ -141,6 +141,11 @@ locals {
     {
       "label" : "Catalogue Concept Nodes",
       "transformer_type" : "catalogue_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Catalogue Image Nodes",
+      "transformer_type" : "catalogue_images",
       "entity_type" : "nodes"
     },
     {
@@ -163,6 +168,11 @@ locals {
     {
       "label" : "Catalogue Concept Edges",
       "transformer_type" : "catalogue_concepts",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Catalogue Image Edges",
+      "transformer_type" : "catalogue_images",
       "entity_type" : "edges"
     },
   ]

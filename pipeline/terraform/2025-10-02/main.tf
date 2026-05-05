@@ -16,9 +16,11 @@ module "pipeline" {
   # }
 
   graph_index_dates = {
-    merged   = "2025-10-02"
-    works    = "2026-03-03"
-    concepts = "2026-03-03"
+    merged    = "2025-10-02"
+    augmented = "2026-04-29"
+    works     = "2026-03-03"
+    concepts  = "2026-03-03"
+    images    = "2026-04-29"
   }
 
   index_config = {
@@ -66,6 +68,12 @@ module "pipeline" {
     "2026-03-06" = {
       works = {
         identified = "works_identified.2023-05-26"
+      }
+    },
+    "2026-04-29" = {
+      images = {
+        augmented = "images_augmented.2026-04-29"
+        indexed   = "images_indexed.2024-11-14"
       }
     }
   }

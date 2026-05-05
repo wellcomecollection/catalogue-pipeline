@@ -4,7 +4,7 @@ module "catalogue_graph_ingestors_state_machine" {
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment       = "Ingest catalogue works and concepts into the pipeline Elasticsearch cluster."
+    Comment       = "Ingest catalogue works, concepts, and images into the pipeline Elasticsearch cluster."
     StartAt       = "Ingestors"
 
     States = {

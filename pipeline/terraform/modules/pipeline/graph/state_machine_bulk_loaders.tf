@@ -40,9 +40,9 @@ module "catalogue_graph_bulk_loaders_incremental_state_machine" {
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Trigger the catalogue-graph-bulk-loader state machine in sequence for each combination of inputs."
-    StartAt       = "Load ${local.concepts_pipeline_inputs_incremental[0].label}"
+    StartAt       = "Load ${local.graph_pipeline_inputs_incremental[0].label}"
     States = merge(tomap({
-      for index, task_input in local.concepts_pipeline_inputs_incremental :
+      for index, task_input in local.graph_pipeline_inputs_incremental :
       "Load ${task_input.label}" => {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
@@ -56,7 +56,7 @@ module "catalogue_graph_bulk_loaders_incremental_state_machine" {
             "insert_error_threshold" : try(task_input.insert_error_threshold, local.bulk_loader_default_insert_error_threshold),
           }
         }
-        Next = index == length(local.concepts_pipeline_inputs_incremental) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_incremental[index + 1].label}"
+        Next = index == length(local.graph_pipeline_inputs_incremental) - 1 ? "Success" : "Load ${local.graph_pipeline_inputs_incremental[index + 1].label}"
       }
       }), {
       Success = {
