@@ -73,7 +73,7 @@ module "pipeline" {
   allow_delete_indices = false
 
   # Base AMI for ECS instances
-  ami_id = "ami-056dd98084762c908"
+  ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date
