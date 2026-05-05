@@ -1,7 +1,9 @@
-from typing import Literal
+from typing import Any, Literal, cast
 
 import elasticsearch
+import elasticsearch.helpers
 import structlog
+from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 from config import (
@@ -73,3 +75,23 @@ def get_client(
         "Creating Elasticsearch client", es_mode=es_mode, host_config=host_config
     )
     return elasticsearch.Elasticsearch(host_config, api_key=config.apikey, timeout=60)
+
+
+def index_es_batch(
+    es_client: Elasticsearch, es_actions: list[dict]
+) -> tuple[int, list[dict[str, Any]]]:
+    success_count, es_errors = elasticsearch.helpers.bulk(
+        es_client,
+        es_actions,
+        raise_on_error=False,
+        stats_only=False,
+    )
+    logger.info(
+        "Indexed batch",
+        success_count=success_count,
+        batch_size=len(es_actions),
+    )
+
+    # Since we called `bulk` with `stats_only=False`, we know that es_errors is a list of dicts
+    es_errors = cast(list[dict[str, Any]], es_errors)
+    return success_count, es_errors

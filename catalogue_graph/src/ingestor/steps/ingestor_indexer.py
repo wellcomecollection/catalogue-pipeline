@@ -5,7 +5,6 @@ from argparse import ArgumentParser
 from collections.abc import Generator
 
 import boto3
-import elasticsearch.helpers
 import structlog
 
 import config
@@ -22,7 +21,11 @@ from ingestor.models.step_events import (
 )
 from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
-from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
+from utils.elasticsearch import (
+    ElasticsearchMode,
+    get_standard_index_name,
+    index_es_batch,
+)
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import IndexerReport
 from utils.steps import create_job_id, run_ecs_handler
@@ -72,10 +75,20 @@ def generate_operations(
 ) -> Generator[dict]:
     for datum in indexable_data:
         source = json.loads(datum.model_dump_json(exclude_none=True))
+        version = int(datum.get_modified_time().timestamp() * 1000)  # epoch millis
+
+        # Documents whose modified date is set to the start of the Unix epoch will have a version of 0.
+        # We floor this to 100 for backward compatibility with documents which use Elasticsearch's default versioning
+        # (which increments every time a given document is reindexed).
+        # This won't be needed after we do a full reindex.
+        version = max(100, version)
+
         yield {
             "_index": index_name,
             "_id": datum.get_id(),
             "_source": source,
+            "_version": version,
+            "_version_type": "external_gte",
         }
 
 
@@ -116,6 +129,8 @@ def handler(
     )
 
     total_success_count = 0
+    all_es_errors = []
+
     for s3_object in objects_to_index:
         indexable_data = get_indexable_data(event, s3_object.s3_uri)
 
@@ -126,19 +141,24 @@ def handler(
             index_name=index_name,
         )
 
-        success_count, _ = elasticsearch.helpers.bulk(
-            es_client, generate_operations(index_name, indexable_data)
-        )
-
-        logger.info("Successfully indexed documents", count=success_count)
-
+        operations = list(generate_operations(index_name, indexable_data))
+        success_count, es_errors = index_es_batch(es_client, operations)
         total_success_count += success_count
+        all_es_errors += es_errors
 
     event_payload = event.model_dump(exclude={"objects_to_index"})
 
     logger.info("Preparing indexer pipeline report")
     report = IndexerReport(**event_payload, success_count=total_success_count)
     report.publish()
+
+    if all_es_errors:
+        logger.error(
+            "Bulk indexing errors encountered",
+            total_errors=len(all_es_errors),
+            first_errors=all_es_errors[:5],
+        )
+        raise RuntimeError(f"Bulk indexing failed with {len(all_es_errors)} error(s)")
 
     return IngestorIndexerMonitorLambdaEvent(
         **event_payload,
