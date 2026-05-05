@@ -92,8 +92,9 @@ class InferenceManagerWorkerServiceTest
             id =>
               val image = augmentedImages(id)
               inside(image.state) {
-                case ImageState.Augmented(_, id, inferredData, _) =>
+                case ImageState.Augmented(_, id, inferredData, augmentedTime) =>
                   images should contain key id
+                  augmentedTime shouldBe defined
                   val seed = id.hashCode
                   inside(inferredData) {
                     case InferredData(
@@ -147,7 +148,8 @@ class InferenceManagerWorkerServiceTest
             id =>
               val image = augmentedImages(id)
               inside(image.state) {
-                case ImageState.Augmented(_, _, inferredData, _) =>
+                case ImageState.Augmented(_, _, inferredData, augmentedTime) =>
+                  augmentedTime shouldBe defined
                   inside(inferredData) {
                     case InferredData(
                           features,
