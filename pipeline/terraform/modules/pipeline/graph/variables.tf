@@ -28,6 +28,7 @@ variable "es_secrets" {
   type = object({
     concepts_ingestor = string
     works_ingestor    = string
+    images_ingestor   = string
     graph_extractor   = string
   })
 }
