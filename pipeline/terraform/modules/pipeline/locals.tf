@@ -1,4 +1,3 @@
-
 // This file is used to create an empty zip file for Lambda functions that
 // don't have any code yet. If we move to container images for all Lambdas
 // we can probably delete this.
@@ -31,10 +30,8 @@ locals {
   es_works_source_index       = "works-source-${var.pipeline_date}"
   es_works_identified_index   = "works-identified-${var.pipeline_date}"
   es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
-  es_works_index              = "works-indexed-${var.pipeline_date}"
-  es_concepts_index           = "concepts-indexed-${var.pipeline_date}"
   es_images_initial_index     = "images-initial-${var.pipeline_date}"
-  es_images_augmented_index   = "images-augmented-${var.pipeline_date}"
+  es_images_augmented_index   = "images-augmented-${var.graph_index_dates.augmented}"
   es_images_index             = "images-indexed-${var.pipeline_date}"
 
   # The max number of connections allowed by the instance.

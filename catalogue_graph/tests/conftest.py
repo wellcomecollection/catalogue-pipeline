@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from typing import Any
 
+import pandas  # noqa: F401 — eager import to prevent freezegun/GC deadlock
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 

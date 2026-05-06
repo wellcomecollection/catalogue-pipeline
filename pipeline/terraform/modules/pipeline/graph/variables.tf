@@ -4,9 +4,11 @@ variable "pipeline_date" {
 
 variable "index_dates" {
   type = object({
-    merged   = string
-    works    = string
-    concepts = string
+    merged    = string
+    augmented = string
+    works     = string
+    concepts  = string
+    images    = string
   })
 }
 
@@ -26,6 +28,7 @@ variable "es_secrets" {
   type = object({
     concepts_ingestor = string
     works_ingestor    = string
+    images_ingestor   = string
     graph_extractor   = string
   })
 }

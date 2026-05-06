@@ -7,6 +7,7 @@ import structlog
 from clients.neptune_client import NeptuneClient
 from graph.removers.base_graph_remover_incremental import BaseGraphRemoverIncremental
 from graph.removers.catalogue_concepts_remover import CatalogueConceptsGraphRemover
+from graph.removers.catalogue_images_remover import CatalogueImagesGraphRemover
 from graph.removers.catalogue_work_identifiers_remover import (
     CatalogueWorkIdentifiersGraphRemover,
 )
@@ -35,6 +36,8 @@ def get_remover(
         return CatalogueWorksGraphRemover(event, es_client, neptune_client)
     if event.transformer_type == "catalogue_concepts":
         return CatalogueConceptsGraphRemover(event, neptune_client)
+    if event.transformer_type == "catalogue_images":
+        return CatalogueImagesGraphRemover(event, neptune_client)
     if event.transformer_type == "catalogue_work_identifiers":
         return CatalogueWorkIdentifiersGraphRemover(event, es_client, neptune_client)
 

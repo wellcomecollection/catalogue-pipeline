@@ -1,12 +1,12 @@
 import argparse
 from pathlib import PurePosixPath
-from typing import Literal, Self
+from typing import Self
 
 from pydantic import BaseModel
 
 import config
 from models.events import BasePipelineEvent, IncrementalWindow, PipelineIndexDates
-from utils.types import IngestorLoadFormat, IngestorType
+from utils.types import IngestorDeletionsType, IngestorLoadFormat, IngestorType
 
 
 class IngestorStepEvent(BasePipelineEvent):
@@ -91,4 +91,4 @@ class IngestorIndexerMonitorLambdaEvent(IngestorStepEvent):
 
 class IngestorDeletionsLambdaEvent(IngestorStepEvent):
     force_pass: bool = False
-    ingestor_type: Literal["concepts"] = "concepts"
+    ingestor_type: IngestorDeletionsType

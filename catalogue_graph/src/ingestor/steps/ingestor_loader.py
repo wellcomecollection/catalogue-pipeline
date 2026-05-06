@@ -146,7 +146,7 @@ def local_handler(parser: ArgumentParser) -> None:
         "--ingestor-type",
         type=str,
         choices=typing.get_args(IngestorType),
-        help="Which ingestor to run (works or concepts).",
+        help="Which ingestor to run (works, concepts, images).",
         required=True,
     )
     parser.add_argument(

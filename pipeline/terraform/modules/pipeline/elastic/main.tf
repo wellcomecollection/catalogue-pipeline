@@ -185,7 +185,11 @@ locals {
       write = [for idx in local.images_augmented_list : idx.name]
     }
     graph_extractor = {
-      read  = [for idx in local.works_denormalised_list : idx.name]
+      read = concat([
+        for idx in local.works_denormalised_list : idx.name
+        ], [
+        for idx in local.images_augmented_list : idx.name
+      ])
       write = []
     }
     image_ingestor = {
@@ -204,7 +208,7 @@ locals {
       read = concat([for idx in local.works_denormalised_list : idx.name], [
         for idx in local.images_augmented_list : idx.name
       ])
-      write = ["images-indexed-dev"]
+      write = ["images-indexed-2026-04-29"] # Only allow writing to the new images index for now
     }
     snapshot_generator = {
       read = concat([

@@ -49,7 +49,7 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment       = "Load catalogue works and concepts them into the graph, and ingests into ES index.",
+    Comment       = "Load catalogue works, concepts, and images into the graph, and ingests into ES index.",
     StartAt       = "Open PIT"
     States = {
       "Open PIT" = {
@@ -135,8 +135,10 @@ module "catalogue_graph_pipeline_incremental_trigger_state_machine" {
           "pipeline_date" : var.pipeline_date,
           "index_dates" : {
             "merged" : var.index_dates["merged"],
+            "augmented" : var.index_dates["augmented"],
             "concepts" : var.index_dates["concepts"],
-            "works" : var.index_dates["works"]
+            "works" : var.index_dates["works"],
+            "images" : var.index_dates["images"],
           },
           # window end time is 5 minutes before the scheduled time
           "window" : {

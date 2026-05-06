@@ -16,9 +16,11 @@ module "pipeline" {
   # }
 
   graph_index_dates = {
-    merged   = "2025-10-02"
-    works    = "2026-03-03"
-    concepts = "2026-03-03"
+    merged    = "2025-10-02"
+    augmented = "2026-04-29"
+    works     = "2026-03-03"
+    concepts  = "2026-03-03"
+    images    = "2026-04-29"
   }
 
   index_config = {
@@ -67,13 +69,19 @@ module "pipeline" {
       works = {
         identified = "works_identified.2023-05-26"
       }
+    },
+    "2026-04-29" = {
+      images = {
+        augmented = "images_augmented.2026-04-29"
+        indexed   = "images_indexed.2024-11-14"
+      }
     }
   }
 
   allow_delete_indices = false
 
   # Base AMI for ECS instances
-  ami_id = "ami-056dd98084762c908"
+  ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date

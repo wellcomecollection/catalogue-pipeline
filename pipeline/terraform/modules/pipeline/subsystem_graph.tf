@@ -13,6 +13,7 @@ module "graph_pipeline" {
   es_secrets = {
     concepts_ingestor = module.elastic.pipeline_storage_es_service_secrets["concepts_ingestor"]["es_apikey"],
     works_ingestor    = module.elastic.pipeline_storage_es_service_secrets["works_ingestor"]["es_apikey"],
+    images_ingestor   = module.elastic.pipeline_storage_es_service_secrets["images_ingestor"]["es_apikey"],
     graph_extractor   = module.elastic.pipeline_storage_es_service_secrets["graph_extractor"]["es_apikey"],
   }
 }
