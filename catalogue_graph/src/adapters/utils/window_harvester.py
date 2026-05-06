@@ -279,7 +279,7 @@ class WindowHarvestManager:
         batch: list[Record],
         progress: BatchProgress,
     ) -> None:
-        logger.info("Processing batch", batch_size=len(batch))
+        logger.info("Processing batch", batch_count=len(batch))
 
         try:
             batch_with_ids = list(self._records_with_ids(batch, progress))
@@ -294,15 +294,15 @@ class WindowHarvestManager:
 
             logger.info(
                 "Processed batch",
-                batch_size=len(batch),
-                total_size=len(progress.record_ids),
+                batch_count=len(batch),
+                record_count=len(progress.record_ids),
             )
         except Exception as e:
             progress.last_error = repr(e)
             progress.batches_failed += 1
             logger.warning(
                 "Failed to process batch",
-                batch_size=len(batch),
+                batch_count=len(batch),
                 error=repr(e),
             )
 
