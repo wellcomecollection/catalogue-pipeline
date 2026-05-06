@@ -15,8 +15,8 @@ logger = structlog.get_logger(__name__)
 # See: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
 # However, experimentally, running more than 4 queries in parallel consistently results in '429 Too Many Requests' errors.
 SPARQL_MAX_PARALLEL_QUERIES = 4
-SPARQL_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
-SPARQL_REQUESTS_BACKOFF_INTERVAL = 10
+SPARQL_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "5"))
+SPARQL_REQUESTS_BACKOFF_INTERVAL = 30
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
