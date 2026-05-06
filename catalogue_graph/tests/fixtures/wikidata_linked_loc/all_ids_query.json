@@ -1,4 +1,4 @@
 {
   "format": "json",
-  "query": "SELECT ?item WHERE { ?item wdt:P244 _:anyValueP244. }"
+  "query": "SELECT ?item WHERE { ?item wdt:P244 ?locId. }"
 }
