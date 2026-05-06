@@ -35,6 +35,7 @@ data "aws_iam_policy_document" "ingestor_allow_pipeline_storage_secret_read" {
       "${local.secrets_manager_prefix}:${var.es_cluster_protocol}*",
       "${local.secrets_manager_prefix}:${var.es_secrets.concepts_ingestor}*",
       "${local.secrets_manager_prefix}:${var.es_secrets.works_ingestor}*",
+      "${local.secrets_manager_prefix}:${var.es_secrets.images_ingestor}*",
       "${local.secrets_manager_prefix}:${var.es_secrets.graph_extractor}*"
     ]
   }
