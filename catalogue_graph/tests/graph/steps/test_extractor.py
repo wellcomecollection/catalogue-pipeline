@@ -64,7 +64,7 @@ WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "status_code": 200,
     "params": {
         "format": "json",
-        "query": "SELECT ?item WHERE { ?item wdt:P244 _:anyValueP244. }",
+        "query": "SELECT ?item WHERE { ?item wdt:P244 ?locId. }",
     },
     "content_bytes": None,
     "json_data": {"results": {"bindings": []}},
@@ -76,7 +76,7 @@ WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "status_code": 200,
     "params": {
         "format": "json",
-        "query": "SELECT ?item WHERE { ?item wdt:P486 _:anyValueP486. }",
+        "query": "SELECT ?item WHERE { ?item wdt:P486 ?meshId. }",
     },
     "content_bytes": None,
     "json_data": {"results": {"bindings": []}},

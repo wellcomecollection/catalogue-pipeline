@@ -104,9 +104,9 @@ class SparqlQueryBuilder:
         Return a query to retrieve the ids of _all_ Wikidata items referencing an id from the `linked_ontology`.
         """
         if linked_ontology == "loc":
-            field_filter = "?item wdt:P244 _:anyValueP244."
+            field_filter = "?item wdt:P244 ?locId."
         elif linked_ontology == "mesh":
-            field_filter = "?item wdt:P486 _:anyValueP486."
+            field_filter = "?item wdt:P486 ?meshId."
         else:
             raise ValueError(f"Invalid linked ontology type: {linked_ontology}")
 
