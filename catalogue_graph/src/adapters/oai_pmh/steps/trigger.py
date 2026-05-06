@@ -18,12 +18,13 @@ import structlog
 from pydantic import BaseModel, ConfigDict
 
 from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHTriggerEvent
+from adapters.oai_pmh.registry import get_config
 from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from clients.chatbot_notifier import ChatbotNotifier
-from models.events import EventBridgeScheduledEvent, IncrementalWindow
+from models.events import IncrementalWindow
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
@@ -241,21 +242,29 @@ def build_runtime(
 def lambda_handler(
     event: dict[str, Any],
     context: Any,
-    *,
-    config: OAIPMHRuntimeConfig,
 ) -> dict[str, Any]:
-    """Lambda entry point for the trigger step.
+    """Unified Lambda entry point for OAI-PMH trigger steps.
 
-    Args:
-        event: EventBridge scheduled event payload.
-        context: Lambda context object.
-        config: Adapter-specific runtime configuration.
+    Resolves the adapter config from the ``adapter_type`` field in the event
+    (injected by the Step Functions state machine from the scheduler input).
 
-    Returns:
-        Serialized OAIPMHLoaderEvent for the next step.
+    The ``time`` field is optional: when present (e.g. from an EventBridge
+    scheduled event) it is used as the reference timestamp; otherwise
+    ``datetime.now(UTC)`` is used.
     """
-    scheduled_event = EventBridgeScheduledEvent.model_validate(event)
-    event_time = datetime.fromisoformat(scheduled_event.time.replace("Z", "+00:00"))
+    adapter_type = event.get("adapter_type")
+    if adapter_type is None:
+        raise ValueError("Event must contain 'adapter_type'")
+
+    config = get_config(adapter_type)
+
+    time_str = event.get("time")
+    event_time = (
+        datetime.fromisoformat(time_str.replace("Z", "+00:00"))
+        if time_str
+        else datetime.now(tz=UTC)
+    )
+
     runtime = build_runtime(config)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
@@ -269,7 +278,9 @@ def lambda_handler(
         runtime=runtime,
         execution_context=execution_context,
     )
-    return loader_event.model_dump(mode="json")
+    result = loader_event.model_dump(mode="json")
+    result["adapter_type"] = adapter_type
+    return result
 
 
 def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
@@ -363,3 +374,34 @@ def run_cli(
         execution_context=execution_context,
     )
     logger.info("Loader event", loader_event=loader_event.model_dump(mode="json"))
+
+
+def main() -> None:
+    """Unified CLI entry point for OAI-PMH trigger steps."""
+    import typing
+
+    from adapters.oai_pmh.registry import AdapterType
+
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to trigger",
+    )
+    pre_args, _ = pre_parser.parse_known_args()
+
+    config = get_config(pre_args.adapter_type)
+    parser = build_cli_parser(config)
+    parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to trigger",
+    )
+    args = parser.parse_args()
+    run_cli(config, args)
+
+
+if __name__ == "__main__":
+    main()

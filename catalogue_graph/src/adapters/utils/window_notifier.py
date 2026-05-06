@@ -168,7 +168,8 @@ class WindowNotifier:
 
         command = (
             f"AWS_PROFILE=platform-developer \\\n"
-            f"uv run python -m adapters.axiell.steps.reloader \\\n"
+            f"uv run python -m adapters.oai_pmh.steps.reloader \\\n"
+            f"  --adapter-type axiell \\\n"
             f"  --job-id {reload_job_id} \\\n"
             f"  --window-start {window_start} \\\n"
             f"  --window-end {window_end} \\\n"

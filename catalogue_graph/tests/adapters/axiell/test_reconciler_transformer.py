@@ -45,7 +45,7 @@ def _run_reconciler(
         {"axiell_reconciler": lambda **kwargs: adapter_table},
     )
     monkeypatch.setattr(
-        "adapters.transformers.transformer.axiell_helpers.build_reconciler_table",
+        "adapters.transformers.transformer.AXIELL_CONFIG.build_reconciler_table",
         lambda **kwargs: reconciler_table,
     )
 

@@ -15,6 +15,7 @@ import structlog
 from pydantic import BaseModel, ConfigDict
 
 from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHLoaderResponse
+from adapters.oai_pmh.registry import get_config
 from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.oai_pmh.steps.loader import (
     LoaderRuntime,
@@ -415,3 +416,42 @@ def run_cli(
         gaps_skipped=sum(1 for g in response.gaps_processed if g.skipped),
         gaps_failed=sum(1 for g in response.gaps_processed if g.error is not None),
     )
+
+
+def main() -> None:
+    """Unified CLI entry point for OAI-PMH reloader steps."""
+    import typing
+
+    from adapters.oai_pmh.registry import AdapterType
+
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to reload",
+    )
+    pre_args, _ = pre_parser.parse_known_args()
+
+    config = get_config(pre_args.adapter_type)
+    parser = argparse.ArgumentParser(
+        description=f"Reload {pre_args.adapter_type} harvesting windows to fill coverage gaps"
+    )
+    parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to reload",
+    )
+    add_cli_args(parser)
+    args = parser.parse_args()
+    run_cli(
+        adapter_config=config,
+        pipeline_step=f"{config.config.pipeline_step_prefix}_reloader",
+        description=f"Reload {pre_args.adapter_type} harvesting windows",
+        args=args,
+    )
+
+
+if __name__ == "__main__":
+    main()

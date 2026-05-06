@@ -52,12 +52,12 @@ All OAI-PMH adapters follow this pattern:
 
 ## Running adapter steps locally
 
-All commands run from `catalogue_graph/` using UV. Replace `{adapter}` with `axiell` or `folio`.
+All commands run from `catalogue_graph/` using UV. Use `--adapter-type` to select the adapter.
 
 ### 1. Trigger → produce a loader event
 
 ```bash
-uv run python -m adapters.{adapter}.steps.trigger \
+uv run python -m adapters.oai_pmh.steps.trigger --adapter-type {axiell,folio} \
   --at 2025-11-17T12:15:00Z \
   --enforce-lag \
   > /tmp/{adapter}_loader_event.json
@@ -66,18 +66,18 @@ uv run python -m adapters.{adapter}.steps.trigger \
 #### Backfilling large gaps
 
 ```bash
-uv run python -m adapters.{adapter}.steps.trigger \
+uv run python -m adapters.oai_pmh.steps.trigger --adapter-type {axiell,folio} \
   --at 2025-11-22T09:00:00Z \
   --window-minutes 120 \
   --lookback-days 5 \
-  --job-id backfill-{adapter}-20251122 \
+  --job-id backfill-20251122 \
   > /tmp/{adapter}_backfill_event.json
 ```
 
 ### 2. Loader → harvest records & emit changesets
 
 ```bash
-uv run python -m adapters.{adapter}.steps.loader \
+uv run python -m adapters.oai_pmh.steps.loader --adapter-type {axiell,folio} \
   --event /tmp/{adapter}_loader_event.json \
   > /tmp/{adapter}_loader_output.json
 ```
@@ -85,7 +85,7 @@ uv run python -m adapters.{adapter}.steps.loader \
 ### 3. Transformer → index the new documents
 
 ```bash
-uv run python -m adapters.{adapter}.steps.transformer \
+uv run python -m adapters.oai_pmh.steps.transformer --adapter-type {axiell,folio} \
   --changeset-id <changeset_id_from_loader> \
   --es-mode private
 ```
@@ -93,7 +93,7 @@ uv run python -m adapters.{adapter}.steps.transformer \
 ### 4. Reloader → fill coverage gaps
 
 ```bash
-uv run python -m adapters.{adapter}.steps.reloader \
+uv run python -m adapters.oai_pmh.steps.reloader --adapter-type {axiell,folio} \
   --job-id gap-reload-20251202 \
   --window-start 2025-12-01T00:00:00Z \
   --window-end 2025-12-02T00:00:00Z \
@@ -103,7 +103,7 @@ uv run python -m adapters.{adapter}.steps.reloader \
 #### Dry-run mode
 
 ```bash
-uv run python -m adapters.{adapter}.steps.reloader \
+uv run python -m adapters.oai_pmh.steps.reloader --adapter-type {axiell,folio} \
   --job-id check-gaps \
   --window-start 2025-12-01T00:00:00Z \
   --window-end 2025-12-02T00:00:00Z \
@@ -137,3 +137,21 @@ uv run python -m adapters.{adapter}.steps.reloader \
 | [FOLIO](../folio/README.md) | `marc21_withholdings` | None | `Authorization` | `/catalogue_pipeline/folio/oai_api_token` |
 
 See individual adapter READMEs for adapter-specific configuration and details.
+
+## Running steps locally
+
+All OAI-PMH adapter steps are invoked through the unified entrypoints with `--adapter-type`:
+
+```bash
+# Trigger — compute the next harvesting window
+uv run python -m adapters.oai_pmh.steps.trigger --adapter-type {axiell,folio} [--at TIMESTAMP]
+
+# Loader — harvest records for a window
+uv run python -m adapters.oai_pmh.steps.loader --adapter-type {axiell,folio} --event EVENT_FILE
+
+# Reloader — fill coverage gaps
+uv run python -m adapters.oai_pmh.steps.reloader --adapter-type {axiell,folio} \
+  --job-id JOB_ID --window-start START --window-end END [--dry-run]
+```
+
+See each adapter's README for adapter-specific configuration (auth, SSM params, env vars).

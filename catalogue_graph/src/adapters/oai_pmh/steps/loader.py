@@ -19,6 +19,7 @@ from pydantic import BaseModel, ConfigDict
 
 from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHLoaderResponse
 from adapters.oai_pmh.record_writer import WindowRecordWriter
+from adapters.oai_pmh.registry import get_config
 from adapters.oai_pmh.reporting import OAIPMHLoaderReport
 from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.utils.adapter_store import AdapterStore
@@ -190,19 +191,17 @@ def handler(
 def lambda_handler(
     event: dict[str, Any],
     context: Any,
-    *,
-    config: OAIPMHRuntimeConfig,
 ) -> dict[str, Any]:
-    """Lambda entry point for the loader step.
+    """Unified Lambda entry point for OAI-PMH loader steps.
 
-    Args:
-        event: Loader event payload.
-        context: Lambda context object.
-        config: Adapter-specific runtime configuration.
-
-    Returns:
-        Serialized OAIPMHLoaderResponse.
+    Resolves the adapter config from the ``adapter_type`` field in the event
+    (injected by the Step Functions state machine from the scheduler input).
     """
+    adapter_type = event.get("adapter_type")
+    if adapter_type is None:
+        raise ValueError("Event must contain 'adapter_type'")
+
+    config = get_config(adapter_type)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
         pipeline_step=f"{config.config.pipeline_step_prefix}_loader",
@@ -285,3 +284,34 @@ def run_cli(
     response = handler(event, runtime, execution_context=execution_context)
 
     logger.info("Loader response", response=response.model_dump(mode="json"))
+
+
+def main() -> None:
+    """Unified CLI entry point for OAI-PMH loader steps."""
+    import typing
+
+    from adapters.oai_pmh.registry import AdapterType
+
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to load",
+    )
+    pre_args, _ = pre_parser.parse_known_args()
+
+    config = get_config(pre_args.adapter_type)
+    parser = build_cli_parser(config)
+    parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to load",
+    )
+    args = parser.parse_args()
+    run_cli(config, args)
+
+
+if __name__ == "__main__":
+    main()

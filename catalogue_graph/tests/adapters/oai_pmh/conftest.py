@@ -18,8 +18,8 @@ from typing import TYPE_CHECKING
 import pytest
 from oai_pmh_client.client import OAIClient
 
-from adapters.axiell.runtime import AXIELL_CONFIG
-from adapters.folio.runtime import FOLIO_CONFIG
+from adapters.oai_pmh.axiell.runtime import AXIELL_CONFIG
+from adapters.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.oai_pmh.steps.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore

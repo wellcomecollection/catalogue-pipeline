@@ -7,7 +7,7 @@ from functools import cache
 import httpx
 from oai_pmh_client.client import OAIClient
 
-from adapters.axiell import config
+from adapters.oai_pmh.axiell import config
 from adapters.oai_pmh.http_client import OAIPMHHTTPClient
 from utils.aws import get_ssm_parameter
 
