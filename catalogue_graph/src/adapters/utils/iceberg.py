@@ -9,6 +9,7 @@ from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.partitioning import UNPARTITIONED_PARTITION_SPEC, PartitionSpec
 from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
+from pyiceberg.table.sorting import SortOrder
 
 from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA
 
@@ -22,6 +23,7 @@ class SharedIcebergTableConfig(BaseModel):
     # Only used when creating a new table
     iceberg_schema: Schema = ADAPTER_STORE_ICEBERG_SCHEMA
     partition_spec: PartitionSpec = UNPARTITIONED_PARTITION_SPEC
+    sort_order: SortOrder = SortOrder(order_id=0)
 
 
 class RestApiIcebergTableConfig(SharedIcebergTableConfig):
@@ -66,6 +68,13 @@ def get_table(
             identifier=table_fullname,
             schema=config.iceberg_schema,
             partition_spec=config.partition_spec,
+            sort_order=config.sort_order,
+            # Our adapter tables are quite small when compressed (under 1 GB), so we use the minimum possible target
+            # file size, as recommended here:
+            # https://docs.aws.amazon.com/prescriptive-guidance/latest/apache-iceberg-on-aws/best-practices-read.html
+            properties={
+                "write.target-file-size-bytes": str(64 * 1024 * 1024),  # 64 MB
+            },
         )
 
     return catalogue.load_table(table_fullname)

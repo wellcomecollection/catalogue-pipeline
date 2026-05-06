@@ -11,6 +11,7 @@ from adapters.utils.iceberg import (
 )
 from adapters.utils.schemata import (
     ADAPTER_STORE_ICEBERG_SCHEMA,
+    ADAPTER_STORE_SORT_ORDER,
     RECONCILER_STORE_ICEBERG_SCHEMA,
 )
 from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
@@ -141,6 +142,7 @@ AXIELL_ADAPTER_CONFIG = OAIPMHAdapterConfig(
         table_name=REST_API_TABLE_NAME,
         namespace=REST_API_NAMESPACE,
         iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
+        sort_order=ADAPTER_STORE_SORT_ORDER,
         s3_tables_bucket=S3_TABLES_BUCKET,
         region=AWS_REGION,
         account_id=AWS_ACCOUNT_ID,
@@ -158,6 +160,7 @@ AXIELL_ADAPTER_CONFIG = OAIPMHAdapterConfig(
         table_name=LOCAL_TABLE_NAME,
         namespace=LOCAL_NAMESPACE,
         iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
+        sort_order=ADAPTER_STORE_SORT_ORDER,
         db_name=LOCAL_DB_NAME,
     ),
     local_window_status_iceberg_config=LocalIcebergTableConfig(

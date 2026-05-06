@@ -32,12 +32,18 @@ def test_get_table_creates_when_flag_true(local_catalog_params):  # type: ignore
         table_name=f"tbl_{uuid4().hex[:8]}",
     )
 
-    get_table(
+    table = get_table(
         config,
         catalogue_name="local",
         create_if_not_exists=True,
         **local_catalog_params,
     )
+
+    # Assert table properties are set correctly
+    assert table.properties["write.target-file-size-bytes"] == str(64 * 1024 * 1024)
+
+    # Assert sort order is applied
+    assert table.sort_order() == config.sort_order
 
     # A second call with create_if_not_exists=True should return the same table (not error)
     same_table = get_table(
