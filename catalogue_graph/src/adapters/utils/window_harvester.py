@@ -7,11 +7,12 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 import structlog
-from models.incremental_window import IncrementalWindow
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.exceptions import NoRecordsMatchError
 from oai_pmh_client.models import Record
 from pydantic import BaseModel
+
+from models.incremental_window import IncrementalWindow
 
 from .window_generator import WindowGenerator
 from .window_store import WindowStore
@@ -283,7 +284,7 @@ class WindowHarvestManager:
         try:
             batch_with_ids = list(self._records_with_ids(batch, progress))
             result = self.record_callback(batch_with_ids)
-            
+
             if result.changeset_id:
                 progress.tags.changeset_ids.append(result.changeset_id)
             progress.tags.upserted_record_count += len(result.upserted_record_ids)
@@ -291,7 +292,11 @@ class WindowHarvestManager:
             progress.record_ids.extend([r[0] for r in batch_with_ids])
             progress.batches_succeeded += 1
 
-            logger.info("Processed batch", batch_size=len(batch), total_size=len(progress.record_ids))
+            logger.info(
+                "Processed batch",
+                batch_size=len(batch),
+                total_size=len(progress.record_ids),
+            )
         except Exception as e:
             progress.last_error = repr(e)
             progress.batches_failed += 1
