@@ -191,7 +191,8 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Transform adapter data")
     parser.add_argument(
-        "--transformer-type",
+        "--adapter-type",
+        dest="transformer_type",
         required=True,
         help="Which transformer to run.",
         choices=typing.get_args(TransformerType),

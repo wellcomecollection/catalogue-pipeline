@@ -13,11 +13,12 @@ its own `uv.lock`, `.python-version` (3.12), and virtualenv.
 
 ## Layout cheat sheet
 
-- `src/adapters/oai_pmh/` — OAI-PMH adapter framework: runtime base class,
-  reusable steps in `steps/`, and per-adapter config/clients/runtime in
-  `axiell/` and `folio/`.
-- `src/adapters/ebsco/`, `src/adapters/marc/`, `src/adapters/transformers/` —
-  source-specific code.
+- `src/adapters/extractors/oai_pmh/` — OAI-PMH adapter framework: runtime base
+  class, per-adapter config/clients/runtime in `axiell/` and `folio/`.
+- `src/adapters/extractors/ebsco/` — EBSCO FTP-based extraction.
+- `src/adapters/transformers/` — MARC/EBSCO/Axiell transformation logic.
+- `src/adapters/steps/` — all Lambda/CLI entrypoints, namespaced by adapter
+  type (`steps/oai_pmh/`, `steps/ebsco/`, `steps/transformer.py`).
 - `src/utils/` — shared helpers (`logger.py`, `steps.py`, `manifests.py`, …).
 - `src/clients/` — Neptune, Elasticsearch and metric clients.
 - `src/ingestor/`, `src/graph/`, `src/id_minter/` — pipeline stages.
