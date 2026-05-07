@@ -115,7 +115,10 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
             **handler_kwargs,
         )
         step_output.send_success(result)
-        logger.info(f"ECS task '{pipeline_step}' completed successfully")
+        logger.info(
+            "ECS task completed successfully",
+            pipeline_step=pipeline_step,
+        )
     except Exception as exc:
         step_output.send_failure(exc)
         raise
