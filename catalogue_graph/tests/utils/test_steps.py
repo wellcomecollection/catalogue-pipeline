@@ -6,7 +6,7 @@ import sys
 from argparse import ArgumentParser
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from tests.mocks import MockStepFunctionsClient
 from utils.logger import ExecutionContext, setup_structlog
@@ -122,6 +122,44 @@ def test_ecs_handler_reports_failure(
     assert cause["message"] == "unexpected kaboom"
     assert cause["type"] == "RuntimeError"
 
+    assert "Sending task failure to Step Functions" in caplog.text
+
+
+def test_ecs_handler_reports_failure_on_invalid_event(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    invalid_payload = '{"not_a_valid_field": 123}'
+    token = "token-invalid"
+    parser = ArgumentParser(prog="test-handler")
+
+    def handler(
+        event: ExampleEvent,  # noqa: ARG001
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult:
+        raise AssertionError("handler should not be called")
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prog", "--event", invalid_payload, "--task-token", token],
+    )
+
+    with (
+        caplog.at_level(logging.ERROR),
+        pytest.raises(ValidationError),
+    ):
+        ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=ExampleEvent.model_validate_json,
+            pipeline_step="test_step",
+        )
+
+    assert MockStepFunctionsClient.task_successes == []
+    assert len(MockStepFunctionsClient.task_failures) == 1
+    failure = MockStepFunctionsClient.task_failures[0]
+    assert failure["taskToken"] == token
     assert "Sending task failure to Step Functions" in caplog.text
 
 
