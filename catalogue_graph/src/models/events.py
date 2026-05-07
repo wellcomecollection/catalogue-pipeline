@@ -45,7 +45,7 @@ class BasePipelineEvent(SourceScope):
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
         window = None
-        if getattr(args, "window_start", None) and getattr(args, "window_end", None):
+        if hasattr(args, "window_start") and hasattr(args, "window_end"):
             window = IncrementalWindow.from_argparser(args)
 
         index_dates = PipelineIndexDates(
