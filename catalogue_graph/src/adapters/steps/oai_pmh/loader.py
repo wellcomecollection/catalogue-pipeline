@@ -211,17 +211,18 @@ def lambda_handler(
     return response.model_dump(mode="json")
 
 
-def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
-    """Build the CLI argument parser with common arguments.
+def parse_cli_args() -> argparse.Namespace:
+    """Parse CLI arguments for the loader step."""
+    import typing
 
-    Args:
-        config: Adapter configuration for default values.
+    from adapters.extractors.oai_pmh.registry import AdapterType
 
-    Returns:
-        ArgumentParser with common loader arguments.
-    """
-    parser = argparse.ArgumentParser(
-        description=f"Run the {config.config.adapter_name} loader step locally"
+    parser = argparse.ArgumentParser(description="Run an OAI-PMH loader step locally")
+    parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to load",
     )
     parser.add_argument(
         "--event",
@@ -240,22 +241,11 @@ def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
         default=True,
         help="Allow partial final window (default: True for CLI)",
     )
-    return parser
+    return parser.parse_args()
 
 
-def run_cli(
-    config: OAIPMHRuntimeConfig, args: argparse.Namespace | None = None
-) -> None:
-    """Run the loader step from the command line.
-
-    Args:
-        config: Adapter-specific runtime configuration.
-        args: Parsed arguments (if None, will parse from sys.argv).
-    """
-    if args is None:
-        parser = build_cli_parser(config)
-        args = parser.parse_args()
-
+def run_cli(config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> None:
+    """Run the loader step from the command line."""
     with open(args.event, encoding="utf-8") as f:
         event_data = json.load(f)
         # Set allow_partial_final_window from CLI arg if not in event
@@ -287,28 +277,8 @@ def run_cli(
 
 def main() -> None:
     """Unified CLI entry point for OAI-PMH loader steps."""
-    import typing
-
-    from adapters.extractors.oai_pmh.registry import AdapterType
-
-    pre_parser = argparse.ArgumentParser(add_help=False)
-    pre_parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to load",
-    )
-    pre_args, _ = pre_parser.parse_known_args()
-
-    config = get_config(pre_args.adapter_type)
-    parser = build_cli_parser(config)
-    parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to load",
-    )
-    args = parser.parse_args()
+    args = parse_cli_args()
+    config = get_config(args.adapter_type)
     run_cli(config, args)
 
 

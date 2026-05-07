@@ -326,12 +326,21 @@ def lambda_handler(
     return response.model_dump(mode="json")
 
 
-def add_cli_args(parser: argparse.ArgumentParser) -> None:
-    """Add common CLI arguments for the reloader step.
+def parse_cli_args() -> argparse.Namespace:
+    """Parse CLI arguments for the reloader step."""
+    import typing
 
-    Args:
-        parser: ArgumentParser to add arguments to.
-    """
+    from adapters.extractors.oai_pmh.registry import AdapterType
+
+    parser = argparse.ArgumentParser(
+        description="Reload OAI-PMH harvesting windows to fill coverage gaps"
+    )
+    parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to reload",
+    )
     parser.add_argument(
         "--job-id",
         type=str,
@@ -367,27 +376,11 @@ def add_cli_args(parser: argparse.ArgumentParser) -> None:
         type=int,
         help="Override default window size in minutes",
     )
+    return parser.parse_args()
 
 
-def run_cli(
-    adapter_config: OAIPMHRuntimeConfig,
-    pipeline_step: str,
-    description: str,
-    args: argparse.Namespace | None = None,
-) -> None:
-    """Run the reloader step from CLI arguments.
-
-    Args:
-        adapter_config: Adapter-specific configuration.
-        pipeline_step: Name of the pipeline step for logging.
-        description: Description for the argument parser.
-        args: Pre-parsed arguments (if None, will parse from sys.argv).
-    """
-    if args is None:
-        parser = argparse.ArgumentParser(description=description)
-        add_cli_args(parser)
-        args = parser.parse_args()
-
+def run_cli(adapter_config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> None:
+    """Run the reloader step from CLI arguments."""
     window = IncrementalWindow(start_time=args.window_start, end_time=args.window_end)
 
     runtime = build_runtime(
@@ -399,7 +392,7 @@ def run_cli(
     )
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
-        pipeline_step=pipeline_step,
+        pipeline_step=f"{adapter_config.config.pipeline_step_prefix}_reloader",
     )
 
     response = handler(
@@ -426,37 +419,9 @@ def run_cli(
 
 def main() -> None:
     """Unified CLI entry point for OAI-PMH reloader steps."""
-    import typing
-
-    from adapters.extractors.oai_pmh.registry import AdapterType
-
-    pre_parser = argparse.ArgumentParser(add_help=False)
-    pre_parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to reload",
-    )
-    pre_args, _ = pre_parser.parse_known_args()
-
-    config = get_config(pre_args.adapter_type)
-    parser = argparse.ArgumentParser(
-        description=f"Reload {pre_args.adapter_type} harvesting windows to fill coverage gaps"
-    )
-    parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to reload",
-    )
-    add_cli_args(parser)
-    args = parser.parse_args()
-    run_cli(
-        adapter_config=config,
-        pipeline_step=f"{config.config.pipeline_step_prefix}_reloader",
-        description=f"Reload {pre_args.adapter_type} harvesting windows",
-        args=args,
-    )
+    args = parse_cli_args()
+    config = get_config(args.adapter_type)
+    run_cli(config, args)
 
 
 if __name__ == "__main__":

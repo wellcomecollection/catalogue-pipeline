@@ -287,17 +287,18 @@ def lambda_handler(
     return loader_event.model_dump(mode="json")
 
 
-def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
-    """Build the CLI argument parser with common arguments.
+def parse_cli_args() -> argparse.Namespace:
+    """Parse CLI arguments for the trigger step."""
+    import typing
 
-    Args:
-        config: Adapter configuration for default values.
+    from adapters.extractors.oai_pmh.registry import AdapterType
 
-    Returns:
-        ArgumentParser with common trigger arguments.
-    """
-    parser = argparse.ArgumentParser(
-        description=f"Run the {config.config.adapter_name} trigger step locally"
+    parser = argparse.ArgumentParser(description="Run an OAI-PMH trigger step locally")
+    parser.add_argument(
+        "--adapter-type",
+        required=True,
+        choices=typing.get_args(AdapterType),
+        help="Which adapter to trigger",
     )
     parser.add_argument(
         "--at",
@@ -317,40 +318,23 @@ def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
     parser.add_argument(
         "--window-minutes",
         type=int,
-        help=(
-            "Number of minutes per harvesting window request "
-            f"(default: {config.config.window_minutes})"
-        ),
+        help="Number of minutes per harvesting window request",
     )
     parser.add_argument(
         "--lookback-days",
         type=int,
-        help=(
-            "Number of days to look back when no successful windows exist "
-            f"(default: {config.config.window_lookback_days})"
-        ),
+        help="Number of days to look back when no successful windows exist",
     )
     parser.add_argument(
         "--job-id",
         type=str,
         help="Optional job identifier to embed in the request",
     )
-    return parser
+    return parser.parse_args()
 
 
-def run_cli(
-    config: OAIPMHRuntimeConfig, args: argparse.Namespace | None = None
-) -> None:
-    """Run the trigger step from the command line.
-
-    Args:
-        config: Adapter-specific runtime configuration.
-        args: Parsed arguments (if None, will parse from sys.argv).
-    """
-    if args is None:
-        parser = build_cli_parser(config)
-        args = parser.parse_args()
-
+def run_cli(config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> None:
+    """Run the trigger step from the command line."""
     now = (
         datetime.fromisoformat(args.at.replace("Z", "+00:00"))
         if args.at
@@ -383,28 +367,8 @@ def run_cli(
 
 def main() -> None:
     """Unified CLI entry point for OAI-PMH trigger steps."""
-    import typing
-
-    from adapters.extractors.oai_pmh.registry import AdapterType
-
-    pre_parser = argparse.ArgumentParser(add_help=False)
-    pre_parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to trigger",
-    )
-    pre_args, _ = pre_parser.parse_known_args()
-
-    config = get_config(pre_args.adapter_type)
-    parser = build_cli_parser(config)
-    parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to trigger",
-    )
-    args = parser.parse_args()
+    args = parse_cli_args()
+    config = get_config(args.adapter_type)
     run_cli(config, args)
 
 
