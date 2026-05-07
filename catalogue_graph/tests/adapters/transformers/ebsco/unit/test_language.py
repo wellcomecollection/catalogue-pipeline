@@ -2,7 +2,7 @@ import pytest
 from pymarc.record import Field, Record
 
 from models.pipeline.id_label import Language
-from tests.adapters.sources.ebsco.helpers import lone_element
+from tests.adapters.extractors.ebsco.helpers import lone_element
 
 from ..ebsco_test_transformer import transform_ebsco_record
 

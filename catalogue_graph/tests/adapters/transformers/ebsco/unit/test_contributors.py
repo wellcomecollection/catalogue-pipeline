@@ -4,7 +4,7 @@ from pymarc.record import Field, Record, Subfield
 from models.pipeline.concept import Contributor
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import Identifiable
-from tests.adapters.sources.ebsco.helpers import lone_element
+from tests.adapters.extractors.ebsco.helpers import lone_element
 from utils.types import RawConceptType
 
 from ..ebsco_test_transformer import transform_ebsco_record

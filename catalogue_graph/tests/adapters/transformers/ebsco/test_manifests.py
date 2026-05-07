@@ -12,7 +12,7 @@ from pathlib import PurePosixPath
 
 import pytest
 
-import adapters.sources.ebsco.config as adapter_config
+import adapters.extractors.ebsco.config as adapter_config
 from adapters.transformers.manifests import (
     TransformerManifest,
     TransformerManifestWriter,
