@@ -8,10 +8,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
-from adapters.ebsco.models.step_events import EbscoAdapterLoaderEvent, LoaderResponse
-from adapters.ebsco.steps import loader
-from adapters.ebsco.steps.loader import EBSCO_NAMESPACE, LoaderRuntime
+from adapters.sources.ebsco.marcxml_loader import MarcXmlFileLoader
+from adapters.sources.ebsco.models.step_events import (
+    EbscoAdapterLoaderEvent,
+    LoaderResponse,
+)
+from adapters.sources.ebsco.steps import loader
+from adapters.sources.ebsco.steps.loader import EBSCO_NAMESPACE, LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from tests.mocks import MockSmartOpen

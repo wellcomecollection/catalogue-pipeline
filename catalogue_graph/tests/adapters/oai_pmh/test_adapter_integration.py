@@ -14,12 +14,12 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
-from adapters.oai_pmh.steps import loader as oai_loader
-from adapters.oai_pmh.steps import reloader as oai_reloader
-from adapters.oai_pmh.steps.loader import LoaderRuntime, LoaderStepConfig
-from adapters.oai_pmh.steps.reloader import ReloaderRuntime, ReloaderStepConfig
-from adapters.oai_pmh.steps.trigger import TriggerRuntime, build_window_request
+from adapters.sources.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.steps import loader as oai_loader
+from adapters.sources.oai_pmh.steps import reloader as oai_reloader
+from adapters.sources.oai_pmh.steps.loader import LoaderRuntime, LoaderStepConfig
+from adapters.sources.oai_pmh.steps.reloader import ReloaderRuntime, ReloaderStepConfig
+from adapters.sources.oai_pmh.steps.trigger import TriggerRuntime, build_window_request
 from adapters.utils.window_store import WindowStore
 from tests.adapters.oai_pmh.conftest import (
     StubOAIClient,

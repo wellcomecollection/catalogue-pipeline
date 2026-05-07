@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from adapters.ebsco.models.step_events import (
+from adapters.sources.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     LoaderResponse,
 )

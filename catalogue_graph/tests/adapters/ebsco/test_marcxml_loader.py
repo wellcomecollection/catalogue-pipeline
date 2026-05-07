@@ -4,11 +4,11 @@ from typing import TextIO
 import pytest
 from lxml import etree
 
-from adapters.ebsco.marcxml_loader import (
+from adapters.sources.ebsco.marcxml_loader import (
     MarcXmlFileLoader,
     MissingRecordIdentifierError,
 )
-from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
+from adapters.sources.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from tests.mocks import MockSmartOpen
 

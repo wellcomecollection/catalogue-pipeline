@@ -10,7 +10,7 @@ from typing import ClassVar
 
 from pydantic import Field
 
-from adapters.oai_pmh.models.step_events import (
+from adapters.sources.oai_pmh.models.step_events import (
     OAIPMHLoaderEvent,
     OAIPMHLoaderResponse,
 )

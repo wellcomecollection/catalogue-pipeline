@@ -8,15 +8,15 @@ from __future__ import annotations
 import httpx
 from oai_pmh_client.client import OAIClient
 
-from adapters.oai_pmh.folio import config
-from adapters.oai_pmh.folio.clients import (
+from adapters.sources.oai_pmh.folio import config
+from adapters.sources.oai_pmh.folio.clients import (
     _oai_endpoint,
 )
-from adapters.oai_pmh.folio.clients import (
+from adapters.sources.oai_pmh.folio.clients import (
     build_http_client as _build_folio_http_client,
 )
-from adapters.oai_pmh.folio.config import FOLIO_ADAPTER_CONFIG
-from adapters.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.folio.config import FOLIO_ADAPTER_CONFIG
+from adapters.sources.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
 
 
 class FolioRuntimeConfig(OAIPMHRuntimeConfig):

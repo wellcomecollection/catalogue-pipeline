@@ -6,9 +6,9 @@ For step integration tests, see tests/adapters/oai_pmh/test_adapter_integration.
 
 from __future__ import annotations
 
-from adapters.oai_pmh.axiell.config import AXIELL_ADAPTER_CONFIG
-from adapters.oai_pmh.axiell.runtime import AXIELL_CONFIG, AxiellRuntimeConfig
-from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.axiell.config import AXIELL_ADAPTER_CONFIG
+from adapters.sources.oai_pmh.axiell.runtime import AXIELL_CONFIG, AxiellRuntimeConfig
+from adapters.sources.oai_pmh.runtime import OAIPMHRuntimeConfig
 
 
 class TestAxiellConfig:

@@ -17,9 +17,12 @@ import boto3
 import structlog
 from pydantic import BaseModel, ConfigDict
 
-from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHTriggerEvent
-from adapters.oai_pmh.registry import get_config
-from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.models.step_events import (
+    OAIPMHLoaderEvent,
+    OAIPMHTriggerEvent,
+)
+from adapters.sources.oai_pmh.registry import get_config
+from adapters.sources.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
@@ -380,7 +383,7 @@ def main() -> None:
     """Unified CLI entry point for OAI-PMH trigger steps."""
     import typing
 
-    from adapters.oai_pmh.registry import AdapterType
+    from adapters.sources.oai_pmh.registry import AdapterType
 
     pre_parser = argparse.ArgumentParser(add_help=False)
     pre_parser.add_argument(

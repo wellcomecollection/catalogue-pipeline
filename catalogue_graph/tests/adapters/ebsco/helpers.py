@@ -10,8 +10,8 @@ import pyarrow as pa
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
-from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
+from adapters.sources.ebsco.marcxml_loader import MarcXmlFileLoader
+from adapters.sources.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 

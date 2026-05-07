@@ -3,8 +3,8 @@ import json
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-import adapters.oai_pmh.axiell.config as adapter_config
-from adapters.oai_pmh.axiell.runtime import AXIELL_CONFIG
+import adapters.sources.oai_pmh.axiell.config as adapter_config
+from adapters.sources.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.transformers.manifests import TransformerManifest
 from adapters.transformers.transformer import TransformerEvent, handler
 from tests.adapters.ebsco.helpers import prepare_changeset

@@ -6,8 +6,8 @@ from functools import cache
 
 import httpx
 
-from adapters.oai_pmh.folio import config
-from adapters.oai_pmh.http_client import OAIPMHHTTPClient
+from adapters.sources.oai_pmh.folio import config
+from adapters.sources.oai_pmh.http_client import OAIPMHHTTPClient
 from utils.aws import get_ssm_parameter
 
 # FOLIO uses the standard "Authorization" header

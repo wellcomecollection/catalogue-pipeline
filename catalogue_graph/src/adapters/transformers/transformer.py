@@ -13,10 +13,10 @@ from typing import Any, Literal, Protocol, cast
 import structlog
 from pydantic import BaseModel, Field
 
-from adapters.ebsco import config as ebsco_config
-from adapters.ebsco import helpers as ebsco_helpers
-from adapters.oai_pmh.axiell import config as axiell_config
-from adapters.oai_pmh.axiell.runtime import AXIELL_CONFIG
+from adapters.sources.ebsco import config as ebsco_config
+from adapters.sources.ebsco import helpers as ebsco_helpers
+from adapters.sources.oai_pmh.axiell import config as axiell_config
+from adapters.sources.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer

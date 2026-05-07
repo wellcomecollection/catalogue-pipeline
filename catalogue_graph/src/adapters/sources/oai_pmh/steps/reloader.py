@@ -14,15 +14,18 @@ from typing import Any
 import structlog
 from pydantic import BaseModel, ConfigDict
 
-from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHLoaderResponse
-from adapters.oai_pmh.registry import get_config
-from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
-from adapters.oai_pmh.steps.loader import (
+from adapters.sources.oai_pmh.models.step_events import (
+    OAIPMHLoaderEvent,
+    OAIPMHLoaderResponse,
+)
+from adapters.sources.oai_pmh.registry import get_config
+from adapters.sources.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.steps.loader import (
     LoaderRuntime,
     LoaderStepConfig,
     build_harvester,
 )
-from adapters.oai_pmh.steps.loader import build_runtime as _build_loader_runtime
+from adapters.sources.oai_pmh.steps.loader import build_runtime as _build_loader_runtime
 from adapters.utils.adapter_events import BaseAdapterEvent
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
@@ -422,7 +425,7 @@ def main() -> None:
     """Unified CLI entry point for OAI-PMH reloader steps."""
     import typing
 
-    from adapters.oai_pmh.registry import AdapterType
+    from adapters.sources.oai_pmh.registry import AdapterType
 
     pre_parser = argparse.ArgumentParser(add_help=False)
     pre_parser.add_argument(

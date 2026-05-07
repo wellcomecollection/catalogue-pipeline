@@ -3,8 +3,8 @@ import json
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-import adapters.ebsco.config as adapter_config
-from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
+import adapters.sources.ebsco.config as adapter_config
+from adapters.sources.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.transformers.manifests import TransformerManifest
 from adapters.transformers.transformer import (
     TransformerEvent,

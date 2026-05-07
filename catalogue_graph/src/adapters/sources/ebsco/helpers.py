@@ -1,4 +1,4 @@
-from adapters.ebsco.config import (
+from adapters.sources.ebsco.config import (
     LOCAL_ICEBERG_CONFIG,
     REST_API_ICEBERG_CONFIG,
 )

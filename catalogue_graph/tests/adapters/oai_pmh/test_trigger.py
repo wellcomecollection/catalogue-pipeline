@@ -12,10 +12,10 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent
-from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
-from adapters.oai_pmh.steps import trigger
-from adapters.oai_pmh.steps.trigger import TriggerRuntime, build_window_request
+from adapters.sources.oai_pmh.models.step_events import OAIPMHLoaderEvent
+from adapters.sources.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.steps import trigger
+from adapters.sources.oai_pmh.steps.trigger import TriggerRuntime, build_window_request
 from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_store import WindowStore
 from clients.chatbot_notifier import ChatbotNotifier
@@ -504,7 +504,7 @@ class TestHandler:
         store = populate_window_store(temporary_window_status_table, [])
         runtime = _create_trigger_runtime(store, adapter_runtime_config)
 
-        from adapters.oai_pmh.models.step_events import OAIPMHTriggerEvent
+        from adapters.sources.oai_pmh.models.step_events import OAIPMHTriggerEvent
 
         event = OAIPMHTriggerEvent(now=now, job_id="test-job")
         result = trigger.handler(event, runtime)

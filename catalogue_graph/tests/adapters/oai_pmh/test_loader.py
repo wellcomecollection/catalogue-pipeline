@@ -13,10 +13,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from lxml import etree
 
-from adapters.oai_pmh.models.step_events import OAIPMHLoaderEvent, OAIPMHLoaderResponse
-from adapters.oai_pmh.record_writer import WindowRecordWriter
-from adapters.oai_pmh.steps import loader
-from adapters.oai_pmh.steps.loader import LoaderRuntime
+from adapters.sources.oai_pmh.models.step_events import (
+    OAIPMHLoaderEvent,
+    OAIPMHLoaderResponse,
+)
+from adapters.sources.oai_pmh.record_writer import WindowRecordWriter
+from adapters.sources.oai_pmh.steps import loader
+from adapters.sources.oai_pmh.steps.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_harvester import WindowHarvestManager
 from adapters.utils.window_summary import WindowSummary
@@ -173,7 +176,7 @@ class TestHandler:
         with (
             patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
             patch(
-                "adapters.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+                "adapters.sources.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
             ) as mock_from_loader,
         ):
             mock_harvest.return_value = [summary]
@@ -203,7 +206,7 @@ class TestHandler:
         with (
             patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
             patch(
-                "adapters.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+                "adapters.sources.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
             ) as mock_from_loader,
         ):
             mock_harvest.return_value = [summary]
@@ -225,7 +228,7 @@ class TestHandler:
         with (
             patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
             patch(
-                "adapters.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+                "adapters.sources.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
             ) as mock_from_loader,
         ):
             mock_harvest.return_value = [summary]

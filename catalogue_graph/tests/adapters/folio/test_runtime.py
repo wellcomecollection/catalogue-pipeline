@@ -4,10 +4,10 @@ from unittest.mock import patch
 
 import httpx
 
-from adapters.oai_pmh.folio.config import FOLIO_ADAPTER_CONFIG
-from adapters.oai_pmh.folio.runtime import FOLIO_CONFIG, FolioRuntimeConfig
-from adapters.oai_pmh.http_client import OAIPMHHTTPClient
-from adapters.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.folio.config import FOLIO_ADAPTER_CONFIG
+from adapters.sources.oai_pmh.folio.runtime import FOLIO_CONFIG, FolioRuntimeConfig
+from adapters.sources.oai_pmh.http_client import OAIPMHHTTPClient
+from adapters.sources.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
 from adapters.utils.iceberg import LocalIcebergTableConfig, RestApiIcebergTableConfig
 from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA
 from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
@@ -36,7 +36,9 @@ def test_folio_adapter_config_is_frozen() -> None:
 
 
 def test_folio_runtime_build_http_client() -> None:
-    with patch("adapters.oai_pmh.folio.clients._oai_token", return_value="test-token"):
+    with patch(
+        "adapters.sources.oai_pmh.folio.clients._oai_token", return_value="test-token"
+    ):
         client = FOLIO_CONFIG.build_http_client()
 
     assert isinstance(client, httpx.Client)
@@ -48,7 +50,8 @@ def test_folio_runtime_get_oai_endpoint() -> None:
     expected_url = "https://edge-wellcome.folio.ebsco.com/oai"
 
     with patch(
-        "adapters.oai_pmh.folio.runtime._oai_endpoint", return_value=expected_url
+        "adapters.sources.oai_pmh.folio.runtime._oai_endpoint",
+        return_value=expected_url,
     ):
         url = FOLIO_CONFIG.get_oai_endpoint()
 
@@ -106,8 +109,8 @@ def test_folio_runtime_accepts_custom_config() -> None:
 
 def test_folio_config_singleton_is_consistent() -> None:
     # Access multiple times, should be same instance
-    from adapters.oai_pmh.folio.runtime import FOLIO_CONFIG as config_import_1
-    from adapters.oai_pmh.folio.runtime import FOLIO_CONFIG as config_import_2
+    from adapters.sources.oai_pmh.folio.runtime import FOLIO_CONFIG as config_import_1
+    from adapters.sources.oai_pmh.folio.runtime import FOLIO_CONFIG as config_import_2
 
     assert config_import_1 is config_import_2
     assert config_import_1.config is config_import_2.config
@@ -117,9 +120,12 @@ def test_folio_runtime_build_oai_client() -> None:
     from oai_pmh_client.client import OAIClient
 
     with (
-        patch("adapters.oai_pmh.folio.clients._oai_token", return_value="test-token"),
         patch(
-            "adapters.oai_pmh.folio.runtime._oai_endpoint",
+            "adapters.sources.oai_pmh.folio.clients._oai_token",
+            return_value="test-token",
+        ),
+        patch(
+            "adapters.sources.oai_pmh.folio.runtime._oai_endpoint",
             return_value="https://test.folio.com/oai",
         ),
     ):

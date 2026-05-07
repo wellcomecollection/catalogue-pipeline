@@ -15,13 +15,13 @@ import boto3
 import smart_open
 import structlog
 
-from adapters.ebsco.config import (
+from adapters.sources.ebsco.config import (
     FTP_S3_PREFIX,
     S3_BUCKET,
     SSM_PARAM_PREFIX,
 )
-from adapters.ebsco.ebsco_ftp import EbscoFtp
-from adapters.ebsco.models.step_events import (
+from adapters.sources.ebsco.ebsco_ftp import EbscoFtp
+from adapters.sources.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTriggerEvent,
 )

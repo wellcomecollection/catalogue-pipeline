@@ -6,9 +6,9 @@ For step integration tests, see tests/adapters/oai_pmh/test_adapter_integration.
 
 from __future__ import annotations
 
-from adapters.oai_pmh.folio.config import FOLIO_ADAPTER_CONFIG
-from adapters.oai_pmh.folio.runtime import FOLIO_CONFIG, FolioRuntimeConfig
-from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.folio.config import FOLIO_ADAPTER_CONFIG
+from adapters.sources.oai_pmh.folio.runtime import FOLIO_CONFIG, FolioRuntimeConfig
+from adapters.sources.oai_pmh.runtime import OAIPMHRuntimeConfig
 
 
 class TestFolioConfig:

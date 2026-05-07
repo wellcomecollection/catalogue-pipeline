@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from adapters.oai_pmh.runtime import OAIPMHAdapterConfig
+from adapters.sources.oai_pmh.runtime import OAIPMHAdapterConfig
 from adapters.utils.iceberg import (
     LocalIcebergTableConfig,
     RestApiIcebergTableConfig,

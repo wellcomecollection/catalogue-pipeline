@@ -3,7 +3,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from adapters.oai_pmh.http_client import OAIPMHHTTPClient
+from adapters.sources.oai_pmh.http_client import OAIPMHHTTPClient
 
 
 class TestOAIPMHHTTPClient:

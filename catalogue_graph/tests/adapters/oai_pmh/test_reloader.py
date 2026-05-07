@@ -14,9 +14,9 @@ from unittest.mock import MagicMock
 from _pytest.monkeypatch import MonkeyPatch
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.oai_pmh.runtime import OAIPMHRuntimeConfig
-from adapters.oai_pmh.steps.loader import LoaderRuntime
-from adapters.oai_pmh.steps.reloader import ReloaderRuntime, handler
+from adapters.sources.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.sources.oai_pmh.steps.loader import LoaderRuntime
+from adapters.sources.oai_pmh.steps.reloader import ReloaderRuntime, handler
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStore
 from adapters.utils.window_summary import WindowSummary
@@ -108,7 +108,7 @@ class TestHandler:
             ]
 
         monkeypatch.setattr(
-            "adapters.oai_pmh.steps.reloader.build_harvester",
+            "adapters.sources.oai_pmh.steps.reloader.build_harvester",
             lambda event, runtime: SimpleNamespace(harvest_range=mock_harvest_range),
         )
 
@@ -176,7 +176,7 @@ class TestHandler:
             ]
 
         monkeypatch.setattr(
-            "adapters.oai_pmh.steps.reloader.build_harvester",
+            "adapters.sources.oai_pmh.steps.reloader.build_harvester",
             lambda event, runtime: SimpleNamespace(harvest_range=mock_harvest_range),
         )
 
@@ -249,7 +249,7 @@ class TestHandler:
             raise RuntimeError("OAI-PMH endpoint unavailable")
 
         monkeypatch.setattr(
-            "adapters.oai_pmh.steps.reloader.build_harvester",
+            "adapters.sources.oai_pmh.steps.reloader.build_harvester",
             lambda event, runtime: SimpleNamespace(
                 harvest_range=mock_harvest_range_error
             ),
@@ -307,7 +307,8 @@ class TestHandler:
             )
 
         monkeypatch.setattr(
-            "adapters.oai_pmh.steps.reloader.build_harvester", mock_build_harvester
+            "adapters.sources.oai_pmh.steps.reloader.build_harvester",
+            mock_build_harvester,
         )
 
         runtime = ReloaderRuntime(
