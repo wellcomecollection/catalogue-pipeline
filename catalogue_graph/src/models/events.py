@@ -2,7 +2,7 @@ import argparse
 from pathlib import PurePosixPath
 from typing import Self, get_args
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
@@ -41,6 +41,16 @@ class BasePipelineEvent(SourceScope):
     pit_ids: PipelinePitIds = PipelinePitIds()
     index_dates: PipelineIndexDates = PipelineIndexDates()
     environment: Environment = "prod"
+
+    @field_validator("pit_ids", mode="before")
+    @classmethod
+    def _coerce_pit_ids(cls, v: object) -> object:
+        return v if v is not None else PipelinePitIds()
+
+    @field_validator("index_dates", mode="before")
+    @classmethod
+    def _coerce_index_dates(cls, v: object) -> object:
+        return v if v is not None else PipelineIndexDates()
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
