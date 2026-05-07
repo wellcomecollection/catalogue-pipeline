@@ -237,6 +237,7 @@
       "ontologyType": "catalogue",
       "value": "val1"
     },
+    "predecessorIdentifier": null,
     "sourceModifiedTime": "2025-10-24T00:00:00Z",
     "modifiedTime": "2025-10-24T01:00:00Z",
     "relations": null,
