@@ -196,4 +196,3 @@ if __name__ == "__main__":
             event_validator=event_validator,
             pipeline_step="ingestor_loader",
         )
-        logger.info("ECS ingestor loader task completed successfully")

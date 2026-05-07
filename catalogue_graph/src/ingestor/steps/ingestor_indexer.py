@@ -254,5 +254,3 @@ if __name__ == "__main__":
             event_validator=event_validator,
             pipeline_step="ingestor_indexer",
         )
-
-        logger.info("ECS ingestor indexer task completed successfully")

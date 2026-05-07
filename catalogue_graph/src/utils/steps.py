@@ -85,7 +85,7 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
 ) -> None:
     arg_parser.add_argument(
         "--event",
-        type=event_validator,
+        type=str,
         help="Raw event in JSON format.",
         required=True,
     )
@@ -98,7 +98,6 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
 
     ecs_args = arg_parser.parse_args()
     task_token = ecs_args.task_token
-    event = ecs_args.event
 
     stepfunctions_client = boto3.client("stepfunctions") if task_token else None
     step_output = StepFunctionOutput(task_token, stepfunctions_client)
@@ -108,6 +107,7 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
             trace_id=get_trace_id(),
             pipeline_step=pipeline_step,
         )
+        event = event_validator(ecs_args.event)
         result = handler(
             event,
             execution_context,
@@ -115,7 +115,7 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
             **handler_kwargs,
         )
         step_output.send_success(result)
-
+        logger.info(f"ECS task '{pipeline_step}' completed successfully")
     except Exception as exc:
         step_output.send_failure(exc)
         raise

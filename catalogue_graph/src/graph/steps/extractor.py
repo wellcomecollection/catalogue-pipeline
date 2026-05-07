@@ -136,5 +136,3 @@ if __name__ == "__main__":
             event_validator=event_validator,
             pipeline_step="graph_extractor",
         )
-
-        logger.info("ECS extractor task completed successfully")

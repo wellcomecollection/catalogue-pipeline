@@ -61,10 +61,7 @@ def test_run_ecs_handler_reports_success(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert handler_calls == [ExampleEvent(message="hello")]
@@ -113,10 +110,7 @@ def test_run_ecs_handler_reports_failure(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert MockStepFunctionsClient.task_successes == []
@@ -165,10 +159,7 @@ def test_run_ecs_handler_handles_none_result(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert MockStepFunctionsClient.task_failures == []
@@ -210,10 +201,7 @@ def test_run_ecs_handler_without_task_token(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert MockStepFunctionsClient.task_successes == []
@@ -250,10 +238,7 @@ def test_run_ecs_handler_without_task_token_none_result(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert MockStepFunctionsClient.task_successes == []
