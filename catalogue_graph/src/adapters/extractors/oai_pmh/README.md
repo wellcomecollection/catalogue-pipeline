@@ -85,7 +85,7 @@ uv run python -m adapters.steps.oai_pmh.loader --adapter-type {axiell,folio} \
 ### 3. Transformer → index the new documents
 
 ```bash
-uv run python -m adapters.steps.transformer --adapter-type {axiell,folio} \
+uv run python -m adapters.steps.transformer --transformer-type {axiell,folio} \
   --changeset-id <changeset_id_from_loader> \
   --es-mode private
 ```
