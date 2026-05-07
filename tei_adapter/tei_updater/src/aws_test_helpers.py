@@ -58,7 +58,7 @@ def get_test_topic_messages(test_topic_arn, mock_sqs_client, mock_sns_client):
 
     def get_messages():
         yield from (
-            json.loads(json.loads(json.loads(m["Body"])["Message"])["default"])
+            json.loads(json.loads(m["Body"])["Message"])
             for m in _get_queue_messages(mock_sqs_client, test_queue_url)
         )
 
