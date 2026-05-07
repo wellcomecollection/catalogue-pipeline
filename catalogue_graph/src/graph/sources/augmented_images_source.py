@@ -17,7 +17,7 @@ class AugmentedImagesSource(ElasticSource):
         super().__init__(
             es_client=es_client,
             index_name=get_images_augmented_index_name(event),
-            pit_id=event.pit_id,
+            pit_id=event.pit_ids.augmented,
             query=event.to_elasticsearch_query("state.augmentedTime", query),
             fields=fields,
             batch_size=config.ES_SOURCE_BATCH_SIZE,

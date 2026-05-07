@@ -5,7 +5,10 @@ from typing import Self
 from pydantic import BaseModel
 
 import config
-from models.events import BasePipelineEvent, IncrementalWindow, PipelineIndexDates
+from models.events import (
+    BasePipelineEvent,
+    PipelineIndexDates,
+)
 from utils.types import IngestorDeletionsType, IngestorLoadFormat, IngestorType
 
 
@@ -51,7 +54,7 @@ class IngestorStepEvent(BasePipelineEvent):
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
-        window = IncrementalWindow.from_argparser(args)
+        base_event = super().from_argparser(args)
 
         index_date_works, index_date_concepts, index_date_images = None, None, None
         if args.ingestor_type == "works":
@@ -68,7 +71,9 @@ class IngestorStepEvent(BasePipelineEvent):
             concepts=index_date_concepts,
             images=index_date_images,
         )
-        return cls(**args.__dict__, window=window, index_dates=index_dates)
+        return cls(
+            **base_event.model_dump(exclude={"index_dates"}), index_dates=index_dates
+        )
 
 
 class IngestorLoaderLambdaEvent(IngestorStepEvent):
