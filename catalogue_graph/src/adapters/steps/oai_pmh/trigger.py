@@ -225,6 +225,7 @@ def build_runtime(
         notifier = WindowNotifier(
             chatbot_notifier=chatbot_notifier,
             table_name=table_name,
+            adapter_name=config.config.adapter_name,
         )
 
     return TriggerRuntime(
