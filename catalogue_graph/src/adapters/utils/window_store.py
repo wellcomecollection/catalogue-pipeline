@@ -16,6 +16,8 @@ from pyiceberg.io.pyarrow import schema_to_pyarrow
 from pyiceberg.schema import Schema
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
+from pyiceberg.table.sorting import SortField, SortOrder
+from pyiceberg.transforms import IdentityTransform
 from pyiceberg.types import (
     IntegerType,
     ListType,
@@ -49,6 +51,12 @@ WINDOW_STATUS_SCHEMA = Schema(
     ),
 )
 WINDOW_STATUS_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(WINDOW_STATUS_SCHEMA)
+
+# Sort by "window_start" (field_id=2) so that Parquet row-group min/max statistics
+# enable effective pruning on time-range queries.
+WINDOW_STATUS_SORT_ORDER = SortOrder(
+    SortField(source_id=2, transform=IdentityTransform())
+)
 
 
 class WindowStore:

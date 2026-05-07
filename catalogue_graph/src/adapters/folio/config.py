@@ -13,7 +13,7 @@ from adapters.utils.schemata import (
     ADAPTER_STORE_ICEBERG_SCHEMA,
     ADAPTER_STORE_SORT_ORDER,
 )
-from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
+from adapters.utils.window_store import WINDOW_STATUS_SCHEMA, WINDOW_STATUS_SORT_ORDER
 
 # ---------------------------------------------------------------------------
 # AWS account / region context
@@ -145,6 +145,7 @@ FOLIO_ADAPTER_CONFIG = OAIPMHAdapterConfig(
         table_name=WINDOW_STATUS_TABLE,
         namespace=WINDOW_STATUS_NAMESPACE,
         iceberg_schema=WINDOW_STATUS_SCHEMA,
+        sort_order=WINDOW_STATUS_SORT_ORDER,
         s3_tables_bucket=S3_TABLES_BUCKET,
         region=AWS_REGION,
         account_id=AWS_ACCOUNT_ID,
@@ -161,6 +162,7 @@ FOLIO_ADAPTER_CONFIG = OAIPMHAdapterConfig(
         table_name=LOCAL_WINDOW_STATUS_TABLE,
         namespace=LOCAL_WINDOW_STATUS_NAMESPACE,
         iceberg_schema=WINDOW_STATUS_SCHEMA,
+        sort_order=WINDOW_STATUS_SORT_ORDER,
         db_name=LOCAL_WINDOW_STATUS_DB_NAME,
     ),
     # Reporting
