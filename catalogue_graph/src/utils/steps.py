@@ -10,7 +10,7 @@ import boto3
 import structlog
 from pydantic import BaseModel
 
-from utils.logger import ExecutionContext
+from utils.logger import ExecutionContext, get_trace_id
 
 logger = structlog.get_logger(__name__)
 
@@ -79,7 +79,7 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
         Concatenate[EventModel, ExecutionContext, Params], ResultModel | None
     ],
     event_validator: Callable[[str], EventModel],
-    execution_context: ExecutionContext,
+    pipeline_step: str,
     *handler_args: Params.args,
     **handler_kwargs: Params.kwargs,
 ) -> None:
@@ -104,6 +104,10 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
     step_output = StepFunctionOutput(task_token, stepfunctions_client)
 
     try:
+        execution_context = ExecutionContext(
+            trace_id=get_trace_id(),
+            pipeline_step=pipeline_step,
+        )
         result = handler(
             event,
             execution_context,

@@ -94,25 +94,6 @@ def event_validator(raw_input: str) -> IngestorLoaderLambdaEvent:
     return IngestorLoaderLambdaEvent.model_validate(event)
 
 
-def ecs_handler(arg_parser: ArgumentParser) -> None:
-    args, _ = arg_parser.parse_known_args()
-
-    execution_context = ExecutionContext(
-        trace_id=get_trace_id(),
-        pipeline_step="ingestor_loader",
-    )
-
-    # This will automatically use `es_mode=private`
-    run_ecs_handler(
-        arg_parser=arg_parser,
-        handler=handler,
-        event_validator=event_validator,
-        execution_context=execution_context,
-    )
-
-    logger.info("ECS ingestor loader task completed successfully")
-
-
 def lambda_handler(event: dict, context: typing.Any) -> dict:
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
@@ -208,4 +189,11 @@ if __name__ == "__main__":
     if args.use_cli:
         local_handler(parser)
     else:
-        ecs_handler(parser)
+        # This will automatically use `es_mode=private`
+        run_ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=event_validator,
+            pipeline_step="ingestor_loader",
+        )
+        logger.info("ECS ingestor loader task completed successfully")

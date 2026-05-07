@@ -69,23 +69,6 @@ def event_validator(raw_input: str) -> ExtractorEvent:
     return ExtractorEvent(**event)
 
 
-def ecs_handler(arg_parser: ArgumentParser) -> None:
-    execution_context = ExecutionContext(
-        trace_id=get_trace_id(),
-        pipeline_step="graph_extractor",
-    )
-
-    # This will automatically use `es_mode=private`
-    run_ecs_handler(
-        arg_parser=arg_parser,
-        handler=handler,
-        event_validator=event_validator,
-        execution_context=execution_context,
-    )
-
-    logger.info("ECS extractor task completed successfully")
-
-
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
         parser,
@@ -146,4 +129,12 @@ if __name__ == "__main__":
     if args.use_cli:
         local_handler(parser)
     else:
-        ecs_handler(parser)
+        # This will automatically use `es_mode=private`
+        run_ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=event_validator,
+            pipeline_step="graph_extractor",
+        )
+
+        logger.info("ECS extractor task completed successfully")
