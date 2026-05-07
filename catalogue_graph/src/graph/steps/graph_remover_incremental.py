@@ -86,6 +86,8 @@ def local_handler() -> None:
             "pipeline_date",
             "window",
             "ids",
+            "index_date_merged",
+            "index_date_augmented",
             "pit_id_merged",
             "pit_id_augmented",
             "environment",

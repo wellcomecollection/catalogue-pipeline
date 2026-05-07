@@ -18,7 +18,7 @@ module "catalogue_graph_ingestors_state_machine" {
           "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
           "index_dates" : "{% $states.context.Execution.Input.index_dates ? $states.context.Execution.Input.index_dates : null %}",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
-          "pit_id" : "{% $states.context.Execution.Input.pit_id ? $states.context.Execution.Input.pit_id : null %}",
+          "pit_ids" : "{% $states.context.Execution.Input.pit_ids ? $states.context.Execution.Input.pit_ids : null %}",
         }
 
         ItemProcessor = {
