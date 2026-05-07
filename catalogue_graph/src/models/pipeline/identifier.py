@@ -55,7 +55,7 @@ class Identifiable(Identifiers):
         7. Return an Identifiable with identifier_type 'label-derived'.
         """
 
-        from adapters.ebsco.transformers.text_utils import trim_trailing_period
+        from adapters.transformers.utils.text_utils import trim_trailing_period
 
         # Step 1 & 2: remove a single trailing period (not ellipsis) then strip surrounding whitespace
         working = trim_trailing_period(label).strip()

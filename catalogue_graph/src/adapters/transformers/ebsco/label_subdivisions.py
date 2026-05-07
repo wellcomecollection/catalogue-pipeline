@@ -6,12 +6,12 @@ from itertools import chain
 
 from pymarc.field import Field
 
-from adapters.ebsco.transformers.parsers.period import (
+from adapters.transformers.ebsco.parsers.period import (
     RE_4_DIGIT_DATE_RANGE,
     RE_NTH_CENTURY,
     parse_period,
 )
-from adapters.ebsco.transformers.text_utils import (
+from adapters.transformers.utils.text_utils import (
     normalise_label,
 )
 from models.pipeline.concept import Concept

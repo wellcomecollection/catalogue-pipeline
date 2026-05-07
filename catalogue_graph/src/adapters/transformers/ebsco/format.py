@@ -1,6 +1,6 @@
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.parsers import field006, leader
+from adapters.transformers.ebsco.parsers import field006, leader
 from models.pipeline.id_label import EBooks, EJournals, Format
 
 BIBLIOGRAPHIC_LEVELS: dict[str, Format] = {"m": EBooks, "s": EJournals}

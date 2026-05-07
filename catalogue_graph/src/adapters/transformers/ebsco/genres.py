@@ -5,16 +5,16 @@ import logging
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.authority_standard_number import extract_identifier
-from adapters.ebsco.transformers.label_subdivisions import (
+from adapters.transformers.ebsco.authority_standard_number import extract_identifier
+from adapters.transformers.ebsco.label_subdivisions import (
     build_concept,
     build_label_with_subdivisions,
     build_subdivision_concepts,
 )
-from adapters.ebsco.transformers.text_utils import (
+from adapters.transformers.marc.common import non_empty
+from adapters.transformers.utils.text_utils import (
     normalise_label,
 )
-from adapters.transformers.marc.common import non_empty
 from models.pipeline.concept import Concept, Genre
 
 logger: logging.Logger = logging.getLogger(__name__)

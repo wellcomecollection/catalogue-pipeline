@@ -15,7 +15,7 @@ from datetime import datetime
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.current_frequency import extract_current_frequency
+from adapters.transformers.ebsco.current_frequency import extract_current_frequency
 from models.pipeline.work_data import WorkData
 from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
 

@@ -1,6 +1,6 @@
 """Tests covering extraction of subjects from MARC subject fields (e.g. 610).
 
-Although the implementation currently lives under `adapters.ebsco.transformers.subjects`,
+Although the implementation currently lives under `adapters.transformers.ebsco.subjects`,
 these tests are MARC-field level and can be shared across adapters.
 """
 
@@ -13,7 +13,7 @@ from datetime import datetime
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
-from adapters.ebsco.transformers.subjects import extract_subjects
+from adapters.transformers.ebsco.subjects import extract_subjects
 from models.pipeline.concept import Subject
 from models.pipeline.identifier import Identifiable
 from models.pipeline.work_data import WorkData

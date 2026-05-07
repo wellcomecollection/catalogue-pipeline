@@ -1,8 +1,8 @@
 import pytest
 from pymarc.record import Field, Subfield
 
-from adapters.ebsco.transformers.genres import build_primary_concept
-from adapters.ebsco.transformers.label_subdivisions import (
+from adapters.transformers.ebsco.genres import build_primary_concept
+from adapters.transformers.ebsco.label_subdivisions import (
     build_label_with_subdivisions,
     build_subdivision_concepts,
 )

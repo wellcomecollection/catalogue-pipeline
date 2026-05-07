@@ -14,7 +14,7 @@ from datetime import datetime
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.description import extract_description
+from adapters.transformers.ebsco.description import extract_description
 from models.pipeline.work_data import WorkData
 from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
 

@@ -19,7 +19,7 @@ from itertools import chain
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import is_url
+from adapters.transformers.ebsco.common import is_url
 
 logger = logging.getLogger("transformer/description")
 

@@ -1,6 +1,6 @@
 """Tests covering extraction of parent/series relations from MARC.
 
-Although the implementation currently lives under `adapters.ebsco.transformers.parents`,
+Although the implementation currently lives under `adapters.transformers.ebsco.parents`,
 these tests are MARC-field level and can be shared across adapters.
 """
 
@@ -13,7 +13,7 @@ from datetime import datetime
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.parents import get_parents
+from adapters.transformers.ebsco.parents import get_parents
 from models.pipeline.work_data import WorkData
 from models.pipeline.work_state import WorkAncestor, WorkRelations
 from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests

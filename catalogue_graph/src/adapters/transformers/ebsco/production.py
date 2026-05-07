@@ -9,9 +9,9 @@ from collections.abc import Iterable
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.parsers.field008 import Field008
-from adapters.ebsco.transformers.parsers.period import parse_period
-from adapters.ebsco.transformers.text_utils import normalise_label
+from adapters.transformers.ebsco.parsers.field008 import Field008
+from adapters.transformers.ebsco.parsers.period import parse_period
+from adapters.transformers.utils.text_utils import normalise_label
 from models.pipeline.concept import Concept
 from models.pipeline.production import ProductionEvent
 

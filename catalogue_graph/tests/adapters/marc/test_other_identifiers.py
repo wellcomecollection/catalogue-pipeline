@@ -4,7 +4,7 @@ MARC fields:
 - 020 (ISBN)
 - 022 (ISSN)
 
-Although the extractor currently lives under `adapters.ebsco.transformers.other_identifiers`,
+Although the extractor currently lives under `adapters.transformers.ebsco.other_identifiers`,
 these tests are MARC-field level and can be shared across adapters.
 """
 
@@ -17,7 +17,7 @@ from datetime import datetime
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.other_identifiers import extract_other_identifiers
+from adapters.transformers.ebsco.other_identifiers import extract_other_identifiers
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.work_data import WorkData
 from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests

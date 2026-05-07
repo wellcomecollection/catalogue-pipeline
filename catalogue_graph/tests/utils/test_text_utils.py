@@ -1,4 +1,4 @@
-from adapters.ebsco.transformers.text_utils import (
+from adapters.transformers.utils.text_utils import (
     normalise_label,
     trim_trailing,
     trim_trailing_period,

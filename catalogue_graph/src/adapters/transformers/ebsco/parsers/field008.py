@@ -3,7 +3,7 @@ Functions for extracting data from the 008 control field
 https://www.loc.gov/marc/bibliographic/bd008a.html
 """
 
-from adapters.ebsco.transformers.parsers.positional_field import PositionalField
+from adapters.transformers.ebsco.parsers.positional_field import PositionalField
 from lookups import places
 
 
