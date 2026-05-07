@@ -4,13 +4,14 @@ This adapter ingests records from the Axiell Collections OAI-PMH feed. It extend
 
 ## Configuration
 
-| Setting         | Value         | Notes                                      |
-| --------------- | ------------- | ------------------------------------------ |
-| Metadata prefix | `oai_marcxml` | Axiell-specific MARC XML format            |
-| Set spec        | `collect`     | Filters to collection records only         |
-| Auth header     | `Token`       | Custom header (not standard Authorization) |
-| Default window  | 15 minutes    | `AXIELL_WINDOW_MINUTES`                    |
-| Lookback        | 7 days        | `AXIELL_WINDOW_LOOKBACK_DAYS`              |
+| Setting         | Env var              | Default       | Notes                                      |
+| --------------- | -------------------- | ------------- | ------------------------------------------ |
+| Metadata prefix | `OAI_METADATA_PREFIX`| `oai_marcxml` | Axiell-specific MARC XML format            |
+| Set spec        | `OAI_SET_SPEC`       | `collect`     | Filters to collection records only         |
+| Auth header     | —                    | `Token`       | Custom header (not standard Authorization) |
+| Window duration | `WINDOW_MINUTES`     | `15`          | Minutes per harvesting window              |
+| Lookback        | `WINDOW_LOOKBACK_DAYS`| `7`          | Fallback range (days) when no history      |
+| Max lag         | `MAX_LAG_MINUTES`    | `360`         | Maximum allowed lag before circuit breaker  |
 
 ## SSM Parameters
 
@@ -38,12 +39,4 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type axiell \
   --use-rest-api-table
 ```
 
-## Environment variables
-
-| Variable                      | Default       | Description                                |
-| ----------------------------- | ------------- | ------------------------------------------ |
-| `AXIELL_WINDOW_MINUTES`       | 15            | Harvesting window duration                 |
-| `AXIELL_WINDOW_LOOKBACK_DAYS` | 7             | Fallback range when no history             |
-| `AXIELL_MAX_LAG_MINUTES`      | 360           | Maximum allowed lag before circuit breaker |
-| `AXIELL_OAI_SET_SPEC`         | `collect`     | OAI set specification                      |
-| `AXIELL_OAI_METADATA_PREFIX`  | `oai_marcxml` | OAI metadata prefix                        |
+See [`config.py`](config.py) for the full set of environment variables.
