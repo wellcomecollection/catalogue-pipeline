@@ -14,7 +14,7 @@ class AppConfig:
     index_sources: List[str]
     filter_query: Dict[str, Any] | None = None
     ignore_fields: List[str] = field(default_factory=list)
-    sample_size: int = 10
+    sample_size: int = 100
     loading_chunk_size: int = 100_000
     hash_bucket_count: int = 6
     namespace: str | None = None

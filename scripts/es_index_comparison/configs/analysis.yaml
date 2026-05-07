@@ -7,8 +7,8 @@
 # Exactly TWO index sources to compare (required)
 # These identifiers must exist in source_configuration.yaml
 index_sources:
-  - works-indexed-2025-10-02
-  - works-indexed-2025-10-09
+  - images-indexed-2025-10-02
+  - images-indexed-2026-04-29
 
 # Optional Elasticsearch query DSL (omit for match_all). This example filters
 # documents where a nested term matches a specific identifier type.
@@ -23,7 +23,46 @@ index_sources:
 #   data.production[].dates[].range.from -> ignore all list indices for those segments
 # Descendants of a matched path are also ignored implicitly.
 ignore_fields:
-  # - some_field
+  # We expect these to be different
+  - debug.indexedTime
+  - modifiedTime
+
+  # Concept labels from graph
+  - aggregatableValues.source.contributors.agent[].label
+  - aggregatableValues.source.subjects[].label
+  - aggregatableValues.source.genres[].label
+  - display.source.genres[].concepts[].label
+  - display.source.contributors[].agent.label
+  - display.source.subjects[].label
+  - display.source.subjects[].concepts[].label
+  - query.source.subjects.concepts.label
+  - query.source.contributors.agent.label
+  - query.source.genres.concepts.label
+  - filterableValues.source.subjects.label
+  - filterableValues.source.contributors.agent.label
+  - filterableValues.source.genres.label
+
+  # Label-based source concept/concept matching in graph
+  - display.source.contributors[].agent.identifiers
+  - display.source.subjects[].identifiers
+  - display.source.genres[].concepts[].identifiers
+  - display.source.subjects[].concepts[].identifiers
+
+  # In the new index, we include the canonical ID in the list (see https://github.com/wellcomecollection/catalogue-pipeline/pull/3148)
+  - query.source.identifiers.value
+
+  # In the new index, we include image IDs on the source work
+  - query.source.images.id
+  - query.source.images.identifiers.value
+
+  # Sometimes incorrect in existing index
+  - query.source.partOf.title
+  - query.source.collectionPath.path
+
+  - query.source
+  - display.source
+  - filterableValues.source
+  - aggregatableValues.source
 
 # Number of differing documents to sample for console display
 sample_size: 10
