@@ -18,7 +18,7 @@ class MergedWorksSource(ElasticSource):
             es_client=es_client,
             index_name=get_merged_index_name(event),
             query=event.to_elasticsearch_query("state.mergedTime", query),
-            pit_id=event.pit_id,
+            pit_id=event.pit_ids.merged,
             fields=fields,
             slice_count=slice_count or event.slice_count,
         )
