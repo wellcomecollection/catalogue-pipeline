@@ -35,7 +35,6 @@ def transform_ebsco_record(
 ) -> VisibleSourceWork:
     """Convenience helper for tests."""
     transformer = EbscoTransformerForTests()
-    work_id = transformer.extract_work_id(marc_record)
     return transformer.transform_record(
-        work_id, marc_record, source_modified_time=source_modified_time
+        marc_record, source_modified_time=source_modified_time
     )

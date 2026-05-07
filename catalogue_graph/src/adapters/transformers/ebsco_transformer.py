@@ -41,7 +41,7 @@ class EbscoTransformer(MarcXmlTransformer):
         )
 
     def transform_record(
-        self, work_id: str, marc_record: Record, source_modified_time: datetime
+        self, marc_record: Record, source_modified_time: datetime
     ) -> VisibleSourceWork:
         work_data = WorkData(
             title=extract_title(marc_record),
@@ -62,7 +62,7 @@ class EbscoTransformer(MarcXmlTransformer):
 
         relations = WorkRelations(ancestors=get_parents(marc_record))
         work_state = self.source_work_state(
-            id_value=work_id,
+            marc_record=marc_record,
             relations=relations,
             source_modified_time=source_modified_time,
         )

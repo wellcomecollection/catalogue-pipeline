@@ -23,9 +23,8 @@ def _transform_description(marc_record: Record) -> str | None:
     transformer = MarcXmlTransformerForTests(
         build_work_data=lambda r: WorkData(description=extract_description(r))
     )
-    work_id = transformer.extract_work_id(marc_record)
     work = transformer.transform_record(
-        work_id, marc_record, source_modified_time=datetime.now()
+        marc_record, source_modified_time=datetime.now()
     )
     return work.data.description
 

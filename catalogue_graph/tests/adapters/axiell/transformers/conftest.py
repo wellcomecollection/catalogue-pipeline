@@ -31,7 +31,6 @@ def marc_record() -> Record:
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(marc_record: Record) -> InvisibleSourceWork:
     transformer = AxiellTransformerForTests()
-    work_id = transformer.extract_work_id(marc_record)
     return transformer.transform_record(
-        work_id, marc_record, source_modified_time=datetime(2020, 1, 1)
+        marc_record, source_modified_time=datetime(2020, 1, 1)
     )
