@@ -15,4 +15,4 @@ def extract_predecessor_id(record: Record) -> str | None:
             count=len(pred_id),
         )
         raise ValueError("Multiple predecessor identifiers (907$a) found.")
-    return pred_id[0] if pred_id else None
+    return pred_id[0].lstrip(".") if pred_id else None
