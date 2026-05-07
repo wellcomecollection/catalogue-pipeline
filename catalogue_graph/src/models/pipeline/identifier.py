@@ -2,6 +2,7 @@ import unicodedata
 from collections.abc import Generator
 from typing import Literal
 
+from adapters.transformers.utils.text_utils import trim_trailing_period
 from models.pipeline.id_label import Id
 from models.pipeline.serialisable import SerialisableModel
 
@@ -54,8 +55,6 @@ class Identifiable(Identifiers):
         6. Truncate to 255 characters (DB column width parity).
         7. Return an Identifiable with identifier_type 'label-derived'.
         """
-
-        from adapters.transformers.utils.text_utils import trim_trailing_period
 
         # Step 1 & 2: remove a single trailing period (not ellipsis) then strip surrounding whitespace
         working = trim_trailing_period(label).strip()

@@ -47,7 +47,9 @@ def test_folio_runtime_build_http_client() -> None:
 def test_folio_runtime_get_oai_endpoint() -> None:
     expected_url = "https://edge-wellcome.folio.ebsco.com/oai"
 
-    with patch("adapters.oai_pmh.folio.runtime._oai_endpoint", return_value=expected_url):
+    with patch(
+        "adapters.oai_pmh.folio.runtime._oai_endpoint", return_value=expected_url
+    ):
         url = FOLIO_CONFIG.get_oai_endpoint()
 
     assert url == expected_url
