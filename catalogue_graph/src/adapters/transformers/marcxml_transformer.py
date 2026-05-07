@@ -8,6 +8,9 @@ from pymarc import parse_xml_to_array
 from pymarc.record import Record
 
 from adapters.marc.transformers.identifier import extract_id
+from adapters.marc.transformers.predecessor_identifier import (
+    extract_predecessor_id,
+)
 from adapters.utils.adapter_store import AdapterStore
 from core.transformer import ElasticBaseTransformer
 from ingestor.models.shared.deleted_reason import DeletedReason
@@ -31,6 +34,7 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         identifier_type: Id,
+        predecessor_identifier_type: Id | None = None,
         snapshot_id: int | None = None,
     ) -> None:
         super().__init__()
@@ -38,6 +42,7 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
             adapter_store, changeset_ids, snapshot_id
         )
         self.identifier_type = identifier_type
+        self.predecessor_identifier_type = predecessor_identifier_type
 
     def _get_document_id(self, record: SourceWork) -> str:
         return record.state.id()
@@ -52,18 +57,18 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         return work_id
 
     def transform_record(
-        self, work_id: str, marc_record: Record, source_modified_time: datetime
+        self, marc_record: Record, source_modified_time: datetime
     ) -> InvisibleSourceWork | VisibleSourceWork:
         raise NotImplementedError
 
-    def source_identifier(self, id_value: str) -> SourceIdentifier:
+    def source_identifier(self, id_value: str, identifier_type: Id) -> SourceIdentifier:
         return SourceIdentifier(
-            identifier_type=self.identifier_type, ontology_type="Work", value=id_value
+            identifier_type=identifier_type, ontology_type="Work", value=id_value
         )
 
     def source_work_state(
         self,
-        id_value: str,
+        marc_record: Record,
         source_modified_time: datetime,
         relations: WorkRelations | None = None,
     ) -> SourceWorkState:
@@ -71,8 +76,16 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         source_modified_time_iso: str = convert_datetime_to_utc_iso(
             source_modified_time
         )
+        source_id = self.extract_work_id(marc_record)
+        predecessor_id = extract_predecessor_id(marc_record)
+
         return SourceWorkState(
-            source_identifier=self.source_identifier(id_value),
+            source_identifier=self.source_identifier(source_id, self.identifier_type),
+            predecessor_identifier=self.source_identifier(
+                predecessor_id, self.predecessor_identifier_type
+            )
+            if predecessor_id and self.predecessor_identifier_type
+            else None,
             source_modified_time=source_modified_time_iso,
             modified_time=current_time_iso,
             relations=relations,
@@ -92,8 +105,7 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         self, row_id: str, marc_record: Record, source_modified_time: datetime
     ) -> Generator[InvisibleSourceWork | VisibleSourceWork]:
         try:
-            work_id = self.extract_work_id(marc_record)
-            yield self.transform_record(work_id, marc_record, source_modified_time)
+            yield self.transform_record(marc_record, source_modified_time)
         except Exception as e:
             logging.error(f"Error transforming row_id {row_id}: {e}")
             self._add_error(e, "transform", row_id)
@@ -102,7 +114,11 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         self, work_id: str, source_modified_time: datetime
     ) -> DeletedSourceWork:
         """Transform a deleted record."""
-        state = self.source_work_state(work_id, source_modified_time)
+        state = SourceWorkState(
+            source_identifier=self.source_identifier(work_id, self.identifier_type),
+            source_modified_time=convert_datetime_to_utc_iso(source_modified_time),
+            modified_time=convert_datetime_to_utc_iso(datetime.now()),
+        )
         version = int(source_modified_time.timestamp())
         return DeletedSourceWork(
             version=version,
