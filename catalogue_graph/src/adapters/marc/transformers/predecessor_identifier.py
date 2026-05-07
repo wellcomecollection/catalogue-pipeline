@@ -1,0 +1,19 @@
+import structlog
+
+from pymarc.record import Record
+
+from adapters.marc.transformers.common import get_a_subfields
+
+logger = structlog.get_logger(__name__)
+
+
+def extract_predecessor_identifier(record: Record) -> str | None:
+    """Extract the predecessor identifier from MARC 907 subfield $a."""
+    pred_id = get_a_subfields("907", record)
+    if len(pred_id) > 1:
+        logger.warning(
+            "Multiple instances of non-repeatable varfield with tag 907",
+            count=len(pred_id),
+        )
+        raise ValueError("Multiple predecessor identifiers (907$a) found.")
+    return pred_id[0] if pred_id else None

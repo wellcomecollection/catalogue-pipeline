@@ -18,9 +18,12 @@ from adapters.axiell import helpers as axiell_helpers
 from adapters.axiell.runtime import AXIELL_CONFIG
 from adapters.ebsco import config as ebsco_config
 from adapters.ebsco import helpers as ebsco_helpers
+from adapters.folio import config as folio_config
+from adapters.folio.runtime import FOLIO_CONFIG
 from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
+from adapters.transformers.folio_transformer import FolioTransformer
 from adapters.transformers.manifests import (
     TransformerManifest,
     TransformerManifestWriter,
@@ -34,7 +37,7 @@ from utils.logger import ExecutionContext, get_trace_id, setup_logging
 logger = structlog.get_logger(__name__)
 
 
-TransformerType = Literal["axiell", "ebsco", "axiell_reconciler"]
+TransformerType = Literal["axiell", "ebsco", "folio", "axiell_reconciler"]
 
 
 class TransformerEvent(BaseModel):
@@ -57,24 +60,28 @@ ICEBERG_NAMESPACE_BY_TYPE: dict[TransformerType, str] = {
     "axiell": "axiell",
     "axiell_reconciler": "axiell",
     "ebsco": "ebsco",
+    "folio": "folio",
 }
 
 CONFIG_BY_TYPE: dict[TransformerType, AdapterConfig] = {
     "axiell": cast(AdapterConfig, axiell_config),
     "axiell_reconciler": cast(AdapterConfig, axiell_config),
     "ebsco": cast(AdapterConfig, ebsco_config),
+    "folio": cast(AdapterConfig, folio_config),
 }
 
 ADAPTER_TABLE_BUILDER_BY_TYPE: dict[TransformerType, Callable] = {
     "axiell": AXIELL_CONFIG.build_adapter_table,
     "axiell_reconciler": AXIELL_CONFIG.build_adapter_table,
     "ebsco": ebsco_helpers.build_adapter_table,
+    "folio": FOLIO_CONFIG.build_adapter_table,
 }
 
 BATCHES_S3_PREFIX_BY_TYPE: dict[TransformerType, str] = {
     "axiell": "transformer/batches",
     "axiell_reconciler": "reconciler/batches",
     "ebsco": "transformer/batches",
+    "folio": "transformer/batches",
 }
 
 
@@ -109,6 +116,8 @@ def build_transformer(
         return AxiellTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "ebsco":
         return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
+    if event.transformer_type == "folio":
+        return FolioTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "axiell_reconciler":
         if not event.changeset_ids:
             # The reconciler doesn't work in the context of a full reindex,
@@ -132,7 +141,7 @@ def build_transformer(
 def handler(
     event: TransformerEvent,
     execution_context: ExecutionContext | None = None,
-    es_mode: ElasticsearchMode = "private",
+    es_mode: ElasticsearchMode = "local",
     use_rest_api_table: bool = False,
     create_if_not_exists: bool = False,
 ) -> TransformerManifest:
