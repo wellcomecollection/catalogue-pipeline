@@ -41,7 +41,7 @@ class WindowNotifier:
         self,
         chatbot_notifier: ChatbotNotifier,
         table_name: str,
-        adapter_name: str = "axiell",
+        adapter_name: str,
     ) -> None:
         """Initialize the WindowNotifier.
 

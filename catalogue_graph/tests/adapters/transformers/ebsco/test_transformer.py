@@ -5,12 +5,12 @@ from pyiceberg.table import Table as IcebergTable
 
 import adapters.extractors.ebsco.config as adapter_config
 from adapters.steps.ebsco.loader import EBSCO_NAMESPACE
-from adapters.transformers.manifests import TransformerManifest
 from adapters.steps.transformer import (
     TransformerEvent,
     build_transformer,
     handler,
 )
+from adapters.transformers.manifests import TransformerManifest
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 

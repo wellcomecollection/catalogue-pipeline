@@ -5,8 +5,8 @@ import pyarrow as pa
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.transformers.manifests import TransformerManifest
 from adapters.steps.transformer import TransformerEvent, handler
+from adapters.transformers.manifests import TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from adapters.utils.schemata import (
