@@ -10,10 +10,11 @@ from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
 
 
 class EbscoAdapterTriggerEvent(BaseAdapterEvent):
-    pass
+    adapter_type: str = "ebsco"
 
 
 class EbscoAdapterLoaderEvent(BaseAdapterEvent):
+    adapter_type: str = "ebsco"
     file_location: str
 
 

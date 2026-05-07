@@ -155,6 +155,7 @@ def build_window_request(
 
     return OAIPMHLoaderEvent(
         job_id=resolved_job_id,
+        adapter_type=runtime.adapter_name,
         window=IncrementalWindow(start_time=start_time, end_time=end_time),
         metadata_prefix=runtime.oai_metadata_prefix,
         set_spec=runtime.oai_set_spec,
@@ -278,13 +279,12 @@ def lambda_handler(
         OAIPMHTriggerEvent(
             now=event_time,
             job_id=generate_job_id(event_time),
+            adapter_type=adapter_type,
         ),
         runtime=runtime,
         execution_context=execution_context,
     )
-    result = loader_event.model_dump(mode="json")
-    result["adapter_type"] = adapter_type
-    return result
+    return loader_event.model_dump(mode="json")
 
 
 def build_cli_parser(config: OAIPMHRuntimeConfig) -> argparse.ArgumentParser:
@@ -365,6 +365,7 @@ def run_cli(
         OAIPMHTriggerEvent(
             now=now,
             job_id=job_id,
+            adapter_type=config.config.adapter_name,
         ),
         runtime=build_runtime(
             config,

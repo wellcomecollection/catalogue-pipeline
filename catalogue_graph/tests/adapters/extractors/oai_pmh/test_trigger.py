@@ -517,7 +517,7 @@ class TestHandler:
 
         from adapters.extractors.oai_pmh.models.step_events import OAIPMHTriggerEvent
 
-        event = OAIPMHTriggerEvent(now=now, job_id="test-job")
+        event = OAIPMHTriggerEvent(now=now, job_id="test-job", adapter_type="axiell")
         result = trigger.handler(event, runtime)
 
         assert isinstance(result, OAIPMHLoaderEvent)

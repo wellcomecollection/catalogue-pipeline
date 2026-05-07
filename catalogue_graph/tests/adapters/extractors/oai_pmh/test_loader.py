@@ -35,6 +35,7 @@ def _create_loader_event(
     now = now or datetime.now(tz=UTC)
     return OAIPMHLoaderEvent(
         job_id="job-123",
+        adapter_type="axiell",
         window=IncrementalWindow(
             start_time=now - timedelta(minutes=15),
             end_time=now,

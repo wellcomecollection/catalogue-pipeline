@@ -150,6 +150,7 @@ def _process_gap(
         # Construct loader event with sensible defaults from config
         loader_event = OAIPMHLoaderEvent(
             job_id=job_id,
+            adapter_type=adapter_config.config.adapter_name,
             window=IncrementalWindow(start_time=gap_start, end_time=gap_end),
             metadata_prefix=adapter_config.config.oai_metadata_prefix,
             set_spec=adapter_config.config.oai_set_spec,

@@ -200,16 +200,12 @@ def lambda_handler(
     Resolves the adapter config from the ``adapter_type`` field in the event
     (injected by the Step Functions state machine from the scheduler input).
     """
-    adapter_type = event.get("adapter_type")
-    if adapter_type is None:
-        raise ValueError("Event must contain 'adapter_type'")
-
-    config = get_config(adapter_type)
+    request = OAIPMHLoaderEvent.model_validate(event)
+    config = get_config(request.adapter_type)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
         pipeline_step=f"{config.config.pipeline_step_prefix}_loader",
     )
-    request = OAIPMHLoaderEvent.model_validate(event)
     runtime = build_runtime(config)
     response = handler(request, runtime, execution_context=execution_context)
     return response.model_dump(mode="json")
