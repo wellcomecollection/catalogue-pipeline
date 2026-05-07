@@ -20,12 +20,12 @@ from adapters.extractors.oai_pmh.models.step_events import (
 )
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
-from adapters.extractors.oai_pmh.steps.loader import (
+from adapters.steps.oai_pmh.loader import (
     LoaderRuntime,
     LoaderStepConfig,
     build_harvester,
 )
-from adapters.extractors.oai_pmh.steps.loader import (
+from adapters.steps.oai_pmh.loader import (
     build_runtime as _build_loader_runtime,
 )
 from adapters.utils.adapter_events import BaseAdapterEvent

@@ -6,7 +6,7 @@ from pyiceberg.table import Table as IcebergTable
 import adapters.extractors.oai_pmh.axiell.config as adapter_config
 from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.transformers.manifests import TransformerManifest
-from adapters.transformers.transformer import TransformerEvent, handler
+from adapters.steps.transformer import TransformerEvent, handler
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 

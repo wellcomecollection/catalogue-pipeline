@@ -13,8 +13,8 @@ from adapters.extractors.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     LoaderResponse,
 )
-from adapters.extractors.ebsco.steps import loader
-from adapters.extractors.ebsco.steps.loader import EBSCO_NAMESPACE, LoaderRuntime
+from adapters.steps.ebsco import loader
+from adapters.steps.ebsco.loader import EBSCO_NAMESPACE, LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from tests.mocks import MockSmartOpen

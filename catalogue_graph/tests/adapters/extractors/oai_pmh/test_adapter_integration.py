@@ -15,14 +15,14 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
-from adapters.extractors.oai_pmh.steps import loader as oai_loader
-from adapters.extractors.oai_pmh.steps import reloader as oai_reloader
-from adapters.extractors.oai_pmh.steps.loader import LoaderRuntime, LoaderStepConfig
-from adapters.extractors.oai_pmh.steps.reloader import (
+from adapters.steps.oai_pmh import loader as oai_loader
+from adapters.steps.oai_pmh import reloader as oai_reloader
+from adapters.steps.oai_pmh.loader import LoaderRuntime, LoaderStepConfig
+from adapters.steps.oai_pmh.reloader import (
     ReloaderRuntime,
     ReloaderStepConfig,
 )
-from adapters.extractors.oai_pmh.steps.trigger import (
+from adapters.steps.oai_pmh.trigger import (
     TriggerRuntime,
     build_window_request,
 )

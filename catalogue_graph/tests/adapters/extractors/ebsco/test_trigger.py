@@ -7,7 +7,7 @@ import pytest
 
 from adapters.extractors.ebsco.ebsco_ftp import EbscoFtp
 from adapters.extractors.ebsco.models.step_events import EbscoAdapterLoaderEvent
-from adapters.extractors.ebsco.steps.trigger import (
+from adapters.steps.ebsco.trigger import (
     EventBridgeScheduledEvent,
     get_most_recent_valid_file,
     lambda_handler,
@@ -38,7 +38,7 @@ class TestSyncFiles:
         self.s3_bucket = "test-bucket"
         self.s3_prefix = "test-prefix"
         self.mock_list_s3_keys = patch(
-            "adapters.extractors.ebsco.steps.trigger._list_s3_keys"
+            "adapters.steps.ebsco.trigger._list_s3_keys"
         ).start()
 
     def teardown_method(self) -> None:
@@ -136,7 +136,7 @@ class TestSyncFiles:
         # Patch smart_open to raise on write
         with (
             patch(
-                "adapters.extractors.ebsco.steps.trigger.smart_open.open",
+                "adapters.steps.ebsco.trigger.smart_open.open",
                 side_effect=OSError("Denied"),
             ),
             pytest.raises(RuntimeError, match="Denied"),
@@ -173,7 +173,7 @@ class TestSyncFiles:
         )
 
 
-@patch("adapters.extractors.ebsco.steps.trigger.handler")
+@patch("adapters.steps.ebsco.trigger.handler")
 def test_lambda_handler_eventbridge_conversion(mock_handler) -> None:  # type: ignore
     scheduled_time = "2025-08-22T12:34:00Z"
     expected_job_id = "20250822T1234"

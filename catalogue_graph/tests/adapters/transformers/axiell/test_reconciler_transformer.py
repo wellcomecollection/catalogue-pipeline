@@ -6,7 +6,7 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.transformers.manifests import TransformerManifest
-from adapters.transformers.transformer import TransformerEvent, handler
+from adapters.steps.transformer import TransformerEvent, handler
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from adapters.utils.schemata import (
@@ -41,11 +41,11 @@ def _run_reconciler(
     changeset_ids: list[str],
 ) -> TransformerManifest:
     monkeypatch.setattr(
-        "adapters.transformers.transformer.ADAPTER_TABLE_BUILDER_BY_TYPE",
+        "adapters.steps.transformer.ADAPTER_TABLE_BUILDER_BY_TYPE",
         {"axiell_reconciler": lambda **kwargs: adapter_table},
     )
     monkeypatch.setattr(
-        "adapters.transformers.transformer.AXIELL_CONFIG.build_reconciler_table",
+        "adapters.steps.transformer.AXIELL_CONFIG.build_reconciler_table",
         lambda **kwargs: reconciler_table,
     )
 

@@ -14,8 +14,8 @@ from pyiceberg.table import Table as IcebergTable
 
 from adapters.extractors.oai_pmh.models.step_events import OAIPMHLoaderEvent
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
-from adapters.extractors.oai_pmh.steps import trigger
-from adapters.extractors.oai_pmh.steps.trigger import (
+from adapters.steps.oai_pmh import trigger
+from adapters.steps.oai_pmh.trigger import (
     TriggerRuntime,
     build_window_request,
 )

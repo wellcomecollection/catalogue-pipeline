@@ -8,7 +8,7 @@ from adapters.extractors.ebsco.marcxml_loader import (
     MarcXmlFileLoader,
     MissingRecordIdentifierError,
 )
-from adapters.extractors.ebsco.steps.loader import EBSCO_NAMESPACE
+from adapters.steps.ebsco.loader import EBSCO_NAMESPACE
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from tests.mocks import MockSmartOpen
 

@@ -21,7 +21,7 @@ from oai_pmh_client.client import OAIClient
 from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
-from adapters.extractors.oai_pmh.steps.loader import LoaderRuntime
+from adapters.steps.oai_pmh.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_store import WindowStore

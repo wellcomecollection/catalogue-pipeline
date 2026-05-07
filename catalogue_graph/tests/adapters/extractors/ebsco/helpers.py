@@ -11,7 +11,7 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.extractors.ebsco.marcxml_loader import MarcXmlFileLoader
-from adapters.extractors.ebsco.steps.loader import EBSCO_NAMESPACE
+from adapters.steps.ebsco.loader import EBSCO_NAMESPACE
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 
@@ -131,7 +131,7 @@ def prepare_changeset(
 
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
-        "adapters.transformers.transformer.ADAPTER_TABLE_BUILDER_BY_TYPE",
+        "adapters.steps.transformer.ADAPTER_TABLE_BUILDER_BY_TYPE",
         {transformer_type: lambda **kwargs: temporary_table},
     )
     return changeset_id

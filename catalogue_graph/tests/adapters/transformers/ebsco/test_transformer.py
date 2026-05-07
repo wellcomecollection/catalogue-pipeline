@@ -4,9 +4,9 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.extractors.ebsco.config as adapter_config
-from adapters.extractors.ebsco.steps.loader import EBSCO_NAMESPACE
+from adapters.steps.ebsco.loader import EBSCO_NAMESPACE
 from adapters.transformers.manifests import TransformerManifest
-from adapters.transformers.transformer import (
+from adapters.steps.transformer import (
     TransformerEvent,
     build_transformer,
     handler,

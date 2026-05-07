@@ -18,8 +18,8 @@ from adapters.extractors.oai_pmh.models.step_events import (
     OAIPMHLoaderResponse,
 )
 from adapters.extractors.oai_pmh.record_writer import WindowRecordWriter
-from adapters.extractors.oai_pmh.steps import loader
-from adapters.extractors.oai_pmh.steps.loader import LoaderRuntime
+from adapters.steps.oai_pmh import loader
+from adapters.steps.oai_pmh.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_harvester import WindowHarvestManager
 from adapters.utils.window_summary import WindowSummary
@@ -176,7 +176,7 @@ class TestHandler:
         with (
             patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
             patch(
-                "adapters.extractors.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+                "adapters.steps.oai_pmh.loader.OAIPMHLoaderReport.from_loader"
             ) as mock_from_loader,
         ):
             mock_harvest.return_value = [summary]
@@ -206,7 +206,7 @@ class TestHandler:
         with (
             patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
             patch(
-                "adapters.extractors.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+                "adapters.steps.oai_pmh.loader.OAIPMHLoaderReport.from_loader"
             ) as mock_from_loader,
         ):
             mock_harvest.return_value = [summary]
@@ -228,7 +228,7 @@ class TestHandler:
         with (
             patch.object(WindowHarvestManager, "harvest_range") as mock_harvest,
             patch(
-                "adapters.extractors.oai_pmh.steps.loader.OAIPMHLoaderReport.from_loader"
+                "adapters.steps.oai_pmh.loader.OAIPMHLoaderReport.from_loader"
             ) as mock_from_loader,
         ):
             mock_harvest.return_value = [summary]
