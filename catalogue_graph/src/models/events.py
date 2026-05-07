@@ -31,19 +31,34 @@ class PipelineIndexDates(BaseModel):
     images: str | None = None  # final images
 
 
+class PipelinePitIds(BaseModel):
+    merged: str | None = None
+    augmented: str | None = None
+
+
 class BasePipelineEvent(SourceScope):
     pipeline_date: str
-    pit_id: str | None = None
+    pit_ids: PipelinePitIds = PipelinePitIds()
     index_dates: PipelineIndexDates = PipelineIndexDates()
     environment: Environment = "prod"
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
-        window = IncrementalWindow.from_argparser(args)
-        merged = getattr(args, "index_date_merged", None)
-        augmented = getattr(args, "index_date_augmented", None)
-        index_dates = PipelineIndexDates(merged=merged, augmented=augmented)
-        return cls(**args.__dict__, window=window, index_dates=index_dates)
+        window = None
+        if getattr(args, "window_start", None) and getattr(args, "window_end", None):
+            window = IncrementalWindow.from_argparser(args)
+
+        index_dates = PipelineIndexDates(
+            merged=getattr(args, "index_date_merged", None),
+            augmented=getattr(args, "index_date_augmented", None),
+        )
+        pit_ids = PipelinePitIds(
+            merged=getattr(args, "pit_id_merged", None),
+            augmented=getattr(args, "pit_id_augmented", None),
+        )
+        return cls(
+            **args.__dict__, window=window, index_dates=index_dates, pit_ids=pit_ids
+        )
 
 
 class GraphPipelineEvent(BasePipelineEvent):
