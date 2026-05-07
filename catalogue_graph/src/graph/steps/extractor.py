@@ -17,7 +17,7 @@ from models.events import (
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
-from utils.steps import run_ecs_handler
+from utils.steps import ecs_handler
 
 logger = structlog.get_logger(__name__)
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         local_handler(parser)
     else:
         # This will automatically use `es_mode=private`
-        run_ecs_handler(
+        ecs_handler(
             arg_parser=parser,
             handler=handler,
             event_validator=event_validator,

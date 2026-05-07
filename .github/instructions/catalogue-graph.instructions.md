@@ -57,7 +57,7 @@ When adding or modifying an OAI-PMH adapter:
 ## Step Functions integration
 
 ECS tasks that participate in Step Functions use
-`utils.steps.run_ecs_handler(...)` which handles `--task-token`,
+`utils.steps.ecs_handler(...)` which handles `--task-token`,
 `send_task_success`/`send_task_failure`, and event validation via a Pydantic
 model. Don't reinvent this glue.
 

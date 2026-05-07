@@ -73,7 +73,7 @@ class StepFunctionOutput:
             logger.error("Task error", error_output=error_output)
 
 
-def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
+def ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
     arg_parser: ArgumentParser,
     handler: Callable[
         Concatenate[EventModel, ExecutionContext, Params], ResultModel | None

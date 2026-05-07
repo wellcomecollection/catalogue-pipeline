@@ -22,7 +22,7 @@ from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import LoaderReport
-from utils.steps import create_job_id, run_ecs_handler
+from utils.steps import create_job_id, ecs_handler
 from utils.types import IngestorType
 
 logger = structlog.get_logger(__name__)
@@ -190,7 +190,7 @@ if __name__ == "__main__":
         local_handler(parser)
     else:
         # This will automatically use `es_mode=private`
-        run_ecs_handler(
+        ecs_handler(
             arg_parser=parser,
             handler=handler,
             event_validator=event_validator,
