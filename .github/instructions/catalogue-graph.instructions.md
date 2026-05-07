@@ -13,10 +13,9 @@ its own `uv.lock`, `.python-version` (3.12), and virtualenv.
 
 ## Layout cheat sheet
 
-- `src/adapters/oai_pmh/` — generic OAI-PMH adapter framework (runtime base
-  class, reusable steps in `steps/loader.py|reloader.py|trigger.py`).
-- `src/adapters/{axiell,folio}/` — concrete OAI-PMH adapters that extend
-  `OAIPMHRuntimeConfig` and wrap the generic steps.
+- `src/adapters/oai_pmh/` — OAI-PMH adapter framework: runtime base class,
+  reusable steps in `steps/`, and per-adapter config/clients/runtime in
+  `axiell/` and `folio/`.
 - `src/adapters/ebsco/`, `src/adapters/marc/`, `src/adapters/transformers/` —
   source-specific code.
 - `src/utils/` — shared helpers (`logger.py`, `steps.py`, `manifests.py`, …).
@@ -30,12 +29,13 @@ its own `uv.lock`, `.python-version` (3.12), and virtualenv.
 When adding or modifying an OAI-PMH adapter:
 
 - Subclass `OAIPMHRuntimeConfig` (see
-  [adapters/folio/runtime.py](../../catalogue_graph/src/adapters/folio/runtime.py))
+  [adapters/oai_pmh/folio/runtime.py](../../catalogue_graph/src/adapters/oai_pmh/folio/runtime.py))
   and expose a module-level singleton (e.g. `FOLIO_CONFIG`).
-- Per-step modules live under `adapters/<name>/steps/` and are thin wrappers
-  around `adapters.oai_pmh.steps.{loader,reloader,trigger}` — re-export
-  `build_runtime`, `handler`, `lambda_handler`, `main`. Don't duplicate the
-  generic logic; extend the base instead.
+- Register the new adapter in `adapters/oai_pmh/registry.py` so the shared
+  entrypoints can dispatch to it via `--adapter-type`.
+- The shared steps live in `adapters/oai_pmh/steps/`; they read `adapter_type`
+  from the event and resolve config via the registry. Don't create per-adapter
+  step wrappers.
 - Step config goes in a `pydantic.BaseModel` subclass named `<Step>StepConfig`.
 - Every entrypoint module exposes both `lambda_handler(event, context)` and a
   `main()` CLI entry point guarded by `if __name__ == "__main__":`.

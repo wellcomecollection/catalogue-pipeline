@@ -20,35 +20,35 @@ All OAI-PMH adapters follow this pattern:
 
 ### Trigger (`steps/trigger.py`)
 
-* Reads window execution history from the **window status table**.
-* Computes the next `[window_start, window_end)` range using the most recent successful entry, defaulting to a configurable look-back if no history exists.
-* Generates a canonical `job_id` (UTC `YYYYMMDDTHHMM`), embeds OAI metadata parameters, and publishes a loader event.
-* Optionally enforces the maximum lag window before allowing the run to proceed.
-* CLI flags: `--window-minutes`, `--lookback-days`, `--job-id`, `--at`, `--enforce-lag`.
+- Reads window execution history from the **window status table**.
+- Computes the next `[window_start, window_end)` range using the most recent successful entry, defaulting to a configurable look-back if no history exists.
+- Generates a canonical `job_id` (UTC `YYYYMMDDTHHMM`), embeds OAI metadata parameters, and publishes a loader event.
+- Optionally enforces the maximum lag window before allowing the run to proceed.
+- CLI flags: `--window-minutes`, `--lookback-days`, `--job-id`, `--at`, `--enforce-lag`.
 
 ### Loader (`steps/loader.py`)
 
-* Receives the loader event and spins up a `WindowHarvestManager` with an OAI client plus a per-window `WindowRecordWriter` callback.
-* For each harvested record, serialises the XML payload into the **Iceberg record table** under the adapter namespace and associates it with the current `job_id`.
-* Updates the window status table with `pending/success/failed` states and attaches tags for `job_id`, `window_key`, and every Iceberg `changeset_id` produced.
-* Returns a `LoaderResponse` containing window results and `changeset_ids`.
+- Receives the loader event and spins up a `WindowHarvestManager` with an OAI client plus a per-window `WindowRecordWriter` callback.
+- For each harvested record, serialises the XML payload into the **Iceberg record table** under the adapter namespace and associates it with the current `job_id`.
+- Updates the window status table with `pending/success/failed` states and attaches tags for `job_id`, `window_key`, and every Iceberg `changeset_id` produced.
+- Returns a `LoaderResponse` containing window results and `changeset_ids`.
 
 ### Reloader (`steps/reloader.py`)
 
-* Analyzes window coverage within a specified time range.
-* Identifies any coverage gaps (missing or failed windows).
-* Invokes the loader handler sequentially for each gap.
-* Supports `--dry-run` mode to preview gaps without processing.
+- Analyzes window coverage within a specified time range.
+- Identifies any coverage gaps (missing or failed windows).
+- Invokes the loader handler sequentially for each gap.
+- Supports `--dry-run` mode to preview gaps without processing.
 
 ### State propagation summary
 
-| Step | Inputs | Outputs | Persistent state |
-| --- | --- | --- | --- |
-| Trigger | Window status table, config | Loader event (job + window info) | Reads status only |
-| Loader | Loader event, OAI feed | `LoaderResponse` + `changeset_ids` | Writes to Iceberg + window status |
-| Transformer | `changeset_ids`, Iceberg rows | `TransformResult` + ES documents | Writes to Elasticsearch |
+| Step        | Inputs                        | Outputs                            | Persistent state                  |
+| ----------- | ----------------------------- | ---------------------------------- | --------------------------------- |
+| Trigger     | Window status table, config   | Loader event (job + window info)   | Reads status only                 |
+| Loader      | Loader event, OAI feed        | `LoaderResponse` + `changeset_ids` | Writes to Iceberg + window status |
+| Transformer | `changeset_ids`, Iceberg rows | `TransformResult` + ES documents   | Writes to Elasticsearch           |
 
-*`job_id`* threads through every payload so logs, metrics, and manifests can be correlated across steps.
+_`job_id`_ threads through every payload so logs, metrics, and manifests can be correlated across steps.
 
 ## Running adapter steps locally
 
@@ -113,28 +113,28 @@ uv run python -m adapters.oai_pmh.steps.reloader --adapter-type {axiell,folio} \
 
 ### Common CLI flags
 
-| Flag | Description |
-| --- | --- |
-| `--use-rest-api-table` | Use S3 Tables catalog instead of local SQLite |
-| `--at` | Override the "current time" for window calculation |
-| `--job-id` | Override the auto-generated job ID |
-| `--window-minutes` | Duration of each harvesting window |
-| `--lookback-days` | How far back to start if no history exists |
-| `--enforce-lag` | Fail if lag exceeds threshold |
-| `--dry-run` | (Reloader only) Preview gaps without processing |
+| Flag                   | Description                                        |
+| ---------------------- | -------------------------------------------------- |
+| `--use-rest-api-table` | Use S3 Tables catalog instead of local SQLite      |
+| `--at`                 | Override the "current time" for window calculation |
+| `--job-id`             | Override the auto-generated job ID                 |
+| `--window-minutes`     | Duration of each harvesting window                 |
+| `--lookback-days`      | How far back to start if no history exists         |
+| `--enforce-lag`        | Fail if lag exceeds threshold                      |
+| `--dry-run`            | (Reloader only) Preview gaps without processing    |
 
 ## Environment prerequisites
 
-* UV-managed virtual environment with the catalogue graph project synced
-* AWS credentials for S3 Tables catalog (or use local fallback)
-* Access to SSM parameters for OAI endpoint and token (adapter-specific)
+- UV-managed virtual environment with the catalogue graph project synced
+- AWS credentials for S3 Tables catalog (or use local fallback)
+- Access to SSM parameters for OAI endpoint and token (adapter-specific)
 
 ## Available adapters
 
-| Adapter | Metadata prefix | Set spec | Auth header | SSM token path |
-| --- | --- | --- | --- | --- |
-| [Axiell](../axiell/README.md) | `oai_marcxml` | `collect` | `Token` | `/catalogue_pipeline/axiell/oai_api_token` |
-| [FOLIO](../folio/README.md) | `marc21_withholdings` | None | `Authorization` | `/catalogue_pipeline/folio/oai_api_token` |
+| Adapter                       | Metadata prefix       | Set spec  | Auth header     | SSM token path                             |
+| ----------------------------- | --------------------- | --------- | --------------- | ------------------------------------------ |
+| [Axiell](../axiell/README.md) | `oai_marcxml`         | `collect` | `Token`         | `/catalogue_pipeline/axiell/oai_api_token` |
+| [FOLIO](../folio/README.md)   | `marc21_withholdings` | None      | `Authorization` | `/catalogue_pipeline/folio/oai_api_token`  |
 
 See individual adapter READMEs for adapter-specific configuration and details.
 
