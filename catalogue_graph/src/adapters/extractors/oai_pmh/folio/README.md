@@ -25,13 +25,13 @@ See the [OAI-PMH README](../README.md) for detailed step-by-step instructions. U
 
 ```bash
 # Trigger
-uv run python -m adapters.oai_pmh.steps.trigger --adapter-type folio --at 2025-11-17T12:15:00Z > /tmp/folio_event.json
+uv run python -m adapters.steps.oai_pmh.trigger --adapter-type folio --at 2025-11-17T12:15:00Z > /tmp/folio_event.json
 
 # Loader
-uv run python -m adapters.oai_pmh.steps.loader --adapter-type folio --event /tmp/folio_event.json
+uv run python -m adapters.steps.oai_pmh.loader --adapter-type folio --event /tmp/folio_event.json
 
 # Reloader (fill gaps)
-uv run python -m adapters.oai_pmh.steps.reloader --adapter-type folio \
+uv run python -m adapters.steps.oai_pmh.reloader --adapter-type folio \
   --job-id gap-reload \
   --window-start 2025-12-01T00:00:00Z \
   --window-end 2025-12-02T00:00:00Z \
