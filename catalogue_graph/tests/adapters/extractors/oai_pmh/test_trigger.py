@@ -288,6 +288,7 @@ class TestWindowGapNotifications:
         notifier = WindowNotifier(
             chatbot_notifier=chatbot_notifier,
             table_name="test_table.window_status",
+            adapter_name="test-adapter",
         )
 
         runtime = _create_trigger_runtime(
@@ -328,6 +329,7 @@ class TestWindowGapNotifications:
         notifier = WindowNotifier(
             chatbot_notifier=chatbot_notifier,
             table_name="test_table.window_status",
+            adapter_name="test-adapter",
         )
 
         runtime = _create_trigger_runtime(
@@ -385,6 +387,7 @@ class TestWindowGapNotifications:
         notifier = WindowNotifier(
             chatbot_notifier=chatbot_notifier,
             table_name="test_table.window_status",
+            adapter_name="test-adapter",
         )
 
         runtime = _create_trigger_runtime(
@@ -428,6 +431,7 @@ class TestWindowGapNotifications:
         notifier = WindowNotifier(
             chatbot_notifier=chatbot_notifier,
             table_name="test_table.window_status",
+            adapter_name="test-adapter",
         )
 
         runtime = _create_trigger_runtime(
@@ -478,6 +482,7 @@ class TestWindowGapNotifications:
         notifier = WindowNotifier(
             chatbot_notifier=chatbot_notifier,
             table_name="test_table.window_status",
+            adapter_name="test-adapter",
         )
 
         runtime = _create_trigger_runtime(

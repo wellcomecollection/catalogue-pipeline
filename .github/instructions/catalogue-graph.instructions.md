@@ -29,11 +29,11 @@ its own `uv.lock`, `.python-version` (3.12), and virtualenv.
 When adding or modifying an OAI-PMH adapter:
 
 - Subclass `OAIPMHRuntimeConfig` (see
-  [adapters/oai_pmh/folio/runtime.py](../../catalogue_graph/src/adapters/oai_pmh/folio/runtime.py))
+  [adapters/extractors/oai_pmh/folio/runtime.py](../../catalogue_graph/src/adapters/extractors/oai_pmh/folio/runtime.py))
   and expose a module-level singleton (e.g. `FOLIO_CONFIG`).
-- Register the new adapter in `adapters/oai_pmh/registry.py` so the shared
+- Register the new adapter in `adapters/extractors/oai_pmh/registry.py` so the shared
   entrypoints can dispatch to it via `--adapter-type`.
-- The shared steps live in `adapters/oai_pmh/steps/`; they read `adapter_type`
+- The shared steps live in `adapters/steps/oai_pmh/`; they read `adapter_type`
   from the event and resolve config via the registry. Don't create per-adapter
   step wrappers.
 - Step config goes in a `pydantic.BaseModel` subclass named `<Step>StepConfig`.
