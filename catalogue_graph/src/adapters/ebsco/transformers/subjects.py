@@ -10,7 +10,7 @@ from adapters.ebsco.transformers.label_subdivisions import (
     SUBFIELD_TYPE_MAP,
     build_concept,
 )
-from adapters.marc.transformers.common import non_empty
+from adapters.transformers.marc.common import non_empty
 from models.pipeline.concept import Concept, Subject
 from models.pipeline.identifier import Identifiable
 from utils.types import RawConceptType

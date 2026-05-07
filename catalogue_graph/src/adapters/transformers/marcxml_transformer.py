@@ -7,7 +7,7 @@ from typing import Any
 from pymarc import parse_xml_to_array
 from pymarc.record import Record
 
-from adapters.marc.transformers.identifier import extract_id
+from adapters.transformers.marc.identifier import extract_id
 from adapters.utils.adapter_store import AdapterStore
 from core.transformer import ElasticBaseTransformer
 from ingestor.models.shared.deleted_reason import DeletedReason

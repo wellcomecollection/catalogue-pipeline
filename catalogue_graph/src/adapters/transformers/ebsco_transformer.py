@@ -16,8 +16,8 @@ from adapters.ebsco.transformers.other_identifiers import extract_other_identifi
 from adapters.ebsco.transformers.parents import get_parents
 from adapters.ebsco.transformers.production import extract_production
 from adapters.ebsco.transformers.subjects import extract_subjects
-from adapters.marc.transformers.alternative_titles import extract_alternative_titles
-from adapters.marc.transformers.title import extract_title
+from adapters.transformers.marc.alternative_titles import extract_alternative_titles
+from adapters.transformers.marc.title import extract_title
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Id

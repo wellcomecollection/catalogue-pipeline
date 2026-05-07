@@ -16,7 +16,7 @@ import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.marc.transformers.common import mandatory_field
+from adapters.transformers.marc.common import mandatory_field
 
 logger = structlog.get_logger(__name__)
 

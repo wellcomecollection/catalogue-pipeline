@@ -5,7 +5,7 @@ from datetime import datetime
 
 from pymarc.record import Record
 
-from adapters.marc.transformers.title import extract_title
+from adapters.transformers.marc.title import extract_title
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from core.transformer import ElasticBaseTransformer as BaseTransformer

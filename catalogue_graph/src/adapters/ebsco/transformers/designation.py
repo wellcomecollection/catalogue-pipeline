@@ -7,7 +7,7 @@ https://www.loc.gov/marc/bibliographic/bd362.html
 
 from pymarc.record import Record
 
-from adapters.marc.transformers.common import get_a_subfields
+from adapters.transformers.marc.common import get_a_subfields
 
 
 def extract_designation(record: Record) -> list[str]:

@@ -14,7 +14,7 @@ from adapters.ebsco.transformers.label_subdivisions import (
 from adapters.ebsco.transformers.text_utils import (
     normalise_label,
 )
-from adapters.marc.transformers.common import non_empty
+from adapters.transformers.marc.common import non_empty
 from models.pipeline.concept import Concept, Genre
 
 logger: logging.Logger = logging.getLogger(__name__)
