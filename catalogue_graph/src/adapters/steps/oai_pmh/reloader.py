@@ -326,21 +326,11 @@ def lambda_handler(
     return response.model_dump(mode="json")
 
 
-def parse_cli_args() -> argparse.Namespace:
-    """Parse CLI arguments for the reloader step."""
-    import typing
+def local_handler(parser: argparse.ArgumentParser) -> None:
+    """Run the reloader step from the command line."""
+    from adapters.utils.argparse import add_adapter_event_args
 
-    from adapters.extractors.oai_pmh.registry import AdapterType
-
-    parser = argparse.ArgumentParser(
-        description="Reload OAI-PMH harvesting windows to fill coverage gaps"
-    )
-    parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to reload",
-    )
+    add_adapter_event_args(parser)
     parser.add_argument(
         "--job-id",
         type=str,
@@ -362,11 +352,6 @@ def parse_cli_args() -> argparse.Namespace:
         "(e.g., 2025-11-17T14:00:00Z)",
     )
     parser.add_argument(
-        "--use-rest-api-table",
-        action="store_true",
-        help="Use the S3 Tables window status catalog instead of local storage",
-    )
-    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Report gaps without actually reloading them",
@@ -376,15 +361,14 @@ def parse_cli_args() -> argparse.Namespace:
         type=int,
         help="Override default window size in minutes",
     )
-    return parser.parse_args()
 
+    args = parser.parse_args()
+    config = get_config(args.adapter_type)
 
-def run_cli(adapter_config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> None:
-    """Run the reloader step from CLI arguments."""
     window = IncrementalWindow(start_time=args.window_start, end_time=args.window_end)
 
     runtime = build_runtime(
-        adapter_config,
+        config,
         ReloaderStepConfig(
             use_rest_api_table=args.use_rest_api_table,
             window_minutes=args.window_minutes,
@@ -392,7 +376,7 @@ def run_cli(adapter_config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> No
     )
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
-        pipeline_step=f"{adapter_config.config.pipeline_step_prefix}_reloader",
+        pipeline_step=f"{config.config.pipeline_step_prefix}_reloader",
     )
 
     response = handler(
@@ -417,12 +401,9 @@ def run_cli(adapter_config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> No
     )
 
 
-def main() -> None:
-    """Unified CLI entry point for OAI-PMH reloader steps."""
-    args = parse_cli_args()
-    config = get_config(args.adapter_type)
-    run_cli(config, args)
-
-
 if __name__ == "__main__":
-    main()
+    local_handler(
+        argparse.ArgumentParser(
+            description="Reload OAI-PMH harvesting windows to fill coverage gaps"
+        )
+    )

@@ -211,19 +211,11 @@ def lambda_handler(
     return response.model_dump(mode="json")
 
 
-def parse_cli_args() -> argparse.Namespace:
-    """Parse CLI arguments for the loader step."""
-    import typing
+def local_handler(parser: argparse.ArgumentParser) -> None:
+    """Run the loader step from the command line."""
+    from adapters.utils.argparse import add_adapter_event_args
 
-    from adapters.extractors.oai_pmh.registry import AdapterType
-
-    parser = argparse.ArgumentParser(description="Run an OAI-PMH loader step locally")
-    parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to load",
-    )
+    add_adapter_event_args(parser)
     parser.add_argument(
         "--event",
         type=str,
@@ -231,21 +223,15 @@ def parse_cli_args() -> argparse.Namespace:
         help="Path to a loader event JSON payload",
     )
     parser.add_argument(
-        "--use-rest-api-table",
-        action="store_true",
-        help="Use the S3 Tables catalog instead of local storage",
-    )
-    parser.add_argument(
         "--allow-partial-final-window",
         action="store_true",
         default=True,
         help="Allow partial final window (default: True for CLI)",
     )
-    return parser.parse_args()
 
+    args = parser.parse_args()
+    config = get_config(args.adapter_type)
 
-def run_cli(config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> None:
-    """Run the loader step from the command line."""
     with open(args.event, encoding="utf-8") as f:
         event_data = json.load(f)
         # Set allow_partial_final_window from CLI arg if not in event
@@ -275,12 +261,7 @@ def run_cli(config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> None:
     logger.info("Loader response", response=response.model_dump(mode="json"))
 
 
-def main() -> None:
-    """Unified CLI entry point for OAI-PMH loader steps."""
-    args = parse_cli_args()
-    config = get_config(args.adapter_type)
-    run_cli(config, args)
-
-
 if __name__ == "__main__":
-    main()
+    local_handler(
+        argparse.ArgumentParser(description="Run an OAI-PMH loader step locally")
+    )

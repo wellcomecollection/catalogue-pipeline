@@ -287,28 +287,15 @@ def lambda_handler(
     return loader_event.model_dump(mode="json")
 
 
-def parse_cli_args() -> argparse.Namespace:
-    """Parse CLI arguments for the trigger step."""
-    import typing
+def local_handler(parser: argparse.ArgumentParser) -> None:
+    """Run the trigger step from the command line."""
+    from adapters.utils.argparse import add_adapter_event_args
 
-    from adapters.extractors.oai_pmh.registry import AdapterType
-
-    parser = argparse.ArgumentParser(description="Run an OAI-PMH trigger step locally")
-    parser.add_argument(
-        "--adapter-type",
-        required=True,
-        choices=typing.get_args(AdapterType),
-        help="Which adapter to trigger",
-    )
+    add_adapter_event_args(parser)
     parser.add_argument(
         "--at",
         type=str,
         help="ISO8601 timestamp to use instead of now (e.g. 2025-11-17T12:15:00Z)",
-    )
-    parser.add_argument(
-        "--use-rest-api-table",
-        action="store_true",
-        help="Use the S3 Tables window status catalog instead of a local store",
     )
     parser.add_argument(
         "--enforce-lag",
@@ -330,11 +317,10 @@ def parse_cli_args() -> argparse.Namespace:
         type=str,
         help="Optional job identifier to embed in the request",
     )
-    return parser.parse_args()
 
+    args = parser.parse_args()
+    config = get_config(args.adapter_type)
 
-def run_cli(config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> None:
-    """Run the trigger step from the command line."""
     now = (
         datetime.fromisoformat(args.at.replace("Z", "+00:00"))
         if args.at
@@ -365,12 +351,7 @@ def run_cli(config: OAIPMHRuntimeConfig, args: argparse.Namespace) -> None:
     logger.info("Loader event", loader_event=loader_event.model_dump(mode="json"))
 
 
-def main() -> None:
-    """Unified CLI entry point for OAI-PMH trigger steps."""
-    args = parse_cli_args()
-    config = get_config(args.adapter_type)
-    run_cli(config, args)
-
-
 if __name__ == "__main__":
-    main()
+    local_handler(
+        argparse.ArgumentParser(description="Run an OAI-PMH trigger step locally")
+    )
