@@ -12,7 +12,7 @@ module "transformer_lambda" {
   publish      = true
 
   image_config = {
-    command = ["adapters.transformers.transformer.lambda_handler"]
+    command = ["adapters.steps.transformer.lambda_handler"]
   }
 
   memory_size = 4096
