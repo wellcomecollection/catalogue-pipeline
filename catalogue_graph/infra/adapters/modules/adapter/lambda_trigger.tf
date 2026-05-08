@@ -11,7 +11,7 @@ module "trigger_lambda" {
     command = ["adapters.steps.${local.steps_namespace}.trigger.lambda_handler"]
   }
 
-  memory_size = 1024
+  memory_size = 4096
   timeout     = 300
 
   environment = {

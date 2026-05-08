@@ -17,17 +17,42 @@ locals {
         ]
       }
       "Run loader" = {
-        Type     = "Task"
-        Resource = module.loader_lambda.lambda.arn
-        Next     = "Should publish event?"
+        Type          = "Task"
+        Resource      = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        QueryLanguage = "JSONata"
+        Next          = "Should publish event?"
         Retry = [
           {
-            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
-            IntervalSeconds = 2
+            ErrorEquals     = ["States.ALL"]
+            IntervalSeconds = 30
             MaxAttempts     = 3
             BackoffRate     = 2.0
           }
         ]
+        Arguments = {
+          Cluster        = var.ecs_cluster_arn
+          TaskDefinition = module.loader_ecs_task.task_definition_arn
+          LaunchType     = "FARGATE"
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              AssignPublicIp = "DISABLED"
+              Subnets        = var.subnets
+              SecurityGroups = var.security_group_ids
+            }
+          }
+          Overrides = {
+            ContainerOverrides = [
+              {
+                Name = "${var.namespace}-adapter-loader"
+                Command = [
+                  "-m", "adapters.steps.${local.steps_namespace}.loader",
+                  "--event", "{% $string($states.input) %}",
+                  "--task-token", "{% $states.context.Task.Token %}"
+                ]
+              }
+            ]
+          }
+        }
       }
       "Should publish event?" = {
         Type = "Choice"
