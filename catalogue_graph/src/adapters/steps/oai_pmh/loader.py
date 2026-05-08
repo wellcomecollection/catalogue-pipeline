@@ -268,6 +268,10 @@ def ecs_task_handler(
 ) -> OAIPMHLoaderResponse:
     """ECS task handler invoked by ecs_handler utility."""
     config = get_config(event.adapter_type)
+    execution_context = ExecutionContext(
+        trace_id=execution_context.trace_id,
+        pipeline_step=f"{config.config.pipeline_step_prefix}_loader",
+    )
     runtime = build_runtime(config)
     return handler(event, runtime, execution_context=execution_context)
 
