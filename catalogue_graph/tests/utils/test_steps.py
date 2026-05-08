@@ -6,11 +6,11 @@ import sys
 from argparse import ArgumentParser
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from tests.mocks import MockStepFunctionsClient
 from utils.logger import ExecutionContext, setup_structlog
-from utils.steps import StepFunctionOutput, run_ecs_handler
+from utils.steps import StepFunctionOutput, ecs_handler
 
 
 class ExampleEvent(BaseModel):
@@ -27,7 +27,7 @@ def configure_structlog() -> None:
     setup_structlog()
 
 
-def test_run_ecs_handler_reports_success(
+def test_ecs_handler_reports_success(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -57,14 +57,11 @@ def test_run_ecs_handler_reports_success(
     )
 
     with caplog.at_level(logging.INFO):
-        run_ecs_handler(
+        ecs_handler(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert handler_calls == [ExampleEvent(message="hello")]
@@ -79,7 +76,7 @@ def test_run_ecs_handler_reports_success(
     assert "Sending task success to Step Functions" in caplog.text
 
 
-def test_run_ecs_handler_reports_failure(
+def test_ecs_handler_reports_failure(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -109,14 +106,11 @@ def test_run_ecs_handler_reports_failure(
         caplog.at_level(logging.ERROR),
         pytest.raises(RuntimeError, match="unexpected kaboom"),
     ):
-        run_ecs_handler(
+        ecs_handler(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert MockStepFunctionsClient.task_successes == []
@@ -131,10 +125,48 @@ def test_run_ecs_handler_reports_failure(
     assert "Sending task failure to Step Functions" in caplog.text
 
 
-# run_ecs_handler tests
+def test_ecs_handler_reports_failure_on_invalid_event(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    invalid_payload = '{"not_a_valid_field": 123}'
+    token = "token-invalid"
+    parser = ArgumentParser(prog="test-handler")
+
+    def handler(
+        event: ExampleEvent,  # noqa: ARG001
+        execution_context: ExecutionContext | None = None,  # noqa: ARG001
+    ) -> ExampleResult:
+        raise AssertionError("handler should not be called")
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prog", "--event", invalid_payload, "--task-token", token],
+    )
+
+    with (
+        caplog.at_level(logging.ERROR),
+        pytest.raises(ValidationError),
+    ):
+        ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=ExampleEvent.model_validate_json,
+            pipeline_step="test_step",
+        )
+
+    assert MockStepFunctionsClient.task_successes == []
+    assert len(MockStepFunctionsClient.task_failures) == 1
+    failure = MockStepFunctionsClient.task_failures[0]
+    assert failure["taskToken"] == token
+    assert "Sending task failure to Step Functions" in caplog.text
 
 
-def test_run_ecs_handler_handles_none_result(
+# ecs_handler tests
+
+
+def test_ecs_handler_handles_none_result(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -161,14 +193,11 @@ def test_run_ecs_handler_handles_none_result(
     )
 
     with caplog.at_level(logging.INFO):
-        run_ecs_handler(
+        ecs_handler(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert MockStepFunctionsClient.task_failures == []
@@ -182,7 +211,7 @@ def test_run_ecs_handler_handles_none_result(
     assert "Sending task success to Step Functions" in caplog.text
 
 
-def test_run_ecs_handler_without_task_token(
+def test_ecs_handler_without_task_token(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -206,14 +235,11 @@ def test_run_ecs_handler_without_task_token(
     )
 
     with caplog.at_level(logging.INFO):
-        run_ecs_handler(
+        ecs_handler(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert MockStepFunctionsClient.task_successes == []
@@ -222,7 +248,7 @@ def test_run_ecs_handler_without_task_token(
     assert "Task result" in caplog.text
 
 
-def test_run_ecs_handler_without_task_token_none_result(
+def test_ecs_handler_without_task_token_none_result(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -246,14 +272,11 @@ def test_run_ecs_handler_without_task_token_none_result(
     )
 
     with caplog.at_level(logging.INFO):
-        run_ecs_handler(
+        ecs_handler(
             arg_parser=parser,
             handler=handler,
             event_validator=ExampleEvent.model_validate_json,
-            execution_context=ExecutionContext(
-                trace_id="test-trace-id",
-                pipeline_step="test_step",
-            ),
+            pipeline_step="test_step",
         )
 
     assert MockStepFunctionsClient.task_successes == []
