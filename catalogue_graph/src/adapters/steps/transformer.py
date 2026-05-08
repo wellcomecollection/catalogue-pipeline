@@ -141,7 +141,7 @@ def build_transformer(
 def handler(
     event: TransformerEvent,
     execution_context: ExecutionContext | None = None,
-    es_mode: ElasticsearchMode = "local",
+    es_mode: ElasticsearchMode = "private",
     use_rest_api_table: bool = False,
     create_if_not_exists: bool = False,
 ) -> TransformerManifest:
