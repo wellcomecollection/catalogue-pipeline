@@ -1,9 +1,9 @@
 import io
-import logging
 from collections.abc import Generator, Iterable
 from datetime import datetime
 from typing import Any
 
+import structlog
 from pymarc import parse_xml_to_array
 from pymarc.record import Record
 
@@ -24,6 +24,8 @@ from models.pipeline.work_state import WorkRelations
 from utils.timezone import convert_datetime_to_utc_iso
 
 from .adapter_store_source import AdapterStoreSource
+
+logger = structlog.get_logger(__name__)
 
 
 class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
@@ -105,7 +107,7 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         try:
             yield self.transform_record(marc_record, source_modified_time)
         except Exception as e:
-            logging.error(f"Error transforming row_id {row_id}: {e}")
+            logger.error("Error transforming record", row_id=row_id, error=str(e))
             self._add_error(e, "transform", row_id)
 
     def _transform_deleted(
@@ -133,7 +135,7 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         row_id, content = row["id"], row.get("content")
 
         if not content:
-            logging.error(f"Row {row_id} has no content; cannot transform. Skipping.")
+            logger.error("Row has no content; cannot transform", row_id=row_id)
             self._add_error(Exception("Missing content"), "transform", row_id)
             return None
 
