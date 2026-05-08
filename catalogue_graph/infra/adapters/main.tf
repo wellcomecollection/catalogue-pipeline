@@ -14,6 +14,7 @@ module "ebsco" {
 module "axiell" {
   source              = "./modules/adapter"
   namespace           = "axiell"
+  steps_namespace     = "oai_pmh"
   s3_bucket_name      = "wellcomecollection-platform-axiell-adapter"
   schedule_expression = "rate(15 minutes)"
   repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
@@ -23,6 +24,7 @@ module "axiell" {
 module "folio" {
   source              = "./modules/adapter"
   namespace           = "folio"
+  steps_namespace     = "oai_pmh"
   s3_bucket_name      = "wellcomecollection-platform-folio-adapter"
   schedule_expression = "rate(15 minutes)"
   repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url

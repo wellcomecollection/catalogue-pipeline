@@ -3,21 +3,21 @@ from datetime import datetime
 import dateutil.parser
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.contributors import extract_contributors
-from adapters.ebsco.transformers.current_frequency import extract_current_frequency
-from adapters.ebsco.transformers.description import extract_description
-from adapters.ebsco.transformers.designation import extract_designation
-from adapters.ebsco.transformers.edition import extract_edition
-from adapters.ebsco.transformers.format import extract_format
-from adapters.ebsco.transformers.genres import extract_genres
-from adapters.ebsco.transformers.holdings import extract_holdings
-from adapters.ebsco.transformers.language import extract_languages
-from adapters.ebsco.transformers.other_identifiers import extract_other_identifiers
-from adapters.ebsco.transformers.parents import get_parents
-from adapters.ebsco.transformers.production import extract_production
-from adapters.ebsco.transformers.subjects import extract_subjects
-from adapters.marc.transformers.alternative_titles import extract_alternative_titles
-from adapters.marc.transformers.title import extract_title
+from adapters.transformers.ebsco.contributors import extract_contributors
+from adapters.transformers.ebsco.current_frequency import extract_current_frequency
+from adapters.transformers.ebsco.description import extract_description
+from adapters.transformers.ebsco.designation import extract_designation
+from adapters.transformers.ebsco.edition import extract_edition
+from adapters.transformers.ebsco.format import extract_format
+from adapters.transformers.ebsco.genres import extract_genres
+from adapters.transformers.ebsco.holdings import extract_holdings
+from adapters.transformers.ebsco.language import extract_languages
+from adapters.transformers.ebsco.other_identifiers import extract_other_identifiers
+from adapters.transformers.ebsco.parents import get_parents
+from adapters.transformers.ebsco.production import extract_production
+from adapters.transformers.ebsco.subjects import extract_subjects
+from adapters.transformers.marc.alternative_titles import extract_alternative_titles
+from adapters.transformers.marc.title import extract_title
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Id

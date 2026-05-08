@@ -9,7 +9,7 @@ module "elasticsearch_pit_opener_lambda" {
   ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
 
   image_config = {
-    command = ["pit_opener.lambda_handler"]
+    command = ["graph.steps.pit_opener.lambda_handler"]
   }
 
   memory_size = 256

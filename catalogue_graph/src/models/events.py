@@ -2,7 +2,7 @@ import argparse
 from pathlib import PurePosixPath
 from typing import Self, get_args
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
@@ -31,19 +31,44 @@ class PipelineIndexDates(BaseModel):
     images: str | None = None  # final images
 
 
+class PipelinePitIds(BaseModel):
+    merged: str | None = None
+    augmented: str | None = None
+
+
 class BasePipelineEvent(SourceScope):
     pipeline_date: str
-    pit_id: str | None = None
+    pit_ids: PipelinePitIds = PipelinePitIds()
     index_dates: PipelineIndexDates = PipelineIndexDates()
     environment: Environment = "prod"
 
+    @field_validator("pit_ids", mode="before")
+    @classmethod
+    def _coerce_pit_ids(cls, v: object) -> object:
+        return v if v is not None else PipelinePitIds()
+
+    @field_validator("index_dates", mode="before")
+    @classmethod
+    def _coerce_index_dates(cls, v: object) -> object:
+        return v if v is not None else PipelineIndexDates()
+
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
-        window = IncrementalWindow.from_argparser(args)
-        merged = getattr(args, "index_date_merged", None)
-        augmented = getattr(args, "index_date_augmented", None)
-        index_dates = PipelineIndexDates(merged=merged, augmented=augmented)
-        return cls(**args.__dict__, window=window, index_dates=index_dates)
+        window = None
+        if hasattr(args, "window_start") and hasattr(args, "window_end"):
+            window = IncrementalWindow.from_argparser(args)
+
+        index_dates = PipelineIndexDates(
+            merged=getattr(args, "index_date_merged", None),
+            augmented=getattr(args, "index_date_augmented", None),
+        )
+        pit_ids = PipelinePitIds(
+            merged=getattr(args, "pit_id_merged", None),
+            augmented=getattr(args, "pit_id_augmented", None),
+        )
+        return cls(
+            **args.__dict__, window=window, index_dates=index_dates, pit_ids=pit_ids
+        )
 
 
 class GraphPipelineEvent(BasePipelineEvent):

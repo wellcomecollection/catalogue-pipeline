@@ -1,6 +1,8 @@
 import pyarrow as pa
 from pyiceberg.io.pyarrow import schema_to_pyarrow
 from pyiceberg.schema import Schema
+from pyiceberg.table.sorting import SortField, SortOrder
+from pyiceberg.transforms import IdentityTransform
 from pyiceberg.types import BooleanType, NestedField, StringType, TimestamptzType
 
 # Define matching Iceberg and Arrow schemas for the adapter store
@@ -30,6 +32,12 @@ ADAPTER_STORE_ICEBERG_SCHEMA = Schema(
     ),
 )
 ADAPTER_STORE_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(ADAPTER_STORE_ICEBERG_SCHEMA)
+
+# Sort by the "id" column (field_id=2 in ADAPTER_STORE_ICEBERG_SCHEMA) so that
+# Parquet row-group min/max statistics enable effective pruning on ID lookups.
+ADAPTER_STORE_SORT_ORDER = SortOrder(
+    SortField(source_id=2, transform=IdentityTransform())
+)
 
 RECONCILER_STORE_ICEBERG_SCHEMA = Schema(
     NestedField(field_id=1, name="namespace", field_type=StringType(), required=True),

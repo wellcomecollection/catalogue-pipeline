@@ -8,7 +8,7 @@ module "loader_lambda" {
   publish      = true
 
   image_config = {
-    command = ["adapters.${var.namespace}.steps.loader.lambda_handler"]
+    command = ["adapters.steps.${local.steps_namespace}.loader.lambda_handler"]
   }
 
   memory_size = 10240

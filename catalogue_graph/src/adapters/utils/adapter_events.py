@@ -9,6 +9,8 @@ class BaseAdapterEvent(BaseModel):
     """
 
     job_id: str
+    adapter_type: str
+    """Adapter sub-type used for routing/dispatch (e.g. 'axiell', 'folio', 'ebsco')."""
 
 
 class BaseLoaderResponse(BaseModel):

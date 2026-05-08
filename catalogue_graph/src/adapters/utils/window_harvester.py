@@ -279,7 +279,7 @@ class WindowHarvestManager:
         batch: list[Record],
         progress: BatchProgress,
     ) -> None:
-        logger.info("Processing batch", batch_size=len(batch))
+        logger.info("Processing batch", batch_count=len(batch))
 
         try:
             batch_with_ids = list(self._records_with_ids(batch, progress))
@@ -291,12 +291,18 @@ class WindowHarvestManager:
             progress.tags.other_tags.update(result.tags)
             progress.record_ids.extend([r[0] for r in batch_with_ids])
             progress.batches_succeeded += 1
+
+            logger.info(
+                "Processed batch",
+                batch_count=len(batch),
+                record_count=len(progress.record_ids),
+            )
         except Exception as e:
             progress.last_error = repr(e)
             progress.batches_failed += 1
             logger.warning(
                 "Failed to process batch",
-                batch_size=len(batch),
+                batch_count=len(batch),
                 error=repr(e),
             )
 
@@ -305,6 +311,7 @@ class WindowHarvestManager:
             # which must be persisted (and whose failure to persist should cause the run to fail) is the final one.
             try:
                 self.store.upsert(progress.to_summary(is_final=False))
+                logger.info("Updated window summary")
             except Exception as e:
                 logger.warning("Failed to persist batch window summary", error=repr(e))
 

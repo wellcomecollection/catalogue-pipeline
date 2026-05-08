@@ -8,7 +8,8 @@ BasePipelineEventArgument = Literal[
     "pipeline_date",
     "index_date_merged",
     "index_date_augmented",
-    "pit_id",
+    "pit_id_merged",
+    "pit_id_augmented",
     "environment",
     "es_mode",
 ]
@@ -64,11 +65,18 @@ def add_pipeline_event_args(
             help="The augmented images index date to read from, will default to pipeline date.",
             required=False,
         )
-    if "pit_id" in args:
+    if "pit_id_merged" in args:
         parser.add_argument(
-            "--pit-id",
+            "--pit-id-merged",
             type=str,
             help="An Elasticsearch point in time ID to use when extracting data from the merged index.",
+            required=False,
+        )
+    if "pit_id_augmented" in args:
+        parser.add_argument(
+            "--pit-id-augmented",
+            type=str,
+            help="An Elasticsearch point in time ID to use when extracting data from the augmented images index.",
             required=False,
         )
     if "environment" in args:
