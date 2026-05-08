@@ -4,14 +4,14 @@ This adapter ingests records from the Axiell Collections OAI-PMH feed. It extend
 
 ## Configuration
 
-| Setting         | Env var              | Default       | Notes                                      |
-| --------------- | -------------------- | ------------- | ------------------------------------------ |
-| Metadata prefix | `OAI_METADATA_PREFIX`| `oai_marcxml` | Axiell-specific MARC XML format            |
-| Set spec        | `OAI_SET_SPEC`       | `collect`     | Filters to collection records only         |
-| Auth header     | —                    | `Token`       | Custom header (not standard Authorization) |
-| Window duration | `WINDOW_MINUTES`     | `15`          | Minutes per harvesting window              |
-| Lookback        | `WINDOW_LOOKBACK_DAYS`| `7`          | Fallback range (days) when no history      |
-| Max lag         | `MAX_LAG_MINUTES`    | `360`         | Maximum allowed lag before circuit breaker  |
+| Setting         | Env var                | Default       | Notes                                      |
+| --------------- | ---------------------- | ------------- | ------------------------------------------ |
+| Metadata prefix | `OAI_METADATA_PREFIX`  | `oai_marcxml` | Axiell-specific MARC XML format            |
+| Set spec        | `OAI_SET_SPEC`         | `collect`     | Filters to collection records only         |
+| Auth header     | —                      | `Token`       | Custom header (not standard Authorization) |
+| Window duration | `WINDOW_MINUTES`       | `15`          | Minutes per harvesting window              |
+| Lookback        | `WINDOW_LOOKBACK_DAYS` | `7`           | Fallback range (days) when no history      |
+| Max lag         | `MAX_LAG_MINUTES`      | `360`         | Maximum allowed lag before circuit breaker |
 
 ## SSM Parameters
 

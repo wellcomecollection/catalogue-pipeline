@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
@@ -341,15 +341,15 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--window-start",
         type=str,
-        required=True,
+        default=(datetime.now(UTC) - timedelta(weeks=2)).isoformat(),
         help="ISO8601 timestamp for the start of the range to analyze "
-        "(e.g., 2025-11-17T12:00:00Z)",
+        "(default is 2 weeks ago) (e.g., 2025-11-17T12:00:00Z)",
     )
     parser.add_argument(
         "--window-end",
         type=str,
-        required=True,
-        help="ISO8601 timestamp for the end of the range to analyze "
+        default=datetime.now(UTC).isoformat(),
+        help="ISO8601 timestamp for the end of the range to analyze (default is now) "
         "(e.g., 2025-11-17T14:00:00Z)",
     )
     parser.add_argument(
@@ -360,7 +360,8 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--window-minutes",
         type=int,
-        help="Override default window size in minutes",
+        default=15,
+        help="Override window size in minutes (defaults to 15)",
     )
 
     args = parser.parse_args()
