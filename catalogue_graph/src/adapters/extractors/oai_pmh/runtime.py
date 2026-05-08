@@ -16,7 +16,6 @@ from abc import ABC, abstractmethod
 
 import httpx
 from oai_pmh_client.client import OAIClient
-from pydantic import BaseModel, ConfigDict
 
 from adapters.models.config import AdapterConfig
 from adapters.utils.adapter_store import AdapterStore
