@@ -10,7 +10,7 @@ from datetime import datetime
 
 from pydantic import Field
 
-from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
+from adapters.models.events import BaseAdapterEvent, BaseLoaderResponse
 from adapters.utils.window_harvester import WindowSummaryTags
 from adapters.utils.window_summary import WindowSummary
 from models.incremental_window import IncrementalWindow
