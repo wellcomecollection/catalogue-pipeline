@@ -79,7 +79,7 @@ class EBSCORuntimeConfig:
     in code that expects a .config property.
     """
 
-    def __init__(self, config: EBSCOAdapterConfig | None = None):
+    def __init__(self, config: EBSCOAdapterConfig | None = None) -> None:
         self._config = config or EBSCO_ADAPTER_CONFIG
 
     @property
