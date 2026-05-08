@@ -14,6 +14,9 @@ class SourceWorkState(WorkState):
 
     def id(self) -> str:
         return str(self.source_identifier)
+    
+    def predecessor_id(self) -> str:
+        return str(self.predecessor_identifier)
 
 
 class SourceWork(Work):
