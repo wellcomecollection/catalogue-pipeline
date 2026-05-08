@@ -21,6 +21,7 @@ from adapters.extractors.oai_pmh.models.step_events import (
 )
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.models.events import BaseAdapterEvent
 from adapters.steps.oai_pmh.loader import (
     LoaderRuntime,
     LoaderStepConfig,
@@ -29,7 +30,6 @@ from adapters.steps.oai_pmh.loader import (
 from adapters.steps.oai_pmh.loader import (
     build_runtime as _build_loader_runtime,
 )
-from adapters.models.events import BaseAdapterEvent
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.incremental_window import IncrementalWindow
