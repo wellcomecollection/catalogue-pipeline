@@ -61,6 +61,7 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
 def the_work_is_invisible(work: SourceWork) -> None:
     assert work.type == "Invisible"
 
+
 @then("the work is visible")
 def the_work_is_visible(work: SourceWork) -> None:
     assert work.type == "Visible"
@@ -71,10 +72,12 @@ def the_work_has_the_identifier(work: SourceWork, identifier: str) -> None:
     assert work.state is not None
     assert work.state.id() == identifier
 
+
 @then(parsers.parse('the work has the predecessor identifier "{identifier}"'))
 def the_work_has_the_predecessor_identifier(work: SourceWork, identifier: str) -> None:
     assert work.state is not None
     assert work.state.predecessor_id() == identifier
+
 
 @then(parsers.parse("the work's source modified time is {date_str}"))
 def work_last_modified_date(work: SourceWork, date_str: str) -> None:
