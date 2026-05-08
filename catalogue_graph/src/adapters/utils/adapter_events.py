@@ -1,21 +1,10 @@
-from pydantic import BaseModel, Field
+"""Backward compatibility shim for adapter events.
 
+The adapter event models have been moved to adapters.models.events.
+This file maintains backward compatibility with existing imports.
+"""
 
-class BaseAdapterEvent(BaseModel):
-    """Shared base for adapter step events.
+from adapters.models.events import BaseAdapterEvent, BaseLoaderResponse
 
-    Provides a required job_id for run tracking without assuming windowed processing.
-    Adapters that need windows can additionally inherit from WindowEvent.
-    """
+__all__ = ["BaseAdapterEvent", "BaseLoaderResponse"]
 
-    job_id: str
-    adapter_type: str
-    """Adapter sub-type used for routing/dispatch (e.g. 'axiell', 'folio', 'ebsco')."""
-
-
-class BaseLoaderResponse(BaseModel):
-    """Shared base for loader step responses."""
-
-    changeset_ids: list[str] = Field(default_factory=list)
-    changed_record_count: int
-    job_id: str

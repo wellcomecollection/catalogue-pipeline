@@ -29,7 +29,7 @@ from adapters.steps.oai_pmh.loader import (
 from adapters.steps.oai_pmh.loader import (
     build_runtime as _build_loader_runtime,
 )
-from adapters.utils.adapter_events import BaseAdapterEvent
+from adapters.models.events import BaseAdapterEvent
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.incremental_window import IncrementalWindow
