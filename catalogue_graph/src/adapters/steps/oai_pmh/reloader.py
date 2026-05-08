@@ -8,6 +8,7 @@ for local troubleshooting and manual gap remediation.
 from __future__ import annotations
 
 import argparse
+import json
 from datetime import datetime
 from typing import Any
 
@@ -388,17 +389,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         dry_run=args.dry_run,
     )
 
-    logger.info(
-        "Reloader complete",
-        job_id=response.job_id,
-        total_gaps=response.total_gaps,
-        dry_run=response.dry_run,
-        gaps_succeeded=sum(
-            1 for g in response.gaps_processed if not g.skipped and g.error is None
-        ),
-        gaps_skipped=sum(1 for g in response.gaps_processed if g.skipped),
-        gaps_failed=sum(1 for g in response.gaps_processed if g.error is not None),
-    )
+    print(json.dumps(response.model_dump(mode="json")))
 
 
 if __name__ == "__main__":

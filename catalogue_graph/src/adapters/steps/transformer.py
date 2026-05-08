@@ -5,6 +5,7 @@ indexes transformed documents into Elasticsearch.
 """
 
 import argparse
+import json
 import typing
 from collections.abc import Callable
 from pathlib import PurePosixPath
@@ -252,7 +253,7 @@ def main() -> None:
         create_if_not_exists=args.create_if_not_exists,
         es_mode=args.es_mode,
     )
-    logger.info("Transformer response", response=response.model_dump(mode="json"))
+    print(json.dumps(response.model_dump(mode="json")))
 
 
 if __name__ == "__main__":

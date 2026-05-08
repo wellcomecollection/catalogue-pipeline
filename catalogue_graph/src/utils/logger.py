@@ -80,11 +80,12 @@ def setup_structlog() -> None:
         cache_logger_on_first_use=True,
     )
 
-    # Configure standard library logging to output to stdout
+    # Configure standard library logging to output to stderr so that
+    # CLI tools can emit structured data on stdout without interleaving.
     logging.basicConfig(
         format="%(message)s",
         level=getattr(logging, log_level.upper()),
-        stream=sys.stdout,
+        stream=sys.stderr,
     )
 
 

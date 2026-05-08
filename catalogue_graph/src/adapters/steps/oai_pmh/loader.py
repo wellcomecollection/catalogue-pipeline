@@ -258,7 +258,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     )
     response = handler(event, runtime, execution_context=execution_context)
 
-    logger.info("Loader response", response=response.model_dump(mode="json"))
+    print(json.dumps(response.model_dump(mode="json")))
 
 
 if __name__ == "__main__":

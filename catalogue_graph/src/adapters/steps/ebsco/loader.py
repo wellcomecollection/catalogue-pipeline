@@ -6,6 +6,7 @@ identifier used by the transformer; skips work if the file was already loaded.
 """
 
 import argparse
+import json
 from datetime import datetime
 from typing import Any
 
@@ -137,7 +138,7 @@ def main() -> None:
     response = handler(
         event=event, execution_context=execution_context, runtime=runtime
     )
-    logger.info("Loader response", response=response.model_dump(mode="json"))
+    print(json.dumps(response.model_dump(mode="json")))
 
 
 if __name__ == "__main__":

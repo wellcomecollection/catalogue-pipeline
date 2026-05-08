@@ -10,6 +10,7 @@ OAI-PMH adapter by providing an OAIPMHRuntimeConfig implementation.
 from __future__ import annotations
 
 import argparse
+import json
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -348,7 +349,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         ),
         execution_context=execution_context,
     )
-    logger.info("Loader event", loader_event=loader_event.model_dump(mode="json"))
+    print(json.dumps(loader_event.model_dump(mode="json")))
 
 
 if __name__ == "__main__":
