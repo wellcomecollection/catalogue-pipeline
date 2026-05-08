@@ -23,3 +23,9 @@ variable "event_bus_name" {
   type        = string
   description = "Name of the EventBridge event bus associated with the adapter"
 }
+
+variable "steps_namespace" {
+  type        = string
+  description = "Namespace for the steps module path (e.g. ebsco, oai_pmh). Defaults to var.namespace."
+  default     = null
+}

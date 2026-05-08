@@ -22,4 +22,5 @@ data "terraform_remote_state" "platform_monitoring" {
 
 locals {
   chatbot_topic_arn = data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn
+  steps_namespace   = coalesce(var.steps_namespace, var.namespace)
 }
