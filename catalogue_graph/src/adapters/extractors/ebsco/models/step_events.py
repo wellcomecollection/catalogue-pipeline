@@ -6,7 +6,7 @@ consistently.
 
 from __future__ import annotations
 
-from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
+from adapters.models.events import BaseAdapterEvent, BaseLoaderResponse
 
 
 class EbscoAdapterTriggerEvent(BaseAdapterEvent):

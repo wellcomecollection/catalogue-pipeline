@@ -1,12 +1,18 @@
 locals {
   state_machine_definition = jsonencode({
-    Comment = "Adapter pipeline (trigger, loader, publish event)"
-    StartAt = "Run trigger"
+    QueryLanguage = "JSONata"
+    Comment       = "Adapter pipeline (trigger, loader, publish event)"
+    StartAt       = "Run trigger"
     States = {
       "Run trigger" = {
         Type     = "Task"
-        Resource = module.trigger_lambda.lambda.arn
-        Next     = "Run loader"
+        Resource = "arn:aws:states:::lambda:invoke"
+        Arguments = {
+          FunctionName = module.trigger_lambda.lambda.arn
+          Payload      = "{% $states.input %}"
+        }
+        Output = "{% $states.result.Payload %}"
+        Next   = "Run loader"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -18,23 +24,46 @@ locals {
       }
       "Run loader" = {
         Type     = "Task"
-        Resource = module.loader_lambda.lambda.arn
+        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
         Next     = "Should publish event?"
         Retry = [
           {
-            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
-            IntervalSeconds = 2
+            ErrorEquals     = ["States.ALL"]
+            IntervalSeconds = 30
             MaxAttempts     = 3
             BackoffRate     = 2.0
           }
         ]
+        Arguments = {
+          Cluster        = var.ecs_cluster_arn
+          TaskDefinition = module.loader_ecs_task.task_definition_arn
+          LaunchType     = "FARGATE"
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              AssignPublicIp = "DISABLED"
+              Subnets        = var.subnets
+              SecurityGroups = var.security_group_ids
+            }
+          }
+          Overrides = {
+            ContainerOverrides = [
+              {
+                Name = "${var.namespace}-adapter-loader"
+                Command = [
+                  "-m", "adapters.steps.${local.steps_namespace}.loader",
+                  "--event", "{% $string($states.input) %}",
+                  "--task-token", "{% $states.context.Task.Token %}"
+                ]
+              }
+            ]
+          }
+        }
       }
       "Should publish event?" = {
         Type = "Choice"
         Choices = [
           {
-            Variable  = "$.changeset_ids[0]"
-            IsPresent = true
+            Condition = "{% $exists($states.input.changeset_ids[0]) %}"
             Next      = "Publish event"
           }
         ]
@@ -43,13 +72,13 @@ locals {
       "Publish event" = {
         Type     = "Task"
         Resource = "arn:aws:states:::events:putEvents"
-        Parameters = {
+        Arguments = {
           Entries = [
             {
               Detail = {
-                transformer_type  = var.namespace
-                "job_id.$"        = "$.job_id"
-                "changeset_ids.$" = "$.changeset_ids"
+                transformer_type = var.namespace
+                job_id           = "{% $states.input.job_id %}"
+                changeset_ids    = "{% $states.input.changeset_ids %}"
               }
               DetailType   = "${var.namespace}.adapter.completed"
               EventBusName = data.aws_cloudwatch_event_bus.event_bus.name
@@ -57,8 +86,8 @@ locals {
             }
           ]
         }
-        ResultPath = null
-        Next       = "Success"
+        Output = "{% $states.input %}"
+        Next   = "Success"
         Retry = [
           {
             ErrorEquals     = ["States.ALL"]

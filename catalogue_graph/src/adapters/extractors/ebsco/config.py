@@ -1,5 +1,8 @@
 import os
 
+from pydantic import ConfigDict
+
+from adapters.models.config import AdapterConfig
 from adapters.utils.iceberg import (
     LocalIcebergTableConfig,
     RestApiIcebergTableConfig,
@@ -46,3 +49,44 @@ LOCAL_ICEBERG_CONFIG = LocalIcebergTableConfig(
     sort_order=ADAPTER_STORE_SORT_ORDER,
     db_name=os.getenv("LOCAL_DB_NAME", "catalog"),
 )
+
+
+class EBSCOAdapterConfig(AdapterConfig):
+    """Configuration for the EBSCO adapter.
+
+    Extends the base AdapterConfig with EBSCO-specific configuration.
+    EBSCO adapters do not use window status tracking (unlike OAI-PMH adapters).
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+
+# Singleton instance of the EBSCO configuration
+EBSCO_ADAPTER_CONFIG = EBSCOAdapterConfig(
+    adapter_name="ebsco",
+    adapter_namespace=os.getenv("ADAPTER_NAMESPACE", "ebsco"),
+    pipeline_step_prefix=os.getenv("PIPELINE_STEP_PREFIX", "ebsco_adapter"),
+    local_iceberg_config=LOCAL_ICEBERG_CONFIG,
+    rest_api_iceberg_config=REST_API_ICEBERG_CONFIG,
+)
+
+
+class EBSCORuntimeConfig:
+    """EBSCO adapter runtime configuration.
+
+    Provides a compatible interface with OAI-PMH adapter runtime classes
+    (AXIELL_CONFIG, FOLIO_CONFIG) so they can be used interchangeably
+    in code that expects a .config property.
+    """
+
+    def __init__(self, config: EBSCOAdapterConfig | None = None) -> None:
+        self._config = config or EBSCO_ADAPTER_CONFIG
+
+    @property
+    def config(self) -> EBSCOAdapterConfig:
+        """Return the adapter configuration."""
+        return self._config
+
+
+# Singleton instance for use by lambda handlers and notebooks
+EBSCO_CONFIG = EBSCORuntimeConfig()

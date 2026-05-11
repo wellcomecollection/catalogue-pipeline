@@ -28,7 +28,7 @@ from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from clients.chatbot_notifier import ChatbotNotifier
-from models.events import IncrementalWindow
+from models.events import IncrementalWindow, ScheduledEvent
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
@@ -264,12 +264,8 @@ def lambda_handler(
 
     config = get_config(adapter_type)
 
-    time_str = event.get("time")
-    event_time = (
-        datetime.fromisoformat(time_str.replace("Z", "+00:00"))
-        if time_str
-        else datetime.now(tz=UTC)
-    )
+    scheduled = ScheduledEvent.model_validate(event)
+    event_time = scheduled.time
 
     runtime = build_runtime(config)
     execution_context = ExecutionContext(

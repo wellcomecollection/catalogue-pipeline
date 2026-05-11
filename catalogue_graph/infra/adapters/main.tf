@@ -9,6 +9,10 @@ module "ebsco" {
   schedule_expression = "cron(0 2 * * ? *)" # Daily at 2 AM UTC
   repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
   event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
+  ecs_cluster_arn     = aws_ecs_cluster.adapters.arn
+  subnets             = local.private_subnets
+  security_group_ids  = [aws_security_group.adapter_egress.id]
+  task_repository_url = data.aws_ecr_repository.unified_pipeline_task.repository_url
 }
 
 module "axiell" {
@@ -19,6 +23,10 @@ module "axiell" {
   schedule_expression = "rate(15 minutes)"
   repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
   event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
+  ecs_cluster_arn     = aws_ecs_cluster.adapters.arn
+  subnets             = local.private_subnets
+  security_group_ids  = [aws_security_group.adapter_egress.id]
+  task_repository_url = data.aws_ecr_repository.unified_pipeline_task.repository_url
 }
 
 module "folio" {
@@ -29,6 +37,10 @@ module "folio" {
   schedule_expression = "rate(15 minutes)"
   repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
   event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
+  ecs_cluster_arn     = aws_ecs_cluster.adapters.arn
+  subnets             = local.private_subnets
+  security_group_ids  = [aws_security_group.adapter_egress.id]
+  task_repository_url = data.aws_ecr_repository.unified_pipeline_task.repository_url
 }
 
 # Event bus to enable communication with the current pipeline

@@ -25,7 +25,7 @@ from adapters.extractors.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTriggerEvent,
 )
-from models.events import EventBridgeScheduledEvent
+from models.events import ScheduledEvent
 from utils.aws import get_ssm_parameter
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -155,13 +155,9 @@ def handler(
     return EbscoAdapterLoaderEvent(job_id=job_id, file_location=s3_location)
 
 
-def lambda_handler(event: EventBridgeScheduledEvent, context: Any) -> dict[str, Any]:
-    eventbridge_event = EventBridgeScheduledEvent.model_validate(event)
-
-    # Convert external scheduled event into internal trigger event with job_id
-    job_id = datetime.fromisoformat(
-        eventbridge_event.time.replace("Z", "+00:00")
-    ).strftime("%Y%m%dT%H%M")
+def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
+    scheduled = ScheduledEvent.model_validate(event)
+    job_id = scheduled.time.strftime("%Y%m%dT%H%M")
     internal_event = EbscoAdapterTriggerEvent(job_id=job_id)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
