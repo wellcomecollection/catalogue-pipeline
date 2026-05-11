@@ -8,7 +8,6 @@ from pymarc import parse_xml_to_array
 from pymarc.record import Record
 
 from adapters.transformers.marc.identifier import extract_id
-from adapters.transformers.marc.predecessor_identifier import extract_predecessor_id
 from adapters.utils.adapter_store import AdapterStore
 from core.transformer import ElasticBaseTransformer
 from ingestor.models.shared.deleted_reason import DeletedReason
@@ -56,6 +55,14 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         work_id: str = extract_id(marc_record)
         return work_id
 
+    def extract_predecessor_id(self, marc_record: Record) -> str | None:
+        """Extract the predecessor identifier from a MARC record.
+
+        Returns None by default. Subclasses should override to extract
+        from the appropriate field with adapter-specific validation.
+        """
+        return None
+
     def transform_record(
         self, marc_record: Record, source_modified_time: datetime
     ) -> InvisibleSourceWork | VisibleSourceWork:
@@ -77,7 +84,7 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
             source_modified_time
         )
         source_id = self.extract_work_id(marc_record)
-        predecessor_id = extract_predecessor_id(marc_record)
+        predecessor_id = self.extract_predecessor_id(marc_record)
 
         return SourceWorkState(
             source_identifier=self.source_identifier(source_id, self.identifier_type),

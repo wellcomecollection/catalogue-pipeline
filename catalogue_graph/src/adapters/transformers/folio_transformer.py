@@ -5,6 +5,7 @@ from typing import Any
 
 from pymarc.record import Record
 
+from adapters.transformers.folio.predecessor_identifier import extract_predecessor_id
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Id
@@ -26,6 +27,9 @@ class FolioTransformer(MarcXmlTransformer):
             predecessor_identifier_type=Id(id="sierra-system-number"),
             snapshot_id=snapshot_id,
         )
+
+    def extract_predecessor_id(self, marc_record: Record) -> str | None:
+        return extract_predecessor_id(marc_record)
 
     def transform_record(
         self, marc_record: Record, source_modified_time: datetime

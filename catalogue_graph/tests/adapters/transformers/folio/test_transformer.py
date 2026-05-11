@@ -129,7 +129,7 @@ def test_transformer_includes_predecessor_identifier(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id = {
-        "fo00004": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00004</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio With Predecessor</subfield></datafield><datafield tag='907' ind1=' ' ind2=' '><subfield code='a'>b1234567</subfield></datafield></record>",
+        "fo00004": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00004</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio With Predecessor</subfield></datafield><datafield tag='907' ind1=' ' ind2=' '><subfield code='a'>b12345679</subfield></datafield></record>",
     }
     changeset_id = prepare_changeset(
         temporary_table,
@@ -156,5 +156,5 @@ def test_transformer_includes_predecessor_identifier(
     assert source["state"]["predecessorIdentifier"] == {
         "identifierType": {"id": "sierra-system-number"},
         "ontologyType": "Work",
-        "value": "b1234567",
+        "value": "b12345679",
     }
