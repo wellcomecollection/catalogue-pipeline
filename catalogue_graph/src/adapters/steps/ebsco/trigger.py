@@ -8,7 +8,7 @@ the chosen S3 object.
 import argparse
 import re
 import tempfile
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 
 import boto3
@@ -25,6 +25,7 @@ from adapters.extractors.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTriggerEvent,
 )
+from models.events import ScheduledEvent
 from utils.aws import get_ssm_parameter
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -155,13 +156,8 @@ def handler(
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    time_str = event.get("time")
-    event_time = (
-        datetime.fromisoformat(time_str.replace("Z", "+00:00"))
-        if time_str
-        else datetime.now(UTC)
-    )
-    job_id = event_time.strftime("%Y%m%dT%H%M")
+    scheduled = ScheduledEvent.model_validate(event)
+    job_id = scheduled.time.strftime("%Y%m%dT%H%M")
     internal_event = EbscoAdapterTriggerEvent(job_id=job_id)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),

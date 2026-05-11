@@ -1,8 +1,9 @@
 import argparse
+from datetime import UTC, datetime
 from pathlib import PurePosixPath
 from typing import Self, get_args
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
@@ -17,6 +18,10 @@ from utils.types import (
 )
 
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
+
+
+class ScheduledEvent(BaseModel):
+    time: datetime = Field(default_factory=lambda: datetime.now(tz=UTC))
 
 
 class PipelineIndexDates(BaseModel):
