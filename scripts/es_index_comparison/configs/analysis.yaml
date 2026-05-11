@@ -23,30 +23,24 @@ index_sources:
 #   data.production[].dates[].range.from -> ignore all list indices for those segments
 # Descendants of a matched path are also ignored implicitly.
 ignore_fields:
-  # We expect these to be different
+  # We expect these timestamps to be different
   - debug.indexedTime
   - modifiedTime
 
-  # Concept labels from graph
-  - aggregatableValues.source.contributors.agent[].label
-  - aggregatableValues.source.subjects[].label
-  - aggregatableValues.source.genres[].label
-  - display.source.genres[].concepts[].label
-  - display.source.contributors[].agent.label
-  - display.source.subjects[].label
-  - display.source.subjects[].concepts[].label
-  - query.source.subjects.concepts.label
-  - query.source.contributors.agent.label
-  - query.source.genres.concepts.label
-  - filterableValues.source.subjects.label
-  - filterableValues.source.contributors.agent.label
-  - filterableValues.source.genres.label
-
-  # Label-based source concept/concept matching in graph
-  - display.source.contributors[].agent.identifiers
-  - display.source.subjects[].identifiers
-  - display.source.genres[].concepts[].identifiers
-  - display.source.subjects[].concepts[].identifiers
+  # The new index uses the graph for label standardisation, concept deduplication, and ID-based
+  # source concept matching, so we expect these to differ
+  - aggregatableValues.source.contributors
+  - aggregatableValues.source.subjects
+  - aggregatableValues.source.genres
+  - display.source.genres
+  - display.source.contributors
+  - display.source.subjects
+  - query.source.subjects
+  - query.source.contributors
+  - query.source.genres
+  - filterableValues.source.subjects
+  - filterableValues.source.contributors
+  - filterableValues.source.genres
 
   # In the new index, we include the canonical ID in the list (see https://github.com/wellcomecollection/catalogue-pipeline/pull/3148)
   - query.source.identifiers.value
@@ -55,16 +49,18 @@ ignore_fields:
   - query.source.images.id
   - query.source.images.identifiers.value
 
-  # Sometimes incorrect in existing index
+  # In the existing index, work hierarchy fields are sometimes incorrect
   - query.source.partOf.title
   - query.source.collectionPath.path
 
-  - query.source
-  - display.source
-  - filterableValues.source
-  - aggregatableValues.source
+  # The existing index sometimes stores outdated item IDs
+  - query.source.items.id
+  - query.source.items.identifiers.value
 
-# Number of differing documents to sample for console display
+  # The Python ingestor does not deduplicate licenses. Here is a fix: https://github.com/wellcomecollection/catalogue-pipeline/pull/3367
+  - aggregatableValues.locations.license
+
+  # Number of differing documents to sample for console display
 sample_size: 10
 
 # Rows per Parquet shard flush during conversion
