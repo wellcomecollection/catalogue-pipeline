@@ -9,6 +9,7 @@ from ingestor.transformers.work_aggregate_transformer import (
 )
 from models.pipeline.concept import Subject
 from models.pipeline.id_label import Id, Language
+from models.pipeline.identifier import Unidentifiable
 from models.pipeline.item import Item
 from models.pipeline.location import DigitalLocation, LocationType
 from tests.test_utils import (
@@ -81,8 +82,8 @@ def test_license_deduplication() -> None:
         license=Id(id="cc-by-nc"),
         access_conditions=[],
     )
-    item_a = Item(id={"type": "Unidentifiable"}, locations=[cc_by_nc_location])
-    item_b = Item(id={"type": "Unidentifiable"}, locations=[cc_by_nc_location])
+    item_a = Item(id=Unidentifiable(), locations=[cc_by_nc_location])
+    item_b = Item(id=Unidentifiable(), locations=[cc_by_nc_location])
     extracted.work.data.items = [item_a, item_b]
 
     licenses = list(AggregateWorkTransformer(extracted).licenses)
