@@ -124,7 +124,7 @@ data "aws_iam_policy_document" "chatbot_topic_publish" {
   }
 }
 
-# IAM Policy for State Machine to invoke Lambda functions
+# IAM Policy for State Machine to invoke Lambda functions and run ECS tasks
 resource "aws_iam_policy" "state_machine_lambda_policy" {
   name        = "${var.namespace}-adapter-state-machine-lambda-policy"
   description = "Allow state machine to invoke adapter Lambda functions"
@@ -139,11 +139,15 @@ resource "aws_iam_policy" "state_machine_lambda_policy" {
         ]
         Resource = [
           module.trigger_lambda.lambda.arn,
-          module.loader_lambda.lambda.arn,
         ]
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy" "state_machine_ecs_run_task" {
+  role   = aws_iam_role.state_machine_role.name
+  policy = module.loader_ecs_task.invoke_policy_document
 }
 
 # IAM Policy allowing the state machine to put events onto the shared adapter event bus

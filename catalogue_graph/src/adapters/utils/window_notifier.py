@@ -41,15 +41,18 @@ class WindowNotifier:
         self,
         chatbot_notifier: ChatbotNotifier,
         table_name: str,
+        adapter_name: str,
     ) -> None:
         """Initialize the WindowNotifier.
 
         Args:
             chatbot_notifier: ChatbotNotifier instance for sending messages.
             table_name: Fully qualified table name (e.g., "namespace.table").
+            adapter_name: Adapter type used in remediation commands.
         """
         self.chatbot_notifier = chatbot_notifier
         self.table_name = table_name
+        self.adapter_name = adapter_name
 
     def notify_if_gaps(
         self,
@@ -168,7 +171,8 @@ class WindowNotifier:
 
         command = (
             f"AWS_PROFILE=platform-developer \\\n"
-            f"uv run python -m adapters.axiell.steps.reloader \\\n"
+            f"uv run python -m adapters.steps.oai_pmh.reloader \\\n"
+            f"  --adapter-type {self.adapter_name} \\\n"
             f"  --job-id {reload_job_id} \\\n"
             f"  --window-start {window_start} \\\n"
             f"  --window-end {window_end} \\\n"

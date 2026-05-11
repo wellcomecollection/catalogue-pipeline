@@ -33,6 +33,7 @@ def notifier(mock_chatbot_notifier: ChatbotNotifier) -> WindowNotifier:
     return WindowNotifier(
         chatbot_notifier=mock_chatbot_notifier,
         table_name="axiell_window_status.window_status",
+        adapter_name="axiell",
     )
 
 
