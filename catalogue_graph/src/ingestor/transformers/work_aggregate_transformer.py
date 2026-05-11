@@ -85,11 +85,16 @@ class AggregateWorkTransformer(WorkBaseTransformer):
 
     @property
     def licenses(self) -> Generator[AggregatableField]:
+        aggregatable = []
         for item in self.data.items:
             for loc in item.locations:
                 display_license = DisplayLicense.from_location(loc)
                 if display_license is not None:
-                    yield AggregatableField(**display_license.model_dump())
+                    aggregatable.append(
+                        AggregatableField(**display_license.model_dump())
+                    )
+
+        yield from get_unique(aggregatable)
 
     @property
     def availabilities(self) -> Generator[AggregatableField]:

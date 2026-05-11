@@ -8,7 +8,10 @@ from ingestor.transformers.work_aggregate_transformer import (
     AggregateWorkTransformer,
 )
 from models.pipeline.concept import Subject
-from models.pipeline.id_label import Language
+from models.pipeline.id_label import Id, Language
+from models.pipeline.identifier import Unidentifiable
+from models.pipeline.item import Item
+from models.pipeline.location import DigitalLocation, LocationType
 from tests.test_utils import (
     load_json_fixture,
 )
@@ -68,3 +71,21 @@ def test_concept_aggregation_deduplication() -> None:
 
     # Deduplicate concepts with the same label
     assert len(list(AggregateWorkTransformer(extracted).subjects)) == 1
+
+
+def test_license_deduplication() -> None:
+    extracted = get_work_fixture()
+
+    cc_by_nc_location = DigitalLocation(
+        url="https://example.com/1",
+        location_type=LocationType(id="iiif-presentation"),
+        license=Id(id="cc-by-nc"),
+        access_conditions=[],
+    )
+    item_a = Item(id=Unidentifiable(), locations=[cc_by_nc_location])
+    item_b = Item(id=Unidentifiable(), locations=[cc_by_nc_location])
+    extracted.work.data.items = [item_a, item_b]
+
+    licenses = list(AggregateWorkTransformer(extracted).licenses)
+    assert len(licenses) == 1
+    assert licenses[0].id == "cc-by-nc"
