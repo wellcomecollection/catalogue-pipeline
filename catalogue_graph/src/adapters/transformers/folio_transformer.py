@@ -1,7 +1,4 @@
-import itertools
-from collections.abc import Generator, Iterable
 from datetime import datetime
-from typing import Any
 
 from pymarc.record import Record
 
@@ -9,7 +6,7 @@ from adapters.transformers.folio.predecessor_identifier import extract_predecess
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Id
-from models.pipeline.source.work import SourceWork, VisibleSourceWork
+from models.pipeline.source.work import VisibleSourceWork
 from models.pipeline.work_data import WorkData
 
 
@@ -45,9 +42,3 @@ class FolioTransformer(MarcXmlTransformer):
             state=work_state,
             data=work_data,
         )
-
-    # TODO: Remove this override once transform_record is implemented
-    def transform(
-        self, rows: Iterable[dict[str, Any]]
-    ) -> Generator[tuple[str, SourceWork]]:
-        return super().transform(itertools.islice(rows, 10))
