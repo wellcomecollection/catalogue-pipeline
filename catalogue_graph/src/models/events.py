@@ -19,10 +19,6 @@ from utils.types import (
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
-class EventBridgeScheduledEvent(BaseModel):
-    time: str
-
-
 class PipelineIndexDates(BaseModel):
     merged: str | None = None  # merged works
     augmented: str | None = None  # augmented images
