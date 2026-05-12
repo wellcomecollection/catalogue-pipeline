@@ -85,7 +85,7 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
         self, records: Iterable[T], index_name: str
     ) -> Generator[dict[str, Any]]:
         for record in records:
-            source = json.loads(record.model_dump_json(exclude_none=True))
+            source = record.model_dump(exclude_none=True, mode="json")
             yield {
                 "_index": index_name,
                 "_id": self._get_document_id(record),
