@@ -1,4 +1,3 @@
-import json
 from collections.abc import Generator, Iterable
 from itertools import batched
 from typing import Any, TypeVar
