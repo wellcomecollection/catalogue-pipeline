@@ -5,6 +5,7 @@ Feature: The bare minimum MARC record for an item
   Scenario: A minimal MARC record from Folio
     Given a MARC record with field 001 "abc123"
     And the MARC record has a 907 field with subfield "a" value "b12345679"
+    And the MARC record has a 245 field with subfield "a" value "Some Title"
     When I transform the MARC record
     Then the work is visible
     And the work has the identifier "Work[folio-instance/abc123]"
