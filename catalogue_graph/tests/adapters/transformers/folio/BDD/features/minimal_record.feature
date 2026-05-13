@@ -10,3 +10,9 @@ Feature: The bare minimum MARC record for an item
     Then the work is visible
     And the work has the identifier "Work[folio-instance/abc123]"
     And the work has the predecessor identifier "Work[sierra-system-number/b12345679]"
+    And the work's title is Some Title
+
+  Scenario: A MARC record with an empty title field should fail
+    Given a MARC record with field 001 "abc123"
+    And the MARC record has a 245 field with subfield "a" value ""
+    Then transforming the record raises ValueError
