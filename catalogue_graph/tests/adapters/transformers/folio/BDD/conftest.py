@@ -24,6 +24,7 @@ def do_transform(marc_record: Record) -> VisibleSourceWork:
         marc_record, source_modified_time=datetime(2020, 1, 1)
     )
 
+
 @then("transforming the record raises ValueError")
 def check_transform_raises_error(marc_record: Record) -> None:
     transformer = FolioTransformerForTests()
