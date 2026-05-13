@@ -3,6 +3,7 @@ from datetime import datetime
 from pymarc.record import Record
 
 from adapters.transformers.folio.predecessor_identifier import extract_predecessor_id
+from adapters.transformers.marc.title import extract_title
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Id
@@ -31,7 +32,9 @@ class FolioTransformer(MarcXmlTransformer):
     def transform_record(
         self, marc_record: Record, source_modified_time: datetime
     ) -> VisibleSourceWork:
-        work_data = WorkData()
+        work_data = WorkData(
+            title=extract_title(marc_record),
+        )
         work_state = self.source_work_state(
             marc_record=marc_record,
             source_modified_time=source_modified_time,

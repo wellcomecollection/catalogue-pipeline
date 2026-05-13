@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
+import pytest
 from pymarc.record import Record
-from pytest_bdd import when
+from pytest_bdd import then, when
 
 from models.pipeline.source.work import VisibleSourceWork
 from tests.adapters.transformers.folio.folio_test_transformer import (
@@ -22,3 +23,12 @@ def do_transform(marc_record: Record) -> VisibleSourceWork:
     return transformer.transform_record(
         marc_record, source_modified_time=datetime(2020, 1, 1)
     )
+
+
+@then("transforming the record raises ValueError")
+def check_transform_raises_error(marc_record: Record) -> None:
+    transformer = FolioTransformerForTests()
+    with pytest.raises(ValueError):
+        transformer.transform_record(
+            marc_record, source_modified_time=datetime(2020, 1, 1)
+        )
