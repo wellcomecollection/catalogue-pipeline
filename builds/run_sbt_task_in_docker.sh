@@ -37,6 +37,12 @@ ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com"
 ROOT=$(git rev-parse --show-toplevel)
 SBT_VERSION=$(sed -n 's/^sbt.version=//p' "$ROOT/project/build.properties")
 
+if [[ -z "$SBT_VERSION" ]]
+then
+  echo "Unable to determine sbt.version from $ROOT/project/build.properties" >&2
+  exit 1
+fi
+
 # Coursier cache location is platform-dependent
 # https://get-coursier.io/docs/cache.html#default-location
 LINUX_COURSIER_CACHE=".cache/coursier/v1"
@@ -52,6 +58,7 @@ docker run --tty --rm \
   -e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}" \
   -e AWS_SECRET_KEY="${AWS_SECRET_KEY:-}" \
   -e AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN:-}" \
+  -e CODEARTIFACT_AUTH_TOKEN="${CODEARTIFACT_AUTH_TOKEN:-}" \
   --volume ~/.sbt:/root/.sbt \
   --volume ~/.ivy2:/root/.ivy2 \
   --volume "$HOST_COURSIER_CACHE:/root/$LINUX_COURSIER_CACHE" \
