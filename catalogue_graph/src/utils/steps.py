@@ -10,7 +10,7 @@ import boto3
 import structlog
 from pydantic import BaseModel
 
-from utils.logger import ExecutionContext
+from utils.logger import ExecutionContext, get_trace_id
 
 logger = structlog.get_logger(__name__)
 
@@ -73,19 +73,19 @@ class StepFunctionOutput:
             logger.error("Task error", error_output=error_output)
 
 
-def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
+def ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
     arg_parser: ArgumentParser,
     handler: Callable[
         Concatenate[EventModel, ExecutionContext, Params], ResultModel | None
     ],
     event_validator: Callable[[str], EventModel],
-    execution_context: ExecutionContext,
+    pipeline_step: str,
     *handler_args: Params.args,
     **handler_kwargs: Params.kwargs,
 ) -> None:
     arg_parser.add_argument(
         "--event",
-        type=event_validator,
+        type=str,
         help="Raw event in JSON format.",
         required=True,
     )
@@ -98,12 +98,16 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
 
     ecs_args = arg_parser.parse_args()
     task_token = ecs_args.task_token
-    event = ecs_args.event
 
     stepfunctions_client = boto3.client("stepfunctions") if task_token else None
     step_output = StepFunctionOutput(task_token, stepfunctions_client)
 
     try:
+        execution_context = ExecutionContext(
+            trace_id=get_trace_id(),
+            pipeline_step=pipeline_step,
+        )
+        event = event_validator(ecs_args.event)
         result = handler(
             event,
             execution_context,
@@ -111,7 +115,10 @@ def run_ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
             **handler_kwargs,
         )
         step_output.send_success(result)
-
+        logger.info(
+            "ECS task completed successfully",
+            pipeline_step=pipeline_step,
+        )
     except Exception as exc:
         step_output.send_failure(exc)
         raise

@@ -2,13 +2,13 @@ from datetime import datetime
 
 from pymarc.record import Record
 
-from adapters.marc.transformers.alternative_titles import extract_alternative_titles
-from adapters.marc.transformers.last_transaction_time import (
+from adapters.transformers.marc.alternative_titles import extract_alternative_titles
+from adapters.transformers.marc.last_transaction_time import (
     extract_last_transaction_time_to_datetime,
 )
-from adapters.marc.transformers.notes import extract_notes
-from adapters.marc.transformers.other_identifiers import extract_other_identifiers
-from adapters.marc.transformers.title import extract_title
+from adapters.transformers.marc.notes import extract_notes
+from adapters.transformers.marc.other_identifiers import extract_other_identifiers
+from adapters.transformers.marc.title import extract_title
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from ingestor.models.shared.invisible_reason import InvisibleReason
@@ -25,11 +25,14 @@ class AxiellTransformer(MarcXmlTransformer):
         snapshot_id: int | None,
     ) -> None:
         super().__init__(
-            adapter_store, changeset_ids, Id(id="axiell-guid"), snapshot_id
+            adapter_store=adapter_store,
+            changeset_ids=changeset_ids,
+            identifier_type=Id(id="axiell-guid"),
+            snapshot_id=snapshot_id,
         )
 
     def transform_record(
-        self, work_id: str, marc_record: Record, source_modified_time: datetime
+        self, marc_record: Record, source_modified_time: datetime
     ) -> InvisibleSourceWork:
         work_data = WorkData(
             title=extract_title(marc_record),
@@ -39,7 +42,7 @@ class AxiellTransformer(MarcXmlTransformer):
         )
 
         work_state = self.source_work_state(
-            id_value=work_id,
+            marc_record=marc_record,
             source_modified_time=extract_last_transaction_time_to_datetime(marc_record),
         )
 

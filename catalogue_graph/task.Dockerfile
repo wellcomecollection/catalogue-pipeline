@@ -33,7 +33,7 @@ RUN uv pip install --system .
 COPY src/ ./src/
 
 # Make the extractor script executable
-RUN chmod +x src/extractor.py
+RUN chmod +x src/graph/steps/extractor.py
 
 # Set Python path to include src directory
 ENV PYTHONPATH="/app/src"

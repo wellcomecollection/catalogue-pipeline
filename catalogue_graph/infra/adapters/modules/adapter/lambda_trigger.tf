@@ -8,10 +8,10 @@ module "trigger_lambda" {
   publish      = true
 
   image_config = {
-    command = ["adapters.${var.namespace}.steps.trigger.lambda_handler"]
+    command = ["adapters.steps.${local.steps_namespace}.trigger.lambda_handler"]
   }
 
-  memory_size = 1024
+  memory_size = 4096
   timeout     = 300
 
   environment = {

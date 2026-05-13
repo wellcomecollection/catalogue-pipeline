@@ -4,33 +4,6 @@
 
 The ingestor subsystem processes catalogue concepts from Neptune graph database to Elasticsearch search index. It consists of multiple Lambda functions that work together to extract, transform, and load concept data while providing comprehensive monitoring and reporting.
 
-## Structure
-
-```
-src/ingestor/
-├── __init__.py                    # Main module documentation
-├── run_local.py                   # Local testing and development script
-├── models/                        # Ingestor-specific data models
-│   ├── __init__.py
-│   ├── concept.py                 # Core concept models
-│   ├── indexable.py               # Base indexable interfaces
-│   ├── indexable_concept.py       # Elasticsearch-ready concept models
-│   ├── related_concepts.py        # Related concept relationship models
-│   └── display/                   # Display-specific models
-│       └── identifier.py
-├── transformers/                  # Elasticsearch transformation logic
-│   ├── __init__.py
-│   └── concepts_transformer.py    # Transforms Neptune concepts to ES format
-└── steps/                         # All pipeline processing and monitoring steps
-    ├── __init__.py
-    ├── ingestor_trigger.py        # Queries Neptune, generates shard ranges
-    ├── ingestor_loader.py         # Loads concepts from Neptune to S3
-    ├── ingestor_indexer.py        # Indexes concepts from S3 to Elasticsearch
-    ├── ingestor_deletions.py      # Removes deleted concepts from ES
-    ├── ingestor_trigger_monitor.py    # Validates trigger output
-    └── ingestor_reporter.py           # Generates final reports
-```
-
 ## Architecture
 
 The ingestor is designed as a serverless pipeline with each step implemented as an AWS Lambda function. All steps are packaged together in a single deployment unit while maintaining clear separation of responsibilities.

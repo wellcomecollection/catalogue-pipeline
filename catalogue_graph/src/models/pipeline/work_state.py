@@ -20,8 +20,12 @@ class WorkRelations(SerialisableModel):
 
 class WorkState(SerialisableModel):
     source_identifier: SourceIdentifier
+    predecessor_identifier: SourceIdentifier | None = None
     source_modified_time: str
     relations: WorkRelations | None = None
 
     def id(self) -> str:
+        raise NotImplementedError()
+
+    def predecessor_id(self) -> str | None:
         raise NotImplementedError()

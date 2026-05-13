@@ -32,7 +32,7 @@ module "catalogue_graph_extractor_state_machine" {
               {
                 Name = "graph-extractor-${var.pipeline_date}"
                 Command = [
-                  "/app/src/extractor.py",
+                  "/app/src/graph/steps/extractor.py",
                   "--event", "{% $string($states.input) %}",
                 ],
               }

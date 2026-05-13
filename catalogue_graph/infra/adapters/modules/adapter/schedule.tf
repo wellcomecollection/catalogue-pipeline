@@ -11,6 +11,7 @@ resource "aws_scheduler_schedule" "adapter_run" {
   target {
     arn      = aws_sfn_state_machine.state_machine.arn
     role_arn = aws_iam_role.eventbridge_state_machine_role.arn
+    input    = jsonencode({ adapter_type = var.namespace })
   }
 }
 

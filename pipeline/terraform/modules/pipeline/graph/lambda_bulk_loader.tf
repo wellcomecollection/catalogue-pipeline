@@ -9,7 +9,7 @@ module "bulk_loader_lambda" {
   ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
 
   image_config = {
-    command = ["bulk_loader.lambda_handler"]
+    command = ["graph.steps.bulk_loader.lambda_handler"]
   }
 
   memory_size = 256

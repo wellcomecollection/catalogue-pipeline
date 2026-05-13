@@ -17,7 +17,7 @@ from models.events import (
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
-from utils.steps import run_ecs_handler
+from utils.steps import ecs_handler
 
 logger = structlog.get_logger(__name__)
 
@@ -69,23 +69,6 @@ def event_validator(raw_input: str) -> ExtractorEvent:
     return ExtractorEvent(**event)
 
 
-def ecs_handler(arg_parser: ArgumentParser) -> None:
-    execution_context = ExecutionContext(
-        trace_id=get_trace_id(),
-        pipeline_step="graph_extractor",
-    )
-
-    # This will automatically use `es_mode=private`
-    run_ecs_handler(
-        arg_parser=arg_parser,
-        handler=handler,
-        event_validator=event_validator,
-        execution_context=execution_context,
-    )
-
-    logger.info("ECS extractor task completed successfully")
-
-
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
         parser,
@@ -95,7 +78,8 @@ def local_handler(parser: ArgumentParser) -> None:
             "index_date_augmented",
             "window",
             "ids",
-            "pit_id",
+            "pit_id_merged",
+            "pit_id_augmented",
             "environment",
             "es_mode",
         },
@@ -145,4 +129,10 @@ if __name__ == "__main__":
     if args.use_cli:
         local_handler(parser)
     else:
-        ecs_handler(parser)
+        # This will automatically use `es_mode=private`
+        ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=event_validator,
+            pipeline_step="graph_extractor",
+        )

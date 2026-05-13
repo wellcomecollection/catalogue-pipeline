@@ -6,7 +6,7 @@ import structlog
 from elasticsearch import Elasticsearch
 
 from graph.sources.merged_works_source import MergedWorksSource
-from models.events import BasePipelineEvent
+from models.events import BasePipelineEvent, PipelinePitIds
 
 logger = structlog.get_logger(__name__)
 
@@ -44,9 +44,8 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
         child_query = {"bool": {"should": child_clauses, "minimum_should_match": 1}}
         full_query = {"bool": {"must": [self.base_query, child_query]}}
 
-        unscoped_event = self.event.model_copy(
-            update={"window": None, "ids": None, "pit_id": self.pit_id}
-        )
+        unscoped_event = self.event.model_copy(update={"window": None, "ids": None})
+        unscoped_event.pit_ids = PipelinePitIds(merged=self.pit_id)
         return MergedWorksSource(
             unscoped_event,
             es_client=self.es_client,

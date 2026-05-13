@@ -59,14 +59,14 @@ Transform records from a specific changeset using a local Iceberg table and loca
 cd catalogue_graph
 
 # Transform Axiell records
-uv run python -m adapters.transformers.transformer \
+uv run python -m adapters.steps.transformer \
   --transformer-type axiell \
   --changeset-id <changeset-id> \
   --job-id dev \
   --es-mode local
 
 # Transform EBSCO records  
-uv run python -m adapters.transformers.transformer \
+uv run python -m adapters.steps.transformer \
   --transformer-type ebsco \
   --changeset-id <changeset-id> \
   --job-id dev \
@@ -80,7 +80,7 @@ To read from the production S3 Tables catalog:
 ```bash
 cd catalogue_graph
 
-AWS_PROFILE=platform-developer uv run python -m adapters.transformers.transformer \
+AWS_PROFILE=platform-developer uv run python -m adapters.steps.transformer \
   --transformer-type axiell \
   --changeset-id <changeset-id> \
   --job-id my-job-123 \
@@ -95,7 +95,7 @@ Omit `--changeset-id` to reindex all records in the adapter store:
 ```bash
 cd catalogue_graph
 
-uv run python -m adapters.transformers.transformer \
+uv run python -m adapters.steps.transformer \
   --transformer-type ebsco \
   --job-id full-reindex \
   --es-mode local \
@@ -109,7 +109,7 @@ Use `--es-mode public` to index to the production cluster (requires appropriate 
 ```bash
 cd catalogue_graph
 
-AWS_PROFILE=platform-developer uv run python -m adapters.transformers.transformer \
+AWS_PROFILE=platform-developer uv run python -m adapters.steps.transformer \
   --transformer-type ebsco \
   --changeset-id <changeset-id> \
   --job-id prod-run-001 \

@@ -240,14 +240,14 @@ parity.
 Direct module invocation (bulk load status example):
 
 ```shell
-AWS_PROFILE=platform-developer uv run bulk_load_poller.py --load-id=<some_id>
+AWS_PROFILE=platform-developer uv run python -m graph.steps.bulk_load_poller --load-id=<some_id>
 ```
 
 Extractor example:
 
 ```shell
 AWS_PROFILE=platform-developer \
-python3.13 extractor.py \
+uv run python -m graph.steps.extractor \
   --transformer-type=wikidata_linked_loc_concepts \
   --entity-type=nodes \
   --stream-destination=void \
@@ -286,14 +286,14 @@ at it via the normal env vars.
 
 | Lambda (logical name) | image_config.command                             |
 |-----------------------|--------------------------------------------------|
-| bulk_loader           | bulk_loader.lambda_handler                       |
-| bulk_load_poller      | bulk_load_poller.lambda_handler                  |
-| graph_remover         | graph_remover.lambda_handler                     |
+| bulk_loader           | graph.steps.bulk_loader.lambda_handler           |
+| bulk_load_poller      | graph.steps.bulk_load_poller.lambda_handler      |
+| graph_remover         | graph.steps.graph_remover.lambda_handler         |
 | indexer               | indexer.lambda_handler                           |
 | ingestor_loader       | ingestor.steps.ingestor_loader.lambda_handler    |
 | ingestor_indexer      | ingestor.steps.ingestor_indexer.lambda_handler   |
 | ingestor_deletions    | ingestor.steps.ingestor_deletions.lambda_handler |
-| pit_opener            | pit_opener.lambda_handler                        |
+| pit_opener            | graph.steps.pit_opener.lambda_handler            |
 
 All use the same ECR image tagged `:prod` in Terraform (promotion strategy can be revised later to use digests or staged
 tags).

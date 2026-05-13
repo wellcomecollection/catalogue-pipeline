@@ -9,7 +9,7 @@ module "graph_remover_incremental_lambda" {
   ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
 
   image_config = {
-    command = ["graph_remover_incremental.lambda_handler"]
+    command = ["graph.steps.graph_remover_incremental.lambda_handler"]
   }
 
   memory_size = 2048
