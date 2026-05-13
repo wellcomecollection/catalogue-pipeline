@@ -29,3 +29,23 @@ variable "steps_namespace" {
   description = "Namespace for the steps module path (e.g. ebsco, oai_pmh). Defaults to var.namespace."
   default     = null
 }
+
+variable "ecs_cluster_arn" {
+  type        = string
+  description = "ARN of the ECS cluster to run loader tasks in"
+}
+
+variable "subnets" {
+  type        = list(string)
+  description = "Subnet IDs for the ECS task network configuration"
+}
+
+variable "security_group_ids" {
+  type        = list(string)
+  description = "Security group IDs for the ECS task network configuration"
+}
+
+variable "task_repository_url" {
+  type        = string
+  description = "ECR repository URL for the ECS task image"
+}

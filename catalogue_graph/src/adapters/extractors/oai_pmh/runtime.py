@@ -16,8 +16,8 @@ from abc import ABC, abstractmethod
 
 import httpx
 from oai_pmh_client.client import OAIClient
-from pydantic import BaseModel, ConfigDict
 
+from adapters.models.config import AdapterConfig
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import (
     IcebergTable,
@@ -31,27 +31,12 @@ from adapters.utils.window_store import (
 )
 
 
-class OAIPMHAdapterConfig(BaseModel):
-    """Configuration values for an OAI-PMH adapter.
+class OAIPMHAdapterConfig(AdapterConfig):
+    """Configuration for OAI-PMH adapters (Axiell, FOLIO).
 
-    This is a frozen Pydantic model containing all static configuration
-    values for an adapter. Runtime behavior (auth, SSM lookups) is handled
-    by the OAIPMHRuntimeConfig class.
+    Extends the base AdapterConfig with OAI-PMH-specific configuration
+    including window harvesting, OAI-PMH endpoints, and window tracking.
     """
-
-    model_config = ConfigDict(frozen=True)
-
-    # ---------------------------------------------------------------------------
-    # Adapter identity
-    # ---------------------------------------------------------------------------
-    adapter_name: str
-    """Short identifier for this adapter (e.g., 'axiell', 'folio')."""
-
-    adapter_namespace: str
-    """Namespace used for records in the adapter store."""
-
-    pipeline_step_prefix: str
-    """Prefix for pipeline step names (e.g., 'axiell_adapter')."""
 
     # ---------------------------------------------------------------------------
     # Window harvesting configuration
@@ -84,12 +69,13 @@ class OAIPMHAdapterConfig(BaseModel):
     """SNS topic ARN for chatbot notifications (None to disable)."""
 
     # ---------------------------------------------------------------------------
-    # Iceberg tables
+    # Window status tracking (OAI-PMH specific)
     # ---------------------------------------------------------------------------
-    rest_api_iceberg_config: RestApiIcebergTableConfig
     rest_api_window_status_iceberg_config: RestApiIcebergTableConfig
-    local_iceberg_config: LocalIcebergTableConfig
+    """Remote Iceberg table for tracking window status."""
+
     local_window_status_iceberg_config: LocalIcebergTableConfig
+    """Local Iceberg table for tracking window status."""
 
     # ---------------------------------------------------------------------------
     # Reporting

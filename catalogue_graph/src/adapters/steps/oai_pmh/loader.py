@@ -30,6 +30,7 @@ from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import WindowHarvestManager
 from adapters.utils.window_store import WindowStore
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from utils.steps import ecs_handler
 
 logger = structlog.get_logger(__name__)
 
@@ -261,7 +262,40 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     print(json.dumps(response.model_dump(mode="json")))
 
 
-if __name__ == "__main__":
-    local_handler(
-        argparse.ArgumentParser(description="Run an OAI-PMH loader step locally")
+def ecs_task_handler(
+    event: OAIPMHLoaderEvent,
+    execution_context: ExecutionContext,
+) -> OAIPMHLoaderResponse:
+    """ECS task handler invoked by ecs_handler utility."""
+    config = get_config(event.adapter_type)
+    execution_context = ExecutionContext(
+        trace_id=execution_context.trace_id,
+        pipeline_step=f"{config.config.pipeline_step_prefix}_loader",
     )
+    runtime = build_runtime(config)
+    return handler(event, runtime, execution_context=execution_context)
+
+
+def event_validator(raw_input: str) -> OAIPMHLoaderEvent:
+    """Validate raw JSON input into an OAIPMHLoaderEvent."""
+    return OAIPMHLoaderEvent.model_validate(json.loads(raw_input))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run OAI-PMH adapter loader")
+    parser.add_argument(
+        "--use-cli",
+        action="store_true",
+        help="Invoke the local CLI handler instead of the ECS handler.",
+    )
+    args, _ = parser.parse_known_args()
+
+    if args.use_cli:
+        local_handler(parser)
+    else:
+        ecs_handler(
+            arg_parser=parser,
+            handler=ecs_task_handler,
+            event_validator=event_validator,
+            pipeline_step="oai_pmh_adapter_loader",
+        )

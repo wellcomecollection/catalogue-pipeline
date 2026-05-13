@@ -1,3 +1,5 @@
+"""Shared adapter event models for step inputs and outputs."""
+
 from pydantic import BaseModel, Field
 
 

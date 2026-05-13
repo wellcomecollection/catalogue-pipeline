@@ -24,6 +24,7 @@ from adapters.extractors.ebsco.reporting import EbscoLoaderReport
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from utils.steps import ecs_handler
 
 logger = structlog.get_logger(__name__)
 
@@ -141,5 +142,35 @@ def main() -> None:
     print(json.dumps(response.model_dump(mode="json")))
 
 
+def ecs_task_handler(
+    event: EbscoAdapterLoaderEvent,
+    execution_context: ExecutionContext,
+) -> LoaderResponse:
+    """ECS task handler invoked by ecs_handler utility."""
+    runtime = build_runtime()
+    return handler(event, runtime=runtime, execution_context=execution_context)
+
+
+def event_validator(raw_input: str) -> EbscoAdapterLoaderEvent:
+    """Validate raw JSON input into an EbscoAdapterLoaderEvent."""
+    return EbscoAdapterLoaderEvent.model_validate(json.loads(raw_input))
+
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run EBSCO adapter loader")
+    parser.add_argument(
+        "--use-cli",
+        action="store_true",
+        help="Invoke the local CLI handler instead of the ECS handler.",
+    )
+    args, _ = parser.parse_known_args()
+
+    if args.use_cli:
+        main()
+    else:
+        ecs_handler(
+            arg_parser=parser,
+            handler=ecs_task_handler,
+            event_validator=event_validator,
+            pipeline_step="ebsco_adapter_loader",
+        )

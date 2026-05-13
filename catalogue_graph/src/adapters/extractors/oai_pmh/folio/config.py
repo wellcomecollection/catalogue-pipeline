@@ -107,6 +107,14 @@ LOADER_DETAIL_TYPE = os.getenv("FOLIO_LOADER_DETAIL_TYPE", "FolioWindowLoaded")
 CHATBOT_TOPIC_ARN = os.getenv("FOLIO_CHATBOT_TOPIC_ARN")
 
 # ---------------------------------------------------------------------------
+# Transform Configuration
+# ---------------------------------------------------------------------------
+PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
+INDEX_DATE = os.getenv("INDEX_DATE", "2026-01-12")  # Use a non-production index for now
+ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "works-source")
+ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "transformer_folio")
+
+# ---------------------------------------------------------------------------
 # S3 storage
 # ---------------------------------------------------------------------------
 S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-folio-adapter")

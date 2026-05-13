@@ -8,7 +8,6 @@ import pytest
 from adapters.extractors.ebsco.ebsco_ftp import EbscoFtp
 from adapters.extractors.ebsco.models.step_events import EbscoAdapterLoaderEvent
 from adapters.steps.ebsco.trigger import (
-    EventBridgeScheduledEvent,
     get_most_recent_valid_file,
     lambda_handler,
     sync_files,
@@ -182,7 +181,7 @@ def test_lambda_handler_eventbridge_conversion(mock_handler) -> None:  # type: i
         job_id=expected_job_id, file_location="s3://test/file.xml"
     )
 
-    result = lambda_handler(EventBridgeScheduledEvent(time=scheduled_time), None)
+    result = lambda_handler({"time": scheduled_time}, None)
     handler_mock = cast(_Mock, mock_handler)
     args_tuple = handler_mock.call_args[0]
     internal_event = args_tuple[0]
