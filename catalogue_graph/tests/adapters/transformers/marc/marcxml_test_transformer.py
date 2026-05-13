@@ -38,7 +38,7 @@ class MarcXmlTransformerForTests(MarcXmlTransformer):
         self._build_relations = build_relations
 
     def transform_record(
-        self, work_id: str, marc_record: Record, source_modified_time: datetime
+        self, marc_record: Record, source_modified_time: datetime
     ) -> VisibleSourceWork:
         work_data = self._build_work_data(marc_record)
 
@@ -47,7 +47,7 @@ class MarcXmlTransformerForTests(MarcXmlTransformer):
             relations = self._build_relations(marc_record)
 
         work_state = self.source_work_state(
-            id_value=work_id,
+            marc_record=marc_record,
             source_modified_time=source_modified_time,
             relations=relations,
         )
@@ -94,7 +94,7 @@ class MarcXmlTransformerWithStoreForTests(MarcXmlTransformer):
         self._build_relations = build_relations
 
     def transform_record(
-        self, work_id: str, marc_record: Record, source_modified_time: datetime
+        self, marc_record: Record, source_modified_time: datetime
     ) -> VisibleSourceWork:
         work_data = self._build_work_data(marc_record)
 
@@ -103,7 +103,7 @@ class MarcXmlTransformerWithStoreForTests(MarcXmlTransformer):
             relations = self._build_relations(marc_record)
 
         work_state = self.source_work_state(
-            id_value=work_id,
+            marc_record=marc_record,
             source_modified_time=source_modified_time,
             relations=relations,
         )

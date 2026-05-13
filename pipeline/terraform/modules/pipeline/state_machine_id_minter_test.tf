@@ -81,7 +81,7 @@ module "id_minter_test" {
 
   pipeline_date        = var.pipeline_date
   namespace            = "test"
-  include_id_generator = false
+  include_id_generator = true
 
   vpc_config      = local.id_minter_test_vpc_config
   env_vars        = local.id_minter_test_env_vars
@@ -154,10 +154,12 @@ resource "aws_iam_role_policy" "run_id_minter_test_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = "states:StartExecution"
-      Resource = module.id_minter_test_state_machine.state_machine_arn
-    }]
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "states:StartExecution"
+        Resource = module.id_minter_test_state_machine.state_machine_arn
+      }
+    ]
   })
 }

@@ -27,7 +27,10 @@ class AxiellReconciler(MarcXmlTransformer):
     ) -> None:
         self.reconciler_store = reconciler_store
         super().__init__(
-            adapter_store, changeset_ids, Id(id="axiell-guid"), snapshot_id
+            adapter_store=adapter_store,
+            changeset_ids=changeset_ids,
+            identifier_type=Id(id="axiell-guid"),
+            snapshot_id=snapshot_id,
         )
 
     def _rows_to_reconciler_arrow_table(

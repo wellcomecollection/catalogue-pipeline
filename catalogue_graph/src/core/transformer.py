@@ -84,10 +84,11 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
         self, records: Iterable[T], index_name: str
     ) -> Generator[dict[str, Any]]:
         for record in records:
+            source = record.model_dump(exclude_none=True, mode="json")
             yield {
                 "_index": index_name,
                 "_id": self._get_document_id(record),
-                "_source": record.model_dump(),
+                "_source": source,
             }
 
     def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
