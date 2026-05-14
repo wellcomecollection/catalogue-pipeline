@@ -177,6 +177,11 @@ locals {
     },
   ]
 
+  # Safety net for waitForTaskToken ECS steps: if a task crashes before calling
+  # SendTaskSuccess/SendTaskFailure the state would otherwise hang for up to 1 year.
+  # 12 hours is generous for the heaviest monthly extractor/ingestor runs.
+  ecs_task_token_timeout_seconds = 12 * 60 * 60 # 12 hours
+
   state_function_default_retry = [
     {
       ErrorEquals = [

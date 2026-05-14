@@ -10,7 +10,7 @@ module "catalogue_graph_ingestor_state_machine" {
       "Run loader" = {
         Type           = "Task"
         Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        TimeoutSeconds = 43200
+        TimeoutSeconds = local.ecs_task_token_timeout_seconds
         Retry          = local.state_function_default_retry,
         Next           = "Run indexer"
         Arguments = {
@@ -44,7 +44,7 @@ module "catalogue_graph_ingestor_state_machine" {
       "Run indexer" = {
         Type           = "Task"
         Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        TimeoutSeconds = 43200
+        TimeoutSeconds = local.ecs_task_token_timeout_seconds
         Retry          = local.state_function_default_retry,
         Next           = "Should run deletions?"
         Arguments = {

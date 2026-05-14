@@ -11,7 +11,7 @@ module "catalogue_graph_extractor_state_machine" {
         Type           = "Task"
         Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
         Output         = "{% $states.input %}"
-        TimeoutSeconds = 43200
+        TimeoutSeconds = local.ecs_task_token_timeout_seconds
         Retry          = local.state_function_default_retry,
         Next           = "Success"
         Arguments = {
