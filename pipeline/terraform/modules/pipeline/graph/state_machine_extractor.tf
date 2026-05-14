@@ -8,11 +8,12 @@ module "catalogue_graph_extractor_state_machine" {
     StartAt       = "Extract"
     States = {
       Extract = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        Output   = "{% $states.input %}"
-        Retry    = local.state_function_default_retry,
-        Next     = "Success"
+        Type           = "Task"
+        Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        Output         = "{% $states.input %}"
+        TimeoutSeconds = 43200
+        Retry          = local.state_function_default_retry,
+        Next           = "Success"
         Arguments = {
           Cluster        = var.ecs_cluster_arn
           TaskDefinition = module.extractor_ecs_task.task_definition_arn

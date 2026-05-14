@@ -8,10 +8,11 @@ module "catalogue_graph_ingestor_state_machine" {
     StartAt       = "Run loader"
     States = {
       "Run loader" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        Retry    = local.state_function_default_retry,
-        Next     = "Run indexer"
+        Type           = "Task"
+        Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        TimeoutSeconds = 43200
+        Retry          = local.state_function_default_retry,
+        Next           = "Run indexer"
         Arguments = {
           Cluster        = var.ecs_cluster_arn
           TaskDefinition = module.ingestor_loader_ecs_task.task_definition_arn
@@ -41,10 +42,11 @@ module "catalogue_graph_ingestor_state_machine" {
         }
       },
       "Run indexer" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        Retry    = local.state_function_default_retry,
-        Next     = "Should run deletions?"
+        Type           = "Task"
+        Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        TimeoutSeconds = 43200
+        Retry          = local.state_function_default_retry,
+        Next           = "Should run deletions?"
         Arguments = {
           Cluster        = var.ecs_cluster_arn
           TaskDefinition = module.ingestor_indexer_ecs_task.task_definition_arn
