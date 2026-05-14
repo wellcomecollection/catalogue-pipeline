@@ -9,7 +9,7 @@ module "catalogue_graph_extractor_state_machine" {
     States = {
       Extract = {
         Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.sync"
+        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
         Output   = "{% $states.input %}"
         Retry    = local.state_function_default_retry,
         Next     = "Success"
@@ -34,6 +34,7 @@ module "catalogue_graph_extractor_state_machine" {
                 Command = [
                   "/app/src/graph/steps/extractor.py",
                   "--event", "{% $string($states.input) %}",
+                  "--task-token", "{% $states.context.Task.Token %}"
                 ],
               }
             ]

@@ -34,3 +34,21 @@ resource "aws_iam_role_policy" "graph_extractor_ecs_read_pipeline_secrets_policy
   role   = module.extractor_ecs_task.task_role_name
   policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read_denormalised_read_only.json
 }
+
+data "aws_iam_policy_document" "allow_extractor_task_token" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "states:SendTaskSuccess",
+      "states:SendTaskFailure",
+    ]
+    resources = [
+      module.catalogue_graph_extractor_state_machine.state_machine_arn,
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "allow_extractor_task_token_policy" {
+  role   = module.extractor_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.allow_extractor_task_token.json
+}

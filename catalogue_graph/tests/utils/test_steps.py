@@ -204,7 +204,7 @@ def test_ecs_handler_handles_none_result(
     assert MockStepFunctionsClient.task_successes == [
         {
             "taskToken": token,
-            "output": "Result is None",
+            "output": "{}",
         }
     ]
 
@@ -322,7 +322,7 @@ def test_step_function_output_send_success_none_result_records() -> None:
     assert MockStepFunctionsClient.task_successes == [
         {
             "taskToken": "token-456",
-            "output": "Result is None",
+            "output": "{}",
         }
     ]
 
