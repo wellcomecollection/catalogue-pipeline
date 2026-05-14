@@ -21,7 +21,6 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
   protected val mergeProcessor: MergeProcessor
   protected val imageMsgSender: Downstream
 
-  // TO DO: remove notifyDownstream entirely once we destroy the scala image ingestor
   private def notifyDownstream(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {
       case Left(work)   => Try(())
