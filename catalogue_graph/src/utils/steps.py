@@ -37,7 +37,7 @@ class StepFunctionOutput:
     def _dump_result(self, result: ResultModel | None) -> str:
         if result is not None:
             return result.model_dump_json()
-        return "Result is None"
+        return "{}"
 
     def send_success(self, result: ResultModel | None) -> None:
         output = self._dump_result(result)
