@@ -13,7 +13,7 @@ module "merger_lambda" {
   vpc_config    = var.vpc_config
 
   environment_variables = {
-    merger_images_topic_arn            = module.merger_images_output_topic.arn
+    merger_images_topic_arn = module.merger_images_output_topic.arn
 
     es_identified_works_index   = var.es_works_identified_index
     es_denormalised_works_index = var.es_works_denormalised_index

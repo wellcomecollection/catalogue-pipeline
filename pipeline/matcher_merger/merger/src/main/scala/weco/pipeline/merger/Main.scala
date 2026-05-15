@@ -13,7 +13,7 @@ import weco.pipeline.merger.config.{MergerConfig, MergerConfigurable}
 import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
   MergerManager,
-  PlatformMerger,
+  PlatformMerger
 }
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
