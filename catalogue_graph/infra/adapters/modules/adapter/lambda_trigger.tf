@@ -12,7 +12,11 @@ module "trigger_lambda" {
   }
 
   memory_size = 4096
-  timeout     = 300
+  timeout     = 900
+
+  ephemeral_storage = {
+    size = 1024
+  }
 
   environment = {
     variables = {
