@@ -33,4 +33,8 @@ module "merger" {
   vpc_config    = local.service_vpc_config
   queue_config  = local.queue_config
   es_config     = local.es_config
+
+  es_works_identified_index   = local.es_works_identified_index
+  es_works_denormalised_index = local.es_works_denormalised_index
+  es_images_initial_index     = local.es_images_initial_index
 }

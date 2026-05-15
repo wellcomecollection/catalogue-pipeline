@@ -13,8 +13,7 @@ import weco.pipeline.merger.config.{MergerConfig, MergerConfigurable}
 import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
   MergerManager,
-  PlatformMerger,
-  WorkRouter
+  PlatformMerger
 }
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
@@ -38,12 +37,6 @@ object Main
 
   private val mergerManager = new MergerManager(PlatformMerger)
 
-  private val workDownstream = Downstream(config.workDownstreamTarget)
-  private val pathDownstream = Downstream(config.pathDownstreamTarget)
-  private val pathConcatDownstream = Downstream(
-    config.pathConcatDownstreamTarget
-  )
-
   private val workOrImageIndexer = {
     new EitherIndexer[Work[Merged], Image[Initial]](
       leftIndexer = new ElasticIndexer[Work[Merged]](
@@ -60,11 +53,6 @@ object Main
   // does this belong here?
   type WorkOrImage = Either[Work[Merged], Image[Initial]]
 
-  override protected val workRouter: WorkRouter = new WorkRouter(
-    workSender = workDownstream,
-    pathSender = pathDownstream,
-    pathConcatenatorSender = pathConcatDownstream
-  )
   override protected val imageMsgSender: Downstream = Downstream(
     config.imageDownstreamTarget
   )

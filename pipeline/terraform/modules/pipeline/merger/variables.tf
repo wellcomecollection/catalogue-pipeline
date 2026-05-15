@@ -2,9 +2,9 @@ variable "pipeline_date" {
   type = string
 }
 
-variable "index_date" {
+variable "service_name" {
   type    = string
-  default = null
+  default = "merger"
 }
 
 variable "vpc_config" {
@@ -23,13 +23,19 @@ variable "es_config" {
   })
 }
 
-variable "es_index_config" {
-  type = object({
-    es_works_identified_index   = optional(string, null)
-    es_works_denormalised_index = optional(string, null)
-    es_images_initial_index     = optional(string, null)
-  })
-  default = {}
+variable "es_works_identified_index" {
+  type        = string
+  description = "Name of the works-identified ES index to read from"
+}
+
+variable "es_works_denormalised_index" {
+  type        = string
+  description = "Name of the works-denormalised ES index to write to"
+}
+
+variable "es_images_initial_index" {
+  type        = string
+  description = "Name of the images-initial ES index to write to"
 }
 
 variable "queue_config" {

@@ -37,7 +37,7 @@ class MergerSQSLambdaTest
       createMatcherResultWith(Set(Set(work3), Set(work1, work2)))
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
         val messages = List(SQSLambdaMessage(
             messageId = randomUUID.toString,
             message = matcherResult
@@ -50,12 +50,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages)) {
           _ =>
-            getWorksSent(workSender) should contain only (
-              work1.id,
-              work2.id,
-              work3.id
-            )
-
             mergedIndex shouldBe Map(
               work1.id -> Left(
                 work1.transition[Merged](matcherResult.createdTime)
@@ -76,7 +70,7 @@ class MergerSQSLambdaTest
     val matcherResult = createMatcherResultWith(Set(Set(work)))
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
           message = matcherResult
@@ -85,8 +79,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages)) {
           _ =>
-            getWorksSent(workSender) should contain only work.id
-
             mergedIndex shouldBe Map(
               work.id -> Left(
                 work.transition[Merged](matcherResult.createdTime)
@@ -101,7 +93,7 @@ class MergerSQSLambdaTest
     val matcherResult = createMatcherResultWith(Set(Set(work)))
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
           message = matcherResult
@@ -109,7 +101,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages).failed) {
           exc =>
-            getWorksSent(workSender) shouldBe empty
             exc shouldBe a[java.lang.RuntimeException]
             exc.getMessage shouldBe s"Works not found: Map(${work.id} -> weco.pipeline_storage.RetrieverNotFoundException: Nothing found with ID ${work.id}!)"
         }
@@ -125,7 +116,7 @@ class MergerSQSLambdaTest
     val matcherResult = createMatcherResultWith(Set(Set(workA, workB)))
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
         val messages = List(SQSLambdaMessage(
             messageId = randomUUID.toString,
             message = matcherResult
@@ -135,8 +126,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages)) {
           _ =>
-            getWorksSent(workSender) should contain allOf (workA.id, workB.id)
-
             mergedIndex shouldBe Map(
               workA.id -> Left(
                 workA.transition[Merged](matcherResult.createdTime)
@@ -155,7 +144,7 @@ class MergerSQSLambdaTest
     val matcherResult = createMatcherResultWith(Set(works.toSet))
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
         val messages = List(SQSLambdaMessage(
             messageId = randomUUID.toString,
             message = matcherResult
@@ -168,7 +157,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages)) {
           _ =>
-            getWorksSent(workSender) should have size 2
             mergedIndex should have size 2
 
             val redirectedWorks = mergedIndex.collect {
@@ -199,7 +187,7 @@ class MergerSQSLambdaTest
     val matcherResult = createMatcherResultWith(Set(works.toSet))
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, imageSender) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, imageSender) =>
         val messages = List(SQSLambdaMessage(
             messageId = randomUUID.toString,
             message = matcherResult
@@ -212,7 +200,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages)) {
           _ =>
-            getWorksSent(workSender).distinct should have size 3
             mergedIndex should have size 4
 
             val imagesSent = getImagesSent(imageSender).distinct
@@ -264,7 +251,7 @@ class MergerSQSLambdaTest
     )
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
           message = matcherResult
@@ -278,8 +265,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages)) {
           _ =>
-            getWorksSent(workSender) should have size 4
-
             val redirectedWorks = mergedIndex.collect {
               case (_, Left(work: Work.Redirected[Merged])) => work
             }
@@ -304,7 +289,7 @@ class MergerSQSLambdaTest
     )
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
           message = matcherResult
@@ -316,8 +301,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages)) {
           _ =>
-            getWorksSent(workSender) should have size 2
-
             val visibleWorks = mergedIndex.collect {
               case (_, Left(work: Work.Visible[Merged])) => work
             }
@@ -338,7 +321,7 @@ class MergerSQSLambdaTest
     val matcherResult = createMatcherResultWith(Set(Set(work0)))
 
     withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
+      case(mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
           message = matcherResult
@@ -347,8 +330,6 @@ class MergerSQSLambdaTest
 
         whenReady(mergerSQSLambda.processMessages(messages)) {
           _ =>
-            getWorksSent(workSender) shouldBe List(work1.id)
-
             mergedIndex shouldBe Map(
               work1.id -> Left(
                 work1.transition[Merged](matcherResult.createdTime)
@@ -366,9 +347,6 @@ class MergerSQSLambdaTest
         MemoryRetriever[Work[WorkState.Identified]],
         mutable.Map[String, WorkOrImage],
         MemoryMessageSender,
-        MemoryMessageSender,
-        MemoryMessageSender,
-        MemoryMessageSender,
       ),
       R
     ]
@@ -376,17 +354,11 @@ class MergerSQSLambdaTest
     val identifiedIndex: MemoryRetriever[Work[WorkState.Identified]] =
       new MemoryRetriever[Work[WorkState.Identified]]()
     val mergedIndex = mutable.Map[String, WorkOrImage]()
-    val workSender = new MemoryMessageSender()
-    val pathSender = new MemoryMessageSender()
-    val pathconcatSender = new MemoryMessageSender()
     val imageSender = new MemoryMessageSender()
 
     withMergerSQSLambda(
       identifiedIndex,
       mergedIndex,
-      workSender,
-      pathSender,
-      pathconcatSender,
       imageSender,
     ) {
       mergerSQSLambda =>
@@ -394,9 +366,6 @@ class MergerSQSLambdaTest
           mergerSQSLambda,
           identifiedIndex,
           mergedIndex,
-          workSender,
-          pathSender,
-          pathconcatSender,
           imageSender,
         ))
     }
