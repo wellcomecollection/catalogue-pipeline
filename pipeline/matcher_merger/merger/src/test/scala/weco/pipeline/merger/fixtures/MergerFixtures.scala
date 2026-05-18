@@ -10,7 +10,7 @@ import weco.lambda.{ApplicationConfig, Downstream}
 import weco.lambda.helpers.MemoryDownstream
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.merger.{MergeProcessor, MergerSQSLambda}
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, PlatformMerger, WorkRouter}
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, PlatformMerger}
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.collection.mutable
@@ -20,12 +20,6 @@ trait MergerFixtures extends MemoryDownstream {
     case class DummyConfig() extends ApplicationConfig
 
     type WorkOrImage = Either[Work[Merged], Image[Initial]]
-
-    val workRouter = new MemoryWorkRouter(
-      new MemoryMessageSender(): MemoryMessageSender,
-      new MemoryMessageSender(): MemoryMessageSender,
-      new MemoryMessageSender(): MemoryMessageSender
-    )
 
     def withMemoryWorkLookup[R](
       identifiedIndex: MemoryRetriever[Work[Identified]]
@@ -66,9 +60,6 @@ trait MergerFixtures extends MemoryDownstream {
     def withMergerSQSLambda[R](
       identifiedIndex: MemoryRetriever[Work[Identified]],
       mergedIndex: mutable.Map[String, WorkOrImage] = mutable.Map.empty,
-      workSender: MemoryMessageSender,
-      pathSender: MemoryMessageSender,
-      pathconcatSender: MemoryMessageSender,
       imageSender: MemoryMessageSender,
     )(
       testWith: TestWith[MergerSQSLambda[DummyConfig], R]
@@ -90,37 +81,11 @@ trait MergerFixtures extends MemoryDownstream {
                         indexer
                       )(global)
                     }
-                    override protected val workRouter: WorkRouter = new MemoryWorkRouter(
-                      workSender,
-                      pathSender,
-                      pathconcatSender
-                    )
                     override protected val imageMsgSender: Downstream = imageDownstream
                   })
               }
           }
       }
-    }
-
-    class MemoryWorkRouter (
-      val workSender: MemoryMessageSender,
-      val pathSender: MemoryMessageSender,
-      val pathConcatenatorSender: MemoryMessageSender
-      ) extends WorkRouter(
-        workSender = new MemorySNSDownstream(workSender),
-        pathSender = new MemorySNSDownstream(pathSender),
-        pathConcatenatorSender = new MemorySNSDownstream(pathConcatenatorSender),
-      )
-
-    def getWorksSent(workSender: MemoryMessageSender): Seq[String] = {
-      workSender.messages.map { _.body }
-    }
-
-    def getPathsSent(pathSender: MemoryMessageSender): Seq[String] =
-      pathSender.messages.map { _.body }
-
-    def getIncompletePathSent(incompletePathSender: MemoryMessageSender): Seq[String] = {
-      incompletePathSender.messages.map { _.body }
     }
 
     def getImagesSent(imageSender: MemoryMessageSender): Seq[String] =

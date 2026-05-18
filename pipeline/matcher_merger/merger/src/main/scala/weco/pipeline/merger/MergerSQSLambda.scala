@@ -10,7 +10,6 @@ import weco.lambda.{
   SQSLambdaMessageResult
 }
 import weco.pipeline.matcher.models.MatcherResult
-import weco.pipeline.merger.services.WorkRouter
 import weco.pipeline.merger.Main.WorkOrImage
 
 import scala.concurrent.Future
@@ -20,12 +19,11 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
     extends SQSBatchResponseLambdaApp[MatcherResult, Config] {
 
   protected val mergeProcessor: MergeProcessor
-  protected val workRouter: WorkRouter
   protected val imageMsgSender: Downstream
 
   private def notifyDownstream(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {
-      case Left(work)   => workRouter(work)
+      case Left(work)   => Try(())
       case Right(image) => imageMsgSender.notify(image.id)
     }
 

@@ -12,9 +12,6 @@ case class MergerConfig(
   identifiedWorkIndex: String,
   denormalisedWorkIndex: String,
   initialImageIndex: String,
-  workDownstreamTarget: DownstreamTarget,
-  pathDownstreamTarget: DownstreamTarget,
-  pathConcatDownstreamTarget: DownstreamTarget,
   imageDownstreamTarget: DownstreamTarget
 ) extends ApplicationConfig
 
@@ -31,10 +28,6 @@ trait MergerConfigurable extends LambdaConfigurable[MergerConfig] {
       denormalisedWorkIndex =
         rawConfig.requireString("es.denormalised-works.index"),
       initialImageIndex = rawConfig.requireString("es.initial-images.index"),
-      workDownstreamTarget = buildDownstreamTarget(rawConfig, "work-sender"),
-      pathDownstreamTarget = buildDownstreamTarget(rawConfig, "path-sender"),
-      pathConcatDownstreamTarget =
-        buildDownstreamTarget(rawConfig, "path-concatenator-sender"),
       imageDownstreamTarget = buildDownstreamTarget(rawConfig, "image-sender")
     )
 }
