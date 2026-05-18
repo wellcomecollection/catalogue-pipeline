@@ -220,14 +220,15 @@ trait IntegrationTestHelpers
               }
             )
           )
-        ) {
-          // Check that the merger has notified the next application about everything
-          // in the index.  This check could be more robust, but it'll do for now.
-          _ =>
-            val idsSentByTheMerger = (
-                imageSender.msgSender.messages
-              ).map(_.body).toSet
-            mergedIndex.keySet.size == idsSentByTheMerger.size
+        ) { _ =>
+          // Only images result in an SNS notification; works are processed
+          // downstream via a window-based read of the merged index.
+          val imageCount = mergedIndex.values.count(_.isRight)
+          val sentCount = imageSender.msgSender.messages.size
+          assert(
+            sentCount == imageCount,
+            s"Expected $imageCount image notification(s) but got $sentCount"
+          )
         }
     }
   }
