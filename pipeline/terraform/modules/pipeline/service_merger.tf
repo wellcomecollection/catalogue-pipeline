@@ -14,7 +14,7 @@ locals {
     batch_size                 = 50
     maximum_concurrency        = 30
     topic_arns = [
-      module.matcher_output_topic.arn,
+      module.matcher.output_topic_arn,
     ]
   }
 

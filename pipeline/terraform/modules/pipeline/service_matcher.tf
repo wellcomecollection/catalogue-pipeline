@@ -23,29 +23,13 @@ locals {
   max_receive_count = 10
 }
 
-resource "aws_iam_role_policy" "matcher_graph_readwrite" {
-  role   = module.matcher_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.graph_table_readwrite.json
-}
+module "matcher" {
+  source = "./matcher"
 
-resource "aws_iam_role_policy" "matcher_lock_readwrite" {
-  role   = module.matcher_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.lock_table_readwrite.json
-}
-
-module "matcher_output_topic" {
-  source = "../topic"
-
-  name       = "${local.namespace}_matcher_output"
-  role_names = [module.matcher_lambda.lambda_role_name]
-}
-
-module "matcher_lambda" {
-  source = "../pipeline_lambda"
-
-  pipeline_date = var.pipeline_date
-
-  service_name = "matcher"
+  pipeline_date             = var.pipeline_date
+  es_works_identified_index = local.es_works_identified_index
+  lock_timeout              = local.lock_timeout
+  scale_up_matcher_db       = var.reindexing_state.scale_up_matcher_db
 
   vpc_config = {
     subnet_ids = local.network_config.subnets
@@ -55,22 +39,8 @@ module "matcher_lambda" {
     ]
   }
 
-  environment_variables = {
-    topic_arn = module.matcher_output_topic.arn
-
-    dynamo_table            = aws_dynamodb_table.matcher_graph_table.id
-    dynamo_index            = "work-sets-index"
-    dynamo_lock_table       = aws_dynamodb_table.matcher_lock_table.id
-    dynamo_lock_table_index = "context-ids-index"
-
-    dynamo_lock_timeout = local.lock_timeout
-
-    es_index = local.es_works_identified_index
-  }
-
   secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["matcher"]
 
-  ecr_repository_name = "uk.ac.wellcome/matcher"
   queue_config = {
     visibility_timeout_seconds = local.queue_visibility_timeout_seconds
     max_receive_count          = local.max_receive_count
@@ -82,6 +52,40 @@ module "matcher_lambda" {
     ]
   }
 
-  timeout     = var.reindexing_state.scale_up_matcher_db ? 300 : 30    # 5 minutes vs 30 seconds
-  memory_size = var.reindexing_state.scale_up_matcher_db ? 4096 : 1024 # 4GB vs 1GB
+  timeout     = var.reindexing_state.scale_up_matcher_db ? 300 : 30
+  memory_size = var.reindexing_state.scale_up_matcher_db ? 4096 : 1024
+}
+
+# ──────────────────────────────────────────────
+# State moves for extracting matcher into sub-module
+# ──────────────────────────────────────────────
+
+moved {
+  from = aws_dynamodb_table.matcher_graph_table
+  to   = module.matcher.aws_dynamodb_table.graph_table
+}
+
+moved {
+  from = aws_dynamodb_table.matcher_lock_table
+  to   = module.matcher.aws_dynamodb_table.lock_table
+}
+
+moved {
+  from = module.matcher_output_topic
+  to   = module.matcher.module.matcher_output_topic
+}
+
+moved {
+  from = module.matcher_lambda
+  to   = module.matcher.module.matcher_lambda
+}
+
+moved {
+  from = aws_iam_role_policy.matcher_graph_readwrite
+  to   = module.matcher.aws_iam_role_policy.matcher_graph_readwrite
+}
+
+moved {
+  from = aws_iam_role_policy.matcher_lock_readwrite
+  to   = module.matcher.aws_iam_role_policy.matcher_lock_readwrite
 }
