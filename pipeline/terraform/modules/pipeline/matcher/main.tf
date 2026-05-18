@@ -1,6 +1,6 @@
 locals {
-  namespace       = "catalogue-${var.pipeline_date}_${var.service_name}"
-  base_namespace  = "catalogue-${var.pipeline_date}" // prod "catalogue-2025-10-02_works-graph" table doesn't reference service name, using base_namespace so table is preserved
+  namespace      = "catalogue-${var.pipeline_date}_${var.service_name}"
+  base_namespace = "catalogue-${var.pipeline_date}" // prod "catalogue-2025-10-02_works-graph" table doesn't reference service name, using base_namespace so table is preserved
 
   graph_table_billing_mode = var.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
   lock_table_billing_mode  = var.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"

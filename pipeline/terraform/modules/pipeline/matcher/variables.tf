@@ -31,8 +31,8 @@ variable "ecr_repository_name" {
 
 variable "queue_config" {
   type = object({
-    name       = optional(string, null)
-    topic_arns = optional(list(string), [])
+    name                       = optional(string, null)
+    topic_arns                 = optional(list(string), [])
     visibility_timeout_seconds = optional(number, 30)
     message_retention_seconds  = optional(number, 345600)
     max_receive_count          = optional(number, 4)
