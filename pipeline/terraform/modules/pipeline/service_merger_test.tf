@@ -2,15 +2,15 @@
 # .buildkite/pipeline.yml -> merger_test
 
 module "merger_test" {
-  source = "./merger"
-  service_name  = "merger_test"
-  
+  source       = "./merger"
+  service_name = "merger_test"
+
   pipeline_date = var.pipeline_date
 
   es_works_identified_index   = "works-identified-2026-03-06"
   es_works_denormalised_index = "works-denormalised-2025-10-09"
   es_images_initial_index     = "images-initial-2025-10-09"
-  
+
   queue_config = {
     visibility_timeout_seconds = 90
     max_receive_count          = 10
@@ -29,7 +29,7 @@ module "merger_test" {
       local.network_config.ec_privatelink_security_group_id,
     ]
   }
-  
+
   es_config = {
     es_host     = module.elastic.pipeline_storage_private_host
     es_port     = module.elastic.pipeline_storage_port

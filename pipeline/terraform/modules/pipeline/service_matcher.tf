@@ -1,8 +1,8 @@
 module "matcher" {
   source = "./matcher"
 
-  pipeline_date             = var.pipeline_date
-  
+  pipeline_date = var.pipeline_date
+
   es_works_identified_index = local.es_works_identified_index
   scale_up_matcher_db       = var.reindexing_state.scale_up_matcher_db
 
