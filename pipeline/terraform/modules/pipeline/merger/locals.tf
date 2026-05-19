@@ -7,6 +7,7 @@ locals {
     es_upstream_protocol = var.es_config.es_protocol
     es_upstream_apikey   = var.es_config.es_apikey
   }
+
   es_downstream_config = {
     es_downstream_host     = var.es_config.es_host
     es_downstream_port     = var.es_config.es_port

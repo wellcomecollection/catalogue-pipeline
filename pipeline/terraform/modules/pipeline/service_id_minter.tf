@@ -48,8 +48,3 @@ module "id_minter_lambda" {
   alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 }
 
-moved {
-  from = aws_cloudwatch_metric_alarm.id_minter_failures
-  to   = module.id_minter_lambda.aws_cloudwatch_metric_alarm.id_minter_failures
-}
-
