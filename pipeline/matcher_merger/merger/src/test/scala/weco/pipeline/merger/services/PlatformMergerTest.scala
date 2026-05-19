@@ -1139,4 +1139,32 @@ class PlatformMergerTest
       }
     }
   }
+
+  it("passes a Folio work through the merger unchanged") {
+    val folioWork = identifiedWork(
+      sourceIdentifier = createFolioSourceIdentifier
+    )
+
+    val result = merger.merge(works = Seq(folioWork))
+
+    val mergedWorks = result.mergedWorksWithTime(now)
+    mergedWorks.size shouldBe 1
+
+    val mergedWork = mergedWorks.head.asInstanceOf[Work.Visible[Merged]]
+    mergedWork.data shouldBe folioWork.data
+  }
+
+  it("passes an Axiell work through the merger unchanged") {
+    val axiellWork = identifiedWork(
+      sourceIdentifier = createAxiellSourceIdentifier
+    )
+
+    val result = merger.merge(works = Seq(axiellWork))
+
+    val mergedWorks = result.mergedWorksWithTime(now)
+    mergedWorks.size shouldBe 1
+
+    val mergedWork = mergedWorks.head.asInstanceOf[Work.Visible[Merged]]
+    mergedWork.data shouldBe axiellWork.data
+  }
 }

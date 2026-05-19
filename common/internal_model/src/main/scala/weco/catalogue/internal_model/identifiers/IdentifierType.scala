@@ -46,6 +46,11 @@ object IdentifierType extends Enum[IdentifierType] {
     val label = "Sierra system number"
   }
 
+  case object FolioInstance extends IdentifierType {
+    val id = "folio-instance"
+    val label = "Folio instance"
+  }
+
   case object SierraIdentifier extends IdentifierType {
     val id = "sierra-identifier"
     val label = "Sierra identifier"
@@ -89,6 +94,11 @@ object IdentifierType extends Enum[IdentifierType] {
   case object CalmRecordIdentifier extends IdentifierType {
     val id = "calm-record-id"
     val label = "Calm RecordIdentifier"
+  }
+
+  case object AxiellGuid extends IdentifierType {
+    val id = "axiell-guid"
+    val label = "Axiell Guid"
   }
 
   case object ISBN extends IdentifierType {

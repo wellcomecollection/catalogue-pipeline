@@ -863,4 +863,42 @@ class MergerIntegrationTest
       }
     }
   }
+
+  Scenario("A single Folio work with nothing linked to it") {
+    withContext {
+      implicit context =>
+        Given("A single Folio work")
+        val work = identifiedWork(
+          sourceIdentifier = createFolioSourceIdentifier
+        )
+
+        When("the work is processed by the matcher/merger")
+        processWork(work)
+
+        Then("the work is returned unchanged")
+        val mergedWork = context.getMerged(work)
+        mergedWork.data shouldBe work.data
+        mergedWork.state should beSimilarTo(work.state)
+        mergedWork.state.mergedTime should beRecent()
+    }
+  }
+
+  Scenario("A single Axiell work with nothing linked to it") {
+    withContext {
+      implicit context =>
+        Given("A single Axiell work")
+        val work = identifiedWork(
+          sourceIdentifier = createAxiellSourceIdentifier
+        )
+
+        When("the work is processed by the matcher/merger")
+        processWork(work)
+
+        Then("the work is returned unchanged")
+        val mergedWork = context.getMerged(work)
+        mergedWork.data shouldBe work.data
+        mergedWork.state should beSimilarTo(work.state)
+        mergedWork.state.mergedTime should beRecent()
+    }
+  }
 }

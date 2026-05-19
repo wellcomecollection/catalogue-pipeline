@@ -127,6 +127,20 @@ trait IdentifiersGenerators extends RandomGenerators {
       ontologyType = "Work"
     )
 
+  def createFolioSourceIdentifier: SourceIdentifier =
+    SourceIdentifier(
+      value = randomAlphanumeric(10),
+      identifierType = IdentifierType.FolioInstance,
+      ontologyType = "Work"
+    )
+
+  def createAxiellSourceIdentifier: SourceIdentifier =
+    SourceIdentifier(
+      value = randomAlphanumeric(10),
+      identifierType = IdentifierType.AxiellGuid,
+      ontologyType = "Work"
+    )
+
   def createDigcodeIdentifier(digcode: String): SourceIdentifier =
     SourceIdentifier(
       value = digcode,
