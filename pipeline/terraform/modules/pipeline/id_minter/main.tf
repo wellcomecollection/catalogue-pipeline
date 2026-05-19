@@ -39,11 +39,6 @@ module "id_minter_lambda" {
   vpc_config      = var.vpc_config
 }
 
-moved {
-  from = module.id_generator_lambda
-  to   = module.id_generator_lambda[0]
-}
-
 module "id_generator_lambda" {
   source = "../../pipeline_lambda"
   count  = var.include_id_generator ? 1 : 0

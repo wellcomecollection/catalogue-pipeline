@@ -1,5 +1,5 @@
-# when we destroy this infra, remember to remove the lambda from the deployment matrix
-# .github/workflows/catalogue-graph-deploy.yml -> id-minter-test
+# when we destroy this infra, remember to remove the lambdas from the deployment matrix
+# .github/workflows/catalogue-graph-deploy.yml -> id-minter-test and id-generator-test
 
 locals {
   id_minter_v2_test_rds_instance = local.infra_critical.id_minter_rds["test"]

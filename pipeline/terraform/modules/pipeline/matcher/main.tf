@@ -1,11 +1,3 @@
-locals {
-  namespace      = "catalogue-${var.pipeline_date}_${var.service_name}"
-  base_namespace = "catalogue-${var.pipeline_date}" // prod "catalogue-2025-10-02_works-graph" table doesn't reference service name, using base_namespace so table is preserved
-
-  graph_table_billing_mode = var.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
-  lock_table_billing_mode  = var.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
-}
-
 # ──────────────────────────────────────────────
 # Output topic
 # ──────────────────────────────────────────────
@@ -36,7 +28,7 @@ module "matcher_lambda" {
     dynamo_lock_table       = aws_dynamodb_table.lock_table.id
     dynamo_lock_table_index = "context-ids-index"
 
-    dynamo_lock_timeout = var.lock_timeout
+    dynamo_lock_timeout = local.lock_timeout
 
     es_index = var.es_works_identified_index
   }
