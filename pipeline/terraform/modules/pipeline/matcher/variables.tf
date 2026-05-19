@@ -59,8 +59,3 @@ variable "scale_up_matcher_db" {
   default     = false
   description = "Whether to use provisioned capacity for DynamoDB tables"
 }
-
-variable "lock_timeout" {
-  type    = number
-  default = 60
-}
