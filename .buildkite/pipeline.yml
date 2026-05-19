@@ -44,8 +44,6 @@ steps:
       - "calm_indexer"
       - "matcher"
       - "merger"
-      - "matcher_test"
-      - "merger_test"
       - "mets_adapter"
       - "reindex_worker"
       - "sierra_indexer"
