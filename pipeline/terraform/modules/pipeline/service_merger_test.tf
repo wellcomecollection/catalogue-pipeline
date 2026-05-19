@@ -8,9 +8,8 @@ module "merger_test" {
   pipeline_date = var.pipeline_date
 
   es_works_identified_index   = "works-identified-2026-03-06"
-  es_works_denormalised_index = "works-denormalised-2026-05-19"
-  es_images_initial_index     = local.es_images_initial_index // same as prod
-  
+  es_works_denormalised_index = "works-denormalised-new-one"
+  es_images_initial_index     = "images-initial-new-one"
   queue_config = {
     visibility_timeout_seconds = 90
     max_receive_count          = 10

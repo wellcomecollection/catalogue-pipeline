@@ -1,7 +1,10 @@
 locals {
   namespace      = "catalogue-${var.pipeline_date}_${var.service_name}"
-  base_namespace = "catalogue-${var.pipeline_date}" // prod "catalogue-2025-10-02_works-graph" table doesn't reference service name, using base_namespace so table is preserved
 
+  # Preserve the existing production graph table name for the primary matcher
+  # service, but give non-prod matcher instances their own distinct namespace 
+  base_namespace = var.service_name == "matcher" ? "catalogue-${var.pipeline_date}" : local.namespace
+  
   graph_table_billing_mode = var.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
   lock_table_billing_mode  = var.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
 
