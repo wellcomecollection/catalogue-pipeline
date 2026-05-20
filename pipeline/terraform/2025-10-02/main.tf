@@ -27,19 +27,19 @@ module "pipeline" {
     (local.pipeline_date) = {
       works = {
         // prod transformers - prod id_minter
-        source       = "works_source.2026-03-25"
+        source = "works_source.2026-03-25"
         // prod id_minter - prod matcher_merger
-        identified   = "works_identified.2023-05-26"
+        identified = "works_identified.2023-05-26"
         // prod matcher_merger - prod graph/ingestor/indexer
         denormalised = "works_denormalised.2025-08-14"
       }
       images = {
         // prod matcher_merger - prod inference manager
-        initial   = "empty"
+        initial = "empty"
         // scala images ingestor - to be deleted when the service is removed
         augmented = "empty"
         // scala images ingestor - to be deleted when the service is removed
-        indexed   = "images_indexed.2024-11-14"
+        indexed = "images_indexed.2024-11-14"
       }
     }
     "2025-10-09" = {
@@ -79,7 +79,7 @@ module "pipeline" {
         // prod inference manager - prod graph/ingestor/indexer
         augmented = "images_augmented.2026-04-29"
         // prod graph/ingestor/indexer - prod API
-        indexed   = "images_indexed.2024-11-14"
+        indexed = "images_indexed.2024-11-14"
       }
     }
   }
