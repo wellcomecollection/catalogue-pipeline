@@ -20,9 +20,13 @@ SPARQL_REQUESTS_BACKOFF_INTERVAL = 30
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
-    exception_name = type(backoff_details["exception"]).__name__
-    logger.warning("SPARQL request failed, retrying", exception=exception_name)
-
+    exception = backoff_details["exception"]
+    logger.warning(
+        "SPARQL request failed, retrying",
+        exception=type(exception).__name__,
+        detail=str(exception)[:500],
+        tries=backoff_details["tries"],
+    )
 
 class WikidataSparqlClient:
     """
