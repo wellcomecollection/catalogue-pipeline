@@ -26,54 +26,60 @@ module "pipeline" {
   index_config = {
     (local.pipeline_date) = {
       works = {
-        source       = "works_source.2026-03-25"
-        identified   = "works_identified.2023-05-26"
+        // prod transformers - prod id_minter
+        source = "works_source.2026-03-25"
+        // prod id_minter - prod matcher_merger
+        identified = "works_identified.2023-05-26"
+        // prod matcher_merger - prod graph/ingestor/indexer
         denormalised = "works_denormalised.2025-08-14"
-        indexed      = "works_indexed.2024-11-14"
       }
       images = {
-        initial   = "empty"
+        // prod matcher_merger - prod inference manager
+        initial = "empty"
+        // scala images ingestor - to be deleted when the service is removed
         augmented = "empty"
-        indexed   = "images_indexed.2024-11-14"
+        // scala images ingestor - to be deleted when the service is removed
+        indexed = "images_indexed.2024-11-14"
       }
     }
     "2025-10-09" = {
       works = {
-        indexed      = "works_indexed.2024-11-14"
+        // test matcher_merger - WCSTP dev
         denormalised = "works_denormalised.2025-08-14"
       }
       images = {
+        // test matcher_merger - WCSTP dev
         initial = "empty"
-      }
-      concepts = { indexed = "concepts_indexed.2025-06-17" }
-    },
-    "2025-11-20" = {
-      works = {
-        indexed = "works_indexed.2024-11-14"
       }
     },
     "2026-01-12" = {
       works = {
+        // test transformers - WCSTP dev
         source = "works_source.2026-03-25"
       }
     },
     "2026-03-03" = {
       works = {
+        // prod graph/ingestor/indexer - prod API
         indexed = "works_indexed.2024-11-14"
       }
       concepts = {
+        // prod graph/ingestor/indexer - prod API
         indexed = "concepts_indexed.2025-06-17"
       }
     },
     "2026-03-06" = {
       works = {
+        // test id_minter - test matcher_merger - WCSTP dev
         identified = "works_identified.2023-05-26"
       }
     },
     "2026-04-29" = {
       images = {
+        // prod inference manager - prod graph/ingestor/indexer
         augmented = "images_augmented.2026-04-29"
-        indexed   = "images_indexed.2024-11-14"
+        // prod graph/ingestor/indexer - prod API
+        indexed = "images_indexed.2024-11-14"
       }
     }
   }
