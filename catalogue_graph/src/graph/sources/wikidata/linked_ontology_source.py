@@ -15,7 +15,7 @@ from .sparql_query_builder import SparqlQueryBuilder, WikidataEdgeQueryType
 
 logger = structlog.get_logger(__name__)
 
-SPARQL_ITEMS_CHUNK_SIZE = 400
+SPARQL_ITEMS_CHUNK_SIZE = 200
 
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 
