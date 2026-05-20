@@ -6,8 +6,27 @@ The Wellcome Collection catalogue pipeline: adapters that fetch records from
 source systems, a transformation pipeline that produces a common model, and
 ingestors that populate Elasticsearch indexes powering the catalogue API.
 
-Start with [README.md](README.md) and [docs/developers.md](docs/developers.md)
+Start with [README.md](/README.md) and [docs/developers.md](/docs/developers.md)
 for the high-level design. Don't duplicate that material here.
+
+> Links in this file use repo-root-absolute paths (`/foo`) so they resolve
+> correctly both here and via the [.github/copilot-instructions.md](/.github/copilot-instructions.md)
+> symlink.
+
+## Agent customization files
+
+This file is the single source of truth for agent guidance. Other agent-facing
+files extend it for tools that support more than a flat instructions file:
+
+- [.github/copilot-instructions.md](/.github/copilot-instructions.md) is a
+  symlink to this file — the GitHub-hosted Copilot coding agent reads it from
+  there. Edit `AGENTS.md`, not the symlink.
+- [.github/instructions/](/.github/instructions/) holds **path-scoped** rules
+  for VS Code Copilot (via `applyTo` frontmatter), e.g.
+  [catalogue-graph.instructions.md](/.github/instructions/catalogue-graph.instructions.md).
+  Put rules that only apply to a subtree here, not in AGENTS.md.
+- [.github/agents/](/.github/agents/) defines VS Code Copilot custom agent
+  modes: `address-review-comments`, `create-pr`, `review-pr`.
 
 ## Repository layout
 
@@ -20,8 +39,10 @@ is no workspace-wide build.
 - **Python** (UV, one project per directory with its own `pyproject.toml`):
   - `catalogue_graph/` — graph + ingestor pipeline, also contains the EBSCO,
     FOLIO, Axiell and OAI-PMH adapters under `src/adapters/` (largest Python
-    project; see [catalogue_graph/README.md](catalogue_graph/README.md))
+    project; see [catalogue_graph/README.md](/catalogue_graph/README.md))
   - `pipeline/inferrer/{aspect_ratio_inferrer,feature_inferrer,palette_inferrer,common}/`
+  - `sierra_adapter/` — Python maintenance scripts living alongside the Scala
+    adapter (own `pyproject.toml`, `uv.lock`, Python 3.13)
   - `reindexer/scripts/`, `scripts/{suppress_miro,miro_links,mimsy_dump,es_index_comparison}/`
 
 When working in a Python project, `cd` into that project's directory before
@@ -65,9 +86,23 @@ Scope `pytest`/`mypy` paths to the area you changed when the project is large
 ## CI
 
 GitHub Actions live in `.github/workflows/`; some Scala projects use Buildkite
-instead (badges in [README.md](README.md)). Python checks use the shared
+instead (badges in [README.md](/README.md)). Python checks use the shared
 `wellcomecollection/.github/.github/actions/python_check@main` action — match
 its commands locally (the four `uv run` commands above) to keep CI green.
+
+## Known repo quirks
+
+- **`gh pr edit --body-file` silently fails on this repo** with a *"GraphQL:
+  Projects (classic) is being deprecated …"* error (exit 1, but looks like a
+  warning). To update a PR description, use the REST API instead:
+  ```bash
+  jq -Rs '{body: .}' < body.md > body.json
+  GH_PROMPT_DISABLED=true gh api -X PATCH \
+    repos/wellcomecollection/catalogue-pipeline/pulls/<n> \
+    --input body.json -q '.html_url' | cat
+  ```
+  Always verify with `gh pr view <n> --json body -q .body | cat` afterwards.
+  Title-only changes via `gh pr edit --title` still work.
 
 ## Don'ts
 

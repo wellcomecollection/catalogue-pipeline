@@ -39,7 +39,7 @@ Set `GH_PROMPT_DISABLED=true` on every `gh` invocation.
 3. **Map the change.** Build a todo list of the meaningful units to review (e.g. "new `FolioRecordPipeline.transform`", "schema migration", "test changes for X"). Skip pure formatting / generated files unless the user wants them included.
 4. **Walk the diff with the reviewer**, one unit at a time. For each unit:
    1. Summarise what changed and why (per the author's description / commit message).
-   2. Read the affected files at the PR's `headRefName` (use `gh api repos/<o>/<r>/contents/<path>?ref=<head>` or check out via `git fetch origin pull/<n>/head:pr-<n>` into a **detached worktree** — never overwrite the user's working tree).
+   2. Read the affected files at the PR's `headRefName`. Prefer `gh api repos/<o>/<r>/contents/<path>?ref=<head>` (no working-tree impact). If you genuinely need a checkout, use a separate worktree — `git fetch origin pull/<n>/head && git worktree add ../pr-<n> FETCH_HEAD` — and never touch the user's existing working tree.
    3. Form an assessment: correctness, edge cases, security, tests, fit with repo conventions (`AGENTS.md`, `*.instructions.md`, repo-memory facts).
    4. **Verify before commenting.** For each potential issue:
       - Cite the file/line in the PR.
@@ -108,7 +108,7 @@ GH_PROMPT_DISABLED=true gh api graphql -f query='
 ' -F o=<o> -F r=<r> -F n=<n> | cat
 ```
 
-If `gh pr edit`-style mutations on this repo trip the *Projects (classic) deprecated* error, fall back to REST as described in `create-pr.agent.md` / `/memories/repo/`.
+If `gh pr edit`-style mutations on this repo trip the *Projects (classic) deprecated* error, fall back to REST as described in [create-pr.agent.md](/.github/agents/create-pr.agent.md) and *Known repo quirks* in [AGENTS.md](/AGENTS.md).
 
 ## Output format per drafted comment
 
