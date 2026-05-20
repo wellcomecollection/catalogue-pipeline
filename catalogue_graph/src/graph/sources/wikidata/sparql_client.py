@@ -28,6 +28,7 @@ def on_request_backoff(backoff_details: typing.Any) -> None:
         tries=backoff_details["tries"],
     )
 
+
 class WikidataSparqlClient:
     """
     A client class for querying Wikidata via SPARQL queries. Automatically throttles requests (in a thread-safe way)
