@@ -29,7 +29,6 @@ module "pipeline" {
         source       = "works_source.2026-03-25"
         identified   = "works_identified.2023-05-26"
         denormalised = "works_denormalised.2025-08-14"
-        indexed      = "works_indexed.2024-11-14"
       }
       images = {
         initial   = "empty"
@@ -39,17 +38,10 @@ module "pipeline" {
     }
     "2025-10-09" = {
       works = {
-        indexed      = "works_indexed.2024-11-14"
         denormalised = "works_denormalised.2025-08-14"
       }
       images = {
         initial = "empty"
-      }
-      concepts = { indexed = "concepts_indexed.2025-06-17" }
-    },
-    "2025-11-20" = {
-      works = {
-        indexed = "works_indexed.2024-11-14"
       }
     },
     "2026-01-12" = {
