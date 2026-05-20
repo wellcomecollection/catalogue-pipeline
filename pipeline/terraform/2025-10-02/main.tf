@@ -28,7 +28,7 @@ module "pipeline" {
       works = {
         // prod transformers - prod id_minter
         source       = "works_source.2026-03-25"
-        // prod id_minter - prod matcher_merger 
+        // prod id_minter - prod matcher_merger
         identified   = "works_identified.2023-05-26"
         // prod matcher_merger - prod graph/ingestor/indexer
         denormalised = "works_denormalised.2025-08-14"
