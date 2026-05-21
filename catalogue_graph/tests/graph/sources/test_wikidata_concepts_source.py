@@ -39,7 +39,7 @@ def _add_mock_wikidata_requests(
             load_fixture(f"wikidata_linked_loc/{query_type}_response.json")
         )
         MockRequest.mock_response(
-            method="GET", url=WIKIDATA_SPARQL_URL, params=params, json_data=response
+            method="POST", url=WIKIDATA_SPARQL_URL, body=params, json_data=response
         )
 
 

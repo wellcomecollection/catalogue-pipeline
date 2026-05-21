@@ -43,6 +43,7 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     monkeypatch.setattr("boto3.client", mock_boto3_client)
     monkeypatch.setattr("requests.request", MockRequest.request)
     monkeypatch.setattr("requests.get", MockRequest.get)
+    monkeypatch.setattr("requests.post", MockRequest.post)
     monkeypatch.setattr("smart_open.open", MockSmartOpen.open)
     monkeypatch.setattr("elasticsearch.Elasticsearch", MockElasticsearchClient)
     monkeypatch.setattr("elasticsearch.helpers.bulk", MockElasticsearchClient.bulk)

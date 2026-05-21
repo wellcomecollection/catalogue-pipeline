@@ -281,11 +281,12 @@ class MockRequestExpectation(TypedDict):
     data: dict | str | None
 
 
-class MockResponseInput(TypedDict):
+class MockResponseInput(TypedDict, total=False):
     method: str
     url: str
     status_code: int
     params: dict | None
+    body: dict | str | None
     content_bytes: bytes | None
     json_data: dict | None
 
@@ -364,6 +365,16 @@ class MockRequest:
         params: dict | None = None,
     ) -> MockResponse:
         return MockRequest.request("GET", url, stream, data, headers, params)
+
+    @staticmethod
+    def post(
+        url: str,
+        stream: bool = False,
+        data: dict | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+    ) -> MockResponse:
+        return MockRequest.request("POST", url, stream, data, headers, params)
 
 
 class MockBulkResponse:
