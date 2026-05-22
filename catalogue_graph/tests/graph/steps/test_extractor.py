@@ -59,10 +59,10 @@ LOC_NAMES_SOURCE_MOCK_RESPONSE: MockResponseInput = {
 }
 
 WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE: MockResponseInput = {
-    "method": "GET",
+    "method": "POST",
     "url": WIKIDATA_SPARQL_URL,
     "status_code": 200,
-    "params": {
+    "body": {
         "format": "json",
         "query": "SELECT ?item WHERE { ?item wdt:P244 ?locId. }",
     },
@@ -71,10 +71,10 @@ WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE: MockResponseInput = {
 }
 
 WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE: MockResponseInput = {
-    "method": "GET",
+    "method": "POST",
     "url": WIKIDATA_SPARQL_URL,
     "status_code": 200,
-    "params": {
+    "body": {
         "format": "json",
         "query": "SELECT ?item WHERE { ?item wdt:P486 ?meshId. }",
     },

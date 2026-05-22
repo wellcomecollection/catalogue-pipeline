@@ -69,9 +69,9 @@ class WikidataSparqlClient:
 
         # Use a semaphore to throttle the number of parallel requests
         with self.parallel_query_semaphore:
-            r = requests.get(
+            r = requests.post(
                 WIKIDATA_SPARQL_URL,
-                params={"format": "json", "query": query},
+                data={"format": "json", "query": query},
                 headers={"User-Agent": self._get_user_agent_header()},
             )
 
@@ -98,5 +98,11 @@ class WikidataSparqlClient:
         elif r.status_code != 200:
             raise Exception(r.content)
 
-        results: list[dict] = r.json()["results"]["bindings"]
+        try:
+            results: list[dict] = r.json()["results"]["bindings"]
+        except (ValueError, KeyError, TypeError) as e:
+            raise Exception(
+                f"SPARQL query returned invalid JSON (status {r.status_code}): "
+                f"{r.content[:500].decode('utf-8', errors='replace')}"
+            ) from e
         return results
