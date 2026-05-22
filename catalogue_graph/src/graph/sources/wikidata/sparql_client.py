@@ -100,7 +100,7 @@ class WikidataSparqlClient:
 
         try:
             results: list[dict] = r.json()["results"]["bindings"]
-        except (ValueError, KeyError) as e:
+        except (ValueError, KeyError, TypeError) as e:
             raise Exception(
                 f"SPARQL query returned invalid JSON (status {r.status_code}): "
                 f"{r.content[:500].decode('utf-8', errors='replace')}"
