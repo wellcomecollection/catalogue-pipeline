@@ -45,7 +45,9 @@ def test_wikidata_concepts_nodes_transformer() -> None:
 
 
 def test_wikidata_concepts_edges_transformer() -> None:
-    add_mock_transformer_outputs_for_ontologies(["loc"])
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc", "wikidata_linked_loc", "wikidata_linked_mesh"]
+    )
     _add_mock_wikidata_requests("edges", "concepts")
 
     source_event = ExtractorEvent(
@@ -57,7 +59,7 @@ def test_wikidata_concepts_edges_transformer() -> None:
     transformer = WikidataConceptsTransformer("loc_concepts", source_event)
 
     edges = list(transformer._stream_entities(entity_type="edges"))
-    assert len(list(edges)) == 9
+    assert len(list(edges)) == 7
 
     assert edges[0] == SourceConceptSameAs(
         from_type="SourceConcept",
