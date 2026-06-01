@@ -5,7 +5,7 @@ data "aws_ecr_repository" "service" {
 
 locals {
   repo_urls = [
-    for repo_url in data.aws_ecr_repository.service.*.repository_url :"${repo_url}:env.${var.release_label}"
+    for repo_url in data.aws_ecr_repository.service.*.repository_url : "${repo_url}:env.${var.release_label}"
   ]
   image_ids = zipmap(local.services, local.repo_urls)
 
