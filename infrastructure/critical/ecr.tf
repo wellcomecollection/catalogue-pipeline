@@ -24,7 +24,7 @@ locals {
       {
         rulePriority = 1
         description  = "Only keep the last 100 images in a repo"
-        selection    = {
+        selection = {
           tagStatus   = "any"
           countType   = "imageCountMoreThan"
           countNumber = 100
