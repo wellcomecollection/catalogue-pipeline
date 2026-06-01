@@ -81,8 +81,9 @@ def _patch_stream_and_validators(
     monkeypatch.setattr(
         source,
         "_is_id_valid_for_transformer",
-        lambda item_id, transformer: item_id
-        in valid_for_transformer.get(transformer, set()),
+        lambda item_id, transformer: (
+            item_id in valid_for_transformer.get(transformer, set())
+        ),
     )
     monkeypatch.setattr(
         source,
