@@ -5,10 +5,8 @@ steps:
     matrix:
       - "internal_model"
       - "lambda"
-      - "display_model"
       - "source_model"
       - "pipeline_storage"
-      - "ingestor_common"
       - "transformer_common"
       - "transformer_marc_common"
       - "transformer_marc_xml"

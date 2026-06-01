@@ -43,12 +43,6 @@ lazy val internal_model = setupProject(
   // Only needed for generating ephemeral indices for testing
   Test / unmanagedResourceDirectories += indexConfigDir.value
 )
-lazy val display_model = setupProject(
-  project,
-  folder = "common/display_model",
-  localDependencies = Seq(internal_model),
-  externalDependencies = CatalogueDependencies.displayModelDependencies
-)
 
 lazy val lambda = setupProject(
   project,
@@ -89,13 +83,6 @@ lazy val pipeline_storage_typesafe = setupProject(
   localDependencies = Seq(pipeline_storage),
   externalDependencies =
     CatalogueDependencies.pipelineStorageTypesafeDependencies
-)
-
-lazy val ingestor_common = setupProject(
-  project,
-  "pipeline/ingestor/ingestor_common",
-  localDependencies = Seq(pipeline_storage_typesafe, display_model),
-  externalDependencies = WellcomeDependencies.elasticsearchTypesafeLibrary
 )
 
 lazy val matcher = setupProject(
