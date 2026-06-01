@@ -16,6 +16,8 @@ from models.pipeline.identifier import (
 from .work_base_transformer import WorkBaseTransformer
 
 
+# Each AggregatableField has an ID and a label. The aggregation is based on the ID, and the label is displayed
+# to the user in the front-end.
 class AggregatableField(BaseModel):
     id: str
     label: str
