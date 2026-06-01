@@ -1,23 +1,21 @@
 from collections.abc import Generator
 
-from graph.sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from models.events import ExtractorEvent
+from graph.sources.wikidata.linked_ontology_source import (
+    PEOPLE_RELATIONSHIP_EDGE_TYPES,
+)
+from graph.sources.wikidata.sparql_query_builder import WikidataEdgeQueryType
 from models.graph_edge import (
     BaseEdge,
     SourceNameRelatedTo,
     SourceNameRelatedToAttributes,
 )
 from models.graph_node import SourceName
-from utils.types import TransformerType
 
 from .concepts_transformer import WikidataConceptsTransformer
 from .raw_concept import RawWikidataName
 
 
 class WikidataNamesTransformer(WikidataConceptsTransformer):
-    def __init__(self, linked_transformer: TransformerType, event: ExtractorEvent):
-        self.source = WikidataLinkedOntologySource(linked_transformer, event)
-
     def transform_node(self, raw_node: dict) -> SourceName | None:
         raw_concept = RawWikidataName(raw_node)
 
@@ -32,15 +30,16 @@ class WikidataNamesTransformer(WikidataConceptsTransformer):
             place_of_birth=raw_concept.place_of_birth,
         )
 
-    def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
-        if raw_node["type"] == "RELATED_TO":
-            attributes = SourceNameRelatedToAttributes(
-                relationship_type=raw_node["subtype"]
-            )
+    def extract_edges(
+        self, raw_edge: tuple[dict, WikidataEdgeQueryType]
+    ) -> Generator[BaseEdge]:
+        edge, edge_type = raw_edge
+        if edge_type in PEOPLE_RELATIONSHIP_EDGE_TYPES:
+            attributes = SourceNameRelatedToAttributes(relationship_type=edge_type)
             yield SourceNameRelatedTo(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
+                from_id=edge["from_id"],
+                to_id=edge["to_id"],
                 attributes=attributes,
             )
         else:
-            yield from super().extract_edges(raw_node)
+            yield from super().extract_edges(raw_edge)

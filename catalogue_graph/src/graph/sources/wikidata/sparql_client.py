@@ -2,12 +2,14 @@ import os
 import threading
 import time
 import typing
+from collections.abc import Callable, Generator, Iterator
 
 import backoff
 import requests
 import structlog
 
 from config import WIKIDATA_SPARQL_URL
+from utils.streaming import process_stream_in_parallel
 
 logger = structlog.get_logger(__name__)
 
@@ -17,6 +19,7 @@ logger = structlog.get_logger(__name__)
 SPARQL_MAX_PARALLEL_QUERIES = 4
 SPARQL_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "5"))
 SPARQL_REQUESTS_BACKOFF_INTERVAL = 30
+SPARQL_ITEMS_CHUNK_SIZE = 400
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -106,3 +109,23 @@ class WikidataSparqlClient:
                 f"{r.content[:500].decode('utf-8', errors='replace')}"
             ) from e
         return results
+
+    def run_query_in_parallel(
+        self, items: Iterator, build_query: Callable[[list[str]], str]
+    ) -> Generator:
+        """
+        Accept an `items` generator and a `build_query` function that constructs a SPARQL query string
+        for a given chunk of IDs. Split `items` into chunks, build a query for each chunk, run it via
+        `self.run_query`, and return a single generator of results.
+        """
+
+        def run_sparql_query(chunk: list[str]) -> list[dict]:
+            query = build_query(chunk)
+            return self.run_query(query)
+
+        yield from process_stream_in_parallel(
+            items,
+            run_sparql_query,
+            SPARQL_ITEMS_CHUNK_SIZE,
+            SPARQL_MAX_PARALLEL_QUERIES,
+        )

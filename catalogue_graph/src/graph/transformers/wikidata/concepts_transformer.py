@@ -1,8 +1,9 @@
 from collections.abc import Generator
 
-from graph.sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from graph.transformers.graph_transformer import GraphBaseTransformer
-from models.events import ExtractorEvent
+from graph.sources.wikidata.linked_ontology_source import (
+    HAS_PARENT_EDGE_TYPES,
+)
+from graph.sources.wikidata.sparql_query_builder import WikidataEdgeQueryType
 from models.graph_edge import (
     BaseEdge,
     SourceConceptHasFieldOfWork,
@@ -12,15 +13,12 @@ from models.graph_edge import (
     SourceConceptSameAsAttributes,
 )
 from models.graph_node import SourceConcept
-from utils.types import TransformerType
 
+from .base_transformer import WikidataBaseTransformer
 from .raw_concept import RawWikidataConcept
 
 
-class WikidataConceptsTransformer(GraphBaseTransformer):
-    def __init__(self, linked_transformer: TransformerType, event: ExtractorEvent):
-        self.source = WikidataLinkedOntologySource(linked_transformer, event)
-
+class WikidataConceptsTransformer(WikidataBaseTransformer):
     def transform_node(self, raw_node: dict) -> SourceConcept | None:
         raw_concept = RawWikidataConcept(raw_node)
 
@@ -35,36 +33,36 @@ class WikidataConceptsTransformer(GraphBaseTransformer):
             description=raw_concept.description,
         )
 
-    def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
-        if raw_node["type"] == "SAME_AS":
+    def extract_edges(
+        self, raw_edge: tuple[dict, WikidataEdgeQueryType]
+    ) -> Generator[BaseEdge]:
+        edge, edge_type = raw_edge
+        if edge_type in ("same_as_loc", "same_as_mesh"):
             edge_attributes = SourceConceptSameAsAttributes(source="wikidata")
             yield SourceConceptSameAs(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
+                from_id=edge["from_id"],
+                to_id=edge["to_id"],
                 attributes=edge_attributes,
             )
             yield SourceConceptSameAs(
-                from_id=raw_node["to_id"],
-                to_id=raw_node["from_id"],
+                from_id=edge["to_id"],
+                to_id=edge["from_id"],
                 attributes=edge_attributes,
             )
-        elif raw_node["type"] == "HAS_PARENT":
+        elif edge_type in HAS_PARENT_EDGE_TYPES:
             yield SourceConceptHasParent(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
+                from_id=edge["from_id"],
+                to_id=edge["to_id"],
             )
-        elif raw_node["type"] == "HAS_FOUNDER":
+        elif edge_type == "has_founder":
             yield SourceConceptHasFounder(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
+                from_id=edge["from_id"],
+                to_id=edge["to_id"],
             )
-        elif (
-            raw_node["type"] == "HAS_INDUSTRY"
-            or raw_node["type"] == "HAS_FIELD_OF_WORK"
-        ):
+        elif edge_type in ("has_industry", "has_field_of_work"):
             yield SourceConceptHasFieldOfWork(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
+                from_id=edge["from_id"],
+                to_id=edge["to_id"],
             )
         else:
-            raise ValueError(f"Unknown edge type {raw_node['type']}")
+            raise ValueError(f"Unknown edge type {edge_type}")
