@@ -15,6 +15,7 @@ from pathlib import Path
 import click
 import elasticsearch
 import structlog
+
 from utils.elasticsearch import get_client
 
 logger = structlog.get_logger(__name__)
