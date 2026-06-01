@@ -9,12 +9,10 @@ locals {
     "id_minter",
     "matcher",
     "merger",
-    "ingestor_works",
     "inference_manager",
     "feature_inferrer",
     "palette_inferrer",
     "aspect_ratio_inferrer",
-    "ingestor_images",
     "elasticdump",
     "relation_embedder",
     "router",
@@ -26,7 +24,7 @@ locals {
       {
         rulePriority = 1
         description  = "Only keep the last 100 images in a repo"
-        selection = {
+        selection    = {
           tagStatus   = "any"
           countType   = "imageCountMoreThan"
           countNumber = 100

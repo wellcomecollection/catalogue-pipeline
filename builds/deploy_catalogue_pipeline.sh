@@ -55,7 +55,6 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
   uk.ac.wellcome/aspect_ratio_inferrer \
   uk.ac.wellcome/matcher \
   uk.ac.wellcome/merger \
-  uk.ac.wellcome/ingestor_images \
   uk.ac.wellcome/transformer_calm \
   uk.ac.wellcome/transformer_mets \
   uk.ac.wellcome/transformer_miro \
@@ -68,7 +67,6 @@ then
   echo "Deploying ECS pipeline services to catalogue-$PIPELINE_DATE"
   CLUSTER="catalogue-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
     image_inferrer \
-    ingestor_images \
     transformer_calm \
     transformer_mets \
     transformer_miro \

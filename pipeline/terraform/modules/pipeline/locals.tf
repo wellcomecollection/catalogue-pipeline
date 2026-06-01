@@ -71,18 +71,12 @@ locals {
   scale_up_adjustment   = var.reindexing_state.scale_up_tasks ? 5 : 1
 
   services = [
-    "ingestor_works",
-    "ingestor_images",
     "matcher",
     "merger",
-    "id_minter",
     "inference_manager",
     "feature_inferrer",
     "palette_inferrer",
     "aspect_ratio_inferrer",
-    "path_concatenator",
-    "batcher",
-    "relation_embedder",
     "transformer_miro",
     "transformer_mets",
     "transformer_tei",
@@ -211,7 +205,7 @@ locals {
   }
 
   lambda_vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,

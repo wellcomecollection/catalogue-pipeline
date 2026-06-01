@@ -26,6 +26,18 @@ jobs:
         with:
           folder: catalogue_graph
 
+  check-test-documents:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v6
+      - name: Regenerate test documents
+        working-directory: catalogue_graph
+        run: uv run python -m document_generators.create_test_image_documents
+      - name: Check for uncommitted changes
+        working-directory: catalogue_graph
+        run: git diff --exit-code document_generators/test_documents/
+
   build-unified-pipeline-task-image:
     runs-on: ubuntu-latest
     needs: [ python-checks ]
