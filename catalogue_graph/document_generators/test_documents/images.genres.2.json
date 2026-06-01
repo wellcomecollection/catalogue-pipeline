@@ -7,7 +7,7 @@
       "locations": [
         {
           "locationType": {
-            "id": "iiif-image-diff-test",
+            "id": "iiif-image",
             "type": "LocationType",
             "label": "IIIF Image API"
           },
