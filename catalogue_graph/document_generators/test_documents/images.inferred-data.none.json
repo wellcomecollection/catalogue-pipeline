@@ -1,0 +1,112 @@
+{
+  "description": "an image without any inferred data",
+  "id": "xnvjnv9w",
+  "document": {
+    "display": {
+      "id": "xnvjnv9w",
+      "locations": [
+        {
+          "locationType": {
+            "id": "iiif-image",
+            "type": "LocationType",
+            "label": "IIIF Image API"
+          },
+          "license": {
+            "id": "cc-by",
+            "type": "License",
+            "label": "Attribution 4.0 International (CC BY 4.0)",
+            "url": "http://creativecommons.org/licenses/by/4.0/"
+          },
+          "accessConditions": [],
+          "url": "https://iiif.wellcomecollection.org/image/nMN.jpg/info.json",
+          "linkText": "Link text: 0sLMuJi",
+          "type": "DigitalLocation"
+        }
+      ],
+      "aspectRatio": 1.0,
+      "averageColor": "#ffffff",
+      "source": {
+        "id": "8lljuyu9",
+        "title": "ueWkByHS9Np0hh8",
+        "contributors": [],
+        "subjects": [],
+        "genres": [],
+        "languages": [],
+        "type": "Work"
+      },
+      "type": "Image",
+      "thumbnail": {
+        "locationType": {
+          "id": "iiif-image",
+          "type": "LocationType",
+          "label": "IIIF Image API"
+        },
+        "license": {
+          "id": "cc-by",
+          "type": "License",
+          "label": "Attribution 4.0 International (CC BY 4.0)",
+          "url": "http://creativecommons.org/licenses/by/4.0/"
+        },
+        "accessConditions": [],
+        "url": "https://iiif.wellcomecollection.org/image/nMN.jpg/info.json",
+        "linkText": "Link text: 0sLMuJi",
+        "type": "DigitalLocation"
+      }
+    },
+    "query": {
+      "id": "xnvjnv9w",
+      "source": {
+        "id": "vhmwulrt",
+        "title": "s5RKPQVGscDoaxw",
+        "alternativeTitles": [],
+        "languages.label": [],
+        "sourceIdentifier.value": "vxOjL0F5wf",
+        "identifiers.value": [
+          "vhmwulrt",
+          "vxOjL0F5wf"
+        ],
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [],
+        "items.id": [],
+        "items.shelfmark.value": [],
+        "notes.contents": [],
+        "partOf.title": [],
+        "production.label": [],
+        "subjects.concepts.label": [],
+        "contributors.agent.label": [],
+        "genres.concepts.label": []
+      }
+    },
+    "aggregatableValues": {
+      "locations.license": [],
+      "source.contributors.agent": [],
+      "source.genres": [],
+      "source.subjects": []
+    },
+    "filterableValues": {
+      "locations.license.id": [
+        "cc-by"
+      ],
+      "source.contributors.agent.label": [],
+      "source.contributors.agent.id": [],
+      "source.contributors.agent.sourceIdentifier": [],
+      "source.genres.label": [],
+      "source.genres.concepts.id": [],
+      "source.genres.concepts.sourceIdentifier": [],
+      "source.subjects.label": [],
+      "source.subjects.concepts.id": [],
+      "source.subjects.concepts.sourceIdentifier": [],
+      "source.production.dates.range.from": []
+    },
+    "vectorValues": {
+      "features": [],
+      "paletteEmbedding": []
+    },
+    "debug": {
+      "indexedTime": "2001-01-01T01:01:01Z"
+    },
+    "modifiedTime": "2001-01-01T01:01:01Z"
+  },
+  "createdAt": "2026-06-01T14:15:24.092352+00:00"
+}
