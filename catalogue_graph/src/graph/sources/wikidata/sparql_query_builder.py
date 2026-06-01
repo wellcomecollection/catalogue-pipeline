@@ -148,32 +148,25 @@ class SparqlQueryBuilder:
         """
         ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
 
-        if edge_type == "same_as_loc":
-            property_path = "p:P244/ps:P244"
-        elif edge_type == "same_as_mesh":
-            property_path = "p:P486/ps:P486"
-        elif edge_type == "instance_of":
-            property_path = "wdt:P31"
-        elif edge_type == "subclass_of":
-            property_path = "wdt:P279"
-        elif edge_type == "has_field_of_work":
-            property_path = "wdt:P101"
-        elif edge_type == "has_founder":
-            property_path = "wdt:P112"
-        elif edge_type == "has_industry":
-            property_path = "wdt:P452"
-        elif edge_type == "has_father":
-            property_path = "wdt:P22"
-        elif edge_type == "has_mother":
-            property_path = "wdt:P25"
-        elif edge_type == "has_sibling":
-            property_path = "wdt:P3373"
-        elif edge_type == "has_spouse":
-            property_path = "wdt:P26"
-        elif edge_type == "has_child":
-            property_path = "wdt:P40"
-        else:
+        edge_type_to_property_path: dict[WikidataEdgeQueryType, str] = {
+            "same_as_loc": "p:P244/ps:P244",
+            "same_as_mesh": "p:P486/ps:P486",
+            "instance_of": "wdt:P31",
+            "subclass_of": "wdt:P279",
+            "has_field_of_work": "wdt:P101",
+            "has_founder": "wdt:P112",
+            "has_industry": "wdt:P452",
+            "has_father": "wdt:P22",
+            "has_mother": "wdt:P25",
+            "has_sibling": "wdt:P3373",
+            "has_spouse": "wdt:P26",
+            "has_child": "wdt:P40",
+        }
+
+        if edge_type not in edge_type_to_property_path:
             raise ValueError(f"Unknown edge type: {edge_type}")
+
+        property_path = edge_type_to_property_path[edge_type]
 
         query = f"""
             SELECT DISTINCT ?fromItem ?toItem

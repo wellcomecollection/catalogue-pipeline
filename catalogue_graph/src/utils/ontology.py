@@ -40,7 +40,7 @@ def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerTy
 
 
 @lru_cache
-def get_extracted_ids(
+def get_ids_for_transformer(
     transformer: TransformerType, pipeline_date: str, environment: Environment
 ) -> set[str]:
     """Return all ids extracted as part of the specified transformer."""
@@ -59,15 +59,25 @@ def get_extracted_ids(
     return ids
 
 
-def is_id_in_ontology(
+def is_id_extracted_for_transformer(
+    item_id: str,
+    transformer: TransformerType,
+    pipeline_date: str,
+    environment: Environment,
+) -> bool:
+    """Return 'True' if the given ID was extracted by the specified transformer."""
+    return item_id in get_ids_for_transformer(transformer, pipeline_date, environment)
+
+
+def is_id_extracted_for_ontology(
     item_id: str,
     item_ontology: OntologyType,
     pipeline_date: str,
     environment: Environment,
 ) -> bool:
-    """Return 'True' if the given ID exists in the catalogue graph under the specified ontology."""
+    """Return 'True' if the given ID was extracted by any transformer under the specified ontology."""
     transformers = get_transformers_from_ontology(item_ontology)
     return any(
-        item_id in get_extracted_ids(t, pipeline_date, environment)
+        item_id in get_ids_for_transformer(t, pipeline_date, environment)
         for t in transformers
     )

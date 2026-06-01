@@ -2,11 +2,16 @@ import json
 from typing import Literal
 
 from config import WIKIDATA_SPARQL_URL
-from graph.sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from graph.sources.wikidata.linked_ontology_edge_source import (
+    WikidataLinkedOntologyEdgeSource,
+)
+from graph.sources.wikidata.linked_ontology_node_source import (
+    WikidataLinkedOntologyNodeSource,
+)
 from models.events import ExtractorEvent
 from tests.mocks import MockRequest
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
-from utils.ontology import get_extracted_ids, is_id_in_ontology
+from utils.ontology import get_ids_for_transformer, is_id_extracted_for_ontology
 
 
 def _add_mock_wikidata_requests(
@@ -55,37 +60,35 @@ def test_wikidata_concepts_source_edges() -> None:
         transformer_type="wikidata_linked_loc_concepts",
         entity_type="edges",
     )
-    loc_concepts_source = WikidataLinkedOntologySource(
+    loc_concepts_source = WikidataLinkedOntologyEdgeSource(
         linked_transformer="loc_concepts", event=source_event
     )
     stream_result = list(loc_concepts_source.stream_raw())
 
-    assert len(stream_result) == 7
+    assert len(stream_result) == 5
 
     same_as_edges = set()
     has_parent_edges = set()
     has_industry_edges = set()
     has_founder_edges = set()
-    for edge in stream_result:
-        if edge["type"] == "SAME_AS":
+    for edge, edge_type in stream_result:
+        if edge_type == "same_as_loc":
             same_as_edges.add((edge["from_id"], edge["to_id"]))
-        elif edge["type"] == "HAS_PARENT":
+        elif edge_type in ("instance_of", "subclass_of"):
             has_parent_edges.add((edge["from_id"], edge["to_id"]))
-        elif edge["type"] == "HAS_INDUSTRY":
+        elif edge_type == "has_industry":
             has_industry_edges.add((edge["from_id"], edge["to_id"]))
-        elif edge["type"] == "HAS_FOUNDER":
+        elif edge_type == "has_founder":
             has_founder_edges.add((edge["from_id"], edge["to_id"]))
         else:
-            raise ValueError(f"Unknown edge type {edge['type']}")
+            raise ValueError(f"Unknown edge type {edge_type}")
 
     assert len(same_as_edges) == 2
     assert ("Q1", "sh00000001") in same_as_edges
     assert ("Q2", "sh00000001") in same_as_edges
 
-    assert len(has_parent_edges) == 3
-    assert ("Q1", "Q4") in has_parent_edges
+    assert len(has_parent_edges) == 1
     assert ("Q2", "Q1") in has_parent_edges
-    assert ("Q2", "Q3") in has_parent_edges
 
     assert len(has_founder_edges) == 1
     assert ("Q1", "Q101") in has_founder_edges
@@ -104,7 +107,7 @@ def test_wikidata_concepts_source_nodes() -> None:
         transformer_type="wikidata_linked_loc_concepts",
         entity_type="nodes",
     )
-    mesh_concepts_source = WikidataLinkedOntologySource(
+    mesh_concepts_source = WikidataLinkedOntologyNodeSource(
         linked_transformer="loc_concepts", event=source_event
     )
 
@@ -121,9 +124,17 @@ def test_wikidata_concepts_source_nodes() -> None:
 def test_wikidata_linked_ontology_id_checker() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc"], "1900-01-01")
 
-    assert is_id_in_ontology("sh00000001", "loc", "1900-01-01", "prod")
-    assert not is_id_in_ontology("sh00000001000", "loc", "1900-01-01", "prod")
+    assert is_id_extracted_for_ontology("sh00000001", "loc", "1900-01-01", "prod")
+    assert not is_id_extracted_for_ontology(
+        "sh00000001000", "loc", "1900-01-01", "prod"
+    )
 
-    assert "sh00000001" not in get_extracted_ids("loc_locations", "1900-01-01", "prod")
-    assert "tgrefwdw" not in get_extracted_ids("loc_locations", "1900-01-01", "prod")
-    assert "sh00000015" in get_extracted_ids("loc_locations", "1900-01-01", "prod")
+    assert "sh00000001" not in get_ids_for_transformer(
+        "loc_locations", "1900-01-01", "prod"
+    )
+    assert "tgrefwdw" not in get_ids_for_transformer(
+        "loc_locations", "1900-01-01", "prod"
+    )
+    assert "sh00000015" in get_ids_for_transformer(
+        "loc_locations", "1900-01-01", "prod"
+    )
