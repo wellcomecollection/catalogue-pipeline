@@ -5,7 +5,7 @@ Fetches documents whose IDs match certain prefixes (color-filter-tests, similar-
 from the images-indexed index and writes them into the test_documents directory.
 
 Run from the catalogue_graph directory:
-    uv run python -m document_generators.update_image_documents <pipeline_date>
+    AWS_PROFILE=platform-developer uv run python -m document_generators.update_image_documents <pipeline_date>
 """
 
 import json
@@ -15,7 +15,6 @@ from pathlib import Path
 import click
 import elasticsearch
 import structlog
-
 from utils.elasticsearch import get_client
 
 logger = structlog.get_logger(__name__)
