@@ -1,17 +1,17 @@
 {
   "description": "examples of works with different types",
-  "id": "fab3djfd",
+  "id": "f69lhvle",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "fab3djfd",
+        "id": "f69lhvle",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "sLt8saTNwr"
+          "value": "rOmZlCCDo4"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "fab3djfd",
+      "id": "f69lhvle",
       "title": "rats",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "sLt8saTNwr",
+      "sourceIdentifier.value": "rOmZlCCDo4",
       "identifiers.value": [
-        "fab3djfd",
-        "sLt8saTNwr"
+        "f69lhvle",
+        "rOmZlCCDo4"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "fab3djfd",
+      "id": "f69lhvle",
       "title": "rats",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "sLt8saTNwr",
+          "value": "rOmZlCCDo4",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -98,8 +98,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "fab3djfd",
-        "sLt8saTNwr"
+        "f69lhvle",
+        "rOmZlCCDo4"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -112,5 +112,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:50:17.292056+00:00"
+  "createdAt": "2026-06-02T15:48:05.323521+00:00"
 }

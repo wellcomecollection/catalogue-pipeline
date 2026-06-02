@@ -1,17 +1,17 @@
 {
   "description": "examples for availabilities tests",
-  "id": "x6cnkeuy",
+  "id": "aw8rub6a",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "x6cnkeuy",
+        "id": "aw8rub6a",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "DlFSiEEJU7"
+          "value": "xEgMpyQoqd"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,25 +22,25 @@
       "redirectSources": []
     },
     "query": {
-      "id": "x6cnkeuy",
-      "title": "Efu3oqYCkBOnJHJ",
+      "id": "aw8rub6a",
+      "title": "2fqnkhruJbvG8aj",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "DlFSiEEJU7",
+      "sourceIdentifier.value": "xEgMpyQoqd",
       "identifiers.value": [
-        "x6cnkeuy",
-        "DlFSiEEJU7"
+        "aw8rub6a",
+        "xEgMpyQoqd"
       ],
       "images.id": [],
       "images.identifiers.value": [],
       "items.identifiers.value": [
-        "78qw5kKdhm"
+        "1D63j58IFI"
       ],
       "items.id": [
-        "wzgujy6s"
+        "zso8grfv"
       ],
       "items.shelfmark.value": [
-        "Shelfmark: vjhUwf"
+        "Shelfmark: w2Iy3uvQ"
       ],
       "notes.contents": [],
       "partOf.title": [],
@@ -50,13 +50,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "x6cnkeuy",
-      "title": "Efu3oqYCkBOnJHJ",
+      "id": "aw8rub6a",
+      "title": "2fqnkhruJbvG8aj",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "DlFSiEEJU7",
+          "value": "xEgMpyQoqd",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -69,10 +69,10 @@
       "genres": [],
       "items": [
         {
-          "id": "wzgujy6s",
+          "id": "zso8grfv",
           "identifiers": [
             {
-              "value": "78qw5kKdhm",
+              "value": "1D63j58IFI",
               "type": "Identifier",
               "identifierType": {
                 "id": "sierra-system-number",
@@ -89,14 +89,14 @@
                 "label": "Open shelves"
               },
               "license": {
-                "id": "ogl",
+                "id": "cc-by",
                 "type": "License",
-                "label": "Open Government Licence",
-                "url": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+                "label": "Attribution 4.0 International (CC BY 4.0)",
+                "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
               "label": "locationLabel",
-              "shelfmark": "Shelfmark: vjhUwf",
+              "shelfmark": "Shelfmark: w2Iy3uvQ",
               "type": "PhysicalLocation"
             }
           ],
@@ -130,8 +130,8 @@
       "contributors.agent": [],
       "items.locations.license": [
         {
-          "id": "ogl",
-          "label": "Open Government Licence"
+          "id": "cc-by",
+          "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
       "availabilities": [
@@ -155,18 +155,18 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "x6cnkeuy",
-        "DlFSiEEJU7"
+        "aw8rub6a",
+        "xEgMpyQoqd"
       ],
       "items.locations.license.id": [
-        "ogl"
+        "cc-by"
       ],
       "items.locations.accessConditions.status.id": [],
       "items.id": [
-        "wzgujy6s"
+        "zso8grfv"
       ],
       "items.identifiers.value": [
-        "78qw5kKdhm"
+        "1D63j58IFI"
       ],
       "items.locations.locationType.id": [
         "open-shelves"
@@ -179,5 +179,5 @@
       ]
     }
   },
-  "createdAt": "2026-06-02T13:50:17.600742+00:00"
+  "createdAt": "2026-06-02T15:48:05.569963+00:00"
 }

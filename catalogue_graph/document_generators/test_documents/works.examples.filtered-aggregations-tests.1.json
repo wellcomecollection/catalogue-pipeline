@@ -1,17 +1,17 @@
 {
   "description": "examples for the works filtered aggregations tests",
-  "id": "lpl6kr23",
+  "id": "izsnkcuv",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "lpl6kr23",
+        "id": "izsnkcuv",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "Q3czwaEKw6"
+          "value": "p73pTmAQO6"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,16 +22,16 @@
       "redirectSources": []
     },
     "query": {
-      "id": "lpl6kr23",
+      "id": "izsnkcuv",
       "title": "capybara",
       "alternativeTitles": [],
       "languages.label": [
         "Marathi"
       ],
-      "sourceIdentifier.value": "Q3czwaEKw6",
+      "sourceIdentifier.value": "p73pTmAQO6",
       "identifiers.value": [
-        "lpl6kr23",
-        "Q3czwaEKw6"
+        "izsnkcuv",
+        "p73pTmAQO6"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -46,7 +46,7 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "lpl6kr23",
+      "id": "izsnkcuv",
       "title": "capybara",
       "alternativeTitles": [],
       "workType": {
@@ -57,7 +57,7 @@
       "contributors": [],
       "identifiers": [
         {
-          "value": "Q3czwaEKw6",
+          "value": "p73pTmAQO6",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -124,8 +124,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "lpl6kr23",
-        "Q3czwaEKw6"
+        "izsnkcuv",
+        "p73pTmAQO6"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -138,5 +138,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:50:17.467526+00:00"
+  "createdAt": "2026-06-02T15:48:05.502440+00:00"
 }

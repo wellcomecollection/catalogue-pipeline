@@ -1,17 +1,17 @@
 {
   "description": "works with different contributor",
-  "id": "w3fv71t3",
+  "id": "g82ulfuk",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "w3fv71t3",
+        "id": "g82ulfuk",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "6k0UfnOH05"
+          "value": "pkDiTvZoFj"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "w3fv71t3",
-      "title": "HCSrWvOlPZzq55l",
+      "id": "g82ulfuk",
+      "title": "OXmreZiDuxsZZCv",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "6k0UfnOH05",
+      "sourceIdentifier.value": "pkDiTvZoFj",
       "identifiers.value": [
-        "w3fv71t3",
-        "6k0UfnOH05"
+        "g82ulfuk",
+        "pkDiTvZoFj"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -47,8 +47,8 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "w3fv71t3",
-      "title": "HCSrWvOlPZzq55l",
+      "id": "g82ulfuk",
+      "title": "OXmreZiDuxsZZCv",
       "alternativeTitles": [],
       "contributors": [
         {
@@ -72,7 +72,7 @@
       ],
       "identifiers": [
         {
-          "value": "6k0UfnOH05",
+          "value": "pkDiTvZoFj",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -132,8 +132,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "w3fv71t3",
-        "6k0UfnOH05"
+        "g82ulfuk",
+        "pkDiTvZoFj"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -146,5 +146,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:50:16.907090+00:00"
+  "createdAt": "2026-06-02T15:48:04.932793+00:00"
 }

@@ -1,17 +1,17 @@
 {
   "description": "one of a list of works with a variety of languages",
-  "id": "fjp7n2ua",
+  "id": "8ymtg2rp",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "fjp7n2ua",
+        "id": "8ymtg2rp",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "qOAy5bsPpn"
+          "value": "WqALHJiTvT"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,17 +22,17 @@
       "redirectSources": []
     },
     "query": {
-      "id": "fjp7n2ua",
+      "id": "8ymtg2rp",
       "title": "A work with languages English, Swedish",
       "alternativeTitles": [],
       "languages.label": [
         "English",
         "Swedish"
       ],
-      "sourceIdentifier.value": "qOAy5bsPpn",
+      "sourceIdentifier.value": "WqALHJiTvT",
       "identifiers.value": [
-        "fjp7n2ua",
-        "qOAy5bsPpn"
+        "8ymtg2rp",
+        "WqALHJiTvT"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -47,13 +47,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "fjp7n2ua",
+      "id": "8ymtg2rp",
       "title": "A work with languages English, Swedish",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "qOAy5bsPpn",
+          "value": "WqALHJiTvT",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -124,8 +124,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "fjp7n2ua",
-        "qOAy5bsPpn"
+        "8ymtg2rp",
+        "WqALHJiTvT"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -138,5 +138,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:48:26.148119+00:00"
+  "createdAt": "2026-06-02T15:48:04.816938+00:00"
 }

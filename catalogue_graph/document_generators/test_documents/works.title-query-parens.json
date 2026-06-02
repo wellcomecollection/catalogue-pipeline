@@ -1,17 +1,17 @@
 {
   "description": "a work whose title has parens meant to trip up ES",
-  "id": "ct4fxgg5",
+  "id": "3qq9ykph",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "ct4fxgg5",
+        "id": "3qq9ykph",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "8kiC62IB7l"
+          "value": "pHcb3TRZLf"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "ct4fxgg5",
+      "id": "3qq9ykph",
       "title": "(a b c d e) h",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "8kiC62IB7l",
+      "sourceIdentifier.value": "pHcb3TRZLf",
       "identifiers.value": [
-        "ct4fxgg5",
-        "8kiC62IB7l"
+        "3qq9ykph",
+        "pHcb3TRZLf"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "ct4fxgg5",
+      "id": "3qq9ykph",
       "title": "(a b c d e) h",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "8kiC62IB7l",
+          "value": "pHcb3TRZLf",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -98,8 +98,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "ct4fxgg5",
-        "8kiC62IB7l"
+        "3qq9ykph",
+        "pHcb3TRZLf"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -112,5 +112,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:48:26.122773+00:00"
+  "createdAt": "2026-06-02T15:48:04.791511+00:00"
 }

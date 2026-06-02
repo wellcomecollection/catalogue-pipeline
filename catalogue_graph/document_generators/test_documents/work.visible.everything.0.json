@@ -1,17 +1,17 @@
 {
   "description": "a list of work with all the include-able fields",
-  "id": "buzir0jj",
+  "id": "i4c7c9yl",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "buzir0jj",
+        "id": "i4c7c9yl",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "aemThQIEcu"
+          "value": "Mjz3tGdki5"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,7 +22,7 @@
       "redirectSources": []
     },
     "query": {
-      "id": "buzir0jj",
+      "id": "i4c7c9yl",
       "title": "A work with all the include-able fields",
       "alternativeTitles": [],
       "languages.label": [
@@ -30,10 +30,10 @@
         "YVAyaA5qII",
         "DWcK6hA9yk"
       ],
-      "sourceIdentifier.value": "aemThQIEcu",
+      "sourceIdentifier.value": "Mjz3tGdki5",
       "identifiers.value": [
-        "buzir0jj",
-        "aemThQIEcu",
+        "i4c7c9yl",
+        "Mjz3tGdki5",
         "vE9ss749JO"
       ],
       "images.id": [
@@ -90,7 +90,7 @@
       ]
     },
     "display": {
-      "id": "buzir0jj",
+      "id": "i4c7c9yl",
       "title": "A work with all the include-able fields",
       "alternativeTitles": [],
       "contributors": [
@@ -115,7 +115,7 @@
       ],
       "identifiers": [
         {
-          "value": "aemThQIEcu",
+          "value": "Mjz3tGdki5",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -422,6 +422,28 @@
             }
           ],
           "type": "Item"
+        },
+        {
+          "identifiers": [],
+          "locations": [
+            {
+              "locationType": {
+                "id": "iiif-image",
+                "type": "LocationType",
+                "label": "IIIF Image API"
+              },
+              "license": {
+                "id": "cc-by",
+                "type": "License",
+                "label": "Attribution 4.0 International (CC BY 4.0)",
+                "url": "http://creativecommons.org/licenses/by/4.0/"
+              },
+              "accessConditions": [],
+              "url": "https://iiif.wellcomecollection.org/image/aem.jpg/info.json",
+              "type": "DigitalLocation"
+            }
+          ],
+          "type": "Item"
         }
       ],
       "holdings": [
@@ -710,11 +732,12 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "buzir0jj",
-        "aemThQIEcu",
+        "i4c7c9yl",
+        "Mjz3tGdki5",
         "vE9ss749JO"
       ],
       "items.locations.license.id": [
+        "cc-by",
         "cc-by",
         "cc-by"
       ],
@@ -729,6 +752,7 @@
       ],
       "items.locations.locationType.id": [
         "iiif-image",
+        "iiif-image",
         "iiif-image"
       ],
       "items.locations.createdDate": [],
@@ -737,5 +761,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:48:26.031478+00:00"
+  "createdAt": "2026-06-02T15:48:04.699888+00:00"
 }

@@ -1,17 +1,17 @@
 {
   "description": "examples for availabilities tests",
-  "id": "54ukpwuk",
+  "id": "ivjhwfrw",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "54ukpwuk",
+        "id": "ivjhwfrw",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "MhtjyQSAQ2"
+          "value": "Qdxy4qwHMv"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "54ukpwuk",
-      "title": "WxaltzEdjQ5SxZW",
+      "id": "ivjhwfrw",
+      "title": "6E2B07K4O4FXhm3",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "MhtjyQSAQ2",
+      "sourceIdentifier.value": "Qdxy4qwHMv",
       "identifiers.value": [
-        "54ukpwuk",
-        "MhtjyQSAQ2"
+        "ivjhwfrw",
+        "Qdxy4qwHMv"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "54ukpwuk",
-      "title": "WxaltzEdjQ5SxZW",
+      "id": "ivjhwfrw",
+      "title": "6E2B07K4O4FXhm3",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "MhtjyQSAQ2",
+          "value": "Qdxy4qwHMv",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -98,8 +98,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "54ukpwuk",
-        "MhtjyQSAQ2"
+        "ivjhwfrw",
+        "Qdxy4qwHMv"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -112,5 +112,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:50:17.613299+00:00"
+  "createdAt": "2026-06-02T15:48:05.582480+00:00"
 }

@@ -1,17 +1,17 @@
 {
   "description": "one of a list of works with a variety of formats",
-  "id": "frszvtfh",
+  "id": "0pb5sj7x",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "frszvtfh",
+        "id": "0pb5sj7x",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "nHRn0ajpDE"
+          "value": "0FxNNPfo3i"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "frszvtfh",
+      "id": "0pb5sj7x",
       "title": "A work with format Audio",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "nHRn0ajpDE",
+      "sourceIdentifier.value": "0FxNNPfo3i",
       "identifiers.value": [
-        "frszvtfh",
-        "nHRn0ajpDE"
+        "0pb5sj7x",
+        "0FxNNPfo3i"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,7 +44,7 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "frszvtfh",
+      "id": "0pb5sj7x",
       "title": "A work with format Audio",
       "alternativeTitles": [],
       "workType": {
@@ -55,7 +55,7 @@
       "contributors": [],
       "identifiers": [
         {
-          "value": "nHRn0ajpDE",
+          "value": "0FxNNPfo3i",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -109,8 +109,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "frszvtfh",
-        "nHRn0ajpDE"
+        "0pb5sj7x",
+        "0FxNNPfo3i"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -123,5 +123,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:48:26.096746+00:00"
+  "createdAt": "2026-06-02T15:48:04.765214+00:00"
 }

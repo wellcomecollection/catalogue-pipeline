@@ -1,17 +1,17 @@
 {
   "description": "examples for the works filtered aggregations tests",
-  "id": "c2qwgyru",
+  "id": "7jbczidm",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "c2qwgyru",
+        "id": "7jbczidm",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "wSpc6bq2l6"
+          "value": "7BoHiWl0RE"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,16 +22,16 @@
       "redirectSources": []
     },
     "query": {
-      "id": "c2qwgyru",
+      "id": "7jbczidm",
       "title": "rats",
       "alternativeTitles": [],
       "languages.label": [
         "Bashkir"
       ],
-      "sourceIdentifier.value": "wSpc6bq2l6",
+      "sourceIdentifier.value": "7BoHiWl0RE",
       "identifiers.value": [
-        "c2qwgyru",
-        "wSpc6bq2l6"
+        "7jbczidm",
+        "7BoHiWl0RE"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -46,7 +46,7 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "c2qwgyru",
+      "id": "7jbczidm",
       "title": "rats",
       "alternativeTitles": [],
       "workType": {
@@ -57,7 +57,7 @@
       "contributors": [],
       "identifiers": [
         {
-          "value": "wSpc6bq2l6",
+          "value": "7BoHiWl0RE",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -124,8 +124,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "c2qwgyru",
-        "wSpc6bq2l6"
+        "7jbczidm",
+        "7BoHiWl0RE"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -138,5 +138,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:50:17.501188+00:00"
+  "createdAt": "2026-06-02T15:48:05.514779+00:00"
 }

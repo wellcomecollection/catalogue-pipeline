@@ -1,17 +1,17 @@
 {
   "description": "works with multi-year production ranges",
-  "id": "4q4m2knz",
+  "id": "z8hg9mnu",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "4q4m2knz",
+        "id": "z8hg9mnu",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "gvlTsgCCm8"
+          "value": "0xZbxZvHL6"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "4q4m2knz",
-      "title": "cTKdDEJJpB3pnN0",
+      "id": "z8hg9mnu",
+      "title": "L3q3XIw4UZjcaiy",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "gvlTsgCCm8",
+      "sourceIdentifier.value": "0xZbxZvHL6",
       "identifiers.value": [
-        "4q4m2knz",
-        "gvlTsgCCm8"
+        "z8hg9mnu",
+        "0xZbxZvHL6"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -39,8 +39,8 @@
       "notes.contents": [],
       "partOf.title": [],
       "production.label": [
-        "9GgZWNx24O3vqGo",
-        "YtYKegzEj6uoipi",
+        "dgi7qKssldrK81x",
+        "MEYu4QLZohBA8Qf",
         "1960"
       ],
       "subjects.concepts.label": [],
@@ -48,13 +48,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "4q4m2knz",
-      "title": "cTKdDEJJpB3pnN0",
+      "id": "z8hg9mnu",
+      "title": "L3q3XIw4UZjcaiy",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "gvlTsgCCm8",
+          "value": "0xZbxZvHL6",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -70,16 +70,16 @@
       "availabilities": [],
       "production": [
         {
-          "label": "PJzjc45f6cOwn4AKSPhAnvfg7",
+          "label": "zTMpY1DZ78mSlFW8DcV61VAmH",
           "places": [
             {
-              "label": "9GgZWNx24O3vqGo",
+              "label": "dgi7qKssldrK81x",
               "type": "Place"
             }
           ],
           "agents": [
             {
-              "label": "YtYKegzEj6uoipi",
+              "label": "MEYu4QLZohBA8Qf",
               "type": "Agent"
             }
           ],
@@ -132,8 +132,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "4q4m2knz",
-        "gvlTsgCCm8"
+        "z8hg9mnu",
+        "0xZbxZvHL6"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -146,5 +146,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:50:17.110335+00:00"
+  "createdAt": "2026-06-02T15:48:05.147335+00:00"
 }

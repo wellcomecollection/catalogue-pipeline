@@ -1,17 +1,17 @@
 {
   "description": "one of a list of works with a variety of formats",
-  "id": "fmg6im97",
+  "id": "4bwwncm2",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "fmg6im97",
+        "id": "4bwwncm2",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "Ae41JnHmnF"
+          "value": "ONBMz3P6qR"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "fmg6im97",
+      "id": "4bwwncm2",
       "title": "A work with format Journals",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "Ae41JnHmnF",
+      "sourceIdentifier.value": "ONBMz3P6qR",
       "identifiers.value": [
-        "fmg6im97",
-        "Ae41JnHmnF"
+        "4bwwncm2",
+        "ONBMz3P6qR"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,7 +44,7 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "fmg6im97",
+      "id": "4bwwncm2",
       "title": "A work with format Journals",
       "alternativeTitles": [],
       "workType": {
@@ -55,7 +55,7 @@
       "contributors": [],
       "identifiers": [
         {
-          "value": "Ae41JnHmnF",
+          "value": "ONBMz3P6qR",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -109,8 +109,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "fmg6im97",
-        "Ae41JnHmnF"
+        "4bwwncm2",
+        "ONBMz3P6qR"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -123,5 +123,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:48:26.083686+00:00"
+  "createdAt": "2026-06-02T15:48:04.752347+00:00"
 }
