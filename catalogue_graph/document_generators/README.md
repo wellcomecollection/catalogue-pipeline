@@ -21,6 +21,7 @@ inferrer models.
 Instead, for these we use "real" documents from the index (which means that, if they need to be updated, that should
 happen after a reindex is complete).
 
-To update them, you can run `./update_image_documents.py <pipeline-date>`. If you want to change the record used for the
-test (e.g. if one of our examples is suppressed) then you can do so by changing the `id` field in one of the
-documents and running the script.
+To update them, you can run (from the `catalogue_graph` directory)
+`AWS_PROFILE=platform-developer uv run python -m document_generators.update_image_documents <pipeline-date>`.
+If you want to change the record used for the test (e.g. if one of our examples is suppressed) then you can do so by
+changing the `id` field in one of the documents and running the script.
