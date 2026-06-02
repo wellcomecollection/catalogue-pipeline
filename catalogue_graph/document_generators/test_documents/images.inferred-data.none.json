@@ -1,9 +1,9 @@
 {
   "description": "an image without any inferred data",
-  "id": "xnvjnv9w",
+  "id": "ffui9nxs",
   "document": {
     "display": {
-      "id": "xnvjnv9w",
+      "id": "ffui9nxs",
       "locations": [
         {
           "locationType": {
@@ -18,16 +18,16 @@
             "url": "http://creativecommons.org/licenses/by/4.0/"
           },
           "accessConditions": [],
-          "url": "https://iiif.wellcomecollection.org/image/nMN.jpg/info.json",
-          "linkText": "Link text: 0sLMuJi",
+          "url": "https://iiif.wellcomecollection.org/image/oJM.jpg/info.json",
+          "linkText": "Link text: CwV5derK9",
           "type": "DigitalLocation"
         }
       ],
       "aspectRatio": 1.0,
       "averageColor": "#ffffff",
       "source": {
-        "id": "8lljuyu9",
-        "title": "ueWkByHS9Np0hh8",
+        "id": "lf5ik6rk",
+        "title": "e03osGHuEYsd0Cw",
         "contributors": [],
         "subjects": [],
         "genres": [],
@@ -48,22 +48,22 @@
           "url": "http://creativecommons.org/licenses/by/4.0/"
         },
         "accessConditions": [],
-        "url": "https://iiif.wellcomecollection.org/image/nMN.jpg/info.json",
-        "linkText": "Link text: 0sLMuJi",
+        "url": "https://iiif.wellcomecollection.org/image/oJM.jpg/info.json",
+        "linkText": "Link text: CwV5derK9",
         "type": "DigitalLocation"
       }
     },
     "query": {
-      "id": "xnvjnv9w",
+      "id": "ffui9nxs",
       "source": {
-        "id": "vhmwulrt",
-        "title": "s5RKPQVGscDoaxw",
+        "id": "bcet59gk",
+        "title": "JvkyXybguwl5UBh",
         "alternativeTitles": [],
         "languages.label": [],
-        "sourceIdentifier.value": "vxOjL0F5wf",
+        "sourceIdentifier.value": "luevALY2pB",
         "identifiers.value": [
-          "vhmwulrt",
-          "vxOjL0F5wf"
+          "bcet59gk",
+          "luevALY2pB"
         ],
         "images.id": [],
         "images.identifiers.value": [],
@@ -108,5 +108,5 @@
     },
     "modifiedTime": "2001-01-01T01:01:01Z"
   },
-  "createdAt": "2026-06-01T14:15:24.092352+00:00"
+  "createdAt": "2026-06-02T10:51:59.993736+00:00"
 }
