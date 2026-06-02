@@ -8,6 +8,7 @@ from ingestor.models.augmented.image import (
 )
 from ingestor.models.merged.work import VisibleMergedWork
 from ingestor.models.neptune.query_result import WorkHierarchy
+from models.pipeline.image import ImageData
 from models.pipeline.work_data import WorkData
 
 from .identifiers import create_identified, create_source_identifier
@@ -76,3 +77,11 @@ def create_extracted_image(
     hierarchy = WorkHierarchy(id=work.state.canonical_id, ancestors=[], children=[])
     extracted_work = VisibleExtractedWork(work=work, hierarchy=hierarchy, concepts=[])
     return ExtractedImage(image=image, work=extracted_work)
+
+
+def create_image_data() -> ImageData:
+    return ImageData(
+        id=create_identified(ontology_type="Image"),
+        version=1,
+        locations=[create_digital_location(location_type_id="iiif-image")],
+    )

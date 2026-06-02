@@ -12,6 +12,7 @@ from .identifiers import create_identified, create_source_identifier
 from .images import (
     create_augmented_image,
     create_extracted_image,
+    create_image_data,
     create_inferred_data,
 )
 from .items import (
@@ -22,13 +23,12 @@ from .items import (
     create_unidentifiable_item,
 )
 from .languages import create_language
+from .notes import create_note
 from .production import create_production_event
 from .random import random_alphanumeric, reset
 from .works import (
     create_deleted_merged_work,
-    create_image_data,
     create_invisible_merged_work,
-    create_note,
     create_redirected_merged_work,
     create_visible_merged_work,
 )
