@@ -1,0 +1,214 @@
+{
+  "description": "a work with licensed digital items",
+  "id": "11lsz2t8",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "11lsz2t8",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "8McoPlaPH6"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "11lsz2t8",
+      "title": "oybNvjl05F4eXgl",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "8McoPlaPH6",
+      "identifiers.value": [
+        "11lsz2t8",
+        "8McoPlaPH6"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [
+        "cfwyPAyYPS",
+        "cBC9CteRov"
+      ],
+      "items.id": [
+        "ams026se",
+        "t49xt0kw"
+      ],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "11lsz2t8",
+      "title": "oybNvjl05F4eXgl",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "8McoPlaPH6",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [
+        {
+          "id": "ams026se",
+          "identifiers": [
+            {
+              "value": "cfwyPAyYPS",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "locationType": {
+                "id": "iiif-image",
+                "type": "LocationType",
+                "label": "IIIF Image API"
+              },
+              "license": {
+                "id": "cc-by",
+                "type": "License",
+                "label": "Attribution 4.0 International (CC BY 4.0)",
+                "url": "http://creativecommons.org/licenses/by/4.0/"
+              },
+              "accessConditions": [],
+              "url": "https://iiif.wellcomecollection.org/image/amK.jpg/info.json",
+              "credit": "Credit line: rnfBbIETV",
+              "linkText": "Link text: eFiQfU",
+              "type": "DigitalLocation"
+            }
+          ],
+          "type": "Item"
+        },
+        {
+          "id": "t49xt0kw",
+          "identifiers": [
+            {
+              "value": "cBC9CteRov",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "locationType": {
+                "id": "iiif-image",
+                "type": "LocationType",
+                "label": "IIIF Image API"
+              },
+              "license": {
+                "id": "cc-by-nc",
+                "type": "License",
+                "label": "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)",
+                "url": "https://creativecommons.org/licenses/by-nc/4.0/"
+              },
+              "accessConditions": [],
+              "url": "https://iiif.wellcomecollection.org/image/WOX.jpg/info.json",
+              "credit": "Credit line: sRFjzR0B69",
+              "linkText": "Link text: sFzJaO",
+              "type": "DigitalLocation"
+            }
+          ],
+          "type": "Item"
+        }
+      ],
+      "holdings": [],
+      "availabilities": [],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [
+        {
+          "id": "cc-by",
+          "label": "Attribution 4.0 International (CC BY 4.0)"
+        },
+        {
+          "id": "cc-by-nc",
+          "label": "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)"
+        }
+      ],
+      "availabilities": []
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "11lsz2t8",
+        "8McoPlaPH6"
+      ],
+      "items.locations.license.id": [
+        "cc-by",
+        "cc-by-nc"
+      ],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [
+        "ams026se",
+        "t49xt0kw"
+      ],
+      "items.identifiers.value": [
+        "cfwyPAyYPS",
+        "cBC9CteRov"
+      ],
+      "items.locations.locationType.id": [
+        "iiif-image",
+        "iiif-image"
+      ],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": []
+    }
+  },
+  "createdAt": "2026-06-02T13:48:26.191362+00:00"
+}

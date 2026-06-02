@@ -1,0 +1,296 @@
+{
+  "description": "examples for availabilities tests",
+  "id": "l8zop6fb",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "l8zop6fb",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "mnrP1PuPI2"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "l8zop6fb",
+      "title": "HvPREB9IrNc4efo",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "mnrP1PuPI2",
+      "identifiers.value": [
+        "l8zop6fb",
+        "mnrP1PuPI2"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [
+        "ONzuiLHYMC",
+        "WnVlThO1TO",
+        "Ec0I18EWEL"
+      ],
+      "items.id": [
+        "qkk3gwo8",
+        "y3gi542l",
+        "6gb5r1cq"
+      ],
+      "items.shelfmark.value": [
+        "Shelfmark: 1ysvCKQ2"
+      ],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "l8zop6fb",
+      "title": "HvPREB9IrNc4efo",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "mnrP1PuPI2",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [
+        {
+          "id": "qkk3gwo8",
+          "identifiers": [
+            {
+              "value": "ONzuiLHYMC",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "locationType": {
+                "id": "closed-stores",
+                "type": "LocationType",
+                "label": "Closed stores"
+              },
+              "license": {
+                "id": "pdm",
+                "type": "License",
+                "label": "Public Domain Mark",
+                "url": "https://creativecommons.org/share-your-work/public-domain/pdm/"
+              },
+              "accessConditions": [],
+              "label": "locationLabel",
+              "type": "PhysicalLocation"
+            }
+          ],
+          "type": "Item"
+        },
+        {
+          "id": "y3gi542l",
+          "identifiers": [
+            {
+              "value": "WnVlThO1TO",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "locationType": {
+                "id": "open-shelves",
+                "type": "LocationType",
+                "label": "Open shelves"
+              },
+              "accessConditions": [],
+              "label": "locationLabel",
+              "shelfmark": "Shelfmark: 1ysvCKQ2",
+              "type": "PhysicalLocation"
+            }
+          ],
+          "type": "Item"
+        },
+        {
+          "id": "6gb5r1cq",
+          "identifiers": [
+            {
+              "value": "Ec0I18EWEL",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "locationType": {
+                "id": "iiif-image",
+                "type": "LocationType",
+                "label": "IIIF Image API"
+              },
+              "license": {
+                "id": "cc-by",
+                "type": "License",
+                "label": "Attribution 4.0 International (CC BY 4.0)",
+                "url": "http://creativecommons.org/licenses/by/4.0/"
+              },
+              "accessConditions": [
+                {
+                  "method": {
+                    "id": "view-online",
+                    "type": "AccessMethod",
+                    "label": "View online"
+                  },
+                  "status": {
+                    "id": "open-with-advisory",
+                    "type": "AccessStatus",
+                    "label": "Open with advisory"
+                  },
+                  "type": "AccessCondition"
+                }
+              ],
+              "url": "https://iiif.wellcomecollection.org/image/wiY.jpg/info.json",
+              "credit": "Credit line: O5l8cNHr",
+              "linkText": "Link text: HlLPJCooJ",
+              "type": "DigitalLocation"
+            }
+          ],
+          "type": "Item"
+        }
+      ],
+      "holdings": [],
+      "availabilities": [
+        {
+          "id": "closed-stores",
+          "type": "Availability",
+          "label": "Closed stores"
+        },
+        {
+          "id": "open-shelves",
+          "type": "Availability",
+          "label": "Open shelves"
+        },
+        {
+          "id": "online",
+          "type": "Availability",
+          "label": "Online"
+        }
+      ],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [
+        {
+          "id": "pdm",
+          "label": "Public Domain Mark"
+        },
+        {
+          "id": "cc-by",
+          "label": "Attribution 4.0 International (CC BY 4.0)"
+        }
+      ],
+      "availabilities": [
+        {
+          "id": "closed-stores",
+          "label": "Closed stores"
+        },
+        {
+          "id": "open-shelves",
+          "label": "Open shelves"
+        },
+        {
+          "id": "online",
+          "label": "Online"
+        }
+      ]
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "l8zop6fb",
+        "mnrP1PuPI2"
+      ],
+      "items.locations.license.id": [
+        "pdm",
+        "cc-by"
+      ],
+      "items.locations.accessConditions.status.id": [
+        "open-with-advisory"
+      ],
+      "items.id": [
+        "qkk3gwo8",
+        "y3gi542l",
+        "6gb5r1cq"
+      ],
+      "items.identifiers.value": [
+        "ONzuiLHYMC",
+        "WnVlThO1TO",
+        "Ec0I18EWEL"
+      ],
+      "items.locations.locationType.id": [
+        "closed-stores",
+        "open-shelves",
+        "iiif-image"
+      ],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": [
+        "closed-stores",
+        "open-shelves",
+        "online"
+      ]
+    }
+  },
+  "createdAt": "2026-06-02T13:50:17.606994+00:00"
+}

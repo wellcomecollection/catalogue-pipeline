@@ -1,0 +1,31 @@
+{
+  "description": "an arbitrary list of invisible works",
+  "id": "mhzfxhcb",
+  "document": {
+    "type": "Invisible",
+    "debug": {
+      "source": {
+        "id": "mhzfxhcb",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "O67IMRebhO"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "invisibilityReasons": [
+        {
+          "type": "SourceFieldMissing",
+          "info": "test"
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-06-02T13:48:25.900804+00:00"
+}

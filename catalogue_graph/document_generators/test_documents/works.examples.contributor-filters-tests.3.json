@@ -1,0 +1,135 @@
+{
+  "description": "examples for the contributor filter tests",
+  "id": "pxrrvlqn",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "pxrrvlqn",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "2s2HkT7EA4"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "pxrrvlqn",
+      "title": "8LIlfXhizrf2ILT",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "2s2HkT7EA4",
+      "identifiers.value": [
+        "pxrrvlqn",
+        "2s2HkT7EA4"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [],
+      "items.id": [],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [
+        "Darwin \"Jones\", Charles"
+      ],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "pxrrvlqn",
+      "title": "8LIlfXhizrf2ILT",
+      "alternativeTitles": [],
+      "contributors": [
+        {
+          "agent": {
+            "label": "Darwin \"Jones\", Charles",
+            "type": "Person"
+          },
+          "roles": [],
+          "primary": true,
+          "type": "Contributor"
+        }
+      ],
+      "identifiers": [
+        {
+          "value": "2s2HkT7EA4",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [],
+      "holdings": [],
+      "availabilities": [],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [
+        {
+          "id": "Darwin \"Jones\", Charles",
+          "label": "Darwin \"Jones\", Charles"
+        }
+      ],
+      "items.locations.license": [],
+      "availabilities": []
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [
+        "Darwin \"Jones\", Charles"
+      ],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "pxrrvlqn",
+        "2s2HkT7EA4"
+      ],
+      "items.locations.license.id": [],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [],
+      "items.identifiers.value": [],
+      "items.locations.locationType.id": [],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": []
+    }
+  },
+  "createdAt": "2026-06-02T13:50:17.396735+00:00"
+}
