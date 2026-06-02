@@ -1,7 +1,7 @@
 import pytest
 from pymarc.record import Field, Record
 
-from models.pipeline.id_label import Format
+from models.pipeline.format import Format
 
 from ..ebsco_test_transformer import transform_ebsco_record
 

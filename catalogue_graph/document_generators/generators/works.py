@@ -15,8 +15,9 @@ from models.pipeline.access_condition import (
 )
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Genre, Subject
+from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
-from models.pipeline.id_label import Format, Id, IdLabel, Language
+from models.pipeline.id_label import Id, IdLabel, Language
 from models.pipeline.identifier import Identified
 from models.pipeline.image import ImageData
 from models.pipeline.item import Item
@@ -220,10 +221,6 @@ def create_image_data() -> ImageData:
     )
 
 
-
-
-
-
 def create_note() -> Note:
     note_types = [
         IdLabel(id="general-note", label="Notes"),
@@ -234,6 +231,7 @@ def create_note() -> Note:
         note_type=rng.choice(note_types),
         contents=random_alphanumeric(),
     )
+
 
 def _make_access_status(status_type: str) -> AccessStatus:
     if status_type == "LicensedResources.Resource":

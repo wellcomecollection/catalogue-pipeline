@@ -36,7 +36,15 @@ from models.pipeline.access_condition import (
 )
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Concept, Genre, Period, Subject
-from models.pipeline.id_label import Format, Id, Language
+from models.pipeline.format import (
+    FORMAT_LABEL_MAPPING,
+    Audio,
+    Books,
+    Format,
+    Journals,
+    Pictures,
+)
+from models.pipeline.id_label import Id, Language
 from models.pipeline.identifier import Identified, SourceIdentifier
 from models.pipeline.production import ProductionEvent
 
@@ -69,58 +77,8 @@ from .generators import (
 
 TEST_DOCUMENTS_DIR = Path(__file__).resolve().parent / "test_documents"
 
-# --- Format constants (matching Scala Format enum) ---
-Books = Format(id="a", label="Books")
-DigitalImages = Format(id="q", label="Digital Images")
-Ephemera = Format(id="l", label="Ephemera")
-Maps = Format(id="e", label="Maps")
-Pictures = Format(id="k", label="Pictures")
-StudentDissertations = Format(id="w", label="Student dissertations")
-ThreeDObjects = Format(id="r", label="3-D Objects")
-CDRoms = Format(id="m", label="CD-Roms")
-Journals = Format(id="d", label="Journals")
-MixedMaterials = Format(id="p", label="Mixed materials")
-Audio = Format(id="i", label="Audio")
-Videos = Format(id="g", label="Videos")
-ArchivesAndManuscripts = Format(id="h", label="Archives and manuscripts")
-ArchivesDigital = Format(id="hdig", label="Born-digital archives")
-Film = Format(id="n", label="Film")
-ManuscriptsAsian = Format(id="b", label="Manuscripts")
-Music = Format(id="c", label="Music")
-StandingOrder = Format(id="u", label="Standing order")
-WebSites = Format(id="z", label="Web sites")
-EBooks = Format(id="v", label="E-books")
-ESound = Format(id="s", label="E-sound")
-EJournals = Format(id="j", label="E-journals")
-EVideos = Format(id="f", label="E-videos")
-EManuscriptsAsian = Format(id="x", label="Manuscripts")
 
-ALL_FORMATS = [
-    Books,
-    DigitalImages,
-    Ephemera,
-    Maps,
-    Pictures,
-    StudentDissertations,
-    ThreeDObjects,
-    CDRoms,
-    Journals,
-    MixedMaterials,
-    Audio,
-    Videos,
-    ArchivesAndManuscripts,
-    ArchivesDigital,
-    Film,
-    ManuscriptsAsian,
-    Music,
-    StandingOrder,
-    WebSites,
-    EBooks,
-    ESound,
-    EJournals,
-    EVideos,
-    EManuscriptsAsian,
-]
+ALL_FORMATS = [Format(id=k, label=v) for k, v in FORMAT_LABEL_MAPPING.items()]
 
 
 @freeze_time("2001-01-01T01:01:01Z")

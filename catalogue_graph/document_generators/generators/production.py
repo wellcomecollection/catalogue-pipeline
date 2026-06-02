@@ -1,7 +1,7 @@
 from models.pipeline.production import ProductionEvent
 
-from .random import random_alphanumeric, rng
 from .concepts import create_concept, create_period_for_year
+from .random import random_alphanumeric, rng
 
 
 def create_production_event() -> ProductionEvent:

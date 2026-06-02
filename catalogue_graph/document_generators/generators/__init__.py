@@ -15,6 +15,7 @@ from .images import (
     create_inferred_data,
 )
 from .languages import create_language
+from .production import create_production_event
 from .random import random_alphanumeric, reset
 from .works import (
     create_closed_stores_item,
@@ -25,7 +26,6 @@ from .works import (
     create_item,
     create_note,
     create_open_shelves_item,
-    create_production_event,
     create_redirected_merged_work,
     create_visible_merged_work,
 )

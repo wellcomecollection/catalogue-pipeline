@@ -1,4 +1,3 @@
-
 from models.pipeline.id_label import Language
 
 from .random import random_alphanumeric

@@ -16,8 +16,9 @@ from models.pipeline.access_condition import (
 )
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Concept, Contributor, Genre, Subject
+from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
-from models.pipeline.id_label import Format, Id, IdLabel, Language
+from models.pipeline.id_label import Id, IdLabel, Language
 from models.pipeline.identifier import Identified, SourceIdentifier
 from models.pipeline.image import ImageData
 from models.pipeline.item import Item

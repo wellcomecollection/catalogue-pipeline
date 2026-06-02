@@ -1,6 +1,4 @@
-
 from models.pipeline.holdings import Holdings
-
 
 from .locations import create_physical_location
 from .random import random_alphanumeric, rng
