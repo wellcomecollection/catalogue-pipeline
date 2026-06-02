@@ -67,6 +67,7 @@ from .generators import (
     create_redirected_merged_work,
     create_source_identifier,
     create_subject,
+    create_unidentifiable_item,
     create_visible_merged_work,
     random_alphanumeric,
     reset,
@@ -246,7 +247,7 @@ def create_works_with_all_includes() -> None:
             holdings=create_holdings(3),
             former_frequency=["Published in 2001", "Published in 2002"],
             designation=["Designation #1", "Designation #2", "Designation #3"],
-            items=[create_item() for _ in range(2)],
+            items=[create_item() for _ in range(2)] + [create_unidentifiable_item()],
         )
         works.append(work)
 
@@ -704,7 +705,7 @@ def create_availabilities_test_examples() -> None:
             availabilities=[Id(id="closed-stores")],
         ),
         "online-only": create_visible_merged_work(
-            items=[create_digital_item(access_status="Open")],
+            items=[create_digital_item(access_status_type="Open")],
             availabilities=[Id(id="online")],
         ),
         "open-only": create_visible_merged_work(
@@ -715,7 +716,7 @@ def create_availabilities_test_examples() -> None:
             items=[
                 create_closed_stores_item(),
                 create_open_shelves_item(),
-                create_digital_item(access_status="OpenWithAdvisory"),
+                create_digital_item(access_status_type="OpenWithAdvisory"),
             ],
             availabilities=[
                 Id(id="closed-stores"),

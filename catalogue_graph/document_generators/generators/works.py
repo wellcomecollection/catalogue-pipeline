@@ -7,12 +7,6 @@ from ingestor.models.merged.work import (
 )
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
-from models.pipeline.access_condition import (
-    AccessCondition,
-    AccessMethod,
-    AccessStatus,
-    AccessStatusRelationship,
-)
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Genre, Subject
 from models.pipeline.format import Format
@@ -28,7 +22,7 @@ from models.pipeline.work_data import WorkData, WorkType
 from models.pipeline.work_state import WorkRelations
 
 from .identifiers import create_identified, create_source_identifier
-from .locations import create_digital_location, create_physical_location
+from .locations import create_digital_location
 from .random import random_alphanumeric, random_canonical_id, rng
 
 
@@ -173,46 +167,6 @@ def create_redirected_merged_work() -> RedirectedMergedWork:
     )
 
 
-def create_item(
-    locations: list | None = None,
-    other_identifiers: list | None = None,
-) -> Item:
-    if locations is None:
-        locations = [create_digital_location(location_type_id="iiif-image")]
-    item_id = create_identified()
-    return Item(id=item_id, locations=locations)
-
-
-def create_digital_item(
-    license_id: str = "cc-by",
-    access_status: str | None = None,
-) -> Item:
-    access_conditions: list[AccessCondition] = []
-    if access_status:
-        access_conditions = [
-            AccessCondition(
-                method=AccessMethod(type="ViewOnline"),
-                status=_make_access_status(access_status),
-            )
-        ]
-    loc = create_digital_location(
-        location_type_id="iiif-image",
-        license_id=license_id,
-        access_conditions=access_conditions,
-    )
-    return Item(id=create_identified(), locations=[loc])
-
-
-def create_closed_stores_item() -> Item:
-    loc = create_physical_location(location_type_id="closed-stores")
-    return Item(id=create_identified(), locations=[loc])
-
-
-def create_open_shelves_item() -> Item:
-    loc = create_physical_location(location_type_id="open-shelves")
-    return Item(id=create_identified(), locations=[loc])
-
-
 def create_image_data() -> ImageData:
     return ImageData(
         id=create_identified(ontology_type="Image"),
@@ -231,17 +185,3 @@ def create_note() -> Note:
         note_type=rng.choice(note_types),
         contents=random_alphanumeric(),
     )
-
-
-def _make_access_status(status_type: str) -> AccessStatus:
-    if status_type == "LicensedResources.Resource":
-        return AccessStatus(
-            type="LicensedResources",
-            relationship=AccessStatusRelationship(type="Resource"),
-        )
-    if status_type == "LicensedResources.RelatedResource":
-        return AccessStatus(
-            type="LicensedResources",
-            relationship=AccessStatusRelationship(type="RelatedResource"),
-        )
-    return AccessStatus(type=status_type)

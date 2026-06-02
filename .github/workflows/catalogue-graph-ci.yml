@@ -33,7 +33,9 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - name: Regenerate test documents
         working-directory: catalogue_graph
-        run: uv run python -m document_generators.create_test_image_documents
+        run: |
+          uv run python -m document_generators.create_test_work_documents
+          uv run python -m document_generators.create_test_image_documents
       - name: Check for uncommitted changes
         working-directory: catalogue_graph
         run: git diff --exit-code document_generators/test_documents/

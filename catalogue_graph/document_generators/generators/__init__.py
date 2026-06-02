@@ -14,18 +14,21 @@ from .images import (
     create_extracted_image,
     create_inferred_data,
 )
+from .items import (
+    create_closed_stores_item,
+    create_digital_item,
+    create_item,
+    create_open_shelves_item,
+    create_unidentifiable_item,
+)
 from .languages import create_language
 from .production import create_production_event
 from .random import random_alphanumeric, reset
 from .works import (
-    create_closed_stores_item,
     create_deleted_merged_work,
-    create_digital_item,
     create_image_data,
     create_invisible_merged_work,
-    create_item,
     create_note,
-    create_open_shelves_item,
     create_redirected_merged_work,
     create_visible_merged_work,
 )
@@ -46,6 +49,7 @@ __all__ = [
     "create_inferred_data",
     "create_invisible_merged_work",
     "create_item",
+    "create_unidentifiable_item",
     "create_language",
     "create_note",
     "create_open_shelves_item",
