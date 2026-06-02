@@ -674,6 +674,19 @@ def create_filtered_aggregations_test_examples() -> None:
     quechua = Language(id="que", label="Quechua")
     chechen = Language(id="che", label="Chechen")
 
+    # | workType     | count |
+    # |--------------|-------|
+    # | a / Books    | 4     |
+    # | d / Journals | 3     |
+    # | i / Audio    | 2     |
+    # | k / Pictures | 1     |
+    #
+    # | language       | count |
+    # |----------------|-------|
+    # | bak / Bashkir  | 4     |
+    # | que / Quechua  | 3     |
+    # | mar / Marathi  | 2     |
+    # | che / Chechen  | 1     |
     combos = [
         (Books, bashkir, "rats"),
         (Journals, marathi, "capybara"),
