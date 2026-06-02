@@ -5,9 +5,6 @@ Run from the catalogue_graph directory:
     uv run python -m document_generators.create_test_image_documents
 """
 
-import json
-from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 from freezegun import freeze_time
@@ -33,37 +30,13 @@ from .generators import (
     random_alphanumeric,
     reset,
 )
-
-TEST_DOCUMENTS_DIR = Path(__file__).resolve().parent / "test_documents"
+from .utils import TEST_DOCUMENTS_DIR, save_document
 
 
 @freeze_time("2001-01-01T01:01:01Z")
 def transform_image(extracted: ExtractedImage) -> dict[str, Any]:
     indexable = IndexableImage.from_extracted_image(extracted)
     return indexable.model_dump(mode="json", exclude_none=True)
-
-
-def save_document(
-    doc_id: str, description: str, image_id: str, document: dict[str, Any]
-) -> None:
-    TEST_DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = TEST_DOCUMENTS_DIR / f"{doc_id}.json"
-
-    output = {
-        "description": description,
-        "id": image_id,
-        "document": document,
-    }
-
-    # Only write if content has changed (ignore createdAt)
-    if path.exists():
-        existing = json.loads(path.read_text())
-        existing.pop("createdAt", None)
-        if existing == output:
-            return
-
-    output["createdAt"] = datetime.now(UTC).isoformat()
-    path.write_text(json.dumps(output, indent=2, ensure_ascii=False) + "\n")
 
 
 def save_images(images: list[ExtractedImage], description: str, doc_id: str) -> None:

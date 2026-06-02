@@ -5,10 +5,7 @@ Run from the catalogue_graph directory:
     uv run python -m document_generators.create_test_work_documents
 """
 
-import json
 from collections.abc import Sequence
-from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 from freezegun import freeze_time
@@ -74,9 +71,8 @@ from .generators import (
     random_alphanumeric,
     reset,
 )
-
-TEST_DOCUMENTS_DIR = Path(__file__).resolve().parent / "test_documents"
-
+from .generators.locations import create_digital_location, create_physical_location
+from .utils import TEST_DOCUMENTS_DIR, save_document
 
 ALL_FORMATS = [Format(id=k, label=v) for k, v in FORMAT_LABEL_MAPPING.items()]
 
@@ -118,29 +114,6 @@ def transform_work(work: MergedWork) -> dict[str, Any]:
         return transform_deleted_work(work)
     else:
         raise ValueError(f"Unknown work type: {type(work)}")
-
-
-def save_document(
-    doc_id: str, description: str, work_id: str, document: dict[str, Any]
-) -> None:
-    TEST_DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = TEST_DOCUMENTS_DIR / f"{doc_id}.json"
-
-    output = {
-        "description": description,
-        "id": work_id,
-        "document": document,
-    }
-
-    # Only write if content has changed (ignore createdAt)
-    if path.exists():
-        existing = json.loads(path.read_text())
-        existing.pop("createdAt", None)
-        if existing == output:
-            return
-
-    output["createdAt"] = datetime.now(UTC).isoformat()
-    path.write_text(json.dumps(output, indent=2, ensure_ascii=False) + "\n")
 
 
 def save_works(works: Sequence[MergedWork], description: str, doc_id: str) -> None:
@@ -196,8 +169,6 @@ def create_works_with_optional_fields() -> None:
         description="a work with optional top-level fields",
         doc_id="work-with-edition-and-duration",
     )
-
-    from .generators.locations import create_digital_location
 
     save_work(
         work=create_visible_merged_work(
@@ -509,8 +480,6 @@ def create_works_with_production_periods() -> None:
 
 
 def create_works_with_location_types() -> None:
-    from .generators.locations import create_digital_location, create_physical_location
-
     items = [
         create_item(locations=[create_digital_location(location_type_id="iiif-image")]),
         create_item(
@@ -660,8 +629,6 @@ def create_contributor_filter_test_examples() -> None:
 
 def create_access_status_filter_test_examples() -> None:
     def work_with_access_status(status: AccessStatus) -> VisibleMergedWork:
-        from .generators.locations import create_digital_location
-
         loc = create_digital_location(
             location_type_id="iiif-image",
             access_conditions=[
