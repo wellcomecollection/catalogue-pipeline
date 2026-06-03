@@ -1,0 +1,182 @@
+{
+  "description": "a work with a digital location created in 2021",
+  "id": "2lnlhwi7",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "2lnlhwi7",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "OuyDg29iFE"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "2lnlhwi7",
+      "title": "Digital location created in 2021",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "OuyDg29iFE",
+      "identifiers.value": [
+        "2lnlhwi7",
+        "OuyDg29iFE"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [
+        "z1ysvCKQ2Z"
+      ],
+      "items.id": [
+        "8zui727g"
+      ],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "2lnlhwi7",
+      "title": "Digital location created in 2021",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "OuyDg29iFE",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [
+        {
+          "id": "8zui727g",
+          "identifiers": [
+            {
+              "value": "z1ysvCKQ2Z",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "locationType": {
+                "id": "iiif-image",
+                "type": "LocationType",
+                "label": "IIIF Image API"
+              },
+              "license": {
+                "id": "cc-by",
+                "type": "License",
+                "label": "Attribution 4.0 International (CC BY 4.0)",
+                "url": "http://creativecommons.org/licenses/by/4.0/"
+              },
+              "accessConditions": [],
+              "url": "https://iiif.wellcomecollection.org/image/zcL.jpg/info.json",
+              "type": "DigitalLocation"
+            }
+          ],
+          "type": "Item"
+        }
+      ],
+      "holdings": [],
+      "availabilities": [
+        {
+          "id": "online",
+          "type": "Availability",
+          "label": "Online"
+        }
+      ],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [
+        {
+          "id": "cc-by",
+          "label": "Attribution 4.0 International (CC BY 4.0)"
+        }
+      ],
+      "availabilities": [
+        {
+          "id": "online",
+          "label": "Online"
+        }
+      ]
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "2lnlhwi7",
+        "OuyDg29iFE"
+      ],
+      "items.locations.license.id": [
+        "cc-by"
+      ],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [
+        "8zui727g"
+      ],
+      "items.identifiers.value": [
+        "z1ysvCKQ2Z"
+      ],
+      "items.locations.locationType.id": [
+        "iiif-image"
+      ],
+      "items.locations.createdDate": [
+        "2021-01-15T10:00:00Z"
+      ],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": [
+        "online"
+      ]
+    }
+  },
+  "createdAt": "2026-06-03T08:43:33.830264+00:00"
+}

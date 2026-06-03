@@ -748,6 +748,34 @@ def create_availabilities_test_examples() -> None:
         )
 
 
+def create_works_with_digital_location_dates() -> None:
+    years = ["2020", "2021", "2022"]
+    for year in years:
+        loc = create_digital_location(
+            location_type_id="iiif-image",
+            license_id="cc-by",
+            created_date=f"{year}-01-15T10:00:00Z",
+        )
+        item = create_item(locations=[loc])
+        save_work(
+            work=create_visible_merged_work(
+                title=f"Digital location created in {year}",
+                items=[item],
+                availabilities=[Id(id="online")],
+            ),
+            description=f"a work with a digital location created in {year}",
+            doc_id=f"work-digital-location.{year}",
+        )
+
+    save_work(
+        work=create_visible_merged_work(
+            title="A work with no digital location",
+        ),
+        description="a work with no digital location",
+        doc_id="work-digital-location.no-date",
+    )
+
+
 def generate_all() -> None:
     reset()
 
@@ -773,6 +801,7 @@ def generate_all() -> None:
     create_access_status_filter_test_examples()
     create_filtered_aggregations_test_examples()
     create_availabilities_test_examples()
+    create_works_with_digital_location_dates()
 
     print(f"Test documents written to {TEST_DOCUMENTS_DIR}")
 
