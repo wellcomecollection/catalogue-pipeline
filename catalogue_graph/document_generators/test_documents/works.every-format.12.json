@@ -1,17 +1,17 @@
 {
   "description": "works with every format",
-  "id": "t4jsc0e3",
+  "id": "dz07xopk",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "t4jsc0e3",
+        "id": "dz07xopk",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "e7XDzXEu0N"
+          "value": "B8O8L9sI6b"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "t4jsc0e3",
-      "title": "Br7u74gYiD0OwGi",
+      "id": "dz07xopk",
+      "title": "SZeDLleWh3zosOg",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "e7XDzXEu0N",
+      "sourceIdentifier.value": "B8O8L9sI6b",
       "identifiers.value": [
-        "t4jsc0e3",
-        "e7XDzXEu0N"
+        "dz07xopk",
+        "B8O8L9sI6b"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,8 +44,8 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "t4jsc0e3",
-      "title": "Br7u74gYiD0OwGi",
+      "id": "dz07xopk",
+      "title": "SZeDLleWh3zosOg",
       "alternativeTitles": [],
       "workType": {
         "id": "h",
@@ -55,7 +55,7 @@
       "contributors": [],
       "identifiers": [
         {
-          "value": "e7XDzXEu0N",
+          "value": "B8O8L9sI6b",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -109,8 +109,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "t4jsc0e3",
-        "e7XDzXEu0N"
+        "dz07xopk",
+        "B8O8L9sI6b"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -123,5 +123,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T15:48:05.060209+00:00"
+  "createdAt": "2026-06-03T09:26:31.624513+00:00"
 }

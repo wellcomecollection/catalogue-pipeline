@@ -414,7 +414,11 @@ def create_works_with_contributors() -> None:
 def create_works_with_item_identifiers() -> None:
     works = []
     for _ in range(5):
-        item = create_item()
+        item = create_item(
+            other_identifiers=[
+                create_source_identifier(identifier_type_id="calm-record-id")
+            ]
+        )
         works.append(create_visible_merged_work(items=[item]))
 
     save_works(

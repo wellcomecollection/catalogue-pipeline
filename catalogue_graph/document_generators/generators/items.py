@@ -3,7 +3,7 @@ from models.pipeline.access_condition import (
     AccessMethod,
     AccessStatus,
 )
-from models.pipeline.identifier import Unidentifiable
+from models.pipeline.identifier import SourceIdentifier, Unidentifiable
 from models.pipeline.item import Item
 
 from .identifiers import create_identified
@@ -12,10 +12,11 @@ from .locations import create_digital_location, create_physical_location
 
 def create_item(
     locations: list | None = None,
+    other_identifiers: list[SourceIdentifier] | None = None,
 ) -> Item:
     if locations is None:
         locations = [create_digital_location(location_type_id="iiif-image")]
-    item_id = create_identified()
+    item_id = create_identified(other_identifiers=other_identifiers)
     return Item(id=item_id, locations=locations)
 
 
