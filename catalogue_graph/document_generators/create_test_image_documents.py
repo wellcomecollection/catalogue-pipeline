@@ -5,8 +5,6 @@ Run from the catalogue_graph directory:
     uv run python -m document_generators.create_test_image_documents
 """
 
-from typing import Any
-
 from freezegun import freeze_time
 
 from ingestor.extractors.images.images_extractor import ExtractedImage
@@ -34,21 +32,17 @@ from .utils import TEST_DOCUMENTS_DIR, save_document
 
 
 @freeze_time("2001-01-01T01:01:01Z")
-def transform_image(extracted: ExtractedImage) -> dict[str, Any]:
-    indexable = IndexableImage.from_extracted_image(extracted)
-    return indexable.model_dump(mode="json", exclude_none=True)
+def transform_image(extracted: ExtractedImage) -> IndexableImage:
+    return IndexableImage.from_extracted_image(extracted)
 
 
 def save_images(images: list[ExtractedImage], description: str, doc_id: str) -> None:
-    if len(images) == 1:
-        document = transform_image(images[0])
-        image_id = images[0].image.state.canonical_id
-        save_document(doc_id, description, image_id, document)
+    indexable_docs = [transform_image(i) for i in images]
+    if len(indexable_docs) == 1:
+        save_document(doc_id, description, indexable_docs[0])
     else:
-        for index, image in enumerate(images):
-            document = transform_image(image)
-            image_id = image.image.state.canonical_id
-            save_document(f"{doc_id}.{index}", description, image_id, document)
+        for index, doc in enumerate(indexable_docs):
+            save_document(f"{doc_id}.{index}", description, doc)
 
 
 def save_image(image: ExtractedImage, description: str, doc_id: str) -> None:

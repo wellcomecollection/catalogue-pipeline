@@ -1,17 +1,17 @@
 {
   "description": "a work with licensed digital items",
-  "id": "fvv2mpx3",
+  "id": "vams026s",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "fvv2mpx3",
+        "id": "vams026s",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "rHhJQRvaja"
+          "value": "JzNrnfBbIE"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "fvv2mpx3",
-      "title": "PEpzOUgAdR1sMkt",
+      "id": "vams026s",
+      "title": "xamKneFiQfUHSQ8",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "rHhJQRvaja",
+      "sourceIdentifier.value": "JzNrnfBbIE",
       "identifiers.value": [
-        "fvv2mpx3",
-        "rHhJQRvaja"
+        "vams026s",
+        "JzNrnfBbIE"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "fvv2mpx3",
-      "title": "PEpzOUgAdR1sMkt",
+      "id": "vams026s",
+      "title": "xamKneFiQfUHSQ8",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "rHhJQRvaja",
+          "value": "JzNrnfBbIE",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -78,8 +78,9 @@
                 "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/lR1.jpg/info.json",
-              "credit": "Credit line: ZCiga8ZH2",
+              "url": "https://iiif.wellcomecollection.org/image/UH0.jpg/info.json",
+              "credit": "Credit line: icFA5DY94",
+              "linkText": "Link text: m0y8SM",
               "type": "DigitalLocation"
             }
           ],
@@ -127,8 +128,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "fvv2mpx3",
-        "rHhJQRvaja"
+        "vams026s",
+        "JzNrnfBbIE"
       ],
       "items.locations.license.id": [
         "cc-by"
@@ -145,5 +146,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T11:19:05.980449+00:00"
+  "createdAt": "2026-06-03T16:56:01.862259+00:00"
 }

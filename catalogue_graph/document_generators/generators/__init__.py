@@ -30,7 +30,9 @@ from .works import (
     create_deleted_merged_work,
     create_invisible_merged_work,
     create_redirected_merged_work,
+    create_visible_extracted_work,
     create_visible_merged_work,
+    create_work_hierarchy_item,
 )
 
 __all__ = [
@@ -60,6 +62,8 @@ __all__ = [
     "create_source_identifier",
     "create_subject",
     "create_visible_merged_work",
+    "create_visible_extracted_work",
+    "create_work_hierarchy_item",
     "random_alphanumeric",
     "reset",
 ]

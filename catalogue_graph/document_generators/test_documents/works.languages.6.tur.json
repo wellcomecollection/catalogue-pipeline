@@ -1,17 +1,17 @@
 {
   "description": "one of a list of works with a variety of languages",
-  "id": "by2ds613",
+  "id": "k2b9ybhg",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "by2ds613",
+        "id": "k2b9ybhg",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "ZPq5XtfxjC"
+          "value": "RkCkkDq51S"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,16 +22,16 @@
       "redirectSources": []
     },
     "query": {
-      "id": "by2ds613",
+      "id": "k2b9ybhg",
       "title": "A work with languages Turkish",
       "alternativeTitles": [],
       "languages.label": [
         "Turkish"
       ],
-      "sourceIdentifier.value": "ZPq5XtfxjC",
+      "sourceIdentifier.value": "RkCkkDq51S",
       "identifiers.value": [
-        "by2ds613",
-        "ZPq5XtfxjC"
+        "k2b9ybhg",
+        "RkCkkDq51S"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -46,13 +46,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "by2ds613",
+      "id": "k2b9ybhg",
       "title": "A work with languages Turkish",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "ZPq5XtfxjC",
+          "value": "RkCkkDq51S",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -113,8 +113,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "by2ds613",
-        "ZPq5XtfxjC"
+        "k2b9ybhg",
+        "RkCkkDq51S"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -127,5 +127,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T11:19:05.966912+00:00"
+  "createdAt": "2026-06-03T16:56:01.834264+00:00"
 }

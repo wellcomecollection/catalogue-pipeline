@@ -1,17 +1,17 @@
 {
   "description": "a work with licensed digital items",
-  "id": "2xamne5i",
+  "id": "so3t9nye",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "2xamne5i",
+        "id": "so3t9nye",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "MvJicFA5DY"
+          "value": "cL0rvWDedW"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "2xamne5i",
-      "title": "RpbgDUH05lm0y8S",
+      "id": "so3t9nye",
+      "title": "k55gQhE0UsUZttz",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "MvJicFA5DY",
+      "sourceIdentifier.value": "cL0rvWDedW",
       "identifiers.value": [
-        "2xamne5i",
-        "MvJicFA5DY"
+        "so3t9nye",
+        "cL0rvWDedW"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "2xamne5i",
-      "title": "RpbgDUH05lm0y8S",
+      "id": "so3t9nye",
+      "title": "k55gQhE0UsUZttz",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "MvJicFA5DY",
+          "value": "cL0rvWDedW",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -78,9 +78,8 @@
                 "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/oDP.jpg/info.json",
-              "credit": "Credit line: oswGuEO2W",
-              "linkText": "Link text: GJ1xlBOZa",
+              "url": "https://iiif.wellcomecollection.org/image/Rov.jpg/info.json",
+              "linkText": "Link text: ybNvjl",
               "type": "DigitalLocation"
             }
           ],
@@ -102,9 +101,9 @@
                 "url": "https://creativecommons.org/licenses/by-nc/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/4VT.jpg/info.json",
-              "credit": "Credit line: PbxENY8",
-              "linkText": "Link text: wrXkl4o",
+              "url": "https://iiif.wellcomecollection.org/image/oPl.jpg/info.json",
+              "credit": "Credit line: BlszCt9Ick",
+              "linkText": "Link text: PH66R",
               "type": "DigitalLocation"
             }
           ],
@@ -156,8 +155,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "2xamne5i",
-        "MvJicFA5DY"
+        "so3t9nye",
+        "cL0rvWDedW"
       ],
       "items.locations.license.id": [
         "cc-by",
@@ -176,5 +175,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T11:19:05.993112+00:00"
+  "createdAt": "2026-06-03T16:56:01.863612+00:00"
 }

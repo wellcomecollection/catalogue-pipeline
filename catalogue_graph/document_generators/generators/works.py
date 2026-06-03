@@ -1,3 +1,6 @@
+from ingestor.extractors.works.base_works_extractor import (
+    VisibleExtractedWork,
+)
 from ingestor.models.merged.work import (
     DeletedMergedWork,
     InvisibleMergedWork,
@@ -5,8 +8,14 @@ from ingestor.models.merged.work import (
     RedirectedMergedWork,
     VisibleMergedWork,
 )
+from ingestor.models.neptune.node import WorkNode
+from ingestor.models.neptune.query_result import (
+    WorkHierarchy,
+    WorkHierarchyItem,
+)
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
+from models.graph_node import Work
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Genre, Subject
 from models.pipeline.format import Format
@@ -22,7 +31,7 @@ from models.pipeline.work_data import WorkData, WorkType
 from models.pipeline.work_state import WorkRelations
 
 from .identifiers import create_source_identifier
-from .random import random_alphanumeric, random_canonical_id
+from .random import random_alphanumeric, random_canonical_id, rng
 
 
 def create_work_data(
@@ -163,4 +172,32 @@ def create_redirected_merged_work() -> RedirectedMergedWork:
             source_identifier=create_source_identifier(),
         ),
         state=create_merged_work_state(),
+    )
+
+
+def create_visible_extracted_work(
+    ancestors: list[WorkHierarchyItem], merged_work: VisibleMergedWork | None = None
+) -> VisibleExtractedWork:
+    merged_work = merged_work or create_visible_merged_work()
+    return VisibleExtractedWork(
+        work=merged_work,
+        hierarchy=WorkHierarchy(
+            id=merged_work.state.canonical_id, ancestors=ancestors or []
+        ),
+        concepts=[],
+    )
+
+
+def create_work_hierarchy_item(parts: int | None = None) -> WorkHierarchyItem:
+    work = create_visible_merged_work()
+    work_node = Work(type="Work", id=work.state.canonical_id, label=work.data.title)
+    return WorkHierarchyItem(
+        work=WorkNode.model_validate(
+            {
+                "~id": "123",
+                "~labels": ["Work"],
+                "~properties": work_node,
+            }
+        ),
+        parts=rng.randint(1, 5) if parts is None else parts,
     )

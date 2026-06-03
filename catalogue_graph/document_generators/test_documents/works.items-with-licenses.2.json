@@ -1,17 +1,17 @@
 {
   "description": "a work with licensed digital items",
-  "id": "hgtfynqy",
+  "id": "kwc122te",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "hgtfynqy",
+        "id": "kwc122te",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "SkCT1KbJyb"
+          "value": "LUMtEJxtA0"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "hgtfynqy",
-      "title": "Vdp61hRkCkkDq51",
+      "id": "kwc122te",
+      "title": "RFjzR0B69zT65X1",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "SkCT1KbJyb",
+      "sourceIdentifier.value": "LUMtEJxtA0",
       "identifiers.value": [
-        "hgtfynqy",
-        "SkCT1KbJyb"
+        "kwc122te",
+        "LUMtEJxtA0"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "hgtfynqy",
-      "title": "Vdp61hRkCkkDq51",
+      "id": "kwc122te",
+      "title": "RFjzR0B69zT65X1",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "SkCT1KbJyb",
+          "value": "LUMtEJxtA0",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -78,9 +78,8 @@
                 "url": "https://creativecommons.org/licenses/by-nc/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/qIk.jpg/info.json",
-              "credit": "Credit line: hGXt4fgIN",
-              "linkText": "Link text: zagagvUn",
+              "url": "https://iiif.wellcomecollection.org/image/ecf.jpg/info.json",
+              "credit": "Credit line: FzJaOBO",
               "type": "DigitalLocation"
             }
           ],
@@ -128,8 +127,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "hgtfynqy",
-        "SkCT1KbJyb"
+        "kwc122te",
+        "LUMtEJxtA0"
       ],
       "items.locations.license.id": [
         "cc-by-nc"
@@ -146,5 +145,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T11:19:05.986834+00:00"
+  "createdAt": "2026-06-03T16:56:01.862879+00:00"
 }

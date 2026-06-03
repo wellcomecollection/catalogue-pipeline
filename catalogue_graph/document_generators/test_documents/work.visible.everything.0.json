@@ -59,7 +59,10 @@
         "Sjfvp110lp",
         "VY1RJk"
       ],
-      "partOf.title": [],
+      "partOf.title": [
+        "08emPYDNpZDHkTv",
+        "wZL0ffJl0qmZquS"
+      ],
       "production.label": [
         "pns4VQaVIGB2dhy",
         "LkiZaJGuxLObZi4",
@@ -629,7 +632,20 @@
         }
       ],
       "parts": [],
-      "partOf": [],
+      "partOf": [
+        {
+          "id": "29jcl6cu",
+          "title": "wZL0ffJl0qmZquS",
+          "totalParts": 5,
+          "type": "Work"
+        },
+        {
+          "id": "7vafg1w2",
+          "title": "08emPYDNpZDHkTv",
+          "totalParts": 1,
+          "type": "Work"
+        }
+      ],
       "type": "Work"
     },
     "aggregatableValues": {
@@ -756,10 +772,16 @@
         "iiif-image"
       ],
       "items.locations.createdDate": [],
-      "partOf.id": [],
-      "partOf.title": [],
+      "partOf.id": [
+        "7vafg1w2",
+        "29jcl6cu"
+      ],
+      "partOf.title": [
+        "08emPYDNpZDHkTv",
+        "wZL0ffJl0qmZquS"
+      ],
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T11:19:05.826625+00:00"
+  "createdAt": "2026-06-04T07:07:52.066552+00:00"
 }

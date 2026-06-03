@@ -1,17 +1,17 @@
 {
   "description": "examples for the aggregation-with-filters tests",
-  "id": "h6zh9dqu",
+  "id": "k3ch7wv1",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "h6zh9dqu",
+        "id": "k3ch7wv1",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "tGZImMI4nR"
+          "value": "OGjkLeRp7G"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "h6zh9dqu",
-      "title": "wX5b8LE8GNBoRTd",
+      "id": "k3ch7wv1",
+      "title": "DjIrde9ClY0FP4t",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "tGZImMI4nR",
+      "sourceIdentifier.value": "OGjkLeRp7G",
       "identifiers.value": [
-        "h6zh9dqu",
-        "tGZImMI4nR"
+        "k3ch7wv1",
+        "OGjkLeRp7G"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -40,16 +40,16 @@
       "partOf.title": [],
       "production.label": [],
       "subjects.concepts.label": [
-        "Qcz3WyrvmGTWpKL",
-        "jNsTZ5tPcKntFyh",
-        "e2QMB3mFnF0JRUz"
+        "X9Pfc9yEMnhr8bl",
+        "dZCFvjPed3QMd5d",
+        "2IRN4ZNYnJG9tHp"
       ],
       "contributors.agent.label": [],
       "genres.concepts.label": []
     },
     "display": {
-      "id": "h6zh9dqu",
-      "title": "wX5b8LE8GNBoRTd",
+      "id": "k3ch7wv1",
+      "title": "DjIrde9ClY0FP4t",
       "alternativeTitles": [],
       "workType": {
         "id": "i",
@@ -59,7 +59,7 @@
       "contributors": [],
       "identifiers": [
         {
-          "value": "tGZImMI4nR",
+          "value": "OGjkLeRp7G",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -74,11 +74,11 @@
           "type": "Subject",
           "concepts": [
             {
-              "id": "9akgx0or",
-              "label": "Qcz3WyrvmGTWpKL",
+              "id": "8394rla1",
+              "label": "X9Pfc9yEMnhr8bl",
               "identifiers": [
                 {
-                  "value": "XzGwKjUfun",
+                  "value": "wtBdS6ccpB",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -90,11 +90,11 @@
               "type": "Concept"
             },
             {
-              "id": "c5pnrkl2",
-              "label": "jNsTZ5tPcKntFyh",
+              "id": "4debqj2k",
+              "label": "dZCFvjPed3QMd5d",
               "identifiers": [
                 {
-                  "value": "ocfozzBOWb",
+                  "value": "50npPo6IQb",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -106,11 +106,11 @@
               "type": "Concept"
             },
             {
-              "id": "wf3xocgw",
-              "label": "e2QMB3mFnF0JRUz",
+              "id": "ozqa5qg9",
+              "label": "2IRN4ZNYnJG9tHp",
               "identifiers": [
                 {
-                  "value": "QD2mtsVgXa",
+                  "value": "jfxUuOH2Pm",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -175,8 +175,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "h6zh9dqu",
-        "tGZImMI4nR"
+        "k3ch7wv1",
+        "OGjkLeRp7G"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -189,5 +189,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T15:52:56.823319+00:00"
+  "createdAt": "2026-06-03T16:56:02.313776+00:00"
 }

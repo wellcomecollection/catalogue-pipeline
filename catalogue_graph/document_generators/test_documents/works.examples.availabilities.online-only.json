@@ -1,17 +1,17 @@
 {
   "description": "examples for availabilities tests",
-  "id": "9rlztqbw",
+  "id": "x40qla5q",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "9rlztqbw",
+        "id": "x40qla5q",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "6yp286bYj6"
+          "value": "xWYGGkFenF"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "9rlztqbw",
-      "title": "cr34w93kNVLE49t",
+      "id": "x40qla5q",
+      "title": "XVTNOHwN0YozViM",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "6yp286bYj6",
+      "sourceIdentifier.value": "xWYGGkFenF",
       "identifiers.value": [
-        "9rlztqbw",
-        "6yp286bYj6"
+        "x40qla5q",
+        "xWYGGkFenF"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "9rlztqbw",
-      "title": "cr34w93kNVLE49t",
+      "id": "x40qla5q",
+      "title": "XVTNOHwN0YozViM",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "6yp286bYj6",
+          "value": "xWYGGkFenF",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -92,7 +92,8 @@
                   "type": "AccessCondition"
                 }
               ],
-              "url": "https://iiif.wellcomecollection.org/image/OP9.jpg/info.json",
+              "url": "https://iiif.wellcomecollection.org/image/n50.jpg/info.json",
+              "credit": "Credit line: 2tQl5nbIP",
               "type": "DigitalLocation"
             }
           ],
@@ -151,8 +152,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "9rlztqbw",
-        "6yp286bYj6"
+        "x40qla5q",
+        "xWYGGkFenF"
       ],
       "items.locations.license.id": [
         "cc-by"
@@ -173,5 +174,5 @@
       ]
     }
   },
-  "createdAt": "2026-06-03T14:13:00.635301+00:00"
+  "createdAt": "2026-06-03T16:56:02.585794+00:00"
 }

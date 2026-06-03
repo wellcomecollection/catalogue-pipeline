@@ -6,13 +6,13 @@ Run from the catalogue_graph directory:
 """
 
 from collections.abc import Sequence
-from typing import Any
 
 from freezegun import freeze_time
 
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.indexable.work import (
     DeletedIndexableWork,
+    IndexableWork,
     InvisibleIndexableWork,
     RedirectedIndexableWork,
     VisibleIndexableWork,
@@ -24,7 +24,9 @@ from ingestor.models.merged.work import (
     RedirectedMergedWork,
     VisibleMergedWork,
 )
-from ingestor.models.neptune.query_result import WorkHierarchy
+from ingestor.models.neptune.query_result import (
+    WorkHierarchy,
+)
 from models.pipeline.access_condition import (
     AccessCondition,
     AccessMethod,
@@ -68,7 +70,9 @@ from .generators import (
     create_source_identifier,
     create_subject,
     create_unidentifiable_item,
+    create_visible_extracted_work,
     create_visible_merged_work,
+    create_work_hierarchy_item,
     random_alphanumeric,
     reset,
 )
@@ -79,55 +83,32 @@ ALL_FORMATS = [Format(id=k, label=v) for k, v in FORMAT_LABEL_MAPPING.items()]
 
 
 @freeze_time("2001-01-01T01:01:01Z")
-def transform_visible_work(work: VisibleMergedWork) -> dict[str, Any]:
-    hierarchy = WorkHierarchy(id=work.state.canonical_id, ancestors=[], children=[])
-    extracted = VisibleExtractedWork(work=work, hierarchy=hierarchy, concepts=[])
-    indexable = VisibleIndexableWork.from_extracted_work(extracted)
-    return indexable.model_dump(mode="json", exclude_none=True)
-
-
-@freeze_time("2001-01-01T01:01:01Z")
-def transform_invisible_work(work: InvisibleMergedWork) -> dict[str, Any]:
-    indexable = InvisibleIndexableWork.from_merged_work(work)
-    return indexable.model_dump(mode="json", exclude_none=True)
-
-
-@freeze_time("2001-01-01T01:01:01Z")
-def transform_redirected_work(work: RedirectedMergedWork) -> dict[str, Any]:
-    indexable = RedirectedIndexableWork.from_merged_work(work)
-    return indexable.model_dump(mode="json", exclude_none=True)
-
-
-@freeze_time("2001-01-01T01:01:01Z")
-def transform_deleted_work(work: DeletedMergedWork) -> dict[str, Any]:
-    indexable = DeletedIndexableWork.from_merged_work(work)
-    return indexable.model_dump(mode="json", exclude_none=True)
-
-
-def transform_work(work: MergedWork) -> dict[str, Any]:
+def transform_work(work: MergedWork | VisibleExtractedWork) -> IndexableWork:
+    if isinstance(work, VisibleExtractedWork):
+        return VisibleIndexableWork.from_extracted_work(work)
     if isinstance(work, VisibleMergedWork):
-        return transform_visible_work(work)
+        hierarchy = WorkHierarchy(id=work.state.canonical_id, ancestors=[], children=[])
+        extracted = VisibleExtractedWork(work=work, hierarchy=hierarchy, concepts=[])
+        return VisibleIndexableWork.from_extracted_work(extracted)
     elif isinstance(work, InvisibleMergedWork):
-        return transform_invisible_work(work)
+        return InvisibleIndexableWork.from_merged_work(work)
     elif isinstance(work, RedirectedMergedWork):
-        return transform_redirected_work(work)
+        return RedirectedIndexableWork.from_merged_work(work)
     elif isinstance(work, DeletedMergedWork):
-        return transform_deleted_work(work)
-    else:
-        raise ValueError(f"Unknown work type: {type(work)}")
+        return DeletedIndexableWork.from_merged_work(work)
+
+    raise ValueError(f"Unknown work type: {type(work)}")
 
 
-def save_works(works: Sequence[MergedWork], description: str, doc_id: str) -> None:
-    if len(works) == 1:
-        work = works[0]
-        document = transform_work(work)
-        work_id = work.state.canonical_id
-        save_document(doc_id, description, work_id, document)
+def save_works(
+    works: Sequence[MergedWork | VisibleExtractedWork], description: str, doc_id: str
+) -> None:
+    indexable_docs = [transform_work(w) for w in works]
+    if len(indexable_docs) == 1:
+        save_document(doc_id, description, indexable_docs[0])
     else:
-        for index, work in enumerate(works):
-            document = transform_work(work)
-            work_id = work.state.canonical_id
-            save_document(f"{doc_id}.{index}", description, work_id, document)
+        for index, doc in enumerate(indexable_docs):
+            save_document(f"{doc_id}.{index}", description, doc)
 
 
 def save_work(work: MergedWork, description: str, doc_id: str) -> None:
@@ -227,7 +208,7 @@ def create_works_with_production_events() -> None:
 def create_works_with_all_includes() -> None:
     works = []
     for _ in range(3):
-        work = create_visible_merged_work(
+        merged_work = create_visible_merged_work(
             title="A work with all the include-able fields",
             other_identifiers=[create_source_identifier()],
             subjects=[
@@ -248,6 +229,14 @@ def create_works_with_all_includes() -> None:
             former_frequency=["Published in 2001", "Published in 2002"],
             designation=["Designation #1", "Designation #2", "Designation #3"],
             items=[create_item() for _ in range(2)] + [create_unidentifiable_item()],
+        )
+
+        work = create_visible_extracted_work(
+            ancestors=[
+                create_work_hierarchy_item(parts=5),
+                create_work_hierarchy_item(parts=1),
+            ],
+            merged_work=merged_work,
         )
         works.append(work)
 

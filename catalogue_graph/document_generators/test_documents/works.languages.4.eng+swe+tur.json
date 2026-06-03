@@ -1,17 +1,17 @@
 {
   "description": "one of a list of works with a variety of languages",
-  "id": "fjp7n2ua",
+  "id": "3q8k2zag",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "fjp7n2ua",
+        "id": "3q8k2zag",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "qOAy5bsPpn"
+          "value": "afvWvC2mpx"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,7 +22,7 @@
       "redirectSources": []
     },
     "query": {
-      "id": "fjp7n2ua",
+      "id": "3q8k2zag",
       "title": "A work with languages English, Swedish, Turkish",
       "alternativeTitles": [],
       "languages.label": [
@@ -30,10 +30,10 @@
         "Swedish",
         "Turkish"
       ],
-      "sourceIdentifier.value": "qOAy5bsPpn",
+      "sourceIdentifier.value": "afvWvC2mpx",
       "identifiers.value": [
-        "fjp7n2ua",
-        "qOAy5bsPpn"
+        "3q8k2zag",
+        "afvWvC2mpx"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -48,13 +48,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "fjp7n2ua",
+      "id": "3q8k2zag",
       "title": "A work with languages English, Swedish, Turkish",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "qOAy5bsPpn",
+          "value": "afvWvC2mpx",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -135,8 +135,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "fjp7n2ua",
-        "qOAy5bsPpn"
+        "3q8k2zag",
+        "afvWvC2mpx"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -149,5 +149,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T11:19:05.954577+00:00"
+  "createdAt": "2026-06-03T16:56:01.822197+00:00"
 }

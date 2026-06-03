@@ -1,17 +1,17 @@
 {
   "description": "a work with licensed digital items",
-  "id": "v0ihpw42",
+  "id": "bx4spbg3",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "v0ihpw42",
+        "id": "bx4spbg3",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "gQbBtuNU6m"
+          "value": "wrXkl4o5Du"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "v0ihpw42",
-      "title": "MFr83lSanvqTT30",
+      "id": "bx4spbg3",
+      "title": "swGuEO2WVD4VT5q",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "gQbBtuNU6m",
+      "sourceIdentifier.value": "wrXkl4o5Du",
       "identifiers.value": [
-        "v0ihpw42",
-        "gQbBtuNU6m"
+        "bx4spbg3",
+        "wrXkl4o5Du"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "v0ihpw42",
-      "title": "MFr83lSanvqTT30",
+      "id": "bx4spbg3",
+      "title": "swGuEO2WVD4VT5q",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "gQbBtuNU6m",
+          "value": "wrXkl4o5Du",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -78,8 +78,8 @@
                 "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/N1K.jpg/info.json",
-              "linkText": "Link text: Hmk1arg1yT",
+              "url": "https://iiif.wellcomecollection.org/image/tfO.jpg/info.json",
+              "linkText": "Link text: nqUyoDPM",
               "type": "DigitalLocation"
             }
           ],
@@ -127,8 +127,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "v0ihpw42",
-        "gQbBtuNU6m"
+        "bx4spbg3",
+        "wrXkl4o5Du"
       ],
       "items.locations.license.id": [
         "cc-by"
@@ -145,5 +145,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T11:19:05.973782+00:00"
+  "createdAt": "2026-06-03T16:56:01.861655+00:00"
 }

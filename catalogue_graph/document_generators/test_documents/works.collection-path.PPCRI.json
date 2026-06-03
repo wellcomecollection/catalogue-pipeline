@@ -1,17 +1,17 @@
 {
   "description": "a work with a collection path",
-  "id": "j0btlkf0",
+  "id": "k5m7sfjx",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "j0btlkf0",
+        "id": "k5m7sfjx",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "tMjFZCaMu6"
+          "value": "nIdFebPdMm"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "j0btlkf0",
-      "title": "sbz2bZ5DZhiZ0tv",
+      "id": "k5m7sfjx",
+      "title": "XkZ5kXMLMd39CXq",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "tMjFZCaMu6",
+      "sourceIdentifier.value": "nIdFebPdMm",
       "identifiers.value": [
-        "j0btlkf0",
-        "tMjFZCaMu6"
+        "k5m7sfjx",
+        "nIdFebPdMm"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -46,13 +46,13 @@
       "collectionPath.path": "PPCRI"
     },
     "display": {
-      "id": "j0btlkf0",
-      "title": "sbz2bZ5DZhiZ0tv",
+      "id": "k5m7sfjx",
+      "title": "XkZ5kXMLMd39CXq",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "tMjFZCaMu6",
+          "value": "nIdFebPdMm",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -100,8 +100,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "j0btlkf0",
-        "tMjFZCaMu6"
+        "k5m7sfjx",
+        "nIdFebPdMm"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -114,5 +114,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T11:19:06.101347+00:00"
+  "createdAt": "2026-06-03T16:56:01.959828+00:00"
 }
