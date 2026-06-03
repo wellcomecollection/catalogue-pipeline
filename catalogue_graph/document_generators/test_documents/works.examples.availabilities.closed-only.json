@@ -1,17 +1,17 @@
 {
   "description": "examples for availabilities tests",
-  "id": "5mdcrwk4",
+  "id": "bqlc2qwg",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "5mdcrwk4",
+        "id": "bqlc2qwg",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "zvyw1umH6t"
+          "value": "wPajmwSpc6"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,22 +22,22 @@
       "redirectSources": []
     },
     "query": {
-      "id": "5mdcrwk4",
-      "title": "6KcCqw4LgOP9yru",
+      "id": "bqlc2qwg",
+      "title": "Dinr0lShQoifrCE",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "zvyw1umH6t",
+      "sourceIdentifier.value": "wPajmwSpc6",
       "identifiers.value": [
-        "5mdcrwk4",
-        "zvyw1umH6t"
+        "bqlc2qwg",
+        "wPajmwSpc6"
       ],
       "images.id": [],
       "images.identifiers.value": [],
       "items.identifiers.value": [
-        "mwSpc6bq2l"
+        "G0MNk0rRC1"
       ],
       "items.id": [
-        "ifr24waj"
+        "zwa4wlpl"
       ],
       "items.shelfmark.value": [],
       "notes.contents": [],
@@ -48,13 +48,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "5mdcrwk4",
-      "title": "6KcCqw4LgOP9yru",
+      "id": "bqlc2qwg",
+      "title": "Dinr0lShQoifrCE",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "zvyw1umH6t",
+          "value": "wPajmwSpc6",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -67,10 +67,10 @@
       "genres": [],
       "items": [
         {
-          "id": "ifr24waj",
+          "id": "zwa4wlpl",
           "identifiers": [
             {
-              "value": "mwSpc6bq2l",
+              "value": "G0MNk0rRC1",
               "type": "Identifier",
               "identifierType": {
                 "id": "sierra-system-number",
@@ -87,10 +87,10 @@
                 "label": "Closed stores"
               },
               "license": {
-                "id": "pdm",
+                "id": "ogl",
                 "type": "License",
-                "label": "Public Domain Mark",
-                "url": "https://creativecommons.org/share-your-work/public-domain/pdm/"
+                "label": "Open Government Licence",
+                "url": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
               },
               "accessConditions": [],
               "label": "locationLabel",
@@ -127,8 +127,8 @@
       "contributors.agent": [],
       "items.locations.license": [
         {
-          "id": "pdm",
-          "label": "Public Domain Mark"
+          "id": "ogl",
+          "label": "Open Government Licence"
         }
       ],
       "availabilities": [
@@ -152,18 +152,18 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "5mdcrwk4",
-        "zvyw1umH6t"
+        "bqlc2qwg",
+        "wPajmwSpc6"
       ],
       "items.locations.license.id": [
-        "pdm"
+        "ogl"
       ],
       "items.locations.accessConditions.status.id": [],
       "items.id": [
-        "ifr24waj"
+        "zwa4wlpl"
       ],
       "items.identifiers.value": [
-        "mwSpc6bq2l"
+        "G0MNk0rRC1"
       ],
       "items.locations.locationType.id": [
         "closed-stores"
@@ -176,5 +176,5 @@
       ]
     }
   },
-  "createdAt": "2026-06-02T15:48:05.556719+00:00"
+  "createdAt": "2026-06-03T14:13:00.629164+00:00"
 }

@@ -173,7 +173,7 @@ def create_works_with_optional_fields() -> None:
 
     save_work(
         work=create_visible_merged_work(
-            thumbnail=create_digital_location(location_type_id="thumbnail-image")
+            thumbnail=create_digital_location(location_type_id="iiif-presentation")
         ),
         description="a work with a thumbnail",
         doc_id="work-thumbnail",
@@ -333,7 +333,7 @@ def create_works_with_genres() -> None:
             canonical_id="concept0a",
             source_identifier=create_source_identifier(ontology_type="Genre"),
         ),
-        label="Conceptual Conversations",
+        label="Electronic books",
         type="GenreConcept",
     )
     concept1 = Concept(
@@ -535,12 +535,17 @@ def create_works_of_different_work_types() -> None:
 def create_genre_filter_test_examples() -> None:
     annual_reports = create_genre(
         "Annual reports",
-        concepts=[create_genre_concept("g00dcafe"), create_concept("baadf00d")],
+        concepts=[
+            create_genre_concept("g00dcafe", label="Annual reports"),
+            create_concept("baadf00d"),
+        ],
     )
-    pamphlets = create_genre("Pamphlets", concepts=[create_genre_concept("g00dcafe")])
+    pamphlets = create_genre(
+        "Pamphlets", concepts=[create_genre_concept("g00dcafe", label="Pamphlets")]
+    )
     psychology = create_genre(
         "Psychology, Pathological",
-        concepts=[create_genre_concept("baadf00d")],
+        concepts=[create_genre_concept("baadf00d", label="Psychology, Pathological")],
     )
     darwin = create_genre('Darwin "Jones", Charles')
 
@@ -576,7 +581,7 @@ def create_subject_filter_test_examples() -> None:
                 )
             ],
         ),
-        label="Sanitation.",
+        label="Sanitation",
         concepts=[create_concept(), create_concept()],
     )
 

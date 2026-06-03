@@ -8,10 +8,12 @@ from ingestor.models.augmented.image import (
 )
 from ingestor.models.merged.work import VisibleMergedWork
 from ingestor.models.neptune.query_result import WorkHierarchy
+from models.pipeline.identifier import Identified
 from models.pipeline.image import ImageData
-from models.pipeline.work_data import WorkData
+from models.pipeline.location import DigitalLocation
 
 from .identifiers import create_identified, create_source_identifier
+from .items import create_unidentifiable_item
 from .locations import create_digital_location
 from .random import random_canonical_id, rng
 from .vectors import random_unit_length_vector
@@ -33,29 +35,37 @@ def create_inferred_data() -> InferredData:
 
 
 def create_augmented_image(
-    license_id: str = "cc-by",
     inferred_data: InferredData | None = None,
-    parent_work_data: WorkData | None = None,
+    parent_work: VisibleMergedWork | None = None,
+    locations: list[DigitalLocation] | None = None,
 ) -> AugmentedImage:
-    canonical_id = random_canonical_id()
+    if parent_work:
+        source = ParentWork(
+            id=Identified(
+                canonical_id=parent_work.state.canonical_id,
+                source_identifier=parent_work.state.source_identifier,
+                other_identifiers=parent_work.data.other_identifiers,
+            ),
+            data=parent_work.data,
+            version=parent_work.version,
+        )
+    else:
+        source = ParentWork(
+            id=create_identified(),
+            data=create_work_data(),
+            version=1,
+        )
+
     return AugmentedImage(
         state=AugmentedImageState(
-            canonical_id=canonical_id,
+            canonical_id=random_canonical_id(),
             source_identifier=create_source_identifier(
                 ontology_type="Image", identifier_type_id="miro-image-number"
             ),
             inferred_data=inferred_data or create_inferred_data(),
         ),
-        source=ParentWork(
-            id=create_identified(),
-            data=parent_work_data or create_work_data(),
-            version=1,
-        ),
-        locations=[
-            create_digital_location(
-                location_type_id="iiif-image", license_id=license_id
-            )
-        ],
+        source=source,
+        locations=locations or [create_digital_location(location_type_id="iiif-image")],
         version=1,
         modified_time="2001-01-01T01:01:01Z",
     )
@@ -65,17 +75,24 @@ def create_extracted_image(
     license_id: str = "cc-by",
     inferred_data: InferredData | None = None,
     parent_work: VisibleMergedWork | None = None,
-    parent_work_data: WorkData | None = None,
 ) -> ExtractedImage:
-    image = create_augmented_image(
-        license_id=license_id,
-        inferred_data=inferred_data,
-        parent_work_data=parent_work_data
-        or (parent_work.data if parent_work else None),
+    location = create_digital_location(
+        location_type_id="iiif-image", license_id=license_id
     )
-    work = parent_work or create_visible_merged_work()
-    hierarchy = WorkHierarchy(id=work.state.canonical_id, ancestors=[], children=[])
-    extracted_work = VisibleExtractedWork(work=work, hierarchy=hierarchy, concepts=[])
+
+    parent_work = parent_work or create_visible_merged_work(
+        items=[create_unidentifiable_item(locations=[location])]
+    )
+    image = create_augmented_image(
+        parent_work=parent_work, inferred_data=inferred_data, locations=[location]
+    )
+
+    hierarchy = WorkHierarchy(
+        id=parent_work.state.canonical_id, ancestors=[], children=[]
+    )
+    extracted_work = VisibleExtractedWork(
+        work=parent_work, hierarchy=hierarchy, concepts=[]
+    )
     return ExtractedImage(image=image, work=extracted_work)
 
 

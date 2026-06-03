@@ -63,9 +63,9 @@
       "genres": [],
       "thumbnail": {
         "locationType": {
-          "id": "thumbnail-image",
+          "id": "iiif-presentation",
           "type": "LocationType",
-          "label": "Thumbnail image"
+          "label": "IIIF Presentation API"
         },
         "license": {
           "id": "cc-by",
@@ -128,5 +128,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:48:25.961819+00:00"
+  "createdAt": "2026-06-03T11:12:35.897280+00:00"
 }

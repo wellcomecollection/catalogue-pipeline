@@ -15,6 +15,7 @@ from .random import random_alphanumeric, random_canonical_id
 
 def create_concept(
     canonical_id: str | None = None,
+    label: str | None = None,
     concept_type: RawConceptType = "Concept",
     identifier_ontology_type: str = "Concept",
 ) -> Concept:
@@ -25,20 +26,29 @@ def create_concept(
                 ontology_type=identifier_ontology_type
             ),
         ),
-        label=random_alphanumeric(15),
+        label=label or random_alphanumeric(15),
         type=concept_type,
     )
 
 
-def create_genre_concept(canonical_id: str | None = None) -> Concept:
+def create_genre_concept(
+    canonical_id: str | None = None, label: str | None = None
+) -> Concept:
     return create_concept(
-        canonical_id, concept_type="GenreConcept", identifier_ontology_type="Genre"
+        canonical_id,
+        label,
+        concept_type="GenreConcept",
+        identifier_ontology_type="Genre",
     )
 
 
 def create_genre(label: str, concepts: list[Concept] | None = None) -> Genre:
     if concepts is None:
-        concepts = [create_genre_concept(), create_concept(), create_concept()]
+        concepts = [
+            create_genre_concept(label=label),
+            create_concept(),
+            create_concept(),
+        ]
     return Genre(label=label, concepts=concepts)
 
 

@@ -1,9 +1,9 @@
 {
   "description": "an image without any inferred data",
-  "id": "ffui9nxs",
+  "id": "tc3wxz6j",
   "document": {
     "display": {
-      "id": "ffui9nxs",
+      "id": "tc3wxz6j",
       "locations": [
         {
           "locationType": {
@@ -18,16 +18,15 @@
             "url": "http://creativecommons.org/licenses/by/4.0/"
           },
           "accessConditions": [],
-          "url": "https://iiif.wellcomecollection.org/image/oJM.jpg/info.json",
-          "linkText": "Link text: CwV5derK9",
+          "url": "https://iiif.wellcomecollection.org/image/leS.jpg/info.json",
           "type": "DigitalLocation"
         }
       ],
       "aspectRatio": 1.0,
       "averageColor": "#ffffff",
       "source": {
-        "id": "lf5ik6rk",
-        "title": "e03osGHuEYsd0Cw",
+        "id": "bjllhyk7",
+        "title": "j6HFKoRbD8jls5a",
         "contributors": [],
         "subjects": [],
         "genres": [],
@@ -48,22 +47,21 @@
           "url": "http://creativecommons.org/licenses/by/4.0/"
         },
         "accessConditions": [],
-        "url": "https://iiif.wellcomecollection.org/image/oJM.jpg/info.json",
-        "linkText": "Link text: CwV5derK9",
+        "url": "https://iiif.wellcomecollection.org/image/leS.jpg/info.json",
         "type": "DigitalLocation"
       }
     },
     "query": {
-      "id": "ffui9nxs",
+      "id": "tc3wxz6j",
       "source": {
-        "id": "bcet59gk",
-        "title": "JvkyXybguwl5UBh",
+        "id": "bjllhyk7",
+        "title": "j6HFKoRbD8jls5a",
         "alternativeTitles": [],
         "languages.label": [],
-        "sourceIdentifier.value": "luevALY2pB",
+        "sourceIdentifier.value": "2nwKhEpYj6",
         "identifiers.value": [
-          "bcet59gk",
-          "luevALY2pB"
+          "bjllhyk7",
+          "2nwKhEpYj6"
         ],
         "images.id": [],
         "images.identifiers.value": [],
@@ -79,7 +77,12 @@
       }
     },
     "aggregatableValues": {
-      "locations.license": [],
+      "locations.license": [
+        {
+          "id": "cc-by",
+          "label": "Attribution 4.0 International (CC BY 4.0)"
+        }
+      ],
       "source.contributors.agent": [],
       "source.genres": [],
       "source.subjects": []
@@ -108,5 +111,5 @@
     },
     "modifiedTime": "2001-01-01T01:01:01Z"
   },
-  "createdAt": "2026-06-02T10:51:59.993736+00:00"
+  "createdAt": "2026-06-03T15:02:30.602983+00:00"
 }

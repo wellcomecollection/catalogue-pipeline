@@ -1,17 +1,17 @@
 {
   "description": "a work with licensed digital items",
-  "id": "pzg0dskt",
+  "id": "v0ihpw42",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "pzg0dskt",
+        "id": "v0ihpw42",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "ga8ZH2SyPE"
+          "value": "gQbBtuNU6m"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "pzg0dskt",
-      "title": "R1wB2BAxLgfJZCi",
+      "id": "v0ihpw42",
+      "title": "MFr83lSanvqTT30",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "ga8ZH2SyPE",
+      "sourceIdentifier.value": "gQbBtuNU6m",
       "identifiers.value": [
-        "pzg0dskt",
-        "ga8ZH2SyPE"
+        "v0ihpw42",
+        "gQbBtuNU6m"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "pzg0dskt",
-      "title": "R1wB2BAxLgfJZCi",
+      "id": "v0ihpw42",
+      "title": "MFr83lSanvqTT30",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "ga8ZH2SyPE",
+          "value": "gQbBtuNU6m",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -78,7 +78,8 @@
                 "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/NU6.jpg/info.json",
+              "url": "https://iiif.wellcomecollection.org/image/N1K.jpg/info.json",
+              "linkText": "Link text: Hmk1arg1yT",
               "type": "DigitalLocation"
             }
           ],
@@ -126,8 +127,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "pzg0dskt",
-        "ga8ZH2SyPE"
+        "v0ihpw42",
+        "gQbBtuNU6m"
       ],
       "items.locations.license.id": [
         "cc-by"
@@ -144,5 +145,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T15:48:04.843007+00:00"
+  "createdAt": "2026-06-03T11:19:05.973782+00:00"
 }

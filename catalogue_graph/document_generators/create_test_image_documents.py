@@ -158,18 +158,19 @@ def create_genre_filter_test_examples() -> None:
     carrot_counselling = create_genre(
         "Carrot counselling",
         concepts=[
-            create_genre_concept("g00dcafe"),
+            create_genre_concept("g00dcafe", label="Carrot counselling"),
             create_concept("baadf00d"),
         ],
     )
+
     dodo_divination = create_genre("Dodo divination")
     emu_entrepreneurship = create_genre(
         "Emu entrepreneurship",
-        concepts=[create_genre_concept("g00dcafe")],
+        concepts=[create_genre_concept("g00dcafe", label="Emu entrepreneurship")],
     )
     falcon_finances = create_genre(
         "Falcon finances",
-        concepts=[create_genre_concept("baadf00d")],
+        concepts=[create_genre_concept("baadf00d", label="Falcon finances")],
     )
 
     images = [

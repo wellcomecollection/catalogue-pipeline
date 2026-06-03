@@ -1,17 +1,17 @@
 {
   "description": "examples for the works filtered aggregations tests",
-  "id": "udfmaf0r",
+  "id": "az78hq3d",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "udfmaf0r",
+        "id": "az78hq3d",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "i3SiS8N9wD"
+          "value": "d113mRKynE"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,16 +22,16 @@
       "redirectSources": []
     },
     "query": {
-      "id": "udfmaf0r",
+      "id": "az78hq3d",
       "title": "tapirs",
       "alternativeTitles": [],
       "languages.label": [
         "Bashkir"
       ],
-      "sourceIdentifier.value": "i3SiS8N9wD",
+      "sourceIdentifier.value": "d113mRKynE",
       "identifiers.value": [
-        "udfmaf0r",
-        "i3SiS8N9wD"
+        "az78hq3d",
+        "d113mRKynE"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -46,7 +46,7 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "udfmaf0r",
+      "id": "az78hq3d",
       "title": "tapirs",
       "alternativeTitles": [],
       "workType": {
@@ -57,7 +57,7 @@
       "contributors": [],
       "identifiers": [
         {
-          "value": "i3SiS8N9wD",
+          "value": "d113mRKynE",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -124,8 +124,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "udfmaf0r",
-        "i3SiS8N9wD"
+        "az78hq3d",
+        "d113mRKynE"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -138,5 +138,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T15:48:05.526615+00:00"
+  "createdAt": "2026-06-03T14:13:00.597450+00:00"
 }

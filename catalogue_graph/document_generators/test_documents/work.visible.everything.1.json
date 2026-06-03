@@ -1,17 +1,17 @@
 {
   "description": "a list of work with all the include-able fields",
-  "id": "5an0xtfb",
+  "id": "jz38nxcb",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "5an0xtfb",
+        "id": "jz38nxcb",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "HP6FtyIIef"
+          "value": "CQu2DejoWh"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,51 +22,51 @@
       "redirectSources": []
     },
     "query": {
-      "id": "5an0xtfb",
+      "id": "jz38nxcb",
       "title": "A work with all the include-able fields",
       "alternativeTitles": [],
       "languages.label": [
-        "O6wBrwz",
-        "3gE5shC",
-        "Vl79vF"
+        "s7mVXE",
+        "syNi1Xh",
+        "oPTxO6wB"
       ],
-      "sourceIdentifier.value": "HP6FtyIIef",
+      "sourceIdentifier.value": "CQu2DejoWh",
       "identifiers.value": [
-        "5an0xtfb",
-        "HP6FtyIIef",
+        "jz38nxcb",
+        "CQu2DejoWh",
         "wZL0ffJl0q"
       ],
       "images.id": [
-        "qmulhlxb",
-        "y4a1nycr"
+        "t5ou7af4",
+        "ay8aihmf"
       ],
       "images.identifiers.value": [
-        "o8cayIaih0",
-        "bLwTx0vRDP"
+        "uz58o09BdK",
+        "VDm2aH5N2A"
       ],
       "items.identifiers.value": [
-        "JUmacdipC3",
-        "Wj97z8DTIn"
+        "FmkzdY8ZX9",
+        "cdipC3RNoQ"
       ],
       "items.id": [
-        "j5n2cp5u",
-        "z2u3ejoh"
+        "vcvk3ym0",
+        "2cp5u9ma"
       ],
       "items.shelfmark.value": [],
       "notes.contents": [
-        "RyyDG",
-        "1NoRzGtFo",
-        "RafEuz58o",
-        "KXcAf"
+        "zXXTs3g",
+        "hCjw7pV",
+        "FohRyyD",
+        "7K1NoRzG"
       ],
       "partOf.title": [],
       "production.label": [
-        "qbLi6yk4CKd6y7Z",
-        "qloIxkt2M16jDe9",
-        "1817",
-        "apoF1troaFw89G7",
-        "Q4YwsyNi1XhzwG3",
-        "1920"
+        "gRCxLSqQFZXo7kJ",
+        "i6yk4CKd6y7ZfPL",
+        "1903",
+        "giQ3d0QiLJmac3z",
+        "Fw89G7vfetKBoVx",
+        "1897"
       ],
       "subjects.concepts.label": [
         "8emPYDNpZDHkTv6",
@@ -77,26 +77,26 @@
         "ADx4KiyKXak7LaR"
       ],
       "contributors.agent.label": [
-        "person-T74HgSXPSn",
-        "person-PMGhrSUNk"
+        "person-5kvOG9v",
+        "person-Sj6yVVJtp"
       ],
       "genres.concepts.label": [
-        "7ixGnIzeiAKQw9g",
-        "HxIbMNXE4prcNu3",
-        "kkvEAkL63sWGh7x",
-        "wiihNwkbBKzDePT",
-        "NVsTYvRhZ9621AX",
-        "8EGt9AA0gRjjaLM"
+        "genre-TZljbb0u",
+        "Eyo6zpPEz6Le1qr",
+        "2djTzbXAU3zB7gT",
+        "genre-MDkkvEAk",
+        "NwkbBKzDePTTReX",
+        "VsTYvRhZ9621AX3"
       ]
     },
     "display": {
-      "id": "5an0xtfb",
+      "id": "jz38nxcb",
       "title": "A work with all the include-able fields",
       "alternativeTitles": [],
       "contributors": [
         {
           "agent": {
-            "label": "person-T74HgSXPSn",
+            "label": "person-5kvOG9v",
             "type": "Person"
           },
           "roles": [],
@@ -105,7 +105,7 @@
         },
         {
           "agent": {
-            "label": "person-PMGhrSUNk",
+            "label": "person-Sj6yVVJtp",
             "type": "Person"
           },
           "roles": [],
@@ -115,7 +115,7 @@
       ],
       "identifiers": [
         {
-          "value": "HP6FtyIIef",
+          "value": "CQu2DejoWh",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -249,7 +249,7 @@
           "concepts": [
             {
               "id": "6acdhjjy",
-              "label": "7ixGnIzeiAKQw9g",
+              "label": "genre-TZljbb0u",
               "identifiers": [
                 {
                   "value": "YbABK6RvTp",
@@ -264,11 +264,11 @@
               "type": "Genre"
             },
             {
-              "id": "11p4yozp",
-              "label": "HxIbMNXE4prcNu3",
+              "id": "ix6n8zei",
+              "label": "Eyo6zpPEz6Le1qr",
               "identifiers": [
                 {
-                  "value": "PEz6Le1qr4",
+                  "value": "AKQw9gB5Bp",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -280,11 +280,11 @@
               "type": "Concept"
             },
             {
-              "id": "zg8djzb0",
-              "label": "kkvEAkL63sWGh7x",
+              "id": "7x8b4prc",
+              "label": "2djTzbXAU3zB7gT",
               "identifiers": [
                 {
-                  "value": "U3zB7gTDMD",
+                  "value": "Nu3Zz9OgI4",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -299,14 +299,14 @@
           "type": "Genre"
         },
         {
-          "label": "genre-jOwXEOH",
+          "label": "genre-MDkkvEAk",
           "concepts": [
             {
-              "id": "dmqlusyc",
-              "label": "wiihNwkbBKzDePT",
+              "id": "s6hxwjw4",
+              "label": "genre-MDkkvEAk",
               "identifiers": [
                 {
-                  "value": "sJBcRAryUn",
+                  "value": "OHWdm49qlU",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -318,11 +318,11 @@
               "type": "Genre"
             },
             {
-              "id": "e189ikjn",
-              "label": "NVsTYvRhZ9621AX",
+              "id": "usycs91c",
+              "label": "NwkbBKzDePTTReX",
               "identifiers": [
                 {
-                  "value": "kobHi0Fw54",
+                  "value": "RAryUnwiih",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -334,11 +334,11 @@
               "type": "Concept"
             },
             {
-              "id": "qkv6v8jy",
-              "label": "8EGt9AA0gRjjaLM",
+              "id": "189ikjnk",
+              "label": "VsTYvRhZ9621AX3",
               "identifiers": [
                 {
-                  "value": "VVJtp46ywy",
+                  "value": "obHi0Fw54N",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -355,10 +355,10 @@
       ],
       "items": [
         {
-          "id": "j5n2cp5u",
+          "id": "vcvk3ym0",
           "identifiers": [
             {
-              "value": "JUmacdipC3",
+              "value": "FmkzdY8ZX9",
               "type": "Identifier",
               "identifierType": {
                 "id": "sierra-system-number",
@@ -381,19 +381,17 @@
                 "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/yRm.jpg/info.json",
-              "credit": "Credit line: 1HmUulH7IT",
-              "linkText": "Link text: FmkzdY8Z",
+              "url": "https://iiif.wellcomecollection.org/image/sxP.jpg/info.json",
               "type": "DigitalLocation"
             }
           ],
           "type": "Item"
         },
         {
-          "id": "z2u3ejoh",
+          "id": "2cp5u9ma",
           "identifiers": [
             {
-              "value": "Wj97z8DTIn",
+              "value": "cdipC3RNoQ",
               "type": "Identifier",
               "identifierType": {
                 "id": "sierra-system-number",
@@ -416,9 +414,8 @@
                 "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/RNo.jpg/info.json",
-              "credit": "Credit line: vFRmkxJ1wT",
-              "linkText": "Link text: Rg39WHB7PO",
+              "url": "https://iiif.wellcomecollection.org/image/v4W.jpg/info.json",
+              "linkText": "Link text: 1HmUulH7IT",
               "type": "DigitalLocation"
             }
           ],
@@ -440,8 +437,8 @@
                 "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/5xT.jpg/info.json",
-              "linkText": "Link text: bznf2",
+              "url": "https://iiif.wellcomecollection.org/image/Rg3.jpg/info.json",
+              "credit": "Credit line: xJ1wTC",
               "type": "DigitalLocation"
             }
           ],
@@ -449,6 +446,27 @@
         }
       ],
       "holdings": [
+        {
+          "note": "Holdings note: x0vRDPiMHf",
+          "enumeration": [],
+          "location": {
+            "locationType": {
+              "id": "closed-stores",
+              "type": "LocationType",
+              "label": "Closed stores"
+            },
+            "license": {
+              "id": "ogl",
+              "type": "License",
+              "label": "Open Government Licence",
+              "url": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+            },
+            "accessConditions": [],
+            "label": "locationLabel",
+            "type": "PhysicalLocation"
+          },
+          "type": "Holdings"
+        },
         {
           "enumeration": [],
           "location": {
@@ -487,72 +505,49 @@
             "type": "PhysicalLocation"
           },
           "type": "Holdings"
-        },
-        {
-          "enumeration": [
-            "7HORh8d"
-          ],
-          "location": {
-            "locationType": {
-              "id": "closed-stores",
-              "type": "LocationType",
-              "label": "Closed stores"
-            },
-            "license": {
-              "id": "ogl",
-              "type": "License",
-              "label": "Open Government Licence",
-              "url": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
-            },
-            "accessConditions": [],
-            "label": "locationLabel",
-            "shelfmark": "Shelfmark: v3NZk",
-            "type": "PhysicalLocation"
-          },
-          "type": "Holdings"
         }
       ],
       "availabilities": [],
       "production": [
         {
-          "label": "yfYcah5x0UEugRCxLSqQFZXo7",
+          "label": "46ywy8EGt9AA0gRjjaLMOT74H",
           "places": [
             {
-              "label": "qbLi6yk4CKd6y7Z",
+              "label": "gRCxLSqQFZXo7kJ",
               "type": "Place"
             }
           ],
           "agents": [
             {
-              "label": "qloIxkt2M16jDe9",
+              "label": "i6yk4CKd6y7ZfPL",
               "type": "Agent"
             }
           ],
           "dates": [
             {
-              "label": "1817",
+              "label": "1903",
               "type": "Period"
             }
           ],
           "type": "ProductionEvent"
         },
         {
-          "label": "EzK8AJfqEo0hsjxZgiQ3d0QiL",
+          "label": "voG3DcENgr1GFJPzEqloIxkt2",
           "places": [
             {
-              "label": "apoF1troaFw89G7",
+              "label": "giQ3d0QiLJmac3z",
               "type": "Place"
             }
           ],
           "agents": [
             {
-              "label": "Q4YwsyNi1XhzwG3",
+              "label": "Fw89G7vfetKBoVx",
               "type": "Agent"
             }
           ],
           "dates": [
             {
-              "label": "1920",
+              "label": "1897",
               "type": "Period"
             }
           ],
@@ -561,25 +556,37 @@
       ],
       "languages": [
         {
-          "id": "oPT",
+          "id": "3Wj",
           "type": "Language",
-          "label": "O6wBrwz"
+          "label": "s7mVXE"
         },
         {
-          "id": "XXT",
+          "id": "Q4Y",
           "type": "Language",
-          "label": "3gE5shC"
+          "label": "syNi1Xh"
         },
         {
-          "id": "jw7",
+          "id": "zwG",
           "type": "Language",
-          "label": "Vl79vF"
+          "label": "oPTxO6wB"
         }
       ],
       "notes": [
         {
           "contents": [
-            "RyyDG"
+            "zXXTs3g",
+            "hCjw7pV"
+          ],
+          "noteType": {
+            "id": "funding-information",
+            "type": "NoteType",
+            "label": "Funding information"
+          },
+          "type": "Note"
+        },
+        {
+          "contents": [
+            "FohRyyD"
           ],
           "noteType": {
             "id": "general-note",
@@ -590,14 +597,12 @@
         },
         {
           "contents": [
-            "1NoRzGtFo",
-            "RafEuz58o",
-            "KXcAf"
+            "7K1NoRzG"
           ],
           "noteType": {
-            "id": "funding-information",
+            "id": "location-of-duplicates-note",
             "type": "NoteType",
-            "label": "Funding information"
+            "label": "Location of duplicates"
           },
           "type": "Note"
         }
@@ -613,11 +618,11 @@
       ],
       "images": [
         {
-          "id": "qmulhlxb",
+          "id": "t5ou7af4",
           "type": "Image"
         },
         {
-          "id": "y4a1nycr",
+          "id": "ay8aihmf",
           "type": "Image"
         }
       ],
@@ -630,11 +635,11 @@
       "genres": [
         {
           "id": "6acdhjjy",
-          "label": "7ixGnIzeiAKQw9g"
+          "label": "genre-TZljbb0u"
         },
         {
-          "id": "dmqlusyc",
-          "label": "wiihNwkbBKzDePT"
+          "id": "s6hxwjw4",
+          "label": "genre-MDkkvEAk"
         }
       ],
       "subjects": [
@@ -649,36 +654,36 @@
       ],
       "languages": [
         {
-          "id": "oPT",
-          "label": "O6wBrwz"
+          "id": "3Wj",
+          "label": "s7mVXE"
         },
         {
-          "id": "XXT",
-          "label": "3gE5shC"
+          "id": "Q4Y",
+          "label": "syNi1Xh"
         },
         {
-          "id": "jw7",
-          "label": "Vl79vF"
+          "id": "zwG",
+          "label": "oPTxO6wB"
         }
       ],
       "production.dates": [
         {
-          "id": "1817",
-          "label": "1817"
+          "id": "1903",
+          "label": "1903"
         },
         {
-          "id": "1920",
-          "label": "1920"
+          "id": "1897",
+          "label": "1897"
         }
       ],
       "contributors.agent": [
         {
-          "id": "person-T74HgSXPSn",
-          "label": "person-T74HgSXPSn"
+          "id": "person-5kvOG9v",
+          "label": "person-5kvOG9v"
         },
         {
-          "id": "person-PMGhrSUNk",
-          "label": "person-PMGhrSUNk"
+          "id": "person-Sj6yVVJtp",
+          "label": "person-Sj6yVVJtp"
         }
       ],
       "items.locations.license": [
@@ -692,25 +697,25 @@
     "filterableValues": {
       "workType": "Standard",
       "production.dates.range.from": [
-        -4828204800000,
-        -1577923200000
+        -2114380800000,
+        -2303596800000
       ],
       "languages.id": [
-        "oPT",
-        "XXT",
-        "jw7"
+        "3Wj",
+        "Q4Y",
+        "zwG"
       ],
       "genres.label": [
-        "7ixGnIzeiAKQw9g",
-        "wiihNwkbBKzDePT"
+        "genre-TZljbb0u",
+        "genre-MDkkvEAk"
       ],
       "genres.concepts.id": [
         "6acdhjjy",
-        "dmqlusyc"
+        "s6hxwjw4"
       ],
       "genres.concepts.sourceIdentifier": [
         "YbABK6RvTp",
-        "sJBcRAryUn"
+        "OHWdm49qlU"
       ],
       "subjects.label": [
         "subject-ZquSTq",
@@ -719,14 +724,14 @@
       "subjects.concepts.id": [],
       "subjects.concepts.sourceIdentifier": [],
       "contributors.agent.label": [
-        "person-T74HgSXPSn",
-        "person-PMGhrSUNk"
+        "person-5kvOG9v",
+        "person-Sj6yVVJtp"
       ],
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "5an0xtfb",
-        "HP6FtyIIef",
+        "jz38nxcb",
+        "CQu2DejoWh",
         "wZL0ffJl0q"
       ],
       "items.locations.license.id": [
@@ -736,12 +741,12 @@
       ],
       "items.locations.accessConditions.status.id": [],
       "items.id": [
-        "j5n2cp5u",
-        "z2u3ejoh"
+        "vcvk3ym0",
+        "2cp5u9ma"
       ],
       "items.identifiers.value": [
-        "JUmacdipC3",
-        "Wj97z8DTIn"
+        "FmkzdY8ZX9",
+        "cdipC3RNoQ"
       ],
       "items.locations.locationType.id": [
         "iiif-image",
@@ -754,5 +759,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T15:48:04.707363+00:00"
+  "createdAt": "2026-06-03T11:19:05.834860+00:00"
 }

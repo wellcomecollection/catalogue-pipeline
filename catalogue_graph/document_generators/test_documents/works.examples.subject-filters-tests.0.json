@@ -1,17 +1,17 @@
 {
   "description": "examples for the subject filter tests",
-  "id": "pgaphecm",
+  "id": "6yfp309u",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "pgaphecm",
+        "id": "6yfp309u",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "G93Wl8jQdV"
+          "value": "tLcC9TCIjP"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "pgaphecm",
-      "title": "NzSjooPZ52NA3M3",
+      "id": "6yfp309u",
+      "title": "YW4ZPBjue9ioHiE",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "G93Wl8jQdV",
+      "sourceIdentifier.value": "tLcC9TCIjP",
       "identifiers.value": [
-        "pgaphecm",
-        "G93Wl8jQdV"
+        "6yfp309u",
+        "tLcC9TCIjP"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -40,20 +40,20 @@
       "partOf.title": [],
       "production.label": [],
       "subjects.concepts.label": [
-        "ByrnwPtDRiSByCA",
-        "e0crv9bTt2zgyAV"
+        "F8cPFM4t3J4pRT7",
+        "Y4kGoWByrnwPtDR"
       ],
       "contributors.agent.label": [],
       "genres.concepts.label": []
     },
     "display": {
-      "id": "pgaphecm",
-      "title": "NzSjooPZ52NA3M3",
+      "id": "6yfp309u",
+      "title": "YW4ZPBjue9ioHiE",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "G93Wl8jQdV",
+          "value": "tLcC9TCIjP",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -65,7 +65,7 @@
       "subjects": [
         {
           "id": "sanitati",
-          "label": "Sanitation.",
+          "label": "Sanitation",
           "identifiers": [
             {
               "value": "lcsh-sanitation",
@@ -89,11 +89,11 @@
           "type": "Subject",
           "concepts": [
             {
-              "id": "r74t2smv",
-              "label": "ByrnwPtDRiSByCA",
+              "id": "daio9a8i",
+              "label": "F8cPFM4t3J4pRT7",
               "identifiers": [
                 {
-                  "value": "niDEY4kGoW",
+                  "value": "L0N8s6QlkL",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -105,11 +105,11 @@
               "type": "Concept"
             },
             {
-              "id": "ndq7d4d0",
-              "label": "e0crv9bTt2zgyAV",
+              "id": "whnojjr7",
+              "label": "Y4kGoWByrnwPtDR",
               "identifiers": [
                 {
-                  "value": "NM7lbaMq5l",
+                  "value": "EtCsmvniDE",
                   "type": "Identifier",
                   "identifierType": {
                     "id": "sierra-system-number",
@@ -143,7 +143,7 @@
       "subjects": [
         {
           "id": "sanitati",
-          "label": "Sanitation."
+          "label": "Sanitation"
         }
       ],
       "languages": [],
@@ -160,7 +160,7 @@
       "genres.concepts.id": [],
       "genres.concepts.sourceIdentifier": [],
       "subjects.label": [
-        "Sanitation."
+        "Sanitation"
       ],
       "subjects.concepts.id": [
         "sanitati"
@@ -173,8 +173,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "pgaphecm",
-        "G93Wl8jQdV"
+        "6yfp309u",
+        "tLcC9TCIjP"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -187,5 +187,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T15:48:05.375977+00:00"
+  "createdAt": "2026-06-03T14:13:00.440651+00:00"
 }

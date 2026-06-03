@@ -1,17 +1,17 @@
 {
   "description": "a work with licensed digital items",
-  "id": "026secfw",
+  "id": "2xamne5i",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "026secfw",
+        "id": "2xamne5i",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "TVvV6amNs1"
+          "value": "MvJicFA5DY"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "026secfw",
-      "title": "UHSQ8JzNrnfBbIE",
+      "id": "2xamne5i",
+      "title": "RpbgDUH05lm0y8S",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "TVvV6amNs1",
+      "sourceIdentifier.value": "MvJicFA5DY",
       "identifiers.value": [
-        "026secfw",
-        "TVvV6amNs1"
+        "2xamne5i",
+        "MvJicFA5DY"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "026secfw",
-      "title": "UHSQ8JzNrnfBbIE",
+      "id": "2xamne5i",
+      "title": "RpbgDUH05lm0y8S",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "TVvV6amNs1",
+          "value": "MvJicFA5DY",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -78,7 +78,9 @@
                 "url": "http://creativecommons.org/licenses/by/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/5Du.jpg/info.json",
+              "url": "https://iiif.wellcomecollection.org/image/oDP.jpg/info.json",
+              "credit": "Credit line: oswGuEO2W",
+              "linkText": "Link text: GJ1xlBOZa",
               "type": "DigitalLocation"
             }
           ],
@@ -100,8 +102,9 @@
                 "url": "https://creativecommons.org/licenses/by-nc/4.0/"
               },
               "accessConditions": [],
-              "url": "https://iiif.wellcomecollection.org/image/m0y.jpg/info.json",
-              "linkText": "Link text: MvJicFA5DY",
+              "url": "https://iiif.wellcomecollection.org/image/4VT.jpg/info.json",
+              "credit": "Credit line: PbxENY8",
+              "linkText": "Link text: wrXkl4o",
               "type": "DigitalLocation"
             }
           ],
@@ -153,8 +156,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "026secfw",
-        "TVvV6amNs1"
+        "2xamne5i",
+        "MvJicFA5DY"
       ],
       "items.locations.license.id": [
         "cc-by",
@@ -173,5 +176,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T15:48:04.862038+00:00"
+  "createdAt": "2026-06-03T11:19:05.993112+00:00"
 }

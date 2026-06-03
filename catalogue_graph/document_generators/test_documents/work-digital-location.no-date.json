@@ -1,17 +1,17 @@
 {
   "description": "a work with no digital location",
-  "id": "jxhtjy05",
+  "id": "8rcefomn",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "jxhtjy05",
+        "id": "8rcefomn",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "fbWxaltzEd"
+          "value": "WELHvPREB9"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "jxhtjy05",
+      "id": "8rcefomn",
       "title": "A work with no digital location",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "fbWxaltzEd",
+      "sourceIdentifier.value": "WELHvPREB9",
       "identifiers.value": [
-        "jxhtjy05",
-        "fbWxaltzEd"
+        "8rcefomn",
+        "WELHvPREB9"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "jxhtjy05",
+      "id": "8rcefomn",
       "title": "A work with no digital location",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "fbWxaltzEd",
+          "value": "WELHvPREB9",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -98,8 +98,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "jxhtjy05",
-        "fbWxaltzEd"
+        "8rcefomn",
+        "WELHvPREB9"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -112,5 +112,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T08:45:41.891253+00:00"
+  "createdAt": "2026-06-03T14:13:00.678223+00:00"
 }
