@@ -39,7 +39,7 @@ Set `GH_PROMPT_DISABLED=true` on every `gh` invocation.
 3. **Map the change.** Build a todo list of the meaningful units to review (e.g. "new `FolioRecordPipeline.transform`", "schema migration", "test changes for X"). Skip pure formatting / generated files unless the user wants them included.
 4. **Walk the diff with the reviewer**, one unit at a time. For each unit:
    1. Summarise what changed and why (per the author's description / commit message).
-   2. Read the affected files at the PR's `headRefName`. Prefer `gh api repos/<o>/<r>/contents/<path>?ref=<head>` (no working-tree impact). If you genuinely need a checkout, use a separate worktree — `git fetch origin pull/<n>/head && git worktree add ../pr-<n> FETCH_HEAD` — and never touch the user's existing working tree.
+   2. Read the affected files at the PR's `headRefName`. Prefer `gh api -H "Accept: application/vnd.github.raw" repos/<o>/<r>/contents/<path>?ref=<head>` so the response is the raw file contents (no working-tree impact). If you genuinely need a checkout, use a separate worktree — `git fetch origin pull/<n>/head && git worktree add ../pr-<n> FETCH_HEAD` — and never touch the user's existing working tree.
    3. Form an assessment: correctness, edge cases, security, tests, fit with repo conventions (`AGENTS.md`, `*.instructions.md`, repo-memory facts).
    4. **Verify before commenting.** For each potential issue:
       - Cite the file/line in the PR.
