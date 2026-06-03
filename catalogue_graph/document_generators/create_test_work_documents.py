@@ -512,7 +512,7 @@ def create_works_for_aggregation_with_filters() -> None:
     for i, fmt in enumerate(ALL_FORMATS):
         work = create_visible_merged_work(
             format=fmt,
-            subjects=[subjects[i % len(subjects)]],
+            subjects=[subjects[i // len(subjects)]],
         )
         works.append(work)
 
