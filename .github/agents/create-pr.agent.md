@@ -60,5 +60,5 @@ If the user asks you to update a PR after pushing more commits:
 1. Re-read the current PR body (step 2 above).
 2. Re-run the diff/log against the base to see what's new.
 3. Extend the existing sections — add bullets for the new work, update *How to test* if test steps changed, leave unrelated content alone.
-4. Push the edit with `gh pr edit <n> --body-file …`.
+4. Push the edit via the REST PATCH workaround shown in *Working with the GitHub CLI* above — **not** `gh pr edit --body-file`, which fails on this repo (see *Known repo quirks* in [AGENTS.md](/AGENTS.md)).
 
