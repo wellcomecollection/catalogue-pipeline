@@ -6,7 +6,6 @@ import org.apache.pekko.http.scaladsl.model.HttpResponse
 import org.apache.pekko.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
@@ -31,9 +30,8 @@ case class AdapterResponseBundle[ImageType](
   response: Try[InferrerResponse]
 )
 
-class InferenceManagerWorkerService[Destination](
+class InferenceManagerWorkerService(
   msgStream: SQSStream[NotificationMessage],
-  msgSender: MessageSender[Destination],
   imageRetriever: Retriever[Image[Initial]],
   imageIndexer: Indexer[Image[Augmented]],
   pipelineStorageConfig: PipelineStorageConfig,
@@ -50,11 +48,7 @@ class InferenceManagerWorkerService[Destination](
   val maxOpenRequests = actorSystem.settings.config
     .getInt("pekko.http.host-connection-pool.max-open-requests")
 
-  val indexAndSend = batchIndexAndSendFlow(
-    pipelineStorageConfig,
-    (image: Image[Augmented]) => msgSender.send(imageIndexable.id(image)),
-    imageIndexer
-  )
+  val indexFlow = batchIndexOnlyFlow(pipelineStorageConfig, imageIndexer)
 
   def run(): Future[Done] =
     for {
@@ -73,7 +67,7 @@ class InferenceManagerWorkerService[Destination](
             .via(collectAndAugment)
             .asSource
             .map { case (image, message) => (message, List(image)) }
-            .via(indexAndSend)
+            .via(indexFlow)
       )
     } yield Done
 

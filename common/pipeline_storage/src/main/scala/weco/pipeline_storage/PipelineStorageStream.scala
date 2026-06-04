@@ -107,12 +107,15 @@ class PipelineStorageStream[In, Out, MsgDestination](
 }
 
 object PipelineStorageStream extends Logging {
-  def batchIndexAndSendFlow[T, MsgDestination](
+
+  /** Takes (Message, List[T]) pairs, creates Bundles, and indexes them.
+    * Emits successfully indexed Bundles.
+    */
+  private def bundleAndIndexFlow[T](
     config: PipelineStorageConfig,
-    send: T => Try[Unit],
     indexer: Indexer[T]
-  )(implicit ec: ExecutionContext, indexable: Indexable[T]) = {
-    val maxSubStreams = Integer.MAX_VALUE
+  )(implicit ec: ExecutionContext, indexable: Indexable[T])
+    : Flow[(Message, List[T]), Bundle[T], NotUsed] =
     Flow[(Message, List[T])]
       .collect {
         case (msg, items @ _ :: _) =>
@@ -123,6 +126,32 @@ object PipelineStorageStream extends Logging {
       }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
+
+  /** Indexes items and emits the originating SQS Message once all items from
+    * that message have been successfully indexed.
+    */
+  def batchIndexOnlyFlow[T](
+    config: PipelineStorageConfig,
+    indexer: Indexer[T]
+  )(implicit ec: ExecutionContext, indexable: Indexable[T])
+    : Flow[(Message, List[T]), Message, NotUsed] = {
+    val maxSubStreams = Integer.MAX_VALUE
+    bundleAndIndexFlow(config, indexer)
+      .via(
+        takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)
+          .collect {
+            case head :: _ => head.message
+          }
+      )
+  }
+
+  def batchIndexAndSendFlow[T, MsgDestination](
+    config: PipelineStorageConfig,
+    send: T => Try[Unit],
+    indexer: Indexer[T]
+  )(implicit ec: ExecutionContext, indexable: Indexable[T]) = {
+    val maxSubStreams = Integer.MAX_VALUE
+    bundleAndIndexFlow(config, indexer)
       .via(takeListsOfCompleteBundles(maxSubStreams, 5 minutes))
       .mapConcat(identity)
       .mapAsyncUnordered(config.parallelism) {
