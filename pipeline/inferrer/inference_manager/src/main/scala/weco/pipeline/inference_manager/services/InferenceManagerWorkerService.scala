@@ -51,12 +51,18 @@ class InferenceManagerWorkerService(
     Flow[(Message, List[Image[Augmented]])]
       .collect {
         case (msg, items @ _ :: _) =>
-          items.map(item => Bundle(message = msg, item = item, numberOfItems = items.size))
+          items.map(
+            item =>
+              Bundle(message = msg, item = item, numberOfItems = items.size)
+          )
       }
       .mapConcat[Bundle[Image[Augmented]]](identity)
       .via(batchIndexFlow(pipelineStorageConfig, imageIndexer))
       .via(
-        takeListsOfCompleteBundles[Image[Augmented]](Integer.MAX_VALUE, 5 minutes)
+        takeListsOfCompleteBundles[Image[Augmented]](
+          Integer.MAX_VALUE,
+          5 minutes
+        )
           .collect {
             case head :: _ => head.message
           }
