@@ -16,7 +16,6 @@ Quick start with uv
 Common scripts
 - start_reindex.py — start a reindex job
 - get_reindex_status.py — show status of reindex operations
-- reingest_for_display.py — trigger reingest for display pipeline
 - pipeline_inject_messages.py — inject messages into the pipeline
 - pipeline_storage_diff.py — compare items in pipeline storage
 - fix_dangling_merges.py — fix or report dangling merges
@@ -48,19 +47,3 @@ Notes
 - Valid sources include: all, notmiro, ebsco, miro, sierra, mets, calm, tei.
 - Modes: complete, partial, specific. For specific you can supply IDs interactively or via --input-file.
 - The script assumes the AWS role arn:aws:iam::760097843905:role/platform-developer.
-
-### reingest_for_display.py
-Reingest only the documents required for display (e.g. visible works/images) through the final stage of the pipeline.
-
-Examples
-- Reingest visible works already in the API index for a given pipeline date:
-  - uv run reingest_for_display.py YYYY-MM-DD --type works --source api
-- Reingest from the last pipeline stage (useful if API ingest/index has issues):
-  - uv run reingest_for_display.py YYYY-MM-DD --type works --source last_stage
-- Test a single image document by ID:
-  - uv run reingest_for_display.py YYYY-MM-DD --type images --test-doc-id abcd1234
-
-Flags
-- --type: works | images (default: works)
-- --source: api | last_stage (default: api)
-- --test-doc-id: Reingest a single document ID instead of all matching documents

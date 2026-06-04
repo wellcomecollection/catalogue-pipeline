@@ -10,7 +10,6 @@ import org.scalatest.{BeforeAndAfterAll, Inside, Inspectors, OptionValues}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
-import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
@@ -48,7 +47,7 @@ class InferenceManagerWorkerServiceTest
   )
 
   it(
-    "reads image messages, augments them with the inferrers, and sends them to SNS"
+    "reads image messages and augments them with the inferrers"
   ) {
     val images = (1 to 5)
       .map(_ => createImageData.toInitialImage)
@@ -80,7 +79,7 @@ class InferenceManagerWorkerServiceTest
         },
       images = _ => Some(Responses.image)
     ) {
-      case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
+      case (QueuePair(queue, dlq), augmentedImages, _, _) =>
         images.values.foreach(
           image => sendNotificationToSQS(queue = queue, body = image.id)
         )
@@ -88,7 +87,7 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.messages.map(_.body)) {
+          forAll(augmentedImages.keys) {
             id =>
               val image = augmentedImages(id)
               inside(image.state) {
@@ -136,7 +135,7 @@ class InferenceManagerWorkerServiceTest
         } else None,
       images = _ => Some(Responses.image)
     ) {
-      case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
+      case (QueuePair(queue, dlq), augmentedImages, _, _) =>
         (1 to 3).foreach(
           _ => sendNotificationToSQS(queue = queue, body = image.id)
         )
@@ -144,7 +143,7 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.messages.map(_.body)) {
+          forAll(augmentedImages.keys) {
             id =>
               val image = augmentedImages(id)
               inside(image.state) {
@@ -189,7 +188,7 @@ class InferenceManagerWorkerServiceTest
         } else None,
       images = _ => Some(Responses.image)
     ) {
-      case (QueuePair(queue, dlq), _, _, _, _) =>
+      case (QueuePair(queue, dlq), _, _, _) =>
         sendNotificationToSQS(queue = queue, body = image404.id)
         sendNotificationToSQS(queue = queue, body = image400.id)
         sendNotificationToSQS(queue = queue, body = image500.id)
@@ -206,7 +205,7 @@ class InferenceManagerWorkerServiceTest
       inferrer = _ => Some(Responses.featureInferrer),
       images = _ => None
     ) {
-      case (QueuePair(queue, dlq), _, _, _, _) =>
+      case (QueuePair(queue, dlq), _, _, _) =>
         val image = createImageData.toInitialImage
         sendNotificationToSQS(queue = queue, body = image.id)
         eventually {
@@ -231,13 +230,13 @@ class InferenceManagerWorkerServiceTest
         } else None,
       images = _ => Some(Responses.image)
     ) {
-      case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
+      case (QueuePair(queue, dlq), augmentedImages, _, _) =>
         sendNotificationToSQS(queue = queue, body = image.id)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val augmentedImage = augmentedImages(messageSender.messages.head.body)
+          val augmentedImage = augmentedImages.values.head
           augmentedImage.state.augmentedTime shouldBe defined
           augmentedImage.state.augmentedTime.get should be >= beforeAugmentation
         }
@@ -252,7 +251,6 @@ class InferenceManagerWorkerServiceTest
     testWith: TestWith[
       (
         QueuePair,
-        MemoryMessageSender,
         mutable.Map[String, Image[Augmented]],
         RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
         RequestPoolMock[(Uri, MergedIdentifiedImage), Message]
@@ -269,9 +267,9 @@ class InferenceManagerWorkerServiceTest
           imagesMock.pool,
           augmentedImages
         ) {
-          case (queuePair, sender) =>
+          queuePair =>
             testWith(
-              (queuePair, sender, augmentedImages, inferrerMock, imagesMock)
+              (queuePair, augmentedImages, inferrerMock, imagesMock)
             )
         }
     }
@@ -304,15 +302,13 @@ class InferenceManagerWorkerServiceTest
     ],
     imageRequestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Message],
     augmentedImages: mutable.Map[String, Image[Augmented]]
-  )(testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
+  )(testWith: TestWith[QueuePair, R]): R =
     withLocalSqsQueuePair() {
       queuePair =>
-        val msgSender = new MemoryMessageSender()
         val fileWriter = new MemoryFileWriter()
 
         withWorkerService(
           queue = queuePair.queue,
-          msgSender = msgSender,
           adapters = Set(
             new FeatureVectorInferrerAdapter("feature_inferrer", 80),
             new PaletteInferrerAdapter("palette_inferrer", 80),
@@ -325,7 +321,7 @@ class InferenceManagerWorkerServiceTest
           augmentedImages = augmentedImages
         ) {
           _ =>
-            testWith((queuePair, msgSender))
+            testWith(queuePair)
         }
     }
 }

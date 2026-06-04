@@ -159,7 +159,6 @@ module "image_inferrer" {
     palette_inferrer_port      = local.palette_inferrer_port
     aspect_ratio_inferrer_host = "localhost"
     aspect_ratio_inferrer_port = local.aspect_ratio_inferrer_port
-    topic_arn                  = module.image_inferrer_output_topic.arn
     images_root                = local.shared_storage_path
 
     es_initial_images_index   = local.es_images_initial_index
@@ -197,11 +196,4 @@ module "image_inferrer" {
   namespace = local.namespace
 
   shared_logging_secrets = local.monitoring_config.shared_logging_secrets
-}
-
-module "image_inferrer_output_topic" {
-  source = "../topic"
-
-  name       = "${local.namespace}_image_inferrer_output"
-  role_names = [module.image_inferrer.task_role_name]
 }

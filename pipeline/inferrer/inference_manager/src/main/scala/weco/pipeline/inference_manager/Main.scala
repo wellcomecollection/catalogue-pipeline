@@ -8,7 +8,7 @@ import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.Implicits._
 import weco.typesafe.WellcomeTypesafeApp
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.SQSBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.elasticsearch.typesafe.ElasticBuilder
@@ -77,10 +77,6 @@ object Main extends WellcomeTypesafeApp {
 
       new InferenceManagerWorkerService(
         msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        msgSender = SNSBuilder.buildSNSMessageSender(
-          config,
-          subject = "Sent from the inference_manager"
-        ),
         imageRetriever = imageRetriever,
         imageIndexer = imageIndexer,
         pipelineStorageConfig = pipelineStorageConfig,
