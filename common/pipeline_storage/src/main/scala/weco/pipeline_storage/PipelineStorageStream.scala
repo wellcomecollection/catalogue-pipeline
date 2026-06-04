@@ -132,7 +132,7 @@ object PipelineStorageStream extends Logging {
   def batchIndexOnlyFlow[T](
     config: PipelineStorageConfig,
     indexer: Indexer[T]
-  )(implicit ec: ExecutionContext, indexable: Indexable[T] ) = {
+  )(implicit ec: ExecutionContext, indexable: Indexable[T]) = {
     val maxSubStreams = Integer.MAX_VALUE
     bundleAndIndexFlow(config, indexer)
       .via(
