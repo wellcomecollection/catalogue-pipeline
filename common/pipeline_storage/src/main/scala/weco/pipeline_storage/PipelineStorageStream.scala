@@ -114,10 +114,7 @@ object PipelineStorageStream extends Logging {
   private def bundleAndIndexFlow[T](
     config: PipelineStorageConfig,
     indexer: Indexer[T]
-  )(
-    implicit ec: ExecutionContext,
-    indexable: Indexable[T]
-  ): Flow[(Message, List[T]), Bundle[T], NotUsed] =
+  )(implicit ec: ExecutionContext, indexable: Indexable[T]) =
     Flow[(Message, List[T])]
       .collect {
         case (msg, items @ _ :: _) =>
@@ -135,10 +132,7 @@ object PipelineStorageStream extends Logging {
   def batchIndexOnlyFlow[T](
     config: PipelineStorageConfig,
     indexer: Indexer[T]
-  )(
-    implicit ec: ExecutionContext,
-    indexable: Indexable[T]
-  ): Flow[(Message, List[T]), Message, NotUsed] = {
+  )(implicit ec: ExecutionContext, indexable: Indexable[T] ) = {
     val maxSubStreams = Integer.MAX_VALUE
     bundleAndIndexFlow(config, indexer)
       .via(
