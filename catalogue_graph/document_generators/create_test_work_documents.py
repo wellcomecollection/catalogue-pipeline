@@ -77,7 +77,7 @@ from .generators import (
     reset,
 )
 from .generators.locations import create_digital_location, create_physical_location
-from .utils import TEST_DOCUMENTS_DIR, save_document
+from .utils import TEST_DOCUMENTS_DIR, save_documents
 
 ALL_FORMATS = [Format(id=k, label=v) for k, v in FORMAT_LABEL_MAPPING.items()]
 
@@ -104,11 +104,7 @@ def save_works(
     works: Sequence[MergedWork | VisibleExtractedWork], description: str, doc_id: str
 ) -> None:
     indexable_docs = [transform_work(w) for w in works]
-    if len(indexable_docs) == 1:
-        save_document(doc_id, description, indexable_docs[0])
-    else:
-        for index, doc in enumerate(indexable_docs):
-            save_document(f"{doc_id}.{index}", description, doc)
+    save_documents(indexable_docs, description, doc_id)
 
 
 def save_work(work: MergedWork, description: str, doc_id: str) -> None:

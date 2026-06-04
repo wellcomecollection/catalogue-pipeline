@@ -1,4 +1,5 @@
 import json
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -26,3 +27,13 @@ def save_document(doc_id: str, description: str, document: IndexableRecord) -> N
 
     output["createdAt"] = datetime.now(UTC).isoformat()
     path.write_text(json.dumps(output, indent=2, ensure_ascii=False) + "\n")
+
+
+def save_documents(
+    documents: Sequence[IndexableRecord], description: str, doc_id: str
+) -> None:
+    if len(documents) == 1:
+        save_document(doc_id, description, documents[0])
+    else:
+        for index, doc in enumerate(documents):
+            save_document(f"{doc_id}.{index}", description, doc)

@@ -28,7 +28,7 @@ from .generators import (
     random_alphanumeric,
     reset,
 )
-from .utils import TEST_DOCUMENTS_DIR, save_document
+from .utils import TEST_DOCUMENTS_DIR, save_documents
 
 
 @freeze_time("2001-01-01T01:01:01Z")
@@ -38,11 +38,7 @@ def transform_image(extracted: ExtractedImage) -> IndexableImage:
 
 def save_images(images: list[ExtractedImage], description: str, doc_id: str) -> None:
     indexable_docs = [transform_image(i) for i in images]
-    if len(indexable_docs) == 1:
-        save_document(doc_id, description, indexable_docs[0])
-    else:
-        for index, doc in enumerate(indexable_docs):
-            save_document(f"{doc_id}.{index}", description, doc)
+    save_documents(indexable_docs, description, doc_id)
 
 
 def save_image(image: ExtractedImage, description: str, doc_id: str) -> None:
