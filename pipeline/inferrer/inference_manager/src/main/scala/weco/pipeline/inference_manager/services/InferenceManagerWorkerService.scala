@@ -6,11 +6,9 @@ import org.apache.pekko.http.scaladsl.model.HttpResponse
 import org.apache.pekko.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
-import weco.pipeline_storage.Indexable.imageIndexable
 import weco.pipeline_storage.PipelineStorageStream._
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
@@ -19,7 +17,7 @@ import weco.pipeline.inference_manager.adapters.{
   InferrerResponse
 }
 import weco.pipeline.inference_manager.models.DownloadedImage
-import weco.pipeline_storage.{Indexer, PipelineStorageConfig, Retriever}
+import weco.pipeline_storage.{Bundle, Indexer, PipelineStorageConfig, Retriever}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,9 +29,8 @@ case class AdapterResponseBundle[ImageType](
   response: Try[InferrerResponse]
 )
 
-class InferenceManagerWorkerService[Destination](
+class InferenceManagerWorkerService(
   msgStream: SQSStream[NotificationMessage],
-  msgSender: MessageSender[Destination],
   imageRetriever: Retriever[Image[Initial]],
   imageIndexer: Indexer[Image[Augmented]],
   pipelineStorageConfig: PipelineStorageConfig,
@@ -50,11 +47,20 @@ class InferenceManagerWorkerService[Destination](
   val maxOpenRequests = actorSystem.settings.config
     .getInt("pekko.http.host-connection-pool.max-open-requests")
 
-  val indexAndSend = batchIndexAndSendFlow(
-    pipelineStorageConfig,
-    (image: Image[Augmented]) => msgSender.send(imageIndexable.id(image)),
-    imageIndexer
-  )
+  val indexFlow =
+    Flow[(Message, List[Image[Augmented]])]
+      .collect {
+        case (msg, items @ _ :: _) =>
+          items.map(item => Bundle(message = msg, item = item, numberOfItems = items.size))
+      }
+      .mapConcat[Bundle[Image[Augmented]]](identity)
+      .via(batchIndexFlow(pipelineStorageConfig, imageIndexer))
+      .via(
+        takeListsOfCompleteBundles[Image[Augmented]](Integer.MAX_VALUE, 5 minutes)
+          .collect {
+            case head :: _ => head.message
+          }
+      )
 
   def run(): Future[Done] =
     for {
@@ -73,7 +79,7 @@ class InferenceManagerWorkerService[Destination](
             .via(collectAndAugment)
             .asSource
             .map { case (image, message) => (message, List(image)) }
-            .via(indexAndSend)
+            .via(indexFlow)
       )
     } yield Done
 

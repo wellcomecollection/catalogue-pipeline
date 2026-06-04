@@ -6,7 +6,6 @@ import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.Queue
-import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.inference_manager.adapters.InferrerAdapter
 import weco.pipeline.inference_manager.models.DownloadedImage
@@ -28,7 +27,6 @@ trait InferenceManagerWorkerServiceFixture
 
   def withWorkerService[R](
     queue: Queue,
-    msgSender: MemoryMessageSender,
     adapters: Set[InferrerAdapter],
     fileWriter: FileWriter,
     inferrerRequestPool: RequestPoolFlow[
@@ -39,14 +37,13 @@ trait InferenceManagerWorkerServiceFixture
     fileRoot: String = "/",
     initialImages: List[Image[Initial]] = Nil,
     augmentedImages: mutable.Map[String, Image[Augmented]]
-  )(testWith: TestWith[InferenceManagerWorkerService[String], R]): R =
+  )(testWith: TestWith[InferenceManagerWorkerService, R]): R =
     withActorSystem {
       implicit actorSystem =>
         withSQSStream[NotificationMessage, R](queue) {
           msgStream =>
             val workerService = new InferenceManagerWorkerService(
               msgStream = msgStream,
-              msgSender = msgSender,
               imageRetriever = new MemoryRetriever[Image[Initial]](
                 index = mutable.Map(
                   initialImages.map(image => image.id -> image): _*

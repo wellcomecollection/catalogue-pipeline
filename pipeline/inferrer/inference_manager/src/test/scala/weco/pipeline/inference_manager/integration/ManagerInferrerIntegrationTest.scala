@@ -14,7 +14,6 @@ import org.scalatest.{Inside, Inspectors, OptionValues}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
-import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 import org.apache.pekko.http.scaladsl.model.Uri
 import weco.catalogue.internal_model.generators.ImageGenerators
@@ -55,7 +54,7 @@ class ManagerInferrerIntegrationTest
     ).toInitialImage
 
     withWorkerServiceFixtures(image) {
-      case (QueuePair(queue, dlq), messageSender, augmentedImages, rootDir) =>
+      case (QueuePair(queue, dlq), augmentedImages, rootDir) =>
         // This is (more than) enough time for the inferrer to have
         // done its prestart work and be ready to use
         eventually(Timeout(scaled(90 seconds))) {
@@ -70,7 +69,7 @@ class ManagerInferrerIntegrationTest
           rootDir.listFiles().length should be(0)
 
           val augmentedImage =
-            augmentedImages(messageSender.messages.head.body)
+            augmentedImages.values.head
 
           inside(augmentedImage.state) {
             case Augmented(_, id, inferredData, _) =>
@@ -118,7 +117,6 @@ class ManagerInferrerIntegrationTest
     testWith: TestWith[
       (
         QueuePair,
-        MemoryMessageSender,
         mutable.Map[String, Image[Augmented]],
         File
       ),
@@ -127,7 +125,6 @@ class ManagerInferrerIntegrationTest
   ): R =
     withLocalSqsQueuePair() {
       queuePair =>
-        val messageSender = new MemoryMessageSender()
         val root = Paths.get("integration-tmp").toFile
         root.mkdir()
         withActorSystem {
@@ -135,7 +132,6 @@ class ManagerInferrerIntegrationTest
             val augmentedImages = mutable.Map.empty[String, Image[Augmented]]
             withWorkerService(
               queuePair.queue,
-              messageSender,
               augmentedImages = augmentedImages,
               initialImages = List(image),
               adapters = Set(
@@ -161,7 +157,7 @@ class ManagerInferrerIntegrationTest
             ) {
               _ =>
                 try {
-                  testWith((queuePair, messageSender, augmentedImages, root))
+                  testWith((queuePair, augmentedImages, root))
                 } finally {
                   root.delete()
                 }
