@@ -71,18 +71,12 @@ locals {
   scale_up_adjustment   = var.reindexing_state.scale_up_tasks ? 5 : 1
 
   services = [
-    "ingestor_works",
-    "ingestor_images",
     "matcher",
     "merger",
-    "id_minter",
     "inference_manager",
     "feature_inferrer",
     "palette_inferrer",
     "aspect_ratio_inferrer",
-    "path_concatenator",
-    "batcher",
-    "relation_embedder",
     "transformer_miro",
     "transformer_mets",
     "transformer_tei",
