@@ -1,0 +1,37 @@
+{
+  "description": "an arbitrary list of redirected works",
+  "id": "vkpo2y0c",
+  "document": {
+    "type": "Redirected",
+    "debug": {
+      "source": {
+        "id": "vkpo2y0c",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "tyVA1PfaMm"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": []
+    },
+    "redirectTarget": {
+      "sourceIdentifier": {
+        "identifierType": {
+          "id": "sierra-system-number"
+        },
+        "ontologyType": "Work",
+        "value": "RwL85O2NiT"
+      },
+      "otherIdentifiers": [],
+      "canonicalId": "c8rip4ws",
+      "type": "Identified"
+    }
+  },
+  "createdAt": "2026-06-02T13:48:25.918788+00:00"
+}

@@ -1,0 +1,246 @@
+{
+  "description": "examples for the genre tests",
+  "id": "jiqripkw",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "jiqripkw",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "7KvXe4xFah"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "jiqripkw",
+      "title": "CN2hiYtIpPGvXRA",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "7KvXe4xFah",
+      "identifiers.value": [
+        "jiqripkw",
+        "7KvXe4xFah"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [],
+      "items.id": [],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": [
+        "Pamphlets",
+        "Psychology, Pathological",
+        "Darwin \"Jones\", Charles",
+        "hR9vqMiUTtc9mHs",
+        "43lxZvotm3OGW5d"
+      ]
+    },
+    "display": {
+      "id": "jiqripkw",
+      "title": "CN2hiYtIpPGvXRA",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "7KvXe4xFah",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [
+        {
+          "label": "Pamphlets",
+          "concepts": [
+            {
+              "id": "g00dcafe",
+              "label": "Pamphlets",
+              "identifiers": [
+                {
+                  "value": "JBP8uGgfEs",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Genre"
+            }
+          ],
+          "type": "Genre"
+        },
+        {
+          "label": "Psychology, Pathological",
+          "concepts": [
+            {
+              "id": "baadf00d",
+              "label": "Psychology, Pathological",
+              "identifiers": [
+                {
+                  "value": "UFD4dtIPJ9",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Genre"
+            }
+          ],
+          "type": "Genre"
+        },
+        {
+          "label": "Darwin \"Jones\", Charles",
+          "concepts": [
+            {
+              "id": "4x4i8od2",
+              "label": "Darwin \"Jones\", Charles",
+              "identifiers": [
+                {
+                  "value": "Kp9p9LoRcs",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Genre"
+            },
+            {
+              "id": "hyv0wjy3",
+              "label": "hR9vqMiUTtc9mHs",
+              "identifiers": [
+                {
+                  "value": "iAkocxD1QD",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Concept"
+            },
+            {
+              "id": "qpf3h85u",
+              "label": "43lxZvotm3OGW5d",
+              "identifiers": [
+                {
+                  "value": "3ltGganoxI",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Concept"
+            }
+          ],
+          "type": "Genre"
+        }
+      ],
+      "items": [],
+      "holdings": [],
+      "availabilities": [],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [
+        {
+          "id": "g00dcafe",
+          "label": "Pamphlets"
+        },
+        {
+          "id": "baadf00d",
+          "label": "Psychology, Pathological"
+        },
+        {
+          "id": "4x4i8od2",
+          "label": "Darwin \"Jones\", Charles"
+        }
+      ],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [],
+      "availabilities": []
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [
+        "Pamphlets",
+        "Psychology, Pathological",
+        "Darwin \"Jones\", Charles"
+      ],
+      "genres.concepts.id": [
+        "g00dcafe",
+        "baadf00d",
+        "4x4i8od2"
+      ],
+      "genres.concepts.sourceIdentifier": [
+        "JBP8uGgfEs",
+        "UFD4dtIPJ9",
+        "Kp9p9LoRcs"
+      ],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "jiqripkw",
+        "7KvXe4xFah"
+      ],
+      "items.locations.license.id": [],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [],
+      "items.identifiers.value": [],
+      "items.locations.locationType.id": [],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": []
+    }
+  },
+  "createdAt": "2026-06-03T16:56:02.378290+00:00"
+}

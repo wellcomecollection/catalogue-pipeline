@@ -1,0 +1,186 @@
+{
+  "description": "a work with different concepts in the genre",
+  "id": "w6xbaajq",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "w6xbaajq",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "jMz2X9xVs8"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "w6xbaajq",
+      "title": "A work with different concepts in the genre",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "jMz2X9xVs8",
+      "identifiers.value": [
+        "w6xbaajq",
+        "jMz2X9xVs8"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [],
+      "items.id": [],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": [
+        "Electronic books",
+        "Pleasant Paris",
+        "Past Prehistory"
+      ]
+    },
+    "display": {
+      "id": "w6xbaajq",
+      "title": "A work with different concepts in the genre",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "jMz2X9xVs8",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [
+        {
+          "label": "Electronic books",
+          "concepts": [
+            {
+              "id": "concept0a",
+              "label": "Electronic books",
+              "identifiers": [
+                {
+                  "value": "0g7FBfhET3",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Genre"
+            },
+            {
+              "id": "concept1a",
+              "label": "Pleasant Paris",
+              "identifiers": [
+                {
+                  "value": "CGU4kIgi2x",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Place"
+            },
+            {
+              "id": "16if6c9p",
+              "label": "Past Prehistory",
+              "identifiers": [
+                {
+                  "value": "SKIz6tpKSf",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Concept"
+            }
+          ],
+          "type": "Genre"
+        }
+      ],
+      "items": [],
+      "holdings": [],
+      "availabilities": [],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [
+        {
+          "id": "concept0a",
+          "label": "Electronic books"
+        }
+      ],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [],
+      "availabilities": []
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [
+        "Electronic books"
+      ],
+      "genres.concepts.id": [
+        "concept0a"
+      ],
+      "genres.concepts.sourceIdentifier": [
+        "0g7FBfhET3"
+      ],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "w6xbaajq",
+        "jMz2X9xVs8"
+      ],
+      "items.locations.license.id": [],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [],
+      "items.identifiers.value": [],
+      "items.locations.locationType.id": [],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": []
+    }
+  },
+  "createdAt": "2026-06-03T16:56:01.870545+00:00"
+}

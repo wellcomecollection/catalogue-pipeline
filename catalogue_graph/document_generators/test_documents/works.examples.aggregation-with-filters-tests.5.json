@@ -1,0 +1,193 @@
+{
+  "description": "examples for the aggregation-with-filters tests",
+  "id": "oskpm5pp",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "oskpm5pp",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "NAqErNVI6R"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "oskpm5pp",
+      "title": "uvdCRUXjGLbMPZM",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "NAqErNVI6R",
+      "identifiers.value": [
+        "oskpm5pp",
+        "NAqErNVI6R"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [],
+      "items.id": [],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [
+        "JRUzHE8kjaHDe3A",
+        "XLaPFeEsUDRJx7E",
+        "LiQHsPflUa3JLUX"
+      ],
+      "contributors.agent.label": [],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "oskpm5pp",
+      "title": "uvdCRUXjGLbMPZM",
+      "alternativeTitles": [],
+      "workType": {
+        "id": "w",
+        "type": "Format",
+        "label": "Student dissertations"
+      },
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "NAqErNVI6R",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [
+        {
+          "label": "agg-subject-0",
+          "type": "Subject",
+          "concepts": [
+            {
+              "id": "w3mtsgae",
+              "label": "JRUzHE8kjaHDe3A",
+              "identifiers": [
+                {
+                  "value": "2QMB3mFnF0",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Concept"
+            },
+            {
+              "id": "ulfv3m50",
+              "label": "XLaPFeEsUDRJx7E",
+              "identifiers": [
+                {
+                  "value": "dkqsIs2QB7",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Concept"
+            },
+            {
+              "id": "etn03w2j",
+              "label": "LiQHsPflUa3JLUX",
+              "identifiers": [
+                {
+                  "value": "XSE4xeqPKn",
+                  "type": "Identifier",
+                  "identifierType": {
+                    "id": "sierra-system-number",
+                    "type": "IdentifierType",
+                    "label": "Sierra system number"
+                  }
+                }
+              ],
+              "type": "Concept"
+            }
+          ]
+        }
+      ],
+      "genres": [],
+      "items": [],
+      "holdings": [],
+      "availabilities": [],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [
+        {
+          "id": "w",
+          "label": "Student dissertations"
+        }
+      ],
+      "genres": [],
+      "subjects": [
+        {
+          "id": "agg-subject-0",
+          "label": "agg-subject-0"
+        }
+      ],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [],
+      "availabilities": []
+    },
+    "filterableValues": {
+      "format.id": "w",
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [
+        "agg-subject-0"
+      ],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "oskpm5pp",
+        "NAqErNVI6R"
+      ],
+      "items.locations.license.id": [],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [],
+      "items.identifiers.value": [],
+      "items.locations.locationType.id": [],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": []
+    }
+  },
+  "createdAt": "2026-06-03T16:56:02.311067+00:00"
+}

@@ -1,0 +1,170 @@
+{
+  "description": "examples for availabilities tests",
+  "id": "dhm4fuoq",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "dhm4fuoq",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "yGs78qw5kK"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "dhm4fuoq",
+      "title": "jhUwfr6wzg3uLj1",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "yGs78qw5kK",
+      "identifiers.value": [
+        "dhm4fuoq",
+        "yGs78qw5kK"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [
+        "y4qwHMv0iv"
+      ],
+      "items.id": [
+        "9415hmdx"
+      ],
+      "items.shelfmark.value": [
+        "Shelfmark: MPUcY"
+      ],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "dhm4fuoq",
+      "title": "jhUwfr6wzg3uLj1",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "yGs78qw5kK",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [
+        {
+          "id": "9415hmdx",
+          "identifiers": [
+            {
+              "value": "y4qwHMv0iv",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "locationType": {
+                "id": "open-shelves",
+                "type": "LocationType",
+                "label": "Open shelves"
+              },
+              "accessConditions": [],
+              "label": "locationLabel",
+              "shelfmark": "Shelfmark: MPUcY",
+              "type": "PhysicalLocation"
+            }
+          ],
+          "type": "Item"
+        }
+      ],
+      "holdings": [],
+      "availabilities": [
+        {
+          "id": "open-shelves",
+          "type": "Availability",
+          "label": "Open shelves"
+        }
+      ],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [],
+      "availabilities": [
+        {
+          "id": "open-shelves",
+          "label": "Open shelves"
+        }
+      ]
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "dhm4fuoq",
+        "yGs78qw5kK"
+      ],
+      "items.locations.license.id": [],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [
+        "9415hmdx"
+      ],
+      "items.identifiers.value": [
+        "y4qwHMv0iv"
+      ],
+      "items.locations.locationType.id": [
+        "open-shelves"
+      ],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": [
+        "open-shelves"
+      ]
+    }
+  },
+  "createdAt": "2026-06-03T16:56:02.592287+00:00"
+}

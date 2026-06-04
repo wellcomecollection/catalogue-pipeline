@@ -1,0 +1,183 @@
+{
+  "description": "examples for availabilities tests",
+  "id": "7prm6mrf",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "7prm6mrf",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "lYm8m8Ix3f"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "7prm6mrf",
+      "title": "eZfRtevYTiBhhng",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "lYm8m8Ix3f",
+      "identifiers.value": [
+        "7prm6mrf",
+        "lYm8m8Ix3f"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [
+        "s4iybnoBWQ"
+      ],
+      "items.id": [
+        "ub6ayp34"
+      ],
+      "items.shelfmark.value": [
+        "Shelfmark: aM0wI"
+      ],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "7prm6mrf",
+      "title": "eZfRtevYTiBhhng",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "lYm8m8Ix3f",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [
+        {
+          "id": "ub6ayp34",
+          "identifiers": [
+            {
+              "value": "s4iybnoBWQ",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "locationType": {
+                "id": "closed-stores",
+                "type": "LocationType",
+                "label": "Closed stores"
+              },
+              "license": {
+                "id": "ogl",
+                "type": "License",
+                "label": "Open Government Licence",
+                "url": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+              },
+              "accessConditions": [],
+              "label": "locationLabel",
+              "shelfmark": "Shelfmark: aM0wI",
+              "type": "PhysicalLocation"
+            }
+          ],
+          "type": "Item"
+        }
+      ],
+      "holdings": [],
+      "availabilities": [
+        {
+          "id": "closed-stores",
+          "type": "Availability",
+          "label": "Closed stores"
+        }
+      ],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [
+        {
+          "id": "ogl",
+          "label": "Open Government Licence"
+        }
+      ],
+      "availabilities": [
+        {
+          "id": "closed-stores",
+          "label": "Closed stores"
+        }
+      ]
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "7prm6mrf",
+        "lYm8m8Ix3f"
+      ],
+      "items.locations.license.id": [
+        "ogl"
+      ],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [
+        "ub6ayp34"
+      ],
+      "items.identifiers.value": [
+        "s4iybnoBWQ"
+      ],
+      "items.locations.locationType.id": [
+        "closed-stores"
+      ],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": [
+        "closed-stores"
+      ]
+    }
+  },
+  "createdAt": "2026-06-03T16:56:02.578858+00:00"
+}

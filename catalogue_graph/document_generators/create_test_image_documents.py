@@ -5,11 +5,6 @@ Run from the catalogue_graph directory:
     uv run python -m document_generators.create_test_image_documents
 """
 
-import json
-from datetime import UTC, datetime
-from pathlib import Path
-from typing import Any
-
 from freezegun import freeze_time
 
 from ingestor.extractors.images.images_extractor import ExtractedImage
@@ -33,49 +28,17 @@ from .generators import (
     random_alphanumeric,
     reset,
 )
-
-TEST_DOCUMENTS_DIR = Path(__file__).resolve().parent / "test_documents"
+from .utils import TEST_DOCUMENTS_DIR, save_documents
 
 
 @freeze_time("2001-01-01T01:01:01Z")
-def transform_image(extracted: ExtractedImage) -> dict[str, Any]:
-    indexable = IndexableImage.from_extracted_image(extracted)
-    return indexable.model_dump(mode="json", exclude_none=True)
-
-
-def save_document(
-    doc_id: str, description: str, image_id: str, document: dict[str, Any]
-) -> None:
-    TEST_DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = TEST_DOCUMENTS_DIR / f"{doc_id}.json"
-
-    output = {
-        "description": description,
-        "id": image_id,
-        "document": document,
-    }
-
-    # Only write if content has changed (ignore createdAt)
-    if path.exists():
-        existing = json.loads(path.read_text())
-        existing.pop("createdAt", None)
-        if existing == output:
-            return
-
-    output["createdAt"] = datetime.now(UTC).isoformat()
-    path.write_text(json.dumps(output, indent=2, ensure_ascii=False) + "\n")
+def transform_image(extracted: ExtractedImage) -> IndexableImage:
+    return IndexableImage.from_extracted_image(extracted)
 
 
 def save_images(images: list[ExtractedImage], description: str, doc_id: str) -> None:
-    if len(images) == 1:
-        document = transform_image(images[0])
-        image_id = images[0].image.state.canonical_id
-        save_document(doc_id, description, image_id, document)
-    else:
-        for index, image in enumerate(images):
-            document = transform_image(image)
-            image_id = image.image.state.canonical_id
-            save_document(f"{doc_id}.{index}", description, image_id, document)
+    indexable_docs = [transform_image(i) for i in images]
+    save_documents(indexable_docs, description, doc_id)
 
 
 def save_image(image: ExtractedImage, description: str, doc_id: str) -> None:
@@ -185,18 +148,19 @@ def create_genre_filter_test_examples() -> None:
     carrot_counselling = create_genre(
         "Carrot counselling",
         concepts=[
-            create_genre_concept("g00dcafe"),
+            create_genre_concept("g00dcafe", label="Carrot counselling"),
             create_concept("baadf00d"),
         ],
     )
+
     dodo_divination = create_genre("Dodo divination")
     emu_entrepreneurship = create_genre(
         "Emu entrepreneurship",
-        concepts=[create_genre_concept("g00dcafe")],
+        concepts=[create_genre_concept("g00dcafe", label="Emu entrepreneurship")],
     )
     falcon_finances = create_genre(
         "Falcon finances",
-        concepts=[create_genre_concept("baadf00d")],
+        concepts=[create_genre_concept("baadf00d", label="Falcon finances")],
     )
 
     images = [

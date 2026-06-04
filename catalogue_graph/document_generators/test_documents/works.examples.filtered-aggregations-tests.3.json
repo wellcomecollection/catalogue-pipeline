@@ -1,0 +1,142 @@
+{
+  "description": "examples for the works filtered aggregations tests",
+  "id": "c2qwgyru",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "c2qwgyru",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "wSpc6bq2l6"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "c2qwgyru",
+      "title": "rats",
+      "alternativeTitles": [],
+      "languages.label": [
+        "Bashkir"
+      ],
+      "sourceIdentifier.value": "wSpc6bq2l6",
+      "identifiers.value": [
+        "c2qwgyru",
+        "wSpc6bq2l6"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [],
+      "items.id": [],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "c2qwgyru",
+      "title": "rats",
+      "alternativeTitles": [],
+      "workType": {
+        "id": "i",
+        "type": "Format",
+        "label": "Audio"
+      },
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "wSpc6bq2l6",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [],
+      "holdings": [],
+      "availabilities": [],
+      "production": [],
+      "languages": [
+        {
+          "id": "bak",
+          "type": "Language",
+          "label": "Bashkir"
+        }
+      ],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [
+        {
+          "id": "i",
+          "label": "Audio"
+        }
+      ],
+      "genres": [],
+      "subjects": [],
+      "languages": [
+        {
+          "id": "bak",
+          "label": "Bashkir"
+        }
+      ],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [],
+      "availabilities": []
+    },
+    "filterableValues": {
+      "format.id": "i",
+      "workType": "Standard",
+      "production.dates.range.from": [],
+      "languages.id": [
+        "bak"
+      ],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "c2qwgyru",
+        "wSpc6bq2l6"
+      ],
+      "items.locations.license.id": [],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [],
+      "items.identifiers.value": [],
+      "items.locations.locationType.id": [],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": []
+    }
+  },
+  "createdAt": "2026-06-03T16:56:02.569547+00:00"
+}

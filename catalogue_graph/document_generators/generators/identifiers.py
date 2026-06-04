@@ -16,9 +16,12 @@ def create_source_identifier(
 
 
 def create_identified(
-    canonical_id: str | None = None, ontology_type: str = "Work"
+    canonical_id: str | None = None,
+    other_identifiers: list[SourceIdentifier] | None = None,
+    ontology_type: str = "Work",
 ) -> Identified:
     return Identified(
         canonical_id=canonical_id or random_canonical_id(),
         source_identifier=create_source_identifier(ontology_type=ontology_type),
+        other_identifiers=other_identifiers or [],
     )
