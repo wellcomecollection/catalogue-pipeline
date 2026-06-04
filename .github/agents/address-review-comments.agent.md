@@ -27,7 +27,7 @@ Set `GH_PROMPT_DISABLED=true` in the environment when invoking `gh`.
          comments(first:10){nodes{databaseId author{login} body}}
        }}}}}' -F owner=<owner> -F repo=<repo> -F num=<n>
    ```
-   Filter to `isResolved == false`.
+   Filter to `isResolved == false`. If the result is empty, report "no unresolved threads" and stop — don't invent work.
 3. **Build a todo list** with one item per unresolved thread so progress is visible.
 4. **For each thread (in file/line order):**
    1. Show the user the comment, the file + line, and the surrounding code.
@@ -38,10 +38,13 @@ Set `GH_PROMPT_DISABLED=true` in the environment when invoking `gh`.
         1. Make the edit.
         2. Run the relevant local checks for the touched area (e.g. for `catalogue_graph/`: `uv run pytest <scoped path>`, `uv run mypy <scoped path>`, `uv run ruff format`, `uv run ruff check --fix`; for Scala: the appropriate `builds/` script).
         3. `git add` only the files you changed for this comment, `git commit` with a short message referencing the comment intent, `git push`.
-        4. Resolve the thread (see snippet below).
+        4. If the formatter/linter touched files unrelated to this comment, show the user the extra diff with `git diff` and ask whether to include them — either as part of this commit, as a separate `chore: formatting` commit, or stashed/reverted. Don't silently bundle them in.
+        5. Resolve the thread (see snippet below).
       - **Decline:** Post a polite reply on the thread explaining the reasoning (reference the convention or constraint that motivates declining), then resolve the thread.
    5. Mark the todo item complete and move on.
 5. **Final summary.** Report which comments were applied (with commit SHAs) and which were declined (with one-line reasons).
+
+If `gh` GraphQL mutations on this repo hit the *Projects (classic) deprecated* error, see *Known repo quirks* in [AGENTS.md](/AGENTS.md) for the REST fallback.
 
 ## Resolving a thread
 
