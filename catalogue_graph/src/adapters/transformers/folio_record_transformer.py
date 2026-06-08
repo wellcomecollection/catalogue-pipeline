@@ -1,0 +1,22 @@
+from adapters.transformers.folio.predecessor_identifier import (
+    extract_sierra_predecessor_id,
+)
+from models.pipeline.identifier import Id, WorkSourceIdentifier
+
+from .marcxml_record_transformer import MarcXMLRecordTransformer
+
+
+class FolioRecordTransformer(MarcXMLRecordTransformer):
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="folio-instance")
+
+    @property
+    def predecessor_identifier(self) -> WorkSourceIdentifier | None:
+        if (value := extract_sierra_predecessor_id(self.record)) is not None:
+            return WorkSourceIdentifier(
+                identifier_type=Id(id="sierra-system-number"),
+                value=value,
+            )
+
+        return None

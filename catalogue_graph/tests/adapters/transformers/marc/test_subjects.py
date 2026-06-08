@@ -4,36 +4,17 @@ Although the implementation currently lives under `adapters.transformers.ebsco.s
 these tests are MARC-field level and can be shared across adapters.
 """
 
-# mypy: allow-untyped-calls
-
 from __future__ import annotations
-
-from datetime import datetime
 
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
 from adapters.transformers.ebsco.subjects import extract_subjects
-from models.pipeline.concept import Subject
 from models.pipeline.identifier import Identifiable
-from models.pipeline.work_data import WorkData
-from tests.adapters.transformers.marc.marcxml_test_transformer import (
-    MarcXmlTransformerForTests,
-)
-
-
-def _transform_subjects(marc_record: Record) -> list[Subject]:
-    transformer = MarcXmlTransformerForTests(
-        build_work_data=lambda r: WorkData(subjects=extract_subjects(r))
-    )
-    work = transformer.transform_record(
-        marc_record, source_modified_time=datetime.now()
-    )
-    return work.data.subjects
 
 
 def test_no_subjects(marc_record: Record) -> None:
-    assert _transform_subjects(marc_record) == []
+    assert extract_subjects(marc_record) == []
 
 
 @pytest.mark.parametrize(
@@ -63,7 +44,7 @@ def test_no_subjects(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_single_subject(marc_record: Record) -> None:
-    subjects = _transform_subjects(marc_record)
+    subjects = extract_subjects(marc_record)
     assert len(subjects) == 1
 
     subject = subjects[0]
