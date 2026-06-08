@@ -10,11 +10,9 @@ from _pytest.logging import LogCaptureFixture
 from pymarc.record import Field, Record, Subfield
 from pytest_bdd import given, parsers, then, when
 
+from adapters.transformers.ebsco_record_transformer import EbscoRecordTransformer
 from models.pipeline.identifier import Id
 from models.pipeline.source.work import VisibleSourceWork
-from tests.adapters.transformers.ebsco.ebsco_test_transformer import (
-    EbscoTransformerForTests,
-)
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
@@ -53,10 +51,9 @@ def marc_record() -> Record:
 # ------------------------------------------------------------------
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceWork:
-    transformer = EbscoTransformerForTests()
-    work = transformer.transform_record(
-        marc_record, source_modified_time=datetime(2020, 1, 1)
-    )
+    work = EbscoRecordTransformer(
+        marc_record, last_modified=datetime(2020, 1, 1)
+    ).visible_work
     context["result"] = work
     return work
 

@@ -3,13 +3,18 @@
 # mypy: allow-untyped-calls
 
 from contextlib import suppress
+from datetime import datetime
 
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
-from tests.adapters.transformers.folio.folio_test_transformer import (
-    FolioTransformerForTests,
-)
+from adapters.transformers.folio_record_transformer import FolioRecordTransformer
+
+
+def get_record_transformer(
+    marc_record: Record, last_modified: datetime = datetime(2020, 1, 1)
+) -> FolioRecordTransformer:
+    return FolioRecordTransformer(marc_record, last_modified=last_modified)
 
 
 def _907_field(value: str) -> Field:
@@ -29,11 +34,6 @@ def marc_record(request: pytest.FixtureRequest) -> Record:
     return record
 
 
-@pytest.fixture
-def transformer() -> FolioTransformerForTests:
-    return FolioTransformerForTests()
-
-
 @pytest.mark.parametrize(
     "marc_record,expected",
     [
@@ -43,16 +43,14 @@ def transformer() -> FolioTransformerForTests:
     ],
     indirect=["marc_record"],
 )
-def test_extracts_predecessor_id_from_907(
-    transformer: FolioTransformerForTests, marc_record: Record, expected: str
-) -> None:
-    assert transformer.extract_predecessor_id(marc_record) == expected
+def test_extracts_predecessor_id_from_907(marc_record: Record, expected: str) -> None:
+    identifier = get_record_transformer(marc_record).predecessor_identifier
+    assert identifier is not None
+    assert identifier.value == expected
 
 
-def test_returns_none_when_no_907(
-    transformer: FolioTransformerForTests, marc_record: Record
-) -> None:
-    assert transformer.extract_predecessor_id(marc_record) is None
+def test_returns_none_when_no_907(marc_record: Record) -> None:
+    assert get_record_transformer(marc_record).predecessor_identifier is None
 
 
 @pytest.mark.parametrize(
@@ -60,10 +58,10 @@ def test_returns_none_when_no_907(
     [(_907_field("b12345679"), _907_field("b12345679"))],
     indirect=True,
 )
-def test_deduplicates_identical_907_fields(
-    transformer: FolioTransformerForTests, marc_record: Record
-) -> None:
-    assert transformer.extract_predecessor_id(marc_record) == "b12345679"
+def test_deduplicates_identical_907_fields(marc_record: Record) -> None:
+    identifier = get_record_transformer(marc_record).predecessor_identifier
+    assert identifier is not None
+    assert identifier.value == "b12345679"
 
 
 @pytest.mark.parametrize(
@@ -71,11 +69,9 @@ def test_deduplicates_identical_907_fields(
     [(_907_field("b12345679"), _907_field("b99999990"))],
     indirect=True,
 )
-def test_raises_when_multiple_distinct_907_values(
-    transformer: FolioTransformerForTests, marc_record: Record
-) -> None:
+def test_raises_when_multiple_distinct_907_values(marc_record: Record) -> None:
     with pytest.raises(ValueError, match="Multiple distinct instances of varfield"):
-        transformer.extract_predecessor_id(marc_record)
+        _ = get_record_transformer(marc_record).predecessor_identifier
 
 
 @pytest.mark.parametrize(
@@ -90,7 +86,7 @@ def test_raises_when_multiple_distinct_907_values(
     indirect=["marc_record"],
 )
 def test_raises_for_invalid_sierra_system_number(
-    transformer: FolioTransformerForTests, marc_record: Record, value: str
+    marc_record: Record, value: str
 ) -> None:
     with pytest.raises(ValueError, match="does not match Sierra system number format"):
-        transformer.extract_predecessor_id(marc_record)
+        _ = get_record_transformer(marc_record).predecessor_identifier

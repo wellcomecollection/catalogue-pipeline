@@ -1,14 +1,8 @@
-from datetime import datetime
-
-from pymarc.record import Record
-
-from adapters.transformers.folio.predecessor_identifier import extract_predecessor_id
-from adapters.transformers.marc.title import extract_title
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
-from models.pipeline.identifier import Id
-from models.pipeline.source.work import VisibleSourceWork
-from models.pipeline.work_data import WorkData
+
+from .folio_record_transformer import FolioRecordTransformer
+from .marcxml_record_transformer import MarcXMLRecordTransformer
 
 
 class FolioTransformer(MarcXmlTransformer):
@@ -25,29 +19,5 @@ class FolioTransformer(MarcXmlTransformer):
         )
 
     @property
-    def source_identifier_type(self) -> Id:
-        return Id(id="folio-instance")
-
-    @property
-    def predecessor_identifier_type(self) -> Id:
-        return Id(id="sierra-system-number")
-
-    def extract_predecessor_id(self, marc_record: Record) -> str | None:
-        return extract_predecessor_id(marc_record)
-
-    def transform_record(
-        self, marc_record: Record, source_modified_time: datetime
-    ) -> VisibleSourceWork:
-        work_data = WorkData(
-            title=extract_title(marc_record),
-        )
-        work_state = self.source_work_state(
-            marc_record=marc_record,
-            source_modified_time=source_modified_time,
-        )
-
-        return VisibleSourceWork(
-            version=int(source_modified_time.timestamp()),
-            state=work_state,
-            data=work_data,
-        )
+    def record_transformer(self) -> type[MarcXMLRecordTransformer]:
+        return FolioRecordTransformer
