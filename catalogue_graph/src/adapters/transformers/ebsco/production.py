@@ -21,19 +21,16 @@ def extract_production(record: Record) -> list[ProductionEvent]:
     productions260_264 = extract_production_from_fields(
         record.get_fields("260")
     ) or extract_production_from_fields(record.get_fields("264"))
-    match (productions260_264, production008):
-        case (productions, None) if not productions:
-            return []
-        case (productions, production) if not productions and production is not None:
-            return [production]
-        case (productions, None):
-            return productions
-        case (productions, production) if production is not None:
-            if not productions[0].dates:
-                productions[0].dates = production.dates
-            return productions
-        case _:
-            return []
+
+    if production008 is None:
+        return productions260_264
+    if not productions260_264:
+        return [production008]
+
+    if not productions260_264[0].dates:
+        productions260_264[0].dates = production008.dates
+
+    return productions260_264
 
 
 def extract_production_from_008(record: Record) -> ProductionEvent | None:
@@ -78,7 +75,7 @@ IND2_264_MAP = {
 
 
 # See MarcProduction.scala for reference implementation
-def labelFromSubFields(field: Field) -> str:
+def label_from_sub_fields(field: Field) -> str:
     return " ".join(subfield.value for subfield in field.subfields)
 
 
@@ -88,7 +85,7 @@ def single_production_event(field: Field) -> ProductionEvent | None:
             f"Unexpected production event field: {field.tag}. Should be one of 260, 264"
         )
     # Label for production event is free-form, no special trimming rules.
-    label = labelFromSubFields(field)
+    label = label_from_sub_fields(field)
     places = [
         Concept(
             label=normalise_label(subfield, "Place", preserve_trailing_period=True),

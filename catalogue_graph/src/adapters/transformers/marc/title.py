@@ -24,19 +24,6 @@ _SUBFIELD_TAGS = {"a", "b", "c", "h", "n", "p"}
 _BRACKETED_SEGMENT = re.compile(r"\[[^\]]+\]")
 
 
-def _get_245_field(marc_record: Record) -> Field:
-    fields_245 = marc_record.get_fields("245")
-    if not fields_245:
-        # Let mandatory_field decorator handle missing field error messaging.
-        raise ValueError("Missing title field (245)")
-    if len(fields_245) > 1:
-        logger.warning(
-            "Multiple instances of non-repeatable varfield with tag 245",
-            count=len(fields_245),
-        )
-    return fields_245[0]
-
-
 def _selected_subfield_values(field_245: Field) -> list[str]:
     subfields = field_245.subfields
     selected: list[tuple[str, str]] = []
@@ -65,8 +52,13 @@ def _selected_subfield_values(field_245: Field) -> list[str]:
 
 @mandatory_field("245", "title")
 def extract_title(marc_record: Record) -> str:
-    field_245 = _get_245_field(marc_record)
-    components = _selected_subfield_values(field_245)
+    fields_245 = marc_record.get_fields("245")
+    if len(fields_245) > 1:
+        logger.warning(
+            "Multiple instances of non-repeatable varfield with tag 245",
+            count=len(fields_245),
+        )
+    components = _selected_subfield_values(fields_245[0])
 
     if not any(c.strip() for c in components):
         # Provide ValueError matching existing tests pattern.
