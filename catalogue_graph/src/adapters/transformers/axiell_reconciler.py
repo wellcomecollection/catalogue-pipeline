@@ -29,9 +29,12 @@ class AxiellReconciler(MarcXmlTransformer):
         super().__init__(
             adapter_store=adapter_store,
             changeset_ids=changeset_ids,
-            identifier_type=Id(id="axiell-guid"),
             snapshot_id=snapshot_id,
         )
+
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="axiell-guid")
 
     def _rows_to_reconciler_arrow_table(
         self, rows: Iterable[dict[str, Any]]
@@ -76,7 +79,7 @@ class AxiellReconciler(MarcXmlTransformer):
         # Emit each row as a deleted work
         for row in data_to_overwrite.to_pylist():
             last_modified = last_modified_by_id.get(row["id"], row["last_modified"])
-            yield row["id"], self._transform_deleted(row["guid"], last_modified)
+            yield row["id"], self.deleted_from_work_id(row["guid"], last_modified)
 
     def _commit(
         self, rows: Iterable[dict[str, Any]], _: set[str], error_row_ids: set[str]

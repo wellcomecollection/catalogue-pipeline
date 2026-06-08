@@ -34,11 +34,12 @@ class EbscoTransformer(MarcXmlTransformer):
         snapshot_id: int | None,
     ) -> None:
         super().__init__(
-            adapter_store,
-            changeset_ids=changeset_ids,
-            identifier_type=Id(id="ebsco-alt-lookup"),
-            snapshot_id=snapshot_id,
+            adapter_store, changeset_ids=changeset_ids, snapshot_id=snapshot_id
         )
+
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="ebsco-alt-lookup")
 
     def transform_record(
         self, marc_record: Record, source_modified_time: datetime

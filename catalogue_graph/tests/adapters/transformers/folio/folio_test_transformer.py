@@ -6,7 +6,6 @@ from pymarc.record import Record
 
 from adapters.transformers.folio_transformer import FolioTransformer
 from core.transformer import ElasticBaseTransformer as BaseTransformer
-from models.pipeline.identifier import Id
 from models.pipeline.source.work import VisibleSourceWork
 
 DEFAULT_SOURCE_MODIFIED_TIME = datetime(2020, 1, 1)
@@ -21,8 +20,6 @@ class FolioTransformerForTests(FolioTransformer):
 
     def __init__(self) -> None:
         BaseTransformer.__init__(self)
-        self.identifier_type = Id(id="folio-instance")
-        self.predecessor_identifier_type = Id(id="sierra-system-number")
 
 
 def transform_folio_record(

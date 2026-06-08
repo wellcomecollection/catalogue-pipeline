@@ -21,10 +21,16 @@ class FolioTransformer(MarcXmlTransformer):
         super().__init__(
             adapter_store,
             changeset_ids=changeset_ids,
-            identifier_type=Id(id="folio-instance"),
-            predecessor_identifier_type=Id(id="sierra-system-number"),
             snapshot_id=snapshot_id,
         )
+
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="folio-instance")
+
+    @property
+    def predecessor_identifier_type(self) -> Id:
+        return Id(id="sierra-system-number")
 
     def extract_predecessor_id(self, marc_record: Record) -> str | None:
         return extract_predecessor_id(marc_record)

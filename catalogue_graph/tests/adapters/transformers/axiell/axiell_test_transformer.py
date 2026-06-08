@@ -24,7 +24,10 @@ class AxiellTransformerForTests(AxiellTransformer):
 
     def __init__(self) -> None:
         BaseTransformer.__init__(self)
-        self.identifier_type = Id(id="axiell-priref")
+
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="axiell-priref")
 
 
 def transform_axiell_record(

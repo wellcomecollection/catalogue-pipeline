@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pymarc.record import Record
 
+from adapters.transformers.folio.predecessor_identifier import extract_predecessor_id
 from adapters.transformers.marc.alternative_titles import extract_alternative_titles
 from adapters.transformers.marc.last_transaction_time import (
     extract_last_transaction_time_to_datetime,
@@ -27,9 +28,19 @@ class AxiellTransformer(MarcXmlTransformer):
         super().__init__(
             adapter_store=adapter_store,
             changeset_ids=changeset_ids,
-            identifier_type=Id(id="axiell-guid"),
             snapshot_id=snapshot_id,
         )
+
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="axiell-guid")
+
+    @property
+    def predecessor_identifier_type(self) -> Id:
+        return Id(id="calm-record-id")
+
+    def extract_predecessor_id(self, marc_record: Record) -> str | None:
+        return extract_predecessor_id(marc_record)
 
     def transform_record(
         self, marc_record: Record, source_modified_time: datetime

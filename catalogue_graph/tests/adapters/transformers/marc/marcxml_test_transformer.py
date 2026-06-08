@@ -33,9 +33,12 @@ class MarcXmlTransformerForTests(MarcXmlTransformer):
         # Avoid MarcXmlTransformer.__init__ (requires AdapterStore) but keep BaseTransformer
         # initialisation so error tracking behaves normally.
         BaseTransformer.__init__(self)
-        self.identifier_type = Id(id="marc-test")
         self._build_work_data = build_work_data
         self._build_relations = build_relations
+
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="marc-test")
 
     def transform_record(
         self, marc_record: Record, source_modified_time: datetime
@@ -86,12 +89,15 @@ class MarcXmlTransformerWithStoreForTests(MarcXmlTransformer):
         super().__init__(
             adapter_store=adapter_store,
             changeset_ids=changeset_ids,
-            identifier_type=identifier_type or Id(id="marc-test"),
         )
         self._build_work_data = build_work_data or (
             lambda r: WorkData(title=extract_title(r))
         )
         self._build_relations = build_relations
+
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="marc-test")
 
     def transform_record(
         self, marc_record: Record, source_modified_time: datetime
