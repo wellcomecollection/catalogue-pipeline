@@ -5,15 +5,22 @@ from datetime import datetime
 from typing import Any, cast
 
 import pytest
-from elasticsearch import Elasticsearch
-
 from adapters.utils.adapter_store import AdapterStore
 from core.source import BaseSource
+from elasticsearch import Elasticsearch
 from models.pipeline.source.work import VisibleSourceWork
+
 from tests.adapters.transformers.marc.marcxml_test_transformer import (
     MarcXmlTransformerForTests,
 )
 from tests.mocks import MockElasticsearchClient
+
+
+@pytest.fixture
+def adapter_store(temporary_table) -> AdapterStore:  # type: ignore[no-untyped-def]
+    """Create an AdapterStore backed by a temporary local Iceberg table."""
+
+    return AdapterStore(temporary_table, "test_namespace")
 
 
 class _StubSource(BaseSource):
