@@ -1,3 +1,4 @@
+from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.ebsco.contributors import extract_contributors
 from adapters.transformers.ebsco.current_frequency import extract_current_frequency
 from adapters.transformers.ebsco.description import extract_description
@@ -17,10 +18,8 @@ from models.pipeline.id_label import Language
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.production import ProductionEvent
 
-from .marcxml_record_transformer import MarcXMLRecordTransformer
 
-
-class EbscoRecordTransformer(MarcXMLRecordTransformer):
+class EbscoWorkBuilder(MarcXmlWorkBuilder):
     @property
     def source_identifier_type(self) -> Id:
         return Id(id="ebsco-alt-lookup")

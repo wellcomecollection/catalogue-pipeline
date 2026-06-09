@@ -5,6 +5,8 @@ from typing import Any
 import structlog
 from pymarc.record import Record
 
+from adapters.transformers.adapter_store_source import AdapterStoreSource
+from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.utils.adapter_store import AdapterStore
 from core.transformer import ElasticBaseTransformer
 from models.pipeline.source.work import (
@@ -14,9 +16,6 @@ from models.pipeline.source.work import (
     VisibleSourceWork,
 )
 from utils.marc import parse_single_marc_record
-
-from .adapter_store_source import AdapterStoreSource
-from .marcxml_record_transformer import MarcXMLRecordTransformer
 
 logger = structlog.get_logger(__name__)
 
@@ -34,7 +33,7 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         )
 
     @property
-    def record_transformer(self) -> type[MarcXMLRecordTransformer]:
+    def record_transformer(self) -> type[MarcXmlWorkBuilder]:
         raise NotImplementedError
 
     def _get_document_id(self, record: SourceWork) -> str:
@@ -79,11 +78,11 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
     def transform_record(
         self, marc_record: Record, last_modified: datetime
     ) -> InvisibleSourceWork | VisibleSourceWork:
-        record_transformer = self.record_transformer(marc_record, last_modified)
-        return record_transformer.visible_work
+        builder = self.record_transformer(marc_record, last_modified)
+        return builder.visible_work
 
     def transform_deleted(
         self, marc_record: Record, last_modified: datetime
     ) -> DeletedSourceWork:
-        record_transformer = self.record_transformer(marc_record, last_modified)
-        return record_transformer.deleted_work
+        builder = self.record_transformer(marc_record, last_modified)
+        return builder.deleted_work

@@ -8,14 +8,12 @@ import pytest
 from pymarc.record import Field, Record
 
 from tests.adapters.transformers.marc.marcxml_test_transformer import (
-    MarcXmlRecordTransformerForTests,
+    MarcXmlWorkBuilderForTests,
 )
 
 
 def _transform_id(marc_record: Record) -> str:
-    transformer = MarcXmlRecordTransformerForTests(
-        marc_record, last_modified=datetime.now()
-    )
+    transformer = MarcXmlWorkBuilderForTests(marc_record, last_modified=datetime.now())
     return transformer.source_identifier.value
 
 

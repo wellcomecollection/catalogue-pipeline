@@ -1,8 +1,7 @@
+from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
+from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
-
-from .folio_record_transformer import FolioRecordTransformer
-from .marcxml_record_transformer import MarcXMLRecordTransformer
 
 
 class FolioTransformer(MarcXmlTransformer):
@@ -19,5 +18,5 @@ class FolioTransformer(MarcXmlTransformer):
         )
 
     @property
-    def record_transformer(self) -> type[MarcXMLRecordTransformer]:
-        return FolioRecordTransformer
+    def record_transformer(self) -> type[MarcXmlWorkBuilder]:
+        return FolioWorkBuilder

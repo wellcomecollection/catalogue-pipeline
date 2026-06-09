@@ -14,7 +14,7 @@ from pymarc.record import Field, Record, Subfield
 from adapters.transformers.ebsco.parents import get_parents
 from models.pipeline.work_state import WorkAncestor, WorkRelations
 from tests.adapters.transformers.marc.marcxml_test_transformer import (
-    MarcXmlRecordTransformerForTests,
+    MarcXmlWorkBuilderForTests,
 )
 
 test_cases = [
@@ -174,9 +174,7 @@ def test_remove_duplicates() -> None:
     indirect=["marc_record"],
 )
 def test_relations_are_set_from_parents(marc_record: Record) -> None:
-    transformer = MarcXmlRecordTransformerForTests(
-        marc_record, last_modified=datetime.now()
-    )
+    transformer = MarcXmlWorkBuilderForTests(marc_record, last_modified=datetime.now())
 
     assert transformer.work_state.relations == WorkRelations(
         ancestors=[

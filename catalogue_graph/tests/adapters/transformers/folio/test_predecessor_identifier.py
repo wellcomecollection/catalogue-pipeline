@@ -8,13 +8,13 @@ from datetime import datetime
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
-from adapters.transformers.folio_record_transformer import FolioRecordTransformer
+from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 
 
 def get_record_transformer(
     marc_record: Record, last_modified: datetime = datetime(2020, 1, 1)
-) -> FolioRecordTransformer:
-    return FolioRecordTransformer(marc_record, last_modified=last_modified)
+) -> FolioWorkBuilder:
+    return FolioWorkBuilder(marc_record, last_modified=last_modified)
 
 
 def _907_field(value: str) -> Field:

@@ -1,8 +1,7 @@
+from adapters.transformers.builders.ebsco_work_builder import EbscoWorkBuilder
+from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
-
-from .ebsco_record_transformer import EbscoRecordTransformer
-from .marcxml_record_transformer import MarcXMLRecordTransformer
 
 
 class EbscoTransformer(MarcXmlTransformer):
@@ -17,5 +16,5 @@ class EbscoTransformer(MarcXmlTransformer):
         )
 
     @property
-    def record_transformer(self) -> type[MarcXMLRecordTransformer]:
-        return EbscoRecordTransformer
+    def record_transformer(self) -> type[MarcXmlWorkBuilder]:
+        return EbscoWorkBuilder

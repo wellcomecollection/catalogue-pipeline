@@ -6,7 +6,7 @@ import pytest
 from pymarc.record import Record
 from pytest_bdd import then, when
 
-from adapters.transformers.folio_record_transformer import FolioRecordTransformer
+from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 from models.pipeline.source.work import VisibleSourceWork
 
 # Allow * imports, pulling in individual step definitions is unwieldy
@@ -17,7 +17,7 @@ from tests.gherkin_steps.work import *
 
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(marc_record: Record) -> VisibleSourceWork:
-    return FolioRecordTransformer(
+    return FolioWorkBuilder(
         marc_record, last_modified=datetime(2020, 1, 1)
     ).visible_work
 
@@ -25,6 +25,6 @@ def do_transform(marc_record: Record) -> VisibleSourceWork:
 @then("transforming the record raises ValueError")
 def check_transform_raises_error(marc_record: Record) -> None:
     with pytest.raises(ValueError):
-        _ = FolioRecordTransformer(
+        _ = FolioWorkBuilder(
             marc_record, last_modified=datetime(2020, 1, 1)
         ).visible_work

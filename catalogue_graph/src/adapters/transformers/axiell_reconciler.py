@@ -6,24 +6,16 @@ import pyarrow.compute as pc
 import structlog
 from pyiceberg.expressions import In
 
+from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
+from adapters.transformers.builders.reconciler_work_builder import ReconcilerWorkBuilder
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
-from models.pipeline.id_label import Id
 from models.pipeline.source.work import (
     DeletedSourceWork,
 )
 
-from .axiell_record_transformer import AxiellRecordTransformer
-from .marcxml_record_transformer import BaseRecordTransformer
-
 logger = structlog.get_logger(__name__)
-
-
-class ReconcilerRecordTransformer(BaseRecordTransformer):
-    @property
-    def source_identifier_type(self) -> Id:
-        return Id(id="axiell-guid")
 
 
 class AxiellReconciler(MarcXmlTransformer):
@@ -46,10 +38,8 @@ class AxiellReconciler(MarcXmlTransformer):
         if not marc_record:
             return None
 
-        record_transformer = AxiellRecordTransformer(
-            marc_record, adapter_row["last_modified"]
-        )
-        return record_transformer.source_identifier.value
+        builder = AxiellWorkBuilder(marc_record, adapter_row["last_modified"])
+        return builder.source_identifier.value
 
     def _rows_to_reconciler_arrow_table(
         self, rows: Iterable[dict[str, Any]]
@@ -94,8 +84,8 @@ class AxiellReconciler(MarcXmlTransformer):
         # Emit each row as a deleted work
         for row in data_to_overwrite.to_pylist():
             last_modified = last_modified_by_id.get(row["id"], row["last_modified"])
-            record_transformer = ReconcilerRecordTransformer(row["guid"], last_modified)
-            yield row["id"], record_transformer.deleted_work
+            builder = ReconcilerWorkBuilder(row["guid"], last_modified)
+            yield row["id"], builder.deleted_work
 
     def _commit(
         self, rows: Iterable[dict[str, Any]], _: set[str], error_row_ids: set[str]

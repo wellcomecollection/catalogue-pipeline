@@ -1,3 +1,4 @@
+from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.predecessor_identifier import extract_predecessor_id
 from adapters.transformers.marc.last_transaction_time import (
     extract_last_transaction_time_to_datetime,
@@ -7,10 +8,8 @@ from models.pipeline.identifier import Id, WorkSourceIdentifier
 from models.pipeline.source.work import InvisibleSourceWork
 from utils.timezone import convert_datetime_to_utc_iso
 
-from .marcxml_record_transformer import MarcXMLRecordTransformer
 
-
-class AxiellRecordTransformer(MarcXMLRecordTransformer):
+class AxiellWorkBuilder(MarcXmlWorkBuilder):
     @property
     def source_identifier_type(self) -> Id:
         return Id(id="axiell-guid")

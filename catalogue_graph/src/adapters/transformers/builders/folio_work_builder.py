@@ -1,12 +1,11 @@
+from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
 from models.pipeline.identifier import Id, WorkSourceIdentifier
 
-from .marcxml_record_transformer import MarcXMLRecordTransformer
 
-
-class FolioRecordTransformer(MarcXMLRecordTransformer):
+class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def source_identifier_type(self) -> Id:
         return Id(id="folio-instance")

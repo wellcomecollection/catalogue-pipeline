@@ -5,7 +5,7 @@ from datetime import datetime
 from pymarc.record import Field, Record, Subfield
 from pytest_bdd import given, when
 
-from adapters.transformers.axiell_record_transformer import AxiellRecordTransformer
+from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from models.pipeline.source.work import InvisibleSourceWork
 
 # Allow * imports, pulling in individual step definitions is unwieldy
@@ -28,6 +28,6 @@ def marc_record() -> Record:
 
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(marc_record: Record) -> InvisibleSourceWork:
-    return AxiellRecordTransformer(
+    return AxiellWorkBuilder(
         marc_record, last_modified=datetime(2020, 1, 1)
     ).invisible_work

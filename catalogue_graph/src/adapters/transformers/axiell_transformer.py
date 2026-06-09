@@ -2,11 +2,10 @@ from datetime import datetime
 
 from pymarc.record import Record
 
+from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.source.work import InvisibleSourceWork
-
-from .axiell_record_transformer import AxiellRecordTransformer
 
 
 class AxiellTransformer(MarcXmlTransformer):
@@ -23,12 +22,12 @@ class AxiellTransformer(MarcXmlTransformer):
         )
 
     @property
-    def record_transformer(self) -> type[AxiellRecordTransformer]:
-        return AxiellRecordTransformer
+    def record_transformer(self) -> type[AxiellWorkBuilder]:
+        return AxiellWorkBuilder
 
     def transform_record(
         self, marc_record: Record, last_modified: datetime
     ) -> InvisibleSourceWork:
-        record_transformer = self.record_transformer(marc_record, last_modified)
+        builder = self.record_transformer(marc_record, last_modified)
         # TODO: Why is this work invisible?
-        return record_transformer.invisible_work
+        return builder.invisible_work
