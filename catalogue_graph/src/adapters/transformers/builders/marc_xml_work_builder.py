@@ -26,6 +26,13 @@ from models.pipeline.work_state import WorkAncestor, WorkRelations
 
 
 class MarcXmlWorkBuilder(SourceWorkBuilder):
+    """
+    Extends `SourceWorkBuilder` for MARC XML records.
+
+    Extracts `source_id` from MARC 001 and provides default implementations for all
+    work field properties, which can be overridden by adapter-specific subclasses.
+    """
+
     def __init__(self, record: Record, last_modified: datetime):
         self.record = record
         super().__init__(self.source_identifier_value, last_modified)
@@ -37,6 +44,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
 
     @property
     def predecessor_identifier(self) -> WorkSourceIdentifier | None:
+        """Override in subclasses to link works to predecessors in another system (e.g. Folio → Sierra)."""
         return None
 
     @property
@@ -181,6 +189,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
 
     @property
     def work_state(self) -> SourceWorkState:
+        """Extends the base work_state with predecessor identifier and ancestor relations from the MARC record."""
         return super().work_state.model_copy(
             update={
                 "predecessor_identifier": self.predecessor_identifier,

@@ -10,6 +10,8 @@ from utils.timezone import convert_datetime_to_utc_iso
 
 
 class AxiellWorkBuilder(MarcXmlWorkBuilder):
+    """Work builder for Axiell (MARC XML) records."""
+
     @property
     def source_identifier_type(self) -> Id:
         return Id(id="axiell-guid")
@@ -26,5 +28,6 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def source_modified_time(self) -> str:
+        """Reads from MARC 005 (last transaction time) rather than the adapter row's last_modified."""
         last_modified = extract_last_transaction_time_to_datetime(self.record)
         return convert_datetime_to_utc_iso(last_modified)

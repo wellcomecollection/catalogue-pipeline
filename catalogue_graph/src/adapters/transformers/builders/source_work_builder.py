@@ -10,7 +10,13 @@ from utils.timezone import convert_datetime_to_utc_iso
 
 
 class SourceWorkBuilder(ABC):
-    """Shared between visible and deleted works"""
+    """
+    Abstract base for assembling a source work from a single source record.
+
+    Subclasses must implement `source_identifier_type`.
+
+    For MARC-based sources, use `MarcXmlWorkBuilder` instead.
+    """
 
     def __init__(self, source_id: str, last_modified: datetime):
         self.source_id = source_id
