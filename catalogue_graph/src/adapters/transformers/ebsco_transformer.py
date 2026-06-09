@@ -16,5 +16,5 @@ class EbscoTransformer(MarcXmlTransformer):
         )
 
     @property
-    def record_transformer(self) -> type[MarcXmlWorkBuilder]:
+    def work_builder(self) -> type[MarcXmlWorkBuilder]:
         return EbscoWorkBuilder

@@ -1,5 +1,5 @@
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
-from adapters.transformers.folio.predecessor_identifier import (
+from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
 from models.pipeline.identifier import Id, WorkSourceIdentifier

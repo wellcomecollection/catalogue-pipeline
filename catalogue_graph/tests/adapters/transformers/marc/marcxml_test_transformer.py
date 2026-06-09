@@ -13,5 +13,5 @@ class MarcXmlWorkBuilderForTests(MarcXmlWorkBuilder):
 
 class MarcXmlTransformerForTests(MarcXmlTransformer):
     @property
-    def record_transformer(self) -> type[MarcXmlWorkBuilder]:
+    def work_builder(self) -> type[MarcXmlWorkBuilder]:
         return MarcXmlWorkBuilderForTests

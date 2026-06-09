@@ -33,7 +33,7 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
         )
 
     @property
-    def record_transformer(self) -> type[MarcXmlWorkBuilder]:
+    def work_builder(self) -> type[MarcXmlWorkBuilder]:
         raise NotImplementedError
 
     def _get_document_id(self, record: SourceWork) -> str:
@@ -78,11 +78,11 @@ class MarcXmlTransformer(ElasticBaseTransformer[SourceWork]):
     def transform_record(
         self, marc_record: Record, last_modified: datetime
     ) -> InvisibleSourceWork | VisibleSourceWork:
-        builder = self.record_transformer(marc_record, last_modified)
+        builder = self.work_builder(marc_record, last_modified)
         return builder.visible_work
 
     def transform_deleted(
         self, marc_record: Record, last_modified: datetime
     ) -> DeletedSourceWork:
-        builder = self.record_transformer(marc_record, last_modified)
+        builder = self.work_builder(marc_record, last_modified)
         return builder.deleted_work

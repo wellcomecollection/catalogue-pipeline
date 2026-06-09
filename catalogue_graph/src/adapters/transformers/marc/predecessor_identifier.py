@@ -11,6 +11,8 @@ logger = structlog.get_logger(__name__)
 # Matches the Scala regex in IdentifierRegexes.scala
 SIERRA_SYSTEM_NUMBER_RE = re.compile(r"^b[0-9]{7}[0-9x]$")
 
+UUID_RE = re.compile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+
 
 def extract_predecessor_id(record: Record) -> str | None:
     """Extract predecessor identifier MARC 907 $a."""
@@ -27,7 +29,6 @@ def extract_predecessor_id(record: Record) -> str | None:
 def extract_sierra_predecessor_id(record: Record) -> str | None:
     """Extract predecessor Sierra system number from MARC 907 $a."""
     identifier = extract_predecessor_id(record)
-
     if not identifier:
         return None
 
@@ -35,5 +36,17 @@ def extract_sierra_predecessor_id(record: Record) -> str | None:
         raise ValueError(
             "Predecessor identifier does not match Sierra system number format"
         )
+
+    return identifier
+
+
+def extract_calm_predecessor_id(record: Record) -> str | None:
+    """Extract predecessor CALM record ID from MARC 907 $a."""
+    identifier = extract_predecessor_id(record)
+    if not identifier:
+        return None
+
+    if not UUID_RE.match(identifier):
+        raise ValueError("Predecessor identifier does not match CALM record ID format")
 
     return identifier

@@ -11,7 +11,7 @@ from pymarc.record import Field, Indicators, Record, Subfield
 from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 
 
-def get_record_transformer(
+def get_work_builder(
     marc_record: Record, last_modified: datetime = datetime(2020, 1, 1)
 ) -> FolioWorkBuilder:
     return FolioWorkBuilder(marc_record, last_modified=last_modified)
@@ -44,13 +44,13 @@ def marc_record(request: pytest.FixtureRequest) -> Record:
     indirect=["marc_record"],
 )
 def test_extracts_predecessor_id_from_907(marc_record: Record, expected: str) -> None:
-    identifier = get_record_transformer(marc_record).predecessor_identifier
+    identifier = get_work_builder(marc_record).predecessor_identifier
     assert identifier is not None
     assert identifier.value == expected
 
 
 def test_returns_none_when_no_907(marc_record: Record) -> None:
-    assert get_record_transformer(marc_record).predecessor_identifier is None
+    assert get_work_builder(marc_record).predecessor_identifier is None
 
 
 @pytest.mark.parametrize(
@@ -59,7 +59,7 @@ def test_returns_none_when_no_907(marc_record: Record) -> None:
     indirect=True,
 )
 def test_deduplicates_identical_907_fields(marc_record: Record) -> None:
-    identifier = get_record_transformer(marc_record).predecessor_identifier
+    identifier = get_work_builder(marc_record).predecessor_identifier
     assert identifier is not None
     assert identifier.value == "b12345679"
 
@@ -71,7 +71,7 @@ def test_deduplicates_identical_907_fields(marc_record: Record) -> None:
 )
 def test_raises_when_multiple_distinct_907_values(marc_record: Record) -> None:
     with pytest.raises(ValueError, match="Multiple distinct instances of varfield"):
-        _ = get_record_transformer(marc_record).predecessor_identifier
+        _ = get_work_builder(marc_record).predecessor_identifier
 
 
 @pytest.mark.parametrize(
@@ -89,4 +89,4 @@ def test_raises_for_invalid_sierra_system_number(
     marc_record: Record, value: str
 ) -> None:
     with pytest.raises(ValueError, match="does not match Sierra system number format"):
-        _ = get_record_transformer(marc_record).predecessor_identifier
+        _ = get_work_builder(marc_record).predecessor_identifier
