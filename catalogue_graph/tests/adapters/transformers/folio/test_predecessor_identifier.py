@@ -3,9 +3,9 @@
 from datetime import datetime
 
 import pytest
-from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 from pymarc.record import Record
 
+from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 from tests.adapters.transformers.conftest import _907_field
 
 
@@ -38,7 +38,7 @@ def test_returns_none_when_no_907(marc_record: Record) -> None:
 @pytest.mark.parametrize(
     "marc_record",
     [(_907_field("b12345679"), _907_field("b12345679"))],
-    indirect=["marc_record"],
+    indirect=True,
 )
 def test_deduplicates_identical_907_fields(marc_record: Record) -> None:
     identifier = get_work_builder(marc_record).predecessor_identifier

@@ -1,9 +1,9 @@
 from datetime import datetime
 
 import pytest
-from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from pymarc.record import Record
 
+from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from tests.adapters.transformers.conftest import _907_field
 
 VALID_UUID = "f1fab6a1-b172-418f-93eb-bc24740e266d"
@@ -37,10 +37,8 @@ def test_returns_none_when_no_907(marc_record: Record) -> None:
 
 @pytest.mark.parametrize(
     "marc_record",
-    [
-        (_907_field(VALID_UUID), _907_field(VALID_UUID))
-    ],
-    indirect=["marc_record"],
+    [(_907_field(VALID_UUID), _907_field(VALID_UUID))],
+    indirect=True,
 )
 def test_deduplicates_identical_907_fields(marc_record: Record) -> None:
     identifier = get_work_builder(marc_record).predecessor_identifier

@@ -28,7 +28,9 @@ from adapters.transformers.manifests import (
     TransformerManifest,
     TransformerManifestWriter,
 )
-from adapters.transformers.marcxml_transformer import MarcXmlTransformer
+from adapters.transformers.source_work_transformer import (
+    SourceWorkTransformer,
+)
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
@@ -103,7 +105,7 @@ def build_transformer(
     event: TransformerEvent,
     use_rest_api_table: bool = False,
     create_if_not_exists: bool = False,
-) -> MarcXmlTransformer:
+) -> SourceWorkTransformer:
     adapter_store = get_adapter_store(
         event.transformer_type,
         use_rest_api_table=use_rest_api_table,

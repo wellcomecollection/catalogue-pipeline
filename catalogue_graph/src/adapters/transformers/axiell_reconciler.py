@@ -8,7 +8,9 @@ from pyiceberg.expressions import In
 
 from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from adapters.transformers.builders.reconciler_work_builder import ReconcilerWorkBuilder
-from adapters.transformers.marcxml_transformer import MarcXmlTransformer
+from adapters.transformers.source_work_transformer import (
+    SourceWorkTransformer,
+)
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from models.pipeline.source.work import (
@@ -18,7 +20,7 @@ from models.pipeline.source.work import (
 logger = structlog.get_logger(__name__)
 
 
-class AxiellReconciler(MarcXmlTransformer):
+class AxiellReconciler(SourceWorkTransformer):
     def __init__(
         self,
         adapter_store: AdapterStore,
@@ -32,6 +34,10 @@ class AxiellReconciler(MarcXmlTransformer):
             changeset_ids=changeset_ids,
             snapshot_id=snapshot_id,
         )
+
+    @property
+    def work_builder(self) -> type[ReconcilerWorkBuilder]:
+        return ReconcilerWorkBuilder
 
     def _get_record_guid(self, adapter_row: dict) -> str | None:
         marc_record = self._row_to_marc_record(adapter_row)
@@ -84,7 +90,7 @@ class AxiellReconciler(MarcXmlTransformer):
         # Emit each row as a deleted work
         for row in data_to_overwrite.to_pylist():
             last_modified = last_modified_by_id.get(row["id"], row["last_modified"])
-            builder = ReconcilerWorkBuilder(row["guid"], last_modified)
+            builder = self.work_builder(row["guid"], last_modified)
             yield row["id"], builder.deleted_work
 
     def _commit(
