@@ -1,11 +1,8 @@
 import re
 
-import structlog
 from pymarc.record import Record
 
 from adapters.transformers.marc.common import get_a_subfields
-
-logger = structlog.get_logger(__name__)
 
 # Sierra system number: b + 7 digits + check character (digit or 'x')
 # Matches the Scala regex in IdentifierRegexes.scala
