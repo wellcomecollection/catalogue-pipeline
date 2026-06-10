@@ -37,7 +37,10 @@ def test_returns_none_when_no_907(marc_record: Record) -> None:
 
 @pytest.mark.parametrize(
     "marc_record",
-    [(_907_field("b12345679"), _907_field("b12345679"))],
+    [
+        (_907_field("b12345679"), _907_field("b12345679")),
+        (_907_field(".b12345679"), _907_field("b12345679")),
+    ],
     indirect=True,
 )
 def test_deduplicates_identical_907_fields(marc_record: Record) -> None:

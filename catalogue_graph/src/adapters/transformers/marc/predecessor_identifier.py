@@ -13,14 +13,15 @@ UUID_RE = re.compile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 def extract_predecessor_id(record: Record) -> str | None:
     """Extract predecessor identifier MARC 907 $a."""
-    pred_id = list(set(get_a_subfields("907", record)))
+    pred_id = get_a_subfields("907", record)
+    pred_id = list({val.lstrip(".") for val in pred_id})
+
     if len(pred_id) > 1:
         raise ValueError("Multiple distinct instances of varfield with tag 907")
     if not pred_id:
         return None
 
-    identifier = pred_id[0].lstrip(".")
-    return identifier
+    return pred_id[0]
 
 
 def extract_sierra_predecessor_id(record: Record) -> str | None:
