@@ -33,7 +33,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
     work field properties, which can be overridden by adapter-specific subclasses.
     """
 
-    def __init__(self, record: Record, last_modified: datetime):
+    def __init__(self, record: Record, last_modified: datetime) -> None:
         self.record = record
         super().__init__(self.source_identifier_value, last_modified)
 

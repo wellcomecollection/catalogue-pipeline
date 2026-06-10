@@ -18,7 +18,7 @@ class SourceWorkBuilder(ABC):
     For MARC-based sources, use `MarcXmlWorkBuilder` instead.
     """
 
-    def __init__(self, source_id: str, last_modified: datetime):
+    def __init__(self, source_id: str, last_modified: datetime) -> None:
         self.source_id = source_id
         self.last_modified = last_modified
 
