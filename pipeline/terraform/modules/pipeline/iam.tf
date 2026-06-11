@@ -112,6 +112,28 @@ data "aws_iam_policy_document" "read_folio_transformer_pipeline_storage_secrets"
   }
 }
 
+# Combined policy documents for the transformer lambda role to stay within
+# the 10 inline policies per role limit.
+data "aws_iam_policy_document" "all_adapter_s3tables_read" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_s3tables_read)[*].json
+}
+
+data "aws_iam_policy_document" "all_adapter_buckets_read" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_bucket_read)[*].json
+}
+
+data "aws_iam_policy_document" "all_adapter_buckets_write" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_bucket_write)[*].json
+}
+
+data "aws_iam_policy_document" "all_transformer_pipeline_storage_secrets" {
+  source_policy_documents = [
+    data.aws_iam_policy_document.read_ebsco_transformer_pipeline_storage_secrets.json,
+    data.aws_iam_policy_document.read_axiell_transformer_pipeline_storage_secrets.json,
+    data.aws_iam_policy_document.read_folio_transformer_pipeline_storage_secrets.json,
+  ]
+}
+
 data "aws_iam_policy_document" "adapter_bucket_write" {
   for_each = local.adapter_buckets
 
