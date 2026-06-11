@@ -2,6 +2,7 @@ locals {
   adapter_buckets = {
     ebsco  = local.ebsco_adapter_bucket
     axiell = local.axiell_adapter_bucket
+    folio  = local.folio_adapter_bucket
   }
 }
 
@@ -97,6 +98,39 @@ data "aws_iam_policy_document" "read_axiell_transformer_pipeline_storage_secrets
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer_axiell/api_key*"
     ]
   }
+}
+
+data "aws_iam_policy_document" "read_folio_transformer_pipeline_storage_secrets" {
+  statement {
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer_folio/api_key*"
+    ]
+  }
+}
+
+# Combined policy documents for the transformer lambda role to access S3 buckets and table, ES source index
+data "aws_iam_policy_document" "all_adapter_s3tables_read" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_s3tables_read)[*].json
+}
+
+data "aws_iam_policy_document" "all_adapter_buckets_read" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_bucket_read)[*].json
+}
+
+data "aws_iam_policy_document" "all_adapter_buckets_write" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_bucket_write)[*].json
+}
+
+data "aws_iam_policy_document" "all_transformer_pipeline_storage_secrets" {
+  source_policy_documents = [
+    data.aws_iam_policy_document.read_ebsco_transformer_pipeline_storage_secrets.json,
+    data.aws_iam_policy_document.read_axiell_transformer_pipeline_storage_secrets.json,
+    data.aws_iam_policy_document.read_folio_transformer_pipeline_storage_secrets.json,
+  ]
 }
 
 data "aws_iam_policy_document" "adapter_bucket_write" {

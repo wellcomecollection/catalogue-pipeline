@@ -35,12 +35,12 @@ module "transformer_lambda" {
   }
 }
 
+# "all_adapter" -> see transformer_types below
+
 # Attach read-only Iceberg access policies to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_iceberg_read" {
-  for_each = local.transformer_types
-
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.adapter_s3tables_read[each.key].json
+  policy = data.aws_iam_policy_document.all_adapter_s3tables_read.json
 }
 
 # Give the transformer Lambda permission to write to the reconciler table
@@ -51,29 +51,20 @@ resource "aws_iam_role_policy" "transformer_lambda_iceberg_reconciler_write" {
 
 # Attach S3 read policies to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_s3_read" {
-  for_each = local.transformer_types
-
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.adapter_bucket_read[each.key].json
+  policy = data.aws_iam_policy_document.all_adapter_buckets_read.json
 }
 
 # Attach S3 write policies to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_s3_write" {
-  for_each = local.transformer_types
-
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.adapter_bucket_write[each.key].json
+  policy = data.aws_iam_policy_document.all_adapter_buckets_write.json
 }
 
 # Allow transformer to read pipeline storage secrets
 resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read" {
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.read_ebsco_transformer_pipeline_storage_secrets.json
-}
-
-resource "aws_iam_role_policy" "transformer_axiell_lambda_pipeline_storage_secret_read" {
-  role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.read_axiell_transformer_pipeline_storage_secrets.json
+  policy = data.aws_iam_policy_document.all_transformer_pipeline_storage_secrets.json
 }
 
 # State Machine Definition
@@ -147,6 +138,11 @@ locals {
       adapter_detail_type  = "axiell.adapter.completed"
       reindex_target_value = "axiell"
     }
+    folio = {
+      adapter_source       = "folio.adapter"
+      adapter_detail_type  = "folio.adapter.completed"
+      reindex_target_value = "folio"
+    }
   }
 }
 
@@ -163,6 +159,7 @@ module "transformer_state_machine" {
   policies_to_attach = {
     "read_ebsco_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
     "read_axiell_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["axiell"].json
+    "read_folio_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["folio"].json
   }
 }
 

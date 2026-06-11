@@ -22,6 +22,10 @@ data "aws_s3_bucket" "axiell_adapter_bucket" {
   bucket = "wellcomecollection-platform-axiell-adapter"
 }
 
+data "aws_s3_bucket" "folio_adapter_bucket" {
+  bucket = "wellcomecollection-platform-folio-adapter"
+}
+
 locals {
   namespace = "catalogue-${var.pipeline_date}"
 
@@ -103,6 +107,9 @@ locals {
 
   # Axiell adapter bucket
   axiell_adapter_bucket = data.aws_s3_bucket.axiell_adapter_bucket.bucket
+
+  # Folio adapter bucket
+  folio_adapter_bucket = data.aws_s3_bucket.folio_adapter_bucket.bucket
 
   # Mets adapter VHS
   mets_adapter_read_policy = data.terraform_remote_state.mets_adapter.outputs.mets_dynamo_read_policy
