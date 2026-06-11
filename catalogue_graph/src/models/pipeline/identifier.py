@@ -16,6 +16,10 @@ class SourceIdentifier(SerialisableModel):
         return f"{self.ontology_type}[{self.identifier_type.id}/{self.value}]"
 
 
+class WorkSourceIdentifier(SourceIdentifier):
+    ontology_type: str = "Work"
+
+
 IdentifyType = Literal["Identifiable", "Identified", "Unidentifiable"]
 
 

@@ -10,9 +10,17 @@ from elasticsearch import Elasticsearch
 from adapters.utils.adapter_store import AdapterStore
 from core.source import BaseSource
 from models.pipeline.source.work import VisibleSourceWork
+from tests.adapters.transformers.marc.marcxml_test_transformer import (
+    MarcXmlTransformerForTests,
+)
 from tests.mocks import MockElasticsearchClient
 
-from .marcxml_test_transformer import MarcXmlTransformerWithStoreForTests
+
+@pytest.fixture
+def adapter_store(temporary_table) -> AdapterStore:  # type: ignore[no-untyped-def]
+    """Create an AdapterStore backed by a temporary local Iceberg table."""
+
+    return AdapterStore(temporary_table, "test_namespace")
 
 
 class _StubSource(BaseSource):
@@ -25,7 +33,7 @@ class _StubSource(BaseSource):
 
 def test_transform_missing_content_logs_error(adapter_store: AdapterStore) -> None:
     """Records without content should log an error and be skipped."""
-    transformer = MarcXmlTransformerWithStoreForTests(adapter_store, [])
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
 
     works = list(
         transformer.transform(
@@ -40,7 +48,7 @@ def test_transform_missing_content_logs_error(adapter_store: AdapterStore) -> No
 
 
 def test_transform_invalid_xml_records_error(adapter_store: AdapterStore) -> None:
-    transformer = MarcXmlTransformerWithStoreForTests(adapter_store, [])
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
 
     works = list(
         transformer.transform(
@@ -61,7 +69,7 @@ def test_transform_invalid_xml_records_error(adapter_store: AdapterStore) -> Non
 
 
 def test_transform_valid_marcxml_returns_work(adapter_store: AdapterStore) -> None:
-    transformer = MarcXmlTransformerWithStoreForTests(adapter_store, [])
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
 
     xml = (
         "<record>"
@@ -89,7 +97,7 @@ def test_transform_valid_marcxml_returns_work(adapter_store: AdapterStore) -> No
 def test_transform_handles_transform_record_exception(
     adapter_store: AdapterStore, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    transformer = MarcXmlTransformerWithStoreForTests(adapter_store, [])
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
 
     def raising_transform_record(*_args: Any, **_kwargs: Any) -> Any:
         raise ValueError("boom: bad data")
@@ -121,7 +129,7 @@ def test_transform_handles_transform_record_exception(
 def test_stream_to_index_success_no_errors(
     adapter_store: AdapterStore,
 ) -> None:
-    transformer = MarcXmlTransformerWithStoreForTests(adapter_store, [])
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
     transformer.source = _StubSource(  # type: ignore[assignment]
         [
             {
@@ -155,7 +163,7 @@ def test_stream_to_index_success_no_errors(
 def test_stream_to_index_with_errors(
     adapter_store: AdapterStore, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    transformer = MarcXmlTransformerWithStoreForTests(adapter_store, [])
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
 
     def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
         actions_list = list(actions)

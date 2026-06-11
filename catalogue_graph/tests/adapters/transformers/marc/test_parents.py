@@ -4,8 +4,6 @@ Although the implementation currently lives under `adapters.transformers.ebsco.p
 these tests are MARC-field level and can be shared across adapters.
 """
 
-# mypy: allow-untyped-calls
-
 from __future__ import annotations
 
 from datetime import datetime
@@ -14,10 +12,9 @@ import pytest
 from pymarc.record import Field, Record, Subfield
 
 from adapters.transformers.ebsco.parents import get_parents
-from models.pipeline.work_data import WorkData
 from models.pipeline.work_state import WorkAncestor, WorkRelations
 from tests.adapters.transformers.marc.marcxml_test_transformer import (
-    MarcXmlTransformerForTests,
+    MarcXmlWorkBuilderForTests,
 )
 
 test_cases = [
@@ -177,16 +174,9 @@ def test_remove_duplicates() -> None:
     indirect=["marc_record"],
 )
 def test_relations_are_set_from_parents(marc_record: Record) -> None:
-    transformer = MarcXmlTransformerForTests(
-        build_work_data=lambda _: WorkData(),
-        build_relations=lambda r: WorkRelations(ancestors=get_parents(r)),
-    )
+    transformer = MarcXmlWorkBuilderForTests(marc_record, last_modified=datetime.now())
 
-    work = transformer.transform_record(
-        marc_record, source_modified_time=datetime.now()
-    )
-
-    assert work.state.relations == WorkRelations(
+    assert transformer.work_state.relations == WorkRelations(
         ancestors=[
             WorkAncestor(
                 title="A title from 440ǂa",

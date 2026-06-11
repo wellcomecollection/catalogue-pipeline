@@ -1,0 +1,15 @@
+from adapters.transformers.builders.source_work_builder import SourceWorkBuilder
+from models.pipeline.identifier import Id
+
+
+class ReconcilerWorkBuilder(SourceWorkBuilder):
+    """
+    Used by `AxiellReconciler` to emit deleted works from the reconciler store.
+
+    Operates on a raw GUID string rather than a MARC record (the reconciler store
+    only stores the resolved GUID).
+    """
+
+    @property
+    def source_identifier_type(self) -> Id:
+        return Id(id="axiell-guid")

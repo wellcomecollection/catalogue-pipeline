@@ -531,12 +531,3 @@ def add_neptune_mock_response(
         json_data={"results": mock_results},
         body=json.dumps(body),
     )
-
-
-def reset_all_mocks() -> None:
-    MockRequest.reset_mocks()
-    MockSmartOpen.reset_mocks()
-    MockSNSClient.reset_mocks()
-    MockElasticsearchClient.reset_mocks()
-    MockCloudwatchClient.reset_mocks()
-    MockS3Client.reset_mocks()

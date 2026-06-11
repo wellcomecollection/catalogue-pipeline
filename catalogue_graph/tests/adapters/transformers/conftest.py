@@ -3,8 +3,6 @@ from contextlib import suppress
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
-from adapters.utils.adapter_store import AdapterStore
-
 # mypy: allow-untyped-calls
 
 
@@ -40,8 +38,9 @@ def marc_record(request: pytest.FixtureRequest) -> Record:
     return record
 
 
-@pytest.fixture
-def adapter_store(temporary_table) -> AdapterStore:  # type: ignore[no-untyped-def]
-    """Create an AdapterStore backed by a temporary local Iceberg table."""
-
-    return AdapterStore(temporary_table, "test_namespace")
+def _907_field(value: str) -> Field:
+    return Field(
+        tag="907",
+        indicators=Indicators(" ", " "),
+        subfields=[Subfield(code="a", value=value)],
+    )

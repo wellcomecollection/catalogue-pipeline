@@ -6,10 +6,13 @@ import pyarrow.compute as pc
 import structlog
 from pyiceberg.expressions import In
 
-from adapters.transformers.marcxml_transformer import MarcXmlTransformer
+from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
+from adapters.transformers.builders.reconciler_work_builder import ReconcilerWorkBuilder
+from adapters.transformers.source_work_transformer import (
+    SourceWorkTransformer,
+)
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
-from models.pipeline.identifier import Id
 from models.pipeline.source.work import (
     DeletedSourceWork,
 )
@@ -17,7 +20,7 @@ from models.pipeline.source.work import (
 logger = structlog.get_logger(__name__)
 
 
-class AxiellReconciler(MarcXmlTransformer):
+class AxiellReconciler(SourceWorkTransformer):
     def __init__(
         self,
         adapter_store: AdapterStore,
@@ -29,24 +32,35 @@ class AxiellReconciler(MarcXmlTransformer):
         super().__init__(
             adapter_store=adapter_store,
             changeset_ids=changeset_ids,
-            identifier_type=Id(id="axiell-guid"),
             snapshot_id=snapshot_id,
         )
+
+    @property
+    def work_builder(self) -> type[ReconcilerWorkBuilder]:
+        return ReconcilerWorkBuilder
+
+    def _get_record_guid(self, adapter_row: dict) -> str | None:
+        marc_record = self._row_to_marc_record(adapter_row)
+        if not marc_record:
+            return None
+
+        builder = AxiellWorkBuilder(marc_record, adapter_row["last_modified"])
+        return builder.source_identifier.value
 
     def _rows_to_reconciler_arrow_table(
         self, rows: Iterable[dict[str, Any]]
     ) -> pa.Table:
         data = []
         for row in rows:
-            marc_record = self._row_to_marc_record(row)
-            if not marc_record:
+            guid = self._get_record_guid(row)
+            if not guid:
                 continue
 
             data.append(
                 {
                     "namespace": self.reconciler_store.namespace,
                     "id": row["id"],
-                    "guid": self.extract_work_id(marc_record),
+                    "guid": guid,
                     "last_modified": row["last_modified"],
                 }
             )
@@ -76,7 +90,8 @@ class AxiellReconciler(MarcXmlTransformer):
         # Emit each row as a deleted work
         for row in data_to_overwrite.to_pylist():
             last_modified = last_modified_by_id.get(row["id"], row["last_modified"])
-            yield row["id"], self._transform_deleted(row["guid"], last_modified)
+            builder = self.work_builder(row["guid"], last_modified)
+            yield row["id"], builder.deleted_work
 
     def _commit(
         self, rows: Iterable[dict[str, Any]], _: set[str], error_row_ids: set[str]

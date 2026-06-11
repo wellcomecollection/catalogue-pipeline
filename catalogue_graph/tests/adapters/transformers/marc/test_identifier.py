@@ -7,15 +7,14 @@ from datetime import datetime
 import pytest
 from pymarc.record import Field, Record
 
-from .marcxml_test_transformer import MarcFieldTransformerForTests
+from tests.adapters.transformers.marc.marcxml_test_transformer import (
+    MarcXmlWorkBuilderForTests,
+)
 
 
 def _transform_id(marc_record: Record) -> str:
-    transformer = MarcFieldTransformerForTests()
-    work = transformer.transform_record(
-        marc_record, source_modified_time=datetime.now()
-    )
-    return work.state.source_identifier.value
+    transformer = MarcXmlWorkBuilderForTests(marc_record, last_modified=datetime.now())
+    return transformer.source_identifier.value
 
 
 @pytest.mark.parametrize(

@@ -1,20 +1,6 @@
-from datetime import datetime
-
-from pymarc.record import Record
-
-from adapters.transformers.marc.alternative_titles import extract_alternative_titles
-from adapters.transformers.marc.last_transaction_time import (
-    extract_last_transaction_time_to_datetime,
-)
-from adapters.transformers.marc.notes import extract_notes
-from adapters.transformers.marc.other_identifiers import extract_other_identifiers
-from adapters.transformers.marc.title import extract_title
+from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
-from ingestor.models.shared.invisible_reason import InvisibleReason
-from models.pipeline.identifier import Id
-from models.pipeline.source.work import InvisibleSourceWork
-from models.pipeline.work_data import WorkData
 
 
 class AxiellTransformer(MarcXmlTransformer):
@@ -27,28 +13,9 @@ class AxiellTransformer(MarcXmlTransformer):
         super().__init__(
             adapter_store=adapter_store,
             changeset_ids=changeset_ids,
-            identifier_type=Id(id="axiell-guid"),
             snapshot_id=snapshot_id,
         )
 
-    def transform_record(
-        self, marc_record: Record, source_modified_time: datetime
-    ) -> InvisibleSourceWork:
-        work_data = WorkData(
-            title=extract_title(marc_record),
-            alternative_titles=extract_alternative_titles(marc_record),
-            other_identifiers=extract_other_identifiers(marc_record),
-            notes=extract_notes(marc_record),
-        )
-
-        work_state = self.source_work_state(
-            marc_record=marc_record,
-            source_modified_time=extract_last_transaction_time_to_datetime(marc_record),
-        )
-
-        return InvisibleSourceWork(
-            version=int(source_modified_time.timestamp()),
-            state=work_state,
-            data=work_data,
-            invisibility_reasons=[InvisibleReason(type="MimsyWorksAreNotVisible")],
-        )
+    @property
+    def work_builder(self) -> type[AxiellWorkBuilder]:
+        return AxiellWorkBuilder

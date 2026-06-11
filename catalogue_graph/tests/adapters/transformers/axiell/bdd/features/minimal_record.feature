@@ -6,8 +6,10 @@ Feature: The bare minimum MARC record for an item
   Scenario: A minimal MARC record from Axiell
     Given a MARC record with field 001 "abc123"
     And the MARC record has a 005 field with the value 20260101094530.0
+    And the MARC record has a 907 field with subfield "a" value "0ef862d5-c3c1-4ede-99d4-50bef401df2e"
     And the MARC record has a 245 field with subfield "a" value "How to avoid huge ships"
     When I transform the MARC record
-    Then the work is invisible
-    And the work has the identifier "Work[axiell-priref/abc123]"
+    Then the work is visible
+    And the work has the identifier "Work[axiell-guid/abc123]"
     And the work's source modified time is 2026-01-01T09:45:30Z
+    And the work has the predecessor identifier "Work[calm-record-id/0ef862d5-c3c1-4ede-99d4-50bef401df2e]"
