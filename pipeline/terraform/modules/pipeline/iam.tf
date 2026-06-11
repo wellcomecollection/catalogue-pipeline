@@ -112,8 +112,7 @@ data "aws_iam_policy_document" "read_folio_transformer_pipeline_storage_secrets"
   }
 }
 
-# Combined policy documents for the transformer lambda role to stay within
-# the 10 inline policies per role limit.
+# Combined policy documents for the transformer lambda role to access S3 buckets and table, ES source index
 data "aws_iam_policy_document" "all_adapter_s3tables_read" {
   source_policy_documents = values(data.aws_iam_policy_document.adapter_s3tables_read)[*].json
 }
