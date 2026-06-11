@@ -76,6 +76,11 @@ resource "aws_iam_role_policy" "transformer_axiell_lambda_pipeline_storage_secre
   policy = data.aws_iam_policy_document.read_axiell_transformer_pipeline_storage_secrets.json
 }
 
+resource "aws_iam_role_policy" "transformer_folio_lambda_pipeline_storage_secret_read" {
+  role   = module.transformer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.read_folio_transformer_pipeline_storage_secrets.json
+}
+
 # State Machine Definition
 locals {
   transformer_state_machine_definition = jsonencode({
@@ -147,6 +152,11 @@ locals {
       adapter_detail_type  = "axiell.adapter.completed"
       reindex_target_value = "axiell"
     }
+    folio = {
+      adapter_source       = "folio.adapter"
+      adapter_detail_type  = "folio.adapter.completed"
+      reindex_target_value = "folio"
+    }
   }
 }
 
@@ -163,6 +173,7 @@ module "transformer_state_machine" {
   policies_to_attach = {
     "read_ebsco_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
     "read_axiell_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["axiell"].json
+    "read_folio_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["folio"].json
   }
 }
 

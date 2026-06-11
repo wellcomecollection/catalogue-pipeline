@@ -2,6 +2,7 @@ locals {
   adapter_buckets = {
     ebsco  = local.ebsco_adapter_bucket
     axiell = local.axiell_adapter_bucket
+    folio  = local.folio_adapter_bucket
   }
 }
 
@@ -95,6 +96,18 @@ data "aws_iam_policy_document" "read_axiell_transformer_pipeline_storage_secrets
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer_axiell/api_key*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "read_folio_transformer_pipeline_storage_secrets" {
+  statement {
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer_folio/api_key*"
     ]
   }
 }
