@@ -99,3 +99,9 @@ variable "graph_index_dates" {
     images    = string
   })
 }
+
+variable "enable_image_inferrer_schedule" {
+  type        = bool
+  default     = false
+  description = "Enable the scheduled image-inferrer state machine. Ships disabled until the new path is validated and we cut over from the SQS-driven service."
+}

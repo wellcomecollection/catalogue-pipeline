@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from config import (
     ES_IMAGES_AUGMENTED_INDEX_NAME,
+    ES_IMAGES_INITIAL_INDEX_NAME,
     ES_LOCAL_API_KEY,
     ES_LOCAL_HOST,
     ES_LOCAL_PORT,
@@ -40,6 +41,12 @@ def get_merged_index_name(event: BasePipelineEvent) -> str:
 def get_images_augmented_index_name(event: BasePipelineEvent) -> str:
     index_date = event.index_dates.augmented or event.pipeline_date
     return get_standard_index_name(ES_IMAGES_AUGMENTED_INDEX_NAME, index_date)
+
+
+def get_images_initial_index_name(event: BasePipelineEvent) -> str:
+    # The initial images index is always suffixed with the pipeline date
+    # (the merger writes `images-initial-<pipeline_date>`).
+    return get_standard_index_name(ES_IMAGES_INITIAL_INDEX_NAME, event.pipeline_date)
 
 
 class ElasticsearchConfig(BaseModel):
