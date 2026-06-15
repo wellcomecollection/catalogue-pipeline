@@ -31,6 +31,7 @@ ORIGIN_CODE_TO_ID_TYPE = {
     "Sierra Number": "sierra-identifier",
     "WI number": "miro-image-number",
     "accession number": "wellcome-accession-number",
+    "RefNo": "calm-ref-no",
     # "Library Reference Number" is handled specially in format_field
     # Two other id schemes exist, but I don't know what to do with them.
     # "SCM loan accession number": ,

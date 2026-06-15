@@ -13,6 +13,10 @@ from tests.mocks import MockElasticsearchClient, MockSmartOpen
 AXIELL_NAMESPACE = AXIELL_CONFIG.config.adapter_namespace
 
 
+TEST_RECORD_ONE = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield><datafield tag='035'><subfield code='a'>(RefNo)A/B</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield></record>"
+TEST_RECORD_TWO = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title Two</subfield></datafield><datafield tag='035'><subfield code='a'>(RefNo)A/B/C</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield></record>"
+
+
 def _run_transform(
     monkeypatch: pytest.MonkeyPatch,
     *,
@@ -40,8 +44,8 @@ def test_transformer_end_to_end_with_local_table(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id = {
-        "ax00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield></record>",
-        "ax00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title Two</subfield></datafield></record>",
+        "ax00001": TEST_RECORD_ONE,
+        "ax00002": TEST_RECORD_TWO,
     }
     changeset_id = prepare_changeset(
         temporary_table,
@@ -88,7 +92,7 @@ def test_transformer_end_to_end_includes_deletions(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id: dict[str, tuple[str, bool] | str] = {
-        "ax00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield></record>",
+        "ax00001": TEST_RECORD_ONE,
         # Deleted records now retain content with a deleted flag
         "ax00003": (
             "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Axiell Work</subfield></datafield></record>",
