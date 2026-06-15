@@ -1,5 +1,5 @@
 Feature: Extract Exhibitions notes from MARC 585 $a
-  notes are derived from every non-empty 585 $a subfield in order of appearance.
+  notes are derived from every non-empty 585 subfield in order of appearance.
 
   Background:
     Given a valid MARC record
@@ -23,6 +23,11 @@ Feature: Extract Exhibitions notes from MARC 585 $a
       And the MARC record has another 585 field with subfield "a" value "   "
       When I transform the MARC record
       Then there are no notes
+
+    Scenario: Globally suppressed subfield $5 is ignored
+      Given the MARC record has a 585 field with subfield "a" value "Some note" and subfield "5" value "Suppressed"
+      When I transform the MARC record
+      Then the only note has the contents "Some note"
 
   Rule: an exhibitions note is created for each valid 585 field
     Scenario: Single 585 $a
