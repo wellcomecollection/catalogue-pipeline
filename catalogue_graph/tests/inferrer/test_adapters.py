@@ -1,3 +1,5 @@
+import base64
+
 import pytest
 
 from inferrer.adapters import (
@@ -22,6 +24,14 @@ def _inferrer(name: str) -> Inferrer:
 def test_decode_base64_floats_is_little_endian() -> None:
     floats = [1.0, -2.5, 3.25, 0.0]
     assert decode_base64_floats(encode_floats(floats)) == pytest.approx(floats)
+
+
+def test_decode_base64_floats_rejects_non_multiple_of_4() -> None:
+    # 5 raw bytes is not a whole number of float32 values; decoding should fail
+    # loudly rather than silently truncating to one float.
+    encoded = base64.b64encode(b"\x00\x00\x00\x00\x00").decode()
+    with pytest.raises(InferrerError):
+        decode_base64_floats(encoded)
 
 
 def test_parse_features_decodes_vector() -> None:

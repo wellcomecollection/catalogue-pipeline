@@ -43,6 +43,7 @@ from utils.elasticsearch import (
     index_es_batch,
 )
 from utils.logger import ExecutionContext, setup_logging
+from utils.timezone import convert_datetime_to_utc_iso
 
 logger = structlog.get_logger(__name__)
 
@@ -108,7 +109,7 @@ def _build_augmented(
         canonical_id=image.state.canonical_id,
         source_identifier=image.state.source_identifier,
         inferred_data=inferred,
-        augmented_time=datetime.now(UTC).isoformat(),
+        augmented_time=convert_datetime_to_utc_iso(datetime.now(UTC)),
     )
     return AugmentedImageToIndex(
         state=state,

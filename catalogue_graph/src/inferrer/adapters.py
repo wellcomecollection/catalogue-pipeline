@@ -34,8 +34,12 @@ class InferrerError(Exception):
 def decode_base64_floats(encoded: str) -> list[float]:
     """Decode a base64 little-endian float32 buffer into a list of floats."""
     raw = base64.b64decode(encoded)
+    if len(raw) % 4 != 0:
+        raise InferrerError(
+            f"Encoded float buffer length {len(raw)} is not a multiple of 4"
+        )
     count = len(raw) // 4
-    return list(struct.unpack(f"<{count}f", raw[: count * 4]))
+    return list(struct.unpack(f"<{count}f", raw))
 
 
 def parse_features(response: dict) -> dict:
