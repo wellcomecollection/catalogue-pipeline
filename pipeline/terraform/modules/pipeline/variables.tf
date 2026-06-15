@@ -116,3 +116,16 @@ variable "image_inferrer_augmented_index_date" {
     `graph_index_dates.augmented`. A matching `index_config` entry must exist (see the 2025-10-02 root).
   EOT
 }
+
+variable "image_inferrer_initial_index_date" {
+  type        = string
+  default     = "2026-06-15"
+  description = <<-EOT
+    Initial-images index date the Python image-inferrer state machine reads from. Defaults to a
+    shadow source index (`images-initial-2026-06-15`) whose mapping indexes `modifiedTime` (the live
+    images-initial uses an "empty"/dynamic:false mapping where modifiedTime is unqueryable). Populate
+    it via a one-off reindex from `images-initial-<pipeline_date>`. At cutover, set this to
+    `var.pipeline_date` once the live images-initial indexes `modifiedTime`. A matching `index_config`
+    entry must exist (see the 2025-10-02 root).
+  EOT
+}

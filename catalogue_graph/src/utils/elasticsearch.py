@@ -44,9 +44,11 @@ def get_images_augmented_index_name(event: BasePipelineEvent) -> str:
 
 
 def get_images_initial_index_name(event: BasePipelineEvent) -> str:
-    # The initial images index is always suffixed with the pipeline date
-    # (the merger writes `images-initial-<pipeline_date>`).
-    return get_standard_index_name(ES_IMAGES_INITIAL_INDEX_NAME, event.pipeline_date)
+    # Defaults to `images-initial-<pipeline_date>` (where the merger writes), but
+    # can be pointed at a shadow source index via `index_dates.initial` (which
+    # indexes `modifiedTime` so the inferrer's time-window query works).
+    index_date = event.index_dates.initial or event.pipeline_date
+    return get_standard_index_name(ES_IMAGES_INITIAL_INDEX_NAME, index_date)
 
 
 class ElasticsearchConfig(BaseModel):

@@ -52,7 +52,10 @@ locals {
         Type = "Pass"
         Output = {
           "pipeline_date" : var.pipeline_date,
-          "index_dates" : { "augmented" : var.image_inferrer_augmented_index_date },
+          "index_dates" : {
+            "initial" : var.image_inferrer_initial_index_date,
+            "augmented" : var.image_inferrer_augmented_index_date
+          },
           # Window end is 5 minutes before the scheduled time (indexing lag);
           # the find-work step defaults the window start to end - 15 minutes.
           "window" : {

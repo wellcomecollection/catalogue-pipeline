@@ -115,6 +115,7 @@ def local_handler(parser: ArgumentParser) -> None:
         parser,
         {
             "pipeline_date",
+            "index_date_initial",
             "index_date_augmented",
             "window",
             "ids",

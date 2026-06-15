@@ -1,8 +1,23 @@
 from inferrer.models import FindWorkEvent
 from inferrer.steps import find_work
+from models.events import PipelineIndexDates
 from tests.mocks import MockElasticsearchClient, mock_es_secrets
+from utils.elasticsearch import get_images_initial_index_name
 
 PIPELINE_DATE = "2026-06-01"
+
+
+def test_source_index_defaults_to_pipeline_date() -> None:
+    event = FindWorkEvent(pipeline_date=PIPELINE_DATE)
+    assert get_images_initial_index_name(event) == f"images-initial-{PIPELINE_DATE}"
+
+
+def test_source_index_uses_index_dates_initial_when_set() -> None:
+    event = FindWorkEvent(
+        pipeline_date=PIPELINE_DATE,
+        index_dates=PipelineIndexDates(initial="2026-06-15"),
+    )
+    assert get_images_initial_index_name(event) == "images-initial-2026-06-15"
 
 
 def _seed_initial_images(ids: list[str]) -> None:

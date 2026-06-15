@@ -216,7 +216,14 @@ def event_validator(raw_input: str) -> InferenceManagerEvent:
 def local_handler(parser: ArgumentParser) -> None:
     add_pipeline_event_args(
         parser,
-        {"pipeline_date", "index_date_augmented", "ids", "environment", "es_mode"},
+        {
+            "pipeline_date",
+            "index_date_initial",
+            "index_date_augmented",
+            "ids",
+            "environment",
+            "es_mode",
+        },
     )
     args = parser.parse_args()
     validate_es_mode_for_writes(parser, args)
