@@ -11,9 +11,9 @@ from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from models.pipeline.access_condition import (
     AccessCondition,
-    LicensedResource,
-    ViewOnline,
 )
+from models.pipeline.access_method import ViewOnline
+from models.pipeline.access_status import LicensedResource
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Concept, Contributor, Genre, Subject
 from models.pipeline.format import Format

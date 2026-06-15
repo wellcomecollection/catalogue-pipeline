@@ -12,9 +12,9 @@ from pymarc.record import Record
 from adapters.transformers.ebsco.common import is_url
 from models.pipeline.access_condition import (
     AccessCondition,
-    LicensedResource,
-    ViewOnline,
 )
+from models.pipeline.access_method import ViewOnline
+from models.pipeline.access_status import LicensedResource
 from models.pipeline.holdings import Holdings
 from models.pipeline.location import DigitalLocation, OnlineResource
 
