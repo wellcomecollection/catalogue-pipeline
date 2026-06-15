@@ -9,11 +9,14 @@ Feature: Extract Exhibitions notes from MARC 585 $a
       When I transform the MARC record
       Then there are no notes
 
-    Scenario: Non-a subfields are ignored
-      Given the MARC record has a 585 field with subfield "b" value "Incorrect note"
-      And the MARC record has another 585 field with subfield "c" value "Another note"
+    Scenario: Subfield contents are concatenated
+      Given the MARC record has a 585 field with subfields:
+        | code | value        |
+        | a    | First note   |
+        | b    | Second note  |
+        | c    | Another note |
       When I transform the MARC record
-      Then there are no notes
+      Then the only note has the contents "First note Second note Another note"
 
     Scenario: Empty $a subfields are ignored
       Given the MARC record has a 585 field with subfield "a" value ""
