@@ -1,0 +1,47 @@
+# Parity comparison: new Python image-inferrer (shadow index) vs the Scala
+# inferrer's prod output, for the same image ids.
+#
+# Prerequisite: in the gitignored configs/source_configuration.yaml, define a
+# cluster for the catalogue 2025-10-02 pipeline ES and these two index_sources,
+# using an API key with read on BOTH indices (e.g. the `read_only` key from
+# elasticsearch/pipeline_storage_2025-10-02/read_only/api_key):
+#
+#   clusters:
+#     pipeline-2025-10-02:
+#       cloud_id: "<cloud-id-of-0687c4947f404fe8ae10fa1aeab71bdc.eu-west-1.aws.found.io>"
+#       api_key:  "<read_only api key>"
+#   index_sources:
+#     prod-images-augmented:
+#       cluster: pipeline-2025-10-02
+#       index:   images-augmented-2026-04-29
+#     shadow-images-augmented:
+#       cluster: pipeline-2025-10-02
+#       index:   images-augmented-2026-04-29-shadow
+
+# Exactly two index sources to compare.
+index_sources:
+  - prod-images-augmented
+  - shadow-images-augmented
+
+# Restrict to the ids the parity run populated in the shadow index (replace the
+# placeholders with the run's image ids). Omit this block to compare the full
+# id intersection of the two indices.
+filter_query:
+  query:
+    ids:
+      values:
+        - "<shadow-image-id-1>"
+        - "<shadow-image-id-2>"
+
+# `state.augmentedTime` is a per-run wall-clock timestamp, so it legitimately
+# differs between the Scala and Python runs. Everything else (inferredData
+# features/paletteEmbedding/averageColorHex/aspectRatio, source, locations,
+# version, modifiedTime) is expected to match exactly.
+ignore_fields:
+  - state.augmentedTime
+  - state.**.augmentedTime
+
+sample_size: 20
+hash_bucket_count: 2
+namespace: image-inferrer-parity
+output_dir: data

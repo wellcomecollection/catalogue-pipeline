@@ -105,3 +105,14 @@ variable "enable_image_inferrer_schedule" {
   default     = false
   description = "Enable the scheduled image-inferrer state machine. Ships disabled until the new path is validated and we cut over from the SQS-driven service."
 }
+
+variable "image_inferrer_augmented_index_date" {
+  type        = string
+  default     = "2026-04-29-shadow"
+  description = <<-EOT
+    Augmented index date the Python image-inferrer state machine writes to. Defaults to a shadow
+    index (`images-augmented-2026-04-29-shadow`) so the new pipeline never overwrites the Scala
+    inferrer's prod output and its results can be compared. At cutover, set this to
+    `graph_index_dates.augmented`. A matching `index_config` entry must exist (see the 2025-10-02 root).
+  EOT
+}

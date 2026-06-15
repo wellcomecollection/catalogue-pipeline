@@ -82,6 +82,15 @@ module "pipeline" {
         indexed = "images_indexed.2024-11-14"
       }
     }
+    // Shadow augmented index: output target of the new Python image-inferrer
+    // state machine (var.image_inferrer_augmented_index_date) so its output can
+    // be compared against the Scala inferrer's prod output without touching the
+    // prod augmented index. Reuses the images_augmented.2026-04-29 mapping.
+    "2026-04-29-shadow" = {
+      images = {
+        augmented = "images_augmented.2026-04-29"
+      }
+    }
   }
 
   allow_delete_indices = false
