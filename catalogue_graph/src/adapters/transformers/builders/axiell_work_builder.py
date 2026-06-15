@@ -2,10 +2,14 @@ from adapters.transformers.axiell.organisation_and_arrangement import (
     extract_hierarchical_level,
 )
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
+from adapters.transformers.ebsco.production import (
+    extract_production,
+)
 from adapters.transformers.marc.last_transaction_time import (
     extract_last_transaction_time_to_datetime,
 )
 from adapters.transformers.marc.notes import extract_notes
+from adapters.transformers.marc.physical_description import extract_physical_description
 from adapters.transformers.marc.predecessor_identifier import (
     extract_calm_predecessor_id,
 )
@@ -17,6 +21,7 @@ from models.pipeline.identifier import Id, Unidentifiable, WorkSourceIdentifier
 from models.pipeline.item import Item
 from models.pipeline.location import LocationType, PhysicalLocation
 from models.pipeline.note import Note
+from models.pipeline.production import ProductionEvent
 from utils.timezone import convert_datetime_to_utc_iso
 from utils.types import WorkType
 
@@ -117,12 +122,18 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     def notes(self) -> list[Note]:
         return extract_notes(self.record)
 
+    @property
+    def physical_description(self) -> str | None:
+        return extract_physical_description(self.record)
+
+    @property
+    def production(self) -> list[ProductionEvent]:
+        return extract_production(self.record)
+
     # format = Some(CalmFormat(record)),
-    # subjects = CalmSubjects(record),
     # languages = languages,
     # items = CalmItems(record),
-    # contributors = CalmContributors(record),
     # description = description(record),
-    # physicalDescription = physicalDescription(record),
-    # production = production(record),
     # notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
+    # subjects = CalmSubjects(record),
+    # contributors = CalmContributors(record),
