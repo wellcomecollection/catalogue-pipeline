@@ -64,14 +64,14 @@ def _create_note_from_contents(
         if subfield_tag in suppressed:
             continue
 
-        # Subfield ǂu is rendered as an HTML link when it contains a valid URL.
+        # Subfield $u is rendered as an HTML link when it contains a valid URL.
         if subfield_tag == "u":
             trimmed = value.strip()
             if _is_url(trimmed):
                 parts.append(f'<a href="{trimmed}">{trimmed}</a>')
             else:
                 logger.warning(
-                    "Subfield ǂu which doesn't look like a URL",
+                    "Subfield $u which doesn't look like a URL",
                     contents=value,
                 )
                 parts.append(value)
