@@ -1,3 +1,4 @@
+from models.pipeline.access_method import AccessMethod
 from models.pipeline.serialisable import SerialisableModel
 
 
@@ -8,12 +9,6 @@ class Type(SerialisableModel):
 class AccessStatusRelationship(Type):
     pass
 
-
-class AccessMethod(Type):
-    pass
-
-
-ViewOnline = AccessMethod(type="ViewOnline")
 
 #  TODO: (Resource vs RelatedResource)
 #  Scala code says this is not exposed the public API,
@@ -32,7 +27,7 @@ LicensedResource = AccessStatus(type="LicensedResources", relationship=Resource)
 
 
 class AccessCondition(SerialisableModel):
-    method: Type
+    method: AccessMethod
     status: AccessStatus | None = None
     terms: str | None = None
     note: str | None = None

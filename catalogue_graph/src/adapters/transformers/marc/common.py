@@ -30,10 +30,14 @@ def mandatory_field(marc_code: str, field_name: str) -> Callable:
     return decorate
 
 
-def get_a_subfields(field_code: str, record: Record) -> list[str]:
+def non_empty_subfields(field_code: str, subfield_code: str, record: Record) -> list[str]:
     return non_empty(
-        field.get("a", "").strip() for field in record.get_fields(field_code)
+        field.get(subfield_code, "").strip() for field in record.get_fields(field_code)
     )
+
+
+def get_a_subfields(field_code: str, record: Record) -> list[str]:
+    return non_empty_subfields(field_code, "a", record)
 
 
 def non_empty[T](value: Iterable[T | None]) -> list[T]:
