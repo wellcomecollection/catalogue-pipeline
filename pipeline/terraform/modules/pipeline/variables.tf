@@ -108,10 +108,10 @@ variable "enable_image_inferrer_schedule" {
 
 variable "image_inferrer_augmented_index_date" {
   type        = string
-  default     = "2026-04-29-shadow"
+  default     = "2026-06-15"
   description = <<-EOT
-    Augmented index date the Python image-inferrer state machine writes to. Defaults to a shadow
-    index (`images-augmented-2026-04-29-shadow`) so the new pipeline never overwrites the Scala
+    Augmented index date the Python image-inferrer state machine writes to. Defaults to a separate
+    shadow index (`images-augmented-2026-06-15`) so the new pipeline never overwrites the Scala
     inferrer's prod output and its results can be compared. At cutover, set this to
     `graph_index_dates.augmented`. A matching `index_config` entry must exist (see the 2025-10-02 root).
   EOT

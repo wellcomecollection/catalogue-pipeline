@@ -16,7 +16,7 @@
 #       index:   images-augmented-2026-04-29
 #     shadow-images-augmented:
 #       cluster: pipeline-2025-10-02
-#       index:   images-augmented-2026-04-29-shadow
+#       index:   images-augmented-2026-06-15
 
 # Exactly two index sources to compare.
 index_sources:
