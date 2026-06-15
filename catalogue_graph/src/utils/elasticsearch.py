@@ -1,3 +1,5 @@
+import json
+from collections.abc import Generator, Sequence
 from typing import Any, Literal, cast
 
 import elasticsearch
@@ -15,6 +17,7 @@ from config import (
     ES_LOCAL_SCHEME,
     ES_MERGED_INDEX_NAME,
 )
+from ingestor.models.indexable.record import IndexableRecord
 from models.events import BasePipelineEvent
 from utils.aws import get_secret
 
@@ -104,3 +107,26 @@ def index_es_batch(
     # Since we called `bulk` with `stats_only=False`, we know that es_errors is a list of dicts
     es_errors = cast(list[dict[str, Any]], es_errors)
     return success_count, es_errors
+
+
+def generate_operations(
+    index_name: str, indexable_data: Sequence[IndexableRecord]
+) -> Generator[dict]:
+    for datum in indexable_data:
+        source = json.loads(datum.model_dump_json(exclude_none=True))
+        version = int(datum.get_modified_time().timestamp() * 1000)  # epoch millis
+
+        # Documents whose modified date is set to the start of the Unix epoch will
+        # have a version of 0. We floor this to 100 for backward compatibility with
+        # documents which use Elasticsearch's default versioning (which increments
+        # every time a given document is reindexed). This won't be needed after we
+        # do a full reindex.
+        version = max(100, version)
+
+        yield {
+            "_index": index_name,
+            "_id": datum.get_id(),
+            "_source": source,
+            "_version": version,
+            "_version_type": "external_gte",
+        }

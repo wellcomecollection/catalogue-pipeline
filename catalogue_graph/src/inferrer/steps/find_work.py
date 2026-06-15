@@ -11,9 +11,9 @@ from __future__ import annotations
 
 import typing
 from argparse import ArgumentParser
+from itertools import batched
 
 import structlog
-from elasticsearch import Elasticsearch
 
 from inferrer.models import (
     DEFAULT_PARTITION_SIZE,
@@ -21,53 +21,15 @@ from inferrer.models import (
     FindWorkResult,
     InferenceManagerEvent,
 )
+from inferrer.source import ImagesInitialSource
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import (
     ElasticsearchMode,
     get_client,
-    get_images_initial_index_name,
 )
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
-
-SCAN_BATCH_SIZE = 1000
-
-
-def scan_ids(es_client: Elasticsearch, index_name: str, query: dict) -> list[str]:
-    """Return the `_id`s of all documents matching `query`, using a PIT + search_after."""
-    pit_id = es_client.open_point_in_time(index=index_name, keep_alive="5m")["id"]
-    ids: list[str] = []
-    search_after = None
-    try:
-        while True:
-            body: dict = {
-                "query": query,
-                "size": SCAN_BATCH_SIZE,
-                "pit": {"id": pit_id, "keep_alive": "5m"},
-                "sort": [{"_shard_doc": "asc"}],
-                "_source": False,
-            }
-            if search_after is not None:
-                body["search_after"] = search_after
-
-            result = es_client.search(body=body)
-            hits = result["hits"]["hits"]
-            if not hits:
-                break
-
-            ids.extend(hit["_id"] for hit in hits)
-            search_after = hits[-1]["sort"]
-            if result.get("pit_id"):
-                pit_id = result["pit_id"]
-    finally:
-        es_client.close_point_in_time(body={"id": pit_id})
-
-    return ids
-
-
-def partition(ids: list[str], size: int) -> list[list[str]]:
-    return [ids[i : i + size] for i in range(0, len(ids), size)]
 
 
 def handler(
@@ -78,18 +40,16 @@ def handler(
     setup_logging(execution_context)
 
     es_client = get_client("inferrer", event.pipeline_date, es_mode)
-    index_name = get_images_initial_index_name(event)
-    query = event.to_elasticsearch_query("modifiedTime")
 
-    ids = scan_ids(es_client, index_name, query)
+    ids = list(ImagesInitialSource(event, es_client).stream_raw())
     partitions = [
         InferenceManagerEvent(
-            ids=chunk,
+            ids=list(chunk),
             pipeline_date=event.pipeline_date,
             index_dates=event.index_dates,
             environment=event.environment,
         )
-        for chunk in partition(ids, event.partition_size)
+        for chunk in batched(ids, event.partition_size)
     ]
 
     logger.info(

@@ -78,7 +78,9 @@ def test_generate_operations_uses_external_gte_versioning() -> None:
     image = make_initial_image("imgA", INFO_JSON_URL)
     augmented = inference_manager._build_augmented(image, _valid_inferred())
 
-    operations = generate_operations(f"images-augmented-{PIPELINE_DATE}", [augmented])
+    operations = list(
+        generate_operations(f"images-augmented-{PIPELINE_DATE}", [augmented])
+    )
 
     expected_version = int(
         datetime.fromisoformat("2026-06-10T12:00:00Z").timestamp() * 1000

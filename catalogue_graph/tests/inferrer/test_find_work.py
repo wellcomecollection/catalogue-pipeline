@@ -30,14 +30,6 @@ def _seed_initial_images(ids: list[str]) -> None:
         )
 
 
-def test_partition_chunks_ids() -> None:
-    assert find_work.partition(["a", "b", "c", "d", "e"], 2) == [
-        ["a", "b"],
-        ["c", "d"],
-        ["e"],
-    ]
-
-
 def test_handler_returns_partitioned_work() -> None:
     mock_es_secrets("inferrer", PIPELINE_DATE)
     _seed_initial_images(["a", "b", "c"])

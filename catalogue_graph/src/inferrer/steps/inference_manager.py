@@ -27,22 +27,26 @@ from inferrer.image_downloader import (
     file_url,
 )
 from inferrer.models import (
-    AugmentedImageStateToIndex,
-    AugmentedImageToIndex,
     InferenceManagerEvent,
     InferenceManagerResult,
     InitialImage,
 )
-from ingestor.models.augmented.image import InferredData
+from ingestor.models.augmented.image import (
+    AugmentedImage,
+    AugmentedImageState,
+    InferredData,
+)
 from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.elasticsearch import (
     ElasticsearchMode,
+    generate_operations,
     get_client,
     get_images_augmented_index_name,
     get_images_initial_index_name,
     index_es_batch,
 )
 from utils.logger import ExecutionContext, setup_logging
+from utils.steps import ecs_handler
 from utils.timezone import convert_datetime_to_utc_iso
 
 logger = structlog.get_logger(__name__)
@@ -102,16 +106,14 @@ def retrieve_initial_images(
     return images
 
 
-def _build_augmented(
-    image: InitialImage, inferred: InferredData
-) -> AugmentedImageToIndex:
-    state = AugmentedImageStateToIndex(
+def _build_augmented(image: InitialImage, inferred: InferredData) -> AugmentedImage:
+    state = AugmentedImageState(
         canonical_id=image.state.canonical_id,
         source_identifier=image.state.source_identifier,
         inferred_data=inferred,
         augmented_time=convert_datetime_to_utc_iso(datetime.now(UTC)),
     )
-    return AugmentedImageToIndex(
+    return AugmentedImage(
         state=state,
         source=image.source,
         locations=image.locations,
@@ -120,7 +122,7 @@ def _build_augmented(
     )
 
 
-def augment_image(image: InitialImage) -> AugmentedImageToIndex:
+def augment_image(image: InitialImage) -> AugmentedImage:
     """Download, infer, and assemble an augmented image.
 
     Raises if the image cannot be downloaded, any inferrer fails to respond, or
@@ -141,28 +143,6 @@ def augment_image(image: InitialImage) -> AugmentedImageToIndex:
         return _build_augmented(image, inferred)
     finally:
         delete_image(path, IMAGES_ROOT)
-
-
-def generate_operations(
-    index_name: str, images: list[AugmentedImageToIndex]
-) -> list[dict]:
-    operations = []
-    for image in images:
-        source = json.loads(image.model_dump_json(exclude_none=True))
-        # Version by modified time (epoch millis) so retries are idempotent,
-        # mirroring the ingestor indexer.
-        version = int(datetime.fromisoformat(image.modified_time).timestamp() * 1000)
-        version = max(100, version)
-        operations.append(
-            {
-                "_index": index_name,
-                "_id": image.state.id(),
-                "_source": source,
-                "_version": version,
-                "_version_type": "external_gte",
-            }
-        )
-    return operations
 
 
 def handler(
@@ -191,7 +171,13 @@ def handler(
     with ThreadPoolExecutor(max_workers=IMAGE_PARALLELISM) as pool:
         augmented = list(pool.map(augment_image, images))
 
-    operations = generate_operations(augmented_index, augmented)
+    for image in augmented:
+        if image.state.augmented_time is None:
+            raise PoisonedImageError(
+                f"augmented_time missing for image {image.get_id()}"
+            )
+
+    operations = list(generate_operations(augmented_index, augmented))
     if operations:
         _, es_errors = index_es_batch(es_client, operations)
         if es_errors:
@@ -233,8 +219,6 @@ def local_handler(parser: ArgumentParser) -> None:
 
 
 if __name__ == "__main__":
-    from utils.steps import ecs_handler
-
     parser: ArgumentParser = ArgumentParser()
     parser.add_argument(
         "--use-cli",

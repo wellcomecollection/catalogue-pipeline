@@ -6,10 +6,9 @@ These mirror the Scala `inference_manager` data model and the catalogue
     Image[Initial]  --(inferrer)-->  Image[Augmented]
 
 The read model (`InitialImage`) is parsed from the `images-initial` index; the
-write model (`AugmentedImageToIndex`) is serialised into `images-augmented`.
-We deliberately do NOT reuse `ingestor.models.augmented.image.AugmentedImage`
-for writing: that read model omits `state.augmentedTime`, which downstream graph
-steps query on, so writing through it would drop the field.
+write path reuses `ingestor.models.augmented.image.AugmentedImage` (which now
+carries an optional `state.augmentedTime`) to serialise into `images-augmented`,
+rather than maintaining a parallel write model here.
 """
 
 from __future__ import annotations
@@ -18,7 +17,6 @@ from pydantic import BaseModel
 
 # InferredData and ParentWork are shared with the ingestor read path.
 from ingestor.models.augmented.image import (
-    AugmentedImageState,
     ParentWork,
 )
 from models.events import BasePipelineEvent
@@ -34,25 +32,6 @@ DEFAULT_PARTITION_SIZE = 300
 
 class InitialImage(SerialisableModel):
     state: ImageState
-    source: ParentWork
-    locations: list[DigitalLocation]
-    version: int
-    modified_time: str
-
-
-# --- Write model: a document for the `images-augmented` index --------------- #
-
-
-class AugmentedImageStateToIndex(AugmentedImageState):
-    # `AugmentedImageState` already carries `inferred_data`; the augmented state
-    # additionally records when augmentation happened (serialised as
-    # `state.augmentedTime`), which the graph pipeline uses for its incremental
-    # window queries.
-    augmented_time: str
-
-
-class AugmentedImageToIndex(SerialisableModel):
-    state: AugmentedImageStateToIndex
     source: ParentWork
     locations: list[DigitalLocation]
     version: int
