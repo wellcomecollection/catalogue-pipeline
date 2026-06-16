@@ -84,7 +84,7 @@ def _create_note(
     field: Field,
     note_type: IdLabel,
     suppressed_subfields: set[str] | None = None,
-) -> Note:
+) -> Note | None:
     # Only produce note when indicator 1 is "1" (not private).
     if note_type in NON_PRIVATE_NOTES and field.indicator1 != "1":
         return None

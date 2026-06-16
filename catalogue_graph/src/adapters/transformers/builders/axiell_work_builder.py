@@ -171,4 +171,4 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     # description = description(record),
     # notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
     # subjects = CalmSubjects(record),
-    # contributors = CalmContributors(record),
+    # contributors = CalmContributors(record)

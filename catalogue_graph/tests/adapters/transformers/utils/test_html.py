@@ -1,7 +1,7 @@
 from adapters.transformers.utils.html import format_as_html_link
 
 
-def test_formats_valid_url_as_link():
+def test_formats_valid_url_as_link() -> None:
     url = "https://example.com/page"
     assert (
         format_as_html_link(url)
@@ -9,7 +9,7 @@ def test_formats_valid_url_as_link():
     )
 
 
-def test_strips_whitespace_before_checking():
+def test_strips_whitespace_before_checking() -> None:
     url = "  https://example.com  "
     assert (
         format_as_html_link(url)
@@ -17,6 +17,6 @@ def test_strips_whitespace_before_checking():
     )
 
 
-def test_returns_non_url_unchanged():
+def test_returns_non_url_unchanged() -> None:
     not_a_url = "just some text"
     assert format_as_html_link(not_a_url) == "just some text"
