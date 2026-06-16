@@ -19,7 +19,7 @@ from itertools import chain
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.common import is_url
+from adapters.transformers.utils.html import format_as_html_link
 
 logger = logging.getLogger("transformer/description")
 
@@ -41,12 +41,4 @@ def get_plain_field_values(field: Field) -> Iterable[str]:
 
 
 def get_u_field_values(field: Field) -> Iterable[str]:
-    return (format_as_link(value) for value in field.get_subfields("u"))
-
-
-def format_as_link(maybe_url: str) -> str:
-    if is_url(maybe_url):
-        return f'<a href="{maybe_url}">{maybe_url}</a>'
-    else:
-        logger.warning("has MARC 520 $u which doesn't look like a URL: %s", maybe_url)
-        return maybe_url
+    return (format_as_html_link(value) for value in field.get_subfields("u"))

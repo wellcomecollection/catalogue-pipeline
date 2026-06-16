@@ -3,12 +3,12 @@ Extract notes from 5xx MARC fields.
 """
 
 from collections.abc import Callable
-from urllib.parse import urlparse
 
 import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.transformers.utils.html import format_as_html_link
 from models.pipeline.id_label import IdLabel
 from models.pipeline.note import Note
 
@@ -48,9 +48,9 @@ EXHIBITIONS_NOTE = IdLabel(id="exhibitions-note", label="Exhibitions note")
 AWARDS_NOTE = IdLabel(id="awards-note", label="Awards note")
 
 
-def _is_url(s: str) -> bool:
-    parsed = urlparse(s)
-    return parsed.scheme in ("http", "https") and bool(parsed.netloc)
+# TODO: The Scala notes transformer (MarcNotes.scala) had custom logic removing all references to Codebreakers.
+# Do we need to reimplement this logic here? To be confirmed once we start validating Python transformed source works
+# against Scala transformed source works.
 
 
 def _create_note_from_contents(
@@ -66,15 +66,7 @@ def _create_note_from_contents(
 
         # Subfield $u is rendered as an HTML link when it contains a valid URL.
         if subfield_tag == "u":
-            trimmed = value.strip()
-            if _is_url(trimmed):
-                parts.append(f'<a href="{trimmed}">{trimmed}</a>')
-            else:
-                logger.warning(
-                    "Subfield $u which doesn't look like a URL",
-                    contents=value,
-                )
-                parts.append(value)
+            parts.append(format_as_html_link(value))
         else:
             parts.append(value)
     contents = " ".join(parts)

@@ -8,10 +8,9 @@ these tests are MARC-field level and can be shared across adapters.
 
 from __future__ import annotations
 
-import logging
-
 import pytest
 from pymarc.record import Field, Record, Subfield
+from structlog.testing import capture_logs
 
 from adapters.transformers.ebsco.description import extract_description
 
@@ -92,16 +91,18 @@ def test_make_link_from_url(marc_record: Record) -> None:
     ],
     indirect=True,
 )
-def test_only_urls_create_links(
-    marc_record: Record, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_only_urls_create_links(marc_record: Record) -> None:
     """Non-URL URIs are treated as text, and a warning is logged."""
-    with caplog.at_level(logging.WARN):
+    with capture_logs() as cap_logs:
         assert (
             extract_description(marc_record)
             == "<p>summary source urn:isbn:9781455841653</p>"
         )
-    assert "doesn't look like a URL: urn:isbn:9781455841653" in caplog.text
+
+    assert any(
+        "$u subfield doesn't look like a URL" in log.get("event", "")
+        for log in cap_logs
+    )
 
 
 @pytest.mark.parametrize(
