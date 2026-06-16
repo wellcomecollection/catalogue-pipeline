@@ -6,6 +6,7 @@ from adapters.transformers.marc.notes import (
     BIBLIOGRAPHICAL_INFORMATION,
     BINDING_INFORMATION,
     BIOGRAPHICAL_NOTE,
+    CITE_AS_NOTE,
     CONTENTS_NOTE,
     COPYRIGHT_NOTE,
     CREDITS_NOTE,
