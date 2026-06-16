@@ -151,6 +151,10 @@ locals {
       read  = []
       write = ["works-source-2026-01-12"]
     }
+    transformer_folio = {
+      read  = []
+      write = ["works-source-2026-01-12"]
+    }
     id_minter = {
       read  = [for idx in local.works_source_list : idx.name]
       write = [for idx in local.works_identified_list : idx.name]
