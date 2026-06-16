@@ -52,6 +52,7 @@ def test_extracts_notes_from_all_fields() -> None:
         ("511", "credits note b", CREDITS_NOTE),
         ("514", "Completeness:", LETTERING_NOTE),
         ("518", "time and place note", TIME_AND_PLACE_NOTE),
+        ("524", "cite as note", CITE_AS_NOTE),
         ("533", "reproduction a", REPRODUCTION_NOTE),
         ("534", "reproduction b", REPRODUCTION_NOTE),
         ("535", "location of original note", LOCATION_OF_ORIGINAL_NOTE),
