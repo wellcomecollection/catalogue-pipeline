@@ -2,10 +2,12 @@ from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuil
 from adapters.transformers.marc.last_transaction_time import (
     extract_last_transaction_time_to_datetime,
 )
+from adapters.transformers.marc.notes import extract_notes
 from adapters.transformers.marc.predecessor_identifier import (
     extract_calm_predecessor_id,
 )
 from models.pipeline.identifier import Id, WorkSourceIdentifier
+from models.pipeline.note import Note
 from utils.timezone import convert_datetime_to_utc_iso
 
 
@@ -31,3 +33,7 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
         """Reads from MARC 005 (last transaction time) rather than the adapter row's last_modified."""
         last_modified = extract_last_transaction_time_to_datetime(self.record)
         return convert_datetime_to_utc_iso(last_modified)
+
+    @property
+    def notes(self) -> list[Note]:
+        return extract_notes(self.record)
