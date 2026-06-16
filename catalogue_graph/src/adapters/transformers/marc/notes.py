@@ -48,6 +48,11 @@ EXHIBITIONS_NOTE = IdLabel(id="exhibitions-note", label="Exhibitions note")
 AWARDS_NOTE = IdLabel(id="awards-note", label="Awards note")
 
 
+# TODO: The Scala notes transformer (MarcNotes.scala) had custom logic removing all references to Codebreakers.
+# Do we need to reimplement this logic here? To be confirmed once we start validating Python transformed source works
+# against Scala transformed source works.
+
+
 def _create_note_from_contents(
     field: Field,
     note_type: IdLabel,
