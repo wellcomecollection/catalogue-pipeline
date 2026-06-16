@@ -1,4 +1,6 @@
-from typing import get_args
+from typing import Literal
+
+import structlog
 
 from adapters.transformers.axiell.access_status import extract_access_status
 from adapters.transformers.axiell.organisation_and_arrangement import (
@@ -19,7 +21,6 @@ from adapters.transformers.marc.predecessor_identifier import (
 from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.access_method import NotRequestable
-from models.pipeline.access_status import AccessStatusValue
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.identifier import Id, Unidentifiable, WorkSourceIdentifier
 from models.pipeline.item import Item
@@ -29,9 +30,32 @@ from models.pipeline.production import ProductionEvent
 from utils.timezone import convert_datetime_to_utc_iso
 from utils.types import WorkType
 
+logger = structlog.get_logger(__name__)
+
+AxiellCatalogueStatus = Literal[
+    "Catalogued", "draft", "partially complete", "In progress"
+]
+NON_SUPPRESSED_STATUSES: set[AxiellCatalogueStatus] = {
+    "Catalogued",
+    "partially complete",
+}
+
 
 class AxiellWorkBuilder(MarcXmlWorkBuilder):
     """Work builder for Axiell (MARC XML) records."""
+
+    @property
+    def _should_suppress(self) -> bool:
+        # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
+        # actual archives but instead guides for researchers, so we suppress them here.
+        ref_no = self.reference_number
+        if ref_no is not None and ref_no.startswith("AMSG"):
+            return True
+
+        catalogue_status = extract_catalogue_status(self.record)
+
+        # If a record does not have a status, or if its status is not listed in NON_SUPPRESSED_STATUSES, we suppress it
+        return catalogue_status not in NON_SUPPRESSED_STATUSES
 
     @property
     def source_identifier_type(self) -> Id:
@@ -57,12 +81,14 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     def collection_path(self) -> CollectionPath:
         ref_no, alt_ref_no = None, None
 
+        # Search for calm-ref-no and calm-altref-no identifiers, extracted into the other_identifiers field
         for identifier in self.other_identifiers:
             if identifier.identifier_type.id == "calm-ref-no":
                 ref_no = identifier.value
             elif identifier.identifier_type.id == "calm-altref-no":
                 alt_ref_no = identifier.value
 
+        # calm-ref-no is required
         if ref_no is None:
             raise ValueError(f"Missing RefNo on work '{self.source_identifier_value}'.")
 
@@ -109,8 +135,7 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
         access_conditions = []
         access_status = extract_access_status(self.record)
 
-        # TODO: Translate statuses
-        if access_status and access_status in get_args(AccessStatusValue):
+        if access_status:
             access_conditions.append(
                 AccessCondition(method=NotRequestable, status=access_status)
             )
