@@ -1,3 +1,6 @@
+from typing import get_args
+
+from adapters.transformers.axiell.access_status import extract_access_status
 from adapters.transformers.axiell.organisation_and_arrangement import (
     extract_hierarchical_level,
 )
@@ -16,10 +19,11 @@ from adapters.transformers.marc.predecessor_identifier import (
 from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.access_method import NotRequestable
+from models.pipeline.access_status import AccessStatusValue
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.identifier import Id, Unidentifiable, WorkSourceIdentifier
 from models.pipeline.item import Item
-from models.pipeline.location import LocationType, PhysicalLocation
+from models.pipeline.location import ClosedStores, PhysicalLocation
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
 from utils.timezone import convert_datetime_to_utc_iso
@@ -102,17 +106,23 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def items(self) -> list[Item]:
-        location_type = "closed-stores"
+        access_conditions = []
+        access_status = extract_access_status(self.record)
+
+        # TODO: Translate statuses
+        if access_status and access_status in get_args(AccessStatusValue):
+            access_conditions.append(
+                AccessCondition(method=NotRequestable, status=access_status)
+            )
+
         return [
             Item(
                 id=Unidentifiable(),
                 locations=[
                     PhysicalLocation(
-                        location_type=LocationType(id=location_type),
-                        label=LOCATION_LABEL_MAPPING[location_type],
-                        access_conditions=[
-                            AccessCondition(method=NotRequestable, status=None)
-                        ],
+                        location_type=ClosedStores,
+                        label=LOCATION_LABEL_MAPPING[ClosedStores.id],
+                        access_conditions=access_conditions,
                     )
                 ],
             )
@@ -132,7 +142,6 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
 
     # format = Some(CalmFormat(record)),
     # languages = languages,
-    # items = CalmItems(record),
     # description = description(record),
     # notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
     # subjects = CalmSubjects(record),
