@@ -3,6 +3,7 @@ from typing import Literal
 import structlog
 
 from adapters.transformers.axiell.access_status import extract_access_status
+from adapters.transformers.axiell.catalogue_status import extract_catalogue_status
 from adapters.transformers.axiell.organisation_and_arrangement import (
     extract_hierarchical_level,
 )
