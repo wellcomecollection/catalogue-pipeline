@@ -1,11 +1,12 @@
-from typing import Literal
-
 import structlog
 
 from adapters.transformers.axiell.access_status import extract_access_status
-from adapters.transformers.axiell.catalogue_status import extract_catalogue_status
+from adapters.transformers.axiell.catalogue_status import (
+    AxiellCatalogueStatus,
+    extract_catalogue_status,
+)
 from adapters.transformers.axiell.organisation_and_arrangement import (
-    extract_hierarchical_level,
+    extract_work_type,
 )
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.ebsco.production import (
@@ -33,9 +34,7 @@ from utils.types import WorkType
 
 logger = structlog.get_logger(__name__)
 
-AxiellCatalogueStatus = Literal[
-    "Catalogued", "draft", "partially complete", "In progress"
-]
+
 NON_SUPPRESSED_STATUSES: set[AxiellCatalogueStatus] = {
     "Catalogued",
     "partially complete",
@@ -101,35 +100,7 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def work_type(self) -> WorkType:
-        level = extract_hierarchical_level(self.record)
-
-        if not level:
-            raise ValueError(
-                f"Missing work type on work '{self.source_identifier_value}'."
-            )
-
-        # TODO: Check if all of these levels are still used in Axiell
-        level_to_work_type: dict[str, WorkType] = {
-            "collection": "Collection",
-            "section": "Section",
-            "subsection": "Section",
-            "subsubsection": "Section",
-            "subsubsubsection": "Section",
-            "series": "Series",
-            "subseries": "Series",
-            "subsubseries": "Series",
-            "subsubsubseries": "Series",
-            "item": "Standard",
-            "piece": "Standard",
-        }
-
-        work_type = level_to_work_type.get(level)
-        if work_type is None:
-            raise ValueError(
-                f"Unknown hierarchical level '{level}' on work '{self.source_identifier_value}'."
-            )
-
-        return work_type
+        return extract_work_type(self.record)
 
     @property
     def items(self) -> list[Item]:
