@@ -11,6 +11,9 @@ from pymarc.record import Record
 
 from adapters.transformers.marc.common import non_empty
 
+# 'partially complete' is the Axiell equivalent of CALM 'partially catalogued'.
+# CALM has several more statuses (e.g. 'not yet available', 'third-party metadata'),
+# which currently don't exist in Axiell.
 AxiellCatalogueStatus = Literal[
     "Catalogued", "draft", "partially complete", "In progress"
 ]
