@@ -22,13 +22,16 @@ from models.pipeline.access_status import (
 
 logger = structlog.get_logger(__name__)
 
-"Closed"
-"restricted access (data protection act)"
-"Donor Permission"
-"Cannot Be Produced"
-"Temporarily Unavailable"
+# TODO: Axiell has two more statuses:
+#  * DATAISSUES: Equivalent of the CALM 'Data issues' status, which is not handled in the Scala code
+#  * PRIVATE: No CALM equivalent. At the moment, only one record has this status (collect:100003386)
 
-# 'DATAISSUES', 'PRIVATE'
+# CALM has a few more statuses which currently don't exist in Axiell:
+#  * Closed: Mapped to Closed
+#  * Donor Permission: Mapped to PermissionRequired
+#  * Cannot Be Produced: Mapped to Unavailable
+#  * Temporarily Unavailable: Mapped to TemporarilyUnavailable
+#  * restricted access (data protection act): Mapped to Restricted
 ACCESS_STATUS_MAPPING = {
     "OPEN": Open,
     "OPENWITHADVISORY": OpenWithAdvisory,

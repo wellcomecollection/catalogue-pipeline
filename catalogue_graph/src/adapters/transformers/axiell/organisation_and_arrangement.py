@@ -9,8 +9,10 @@ from pymarc.record import Record
 from adapters.transformers.marc.common import non_empty_subfields
 from models.pipeline.work_data import WorkType
 
-# CALM had additional levels ('subsubsection', 'subsubsubsection', 'subsubseries', ''subsubsubseries),
-# which don't exist in Axiell
+# TODO: There is a single Axiell work with the level 'Work' (collect:200000001). What work type should we map it to?
+
+# CALM has additional levels which currently don't exist in Axiell:
+# subsubsection, subsubsubsection, subsubseries, subsubsubseries
 LEVEL_TO_WORK_TYPE_MAPPING: dict[str, WorkType] = {
     "Collection": "Collection",
     "Section": "Section",
