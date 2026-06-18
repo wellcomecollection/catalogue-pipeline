@@ -5,10 +5,12 @@ from adapters.transformers.axiell.catalogue_status import (
     AxiellCatalogueStatus,
     extract_catalogue_status,
 )
+from adapters.transformers.axiell.contributors import extract_contributors
 from adapters.transformers.axiell.format import extract_format
 from adapters.transformers.axiell.organisation_and_arrangement import (
     extract_work_type,
 )
+from adapters.transformers.axiell.subjects import extract_subjects
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.ebsco.production import (
     extract_production,
@@ -25,6 +27,7 @@ from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.access_method import NotRequestable
 from models.pipeline.collection_path import CollectionPath
+from models.pipeline.concept import Contributor, Subject
 from models.pipeline.format import Format
 from models.pipeline.identifier import Id, Unidentifiable, WorkSourceIdentifier
 from models.pipeline.item import Item
@@ -143,7 +146,14 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     def production(self) -> list[ProductionEvent]:
         return extract_production(self.record)
 
-    # languages = languages,
-    # notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
-    # subjects = CalmSubjects(record),
-    # contributors = CalmContributors(record)
+    @property
+    def contributors(self) -> list[Contributor]:
+        return extract_contributors(self.record)
+
+    @property
+    def subjects(self) -> list[Subject]:
+        return extract_subjects(self.record)
+
+    # TODO: Remaining fields:
+    # * languages
+    # * notes (language notes, terms of use)
