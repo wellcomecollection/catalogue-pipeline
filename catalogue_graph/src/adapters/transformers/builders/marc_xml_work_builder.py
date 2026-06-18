@@ -5,6 +5,7 @@ from pymarc.record import Record
 from adapters.transformers.builders.source_work_builder import SourceWorkBuilder
 from adapters.transformers.ebsco.parents import get_parents
 from adapters.transformers.marc.alternative_titles import extract_alternative_titles
+from adapters.transformers.marc.description import extract_description
 from adapters.transformers.marc.identifier import extract_id
 from adapters.transformers.marc.other_identifiers import extract_other_identifiers
 from adapters.transformers.marc.title import extract_title
@@ -65,7 +66,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
 
     @property
     def description(self) -> str | None:
-        return None
+        return extract_description(self.record)
 
     @property
     def physical_description(self) -> str | None:

@@ -49,7 +49,6 @@ NON_SUPPRESSED_STATUSES: set[AxiellCatalogueStatus] = {
 class AxiellWorkBuilder(MarcXmlWorkBuilder):
     """Work builder for Axiell (MARC XML) records."""
 
-    @property
     def _should_suppress(self) -> bool:
         # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
         # actual archives but instead guides for researchers, so we suppress them here.
@@ -157,3 +156,4 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     # TODO: Remaining fields:
     # * languages
     # * notes (language notes, terms of use)
+    # * merge candidates

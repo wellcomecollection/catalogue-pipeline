@@ -31,7 +31,8 @@ ORIGIN_CODE_TO_ID_TYPE = {
     "Sierra Number": "sierra-identifier",
     "WI number": "miro-image-number",
     "accession number": "wellcome-accession-number",
-    "RefNo": "calm-ref-no",
+    "Calm RefNo": "calm-ref-no",
+    "AltRefNo": "calm-altref-no",
     # "Library Reference Number" is handled specially in format_field
     # Two other id schemes exist, but I don't know what to do with them.
     # "SCM loan accession number": ,
@@ -67,6 +68,6 @@ def format_field(field: Field) -> SourceIdentifier | None:
 def which_identifier_type(prefix: str, id_value: str) -> str | None:
     if prefix == "Library Reference Number":
         if "/" in id_value:
-            return "calm-alt-ref-no"
+            return "calm-altref-no"
         return "iconographic-number"
     return ORIGIN_CODE_TO_ID_TYPE.get(prefix)

@@ -19,7 +19,7 @@ Feature: Other Identifiers extraction from MARC records
       | (accession number)172              | wellcome-accession-number | 172              |
       | (Library Reference Number)20385i.3 | iconographic-number       | 20385i.3         |
       | (Library Reference Number)20385i   | iconographic-number       | 20385i           |
-      | (Library Reference Number)BA/NA/NA | calm-alt-ref-no           | BA/NA/NA         |
+      | (Library Reference Number)BA/NA/NA | calm-altref-no            | BA/NA/NA         |
 
   Scenario: multiple other identifiers
     Given the MARC record has a 035 field with subfield "a" value "(Bibliographic Number)b11839053"

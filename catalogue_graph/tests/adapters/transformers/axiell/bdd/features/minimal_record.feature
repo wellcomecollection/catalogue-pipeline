@@ -8,7 +8,7 @@ Feature: The bare minimum MARC record for an item
     And the MARC record has a 005 field with the value 20260101094530.0
     And the MARC record has a 907 field with subfield "a" value "0ef862d5-c3c1-4ede-99d4-50bef401df2e"
     And the MARC record has a 245 field with subfield "a" value "How to avoid huge ships"
-    And the MARC record has a 035 field with subfield "a" value "(RefNo)A/B/C"
+    And the MARC record has a 035 field with subfield "a" value "(Calm RefNo)A/B/C"
     And the MARC record has a 351 field with subfield "c" value "item"
     When I transform the MARC record
     Then the work is visible

@@ -13,8 +13,8 @@ from tests.mocks import MockElasticsearchClient, MockSmartOpen
 AXIELL_NAMESPACE = AXIELL_CONFIG.config.adapter_namespace
 
 
-TEST_RECORD_ONE = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield><datafield tag='035'><subfield code='a'>(RefNo)A/B</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield></record>"
-TEST_RECORD_TWO = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title Two</subfield></datafield><datafield tag='035'><subfield code='a'>(RefNo)A/B/C</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield></record>"
+TEST_RECORD_ONE = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield><datafield tag='035'><subfield code='a'>(Calm RefNo)A/B</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield></record>"
+TEST_RECORD_TWO = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title Two</subfield></datafield><datafield tag='035'><subfield code='a'>(Calm RefNo)A/B/C</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield></record>"
 
 
 def _run_transform(
