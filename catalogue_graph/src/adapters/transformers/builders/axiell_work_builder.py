@@ -5,6 +5,7 @@ from adapters.transformers.axiell.catalogue_status import (
     AxiellCatalogueStatus,
     extract_catalogue_status,
 )
+from adapters.transformers.axiell.format import extract_format
 from adapters.transformers.axiell.organisation_and_arrangement import (
     extract_work_type,
 )
@@ -24,6 +25,7 @@ from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.access_method import NotRequestable
 from models.pipeline.collection_path import CollectionPath
+from models.pipeline.format import Format
 from models.pipeline.identifier import Id, Unidentifiable, WorkSourceIdentifier
 from models.pipeline.item import Item
 from models.pipeline.location import ClosedStores, PhysicalLocation
@@ -36,7 +38,7 @@ logger = structlog.get_logger(__name__)
 
 
 NON_SUPPRESSED_STATUSES: set[AxiellCatalogueStatus] = {
-    "Catalogued",
+    "catalogued",
     "partially complete",
 }
 
@@ -70,6 +72,10 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
             )
 
         return None
+
+    @property
+    def format(self) -> Format:
+        return extract_format(self.record)
 
     @property
     def source_modified_time(self) -> str:
@@ -137,9 +143,7 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     def production(self) -> list[ProductionEvent]:
         return extract_production(self.record)
 
-    # format = Some(CalmFormat(record)),
     # languages = languages,
-    # description = description(record),
     # notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
     # subjects = CalmSubjects(record),
     # contributors = CalmContributors(record)

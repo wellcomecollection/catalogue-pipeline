@@ -12,7 +12,7 @@ import pytest
 from pymarc.record import Field, Record, Subfield
 from structlog.testing import capture_logs
 
-from adapters.transformers.ebsco.description import extract_description
+from adapters.transformers.marc.description import extract_description
 
 
 def test_no_description(marc_record: Record) -> None:

@@ -26,7 +26,7 @@ def marc_record() -> Record:
     record.add_field(
         Field(tag="035", subfields=[Subfield(code="a", value="(RefNo)TestRefNo")])
     )
-    record.add_field(Field(tag="351", subfields=[Subfield(code="c", value="item")]))
+    record.add_field(Field(tag="351", subfields=[Subfield(code="c", value="Item")]))
     return record
 
 
