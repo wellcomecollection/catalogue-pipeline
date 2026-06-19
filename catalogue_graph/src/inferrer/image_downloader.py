@@ -29,7 +29,9 @@ THUMBNAIL_SUFFIX = "full/!400,400/0/default.jpg"
 # fail-fast Map, can abort an entire run), so retry these rather than failing.
 TRANSIENT_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 MAX_DOWNLOAD_ATTEMPTS = int(os.environ.get("IMAGE_DOWNLOAD_MAX_ATTEMPTS", "4"))
-DOWNLOAD_BACKOFF_SECONDS = float(os.environ.get("IMAGE_DOWNLOAD_BACKOFF_SECONDS", "0.5"))
+DOWNLOAD_BACKOFF_SECONDS = float(
+    os.environ.get("IMAGE_DOWNLOAD_BACKOFF_SECONDS", "0.5")
+)
 
 
 class ImageDownloadError(Exception):
@@ -78,8 +80,7 @@ def _fetch_image(url: str, timeout: float) -> requests.Response:
                 return response
             if response.status_code not in TRANSIENT_STATUS_CODES:
                 raise ImageDownloadError(
-                    f"Image request for {url} failed with status "
-                    f"{response.status_code}"
+                    f"Image request for {url} failed with status {response.status_code}"
                 )
             last_error = f"status {response.status_code}"
 
