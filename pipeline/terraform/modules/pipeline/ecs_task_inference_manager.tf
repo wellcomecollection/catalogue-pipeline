@@ -135,3 +135,20 @@ resource "aws_iam_role_policy" "inference_manager_secret_read" {
   role   = module.inference_manager_ecs_task.task_role_name
   policy = data.aws_iam_policy_document.inference_manager_pipeline_storage_secret_read.json
 }
+
+# Each task reads its partition (image ids written by find_work) from S3.
+data "aws_iam_policy_document" "inference_manager_s3_read" {
+  statement {
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      "arn:aws:s3:::wellcomecollection-catalogue-graph/inferrer/*",
+      "arn:aws:s3:::wellcomecollection-catalogue-graph-dev/inferrer/*",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "inference_manager_s3_read" {
+  role   = module.inference_manager_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.inference_manager_s3_read.json
+}

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from inferrer.models import InferenceManagerEvent
 from inferrer.steps import inference_manager
 from inferrer.steps.inference_manager import (
     PoisonedImageError,
+    event_validator,
     generate_operations,
     validate_inferred,
 )
@@ -19,6 +21,7 @@ from tests.inferrer.factories import (
     make_initial_image,
 )
 from tests.mocks import MockElasticsearchClient, MockRequest, mock_es_secrets
+from utils.aws import pydantic_to_s3_json
 
 PIPELINE_DATE = "2026-06-01"
 THUMBNAIL_URL = "http://iiif.test/image/imgA/full/!400,400/0/default.jpg"
@@ -152,3 +155,26 @@ def test_handler_fails_and_indexes_nothing_on_poison(
         inference_manager.handler(event, es_mode="private")
 
     assert MockElasticsearchClient.inputs == []
+
+
+def test_event_validator_resolves_s3_ref() -> None:
+    # find_work writes the partition to S3 and the Map passes a small ref; the
+    # task must resolve the ref back to the full event.
+    s3_uri = "s3://wellcomecollection-catalogue-graph/inferrer/test/partition-0.json"
+    partition = InferenceManagerEvent(pipeline_date=PIPELINE_DATE, ids=["x", "y"])
+    pydantic_to_s3_json(partition, s3_uri)
+
+    resolved = event_validator(json.dumps({"s3_uri": s3_uri, "image_count": 2}))
+
+    assert resolved.ids == ["x", "y"]
+    assert resolved.pipeline_date == PIPELINE_DATE
+
+
+def test_event_validator_parses_inline_event() -> None:
+    # Backward-compat: a local/CLI invocation passes the event inline.
+    raw = json.dumps({"pipeline_date": PIPELINE_DATE, "ids": ["a"]})
+
+    resolved = event_validator(raw)
+
+    assert resolved.ids == ["a"]
+    assert resolved.pipeline_date == PIPELINE_DATE

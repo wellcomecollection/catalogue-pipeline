@@ -69,3 +69,21 @@ class InferenceManagerResult(BaseModel):
 
 class FindWorkResult(BaseModel):
     partitions: list[InferenceManagerEvent]
+
+
+class PartitionRef(BaseModel):
+    """A pointer to a partition's `InferenceManagerEvent` stored in S3.
+
+    The work-discovery step writes each partition (its image ids + metadata) to S3
+    and returns these small refs instead of the partitions inline, so the state
+    machine's Map payload stays well under the Step Functions 256 KB state limit
+    even for large windows. Each inference task resolves its ref back to the full
+    event (see `inference_manager.event_validator`).
+    """
+
+    s3_uri: str
+    image_count: int
+
+
+class FindWorkRefsResult(BaseModel):
+    partitions: list[PartitionRef]

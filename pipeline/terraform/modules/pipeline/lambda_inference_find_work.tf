@@ -33,3 +33,21 @@ resource "aws_iam_role_policy" "inference_find_work_secret_read" {
   role   = module.inference_find_work_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.inference_manager_pipeline_storage_secret_read.json
 }
+
+# find_work writes each partition's ids to S3 (pass-by-reference) so the state
+# machine Map payload stays small; the inference task reads them back.
+data "aws_iam_policy_document" "inference_find_work_s3_write" {
+  statement {
+    effect  = "Allow"
+    actions = ["s3:PutObject"]
+    resources = [
+      "arn:aws:s3:::wellcomecollection-catalogue-graph/inferrer/*",
+      "arn:aws:s3:::wellcomecollection-catalogue-graph-dev/inferrer/*",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "inference_find_work_s3_write" {
+  role   = module.inference_find_work_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.inference_find_work_s3_write.json
+}

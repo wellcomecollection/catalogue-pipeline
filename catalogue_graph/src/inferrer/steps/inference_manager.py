@@ -37,6 +37,7 @@ from ingestor.models.augmented.image import (
     InferredData,
 )
 from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
+from utils.aws import pydantic_from_s3_json
 from utils.elasticsearch import (
     ElasticsearchMode,
     generate_operations,
@@ -197,7 +198,16 @@ def handler(
 
 
 def event_validator(raw_input: str) -> InferenceManagerEvent:
-    return InferenceManagerEvent.model_validate(json.loads(raw_input))
+    data = json.loads(raw_input)
+    # The state machine passes a small S3 ref ({"s3_uri": ...}) written by
+    # find_work; resolve it to the full partition event. Fall back to an inline
+    # event for local/CLI use.
+    if isinstance(data, dict) and "s3_uri" in data:
+        event = pydantic_from_s3_json(InferenceManagerEvent, data["s3_uri"])
+        if event is None:
+            raise ValueError(f"Partition not found in S3: {data['s3_uri']}")
+        return event
+    return InferenceManagerEvent.model_validate(data)
 
 
 def local_handler(parser: ArgumentParser) -> None:
