@@ -9,6 +9,8 @@ once inference is done.
 
 from __future__ import annotations
 
+import os
+import time
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
@@ -20,6 +22,14 @@ IIIF_IMAGE_LOCATION_TYPE = "iiif-image"
 INFO_JSON = "info.json"
 # DLCS serves a fixed set of thumbnail sizes without touching the image server.
 THUMBNAIL_SUFFIX = "full/!400,400/0/default.jpg"
+
+# Transient HTTP statuses worth retrying: gateway/overload errors from the IIIF
+# thumbnail service that typically clear on a retry. A single un-retried 502 here
+# fails the whole all-or-nothing inference task (and, with the state machine's
+# fail-fast Map, can abort an entire run), so retry these rather than failing.
+TRANSIENT_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+MAX_DOWNLOAD_ATTEMPTS = int(os.environ.get("IMAGE_DOWNLOAD_MAX_ATTEMPTS", "4"))
+DOWNLOAD_BACKOFF_SECONDS = float(os.environ.get("IMAGE_DOWNLOAD_BACKOFF_SECONDS", "0.5"))
 
 
 class ImageDownloadError(Exception):
@@ -50,6 +60,38 @@ def file_url(path: Path) -> str:
     return path.as_uri()
 
 
+def _fetch_image(url: str, timeout: float) -> requests.Response:
+    """GET the thumbnail, retrying transient failures with exponential backoff.
+
+    Retries transient HTTP statuses (`TRANSIENT_STATUS_CODES`) and connection/
+    timeout errors; a non-transient bad status (e.g. 404) fails immediately since
+    retrying will not help.
+    """
+    last_error = "no attempts made"
+    for attempt in range(1, MAX_DOWNLOAD_ATTEMPTS + 1):
+        try:
+            response = requests.get(url, timeout=timeout)
+        except requests.exceptions.RequestException as exc:
+            last_error = f"request error: {exc!r}"
+        else:
+            if response.status_code == 200:
+                return response
+            if response.status_code not in TRANSIENT_STATUS_CODES:
+                raise ImageDownloadError(
+                    f"Image request for {url} failed with status "
+                    f"{response.status_code}"
+                )
+            last_error = f"status {response.status_code}"
+
+        if attempt < MAX_DOWNLOAD_ATTEMPTS:
+            time.sleep(DOWNLOAD_BACKOFF_SECONDS * 2 ** (attempt - 1))
+
+    raise ImageDownloadError(
+        f"Image request for {url} failed after {MAX_DOWNLOAD_ATTEMPTS} "
+        f"attempts ({last_error})"
+    )
+
+
 def download_image(image: InitialImage, root: str, timeout: float) -> Path:
     url = get_image_url(image)
     if url is None:
@@ -58,11 +100,7 @@ def download_image(image: InitialImage, root: str, timeout: float) -> Path:
             f"{image.state.source_identifier}"
         )
 
-    response = requests.get(url, timeout=timeout)
-    if response.status_code != 200:
-        raise ImageDownloadError(
-            f"Image request for {url} failed with status {response.status_code}"
-        )
+    response = _fetch_image(url, timeout)
 
     path = local_image_path(image, root)
     path.parent.mkdir(parents=True, exist_ok=True)

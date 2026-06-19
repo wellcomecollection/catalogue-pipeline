@@ -1,4 +1,6 @@
 import json
+import os
+import time
 from collections.abc import Generator, Sequence
 from typing import Any, Literal, cast
 
@@ -22,6 +24,17 @@ from models.events import BasePipelineEvent
 from utils.aws import get_secret
 
 logger = structlog.get_logger(__name__)
+
+# Transient transport failures talking to Elasticsearch (e.g. a dropped keep-alive
+# connection -> "Remote end closed connection without response"). These are not
+# data errors and clear on a retry; without retrying, a single blip during a bulk
+# write fails the whole all-or-nothing inference task (and can abort the run).
+TRANSIENT_ES_ERRORS = (
+    elasticsearch.exceptions.ConnectionError,
+    elasticsearch.exceptions.ConnectionTimeout,
+)
+ES_BULK_MAX_ATTEMPTS = int(os.environ.get("ES_BULK_MAX_ATTEMPTS", "4"))
+ES_BULK_BACKOFF_SECONDS = float(os.environ.get("ES_BULK_BACKOFF_SECONDS", "1.0"))
 
 # private: Connect to the production cluster via the private endpoint (production runs only)
 # public: Connect to the production cluster via the public endpoint (local runs only)
@@ -92,12 +105,30 @@ def get_client(
 def index_es_batch(
     es_client: Elasticsearch, es_actions: list[dict]
 ) -> tuple[int, list[dict[str, Any]]]:
-    success_count, es_errors = elasticsearch.helpers.bulk(
-        es_client,
-        es_actions,
-        raise_on_error=False,
-        stats_only=False,
-    )
+    last_error: Exception | None = None
+    for attempt in range(1, ES_BULK_MAX_ATTEMPTS + 1):
+        try:
+            success_count, es_errors = elasticsearch.helpers.bulk(
+                es_client,
+                es_actions,
+                raise_on_error=False,
+                stats_only=False,
+            )
+            break
+        except TRANSIENT_ES_ERRORS as exc:
+            last_error = exc
+            logger.warning(
+                "Transient Elasticsearch error during bulk write; retrying",
+                attempt=attempt,
+                max_attempts=ES_BULK_MAX_ATTEMPTS,
+                error=repr(exc),
+            )
+            if attempt < ES_BULK_MAX_ATTEMPTS:
+                time.sleep(ES_BULK_BACKOFF_SECONDS * 2 ** (attempt - 1))
+    else:
+        assert last_error is not None
+        raise last_error
+
     logger.info(
         "Indexed batch",
         success_count=success_count,

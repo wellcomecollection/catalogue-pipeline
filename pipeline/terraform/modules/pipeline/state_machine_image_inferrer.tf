@@ -28,6 +28,21 @@ locals {
   # Retry transient ECS infrastructure errors only. Application failures (e.g. a
   # poisoned-doc error) are intentionally NOT retried so they surface promptly.
   inference_ecs_retry = [
+    # Capacity/placement contention. When the Map fans out runTask calls
+    # concurrently, ECS can momentarily fail placement with
+    # `ECS.AmazonECSException: Insufficient CPU available` if two tasks race for
+    # the same instance, or while the EC2 capacity provider is still scaling up.
+    # This is transient and clears once a slot frees / the reservation registers,
+    # so retry it generously (long enough to outlast an in-flight task) rather
+    # than letting one placement race abort the whole run.
+    {
+      ErrorEquals     = ["ECS.AmazonECSException"]
+      IntervalSeconds = 15
+      MaxAttempts     = 12
+      BackoffRate     = 2.0
+      MaxDelaySeconds = 60
+      JitterStrategy  = "FULL"
+    },
     {
       ErrorEquals = [
         "Ecs.ServerException",
@@ -121,6 +136,25 @@ locals {
                     }
                   ]
                 }
+              }
+              # A partition that still fails after task-level retries (an
+              # exhausted capacity retry, a permanently-missing image, or an ES
+              # error) is recorded and tolerated rather than aborting the whole
+              # Map. Its images are left un-augmented and picked up by a later
+              # window (writes are idempotent external_gte). Without this, one bad
+              # partition fails-fast the entire run.
+              Catch = [
+                {
+                  ErrorEquals = ["States.ALL"]
+                  Next        = "RecordPartitionFailure"
+                }
+              ]
+              End = true
+            }
+            RecordPartitionFailure = {
+              Type = "Pass"
+              Output = {
+                "partition_failed" : true
               }
               End = true
             }
