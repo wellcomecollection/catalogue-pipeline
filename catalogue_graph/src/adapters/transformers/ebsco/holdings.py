@@ -9,7 +9,7 @@ from collections.abc import Iterator
 
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.common import is_url
+from adapters.transformers.utils.html import is_url
 from models.pipeline.access_condition import (
     AccessCondition,
     LicensedResource,
