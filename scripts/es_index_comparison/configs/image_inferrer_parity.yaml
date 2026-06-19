@@ -33,13 +33,29 @@ filter_query:
         - "<shadow-image-id-1>"
         - "<shadow-image-id-2>"
 
-# `state.augmentedTime` is a per-run wall-clock timestamp, so it legitimately
-# differs between the Scala and Python runs. Everything else (inferredData
-# features/paletteEmbedding/averageColorHex/aspectRatio, source, locations,
-# version, modifiedTime) is expected to match exactly.
+# Fields that legitimately differ between the Scala and Python runs and so are
+# excluded from the comparison. Everything else (inferredData
+# features/averageColorHex/aspectRatio, source/locations data values, version,
+# modifiedTime) is expected to match exactly -- those are the fields that would
+# reveal a real regression.
 ignore_fields:
+  # Per-run wall-clock timestamp.
   - state.augmentedTime
   - state.**.augmentedTime
+  # The palette encoder is non-deterministic BY DESIGN: it adds unseeded Gaussian
+  # noise to every pixel (np.random.normal, no seed) in palette_inferrer's
+  # palette_encoder.py, so paletteEmbedding differs on every run regardless of
+  # the input. Neither value is "more correct"; it can never match exactly.
+  - state.inferredData.paletteEmbedding
+  # `type` discriminators on the copied source/locations blocks. The Python
+  # pydantic models emit `type` literal defaults (e.g. DigitalLocation, Identified)
+  # that the Scala stored shape omits (or vice versa). This is cosmetic: the image
+  # ingestor re-derives these tags from its own model defaults on read (parsing is
+  # lenient -- extras ignored, missing tags defaulted), so the indexed output and
+  # API result are identical. Data VALUES under source/locations are still compared.
+  - source.type
+  - source.**.type
+  - locations[].type
 
 sample_size: 20
 hash_bucket_count: 2
