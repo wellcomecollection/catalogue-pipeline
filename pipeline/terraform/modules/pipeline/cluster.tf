@@ -1,3 +1,12 @@
+locals {
+  # Single source of truth for image-inference parallelism: the inferrer ASG's
+  # max_instances and the state machine Map's MaxConcurrency both read this, so
+  # the Map never fans out more tasks than the ASG can place (each task fills one
+  # c5.xlarge, so instances == concurrent tasks). During a full reindex we use the
+  # larger fixed size; otherwise `var.image_inferrer_max_concurrency`.
+  inference_max_concurrency = var.reindexing_state.scale_up_tasks ? 12 : var.image_inferrer_max_concurrency
+}
+
 resource "aws_ecs_cluster" "cluster" {
   name = local.namespace
 
@@ -27,7 +36,7 @@ module "inference_capacity_provider" {
   # blue-green deployment of an image inferrer task, it's (briefly) running
   # two tasks at once: the old task and the new task.
   instance_type = var.reindexing_state.scale_up_tasks ? "c5.2xlarge" : "c5.xlarge"
-  max_instances = var.reindexing_state.scale_up_tasks ? 12 : 2
+  max_instances = local.inference_max_concurrency
 
   use_spot_purchasing     = true
   scaling_action_cooldown = 240

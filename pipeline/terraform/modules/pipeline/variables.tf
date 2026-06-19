@@ -129,3 +129,16 @@ variable "image_inferrer_initial_index_date" {
     entry must exist (see the 2025-10-02 root).
   EOT
 }
+
+variable "image_inferrer_max_concurrency" {
+  type        = number
+  default     = 10
+  description = <<-EOT
+    Single source of truth for image-inference parallelism (when not reindexing). Drives BOTH the
+    inferrer EC2 capacity provider's `max_instances` AND the state machine Map's `MaxConcurrency`, so
+    the Map can never fan out more concurrent tasks than the ASG can place. Each task fills one
+    c5.xlarge (~4096 CPU), so one instance == one task and the two values stay equal. The ASG scales
+    to 0 when idle, so this is only a ceiling, not a running cost. (During a full reindex,
+    `reindexing_state.scale_up_tasks` overrides both to the larger fixed size.)
+  EOT
+}

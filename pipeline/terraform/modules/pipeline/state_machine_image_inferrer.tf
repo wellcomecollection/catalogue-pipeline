@@ -93,9 +93,11 @@ locals {
       }
 
       InferImages = {
-        Type           = "Map"
-        Items          = "{% $states.input.partitions %}"
-        MaxConcurrency = 10
+        Type  = "Map"
+        Items = "{% $states.input.partitions %}"
+        # Matches the inferrer ASG max_instances (local.inference_max_concurrency)
+        # so the Map never fans out more tasks than the capacity provider can place.
+        MaxConcurrency = local.inference_max_concurrency
         ItemProcessor = {
           ProcessorConfig = { Mode = "INLINE" }
           StartAt         = "RunInferenceTask"
