@@ -31,7 +31,7 @@ dependencies = [
     "structlog>=24.1.0",
     "python-dotenv>=1.0.0",
     "pymysql>=1.0.0",
-    "cryptography>=46.0.0",
+    "cryptography>=48.0.1",
     "yoyo-migrations>=8.2.0",
 ]
 
