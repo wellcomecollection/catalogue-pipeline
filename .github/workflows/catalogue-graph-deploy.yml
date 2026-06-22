@@ -111,6 +111,11 @@ jobs:
           - graph-bulk-loader
           - graph-remover-incremental
           - graph-ingestor-deletions
+          # Image inferrer (work-discovery lambda for the scheduled state machine).
+          # The inferrer task itself ships in unified_pipeline_task and is picked up
+          # automatically via retag-dated-unified-pipeline-task-image + the ephemeral
+          # runTask launch, so only this lambda needs an explicit code deploy.
+          - image-inference-find-work
 
 
     steps:
