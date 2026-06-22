@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterable
-from datetime import datetime
 from typing import Any
 
 import structlog
-from pymarc.record import Record
 
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.source_work_transformer import SourceWorkTransformer
@@ -33,22 +31,17 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
             row_id, last_modified = row["id"], row["last_modified"]
 
             try:
-                if row.get("deleted", False):
-                    yield row_id, self.transform_deleted(marc_record, last_modified)
+                builder = self.work_builder(marc_record, last_modified)
+                if builder.is_deleted(row):
+                    yield row_id, self.transform_deleted(builder)
                 else:
-                    yield row_id, self.transform_record(marc_record, last_modified)
+                    yield row_id, self.transform_record(builder)
             except Exception as e:
                 logger.error("Error transforming record", row_id=row_id, error=str(e))
                 self._add_error(e, "transform", row_id)
 
-    def transform_record(
-        self, marc_record: Record, last_modified: datetime
-    ) -> VisibleSourceWork:
-        builder = self.work_builder(marc_record, last_modified)
+    def transform_record(self, builder: MarcXmlWorkBuilder) -> VisibleSourceWork:
         return builder.visible_work
 
-    def transform_deleted(
-        self, marc_record: Record, last_modified: datetime
-    ) -> DeletedSourceWork:
-        builder = self.work_builder(marc_record, last_modified)
+    def transform_deleted(self, builder: MarcXmlWorkBuilder) -> DeletedSourceWork:
         return builder.deleted_work

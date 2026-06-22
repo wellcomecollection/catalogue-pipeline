@@ -125,6 +125,46 @@ def test_transformer_end_to_end_includes_deletions(
     assert deleted["deletedReason"]["info"] == "Marked as deleted from source"
 
 
+def test_transformer_includes_suppressions(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test that records marked with FOLIO suppression marker ($t=1 in MARC 999) are treated as deleted."""
+    records_by_id = {
+        "fo00005": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00005</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Visible Folio Work</marc:subfield></marc:datafield></record>',
+        "fo00006": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00006</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Suppressed Folio Work</marc:subfield></marc:datafield><marc:datafield tag="999" ind1="f" ind2="f"><marc:subfield code="i">73822760-c6e3-4be4-a644-fe97fb32567f</marc:subfield><marc:subfield code="t">1</marc:subfield></marc:datafield></record>',
+    }
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2026-01-01",
+    )
+
+    assert result.successes.count == 2
+    assert result.failures is None
+
+    by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
+
+    # Visible record should be transformed normally
+    visible = by_id["Work[folio-instance/fo00005]"]["_source"]
+    assert visible["type"] == "Visible"
+
+    # Suppressed record should be treated as deleted
+    suppressed = by_id["Work[folio-instance/fo00006]"]["_source"]
+    assert suppressed["type"] == "Deleted"
+    assert suppressed["deletedReason"]["type"] == "DeletedFromSource"
+    assert suppressed["deletedReason"]["info"] == "Marked as deleted from source"
+
+
 def test_transformer_includes_predecessor_identifier(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
