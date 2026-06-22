@@ -53,7 +53,7 @@ def marc_record() -> Record:
 def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceWork:
     work = EbscoWorkBuilder(
         marc_record, last_modified=datetime(2020, 1, 1)
-    ).visible_work
+    ).transform_visible_work()
     context["result"] = work
     return work
 

@@ -34,4 +34,4 @@ def marc_record() -> Record:
 def do_transform(marc_record: Record) -> VisibleSourceWork:
     return AxiellWorkBuilder(
         marc_record, last_modified=datetime(2020, 1, 1)
-    ).visible_work
+    ).transform_visible_work()

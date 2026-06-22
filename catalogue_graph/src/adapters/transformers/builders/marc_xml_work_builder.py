@@ -20,7 +20,7 @@ from models.pipeline.item import Item
 from models.pipeline.location import DigitalLocation
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
-from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
+from models.pipeline.source.work import SourceWork, SourceWorkState, VisibleSourceWork
 from models.pipeline.work_data import WorkData, WorkType
 from models.pipeline.work_state import WorkAncestor, WorkRelations
 
@@ -197,10 +197,12 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
             }
         )
 
-    @property
-    def visible_work(self) -> VisibleSourceWork:
+    def transform_visible_work(self) -> VisibleSourceWork:
         return VisibleSourceWork(
             version=self.version,
             state=self.work_state,
             data=self.work_data,
         )
+
+    def transform_work(self) -> SourceWork:
+        return self.transform_visible_work()

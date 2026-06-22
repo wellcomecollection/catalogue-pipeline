@@ -24,6 +24,7 @@ from adapters.transformers.marc.predecessor_identifier import (
     extract_calm_predecessor_id,
 )
 from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
+from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.access_method import NotRequestable
 from models.pipeline.collection_path import CollectionPath
@@ -34,6 +35,10 @@ from models.pipeline.item import Item
 from models.pipeline.location import ClosedStores, PhysicalLocation
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
+from models.pipeline.source.work import (
+    DeletedSourceWork,
+    VisibleSourceWork,
+)
 from utils.timezone import convert_datetime_to_utc_iso
 from utils.types import WorkType
 
@@ -152,6 +157,12 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     @property
     def subjects(self) -> list[Subject]:
         return extract_subjects(self.record)
+
+    def transform_work(self) -> VisibleSourceWork | DeletedSourceWork:
+        if self._should_suppress():
+            return self.transform_deleted_work(deleted_reason=SuppressedFromSource)
+        else:
+            return self.transform_visible_work()
 
     # TODO: Remaining fields:
     # * languages

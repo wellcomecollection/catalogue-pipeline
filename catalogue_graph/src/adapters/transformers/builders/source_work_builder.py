@@ -49,12 +49,11 @@ class SourceWorkBuilder(ABC):
             modified_time=convert_datetime_to_utc_iso(datetime.now()),
         )
 
-    @property
-    def deleted_work(self) -> DeletedSourceWork:
+    def transform_deleted_work(
+        self, deleted_reason: DeletedReason
+    ) -> DeletedSourceWork:
         return DeletedSourceWork(
             version=self.version,
-            deleted_reason=DeletedReason(
-                type="DeletedFromSource", info="Marked as deleted from source"
-            ),
+            deleted_reason=deleted_reason,
             state=self.work_state,
         )

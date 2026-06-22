@@ -8,10 +8,10 @@ from pymarc.record import Record
 
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.source_work_transformer import SourceWorkTransformer
+from ingestor.models.shared.deleted_reason import DeletedFromSource
 from models.pipeline.source.work import (
     DeletedSourceWork,
     SourceWork,
-    VisibleSourceWork,
 )
 
 logger = structlog.get_logger(__name__)
@@ -43,12 +43,12 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
 
     def transform_record(
         self, marc_record: Record, last_modified: datetime
-    ) -> VisibleSourceWork:
+    ) -> SourceWork:
         builder = self.work_builder(marc_record, last_modified)
-        return builder.visible_work
+        return builder.transform_work()
 
     def transform_deleted(
         self, marc_record: Record, last_modified: datetime
     ) -> DeletedSourceWork:
         builder = self.work_builder(marc_record, last_modified)
-        return builder.deleted_work
+        return builder.transform_deleted_work(deleted_reason=DeletedFromSource)
