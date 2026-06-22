@@ -45,6 +45,7 @@ from utils.elasticsearch import (
     get_images_augmented_index_name,
     get_images_initial_index_name,
     index_es_batch,
+    mget_es,
 )
 from utils.logger import ExecutionContext, setup_logging
 from utils.steps import ecs_handler
@@ -95,7 +96,7 @@ def retrieve_initial_images(
     if not ids:
         return []
 
-    response = es_client.mget(index=index_name, body={"ids": ids})
+    response = mget_es(es_client, index_name, ids)
     images = []
     for doc in response["docs"]:
         if doc.get("found"):

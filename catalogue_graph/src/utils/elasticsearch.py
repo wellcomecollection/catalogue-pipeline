@@ -27,24 +27,41 @@ logger = structlog.get_logger(__name__)
 
 # Transient transport failures talking to Elasticsearch (e.g. a dropped keep-alive
 # connection -> "Remote end closed connection without response"). These are not
-# data errors and clear on a retry; without retrying, a single blip during a bulk
-# write fails the whole all-or-nothing inference task (and can abort the run).
+# data errors and clear on a retry; without retrying, a single blip during an ES
+# round-trip fails the whole all-or-nothing inference task (and can abort the run).
 TRANSIENT_ES_ERRORS = (
     elasticsearch.exceptions.ConnectionError,
     elasticsearch.exceptions.ConnectionTimeout,
 )
-ES_BULK_MAX_ATTEMPTS = int(os.environ.get("ES_BULK_MAX_ATTEMPTS", "4"))
-ES_BULK_BACKOFF_SECONDS = float(os.environ.get("ES_BULK_BACKOFF_SECONDS", "1.0"))
+ES_TRANSIENT_MAX_ATTEMPTS = int(os.environ.get("ES_TRANSIENT_MAX_ATTEMPTS", "4"))
+ES_TRANSIENT_BACKOFF_SECONDS = float(
+    os.environ.get("ES_TRANSIENT_BACKOFF_SECONDS", "1.0")
+)
 
 
-def _on_bulk_backoff(backoff_details: Any) -> None:
+def _on_es_transient_retry(backoff_details: Any) -> None:
+    operation = getattr(backoff_details["target"], "__name__", "es request")
     exception_name = type(backoff_details["exception"]).__name__
     logger.warning(
-        "Transient Elasticsearch error during bulk write, retrying",
+        "Transient Elasticsearch error, retrying",
+        operation=operation,
         exception_name=exception_name,
         attempt=backoff_details["tries"],
-        max_attempts=ES_BULK_MAX_ATTEMPTS,
+        max_attempts=ES_TRANSIENT_MAX_ATTEMPTS,
     )
+
+
+# Shared retry policy for transient ES transport errors, applied to every ES
+# round-trip that would otherwise fail a whole all-or-nothing inference task —
+# both reads (`mget_es`) and writes (`index_es_batch`) — so a single dropped
+# connection under load doesn't abort a partition.
+es_transient_retry = backoff.on_exception(
+    backoff.expo,
+    TRANSIENT_ES_ERRORS,
+    max_tries=lambda: ES_TRANSIENT_MAX_ATTEMPTS,
+    factor=ES_TRANSIENT_BACKOFF_SECONDS,
+    on_backoff=_on_es_transient_retry,
+)
 
 
 # private: Connect to the production cluster via the private endpoint (production runs only)
@@ -113,13 +130,20 @@ def get_client(
     return elasticsearch.Elasticsearch(host_config, api_key=config.apikey, timeout=60)
 
 
-@backoff.on_exception(
-    backoff.expo,
-    TRANSIENT_ES_ERRORS,
-    max_tries=lambda: ES_BULK_MAX_ATTEMPTS,
-    factor=ES_BULK_BACKOFF_SECONDS,
-    on_backoff=_on_bulk_backoff,
-)
+@es_transient_retry
+def mget_es(
+    es_client: Elasticsearch, index_name: str, ids: list[str]
+) -> dict[str, Any]:
+    """Multi-get documents by id, retrying transient ES transport errors.
+
+    Mirrors `index_es_batch`'s resilience for the read path: under sustained load
+    the cluster can drop a connection, and without a retry that single blip would
+    fail the whole all-or-nothing inference partition before any work is written.
+    """
+    return cast("dict[str, Any]", es_client.mget(index=index_name, body={"ids": ids}))
+
+
+@es_transient_retry
 def index_es_batch(
     es_client: Elasticsearch, es_actions: list[dict]
 ) -> tuple[int, list[dict[str, Any]]]:
