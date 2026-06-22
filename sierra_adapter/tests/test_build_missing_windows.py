@@ -2,6 +2,7 @@
 
 import datetime as dt
 
+import pytest
 import pytz
 
 from build_missing_windows import get_missing_windows, sliding_window
@@ -85,3 +86,12 @@ def test_respects_window_length():
         start = dt.datetime.fromisoformat(w["start"])
         end = dt.datetime.fromisoformat(w["end"])
         assert end - start == dt.timedelta(minutes=5)
+
+
+@pytest.mark.parametrize("bad_length", [1, 0, -1])
+def test_rejects_unsafe_window_length(bad_length):
+    # generate_windows steps by (minutes - 1); a length < 2 would loop forever,
+    # so it must be rejected rather than hang.
+    report = [iv(dtm(12, 0), dtm(12, 5)), iv(dtm(12, 10), dtm(12, 15))]
+    with pytest.raises(ValueError):
+        list(get_missing_windows(report, window_length_minutes=bad_length))

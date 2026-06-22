@@ -48,6 +48,11 @@ def get_missing_windows(report, window_length_minutes=2):
     intervals that merely touch) as a gap and inflate it into a full window —
     re-harvesting data that is already present.
     """
+    # generate_windows() advances by (minutes - 1), so a window length below 2
+    # gives a zero/negative step and would loop forever.  Guard before calling it.
+    if window_length_minutes < 2:
+        raise ValueError("window_length_minutes must be >= 2")
+
     # combine_overlapping_intervals expects intervals sorted by start; don't
     # rely on the order S3 happens to return keys in.
     intervals = sorted(report, key=lambda iv: iv.start)
@@ -97,7 +102,7 @@ def _assume_platform_session():
 )
 @click.option(
     "--throttle",
-    type=float,
+    type=click.FloatRange(min=0),
     default=1.0,
     show_default=True,
     help="Seconds to sleep between SNS publishes (paces load on the Sierra API). "
@@ -105,10 +110,11 @@ def _assume_platform_session():
 )
 @click.option(
     "--window-length",
-    type=int,
+    type=click.IntRange(min=2),
     default=2,
     show_default=True,
-    help="Length of each generated window, in minutes.",
+    help="Length of each generated window, in minutes (must be >= 2; "
+    "generate_windows steps by minutes - 1).",
 )
 @click.option(
     "--yes",
