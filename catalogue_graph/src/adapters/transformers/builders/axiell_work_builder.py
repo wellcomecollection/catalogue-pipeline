@@ -184,8 +184,8 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
                     )
                 )
 
-        return SourceWorkState(
-            **super().visible_work_state.model_dump(), merge_candidates=merge_candidates
+        return super().visible_work_state.model_copy(
+            update={"merge_candidates": merge_candidates}
         )
 
     def transform_work(self) -> VisibleSourceWork | DeletedSourceWork:

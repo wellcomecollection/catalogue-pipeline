@@ -1,9 +1,12 @@
-from pymarc.record import Field, Record, Subfield
+from pymarc.record import Field, Indicators, Record, Subfield
 
 # mypy: allow-untyped-calls
 
 
-def make_axiell_record(identifier: str = "test001") -> Record:
+def make_axiell_record(
+    identifier: str = "test001",
+    catalogue_status: str | None = "catalogued",
+) -> Record:
     """Minimal valid Axiell MARC record with all required fields."""
     record = Record()
     record.add_field(Field(tag="001", data=identifier))
@@ -15,4 +18,13 @@ def make_axiell_record(identifier: str = "test001") -> Record:
         Field(tag="035", subfields=[Subfield(code="a", value="(Calm RefNo)TestRefNo")])
     )
     record.add_field(Field(tag="351", subfields=[Subfield(code="c", value="Item")]))
+
+    if catalogue_status is not None:
+        record.add_field(
+            Field(
+                tag="583",
+                indicators=Indicators("0", " "),
+                subfields=[Subfield(code="l", value=catalogue_status)],
+            )
+        )
     return record
