@@ -37,7 +37,9 @@ def _transform(record: Record) -> VisibleSourceWork | DeletedSourceWork:
     ).transform_work()
 
 
-@pytest.mark.parametrize("status", ["catalogued", "partially complete"])
+@pytest.mark.parametrize(
+    "status", ["catalogued", "partially complete", "Catalogued", "CATALOGUED"]
+)
 def test_non_suppressed_statuses_yield_visible_work(status: str) -> None:
     record = _with_status(make_axiell_record(), status)
     assert isinstance(_transform(record), VisibleSourceWork)
