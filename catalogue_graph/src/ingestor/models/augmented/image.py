@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from ingestor.models.indexable.record import IndexableRecord
 from models.pipeline.identifier import Identified
 from models.pipeline.image_state import ImageState
 from models.pipeline.location import DigitalLocation
@@ -20,11 +23,18 @@ class InferredData(SerialisableModel):
 
 class AugmentedImageState(ImageState):
     inferred_data: InferredData
+    augmented_time: str | None = None
 
 
-class AugmentedImage(SerialisableModel):
+class AugmentedImage(IndexableRecord):
     state: AugmentedImageState
     source: ParentWork
     locations: list[DigitalLocation]
     version: int
     modified_time: str
+
+    def get_id(self) -> str:
+        return self.state.id()
+
+    def get_modified_time(self) -> datetime:
+        return datetime.fromisoformat(self.modified_time)

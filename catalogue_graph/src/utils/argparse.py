@@ -6,6 +6,7 @@ BasePipelineEventArgument = Literal[
     "window",
     "ids",
     "pipeline_date",
+    "index_date_initial",
     "index_date_merged",
     "index_date_augmented",
     "pit_id_merged",
@@ -50,6 +51,13 @@ def add_pipeline_event_args(
             help="Which pipeline date to use when connecting to ES and reading/writing S3 files. Will default to 'dev'.",
             required=False,
             default="dev",
+        )
+    if "index_date_initial" in args:
+        parser.add_argument(
+            "--index-date-initial",
+            type=str,
+            help="The initial images index date to read from, will default to pipeline date.",
+            required=False,
         )
     if "index_date_merged" in args:
         parser.add_argument(

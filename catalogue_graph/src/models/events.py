@@ -25,6 +25,7 @@ class ScheduledEvent(BaseModel):
 
 
 class PipelineIndexDates(BaseModel):
+    initial: str | None = None  # initial images (inferrer source)
     merged: str | None = None  # merged works
     augmented: str | None = None  # augmented images
     concepts: str | None = None  # final concepts
@@ -60,6 +61,7 @@ class BasePipelineEvent(SourceScope):
             window = IncrementalWindow.from_argparser(args)
 
         index_dates = PipelineIndexDates(
+            initial=getattr(args, "index_date_initial", None),
             merged=getattr(args, "index_date_merged", None),
             augmented=getattr(args, "index_date_augmented", None),
         )
