@@ -1,8 +1,8 @@
 """
 Extract access status from field
-351 - Restrictions on Access Note
+506 - Restrictions on Access Note
     $f - Standardized terminology for access restriction
-https://www.loc.gov/marc/bibliographic/bd351.html
+https://www.loc.gov/marc/bibliographic/bd506.html
 """
 
 import structlog
@@ -60,7 +60,7 @@ def extract_access_status(record: Record) -> AccessStatus | None:
 
     if status in ACCESS_STATUS_MAPPING:
         return ACCESS_STATUS_MAPPING[status]
-    logger.warn(
+    logger.warning(
         "Unrecognised Axiell access status value",
         status=status,
         record_id=extract_id(record),
