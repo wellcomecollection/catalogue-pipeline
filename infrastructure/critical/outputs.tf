@@ -54,3 +54,17 @@ output "vhs_miro_table_name" {
 output "vhs_miro_assumable_read_role" {
   value = module.vhs_miro.assumable_read_role
 }
+
+# Elasticsearch cluster
+
+output "pipeline_storage_es_cluster" {
+  sensitive = true
+  value = {
+    https_endpoint = ec_deployment.pipeline_storage.elasticsearch.https_endpoint
+    username       = ec_deployment.pipeline_storage.elasticsearch_username
+    password       = ec_deployment.pipeline_storage.elasticsearch_password
+    private_host   = local.pipeline_storage_secrets_kv_map["elasticsearch/pipeline_storage_v1/private_host"]
+    port           = local.pipeline_storage_secrets_kv_map["elasticsearch/pipeline_storage_v1/port"]
+    protocol       = local.pipeline_storage_secrets_kv_map["elasticsearch/pipeline_storage_v1/protocol"]
+  }
+}
