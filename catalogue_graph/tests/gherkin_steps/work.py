@@ -244,6 +244,18 @@ def child_list_member_with_datatable(
         assert member == row[0]
 
 
+@then(parsers.parse('the work\'s {attr} is "{value}"'))
+def work_attr_is(work: SourceWork, attr: str, value: str) -> None:
+    actual = drill_through_dots(work.data, attr)
+    assert actual == value, f"Expected work.data.{attr} == {value!r}, got {actual!r}"
+
+
+@then(parsers.parse("the work's {attr} is absent"))
+def work_attr_is_absent(work: SourceWork, attr: str) -> None:
+    actual = drill_through_dots(work.data, attr)
+    assert actual is None, f"Expected work.data.{attr} to be absent, got {actual!r}"
+
+
 @then("the item is in closed stores")
 def item_in_closed_stores(work: VisibleSourceWork) -> None:
     item = work.data.items[0]
