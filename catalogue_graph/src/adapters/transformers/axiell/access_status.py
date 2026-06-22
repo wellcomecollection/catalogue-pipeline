@@ -1,8 +1,8 @@
 """
 Extract access status from field
-351 - Restrictions on Access Note
+506 - Restrictions on Access Note
     $f - Standardized terminology for access restriction
-https://www.loc.gov/marc/bibliographic/bd351.html
+https://www.loc.gov/marc/bibliographic/bd506.html
 """
 
 import structlog
