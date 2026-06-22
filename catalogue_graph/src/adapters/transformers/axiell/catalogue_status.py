@@ -5,7 +5,7 @@ Extract catalogue status from private field
 https://www.loc.gov/marc/bibliographic/bd583.html
 """
 
-from typing import Literal, get_args
+from typing import Literal, cast, get_args
 
 from pymarc.record import Record
 
@@ -43,4 +43,4 @@ def extract_catalogue_status(record: Record) -> AxiellCatalogueStatus | None:
             f"Unexpected Axiell catalogue status (record progress) value '{value}' on record '{extract_id(record)}'."
         )
 
-    return value
+    return cast(AxiellCatalogueStatus, value)
