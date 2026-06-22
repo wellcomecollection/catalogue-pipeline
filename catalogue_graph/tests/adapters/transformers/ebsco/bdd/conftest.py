@@ -120,14 +120,6 @@ def sublist_member_count(
     )
 
 
-@then(parsers.parse("it has {count:d} {attr_phrase}"))
-def child_list_member_count(antecedent: Any, count: int, attr_phrase: str) -> None:
-    values: Sequence[Any] = _get_attr_list(antecedent, attr_phrase)
-    assert len(values) == count, (
-        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
-    )
-
-
 @then(parsers.parse("it has {count:d} {attr_phrase}:"))
 def child_list_member_datatable(
     antecedent: Any, datatable: list[list[str]], count: int, attr_phrase: str

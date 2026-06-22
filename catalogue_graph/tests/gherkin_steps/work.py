@@ -33,6 +33,7 @@ ATTR_ALIASES: dict[str, str] = {
     "other identifier": "other_identifiers",
     "note": "notes",
     "item": "items",
+    "contributor": "contributors",
 }
 
 
@@ -112,6 +113,20 @@ def list_member_count(work: SourceWork, count: int, attr_phrase: str) -> None:
 @then(parsers.parse("there are no {attr_phrase}"))
 def list_member_empty(work: SourceWork, attr_phrase: str) -> None:
     list_member_count(work, 0, attr_phrase)
+
+
+@then(parsers.parse("it has {count:d} {attr_phrase}"))
+def child_list_member_count(antecedent: Any, count: int, attr_phrase: str) -> None:
+    values: Sequence[Any] = _get_attr_list(antecedent, attr_phrase)
+    assert len(values) == count, (
+        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
+    )
+
+
+@then(parsers.parse('it has the {sub_attr} "{value}"'))
+def antecedent_has_attr(antecedent: Any, sub_attr: str, value: str) -> None:
+    actual = drill_through_dots(antecedent, sub_attr)
+    assert actual == value, f"Expected {sub_attr} == {value!r}, got {actual!r}"
 
 
 @then(parsers.parse('the only {attr_phrase} is "{value}"'), target_fixture="antecedent")
