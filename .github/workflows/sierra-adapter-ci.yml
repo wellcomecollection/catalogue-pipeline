@@ -1,0 +1,29 @@
+name: "Sierra adapter: Test"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "sierra_adapter/**"
+      - "common/window_generator/**"
+      - ".github/workflows/sierra-adapter-ci.yml"
+  pull_request:
+    paths:
+      - "sierra_adapter/**"
+      - "common/window_generator/**"
+      - ".github/workflows/sierra-adapter-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v6
+      - name: Run tests
+        working-directory: sierra_adapter
+        run: uv run --group dev pytest
