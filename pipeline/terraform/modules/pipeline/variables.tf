@@ -99,3 +99,46 @@ variable "graph_index_dates" {
     images    = string
   })
 }
+
+variable "enable_image_inferrer_schedule" {
+  type        = bool
+  default     = false
+  description = "Enable the scheduled image-inferrer state machine. Ships disabled until the new path is validated and we cut over from the SQS-driven service."
+}
+
+variable "image_inferrer_augmented_index_date" {
+  type        = string
+  default     = "2026-06-15"
+  description = <<-EOT
+    Augmented index date the Python image-inferrer state machine writes to. Defaults to a separate
+    shadow index (`images-augmented-2026-06-15`) so the new pipeline never overwrites the Scala
+    inferrer's prod output and its results can be compared. At cutover, set this to
+    `graph_index_dates.augmented`. A matching `index_config` entry must exist (see the 2025-10-02 root).
+  EOT
+}
+
+variable "image_inferrer_initial_index_date" {
+  type        = string
+  default     = "2026-06-15"
+  description = <<-EOT
+    Initial-images index date the Python image-inferrer state machine reads from. Defaults to a
+    shadow source index (`images-initial-2026-06-15`) whose mapping indexes `modifiedTime` (the live
+    images-initial uses an "empty"/dynamic:false mapping where modifiedTime is unqueryable). Populate
+    it via a one-off reindex from `images-initial-<pipeline_date>`. At cutover, set this to
+    `var.pipeline_date` once the live images-initial indexes `modifiedTime`. A matching `index_config`
+    entry must exist (see the 2025-10-02 root).
+  EOT
+}
+
+variable "image_inferrer_max_concurrency" {
+  type        = number
+  default     = 10
+  description = <<-EOT
+    Single source of truth for image-inference parallelism (when not reindexing). Drives BOTH the
+    inferrer EC2 capacity provider's `max_instances` AND the state machine Map's `MaxConcurrency`, so
+    the Map can never fan out more concurrent tasks than the ASG can place. Each task fills one
+    c5.xlarge (~4096 CPU), so one instance == one task and the two values stay equal. The ASG scales
+    to 0 when idle, so this is only a ceiling, not a running cost. (During a full reindex,
+    `reindexing_state.scale_up_tasks` overrides both to the larger fixed size.)
+  EOT
+}

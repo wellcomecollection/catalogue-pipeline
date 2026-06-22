@@ -89,6 +89,7 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
     assert report == {
         "pipeline_date": pipeline_date,
         "index_dates": {
+            "initial": None,
             "merged": None,
             "augmented": None,
             "concepts": None,
@@ -154,6 +155,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
     assert report == {
         "pipeline_date": pipeline_date,
         "index_dates": {
+            "initial": None,
             "merged": None,
             "augmented": None,
             "concepts": None,
