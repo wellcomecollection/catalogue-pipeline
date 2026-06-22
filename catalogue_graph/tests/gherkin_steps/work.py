@@ -4,7 +4,8 @@ from typing import Any
 import pytest
 from pytest_bdd import parsers, then
 
-from models.pipeline.source.work import SourceWork
+from models.pipeline.location import PhysicalLocation
+from models.pipeline.source.work import SourceWork, VisibleSourceWork
 
 
 @pytest.fixture
@@ -31,6 +32,7 @@ ATTR_ALIASES: dict[str, str] = {
     "concept": "concepts",
     "other identifier": "other_identifiers",
     "note": "notes",
+    "item": "items",
 }
 
 
@@ -225,3 +227,28 @@ def child_list_member_with_datatable(
     )
     for member, row in zip(members, datatable, strict=True):
         assert member == row[0]
+
+
+@then("the item is in closed stores")
+def item_in_closed_stores(work: VisibleSourceWork) -> None:
+    item = work.data.items[0]
+    assert len(item.locations) == 1
+    loc = item.locations[0]
+    assert isinstance(loc, PhysicalLocation)
+    assert loc.location_type.id == "closed-stores"
+    assert loc.label == "Closed stores"
+
+
+@then("the item has no access conditions")
+def item_no_access_conditions(work: VisibleSourceWork) -> None:
+    loc = work.data.items[0].locations[0]
+    assert loc.access_conditions == []
+
+
+@then(parsers.parse('the item has 1 access condition with status "{status}"'))
+def item_one_access_condition_with_status(work: VisibleSourceWork, status: str) -> None:
+    loc = work.data.items[0].locations[0]
+    assert len(loc.access_conditions) == 1
+    condition = loc.access_conditions[0]
+    assert condition.status is not None
+    assert condition.status.type == status
