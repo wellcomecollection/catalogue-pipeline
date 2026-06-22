@@ -10,10 +10,10 @@ once inference is done.
 from __future__ import annotations
 
 import os
-import time
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
+import backoff
 import requests
 
 from inferrer.models import InitialImage
@@ -36,6 +36,15 @@ DOWNLOAD_BACKOFF_SECONDS = float(
 
 class ImageDownloadError(Exception):
     pass
+
+
+class _TransientImageDownloadError(ImageDownloadError):
+    """A retryable download failure (a transient HTTP status).
+
+    Subclasses `ImageDownloadError` so that, once the `backoff` retries are
+    exhausted and this propagates, callers catching `ImageDownloadError` still
+    handle it.
+    """
 
 
 def _to_thumbnail_url(url: str) -> str:
@@ -62,35 +71,28 @@ def file_url(path: Path) -> str:
     return path.as_uri()
 
 
+@backoff.on_exception(
+    backoff.expo,
+    (_TransientImageDownloadError, requests.exceptions.RequestException),
+    max_tries=lambda: MAX_DOWNLOAD_ATTEMPTS,
+    factor=DOWNLOAD_BACKOFF_SECONDS,
+)
 def _fetch_image(url: str, timeout: float) -> requests.Response:
     """GET the thumbnail, retrying transient failures with exponential backoff.
 
-    Retries transient HTTP statuses (`TRANSIENT_STATUS_CODES`) and connection/
-    timeout errors; a non-transient bad status (e.g. 404) fails immediately since
-    retrying will not help.
+    The `backoff` decorator retries transient HTTP statuses (raised as
+    `_TransientImageDownloadError`) and transport errors
+    (`requests.exceptions.RequestException`); a non-transient bad status (e.g.
+    404) raises `ImageDownloadError` immediately since retrying will not help.
     """
-    last_error = "no attempts made"
-    for attempt in range(1, MAX_DOWNLOAD_ATTEMPTS + 1):
-        try:
-            response = requests.get(url, timeout=timeout)
-        except requests.exceptions.RequestException as exc:
-            last_error = f"request error: {exc!r}"
-        else:
-            if response.status_code == 200:
-                return response
-            if response.status_code not in TRANSIENT_STATUS_CODES:
-                raise ImageDownloadError(
-                    f"Image request for {url} failed with status {response.status_code}"
-                )
-            last_error = f"status {response.status_code}"
+    response = requests.get(url, timeout=timeout)
+    if response.status_code == 200:
+        return response
 
-        if attempt < MAX_DOWNLOAD_ATTEMPTS:
-            time.sleep(DOWNLOAD_BACKOFF_SECONDS * 2 ** (attempt - 1))
-
-    raise ImageDownloadError(
-        f"Image request for {url} failed after {MAX_DOWNLOAD_ATTEMPTS} "
-        f"attempts ({last_error})"
-    )
+    message = f"Image request for {url} failed with status {response.status_code}"
+    if response.status_code in TRANSIENT_STATUS_CODES:
+        raise _TransientImageDownloadError(message)
+    raise ImageDownloadError(message)
 
 
 def download_image(image: InitialImage, root: str, timeout: float) -> Path:

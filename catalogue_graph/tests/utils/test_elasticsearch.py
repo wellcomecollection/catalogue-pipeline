@@ -25,7 +25,9 @@ def test_get_merged_index_name_uses_pipeline_date_if_merged_date_missing() -> No
 def test_index_es_batch_retries_transient_connection_error(
     monkeypatch: MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(es_utils, "ES_BULK_BACKOFF_SECONDS", 0.0)
+    # Retry waits are driven by the `backoff` decorator (via `time.sleep`);
+    # neutralise it so the test doesn't wait for real.
+    monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
     calls = {"n": 0}
 
     def fake_bulk(client: object, actions: list, **kwargs: object) -> tuple:
@@ -46,7 +48,7 @@ def test_index_es_batch_retries_transient_connection_error(
 def test_index_es_batch_raises_after_exhausting_retries(
     monkeypatch: MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(es_utils, "ES_BULK_BACKOFF_SECONDS", 0.0)
+    monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
     monkeypatch.setattr(es_utils, "ES_BULK_MAX_ATTEMPTS", 3)
     calls = {"n": 0}
 

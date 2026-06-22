@@ -1,9 +1,9 @@
 import json
 import os
-import time
 from collections.abc import Generator, Sequence
 from typing import Any, Literal, cast
 
+import backoff
 import elasticsearch
 import elasticsearch.helpers
 import structlog
@@ -35,6 +35,17 @@ TRANSIENT_ES_ERRORS = (
 )
 ES_BULK_MAX_ATTEMPTS = int(os.environ.get("ES_BULK_MAX_ATTEMPTS", "4"))
 ES_BULK_BACKOFF_SECONDS = float(os.environ.get("ES_BULK_BACKOFF_SECONDS", "1.0"))
+
+
+def _on_bulk_backoff(backoff_details: Any) -> None:
+    exception_name = type(backoff_details["exception"]).__name__
+    logger.warning(
+        "Transient Elasticsearch error during bulk write, retrying",
+        exception_name=exception_name,
+        attempt=backoff_details["tries"],
+        max_attempts=ES_BULK_MAX_ATTEMPTS,
+    )
+
 
 # private: Connect to the production cluster via the private endpoint (production runs only)
 # public: Connect to the production cluster via the public endpoint (local runs only)
@@ -102,32 +113,22 @@ def get_client(
     return elasticsearch.Elasticsearch(host_config, api_key=config.apikey, timeout=60)
 
 
+@backoff.on_exception(
+    backoff.expo,
+    TRANSIENT_ES_ERRORS,
+    max_tries=lambda: ES_BULK_MAX_ATTEMPTS,
+    factor=ES_BULK_BACKOFF_SECONDS,
+    on_backoff=_on_bulk_backoff,
+)
 def index_es_batch(
     es_client: Elasticsearch, es_actions: list[dict]
 ) -> tuple[int, list[dict[str, Any]]]:
-    last_error: Exception | None = None
-    for attempt in range(1, ES_BULK_MAX_ATTEMPTS + 1):
-        try:
-            success_count, es_errors = elasticsearch.helpers.bulk(
-                es_client,
-                es_actions,
-                raise_on_error=False,
-                stats_only=False,
-            )
-            break
-        except TRANSIENT_ES_ERRORS as exc:
-            last_error = exc
-            logger.warning(
-                "Transient Elasticsearch error during bulk write; retrying",
-                attempt=attempt,
-                max_attempts=ES_BULK_MAX_ATTEMPTS,
-                error=repr(exc),
-            )
-            if attempt < ES_BULK_MAX_ATTEMPTS:
-                time.sleep(ES_BULK_BACKOFF_SECONDS * 2 ** (attempt - 1))
-    else:
-        assert last_error is not None
-        raise last_error
+    success_count, es_errors = elasticsearch.helpers.bulk(
+        es_client,
+        es_actions,
+        raise_on_error=False,
+        stats_only=False,
+    )
 
     logger.info(
         "Indexed batch",

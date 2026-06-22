@@ -31,7 +31,9 @@ def _patch_get_sequence(monkeypatch: MonkeyPatch, items: list) -> dict:
         return item
 
     monkeypatch.setattr(image_downloader.requests, "get", fake_get)
-    monkeypatch.setattr(image_downloader, "DOWNLOAD_BACKOFF_SECONDS", 0.0)
+    # The retry waits are driven by the `backoff` decorator, which sleeps via
+    # `time.sleep`; neutralise it so the retry tests don't wait for real.
+    monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
     return state
 
 
@@ -118,7 +120,9 @@ def test_download_raises_after_exhausting_transient_retries(
     image = make_initial_image("imgA", "http://iiif.test/image/imgA/info.json")
     state = _patch_get_sequence(monkeypatch, [MockResponse(503)] * 3)
 
-    with pytest.raises(ImageDownloadError, match="after 3 attempts"):
+    # After the retries are exhausted, `backoff` re-raises the last transient
+    # error (a `_TransientImageDownloadError`, which is an `ImageDownloadError`).
+    with pytest.raises(ImageDownloadError, match="status 503"):
         download_image(image, str(tmp_path), timeout=5)
     assert state["calls"] == 3
 
