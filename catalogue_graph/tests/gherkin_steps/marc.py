@@ -72,6 +72,18 @@ def replace_field(
 
 @given(
     parsers.re(
+        r'the MARC record\'s only (?P<tag>\d{3}) field with the value "(?P<data>.+)"'
+    ),
+    target_fixture="marc_record",
+)
+def replace_control_field(marc_record: Record, tag: str, data: str) -> Record:
+    marc_record.remove_fields(tag)
+    marc_record.add_field(Field(tag=tag, data=data))
+    return marc_record
+
+
+@given(
+    parsers.re(
         r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)")? with subfields:'
     )
 )

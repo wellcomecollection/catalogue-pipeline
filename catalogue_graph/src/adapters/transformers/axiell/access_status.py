@@ -9,6 +9,7 @@ import structlog
 from pymarc.record import Record
 
 from adapters.transformers.marc.common import non_empty_subfields
+from adapters.transformers.marc.identifier import extract_id
 from models.pipeline.access_status import (
     AccessStatus,
     ByAppointment,
@@ -59,5 +60,9 @@ def extract_access_status(record: Record) -> AccessStatus | None:
 
     if status in ACCESS_STATUS_MAPPING:
         return ACCESS_STATUS_MAPPING[status]
-    logger.warn("Unrecognised Axiell access status value", status=status, record=record)
+    logger.warn(
+        "Unrecognised Axiell access status value",
+        status=status,
+        record_id=extract_id(record),
+    )
     return None
