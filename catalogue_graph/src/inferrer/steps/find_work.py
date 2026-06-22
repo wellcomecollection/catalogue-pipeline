@@ -16,7 +16,6 @@ from itertools import batched
 
 import structlog
 
-import config
 from inferrer.models import (
     DEFAULT_PARTITION_SIZE,
     FindWorkEvent,
@@ -70,35 +69,32 @@ def handler(
     return FindWorkResult(partitions=partitions)
 
 
-def _partition_s3_uri(event: FindWorkEvent, run_id: str, index: int) -> str:
-    bucket = config.CATALOGUE_GRAPH_S3_BUCKETS[event.environment]
-    return (
-        f"s3://{bucket}/{config.INFERRER_S3_PREFIX}/{event.pipeline_date}"
-        f"/find_work/{run_id}/partition-{index}.json"
-    )
-
-
 def write_partitions_to_s3(
-    partitions: list[InferenceManagerEvent], event: FindWorkEvent, run_id: str
+    partitions: list[InferenceManagerEvent], event: FindWorkEvent
 ) -> list[PartitionRef]:
     """Write each partition to S3 and return small refs.
 
     The state machine's Map then iterates these refs (a few hundred bytes each)
     rather than the full partitions, keeping the find-work result well under the
     Step Functions 256 KB state limit. Each inference task resolves its ref back
-    to the full `InferenceManagerEvent` from S3.
+    to the full `InferenceManagerEvent` from S3. The partitions are written under
+    a scope-keyed prefix (`event.find_work_s3_prefix`) for the run.
     """
 
     def write_one(indexed: tuple[int, InferenceManagerEvent]) -> PartitionRef:
         index, partition = indexed
-        s3_uri = _partition_s3_uri(event, run_id, index)
+        s3_uri = event.partition_s3_uri(index)
         pydantic_to_s3_json(partition, s3_uri)
         return PartitionRef(s3_uri=s3_uri, image_count=len(partition.ids or []))
 
     with ThreadPoolExecutor(max_workers=S3_WRITE_PARALLELISM) as pool:
         refs = list(pool.map(write_one, enumerate(partitions)))
 
-    logger.info("Wrote partitions to S3", partition_count=len(refs), run_id=run_id)
+    logger.info(
+        "Wrote partitions to S3",
+        partition_count=len(refs),
+        s3_prefix=event.find_work_s3_prefix,
+    )
     return refs
 
 
@@ -112,8 +108,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
 
     # Hand the partitions off via S3 (pass-by-reference) so the Map's inline
     # payload stays small regardless of how many images the window matched.
-    run_id = getattr(context, "aws_request_id", None) or get_trace_id(context)
-    refs = write_partitions_to_s3(result.partitions, parsed_event, run_id)
+    refs = write_partitions_to_s3(result.partitions, parsed_event)
     return FindWorkRefsResult(partitions=refs).model_dump(mode="json")
 
 

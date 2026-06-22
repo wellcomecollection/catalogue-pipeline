@@ -53,7 +53,14 @@ def test_lambda_handler_writes_partitions_to_s3_and_returns_refs() -> None:
     mock_es_secrets("inferrer", PIPELINE_DATE)
     _seed_initial_images(["a", "b", "c"])
 
-    event = {"pipeline_date": PIPELINE_DATE, "partition_size": 2}
+    event = {
+        "pipeline_date": PIPELINE_DATE,
+        "partition_size": 2,
+        "window": {
+            "start_time": "2026-06-01T00:00:00Z",
+            "end_time": "2026-06-30T00:00:00Z",
+        },
+    }
     result = find_work.lambda_handler(event, _LambdaContext())
 
     # 3 ids at partition_size 2 -> 2 partitions, returned as small S3 refs (no
@@ -61,7 +68,11 @@ def test_lambda_handler_writes_partitions_to_s3_and_returns_refs() -> None:
     refs = result["partitions"]
     assert len(refs) == 2
     assert all(r["s3_uri"].startswith("s3://") for r in refs)
-    assert all("req-abc123" in r["s3_uri"] for r in refs)
+    # Partitions are written under a window-keyed prefix (not an opaque run id),
+    # mirroring the pipeline's standard event-keyed S3 layout.
+    assert all(
+        "/find_work/windows/20260601T0000-20260630T0000/" in r["s3_uri"] for r in refs
+    )
     assert sum(r["image_count"] for r in refs) == 3
     assert all("ids" not in r for r in refs)
 
