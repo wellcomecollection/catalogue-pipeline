@@ -25,18 +25,25 @@ from adapters.transformers.marc.predecessor_identifier import (
 )
 from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
+from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.access_method import NotRequestable
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Subject
 from models.pipeline.format import Format
-from models.pipeline.identifier import Id, Unidentifiable, WorkSourceIdentifier
+from models.pipeline.identifier import (
+    Id,
+    Identifiable,
+    Unidentifiable,
+    WorkSourceIdentifier,
+)
 from models.pipeline.item import Item
 from models.pipeline.location import ClosedStores, PhysicalLocation
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
 from models.pipeline.source.work import (
     DeletedSourceWork,
+    SourceWorkState,
     VisibleSourceWork,
 )
 from utils.timezone import convert_datetime_to_utc_iso
@@ -158,6 +165,29 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     def subjects(self) -> list[Subject]:
         return extract_subjects(self.record)
 
+    @property
+    def visible_work_state(self) -> SourceWorkState:
+        merge_candidates = []
+        for identifier in self.other_identifiers:
+            if identifier.identifier_type.id == "sierra-system-number":
+                merge_candidates.append(
+                    MergeCandidate(
+                        id=Identifiable.from_source_identifier(identifier),
+                        reason="CALM/Sierra harvest work",
+                    )
+                )
+            elif identifier.identifier_type.id == "calm-ref-no":
+                merge_candidates.append(
+                    MergeCandidate(
+                        id=Identifiable.from_source_identifier(identifier),
+                        reason="Archivematica work",
+                    )
+                )
+
+        return SourceWorkState(
+            **super().visible_work_state.model_dump(), merge_candidates=merge_candidates
+        )
+
     def transform_work(self) -> VisibleSourceWork | DeletedSourceWork:
         if self._should_suppress():
             return self.transform_deleted_work(deleted_reason=SuppressedFromSource)
@@ -167,4 +197,3 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     # TODO: Remaining fields:
     # * languages
     # * notes (language notes, terms of use)
-    # * merge candidates

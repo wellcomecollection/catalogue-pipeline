@@ -188,9 +188,9 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
         )
 
     @property
-    def work_state(self) -> SourceWorkState:
+    def visible_work_state(self) -> SourceWorkState:
         """Extends the base work_state with predecessor identifier and ancestor relations from the MARC record."""
-        return super().work_state.model_copy(
+        return super()._base_work_state.model_copy(
             update={
                 "predecessor_identifier": self.predecessor_identifier,
                 "relations": WorkRelations(ancestors=self.ancestors),
@@ -200,7 +200,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
     def transform_visible_work(self) -> VisibleSourceWork:
         return VisibleSourceWork(
             version=self.version,
-            state=self.work_state,
+            state=self.visible_work_state,
             data=self.work_data,
         )
 
