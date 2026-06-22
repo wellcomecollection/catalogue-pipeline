@@ -1,0 +1,8 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "modifiedTime": {
+      "type": "date"
+    }
+  }
+}

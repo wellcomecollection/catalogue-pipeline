@@ -82,6 +82,21 @@ module "pipeline" {
         indexed = "images_indexed.2024-11-14"
       }
     }
+    // Shadow indexes for the new Python image-inferrer state machine, so it can
+    // run in isolation against real data without touching the live indexes.
+    // Date-only name (today's date) like the other test indexes.
+    //  - initial: the SOURCE index, with an explicit mapping that indexes
+    //    modifiedTime (the live images-initial uses the "empty"/dynamic:false
+    //    mapping, where modifiedTime is unqueryable). Populated by a one-off
+    //    reindex from images-initial-2025-10-02.
+    //  - augmented: the OUTPUT index (reuses the images_augmented.2026-04-29
+    //    mapping) so output can be compared against the Scala inferrer's prod output.
+    "2026-06-15" = {
+      images = {
+        initial   = "images_initial.2026-06-15"
+        augmented = "images_augmented.2026-04-29"
+      }
+    }
   }
 
   allow_delete_indices = false
