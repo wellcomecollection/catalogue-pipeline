@@ -43,4 +43,4 @@ def extract_catalogue_status(record: Record) -> AxiellCatalogueStatus | None:
             f"Unexpected Axiell catalogue status (record progress) value '{value}' on record '{extract_id(record)}'."
         )
 
-    return values[0] if values else None
+    return value
