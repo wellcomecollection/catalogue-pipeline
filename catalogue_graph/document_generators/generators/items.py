@@ -1,9 +1,8 @@
 from models.pipeline.access_condition import (
     AccessCondition,
-    AccessMethod,
-    AccessStatus,
 )
-from models.pipeline.access_status import AccessStatusValue
+from models.pipeline.access_method import AccessMethod
+from models.pipeline.access_status import AccessStatus, AccessStatusValue
 from models.pipeline.identifier import SourceIdentifier, Unidentifiable
 from models.pipeline.item import Item
 
