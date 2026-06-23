@@ -35,7 +35,7 @@ locals {
       RDS_USERNAME     = "${local.rds_test_master_secret_name}:username"
       RDS_PASSWORD     = "${local.rds_test_master_secret_name}:password"
     },
-    module.elastic.pipeline_storage_es_service_secrets["id_minter"],
+    var.elastic_outputs.pipeline_storage_es_service_secrets["id_minter"],
   )
 
   id_minter_test_state_machine_definition = jsonencode({

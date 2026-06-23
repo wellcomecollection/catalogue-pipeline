@@ -72,10 +72,10 @@ module "transformers" {
   }
 
   trigger_values = [
-    module.elastic.api_key_versions["transformer"],
+    var.elastic_outputs.api_key_versions["transformer"],
   ]
 
-  secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["transformer"]
+  secret_env_vars = var.elastic_outputs.pipeline_storage_es_service_secrets["transformer"]
 
   min_capacity = var.min_capacity
   max_capacity = local.max_capacity

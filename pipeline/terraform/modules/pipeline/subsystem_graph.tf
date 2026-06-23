@@ -6,14 +6,14 @@ module "graph_pipeline" {
 
   ecs_cluster_arn = aws_ecs_cluster.cluster.arn
 
-  es_cluster_host     = module.elastic.pipeline_storage_private_host
-  es_cluster_port     = module.elastic.pipeline_storage_port
-  es_cluster_protocol = module.elastic.pipeline_storage_protocol
+  es_cluster_host     = var.elastic_outputs.pipeline_storage_private_host
+  es_cluster_port     = var.elastic_outputs.pipeline_storage_port
+  es_cluster_protocol = var.elastic_outputs.pipeline_storage_protocol
 
   es_secrets = {
-    concepts_ingestor = module.elastic.pipeline_storage_es_service_secrets["concepts_ingestor"]["es_apikey"],
-    works_ingestor    = module.elastic.pipeline_storage_es_service_secrets["works_ingestor"]["es_apikey"],
-    images_ingestor   = module.elastic.pipeline_storage_es_service_secrets["images_ingestor"]["es_apikey"],
-    graph_extractor   = module.elastic.pipeline_storage_es_service_secrets["graph_extractor"]["es_apikey"],
+    concepts_ingestor = var.elastic_outputs.pipeline_storage_es_service_secrets["concepts_ingestor"]["es_apikey"],
+    works_ingestor    = var.elastic_outputs.pipeline_storage_es_service_secrets["works_ingestor"]["es_apikey"],
+    images_ingestor   = var.elastic_outputs.pipeline_storage_es_service_secrets["images_ingestor"]["es_apikey"],
+    graph_extractor   = var.elastic_outputs.pipeline_storage_es_service_secrets["graph_extractor"]["es_apikey"],
   }
 }
