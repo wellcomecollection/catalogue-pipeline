@@ -108,25 +108,26 @@ variable "enable_image_inferrer_schedule" {
 
 variable "image_inferrer_augmented_index_date" {
   type        = string
-  default     = "2026-06-15"
+  default     = ""
   description = <<-EOT
-    Augmented index date the Python image-inferrer state machine writes to. Defaults to a separate
-    shadow index (`images-augmented-2026-06-15`) so the new pipeline never overwrites the Scala
-    inferrer's prod output and its results can be compared. At cutover, set this to
-    `graph_index_dates.augmented`. A matching `index_config` entry must exist (see the 2025-10-02 root).
+    Augmented index date the Python image-inferrer state machine writes to. Empty (the default) falls
+    back to `graph_index_dates.augmented` — i.e. the production augmented index the images ingestor
+    reads — which is the steady-state cutover target. Set explicitly only to write a separate shadow
+    index (e.g. `2026-06-15`) for isolated comparison runs. A matching `index_config` entry must exist
+    (see the 2025-10-02 root).
   EOT
 }
 
 variable "image_inferrer_initial_index_date" {
   type        = string
-  default     = "2026-06-15"
+  default     = ""
   description = <<-EOT
-    Initial-images index date the Python image-inferrer state machine reads from. Defaults to a
-    shadow source index (`images-initial-2026-06-15`) whose mapping indexes `modifiedTime` (the live
-    images-initial uses an "empty"/dynamic:false mapping where modifiedTime is unqueryable). Populate
-    it via a one-off reindex from `images-initial-<pipeline_date>`. At cutover, set this to
-    `var.pipeline_date` once the live images-initial indexes `modifiedTime`. A matching `index_config`
-    entry must exist (see the 2025-10-02 root).
+    Initial-images index the merger writes and both inferrers read. Empty (the default) falls back to
+    `var.pipeline_date`, which is the steady-state once a fresh pipeline's images-initial is created
+    with a mapping that indexes `modifiedTime`. Set explicitly during the in-place migration on an
+    existing pipeline whose live images-initial uses the "empty"/dynamic:false mapping (where
+    `modifiedTime` is unqueryable): point it at a modifiedTime-mapped index (e.g. `2026-06-15`) that the
+    merger is moved onto. A matching `index_config` entry must exist (see the 2025-10-02 root).
   EOT
 }
 
