@@ -38,6 +38,13 @@ def non_empty_subfields(
     )
 
 
+def first_non_empty_subfield(
+    field_code: str, subfield_code: str, record: Record
+) -> str | None:
+    values = non_empty_subfields(field_code, subfield_code, record)
+    return values[0] if values else None
+
+
 def get_a_subfields(field_code: str, record: Record) -> list[str]:
     return non_empty_subfields(field_code, "a", record)
 
