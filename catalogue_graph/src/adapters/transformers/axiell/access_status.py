@@ -60,9 +60,11 @@ def extract_access_status(record: Record) -> AccessStatus | None:
 
     if status in ACCESS_STATUS_MAPPING:
         return ACCESS_STATUS_MAPPING[status]
-    logger.warning(
-        "Unrecognised Axiell access status value",
-        status=status,
-        record_id=extract_id(record),
-    )
+
+    if status is not None:
+        logger.warning(
+            "Unrecognised Axiell access status value",
+            status=status,
+            record_id=extract_id(record),
+        )
     return None
