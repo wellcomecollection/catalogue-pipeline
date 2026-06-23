@@ -158,11 +158,11 @@ def test_transformer_includes_suppressions(
     visible = by_id["Work[folio-instance/fo00005]"]["_source"]
     assert visible["type"] == "Visible"
 
-    # Suppressed record should be treated as deleted
+    # Suppressed record should be treated as deleted with SuppressedFromSource reason
     suppressed = by_id["Work[folio-instance/fo00006]"]["_source"]
     assert suppressed["type"] == "Deleted"
-    assert suppressed["deletedReason"]["type"] == "DeletedFromSource"
-    assert suppressed["deletedReason"]["info"] == "Marked as deleted from source"
+    assert suppressed["deletedReason"]["type"] == "SuppressedFromSource"
+    assert suppressed["deletedReason"]["info"] == "Folio"
 
 
 def test_transformer_includes_predecessor_identifier(

@@ -2,7 +2,9 @@ from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuil
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
+from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.identifier import Id, WorkSourceIdentifier
+from models.pipeline.source.work import DeletedSourceWork
 
 
 class FolioWorkBuilder(MarcXmlWorkBuilder):
@@ -50,3 +52,18 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
             True if the record is hard-deleted or suppressed.
         """
         return row.get("deleted", False) or self._is_suppressed()
+
+    @property
+    def deleted_work(self) -> DeletedSourceWork:
+        reason = (
+            DeletedReason(type="SuppressedFromSource", info="Folio")
+            if self._is_suppressed()
+            else DeletedReason(
+                type="DeletedFromSource", info="Marked as deleted from source"
+            )
+        )
+        return DeletedSourceWork(
+            version=self.version,
+            deleted_reason=reason,
+            state=self.work_state,
+        )
