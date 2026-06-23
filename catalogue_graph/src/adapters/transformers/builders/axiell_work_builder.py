@@ -147,7 +147,7 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def notes(self) -> list[Note]:
-        return extract_notes(self.record)
+        return extract_notes(self.record, exclude_fields=["506", "540"])
 
     @property
     def physical_description(self) -> str | None:

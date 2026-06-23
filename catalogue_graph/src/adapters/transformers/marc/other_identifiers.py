@@ -7,14 +7,12 @@ identifier types that were stored there
 
 """
 
-import logging
-
+import structlog
+from models.pipeline.identifier import Id, SourceIdentifier
 from pymarc.field import Field
 from pymarc.record import Record
 
-from models.pipeline.identifier import Id, SourceIdentifier
-
-logger = logging.getLogger("transformer/other_identifiers")
+logger = structlog.get_logger(__name__)
 
 
 def extract_other_identifiers(record: Record) -> list[SourceIdentifier]:
@@ -56,7 +54,7 @@ def format_field(field: Field) -> SourceIdentifier | None:
             # logging them would just clutter the logs
             return None
         logger.warning(
-            "unknown identifier prefix '%s' in identifier: %s", prefix, a_subfield
+            "Unknown identifier prefix", prefix=prefix, identifier_value=a_subfield
         )
         return None
 

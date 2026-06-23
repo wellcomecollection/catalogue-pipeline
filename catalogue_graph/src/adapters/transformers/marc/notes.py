@@ -2,7 +2,7 @@
 Extract notes from 5xx MARC fields.
 """
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 
 import structlog
 from pymarc.field import Field
@@ -145,9 +145,14 @@ _NOTES_FIELDS: dict[str, Callable[[Field], Note | None]] = {
 }
 
 
-def extract_notes(record: Record) -> list[Note]:
+def extract_notes(
+    record: Record, exclude_fields: Iterable[str] | None = None
+) -> list[Note]:
     notes: list[Note] = []
-    for field in record.get_fields(*_NOTES_FIELDS.keys()):
+
+    note_fields: set[str] = set(_NOTES_FIELDS.keys()) - set(exclude_fields or [])
+
+    for field in record.get_fields(*note_fields):
         create = _NOTES_FIELDS.get(field.tag)
         if create is None:
             continue
