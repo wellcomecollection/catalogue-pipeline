@@ -23,6 +23,7 @@ from utils.argparse import add_pipeline_event_args, validate_es_mode_for_writes
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import (
     ElasticsearchMode,
+    generate_operations,
     get_standard_index_name,
     index_es_batch,
 )
@@ -68,28 +69,6 @@ def _get_objects_to_index(
                     content_length=s3_object["Size"],
                     record_count=range_end - range_start,
                 )
-
-
-def generate_operations(
-    index_name: str, indexable_data: list[IndexableRecord]
-) -> Generator[dict]:
-    for datum in indexable_data:
-        source = json.loads(datum.model_dump_json(exclude_none=True))
-        version = int(datum.get_modified_time().timestamp() * 1000)  # epoch millis
-
-        # Documents whose modified date is set to the start of the Unix epoch will have a version of 0.
-        # We floor this to 100 for backward compatibility with documents which use Elasticsearch's default versioning
-        # (which increments every time a given document is reindexed).
-        # This won't be needed after we do a full reindex.
-        version = max(100, version)
-
-        yield {
-            "_index": index_name,
-            "_id": datum.get_id(),
-            "_source": source,
-            "_version": version,
-            "_version_type": "external_gte",
-        }
 
 
 def get_indexable_data(
