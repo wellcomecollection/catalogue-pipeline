@@ -131,6 +131,21 @@ variable "image_inferrer_initial_index_date" {
   EOT
 }
 
+variable "graph_images_augmented_index_date" {
+  type        = string
+  default     = ""
+  description = <<-EOT
+    Augmented-images index that the graph subsystem READ-path (graph extractor, images ingestor,
+    incremental remover) uses as its source. Empty (the default) falls back to
+    `graph_index_dates.augmented`, keeping the read-path and the old Scala inferrer's write target
+    (`local.es_images_augmented_index`, also derived from `graph_index_dates.augmented`) on the same
+    index. Set explicitly to decouple them — i.e. to cut the read-path over to the new Python inferrer's
+    output (e.g. `2026-06-15`) while the old SQS-driven service keeps writing
+    `graph_index_dates.augmented` as an untouched, live fallback (so a rollback is just reverting this
+    var). The target index must be at full coverage before the switch.
+  EOT
+}
+
 variable "image_inferrer_max_concurrency" {
   type        = number
   default     = 10

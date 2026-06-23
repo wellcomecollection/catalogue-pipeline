@@ -80,7 +80,10 @@ module "pipeline" {
     },
     "2026-04-29" = {
       images = {
-        // prod inference manager - prod graph/ingestor/indexer
+        // OLD Scala inference manager output (its write target = local.es_images_augmented_index =
+        // images-augmented-${graph_index_dates.augmented}). POST-PHASE-2 the graph read-path no longer
+        // reads this (graph_images_augmented_index_date points it at 2026-06-15); the old service keeps
+        // writing it as a live rollback fallback. Remove when the old service is retired.
         augmented = "images_augmented.2026-04-29"
         // prod graph/ingestor/indexer - prod API
         indexed = "images_indexed.2024-11-14"
@@ -94,12 +97,10 @@ module "pipeline" {
     //    the "empty"/dynamic:false mapping, where modifiedTime is unqueryable). No longer
     //    a shadow index — keep it. (Will be a normal images-initial-<date> on the next
     //    full pipeline reindex; the off-pipeline-date name is cosmetic until then.)
-    //  - augmented: parallel OUTPUT index kept in sync by the scheduled inferrer, for
-    //    comparison against the Scala inferrer's prod output (reuses the
-    //    images_augmented.2026-04-29 mapping). KEEP — deliberately retained. POST-CUTOVER,
-    //    when the new inferrer is switched to write the prod augmented index
-    //    (graph_index_dates.augmented) and the old service is retired, this stays as the
-    //    comparison/standby index unless we later decide otherwise.
+    //  - augmented: the scheduled inferrer's output (reuses the images_augmented.2026-04-29 mapping).
+    //    As of Phase 2 this is the graph read-path SOURCE (graph_images_augmented_index_date =
+    //    "2026-06-15" below) — i.e. the production augmented index feeding the API. Must be at full
+    //    coverage before that switch is applied (see the graph_images_augmented_index_date note + PR).
     "2026-06-15" = {
       images = {
         initial   = "images_initial.2026-06-15"
@@ -110,19 +111,21 @@ module "pipeline" {
 
   allow_delete_indices = false
 
-  # Image-inferrer cutover, run alongside the old SQS-driven service (not yet retired).
-  # The live images-initial-2025-10-02 uses the "empty"/dynamic:false mapping where modifiedTime is
-  # unqueryable, so the merger + Scala inferrer are moved onto the modifiedTime-mapped
-  # images-initial-2026-06-15 (the index the new state-machine inferrer already reads). The schedule
-  # is ENABLED so the new path runs every 15 min and keeps its shadow augmented index in sync; it
-  # keeps writing the shadow images-augmented-2026-06-15 (NOT prod), so the old service remains the
-  # source of truth for the prod augmented index that the API reads. The switch to the production
-  # augmented index (graph_index_dates.augmented = 2026-04-29) + retiring the old service is a
-  # separate later step. NB the augmented override must stay set explicitly — the module var
-  # defaults to "" which falls back to graph_index_dates.augmented (prod 2026-04-29).
+  # Image-inferrer cutover. Phase 1 (applied): merger + Scala inferrer moved onto the modifiedTime-mapped
+  # images-initial-2026-06-15; the scheduled inferrer enabled, writing images-augmented-2026-06-15.
+  # Phase 2 (this change): the graph READ-path (extractor + ingestor + remover) is pointed at the new
+  # inferrer's output via graph_images_augmented_index_date below, so the API is now fed from
+  # images-augmented-2026-06-15. graph_index_dates.augmented stays "2026-04-29" on purpose: the old
+  # Scala service keeps writing that index as an untouched, live fallback (rollback = drop this override
+  # and the read-path returns to a still-current 2026-04-29). The new inferrer keeps writing
+  # images-augmented-2026-06-15 (image_inferrer_augmented_index_date), now the production augmented index.
+  # PREREQUISITE before apply: images-augmented-2026-06-15 must be at full coverage — it was short by
+  # ~5,709 historical images the scheduled find_work window hasn't reached; close that backlog first by
+  # reindexing images-augmented-2026-04-29 -> images-augmented-2026-06-15 (external_gte; see PR).
   enable_image_inferrer_schedule      = true
   image_inferrer_initial_index_date   = "2026-06-15"
   image_inferrer_augmented_index_date = "2026-06-15"
+  graph_images_augmented_index_date   = "2026-06-15"
 
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
