@@ -50,7 +50,6 @@ AWARDS_NOTE = IdLabel(id="awards-note", label="Awards note")
 ACQUISITION_NOTE = IdLabel(id="acquisition-note", label="Acquisition note")
 APPRAISAL_NOTE = IdLabel(id="appraisal-note", label="Appraisal note")
 ACCRUALS_NOTE = IdLabel(id="accruals-note", label="Accruals note")
-FINDING_AIDS = IdLabel(id="finding-aids", label="Finding aids")
 ARRANGEMENT_NOTE = IdLabel(id="arrangement-note", label="Arrangement")
 
 
