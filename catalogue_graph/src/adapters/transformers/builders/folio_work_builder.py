@@ -2,7 +2,9 @@ from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuil
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
+from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.identifier import Id, WorkSourceIdentifier
+from models.pipeline.source.work import DeletedSourceWork
 
 
 class FolioWorkBuilder(MarcXmlWorkBuilder):
@@ -19,3 +21,49 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
             )
 
         return None
+
+    def _is_suppressed(self) -> bool:
+        """Check if a FOLIO Instance is marked as suppressed in its MARC data.
+
+        FOLIO marks suppressed Instances with $t = 1 in MARC field 999
+        when "Transfer suppressed records with discovery flag value" is enabled
+        in FOLIO's OAI-PMH settings.
+
+        Returns:
+            True if suppression marker is found in field 999, False otherwise.
+        """
+        for field in self.record.fields:
+            if field.tag == "999" and "1" in field.get_subfields("t"):
+                return True
+
+        return False
+
+    def is_deleted(self, row: dict) -> bool:
+        """Check if a FOLIO record should be treated as deleted.
+
+        A FOLIO record is deleted if:
+        1. OAI-PMH hard deletion: row.deleted = True
+        2. FOLIO discovery suppression: MARC field 999 contains $t = 1
+
+        Args:
+            row: The adapter store row.
+
+        Returns:
+            True if the record is hard-deleted or suppressed.
+        """
+        return row.get("deleted", False) or self._is_suppressed()
+
+    @property
+    def deleted_work(self) -> DeletedSourceWork:
+        reason = (
+            DeletedReason(type="SuppressedFromSource", info="Folio")
+            if self._is_suppressed()
+            else DeletedReason(
+                type="DeletedFromSource", info="Marked as deleted from source"
+            )
+        )
+        return DeletedSourceWork(
+            version=self.version,
+            deleted_reason=reason,
+            state=self.work_state,
+        )

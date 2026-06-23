@@ -46,6 +46,20 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
         """Override in subclasses to link works to predecessors in another system (e.g. Folio → Sierra)."""
         return None
 
+    def is_deleted(self, row: dict) -> bool:
+        """Check if a record should be treated as deleted.
+
+        Base implementation checks only the Iceberg table's deleted column.
+        Subclasses can override to add adapter-specific suppression logic.
+
+        Args:
+            row: The adapter store row.
+
+        Returns:
+            True if the record should be marked as deleted.
+        """
+        return bool(row.get("deleted", False))
+
     @property
     def title(self) -> str:
         title: str = extract_title(self.record)
