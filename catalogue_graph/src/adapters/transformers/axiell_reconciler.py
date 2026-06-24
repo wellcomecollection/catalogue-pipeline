@@ -13,6 +13,7 @@ from adapters.transformers.source_work_transformer import (
 )
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
+from ingestor.models.shared.deleted_reason import DeletedFromSource
 from models.pipeline.source.work import (
     DeletedSourceWork,
 )
@@ -91,7 +92,10 @@ class AxiellReconciler(SourceWorkTransformer):
         for row in data_to_overwrite.to_pylist():
             last_modified = last_modified_by_id.get(row["id"], row["last_modified"])
             builder = self.work_builder(row["guid"], last_modified)
-            yield row["id"], builder.deleted_work
+            yield (
+                row["id"],
+                builder.transform_deleted_work(deleted_reason=DeletedFromSource()),
+            )
 
     def _commit(
         self, rows: Iterable[dict[str, Any]], _: set[str], error_row_ids: set[str]

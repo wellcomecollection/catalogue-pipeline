@@ -16,6 +16,7 @@ logger = structlog.get_logger(__name__)
 
 GLOBALLY_SUPPRESSED_SUBFIELDS = {"5"}
 
+
 GENERAL_NOTE = IdLabel(id="general-note", label="Notes")
 DISSERTATION_NOTE = IdLabel(id="dissertation-note", label="Dissertation note")
 BIBLIOGRAPHICAL_INFORMATION = IdLabel(
@@ -46,6 +47,14 @@ BINDING_INFORMATION = IdLabel(id="binding-detail", label="Binding detail")
 PUBLICATIONS_NOTE = IdLabel(id="publication-note", label="Publications note")
 EXHIBITIONS_NOTE = IdLabel(id="exhibitions-note", label="Exhibitions note")
 AWARDS_NOTE = IdLabel(id="awards-note", label="Awards note")
+ACQUISITION_NOTE = IdLabel(id="acquisition-note", label="Acquisition note")
+APPRAISAL_NOTE = IdLabel(id="appraisal-note", label="Appraisal note")
+ACCRUALS_NOTE = IdLabel(id="accruals-note", label="Accruals note")
+FINDING_AIDS = IdLabel(id="finding-aids", label="Finding aids")
+ARRANGEMENT_NOTE = IdLabel(id="arrangement-note", label="Arrangement")
+
+
+NON_PRIVATE_NOTES = (OWNERSHIP_NOTE, APPRAISAL_NOTE, ACQUISITION_NOTE)
 
 
 # TODO: The Scala notes transformer (MarcNotes.scala) had custom logic removing all references to Codebreakers.
@@ -53,11 +62,9 @@ AWARDS_NOTE = IdLabel(id="awards-note", label="Awards note")
 # against Scala transformed source works.
 
 
-def _create_note_from_contents(
-    field: Field,
-    note_type: IdLabel,
-    suppressed_subfields: set[str] | None = None,
-) -> Note:
+def _extract_note_contents(
+    field: Field, suppressed_subfields: set[str] | None = None
+) -> str:
     suppressed = GLOBALLY_SUPPRESSED_SUBFIELDS | (suppressed_subfields or set())
     parts: list[str] = []
     for subfield_tag, value in field:
@@ -69,26 +76,32 @@ def _create_note_from_contents(
             parts.append(format_as_html_link(value))
         else:
             parts.append(value)
-    contents = " ".join(parts)
+
+    return " ".join(parts)
+
+
+def _create_note(
+    field: Field,
+    note_type: IdLabel,
+    suppressed_subfields: set[str] | None = None,
+) -> Note | None:
+    # Only produce note when indicator 1 is "1" (not private).
+    if note_type in NON_PRIVATE_NOTES and field.indicator1 != "1":
+        return None
+
+    contents = _extract_note_contents(field, suppressed_subfields)
     return Note(contents=contents, note_type=note_type)
-
-
-def _create_ownership_note(field: Field) -> Note | None:
-    # Only produce an ownership note when indicator 1 is "1" (not private).
-    if field.indicator1 == "1":
-        return _create_note_from_contents(field, OWNERSHIP_NOTE)
-    return None
 
 
 def _create_location_of_note(field: Field) -> Note | None:
     # Use indicator 1 to distinguish location of originals vs duplicates.
     if field.indicator1 == "2":
-        return _create_note_from_contents(field, LOCATION_OF_DUPLICATES_NOTE)
-    return _create_note_from_contents(field, LOCATION_OF_ORIGINAL_NOTE)
+        return _create_note(field, LOCATION_OF_DUPLICATES_NOTE)
+    return _create_note(field, LOCATION_OF_ORIGINAL_NOTE)
 
 
 def _note_from(note_type: IdLabel) -> Callable[[Field], Note | None]:
-    return lambda field: _create_note_from_contents(field, note_type)
+    return lambda field: _create_note(field, note_type)
 
 
 # Mapping of MARC tag to a function that creates a Note from the field
@@ -112,17 +125,20 @@ _NOTES_FIELDS: dict[str, Callable[[Field], Note | None]] = {
     "535": _create_location_of_note,
     "536": _note_from(FUNDING_INFORMATION),
     "540": _note_from(TERMS_OF_USE),
+    "541": _note_from(ACQUISITION_NOTE),
     "542": _note_from(COPYRIGHT_NOTE),
     "544": _note_from(RELATED_MATERIAL),
     "545": _note_from(BIOGRAPHICAL_NOTE),
     "546": _note_from(LANGUAGE_NOTE),
     "547": _note_from(GENERAL_NOTE),
     "550": _note_from(GENERAL_NOTE),
-    "561": _create_ownership_note,
+    "561": _note_from(OWNERSHIP_NOTE),
     "562": _note_from(GENERAL_NOTE),
     "563": _note_from(BINDING_INFORMATION),
     "580": _note_from(GENERAL_NOTE),
     "581": _note_from(PUBLICATIONS_NOTE),
+    "583": _note_from(APPRAISAL_NOTE),
+    "584": _note_from(ACCRUALS_NOTE),
     "585": _note_from(EXHIBITIONS_NOTE),
     "586": _note_from(AWARDS_NOTE),
     "588": _note_from(GENERAL_NOTE),

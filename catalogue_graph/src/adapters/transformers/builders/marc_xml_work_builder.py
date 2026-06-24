@@ -5,6 +5,7 @@ from pymarc.record import Record
 from adapters.transformers.builders.source_work_builder import SourceWorkBuilder
 from adapters.transformers.ebsco.parents import get_parents
 from adapters.transformers.marc.alternative_titles import extract_alternative_titles
+from adapters.transformers.marc.description import extract_description
 from adapters.transformers.marc.identifier import extract_id
 from adapters.transformers.marc.other_identifiers import extract_other_identifiers
 from adapters.transformers.marc.title import extract_title
@@ -19,7 +20,7 @@ from models.pipeline.item import Item
 from models.pipeline.location import DigitalLocation
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
-from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
+from models.pipeline.source.work import SourceWork, SourceWorkState, VisibleSourceWork
 from models.pipeline.work_data import WorkData, WorkType
 from models.pipeline.work_state import WorkAncestor, WorkRelations
 
@@ -46,20 +47,6 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
         """Override in subclasses to link works to predecessors in another system (e.g. Folio → Sierra)."""
         return None
 
-    def is_deleted(self, row: dict) -> bool:
-        """Check if a record should be treated as deleted.
-
-        Base implementation checks only the Iceberg table's deleted column.
-        Subclasses can override to add adapter-specific suppression logic.
-
-        Args:
-            row: The adapter store row.
-
-        Returns:
-            True if the record should be marked as deleted.
-        """
-        return bool(row.get("deleted", False))
-
     @property
     def title(self) -> str:
         title: str = extract_title(self.record)
@@ -79,7 +66,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
 
     @property
     def description(self) -> str | None:
-        return None
+        return extract_description(self.record)
 
     @property
     def physical_description(self) -> str | None:
@@ -201,19 +188,21 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
         )
 
     @property
-    def work_state(self) -> SourceWorkState:
+    def visible_work_state(self) -> SourceWorkState:
         """Extends the base work_state with predecessor identifier and ancestor relations from the MARC record."""
-        return super().work_state.model_copy(
+        return super()._base_work_state.model_copy(
             update={
                 "predecessor_identifier": self.predecessor_identifier,
                 "relations": WorkRelations(ancestors=self.ancestors),
             }
         )
 
-    @property
-    def visible_work(self) -> VisibleSourceWork:
+    def transform_visible_work(self) -> VisibleSourceWork:
         return VisibleSourceWork(
             version=self.version,
-            state=self.work_state,
+            state=self.visible_work_state,
             data=self.work_data,
         )
+
+    def transform_work(self) -> SourceWork:
+        return self.transform_visible_work()

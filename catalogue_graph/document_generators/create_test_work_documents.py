@@ -29,10 +29,9 @@ from ingestor.models.neptune.query_result import (
 )
 from models.pipeline.access_condition import (
     AccessCondition,
-    AccessMethod,
-    AccessStatus,
-    AccessStatusRelationship,
 )
+from models.pipeline.access_method import AccessMethod
+from models.pipeline.access_status import AccessStatus, AccessStatusRelationship
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Concept, Genre, Period, Subject
 from models.pipeline.format import (
