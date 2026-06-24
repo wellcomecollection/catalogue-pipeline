@@ -119,9 +119,6 @@ module "pipeline" {
   # Scala service keeps writing that index as an untouched, live fallback (rollback = drop this override
   # and the read-path returns to a still-current 2026-04-29). The new inferrer keeps writing
   # images-augmented-2026-06-15 (image_inferrer_augmented_index_date), now the production augmented index.
-  # PREREQUISITE before apply: images-augmented-2026-06-15 must be at full coverage — it was short by
-  # ~5,709 historical images the scheduled find_work window hasn't reached; close that backlog first by
-  # reindexing images-augmented-2026-04-29 -> images-augmented-2026-06-15 (external_gte; see PR).
   enable_image_inferrer_schedule      = true
   image_inferrer_initial_index_date   = "2026-06-15"
   image_inferrer_augmented_index_date = "2026-06-15"
