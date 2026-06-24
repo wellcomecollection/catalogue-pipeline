@@ -59,6 +59,13 @@ def format_field(field: Field) -> SourceIdentifier | None:
         )
         return None
 
+    # TODO: This should be fixed at source
+    if identifier_type == "wellcome-accession-number":
+        id_value = id_value.removeprefix("Acc ")
+
+    if not id_value:
+        return None
+
     return SourceIdentifier(
         identifier_type=Id(id=identifier_type), ontology_type="Work", value=id_value
     )
