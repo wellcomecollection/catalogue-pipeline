@@ -12,6 +12,8 @@ def extract_subject_labels(record: Record) -> list[str]:
 def extract_subjects(record: Record) -> list[Subject]:
     labels = extract_subject_labels(record)
 
+    labels = [label.removeprefix("<p>") for label in labels]
+
     subjects = []
     for label in labels:
         nested_concept = build_concept(label, "Concept")
