@@ -7,16 +7,8 @@ from adapters.transformers.axiell.access_status import extract_access_status
 from adapters.transformers.marc.common import first_non_empty_subfield
 from adapters.transformers.marc.identifier import extract_id
 from models.pipeline.access_status import Closed, PermissionRequired, Restricted
-from models.pipeline.id_label import IdLabel
-from models.pipeline.note import Note
 
 logger = structlog.get_logger(__name__)
-
-TERMS_OF_USE = IdLabel(id="terms-of-use", label="Terms of use")
-
-
-class TermsOfUseNote(Note):
-    note_type: IdLabel = TERMS_OF_USE
 
 
 def _try_parse_date(s: str) -> date | None:
@@ -80,7 +72,7 @@ def _has_restrictions(text: str) -> bool:
     return "restricted" in lower or "restrictions" in lower
 
 
-def extract_terms_of_use(record: Record) -> Note | None:
+def extract_terms_of_use(record: Record) -> str | None:
     conditions = extract_access_conditions(record)
     access_status = extract_access_status(record)
     closed_until = extract_closed_until_date(record)
@@ -92,45 +84,48 @@ def extract_terms_of_use(record: Record) -> Note | None:
 
     # Conditions with no dates: return them as-is
     if conditions and not closed_until and not restricted_until:
-        return TermsOfUseNote(contents=conditions)
+        return conditions
 
-    # Closed status with a closedUntil date
+    # Closed status with a closed until date
     if access_status == Closed and closed_until:
-        if conditions:
-            if "closed" in conditions.lower() and _contains_date(
-                conditions, closed_until
-            ):
-                return TermsOfUseNote(contents=conditions)
-            return TermsOfUseNote(
-                contents=f"{conditions} Closed until {_display_date(closed_until)}.",
-            )
-        return TermsOfUseNote(
-            contents=f"Closed until {_display_date(closed_until)}.",
-        )
+        closed_until_message = f"Closed until {_display_date(closed_until)}."
+        if not conditions:
+            return closed_until_message
 
-    # Restricted status with a restrictedUntil date
+        # Don't repeat the access status/date if they're already included in the text
+        if "closed" in conditions.lower() and _contains_date(conditions, closed_until):
+            return conditions
+
+        return f"{conditions} {closed_until_message}"
+
+    # Restricted status with a restricted until date
     if access_status == Restricted and restricted_until:
-        if conditions:
-            if "restricted" in conditions.lower() and _contains_date(
-                conditions, restricted_until
-            ):
-                return TermsOfUseNote(contents=conditions)
-            return TermsOfUseNote(
-                contents=f"{conditions} Restricted until {_display_date(restricted_until)}.",
-            )
-        return TermsOfUseNote(
-            contents=f"Restricted until {_display_date(restricted_until)}.",
+        restricted_until_message = (
+            f"Restricted until {_display_date(restricted_until)}."
         )
 
-    # PermissionRequired with a restrictedUntil date where conditions already mention
+        if not conditions:
+            return restricted_until_message
+
+        if "restricted" in conditions.lower() and _contains_date(
+            conditions, restricted_until
+        ):
+            return conditions
+
+        return f"{conditions} {restricted_until_message}"
+
+    # PermissionRequired with a restricted until date where conditions already mention
     # both permission and restrictions
-    if access_status == PermissionRequired and restricted_until and conditions:
-        if "permission" in conditions.lower() and _has_restrictions(conditions):
-            if _contains_date(conditions, restricted_until):
-                return TermsOfUseNote(contents=conditions)
-            return TermsOfUseNote(
-                contents=f"{conditions} Restricted until {_display_date(restricted_until)}.",
-            )
+    if (
+        access_status == PermissionRequired
+        and restricted_until
+        and conditions
+        and "permission" in conditions.lower()
+        and _has_restrictions(conditions)
+    ):
+        if _contains_date(conditions, restricted_until):
+            return conditions
+        return f"{conditions} Restricted until {_display_date(restricted_until)}."
 
     # Catch-all: log a warning and combine what we have. This affects very few
     # records and typically reflects a data issue in the source system.
@@ -138,14 +133,13 @@ def extract_terms_of_use(record: Record) -> Note | None:
         "Unclear how to create a TermsOfUse note",
         record_id=extract_id(record),
     )
-    parts = [
-        conditions,
-        f"Restricted until {_display_date(restricted_until)}."
-        if restricted_until
-        else None,
-        f"Closed until {_display_date(closed_until)}." if closed_until else None,
-    ]
-    non_empty = [p for p in parts if p]
-    if not non_empty:
-        return None
-    return TermsOfUseNote(contents=" ".join(non_empty))
+
+    parts = []
+    if conditions:
+        parts.append(conditions)
+    if restricted_until:
+        parts.append(f"Restricted until {_display_date(restricted_until)}.")
+    if closed_until:
+        parts.append(f"Closed until {_display_date(closed_until)}.")
+
+    return " ".join(parts) if parts else None

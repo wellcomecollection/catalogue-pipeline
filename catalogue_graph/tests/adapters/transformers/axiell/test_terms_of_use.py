@@ -10,7 +10,6 @@ from adapters.transformers.axiell.terms_of_use import extract_terms_of_use
 from models.pipeline.access_status import (
     Closed,
 )
-from models.pipeline.note import Note
 
 
 def _make_record(
@@ -47,10 +46,6 @@ def _make_record(
     return record
 
 
-def _contents(note: Note | None) -> str | None:
-    return note.contents if note else None
-
-
 # ---------------------------------------------------------------------------
 # Tests that don't need Closed status (Axiell-native statuses only)
 # ---------------------------------------------------------------------------
@@ -62,7 +57,7 @@ def test_open_with_conditions_no_dates() -> None:
         status="OPEN",
         conditions="The papers are available subject to the usual conditions of access to Archives and Manuscripts material.",
     )
-    assert _contents(extract_terms_of_use(record)) == (
+    assert extract_terms_of_use(record) == (
         "The papers are available subject to the usual conditions of access to Archives and Manuscripts material."
     )
 
@@ -77,7 +72,7 @@ def test_restricted_with_conditions_no_dates() -> None:
             "Please contact collections@wellcome.ac.uk for more details."
         ),
     )
-    assert _contents(extract_terms_of_use(record)) == (
+    assert extract_terms_of_use(record) == (
         "Digital records cannot be ordered or viewed online. "
         "Requests to view digital records onsite are considered on a case by case basis. "
         "Please contact collections@wellcome.ac.uk for more details."
@@ -94,7 +89,7 @@ def test_restricted_date_already_in_conditions() -> None:
         ),
         restricted_until="01/01/2039",
     )
-    assert _contents(extract_terms_of_use(record)) == (
+    assert extract_terms_of_use(record) == (
         "This file is restricted until 01/01/2039 for data protection reasons. "
         "Readers must complete and sign a Restricted Access undertaking form to apply for access."
     )
@@ -111,7 +106,7 @@ def test_restricted_date_not_in_conditions() -> None:
         ),
         restricted_until="01/01/2060",
     )
-    assert _contents(extract_terms_of_use(record)) == (
+    assert extract_terms_of_use(record) == (
         "This file is restricted for data protection reasons. "
         "When a reader arrives onsite, they will be required to sign a Restricted Access form "
         "agreeing to anonymise personal data before viewing the file. "
@@ -144,7 +139,7 @@ def test_permission_required_with_restrictions_date_not_in_conditions() -> None:
         ),
         restricted_until="01/01/2072",
     )
-    assert _contents(extract_terms_of_use(record)) == (
+    assert extract_terms_of_use(record) == (
         'Permission must be obtained from <a href="mailto:barbie.antonis@gmail.com">the Winnicott Trust</a>, '
         "and the usual conditions of access to Archives and Manuscripts material apply; "
         "a Reader's Undertaking must be completed. "
@@ -164,7 +159,7 @@ def test_removes_trailing_whitespace() -> None:
         ),
         restricted_until="01/01/2024",
     )
-    assert _contents(extract_terms_of_use(record)) == (
+    assert extract_terms_of_use(record) == (
         "This file is restricted until 01/01/2024 for data protection reasons. "
         "Readers must complete and sign a Restricted Access undertaking form to apply for access."
     )
@@ -180,7 +175,7 @@ def test_fallback_case() -> None:
         ),
         restricted_until="01/01/2066",
     )
-    assert _contents(extract_terms_of_use(record)) == (
+    assert extract_terms_of_use(record) == (
         "The papers are available subject to the usual conditions of access to Archives and Manuscripts material. "
         "In addition a Restricted Access form must be completed to apply for access to this file. "
         "Restricted until 1 January 2066."
@@ -199,9 +194,7 @@ def test_closed_with_conditions_no_dates() -> None:
     """Closed item with conditions, no date: conditions are returned as-is."""
     record = _make_record(conditions="Closed on depositor agreement.")
     with patch(_PATCH_TARGET, return_value=Closed):
-        assert (
-            _contents(extract_terms_of_use(record)) == "Closed on depositor agreement."
-        )
+        assert extract_terms_of_use(record) == "Closed on depositor agreement."
 
 
 def test_closed_date_already_in_conditions() -> None:
@@ -211,7 +204,7 @@ def test_closed_date_already_in_conditions() -> None:
         closed_until="01/01/2039",
     )
     with patch(_PATCH_TARGET, return_value=Closed):
-        assert _contents(extract_terms_of_use(record)) == (
+        assert extract_terms_of_use(record) == (
             "Closed under the Data Protection Act until 1st January 2039."
         )
 
@@ -223,7 +216,7 @@ def test_closed_date_not_in_conditions() -> None:
         closed_until="01/01/2039",
     )
     with patch(_PATCH_TARGET, return_value=Closed):
-        assert _contents(extract_terms_of_use(record)) == (
+        assert extract_terms_of_use(record) == (
             "Closed under the Data Protection Act. Closed until 1 January 2039."
         )
 
@@ -232,7 +225,7 @@ def test_closed_no_conditions() -> None:
     """Closed item with no conditions: synthesise 'Closed until …' note."""
     record = _make_record(closed_until="01/01/2068")
     with patch(_PATCH_TARGET, return_value=Closed):
-        assert _contents(extract_terms_of_use(record)) == "Closed until 1 January 2068."
+        assert extract_terms_of_use(record) == "Closed until 1 January 2068."
 
 
 def test_adds_missing_full_stop() -> None:
@@ -242,7 +235,7 @@ def test_adds_missing_full_stop() -> None:
         closed_until="01/01/2055",
     )
     with patch(_PATCH_TARGET, return_value=Closed):
-        assert _contents(extract_terms_of_use(record)) == (
+        assert extract_terms_of_use(record) == (
             "This file is closed for data protection reasons and cannot be accessed. "
             "Closed until 1 January 2055."
         )
