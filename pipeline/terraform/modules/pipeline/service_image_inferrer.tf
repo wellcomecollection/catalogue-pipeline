@@ -38,6 +38,11 @@ locals {
   inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory - local.log_router_memory))
 }
 
+# OLD SQS-driven image inferrer. Being replaced by the scheduled state machine in
+# state_machine_image_inferrer.tf. POST-CUTOVER: remove this whole module (and its SNS
+# subscription to merger.images_output) once the new path writes the prod augmented index
+# and has been the sole inferrer for long enough to be trusted. Kept running in parallel
+# during the transition (it remains the source of truth for the prod augmented index).
 module "image_inferrer" {
   source = "../services_with_manager"
 

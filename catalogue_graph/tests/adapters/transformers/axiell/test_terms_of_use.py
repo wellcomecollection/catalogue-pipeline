@@ -4,11 +4,12 @@
 
 from unittest.mock import patch
 
-import pytest
 from pymarc.record import Field, Record, Subfield
 
 from adapters.transformers.axiell.terms_of_use import extract_terms_of_use
-from models.pipeline.access_status import ByAppointment, Closed, PermissionRequired, Restricted
+from models.pipeline.access_status import (
+    Closed,
+)
 from models.pipeline.note import Note
 
 
@@ -198,7 +199,9 @@ def test_closed_with_conditions_no_dates() -> None:
     """Closed item with conditions, no date: conditions are returned as-is."""
     record = _make_record(conditions="Closed on depositor agreement.")
     with patch(_PATCH_TARGET, return_value=Closed):
-        assert _contents(extract_terms_of_use(record)) == "Closed on depositor agreement."
+        assert (
+            _contents(extract_terms_of_use(record)) == "Closed on depositor agreement."
+        )
 
 
 def test_closed_date_already_in_conditions() -> None:

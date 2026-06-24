@@ -94,7 +94,7 @@ class AxiellReconciler(SourceWorkTransformer):
             builder = self.work_builder(row["guid"], last_modified)
             yield (
                 row["id"],
-                builder.transform_deleted_work(deleted_reason=DeletedFromSource),
+                builder.transform_deleted_work(deleted_reason=DeletedFromSource()),
             )
 
     def _commit(

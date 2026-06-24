@@ -1,14 +1,14 @@
-import structlog
 from datetime import date
 
-from models.pipeline.access_status import Closed, PermissionRequired, Restricted
-from models.pipeline.id_label import IdLabel
-from models.pipeline.note import Note
+import structlog
 from pymarc.record import Record
 
 from adapters.transformers.axiell.access_status import extract_access_status
 from adapters.transformers.marc.common import first_non_empty_subfield
 from adapters.transformers.marc.identifier import extract_id
+from models.pipeline.access_status import Closed, PermissionRequired, Restricted
+from models.pipeline.id_label import IdLabel
+from models.pipeline.note import Note
 
 logger = structlog.get_logger(__name__)
 
@@ -56,7 +56,10 @@ def _contains_date(text: str, d: date) -> bool:
     matching the Scala CalmTermsOfUse behaviour.
     """
     normalised = (
-        text.replace("1st", "1").replace("2nd", "2").replace("3rd", "3").replace("th", "")
+        text.replace("1st", "1")
+        .replace("2nd", "2")
+        .replace("3rd", "3")
+        .replace("th", "")
     )
     return any(
         f"until {fmt}" in normalised
@@ -94,7 +97,9 @@ def extract_terms_of_use(record: Record) -> Note | None:
         try:
             restricted_until = _parse_date(restricted_until_date)
         except (ValueError, TypeError):
-            logger.warning("Could not parse restrictedUntil date", value=restricted_until_date)
+            logger.warning(
+                "Could not parse restrictedUntil date", value=restricted_until_date
+            )
 
     # No conditions and no dates: nothing useful to output
     if not conditions and not closed_until and not restricted_until:
@@ -107,7 +112,9 @@ def extract_terms_of_use(record: Record) -> Note | None:
     # Closed status with a closedUntil date
     if access_status == Closed and closed_until:
         if conditions:
-            if "closed" in conditions.lower() and _contains_date(conditions, closed_until):
+            if "closed" in conditions.lower() and _contains_date(
+                conditions, closed_until
+            ):
                 return Note(note_type=_TERMS_OF_USE, contents=conditions)
             return Note(
                 note_type=_TERMS_OF_USE,
@@ -121,7 +128,9 @@ def extract_terms_of_use(record: Record) -> Note | None:
     # Restricted status with a restrictedUntil date
     if access_status == Restricted and restricted_until:
         if conditions:
-            if "restricted" in conditions.lower() and _contains_date(conditions, restricted_until):
+            if "restricted" in conditions.lower() and _contains_date(
+                conditions, restricted_until
+            ):
                 return Note(note_type=_TERMS_OF_USE, contents=conditions)
             return Note(
                 note_type=_TERMS_OF_USE,
@@ -151,10 +160,12 @@ def extract_terms_of_use(record: Record) -> Note | None:
     )
     parts = [
         conditions,
-        f"Restricted until {_display_date(restricted_until)}." if restricted_until else None,
+        f"Restricted until {_display_date(restricted_until)}."
+        if restricted_until
+        else None,
         f"Closed until {_display_date(closed_until)}." if closed_until else None,
     ]
     non_empty = [p for p in parts if p]
     if not non_empty:
         return None
-    return Note(note_type=_TERMS_OF_USE, contents=" ".join(non_empty)) 
+    return Note(note_type=_TERMS_OF_USE, contents=" ".join(non_empty))
