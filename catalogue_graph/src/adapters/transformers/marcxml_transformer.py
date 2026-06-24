@@ -51,4 +51,4 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
         self, marc_record: Record, last_modified: datetime
     ) -> DeletedSourceWork:
         builder = self.work_builder(marc_record, last_modified)
-        return builder.transform_deleted_work(deleted_reason=DeletedFromSource)
+        return builder.transform_deleted_work(deleted_reason=DeletedFromSource())

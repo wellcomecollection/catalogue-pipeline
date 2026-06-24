@@ -61,7 +61,7 @@ NON_SUPPRESSED_STATUSES: set[AxiellCatalogueStatus] = {
 class AxiellWorkBuilder(MarcXmlWorkBuilder):
     """Work builder for Axiell (MARC XML) records."""
 
-    def _should_suppress(self) -> bool:
+    def _is_suppresssed(self) -> bool:
         # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
         # actual archives but instead guides for researchers, so we suppress them here.
         ref_no = self.reference_number
@@ -189,8 +189,10 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
         )
 
     def transform_work(self) -> VisibleSourceWork | DeletedSourceWork:
-        if self._should_suppress():
-            return self.transform_deleted_work(deleted_reason=SuppressedFromSource)
+        if self._is_suppresssed():
+            return self.transform_deleted_work(
+                deleted_reason=SuppressedFromSource(info="Axiell")
+            )
         else:
             return self.transform_visible_work()
 

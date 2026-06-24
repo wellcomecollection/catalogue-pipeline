@@ -8,7 +8,10 @@ class DeletedReason(BaseModel):
     info: str | None = None
 
 
-DeletedFromSource = DeletedReason(
-    type="DeletedFromSource", info="Marked as deleted from source"
-)
-SuppressedFromSource = DeletedReason(type="SuppressedFromSource")
+class SuppressedFromSource(DeletedReason):
+    type: DeletedReasonType = "SuppressedFromSource"
+
+
+class DeletedFromSource(DeletedReason):
+    type: DeletedReasonType = "DeletedFromSource"
+    info: str | None = "Marked as deleted from source"
