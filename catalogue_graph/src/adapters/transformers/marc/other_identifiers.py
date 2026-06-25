@@ -39,6 +39,9 @@ ORIGIN_CODE_TO_ID_TYPE = {
 }
 
 
+IGNORED_PREFIXES = {"SCM loan accession number", "temporary number"}
+
+
 def format_field(field: Field) -> SourceIdentifier | None:
     a_subfield = field.get("a")
     if a_subfield is None:
@@ -50,18 +53,18 @@ def format_field(field: Field) -> SourceIdentifier | None:
         return None
     identifier_type = which_identifier_type(prefix, id_value)
     if identifier_type is None:
-        if prefix == "SCM loan accession number" or prefix == "temporary number":
-            # don't bother warning, we know about these and don't have a use for them yet
-            # logging them would just clutter the logs
-            return None
-        logger.warning(
-            "Unknown identifier prefix", prefix=prefix, identifier_value=a_subfield
-        )
+        # Do not warn about known ignored prefixes. We don't have a use for them
+        # and logging them would clutter the logs.
+        if prefix not in IGNORED_PREFIXES:
+            logger.warning(
+                "Unknown identifier prefix", prefix=prefix, identifier_value=a_subfield
+            )
+
         return None
 
     # TODO: This should be fixed at source
     if identifier_type == "wellcome-accession-number":
-        id_value = id_value.removeprefix("Acc ")
+        id_value = id_value.removeprefix("Acc").strip()
 
     if not id_value:
         return None

@@ -2,14 +2,10 @@
 
 # mypy: allow-untyped-calls
 
-from unittest.mock import patch
-
+from freezegun import freeze_time
 from pymarc.record import Field, Record, Subfield
 
 from adapters.transformers.axiell.terms_of_use import extract_terms_of_use
-from models.pipeline.access_status import (
-    Closed,
-)
 
 
 def _make_record(
@@ -18,13 +14,7 @@ def _make_record(
     closed_until: str | None = None,
     restricted_until: str | None = None,
 ) -> Record:
-    """Build a minimal MARC record with access fields populated.
-
-    status         → 506 $f  (Axiell access status code, e.g. "OPEN", "RESTRICTED")
-    conditions     → 506 $a  (access conditions text)
-    closed_until   → 506 $g  (date in d/M/yyyy format)
-    restricted_until → 540 $g (date in d/M/yyyy format)
-    """
+    """Build a minimal MARC record with access fields populated. Dates must be in yyyy/M/d format."""
     record = Record()
     record.add_field(Field(tag="001", data="test_id"))
 
@@ -46,71 +36,55 @@ def _make_record(
     return record
 
 
-# ---------------------------------------------------------------------------
-# Tests that don't need Closed status (Axiell-native statuses only)
-# ---------------------------------------------------------------------------
-
-
 def test_open_with_conditions_no_dates() -> None:
     """Open item: conditions are returned as-is."""
-    record = _make_record(
-        status="OPEN",
-        conditions="The papers are available subject to the usual conditions of access to Archives and Manuscripts material.",
-    )
-    assert extract_terms_of_use(record) == (
-        "The papers are available subject to the usual conditions of access to Archives and Manuscripts material."
-    )
+    conditions = "The papers are available subject to the usual conditions of access to Archives and Manuscripts material."
+    record = _make_record(status="OPEN", conditions=conditions)
+    assert extract_terms_of_use(record) == conditions
 
 
 def test_restricted_with_conditions_no_dates() -> None:
     """Restricted item with no date: conditions are returned as-is."""
-    record = _make_record(
-        status="RESTRICTED",
-        conditions=(
-            "Digital records cannot be ordered or viewed online. "
-            "Requests to view digital records onsite are considered on a case by case basis. "
-            "Please contact collections@wellcome.ac.uk for more details."
-        ),
-    )
-    assert extract_terms_of_use(record) == (
+    conditions = (
         "Digital records cannot be ordered or viewed online. "
         "Requests to view digital records onsite are considered on a case by case basis. "
         "Please contact collections@wellcome.ac.uk for more details."
     )
 
+    record = _make_record(status="RESTRICTED", conditions=conditions)
+    assert extract_terms_of_use(record) == conditions
 
+
+@freeze_time("2025-01-01T12:00:00Z")
 def test_restricted_date_already_in_conditions() -> None:
-    """Restricted item: date already present in conditions → no repetition."""
-    record = _make_record(
-        status="RESTRICTED",
-        conditions=(
-            "This file is restricted until 01/01/2039 for data protection reasons. "
-            "Readers must complete and sign a Restricted Access undertaking form to apply for access."
-        ),
-        restricted_until="01/01/2039",
-    )
-    assert extract_terms_of_use(record) == (
+    """Restricted item, date already present in conditions: no repetition."""
+    conditions = (
         "This file is restricted until 01/01/2039 for data protection reasons. "
         "Readers must complete and sign a Restricted Access undertaking form to apply for access."
     )
-
-
-def test_restricted_date_not_in_conditions() -> None:
-    """Restricted item: date not in conditions → append 'Restricted until …'."""
     record = _make_record(
         status="RESTRICTED",
-        conditions=(
-            "This file is restricted for data protection reasons. "
-            "When a reader arrives onsite, they will be required to sign a Restricted Access form "
-            "agreeing to anonymise personal data before viewing the file."
-        ),
-        restricted_until="01/01/2060",
+        conditions=conditions,
+        restricted_until="01/01/2039",
     )
-    assert extract_terms_of_use(record) == (
+    assert extract_terms_of_use(record) == conditions
+
+
+@freeze_time("2025-01-01T12:00:00Z")
+def test_restricted_date_not_in_conditions() -> None:
+    """Restricted item, date not in conditions: append 'Restricted until <date>'."""
+    conditions = (
         "This file is restricted for data protection reasons. "
         "When a reader arrives onsite, they will be required to sign a Restricted Access form "
         "agreeing to anonymise personal data before viewing the file. "
-        "Restricted until 1 January 2060."
+    )
+    record = _make_record(
+        status="RESTRICTED",
+        conditions=conditions,
+        restricted_until="2060-01-01",
+    )
+    assert (
+        extract_terms_of_use(record) == f"{conditions}Restricted until 1 January 2060."
     )
 
 
@@ -125,122 +99,98 @@ def test_no_access_information() -> None:
     assert extract_terms_of_use(_make_record()) is None
 
 
+@freeze_time("2025-01-01T12:00:00Z")
 def test_permission_required_with_restrictions_date_not_in_conditions() -> None:
     """PermissionRequired + conditions mentioning both permission and restrictions,
-    date not yet in conditions → append 'Restricted until …'."""
-    record = _make_record(
-        status="PERMISSIONREQUIRED",
-        conditions=(
-            'Permission must be obtained from <a href="mailto:barbie.antonis@gmail.com">the Winnicott Trust</a>, '
-            "and the usual conditions of access to Archives and Manuscripts material apply; "
-            "a Reader's Undertaking must be completed. "
-            "In addition there are Data Protection restrictions on this item and an additional "
-            "application for access must be completed."
-        ),
-        restricted_until="01/01/2072",
-    )
-    assert extract_terms_of_use(record) == (
+    date not yet in conditions: append 'Restricted until <date>'."""
+    conditions = (
         'Permission must be obtained from <a href="mailto:barbie.antonis@gmail.com">the Winnicott Trust</a>, '
         "and the usual conditions of access to Archives and Manuscripts material apply; "
         "a Reader's Undertaking must be completed. "
         "In addition there are Data Protection restrictions on this item and an additional "
-        "application for access must be completed. "
-        "Restricted until 1 January 2072."
+        "application for access must be completed."
+    )
+    record = _make_record(
+        status="PERMISSIONREQUIRED",
+        conditions=conditions,
+        restricted_until="2072-01-01",
+    )
+    assert (
+        extract_terms_of_use(record) == f"{conditions} Restricted until 1 January 2072."
     )
 
 
+@freeze_time("2025-01-01T12:00:00Z")
 def test_removes_trailing_whitespace() -> None:
-    """Trailing whitespace on conditions is stripped; date already in conditions."""
+    """Trailing whitespace on conditions is stripped, date already in conditions."""
+    conditions = (
+        "This file is restricted until 01/01/2054 for data protection reasons. "
+        "Readers must complete and sign a Restricted Access undertaking form to apply for access.\n\n"
+    )
     record = _make_record(
         status="RESTRICTED",
-        conditions=(
-            "This file is restricted until 01/01/2024 for data protection reasons. "
-            "Readers must complete and sign a Restricted Access undertaking form to apply for access.\n\n"
-        ),
-        restricted_until="01/01/2024",
+        conditions=conditions,
+        restricted_until="2054-01-01",
     )
-    assert extract_terms_of_use(record) == (
-        "This file is restricted until 01/01/2024 for data protection reasons. "
-        "Readers must complete and sign a Restricted Access undertaking form to apply for access."
-    )
+    assert extract_terms_of_use(record) == conditions.strip()
 
 
+@freeze_time("2025-01-01T12:00:00Z")
 def test_fallback_case() -> None:
-    """By Appointment + conditions + restrictedUntil → catch-all appends 'Restricted until …'."""
+    """By Appointment + conditions + restricted until date: catch-all appends 'Restricted until <date>'."""
+    conditions = (
+        "The papers are available subject to the usual conditions of access to Archives and Manuscripts material. "
+        "In addition a Restricted Access form must be completed to apply for access to this file."
+    )
     record = _make_record(
         status="BYAPPOINTMENT",
-        conditions=(
-            "The papers are available subject to the usual conditions of access to Archives and Manuscripts material. "
-            "In addition a Restricted Access form must be completed to apply for access to this file."
-        ),
-        restricted_until="01/01/2066",
+        conditions=conditions,
+        restricted_until="2066-01-01",
     )
-    assert extract_terms_of_use(record) == (
-        "The papers are available subject to the usual conditions of access to Archives and Manuscripts material. "
-        "In addition a Restricted Access form must be completed to apply for access to this file. "
-        "Restricted until 1 January 2066."
+    assert (
+        extract_terms_of_use(record) == f"{conditions} Restricted until 1 January 2066."
     )
 
 
-# ---------------------------------------------------------------------------
-# Tests that require Closed access status (mocked, as Axiell has no CLOSED
-# MARC value in the current data)
-# ---------------------------------------------------------------------------
-
-_PATCH_TARGET = "adapters.transformers.axiell.terms_of_use.extract_access_status"
-
-
-def test_closed_with_conditions_no_dates() -> None:
-    """Closed item with conditions, no date: conditions are returned as-is."""
-    record = _make_record(conditions="Closed on depositor agreement.")
-    with patch(_PATCH_TARGET, return_value=Closed):
-        assert extract_terms_of_use(record) == "Closed on depositor agreement."
-
-
+@freeze_time("2025-01-01T12:00:00Z")
 def test_closed_date_already_in_conditions() -> None:
-    """Closed item: date already present in conditions (with ordinal) → no repetition."""
-    record = _make_record(
-        conditions="Closed under the Data Protection Act until 1st January 2039.",
-        closed_until="01/01/2039",
-    )
-    with patch(_PATCH_TARGET, return_value=Closed):
-        assert extract_terms_of_use(record) == (
-            "Closed under the Data Protection Act until 1st January 2039."
-        )
+    """Closed item, date already present in conditions (with ordinal): no repetition."""
+    conditions = "Closed under the Data Protection Act until 1st January 2039."
+    record = _make_record(conditions=conditions, closed_until="2039-01-01")
+    assert extract_terms_of_use(record) == conditions
 
 
+@freeze_time("2025-01-01T12:00:00Z")
 def test_closed_date_not_in_conditions() -> None:
-    """Closed item: date not in conditions → append 'Closed until …'."""
+    """Closed item, date not in conditions: append 'Closed until <date>'."""
     record = _make_record(
         conditions="Closed under the Data Protection Act.",
-        closed_until="01/01/2039",
+        closed_until="2039-01-01",
     )
-    with patch(_PATCH_TARGET, return_value=Closed):
-        assert extract_terms_of_use(record) == (
-            "Closed under the Data Protection Act. Closed until 1 January 2039."
-        )
+    assert extract_terms_of_use(record) == (
+        "Closed under the Data Protection Act. Closed until 1 January 2039."
+    )
 
 
+@freeze_time("2025-01-01T12:00:00Z")
 def test_closed_no_conditions() -> None:
-    """Closed item with no conditions: synthesise 'Closed until …' note."""
-    record = _make_record(closed_until="01/01/2068")
-    with patch(_PATCH_TARGET, return_value=Closed):
-        assert extract_terms_of_use(record) == "Closed until 1 January 2068."
+    """Closed item with no conditions: synthesise 'Closed until <date>' note."""
+    record = _make_record(closed_until="2068-01-01")
+    assert extract_terms_of_use(record) == "Closed until 1 January 2068."
 
 
+@freeze_time("2025-01-01T12:00:00Z")
 def test_adds_missing_full_stop() -> None:
     """Conditions lacking a trailing period get one before appending the date."""
     record = _make_record(
         conditions="This file is closed for data protection reasons and cannot be accessed",
-        closed_until="01/01/2055",
+        closed_until="2055-01-01",
     )
-    with patch(_PATCH_TARGET, return_value=Closed):
-        assert extract_terms_of_use(record) == (
-            "This file is closed for data protection reasons and cannot be accessed. "
-            "Closed until 1 January 2055."
-        )
+    assert extract_terms_of_use(record) == (
+        "This file is closed for data protection reasons and cannot be accessed. "
+        "Closed until 1 January 2055."
+    )
 
 
 def test_returns_none_for_no_useful_access_info() -> None:
-    """Duplicate of the 'no access information' case — asserts Note is absent."""
     assert extract_terms_of_use(_make_record()) is None
