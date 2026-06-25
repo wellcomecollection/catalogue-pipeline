@@ -65,7 +65,7 @@ def extract_access_status(record: Record) -> AccessStatus | None:
     if status in ACCESS_STATUS_MAPPING:
         return ACCESS_STATUS_MAPPING[status]
 
-    # Unlike CALM, Axiell does not currently have a CLOSED status value. Do determine if an item is closed,
+    # Unlike CALM, Axiell does not currently have a CLOSED status value. To determine if an item is closed,
     # we use the 'closed until' date instead. If this date is in the future, the item is closed.
     # This approach produces a ~98% match with the CALM transformer.
     closed_until = extract_closed_until_date(record)
