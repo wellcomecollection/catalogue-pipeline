@@ -149,7 +149,8 @@ def extract_notes(
 ) -> list[Note]:
     notes: list[Note] = []
 
-    note_fields: set[str] = set(_NOTES_FIELDS.keys()) - set(exclude_fields or [])
+    excluded: set[str] = set(exclude_fields or [])
+    note_fields = [tag for tag in _NOTES_FIELDS if tag not in excluded]
 
     for field in record.get_fields(*note_fields):
         create = _NOTES_FIELDS.get(field.tag)
