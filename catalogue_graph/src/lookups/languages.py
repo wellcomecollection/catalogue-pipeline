@@ -27,14 +27,14 @@ def load_language_code_to_name_map() -> dict[str, str]:
 
 
 @cache
-def load_language_name_to_codes_map() -> dict[str, list]:
+def load_language_name_to_codes_map() -> dict[str, list[str]]:
     doc = _load_language_xml()
-    mapping = defaultdict(list)
+    mapping: defaultdict[str, list[str]] = defaultdict(list)
     for code, name in _iter_languages(doc):
         if code and name:
             mapping[name].append(code)
 
-    return mapping
+    return dict(mapping)
 
 
 def _iter_languages(doc: etree._ElementTree) -> Iterator[tuple[str | None, str | None]]:
