@@ -192,5 +192,6 @@ def test_adds_missing_full_stop() -> None:
     )
 
 
-def test_returns_none_for_no_useful_access_info() -> None:
-    assert extract_terms_of_use(_make_record()) is None
+def test_returns_none_for_whitespace_only_conditions() -> None:
+    record = _make_record(status="OPEN", conditions="  \n\t")
+    assert extract_terms_of_use(record) is None
