@@ -62,7 +62,9 @@ def format_field(field: Field) -> SourceIdentifier | None:
 
         return None
 
-    # TODO: This should be fixed at source
+    # Axiell records always have a redundant "Acc" prefix, even when it is not followed by a value.
+    # We remove the prefix as a temporary fix.
+    # TODO: This issue should be fixed at source.
     if identifier_type == "wellcome-accession-number":
         id_value = id_value.removeprefix("Acc").strip()
 
