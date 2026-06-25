@@ -21,6 +21,8 @@ def extract_access_conditions(record: Record) -> str | None:
     # Normalise conditions: strip trailing whitespace, then ensure the text ends with a period
     if value:
         stripped = value.strip()
+        if not stripped:
+            return None
         value = stripped if stripped.endswith(".") else stripped + "."
 
     return value
