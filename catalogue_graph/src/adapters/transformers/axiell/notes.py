@@ -21,7 +21,7 @@ def extract_notes(record: Record) -> list[Note]:
     # Exclude MARC 506 and 540. They are handled below using custom 'Terms of Use' note logic.
     notes = base_extract_notes(record, exclude_fields=["506", "540"])
 
-    # We use MARC 590 to store custom 'finding AIDS' notes
+    # We use MARC 590 to store custom 'finding aids' notes
     for field in record.get_fields("590"):
         finding_aids_note = _create_note(field, note_type=FINDING_AIDS)
         if finding_aids_note:
