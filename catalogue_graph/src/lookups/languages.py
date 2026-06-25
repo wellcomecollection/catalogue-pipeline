@@ -61,7 +61,7 @@ def from_name(language_name: str) -> Language | None:
 
     if len(language_codes) > 1:
         logger.warning(
-            "Multiple language code for language name",
+            "Multiple language codes for language name",
             name=language_name,
             codes=language_codes,
         )
