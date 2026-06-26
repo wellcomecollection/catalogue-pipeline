@@ -24,7 +24,7 @@ click==8.3.3
     # via -r requirements.txt
 coverage==7.13.5
     # via -r test_requirements.in
-cryptography==48.0.0
+cryptography==48.0.1
     # via moto
 docker==7.1.0
     # via -r test_requirements.in
