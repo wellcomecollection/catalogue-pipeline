@@ -80,10 +80,10 @@ module "pipeline" {
     },
     "2026-04-29" = {
       images = {
-        // OLD Scala inference manager output (its write target = local.es_images_augmented_index =
-        // images-augmented-${graph_index_dates.augmented}). POST-PHASE-2 the graph read-path no longer
-        // reads this (graph_images_augmented_index_date points it at 2026-06-15); the old service keeps
-        // writing it as a live rollback fallback. Remove when the old service is retired.
+        // Old Scala inference manager output. The Scala service has been retired, so nothing writes this
+        // index now; the graph read-path already reads images-augmented-2026-06-15 (via
+        // graph_images_augmented_index_date). This index and this entry are pending removal in the
+        // index-cleanup PR.
         augmented = "images_augmented.2026-04-29"
         // prod graph/ingestor/indexer - prod API
         indexed = "images_indexed.2024-11-14"
