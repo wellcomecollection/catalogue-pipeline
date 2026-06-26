@@ -34,14 +34,7 @@ locals {
   // them explicitly during cutover (see the 2025-10-02 root). The merger, the Scala inferrer and
   // the new state-machine inferrer all derive the initial index from one resolved value, so they
   // can never diverge.
-  image_inferrer_initial_index_date   = var.image_inferrer_initial_index_date != "" ? var.image_inferrer_initial_index_date : var.pipeline_date
-  image_inferrer_augmented_index_date = var.image_inferrer_augmented_index_date != "" ? var.image_inferrer_augmented_index_date : var.graph_index_dates.augmented
-
-  // Augmented index the graph subsystem READ-path (extractor/ingestor/remover) sources from. Falls
-  // back to graph_index_dates.augmented (so read-path and the old Scala service's write target stay
-  // aligned) unless overridden to decouple them during the image-inferrer cutover. See the
-  // graph_images_augmented_index_date variable. Injected via subsystem_graph.tf's index_dates.
-  graph_images_augmented_index_date = var.graph_images_augmented_index_date != "" ? var.graph_images_augmented_index_date : var.graph_index_dates.augmented
+  image_inferrer_initial_index_date = var.image_inferrer_initial_index_date != "" ? var.image_inferrer_initial_index_date : var.pipeline_date
 
   // Default index names for services that need to know where to write/read from
   // These presume that the indexes exist and are created by the index_config
