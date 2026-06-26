@@ -111,11 +111,9 @@ module "pipeline" {
   allow_delete_indices = false
 
   # Image-inferrer. The scheduled Python inferrer is the sole inferrer: it reads images-initial-2026-06-15
-  # and writes images-augmented-2026-06-15, which the graph READ-path (extractor + ingestor + remover)
-  # also reads. graph_index_dates.augmented = "2026-06-15" is the single source for both the write target
-  # and the read source. image_inferrer_initial_index_date stays overridden because this in-place pipeline's
-  # live images-initial used the old "empty"/dynamic:false mapping, so the merger and inferrer were moved
-  # onto the modifiedTime-mapped images-initial-2026-06-15 (it falls back to pipeline_date otherwise).
+  # and writes images-augmented-2026-06-15, which the graph read-path also reads.
+  # graph_index_dates.augmented = "2026-06-15" is the single source for both. image_inferrer_initial_index_date
+  # is overridden because it otherwise falls back to pipeline_date.
   image_inferrer_initial_index_date = "2026-06-15"
 
   # Base AMI for ECS instances
