@@ -116,7 +116,6 @@ module "pipeline" {
   # and the read source. image_inferrer_initial_index_date stays overridden because this in-place pipeline's
   # live images-initial used the old "empty"/dynamic:false mapping, so the merger and inferrer were moved
   # onto the modifiedTime-mapped images-initial-2026-06-15 (it falls back to pipeline_date otherwise).
-  enable_image_inferrer_schedule    = true
   image_inferrer_initial_index_date = "2026-06-15"
 
   # Base AMI for ECS instances
