@@ -17,9 +17,16 @@ _FUZZY_CORRECTIONS = [
     ("Portugese", "Portuguese"),
     ("Portguese", "Portuguese"),
     ("Potuguese", "Portuguese"),
+    ("Portugeuse", "Portuguese"),
     ("Swiss-German", "Swiss German"),
     ("Norweigan", "Norwegian"),
     ("Lugandan", "Luganda"),
+    ("Enlgish", "English"),
+    ("Itallian", "Italian"),
+    ("Russain", "Russian"),
+    ("Gujerati", "Gujarati"),
+    ("Chipewayan", "Chipewyan"),
+    ("Fante", "Fanti"),
 ]
 
 
