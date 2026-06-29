@@ -1,5 +1,6 @@
 from pymarc.record import Record
 
+from adapters.transformers.axiell.languages import extract_languages
 from adapters.transformers.axiell.organisation_and_arrangement import (
     extract_arrangement,
 )
@@ -35,5 +36,7 @@ def extract_notes(record: Record) -> list[Note]:
     terms_of_use = extract_terms_of_use(record)
     if terms_of_use:
         notes.append(Note(contents=terms_of_use, note_type=TERMS_OF_USE))
+
+    notes += extract_languages(record)[1]
 
     return notes
