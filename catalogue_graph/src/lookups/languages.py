@@ -30,21 +30,28 @@ def load_language_code_to_name_map() -> dict[str, str]:
 def load_language_name_to_codes_map() -> dict[str, list[str]]:
     doc = _load_language_xml()
     mapping: defaultdict[str, list[str]] = defaultdict(list)
-    for code, name in _iter_languages(doc):
+    for code, name in _iter_languages(doc, include_name_variants=True):
         if code and name:
             mapping[name].append(code)
 
     return dict(mapping)
 
 
-def _iter_languages(doc: etree._ElementTree) -> Iterator[tuple[str | None, str | None]]:
+def _iter_languages(
+    doc: etree._ElementTree, include_name_variants: bool = False
+) -> Iterator[tuple[str | None, str | None]]:
     ns_decl = {"c": CODELIST_NS}
     code_tag = f"{{{CODELIST_NS}}}code"
     name_tag = f"{{{CODELIST_NS}}}name"
+    uf_tag = f"{{{CODELIST_NS}}}uf"
     for language_element in doc.findall("c:languages/c:language", namespaces=ns_decl):
         code = language_element.findtext(code_tag)
         name = language_element.findtext(name_tag)
         yield code, name
+
+        if include_name_variants:
+            for uf in language_element.findall(uf_tag):
+                yield code, uf.findtext(name_tag)
 
 
 def from_code(language_code: str) -> Language | None:

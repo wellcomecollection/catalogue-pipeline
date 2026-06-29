@@ -7,6 +7,7 @@ from adapters.transformers.axiell.catalogue_status import (
 )
 from adapters.transformers.axiell.contributors import extract_contributors
 from adapters.transformers.axiell.format import extract_format
+from adapters.transformers.axiell.languages import extract_languages
 from adapters.transformers.axiell.notes import extract_notes
 from adapters.transformers.axiell.organisation_and_arrangement import (
     extract_work_type,
@@ -31,6 +32,7 @@ from models.pipeline.access_method import NotRequestable
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Subject
 from models.pipeline.format import Format
+from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
     Id,
     Identifiable,
@@ -166,6 +168,10 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
         return extract_subjects(self.record)
 
     @property
+    def languages(self) -> list[Language]:
+        return extract_languages(self.record)[0]
+
+    @property
     def visible_work_state(self) -> SourceWorkState:
         merge_candidates = []
         for identifier in self.other_identifiers:
@@ -195,7 +201,3 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
             )
         else:
             return self.transform_visible_work()
-
-    # TODO: Remaining fields:
-    # * languages
-    # * notes (language notes, terms of use)
