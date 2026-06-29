@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 import structlog
@@ -38,12 +39,7 @@ def _contains_date(text: str, d: date) -> bool:
 
     Normalises ordinal suffixes (1st → 1, 2nd → 2, 3rd → 3, *th → *) before checking.
     """
-    normalised = (
-        text.replace("1st", "1")
-        .replace("2nd", "2")
-        .replace("3rd", "3")
-        .replace("th", "")
-    )
+    normalised = re.sub(r"(\d+)(st|nd|rd|th)", r"\1", text)
     return any(
         f"until {fmt}" in normalised
         for fmt in (_display_date(d), d.strftime("%d/%m/%Y"))
