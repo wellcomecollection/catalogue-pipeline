@@ -12,6 +12,7 @@ _SEPARATORS = re.compile(r"\n|;|\.|,|/|\band\b|`")
 _LANGUAGE_TAG_PATTERN = re.compile(r'<language(?: langcode="[a-z]+")?>(.*?)</language>')
 _LANGUAGE_NAME_PATTERN = re.compile(r"[A-Z][a-z]+")
 
+# TODO: These corrections are ported from the Scala pipeline. It would be preferable to fix these in the source system.
 _FUZZY_CORRECTIONS = [
     ("Portugese", "Portuguese"),
     ("Portguese", "Portuguese"),
@@ -62,9 +63,12 @@ def _parse_single_value(lang_field: str) -> tuple[list[Language], list[Note]]:
 
 
 def _parse_as_language_list(lang_field: str) -> list[Language] | None:
+    """
+    Try to parse the whole string as a list of languages.
+    If the string contains non-language components, return None.
+    """
     for matcher in (
-        _match_whole_field,
-        _match_all_components,
+        _match_exact,
         _match_after_corrections,
         _match_after_stripping_tags,
     ):
@@ -74,13 +78,8 @@ def _parse_as_language_list(lang_field: str) -> list[Language] | None:
     return None
 
 
-def _match_whole_field(lang_field: str) -> list[Language] | None:
-    if language := from_name(lang_field):
-        return [language]
-    return None
-
-
-def _match_all_components(lang_field: str) -> list[Language] | None:
+def _match_exact(lang_field: str) -> list[Language] | None:
+    """Split the string using `_SEPARATORS` and then try to match each component to a language name exactly."""
     components = [
         part.strip() for part in _SEPARATORS.split(lang_field) if part.strip()
     ]
@@ -92,6 +91,7 @@ def _match_all_components(lang_field: str) -> list[Language] | None:
 
 
 def _match_after_corrections(lang_field: str) -> list[Language] | None:
+    """Fix misspelled languages and then retry `_parse_as_language_list`."""
     corrected = lang_field
     for wrong, right in _FUZZY_CORRECTIONS:
         corrected = corrected.replace(wrong, right)
@@ -104,6 +104,7 @@ def _match_after_corrections(lang_field: str) -> list[Language] | None:
 
 
 def _match_after_stripping_tags(lang_field: str) -> list[Language] | None:
+    """Remove XML tags surrounding language names and then retry `_parse_as_language_list`."""
     tagless = _LANGUAGE_TAG_PATTERN.sub(r"\1", lang_field)
     if tagless != lang_field:
         return _parse_as_language_list(tagless)
@@ -111,6 +112,7 @@ def _match_after_stripping_tags(lang_field: str) -> list[Language] | None:
 
 
 def _find_languages_in_text(lang_field: str) -> list[Language]:
+    """Identify capitalised words and try to match them to langauge names, returning all matches."""
     return [
         lang
         for word in _LANGUAGE_NAME_PATTERN.findall(lang_field)
