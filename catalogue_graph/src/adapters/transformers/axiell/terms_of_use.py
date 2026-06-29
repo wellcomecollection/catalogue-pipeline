@@ -4,11 +4,11 @@ from datetime import date
 import structlog
 from pymarc.record import Record
 
-from adapters.transformers.axiell.access_dates import (
+from adapters.transformers.axiell.access_status import extract_access_status
+from adapters.transformers.axiell.dates import (
     extract_closed_until_date,
     extract_restricted_until_date,
 )
-from adapters.transformers.axiell.access_status import extract_access_status
 from adapters.transformers.marc.common import first_non_empty_subfield
 from adapters.transformers.marc.identifier import extract_id
 from models.pipeline.access_status import Closed, PermissionRequired, Restricted
