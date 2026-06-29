@@ -184,7 +184,7 @@ def test_fallback_cases(lang_field: str, expected_languages: list[Language]) -> 
 
 
 def test_fixes_spelling_errors() -> None:
-    # Taken from f9f09f42-675d-4d27-8efa-1726d314f20b
+    # Taken from CALM f9f09f42-675d-4d27-8efa-1726d314f20b (Axiell collect:110159658)
     # We can remove this test and the fixup code once the record is corrected.
     record = _make_record(
         "The majority of this collection is in English, however Kitzinger recieved "

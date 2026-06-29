@@ -19,8 +19,10 @@ FINDING_AIDS = IdLabel(id="finding-aids", label="Finding aids")
 
 def extract_notes(record: Record) -> list[Note]:
     """Extract base notes using shared MARC logic, plus notes specific to Axiell data"""
-    # Exclude MARC 506 and 540. They are handled below using custom 'Terms of Use' note logic.
-    notes = base_extract_notes(record, exclude_fields=["506", "540"])
+    # Exclude fields which are handled below using Axiell-specific note logic:
+    # * 506 and 540: Custom 'terms of use' note logic
+    # * 546: Custom 'languages' note logic
+    notes = base_extract_notes(record, exclude_fields=["506", "540", "546"])
 
     # We use MARC 590 to store custom 'finding aids' notes
     for field in record.get_fields("590"):
