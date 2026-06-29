@@ -5,14 +5,18 @@ Extract access status from field
 https://www.loc.gov/marc/bibliographic/bd506.html
 """
 
+from datetime import date
+
 import structlog
 from pymarc.record import Record
 
+from adapters.transformers.axiell.access_dates import extract_closed_until_date
 from adapters.transformers.marc.common import non_empty_subfields
 from adapters.transformers.marc.identifier import extract_id
 from models.pipeline.access_status import (
     AccessStatus,
     ByAppointment,
+    Closed,
     Open,
     OpenWithAdvisory,
     PermissionRequired,
@@ -60,6 +64,13 @@ def extract_access_status(record: Record) -> AccessStatus | None:
 
     if status in ACCESS_STATUS_MAPPING:
         return ACCESS_STATUS_MAPPING[status]
+
+    # Unlike CALM, Axiell does not currently have a CLOSED status value. To determine if an item is closed,
+    # we use the 'closed until' date instead. If this date is in the future, the item is closed.
+    # This approach produces a ~98% match with the CALM transformer.
+    closed_until = extract_closed_until_date(record)
+    if closed_until and closed_until >= date.today():
+        return Closed
 
     if status is not None:
         logger.warning(

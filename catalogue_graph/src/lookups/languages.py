@@ -1,10 +1,15 @@
 import os
+from collections import defaultdict
 from collections.abc import Iterator
 from functools import cache
 
+import structlog
 from lxml import etree
 
 from models.pipeline.id_label import Language
+
+logger = structlog.get_logger(__name__)
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CODELIST_NS = "info:lc/xmlns/codelist-v1"
@@ -16,9 +21,20 @@ def _load_language_xml() -> etree._ElementTree:
 
 
 @cache
-def _load_languages() -> dict[str, str]:
+def load_language_code_to_name_map() -> dict[str, str]:
     doc = _load_language_xml()
     return {code: name for (code, name) in _iter_languages(doc) if code and name}
+
+
+@cache
+def load_language_name_to_codes_map() -> dict[str, list[str]]:
+    doc = _load_language_xml()
+    mapping: defaultdict[str, list[str]] = defaultdict(list)
+    for code, name in _iter_languages(doc):
+        if code and name:
+            mapping[name].append(code)
+
+    return dict(mapping)
 
 
 def _iter_languages(doc: etree._ElementTree) -> Iterator[tuple[str | None, str | None]]:
@@ -32,6 +48,22 @@ def _iter_languages(doc: etree._ElementTree) -> Iterator[tuple[str | None, str |
 
 
 def from_code(language_code: str) -> Language | None:
-    if language_name := _load_languages().get(language_code):
+    if language_name := load_language_code_to_name_map().get(language_code):
         return Language(id=language_code, label=language_name)
     return None
+
+
+def from_name(language_name: str) -> Language | None:
+    language_codes = load_language_name_to_codes_map().get(language_name)
+
+    if not language_codes:
+        return None
+
+    if len(language_codes) > 1:
+        logger.warning(
+            "Multiple language codes for language name",
+            name=language_name,
+            codes=language_codes,
+        )
+
+    return Language(label=language_name, id=language_codes[0])

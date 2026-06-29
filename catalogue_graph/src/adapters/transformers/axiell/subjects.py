@@ -12,6 +12,10 @@ def extract_subject_labels(record: Record) -> list[str]:
 def extract_subjects(record: Record) -> list[Subject]:
     labels = extract_subject_labels(record)
 
+    # Some subject labels coming from Axiell/CALM have a leading <p> prefix to indicate that the subject is linked
+    # to a Library of Congress entry. Remove the prefix.
+    labels = [label.removeprefix("<p>") for label in labels]
+
     subjects = []
     for label in labels:
         nested_concept = build_concept(label, "Concept")

@@ -7,6 +7,7 @@ from adapters.transformers.axiell.catalogue_status import (
 )
 from adapters.transformers.axiell.contributors import extract_contributors
 from adapters.transformers.axiell.format import extract_format
+from adapters.transformers.axiell.notes import extract_notes
 from adapters.transformers.axiell.organisation_and_arrangement import (
     extract_work_type,
 )
@@ -18,7 +19,6 @@ from adapters.transformers.ebsco.production import (
 from adapters.transformers.marc.last_transaction_time import (
     extract_last_transaction_time_to_datetime,
 )
-from adapters.transformers.marc.notes import extract_notes
 from adapters.transformers.marc.physical_description import extract_physical_description
 from adapters.transformers.marc.predecessor_identifier import (
     extract_calm_predecessor_id,

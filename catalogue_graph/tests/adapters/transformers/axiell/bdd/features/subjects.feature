@@ -37,3 +37,13 @@ Feature: Subjects extraction from Axiell MARC records
     And the 1st subject has the label "Radiology"
     And the 2nd subject has the label "Oncology"
     And the 3rd subject has the label "Pathology"
+
+  Scenario: Leading <p> prefix is stripped from label
+    Given the MARC record has a 653 field with subfield "a" value "<p>Influenza"
+    When I transform the MARC record
+    Then the only subject has the label "Influenza"
+
+  Scenario: <p> prefix stripped alongside trailing period
+    Given the MARC record has a 653 field with subfield "a" value "<p>Surgery."
+    When I transform the MARC record
+    Then the only subject has the label "Surgery"
