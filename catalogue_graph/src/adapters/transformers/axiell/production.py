@@ -1,7 +1,5 @@
 """
-Production is derived from field 260 or 264, and also 008
-In EBSCO data, prefer field 260 over 264 but use 264 if 260 is absent or invalid
-In addition, use the date segments from 008 to add another production event.
+Production label is derived from MARC 264. Production dates are derived from MARC 046.
 """
 
 from datetime import UTC, date, datetime, time
@@ -34,18 +32,15 @@ def extract_production(record: Record) -> list[ProductionEvent]:
     if production_label is None or start_date is None or end_date is None:
         return []
 
-    period = Period(
-        label=production_label,
-        range=DateTimeRange.model_validate(
-            {
-                "from": _day_start(start_date).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "to": _day_end(end_date).strftime("%Y-%m-%dT%H:%M:%S.%f") + "999Z",
-                "label": production_label,
-            }
-        ),
-        id=Unidentifiable(),
+    date_range = DateTimeRange.model_validate(
+        {
+            "from": _day_start(start_date).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "to": _day_end(end_date).strftime("%Y-%m-%dT%H:%M:%S.%f") + "999Z",
+            "label": production_label,
+        }
     )
 
+    period = Period(label=production_label, range=date_range, id=Unidentifiable())
     event = ProductionEvent(
         label=production_label, dates=[period], places=[], agents=[], function=None
     )
