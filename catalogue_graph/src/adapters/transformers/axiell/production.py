@@ -29,16 +29,18 @@ def extract_production(record: Record) -> list[ProductionEvent]:
     start_date = extract_production_start_date(record)
     end_date = extract_production_end_date(record)
 
-    if production_label is None or start_date is None or end_date is None:
+    if production_label is None:
         return []
 
-    date_range = DateTimeRange.model_validate(
-        {
-            "from": _day_start(start_date).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "to": _day_end(end_date).strftime("%Y-%m-%dT%H:%M:%S.%f") + "999Z",
-            "label": production_label,
-        }
-    )
+    date_range = None
+    if start_date is not None and end_date is not None:
+        date_range = DateTimeRange.model_validate(
+            {
+                "from": _day_start(start_date).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "to": _day_end(end_date).strftime("%Y-%m-%dT%H:%M:%S.%f") + "999Z",
+                "label": production_label,
+            }
+        )
 
     period = Period(label=production_label, range=date_range, id=Unidentifiable())
     event = ProductionEvent(
