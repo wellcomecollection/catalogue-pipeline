@@ -102,20 +102,8 @@ variable "graph_index_dates" {
 
 variable "enable_image_inferrer_schedule" {
   type        = bool
-  default     = false
-  description = "Enable the scheduled image-inferrer state machine. Ships disabled until the new path is validated and we cut over from the SQS-driven service."
-}
-
-variable "image_inferrer_augmented_index_date" {
-  type        = string
-  default     = ""
-  description = <<-EOT
-    Augmented index date the Python image-inferrer state machine writes to. Empty (the default) falls
-    back to `graph_index_dates.augmented` — i.e. the production augmented index the images ingestor
-    reads — which is the steady-state cutover target. Set explicitly only to write a separate shadow
-    index (e.g. `2026-06-15`) for isolated comparison runs. A matching `index_config` entry must exist
-    (see the 2025-10-02 root).
-  EOT
+  default     = true
+  description = "Whether the scheduled image-inferrer state machine is enabled. Defaults to true, since it is the sole image inferrer. Set to false as a kill-switch to pause scheduled inference, e.g. during an incident or a large reindex."
 }
 
 variable "image_inferrer_initial_index_date" {
@@ -128,20 +116,6 @@ variable "image_inferrer_initial_index_date" {
     existing pipeline whose live images-initial uses the "empty"/dynamic:false mapping (where
     `modifiedTime` is unqueryable): point it at a modifiedTime-mapped index (e.g. `2026-06-15`) that the
     merger is moved onto. A matching `index_config` entry must exist (see the 2025-10-02 root).
-  EOT
-}
-
-variable "graph_images_augmented_index_date" {
-  type        = string
-  default     = ""
-  description = <<-EOT
-    Augmented-images index that the graph subsystem READ-path (graph extractor, images ingestor,
-    incremental remover) uses as its source. Empty (the default) falls back to
-    `graph_index_dates.augmented`. Set explicitly to point the read-path at the new Python inferrer's
-    output (e.g. `2026-06-15`) independently of `graph_index_dates.augmented`. This override exists
-    because `graph_index_dates.augmented` still names the now-retired Scala inferrer's old output index,
-    which is pending removal; once that index is gone and `graph_index_dates.augmented` is set to the new
-    inferrer's output, this override can be dropped.
   EOT
 }
 

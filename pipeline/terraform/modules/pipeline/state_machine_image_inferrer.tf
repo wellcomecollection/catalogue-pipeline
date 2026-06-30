@@ -69,7 +69,7 @@ locals {
           "pipeline_date" : var.pipeline_date,
           "index_dates" : {
             "initial" : local.image_inferrer_initial_index_date,
-            "augmented" : local.image_inferrer_augmented_index_date
+            "augmented" : var.graph_index_dates.augmented
           },
           # Window end is 5 minutes before the scheduled time (indexing lag);
           # the find-work step defaults the window start to end - 15 minutes.
