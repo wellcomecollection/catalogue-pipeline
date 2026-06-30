@@ -77,6 +77,7 @@ def _parse_as_language_list(lang_field: str) -> list[Language] | None:
     If the string contains non-language components, return None.
     """
     for matcher in (
+        _match_exact_single,
         _match_exact,
         _match_after_corrections,
         _match_after_stripping_tags,
@@ -84,6 +85,13 @@ def _parse_as_language_list(lang_field: str) -> list[Language] | None:
         result = matcher(lang_field)
         if result is not None:
             return result
+    return None
+
+
+def _match_exact_single(lang_field: str) -> list[Language] | None:
+    """Try to match the whole string to a single language name exactly."""
+    if language := from_name(lang_field):
+        return [language]
     return None
 
 
