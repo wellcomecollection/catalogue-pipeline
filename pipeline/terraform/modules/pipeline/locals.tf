@@ -49,7 +49,6 @@ locals {
   es_works_identified_index   = "works-identified-${var.pipeline_date}"
   es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
   es_images_initial_index     = "images-initial-${local.image_inferrer_initial_index_date}"
-  es_images_augmented_index   = "images-augmented-${var.graph_index_dates.augmented}"
   es_images_index             = "images-indexed-${var.pipeline_date}"
 
   # The max number of connections allowed by the instance.
@@ -91,7 +90,6 @@ locals {
   services = [
     "matcher",
     "merger",
-    "inference_manager",
     "feature_inferrer",
     "palette_inferrer",
     "aspect_ratio_inferrer",

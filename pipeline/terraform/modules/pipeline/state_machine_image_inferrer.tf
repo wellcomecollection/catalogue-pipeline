@@ -3,9 +3,9 @@
 #     -> FindWork (Lambda: ids of images modified in the window, partitioned)
 #       -> InferImages (Map: one EC2 inference task per partition, runTask.waitForTaskToken)
 #
-# This replaces the always-on SQS-driven image_inferrer service. It is additive:
-# the old service stays until cutover (see service_image_inferrer.tf). Ship the
-# schedule disabled (var.enable_image_inferrer_schedule) until validated.
+# This is the sole image inferrer; it replaced the always-on SQS-driven image_inferrer
+# Scala service, which has been retired. The schedule is gated on
+# var.enable_image_inferrer_schedule.
 
 locals {
   # Generous timeout so EC2 capacity-provider warm-up does not trip the task token.
