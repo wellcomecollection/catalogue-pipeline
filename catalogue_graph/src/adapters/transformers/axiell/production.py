@@ -34,10 +34,14 @@ def extract_production(record: Record) -> list[ProductionEvent]:
 
     date_range = None
     if start_date is not None and end_date is not None:
+        formatted_start = _day_start(start_date).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        # Reproduce the nanosecond precision of the Scala pipeline.
+        formatted_end = _day_end(end_date).strftime("%Y-%m-%dT%H:%M:%S.%f") + "999Z"
         date_range = DateTimeRange.model_validate(
             {
-                "from": _day_start(start_date).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "to": _day_end(end_date).strftime("%Y-%m-%dT%H:%M:%S.%f") + "999Z",
+                "from": formatted_start,
+                "to": formatted_end,
                 "label": production_label,
             }
         )
