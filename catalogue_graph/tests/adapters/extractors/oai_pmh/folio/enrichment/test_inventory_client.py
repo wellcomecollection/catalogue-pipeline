@@ -81,6 +81,27 @@ def test_enriched_instances_parses_ndjson() -> None:
     assert [i.instance_id for i in result] == ["i-1", "i-2"]
 
 
+def test_enriched_instances_parses_concatenated_json_stream() -> None:
+    """The live endpoint streams concatenated objects with no array/newlines, and an
+    instance with no items sends ``itemsandholdingsfields: ""``."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = (
+            '{"instanceid":"i-1","itemsandholdingsfields":""}'
+            '{"instanceid":"i-2","itemsandholdingsfields":'
+            '{"items":[{"id":"item-9b59","barcode":"22501207789","materialType":"Books"}]}}'
+        )
+        return httpx.Response(200, text=body)
+
+    client = _client(handler)
+    result = client.enriched_instances(["i-1", "i-2"])
+    assert [i.instance_id for i in result] == ["i-1", "i-2"]
+    assert result[0].items == []  # empty-string itemsandholdingsfields
+    assert [it.id for it in result[1].items] == ["item-9b59"]
+    assert result[1].items[0].barcode == "22501207789"
+    assert result[1].items[0].material_type == "Books"
+
+
 def test_enriched_instances_empty_input_makes_no_request() -> None:
     def handler(request: httpx.Request) -> httpx.Response:  # pragma: no cover
         raise AssertionError("should not be called")

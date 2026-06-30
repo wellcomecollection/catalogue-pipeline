@@ -2,34 +2,42 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import (
     FolioEnrichedInstance,
 )
 
-# A representative enrichedInstances record. The exact contract is an open question,
-# so the parser is deliberately tolerant; these tests pin the fields we rely on.
+# A record shaped per the mod-inventory-storage oai-pmh-view enrichedInstances docs:
+# instanceId + itemsAndHoldingsFields.items, with nested callNumber / location objects.
 SAMPLE_RECORD = {
     "instanceId": "3144420c-1111-2222-3333-444455556666",
-    "itemsandholdingsfields": {
+    "itemsAndHoldingsFields": {
+        "instanceid": "3144420c-1111-2222-3333-444455556666",
         "items": [
             {
                 "id": "aaa11111-0000-0000-0000-000000000001",
-                "holdingsRecordId": "hhh00000-0000-0000-0000-000000000001",
-                "barcode": "1234567890",
-                "callNumber": "WZ 100",
-                "copyNumber": "1",
+                "volume": "v1",
+                "enumeration": "no. 1",
                 "materialType": "book",
-                "permanentLocation": "Closed stores",
+                "barcode": "1234567890",
+                "callNumber": {
+                    "prefix": "WZ",
+                    "suffix": None,
+                    "typeId": "ttt-0000",
+                    "callNumber": "WZ 100",
+                },
+                "location": {
+                    "name": "Closed stores",
+                    "location": {
+                        "libraryName": "Rare Materials Room",
+                        "institutionName": "Wellcome Collection",
+                    },
+                },
             },
             {
                 "id": "aaa11111-0000-0000-0000-000000000002",
-                "barcode": None,
             },
-        ],
-        "holdings": [
-            {"id": "hhh00000-0000-0000-0000-000000000001", "callNumber": "WZ 100"}
         ],
     },
 }
 
 
-def test_from_api_parses_items_and_holdings() -> None:
+def test_from_api_parses_documented_shape() -> None:
     instance = FolioEnrichedInstance.from_api(SAMPLE_RECORD)
 
     assert instance.instance_id == "3144420c-1111-2222-3333-444455556666"
@@ -39,36 +47,57 @@ def test_from_api_parses_items_and_holdings() -> None:
     ]
     first = instance.items[0]
     assert first.barcode == "1234567890"
+    assert first.volume == "v1"
+    assert first.enumeration == "no. 1"
+    assert first.material_type == "book"
+    # callNumber is a nested object; we flatten to its call-number string.
     assert first.call_number == "WZ 100"
-    assert first.copy_number == "1"
+    # location is a nested object; we take a readable name.
     assert first.location == "Closed stores"
-    assert first.holdings_record_id == "hhh00000-0000-0000-0000-000000000001"
 
     # Missing fields are tolerated.
     assert instance.items[1].barcode is None
     assert instance.items[1].call_number is None
+    assert instance.items[1].location is None
 
-    assert [h.id for h in instance.holdings] == ["hhh00000-0000-0000-0000-000000000001"]
 
-
-def test_from_api_handles_top_level_items() -> None:
-    """Items/holdings supplied at the top level (not nested) are also parsed."""
+def test_from_api_flattens_location_from_nested_library_name() -> None:
     instance = FolioEnrichedInstance.from_api(
         {
             "instanceId": "i-1",
-            "items": [{"id": "item-1"}],
-            "holdings": [{"id": "hold-1"}],
+            "itemsAndHoldingsFields": {
+                "items": [
+                    {
+                        "id": "item-1",
+                        "location": {
+                            "location": {"libraryName": "History of Medicine"}
+                        },
+                    }
+                ]
+            },
+        }
+    )
+    assert instance.items[0].location == "History of Medicine"
+
+
+def test_from_api_handles_lowercase_wrapper_and_string_callnumber() -> None:
+    """Tolerate the lowercase ``itemsandholdingsfields`` and a plain-string callNumber."""
+    instance = FolioEnrichedInstance.from_api(
+        {
+            "instanceId": "i-1",
+            "itemsandholdingsfields": {
+                "items": [{"id": "item-1", "callNumber": "WZ 100"}]
+            },
         }
     )
     assert [i.id for i in instance.items] == ["item-1"]
-    assert [h.id for h in instance.holdings] == ["hold-1"]
+    assert instance.items[0].call_number == "WZ 100"
 
 
 def test_from_api_handles_no_items() -> None:
     instance = FolioEnrichedInstance.from_api({"instanceId": "i-empty"})
     assert instance.instance_id == "i-empty"
     assert instance.items == []
-    assert instance.holdings == []
 
 
 def test_store_content_round_trips() -> None:

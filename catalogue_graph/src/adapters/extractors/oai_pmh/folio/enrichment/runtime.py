@@ -55,11 +55,12 @@ def _inventory_token() -> str:
 def build_inventory_http_client() -> httpx.Client:
     """Build an authenticated client for mod-inventory-storage.
 
-    OKAPI expects a tenant header alongside the auth token; the tenant is supplied
-    via ``FOLIO_INVENTORY_TENANT`` and omitted when unset (e.g. an edge gateway that
-    injects it server-side).
+    ``enrichedInstances`` is an OKAPI/mod-inventory-storage endpoint, so it expects
+    ``x-okapi-token`` plus ``x-okapi-tenant`` (NOT the ``Authorization`` token the edge
+    OAI feed uses). The token comes from ``FOLIO_INVENTORY_TOKEN``/SSM and the tenant
+    from ``FOLIO_INVENTORY_TENANT`` (omitted when unset, e.g. a gateway that injects it).
     """
-    headers = {"Authorization": _inventory_token()}
+    headers = {"x-okapi-token": _inventory_token()}
     if config.INVENTORY_TENANT:
         headers["x-okapi-tenant"] = config.INVENTORY_TENANT
     return httpx.Client(

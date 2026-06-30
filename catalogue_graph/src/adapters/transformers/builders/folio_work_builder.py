@@ -55,7 +55,7 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
                         value=item.id,
                     )
                 ),
-                title=item.copy_number,
+                title=item.enumeration or item.volume,
             )
             for item in enriched.items
         ]

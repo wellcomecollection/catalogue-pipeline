@@ -97,3 +97,27 @@ def test_enrich_empty_input_is_noop(temporary_table: IcebergTable) -> None:
 
     assert enricher.enrich([]) is None
     assert client.calls == []
+
+
+def test_enrich_keys_by_oai_id_but_queries_bare_uuid(
+    temporary_table: IcebergTable,
+) -> None:
+    """The bib store id is an OAI identifier; the API is queried by the bare UUID and
+    the stored row is re-keyed back to the OAI id so the transform join matches."""
+    uuid = "3144420c-9a8d-5738-a0a4-7cbbbbf0dc14"
+    store_id = f"oai:edge-wellcome.folio.ebsco.com:fs00001190/{uuid}"
+    # The API returns results keyed by the bare instance UUID.
+    client = FakeInventoryClient({uuid: _instance(uuid, ["item-a"])})
+    store = _store(temporary_table)
+    enricher = FolioItemEnricher(client, store)  # type: ignore[arg-type]
+
+    update = enricher.enrich([store_id])
+
+    assert update is not None
+    # Queried with the bare UUID...
+    assert client.calls == [[uuid]]
+    # ...but stored under the full OAI id (so it joins onto the bib row).
+    rows = {r["id"]: r for r in store.get_active_namespace_records().to_pylist()}
+    assert set(rows) == {store_id}
+    stored = FolioEnrichedInstance.from_store_content(rows[store_id]["content"])
+    assert [i.id for i in stored.items] == ["item-a"]

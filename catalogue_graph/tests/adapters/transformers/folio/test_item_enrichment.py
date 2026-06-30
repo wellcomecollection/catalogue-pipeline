@@ -46,7 +46,7 @@ def test_work_builder_emits_items_with_folio_item_identifier() -> None:
     enriched = FolioEnrichedInstance(
         instance_id="inst-1",
         items=[
-            FolioEnrichedItem(id="item-uuid-1", copy_number="1"),
+            FolioEnrichedItem(id="item-uuid-1", enumeration="no. 1"),
             FolioEnrichedItem(id="item-uuid-2"),
         ],
     )
@@ -65,7 +65,7 @@ def test_work_builder_emits_items_with_folio_item_identifier() -> None:
     assert first.id.source_identifier.identifier_type.id == "folio-item"
     assert first.id.source_identifier.ontology_type == "Item"
     assert first.id.source_identifier.value == "item-uuid-1"
-    assert first.title == "1"
+    assert first.title == "no. 1"
 
 
 def test_work_builder_emits_no_items_without_enrichment() -> None:

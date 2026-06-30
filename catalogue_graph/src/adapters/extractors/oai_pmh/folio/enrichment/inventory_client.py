@@ -83,6 +83,8 @@ class FolioInventoryClient:
             },
         )
         response.raise_for_status()
+        # from_api raises on an unparseable record (missing instanceId / item id); we
+        # deliberately let that propagate and fail the whole batch rather than swallow it.
         return [
             FolioEnrichedInstance.from_api(record)
             for record in _parse_records(response)
@@ -92,8 +94,9 @@ class FolioInventoryClient:
 def _parse_records(response: httpx.Response) -> list[dict]:
     """Parse the response body into a list of record dicts.
 
-    ``enrichedInstances`` may return a JSON array, a single JSON object wrapping the
-    records, or newline-delimited JSON. Handle all three rather than assuming one.
+    The live ``enrichedInstances`` endpoint streams **concatenated** JSON objects
+    (``{...}{...}`` with no array brackets or newline delimiters). We also tolerate a
+    JSON array or a single object wrapping the records.
     """
     text = response.text.strip()
     if not text:
@@ -102,8 +105,8 @@ def _parse_records(response: httpx.Response) -> list[dict]:
     try:
         payload = response.json()
     except json.JSONDecodeError:
-        # Newline-delimited JSON (one record per line).
-        return [json.loads(line) for line in text.splitlines() if line.strip()]
+        # Streamed/concatenated (or newline-delimited) JSON objects.
+        return _decode_json_stream(text)
 
     if isinstance(payload, list):
         return cast("list[dict]", payload)
@@ -113,3 +116,19 @@ def _parse_records(response: httpx.Response) -> list[dict]:
                 return cast("list[dict]", payload[key])
         return [payload]
     return []
+
+
+def _decode_json_stream(text: str) -> list[dict]:
+    """Decode a run of JSON objects with no separators (or whitespace/newlines)."""
+    decoder = json.JSONDecoder()
+    records: list[dict] = []
+    idx, length = 0, len(text)
+    while idx < length:
+        while idx < length and text[idx].isspace():
+            idx += 1
+        if idx >= length:
+            break
+        obj, end = decoder.raw_decode(text, idx)
+        records.append(obj)
+        idx = end
+    return records
