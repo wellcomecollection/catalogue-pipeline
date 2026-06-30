@@ -5,7 +5,9 @@ module "trigger_lambda" {
   description  = "Lambda function to trigger adapter ingestion"
   package_type = "Image"
   image_uri    = "${var.repository_url}:prod"
-  publish      = true
+  # CI deploys via `update-function-code --publish` and nothing consumes a
+  # versioned ARN, so Terraform publishing only caused a perpetual version diff.
+  publish = false
 
   image_config = {
     command = ["adapters.steps.${local.steps_namespace}.trigger.lambda_handler"]

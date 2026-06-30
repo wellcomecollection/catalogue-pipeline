@@ -9,7 +9,9 @@ module "transformer_lambda" {
   description  = "Lambda function to transform EBSCO/Axiell data"
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
-  publish      = true
+  # CI deploys via `update-function-code --publish` and nothing consumes a
+  # versioned ARN, so Terraform publishing only caused a perpetual version diff.
+  publish = false
 
   image_config = {
     command = ["adapters.steps.transformer.lambda_handler"]
