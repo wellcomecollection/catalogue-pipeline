@@ -2,12 +2,9 @@ module "graph_pipeline" {
   source = "./graph"
 
   pipeline_date = var.pipeline_date
-  # The graph subsystem's augmented source can be decoupled from graph_index_dates.augmented (which
-  # the old Scala inferrer still writes) via graph_images_augmented_index_date — see that variable and
-  # local.graph_images_augmented_index_date. All other dates pass through unchanged.
   index_dates = {
     merged    = var.graph_index_dates.merged
-    augmented = local.graph_images_augmented_index_date
+    augmented = var.graph_index_dates.augmented
     works     = var.graph_index_dates.works
     concepts  = var.graph_index_dates.concepts
     images    = var.graph_index_dates.images

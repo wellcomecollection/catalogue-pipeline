@@ -5,7 +5,6 @@ from functools import cache
 
 import structlog
 from lxml import etree
-
 from models.pipeline.id_label import Language
 
 logger = structlog.get_logger(__name__)
@@ -30,7 +29,12 @@ def load_language_code_to_name_map() -> dict[str, str]:
 def load_language_name_to_codes_map() -> dict[str, list[str]]:
     doc = _load_language_xml()
     mapping: defaultdict[str, list[str]] = defaultdict(list)
-    for code, name in _iter_languages(doc, include_name_variants=True):
+
+    # For languages with multiple codes (e.g. "hrv" and "scr" for Croatian),
+    # we do not want to include codes marked as obsolete in the mapping
+    for code, name in _iter_languages(
+        doc, include_name_variants=True, skip_obsolete_codes=True
+    ):
         if code and name:
             mapping[name].append(code)
 
@@ -38,20 +42,29 @@ def load_language_name_to_codes_map() -> dict[str, list[str]]:
 
 
 def _iter_languages(
-    doc: etree._ElementTree, include_name_variants: bool = False
+    doc: etree._ElementTree,
+    include_name_variants: bool = False,
+    skip_obsolete_codes: bool = False,
 ) -> Iterator[tuple[str | None, str | None]]:
     ns_decl = {"c": CODELIST_NS}
     code_tag = f"{{{CODELIST_NS}}}code"
     name_tag = f"{{{CODELIST_NS}}}name"
-    uf_tag = f"{{{CODELIST_NS}}}uf"
+
     for language_element in doc.findall("c:languages/c:language", namespaces=ns_decl):
-        code = language_element.findtext(code_tag)
+        code_element = language_element.find(code_tag)
+        if code_element is None:
+            continue
+        if skip_obsolete_codes and code_element.get("status") == "obsolete":
+            continue
+
         name = language_element.findtext(name_tag)
+        code = code_element.text
         yield code, name
 
         if include_name_variants:
-            for uf in language_element.findall(uf_tag):
-                yield code, uf.findtext(name_tag)
+            # Find all descendant instances of `<name>` to make sure we yield all variant names
+            for name_element in language_element.findall(f".//{name_tag}"):
+                yield code, name_element.text
 
 
 def from_code(language_code: str) -> Language | None:

@@ -1,12 +1,12 @@
 import re
 
+from lookups.languages import from_name
+from models.pipeline.id_label import Language
+from models.pipeline.note import Note
 from pymarc.record import Record
 
 from adapters.transformers.marc.common import non_empty_subfields
 from adapters.transformers.marc.notes import LANGUAGE_NOTE
-from lookups.languages import from_name
-from models.pipeline.id_label import Language
-from models.pipeline.note import Note
 
 _SEPARATORS = re.compile(r"\n|;|\.|,|/|\band\b|`")
 _LANGUAGE_TAG_PATTERN = re.compile(r'<language(?: langcode="[a-z]+")?>(.*?)</language>')
@@ -62,6 +62,8 @@ def _parse_single_value(lang_field: str) -> tuple[list[Language], list[Note]]:
         _find_languages_in_text(lang_field),
         [
             Note(
+                # TODO: This spelling correction is ported from Scala and affects exactly one record
+                # (collect:110159658). It would be preferable to fix this in the source system.
                 contents=lang_field.replace("recieved", "received"),
                 note_type=LANGUAGE_NOTE,
             )
@@ -75,6 +77,7 @@ def _parse_as_language_list(lang_field: str) -> list[Language] | None:
     If the string contains non-language components, return None.
     """
     for matcher in (
+        _match_exact_single,
         _match_exact,
         _match_after_corrections,
         _match_after_stripping_tags,
@@ -82,6 +85,13 @@ def _parse_as_language_list(lang_field: str) -> list[Language] | None:
         result = matcher(lang_field)
         if result is not None:
             return result
+    return None
+
+
+def _match_exact_single(lang_field: str) -> list[Language] | None:
+    """Try to match the whole string to a single language name exactly."""
+    if language := from_name(lang_field):
+        return [language]
     return None
 
 
@@ -119,7 +129,7 @@ def _match_after_stripping_tags(lang_field: str) -> list[Language] | None:
 
 
 def _find_languages_in_text(lang_field: str) -> list[Language]:
-    """Identify capitalised words and try to match them to langauge names, returning all matches."""
+    """Identify capitalised words and try to match them to language names, returning all matches."""
     return [
         lang
         for word in _LANGUAGE_NAME_PATTERN.findall(lang_field)

@@ -58,19 +58,6 @@ steps:
     agents:
       queue: "scala"
 
-  - label: "inference_manager (app)"
-    command: |
-      ./builds/run_inference_manager_tests.sh
-      ./builds/build_sbt_image.sh inference_manager "$BUILDKITE_COMMIT"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_sbt_image_to_ecr.sh inference_manager "$BUILDKITE_COMMIT"
-      fi
-
-    agents:
-      queue: "scala"
-
   - label: "{{ matrix }} (Test/Lambda)"
     plugins:
       - docker-compose#v4.11.0:

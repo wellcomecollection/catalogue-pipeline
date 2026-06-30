@@ -1,8 +1,8 @@
 # The EC2 task (Python inference_manager + the three inferrer sidecars) that the
-# image-inferrer state machine launches via runTask.waitForTaskToken. This is
-# additive: the always-on `module.image_inferrer` service (service_image_inferrer.tf)
-# stays in place until the scheduled state machine is proven and we cut over.
-# The inferrer image/port/cpu/memory locals are reused from service_image_inferrer.tf.
+# image-inferrer state machine launches via runTask.waitForTaskToken. This is the
+# sole image inferrer; the old SQS-driven Scala service has been retired. The inferrer
+# port and CPU/memory sizing locals below were previously shared with that service and
+# now live here, its only remaining consumer.
 
 data "aws_caller_identity" "current" {}
 
@@ -13,6 +13,40 @@ data "aws_ecr_repository" "unified_pipeline_task" {
 locals {
   inference_manager_container_name = "inference-manager-${var.pipeline_date}"
   secrets_manager_prefix           = "arn:aws:secretsmanager:eu-west-1:${data.aws_caller_identity.current.account_id}:secret"
+
+  feature_inferrer_port      = 3141
+  palette_inferrer_port      = 3142
+  aspect_ratio_inferrer_port = 3143
+  shared_storage_name        = "shared_storage"
+  shared_storage_path        = "/data"
+
+  # This is the CPU/memory available on an ECS instance which isn't running
+  # any tasks.  You can find it in the ECS console, in the list of
+  # capacity providers.
+  base_2x_total_cpu = 8192
+  base_1x_total_cpu = 4096
+
+  base_2x_total_memory = 14336
+  base_1x_total_memory = 7168
+
+  base_manager_memory      = 2048
+  base_manager_cpu         = 1024
+  base_aspect_ratio_cpu    = 2048
+  base_aspect_ratio_memory = 2048
+
+  # When we're not reindexing, we halve the size of these tasks, because
+  # they won't be getting as many updates.
+  total_cpu           = var.reindexing_state.scale_up_tasks ? local.base_2x_total_cpu : local.base_1x_total_cpu
+  total_memory        = var.reindexing_state.scale_up_tasks ? local.base_2x_total_memory : local.base_1x_total_memory
+  manager_memory      = var.reindexing_state.scale_up_tasks ? local.base_manager_memory : floor(local.base_manager_memory / 2)
+  manager_cpu         = var.reindexing_state.scale_up_tasks ? local.base_manager_cpu : floor(local.base_manager_cpu / 2)
+  aspect_ratio_cpu    = var.reindexing_state.scale_up_tasks ? local.base_aspect_ratio_cpu : floor(local.base_aspect_ratio_cpu / 2)
+  aspect_ratio_memory = var.reindexing_state.scale_up_tasks ? local.base_aspect_ratio_memory : floor(local.base_aspect_ratio_memory / 2)
+
+  log_router_memory = 50
+
+  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
+  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory - local.log_router_memory))
 }
 
 module "inference_manager_ecs_task" {
