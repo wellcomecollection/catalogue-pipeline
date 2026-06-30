@@ -19,6 +19,7 @@ from adapters.extractors.ebsco import helpers as ebsco_helpers
 from adapters.extractors.oai_pmh.axiell import config as axiell_config
 from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.extractors.oai_pmh.folio import config as folio_config
+from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_items_store
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.axiell_transformer import AxiellTransformer
@@ -119,7 +120,12 @@ def build_transformer(
     if event.transformer_type == "ebsco":
         return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "folio":
-        return FolioTransformer(adapter_store, event.changeset_ids, snapshot_id)
+        # Join the enriched items store (RFC 088 / Option C) so FOLIO works carry
+        # items with stable `folio-item` identifiers.
+        items_store = build_items_store(use_rest_api_table=use_rest_api_table)
+        return FolioTransformer(
+            adapter_store, event.changeset_ids, snapshot_id, items_store=items_store
+        )
     if event.transformer_type == "axiell_reconciler":
         if not event.changeset_ids:
             # The reconciler doesn't work in the context of a full reindex,

@@ -122,6 +122,55 @@ S3_PREFIX = os.getenv("S3_PREFIX", "dev")
 
 
 # ---------------------------------------------------------------------------
+# Item enrichment (RFC 088 / Option C)
+#
+# A second Iceberg store, populated from mod-inventory-storage's
+# `oai-pmh-view/enrichedInstances`, holding each instance's items and holdings
+# (with UUIDs) keyed by instance id. It mirrors the adapter-store shape and is
+# joined onto the bib store at transform time. See
+# docs/discovery/folio-oai-pmh-item-enrichment.md.
+# ---------------------------------------------------------------------------
+ITEMS_NAMESPACE = os.getenv("FOLIO_ITEMS_NAMESPACE", "folio-items")
+ITEMS_REST_API_TABLE_NAME = os.getenv(
+    "FOLIO_ITEMS_REST_API_TABLE_NAME", "folio_items_table"
+)
+ITEMS_LOCAL_TABLE_NAME = os.getenv(
+    "FOLIO_ITEMS_LOCAL_TABLE_NAME", "folio_items_local_table"
+)
+
+# mod-inventory-storage connectivity (distinct from the OAI-PMH feed).
+SSM_INVENTORY_URL = os.getenv(
+    "FOLIO_SSM_INVENTORY_URL", "/catalogue_pipeline/folio/inventory_api_url"
+)
+SSM_INVENTORY_TOKEN = os.getenv(
+    "FOLIO_SSM_INVENTORY_TOKEN", "/catalogue_pipeline/folio/inventory_api_token"
+)
+INVENTORY_TENANT = os.getenv("FOLIO_INVENTORY_TENANT")
+ENRICH_BATCH_SIZE = int(os.getenv("FOLIO_ENRICH_BATCH_SIZE", "50"))
+ENRICH_SKIP_SUPPRESSED = (
+    os.getenv("FOLIO_ENRICH_SKIP_SUPPRESSED", "false").lower() == "true"
+)
+
+# Iceberg table configs for the items store (reusing the adapter-store schema).
+ITEMS_REST_API_ICEBERG_CONFIG = RestApiIcebergTableConfig(
+    table_name=ITEMS_REST_API_TABLE_NAME,
+    namespace=REST_API_NAMESPACE,
+    iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
+    sort_order=ADAPTER_STORE_SORT_ORDER,
+    s3_tables_bucket=S3_TABLES_BUCKET,
+    region=AWS_REGION,
+    account_id=AWS_ACCOUNT_ID,
+)
+ITEMS_LOCAL_ICEBERG_CONFIG = LocalIcebergTableConfig(
+    table_name=ITEMS_LOCAL_TABLE_NAME,
+    namespace=LOCAL_NAMESPACE,
+    iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
+    sort_order=ADAPTER_STORE_SORT_ORDER,
+    db_name=LOCAL_DB_NAME,
+)
+
+
+# ---------------------------------------------------------------------------
 # OAI-PMH Adapter Config (Pydantic model for runtime)
 # ---------------------------------------------------------------------------
 FOLIO_ADAPTER_CONFIG = OAIPMHAdapterConfig(

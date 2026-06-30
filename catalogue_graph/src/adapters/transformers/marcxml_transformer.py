@@ -31,20 +31,33 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
                 continue
 
             row_id, last_modified = row["id"], row["last_modified"]
+            # Item/holdings enrichment content joined on by AdapterStoreSource
+            # (None for adapters without an items store). See RFC 088 / Option C.
+            enrichment_content = row.get("enrichment_content")
 
             try:
                 if row.get("deleted", False):
                     yield row_id, self.transform_deleted(marc_record, last_modified)
                 else:
-                    yield row_id, self.transform_record(marc_record, last_modified)
+                    yield (
+                        row_id,
+                        self.transform_record(
+                            marc_record, last_modified, enrichment_content
+                        ),
+                    )
             except Exception as e:
                 logger.error("Error transforming record", row_id=row_id, error=str(e))
                 self._add_error(e, "transform", row_id)
 
     def transform_record(
-        self, marc_record: Record, last_modified: datetime
+        self,
+        marc_record: Record,
+        last_modified: datetime,
+        enrichment_content: str | None = None,
     ) -> SourceWork:
-        builder = self.work_builder(marc_record, last_modified)
+        builder = self.work_builder(
+            marc_record, last_modified, enrichment_content=enrichment_content
+        )
         return builder.transform_work()
 
     def transform_deleted(
