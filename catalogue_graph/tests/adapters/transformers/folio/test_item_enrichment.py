@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from uuid import uuid1
 
 import pytest
+from pyiceberg.expressions import In
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.extractors.oai_pmh.folio.config as adapter_config
@@ -18,6 +19,8 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import (
 )
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.steps.transformer import TransformerEvent, handler
+from adapters.transformers import adapter_store_source
+from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import LocalIcebergTableConfig, get_local_table
@@ -195,3 +198,72 @@ def test_transformer_emits_no_items_when_instance_not_enriched(
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
     source = by_id["Work[folio-instance/inst-2]"]["_source"]
     assert source["data"]["items"] == []
+
+
+# ---------------------------------------------------------------------------
+# Scale: the item lookup is id-scoped and batched, not a full-namespace load
+# ---------------------------------------------------------------------------
+def _one_item_instance(instance_id: str) -> FolioEnrichedInstance:
+    return FolioEnrichedInstance(
+        instance_id=instance_id,
+        items=[FolioEnrichedItem(id=f"item-{instance_id}")],
+    )
+
+
+def test_enrichment_fetches_only_requested_ids(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The join reads items filtered by the ids being transformed (an `In` filter),
+    not the whole namespace, and attaches only the matching content."""
+    items_store = _make_items_store(
+        {iid: _one_item_instance(iid) for iid in ("inst-1", "inst-2", "inst-3")}
+    )
+
+    captured_filters = []
+    original = items_store.get_active_namespace_records
+
+    def spy(*args: object, **kwargs: object) -> object:
+        captured_filters.append(kwargs.get("iceberg_filter"))
+        return original(*args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(items_store, "get_active_namespace_records", spy)
+
+    # adapter_store is unused by the enrichment join; pass the items store as a stand-in.
+    source = AdapterStoreSource(items_store, [], items_store=items_store)
+    rows = [{"id": "inst-1"}, {"id": "inst-3"}, {"id": "missing"}]
+    enriched = list(source._with_enrichment(rows))
+
+    # The store was queried once, with an `In` filter (scoped read), not unfiltered.
+    assert len(captured_filters) == 1
+    assert isinstance(captured_filters[0], In)
+
+    by_id = {row["id"]: row["enrichment_content"] for row in enriched}
+    assert by_id["inst-1"] is not None and by_id["inst-3"] is not None
+    assert by_id["missing"] is None
+    # inst-2 was never requested, so its content is not present anywhere.
+    assert "inst-2" not in by_id
+
+
+def test_enrichment_batches_lookups(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With more rows than the batch size, the lookup runs once per chunk and every
+    row still gets its matching enrichment."""
+    monkeypatch.setattr(adapter_store_source, "ITEM_ENRICHMENT_BATCH_SIZE", 2)
+    ids = [f"inst-{i}" for i in range(5)]
+    items_store = _make_items_store({iid: _one_item_instance(iid) for iid in ids})
+
+    call_count = 0
+    original = items_store.get_active_namespace_records
+
+    def spy(*args: object, **kwargs: object) -> object:
+        nonlocal call_count
+        call_count += 1
+        return original(*args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(items_store, "get_active_namespace_records", spy)
+
+    source = AdapterStoreSource(items_store, [], items_store=items_store)
+    enriched = list(source._with_enrichment([{"id": iid} for iid in ids]))
+
+    assert len(enriched) == 5
+    assert all(row["enrichment_content"] is not None for row in enriched)
+    assert call_count == 3  # 5 rows, batch size 2 -> 3 chunks

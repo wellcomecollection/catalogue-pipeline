@@ -2,7 +2,8 @@ from datetime import UTC, datetime
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from pyiceberg.expressions import EqualTo, IsNull, Or
+from pyiceberg.expressions import And, BooleanExpression, EqualTo, IsNull, Or
+from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.pipeline_store import PipelineStore, PipelineStoreUpdate
@@ -64,10 +65,21 @@ class AdapterStore(PipelineStore):
 
         return self._commit_changeset(changes, inserts)
 
-    def get_active_namespace_records(self, snapshot_id: int | None = None) -> pa.Table:
-        """Return non-deleted records in the store namespace."""
+    def get_active_namespace_records(
+        self,
+        snapshot_id: int | None = None,
+        *,
+        iceberg_filter: BooleanExpression = ALWAYS_TRUE,
+    ) -> pa.Table:
+        """Return non-deleted records in the store namespace.
+
+        ``iceberg_filter`` is And-ed with the non-deleted filter so callers can scope
+        the read (e.g. to a set of ids) while keeping active-only semantics.
+        """
         non_deleted_filter = Or(EqualTo("deleted", False), IsNull("deleted"))
-        return self.get_namespace_records(non_deleted_filter, snapshot_id)
+        return self.get_namespace_records(
+            And(non_deleted_filter, iceberg_filter), snapshot_id
+        )
 
     @staticmethod
     def _preserve_content_for_deletions(

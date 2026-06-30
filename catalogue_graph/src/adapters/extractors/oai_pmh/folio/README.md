@@ -61,17 +61,19 @@ enrichment closes that gap:
    it emits no items (it never guesses from MARC 952), so works stay valid.
 
 Enrichment is enabled in infra via the `enable_item_enrichment` module variable
-(FOLIO only). A full reindex never calls FOLIO — it just joins whatever is already in
-the items store — so transformer purity is preserved.
+(FOLIO only). A full reindex never calls FOLIO; it just joins whatever is already in
+the items store, so transformer purity is preserved.
 
 See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
 
 ### Running enrichment locally
 
 The enrichment step has a local CLI (defaults to local Iceberg tables; pass
-`--use-rest-api-table` for S3 Tables). The inventory URL/token are read from
-`FOLIO_INVENTORY_URL` / `FOLIO_INVENTORY_TOKEN` when set, otherwise from SSM — so you
-can point at a dev or mock endpoint without AWS:
+`--use-rest-api-table` for S3 Tables). The inventory URL and token are read from
+`FOLIO_INVENTORY_URL` / `FOLIO_INVENTORY_TOKEN` when set, otherwise from SSM, so you
+can point at a dev or mock endpoint without AWS. Note `FOLIO_INVENTORY_TOKEN` is an
+OKAPI token (also set `FOLIO_INVENTORY_TENANT` if the gateway needs it), not the OAI
+feed token; to read either from SSM use `AWS_PROFILE=platform-developer`.
 
 ```bash
 # event is the loader response (or any JSON with job_id + changeset_ids)
@@ -81,8 +83,18 @@ FOLIO_INVENTORY_URL=https://<inventory-host> FOLIO_INVENTORY_TOKEN=<token> \
   uv run python -m adapters.steps.oai_pmh.folio_enrich --use-cli --event /tmp/enrich_event.json
 ```
 
-Then run the transformer locally to see the joined items
-(`uv run python -m adapters.steps.transformer --transformer-type folio --changeset-id <bib-changeset-id>`).
+To see the joined items end to end, bring up a local Elasticsearch and Kibana with the
+shared [`elasticsearch.docker-compose.yml`](../../../../../elasticsearch.docker-compose.yml)
+(ES on `:9200`, Kibana on `:5601`) and run the transformer against it:
+
+```bash
+docker compose -f elasticsearch.docker-compose.yml up
+
+uv run python -m adapters.steps.transformer --transformer-type folio \
+  --changeset-id <bib-changeset-id> --es-mode local
+```
+
+The transformed works land in a local index you can browse in Kibana at `localhost:5601`.
 
 ## Environment variables
 
