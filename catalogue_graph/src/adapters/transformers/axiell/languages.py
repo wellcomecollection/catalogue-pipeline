@@ -62,6 +62,8 @@ def _parse_single_value(lang_field: str) -> tuple[list[Language], list[Note]]:
         _find_languages_in_text(lang_field),
         [
             Note(
+                # TODO: This spelling correction is ported from Scala and affects exactly one record
+                # (collect:110159658). It would be preferable to fix this in the source system.
                 contents=lang_field.replace("recieved", "received"),
                 note_type=LANGUAGE_NOTE,
             )
