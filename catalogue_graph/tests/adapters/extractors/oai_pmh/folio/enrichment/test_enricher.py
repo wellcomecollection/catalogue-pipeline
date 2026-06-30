@@ -1,3 +1,4 @@
+import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioItemEnricher
@@ -121,3 +122,18 @@ def test_enrich_keys_by_oai_id_but_queries_bare_uuid(
     assert set(rows) == {store_id}
     stored = FolioEnrichedInstance.from_store_content(rows[store_id]["content"])
     assert [i.id for i in stored.items] == ["item-a"]
+
+
+def test_enrich_raises_when_returned_id_matches_no_request(
+    temporary_table: IcebergTable,
+) -> None:
+    """An instance the API returns whose id matches no requested id cannot be re-keyed
+    onto a bib row, so enrichment fails loudly rather than storing an orphan row."""
+    client = FakeInventoryClient(
+        {"inst-1": FolioEnrichedInstance(instance_id="unexpected", items=[])}
+    )
+    store = _store(temporary_table)
+    enricher = FolioItemEnricher(client, store)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="matched no requested id"):
+        enricher.enrich(["inst-1"])

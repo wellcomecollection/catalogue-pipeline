@@ -1,3 +1,5 @@
+import pytest
+
 from adapters.extractors.oai_pmh.folio.enrichment.models import (
     FolioEnrichedInstance,
 )
@@ -108,3 +110,24 @@ def test_store_content_round_trips() -> None:
     restored = FolioEnrichedInstance.from_store_content(content)
     assert restored == instance
     assert restored.items[0].id == "aaa11111-0000-0000-0000-000000000001"
+
+
+def test_from_api_raises_when_item_missing_id() -> None:
+    """An item with no id cannot mint a stable identifier, so parsing fails loudly
+    rather than emitting an item identified by the literal string "None"."""
+    with pytest.raises(ValueError, match="item is missing an id"):
+        FolioEnrichedInstance.from_api(
+            {
+                "instanceId": "i-1",
+                "itemsAndHoldingsFields": {"items": [{"barcode": "123"}]},
+            }
+        )
+
+
+def test_from_api_raises_when_instance_missing_id() -> None:
+    """A record with no instanceId cannot be keyed to a bib row, so parsing fails
+    loudly rather than storing a row keyed by the literal string "None"."""
+    with pytest.raises(ValueError, match="missing instanceId"):
+        FolioEnrichedInstance.from_api(
+            {"itemsAndHoldingsFields": {"items": [{"id": "item-1"}]}}
+        )
