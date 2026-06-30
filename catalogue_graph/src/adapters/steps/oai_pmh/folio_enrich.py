@@ -24,6 +24,7 @@ from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_enricher
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.utils.adapter_store import AdapterStore
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from utils.steps import ecs_handler
 
 logger = structlog.get_logger(__name__)
 
@@ -101,10 +102,25 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     ).model_dump(mode="json")
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the FOLIO enrichment step")
+def ecs_task_handler(
+    event: EnrichmentEvent,
+    execution_context: ExecutionContext,
+) -> EnrichmentResponse:
+    """ECS task handler invoked by the ecs_handler utility (waitForTaskToken)."""
+    return handler(event, use_rest_api_table=True, execution_context=execution_context)
+
+
+def event_validator(raw_input: str) -> EnrichmentEvent:
+    return EnrichmentEvent.model_validate(json.loads(raw_input))
+
+
+def local_handler(parser: argparse.ArgumentParser) -> None:
+    """Run the enrichment step from the command line against a local event file."""
     parser.add_argument(
-        "--event", type=str, required=True, help="Path to an enrichment event JSON file"
+        "--event-file",
+        type=str,
+        required=True,
+        help="Path to an enrichment event JSON file",
     )
     parser.add_argument(
         "--use-rest-api-table",
@@ -113,7 +129,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    with open(args.event, encoding="utf-8") as f:
+    with open(args.event_file, encoding="utf-8") as f:
         event = EnrichmentEvent.model_validate(json.load(f))
 
     response = handler(event, use_rest_api_table=args.use_rest_api_table)
@@ -121,4 +137,20 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run the FOLIO enrichment step")
+    parser.add_argument(
+        "--use-cli",
+        action="store_true",
+        help="Invoke the local CLI handler instead of the ECS handler.",
+    )
+    cli_args, _ = parser.parse_known_args()
+
+    if cli_args.use_cli:
+        local_handler(parser)
+    else:
+        ecs_handler(
+            arg_parser=parser,
+            handler=ecs_task_handler,
+            event_validator=event_validator,
+            pipeline_step="folio_adapter_enrichment",
+        )

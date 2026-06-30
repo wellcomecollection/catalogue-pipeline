@@ -103,3 +103,31 @@ resource "aws_ssm_parameter" "ebsco_adapter_ftp_remote_dir" {
     ]
   }
 }
+
+# FOLIO mod-inventory-storage (oai-pmh-view) — used by the item-enrichment step
+# (RFC 088 / Option C). Distinct from the FOLIO OAI-PMH feed credentials above.
+resource "aws_ssm_parameter" "folio_inventory_api_url" {
+  name        = "/catalogue_pipeline/folio/inventory_api_url"
+  description = "Base URL for the FOLIO mod-inventory-storage oai-pmh-view API"
+  type        = "String"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
+
+resource "aws_ssm_parameter" "folio_inventory_api_token" {
+  name        = "/catalogue_pipeline/folio/inventory_api_token"
+  description = "Auth token for the FOLIO mod-inventory-storage oai-pmh-view API"
+  type        = "SecureString"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
