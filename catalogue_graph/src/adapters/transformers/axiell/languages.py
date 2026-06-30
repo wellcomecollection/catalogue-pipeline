@@ -121,7 +121,7 @@ def _match_after_stripping_tags(lang_field: str) -> list[Language] | None:
 
 
 def _find_languages_in_text(lang_field: str) -> list[Language]:
-    """Identify capitalised words and try to match them to langauge names, returning all matches."""
+    """Identify capitalised words and try to match them to language names, returning all matches."""
     return [
         lang
         for word in _LANGUAGE_NAME_PATTERN.findall(lang_field)
