@@ -53,5 +53,5 @@ variable "task_repository_url" {
 variable "enable_item_enrichment" {
   type        = bool
   default     = false
-  description = "Run a FOLIO item-enrichment state between Run loader and Publish event (RFC 088 / Option C). FOLIO-only; leave false for other adapters."
+  description = "Run a FOLIO item-enrichment state between Run loader and Publish event. FOLIO-only; leave false for other adapters."
 }

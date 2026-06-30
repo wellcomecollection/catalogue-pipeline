@@ -22,7 +22,7 @@ class AdapterStoreSource(BaseSource):
         self.snapshot_id = snapshot_id
         # Optional secondary store joined onto each record by id. Used by the FOLIO
         # adapter to attach enriched item/holdings content (with UUIDs) that the
-        # OAI-PMH bib record cannot carry. See RFC 088 / Option C.
+        # OAI-PMH bib record cannot carry.
         self.items_store = items_store
 
     def stream_raw(self) -> Generator[dict[str, Any]]:

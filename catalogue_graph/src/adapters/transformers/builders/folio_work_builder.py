@@ -14,7 +14,7 @@ from models.pipeline.item import Item
 from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
 
 # The source-identifier type for a FOLIO item. The id-minter turns this plus the
-# item UUID into a stable canonical id for the public catalogue (RFC 088 / Option C).
+# item UUID into a stable canonical id for the public catalogue.
 FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
 
 

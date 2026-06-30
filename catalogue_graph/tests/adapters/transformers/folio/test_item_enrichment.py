@@ -1,4 +1,4 @@
-"""Tests for FOLIO item enrichment at transform time (RFC 088 / Option C).
+"""Tests for FOLIO item enrichment at transform time.
 
 Covers both the unit level (FolioWorkBuilder emitting items from enrichment
 content) and the end-to-end join (the transformer handler joining the items store

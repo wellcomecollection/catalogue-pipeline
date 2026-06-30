@@ -122,13 +122,13 @@ S3_PREFIX = os.getenv("S3_PREFIX", "dev")
 
 
 # ---------------------------------------------------------------------------
-# Item enrichment (RFC 088 / Option C)
+# Item enrichment
 #
 # A second Iceberg store, populated from mod-inventory-storage's
 # `oai-pmh-view/enrichedInstances`, holding each instance's items and holdings
 # (with UUIDs) keyed by instance id. It mirrors the adapter-store shape and is
 # joined onto the bib store at transform time. See
-# docs/discovery/folio-oai-pmh-item-enrichment.md.
+# https://github.com/wellcomecollection/catalogue-pipeline/pull/3438.
 # ---------------------------------------------------------------------------
 ITEMS_NAMESPACE = os.getenv("FOLIO_ITEMS_NAMESPACE", "folio-items")
 ITEMS_REST_API_TABLE_NAME = os.getenv(

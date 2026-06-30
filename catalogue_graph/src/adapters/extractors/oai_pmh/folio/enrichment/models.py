@@ -1,4 +1,4 @@
-"""Models for the FOLIO item-enrichment payload (RFC 088 / Option C).
+"""Models for the FOLIO item-enrichment payload.
 
 The FOLIO OAI-PMH feed (``marc21_withholdings``) carries item/holdings data in
 MARC 952 datafields but no item UUID. To give the public catalogue a stable item
@@ -10,10 +10,11 @@ These models describe:
   * what we persist, per instance, into the ``folio_items_table`` store
     (the same model, serialised to JSON in the store ``content`` column).
 
-The precise ``enrichedInstances`` response contract is still an open question (see
-``docs/discovery/folio-oai-pmh-item-enrichment.md``). ``from_api`` is intentionally
-tolerant: it reads the fields we need and ignores everything else, so a change in
-the upstream shape does not break harvesting.
+The precise ``enrichedInstances`` response contract is still an open question, so
+``from_api`` is intentionally tolerant: it reads the fields we need and ignores
+everything else, so a change in the upstream shape does not break harvesting.
+
+See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
 """
 
 from __future__ import annotations

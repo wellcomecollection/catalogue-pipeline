@@ -120,8 +120,8 @@ def build_transformer(
     if event.transformer_type == "ebsco":
         return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "folio":
-        # Join the enriched items store (RFC 088 / Option C) so FOLIO works carry
-        # items with stable `folio-item` identifiers.
+        # Join the enriched items store so FOLIO works carry items with stable
+        # `folio-item` identifiers.
         items_store = build_items_store(use_rest_api_table=use_rest_api_table)
         return FolioTransformer(
             adapter_store, event.changeset_ids, snapshot_id, items_store=items_store

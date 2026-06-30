@@ -1,6 +1,7 @@
-# FOLIO item-enrichment ECS task (RFC 088 / Option C).
+# FOLIO item-enrichment ECS task.
 # Gated by var.enable_item_enrichment so only the FOLIO adapter provisions it.
 # Mirrors ecs_loader.tf: same image, IAM shape, and Step Functions callback.
+# See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438.
 
 module "enrichment_ecs_task" {
   count  = var.enable_item_enrichment ? 1 : 0

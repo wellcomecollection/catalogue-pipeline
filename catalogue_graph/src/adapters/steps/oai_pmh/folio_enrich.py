@@ -1,4 +1,4 @@
-"""Enrichment step for the FOLIO adapter (RFC 088 / Option C).
+"""Enrichment step for the FOLIO adapter.
 
 Runs between the loader and the publish event. Given the bib changeset(s) produced
 by the loader, it reads the changed instance ids, fetches their items/holdings from
@@ -8,6 +8,8 @@ event can carry them.
 
 Running here (rather than at transform time) preserves transformer purity: a full
 reindex never calls FOLIO, it just joins whatever is already in the items store.
+
+See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
 """
 
 from __future__ import annotations
@@ -115,12 +117,15 @@ def event_validator(raw_input: str) -> EnrichmentEvent:
 
 
 def local_handler(parser: argparse.ArgumentParser) -> None:
-    """Run the enrichment step from the command line against a local event file."""
+    """Run the enrichment step from the command line against a local event file.
+
+    Defaults to local Iceberg tables; pass --use-rest-api-table for S3 Tables.
+    """
     parser.add_argument(
-        "--event-file",
+        "--event",
         type=str,
         required=True,
-        help="Path to an enrichment event JSON file",
+        help="Path to an enrichment event JSON file (e.g. the loader response)",
     )
     parser.add_argument(
         "--use-rest-api-table",
@@ -129,7 +134,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     )
     args = parser.parse_args()
 
-    with open(args.event_file, encoding="utf-8") as f:
+    with open(args.event, encoding="utf-8") as f:
         event = EnrichmentEvent.model_validate(json.load(f))
 
     response = handler(event, use_rest_api_table=args.use_rest_api_table)

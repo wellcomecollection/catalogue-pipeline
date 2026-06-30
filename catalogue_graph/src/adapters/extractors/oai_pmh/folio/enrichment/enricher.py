@@ -1,4 +1,4 @@
-"""Populate the FOLIO items store from a bib changeset (RFC 088 / Option C).
+"""Populate the FOLIO items store from a bib changeset.
 
 The enricher is the new "Run enrichment" step that sits between the loader and the
 publish event. Given the set of instance ids that changed in a bib harvest window,
@@ -7,8 +7,10 @@ it fetches their items/holdings from mod-inventory-storage and upserts them into
 
 The bib changeset is the trigger: because the FOLIO adapter harvests
 ``marc21_withholdings``, an item or holdings change advances the instance's OAI
-datestamp and so re-appears in the bib window. This is verified read-only against the
-live dev feed in ``docs/discovery/folio-oai-pmh-item-enrichment.md``.
+datestamp and so re-appears in the bib window (verified read-only against the live
+dev feed).
+
+See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
 
 The store reuses ``AdapterStore`` (the same schema as the bib store): ``id`` is the
 instance id and ``content`` is the enriched items/holdings JSON. Using

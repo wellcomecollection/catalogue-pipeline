@@ -1,11 +1,15 @@
-"""Factories for the FOLIO item-enrichment runtime (RFC 088 / Option C).
+"""Factories for the FOLIO item-enrichment runtime.
 
-Wires the SSM-backed config in ``folio.config`` to the items store and the
-mod-inventory-storage client used by the enrichment step.
+Wires the config in ``folio.config`` to the items store and the
+mod-inventory-storage client used by the enrichment step. The inventory URL/token
+come from env vars when set (handy for local runs) and otherwise from SSM.
+
+See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
 """
 
 from __future__ import annotations
 
+import os
 from functools import cache
 
 import httpx
@@ -35,12 +39,17 @@ def build_items_store(*, use_rest_api_table: bool = True) -> AdapterStore:
 
 @cache
 def _inventory_url() -> str:
-    return get_ssm_parameter(config.SSM_INVENTORY_URL)
+    # Prefer an explicit env var (local runs / overrides), else read from SSM.
+    return os.getenv("FOLIO_INVENTORY_URL") or get_ssm_parameter(
+        config.SSM_INVENTORY_URL
+    )
 
 
 @cache
 def _inventory_token() -> str:
-    return get_ssm_parameter(config.SSM_INVENTORY_TOKEN)
+    return os.getenv("FOLIO_INVENTORY_TOKEN") or get_ssm_parameter(
+        config.SSM_INVENTORY_TOKEN
+    )
 
 
 def build_inventory_http_client() -> httpx.Client:
