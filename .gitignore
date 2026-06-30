@@ -408,5 +408,8 @@ scripts/mirolinks.csv
 # Ignore documents added for agent context
 catalogue_graph/.context
 
+# Ignore project local Claude context
+.claude
+
 # Ignore scratch files
 .scratch
