@@ -5,6 +5,7 @@ from functools import cache
 
 import structlog
 from lxml import etree
+
 from models.pipeline.id_label import Language
 
 logger = structlog.get_logger(__name__)
@@ -59,12 +60,13 @@ def _iter_languages(
 
         name = language_element.findtext(name_tag)
         code = code_element.text
-        yield code, name
 
         if include_name_variants:
             # Find all descendant instances of `<name>` to make sure we yield all variant names
             for name_element in language_element.findall(f".//{name_tag}"):
                 yield code, name_element.text
+        else:
+            yield code, name
 
 
 def from_code(language_code: str) -> Language | None:

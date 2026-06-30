@@ -1,12 +1,12 @@
 import re
 
-from lookups.languages import from_name
-from models.pipeline.id_label import Language
-from models.pipeline.note import Note
 from pymarc.record import Record
 
 from adapters.transformers.marc.common import non_empty_subfields
 from adapters.transformers.marc.notes import LANGUAGE_NOTE
+from lookups.languages import from_name
+from models.pipeline.id_label import Language
+from models.pipeline.note import Note
 
 _SEPARATORS = re.compile(r"\n|;|\.|,|/|\band\b|`")
 _LANGUAGE_TAG_PATTERN = re.compile(r'<language(?: langcode="[a-z]+")?>(.*?)</language>')
