@@ -8,7 +8,6 @@ module "enrichment_ecs_task" {
   source = "../../../../../pipeline/terraform/modules/ecs_task"
 
   task_name = "${var.namespace}-adapter-enrichment"
-  # TODO: Change to :prod before merging — currently :dev for testing
   image = "${var.task_repository_url}:prod"
 
   # Steady state is light, but size for backfill windows (matches the loader).
