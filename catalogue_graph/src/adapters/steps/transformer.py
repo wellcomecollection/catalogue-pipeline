@@ -13,6 +13,7 @@ from typing import Any, Literal, Protocol, cast
 
 import structlog
 from pydantic import BaseModel, Field
+from pyiceberg.exceptions import NoSuchTableError
 
 from adapters.extractors.ebsco import config as ebsco_config
 from adapters.extractors.ebsco import helpers as ebsco_helpers
@@ -123,9 +124,20 @@ def build_transformer(
         # Join the enriched items store so FOLIO works carry items with stable
         # `folio-item` identifiers.
         # The transformer only reads the items store; the enrichment step creates it.
-        items_store = build_items_store(
-            use_rest_api_table=use_rest_api_table, create_if_not_exists=False
-        )
+        # Before enrichment has ever run the items table does not exist yet, so treat
+        # a missing table as "no enrichment" and transform without items (works still
+        # emit no items rather than failing the whole transform).
+        items_store: AdapterStore | None
+        try:
+            items_store = build_items_store(
+                use_rest_api_table=use_rest_api_table, create_if_not_exists=False
+            )
+        except NoSuchTableError:
+            logger.warning(
+                "FOLIO items store does not exist yet; "
+                "transforming without item enrichment"
+            )
+            items_store = None
         return FolioTransformer(
             adapter_store, event.changeset_ids, snapshot_id, items_store=items_store
         )
