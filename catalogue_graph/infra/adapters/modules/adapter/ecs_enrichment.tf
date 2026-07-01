@@ -8,7 +8,7 @@ module "enrichment_ecs_task" {
   source = "../../../../../pipeline/terraform/modules/ecs_task"
 
   task_name = "${var.namespace}-adapter-enrichment"
-  image = "${var.task_repository_url}:prod"
+  image     = "${var.task_repository_url}:prod"
 
   # Steady state is light, but size for backfill windows (matches the loader).
   cpu    = 2048
