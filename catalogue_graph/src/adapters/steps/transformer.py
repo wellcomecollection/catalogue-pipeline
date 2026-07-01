@@ -122,7 +122,10 @@ def build_transformer(
     if event.transformer_type == "folio":
         # Join the enriched items store so FOLIO works carry items with stable
         # `folio-item` identifiers.
-        items_store = build_items_store(use_rest_api_table=use_rest_api_table)
+        # The transformer only reads the items store; the enrichment step creates it.
+        items_store = build_items_store(
+            use_rest_api_table=use_rest_api_table, create_if_not_exists=False
+        )
         return FolioTransformer(
             adapter_store, event.changeset_ids, snapshot_id, items_store=items_store
         )

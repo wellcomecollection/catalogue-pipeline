@@ -25,15 +25,25 @@ from adapters.utils.iceberg import get_local_table, get_rest_api_table
 from utils.aws import get_ssm_parameter
 
 
-def build_items_store(*, use_rest_api_table: bool = True) -> AdapterStore:
-    """Build the FOLIO items store (the ``folio_items_table``)."""
+def build_items_store(
+    *, use_rest_api_table: bool = True, create_if_not_exists: bool = True
+) -> AdapterStore:
+    """Build the FOLIO items store (the ``folio_items_table``).
+
+    The enrichment step is the writer and creates the table if needed
+    (``create_if_not_exists=True``). The transformer is a reader and should pass
+    ``create_if_not_exists=False`` so it does not need (and is not granted) the
+    s3tables create permissions.
+    """
     if use_rest_api_table:
         table = get_rest_api_table(
-            config.ITEMS_REST_API_ICEBERG_CONFIG, create_if_not_exists=True
+            config.ITEMS_REST_API_ICEBERG_CONFIG,
+            create_if_not_exists=create_if_not_exists,
         )
     else:
         table = get_local_table(
-            config.ITEMS_LOCAL_ICEBERG_CONFIG, create_if_not_exists=True
+            config.ITEMS_LOCAL_ICEBERG_CONFIG,
+            create_if_not_exists=create_if_not_exists,
         )
     return AdapterStore(table, namespace=config.ITEMS_NAMESPACE)
 
