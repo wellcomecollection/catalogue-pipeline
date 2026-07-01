@@ -136,10 +136,7 @@ def execute_loader(
         runtime: Loader runtime with clients and configuration.
 
     Returns:
-        OAIPMHLoaderResponse with harvest results.
-
-    Raises:
-        RuntimeError: If no windows were ready to harvest.
+        OAIPMHLoaderResponse with harvest results (empty when nothing was pending).
     """
     window = request.window
     harvester = build_harvester(request, runtime)
@@ -151,9 +148,13 @@ def execute_loader(
     )
 
     if not summaries:
-        raise RuntimeError(
-            "No pending windows to harvest for "
-            f"{window.start_time.isoformat()} -> {window.end_time.isoformat()}"
+        # Every candidate window in the range was already harvested (or the range
+        # produced none): a caught-up no-op, not an error. Return an empty response so
+        # the state machine routes straight to success instead of failing and retrying.
+        logger.info(
+            "No pending windows to harvest",
+            window_start=window.start_time.isoformat(),
+            window_end=window.end_time.isoformat(),
         )
 
     return OAIPMHLoaderResponse.from_summaries(summaries, job_id=request.job_id)
