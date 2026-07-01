@@ -1,8 +1,8 @@
 """Factories for the FOLIO item-enrichment runtime.
 
 Wires the config in ``folio.config`` to the items store and the
-mod-inventory-storage client used by the enrichment step. The inventory URL/token
-come from env vars when set (handy for local runs) and otherwise from SSM.
+mod-inventory-storage client used by the enrichment step. The inventory URL and OKAPI
+credentials come from env vars when set (handy for local runs) and otherwise from SSM.
 
 See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
 """
@@ -19,6 +19,7 @@ from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioItemEnric
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
 )
+from adapters.extractors.oai_pmh.folio.enrichment.okapi_auth import OkapiAuth
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import get_local_table, get_rest_api_table
 from utils.aws import get_ssm_parameter
@@ -46,25 +47,43 @@ def _inventory_url() -> str:
 
 
 @cache
-def _inventory_token() -> str:
-    return os.getenv("FOLIO_INVENTORY_TOKEN") or get_ssm_parameter(
-        config.SSM_INVENTORY_TOKEN
+def _inventory_username() -> str:
+    return os.getenv("FOLIO_INVENTORY_USERNAME") or get_ssm_parameter(
+        config.SSM_INVENTORY_USERNAME
+    )
+
+
+@cache
+def _inventory_password() -> str:
+    return os.getenv("FOLIO_INVENTORY_PASSWORD") or get_ssm_parameter(
+        config.SSM_INVENTORY_PASSWORD
+    )
+
+
+@cache
+def _inventory_tenant() -> str:
+    return os.getenv("FOLIO_INVENTORY_TENANT") or get_ssm_parameter(
+        config.SSM_INVENTORY_TENANT
     )
 
 
 def build_inventory_http_client() -> httpx.Client:
     """Build an authenticated client for mod-inventory-storage.
 
-    ``enrichedInstances`` is an OKAPI/mod-inventory-storage endpoint, so it expects
-    ``x-okapi-token`` plus ``x-okapi-tenant`` (NOT the ``Authorization`` token the edge
-    OAI feed uses). The token comes from ``FOLIO_INVENTORY_TOKEN``/SSM and the tenant
-    from ``FOLIO_INVENTORY_TENANT`` (omitted when unset, e.g. a gateway that injects it).
+    ``enrichedInstances`` is an OKAPI/mod-inventory-storage endpoint. OKAPI tokens are
+    short-lived, so the client logs in itself (POST ``/authn/login`` with the
+    username/password from ``FOLIO_INVENTORY_*``/SSM) and refreshes on 401, sending
+    ``x-okapi-token`` plus ``x-okapi-tenant``. The URL, credentials and tenant all come
+    from ``FOLIO_INVENTORY_*`` env vars when set, otherwise SSM.
     """
-    headers = {"x-okapi-token": _inventory_token()}
-    if config.INVENTORY_TENANT:
-        headers["x-okapi-tenant"] = config.INVENTORY_TENANT
+    auth = OkapiAuth(
+        base_url=_inventory_url(),
+        tenant=_inventory_tenant(),
+        username=_inventory_username(),
+        password=_inventory_password(),
+    )
     return httpx.Client(
-        headers=headers,
+        auth=auth,
         timeout=httpx.Timeout(
             config.OAI_HTTP_TIMEOUT, read=config.OAI_MAX_READ_TIMEOUT
         ),

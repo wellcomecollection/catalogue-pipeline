@@ -18,7 +18,8 @@ module "enrichment_ecs_task" {
   environment = {
     S3_BUCKET = data.aws_s3_bucket.adapter.id
     S3_PREFIX = "prod"
-    # FOLIO_INVENTORY_TENANT can be set here if the gateway requires x-okapi-tenant.
+    # Inventory URL, OKAPI credentials and tenant are read from SSM at runtime
+    # (/catalogue_pipeline/folio/inventory_*).
   }
 }
 

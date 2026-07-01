@@ -18,7 +18,8 @@ This adapter ingests records from the FOLIO OAI-PMH feed. It extends the shared 
 | ----------------------------------------------- | -------------------------------------------- |
 | `/catalogue_pipeline/folio/oai_api_token`       | FOLIO OAI API token                          |
 | `/catalogue_pipeline/folio/oai_api_url`         | FOLIO OAI-PMH endpoint URL                   |
-| `/catalogue_pipeline/folio/inventory_api_token` | mod-inventory-storage token (item enrichment) |
+| `/catalogue_pipeline/folio/inventory_username`  | OKAPI username for item enrichment (mod-inventory-storage) |
+| `/catalogue_pipeline/folio/inventory_password`  | OKAPI password for item enrichment (mod-inventory-storage) |
 | `/catalogue_pipeline/folio/inventory_api_url`   | mod-inventory-storage base URL (item enrichment) |
 
 ## Quick start
@@ -69,17 +70,20 @@ See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the d
 ### Running enrichment locally
 
 The enrichment step has a local CLI (defaults to local Iceberg tables; pass
-`--use-rest-api-table` for S3 Tables). The inventory URL and token are read from
-`FOLIO_INVENTORY_URL` / `FOLIO_INVENTORY_TOKEN` when set, otherwise from SSM, so you
-can point at a dev or mock endpoint without AWS. Note `FOLIO_INVENTORY_TOKEN` is an
-OKAPI token (also set `FOLIO_INVENTORY_TENANT` if the gateway needs it), not the OAI
-feed token; to read either from SSM use `AWS_PROFILE=platform-developer`.
+`--use-rest-api-table` for S3 Tables). The inventory URL, OKAPI credentials and tenant
+are read from `FOLIO_INVENTORY_URL` / `FOLIO_INVENTORY_USERNAME` /
+`FOLIO_INVENTORY_PASSWORD` / `FOLIO_INVENTORY_TENANT` when set, otherwise from SSM, so
+you can point at a dev or mock endpoint without AWS. The enrichment client logs in to
+OKAPI itself (POST `/authn/login`) and refreshes on 401. These are OKAPI inventory
+credentials, not the OAI feed token; to read them from SSM use
+`AWS_PROFILE=platform-developer`.
 
 ```bash
 # event is the loader response (or any JSON with job_id + changeset_ids)
 echo '{"job_id":"local","changeset_ids":["<bib-changeset-id>"]}' > /tmp/enrich_event.json
 
-FOLIO_INVENTORY_URL=https://<inventory-host> FOLIO_INVENTORY_TOKEN=<token> \
+FOLIO_INVENTORY_URL=https://<inventory-host> FOLIO_INVENTORY_TENANT=<tenant> \
+  FOLIO_INVENTORY_USERNAME=<username> FOLIO_INVENTORY_PASSWORD=<password> \
   uv run python -m adapters.steps.oai_pmh.folio_enrich --use-cli --event /tmp/enrich_event.json
 ```
 
@@ -106,6 +110,7 @@ The transformed works land in a local index you can browse in Kibana at `localho
 | `FOLIO_OAI_SET_SPEC`         | None                  | OAI set specification (empty = all records) |
 | `FOLIO_OAI_METADATA_PREFIX`  | `marc21_withholdings` | OAI metadata prefix                         |
 | `FOLIO_INVENTORY_URL`        | None (SSM)            | mod-inventory-storage base URL override (item enrichment) |
-| `FOLIO_INVENTORY_TOKEN`      | None (SSM)            | mod-inventory-storage token override (item enrichment) |
-| `FOLIO_INVENTORY_TENANT`     | None                  | OKAPI tenant header, if the gateway requires it |
+| `FOLIO_INVENTORY_USERNAME`   | None (SSM)            | OKAPI username override (item enrichment) |
+| `FOLIO_INVENTORY_PASSWORD`   | None (SSM)            | OKAPI password override (item enrichment) |
+| `FOLIO_INVENTORY_TENANT`     | None (SSM)            | OKAPI tenant (x-okapi-tenant) override (item enrichment) |
 | `FOLIO_ENRICH_BATCH_SIZE`    | 50                    | Instance ids per `enrichedInstances` request |

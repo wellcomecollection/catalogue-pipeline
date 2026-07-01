@@ -142,10 +142,17 @@ ITEMS_LOCAL_TABLE_NAME = os.getenv(
 SSM_INVENTORY_URL = os.getenv(
     "FOLIO_SSM_INVENTORY_URL", "/catalogue_pipeline/folio/inventory_api_url"
 )
-SSM_INVENTORY_TOKEN = os.getenv(
-    "FOLIO_SSM_INVENTORY_TOKEN", "/catalogue_pipeline/folio/inventory_api_token"
+# OKAPI login credentials: the enricher authenticates itself (POST /authn/login) and
+# refreshes on 401, rather than using a short-lived static token.
+SSM_INVENTORY_USERNAME = os.getenv(
+    "FOLIO_SSM_INVENTORY_USERNAME", "/catalogue_pipeline/folio/inventory_username"
 )
-INVENTORY_TENANT = os.getenv("FOLIO_INVENTORY_TENANT")
+SSM_INVENTORY_PASSWORD = os.getenv(
+    "FOLIO_SSM_INVENTORY_PASSWORD", "/catalogue_pipeline/folio/inventory_password"
+)
+SSM_INVENTORY_TENANT = os.getenv(
+    "FOLIO_SSM_INVENTORY_TENANT", "/catalogue_pipeline/folio/inventory_tenant"
+)
 ENRICH_BATCH_SIZE = int(os.getenv("FOLIO_ENRICH_BATCH_SIZE", "50"))
 ENRICH_SKIP_SUPPRESSED = (
     os.getenv("FOLIO_ENRICH_SKIP_SUPPRESSED", "false").lower() == "true"
