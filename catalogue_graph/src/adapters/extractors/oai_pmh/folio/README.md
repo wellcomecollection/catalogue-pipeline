@@ -21,6 +21,7 @@ This adapter ingests records from the FOLIO OAI-PMH feed. It extends the shared 
 | `/catalogue_pipeline/folio/inventory_username`  | OKAPI username for item enrichment (mod-inventory-storage) |
 | `/catalogue_pipeline/folio/inventory_password`  | OKAPI password for item enrichment (mod-inventory-storage) |
 | `/catalogue_pipeline/folio/inventory_api_url`   | mod-inventory-storage base URL (item enrichment) |
+| `/catalogue_pipeline/folio/inventory_tenant`    | OKAPI tenant (`x-okapi-tenant`) for item enrichment |
 
 ## Quick start
 
