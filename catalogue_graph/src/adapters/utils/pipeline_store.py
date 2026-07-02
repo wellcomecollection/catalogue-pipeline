@@ -107,16 +107,12 @@ class PipelineStore(ABC):
         including soft-deleted rows.
 
         The changeset filter cannot prune data files on the id-sorted table,
-        so a first pass projects only `last_modified` to find the changesets'
-        minimum, and the content read applies it as a `last_modified >=`
-        bound. The bound is exact by construction (every target row is at or
-        after the minimum of the set), so it can never exclude a row; it only
-        lets file-level column stats skip files that predate the changesets.
-        Worst case (an old bound) it prunes nothing and the read behaves like
-        a plain changeset scan.
+        so the content read is bounded by the changesets' minimum
+        `last_modified` (found with a cheap single-column scan). Every target
+        row is at or after that minimum, so the bound excludes nothing; it
+        only lets file stats skip files that predate the changesets.
         """
-        # Resolve the snapshot once so the bound lookup and the content read
-        # see identical rows even when the caller did not pin a snapshot.
+        # Resolve the snapshot once so both phases read the same rows.
         if snapshot_id is None:
             snapshot_id = self.current_snapshot_id()
 
@@ -134,11 +130,9 @@ class PipelineStore(ABC):
     def _get_min_last_modified(
         self, iceberg_filter: BooleanExpression, snapshot_id: int | None
     ) -> datetime | None:
-        """Return the minimum `last_modified` of the matching rows, or None if
-        there are none.
-
-        Projects only the `last_modified` column, so the scan avoids reading
-        row content even when the filter cannot prune data files.
+        """Return the minimum `last_modified` of the matching rows (None if
+        none). Projects a single column, so the scan stays cheap even when
+        the filter cannot prune data files.
         """
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
         timestamp_table = self.table.scan(

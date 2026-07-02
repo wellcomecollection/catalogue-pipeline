@@ -22,8 +22,7 @@ class AdapterStoreSource(BaseSource):
 
     def stream_raw(self) -> Generator[dict[str, Any]]:
         if self.changeset_ids:
-            # Changeset reads include soft-deleted rows (needed to overwrite
-            # documents downstream); get_records_by_changesets preserves that.
+            # Includes soft-deleted rows, needed to overwrite documents downstream.
             table = self.adapter_store.get_records_by_changesets(
                 self.changeset_ids, self.snapshot_id
             )
