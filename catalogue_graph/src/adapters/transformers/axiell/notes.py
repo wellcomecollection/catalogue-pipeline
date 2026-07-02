@@ -45,4 +45,5 @@ def extract_notes(record: Record) -> list[Note]:
     for note in notes:
         note.contents = normalise_text(note.contents)
 
-    return notes
+    # Filter out any notes whose contents were fully removed by `normalise_text`
+    return [n for n in notes if n.contents]
