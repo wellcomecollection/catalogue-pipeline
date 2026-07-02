@@ -6,7 +6,6 @@ onto the bib store and producing works with `folio-item` item identifiers).
 """
 
 from datetime import UTC, datetime
-from uuid import uuid1
 
 import pytest
 from pyiceberg.exceptions import NoSuchTableError
@@ -24,15 +23,13 @@ from adapters.transformers import folio_store_source
 from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 from adapters.transformers.folio_store_source import FolioStoreSource
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.iceberg import LocalIcebergTableConfig, get_local_table
 from models.pipeline.identifier import Identifiable
-from tests.adapters.conftest import adapter_records_to_table
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
+from tests.adapters.transformers.folio.helpers import make_items_store
 from tests.mocks import MockElasticsearchClient
 from utils.marc import parse_single_marc_record
 
 FOLIO_NAMESPACE = FOLIO_CONFIG.config.adapter_namespace
-ITEMS_NAMESPACE = "folio-items"
 
 BIB_RECORD = (
     "<record><leader>00000nam a2200000   4500</leader>"
@@ -81,26 +78,6 @@ def test_work_builder_emits_no_items_without_enrichment() -> None:
 # ---------------------------------------------------------------------------
 # End-to-end: the transformer joins the items store onto bib records
 # ---------------------------------------------------------------------------
-def _make_items_store(records: dict[str, FolioEnrichedInstance]) -> AdapterStore:
-    config = LocalIcebergTableConfig(
-        table_name=str(uuid1()),
-        namespace="test",
-        db_name="test_catalog",
-    )
-    table = get_local_table(config)
-    store = AdapterStore(table, ITEMS_NAMESPACE)
-    if records:
-        rows = adapter_records_to_table(
-            [
-                {"id": instance_id, "content": instance.to_store_content()}
-                for instance_id, instance in records.items()
-            ],
-            namespace=ITEMS_NAMESPACE,
-        )
-        store.incremental_update(rows)
-    return store
-
-
 def _item_identifiers(source: dict) -> list[tuple[str, str]]:
     """Return (identifier_type_id, value) for each item on a work _source."""
     return [
@@ -126,7 +103,7 @@ def test_transformer_attaches_enriched_items(
         transformer_type="folio",
     )
 
-    items_store = _make_items_store(
+    items_store = make_items_store(
         {
             "inst-1": FolioEnrichedInstance(
                 instance_id="inst-1",
@@ -178,7 +155,7 @@ def test_transformer_emits_no_items_when_instance_not_enriched(
         transformer_type="folio",
     )
 
-    items_store = _make_items_store({})  # empty items store
+    items_store = make_items_store({})  # empty items store
     monkeypatch.setattr(
         "adapters.steps.transformer.build_items_store",
         lambda **kwargs: items_store,
@@ -249,7 +226,7 @@ def test_enrichment_fetches_only_requested_ids(
 ) -> None:
     """The join reads items filtered by the ids being transformed (an `In` filter),
     not the whole namespace, and attaches only the matching content."""
-    items_store = _make_items_store(
+    items_store = make_items_store(
         {iid: _one_item_instance(iid) for iid in ("inst-1", "inst-2", "inst-3")}
     )
 
@@ -283,7 +260,7 @@ def test_enrichment_batches_lookups(monkeypatch: pytest.MonkeyPatch) -> None:
     row still gets its matching enrichment."""
     monkeypatch.setattr(folio_store_source, "ITEM_ENRICHMENT_BATCH_SIZE", 2)
     ids = [f"inst-{i}" for i in range(5)]
-    items_store = _make_items_store({iid: _one_item_instance(iid) for iid in ids})
+    items_store = make_items_store({iid: _one_item_instance(iid) for iid in ids})
 
     call_count = 0
     original = items_store.get_active_namespace_records
