@@ -48,19 +48,33 @@ def test_stream_raw_changeset_path_uses_changeset_lookup(
     assert sorted(row["id"] for row in rows) == ["rec001", "rec002"]
 
 
-class _StreamingOnlyStore:
-    """Stub store that streams instrumented batches and forbids eager reads."""
+class _ClosableBatchStream:
+    """Iterable of record batches that records consumption and close(), like a reader."""
 
     def __init__(self, batches: list[pa.RecordBatch]) -> None:
         self.batches = batches
         self.batches_consumed: list[int] = []
+        self.closed = False
 
-    def stream_active_namespace_records(
-        self, snapshot_id: int | None = None
-    ) -> Generator[pa.RecordBatch]:
+    def __iter__(self) -> Generator[pa.RecordBatch]:
         for index, batch in enumerate(self.batches):
             self.batches_consumed.append(index)
             yield batch
+
+    def close(self) -> None:
+        self.closed = True
+
+
+class _StreamingOnlyStore:
+    """Stub store that streams instrumented batches and forbids eager reads."""
+
+    def __init__(self, batches: list[pa.RecordBatch]) -> None:
+        self.stream = _ClosableBatchStream(batches)
+
+    def stream_active_namespace_records(
+        self, snapshot_id: int | None = None
+    ) -> _ClosableBatchStream:
+        return self.stream
 
     def get_active_namespace_records(self, snapshot_id: int | None = None) -> pa.Table:
         raise AssertionError(
@@ -84,10 +98,25 @@ def test_stream_raw_full_reindex_is_lazy() -> None:
     first_row = next(stream)
 
     assert first_row["id"] == "rec001"
-    assert store.batches_consumed == [0]
+    assert store.stream.batches_consumed == [0]
 
     assert next(stream)["id"] == "rec002"
-    assert store.batches_consumed == [0, 1]
+    assert store.stream.batches_consumed == [0, 1]
+
+
+def test_stream_raw_full_reindex_closes_reader_when_abandoned() -> None:
+    """Abandoning the stream mid-iteration closes the underlying batch reader,
+    so a consumer error does not leave the reader's prefetch reads running."""
+    store = _StreamingOnlyStore(
+        [_single_row_batch("rec001"), _single_row_batch("rec002")]
+    )
+    source = AdapterStoreSource(cast(AdapterStore, store), changeset_ids=[])
+
+    stream = source.stream_raw()
+    next(stream)
+    stream.close()
+
+    assert store.stream.closed
 
 
 def test_stream_raw_full_reindex_empty_store() -> None:

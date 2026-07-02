@@ -32,9 +32,14 @@ class AdapterStoreSource(BaseSource):
 
             # During a full reindex we are writing into an empty index,
             # so no need to include deleted rows to overwrite documents.
-            # Stream record batches so the full table is never held in memory at once.
+            # Stream record batches so the full table need not be materialised
+            # at once. Close the reader on exit so an abandoned stream (e.g. a
+            # consumer error mid-reindex) does not leave prefetch reads running.
             batches = self.adapter_store.stream_active_namespace_records(
                 self.snapshot_id
             )
-            for batch in batches:
-                yield from batch.to_pylist()
+            try:
+                for batch in batches:
+                    yield from batch.to_pylist()
+            finally:
+                batches.close()
