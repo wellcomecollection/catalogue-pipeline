@@ -1,29 +1,4 @@
 import structlog
-
-from adapters.transformers.axiell.access_status import extract_access_status
-from adapters.transformers.axiell.catalogue_status import (
-    AxiellCatalogueStatus,
-    extract_catalogue_status,
-)
-from adapters.transformers.axiell.contributors import extract_contributors
-from adapters.transformers.axiell.format import extract_format
-from adapters.transformers.axiell.languages import extract_languages
-from adapters.transformers.axiell.notes import extract_notes
-from adapters.transformers.axiell.organisation_and_arrangement import (
-    extract_work_type,
-)
-from adapters.transformers.axiell.production import (
-    extract_production,
-)
-from adapters.transformers.axiell.subjects import extract_subjects
-from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
-from adapters.transformers.marc.last_transaction_time import (
-    extract_last_transaction_time_to_datetime,
-)
-from adapters.transformers.marc.physical_description import extract_physical_description
-from adapters.transformers.marc.predecessor_identifier import (
-    extract_calm_predecessor_id,
-)
 from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from ingestor.models.shared.merge_candidate import MergeCandidate
@@ -50,6 +25,34 @@ from models.pipeline.source.work import (
 )
 from utils.timezone import convert_datetime_to_utc_iso
 from utils.types import WorkType
+
+from adapters.transformers.axiell.access_status import extract_access_status
+from adapters.transformers.axiell.catalogue_status import (
+    AxiellCatalogueStatus,
+    extract_catalogue_status,
+)
+from adapters.transformers.axiell.contributors import extract_contributors
+from adapters.transformers.axiell.description import extract_description
+from adapters.transformers.axiell.format import extract_format
+from adapters.transformers.axiell.languages import extract_languages
+from adapters.transformers.axiell.notes import extract_notes
+from adapters.transformers.axiell.organisation_and_arrangement import (
+    extract_work_type,
+)
+from adapters.transformers.axiell.physical_description import (
+    extract_physical_description,
+)
+from adapters.transformers.axiell.production import (
+    extract_production,
+)
+from adapters.transformers.axiell.subjects import extract_subjects
+from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
+from adapters.transformers.marc.last_transaction_time import (
+    extract_last_transaction_time_to_datetime,
+)
+from adapters.transformers.marc.predecessor_identifier import (
+    extract_calm_predecessor_id,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -158,6 +161,10 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     @property
     def production(self) -> list[ProductionEvent]:
         return extract_production(self.record)
+
+    @property
+    def description(self) -> str | None:
+        return extract_description(self.record)
 
     @property
     def contributors(self) -> list[Contributor]:

@@ -66,6 +66,26 @@ class PipelineStore(ABC):
             .cast(self.schema)
         )
 
+    def stream_namespace_records(
+        self,
+        iceberg_filter: BooleanExpression = ALWAYS_TRUE,
+        snapshot_id: int | None = None,
+    ) -> pa.RecordBatchReader:
+        """Stream records in the store namespace as Arrow record batches.
+
+        Unlike `get_namespace_records`, rows are not materialised as a single
+        table. Note that pyiceberg's reader prefetches data files on a thread
+        pool regardless of consumption rate (apache/iceberg-python#2407), so
+        peak memory is well below an eager read but can still approach the
+        table size when the consumer is slower than the downloads.
+        """
+        full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
+        return (
+            self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)
+            .to_arrow_batch_reader()
+            .cast(self.schema)
+        )
+
     def get_records_by_changeset(
         self, changeset_id: str, snapshot_id: int | None = None
     ) -> pa.Table:
