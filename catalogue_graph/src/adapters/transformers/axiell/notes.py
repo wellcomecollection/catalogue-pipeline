@@ -11,6 +11,7 @@ from adapters.transformers.marc.notes import (
     _create_note,
 )
 from adapters.transformers.marc.notes import extract_notes as base_extract_notes
+from adapters.transformers.utils.html import normalise_text
 from models.pipeline.id_label import IdLabel
 from models.pipeline.note import Note
 
@@ -40,5 +41,8 @@ def extract_notes(record: Record) -> list[Note]:
         notes.append(Note(contents=terms_of_use, note_type=TERMS_OF_USE))
 
     notes += extract_languages(record)[1]
+
+    for note in notes:
+        note.contents = normalise_text(note.contents)
 
     return notes
