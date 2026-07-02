@@ -36,6 +36,7 @@ ATTR_ALIASES: dict[str, str] = {
     "contributor": "contributors",
     "production": "production",
     "productions": "production",
+    "date": "dates",
     "place": "places",
     "agent": "agents",
 }
