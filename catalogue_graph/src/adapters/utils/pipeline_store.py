@@ -129,7 +129,7 @@ class PipelineStore(ABC):
 
         row_filter = And(
             changeset_filter,
-            GreaterThanOrEqual("last_modified", min_last_modified.isoformat()),
+            GreaterThanOrEqual("last_modified", min_last_modified),
         )
         return self.get_namespace_records(row_filter, snapshot_id)
 
