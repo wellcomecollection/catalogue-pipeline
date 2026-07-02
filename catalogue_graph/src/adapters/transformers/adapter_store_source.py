@@ -32,5 +32,9 @@ class AdapterStoreSource(BaseSource):
 
             # During a full reindex we are writing into an empty index,
             # so no need to include deleted rows to overwrite documents.
-            table = self.adapter_store.get_active_namespace_records(self.snapshot_id)
-            yield from table.to_pylist()
+            # Stream record batches so the full table is never held in memory at once.
+            batches = self.adapter_store.stream_active_namespace_records(
+                self.snapshot_id
+            )
+            for batch in batches:
+                yield from batch.to_pylist()

@@ -1,5 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from datetime import datetime
 from typing import Any, cast
 
@@ -7,6 +8,7 @@ import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
 from pyiceberg.expressions import And, BooleanExpression, EqualTo, In
+from pyiceberg.io.pyarrow import ArrowScan
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
@@ -65,6 +67,32 @@ class PipelineStore(ABC):
             .to_arrow()
             .cast(self.schema)
         )
+
+    def stream_namespace_records(
+        self,
+        iceberg_filter: BooleanExpression = ALWAYS_TRUE,
+        snapshot_id: int | None = None,
+    ) -> Generator[pa.RecordBatch]:
+        """Stream records in the store namespace as Arrow record batches.
+
+        Unlike `get_namespace_records`, rows are never materialised all at once:
+        memory stays bounded at roughly one data file regardless of table size.
+
+        Files are read one at a time rather than through `to_arrow_batch_reader`,
+        whose thread pool downloads every file eagerly regardless of consumption
+        rate, buffering close to the whole table in memory.
+        """
+        full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
+        scan = self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)
+        for task in scan.plan_files():
+            file_table = ArrowScan(
+                scan.table_metadata,
+                scan.io,
+                scan.projection(),
+                scan.row_filter,
+                scan.case_sensitive,
+            ).to_table([task])
+            yield from file_table.cast(self.schema).to_batches()
 
     def get_records_by_changeset(
         self, changeset_id: str, snapshot_id: int | None = None
