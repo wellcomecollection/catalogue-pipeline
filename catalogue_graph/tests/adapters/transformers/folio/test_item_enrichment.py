@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from uuid import uuid1
 
 import pytest
+from pyiceberg.exceptions import NoSuchTableError
 from pyiceberg.expressions import In
 from pyiceberg.table import Table as IcebergTable
 
@@ -198,6 +199,39 @@ def test_transformer_emits_no_items_when_instance_not_enriched(
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
     source = by_id["Work[folio-instance/inst-2]"]["_source"]
     assert source["data"]["items"] == []
+
+
+def test_transformer_fails_when_items_store_is_missing(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A missing items table fails the transform loudly rather than silently
+    emitting works without items."""
+    monkeypatch.setattr(adapter_config, "PIPELINE_DATE", "dev")
+    monkeypatch.setattr(adapter_config, "INDEX_DATE", "2026-01-01")
+
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        {"inst-3": BIB_RECORD.format(id="inst-3")},
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    def missing_table(**kwargs: object) -> AdapterStore:
+        raise NoSuchTableError("folio items table does not exist")
+
+    monkeypatch.setattr("adapters.steps.transformer.build_items_store", missing_table)
+
+    with pytest.raises(NoSuchTableError):
+        handler(
+            event=TransformerEvent(
+                transformer_type="folio",
+                job_id="20260101T1200",
+                changeset_ids=[changeset_id],
+            ),
+            es_mode="local",
+            use_rest_api_table=False,
+        )
 
 
 # ---------------------------------------------------------------------------
