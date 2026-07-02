@@ -45,12 +45,14 @@ _TAGS: dict[AllowedTags, set[str]] = {
 
 
 def normalise_text(s: str, allowed_tags: AllowedTags = "basic") -> str:
+    """Sanitise an HTML string, retaining only the tags permitted by allowed_tags."""
     cleaned = nh3.clean(s, tags=_TAGS[allowed_tags], link_rel="nofollow")
 
     lines = [line.rstrip() for line in cleaned.splitlines()]
 
     result: list[str] = []
     for line in lines:
+        # Strip consecutive blank lines
         if not result and line == "":
             continue
         if result and result[-1] == "" and line == "":
