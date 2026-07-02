@@ -11,7 +11,8 @@ so it has its own SSM-backed configuration in ``folio.config``.
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
+from itertools import batched
 from typing import cast
 
 import httpx
@@ -22,11 +23,6 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedIns
 logger = structlog.get_logger(__name__)
 
 ENRICHED_INSTANCES_PATH = "oai-pmh-view/enrichedInstances"
-
-
-def _chunk(ids: list[str], size: int) -> Iterator[list[str]]:
-    for start in range(0, len(ids), size):
-        yield ids[start : start + size]
 
 
 class FolioInventoryClient:
@@ -64,8 +60,8 @@ class FolioInventoryClient:
         unique_ids = list(dict.fromkeys(i for i in instance_ids if i))
         results: list[FolioEnrichedInstance] = []
 
-        for batch in _chunk(unique_ids, self._batch_size):
-            results.extend(self._fetch_batch(batch))
+        for batch in batched(unique_ids, self._batch_size):
+            results.extend(self._fetch_batch(list(batch)))
 
         logger.info(
             "Fetched enriched instances",
