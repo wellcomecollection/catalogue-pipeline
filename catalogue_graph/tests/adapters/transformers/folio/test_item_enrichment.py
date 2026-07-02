@@ -19,9 +19,9 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import (
 )
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.steps.transformer import TransformerEvent, handler
-from adapters.transformers import adapter_store_source
-from adapters.transformers.adapter_store_source import AdapterStoreSource
+from adapters.transformers import folio_store_source
 from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
+from adapters.transformers.folio_store_source import FolioStoreSource
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import LocalIcebergTableConfig, get_local_table
 from models.pipeline.identifier import Identifiable
@@ -229,9 +229,9 @@ def test_enrichment_fetches_only_requested_ids(
     monkeypatch.setattr(items_store, "get_active_namespace_records", spy)
 
     # adapter_store is unused by the enrichment join; pass the items store as a stand-in.
-    source = AdapterStoreSource(items_store, [], items_store=items_store)
+    source = FolioStoreSource(items_store, [], items_store=items_store)
     rows = [{"id": "inst-1"}, {"id": "inst-3"}, {"id": "missing"}]
-    enriched = list(source._with_enrichment(rows))
+    enriched = list(source._process_rows(rows))
 
     # The store was queried once, with an `In` filter (scoped read), not unfiltered.
     assert len(captured_filters) == 1
@@ -247,7 +247,7 @@ def test_enrichment_fetches_only_requested_ids(
 def test_enrichment_batches_lookups(monkeypatch: pytest.MonkeyPatch) -> None:
     """With more rows than the batch size, the lookup runs once per chunk and every
     row still gets its matching enrichment."""
-    monkeypatch.setattr(adapter_store_source, "ITEM_ENRICHMENT_BATCH_SIZE", 2)
+    monkeypatch.setattr(folio_store_source, "ITEM_ENRICHMENT_BATCH_SIZE", 2)
     ids = [f"inst-{i}" for i in range(5)]
     items_store = _make_items_store({iid: _one_item_instance(iid) for iid in ids})
 
@@ -261,8 +261,8 @@ def test_enrichment_batches_lookups(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(items_store, "get_active_namespace_records", spy)
 
-    source = AdapterStoreSource(items_store, [], items_store=items_store)
-    enriched = list(source._with_enrichment([{"id": iid} for iid in ids]))
+    source = FolioStoreSource(items_store, [], items_store=items_store)
+    enriched = list(source._process_rows([{"id": iid} for iid in ids]))
 
     assert len(enriched) == 5
     assert all(row["enrichment_content"] is not None for row in enriched)
