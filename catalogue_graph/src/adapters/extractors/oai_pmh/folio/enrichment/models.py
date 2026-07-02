@@ -23,7 +23,12 @@ from pydantic import BaseModel, Field
 
 
 def _first_present(data: dict[str, Any], *keys: str) -> Any | None:
-    """Return the first non-null value among ``keys`` (case-insensitive)."""
+    """Return the first non-null value among ``keys`` (case-insensitive).
+
+    Case-insensitive because the live ``enrichedInstances`` stream lowercases its
+    wrapper keys (``instanceid``, ``itemsandholdingsfields``) even though item fields
+    are camelCase, so callers pass the documented camelCase key and this matches both.
+    """
     lowered = {k.lower(): v for k, v in data.items()}
     for key in keys:
         value = lowered.get(key.lower())
@@ -46,7 +51,7 @@ def _call_number(value: Any | None) -> str | None:
     or simplified shapes may send a plain string. Handle both.
     """
     if isinstance(value, dict):
-        return _opt_str(_first_present(value, "callNumber", "callNumberString"))
+        return _opt_str(_first_present(value, "callNumber"))
     return _opt_str(value)
 
 
@@ -57,7 +62,7 @@ def _location_name(value: Any | None) -> str | None:
     back through the available name fields, or accept a plain string.
     """
     if isinstance(value, dict):
-        name = _first_present(value, "name", "effectiveLocation")
+        name = _first_present(value, "name")
         if name is None:
             inner = value.get("location")
             if isinstance(inner, dict):
@@ -85,7 +90,7 @@ class FolioEnrichedItem(BaseModel):
 
     @classmethod
     def from_api(cls, data: dict[str, Any]) -> FolioEnrichedItem:
-        item_id = _first_present(data, "id", "itemId")
+        item_id = _first_present(data, "id")
         if item_id is None:
             # The id is the stable identifier the whole enrichment exists to provide;
             # an item without one cannot mint a valid identifier. Reject it explicitly
@@ -96,9 +101,7 @@ class FolioEnrichedItem(BaseModel):
             barcode=_opt_str(_first_present(data, "barcode")),
             volume=_opt_str(_first_present(data, "volume")),
             enumeration=_opt_str(_first_present(data, "enumeration")),
-            material_type=_opt_str(
-                _first_present(data, "materialType", "materialTypeId")
-            ),
+            material_type=_opt_str(_first_present(data, "materialType")),
             call_number=_call_number(_first_present(data, "callNumber")),
             location=_location_name(_first_present(data, "location")),
         )
@@ -119,18 +122,15 @@ class FolioEnrichedInstance(BaseModel):
     @classmethod
     def from_api(cls, data: dict[str, Any]) -> FolioEnrichedInstance:
         """Parse one record from the ``enrichedInstances`` response."""
-        nested = (
-            _first_present(data, "itemsAndHoldingsFields", "itemsandholdingsfields")
-            or {}
-        )
+        nested = _first_present(data, "itemsAndHoldingsFields") or {}
         raw_items = (
             _first_present(data, "items")
             or (nested.get("items") if isinstance(nested, dict) else None)
             or []
         )
-        instance_id = _first_present(data, "instanceId", "instanceid", "instance_id")
+        instance_id = _first_present(data, "instanceId")
         if instance_id is None and isinstance(nested, dict):
-            instance_id = _first_present(nested, "instanceId", "instanceid")
+            instance_id = _first_present(nested, "instanceId")
         if instance_id is None:
             # Without an instance id the row cannot be keyed to a bib record. Fail
             # loudly rather than store an unjoinable row keyed by the string "None".
