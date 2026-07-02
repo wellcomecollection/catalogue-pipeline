@@ -1,8 +1,63 @@
+import html
+from typing import Literal
 from urllib.parse import urlparse
 
+import nh3
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+
+type AllowedTags = Literal["basic", "none", "italics_only"]
+
+BASIC_TAGS = {
+    "a",
+    "b",
+    "blockquote",
+    "br",
+    "cite",
+    "code",
+    "dd",
+    "dl",
+    "dt",
+    "em",
+    "i",
+    "li",
+    "ol",
+    "p",
+    "pre",
+    "q",
+    "small",
+    "span",
+    "strike",
+    "strong",
+    "sub",
+    "sup",
+    "u",
+    "ul",
+}
+
+_TAGS: dict[AllowedTags, set[str]] = {
+    "basic": BASIC_TAGS,
+    "none": set(),
+    "italics_only": {"i"},
+}
+
+
+def normalise_text(s: str, allowed_tags: AllowedTags = "basic") -> str:
+    cleaned = nh3.clean(s, tags=_TAGS[allowed_tags], link_rel="nofollow")
+
+    lines = [line.rstrip() for line in cleaned.splitlines()]
+
+    result: list[str] = []
+    for line in lines:
+        if not result and line == "":
+            continue
+        if result and result[-1] == "" and line == "":
+            continue
+        result.append(line)
+
+    return html.unescape("\n".join(result)).strip()
 
 
 def is_url(maybe_url: str) -> bool:
