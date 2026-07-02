@@ -10,7 +10,7 @@ from datetime import date
 import structlog
 from pymarc.record import Record
 
-from adapters.transformers.axiell.access_dates import extract_closed_until_date
+from adapters.transformers.axiell.dates import extract_closed_until_date
 from adapters.transformers.marc.common import non_empty_subfields
 from adapters.transformers.marc.identifier import extract_id
 from models.pipeline.access_status import (
