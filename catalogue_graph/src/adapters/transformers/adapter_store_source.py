@@ -43,8 +43,17 @@ class AdapterStoreSource(BaseSource):
 
             # During a full reindex we are writing into an empty index,
             # so no need to include deleted rows to overwrite documents.
-            table = self.adapter_store.get_active_namespace_records(self.snapshot_id)
-            yield from self._with_enrichment(table.to_pylist())
+            # Stream record batches so the full table need not be materialised
+            # at once. Close the reader on exit so an abandoned stream (e.g. a
+            # consumer error mid-reindex) does not leave prefetch reads running.
+            batches = self.adapter_store.stream_active_namespace_records(
+                self.snapshot_id
+            )
+            try:
+                for batch in batches:
+                    yield from self._with_enrichment(batch.to_pylist())
+            finally:
+                batches.close()
 
     def _with_enrichment(self, rows: list[dict[str, Any]]) -> Generator[dict[str, Any]]:
         """Attach matching item-store content to each row by id.

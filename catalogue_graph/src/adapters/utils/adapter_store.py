@@ -81,6 +81,13 @@ class AdapterStore(PipelineStore):
             And(non_deleted_filter, iceberg_filter), snapshot_id
         )
 
+    def stream_active_namespace_records(
+        self, snapshot_id: int | None = None
+    ) -> pa.RecordBatchReader:
+        """Stream non-deleted records in the store namespace as record batches."""
+        non_deleted_filter = Or(EqualTo("deleted", False), IsNull("deleted"))
+        return self.stream_namespace_records(non_deleted_filter, snapshot_id)
+
     @staticmethod
     def _preserve_content_for_deletions(
         updates: pa.Table, existing_data: pa.Table
