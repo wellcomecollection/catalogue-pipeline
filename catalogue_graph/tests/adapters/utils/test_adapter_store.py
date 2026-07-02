@@ -236,7 +236,7 @@ def test_stream_active_namespace_records_excludes_deleted(
     assert sorted(streamed_ids) == ["rec001", "rec002"]
 
 
-def test_stream_namespace_records_honours_snapshot_id(
+def test_stream_active_namespace_records_honours_snapshot_id(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
     """Streaming with a pinned snapshot excludes rows appended after the snapshot."""
@@ -277,7 +277,7 @@ def test_stream_active_namespace_records_empty_table(
     assert sum(batch.num_rows for batch in reader) == 0
 
 
-def test_stream_namespace_records_batches_match_store_schema(
+def test_stream_active_namespace_records_batches_match_store_schema(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
     """Streamed batches carry the store's Arrow schema."""
