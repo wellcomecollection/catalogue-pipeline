@@ -1,7 +1,7 @@
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, NamedTuple, cast
+from typing import Any, cast
 
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -16,14 +16,6 @@ from pyiceberg.expressions import (
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
-
-
-class ChangesetRecordIds(NamedTuple):
-    """The record IDs written under a set of changesets, with the minimum
-    `last_modified` across them (a file-pruning bound for id-based reads)."""
-
-    ids: list[str]
-    min_last_modified: datetime | None
 
 
 class PipelineStoreUpdate(BaseModel):
@@ -108,61 +100,57 @@ class PipelineStore(ABC):
             EqualTo("changeset", changeset_id), snapshot_id
         )
 
-    def get_records_by_ids(
-        self,
-        ids: list[str],
-        snapshot_id: int | None = None,
-        updated_since: datetime | None = None,
+    def get_records_by_changesets(
+        self, changeset_ids: list[str], snapshot_id: int | None = None
     ) -> pa.Table:
-        """Return rows with the specified record IDs, including soft-deleted rows.
+        """Return rows written under any of the specified changeset IDs,
+        including soft-deleted rows.
 
-        Unlike a changeset filter, an `id` filter prunes data files on the
-        id-sorted table, so this read is cheap when `ids` spans few files.
-
-        `updated_since` is a pruning bound, not a selection filter: callers must
-        ensure every target row's `last_modified` is at or after it (e.g. the
-        minimum across a changeset's rows). It lets file-level column stats
-        skip old compacted files whose id ranges overlap the target ids but
-        which cannot contain the recently written rows.
+        The changeset filter cannot prune data files on the id-sorted table,
+        so a first pass projects only `last_modified` to find the changesets'
+        minimum, and the content read applies it as a `last_modified >=`
+        bound. The bound is exact by construction (every target row is at or
+        after the minimum of the set), so it can never exclude a row; it only
+        lets file-level column stats skip files that predate the changesets.
+        Worst case (an old bound) it prunes nothing and the read behaves like
+        a plain changeset scan.
         """
-        row_filter: BooleanExpression = In("id", ids)
-        if updated_since is not None:
+        # Resolve the snapshot once so the bound lookup and the content read
+        # see identical rows even when the caller did not pin a snapshot.
+        if snapshot_id is None:
+            snapshot_id = self.current_snapshot_id()
+
+        changeset_filter = In("changeset", changeset_ids)
+        min_last_modified = self._get_min_last_modified(changeset_filter, snapshot_id)
+
+        row_filter: BooleanExpression = changeset_filter
+        if min_last_modified is not None:
             row_filter = And(
-                row_filter,
-                GreaterThanOrEqual("last_modified", updated_since.isoformat()),
+                changeset_filter,
+                GreaterThanOrEqual("last_modified", min_last_modified.isoformat()),
             )
         return self.get_namespace_records(row_filter, snapshot_id)
 
-    def get_changeset_record_ids(
-        self, changeset_ids: list[str], snapshot_id: int | None = None
-    ) -> ChangesetRecordIds:
-        """Return the IDs of rows written under any of the specified changesets,
-        with the minimum `last_modified` across them (for use as a pruning
-        bound in `get_records_by_ids`).
+    def _get_min_last_modified(
+        self, iceberg_filter: BooleanExpression, snapshot_id: int | None
+    ) -> datetime | None:
+        """Return the minimum `last_modified` of the matching rows, or None if
+        there are none.
 
-        Projects only the `id` and `last_modified` columns, so the scan avoids
-        reading row content and stays cheap even though the changeset filter
-        cannot prune data files on the id-sorted table.
+        Projects only the `last_modified` column, so the scan avoids reading
+        row content even when the filter cannot prune data files.
         """
-        full_filter = And(
-            EqualTo("namespace", self.namespace), In("changeset", changeset_ids)
-        )
-        id_table = self.table.scan(
+        full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
+        timestamp_table = self.table.scan(
             row_filter=full_filter,
             snapshot_id=snapshot_id,
-            selected_fields=("id", "last_modified"),
+            selected_fields=("last_modified",),
         ).to_arrow()
 
         timestamps = cast(
-            list[datetime | None], id_table.column("last_modified").to_pylist()
+            list[datetime], timestamp_table.column("last_modified").to_pylist()
         )
-        # A null last_modified would make the pruning bound exclude that row,
-        # so only supply a bound when every row carries a timestamp.
-        non_null = [t for t in timestamps if t is not None]
-        min_last_modified = (
-            min(non_null) if len(non_null) == len(timestamps) and non_null else None
-        )
-        return ChangesetRecordIds(self._extract_ids(id_table), min_last_modified)
+        return min(timestamps, default=None)
 
     def normalise_table(self, table: pa.Table) -> pa.Table:
         """Enforce that the table conforms to the required schema and filter for records in the selected namespace"""

@@ -189,14 +189,14 @@ def test_get_records_by_changeset_includes_deleted_records(
 
 
 # =============================================================================
-# get_changeset_record_ids tests
+# get_records_by_changesets tests
 # =============================================================================
 
 
-def test_get_changeset_record_ids_returns_ids_for_requested_changesets(
+def test_get_records_by_changesets_returns_rows_for_requested_changesets(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
-    """Only ids from the requested changesets are returned."""
+    """Only rows from the requested changesets are returned."""
     client = adapter_store_with_records(
         [
             {"id": "rec001", "content": "first", "changeset": "changeset-a"},
@@ -206,140 +206,17 @@ def test_get_changeset_record_ids_returns_ids_for_requested_changesets(
         ]
     )
 
-    ids = client.get_changeset_record_ids(["changeset-a", "changeset-b"]).ids
+    result = client.get_records_by_changesets(["changeset-a", "changeset-b"])
 
+    ids = cast(list[str], result.column("id").to_pylist())
     assert sorted(ids) == ["rec001", "rec002", "rec003"]
 
 
-def test_get_changeset_record_ids_includes_deleted_records(
+def test_get_records_by_changesets_matches_per_changeset_reads(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
-    """Deleted rows in a changeset are included (no filtering by deleted flag)."""
-    client = adapter_store_with_records(
-        [
-            {"id": "rec001", "content": "active", "changeset": "changeset-a"},
-            {
-                "id": "rec002",
-                "content": "deleted",
-                "deleted": True,
-                "changeset": "changeset-a",
-            },
-        ]
-    )
-
-    ids = client.get_changeset_record_ids(["changeset-a"]).ids
-
-    assert sorted(ids) == ["rec001", "rec002"]
-
-
-def test_get_changeset_record_ids_scoped_to_namespace(
-    adapter_store_with_records: AdapterStoreFactory,
-) -> None:
-    """Only ids in the store's namespace are returned for a shared changeset id."""
-    client = adapter_store_with_records(
-        [
-            {"id": "rec001", "content": "mine", "changeset": "changeset-a"},
-            {
-                "id": "rec002",
-                "content": "other",
-                "changeset": "changeset-a",
-                "namespace": "other_namespace",
-            },
-        ]
-    )
-
-    ids = client.get_changeset_record_ids(["changeset-a"]).ids
-
-    assert ids == ["rec001"]
-
-
-def test_get_changeset_record_ids_nonexistent_changeset_returns_empty(
-    adapter_store_with_records: AdapterStoreFactory,
-) -> None:
-    """A changeset with no rows returns an empty id list."""
-    client = adapter_store_with_records(
-        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
-    )
-
-    result = client.get_changeset_record_ids(["nonexistent"])
-
-    assert result.ids == []
-    assert result.min_last_modified is None
-
-
-def test_get_changeset_record_ids_pins_snapshot(
-    adapter_store_with_records: AdapterStoreFactory,
-) -> None:
-    """Ids are read at the pinned snapshot, excluding later appends."""
-    client = adapter_store_with_records(
-        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
-    )
-    pinned_snapshot_id = client.current_snapshot_id()
-
-    client.table.append(
-        adapter_records_to_table(
-            [{"id": "rec002", "content": "later", "changeset": "changeset-a"}]
-        )
-    )
-
-    pinned_ids = client.get_changeset_record_ids(
-        ["changeset-a"], pinned_snapshot_id
-    ).ids
-    current_ids = client.get_changeset_record_ids(["changeset-a"]).ids
-
-    assert pinned_ids == ["rec001"]
-    assert sorted(current_ids) == ["rec001", "rec002"]
-
-
-# =============================================================================
-# get_records_by_ids tests
-# =============================================================================
-
-
-def test_get_records_by_ids_matches_changeset_read_including_deleted(
-    adapter_store_with_records: AdapterStoreFactory,
-) -> None:
-    """The id-based read returns the same rows as the changeset read, including
-    a deleted row with its preserved content."""
-    client = adapter_store_with_records(
-        [
-            {"id": "rec001", "content": "active", "changeset": "changeset-a"},
-            {
-                "id": "rec002",
-                "content": "deleted with content preserved",
-                "deleted": True,
-                "changeset": "changeset-a",
-            },
-            {"id": "rec003", "content": "other changeset", "changeset": "changeset-b"},
-        ]
-    )
-
-    ids = client.get_changeset_record_ids(["changeset-a"]).ids
-    by_ids = client.get_records_by_ids(ids).to_pylist()
-    by_changeset = client.get_records_by_changeset("changeset-a").to_pylist()
-
-    sort_key = itemgetter("id")
-    assert sorted(by_ids, key=sort_key) == sorted(by_changeset, key=sort_key)
-    deleted_row = next(row for row in by_ids if row["id"] == "rec002")
-    assert deleted_row["deleted"] is True
-    assert deleted_row["content"] == "deleted with content preserved"
-
-
-def test_get_records_by_ids_empty_ids_returns_empty(
-    adapter_store_with_records: AdapterStoreFactory,
-) -> None:
-    """An empty id list returns an empty table without erroring."""
-    client = adapter_store_with_records(
-        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
-    )
-
-    assert client.get_records_by_ids([]).num_rows == 0
-
-
-def test_get_changeset_record_ids_returns_min_last_modified(
-    adapter_store_with_records: AdapterStoreFactory,
-) -> None:
-    """The minimum last_modified across the changeset's rows is returned."""
+    """The bounded multi-changeset read returns exactly the union of the
+    plain per-changeset reads, with rows carrying mixed timestamps."""
     earlier = datetime(2026, 7, 1, 9, 0, tzinfo=UTC)
     later = datetime(2026, 7, 1, 10, 0, tzinfo=UTC)
     client = adapter_store_with_records(
@@ -356,55 +233,123 @@ def test_get_changeset_record_ids_returns_min_last_modified(
                 "changeset": "changeset-a",
                 "last_modified": earlier,
             },
-        ]
-    )
-
-    result = client.get_changeset_record_ids(["changeset-a"])
-
-    assert result.min_last_modified == earlier
-
-
-def test_get_records_by_ids_with_updated_since_bound_returns_all_target_rows(
-    adapter_store_with_records: AdapterStoreFactory,
-) -> None:
-    """Using the changeset's own minimum last_modified as the bound returns
-    exactly the same rows as the unbounded id read."""
-    earlier = datetime(2026, 7, 1, 9, 0, tzinfo=UTC)
-    later = datetime(2026, 7, 1, 10, 0, tzinfo=UTC)
-    client = adapter_store_with_records(
-        [
             {
-                "id": "rec001",
-                "content": "first",
-                "changeset": "changeset-a",
-                "last_modified": earlier,
-            },
-            {
-                "id": "rec002",
-                "content": "deleted",
-                "deleted": True,
-                "changeset": "changeset-a",
+                "id": "rec003",
+                "content": "third",
+                "changeset": "changeset-b",
                 "last_modified": later,
             },
             {
-                "id": "rec003",
-                "content": "older row outside the changeset",
-                "changeset": "changeset-b",
+                "id": "rec004",
+                "content": "old row outside the requested changesets",
+                "changeset": "changeset-c",
                 "last_modified": datetime(2026, 1, 1, tzinfo=UTC),
             },
         ]
     )
 
-    ids, min_last_modified = client.get_changeset_record_ids(["changeset-a"])
-    bounded = client.get_records_by_ids(ids, updated_since=min_last_modified)
-    unbounded = client.get_records_by_ids(ids)
+    combined = client.get_records_by_changesets(["changeset-a", "changeset-b"])
+    per_changeset = (
+        client.get_records_by_changeset("changeset-a").to_pylist()
+        + client.get_records_by_changeset("changeset-b").to_pylist()
+    )
 
     sort_key = itemgetter("id")
-    assert sorted(bounded.to_pylist(), key=sort_key) == sorted(
-        unbounded.to_pylist(), key=sort_key
+    assert sorted(combined.to_pylist(), key=sort_key) == sorted(
+        per_changeset, key=sort_key
     )
-    bounded_ids = cast(list[str], bounded.column("id").to_pylist())
-    assert sorted(bounded_ids) == ["rec001", "rec002"]
+
+
+def test_get_records_by_changesets_includes_deleted_records(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Deleted rows in a changeset are returned with their preserved content."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "active", "changeset": "changeset-a"},
+            {
+                "id": "rec002",
+                "content": "deleted with content preserved",
+                "deleted": True,
+                "changeset": "changeset-a",
+            },
+        ]
+    )
+
+    rows = {
+        row["id"]: row
+        for row in client.get_records_by_changesets(["changeset-a"]).to_pylist()
+    }
+
+    assert sorted(rows) == ["rec001", "rec002"]
+    assert rows["rec002"]["deleted"] is True
+    assert rows["rec002"]["content"] == "deleted with content preserved"
+
+
+def test_get_records_by_changesets_scoped_to_namespace(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Only rows in the store's namespace are returned for a shared changeset id."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "mine", "changeset": "changeset-a"},
+            {
+                "id": "rec002",
+                "content": "other",
+                "changeset": "changeset-a",
+                "namespace": "other_namespace",
+            },
+        ]
+    )
+
+    result = client.get_records_by_changesets(["changeset-a"])
+
+    assert result.column("id").to_pylist() == ["rec001"]
+
+
+def test_get_records_by_changesets_nonexistent_changeset_returns_empty(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Changesets with no rows return an empty table."""
+    client = adapter_store_with_records(
+        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
+    )
+
+    assert client.get_records_by_changesets(["nonexistent"]).num_rows == 0
+
+
+def test_get_records_by_changesets_empty_input_returns_empty(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """An empty changeset id list returns an empty table without erroring."""
+    client = adapter_store_with_records(
+        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
+    )
+
+    assert client.get_records_by_changesets([]).num_rows == 0
+
+
+def test_get_records_by_changesets_pins_snapshot(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Rows are read at the pinned snapshot, excluding later appends."""
+    client = adapter_store_with_records(
+        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
+    )
+    pinned_snapshot_id = client.current_snapshot_id()
+
+    client.table.append(
+        adapter_records_to_table(
+            [{"id": "rec002", "content": "later", "changeset": "changeset-a"}]
+        )
+    )
+
+    pinned = client.get_records_by_changesets(["changeset-a"], pinned_snapshot_id)
+    current = client.get_records_by_changesets(["changeset-a"])
+
+    assert pinned.column("id").to_pylist() == ["rec001"]
+    current_ids = cast(list[str], current.column("id").to_pylist())
+    assert sorted(current_ids) == ["rec001", "rec002"]
 
 
 # =============================================================================
