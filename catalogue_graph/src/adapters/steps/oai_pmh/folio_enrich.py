@@ -50,10 +50,10 @@ def collect_instance_ids(
     bib_store: AdapterStore, changeset_ids: list[str]
 ) -> list[str]:
     """Return the de-duplicated instance ids that changed across the bib changesets."""
-    instance_ids: list[str] = []
-    for changeset_id in changeset_ids:
-        table = bib_store.get_records_by_changeset(changeset_id)
-        instance_ids.extend(cast("list[str]", table.column("id").to_pylist()))
+    # get_records_by_changesets bounds the content read by the changesets' minimum
+    # last_modified, so file stats can prune (the plain changeset scan cannot).
+    table = bib_store.get_records_by_changesets(changeset_ids)
+    instance_ids = cast("list[str]", table.column("id").to_pylist())
     return list(dict.fromkeys(instance_ids))
 
 
