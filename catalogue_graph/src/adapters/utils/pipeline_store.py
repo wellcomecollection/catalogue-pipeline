@@ -6,7 +6,13 @@ from typing import Any, cast
 import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
-from pyiceberg.expressions import And, BooleanExpression, EqualTo, In
+from pyiceberg.expressions import (
+    And,
+    BooleanExpression,
+    EqualTo,
+    GreaterThanOrEqual,
+    In,
+)
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
@@ -89,9 +95,60 @@ class PipelineStore(ABC):
     def get_records_by_changeset(
         self, changeset_id: str, snapshot_id: int | None = None
     ) -> pa.Table:
-        """Return rows written under the specified changeset ID."""
+        """Return rows written under the specified changeset ID.
+
+        This is the plain, unbounded changeset scan, kept as the reference
+        read (and parity-test oracle) for `get_records_by_changesets`, which
+        prunes data files and should be preferred by production callers.
+        """
         return self.get_namespace_records(
             EqualTo("changeset", changeset_id), snapshot_id
+        )
+
+    def get_records_by_changesets(
+        self, changeset_ids: list[str], snapshot_id: int | None = None
+    ) -> pa.Table:
+        """Return rows written under any of the specified changeset IDs,
+        including soft-deleted rows.
+
+        The changeset filter cannot prune data files on the id-sorted table,
+        so the content read is bounded by the changesets' minimum
+        `last_modified` (found with a cheap single-column scan). Every target
+        row is at or after that minimum, so the bound excludes nothing; it
+        only lets file stats skip files that predate the changesets.
+        """
+        # Resolve the snapshot once so both phases read the same rows.
+        if snapshot_id is None:
+            snapshot_id = self.current_snapshot_id()
+
+        changeset_filter = In("changeset", changeset_ids)
+        min_last_modified = self._get_min_last_modified(changeset_filter, snapshot_id)
+        if min_last_modified is None:
+            # No rows match at this snapshot; skip the un-prunable content scan.
+            return self.schema.empty_table()
+
+        row_filter = And(
+            changeset_filter,
+            GreaterThanOrEqual("last_modified", min_last_modified),
+        )
+        return self.get_namespace_records(row_filter, snapshot_id)
+
+    def _get_min_last_modified(
+        self, iceberg_filter: BooleanExpression, snapshot_id: int | None
+    ) -> datetime | None:
+        """Return the minimum `last_modified` of the matching rows (None if
+        none). Projects a single column, so the scan stays cheap even when
+        the filter cannot prune data files.
+        """
+        full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
+        timestamp_table = self.table.scan(
+            row_filter=full_filter,
+            snapshot_id=snapshot_id,
+            selected_fields=("last_modified",),
+        ).to_arrow()
+
+        return cast(
+            datetime | None, pc.min(timestamp_table.column("last_modified")).as_py()
         )
 
     def normalise_table(self, table: pa.Table) -> pa.Table:

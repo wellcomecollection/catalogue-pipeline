@@ -48,6 +48,43 @@ def test_stream_raw_changeset_path_uses_changeset_lookup(
     assert sorted(row["id"] for row in rows) == ["rec001", "rec002"]
 
 
+def test_stream_raw_changeset_path_includes_deleted_rows_with_content(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Deleted rows in a changeset are streamed with their preserved content,
+    so downstream documents can be overwritten."""
+    store = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "active", "changeset": "changeset-1"},
+            {
+                "id": "rec002",
+                "content": "deleted with content preserved",
+                "deleted": True,
+                "changeset": "changeset-1",
+            },
+        ]
+    )
+    source = AdapterStoreSource(store, changeset_ids=["changeset-1"])
+
+    rows = {row["id"]: row for row in source.stream_raw()}
+
+    assert sorted(rows) == ["rec001", "rec002"]
+    assert rows["rec002"]["deleted"] is True
+    assert rows["rec002"]["content"] == "deleted with content preserved"
+
+
+def test_stream_raw_empty_changeset_yields_nothing(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """A changeset matching no rows yields an empty stream."""
+    store = adapter_store_with_records(
+        [{"id": "rec001", "content": "first", "changeset": "changeset-1"}]
+    )
+    source = AdapterStoreSource(store, changeset_ids=["nonexistent"])
+
+    assert list(source.stream_raw()) == []
+
+
 class _ClosableBatchStream:
     """Iterable of record batches that records consumption and close(), like a reader."""
 
