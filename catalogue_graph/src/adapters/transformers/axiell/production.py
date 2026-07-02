@@ -19,11 +19,11 @@ from models.pipeline.identifier import Unidentifiable
 from models.pipeline.production import ProductionEvent
 
 
-def _day_start(d: date) -> date:
+def _day_start(d: date) -> datetime:
     return datetime.combine(d, time.min, tzinfo=UTC)
 
 
-def _day_end(d: date) -> date:
+def _day_end(d: date) -> datetime:
     return datetime.combine(d, time.max, tzinfo=UTC)
 
 
