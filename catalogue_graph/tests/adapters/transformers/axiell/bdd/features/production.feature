@@ -39,6 +39,7 @@ Feature: Production event extraction from Axiell MARC records
     Then there is 1 production
     And the only production has the label "1985"
     And its only date has the range.from_time "1985-01-01T00:00:00Z"
+    And it has the range.to_time "1985-12-31T23:59:59.999999999Z"
 
   Scenario: Single 264 $c with 046 $l but no $k — falls back to parsing label
     Given the MARC record has a 264 field with subfield "c" value "1985"
@@ -47,6 +48,7 @@ Feature: Production event extraction from Axiell MARC records
     Then there is 1 production
     And the only production has the label "1985"
     And its only date has the range.from_time "1985-01-01T00:00:00Z"
+    And it has the range.to_time "1985-12-31T23:59:59.999999999Z"
 
   Scenario: Multiple 264 $c fields — labels joined, one period per label
     Given the MARC record has a 264 field with subfield "c" value "1985"
