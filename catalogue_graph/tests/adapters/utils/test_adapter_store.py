@@ -6,12 +6,14 @@ These tests cover methods that are not specific to either incremental_update or 
 - get_records_by_changeset
 """
 
+from operator import itemgetter
 from typing import cast
 
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.adapter_store import AdapterStore
-from tests.adapters.conftest import AdapterStoreFactory
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
+from tests.adapters.conftest import AdapterStoreFactory, adapter_records_to_table
 
 # =============================================================================
 # get_all_records tests
@@ -183,3 +185,105 @@ def test_get_records_by_changeset_includes_deleted_records(
     assert result.num_rows == 2
     ids = set(result.column("id").to_pylist())
     assert ids == {"rec001", "rec002"}
+
+
+# =============================================================================
+# stream_active_namespace_records tests
+# =============================================================================
+
+
+def test_stream_active_namespace_records_matches_eager_read(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Streaming yields exactly the same rows as the eager read."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first"},
+            {"id": "rec002", "content": "second", "deleted": False},
+            {"id": "rec003", "content": "third"},
+        ]
+    )
+
+    streamed = [
+        row
+        for batch in client.stream_active_namespace_records()
+        for row in batch.to_pylist()
+    ]
+    eager = client.get_active_namespace_records().to_pylist()
+
+    sort_key = itemgetter("id")
+    assert sorted(streamed, key=sort_key) == sorted(eager, key=sort_key)
+
+
+def test_stream_active_namespace_records_excludes_deleted(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Streaming returns records where deleted is null or False, excluding deleted ones."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "active record"},
+            {"id": "rec002", "content": "another active", "deleted": False},
+            {"id": "rec003", "content": "deleted record", "deleted": True},
+        ]
+    )
+
+    streamed_ids = [
+        row["id"]
+        for batch in client.stream_active_namespace_records()
+        for row in batch.to_pylist()
+    ]
+
+    assert sorted(streamed_ids) == ["rec001", "rec002"]
+
+
+def test_stream_active_namespace_records_honours_snapshot_id(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Streaming with a pinned snapshot excludes rows appended after the snapshot."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first"},
+            {"id": "rec002", "content": "second"},
+        ]
+    )
+    pinned_snapshot_id = client.current_snapshot_id()
+
+    client.table.append(adapter_records_to_table([{"id": "rec003", "content": "new"}]))
+
+    pinned_ids = [
+        row["id"]
+        for batch in client.stream_active_namespace_records(pinned_snapshot_id)
+        for row in batch.to_pylist()
+    ]
+    current_ids = [
+        row["id"]
+        for batch in client.stream_active_namespace_records()
+        for row in batch.to_pylist()
+    ]
+
+    assert sorted(pinned_ids) == ["rec001", "rec002"]
+    assert sorted(current_ids) == ["rec001", "rec002", "rec003"]
+
+
+def test_stream_active_namespace_records_empty_table(
+    temporary_table: IcebergTable,
+) -> None:
+    """Streaming an empty table yields no rows, with the store's Arrow schema."""
+    client = AdapterStore(temporary_table, "test_namespace")
+
+    reader = client.stream_active_namespace_records()
+
+    assert reader.schema == ADAPTER_STORE_ARROW_SCHEMA
+    assert sum(batch.num_rows for batch in reader) == 0
+
+
+def test_stream_active_namespace_records_batches_match_store_schema(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Streamed batches carry the store's Arrow schema."""
+    client = adapter_store_with_records([{"id": "rec001", "content": "first"}])
+
+    batches = list(client.stream_active_namespace_records())
+
+    assert len(batches) > 0
+    assert all(batch.schema == ADAPTER_STORE_ARROW_SCHEMA for batch in batches)
