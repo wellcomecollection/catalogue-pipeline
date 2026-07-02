@@ -64,6 +64,76 @@ def test_normalise_does_not_escape_symbols() -> None:
     assert normalise_text(s) == s
 
 
+def test_normalise_strips_hreflang_from_links() -> None:
+    s = '<a href="https://example.com" hreflang="en">link</a>'
+    assert normalise_text(s) == '<a href="https://example.com" rel="nofollow">link</a>'
+
+
+def test_normalise_strips_generic_lang_attribute() -> None:
+    assert normalise_text('<p lang="en">text</p>') == "<p>text</p>"
+
+
+def test_normalise_strips_generic_title_attribute() -> None:
+    assert normalise_text('<span title="tooltip">text</span>') == "<span>text</span>"
+
+
+def test_normalise_allows_cite_on_blockquote() -> None:
+    s = '<blockquote cite="https://example.com">quote</blockquote>'
+    assert normalise_text(s) == s
+
+
+def test_normalise_allows_cite_on_q() -> None:
+    s = '<q cite="https://example.com">quote</q>'
+    assert normalise_text(s) == s
+
+
+def test_normalise_strips_relative_href() -> None:
+    assert (
+        normalise_text('<a href="/relative/path">link</a>')
+        == '<a rel="nofollow">link</a>'
+    )
+
+
+def test_normalise_strips_anchor_href() -> None:
+    assert normalise_text('<a href="#section">link</a>') == '<a rel="nofollow">link</a>'
+
+
+def test_normalise_allows_ftp_href() -> None:
+    s = '<a href="ftp://files.example.com">FTP</a>'
+    assert (
+        normalise_text(s) == '<a href="ftp://files.example.com" rel="nofollow">FTP</a>'
+    )
+
+
+def test_normalise_allows_mailto_href() -> None:
+    s = '<a href="mailto:user@example.com">email</a>'
+    assert (
+        normalise_text(s)
+        == '<a href="mailto:user@example.com" rel="nofollow">email</a>'
+    )
+
+
+def test_normalise_strips_javascript_href() -> None:
+    assert (
+        normalise_text('<a href="javascript:alert(1)">xss</a>')
+        == '<a rel="nofollow">xss</a>'
+    )
+
+
+def test_normalise_strips_magnet_href() -> None:
+    assert (
+        normalise_text('<a href="magnet:?xt=urn:example">magnet</a>')
+        == '<a rel="nofollow">magnet</a>'
+    )
+
+
+def test_normalise_strips_irc_href() -> None:
+    assert (
+        normalise_text('<a href="irc://irc.example.com/channel">IRC</a>')
+        == '<a rel="nofollow">IRC</a>'
+    )
+
+
 def test_normalise_strips_full_html_document_removing_recurring_empty_lines() -> None:
     s = """
       <!doctype html>

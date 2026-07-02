@@ -48,7 +48,15 @@ def normalise_text(s: str, allowed_tags: AllowedTags = "basic") -> str:
     """Sanitise an HTML string, retaining only the tags permitted by allowed_tags."""
 
     # TODO: `rel="nofollow"` added to mirror Scala. Do we also want to add `noreferrer`?
-    cleaned = nh3.clean(s, tags=_TAGS[allowed_tags], link_rel="nofollow")
+    cleaned = nh3.clean(
+        s,
+        tags=_TAGS[allowed_tags],
+        #  `"*": set()` clears generic attributes
+        attributes={"a": {"href"}, "blockquote": {"cite"}, "q": {"cite"}, "*": set()},
+        url_schemes={"ftp", "http", "https", "mailto"},
+        url_relative="deny",
+        link_rel="nofollow",
+    )
 
     lines = [line.rstrip() for line in cleaned.splitlines()]
 
