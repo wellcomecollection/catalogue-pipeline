@@ -1,28 +1,38 @@
 locals {
-  state_machine_definition = jsonencode({
-    QueryLanguage = "JSONata"
-    Comment       = "Adapter pipeline (trigger, loader, publish event)"
-    StartAt       = "Run trigger"
-    States = {
-      "Run trigger" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::lambda:invoke"
-        Arguments = {
-          FunctionName = module.trigger_lambda.lambda.arn
-          Payload      = "{% $states.input %}"
-        }
-        Output = "{% $states.result.Payload %}"
-        Next   = "Run loader"
-        Retry = [
+  # When item enrichment is enabled, the loader routes through a "Run enrichment"
+  # state before publishing, so both the bib and item changesets exist by the time
+  # "folio.adapter.completed" fires. Otherwise the loader goes straight to publish.
+  loader_next = var.enable_item_enrichment ? "Should enrich?" : "Should publish event?"
+
+  # Carry the items changeset for provenance only when enrichment runs.
+  # The `merge([for ...]...)` pattern yields an empty map when disabled, avoiding
+  # the type-unification error a `? : {}` conditional would raise.
+  publish_event_detail = merge(
+    {
+      transformer_type = var.namespace
+      job_id           = "{% $states.input.job_id %}"
+      changeset_ids    = "{% $states.input.changeset_ids %}"
+    },
+    merge([
+      for _ in range(var.enable_item_enrichment ? 1 : 0) : {
+        items_changeset_ids = "{% $states.input.items_changeset_ids %}"
+      }
+    ]...)
+  )
+
+  enrichment_states = merge([
+    for _ in range(var.enable_item_enrichment ? 1 : 0) : {
+      "Should enrich?" = {
+        Type = "Choice"
+        Choices = [
           {
-            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
-            IntervalSeconds = 2
-            MaxAttempts     = 3
-            BackoffRate     = 2.0
+            Condition = "{% $exists($states.input.changeset_ids[0]) %}"
+            Next      = "Run enrichment"
           }
         ]
+        Default = "Should publish event?"
       }
-      "Run loader" = {
+      "Run enrichment" = {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
         Next     = "Should publish event?"
@@ -36,7 +46,7 @@ locals {
         ]
         Arguments = {
           Cluster        = var.ecs_cluster_arn
-          TaskDefinition = module.loader_ecs_task.task_definition_arn
+          TaskDefinition = one(module.enrichment_ecs_task[*].task_definition_arn)
           LaunchType     = "FARGATE"
           NetworkConfiguration = {
             AwsvpcConfiguration = {
@@ -48,9 +58,9 @@ locals {
           Overrides = {
             ContainerOverrides = [
               {
-                Name = "${var.namespace}-adapter-loader"
+                Name = "${var.namespace}-adapter-enrichment"
                 Command = [
-                  "-m", "adapters.steps.${local.steps_namespace}.loader",
+                  "-m", "adapters.steps.${local.steps_namespace}.folio_enrich",
                   "--event", "{% $string($states.input) %}",
                   "--task-token", "{% $states.context.Task.Token %}"
                 ]
@@ -59,48 +69,109 @@ locals {
           }
         }
       }
-      "Should publish event?" = {
-        Type = "Choice"
-        Choices = [
-          {
-            Condition = "{% $exists($states.input.changeset_ids[0]) %}"
-            Next      = "Publish event"
-          }
-        ]
-        Default = "Success"
+    }
+  ]...)
+
+  base_states = {
+    "Run trigger" = {
+      Type     = "Task"
+      Resource = "arn:aws:states:::lambda:invoke"
+      Arguments = {
+        FunctionName = module.trigger_lambda.lambda.arn
+        Payload      = "{% $states.input %}"
       }
-      "Publish event" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::events:putEvents"
-        Arguments = {
-          Entries = [
+      Output = "{% $states.result.Payload %}"
+      Next   = "Run loader"
+      Retry = [
+        {
+          ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
+          IntervalSeconds = 2
+          MaxAttempts     = 3
+          BackoffRate     = 2.0
+        }
+      ]
+    }
+    "Run loader" = {
+      Type     = "Task"
+      Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+      Next     = local.loader_next
+      Retry = [
+        {
+          ErrorEquals     = ["States.ALL"]
+          IntervalSeconds = 30
+          MaxAttempts     = 3
+          BackoffRate     = 2.0
+        }
+      ]
+      Arguments = {
+        Cluster        = var.ecs_cluster_arn
+        TaskDefinition = module.loader_ecs_task.task_definition_arn
+        LaunchType     = "FARGATE"
+        NetworkConfiguration = {
+          AwsvpcConfiguration = {
+            AssignPublicIp = "DISABLED"
+            Subnets        = var.subnets
+            SecurityGroups = var.security_group_ids
+          }
+        }
+        Overrides = {
+          ContainerOverrides = [
             {
-              Detail = {
-                transformer_type = var.namespace
-                job_id           = "{% $states.input.job_id %}"
-                changeset_ids    = "{% $states.input.changeset_ids %}"
-              }
-              DetailType   = "${var.namespace}.adapter.completed"
-              EventBusName = data.aws_cloudwatch_event_bus.event_bus.name
-              Source       = "${var.namespace}.adapter"
+              Name = "${var.namespace}-adapter-loader"
+              Command = [
+                "-m", "adapters.steps.${local.steps_namespace}.loader",
+                "--event", "{% $string($states.input) %}",
+                "--task-token", "{% $states.context.Task.Token %}"
+              ]
             }
           ]
         }
-        Output = "{% $states.input %}"
-        Next   = "Success"
-        Retry = [
+      }
+    }
+    "Should publish event?" = {
+      Type = "Choice"
+      Choices = [
+        {
+          Condition = "{% $exists($states.input.changeset_ids[0]) %}"
+          Next      = "Publish event"
+        }
+      ]
+      Default = "Success"
+    }
+    "Publish event" = {
+      Type     = "Task"
+      Resource = "arn:aws:states:::events:putEvents"
+      Arguments = {
+        Entries = [
           {
-            ErrorEquals     = ["States.ALL"]
-            IntervalSeconds = 2
-            MaxAttempts     = 3
-            BackoffRate     = 2.0
+            Detail       = local.publish_event_detail
+            DetailType   = "${var.namespace}.adapter.completed"
+            EventBusName = data.aws_cloudwatch_event_bus.event_bus.name
+            Source       = "${var.namespace}.adapter"
           }
         ]
       }
-      Success = {
-        Type = "Succeed"
-      }
+      Output = "{% $states.input %}"
+      Next   = "Success"
+      Retry = [
+        {
+          ErrorEquals     = ["States.ALL"]
+          IntervalSeconds = 2
+          MaxAttempts     = 3
+          BackoffRate     = 2.0
+        }
+      ]
     }
+    Success = {
+      Type = "Succeed"
+    }
+  }
+
+  state_machine_definition = jsonencode({
+    QueryLanguage = "JSONata"
+    Comment       = "Adapter pipeline (trigger, loader, publish event)"
+    StartAt       = "Run trigger"
+    States        = merge(local.base_states, local.enrichment_states)
   })
 }
 

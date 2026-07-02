@@ -17,7 +17,11 @@ module "transformer_lambda" {
     command = ["adapters.steps.transformer.lambda_handler"]
   }
 
-  memory_size = 4096
+  # 10240 (up from 4096) to accommodate the FOLIO item-enrichment join. The bib
+  # store is sorted by id, so a changeset read cannot prune and materialises most
+  # of the table; on the FOLIO enrichment path this tips a single-record transform
+  # over 4096. Interim mitigation until the changeset read is made prunable (#3444).
+  memory_size = 10240
   timeout     = 600
 
   vpc_config = {

@@ -22,10 +22,11 @@ class SourceWorkTransformer(ElasticBaseTransformer[SourceWork], ABC):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None = None,
+        items_store: AdapterStore | None = None,
     ) -> None:
         super().__init__()
         self.source: AdapterStoreSource = AdapterStoreSource(
-            adapter_store, changeset_ids, snapshot_id
+            adapter_store, changeset_ids, snapshot_id, items_store=items_store
         )
 
     @property
