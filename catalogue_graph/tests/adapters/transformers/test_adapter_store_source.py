@@ -1,14 +1,23 @@
 """Tests for AdapterStoreSource, the Iceberg-backed source used by transformers."""
 
 from collections.abc import Generator
-from typing import cast
+from typing import Any, cast
 
 import pyarrow as pa
+import pytest
 
+from adapters.transformers import adapter_store_source
 from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from tests.adapters.conftest import AdapterStoreFactory, adapter_records_to_table
+
+
+def _forbid(method_name: str) -> Any:
+    def _raise(*args: Any, **kwargs: Any) -> None:
+        raise AssertionError(f"{method_name} must not be called on this path")
+
+    return _raise
 
 
 def test_stream_raw_full_reindex_yields_all_active_rows(
@@ -46,6 +55,91 @@ def test_stream_raw_changeset_path_uses_changeset_lookup(
     rows = list(source.stream_raw())
 
     assert sorted(row["id"] for row in rows) == ["rec001", "rec002"]
+
+
+def test_stream_raw_small_changeset_avoids_changeset_content_read(
+    adapter_store_with_records: AdapterStoreFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A small changeset is read by record id, never via the un-prunable
+    changeset-filtered content scan."""
+    store = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first", "changeset": "changeset-1"},
+            {"id": "rec002", "content": "second", "changeset": "changeset-2"},
+        ]
+    )
+    monkeypatch.setattr(
+        store, "get_records_by_changeset", _forbid("get_records_by_changeset")
+    )
+    source = AdapterStoreSource(store, changeset_ids=["changeset-1"])
+
+    rows = list(source.stream_raw())
+
+    assert [row["id"] for row in rows] == ["rec001"]
+
+
+def test_stream_raw_small_changeset_includes_deleted_rows_with_content(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Deleted rows in a changeset are streamed with their preserved content,
+    so downstream documents can be overwritten."""
+    store = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "active", "changeset": "changeset-1"},
+            {
+                "id": "rec002",
+                "content": "deleted with content preserved",
+                "deleted": True,
+                "changeset": "changeset-1",
+            },
+        ]
+    )
+    source = AdapterStoreSource(store, changeset_ids=["changeset-1"])
+
+    rows = {row["id"]: row for row in source.stream_raw()}
+
+    assert sorted(rows) == ["rec001", "rec002"]
+    assert rows["rec002"]["deleted"] is True
+    assert rows["rec002"]["content"] == "deleted with content preserved"
+
+
+def test_stream_raw_falls_back_for_large_changesets(
+    adapter_store_with_records: AdapterStoreFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Above the threshold, stream_raw uses the eager changeset read instead of
+    an id-filtered read."""
+    store = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first", "changeset": "changeset-1"},
+            {"id": "rec002", "content": "second", "changeset": "changeset-1"},
+        ]
+    )
+    monkeypatch.setattr(adapter_store_source, "SMALL_CHANGESET_THRESHOLD", 1)
+    monkeypatch.setattr(store, "get_records_by_ids", _forbid("get_records_by_ids"))
+    source = AdapterStoreSource(store, changeset_ids=["changeset-1"])
+
+    rows = list(source.stream_raw())
+
+    assert sorted(row["id"] for row in rows) == ["rec001", "rec002"]
+
+
+def test_stream_raw_empty_changeset_yields_no_content_read(
+    adapter_store_with_records: AdapterStoreFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A changeset matching no rows yields nothing and performs no content read."""
+    store = adapter_store_with_records(
+        [{"id": "rec001", "content": "first", "changeset": "changeset-1"}]
+    )
+    monkeypatch.setattr(store, "get_records_by_ids", _forbid("get_records_by_ids"))
+    monkeypatch.setattr(
+        store, "get_records_by_changeset", _forbid("get_records_by_changeset")
+    )
+    source = AdapterStoreSource(store, changeset_ids=["nonexistent"])
+
+    assert list(source.stream_raw()) == []
 
 
 class _ClosableBatchStream:

@@ -94,6 +94,33 @@ class PipelineStore(ABC):
             EqualTo("changeset", changeset_id), snapshot_id
         )
 
+    def get_records_by_ids(
+        self, ids: list[str], snapshot_id: int | None = None
+    ) -> pa.Table:
+        """Return rows with the specified record IDs, including soft-deleted rows.
+
+        Unlike a changeset filter, an `id` filter prunes data files on the
+        id-sorted table, so this read is cheap when `ids` spans few files.
+        """
+        return self.get_namespace_records(In("id", ids), snapshot_id)
+
+    def get_changeset_record_ids(
+        self, changeset_ids: list[str], snapshot_id: int | None = None
+    ) -> list[str]:
+        """Return the IDs of rows written under any of the specified changesets.
+
+        Projects only the `id` column, so the scan avoids reading row content
+        and stays cheap even though the changeset filter cannot prune data
+        files on the id-sorted table.
+        """
+        full_filter = And(
+            EqualTo("namespace", self.namespace), In("changeset", changeset_ids)
+        )
+        id_table = self.table.scan(
+            row_filter=full_filter, snapshot_id=snapshot_id, selected_fields=("id",)
+        ).to_arrow()
+        return self._extract_ids(id_table)
+
     def normalise_table(self, table: pa.Table) -> pa.Table:
         """Enforce that the table conforms to the required schema and filter for records in the selected namespace"""
         table = table.cast(self.schema)
