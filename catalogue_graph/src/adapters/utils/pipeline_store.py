@@ -1,6 +1,5 @@
 import uuid
 from abc import ABC, abstractmethod
-from collections.abc import Generator
 from datetime import datetime
 from typing import Any, cast
 
@@ -8,7 +7,6 @@ import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
 from pyiceberg.expressions import And, BooleanExpression, EqualTo, In
-from pyiceberg.io.pyarrow import ArrowScan
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
@@ -72,27 +70,21 @@ class PipelineStore(ABC):
         self,
         iceberg_filter: BooleanExpression = ALWAYS_TRUE,
         snapshot_id: int | None = None,
-    ) -> Generator[pa.RecordBatch]:
+    ) -> pa.RecordBatchReader:
         """Stream records in the store namespace as Arrow record batches.
 
-        Unlike `get_namespace_records`, rows are never materialised all at once:
-        memory stays bounded at roughly one data file regardless of table size.
-
-        Files are read one at a time rather than through `to_arrow_batch_reader`,
-        whose thread pool downloads every file eagerly regardless of consumption
-        rate, buffering close to the whole table in memory.
+        Unlike `get_namespace_records`, rows are not materialised as a single
+        table. Note that pyiceberg's reader prefetches data files on a thread
+        pool regardless of consumption rate (apache/iceberg-python#2407), so
+        peak memory is well below an eager read but can still approach the
+        table size when the consumer is slower than the downloads.
         """
         full_filter = And(EqualTo("namespace", self.namespace), iceberg_filter)
-        scan = self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)
-        for task in scan.plan_files():
-            file_table = ArrowScan(
-                scan.table_metadata,
-                scan.io,
-                scan.projection(),
-                scan.row_filter,
-                scan.case_sensitive,
-            ).to_table([task])
-            yield from file_table.cast(self.schema).to_batches()
+        return (
+            self.table.scan(row_filter=full_filter, snapshot_id=snapshot_id)
+            .to_arrow_batch_reader()
+            .cast(self.schema)
+        )
 
     def get_records_by_changeset(
         self, changeset_id: str, snapshot_id: int | None = None

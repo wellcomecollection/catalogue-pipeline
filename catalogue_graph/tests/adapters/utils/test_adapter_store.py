@@ -268,12 +268,13 @@ def test_stream_namespace_records_honours_snapshot_id(
 def test_stream_active_namespace_records_empty_table(
     temporary_table: IcebergTable,
 ) -> None:
-    """Streaming an empty table yields no rows."""
+    """Streaming an empty table yields no rows, with the store's Arrow schema."""
     client = AdapterStore(temporary_table, "test_namespace")
 
-    batches = list(client.stream_active_namespace_records())
+    reader = client.stream_active_namespace_records()
 
-    assert sum(batch.num_rows for batch in batches) == 0
+    assert reader.schema == ADAPTER_STORE_ARROW_SCHEMA
+    assert sum(batch.num_rows for batch in reader) == 0
 
 
 def test_stream_namespace_records_batches_match_store_schema(
