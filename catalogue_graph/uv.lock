@@ -181,7 +181,7 @@ requires-dist = [
     { name = "cryptography", specifier = ">=48.0.1" },
     { name = "elasticsearch", specifier = ">=8.11,<8.13" },
     { name = "lxml", specifier = ">=6.0.0" },
-    { name = "nh3" },
+    { name = "nh3", specifier = ">=0.3" },
     { name = "oai-pmh-client", git = "https://github.com/wellcomecollection/oai-pmh.git?tag=v1.0.1" },
     { name = "polars" },
     { name = "pyarrow", specifier = "~=23.0" },
