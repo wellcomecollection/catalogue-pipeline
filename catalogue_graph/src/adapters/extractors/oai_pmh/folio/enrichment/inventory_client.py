@@ -107,9 +107,6 @@ def _parse_records(response: httpx.Response) -> list[dict]:
     if isinstance(payload, list):
         return cast("list[dict]", payload)
     if isinstance(payload, dict):
-        for key in ("enrichedInstances", "instances", "records"):
-            if isinstance(payload.get(key), list):
-                return cast("list[dict]", payload[key])
         return [payload]
     return []
 
