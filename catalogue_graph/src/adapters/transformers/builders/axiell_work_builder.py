@@ -1,30 +1,4 @@
 import structlog
-from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
-from ingestor.models.shared.deleted_reason import SuppressedFromSource
-from ingestor.models.shared.merge_candidate import MergeCandidate
-from models.pipeline.access_condition import AccessCondition
-from models.pipeline.access_method import NotRequestable
-from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Contributor, Subject
-from models.pipeline.format import Format
-from models.pipeline.id_label import Language
-from models.pipeline.identifier import (
-    Id,
-    Identifiable,
-    Unidentifiable,
-    WorkSourceIdentifier,
-)
-from models.pipeline.item import Item
-from models.pipeline.location import ClosedStores, PhysicalLocation
-from models.pipeline.note import Note
-from models.pipeline.production import ProductionEvent
-from models.pipeline.source.work import (
-    DeletedSourceWork,
-    SourceWorkState,
-    VisibleSourceWork,
-)
-from utils.timezone import convert_datetime_to_utc_iso
-from utils.types import WorkType
 
 from adapters.transformers.axiell.access_status import extract_access_status
 from adapters.transformers.axiell.catalogue_status import (
@@ -53,6 +27,32 @@ from adapters.transformers.marc.last_transaction_time import (
 from adapters.transformers.marc.predecessor_identifier import (
     extract_calm_predecessor_id,
 )
+from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
+from ingestor.models.shared.deleted_reason import SuppressedFromSource
+from ingestor.models.shared.merge_candidate import MergeCandidate
+from models.pipeline.access_condition import AccessCondition
+from models.pipeline.access_method import NotRequestable
+from models.pipeline.collection_path import CollectionPath
+from models.pipeline.concept import Contributor, Subject
+from models.pipeline.format import Format
+from models.pipeline.id_label import Language
+from models.pipeline.identifier import (
+    Id,
+    Identifiable,
+    Unidentifiable,
+    WorkSourceIdentifier,
+)
+from models.pipeline.item import Item
+from models.pipeline.location import ClosedStores, PhysicalLocation
+from models.pipeline.note import Note
+from models.pipeline.production import ProductionEvent
+from models.pipeline.source.work import (
+    DeletedSourceWork,
+    SourceWorkState,
+    VisibleSourceWork,
+)
+from utils.timezone import convert_datetime_to_utc_iso
+from utils.types import WorkType
 
 logger = structlog.get_logger(__name__)
 
