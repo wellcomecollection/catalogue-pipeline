@@ -23,10 +23,13 @@ class AdapterStoreSource(BaseSource):
     def stream_raw(self) -> Generator[dict[str, Any]]:
         if self.changeset_ids:
             # Includes soft-deleted rows, needed to overwrite documents downstream.
+            # Convert one batch at a time so the Python dicts never hold the
+            # whole (possibly multi-changeset) table alongside the Arrow copy.
             table = self.adapter_store.get_records_by_changesets(
                 self.changeset_ids, self.snapshot_id
             )
-            yield from table.to_pylist()
+            for batch in table.to_batches():
+                yield from batch.to_pylist()
         else:
             logger.info("No changeset_id provided; performing full reindex of records.")
 

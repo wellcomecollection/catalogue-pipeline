@@ -95,7 +95,12 @@ class PipelineStore(ABC):
     def get_records_by_changeset(
         self, changeset_id: str, snapshot_id: int | None = None
     ) -> pa.Table:
-        """Return rows written under the specified changeset ID."""
+        """Return rows written under the specified changeset ID.
+
+        This is the plain, unbounded changeset scan, kept as the reference
+        read (and parity-test oracle) for `get_records_by_changesets`, which
+        prunes data files and should be preferred by production callers.
+        """
         return self.get_namespace_records(
             EqualTo("changeset", changeset_id), snapshot_id
         )
@@ -118,13 +123,14 @@ class PipelineStore(ABC):
 
         changeset_filter = In("changeset", changeset_ids)
         min_last_modified = self._get_min_last_modified(changeset_filter, snapshot_id)
+        if min_last_modified is None:
+            # No rows match at this snapshot; skip the un-prunable content scan.
+            return self.schema.empty_table()
 
-        row_filter: BooleanExpression = changeset_filter
-        if min_last_modified is not None:
-            row_filter = And(
-                changeset_filter,
-                GreaterThanOrEqual("last_modified", min_last_modified.isoformat()),
-            )
+        row_filter = And(
+            changeset_filter,
+            GreaterThanOrEqual("last_modified", min_last_modified.isoformat()),
+        )
         return self.get_namespace_records(row_filter, snapshot_id)
 
     def _get_min_last_modified(
@@ -141,10 +147,9 @@ class PipelineStore(ABC):
             selected_fields=("last_modified",),
         ).to_arrow()
 
-        timestamps = cast(
-            list[datetime], timestamp_table.column("last_modified").to_pylist()
+        return cast(
+            datetime | None, pc.min(timestamp_table.column("last_modified")).as_py()
         )
-        return min(timestamps, default=None)
 
     def normalise_table(self, table: pa.Table) -> pa.Table:
         """Enforce that the table conforms to the required schema and filter for records in the selected namespace"""
