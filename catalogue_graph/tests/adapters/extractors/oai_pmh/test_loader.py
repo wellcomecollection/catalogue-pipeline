@@ -10,7 +10,6 @@ from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-import pytest
 from lxml import etree
 
 from adapters.extractors.oai_pmh.models.step_events import (
@@ -147,17 +146,21 @@ class TestExecuteLoader:
             assert response.changed_record_count == 0
             assert adapter_store_client.get_all_records().num_rows == 0
 
-    def test_errors_when_no_windows(
+    def test_no_pending_windows_returns_empty_response(
         self,
         loader_runtime: LoaderRuntime,
     ) -> None:
+        """A caught-up range (no pending windows) is a no-op, not an error: the loader
+        returns an empty response so the state machine routes straight to success."""
         req = _create_loader_event()
 
         with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
             mock_harvest.return_value = []
 
-            with pytest.raises(RuntimeError):
-                loader.execute_loader(req, runtime=loader_runtime)
+            response = loader.execute_loader(req, runtime=loader_runtime)
+
+        assert response.changeset_ids == []
+        assert response.changed_record_count == 0
 
 
 # ---------------------------------------------------------------------------
