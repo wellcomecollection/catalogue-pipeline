@@ -1,15 +1,29 @@
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, cast
+from typing import Any, NamedTuple, cast
 
 import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
-from pyiceberg.expressions import And, BooleanExpression, EqualTo, In
+from pyiceberg.expressions import (
+    And,
+    BooleanExpression,
+    EqualTo,
+    GreaterThanOrEqual,
+    In,
+)
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
+
+
+class ChangesetRecordIds(NamedTuple):
+    """The record IDs written under a set of changesets, with the minimum
+    `last_modified` across them (a file-pruning bound for id-based reads)."""
+
+    ids: list[str]
+    min_last_modified: datetime | None
 
 
 class PipelineStoreUpdate(BaseModel):
@@ -95,31 +109,60 @@ class PipelineStore(ABC):
         )
 
     def get_records_by_ids(
-        self, ids: list[str], snapshot_id: int | None = None
+        self,
+        ids: list[str],
+        snapshot_id: int | None = None,
+        updated_since: datetime | None = None,
     ) -> pa.Table:
         """Return rows with the specified record IDs, including soft-deleted rows.
 
         Unlike a changeset filter, an `id` filter prunes data files on the
         id-sorted table, so this read is cheap when `ids` spans few files.
+
+        `updated_since` is a pruning bound, not a selection filter: callers must
+        ensure every target row's `last_modified` is at or after it (e.g. the
+        minimum across a changeset's rows). It lets file-level column stats
+        skip old compacted files whose id ranges overlap the target ids but
+        which cannot contain the recently written rows.
         """
-        return self.get_namespace_records(In("id", ids), snapshot_id)
+        row_filter: BooleanExpression = In("id", ids)
+        if updated_since is not None:
+            row_filter = And(
+                row_filter,
+                GreaterThanOrEqual("last_modified", updated_since.isoformat()),
+            )
+        return self.get_namespace_records(row_filter, snapshot_id)
 
     def get_changeset_record_ids(
         self, changeset_ids: list[str], snapshot_id: int | None = None
-    ) -> list[str]:
-        """Return the IDs of rows written under any of the specified changesets.
+    ) -> ChangesetRecordIds:
+        """Return the IDs of rows written under any of the specified changesets,
+        with the minimum `last_modified` across them (for use as a pruning
+        bound in `get_records_by_ids`).
 
-        Projects only the `id` column, so the scan avoids reading row content
-        and stays cheap even though the changeset filter cannot prune data
-        files on the id-sorted table.
+        Projects only the `id` and `last_modified` columns, so the scan avoids
+        reading row content and stays cheap even though the changeset filter
+        cannot prune data files on the id-sorted table.
         """
         full_filter = And(
             EqualTo("namespace", self.namespace), In("changeset", changeset_ids)
         )
         id_table = self.table.scan(
-            row_filter=full_filter, snapshot_id=snapshot_id, selected_fields=("id",)
+            row_filter=full_filter,
+            snapshot_id=snapshot_id,
+            selected_fields=("id", "last_modified"),
         ).to_arrow()
-        return self._extract_ids(id_table)
+
+        timestamps = cast(
+            list[datetime | None], id_table.column("last_modified").to_pylist()
+        )
+        # A null last_modified would make the pruning bound exclude that row,
+        # so only supply a bound when every row carries a timestamp.
+        non_null = [t for t in timestamps if t is not None]
+        min_last_modified = (
+            min(non_null) if len(non_null) == len(timestamps) and non_null else None
+        )
+        return ChangesetRecordIds(self._extract_ids(id_table), min_last_modified)
 
     def normalise_table(self, table: pa.Table) -> pa.Table:
         """Enforce that the table conforms to the required schema and filter for records in the selected namespace"""

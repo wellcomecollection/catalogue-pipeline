@@ -6,6 +6,7 @@ These tests cover methods that are not specific to either incremental_update or 
 - get_records_by_changeset
 """
 
+from datetime import UTC, datetime
 from operator import itemgetter
 from typing import cast
 
@@ -205,7 +206,7 @@ def test_get_changeset_record_ids_returns_ids_for_requested_changesets(
         ]
     )
 
-    ids = client.get_changeset_record_ids(["changeset-a", "changeset-b"])
+    ids = client.get_changeset_record_ids(["changeset-a", "changeset-b"]).ids
 
     assert sorted(ids) == ["rec001", "rec002", "rec003"]
 
@@ -226,7 +227,7 @@ def test_get_changeset_record_ids_includes_deleted_records(
         ]
     )
 
-    ids = client.get_changeset_record_ids(["changeset-a"])
+    ids = client.get_changeset_record_ids(["changeset-a"]).ids
 
     assert sorted(ids) == ["rec001", "rec002"]
 
@@ -247,7 +248,7 @@ def test_get_changeset_record_ids_scoped_to_namespace(
         ]
     )
 
-    ids = client.get_changeset_record_ids(["changeset-a"])
+    ids = client.get_changeset_record_ids(["changeset-a"]).ids
 
     assert ids == ["rec001"]
 
@@ -260,7 +261,10 @@ def test_get_changeset_record_ids_nonexistent_changeset_returns_empty(
         [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
     )
 
-    assert client.get_changeset_record_ids(["nonexistent"]) == []
+    result = client.get_changeset_record_ids(["nonexistent"])
+
+    assert result.ids == []
+    assert result.min_last_modified is None
 
 
 def test_get_changeset_record_ids_pins_snapshot(
@@ -278,8 +282,10 @@ def test_get_changeset_record_ids_pins_snapshot(
         )
     )
 
-    pinned_ids = client.get_changeset_record_ids(["changeset-a"], pinned_snapshot_id)
-    current_ids = client.get_changeset_record_ids(["changeset-a"])
+    pinned_ids = client.get_changeset_record_ids(
+        ["changeset-a"], pinned_snapshot_id
+    ).ids
+    current_ids = client.get_changeset_record_ids(["changeset-a"]).ids
 
     assert pinned_ids == ["rec001"]
     assert sorted(current_ids) == ["rec001", "rec002"]
@@ -308,7 +314,7 @@ def test_get_records_by_ids_matches_changeset_read_including_deleted(
         ]
     )
 
-    ids = client.get_changeset_record_ids(["changeset-a"])
+    ids = client.get_changeset_record_ids(["changeset-a"]).ids
     by_ids = client.get_records_by_ids(ids).to_pylist()
     by_changeset = client.get_records_by_changeset("changeset-a").to_pylist()
 
@@ -328,6 +334,77 @@ def test_get_records_by_ids_empty_ids_returns_empty(
     )
 
     assert client.get_records_by_ids([]).num_rows == 0
+
+
+def test_get_changeset_record_ids_returns_min_last_modified(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """The minimum last_modified across the changeset's rows is returned."""
+    earlier = datetime(2026, 7, 1, 9, 0, tzinfo=UTC)
+    later = datetime(2026, 7, 1, 10, 0, tzinfo=UTC)
+    client = adapter_store_with_records(
+        [
+            {
+                "id": "rec001",
+                "content": "first",
+                "changeset": "changeset-a",
+                "last_modified": later,
+            },
+            {
+                "id": "rec002",
+                "content": "second",
+                "changeset": "changeset-a",
+                "last_modified": earlier,
+            },
+        ]
+    )
+
+    result = client.get_changeset_record_ids(["changeset-a"])
+
+    assert result.min_last_modified == earlier
+
+
+def test_get_records_by_ids_with_updated_since_bound_returns_all_target_rows(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Using the changeset's own minimum last_modified as the bound returns
+    exactly the same rows as the unbounded id read."""
+    earlier = datetime(2026, 7, 1, 9, 0, tzinfo=UTC)
+    later = datetime(2026, 7, 1, 10, 0, tzinfo=UTC)
+    client = adapter_store_with_records(
+        [
+            {
+                "id": "rec001",
+                "content": "first",
+                "changeset": "changeset-a",
+                "last_modified": earlier,
+            },
+            {
+                "id": "rec002",
+                "content": "deleted",
+                "deleted": True,
+                "changeset": "changeset-a",
+                "last_modified": later,
+            },
+            {
+                "id": "rec003",
+                "content": "older row outside the changeset",
+                "changeset": "changeset-b",
+                "last_modified": datetime(2026, 1, 1, tzinfo=UTC),
+            },
+        ]
+    )
+
+    ids, min_last_modified = client.get_changeset_record_ids(["changeset-a"])
+    bounded = client.get_records_by_ids(ids, updated_since=min_last_modified)
+    unbounded = client.get_records_by_ids(ids)
+
+    sort_key = itemgetter("id")
+    assert sorted(bounded.to_pylist(), key=sort_key) == sorted(
+        unbounded.to_pylist(), key=sort_key
+    )
+    bounded_ids = cast(list[str], bounded.column("id").to_pylist())
+    assert sorted(bounded_ids) == ["rec001", "rec002"]
 
 
 # =============================================================================

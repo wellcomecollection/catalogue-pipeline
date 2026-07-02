@@ -55,15 +55,19 @@ class AdapterStoreSource(BaseSource):
         if snapshot_id is None:
             snapshot_id = self.adapter_store.current_snapshot_id()
 
-        ids = self.adapter_store.get_changeset_record_ids(
+        ids, min_last_modified = self.adapter_store.get_changeset_record_ids(
             self.changeset_ids, snapshot_id
         )
         if not ids:
             return
         if len(ids) <= SMALL_CHANGESET_THRESHOLD:
             # Changeset reads include soft-deleted rows (needed to overwrite
-            # documents downstream); get_records_by_ids preserves that.
-            table = self.adapter_store.get_records_by_ids(ids, snapshot_id)
+            # documents downstream); get_records_by_ids preserves that. The
+            # last_modified bound is derived from the changeset's own rows, so
+            # it excludes nothing and lets file stats skip old compacted files.
+            table = self.adapter_store.get_records_by_ids(
+                ids, snapshot_id, updated_since=min_last_modified
+            )
             yield from table.to_pylist()
         else:
             for changeset_id in self.changeset_ids:
