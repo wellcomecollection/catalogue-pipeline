@@ -1,4 +1,4 @@
-Feature: Production event extraction from Axiell MARC records
+Feature: Production event extraction from MARC records
   Production events are derived from MARC 260, 264, and 008 fields.
   260 $a = place, $b = agent, $c = date. All subfields are joined as the label.
   264 ind2 sets the function: 0=Production, 1=Publication, 2=Distribution, 3=Manufacture.
