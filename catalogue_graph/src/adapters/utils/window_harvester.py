@@ -26,7 +26,6 @@ BATCH_SIZE = 10_000
 class WindowSummaryTags(BaseModel):
     changeset_ids: list[str] = []
     upserted_record_count: int = 0
-    published_at: str | None = None
     other_tags: dict[str, str] = {}
 
     @classmethod
@@ -47,22 +46,22 @@ class WindowSummaryTags(BaseModel):
         if "upserted_record_count" in tags:
             upserted_record_count = int(tags.pop("upserted_record_count"))
 
+        # published_at is deliberately not modelled here: it rides through
+        # other_tags untouched, and adapters.utils.window_summary.
+        # published_at_from_tags is the one reader that decides what counts
+        # as a valid stamp.
         return cls(
             changeset_ids=changeset_ids,
             upserted_record_count=upserted_record_count,
-            published_at=tags.pop("published_at", None),
             other_tags=tags,
         )
 
     def dump(self) -> dict[str, str]:
-        tags = {
+        return {
             **self.other_tags,
             "changeset_ids": json.dumps(self.changeset_ids),
             "upserted_record_count": str(self.upserted_record_count),
         }
-        if self.published_at is not None:
-            tags["published_at"] = self.published_at
-        return tags
 
 
 def get_record_identifier(record: Record) -> str | None:

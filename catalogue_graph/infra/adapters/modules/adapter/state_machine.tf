@@ -190,7 +190,7 @@ locals {
         Arguments = {
           FunctionName = one(module.mark_published_lambda[*].lambda.arn)
           # The loader/enrichment response carries no adapter identity, so
-          # inject it alongside the response and the threaded window.
+          # inject it alongside the response and its covered window keys.
           Payload = "{% $merge([$states.input, {'adapter_type': '${var.namespace}'}]) %}"
         }
         Output = "{% $states.result.Payload %}"

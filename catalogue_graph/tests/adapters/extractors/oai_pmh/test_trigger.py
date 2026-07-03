@@ -261,12 +261,16 @@ class TestBuildWindowRequest:
 
         assert request.window.start_time == last_success_end
 
-    def test_lag_measured_against_published_cursor(
+    def test_stale_published_cursor_recovers_without_tripping_breaker(
         self,
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
-        """A stale published cursor trips the breaker even with fresh success rows."""
+        """Lag measures harvest liveness, not the published cursor: a stamp
+        left stale by a stalled mark-published step or a disable/re-enable
+        cycle must not halt the trigger, because only a completed execution
+        can refresh the stamps. The run proceeds and re-covers the stale
+        range instead."""
         now = datetime(2025, 11, 17, 13, 0, tzinfo=UTC)
         published_end = now - timedelta(hours=2)
         fresh_success_end = now - timedelta(minutes=15)
@@ -292,8 +296,10 @@ class TestBuildWindowRequest:
             use_published_cursor=True,
         )
 
-        with pytest.raises(RuntimeError):
-            build_window_request(runtime=runtime, now=now)
+        request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == published_end
+        assert request.window.end_time == now
 
     def test_errors_when_lag_exceeds_limit(
         self,

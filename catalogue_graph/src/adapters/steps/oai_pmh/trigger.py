@@ -84,18 +84,19 @@ def _determine_start(
 
 def _enforce_lag(
     now: datetime,
-    cursor_end: datetime | None,
+    last_success_end: datetime | None,
     max_lag_minutes: int,
     adapter_name: str,
 ) -> None:
     """Check if the adapter is too far behind and raise if so."""
-    if cursor_end is None:
+    if last_success_end is None:
         return
-    lag_minutes = (now - cursor_end).total_seconds() / 60
+    lag_minutes = (now - last_success_end).total_seconds() / 60
     if lag_minutes > max_lag_minutes:
         raise RuntimeError(
-            f"{adapter_name.title()} adapter is too far behind: harvest cursor is at "
-            f"{cursor_end.isoformat()}, {lag_minutes:.1f} minutes ago (limit={max_lag_minutes})."
+            f"{adapter_name.title()} adapter is too far behind: last successful window "
+            f"ended {last_success_end.isoformat()}, {lag_minutes:.1f} minutes ago "
+            f"(limit={max_lag_minutes})."
         )
 
 
@@ -127,15 +128,22 @@ def build_window_request(
     # Falls back to last_success_end while no window carries a published stamp,
     # or when published tracking is disabled for this adapter.
     preliminary_report = reporter.coverage_report()
+    last_success_end = preliminary_report.last_success_end
     cursor_end = (
         preliminary_report.last_published_end if runtime.use_published_cursor else None
-    ) or preliminary_report.last_success_end
+    ) or last_success_end
 
-    # Enforce lag before notifying to avoid repeated alerts when circuit breaker trips
+    # Enforce lag before notifying to avoid repeated alerts when circuit breaker trips.
+    # Lag measures harvest liveness (last_success_end), not the published cursor:
+    # a stale published cursor (a stalled mark-published step, or stamps left
+    # behind by a disable/re-enable cycle) must not stop harvesting, because
+    # only a completed execution can refresh the stamps. The next successful
+    # run re-covers the stale range and re-stamps it; stamping failures still
+    # alarm through the failed execution.
     if runtime.enforce_lag:
         _enforce_lag(
             now,
-            cursor_end,
+            last_success_end,
             runtime.max_lag_minutes,
             runtime.adapter_name,
         )

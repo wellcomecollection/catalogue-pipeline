@@ -75,6 +75,21 @@ def handler(
 
     rows = runtime.store.list_by_keys(event.covered_window_keys)
 
+    # Every covered key was minted from a row this run's loader saw, so a miss
+    # means the loader and this step disagree about the store (key-format
+    # drift, wrong table) — surface it, or a stalled cursor looks like a
+    # quiet run.
+    missing_keys = sorted(
+        set(event.covered_window_keys) - {row.window_key for row in rows}
+    )
+    if missing_keys:
+        logger.warning(
+            "Covered windows missing from the window store",
+            adapter=runtime.adapter_name,
+            job_id=event.job_id,
+            missing_window_keys=missing_keys,
+        )
+
     to_stamp = []
     skipped = 0
     for row in rows:
