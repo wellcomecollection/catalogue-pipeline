@@ -98,3 +98,16 @@ def test_540_text_content_not_emitted_as_terms_of_use() -> None:
     record.add_field(_field("540", "a", "Reproductions may be made for personal use."))
     notes = extract_notes(record)
     assert not any(n.note_type == TERMS_OF_USE for n in notes)
+
+
+def test_note_stripped_to_empty_by_normalise_text_is_excluded() -> None:
+    """A note whose content normalise_text reduces to an empty string is not returned.
+
+    An HTML comment is non-empty (so it passes the base extract_notes whitespace
+    filter) but nh3 strips it entirely, leaving nothing after normalise_text.
+    """
+    record = Record()
+    record.add_field(Field(tag="001", data="test_id"))
+    record.add_field(_field("500", "a", "<!-- only a comment -->"))
+    notes = extract_notes(record)
+    assert notes == []
