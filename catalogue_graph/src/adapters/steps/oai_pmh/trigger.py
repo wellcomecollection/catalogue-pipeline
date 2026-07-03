@@ -86,8 +86,8 @@ def _enforce_lag(
     lag_minutes = (now - cursor_end).total_seconds() / 60
     if lag_minutes > max_lag_minutes:
         raise RuntimeError(
-            f"{adapter_name.title()} adapter is too far behind: last published window "
-            f"ended {lag_minutes:.1f} minutes ago (limit={max_lag_minutes})."
+            f"{adapter_name.title()} adapter is too far behind: harvest cursor is at "
+            f"{cursor_end.isoformat()}, {lag_minutes:.1f} minutes ago (limit={max_lag_minutes})."
         )
 
 
