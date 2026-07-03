@@ -181,6 +181,17 @@ def its_only_list_member_has(
     return member
 
 
+@then(parsers.parse("its only {attr_phrase} has no {sub_attr}"))
+def its_only_list_member_lacks(
+    antecedent: Any, attr_phrase: str, sub_attr: str
+) -> None:
+    member = _list_member_nth(antecedent, 1, attr_phrase)
+    actual = drill_through_dots(member, sub_attr)
+    assert actual is None, (
+        f"Expected only {attr_phrase}.{sub_attr} to be absent, got {actual!r}"
+    )
+
+
 @then(
     parsers.re(
         r'the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) is "(?P<value>.*)"'

@@ -45,6 +45,16 @@ def _period_from_dates(
     return Period(label=production_label, range=date_range, id=Unidentifiable())
 
 
+def _parse_period_or_bare_label(label: str) -> Period:
+    # The Scala pipeline's PeriodParser returns an empty result for labels it
+    # cannot parse, producing a Period with no range. Match that here instead
+    # of failing the whole record.
+    try:
+        return parse_period(label)
+    except ValueError:
+        return Period(label=label, id=Unidentifiable())
+
+
 def extract_production(record: Record) -> list[ProductionEvent]:
     production_labels = non_empty_subfields("264", "c", record)
     start_date = extract_production_start_date(record)
@@ -59,7 +69,7 @@ def extract_production(record: Record) -> list[ProductionEvent]:
     if len(production_labels) == 1 and start_date is not None and end_date is not None:
         periods = [_period_from_dates(production_labels[0], start_date, end_date)]
     else:
-        periods = [parse_period(label) for label in production_labels]
+        periods = [_parse_period_or_bare_label(label) for label in production_labels]
 
     production_label = " ".join(production_labels)
     event = ProductionEvent(
