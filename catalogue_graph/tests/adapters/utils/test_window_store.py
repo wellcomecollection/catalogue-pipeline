@@ -149,6 +149,12 @@ def test_window_store_upsert_many(tmp_path: Path) -> None:
     store.upsert_many([])
     assert len(list(store.table.snapshots())) == snapshots_after
 
+    # list_by_keys returns exactly the named rows; unknown keys are ignored
+    keys = [make_record(t1).window_key, make_record(t3).window_key]
+    rows = store.list_by_keys([*keys, "2099-01-01T00:00:00+00:00/PT15M"])
+    assert sorted(row.window_key for row in rows) == sorted(keys)
+    assert store.list_by_keys([]) == []
+
 
 def test_window_store_list_in_range(tmp_path: Path) -> None:
     catalog_path = tmp_path / "catalog.db"

@@ -216,6 +216,9 @@ class WindowNotifier:
         if report.last_success_end:
             context["last_success_end"] = report.last_success_end.isoformat()
 
+        if report.last_published_end:
+            context["last_published_end"] = report.last_published_end.isoformat()
+
         return context
 
     @staticmethod

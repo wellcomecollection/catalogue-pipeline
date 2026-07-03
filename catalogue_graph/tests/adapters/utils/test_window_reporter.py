@@ -261,6 +261,34 @@ def test_coverage_report_last_published_end(tmp_path: Path) -> None:
     report = reporter.coverage_report()
     assert report.last_published_end == end2
 
+    # A garbage stamp value is treated as unstamped, not an error
+    end5 = end4 + timedelta(minutes=15)
+    _insert_window(store, end4, end5, "success", tags={"published_at": "None"})
+    report = reporter.coverage_report()
+    assert report.last_published_end == end2
+
+
+def test_coverage_report_tolerates_corrupt_tags(tmp_path: Path) -> None:
+    """The cursor computation must not parse the JSON-bearing tag values: one
+    corrupt row would otherwise fail the trigger on every run."""
+    store = _build_store(tmp_path)
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+    end = start + timedelta(minutes=15)
+    _insert_window(
+        store,
+        start,
+        end,
+        "success",
+        tags={
+            "changeset_ids": "{not json",
+            "published_at": "2025-01-01T13:00:00+00:00",
+        },
+    )
+
+    report = WindowReporter(store).coverage_report()
+
+    assert report.last_published_end == end
+
 
 def test_coverage_report_overlapping_success_windows(tmp_path: Path) -> None:
     """Test that overlapping successful windows are merged correctly.

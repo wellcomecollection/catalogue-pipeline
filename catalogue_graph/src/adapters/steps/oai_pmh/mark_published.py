@@ -19,22 +19,21 @@ import structlog
 from pydantic import BaseModel, ConfigDict
 
 from adapters.extractors.oai_pmh.registry import get_config
-from adapters.utils.window_harvester import WindowSummaryTags
 from adapters.utils.window_store import WindowStore
-from models.incremental_window import IncrementalWindow
+from adapters.utils.window_summary import published_at_from_tags
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
 
 
 class MarkPublishedEvent(BaseModel):
-    """Input payload: the loader/enrichment response merged with the harvest
-    window and adapter type by the state machine. Extra keys (changeset_ids,
+    """Input payload: the loader/enrichment response merged with the adapter
+    type by the state machine. Extra keys (changeset_ids,
     changed_record_count, ...) are ignored."""
 
     job_id: str
     adapter_type: str
-    window: IncrementalWindow
+    covered_window_keys: list[str]
 
 
 class MarkPublishedResponse(BaseModel):
@@ -58,32 +57,34 @@ def handler(
     execution_context: ExecutionContext | None = None,
     now: datetime | None = None,
 ) -> MarkPublishedResponse:
-    """Stamp success windows in the covered range with a published_at tag.
+    """Stamp the covered windows with a published_at tag.
 
-    Only rows with ``state == "success"`` are stamped: failed and partial
-    windows were not fully loaded, and windows the loader never reached have
-    no rows at all, so the published cursor cannot advance past unfinished
-    work. Already-stamped rows are skipped, preserving their original
-    publish timestamp and keeping retries idempotent.
+    Stamps exactly the rows named by the loader response's
+    ``covered_window_keys`` — the success windows whose changesets this
+    execution actually carried to the publish event. Keying on the response
+    (rather than a time range) means rows written by a concurrently running
+    execution, or rows whose changesets the loader never re-emitted, are
+    never marked published here.
+
+    Only rows still in ``state == "success"`` are stamped, and already-stamped
+    rows are skipped, preserving their original publish timestamp and keeping
+    retries idempotent.
     """
     setup_logging(execution_context)
     now = now or datetime.now(UTC)
 
-    rows = runtime.store.list_in_range(
-        event.window.start_time_utc, event.window.end_time_utc
-    )
+    rows = runtime.store.list_by_keys(event.covered_window_keys)
 
     to_stamp = []
     skipped = 0
     for row in rows:
         if row.state != "success":
             continue
-        tags = WindowSummaryTags.parse(row.tags)
-        if tags.published_at is not None:
+        if published_at_from_tags(row.tags) is not None:
             skipped += 1
             continue
-        tags.published_at = now.isoformat()
-        to_stamp.append(row.model_copy(update={"tags": tags.dump(), "updated_at": now}))
+        tags = {**(row.tags or {}), "published_at": now.isoformat()}
+        to_stamp.append(row.model_copy(update={"tags": tags, "updated_at": now}))
 
     runtime.store.upsert_many(to_stamp)
 
@@ -93,7 +94,7 @@ def handler(
         "Marked windows as published",
         adapter=runtime.adapter_name,
         job_id=event.job_id,
-        window=event.window.to_iso_string(),
+        covered_window_keys=len(event.covered_window_keys),
         windows_stamped=len(to_stamp),
         windows_skipped=skipped,
         last_published_end=last_published_end.isoformat()
@@ -123,8 +124,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     """Unified Lambda entry point for OAI-PMH mark-published steps.
 
     Resolves the adapter config from the ``adapter_type`` field, injected by
-    the state machine alongside the loader/enrichment response and the
-    harvest window.
+    the state machine alongside the loader/enrichment response.
     """
     adapter_type = event.get("adapter_type")
     if adapter_type is None:
@@ -149,16 +149,10 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
 
     add_adapter_event_args(parser)
     parser.add_argument(
-        "--window-start",
+        "--window-keys",
         type=str,
         required=True,
-        help="ISO8601 start of the covered range (e.g. 2026-07-03T10:00:00Z)",
-    )
-    parser.add_argument(
-        "--window-end",
-        type=str,
-        required=True,
-        help="ISO8601 end of the covered range",
+        help="Comma-separated window keys to stamp (as stored in window_key)",
     )
     parser.add_argument(
         "--job-id",
@@ -177,9 +171,9 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         MarkPublishedEvent(
             job_id=args.job_id,
             adapter_type=args.adapter_type,
-            window=IncrementalWindow(
-                start_time=args.window_start, end_time=args.window_end
-            ),
+            covered_window_keys=[
+                key.strip() for key in args.window_keys.split(",") if key.strip()
+            ],
         ),
         runtime=build_runtime(
             args.adapter_type, use_rest_api_table=args.use_rest_api_table

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -56,6 +57,13 @@ class TriggerRuntime(BaseModel):
     oai_metadata_prefix: str
     oai_set_spec: str | None = None
     adapter_name: str
+    use_published_cursor: bool = False
+    """Resume from the last published window rather than the last loaded one.
+
+    Driven by the PUBLISHED_CURSOR_ENABLED environment variable, which
+    terraform sets from the same enable_published_tracking flag that wires
+    the mark-published step, so the trigger never prefers stamps that
+    nothing is maintaining."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -116,11 +124,12 @@ def build_window_request(
     # pipeline. Loaded-but-unpublished windows stay inside the next range: the
     # loader skips re-harvesting them but still re-emits their changeset ids,
     # so a run that died between loading and publishing self-heals here.
-    # Falls back to last_success_end while no window carries a published stamp.
+    # Falls back to last_success_end while no window carries a published stamp,
+    # or when published tracking is disabled for this adapter.
     preliminary_report = reporter.coverage_report()
     cursor_end = (
-        preliminary_report.last_published_end or preliminary_report.last_success_end
-    )
+        preliminary_report.last_published_end if runtime.use_published_cursor else None
+    ) or preliminary_report.last_success_end
 
     # Enforce lag before notifying to avoid repeated alerts when circuit breaker trips
     if runtime.enforce_lag:
@@ -248,6 +257,8 @@ def build_runtime(
         oai_metadata_prefix=config.config.oai_metadata_prefix,
         oai_set_spec=config.config.oai_set_spec,
         adapter_name=config.config.adapter_name,
+        use_published_cursor=os.getenv("PUBLISHED_CURSOR_ENABLED", "false").lower()
+        == "true",
     )
 
 

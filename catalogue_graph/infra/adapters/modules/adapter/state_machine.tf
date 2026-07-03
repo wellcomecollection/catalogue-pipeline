@@ -10,12 +10,12 @@ locals {
   # success rows too, and skipping them would stall the published cursor.
   post_publish_next = var.enable_published_tracking ? "Mark published" : "Success"
 
-  # Carry the trigger's harvest window past the loader so "Mark published"
-  # knows the covered range; loader and enrichment responses only carry
-  # job_id and changeset ids.
-  window_passthrough_output = merge([
+  # The loader response names the success windows whose changesets it carries
+  # (covered_window_keys); "Mark published" stamps exactly those rows. The
+  # enrichment response drops the field, so carry it past that state here.
+  covered_keys_passthrough_output = merge([
     for _ in range(var.enable_published_tracking ? 1 : 0) : {
-      Output = "{% $merge([$states.result, {'window': $states.input.window}]) %}"
+      Output = "{% $merge([$states.result, {'covered_window_keys': $states.input.covered_window_keys}]) %}"
     }
   ]...)
 
@@ -83,7 +83,7 @@ locals {
             ]
           }
         }
-      }, local.window_passthrough_output)
+      }, local.covered_keys_passthrough_output)
     }
   ]...)
 
@@ -106,7 +106,7 @@ locals {
         }
       ]
     }
-    "Run loader" = merge({
+    "Run loader" = {
       Type     = "Task"
       Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
       Next     = local.loader_next
@@ -142,7 +142,7 @@ locals {
           ]
         }
       }
-    }, local.window_passthrough_output)
+    }
     "Should publish event?" = {
       Type = "Choice"
       Choices = [

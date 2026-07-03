@@ -25,6 +25,9 @@ module "trigger_lambda" {
       S3_BUCKET         = data.aws_s3_bucket.adapter.id
       S3_PREFIX         = "prod"
       CHATBOT_TOPIC_ARN = local.chatbot_topic_arn
+      # Same flag that wires the mark-published step: the trigger only prefers
+      # the published cursor while something is maintaining the stamps.
+      PUBLISHED_CURSOR_ENABLED = var.enable_published_tracking ? "true" : "false"
     }
   }
 }

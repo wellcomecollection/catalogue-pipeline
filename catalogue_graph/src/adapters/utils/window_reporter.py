@@ -7,9 +7,12 @@ from pydantic import BaseModel, Field
 
 from utils.timezone import ensure_datetime_utc
 
-from .window_harvester import WindowSummaryTags
 from .window_store import WindowStore
-from .window_summary import WindowState, WindowSummary
+from .window_summary import (
+    WindowState,
+    WindowSummary,
+    published_at_from_tags,
+)
 
 
 class CoverageGap(BaseModel):
@@ -180,7 +183,7 @@ class WindowReporter:
         published_rows = [
             row
             for row in successful_rows
-            if WindowSummaryTags.parse(row.tags).published_at is not None
+            if published_at_from_tags(row.tags) is not None
         ]
         last_published_end = (
             max(ensure_datetime_utc(row.window_end) for row in published_rows)
