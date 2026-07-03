@@ -81,7 +81,11 @@ locals {
         denormalised = "works_denormalised.2025-08-14"
       }
       images = {
-        // prod matcher_merger - prod inference manager
+        // prod matcher_merger - OLD SQS-driven inference manager.
+        // POST-CUTOVER: orphaned. The merger + Scala inferrer now write/read the
+        // modifiedTime-mapped images-initial-2026-06-15 (see the 2026-06-15 entry below),
+        // so nothing writes this index any more. Remove this `initial` entry to delete the
+        // old index once we're confident the new path is the source of truth.
         initial = "empty"
         // scala images ingestor - to be deleted when the service is removed
         augmented = "empty"
@@ -123,10 +127,30 @@ locals {
     },
     "2026-04-29" = {
       images = {
-        // prod inference manager - prod graph/ingestor/indexer
+        // Old Scala inference manager output. The Scala service has been retired, so nothing writes this
+        // index now, and the graph read-path reads images-augmented-2026-06-15 (graph_index_dates.augmented).
+        // This index is orphaned; terraform still manages it under deletion_protection, so dropping it is a
+        // separate operational step. Remove this augmented entry once the index has been deleted.
         augmented = "images_augmented.2026-04-29"
         // prod graph/ingestor/indexer - prod API
         indexed = "images_indexed.2024-11-14"
+      }
+    }
+    // Indexes for the new Python image-inferrer state machine.
+    // (Date-only name, chosen when these started as shadow indexes.)
+    //  - initial: now the PRODUCTION source index. The merger and both inferrers
+    //    write/read this; it has an explicit mapping that indexes modifiedTime, which
+    //    the find_work time-window query needs (the old images-initial-2025-10-02 used
+    //    the "empty"/dynamic:false mapping, where modifiedTime is unqueryable). No longer
+    //    a shadow index — keep it. (Will be a normal images-initial-<date> on the next
+    //    full pipeline reindex; the off-pipeline-date name is cosmetic until then.)
+    //  - augmented: the scheduled inferrer's output (reuses the images_augmented.2026-04-29 mapping).
+    //    This is the production augmented index feeding the API: both the inferrer's write target and
+    //    the graph read-path source, resolved from graph_index_dates.augmented = "2026-06-15".
+    "2026-06-15" = {
+      images = {
+        initial   = "images_initial.2026-06-15"
+        augmented = "images_augmented.2026-04-29"
       }
     }
   }
