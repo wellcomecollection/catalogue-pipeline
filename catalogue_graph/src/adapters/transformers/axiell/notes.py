@@ -11,6 +11,7 @@ from adapters.transformers.marc.notes import (
     _create_note,
 )
 from adapters.transformers.marc.notes import extract_notes as base_extract_notes
+from adapters.transformers.utils.html import normalise_text
 from models.pipeline.id_label import IdLabel
 from models.pipeline.note import Note
 
@@ -41,4 +42,8 @@ def extract_notes(record: Record) -> list[Note]:
 
     notes += extract_languages(record)[1]
 
-    return notes
+    for note in notes:
+        note.contents = normalise_text(note.contents)
+
+    # Filter out any notes whose contents were fully removed by `normalise_text`
+    return [n for n in notes if n.contents]

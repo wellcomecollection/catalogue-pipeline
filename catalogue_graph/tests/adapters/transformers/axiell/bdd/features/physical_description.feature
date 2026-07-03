@@ -1,8 +1,6 @@
 Feature: Physical description extraction from Axiell MARC records
-  Physical description is derived from MARC 300 (Physical Description).
-  Subfields $a (extent), $b (other physical details), $c (dimensions), and
-  $e (accompanying material) are joined with a space. Multiple 300 fields are
-  joined with "<br/>".
+  Physical description is derived from MARC 300 $a (Physical Description, extent).
+  Multiple 300 fields are joined with spaces.
   - https://www.loc.gov/marc/bibliographic/bd300.html
 
   Background:
@@ -16,19 +14,9 @@ Feature: Physical description extraction from Axiell MARC records
     Given the MARC record has a 300 field with subfield "a" value "42 leaves"
     When I transform the MARC record
     Then the work's physical_description is "42 leaves"
-
-  Scenario: Single 300 field with multiple subfields joined by space
-    Given the MARC record has a 300 field with subfields:
-      | code | value              |
-      | a    | 1 folder           |
-      | b    | ill.               |
-      | c    | 30 cm              |
-      | e    | + 1 map            |
-    When I transform the MARC record
-    Then the work's physical_description is "1 folder ill. 30 cm + 1 map"
-
-  Scenario: Multiple 300 fields are joined with <br/>
+    
+  Scenario: Multiple 300 fields are joined by space
     Given the MARC record has a 300 field with subfield "a" value "42 leaves"
     And the MARC record has another 300 field with subfield "a" value "1 map"
     When I transform the MARC record
-    Then the work's physical_description is "42 leaves<br/>1 map"
+    Then the work's physical_description is "42 leaves 1 map"

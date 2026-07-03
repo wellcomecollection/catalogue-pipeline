@@ -8,6 +8,7 @@ from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.steps.transformer import TransformerEvent, handler
 from adapters.transformers.manifests import TransformerManifest
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
+from tests.adapters.transformers.folio.helpers import make_items_store
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 
 FOLIO_NAMESPACE = FOLIO_CONFIG.config.adapter_namespace
@@ -22,6 +23,14 @@ def _run_transform(
 ) -> TransformerManifest:
     monkeypatch.setattr(adapter_config, "PIPELINE_DATE", pipeline_date)
     monkeypatch.setattr(adapter_config, "INDEX_DATE", index_date)
+
+    # The transformer requires the items store to exist (a missing table fails the
+    # transform), so provide an empty one rather than relying on local catalog state.
+    items_store = make_items_store({})
+    monkeypatch.setattr(
+        "adapters.steps.transformer.build_items_store",
+        lambda **kwargs: items_store,
+    )
 
     event = TransformerEvent(
         transformer_type="folio",
