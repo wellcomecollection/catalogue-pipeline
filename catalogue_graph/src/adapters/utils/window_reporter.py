@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from utils.timezone import ensure_datetime_utc
 
+from .window_harvester import WindowSummaryTags
 from .window_store import WindowStore
 from .window_summary import WindowState, WindowSummary
 
@@ -33,6 +34,7 @@ class WindowCoverageReport(BaseModel):
     coverage_gaps: list[CoverageGap] = Field(default_factory=list)
     failures: list[WindowFailure] = Field(default_factory=list)
     last_success_end: datetime | None = None
+    last_published_end: datetime | None = None
 
     def summary(self) -> str:
         """Generate a human-readable summary for logging."""
@@ -81,6 +83,11 @@ class WindowCoverageReport(BaseModel):
         if self.last_success_end:
             lines.append(
                 f"Last successful window ended: {self.last_success_end.isoformat()}"
+            )
+
+        if self.last_published_end:
+            lines.append(
+                f"Last published window ended: {self.last_published_end.isoformat()}"
             )
 
         return "\n".join(lines)
@@ -167,6 +174,19 @@ class WindowReporter:
             if successful_rows
             else None
         )
+
+        # Track the last window whose changesets made it through the whole
+        # pipeline (stamped by the mark-published step after the publish event).
+        published_rows = [
+            row
+            for row in successful_rows
+            if WindowSummaryTags.parse(row.tags).published_at is not None
+        ]
+        last_published_end = (
+            max(ensure_datetime_utc(row.window_end) for row in published_rows)
+            if published_rows
+            else None
+        )
         return WindowCoverageReport(
             range_start=first_start,
             range_end=last_end,
@@ -176,6 +196,7 @@ class WindowReporter:
             coverage_gaps=coverage_gaps,
             failures=failures,
             last_success_end=last_success_end,
+            last_published_end=last_published_end,
         )
 
     def _empty_range_report(

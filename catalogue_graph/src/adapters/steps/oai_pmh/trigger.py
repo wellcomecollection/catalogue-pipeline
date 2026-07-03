@@ -66,27 +66,27 @@ def generate_job_id(timestamp: datetime) -> str:
 
 
 def _determine_start(
-    now: datetime, last_success_end: datetime | None, window_lookback_days: int
+    now: datetime, cursor_end: datetime | None, window_lookback_days: int
 ) -> datetime:
     """Determine the start time for the next harvesting window."""
-    if last_success_end is not None:
-        return last_success_end
+    if cursor_end is not None:
+        return cursor_end
     return now - timedelta(days=window_lookback_days)
 
 
 def _enforce_lag(
     now: datetime,
-    last_success_end: datetime | None,
+    cursor_end: datetime | None,
     max_lag_minutes: int,
     adapter_name: str,
 ) -> None:
     """Check if the adapter is too far behind and raise if so."""
-    if last_success_end is None:
+    if cursor_end is None:
         return
-    lag_minutes = (now - last_success_end).total_seconds() / 60
+    lag_minutes = (now - cursor_end).total_seconds() / 60
     if lag_minutes > max_lag_minutes:
         raise RuntimeError(
-            f"{adapter_name.title()} adapter is too far behind: last successful window "
+            f"{adapter_name.title()} adapter is too far behind: last published window "
             f"ended {lag_minutes:.1f} minutes ago (limit={max_lag_minutes})."
         )
 
@@ -112,22 +112,28 @@ def build_window_request(
     """
     reporter = WindowReporter(store=runtime.store)
 
-    # First get a preliminary report to determine last_success_end
+    # Resume from the last window whose changesets made it through the whole
+    # pipeline. Loaded-but-unpublished windows stay inside the next range: the
+    # loader skips re-harvesting them but still re-emits their changeset ids,
+    # so a run that died between loading and publishing self-heals here.
+    # Falls back to last_success_end while no window carries a published stamp.
     preliminary_report = reporter.coverage_report()
-    last_success_end = preliminary_report.last_success_end
+    cursor_end = (
+        preliminary_report.last_published_end or preliminary_report.last_success_end
+    )
 
     # Enforce lag before notifying to avoid repeated alerts when circuit breaker trips
     if runtime.enforce_lag:
         _enforce_lag(
             now,
-            last_success_end,
+            cursor_end,
             runtime.max_lag_minutes,
             runtime.adapter_name,
         )
 
     start_time = _determine_start(
         now,
-        last_success_end,
+        cursor_end,
         runtime.window_lookback_days,
     ).astimezone(UTC)
     end_time = now.astimezone(UTC)
@@ -149,7 +155,7 @@ def build_window_request(
     if start_time >= end_time:
         raise RuntimeError(
             f"No new windows are ready to process: start_time={start_time.isoformat()} "
-            f"last_success_end={last_success_end.isoformat() if last_success_end else 'None'}"
+            f"cursor_end={cursor_end.isoformat() if cursor_end else 'None'}"
         )
 
     resolved_job_id = job_id or generate_job_id(now)

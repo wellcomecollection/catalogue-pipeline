@@ -26,6 +26,7 @@ BATCH_SIZE = 10_000
 class WindowSummaryTags(BaseModel):
     changeset_ids: list[str] = []
     upserted_record_count: int = 0
+    published_at: str | None = None
     other_tags: dict[str, str] = {}
 
     @classmethod
@@ -49,15 +50,19 @@ class WindowSummaryTags(BaseModel):
         return cls(
             changeset_ids=changeset_ids,
             upserted_record_count=upserted_record_count,
+            published_at=tags.pop("published_at", None),
             other_tags=tags,
         )
 
     def dump(self) -> dict[str, str]:
-        return {
+        tags = {
             **self.other_tags,
             "changeset_ids": json.dumps(self.changeset_ids),
             "upserted_record_count": str(self.upserted_record_count),
         }
+        if self.published_at is not None:
+            tags["published_at"] = self.published_at
+        return tags
 
 
 def get_record_identifier(record: Record) -> str | None:

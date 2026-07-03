@@ -809,3 +809,26 @@ def test_parse_tags_unknown_keys_passed_through() -> None:
         {"changeset_ids": json.dumps([]), "extra": "value"}
     )
     assert result.other_tags == {"extra": "value"}
+
+
+def test_parse_tags_published_at_absent_is_none() -> None:
+    result = WindowSummaryTags.parse({"changeset_ids": json.dumps(["cs-1"])})
+    assert result.published_at is None
+
+
+def test_parse_tags_published_at_round_trip() -> None:
+    tags = {
+        "changeset_ids": json.dumps(["cs-1"]),
+        "upserted_record_count": "3",
+        "published_at": "2026-07-03T10:00:00+00:00",
+        "extra": "value",
+    }
+    result = WindowSummaryTags.parse(tags)
+    assert result.published_at == "2026-07-03T10:00:00+00:00"
+    assert result.other_tags == {"extra": "value"}
+    assert result.dump() == tags
+
+
+def test_dump_omits_published_at_when_unset() -> None:
+    result = WindowSummaryTags(changeset_ids=["cs-1"])
+    assert "published_at" not in result.dump()
