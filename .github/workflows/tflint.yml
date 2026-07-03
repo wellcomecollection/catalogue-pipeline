@@ -1,0 +1,60 @@
+name: "Terraform: tflint"
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/.terraform.lock.hcl"
+      - ".tflint.hcl"
+      - ".github/workflows/tflint.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.tf"
+      - "**/.terraform.lock.hcl"
+      - ".tflint.hcl"
+      - ".github/workflows/tflint.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tflint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.54.0
+
+      - name: Initialise tflint plugins
+        run: tflint --init
+
+      - name: Run tflint on all Terraform roots
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          config_file="$(pwd)/.tflint.hcl"
+
+          mapfile -t terraform_roots < <(
+            find . -type f -name '.terraform.lock.hcl' -exec dirname {} \; | sort -u
+          )
+
+          if [[ ${#terraform_roots[@]} -eq 0 ]]; then
+            echo "No Terraform roots found"
+            exit 1
+          fi
+
+          for root in "${terraform_roots[@]}"; do
+            if [[ "${root}" == "./reindexer/terraform" ]]; then
+              echo "Skipping ${root}; this root currently fails static evaluation in a shared module"
+              continue
+            fi
+
+            echo "Linting ${root}"
+            tflint --chdir="${root}" --config="${config_file}" --format=compact --minimum-failure-severity=error
+          done
