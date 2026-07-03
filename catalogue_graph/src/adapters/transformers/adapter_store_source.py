@@ -29,7 +29,7 @@ class AdapterStoreSource(BaseSource):
                 self.changeset_ids, self.snapshot_id
             )
             for batch in table.to_batches():
-                yield from batch.to_pylist()
+                yield from self._process_rows(batch.to_pylist())
         else:
             logger.info("No changeset_id provided; performing full reindex of records.")
 
@@ -43,6 +43,11 @@ class AdapterStoreSource(BaseSource):
             )
             try:
                 for batch in batches:
-                    yield from batch.to_pylist()
+                    yield from self._process_rows(batch.to_pylist())
             finally:
                 batches.close()
+
+    def _process_rows(self, rows: list[dict[str, Any]]) -> Generator[dict[str, Any]]:
+        """Hook for source-specific per-batch processing (e.g. the FOLIO item join
+        in `FolioStoreSource`). The base source passes rows through unchanged."""
+        yield from rows

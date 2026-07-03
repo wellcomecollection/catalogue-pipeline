@@ -49,3 +49,9 @@ variable "task_repository_url" {
   type        = string
   description = "ECR repository URL for the ECS task image"
 }
+
+variable "enable_item_enrichment" {
+  type        = bool
+  default     = false
+  description = "Run a FOLIO item-enrichment state between Run loader and Publish event. FOLIO-only; leave false for other adapters."
+}
