@@ -18,4 +18,4 @@ def transform_ebsco_record(
     """Convenience helper for tests."""
     return EbscoWorkBuilder(
         marc_record, last_modified=source_modified_time
-    ).visible_work
+    ).transform_visible_work()

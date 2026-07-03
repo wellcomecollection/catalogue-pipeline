@@ -11,7 +11,6 @@ locals {
 
   matcher_image               = local.image_ids["matcher"]
   merger_image                = local.image_ids["merger"]
-  inference_manager_image     = local.image_ids["inference_manager"]
   feature_inferrer_image      = local.image_ids["feature_inferrer"]
   palette_inferrer_image      = local.image_ids["palette_inferrer"]
   aspect_ratio_inferrer_image = local.image_ids["aspect_ratio_inferrer"]

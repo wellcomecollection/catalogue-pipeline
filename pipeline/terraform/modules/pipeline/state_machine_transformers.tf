@@ -9,13 +9,19 @@ module "transformer_lambda" {
   description  = "Lambda function to transform EBSCO/Axiell data"
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
-  publish      = true
+  # CI deploys via `update-function-code --publish` and nothing consumes a
+  # versioned ARN, so Terraform publishing only caused a perpetual version diff.
+  publish = false
 
   image_config = {
     command = ["adapters.steps.transformer.lambda_handler"]
   }
 
-  memory_size = 4096
+  # 10240 (up from 4096) to accommodate the FOLIO item-enrichment join. The bib
+  # store is sorted by id, so a changeset read cannot prune and materialises most
+  # of the table; on the FOLIO enrichment path this tips a single-record transform
+  # over 4096. Interim mitigation until the changeset read is made prunable (#3444).
+  memory_size = 10240
   timeout     = 600
 
   vpc_config = {

@@ -10,7 +10,6 @@ from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-import pytest
 from lxml import etree
 
 from adapters.extractors.oai_pmh.models.step_events import (
@@ -106,6 +105,39 @@ class TestExecuteLoader:
                 reprocess_successful_windows=False,
             )
 
+    def test_reemits_changeset_ids_from_reused_summaries(
+        self,
+        loader_runtime: LoaderRuntime,
+    ) -> None:
+        """A window already marked success is not re-harvested; harvest_range returns
+        its stored summary, and the changeset id in its tags must still reach the
+        response. This makes the loader output idempotent: re-running over an
+        already-processed window re-emits the original changeset for downstream steps.
+        """
+        now = datetime.now(tz=UTC)
+        prior_req = _create_loader_event(now=now - timedelta(minutes=15))
+        req = _create_loader_event(now=now)
+
+        # Mimics a summary stored by an earlier run and reused by harvest_range
+        # (it carries the old singular changeset_id tag, covering back-compat too).
+        reused = _create_success_summary(
+            prior_req, record_ids=["id-1"], changeset_id="changeset-prior"
+        )
+        fresh = _create_success_summary(
+            req, record_ids=["id-2"], changeset_id="changeset-new"
+        )
+
+        with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
+            mock_harvest.return_value = [reused, fresh]
+
+            response = loader.execute_loader(req, runtime=loader_runtime)
+
+            assert sorted(response.changeset_ids) == [
+                "changeset-new",
+                "changeset-prior",
+            ]
+            assert len(response.summaries) == 2
+
     def test_counts_only_changed_records(
         self,
         loader_runtime: LoaderRuntime,
@@ -147,17 +179,21 @@ class TestExecuteLoader:
             assert response.changed_record_count == 0
             assert adapter_store_client.get_all_records().num_rows == 0
 
-    def test_errors_when_no_windows(
+    def test_no_pending_windows_returns_empty_response(
         self,
         loader_runtime: LoaderRuntime,
     ) -> None:
+        """A caught-up range (no pending windows) is a no-op, not an error: the loader
+        returns an empty response so the state machine routes straight to success."""
         req = _create_loader_event()
 
         with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
             mock_harvest.return_value = []
 
-            with pytest.raises(RuntimeError):
-                loader.execute_loader(req, runtime=loader_runtime)
+            response = loader.execute_loader(req, runtime=loader_runtime)
+
+        assert response.changeset_ids == []
+        assert response.changed_record_count == 0
 
 
 # ---------------------------------------------------------------------------

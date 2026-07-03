@@ -42,7 +42,7 @@ class SourceWorkBuilder(ABC):
         return int(dateutil.parser.parse(self.source_modified_time).timestamp())
 
     @property
-    def work_state(self) -> SourceWorkState:
+    def _base_work_state(self) -> SourceWorkState:
         return SourceWorkState(
             source_identifier=self.source_identifier,
             source_modified_time=self.source_modified_time,
@@ -50,11 +50,14 @@ class SourceWorkBuilder(ABC):
         )
 
     @property
-    def deleted_work(self) -> DeletedSourceWork:
+    def deleted_work_state(self) -> SourceWorkState:
+        return self._base_work_state
+
+    def transform_deleted_work(
+        self, deleted_reason: DeletedReason
+    ) -> DeletedSourceWork:
         return DeletedSourceWork(
             version=self.version,
-            deleted_reason=DeletedReason(
-                type="DeletedFromSource", info="Marked as deleted from source"
-            ),
-            state=self.work_state,
+            deleted_reason=deleted_reason,
+            state=self.deleted_work_state,
         )

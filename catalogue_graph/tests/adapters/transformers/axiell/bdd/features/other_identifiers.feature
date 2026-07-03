@@ -8,8 +8,8 @@ Feature: Other Identifiers extraction from MARC records
   Scenario Outline: A single other identifier
     Given the MARC record has a 035 field with subfield "a" value "<alternative_number>"
     When I transform the MARC record
-    Then the only other identifier has the value "<other_identifier>"
-    And the only other identifier has the identifier_type.id "<scheme>"
+    Then the 2nd other identifier has the value "<other_identifier>"
+    And the 2nd other identifier has the identifier_type.id "<scheme>"
     Examples:
       | alternative_number                 | scheme                    | other_identifier |
       | (Bibliographic Number)b11839053    | sierra-system-number      | b11839053        |
@@ -19,10 +19,10 @@ Feature: Other Identifiers extraction from MARC records
       | (accession number)172              | wellcome-accession-number | 172              |
       | (Library Reference Number)20385i.3 | iconographic-number       | 20385i.3         |
       | (Library Reference Number)20385i   | iconographic-number       | 20385i           |
-      | (Library Reference Number)BA/NA/NA | calm-alt-ref-no           | BA/NA/NA         |
+      | (Library Reference Number)BA/NA/NA | calm-altref-no            | BA/NA/NA         |
 
   Scenario: multiple other identifiers
     Given the MARC record has a 035 field with subfield "a" value "(Bibliographic Number)b11839053"
     And the MARC record has a 035 field with subfield "a" value "(Mimsy reference)WELL-55"
     When I transform the MARC record
-    Then there are 2 other identifiers
+    Then there are 3 other identifiers

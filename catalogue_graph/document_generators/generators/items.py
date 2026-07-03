@@ -1,8 +1,8 @@
 from models.pipeline.access_condition import (
     AccessCondition,
-    AccessMethod,
-    AccessStatus,
 )
+from models.pipeline.access_method import AccessMethod
+from models.pipeline.access_status import AccessStatus, AccessStatusValue
 from models.pipeline.identifier import SourceIdentifier, Unidentifiable
 from models.pipeline.item import Item
 
@@ -29,7 +29,7 @@ def create_unidentifiable_item(locations: list | None = None) -> Item:
 
 def create_digital_item(
     license_id: str = "cc-by",
-    access_status_type: str | None = None,
+    access_status_type: AccessStatusValue | None = None,
 ) -> Item:
     access_conditions: list[AccessCondition] = []
     if access_status_type:

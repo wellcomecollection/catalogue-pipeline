@@ -10,6 +10,7 @@ class LocationType(Id):
 
 
 OnlineResource = LocationType(id="online-resource")
+ClosedStores = LocationType(id="closed-stores")
 
 LocationDiscriminator = Literal["DigitalLocation", "PhysicalLocation"]
 

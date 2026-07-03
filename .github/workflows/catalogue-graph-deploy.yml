@@ -111,6 +111,8 @@ jobs:
           - graph-bulk-loader
           - graph-remover-incremental
           - graph-ingestor-deletions
+          # Image inferrer (work-discovery lambda for the scheduled state machine).
+          - image-inference-find-work
 
 
     steps:

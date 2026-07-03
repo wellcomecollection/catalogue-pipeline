@@ -6,12 +6,15 @@ These tests cover methods that are not specific to either incremental_update or 
 - get_records_by_changeset
 """
 
+from datetime import UTC, datetime
+from operator import itemgetter
 from typing import cast
 
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.adapter_store import AdapterStore
-from tests.adapters.conftest import AdapterStoreFactory
+from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
+from tests.adapters.conftest import AdapterStoreFactory, adapter_records_to_table
 
 # =============================================================================
 # get_all_records tests
@@ -183,3 +186,269 @@ def test_get_records_by_changeset_includes_deleted_records(
     assert result.num_rows == 2
     ids = set(result.column("id").to_pylist())
     assert ids == {"rec001", "rec002"}
+
+
+# =============================================================================
+# get_records_by_changesets tests
+# =============================================================================
+
+
+def test_get_records_by_changesets_returns_rows_for_requested_changesets(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Only rows from the requested changesets are returned."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first", "changeset": "changeset-a"},
+            {"id": "rec002", "content": "second", "changeset": "changeset-a"},
+            {"id": "rec003", "content": "third", "changeset": "changeset-b"},
+            {"id": "rec004", "content": "fourth", "changeset": "changeset-c"},
+        ]
+    )
+
+    result = client.get_records_by_changesets(["changeset-a", "changeset-b"])
+
+    ids = cast(list[str], result.column("id").to_pylist())
+    assert sorted(ids) == ["rec001", "rec002", "rec003"]
+
+
+def test_get_records_by_changesets_matches_per_changeset_reads(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """The bounded multi-changeset read returns exactly the union of the
+    plain per-changeset reads, with rows carrying mixed timestamps."""
+    earlier = datetime(2026, 7, 1, 9, 0, tzinfo=UTC)
+    later = datetime(2026, 7, 1, 10, 0, tzinfo=UTC)
+    client = adapter_store_with_records(
+        [
+            {
+                "id": "rec001",
+                "content": "first",
+                "changeset": "changeset-a",
+                "last_modified": later,
+            },
+            {
+                "id": "rec002",
+                "content": "second",
+                "changeset": "changeset-a",
+                "last_modified": earlier,
+            },
+            {
+                "id": "rec003",
+                "content": "third",
+                "changeset": "changeset-b",
+                "last_modified": later,
+            },
+            {
+                "id": "rec004",
+                "content": "old row outside the requested changesets",
+                "changeset": "changeset-c",
+                "last_modified": datetime(2026, 1, 1, tzinfo=UTC),
+            },
+        ]
+    )
+
+    combined = client.get_records_by_changesets(["changeset-a", "changeset-b"])
+    per_changeset = (
+        client.get_records_by_changeset("changeset-a").to_pylist()
+        + client.get_records_by_changeset("changeset-b").to_pylist()
+    )
+
+    sort_key = itemgetter("id")
+    assert sorted(combined.to_pylist(), key=sort_key) == sorted(
+        per_changeset, key=sort_key
+    )
+
+
+def test_get_records_by_changesets_includes_deleted_records(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Deleted rows in a changeset are returned with their preserved content."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "active", "changeset": "changeset-a"},
+            {
+                "id": "rec002",
+                "content": "deleted with content preserved",
+                "deleted": True,
+                "changeset": "changeset-a",
+            },
+        ]
+    )
+
+    rows = {
+        row["id"]: row
+        for row in client.get_records_by_changesets(["changeset-a"]).to_pylist()
+    }
+
+    assert sorted(rows) == ["rec001", "rec002"]
+    assert rows["rec002"]["deleted"] is True
+    assert rows["rec002"]["content"] == "deleted with content preserved"
+
+
+def test_get_records_by_changesets_scoped_to_namespace(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Only rows in the store's namespace are returned for a shared changeset id."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "mine", "changeset": "changeset-a"},
+            {
+                "id": "rec002",
+                "content": "other",
+                "changeset": "changeset-a",
+                "namespace": "other_namespace",
+            },
+        ]
+    )
+
+    result = client.get_records_by_changesets(["changeset-a"])
+
+    assert result.column("id").to_pylist() == ["rec001"]
+
+
+def test_get_records_by_changesets_nonexistent_changeset_returns_empty(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Changesets with no rows return an empty table."""
+    client = adapter_store_with_records(
+        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
+    )
+
+    assert client.get_records_by_changesets(["nonexistent"]).num_rows == 0
+
+
+def test_get_records_by_changesets_empty_input_returns_empty(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """An empty changeset id list returns an empty table without erroring."""
+    client = adapter_store_with_records(
+        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
+    )
+
+    assert client.get_records_by_changesets([]).num_rows == 0
+
+
+def test_get_records_by_changesets_pins_snapshot(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Rows are read at the pinned snapshot, excluding later appends."""
+    client = adapter_store_with_records(
+        [{"id": "rec001", "content": "first", "changeset": "changeset-a"}]
+    )
+    pinned_snapshot_id = client.current_snapshot_id()
+
+    client.table.append(
+        adapter_records_to_table(
+            [{"id": "rec002", "content": "later", "changeset": "changeset-a"}]
+        )
+    )
+
+    pinned = client.get_records_by_changesets(["changeset-a"], pinned_snapshot_id)
+    current = client.get_records_by_changesets(["changeset-a"])
+
+    assert pinned.column("id").to_pylist() == ["rec001"]
+    current_ids = cast(list[str], current.column("id").to_pylist())
+    assert sorted(current_ids) == ["rec001", "rec002"]
+
+
+# =============================================================================
+# stream_active_namespace_records tests
+# =============================================================================
+
+
+def test_stream_active_namespace_records_matches_eager_read(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Streaming yields exactly the same rows as the eager read."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first"},
+            {"id": "rec002", "content": "second", "deleted": False},
+            {"id": "rec003", "content": "third"},
+        ]
+    )
+
+    streamed = [
+        row
+        for batch in client.stream_active_namespace_records()
+        for row in batch.to_pylist()
+    ]
+    eager = client.get_active_namespace_records().to_pylist()
+
+    sort_key = itemgetter("id")
+    assert sorted(streamed, key=sort_key) == sorted(eager, key=sort_key)
+
+
+def test_stream_active_namespace_records_excludes_deleted(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Streaming returns records where deleted is null or False, excluding deleted ones."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "active record"},
+            {"id": "rec002", "content": "another active", "deleted": False},
+            {"id": "rec003", "content": "deleted record", "deleted": True},
+        ]
+    )
+
+    streamed_ids = [
+        row["id"]
+        for batch in client.stream_active_namespace_records()
+        for row in batch.to_pylist()
+    ]
+
+    assert sorted(streamed_ids) == ["rec001", "rec002"]
+
+
+def test_stream_active_namespace_records_honours_snapshot_id(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Streaming with a pinned snapshot excludes rows appended after the snapshot."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first"},
+            {"id": "rec002", "content": "second"},
+        ]
+    )
+    pinned_snapshot_id = client.current_snapshot_id()
+
+    client.table.append(adapter_records_to_table([{"id": "rec003", "content": "new"}]))
+
+    pinned_ids = [
+        row["id"]
+        for batch in client.stream_active_namespace_records(pinned_snapshot_id)
+        for row in batch.to_pylist()
+    ]
+    current_ids = [
+        row["id"]
+        for batch in client.stream_active_namespace_records()
+        for row in batch.to_pylist()
+    ]
+
+    assert sorted(pinned_ids) == ["rec001", "rec002"]
+    assert sorted(current_ids) == ["rec001", "rec002", "rec003"]
+
+
+def test_stream_active_namespace_records_empty_table(
+    temporary_table: IcebergTable,
+) -> None:
+    """Streaming an empty table yields no rows, with the store's Arrow schema."""
+    client = AdapterStore(temporary_table, "test_namespace")
+
+    reader = client.stream_active_namespace_records()
+
+    assert reader.schema == ADAPTER_STORE_ARROW_SCHEMA
+    assert sum(batch.num_rows for batch in reader) == 0
+
+
+def test_stream_active_namespace_records_batches_match_store_schema(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Streamed batches carry the store's Arrow schema."""
+    client = adapter_store_with_records([{"id": "rec001", "content": "first"}])
+
+    batches = list(client.stream_active_namespace_records())
+
+    assert len(batches) > 0
+    assert all(batch.schema == ADAPTER_STORE_ARROW_SCHEMA for batch in batches)

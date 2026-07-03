@@ -2,7 +2,13 @@ module "graph_pipeline" {
   source = "./graph"
 
   pipeline_date = var.pipeline_date
-  index_dates   = var.graph_index_dates
+  index_dates = {
+    merged    = var.graph_index_dates.merged
+    augmented = var.graph_index_dates.augmented
+    works     = var.graph_index_dates.works
+    concepts  = var.graph_index_dates.concepts
+    images    = var.graph_index_dates.images
+  }
 
   ecs_cluster_arn = aws_ecs_cluster.cluster.arn
 

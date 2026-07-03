@@ -29,13 +29,19 @@ data "aws_s3_bucket" "folio_adapter_bucket" {
 locals {
   namespace = "catalogue-${var.pipeline_date}"
 
+  // Resolved index dates for the image-inferrer path. Each var falls back to the steady-state
+  // default when empty, so a fresh pipeline is safe without overrides; an existing pipeline sets
+  // them explicitly during cutover (see the 2025-10-02 root). The merger, the Scala inferrer and
+  // the new state-machine inferrer all derive the initial index from one resolved value, so they
+  // can never diverge.
+  image_inferrer_initial_index_date = var.image_inferrer_initial_index_date != "" ? var.image_inferrer_initial_index_date : var.pipeline_date
+
   // Default index names for services that need to know where to write/read from
   // These presume that the indexes exist and are created by the index_config
   es_works_source_index       = "works-source-${var.pipeline_date}"
   es_works_identified_index   = "works-identified-${var.pipeline_date}"
   es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
-  es_images_initial_index     = "images-initial-${var.pipeline_date}"
-  es_images_augmented_index   = "images-augmented-${var.graph_index_dates.augmented}"
+  es_images_initial_index     = "images-initial-${local.image_inferrer_initial_index_date}"
   es_images_index             = "images-indexed-${var.pipeline_date}"
 
   # The max number of connections allowed by the instance.
@@ -77,7 +83,6 @@ locals {
   services = [
     "matcher",
     "merger",
-    "inference_manager",
     "feature_inferrer",
     "palette_inferrer",
     "aspect_ratio_inferrer",

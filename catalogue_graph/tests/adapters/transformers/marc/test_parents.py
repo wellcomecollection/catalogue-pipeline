@@ -176,7 +176,7 @@ def test_remove_duplicates() -> None:
 def test_relations_are_set_from_parents(marc_record: Record) -> None:
     transformer = MarcXmlWorkBuilderForTests(marc_record, last_modified=datetime.now())
 
-    assert transformer.work_state.relations == WorkRelations(
+    assert transformer.visible_work_state.relations == WorkRelations(
         ancestors=[
             WorkAncestor(
                 title="A title from 440ǂa",

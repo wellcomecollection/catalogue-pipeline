@@ -1,5 +1,3 @@
-from typing import Literal
-
 from pydantic import Field
 
 from models.pipeline.collection_path import CollectionPath
@@ -14,8 +12,7 @@ from models.pipeline.location import DigitalLocation
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
 from models.pipeline.serialisable import SerialisableModel
-
-WorkType = Literal["Standard", "Series", "Section", "Collection"]
+from utils.types import WorkType
 
 
 class WorkData(SerialisableModel):

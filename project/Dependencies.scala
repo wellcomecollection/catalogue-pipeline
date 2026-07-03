@@ -312,10 +312,6 @@ object CatalogueDependencies {
   val sierraIndexerDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageLibrary
 
-  // Inference manager
-  val inferenceManagerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.httpLibrary
-
   // TEI adapter
 
   val teiIdExtractorDependencies: Seq[ModuleID] =

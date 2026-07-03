@@ -4,7 +4,8 @@ from typing import Any
 import pytest
 from pytest_bdd import parsers, then
 
-from models.pipeline.source.work import SourceWork
+from models.pipeline.location import PhysicalLocation
+from models.pipeline.source.work import SourceWork, VisibleSourceWork
 
 
 @pytest.fixture
@@ -31,6 +32,12 @@ ATTR_ALIASES: dict[str, str] = {
     "concept": "concepts",
     "other identifier": "other_identifiers",
     "note": "notes",
+    "item": "items",
+    "contributor": "contributors",
+    "production": "production",
+    "productions": "production",
+    "place": "places",
+    "agent": "agents",
 }
 
 
@@ -110,6 +117,20 @@ def list_member_count(work: SourceWork, count: int, attr_phrase: str) -> None:
 @then(parsers.parse("there are no {attr_phrase}"))
 def list_member_empty(work: SourceWork, attr_phrase: str) -> None:
     list_member_count(work, 0, attr_phrase)
+
+
+@then(parsers.parse("it has {count:d} {attr_phrase}"))
+def child_list_member_count(antecedent: Any, count: int, attr_phrase: str) -> None:
+    values: Sequence[Any] = _get_attr_list(antecedent, attr_phrase)
+    assert len(values) == count, (
+        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
+    )
+
+
+@then(parsers.parse('it has the {sub_attr} "{value}"'))
+def antecedent_has_attr(antecedent: Any, sub_attr: str, value: str) -> None:
+    actual = drill_through_dots(antecedent, sub_attr)
+    assert actual == value, f"Expected {sub_attr} == {value!r}, got {actual!r}"
 
 
 @then(parsers.parse('the only {attr_phrase} is "{value}"'), target_fixture="antecedent")
@@ -225,3 +246,40 @@ def child_list_member_with_datatable(
     )
     for member, row in zip(members, datatable, strict=True):
         assert member == row[0]
+
+
+@then(parsers.parse('the work\'s {attr} is "{value}"'))
+def work_attr_is(work: SourceWork, attr: str, value: str) -> None:
+    actual = drill_through_dots(work.data, attr)
+    assert actual == value, f"Expected work.data.{attr} == {value!r}, got {actual!r}"
+
+
+@then(parsers.parse("the work's {attr} is absent"))
+def work_attr_is_absent(work: SourceWork, attr: str) -> None:
+    actual = drill_through_dots(work.data, attr)
+    assert actual is None, f"Expected work.data.{attr} to be absent, got {actual!r}"
+
+
+@then("the item is in closed stores")
+def item_in_closed_stores(work: VisibleSourceWork) -> None:
+    item = work.data.items[0]
+    assert len(item.locations) == 1
+    loc = item.locations[0]
+    assert isinstance(loc, PhysicalLocation)
+    assert loc.location_type.id == "closed-stores"
+    assert loc.label == "Closed stores"
+
+
+@then("the item has no access conditions")
+def item_no_access_conditions(work: VisibleSourceWork) -> None:
+    loc = work.data.items[0].locations[0]
+    assert loc.access_conditions == []
+
+
+@then(parsers.parse('the item has 1 access condition with status "{status}"'))
+def item_one_access_condition_with_status(work: VisibleSourceWork, status: str) -> None:
+    loc = work.data.items[0].locations[0]
+    assert len(loc.access_conditions) == 1
+    condition = loc.access_conditions[0]
+    assert condition.status is not None
+    assert condition.status.type == status

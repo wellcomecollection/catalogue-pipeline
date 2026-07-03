@@ -49,7 +49,6 @@ then
 fi
 
 ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
-  uk.ac.wellcome/inference_manager \
   uk.ac.wellcome/feature_inferrer \
   uk.ac.wellcome/palette_inferrer \
   uk.ac.wellcome/aspect_ratio_inferrer \
@@ -66,7 +65,6 @@ if [[ "$TASK" == "tag_images_and_deploy_services" ]]
 then
   echo "Deploying ECS pipeline services to catalogue-$PIPELINE_DATE"
   CLUSTER="catalogue-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
-    image_inferrer \
     transformer_calm \
     transformer_mets \
     transformer_miro \

@@ -1,7 +1,6 @@
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.ebsco.contributors import extract_contributors
 from adapters.transformers.ebsco.current_frequency import extract_current_frequency
-from adapters.transformers.ebsco.description import extract_description
 from adapters.transformers.ebsco.designation import extract_designation
 from adapters.transformers.ebsco.edition import extract_edition
 from adapters.transformers.ebsco.format import extract_format
@@ -31,10 +30,6 @@ class EbscoWorkBuilder(MarcXmlWorkBuilder):
     @property
     def designation(self) -> list[str]:
         return extract_designation(self.record)
-
-    @property
-    def description(self) -> str | None:
-        return extract_description(self.record)
 
     @property
     def current_frequency(self) -> str | None:

@@ -79,7 +79,12 @@ module "catalogue_graph_ingestor_state_machine" {
         Type = "Choice"
         Choices = [
           {
-            "Condition" : "{% $states.input.ingestor_type in ['concepts', 'images'] %}",
+            # Reconciliation deletions only make sense for a full/window-driven run. Skip them when
+            # the event carries `ids` (a targeted by-id re-ingest): the loader/indexer treat `ids` as
+            # "ingest these", but the deletions step treats the same `ids` as "delete these" (see
+            # ingestor_deletions.py), so without this guard a by-id run would index those ids and then
+            # immediately delete them from the live index.
+            "Condition" : "{% $states.input.ingestor_type in ['concepts', 'images'] and $count($states.input.ids) = 0 %}",
             "Next" : "Run deletions"
           }
         ]

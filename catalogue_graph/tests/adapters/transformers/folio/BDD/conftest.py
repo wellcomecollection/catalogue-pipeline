@@ -19,7 +19,7 @@ from tests.gherkin_steps.work import *
 def do_transform(marc_record: Record) -> VisibleSourceWork:
     return FolioWorkBuilder(
         marc_record, last_modified=datetime(2020, 1, 1)
-    ).visible_work
+    ).transform_visible_work()
 
 
 @then("transforming the record raises ValueError")
@@ -27,4 +27,4 @@ def check_transform_raises_error(marc_record: Record) -> None:
     with pytest.raises(ValueError):
         _ = FolioWorkBuilder(
             marc_record, last_modified=datetime(2020, 1, 1)
-        ).visible_work
+        ).transform_visible_work()

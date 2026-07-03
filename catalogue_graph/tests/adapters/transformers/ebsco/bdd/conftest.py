@@ -53,7 +53,7 @@ def marc_record() -> Record:
 def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceWork:
     work = EbscoWorkBuilder(
         marc_record, last_modified=datetime(2020, 1, 1)
-    ).visible_work
+    ).transform_visible_work()
     context["result"] = work
     return work
 
@@ -115,14 +115,6 @@ def sublist_member_count(
     context: dict[str, Any], thing: str, count: int, attr_phrase: str
 ) -> None:
     values: Sequence[Any] = _get_attr_list(context[thing], attr_phrase)
-    assert len(values) == count, (
-        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
-    )
-
-
-@then(parsers.parse("it has {count:d} {attr_phrase}"))
-def child_list_member_count(antecedent: Any, count: int, attr_phrase: str) -> None:
-    values: Sequence[Any] = _get_attr_list(antecedent, attr_phrase)
     assert len(values) == count, (
         f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
     )

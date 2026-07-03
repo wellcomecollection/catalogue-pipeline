@@ -225,14 +225,6 @@ lazy val calm_indexer = setupProject(
   externalDependencies = CatalogueDependencies.calmIndexerDependencies
 )
 
-// Inference manager
-lazy val inference_manager = setupProject(
-  project,
-  folder = "pipeline/inferrer/inference_manager",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
-  externalDependencies = CatalogueDependencies.inferenceManagerDependencies
-)
-
 // TEI adapter
 lazy val tei_id_extractor = setupProject(
   project,

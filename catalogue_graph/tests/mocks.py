@@ -341,6 +341,8 @@ class MockRequest:
         data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None,
+        timeout: float | None = None,
+        **kwargs: Any,
     ) -> MockResponse:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
@@ -363,6 +365,8 @@ class MockRequest:
         data: dict | None = None,
         headers: dict | None = None,
         params: dict | None = None,
+        timeout: float | None = None,
+        **kwargs: Any,
     ) -> MockResponse:
         return MockRequest.request("GET", url, stream, data, headers, params)
 
@@ -373,6 +377,8 @@ class MockRequest:
         data: dict | None = None,
         headers: dict | None = None,
         params: dict | None = None,
+        timeout: float | None = None,
+        **kwargs: Any,
     ) -> MockResponse:
         return MockRequest.request("POST", url, stream, data, headers, params)
 

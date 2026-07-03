@@ -51,6 +51,37 @@ def add_field(
     marc_record.add_field(Field(tag=tag, indicators=indicators, subfields=subfields))
 
 
+replace_field_step_regex = parsers.re(
+    r"the MARC record's only (?P<tag>\d{3}) field"
+    r'(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)"|)'
+    r'(?P<subs>(?: (?:with|and) subfield "[^"]+" value "[^"]*")+)'
+)
+
+
+@given(replace_field_step_regex)
+def replace_field(
+    marc_record: Record,
+    tag: str,
+    subs: str,
+    ind1: str = "",
+    ind2: str = "",
+) -> None:
+    marc_record.remove_fields(tag)
+    add_field(marc_record, tag, subs, ind1, ind2)
+
+
+@given(
+    parsers.re(
+        r'the MARC record\'s only (?P<tag>\d{3}) field with the value "(?P<data>.+)"'
+    ),
+    target_fixture="marc_record",
+)
+def replace_control_field(marc_record: Record, tag: str, data: str) -> Record:
+    marc_record.remove_fields(tag)
+    marc_record.add_field(Field(tag=tag, data=data))
+    return marc_record
+
+
 @given(
     parsers.re(
         r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)")? with subfields:'

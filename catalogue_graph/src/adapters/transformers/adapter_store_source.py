@@ -22,15 +22,32 @@ class AdapterStoreSource(BaseSource):
 
     def stream_raw(self) -> Generator[dict[str, Any]]:
         if self.changeset_ids:
-            for changeset_id in self.changeset_ids:
-                table = self.adapter_store.get_records_by_changeset(
-                    changeset_id, self.snapshot_id
-                )
-                yield from table.to_pylist()
+            # Includes soft-deleted rows, needed to overwrite documents downstream.
+            # Convert one batch at a time so the Python dicts never hold the
+            # whole (possibly multi-changeset) table alongside the Arrow copy.
+            table = self.adapter_store.get_records_by_changesets(
+                self.changeset_ids, self.snapshot_id
+            )
+            for batch in table.to_batches():
+                yield from self._process_rows(batch.to_pylist())
         else:
             logger.info("No changeset_id provided; performing full reindex of records.")
 
             # During a full reindex we are writing into an empty index,
             # so no need to include deleted rows to overwrite documents.
-            table = self.adapter_store.get_active_namespace_records(self.snapshot_id)
-            yield from table.to_pylist()
+            # Stream record batches so the full table need not be materialised
+            # at once. Close the reader on exit so an abandoned stream (e.g. a
+            # consumer error mid-reindex) does not leave prefetch reads running.
+            batches = self.adapter_store.stream_active_namespace_records(
+                self.snapshot_id
+            )
+            try:
+                for batch in batches:
+                    yield from self._process_rows(batch.to_pylist())
+            finally:
+                batches.close()
+
+    def _process_rows(self, rows: list[dict[str, Any]]) -> Generator[dict[str, Any]]:
+        """Hook for source-specific per-batch processing (e.g. the FOLIO item join
+        in `FolioStoreSource`). The base source passes rows through unchanged."""
+        yield from rows
