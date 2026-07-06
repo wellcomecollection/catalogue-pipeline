@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, cast
 from uuid import uuid4
 
+import pyarrow as pa
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from lxml import etree
@@ -20,6 +21,7 @@ from pyiceberg.table import Table as IcebergTable
 import adapters.utils.window_harvester as harvester_mod
 from adapters.extractors.oai_pmh.record_writer import BufferedWindowRecordWriter
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.pipeline_store import PipelineStoreUpdate
 from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import (
     WindowCallback,
@@ -852,19 +854,19 @@ class FlushSpies:
         original_upsert = harvester.store.upsert
         original_upsert_many = harvester.store.upsert_many
 
-        def spy_incremental_update(table: Any) -> Any:
-            self.incremental_update_calls.append(table.num_rows)
-            return original_incremental_update(table)
+        def spy_incremental_update(new_data: pa.Table) -> PipelineStoreUpdate | None:
+            self.incremental_update_calls.append(new_data.num_rows)
+            return original_incremental_update(new_data)
 
-        def spy_upsert(summary: WindowSummary) -> None:
-            self.upsert_calls.append(summary.model_copy(deep=True))
-            original_upsert(summary)
+        def spy_upsert(record: WindowSummary) -> None:
+            self.upsert_calls.append(record.model_copy(deep=True))
+            original_upsert(record)
 
-        def spy_upsert_many(summaries: list[WindowSummary]) -> None:
+        def spy_upsert_many(records: list[WindowSummary]) -> None:
             self.upsert_many_calls.append(
-                [summary.model_copy(deep=True) for summary in summaries]
+                [summary.model_copy(deep=True) for summary in records]
             )
-            original_upsert_many(summaries)
+            original_upsert_many(records)
 
         adapter_store.incremental_update = spy_incremental_update  # type: ignore[method-assign]
         harvester.store.upsert = spy_upsert  # type: ignore[method-assign]
@@ -1114,7 +1116,7 @@ def test_flush_every_crash_between_records_and_statuses_recovers_on_rerun(
 
     original_upsert_many = harvester.store.upsert_many
 
-    def crashing_upsert_many(summaries: list[WindowSummary]) -> None:
+    def crashing_upsert_many(records: list[WindowSummary]) -> None:
         raise RuntimeError("simulated crash after record flush")
 
     harvester.store.upsert_many = crashing_upsert_many  # type: ignore[method-assign]
@@ -1153,6 +1155,6 @@ def test_flush_every_crash_between_records_and_statuses_recovers_on_rerun(
     # identical re-flush is a no-op that produces no new changeset
     all_records = adapter_store.get_all_records()
     assert all_records.num_rows == 2
-    ids = sorted(all_records.column("id").to_pylist())
+    ids = sorted(cast(list[str], all_records.column("id").to_pylist()))
     assert len(ids) == len(set(ids))
     assert len(writer.changeset_ids) == 1
