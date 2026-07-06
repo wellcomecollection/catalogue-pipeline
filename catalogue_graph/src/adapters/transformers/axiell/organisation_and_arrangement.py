@@ -13,7 +13,8 @@ from models.pipeline.work_data import WorkType
 # TODO: There is a single Axiell work with the level 'Work' (collect:200000001). What work type should we map it to?
 
 # All raw level values are lowercased for consistency.
-# In Axiell, all `(?:sub)+section` levels (subsection, subsubsection, etc.) are mapped to 'sub-section'
+# In Axiell, nested subsection levels which existed in CALM (subsection, subsubsection, etc.)
+# are collapsed to a single 'sub-section' level.
 LEVEL_TO_WORK_TYPE_MAPPING: dict[str, WorkType] = {
     "collection": "Collection",
     "section": "Section",
