@@ -40,9 +40,7 @@ dependencies = [
 package = true
 
 [tool.uv.sources]
-# Pinned to the merged transient-retries commit; repin to tag = "v1.1.0" once
-# https://github.com/wellcomecollection/oai-pmh/pull/14 is released.
-oai-pmh-client = { git = "https://github.com/wellcomecollection/oai-pmh.git", rev = "cb928e0ce9c5f8cfea34c6a05a1a243951bd549e" }
+oai-pmh-client = { git = "https://github.com/wellcomecollection/oai-pmh.git", tag = "v1.1.0" }
 
 
 [dependency-groups]
