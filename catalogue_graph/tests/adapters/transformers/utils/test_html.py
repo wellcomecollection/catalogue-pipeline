@@ -59,8 +59,8 @@ def test_normalise_retains_links_stripping_non_href_attributes() -> None:
     )
 
 
-def test_normalise_does_not_escape_symbols() -> None:
-    s = "Ampersand & some other symbols like >."
+def test_normalise_escapes_symbols() -> None:
+    s = "Ampersand &amp; some other symbols like &gt;."
     assert normalise_text(s) == s
 
 

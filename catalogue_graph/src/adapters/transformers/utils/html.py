@@ -1,4 +1,3 @@
-import html
 from typing import Literal
 from urllib.parse import urlparse
 
@@ -70,7 +69,7 @@ def normalise_text(s: str, allowed_tags: AllowedTags = "basic") -> str:
             continue
         result.append(line)
 
-    return html.unescape("\n".join(result)).strip()
+    return "\n".join(result).strip()
 
 
 def is_url(maybe_url: str) -> bool:
