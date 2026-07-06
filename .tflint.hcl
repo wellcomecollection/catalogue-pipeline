@@ -12,3 +12,10 @@ plugin "aws" {
   version = "0.48.0"
   source  = "github.com/terraform-linters/tflint-ruleset-aws"
 }
+
+# Enforce the recommended Terraform naming convention (snake_case, the
+# rule default) for resources, variables, outputs, etc.
+rule "terraform_naming_convention" {
+  enabled = true
+  format  = "snake_case"
+}
