@@ -16,6 +16,7 @@ from adapters.extractors.oai_pmh.folio.clients import (
     build_http_client as _build_folio_http_client,
 )
 from adapters.extractors.oai_pmh.folio.config import FOLIO_ADAPTER_CONFIG
+from adapters.extractors.oai_pmh.resilient_client import ResilientOAIClient
 from adapters.extractors.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
 
 
@@ -46,9 +47,12 @@ class FolioRuntimeConfig(OAIPMHRuntimeConfig):
         Overrides base to include FOLIO-specific retry configuration.
         """
         client = http_client or self.build_http_client()
-        return OAIClient(
+        return ResilientOAIClient(
             self.get_oai_endpoint(),
             client=client,
+            empty_body_retries=config.OAI_EMPTY_BODY_RETRIES,
+            empty_body_backoff_factor=config.OAI_BACKOFF_FACTOR,
+            empty_body_backoff_max=config.OAI_BACKOFF_MAX,
             max_request_retries=config.OAI_MAX_RETRIES,
             request_backoff_factor=config.OAI_BACKOFF_FACTOR,
             request_max_backoff=config.OAI_BACKOFF_MAX,
