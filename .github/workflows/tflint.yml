@@ -40,8 +40,14 @@ jobs:
 
           config_file="$(pwd)/.tflint.hcl"
 
+          # A Terraform root is identified by having a backend configuration.
+          # Child modules (under modules/, etc.) never declare a backend, so this
+          # discovers every root without depending on a committed .terraform.lock.hcl.
           mapfile -t terraform_roots < <(
-            find . -type f -name '.terraform.lock.hcl' -exec dirname {} \; | sort -u
+            grep -rlE '^\s*backend\s+"' --include='*.tf' . \
+              | xargs -r -n1 dirname \
+              | sed 's|^\./||' \
+              | sort -u
           )
 
           if [[ ${#terraform_roots[@]} -eq 0 ]]; then
@@ -50,7 +56,7 @@ jobs:
           fi
 
           for root in "${terraform_roots[@]}"; do
-            if [[ "${root}" == "./reindexer/terraform" ]]; then
+            if [[ "${root}" == "reindexer/terraform" ]]; then
               echo "Skipping ${root}; this root currently fails static evaluation in a shared module"
               continue
             fi
