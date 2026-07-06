@@ -81,13 +81,21 @@ Run from the repository root:
 
 ```bash
 tflint --init
-find . -type f -name '.terraform.lock.hcl' -exec dirname {} \; | sort -u | while IFS= read -r root; do
-  if [[ "$root" == "./reindexer/terraform" ]]; then
-    continue
-  fi
 
-  tflint --chdir="$root" --config="$(pwd)/.tflint.hcl" --format=compact --minimum-failure-severity=error
-done
+config_file="$(pwd)/.tflint.hcl"
+
+grep -rlE '^\s*backend\s+"' --include='*.tf' . \
+  | xargs -r -n1 dirname \
+  | sed 's|^\./||' \
+  | sort -u \
+  | while IFS= read -r root; do
+    if [[ "$root" == "reindexer/terraform" ]]; then
+      continue
+    fi
+
+    echo "Linting ${root}"
+    tflint --chdir="${root}" --config="${config_file}" --format=compact --minimum-failure-severity=error
+  done
 ```
 
 ## Scala conventions
