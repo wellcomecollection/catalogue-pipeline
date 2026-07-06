@@ -168,7 +168,15 @@ locals {
     {
       "label" : "Catalogue Concept Edges",
       "transformer_type" : "catalogue_concepts",
-      "entity_type" : "edges"
+      "entity_type" : "edges",
+      # When bulk loading concept edges, we are expecting a small number of insert failures due to missing
+      # source concept nodes. Catalogue concepts are matched against the LoC/MeSH bulk load files in S3, which
+      # the monthly pipeline refreshes hours before it loads the corresponding nodes into Neptune, so an edge
+      # can reference a newly minted source concept which does not exist in the graph yet. Neptune drops such
+      # edges; the edge is created the next time the referencing work is updated after the monthly load completes.
+      # When running in incremental mode, we cannot predict how many of these missing source concepts will exist
+      # in any given batch, and so we allow any number of insert errors.
+      "insert_error_threshold" : 1
     },
     {
       "label" : "Catalogue Image Edges",
