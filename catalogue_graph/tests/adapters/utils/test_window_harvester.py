@@ -11,12 +11,15 @@ from uuid import uuid4
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
+from lxml import etree
 from oai_pmh_client.models import Header, Record
 from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.utils.window_harvester as harvester_mod
+from adapters.extractors.oai_pmh.record_writer import BufferedWindowRecordWriter
+from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import (
     WindowCallback,
@@ -126,6 +129,8 @@ def _build_harvester(
     record_callback: WindowCallback | None = None,
     window_minutes: int | None = None,
     allow_partial_final_window: bool = True,
+    client: object | None = None,
+    flush_callback: Any = None,
 ) -> WindowHarvestManager:
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
@@ -137,7 +142,7 @@ def _build_harvester(
         catalog_name=f"catalog_{uuid4().hex}",
     )
     store = WindowStore(table)
-    client = StubOAIClient(responses)
+    client = client or StubOAIClient(responses)
 
     def default_callback(
         records: list[tuple[str, Record]],
@@ -159,6 +164,7 @@ def _build_harvester(
         set_spec="collect",
         record_callback=callback,
         default_tags=default_tags,
+        flush_callback=flush_callback,
     )
 
 
@@ -809,3 +815,242 @@ def test_parse_tags_unknown_keys_passed_through() -> None:
         {"changeset_ids": json.dumps([]), "extra": "value"}
     )
     assert result.other_tags == {"extra": "value"}
+
+
+# ---------------------------------------------------------------------------
+# Batched-commit (flush_every) mode
+# ---------------------------------------------------------------------------
+class SequenceOAIClient:
+    """Stub client returning a distinct record per list_records call."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    def list_records(self, **kwargs: object) -> list[Record]:
+        index = len(self.calls)
+        self.calls.append(kwargs)
+        header = Header(
+            identifier=f"id:{index}",
+            datestamp=datetime(2025, 1, 1, tzinfo=UTC),
+            setSpec=["collect"],
+            status=False,
+        )
+        return [Record(header=header, metadata=etree.fromstring(f"<m>{index}</m>"))]
+
+
+class FlushSpies:
+    """Spies on adapter-store and window-store commits."""
+
+    def __init__(
+        self, harvester: WindowHarvestManager, adapter_store: AdapterStore
+    ) -> None:
+        self.incremental_update_calls: list[int] = []
+        self.upsert_calls: list[WindowSummary] = []
+        self.upsert_many_calls: list[list[WindowSummary]] = []
+
+        original_incremental_update = adapter_store.incremental_update
+        original_upsert = harvester.store.upsert
+        original_upsert_many = harvester.store.upsert_many
+
+        def spy_incremental_update(table: Any) -> Any:
+            self.incremental_update_calls.append(table.num_rows)
+            return original_incremental_update(table)
+
+        def spy_upsert(summary: WindowSummary) -> None:
+            self.upsert_calls.append(summary.model_copy(deep=True))
+            original_upsert(summary)
+
+        def spy_upsert_many(summaries: list[WindowSummary]) -> None:
+            self.upsert_many_calls.append(
+                [summary.model_copy(deep=True) for summary in summaries]
+            )
+            original_upsert_many(summaries)
+
+        adapter_store.incremental_update = spy_incremental_update  # type: ignore[method-assign]
+        harvester.store.upsert = spy_upsert  # type: ignore[method-assign]
+        harvester.store.upsert_many = spy_upsert_many  # type: ignore[method-assign]
+
+
+def _build_buffered_harvester(
+    tmp_path: Path,
+    temporary_table: IcebergTable,
+    *,
+    record_callback: WindowCallback | None = None,
+) -> tuple[WindowHarvestManager, BufferedWindowRecordWriter, AdapterStore, FlushSpies]:
+    adapter_store = AdapterStore(temporary_table, namespace="harvest")
+    writer = BufferedWindowRecordWriter(
+        namespace="harvest",
+        table_client=adapter_store,
+        job_id="job-1",
+        window_range="range",
+    )
+    harvester = _build_harvester(
+        tmp_path,
+        [],
+        record_callback=record_callback or writer,
+        client=SequenceOAIClient(),
+        flush_callback=writer.flush,
+    )
+    spies = FlushSpies(harvester, adapter_store)
+    return harvester, writer, adapter_store, spies
+
+
+def test_flush_every_batches_commits(
+    tmp_path: Path, temporary_table: IcebergTable
+) -> None:
+    """With 5 windows and flush_every=2 we expect 3 flushes (2 + 2 + 1), each
+    costing one record commit and one window-status commit, and no per-window
+    upserts at all."""
+    harvester, writer, adapter_store, spies = _build_buffered_harvester(
+        tmp_path, temporary_table
+    )
+
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    window = IncrementalWindow(
+        start_time=start, end_time=start + timedelta(minutes=15 * 5)
+    )
+    summaries = harvester.harvest_range(time_range=window, flush_every=2)
+
+    assert len(summaries) == 5
+    assert all(summary.state == "success" for summary in summaries)
+
+    # One incremental_update per flush, not per window
+    assert spies.incremental_update_calls == [2, 2, 1]
+    # One window-status commit per flush, not per window
+    assert [len(batch) for batch in spies.upsert_many_calls] == [2, 2, 1]
+    assert spies.upsert_calls == []
+
+    # All summaries persisted
+    status_map = harvester.store.load_status_map()
+    assert len(status_map) == 5
+    assert all(row.state == "success" for row in status_map.values())
+
+    # All records committed; changeset ids accumulate per flush
+    assert adapter_store.get_all_records().num_rows == 5
+    assert len(writer.changeset_ids) == 3
+
+
+def test_flush_every_summaries_carry_no_per_window_changesets(
+    tmp_path: Path, temporary_table: IcebergTable
+) -> None:
+    """In buffered mode changeset ids are per-flush, not per-window: the
+    persisted summaries carry empty changeset id lists."""
+    harvester, writer, _, _ = _build_buffered_harvester(tmp_path, temporary_table)
+
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    window = IncrementalWindow(
+        start_time=start, end_time=start + timedelta(minutes=15 * 2)
+    )
+    harvester.harvest_range(time_range=window, flush_every=2)
+
+    for row in harvester.store.load_status_map().values():
+        assert json.loads((row.tags or {})["changeset_ids"]) == []
+    assert len(writer.changeset_ids) == 1
+
+
+def test_flush_every_persists_failed_windows(
+    tmp_path: Path, temporary_table: IcebergTable
+) -> None:
+    """Failed windows in deferred mode must still have their summaries
+    persisted at the flush boundary."""
+    adapter_store = AdapterStore(temporary_table, namespace="harvest")
+    writer = BufferedWindowRecordWriter(
+        namespace="harvest",
+        table_client=adapter_store,
+        job_id="job-1",
+        window_range="range",
+    )
+
+    calls = {"count": 0}
+
+    def flaky_callback(records: list[tuple[str, Record]]) -> WindowCallbackResult:
+        calls["count"] += 1
+        if calls["count"] == 2:
+            raise RuntimeError("boom")
+        return writer(records)
+
+    harvester = _build_harvester(
+        tmp_path,
+        [],
+        record_callback=flaky_callback,
+        client=SequenceOAIClient(),
+        flush_callback=writer.flush,
+    )
+
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    window = IncrementalWindow(
+        start_time=start, end_time=start + timedelta(minutes=15 * 3)
+    )
+    summaries = harvester.harvest_range(time_range=window, flush_every=3)
+
+    assert [summary.state for summary in summaries] == [
+        "success",
+        "failed",
+        "success",
+    ]
+
+    status_map = harvester.store.load_status_map()
+    assert len(status_map) == 3
+    states = sorted(row.state for row in status_map.values())
+    assert states == ["failed", "success", "success"]
+    failed_row = next(row for row in status_map.values() if row.state == "failed")
+    assert failed_row.last_error is not None
+    assert "boom" in failed_row.last_error
+
+
+def test_flush_every_resume_after_partial_run(
+    tmp_path: Path, temporary_table: IcebergTable
+) -> None:
+    """Windows committed by an earlier flush must be skipped on rerun."""
+    harvester, _, _, _ = _build_buffered_harvester(tmp_path, temporary_table)
+
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    window = IncrementalWindow(
+        start_time=start, end_time=start + timedelta(minutes=15 * 4)
+    )
+
+    # First run only processes (and flushes) the first two windows
+    first = harvester.harvest_range(time_range=window, max_windows=2, flush_every=2)
+    assert len(first) == 2
+
+    client = cast(SequenceOAIClient, harvester.client)
+    assert len(client.calls) == 2
+
+    # Second run over the full range: the two committed windows are skipped
+    second = harvester.harvest_range(time_range=window, flush_every=2)
+    assert len(second) == 4
+    assert len(client.calls) == 4
+
+    status_map = harvester.store.load_status_map()
+    assert len(status_map) == 4
+    assert all(row.state == "success" for row in status_map.values())
+
+
+def test_flush_every_rejects_non_positive_values(tmp_path: Path) -> None:
+    harvester = _build_harvester(tmp_path, [_make_record("id:1")])
+    with pytest.raises(ValueError, match="flush_every"):
+        harvester.harvest_range(time_range=_window_range(hours=1), flush_every=0)
+
+
+def test_legacy_path_commits_per_window(
+    tmp_path: Path, temporary_table: IcebergTable
+) -> None:
+    """Without flush_every the classic behaviour is preserved: per-window
+    status upserts and no batched writes."""
+    harvester, writer, adapter_store, spies = _build_buffered_harvester(
+        tmp_path, temporary_table
+    )
+
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    window = IncrementalWindow(
+        start_time=start, end_time=start + timedelta(minutes=15 * 2)
+    )
+    summaries = harvester.harvest_range(time_range=window)
+
+    assert len(summaries) == 2
+    # Intermediate + final upsert per window; no batched commits
+    assert len(spies.upsert_calls) == 4
+    assert spies.upsert_many_calls == []
+    # The buffered writer's flush was never invoked by the harvester
+    assert spies.incremental_update_calls == []
+    assert writer.changeset_ids == []

@@ -74,10 +74,22 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
 
     @classmethod
     def from_summaries(
-        cls, summaries: list[WindowSummary], job_id: str
+        cls,
+        summaries: list[WindowSummary],
+        job_id: str,
+        extra_changeset_ids: list[str] | None = None,
     ) -> OAIPMHLoaderResponse:
+        """Build a response from window summaries.
+
+        Args:
+            summaries: Window summaries whose tags carry per-window changeset
+                ids and upsert counts.
+            job_id: Job identifier linking the response to its trigger.
+            extra_changeset_ids: Changeset ids created outside per-window tags
+                (e.g. per-flush commits in the loader's buffered backfill mode).
+        """
         upserted_record_count = 0
-        changeset_ids = []
+        changeset_ids = list(extra_changeset_ids or [])
 
         for summary in summaries:
             if not summary.tags:
