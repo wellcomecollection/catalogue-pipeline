@@ -17,7 +17,6 @@ from abc import ABC, abstractmethod
 import httpx
 from oai_pmh_client.client import OAIClient
 
-from adapters.extractors.oai_pmh.resilient_client import ResilientOAIClient
 from adapters.models.config import AdapterConfig
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import (
@@ -174,7 +173,7 @@ class OAIPMHRuntimeConfig(ABC):
     def build_oai_client(self, *, http_client: httpx.Client | None = None) -> OAIClient:
         """Build the OAI-PMH client for harvesting records."""
         client = http_client or self.build_http_client()
-        return ResilientOAIClient(
+        return OAIClient(
             self.get_oai_endpoint(),
             client=client,
         )

@@ -123,7 +123,6 @@ def test_folio_config_singleton_is_consistent() -> None:
 
 def test_folio_runtime_build_oai_client() -> None:
     from adapters.extractors.oai_pmh.folio import config
-    from adapters.extractors.oai_pmh.resilient_client import ResilientOAIClient
 
     with (
         patch(
@@ -137,13 +136,9 @@ def test_folio_runtime_build_oai_client() -> None:
     ):
         oai_client = FOLIO_CONFIG.build_oai_client()
 
-    # isinstance(_, OAIClient) would pass trivially for the subclass; assert
-    # the resilient wrapper is used and configured from the FOLIO constants.
-    assert isinstance(oai_client, ResilientOAIClient)
+    # Assert the client is configured from the FOLIO constants.
     assert oai_client.base_url == "https://test.folio.com/oai"
-    assert oai_client.empty_body_retries == config.OAI_EMPTY_BODY_RETRIES
-    assert oai_client.empty_body_backoff_factor == config.OAI_BACKOFF_FACTOR
-    assert oai_client.empty_body_backoff_max == config.OAI_BACKOFF_MAX
+    assert oai_client.max_transient_retries == config.OAI_TRANSIENT_RETRIES
     assert oai_client.max_request_retries == max(1, config.OAI_MAX_RETRIES)
     assert oai_client.request_backoff_factor == config.OAI_BACKOFF_FACTOR
     assert oai_client.request_max_backoff == config.OAI_BACKOFF_MAX
