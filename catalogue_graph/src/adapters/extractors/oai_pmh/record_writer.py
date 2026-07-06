@@ -121,9 +121,10 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
 
     - ``__call__`` only buffers: it returns ``changeset_id=None`` and an empty
       ``upserted_record_ids`` list, so per-window summaries carry no changeset
-      ids or upsert counts. Changeset ids in buffered mode are per-flush, not
-      per-window; they accumulate on :attr:`changeset_ids` and must be added to
-      the loader response separately.
+      ids or upsert counts. Changeset ids and upserted-record counts in
+      buffered mode are per-flush, not per-window; they accumulate on
+      :attr:`changeset_ids` and :attr:`upserted_record_count` and must be added
+      to the loader response separately.
     - If the same record id is buffered more than once between flushes, the
       most recently buffered row wins (matching last-write-wins behaviour of
       sequential per-window commits).
@@ -148,6 +149,7 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
         # Keyed by record id so later windows overwrite earlier buffered rows.
         self._buffer: dict[str, dict[str, Any]] = {}
         self.changeset_ids: list[str] = []
+        self.upserted_record_count: int = 0
 
     def __call__(
         self,
@@ -185,5 +187,6 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
 
         if update:
             self.changeset_ids.append(update.changeset_id)
+            self.upserted_record_count += len(update.upserted_record_ids)
             return update.changeset_id
         return None

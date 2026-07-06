@@ -183,14 +183,20 @@ def execute_loader(
             window_end=window.end_time.isoformat(),
         )
 
-    # In buffered mode changeset ids are produced per flush, not per window, so
-    # they aren't in the summaries' tags and must be added to the response here.
+    # In buffered mode changeset ids and upserted counts are produced per
+    # flush, not per window, so they aren't in the summaries' tags and must be
+    # added to the response here.
     extra_changeset_ids: list[str] = []
+    extra_upserted_record_count = 0
     if isinstance(harvester.record_callback, BufferedWindowRecordWriter):
         extra_changeset_ids = harvester.record_callback.changeset_ids
+        extra_upserted_record_count = harvester.record_callback.upserted_record_count
 
     return OAIPMHLoaderResponse.from_summaries(
-        summaries, job_id=request.job_id, extra_changeset_ids=extra_changeset_ids
+        summaries,
+        job_id=request.job_id,
+        extra_changeset_ids=extra_changeset_ids,
+        extra_upserted_record_count=extra_upserted_record_count,
     )
 
 

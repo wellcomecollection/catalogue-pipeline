@@ -78,6 +78,7 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
         summaries: list[WindowSummary],
         job_id: str,
         extra_changeset_ids: list[str] | None = None,
+        extra_upserted_record_count: int = 0,
     ) -> OAIPMHLoaderResponse:
         """Build a response from window summaries.
 
@@ -87,8 +88,11 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
             job_id: Job identifier linking the response to its trigger.
             extra_changeset_ids: Changeset ids created outside per-window tags
                 (e.g. per-flush commits in the loader's buffered backfill mode).
+            extra_upserted_record_count: Upserted records counted outside
+                per-window tags (the per-flush counterpart of
+                ``extra_changeset_ids``).
         """
-        upserted_record_count = 0
+        upserted_record_count = extra_upserted_record_count
         changeset_ids = list(extra_changeset_ids or [])
 
         for summary in summaries:

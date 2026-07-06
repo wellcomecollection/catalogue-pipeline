@@ -214,3 +214,68 @@ def test_4xx_response_is_not_retried() -> None:
         list(client.list_records(metadata_prefix="oai_marcxml"))
 
     assert log.count == 1
+
+
+# ---------------------------------------------------------------------------
+# Factory wiring: every build_oai_client must return a configured
+# ResilientOAIClient (isinstance(_, OAIClient) would pass trivially since
+# it's a subclass, so assert the concrete type and the config values).
+# ---------------------------------------------------------------------------
+def test_base_runtime_build_oai_client_returns_resilient_client() -> None:
+    from adapters.extractors.oai_pmh.axiell.config import AXIELL_ADAPTER_CONFIG
+    from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
+
+    class StubRuntimeConfig(OAIPMHRuntimeConfig):
+        def build_http_client(self) -> httpx.Client:
+            return httpx.Client(transport=httpx.MockTransport(lambda _: None))  # type: ignore[arg-type,return-value]
+
+        def get_oai_endpoint(self) -> str:
+            return BASE_URL
+
+    oai_client = StubRuntimeConfig(AXIELL_ADAPTER_CONFIG).build_oai_client()
+
+    assert isinstance(oai_client, ResilientOAIClient)
+    assert oai_client.base_url == BASE_URL
+    # The base factory uses the ResilientOAIClient defaults
+    assert oai_client.empty_body_retries == 3
+    assert oai_client.empty_body_backoff_factor == 2.0
+    assert oai_client.empty_body_backoff_max == 30.0
+    oai_client._client.close()
+
+
+def test_axiell_build_oai_client_returns_resilient_client_with_config() -> None:
+    from unittest.mock import patch
+
+    from adapters.extractors.oai_pmh.axiell import clients, config
+
+    with (
+        patch.object(clients, "_oai_token", return_value="test-token"),
+        patch.object(clients, "_oai_endpoint", return_value=BASE_URL),
+    ):
+        oai_client = clients.build_oai_client()
+
+    assert isinstance(oai_client, ResilientOAIClient)
+    assert oai_client.base_url == BASE_URL
+    assert oai_client.empty_body_retries == config.OAI_EMPTY_BODY_RETRIES
+    assert oai_client.empty_body_backoff_factor == config.OAI_BACKOFF_FACTOR
+    assert oai_client.empty_body_backoff_max == config.OAI_BACKOFF_MAX
+    assert oai_client.max_request_retries == max(1, config.OAI_MAX_RETRIES)
+    assert oai_client.request_backoff_factor == config.OAI_BACKOFF_FACTOR
+    assert oai_client.request_max_backoff == config.OAI_BACKOFF_MAX
+    oai_client._client.close()
+
+
+def test_axiell_runtime_delegates_to_clients_factory() -> None:
+    from unittest.mock import patch
+
+    from adapters.extractors.oai_pmh.axiell import clients
+    from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
+
+    with (
+        patch.object(clients, "_oai_token", return_value="test-token"),
+        patch.object(clients, "_oai_endpoint", return_value=BASE_URL),
+    ):
+        oai_client = AXIELL_CONFIG.build_oai_client()
+
+    assert isinstance(oai_client, ResilientOAIClient)
+    oai_client._client.close()

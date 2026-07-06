@@ -104,6 +104,11 @@ class ResilientOAIClient(OAIClient):
                     raise
                 self._backoff(attempt, verb, error, is_token_page=is_token_page)
             except httpx.TransportError as error:
+                # Note: the base client's _send_with_retries already retries
+                # timeout exceptions (a TransportError subset) internally, up
+                # to max_request_retries, so a timeout only surfaces here once
+                # those are exhausted. Raising OAI_MAX_RETRIES therefore stacks
+                # multiplicatively with this outer ladder for timeouts.
                 if attempt > self._max_retries_for(is_token_page):
                     raise
                 self._backoff(attempt, verb, error, is_token_page=is_token_page)

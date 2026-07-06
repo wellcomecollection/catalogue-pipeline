@@ -925,9 +925,10 @@ def test_flush_every_batches_commits(
     assert len(status_map) == 5
     assert all(row.state == "success" for row in status_map.values())
 
-    # All records committed; changeset ids accumulate per flush
+    # All records committed; changeset ids and upsert counts accumulate per flush
     assert adapter_store.get_all_records().num_rows == 5
     assert len(writer.changeset_ids) == 3
+    assert writer.upserted_record_count == 5
 
 
 def test_flush_every_summaries_carry_no_per_window_changesets(
@@ -1054,3 +1055,104 @@ def test_legacy_path_commits_per_window(
     # The buffered writer's flush was never invoked by the harvester
     assert spies.incremental_update_calls == []
     assert writer.changeset_ids == []
+
+
+class WindowKeyedOAIClient:
+    """Stub client returning a stable record derived from the window start.
+
+    Unlike SequenceOAIClient, re-harvesting the same window yields the same
+    record, so convergence after a crash can be asserted."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    def list_records(self, **kwargs: object) -> list[Record]:
+        self.calls.append(kwargs)
+        from_date = cast(datetime, kwargs["from_date"])
+        identifier = f"id:{from_date.isoformat()}"
+        header = Header(
+            identifier=identifier,
+            datestamp=from_date,
+            setSpec=["collect"],
+            status=False,
+        )
+        return [
+            Record(header=header, metadata=etree.fromstring(f"<m>{identifier}</m>"))
+        ]
+
+
+def test_flush_every_crash_between_records_and_statuses_recovers_on_rerun(
+    tmp_path: Path, temporary_table: IcebergTable
+) -> None:
+    """If the run crashes after a flush committed the records but before the
+    window statuses were written, the affected windows are not marked
+    successful, so a rerun re-harvests them and the record upserts converge
+    (no duplicate rows)."""
+    adapter_store = AdapterStore(temporary_table, namespace="harvest")
+    writer = BufferedWindowRecordWriter(
+        namespace="harvest",
+        table_client=adapter_store,
+        job_id="job-1",
+        window_range="range",
+    )
+    harvester = _build_harvester(
+        tmp_path,
+        [],
+        record_callback=writer,
+        client=WindowKeyedOAIClient(),
+        flush_callback=writer.flush,
+    )
+
+    flush_calls = {"count": 0}
+    original_flush = writer.flush
+
+    def counting_flush() -> str | None:
+        flush_calls["count"] += 1
+        return original_flush()
+
+    harvester.flush_callback = counting_flush
+
+    original_upsert_many = harvester.store.upsert_many
+
+    def crashing_upsert_many(summaries: list[WindowSummary]) -> None:
+        raise RuntimeError("simulated crash after record flush")
+
+    harvester.store.upsert_many = crashing_upsert_many  # type: ignore[method-assign]
+
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    window = IncrementalWindow(
+        start_time=start, end_time=start + timedelta(minutes=15 * 2)
+    )
+
+    # First run: records are flushed, then the status write crashes
+    with pytest.raises(RuntimeError, match="simulated crash"):
+        harvester.harvest_range(time_range=window, flush_every=2)
+
+    assert flush_calls["count"] == 1
+    assert adapter_store.get_all_records().num_rows == 2
+    # No statuses were persisted, so nothing is marked successful
+    assert harvester.store.load_status_map() == {}
+
+    # Rerun with a healthy store: the windows are NOT treated as successful
+    harvester.store.upsert_many = original_upsert_many  # type: ignore[method-assign]
+    client = cast(WindowKeyedOAIClient, harvester.client)
+    calls_before_rerun = len(client.calls)
+
+    summaries = harvester.harvest_range(time_range=window, flush_every=2)
+
+    assert len(summaries) == 2
+    assert all(summary.state == "success" for summary in summaries)
+    # Both windows were re-harvested
+    assert len(client.calls) == calls_before_rerun + 2
+
+    status_map = harvester.store.load_status_map()
+    assert len(status_map) == 2
+    assert all(row.state == "success" for row in status_map.values())
+
+    # Re-writing the same ids converges: still one row per record, and the
+    # identical re-flush is a no-op that produces no new changeset
+    all_records = adapter_store.get_all_records()
+    assert all_records.num_rows == 2
+    ids = sorted(all_records.column("id").to_pylist())
+    assert len(ids) == len(set(ids))
+    assert len(writer.changeset_ids) == 1

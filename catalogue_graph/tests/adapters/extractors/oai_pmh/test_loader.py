@@ -539,12 +539,13 @@ class TestLoaderBackfillMode:
         assert isinstance(buffered.record_callback, BufferedWindowRecordWriter)
         assert buffered.flush_callback == buffered.record_callback.flush
 
-    def test_flush_changeset_ids_reach_the_response(
+    def test_flush_changeset_ids_and_counts_reach_the_response(
         self,
         loader_runtime: LoaderRuntime,
     ) -> None:
-        """Changeset ids produced by per-flush commits (not in any window's
-        tags) must still be included in the loader response."""
+        """Changeset ids and upserted counts produced by per-flush commits
+        (not in any window's tags) must still be included in the loader
+        response."""
         req = _create_loader_event()
         loader_runtime.flush_every = 10
 
@@ -557,6 +558,7 @@ class TestLoaderBackfillMode:
             # Simulate a flush having committed a changeset during the harvest
             assert isinstance(self.record_callback, BufferedWindowRecordWriter)
             self.record_callback.changeset_ids.append("cs-flush-1")
+            self.record_callback.upserted_record_count += 1234
             return [summary]
 
         with patch.object(
@@ -567,6 +569,7 @@ class TestLoaderBackfillMode:
             response = loader.execute_loader(req, runtime=loader_runtime)
 
         assert response.changeset_ids == ["cs-flush-1"]
+        assert response.changed_record_count == 1234
 
     def test_local_cli_flags_reach_step_config(
         self, tmp_path: object, monkeypatch: object
@@ -644,6 +647,22 @@ class TestFromSummariesExtraChangesets:
 
         assert sorted(response.changeset_ids) == ["cs-flush", "cs-window"]
 
+    def test_extra_upserted_record_count_is_added(self) -> None:
+        req = _create_loader_event()
+        # Window tags count 2 changed records; the flush adds another 5
+        summary = _create_success_summary(
+            req,
+            record_ids=["id-1", "id-2"],
+            changed_record_ids=["id-1", "id-2"],
+            changeset_id="cs-window",
+        )
+
+        response = OAIPMHLoaderResponse.from_summaries(
+            [summary], job_id=req.job_id, extra_upserted_record_count=5
+        )
+
+        assert response.changed_record_count == 7
+
     def test_extra_changeset_ids_default_is_backward_compatible(self) -> None:
         req = _create_loader_event()
         summary = _create_success_summary(
@@ -653,6 +672,7 @@ class TestFromSummariesExtraChangesets:
         response = OAIPMHLoaderResponse.from_summaries([summary], job_id=req.job_id)
 
         assert response.changeset_ids == ["cs-window"]
+        assert response.changed_record_count == 1
 
 
 # ---------------------------------------------------------------------------
@@ -752,6 +772,25 @@ class TestBufferedWindowRecordWriter:
         assert first is not None and second is not None
         assert writer.changeset_ids == [first, second]
 
+    def test_upserted_record_count_accumulates_across_flushes(
+        self,
+        adapter_store_client: AdapterStore,
+        adapter_namespace: str,
+    ) -> None:
+        writer = self._make_writer(adapter_store_client, adapter_namespace)
+        when = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+        assert writer.upserted_record_count == 0
+
+        writer(records=[("id-1", self._record("<m>one</m>", when))])
+        writer(records=[("id-2", self._record("<m>two</m>", when))])
+        writer.flush()
+        assert writer.upserted_record_count == 2
+
+        writer(records=[("id-3", self._record("<m>three</m>", when))])
+        writer.flush()
+        assert writer.upserted_record_count == 3
+
     def test_noop_flush_produces_no_changeset(
         self,
         adapter_store_client: AdapterStore,
@@ -767,3 +806,4 @@ class TestBufferedWindowRecordWriter:
         writer(records=[("id-1", self._record("<m>one</m>", when))])
         assert writer.flush() is None
         assert len(writer.changeset_ids) == 1
+        assert writer.upserted_record_count == 1
