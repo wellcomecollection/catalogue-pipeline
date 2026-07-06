@@ -1,5 +1,5 @@
 import re
-from typing import cast
+from typing import Literal, NamedTuple, cast
 
 from models.pipeline.concept import (
     IdentifiedConcept,
@@ -10,6 +10,12 @@ from models.pipeline.identifier import (
 from utils.types import ConceptSource
 
 from .id_label_checker import IdLabelChecker
+
+
+class SourceConceptMatch(NamedTuple):
+    source_id: str
+    matched_by: Literal["label", "identifier"]
+    qualifier: str | None
 
 
 class RawCatalogueConcept:
@@ -77,9 +83,9 @@ class RawCatalogueConcept:
                 self.source_concept_id, self.source
             )
 
-            all_source_labels = source_alternative_labels
+            all_source_labels = [label.lower() for label in source_alternative_labels]
             if source_label is not None:
-                all_source_labels.append(source_label)
+                all_source_labels.append(source_label.lower())
 
             normalised_label = self.label.lower()
 
@@ -93,3 +99,27 @@ class RawCatalogueConcept:
             )
 
         return False
+
+    def matched_source_concepts(self) -> list[SourceConceptMatch]:
+        """
+        Return all matched source concepts. Both `HAS_SOURCE_CONCEPT` edges and the stub nodes
+        guaranteeing their targets exist are derived from this single code path.
+        """
+        matches = []
+
+        # Match via label
+        if (
+            self.source == "label-derived"
+            and (source_id := self.label_matched_source_concept_id) is not None
+        ):
+            matches.append(SourceConceptMatch(source_id, "label", None))
+
+        # Match via ID
+        if self.has_valid_source_concept:
+            matches.append(
+                SourceConceptMatch(
+                    str(self.source_concept_id), "identifier", self.mesh_qualifier
+                )
+            )
+
+        return matches

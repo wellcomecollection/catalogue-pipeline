@@ -33,7 +33,7 @@ class CypherBulkLoadConverter(CypherBaseConverter):
         return f"{field_name}:{field_type}"
 
     def _node_to_bulk_cypher(self, model: BaseNode) -> dict:
-        bulk_node = {":ID": model.id, ":LABEL": type(model).__name__}
+        bulk_node = {":ID": model.id, ":LABEL": type(model).bulk_load_label()}
 
         for field_name, raw_value in model.dict().items():
             column_header = self._get_bulk_loader_column_header(model, field_name)

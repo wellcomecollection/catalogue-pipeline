@@ -31,6 +31,13 @@ class GraphBaseTransformer(BaseTransformer):
             "Each transformer must implement an `extract_edges` method."
         )
 
+    def extract_supplementary_nodes(self, raw_node: Any) -> Generator[BaseNode]:
+        """
+        Accepts a raw node and returns a generator of additional nodes to stream alongside transformed
+        nodes (e.g. stub nodes guaranteeing that targets of later edge loads exist). No-op by default.
+        """
+        yield from ()
+
     def _stream_nodes(self, number: int | None = None) -> Generator[BaseNode]:
         """
         Extracts nodes from the specified source and transforms them. The `source` must define a `stream_raw` method.
@@ -49,6 +56,15 @@ class GraphBaseTransformer(BaseTransformer):
                     logger.info("Streaming nodes progress", count=counter)
             if counter == number:
                 return
+
+            for supplementary_node in self.extract_supplementary_nodes(raw_node):
+                yield supplementary_node
+                counter += 1
+
+                if counter % 10000 == 0:
+                    logger.info("Streaming nodes progress", count=counter)
+                if counter == number:
+                    return
 
         logger.info("Streamed all nodes", count=counter)
 

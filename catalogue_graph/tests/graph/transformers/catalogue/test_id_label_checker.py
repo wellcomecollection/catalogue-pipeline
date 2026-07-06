@@ -75,3 +75,21 @@ def test_id_label_checker_source_priority() -> None:
 
     # Prioritise matching on MeSH rather than LoC
     assert id_label_checker.get_id("anatomy", "Concept") == "D000715"
+
+
+def test_id_label_checker_original_case_labels() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # Labels keep their original casing (they are reused verbatim by stub nodes),
+    # while matching stays case-insensitive
+    assert id_label_checker.get_label("sh00000002", "lc-subjects") == "Tacos"
+    assert id_label_checker.get_label("D000715", "nlm-mesh") == "Anatomy"
+
+
+def test_id_label_checker_transformer_per_id() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    assert id_label_checker.get_transformer("sh00000002") == "loc_concepts"
+    assert id_label_checker.get_transformer("n00000001") == "loc_names"
+    assert id_label_checker.get_transformer("D000715") == "mesh_concepts"
+    assert id_label_checker.get_transformer("does-not-exist") is None

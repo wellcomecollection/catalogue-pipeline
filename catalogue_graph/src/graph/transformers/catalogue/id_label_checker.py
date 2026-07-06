@@ -18,7 +18,7 @@ with open(f"{os.path.dirname(__file__)}/data/concept_label_deny_list.txt") as f:
     CONCEPT_DENY_LIST = [line.strip().lower() for line in f]
 
 
-def _concept_source_from_id(source_id: str) -> ConceptSource:
+def concept_source_from_id(source_id: str) -> ConceptSource:
     if source_id[0] == "n":
         return "lc-names"
     if source_id[0] == "s":
@@ -49,6 +49,9 @@ class IdLabelChecker:
         self.alternative_labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = (
             defaultdict(lambda: defaultdict(list))
         )
+        # Records which transformer's bulk load file each source id came from,
+        # so that stub nodes can be minted with the matching node label.
+        self.ids_to_transformers: dict[str, TransformerType] = {}
 
         for transformer in transformers:
             event = BulkLoaderEvent(
@@ -59,14 +62,17 @@ class IdLabelChecker:
             )
             for row in get_csv_from_s3(event.get_s3_uri()):
                 source_id = row[":ID"]
-                label = row["label:String"].lower()
+                # Labels are stored with their original casing (they are reused verbatim when
+                # minting stub nodes); lookups lowercase them at comparison time.
+                label = row["label:String"]
                 alternative_labels = [
                     label.lower()
                     for label in row["alternative_labels:String"].split("||")
                     if label != ""
                 ]
 
-                concept_source = _concept_source_from_id(source_id)
+                concept_source = concept_source_from_id(source_id)
+                self.ids_to_transformers[source_id] = transformer
                 self._add_label_mapping(label, source_id, concept_source)
                 self._add_alternative_label_mappings(
                     alternative_labels, source_id, concept_source
@@ -76,7 +82,7 @@ class IdLabelChecker:
         self, label: str, source_id: str, concept_source: ConceptSource
     ) -> None:
         self.ids_to_labels[concept_source][source_id] = label
-        self.labels_to_ids[concept_source][label].append(source_id)
+        self.labels_to_ids[concept_source][label.lower()].append(source_id)
 
     def _add_alternative_label_mappings(
         self, labels: list[str], source_id: str, concept_source: ConceptSource
@@ -129,6 +135,10 @@ class IdLabelChecker:
     def get_label(self, source_id: str, source: ConceptSource) -> str | None:
         """Given a source id from a specific source (e.g. nlm-mesh, lc-subjects), return its label."""
         return self.ids_to_labels[source].get(source_id, None)
+
+    def get_transformer(self, source_id: str) -> TransformerType | None:
+        """Given a source id, return the transformer type whose bulk load file it came from."""
+        return self.ids_to_transformers.get(source_id, None)
 
     def get_alternative_labels(
         self, source_id: str, source: ConceptSource

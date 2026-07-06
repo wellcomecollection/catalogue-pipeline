@@ -14,6 +14,11 @@ class BaseNode(BaseModel):
     id: str
     label: str | None = None
 
+    @classmethod
+    def bulk_load_label(cls) -> str:
+        """The Neptune node label (`:LABEL`) under which instances are bulk loaded."""
+        return cls.__name__
+
 
 # Represents a LoC, MeSH, or Wikidata concept.
 # The `id` field stores a unique identifier provided by the source vocabulary/ontology
@@ -40,6 +45,30 @@ class SourceName(SourceConcept):
     date_of_birth: FormattedDateString | None = None
     date_of_death: FormattedDateString | None = None
     place_of_birth: str | None = None
+
+
+# A minimal stand-in for a source concept which is referenced by a catalogue concept but might not have been
+# bulk loaded into the graph yet (source ontology loads run monthly; catalogue loads run incrementally).
+# The full monthly load enriches the stub in place. The field set must stay identical to `Concept` so that
+# both can share a single bulk load CSV (whose header is derived from one model).
+class SourceConceptStub(BaseNode):
+    source: ConceptSource
+
+    @classmethod
+    def bulk_load_label(cls) -> str:
+        return "SourceConcept"
+
+
+class SourceLocationStub(SourceConceptStub):
+    @classmethod
+    def bulk_load_label(cls) -> str:
+        return "SourceLocation"
+
+
+class SourceNameStub(SourceConceptStub):
+    @classmethod
+    def bulk_load_label(cls) -> str:
+        return "SourceName"
 
 
 # The `id` field stores a canonical Wellcome identifier
