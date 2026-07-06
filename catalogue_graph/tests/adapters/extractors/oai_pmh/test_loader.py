@@ -16,7 +16,10 @@ from adapters.extractors.oai_pmh.models.step_events import (
     OAIPMHLoaderEvent,
     OAIPMHLoaderResponse,
 )
-from adapters.extractors.oai_pmh.record_writer import WindowRecordWriter
+from adapters.extractors.oai_pmh.record_writer import (
+    BufferedWindowRecordWriter,
+    WindowRecordWriter,
+)
 from adapters.steps.oai_pmh import loader
 from adapters.steps.oai_pmh.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
@@ -103,6 +106,7 @@ class TestExecuteLoader:
                 time_range=req.window,
                 max_windows=req.max_windows,
                 reprocess_successful_windows=False,
+                flush_every=None,
             )
 
     def test_reemits_changeset_ids_from_reused_summaries(
@@ -489,3 +493,317 @@ class TestWindowRecordWriter:
 
         # Should have changeset_id again
         assert result_3.changeset_id is not None
+
+
+# ---------------------------------------------------------------------------
+# Backfill mode (reprocess + batched commits)
+# ---------------------------------------------------------------------------
+class TestLoaderBackfillMode:
+    def test_step_config_defaults(self) -> None:
+        cfg = loader.LoaderStepConfig()
+        assert cfg.reprocess_successful_windows is False
+        assert cfg.flush_every is None
+
+    def test_execute_loader_threads_backfill_options_to_harvest_range(
+        self,
+        loader_runtime: LoaderRuntime,
+    ) -> None:
+        req = _create_loader_event()
+        loader_runtime.reprocess_successful_windows = True
+        loader_runtime.flush_every = 25
+
+        with patch.object(WindowHarvestManager, "harvest_range") as mock_harvest:
+            mock_harvest.return_value = []
+
+            loader.execute_loader(req, runtime=loader_runtime)
+
+            mock_harvest.assert_called_once_with(
+                time_range=req.window,
+                max_windows=req.max_windows,
+                reprocess_successful_windows=True,
+                flush_every=25,
+            )
+
+    def test_build_harvester_uses_buffered_writer_when_flushing(
+        self,
+        loader_runtime: LoaderRuntime,
+    ) -> None:
+        req = _create_loader_event()
+
+        legacy = loader.build_harvester(req, loader_runtime)
+        assert type(legacy.record_callback) is WindowRecordWriter
+        assert legacy.flush_callback is None
+
+        loader_runtime.flush_every = 10
+        buffered = loader.build_harvester(req, loader_runtime)
+        assert isinstance(buffered.record_callback, BufferedWindowRecordWriter)
+        assert buffered.flush_callback == buffered.record_callback.flush
+
+    def test_flush_changeset_ids_and_counts_reach_the_response(
+        self,
+        loader_runtime: LoaderRuntime,
+    ) -> None:
+        """Changeset ids and upserted counts produced by per-flush commits
+        (not in any window's tags) must still be included in the loader
+        response."""
+        req = _create_loader_event()
+        loader_runtime.flush_every = 10
+
+        summary = _create_success_summary(req, record_ids=["id-1"], changeset_id=None)
+        summary.tags = {"job_id": req.job_id}
+
+        def fake_harvest_range(
+            self: WindowHarvestManager, **kwargs: object
+        ) -> list[WindowSummary]:
+            # Simulate a flush having committed a changeset during the harvest
+            assert isinstance(self.record_callback, BufferedWindowRecordWriter)
+            self.record_callback.changeset_ids.append("cs-flush-1")
+            self.record_callback.upserted_record_count += 1234
+            return [summary]
+
+        with patch.object(
+            WindowHarvestManager, "harvest_range", autospec=True
+        ) as mock_harvest:
+            mock_harvest.side_effect = fake_harvest_range
+
+            response = loader.execute_loader(req, runtime=loader_runtime)
+
+        assert response.changeset_ids == ["cs-flush-1"]
+        assert response.changed_record_count == 1234
+
+    def test_local_cli_flags_reach_step_config(
+        self, tmp_path: object, monkeypatch: object
+    ) -> None:
+        import argparse
+        import json as jsonlib
+        import sys
+        from pathlib import Path
+        from unittest.mock import MagicMock
+
+        assert isinstance(tmp_path, Path)
+
+        now = datetime.now(tz=UTC)
+        event_path = tmp_path / "event.json"
+        event_path.write_text(
+            jsonlib.dumps(
+                {
+                    "job_id": "job-123",
+                    "adapter_type": "axiell",
+                    "window": {
+                        "start_time": (now - timedelta(minutes=15)).isoformat(),
+                        "end_time": now.isoformat(),
+                    },
+                }
+            )
+        )
+
+        captured: dict[str, object] = {}
+
+        def fake_build_runtime(
+            config: object, step_config: loader.LoaderStepConfig
+        ) -> MagicMock:
+            captured["step_config"] = step_config
+            return MagicMock()
+
+        fake_response = MagicMock()
+        fake_response.model_dump.return_value = {}
+
+        monkeypatch.setattr(loader, "get_config", MagicMock())  # type: ignore[attr-defined]
+        monkeypatch.setattr(loader, "build_runtime", fake_build_runtime)  # type: ignore[attr-defined]
+        monkeypatch.setattr(loader, "handler", MagicMock(return_value=fake_response))  # type: ignore[attr-defined]
+        monkeypatch.setattr(  # type: ignore[attr-defined]
+            sys,
+            "argv",
+            [
+                "loader",
+                "--adapter-type",
+                "axiell",
+                "--event",
+                str(event_path),
+                "--reprocess-successful-windows",
+                "--flush-every",
+                "50",
+            ],
+        )
+
+        loader.local_handler(argparse.ArgumentParser())
+
+        step_config = captured["step_config"]
+        assert isinstance(step_config, loader.LoaderStepConfig)
+        assert step_config.reprocess_successful_windows is True
+        assert step_config.flush_every == 50
+
+
+class TestFromSummariesExtraChangesets:
+    def test_extra_changeset_ids_are_added(self) -> None:
+        req = _create_loader_event()
+        summary = _create_success_summary(
+            req, record_ids=["id-1"], changeset_id="cs-window"
+        )
+
+        response = OAIPMHLoaderResponse.from_summaries(
+            [summary], job_id=req.job_id, extra_changeset_ids=["cs-flush"]
+        )
+
+        assert sorted(response.changeset_ids) == ["cs-flush", "cs-window"]
+
+    def test_extra_upserted_record_count_is_added(self) -> None:
+        req = _create_loader_event()
+        # Window tags count 2 changed records; the flush adds another 5
+        summary = _create_success_summary(
+            req,
+            record_ids=["id-1", "id-2"],
+            changed_record_ids=["id-1", "id-2"],
+            changeset_id="cs-window",
+        )
+
+        response = OAIPMHLoaderResponse.from_summaries(
+            [summary], job_id=req.job_id, extra_upserted_record_count=5
+        )
+
+        assert response.changed_record_count == 7
+
+    def test_extra_changeset_ids_default_is_backward_compatible(self) -> None:
+        req = _create_loader_event()
+        summary = _create_success_summary(
+            req, record_ids=["id-1"], changeset_id="cs-window"
+        )
+
+        response = OAIPMHLoaderResponse.from_summaries([summary], job_id=req.job_id)
+
+        assert response.changeset_ids == ["cs-window"]
+        assert response.changed_record_count == 1
+
+
+# ---------------------------------------------------------------------------
+# BufferedWindowRecordWriter tests (adapter-agnostic)
+# ---------------------------------------------------------------------------
+class TestBufferedWindowRecordWriter:
+    def _make_writer(
+        self, adapter_store_client: AdapterStore, adapter_namespace: str
+    ) -> BufferedWindowRecordWriter:
+        return BufferedWindowRecordWriter(
+            namespace=adapter_namespace,
+            table_client=adapter_store_client,
+            job_id="job-123",
+            window_range=WINDOW_RANGE,
+        )
+
+    def _record(self, content: str | None, when: datetime) -> SimpleNamespace:
+        metadata = etree.fromstring(content) if content is not None else None
+        return SimpleNamespace(
+            metadata=metadata, header=SimpleNamespace(datestamp=when)
+        )
+
+    def test_call_buffers_without_committing(
+        self,
+        adapter_store_client: AdapterStore,
+        adapter_namespace: str,
+    ) -> None:
+        writer = self._make_writer(adapter_store_client, adapter_namespace)
+        when = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+        result = writer(records=[("id-1", self._record("<m>one</m>", when))])
+
+        assert result.changeset_id is None
+        assert result.upserted_record_ids == []
+        assert result.tags["job_id"] == "job-123"
+        # Nothing committed until flush
+        assert adapter_store_client.get_all_records().num_rows == 0
+
+    def test_flush_commits_buffered_rows_once(
+        self,
+        adapter_store_client: AdapterStore,
+        adapter_namespace: str,
+    ) -> None:
+        writer = self._make_writer(adapter_store_client, adapter_namespace)
+        when = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+        writer(records=[("id-1", self._record("<m>one</m>", when))])
+        writer(records=[("id-2", self._record("<m>two</m>", when))])
+
+        changeset_id = writer.flush()
+
+        assert changeset_id is not None
+        assert writer.changeset_ids == [changeset_id]
+        assert adapter_store_client.get_all_records().num_rows == 2
+
+    def test_flush_with_empty_buffer_returns_none(
+        self,
+        adapter_store_client: AdapterStore,
+        adapter_namespace: str,
+    ) -> None:
+        writer = self._make_writer(adapter_store_client, adapter_namespace)
+        assert writer.flush() is None
+        assert writer.changeset_ids == []
+
+    def test_rebuffered_record_last_write_wins(
+        self,
+        adapter_store_client: AdapterStore,
+        adapter_namespace: str,
+    ) -> None:
+        writer = self._make_writer(adapter_store_client, adapter_namespace)
+        t1 = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+        t2 = t1 + timedelta(minutes=15)
+
+        writer(records=[("id-1", self._record("<m>old</m>", t1))])
+        writer(records=[("id-1", self._record("<m>new</m>", t2))])
+        writer.flush()
+
+        all_records = adapter_store_client.get_all_records()
+        assert all_records.num_rows == 1
+        row = all_records.to_pylist()[0]
+        assert row["content"] == "<m>new</m>"
+        assert row["last_modified"] == t2
+
+    def test_changeset_ids_accumulate_across_flushes(
+        self,
+        adapter_store_client: AdapterStore,
+        adapter_namespace: str,
+    ) -> None:
+        writer = self._make_writer(adapter_store_client, adapter_namespace)
+        when = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+        writer(records=[("id-1", self._record("<m>one</m>", when))])
+        first = writer.flush()
+        writer(records=[("id-2", self._record("<m>two</m>", when))])
+        second = writer.flush()
+
+        assert first is not None and second is not None
+        assert writer.changeset_ids == [first, second]
+
+    def test_upserted_record_count_accumulates_across_flushes(
+        self,
+        adapter_store_client: AdapterStore,
+        adapter_namespace: str,
+    ) -> None:
+        writer = self._make_writer(adapter_store_client, adapter_namespace)
+        when = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+        assert writer.upserted_record_count == 0
+
+        writer(records=[("id-1", self._record("<m>one</m>", when))])
+        writer(records=[("id-2", self._record("<m>two</m>", when))])
+        writer.flush()
+        assert writer.upserted_record_count == 2
+
+        writer(records=[("id-3", self._record("<m>three</m>", when))])
+        writer.flush()
+        assert writer.upserted_record_count == 3
+
+    def test_noop_flush_produces_no_changeset(
+        self,
+        adapter_store_client: AdapterStore,
+        adapter_namespace: str,
+    ) -> None:
+        """Re-flushing identical data is a no-op incremental update."""
+        writer = self._make_writer(adapter_store_client, adapter_namespace)
+        when = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+        writer(records=[("id-1", self._record("<m>one</m>", when))])
+        assert writer.flush() is not None
+
+        writer(records=[("id-1", self._record("<m>one</m>", when))])
+        assert writer.flush() is None
+        assert len(writer.changeset_ids) == 1
+        assert writer.upserted_record_count == 1

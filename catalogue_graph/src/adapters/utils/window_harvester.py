@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 import json
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from datetime import UTC, datetime
 from typing import Protocol
 
@@ -144,6 +144,7 @@ class WindowHarvestManager:
         *,
         record_callback: WindowCallback,
         default_tags: dict[str, str] | None = None,
+        flush_callback: Callable[[], str | None] | None = None,
     ) -> None:
         self.client = client
         self.store = store
@@ -153,6 +154,7 @@ class WindowHarvestManager:
         self.window_minutes = window_generator.window_minutes
         self.record_callback = record_callback
         self.default_tags = dict(default_tags or {})
+        self.flush_callback = flush_callback
 
     def harvest_range(
         self,
@@ -160,7 +162,20 @@ class WindowHarvestManager:
         time_range: IncrementalWindow,
         max_windows: int | None = None,
         reprocess_successful_windows: bool = False,
+        flush_every: int | None = None,
     ) -> list[WindowSummary]:
+        """Harvest all pending windows in the given time range.
+
+        When ``flush_every`` is set, store writes are batched: window-status
+        rows and any buffered record writes (via ``flush_callback``) are only
+        committed at every ``flush_every``-th window and once at the end,
+        instead of once per window. This trades durability for throughput: a
+        crash loses up to ``flush_every`` windows of uncommitted work, which
+        must be re-harvested on the next run. The mode is intended for
+        resumable backfills where windows committed by an earlier flush are
+        skipped on rerun. With ``flush_every=None`` (the default) behaviour is
+        identical to the classic one-commit-per-window path.
+        """
         candidate_windows = self.window_generator.generate_windows(time_range)
         pending_windows = []
 
@@ -192,7 +207,9 @@ class WindowHarvestManager:
             window_range=time_range.to_formatted_string(),
         )
 
-        new_summaries = self.harvest_windows(pending_windows, summary_map=summary_map)
+        new_summaries = self.harvest_windows(
+            pending_windows, summary_map=summary_map, flush_every=flush_every
+        )
 
         combined_summaries = reused_summaries + new_summaries
         combined_summaries.sort(key=lambda summary: summary.window_start)
@@ -203,25 +220,76 @@ class WindowHarvestManager:
         windows: Sequence[IncrementalWindow],
         *,
         summary_map: dict[str, WindowSummary] | None = None,
+        flush_every: int | None = None,
     ) -> list[WindowSummary]:
-        logger.info("Processing windows sequentially", window_count=len(windows))
+        """Process windows sequentially, optionally batching store commits.
+
+        See ``harvest_range`` for the semantics (and crash trade-offs) of
+        ``flush_every``.
+        """
+        if flush_every is not None and flush_every < 1:
+            raise ValueError("flush_every must be a positive integer")
+
+        logger.info(
+            "Processing windows sequentially",
+            window_count=len(windows),
+            flush_every=flush_every,
+        )
+        defer_store_writes = flush_every is not None
 
         summaries = []
+        pending_flush: list[WindowSummary] = []
         for window in windows:
             existing_summary = (summary_map or {}).get(window.to_iso_string())
-            summaries.append(
-                self.process_window(window, existing_summary=existing_summary)
+            summary = self.process_window(
+                window,
+                existing_summary=existing_summary,
+                defer_store_writes=defer_store_writes,
             )
+            summaries.append(summary)
+
+            if defer_store_writes:
+                # Failed windows are included too, so their failure rows are
+                # persisted at the flush boundary (matching legacy semantics).
+                pending_flush.append(summary)
+                if flush_every is not None and len(pending_flush) >= flush_every:
+                    self._flush(pending_flush)
+                    pending_flush = []
+
+        if pending_flush:
+            self._flush(pending_flush)
 
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
+
+    def _flush(self, pending_summaries: list[WindowSummary]) -> None:
+        """Commit deferred record writes and window-status rows.
+
+        Records are flushed before the status rows are marked, so a crash in
+        between re-harvests the affected windows on the next run (idempotent
+        upserts) rather than marking never-committed windows as successful.
+        """
+        changeset_id = self.flush_callback() if self.flush_callback else None
+        self.store.upsert_many(pending_summaries)
+        logger.info(
+            "Flushed window batch",
+            window_count=len(pending_summaries),
+            changeset_id=changeset_id,
+        )
 
     def process_window(
         self,
         window: IncrementalWindow,
         *,
         existing_summary: WindowSummary | None = None,
+        defer_store_writes: bool = False,
     ) -> WindowSummary:
+        """Harvest a single window and return its summary.
+
+        With ``defer_store_writes=True`` neither the final window-status upsert
+        nor the intermediate per-batch upserts are written; the caller is
+        responsible for persisting the returned summary (see ``_flush``).
+        """
         logger.info("Processing window", window=window.to_iso_string())
 
         # If we already processed a window but some of its batches failed,
@@ -250,14 +318,17 @@ class WindowHarvestManager:
                 if get_record_identifier(r) not in ids_to_skip
             )
             for batch in itertools.batched(records_in_window, BATCH_SIZE):
-                self._process_single_batch(list(batch), progress)
+                self._process_single_batch(
+                    list(batch), progress, defer_store_writes=defer_store_writes
+                )
         except NoRecordsMatchError:
             pass  # Fall through to final state
         except Exception as e:
             progress.last_error = repr(e)
 
         summary = progress.to_summary(is_final=True)
-        self.store.upsert(summary)
+        if not defer_store_writes:
+            self.store.upsert(summary)
 
         if summary.state == "success":
             logger.info(
@@ -278,6 +349,8 @@ class WindowHarvestManager:
         self,
         batch: list[Record],
         progress: BatchProgress,
+        *,
+        defer_store_writes: bool = False,
     ) -> None:
         logger.info("Processing batch", batch_count=len(batch))
 
@@ -306,7 +379,7 @@ class WindowHarvestManager:
                 error=repr(e),
             )
 
-        if progress.batches_succeeded > 0:
+        if progress.batches_succeeded > 0 and not defer_store_writes:
             # Failing to persist the window summary for a specific batch is not a critical error. The only summary
             # which must be persisted (and whose failure to persist should cause the run to fail) is the final one.
             try:

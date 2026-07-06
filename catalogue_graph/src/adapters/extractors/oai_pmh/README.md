@@ -32,6 +32,7 @@ All OAI-PMH adapters follow this pattern:
 - For each harvested record, serialises the XML payload into the **Iceberg record table** under the adapter namespace and associates it with the current `job_id`.
 - Updates the window status table with `pending/success/failed` states and attaches tags for `job_id`, `window_key`, and every Iceberg `changeset_id` produced.
 - Returns a `LoaderResponse` containing window results and `changeset_ids`.
+- Local CLI runs additionally support `--reprocess-successful-windows` and `--flush-every N` for backfills (see [Backfilling large gaps](#backfilling-large-gaps)).
 
 ### Reloader (`steps/reloader.py`)
 
@@ -65,6 +66,8 @@ uv run python -m adapters.steps.oai_pmh.trigger --adapter-type {axiell,folio} \
 
 #### Backfilling large gaps
 
+Use the trigger to build an event covering the gap:
+
 ```bash
 uv run python -m adapters.steps.oai_pmh.trigger --adapter-type {axiell,folio} \
   --at 2025-11-22T09:00:00Z \
@@ -73,6 +76,21 @@ uv run python -m adapters.steps.oai_pmh.trigger --adapter-type {axiell,folio} \
   --job-id backfill-20251122 \
   > /tmp/{adapter}_backfill_event.json
 ```
+
+Then run the loader with the backfill options:
+
+```bash
+uv run python -m adapters.steps.oai_pmh.loader --use-cli --adapter-type {axiell,folio} \
+  --event /tmp/{adapter}_backfill_event.json \
+  --reprocess-successful-windows \
+  --flush-every 50 \
+  > /tmp/{adapter}_backfill_output.json
+```
+
+- `--reprocess-successful-windows` re-harvests windows already marked success. Use it when committed windows have gone stale, for example after a bulk load with backdated datestamps changed records inside windows that already succeeded.
+- `--flush-every N` batches Iceberg commits: records and window statuses are committed once per N windows instead of once per window. Per-window commits on S3 Tables dominate backfill wall-clock time, so batching speeds large backfills up severalfold. The trade-off is crash recovery: a crash loses up to N windows of uncommitted fetch work, which is re-fetched on the next run. This is safe because records are committed before window statuses, so an interrupted flush never marks unharvested windows as successful.
+
+Leave both flags off for normal incremental operation: default per-window commits give the tightest durability, and skipping already-successful windows is what keeps scheduled runs idempotent.
 
 ### 2. Loader → harvest records & emit changesets
 
@@ -113,15 +131,17 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \
 
 ### Common CLI flags
 
-| Flag                   | Description                                        |
-| ---------------------- | -------------------------------------------------- |
-| `--use-rest-api-table` | Use S3 Tables catalog instead of local SQLite      |
-| `--at`                 | Override the "current time" for window calculation |
-| `--job-id`             | Override the auto-generated job ID                 |
-| `--window-minutes`     | Duration of each harvesting window                 |
-| `--lookback-days`      | How far back to start if no history exists         |
-| `--enforce-lag`        | Fail if lag exceeds threshold                      |
-| `--dry-run`            | (Reloader only) Preview gaps without processing    |
+| Flag                             | Description                                                    |
+| -------------------------------- | -------------------------------------------------------------- |
+| `--use-rest-api-table`           | Use S3 Tables catalog instead of local SQLite                  |
+| `--at`                           | Override the "current time" for window calculation             |
+| `--job-id`                       | Override the auto-generated job ID                             |
+| `--window-minutes`               | Duration of each harvesting window                             |
+| `--lookback-days`                | How far back to start if no history exists                     |
+| `--enforce-lag`                  | Fail if lag exceeds threshold                                  |
+| `--dry-run`                      | (Reloader only) Preview gaps without processing                |
+| `--reprocess-successful-windows` | (Loader only) Re-harvest windows already marked success        |
+| `--flush-every`                  | (Loader only) Commit records and statuses every N windows      |
 
 ## Environment prerequisites
 
