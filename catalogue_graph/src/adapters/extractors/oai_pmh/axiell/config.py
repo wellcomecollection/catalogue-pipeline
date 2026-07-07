@@ -71,6 +71,9 @@ OAI_MAX_READ_TIMEOUT = float(os.getenv("OAI_MAX_READ_TIMEOUT", "60.0"))
 OAI_MAX_RETRIES = int(os.getenv("OAI_MAX_RETRIES", "1"))
 OAI_BACKOFF_FACTOR = float(os.getenv("OAI_BACKOFF_FACTOR", "0.75"))
 OAI_BACKOFF_MAX = float(os.getenv("OAI_BACKOFF_MAX", "5.0"))
+# Retries for transient failures (empty bodies, transport errors, 5xx); shares
+# the backoff ladder configured by OAI_BACKOFF_FACTOR / OAI_BACKOFF_MAX.
+OAI_TRANSIENT_RETRIES = int(os.getenv("OAI_TRANSIENT_RETRIES", "3"))
 
 
 # ---------------------------------------------------------------------------

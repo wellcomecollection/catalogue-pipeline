@@ -114,7 +114,7 @@
                   }
                 }
               ],
-              "type": "Concept"
+              "type": "Period"
             }
           ],
           "type": "Genre"
@@ -182,5 +182,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T16:56:01.870545+00:00"
+  "createdAt": "2026-06-30T07:40:46.607116+00:00"
 }

@@ -62,6 +62,7 @@ class DateTimeRange(SerialisableModel):
 
 class Period(Concept):
     range: DateTimeRange | None = None
+    type: RawConceptType = "Period"
 
 
 class Subject(Concept):

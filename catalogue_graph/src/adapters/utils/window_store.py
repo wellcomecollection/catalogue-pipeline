@@ -97,19 +97,33 @@ class WindowStore:
 
     def upsert(self, record: WindowSummary) -> None:
         """Replace any existing row for this window, in a single Iceberg commit."""
-        self.upsert_many([record])
+        arrow = pa.Table.from_pylist(
+            [record.model_dump()], schema=WINDOW_STATUS_ARROW_SCHEMA
+        )
+        with self._lock, self.table.transaction() as tx:
+            tx.overwrite(
+                arrow, overwrite_filter=EqualTo("window_key", str(record.window_key))
+            )
 
     def upsert_many(self, records: list[WindowSummary]) -> None:
-        """Replace any existing rows for these windows, in a single Iceberg commit."""
+        """Replace any existing rows for these windows, in a single Iceberg commit.
+
+        Behaves like calling ``upsert`` for each record but costs one commit
+        instead of one per row. Records must have distinct window keys.
+        """
         if not records:
             return
+
+        window_keys = [str(record.window_key) for record in records]
+        if len(set(window_keys)) != len(window_keys):
+            raise ValueError("upsert_many requires distinct window keys")
+
         arrow = pa.Table.from_pylist(
             [record.model_dump() for record in records],
             schema=WINDOW_STATUS_ARROW_SCHEMA,
         )
-        keys = [str(record.window_key) for record in records]
         with self._lock, self.table.transaction() as tx:
-            tx.overwrite(arrow, overwrite_filter=In("window_key", keys))
+            tx.overwrite(arrow, overwrite_filter=In("window_key", window_keys))
 
     def list_by_state(self, state: str) -> list[dict[str, Any]]:
         """Return rows filtered by state (e.g. success, failed)."""

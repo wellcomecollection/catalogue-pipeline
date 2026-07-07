@@ -39,7 +39,14 @@ ORIGIN_CODE_TO_ID_TYPE = {
 }
 
 
-IGNORED_PREFIXES = {"SCM loan accession number", "temporary number"}
+IGNORED_PREFIXES = {
+    "SCM loan accession number",
+    "temporary number",
+    "Other number",
+    "Previous number",
+    "Previouse number",
+    "Archivematica UUID",
+}
 
 
 def format_field(field: Field) -> SourceIdentifier | None:

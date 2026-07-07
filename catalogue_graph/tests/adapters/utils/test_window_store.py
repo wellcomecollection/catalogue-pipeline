@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
+import pytest
 from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
@@ -253,3 +254,94 @@ def test_load_status_map_filters_by_time_range(tmp_path: Path) -> None:
         ).to_iso_string()
         in result
     )
+
+
+def _summary(
+    start: datetime, state: str = "success", attempts: int = 1
+) -> WindowSummary:
+    return WindowSummary.model_validate(
+        {
+            "window_start": start,
+            "window_end": start + timedelta(minutes=15),
+            "state": state,
+            "attempts": attempts,
+            "last_error": None,
+            "record_ids": [],
+            "updated_at": datetime.now(UTC),
+            "tags": None,
+        }
+    )
+
+
+def test_upsert_many_writes_and_replaces_rows(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog.db"
+    warehouse_path = tmp_path / "warehouse"
+    table = _create_table(
+        catalog_uri=f"sqlite:///{catalog_path}",
+        warehouse_path=warehouse_path,
+        namespace="harvest",
+        table_name=f"window_status_{uuid4().hex}",
+        catalog_name=f"catalog_{uuid4().hex}",
+    )
+    store = WindowStore(table)
+
+    t1 = datetime(2025, 1, 1, 10, 0, tzinfo=UTC)
+    t2 = datetime(2025, 1, 1, 11, 0, tzinfo=UTC)
+    t3 = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    # Pre-existing row for t1 that the batch must replace
+    store.upsert(_summary(t1, state="failed"))
+    snapshots_before = len(table.history())
+
+    store.upsert_many(
+        [
+            _summary(t1, state="success", attempts=2),
+            _summary(t2),
+            _summary(t3),
+        ]
+    )
+
+    # A single Iceberg transaction for the whole batch: one overwrite produces
+    # at most a delete snapshot plus an append snapshot, regardless of row count
+    # (three individual upserts would have produced up to six).
+    assert len(table.history()) - snapshots_before <= 2
+
+    stored = store.load_status_map()
+    assert len(stored) == 3
+    t1_key = _summary(t1).window_key
+    assert stored[t1_key].state == "success"
+    assert stored[t1_key].attempts == 2
+
+
+def test_upsert_many_with_empty_list_is_a_noop(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog.db"
+    warehouse_path = tmp_path / "warehouse"
+    table = _create_table(
+        catalog_uri=f"sqlite:///{catalog_path}",
+        warehouse_path=warehouse_path,
+        namespace="harvest",
+        table_name=f"window_status_{uuid4().hex}",
+        catalog_name=f"catalog_{uuid4().hex}",
+    )
+    store = WindowStore(table)
+
+    store.upsert_many([])
+    assert store.load_status_map() == {}
+    assert len(table.history()) == 0
+
+
+def test_upsert_many_rejects_duplicate_window_keys(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog.db"
+    warehouse_path = tmp_path / "warehouse"
+    table = _create_table(
+        catalog_uri=f"sqlite:///{catalog_path}",
+        warehouse_path=warehouse_path,
+        namespace="harvest",
+        table_name=f"window_status_{uuid4().hex}",
+        catalog_name=f"catalog_{uuid4().hex}",
+    )
+    store = WindowStore(table)
+
+    t1 = datetime(2025, 1, 1, 10, 0, tzinfo=UTC)
+    with pytest.raises(ValueError, match="distinct window keys"):
+        store.upsert_many([_summary(t1), _summary(t1, state="failed")])
