@@ -71,6 +71,10 @@ class PipelineReport(BaseModel):
 
 class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
     @property
+    def publish_to_cloudwatch(self) -> bool:
+        return self.graph_date != "dev"
+
+    @property
     def metric_namespace(self) -> str:
         return "catalogue_graph_pipeline"
 
@@ -94,6 +98,10 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
 
 
 class IngestorReport(PipelineReport, IngestorStepEvent):
+    @property
+    def publish_to_cloudwatch(self) -> bool:
+        return self.graph_date != "dev"
+
     @property
     def metric_namespace(self) -> str:
         return "catalogue_graph_pipeline"
