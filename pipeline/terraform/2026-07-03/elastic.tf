@@ -49,6 +49,7 @@ locals {
 module "elastic" {
   source = "../modules/pipeline/elastic_indices"
 
+  es_cluster_date            = local.es_cluster_date
   pipeline_date              = local.pipeline_date
   es_endpoint                = local.es_cluster.https_endpoint
   es_username                = local.es_cluster.username

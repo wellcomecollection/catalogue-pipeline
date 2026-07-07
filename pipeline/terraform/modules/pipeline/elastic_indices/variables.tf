@@ -1,5 +1,7 @@
 variable "pipeline_date" { type = string }
 
+variable "es_cluster_date" { type = string }
+
 variable "es_endpoint" {
   type        = string
   description = "Elasticsearch HTTPS endpoint (e.g. https://xxx.eu-west-1.aws.found.io:9243)"

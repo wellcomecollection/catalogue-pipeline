@@ -1,16 +1,16 @@
 locals {
-  deployment_name = replace(var.cluster_name, "_", "-")
+  # deployment_name = replace(var.cluster_date, "_", "-")
 
   elastic_id     = ec_deployment.cluster.elasticsearch.resource_id
   elastic_region = ec_deployment.cluster.elasticsearch.region
 
   secrets_kv_map = {
-    "elasticsearch/${var.cluster_name}/public_host"  = "${local.elastic_id}.${local.elastic_region}.aws.found.io"
-    "elasticsearch/${var.cluster_name}/private_host" = "${local.elastic_id}.vpce.${local.elastic_region}.aws.elastic-cloud.com"
-    "elasticsearch/${var.cluster_name}/protocol"     = split(":", ec_deployment.cluster.elasticsearch.https_endpoint)[0]
-    "elasticsearch/${var.cluster_name}/port"         = reverse(split(":", ec_deployment.cluster.elasticsearch.https_endpoint))[0]
-    "elasticsearch/${var.cluster_name}/es_username"  = ec_deployment.cluster.elasticsearch_username
-    "elasticsearch/${var.cluster_name}/es_password"  = ec_deployment.cluster.elasticsearch_password
+    "elasticsearch/es-cluster-${var.cluster_date}/public_host"  = "${local.elastic_id}.${local.elastic_region}.aws.found.io"
+    "elasticsearch/es-cluster-${var.cluster_date}/private_host" = "${local.elastic_id}.vpce.${local.elastic_region}.aws.elastic-cloud.com"
+    "elasticsearch/es-cluster-${var.cluster_date}/protocol"     = split(":", ec_deployment.cluster.elasticsearch.https_endpoint)[0]
+    "elasticsearch/es-cluster-${var.cluster_date}/port"         = reverse(split(":", ec_deployment.cluster.elasticsearch.https_endpoint))[0]
+    "elasticsearch/es-cluster-${var.cluster_date}/es_username"  = ec_deployment.cluster.elasticsearch_username
+    "elasticsearch/es-cluster-${var.cluster_date}/es_password"  = ec_deployment.cluster.elasticsearch_password
   }
 }
 
@@ -20,7 +20,7 @@ data "ec_stack" "latest_patch" {
 }
 
 resource "ec_deployment" "cluster" {
-  name                   = local.deployment_name
+  name                   = "es-cluster-${var.cluster_date}"
   version                = data.ec_stack.latest_patch.version
   region                 = "eu-west-1"
   deployment_template_id = var.deployment_template
@@ -82,7 +82,7 @@ module "readonly_user_secrets" {
   source        = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
   deletion_mode = "IMMEDIATE"
   key_value_map = {
-    "elasticsearch/${var.cluster_name}/read_only/es_username" = elasticstack_elasticsearch_security_user.read_only.username
-    "elasticsearch/${var.cluster_name}/read_only/es_password" = elasticstack_elasticsearch_security_user.read_only.password
+    "elasticsearch/${var.cluster_date}/read_only/es_username" = elasticstack_elasticsearch_security_user.read_only.username
+    "elasticsearch/${var.cluster_date}/read_only/es_password" = elasticstack_elasticsearch_security_user.read_only.password
   }
 }

@@ -15,7 +15,14 @@ variable "name" {
 }
 
 variable "pipeline_date" {
-  type = string
+  type        = string
+  description = "Pipeline date used service names, eg. 'merger-2025-10-02'"
+}
+
+variable "es_cluster_date" {
+  type        = string
+  default     = null
+  description = "When using persistent infrastructure/critical/modules/es-cluster, cluster date used in secret paths (elasticsearch/es-cluster-<date>/...)."
 }
 
 variable "expose_to_catalogue" {

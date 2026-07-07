@@ -1,6 +1,6 @@
-variable "cluster_name" {
+variable "cluster_date" {
   type        = string
-  description = "Short identifier used in AWS secret paths and EC deployment name (e.g. 'pipeline_storage_v1')."
+  description = "Date identifier used in AWS secret paths and EC deployment name (e.g. '2026-07-03')."
 }
 
 variable "deployment_template" {

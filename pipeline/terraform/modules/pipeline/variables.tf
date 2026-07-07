@@ -1,5 +1,10 @@
-variable "pipeline_date" {
+variable "pipeline_date" { // nammespace for the pipeline services
   type = string
+}
+
+variable "es_cluster_date" { // the es cluster that the pipeline services use, eg. "es-cluster-2026-07-03"
+  type = string
+  default = null
 }
 
 variable "min_capacity" {

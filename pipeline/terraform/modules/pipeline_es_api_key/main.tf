@@ -44,6 +44,10 @@ locals {
   })
 }
 
+locals {
+  secret_prefix = var.es_cluster_date != null ? "elasticsearch/es-cluster-${var.es_cluster_date}" : "elasticsearch/pipeline_storage_${var.pipeline_date}"
+}
+
 resource "elasticstack_elasticsearch_security_api_key" "pipeline_service" {
   name             = "${var.name}-${var.pipeline_date}"
   role_descriptors = jsonencode(local.role_descriptors)
@@ -55,7 +59,7 @@ module "pipeline_service_api_key_secrets" {
   deletion_mode = "IMMEDIATE"
 
   key_value_map = {
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/${var.name}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
+    "${local.secret_prefix}/${var.name}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
   }
 }
 
@@ -70,6 +74,6 @@ module "pipeline_catalogue_service_api_key_secrets" {
 
   deletion_mode = "IMMEDIATE"
   key_value_map = {
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/${var.name}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
+    "${local.secret_prefix}/${var.name}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
   }
 }

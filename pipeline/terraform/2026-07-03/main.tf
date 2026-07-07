@@ -33,6 +33,7 @@ module "pipeline" {
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
   pipeline_date = local.pipeline_date
+  es_cluster_date = local.es_cluster_date
   release_label = local.pipeline_date
 
   elastic_outputs = module.elastic

@@ -173,7 +173,7 @@ locals {
       es_host     = var.es_private_host
       es_port     = var.es_port
       es_protocol = var.es_protocol
-      es_apikey   = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key"
+      es_apikey   = "elasticsearch/es-cluster-${var.es_cluster_date}/${service}/api_key"
     }
   }
 
@@ -189,6 +189,7 @@ module "pipeline_services" {
   read_from           = each.value.read
   write_to            = each.value.write
   pipeline_date       = var.pipeline_date
+  es_cluster_date     = var.es_cluster_date
   expose_to_catalogue = contains(var.catalogue_account_services, each.key)
   providers = {
     aws.catalogue = aws.catalogue
