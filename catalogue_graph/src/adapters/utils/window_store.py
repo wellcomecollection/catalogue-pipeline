@@ -73,6 +73,14 @@ class WindowStore:
         pylist = arrow_table.to_pylist(maps_as_pydicts="lossy")
         return [WindowSummary.model_validate(row) for row in pylist]
 
+    def list_by_keys(self, keys: list[str]) -> list[WindowSummary]:
+        """Return rows whose window_key is in the given list."""
+        if not keys:
+            return []
+        arrow_table = self.table.scan().filter(In("window_key", keys)).to_arrow()
+        pylist = arrow_table.to_pylist(maps_as_pydicts="lossy")
+        return [WindowSummary.model_validate(row) for row in pylist]
+
     def load_status_map(
         self,
         start_time: datetime | None = None,

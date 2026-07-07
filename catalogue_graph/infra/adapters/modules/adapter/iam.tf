@@ -137,9 +137,10 @@ resource "aws_iam_policy" "state_machine_lambda_policy" {
         Action = [
           "lambda:InvokeFunction"
         ]
-        Resource = [
-          module.trigger_lambda.lambda.arn,
-        ]
+        Resource = concat(
+          [module.trigger_lambda.lambda.arn],
+          module.mark_published_lambda[*].lambda.arn,
+        )
       }
     ]
   })

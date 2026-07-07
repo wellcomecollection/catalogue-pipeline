@@ -4,6 +4,21 @@ locals {
   # "folio.adapter.completed" fires. Otherwise the loader goes straight to publish.
   loader_next = var.enable_item_enrichment ? "Should enrich?" : "Should publish event?"
 
+  # With published tracking, both the publish and the quiet no-publish paths end
+  # in "Mark published", which stamps the covered windows so the trigger resumes
+  # from the last published window. The quiet path matters: quiet windows are
+  # success rows too, and skipping them would stall the published cursor.
+  post_publish_next = local.published_tracking ? "Mark published" : "Success"
+
+  # The loader response names the success windows whose changesets it carries
+  # (covered_window_keys); "Mark published" stamps exactly those rows. The
+  # enrichment response drops the field, so carry it past that state here.
+  covered_keys_passthrough_output = merge([
+    for _ in range(local.published_tracking ? 1 : 0) : {
+      Output = "{% $merge([$states.result, {'covered_window_keys': $states.input.covered_window_keys}]) %}"
+    }
+  ]...)
+
   # Carry the items changeset for provenance only when enrichment runs.
   # The `merge([for ...]...)` pattern yields an empty map when disabled, avoiding
   # the type-unification error a `? : {}` conditional would raise.
@@ -32,7 +47,7 @@ locals {
         ]
         Default = "Should publish event?"
       }
-      "Run enrichment" = {
+      "Run enrichment" = merge({
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
         Next     = "Should publish event?"
@@ -68,7 +83,7 @@ locals {
             ]
           }
         }
-      }
+      }, local.covered_keys_passthrough_output)
     }
   ]...)
 
@@ -136,7 +151,7 @@ locals {
           Next      = "Publish event"
         }
       ]
-      Default = "Success"
+      Default = local.post_publish_next
     }
     "Publish event" = {
       Type     = "Task"
@@ -152,7 +167,7 @@ locals {
         ]
       }
       Output = "{% $states.input %}"
-      Next   = "Success"
+      Next   = local.post_publish_next
       Retry = [
         {
           ErrorEquals     = ["States.ALL"]
@@ -167,11 +182,43 @@ locals {
     }
   }
 
+  mark_published_states = merge([
+    for _ in range(local.published_tracking ? 1 : 0) : {
+      "Mark published" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke"
+        Arguments = {
+          FunctionName = one(module.mark_published_lambda[*].lambda.arn)
+          # The loader/enrichment response carries no adapter identity, so
+          # inject it alongside the response and its covered window keys.
+          Payload = "{% $merge([$states.input, {'adapter_type': '${var.namespace}'}]) %}"
+        }
+        Output = "{% $states.result.Payload %}"
+        Next   = "Success"
+        Retry = [
+          {
+            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
+            IntervalSeconds = 2
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          },
+          {
+            # Iceberg optimistic-concurrency commit conflicts; re-stamping is a no-op.
+            ErrorEquals     = ["States.ALL"]
+            IntervalSeconds = 5
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          }
+        ]
+      }
+    }
+  ]...)
+
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Adapter pipeline (trigger, loader, publish event)"
     StartAt       = "Run trigger"
-    States        = merge(local.base_states, local.enrichment_states)
+    States        = merge(local.base_states, local.enrichment_states, local.mark_published_states)
   })
 }
 
