@@ -30,8 +30,8 @@ def load_jsonl_fixture(file_name: str) -> list[Any]:
 
 def add_mock_transformer_outputs(
     transformers: list[TransformerType],
-    pipeline_date: str = "dev",
-    graph_date: str | None = None,
+    pipeline_date: str,
+    graph_date: str,
 ) -> None:
     """
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
@@ -39,7 +39,7 @@ def add_mock_transformer_outputs(
 
     for transformer in transformers:
         event = BulkLoaderEvent(
-            graph_date=graph_date or pipeline_date,
+            graph_date=graph_date,
             pipeline_date=pipeline_date,
             transformer_type=transformer,
             entity_type="nodes",
@@ -57,7 +57,7 @@ def add_mock_transformer_outputs(
 def add_mock_transformer_outputs_for_ontologies(
     ontologies: list[OntologyType],
     pipeline_date: str = "dev",
-    graph_date: str | None = None,
+    graph_date: str = "dev",
 ) -> None:
     """
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.

@@ -14,13 +14,15 @@ from tests.test_utils import (
 
 
 def test_wikidata_names_source_edges() -> None:
-    add_mock_transformer_outputs_for_ontologies(["loc", "wikidata_linked_loc"])
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc", "wikidata_linked_loc"], graph_date="2025-01-01"
+    )
 
     _add_mock_wikidata_requests("edges", "names")
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        graph_date="dev",
+        graph_date="2025-01-01",
         transformer_type="wikidata_linked_loc_names",
         entity_type="edges",
     )

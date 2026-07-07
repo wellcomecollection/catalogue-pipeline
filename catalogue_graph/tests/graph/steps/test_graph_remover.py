@@ -88,7 +88,9 @@ def test_graph_remover_next_run() -> None:
         load_fixture("loc/id_snapshot_loc_concepts__nodes.parquet"),
     )
 
-    add_mock_transformer_outputs_for_ontologies(["loc"], pipeline_date=pipeline_date)
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc"], pipeline_date=pipeline_date, graph_date=pipeline_date
+    )
 
     # Mock a deleted ids snapshot which includes two of the redundant IDs (sh00000004, sh00000005), leaving
     # sh00000006 as the only ID which should be removed as part of this run.

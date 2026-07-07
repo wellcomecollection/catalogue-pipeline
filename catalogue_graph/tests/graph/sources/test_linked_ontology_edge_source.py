@@ -18,7 +18,7 @@ def concepts_source() -> WikidataLinkedOntologyEdgeSource:
         linked_transformer="loc_concepts",
         event=ExtractorEvent(
             pipeline_date="test",
-            graph_date="dev",
+            graph_date="2023-12-12",
             transformer_type="wikidata_linked_loc_concepts",
             entity_type="edges",
         ),
@@ -31,7 +31,7 @@ def names_source() -> WikidataLinkedOntologyEdgeSource:
         linked_transformer="loc_names",
         event=ExtractorEvent(
             pipeline_date="test",
-            graph_date="dev",
+            graph_date="2025-01-01",
             transformer_type="wikidata_linked_loc_names",
             entity_type="edges",
         ),

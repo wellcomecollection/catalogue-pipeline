@@ -255,11 +255,12 @@ uv run python -m graph.steps.extractor \
   --is-local
 ```
 
-## Environments
+## Graph clusters
 
-The pipeline runs against two environments: `prod` and `dev`. Each environment has its own Neptune cluster and S3 bucket
-for pipeline outputs. Every pipeline service accepts an `--environment` argument and every pipeline event has a
-corresponding `environment` field. Local runs use `dev` by default while deployed services default to `prod`.
+Graphs are identified by a `graph_date`. Each dated graph has its own Neptune cluster
+and a dedicated S3 prefix in the shared catalogue graph bucket for pipeline outputs.
+
+A dedicated experimental graph with `graph_date` set to `dev` is available for local development and ad-hoc testing.
 
 ## Local Neptune experimentation
 

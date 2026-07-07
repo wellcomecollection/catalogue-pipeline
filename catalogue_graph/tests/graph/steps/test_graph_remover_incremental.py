@@ -272,14 +272,14 @@ def test_metrics() -> None:
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
-    mock_neptune_secrets("dev")
+    mock_neptune_secrets("2026-06-06")
     mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
-        "graph_date": "dev",
+        "graph_date": "2026-06-06",
         "window": {"end_time": "2025-02-02T12:00"},
     }
     lambda_handler(event, None)
@@ -289,7 +289,7 @@ def test_metrics() -> None:
             "dimensions": {
                 "entity_type": "nodes",
                 "pipeline_date": "dev",
-                "graph_date": "dev",
+                "graph_date": "2026-06-06",
                 "transformer_type": "catalogue_concepts",
                 "pipeline_step": "incremental_graph_remover",
             },
@@ -302,25 +302,28 @@ def test_metrics() -> None:
 
 def test_graph_remover_incremental_id_mode() -> None:
     """ID mode should scope the ES query and write output to an IDs-specific S3 path."""
-    add_mock_merged_documents("dev", work_status="Invisible")
+    graph_date = "2025-01-01"
+    pipeline_date = "dev"
+
+    add_mock_merged_documents(pipeline_date, work_status="Invisible")
     mock_neptune_get_existing_nodes_response(["sghsneca"])
     mock_neptune_delete_nodes_response(["sghsneca"])
     mock_neptune_get_total_node_count("Work", 100)
-    mock_neptune_secrets("dev")
+    mock_neptune_secrets(graph_date)
     mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_works",
         "entity_type": "nodes",
-        "pipeline_date": "dev",
-        "graph_date": "dev",
+        "pipeline_date": pipeline_date,
+        "graph_date": graph_date,
         "ids": ["sghsneca"],
     }
     lambda_handler(event, None)
 
     s3_uri = get_remover_s3_uri(
-        "dev",
-        "dev",
+        graph_date,
+        pipeline_date,
         "by_id/sghsneca/deleted_ids/catalogue_works__nodes.parquet",
     )
     check_deleted_ids_log(s3_uri, {"sghsneca"})

@@ -51,13 +51,14 @@ def _add_mock_wikidata_requests(
 
 def test_wikidata_concepts_source_edges() -> None:
     add_mock_transformer_outputs_for_ontologies(
-        ["loc", "mesh", "wikidata_linked_loc", "wikidata_linked_mesh"]
+        ["loc", "mesh", "wikidata_linked_loc", "wikidata_linked_mesh"],
+        graph_date="2025-01-01",
     )
     _add_mock_wikidata_requests("edges", "concepts")
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        graph_date="dev",
+        graph_date="2025-01-01",
         transformer_type="wikidata_linked_loc_concepts",
         entity_type="edges",
     )

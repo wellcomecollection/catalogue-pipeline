@@ -1,3 +1,5 @@
+import pytest
+
 from graph.transformers.catalogue.concepts_transformer import (
     CatalogueConceptsTransformer,
 )
@@ -15,10 +17,12 @@ from tests.test_utils import (
 )
 
 
-def get_transformer(pipeline_date: str = "dev") -> CatalogueConceptsTransformer:
+def get_transformer(
+    pipeline_date: str = "dev", graph_date: str = "dev"
+) -> CatalogueConceptsTransformer:
     es_client = get_mock_es_client("graph_extractor", pipeline_date)
     return CatalogueConceptsTransformer(
-        BasePipelineEvent(pipeline_date=pipeline_date, graph_date=pipeline_date),
+        BasePipelineEvent(pipeline_date=pipeline_date, graph_date=graph_date),
         es_client,
     )
 
@@ -38,10 +42,13 @@ def test_catalogue_concepts_transformer_nodes() -> None:
 
 def test_catalogue_concepts_transformer_edges() -> None:
     pipeline_date = "2027-12-24"
-    add_mock_transformer_outputs_for_ontologies(["loc", "mesh"], pipeline_date)
+    graph_date = "2024-12-24"
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc", "mesh"], pipeline_date, graph_date
+    )
     add_mock_merged_documents(pipeline_date, work_status="Visible")
 
-    edges = list(get_transformer(pipeline_date)._stream_edges())
+    edges = list(get_transformer(pipeline_date, graph_date)._stream_edges())
     assert len(edges) == 7
 
     check_bulk_load_edge(
@@ -107,10 +114,27 @@ def test_catalogue_concepts_transformer_edges() -> None:
 
 def test_mismatched_pipeline_date() -> None:
     pipeline_date = "2027-12-24"
-    add_mock_transformer_outputs_for_ontologies(["loc", "mesh"], pipeline_date)
+    graph_date = "2027-12-24"
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc", "mesh"], pipeline_date, graph_date
+    )
 
     # Works exist in an index with a different pipeline date
     add_mock_merged_documents("2025-01-01", work_status="Visible")
 
-    edges = list(get_transformer(pipeline_date=pipeline_date)._stream_edges())
+    edges = list(get_transformer(pipeline_date, graph_date)._stream_edges())
     assert len(edges) == 0
+
+
+def test_mismatched_graph_date() -> None:
+    pipeline_date = "2027-12-24"
+    graph_date = "2027-12-24"
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc", "mesh"], pipeline_date, graph_date
+    )
+
+    add_mock_merged_documents("2027-12-24", work_status="Visible")
+
+    # Transformer uses wrong graph date
+    with pytest.raises(KeyError, match="does not exist"):
+        list(get_transformer(pipeline_date, "2025-01-01")._stream_edges())

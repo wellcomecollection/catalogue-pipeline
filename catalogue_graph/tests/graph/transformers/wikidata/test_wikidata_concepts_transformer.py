@@ -19,12 +19,12 @@ from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_f
 
 
 def test_wikidata_concepts_nodes_transformer() -> None:
-    add_mock_transformer_outputs_for_ontologies(["loc"])
+    add_mock_transformer_outputs_for_ontologies(["loc"], graph_date="2025-01-01")
     _add_mock_wikidata_requests("nodes", "concepts")
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        graph_date="dev",
+        graph_date="2025-01-01",
         transformer_type="wikidata_linked_loc_concepts",
         entity_type="nodes",
     )

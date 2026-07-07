@@ -30,7 +30,7 @@ def names_source() -> WikidataLinkedOntologyNodeSource:
         linked_transformer="loc_names",
         event=ExtractorEvent(
             pipeline_date="test",
-            graph_date="dev",
+            graph_date="2025-01-01",
             transformer_type="wikidata_linked_loc_names",
             entity_type="nodes",
         ),
