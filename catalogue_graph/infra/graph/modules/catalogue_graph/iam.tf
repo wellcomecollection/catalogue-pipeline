@@ -15,7 +15,7 @@ data "aws_iam_policy_document" "neptune_s3_read_only_policy" {
 
 # Neptune uses RDS for some operations
 resource "aws_iam_role" "catalogue_graph_cluster" {
-  name = "${var.namespace}-cluster"
+  name = "${local.full_namespace}-cluster"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

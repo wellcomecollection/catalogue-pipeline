@@ -23,3 +23,8 @@ variable "bulk_loader_s3_bucket_name" {
   description = "Name of the S3 bucket storing Neptune bulk load files."
 }
 
+variable "graph_date" {
+  type        = string
+  description = "Date associated with this graph instance (YYYY-MM-DD), incorporated into the namespace."
+}
+
