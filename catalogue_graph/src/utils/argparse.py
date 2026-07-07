@@ -90,6 +90,7 @@ def add_pipeline_event_args(
     if "graph_date" in args:
         parser.add_argument(
             "--environment",
+            dest="graph_date",
             type=str,
             help="Which Neptune cluster to connect to. Use 'dev' to connect to the dev cluster.",
             required=True,
@@ -114,5 +115,5 @@ def validate_es_mode_for_writes(
     Neptune cluster (`environment=dev`) so that we cannot accidentally write non-production data to
     production indexes.
     """
-    if args.environment == "dev" and args.es_mode != "local":
+    if args.graph_date == "dev" and args.es_mode != "local":
         parser.error(f"--es-mode={args.es_mode} cannot be used with --environment=dev")

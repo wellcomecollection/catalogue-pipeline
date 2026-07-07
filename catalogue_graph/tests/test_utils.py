@@ -35,7 +35,7 @@ def add_mock_transformer_outputs(
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
     """
     for transformer in transformers:
-        bucket_name = config.CATALOGUE_GRAPH_S3_BUCKETS["prod"]
+        bucket_name = config.CATALOGUE_GRAPH_S3_BUCKET
         s3_uri = f"s3://{bucket_name}/graph_bulk_loader/{pipeline_date}/{transformer}__nodes.csv"
 
         try:

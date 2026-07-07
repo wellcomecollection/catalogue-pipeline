@@ -65,6 +65,7 @@ def test_graph_remover_first_run() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     lambda_handler(event, None)
 
@@ -102,6 +103,7 @@ def test_graph_remover_next_run() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": pipeline_date,
+        "graph_date": pipeline_date,
     }
     lambda_handler(event, None)
 
@@ -151,6 +153,7 @@ def test_graph_remover_old_id_removal() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     lambda_handler(event, None)
 
@@ -175,6 +178,7 @@ def test_graph_remover_safety_check() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     with pytest.raises(ValueError):
         lambda_handler(event, None)
@@ -185,6 +189,7 @@ def test_graph_remover_missing_bulk_load_file() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "2020-01-01",
+        "graph_date": "2020-01-01",
     }
 
     with pytest.raises(KeyError):
@@ -197,6 +202,7 @@ def test_graph_remover_catalogue_failure() -> None:
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
 
     with pytest.raises(pydantic.ValidationError):

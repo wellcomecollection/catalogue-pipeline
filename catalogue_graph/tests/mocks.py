@@ -519,7 +519,7 @@ def get_mock_es_client(
 
 def get_mock_neptune_client() -> NeptuneClient:
     mock_neptune_secrets()
-    return NeptuneClient()
+    return NeptuneClient("dev")
 
 
 def add_neptune_mock_response(

@@ -24,7 +24,7 @@ def test_wikidata_concepts_nodes_transformer() -> None:
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        environment="prod",
+        graph_date="dev",
         transformer_type="wikidata_linked_loc_concepts",
         entity_type="nodes",
     )
@@ -52,7 +52,7 @@ def test_wikidata_concepts_edges_transformer() -> None:
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        environment="prod",
+        graph_date="dev",
         transformer_type="wikidata_linked_loc_concepts",
         entity_type="edges",
     )

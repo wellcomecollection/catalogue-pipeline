@@ -102,7 +102,7 @@ def local_handler() -> None:
             "index_date_merged",
             "window",
             "ids",
-            "environment",
+            "graph_date",
             "es_mode",
         },
     )

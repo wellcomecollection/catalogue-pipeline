@@ -36,6 +36,7 @@ def get_mock_indexer_event(record_type: IngestorType) -> IngestorIndexerLambdaEv
     return IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date="2021-07-01",
+        graph_date="2021-07-01",
         index_dates=PipelineIndexDates.model_validate({record_type: "2025-01-01"}),
         job_id="123",
         objects_to_index=[
@@ -57,13 +58,14 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date=pipeline_date,
+        graph_date=pipeline_date,
         index_dates=PipelineIndexDates.model_validate({record_type: index_date}),
         job_id=job_id,
         objects_to_index=None,
     )
 
     prefix = event.get_path_prefix()
-    bucket = config.CATALOGUE_GRAPH_S3_BUCKETS["prod"]
+    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
     key = f"{prefix}/00000000-00000010.parquet"
     s3_uri = f"s3://{bucket}/{key}"
 
@@ -99,7 +101,7 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
         },
         "ingestor_type": record_type,
         "job_id": job_id,
-        "environment": "prod",
+        "graph_date": pipeline_date,
         "load_format": "parquet",
         "publish_to_s3": True,
         "window": None,
@@ -119,7 +121,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
         f"{config.INGESTOR_S3_PREFIX}_{record_type}/"
         f"{pipeline_date}/{index_date}/{job_id}"
     )
-    bucket = config.CATALOGUE_GRAPH_S3_BUCKETS["prod"]
+    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
     key = f"{prefix}/00000000-00000010.parquet"
     s3_uri = f"s3://{bucket}/{key}"
 
@@ -130,6 +132,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date=pipeline_date,
+        graph_date=pipeline_date,
         index_dates=PipelineIndexDates.model_validate({record_type: index_date}),
         job_id=job_id,
         objects_to_index=[
@@ -165,7 +168,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
         },
         "ingestor_type": record_type,
         "job_id": job_id,
-        "environment": "prod",
+        "graph_date": pipeline_date,
         "load_format": "parquet",
         "publish_to_s3": True,
         "window": None,
@@ -226,6 +229,7 @@ def test_ingestor_indexer_failure_missing_file(record_type: IngestorType) -> Non
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date="2021-07-01",
+        graph_date="2021-07-01",
         index_dates=PipelineIndexDates.model_validate({record_type: "2025-01-01"}),
         job_id="123",
         objects_to_index=[

@@ -5,7 +5,7 @@ from models.graph_node import Work
 from tests.mocks import get_mock_es_client
 from tests.test_utils import add_mock_merged_documents, check_bulk_load_edge
 
-MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev", graph_date="dev")
 
 
 def get_transformer() -> CatalogueWorksTransformer:

@@ -41,7 +41,7 @@ def _get_concepts_count(graph_date: str) -> int:
 
 def get_concepts_with_inconsistent_types(graph_date: str) -> Generator[dict]:
     """Return all concepts whose combination of types is not consistent."""
-    client = NeptuneClient()
+    client = NeptuneClient(graph_date)
 
     start_offset = 0
     concepts_count = _get_concepts_count(graph_date)

@@ -106,6 +106,7 @@ def test_graph_remover_incremental_concept_nodes() -> None:
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     lambda_handler(event, None)
 
@@ -120,6 +121,7 @@ def test_graph_remover_incremental_concept_edges() -> None:
         "transformer_type": "catalogue_concepts",
         "entity_type": "edges",
         "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
     }
     lambda_handler(event, None)
 
@@ -180,6 +182,7 @@ def test_graph_remover_incremental_work_edges() -> None:
         "transformer_type": "catalogue_works",
         "entity_type": "edges",
         "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
     }
     lambda_handler(event, None)
 
@@ -202,6 +205,7 @@ def test_graph_remover_incremental_work_nodes() -> None:
         "transformer_type": "catalogue_works",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     lambda_handler(event, None)
 
@@ -215,6 +219,7 @@ def test_graph_remover_catalogue_failure() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
 
     with pytest.raises(pydantic.ValidationError):
@@ -234,6 +239,7 @@ def test_graph_remover_safety_mechanism() -> None:
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
 
     # Safety check enabled
@@ -263,6 +269,7 @@ def test_metrics() -> None:
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
         "window": {"end_time": "2025-02-02T12:00"},
     }
     lambda_handler(event, None)
@@ -272,6 +279,7 @@ def test_metrics() -> None:
             "dimensions": {
                 "entity_type": "nodes",
                 "pipeline_date": "dev",
+                "graph_date": "dev",
                 "transformer_type": "catalogue_concepts",
                 "pipeline_step": "incremental_graph_remover",
             },
@@ -295,6 +303,7 @@ def test_graph_remover_incremental_id_mode() -> None:
         "transformer_type": "catalogue_works",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
         "ids": ["sghsneca"],
     }
     lambda_handler(event, None)

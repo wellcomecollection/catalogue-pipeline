@@ -20,7 +20,7 @@ def test_wikidata_names_source_edges() -> None:
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        environment="prod",
+        graph_date="dev",
         transformer_type="wikidata_linked_loc_names",
         entity_type="edges",
     )
@@ -73,7 +73,7 @@ def test_wikidata_names_source_nodes() -> None:
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        environment="prod",
+        graph_date="dev",
         transformer_type="wikidata_linked_loc_names",
         entity_type="nodes",
     )

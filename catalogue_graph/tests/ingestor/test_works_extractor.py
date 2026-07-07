@@ -179,7 +179,7 @@ def test_multiple_works(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def get_incremental_extractor(work_ids: list[str]) -> WorksIndexExtractor:
-    event = BasePipelineEvent(pipeline_date="dev", ids=work_ids)
+    event = BasePipelineEvent(pipeline_date="dev", graph_date="dev", ids=work_ids)
     return WorksIndexExtractor(
         event,
         get_mock_es_client("graph_extractor", event.pipeline_date),

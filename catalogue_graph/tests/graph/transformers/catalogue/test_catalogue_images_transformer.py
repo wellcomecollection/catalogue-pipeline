@@ -8,7 +8,7 @@ from models.graph_edge import WorkHasImage
 from models.graph_node import Image
 from tests.mocks import MockElasticsearchClient, get_mock_es_client
 
-MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev", graph_date="dev")
 
 VALID_RAW_IMAGE = {
     "state": {"canonicalId": "img123"},

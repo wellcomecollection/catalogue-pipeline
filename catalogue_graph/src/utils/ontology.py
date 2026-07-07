@@ -40,23 +40,31 @@ def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerTy
 
 
 @lru_cache
-def get_ids_for_transformer(
-    transformer: TransformerType, scope: GraphPipelineScope
+def _get_ids_for_transformer_cached(
+    transformer: TransformerType, pipeline_date: str, graph_date: str
 ) -> set[str]:
-    """Return all ids extracted as part of the specified transformer."""
     logger.info("Retrieving ids from S3", transformer=transformer)
 
     event = BulkLoaderEvent(
         transformer_type=transformer,
         entity_type="nodes",
-        pipeline_date=scope.pipeline_date,
-        graph_date=scope.graph_date,
+        pipeline_date=pipeline_date,
+        graph_date=graph_date,
     )
     ids = {row[":ID"] for row in get_csv_from_s3(event.get_s3_uri())}
 
     logger.info("Retrieved ids", transformer=transformer, count=len(ids))
 
     return ids
+
+
+def get_ids_for_transformer(
+    transformer: TransformerType, scope: GraphPipelineScope
+) -> set[str]:
+    """Return all ids extracted as part of the specified transformer."""
+    return _get_ids_for_transformer_cached(
+        transformer, scope.pipeline_date, scope.graph_date
+    )
 
 
 def is_id_extracted_for_transformer(

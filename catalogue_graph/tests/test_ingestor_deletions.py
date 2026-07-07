@@ -9,6 +9,7 @@ REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover_incre
 
 MOCK_EVENT = {
     "ingestor_type": "concepts",
+    "graph_date": "dev",
     "pipeline_date": "dev",
     "index_date": "dev",
     "job_id": "dev",

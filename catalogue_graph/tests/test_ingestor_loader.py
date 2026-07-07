@@ -87,6 +87,7 @@ def make_loader_event(
     return IngestorLoaderLambdaEvent(
         ingestor_type=ingestor_type,
         pipeline_date=MOCK_PIPELINE_DATE,
+        graph_date=MOCK_PIPELINE_DATE,
         index_dates=PipelineIndexDates.model_validate({ingestor_type: MOCK_INDEX_DATE}),
         job_id=job_id,
         pass_objects_to_index=pass_objects_to_index,
@@ -395,6 +396,7 @@ def _get_expected_metrics(
     loader_event: IngestorLoaderLambdaEvent, record_count: int, total_file_size: int
 ) -> list[dict]:
     dimensions = {
+        "graph_date": loader_event.graph_date,
         "ingestor_type": loader_event.ingestor_type,
         "pipeline_date": loader_event.pipeline_date,
         "pipeline_step": "loader",

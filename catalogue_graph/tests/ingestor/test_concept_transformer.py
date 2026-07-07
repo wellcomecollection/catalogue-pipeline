@@ -38,7 +38,7 @@ MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "founded_by": [],
 }
 
-MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev", graph_date="dev")
 
 
 def get_transformer() -> IngestorConceptsTransformer:

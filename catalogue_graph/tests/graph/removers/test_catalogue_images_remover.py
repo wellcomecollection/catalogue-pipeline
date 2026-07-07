@@ -11,6 +11,7 @@ def _make_remover(
 ) -> tuple[CatalogueImagesGraphRemover, MagicMock]:
     event = IncrementalGraphRemoverEvent(
         pipeline_date="2025-01-01",
+        graph_date="2025-01-01",
         transformer_type="catalogue_images",
         entity_type=entity_type,
         window=IncrementalWindow.model_validate({"end_time": "2025-01-01T12:00"}),

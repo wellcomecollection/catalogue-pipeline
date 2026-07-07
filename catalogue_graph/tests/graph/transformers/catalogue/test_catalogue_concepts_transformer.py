@@ -18,7 +18,8 @@ from tests.test_utils import (
 def get_transformer(pipeline_date: str = "dev") -> CatalogueConceptsTransformer:
     es_client = get_mock_es_client("graph_extractor", pipeline_date)
     return CatalogueConceptsTransformer(
-        BasePipelineEvent(pipeline_date=pipeline_date), es_client
+        BasePipelineEvent(pipeline_date=pipeline_date, graph_date=pipeline_date),
+        es_client,
     )
 
 

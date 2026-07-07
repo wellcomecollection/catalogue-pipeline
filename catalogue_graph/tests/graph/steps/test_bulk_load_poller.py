@@ -17,6 +17,7 @@ from tests.mocks import (
 LOAD_ID = "123"
 BULK_LOADER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader"
 PIPELINE_DATE = "2020-12-12"
+GRAPH_DATE = "2025-01-01"
 TRANSFORMER_TYPE = "catalogue_concepts"
 ENTITY_TYPE = "nodes"
 
@@ -25,6 +26,7 @@ S3_PATH = f"{PIPELINE_DATE}/windows/20251022T0800-20251022T0815/{TRANSFORMER_TYP
 
 def _get_mock_metric(name: str, value: int) -> dict:
     dimensions = {
+        "graph_date": GRAPH_DATE,
         "pipeline_date": PIPELINE_DATE,
         "transformer_type": TRANSFORMER_TYPE,
         "entity_type": ENTITY_TYPE,
@@ -80,12 +82,12 @@ def test_bulk_load_in_progress(status: str) -> None:
     add_mock_status_response(status)
     mock_neptune_secrets()
 
-    event = {"load_id": LOAD_ID}
+    event = {"load_id": LOAD_ID, "graph_date": GRAPH_DATE}
     response = lambda_handler(event, None)
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
-        "environment": "prod",
+        "graph_date": GRAPH_DATE,
         "status": "IN_PROGRESS",
     }
 
@@ -101,12 +103,12 @@ def test_bulk_load_succeeded() -> None:
     )
     mock_neptune_secrets()
 
-    event = {"load_id": LOAD_ID}
+    event = {"load_id": LOAD_ID, "graph_date": GRAPH_DATE}
     response = lambda_handler(event, None)
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
-        "environment": "prod",
+        "graph_date": GRAPH_DATE,
         "status": "SUCCEEDED",
     }
 
@@ -131,7 +133,7 @@ def test_bulk_load_failed() -> None:
     )
     mock_neptune_secrets()
 
-    event = {"load_id": LOAD_ID}
+    event = {"load_id": LOAD_ID, "graph_date": GRAPH_DATE}
     with pytest.raises(Exception, match="Load failed."):
         lambda_handler(event, None)
 
@@ -155,11 +157,11 @@ def test_bulk_load_failed_below_error_threshold() -> None:
     )
     mock_neptune_secrets()
 
-    event = {"load_id": LOAD_ID}
+    event = {"load_id": LOAD_ID, "graph_date": GRAPH_DATE}
     response = lambda_handler(event, None)
     assert response == {
         "load_id": LOAD_ID,
         "insert_error_threshold": 0.0001,
-        "environment": "prod",
+        "graph_date": GRAPH_DATE,
         "status": "SUCCEEDED",
     }

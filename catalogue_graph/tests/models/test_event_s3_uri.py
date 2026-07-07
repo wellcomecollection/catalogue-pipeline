@@ -17,6 +17,7 @@ def test_construct_bulk_loader_file_path() -> None:
     prefix = "graph_bulk_loader"
     for model in [ExtractorEvent, BulkLoaderEvent]:
         event = model(
+            graph_date="2026-01-01",
             pipeline_date="2025-01-01",
             transformer_type="loc_concepts",
             entity_type="nodes",
@@ -24,6 +25,7 @@ def test_construct_bulk_loader_file_path() -> None:
         assert event.get_file_path() == f"{prefix}/2025-01-01/loc_concepts__nodes.csv"
 
         event = model(
+            graph_date="2026-01-01",
             pipeline_date="2025-05-01",
             transformer_type="catalogue_works",
             entity_type="nodes",
@@ -41,6 +43,7 @@ def test_construct_bulk_loader_s3_uri() -> None:
     s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader"
     for model in [ExtractorEvent, BulkLoaderEvent]:
         event = model(
+            graph_date="2026-01-01",
             pipeline_date="2025-01-01",
             transformer_type="loc_concepts",
             entity_type="nodes",
@@ -48,6 +51,7 @@ def test_construct_bulk_loader_s3_uri() -> None:
         assert event.get_s3_uri() == f"{s3_prefix}/2025-01-01/loc_concepts__nodes.csv"
 
         event = model(
+            graph_date="2026-01-01",
             pipeline_date="2025-05-01",
             transformer_type="catalogue_concepts",
             entity_type="edges",
@@ -63,6 +67,7 @@ def test_construct_full_graph_remover_s3_uri() -> None:
     s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_remover"
     event = FullGraphRemoverEvent(
         pipeline_date="2025-01-01",
+        graph_date="2025-01-01",
         transformer_type="loc_concepts",
         entity_type="edges",
     )
@@ -77,6 +82,7 @@ def test_construct_incremental_graph_remover_s3_uri() -> None:
     s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
     event = IncrementalGraphRemoverEvent(
         pipeline_date="2025-01-01",
+        graph_date="2025-01-01",
         transformer_type="catalogue_work_identifiers",
         entity_type="edges",
         window=IncrementalWindow.model_validate({"end_time": "2022-01-01T12:00"}),
@@ -109,6 +115,7 @@ def test_construct_bulk_loader_report_s3_uri() -> None:
 
     event = BulkLoaderReport(
         pipeline_date="2025-01-01",
+        graph_date="2025-01-01",
         transformer_type="catalogue_work_identifiers",
         entity_type="edges",
         window=IncrementalWindow.model_validate({"end_time": "2022-01-01T12:00"}),
@@ -125,6 +132,7 @@ def test_construct_graph_remover_report_s3_uri() -> None:
     s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
     event = IncrementalGraphRemoverReport(
         pipeline_date="2025-01-01",
+        graph_date="2025-01-01",
         transformer_type="catalogue_concepts",
         entity_type="nodes",
         window=IncrementalWindow.model_validate({"end_time": "2022-01-01T12:00"}),

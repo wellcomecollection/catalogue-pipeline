@@ -90,7 +90,7 @@ def local_handler() -> None:
             "index_date_augmented",
             "pit_id_merged",
             "pit_id_augmented",
-            "environment",
+            "graph_date",
             "es_mode",
         },
     )
