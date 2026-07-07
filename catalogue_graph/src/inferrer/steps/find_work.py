@@ -54,7 +54,7 @@ def handler(
             ids=list(chunk),
             pipeline_date=event.pipeline_date,
             index_dates=event.index_dates,
-            environment=event.environment,
+            graph_date=event.graph_date,
         )
         for chunk in batched(ids, event.partition_size)
     ]

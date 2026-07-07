@@ -27,7 +27,7 @@ from tests.mocks import (
 from tests.test_ingestor_loader import MOCK_CONCEPT_ID, add_mock_responses_for_ids
 from tests.test_utils import load_json_fixture
 
-MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev", graph_date="dev")
 
 MERGED_FIXTURE = load_json_fixture("ingestor/single_merged.json")
 ANCESTORS_FIXTURE = load_json_fixture("neptune/work_ancestors_single.json")

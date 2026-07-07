@@ -55,7 +55,7 @@ class IdLabelChecker:
                 transformer_type=transformer,
                 entity_type="nodes",
                 pipeline_date=event.pipeline_date,
-                environment=event.environment,
+                graph_date=event.graph_date,
             )
             for row in get_csv_from_s3(event.get_s3_uri()):
                 source_id = row[":ID"]

@@ -7,11 +7,11 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
+from models.pipeline_scope import GraphPipelineScope, PipelineIndexDates
 from models.source_scope import SourceScope
 from utils.types import (
     CatalogueTransformerType,
     EntityType,
-    Environment,
     FullGraphRemoverType,
     StreamDestination,
     TransformerType,
@@ -24,35 +24,18 @@ class ScheduledEvent(BaseModel):
     time: datetime = Field(default_factory=lambda: datetime.now(tz=UTC))
 
 
-class PipelineIndexDates(BaseModel):
-    initial: str | None = None  # initial images (inferrer source)
-    merged: str | None = None  # merged works
-    augmented: str | None = None  # augmented images
-    concepts: str | None = None  # final concepts
-    works: str | None = None  # final works
-    images: str | None = None  # final images
-
-
 class PipelinePitIds(BaseModel):
     merged: str | None = None
     augmented: str | None = None
 
 
-class BasePipelineEvent(SourceScope):
-    pipeline_date: str
+class BasePipelineEvent(SourceScope, GraphPipelineScope):
     pit_ids: PipelinePitIds = PipelinePitIds()
-    index_dates: PipelineIndexDates = PipelineIndexDates()
-    environment: Environment = "prod"
 
     @field_validator("pit_ids", mode="before")
     @classmethod
     def _coerce_pit_ids(cls, v: object) -> object:
         return v if v is not None else PipelinePitIds()
-
-    @field_validator("index_dates", mode="before")
-    @classmethod
-    def _coerce_index_dates(cls, v: object) -> object:
-        return v if v is not None else PipelineIndexDates()
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
@@ -122,7 +105,7 @@ class GraphPipelineEvent(BasePipelineEvent):
 
     def get_s3_uri(self, file_format: str = "csv", folder: str | None = None) -> str:
         file_path = self.get_file_path(file_format, folder)
-        bucket = config.CATALOGUE_GRAPH_S3_BUCKETS[self.environment]
+        bucket = config.CATALOGUE_GRAPH_S3_BUCKET
         return f"s3://{bucket}/{file_path}"
 
 
@@ -146,7 +129,7 @@ class BulkLoaderEvent(GraphPipelineEvent):
 class BulkLoadPollerEvent(BaseModel):
     load_id: str
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
-    environment: Environment = "prod"
+    graph_date: str
 
 
 class GraphRemoverEvent(GraphPipelineEvent):

@@ -77,7 +77,7 @@ class FindWorkEvent(BasePipelineEvent):
         return "/".join(parts)
 
     def partition_s3_uri(self, index: int) -> str:
-        bucket = config.CATALOGUE_GRAPH_S3_BUCKETS[self.environment]
+        bucket = config.CATALOGUE_GRAPH_S3_BUCKET
         return f"s3://{bucket}/{self.find_work_s3_prefix}/partition-{index}.json"
 
 

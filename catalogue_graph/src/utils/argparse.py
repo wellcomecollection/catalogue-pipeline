@@ -11,7 +11,7 @@ BasePipelineEventArgument = Literal[
     "index_date_augmented",
     "pit_id_merged",
     "pit_id_augmented",
-    "environment",
+    "graph_date",
     "es_mode",
 ]
 
@@ -87,14 +87,12 @@ def add_pipeline_event_args(
             help="An Elasticsearch point in time ID to use when extracting data from the augmented images index.",
             required=False,
         )
-    if "environment" in args:
+    if "graph_date" in args:
         parser.add_argument(
             "--environment",
             type=str,
-            help="Which environment to connect to (used for Neptune and S3 bucket selection).",
-            required=False,
-            choices=["prod", "dev"],
-            default="dev",
+            help="Which Neptune cluster to connect to. Use 'dev' to connect to the dev cluster.",
+            required=True,
         )
     if "es_mode" in args:
         parser.add_argument(

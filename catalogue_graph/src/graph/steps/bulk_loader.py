@@ -32,13 +32,13 @@ def handler(
         entity_type=event.entity_type,
     )
 
-    neptune_client = NeptuneClient(event.environment)
+    neptune_client = NeptuneClient(event.graph_date)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
 
     return BulkLoadPollerEvent(
         load_id=load_id,
         insert_error_threshold=event.insert_error_threshold,
-        environment=event.environment,
+        graph_date=event.graph_date,
     )
 
 
@@ -52,7 +52,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date", "window", "ids", "environment"})
+    add_pipeline_event_args(parser, {"pipeline_date", "window", "ids", "graph_date"})
     parser.add_argument(
         "--transformer-type",
         type=str,

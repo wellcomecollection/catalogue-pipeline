@@ -16,7 +16,7 @@ import config
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.aws import get_secret
 from utils.streaming import process_stream_in_parallel
-from utils.types import EntityType, Environment
+from utils.types import EntityType
 
 logger = structlog.get_logger(__name__)
 
@@ -45,16 +45,12 @@ class NeptuneClient:
     Communicates with the Neptune cluster. Makes openCypher queries, triggers bulk load operations, etc.
     """
 
-    def __init__(self, environment: Environment = "prod") -> None:
+    def __init__(self, graph_date: str) -> None:
         self.session = boto3.Session()
-        self.environment = environment
+        self.graph_date = graph_date
 
-        if environment == "prod":
-            endpoint_secret_name = config.NEPTUNE_PROD_HOST_SECRET_NAME
-        else:
-            endpoint_secret_name = config.NEPTUNE_DEV_HOST_SECRET_NAME
-
-        logger.info("Creating Neptune client", environment=environment)
+        endpoint_secret_name = f"catalogue-graph/{config.NEPTUNE_HOST_SECRET_NAME}"
+        logger.info("Creating Neptune client", graph_date=graph_date)
 
         self.neptune_endpoint: str = get_secret(endpoint_secret_name)
 
@@ -164,11 +160,8 @@ class NeptuneClient:
         Initiates a Neptune bulk load from an S3 file.
         See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-load.html for more info.
         """
-        role_name = (
-            "catalogue-graph-cluster"
-            if self.environment == "prod"
-            else "catalogue-graph-dev-cluster"
-        )
+        date_infix = f"-{self.graph_date}" if self.graph_date else ""
+        role_name = f"catalogue-graph{date_infix}-cluster"
 
         response = self._make_request(
             "POST",

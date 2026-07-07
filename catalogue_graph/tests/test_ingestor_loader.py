@@ -111,7 +111,7 @@ def make_expected_indexer_event(
         objects_to_index=[
             IngestorIndexerObject(
                 s3_uri=(
-                    f"s3://{config.CATALOGUE_GRAPH_S3_BUCKETS['prod']}/"
+                    f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/"
                     f"{loader_event.get_path_prefix()}/{s3_filename}"
                 ),
                 content_length=1,
@@ -337,7 +337,7 @@ def _get_result_s3_uri(
         return result.objects_to_index[0].s3_uri
 
     prefix = loader_event.get_path_prefix()
-    uri_prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKETS['prod']}/{prefix}/"
+    uri_prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/"
 
     matches = [
         uri
@@ -599,7 +599,7 @@ def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> 
 
     assert len(MockRequest.calls) == 0
 
-    prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKETS['prod']}/{loader_event.get_path_prefix()}"
+    prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{loader_event.get_path_prefix()}"
     parquet_matches = [
         uri
         for uri in MockSmartOpen.file_lookup

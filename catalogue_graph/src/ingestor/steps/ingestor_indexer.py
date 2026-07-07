@@ -45,7 +45,7 @@ def _get_objects_to_index(
     base_event: IngestorStepEvent,
 ) -> Generator[IngestorIndexerObject]:
     logger.info("Listing S3 objects to index")
-    bucket_name = config.CATALOGUE_GRAPH_S3_BUCKETS[base_event.environment]
+    bucket_name = config.CATALOGUE_GRAPH_S3_BUCKET
     prefix = base_event.get_path_prefix()
     load_format = base_event.load_format
 

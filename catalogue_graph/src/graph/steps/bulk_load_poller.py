@@ -18,7 +18,7 @@ from utils.argparse import add_pipeline_event_args
 from utils.aws import get_csv_from_s3
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.reporting import BulkLoaderReport
-from utils.types import EntityType, Environment, TransformerType
+from utils.types import EntityType, TransformerType
 
 logger = structlog.get_logger(__name__)
 
@@ -56,9 +56,7 @@ def print_detailed_bulk_load_errors(payload: BulkLoadStatusResponse) -> None:
             logger.warning("Failed feed", status=failed_feed.status)
 
 
-def bulk_loader_event_from_s3_uri(
-    s3_uri: str, environment: Environment
-) -> BulkLoaderEvent:
+def bulk_loader_event_from_s3_uri(s3_uri: str, graph_date: str) -> BulkLoaderEvent:
     """Given a bulk load file S3 URI, reconstruct the corresponding bulk loader event."""
     regex = re.compile(
         r"^(?:s3://[^/]+/[^/]+/)"
@@ -83,7 +81,7 @@ def bulk_loader_event_from_s3_uri(
         ids = list(dict.fromkeys([row[ids_column] for row in get_csv_from_s3(s3_uri)]))
 
     return BulkLoaderEvent(
-        environment=environment,
+        graph_date=graph_date,
         pipeline_date=m.group("pipeline_date"),
         transformer_type=cast(TransformerType, m.group("transformer_type")),
         entity_type=cast(EntityType, m.group("entity_type")),
@@ -98,7 +96,7 @@ def handler(
 ) -> BulkLoadPollerResponse:
     setup_logging(execution_context)
 
-    neptune_client = NeptuneClient(event.environment)
+    neptune_client = NeptuneClient(event.graph_date)
     payload = neptune_client.get_bulk_load_status(event.load_id)
     overall_status = payload.overall_status
 
@@ -138,7 +136,7 @@ def handler(
     )
 
     bulk_loader_event = bulk_loader_event_from_s3_uri(
-        overall_status.full_uri, event.environment
+        overall_status.full_uri, event.graph_date
     )
     report = BulkLoaderReport(**bulk_loader_event.model_dump(), status=payload)
     report.publish()
@@ -159,7 +157,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"environment"})
+    add_pipeline_event_args(parser, {"graph_date"})
     parser.add_argument(
         "--load-id",
         type=str,

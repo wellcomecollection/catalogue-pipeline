@@ -126,7 +126,7 @@ def handler(
 
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
-        client = NeptuneClient(event.environment)
+        client = NeptuneClient(event.graph_date)
         client.delete_entities_by_id(list(deleted_ids), event.entity_type)
 
     # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
@@ -149,7 +149,7 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    add_pipeline_event_args(parser, {"pipeline_date", "environment"})
+    add_pipeline_event_args(parser, {"pipeline_date", "graph_date"})
     parser.add_argument(
         "--transformer-type",
         type=str,
