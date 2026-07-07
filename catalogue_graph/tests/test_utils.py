@@ -2,7 +2,7 @@ import json
 import os
 from typing import Any
 
-import config
+from models.events import BulkLoaderEvent
 from models.graph_edge import BaseEdge
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 from utils.ontology import get_transformers_from_ontology
@@ -29,14 +29,22 @@ def load_jsonl_fixture(file_name: str) -> list[Any]:
 
 
 def add_mock_transformer_outputs(
-    transformers: list[TransformerType], pipeline_date: str = "dev"
+    transformers: list[TransformerType],
+    pipeline_date: str = "dev",
+    graph_date: str | None = None,
 ) -> None:
     """
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
     """
+
     for transformer in transformers:
-        bucket_name = config.CATALOGUE_GRAPH_S3_BUCKET
-        s3_uri = f"s3://{bucket_name}/graph_bulk_loader/{pipeline_date}/{transformer}__nodes.csv"
+        event = BulkLoaderEvent(
+            graph_date=graph_date or pipeline_date,
+            pipeline_date=pipeline_date,
+            transformer_type=transformer,
+            entity_type="nodes",
+        )
+        s3_uri = event.get_s3_uri()
 
         try:
             fixture = load_fixture(f"bulk_load/{transformer}__nodes.csv").decode()
@@ -47,7 +55,9 @@ def add_mock_transformer_outputs(
 
 
 def add_mock_transformer_outputs_for_ontologies(
-    ontologies: list[OntologyType], pipeline_date: str = "dev"
+    ontologies: list[OntologyType],
+    pipeline_date: str = "dev",
+    graph_date: str | None = None,
 ) -> None:
     """
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
@@ -56,7 +66,7 @@ def add_mock_transformer_outputs_for_ontologies(
     for ontology in ontologies:
         transformers += get_transformers_from_ontology(ontology)
 
-    return add_mock_transformer_outputs(transformers, pipeline_date)
+    return add_mock_transformer_outputs(transformers, pipeline_date, graph_date)
 
 
 def add_mock_merged_documents(

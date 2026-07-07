@@ -448,7 +448,7 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
         lambda event, es_client, neptune_client: DummyTransformer(),
     )
 
-    mock_neptune_secrets()
+    mock_neptune_secrets(MOCK_PIPELINE_DATE)
     mock_es_secrets(service_name="concepts_ingestor", pipeline_date=MOCK_PIPELINE_DATE)
     loader_event = make_loader_event(pass_objects_to_index, "concepts", "123")
     result = handler(loader_event)
@@ -490,7 +490,7 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
 @freeze_time("2025-01-02")
 def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> None:
-    mock_neptune_secrets()
+    mock_neptune_secrets(MOCK_PIPELINE_DATE)
     mock_es_secrets("concepts_ingestor", MOCK_PIPELINE_DATE)
     mock_merged_work()
     mock_neptune_responses([])
@@ -528,7 +528,7 @@ def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> Non
 def test_ingestor_loader_with_broader_than_concepts(
     pass_objects_to_index: bool,
 ) -> None:
-    mock_neptune_secrets()
+    mock_neptune_secrets(MOCK_PIPELINE_DATE)
     mock_es_secrets("concepts_ingestor", MOCK_PIPELINE_DATE)
     mock_merged_work()
     mock_neptune_responses(["broader_than"])
@@ -562,7 +562,7 @@ def test_ingestor_loader_with_related_to_concepts(
     pass_objects_to_index: bool,
 ) -> None:
     mock_es_secrets("concepts_ingestor", MOCK_PIPELINE_DATE)
-    mock_neptune_secrets()
+    mock_neptune_secrets(MOCK_PIPELINE_DATE)
     mock_merged_work()
     mock_neptune_responses(["related_to", "people"])
 
@@ -589,7 +589,7 @@ def test_ingestor_loader_with_related_to_concepts(
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
 @freeze_time("2025-01-02")
 def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> None:
-    mock_neptune_secrets()
+    mock_neptune_secrets(MOCK_PIPELINE_DATE)
     mock_es_secrets(service_name="concepts_ingestor", pipeline_date=MOCK_PIPELINE_DATE)
     loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
     result = handler(loader_event)
@@ -649,7 +649,7 @@ def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
     add_mock_merged_documents(
         pipeline_date=MOCK_PIPELINE_DATE, work_status="Redirected"
     )
-    mock_neptune_secrets()
+    mock_neptune_secrets(MOCK_PIPELINE_DATE)
     mock_es_secrets(service_name="works_ingestor", pipeline_date=MOCK_PIPELINE_DATE)
 
     loader_event = make_loader_event(
@@ -780,7 +780,7 @@ def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
 @freeze_time("2025-01-02")
 def test_ingestor_loader_concepts_id_mode() -> None:
     """In ID mode, the concept IDs are passed directly (no ES query for merged works)."""
-    mock_neptune_secrets()
+    mock_neptune_secrets(MOCK_PIPELINE_DATE)
     mock_es_secrets("concepts_ingestor", MOCK_PIPELINE_DATE)
     mock_merged_work()
     mock_neptune_responses([])

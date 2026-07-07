@@ -24,13 +24,13 @@ def test_ingestor_indexer_local_defaults_dev_local(
     MockSecretsManagerClient.calls = []
     parser = argparse.ArgumentParser()
     monkeypatch.setattr(
-        sys, "argv", ["prog", "--ingestor-type", "concepts", "--environment", "dev"]
+        sys, "argv", ["prog", "--ingestor-type", "concepts", "--graph-date", "dev"]
     )
 
     ingestor_indexer.local_handler(parser)
 
     bucket = config.CATALOGUE_GRAPH_S3_BUCKET
-    prefix = f"{config.INGESTOR_S3_PREFIX}_concepts/dev/dev/dev"
+    prefix = f"graph-dev/pipeline-dev/{config.INGESTOR_S3_PREFIX}_concepts/index-dev/full/dev"
 
     assert MockS3Client.list_objects_v2_calls == [(bucket, prefix)]
     assert MockSecretsManagerClient.calls == []
@@ -61,7 +61,7 @@ def test_ingestor_deletions_rejects_dev_public_es(
         "argv",
         [
             "prog",
-            "--environment",
+            "--graph-date",
             "dev",
             "--es-mode",
             "public",
@@ -83,7 +83,7 @@ def test_ingestor_indexer_rejects_dev_public_es(
             "prog",
             "--ingestor-type",
             "concepts",
-            "--environment",
+            "--graph-date",
             "dev",
             "--es-mode",
             "public",
@@ -109,10 +109,10 @@ def test_es_mode_validation_allows_expected_pairs() -> None:
     parser = argparse.ArgumentParser()
     add_pipeline_event_args(parser, {"graph_date", "es_mode"})
 
-    prod_args = parser.parse_args(["--environment", "prod", "--es-mode", "public"])
+    prod_args = parser.parse_args(["--graph-date", "prod", "--es-mode", "public"])
     validate_es_mode_for_writes(parser, prod_args)
 
-    dev_args = parser.parse_args(["--environment", "dev", "--es-mode", "local"])
+    dev_args = parser.parse_args(["--graph-date", "dev", "--es-mode", "local"])
     validate_es_mode_for_writes(parser, dev_args)
 
 
@@ -184,27 +184,27 @@ def test_metric_namespace_for_ingestor_reports() -> None:
 
 def test_neptune_client_uses_host_secret_name() -> None:
     MockSecretsManagerClient.add_mock_secret(
-        f"catalogue-graph/{config.NEPTUNE_HOST_SECRET_NAME}",
+        f"catalogue-graph-2025-01-01/{config.NEPTUNE_HOST_SECRET_NAME}",
         "prod-endpoint",
     )
 
     client = NeptuneClient("2025-01-01")
     assert (
-        f"catalogue-graph/{config.NEPTUNE_HOST_SECRET_NAME}"
+        f"catalogue-graph-2025-01-01/{config.NEPTUNE_HOST_SECRET_NAME}"
         in MockSecretsManagerClient.calls
     )
     assert client.neptune_endpoint == "prod-endpoint"
 
 
-def test_neptune_client_graph_date_does_not_affect_endpoint() -> None:
+def test_neptune_client_graph_date_selects_endpoint() -> None:
     MockSecretsManagerClient.add_mock_secret(
-        f"catalogue-graph/{config.NEPTUNE_HOST_SECRET_NAME}",
-        "shared-endpoint",
+        f"catalogue-graph-dev/{config.NEPTUNE_HOST_SECRET_NAME}",
+        "dev-endpoint",
     )
 
     dev_client = NeptuneClient("dev")
     assert (
-        f"catalogue-graph/{config.NEPTUNE_HOST_SECRET_NAME}"
+        f"catalogue-graph-dev/{config.NEPTUNE_HOST_SECRET_NAME}"
         in MockSecretsManagerClient.calls
     )
-    assert dev_client.neptune_endpoint == "shared-endpoint"
+    assert dev_client.neptune_endpoint == "dev-endpoint"

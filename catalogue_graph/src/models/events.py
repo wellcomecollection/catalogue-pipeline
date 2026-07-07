@@ -56,6 +56,31 @@ class BasePipelineEvent(SourceScope, GraphPipelineScope):
             **args.__dict__, window=window, index_dates=index_dates, pit_ids=pit_ids
         )
 
+    @property
+    def s3_service_prefix_parts(self) -> list[str]:
+        raise NotImplementedError()
+
+    @property
+    def s3_prefix_parts(self) -> list[str]:
+        """S3 prefix under which this run's partition files are written."""
+        parts: list[str] = []
+
+        parts += [
+            f"graph-{self.graph_date or 'prod'}",
+            f"pipeline-{self.pipeline_date}",
+        ]
+
+        parts += self.s3_service_prefix_parts
+
+        if self.window is not None:
+            parts += ["windows", self.window.to_formatted_string()]
+        elif self.ids:
+            parts += ["by_id", self.ids_path_segment]
+        else:
+            parts.append("full")
+
+        return parts
+
 
 class GraphPipelineEvent(BasePipelineEvent):
     transformer_type: TransformerType
@@ -79,25 +104,11 @@ class GraphPipelineEvent(BasePipelineEvent):
         return self
 
     @property
-    def s3_prefix(self) -> str:
-        raise NotImplementedError()
-
-    @property
     def event_key(self) -> str:
         return f"{self.transformer_type}__{self.entity_type}"
 
-    @property
-    def file_path_parts(self) -> list[str]:
-        parts: list[str] = [self.s3_prefix, self.pipeline_date]
-        if self.window is not None:
-            parts += ["windows", self.window.to_formatted_string()]
-        if self.ids:
-            parts += ["by_id", self.ids_path_segment]
-
-        return parts
-
     def get_file_path(self, file_format: str = "csv", folder: str | None = None) -> str:
-        parts = self.file_path_parts
+        parts = self.s3_prefix_parts
         if folder:
             parts.append(folder)
 
@@ -105,8 +116,7 @@ class GraphPipelineEvent(BasePipelineEvent):
 
     def get_s3_uri(self, file_format: str = "csv", folder: str | None = None) -> str:
         file_path = self.get_file_path(file_format, folder)
-        bucket = config.CATALOGUE_GRAPH_S3_BUCKET
-        return f"s3://{bucket}/{file_path}"
+        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{file_path}"
 
 
 class ExtractorEvent(GraphPipelineEvent):
@@ -114,16 +124,16 @@ class ExtractorEvent(GraphPipelineEvent):
     sample_size: int | None = None
 
     @property
-    def s3_prefix(self) -> str:
-        return config.BULK_LOADER_S3_PREFIX
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.BULK_LOADER_S3_PREFIX]
 
 
 class BulkLoaderEvent(GraphPipelineEvent):
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
 
     @property
-    def s3_prefix(self) -> str:
-        return config.BULK_LOADER_S3_PREFIX
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.BULK_LOADER_S3_PREFIX]
 
 
 class BulkLoadPollerEvent(BaseModel):
@@ -140,13 +150,13 @@ class FullGraphRemoverEvent(GraphRemoverEvent):
     transformer_type: FullGraphRemoverType
 
     @property
-    def s3_prefix(self) -> str:
-        return config.GRAPH_REMOVER_S3_PREFIX
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.GRAPH_REMOVER_S3_PREFIX]
 
 
 class IncrementalGraphRemoverEvent(GraphRemoverEvent):
     transformer_type: CatalogueTransformerType
 
     @property
-    def s3_prefix(self) -> str:
-        return config.INCREMENTAL_GRAPH_REMOVER_S3_PREFIX
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.INCREMENTAL_GRAPH_REMOVER_S3_PREFIX]

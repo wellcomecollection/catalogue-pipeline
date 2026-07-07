@@ -123,7 +123,7 @@ def test_wikidata_concepts_source_nodes() -> None:
 
 
 def test_wikidata_linked_ontology_id_checker() -> None:
-    add_mock_transformer_outputs_for_ontologies(["loc"], "1900-01-01")
+    add_mock_transformer_outputs_for_ontologies(["loc"], "1900-01-01", graph_date="dev")
     scope = GraphPipelineScope(pipeline_date="1900-01-01", graph_date="dev")
 
     assert is_id_extracted_for_ontology("sh00000001", "loc", scope)

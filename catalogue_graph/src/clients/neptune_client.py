@@ -49,7 +49,10 @@ class NeptuneClient:
         self.session = boto3.Session()
         self.graph_date = graph_date
 
-        endpoint_secret_name = f"catalogue-graph/{config.NEPTUNE_HOST_SECRET_NAME}"
+        date_infix = f"-{self.graph_date}" if self.graph_date else ""
+        endpoint_secret_name = (
+            f"catalogue-graph{date_infix}/{config.NEPTUNE_HOST_SECRET_NAME}"
+        )
         logger.info("Creating Neptune client", graph_date=graph_date)
 
         self.neptune_endpoint: str = get_secret(endpoint_secret_name)

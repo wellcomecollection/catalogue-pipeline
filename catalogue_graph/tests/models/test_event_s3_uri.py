@@ -22,7 +22,10 @@ def test_construct_bulk_loader_file_path() -> None:
             transformer_type="loc_concepts",
             entity_type="nodes",
         )
-        assert event.get_file_path() == f"{prefix}/2025-01-01/loc_concepts__nodes.csv"
+        assert (
+            event.get_file_path()
+            == f"graph-{event.graph_date}/pipeline-{event.pipeline_date}/{prefix}/full/loc_concepts__nodes.csv"
+        )
 
         event = model(
             graph_date="2026-01-01",
@@ -35,12 +38,11 @@ def test_construct_bulk_loader_file_path() -> None:
         )
         assert (
             event.get_file_path()
-            == f"{prefix}/2025-05-01/windows/20211201T1200-20250101T1200/catalogue_works__nodes.csv"
+            == f"graph-{event.graph_date}/pipeline-{event.pipeline_date}/{prefix}/windows/20211201T1200-20250101T1200/catalogue_works__nodes.csv"
         )
 
 
 def test_construct_bulk_loader_s3_uri() -> None:
-    s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader"
     for model in [ExtractorEvent, BulkLoaderEvent]:
         event = model(
             graph_date="2026-01-01",
@@ -48,7 +50,10 @@ def test_construct_bulk_loader_s3_uri() -> None:
             transformer_type="loc_concepts",
             entity_type="nodes",
         )
-        assert event.get_s3_uri() == f"{s3_prefix}/2025-01-01/loc_concepts__nodes.csv"
+        assert (
+            event.get_s3_uri()
+            == f"s3://wellcomecollection-catalogue-graph/graph-{event.graph_date}/pipeline-{event.pipeline_date}/graph_bulk_loader/full/loc_concepts__nodes.csv"
+        )
 
         event = model(
             graph_date="2026-01-01",
@@ -59,12 +64,11 @@ def test_construct_bulk_loader_s3_uri() -> None:
         )
         assert (
             event.get_s3_uri()
-            == f"{s3_prefix}/2025-05-01/windows/20250101T1145-20250101T1200/catalogue_concepts__edges.csv"
+            == f"s3://wellcomecollection-catalogue-graph/graph-{event.graph_date}/pipeline-{event.pipeline_date}/graph_bulk_loader/windows/20250101T1145-20250101T1200/catalogue_concepts__edges.csv"
         )
 
 
 def test_construct_full_graph_remover_s3_uri() -> None:
-    s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_remover"
     event = FullGraphRemoverEvent(
         pipeline_date="2025-01-01",
         graph_date="2025-01-01",
@@ -74,12 +78,11 @@ def test_construct_full_graph_remover_s3_uri() -> None:
 
     assert (
         event.get_s3_uri("parquet", "deleted_ids")
-        == f"{s3_prefix}/2025-01-01/deleted_ids/loc_concepts__edges.parquet"
+        == "s3://wellcomecollection-catalogue-graph/graph-2025-01-01/pipeline-2025-01-01/graph_remover/full/deleted_ids/loc_concepts__edges.parquet"
     )
 
 
 def test_construct_incremental_graph_remover_s3_uri() -> None:
-    s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
     event = IncrementalGraphRemoverEvent(
         pipeline_date="2025-01-01",
         graph_date="2025-01-01",
@@ -90,12 +93,11 @@ def test_construct_incremental_graph_remover_s3_uri() -> None:
 
     assert (
         event.get_s3_uri("parquet", "deleted_ids")
-        == f"{s3_prefix}/2025-01-01/windows/20220101T1145-20220101T1200/deleted_ids/catalogue_work_identifiers__edges.parquet"
+        == "s3://wellcomecollection-catalogue-graph/graph-2025-01-01/pipeline-2025-01-01/graph_remover_incremental/windows/20220101T1145-20220101T1200/deleted_ids/catalogue_work_identifiers__edges.parquet"
     )
 
 
 def test_construct_bulk_loader_report_s3_uri() -> None:
-    s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader"
     mock_status = BulkLoadStatusResponse(
         overall_status=BulkLoadFeed(
             full_uri="",
@@ -124,12 +126,11 @@ def test_construct_bulk_loader_report_s3_uri() -> None:
 
     assert (
         event.get_s3_uri("json")
-        == f"{s3_prefix}/2025-01-01/windows/20220101T1145-20220101T1200/report.catalogue_work_identifiers__edges.json"
+        == "s3://wellcomecollection-catalogue-graph/graph-2025-01-01/pipeline-2025-01-01/graph_bulk_loader/windows/20220101T1145-20220101T1200/report.catalogue_work_identifiers__edges.json"
     )
 
 
 def test_construct_graph_remover_report_s3_uri() -> None:
-    s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
     event = IncrementalGraphRemoverReport(
         pipeline_date="2025-01-01",
         graph_date="2025-01-01",
@@ -141,5 +142,5 @@ def test_construct_graph_remover_report_s3_uri() -> None:
 
     assert (
         event.get_s3_uri("json")
-        == f"{s3_prefix}/2025-01-01/windows/20220101T1145-20220101T1200/report.catalogue_concepts__nodes.json"
+        == "s3://wellcomecollection-catalogue-graph/graph-2025-01-01/pipeline-2025-01-01/graph_remover_incremental/windows/20220101T1145-20220101T1200/report.catalogue_concepts__nodes.json"
     )

@@ -8,11 +8,11 @@ from graph.steps.graph_remover import IDS_LOG_SCHEMA, lambda_handler
 from tests.mocks import MockSmartOpen, add_neptune_mock_response, mock_neptune_secrets
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 
-REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover"
+BUCKET = "wellcomecollection-catalogue-graph"
 
 
 def get_mock_remover_uri(pipeline_date: str, folder: str) -> str:
-    return f"{REMOVER_S3_PREFIX}/{pipeline_date}/{folder}/loc_concepts__nodes.parquet"
+    return f"s3://{BUCKET}/graph-{pipeline_date}/pipeline-{pipeline_date}/graph_remover/full/{folder}/loc_concepts__nodes.parquet"
 
 
 def mock_deleted_ids_log_file(
@@ -97,7 +97,7 @@ def test_graph_remover_next_run() -> None:
     )
     mock_neptune_get_existing_response(["sh00000006"])
     mock_neptune_removal_response(["sh00000006"])
-    mock_neptune_secrets()
+    mock_neptune_secrets(pipeline_date)
 
     event = {
         "transformer_type": "loc_concepts",
@@ -147,7 +147,7 @@ def test_graph_remover_old_id_removal() -> None:
     mock_deleted_ids_log_file(["sh00000004", "sh00000005"], "dev", age_in_days=365)
     mock_neptune_get_existing_response(["sh00000006"])
     mock_neptune_removal_response(["sh00000006"])
-    mock_neptune_secrets()
+    mock_neptune_secrets("dev")
 
     event = {
         "transformer_type": "loc_concepts",

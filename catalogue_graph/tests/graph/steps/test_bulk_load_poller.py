@@ -15,13 +15,15 @@ from tests.mocks import (
 )
 
 LOAD_ID = "123"
-BULK_LOADER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader"
 PIPELINE_DATE = "2020-12-12"
 GRAPH_DATE = "2025-01-01"
+BULK_LOADER_S3_PREFIX = (
+    f"s3://wellcomecollection-catalogue-graph/graph-{GRAPH_DATE}/graph_bulk_loader"
+)
 TRANSFORMER_TYPE = "catalogue_concepts"
 ENTITY_TYPE = "nodes"
 
-S3_PATH = f"{PIPELINE_DATE}/windows/20251022T0800-20251022T0815/{TRANSFORMER_TYPE}__{ENTITY_TYPE}.csv"
+S3_PATH = f"pipeline-{PIPELINE_DATE}/windows/20251022T0800-20251022T0815/{TRANSFORMER_TYPE}__{ENTITY_TYPE}.csv"
 
 
 def _get_mock_metric(name: str, value: int) -> dict:
@@ -80,7 +82,7 @@ def add_mock_status_response(
 )
 def test_bulk_load_in_progress(status: str) -> None:
     add_mock_status_response(status)
-    mock_neptune_secrets()
+    mock_neptune_secrets(GRAPH_DATE)
 
     event = {"load_id": LOAD_ID, "graph_date": GRAPH_DATE}
     response = lambda_handler(event, None)
@@ -101,7 +103,7 @@ def test_bulk_load_succeeded() -> None:
     add_mock_status_response(
         "LOAD_COMPLETED", record_count=record_count, duplicate_count=duplicate_count
     )
-    mock_neptune_secrets()
+    mock_neptune_secrets(GRAPH_DATE)
 
     event = {"load_id": LOAD_ID, "graph_date": GRAPH_DATE}
     response = lambda_handler(event, None)
@@ -131,7 +133,7 @@ def test_bulk_load_failed() -> None:
         record_count=record_count,
         insert_error_count=insert_error_count,
     )
-    mock_neptune_secrets()
+    mock_neptune_secrets(GRAPH_DATE)
 
     event = {"load_id": LOAD_ID, "graph_date": GRAPH_DATE}
     with pytest.raises(Exception, match="Load failed."):
@@ -155,7 +157,7 @@ def test_bulk_load_failed_below_error_threshold() -> None:
         record_count=record_count,
         insert_error_count=insert_error_count,
     )
-    mock_neptune_secrets()
+    mock_neptune_secrets(GRAPH_DATE)
 
     event = {"load_id": LOAD_ID, "graph_date": GRAPH_DATE}
     response = lambda_handler(event, None)

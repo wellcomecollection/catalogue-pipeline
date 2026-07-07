@@ -78,7 +78,7 @@ def write_partitions_to_s3(
     rather than the full partitions, keeping the find-work result well under the
     Step Functions 256 KB state limit. Each inference task resolves its ref back
     to the full `InferenceManagerEvent` from S3. The partitions are written under
-    a scope-keyed prefix (`event.find_work_s3_prefix`) for the run.
+    a scope-keyed prefix for the run.
     """
 
     def write_one(indexed: tuple[int, InferenceManagerEvent]) -> PartitionRef:
@@ -93,7 +93,7 @@ def write_partitions_to_s3(
     logger.info(
         "Wrote partitions to S3",
         partition_count=len(refs),
-        s3_prefix=event.find_work_s3_prefix,
+        s3_prefix=event.s3_prefix_parts,
     )
     return refs
 
