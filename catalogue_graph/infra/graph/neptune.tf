@@ -1,7 +1,7 @@
 module "catalogue_graph_neptune_cluster" {
   source = "./modules/catalogue_graph"
 
-  namespace                  = local.namespace
+  namespace = local.namespace
   # graph_date is empty to preserve the existing cluster name (catalogue-graph). Once the prod
   # cluster is recreated with a proper date, this should be set to a non-empty value.
   graph_date                 = ""
