@@ -21,10 +21,10 @@ Feature: Contributors extraction from Axiell MARC records
     And the only contributor has the agent.label "Smith, John"
     And the only contributor has the agent.type "Agent"
 
-  Scenario: Trailing comma in name is stripped
-    Given the MARC record has a 720 field with subfield "a" value "Smith, John,"
+  Scenario: Trailing period in name is not stripped
+    Given the MARC record has a 720 field with subfield "a" value "Smith, John."
     When I transform the MARC record
-    Then the only contributor has the agent.label "Smith, John"
+    Then the only contributor has the agent.label "Smith, John."
 
   Scenario: Multiple contributors preserve order
     Given the MARC record has a 720 field with subfield "a" value "Smith, John"

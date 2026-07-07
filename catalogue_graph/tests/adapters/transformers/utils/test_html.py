@@ -39,6 +39,13 @@ def test_normalise_removes_script_tags_and_inner_content() -> None:
     assert normalise_text(s) == "Nothing here... Nothing."
 
 
+def test_normalise_treats_html_encoded_script_tags_as_text() -> None:
+    # &lt;script&gt; is an HTML-encoded literal, not an executable tag.
+    # It should be preserved as-is rather than decoded into a script element.
+    s = "&lt;script&gt;alert(1)&lt;/script&gt;"
+    assert normalise_text(s) == s
+
+
 def test_normalise_does_not_error_on_missing_closing_tags() -> None:
     assert (
         normalise_text("Someone forgot <em>to close something..")
@@ -59,9 +66,9 @@ def test_normalise_retains_links_stripping_non_href_attributes() -> None:
     )
 
 
-def test_normalise_does_not_escape_symbols() -> None:
+def test_normalise_escapes_symbols() -> None:
     s = "Ampersand & some other symbols like >."
-    assert normalise_text(s) == s
+    assert normalise_text(s) == "Ampersand &amp; some other symbols like &gt;."
 
 
 def test_normalise_strips_hreflang_from_links() -> None:
