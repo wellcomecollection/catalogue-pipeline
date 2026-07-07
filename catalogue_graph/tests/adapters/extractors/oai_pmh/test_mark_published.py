@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
+import pytest
+
 from adapters.extractors.oai_pmh.models.step_events import OAIPMHLoaderResponse
 from adapters.steps.oai_pmh.folio_enrich import EnrichmentResponse
 from adapters.steps.oai_pmh.mark_published import (
@@ -141,13 +143,25 @@ class TestMarkPublished:
         stored = window_store.load_status_map()
         assert (stored[_key(row)].tags or {})["published_at"] == STAMP_TIME.isoformat()
 
-    def test_empty_and_unknown_keys_are_ok(self, window_store: WindowStore) -> None:
+    def test_empty_keys_are_a_no_op(self, window_store: WindowStore) -> None:
         response = _run(window_store, [])
         assert response.windows_stamped == 0
         assert response.last_published_end is None
 
-        response = _run(window_store, ["2026-07-03T10:00:00+00:00/PT15M"])
-        assert response.windows_stamped == 0
+    def test_missing_keys_raise(self, window_store: WindowStore) -> None:
+        """A covered key with no matching row means the loader and this step
+        disagree about the store, so the step fails instead of stamping."""
+        s0, e0 = _window(0)
+        row = create_window_row(s0, e0, state="success")
+        populate_window_store(window_store.table, [row])
+
+        missing_key = "2026-07-03T10:00:00+00:00/PT15M"
+        with pytest.raises(RuntimeError, match="missing from the folio window"):
+            _run(window_store, [_key(row), missing_key])
+
+        # Nothing was stamped, so the next run re-covers these windows.
+        stored = window_store.load_status_map()
+        assert published_at_from_tags(stored[_key(row)].tags) is None
 
     def test_changeset_tags_survive_stamping(self, window_store: WindowStore) -> None:
         s0, e0 = _window(0)
