@@ -49,10 +49,7 @@ class NeptuneClient:
         self.session = boto3.Session()
         self.graph_date = graph_date
 
-        date_infix = f"-{self.graph_date}" if self.graph_date else ""
-        endpoint_secret_name = (
-            f"catalogue-graph{date_infix}/{config.NEPTUNE_HOST_SECRET_NAME}"
-        )
+        endpoint_secret_name = f"{self.namespace}/{config.NEPTUNE_HOST_SECRET_NAME}"
         logger.info("Creating Neptune client", graph_date=graph_date)
 
         self.neptune_endpoint: str = get_secret(endpoint_secret_name)
@@ -61,6 +58,13 @@ class NeptuneClient:
         self.parallel_query_semaphore = threading.Semaphore(
             NEPTUNE_MAX_PARALLEL_QUERIES
         )
+
+    @property
+    def namespace(self) -> str:
+        # The current production cluster was created before we introduced graph dates, requiring the if/else statement.
+        # We can simplify this once we switch to a dated cluster.
+        date_infix = f"-{self.graph_date}" if self.graph_date else ""
+        return f"catalogue-graph{date_infix}"
 
     def _get_client_url(self) -> str:
         return f"https://{self.neptune_endpoint}:{NEPTUNE_PORT}"
@@ -163,8 +167,7 @@ class NeptuneClient:
         Initiates a Neptune bulk load from an S3 file.
         See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-load.html for more info.
         """
-        date_infix = f"-{self.graph_date}" if self.graph_date else ""
-        role_name = f"catalogue-graph{date_infix}-cluster"
+        role_name = f"{self.namespace}-cluster"
 
         response = self._make_request(
             "POST",

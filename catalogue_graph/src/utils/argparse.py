@@ -92,7 +92,7 @@ def add_pipeline_event_args(
             "--graph-date",
             dest="graph_date",
             type=str,
-            help="Which Neptune cluster to connect to. Use 'dev' to connect to the dev cluster.",
+            help="Which Neptune cluster to connect to. Use 'dev' to connect to the dedicated dev cluster.",
             required=True,
         )
     if "es_mode" in args:

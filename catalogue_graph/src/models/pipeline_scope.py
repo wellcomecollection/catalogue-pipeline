@@ -11,6 +11,12 @@ class PipelineIndexDates(BaseModel):
 
 
 class GraphPipelineScope(BaseModel):
+    """
+    Fully defines the data layer for a pipeline run, identifying which
+    graph cluster, Elasticsearch cluster, and individual Elasticsearch
+    indexes a given execution should read from and write to.
+    """
+
     graph_date: str
     pipeline_date: str
     index_dates: PipelineIndexDates = PipelineIndexDates()
