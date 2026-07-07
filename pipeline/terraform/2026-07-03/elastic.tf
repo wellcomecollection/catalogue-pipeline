@@ -21,25 +21,25 @@ locals {
   index_config = {
     (local.pipeline_date) = {
       works = {
-        // prod transformers - prod id_minter
+        // transformers - id_minter
         source = "works_source.2026-03-25"
-        // prod id_minter - prod matcher_merger
+        // id_minter - matcher_merger
         identified = "works_identified.2023-05-26"
-        // prod matcher_merger - prod graph/ingestor/indexer
+        // matcher_merger - graph/ingestor/indexer
         denormalised = "works_denormalised.2025-08-14"
-        // prod graph/ingestor/indexer - prod API
+        // graph/ingestor/indexer - API
         indexed = "works_indexed.2024-11-14"
       }
       images = {
-        // prod matcher_merger - prod images_inferrer
+        // matcher_merger - images_inferrer
         initial   = "images_initial.2026-06-15"
-        // prod images_inferrer - prod graph/ingestor/indexer
+        // images_inferrer - graph/ingestor/indexer
         augmented = "images_augmented.2026-04-29"
-        // prod graph/ingestor/indexer - prod API
+        // graph/ingestor/indexer - API
         indexed = "images_indexed.2024-11-14"
       }
       concepts = {
-        // prod graph/ingestor/indexer - prod API
+        // graph/ingestor/indexer - API
         indexed = "concepts_indexed.2025-06-17"
       }
     }
@@ -49,8 +49,8 @@ locals {
 module "elastic" {
   source = "../modules/pipeline/elastic_indices"
 
-  es_cluster_date            = local.es_cluster_date
   pipeline_date              = local.pipeline_date
+  es_cluster_date            = local.es_cluster_date
   es_endpoint                = local.es_cluster.https_endpoint
   es_username                = local.es_cluster.username
   es_password                = local.es_cluster.password

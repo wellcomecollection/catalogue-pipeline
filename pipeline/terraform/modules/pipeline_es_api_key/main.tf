@@ -45,7 +45,8 @@ locals {
 }
 
 locals {
-  secret_prefix = var.es_cluster_date != null ? "elasticsearch/es-cluster-${var.es_cluster_date}" : "elasticsearch/pipeline_storage_${var.pipeline_date}"
+  // temporary while the existing cluster stores secrets at "elasticsearch/pipeline_storage_<pipeline_date>/..." 
+  secret_prefix = var.es_cluster_date != "" ? "elasticsearch/es-cluster-${var.es_cluster_date}" : "elasticsearch/pipeline_storage_${var.pipeline_date}"
 }
 
 resource "elasticstack_elasticsearch_security_api_key" "pipeline_service" {
@@ -53,7 +54,7 @@ resource "elasticstack_elasticsearch_security_api_key" "pipeline_service" {
   role_descriptors = jsonencode(local.role_descriptors)
 }
 
-module "pipeline_service_api_key_secrets" {
+module "pipeline_service_api_key_secrets" { 
   source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.5.0"
 
   deletion_mode = "IMMEDIATE"

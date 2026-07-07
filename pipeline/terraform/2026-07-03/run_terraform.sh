@@ -15,10 +15,8 @@ SCRIPT_DIR="$(dirname "$THIS_DIR")/scripts"
 # Create the config file that tells Terraform which pipeline we're running
 # in and where to store the remote state.
 export PIPELINE_DATE="$(basename "$THIS_DIR")"
+export ES_CLUSTER_DATE="2026-07-03"
 . $SCRIPT_DIR/create_terraform_config_file.sh
-
-# Get the Elastic Cloud API key, which we need for the EC provider
-EC_API_KEY=$(. "$SCRIPT_DIR/get_elastic_cloud_api_key.sh")
 
 # Check that we do not use dot notation in ES mapping files. See `index_config/README.md` for more info.
 if ! python3 "$SCRIPT_DIR"/dot_notation_checker.py "$ROOT"/index_config; then
@@ -28,4 +26,4 @@ fi
 
 # Now run Terraform itself, passing any arguments directly to the underlying
 # Terraform binary.
-EC_API_KEY=$EC_API_KEY terraform "$@"
+terraform "$@"
