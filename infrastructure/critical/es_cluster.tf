@@ -1,5 +1,5 @@
 module "es_cluster_2026-07-03" {
-  source = "./modules/es-pipeline-cluster"
+  source = "./modules/es-cluster"
   providers = {
     aws           = aws
     aws.catalogue = aws.catalogue
