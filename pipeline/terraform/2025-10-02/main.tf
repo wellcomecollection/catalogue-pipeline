@@ -38,6 +38,13 @@ module "pipeline" {
 
   elastic_outputs = module.elastic
 
+  // test services use a count guard so that we don't also create test services in further pipelines
+  enabled_services = [
+    "matcher_test",
+    "merger_test",
+    "id_minter_test",
+  ]
+
   providers = {
     aws           = aws
     aws.catalogue = aws.catalogue

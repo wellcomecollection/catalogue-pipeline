@@ -6,6 +6,19 @@ variable "es_cluster_date" { // the es cluster that the pipeline services use, e
   type = string
 }
 
+variable "enabled_services" {
+  type        = set(string)
+  description = "Set of services to create in this stack. Omit a service to skip it entirely."
+  default = [
+    "transformers",
+    "id_minter",
+    "matcher",
+    "merger",
+    "image_inferrer",
+    "graph_pipeline",
+  ]
+}
+
 variable "min_capacity" {
   type    = number
   default = 0

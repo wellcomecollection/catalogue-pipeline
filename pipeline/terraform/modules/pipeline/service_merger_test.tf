@@ -2,6 +2,7 @@
 # .buildkite/pipeline.yml -> merger_test
 
 module "merger_test" {
+  count        = contains(var.enabled_services, "merger_test") ? 1 : 0
   source       = "./merger"
   service_name = "merger_test"
 
@@ -18,7 +19,7 @@ module "merger_test" {
     batch_size                 = 50
     maximum_concurrency        = 30
     topic_arns = [
-      module.matcher_test.output_topic_arn,
+      module.matcher_test[0].output_topic_arn,
     ]
   }
 

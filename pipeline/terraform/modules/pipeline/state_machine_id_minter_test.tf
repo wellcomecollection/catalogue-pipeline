@@ -58,7 +58,7 @@ locals {
         Type     = "Task"
         Resource = "arn:aws:states:::lambda:invoke"
         Arguments = {
-          FunctionName = module.id_minter_test.id_minter_lambda_arn
+          FunctionName = module.id_minter_test[0].id_minter_lambda_arn
           Payload      = "{% $states.input %}"
         }
         Output = "{% $states.result.Payload %}"
@@ -77,6 +77,7 @@ locals {
 }
 
 module "id_minter_test" {
+  count  = contains(var.enabled_services, "id_minter_test") ? 1 : 0
   source = "./id_minter"
 
   pipeline_date        = var.pipeline_date
@@ -90,17 +91,19 @@ module "id_minter_test" {
 }
 
 module "id_minter_test_state_machine" {
+  count  = contains(var.enabled_services, "id_minter_test") ? 1 : 0
   source = "../state_machine"
 
   name                     = "pipeline-${var.pipeline_date}_id_minter_test"
   state_machine_definition = local.id_minter_test_state_machine_definition
-  invokable_lambda_arns    = [module.id_minter_test.id_minter_lambda_arn]
+  invokable_lambda_arns    = [module.id_minter_test[0].id_minter_lambda_arn]
 }
 
 module "id_minter_test_state_machine_alarms" {
+  count  = contains(var.enabled_services, "id_minter_test") ? 1 : 0
   source = "../state_machine_alarms"
 
-  state_machine_arn = module.id_minter_test_state_machine.state_machine_arn
+  state_machine_arn = module.id_minter_test_state_machine[0].state_machine_arn
   alarm_name_prefix = "id-minter-test"
   alarm_name_suffix = "-${var.pipeline_date}"
 
@@ -111,6 +114,7 @@ module "id_minter_test_state_machine_alarms" {
 
 # EventBridge Scheduler
 resource "aws_scheduler_schedule" "id_minter_test_schedule" {
+  count               = contains(var.enabled_services, "id_minter_test") ? 1 : 0
   name                = "id-minter-test-schedule-${var.pipeline_date}"
   schedule_expression = "cron(5,20,35,50 * * * ? *)"
 
@@ -119,8 +123,8 @@ resource "aws_scheduler_schedule" "id_minter_test_schedule" {
   }
 
   target {
-    arn      = module.id_minter_test_state_machine.state_machine_arn
-    role_arn = aws_iam_role.run_id_minter_test_role.arn
+    arn      = module.id_minter_test_state_machine[0].state_machine_arn
+    role_arn = aws_iam_role.run_id_minter_test_role[0].arn
 
     input = <<JSON
     {
@@ -133,7 +137,8 @@ resource "aws_scheduler_schedule" "id_minter_test_schedule" {
 }
 
 resource "aws_iam_role" "run_id_minter_test_role" {
-  name = "run-id-minter-test-role-${var.pipeline_date}"
+  count = contains(var.enabled_services, "id_minter_test") ? 1 : 0
+  name  = "run-id-minter-test-role-${var.pipeline_date}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -150,7 +155,8 @@ resource "aws_iam_role" "run_id_minter_test_role" {
 }
 
 resource "aws_iam_role_policy" "run_id_minter_test_policy" {
-  role = aws_iam_role.run_id_minter_test_role.id
+  count = contains(var.enabled_services, "id_minter_test") ? 1 : 0
+  role  = aws_iam_role.run_id_minter_test_role[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -158,7 +164,7 @@ resource "aws_iam_role_policy" "run_id_minter_test_policy" {
       {
         Effect   = "Allow"
         Action   = "states:StartExecution"
-        Resource = module.id_minter_test_state_machine.state_machine_arn
+        Resource = module.id_minter_test_state_machine[0].state_machine_arn
       }
     ]
   })
