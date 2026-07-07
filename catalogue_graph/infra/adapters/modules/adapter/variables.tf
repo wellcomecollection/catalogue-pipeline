@@ -55,9 +55,3 @@ variable "enable_item_enrichment" {
   default     = false
   description = "Run a FOLIO item-enrichment state between Run loader and Publish event. FOLIO-only; leave false for other adapters."
 }
-
-variable "enable_published_tracking" {
-  type        = bool
-  default     = false
-  description = "Stamp window rows with a published_at tag after the publish event so the trigger resumes from the last published window. Requires the OAI-PMH window store; leave false for adapters without one (e.g. ebsco)."
-}

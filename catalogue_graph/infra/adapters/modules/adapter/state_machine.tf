@@ -8,13 +8,13 @@ locals {
   # in "Mark published", which stamps the covered windows so the trigger resumes
   # from the last published window. The quiet path matters: quiet windows are
   # success rows too, and skipping them would stall the published cursor.
-  post_publish_next = var.enable_published_tracking ? "Mark published" : "Success"
+  post_publish_next = local.published_tracking ? "Mark published" : "Success"
 
   # The loader response names the success windows whose changesets it carries
   # (covered_window_keys); "Mark published" stamps exactly those rows. The
   # enrichment response drops the field, so carry it past that state here.
   covered_keys_passthrough_output = merge([
-    for _ in range(var.enable_published_tracking ? 1 : 0) : {
+    for _ in range(local.published_tracking ? 1 : 0) : {
       Output = "{% $merge([$states.result, {'covered_window_keys': $states.input.covered_window_keys}]) %}"
     }
   ]...)
@@ -183,7 +183,7 @@ locals {
   }
 
   mark_published_states = merge([
-    for _ in range(var.enable_published_tracking ? 1 : 0) : {
+    for _ in range(local.published_tracking ? 1 : 0) : {
       "Mark published" = {
         Type     = "Task"
         Resource = "arn:aws:states:::lambda:invoke"

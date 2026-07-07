@@ -1,5 +1,5 @@
 module "mark_published_lambda" {
-  count  = var.enable_published_tracking ? 1 : 0
+  count  = local.published_tracking ? 1 : 0
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
   name         = "${var.namespace}-adapter-mark-published"
@@ -30,7 +30,7 @@ module "mark_published_lambda" {
 }
 
 resource "aws_iam_role_policy" "mark_published_lambda_iceberg_write" {
-  count  = var.enable_published_tracking ? 1 : 0
+  count  = local.published_tracking ? 1 : 0
   role   = one(module.mark_published_lambda[*].lambda_role.name)
   policy = data.aws_iam_policy_document.iceberg_write.json
 }

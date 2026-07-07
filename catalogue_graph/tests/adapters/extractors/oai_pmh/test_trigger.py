@@ -39,7 +39,6 @@ def _create_trigger_runtime(
     window_lookback_days: int | None = None,
     max_lag_minutes: int | None = None,
     max_pending_windows: int | None = None,
-    use_published_cursor: bool = False,
 ) -> TriggerRuntime:
     """Create a TriggerRuntime for testing."""
     cfg = adapter_runtime_config.config
@@ -54,7 +53,6 @@ def _create_trigger_runtime(
         oai_metadata_prefix=cfg.oai_metadata_prefix,
         oai_set_spec=cfg.oai_set_spec,
         adapter_name=cfg.adapter_name,
-        use_published_cursor=use_published_cursor,
     )
 
 
@@ -199,44 +197,12 @@ class TestBuildWindowRequest:
                 create_window_row(published_end, stranded_end),
             ],
         )
-        runtime = _create_trigger_runtime(
-            store, adapter_runtime_config, use_published_cursor=True
-        )
+        runtime = _create_trigger_runtime(store, adapter_runtime_config)
 
         request = build_window_request(runtime=runtime, now=now)
 
         assert request.window.start_time == published_end
         assert request.window.end_time == now
-
-    def test_ignores_stamps_when_published_cursor_disabled(
-        self,
-        temporary_window_status_table: IcebergTable,
-        adapter_runtime_config: OAIPMHRuntimeConfig,
-    ) -> None:
-        """With tracking off nothing maintains the stamps, so the trigger must
-        not prefer them: a frozen stamp would otherwise pin the cursor."""
-        now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
-        published_end = now - timedelta(minutes=45)
-        newer_success_end = now - timedelta(minutes=30)
-
-        store = populate_window_store(
-            temporary_window_status_table,
-            [
-                create_window_row(
-                    published_end - timedelta(minutes=15),
-                    published_end,
-                    tags={"published_at": "2025-11-17T11:30:00+00:00"},
-                ),
-                create_window_row(published_end, newer_success_end),
-            ],
-        )
-        runtime = _create_trigger_runtime(
-            store, adapter_runtime_config, use_published_cursor=False
-        )
-
-        request = build_window_request(runtime=runtime, now=now)
-
-        assert request.window.start_time == newer_success_end
 
     def test_cascades_to_last_success_when_nothing_published(
         self,
@@ -253,9 +219,7 @@ class TestBuildWindowRequest:
                 )
             ],
         )
-        runtime = _create_trigger_runtime(
-            store, adapter_runtime_config, use_published_cursor=True
-        )
+        runtime = _create_trigger_runtime(store, adapter_runtime_config)
 
         request = build_window_request(runtime=runtime, now=now)
 
@@ -267,10 +231,9 @@ class TestBuildWindowRequest:
         adapter_runtime_config: OAIPMHRuntimeConfig,
     ) -> None:
         """Lag measures harvest liveness, not the published cursor: a stamp
-        left stale by a stalled mark-published step or a disable/re-enable
-        cycle must not halt the trigger, because only a completed execution
-        can refresh the stamps. The run proceeds and re-covers the stale
-        range instead."""
+        left stale by a stalled mark-published step must not halt the
+        trigger, because only a completed execution can refresh the stamps.
+        The run proceeds and re-covers the stale range instead."""
         now = datetime(2025, 11, 17, 13, 0, tzinfo=UTC)
         published_end = now - timedelta(hours=2)
         fresh_success_end = now - timedelta(minutes=15)
@@ -293,7 +256,6 @@ class TestBuildWindowRequest:
             adapter_runtime_config,
             max_lag_minutes=30,
             enforce_lag=True,
-            use_published_cursor=True,
         )
 
         request = build_window_request(runtime=runtime, now=now)
