@@ -130,6 +130,49 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \
   --dry-run
 ```
 
+### 5. Recover → fetch specific records by id
+
+When recovery has a list of record ids rather than a time window (for example
+records the source serves individually but not through a date-range query), this
+step fetches each id via OAI `GetRecord` and writes it to the adapter store,
+committing in batches.
+
+```bash
+uv run python -m adapters.steps.oai_pmh.recover --adapter-type {axiell,folio} \
+  --ids-file missing_ids.txt \
+  --commit-every 300 \
+  --report recover_report.json \
+  --use-rest-api-table
+```
+
+Each id is classified as recovered, removed (the source reports
+`idDoesNotExist`), or unfetchable (neither returned nor reported gone, after the
+client's retries). Unfetchable ids are left absent from the store and listed in
+the report, never backfilled with stale content.
+
+### 6. Rebuild reconciler → reseed the id-to-GUID baseline (Axiell)
+
+The reconciler maps each record id to the source-identifier GUID it produces, so
+a later GUID change can mark the old work deleted. It only runs incrementally,
+per changeset, and cannot run over a full snapshot. After a full reindex (a
+clean-slate rebuild of the adapter store) there is otherwise no supported way to
+reseed it. This step walks the active records, recomputes each GUID with the
+same builder the reconciler uses, and writes the mappings in batches.
+
+```bash
+uv run python -m adapters.steps.oai_pmh.rebuild_reconciler --adapter-type axiell \
+  --use-rest-api-table
+```
+
+Records whose MARC cannot be parsed, or that yield no GUID (such as records with
+an empty 001), are skipped and counted rather than failing the run.
+
+Writes go through the reconciler store's incremental update, which only applies
+a mapping when its `last_modified` is newer than what is already stored. That is
+what you want for reseeding an empty table. If instead the table holds stale
+mappings whose GUIDs changed without the record's `last_modified` advancing,
+clear it before rebuilding rather than relying on a re-run to overwrite them.
+
 ### Common CLI flags
 
 | Flag                             | Description                                                    |
@@ -143,6 +186,9 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \
 | `--dry-run`                      | (Reloader only) Preview gaps without processing                |
 | `--reprocess-successful-windows` | (Loader only) Re-harvest windows already marked success        |
 | `--flush-every`                  | (Loader only) Commit records and statuses every N windows      |
+| `--ids` / `--ids-file`           | (Recover only) Record ids to fetch, inline or one per line     |
+| `--commit-every`                 | (Recover only) Commit recovered records every N ids            |
+| `--batch-size`                   | (Rebuild-reconciler only) GUID mappings committed per batch    |
 
 ## Environment prerequisites
 
