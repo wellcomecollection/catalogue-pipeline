@@ -62,7 +62,21 @@ class BasePipelineEvent(SourceScope, GraphPipelineScope):
 
     @property
     def s3_prefix_parts(self) -> list[str]:
-        """S3 prefix under which this run's partition files are written."""
+        """Build the S3 path prefix for this run's output files.
+
+        All services share the same top-level layout:
+
+            graph-{graph_date}/pipeline-{pipeline_date}/{service_prefix(es)}/{scope}
+
+        where:
+            - ``graph_date`` identifies the Neptune graph cluster (temporarily defaults to ``prod``)
+            - ``pipeline_date`` identifies the Elasticsearch pipeline cluster
+            - service-specific segment(s) are provided by ``s3_service_prefix_parts``
+            - ``scope`` reflects the pipeline run mode:
+                - ``windows/{window}`` for incremental (window-based) runs
+                - ``by_id/{ids}`` for ID-based runs
+                - ``full`` for a complete reindex
+        """
         parts: list[str] = []
 
         parts += [
