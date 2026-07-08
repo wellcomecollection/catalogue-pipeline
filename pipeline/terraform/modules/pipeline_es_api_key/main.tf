@@ -60,7 +60,7 @@ module "pipeline_service_api_key_secrets" {
   deletion_mode = "IMMEDIATE"
 
   key_value_map = {
-    "${local.secret_prefix}/${var.name}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
+    "${local.secret_prefix}/${var.name}-${var.pipeline_date}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
   }
 }
 
