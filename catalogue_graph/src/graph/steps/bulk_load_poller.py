@@ -60,11 +60,10 @@ def bulk_loader_event_from_s3_uri(s3_uri: str, graph_date: str) -> BulkLoaderEve
     """Given a bulk load file S3 URI, reconstruct the corresponding bulk loader event."""
     regex = re.compile(
         r"^(?:s3://[^/]+/)"  # s3://bucket/
-        r"(?:graph-[^/]+/)?"  # optional graph-{graph_date}/
-        r"(?:[^/]+/)"  # s3_prefix/
-        r"pipeline-(?P<pipeline_date>[^/]+)/"
-        r"(windows/(?P<window>[^/]+)/)?"
-        r"(by_id/(?P<ids>[^/]+)/)?"
+        r"graph-(?P<graph_date>[^/]+)/"  # graph-2026-01-01
+        r"pipeline-(?P<pipeline_date>[^/]+)/"  # pipeline-2026-01-01
+        r"[^/]+/"
+        r"(?:windows/(?P<window>[^/]+)|by_id/(?P<ids>[^/]+)|full)/"
         r"(?P<transformer_type>[^/]+)__(?P<entity_type>[^/]+)\.csv$"
     )
 
