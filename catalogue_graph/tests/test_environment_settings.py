@@ -169,6 +169,27 @@ def test_metrics_published_for_all_graph_dates() -> None:
     assert ingestor_report.publish_to_cloudwatch is True
 
 
+def test_metrics_not_published_for_dev_graph_date() -> None:
+    remover_dev_report = IncrementalGraphRemoverReport(
+        pipeline_date="2025-01-01",
+        graph_date="dev",
+        transformer_type="catalogue_concepts",
+        entity_type="nodes",
+        deleted_count=1,
+    )
+    assert remover_dev_report.publish_to_cloudwatch is False
+
+    ingestor_dev_report = LoaderReport(
+        pipeline_date="2025-01-01",
+        graph_date="dev",
+        ingestor_type="concepts",
+        job_id="20250101T0101",
+        record_count=1,
+        total_file_size=1,
+    )
+    assert ingestor_dev_report.publish_to_cloudwatch is False
+
+
 def test_metric_namespace_for_ingestor_reports() -> None:
     prod_report = LoaderReport(
         pipeline_date="2025-01-01",

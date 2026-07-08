@@ -93,7 +93,7 @@ def write_partitions_to_s3(
     logger.info(
         "Wrote partitions to S3",
         partition_count=len(refs),
-        s3_prefix=event.s3_prefix_parts,
+        s3_prefix="/".join(event.s3_prefix_parts),
     )
     return refs
 

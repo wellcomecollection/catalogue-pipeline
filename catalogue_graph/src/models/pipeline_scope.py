@@ -17,6 +17,7 @@ class GraphPipelineScope(BaseModel):
     indexes a given execution should read from and write to.
     """
 
+    # empty graph_date = legacy pre-dated prod cluster (see infra/graph/neptune.tf)
     graph_date: str
     pipeline_date: str
     index_dates: PipelineIndexDates = PipelineIndexDates()

@@ -133,6 +133,7 @@ module "catalogue_graph_pipeline_incremental_trigger_state_machine" {
 
         "Output" : {
           "pipeline_date" : var.pipeline_date,
+          "graph_date" : var.graph_date,
           "index_dates" : {
             "merged" : var.index_dates["merged"],
             "augmented" : var.index_dates["augmented"],

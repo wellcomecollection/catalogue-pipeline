@@ -71,6 +71,13 @@ def bulk_loader_event_from_s3_uri(s3_uri: str, graph_date: str) -> BulkLoaderEve
     if not m:
         raise ValueError(f"S3 uri '{s3_uri}' does not match the expected format.")
 
+    uri_graph_date = m.group("graph_date")
+    # This should never happen, but validate just in case
+    if uri_graph_date != graph_date:
+        raise ValueError(
+            f"graph_date mismatch: S3 URI encodes '{uri_graph_date}' but caller passed '{graph_date}'"
+        )
+
     window = None
     if raw_window := m.group("window"):
         window = IncrementalWindow.from_formatted_string(raw_window)

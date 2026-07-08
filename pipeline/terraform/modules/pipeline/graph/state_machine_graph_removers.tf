@@ -28,6 +28,7 @@ module "catalogue_graph_removers_monthly_state_machine" {
                   "transformer_type" : "{% $states.input.transformer_type %}",
                   "entity_type" : "{% $states.input.entity_type %}",
                   "pipeline_date" : var.pipeline_date,
+                  "graph_date" : var.graph_date,
                 }
               },
               Retry = local.state_function_default_retry,
@@ -67,6 +68,7 @@ module "catalogue_graph_removers_incremental_state_machine" {
           "transformer_type" : "{% $states.context.Map.Item.Value.transformer_type %}",
           "entity_type" : "{% $states.context.Map.Item.Value.entity_type %}",
           "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
+          "graph_date" : "{% $states.context.Execution.Input.graph_date %}",
           "index_dates" : "{% $states.context.Execution.Input.index_dates ? $states.context.Execution.Input.index_dates : null %}",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
           "pit_ids" : "{% $states.context.Execution.Input.pit_ids ? $states.context.Execution.Input.pit_ids : null %}",
