@@ -70,7 +70,7 @@ class BasePipelineEvent(SourceScope, GraphPipelineScope):
 
         where:
             - ``graph_date`` identifies the Neptune graph cluster (temporarily defaults to ``prod``)
-            - ``pipeline_date`` identifies the Elasticsearch pipeline cluster
+            - ``pipeline_date`` identifies the pipeline service stack
             - service-specific segment(s) are provided by ``s3_service_prefix_parts``
             - ``scope`` reflects the pipeline run mode:
                 - ``windows/{window}`` for incremental (window-based) runs
