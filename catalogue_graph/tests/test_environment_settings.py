@@ -30,7 +30,7 @@ def test_ingestor_indexer_local_defaults_dev_local(
     ingestor_indexer.local_handler(parser)
 
     bucket = config.CATALOGUE_GRAPH_S3_BUCKET
-    prefix = f"graph-dev/pipeline-dev/{config.INGESTOR_S3_PREFIX}_concepts/index-dev/full/dev"
+    prefix = f"graph-dev/pipeline-dev/{config.INGESTOR_S3_PREFIX}_concepts/index-dev/full/job-dev"
 
     assert MockS3Client.list_objects_v2_calls == [(bucket, prefix)]
     assert MockSecretsManagerClient.calls == []
