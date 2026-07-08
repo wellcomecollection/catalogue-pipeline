@@ -13,6 +13,7 @@ Auth Notes:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 
 import httpx
 from oai_pmh_client.client import OAIClient
@@ -177,3 +178,46 @@ class OAIPMHRuntimeConfig(ABC):
             self.get_oai_endpoint(),
             client=client,
         )
+
+    def source_of_truth_count(self) -> int | None:
+        """Total number of records the source currently holds, or None if unknown.
+
+        Reads ``completeListSize`` from a single raw ``ListIdentifiers`` response;
+        the oai_pmh_client iterators hide the resumption token, so this issues the
+        request directly. Adapters with a more reliable inventory API should
+        override this.
+        """
+        from lxml import etree
+
+        oai_ns = {"o": "http://www.openarchives.org/OAI/2.0/"}
+        params = {
+            "verb": "ListIdentifiers",
+            "metadataPrefix": self.config.oai_metadata_prefix,
+        }
+        if self.config.oai_set_spec:
+            params["set"] = self.config.oai_set_spec
+
+        response = self.build_http_client().get(self.get_oai_endpoint(), params=params)
+        response.raise_for_status()
+        if not response.content:
+            return None
+
+        root = etree.fromstring(response.content)
+        token = root.find(".//o:resumptionToken", oai_ns)
+        complete_list_size = (
+            token.get("completeListSize") if token is not None else None
+        )
+        if complete_list_size:
+            return int(complete_list_size)
+        # No resumption token: the whole list fitted on one page.
+        return len(root.findall(".//o:header", oai_ns))
+
+    def enumerate_source_ids(self) -> Iterator[str] | None:
+        """Yield every record id the source holds, or None if not supported.
+
+        The default returns None: enumerating via OAI resumption-token chains is
+        unreliable, so only adapters with a stateless inventory API (e.g. Axiell's
+        WebAPI) implement this. Used by the reconciliation audit to list the
+        specific records missing from the adapter store.
+        """
+        return None

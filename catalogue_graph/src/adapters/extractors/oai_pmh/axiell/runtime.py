@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 import httpx
 from oai_pmh_client.client import OAIClient
 
@@ -11,6 +13,9 @@ from adapters.extractors.oai_pmh.axiell.clients import (
 )
 from adapters.extractors.oai_pmh.axiell.clients import (
     build_oai_client as _build_axiell_oai_client,
+)
+from adapters.extractors.oai_pmh.axiell.clients import (
+    build_webapi_client as _build_axiell_webapi_client,
 )
 from adapters.extractors.oai_pmh.axiell.config import AXIELL_ADAPTER_CONFIG
 from adapters.extractors.oai_pmh.runtime import OAIPMHAdapterConfig, OAIPMHRuntimeConfig
@@ -44,6 +49,28 @@ class AxiellRuntimeConfig(OAIPMHRuntimeConfig):
         Overrides base to include Axiell-specific retry configuration.
         """
         return _build_axiell_oai_client(http_client=http_client)
+
+    def _webapi_database(self) -> str:
+        return self.config.oai_set_spec or "collect"
+
+    def source_of_truth_count(self) -> int | None:
+        """Total record count from the Axiell WebAPI (wwwopac.ashx).
+
+        A direct database count, so unaffected by the OAI module's
+        datestamp-query faults.
+        """
+        return _build_axiell_webapi_client(database=self._webapi_database()).count()
+
+    def enumerate_source_ids(self) -> Iterator[str]:
+        """Yield every record id via the Axiell WebAPI (stateless paging).
+
+        Ids are ``<database>:<priref>`` to match the OAI identifiers stored in
+        the adapter table.
+        """
+        database = self._webapi_database()
+        return _build_axiell_webapi_client(database=database).enumerate_ids(
+            namespace=database
+        )
 
     def build_reconciler_table(
         self,

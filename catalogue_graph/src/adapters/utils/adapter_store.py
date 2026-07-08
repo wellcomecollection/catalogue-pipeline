@@ -88,6 +88,21 @@ class AdapterStore(PipelineStore):
         non_deleted_filter = Or(EqualTo("deleted", False), IsNull("deleted"))
         return self.stream_namespace_records(non_deleted_filter, snapshot_id)
 
+    def count_active_namespace_records(self, snapshot_id: int | None = None) -> int:
+        """Count non-deleted records in the store namespace.
+
+        Scans only the ``id`` column and sums record-batch row counts, so it
+        never materialises a full Arrow table.
+        """
+        non_deleted_filter = Or(EqualTo("deleted", False), IsNull("deleted"))
+        full_filter = And(EqualTo("namespace", self.namespace), non_deleted_filter)
+        reader = self.table.scan(
+            row_filter=full_filter,
+            selected_fields=("id",),
+            snapshot_id=snapshot_id,
+        ).to_arrow_batch_reader()
+        return sum(batch.num_rows for batch in reader)
+
     @staticmethod
     def _preserve_content_for_deletions(
         updates: pa.Table, existing_data: pa.Table

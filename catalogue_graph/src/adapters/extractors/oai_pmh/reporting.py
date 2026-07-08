@@ -120,3 +120,48 @@ class OAIPMHLoaderReport(OAIPMHReport):
             ),
             PipelineMetric(name="changeset_count", value=self.changeset_count),
         ]
+
+
+class OAIPMHReconcileReport(OAIPMHReport):
+    """Reconciliation-audit report: adapter store vs source-of-truth count.
+
+    ``drift_count`` is ``max(0, server_count - harvested_count)``: positive means
+    the source holds records the store is missing. It is clamped to 0 when the
+    store holds more than the source counts (an unpropagated deletion) and when
+    the source count is unknown (a failed probe must not read as zero drift), so
+    the audit is one-directional: it detects records missing from the store, not
+    stale records lingering in it.
+    """
+
+    label: ClassVar[str] = "adapter_reconcile"
+    server_count: int | None
+    harvested_count: int
+    drift_count: int
+
+    @classmethod
+    def from_counts(
+        cls,
+        *,
+        window: IncrementalWindow,
+        adapter_type: str,
+        server_count: int | None,
+        harvested_count: int,
+    ) -> OAIPMHReconcileReport:
+        drift = (
+            max(0, server_count - harvested_count) if server_count is not None else 0
+        )
+        return cls(
+            window=window,
+            adapter_type=adapter_type,
+            server_count=server_count,
+            harvested_count=harvested_count,
+            drift_count=drift,
+        )
+
+    @property
+    def metrics(self) -> list[PipelineMetric]:
+        return [
+            PipelineMetric(name="server_count", value=self.server_count or 0),
+            PipelineMetric(name="harvested_count", value=self.harvested_count),
+            PipelineMetric(name="drift_count", value=self.drift_count),
+        ]

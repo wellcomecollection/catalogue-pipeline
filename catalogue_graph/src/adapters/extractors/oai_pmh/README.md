@@ -129,6 +129,38 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \
   --dry-run
 ```
 
+### 5. Reconcile → check drift against the source of truth
+
+The reconciliation audit compares how many records the source currently holds
+against the number of active records in the adapter store, and emits a
+`drift_count` metric (namespace `catalogue_adapters`, dimension
+`adapter_type`). Positive drift means the source has records the store is
+missing.
+
+```bash
+uv run python -m adapters.steps.oai_pmh.reconcile --adapter-type {axiell,folio} \
+  --use-rest-api-table \
+  --list-missing
+```
+
+The source count is adapter-specific. The default reads the OAI
+`completeListSize`; Axiell overrides it with the WebAPI (`wwwopac.ashx`) count,
+which is a direct database count and is unaffected by faults in the OAI module.
+`--list-missing` additionally logs a sample of the specific ids present at the
+source but absent from the store, when the adapter can enumerate ids (Axiell).
+Feed those ids to the [recover](#6-recover--fetch-specific-records-by-id) step
+to pull them into the store.
+
+This step is run on demand rather than on a schedule. It emits its metric each
+time it runs, so it can be wired to a schedule and an alarm later without code
+changes.
+
+The audit is one-directional: it detects records the source holds but the store
+is missing. It does not detect the reverse (records lingering in the store after
+being deleted at the source), because `drift_count` is a count comparison
+clamped at zero. Catching stale records would need an id-level diff, not a
+count.
+
 ### Common CLI flags
 
 | Flag                             | Description                                                    |
@@ -142,6 +174,7 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \
 | `--dry-run`                      | (Reloader only) Preview gaps without processing                |
 | `--reprocess-successful-windows` | (Loader only) Re-harvest windows already marked success        |
 | `--flush-every`                  | (Loader only) Commit records and statuses every N windows      |
+| `--list-missing`                 | (Reconcile only) On drift, log a sample of missing ids         |
 
 ## Environment prerequisites
 

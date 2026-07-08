@@ -452,3 +452,30 @@ def test_stream_active_namespace_records_batches_match_store_schema(
 
     assert len(batches) > 0
     assert all(batch.schema == ADAPTER_STORE_ARROW_SCHEMA for batch in batches)
+
+
+def test_count_active_namespace_records_excludes_deleted(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Counting matches the active (non-deleted) records the store returns."""
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "active record"},
+            {"id": "rec002", "content": "another active", "deleted": False},
+            {"id": "rec003", "content": "deleted record", "deleted": True},
+        ]
+    )
+
+    assert client.count_active_namespace_records() == 2
+    # The count must agree with the full active read it stands in for.
+    assert (
+        client.count_active_namespace_records()
+        == client.get_active_namespace_records().num_rows
+    )
+
+
+def test_count_active_namespace_records_empty(
+    temporary_table: IcebergTable,
+) -> None:
+    client = AdapterStore(temporary_table, "test_namespace")
+    assert client.count_active_namespace_records() == 0

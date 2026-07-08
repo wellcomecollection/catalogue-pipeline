@@ -8,6 +8,10 @@ import httpx
 from oai_pmh_client.client import OAIClient
 
 from adapters.extractors.oai_pmh.axiell import config
+from adapters.extractors.oai_pmh.axiell.webapi_client import (
+    AxiellWebApiClient,
+    oai_url_to_webapi_url,
+)
 from adapters.extractors.oai_pmh.http_client import OAIPMHHTTPClient
 from utils.aws import get_ssm_parameter
 
@@ -48,4 +52,20 @@ def build_oai_client(*, http_client: httpx.Client | None = None) -> OAIClient:
         request_backoff_factor=config.OAI_BACKOFF_FACTOR,
         request_max_backoff=config.OAI_BACKOFF_MAX,
         max_transient_retries=config.OAI_TRANSIENT_RETRIES,
+    )
+
+
+def build_webapi_client(
+    *, http_client: httpx.Client | None = None, database: str = "collect"
+) -> AxiellWebApiClient:
+    """Build a WebAPI (wwwopac.ashx) client for Axiell.
+
+    Reuses the Token-authenticated HTTP client and derives the WebAPI URL from
+    the OAI endpoint (same application, same credentials).
+    """
+    client = http_client or build_http_client()
+    return AxiellWebApiClient(
+        base_url=oai_url_to_webapi_url(_oai_endpoint()),
+        client=client,
+        database=database,
     )
