@@ -90,7 +90,7 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
     @property
     def metric_dimensions(self) -> dict:
         return {
-            "graph_date": self.graph_date,
+            "graph_date": self.graph_date or "prod",
             "pipeline_date": self.pipeline_date,
             "transformer_type": self.transformer_type,
             "entity_type": self.entity_type,
@@ -113,7 +113,7 @@ class IngestorReport(PipelineReport, IngestorStepEvent):
     @property
     def metric_dimensions(self) -> dict:
         return {
-            "graph_date": self.graph_date,
+            "graph_date": self.graph_date or "prod",
             "pipeline_date": self.pipeline_date,
             "ingestor_type": self.ingestor_type,
             "index_date": self.index_date,
