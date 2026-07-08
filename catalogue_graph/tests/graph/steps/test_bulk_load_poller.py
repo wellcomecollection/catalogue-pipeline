@@ -1,7 +1,7 @@
 import pytest
 from freezegun import freeze_time
 
-from graph.steps.bulk_load_poller import lambda_handler
+from graph.steps.bulk_load_poller import bulk_loader_event_from_s3_uri, lambda_handler
 from models.neptune_bulk_loader import (
     BulkLoadErrors,
     BulkLoadFeed,
@@ -11,19 +11,18 @@ from tests.mocks import (
     MOCK_NEPTUNE_ENDPOINT,
     MockCloudwatchClient,
     MockRequest,
+    MockSmartOpen,
     mock_neptune_secrets,
 )
 
 LOAD_ID = "123"
 PIPELINE_DATE = "2020-12-12"
 GRAPH_DATE = "2025-01-01"
-BULK_LOADER_S3_PREFIX = (
-    f"s3://wellcomecollection-catalogue-graph/graph-{GRAPH_DATE}/graph_bulk_loader"
-)
+BULK_LOADER_S3_PREFIX = f"s3://wellcomecollection-catalogue-graph/graph-{GRAPH_DATE}/pipeline-{PIPELINE_DATE}/graph_bulk_loader"
 TRANSFORMER_TYPE = "catalogue_concepts"
 ENTITY_TYPE = "nodes"
 
-S3_PATH = f"pipeline-{PIPELINE_DATE}/windows/20251022T0800-20251022T0815/{TRANSFORMER_TYPE}__{ENTITY_TYPE}.csv"
+S3_PATH = f"windows/20251022T0800-20251022T0815/{TRANSFORMER_TYPE}__{ENTITY_TYPE}.csv"
 
 
 def _get_mock_metric(name: str, value: int) -> dict:
@@ -147,6 +146,54 @@ def test_bulk_load_failed() -> None:
         _get_mock_metric("data_type_error_count", 0),
         _get_mock_metric("insert_error_count", insert_error_count),
     ]
+
+
+def test_bulk_loader_event_from_s3_uri_full() -> None:
+    uri = f"{BULK_LOADER_S3_PREFIX}/full/{TRANSFORMER_TYPE}__{ENTITY_TYPE}.csv"
+    event = bulk_loader_event_from_s3_uri(uri, GRAPH_DATE)
+    assert event.graph_date == GRAPH_DATE
+    assert event.pipeline_date == PIPELINE_DATE
+    assert event.transformer_type == TRANSFORMER_TYPE
+    assert event.entity_type == ENTITY_TYPE
+    assert event.window is None
+    assert event.ids is None
+
+
+def test_bulk_loader_event_from_s3_uri_window() -> None:
+    window_str = "20251022T0800-20251022T0815"
+    uri = f"{BULK_LOADER_S3_PREFIX}/windows/{window_str}/{TRANSFORMER_TYPE}__{ENTITY_TYPE}.csv"
+    event = bulk_loader_event_from_s3_uri(uri, GRAPH_DATE)
+    assert event.graph_date == GRAPH_DATE
+    assert event.pipeline_date == PIPELINE_DATE
+    assert event.transformer_type == TRANSFORMER_TYPE
+    assert event.entity_type == ENTITY_TYPE
+    assert event.window is not None
+    assert event.window.to_formatted_string() == window_str
+    assert event.ids is None
+
+
+def test_bulk_loader_event_from_s3_uri_by_id_nodes() -> None:
+    # ID-based processing is only supported by the `catalogue_works` transformer
+    uri = f"{BULK_LOADER_S3_PREFIX}/by_id/id1_id2/catalogue_works__nodes.csv"
+    MockSmartOpen.mock_s3_file(uri, ":ID,label\nid1,foo\nid2,bar\n")
+    event = bulk_loader_event_from_s3_uri(uri, GRAPH_DATE)
+    assert event.graph_date == GRAPH_DATE
+    assert event.pipeline_date == PIPELINE_DATE
+    assert event.transformer_type == "catalogue_works"
+    assert event.window is None
+    assert event.ids == ["id1", "id2"]
+
+
+def test_bulk_loader_event_from_s3_uri_by_id_edges() -> None:
+    # ID-based processing is only supported by the `catalogue_works` transformer
+    uri = f"{BULK_LOADER_S3_PREFIX}/by_id/id1_id2/catalogue_works__edges.csv"
+    MockSmartOpen.mock_s3_file(uri, ":START_ID,:END_ID\nid1,target1\nid2,target2\n")
+    event = bulk_loader_event_from_s3_uri(uri, GRAPH_DATE)
+    assert event.graph_date == GRAPH_DATE
+    assert event.pipeline_date == PIPELINE_DATE
+    assert event.transformer_type == "catalogue_works"
+    assert event.window is None
+    assert event.ids == ["id1", "id2"]
 
 
 def test_bulk_load_failed_below_error_threshold() -> None:

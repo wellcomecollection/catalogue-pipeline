@@ -15,7 +15,7 @@ def save_data_quality_check_result(
     logged_items: list[dict], name: str, graph_date: str
 ) -> None:
     bucket = config.CATALOGUE_GRAPH_S3_BUCKET
-    graph_prefix = f"graph-{graph_date}/" if graph_date else ""
+    graph_prefix = f"graph-{graph_date or 'prod'}/"
     prefix = f"s3://{bucket}/{graph_prefix}data_quality_checks"
     write_csv_to_s3(f"{prefix}/{name}.csv", list(logged_items))
 
