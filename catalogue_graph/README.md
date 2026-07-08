@@ -262,6 +262,13 @@ and a dedicated S3 prefix in the shared catalogue graph bucket for pipeline outp
 
 A dedicated experimental graph with `graph_date` set to `dev` is available for local development and ad-hoc testing.
 
+When a new graph cluster is provisioned, it needs to be fully populated using both the monthly pipeline (to add
+concepts from external ontologies) and the incremental pipeline in `full` mode (to add catalogue works, concepts,
+and images). To avoid running the full monthly pipeline (which is very slow),
+use the [copy_monthly_bulk_load_files notebook](notebooks/copy_monthly_bulk_load_files.ipynb). It copies bulk load files
+from the existing cluster's S3 location to the new cluster's location. Once these files are available to the new
+cluster, use the monthly bulk loader state machine to load them to the graph, skipping the lengthy extraction step.
+
 ## Local Neptune experimentation
 
 To run experimental Neptune queries locally, you can use the notebook in the `notebooks` directory. This notebook
