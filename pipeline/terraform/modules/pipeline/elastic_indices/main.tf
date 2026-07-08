@@ -185,7 +185,7 @@ locals {
 module "pipeline_services" {
   for_each            = local.service_index_permissions
   source              = "../../pipeline_es_api_key"
-  name                = each.key
+  name                = "${each.key}-${var.pipeline_date}"
   read_from           = each.value.read
   write_to            = each.value.write
   pipeline_date       = var.pipeline_date
