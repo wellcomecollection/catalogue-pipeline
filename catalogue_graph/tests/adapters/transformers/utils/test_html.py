@@ -39,6 +39,13 @@ def test_normalise_removes_script_tags_and_inner_content() -> None:
     assert normalise_text(s) == "Nothing here... Nothing."
 
 
+def test_normalise_treats_html_encoded_script_tags_as_text() -> None:
+    # &lt;script&gt; is an HTML-encoded literal, not an executable tag.
+    # It should be preserved as-is rather than decoded into a script element.
+    s = "&lt;script&gt;alert(1)&lt;/script&gt;"
+    assert normalise_text(s) == s
+
+
 def test_normalise_does_not_error_on_missing_closing_tags() -> None:
     assert (
         normalise_text("Someone forgot <em>to close something..")
@@ -59,9 +66,79 @@ def test_normalise_retains_links_stripping_non_href_attributes() -> None:
     )
 
 
-def test_normalise_does_not_escape_symbols() -> None:
+def test_normalise_escapes_symbols() -> None:
     s = "Ampersand & some other symbols like >."
+    assert normalise_text(s) == "Ampersand &amp; some other symbols like &gt;."
+
+
+def test_normalise_strips_hreflang_from_links() -> None:
+    s = '<a href="https://example.com" hreflang="en">link</a>'
+    assert normalise_text(s) == '<a href="https://example.com" rel="nofollow">link</a>'
+
+
+def test_normalise_strips_generic_lang_attribute() -> None:
+    assert normalise_text('<p lang="en">text</p>') == "<p>text</p>"
+
+
+def test_normalise_strips_generic_title_attribute() -> None:
+    assert normalise_text('<span title="tooltip">text</span>') == "<span>text</span>"
+
+
+def test_normalise_allows_cite_on_blockquote() -> None:
+    s = '<blockquote cite="https://example.com">quote</blockquote>'
     assert normalise_text(s) == s
+
+
+def test_normalise_allows_cite_on_q() -> None:
+    s = '<q cite="https://example.com">quote</q>'
+    assert normalise_text(s) == s
+
+
+def test_normalise_strips_relative_href() -> None:
+    assert (
+        normalise_text('<a href="/relative/path">link</a>')
+        == '<a rel="nofollow">link</a>'
+    )
+
+
+def test_normalise_strips_anchor_href() -> None:
+    assert normalise_text('<a href="#section">link</a>') == '<a rel="nofollow">link</a>'
+
+
+def test_normalise_allows_ftp_href() -> None:
+    s = '<a href="ftp://files.example.com">FTP</a>'
+    assert (
+        normalise_text(s) == '<a href="ftp://files.example.com" rel="nofollow">FTP</a>'
+    )
+
+
+def test_normalise_allows_mailto_href() -> None:
+    s = '<a href="mailto:user@example.com">email</a>'
+    assert (
+        normalise_text(s)
+        == '<a href="mailto:user@example.com" rel="nofollow">email</a>'
+    )
+
+
+def test_normalise_strips_javascript_href() -> None:
+    assert (
+        normalise_text('<a href="javascript:alert(1)">xss</a>')
+        == '<a rel="nofollow">xss</a>'
+    )
+
+
+def test_normalise_strips_magnet_href() -> None:
+    assert (
+        normalise_text('<a href="magnet:?xt=urn:example">magnet</a>')
+        == '<a rel="nofollow">magnet</a>'
+    )
+
+
+def test_normalise_strips_irc_href() -> None:
+    assert (
+        normalise_text('<a href="irc://irc.example.com/channel">IRC</a>')
+        == '<a rel="nofollow">IRC</a>'
+    )
 
 
 def test_normalise_strips_full_html_document_removing_recurring_empty_lines() -> None:

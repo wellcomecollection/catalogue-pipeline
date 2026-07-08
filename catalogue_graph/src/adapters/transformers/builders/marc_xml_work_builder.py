@@ -33,8 +33,16 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
     work field properties, which can be overridden by adapter-specific subclasses.
     """
 
-    def __init__(self, record: Record, last_modified: datetime) -> None:
+    def __init__(
+        self,
+        record: Record,
+        last_modified: datetime,
+        enrichment_content: str | None = None,
+    ) -> None:
         self.record = record
+        # Optional serialised item/holdings enrichment (with UUIDs) joined on by the
+        # source. Generic builders ignore it; FolioWorkBuilder reads it to emit items.
+        self.enrichment_content = enrichment_content
         super().__init__(self.source_identifier_value, last_modified)
 
     @property

@@ -1,8 +1,6 @@
 Feature: Physical description extraction from Axiell MARC records
-  Physical description is derived from MARC 300 (Physical Description).
-  Subfields $a (extent), $b (other physical details), $c (dimensions), and
-  $e (accompanying material) are joined with a space. Multiple 300 fields are
-  joined with "<br/>".
+  Physical description is derived from MARC 300 $a (Physical Description, extent).
+  Multiple 300 fields are joined with spaces.
   - https://www.loc.gov/marc/bibliographic/bd300.html
 
   Background:
