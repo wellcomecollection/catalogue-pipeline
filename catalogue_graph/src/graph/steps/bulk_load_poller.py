@@ -73,7 +73,7 @@ def bulk_loader_event_from_s3_uri(s3_uri: str, graph_date: str) -> BulkLoaderEve
 
     uri_graph_date = m.group("graph_date")
     # This should never happen, but validate just in case
-    if uri_graph_date != graph_date:
+    if uri_graph_date != (graph_date or "prod"):
         raise ValueError(
             f"graph_date mismatch: S3 URI encodes '{uri_graph_date}' but caller passed '{graph_date}'"
         )
