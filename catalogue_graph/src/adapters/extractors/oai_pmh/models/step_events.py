@@ -66,6 +66,13 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
     changeset_ids: list[str] = Field(default_factory=list)
     """Identifiers for changesets created during this load."""
 
+    covered_window_keys: list[str] = Field(default_factory=list)
+    """Keys of the success windows whose changesets this response carries.
+
+    The mark-published step stamps exactly these rows, so windows written by
+    other runs (or rows the loader never re-emitted) are never marked
+    published by this execution."""
+
     changed_record_count: int
     """Total number of records that changed in this batch."""
 
@@ -74,10 +81,26 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
 
     @classmethod
     def from_summaries(
-        cls, summaries: list[WindowSummary], job_id: str
+        cls,
+        summaries: list[WindowSummary],
+        job_id: str,
+        extra_changeset_ids: list[str] | None = None,
+        extra_upserted_record_count: int = 0,
     ) -> OAIPMHLoaderResponse:
-        upserted_record_count = 0
-        changeset_ids = []
+        """Build a response from window summaries.
+
+        Args:
+            summaries: Window summaries whose tags carry per-window changeset
+                ids and upsert counts.
+            job_id: Job identifier linking the response to its trigger.
+            extra_changeset_ids: Changeset ids created outside per-window tags
+                (e.g. per-flush commits in the loader's buffered backfill mode).
+            extra_upserted_record_count: Upserted records counted outside
+                per-window tags (the per-flush counterpart of
+                ``extra_changeset_ids``).
+        """
+        upserted_record_count = extra_upserted_record_count
+        changeset_ids = list(extra_changeset_ids or [])
 
         for summary in summaries:
             if not summary.tags:
@@ -91,5 +114,10 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
             summaries=summaries,
             job_id=job_id,
             changeset_ids=list(set(changeset_ids)),
+            covered_window_keys=[
+                summary.window_key
+                for summary in summaries
+                if summary.state == "success"
+            ],
             changed_record_count=upserted_record_count,
         )

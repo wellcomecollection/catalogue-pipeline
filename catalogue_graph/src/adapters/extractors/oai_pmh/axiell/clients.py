@@ -47,4 +47,5 @@ def build_oai_client(*, http_client: httpx.Client | None = None) -> OAIClient:
         max_request_retries=config.OAI_MAX_RETRIES,
         request_backoff_factor=config.OAI_BACKOFF_FACTOR,
         request_max_backoff=config.OAI_BACKOFF_MAX,
+        max_transient_retries=config.OAI_TRANSIENT_RETRIES,
     )

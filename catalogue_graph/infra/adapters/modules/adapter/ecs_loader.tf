@@ -2,8 +2,7 @@ module "loader_ecs_task" {
   source = "../../../../../pipeline/terraform/modules/ecs_task"
 
   task_name = "${var.namespace}-adapter-loader"
-  # TODO: Change to :prod before merging — currently :dev for testing
-  image = "${var.task_repository_url}:prod"
+  image     = "${var.task_repository_url}:prod"
 
   cpu    = 4096
   memory = 16384

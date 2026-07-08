@@ -21,7 +21,10 @@ from adapters.extractors.oai_pmh.models.step_events import (
     OAIPMHLoaderEvent,
     OAIPMHLoaderResponse,
 )
-from adapters.extractors.oai_pmh.record_writer import WindowRecordWriter
+from adapters.extractors.oai_pmh.record_writer import (
+    BufferedWindowRecordWriter,
+    WindowRecordWriter,
+)
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.extractors.oai_pmh.reporting import OAIPMHLoaderReport
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
@@ -43,6 +46,15 @@ class LoaderStepConfig(BaseModel):
     allow_partial_final_window: bool = False
     suppress_summaries: bool = True
 
+    reprocess_successful_windows: bool = False
+    """Re-harvest windows already marked successful (backfill mode)."""
+
+    flush_every: int | None = None
+    """Batch record and window-status commits every N windows instead of per
+    window. Intended for resumable backfills: a crash loses up to N windows of
+    uncommitted work, which are re-harvested on the next run. None (default)
+    keeps the classic one-commit-per-window behaviour."""
+
 
 class LoaderRuntime(BaseModel):
     """Runtime dependencies for the loader step."""
@@ -56,6 +68,8 @@ class LoaderRuntime(BaseModel):
     suppress_summaries: bool = True
     report_s3_bucket: str | None = None
     report_s3_prefix: str = "dev"
+    reprocess_successful_windows: bool = False
+    flush_every: int | None = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -93,6 +107,8 @@ def build_runtime(
         suppress_summaries=cfg.suppress_summaries,
         report_s3_bucket=config.config.report_s3_bucket,
         report_s3_prefix=config.config.report_s3_prefix,
+        reprocess_successful_windows=cfg.reprocess_successful_windows,
+        flush_every=cfg.flush_every,
     )
 
 
@@ -109,11 +125,19 @@ def build_harvester(
     Returns:
         WindowHarvestManager configured for this request.
     """
-    record_writer = WindowRecordWriter(
+    writer_cls = (
+        BufferedWindowRecordWriter if runtime.flush_every else WindowRecordWriter
+    )
+    record_writer = writer_cls(
         namespace=runtime.adapter_namespace,
         table_client=runtime.table_client,
         job_id=request.job_id,
         window_range=request.window.to_iso_string(),
+    )
+    flush_callback = (
+        record_writer.flush
+        if isinstance(record_writer, BufferedWindowRecordWriter)
+        else None
     )
     return WindowHarvestManager(
         store=runtime.store,
@@ -122,6 +146,7 @@ def build_harvester(
         metadata_prefix=request.metadata_prefix,
         set_spec=request.set_spec,
         record_callback=record_writer,
+        flush_callback=flush_callback,
     )
 
 
@@ -144,7 +169,8 @@ def execute_loader(
     summaries = harvester.harvest_range(
         time_range=window,
         max_windows=request.max_windows,
-        reprocess_successful_windows=False,
+        reprocess_successful_windows=runtime.reprocess_successful_windows,
+        flush_every=runtime.flush_every,
     )
 
     if not summaries:
@@ -157,7 +183,21 @@ def execute_loader(
             window_end=window.end_time.isoformat(),
         )
 
-    return OAIPMHLoaderResponse.from_summaries(summaries, job_id=request.job_id)
+    # In buffered mode changeset ids and upserted counts are produced per
+    # flush, not per window, so they aren't in the summaries' tags and must be
+    # added to the response here.
+    extra_changeset_ids: list[str] = []
+    extra_upserted_record_count = 0
+    if isinstance(harvester.record_callback, BufferedWindowRecordWriter):
+        extra_changeset_ids = harvester.record_callback.changeset_ids
+        extra_upserted_record_count = harvester.record_callback.upserted_record_count
+
+    return OAIPMHLoaderResponse.from_summaries(
+        summaries,
+        job_id=request.job_id,
+        extra_changeset_ids=extra_changeset_ids,
+        extra_upserted_record_count=extra_upserted_record_count,
+    )
 
 
 def handler(
@@ -230,6 +270,22 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         default=True,
         help="Allow partial final window (default: True for CLI)",
     )
+    parser.add_argument(
+        "--reprocess-successful-windows",
+        action="store_true",
+        help="Re-harvest windows already marked successful (backfill mode)",
+    )
+    parser.add_argument(
+        "--flush-every",
+        type=int,
+        default=None,
+        metavar="N",
+        help=(
+            "Batch record and window-status commits every N windows instead of "
+            "per window (resumable backfills; a crash loses up to N windows of "
+            "uncommitted work)"
+        ),
+    )
 
     args = parser.parse_args()
     config = get_config(args.adapter_type)
@@ -252,6 +308,8 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
                 else args.allow_partial_final_window
             ),
             suppress_summaries=False,
+            reprocess_successful_windows=args.reprocess_successful_windows,
+            flush_every=args.flush_every,
         ),
     )
     execution_context = ExecutionContext(

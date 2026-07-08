@@ -174,6 +174,95 @@ class TestBuildWindowRequest:
         assert request.window.start_time == end2
         assert request.window.end_time == now
 
+    def test_resumes_from_last_published_window(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        """Loaded-but-unpublished windows must not advance the start: the next
+        range re-covers them so their changesets are re-emitted and re-published."""
+        now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
+        published_end = now - timedelta(minutes=45)
+        stranded_end = now - timedelta(minutes=30)
+
+        store = populate_window_store(
+            temporary_window_status_table,
+            [
+                create_window_row(
+                    published_end - timedelta(minutes=15),
+                    published_end,
+                    tags={"published_at": "2025-11-17T11:30:00+00:00"},
+                ),
+                # Loaded successfully but the execution died before publishing
+                create_window_row(published_end, stranded_end),
+            ],
+        )
+        runtime = _create_trigger_runtime(store, adapter_runtime_config)
+
+        request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == published_end
+        assert request.window.end_time == now
+
+    def test_cascades_to_last_success_when_nothing_published(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
+        last_success_end = now - timedelta(minutes=30)
+        store = populate_window_store(
+            temporary_window_status_table,
+            [
+                create_window_row(
+                    last_success_end - timedelta(minutes=15), last_success_end
+                )
+            ],
+        )
+        runtime = _create_trigger_runtime(store, adapter_runtime_config)
+
+        request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == last_success_end
+
+    def test_stale_published_cursor_recovers_without_tripping_breaker(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        """Lag measures harvest liveness, not the published cursor: a stamp
+        left stale by a stalled mark-published step must not halt the
+        trigger, because only a completed execution can refresh the stamps.
+        The run proceeds and re-covers the stale range instead."""
+        now = datetime(2025, 11, 17, 13, 0, tzinfo=UTC)
+        published_end = now - timedelta(hours=2)
+        fresh_success_end = now - timedelta(minutes=15)
+
+        store = populate_window_store(
+            temporary_window_status_table,
+            [
+                create_window_row(
+                    published_end - timedelta(minutes=15),
+                    published_end,
+                    tags={"published_at": "2025-11-17T11:00:00+00:00"},
+                ),
+                create_window_row(
+                    fresh_success_end - timedelta(minutes=15), fresh_success_end
+                ),
+            ],
+        )
+        runtime = _create_trigger_runtime(
+            store,
+            adapter_runtime_config,
+            max_lag_minutes=30,
+            enforce_lag=True,
+        )
+
+        request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == published_end
+        assert request.window.end_time == now
+
     def test_errors_when_lag_exceeds_limit(
         self,
         temporary_window_status_table: IcebergTable,

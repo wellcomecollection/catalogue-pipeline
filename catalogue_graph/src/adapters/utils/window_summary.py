@@ -11,6 +11,23 @@ from utils.timezone import ensure_datetime_utc
 WindowState = Literal["success", "partial_success", "failed"]
 
 
+def published_at_from_tags(tags: dict[str, str] | None) -> datetime | None:
+    """Read the published_at stamp from a window row's tags.
+
+    Deliberately avoids parsing the other tag values (which hold JSON), so a
+    corrupt tag elsewhere in the row cannot break cursor computation. A value
+    that is not a valid ISO timestamp is treated as unstamped, so garbage
+    stamps are re-stamped rather than advancing the cursor.
+    """
+    value = (tags or {}).get("published_at")
+    if not value:
+        return None
+    try:
+        return ensure_datetime_utc(datetime.fromisoformat(value))
+    except ValueError:
+        return None
+
+
 class WindowSummary(BaseModel):
     window_start: datetime
     window_end: datetime
