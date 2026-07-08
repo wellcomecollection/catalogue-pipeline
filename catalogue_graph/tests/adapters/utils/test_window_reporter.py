@@ -61,6 +61,7 @@ def _insert_window(
     start: datetime,
     end: datetime,
     state: WindowState = "success",
+    tags: dict[str, str] | None = None,
 ) -> None:
     store.upsert(
         WindowSummary(
@@ -71,7 +72,7 @@ def _insert_window(
             last_error="Error" if state == "failed" else None,
             record_ids=[],
             updated_at=datetime.now(UTC),
-            tags=None,
+            tags=tags,
         )
     )
 
@@ -222,6 +223,71 @@ def test_coverage_report_last_success_end(tmp_path: Path) -> None:
     _insert_window(store, end2, end3, "success")
     report = reporter.coverage_report()
     assert report.last_success_end == end3
+
+
+def test_coverage_report_last_published_end(tmp_path: Path) -> None:
+    store = _build_store(tmp_path)
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+    published_tags = {"published_at": "2025-01-01T13:00:00+00:00"}
+
+    # No windows
+    reporter = WindowReporter(store)
+    report = reporter.coverage_report()
+    assert report.last_published_end is None
+
+    # Success rows without the stamp do not advance the published cursor
+    end1 = start + timedelta(minutes=15)
+    _insert_window(store, start, end1, "success")
+    report = reporter.coverage_report()
+    assert report.last_published_end is None
+    assert report.last_success_end == end1
+
+    # A stamped success row does
+    end2 = end1 + timedelta(minutes=15)
+    _insert_window(store, end1, end2, "success", tags=published_tags)
+    report = reporter.coverage_report()
+    assert report.last_published_end == end2
+
+    # A later loaded-but-unpublished success row advances last_success_end only
+    end3 = end2 + timedelta(minutes=15)
+    _insert_window(store, end2, end3, "success")
+    report = reporter.coverage_report()
+    assert report.last_published_end == end2
+    assert report.last_success_end == end3
+
+    # A stamped-looking tag on a non-success row is ignored
+    end4 = end3 + timedelta(minutes=15)
+    _insert_window(store, end3, end4, "failed", tags=published_tags)
+    report = reporter.coverage_report()
+    assert report.last_published_end == end2
+
+    # A garbage stamp value is treated as unstamped, not an error
+    end5 = end4 + timedelta(minutes=15)
+    _insert_window(store, end4, end5, "success", tags={"published_at": "None"})
+    report = reporter.coverage_report()
+    assert report.last_published_end == end2
+
+
+def test_coverage_report_tolerates_corrupt_tags(tmp_path: Path) -> None:
+    """The cursor computation must not parse the JSON-bearing tag values: one
+    corrupt row would otherwise fail the trigger on every run."""
+    store = _build_store(tmp_path)
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+    end = start + timedelta(minutes=15)
+    _insert_window(
+        store,
+        start,
+        end,
+        "success",
+        tags={
+            "changeset_ids": "{not json",
+            "published_at": "2025-01-01T13:00:00+00:00",
+        },
+    )
+
+    report = WindowReporter(store).coverage_report()
+
+    assert report.last_published_end == end
 
 
 def test_coverage_report_overlapping_success_windows(tmp_path: Path) -> None:

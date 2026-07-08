@@ -23,4 +23,9 @@ data "terraform_remote_state" "platform_monitoring" {
 locals {
   chatbot_topic_arn = data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn
   steps_namespace   = coalesce(var.steps_namespace, var.namespace)
+
+  # The oai_pmh steps package carries the mark-published step and the
+  # published-cursor trigger; adapters on other steps packages (e.g. ebsco)
+  # have no OAI-PMH window store to stamp.
+  published_tracking = local.steps_namespace == "oai_pmh"
 }

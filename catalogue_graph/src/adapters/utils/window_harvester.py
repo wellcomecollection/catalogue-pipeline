@@ -46,6 +46,10 @@ class WindowSummaryTags(BaseModel):
         if "upserted_record_count" in tags:
             upserted_record_count = int(tags.pop("upserted_record_count"))
 
+        # published_at is deliberately not modelled here: it rides through
+        # other_tags untouched, and adapters.utils.window_summary.
+        # published_at_from_tags is the one reader that decides what counts
+        # as a valid stamp.
         return cls(
             changeset_ids=changeset_ids,
             upserted_record_count=upserted_record_count,

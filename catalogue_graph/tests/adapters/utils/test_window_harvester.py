@@ -819,6 +819,20 @@ def test_parse_tags_unknown_keys_passed_through() -> None:
     assert result.other_tags == {"extra": "value"}
 
 
+def test_parse_tags_published_at_survives_round_trip_via_other_tags() -> None:
+    """The stamp is not modelled on WindowSummaryTags; it must ride through
+    other_tags untouched so partial-window retries preserve it."""
+    tags = {
+        "changeset_ids": json.dumps(["cs-1"]),
+        "upserted_record_count": "3",
+        "published_at": "2026-07-03T10:00:00+00:00",
+        "extra": "value",
+    }
+    result = WindowSummaryTags.parse(tags)
+    assert result.other_tags["published_at"] == "2026-07-03T10:00:00+00:00"
+    assert result.dump() == tags
+
+
 # ---------------------------------------------------------------------------
 # Batched-commit (flush_every) mode
 # ---------------------------------------------------------------------------
