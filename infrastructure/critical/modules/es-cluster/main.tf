@@ -82,7 +82,7 @@ module "readonly_user_secrets" {
   source        = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
   deletion_mode = "IMMEDIATE"
   key_value_map = {
-    "elasticsearch/${var.cluster_date}/read_only/es_username" = elasticstack_elasticsearch_security_user.read_only.username
-    "elasticsearch/${var.cluster_date}/read_only/es_password" = elasticstack_elasticsearch_security_user.read_only.password
+    "elasticsearch/es-cluster-${var.cluster_date}/read_only/es_username" = elasticstack_elasticsearch_security_user.read_only.username
+    "elasticsearch/es-cluster-${var.cluster_date}/read_only/es_password" = elasticstack_elasticsearch_security_user.read_only.password
   }
 }

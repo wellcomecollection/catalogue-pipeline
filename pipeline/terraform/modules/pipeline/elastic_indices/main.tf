@@ -173,7 +173,7 @@ locals {
       es_host     = var.es_private_host
       es_port     = var.es_port
       es_protocol = var.es_protocol
-      es_apikey   = "elasticsearch/es-cluster-${var.es_cluster_date}/${service}/api_key"
+      es_apikey   = "elasticsearch/es-cluster-${var.es_cluster_date}/${service}-${var.pipeline_date}/api_key"
     }
   }
 
