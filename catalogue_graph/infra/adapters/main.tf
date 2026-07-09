@@ -50,3 +50,19 @@ module "folio" {
 resource "aws_cloudwatch_event_bus" "event_bus" {
   name = "catalogue-pipeline-adapter-event-bus"
 }
+
+# Axiell → FOLIO outbound sync. Deployed as part of this stack (shares
+# terraform/adapters.tfstate). Listens for axiell.adapter.completed on the shared
+# bus and upserts changed records into FOLIO Inventory. Runs the sync handler out
+# of the shared unified_pipeline_lambda image; build/deploy locally with
+# `scripts/deploy_lambda.sh axiell-folio-sync`. OKAPI credentials come from SSM
+# at runtime (seeded as a placeholder).
+module "axiell_folio_sync" {
+  source              = "./modules/axiell_folio_sync"
+  repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
+  image_tag           = "dev"
+  event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
+  okapi_url           = var.okapi_url
+  okapi_tenant        = var.okapi_tenant
+  s3_table_bucket_arn = var.s3_table_bucket_arn
+}
