@@ -20,7 +20,7 @@ module "inference_find_work_lambda" {
   timeout     = 300 # 5 minutes
 
   vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       local.network_config.ec_privatelink_security_group_id,
       aws_security_group.egress.id,
@@ -38,11 +38,10 @@ resource "aws_iam_role_policy" "inference_find_work_secret_read" {
 # machine Map payload stays small; the inference task reads them back.
 data "aws_iam_policy_document" "inference_find_work_s3_write" {
   statement {
-    effect  = "Allow"
-    actions = ["s3:PutObject"]
+    effect    = "Allow"
+    actions   = ["s3:PutObject"]
     resources = [
-      "arn:aws:s3:::wellcomecollection-catalogue-graph/inferrer/*",
-      "arn:aws:s3:::wellcomecollection-catalogue-graph-dev/inferrer/*",
+      "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/inferrer/*"
     ]
   }
 }
@@ -116,9 +115,9 @@ locals {
     QueryLanguage = "JSONata"
     Comment       = "Find images modified within the window and augment them with inferred data."
     StartAt       = "ConstructEvent"
-    States = {
+    States        = {
       ConstructEvent = {
-        Type = "Pass"
+        Type   = "Pass"
         Output = {
           "pipeline_date" : var.pipeline_date,
           "graph_date" : var.graph_date,
@@ -136,8 +135,8 @@ locals {
       }
 
       FindWork = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::lambda:invoke"
+        Type      = "Task"
+        Resource  = "arn:aws:states:::lambda:invoke"
         Arguments = {
           FunctionName = module.inference_find_work_lambda.lambda_arn
           Payload      = "{% $states.input %}"
@@ -148,23 +147,23 @@ locals {
       }
 
       InferImages = {
-        Type  = "Map"
-        Items = "{% $states.input.partitions %}"
+        Type           = "Map"
+        Items          = "{% $states.input.partitions %}"
         # Matches the inferrer ASG max_instances (local.inference_max_concurrency)
         # so the Map never fans out more tasks than the capacity provider can place.
         MaxConcurrency = local.inference_max_concurrency
-        ItemProcessor = {
+        ItemProcessor  = {
           ProcessorConfig = { Mode = "INLINE" }
           StartAt         = "RunInferenceTask"
-          States = {
+          States          = {
             RunInferenceTask = {
               Type           = "Task"
               Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
               TimeoutSeconds = local.inference_task_token_timeout_seconds
               Retry          = local.inference_ecs_retry
-              Arguments = {
-                Cluster        = aws_ecs_cluster.cluster.arn
-                TaskDefinition = module.inference_manager_ecs_task.task_definition_arn
+              Arguments      = {
+                Cluster                  = aws_ecs_cluster.cluster.arn
+                TaskDefinition           = module.inference_manager_ecs_task.task_definition_arn
                 CapacityProviderStrategy = [
                   {
                     CapacityProvider = module.inference_capacity_provider.name
@@ -184,7 +183,7 @@ locals {
                 Overrides = {
                   ContainerOverrides = [
                     {
-                      Name = local.inference_manager_container_name
+                      Name    = local.inference_manager_container_name
                       Command = [
                         "/app/src/inferrer/steps/inference_manager.py",
                         "--event", "{% $string($states.input) %}",
@@ -209,7 +208,7 @@ locals {
               End = true
             }
             RecordPartitionFailure = {
-              Type = "Pass"
+              Type   = "Pass"
               Output = {
                 "partition_failed" : true
               }
@@ -276,7 +275,7 @@ resource "aws_iam_role" "run_image_inferrer_role" {
   name = "run-image-inferrer-role-${var.pipeline_date}"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect    = "Allow"
@@ -291,7 +290,7 @@ resource "aws_iam_role_policy" "run_image_inferrer_policy" {
   role = aws_iam_role.run_image_inferrer_role.id
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect   = "Allow"

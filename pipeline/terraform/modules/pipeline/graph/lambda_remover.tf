@@ -64,7 +64,7 @@ data "aws_iam_policy_document" "graph_remover_s3_policy" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_remover/*"
     ]
   }
 }
