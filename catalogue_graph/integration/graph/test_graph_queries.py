@@ -49,7 +49,9 @@ GRAPH_DATE = os.environ.get("GRAPH_DATE")
 @lru_cache(maxsize=1)
 def neptune_client() -> NeptuneClient:
     if GRAPH_DATE is None:
-        raise ValueError("GRAPH_DATE environment variable must be set to run integration tests")
+        raise ValueError(
+            "GRAPH_DATE environment variable must be set to run integration tests"
+        )
     return NeptuneClient(GRAPH_DATE)
 
 
