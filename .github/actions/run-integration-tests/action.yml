@@ -7,6 +7,9 @@ inputs:
   slack_webhook_secret_id:
     description: "Secrets Manager secret id/name for the Slack failure alert webhook"
     required: true
+  graph_date:
+    description: "Neptune graph date (empty string for the legacy production cluster)"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -29,6 +32,8 @@ runs:
         uv run pytest -m "integration"
       working-directory: catalogue_graph
       shell: bash
+      env:
+        GRAPH_DATE: ${{ inputs.graph_date }}
 
     - name: Get Slack webhook URL
       if: ${{ failure() }}

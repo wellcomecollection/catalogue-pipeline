@@ -79,6 +79,7 @@ jobs:
         with:
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           slack_webhook_secret_id: monitoring/critical_slack_webhook
+          graph_date: ""
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
