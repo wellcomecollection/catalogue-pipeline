@@ -83,13 +83,12 @@ data "aws_iam_policy_document" "neptune_delete" {
 data "aws_iam_policy_document" "ingestor_s3_read" {
   statement {
     actions = [
-      "s3:ListBucket",
       "s3:GetObject",
       "s3:HeadObject",
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/ingestor*"
     ]
   }
 
@@ -108,13 +107,12 @@ data "aws_iam_policy_document" "ingestor_s3_read" {
 data "aws_iam_policy_document" "graph_remover_s3_read" {
   statement {
     actions = [
-      "s3:ListBucket",
       "s3:GetObject",
       "s3:HeadObject",
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_remover/*"
     ]
   }
 }
@@ -127,7 +125,7 @@ data "aws_iam_policy_document" "ingestor_s3_write" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/ingestor*"
     ]
   }
 }
@@ -135,13 +133,12 @@ data "aws_iam_policy_document" "ingestor_s3_write" {
 data "aws_iam_policy_document" "s3_bulk_load_read" {
   statement {
     actions = [
-      "s3:ListBucket",
       "s3:HeadObject",
       "s3:GetObject"
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_bulk_loader/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_bulk_loader/*"
     ]
   }
 }
@@ -153,7 +150,7 @@ data "aws_iam_policy_document" "s3_bulk_load_write" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_bulk_loader/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_bulk_loader/*"
     ]
   }
 }
@@ -161,13 +158,12 @@ data "aws_iam_policy_document" "s3_bulk_load_write" {
 data "aws_iam_policy_document" "ingestor_deletions_s3_policy" {
   statement {
     actions = [
-      "s3:ListBucket",
       "s3:HeadObject",
       "s3:GetObject"
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover_incremental/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_remover_incremental/*"
     ]
   }
 }
