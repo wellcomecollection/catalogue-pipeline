@@ -38,3 +38,10 @@ module "catalogue_graph_neptune_cluster_dev" {
     aws.dns = aws.dns
   }
 }
+
+resource "aws_ssm_parameter" "production_graph_date" {
+  name        = "/catalogue_graph/production_graph_date"
+  type        = "String"
+  description = "The graph_date of the current production Neptune cluster, read by CI."
+  value       = module.catalogue_graph_neptune_cluster.graph_date != "" ? module.catalogue_graph_neptune_cluster.graph_date : "prod"
+}

@@ -13,3 +13,7 @@ output "neptune_cluster_data_access_arn" {
 output "neptune_cluster_endpoint_secret_arn" {
   value = aws_secretsmanager_secret.neptune_cluster_endpoint.arn
 }
+
+output "graph_date" {
+  value = var.graph_date
+}

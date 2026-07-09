@@ -75,11 +75,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+      - name: Get production graph date
+        id: graph_date
+        run: |
+          VALUE=$(aws ssm get-parameter \
+            --name /catalogue_graph/production_graph_date \
+            --query Parameter.Value --output text)
+          echo "value=$VALUE" >> "$GITHUB_OUTPUT"
+        shell: bash
       - uses: ./.github/actions/run-integration-tests
         with:
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           slack_webhook_secret_id: monitoring/critical_slack_webhook
-          graph_date: ""
+          graph_date: ${{ steps.graph_date.outputs.value }}
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
