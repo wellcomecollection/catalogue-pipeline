@@ -61,9 +61,11 @@ class NeptuneClient:
 
     @property
     def namespace(self) -> str:
-        # The current production cluster was created before we introduced graph dates, requiring the if/else statement.
-        # We can simplify this once we switch to a dated cluster.
-        if self.graph_date == "prod" or not self.graph_date:
+        # The current production cluster was created before we introduced graph dates. Its graph date is blank to
+        # preserve its Neptune cluster ID. In places which do not support empty labels (SSM, CloudWatch metrics, S3),
+        # the cluster is labelled `prod`, so both `` and `prod` refer to the same legacy production cluster.
+        # This is confusing, but temporary. Once we switch to a new (dated) cluster, we will be able to remove this.
+        if self.graph_date in ("prod", ""):
             return "catalogue-graph"
 
         return f"catalogue-graph-{self.graph_date}"
