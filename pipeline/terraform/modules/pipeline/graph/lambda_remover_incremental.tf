@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "graph_remover_incremental_s3_policy" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover_incremental/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/*/graph_remover_incremental/*"
     ]
   }
 }

@@ -89,7 +89,7 @@ data "aws_iam_policy_document" "ingestor_s3_read" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/ingestor*"
     ]
   }
 
@@ -114,7 +114,7 @@ data "aws_iam_policy_document" "graph_remover_s3_read" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_remover/*"
     ]
   }
 }
@@ -127,7 +127,7 @@ data "aws_iam_policy_document" "ingestor_s3_write" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/ingestor*"
     ]
   }
 }
@@ -141,7 +141,7 @@ data "aws_iam_policy_document" "s3_bulk_load_read" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_bulk_loader/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_bulk_loader/*"
     ]
   }
 }
@@ -153,7 +153,7 @@ data "aws_iam_policy_document" "s3_bulk_load_write" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_bulk_loader/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_bulk_loader/*"
     ]
   }
 }
@@ -167,7 +167,7 @@ data "aws_iam_policy_document" "ingestor_deletions_s3_policy" {
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover_incremental/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_remover_incremental/*"
     ]
   }
 }
