@@ -63,8 +63,10 @@ class NeptuneClient:
     def namespace(self) -> str:
         # The current production cluster was created before we introduced graph dates, requiring the if/else statement.
         # We can simplify this once we switch to a dated cluster.
-        date_infix = f"-{self.graph_date}" if self.graph_date else ""
-        return f"catalogue-graph{date_infix}"
+        if self.graph_date == "prod" or not self.graph_date:
+            return "catalogue-graph"
+
+        return f"catalogue-graph-{self.graph_date}"
 
     def _get_client_url(self) -> str:
         return f"https://{self.neptune_endpoint}:{NEPTUNE_PORT}"
