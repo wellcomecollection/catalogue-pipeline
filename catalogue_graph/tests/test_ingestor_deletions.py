@@ -5,10 +5,9 @@ import pytest
 from ingestor.steps.ingestor_deletions import lambda_handler
 from tests.mocks import MockElasticsearchClient, MockSmartOpen, mock_es_secrets
 
-REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
-
 MOCK_EVENT = {
     "ingestor_type": "concepts",
+    "graph_date": "dev",
     "pipeline_date": "dev",
     "index_date": "dev",
     "job_id": "dev",
@@ -33,7 +32,7 @@ def get_indexed_concept_ids(index_name: str = "concepts-indexed-dev") -> list[st
 def mock_deleted_ids_log_file(mock_ids: list[str], pipeline_date: str) -> None:
     df = pl.DataFrame(mock_ids)
 
-    uri = f"{REMOVER_S3_PREFIX}/{pipeline_date}/deleted_ids/catalogue_concepts__nodes.parquet"
+    uri = f"s3://wellcomecollection-catalogue-graph/graph-dev/pipeline-{pipeline_date}/graph_remover_incremental/full/deleted_ids/catalogue_concepts__nodes.parquet"
     MockSmartOpen.mock_s3_parquet_file(uri, df)
 
 
@@ -44,7 +43,7 @@ def mock_time_window_deleted_ids_log_file(
     df = pl.DataFrame(mock_ids)
 
     file_name = "catalogue_concepts__nodes.parquet"
-    uri = f"{REMOVER_S3_PREFIX}/{pipeline_date}/windows/20251022T0800-20251022T0815/deleted_ids/{file_name}"
+    uri = f"s3://wellcomecollection-catalogue-graph/graph-dev/pipeline-{pipeline_date}/graph_remover_incremental/windows/20251022T0800-20251022T0815/deleted_ids/{file_name}"
     MockSmartOpen.mock_s3_parquet_file(uri, df)
 
 

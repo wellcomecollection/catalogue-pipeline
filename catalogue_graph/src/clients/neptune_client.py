@@ -16,7 +16,7 @@ import config
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.aws import get_secret
 from utils.streaming import process_stream_in_parallel
-from utils.types import EntityType, Environment
+from utils.types import EntityType
 
 logger = structlog.get_logger(__name__)
 
@@ -45,16 +45,12 @@ class NeptuneClient:
     Communicates with the Neptune cluster. Makes openCypher queries, triggers bulk load operations, etc.
     """
 
-    def __init__(self, environment: Environment = "prod") -> None:
+    def __init__(self, graph_date: str) -> None:
         self.session = boto3.Session()
-        self.environment = environment
+        self.graph_date = graph_date
 
-        if environment == "prod":
-            endpoint_secret_name = config.NEPTUNE_PROD_HOST_SECRET_NAME
-        else:
-            endpoint_secret_name = config.NEPTUNE_DEV_HOST_SECRET_NAME
-
-        logger.info("Creating Neptune client", environment=environment)
+        endpoint_secret_name = f"{self.namespace}/{config.NEPTUNE_HOST_SECRET_NAME}"
+        logger.info("Creating Neptune client", graph_date=graph_date)
 
         self.neptune_endpoint: str = get_secret(endpoint_secret_name)
 
@@ -62,6 +58,13 @@ class NeptuneClient:
         self.parallel_query_semaphore = threading.Semaphore(
             NEPTUNE_MAX_PARALLEL_QUERIES
         )
+
+    @property
+    def namespace(self) -> str:
+        # The current production cluster was created before we introduced graph dates, requiring the if/else statement.
+        # We can simplify this once we switch to a dated cluster.
+        date_infix = f"-{self.graph_date}" if self.graph_date else ""
+        return f"catalogue-graph{date_infix}"
 
     def _get_client_url(self) -> str:
         return f"https://{self.neptune_endpoint}:{NEPTUNE_PORT}"
@@ -164,11 +167,7 @@ class NeptuneClient:
         Initiates a Neptune bulk load from an S3 file.
         See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-load.html for more info.
         """
-        role_name = (
-            "catalogue-graph-cluster"
-            if self.environment == "prod"
-            else "catalogue-graph-dev-cluster"
-        )
+        role_name = f"{self.namespace}-cluster"
 
         response = self._make_request(
             "POST",

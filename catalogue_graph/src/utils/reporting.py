@@ -72,7 +72,7 @@ class PipelineReport(BaseModel):
 class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
     @property
     def publish_to_cloudwatch(self) -> bool:
-        return self.environment == "prod"
+        return self.graph_date != "dev"
 
     @property
     def metric_namespace(self) -> str:
@@ -90,6 +90,7 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
     @property
     def metric_dimensions(self) -> dict:
         return {
+            "graph_date": self.graph_date or "prod",
             "pipeline_date": self.pipeline_date,
             "transformer_type": self.transformer_type,
             "entity_type": self.entity_type,
@@ -99,7 +100,7 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
 class IngestorReport(PipelineReport, IngestorStepEvent):
     @property
     def publish_to_cloudwatch(self) -> bool:
-        return self.environment == "prod"
+        return self.graph_date != "dev"
 
     @property
     def metric_namespace(self) -> str:
@@ -112,6 +113,7 @@ class IngestorReport(PipelineReport, IngestorStepEvent):
     @property
     def metric_dimensions(self) -> dict:
         return {
+            "graph_date": self.graph_date or "prod",
             "pipeline_date": self.pipeline_date,
             "ingestor_type": self.ingestor_type,
             "index_date": self.index_date,

@@ -32,19 +32,19 @@ def _are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
     return set(filtered_types) in compatible_combinations
 
 
-def _get_concepts_count() -> int:
+def _get_concepts_count(graph_date: str) -> int:
     count_query = "MATCH (c:Concept) RETURN count(c) AS count"
-    response = NeptuneClient().run_open_cypher_query(count_query)
+    response = NeptuneClient(graph_date).run_open_cypher_query(count_query)
     count: int = response[0]["count"]
     return count
 
 
-def get_concepts_with_inconsistent_types() -> Generator[dict]:
+def get_concepts_with_inconsistent_types(graph_date: str) -> Generator[dict]:
     """Return all concepts whose combination of types is not consistent."""
-    client = NeptuneClient()
+    client = NeptuneClient(graph_date)
 
     start_offset = 0
-    concepts_count = _get_concepts_count()
+    concepts_count = _get_concepts_count(graph_date)
     while start_offset < concepts_count:
         params = {"start_offset": start_offset, "limit": CONCEPT_TYPES_QUERY_LIMIT}
         response = client.run_open_cypher_query(CONCEPT_TYPES_QUERY, params)

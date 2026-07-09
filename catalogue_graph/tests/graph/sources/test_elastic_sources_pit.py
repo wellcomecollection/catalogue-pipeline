@@ -8,6 +8,7 @@ from models.events import BasePipelineEvent, PipelinePitIds
 def test_merged_works_source_uses_merged_pit_id() -> None:
     event = BasePipelineEvent(
         pipeline_date="2025-01-01",
+        graph_date="2025-01-01",
         pit_ids=PipelinePitIds(merged="merged_pit_123", augmented="augmented_pit_456"),
     )
     es_client = MagicMock()
@@ -21,6 +22,7 @@ def test_merged_works_source_uses_merged_pit_id() -> None:
 def test_augmented_images_source_uses_augmented_pit_id() -> None:
     event = BasePipelineEvent(
         pipeline_date="2025-01-01",
+        graph_date="2025-01-01",
         pit_ids=PipelinePitIds(merged="merged_pit_123", augmented="augmented_pit_456"),
     )
     es_client = MagicMock()
@@ -32,7 +34,7 @@ def test_augmented_images_source_uses_augmented_pit_id() -> None:
 
 
 def test_merged_works_source_opens_pit_when_none() -> None:
-    event = BasePipelineEvent(pipeline_date="2025-01-01")
+    event = BasePipelineEvent(pipeline_date="2025-01-01", graph_date="2025-01-01")
     es_client = MagicMock()
     es_client.open_point_in_time.return_value = {"id": "fresh_merged_pit"}
 
@@ -43,7 +45,7 @@ def test_merged_works_source_opens_pit_when_none() -> None:
 
 
 def test_augmented_images_source_opens_pit_when_none() -> None:
-    event = BasePipelineEvent(pipeline_date="2025-01-01")
+    event = BasePipelineEvent(pipeline_date="2025-01-01", graph_date="2025-01-01")
     es_client = MagicMock()
     es_client.open_point_in_time.return_value = {"id": "fresh_augmented_pit"}
 

@@ -125,6 +125,7 @@ def build_test_matrix() -> Generator[tuple[dict, list[MockResponseInput]], Any]:
                         "entity_type": entity_type,
                         "stream_destination": stream_destination,
                         "pipeline_date": "2024-06-06",
+                        "graph_date": "2024-06-06",
                         "sample_size": 1,
                     },
                     mock_requests_lookup_table(stream_destination, transformer_type),
@@ -195,6 +196,7 @@ def test_incremental_mode() -> None:
         "entity_type": "nodes",
         "stream_destination": "s3",
         "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
         "window": {"start_time": "2025-05-05T15:15", "end_time": "2025-05-05T15:30"},
         "sample_size": 100,
     }
@@ -203,7 +205,7 @@ def test_incremental_mode() -> None:
     mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
     lambda_handler(event, None)
 
-    expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/windows/20250505T1515-20250505T1530/catalogue_works__nodes.csv"
+    expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph-2024-06-06/pipeline-2024-06-06/graph_bulk_loader/windows/20250505T1515-20250505T1530/catalogue_works__nodes.csv"
     assert len(MockSmartOpen.file_lookup) == 1
     assert expected_s3_uri in MockSmartOpen.file_lookup
 
@@ -232,6 +234,7 @@ def test_unsupported_incremental_mode() -> None:
         "entity_type": "nodes",
         "stream_destination": "local",
         "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
         "window": {"start_time": "2025-05-05T15:15", "end_time": "2025-05-05T15:30"},
         "sample_size": 1,
     }
@@ -247,6 +250,7 @@ def test_unsupported_id_based_processing() -> None:
         "entity_type": "nodes",
         "stream_destination": "local",
         "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
         "ids": ["abc123"],
         "sample_size": 1,
     }
@@ -262,6 +266,7 @@ def test_id_mode() -> None:
         "entity_type": "nodes",
         "stream_destination": "s3",
         "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
         "ids": ["work-id-2", "work-id-1"],
         "sample_size": 100,
     }
@@ -271,7 +276,7 @@ def test_id_mode() -> None:
     lambda_handler(event, None)
 
     # File name contains underscore-separated sorted IDs
-    expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/by_id/work-id-1_work-id-2/catalogue_works__nodes.csv"
+    expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph-2024-06-06/pipeline-2024-06-06/graph_bulk_loader/by_id/work-id-1_work-id-2/catalogue_works__nodes.csv"
     assert len(MockSmartOpen.file_lookup) == 1
     assert expected_s3_uri in MockSmartOpen.file_lookup
 

@@ -16,7 +16,11 @@ from tests.mocks import (
 )
 from tests.test_utils import add_mock_merged_documents
 
-REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
+BUCKET = "wellcomecollection-catalogue-graph"
+
+
+def get_remover_s3_uri(graph_date: str, pipeline_date: str, suffix: str) -> str:
+    return f"s3://{BUCKET}/graph-{graph_date}/pipeline-{pipeline_date}/graph_remover_incremental/{suffix}"
 
 
 def mock_neptune_get_disconnected_concept_nodes(node_ids: list) -> None:
@@ -99,32 +103,36 @@ def test_graph_remover_incremental_concept_nodes() -> None:
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
-    mock_neptune_secrets()
+    mock_neptune_secrets("dev")
     mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     lambda_handler(event, None)
 
-    s3_uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_concepts__nodes.parquet"
+    s3_uri = get_remover_s3_uri(
+        "dev", "dev", "full/deleted_ids/catalogue_concepts__nodes.parquet"
+    )
     check_deleted_ids_log(s3_uri, set(disconnected_ids))
 
 
 def test_graph_remover_incremental_concept_edges() -> None:
-    mock_neptune_secrets()
+    mock_neptune_secrets("2024-06-06")
     mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
     event = {
         "transformer_type": "catalogue_concepts",
         "entity_type": "edges",
         "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
     }
     lambda_handler(event, None)
 
-    s3_uri = (
-        f"{REMOVER_S3_PREFIX}/2024-06-06/deleted_ids/catalogue_concepts__edges.parquet"
+    s3_uri = get_remover_s3_uri(
+        "2024-06-06", "2024-06-06", "full/deleted_ids/catalogue_concepts__edges.parquet"
     )
     with MockSmartOpen.open(s3_uri, "rb") as f:
         df = pl.read_parquet(f)
@@ -136,7 +144,7 @@ def test_graph_remover_incremental_work_edges() -> None:
     # Add three visible works to the merged index.
     add_mock_merged_documents("2024-06-06", work_status="Visible")
     mock_neptune_get_total_edge_count("HAS_CONCEPT", 12345)
-    mock_neptune_secrets()
+    mock_neptune_secrets("2024-06-06")
     mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
 
     # Mock HAS_CONCEPT graph relationships for all three works, some of which also exist in the merged index,
@@ -180,11 +188,12 @@ def test_graph_remover_incremental_work_edges() -> None:
         "transformer_type": "catalogue_works",
         "entity_type": "edges",
         "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
     }
     lambda_handler(event, None)
 
-    s3_uri = (
-        f"{REMOVER_S3_PREFIX}/2024-06-06/deleted_ids/catalogue_works__edges.parquet"
+    s3_uri = get_remover_s3_uri(
+        "2024-06-06", "2024-06-06", "full/deleted_ids/catalogue_works__edges.parquet"
     )
     check_deleted_ids_log(s3_uri, set(edges_to_remove))
 
@@ -195,17 +204,20 @@ def test_graph_remover_incremental_work_nodes() -> None:
     mock_neptune_get_existing_nodes_response(["sghsneca"])
     mock_neptune_delete_nodes_response(["sghsneca"])
     mock_neptune_get_total_node_count("Work", 100)
-    mock_neptune_secrets()
+    mock_neptune_secrets("dev")
     mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_works",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     lambda_handler(event, None)
 
-    s3_uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_works__nodes.parquet"
+    s3_uri = get_remover_s3_uri(
+        "dev", "dev", "full/deleted_ids/catalogue_works__nodes.parquet"
+    )
     check_deleted_ids_log(s3_uri, {"sghsneca"})
 
 
@@ -215,6 +227,7 @@ def test_graph_remover_catalogue_failure() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
 
     with pytest.raises(pydantic.ValidationError):
@@ -227,13 +240,14 @@ def test_graph_remover_safety_mechanism() -> None:
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
-    mock_neptune_secrets()
+    mock_neptune_secrets("dev")
     mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event: dict[str, Any] = {
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
 
     # Safety check enabled
@@ -245,7 +259,9 @@ def test_graph_remover_safety_mechanism() -> None:
     # Safety check disabled
     event["force_pass"] = True
     lambda_handler(event, None)
-    s3_uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_concepts__nodes.parquet"
+    s3_uri = get_remover_s3_uri(
+        "dev", "dev", "full/deleted_ids/catalogue_concepts__nodes.parquet"
+    )
     check_deleted_ids_log(s3_uri, set(disconnected_ids))
 
 
@@ -256,13 +272,14 @@ def test_metrics() -> None:
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
-    mock_neptune_secrets()
+    mock_neptune_secrets("2026-06-06")
     mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "2026-06-06",
         "window": {"end_time": "2025-02-02T12:00"},
     }
     lambda_handler(event, None)
@@ -272,6 +289,7 @@ def test_metrics() -> None:
             "dimensions": {
                 "entity_type": "nodes",
                 "pipeline_date": "dev",
+                "graph_date": "2026-06-06",
                 "transformer_type": "catalogue_concepts",
                 "pipeline_step": "incremental_graph_remover",
             },
@@ -284,22 +302,30 @@ def test_metrics() -> None:
 
 def test_graph_remover_incremental_id_mode() -> None:
     """ID mode should scope the ES query and write output to an IDs-specific S3 path."""
-    add_mock_merged_documents("dev", work_status="Invisible")
+    graph_date = "2025-01-01"
+    pipeline_date = "dev"
+
+    add_mock_merged_documents(pipeline_date, work_status="Invisible")
     mock_neptune_get_existing_nodes_response(["sghsneca"])
     mock_neptune_delete_nodes_response(["sghsneca"])
     mock_neptune_get_total_node_count("Work", 100)
-    mock_neptune_secrets()
+    mock_neptune_secrets(graph_date)
     mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
 
     event = {
         "transformer_type": "catalogue_works",
         "entity_type": "nodes",
-        "pipeline_date": "dev",
+        "pipeline_date": pipeline_date,
+        "graph_date": graph_date,
         "ids": ["sghsneca"],
     }
     lambda_handler(event, None)
 
-    s3_uri = f"{REMOVER_S3_PREFIX}/dev/by_id/sghsneca/deleted_ids/catalogue_works__nodes.parquet"
+    s3_uri = get_remover_s3_uri(
+        graph_date,
+        pipeline_date,
+        "by_id/sghsneca/deleted_ids/catalogue_works__nodes.parquet",
+    )
     check_deleted_ids_log(s3_uri, {"sghsneca"})
 
     # ID mode should produce an ids query filter

@@ -90,6 +90,12 @@ variable "version_regex" {
 }
 
 
+variable "graph_date" {
+  type        = string
+  description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
+  default     = ""
+}
+
 variable "graph_index_dates" {
   type = object({
     merged    = string

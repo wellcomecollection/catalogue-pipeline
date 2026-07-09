@@ -4,10 +4,10 @@ from typing import get_args
 import structlog
 
 from models.events import BulkLoaderEvent
+from models.pipeline_scope import GraphPipelineScope
 from utils.aws import get_csv_from_s3
 from utils.types import (
     CatalogueTransformerType,
-    Environment,
     LocTransformerType,
     MeshTransformerType,
     OntologyType,
@@ -40,17 +40,16 @@ def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerTy
 
 
 @lru_cache
-def get_ids_for_transformer(
-    transformer: TransformerType, pipeline_date: str, environment: Environment
+def _get_ids_for_transformer_cached(
+    transformer: TransformerType, pipeline_date: str, graph_date: str
 ) -> set[str]:
-    """Return all ids extracted as part of the specified transformer."""
     logger.info("Retrieving ids from S3", transformer=transformer)
 
     event = BulkLoaderEvent(
         transformer_type=transformer,
         entity_type="nodes",
         pipeline_date=pipeline_date,
-        environment=environment,
+        graph_date=graph_date,
     )
     ids = {row[":ID"] for row in get_csv_from_s3(event.get_s3_uri())}
 
@@ -59,25 +58,25 @@ def get_ids_for_transformer(
     return ids
 
 
+def get_ids_for_transformer(
+    transformer: TransformerType, scope: GraphPipelineScope
+) -> set[str]:
+    """Return all ids extracted as part of the specified transformer."""
+    return _get_ids_for_transformer_cached(
+        transformer, scope.pipeline_date, scope.graph_date
+    )
+
+
 def is_id_extracted_for_transformer(
-    item_id: str,
-    transformer: TransformerType,
-    pipeline_date: str,
-    environment: Environment,
+    item_id: str, transformer: TransformerType, scope: GraphPipelineScope
 ) -> bool:
     """Return 'True' if the given ID was extracted by the specified transformer."""
-    return item_id in get_ids_for_transformer(transformer, pipeline_date, environment)
+    return item_id in get_ids_for_transformer(transformer, scope)
 
 
 def is_id_extracted_for_ontology(
-    item_id: str,
-    item_ontology: OntologyType,
-    pipeline_date: str,
-    environment: Environment,
+    item_id: str, item_ontology: OntologyType, scope: GraphPipelineScope
 ) -> bool:
     """Return 'True' if the given ID was extracted by any transformer under the specified ontology."""
     transformers = get_transformers_from_ontology(item_ontology)
-    return any(
-        item_id in get_ids_for_transformer(t, pipeline_date, environment)
-        for t in transformers
-    )
+    return any(item_id in get_ids_for_transformer(t, scope) for t in transformers)

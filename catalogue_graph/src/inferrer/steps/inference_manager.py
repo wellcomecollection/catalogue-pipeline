@@ -219,7 +219,7 @@ def local_handler(parser: ArgumentParser) -> None:
             "index_date_initial",
             "index_date_augmented",
             "ids",
-            "environment",
+            "graph_date",
             "es_mode",
         },
     )
