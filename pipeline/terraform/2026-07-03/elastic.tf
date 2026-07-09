@@ -16,7 +16,7 @@ data "terraform_remote_state" "catalogue_infra_critical" {
 }
 
 locals {
-  es_cluster = data.terraform_remote_state.catalogue_infra_critical.outputs.pipeline_storage_es_cluster_v1
+  es_cluster = data.terraform_remote_state.catalogue_infra_critical.outputs.es_cluster_2026_07_03
 
   index_config = {
     (local.pipeline_date) = {
@@ -50,13 +50,7 @@ module "elastic" {
   source = "../modules/pipeline/elastic_indices"
 
   pipeline_date              = local.pipeline_date
-  es_cluster_date            = local.es_cluster_date
-  es_endpoint                = local.es_cluster.https_endpoint
-  es_username                = local.es_cluster.username
-  es_password                = local.es_cluster.password
-  es_private_host            = local.es_cluster.private_host
-  es_port                    = local.es_cluster.port
-  es_protocol                = local.es_cluster.protocol
+  es_cluster                 = local.es_cluster
   allow_delete_indices       = false
   index_config               = local.index_config
   catalogue_account_services = ["catalogue_api", "snapshot_generator", "concepts_api"]

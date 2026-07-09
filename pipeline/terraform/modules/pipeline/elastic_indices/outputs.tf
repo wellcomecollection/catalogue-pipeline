@@ -1,6 +1,6 @@
-output "pipeline_storage_private_host" { value = var.es_private_host }
-output "pipeline_storage_port" { value = var.es_port }
-output "pipeline_storage_protocol" { value = var.es_protocol }
+output "pipeline_storage_private_host" { value = var.es_cluster.private_host }
+output "pipeline_storage_port" { value = var.es_cluster.port }
+output "pipeline_storage_protocol" { value = var.es_cluster.protocol }
 
 output "works_source_indices" { value = [for i in local.works_source_list : i.name] }
 output "works_identified_indices" { value = [for i in local.works_identified_list : i.name] }

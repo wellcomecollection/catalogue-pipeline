@@ -105,14 +105,6 @@ locals {
         for idx in local.images_initial_list : idx.name
       ])
     }
-    path_concatenator = {
-      read  = [for idx in local.works_denormalised_list : idx.name]
-      write = [for idx in local.works_denormalised_list : idx.name]
-    }
-    relation_embedder = {
-      read  = [for idx in local.works_denormalised_list : idx.name]
-      write = [for idx in local.works_denormalised_list : idx.name]
-    }
     work_ingestor = {
       read  = [for idx in local.works_denormalised_list : idx.name]
       write = [for idx in local.works_indexed_list : idx.name]
@@ -170,10 +162,10 @@ locals {
   }
   pipeline_storage_es_service_secrets = {
     for service in keys(local.service_index_permissions) : service => {
-      es_host     = var.es_private_host
-      es_port     = var.es_port
-      es_protocol = var.es_protocol
-      es_apikey   = "elasticsearch/es-cluster-${var.es_cluster_date}/${service}-${var.pipeline_date}/api_key"
+      es_host     = var.es_cluster.private_host
+      es_port     = var.es_cluster.port
+      es_protocol = var.es_cluster.protocol
+      es_apikey   = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key"
     }
   }
 
@@ -183,13 +175,12 @@ locals {
 }
 
 module "pipeline_services" {
-  for_each            = local.service_index_permissions
-  source              = "../../pipeline_es_api_key"
-  name                = each.key
-  read_from           = each.value.read
-  write_to            = each.value.write
-  pipeline_date       = var.pipeline_date
-  es_cluster_date     = var.es_cluster_date
+  for_each        = local.service_index_permissions
+  source          = "../../pipeline_es_api_key"
+  name            = each.key
+  read_from       = each.value.read
+  write_to        = each.value.write
+  pipeline_date   = var.pipeline_date
   expose_to_catalogue = contains(var.catalogue_account_services, each.key)
   providers = {
     aws.catalogue = aws.catalogue
@@ -208,4 +199,21 @@ resource "elasticstack_elasticsearch_ingest_pipeline" "set_indexed_at" {
       }
     })
   ]
+}
+
+# Cluster connection secrets 
+module "pipeline_storage_connection_secrets" {
+  source        = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.5.0"
+  deletion_mode = "IMMEDIATE"
+
+  key_value_map = {
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/public_host"  = var.es_cluster.public_host
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/private_host" = var.es_cluster.private_host
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/port"         = var.es_cluster.port
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/protocol"     = var.es_cluster.protocol
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/es_username"  = var.es_cluster.username
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/es_password"  = var.es_cluster.password
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_username" = var.es_cluster.read_only_username
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_password" = var.es_cluster.read_only_password
+  }
 }

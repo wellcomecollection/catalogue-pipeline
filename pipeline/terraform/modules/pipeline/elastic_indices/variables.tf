@@ -1,33 +1,19 @@
 variable "pipeline_date" { type = string }
 
-variable "es_cluster_date" { type = string }
-
-variable "es_endpoint" {
-  type        = string
-  description = "Elasticsearch HTTPS endpoint (e.g. https://xxx.eu-west-1.aws.found.io:9243)"
-}
-
-variable "es_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "es_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "es_private_host" {
-  type        = string
-  description = "Private VPC endpoint hostname for the cluster"
-}
-
-variable "es_port" {
-  type = string
-}
-
-variable "es_protocol" {
-  type = string
+variable "es_cluster" {
+  type = object({
+    https_endpoint     = string
+    username           = string
+    password           = string
+    private_host       = string
+    public_host        = string
+    port               = string
+    protocol           = string
+    read_only_username = string
+    read_only_password = string
+  })
+  sensitive   = true
+  description = "Elasticsearch cluster connection details (from infrastructure/critical outputs)."
 }
 
 variable "allow_delete_indices" {

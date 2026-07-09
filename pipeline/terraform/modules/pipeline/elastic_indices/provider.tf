@@ -17,8 +17,8 @@ terraform {
 
 provider "elasticstack" {
   elasticsearch {
-    username  = var.es_username
-    password  = var.es_password
-    endpoints = [var.es_endpoint]
+    username  = var.es_cluster.username
+    password  = var.es_cluster.password
+    endpoints = [var.es_cluster.https_endpoint]
   }
 }

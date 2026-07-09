@@ -44,23 +44,18 @@ locals {
   })
 }
 
-locals {
-  // temporary while the existing cluster stores secrets at "elasticsearch/pipeline_storage_<pipeline_date>/..." 
-  secret_prefix = var.es_cluster_date != "" ? "elasticsearch/es-cluster-${var.es_cluster_date}" : "elasticsearch/pipeline_storage_${var.pipeline_date}"
-}
-
 resource "elasticstack_elasticsearch_security_api_key" "pipeline_service" {
   name             = "${var.name}-${var.pipeline_date}"
   role_descriptors = jsonencode(local.role_descriptors)
 }
 
-module "pipeline_service_api_key_secrets" { 
+module "pipeline_service_api_key_secrets" {
   source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.5.0"
 
   deletion_mode = "IMMEDIATE"
 
   key_value_map = {
-    "${local.secret_prefix}/${var.name}-${var.pipeline_date}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/${var.name}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
   }
 }
 
@@ -75,6 +70,6 @@ module "pipeline_catalogue_service_api_key_secrets" {
 
   deletion_mode = "IMMEDIATE"
   key_value_map = {
-    "${local.secret_prefix}/${var.name}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/${var.name}/api_key" = elasticstack_elasticsearch_security_api_key.pipeline_service.encoded
   }
 }

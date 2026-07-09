@@ -4,23 +4,36 @@ output "https_endpoint" {
 }
 
 output "username" {
-  value     = local.secrets_kv_map["elasticsearch/es-cluster-${var.cluster_date}/es_username"]
+  value     = ec_deployment.cluster.elasticsearch_username
   sensitive = true
 }
 
 output "password" {
-  value     = local.secrets_kv_map["elasticsearch/es-cluster-${var.cluster_date}/es_password"]
+  value     = ec_deployment.cluster.elasticsearch_password
   sensitive = true
 }
 
 output "private_host" {
-  value = local.secrets_kv_map["elasticsearch/es-cluster-${var.cluster_date}/private_host"]
+  value = "${local.elastic_id}.vpce.${local.elastic_region}.aws.elastic-cloud.com"
+}
+
+output "public_host" {
+  value = "${local.elastic_id}.${local.elastic_region}.aws.found.io"
 }
 
 output "port" {
-  value = local.secrets_kv_map["elasticsearch/es-cluster-${var.cluster_date}/port"]
+  value = reverse(split(":", ec_deployment.cluster.elasticsearch.https_endpoint))[0]
 }
 
 output "protocol" {
-  value = local.secrets_kv_map["elasticsearch/es-cluster-${var.cluster_date}/protocol"]
+  value = split(":", ec_deployment.cluster.elasticsearch.https_endpoint)[0]
+}
+
+output "read_only_username" {
+  value = elasticstack_elasticsearch_security_user.read_only.username
+}
+
+output "read_only_password" {
+  value     = random_password.read_only_user.result
+  sensitive = true
 }

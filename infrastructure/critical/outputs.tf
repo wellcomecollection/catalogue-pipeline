@@ -57,14 +57,17 @@ output "vhs_miro_assumable_read_role" {
 
 # Elasticsearch cluster
 
-output "pipeline_storage_es_cluster_v1" {
+output "es_cluster_2026_07_03" {
   sensitive = true
   value = {
-    https_endpoint = module.es_cluster_2026-07-03.https_endpoint
-    username       = module.es_cluster_2026-07-03.username
-    password       = module.es_cluster_2026-07-03.password
-    private_host   = module.es_cluster_2026-07-03.private_host
-    port           = module.es_cluster_2026-07-03.port
-    protocol       = module.es_cluster_2026-07-03.protocol
+    https_endpoint     = module.es_cluster_2026_07_03.https_endpoint
+    username           = module.es_cluster_2026_07_03.username
+    password           = module.es_cluster_2026_07_03.password
+    private_host       = module.es_cluster_2026_07_03.private_host
+    public_host        = module.es_cluster_2026_07_03.public_host
+    port               = module.es_cluster_2026_07_03.port
+    protocol           = module.es_cluster_2026_07_03.protocol
+    read_only_username = module.es_cluster_2026_07_03.read_only_username
+    read_only_password = module.es_cluster_2026_07_03.read_only_password
   }
 }

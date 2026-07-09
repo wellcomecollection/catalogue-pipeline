@@ -1,4 +1,4 @@
-module "es_cluster_2026-07-03" {
+module "es_cluster_2026_07_03" {
   source = "./modules/es-cluster"
   providers = {
     aws           = aws
