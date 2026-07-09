@@ -41,8 +41,7 @@ data "aws_iam_policy_document" "inference_find_work_s3_write" {
     effect  = "Allow"
     actions = ["s3:PutObject"]
     resources = [
-      "arn:aws:s3:::wellcomecollection-catalogue-graph/inferrer/*",
-      "arn:aws:s3:::wellcomecollection-catalogue-graph-dev/inferrer/*",
+      "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/inferrer/*"
     ]
   }
 }
