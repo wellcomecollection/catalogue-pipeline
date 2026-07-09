@@ -43,11 +43,13 @@ from ingestor.queries.work_queries import (
 pytestmark = pytest.mark.integration
 
 
-GRAPH_DATE = os.environ["GRAPH_DATE"]
+GRAPH_DATE = os.environ.get("GRAPH_DATE")
 
 
 @lru_cache(maxsize=1)
 def neptune_client() -> NeptuneClient:
+    if GRAPH_DATE is None:
+        raise ValueError("GRAPH_DATE environment variable must be set to run integration tests")
     return NeptuneClient(GRAPH_DATE)
 
 
