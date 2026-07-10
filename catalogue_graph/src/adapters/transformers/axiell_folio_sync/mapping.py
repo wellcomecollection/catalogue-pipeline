@@ -61,6 +61,28 @@ def _safe_segment(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.strip().lower()).strip("-") or "unknown"
 
 
+# ── record selection (RFC 090 §Record selection) ─────────────────────────────
+# A record is synced to FOLIO only if it is flagged for harvest AND is item-level.
+# Both are read from the harvested MARCXML.
+HARVEST_FLAG_SPEC = "980$a"  # present (non-empty) = opted in for FOLIO sync
+RECORD_TYPE_SPEC = "351$c"  # Axiell record type / level
+RECORD_TYPE_ITEM = "ITEM"  # only item-level records are synced
+
+
+def is_selected_for_sync(xml_content: str) -> bool:
+    """Whether a record should be synced to FOLIO.
+
+    True only when it carries the harvest flag (MARC ``980 $a`` present) and is of
+    record type ITEM (MARC ``351 $c`` == "ITEM", case-insensitive). Records that
+    fail either check are skipped entirely — never created, updated or suppressed.
+    """
+    root = parse_xml(xml_content)
+    if not extract(root, HARVEST_FLAG_SPEC):
+        return False
+    record_type = (extract(root, RECORD_TYPE_SPEC) or "").strip().upper()
+    return record_type == RECORD_TYPE_ITEM
+
+
 def parse_marcxml(xml_content: str, *, deleted: bool = False) -> CanonicalRecord:
     """Parse a single MARCXML string into a :class:`CanonicalRecord` via MARC_SOURCE.
 

@@ -37,6 +37,7 @@ import argparse
 import json
 import os
 import urllib.parse
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any, cast
 
@@ -45,7 +46,11 @@ import structlog
 from pydantic import BaseModel, Field
 
 from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
-from adapters.transformers.axiell_folio_sync.mapping import MappingError, build_payloads
+from adapters.transformers.axiell_folio_sync.mapping import (
+    MappingError,
+    build_payloads,
+    is_selected_for_sync,
+)
 from adapters.transformers.axiell_folio_sync.ref_cache import RefCache
 from adapters.transformers.axiell_folio_sync.upsert import upsert_from_payloads
 from adapters.utils.adapter_store import AdapterStore
@@ -213,6 +218,11 @@ def _emit_metrics(counts: dict) -> None:
                 "Unit": "Count",
             },
             {
+                "MetricName": "RecordsSkipped",
+                "Value": counts.get("skipped", 0),
+                "Unit": "Count",
+            },
+            {
                 "MetricName": "RecordsFailed",
                 "Value": counts.get("failed", 0),
                 "Unit": "Count",
@@ -297,38 +307,27 @@ def _write_metadata_manifest(
 
 
 def run_sync(
-    event: AxiellFolioSyncEvent, *, use_rest_api_table: bool = True
+    event: AxiellFolioSyncEvent,
+    rows: list[dict],
+    ref_cache: RefCache,
+    folio_get: Callable,
+    folio_post: Callable,
+    folio_put: Callable,
+    *,
+    dry_run: bool,
+    manifest_bucket: str | None = None,
 ) -> AxiellFolioSyncResponse:
-    """Read the Axiell adapter table for the event's changesets and upsert to FOLIO."""
-    env_dry_run = os.environ.get("DRY_RUN", "true").lower() not in ("false", "0", "no")
-    dry_run = event.dry_run if event.dry_run is not None else env_dry_run
+    """Select, map, and upsert pre-read adapter rows to FOLIO.
 
-    manifest_bucket = os.environ.get("MANIFEST_S3_BUCKET")
-    okapi = _load_okapi_config()
-
+    Dependencies (rows, ref cache, FOLIO callables) are injected so the loop is
+    unit-testable without SSM / Iceberg / FOLIO; ``handler`` builds the real ones.
+    """
     logger.info(
         "axiell_folio_sync start",
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
         dry_run=dry_run,
     )
-
-    client = FolioClient(
-        okapi["url"].rstrip("/"),
-        okapi["tenant"],
-        username=okapi["username"],
-        password=okapi["password"],
-        ssl_context=ssl_context_from_env(),
-    )
-    folio_get, folio_post, folio_put = _make_folio_callables(client)
-    ref_cache = RefCache(folio_get).load()
-
-    rows = _read_rows(
-        event.changeset_ids or None,
-        event.sample_limit,
-        use_rest_api_table=use_rest_api_table,
-    )
-    logger.info("adapter_read complete", rows=len(rows))
 
     successful_batch: list[dict] = []
     errors_list: list[dict] = []
@@ -338,6 +337,7 @@ def run_sync(
         "created": 0,
         "updated": 0,
         "suppressed": 0,
+        "skipped": 0,
         "failed": 0,
         "total": 0,
     }
@@ -360,6 +360,35 @@ def run_sync(
                     "error": "empty_content",
                     "timestamp": _utc_now_iso(),
                 }
+            )
+            continue
+
+        # Record selection (RFC 090): only records flagged for harvest (MARC 980 $a)
+        # and of record type ITEM (MARC 351 $c) are synced; the rest are skipped
+        # before mapping (never created/updated/suppressed). Malformed XML is caught
+        # here and recorded as an error rather than crashing the batch.
+        try:
+            selected = is_selected_for_sync(row["content"])
+        except Exception as exc:
+            counts["failed"] += 1
+            total_errors += 1
+            logger.warning("selection_error", source_id=source_id, error=str(exc))
+            errors_list.append(
+                {
+                    "jobId": event.job_id,
+                    "sourceId": source_id,
+                    "changesetId": changeset_id,
+                    "stage": "selection",
+                    "error": str(exc),
+                    "timestamp": _utc_now_iso(),
+                }
+            )
+            continue
+
+        if not selected:
+            counts["skipped"] += 1
+            logger.info(
+                "skipped_not_selected", source_id=source_id, changeset_id=changeset_id
             )
             continue
 
@@ -488,8 +517,42 @@ def handler(
     use_rest_api_table: bool = True,
     execution_context: ExecutionContext | None = None,
 ) -> AxiellFolioSyncResponse:
+    """Build the real dependencies (OKAPI client, ref cache, adapter rows) and
+    hand them to :func:`run_sync`."""
     setup_logging(execution_context)
-    return run_sync(event, use_rest_api_table=use_rest_api_table)
+
+    env_dry_run = os.environ.get("DRY_RUN", "true").lower() not in ("false", "0", "no")
+    dry_run = event.dry_run if event.dry_run is not None else env_dry_run
+    manifest_bucket = os.environ.get("MANIFEST_S3_BUCKET")
+
+    okapi = _load_okapi_config()
+    client = FolioClient(
+        okapi["url"].rstrip("/"),
+        okapi["tenant"],
+        username=okapi["username"],
+        password=okapi["password"],
+        ssl_context=ssl_context_from_env(),
+    )
+    folio_get, folio_post, folio_put = _make_folio_callables(client)
+    ref_cache = RefCache(folio_get).load()
+
+    rows = _read_rows(
+        event.changeset_ids or None,
+        event.sample_limit,
+        use_rest_api_table=use_rest_api_table,
+    )
+    logger.info("adapter_read complete", rows=len(rows))
+
+    return run_sync(
+        event,
+        rows,
+        ref_cache,
+        folio_get,
+        folio_post,
+        folio_put,
+        dry_run=dry_run,
+        manifest_bucket=manifest_bucket,
+    )
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
