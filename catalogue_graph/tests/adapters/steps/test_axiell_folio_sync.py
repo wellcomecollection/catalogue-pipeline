@@ -93,3 +93,16 @@ def test_malformed_xml_recorded_as_error() -> None:
     assert resp.counts["failed"] == 1
     assert resp.total_errors == 1
     assert resp.counts["skipped"] == 0
+
+
+def test_loader_tombstone_is_advisory_not_suppressed() -> None:
+    # deleted=true is recorded as an advisory signal, not suppressed/upserted
+    # (RFC 090: authoritative deletes come from the reconciler, not this path).
+    tombstone = {**_row("tomb", SELECTED), "deleted": True}
+    resp = _run([tombstone])
+
+    assert resp.counts["tombstone"] == 1
+    assert resp.counts["suppressed"] == 0
+    assert resp.counts["created"] == 0  # no upsert happened
+    assert resp.total_successful == 0
+    assert resp.total_errors == 0

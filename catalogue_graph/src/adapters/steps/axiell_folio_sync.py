@@ -223,6 +223,11 @@ def _emit_metrics(counts: dict) -> None:
                 "Unit": "Count",
             },
             {
+                "MetricName": "RecordsTombstoned",
+                "Value": counts.get("tombstone", 0),
+                "Unit": "Count",
+            },
+            {
                 "MetricName": "RecordsFailed",
                 "Value": counts.get("failed", 0),
                 "Unit": "Count",
@@ -338,6 +343,7 @@ def run_sync(
         "updated": 0,
         "suppressed": 0,
         "skipped": 0,
+        "tombstone": 0,
         "failed": 0,
         "total": 0,
     }
@@ -346,6 +352,16 @@ def run_sync(
         source_id: str = row.get("id", "unknown")
         changeset_id: str = row.get("changeset", "unknown")
         counts["total"] += 1
+
+        # Loader tombstones are advisory only (RFC 090): the loader's deleted=true is
+        # unreliable, so we record and metric the signal but do NOT suppress/remove.
+        # Authoritative deletes come from the reconciler, not this path.
+        if row.get("deleted"):
+            counts["tombstone"] += 1
+            logger.info(
+                "tombstone_advisory", source_id=source_id, changeset_id=changeset_id
+            )
+            continue
 
         if not row.get("content"):
             counts["failed"] += 1
@@ -393,9 +409,9 @@ def run_sync(
             continue
 
         try:
-            mapped = build_payloads(
-                row["content"], ref_cache, deleted=bool(row.get("deleted"))
-            )
+            # Deleted rows are handled above (advisory); everything here is a live
+            # record, so build_payloads runs in its default (non-deleted) mode.
+            mapped = build_payloads(row["content"], ref_cache)
         except MappingError as exc:
             counts["failed"] += 1
             total_errors += 1
