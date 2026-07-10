@@ -2,7 +2,6 @@
 # .buildkite/pipeline.yml -> merger_test
 
 module "merger_test" {
-  count        = contains(var.enabled_services, "merger_test") ? 1 : 0
   source       = "./merger"
   service_name = "merger_test"
 

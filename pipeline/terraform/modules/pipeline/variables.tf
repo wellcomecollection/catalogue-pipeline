@@ -1,4 +1,4 @@
-variable "pipeline_date" { // nammespace for the pipeline services
+variable "pipeline_date" { // namespace for the pipeline services
   type = string
 }
 
@@ -6,17 +6,10 @@ variable "es_cluster_date" { // the es cluster that the pipeline services use, e
   type = string
 }
 
-variable "enabled_services" {
-  type        = set(string)
-  description = "Set of services to create in this stack. Omit a service to skip it entirely."
-  default = [
-    "transformers",
-    "id_minter",
-    "matcher",
-    "merger",
-    "image_inferrer",
-    "graph_pipeline",
-  ]
+variable "graph_date" {
+  type        = string
+  description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
+  default     = ""
 }
 
 variable "min_capacity" {
@@ -57,13 +50,6 @@ variable "ami_id" {
 
 variable "version_regex" {
   type = string
-}
-
-
-variable "graph_date" {
-  type        = string
-  description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
-  default     = ""
 }
 
 variable "graph_index_dates" {

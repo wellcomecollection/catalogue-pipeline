@@ -39,14 +39,10 @@ module "pipeline" {
   es_cluster_date = local.es_cluster_date
   release_label = local.pipeline_date
 
+  version_regex = "9.1.?"
+
   elastic_outputs = module.elastic
 
-  // test services use a count guard so that we don't also create test services in further pipelines
-  enabled_services = [
-    "matcher_test",
-    "merger_test",
-    "id_minter_test",
-  ]
 
   providers = {
     aws           = aws

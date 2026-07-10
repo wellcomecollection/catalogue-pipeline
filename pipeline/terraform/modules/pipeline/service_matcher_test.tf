@@ -2,7 +2,6 @@
 # .buildkite/pipeline.yml -> matcher_test
 
 module "matcher_test" {
-  count        = contains(var.enabled_services, "matcher_test") ? 1 : 0
   source       = "./matcher"
   service_name = "matcher_test"
 
