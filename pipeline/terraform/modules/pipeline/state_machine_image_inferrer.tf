@@ -41,8 +41,7 @@ data "aws_iam_policy_document" "inference_find_work_s3_write" {
     effect  = "Allow"
     actions = ["s3:PutObject"]
     resources = [
-      "arn:aws:s3:::wellcomecollection-catalogue-graph/inferrer/*",
-      "arn:aws:s3:::wellcomecollection-catalogue-graph-dev/inferrer/*",
+      "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/inferrer/*"
     ]
   }
 }
@@ -121,6 +120,7 @@ locals {
         Type = "Pass"
         Output = {
           "pipeline_date" : var.pipeline_date,
+          "graph_date" : var.graph_date,
           "index_dates" : {
             "initial" : local.image_inferrer_initial_index_date,
             "augmented" : var.graph_index_dates.augmented
@@ -291,10 +291,12 @@ resource "aws_iam_role_policy" "run_image_inferrer_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = "states:StartExecution"
-      Resource = module.image_inferrer_state_machine.state_machine_arn
-    }]
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "states:StartExecution"
+        Resource = module.image_inferrer_state_machine.state_machine_arn
+      }
+    ]
   })
 }

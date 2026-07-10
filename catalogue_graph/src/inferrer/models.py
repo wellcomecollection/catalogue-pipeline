@@ -13,6 +13,8 @@ rather than maintaining a parallel write model here.
 
 from __future__ import annotations
 
+from pathlib import PurePosixPath
+
 from pydantic import BaseModel
 
 import config
@@ -58,27 +60,12 @@ class FindWorkEvent(BasePipelineEvent):
     partition_size: int = DEFAULT_PARTITION_SIZE
 
     @property
-    def find_work_s3_prefix(self) -> str:
-        """S3 prefix under which this run's partition files are written.
-
-        Mirrors the pipeline's standard event-keyed layout (cf.
-        `GraphPipelineEvent.file_path_parts`): the path is keyed by the run's
-        scope — the time window, the ids, or `full` — rather than an opaque run
-        id, so a given window's partitions land in a stable, predictable
-        location that is easy to find in S3.
-        """
-        parts = [config.INFERRER_S3_PREFIX, self.pipeline_date, "find_work"]
-        if self.window is not None:
-            parts += ["windows", self.window.to_formatted_string()]
-        elif self.ids:
-            parts += ["by_id", self.ids_path_segment]
-        else:
-            parts.append("full")
-        return "/".join(parts)
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.INFERRER_S3_PREFIX, "find_work"]
 
     def partition_s3_uri(self, index: int) -> str:
-        bucket = config.CATALOGUE_GRAPH_S3_BUCKETS[self.environment]
-        return f"s3://{bucket}/{self.find_work_s3_prefix}/partition-{index}.json"
+        bucket = config.CATALOGUE_GRAPH_S3_BUCKET
+        return f"s3://{bucket}/{PurePosixPath(*self.s3_prefix_parts)}/partition-{index}.json"
 
 
 # --- Step results ---------------------------------------------------------- #

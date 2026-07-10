@@ -18,7 +18,7 @@ def _make_work(canonical_id: str, path: str | None = None) -> dict:
 
 
 def _make_source(query: dict | None = None) -> MergedWorksWithChildrenSource:
-    event = BasePipelineEvent(pipeline_date="dev")
+    event = BasePipelineEvent(pipeline_date="dev", graph_date="dev")
     es_client = MagicMock()
     es_client.open_point_in_time.return_value = {"id": "some_pit_id"}
     return MergedWorksWithChildrenSource(event=event, es_client=es_client, query=query)

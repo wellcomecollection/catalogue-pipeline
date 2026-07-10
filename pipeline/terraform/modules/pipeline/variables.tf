@@ -55,6 +55,17 @@ variable "ami_id" {
   description = "AMI to use for the ECS EC2 cluster host"
 }
 
+variable "version_regex" {
+  type = string
+}
+
+
+variable "graph_date" {
+  type        = string
+  description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
+  default     = ""
+}
+
 variable "graph_index_dates" {
   type = object({
     merged    = string

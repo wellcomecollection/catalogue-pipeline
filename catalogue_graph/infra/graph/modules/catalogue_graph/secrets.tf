@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "neptune_cluster_endpoint" {
-  name = "${var.namespace}/neptune-cluster-endpoint"
+  name = "${local.full_namespace}/neptune-cluster-endpoint"
 }
 
 resource "aws_secretsmanager_secret_version" "neptune_cluster_endpoint_value" {

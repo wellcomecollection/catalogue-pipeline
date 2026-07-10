@@ -46,13 +46,12 @@ resource "aws_iam_role_policy" "graph_remover_incremental_lambda_s3_policy" {
 data "aws_iam_policy_document" "graph_remover_incremental_s3_policy" {
   statement {
     actions = [
-      "s3:ListBucket",
       "s3:PutObject",
       "s3:HeadObject"
     ]
 
     resources = [
-      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover_incremental/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/graph_remover_incremental/*"
     ]
   }
 }

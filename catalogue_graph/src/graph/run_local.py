@@ -38,7 +38,7 @@ def main() -> None:
             "ids",
             "pit_id_merged",
             "pit_id_augmented",
-            "environment",
+            "graph_date",
             "es_mode",
         },
     )

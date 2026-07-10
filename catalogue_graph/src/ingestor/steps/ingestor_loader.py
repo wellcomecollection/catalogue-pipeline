@@ -61,7 +61,7 @@ def handler(
     es_client = get_client(
         f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
     )
-    neptune_client = NeptuneClient(event.environment)
+    neptune_client = NeptuneClient(event.graph_date)
     transformer = create_transformer(event, es_client, neptune_client)
     objects_to_index = transformer.load_documents(event, load_destination)
 
@@ -119,7 +119,7 @@ def local_handler(parser: ArgumentParser) -> None:
             "ids",
             "pit_id_merged",
             "pit_id_augmented",
-            "environment",
+            "graph_date",
             "es_mode",
         },
     )

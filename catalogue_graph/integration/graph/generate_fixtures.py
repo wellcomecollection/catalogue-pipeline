@@ -146,7 +146,8 @@ def main() -> None:
     reason = confirm_regeneration()
     append_regeneration_log(reason=reason)
 
-    client = NeptuneClient()
+    graph_date = input("Enter the graph date (e.g. 2025-01-01): ").strip()
+    client = NeptuneClient(graph_date)
 
     # Get a sample of `ID_POOL_SIZE` random concept and work IDs.
     random_concept_ids = sample_ids(client=client, label="Concept")

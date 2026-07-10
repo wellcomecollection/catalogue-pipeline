@@ -8,11 +8,11 @@ from graph.steps.graph_remover import IDS_LOG_SCHEMA, lambda_handler
 from tests.mocks import MockSmartOpen, add_neptune_mock_response, mock_neptune_secrets
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 
-REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover"
+BUCKET = "wellcomecollection-catalogue-graph"
 
 
 def get_mock_remover_uri(pipeline_date: str, folder: str) -> str:
-    return f"{REMOVER_S3_PREFIX}/{pipeline_date}/{folder}/loc_concepts__nodes.parquet"
+    return f"s3://{BUCKET}/graph-{pipeline_date}/pipeline-{pipeline_date}/graph_remover/full/{folder}/loc_concepts__nodes.parquet"
 
 
 def mock_deleted_ids_log_file(
@@ -65,6 +65,7 @@ def test_graph_remover_first_run() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     lambda_handler(event, None)
 
@@ -87,7 +88,9 @@ def test_graph_remover_next_run() -> None:
         load_fixture("loc/id_snapshot_loc_concepts__nodes.parquet"),
     )
 
-    add_mock_transformer_outputs_for_ontologies(["loc"], pipeline_date=pipeline_date)
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc"], pipeline_date=pipeline_date, graph_date=pipeline_date
+    )
 
     # Mock a deleted ids snapshot which includes two of the redundant IDs (sh00000004, sh00000005), leaving
     # sh00000006 as the only ID which should be removed as part of this run.
@@ -96,12 +99,13 @@ def test_graph_remover_next_run() -> None:
     )
     mock_neptune_get_existing_response(["sh00000006"])
     mock_neptune_removal_response(["sh00000006"])
-    mock_neptune_secrets()
+    mock_neptune_secrets(pipeline_date)
 
     event = {
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": pipeline_date,
+        "graph_date": pipeline_date,
     }
     lambda_handler(event, None)
 
@@ -145,12 +149,13 @@ def test_graph_remover_old_id_removal() -> None:
     mock_deleted_ids_log_file(["sh00000004", "sh00000005"], "dev", age_in_days=365)
     mock_neptune_get_existing_response(["sh00000006"])
     mock_neptune_removal_response(["sh00000006"])
-    mock_neptune_secrets()
+    mock_neptune_secrets("dev")
 
     event = {
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     lambda_handler(event, None)
 
@@ -175,6 +180,7 @@ def test_graph_remover_safety_check() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
     with pytest.raises(ValueError):
         lambda_handler(event, None)
@@ -185,6 +191,7 @@ def test_graph_remover_missing_bulk_load_file() -> None:
         "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "2020-01-01",
+        "graph_date": "2020-01-01",
     }
 
     with pytest.raises(KeyError):
@@ -197,6 +204,7 @@ def test_graph_remover_catalogue_failure() -> None:
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
+        "graph_date": "dev",
     }
 
     with pytest.raises(pydantic.ValidationError):

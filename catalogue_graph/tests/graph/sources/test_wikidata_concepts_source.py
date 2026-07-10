@@ -9,6 +9,7 @@ from graph.sources.wikidata.linked_ontology_node_source import (
     WikidataLinkedOntologyNodeSource,
 )
 from models.events import ExtractorEvent
+from models.pipeline_scope import GraphPipelineScope
 from tests.mocks import MockRequest
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 from utils.ontology import get_ids_for_transformer, is_id_extracted_for_ontology
@@ -50,13 +51,14 @@ def _add_mock_wikidata_requests(
 
 def test_wikidata_concepts_source_edges() -> None:
     add_mock_transformer_outputs_for_ontologies(
-        ["loc", "mesh", "wikidata_linked_loc", "wikidata_linked_mesh"]
+        ["loc", "mesh", "wikidata_linked_loc", "wikidata_linked_mesh"],
+        graph_date="2025-01-01",
     )
     _add_mock_wikidata_requests("edges", "concepts")
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        environment="prod",
+        graph_date="2025-01-01",
         transformer_type="wikidata_linked_loc_concepts",
         entity_type="edges",
     )
@@ -103,7 +105,7 @@ def test_wikidata_concepts_source_nodes() -> None:
 
     source_event = ExtractorEvent(
         pipeline_date="dev",
-        environment="prod",
+        graph_date="dev",
         transformer_type="wikidata_linked_loc_concepts",
         entity_type="nodes",
     )
@@ -122,19 +124,12 @@ def test_wikidata_concepts_source_nodes() -> None:
 
 
 def test_wikidata_linked_ontology_id_checker() -> None:
-    add_mock_transformer_outputs_for_ontologies(["loc"], "1900-01-01")
+    add_mock_transformer_outputs_for_ontologies(["loc"], "1900-01-01", graph_date="dev")
+    scope = GraphPipelineScope(pipeline_date="1900-01-01", graph_date="dev")
 
-    assert is_id_extracted_for_ontology("sh00000001", "loc", "1900-01-01", "prod")
-    assert not is_id_extracted_for_ontology(
-        "sh00000001000", "loc", "1900-01-01", "prod"
-    )
+    assert is_id_extracted_for_ontology("sh00000001", "loc", scope)
+    assert not is_id_extracted_for_ontology("sh00000001000", "loc", scope)
 
-    assert "sh00000001" not in get_ids_for_transformer(
-        "loc_locations", "1900-01-01", "prod"
-    )
-    assert "tgrefwdw" not in get_ids_for_transformer(
-        "loc_locations", "1900-01-01", "prod"
-    )
-    assert "sh00000015" in get_ids_for_transformer(
-        "loc_locations", "1900-01-01", "prod"
-    )
+    assert "sh00000001" not in get_ids_for_transformer("loc_locations", scope)
+    assert "tgrefwdw" not in get_ids_for_transformer("loc_locations", scope)
+    assert "sh00000015" in get_ids_for_transformer("loc_locations", scope)

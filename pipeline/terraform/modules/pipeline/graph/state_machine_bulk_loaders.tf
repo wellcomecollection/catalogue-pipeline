@@ -16,6 +16,7 @@ module "catalogue_graph_bulk_loaders_monthly_state_machine" {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
             "pipeline_date" : var.pipeline_date,
+            "graph_date" : var.graph_date,
             "insert_error_threshold" : try(task_input.insert_error_threshold, local.bulk_loader_default_insert_error_threshold),
           }
         }
@@ -52,6 +53,7 @@ module "catalogue_graph_bulk_loaders_incremental_state_machine" {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
             "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
+            "graph_date" : "{% $states.context.Execution.Input.graph_date %}",
             "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
             "insert_error_threshold" : try(task_input.insert_error_threshold, local.bulk_loader_default_insert_error_threshold),
           }

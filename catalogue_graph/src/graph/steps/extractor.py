@@ -31,7 +31,7 @@ def handler(
 
     logger.info(
         f"Extractor starting for {event.sample_size or 'all'} entities.",
-        environment=event.environment,
+        graph_date=event.graph_date,
         transformer_type=event.transformer_type,
         entity_type=event.entity_type,
         stream_destination=event.stream_destination,
@@ -80,7 +80,7 @@ def local_handler(parser: ArgumentParser) -> None:
             "ids",
             "pit_id_merged",
             "pit_id_augmented",
-            "environment",
+            "graph_date",
             "es_mode",
         },
     )
