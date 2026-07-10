@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "sync_ssm_read" {
 }
 
 resource "aws_iam_role_policy" "sync_ssm_read" {
-  name   = "${var.namespace}-ssm-read"
+  name   = "${var.namespace}-adapter-ssm-read"
   role   = module.sync_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.sync_ssm_read.json
 }
@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "sync_cloudwatch" {
 }
 
 resource "aws_iam_role_policy" "sync_cloudwatch" {
-  name   = "${var.namespace}-cloudwatch"
+  name   = "${var.namespace}-adapter-cloudwatch"
   role   = module.sync_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.sync_cloudwatch.json
 }
@@ -93,7 +93,7 @@ data "aws_iam_policy_document" "sync_s3tables" {
 }
 
 resource "aws_iam_role_policy" "sync_s3tables" {
-  name   = "${var.namespace}-s3tables"
+  name   = "${var.namespace}-adapter-s3tables"
   role   = module.sync_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.sync_s3tables.json
 }
@@ -114,7 +114,7 @@ data "aws_iam_policy_document" "sync_s3_manifests" {
 }
 
 resource "aws_iam_role_policy" "sync_s3_manifests" {
-  name   = "${var.namespace}-s3-manifests"
+  name   = "${var.namespace}-adapter-s3-manifests"
   role   = module.sync_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.sync_s3_manifests.json
 }

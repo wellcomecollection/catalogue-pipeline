@@ -22,12 +22,13 @@ The adapter table is read via the shared ``AXIELL_CONFIG`` / ``AdapterStore``
 and a local sqlite catalog for local runs — so no Iceberg-specific env vars.
 
 Environment variables (injected by Terraform):
-  OKAPI_URL              — FOLIO OKAPI base URL
-  OKAPI_TENANT           — FOLIO tenant id
-  OKAPI_SECRET_PARAM     — SSM path to {"username":…, "password":…}
+  OKAPI_SECRET_PARAM     — SSM path to {"url":…, "tenant":…, "username":…, "password":…}
   MANIFEST_S3_BUCKET     — S3 bucket name for NDJSON manifest storage
   AWS_REGION             — e.g. eu-west-1 (set automatically in Lambda)
   DRY_RUN                — default "true"; event.dry_run overrides
+
+For local runs, OKAPI_URL / OKAPI_TENANT / OKAPI_USERNAME / OKAPI_PASSWORD
+override the corresponding SSM fields (and skip SSM if all are set).
 """
 
 from __future__ import annotations
@@ -111,17 +112,24 @@ def _s3() -> Any:
 # ── OKAPI auth ────────────────────────────────────────────────────────────────
 
 
-def _load_okapi_creds() -> tuple[str, str]:
-    # Local override: set OKAPI_USERNAME + OKAPI_PASSWORD to skip SSM entirely.
-    username = os.environ.get("OKAPI_USERNAME")
-    password = os.environ.get("OKAPI_PASSWORD")
-    if username and password:
-        return username, password
-    param = _ssm().get_parameter(
-        Name=os.environ["OKAPI_SECRET_PARAM"], WithDecryption=True
-    )
-    creds = json.loads(param["Parameter"]["Value"])
-    return creds["username"], creds["password"]
+def _load_okapi_config() -> dict[str, str]:
+    """FOLIO OKAPI url/tenant/username/password from the SSM SecureString JSON.
+
+    Per-field env overrides (OKAPI_URL / OKAPI_TENANT / OKAPI_USERNAME /
+    OKAPI_PASSWORD) let local runs skip SSM entirely; in the Lambda all four come
+    from the ``OKAPI_SECRET_PARAM`` parameter.
+    """
+    data: dict[str, str] = {}
+    param_name = os.environ.get("OKAPI_SECRET_PARAM")
+    if param_name:
+        param = _ssm().get_parameter(Name=param_name, WithDecryption=True)
+        data = json.loads(param["Parameter"]["Value"])
+    return {
+        "url": os.environ.get("OKAPI_URL") or data["url"],
+        "tenant": os.environ.get("OKAPI_TENANT") or data["tenant"],
+        "username": os.environ.get("OKAPI_USERNAME") or data["username"],
+        "password": os.environ.get("OKAPI_PASSWORD") or data["password"],
+    }
 
 
 def _make_folio_callables(client: FolioClient) -> tuple[Any, Any, Any]:
@@ -296,8 +304,7 @@ def run_sync(
     dry_run = event.dry_run if event.dry_run is not None else env_dry_run
 
     manifest_bucket = os.environ.get("MANIFEST_S3_BUCKET")
-    base_url = os.environ["OKAPI_URL"].rstrip("/")
-    tenant = os.environ["OKAPI_TENANT"]
+    okapi = _load_okapi_config()
 
     logger.info(
         "axiell_folio_sync start",
@@ -307,9 +314,10 @@ def run_sync(
     )
 
     client = FolioClient(
-        base_url,
-        tenant,
-        credentials_provider=_load_okapi_creds,
+        okapi["url"].rstrip("/"),
+        okapi["tenant"],
+        username=okapi["username"],
+        password=okapi["password"],
         ssl_context=ssl_context_from_env(),
     )
     folio_get, folio_post, folio_put = _make_folio_callables(client)

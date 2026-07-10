@@ -1,11 +1,11 @@
 # The sync runs out of the shared unified_pipeline_lambda image with the
 # entrypoint overridden, deployed via the standard terraform-aws-lambda module
 # (same convention as the adapter trigger lambdas). Build/deploy with
-# scripts/deploy_lambda.sh axiell-folio-sync.
+# scripts/deploy_lambda.sh axiell-folio-sync-adapter-lambda.
 module "sync_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = var.namespace
+  name         = "${var.namespace}-adapter-lambda"
   description  = "Axiell → FOLIO outbound sync (upserts changed records into FOLIO Inventory)"
   package_type = "Image"
   image_uri    = "${var.repository_url}:${var.image_tag}"
@@ -22,8 +22,7 @@ module "sync_lambda" {
 
   environment = {
     variables = {
-      OKAPI_URL          = var.okapi_url
-      OKAPI_TENANT       = var.okapi_tenant
+      # url/tenant/username/password all come from this SSM SecureString.
       OKAPI_SECRET_PARAM = aws_ssm_parameter.okapi_credentials.name
       MANIFEST_S3_BUCKET = aws_s3_bucket.axiell_folio_sync_manifests.bucket
       # The adapter table is read via AXIELL_CONFIG/AdapterStore, so no

@@ -15,16 +15,6 @@ variable "image_tag" {
   default     = "dev"
 }
 
-variable "okapi_url" {
-  description = "FOLIO OKAPI base URL, e.g. https://api-wellcome.folio.ebsco.com"
-  type        = string
-}
-
-variable "okapi_tenant" {
-  description = "FOLIO OKAPI tenant ID"
-  type        = string
-}
-
 variable "s3_table_bucket_arn" {
   description = "ARN of the Axiell adapter S3 Tables bucket (bucket scope, not table ARN); used to scope IAM read access"
   type        = string

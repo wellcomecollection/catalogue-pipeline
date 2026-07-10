@@ -41,7 +41,7 @@ locals {
 
 # IAM role for the state machine
 resource "aws_iam_role" "state_machine_role" {
-  name = "${var.namespace}-state-machine-role"
+  name = "${var.namespace}-adapter-state-machine-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -86,18 +86,18 @@ data "aws_iam_policy_document" "state_machine" {
 }
 
 resource "aws_iam_role_policy" "state_machine" {
-  name   = "${var.namespace}-state-machine"
+  name   = "${var.namespace}-adapter-state-machine"
   role   = aws_iam_role.state_machine_role.id
   policy = data.aws_iam_policy_document.state_machine.json
 }
 
 resource "aws_cloudwatch_log_group" "state_machine" {
-  name              = "/aws/stepfunctions/${var.namespace}"
+  name              = "/aws/stepfunctions/${var.namespace}-adapter-pipeline"
   retention_in_days = 14
 }
 
 resource "aws_sfn_state_machine" "state_machine" {
-  name       = var.namespace
+  name       = "${var.namespace}-adapter"
   role_arn   = aws_iam_role.state_machine_role.arn
   definition = local.state_machine_definition
 

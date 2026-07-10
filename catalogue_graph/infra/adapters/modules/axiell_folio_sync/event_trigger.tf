@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "eventbridge_assume_role" {
 }
 
 resource "aws_iam_role" "eventbridge_exec" {
-  name               = "${var.namespace}-eventbridge-exec"
+  name               = "${var.namespace}-adapter-eventbridge"
   assume_role_policy = data.aws_iam_policy_document.eventbridge_assume_role.json
 }
 
@@ -25,13 +25,13 @@ data "aws_iam_policy_document" "eventbridge_policy" {
 }
 
 resource "aws_iam_role_policy" "eventbridge_policy" {
-  name   = "${var.namespace}-eventbridge-policy"
+  name   = "${var.namespace}-adapter-eventbridge-policy"
   role   = aws_iam_role.eventbridge_exec.id
   policy = data.aws_iam_policy_document.eventbridge_policy.json
 }
 
 resource "aws_cloudwatch_event_rule" "axiell_adapter_completed" {
-  name           = "${var.namespace}-axiell-adapter-completed"
+  name           = "${var.namespace}-adapter-axiell-completed"
   event_bus_name = var.event_bus_name
   description    = "Trigger the Axiell → FOLIO sync when the adapter completes processing changesets"
 
@@ -47,7 +47,7 @@ resource "aws_cloudwatch_event_rule" "axiell_adapter_completed" {
 resource "aws_cloudwatch_event_target" "axiell_sync_step_function" {
   rule           = aws_cloudwatch_event_rule.axiell_adapter_completed.name
   event_bus_name = var.event_bus_name
-  target_id      = "${var.namespace}-step-function"
+  target_id      = "${var.namespace}-adapter-step-function"
   arn            = aws_sfn_state_machine.state_machine.arn
   role_arn       = aws_iam_role.eventbridge_exec.arn
 

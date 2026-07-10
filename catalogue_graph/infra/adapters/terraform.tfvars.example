@@ -1,6 +1,0 @@
-# Copy to terraform.tfvars (gitignored) before `terraform apply`.
-# These configure the axiell_folio_sync module. None are secret — the OKAPI
-# credentials themselves live in SSM, not here.
-okapi_url           = "https://example.folio.ebsco.com"
-okapi_tenant        = "example_tenant"
-s3_table_bucket_arn = "arn:aws:s3tables:eu-west-1:123456789012:bucket/example-bucket"
