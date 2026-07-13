@@ -4,7 +4,6 @@
 
 locals {
   pipeline_date   = "2025-10-02"
-  es_cluster_date = ""
 }
 
 terraform {

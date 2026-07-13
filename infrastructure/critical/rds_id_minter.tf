@@ -28,7 +28,7 @@ module "id_minter_rds_test" {
   master_username = data.aws_ssm_parameter.rds_username.value
 }
 
-module "id_minter_rds_test_2026_07_03" {
+module "id_minter_rds_2026_07_03" {
   source = "./modules/id-minter-rds"
 
   name_suffix = "2026-07-03"

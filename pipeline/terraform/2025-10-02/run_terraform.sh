@@ -16,7 +16,6 @@ SCRIPT_DIR="$(dirname "$THIS_DIR")/scripts"
 # in and where to store the remote state.
 export PIPELINE_DATE="$(basename "$THIS_DIR")"
 # needed for pipeline/terraform/scripts/create_terraform_config_file.sh but unused in pipeline/terraform/2025-10-02
-export ES_CLUSTER_DATE=""
 . $SCRIPT_DIR/create_terraform_config_file.sh
 
 # Get the Elastic Cloud API key, which we need for the EC provider

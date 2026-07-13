@@ -24,7 +24,6 @@ cat > pipeline_config.tf.tmp <<EOF
 
 locals {
   pipeline_date   = "$PIPELINE_DATE"
-  es_cluster_date = "$ES_CLUSTER_DATE"
 }
 
 terraform {
