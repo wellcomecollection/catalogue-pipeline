@@ -1,6 +1,6 @@
 // dead topic, the image inferrer now runs on a schedule 
 // the merger code still references it so it stays here for now 
-// output as been removed from the module
+// output has been removed from the module
 module "merger_images_output_topic" {
   source = "../../topic"
 

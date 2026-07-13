@@ -5,7 +5,6 @@ variable "pipeline_date" { // namespace for the pipeline services
 variable "graph_date" {
   type        = string
   description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
-  default     = ""
 }
 
 variable "rds_id_minter" {

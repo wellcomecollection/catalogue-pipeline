@@ -40,7 +40,6 @@ variable "ecs_cluster_arn" {
 variable "graph_date" {
   type        = string
   description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
-  default     = ""
 }
 
 variable "enable_schedule" {
