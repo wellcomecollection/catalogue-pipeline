@@ -1,5 +1,6 @@
-import httpx
 from collections.abc import Callable
+
+import httpx
 
 from clients.folio_client import FolioClient
 from clients.folio_client.okapi_auth import OkapiAuth
