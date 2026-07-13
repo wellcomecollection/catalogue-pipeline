@@ -23,7 +23,7 @@ cat > pipeline_config.tf.tmp <<EOF
 # Edits to this file may be reverted!
 
 locals {
-  pipeline_date   = "$PIPELINE_DATE"
+  pipeline_date = "$PIPELINE_DATE"
 }
 
 terraform {

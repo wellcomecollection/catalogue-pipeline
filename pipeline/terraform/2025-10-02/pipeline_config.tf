@@ -3,7 +3,7 @@
 # Edits to this file may be reverted!
 
 locals {
-  pipeline_date   = "2025-10-02"
+  pipeline_date = "2025-10-02"
 }
 
 terraform {
