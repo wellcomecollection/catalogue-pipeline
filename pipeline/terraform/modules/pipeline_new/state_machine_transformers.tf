@@ -34,10 +34,10 @@ module "transformer_lambda" {
 
   environment = {
     variables = {
-      PIPELINE_DATE                    = var.pipeline_date
-      INDEX_DATE                       = var.index_dates.source
-      S3_PREFIX                        = "prod"
-      RECONCILER_REST_API_TABLE_NAME   = "axiell_reconciler_table_${replace(var.pipeline_date, "-", "_")}"
+      PIPELINE_DATE                  = var.pipeline_date
+      INDEX_DATE                     = var.index_dates.source
+      S3_PREFIX                      = "prod"
+      RECONCILER_REST_API_TABLE_NAME = "axiell_reconciler_table_${replace(var.pipeline_date, "-", "_")}"
     }
   }
 }

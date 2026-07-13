@@ -32,7 +32,7 @@ locals {
       }
       images = {
         // matcher_merger - images_inferrer
-        initial   = "images_initial.2026-06-15"
+        initial = "images_initial.2026-06-15"
         // images_inferrer - graph/ingestor/indexer
         augmented = "images_augmented.2026-04-29"
         // graph/ingestor/indexer - API

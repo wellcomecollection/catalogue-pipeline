@@ -72,7 +72,7 @@ module "indices" {
 }
 
 locals {
-service_index_permissions = {
+  service_index_permissions = {
     read_only = {
       read  = ["*"]
       write = []
@@ -167,12 +167,12 @@ service_index_permissions = {
 }
 
 module "pipeline_services" {
-  for_each        = local.service_index_permissions
-  source          = "../../pipeline_es_api_key"
-  name            = each.key
-  read_from       = each.value.read
-  write_to        = each.value.write
-  pipeline_date   = var.pipeline_date
+  for_each            = local.service_index_permissions
+  source              = "../../pipeline_es_api_key"
+  name                = each.key
+  read_from           = each.value.read
+  write_to            = each.value.write
+  pipeline_date       = var.pipeline_date
   expose_to_catalogue = contains(var.catalogue_account_services, each.key)
   providers = {
     aws.catalogue = aws.catalogue
@@ -199,12 +199,12 @@ module "pipeline_storage_connection_secrets" {
   deletion_mode = "IMMEDIATE"
 
   key_value_map = {
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/public_host"  = var.es_cluster.public_host
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/private_host" = var.es_cluster.private_host
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/port"         = var.es_cluster.port
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/protocol"     = var.es_cluster.protocol
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/es_username"  = var.es_cluster.username
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/es_password"  = var.es_cluster.password
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/public_host"           = var.es_cluster.public_host
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/private_host"          = var.es_cluster.private_host
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/port"                  = var.es_cluster.port
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/protocol"              = var.es_cluster.protocol
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/es_username"           = var.es_cluster.username
+    "elasticsearch/pipeline_storage_${var.pipeline_date}/es_password"           = var.es_cluster.password
     "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_username" = var.es_cluster.read_only_username
     "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_password" = var.es_cluster.read_only_password
   }

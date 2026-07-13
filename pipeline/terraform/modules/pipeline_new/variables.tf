@@ -50,14 +50,14 @@ variable "ami_id" {
 
 variable "index_dates" {
   type = object({
-    source    = string
+    source     = string
     identified = string
-    merged    = string
-    initial   = string
-    augmented = string
-    works     = string
-    concepts  = string
-    images    = string
+    merged     = string
+    initial    = string
+    augmented  = string
+    works      = string
+    concepts   = string
+    images     = string
   })
 }
 
