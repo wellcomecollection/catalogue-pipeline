@@ -1,8 +1,4 @@
 variable "pipeline_date" { type = string }
-variable "es_cluster_date" { 
-  type = string 
-  default = "" 
-}
 variable "es_cluster_deployment_template" { type = string }
 variable "es_node_count" { type = number }
 variable "es_memory" { type = string }

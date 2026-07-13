@@ -1,15 +1,5 @@
-variable "pipeline_date" { // namespace for the pipeline services
+variable "pipeline_date" {
   type = string
-}
-
-variable "es_cluster_date" { // the es cluster that the pipeline services use, eg. "es-cluster-2026-07-03"
-  type = string
-}
-
-variable "graph_date" {
-  type        = string
-  description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
-  default     = ""
 }
 
 variable "min_capacity" {
@@ -36,11 +26,58 @@ variable "release_label" {
   type = string
 }
 
+variable "es_cluster_nodes" {
+  type        = number
+  description = "How many nodes should the cluster have?"
+  default     = 3
+}
 
+variable "es_cluster_memory" {
+  type        = string
+  description = "How much memory should the cluster have?"
+  default     = "4g"
+}
 
-variable "elastic_outputs" {
-  description = "Outputs from the elastic module (indices, API keys, connection details)."
-  type        = any
+variable "es_cluster_deployment_template" {
+  type        = string
+  description = "Which hardware profile should the cluster use? Choose from https://www.elastic.co/guide/en/cloud/current/ec-regions-templates-instances.html#eu-west-1"
+  default     = "aws-cpu-optimized-arm"
+}
+
+locals {
+  es_memory = var.reindexing_state.scale_up_elastic_cluster ? "30g" : var.es_cluster_memory
+
+  # When we're reindexing, this cluster isn't depended on for anything.
+  # It's ephemeral data (and at 30GB of memory, expensive).
+  #
+  # Once we stop reindexing and make the pipeline live, we want it to be
+  # highly available, because it's serving API traffic.
+  es_node_count = var.reindexing_state.scale_up_elastic_cluster ? 2 : var.es_cluster_nodes
+}
+
+variable "index_config" {
+  type = map(object({
+    works = optional(object({
+      source       = optional(string)
+      identified   = optional(string)
+      denormalised = optional(string)
+      indexed      = optional(string)
+    }), {})
+    images = optional(object({
+      initial   = optional(string)
+      augmented = optional(string)
+      indexed   = optional(string)
+    }), {})
+    concepts = optional(object({
+      indexed = optional(string)
+    }), {})
+  }))
+  description = "Index configuration keyed by pipeline date. Omit a field to skip creation of that index."
+}
+
+variable "allow_delete_indices" {
+  type    = bool
+  default = false
 }
 
 variable "ami_id" {
@@ -50,6 +87,13 @@ variable "ami_id" {
 
 variable "version_regex" {
   type = string
+}
+
+
+variable "graph_date" {
+  type        = string
+  description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
+  default     = ""
 }
 
 variable "graph_index_dates" {

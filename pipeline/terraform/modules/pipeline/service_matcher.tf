@@ -14,7 +14,7 @@ module "matcher" {
     ]
   }
 
-  secret_env_vars = var.elastic_outputs.pipeline_storage_es_service_secrets["matcher"]
+  secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["matcher"]
 
   queue_config = {
     visibility_timeout_seconds = 90

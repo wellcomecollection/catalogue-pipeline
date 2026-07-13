@@ -35,7 +35,7 @@ locals {
       RDS_USERNAME     = "${local.rds_test_master_secret_name}:username"
       RDS_PASSWORD     = "${local.rds_test_master_secret_name}:password"
     },
-    var.elastic_outputs.pipeline_storage_es_service_secrets["id_minter"],
+    module.elastic.pipeline_storage_es_service_secrets["id_minter"],
   )
 
   id_minter_test_state_machine_definition = jsonencode({
@@ -133,7 +133,7 @@ resource "aws_scheduler_schedule" "id_minter_test_schedule" {
 }
 
 resource "aws_iam_role" "run_id_minter_test_role" {
-  name  = "run-id-minter-test-role-${var.pipeline_date}"
+  name = "run-id-minter-test-role-${var.pipeline_date}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -150,7 +150,7 @@ resource "aws_iam_role" "run_id_minter_test_role" {
 }
 
 resource "aws_iam_role_policy" "run_id_minter_test_policy" {
-  role  = aws_iam_role.run_id_minter_test_role.id
+  role = aws_iam_role.run_id_minter_test_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"

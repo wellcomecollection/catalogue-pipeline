@@ -33,7 +33,7 @@ locals {
       RDS_USERNAME     = "${local.rds_v2_master_secret_name}:username"
       RDS_PASSWORD     = "${local.rds_v2_master_secret_name}:password"
     },
-    var.elastic_outputs.pipeline_storage_es_service_secrets["id_minter"],
+    module.elastic.pipeline_storage_es_service_secrets["id_minter"],
   )
 }
 
