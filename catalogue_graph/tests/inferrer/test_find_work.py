@@ -14,13 +14,14 @@ PIPELINE_DATE = "2026-06-01"
 
 
 def test_source_index_defaults_to_pipeline_date() -> None:
-    event = FindWorkEvent(pipeline_date=PIPELINE_DATE)
+    event = FindWorkEvent(pipeline_date=PIPELINE_DATE, graph_date=PIPELINE_DATE)
     assert get_images_initial_index_name(event) == f"images-initial-{PIPELINE_DATE}"
 
 
 def test_source_index_uses_index_dates_initial_when_set() -> None:
     event = FindWorkEvent(
         pipeline_date=PIPELINE_DATE,
+        graph_date=PIPELINE_DATE,
         index_dates=PipelineIndexDates(initial="2026-06-15"),
     )
     assert get_images_initial_index_name(event) == "images-initial-2026-06-15"
@@ -40,7 +41,9 @@ def test_handler_returns_partitioned_work() -> None:
     mock_es_secrets("inferrer", PIPELINE_DATE)
     _seed_initial_images(["a", "b", "c"])
 
-    event = FindWorkEvent(pipeline_date=PIPELINE_DATE, partition_size=2)
+    event = FindWorkEvent(
+        pipeline_date=PIPELINE_DATE, graph_date=PIPELINE_DATE, partition_size=2
+    )
     result = find_work.handler(event, es_mode="private")
 
     assert len(result.partitions) == 2
@@ -55,6 +58,7 @@ def test_lambda_handler_writes_partitions_to_s3_and_returns_refs() -> None:
 
     event = {
         "pipeline_date": PIPELINE_DATE,
+        "graph_date": PIPELINE_DATE,
         "partition_size": 2,
         "window": {
             "start_time": "2026-06-01T00:00:00Z",
@@ -92,6 +96,7 @@ def test_handler_builds_window_query_on_modified_time() -> None:
 
     event = FindWorkEvent.model_validate(
         {
+            "graph_date": PIPELINE_DATE,
             "pipeline_date": PIPELINE_DATE,
             "window": {"end_time": "2026-06-10T12:00:00Z"},
         }

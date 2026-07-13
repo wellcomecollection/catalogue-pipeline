@@ -11,7 +11,7 @@ BasePipelineEventArgument = Literal[
     "index_date_augmented",
     "pit_id_merged",
     "pit_id_augmented",
-    "environment",
+    "graph_date",
     "es_mode",
 ]
 
@@ -87,14 +87,13 @@ def add_pipeline_event_args(
             help="An Elasticsearch point in time ID to use when extracting data from the augmented images index.",
             required=False,
         )
-    if "environment" in args:
+    if "graph_date" in args:
         parser.add_argument(
-            "--environment",
+            "--graph-date",
+            dest="graph_date",
             type=str,
-            help="Which environment to connect to (used for Neptune and S3 bucket selection).",
-            required=False,
-            choices=["prod", "dev"],
-            default="dev",
+            help="Which Neptune cluster to connect to. Use 'dev' to connect to the dedicated dev cluster.",
+            required=True,
         )
     if "es_mode" in args:
         parser.add_argument(
@@ -113,8 +112,8 @@ def validate_es_mode_for_writes(
     """
     When running services which write to an Elasticsearch index locally, we disallow combining
     the production Elasticsearch cluster (`es_mode=public` or `es_mode=private`) with the development
-    Neptune cluster (`environment=dev`) so that we cannot accidentally write non-production data to
+    Neptune cluster (`graph_date=dev`) so that we cannot accidentally write non-production data to
     production indexes.
     """
-    if args.environment == "dev" and args.es_mode != "local":
-        parser.error(f"--es-mode={args.es_mode} cannot be used with --environment=dev")
+    if args.graph_date == "dev" and args.es_mode != "local":
+        parser.error(f"--es-mode={args.es_mode} cannot be used with --graph-date=dev")

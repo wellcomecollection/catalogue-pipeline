@@ -30,7 +30,7 @@ def get_remover(
     es_mode: ElasticsearchMode,
 ) -> BaseGraphRemoverIncremental:
     es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
-    neptune_client = NeptuneClient(event.environment)
+    neptune_client = NeptuneClient(event.graph_date)
 
     if event.transformer_type == "catalogue_works":
         return CatalogueWorksGraphRemover(event, es_client, neptune_client)
@@ -90,7 +90,7 @@ def local_handler() -> None:
             "index_date_augmented",
             "pit_id_merged",
             "pit_id_augmented",
-            "environment",
+            "graph_date",
             "es_mode",
         },
     )

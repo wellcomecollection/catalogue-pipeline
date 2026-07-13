@@ -20,7 +20,7 @@ from tests.mocks import (
 )
 from tests.test_utils import load_json_fixture
 
-MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev", graph_date="dev")
 
 IMAGE_FIXTURE = load_json_fixture("ingestor/single_augmented_image.json")
 MERGED_FIXTURE = load_json_fixture("ingestor/single_merged.json")

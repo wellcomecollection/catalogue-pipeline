@@ -119,6 +119,9 @@ module "pipeline" {
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
+  # The current production Neptune cluster was created before we introduced graph dates.
+  # An empty string preserves its existing cluster name. Switch to a real date when we switch to a dated cluster.
+  graph_date    = ""
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date
 

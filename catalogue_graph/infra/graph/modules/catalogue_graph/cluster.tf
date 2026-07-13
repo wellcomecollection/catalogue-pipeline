@@ -1,5 +1,5 @@
 resource "aws_neptune_cluster" "catalogue_graph_cluster" {
-  cluster_identifier                   = var.namespace
+  cluster_identifier                   = local.full_namespace
   engine                               = "neptune"
   engine_version                       = "1.4.6.3"
   neptune_cluster_parameter_group_name = "default.neptune1.4"
@@ -27,7 +27,7 @@ resource "aws_neptune_cluster_instance" "catalogue_graph_instance" {
 }
 
 resource "aws_db_subnet_group" "neptune_subnet_group" {
-  name       = var.namespace
+  name       = local.full_namespace
   subnet_ids = var.public_subnets
 }
 

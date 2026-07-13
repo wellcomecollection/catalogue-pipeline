@@ -7,11 +7,11 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
+from models.pipeline_scope import GraphPipelineScope, PipelineIndexDates
 from models.source_scope import SourceScope
 from utils.types import (
     CatalogueTransformerType,
     EntityType,
-    Environment,
     FullGraphRemoverType,
     StreamDestination,
     TransformerType,
@@ -24,35 +24,18 @@ class ScheduledEvent(BaseModel):
     time: datetime = Field(default_factory=lambda: datetime.now(tz=UTC))
 
 
-class PipelineIndexDates(BaseModel):
-    initial: str | None = None  # initial images (inferrer source)
-    merged: str | None = None  # merged works
-    augmented: str | None = None  # augmented images
-    concepts: str | None = None  # final concepts
-    works: str | None = None  # final works
-    images: str | None = None  # final images
-
-
 class PipelinePitIds(BaseModel):
     merged: str | None = None
     augmented: str | None = None
 
 
-class BasePipelineEvent(SourceScope):
-    pipeline_date: str
+class BasePipelineEvent(SourceScope, GraphPipelineScope):
     pit_ids: PipelinePitIds = PipelinePitIds()
-    index_dates: PipelineIndexDates = PipelineIndexDates()
-    environment: Environment = "prod"
 
     @field_validator("pit_ids", mode="before")
     @classmethod
     def _coerce_pit_ids(cls, v: object) -> object:
         return v if v is not None else PipelinePitIds()
-
-    @field_validator("index_dates", mode="before")
-    @classmethod
-    def _coerce_index_dates(cls, v: object) -> object:
-        return v if v is not None else PipelineIndexDates()
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
@@ -72,6 +55,45 @@ class BasePipelineEvent(SourceScope):
         return cls(
             **args.__dict__, window=window, index_dates=index_dates, pit_ids=pit_ids
         )
+
+    @property
+    def s3_service_prefix_parts(self) -> list[str]:
+        raise NotImplementedError()
+
+    @property
+    def s3_prefix_parts(self) -> list[str]:
+        """Build the S3 path prefix for this run's output files.
+
+        All services share the same top-level layout:
+
+            graph-{graph_date}/pipeline-{pipeline_date}/{service_prefix(es)}/{scope}
+
+        where:
+            - ``graph_date`` identifies the Neptune graph cluster (temporarily defaults to ``prod``)
+            - ``pipeline_date`` identifies the pipeline service stack
+            - service-specific segment(s) are provided by ``s3_service_prefix_parts``
+            - ``scope`` reflects the pipeline run mode:
+                - ``windows/{window}`` for incremental (window-based) runs
+                - ``by_id/{ids}`` for ID-based runs
+                - ``full`` for a complete reindex
+        """
+        parts: list[str] = []
+
+        parts += [
+            f"graph-{self.graph_date or 'prod'}",
+            f"pipeline-{self.pipeline_date}",
+        ]
+
+        parts += self.s3_service_prefix_parts
+
+        if self.window is not None:
+            parts += ["windows", self.window.to_formatted_string()]
+        elif self.ids:
+            parts += ["by_id", self.ids_path_segment]
+        else:
+            parts.append("full")
+
+        return parts
 
 
 class GraphPipelineEvent(BasePipelineEvent):
@@ -96,25 +118,11 @@ class GraphPipelineEvent(BasePipelineEvent):
         return self
 
     @property
-    def s3_prefix(self) -> str:
-        raise NotImplementedError()
-
-    @property
     def event_key(self) -> str:
         return f"{self.transformer_type}__{self.entity_type}"
 
-    @property
-    def file_path_parts(self) -> list[str]:
-        parts: list[str] = [self.s3_prefix, self.pipeline_date]
-        if self.window is not None:
-            parts += ["windows", self.window.to_formatted_string()]
-        if self.ids:
-            parts += ["by_id", self.ids_path_segment]
-
-        return parts
-
     def get_file_path(self, file_format: str = "csv", folder: str | None = None) -> str:
-        parts = self.file_path_parts
+        parts = self.s3_prefix_parts
         if folder:
             parts.append(folder)
 
@@ -122,8 +130,7 @@ class GraphPipelineEvent(BasePipelineEvent):
 
     def get_s3_uri(self, file_format: str = "csv", folder: str | None = None) -> str:
         file_path = self.get_file_path(file_format, folder)
-        bucket = config.CATALOGUE_GRAPH_S3_BUCKETS[self.environment]
-        return f"s3://{bucket}/{file_path}"
+        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{file_path}"
 
 
 class ExtractorEvent(GraphPipelineEvent):
@@ -131,22 +138,22 @@ class ExtractorEvent(GraphPipelineEvent):
     sample_size: int | None = None
 
     @property
-    def s3_prefix(self) -> str:
-        return config.BULK_LOADER_S3_PREFIX
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.BULK_LOADER_S3_PREFIX]
 
 
 class BulkLoaderEvent(GraphPipelineEvent):
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
 
     @property
-    def s3_prefix(self) -> str:
-        return config.BULK_LOADER_S3_PREFIX
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.BULK_LOADER_S3_PREFIX]
 
 
 class BulkLoadPollerEvent(BaseModel):
     load_id: str
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
-    environment: Environment = "prod"
+    graph_date: str
 
 
 class GraphRemoverEvent(GraphPipelineEvent):
@@ -157,13 +164,13 @@ class FullGraphRemoverEvent(GraphRemoverEvent):
     transformer_type: FullGraphRemoverType
 
     @property
-    def s3_prefix(self) -> str:
-        return config.GRAPH_REMOVER_S3_PREFIX
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.GRAPH_REMOVER_S3_PREFIX]
 
 
 class IncrementalGraphRemoverEvent(GraphRemoverEvent):
     transformer_type: CatalogueTransformerType
 
     @property
-    def s3_prefix(self) -> str:
-        return config.INCREMENTAL_GRAPH_REMOVER_S3_PREFIX
+    def s3_service_prefix_parts(self) -> list[str]:
+        return [config.INCREMENTAL_GRAPH_REMOVER_S3_PREFIX]

@@ -119,7 +119,9 @@ def test_handler_indexes_augmented_image(
     MockRequest.mock_response(method="GET", url=THUMBNAIL_URL, content_bytes=b"jpeg")
     _mock_inferrers(file_url(local_image_path(image, str(tmp_path))))
 
-    event = InferenceManagerEvent(pipeline_date=PIPELINE_DATE, ids=["imgA"])
+    event = InferenceManagerEvent(
+        pipeline_date=PIPELINE_DATE, graph_date=PIPELINE_DATE, ids=["imgA"]
+    )
     result = inference_manager.handler(event, es_mode="private")
 
     assert result.processed == 1
@@ -150,7 +152,9 @@ def test_handler_fails_and_indexes_nothing_on_poison(
         file_url(local_image_path(image, str(tmp_path))), features=[0.1] * 10
     )
 
-    event = InferenceManagerEvent(pipeline_date=PIPELINE_DATE, ids=["imgA"])
+    event = InferenceManagerEvent(
+        pipeline_date=PIPELINE_DATE, graph_date=PIPELINE_DATE, ids=["imgA"]
+    )
     with pytest.raises(PoisonedImageError):
         inference_manager.handler(event, es_mode="private")
 
@@ -161,7 +165,9 @@ def test_event_validator_resolves_s3_ref() -> None:
     # find_work writes the partition to S3 and the Map passes a small ref; the
     # task must resolve the ref back to the full event.
     s3_uri = "s3://wellcomecollection-catalogue-graph/inferrer/test/partition-0.json"
-    partition = InferenceManagerEvent(pipeline_date=PIPELINE_DATE, ids=["x", "y"])
+    partition = InferenceManagerEvent(
+        pipeline_date=PIPELINE_DATE, graph_date=PIPELINE_DATE, ids=["x", "y"]
+    )
     pydantic_to_s3_json(partition, s3_uri)
 
     resolved = event_validator(json.dumps({"s3_uri": s3_uri, "image_count": 2}))
@@ -172,9 +178,12 @@ def test_event_validator_resolves_s3_ref() -> None:
 
 def test_event_validator_parses_inline_event() -> None:
     # Backward-compat: a local/CLI invocation passes the event inline.
-    raw = json.dumps({"pipeline_date": PIPELINE_DATE, "ids": ["a"]})
+    raw = json.dumps(
+        {"pipeline_date": PIPELINE_DATE, "graph_date": "2026-01-01", "ids": ["a"]}
+    )
 
     resolved = event_validator(raw)
 
     assert resolved.ids == ["a"]
     assert resolved.pipeline_date == PIPELINE_DATE
+    assert resolved.graph_date == "2026-01-01"

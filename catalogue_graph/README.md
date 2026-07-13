@@ -255,11 +255,19 @@ uv run python -m graph.steps.extractor \
   --is-local
 ```
 
-## Environments
+## Graph clusters
 
-The pipeline runs against two environments: `prod` and `dev`. Each environment has its own Neptune cluster and S3 bucket
-for pipeline outputs. Every pipeline service accepts an `--environment` argument and every pipeline event has a
-corresponding `environment` field. Local runs use `dev` by default while deployed services default to `prod`.
+Graphs are identified by a `graph_date`. Each dated graph has its own Neptune cluster
+and a dedicated S3 prefix in the shared catalogue graph bucket for pipeline outputs.
+
+A dedicated experimental graph with `graph_date` set to `dev` is available for local development and ad-hoc testing.
+
+When a new graph cluster is provisioned, it needs to be fully populated using both the monthly pipeline (to add
+concepts from external ontologies) and the incremental pipeline in `full` mode (to add catalogue works, concepts,
+and images). To avoid running the full monthly pipeline (which is very slow),
+use the [copy_monthly_bulk_load_files notebook](notebooks/copy_monthly_bulk_load_files.ipynb). It copies bulk load files
+from the existing cluster's S3 location to the new cluster's location. Once these files are available to the new
+cluster, use the monthly bulk loader state machine to load them to the graph, skipping the lengthy extraction step.
 
 ## Local Neptune experimentation
 

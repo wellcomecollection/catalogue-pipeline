@@ -132,17 +132,13 @@ class WikidataLinkedOntologySource(BaseSource, ABC):
 
     def _is_id_valid_for_ontology(self, item_id: str, ontology: OntologyType) -> bool:
         """Return `True` if the given ID is valid for the specified ontology."""
-        return is_id_extracted_for_ontology(
-            item_id, ontology, self.event.pipeline_date, self.event.environment
-        )
+        return is_id_extracted_for_ontology(item_id, ontology, self.event)
 
     def _is_id_valid_for_transformer(
         self, item_id: str, transformer_type: TransformerType
     ) -> bool:
         """Return `True` if the given ID was extracted by the specified transformer."""
-        return is_id_extracted_for_transformer(
-            item_id, transformer_type, self.event.pipeline_date, self.event.environment
-        )
+        return is_id_extracted_for_transformer(item_id, transformer_type, self.event)
 
     @abstractmethod
     def stream_raw(self) -> Generator[Any]: ...
