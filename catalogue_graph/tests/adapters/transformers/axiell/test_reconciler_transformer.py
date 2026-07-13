@@ -16,6 +16,13 @@ from adapters.utils.schemata import (
 )
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 
+CONTENT_WITHOUT_001 = (
+    "<record><leader>00000nam a2200000   4500</leader>"
+    "<datafield tag='245' ind1='0' ind2='0'>"
+    "<subfield code='a'>Title without GUID</subfield>"
+    "</datafield></record>"
+)
+
 
 def _marcxml(guid: str) -> str:
     return (
@@ -477,9 +484,18 @@ def test_reconciler_skips_missing_or_invalid_content(
                     "last_modified": datetime.now(UTC),
                     "deleted": False,
                 },
+                {
+                    "namespace": "axiell",
+                    "id": "collect-missing-001",
+                    "content": CONTENT_WITHOUT_001,
+                    "changeset": None,
+                    "last_modified": datetime.now(UTC),
+                    "deleted": False,
+                },
             ]
         )
     )
+
     assert adapter_changeset is not None
 
     result = _run_reconciler(
@@ -493,7 +509,7 @@ def test_reconciler_skips_missing_or_invalid_content(
 
     assert result.successes.count == 0
     assert result.failures is not None
-    assert result.failures.count == 2
+    assert result.failures.count == 3
     assert MockElasticsearchClient.inputs == []
 
 
@@ -527,40 +543,18 @@ def _make_reconciler(
     )
 
 
-def test_get_record_guid_returns_none_when_content_missing(
-    temporary_table: IcebergTable,
-    reconciler_temporary_table: IcebergTable,
-) -> None:
-    """A row with no MARC content returns None and records an error without raising."""
-    reconciler = _make_reconciler(temporary_table, reconciler_temporary_table)
-    row = {
-        "id": "collect-no-content",
-        "content": None,
-        "last_modified": datetime.now(UTC),
-    }
-
-    result = reconciler._get_record_guid(row)
-
-    assert result is None
-    assert len(reconciler.errors) == 1
-    assert reconciler.errors[0].row_id == "collect-no-content"
-
-
 def test_get_record_guid_returns_none_and_logs_error_when_guid_missing(
     temporary_table: IcebergTable,
     reconciler_temporary_table: IcebergTable,
 ) -> None:
-    """A valid MARC record without a 001 field cannot yield a GUID; the run continues and the record is logged as an error."""
+    """
+    A valid MARC record without a 001 field cannot yield a GUID. The run continues and the record is logged as an error.
+    """
     reconciler = _make_reconciler(temporary_table, reconciler_temporary_table)
-    content_without_001 = (
-        "<record><leader>00000nam a2200000   4500</leader>"
-        "<datafield tag='245' ind1='0' ind2='0'>"
-        "<subfield code='a'>Title without GUID</subfield>"
-        "</datafield></record>"
-    )
+
     row = {
         "id": "collect-no-guid",
-        "content": content_without_001,
+        "content": CONTENT_WITHOUT_001,
         "last_modified": datetime.now(UTC),
     }
 

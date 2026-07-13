@@ -49,9 +49,12 @@ class AxiellReconciler(SourceWorkTransformer):
             builder = AxiellWorkBuilder(marc_record, adapter_row["last_modified"])
             return builder.source_identifier.value
         except Exception as e:
-            logger.error(
-                "Error extracting record GUID", row_id=adapter_row["id"], error=str(e)
-            )
+            if adapter_row["id"] not in self.error_ids:  # only log on first encounter
+                logger.error(
+                    "Error extracting record GUID",
+                    row_id=adapter_row["id"],
+                    error=str(e),
+                )
             self._add_error(e, "transform", adapter_row["id"])
             return None
 
