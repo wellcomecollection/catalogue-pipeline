@@ -64,10 +64,10 @@ flowchart TB
 ```
 
 Individual stages:
-* [CALM adapter](../calm_adapter/README.md) soon to be replaced by [Axiell adapter](../catalogue_graph/src/adapters/extractors/oai_pmh/README.md)
+* [CALM adapter](../calm_adapter/README.md) soon to be replaced by [Axiell adapter](../catalogue_graph/src/adapters/extractors/oai_pmh/axiell/README.md)
 * [EBSCO adapter](../ebsco_adapter/README.md)
 * [METS adapter](../mets_adapter/README.md)
-* [SIERRA adapter](../sierra_adapter/README.md) soon to be replaced by [Folio adapter](../catalogue_graph/src/adapters/extractors/oai_pmh/README.md)
+* [SIERRA adapter](../sierra_adapter/README.md) soon to be replaced by [Folio adapter](../catalogue_graph/src/adapters/extractors/oai_pmh/folio/README.md)
 * [TEI adapter](../tei_adapter/README.md)
 * [transformers](./transformer/)
 * [id_minter](../catalogue_graph/src/id_minter/README.md)

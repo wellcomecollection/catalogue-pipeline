@@ -33,7 +33,7 @@ module "id_minter_rds_2026_07_03" {
 
   name_suffix = "2026-07-03"
   # Restore from production, use recent snapshot
-  snapshot_identifier = ""
+  snapshot_identifier = null
 
   vpc_id             = local.vpc_id_new
   private_subnet_ids = local.private_subnets_new
