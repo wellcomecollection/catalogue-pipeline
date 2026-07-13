@@ -68,7 +68,6 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "secretsmanager:DescribeSecret",
     ]
     resources = [
-      data.terraform_remote_state.catalogue_graph.outputs.neptune_nlb_url_secret_arn,
       data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_endpoint_secret_arn,
       data.aws_secretsmanager_secret.wc_platform_alerts_slack_webhook.arn,
     ]
@@ -92,6 +91,15 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
 
     resources = [
       data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "ssm:GetParameter",
+    ]
+    resources = [
+      "arn:aws:ssm:eu-west-1:760097843905:parameter/catalogue_graph/production_graph_date",
     ]
   }
 }

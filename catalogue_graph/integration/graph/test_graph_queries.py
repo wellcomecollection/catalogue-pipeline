@@ -4,11 +4,12 @@ These tests use the live database, so they are marked as `integration` and
 deselected by default in pytest config.
 
 Usage:
-    AWS_PROFILE=platform-developer uv run pytest -m "integration"
+    GRAPH_DATE=2026-01-01 AWS_PROFILE=platform-developer uv run pytest -m "integration"
 """
 
 import csv
 import json
+import os
 import warnings
 from functools import cache, lru_cache
 from pathlib import Path
@@ -42,9 +43,16 @@ from ingestor.queries.work_queries import (
 pytestmark = pytest.mark.integration
 
 
+GRAPH_DATE = os.environ.get("GRAPH_DATE")
+
+
 @lru_cache(maxsize=1)
 def neptune_client() -> NeptuneClient:
-    return NeptuneClient("prod")
+    if GRAPH_DATE is None:
+        raise ValueError(
+            "GRAPH_DATE environment variable must be set to run integration tests"
+        )
+    return NeptuneClient(GRAPH_DATE)
 
 
 @cache
