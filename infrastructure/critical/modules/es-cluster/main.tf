@@ -13,7 +13,7 @@ resource "ec_deployment" "cluster" {
   version                = data.ec_stack.latest_patch.version
   region                 = "eu-west-1"
   deployment_template_id = var.deployment_template
-  traffic_filter = var.traffic_filter_ids
+  traffic_filter         = var.traffic_filter_ids
 
   elasticsearch = {
     hot = {
