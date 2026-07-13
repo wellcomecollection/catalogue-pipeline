@@ -68,6 +68,10 @@ def _no_write(*args: Any, **kwargs: Any) -> dict:
     raise AssertionError("dry-run must not issue FOLIO writes")
 
 
+def _no_delete(*args: Any, **kwargs: Any) -> dict:
+    raise AssertionError("dry-run must not issue FOLIO deletes")
+
+
 def _run(rows: list[dict[str, Any]]) -> Any:
     return run_sync(
         AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
@@ -76,6 +80,7 @@ def _run(rows: list[dict[str, Any]]) -> Any:
         _folio_get,
         _no_write,
         _no_write,
+        _no_delete,
         dry_run=True,
     )
 
@@ -133,7 +138,7 @@ class _MockS3:
     def get_object(self, *, Bucket: str, Key: str) -> dict[str, Any]:
         content = self.objects.get((Bucket, Key))
         if content is None:
-            raise KeyError("missing")
+            raise sync_step.ClientError({"Error": {"Code": "NoSuchKey"}}, "GetObject")
         return {"Body": io.BytesIO(content)}
 
     def put_object(
@@ -170,6 +175,7 @@ def test_run_sync_passes_ref_cache_to_upsert(monkeypatch: pytest.MonkeyPatch) ->
         folio_get: Any,
         folio_post: Any,
         folio_put: Any,
+        folio_delete: Any,
         *,
         ref_cache: Any = None,
         dry_run: bool = False,
@@ -191,6 +197,7 @@ def test_run_sync_passes_ref_cache_to_upsert(monkeypatch: pytest.MonkeyPatch) ->
         _folio_get,
         _no_write,
         _no_write,
+        _no_delete,
         dry_run=True,
     )
 

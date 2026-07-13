@@ -43,6 +43,7 @@ from typing import Any, cast
 
 import boto3
 import structlog
+from botocore.exceptions import ClientError
 from pydantic import BaseModel, Field
 
 from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
@@ -147,9 +148,9 @@ def _load_okapi_config() -> dict[str, str]:
     return cast("dict[str, str]", merged)
 
 
-def _make_folio_callables(client: FolioClient) -> tuple[Any, Any, Any]:
-    """Adapt a :class:`FolioClient` to the (folio_get, folio_post, folio_put)
-    callables that ``ref_cache`` and ``upsert`` expect."""
+def _make_folio_callables(client: FolioClient) -> tuple[Any, Any, Any, Any]:
+    """Adapt a :class:`FolioClient` to the (folio_get, folio_post, folio_put,
+    folio_delete) callables that ``ref_cache`` and ``upsert`` expect."""
 
     def folio_get(path: str, params: dict | None = None) -> dict:
         if params:
@@ -171,7 +172,13 @@ def _make_folio_callables(client: FolioClient) -> tuple[Any, Any, Any]:
             raise RuntimeError(f"PUT {path} failed: {status} {str(data)[:200]}")
         return cast("dict", data)
 
-    return folio_get, folio_post, folio_put
+    def folio_delete(path: str) -> dict:
+        status, data = client.request("DELETE", path, accept="text/plain")
+        if status >= 400 and status != 404:
+            raise RuntimeError(f"DELETE {path} failed: {status} {str(data)[:200]}")
+        return cast("dict", data)
+
+    return folio_get, folio_post, folio_put, folio_delete
 
 
 # ── adapter store read ────────────────────────────────────────────────────────
@@ -265,9 +272,12 @@ def _flush_success_batch(bucket: str, job_id: str, batch: list[dict]) -> None:
     try:
         existing = _s3().get_object(Bucket=bucket, Key=key)
         existing_body = existing["Body"].read()
-    except Exception:
-        # First flush for this run: object is expected not to exist yet.
-        existing_body = b""
+    except ClientError as exc:
+        error_code = exc.response.get("Error", {}).get("Code")
+        if error_code in ("NoSuchKey", "404", "NotFound"):
+            existing_body = b""
+        else:
+            raise
 
     _s3().put_object(
         Bucket=bucket,
@@ -338,6 +348,7 @@ def run_sync(
     folio_get: Callable,
     folio_post: Callable,
     folio_put: Callable,
+    folio_delete: Callable,
     *,
     dry_run: bool,
     manifest_bucket: str | None = None,
@@ -453,6 +464,7 @@ def run_sync(
             folio_get=folio_get,
             folio_post=folio_post,
             folio_put=folio_put,
+            folio_delete=folio_delete,
             dry_run=dry_run,
             ref_cache=ref_cache,
         )
@@ -570,7 +582,7 @@ def handler(
         password=okapi["password"],
         ssl_context=ssl_context_from_env(),
     )
-    folio_get, folio_post, folio_put = _make_folio_callables(client)
+    folio_get, folio_post, folio_put, folio_delete = _make_folio_callables(client)
     ref_cache = RefCache(folio_get).load()
 
     rows = _read_rows(
@@ -587,6 +599,7 @@ def handler(
         folio_get,
         folio_post,
         folio_put,
+        folio_delete,
         dry_run=dry_run,
         manifest_bucket=manifest_bucket,
     )

@@ -136,6 +136,29 @@ def _upsert_entity(
         return "create", None
 
 
+def _best_effort_delete(
+    folio_delete: Callable,
+    *,
+    path: str,
+    source_id: str,
+    entity: str,
+) -> None:
+    """Attempt cleanup for create-path partial failures; never raise."""
+    try:
+        folio_delete(path)
+        logger.info(
+            "rollback_deleted entity=%s path=%s source_id=%s", entity, path, source_id
+        )
+    except Exception as exc:
+        logger.warning(
+            "rollback_delete_failed entity=%s path=%s source_id=%s error=%s",
+            entity,
+            path,
+            source_id,
+            exc,
+        )
+
+
 # ── build_payloads path ───────────────────────────────────────────────────────
 
 
@@ -144,6 +167,7 @@ def upsert_from_payloads(
     folio_get: Callable,
     folio_post: Callable,
     folio_put: Callable,
+    folio_delete: Callable,
     *,
     ref_cache: RefCache | None = None,
     dry_run: bool = False,
@@ -153,7 +177,7 @@ def upsert_from_payloads(
 
     Args:
         mapped:   Dict with keys "instance", "holdings", "item", "meta".
-        folio_get/post/put: Authenticated OKAPI callables.
+        folio_get/post/put/delete: Authenticated OKAPI callables.
         ref_cache: RefCache instance for resolving note types (optional).
         dry_run:  If True, plan without writing.
     """
@@ -173,6 +197,9 @@ def upsert_from_payloads(
         "errors": [],
     }
 
+    created_instance_id: str | None = None
+    created_holdings_id: str | None = None
+
     try:
         # ── Instance ────────────────────────────────────────────────────────
         action, instance_id = _upsert_entity(
@@ -187,6 +214,8 @@ def upsert_from_payloads(
             dry_run=dry_run,
         )
         result["instance"] = {"action": action, "id": instance_id}
+        if action == "create" and not dry_run:
+            created_instance_id = instance_id
         if dry_run:
             instance_id = f"dry-run:{instance_hrid}"
 
@@ -204,6 +233,8 @@ def upsert_from_payloads(
             dry_run=dry_run,
         )
         result["holdings"] = {"action": action, "id": holdings_id}
+        if action == "create" and not dry_run:
+            created_holdings_id = holdings_id
         if dry_run:
             holdings_id = f"dry-run:{holdings_hrid}"
 
@@ -245,6 +276,22 @@ def upsert_from_payloads(
             result["item"] = {"action": action, "id": item_id}
 
     except Exception as exc:
+        if not dry_run:
+            if created_holdings_id:
+                _best_effort_delete(
+                    folio_delete,
+                    path=f"/holdings-storage/holdings/{created_holdings_id}",
+                    source_id=source_id,
+                    entity="holdings",
+                )
+            if created_instance_id:
+                _best_effort_delete(
+                    folio_delete,
+                    path=f"/inventory/instances/{created_instance_id}",
+                    source_id=source_id,
+                    entity="instance",
+                )
+
         result["errors"].append({"type": "api", "detail": str(exc)})
         logger.error("api error source_id=%s detail=%s", source_id, exc)
 
