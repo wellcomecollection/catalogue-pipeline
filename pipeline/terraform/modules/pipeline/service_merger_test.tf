@@ -18,7 +18,7 @@ module "merger_test" {
     batch_size                 = 50
     maximum_concurrency        = 30
     topic_arns = [
-      module.matcher_test[0].output_topic_arn,
+      module.matcher_test.output_topic_arn,
     ]
   }
 

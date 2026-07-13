@@ -27,7 +27,7 @@ module "matcher_test" {
     batch_size                 = var.reindexing_state.scale_up_matcher_db ? 400 : 100
     maximum_concurrency        = var.reindexing_state.scale_up_matcher_db ? 40 : 2
     topic_arns = [
-      module.id_minter_test[0].id_minter_output_topic_arn,
+      module.id_minter_test.id_minter_output_topic_arn,
     ]
   }
 
