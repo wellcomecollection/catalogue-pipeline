@@ -45,8 +45,15 @@ class AxiellReconciler(SourceWorkTransformer):
         if not marc_record:
             return None
 
-        builder = AxiellWorkBuilder(marc_record, adapter_row["last_modified"])
-        return builder.source_identifier.value
+        try:
+            builder = AxiellWorkBuilder(marc_record, adapter_row["last_modified"])
+            return builder.source_identifier.value
+        except Exception as e:
+            logger.error(
+                "Error extracting record GUID", row_id=adapter_row["id"], error=str(e)
+            )
+            self._add_error(e, "transform", adapter_row["id"])
+            return None
 
     def _rows_to_reconciler_arrow_table(
         self, rows: Iterable[dict[str, Any]]

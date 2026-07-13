@@ -6,6 +6,7 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.steps.transformer import TransformerEvent, handler
+from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.manifests import TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
@@ -511,3 +512,79 @@ def test_reconciler_requires_changeset_id(
             reconciler_temporary_table,
             [],
         )
+
+
+def _make_reconciler(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+) -> AxiellReconciler:
+    return AxiellReconciler(
+        adapter_store=AdapterStore(temporary_table, namespace="axiell"),
+        changeset_ids=[],
+        reconciler_store=ReconcilerStore(
+            reconciler_temporary_table, namespace="axiell"
+        ),
+    )
+
+
+def test_get_record_guid_returns_none_when_content_missing(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+) -> None:
+    """A row with no MARC content returns None and records an error without raising."""
+    reconciler = _make_reconciler(temporary_table, reconciler_temporary_table)
+    row = {
+        "id": "collect-no-content",
+        "content": None,
+        "last_modified": datetime.now(UTC),
+    }
+
+    result = reconciler._get_record_guid(row)
+
+    assert result is None
+    assert len(reconciler.errors) == 1
+    assert reconciler.errors[0].row_id == "collect-no-content"
+
+
+def test_get_record_guid_returns_none_and_logs_error_when_guid_missing(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+) -> None:
+    """A valid MARC record without a 001 field cannot yield a GUID; the run continues and the record is logged as an error."""
+    reconciler = _make_reconciler(temporary_table, reconciler_temporary_table)
+    content_without_001 = (
+        "<record><leader>00000nam a2200000   4500</leader>"
+        "<datafield tag='245' ind1='0' ind2='0'>"
+        "<subfield code='a'>Title without GUID</subfield>"
+        "</datafield></record>"
+    )
+    row = {
+        "id": "collect-no-guid",
+        "content": content_without_001,
+        "last_modified": datetime.now(UTC),
+    }
+
+    result = reconciler._get_record_guid(row)
+
+    assert result is None
+    assert len(reconciler.errors) == 1
+    assert reconciler.errors[0].row_id == "collect-no-guid"
+    assert reconciler.errors[0].stage == "transform"
+
+
+def test_get_record_guid_returns_guid_for_valid_record(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+) -> None:
+    """A MARC record with a 001 field returns the GUID value and records no errors."""
+    reconciler = _make_reconciler(temporary_table, reconciler_temporary_table)
+    row = {
+        "id": "collect-valid",
+        "content": _marcxml("expected-guid"),
+        "last_modified": datetime.now(UTC),
+    }
+
+    result = reconciler._get_record_guid(row)
+
+    assert result == "expected-guid"
+    assert reconciler.errors == []
