@@ -13,7 +13,7 @@ locals {
             changeset_ids    = "{% $states.input.detail.changeset_ids %}"
             job_id           = "{% $states.input.detail.job_id %}"
             transformer_type = "{% $states.input.detail.transformer_type %}"
-            dry_run          = var.dry_run_default
+            dry_run          = "{% $exists($states.input.detail.dry_run) ? $states.input.detail.dry_run : ${var.dry_run_default} %}"
           }
         }
         Output = "{% $states.result.Payload %}"

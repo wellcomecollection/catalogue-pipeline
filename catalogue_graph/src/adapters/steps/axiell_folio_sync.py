@@ -118,23 +118,33 @@ def _s3() -> Any:
 
 
 def _load_okapi_config() -> dict[str, str]:
-    """FOLIO OKAPI url/tenant/username/password from the SSM SecureString JSON.
+    """FOLIO OKAPI url/tenant/username/password from env and/or SSM.
 
     Per-field env overrides (OKAPI_URL / OKAPI_TENANT / OKAPI_USERNAME /
-    OKAPI_PASSWORD) let local runs skip SSM entirely; in the Lambda all four come
-    from the ``OKAPI_SECRET_PARAM`` parameter.
+    OKAPI_PASSWORD) let local runs skip SSM entirely; in Lambda these usually
+    come from the OKAPI_SECRET_PARAM SecureString JSON.
     """
     data: dict[str, str] = {}
     param_name = os.environ.get("OKAPI_SECRET_PARAM")
     if param_name:
         param = _ssm().get_parameter(Name=param_name, WithDecryption=True)
         data = json.loads(param["Parameter"]["Value"])
-    return {
-        "url": os.environ.get("OKAPI_URL") or data["url"],
-        "tenant": os.environ.get("OKAPI_TENANT") or data["tenant"],
-        "username": os.environ.get("OKAPI_USERNAME") or data["username"],
-        "password": os.environ.get("OKAPI_PASSWORD") or data["password"],
+
+    merged = {
+        "url": os.environ.get("OKAPI_URL") or data.get("url"),
+        "tenant": os.environ.get("OKAPI_TENANT") or data.get("tenant"),
+        "username": os.environ.get("OKAPI_USERNAME") or data.get("username"),
+        "password": os.environ.get("OKAPI_PASSWORD") or data.get("password"),
     }
+    missing = [key for key, value in merged.items() if not value]
+    if missing:
+        missing_list = ", ".join(missing)
+        raise ValueError(
+            "Missing OKAPI configuration fields: "
+            f"{missing_list}. Provide OKAPI_* env vars or set OKAPI_SECRET_PARAM."
+        )
+
+    return cast("dict[str, str]", merged)
 
 
 def _make_folio_callables(client: FolioClient) -> tuple[Any, Any, Any]:
@@ -247,12 +257,22 @@ def _emit_metrics(counts: dict) -> None:
 def _flush_success_batch(bucket: str, job_id: str, batch: list[dict]) -> None:
     if not batch:
         return
+
     key = f"manifests/{job_id}.ids.ndjson"
-    ndjson_lines = "\n".join(json.dumps(record) for record in batch)
+    ndjson_lines = "\n".join(json.dumps(record) for record in batch) + "\n"
+
+    existing_body = b""
+    try:
+        existing = _s3().get_object(Bucket=bucket, Key=key)
+        existing_body = existing["Body"].read()
+    except Exception:
+        # First flush for this run: object is expected not to exist yet.
+        existing_body = b""
+
     _s3().put_object(
         Bucket=bucket,
         Key=key,
-        Body=(ndjson_lines + "\n").encode("utf-8"),
+        Body=existing_body + ndjson_lines.encode("utf-8"),
         ContentType="application/x-ndjson",
     )
     logger.info("flushed_success_batch", job_id=job_id, key=key, count=len(batch))
@@ -434,6 +454,7 @@ def run_sync(
             folio_post=folio_post,
             folio_put=folio_put,
             dry_run=dry_run,
+            ref_cache=ref_cache,
         )
 
         if result["errors"]:

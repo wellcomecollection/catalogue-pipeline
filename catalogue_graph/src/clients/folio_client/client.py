@@ -14,16 +14,16 @@ across warm Lambda invocations.
 from __future__ import annotations
 
 import json
-import logging
 import ssl
 from collections.abc import Callable
 from typing import Any
 
 import httpx
+import structlog
 
 from .okapi_auth import OkapiAuth
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 CredentialsProvider = Callable[[], "tuple[str, str]"]
 
@@ -98,7 +98,7 @@ class FolioClient:
         accept: str = "application/json",
     ) -> tuple[int, Any]:
         """Authenticated OKAPI request (lazy login + one 401 re-auth via OkapiAuth)."""
-        logger.info("OKAPI %s %s", method, path)
+        logger.info("okapi_request", method=method, path=path)
         kwargs: dict[str, Any] = {"headers": {"accept": accept}}
         if body is not None:
             kwargs["json"] = body

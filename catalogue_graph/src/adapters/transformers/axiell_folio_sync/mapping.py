@@ -2,7 +2,7 @@
 AxC → FOLIO mapping: payload models, normalization rules, and builders.
 
 This is the single home for everything that decides *what an Axiell record
-becomes in FOLIO*. The payloads are typed Pydantic models,so a malformed payload
+becomes in FOLIO*. The payloads are typed Pydantic models, so a malformed payload
 (missing/ill-typed required field, typo'd key) fails at
 build time — before any OKAPI call — instead of surfacing as a FOLIO 422.
 
@@ -97,10 +97,8 @@ def parse_marcxml(xml_content: str, *, deleted: bool = False) -> CanonicalRecord
     if not source_id:
         raise MappingError("Missing MARC 001 — cannot identify record")
 
-    instance_hrid = f"axiell:{source_id}"
-    holdings_hrid = (
-        f"{instance_hrid}-holding-{_safe_segment(values['location_code'] or 'unknown')}"
-    )
+    instance_hrid = _instance_hrid(source_id)
+    holdings_hrid = _holdings_hrid(source_id)
     return CanonicalRecord(
         source_id=source_id,
         instance_hrid=instance_hrid,

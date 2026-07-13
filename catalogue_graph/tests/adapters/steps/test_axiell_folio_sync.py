@@ -1,14 +1,17 @@
 """Handler-level tests for the Axiell → FOLIO sync step.
 
-These exercise how ``run_sync`` selects, skips, and processes rows using injected
-fakes (a stub ref cache + FOLIO callables) rather than patching module globals —
-the same dependency-injection style as the ``folio_enrich`` step tests.
+These exercise how run_sync selects, skips, and processes rows using injected
+fakes (a stub ref cache + FOLIO callables) rather than patching module globals.
 """
 
 from __future__ import annotations
 
+import io
 from typing import Any
 
+import pytest
+
+import adapters.steps.axiell_folio_sync as sync_step
 from adapters.steps.axiell_folio_sync import AxiellFolioSyncEvent, run_sync
 
 # 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title).
@@ -96,8 +99,7 @@ def test_malformed_xml_recorded_as_error() -> None:
 
 
 def test_loader_tombstone_is_advisory_not_suppressed() -> None:
-    # deleted=true is recorded as an advisory signal, not suppressed/upserted
-    # (RFC 090: authoritative deletes come from the reconciler, not this path).
+    # deleted=true is recorded as an advisory signal, not suppressed/upserted.
     tombstone = {**_row("tomb", SELECTED), "deleted": True}
     resp = _run([tombstone])
 
@@ -106,3 +108,90 @@ def test_loader_tombstone_is_advisory_not_suppressed() -> None:
     assert resp.counts["created"] == 0  # no upsert happened
     assert resp.total_successful == 0
     assert resp.total_errors == 0
+
+
+def test_load_okapi_config_raises_clear_error_for_missing_fields(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for key in (
+        "OKAPI_URL",
+        "OKAPI_TENANT",
+        "OKAPI_USERNAME",
+        "OKAPI_PASSWORD",
+        "OKAPI_SECRET_PARAM",
+    ):
+        monkeypatch.delenv(key, raising=False)
+
+    with pytest.raises(ValueError, match="Missing OKAPI configuration fields"):
+        sync_step._load_okapi_config()
+
+
+class _MockS3:
+    def __init__(self) -> None:
+        self.objects: dict[tuple[str, str], bytes] = {}
+
+    def get_object(self, *, Bucket: str, Key: str) -> dict[str, Any]:
+        content = self.objects.get((Bucket, Key))
+        if content is None:
+            raise KeyError("missing")
+        return {"Body": io.BytesIO(content)}
+
+    def put_object(
+        self,
+        *,
+        Bucket: str,
+        Key: str,
+        Body: bytes,
+        ContentType: str,
+    ) -> dict[str, Any]:
+        self.objects[(Bucket, Key)] = Body
+        return {}
+
+
+def test_flush_success_batch_appends_instead_of_overwrite(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mock_s3 = _MockS3()
+    monkeypatch.setattr(sync_step, "_s3_client", mock_s3)
+
+    sync_step._flush_success_batch("bucket-1", "job-1", [{"sourceId": "a"}])
+    sync_step._flush_success_batch("bucket-1", "job-1", [{"sourceId": "b"}])
+
+    key = ("bucket-1", "manifests/job-1.ids.ndjson")
+    payload = mock_s3.objects[key].decode("utf-8").strip().splitlines()
+    assert len(payload) == 2
+
+
+def test_run_sync_passes_ref_cache_to_upsert(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, Any] = {}
+
+    def fake_upsert(
+        mapped: dict,
+        folio_get: Any,
+        folio_post: Any,
+        folio_put: Any,
+        *,
+        ref_cache: Any = None,
+        dry_run: bool = False,
+    ) -> dict[str, Any]:
+        captured["ref_cache"] = ref_cache
+        return {
+            "instance": {"action": "create", "id": None},
+            "holdings": {"action": "create", "id": None},
+            "item": {"action": "create", "id": None},
+            "errors": [],
+        }
+
+    monkeypatch.setattr(sync_step, "upsert_from_payloads", fake_upsert)
+
+    run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [_row("sel", SELECTED)],
+        FakeRefCache(),  # type: ignore[arg-type]
+        _folio_get,
+        _no_write,
+        _no_write,
+        dry_run=True,
+    )
+
+    assert isinstance(captured["ref_cache"], FakeRefCache)

@@ -218,7 +218,7 @@ def upsert_from_payloads(
                     folio_put(
                         f"/inventory/items/{existing_item['id']}",
                         {
-                            **existing_item,
+                            **_strip_readonly(existing_item),
                             "discoverySuppress": True,
                             "staffSuppress": True,
                         },
