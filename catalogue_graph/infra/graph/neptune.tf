@@ -43,4 +43,5 @@ resource "aws_ssm_parameter" "production_graph_date" {
   name        = "/catalogue_graph/production_graph_date"
   type        = "String"
   description = "The graph_date of the current production Neptune cluster (or 'prod' for the legacy cluster), read by CI."
+  value       = module.catalogue_graph_neptune_cluster.graph_date != "" ? module.catalogue_graph_neptune_cluster.graph_date : "prod"
 }
