@@ -29,6 +29,7 @@ from adapters.transformers.manifests import (
     TransformerManifest,
     TransformerManifestWriter,
 )
+from adapters.transformers.reporting import TransformerReport
 from adapters.transformers.source_work_transformer import (
     SourceWorkTransformer,
 )
@@ -198,6 +199,25 @@ def handler(
         successful_ids=transformer.successful_ids,
         errors=transformer.errors,
     )
+
+    success_count = result.successes.count
+    failure_count = result.failures.count if result.failures else 0
+
+    logger.info(
+        "Transformation complete",
+        job_id=event.job_id,
+        transformer_type=event.transformer_type,
+        success_count=success_count,
+        failure_count=failure_count,
+    )
+
+    TransformerReport(
+        pipeline_date=config.PIPELINE_DATE,
+        transformer_type=event.transformer_type,
+        success_count=success_count,
+        failure_count=failure_count,
+    ).publish()
+
     return result
 
 
