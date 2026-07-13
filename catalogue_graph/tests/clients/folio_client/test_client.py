@@ -1,4 +1,5 @@
 import httpx
+from collections.abc import Callable
 
 from clients.folio_client import FolioClient
 from clients.folio_client.okapi_auth import OkapiAuth
@@ -6,7 +7,7 @@ from clients.folio_client.okapi_auth import OkapiAuth
 BASE = "https://folio.example"
 
 
-def _client_with(handler: httpx.MockTransport) -> FolioClient:
+def _client_with(handler: Callable[[httpx.Request], httpx.Response]) -> FolioClient:
     """A FolioClient whose httpx.Client is pre-built onto a mock transport.
 
     Pre-setting ``_client`` skips only the lazy build in ``_http`` (credential

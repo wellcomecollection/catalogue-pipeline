@@ -65,7 +65,7 @@ def _no_write(*args: Any, **kwargs: Any) -> dict:
     raise AssertionError("dry-run must not issue FOLIO writes")
 
 
-def _run(rows: list[dict]):
+def _run(rows: list[dict[str, Any]]) -> Any:
     return run_sync(
         AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
         rows,
