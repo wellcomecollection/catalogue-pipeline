@@ -15,7 +15,8 @@ variable "name" {
 }
 
 variable "pipeline_date" {
-  type = string
+  type        = string
+  description = "Pipeline date used in service names, eg. 'merger-2025-10-02'"
 }
 
 variable "expose_to_catalogue" {
