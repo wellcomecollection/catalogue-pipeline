@@ -6,6 +6,7 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.steps.transformer import TransformerEvent, handler
+from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.manifests import TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
@@ -14,6 +15,13 @@ from adapters.utils.schemata import (
     RECONCILER_STORE_ARROW_SCHEMA,
 )
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
+
+CONTENT_WITHOUT_001 = (
+    "<record><leader>00000nam a2200000   4500</leader>"
+    "<datafield tag='245' ind1='0' ind2='0'>"
+    "<subfield code='a'>Title without GUID</subfield>"
+    "</datafield></record>"
+)
 
 
 def _marcxml(guid: str) -> str:
@@ -476,9 +484,18 @@ def test_reconciler_skips_missing_or_invalid_content(
                     "last_modified": datetime.now(UTC),
                     "deleted": False,
                 },
+                {
+                    "namespace": "axiell",
+                    "id": "collect-missing-001",
+                    "content": CONTENT_WITHOUT_001,
+                    "changeset": None,
+                    "last_modified": datetime.now(UTC),
+                    "deleted": False,
+                },
             ]
         )
     )
+
     assert adapter_changeset is not None
 
     result = _run_reconciler(
@@ -492,7 +509,7 @@ def test_reconciler_skips_missing_or_invalid_content(
 
     assert result.successes.count == 0
     assert result.failures is not None
-    assert result.failures.count == 2
+    assert result.failures.count == 3
     assert MockElasticsearchClient.inputs == []
 
 
@@ -511,3 +528,57 @@ def test_reconciler_requires_changeset_id(
             reconciler_temporary_table,
             [],
         )
+
+
+def _make_reconciler(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+) -> AxiellReconciler:
+    return AxiellReconciler(
+        adapter_store=AdapterStore(temporary_table, namespace="axiell"),
+        changeset_ids=[],
+        reconciler_store=ReconcilerStore(
+            reconciler_temporary_table, namespace="axiell"
+        ),
+    )
+
+
+def test_get_record_guid_returns_none_and_logs_error_when_guid_missing(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+) -> None:
+    """
+    A valid MARC record without a 001 field cannot yield a GUID. The run continues and the record is logged as an error.
+    """
+    reconciler = _make_reconciler(temporary_table, reconciler_temporary_table)
+
+    row = {
+        "id": "collect-no-guid",
+        "content": CONTENT_WITHOUT_001,
+        "last_modified": datetime.now(UTC),
+    }
+
+    result = reconciler._get_record_guid(row)
+
+    assert result is None
+    assert len(reconciler.errors) == 1
+    assert reconciler.errors[0].row_id == "collect-no-guid"
+    assert reconciler.errors[0].stage == "transform"
+
+
+def test_get_record_guid_returns_guid_for_valid_record(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+) -> None:
+    """A MARC record with a 001 field returns the GUID value and records no errors."""
+    reconciler = _make_reconciler(temporary_table, reconciler_temporary_table)
+    row = {
+        "id": "collect-valid",
+        "content": _marcxml("expected-guid"),
+        "last_modified": datetime.now(UTC),
+    }
+
+    result = reconciler._get_record_guid(row)
+
+    assert result == "expected-guid"
+    assert reconciler.errors == []
