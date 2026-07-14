@@ -64,4 +64,5 @@ module "axiell_folio_sync" {
   image_tag           = "dev"
   event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
   s3_table_bucket_arn = aws_s3tables_table_bucket.axiell_table_bucket.arn
+  manifest_bucket_name = "wellcomecollection-axiell-folio-sync-manifests"
 }

@@ -39,9 +39,8 @@ variable "event_bus_name" {
 }
 
 variable "manifest_bucket_name" {
-  description = "S3 bucket name for NDJSON manifest storage. If empty, auto-generated."
+  description = "S3 bucket name for NDJSON manifest storage."
   type        = string
-  default     = ""
 }
 
 variable "manifest_retention_days" {
