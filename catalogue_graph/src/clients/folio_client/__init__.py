@@ -11,11 +11,13 @@ import os
 import ssl
 
 from .client import FolioClient, FolioError
+from .inventory_client import FolioInventoryClient
 from .okapi_auth import OkapiAuth, OkapiLoginError
 
 __all__ = [
     "FolioClient",
     "FolioError",
+    "FolioInventoryClient",
     "OkapiAuth",
     "OkapiLoginError",
     "ssl_context_from_env",

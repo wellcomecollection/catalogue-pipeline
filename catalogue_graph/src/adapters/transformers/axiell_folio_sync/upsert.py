@@ -21,12 +21,13 @@ Result dict shape
 
 from __future__ import annotations
 
-import logging
-from collections.abc import Callable
+import structlog
 
+from .folio_callables import FolioInventoryOps
+from .mapping import EntityResult, MappedPayloads, UpsertError, UpsertResult
 from .ref_cache import RefCache
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Fields that FOLIO returns in GET responses but rejects in PUT/POST bodies.
 # Sending them back causes 422 "Unrecognized field" errors.
@@ -55,11 +56,11 @@ def _strip_readonly(record: dict) -> dict:
 
 
 def _find_by_hrid(
-    folio_get: Callable, path: str, hrid: str, list_key: str
+    folio: FolioInventoryOps, path: str, hrid: str, list_key: str
 ) -> dict | None:
     """Return the first FOLIO record matching hrid via CQL, or None."""
     try:
-        result = folio_get(path, {"query": f'hrid=="{hrid}"', "limit": 1})
+        result = folio.get(path, {"query": f'hrid=="{hrid}"', "limit": 1})
         records = result.get(list_key, [])
         return records[0] if records else None
     except Exception as exc:
@@ -93,9 +94,7 @@ def _resolve_item_note_types(payload: dict, ref_cache: RefCache) -> dict:
 
 
 def _upsert_entity(
-    folio_get: Callable,
-    folio_post: Callable,
-    folio_put: Callable,
+    folio: FolioInventoryOps,
     *,
     search_path: str,
     list_key: str,
@@ -109,23 +108,23 @@ def _upsert_entity(
 
     Returns (action, folio_id).
     """
-    existing = _find_by_hrid(folio_get, search_path, hrid, list_key)
+    existing = _find_by_hrid(folio, search_path, hrid, list_key)
     if existing:
         folio_id: str | None = existing["id"]
         if not dry_run:
             merged = {**_strip_readonly(existing), **payload, "id": folio_id}
-            folio_put(f"{write_path_prefix}/{folio_id}", merged)
+            folio.put(f"{write_path_prefix}/{folio_id}", merged)
             logger.info("updated hrid=%s folio_id=%s", hrid, folio_id)
         return "update", folio_id
     else:
         if not dry_run:
-            created = folio_post(write_path_prefix, payload)
+            created = folio.post(write_path_prefix, payload)
             folio_id = created.get("id") if isinstance(created, dict) else None
             if not folio_id:
                 # Some FOLIO inventory POSTs return 201 with an empty body — the
                 # new id comes back only in the Location header, which the
                 # folio_post callable drops. Re-resolve by the hrid we just wrote.
-                refetched = _find_by_hrid(folio_get, search_path, hrid, list_key)
+                refetched = _find_by_hrid(folio, search_path, hrid, list_key)
                 folio_id = refetched["id"] if refetched else None
             if not folio_id:
                 raise RuntimeError(
@@ -137,7 +136,7 @@ def _upsert_entity(
 
 
 def _best_effort_delete(
-    folio_delete: Callable,
+    folio: FolioInventoryOps,
     *,
     path: str,
     source_id: str,
@@ -145,7 +144,7 @@ def _best_effort_delete(
 ) -> None:
     """Attempt cleanup for create-path partial failures; never raise."""
     try:
-        folio_delete(path)
+        folio.delete(path)
         logger.info(
             "rollback_deleted entity=%s path=%s source_id=%s", entity, path, source_id
         )
@@ -163,39 +162,32 @@ def _best_effort_delete(
 
 
 def upsert_from_payloads(
-    mapped: dict,
-    folio_get: Callable,
-    folio_post: Callable,
-    folio_put: Callable,
-    folio_delete: Callable,
+    mapped: MappedPayloads,
+    folio: FolioInventoryOps,
     *,
     ref_cache: RefCache | None = None,
     dry_run: bool = False,
-) -> dict:
+) -> UpsertResult:
     """
     Upsert a record using the output of mapping.build_payloads().
 
     Args:
-        mapped:   Dict with keys "instance", "holdings", "item", "meta".
-        folio_get/post/put/delete: Authenticated OKAPI callables.
+        mapped:   MappedPayloads model with instance, holdings, item, meta.
+        folio:   Authenticated Inventory operations client.
         ref_cache: RefCache instance for resolving note types (optional).
         dry_run:  If True, plan without writing.
     """
-    meta = mapped.get("meta", {})
-    source_id: str = meta.get("source_id", "unknown")
-    deleted: bool = bool(meta.get("deleted", False))
-    instance_hrid: str = meta.get("instance_hrid", f"axiell:{source_id}")
-    holdings_hrid: str = meta.get("holdings_hrid", f"{instance_hrid}-holding-unknown")
-    item_hrid: str = meta.get("item_hrid", f"{instance_hrid}-item-unknown")
+    meta = mapped.meta
+    source_id: str = meta.source_id
+    deleted: bool = meta.deleted
+    instance_hrid: str = meta.instance_hrid
+    holdings_hrid: str = meta.holdings_hrid
+    item_hrid: str = meta.item_hrid
 
-    result: dict = {
-        "source_id": source_id,
-        "mapping_version": meta.get("mapping_version"),
-        "instance": {"action": None, "id": None},
-        "holdings": {"action": None, "id": None},
-        "item": {"action": None, "id": None},
-        "errors": [],
-    }
+    result = UpsertResult(
+        source_id=source_id,
+        mapping_version=meta.mapping_version,
+    )
 
     created_instance_id: str | None = None
     created_holdings_id: str | None = None
@@ -203,28 +195,24 @@ def upsert_from_payloads(
     try:
         # ── Instance ────────────────────────────────────────────────────────
         action, instance_id = _upsert_entity(
-            folio_get,
-            folio_post,
-            folio_put,
+            folio,
             search_path="/inventory/instances",
             list_key="instances",
             write_path_prefix="/inventory/instances",
             hrid=instance_hrid,
-            payload=mapped["instance"],
+            payload=mapped.instance.model_dump(exclude_none=True),
             dry_run=dry_run,
         )
-        result["instance"] = {"action": action, "id": instance_id}
+        result.instance = EntityResult(action=action, id=instance_id)
         if action == "create" and not dry_run:
             created_instance_id = instance_id
         if dry_run:
             instance_id = f"dry-run:{instance_hrid}"
 
         # ── Holdings ────────────────────────────────────────────────────────
-        holdings_payload = {**mapped["holdings"], "instanceId": instance_id}
+        holdings_payload = {**mapped.holdings.model_dump(exclude_none=True), "instanceId": instance_id}
         action, holdings_id = _upsert_entity(
-            folio_get,
-            folio_post,
-            folio_put,
+            folio,
             search_path="/holdings-storage/holdings",
             list_key="holdingsRecords",
             write_path_prefix="/holdings-storage/holdings",
@@ -232,7 +220,7 @@ def upsert_from_payloads(
             payload=holdings_payload,
             dry_run=dry_run,
         )
-        result["holdings"] = {"action": action, "id": holdings_id}
+        result.holdings = EntityResult(action=action, id=holdings_id)
         if action == "create" and not dry_run:
             created_holdings_id = holdings_id
         if dry_run:
@@ -241,12 +229,12 @@ def upsert_from_payloads(
         # ── Item ────────────────────────────────────────────────────────────
         if deleted:
             existing_item = _find_by_hrid(
-                folio_get, "/inventory/items", item_hrid, "items"
+                folio, "/inventory/items", item_hrid, "items"
             )
             if existing_item:
-                result["item"] = {"action": "suppress", "id": existing_item["id"]}
+                result.item = EntityResult(action="suppress", id=existing_item["id"])
                 if not dry_run:
-                    folio_put(
+                    folio.put(
                         f"/inventory/items/{existing_item['id']}",
                         {
                             **_strip_readonly(existing_item),
@@ -256,16 +244,14 @@ def upsert_from_payloads(
                     )
                     logger.info("suppressed item source_id=%s", source_id)
             else:
-                result["item"] = {"action": "skip", "id": None}
+                result.item = EntityResult(action="skip")
         else:
-            item_payload = {**mapped["item"], "holdingsRecordId": holdings_id}
+            item_payload = {**mapped.item.model_dump(exclude_none=True), "holdingsRecordId": holdings_id}
             # Resolve item note types if ref_cache is available
             if ref_cache:
                 item_payload = _resolve_item_note_types(item_payload, ref_cache)
             action, item_id = _upsert_entity(
-                folio_get,
-                folio_post,
-                folio_put,
+                folio,
                 search_path="/inventory/items",
                 list_key="items",
                 write_path_prefix="/inventory/items",
@@ -273,26 +259,26 @@ def upsert_from_payloads(
                 payload=item_payload,
                 dry_run=dry_run,
             )
-            result["item"] = {"action": action, "id": item_id}
+            result.item = EntityResult(action=action, id=item_id)
 
     except Exception as exc:
         if not dry_run:
             if created_holdings_id:
                 _best_effort_delete(
-                    folio_delete,
+                    folio,
                     path=f"/holdings-storage/holdings/{created_holdings_id}",
                     source_id=source_id,
                     entity="holdings",
                 )
             if created_instance_id:
                 _best_effort_delete(
-                    folio_delete,
+                    folio,
                     path=f"/inventory/instances/{created_instance_id}",
                     source_id=source_id,
                     entity="instance",
                 )
 
-        result["errors"].append({"type": "api", "detail": str(exc)})
+        result.errors.append(UpsertError(type="api", detail=str(exc)))
         logger.error("api error source_id=%s detail=%s", source_id, exc)
 
     return result

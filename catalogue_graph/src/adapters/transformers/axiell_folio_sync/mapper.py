@@ -10,10 +10,12 @@ table to populate a :class:`CanonicalRecord`.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
-MARC_NS = {"marc": "http://www.loc.gov/MARC21/slim"}
+from pymarc.record import Record
+
+from adapters.transformers.marc.common import first_non_empty_subfield
+from utils.marc import parse_single_marc_record
 
 
 class MappingError(ValueError):
@@ -41,46 +43,15 @@ class CanonicalRecord:
     deleted: bool = False
 
 
-# ── internal XML helpers ──────────────────────────────────────────────────────
-
-
-def _uses_marc_ns(root: ET.Element) -> bool:
-    return root.tag.startswith("{") and "MARC21/slim" in root.tag
-
-
-def _controlfield(root: ET.Element, tag: str) -> str | None:
-    if _uses_marc_ns(root):
-        node = root.find(f".//marc:controlfield[@tag='{tag}']", MARC_NS)
-    else:
-        node = root.find(f".//controlfield[@tag='{tag}']")
-    if node is None or not node.text:
-        return None
-    return node.text.strip() or None
-
-
-def _first_subfield(root: ET.Element, tag: str, code: str) -> str | None:
-    if _uses_marc_ns(root):
-        nodes = root.findall(
-            f".//marc:datafield[@tag='{tag}']/marc:subfield[@code='{code}']", MARC_NS
-        )
-    else:
-        nodes = root.findall(f".//datafield[@tag='{tag}']/subfield[@code='{code}']")
-    for node in nodes:
-        value = (node.text or "").strip()
-        if value:
-            return value
-    return None
-
-
 # ── extraction primitives ─────────────────────────────────────────────────────
 
 
-def parse_xml(xml_content: str) -> ET.Element:
-    """Parse a MARCXML string into an ElementTree root."""
-    return ET.fromstring(xml_content)
+def parse_xml(xml_content: str) -> Record:
+    """Parse a MARCXML string into a pymarc Record."""
+    return parse_single_marc_record(xml_content)
 
 
-def extract(root: ET.Element, spec: str) -> str | None:
+def extract(record: Record, spec: str) -> str | None:
     """Extract one value using ``"TAG$subfield"`` (datafield) or ``"TAG"`` (controlfield).
 
     This is the only field-access primitive callers need; the table of which
@@ -88,5 +59,11 @@ def extract(root: ET.Element, spec: str) -> str | None:
     """
     if "$" in spec:
         tag, code = spec.split("$", 1)
-        return _first_subfield(root, tag.strip(), code.strip())
-    return _controlfield(root, spec.strip())
+        return first_non_empty_subfield(tag.strip(), code.strip(), record)
+    # Control field (e.g. 001, 003, 005, 008)
+    tag = spec.strip()
+    fields = record.get_fields(tag)
+    if not fields:
+        return None
+    value: str = getattr(fields[0], "data", "") or ""
+    return value.strip() or None

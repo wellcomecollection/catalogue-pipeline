@@ -16,11 +16,13 @@ Usage
 
 from __future__ import annotations
 
-import logging
-from collections.abc import Callable
 from typing import Any, cast
 
-logger = logging.getLogger(__name__)
+import structlog
+
+from .folio_callables import FolioInventoryOps
+
+logger = structlog.get_logger(__name__)
 
 # Default instance type to resolve when no code is available in the MARC record.
 DEFAULT_INSTANCE_TYPE_NAME = "text"
@@ -29,14 +31,13 @@ DEFAULT_INSTANCE_TYPE_NAME = "text"
 class RefCache:
     """In-memory cache of FOLIO tenant reference data UUIDs."""
 
-    def __init__(self, folio_get: Callable):
+    def __init__(self, folio: FolioInventoryOps):
         """
         Args:
-            folio_get: The ``folio_get(path, params)`` callable already wired
-                       to the authenticated FOLIO tenant (from the notebook or
-                       FolioClient.request).
+            folio: Inventory operations already wired to the authenticated
+                   FOLIO tenant.
         """
-        self._get = folio_get
+        self._folio = folio
         self._locations: dict[str, str] = {}  # code.lower() → UUID
         self._location_names: dict[str, str] = {}  # name.lower() → UUID
         self._material_types: dict[str, str] = {}  # name.lower() → UUID
@@ -64,7 +65,7 @@ class RefCache:
         logger.info("RefCache: %d loan types", len(self._loan_types))
 
         # Folio tenants may expose different response keys here; handle both.
-        data = self._get("/holdings-sources", {"limit": 2000})
+        data = self._folio.get("/holdings-sources", {"limit": 2000})
         rows = data.get("holdingsRecordsSources") or data.get("holdingsSources") or []
         holdings_source_records = [r for r in rows if isinstance(r, dict)]
         self._holdings_sources = self._build_map(holdings_source_records, key="name")
@@ -83,7 +84,7 @@ class RefCache:
         return self
 
     def _fetch_records(self, path: str, list_key: str) -> list[dict[str, Any]]:
-        data = self._get(path, {"limit": 2000})
+        data = self._folio.get(path, {"limit": 2000})
         rows = data.get(list_key, [])
         if not isinstance(rows, list):
             return []
@@ -93,7 +94,7 @@ class RefCache:
         return {r[key].lower(): r["id"] for r in rows if r.get(key) and r.get("id")}
 
     def _fetch_instance_type_id(self) -> str | None:
-        data = self._get("/instance-types", {"limit": 500})
+        data = self._folio.get("/instance-types", {"limit": 500})
         types = data.get("instanceTypes", [])
         records = [r for r in types if isinstance(r, dict)]
         for r in records:

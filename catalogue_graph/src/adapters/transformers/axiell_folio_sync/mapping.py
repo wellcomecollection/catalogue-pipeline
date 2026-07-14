@@ -24,7 +24,6 @@ for :func:`axiell_folio_sync.upsert.upsert_from_payloads`.
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -54,11 +53,6 @@ MARC_SOURCE: dict[str, str] = {
     "volume": "876$t",
     "electronic_access_uri": "856$u",
 }
-
-
-def _safe_segment(value: str) -> str:
-    """Lowercase slug from an arbitrary string — used in composite hrids."""
-    return re.sub(r"[^a-z0-9]+", "-", value.strip().lower()).strip("-") or "unknown"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────
@@ -105,6 +99,59 @@ def parse_marcxml(xml_content: str, *, deleted: bool = False) -> CanonicalRecord
         holdings_hrid=holdings_hrid,
         deleted=deleted,
         **values,
+    )
+
+
+def select_and_build(
+    xml_content: str,
+    ref_cache: RefCache,
+    *,
+    deleted: bool = False,
+) -> MappedPayloads | None:
+    """Select and build in one pass — parses XML only once.
+
+    Returns ``None`` if the record is not selected for sync; otherwise returns
+    the :class:`MappedPayloads`. Raises on malformed XML or mapping errors.
+    """
+    root = parse_xml(xml_content)
+
+    # Selection check (same logic as is_selected_for_sync)
+    if not extract(root, HARVEST_FLAG_SPEC):
+        return None
+    record_type = (extract(root, RECORD_TYPE_SPEC) or "").strip().upper()
+    if record_type != RECORD_TYPE_ITEM:
+        return None
+
+    # Extract canonical record from the already-parsed XML
+    values = {field: extract(root, spec) for field, spec in MARC_SOURCE.items()}
+    source_id = values.pop("source_id")
+    if not source_id:
+        raise MappingError("Missing MARC 001 — cannot identify record")
+
+    rec = CanonicalRecord(
+        source_id=source_id,
+        instance_hrid=_instance_hrid(source_id),
+        holdings_hrid=_holdings_hrid(source_id),
+        deleted=deleted,
+        **values,
+    )
+
+    instance = build_instance(rec, ref_cache)
+    holdings = build_holdings(rec, ref_cache)
+    item = build_item(rec, ref_cache)
+
+    return MappedPayloads(
+        instance=instance,
+        holdings=holdings,
+        item=item,
+        meta=PayloadMeta(
+            source_id=rec.source_id,
+            instance_hrid=_instance_hrid(rec.source_id),
+            holdings_hrid=_holdings_hrid(rec.source_id),
+            item_hrid=_item_hrid(rec.source_id),
+            mapping_version=VERSION,
+            deleted=deleted,
+        ),
     )
 
 
@@ -197,6 +244,51 @@ class Item(BaseModel):
     volume: str | None = None
     electronicAccess: list[ElectronicAccess] | None = None
     notes: list[Note] | None = None
+
+
+class PayloadMeta(BaseModel):
+    """Metadata attached to a mapped payload set."""
+
+    source_id: str
+    instance_hrid: str
+    holdings_hrid: str
+    item_hrid: str
+    mapping_version: str
+    deleted: bool = False
+
+
+class MappedPayloads(BaseModel):
+    """The complete output of :func:`build_payloads`."""
+
+    instance: Instance
+    holdings: Holdings
+    item: Item
+    meta: PayloadMeta
+
+
+class EntityResult(BaseModel):
+    """Outcome of upserting a single FOLIO entity (instance / holdings / item)."""
+
+    action: str | None = None
+    id: str | None = None
+
+
+class UpsertError(BaseModel):
+    """A single error recorded during an upsert attempt."""
+
+    type: str
+    detail: str
+
+
+class UpsertResult(BaseModel):
+    """The complete result of :func:`upsert.upsert_from_payloads`."""
+
+    source_id: str
+    mapping_version: str
+    instance: EntityResult = Field(default_factory=EntityResult)
+    holdings: EntityResult = Field(default_factory=EntityResult)
+    item: EntityResult = Field(default_factory=EntityResult)
+    errors: list[UpsertError] = Field(default_factory=list)
 
 
 # ── lookup helper (mirrors the YAML map → default → lookup chain) ────────────────
@@ -317,12 +409,11 @@ def build_payloads(
     ref_cache: RefCache,
     *,
     deleted: bool = False,
-) -> dict:
-    """Parse MARCXML and build the three FOLIO payloads as JSON-ready dicts.
+) -> MappedPayloads:
+    """Parse MARCXML and build the three FOLIO payloads.
 
-    Drop-in replacement for ``YamlMapper.build_payloads`` — returns the same
-    ``{"instance", "holdings", "item", "meta"}`` shape that
-    :func:`axiell_folio_sync.upsert.upsert_from_payloads` consumes.
+    Returns a :class:`MappedPayloads` model consumed by
+    :func:`axiell_folio_sync.upsert.upsert_from_payloads`.
 
     Raises :class:`MappingError` for required-field violations or unresolved lookups.
     """
@@ -332,16 +423,16 @@ def build_payloads(
     holdings = build_holdings(rec, ref_cache)
     item = build_item(rec, ref_cache)
 
-    return {
-        "instance": instance.model_dump(exclude_none=True),
-        "holdings": holdings.model_dump(exclude_none=True),
-        "item": item.model_dump(exclude_none=True),
-        "meta": {
-            "source_id": rec.source_id,
-            "instance_hrid": _instance_hrid(rec.source_id),
-            "holdings_hrid": _holdings_hrid(rec.source_id),
-            "item_hrid": _item_hrid(rec.source_id),
-            "mapping_version": VERSION,
-            "deleted": deleted,
-        },
-    }
+    return MappedPayloads(
+        instance=instance,
+        holdings=holdings,
+        item=item,
+        meta=PayloadMeta(
+            source_id=rec.source_id,
+            instance_hrid=_instance_hrid(rec.source_id),
+            holdings_hrid=_holdings_hrid(rec.source_id),
+            item_hrid=_item_hrid(rec.source_id),
+            mapping_version=VERSION,
+            deleted=deleted,
+        ),
+    )
