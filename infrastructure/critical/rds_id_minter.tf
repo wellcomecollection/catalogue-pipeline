@@ -16,7 +16,7 @@ module "id_minter_rds" {
 module "id_minter_rds_test" {
   source = "./modules/id-minter-rds"
 
-  name_suffix         = "test"
+  name_suffix = "test"
   # Restore from production on April 21, 2026, 04:18 (UTC+01:00)
   snapshot_identifier = "awsbackup:job-349affad-75e5-83a7-5e9b-7c631bdfa39e"
 
@@ -31,7 +31,7 @@ module "id_minter_rds_test" {
 module "id_minter_rds_2026_07_03" {
   source = "./modules/id-minter-rds"
 
-  name_suffix         = "2026-07-03"
+  name_suffix = "2026-07-03"
   # Restore from production on July 14, 2026, 04:41 (UTC+01:00)
   snapshot_identifier = "awsbackup:job-a03d7ad1-17f3-4f12-6993-1c7a19cda33d"
 
