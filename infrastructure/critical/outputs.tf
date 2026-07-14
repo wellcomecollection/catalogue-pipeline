@@ -2,8 +2,9 @@
 
 locals {
   id_minter_rds_instances = {
-    prod = module.id_minter_rds
-    test = module.id_minter_rds_test
+    prod         = module.id_minter_rds
+    test         = module.id_minter_rds_test
+    "2026-07-03" = module.id_minter_rds_2026_07_03
   }
 }
 
@@ -53,4 +54,21 @@ output "vhs_miro_table_name" {
 
 output "vhs_miro_assumable_read_role" {
   value = module.vhs_miro.assumable_read_role
+}
+
+# Elasticsearch cluster
+
+output "es_cluster_2026_07_03" {
+  sensitive = true
+  value = {
+    https_endpoint     = module.es_cluster_2026_07_03.https_endpoint
+    username           = module.es_cluster_2026_07_03.username
+    password           = module.es_cluster_2026_07_03.password
+    private_host       = module.es_cluster_2026_07_03.private_host
+    public_host        = module.es_cluster_2026_07_03.public_host
+    port               = module.es_cluster_2026_07_03.port
+    protocol           = module.es_cluster_2026_07_03.protocol
+    read_only_username = module.es_cluster_2026_07_03.read_only_username
+    read_only_password = module.es_cluster_2026_07_03.read_only_password
+  }
 }

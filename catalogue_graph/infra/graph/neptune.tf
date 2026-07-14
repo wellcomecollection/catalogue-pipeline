@@ -39,6 +39,21 @@ module "catalogue_graph_neptune_cluster_dev" {
   }
 }
 
+module "catalogue_graph_neptune_cluster_2026_07_03" {
+  source = "./modules/catalogue_graph"
+
+  graph_date                 = "2026-07-03"
+  namespace                  = local.namespace
+  vpc_id                     = local.vpc_id
+  private_subnets            = local.private_subnets
+  public_subnets             = local.public_subnets
+  bulk_loader_s3_bucket_name = aws_s3_bucket.catalogue_graph_bucket.bucket
+
+  providers = {
+    aws     = aws
+    aws.dns = aws.dns
+  }
+}
 resource "aws_ssm_parameter" "production_graph_date" {
   name        = "/catalogue_graph/production_graph_date"
   type        = "String"

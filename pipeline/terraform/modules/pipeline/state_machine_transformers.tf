@@ -181,6 +181,46 @@ module "transformer_state_machine_alarms" {
   }
 }
 
+resource "aws_iam_role_policy" "transformer_lambda_cloudwatch_write" {
+  role   = module.transformer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.transformer_lambda_cloudwatch_write.json
+}
+
+data "aws_iam_policy_document" "transformer_lambda_cloudwatch_write" {
+  statement {
+    actions   = ["cloudwatch:PutMetricData"]
+    resources = ["*"]
+  }
+}
+
+locals {
+  # All transformer types that can report failure_count metrics, including
+  # axiell_reconciler which is invoked from within the state machine.
+  all_transformer_types = toset(concat(keys(local.transformer_types), ["axiell_reconciler"]))
+}
+
+resource "aws_cloudwatch_metric_alarm" "transformer_failures" {
+  for_each = local.all_transformer_types
+
+  alarm_name          = "${each.key}-transformer-failures-${var.pipeline_date}"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "failure_count"
+  namespace           = "catalogue_graph_pipeline"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 0
+  alarm_description   = "${each.key} adapter transformer Lambda reported transformation failures"
+
+  dimensions = {
+    pipeline_date    = var.pipeline_date
+    pipeline_step    = "adapter_transformer"
+    transformer_type = each.key
+  }
+
+  alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+}
+
 # Trigger State Machine on adapter completed events
 module "adapter_transformer_trigger" {
   for_each = local.transformer_types
