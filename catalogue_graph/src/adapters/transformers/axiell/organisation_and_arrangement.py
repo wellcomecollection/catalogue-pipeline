@@ -26,6 +26,7 @@ LEVEL_TO_WORK_TYPE_MAPPING: dict[str, WorkType] = {
     # TODO: These appeared after the latest migration and are temporary. Remove before release.
     "sub-fonds": "Section",
     "fonds": "Collection",
+    "file": "Standard",
 }
 
 
