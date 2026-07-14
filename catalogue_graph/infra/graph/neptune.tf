@@ -38,3 +38,25 @@ module "catalogue_graph_neptune_cluster_dev" {
     aws.dns = aws.dns
   }
 }
+
+module "catalogue_graph_neptune_cluster_2026_07_03" {
+  source = "./modules/catalogue_graph"
+
+  graph_date                 = "2026-07-03"
+  namespace                  = local.namespace
+  vpc_id                     = local.vpc_id
+  private_subnets            = local.private_subnets
+  public_subnets             = local.public_subnets
+  bulk_loader_s3_bucket_name = aws_s3_bucket.catalogue_graph_bucket.bucket
+
+  providers = {
+    aws     = aws
+    aws.dns = aws.dns
+  }
+}
+resource "aws_ssm_parameter" "production_graph_date" {
+  name        = "/catalogue_graph/production_graph_date"
+  type        = "String"
+  description = "The graph_date of the current production Neptune cluster (or 'prod' for the legacy cluster), read by CI."
+  value       = module.catalogue_graph_neptune_cluster.graph_date != "" ? module.catalogue_graph_neptune_cluster.graph_date : "prod"
+}

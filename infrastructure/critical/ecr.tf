@@ -6,17 +6,12 @@ locals {
     "transformer_mets",
     "transformer_calm",
     "transformer_tei",
-    "id_minter",
     "matcher",
     "merger",
-    "inference_manager",
     "feature_inferrer",
     "palette_inferrer",
     "aspect_ratio_inferrer",
     "elasticdump",
-    "relation_embedder",
-    "router",
-    "batcher",
   ]
 
   ecr_policy_only_keep_the_last_100_images = jsonencode({
