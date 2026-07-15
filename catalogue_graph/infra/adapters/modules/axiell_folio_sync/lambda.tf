@@ -14,7 +14,7 @@ module "sync_lambda" {
   publish = false
 
   image_config = {
-    command = ["adapters.steps.axiell_folio_sync.lambda_handler"]
+    command = ["adapters.steps.axiell_folio_sync.axiell_folio_sync.lambda_handler"]
   }
 
   memory_size = var.lambda_memory_mb

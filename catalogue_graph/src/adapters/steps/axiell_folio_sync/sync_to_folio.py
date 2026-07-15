@@ -21,7 +21,7 @@ from adapters.steps.axiell_folio_sync.models import (
 )
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
 from adapters.steps.axiell_folio_sync.s3_manifest import (
-    _utc_now_iso,
+    utc_now_iso,
     flush_success_batch,
     write_error_manifest,
     write_metadata_manifest,
@@ -103,7 +103,7 @@ def _build_error(
         "changesetId": changeset_id,
         "stage": stage,
         key: error,
-        "timestamp": _utc_now_iso(),
+        "timestamp": utc_now_iso(),
     }
 
 
@@ -232,7 +232,7 @@ def run_sync(
                     "instanceAction": result.instance.action,
                     "holdingsAction": result.holdings.action,
                     "itemAction": result.item.action,
-                    "timestamp": _utc_now_iso(),
+                    "timestamp": utc_now_iso(),
                 }
             )
 

@@ -16,7 +16,7 @@ from botocore.exceptions import ClientError
 logger = structlog.get_logger(__name__)
 
 
-def _utc_now_iso() -> str:
+def utc_now_iso() -> str:
     """Timezone-aware UTC timestamp in ISO 8601."""
     return datetime.now(UTC).isoformat()
 
@@ -80,7 +80,7 @@ def write_metadata_manifest(
     """Write a JSON summary manifest and return its S3 URI."""
     metadata: dict[str, Any] = {
         "jobId": job_id,
-        "timestamp": _utc_now_iso(),
+        "timestamp": utc_now_iso(),
         "summary": {
             "totalSuccessful": total_successful,
             "totalErrors": total_errors,
