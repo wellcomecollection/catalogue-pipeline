@@ -9,12 +9,6 @@ variable "repository_url" {
   type        = string
 }
 
-variable "image_tag" {
-  description = "Tag of the shared image to deploy (dev for scripts/deploy_lambda.sh, prod for CI)"
-  type        = string
-  default     = "dev"
-}
-
 variable "s3_table_bucket_arn" {
   description = "ARN of the Axiell adapter S3 Tables bucket (bucket scope, not table ARN); used to scope IAM read access"
   type        = string

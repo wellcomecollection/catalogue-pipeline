@@ -61,7 +61,6 @@ module "axiell_folio_sync" {
   source               = "./modules/axiell_folio_sync"
   namespace            = "axiell-folio-sync"
   repository_url       = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
-  image_tag            = "dev"
   event_bus_name       = aws_cloudwatch_event_bus.event_bus.name
   s3_table_bucket_arn  = aws_s3tables_table_bucket.axiell_table_bucket.arn
   manifest_bucket_name = "wellcomecollection-axiell-folio-sync-manifests"

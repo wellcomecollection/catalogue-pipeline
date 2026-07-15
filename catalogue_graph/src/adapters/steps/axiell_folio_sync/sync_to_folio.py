@@ -21,8 +21,8 @@ from adapters.steps.axiell_folio_sync.models import (
 )
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
 from adapters.steps.axiell_folio_sync.s3_manifest import (
-    utc_now_iso,
     flush_success_batch,
+    utc_now_iso,
     write_error_manifest,
     write_metadata_manifest,
 )
@@ -154,8 +154,8 @@ def run_sync(
     }
 
     for row in rows:
-        source_id: str = row.get("id", "unknown")
-        changeset_id: str = row.get("changeset", "unknown")
+        source_id: str = row.get("id")
+        changeset_id: str = row.get("changeset")
         counts["total"] += 1
 
         # Loader tombstones are advisory only (RFC 090): the loader's deleted=true is

@@ -2,6 +2,10 @@
 
 resource "aws_s3_bucket" "axiell_folio_sync_manifests" {
   bucket = var.manifest_bucket_name
+
+  lifecycle {
+    prevent_destroy = false
+  }
 }
 
 # Expire manifests after the configured retention window.

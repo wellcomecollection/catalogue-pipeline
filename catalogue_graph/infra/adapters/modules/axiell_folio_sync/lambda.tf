@@ -8,7 +8,7 @@ module "sync_lambda" {
   name         = "${var.namespace}-adapter-lambda"
   description  = "Axiell → FOLIO outbound sync (upserts changed records into FOLIO Inventory)"
   package_type = "Image"
-  image_uri    = "${var.repository_url}:${var.image_tag}"
+  image_uri    = "${var.repository_url}:dev"
   # CI deploys via `update-function-code --publish`; nothing consumes a versioned
   # ARN, so Terraform publishing only causes a perpetual version diff.
   publish = false
