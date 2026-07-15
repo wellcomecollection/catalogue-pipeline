@@ -26,10 +26,9 @@ variable "max_capacity" {
 
 variable "reindexing_state" {
   type = object({
-    listen_to_reindexer      = bool
-    scale_up_tasks           = bool
-    scale_up_elastic_cluster = bool
-    scale_up_matcher_db      = bool
+    listen_to_reindexer = bool
+    scale_up_tasks      = bool
+    scale_up_matcher_db = bool
   })
 }
 
