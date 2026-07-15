@@ -1,4 +1,4 @@
-"""S3 NDJSON manifest writing for the Axiell → FOLIO sync step.
+"""S3 NDJSON manifest writing for the Axiell to Folio sync step.
 
 These functions write success records, error records, and a metadata summary to S3 in NDJSON format —
 providing an audit trail per sync job.

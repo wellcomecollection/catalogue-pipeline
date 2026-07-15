@@ -1,4 +1,4 @@
-"""CloudWatch metrics report for the Axiell → FOLIO sync step.
+"""CloudWatch metrics report for the Axiell to Folio sync step.
 
 Publishes per-run operation counts to CloudWatch under the
 ``catalogue_adapters`` namespace with an ``adapter_type`` dimension,

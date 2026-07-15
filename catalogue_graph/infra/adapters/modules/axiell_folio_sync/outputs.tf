@@ -9,7 +9,7 @@ output "lambda_function_name" {
 }
 
 output "step_function_arn" {
-  description = "ARN of the Axiell → FOLIO sync Step Function state machine"
+  description = "ARN of the Axiell to Folio sync Step Function state machine"
   value       = aws_sfn_state_machine.state_machine.arn
 }
 

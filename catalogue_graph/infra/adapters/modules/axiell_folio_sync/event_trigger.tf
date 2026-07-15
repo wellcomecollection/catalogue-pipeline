@@ -33,7 +33,7 @@ resource "aws_iam_role_policy" "eventbridge_policy" {
 resource "aws_cloudwatch_event_rule" "axiell_adapter_completed" {
   name           = "${var.namespace}-adapter-axiell-completed"
   event_bus_name = var.event_bus_name
-  description    = "Trigger the Axiell → FOLIO sync when the adapter completes processing changesets"
+  description    = "Trigger the Axiell to Folio sync when the adapter completes processing changesets"
 
   event_pattern = jsonencode({
     source      = ["axiell.adapter"]

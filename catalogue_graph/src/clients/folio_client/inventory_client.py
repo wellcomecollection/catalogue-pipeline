@@ -1,7 +1,7 @@
 """Higher-level FOLIO Inventory client.
 
 Wraps :class:`~clients.folio_client.FolioClient` with the four typed operations
-used by the Axiell → FOLIO sync step (get, post, put, delete), applying the
+used by the Axiell to Folio sync step (get, post, put, delete), applying the
 appropriate error semantics for each HTTP verb.
 
 Separating this from :class:`FolioClient` keeps the low-level HTTP layer generic

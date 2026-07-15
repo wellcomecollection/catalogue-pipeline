@@ -6,7 +6,7 @@ module "sync_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
   name         = "${var.namespace}-adapter-lambda"
-  description  = "Axiell → FOLIO outbound sync (upserts changed records into FOLIO Inventory)"
+  description  = "Axiell to FOLIO outbound sync (upserts changed records into FOLIO Inventory)"
   package_type = "Image"
   image_uri    = "${var.repository_url}:dev"
   # CI deploys via `update-function-code --publish`; nothing consumes a versioned

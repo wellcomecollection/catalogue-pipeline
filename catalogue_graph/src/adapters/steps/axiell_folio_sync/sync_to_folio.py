@@ -1,4 +1,4 @@
-"""Core sync loop and OKAPI configuration for the Axiell → FOLIO sync step.
+"""Core sync loop and OKAPI configuration for the Axiell to Folio sync step.
 
 Extracted from ``axiell_folio_sync.py`` for readability. Contains:
 - ``load_okapi_config`` — resolves FOLIO credentials from env / SSM

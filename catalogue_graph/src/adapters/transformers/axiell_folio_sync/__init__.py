@@ -1,4 +1,4 @@
-"""Axiell → FOLIO sync prototype package."""
+"""Axiell to Folio sync prototype package."""
 
 from .mapper import CanonicalRecord
 from .mapping import (

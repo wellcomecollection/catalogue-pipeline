@@ -1,4 +1,4 @@
-"""Handler-level tests for the Axiell → FOLIO sync step.
+"""Handler-level tests for the Axiell to Folio sync step.
 
 These exercise how run_sync selects, skips, and processes rows using injected
 fakes (a stub ref cache + FOLIO callables) rather than patching module globals.

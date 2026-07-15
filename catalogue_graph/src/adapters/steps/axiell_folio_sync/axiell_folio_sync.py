@@ -1,4 +1,4 @@
-"""Axiell → FOLIO sync step.
+"""Axiell to Folio sync step.
 
 Triggered by ``axiell.adapter.completed`` EventBridge events. Reads changed
 records from the Axiell Iceberg adapter table, maps them via MARCXML → FOLIO
@@ -203,7 +203,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run the Axiell → FOLIO sync step")
+    parser = argparse.ArgumentParser(description="Run the Axiell to Folio sync step")
     parser.add_argument(
         "--use-cli",
         action="store_true",

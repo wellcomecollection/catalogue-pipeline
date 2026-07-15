@@ -1,7 +1,7 @@
 locals {
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment       = "Axiell → FOLIO sync: invoke the sync Lambda on adapter completion"
+    Comment       = "Axiell to Folio sync: invoke the sync Lambda on adapter completion"
     StartAt       = "Run sync"
     States = {
       "Run sync" = {
@@ -12,7 +12,8 @@ locals {
           Payload = {
             changeset_ids    = "{% $states.input.detail.changeset_ids %}"
             job_id           = "{% $states.input.detail.job_id %}"
-            transformer_type = "{% $states.input.detail.transformer_type %}"
+            transformer_type = "{% $exists($states.input.detail.transformer_type) ? $states.input.detail.transformer_type : null %}"
+            sample_limit     = "{% $exists($states.input.detail.sample_limit) ? $states.input.detail.sample_limit : null %}"
             dry_run          = "{% $exists($states.input.detail.dry_run) ? $states.input.detail.dry_run : ${var.dry_run_default} %}"
           }
         }

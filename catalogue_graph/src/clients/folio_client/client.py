@@ -1,6 +1,6 @@
 """Folio (OKAPI) JSON client.
 
-Used by the Axiell → FOLIO sync for Inventory upserts. Authentication is the
+Used by the Axiell to Folio sync for Inventory upserts. Authentication is the
 shared service-account OKAPI login (:class:`~clients.folio_client.OkapiAuth`):
 ``POST /authn/login`` -> ``x-okapi-token``, sent as ``x-okapi-token`` /
 ``x-okapi-tenant`` on every request and refreshed once on a 401. The same auth

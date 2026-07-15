@@ -1,4 +1,4 @@
-"""Pydantic models for the Axiell → FOLIO sync step."""
+"""Pydantic models for the Axiell to Folio sync step."""
 
 from __future__ import annotations
 
