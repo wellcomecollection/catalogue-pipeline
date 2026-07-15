@@ -11,7 +11,7 @@ module "transformer_lambda" {
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   # CI deploys via `update-function-code --publish` and nothing consumes a
   # versioned ARN, so Terraform publishing only caused a perpetual version diff.
-  publish = false
+  publish      = false
 
   image_config = {
     command = ["adapters.steps.transformer.lambda_handler"]
@@ -25,7 +25,7 @@ module "transformer_lambda" {
   timeout     = 600
 
   vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,
@@ -78,13 +78,13 @@ resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read"
 locals {
   transformer_state_machine_definition = jsonencode({
     StartAt = "Run transformer"
-    States = {
+    States  = {
       "Run transformer" = {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
         Next      = "Should run reconciler?"
-        Retry = [
+        Retry     = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -94,7 +94,7 @@ locals {
         ]
       }
       "Should run reconciler?" = {
-        Type = "Choice"
+        Type    = "Choice"
         Choices = [
           {
             And = [
@@ -113,11 +113,11 @@ locals {
         Default = "Success"
       },
       "Run reconciler" = {
-        Type     = "Task",
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type       = "Task",
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           "StateMachineArn.$" = "$$.StateMachine.Id"
-          Input = {
+          Input               = {
             detail = {
               "job_id.$"        = "$$.Execution.Input.detail.job_id"
               "changeset_ids.$" = "$$.Execution.Input.detail.changeset_ids"
@@ -145,11 +145,11 @@ locals {
       adapter_detail_type  = "axiell.adapter.completed"
       reindex_target_value = "axiell"
     }
-    folio = {
-      adapter_source       = "folio.adapter"
-      adapter_detail_type  = "folio.adapter.completed"
-      reindex_target_value = "folio"
-    }
+    #    folio = {
+    #      adapter_source       = "folio.adapter"
+    #      adapter_detail_type  = "folio.adapter.completed"
+    #      reindex_target_value = "folio"
+    #    }
   }
 }
 
@@ -159,7 +159,7 @@ module "transformer_state_machine" {
 
   name                     = "transformer-${var.pipeline_date}"
   state_machine_definition = local.transformer_state_machine_definition
-  invokable_lambda_arns = [
+  invokable_lambda_arns    = [
     module.transformer_lambda.lambda.arn,
   ]
 
@@ -224,28 +224,28 @@ resource "aws_cloudwatch_metric_alarm" "transformer_failures" {
 }
 
 # Trigger State Machine on adapter completed events
-module "adapter_transformer_trigger" {
-  for_each = local.transformer_types
-  source   = "../state_machine_trigger"
-
-  name              = "${each.key}-transformer-${var.pipeline_date}"
-  event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
-  state_machine_arn = module.transformer_state_machine.state_machine_arn
-
-  enabled = true
-
-  event_pattern = {
-    source        = [each.value.adapter_source],
-    "detail-type" = [each.value.adapter_detail_type]
-  }
-  // Unfortunately the input template needs to be a full JSON object,
-  // so we must wrap the detail in another object and then unwrap in
-  // the state machine (it's not possible to just pass the detail directly).
-  input_paths = {
-    detail = "$.detail"
-  }
-  input_template = "{\"detail\": <detail>}"
-}
+#module "adapter_transformer_trigger" {
+#  for_each = local.transformer_types
+#  source   = "../state_machine_trigger"
+#
+#  name              = "${each.key}-transformer-${var.pipeline_date}"
+#  event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
+#  state_machine_arn = module.transformer_state_machine.state_machine_arn
+#
+#  enabled = true
+#
+#  event_pattern = {
+#    source        = [each.value.adapter_source],
+#    "detail-type" = [each.value.adapter_detail_type]
+#  }
+#  // Unfortunately the input template needs to be a full JSON object,
+#  // so we must wrap the detail in another object and then unwrap in
+#  // the state machine (it's not possible to just pass the detail directly).
+#  input_paths = {
+#    detail = "$.detail"
+#  }
+#  input_template = "{\"detail\": <detail>}"
+#}
 
 # Trigger State Machine on weco.pipeline.reindex events
 module "reindex_transformer_trigger" {
@@ -270,7 +270,7 @@ module "reindex_transformer_trigger" {
   event_pattern = {
     source        = ["weco.pipeline.reindex"],
     "detail-type" = ["weco.pipeline.reindex.requested"],
-    detail = {
+    detail        = {
       reindex_targets = [each.value.reindex_target_value]
     }
   }
