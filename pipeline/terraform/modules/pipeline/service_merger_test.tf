@@ -2,7 +2,7 @@
 # .buildkite/pipeline.yml -> merger_test
 
 module "merger_test" {
-  source       = "./merger"
+  source       = "../pipeline_services/merger"
   service_name = "merger_test"
 
   pipeline_date = var.pipeline_date
@@ -17,13 +17,13 @@ module "merger_test" {
     batching_window_seconds    = 120
     batch_size                 = 50
     maximum_concurrency        = 30
-    topic_arns = [
+    topic_arns                 = [
       module.matcher_test.output_topic_arn,
     ]
   }
 
   vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,

@@ -1,5 +1,5 @@
 module "matcher" {
-  source = "./matcher"
+  source = "../pipeline_services/matcher"
 
   pipeline_date = var.pipeline_date
 
@@ -7,7 +7,7 @@ module "matcher" {
   scale_up_matcher_db       = var.reindexing_state.scale_up_matcher_db
 
   vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,
@@ -22,7 +22,7 @@ module "matcher" {
     batching_window_seconds    = 30
     batch_size                 = var.reindexing_state.scale_up_matcher_db ? 400 : 100
     maximum_concurrency        = var.reindexing_state.scale_up_matcher_db ? 40 : 2
-    topic_arns = [
+    topic_arns                 = [
       module.id_minter_lambda.id_minter_output_topic_arn,
     ]
   }
