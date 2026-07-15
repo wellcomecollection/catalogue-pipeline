@@ -85,7 +85,7 @@ module "inference_manager_ecs_task" {
       memory          = local.inferrer_memory
       env_vars        = { PORT = local.feature_inferrer_port }
       secret_env_vars = {}
-      mount_points    = [
+      mount_points = [
         { containerPath = local.shared_storage_path, sourceVolume = local.shared_storage_name }
       ]
       healthcheck = {
@@ -102,7 +102,7 @@ module "inference_manager_ecs_task" {
       memory          = local.inferrer_memory
       env_vars        = { PORT = local.palette_inferrer_port }
       secret_env_vars = {}
-      mount_points    = [
+      mount_points = [
         { containerPath = local.shared_storage_path, sourceVolume = local.shared_storage_name }
       ]
       healthcheck = {
@@ -119,7 +119,7 @@ module "inference_manager_ecs_task" {
       memory          = local.aspect_ratio_memory
       env_vars        = { PORT = local.aspect_ratio_inferrer_port }
       secret_env_vars = {}
-      mount_points    = [
+      mount_points = [
         { containerPath = local.shared_storage_path, sourceVolume = local.shared_storage_name }
       ]
       healthcheck = {
@@ -136,8 +136,8 @@ module "inference_manager_ecs_task" {
 # Allow the task to report success/failure back to the state machine.
 data "aws_iam_policy_document" "inference_manager_task_token" {
   statement {
-    effect    = "Allow"
-    actions   = ["states:SendTaskSuccess", "states:SendTaskFailure"]
+    effect  = "Allow"
+    actions = ["states:SendTaskSuccess", "states:SendTaskFailure"]
     resources = [
       module.image_inferrer_state_machine.state_machine_arn,
     ]
@@ -154,8 +154,8 @@ resource "aws_iam_role_policy" "inference_manager_task_token" {
 # pipeline-storage secrets (the Scala manager used injected env vars instead).
 data "aws_iam_policy_document" "inference_manager_pipeline_storage_secret_read" {
   statement {
-    effect    = "Allow"
-    actions   = ["secretsmanager:GetSecretValue"]
+    effect  = "Allow"
+    actions = ["secretsmanager:GetSecretValue"]
     resources = [
       "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/*",
     ]
@@ -170,8 +170,8 @@ resource "aws_iam_role_policy" "inference_manager_secret_read" {
 # Each task reads its partition (image ids written by find_work) from S3.
 data "aws_iam_policy_document" "inference_manager_s3_read" {
   statement {
-    effect    = "Allow"
-    actions   = ["s3:GetObject"]
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
     resources = [
       "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/inferrer/*"
     ]
