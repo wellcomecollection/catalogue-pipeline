@@ -210,7 +210,10 @@ def upsert_from_payloads(
             instance_id = f"dry-run:{instance_hrid}"
 
         # ── Holdings ────────────────────────────────────────────────────────
-        holdings_payload = {**mapped.holdings.model_dump(exclude_none=True), "instanceId": instance_id}
+        holdings_payload = {
+            **mapped.holdings.model_dump(exclude_none=True),
+            "instanceId": instance_id,
+        }
         action, holdings_id = _upsert_entity(
             folio,
             search_path="/holdings-storage/holdings",
@@ -228,9 +231,7 @@ def upsert_from_payloads(
 
         # ── Item ────────────────────────────────────────────────────────────
         if deleted:
-            existing_item = _find_by_hrid(
-                folio, "/inventory/items", item_hrid, "items"
-            )
+            existing_item = _find_by_hrid(folio, "/inventory/items", item_hrid, "items")
             if existing_item:
                 result.item = EntityResult(action="suppress", id=existing_item["id"])
                 if not dry_run:
@@ -246,7 +247,10 @@ def upsert_from_payloads(
             else:
                 result.item = EntityResult(action="skip")
         else:
-            item_payload = {**mapped.item.model_dump(exclude_none=True), "holdingsRecordId": holdings_id}
+            item_payload = {
+                **mapped.item.model_dump(exclude_none=True),
+                "holdingsRecordId": holdings_id,
+            }
             # Resolve item note types if ref_cache is available
             if ref_cache:
                 item_payload = _resolve_item_note_types(item_payload, ref_cache)

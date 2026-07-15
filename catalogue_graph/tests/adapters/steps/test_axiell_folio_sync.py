@@ -79,9 +79,7 @@ def _no_delete(*args: Any, **kwargs: Any) -> dict:
 
 
 class _FakeInventory:
-    def get(
-        self, path: str, params: Mapping[str, Any] | None = None
-    ) -> dict[str, Any]:
+    def get(self, path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return _folio_get(path, params)
 
     def post(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:

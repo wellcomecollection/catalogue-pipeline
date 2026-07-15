@@ -46,9 +46,7 @@ class AxiellFolioSyncReport(PipelineReport):
                 name="records_tombstoned", value=self.counts.get("tombstone", 0)
             ),
             PipelineMetric(name="records_failed", value=self.counts.get("failed", 0)),
-            PipelineMetric(
-                name="records_processed", value=self.counts.get("total", 0)
-            ),
+            PipelineMetric(name="records_processed", value=self.counts.get("total", 0)),
         ]
 
     @property

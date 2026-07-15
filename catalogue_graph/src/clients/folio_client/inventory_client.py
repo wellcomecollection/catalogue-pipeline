@@ -36,9 +36,7 @@ class FolioInventoryClient:
     def __init__(self, client: FolioClient) -> None:
         self._client = client
 
-    def get(
-        self, path: str, params: Mapping[str, Any] | None = None
-    ) -> dict[str, Any]:
+    def get(self, path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
         if params:
             path = f"{path}?{urllib.parse.urlencode(params)}"
         status, data = self._client.request("GET", path)

@@ -173,7 +173,9 @@ def run_sync(
             total_errors += 1
             logger.warning("empty_content", source_id=source_id)
             errors_list.append(
-                _build_error(event.job_id, source_id, changeset_id, "scan", "empty_content")
+                _build_error(
+                    event.job_id, source_id, changeset_id, "scan", "empty_content"
+                )
             )
             continue
 
@@ -195,7 +197,9 @@ def run_sync(
             total_errors += 1
             logger.warning("selection_error", source_id=source_id, error=str(exc))
             errors_list.append(
-                _build_error(event.job_id, source_id, changeset_id, "selection", str(exc))
+                _build_error(
+                    event.job_id, source_id, changeset_id, "selection", str(exc)
+                )
             )
             continue
 
@@ -217,8 +221,13 @@ def run_sync(
             counts["failed"] += 1
             total_errors += 1
             errors_list.append(
-                _build_error(event.job_id, source_id, changeset_id, "upsert",
-                             [e.model_dump() for e in result.errors])
+                _build_error(
+                    event.job_id,
+                    source_id,
+                    changeset_id,
+                    "upsert",
+                    [e.model_dump() for e in result.errors],
+                )
             )
         else:
             total_successful += 1
