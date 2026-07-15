@@ -5,7 +5,7 @@ locals {
   id_minter_v2_test_rds_instance = local.infra_critical.id_minter_rds["test"]
 
   id_minter_test_vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.id_minter_v2_test_rds_instance.ingress_security_group_id,
@@ -25,7 +25,9 @@ locals {
   rds_test_master_secret_name = regex(
     "arn:aws:secretsmanager:[^:]+:[^:]+:secret:(.+)-.{6}$",
     local.id_minter_v2_test_rds_instance.master_user_secret_arn
-  )[0]
+  )[
+  0
+  ]
 
   id_minter_test_secret_env_vars = merge(
     {
@@ -42,9 +44,9 @@ locals {
     QueryLanguage = "JSONata"
     Comment       = "Invoke the id_minter Lambda"
     StartAt       = "ConstructEvent"
-    States = {
+    States        = {
       ConstructEvent = {
-        Type = "Pass",
+        Type   = "Pass",
         Output = {
           "pipeline_date" : var.pipeline_date,
           # window end time is 5 minutes before the scheduled time
@@ -55,14 +57,14 @@ locals {
         Next = "InvokeIdMinter"
       }
       InvokeIdMinter = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::lambda:invoke"
+        Type      = "Task"
+        Resource  = "arn:aws:states:::lambda:invoke"
         Arguments = {
           FunctionName = module.id_minter_test.id_minter_lambda_arn
           Payload      = "{% $states.input %}"
         }
         Output = "{% $states.result.Payload %}"
-        Retry = [
+        Retry  = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -77,7 +79,7 @@ locals {
 }
 
 module "id_minter_test" {
-  source = "./id_minter"
+  source = "../pipeline_services/id_minter"
 
   pipeline_date        = var.pipeline_date
   namespace            = "test"
@@ -136,10 +138,10 @@ resource "aws_iam_role" "run_id_minter_test_role" {
   name = "run-id-minter-test-role-${var.pipeline_date}"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
+        Effect    = "Allow"
         Principal = {
           Service = "scheduler.amazonaws.com"
         }
@@ -153,7 +155,7 @@ resource "aws_iam_role_policy" "run_id_minter_test_policy" {
   role = aws_iam_role.run_id_minter_test_role.id
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect   = "Allow"
