@@ -2,9 +2,9 @@ module "pipeline" {
   source = "../modules/pipeline_new"
 
   reindexing_state = {
-    listen_to_reindexer      = true
-    scale_up_tasks           = false
-    scale_up_matcher_db      = false
+    listen_to_reindexer = true
+    scale_up_tasks      = false
+    scale_up_matcher_db = false
   }
 
   index_dates = {
