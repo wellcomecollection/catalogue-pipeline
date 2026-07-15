@@ -26,10 +26,9 @@ variable "max_capacity" {
 
 variable "reindexing_state" {
   type = object({
-    listen_to_reindexer      = bool
-    scale_up_tasks           = bool
-    scale_up_elastic_cluster = bool
-    scale_up_matcher_db      = bool
+    listen_to_reindexer = bool
+    scale_up_tasks      = bool
+    scale_up_matcher_db = bool
   })
 }
 
@@ -64,7 +63,7 @@ variable "index_dates" {
 variable "enable_image_inferrer_schedule" {
   type        = bool
   default     = true
-  description = "Whether the scheduled image-inferrer state machine is enabled. Defaults to true, since it is the sole image inferrer. Set to false as a kill-switch to pause scheduled inference, e.g. during an incident or a large reindex."
+  description = "Whether the scheduled image-inferrer state machine is enabled. Set to false as a kill-switch to pause scheduled inference, e.g. during an incident or a large reindex."
 }
 
 variable "image_inferrer_max_concurrency" {

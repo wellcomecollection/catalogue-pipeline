@@ -11,7 +11,7 @@ module "transformer_lambda" {
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   # CI deploys via `update-function-code --publish` and nothing consumes a
   # versioned ARN, so Terraform publishing only caused a perpetual version diff.
-  publish = false
+  publish      = false
 
   image_config = {
     command = ["adapters.steps.transformer.lambda_handler"]
@@ -25,7 +25,7 @@ module "transformer_lambda" {
   timeout     = 600
 
   vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,
@@ -78,13 +78,13 @@ resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read"
 locals {
   transformer_state_machine_definition = jsonencode({
     StartAt = "Run transformer"
-    States = {
+    States  = {
       "Run transformer" = {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
         Next      = "Should run reconciler?"
-        Retry = [
+        Retry     = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -94,7 +94,7 @@ locals {
         ]
       }
       "Should run reconciler?" = {
-        Type = "Choice"
+        Type    = "Choice"
         Choices = [
           {
             And = [
@@ -113,11 +113,11 @@ locals {
         Default = "Success"
       },
       "Run reconciler" = {
-        Type     = "Task",
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type       = "Task",
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           "StateMachineArn.$" = "$$.StateMachine.Id"
-          Input = {
+          Input               = {
             detail = {
               "job_id.$"        = "$$.Execution.Input.detail.job_id"
               "changeset_ids.$" = "$$.Execution.Input.detail.changeset_ids"
@@ -159,7 +159,7 @@ module "transformer_state_machine" {
 
   name                     = "transformer-${var.pipeline_date}"
   state_machine_definition = local.transformer_state_machine_definition
-  invokable_lambda_arns = [
+  invokable_lambda_arns    = [
     module.transformer_lambda.lambda.arn,
   ]
 
@@ -180,6 +180,47 @@ module "transformer_state_machine_alarms" {
   default_alarm_configuration = {
     alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
   }
+}
+
+
+resource "aws_iam_role_policy" "transformer_lambda_cloudwatch_write" {
+  role   = module.transformer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.transformer_lambda_cloudwatch_write.json
+}
+
+data "aws_iam_policy_document" "transformer_lambda_cloudwatch_write" {
+  statement {
+    actions   = ["cloudwatch:PutMetricData"]
+    resources = ["*"]
+  }
+}
+
+locals {
+  # All transformer types that can report failure_count metrics, including
+  # axiell_reconciler which is invoked from within the state machine.
+  all_transformer_types = toset(concat(keys(local.transformer_types), ["axiell_reconciler"]))
+}
+
+resource "aws_cloudwatch_metric_alarm" "transformer_failures" {
+  for_each = local.all_transformer_types
+
+  alarm_name          = "${each.key}-transformer-failures-${var.pipeline_date}"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "failure_count"
+  namespace           = "catalogue_graph_pipeline"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 0
+  alarm_description   = "${each.key} adapter transformer Lambda reported transformation failures"
+
+  dimensions = {
+    pipeline_date    = var.pipeline_date
+    pipeline_step    = "adapter_transformer"
+    transformer_type = each.key
+  }
+
+  alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
 }
 
 # Trigger State Machine on adapter completed events
@@ -229,7 +270,7 @@ module "reindex_transformer_trigger" {
   event_pattern = {
     source        = ["weco.pipeline.reindex"],
     "detail-type" = ["weco.pipeline.reindex.requested"],
-    detail = {
+    detail        = {
       reindex_targets = [each.value.reindex_target_value]
     }
   }
