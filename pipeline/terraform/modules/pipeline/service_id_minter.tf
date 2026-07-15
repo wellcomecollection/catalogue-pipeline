@@ -23,9 +23,7 @@ locals {
   rds_v2_master_secret_name = regex(
     "arn:aws:secretsmanager:[^:]+:[^:]+:secret:(.+)-.{6}$",
     local.infra_critical.rds_v2_master_user_secret_arn
-    )[
-    0
-  ]
+  )[0]
 
   id_minter_v2_secret_env_vars = merge(
     {
