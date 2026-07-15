@@ -3,7 +3,7 @@ module "graph_pipeline" {
 
   pipeline_date = var.pipeline_date
   graph_date    = var.graph_date
-  index_dates   = {
+  index_dates = {
     merged    = var.index_dates.merged
     augmented = var.index_dates.augmented
     works     = var.index_dates.works
