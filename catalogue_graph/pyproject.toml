@@ -33,7 +33,8 @@ dependencies = [
     "pymysql>=1.0.0",
     "cryptography>=48.0.1",
     "yoyo-migrations>=8.2.0",
-    "nh3>=0.3"
+    "nh3>=0.3",
+    "httpx>=0.28",
 ]
 
 [tool.uv]
