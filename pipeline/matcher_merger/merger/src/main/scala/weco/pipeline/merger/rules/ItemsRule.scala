@@ -127,16 +127,19 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       Nil
     }
 
-  /** When records are harvested from Calm, both a bib and an item record are
-    * created in Sierra. The Sierra item will have more interesting information
-    * about access status, hold count, etc. The Calm items are just stubs.
+  /** When records are harvested from Calm/Axiell, both a bib and an item record
+    * are created in Sierra. The Sierra item will have more interesting
+    * information about access status, hold count, etc. The Calm/Axiell items
+    * are just stubs.
     *
-    * See CalmItems.scala -- the Calm item is only:
+    * See CalmItems.scala (axiell_work_builder.py) -- the Calm/Axiell item is
+    * only:
     *
     * Item { locations: [ Location { locationType = ClosedStores } ] }
     *
-    * For this reason, we keep all the items *except* the Calm item. This means
-    * we'll also pick up any items linked to the Sierra work from METS or Miro.
+    * For this reason, we keep all the items *except* the Calm/Axiell item. This
+    * means we'll also pick up any items linked to the Sierra work from METS or
+    * Miro.
     */
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate =
