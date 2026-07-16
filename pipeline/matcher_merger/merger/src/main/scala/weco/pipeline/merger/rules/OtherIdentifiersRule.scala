@@ -107,11 +107,11 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   private val mergeIntoTeiTarget = new OtherIdentifiersMergeRule {
     val isDefinedForTarget: WorkPredicate = teiWork
     val isDefinedForSource: WorkPredicate =
-      sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork
+      sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
   }
 
   private val mergeIntoCalmTarget = new OtherIdentifiersMergeRule {
-    val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
+    val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or sierraWork or singleDigitalItemMiroWork
   }

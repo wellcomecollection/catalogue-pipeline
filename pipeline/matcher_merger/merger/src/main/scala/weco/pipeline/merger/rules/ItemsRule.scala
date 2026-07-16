@@ -139,7 +139,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     * we'll also pick up any items linked to the Sierra work from METS or Miro.
     */
   private val mergeIntoCalmTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
+    val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or
         singleDigitalItemMiroWork or

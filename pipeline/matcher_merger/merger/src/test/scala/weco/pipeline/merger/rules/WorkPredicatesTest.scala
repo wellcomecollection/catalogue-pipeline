@@ -3,13 +3,13 @@ package weco.pipeline.merger.rules
 import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.generators.{
+  AxiellWorkGenerators,
   MetsWorkGenerators,
   MiroWorkGenerators
 }
@@ -19,6 +19,7 @@ class WorkPredicatesTest
     extends AnyFunSpec
     with MetsWorkGenerators
     with MiroWorkGenerators
+    with AxiellWorkGenerators
     with Matchers
     with Inspectors {
   val works: Seq[Work[Identified]] = List(
@@ -134,5 +135,18 @@ class WorkPredicatesTest
         )
         work.data.otherIdentifiers.map(_.value) should contain("digaids")
     }
+  }
+
+  it("selects singlePhysicalItemAxiellWork works") {
+    val axiell = axiellIdentifiedWork()
+    WorkPredicates.singlePhysicalItemAxiellWork(axiell) shouldBe true
+  }
+
+  it("does not select a CALM work as singlePhysicalItemAxiellWork") {
+    WorkPredicates.singlePhysicalItemAxiellWork(
+      identifiedWork(
+        sourceIdentifier = createCalmSourceIdentifier
+      ).items(List(createCalmItem))
+    ) shouldBe false
   }
 }
