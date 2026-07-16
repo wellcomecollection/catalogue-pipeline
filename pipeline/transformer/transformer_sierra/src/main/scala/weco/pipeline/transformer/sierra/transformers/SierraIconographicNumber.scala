@@ -21,8 +21,7 @@ object SierraIconographicNumber
   override def apply(bibData: SierraBibData): Option[String] =
     bibData match {
       case _ if bibData.isVisualCollections =>
-        bibData
-          .varfieldsWithTag("001")
+        (bibData.varfieldsWithTag("001") ++ bibData.varfieldsWithTag("099"))
           .flatMap { _.content }
           .collectFirst {
             // There are a handful of cases where the value in this field doesn't
