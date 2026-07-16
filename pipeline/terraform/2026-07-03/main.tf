@@ -22,6 +22,7 @@ module "pipeline" {
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
   enable_graph_pipeline_schedule = false
+  enable_image_inferrer_schedule = false
 
   pipeline_date = local.pipeline_date // namespaces services
   graph_date    = "2026-07-03"        // namespaces graph database
