@@ -11,7 +11,7 @@ locals {
     QueryLanguage = "JSONPath"
     Comment       = "Runs the ids generator Lambda to ensure a pool of pre-generated IDs is available for the id_minter"
     StartAt       = "Top up ids"
-    States = {
+    States        = {
       "Top up ids" : {
         "Type" : "Task",
         "Resource" : "arn:aws:states:::lambda:invoke",
@@ -56,16 +56,18 @@ resource "aws_scheduler_schedule" "minter_id_generator_schedule" {
     arn      = module.minter_id_generator_state_machine.state_machine_arn
     role_arn = aws_iam_role.run_minter_id_generator_role.arn
   }
+
+  state = "DISABLED"  # DISABLE for now
 }
 
 resource "aws_iam_role" "run_minter_id_generator_role" {
   name = "run-minter-id-generator-role-${var.pipeline_date}"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
+        Effect    = "Allow"
         Principal = {
           Service = "scheduler.amazonaws.com"
         }
@@ -79,7 +81,7 @@ resource "aws_iam_role_policy" "run_minter_id_generator_policy" {
   role = aws_iam_role.run_minter_id_generator_role.id
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect   = "Allow"
