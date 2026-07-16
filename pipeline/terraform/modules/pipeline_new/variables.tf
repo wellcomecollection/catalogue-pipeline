@@ -60,6 +60,12 @@ variable "index_dates" {
   })
 }
 
+variable "enable_graph_pipeline_schedule" {
+  type        = bool
+  default     = true
+  description = "Whether the scheduled graph-pipeline state machines are enabled. Set to false as a kill-switch to pause all graph pipeline scheduling, e.g. during an incident."
+}
+
 variable "enable_image_inferrer_schedule" {
   type        = bool
   default     = true
