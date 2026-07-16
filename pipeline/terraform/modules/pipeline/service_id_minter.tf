@@ -1,6 +1,6 @@
 locals {
   id_minter_v2_vpc_config = {
-    subnet_ids         = local.network_config.subnets
+    subnet_ids = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.rds_v2_config.security_group_id,

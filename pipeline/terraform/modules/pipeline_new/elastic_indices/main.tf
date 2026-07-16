@@ -1,5 +1,5 @@
 locals {
-  es_config_path     = "${path.root}/../../../index_config"
+  es_config_path = "${path.root}/../../../index_config"
   index_config_dates = [
     for date, cfg in var.index_config : {
       date     = date
@@ -58,7 +58,7 @@ locals {
     } if try(cfg.concepts.indexed, null) != null && cfg.concepts.indexed != ""
   ]
   index_list        = concat(local.works_source_list, local.works_denormalised_list, local.works_identified_list, local.works_indexed_list, local.images_initial_list, local.images_augmented_list, local.images_indexed_list, local.concepts_indexed_list)
-  index_definitions = {for i in local.index_list : i.name => i}
+  index_definitions = { for i in local.index_list : i.name => i }
 }
 
 module "indices" {
@@ -99,10 +99,10 @@ locals {
       write = []
     }
     merger = {
-      read  = [for idx in local.works_identified_list : idx.name]
+      read = [for idx in local.works_identified_list : idx.name]
       write = concat([
         for idx in local.works_denormalised_list : idx.name
-      ], [
+        ], [
         for idx in local.images_initial_list : idx.name
       ])
     }
@@ -113,7 +113,7 @@ locals {
     graph_extractor = {
       read = concat([
         for idx in local.works_denormalised_list : idx.name
-      ], [
+        ], [
         for idx in local.images_augmented_list : idx.name
       ])
       write = []
@@ -135,7 +135,7 @@ locals {
     snapshot_generator = {
       read = concat([
         for idx in local.works_indexed_list : idx.name
-      ], [
+        ], [
         for idx in local.images_indexed_list : idx.name
       ])
       write = []
@@ -143,7 +143,7 @@ locals {
     catalogue_api = {
       read = concat([
         for idx in local.works_indexed_list : idx.name
-      ], [
+        ], [
         for idx in local.images_indexed_list : idx.name
       ])
       write = []
@@ -175,7 +175,7 @@ module "pipeline_services" {
   write_to            = each.value.write
   pipeline_date       = var.pipeline_date
   expose_to_catalogue = contains(var.catalogue_account_services, each.key)
-  providers           = {
+  providers = {
     aws.catalogue = aws.catalogue
   }
 }
