@@ -74,6 +74,15 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
       .varfieldsWithTags(tags: _*)
       .map(SierraMarcDataConversions.varFieldToMarcControlField)
 
+  override def controlField(tag: String): Option[MarcControlField] =
+    super.controlField(tag).orElse {
+      // Fall back to 099 if the value from 001 has been moved there. See https://wellcome.slack.com/archives/C8X9YKM5X/p1777629042762979
+      if (tag == "001")
+        controlFieldsWithTags("099").headOption
+          .map(f => MarcControlField("001", f.content))
+      else None
+    }
+
   lazy val fields: Seq[MarcField] =
     bibData.varFields
       // Only actual MARC varfields, with an actual MARC tag, are exercised

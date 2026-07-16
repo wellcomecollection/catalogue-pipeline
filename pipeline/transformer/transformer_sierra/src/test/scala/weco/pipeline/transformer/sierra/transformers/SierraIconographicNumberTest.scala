@@ -56,6 +56,38 @@ class SierraIconographicNumberTest
 
     SierraIconographicNumber(bibData) shouldBe None
   }
+
+  it("uses the i-number from 099 if there is no 001") {
+    val bibData = createSierraBibDataWith(
+      materialType = Some(SierraMaterialType("k")),
+      varFields = List(
+        VarField(
+          marcTag = Some("099"),
+          content = Some("12345i")
+        )
+      )
+    )
+
+    SierraIconographicNumber(bibData) shouldBe Some("12345i")
+  }
+
+  it("prefers 001 over 099 when both are present") {
+    val bibData = createSierraBibDataWith(
+      materialType = Some(SierraMaterialType("k")),
+      varFields = List(
+        VarField(
+          marcTag = Some("001"),
+          content = Some("11111i")
+        ),
+        VarField(
+          marcTag = Some("099"),
+          content = Some("22222i")
+        )
+      )
+    )
+
+    SierraIconographicNumber(bibData) shouldBe Some("11111i")
+  }
   describe("validating i-numbers") {
     val badINumbers = Table(
       ("iNumber", "label"),
