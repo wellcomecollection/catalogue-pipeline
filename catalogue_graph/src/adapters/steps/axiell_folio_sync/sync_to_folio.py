@@ -154,8 +154,8 @@ def run_sync(
     }
 
     for row in rows:
-        source_id: str = row.get("id")
-        changeset_id: str = row.get("changeset")
+        source_id = cast(str, row["id"])
+        changeset_id = cast(str, row["changeset"])
         counts["total"] += 1
 
         # Loader tombstones are advisory only (RFC 090): the loader's deleted=true is
