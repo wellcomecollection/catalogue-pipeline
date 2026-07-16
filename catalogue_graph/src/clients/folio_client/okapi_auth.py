@@ -1,13 +1,13 @@
-"""OKAPI login auth for the FOLIO inventory client.
+"""OKAPI login auth for FOLIO clients.
 
-mod-inventory-storage sits behind OKAPI, whose tokens are short-lived, so a static
-token is not viable for a scheduled adapter. This performs the OKAPI login itself
+FOLIO services sit behind OKAPI, whose tokens are short-lived, so a static token
+is not viable for a scheduled adapter. This performs the OKAPI login itself
 (POST ``/authn/login`` with username/password, read the ``x-okapi-token`` response
-header) and re-authenticates once on a 401. It mirrors the login flow of the shared
-folio-client prototype, but on httpx so it composes with the existing streaming
-inventory client (which the prototype's urllib/JSON transport cannot handle).
+header) and re-authenticates once on a 401.
 
-See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
+It is an :class:`httpx.Auth`, shared across FOLIO clients: the streaming inventory
+client (``FolioInventoryClient``) and the JSON :class:`~clients.folio_client.FolioClient`
+both compose it onto an ``httpx.Client``.
 """
 
 from __future__ import annotations
