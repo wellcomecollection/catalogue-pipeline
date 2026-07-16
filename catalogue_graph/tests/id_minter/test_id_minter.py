@@ -94,13 +94,6 @@ def _build_runtime(
     )
 
 
-def _read_ndjson(uri: str) -> list[dict]:
-    """Read NDJSON lines from a MockSmartOpen-backed S3 URI."""
-    path = MockSmartOpen.file_lookup[uri]
-    with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
-
-
 # ---------------------------------------------------------------------------
 # Tests: execute() with real resolver
 # ---------------------------------------------------------------------------
@@ -471,7 +464,7 @@ class TestS3Publishing:
         expected_uri = (
             f"s3://{config.s3_bucket}"
             f"/pipeline-{config.pipeline_date}"
-            f"/{config.batch_s3_prefix}/s3-report-test.ndjson"
+            f"/{config.s3_prefix}/s3-report-test.json"
         )
         assert expected_uri in MockSmartOpen.file_lookup
 

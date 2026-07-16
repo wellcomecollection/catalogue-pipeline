@@ -171,7 +171,7 @@ def handler(
         successful_ids=successful_ids,
         errors=errors,
         s3_bucket=runtime.config.s3_bucket,
-        s3_prefix=runtime.config.batch_s3_prefix,
+        s3_prefix=runtime.config.s3_prefix,
     )
     report.publish()
 
