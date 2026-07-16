@@ -43,6 +43,6 @@ class IdMinterReport(PipelineReport):
     @property
     def s3_uri(self) -> str:
         path = PurePosixPath(
-            f"pipeline-{self.pipeline_date}", self.s3_prefix, f"{self.job_id}.ndjson"
+            f"pipeline-{self.pipeline_date}", self.s3_prefix, f"{self.job_id}.json"
         )
         return f"s3://{self.s3_bucket}/{path}"
