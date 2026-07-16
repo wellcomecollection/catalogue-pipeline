@@ -3,7 +3,7 @@ import json
 import httpx
 import pytest
 
-from adapters.extractors.oai_pmh.folio.enrichment.okapi_auth import (
+from clients.folio_client import (
     OkapiAuth,
     OkapiLoginError,
 )
