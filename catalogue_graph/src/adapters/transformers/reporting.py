@@ -49,7 +49,7 @@ class TransformerReport(PipelineReport):
     @property
     def s3_uri(self) -> str:
         changeset_label = "_".join(self.changeset_ids) or "reindex"
-        file_name = f"{changeset_label}__{self.job_id}.ndjson"
+        file_name = f"{changeset_label}__{self.job_id}.json"
         path = PurePosixPath(
             f"pipeline-{self.pipeline_date}",
             self.transformer_type,

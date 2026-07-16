@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import os
-from typing import ClassVar, Literal
+from collections.abc import Sequence
+from pathlib import PurePosixPath
+from typing import ClassVar
+
+from pydantic import BaseModel, PrivateAttr
 
 from utils.reporting import PipelineMetric, PipelineReport
 
@@ -10,11 +14,12 @@ class IdMinterReport(PipelineReport):
     label: ClassVar[str] = os.environ.get("PIPELINE_STEP", "id_minter")
 
     pipeline_date: str
-    success_count: int
-    failure_count: int
-    # S3 publishing is disabled because the manifest writer already writes
-    # successes and failures to S3, from which these counts can be inferred.
-    publish_to_s3: Literal[False] = False
+    job_id: str
+    successful_ids: list[str]
+    errors: Sequence[BaseModel]
+
+    _s3_bucket: str = PrivateAttr()
+    _s3_prefix: str = PrivateAttr()
 
     @property
     def publish_to_cloudwatch(self) -> bool:
@@ -31,6 +36,13 @@ class IdMinterReport(PipelineReport):
     @property
     def metrics(self) -> list[PipelineMetric]:
         return [
-            PipelineMetric(name="success_count", value=self.success_count),
-            PipelineMetric(name="failure_count", value=self.failure_count),
+            PipelineMetric(name="success_count", value=len(self.successful_ids)),
+            PipelineMetric(name="failure_count", value=len(self.errors)),
         ]
+
+    @property
+    def s3_uri(self) -> str:
+        path = PurePosixPath(
+            f"pipeline-{self.pipeline_date}", self._s3_prefix, f"{self.job_id}.ndjson"
+        )
+        return f"s3://{self._s3_bucket}/{path}"
