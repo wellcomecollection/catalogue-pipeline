@@ -77,7 +77,8 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
   override def controlField(tag: String): Option[MarcControlField] =
     super.controlField(tag).orElse {
       if (tag == "001")
-        controlFieldsWithTags("099").headOption.map(f => MarcControlField("001", f.content))
+        controlFieldsWithTags("099").headOption
+          .map(f => MarcControlField("001", f.content))
       else None
     }
 
