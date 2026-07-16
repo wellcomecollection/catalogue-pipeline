@@ -109,6 +109,13 @@ def test_transformer_end_to_end_includes_deletions(
 
     assert result.success_count == 2
     assert result.failure_count == 0
+    report = read_transformer_report(result)
+    assert sorted(report["successful_ids"]) == sorted(
+        [
+            "Work[folio-instance/fo00001]",
+            "Work[folio-instance/fo00003]",
+        ]
+    )
 
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
     deleted = by_id["Work[folio-instance/fo00003]"]["_source"]

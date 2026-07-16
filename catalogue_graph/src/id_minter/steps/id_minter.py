@@ -7,12 +7,12 @@ Follows the runtime / handler pattern used by the EBSCO adapter loader.
 from __future__ import annotations
 
 import argparse
-from collections.abc import Sequence
 from typing import Any
 
 import structlog
 from pydantic import BaseModel, ConfigDict
 
+from core.transformer import TransformationError
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
 from id_minter.id_minting_source import IdMintingSource
@@ -67,7 +67,7 @@ def build_runtime(
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
-) -> tuple[list[str], Sequence[BaseModel]]:
+) -> tuple[list[str], list[TransformationError]]:
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)

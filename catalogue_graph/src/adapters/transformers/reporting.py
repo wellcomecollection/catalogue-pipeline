@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
 from pathlib import PurePosixPath
 from typing import ClassVar
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
+from core.transformer import TransformationError
 from utils.reporting import PipelineMetric, PipelineReport
 
 
@@ -19,7 +19,7 @@ class TransformerReport(PipelineReport):
     snapshot_id: int | None = None
 
     successful_ids: list[str]
-    errors: Sequence[BaseModel]
+    errors: list[TransformationError]
 
     s3_bucket: str = Field(exclude=True)
     s3_prefix: str = Field(exclude=True)

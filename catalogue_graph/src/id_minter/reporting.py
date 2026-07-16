@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Sequence
 from pathlib import PurePosixPath
 from typing import ClassVar
 
-from pydantic import BaseModel
+from pydantic import Field
 
+from core.transformer import TransformationError
 from utils.reporting import PipelineMetric, PipelineReport
 
 
@@ -16,10 +16,10 @@ class IdMinterReport(PipelineReport):
     pipeline_date: str
     job_id: str
     successful_ids: list[str]
-    errors: Sequence[BaseModel]
+    errors: list[TransformationError]
 
-    s3_bucket: str
-    s3_prefix: str
+    s3_bucket: str = Field(exclude=True)
+    s3_prefix: str = Field(exclude=True)
 
     @property
     def publish_to_cloudwatch(self) -> bool:
