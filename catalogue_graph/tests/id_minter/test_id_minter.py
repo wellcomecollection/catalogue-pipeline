@@ -20,7 +20,6 @@ import pymysql
 import pymysql.connections
 import pytest
 from elasticsearch import Elasticsearch
-
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.models.identifier import SourceIdentifierKey
@@ -35,6 +34,7 @@ from id_minter.steps.id_minter import (
     handler,
 )
 from models.incremental_window import IncrementalWindow
+
 from tests.id_minter.conftest import (
     get_canonical_status,
     make_source_identifier,
@@ -92,13 +92,6 @@ def _build_runtime(
         source_es_mode="local",
         target_es_mode="local",
     )
-
-
-def _read_ndjson(uri: str) -> list[dict]:
-    """Read NDJSON lines from a MockSmartOpen-backed S3 URI."""
-    path = MockSmartOpen.file_lookup[uri]
-    with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
 
 
 # ---------------------------------------------------------------------------
@@ -470,8 +463,8 @@ class TestS3Publishing:
 
         expected_uri = (
             f"s3://{config.s3_bucket}"
-            f"/pipeline-{config.pipeline_date}"
-            f"/{config.batch_s3_prefix}/s3-report-test.ndjson"
+            f"/pipeline-{config.pipeline_date}/id_minter"
+            f"/{config.s3_prefix}/s3-report-test.json"
         )
         assert expected_uri in MockSmartOpen.file_lookup
 

@@ -53,7 +53,7 @@ class TransformerReport(PipelineReport):
         path = PurePosixPath(
             f"pipeline-{self.pipeline_date}",
             self.transformer_type,
-            f"{self.s3_prefix}",
+            self.s3_prefix,
             file_name,
         )
         return f"s3://{self.s3_bucket}/{path}"
