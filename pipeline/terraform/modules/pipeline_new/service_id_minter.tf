@@ -2,7 +2,7 @@ locals {
   id_minter_rds_instance = local.infra_critical.id_minter_rds[var.rds_id_minter]
 
   id_minter_vpc_config = {
-    subnet_ids         = local.network_config.subnets
+    subnet_ids = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.id_minter_rds_instance.ingress_security_group_id,
