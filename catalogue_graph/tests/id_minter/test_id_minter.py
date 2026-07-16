@@ -20,6 +20,7 @@ import pymysql
 import pymysql.connections
 import pytest
 from elasticsearch import Elasticsearch
+
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.models.identifier import SourceIdentifierKey
@@ -34,7 +35,6 @@ from id_minter.steps.id_minter import (
     handler,
 )
 from models.incremental_window import IncrementalWindow
-
 from tests.id_minter.conftest import (
     get_canonical_status,
     make_source_identifier,
