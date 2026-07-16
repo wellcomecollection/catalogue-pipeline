@@ -1,5 +1,3 @@
-import json
-
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
@@ -7,12 +5,13 @@ import adapters.extractors.ebsco.config as adapter_config
 from adapters.steps.ebsco.loader import EBSCO_NAMESPACE
 from adapters.steps.transformer import (
     TransformerEvent,
+    TransformerResult,
     build_transformer,
     handler,
 )
-from adapters.transformers.manifests import TransformerManifest
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
-from tests.mocks import MockElasticsearchClient, MockSmartOpen
+from tests.adapters.transformers.conftest import read_transformer_report
+from tests.mocks import MockElasticsearchClient
 
 
 def _run_transform(
@@ -21,7 +20,7 @@ def _run_transform(
     changeset_ids: list[str] | None = None,
     index_date: str | None = None,
     pipeline_date: str = "dev",
-) -> TransformerManifest:
+) -> TransformerResult:
     monkeypatch.setattr(adapter_config, "PIPELINE_DATE", pipeline_date)
     monkeypatch.setattr(adapter_config, "INDEX_DATE", index_date)
 
@@ -61,24 +60,19 @@ def test_transformer_end_to_end_with_local_table(
         index_date="2025-01-01",
     )
 
-    assert result.successes.count == 2
-    assert result.failures is None
+    assert result.success_count == 2
+    assert result.failure_count == 0
     assert result.job_id == "20250101T1200"
     assert result.changeset_ids == [changeset_id]
+    assert (
+        result.report_s3_uri
+        == f"s3://wellcomecollection-platform-ebsco-adapter/pipeline-dev/ebsco/dev/{changeset_id}__20250101T1200.json"
+    )
 
-    # Validate file contents written to mock S3 (NDJSON)
-    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
-    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
-    with open(batch_contents_path, encoding="utf-8") as f:
-        lines = [json.loads(line) for line in f if line.strip()]
-
-    # Success lines include sourceIdentifiers and jobId
-    assert lines == [
-        {
-            "sourceIdentifiers": [f"Work[ebsco-alt-lookup/{i}]" for i in records_by_id],
-            "jobId": "20250101T1200",
-        }
-    ]
+    report = read_transformer_report(result)
+    assert sorted(report["successful_ids"]) == sorted(
+        [f"Work[ebsco-alt-lookup/{i}]" for i in records_by_id]
+    )
 
     titles = {
         op["_source"].get("data", {}).get("title")
@@ -114,19 +108,8 @@ def test_transformer_end_to_end_includes_deletions(
         index_date="2025-01-01",
     )
 
-    assert result.successes.count == 2
-    assert result.failures is None
-
-    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
-    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
-    with open(batch_contents_path, encoding="utf-8") as f:
-        lines = [json.loads(line) for line in f if line.strip()]
-
-    assert len(lines) == 1
-    assert set(lines[0]["sourceIdentifiers"]) == {
-        "Work[ebsco-alt-lookup/ebs00001]",
-        "Work[ebsco-alt-lookup/ebs00003]",
-    }
+    assert result.success_count == 2
+    assert result.failure_count == 0
 
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
     deleted = by_id["Work[ebsco-alt-lookup/ebs00003]"]["_source"]

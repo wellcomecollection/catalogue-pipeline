@@ -1,7 +1,11 @@
+import json
 from contextlib import suppress
 
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
+
+from adapters.steps.transformer import TransformerResult
+from tests.mocks import MockSmartOpen
 
 # mypy: allow-untyped-calls
 
@@ -49,3 +53,9 @@ def _907_field(value: str) -> Field:
         indicators=Indicators(" ", " "),
         subfields=[Subfield(code="a", value=value)],
     )
+
+
+def read_transformer_report(result: TransformerResult) -> dict:
+    with open(MockSmartOpen.file_lookup[result.report_s3_uri], encoding="utf-8") as f:
+        report: dict = json.loads(f.read())
+        return report

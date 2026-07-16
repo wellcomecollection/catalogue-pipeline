@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from pathlib import PurePosixPath
 from typing import ClassVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from utils.reporting import PipelineMetric, PipelineReport
 
@@ -21,8 +21,8 @@ class TransformerReport(PipelineReport):
     successful_ids: list[str]
     errors: Sequence[BaseModel]
 
-    _s3_bucket: str
-    _s3_prefix: str
+    s3_bucket: str = Field(exclude=True)
+    s3_prefix: str = Field(exclude=True)
 
     @property
     def publish_to_cloudwatch(self) -> bool:
@@ -53,7 +53,7 @@ class TransformerReport(PipelineReport):
         path = PurePosixPath(
             f"pipeline-{self.pipeline_date}",
             self.transformer_type,
-            f"{self._s3_prefix}",
+            f"{self.s3_prefix}",
             file_name,
         )
-        return f"s3://{self._s3_bucket}/{path}"
+        return f"s3://{self.s3_bucket}/{path}"

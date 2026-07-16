@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from pathlib import PurePosixPath
 from typing import ClassVar
 
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel
 
 from utils.reporting import PipelineMetric, PipelineReport
 
@@ -18,8 +18,8 @@ class IdMinterReport(PipelineReport):
     successful_ids: list[str]
     errors: Sequence[BaseModel]
 
-    _s3_bucket: str = PrivateAttr()
-    _s3_prefix: str = PrivateAttr()
+    s3_bucket: str
+    s3_prefix: str
 
     @property
     def publish_to_cloudwatch(self) -> bool:
@@ -43,6 +43,6 @@ class IdMinterReport(PipelineReport):
     @property
     def s3_uri(self) -> str:
         path = PurePosixPath(
-            f"pipeline-{self.pipeline_date}", self._s3_prefix, f"{self.job_id}.ndjson"
+            f"pipeline-{self.pipeline_date}", self.s3_prefix, f"{self.job_id}.ndjson"
         )
-        return f"s3://{self._s3_bucket}/{path}"
+        return f"s3://{self.s3_bucket}/{path}"

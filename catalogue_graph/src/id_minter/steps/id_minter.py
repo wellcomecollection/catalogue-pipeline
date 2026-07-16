@@ -7,14 +7,11 @@ Follows the runtime / handler pattern used by the EBSCO adapter loader.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 from typing import Any
 
 import structlog
-from models.incremental_window import IncrementalWindow
 from pydantic import BaseModel, ConfigDict
-from utils.elasticsearch import ElasticsearchMode, get_client
-from utils.logger import ExecutionContext, get_trace_id, setup_logging
-from utils.steps import create_job_id
 
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
@@ -28,6 +25,10 @@ from id_minter.reporting import IdMinterReport
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
+from models.incremental_window import IncrementalWindow
+from utils.elasticsearch import ElasticsearchMode, get_client
+from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from utils.steps import create_job_id
 
 logger = structlog.get_logger(__name__)
 
@@ -44,6 +45,7 @@ class IdMinterRuntime(BaseModel):
 class IdMinterResult(StepFunctionMintingRequest):
     success_count: int
     failure_count: int
+    report_s3_uri: str
 
 
 def build_runtime(
@@ -65,7 +67,7 @@ def build_runtime(
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
-) -> tuple[list[str], list[BaseModel]]:
+) -> tuple[list[str], Sequence[BaseModel]]:
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
@@ -163,20 +165,22 @@ def handler(
         failure_count=len(errors),
     )
 
-    IdMinterReport(
+    report = IdMinterReport(
         pipeline_date=runtime.config.pipeline_date,
         job_id=event.job_id,
         successful_ids=successful_ids,
         errors=errors,
-        _s3_bucket=runtime.config.s3_bucket,
-        _s3_prefix=runtime.config.batch_s3_prefix,
-    ).publish()
+        s3_bucket=runtime.config.s3_bucket,
+        s3_prefix=runtime.config.batch_s3_prefix,
+    )
+    report.publish()
 
     return IdMinterResult.model_validate(
         {
             **event.model_dump(),
             "success_count": len(successful_ids),
             "failure_count": len(errors),
+            "report_s3_uri": report.s3_uri,
         }
     )
 

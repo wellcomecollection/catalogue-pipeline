@@ -130,7 +130,7 @@ def test_transformer_attaches_enriched_items(
         use_rest_api_table=False,
     )
 
-    assert result.failures is None
+    assert result.failure_count == 0
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
     source = by_id["Work[folio-instance/inst-1]"]["_source"]
 
@@ -172,7 +172,7 @@ def test_transformer_emits_no_items_when_instance_not_enriched(
         use_rest_api_table=False,
     )
 
-    assert result.failures is None
+    assert result.failure_count == 0
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
     source = by_id["Work[folio-instance/inst-2]"]["_source"]
     assert source["data"]["items"] == []

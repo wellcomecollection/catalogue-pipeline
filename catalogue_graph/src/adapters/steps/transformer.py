@@ -58,6 +58,7 @@ class AdapterConfig(Protocol):
 class TransformerResult(TransformerEvent):
     success_count: int
     failure_count: int
+    report_s3_uri: str
 
 
 ICEBERG_NAMESPACE_BY_TYPE: dict[TransformerType, str] = {
@@ -198,8 +199,8 @@ def handler(
         changeset_ids=event.changeset_ids,
         snapshot_id=transformer.source.snapshot_id,
         job_id=event.job_id,
-        _s3_bucket=config.S3_BUCKET,
-        _s3_prefix=config.S3_PREFIX,
+        s3_bucket=config.S3_BUCKET,
+        s3_prefix=config.S3_PREFIX,
     )
     report.publish()
 
@@ -208,6 +209,7 @@ def handler(
             **event.model_dump(),
             "success_count": len(transformer.successful_ids),
             "failure_count": len(transformer.errors),
+            "report_s3_uri": report.s3_uri,
         },
     )
 
