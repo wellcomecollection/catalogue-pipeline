@@ -80,7 +80,7 @@ data "aws_iam_policy_document" "id_minter_s3_write" {
   statement {
     actions = ["s3:PutObject"]
     resources = [
-      "arn:aws:s3:::${var.env_vars.S3_BUCKET}/${var.env_vars.S3_PREFIX}/id_minter/*",
+      "arn:aws:s3:::${var.env_vars.S3_BUCKET}/pipeline-${var.pipeline_date}/id_minter/${var.env_vars.S3_PREFIX}/*",
     ]
   }
 }
