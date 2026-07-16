@@ -3,9 +3,9 @@ locals {
     QueryLanguage = "JSONata"
     Comment       = "Invoke the id_minter Lambda"
     StartAt       = "ConstructEvent"
-    States = {
+    States        = {
       ConstructEvent = {
-        Type = "Pass",
+        Type   = "Pass",
         Output = {
           "pipeline_date" : var.pipeline_date,
           # window end time is 5 minutes before the scheduled time
@@ -16,14 +16,14 @@ locals {
         Next = "InvokeIdMinter"
       }
       InvokeIdMinter = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::lambda:invoke"
+        Type      = "Task"
+        Resource  = "arn:aws:states:::lambda:invoke"
         Arguments = {
           FunctionName = module.id_minter_lambda.id_minter_lambda_arn
           Payload      = "{% $states.input %}"
         }
         Output = "{% $states.result.Payload %}"
-        Retry = [
+        Retry  = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -77,17 +77,17 @@ resource "aws_scheduler_schedule" "id_minter_schedule" {
     JSON
   }
 
-  state = "ENABLED"
+  state = "DISABLED"
 }
 
 resource "aws_iam_role" "run_id_minter_role" {
   name = "run-id-minter-role-${var.pipeline_date}"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
+        Effect    = "Allow"
         Principal = {
           Service = "scheduler.amazonaws.com"
         }
@@ -101,11 +101,13 @@ resource "aws_iam_role_policy" "run_id_minter_policy" {
   role = aws_iam_role.run_id_minter_role.id
 
   policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = "states:StartExecution"
-      Resource = module.id_minter_state_machine.state_machine_arn
-    }]
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "states:StartExecution"
+        Resource = module.id_minter_state_machine.state_machine_arn
+      }
+    ]
   })
 }
