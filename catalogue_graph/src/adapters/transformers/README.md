@@ -15,20 +15,25 @@ The transformer pipeline consists of:
 ### Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────────┐    ┌─────────────────┐    ┌───────────────┐
-│  Iceberg Table  │───▶│  MarcXmlTransformer  │───▶│   SourceWork    │───▶│ Elasticsearch │
-│  (Adapter Store)│    │  (Axiell or EBSCO)   │    │   Documents     │    │    Index      │
-└─────────────────┘    └──────────────────────┘    └─────────────────┘    └───────────────┘
+┌─────────────────┐    ┌────────────────────────┐    ┌─────────────────┐    ┌───────────────┐
+│  Iceberg Table  │───▶│  MarcXmlTransformer    │───▶│   SourceWork    │───▶│ Elasticsearch │
+│  (Adapter Store)│    │  (Axiell/EBSCO/FOLIO)  │    │   Documents     │    │    Index      │
+└─────────────────┘    └────────────────────────┘    └─────────────────┘    └───────────────┘
 ```
 
 ### Transformer Types
 
 - **`AxiellTransformer`**: Transforms Axiell/Mimsy records into `InvisibleSourceWork` documents
 - **`EbscoTransformer`**: Transforms EBSCO serial records into `VisibleSourceWork` documents
+- **`FolioTransformer`**: Transforms FOLIO instance records (enriched with holdings/items) into `VisibleSourceWork`
+  documents
 - **`AxiellReconciler`**: A special Axiell transformer emitting `DeletedSourceWork` documents.
   See [Axiell reconciler](#axiell-reconciler) section for more information
 
-Both inherit from `MarcXmlTransformer`, which handles common MARC parsing and deleted record handling.
+All inherit from `MarcXmlTransformer`, which handles common MARC parsing and deleted record handling.
+
+Note: the Axiell to FOLIO *sync* (which writes Axiell records out to FOLIO Inventory rather than into Elasticsearch)
+is not a transformer; it lives in [`adapters/steps/axiell_folio_sync`](../steps/axiell_folio_sync/README.md).
 
 ## Running the Transformer
 
@@ -121,7 +126,7 @@ AWS_PROFILE=platform-developer uv run python -m adapters.steps.transformer \
 
 | Argument                 | Required | Description                                                                                                                               |
 |--------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| `--transformer-type`     | Yes      | Which transformer to run: `axiell`, `ebsco`, or `axiell_reconciler`                                                                       |
+| `--transformer-type`     | Yes      | Which transformer to run: `axiell`, `ebsco`, `folio`, or `axiell_reconciler`                                                              |
 | `--changeset-id`         | No       | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records. Required for `axiell_reconciler`. |
 | `--job-id`               | No       | Job identifier for manifest tracking. Defaults to `dev`.                                                                                  |
 | `--use-rest-api-table`   | No       | Use the S3 Tables catalog instead of local storage.                                                                                       |

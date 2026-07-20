@@ -20,6 +20,9 @@ which yields the CanonicalRecord these builders read from.
 ``build_payloads`` returns
 ``{"instance": {...}, "holdings": {...}, "item": {...}, "meta": {...}}`` ready
 for :func:`adapters.steps.axiell_folio_sync.upsert.upsert_from_payloads`.
+
+RFC 090 references below point at the design spec:
+https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync
 """
 
 from __future__ import annotations

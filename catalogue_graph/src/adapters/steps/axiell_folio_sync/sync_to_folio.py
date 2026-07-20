@@ -3,6 +3,9 @@
 Extracted from ``axiell_folio_sync.py`` for readability. Contains:
 - ``load_okapi_config`` — resolves FOLIO credentials from env / SSM
 - ``run_sync`` — the select → map → upsert loop over adapter rows
+
+RFC 090 references below point at the design spec:
+https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync
 """
 
 from __future__ import annotations

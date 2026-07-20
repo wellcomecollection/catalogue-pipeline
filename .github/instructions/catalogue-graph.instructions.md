@@ -18,7 +18,9 @@ its own `uv.lock`, `.python-version` (3.12), and virtualenv.
 - `src/adapters/extractors/ebsco/` — EBSCO FTP-based extraction.
 - `src/adapters/transformers/` — MARC/EBSCO/Axiell transformation logic.
 - `src/adapters/steps/` — all Lambda/CLI entrypoints, namespaced by adapter
-  type (`steps/oai_pmh/`, `steps/ebsco/`, `steps/transformer.py`).
+  type (`steps/oai_pmh/`, `steps/ebsco/`, `steps/transformer.py`,
+  `steps/axiell_folio_sync/` — the self-contained Axiell to FOLIO outbound
+  sync, including its mapping/upsert logic).
 - `src/utils/` — shared helpers (`logger.py`, `steps.py`, `manifests.py`, …).
 - `src/clients/` — Neptune, Elasticsearch and metric clients.
 - `src/ingestor/`, `src/graph/`, `src/id_minter/` — pipeline stages.
@@ -26,6 +28,11 @@ its own `uv.lock`, `.python-version` (3.12), and virtualenv.
   so import as `from adapters.foo …`, **not** `from src.adapters.foo …`.
 
 ## Adapter / step pattern
+
+This pattern applies to OAI-PMH *extractors* (source → Iceberg). It does not
+apply to `steps/axiell_folio_sync/`, which is a write-back sync (Iceberg →
+FOLIO Inventory) with its own event-triggered step; see
+[its README](../../catalogue_graph/src/adapters/steps/axiell_folio_sync/README.md).
 
 When adding or modifying an OAI-PMH adapter:
 

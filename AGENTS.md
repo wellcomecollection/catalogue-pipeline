@@ -38,8 +38,9 @@ is no workspace-wide build.
   scripts under `builds/`.
 - **Python** (UV, one project per directory with its own `pyproject.toml`):
   - `catalogue_graph/` — graph + ingestor pipeline, also contains the EBSCO,
-    FOLIO, Axiell and OAI-PMH adapters under `src/adapters/` (largest Python
-    project; see [catalogue_graph/README.md](/catalogue_graph/README.md))
+    FOLIO, Axiell and OAI-PMH adapters and the Axiell to FOLIO sync under
+    `src/adapters/` (largest Python project; see
+    [catalogue_graph/README.md](/catalogue_graph/README.md))
   - `pipeline/inferrer/{aspect_ratio_inferrer,feature_inferrer,palette_inferrer,common}/`
   - `sierra_adapter/` — Python maintenance scripts living alongside the Scala
     adapter (own `pyproject.toml`, `uv.lock`, Python 3.13)
