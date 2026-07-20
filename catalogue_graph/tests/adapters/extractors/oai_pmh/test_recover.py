@@ -14,7 +14,7 @@ from oai_pmh_client.exceptions import IdDoesNotExistError
 from oai_pmh_client.models import Header, Record
 
 from adapters.steps.oai_pmh import recover
-from adapters.steps.oai_pmh.recover import RecoverRuntime
+from adapters.steps.oai_pmh.recover import RecoverRuntime, RecoveryBatch
 from adapters.utils.adapter_store import AdapterStore
 
 
@@ -57,6 +57,64 @@ def _runtime(get_record: object) -> tuple[RecoverRuntime, list[pa.Table]]:
         metadata_prefix="oai_marcxml",
     )
     return runtime, commits
+
+
+class TestRecoveryBatch:
+    """The accumulator the handler drives, exercised directly."""
+
+    def test_buffers_until_commit_every_then_commits(self) -> None:
+        runtime, commits = _runtime(lambda **_: None)
+        batch = RecoveryBatch(runtime, commit_every=2)
+
+        batch.add_recovered("collect:1", _record("collect:1"))
+        assert commits == []
+        batch.add_recovered("collect:2", _record("collect:2"))
+        assert [c.num_rows for c in commits] == [2]
+
+    def test_flush_commits_the_remainder(self) -> None:
+        runtime, commits = _runtime(lambda **_: None)
+        batch = RecoveryBatch(runtime, commit_every=10)
+
+        batch.add_recovered("collect:1", _record("collect:1"))
+        batch.flush()
+        assert [c.num_rows for c in commits] == [1]
+        assert cast("list[str]", commits[0]["id"].to_pylist()) == ["collect:1"]
+
+    def test_flush_on_an_empty_buffer_makes_no_commit(self) -> None:
+        runtime, commits = _runtime(lambda **_: None)
+        batch = RecoveryBatch(runtime)
+
+        batch.flush()
+        batch.flush()
+        assert commits == []
+
+    def test_classification_lists_stay_separate(self) -> None:
+        runtime, _ = _runtime(lambda **_: None)
+        batch = RecoveryBatch(runtime)
+
+        batch.add_recovered("collect:1", _record("collect:1"))
+        batch.add_removed("collect:gone")
+        batch.add_unfetchable("collect:dead", _empty_body_error())
+
+        assert batch.recovered == ["collect:1"]
+        assert batch.removed == ["collect:gone"]
+        assert batch.unfetchable == ["collect:dead"]
+
+    def test_to_response_reports_the_accumulated_counts(self) -> None:
+        runtime, _ = _runtime(lambda **_: None)
+        batch = RecoveryBatch(runtime)
+
+        batch.add_recovered("collect:1", _record("collect:1"))
+        batch.add_removed("collect:gone")
+        batch.add_unfetchable("collect:dead", _empty_body_error())
+        response = batch.to_response(requested=3)
+
+        assert response.adapter_type == "axiell"
+        assert response.requested == 3
+        assert response.recovered == 1
+        assert response.removed == 1
+        # Unfetchable ids are reported in full, not just counted.
+        assert response.unfetchable == ["collect:dead"]
 
 
 def test_recovers_writes_and_classifies() -> None:

@@ -72,6 +72,74 @@ def _compute_guid(row: dict[str, Any]) -> str | None:
         return None
 
 
+class ReconcilerBaselineBatch:
+    """Accumulates id->GUID mappings and commits them in batches.
+
+    Holds the counts the run reports on, plus the pending write buffer. Callers
+    offer each active row in turn and call :meth:`flush` at the end to commit
+    whatever is left in the buffer.
+    """
+
+    def __init__(
+        self,
+        runtime: RebuildReconcilerRuntime,
+        *,
+        batch_size: int = DEFAULT_BATCH_SIZE,
+    ) -> None:
+        self._runtime = runtime
+        self._batch_size = batch_size
+        self._buffer: list[dict[str, Any]] = []
+        self.active = 0
+        self.written = 0
+        self.skipped = 0
+
+    def add_row(self, row: dict[str, Any]) -> None:
+        """Buffer a row's mapping, or count it as skipped if it yields no GUID."""
+        self.active += 1
+        guid = _compute_guid(row)
+        if not guid:
+            self.skipped += 1
+            return
+        self._buffer.append(
+            {
+                "namespace": self._runtime.namespace,
+                "id": row["id"],
+                "guid": guid,
+                "last_modified": row["last_modified"],
+            }
+        )
+        if len(self._buffer) >= self._batch_size:
+            self.flush()
+
+    def flush(self) -> None:
+        """Commit any buffered mappings to the reconciler store."""
+        if not self._buffer:
+            return
+        table = pa.Table.from_pylist(
+            self._buffer, schema=self._runtime.reconciler_store.schema
+        )
+        result = self._runtime.reconciler_store.incremental_update(table)
+        if result:
+            self.written += len(result.inserted_record_ids) + len(
+                result.updated_record_ids
+            )
+        logger.info(
+            "Committed reconciler mappings",
+            adapter=self._runtime.adapter_name,
+            committed=len(self._buffer),
+            written_total=self.written,
+        )
+        self._buffer.clear()
+
+    def to_response(self) -> RebuildReconcilerResponse:
+        return RebuildReconcilerResponse(
+            adapter_type=self._runtime.adapter_name,
+            active_records=self.active,
+            mappings_written=self.written,
+            skipped=self.skipped,
+        )
+
+
 def handler(
     runtime: RebuildReconcilerRuntime,
     execution_context: ExecutionContext | None = None,
@@ -81,59 +149,21 @@ def handler(
     """Recompute and write id->GUID mappings for every active record."""
     setup_logging(execution_context)
 
-    active = 0
-    written = 0
-    skipped = 0
-    buffer: list[dict[str, Any]] = []
-
-    def flush() -> None:
-        nonlocal written
-        if not buffer:
-            return
-        table = pa.Table.from_pylist(buffer, schema=runtime.reconciler_store.schema)
-        result = runtime.reconciler_store.incremental_update(table)
-        if result:
-            written += len(result.inserted_record_ids) + len(result.updated_record_ids)
-        logger.info(
-            "Committed reconciler mappings",
-            adapter=runtime.adapter_name,
-            committed=len(buffer),
-            written_total=written,
-        )
-        buffer.clear()
+    batch = ReconcilerBaselineBatch(runtime, batch_size=batch_size)
 
     for record_batch in runtime.adapter_store.stream_active_namespace_records():
         for row in record_batch.to_pylist():
-            active += 1
-            guid = _compute_guid(row)
-            if not guid:
-                skipped += 1
-                continue
-            buffer.append(
-                {
-                    "namespace": runtime.namespace,
-                    "id": row["id"],
-                    "guid": guid,
-                    "last_modified": row["last_modified"],
-                }
-            )
-            if len(buffer) >= batch_size:
-                flush()
-    flush()
+            batch.add_row(row)
+    batch.flush()
 
     logger.info(
         "Reconciler baseline rebuild complete",
         adapter=runtime.adapter_name,
-        active_records=active,
-        mappings_written=written,
-        skipped=skipped,
+        active_records=batch.active,
+        mappings_written=batch.written,
+        skipped=batch.skipped,
     )
-    return RebuildReconcilerResponse(
-        adapter_type=runtime.adapter_name,
-        active_records=active,
-        mappings_written=written,
-        skipped=skipped,
-    )
+    return batch.to_response()
 
 
 def build_runtime(

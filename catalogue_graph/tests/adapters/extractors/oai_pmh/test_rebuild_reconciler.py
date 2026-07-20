@@ -10,7 +10,10 @@ import pyarrow as pa
 import pytest
 
 from adapters.steps.oai_pmh import rebuild_reconciler
-from adapters.steps.oai_pmh.rebuild_reconciler import RebuildReconcilerRuntime
+from adapters.steps.oai_pmh.rebuild_reconciler import (
+    RebuildReconcilerRuntime,
+    ReconcilerBaselineBatch,
+)
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from adapters.utils.schemata import (
@@ -110,6 +113,104 @@ def _runtime(rows: list[dict]) -> tuple[RebuildReconcilerRuntime, list[pa.Table]
         namespace="axiell",
     )
     return runtime, commits
+
+
+class TestReconcilerBaselineBatch:
+    """The accumulator the handler drives, exercised directly."""
+
+    @staticmethod
+    def _row(record_id: str) -> dict:
+        return {
+            "id": record_id,
+            "content": "x",
+            "last_modified": datetime(2025, 1, 1, tzinfo=UTC),
+        }
+
+    def test_buffers_until_batch_size_then_commits(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            rebuild_reconciler, "_compute_guid", lambda row: f"guid-{row['id']}"
+        )
+        runtime, commits = _runtime([])
+        batch = ReconcilerBaselineBatch(runtime, batch_size=2)
+
+        batch.add_row(self._row("collect:1"))
+        assert commits == []
+        batch.add_row(self._row("collect:2"))
+        assert [c.num_rows for c in commits] == [2]
+        assert batch.written == 2
+
+    def test_flush_commits_the_remainder(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(
+            rebuild_reconciler, "_compute_guid", lambda row: f"guid-{row['id']}"
+        )
+        runtime, commits = _runtime([])
+        batch = ReconcilerBaselineBatch(runtime, batch_size=10)
+
+        batch.add_row(self._row("collect:1"))
+        batch.flush()
+        assert cast("list[str]", commits[0]["guid"].to_pylist()) == ["guid-collect:1"]
+
+    def test_flush_on_an_empty_buffer_makes_no_commit(self) -> None:
+        runtime, commits = _runtime([])
+        batch = ReconcilerBaselineBatch(runtime)
+
+        batch.flush()
+        batch.flush()
+        assert commits == []
+        assert batch.written == 0
+
+    def test_rows_without_a_guid_are_skipped_not_buffered(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(rebuild_reconciler, "_compute_guid", lambda row: None)
+        runtime, commits = _runtime([])
+        batch = ReconcilerBaselineBatch(runtime, batch_size=1)
+
+        batch.add_row(self._row("collect:bad"))
+        batch.flush()
+
+        # The row counts as active and skipped, but nothing is written.
+        assert batch.active == 1
+        assert batch.skipped == 1
+        assert commits == []
+
+    def test_written_accumulates_across_flushes(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # `written` was previously a `nonlocal` in the handler; it must still
+        # total across commits rather than reset per flush.
+        monkeypatch.setattr(
+            rebuild_reconciler, "_compute_guid", lambda row: f"guid-{row['id']}"
+        )
+        runtime, _ = _runtime([])
+        batch = ReconcilerBaselineBatch(runtime, batch_size=1)
+
+        batch.add_row(self._row("collect:1"))
+        batch.add_row(self._row("collect:2"))
+        assert batch.written == 2
+
+    def test_to_response_reports_the_accumulated_counts(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            rebuild_reconciler,
+            "_compute_guid",
+            lambda row: None if row["id"] == "collect:bad" else f"guid-{row['id']}",
+        )
+        runtime, _ = _runtime([])
+        batch = ReconcilerBaselineBatch(runtime, batch_size=10)
+
+        batch.add_row(self._row("collect:1"))
+        batch.add_row(self._row("collect:bad"))
+        batch.flush()
+        response = batch.to_response()
+
+        assert response.adapter_type == "axiell"
+        assert response.active_records == 2
+        assert response.mappings_written == 1
+        assert response.skipped == 1
 
 
 def test_handler_skips_and_counts_records_without_guid(

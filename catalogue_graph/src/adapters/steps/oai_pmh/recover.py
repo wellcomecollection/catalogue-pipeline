@@ -27,6 +27,7 @@ import structlog
 from lxml import etree
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.exceptions import IdDoesNotExistError, OAIError
+from oai_pmh_client.models import Record
 from pydantic import BaseModel, ConfigDict
 
 from adapters.extractors.oai_pmh.record_writer import _serialize_metadata
@@ -59,6 +60,78 @@ class RecoverRuntime(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
+class RecoveryBatch:
+    """Classifies recovery outcomes and commits recovered records in batches.
+
+    Holds the counts the run reports on, plus the pending write buffer. Callers
+    record one outcome per requested id (recovered, removed, or unfetchable) and
+    call :meth:`flush` at the end to commit whatever is left in the buffer.
+    """
+
+    def __init__(
+        self, runtime: RecoverRuntime, *, commit_every: int = DEFAULT_COMMIT_EVERY
+    ) -> None:
+        self._runtime = runtime
+        self._commit_every = commit_every
+        self._buffer: list[dict[str, Any]] = []
+        self.recovered: list[str] = []
+        self.removed: list[str] = []
+        self.unfetchable: list[str] = []
+
+    def add_recovered(self, record_id: str, record: Record) -> None:
+        """Buffer a fetched record, committing once the buffer is full."""
+        content = _serialize_metadata(record)
+        self.recovered.append(record_id)
+        self._buffer.append(
+            {
+                "namespace": self._runtime.namespace,
+                "id": record_id,
+                "content": content,
+                "last_modified": record.header.datestamp,
+                "deleted": content is None,
+            }
+        )
+        if len(self._buffer) >= self._commit_every:
+            self.flush()
+
+    def add_removed(self, record_id: str) -> None:
+        """Record an id the source reports as no longer existing."""
+        self.removed.append(record_id)
+
+    def add_unfetchable(self, record_id: str, error: Exception) -> None:
+        """Record an id the source neither returned nor declared gone."""
+        logger.warning(
+            "Record unfetchable",
+            adapter=self._runtime.adapter_name,
+            record_id=record_id,
+            error=type(error).__name__,
+        )
+        self.unfetchable.append(record_id)
+
+    def flush(self) -> None:
+        """Commit any buffered records to the adapter store."""
+        if not self._buffer:
+            return
+        table = pa.Table.from_pylist(self._buffer, schema=ADAPTER_STORE_ARROW_SCHEMA)
+        self._runtime.store.incremental_update(table)
+        logger.info(
+            "Committed recovered records",
+            adapter=self._runtime.adapter_name,
+            committed=len(self._buffer),
+            recovered_total=len(self.recovered),
+        )
+        self._buffer.clear()
+
+    def to_response(self, requested: int) -> RecoverResponse:
+        return RecoverResponse(
+            adapter_type=self._runtime.adapter_name,
+            requested=requested,
+            recovered=len(self.recovered),
+            removed=len(self.removed),
+            unfetchable=self.unfetchable,
+        )
+
+
 def handler(
     ids: list[str],
     runtime: RecoverRuntime,
@@ -70,23 +143,7 @@ def handler(
     setup_logging(execution_context)
 
     unique_ids = list(dict.fromkeys(i for i in ids if i))
-    recovered: list[str] = []
-    removed: list[str] = []
-    unfetchable: list[str] = []
-    buffer: list[dict[str, Any]] = []
-
-    def flush() -> None:
-        if not buffer:
-            return
-        table = pa.Table.from_pylist(buffer, schema=ADAPTER_STORE_ARROW_SCHEMA)
-        runtime.store.incremental_update(table)
-        logger.info(
-            "Committed recovered records",
-            adapter=runtime.adapter_name,
-            committed=len(buffer),
-            recovered_total=len(recovered),
-        )
-        buffer.clear()
+    batch = RecoveryBatch(runtime, commit_every=commit_every)
 
     for record_id in unique_ids:
         time.sleep(POLITE_DELAY_SECONDS)
@@ -95,7 +152,7 @@ def handler(
                 identifier=record_id, metadata_prefix=runtime.metadata_prefix
             )
         except IdDoesNotExistError:
-            removed.append(record_id)
+            batch.add_removed(record_id)
             continue
         except (etree.XMLSyntaxError, OAIError, httpx.HTTPError) as exc:
             # Empty body, an OAI protocol error, or a network failure after the
@@ -103,46 +160,22 @@ def handler(
             # flaky, so classify the id as unfetchable and keep going rather than
             # aborting a large batch on one bad id. Unexpected exceptions (bugs)
             # are deliberately not caught here.
-            logger.warning(
-                "Record unfetchable",
-                adapter=runtime.adapter_name,
-                record_id=record_id,
-                error=type(exc).__name__,
-            )
-            unfetchable.append(record_id)
+            batch.add_unfetchable(record_id, exc)
             continue
 
-        content = _serialize_metadata(record)
-        recovered.append(record_id)
-        buffer.append(
-            {
-                "namespace": runtime.namespace,
-                "id": record_id,
-                "content": content,
-                "last_modified": record.header.datestamp,
-                "deleted": content is None,
-            }
-        )
-        if len(buffer) >= commit_every:
-            flush()
+        batch.add_recovered(record_id, record)
 
-    flush()
+    batch.flush()
 
     logger.info(
         "Recover-by-id complete",
         adapter=runtime.adapter_name,
         requested=len(unique_ids),
-        recovered=len(recovered),
-        removed=len(removed),
-        unfetchable=len(unfetchable),
+        recovered=len(batch.recovered),
+        removed=len(batch.removed),
+        unfetchable=len(batch.unfetchable),
     )
-    return RecoverResponse(
-        adapter_type=runtime.adapter_name,
-        requested=len(unique_ids),
-        recovered=len(recovered),
-        removed=len(removed),
-        unfetchable=unfetchable,
-    )
+    return batch.to_response(requested=len(unique_ids))
 
 
 def build_runtime(adapter_type: str, use_rest_api_table: bool = True) -> RecoverRuntime:
