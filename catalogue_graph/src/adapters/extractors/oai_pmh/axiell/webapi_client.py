@@ -23,10 +23,6 @@ logger = structlog.get_logger(__name__)
 
 DEFAULT_DATABASE = "collect"
 DEFAULT_PAGE_SIZE = 1000
-# Absolute page ceiling. At the default page size this is ~1 billion records,
-# far beyond any real database, so it only ever trips on a server that ignores
-# ``startfrom`` and never drains (which would otherwise loop until timeout).
-DEFAULT_MAX_PAGES = 1_000_000
 
 
 def oai_url_to_webapi_url(oai_endpoint: str) -> str:
@@ -55,13 +51,11 @@ class AxiellWebApiClient:
         client: httpx.Client,
         database: str = DEFAULT_DATABASE,
         page_size: int = DEFAULT_PAGE_SIZE,
-        max_pages: int = DEFAULT_MAX_PAGES,
     ) -> None:
         self._base_url = base_url
         self._client = client
         self._database = database
         self._page_size = page_size
-        self._max_pages = max_pages
 
     def _search(self, *, fields: str, limit: int, startfrom: int) -> etree._Element:
         response = self._client.get(
@@ -94,39 +88,44 @@ class AxiellWebApiClient:
         return int(hits)
 
     def enumerate_ids(self, *, namespace: str = DEFAULT_DATABASE) -> Iterator[str]:
-        """Yield every record id as ``<namespace>:<priref>``, paging statelessly.
+        """Yield every distinct record id as ``<namespace>:<priref>``.
 
-        Each page is an independent request (``startfrom`` offset), so a retry of
-        one page never invalidates the others. Terminates on ``seen >= total`` or
-        an empty page; ``max_pages`` is an absolute backstop against a server that
-        ignores ``startfrom`` and never drains (which matters most when the
-        response carries no ``hits`` total to bound the loop).
+        Each page is an independent ``startfrom`` request, so a retry of one page
+        never invalidates the others. The expected total comes from :meth:`count`,
+        which requires ``<diagnostic><hits>`` and so fails loudly if the server
+        stops reporting it.
+
+        Ids already yielded are tracked, so a server that ignores ``startfrom``
+        and repeats a page terminates immediately rather than re-yielding the same
+        records until the total is nominally reached. Enumeration is only
+        considered complete when the distinct id count matches the expected total.
         """
+        total = self.count()
+        seen_ids: set[str] = set()
         startfrom = 1
-        total: int | None = None
-        seen = 0
-        pages = 0
-        while True:
-            if pages >= self._max_pages:
-                raise RuntimeError(
-                    f"WebAPI enumeration exceeded {self._max_pages} pages without "
-                    f"draining (seen={seen}, total={total}); startfrom may be "
-                    f"ignored server-side"
-                )
+        while len(seen_ids) < total:
             root = self._search(
                 fields="priref", limit=self._page_size, startfrom=startfrom
             )
-            pages += 1
-            if total is None:
-                hits = root.findtext(".//diagnostic/hits")
-                total = int(hits) if hits is not None else None
             prirefs = [p.text for p in root.findall(".//record/priref") if p.text]
             if not prirefs:
                 break
+            new_ids = []
             for priref in prirefs:
-                yield f"{namespace}:{priref}"
-            seen += len(prirefs)
-            startfrom += self._page_size
-            if total is not None and seen >= total:
+                record_id = f"{namespace}:{priref}"
+                if record_id not in seen_ids:
+                    new_ids.append(record_id)
+            if not new_ids:
                 break
-        logger.info("Enumerated WebAPI ids", database=self._database, count=seen)
+            seen_ids.update(new_ids)
+            yield from new_ids
+            startfrom += self._page_size
+        if len(seen_ids) != total:
+            raise RuntimeError(
+                f"WebAPI enumeration yielded {len(seen_ids)} distinct ids but the "
+                f"database reports {total} (database={self._database}); paging may "
+                f"be faulty server-side"
+            )
+        logger.info(
+            "Enumerated WebAPI ids", database=self._database, count=len(seen_ids)
+        )

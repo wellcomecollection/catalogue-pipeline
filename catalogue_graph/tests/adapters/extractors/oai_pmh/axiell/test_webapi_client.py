@@ -56,15 +56,16 @@ def test_enumerate_ids_pages_statelessly_until_hits_reached() -> None:
     assert ids == ["collect:1", "collect:2", "collect:3"]
 
 
-def test_enumerate_ids_stops_on_empty_page() -> None:
+def test_enumerate_ids_raises_when_page_runs_out_before_total() -> None:
+    # The server reports more records than it actually pages out. Stopping early
+    # and silently under-reporting would look like a mass deletion to the caller.
     def handler(request: httpx.Request) -> httpx.Response:
         startfrom = int(request.url.params["startfrom"])
         prirefs = ["1"] if startfrom == 1 else []
-        # hits deliberately larger than returned so the empty page is what stops it
         return httpx.Response(200, content=_adlib_xml(prirefs, hits=999))
 
-    ids = list(_client(handler, page_size=1).enumerate_ids())
-    assert ids == ["collect:1"]
+    with pytest.raises(RuntimeError, match="1 distinct ids but the database reports"):
+        list(_client(handler, page_size=1).enumerate_ids())
 
 
 def test_empty_body_raises() -> None:
@@ -75,9 +76,9 @@ def test_empty_body_raises() -> None:
         _client(handler).count()
 
 
-def test_enumerate_ids_caps_pages_when_startfrom_ignored() -> None:
-    # A server that ignores startfrom and reports no total returns a non-empty
-    # page forever; the absolute page cap is the only thing that stops it.
+def test_enumerate_ids_requires_a_hits_total() -> None:
+    # A response with no <diagnostic><hits> must fail loudly rather than fall back
+    # to an unbounded enumeration with no expected total to check against.
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(
             200,
@@ -88,5 +89,16 @@ def test_enumerate_ids_caps_pages_when_startfrom_ignored() -> None:
             ),
         )
 
-    with pytest.raises(RuntimeError, match="exceeded"):
-        list(_client(handler, page_size=1, max_pages=3).enumerate_ids())
+    with pytest.raises(ValueError, match="did not contain a <hits> count"):
+        list(_client(handler, page_size=1).enumerate_ids())
+
+
+def test_enumerate_ids_stops_when_startfrom_is_ignored() -> None:
+    # A server that ignores startfrom repeats page 1 forever. Tracking yielded ids
+    # stops that on the second page rather than re-yielding the same record until
+    # the total is nominally reached.
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=_adlib_xml(["1"], hits=3))
+
+    with pytest.raises(RuntimeError, match="1 distinct ids but the database reports 3"):
+        list(_client(handler, page_size=1).enumerate_ids())
