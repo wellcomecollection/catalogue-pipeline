@@ -28,7 +28,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   ): FieldMergeResult[FieldData] = {
     val items =
       mergeIntoTeiTarget(target, sources)
-        .orElse(mergeIntoCalmTarget(target, sources))
+        .orElse(mergeIntoCalmOrAxiellTarget(target, sources))
         .orElse(mergeMetsIntoSierraTarget(target, sources))
         .orElse(
           mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
@@ -39,7 +39,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val mergedSources = (
       List(
         mergeIntoTeiTarget,
-        mergeIntoCalmTarget,
+        mergeIntoCalmOrAxiellTarget,
         mergeMetsIntoSierraTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget
       ).flatMap {
@@ -141,7 +141,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     * means we'll also pick up any items linked to the Sierra work from METS or
     * Miro.
     */
-  private val mergeIntoCalmTarget = new PartialRule {
+  private val mergeIntoCalmOrAxiellTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate =
       singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
     val isDefinedForSource: WorkPredicate =
