@@ -149,4 +149,12 @@ class WorkPredicatesTest
       ).items(List(createCalmItem))
     ) shouldBe false
   }
+
+  it("does not select an Axiell work as singlePhysicalItemCalmWork") {
+    WorkPredicates.singlePhysicalItemCalmWork(
+      identifiedWork(
+        sourceIdentifier = createAxiellSourceIdentifier
+      ).items(List(createCalmItem))
+    ) shouldBe false
+  }
 }
