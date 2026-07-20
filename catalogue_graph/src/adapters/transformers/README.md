@@ -25,8 +25,8 @@ The transformer pipeline consists of:
 
 - **`AxiellTransformer`**: Transforms Axiell/Mimsy records into `InvisibleSourceWork` documents
 - **`EbscoTransformer`**: Transforms EBSCO serial records into `VisibleSourceWork` documents
-- **`FolioTransformer`**: Transforms FOLIO instance records (enriched with holdings/items) into `VisibleSourceWork`
-  documents
+- **`FolioTransformer`**: Transforms FOLIO instance records into `VisibleSourceWork` documents, joining a second
+  Iceberg store to attach items. See [FOLIO item enrichment](#folio-item-enrichment) section for more information
 - **`AxiellReconciler`**: A special Axiell transformer emitting `DeletedSourceWork` documents.
   See [Axiell reconciler](#axiell-reconciler) section for more information
 
@@ -197,3 +197,21 @@ flowchart TD
     transformer_store[(Transformer Store<br/>guid: Work)]
     delete -.-> transformer_store
 ```
+
+## FOLIO item enrichment
+
+The FOLIO transformer differs from the others in that it reads *two* Iceberg tables. The FOLIO OAI-PMH bib record
+carries no item UUIDs, so a separate enrichment step (`adapters.steps.oai_pmh.folio_enrich`, running between the
+loader and the publish event) maintains an items store keyed by instance id. At transform time `FolioStoreSource`
+joins that store onto each bib row (in bounded batches, attached as `enrichment_content`), and `FolioWorkBuilder`
+emits items carrying a `folio-item` source identifier with the inventory UUID.
+
+Transformer-side behaviour to be aware of:
+
+- The items table must exist: a missing table fails the transform (`NoSuchTableError`) rather than silently emitting
+  works without items. On a fresh environment, run one enrichment pass before transforming.
+- An instance that has not been enriched emits no items; the transformer never guesses item identity from MARC 952.
+- Transformation never calls FOLIO. A full reindex joins whatever is already in the items store.
+
+See [Item enrichment](../extractors/oai_pmh/folio/README.md#item-enrichment) in the FOLIO adapter README for the full
+design, including how the items store is populated and kept current.
