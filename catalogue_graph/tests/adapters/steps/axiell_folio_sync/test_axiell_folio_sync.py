@@ -232,6 +232,26 @@ def test_no_s3_report_without_bucket(monkeypatch: pytest.MonkeyPatch) -> None:
     assert resp.manifest_s3_path is None
 
 
+def test_no_s3_report_with_empty_string_bucket(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fail_to_s3(model: Any, s3_uri: str) -> None:
+        raise AssertionError("must not publish to S3 with an empty bucket name")
+
+    monkeypatch.setattr("utils.reporting.pydantic_to_s3_json", fail_to_s3)
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [_row("sel", SELECTED)],
+        FakeRefCache(),  # type: ignore[arg-type]
+        _FakeInventory(),
+        dry_run=True,
+        manifest_bucket="",
+    )
+
+    assert resp.manifest_s3_path is None
+
+
 def test_report_s3_uri_requires_bucket() -> None:
     report = AxiellFolioSyncReport(job_id="job-1", dry_run=True, counts={})
 

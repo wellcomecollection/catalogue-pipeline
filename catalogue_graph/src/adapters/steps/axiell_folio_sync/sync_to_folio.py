@@ -253,7 +253,7 @@ def run_sync(
         s3_bucket=manifest_bucket,
         # The S3 report is written even on dry runs (it is how dry runs are
         # validated); only CloudWatch metrics are suppressed.
-        publish_to_s3=manifest_bucket is not None,
+        publish_to_s3=bool(manifest_bucket),
     )
     report.publish()
     manifest_path = report.s3_uri if manifest_bucket else None
