@@ -159,9 +159,15 @@ def handler(
 
     batch = ReconcilerBaselineBatch(runtime, batch_size=batch_size)
 
-    for record_batch in runtime.adapter_store.stream_active_namespace_records():
-        for row in record_batch.to_pylist():
-            batch.add_row(row)
+    # Close the reader on exit so an abandoned stream (e.g. a row that fails
+    # mid-rebuild) does not leave prefetch reads running.
+    batches = runtime.adapter_store.stream_active_namespace_records()
+    try:
+        for record_batch in batches:
+            for row in record_batch.to_pylist():
+                batch.add_row(row)
+    finally:
+        batches.close()
     batch.flush()
 
     logger.info(
