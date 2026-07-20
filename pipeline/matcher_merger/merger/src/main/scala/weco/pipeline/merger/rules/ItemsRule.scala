@@ -132,10 +132,12 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     * information about access status, hold count, etc. The Calm/Axiell items
     * are just stubs.
     *
-    * See CalmItems.scala (axiell_work_builder.py) -- the Calm/Axiell item is
-    * only:
+    * See CalmItems.scala and axiell_work_builder.py -- the Calm/Axiell item is
+    * essentially a single item with a ClosedStores PhysicalLocation (and
+    * optional accessConditions), e.g.
     *
-    * Item { locations: [ Location { locationType = ClosedStores } ] }
+    * Item { locations: [ PhysicalLocation { locationType = ClosedStores,
+    * accessConditions = [...] } ] }
     *
     * For this reason, we keep all the items *except* the Calm/Axiell item. This
     * means we'll also pick up any items linked to the Sierra work from METS or
