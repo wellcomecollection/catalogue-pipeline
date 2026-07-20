@@ -7,7 +7,7 @@ locals {
 
 data "aws_iam_policy_document" "allow_catalogue_graph_secret_read" {
   statement {
-    actions = ["secretsmanager:GetSecretValue"]
+    actions   = ["secretsmanager:GetSecretValue"]
     resources = [
       "${local.secrets_manager_prefix}:catalogue-graph/*"
     ]
@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "allow_slack_secret_read" {
 
 data "aws_iam_policy_document" "ingestor_allow_pipeline_storage_secret_read" {
   statement {
-    actions = ["secretsmanager:GetSecretValue"]
+    actions   = ["secretsmanager:GetSecretValue"]
     resources = [
       "${local.secrets_manager_prefix}:${var.es_cluster_host}*",
       "${local.secrets_manager_prefix}:${var.es_cluster_port}*",
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "ingestor_allow_pipeline_storage_secret_read" {
 
 data "aws_iam_policy_document" "allow_pipeline_storage_secret_read_denormalised_read_only" {
   statement {
-    actions = ["secretsmanager:GetSecretValue"]
+    actions   = ["secretsmanager:GetSecretValue"]
     resources = [
       "${local.secrets_manager_prefix}:${var.es_cluster_host}*",
       "${local.secrets_manager_prefix}:${var.es_cluster_port}*",
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "neptune_read" {
     ]
 
     resources = [
-      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arns[var.graph_date]
     ]
   }
 }
@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "neptune_delete" {
     ]
 
     resources = [
-      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arns[var.graph_date]
     ]
   }
 }
