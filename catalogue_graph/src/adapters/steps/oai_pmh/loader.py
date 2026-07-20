@@ -1,7 +1,16 @@
 """Generic loader step for OAI-PMH adapters.
 
-Harvests OAI-PMH windows requested by the trigger step, persists raw records
-into Iceberg, and emits changeset identifiers for downstream processing.
+The loader runs in one of two modes, selected by the event's ``mode`` field.
+
+Window mode harvests the range requested by the trigger step, tracking progress
+in the window store so an interrupted run resumes where it stopped. Id mode
+fetches an explicit list of record ids via ``GetRecord``, for records the source
+holds but the store is missing; it keeps no window state, so a re-run re-fetches
+everything.
+
+The modes share only the record writer. Both emit changeset identifiers, so
+either causes the state machine to publish and the transformer to pick the work
+up.
 
 This module provides reusable loader logic that can be used by any
 OAI-PMH adapter by providing an OAIPMHRuntimeConfig implementation.
@@ -11,29 +20,39 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from typing import Any
 
+import httpx
 import structlog
+from lxml import etree
 from oai_pmh_client.client import OAIClient
+from oai_pmh_client.exceptions import IdDoesNotExistError, OAIError
 from pydantic import BaseModel, ConfigDict
 
 from adapters.extractors.oai_pmh.models.step_events import (
+    UNFETCHABLE_SAMPLE_SIZE,
+    LoaderEvent,
+    LoaderResponse,
+    OAIPMHIdLoaderEvent,
+    OAIPMHIdLoaderResponse,
     OAIPMHLoaderEvent,
     OAIPMHLoaderResponse,
+    validate_loader_event,
 )
 from adapters.extractors.oai_pmh.record_writer import (
     BufferedWindowRecordWriter,
     WindowRecordWriter,
 )
 from adapters.extractors.oai_pmh.registry import get_config
-from adapters.extractors.oai_pmh.reporting import OAIPMHLoaderReport
+from adapters.extractors.oai_pmh.reporting import OAIPMHIdLoadReport, OAIPMHLoaderReport
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import WindowHarvestManager
 from adapters.utils.window_store import WindowStore
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
-from utils.steps import ecs_handler
+from utils.steps import create_job_id, ecs_handler
 
 logger = structlog.get_logger(__name__)
 
@@ -200,22 +219,133 @@ def execute_loader(
     )
 
 
+class IdLoadOutcome:
+    """Classification counts for an id-mode run.
+
+    Ids fall into exactly one of three buckets. ``removed`` records the source
+    reporting ``idDoesNotExist``; note this does *not* write a tombstone. See
+    :func:`execute_id_loader` for why.
+    """
+
+    def __init__(self) -> None:
+        self.recovered: list[str] = []
+        self.removed: list[str] = []
+        self.unfetchable: list[str] = []
+
+
+def execute_id_loader(
+    request: OAIPMHIdLoaderEvent,
+    runtime: LoaderRuntime,
+) -> tuple[OAIPMHIdLoaderResponse, list[str]]:
+    """Fetch each requested id and write the recoverable ones in batches.
+
+    Returns the response alongside the *full* list of unfetchable ids. The
+    response carries only a sample of those, to bound the payload the state
+    machine passes onward; the full list belongs in the report.
+
+    Deletions are deliberately asymmetric with window mode. There, a tombstone
+    is written when the repository affirmatively reports ``status="deleted"``.
+    Here, ``IdDoesNotExistError`` is a weaker and different assertion -- "this
+    identifier is not in this repository" -- which fires equally for a typo in
+    an operator's id list or an id from another set. Since this response now
+    publishes changesets, tombstoning on that signal would propagate a delete
+    downstream to Elasticsearch automatically. Removed ids are therefore
+    reported and counted, never written.
+
+    No window-status rows are written either. A synthetic window row would enter
+    the coverage report and shift the trigger's resume cursor to a range that
+    was never harvested.
+    """
+    unique_ids = list(dict.fromkeys(i for i in request.ids if i))
+    outcome = IdLoadOutcome()
+
+    writer = BufferedWindowRecordWriter(
+        namespace=runtime.adapter_namespace,
+        table_client=runtime.table_client,
+        job_id=request.job_id,
+        flush_threshold=request.commit_every,
+    )
+
+    for record_id in unique_ids:
+        time.sleep(request.polite_delay_seconds)
+        try:
+            record = runtime.oai_client.get_record(
+                identifier=record_id, metadata_prefix=request.metadata_prefix
+            )
+        except IdDoesNotExistError:
+            outcome.removed.append(record_id)
+            continue
+        except (etree.XMLSyntaxError, OAIError, httpx.HTTPError) as exc:
+            # Empty body, an OAI protocol error, or a network failure after the
+            # client's own retries. The source this targets is known to be
+            # flaky, so classify the id as unfetchable and keep going rather than
+            # aborting a large batch on one bad id. Unexpected exceptions (bugs)
+            # are deliberately not caught here.
+            logger.warning(
+                "Unfetchable record",
+                record_id=record_id,
+                error=type(exc).__name__,
+            )
+            outcome.unfetchable.append(record_id)
+            continue
+
+        outcome.recovered.append(record_id)
+        writer([(record_id, record)])
+
+    writer.flush()
+
+    logger.info(
+        "Id load complete",
+        adapter=runtime.adapter_name,
+        requested=len(unique_ids),
+        recovered=len(outcome.recovered),
+        removed=len(outcome.removed),
+        unfetchable=len(outcome.unfetchable),
+        changeset_count=len(writer.changeset_ids),
+    )
+
+    response = OAIPMHIdLoaderResponse(
+        job_id=request.job_id,
+        changeset_ids=writer.changeset_ids,
+        changed_record_count=writer.upserted_record_count,
+        requested=len(unique_ids),
+        recovered=len(outcome.recovered),
+        removed=len(outcome.removed),
+        unfetchable_count=len(outcome.unfetchable),
+        unfetchable_sample=outcome.unfetchable[:UNFETCHABLE_SAMPLE_SIZE],
+    )
+    return response, outcome.unfetchable
+
+
 def handler(
-    event: OAIPMHLoaderEvent,
+    event: LoaderEvent,
     runtime: LoaderRuntime,
     execution_context: ExecutionContext | None = None,
-) -> OAIPMHLoaderResponse:
-    """Execute the loader step.
+) -> LoaderResponse:
+    """Execute the loader step in whichever mode the event selects.
 
     Args:
-        event: Loader event with window and OAI-PMH parameters.
+        event: Loader event, either window mode or id mode.
         runtime: Runtime dependencies and configuration.
         execution_context: Optional logging context.
 
     Returns:
-        OAIPMHLoaderResponse with harvest results.
+        The response for the selected mode. Both carry ``changeset_ids``, which
+        is what drives the downstream publish.
     """
     setup_logging(execution_context)
+
+    if isinstance(event, OAIPMHIdLoaderEvent):
+        id_response, unfetchable = execute_id_loader(event, runtime=runtime)
+        OAIPMHIdLoadReport.from_id_load(
+            id_response,
+            adapter_type=runtime.adapter_name,
+            unfetchable=unfetchable,
+            report_s3_bucket=runtime.report_s3_bucket,
+            report_s3_prefix=runtime.report_s3_prefix,
+        ).publish()
+        return id_response
+
     response = execute_loader(event, runtime=runtime)
 
     report = OAIPMHLoaderReport.from_loader(
@@ -242,7 +372,7 @@ def lambda_handler(
     Resolves the adapter config from the ``adapter_type`` field in the event
     (injected by the Step Functions state machine from the scheduler input).
     """
-    request = OAIPMHLoaderEvent.model_validate(event)
+    request = validate_loader_event(event)
     config = get_config(request.adapter_type)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
@@ -253,6 +383,19 @@ def lambda_handler(
     return response.model_dump(mode="json")
 
 
+def _read_ids(args: argparse.Namespace) -> list[str]:
+    """Collect record ids from --ids and/or --ids-file."""
+    ids: list[str] = []
+    if args.ids:
+        ids += [i.strip() for i in args.ids.split(",") if i.strip()]
+    if args.ids_file:
+        with open(args.ids_file, encoding="utf-8") as f:
+            ids += [line.strip() for line in f if line.strip()]
+    if not ids:
+        raise ValueError("No record ids supplied; use --ids or --ids-file")
+    return ids
+
+
 def local_handler(parser: argparse.ArgumentParser) -> None:
     """Run the loader step from the command line."""
     from adapters.utils.argparse import add_adapter_event_args
@@ -261,8 +404,33 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--event",
         type=str,
-        required=True,
-        help="Path to a loader event JSON payload",
+        default=None,
+        help="Path to a window-mode loader event JSON payload",
+    )
+    parser.add_argument(
+        "--ids",
+        type=str,
+        default=None,
+        help="Comma-separated record ids to fetch (selects id mode)",
+    )
+    parser.add_argument(
+        "--ids-file",
+        type=str,
+        default=None,
+        help="Path to a file of record ids, one per line (selects id mode)",
+    )
+    parser.add_argument(
+        "--commit-every",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Id mode: records buffered before committing a batch",
+    )
+    parser.add_argument(
+        "--job-id",
+        type=str,
+        default=None,
+        help="Id mode: job identifier (defaults to a generated one)",
     )
     parser.add_argument(
         "--allow-partial-final-window",
@@ -290,16 +458,38 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     args = parser.parse_args()
     config = get_config(args.adapter_type)
 
-    with open(args.event, encoding="utf-8") as f:
-        event_data = json.load(f)
-        # Set allow_partial_final_window from CLI arg if not in event
-        if "allow_partial_final_window" not in event_data:
-            event_data["allow_partial_final_window"] = args.allow_partial_final_window
-        event = OAIPMHLoaderEvent.model_validate(event_data)
+    id_mode = bool(args.ids or args.ids_file)
+    if id_mode and args.event:
+        raise ValueError("--event is window mode; do not combine it with --ids")
+    if not id_mode and not args.event:
+        raise ValueError("Supply --event for window mode, or --ids/--ids-file")
 
-    runtime = build_runtime(
-        config,
-        LoaderStepConfig(
+    event: LoaderEvent
+    if id_mode:
+        id_kwargs: dict[str, Any] = {
+            "mode": "ids",
+            "adapter_type": args.adapter_type,
+            "job_id": args.job_id or f"idload-{create_job_id()}",
+            "ids": _read_ids(args),
+        }
+        if args.commit_every is not None:
+            id_kwargs["commit_every"] = args.commit_every
+        event = OAIPMHIdLoaderEvent.model_validate(id_kwargs)
+        step_config = LoaderStepConfig(
+            use_rest_api_table=args.use_rest_api_table,
+            suppress_summaries=False,
+        )
+    else:
+        with open(args.event, encoding="utf-8") as f:
+            event_data = json.load(f)
+            # Set allow_partial_final_window from CLI arg if not in event
+            if "allow_partial_final_window" not in event_data:
+                event_data["allow_partial_final_window"] = (
+                    args.allow_partial_final_window
+                )
+            event = OAIPMHLoaderEvent.model_validate(event_data)
+
+        step_config = LoaderStepConfig(
             use_rest_api_table=args.use_rest_api_table,
             window_minutes=event.window_minutes,
             allow_partial_final_window=(
@@ -310,8 +500,9 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
             suppress_summaries=False,
             reprocess_successful_windows=args.reprocess_successful_windows,
             flush_every=args.flush_every,
-        ),
-    )
+        )
+
+    runtime = build_runtime(config, step_config)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
         pipeline_step=f"{config.config.pipeline_step_prefix}_loader",
@@ -322,9 +513,9 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
 
 
 def ecs_task_handler(
-    event: OAIPMHLoaderEvent,
+    event: LoaderEvent,
     execution_context: ExecutionContext,
-) -> OAIPMHLoaderResponse:
+) -> LoaderResponse:
     """ECS task handler invoked by ecs_handler utility."""
     config = get_config(event.adapter_type)
     execution_context = ExecutionContext(
@@ -335,9 +526,9 @@ def ecs_task_handler(
     return handler(event, runtime, execution_context=execution_context)
 
 
-def event_validator(raw_input: str) -> OAIPMHLoaderEvent:
-    """Validate raw JSON input into an OAIPMHLoaderEvent."""
-    return OAIPMHLoaderEvent.model_validate(json.loads(raw_input))
+def event_validator(raw_input: str) -> LoaderEvent:
+    """Validate raw JSON input into whichever loader event the mode selects."""
+    return validate_loader_event(json.loads(raw_input))
 
 
 if __name__ == "__main__":

@@ -255,6 +255,7 @@ class TestHandler:
 
             response = loader.handler(req, runtime=loader_runtime)
 
+        assert isinstance(response, OAIPMHLoaderResponse)
         assert response.summaries == []
 
     def test_keeps_summaries_when_suppression_disabled(
@@ -277,6 +278,7 @@ class TestHandler:
 
             response = loader.handler(req, runtime=loader_runtime)
 
+        assert isinstance(response, OAIPMHLoaderResponse)
         assert len(response.summaries) == 1
 
 

@@ -11,6 +11,7 @@ from typing import ClassVar
 from pydantic import Field
 
 from adapters.extractors.oai_pmh.models.step_events import (
+    OAIPMHIdLoaderResponse,
     OAIPMHLoaderEvent,
     OAIPMHLoaderResponse,
 )
@@ -19,15 +20,14 @@ from models.incremental_window import IncrementalWindow
 from utils.reporting import PipelineMetric, PipelineReport
 
 
-class OAIPMHReport(PipelineReport):
+class OAIPMHReportBase(PipelineReport):
     """Base report class for OAI-PMH adapters.
 
     Subclasses should set adapter_type to drive metrics dimensions.
     The pipeline_step dimension is automatically injected by PipelineReport.put_metrics().
-    Window is required for adapter reports.
+    Carries no window, so it also serves steps that do not harvest one.
     """
 
-    window: IncrementalWindow
     adapter_type: str
     """Adapter identifier (e.g., 'axiell', 'folio') for metrics dimensions."""
 
@@ -45,6 +45,18 @@ class OAIPMHReport(PipelineReport):
         return "catalogue_adapters"
 
     @property
+    def metric_dimensions(self) -> dict:
+        return {
+            "adapter_type": self.adapter_type,
+        }
+
+
+class OAIPMHReport(OAIPMHReportBase):
+    """Base report for window-harvesting steps, keyed on the harvested window."""
+
+    window: IncrementalWindow
+
+    @property
     def s3_uri(self) -> str:
         start = self.window.start_time.strftime("%Y%m%dT%H%M%S")
         end = self.window.end_time.strftime("%Y%m%dT%H%M%S")
@@ -52,12 +64,6 @@ class OAIPMHReport(PipelineReport):
             f"s3://{self.report_s3_bucket}/{self.report_s3_prefix}"
             f"/reports/{self.adapter_type}/{self.label}/{start}_{end}.json"
         )
-
-    @property
-    def metric_dimensions(self) -> dict:
-        return {
-            "adapter_type": self.adapter_type,
-        }
 
 
 class OAIPMHLoaderReport(OAIPMHReport):
@@ -115,6 +121,81 @@ class OAIPMHLoaderReport(OAIPMHReport):
             PipelineMetric(
                 name="window_failure_count", value=self.window_failure_count
             ),
+            PipelineMetric(
+                name="record_changes_count", value=self.record_changes_count
+            ),
+            PipelineMetric(name="changeset_count", value=self.changeset_count),
+        ]
+
+
+class OAIPMHIdLoadReport(OAIPMHReportBase):
+    """Loader step report for id mode.
+
+    A separate label from the window-mode loader report, so runs that harvest no
+    windows do not land zeroes on the window dashboards.
+    """
+
+    label: ClassVar[str] = "adapter_id_load"
+    job_id: str
+    requested_count: int
+    recovered_count: int
+    removed_count: int
+    unfetchable_count: int
+    changeset_count: int = 0
+    record_changes_count: int = 0
+
+    unfetchable: list[str] = Field(default_factory=list)
+    """Every unfetchable id. The response carries only a sample, so this is the
+    complete record of what needs another attempt."""
+
+    @property
+    def s3_uri(self) -> str:
+        return (
+            f"s3://{self.report_s3_bucket}/{self.report_s3_prefix}"
+            f"/reports/{self.adapter_type}/{self.label}/{self.job_id}.json"
+        )
+
+    @classmethod
+    def from_id_load(
+        cls,
+        response: OAIPMHIdLoaderResponse,
+        *,
+        adapter_type: str,
+        unfetchable: list[str],
+        report_s3_bucket: str | None = None,
+        report_s3_prefix: str = "dev",
+    ) -> OAIPMHIdLoadReport:
+        """Create a report from an id-mode response.
+
+        Args:
+            response: The id-mode loader response.
+            adapter_type: Adapter identifier for metrics (e.g., 'axiell').
+            unfetchable: The full unfetchable id list, not the response sample.
+            report_s3_bucket: S3 bucket for report storage (None to skip S3).
+            report_s3_prefix: S3 key prefix for report paths.
+        """
+        return cls(
+            adapter_type=adapter_type,
+            publish_to_s3=report_s3_bucket is not None,
+            report_s3_bucket=report_s3_bucket,
+            report_s3_prefix=report_s3_prefix,
+            job_id=response.job_id,
+            requested_count=response.requested,
+            recovered_count=response.recovered,
+            removed_count=response.removed,
+            unfetchable_count=response.unfetchable_count,
+            changeset_count=len(response.changeset_ids),
+            record_changes_count=response.changed_record_count,
+            unfetchable=unfetchable,
+        )
+
+    @property
+    def metrics(self) -> list[PipelineMetric]:
+        return [
+            PipelineMetric(name="requested_count", value=self.requested_count),
+            PipelineMetric(name="recovered_count", value=self.recovered_count),
+            PipelineMetric(name="removed_count", value=self.removed_count),
+            PipelineMetric(name="unfetchable_count", value=self.unfetchable_count),
             PipelineMetric(
                 name="record_changes_count", value=self.record_changes_count
             ),
