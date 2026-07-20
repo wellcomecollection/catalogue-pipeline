@@ -12,7 +12,7 @@ import weco.pipeline.merger.models.FieldMergeResult
 
 /** Identifiers are merged as follows:
   *
-  *   - All source identifiers are merged into Calm works
+  *   - All source identifiers are merged into Calm/Axiell works
   *   - Miro identifiers are merged into single or zero item Sierra works
   *   - Sierra works with linked digitised Sierra works have the first of these
   *     linked IDs merged into them
@@ -27,7 +27,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   // from a source work's otherIdentifiers into a target work.
   //
   // - wellcome-digcode is present to persist digcode identifiers from
-  //   Encore records onto Calm target works if they are merged, because
+  //   Encore records onto Calm/Axiell target works if they are merged, because
   //   digcode identifiers are used as a tagging/classification system.
   private val otherIdentifiersTypeAllowList =
     Set(

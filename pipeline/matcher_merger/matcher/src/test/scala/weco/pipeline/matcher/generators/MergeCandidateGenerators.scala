@@ -38,6 +38,15 @@ trait MergeCandidateGenerators {
       reason = "Calm/Sierra harvest"
     )
 
+  def createAxiellMergeCandidateFor(
+    w: Work[WorkState.Identified]
+  ): MergeCandidate[IdState.Identified] =
+    createMergeCandidate(
+      w,
+      IdentifierType.AxiellGuid,
+      reason = "CALM/Sierra harvest work"
+    )
+
   def createCalmMiroMergeCandidateFor(
     w: Work[WorkState.Identified]
   ): MergeCandidate[IdState.Identified] =
