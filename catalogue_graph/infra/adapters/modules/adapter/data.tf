@@ -28,4 +28,9 @@ locals {
   # published-cursor trigger; adapters on other steps packages (e.g. ebsco)
   # have no OAI-PMH window store to stamp.
   published_tracking = local.steps_namespace == "oai_pmh"
+
+  # Only the oai_pmh loader accepts a mode discriminator and an id list. The
+  # ebsco loader takes its own event, so it gets no id-mode branch rather than
+  # one that routes to a loader unable to parse it.
+  id_mode_enabled = local.steps_namespace == "oai_pmh"
 }
