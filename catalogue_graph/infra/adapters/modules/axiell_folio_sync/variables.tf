@@ -33,7 +33,7 @@ variable "event_bus_name" {
 }
 
 variable "manifest_bucket_name" {
-  description = "S3 bucket name for NDJSON manifest storage."
+  description = "S3 bucket name for JSON run report storage."
   type        = string
 }
 

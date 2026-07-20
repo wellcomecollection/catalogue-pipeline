@@ -1,4 +1,4 @@
-# S3 bucket for NDJSON manifest files produced by sync operations.
+# S3 bucket for the JSON run reports produced by sync operations.
 
 resource "aws_s3_bucket" "axiell_folio_sync_manifests" {
   bucket = var.manifest_bucket_name

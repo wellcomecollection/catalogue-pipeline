@@ -26,8 +26,8 @@ The design, record-selection rules and tombstone semantics are specified in
      FOLIO tenant and reused across warm Lambda starts.
    * **Upsert** (`upsert.py`): writes in Instance → Holdings → Item order via OKAPI, with best-effort rollback if a
      later entity write fails.
-5. Results are written as NDJSON manifests to S3 and published as CloudWatch metrics (`report.py`, namespace
-   `catalogue_adapters`; metrics are suppressed on dry runs).
+5. Results are published via a single `PipelineReport` (`report.py`): one JSON run report to S3 plus CloudWatch
+   metrics (namespace `catalogue_adapters`; metrics are suppressed on dry runs, the S3 report is not).
 
 Rows with `deleted=true` are counted as advisory tombstones and otherwise ignored: the loader's deleted flag is
 unreliable, so this path never suppresses or removes FOLIO records. Authoritative deletes come from the reconciler
@@ -44,8 +44,7 @@ unreliable, so this path never suppresses or removes FOLIO records. Authoritativ
 | `ref_cache.py`         | Cache of FOLIO tenant reference-data UUIDs                           |
 | `upsert.py`            | FOLIO Inventory write orchestration and rollback                     |
 | `folio_callables.py`   | `FolioInventoryOps` protocol decoupling this package from the client |
-| `s3_manifest.py`       | NDJSON manifest writers                                              |
-| `models.py` / `report.py` | Step event/response models; CloudWatch metrics                    |
+| `models.py` / `report.py` | Step event/response/report-entry models; the S3 + CloudWatch run report |
 
 The OKAPI HTTP client itself lives in [`clients/folio_client`](../../../clients/folio_client/).
 
@@ -66,7 +65,7 @@ Environment variables (injected by Terraform in Lambda):
 | Env var              | Description                                                          |
 | -------------------- | -------------------------------------------------------------------- |
 | `OKAPI_SECRET_PARAM` | SSM path to the OKAPI credentials SecureString                       |
-| `MANIFEST_S3_BUCKET` | Bucket for NDJSON run manifests                                      |
+| `MANIFEST_S3_BUCKET` | Bucket for JSON run reports                                          |
 | `DRY_RUN`            | Default dry-run behaviour (`true` unless overridden by the event)    |
 
 For local runs, `OKAPI_URL` / `OKAPI_TENANT` / `OKAPI_USERNAME` / `OKAPI_PASSWORD` override the corresponding SSM
@@ -80,14 +79,18 @@ fields (and skip SSM entirely if all four are set).
 
 The parameter is seeded with placeholders by Terraform; real values are set out-of-band.
 
-## Manifests
+## Run reports
 
-Each run writes to the manifest bucket (`wellcomecollection-axiell-folio-sync-manifests`, expiring after
-`manifest_retention_days`, default 90):
+Each run writes a single JSON report to the manifest bucket (`wellcomecollection-axiell-folio-sync-manifests`,
+expiring after `manifest_retention_days`, default 90):
 
-* `manifests/<job_id>.ids.ndjson` — successfully synced records with per-entity actions
-* `manifests/<job_id>.ids.failures.ndjson` — per-record errors with the failing stage (only written when there are errors)
-* `manifests/<job_id>.manifest.json` — run metadata and counts
+* `manifests/<job_id>.json` — counts, the successfully synced records with per-entity actions (`successful`), and
+  per-record errors with the failing stage (`errors`)
+
+The report is written on dry runs too, so a dry run can be validated before flipping `dry_run_default`. This uses the
+shared `PipelineReport` machinery (`utils/reporting.py`), following the consolidated run-artefact convention
+introduced for the transformers and ID minter in
+[#3468](https://github.com/wellcomecollection/catalogue-pipeline/pull/3468).
 
 ## Running locally
 
