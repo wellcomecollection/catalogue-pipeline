@@ -1,3 +1,13 @@
+locals {
+  neptune_clusters = [
+    module.catalogue_graph_neptune_cluster,
+    module.catalogue_graph_neptune_cluster_dev,
+    module.catalogue_graph_neptune_cluster_2026_07_03
+  ]
+
+  production_cluster = module.catalogue_graph_neptune_cluster
+}
+
 module "catalogue_graph_neptune_cluster" {
   source = "./modules/catalogue_graph"
 
@@ -54,9 +64,10 @@ module "catalogue_graph_neptune_cluster_2026_07_03" {
     aws.dns = aws.dns
   }
 }
+
 resource "aws_ssm_parameter" "production_graph_date" {
   name        = "/catalogue_graph/production_graph_date"
   type        = "String"
   description = "The graph_date of the current production Neptune cluster (or 'prod' for the legacy cluster), read by CI."
-  value       = module.catalogue_graph_neptune_cluster.graph_date != "" ? module.catalogue_graph_neptune_cluster.graph_date : "prod"
+  value       = local.production_cluster.graph_date != "" ? local.production_cluster.graph_date : "prod"
 }
