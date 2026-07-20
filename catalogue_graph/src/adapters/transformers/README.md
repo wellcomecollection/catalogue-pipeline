@@ -15,20 +15,25 @@ The transformer pipeline consists of:
 ### Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────────┐    ┌─────────────────┐    ┌───────────────┐
-│  Iceberg Table  │───▶│  MarcXmlTransformer  │───▶│   SourceWork    │───▶│ Elasticsearch │
-│  (Adapter Store)│    │  (Axiell or EBSCO)   │    │   Documents     │    │    Index      │
-└─────────────────┘    └──────────────────────┘    └─────────────────┘    └───────────────┘
+┌─────────────────┐    ┌────────────────────────┐    ┌─────────────────┐    ┌───────────────┐
+│  Iceberg Table  │───▶│  MarcXmlTransformer    │───▶│   SourceWork    │───▶│ Elasticsearch │
+│  (Adapter Store)│    │  (Axiell/EBSCO/FOLIO)  │    │   Documents     │    │    Index      │
+└─────────────────┘    └────────────────────────┘    └─────────────────┘    └───────────────┘
 ```
 
 ### Transformer Types
 
 - **`AxiellTransformer`**: Transforms Axiell/Mimsy records into `InvisibleSourceWork` documents
 - **`EbscoTransformer`**: Transforms EBSCO serial records into `VisibleSourceWork` documents
+- **`FolioTransformer`**: Transforms FOLIO instance records into `VisibleSourceWork` documents, joining a second
+  Iceberg store to attach items. See [FOLIO item enrichment](#folio-item-enrichment) section for more information
 - **`AxiellReconciler`**: A special Axiell transformer emitting `DeletedSourceWork` documents.
   See [Axiell reconciler](#axiell-reconciler) section for more information
 
-Both inherit from `MarcXmlTransformer`, which handles common MARC parsing and deleted record handling.
+All inherit from `MarcXmlTransformer`, which handles common MARC parsing and deleted record handling.
+
+Note: the Axiell to FOLIO *sync* (which writes Axiell records out to FOLIO Inventory rather than into Elasticsearch)
+is not a transformer; it lives in [`adapters/steps/axiell_folio_sync`](../steps/axiell_folio_sync/README.md).
 
 ## Running the Transformer
 
@@ -121,7 +126,7 @@ AWS_PROFILE=platform-developer uv run python -m adapters.steps.transformer \
 
 | Argument                 | Required | Description                                                                                                                               |
 |--------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| `--transformer-type`     | Yes      | Which transformer to run: `axiell`, `ebsco`, or `axiell_reconciler`                                                                       |
+| `--transformer-type`     | Yes      | Which transformer to run: `axiell`, `ebsco`, `folio`, or `axiell_reconciler`                                                              |
 | `--changeset-id`         | No       | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records. Required for `axiell_reconciler`. |
 | `--job-id`               | No       | Job identifier for manifest tracking. Defaults to `dev`.                                                                                  |
 | `--use-rest-api-table`   | No       | Use the S3 Tables catalog instead of local storage.                                                                                       |
@@ -192,3 +197,21 @@ flowchart TD
     transformer_store[(Transformer Store<br/>guid: Work)]
     delete -.-> transformer_store
 ```
+
+## FOLIO item enrichment
+
+The FOLIO transformer differs from the others in that it reads *two* Iceberg tables. The FOLIO OAI-PMH bib record
+carries no item UUIDs, so a separate enrichment step (`adapters.steps.oai_pmh.folio_enrich`, running between the
+loader and the publish event) maintains an items store keyed by instance id. At transform time `FolioStoreSource`
+joins that store onto each bib row (in bounded batches, attached as `enrichment_content`), and `FolioWorkBuilder`
+emits items carrying a `folio-item` source identifier with the inventory UUID.
+
+Transformer-side behaviour to be aware of:
+
+- The items table must exist: a missing table fails the transform (`NoSuchTableError`) rather than silently emitting
+  works without items. On a fresh environment, run one enrichment pass before transforming.
+- An instance that has not been enriched emits no items; the transformer never guesses item identity from MARC 952.
+- Transformation never calls FOLIO. A full reindex joins whatever is already in the items store.
+
+See [Item enrichment](../extractors/oai_pmh/folio/README.md#item-enrichment) in the FOLIO adapter README for the full
+design, including how the items store is populated and kept current.

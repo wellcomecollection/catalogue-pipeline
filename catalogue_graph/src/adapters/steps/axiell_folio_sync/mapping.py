@@ -17,9 +17,12 @@ Everything a reviewer needs to understand or change the mapping lives here:
 MARC *extraction* (which subfield holds what) stays in mapper.parse_marcxml,
 which yields the CanonicalRecord these builders read from.
 
-Output contract is unchanged from the YAML mapper: ``build_payloads`` returns
+``build_payloads`` returns
 ``{"instance": {...}, "holdings": {...}, "item": {...}, "meta": {...}}`` ready
-for :func:`axiell_folio_sync.upsert.upsert_from_payloads`.
+for :func:`adapters.steps.axiell_folio_sync.upsert.upsert_from_payloads`.
+
+RFC 090 references below point at the design spec:
+https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync
 """
 
 from __future__ import annotations
@@ -413,7 +416,7 @@ def build_payloads(
     """Parse MARCXML and build the three FOLIO payloads.
 
     Returns a :class:`MappedPayloads` model consumed by
-    :func:`axiell_folio_sync.upsert.upsert_from_payloads`.
+    :func:`adapters.steps.axiell_folio_sync.upsert.upsert_from_payloads`.
 
     Raises :class:`MappingError` for required-field violations or unresolved lookups.
     """

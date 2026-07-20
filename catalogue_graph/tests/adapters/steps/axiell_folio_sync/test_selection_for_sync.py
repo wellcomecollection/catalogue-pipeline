@@ -1,6 +1,6 @@
 import pytest
 
-from adapters.transformers.axiell_folio_sync.mapping import is_selected_for_sync
+from adapters.steps.axiell_folio_sync.mapping import is_selected_for_sync
 
 
 def _record(*, flag: str | None = None, record_type: str | None = None) -> str:
