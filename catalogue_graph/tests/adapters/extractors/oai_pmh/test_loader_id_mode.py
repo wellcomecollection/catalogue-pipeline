@@ -105,6 +105,22 @@ class TestIdLoaderEvent:
         with pytest.raises(ValueError, match="exceeds the"):
             _event([f"collect:{i}" for i in range(MAX_IDS_PER_RUN + 1)])
 
+    @pytest.mark.parametrize("commit_every", [0, -1])
+    def test_rejects_a_non_positive_commit_every(self, commit_every: int) -> None:
+        # 0 would disable auto-flush and buffer the whole run; a negative value
+        # is truthy in the writer's flush check and commits one changeset per
+        # record. Both are rejected at the event boundary rather than surprising
+        # us mid-run.
+        with pytest.raises(ValueError, match="greater than or equal to 1"):
+            _event(["collect:1"], commit_every=commit_every)
+
+    def test_rejects_a_negative_polite_delay(self) -> None:
+        with pytest.raises(ValueError, match="greater than or equal to 0"):
+            _event(["collect:1"], polite_delay_seconds=-0.1)
+
+    def test_allows_a_zero_polite_delay(self) -> None:
+        assert _event(["collect:1"], polite_delay_seconds=0).polite_delay_seconds == 0
+
     def test_mode_discriminates_the_union(self) -> None:
         """A payload without a mode is still a window event, so stored trigger
         payloads written before id mode existed keep validating."""

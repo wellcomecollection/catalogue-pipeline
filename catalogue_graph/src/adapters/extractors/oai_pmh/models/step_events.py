@@ -93,11 +93,18 @@ class OAIPMHIdLoaderEvent(BaseAdapterEvent):
     ids: list[str]
     """Record ids to fetch, in ``<namespace>:<local-id>`` form."""
 
-    commit_every: int = DEFAULT_ID_COMMIT_EVERY
-    """Records buffered before committing a batch."""
+    commit_every: int = Field(default=DEFAULT_ID_COMMIT_EVERY, ge=1)
+    """Records buffered before committing a batch.
 
-    polite_delay_seconds: float = 0.3
-    """Pause between GetRecord calls, to avoid hammering a flaky source."""
+    Must be at least 1. A negative value is truthy in the writer's flush check
+    and would commit a changeset per record; 0 would disable auto-flush and
+    buffer the whole run."""
+
+    polite_delay_seconds: float = Field(default=0.3, ge=0)
+    """Pause between GetRecord calls, to avoid hammering a flaky source.
+
+    0 is allowed and means no delay; a negative value would raise at
+    ``time.sleep`` partway through a run."""
 
     metadata_prefix: str | None = None
     """OAI-PMH metadata prefix to request (e.g., 'oai_marcxml')."""
