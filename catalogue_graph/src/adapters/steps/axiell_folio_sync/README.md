@@ -29,9 +29,9 @@ The design, record-selection rules and tombstone semantics are specified in
 5. Results are written as NDJSON manifests to S3 and published as CloudWatch metrics (`report.py`, namespace
    `catalogue_adapters`; metrics are suppressed on dry runs).
 
-Rows with `deleted=true` are counted as advisory tombstones and otherwise ignored: the loader's deleted flag is
-unreliable, so this path never suppresses or removes FOLIO records. Authoritative deletes come from the reconciler
-(see RFC 090).
+Rows with `deleted=true` are counted as advisory tombstones and ignored: the loader's deleted flag is
+unreliable, so we record the signal but do not suppress or remove FOLIO records based on it.
+Authoritative deletes come from the reconciler (see RFC 090).
 
 ## Module layout
 
