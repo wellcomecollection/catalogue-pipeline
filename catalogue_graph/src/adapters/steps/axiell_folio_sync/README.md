@@ -1,0 +1,114 @@
+# Axiell to FOLIO sync
+
+This step exports changed Axiell records to FOLIO Inventory. It is the FOLIO *outbound* (write) path: it reads changed
+records from the Axiell Iceberg adapter table, maps their MARCXML to FOLIO Inventory payloads, and upserts them
+(Instance → Holdings → Item) via the OKAPI REST API.
+
+It is distinct from the [FOLIO adapter](../../extractors/oai_pmh/folio/README.md), which reads FOLIO records *into*
+the pipeline, and from the FOLIO enrichment step (`steps/oai_pmh/folio_enrich.py`). Beyond the name "FOLIO" they share
+nothing.
+
+The design, record-selection rules and tombstone semantics are specified in
+[RFC 090: Axiell to FOLIO sync](https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync).
+
+## How it works
+
+1. The Axiell adapter finishes a run and emits an `axiell.adapter.completed` EventBridge event.
+2. An EventBridge rule starts the sync Step Function, which invokes the Lambda
+   (entrypoint `adapters.steps.axiell_folio_sync.axiell_folio_sync.lambda_handler`).
+3. The step reads the changed rows for the event's `changeset_ids` from the Axiell adapter table (using the same
+   `AXIELL_CONFIG` as the Axiell adapter, so S3 Tables in Lambda and a local sqlite catalog for local runs).
+4. Each record is selected, mapped, and upserted:
+   * **Selection** (`is_selected_for_sync`): a record is synced only if it carries the harvest flag (MARC `980 $a`
+     present) and is item-level (MARC `351 $c` == `ITEM`). Everything else is skipped.
+   * **Mapping** (`mapping.py`): MARCXML → typed Pydantic payloads for Instance, Holdings and Item. FOLIO reference
+     UUIDs (locations, material types, loan types, …) are resolved via `RefCache`, loaded once per invocation from the
+     FOLIO tenant and reused across warm Lambda starts.
+   * **Upsert** (`upsert.py`): writes in Instance → Holdings → Item order via OKAPI, with best-effort rollback if a
+     later entity write fails.
+5. Results are written as NDJSON manifests to S3 and published as CloudWatch metrics (`report.py`, namespace
+   `catalogue_adapters`; metrics are suppressed on dry runs).
+
+Rows with `deleted=true` are counted as advisory tombstones and ignored: the loader's deleted flag is
+unreliable, so we record the signal but do not suppress or remove FOLIO records based on it.
+Authoritative deletes come from the reconciler (see RFC 090).
+
+## Module layout
+
+| Module                 | Responsibility                                                       |
+| ---------------------- | -------------------------------------------------------------------- |
+| `axiell_folio_sync.py` | Lambda/ECS/CLI entrypoints; builds real dependencies                  |
+| `sync_to_folio.py`     | OKAPI credential resolution and the select → map → upsert loop       |
+| `mapper.py`            | MARCXML extraction primitives and the `CanonicalRecord` model        |
+| `mapping.py`           | MARC → FOLIO payload mapping and record selection (single source of truth) |
+| `ref_cache.py`         | Cache of FOLIO tenant reference-data UUIDs                           |
+| `upsert.py`            | FOLIO Inventory write orchestration and rollback                     |
+| `folio_callables.py`   | `FolioInventoryOps` protocol decoupling this package from the client |
+| `s3_manifest.py`       | NDJSON manifest writers                                              |
+| `models.py` / `report.py` | Step event/response models; CloudWatch metrics                    |
+
+The OKAPI HTTP client itself lives in [`clients/folio_client`](../../../clients/folio_client/).
+
+## Dry run
+
+The step is dry-run by default: payloads are built and upsert actions are planned and logged, but nothing is written
+to FOLIO. Note that dry runs still *read* from FOLIO (reference data and existence lookups), so valid credentials are
+required either way.
+
+The default comes from the `DRY_RUN` env var (Terraform `dry_run_default`, currently `true`); an explicit `dry_run`
+field on the event overrides it per run. Flip `dry_run_default` to `false` in Terraform only after validating a dry
+run's manifest.
+
+## Configuration
+
+Environment variables (injected by Terraform in Lambda):
+
+| Env var              | Description                                                          |
+| -------------------- | -------------------------------------------------------------------- |
+| `OKAPI_SECRET_PARAM` | SSM path to the OKAPI credentials SecureString                       |
+| `MANIFEST_S3_BUCKET` | Bucket for NDJSON run manifests                                      |
+| `DRY_RUN`            | Default dry-run behaviour (`true` unless overridden by the event)    |
+
+For local runs, `OKAPI_URL` / `OKAPI_TENANT` / `OKAPI_USERNAME` / `OKAPI_PASSWORD` override the corresponding SSM
+fields (and skip SSM entirely if all four are set).
+
+## SSM Parameters
+
+| Parameter                                              | Description                                        |
+| ------------------------------------------------------ | -------------------------------------------------- |
+| `/catalogue_pipeline/axiell-folio-sync/okapi_credentials` | SecureString JSON: `url`, `tenant`, `username`, `password` |
+
+The parameter is seeded with placeholders by Terraform; real values are set out-of-band.
+
+## Manifests
+
+Each run writes to the manifest bucket (`wellcomecollection-axiell-folio-sync-manifests`, expiring after
+`manifest_retention_days`, default 90):
+
+* `manifests/<job_id>.ids.ndjson` — successfully synced records with per-entity actions
+* `manifests/<job_id>.ids.failures.ndjson` — per-record errors with the failing stage (only written when there are errors)
+* `manifests/<job_id>.manifest.json` — run metadata and counts
+
+## Running locally
+
+```bash
+# Dry run against 5 sample records from the production S3 Tables catalog
+AWS_PROFILE=platform-developer uv run python -m adapters.steps.axiell_folio_sync.axiell_folio_sync \
+  --use-cli --job-id local-test-1 --sample-limit 5 --use-rest-api-table
+
+# Specific changesets; pass --live to disable dry run and write to FOLIO
+AWS_PROFILE=platform-developer uv run python -m adapters.steps.axiell_folio_sync.axiell_folio_sync \
+  --use-cli --job-id my-job-123 --changeset-ids <changeset-id> --use-rest-api-table
+```
+
+Set the `OKAPI_*` environment variables first (see Configuration above).
+
+## Infrastructure
+
+Terraform lives in [`infra/adapters/modules/axiell_folio_sync`](../../../../infra/adapters/modules/axiell_folio_sync/):
+the Lambda (running the shared `unified_pipeline_lambda` image), the Step Function, the EventBridge rule, the manifest
+bucket, the SSM parameter, and IAM. Deploy code changes with:
+
+```bash
+./scripts/deploy_lambda.sh axiell-folio-sync-adapter-lambda
+```

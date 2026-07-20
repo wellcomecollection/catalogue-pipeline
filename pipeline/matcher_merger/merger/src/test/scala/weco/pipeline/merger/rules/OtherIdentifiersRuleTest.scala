@@ -64,6 +64,14 @@ class OtherIdentifiersRuleTest
       )
     )
 
+  val axiellWork: Work.Visible[WorkState.Identified] =
+    axiellIdentifiedWork().otherIdentifiers(
+      List(
+        createSourceIdentifierWith(identifierType = IdentifierType.CalmRefNo),
+        createSourceIdentifierWith(identifierType = IdentifierType.CalmAltRefNo)
+      )
+    )
+
   val mergeCandidate: Work.Visible[WorkState.Identified] =
     sierraIdentifiedWork()
 
@@ -128,6 +136,55 @@ class OtherIdentifiersRuleTest
             .get
 
         mergedSources should contain theSameElementsAs (physicalSierraWork :: miroWork :: metsWorks)
+    }
+  }
+
+  it("merges METS, Miro, and Sierra source IDs into Axiell target") {
+    inside(
+      OtherIdentifiersRule
+        .merge(
+          axiellWork,
+          physicalSierraWork :: nothingWork :: miroWork :: metsWorks
+        )
+    ) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers should contain theSameElementsAs
+          List(
+            physicalSierraWork.sourceIdentifier,
+            miroWork.sourceIdentifier
+          ) ++
+          metsWorks.map(_.sourceIdentifier) ++ axiellWork.data.otherIdentifiers :+
+          physicalSierraWork.data.otherIdentifiers
+            .find(_.identifierType.id == IdentifierType.SierraIdentifier.id)
+            .get
+
+        mergedSources should contain theSameElementsAs (physicalSierraWork :: miroWork :: metsWorks)
+    }
+  }
+
+  it("merges METS, Miro, Axiell and Sierra source IDs into Tei target") {
+    inside(
+      OtherIdentifiersRule
+        .merge(
+          teiWork,
+          axiellWork :: physicalSierraWork :: nothingWork :: miroWork :: metsWorks
+        )
+    ) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers should contain theSameElementsAs
+          List(
+            physicalSierraWork.sourceIdentifier,
+            miroWork.sourceIdentifier
+          ) ++ axiellWork.data.otherIdentifiers :+ axiellWork.sourceIdentifier :+
+          physicalSierraWork.data.otherIdentifiers
+            .find(_.identifierType.id == IdentifierType.SierraIdentifier.id)
+            .get
+
+        mergedSources should contain theSameElementsAs List(
+          physicalSierraWork,
+          miroWork,
+          axiellWork
+        )
     }
   }
   describe("Miro into Sierra") {
@@ -249,6 +306,18 @@ class OtherIdentifiersRuleTest
       case FieldMergeResult(otherIdentifiers, _) =>
         otherIdentifiers should contain only (
           (calmWork.data.otherIdentifiers ++ sierraWithDigcode.data.otherIdentifiers
+            .find(_.identifierType.id == "wellcome-digcode")
+            .toList :+
+            sierraWithDigcode.sourceIdentifier): _*
+        )
+    }
+  }
+
+  it("merges only digcode identifiers from sources' otherIdentifiers into Axiell target") {
+    inside(OtherIdentifiersRule.merge(axiellWork, Seq(sierraWithDigcode))) {
+      case FieldMergeResult(otherIdentifiers, _) =>
+        otherIdentifiers should contain only (
+          (axiellWork.data.otherIdentifiers ++ sierraWithDigcode.data.otherIdentifiers
             .find(_.identifierType.id == "wellcome-digcode")
             .toList :+
             sierraWithDigcode.sourceIdentifier): _*

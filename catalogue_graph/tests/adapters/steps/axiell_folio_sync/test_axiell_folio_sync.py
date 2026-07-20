@@ -13,12 +13,12 @@ from typing import Any
 import pytest
 
 import adapters.steps.axiell_folio_sync.sync_to_folio as sync_to_folio_mod
-from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
-from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
-from adapters.transformers.axiell_folio_sync.mapping import (
+from adapters.steps.axiell_folio_sync.mapping import (
     EntityResult,
     UpsertResult,
 )
+from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
+from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
 
 # 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title).
 SELECTED = (
