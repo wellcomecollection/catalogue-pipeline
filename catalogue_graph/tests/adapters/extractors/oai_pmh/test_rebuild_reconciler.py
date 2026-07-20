@@ -11,6 +11,7 @@ import pytest
 
 from adapters.steps.oai_pmh import rebuild_reconciler
 from adapters.steps.oai_pmh.rebuild_reconciler import (
+    RebuildReconcilerEvent,
     RebuildReconcilerRuntime,
     ReconcilerBaselineBatch,
 )
@@ -113,6 +114,24 @@ def _runtime(rows: list[dict]) -> tuple[RebuildReconcilerRuntime, list[pa.Table]
         namespace="axiell",
     )
     return runtime, commits
+
+
+class TestRebuildReconcilerEvent:
+    def test_parses_a_minimal_event(self) -> None:
+        event = RebuildReconcilerEvent.model_validate({"adapter_type": "axiell"})
+        assert event.adapter_type == "axiell"
+        assert event.batch_size == rebuild_reconciler.DEFAULT_BATCH_SIZE
+        assert event.job_id is None
+
+    def test_batch_size_is_coerced_from_a_string(self) -> None:
+        event = RebuildReconcilerEvent.model_validate(
+            {"adapter_type": "axiell", "batch_size": "500"}
+        )
+        assert event.batch_size == 500
+
+    def test_rejects_an_event_without_adapter_type(self) -> None:
+        with pytest.raises(ValueError):
+            RebuildReconcilerEvent.model_validate({})
 
 
 class TestReconcilerBaselineBatch:

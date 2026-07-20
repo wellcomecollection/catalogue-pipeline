@@ -22,6 +22,7 @@ import pyarrow as pa
 import structlog
 from pydantic import BaseModel, ConfigDict
 
+from adapters.extractors.oai_pmh.models.step_events import AdapterRecoveryEvent
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from adapters.utils.adapter_store import AdapterStore
@@ -32,6 +33,13 @@ from utils.marc import parse_single_marc_record
 logger = structlog.get_logger(__name__)
 
 DEFAULT_BATCH_SIZE = 10_000
+
+
+class RebuildReconcilerEvent(AdapterRecoveryEvent):
+    """Event payload for the reconciler baseline rebuild step."""
+
+    batch_size: int = DEFAULT_BATCH_SIZE
+    """Number of id->GUID mappings to buffer before committing a batch."""
 
 
 class RebuildReconcilerResponse(BaseModel):
@@ -189,19 +197,17 @@ def build_runtime(
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     """Lambda entry point. Resolves the adapter from the ``adapter_type`` field."""
-    adapter_type = event.get("adapter_type")
-    if adapter_type is None:
-        raise ValueError("Event must contain 'adapter_type'")
+    request = RebuildReconcilerEvent.model_validate(event)
 
-    config = get_config(adapter_type)
+    config = get_config(request.adapter_type)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
         pipeline_step=f"{config.config.pipeline_step_prefix}_rebuild_reconciler",
     )
     response = handler(
-        build_runtime(adapter_type),
+        build_runtime(request.adapter_type),
         execution_context=execution_context,
-        batch_size=int(event.get("batch_size", DEFAULT_BATCH_SIZE)),
+        batch_size=request.batch_size,
     )
     return response.model_dump(mode="json")
 

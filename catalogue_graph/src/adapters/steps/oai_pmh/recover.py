@@ -30,6 +30,7 @@ from oai_pmh_client.exceptions import IdDoesNotExistError, OAIError
 from oai_pmh_client.models import Record
 from pydantic import BaseModel, ConfigDict
 
+from adapters.extractors.oai_pmh.models.step_events import AdapterRecoveryEvent
 from adapters.extractors.oai_pmh.record_writer import _serialize_metadata
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.utils.adapter_store import AdapterStore
@@ -40,6 +41,16 @@ logger = structlog.get_logger(__name__)
 
 DEFAULT_COMMIT_EVERY = 300
 POLITE_DELAY_SECONDS = 0.3
+
+
+class RecoverEvent(AdapterRecoveryEvent):
+    """Event payload for the recover-by-id step."""
+
+    ids: list[str]
+    """Record ids to fetch individually via OAI ``GetRecord``."""
+
+    commit_every: int = DEFAULT_COMMIT_EVERY
+    """Number of recovered records to buffer before committing a batch."""
 
 
 class RecoverResponse(BaseModel):
@@ -191,23 +202,18 @@ def build_runtime(adapter_type: str, use_rest_api_table: bool = True) -> Recover
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     """Lambda entry point. Expects ``adapter_type`` and an ``ids`` list."""
-    adapter_type = event.get("adapter_type")
-    if adapter_type is None:
-        raise ValueError("Event must contain 'adapter_type'")
-    ids = event.get("ids")
-    if not isinstance(ids, list):
-        raise ValueError("Event must contain an 'ids' list")
+    request = RecoverEvent.model_validate(event)
 
-    config = get_config(adapter_type)
+    config = get_config(request.adapter_type)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
         pipeline_step=f"{config.config.pipeline_step_prefix}_recover",
     )
     response = handler(
-        ids,
-        runtime=build_runtime(adapter_type),
+        request.ids,
+        runtime=build_runtime(request.adapter_type),
         execution_context=execution_context,
-        commit_every=int(event.get("commit_every", DEFAULT_COMMIT_EVERY)),
+        commit_every=request.commit_every,
     )
     return response.model_dump(mode="json")
 

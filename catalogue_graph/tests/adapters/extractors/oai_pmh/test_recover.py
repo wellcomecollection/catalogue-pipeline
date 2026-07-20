@@ -14,7 +14,7 @@ from oai_pmh_client.exceptions import IdDoesNotExistError
 from oai_pmh_client.models import Header, Record
 
 from adapters.steps.oai_pmh import recover
-from adapters.steps.oai_pmh.recover import RecoverRuntime, RecoveryBatch
+from adapters.steps.oai_pmh.recover import RecoverEvent, RecoverRuntime, RecoveryBatch
 from adapters.utils.adapter_store import AdapterStore
 
 
@@ -57,6 +57,39 @@ def _runtime(get_record: object) -> tuple[RecoverRuntime, list[pa.Table]]:
         metadata_prefix="oai_marcxml",
     )
     return runtime, commits
+
+
+class TestRecoverEvent:
+    def test_parses_a_minimal_event(self) -> None:
+        event = RecoverEvent.model_validate(
+            {"adapter_type": "axiell", "ids": ["collect:1"]}
+        )
+        assert event.adapter_type == "axiell"
+        assert event.ids == ["collect:1"]
+        assert event.commit_every == recover.DEFAULT_COMMIT_EVERY
+        # These steps are invoked ad hoc, so they belong to no harvest job.
+        assert event.job_id is None
+
+    def test_commit_every_is_coerced_from_a_string(self) -> None:
+        event = RecoverEvent.model_validate(
+            {"adapter_type": "axiell", "ids": ["collect:1"], "commit_every": "50"}
+        )
+        assert event.commit_every == 50
+
+    @pytest.mark.parametrize(
+        "event",
+        [
+            {"ids": ["collect:1"]},
+            {"adapter_type": "axiell"},
+            {"adapter_type": "axiell", "ids": "collect:1"},
+        ],
+        ids=["missing adapter_type", "missing ids", "ids not a list"],
+    )
+    def test_rejects_malformed_events(self, event: dict) -> None:
+        # ValidationError subclasses ValueError, so existing callers that catch
+        # ValueError still see these as failures.
+        with pytest.raises(ValueError):
+            RecoverEvent.model_validate(event)
 
 
 class TestRecoveryBatch:
