@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from adapters.transformers.axiell_folio_sync.mapping import (
+from adapters.steps.axiell_folio_sync.mapping import (
     Holdings,
     IdRef,
     Instance,
@@ -11,7 +11,7 @@ from adapters.transformers.axiell_folio_sync.mapping import (
     MappedPayloads,
     PayloadMeta,
 )
-from adapters.transformers.axiell_folio_sync.upsert import upsert_from_payloads
+from adapters.steps.axiell_folio_sync.upsert import upsert_from_payloads
 
 MAPPED = MappedPayloads(
     instance=Instance(hrid="AxC-instance-1", title="t", instanceTypeId="it"),

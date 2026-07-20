@@ -15,10 +15,19 @@ from typing import Any, cast
 import boto3
 import structlog
 
+from adapters.steps.axiell_folio_sync.folio_callables import (
+    FolioInventoryOps,
+)
+from adapters.steps.axiell_folio_sync.mapping import (
+    MappingError,
+    UpsertResult,
+    select_and_build,
+)
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
 )
+from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
 from adapters.steps.axiell_folio_sync.s3_manifest import (
     flush_success_batch,
@@ -26,16 +35,7 @@ from adapters.steps.axiell_folio_sync.s3_manifest import (
     write_error_manifest,
     write_metadata_manifest,
 )
-from adapters.transformers.axiell_folio_sync.folio_callables import (
-    FolioInventoryOps,
-)
-from adapters.transformers.axiell_folio_sync.mapping import (
-    MappingError,
-    UpsertResult,
-    select_and_build,
-)
-from adapters.transformers.axiell_folio_sync.ref_cache import RefCache
-from adapters.transformers.axiell_folio_sync.upsert import upsert_from_payloads
+from adapters.steps.axiell_folio_sync.upsert import upsert_from_payloads
 
 logger = structlog.get_logger(__name__)
 
