@@ -7,6 +7,7 @@ dimensions, enabling reuse across Axiell, FOLIO, and other adapters.
 from __future__ import annotations
 
 from typing import ClassVar
+from uuid import uuid4
 
 from pydantic import Field
 
@@ -144,15 +145,33 @@ class OAIPMHIdLoadReport(OAIPMHReportBase):
     changeset_count: int = 0
     record_changes_count: int = 0
 
+    report_id: str = Field(default_factory=lambda: uuid4().hex[:8])
+    """Disambiguates the S3 key. ``job_id`` is only minute-resolution, and the
+    per-run id ceiling encourages splitting a recovery across several runs, so
+    two of them starting in the same minute would otherwise overwrite each
+    other's report."""
+
+    removed: list[str] = Field(default_factory=list)
+    """Every id the source reported as no longer existing. These are counted but
+    never written, so this is the only record of which ids vanished."""
+
     unfetchable: list[str] = Field(default_factory=list)
     """Every unfetchable id. The response carries only a sample, so this is the
     complete record of what needs another attempt."""
+
+    emit_metrics: bool = True
+    """Publish CloudWatch metrics. Disabled for local runs."""
+
+    @property
+    def publish_to_cloudwatch(self) -> bool:
+        return self.emit_metrics
 
     @property
     def s3_uri(self) -> str:
         return (
             f"s3://{self.report_s3_bucket}/{self.report_s3_prefix}"
-            f"/reports/{self.adapter_type}/{self.label}/{self.job_id}.json"
+            f"/reports/{self.adapter_type}/{self.label}"
+            f"/{self.job_id}_{self.report_id}.json"
         )
 
     @classmethod
@@ -161,18 +180,22 @@ class OAIPMHIdLoadReport(OAIPMHReportBase):
         response: OAIPMHIdLoaderResponse,
         *,
         adapter_type: str,
+        removed: list[str],
         unfetchable: list[str],
         report_s3_bucket: str | None = None,
         report_s3_prefix: str = "dev",
+        emit_metrics: bool = True,
     ) -> OAIPMHIdLoadReport:
         """Create a report from an id-mode response.
 
         Args:
             response: The id-mode loader response.
             adapter_type: Adapter identifier for metrics (e.g., 'axiell').
+            removed: The full list of ids the source reported as gone.
             unfetchable: The full unfetchable id list, not the response sample.
             report_s3_bucket: S3 bucket for report storage (None to skip S3).
             report_s3_prefix: S3 key prefix for report paths.
+            emit_metrics: Whether to publish CloudWatch metrics.
         """
         return cls(
             adapter_type=adapter_type,
@@ -186,7 +209,9 @@ class OAIPMHIdLoadReport(OAIPMHReportBase):
             unfetchable_count=response.unfetchable_count,
             changeset_count=len(response.changeset_ids),
             record_changes_count=response.changed_record_count,
+            removed=removed,
             unfetchable=unfetchable,
+            emit_metrics=emit_metrics,
         )
 
     @property

@@ -104,7 +104,12 @@ class OAIPMHIdLoaderEvent(BaseAdapterEvent):
 
     @field_validator("ids")
     @classmethod
-    def _reject_oversized_runs(cls, ids: list[str]) -> list[str]:
+    def _check_run_size(cls, ids: list[str]) -> list[str]:
+        # An empty list means the caller asked to recover nothing, which is
+        # almost always an id query that came back empty. Fail rather than run a
+        # no-op that reads like a success.
+        if not ids:
+            raise ValueError("No ids supplied; id mode needs at least one record id")
         if len(ids) > MAX_IDS_PER_RUN:
             raise ValueError(
                 f"{len(ids)} ids exceeds the {MAX_IDS_PER_RUN} per-run ceiling; "

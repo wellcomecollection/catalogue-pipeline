@@ -156,7 +156,7 @@ def _process_gap(
             metadata_prefix=adapter_config.config.oai_metadata_prefix,
             set_spec=adapter_config.config.oai_set_spec,
             max_windows=None,  # Process all windows in the gap
-            window_minutes=runtime.loader_runtime.window_generator.window_minutes,
+            window_minutes=runtime.loader_runtime.require_window_generator().window_minutes,
         )
 
         logger.info(
@@ -217,7 +217,7 @@ def handler(
     # Generate coverage report for the specified range
     reporter = WindowReporter(
         store=runtime.store,
-        window_minutes=runtime.loader_runtime.window_generator.window_minutes,
+        window_minutes=runtime.loader_runtime.require_window_generator().window_minutes,
     )
     report = reporter.coverage_report(range_start=window_start, range_end=window_end)
 

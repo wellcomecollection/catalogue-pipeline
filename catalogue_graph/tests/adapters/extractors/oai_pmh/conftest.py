@@ -118,6 +118,7 @@ def loader_runtime(
         window_generator=window_generator,
         adapter_namespace=adapter_namespace,
         adapter_name=adapter_name,
+        oai_metadata_prefix="oai_marcxml",
     )
 
 

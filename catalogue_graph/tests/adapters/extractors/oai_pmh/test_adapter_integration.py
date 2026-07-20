@@ -131,7 +131,7 @@ class TestLoaderIntegration:
         assert isinstance(runtime, LoaderRuntime)
         assert runtime.adapter_name == cfg.adapter_name
         assert runtime.adapter_namespace == cfg.adapter_namespace
-        assert runtime.window_generator.window_minutes == 15
+        assert runtime.require_window_generator().window_minutes == 15
 
 
 class TestReloaderIntegration:

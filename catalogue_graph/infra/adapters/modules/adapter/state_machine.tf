@@ -152,7 +152,11 @@ locals {
         Type = "Choice"
         Choices = [
           {
-            Condition = "{% $exists($states.input.ids[0]) %}"
+            # Tests for the field, not its first element. An explicitly supplied
+            # but empty list still routes to id mode, where the event validator
+            # rejects it, rather than falling through to a window harvest the
+            # caller never asked for.
+            Condition = "{% $exists($states.input.ids) %}"
             Next      = "Prepare id run"
           }
         ]
@@ -171,10 +175,11 @@ locals {
       # Same task definition and module as "Run loader"; a separate state purely
       # so the retry policy can differ. Do not merge the two. A window-mode retry
       # is cheap and idempotent because already-successful windows are skipped,
-      # but an id-mode retry re-fetches every id from scratch with a politeness
-      # delay on each, so retrying a large run would hammer a source that is
-      # already flaky. Failed ids come back in the response for a deliberate
-      # second run instead.
+      # but id mode keeps no progress state, so any retry re-fetches every id
+      # from scratch with a politeness delay on each. At the per-run ceiling that
+      # is hours of duplicated load on a source already known to be flaky, so
+      # there are no automatic retries at all: failed ids come back in the
+      # report for a deliberate, smaller second run.
       "Run id loader" = {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
@@ -183,7 +188,7 @@ locals {
           {
             ErrorEquals     = ["States.ALL"]
             IntervalSeconds = 30
-            MaxAttempts     = 1
+            MaxAttempts     = 0
             BackoffRate     = 2.0
           }
         ]

@@ -160,8 +160,15 @@ id-to-GUID mappings rebuilt.
 
 Each id is classified as recovered, removed (the source reports
 `idDoesNotExist`), or unfetchable (neither returned nor reported gone, after the
-client's retries). Unfetchable ids are left absent from the store and listed in
-full in the report, never backfilled with stale content.
+client's retries). Unfetchable ids are left absent from the store, never
+backfilled with stale content. The report carries the full removed and
+unfetchable id lists; the response carries only a sample of the unfetchable
+ones, to keep the state machine payload bounded.
+
+A CLI run writes its report to a local file (`--report`, defaulting to
+`<job-id>_report.json`) and emits no CloudWatch metrics, so an ad hoc recovery
+leaves the production report bucket and dashboards alone. A pipeline run writes
+the report to S3 and emits metrics.
 
 Two deliberate differences from window mode:
 
@@ -172,12 +179,15 @@ Two deliberate differences from window mode:
   signal.
 - **No window state is written**, so a re-run re-fetches everything. Recording
   synthetic windows would shift the trigger's resume cursor onto a range that
-  was never harvested.
+  was never harvested. Because there is no progress state to resume from, the
+  state machine does not retry an id run automatically: re-run it against the
+  unfetchable ids from the report instead.
 
 `commit_every` defaults to 10,000 rather than a small batch. Every changeset id
 published costs the transformer roughly a full materialisation of the bib store,
 so committing rarely keeps a large recovery down to a handful of changesets.
-Runs are capped at 50,000 ids.
+Runs are capped at 50,000 ids, and an empty id list is rejected rather than
+treated as a no-op.
 
 ### 6. Rebuild reconciler → reseed the id-to-GUID baseline (Axiell)
 
@@ -217,6 +227,7 @@ clear it before rebuilding rather than relying on a re-run to overwrite them.
 | `--flush-every`                  | (Loader only) Commit records and statuses every N windows      |
 | `--ids` / `--ids-file`           | (Loader id mode) Record ids to fetch, inline or one per line   |
 | `--commit-every`                 | (Loader id mode) Records buffered before committing a batch    |
+| `--report`                       | (Loader id mode) Path for the run report (full id lists)       |
 | `--batch-size`                   | (Rebuild-reconciler only) GUID mappings committed per batch    |
 
 ## Environment prerequisites

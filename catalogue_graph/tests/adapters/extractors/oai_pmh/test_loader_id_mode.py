@@ -18,13 +18,16 @@ from adapters.extractors.oai_pmh.models.step_events import (
     MAX_IDS_PER_RUN,
     UNFETCHABLE_SAMPLE_SIZE,
     OAIPMHIdLoaderEvent,
+    OAIPMHIdLoaderResponse,
     validate_loader_event,
 )
+from adapters.extractors.oai_pmh.reporting import OAIPMHIdLoadReport
 from adapters.steps.oai_pmh import loader
 from adapters.steps.oai_pmh.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_store import WindowStore
+
+CONFIGURED_PREFIX = "oai_marcxml"
 
 
 def _empty_body_error() -> etree.XMLSyntaxError:
@@ -76,12 +79,11 @@ def _runtime(get_record: object) -> tuple[LoaderRuntime, list[pa.Table]]:
     store.incremental_update.side_effect = _update
 
     runtime = LoaderRuntime(
-        store=MagicMock(spec=WindowStore),
         table_client=store,
         oai_client=oai,
-        window_generator=MagicMock(spec=WindowGenerator),
         adapter_namespace="axiell",
         adapter_name="axiell",
+        oai_metadata_prefix=CONFIGURED_PREFIX,
     )
     return runtime, commits
 
@@ -139,7 +141,7 @@ class TestExecuteIdLoader:
             return _record(identifier)
 
         runtime, commits = _runtime(get_record)
-        response, unfetchable = loader.execute_id_loader(
+        response, outcome = loader.execute_id_loader(
             _event(["collect:1", "collect:gone", "collect:bad", "collect:2"]),
             runtime,
         )
@@ -148,7 +150,7 @@ class TestExecuteIdLoader:
         assert response.recovered == 2
         assert response.removed == 1
         assert response.unfetchable_count == 1
-        assert unfetchable == ["collect:bad"]
+        assert outcome.unfetchable == ["collect:bad"]
         assert len(commits) == 1
         assert commits[0]["id"].to_pylist() == ["collect:1", "collect:2"]
 
@@ -233,11 +235,11 @@ class TestExecuteIdLoader:
             return _record(identifier)
 
         runtime, commits = _runtime(get_record)
-        response, unfetchable = loader.execute_id_loader(
+        response, outcome = loader.execute_id_loader(
             _event(["collect:bad", "collect:2"]), runtime
         )
 
-        assert unfetchable == ["collect:bad"]
+        assert outcome.unfetchable == ["collect:bad"]
         assert response.recovered == 1
         assert commits[0]["id"].to_pylist() == ["collect:2"]
 
@@ -258,23 +260,23 @@ class TestExecuteIdLoader:
             raise _empty_body_error()
 
         runtime, _ = _runtime(get_record)
-        response, unfetchable = loader.execute_id_loader(_event(ids), runtime)
+        response, outcome = loader.execute_id_loader(_event(ids), runtime)
 
         assert response.unfetchable_count == len(ids)
         assert len(response.unfetchable_sample) == UNFETCHABLE_SAMPLE_SIZE
-        assert len(unfetchable) == len(ids)
+        assert len(outcome.unfetchable) == len(ids)
 
-    def test_writes_no_window_state(self) -> None:
-        """Id mode must not touch the window store, or it would shift the
-        trigger's resume cursor onto a range that was never harvested."""
+    def test_holds_no_window_store(self) -> None:
+        """Id mode must not touch window state, or it would shift the trigger's
+        resume cursor onto a range that was never harvested. It is not given a
+        window store at all, so it cannot."""
         runtime, _ = _runtime(
             lambda *, identifier, metadata_prefix: _record(identifier)
         )
         loader.execute_id_loader(_event(["collect:1"]), runtime)
 
-        window_store = runtime.store
-        assert isinstance(window_store, MagicMock)
-        window_store.upsert_many.assert_not_called()
+        assert runtime.store is None
+        assert runtime.window_generator is None
 
 
 class TestHandlerDispatch:
@@ -294,3 +296,134 @@ class TestHandlerDispatch:
         mock_report.assert_called_once()
         # The report gets the full unfetchable list, not the response sample.
         assert "unfetchable" in mock_report.call_args.kwargs
+
+
+class TestMetadataPrefix:
+    """The event does not name a metadata prefix on any real path: the state
+    machine's Pass state injects only mode and job_id, and the CLI has no flag
+    for it. OAI-PMH requires metadataPrefix on every GetRecord, so the adapter's
+    configured prefix has to be what actually goes out.
+    """
+
+    def _captured_prefix(self, event: OAIPMHIdLoaderEvent) -> str | None:
+        seen: list[str | None] = []
+
+        def get_record(*, identifier: str, metadata_prefix: str) -> Record:
+            seen.append(metadata_prefix)
+            return _record(identifier)
+
+        runtime, _ = _runtime(get_record)
+        loader.execute_id_loader(event, runtime)
+        return seen[0]
+
+    def test_falls_back_to_the_configured_prefix(self) -> None:
+        event = _event(["collect:1"])
+        assert event.metadata_prefix is None
+        assert self._captured_prefix(event) == CONFIGURED_PREFIX
+
+    def test_never_sends_none(self) -> None:
+        """Sending None produces a badArgument that the classifier would file as
+        'unfetchable', so an entire run would report zero recovered and look like
+        a flaky source rather than a broken request."""
+        assert self._captured_prefix(_event(["collect:1"])) is not None
+
+    def test_event_can_still_override(self) -> None:
+        event = _event(["collect:1"], metadata_prefix="oai_dc")
+        assert self._captured_prefix(event) == "oai_dc"
+
+
+class TestIdCeilingAndEmptiness:
+    def test_rejects_an_empty_id_list(self) -> None:
+        """The state machine routes an explicitly supplied empty list here, so
+        this is what stops it becoming a silent no-op."""
+        with pytest.raises(ValueError, match="at least one record id"):
+            _event([])
+
+
+class TestReporting:
+    def _response(self) -> OAIPMHIdLoaderResponse:
+        runtime, _ = _runtime(
+            lambda *, identifier, metadata_prefix: _record(identifier)
+        )
+        response, _ = loader.execute_id_loader(_event(["collect:1"]), runtime)
+        return response
+
+    def test_s3_key_disambiguates_runs_in_the_same_minute(self) -> None:
+        """job_id is only minute-resolution, and splitting a large recovery
+        across runs makes collisions likely."""
+        response = self._response()
+        keys = {
+            OAIPMHIdLoadReport.from_id_load(
+                response,
+                adapter_type="axiell",
+                removed=[],
+                unfetchable=[],
+                report_s3_bucket="bucket",
+            ).s3_uri
+            for _ in range(2)
+        }
+        assert len(keys) == 2
+
+    def test_carries_full_removed_and_unfetchable_lists(self) -> None:
+        report = OAIPMHIdLoadReport.from_id_load(
+            self._response(),
+            adapter_type="axiell",
+            removed=["collect:gone"],
+            unfetchable=["collect:bad"],
+        )
+        assert report.removed == ["collect:gone"]
+        assert report.unfetchable == ["collect:bad"]
+
+    def test_metrics_can_be_suppressed_for_local_runs(self) -> None:
+        report = OAIPMHIdLoadReport.from_id_load(
+            self._response(),
+            adapter_type="axiell",
+            removed=[],
+            unfetchable=[],
+            emit_metrics=False,
+        )
+        assert report.publish_to_cloudwatch is False
+        assert report.publish_to_s3 is False
+
+
+def _mock_config() -> MagicMock:
+    config = MagicMock()
+    config.config.adapter_namespace = "axiell"
+    config.config.adapter_name = "axiell"
+    config.config.oai_metadata_prefix = CONFIGURED_PREFIX
+    config.config.report_s3_bucket = None
+    config.config.report_s3_prefix = "dev"
+    config.config.window_minutes = 15
+    config.build_adapter_store.return_value = MagicMock(spec=AdapterStore)
+    config.build_oai_client.return_value = MagicMock(spec=OAIClient)
+    config.build_window_store.return_value = MagicMock(spec=WindowStore)
+    return config
+
+
+class TestBuildRuntime:
+    def test_id_mode_builds_no_window_store(self) -> None:
+        """Building one would open, and locally create, a window-status table for
+        a mode that writes no window state."""
+        config = _mock_config()
+
+        runtime = loader.build_runtime(config, id_mode=True)
+
+        assert runtime.store is None
+        assert runtime.window_generator is None
+        config.build_window_store.assert_not_called()
+        assert runtime.oai_metadata_prefix == CONFIGURED_PREFIX
+
+    def test_window_mode_still_builds_one(self) -> None:
+        config = _mock_config()
+
+        runtime = loader.build_runtime(config)
+
+        assert runtime.store is not None
+        assert runtime.window_generator is not None
+
+    def test_window_harvester_refuses_an_id_mode_runtime(self) -> None:
+        runtime, _ = _runtime(
+            lambda *, identifier, metadata_prefix: _record(identifier)
+        )
+        with pytest.raises(ValueError, match="built for id mode"):
+            loader.build_harvester(MagicMock(), runtime)
