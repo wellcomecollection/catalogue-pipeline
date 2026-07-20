@@ -1,4 +1,4 @@
-"""Reconciliation audit for OAI-PMH adapters.
+"""Adapter audit for OAI-PMH adapters.
 
 A local diagnostic to identify records the source holds but the adapter store is
 missing. Windowed harvesting cannot spot this on its own: records loaded with
@@ -23,7 +23,7 @@ import structlog
 from pydantic import BaseModel, ConfigDict, Field
 
 from adapters.extractors.oai_pmh.registry import get_config
-from adapters.extractors.oai_pmh.reporting import OAIPMHReconcileReport
+from adapters.extractors.oai_pmh.reporting import OAIPMHAuditReport
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.utils.adapter_store import AdapterStore
 from models.incremental_window import IncrementalWindow
@@ -34,7 +34,7 @@ logger = structlog.get_logger(__name__)
 MISSING_ID_SAMPLE = 50
 
 
-class ReconcileResponse(BaseModel):
+class AuditResponse(BaseModel):
     adapter_type: str
     server_count: int | None
     harvested_count: int
@@ -42,7 +42,7 @@ class ReconcileResponse(BaseModel):
     missing_id_sample: list[str] = Field(default_factory=list)
 
 
-class ReconcileRuntime(BaseModel):
+class AuditRuntime(BaseModel):
     config: OAIPMHRuntimeConfig
     store: AdapterStore
     adapter_name: str
@@ -51,12 +51,12 @@ class ReconcileRuntime(BaseModel):
 
 
 def handler(
-    runtime: ReconcileRuntime,
+    runtime: AuditRuntime,
     execution_context: ExecutionContext | None = None,
     *,
     list_missing: bool = False,
     now: datetime | None = None,
-) -> ReconcileResponse:
+) -> AuditResponse:
     """Compute source vs adapter-store drift and publish the metric."""
     setup_logging(execution_context)
     now = now or datetime.now(UTC)
@@ -64,7 +64,7 @@ def handler(
     server_count = runtime.config.source_of_truth_count()
     harvested_count = runtime.store.count_active_namespace_records()
 
-    report = OAIPMHReconcileReport.from_counts(
+    report = OAIPMHAuditReport.from_counts(
         window=IncrementalWindow(start_time=now, end_time=now),
         adapter_type=runtime.adapter_name,
         server_count=server_count,
@@ -73,7 +73,7 @@ def handler(
     report.publish()
 
     logger.info(
-        "Reconciliation audit",
+        "Adapter audit",
         adapter=runtime.adapter_name,
         server_count=server_count,
         harvested_count=harvested_count,
@@ -91,7 +91,7 @@ def handler(
                 sample=missing_sample,
             )
 
-    return ReconcileResponse(
+    return AuditResponse(
         adapter_type=runtime.adapter_name,
         server_count=server_count,
         harvested_count=harvested_count,
@@ -100,7 +100,7 @@ def handler(
     )
 
 
-def _sample_missing_ids(runtime: ReconcileRuntime) -> list[str]:
+def _sample_missing_ids(runtime: AuditRuntime) -> list[str]:
     """Return up to MISSING_ID_SAMPLE ids present in the source but not the store.
 
     Returns an empty list if the adapter does not support id enumeration. The
@@ -124,11 +124,9 @@ def _sample_missing_ids(runtime: ReconcileRuntime) -> list[str]:
     return missing
 
 
-def build_runtime(
-    adapter_type: str, use_rest_api_table: bool = True
-) -> ReconcileRuntime:
+def build_runtime(adapter_type: str, use_rest_api_table: bool = True) -> AuditRuntime:
     config = get_config(adapter_type)
-    return ReconcileRuntime(
+    return AuditRuntime(
         config=config,
         store=config.build_adapter_store(use_rest_api_table=use_rest_api_table),
         adapter_name=config.config.adapter_name,
@@ -144,7 +142,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     config = get_config(adapter_type)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
-        pipeline_step=f"{config.config.pipeline_step_prefix}_reconcile",
+        pipeline_step=f"{config.config.pipeline_step_prefix}_audit",
     )
     response = handler(
         build_runtime(adapter_type),
@@ -155,7 +153,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
 
 
 def local_handler(parser: argparse.ArgumentParser) -> None:
-    """Run the reconciliation audit from the command line."""
+    """Run the adapter audit from the command line."""
     from adapters.utils.argparse import add_adapter_event_args
 
     add_adapter_event_args(parser)
@@ -169,7 +167,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     config = get_config(args.adapter_type)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
-        pipeline_step=f"{config.config.pipeline_step_prefix}_reconcile",
+        pipeline_step=f"{config.config.pipeline_step_prefix}_audit",
     )
     response = handler(
         build_runtime(args.adapter_type, use_rest_api_table=args.use_rest_api_table),
@@ -180,6 +178,4 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
 
 
 if __name__ == "__main__":
-    local_handler(
-        argparse.ArgumentParser(description="Run an OAI-PMH reconciliation audit")
-    )
+    local_handler(argparse.ArgumentParser(description="Run an OAI-PMH adapter audit"))

@@ -129,16 +129,16 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \
   --dry-run
 ```
 
-### 5. Reconcile → check drift against the source of truth
+### 5. Audit → check drift against the source of truth
 
-The reconciliation audit compares how many records the source currently holds
+The adapter audit compares how many records the source currently holds
 against the number of active records in the adapter store, and emits a
 `drift_count` metric (namespace `catalogue_adapters`, dimension
 `adapter_type`). Positive drift means the source has records the store is
 missing.
 
 ```bash
-uv run python -m adapters.steps.oai_pmh.reconcile --adapter-type {axiell,folio} \
+uv run python -m adapters.steps.oai_pmh.audit --adapter-type {axiell,folio} \
   --use-rest-api-table \
   --list-missing
 ```
@@ -174,7 +174,7 @@ count.
 | `--dry-run`                      | (Reloader only) Preview gaps without processing                |
 | `--reprocess-successful-windows` | (Loader only) Re-harvest windows already marked success        |
 | `--flush-every`                  | (Loader only) Commit records and statuses every N windows      |
-| `--list-missing`                 | (Reconcile only) On drift, log a sample of missing ids         |
+| `--list-missing`                 | (Audit only) On drift, log a sample of missing ids         |
 
 ## Environment prerequisites
 

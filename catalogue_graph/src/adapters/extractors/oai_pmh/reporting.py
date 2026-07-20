@@ -122,8 +122,8 @@ class OAIPMHLoaderReport(OAIPMHReport):
         ]
 
 
-class OAIPMHReconcileReport(OAIPMHReport):
-    """Reconciliation-audit report: adapter store vs source-of-truth count.
+class OAIPMHAuditReport(OAIPMHReport):
+    """Adapter audit report: adapter store vs source-of-truth count.
 
     ``drift_count`` is ``max(0, server_count - harvested_count)``: positive means
     the source holds records the store is missing. It is clamped to 0 when the
@@ -133,7 +133,7 @@ class OAIPMHReconcileReport(OAIPMHReport):
     stale records lingering in it.
     """
 
-    label: ClassVar[str] = "adapter_reconcile"
+    label: ClassVar[str] = "adapter_audit"
     server_count: int | None
     harvested_count: int
     drift_count: int
@@ -146,7 +146,7 @@ class OAIPMHReconcileReport(OAIPMHReport):
         adapter_type: str,
         server_count: int | None,
         harvested_count: int,
-    ) -> OAIPMHReconcileReport:
+    ) -> OAIPMHAuditReport:
         drift = (
             max(0, server_count - harvested_count) if server_count is not None else 0
         )
