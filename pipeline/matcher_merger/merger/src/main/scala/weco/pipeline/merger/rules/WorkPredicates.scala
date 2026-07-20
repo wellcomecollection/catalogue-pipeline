@@ -26,6 +26,9 @@ object WorkPredicates {
   private val calmIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.CalmRecordIdentifier
   )
+  private val axiellIdentified: WorkPredicate = identifierTypeId(
+    IdentifierType.AxiellGuid
+  )
   private val teiIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.Tei
   )
@@ -61,6 +64,13 @@ object WorkPredicates {
     */
   val singlePhysicalItemCalmWork: WorkPredicate = satisfiesAll(
     calmIdentified,
+    singleItem,
+    singleLocation,
+    allPhysicalLocations
+  )
+
+  val singlePhysicalItemAxiellWork: WorkPredicate = satisfiesAll(
+    axiellIdentified,
     singleItem,
     singleLocation,
     allPhysicalLocations

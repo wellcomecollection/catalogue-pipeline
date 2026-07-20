@@ -14,6 +14,7 @@ class TargetPrecedenceTest
 
   val tei = teiIdentifiedWork()
   val calm = calmIdentifiedWork()
+  val axiell = axiellIdentifiedWork()
   val videoSierra = sierraDigitalIdentifiedWork().format(Format.Videos)
   val multiItemPhysicalSierra = sierraIdentifiedWork().items(
     List(createIdentifiedPhysicalItem, createIdentifiedPhysicalItem)
@@ -42,6 +43,13 @@ class TargetPrecedenceTest
           Seq(videoSierra, multiItemPhysicalSierra, digitalSierra, calm, miro)
         )
         .value shouldBe calm
+    }
+    it("second, chooses an Axiell work at the same precedence as Calm") {
+      TargetPrecedence
+        .getTarget(
+          Seq(videoSierra, multiItemPhysicalSierra, digitalSierra, axiell, miro)
+        )
+        .value shouldBe axiell
     }
     it("third, chooses a Sierra e-video") {
       TargetPrecedence
