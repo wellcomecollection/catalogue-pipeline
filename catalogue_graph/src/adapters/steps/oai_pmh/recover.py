@@ -31,7 +31,7 @@ from oai_pmh_client.models import Record
 from pydantic import BaseModel, ConfigDict
 
 from adapters.extractors.oai_pmh.models.step_events import AdapterRecoveryEvent
-from adapters.extractors.oai_pmh.record_writer import _serialize_metadata
+from adapters.extractors.oai_pmh.record_writer import build_adapter_store_row
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
@@ -91,16 +91,13 @@ class RecoveryBatch:
 
     def add_recovered(self, record_id: str, record: Record) -> None:
         """Buffer a fetched record, committing once the buffer is full."""
-        content = _serialize_metadata(record)
         self.recovered.append(record_id)
         self._buffer.append(
-            {
-                "namespace": self._runtime.namespace,
-                "id": record_id,
-                "content": content,
-                "last_modified": record.header.datestamp,
-                "deleted": content is None,
-            }
+            build_adapter_store_row(
+                namespace=self._runtime.namespace,
+                identifier=record_id,
+                record=record,
+            )
         )
         if len(self._buffer) >= self._commit_every:
             self.flush()
