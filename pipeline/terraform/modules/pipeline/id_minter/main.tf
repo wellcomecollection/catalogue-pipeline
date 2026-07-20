@@ -1,12 +1,14 @@
 locals {
   underscore_namespace = var.namespace != "" ? "_${var.namespace}" : ""
   dash_namespace       = var.namespace != "" ? "-${var.namespace}" : ""
+
+  pipeline_step = "id_minter${local.underscore_namespace}"
 }
 
 module "id_minter_output_topic" {
   source = "../../topic"
 
-  name       = "catalogue-${var.pipeline_date}_id_minter${local.underscore_namespace}_output"
+  name       = "catalogue-${var.pipeline_date}_${local.pipeline_step}_output"
   role_names = [module.id_minter_lambda.lambda_role_name]
 }
 
@@ -28,10 +30,10 @@ module "id_minter_lambda" {
   timeout     = 900
 
   environment_variables = merge(
-    { for k, v in var.env_vars : k => tostring(v) if v != null },
+    {for k, v in var.env_vars : k => tostring(v) if v != null},
     {
       PIPELINE_DATE            = var.pipeline_date
-      PIPELINE_STEP            = "id_minter${local.underscore_namespace}" // used in CloudWatch metric dimensions
+      PIPELINE_STEP            = local.pipeline_step // used in CloudWatch metric dimensions
       DOWNSTREAM_SNS_TOPIC_ARN = module.id_minter_output_topic.arn
     }
   )
@@ -78,9 +80,9 @@ data "aws_iam_policy_document" "id_minter_s3_write" {
   count = var.env_vars.S3_BUCKET != null ? 1 : 0
 
   statement {
-    actions = ["s3:PutObject"]
+    actions   = ["s3:PutObject"]
     resources = [
-      "arn:aws:s3:::${var.env_vars.S3_BUCKET}/pipeline-${var.pipeline_date}/id_minter/${var.env_vars.S3_PREFIX}/*",
+      "arn:aws:s3:::${var.env_vars.S3_BUCKET}/pipeline-${var.pipeline_date}/${local.pipeline_step}/${var.env_vars.S3_PREFIX}/*",
     ]
   }
 }
@@ -118,7 +120,7 @@ resource "aws_cloudwatch_metric_alarm" "id_minter_failures" {
 
   dimensions = {
     pipeline_date = var.pipeline_date
-    pipeline_step = "id_minter${local.underscore_namespace}"
+    pipeline_step = local.pipeline_step
   }
 
   alarm_actions = [var.alarm_topic_arn]
