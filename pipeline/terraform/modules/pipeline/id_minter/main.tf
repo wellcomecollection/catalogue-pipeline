@@ -30,7 +30,7 @@ module "id_minter_lambda" {
   timeout     = 900
 
   environment_variables = merge(
-    {for k, v in var.env_vars : k => tostring(v) if v != null},
+    { for k, v in var.env_vars : k => tostring(v) if v != null },
     {
       PIPELINE_DATE            = var.pipeline_date
       PIPELINE_STEP            = local.pipeline_step // used in CloudWatch metric dimensions
@@ -80,7 +80,7 @@ data "aws_iam_policy_document" "id_minter_s3_write" {
   count = var.env_vars.S3_BUCKET != null ? 1 : 0
 
   statement {
-    actions   = ["s3:PutObject"]
+    actions = ["s3:PutObject"]
     resources = [
       "arn:aws:s3:::${var.env_vars.S3_BUCKET}/pipeline-${var.pipeline_date}/${local.pipeline_step}/${var.env_vars.S3_PREFIX}/*",
     ]
