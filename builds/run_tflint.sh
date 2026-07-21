@@ -15,12 +15,20 @@ else
   # A Terraform root is identified by having a backend configuration.
   # Child modules (under modules/, etc.) never declare a backend, so this
   # discovers every root without depending on a committed .terraform.lock.hcl.
-  mapfile -t terraform_roots < <(
-    grep -rlE '^\s*backend\s+"' --exclude-dir='.terraform' --include='*.tf' . \
-      | xargs -r -n1 dirname \
-      | sed 's|^\./||' \
-      | sort -u
-  )
+  roots_file="$(mktemp)"
+
+  while IFS= read -r tf_file; do
+    dirname "${tf_file}"
+  done < <(
+    grep -rlE '^[[:space:]]*backend[[:space:]]+"' --exclude-dir='.terraform' --include='*.tf' . || true
+  ) | sed 's|^\./||' | sort -u > "${roots_file}"
+
+  terraform_roots=()
+  while IFS= read -r root; do
+    terraform_roots+=("${root}")
+  done < "${roots_file}"
+
+  rm -f "${roots_file}"
 fi
 
 if [[ ${#terraform_roots[@]} -eq 0 ]]; then
