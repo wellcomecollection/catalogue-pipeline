@@ -1,20 +1,19 @@
-import json
 from datetime import UTC, datetime, timedelta
 
 import pyarrow as pa
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.steps.transformer import TransformerEvent, handler
+from adapters.steps.transformer import TransformerEvent, TransformerResult, handler
 from adapters.transformers.axiell_reconciler import AxiellReconciler
-from adapters.transformers.manifests import TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from adapters.utils.schemata import (
     ADAPTER_STORE_ARROW_SCHEMA,
     RECONCILER_STORE_ARROW_SCHEMA,
 )
-from tests.mocks import MockElasticsearchClient, MockSmartOpen
+from tests.adapters.transformers.conftest import read_transformer_report
+from tests.mocks import MockElasticsearchClient
 
 CONTENT_WITHOUT_001 = (
     "<record><leader>00000nam a2200000   4500</leader>"
@@ -47,7 +46,7 @@ def _run_reconciler(
     adapter_table: IcebergTable,
     reconciler_table: IcebergTable,
     changeset_ids: list[str],
-) -> TransformerManifest:
+) -> TransformerResult:
     monkeypatch.setattr(
         "adapters.steps.transformer.ADAPTER_TABLE_BUILDER_BY_TYPE",
         {"axiell_reconciler": lambda **kwargs: adapter_table},
@@ -64,16 +63,6 @@ def _run_reconciler(
     )
 
     return handler(event=event, es_mode="local", use_rest_api_table=False)
-
-
-def _read_success_lines(manifest: TransformerManifest) -> list[dict]:
-    batch_path_full = (
-        f"s3://{manifest.successes.batch_file_location.bucket}/"
-        f"{manifest.successes.batch_file_location.key}"
-    )
-    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
-    with open(batch_contents_path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
 
 
 def test_reconciler_updates_mappings_inserts_new_keeps_existing_and_emits_deleted(
@@ -153,17 +142,18 @@ def test_reconciler_updates_mappings_inserts_new_keeps_existing_and_emits_delete
     }
 
     # Old GUID corresponding to collect-1 should be transformed as a deleted work
-    assert result.successes.count == 1
-    assert result.failures is None
+    assert result.success_count == 1
+    assert result.failure_count == 0
     assert [op["_id"] for op in MockElasticsearchClient.inputs] == [
         "Work[axiell-guid/guid-old-1]"
     ]
+    assert (
+        result.report_s3_uri
+        == f"s3://wellcomecollection-platform-axiell-adapter/pipeline-dev/axiell_reconciler/dev/{adapter_changeset.changeset_id}__test-job-id.json"
+    )
 
-    # Old GUID corresponding to collect-1 should be included in the manifest
-    lines = _read_success_lines(result)
-    assert lines == [
-        {"sourceIdentifiers": ["Work[axiell-guid/guid-old-1]"], "jobId": "test-job-id"}
-    ]
+    report = read_transformer_report(result)
+    assert report["successful_ids"] == ["Work[axiell-guid/guid-old-1]"]
 
 
 def test_reconciler_creates_new_mappings_without_emitting_deleted_works(
@@ -214,10 +204,9 @@ def test_reconciler_creates_new_mappings_without_emitting_deleted_works(
     assert final_rows == {"collect-100": "guid-100", "collect-101": "guid-101"}
 
     # No deleted works transformed
-    assert result.successes.count == 0
-    assert result.failures is None
+    assert result.success_count == 0
+    assert result.failure_count == 0
     assert MockElasticsearchClient.inputs == []
-    assert _read_success_lines(result) == []
 
 
 def test_reconciler_emits_deleted_with_updated_last_modified(
@@ -268,7 +257,7 @@ def test_reconciler_emits_deleted_with_updated_last_modified(
         [adapter_changeset.changeset_id],
     )
 
-    assert result.successes.count == 1
+    assert result.success_count == 1
     deleted = MockElasticsearchClient.inputs[0]["_source"]
     assert deleted["type"] == "Deleted"
     assert deleted["version"] == int(new_time.timestamp())
@@ -324,8 +313,8 @@ def test_reconciler_does_not_update_or_emit_when_adapter_timestamp_is_older(
     assert final_rows[0]["id"] == "collect-older"
     assert final_rows[0]["guid"] == "guid-current"
 
-    assert result.successes.count == 0
-    assert result.failures is None
+    assert result.success_count == 0
+    assert result.failure_count == 0
     assert MockElasticsearchClient.inputs == []
 
 
@@ -419,9 +408,8 @@ def test_reconciler_only_commits_updates_when_deleted_work_is_indexed(
         [adapter_changeset.changeset_id],
     )
 
-    assert failed_result.successes.count == 1
-    assert failed_result.failures is not None
-    assert failed_result.failures.count == 1
+    assert failed_result.success_count == 1
+    assert failed_result.failure_count == 1
 
     after_failed = {
         row["id"]: row["guid"]
@@ -444,7 +432,7 @@ def test_reconciler_only_commits_updates_when_deleted_work_is_indexed(
         [adapter_changeset.changeset_id],
     )
 
-    assert successful_result.successes.count == 1
+    assert successful_result.success_count == 1
 
     after_success = {
         row["id"]: row["guid"]
@@ -507,9 +495,8 @@ def test_reconciler_skips_missing_or_invalid_content(
 
     assert reconciler_store.get_namespace_records().num_rows == 0
 
-    assert result.successes.count == 0
-    assert result.failures is not None
-    assert result.failures.count == 3
+    assert result.success_count == 0
+    assert result.failure_count == 3
     assert MockElasticsearchClient.inputs == []
 
 

@@ -23,7 +23,7 @@ and a local sqlite catalog for local runs — so no Iceberg-specific env vars.
 
 Environment variables (injected by Terraform):
   OKAPI_SECRET_PARAM     — SSM path to {"url":…, "tenant":…, "username":…, "password":…}
-  MANIFEST_S3_BUCKET     — S3 bucket name for NDJSON manifest storage
+  MANIFEST_S3_BUCKET     — S3 bucket name for JSON run reports
   AWS_REGION             — e.g. eu-west-1 (set automatically in Lambda)
   DRY_RUN                — default "true"; event.dry_run overrides
 

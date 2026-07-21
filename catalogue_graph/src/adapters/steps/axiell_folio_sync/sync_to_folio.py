@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any, cast
 
@@ -29,29 +30,22 @@ from adapters.steps.axiell_folio_sync.mapping import (
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
+    SyncErrorEntry,
+    SyncSuccessEntry,
 )
 from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
-from adapters.steps.axiell_folio_sync.s3_manifest import (
-    flush_success_batch,
-    utc_now_iso,
-    write_error_manifest,
-    write_metadata_manifest,
-)
 from adapters.steps.axiell_folio_sync.upsert import upsert_from_payloads
 
 logger = structlog.get_logger(__name__)
 
-# In-memory success buffer is flushed to S3 in chunks of this size.
-BATCH_SIZE = 5000
+
+def utc_now_iso() -> str:
+    """Timezone-aware UTC timestamp in ISO 8601."""
+    return datetime.now(UTC).isoformat()
 
 
 # ── lazy singletons (survive across warm Lambda invocations) ──────────────────
-
-
-@lru_cache(maxsize=1)
-def _s3() -> Any:
-    return boto3.client("s3", region_name=os.environ["AWS_REGION"])
 
 
 @lru_cache(maxsize=1)
@@ -96,18 +90,16 @@ def load_okapi_config() -> dict[str, str]:
 
 
 def _build_error(
-    job_id: str, source_id: str, changeset_id: str, stage: str, error: str | list
-) -> dict:
-    """Construct a per-row error entry for the error manifest."""
-    key = "errors" if isinstance(error, list) else "error"
-    return {
-        "jobId": job_id,
-        "sourceId": source_id,
-        "changesetId": changeset_id,
-        "stage": stage,
-        key: error,
-        "timestamp": utc_now_iso(),
-    }
+    source_id: str, changeset_id: str, stage: str, error: str | list[dict[str, Any]]
+) -> SyncErrorEntry:
+    """Construct a per-row error entry for the run report."""
+    return SyncErrorEntry(
+        source_id=source_id,
+        changeset_id=changeset_id,
+        stage=stage,
+        error=error,
+        timestamp=utc_now_iso(),
+    )
 
 
 def _tally_upsert_actions(result: UpsertResult, counts: dict[str, int]) -> None:
@@ -142,8 +134,8 @@ def run_sync(
         dry_run=dry_run,
     )
 
-    successful_batch: list[dict] = []
-    errors_list: list[dict] = []
+    successful: list[SyncSuccessEntry] = []
+    errors_list: list[SyncErrorEntry] = []
     total_successful = 0
     total_errors = 0
     counts: dict[str, int] = {
@@ -176,9 +168,7 @@ def run_sync(
             total_errors += 1
             logger.warning("empty_content", source_id=source_id)
             errors_list.append(
-                _build_error(
-                    event.job_id, source_id, changeset_id, "scan", "empty_content"
-                )
+                _build_error(source_id, changeset_id, "scan", "empty_content")
             )
             continue
 
@@ -192,7 +182,7 @@ def run_sync(
             total_errors += 1
             logger.warning("mapping_error", source_id=source_id, error=str(exc))
             errors_list.append(
-                _build_error(event.job_id, source_id, changeset_id, "mapping", str(exc))
+                _build_error(source_id, changeset_id, "mapping", str(exc))
             )
             continue
         except Exception as exc:
@@ -200,9 +190,7 @@ def run_sync(
             total_errors += 1
             logger.warning("selection_error", source_id=source_id, error=str(exc))
             errors_list.append(
-                _build_error(
-                    event.job_id, source_id, changeset_id, "selection", str(exc)
-                )
+                _build_error(source_id, changeset_id, "selection", str(exc))
             )
             continue
 
@@ -225,7 +213,6 @@ def run_sync(
             total_errors += 1
             errors_list.append(
                 _build_error(
-                    event.job_id,
                     source_id,
                     changeset_id,
                     "upsert",
@@ -236,23 +223,16 @@ def run_sync(
             total_successful += 1
             _tally_upsert_actions(result, counts)
 
-            successful_batch.append(
-                {
-                    "jobId": event.job_id,
-                    "sourceId": source_id,
-                    "changesetId": changeset_id,
-                    "instanceAction": result.instance.action,
-                    "holdingsAction": result.holdings.action,
-                    "itemAction": result.item.action,
-                    "timestamp": utc_now_iso(),
-                }
-            )
-
-            if len(successful_batch) >= BATCH_SIZE and manifest_bucket:
-                flush_success_batch(
-                    _s3(), manifest_bucket, event.job_id, successful_batch
+            successful.append(
+                SyncSuccessEntry(
+                    source_id=source_id,
+                    changeset_id=changeset_id,
+                    instance_action=result.instance.action,
+                    holdings_action=result.holdings.action,
+                    item_action=result.item.action,
+                    timestamp=utc_now_iso(),
                 )
-                successful_batch = []
+            )
 
         logger.info(
             "upsert_result",
@@ -263,24 +243,20 @@ def run_sync(
             errors=len(result.errors),
         )
 
-    if successful_batch and manifest_bucket:
-        flush_success_batch(_s3(), manifest_bucket, event.job_id, successful_batch)
-
-    manifest_path: str | None = None
-    if manifest_bucket:
-        if errors_list:
-            write_error_manifest(_s3(), manifest_bucket, event.job_id, errors_list)
-        manifest_path = write_metadata_manifest(
-            _s3(),
-            manifest_bucket,
-            event.job_id,
-            total_successful,
-            total_errors,
-            has_errors_file=bool(errors_list),
-            changeset_ids=event.changeset_ids or None,
-        )
-
-    AxiellFolioSyncReport(dry_run=dry_run, counts=counts).publish()
+    report = AxiellFolioSyncReport(
+        job_id=event.job_id,
+        changeset_ids=event.changeset_ids,
+        dry_run=dry_run,
+        counts=counts,
+        successful=successful,
+        errors=errors_list,
+        s3_bucket=manifest_bucket,
+        # The S3 report is written even on dry runs (it is how dry runs are
+        # validated); only CloudWatch metrics are suppressed.
+        publish_to_s3=bool(manifest_bucket),
+    )
+    report.publish()
+    manifest_path = report.s3_uri if manifest_bucket else None
 
     logger.info(
         "axiell_folio_sync complete",

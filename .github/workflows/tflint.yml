@@ -1,0 +1,35 @@
+name: "Terraform: tflint"
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/.terraform.lock.hcl"
+      - ".tflint.hcl"
+      - ".github/workflows/tflint.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.tf"
+      - "**/.terraform.lock.hcl"
+      - ".tflint.hcl"
+      - ".github/workflows/tflint.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tflint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.64.0
+
+      - name: Run tflint on all Terraform roots
+        shell: bash
+        run: builds/run_tflint.sh

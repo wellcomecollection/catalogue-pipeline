@@ -37,9 +37,8 @@ locals {
   )
 }
 
-# This is the new version of the id_minter, that uses the V2 RDS cluster
 module "id_minter_lambda" {
-  source = "./id_minter"
+  source = "../pipeline_services/id_minter"
 
   pipeline_date   = var.pipeline_date
   vpc_config      = local.id_minter_v2_vpc_config

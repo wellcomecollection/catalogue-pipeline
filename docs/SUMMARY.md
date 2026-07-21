@@ -63,5 +63,6 @@
   * [Sierra IDs](sierra/sierra_ids.md)
 * [Pipeline](pipeline/README.md)
   * [Merging](pipeline/merging.md)
+  * [Deployment](pipeline/deployment.md)
 * [APM](apm.md)
 

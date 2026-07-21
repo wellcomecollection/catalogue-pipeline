@@ -1,5 +1,5 @@
 module "matcher" {
-  source = "./matcher"
+  source = "../pipeline_services/matcher"
 
   pipeline_date = var.pipeline_date
 

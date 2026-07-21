@@ -1,8 +1,8 @@
 name: "Deploy Dated Pipeline Lambda"
 description: "Uses the dated pipeline image (env.{date}) to deploy the catalogue-{date}-{lambda_suffix} lambda."
 inputs:
-  source_tag:
-    description: "Existing image tag to retag from (e.g., commit SHA)"
+  pipeline_date:
+    description: "Pipeline date identifying the target pipeline (e.g. 2025-10-02)"
     required: true
   registry:
     description: "ECR registry hostname"
@@ -18,48 +18,51 @@ inputs:
     description: "AWS region"
     required: false
     default: "eu-west-1"
-  terraform_dir:
-    description: "Directory containing dated pipeline terraform folders"
-    required: false
-    default: "pipeline/terraform"
   lambda_suffix:
     description: "Suffix for the dated lambda name (e.g., transformer_ebsco). The full name becomes catalogue-{date}-{lambda_suffix}."
     required: true
 outputs:
-  pipeline_date:
-    description: "Discovered latest pipeline date"
-    value: ${{ steps.image.outputs.pipeline_date }}
   lambda_name:
     description: "Resolved dated lambda name"
     value: ${{ steps.lambda.outputs.lambda_name }}
 runs:
   using: "composite"
   steps:
-    - name: Discover pipeline date and retag image
-      id: image
-      uses: ./.github/actions/retag-dated-pipeline-image
-      with:
-        registry: ${{ inputs.registry }}
-        image_name: ${{ inputs.image_name }}
-        source_tag: ${{ inputs.source_tag }}
-        role_to_assume: ${{ inputs.role_to_assume }}
-        terraform_dir: ${{ inputs.terraform_dir }}
-
     - name: Resolve lambda name
       id: lambda
       shell: bash
       run: |
         chmod +x "${{ github.action_path }}/lambda_name.sh"
         "${{ github.action_path }}/lambda_name.sh" \
-          "${{ steps.image.outputs.pipeline_date }}" \
+          "${{ inputs.pipeline_date }}" \
           "${{ inputs.lambda_suffix }}"
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        aws-region: ${{ inputs.aws_region }}
+        role-to-assume: ${{ inputs.role_to_assume }}
+
+    # Not every pipeline runs every lambda (newer pipeline stacks are composed
+    # from a subset), so skip functions that don't exist in this pipeline.
+    - name: Check the lambda exists in this pipeline
+      id: check
+      shell: bash
+      run: |
+        if aws lambda get-function-configuration --function-name "${{ steps.lambda.outputs.lambda_name }}" > /dev/null 2>&1; then
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "::warning::Skipping ${{ steps.lambda.outputs.lambda_name }}, not present in pipeline ${{ inputs.pipeline_date }}"
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Deploy Lambda to pipeline date image
+      if: steps.check.outputs.exists == 'true'
       uses: ./.github/actions/deploy-lambda-image
       with:
         lambda_name: ${{ steps.lambda.outputs.lambda_name }}
         registry: ${{ inputs.registry }}
         image_name: ${{ inputs.image_name }}
-        deploy_tag: env.${{ steps.image.outputs.pipeline_date }}
+        deploy_tag: env.${{ inputs.pipeline_date }}
         role_to_assume: ${{ inputs.role_to_assume }}
         aws_region: ${{ inputs.aws_region }}

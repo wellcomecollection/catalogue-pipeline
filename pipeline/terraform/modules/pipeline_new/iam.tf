@@ -1,0 +1,177 @@
+locals {
+  adapter_buckets = {
+    ebsco  = local.ebsco_adapter_bucket
+    axiell = local.axiell_adapter_bucket
+    folio  = local.folio_adapter_bucket
+  }
+}
+
+data "aws_iam_policy_document" "adapter_bucket_read" {
+  for_each = local.adapter_buckets
+
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject*",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${each.value}",
+      "arn:aws:s3:::${each.value}/*",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "adapter_s3tables_read" {
+  for_each = local.adapter_buckets
+
+  statement {
+    actions = [
+      "s3tables:GetNamespace",
+      "s3tables:ListNamespaces",
+      "s3tables:ListTables",
+      "s3tables:GetTableBucket",
+      "s3tables:GetTableMetadataLocation",
+    ]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${each.value}",
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${each.value}/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3tables:GetTableMetadataLocation",
+      "s3tables:ListTables",
+      "s3tables:GetTable",
+      "s3tables:GetTableData",
+      "s3tables:UpdateTableMetadataLocation"
+    ]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${each.value}/table/*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "reconciler_s3tables_write" {
+  statement {
+    actions = [
+      "s3tables:PutTableData",
+    ]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${local.axiell_adapter_bucket}/table/*"
+    ]
+
+    # Restrict write permissions to the namespaced reconciler table
+    condition {
+      test     = "StringEquals"
+      variable = "s3tables:namespace"
+      values   = ["wellcomecollection_catalogue"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "s3tables:tableName"
+      values   = ["axiell_reconciler_table_${replace(var.pipeline_date, "-", "_")}"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "read_ebsco_transformer_pipeline_storage_secrets" {
+  statement {
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer/api_key*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "read_axiell_transformer_pipeline_storage_secrets" {
+  statement {
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer_axiell/api_key*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "read_folio_transformer_pipeline_storage_secrets" {
+  statement {
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer_folio/api_key*"
+    ]
+  }
+}
+
+# Combined policy documents for the transformer lambda role to access S3 buckets and table, ES source index
+data "aws_iam_policy_document" "all_adapter_s3tables_read" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_s3tables_read)[*].json
+}
+
+data "aws_iam_policy_document" "all_adapter_buckets_read" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_bucket_read)[*].json
+}
+
+data "aws_iam_policy_document" "all_adapter_buckets_write" {
+  source_policy_documents = values(data.aws_iam_policy_document.adapter_bucket_write)[*].json
+}
+
+data "aws_iam_policy_document" "all_transformer_pipeline_storage_secrets" {
+  source_policy_documents = [
+    data.aws_iam_policy_document.read_ebsco_transformer_pipeline_storage_secrets.json,
+    data.aws_iam_policy_document.read_axiell_transformer_pipeline_storage_secrets.json,
+    data.aws_iam_policy_document.read_folio_transformer_pipeline_storage_secrets.json,
+  ]
+}
+
+data "aws_iam_policy_document" "adapter_bucket_write" {
+  for_each = local.adapter_buckets
+
+  statement {
+    actions = [
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${each.value}/prod/transformer/batches/*",
+      "arn:aws:s3:::${each.value}/prod/reconciler/batches/*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "read_tei_adapter_bucket" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject*",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${local.tei_adapter_bucket}",
+      "arn:aws:s3:::${local.tei_adapter_bucket}/*",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "read_storage_bucket" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject*",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${local.storage_bucket}",
+      "arn:aws:s3:::${local.storage_bucket}/*",
+    ]
+  }
+}

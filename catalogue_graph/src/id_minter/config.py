@@ -45,7 +45,6 @@ DOWNSTREAM_SNS_TOPIC_ARN = os.getenv("DOWNSTREAM_SNS_TOPIC_ARN")
 # ---------------------------------------------------------------------------
 S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-id-minter")
 S3_PREFIX = os.getenv("S3_PREFIX", "dev")
-BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "id_minter")
 
 # ---------------------------------------------------------------------------
 # RDS Data API (for local/CLI access without direct DB connectivity)
@@ -100,7 +99,7 @@ class IdMinterConfig(DBConfig):
     rds_cluster_id: str = RDS_CLUSTER_ID
     rds_region: str = RDS_REGION
     s3_bucket: str = S3_BUCKET
-    batch_s3_prefix: str = BATCH_S3_PREFIX
+    s3_prefix: str = S3_PREFIX
 
     @property
     def source_index_name(self) -> str:

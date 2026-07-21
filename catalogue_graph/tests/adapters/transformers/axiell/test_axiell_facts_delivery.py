@@ -1,13 +1,11 @@
-import json
 from typing import Any
 
 import pytest
 from pyiceberg.exceptions import NoSuchTableError
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.steps.transformer import TransformerEvent, handler
+from adapters.steps.transformer import TransformerEvent, TransformerResult, handler
 from adapters.transformers.axiell_store_source import AxiellStoreSource
-from adapters.transformers.manifests import TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.deletion_facts_store import DeletionFactsStore
 from adapters.utils.reconciler_store import ReconcilerStore
@@ -16,7 +14,8 @@ from tests.adapters.conftest import (
     reconciler_records_to_table,
 )
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
-from tests.mocks import MockElasticsearchClient, MockSmartOpen
+from tests.adapters.transformers.conftest import read_transformer_report
+from tests.mocks import MockElasticsearchClient
 
 AXIELL_NAMESPACE = "axiell"
 
@@ -63,7 +62,7 @@ def _run_transform(
     changeset_ids: list[str],
     facts_table: IcebergTable | None = None,
     reconciler_table: IcebergTable | None = None,
-) -> TransformerManifest:
+) -> TransformerResult:
     if facts_table is not None:
         monkeypatch.setattr(
             "adapters.steps.transformer.AXIELL_CONFIG.build_deletion_facts_table",
@@ -82,27 +81,6 @@ def _run_transform(
     )
 
     return handler(event=event, es_mode="local", use_rest_api_table=False)
-
-
-def _read_success_lines(manifest: TransformerManifest) -> list[dict]:
-    batch_path_full = (
-        f"s3://{manifest.successes.batch_file_location.bucket}/"
-        f"{manifest.successes.batch_file_location.key}"
-    )
-    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
-    with open(batch_contents_path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
-
-
-def _read_failure_lines(manifest: TransformerManifest) -> list[dict]:
-    assert manifest.failures is not None
-    failure_path_full = (
-        f"s3://{manifest.failures.error_file_location.bucket}/"
-        f"{manifest.failures.error_file_location.key}"
-    )
-    failure_contents_path = MockSmartOpen.file_lookup[failure_path_full]
-    with open(failure_contents_path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
 
 
 def test_facts_delivered_as_tombstones_alongside_adapter_rows(
@@ -132,8 +110,8 @@ def test_facts_delivered_as_tombstones_alongside_adapter_rows(
         reconciler_table=reconciler_temporary_table,
     )
 
-    assert result.successes.count == 2
-    assert result.failures is None
+    assert result.success_count == 2
+    assert result.failure_count == 0
 
     docs_by_id = {op["_id"]: op["_source"] for op in MockElasticsearchClient.inputs}
     assert set(docs_by_id) == {
@@ -144,14 +122,11 @@ def test_facts_delivered_as_tombstones_alongside_adapter_rows(
     assert tombstone["type"] == "Deleted"
     assert tombstone["deletedReason"]["type"] == "DeletedFromSource"
 
-    # The fact delivery is covered by the success manifest alongside the
-    # adapter row's work.
-    lines = _read_success_lines(result)
-    assert len(lines) == 1
-    assert set(lines[0]["sourceIdentifiers"]) == {
-        "Work[axiell-guid/guid-new-1]",
-        "Work[axiell-guid/guid-old-1]",
-    }
+    # The fact delivery is reported alongside the adapter row's work.
+    report = read_transformer_report(result)
+    assert sorted(report["successful_ids"]) == sorted(
+        ["Work[axiell-guid/guid-new-1]", "Work[axiell-guid/guid-old-1]"]
+    )
 
 
 def test_facts_from_other_changesets_are_not_delivered(
@@ -190,14 +165,14 @@ def test_facts_from_other_changesets_are_not_delivered(
         reconciler_table=reconciler_temporary_table,
     )
 
-    assert result.successes.count == 2
+    assert result.success_count == 2
     assert {op["_id"] for op in MockElasticsearchClient.inputs} == {
         "Work[axiell-guid/guid-new-1]",
         "Work[axiell-guid/guid-old-1]",
     }
 
 
-def test_es_error_on_tombstone_lands_in_manifest_under_fact_id(
+def test_es_error_on_tombstone_reported_under_fact_id(
     temporary_table: IcebergTable,
     deletion_facts_temporary_table: IcebergTable,
     reconciler_temporary_table: IcebergTable,
@@ -240,17 +215,16 @@ def test_es_error_on_tombstone_lands_in_manifest_under_fact_id(
         reconciler_table=reconciler_temporary_table,
     )
 
-    assert result.successes.count == 1
-    assert result.failures is not None
-    assert result.failures.count == 1
+    assert result.success_count == 1
+    assert result.failure_count == 1
 
-    failure_lines = _read_failure_lines(result)
-    assert len(failure_lines) == 1
-    assert failure_lines[0]["row_id"] == f"collect-1/{changeset_id}"
-    assert failure_lines[0]["stage"] == "index"
+    errors = read_transformer_report(result)["errors"]
+    assert len(errors) == 1
+    assert errors[0]["row_id"] == f"collect-1/{changeset_id}"
+    assert errors[0]["stage"] == "index"
 
 
-def test_fact_transform_error_lands_in_manifest_and_run_continues(
+def test_fact_transform_error_reported_and_run_continues(
     temporary_table: IcebergTable,
     deletion_facts_temporary_table: IcebergTable,
     reconciler_temporary_table: IcebergTable,
@@ -284,17 +258,16 @@ def test_fact_transform_error_lands_in_manifest_and_run_continues(
     )
 
     # The adapter row's work is still transformed and indexed.
-    assert result.successes.count == 1
+    assert result.success_count == 1
     assert [op["_id"] for op in MockElasticsearchClient.inputs] == [
         "Work[axiell-guid/guid-new-1]"
     ]
 
-    assert result.failures is not None
-    assert result.failures.count == 1
-    failure_lines = _read_failure_lines(result)
-    assert len(failure_lines) == 1
-    assert failure_lines[0]["row_id"] == f"collect-1/{changeset_id}"
-    assert failure_lines[0]["stage"] == "transform"
+    assert result.failure_count == 1
+    errors = read_transformer_report(result)["errors"]
+    assert len(errors) == 1
+    assert errors[0]["row_id"] == f"collect-1/{changeset_id}"
+    assert errors[0]["stage"] == "transform"
 
 
 def test_full_reindex_never_builds_or_reads_the_facts_store(
@@ -321,7 +294,7 @@ def test_full_reindex_never_builds_or_reads_the_facts_store(
 
     result = _run_transform(monkeypatch, changeset_ids=[])
 
-    assert result.successes.count == 1
+    assert result.success_count == 1
     assert [op["_id"] for op in MockElasticsearchClient.inputs] == [
         "Work[axiell-guid/guid-new-1]"
     ]
@@ -380,8 +353,8 @@ def test_stale_fact_for_reclaimed_guid_is_skipped(
         reconciler_table=reconciler_temporary_table,
     )
 
-    assert result.successes.count == 2
-    assert result.failures is None
+    assert result.success_count == 2
+    assert result.failure_count == 0
     assert {op["_id"] for op in MockElasticsearchClient.inputs} == {
         "Work[axiell-guid/guid-3]",
         "Work[axiell-guid/guid-old-2]",
