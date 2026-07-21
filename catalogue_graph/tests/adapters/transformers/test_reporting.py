@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
@@ -6,7 +8,7 @@ from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.steps.transformer import TransformerEvent, handler
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
 from tests.adapters.transformers.folio.helpers import make_items_store
-from tests.mocks import MockCloudwatchClient
+from tests.mocks import MockCloudwatchClient, MockSmartOpen
 
 FOLIO_NAMESPACE = FOLIO_CONFIG.config.adapter_namespace
 
@@ -101,3 +103,44 @@ def test_transformer_run_skips_cloudwatch_for_dev_pipeline_date(
     _run_transform(monkeypatch, changeset_ids=[changeset_id], pipeline_date="dev")
 
     assert MockCloudwatchClient.metrics_reported == []
+
+
+def test_transformer_run_writes_report_to_s3(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        {"fo00001": _MINIMAL_RECORD.format(id="fo00001")},
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+    items_store = make_items_store({})
+    monkeypatch.setattr(
+        "adapters.steps.transformer.build_items_store",
+        lambda **kwargs: items_store,
+    )
+    monkeypatch.setattr(adapter_config, "PIPELINE_DATE", "2026-03-15")
+    monkeypatch.setattr(adapter_config, "INDEX_DATE", None)
+
+    event = TransformerEvent(
+        transformer_type="folio",
+        job_id="20260101T1200",
+        changeset_ids=[changeset_id],
+    )
+    handler(event=event, es_mode="local", use_rest_api_table=False)
+
+    expected_uri = (
+        f"s3://{adapter_config.S3_BUCKET}"
+        f"/pipeline-2026-03-15/folio/{adapter_config.S3_PREFIX}"
+        f"/{changeset_id}__20260101T1200.json"
+    )
+    assert expected_uri in MockSmartOpen.file_lookup
+
+    with open(MockSmartOpen.file_lookup[expected_uri], encoding="utf-8") as f:
+        report = json.loads(f.read())
+
+    assert report["successful_ids"] == ["Work[folio-instance/fo00001]"]
+    assert report["errors"] == []
+    assert report["changeset_ids"] == [changeset_id]
+    assert report["transformer_type"] == "folio"

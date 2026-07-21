@@ -16,7 +16,7 @@ locals {
     ES_SOURCE_INDEX_DATE_SUFFIX = var.index_dates.source
     ES_TARGET_INDEX_DATE_SUFFIX = var.index_dates.identified
     S3_BUCKET                   = "wellcomecollection-platform-id-minter"
-    S3_PREFIX                   = var.pipeline_date
+    S3_PREFIX                   = "prod"
   }
 
   # Extract the secret name from the full ARN.

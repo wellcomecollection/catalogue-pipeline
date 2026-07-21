@@ -15,7 +15,6 @@ from __future__ import annotations
 import json
 from datetime import datetime
 from typing import cast
-from unittest.mock import patch
 
 import pymysql
 import pymysql.connections
@@ -30,6 +29,7 @@ from id_minter.models.step_events import (
 )
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.steps.id_minter import (
+    IdMinterResult,
     IdMinterRuntime,
     execute,
     handler,
@@ -49,7 +49,6 @@ from tests.mocks import (
     MockSmartOpen,
     MockSNSClient,
 )
-from utils.models.manifests import StepManifest
 
 pytestmark = pytest.mark.database
 
@@ -95,32 +94,6 @@ def _build_runtime(
     )
 
 
-def _read_ndjson(uri: str) -> list[dict]:
-    """Read NDJSON lines from a MockSmartOpen-backed S3 URI."""
-    path = MockSmartOpen.file_lookup[uri]
-    with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
-
-
-def _read_batch_ids(manifest: StepManifest) -> list[str]:
-    """Extract all canonical IDs from the success batch file."""
-    loc = manifest.successes.batch_file_location
-    uri = f"s3://{loc.bucket}/{loc.key}"
-    lines = _read_ndjson(uri)
-    ids: list[str] = []
-    for line in lines:
-        ids.extend(line["canonicalIds"])
-    return ids
-
-
-def _read_failure_details(manifest: StepManifest) -> list[dict]:
-    """Read failure detail records from the failure batch file."""
-    assert manifest.failures is not None
-    loc = manifest.failures.error_file_location
-    uri = f"s3://{loc.bucket}/{loc.key}"
-    return _read_ndjson(uri)
-
-
 # ---------------------------------------------------------------------------
 # Tests: execute() with real resolver
 # ---------------------------------------------------------------------------
@@ -149,15 +122,10 @@ class TestExecuteWithRealResolver:
         runtime = _build_runtime(ids_db)
 
         with stub_transformer_source([doc]):
-            response = execute(minting_request, runtime=runtime)
+            successful_ids, errors = execute(minting_request, runtime=runtime)
 
-        assert isinstance(response, StepManifest)
-        assert response.job_id == minting_request.job_id
-        assert response.failures is None
-        assert response.successes.count == 1
-        assert _read_batch_ids(response) == ["mint0001"]
-
-        # Verify the ID was actually assigned in the database
+        assert successful_ids == ["mint0001"]
+        assert errors == []
         assert get_canonical_status(ids_db, "mint0001") == "assigned"
 
     def test_mints_ids_for_multiple_works(
@@ -182,12 +150,11 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source(docs):
-            response = execute(request, runtime=runtime)
+            successful_ids, errors = execute(request, runtime=runtime)
 
-        assert response.job_id == "integration-test-multi"
-        assert response.failures is None
-        assert response.successes.count == 3
-        assert set(_read_batch_ids(response)) == {"multi001", "multi002", "multi003"}
+        assert len(successful_ids) == 3
+        assert errors == []
+        assert set(successful_ids) == {"multi001", "multi002", "multi003"}
 
         for cid in ["multi001", "multi002", "multi003"]:
             assert get_canonical_status(ids_db, cid) == "assigned"
@@ -214,11 +181,10 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source([doc]):
-            response = execute(request, runtime=runtime)
+            successful_ids, errors = execute(request, runtime=runtime)
 
-        assert response.failures is None
-        assert response.successes.count == 1
-        assert _read_batch_ids(response) == ["exist001"]
+        assert successful_ids == ["exist001"]
+        assert errors == []
         # The spare free ID should still be free
         assert get_canonical_status(ids_db, "spare001") == "free"
 
@@ -241,10 +207,10 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source([doc]):
-            response = execute(request, runtime=runtime)
+            successful_ids, errors = execute(request, runtime=runtime)
 
-        assert response.failures is None
-        assert response.successes.count == 1
+        assert len(successful_ids) == 1
+        assert errors == []
 
         # Verify both IDs were claimed from the pool
         for cid in ["nest0001", "nest0002"]:
@@ -286,10 +252,10 @@ class TestHandlerWithRealResolver:
         with stub_transformer_source([doc]):
             response = handler(request, runtime=runtime)
 
-        assert isinstance(response, StepManifest)
+        assert isinstance(response, IdMinterResult)
         assert response.job_id == "handler-integration"
-        assert response.successes.count == 1
-        assert response.failures is None
+        assert response.success_count == 1
+        assert response.failure_count == 0
         assert get_canonical_status(ids_db, "hand0001") == "assigned"
 
     def test_handler_reports_failures_on_pool_exhaustion(
@@ -314,11 +280,8 @@ class TestHandlerWithRealResolver:
         # The transform step catches the RuntimeError from the resolver
         # and records it as a failure
         assert response.job_id == "handler-exhaustion"
-        assert response.successes.count == 0
-        assert response.failures is not None
-        assert response.failures.count == 1
-        failure_records = _read_failure_details(response)
-        assert "Free ID pool exhausted" in failure_records[0]["detail"]
+        assert response.success_count == 0
+        assert response.failure_count == 1
 
     def test_handler_empty_request(
         self,
@@ -336,8 +299,8 @@ class TestHandlerWithRealResolver:
             response = handler(request, runtime=runtime)
 
         assert response.job_id == "handler-empty"
-        assert response.successes.count == 0
-        assert response.failures is None
+        assert response.success_count == 0
+        assert response.failure_count == 0
 
 
 # ---------------------------------------------------------------------------
@@ -460,46 +423,57 @@ class TestMetricsPublishing:
         assert metrics["success_count"]["value"] == 0
         assert metrics["failure_count"]["value"] == 1
 
-    def test_handler_returns_response_when_publish_fails(
+
+# ---------------------------------------------------------------------------
+# Tests: S3 report publishing
+# ---------------------------------------------------------------------------
+
+
+class TestS3Publishing:
+    """Verify that the report is written to S3 after a handler run."""
+
+    def test_handler_writes_report_to_s3(
         self,
         mock_es: None,
         ids_db: pymysql.connections.Connection,
     ) -> None:
-        """handler() still returns the minting manifest if metrics publishing raises."""
-        seed_free_ids(ids_db, ["metr0003"])
+        seed_free_ids(ids_db, ["s3rpt001"])
 
-        si = make_source_identifier("Work", "sierra-system-number", "b6004")
+        si = make_source_identifier("Work", "sierra-system-number", "b9001")
         doc = make_work_doc(si)
 
-        resolver = MintingResolver.from_connection(ids_db)
         config = IdMinterConfig(
             rds_client=RDSClientConfig(password="id_minter"),
             apply_migrations=False,
-            pipeline_date="2024-01-01",
+            pipeline_date="2024-06-01",
         )
         runtime = IdMinterRuntime(
             config=config,
-            resolver=resolver,
+            resolver=MintingResolver.from_connection(ids_db),
             source_es_mode="local",
             target_es_mode="local",
         )
         request = StepFunctionMintingRequest(
             window=IncrementalWindow.model_validate({"end_time": END_TIME}),
-            job_id="metrics-test-publish-error",
+            job_id="s3-report-test",
         )
 
-        with (
-            stub_transformer_source([doc]),
-            patch(
-                "id_minter.steps.id_minter.IdMinterReport.publish",
-                side_effect=RuntimeError("CloudWatch unavailable"),
-            ),
-        ):
-            response = handler(request, runtime=runtime)
+        with stub_transformer_source([doc]):
+            handler(request, runtime=runtime)
 
-        assert response.job_id == "metrics-test-publish-error"
-        assert response.successes.count == 1
-        assert response.failures is None
+        expected_uri = (
+            f"s3://{config.s3_bucket}"
+            f"/pipeline-{config.pipeline_date}/id_minter"
+            f"/{config.s3_prefix}/s3-report-test.json"
+        )
+        assert expected_uri in MockSmartOpen.file_lookup
+
+        with open(MockSmartOpen.file_lookup[expected_uri], encoding="utf-8") as f:
+            report = json.loads(f.read())
+
+        assert report["successful_ids"] == ["s3rpt001"]
+        assert report["errors"] == []
+        assert report["job_id"] == "s3-report-test"
 
 
 # ---------------------------------------------------------------------------
@@ -598,9 +572,9 @@ class TestSnsPublishing:
         )
 
         with stub_transformer_source([doc]):
-            response = execute(request, runtime=runtime)
+            successful_ids, _ = execute(request, runtime=runtime)
 
-        assert response.successes.count == 1
+        assert len(successful_ids) == 1
         assert len(MockSNSClient.publish_batch_request_entries) == 0
 
     def test_no_sns_publish_when_no_successful_ids(

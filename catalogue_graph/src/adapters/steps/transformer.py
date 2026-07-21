@@ -8,7 +8,6 @@ import argparse
 import json
 import typing
 from collections.abc import Callable
-from pathlib import PurePosixPath
 from typing import Any, Literal, Protocol, cast
 
 import structlog
@@ -25,10 +24,6 @@ from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.folio_transformer import FolioTransformer
-from adapters.transformers.manifests import (
-    TransformerManifest,
-    TransformerManifestWriter,
-)
 from adapters.transformers.reporting import TransformerReport
 from adapters.transformers.source_work_transformer import (
     SourceWorkTransformer,
@@ -60,6 +55,12 @@ class AdapterConfig(Protocol):
     S3_PREFIX: str
 
 
+class TransformerResult(TransformerEvent):
+    success_count: int
+    failure_count: int
+    report_s3_uri: str
+
+
 ICEBERG_NAMESPACE_BY_TYPE: dict[TransformerType, str] = {
     "axiell": "axiell",
     "axiell_reconciler": "axiell",
@@ -79,13 +80,6 @@ ADAPTER_TABLE_BUILDER_BY_TYPE: dict[TransformerType, Callable] = {
     "axiell_reconciler": AXIELL_CONFIG.build_adapter_table,
     "ebsco": ebsco_helpers.build_adapter_table,
     "folio": FOLIO_CONFIG.build_adapter_table,
-}
-
-BATCHES_S3_PREFIX_BY_TYPE: dict[TransformerType, str] = {
-    "axiell": "transformer/batches",
-    "axiell_reconciler": "reconciler/batches",
-    "ebsco": "transformer/batches",
-    "folio": "transformer/batches",
 }
 
 
@@ -159,7 +153,7 @@ def handler(
     es_mode: ElasticsearchMode = "private",
     use_rest_api_table: bool = False,
     create_if_not_exists: bool = False,
-) -> TransformerManifest:
+) -> TransformerResult:
     setup_logging(execution_context)
     logger.info("Processing transformer event", transformer_event=event.model_dump())
     logger.info("Received job_id", job_id=event.job_id)
@@ -187,38 +181,37 @@ def handler(
 
     transformer.stream_to_index(es_client, index_name)
 
-    s3_batches_prefix = BATCHES_S3_PREFIX_BY_TYPE[event.transformer_type]
-    writer = TransformerManifestWriter(
-        job_id=event.job_id,
-        changeset_ids=event.changeset_ids,
-        snapshot_id=transformer.source.snapshot_id,
-        bucket=config.S3_BUCKET,
-        prefix=str(PurePosixPath(config.S3_PREFIX, s3_batches_prefix)),
-    )
-    result = writer.build_manifest(
-        successful_ids=transformer.successful_ids,
-        errors=transformer.errors,
-    )
-
-    success_count = result.successes.count
-    failure_count = result.failures.count if result.failures else 0
-
     logger.info(
         "Transformation complete",
         job_id=event.job_id,
         transformer_type=event.transformer_type,
-        success_count=success_count,
-        failure_count=failure_count,
+        success_count=len(transformer.successful_ids),
+        failure_count=len(transformer.errors),
+        changeset_ids=event.changeset_ids,
+        snapshot_id=transformer.source.snapshot_id,
     )
 
-    TransformerReport(
+    report = TransformerReport(
         pipeline_date=config.PIPELINE_DATE,
         transformer_type=event.transformer_type,
-        success_count=success_count,
-        failure_count=failure_count,
-    ).publish()
+        successful_ids=transformer.successful_ids,
+        errors=transformer.errors,
+        changeset_ids=event.changeset_ids,
+        snapshot_id=transformer.source.snapshot_id,
+        job_id=event.job_id,
+        s3_bucket=config.S3_BUCKET,
+        s3_prefix=config.S3_PREFIX,
+    )
+    report.publish()
 
-    return result
+    return TransformerResult.model_validate(
+        {
+            **event.model_dump(),
+            "success_count": len(transformer.successful_ids),
+            "failure_count": len(transformer.errors),
+            "report_s3_uri": report.s3_uri,
+        },
+    )
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:

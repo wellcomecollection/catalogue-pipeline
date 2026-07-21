@@ -142,8 +142,7 @@ data "aws_iam_policy_document" "adapter_bucket_write" {
     ]
 
     resources = [
-      "arn:aws:s3:::${each.value}/prod/transformer/batches/*",
-      "arn:aws:s3:::${each.value}/prod/reconciler/batches/*"
+      "arn:aws:s3:::${each.value}/pipeline-${var.pipeline_date}/*/*",
     ]
   }
 }
