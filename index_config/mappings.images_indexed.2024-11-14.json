@@ -190,7 +190,7 @@
       }
     },
     "debug": {
-      "dynamic": "false",
+      "dynamic": false,
       "properties": {
         "indexedTime": {
           "type": "date"

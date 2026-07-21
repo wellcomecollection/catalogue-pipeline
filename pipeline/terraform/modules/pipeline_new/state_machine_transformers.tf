@@ -6,7 +6,7 @@ module "transformer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
   name         = "${local.namespace}-transformer"
-  description  = "Lambda function to transform EBSCO/Axiell data"
+  description  = "Lambda function to transform EBSCO/Axiell/Folio data"
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   # CI deploys via `update-function-code --publish` and nothing consumes a
@@ -34,8 +34,10 @@ module "transformer_lambda" {
 
   environment = {
     variables = {
-      PIPELINE_DATE = var.pipeline_date
-      S3_PREFIX     = "prod"
+      PIPELINE_DATE                  = var.pipeline_date
+      INDEX_DATE                     = var.index_dates.source
+      S3_PREFIX                      = "prod"
+      RECONCILER_REST_API_TABLE_NAME = "axiell_reconciler_table_${replace(var.pipeline_date, "-", "_")}"
     }
   }
 }
@@ -143,11 +145,11 @@ locals {
       adapter_detail_type  = "axiell.adapter.completed"
       reindex_target_value = "axiell"
     }
-    folio = {
-      adapter_source       = "folio.adapter"
-      adapter_detail_type  = "folio.adapter.completed"
-      reindex_target_value = "folio"
-    }
+    #    folio = {
+    #      adapter_source       = "folio.adapter"
+    #      adapter_detail_type  = "folio.adapter.completed"
+    #      reindex_target_value = "folio"
+    #    }
   }
 }
 
@@ -179,6 +181,7 @@ module "transformer_state_machine_alarms" {
     alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
   }
 }
+
 
 resource "aws_iam_role_policy" "transformer_lambda_cloudwatch_write" {
   role   = module.transformer_lambda.lambda_role.name
@@ -229,7 +232,7 @@ module "adapter_transformer_trigger" {
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.transformer_state_machine.state_machine_arn
 
-  enabled = true
+  enabled = false # DISABLE for now
 
   event_pattern = {
     source        = [each.value.adapter_source],

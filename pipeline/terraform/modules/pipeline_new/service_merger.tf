@@ -24,9 +24,9 @@ module "merger" {
     ]
   }
   es_config = {
-    es_host     = module.elastic.pipeline_storage_private_host
-    es_port     = module.elastic.pipeline_storage_port
-    es_protocol = module.elastic.pipeline_storage_protocol
-    es_apikey   = module.elastic.pipeline_storage_es_service_secrets["merger"]["es_apikey"]
+    es_host     = var.elastic.pipeline_storage_es_service_secrets["merger"]["es_host"]
+    es_port     = var.elastic.pipeline_storage_es_service_secrets["merger"]["es_port"]
+    es_protocol = var.elastic.pipeline_storage_es_service_secrets["merger"]["es_protocol"]
+    es_apikey   = var.elastic.pipeline_storage_es_service_secrets["merger"]["es_apikey"]
   }
 }

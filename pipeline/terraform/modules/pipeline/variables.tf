@@ -109,7 +109,7 @@ variable "graph_index_dates" {
 variable "enable_image_inferrer_schedule" {
   type        = bool
   default     = true
-  description = "Whether the scheduled image-inferrer state machine is enabled. Defaults to true, since it is the sole image inferrer. Set to false as a kill-switch to pause scheduled inference, e.g. during an incident or a large reindex."
+  description = "Whether the scheduled image-inferrer state machine is enabled. Set to false as a kill-switch to pause scheduled inference, e.g. during an incident or a large reindex."
 }
 
 variable "image_inferrer_initial_index_date" {

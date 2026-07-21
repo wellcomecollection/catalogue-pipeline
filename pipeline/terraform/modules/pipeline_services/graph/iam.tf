@@ -9,7 +9,7 @@ data "aws_iam_policy_document" "allow_catalogue_graph_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "${local.secrets_manager_prefix}:catalogue-graph/*"
+      "${local.secrets_manager_prefix}:catalogue-graph*"
     ]
   }
 }

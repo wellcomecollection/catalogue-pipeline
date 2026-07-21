@@ -1,13 +1,9 @@
-# when we destroy this infra, remember to remove the apps from the deployment matrix
-# .buildkite/pipeline.yml -> matcher_test
-
-module "matcher_test" {
-  source       = "../pipeline_services/matcher"
-  service_name = "matcher_test"
+module "matcher" {
+  source = "../pipeline_services/matcher"
 
   pipeline_date = var.pipeline_date
 
-  es_works_identified_index = "works-identified-2026-03-06"
+  es_works_identified_index = local.es_works_identified_index
   scale_up_matcher_db       = var.reindexing_state.scale_up_matcher_db
 
   vpc_config = {
@@ -18,7 +14,7 @@ module "matcher_test" {
     ]
   }
 
-  secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["matcher"]
+  secret_env_vars = var.elastic.pipeline_storage_es_service_secrets["matcher"]
 
   queue_config = {
     visibility_timeout_seconds = 90
@@ -27,7 +23,7 @@ module "matcher_test" {
     batch_size                 = var.reindexing_state.scale_up_matcher_db ? 400 : 100
     maximum_concurrency        = var.reindexing_state.scale_up_matcher_db ? 40 : 2
     topic_arns = [
-      module.id_minter_test.id_minter_output_topic_arn,
+      module.id_minter_lambda.id_minter_output_topic_arn,
     ]
   }
 
