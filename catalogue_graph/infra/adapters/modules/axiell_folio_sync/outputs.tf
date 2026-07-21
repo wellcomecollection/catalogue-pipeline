@@ -14,6 +14,6 @@ output "step_function_arn" {
 }
 
 output "manifest_bucket_name" {
-  description = "S3 bucket name for storing NDJSON sync manifests"
+  description = "S3 bucket name for storing JSON sync run reports"
   value       = aws_s3_bucket.axiell_folio_sync_manifests.bucket
 }
