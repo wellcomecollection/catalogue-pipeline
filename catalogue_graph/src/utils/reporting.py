@@ -2,7 +2,7 @@ import typing
 from datetime import datetime
 from typing import ClassVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from clients.metric_reporter import MetricReporter
 from ingestor.models.step_events import (
@@ -25,7 +25,7 @@ class PipelineMetric(BaseModel):
 
 class PipelineReport(BaseModel):
     window: IncrementalWindow | None = None
-    publish_to_s3: bool = True
+    publish_to_s3: bool = Field(default=True, exclude=True)
     label: ClassVar[str]
 
     @property
