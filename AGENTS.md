@@ -38,8 +38,9 @@ is no workspace-wide build.
   scripts under `builds/`.
 - **Python** (UV, one project per directory with its own `pyproject.toml`):
   - `catalogue_graph/` — graph + ingestor pipeline, also contains the EBSCO,
-    FOLIO, Axiell and OAI-PMH adapters under `src/adapters/` (largest Python
-    project; see [catalogue_graph/README.md](/catalogue_graph/README.md))
+    FOLIO, Axiell and OAI-PMH adapters and the Axiell to FOLIO sync under
+    `src/adapters/` (largest Python project; see
+    [catalogue_graph/README.md](/catalogue_graph/README.md))
   - `pipeline/inferrer/{aspect_ratio_inferrer,feature_inferrer,palette_inferrer,common}/`
   - `sierra_adapter/` — Python maintenance scripts living alongside the Scala
     adapter (own `pyproject.toml`, `uv.lock`, Python 3.13)
@@ -73,6 +74,22 @@ uv run ruff check --fix
 
 Scope `pytest`/`mypy` paths to the area you changed when the project is large
 (e.g. `catalogue_graph/`); a full run can be slow.
+
+## Terraform conventions
+
+### Before finalising a Terraform change
+
+Run from the repository root:
+
+```bash
+builds/run_tflint.sh
+```
+
+Optionally pass one or more Terraform roots to target a subset:
+
+```bash
+builds/run_tflint.sh calm_adapter/terraform infrastructure/adapter_stack
+```
 
 ## Scala conventions
 

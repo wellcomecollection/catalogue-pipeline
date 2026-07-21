@@ -34,9 +34,8 @@ module "transformer_lambda" {
 
   environment = {
     variables = {
-      PIPELINE_DATE                = var.pipeline_date
-      S3_PREFIX                    = "prod"
-      AXIELL_TRANSFORMER_S3_PREFIX = "prod"
+      PIPELINE_DATE = var.pipeline_date
+      S3_PREFIX     = "prod"
     }
   }
 }

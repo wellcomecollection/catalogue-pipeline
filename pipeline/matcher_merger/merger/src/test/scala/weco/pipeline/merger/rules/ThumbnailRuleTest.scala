@@ -26,6 +26,7 @@ class ThumbnailRuleTest
   private val digitalSierraWork = sierraDigitalIdentifiedWork()
 
   private val calmWork = calmIdentifiedWork()
+  private val axiellWork = axiellIdentifiedWork()
   private val teiWork = teiIdentifiedWork()
 
   private val metsWork = metsIdentifiedWork()
@@ -139,6 +140,14 @@ class ThumbnailRuleTest
 
   it("chooses the METS thumbnail for a Calm target") {
     inside(ThumbnailRule.merge(calmWork, miroWorks :+ metsWork)) {
+      case FieldMergeResult(thumbnail, _) =>
+        thumbnail shouldBe defined
+        thumbnail shouldBe metsWork.data.thumbnail
+    }
+  }
+
+  it("chooses the METS thumbnail for an Axiell target") {
+    inside(ThumbnailRule.merge(axiellWork, miroWorks :+ metsWork)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
         thumbnail shouldBe metsWork.data.thumbnail

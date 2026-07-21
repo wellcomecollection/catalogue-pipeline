@@ -38,6 +38,7 @@ IDENTIFIER_LABEL_MAPPING = {
     "wellcome-accession-number": "Accession number",
     "wikidata": "Wikidata",
     "weco-authority": "Wellcome Concepts",
+    "axiell-guid": "Axiell GUID",
 }
 
 

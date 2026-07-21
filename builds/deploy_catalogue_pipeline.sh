@@ -59,7 +59,8 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
   uk.ac.wellcome/transformer_miro \
   uk.ac.wellcome/transformer_sierra \
   uk.ac.wellcome/transformer_tei \
-  uk.ac.wellcome/unified_pipeline_lambda
+  uk.ac.wellcome/unified_pipeline_lambda \
+  uk.ac.wellcome/unified_pipeline_task
   
 if [[ "$TASK" == "tag_images_and_deploy_services" ]]
 then

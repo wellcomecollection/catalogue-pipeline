@@ -17,7 +17,7 @@ locals {
 
 resource "elasticstack_elasticsearch_index" "the_index" {
   name                 = local.full_name
-  mappings             = file(local.mappings_file)
+  mappings             = jsonencode(jsondecode(file(local.mappings_file))) # Normalise JSON
   analysis_analyzer    = local.analysis.analyzer
   analysis_normalizer  = local.analysis.normalizer
   analysis_filter      = local.analysis.filter

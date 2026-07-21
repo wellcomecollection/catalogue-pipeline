@@ -2,7 +2,30 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
+
+
+class SyncSuccessEntry(BaseModel):
+    """One successfully synced record in the run report."""
+
+    source_id: str
+    changeset_id: str
+    instance_action: str | None
+    holdings_action: str | None
+    item_action: str | None
+    timestamp: str
+
+
+class SyncErrorEntry(BaseModel):
+    """One failed record in the run report, with the stage that failed."""
+
+    source_id: str
+    changeset_id: str
+    stage: str
+    error: str | list[dict[str, Any]]
+    timestamp: str
 
 
 class AxiellFolioSyncEvent(BaseModel):

@@ -14,6 +14,9 @@ To run a reindex follow these steps:
 Copy one of the per-pipeline folders in `pipeline/terraform` – these are labelled with the date of the pipeline.
 Rename the new folder with the date of your pipeline (usually the current date).
 
+By default CI deploys new code only to the most recent dated pipeline; while running more than one pipeline you can set `deploy_all_pipelines` in `pipeline/terraform/deploy_settings.json` to keep all of them on the latest code.
+See [the deployment docs](docs/pipeline/deployment.md) for how deployment works.
+
 Update the `reindexing_state` variables in `main.tf` – you want them all to be `true` if you're about to do a complete reindex, as this adds extra capacity and scaling to the pipeline.
 
 NOTE: once the reindexing of the new pipeline has completed, change `true` to `false` then `terraform apply` the changes to scale ES clusters/services down.

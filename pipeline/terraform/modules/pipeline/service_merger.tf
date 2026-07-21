@@ -1,5 +1,5 @@
 module "merger" {
-  source = "./merger"
+  source = "../pipeline_services/merger"
 
   pipeline_date = var.pipeline_date
 

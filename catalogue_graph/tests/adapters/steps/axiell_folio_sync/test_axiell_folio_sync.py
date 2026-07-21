@@ -6,19 +6,19 @@ fakes (a stub ref cache + FOLIO callables) rather than patching module globals.
 
 from __future__ import annotations
 
-import io
 from collections.abc import Mapping
 from typing import Any
 
 import pytest
 
 import adapters.steps.axiell_folio_sync.sync_to_folio as sync_to_folio_mod
-from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
-from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
-from adapters.transformers.axiell_folio_sync.mapping import (
+from adapters.steps.axiell_folio_sync.mapping import (
     EntityResult,
     UpsertResult,
 )
+from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
+from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
+from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
 
 # 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title).
 SELECTED = (
@@ -148,42 +148,115 @@ def test_load_okapi_config_raises_clear_error_for_missing_fields(
         load_okapi_config()
 
 
-class _MockS3:
-    def __init__(self) -> None:
-        self.objects: dict[tuple[str, str], bytes] = {}
+def test_report_written_to_s3_on_dry_run(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Dry runs still publish the S3 report (that's how they're validated);
+    # only CloudWatch metrics are suppressed.
+    captured: dict[str, Any] = {}
 
-    def get_object(self, *, Bucket: str, Key: str) -> dict[str, Any]:
-        from botocore.exceptions import ClientError
+    def fake_to_s3(model: Any, s3_uri: str) -> None:
+        captured["model"] = model
+        captured["s3_uri"] = s3_uri
 
-        content = self.objects.get((Bucket, Key))
-        if content is None:
-            raise ClientError({"Error": {"Code": "NoSuchKey"}}, "GetObject")
-        return {"Body": io.BytesIO(content)}
+    monkeypatch.setattr("utils.reporting.pydantic_to_s3_json", fake_to_s3)
 
-    def put_object(
-        self,
-        *,
-        Bucket: str,
-        Key: str,
-        Body: bytes,
-        ContentType: str,
-    ) -> dict[str, Any]:
-        self.objects[(Bucket, Key)] = Body
-        return {}
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [_row("sel", SELECTED), _row("bad", "<record><oops")],
+        FakeRefCache(),  # type: ignore[arg-type]
+        _FakeInventory(),
+        dry_run=True,
+        manifest_bucket="bucket-1",
+    )
+
+    assert captured["s3_uri"] == "s3://bucket-1/manifests/job-1.json"
+    assert resp.manifest_s3_path == captured["s3_uri"]
+
+    report = captured["model"]
+    assert report.publish_to_cloudwatch is False  # dry run suppresses metrics
+    assert [entry.source_id for entry in report.successful] == ["sel"]
+    assert report.successful[0].instance_action == "create"
+    assert [entry.source_id for entry in report.errors] == ["bad"]
+    assert report.errors[0].stage == "selection"
+    assert report.counts == resp.counts
 
 
-def test_flush_success_batch_appends_instead_of_overwrite(
+def test_upsert_errors_recorded_as_structured_entries(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    mock_s3 = _MockS3()
-    import adapters.steps.axiell_folio_sync.s3_manifest as manifest_mod
+    # The upsert stage reports a list of per-entity error dicts, exercising the
+    # list branch of SyncErrorEntry.error (other stages use the str branch).
+    from adapters.steps.axiell_folio_sync.mapping import UpsertError
 
-    manifest_mod.flush_success_batch(mock_s3, "bucket-1", "job-1", [{"sourceId": "a"}])
-    manifest_mod.flush_success_batch(mock_s3, "bucket-1", "job-1", [{"sourceId": "b"}])
+    def failing_upsert(*args: Any, **kwargs: Any) -> UpsertResult:
+        return UpsertResult(
+            source_id="sel",
+            mapping_version="2.1.0",
+            instance=EntityResult(action=None),
+            holdings=EntityResult(action=None),
+            item=EntityResult(action=None),
+            errors=[UpsertError(type="instance_put_failed", detail="FOLIO said no")],
+        )
 
-    key = ("bucket-1", "manifests/job-1.ids.ndjson")
-    payload = mock_s3.objects[key].decode("utf-8").strip().splitlines()
-    assert len(payload) == 2
+    monkeypatch.setattr(sync_to_folio_mod, "upsert_from_payloads", failing_upsert)
+
+    captured: dict[str, Any] = {}
+    monkeypatch.setattr(
+        "utils.reporting.pydantic_to_s3_json",
+        lambda model, s3_uri: captured.update(model=model),
+    )
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [_row("sel", SELECTED)],
+        FakeRefCache(),  # type: ignore[arg-type]
+        _FakeInventory(),
+        dry_run=True,
+        manifest_bucket="bucket-1",
+    )
+
+    assert resp.total_errors == 1
+    entry = captured["model"].errors[0]
+    assert entry.stage == "upsert"
+    assert isinstance(entry.error, list)
+    assert entry.error[0]["detail"] == "FOLIO said no"
+
+
+def test_no_s3_report_without_bucket(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fail_to_s3(model: Any, s3_uri: str) -> None:
+        raise AssertionError("must not publish to S3 without a bucket")
+
+    monkeypatch.setattr("utils.reporting.pydantic_to_s3_json", fail_to_s3)
+
+    resp = _run([_row("sel", SELECTED)])
+
+    assert resp.manifest_s3_path is None
+
+
+def test_no_s3_report_with_empty_string_bucket(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fail_to_s3(model: Any, s3_uri: str) -> None:
+        raise AssertionError("must not publish to S3 with an empty bucket name")
+
+    monkeypatch.setattr("utils.reporting.pydantic_to_s3_json", fail_to_s3)
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [_row("sel", SELECTED)],
+        FakeRefCache(),  # type: ignore[arg-type]
+        _FakeInventory(),
+        dry_run=True,
+        manifest_bucket="",
+    )
+
+    assert resp.manifest_s3_path is None
+
+
+def test_report_s3_uri_requires_bucket() -> None:
+    report = AxiellFolioSyncReport(job_id="job-1", dry_run=True, counts={})
+
+    with pytest.raises(ValueError, match="No S3 bucket configured"):
+        _ = report.s3_uri
 
 
 def test_run_sync_passes_ref_cache_to_upsert(monkeypatch: pytest.MonkeyPatch) -> None:

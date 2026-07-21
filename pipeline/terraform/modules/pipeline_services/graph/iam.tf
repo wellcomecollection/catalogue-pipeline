@@ -9,7 +9,7 @@ data "aws_iam_policy_document" "allow_catalogue_graph_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "${local.secrets_manager_prefix}:catalogue-graph/*"
+      "${local.secrets_manager_prefix}:catalogue-graph*"
     ]
   }
 }
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "neptune_read" {
     ]
 
     resources = [
-      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arns[var.graph_date]
     ]
   }
 }
@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "neptune_delete" {
     ]
 
     resources = [
-      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arns[var.graph_date]
     ]
   }
 }

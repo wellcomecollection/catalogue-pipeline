@@ -35,7 +35,25 @@ EOF
 set -o errexit
 set -o nounset
 
+# Not every pipeline runs every service (newer pipeline stacks are composed
+# from a subset), so skip services that don't exist in this cluster.
+EXISTING_SERVICES=""
 for serviceName in "$@"
+do
+  status=$(aws ecs describe-services \
+    --cluster "$CLUSTER" \
+    --services "$serviceName" \
+    --query 'services[0].status' \
+    --output text 2>/dev/null || echo "MISSING")
+  if [[ "$status" == "ACTIVE" ]]
+  then
+    EXISTING_SERVICES="$EXISTING_SERVICES $serviceName"
+  else
+    echo "WARNING: skipping $serviceName, not present in $CLUSTER"
+  fi
+done
+
+for serviceName in $EXISTING_SERVICES
 do
   echo "Forcing a new deployment of $serviceName in $CLUSTER"
   aws ecs update-service \
@@ -44,7 +62,7 @@ do
     --force-new-deployment >/dev/null
 done
 
-for serviceName in "$@"
+for serviceName in $EXISTING_SERVICES
 do
   echo "Waiting for $serviceName to be stable"
   aws ecs wait services-stable \

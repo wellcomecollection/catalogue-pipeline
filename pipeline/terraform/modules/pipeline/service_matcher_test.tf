@@ -2,7 +2,7 @@
 # .buildkite/pipeline.yml -> matcher_test
 
 module "matcher_test" {
-  source       = "./matcher"
+  source       = "../pipeline_services/matcher"
   service_name = "matcher_test"
 
   pipeline_date = var.pipeline_date

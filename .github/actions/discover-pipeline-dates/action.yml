@@ -1,0 +1,24 @@
+name: "Discover Pipeline Dates"
+description: "Discovers the dated pipeline directories to deploy to, honouring deploy_settings.json."
+inputs:
+  terraform_dir:
+    description: "Directory containing dated pipeline terraform folders"
+    required: false
+    default: "pipeline/terraform"
+outputs:
+  pipeline_date:
+    description: "Most recent pipeline date"
+    value: ${{ steps.discover.outputs.pipeline_date }}
+  pipeline_dates:
+    description: "JSON array of pipeline dates to deploy to"
+    value: ${{ steps.discover.outputs.pipeline_dates }}
+runs:
+  using: "composite"
+  steps:
+    - name: Discover pipeline dates
+      id: discover
+      shell: bash
+      run: |
+        chmod +x "${{ github.action_path }}/discover.sh"
+        "${{ github.action_path }}/discover.sh" \
+          "${{ inputs.terraform_dir }}"

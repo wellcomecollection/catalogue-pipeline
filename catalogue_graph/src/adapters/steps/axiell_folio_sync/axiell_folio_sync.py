@@ -23,7 +23,7 @@ and a local sqlite catalog for local runs — so no Iceberg-specific env vars.
 
 Environment variables (injected by Terraform):
   OKAPI_SECRET_PARAM     — SSM path to {"url":…, "tenant":…, "username":…, "password":…}
-  MANIFEST_S3_BUCKET     — S3 bucket name for NDJSON manifest storage
+  MANIFEST_S3_BUCKET     — S3 bucket name for JSON run reports
   AWS_REGION             — e.g. eu-west-1 (set automatically in Lambda)
   DRY_RUN                — default "true"; event.dry_run overrides
 
@@ -45,9 +45,9 @@ from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
 )
+from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
 from adapters.transformers.adapter_store_source import AdapterStoreSource
-from adapters.transformers.axiell_folio_sync.ref_cache import RefCache
 from adapters.utils.adapter_store import AdapterStore
 from clients.folio_client import FolioClient, FolioInventoryClient, ssl_context_from_env
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
