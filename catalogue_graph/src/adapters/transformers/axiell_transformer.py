@@ -1,6 +1,8 @@
 from collections.abc import Generator
 from typing import Any
 
+import structlog
+
 from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.transformers.axiell_store_source import AxiellStoreSource
 from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
@@ -11,6 +13,8 @@ from adapters.utils.deletion_facts_store import DeletionFactsStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from ingestor.models.shared.deleted_reason import DeletedFromSource
 from models.pipeline.source.work import SourceWork
+
+logger = structlog.get_logger(__name__)
 
 
 class AxiellTransformer(MarcXmlTransformer):
@@ -53,10 +57,18 @@ class AxiellTransformer(MarcXmlTransformer):
         # Deletion facts (appended by AxiellStoreSource) carry a `guid` key;
         # adapter rows never do. Each fact tombstones its superseded guid.
         if "guid" in row:
-            builder = ReconcilerWorkBuilder(row["guid"], row["last_modified"])
-            yield (
-                row["id"],
-                builder.transform_deleted_work(deleted_reason=DeletedFromSource()),
-            )
+            # Record failures in the manifest like MARC row failures, so one
+            # bad fact cannot fail the whole transform run.
+            try:
+                builder = ReconcilerWorkBuilder(row["guid"], row["last_modified"])
+                yield (
+                    row["id"],
+                    builder.transform_deleted_work(deleted_reason=DeletedFromSource()),
+                )
+            except Exception as e:
+                logger.error(
+                    "Error transforming deletion fact", row_id=row["id"], error=str(e)
+                )
+                self._add_error(e, "transform", row["id"])
         else:
             yield from super()._transform_row(row)

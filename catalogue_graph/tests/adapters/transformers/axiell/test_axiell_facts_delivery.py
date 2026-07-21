@@ -250,6 +250,53 @@ def test_es_error_on_tombstone_lands_in_manifest_under_fact_id(
     assert failure_lines[0]["stage"] == "index"
 
 
+def test_fact_transform_error_lands_in_manifest_and_run_continues(
+    temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        {"collect-1": _marcxml("guid-new-1")},
+        namespace=AXIELL_NAMESPACE,
+        transformer_type="axiell",
+    )
+    _seed_facts(
+        deletion_facts_temporary_table,
+        [{"record_id": "collect-1", "guid": "guid-old-1", "changeset": changeset_id}],
+    )
+
+    def broken_builder(*args: Any, **kwargs: Any) -> None:
+        raise ValueError("broken fact")
+
+    monkeypatch.setattr(
+        "adapters.transformers.axiell_transformer.ReconcilerWorkBuilder",
+        broken_builder,
+    )
+
+    result = _run_transform(
+        monkeypatch,
+        [changeset_id],
+        facts_table=deletion_facts_temporary_table,
+        reconciler_table=reconciler_temporary_table,
+    )
+
+    # The adapter row's work is still transformed and indexed.
+    assert result.successes.count == 1
+    assert [op["_id"] for op in MockElasticsearchClient.inputs] == [
+        "Work[axiell-guid/guid-new-1]"
+    ]
+
+    assert result.failures is not None
+    assert result.failures.count == 1
+    failure_lines = _read_failure_lines(result)
+    assert len(failure_lines) == 1
+    assert failure_lines[0]["row_id"] == f"collect-1/{changeset_id}"
+    assert failure_lines[0]["stage"] == "transform"
+
+
 def test_full_reindex_never_builds_or_reads_the_facts_store(
     temporary_table: IcebergTable,
     deletion_facts_temporary_table: IcebergTable,

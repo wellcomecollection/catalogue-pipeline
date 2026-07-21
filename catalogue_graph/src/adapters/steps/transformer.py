@@ -137,12 +137,14 @@ def build_transformer(
                 )
                 facts_store = DeletionFactsStore(facts_table, namespace="axiell")
                 reconciler_store = ReconcilerStore(reconciler_table, namespace="axiell")
-            except NoSuchTableError:
+            except NoSuchTableError as e:
                 # Tolerated so the transform still runs before the adapter
-                # reconcile step has created the table (cutover, fresh dev
+                # reconcile step has created the tables (cutover, fresh dev
                 # environments).
                 logger.warning(
-                    "Deletion facts table not found; transforming without facts delivery"
+                    "Deletion facts or reconciler table not found; "
+                    "transforming without facts delivery",
+                    error=str(e),
                 )
         return AxiellTransformer(
             adapter_store,
