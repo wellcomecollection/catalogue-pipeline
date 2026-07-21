@@ -199,12 +199,9 @@ resource "elasticstack_elasticsearch_ingest_pipeline" "set_indexed_at" {
   ]
 }
 
-# Cluster connection secrets 
-module "pipeline_storage_connection_secrets" {
-  source        = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.5.0"
-  deletion_mode = "IMMEDIATE"
-
-  key_value_map = {
+# Cluster connection secrets
+locals {
+  connection_secrets_kv_map = {
     "elasticsearch/pipeline_storage_${var.pipeline_date}/public_host"           = var.es_cluster.public_host
     "elasticsearch/pipeline_storage_${var.pipeline_date}/private_host"          = var.es_cluster.private_host
     "elasticsearch/pipeline_storage_${var.pipeline_date}/port"                  = var.es_cluster.port
@@ -214,4 +211,24 @@ module "pipeline_storage_connection_secrets" {
     "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_username" = var.es_cluster.read_only_username
     "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_password" = var.es_cluster.read_only_password
   }
+}
+
+module "pipeline_storage_connection_secrets" {
+  source        = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.5.0"
+  deletion_mode = "IMMEDIATE"
+
+  key_value_map = local.connection_secrets_kv_map
+}
+
+# Readers in the catalogue account (e.g. the catalogue API's multiCluster
+# entries) resolve these secrets there, so duplicate them like the old
+# pipeline module's pipeline_storage_secrets_catalogue.
+module "pipeline_storage_connection_secrets_catalogue" {
+  source        = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.5.0"
+  deletion_mode = "IMMEDIATE"
+  providers = {
+    aws = aws.catalogue
+  }
+
+  key_value_map = local.connection_secrets_kv_map
 }

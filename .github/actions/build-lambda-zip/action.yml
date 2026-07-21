@@ -49,7 +49,7 @@ runs:
 
     - name: Configure AWS credentials
       if: ${{ inputs.upload_to_s3 == 'true' }}
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v6
       with:
         aws-region: eu-west-1
         role-to-assume: ${{ inputs.role_to_assume }}

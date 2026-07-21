@@ -28,7 +28,7 @@ jobs:
     outputs:
       pipeline_dates: ${{ steps.discover.outputs.pipeline_dates }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Discover pipeline dates to deploy to
         id: discover
         uses: ./.github/actions/discover-pipeline-dates
@@ -41,7 +41,7 @@ jobs:
       matrix:
         image_name: [ unified_pipeline_task, unified_pipeline_lambda ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/retag-docker-image
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
@@ -58,7 +58,7 @@ jobs:
         pipeline_date: ${{ fromJSON(needs.discover-pipeline-dates.outputs.pipeline_dates) }}
         image_name: [ unified_pipeline_task, unified_pipeline_lambda ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/retag-docker-image
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
@@ -82,7 +82,7 @@ jobs:
             folio-adapter-mark-published,
           ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/deploy-lambda-image
         with:
           lambda_name: ${{ matrix.lambda_name }}
@@ -118,7 +118,7 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Deploy dated pipeline lambda
         uses: ./.github/actions/deploy-dated-pipeline-lambda
         with:

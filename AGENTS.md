@@ -75,6 +75,22 @@ uv run ruff check --fix
 Scope `pytest`/`mypy` paths to the area you changed when the project is large
 (e.g. `catalogue_graph/`); a full run can be slow.
 
+## Terraform conventions
+
+### Before finalising a Terraform change
+
+Run from the repository root:
+
+```bash
+builds/run_tflint.sh
+```
+
+Optionally pass one or more Terraform roots to target a subset:
+
+```bash
+builds/run_tflint.sh calm_adapter/terraform infrastructure/adapter_stack
+```
+
 ## Scala conventions
 
 - SBT project at the repo root. Sub-projects are wired up in `build.sbt` via
