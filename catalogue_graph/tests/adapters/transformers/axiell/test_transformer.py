@@ -23,9 +23,21 @@ def _run_transform(
     changeset_ids: list[str] | None = None,
     index_date: str | None = None,
     pipeline_date: str = "dev",
+    facts_table: IcebergTable | None = None,
+    reconciler_table: IcebergTable | None = None,
 ) -> TransformerManifest:
     monkeypatch.setattr(adapter_config, "PIPELINE_DATE", pipeline_date)
     monkeypatch.setattr(adapter_config, "INDEX_DATE", index_date)
+    if facts_table is not None:
+        monkeypatch.setattr(
+            "adapters.steps.transformer.AXIELL_CONFIG.build_deletion_facts_table",
+            lambda **kwargs: facts_table,
+        )
+    if reconciler_table is not None:
+        monkeypatch.setattr(
+            "adapters.steps.transformer.AXIELL_CONFIG.build_reconciler_table",
+            lambda **kwargs: reconciler_table,
+        )
 
     event = TransformerEvent(
         transformer_type="axiell",
@@ -41,7 +53,10 @@ def _run_transform(
 
 
 def test_transformer_end_to_end_with_local_table(
-    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     records_by_id = {
         "ax00001": TEST_RECORD_ONE,
@@ -61,6 +76,8 @@ def test_transformer_end_to_end_with_local_table(
         monkeypatch,
         changeset_ids=[changeset_id],
         index_date="2025-01-01",
+        facts_table=deletion_facts_temporary_table,
+        reconciler_table=reconciler_temporary_table,
     )
 
     assert result.successes.count == 2
@@ -89,7 +106,10 @@ def test_transformer_end_to_end_with_local_table(
 
 
 def test_transformer_end_to_end_includes_deletions(
-    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     records_by_id: dict[str, tuple[str, bool] | str] = {
         "ax00001": TEST_RECORD_ONE,
@@ -113,6 +133,8 @@ def test_transformer_end_to_end_includes_deletions(
         monkeypatch,
         changeset_ids=[changeset_id],
         index_date="2025-01-01",
+        facts_table=deletion_facts_temporary_table,
+        reconciler_table=reconciler_temporary_table,
     )
 
     assert result.successes.count == 2

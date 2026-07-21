@@ -402,7 +402,7 @@ def test_facts_store_requires_reconciler_store(
         )
 
 
-def test_missing_reconciler_table_is_tolerated(
+def test_missing_reconciler_table_fails_the_transform(
     temporary_table: IcebergTable,
     deletion_facts_temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
@@ -414,10 +414,6 @@ def test_missing_reconciler_table_is_tolerated(
         namespace=AXIELL_NAMESPACE,
         transformer_type="axiell",
     )
-    _seed_facts(
-        deletion_facts_temporary_table,
-        [{"record_id": "collect-1", "guid": "guid-old-1", "changeset": changeset_id}],
-    )
 
     def missing_table(**kwargs: Any) -> IcebergTable:
         raise NoSuchTableError("no such table")
@@ -427,18 +423,13 @@ def test_missing_reconciler_table_is_tolerated(
         missing_table,
     )
 
-    result = _run_transform(
-        monkeypatch, [changeset_id], facts_table=deletion_facts_temporary_table
-    )
-
-    assert result.successes.count == 1
-    assert result.failures is None
-    assert [op["_id"] for op in MockElasticsearchClient.inputs] == [
-        "Work[axiell-guid/guid-new-1]"
-    ]
+    with pytest.raises(NoSuchTableError):
+        _run_transform(
+            monkeypatch, [changeset_id], facts_table=deletion_facts_temporary_table
+        )
 
 
-def test_missing_facts_table_is_tolerated(
+def test_missing_facts_table_fails_the_transform(
     temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -458,10 +449,5 @@ def test_missing_facts_table_is_tolerated(
         missing_table,
     )
 
-    result = _run_transform(monkeypatch, [changeset_id])
-
-    assert result.successes.count == 1
-    assert result.failures is None
-    assert [op["_id"] for op in MockElasticsearchClient.inputs] == [
-        "Work[axiell-guid/guid-new-1]"
-    ]
+    with pytest.raises(NoSuchTableError):
+        _run_transform(monkeypatch, [changeset_id])
