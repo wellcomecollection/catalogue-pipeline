@@ -18,7 +18,7 @@ runs:
       with:
         aws-region: eu-west-1
         role-to-assume: ${{ inputs.role_to_assume }}
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version-file: catalogue_graph/.python-version
     - name: setup dependencies
@@ -37,7 +37,7 @@ runs:
 
     - name: Get Slack webhook URL
       if: ${{ failure() }}
-      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      uses: aws-actions/aws-secretsmanager-get-secrets@v3
       with:
         secret-ids: |
           SLACK_WEBHOOK_URL,${{ inputs.slack_webhook_secret_id }}
