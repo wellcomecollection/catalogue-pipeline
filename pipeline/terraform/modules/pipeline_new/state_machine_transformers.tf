@@ -34,10 +34,9 @@ module "transformer_lambda" {
 
   environment = {
     variables = {
-      PIPELINE_DATE                  = var.pipeline_date
-      INDEX_DATE                     = var.index_dates.source
-      S3_PREFIX                      = "prod"
-      RECONCILER_REST_API_TABLE_NAME = "axiell_reconciler_table_${replace(var.pipeline_date, "-", "_")}"
+      PIPELINE_DATE = var.pipeline_date
+      INDEX_DATE    = var.index_dates.source
+      S3_PREFIX     = "prod"
     }
   }
 }
@@ -48,12 +47,6 @@ module "transformer_lambda" {
 resource "aws_iam_role_policy" "transformer_lambda_iceberg_read" {
   role   = module.transformer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.all_adapter_s3tables_read.json
-}
-
-# Give the transformer Lambda permission to write to the reconciler table
-resource "aws_iam_role_policy" "transformer_lambda_iceberg_reconciler_write" {
-  role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.reconciler_s3tables_write.json
 }
 
 # Attach S3 read policies to transformer lambda
@@ -83,7 +76,7 @@ locals {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
-        Next      = "Should run reconciler?"
+        Next      = "Success"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -93,41 +86,6 @@ locals {
           }
         ]
       }
-      "Should run reconciler?" = {
-        Type = "Choice"
-        Choices = [
-          {
-            And = [
-              {
-                Variable     = "$$.Execution.Input.detail.transformer_type"
-                StringEquals = "axiell"
-              },
-              {
-                Variable  = "$$.Execution.Input.detail.changeset_ids[0]"
-                IsPresent = true
-              }
-            ]
-            Next = "Run reconciler"
-          }
-        ]
-        Default = "Success"
-      },
-      "Run reconciler" = {
-        Type     = "Task",
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
-        Parameters = {
-          "StateMachineArn.$" = "$$.StateMachine.Id"
-          Input = {
-            detail = {
-              "job_id.$"        = "$$.Execution.Input.detail.job_id"
-              "changeset_ids.$" = "$$.Execution.Input.detail.changeset_ids"
-              transformer_type  = "axiell_reconciler"
-              "snapshot_id.$"   = "$.snapshot_id"
-            }
-          }
-        },
-        Next = "Success"
-      },
       "Success" = {
         Type = "Succeed"
       }
@@ -195,14 +153,8 @@ data "aws_iam_policy_document" "transformer_lambda_cloudwatch_write" {
   }
 }
 
-locals {
-  # All transformer types that can report failure_count metrics, including
-  # axiell_reconciler which is invoked from within the state machine.
-  all_transformer_types = toset(concat(keys(local.transformer_types), ["axiell_reconciler"]))
-}
-
 resource "aws_cloudwatch_metric_alarm" "transformer_failures" {
-  for_each = local.all_transformer_types
+  for_each = toset(keys(local.transformer_types))
 
   alarm_name          = "${each.key}-transformer-failures-${var.pipeline_date}"
   comparison_operator = "GreaterThanThreshold"
