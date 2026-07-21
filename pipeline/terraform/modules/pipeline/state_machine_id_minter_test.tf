@@ -77,7 +77,7 @@ locals {
 }
 
 module "id_minter_test" {
-  source = "./id_minter"
+  source = "../pipeline_services/id_minter"
 
   pipeline_date        = var.pipeline_date
   namespace            = "test"

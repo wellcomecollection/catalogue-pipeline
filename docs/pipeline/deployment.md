@@ -48,6 +48,8 @@ By default, both CI systems deploy to a single pipeline: the one with the lexico
 
 When `deploy_all_pipelines` is `true`, every dated pipeline directory is deployed on each merge to main. Buildkite reads the file in `deploy_latest_pipeline.py`; GitHub Actions reads it in the `discover-pipeline-dates` job (`.github/actions/discover-pipeline-dates`). A failure deploying one pipeline does not stop the others, but the build fails at the end if any pipeline failed.
 
+Pipelines do not all run the same set of services: newer stacks built from the composable `pipeline_new` module may have fewer ECS services or lambdas than the older stack. The deploy scripts check that each target exists in the pipeline being deployed and skip missing ones with a warning rather than failing.
+
 Turn the flag on when several pipelines should all track main, for example during an extended migration where an old and a new pipeline run side by side. Leave it off (the default) whenever an older pipeline is deliberately pinned, for example when a code change is incompatible with an older pipeline's index mappings. Flipping the flag is a pull request against `deploy_settings.json`.
 
 To deploy an older pipeline manually while the flag is off, run:
