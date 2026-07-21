@@ -21,6 +21,16 @@ do
 
   echo "Deploying ${IMAGE_URI} to ${FUNCTION_NAME}, @ $(date) ..."
 
+  # Not every pipeline runs every lambda (newer pipeline stacks are composed
+  # from a subset), so skip functions that don't exist in this pipeline.
+  if ! aws lambda get-function-configuration \
+    --function-name "$FUNCTION_NAME" \
+    --no-cli-pager > /dev/null 2>&1
+  then
+    echo "WARNING: skipping ${FUNCTION_NAME}, not present in this pipeline"
+    continue
+  fi
+
   echo "Current lambda configuration for ${FUNCTION_NAME}:"
   aws lambda get-function-configuration \
     --function-name "$FUNCTION_NAME" \
