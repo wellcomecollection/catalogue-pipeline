@@ -18,6 +18,9 @@ Feature: Work type extraction from Axiell MARC records
       | sub-series  | Series     |
       | item        | Standard   |
       | item part   | Standard   |
+      | fonds       | Collection |
+      | sub-fonds   | Section    |
+      | file        | Standard   |
 
   Scenario: Level matching is case-insensitive
     Given the MARC record's only 351 field with subfield "c" value "CoLlECtIon"
