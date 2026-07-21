@@ -24,6 +24,7 @@ This documentation provides an overview of the Wellcome Collection catalogue pip
 ## Pipeline Components
 
 * [Pipeline](pipeline/README.md) - The works pipeline and transformation logic
+* [Deployment](docs/pipeline/deployment.md) - How pipeline code is built and deployed, including to multiple pipelines
 * [Catalogue Graph](catalogue_graph/README.md) - Graph pipeline for building knowledge connections
 * [Scripts](scripts/README.md) - Utility scripts for pipeline operations and maintenance
 

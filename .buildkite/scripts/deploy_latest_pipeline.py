@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import re
 import subprocess
+import sys
 
 import httpx
 
@@ -26,6 +28,28 @@ def deploy_to(root, pipeline_date):
             "tag_images_and_deploy_services",
         ]
     )
+
+
+def get_deploy_settings(root):
+    """
+    Reads pipeline/terraform/deploy_settings.json, which controls whether we
+    deploy to every dated pipeline or just the most recent one.
+    """
+    settings_path = f"{root}/pipeline/terraform/deploy_settings.json"
+    try:
+        with open(settings_path) as f:
+            settings = json.load(f)
+    except FileNotFoundError:
+        return {"deploy_all_pipelines": False}
+
+    deploy_all = settings.get("deploy_all_pipelines", False)
+    if not isinstance(deploy_all, bool):
+        sys.exit(
+            f"deploy_all_pipelines in {settings_path} must be a JSON boolean, "
+            f"got: {deploy_all!r}"
+        )
+
+    return settings
 
 
 def get_pipeline_names_from_terraform_dir(root):
@@ -65,4 +89,21 @@ if __name__ == "__main__":
             "WARNING: The most up to date pipeline is not the current production pipeline "
         )
         print(f"production:\t{prod_pipeline}\nlatest:\t\t{latest_pipeline}")
-    deploy_to(root, latest_pipeline)
+
+    if get_deploy_settings(root).get("deploy_all_pipelines", False):
+        pipelines_to_deploy = sorted(candidate_pipelines)
+        print(f"deploy_all_pipelines is on; deploying to: {', '.join(pipelines_to_deploy)}")
+    else:
+        pipelines_to_deploy = [latest_pipeline]
+
+    failed_pipelines = []
+    for pipeline_date in pipelines_to_deploy:
+        try:
+            deploy_to(root, pipeline_date)
+        except subprocess.CalledProcessError as err:
+            print(f"ERROR: deploy to {pipeline_date} failed: {err}")
+            failed_pipelines.append(pipeline_date)
+
+    if failed_pipelines:
+        print(f"Deploys failed for: {', '.join(failed_pipelines)}")
+        sys.exit(1)
