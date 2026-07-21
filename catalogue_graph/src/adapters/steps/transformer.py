@@ -13,6 +13,7 @@ from typing import Any, Literal, Protocol, cast
 
 import structlog
 from pydantic import BaseModel, Field
+from pyiceberg.exceptions import NoSuchTableError
 
 from adapters.extractors.ebsco import config as ebsco_config
 from adapters.extractors.ebsco import helpers as ebsco_helpers
@@ -34,6 +35,7 @@ from adapters.transformers.source_work_transformer import (
     SourceWorkTransformer,
 )
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.deletion_facts_store import DeletionFactsStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -117,7 +119,38 @@ def build_transformer(
     snapshot_id = event.snapshot_id or adapter_store.current_snapshot_id()
 
     if event.transformer_type == "axiell":
-        return AxiellTransformer(adapter_store, event.changeset_ids, snapshot_id)
+        # Deletion facts only apply to incremental runs; a full reindex writes
+        # into an empty index, so historic deletions have nothing to overwrite.
+        facts_store = None
+        reconciler_store = None
+        if event.changeset_ids:
+            try:
+                facts_table = AXIELL_CONFIG.build_deletion_facts_table(
+                    use_rest_api_table=use_rest_api_table,
+                    create_if_not_exists=False,
+                )
+                # Delivery re-checks each fact's guid against the current
+                # reconciler mappings, so the two stores travel together.
+                reconciler_table = AXIELL_CONFIG.build_reconciler_table(
+                    use_rest_api_table=use_rest_api_table,
+                    create_if_not_exists=False,
+                )
+                facts_store = DeletionFactsStore(facts_table, namespace="axiell")
+                reconciler_store = ReconcilerStore(reconciler_table, namespace="axiell")
+            except NoSuchTableError:
+                # Tolerated so the transform still runs before the adapter
+                # reconcile step has created the table (cutover, fresh dev
+                # environments).
+                logger.warning(
+                    "Deletion facts table not found; transforming without facts delivery"
+                )
+        return AxiellTransformer(
+            adapter_store,
+            event.changeset_ids,
+            snapshot_id,
+            facts_store=facts_store,
+            reconciler_store=reconciler_store,
+        )
     if event.transformer_type == "ebsco":
         return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "folio":

@@ -51,3 +51,21 @@ RECONCILER_STORE_ICEBERG_SCHEMA = Schema(
 RECONCILER_STORE_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(
     RECONCILER_STORE_ICEBERG_SCHEMA
 )
+
+# Append-only record of superseded guids. Each fact's `id` is the deterministic
+# "{record_id}/{changeset_id}", so detection re-runs are idempotent; `guid` is
+# the OLD guid the record moved away from, and `changeset` is the triggering
+# adapter changeset id (the delivery query key).
+DELETION_FACTS_ICEBERG_SCHEMA = Schema(
+    NestedField(field_id=1, name="namespace", field_type=StringType(), required=True),
+    NestedField(field_id=2, name="id", field_type=StringType(), required=True),
+    NestedField(field_id=3, name="record_id", field_type=StringType(), required=True),
+    NestedField(field_id=4, name="guid", field_type=StringType(), required=True),
+    NestedField(field_id=5, name="changeset", field_type=StringType(), required=True),
+    NestedField(
+        field_id=6, name="last_modified", field_type=TimestamptzType(), required=True
+    ),
+)
+DELETION_FACTS_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(
+    DELETION_FACTS_ICEBERG_SCHEMA
+)
