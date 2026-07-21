@@ -3,11 +3,10 @@
 Runs in the adapter state machine between the loader and the publish event.
 Reads the just-loaded changeset rows, computes id->GUID mappings, diffs them
 against the reconciler store, and records each superseded guid as a durable
-deletion fact before committing the new mappings. Facts are written first
-because the mappings commit destroys the diff: a guid change never reappears
-in a later changeset, so publishing without facts would lose the deletion
-permanently. Re-runs are idempotent — facts deduplicate on their deterministic
-ids and the mappings commit is guid-compared and timestamp-gated.
+deletion fact before committing the new mappings. Facts must land first: the
+mappings commit destroys the diff, and a guid change never reappears in a
+later changeset. Re-runs are idempotent (facts deduplicate on deterministic
+ids; the mappings commit is guid-compared and timestamp-gated).
 """
 
 from __future__ import annotations
@@ -106,14 +105,10 @@ def handler(
         last_modified_by_id[mapping["id"]] = mapping["last_modified"]
         claimants_by_guid[mapping["guid"]].add(mapping["id"])
     if candidates:
-        # Stored rows that this commit remaps to a different guid (ids in
-        # record_ids_to_overwrite) no longer claim their old guid post-commit,
-        # so they must not count as claimants: otherwise two records leaving a
-        # shared guid in one run would each suppress the other's fact and the
-        # deletion would be lost permanently. Their forward-state claims are
-        # already covered by the incoming-mappings pass above. Rows whose
-        # incoming update was timestamp-gated out are not in the overwrite set
-        # and correctly still count.
+        # Rows this commit remaps hold no post-commit claim on their old guid
+        # (counting them would make two records leaving a shared guid suppress
+        # each other's facts); their new-guid claims are collected above.
+        # Timestamp-gated rows stay out of the overwrite set and still count.
         overwritten_ids = set(record_ids_to_overwrite)
         guid_filter = In("guid", [row["guid"] for row in candidates])
         for stored in runtime.reconciler_store.get_namespace_records(
@@ -125,11 +120,10 @@ def handler(
     facts: list[dict[str, Any]] = []
     guard_suppressed = 0
     for row in candidates:
-        # A guid claimed by a different record (in the incoming mappings or
-        # the store) is a handoff, not a deletion: the work stays live under
-        # its new owner, so tombstoning it would delete a live work. A
+        # A guid claimed by another record is a handoff, not a deletion:
+        # tombstoning it would delete the live work under its new owner. A
         # candidate never claims its own old guid (its incoming mapping holds
-        # the new guid, and its stored row is excluded above).
+        # the new guid; its stored row is excluded above).
         other_claimants = claimants_by_guid[row["guid"]]
         if other_claimants:
             guard_suppressed += 1

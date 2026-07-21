@@ -17,16 +17,15 @@ class AxiellStoreSource(AdapterStoreSource):
     """AdapterStoreSource that follows adapter rows with deletion facts.
 
     Fact rows carry a `guid` key (the superseded guid), which adapter rows
-    never do — the transformer uses that key to discriminate. Facts are only
-    read for incremental runs: a full reindex writes into an empty index, so
+    never do; the transformer discriminates on that key. Facts are only read
+    for incremental runs: a full reindex writes into an empty index, so
     historic deletions have nothing to overwrite.
 
-    Facts capture detection-time state but live forever, so each one is
-    re-checked against the current reconciler mappings before delivery: if
-    its guid has since been reclaimed (a revert, a handoff to another record,
-    or a redrive of an old changeset after either), the tombstone would
-    overwrite the live work now indexed under that guid, and the fact is
-    skipped instead.
+    Facts capture detection-time state but live forever, so each is
+    re-checked against the current reconciler mappings: a fact whose guid has
+    since been reclaimed (revert, handoff, or a redrive of an old changeset)
+    is skipped, as its tombstone would overwrite the live work now indexed
+    under that guid.
     """
 
     def __init__(

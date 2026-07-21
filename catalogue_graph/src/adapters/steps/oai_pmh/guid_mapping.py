@@ -21,11 +21,10 @@ from utils.marc import parse_single_marc_record
 def compute_guid(row: dict[str, Any]) -> str | None:
     """Compute a record's source-identifier GUID, or None if not derivable.
 
-    Follows ``AxiellReconciler._get_record_guid`` (parse the MARCXML, read the
-    GUID the Axiell work builder produces), but is intentionally more
-    defensive: the builder raises on a record with no usable 001, and here
-    that is a skip-and-count rather than a crash, so a whole run is not lost
-    to a handful of malformed records.
+    Parses the MARCXML and reads the GUID the Axiell work builder produces.
+    The builder raises on a record with no usable 001; returning None instead
+    lets callers skip and count, so a run is not lost to a handful of
+    malformed records.
     """
     content = row.get("content")
     if not content:
