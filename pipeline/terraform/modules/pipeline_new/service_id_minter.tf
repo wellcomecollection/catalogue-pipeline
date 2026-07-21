@@ -2,7 +2,7 @@ locals {
   id_minter_rds_instance = local.infra_critical.id_minter_rds[var.rds_id_minter]
 
   id_minter_vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.id_minter_rds_instance.ingress_security_group_id,
@@ -16,7 +16,7 @@ locals {
     ES_SOURCE_INDEX_DATE_SUFFIX = var.index_dates.source
     ES_TARGET_INDEX_DATE_SUFFIX = var.index_dates.identified
     S3_BUCKET                   = "wellcomecollection-platform-id-minter"
-    S3_PREFIX                   = var.pipeline_date
+    S3_PREFIX                   = "prod"
   }
 
   # Extract the secret name from the full ARN.
