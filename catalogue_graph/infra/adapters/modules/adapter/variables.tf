@@ -55,3 +55,9 @@ variable "enable_item_enrichment" {
   default     = false
   description = "Run a FOLIO item-enrichment state between Run loader and Publish event. FOLIO-only; leave false for other adapters."
 }
+
+variable "enable_reconciliation" {
+  type        = bool
+  default     = false
+  description = "Run a reconcile state between Run loader and Publish event, recording guid-change deletion facts before the completed event fires. Axiell-only; leave false for other adapters."
+}

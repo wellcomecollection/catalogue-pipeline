@@ -1,8 +1,12 @@
 locals {
-  # When item enrichment is enabled, the loader routes through a "Run enrichment"
-  # state before publishing, so both the bib and item changesets exist by the time
-  # "folio.adapter.completed" fires. Otherwise the loader goes straight to publish.
-  loader_next = var.enable_item_enrichment ? "Should enrich?" : "Should publish event?"
+  # When reconciliation is enabled, the loader routes through a "Run reconcile"
+  # state so deletion facts are durably recorded before the completed event
+  # fires; when item enrichment is enabled, it routes through "Run enrichment"
+  # so both the bib and item changesets exist by then. Otherwise the loader
+  # goes straight to publish. No adapter currently enables both, but the
+  # chain composes: reconcile runs first, then enrichment.
+  loader_next    = var.enable_reconciliation ? "Should reconcile?" : local.reconcile_next
+  reconcile_next = var.enable_item_enrichment ? "Should enrich?" : "Should publish event?"
 
   # With published tracking, both the publish and the quiet no-publish paths end
   # in "Mark published", which stamps the covered windows so the trigger resumes
@@ -34,6 +38,56 @@ locals {
       }
     ]...)
   )
+
+  reconcile_states = merge([
+    for _ in range(var.enable_reconciliation ? 1 : 0) : {
+      "Should reconcile?" = {
+        Type = "Choice"
+        Choices = [
+          {
+            Condition = "{% $exists($states.input.changeset_ids[0]) %}"
+            Next      = "Run reconcile"
+          }
+        ]
+        Default = local.reconcile_next
+      }
+      "Run reconcile" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke"
+        Arguments = {
+          FunctionName = one(module.reconcile_lambda[*].lambda.arn)
+          # The loader response carries no adapter identity, so inject it.
+          Payload = "{% $merge([$states.input, {'adapter_type': '${var.namespace}'}]) %}"
+        }
+        # The loader response continues downstream unchanged; the reconcile
+        # response (fact and mapping counts) stays visible in the execution
+        # history.
+        Output = "{% $states.input %}"
+        Next   = local.reconcile_next
+        Retry = [
+          {
+            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
+            IntervalSeconds = 2
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          },
+          {
+            # Iceberg optimistic-concurrency commit conflicts; re-runs dedupe
+            # on deterministic fact ids, so retrying is safe.
+            ErrorEquals     = ["States.ALL"]
+            IntervalSeconds = 5
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          }
+        ]
+        # No Catch: a failed reconcile must fail the execution before
+        # "Publish event" and "Mark published". A guid change never reappears
+        # in a later changeset, so publishing without its facts would lose
+        # the deletion; leaving the windows unstamped makes the next trigger
+        # re-cover them and retry.
+      }
+    }
+  ]...)
 
   enrichment_states = merge([
     for _ in range(var.enable_item_enrichment ? 1 : 0) : {
@@ -218,7 +272,7 @@ locals {
     QueryLanguage = "JSONata"
     Comment       = "Adapter pipeline (trigger, loader, publish event)"
     StartAt       = "Run trigger"
-    States        = merge(local.base_states, local.enrichment_states, local.mark_published_states)
+    States        = merge(local.base_states, local.reconcile_states, local.enrichment_states, local.mark_published_states)
   })
 }
 
