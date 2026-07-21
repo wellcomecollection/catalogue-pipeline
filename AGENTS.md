@@ -75,27 +75,20 @@ uv run ruff check --fix
 Scope `pytest`/`mypy` paths to the area you changed when the project is large
 (e.g. `catalogue_graph/`); a full run can be slow.
 
+## Terraform conventions
+
 ### Before finalising a Terraform change
 
 Run from the repository root:
 
 ```bash
-tflint --init
+builds/run_tflint.sh
+```
 
-config_file="$(pwd)/.tflint.hcl"
+Optionally pass one or more Terraform roots to target a subset:
 
-grep -rlE '^\s*backend\s+"' --include='*.tf' . \
-  | xargs -r -n1 dirname \
-  | sed 's|^\./||' \
-  | sort -u \
-  | while IFS= read -r root; do
-    if [[ "$root" == "reindexer/terraform" ]]; then
-      continue
-    fi
-
-    echo "Linting ${root}"
-    tflint --chdir="${root}" --config="${config_file}" --format=compact --minimum-failure-severity=error
-  done
+```bash
+builds/run_tflint.sh calm_adapter/terraform infrastructure/adapter_stack
 ```
 
 ## Scala conventions

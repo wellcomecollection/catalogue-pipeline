@@ -28,39 +28,8 @@ jobs:
 
       - uses: terraform-linters/setup-tflint@v4
         with:
-          tflint_version: v0.54.0
-
-      - name: Initialise tflint plugins
-        run: tflint --init
+          tflint_version: v0.64
 
       - name: Run tflint on all Terraform roots
         shell: bash
-        run: |
-          set -euo pipefail
-
-          config_file="$(pwd)/.tflint.hcl"
-
-          # A Terraform root is identified by having a backend configuration.
-          # Child modules (under modules/, etc.) never declare a backend, so this
-          # discovers every root without depending on a committed .terraform.lock.hcl.
-          mapfile -t terraform_roots < <(
-            grep -rlE '^\s*backend\s+"' --include='*.tf' . \
-              | xargs -r -n1 dirname \
-              | sed 's|^\./||' \
-              | sort -u
-          )
-
-          if [[ ${#terraform_roots[@]} -eq 0 ]]; then
-            echo "No Terraform roots found"
-            exit 1
-          fi
-
-          for root in "${terraform_roots[@]}"; do
-            if [[ "${root}" == "reindexer/terraform" ]]; then
-              echo "Skipping ${root}; this root currently fails static evaluation in a shared module"
-              continue
-            fi
-
-            echo "Linting ${root}"
-            tflint --chdir="${root}" --config="${config_file}" --format=compact --minimum-failure-severity=error
-          done
+        run: builds/run_tflint.sh
