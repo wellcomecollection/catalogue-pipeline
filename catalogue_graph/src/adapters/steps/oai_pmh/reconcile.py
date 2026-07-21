@@ -51,7 +51,6 @@ class ReconcileResponse(BaseModel):
     mappings_inserted: int
     mappings_updated: int
     skipped: int
-    guard_suppressed: int
 
 
 class ReconcileRuntime(BaseModel):
@@ -91,10 +90,8 @@ def handler(
         )
 
     candidates = _superseded_mappings(runtime, mappings)
-    claimants_by_guid = _guid_claimants(runtime, mappings, candidates)
-    facts, guard_suppressed = _build_deletion_facts(
-        event, runtime, rows, mappings, candidates, claimants_by_guid
-    )
+    _reject_guid_handoffs(event, runtime, mappings, candidates)
+    facts = _build_deletion_facts(runtime.namespace, rows, mappings, candidates)
 
     # Facts must be durable before the mappings commit destroys the diff; a
     # failure here leaves the mappings untouched, so a re-run recomputes the
@@ -117,7 +114,6 @@ def handler(
         mappings_inserted=mappings_inserted,
         mappings_updated=mappings_updated,
         skipped=len(skipped_ids),
-        guard_suppressed=guard_suppressed,
     )
     return ReconcileResponse(
         job_id=event.job_id,
@@ -128,7 +124,6 @@ def handler(
         mappings_inserted=mappings_inserted,
         mappings_updated=mappings_updated,
         skipped=len(skipped_ids),
-        guard_suppressed=guard_suppressed,
     )
 
 
@@ -152,9 +147,9 @@ def _guid_claimants(
     Claims come from the incoming mappings and from stored rows this commit
     leaves in place. Rows this commit remaps hold no post-commit claim on
     their old guid (counting them would make two records leaving a shared
-    guid suppress each other's facts); their new-guid claims come from their
-    incoming mappings. Timestamp-gated rows stay out of the overwrite set
-    and still count.
+    guid trip the handoff check against each other); their new-guid claims
+    come from their incoming mappings. Timestamp-gated rows stay out of the
+    overwrite set and still count.
     """
     claimants_by_guid: dict[str, set[str]] = defaultdict(set)
     for mapping in mappings.to_pylist():
@@ -170,47 +165,68 @@ def _guid_claimants(
     return claimants_by_guid
 
 
-def _build_deletion_facts(
+def _reject_guid_handoffs(
     event: ReconcileEvent,
     runtime: ReconcileRuntime,
-    rows: list[dict[str, Any]],
     mappings: pa.Table,
     candidates: list[dict[str, Any]],
-    claimants_by_guid: dict[str, set[str]],
-) -> tuple[list[dict[str, Any]], int]:
-    """One deletion fact per superseded mapping, tagged with the incoming
-    row's changeset and last_modified (not the superseded mapping's).
+) -> None:
+    """Fail the run if any superseded guid is claimed by another record.
 
-    A guid claimed by another record is a handoff, not a deletion:
-    tombstoning it would delete the live work under its new owner. A
-    candidate never claims its own old guid (its incoming mapping holds the
-    new guid; its stored row is excluded from the claimants).
+    A guid claimed by a different record is a handoff, not a deletion. Guids
+    are assumed unique to one record for all time, so a handoff can only
+    arise from a serious data quality issue in the source system (two
+    records carrying the same guid), and it corrupts downstream identity:
+    the work indexed under the guid silently swaps to the new owner's
+    content, and the id minter can hand the same canonical id to different
+    works. Stop the run so the failure alerts, rather than continuing on
+    corrupt source data. A candidate never claims its own old guid (its
+    incoming mapping holds the new guid; its stored row is excluded from
+    the claimants), so a record reverting to an earlier guid never trips
+    this check.
     """
-    changeset_by_record_id = {row["id"]: row["changeset"] for row in rows}
-    last_modified_by_id = {
-        mapping["id"]: mapping["last_modified"] for mapping in mappings.to_pylist()
-    }
-
-    facts: list[dict[str, Any]] = []
-    guard_suppressed = 0
+    claimants_by_guid = _guid_claimants(runtime, mappings, candidates)
+    handoff_count = 0
     for row in candidates:
         other_claimants = claimants_by_guid[row["guid"]]
         if other_claimants:
-            guard_suppressed += 1
-            logger.warning(
-                "Suppressed deletion fact for handed-off guid",
+            handoff_count += 1
+            logger.error(
+                "Superseded guid is claimed by another record",
                 adapter=runtime.adapter_name,
                 job_id=event.job_id,
                 record_id=row["id"],
                 guid=row["guid"],
                 claimed_by=sorted(other_claimants),
             )
-            continue
+    if handoff_count:
+        raise ValueError(
+            f"Detected {handoff_count} guid handoff(s): a guid moved between "
+            "records, breaking the guid uniqueness assumption. This indicates "
+            "a data quality issue in the source system; see the logs for the "
+            "affected records."
+        )
 
+
+def _build_deletion_facts(
+    namespace: str,
+    rows: list[dict[str, Any]],
+    mappings: pa.Table,
+    candidates: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """One deletion fact per superseded mapping, tagged with the incoming
+    row's changeset and last_modified (not the superseded mapping's)."""
+    changeset_by_record_id = {row["id"]: row["changeset"] for row in rows}
+    last_modified_by_id = {
+        mapping["id"]: mapping["last_modified"] for mapping in mappings.to_pylist()
+    }
+
+    facts: list[dict[str, Any]] = []
+    for row in candidates:
         changeset_id = changeset_by_record_id[row["id"]]
         facts.append(
             {
-                "namespace": runtime.namespace,
+                "namespace": namespace,
                 "id": f"{row['id']}/{changeset_id}",
                 "record_id": row["id"],
                 "guid": row["guid"],
@@ -220,7 +236,7 @@ def _build_deletion_facts(
                 ),
             }
         )
-    return facts, guard_suppressed
+    return facts
 
 
 def build_runtime(

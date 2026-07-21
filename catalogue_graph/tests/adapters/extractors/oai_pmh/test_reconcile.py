@@ -150,7 +150,6 @@ def test_guid_change_writes_fact_and_updates_mapping(
     assert response.facts_written == 1
     assert response.mappings_updated == 1
     assert response.mappings_inserted == 0
-    assert response.guard_suppressed == 0
 
     facts = _fact_rows(runtime)
     assert len(facts) == 1
@@ -210,11 +209,12 @@ def test_unparseable_content_is_skipped_and_counted(
     assert _mapping_guids(runtime) == {"collect-valid": "guid-valid"}
 
 
-def test_guid_handoff_to_incoming_record_suppresses_fact(
+def test_guid_handoff_to_incoming_record_fails_the_run(
     runtime: ReconcileRuntime,
 ) -> None:
-    """Record B's incoming mapping claims record A's old guid: the work stays
-    live under B, so no fact is written for A's change."""
+    """Record B's incoming mapping claims record A's old guid: a handoff can
+    only come from a source data quality issue, so the run stops before any
+    facts or mappings are written."""
     _seed_baseline(runtime, {"collect-1": "guid-shared"})
     changeset_id = _load_adapter_rows(
         runtime,
@@ -224,32 +224,27 @@ def test_guid_handoff_to_incoming_record_suppresses_fact(
         },
     )
 
-    response = _run(runtime, [changeset_id])
+    with pytest.raises(ValueError, match="guid handoff"):
+        _run(runtime, [changeset_id])
 
-    assert response.guard_suppressed == 1
-    assert response.facts_written == 0
     assert _fact_rows(runtime) == []
-    assert _mapping_guids(runtime) == {
-        "collect-1": "guid-new-1",
-        "collect-2": "guid-shared",
-    }
+    assert _mapping_guids(runtime) == {"collect-1": "guid-shared"}
 
 
-def test_guid_claimed_by_another_stored_record_suppresses_fact(
+def test_guid_claimed_by_another_stored_record_fails_the_run(
     runtime: ReconcileRuntime,
 ) -> None:
     """A different record already holds the old guid as its current mapping in
-    the store: tombstoning it would delete that live work."""
+    the store: two records carried the same guid, so the run stops."""
     _seed_baseline(runtime, {"collect-1": "guid-shared", "collect-2": "guid-shared"})
     changeset_id = _load_adapter_rows(runtime, {"collect-1": _marcxml("guid-new-1")})
 
-    response = _run(runtime, [changeset_id])
+    with pytest.raises(ValueError, match="guid handoff"):
+        _run(runtime, [changeset_id])
 
-    assert response.guard_suppressed == 1
-    assert response.facts_written == 0
     assert _fact_rows(runtime) == []
     assert _mapping_guids(runtime) == {
-        "collect-1": "guid-new-1",
+        "collect-1": "guid-shared",
         "collect-2": "guid-shared",
     }
 
@@ -259,7 +254,7 @@ def test_all_claimants_leaving_a_shared_guid_write_facts(
 ) -> None:
     """Two records sharing a stored guid (e.g. duplicate 001s) are both
     re-identified in one run: nothing claims the guid post-commit, so both
-    facts are written rather than each suppressing the other's."""
+    facts are written rather than each tripping the handoff check."""
     _seed_baseline(runtime, {"collect-1": "guid-shared", "collect-2": "guid-shared"})
     changeset_id = _load_adapter_rows(
         runtime,
@@ -271,7 +266,6 @@ def test_all_claimants_leaving_a_shared_guid_write_facts(
 
     response = _run(runtime, [changeset_id])
 
-    assert response.guard_suppressed == 0
     assert response.facts_written == 2
     assert response.mappings_updated == 2
 
@@ -284,12 +278,12 @@ def test_all_claimants_leaving_a_shared_guid_write_facts(
     }
 
 
-def test_timestamp_gated_claimant_still_suppresses_fact(
+def test_timestamp_gated_claimant_still_fails_the_run(
     runtime: ReconcileRuntime,
 ) -> None:
     """A stored claimant whose own incoming update is older than its mapping
-    keeps its guid post-commit, so it still suppresses the departing record's
-    fact."""
+    keeps its guid post-commit, so the departing record's change is still a
+    handoff and stops the run."""
     _seed_baseline(runtime, {"collect-1": "guid-shared", "collect-2": "guid-shared"})
     departing_changeset = _load_adapter_rows(
         runtime, {"collect-1": _marcxml("guid-new-1")}
@@ -300,13 +294,12 @@ def test_timestamp_gated_claimant_still_suppresses_fact(
         last_modified=BASELINE_TIME - timedelta(days=1),
     )
 
-    response = _run(runtime, [departing_changeset, stale_changeset])
+    with pytest.raises(ValueError, match="guid handoff"):
+        _run(runtime, [departing_changeset, stale_changeset])
 
-    assert response.guard_suppressed == 1
-    assert response.facts_written == 0
     assert _fact_rows(runtime) == []
     assert _mapping_guids(runtime) == {
-        "collect-1": "guid-new-1",
+        "collect-1": "guid-shared",
         "collect-2": "guid-shared",
     }
 
