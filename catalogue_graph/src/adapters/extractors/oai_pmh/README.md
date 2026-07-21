@@ -189,29 +189,6 @@ so committing rarely keeps a large recovery down to a handful of changesets.
 Runs are capped at 50,000 ids, and an empty id list is rejected rather than
 treated as a no-op.
 
-### 6. Rebuild reconciler → reseed the id-to-GUID baseline (Axiell)
-
-The reconciler maps each record id to the source-identifier GUID it produces, so
-a later GUID change can mark the old work deleted. It only runs incrementally,
-per changeset, and cannot run over a full snapshot. After a full reindex (a
-clean-slate rebuild of the adapter store) there is otherwise no supported way to
-reseed it. This step walks the active records, recomputes each GUID with the
-same builder the reconciler uses, and writes the mappings in batches.
-
-```bash
-uv run python -m adapters.steps.oai_pmh.rebuild_reconciler --adapter-type axiell \
-  --use-rest-api-table
-```
-
-Records whose MARC cannot be parsed, or that yield no GUID (such as records with
-an empty 001), are skipped and counted rather than failing the run.
-
-Writes go through the reconciler store's incremental update, which only applies
-a mapping when its `last_modified` is newer than what is already stored. That is
-what you want for reseeding an empty table. If instead the table holds stale
-mappings whose GUIDs changed without the record's `last_modified` advancing,
-clear it before rebuilding rather than relying on a re-run to overwrite them.
-
 ### Common CLI flags
 
 | Flag                             | Description                                                    |
