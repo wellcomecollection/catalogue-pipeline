@@ -42,6 +42,7 @@ class ItemsRuleTest
   val miroWork: Work.Visible[WorkState.Identified] = miroIdentifiedWork()
 
   val calmWork: Work.Visible[WorkState.Identified] = calmIdentifiedWork()
+  val axiellWork: Work.Visible[WorkState.Identified] = axiellIdentifiedWork()
 
   it(
     "leaves items unchanged and returns a digitised version of a Sierra work as a merged source"
@@ -384,6 +385,47 @@ class ItemsRuleTest
 
   it("replace Calm items with Sierra and METS items") {
     inside(ItemsRule.merge(calmWork, List(physicalPictureSierra, metsWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 2
+
+        items shouldBe physicalPictureSierra.data.items ++ metsWork.data.items
+    }
+  }
+
+  // Axiell (drop-in replacement for Calm)
+  it("Adds Sierra item IDs to Axiell item") {
+    inside(ItemsRule.merge(axiellWork, List(physicalPictureSierra))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head.id should be(physicalPictureSierra.data.items.head.id)
+
+        mergedSources should be(Seq(physicalPictureSierra))
+    }
+  }
+
+  it("copies the locations from Sierra to Axiell") {
+    val ac = AccessCondition(
+      method = AccessMethod.OnlineRequest,
+      status = AccessStatus.Open
+    )
+
+    val location = createPhysicalLocationWith(accessConditions = List(ac))
+
+    val item = createIdentifiedItemWith(locations = List(location))
+
+    val sierraWork = sierraIdentifiedWork().items(List(item))
+
+    inside(ItemsRule.merge(axiellWork, List(sierraWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 1
+        items.head.locations shouldBe Seq(location)
+
+        mergedSources shouldBe Seq(sierraWork)
+    }
+  }
+
+  it("replaces Axiell items with Sierra and METS items") {
+    inside(ItemsRule.merge(axiellWork, List(physicalPictureSierra, metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 2
 
