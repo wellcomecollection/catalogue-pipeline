@@ -46,6 +46,7 @@ IGNORED_PREFIXES = {
     "Previous number",
     "Previouse number",
     "Archivematica UUID",
+    "AV  barcode",
 }
 
 

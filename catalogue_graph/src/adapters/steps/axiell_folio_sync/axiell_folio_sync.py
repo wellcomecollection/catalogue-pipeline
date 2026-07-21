@@ -45,9 +45,9 @@ from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
 )
+from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
 from adapters.transformers.adapter_store_source import AdapterStoreSource
-from adapters.transformers.axiell_folio_sync.ref_cache import RefCache
 from adapters.utils.adapter_store import AdapterStore
 from clients.folio_client import FolioClient, FolioInventoryClient, ssl_context_from_env
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
