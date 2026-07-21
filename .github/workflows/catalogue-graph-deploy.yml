@@ -35,75 +35,41 @@ jobs:
         with:
           terraform_dir: pipeline/terraform
 
-  retag-unified-pipeline-task-image:
+  retag-prod-images:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image_name: [ unified_pipeline_task, unified_pipeline_lambda ]
     steps:
       - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-1
-          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
       - uses: ./.github/actions/retag-docker-image
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
-          image_name: unified_pipeline_task
+          image_name: ${{ matrix.image_name }}
           source_tag: ${{ inputs.deploy_tag }}
           target_tag: prod
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
 
-  retag-unified-pipeline-lambda-image:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-1
-          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-      - uses: ./.github/actions/retag-docker-image
-        with:
-          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
-          image_name: unified_pipeline_lambda
-          source_tag: ${{ inputs.deploy_tag }}
-          target_tag: prod
-          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-
-  retag-dated-unified-pipeline-task-image:
+  retag-dated-images:
     runs-on: ubuntu-latest
     needs: [ discover-pipeline-dates ]
     strategy:
       matrix:
         pipeline_date: ${{ fromJSON(needs.discover-pipeline-dates.outputs.pipeline_dates) }}
+        image_name: [ unified_pipeline_task, unified_pipeline_lambda ]
     steps:
       - uses: actions/checkout@v3
-      - name: Retag dated unified pipeline task image
-        uses: ./.github/actions/retag-docker-image
+      - uses: ./.github/actions/retag-docker-image
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
-          image_name: unified_pipeline_task
-          source_tag: ${{ inputs.deploy_tag }}
-          target_tag: env.${{ matrix.pipeline_date }}
-          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-
-  retag-dated-unified-pipeline-lambda-image:
-    runs-on: ubuntu-latest
-    needs: [ discover-pipeline-dates ]
-    strategy:
-      matrix:
-        pipeline_date: ${{ fromJSON(needs.discover-pipeline-dates.outputs.pipeline_dates) }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Retag dated unified pipeline lambda image
-        uses: ./.github/actions/retag-docker-image
-        with:
-          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
-          image_name: unified_pipeline_lambda
+          image_name: ${{ matrix.image_name }}
           source_tag: ${{ inputs.deploy_tag }}
           target_tag: env.${{ matrix.pipeline_date }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
 
   deploy-unified-pipeline-lambdas:
     runs-on: ubuntu-latest
-    needs: [ retag-unified-pipeline-lambda-image ]
+    needs: [ retag-prod-images ]
     strategy:
       matrix:
         lambda_name:
@@ -126,7 +92,7 @@ jobs:
   deploy-dated-unified-pipeline-lambdas:
     name: Deploy dated unified pipeline lambdas
     runs-on: ubuntu-latest
-    needs: [ discover-pipeline-dates, retag-dated-unified-pipeline-lambda-image ]
+    needs: [ discover-pipeline-dates, retag-dated-images ]
     strategy:
       matrix:
         pipeline_date: ${{ fromJSON(needs.discover-pipeline-dates.outputs.pipeline_dates) }}
