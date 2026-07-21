@@ -38,9 +38,18 @@ def get_deploy_settings(root):
     settings_path = f"{root}/pipeline/terraform/deploy_settings.json"
     try:
         with open(settings_path) as f:
-            return json.load(f)
+            settings = json.load(f)
     except FileNotFoundError:
         return {"deploy_all_pipelines": False}
+
+    deploy_all = settings.get("deploy_all_pipelines", False)
+    if not isinstance(deploy_all, bool):
+        sys.exit(
+            f"deploy_all_pipelines in {settings_path} must be a JSON boolean, "
+            f"got: {deploy_all!r}"
+        )
+
+    return settings
 
 
 def get_pipeline_names_from_terraform_dir(root):
