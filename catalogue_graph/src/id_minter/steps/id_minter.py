@@ -199,7 +199,7 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
         runtime=runtime,
         execution_context=execution_context,
     )
-    return response.model_dump()
+    return response.model_dump(mode="json")
 
 
 def local_handler(parser: argparse.ArgumentParser) -> None:

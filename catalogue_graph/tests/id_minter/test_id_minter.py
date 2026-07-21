@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 from typing import cast
+from unittest.mock import MagicMock, patch
 
 import pymysql
 import pymysql.connections
@@ -33,6 +34,7 @@ from id_minter.steps.id_minter import (
     IdMinterRuntime,
     execute,
     handler,
+    lambda_handler,
 )
 from models.incremental_window import IncrementalWindow
 from tests.id_minter.conftest import (
@@ -597,6 +599,43 @@ class TestSnsPublishing:
             execute(request, runtime=runtime)
 
         assert len(MockSNSClient.publish_batch_request_entries) == 0
+
+
+# ---------------------------------------------------------------------------
+# Tests: lambda_handler response serialisation
+# ---------------------------------------------------------------------------
+
+
+class TestLambdaHandlerJsonSerialisation:
+    """Verify that lambda_handler returns a JSON-serialisable dict."""
+
+    def test_window_datetimes_are_serialised_as_strings(self) -> None:
+        """lambda_handler must not return raw datetime objects."""
+        window = IncrementalWindow.model_validate({"end_time": END_TIME})
+        fake_result = IdMinterResult(
+            window=window,
+            job_id="lambda-handler-dt-test",
+            success_count=1,
+            failure_count=0,
+            report_s3_uri="s3://bucket/key.json",
+        )
+
+        event = {
+            "window": {"end_time": END_TIME.isoformat()},
+            "job_id": "lambda-handler-dt-test",
+        }
+
+        with (
+            patch("id_minter.steps.id_minter.build_runtime", return_value=MagicMock()),
+            patch("id_minter.steps.id_minter.handler", return_value=fake_result),
+        ):
+            result = lambda_handler(event, context=None)
+
+        # Must be fully JSON-serialisable — no datetime objects.
+        json.dumps(result)
+
+        # The window datetimes should be ISO-format strings
+        assert isinstance(result["window"]["end_time"], str)
 
 
 class TestBuildMintingSource:

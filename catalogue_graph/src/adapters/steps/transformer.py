@@ -29,6 +29,7 @@ from adapters.transformers.source_work_transformer import (
     SourceWorkTransformer,
 )
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.facts_delivery import build_facts_delivery_stores
 from adapters.utils.reconciler_store import ReconcilerStore
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -111,7 +112,20 @@ def build_transformer(
     snapshot_id = event.snapshot_id or adapter_store.current_snapshot_id()
 
     if event.transformer_type == "axiell":
-        return AxiellTransformer(adapter_store, event.changeset_ids, snapshot_id)
+        delivery_stores = build_facts_delivery_stores(
+            AXIELL_CONFIG,
+            namespace="axiell",
+            changeset_ids=event.changeset_ids,
+            use_rest_api_table=use_rest_api_table,
+        )
+        facts_store, reconciler_store = delivery_stores or (None, None)
+        return AxiellTransformer(
+            adapter_store,
+            event.changeset_ids,
+            snapshot_id,
+            facts_store=facts_store,
+            reconciler_store=reconciler_store,
+        )
     if event.transformer_type == "ebsco":
         return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "folio":
