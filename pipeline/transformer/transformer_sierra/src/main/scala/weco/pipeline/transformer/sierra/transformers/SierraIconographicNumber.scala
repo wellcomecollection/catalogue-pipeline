@@ -22,13 +22,17 @@ object SierraIconographicNumber
     bibData match {
       case _ if bibData.isVisualCollections =>
         // Fall back to 099 if the value from 001 has been moved there. See https://wellcome.slack.com/archives/C8X9YKM5X/p1777629042762979
-        (bibData.varfieldsWithTag("001") ++ bibData.varfieldsWithTag("099"))
-          .flatMap { _.content }
-          .collectFirst {
-            // There are a handful of cases where the value in this field doesn't
-            // look like an i-number, in which case we discard it.
-            case IconographicNumberMatch(number, _) => number
-          }
+        val content001 = bibData.varfieldsWithTag("001").flatMap(_.content)
+        val contentToSearch = if (content001.isEmpty) {
+          bibData.varfieldsWithTag("099").flatMap(_.content)
+        } else {
+          content001
+        }
+        contentToSearch.collectFirst {
+          // There are a handful of cases where the value in this field doesn't
+          // look like an i-number, in which case we discard it.
+          case IconographicNumberMatch(number, _) => number
+        }
 
       case _ => None
     }
