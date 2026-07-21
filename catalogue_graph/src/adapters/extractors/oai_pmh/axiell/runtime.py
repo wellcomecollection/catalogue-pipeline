@@ -61,6 +61,24 @@ class AxiellRuntimeConfig(OAIPMHRuntimeConfig):
             return get_rest_api_table(RECONCILER_REST_API_CONFIG, create_if_not_exists)
         return get_local_table(RECONCILER_LOCAL_CONFIG, create_if_not_exists)
 
+    def build_deletion_facts_table(
+        self,
+        *,
+        use_rest_api_table: bool = True,
+        create_if_not_exists: bool = True,
+    ) -> IcebergTable:
+        """Build the Iceberg table for the Axiell deletion facts store."""
+        from adapters.extractors.oai_pmh.axiell.config import (
+            DELETION_FACTS_LOCAL_CONFIG,
+            DELETION_FACTS_REST_API_CONFIG,
+        )
+
+        if use_rest_api_table:
+            return get_rest_api_table(
+                DELETION_FACTS_REST_API_CONFIG, create_if_not_exists
+            )
+        return get_local_table(DELETION_FACTS_LOCAL_CONFIG, create_if_not_exists)
+
 
 # Singleton instance for use by lambda handlers and CLI
 AXIELL_CONFIG = AxiellRuntimeConfig()

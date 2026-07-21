@@ -12,6 +12,7 @@ from adapters.utils.iceberg import (
 from adapters.utils.schemata import (
     ADAPTER_STORE_ICEBERG_SCHEMA,
     ADAPTER_STORE_SORT_ORDER,
+    DELETION_FACTS_ICEBERG_SCHEMA,
     RECONCILER_STORE_ICEBERG_SCHEMA,
 )
 from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
@@ -197,5 +198,28 @@ RECONCILER_LOCAL_CONFIG = LocalIcebergTableConfig(
     table_name=RECONCILER_LOCAL_TABLE_NAME,
     namespace=LOCAL_NAMESPACE,
     iceberg_schema=RECONCILER_STORE_ICEBERG_SCHEMA,
+    db_name=LOCAL_DB_NAME,
+)
+
+DELETION_FACTS_REST_API_TABLE_NAME = os.getenv(
+    "DELETION_FACTS_REST_API_TABLE_NAME", "axiell_deletion_facts_table"
+)
+DELETION_FACTS_LOCAL_TABLE_NAME = os.getenv(
+    "DELETION_FACTS_LOCAL_TABLE_NAME", "axiell_local_deletion_facts_table"
+)
+
+DELETION_FACTS_REST_API_CONFIG = RestApiIcebergTableConfig(
+    table_name=DELETION_FACTS_REST_API_TABLE_NAME,
+    namespace=REST_API_NAMESPACE,
+    iceberg_schema=DELETION_FACTS_ICEBERG_SCHEMA,
+    s3_tables_bucket=S3_TABLES_BUCKET,
+    region=AWS_REGION,
+    account_id=AWS_ACCOUNT_ID,
+)
+
+DELETION_FACTS_LOCAL_CONFIG = LocalIcebergTableConfig(
+    table_name=DELETION_FACTS_LOCAL_TABLE_NAME,
+    namespace=LOCAL_NAMESPACE,
+    iceberg_schema=DELETION_FACTS_ICEBERG_SCHEMA,
     db_name=LOCAL_DB_NAME,
 )

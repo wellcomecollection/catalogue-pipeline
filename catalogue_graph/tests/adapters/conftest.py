@@ -16,6 +16,8 @@ from adapters.utils.iceberg import (
 )
 from adapters.utils.schemata import (
     ADAPTER_STORE_ARROW_SCHEMA,
+    DELETION_FACTS_ARROW_SCHEMA,
+    DELETION_FACTS_ICEBERG_SCHEMA,
     RECONCILER_STORE_ARROW_SCHEMA,
     RECONCILER_STORE_ICEBERG_SCHEMA,
 )
@@ -79,6 +81,33 @@ def reconciler_records_to_table(
         data.append(new_item)
 
     return pa.Table.from_pylist(data, schema=RECONCILER_STORE_ARROW_SCHEMA)
+
+
+def deletion_facts_records_to_table(
+    records: list[dict[str, Any]],
+    namespace: str = "test_namespace",
+) -> pa.Table:
+    """Create an Arrow table with the deletion facts schema from a list of dicts.
+
+    Provides sensible defaults for required fields:
+    - namespace: "test_namespace" (or as specified)
+    - id: the deterministic fact id "{record_id}/{changeset}"
+    - last_modified: datetime.now(UTC)
+
+    Args:
+        records: List of dicts with at minimum 'record_id', 'guid' and
+            'changeset' keys
+        namespace: Default namespace to apply to records without one
+    """
+    data: list[dict[str, Any]] = []
+    for item in records:
+        new_item = item.copy()
+        new_item.setdefault("namespace", namespace)
+        new_item.setdefault("id", f"{item['record_id']}/{item['changeset']}")
+        new_item.setdefault("last_modified", datetime.now(UTC))
+        data.append(new_item)
+
+    return pa.Table.from_pylist(data, schema=DELETION_FACTS_ARROW_SCHEMA)
 
 
 @pytest.fixture
@@ -148,6 +177,21 @@ def reconciler_temporary_table() -> Generator[IcebergTable, None, None]:
         namespace="test",
         db_name="test_catalog",
         iceberg_schema=RECONCILER_STORE_ICEBERG_SCHEMA,
+    )
+    table = get_local_table(config)
+    try:
+        yield table
+    finally:
+        table.catalog.drop_table(f"test.{config.table_name}")
+
+
+@pytest.fixture
+def deletion_facts_temporary_table() -> Generator[IcebergTable, None, None]:
+    config = LocalIcebergTableConfig(
+        table_name=str(uuid1()),
+        namespace="test",
+        db_name="test_catalog",
+        iceberg_schema=DELETION_FACTS_ICEBERG_SCHEMA,
     )
     table = get_local_table(config)
     try:
