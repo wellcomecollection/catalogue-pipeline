@@ -140,6 +140,7 @@ resource "aws_iam_policy" "state_machine_lambda_policy" {
         Resource = concat(
           [module.trigger_lambda.lambda.arn],
           module.mark_published_lambda[*].lambda.arn,
+          module.reconcile_lambda[*].lambda.arn,
         )
       }
     ]

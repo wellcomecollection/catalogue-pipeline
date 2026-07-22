@@ -80,6 +80,7 @@ jobs:
             folio-adapter-trigger,
             axiell-adapter-mark-published,
             folio-adapter-mark-published,
+            axiell-adapter-reconcile,
           ]
     steps:
       - uses: actions/checkout@v7
