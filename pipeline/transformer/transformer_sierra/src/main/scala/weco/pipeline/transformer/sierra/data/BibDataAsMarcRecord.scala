@@ -74,6 +74,21 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
       .varfieldsWithTags(tags: _*)
       .map(SierraMarcDataConversions.varFieldToMarcControlField)
 
+  override def controlField(tag: String): Option[MarcControlField] =
+    super.controlField(tag).orElse {
+      // Fall back to 099 $a if the value from 001 has been moved there. See https://wellcome.slack.com/archives/C8X9YKM5X/p1777629042762979
+      // Only fall back when there is genuinely no 001 field — super.controlField
+      // also returns None when multiple 001 fields exist (non-repeatable field),
+      // and in that case we should not use 099 as a substitute.
+      if (tag == "001" && bibData.varfieldsWithTag("001").isEmpty)
+        bibData
+          .varfieldsWithTag("099")
+          .headOption
+          .flatMap(_.subfields.find(_.tag == "a"))
+          .map(sf => MarcControlField("001", sf.content))
+      else None
+    }
+
   lazy val fields: Seq[MarcField] =
     bibData.varFields
       // Only actual MARC varfields, with an actual MARC tag, are exercised

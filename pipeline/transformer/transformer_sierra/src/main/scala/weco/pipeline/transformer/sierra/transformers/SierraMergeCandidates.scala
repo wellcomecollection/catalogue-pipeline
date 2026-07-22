@@ -66,10 +66,16 @@ object SierraMergeCandidates
       .exists(_.equals("EBZ"))
 
     // If the bib has an 003 field with the value "EBZ", we look for an 001 field
+    // Fall back to 099 $a if the value has been moved there. See https://wellcome.slack.com/archives/C8X9YKM5X/p1777629042762979
     if (ebzControlNumberIdentifier) {
       bibData
         .nonrepeatableVarfieldWithTag("001")
         .flatMap(_.content)
+        .orElse(
+          bibData
+            .nonrepeatableVarfieldWithTag("099")
+            .flatMap(_.subfields.find(_.tag == "a").map(_.content))
+        )
         .flatMap {
           case ebscoAltLookupRegex(ebscoId) =>
             Some(
