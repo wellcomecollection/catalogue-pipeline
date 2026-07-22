@@ -162,8 +162,8 @@ Each id is classified as recovered, removed (the source reports
 `idDoesNotExist`), or unfetchable (neither returned nor reported gone, after the
 client's retries). Unfetchable ids are left absent from the store, never
 backfilled with stale content. The report carries the full removed and
-unfetchable id lists; the response carries only a sample of the unfetchable
-ones, to keep the state machine payload bounded.
+unfetchable id lists; the response carries only counts plus the report's S3
+URI, matching the transformer and id minter responses.
 
 A CLI run writes its report to a local file (`--report`, defaulting to
 `<job-id>_report.json`) and emits no CloudWatch metrics, so an ad hoc recovery

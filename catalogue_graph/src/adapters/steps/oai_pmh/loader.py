@@ -32,7 +32,6 @@ from oai_pmh_client.exceptions import IdDoesNotExistError, OAIError
 from pydantic import BaseModel, ConfigDict
 
 from adapters.extractors.oai_pmh.models.step_events import (
-    UNFETCHABLE_SAMPLE_SIZE,
     LoaderEvent,
     LoaderResponse,
     OAIPMHIdLoaderEvent,
@@ -304,9 +303,8 @@ def execute_id_loader(
     """Fetch each requested id and write the recoverable ones in batches.
 
     Returns the response alongside the outcome, which holds the *full* removed
-    and unfetchable id lists. The response carries only a sample of the
-    unfetchable ones, to bound the payload the state machine passes onward; the
-    full lists belong in the report.
+    and unfetchable id lists. The response carries only counts, matching the
+    transformer and id minter responses; the full lists belong in the report.
 
     Deletions are deliberately asymmetric with window mode. There, a tombstone
     is written when the repository affirmatively reports ``status="deleted"``.
@@ -382,7 +380,6 @@ def execute_id_loader(
         recovered=outcome.recovered,
         removed=len(outcome.removed),
         unfetchable_count=len(outcome.unfetchable),
-        unfetchable_sample=outcome.unfetchable[:UNFETCHABLE_SAMPLE_SIZE],
     )
     return response, outcome
 
@@ -425,6 +422,10 @@ def handler(
                 id_report.model_dump_json(indent=2), encoding="utf-8"
             )
         id_report.publish()
+        # The response carries only counts, so point at where the full removed
+        # and unfetchable id lists went.
+        if id_report.publish_to_s3:
+            id_response.report_s3_uri = id_report.s3_uri
         return id_response
 
     response = execute_loader(event, runtime=runtime)

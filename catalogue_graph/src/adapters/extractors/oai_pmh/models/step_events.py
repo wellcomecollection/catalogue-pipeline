@@ -185,14 +185,6 @@ class OAIPMHLoaderResponse(BaseLoaderResponse):
         )
 
 
-UNFETCHABLE_SAMPLE_SIZE = 100
-"""Unfetchable ids carried inline on the response.
-
-The publish state passes the whole response onward as its output, so an
-unbounded list risks breaching the Step Functions payload limit after the store
-writes have already succeeded. The full list goes to the report in S3."""
-
-
 class OAIPMHIdLoaderResponse(BaseLoaderResponse):
     """Response from the loader step in id mode.
 
@@ -228,8 +220,10 @@ class OAIPMHIdLoaderResponse(BaseLoaderResponse):
     unfetchable_count: int
     """Ids neither returned nor reported gone, after the client's retries."""
 
-    unfetchable_sample: list[str] = Field(default_factory=list)
-    """First few unfetchable ids. The full list is in the report."""
+    report_s3_uri: str | None = None
+    """Location of the report carrying the full removed and unfetchable id
+    lists. The response itself carries only counts, matching the transformer and
+    id minter responses. ``None`` for local runs, whose report goes to disk."""
 
 
 LoaderEvent = OAIPMHLoaderEvent | OAIPMHIdLoaderEvent

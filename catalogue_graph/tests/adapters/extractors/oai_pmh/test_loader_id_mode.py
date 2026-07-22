@@ -16,7 +16,6 @@ from oai_pmh_client.models import Header, Record
 from adapters.extractors.oai_pmh.models.step_events import (
     DEFAULT_ID_COMMIT_EVERY,
     MAX_IDS_PER_RUN,
-    UNFETCHABLE_SAMPLE_SIZE,
     OAIPMHIdLoaderEvent,
     OAIPMHIdLoaderResponse,
     OAIPMHLoaderEvent,
@@ -268,8 +267,11 @@ class TestExecuteIdLoader:
         with pytest.raises(RuntimeError, match="a bug"):
             loader.execute_id_loader(_event(["collect:1"]), runtime)
 
-    def test_unfetchable_sample_is_capped_but_count_is_exact(self) -> None:
-        ids = [f"collect:{i}" for i in range(UNFETCHABLE_SAMPLE_SIZE + 25)]
+    def test_response_carries_counts_not_id_lists(self) -> None:
+        """The response holds counts and (once published) the report URI,
+        matching the transformer and id minter responses. The full removed and
+        unfetchable id lists travel in the outcome, bound for the report."""
+        ids = [f"collect:{i}" for i in range(25)]
 
         def get_record(*, identifier: str, metadata_prefix: str) -> Record:
             raise _empty_body_error()
@@ -278,8 +280,8 @@ class TestExecuteIdLoader:
         response, outcome = loader.execute_id_loader(_event(ids), runtime)
 
         assert response.unfetchable_count == len(ids)
-        assert len(response.unfetchable_sample) == UNFETCHABLE_SAMPLE_SIZE
         assert len(outcome.unfetchable) == len(ids)
+        assert response.report_s3_uri is None
 
     def test_holds_no_window_store(self) -> None:
         """Id mode must not touch window state, or it would shift the trigger's
@@ -303,14 +305,19 @@ class TestHandlerDispatch:
         with patch(
             "adapters.steps.oai_pmh.loader.OAIPMHIdLoadReport.from_id_load"
         ) as mock_report:
-            mock_report.return_value = MagicMock()
+            mock_report.return_value = MagicMock(
+                publish_to_s3=True, s3_uri="s3://reports/dev/idload.json"
+            )
             response = loader.handler(_event(["collect:1"]), runtime=runtime)
 
+        assert isinstance(response, OAIPMHIdLoaderResponse)
         assert response.changeset_ids == ["cs1"]
         assert response.covered_window_keys == []
         mock_report.assert_called_once()
-        # The report gets the full unfetchable list, not the response sample.
+        # The report gets the full unfetchable list; the response only counts.
         assert "unfetchable" in mock_report.call_args.kwargs
+        # The published report's location is surfaced on the response.
+        assert response.report_s3_uri == "s3://reports/dev/idload.json"
 
 
 class TestMetadataPrefix:
