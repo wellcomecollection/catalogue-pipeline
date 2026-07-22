@@ -116,17 +116,6 @@ class OAIPMHIdLoaderEvent(BaseAdapterEvent):
         return ids
 
 
-class AdapterRecoveryEvent(BaseAdapterEvent):
-    """Shared base for the manually invoked recovery steps.
-
-    These steps are run ad hoc against a chosen adapter rather than as a stage
-    of a harvest, so unlike the trigger and loader they belong to no job and
-    ``job_id`` is optional.
-    """
-
-    job_id: str | None = None  # type: ignore[assignment]
-
-
 class OAIPMHLoaderResponse(BaseLoaderResponse):
     """Response from the loader step.
 
