@@ -341,9 +341,9 @@ class SierraMergeCandidatesTest
             fieldTag = Some("o")
           ),
           VarField(
-            content = Some("ebs22222e"),
             marcTag = Some("099"),
-            fieldTag = Some("o")
+            fieldTag = Some("o"),
+            subfields = List(Subfield(tag = "a", content = "ebs22222e"))
           )
         )
       )
@@ -495,9 +495,9 @@ class SierraMergeCandidatesTest
           fieldTag = Some("y")
         ),
         VarField(
-          content = Some(controlNumber),
           marcTag = Some("099"),
-          fieldTag = Some("o")
+          fieldTag = Some("o"),
+          subfields = List(Subfield(tag = "a", content = controlNumber))
         )
       )
     )

@@ -21,10 +21,10 @@ object SierraIconographicNumber
   override def apply(bibData: SierraBibData): Option[String] =
     bibData match {
       case _ if bibData.isVisualCollections =>
-        // Fall back to 099 if the value from 001 has been moved there. See https://wellcome.slack.com/archives/C8X9YKM5X/p1777629042762979
+        // Fall back to 099 $a if the value from 001 has been moved there. See https://wellcome.slack.com/archives/C8X9YKM5X/p1777629042762979
         val content001 = bibData.varfieldsWithTag("001").flatMap(_.content)
         val contentToSearch = if (content001.isEmpty) {
-          bibData.varfieldsWithTag("099").flatMap(_.content)
+          bibData.subfieldsWithTag("099" -> "a").map(_.content)
         } else {
           content001
         }

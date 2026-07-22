@@ -76,10 +76,11 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
 
   override def controlField(tag: String): Option[MarcControlField] =
     super.controlField(tag).orElse {
-      // Fall back to 099 if the value from 001 has been moved there. See https://wellcome.slack.com/archives/C8X9YKM5X/p1777629042762979
+      // Fall back to 099 $a if the value from 001 has been moved there. See https://wellcome.slack.com/archives/C8X9YKM5X/p1777629042762979
       if (tag == "001")
-        controlFieldsWithTags("099").headOption
-          .map(f => MarcControlField("001", f.content))
+        bibData.varfieldsWithTag("099").headOption
+          .flatMap(_.subfields.find(_.tag == "a"))
+          .map(sf => MarcControlField("001", sf.content))
       else None
     }
 

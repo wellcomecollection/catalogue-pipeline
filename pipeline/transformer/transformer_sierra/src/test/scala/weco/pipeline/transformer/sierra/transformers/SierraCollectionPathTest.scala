@@ -111,11 +111,11 @@ class SierraCollectionPathTest
       getCollectionPath(varFields).get shouldBe CollectionPath(path = "12345i")
     }
 
-    it("uses the 099 field as identifier when there is no 001") {
+    it("uses the 099 $a subfield as identifier when there is no 001") {
       val varFields = List(
         VarField(
           marcTag = Some("099"),
-          content = Some("12345i")
+          subfields = List(Subfield(tag = "a", content = "12345i"))
         ),
         VarField(
           marcTag = Some("774"),
@@ -140,7 +140,7 @@ class SierraCollectionPathTest
         ),
         VarField(
           marcTag = Some("099"),
-          content = Some("00099")
+          subfields = List(Subfield(tag = "a", content = "00099"))
         ),
         VarField(
           marcTag = Some("774"),

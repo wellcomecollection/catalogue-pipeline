@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.fields.SierraMaterialType
-import weco.sierra.models.marc.VarField
+import weco.sierra.models.marc.{Subfield, VarField}
 
 class SierraIconographicNumberTest
     extends AnyFunSpec
@@ -57,13 +57,13 @@ class SierraIconographicNumberTest
     SierraIconographicNumber(bibData) shouldBe None
   }
 
-  it("uses the i-number from 099 if there is no 001") {
+  it("uses the i-number from 099 $a if there is no 001") {
     val bibData = createSierraBibDataWith(
       materialType = Some(SierraMaterialType("k")),
       varFields = List(
         VarField(
           marcTag = Some("099"),
-          content = Some("12345i")
+          subfields = List(Subfield(tag = "a", content = "12345i"))
         )
       )
     )
@@ -81,7 +81,7 @@ class SierraIconographicNumberTest
         ),
         VarField(
           marcTag = Some("099"),
-          content = Some("22222i")
+          subfields = List(Subfield(tag = "a", content = "22222i"))
         )
       )
     )
