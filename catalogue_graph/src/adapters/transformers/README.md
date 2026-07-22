@@ -23,12 +23,12 @@ The transformer pipeline consists of:
 
 ### Transformer Types
 
-- **`AxiellTransformer`**: Transforms Axiell/Mimsy records into `InvisibleSourceWork` documents
+- **`AxiellTransformer`**: Transforms Axiell/Mimsy records into `InvisibleSourceWork` documents, and delivers
+  guid-change deletions recorded by the adapter-side reconcile step. See
+  [Axiell deletion reconciliation](#axiell-deletion-reconciliation) for more information
 - **`EbscoTransformer`**: Transforms EBSCO serial records into `VisibleSourceWork` documents
 - **`FolioTransformer`**: Transforms FOLIO instance records into `VisibleSourceWork` documents, joining a second
   Iceberg store to attach items. See [FOLIO item enrichment](#folio-item-enrichment) section for more information
-The Axiell transformer also delivers guid-change deletions recorded by the adapter-side reconcile step.
-See [Axiell deletion reconciliation](#axiell-deletion-reconciliation) for more information.
 
 All inherit from `MarcXmlTransformer`, which handles common MARC parsing and deleted record handling.
 
@@ -182,12 +182,17 @@ Reconciliation is split between the adapter and the transformer:
 Because detection writes durable facts rather than emitting deletions directly, any number of pipeline stacks
 can deliver the same deletion independently.
 
+If indexing a tombstone fails, the error lands in the transformer report and fires the per-pipeline
+transformer-failures alarm, but the execution still succeeds. Facts are only read by runs for their original
+changeset ids, so recovery is a manual redrive: re-run the transformer for that pipeline with the failed run's
+changeset ids (idempotent, safe to repeat).
+
 ```mermaid
 ---
 title: deletion reconciliation
 ---
 flowchart TD
-    subgraph adapter["Adapter (once per changeset)"]
+    subgraph adapter["Adapter reconcile step, once per loader run"]
         loader["loader writes changeset"] --> reconcile["reconcile step:<br/>diff collectId -> guid"]
         reconciler_store[(Reconciler Store<br/>collectId: guid)]
         reconcile -.-> reconciler_store
@@ -196,7 +201,7 @@ flowchart TD
         facts -.-> facts_table
         facts --> publish["publish adapter.completed"]
     end
-    subgraph pipeline["Each pipeline (per event)"]
+    subgraph pipeline["Each pipeline, per completed event"]
         transform["Axiell transformer:<br/>adapter rows + facts"] --> works["works + DeletedSourceWork"]
     end
     publish --> transform

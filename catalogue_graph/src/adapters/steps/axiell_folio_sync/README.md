@@ -31,7 +31,9 @@ The design, record-selection rules and tombstone semantics are specified in
 
 Rows with `deleted=true` are counted as advisory tombstones and ignored: the loader's deleted flag is
 unreliable, so we record the signal but do not suppress or remove FOLIO records based on it.
-Authoritative deletes come from the reconciler (see RFC 090).
+Authoritative deletes come from the adapter-side reconcile step's deletion facts, delivered by the Axiell
+transformer (see
+[Axiell deletion reconciliation](../../transformers/README.md#axiell-deletion-reconciliation) and RFC 090).
 
 ## Module layout
 

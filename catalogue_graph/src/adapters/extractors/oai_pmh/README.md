@@ -14,7 +14,8 @@ All OAI-PMH adapters follow this pattern:
 
 1. **Trigger** inspects the window status table to determine the next harvesting window, enforces lag thresholds, and emits a loader request event with a fresh `job_id`.
 2. **Loader** harvests the requested window via OAI-PMH, writes raw XML documents into the Iceberg record table, updates the window status table, and returns the Iceberg `changeset_id` values.
-3. **Transformer** fetches the Iceberg rows referenced by each changeset, transforms them, and indexes into Elasticsearch.
+3. **Reconcile** (Axiell only, `steps/reconcile.py`) diffs each changeset's guid mappings against the reconciler store and records deletion facts before the completed event publishes. See [Axiell deletion reconciliation](../../transformers/README.md#axiell-deletion-reconciliation).
+4. **Transformer** fetches the Iceberg rows referenced by each changeset, transforms them, and indexes into Elasticsearch.
 
 ## Step details
 
