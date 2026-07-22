@@ -180,9 +180,10 @@ Reconciliation is split between the adapter and the transformer:
   redrive of an old changeset) is skipped, so a stale fact can never tombstone a live work.
 
 Because detection writes durable facts rather than emitting deletions directly, any number of pipeline stacks
-can deliver the same deletion independently. Consumers read both streams through
+can deliver the same deletion independently. Consumers read through
 `adapters.utils.axiell_changeset_reader.AxiellChangesetReader`, which owns the store wiring and the liveness
-check; the transformer and the Axiell to FOLIO sync both build on it.
+check. The transformer consumes both streams; the Axiell to FOLIO sync reads records through the reader today
+and adopts `iter_deletions()` with platform#6440.
 
 If indexing a tombstone fails, the error lands in the transformer report and fires the per-pipeline
 transformer-failures alarm, but the execution still succeeds. Facts are only read by runs for their original

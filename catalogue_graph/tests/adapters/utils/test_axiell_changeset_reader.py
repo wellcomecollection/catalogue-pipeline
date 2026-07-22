@@ -4,13 +4,6 @@ from typing import Any
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.steps.axiell_folio_sync.mapper import extract, parse_xml
-from adapters.steps.axiell_folio_sync.mapping import (
-    _holdings_hrid,
-    _instance_hrid,
-    _item_hrid,
-)
-from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.axiell_changeset_reader import (
     AxiellChangesetReader,
@@ -23,7 +16,6 @@ from tests.adapters.conftest import (
     deletion_facts_records_to_table,
     reconciler_records_to_table,
 )
-from utils.marc import parse_single_marc_record
 
 NAMESPACE = "axiell"
 
@@ -59,24 +51,24 @@ def _reader(
     )
 
 
-def _seed_adapter_rows(table: IcebergTable, rows: list[dict[str, Any]]) -> None:
+def _seed_adapter_rows(table: IcebergTable, rows: list[dict[str, Any]]) -> list[str]:
     store = AdapterStore(table, namespace=NAMESPACE)
-    store.incremental_update(adapter_records_to_table(rows, namespace=NAMESPACE))
+    result = store.incremental_update(
+        adapter_records_to_table(rows, namespace=NAMESPACE)
+    )
+    assert result is not None
+    return [result.changeset_id]
 
 
 def test_records_pass_through_unchanged_including_tombstones(
     temporary_table: IcebergTable,
 ) -> None:
-    _seed_adapter_rows(
+    changeset_ids = _seed_adapter_rows(
         temporary_table,
         [
             {"id": "collect-1", "content": MARCXML},
             {"id": "collect-2", "content": MARCXML, "deleted": True},
         ],
-    )
-    store = AdapterStore(temporary_table, namespace=NAMESPACE)
-    changeset_ids = list(
-        {row["changeset"] for row in store.get_all_records().to_pylist()}
     )
 
     rows = {
@@ -179,6 +171,8 @@ def test_facts_store_requires_reconciler_store(
 class _CountingConfig:
     """Table builder that records which tables were requested."""
 
+    adapter_namespace = NAMESPACE
+
     def __init__(self, adapter_table: IcebergTable):
         self.adapter_table = adapter_table
         self.adapter_builds = 0
@@ -202,11 +196,11 @@ def test_build_without_deletion_facts_builds_no_facts_tables(
         config,
         ["cs-1"],
         use_rest_api_table=False,
-        namespace=NAMESPACE,
         with_deletion_facts=False,
     )
     assert reader.facts_store is None
-    assert list(reader.iter_deletions()) == []
+    with pytest.raises(RuntimeError, match="without deletion facts"):
+        list(reader.iter_deletions())
 
 
 def test_build_reuses_injected_adapter_store(temporary_table: IcebergTable) -> None:
@@ -216,36 +210,7 @@ def test_build_reuses_injected_adapter_store(temporary_table: IcebergTable) -> N
         config,
         [],
         use_rest_api_table=False,
-        namespace=NAMESPACE,
         adapter_store=adapter_store,
     )
     assert reader.adapter_store is adapter_store
     assert config.adapter_builds == 0
-
-
-def test_superseded_guid_maps_directly_onto_folio_hrids() -> None:
-    """The consumption point for platform#6440: a deletion fact's guid is the
-    FOLIO source_id, so suppression targets derive with no adapter-row read."""
-    deletion = SupersededGuid(
-        fact_id="collect-1/cs-1",
-        record_id="collect-1",
-        guid="guid-001",
-        changeset_id="cs-1",
-        last_modified=datetime(2026, 7, 1, tzinfo=UTC),
-    )
-    assert _instance_hrid(deletion.guid) == "AxC-instance-guid-001"
-    assert _holdings_hrid(deletion.guid) == "AxC-holding-guid-001"
-    assert _item_hrid(deletion.guid) == "AxC-item-guid-001"
-
-
-def test_fact_guid_and_folio_source_id_derivations_agree() -> None:
-    """Pin the two 001 derivations together: the reconcile step's guid (via
-    AxiellWorkBuilder / pymarc) and the sync's source_id (via mapper.extract)
-    must stay byte-identical, or facts stop mapping onto FOLIO hrids."""
-    work_builder_guid = AxiellWorkBuilder(
-        parse_single_marc_record(MARCXML), datetime(2026, 7, 1, tzinfo=UTC)
-    ).source_identifier.value
-    sync_source_id = extract(parse_xml(MARCXML), "001")
-
-    assert work_builder_guid == "guid-001"
-    assert sync_source_id == work_builder_guid

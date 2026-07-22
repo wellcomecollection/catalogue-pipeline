@@ -4,9 +4,9 @@ from typing import Any
 import structlog
 from pymarc.record import Record
 
-from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.transformers.builders.source_work_builder import SourceWorkBuilder
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.adapter_store_source import AdapterStoreSource, RecordSource
 from core.transformer import ElasticBaseTransformer
 from models.pipeline.source.work import (
     SourceWork,
@@ -24,7 +24,7 @@ class SourceWorkTransformer(ElasticBaseTransformer[SourceWork], ABC):
         snapshot_id: int | None = None,
     ) -> None:
         super().__init__()
-        self.source: AdapterStoreSource = self._build_source(
+        self.source: RecordSource = self._build_source(
             adapter_store, changeset_ids, snapshot_id
         )
 
@@ -33,7 +33,7 @@ class SourceWorkTransformer(ElasticBaseTransformer[SourceWork], ABC):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None,
-    ) -> AdapterStoreSource:
+    ) -> RecordSource:
         """Build the record source. Subclasses override this to supply a
         source-specific subclass (e.g. `FolioStoreSource`)."""
         return AdapterStoreSource(adapter_store, changeset_ids, snapshot_id)

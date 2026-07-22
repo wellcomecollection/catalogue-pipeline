@@ -17,9 +17,10 @@ Event shape (from EventBridge axiell.adapter.completed event):
     "sample_limit": 50
   }
 
-The adapter table is read via the shared ``AXIELL_CONFIG`` / ``AdapterStore``
-(same as the Axiell adapter), which selects the S3 Tables catalog in the Lambda
-and a local sqlite catalog for local runs — so no Iceberg-specific env vars.
+The adapter table is read via the shared ``AXIELL_CONFIG`` /
+``AxiellChangesetReader`` (same config as the Axiell adapter), which selects
+the S3 Tables catalog in the Lambda and a local sqlite catalog for local runs,
+so no Iceberg-specific env vars.
 
 Environment variables (injected by Terraform):
   OKAPI_SECRET_PARAM     — SSM path to {"url":…, "tenant":…, "username":…, "password":…}
@@ -79,7 +80,6 @@ def _read_rows(
         AXIELL_CONFIG,
         changeset_ids or [],
         use_rest_api_table=use_rest_api_table,
-        namespace=AXIELL_CONFIG.config.adapter_namespace,
         with_deletion_facts=False,
     )
 

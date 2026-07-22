@@ -106,6 +106,11 @@ class OAIPMHRuntimeConfig(ABC):
         """The adapter configuration."""
         return self._config
 
+    @property
+    def adapter_namespace(self) -> str:
+        """The Iceberg row-level namespace all this adapter's stores share."""
+        return self._config.adapter_namespace
+
     # ---------------------------------------------------------------------------
     # Abstract methods (adapter-specific behavior)
     # ---------------------------------------------------------------------------

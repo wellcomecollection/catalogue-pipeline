@@ -19,8 +19,8 @@ import structlog
 from pyiceberg.expressions import In
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.adapter_store_source import AdapterStoreSource
 from adapters.utils.deletion_facts_store import DeletionFactsStore
 from adapters.utils.reconciler_store import ReconcilerStore
 
@@ -44,6 +44,9 @@ class SupersededGuid:
 
 class AxiellReaderTableBuilder(Protocol):
     """The subset of an adapter runtime config needed to build reader tables."""
+
+    @property
+    def adapter_namespace(self) -> str: ...
 
     def build_adapter_table(
         self, *, use_rest_api_table: bool = ..., create_if_not_exists: bool = ...
@@ -85,9 +88,6 @@ class AxiellChangesetReader:
         self.snapshot_id = snapshot_id
         self.facts_store = facts_store
         self.reconciler_store = reconciler_store
-        self._record_source = AdapterStoreSource(
-            adapter_store, changeset_ids, snapshot_id
-        )
 
     @classmethod
     def build(
@@ -96,7 +96,6 @@ class AxiellChangesetReader:
         changeset_ids: list[str],
         *,
         use_rest_api_table: bool,
-        namespace: str = "axiell",
         snapshot_id: int | None = None,
         adapter_store: AdapterStore | None = None,
         with_deletion_facts: bool = True,
@@ -111,6 +110,7 @@ class AxiellChangesetReader:
         step once first). Pass `with_deletion_facts=False` for consumers that
         do not handle deletions yet and should not depend on those tables.
         """
+        namespace = config.adapter_namespace
         if adapter_store is None:
             adapter_table = config.build_adapter_table(
                 use_rest_api_table=use_rest_api_table, create_if_not_exists=False
@@ -147,7 +147,10 @@ class AxiellChangesetReader:
         lazily-streamed full scan of every active record (the transformer's
         reindex mode) — consumers that only want a sample must break early.
         """
-        yield from self._record_source.stream_raw()
+        source = AdapterStoreSource(
+            self.adapter_store, self.changeset_ids, self.snapshot_id
+        )
+        yield from source.stream_raw()
 
     def iter_deletions(self) -> Generator[SupersededGuid]:
         """Yield the changesets' deletion facts that are still deliverable.
@@ -156,11 +159,19 @@ class AxiellChangesetReader:
         re-checked against the current reconciler mappings: a fact whose guid
         has since been reclaimed (revert, handoff, or a redrive of an old
         changeset) is skipped, as acting on it would target the live record
-        now identified by that guid. Yields nothing for non-incremental runs
-        or when the reader was built without deletion facts.
+        now identified by that guid. Yields nothing for non-incremental runs;
+        raises if the reader was built without deletion facts, so a consumer
+        wired to a records-only reader fails loudly instead of silently
+        delivering nothing.
         """
-        if not self.changeset_ids or self.facts_store is None:
+        if not self.changeset_ids:
             return
+        if self.facts_store is None:
+            raise RuntimeError(
+                "this reader was built without deletion facts "
+                "(with_deletion_facts=False or no facts/reconciler stores); "
+                "rebuild it with deletion facts to consume deletions"
+            )
 
         # The facts store is read at its own current snapshot:
         # `self.snapshot_id` pins the *adapter* store and is not a valid

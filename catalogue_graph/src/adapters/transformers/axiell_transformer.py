@@ -3,12 +3,12 @@ from typing import Any
 
 import structlog
 
-from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.transformers.axiell_store_source import AxiellStoreSource
 from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from adapters.transformers.builders.reconciler_work_builder import ReconcilerWorkBuilder
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.adapter_store_source import RecordSource
 from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from ingestor.models.shared.deleted_reason import DeletedFromSource
 from models.pipeline.source.work import SourceWork
@@ -31,7 +31,7 @@ class AxiellTransformer(MarcXmlTransformer):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None,
-    ) -> AdapterStoreSource:
+    ) -> RecordSource:
         return AxiellStoreSource(self._reader)
 
     @property
