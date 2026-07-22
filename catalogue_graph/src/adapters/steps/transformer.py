@@ -20,7 +20,6 @@ from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.extractors.oai_pmh.folio import config as folio_config
 from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_items_store
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
-from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.folio_transformer import FolioTransformer
@@ -30,14 +29,13 @@ from adapters.transformers.source_work_transformer import (
 )
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.facts_delivery import build_facts_delivery_stores
-from adapters.utils.reconciler_store import ReconcilerStore
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
 
 
-TransformerType = Literal["axiell", "ebsco", "folio", "axiell_reconciler"]
+TransformerType = Literal["axiell", "ebsco", "folio"]
 
 
 class TransformerEvent(BaseModel):
@@ -64,21 +62,18 @@ class TransformerResult(TransformerEvent):
 
 ICEBERG_NAMESPACE_BY_TYPE: dict[TransformerType, str] = {
     "axiell": "axiell",
-    "axiell_reconciler": "axiell",
     "ebsco": "ebsco",
     "folio": "folio",
 }
 
 CONFIG_BY_TYPE: dict[TransformerType, AdapterConfig] = {
     "axiell": cast(AdapterConfig, axiell_config),
-    "axiell_reconciler": cast(AdapterConfig, axiell_config),
     "ebsco": cast(AdapterConfig, ebsco_config),
     "folio": cast(AdapterConfig, folio_config),
 }
 
 ADAPTER_TABLE_BUILDER_BY_TYPE: dict[TransformerType, Callable] = {
     "axiell": AXIELL_CONFIG.build_adapter_table,
-    "axiell_reconciler": AXIELL_CONFIG.build_adapter_table,
     "ebsco": ebsco_helpers.build_adapter_table,
     "folio": FOLIO_CONFIG.build_adapter_table,
 }
@@ -141,23 +136,6 @@ def build_transformer(
         return FolioTransformer(
             adapter_store, event.changeset_ids, snapshot_id, items_store=items_store
         )
-    if event.transformer_type == "axiell_reconciler":
-        if not event.changeset_ids:
-            # The reconciler doesn't work in the context of a full reindex,
-            # since it doesn't preserve historic deleted work GUIDs (source IDs).
-            raise ValueError(
-                "The reconciler only supports incremental mode. At least one changeset_id required."
-            )
-
-        table = AXIELL_CONFIG.build_reconciler_table(
-            use_rest_api_table=use_rest_api_table,
-            create_if_not_exists=create_if_not_exists,
-        )
-        reconciler_store = ReconcilerStore(table, namespace="axiell")
-        return AxiellReconciler(
-            adapter_store, event.changeset_ids, reconciler_store, snapshot_id
-        )
-
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
 

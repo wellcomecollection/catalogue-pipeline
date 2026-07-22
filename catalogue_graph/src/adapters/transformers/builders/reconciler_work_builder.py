@@ -4,10 +4,10 @@ from models.pipeline.identifier import Id
 
 class ReconcilerWorkBuilder(SourceWorkBuilder):
     """
-    Used by `AxiellReconciler` to emit deleted works from the reconciler store.
+    Used by `AxiellTransformer` to emit deleted works from deletion facts.
 
-    Operates on a raw GUID string rather than a MARC record (the reconciler store
-    only stores the resolved GUID).
+    Operates on a raw GUID string rather than a MARC record (facts only carry
+    the resolved GUID).
     """
 
     @property

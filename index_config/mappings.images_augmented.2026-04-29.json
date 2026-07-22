@@ -1,5 +1,5 @@
 {
-  "dynamic": false,
+  "dynamic": "false",
   "properties": {
     "modifiedTime": {
       "type": "date"
