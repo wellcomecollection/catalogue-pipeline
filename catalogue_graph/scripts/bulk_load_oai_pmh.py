@@ -45,13 +45,11 @@ def load_snapshot(path: str) -> list[dict[str, Any]]:
 
 def _wipe_adapter_table(adapter_store: AdapterStore) -> None:
     namespace = adapter_store.namespace
-    row_count = (
-        adapter_store.table.scan(
-            row_filter=EqualTo("namespace", namespace), selected_fields=("id",)
-        )
-        .to_arrow()
-        .num_rows
+
+    ids = adapter_store.table.scan(
+        row_filter=EqualTo("namespace", namespace), selected_fields=("id",)
     )
+    row_count = ids.to_arrow().num_rows
 
     confirm = input(
         f"WARNING: this will hard-delete ALL {row_count:,} rows for namespace '{namespace}' "
