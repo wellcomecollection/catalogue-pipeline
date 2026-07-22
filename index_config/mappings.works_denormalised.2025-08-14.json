@@ -1,5 +1,5 @@
 {
-  "dynamic": false,
+  "dynamic": "false",
   "properties": {
     "data": {
       "properties": {
