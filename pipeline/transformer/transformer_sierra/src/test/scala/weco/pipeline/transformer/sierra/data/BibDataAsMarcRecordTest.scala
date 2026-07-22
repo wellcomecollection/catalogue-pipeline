@@ -65,4 +65,19 @@ class BibDataAsMarcRecordTest
 
   }
 
+    it(
+      "returns None when there are multiple 001 fields even if 099 $$a exists"
+    ) {
+      val bibData = createSierraBibDataWith(varFields =
+        List(
+          VarField(marcTag = Some("001"), content = Some("first")),
+          VarField(marcTag = Some("001"), content = Some("second")),
+          VarField(
+            marcTag = Some("099"),
+            subfields = List(Subfield(tag = "a", content = "from099"))
+          )
+        )
+      )
+      bibDataToMarcRecord(bibData).controlField("001") shouldBe None
+    }
 }
