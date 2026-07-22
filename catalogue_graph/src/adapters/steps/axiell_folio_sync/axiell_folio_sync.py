@@ -47,8 +47,7 @@ from adapters.steps.axiell_folio_sync.models import (
 )
 from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
-from adapters.transformers.adapter_store_source import AdapterStoreSource
-from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from clients.folio_client import FolioClient, FolioInventoryClient, ssl_context_from_env
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import ecs_handler
@@ -67,28 +66,32 @@ def _read_rows(
     *,
     use_rest_api_table: bool,
 ) -> list[dict]:
-    """Read changed Axiell adapter rows via :class:`AdapterStoreSource`.
+    """Read changed Axiell adapter rows via :class:`AxiellChangesetReader`.
 
     Uses the same ``AXIELL_CONFIG`` as the Axiell adapter, so it works against
     S3 Tables (``use_rest_api_table=True``, production) or the local sqlite
     catalog (``use_rest_api_table=False``, local dev) with no code changes.
-    Read-only: the table is never created.
+    Read-only: the table is never created. Built without deletion facts, so
+    the sync depends on no other tables; authoritative deletes (platform#6440)
+    would consume ``reader.iter_deletions()`` after the upsert pass.
     """
-    table = AXIELL_CONFIG.build_adapter_table(
-        use_rest_api_table=use_rest_api_table, create_if_not_exists=False
+    reader = AxiellChangesetReader.build(
+        AXIELL_CONFIG,
+        changeset_ids or [],
+        use_rest_api_table=use_rest_api_table,
+        namespace=AXIELL_CONFIG.config.adapter_namespace,
+        with_deletion_facts=False,
     )
-    store = AdapterStore(table, namespace=AXIELL_CONFIG.config.adapter_namespace)
-    source = AdapterStoreSource(store, changeset_ids=changeset_ids or [])
 
     if changeset_ids:
         logger.info("adapter_read", mode="changesets", changeset_ids=changeset_ids)
-        return list(source.stream_raw())
+        return list(reader.iter_records())
 
     # Dev/smoke-test fallback: a sample of active records (no changesets given).
     limit = sample_limit or 10
     logger.info("adapter_read", mode="sample", limit=limit)
     rows: list[dict] = []
-    for row in source.stream_raw():
+    for row in reader.iter_records():
         rows.append(row)
         if len(rows) >= limit:
             break

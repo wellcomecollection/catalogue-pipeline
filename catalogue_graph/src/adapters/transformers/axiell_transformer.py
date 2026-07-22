@@ -9,8 +9,7 @@ from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from adapters.transformers.builders.reconciler_work_builder import ReconcilerWorkBuilder
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.deletion_facts_store import DeletionFactsStore
-from adapters.utils.reconciler_store import ReconcilerStore
+from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from ingestor.models.shared.deleted_reason import DeletedFromSource
 from models.pipeline.source.work import SourceWork
 
@@ -18,21 +17,13 @@ logger = structlog.get_logger(__name__)
 
 
 class AxiellTransformer(MarcXmlTransformer):
-    def __init__(
-        self,
-        adapter_store: AdapterStore,
-        changeset_ids: list[str],
-        snapshot_id: int | None,
-        facts_store: DeletionFactsStore | None = None,
-        reconciler_store: ReconcilerStore | None = None,
-    ) -> None:
+    def __init__(self, reader: AxiellChangesetReader) -> None:
         # Stored before super().__init__, which builds the source via _build_source.
-        self._facts_store = facts_store
-        self._reconciler_store = reconciler_store
+        self._reader = reader
         super().__init__(
-            adapter_store=adapter_store,
-            changeset_ids=changeset_ids,
-            snapshot_id=snapshot_id,
+            adapter_store=reader.adapter_store,
+            changeset_ids=reader.changeset_ids,
+            snapshot_id=reader.snapshot_id,
         )
 
     def _build_source(
@@ -41,13 +32,7 @@ class AxiellTransformer(MarcXmlTransformer):
         changeset_ids: list[str],
         snapshot_id: int | None,
     ) -> AdapterStoreSource:
-        return AxiellStoreSource(
-            adapter_store,
-            changeset_ids,
-            snapshot_id,
-            facts_store=self._facts_store,
-            reconciler_store=self._reconciler_store,
-        )
+        return AxiellStoreSource(self._reader)
 
     @property
     def work_builder(self) -> type[AxiellWorkBuilder]:

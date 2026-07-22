@@ -8,6 +8,7 @@ from pyiceberg.table import Table as IcebergTable
 from adapters.steps.transformer import TransformerEvent, TransformerResult, handler
 from adapters.transformers.axiell_store_source import AxiellStoreSource
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from adapters.utils.deletion_facts_store import DeletionFactsStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from tests.adapters.conftest import (
@@ -323,12 +324,14 @@ def test_full_reindex_never_builds_or_reads_the_facts_store(
 
     monkeypatch.setattr(facts_store, "get_records_by_changesets", fail_read)
     source = AxiellStoreSource(
-        AdapterStore(temporary_table, namespace=AXIELL_NAMESPACE),
-        changeset_ids=[],
-        facts_store=facts_store,
-        reconciler_store=ReconcilerStore(
-            reconciler_temporary_table, namespace=AXIELL_NAMESPACE
-        ),
+        AxiellChangesetReader(
+            AdapterStore(temporary_table, namespace=AXIELL_NAMESPACE),
+            changeset_ids=[],
+            facts_store=facts_store,
+            reconciler_store=ReconcilerStore(
+                reconciler_temporary_table, namespace=AXIELL_NAMESPACE
+            ),
+        )
     )
     assert [row["id"] for row in source.stream_raw()] == ["collect-1"]
 
@@ -379,7 +382,7 @@ def test_facts_store_requires_reconciler_store(
     deletion_facts_temporary_table: IcebergTable,
 ) -> None:
     with pytest.raises(ValueError, match="provided together"):
-        AxiellStoreSource(
+        AxiellChangesetReader(
             AdapterStore(temporary_table, namespace=AXIELL_NAMESPACE),
             changeset_ids=["some-changeset"],
             facts_store=DeletionFactsStore(
