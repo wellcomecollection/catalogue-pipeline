@@ -57,7 +57,7 @@ class SierraIconographicNumberTest
     SierraIconographicNumber(bibData) shouldBe None
   }
 
-  it("uses the i-number from 099 $a if there is no 001") {
+  it("uses the i-number from 099 $$a if there is no 001") {
     val bibData = createSierraBibDataWith(
       materialType = Some(SierraMaterialType("k")),
       varFields = List(
