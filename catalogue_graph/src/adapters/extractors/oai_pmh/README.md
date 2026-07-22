@@ -205,7 +205,6 @@ treated as a no-op.
 | `--ids` / `--ids-file`           | (Loader id mode) Record ids to fetch, inline or one per line   |
 | `--commit-every`                 | (Loader id mode) Records buffered before committing a batch    |
 | `--report`                       | (Loader id mode) Path for the run report (full id lists)       |
-| `--batch-size`                   | (Rebuild-reconciler only) GUID mappings committed per batch    |
 
 ## Environment prerequisites
 
