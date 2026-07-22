@@ -255,6 +255,7 @@ class TestHandler:
 
             response = loader.handler(req, runtime=loader_runtime)
 
+        assert isinstance(response, OAIPMHLoaderResponse)
         assert response.summaries == []
 
     def test_keeps_summaries_when_suppression_disabled(
@@ -277,6 +278,7 @@ class TestHandler:
 
             response = loader.handler(req, runtime=loader_runtime)
 
+        assert isinstance(response, OAIPMHLoaderResponse)
         assert len(response.summaries) == 1
 
 
@@ -600,9 +602,13 @@ class TestLoaderBackfillMode:
         captured: dict[str, object] = {}
 
         def fake_build_runtime(
-            config: object, step_config: loader.LoaderStepConfig
+            config: object,
+            step_config: loader.LoaderStepConfig,
+            *,
+            id_mode: bool = False,
         ) -> MagicMock:
             captured["step_config"] = step_config
+            captured["id_mode"] = id_mode
             return MagicMock()
 
         fake_response = MagicMock()

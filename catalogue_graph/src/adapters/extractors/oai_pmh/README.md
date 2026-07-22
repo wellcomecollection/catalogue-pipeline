@@ -130,6 +130,65 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \
   --dry-run
 ```
 
+### 5. Loader (id mode) → fetch specific records by id
+
+The loader runs in one of two modes. Window mode (step 2) harvests a time range.
+Id mode takes an explicit list of record ids instead, for records the source
+holds but the store is missing, typically because they were written with
+datestamps inside windows that had already been harvested. Each id is fetched
+via OAI `GetRecord` and written to the adapter store, committing in batches.
+
+```bash
+uv run python -m adapters.steps.oai_pmh.loader --use-cli \
+  --adapter-type {axiell,folio} \
+  --ids-file missing_ids.txt \
+  --use-rest-api-table
+```
+
+In the pipeline, start the adapter state machine with `ids` in the input and it
+routes to id mode automatically:
+
+```json
+{ "adapter_type": "axiell", "ids": ["collect:123", "collect:456"] }
+```
+
+Both modes emit changeset ids, so an id-mode run publishes the same
+`adapter.completed` event as a harvest and the transformer picks the records up
+without anyone having to find changeset ids by hand. For Axiell this also
+triggers the reconciler, which is intended: recovered records need their
+id-to-GUID mappings rebuilt.
+
+Each id is classified as recovered, removed (the source reports
+`idDoesNotExist`), or unfetchable (neither returned nor reported gone, after the
+client's retries). Unfetchable ids are left absent from the store, never
+backfilled with stale content. The report carries the full removed and
+unfetchable id lists; the response carries only counts plus the report's S3
+URI, matching the transformer and id minter responses.
+
+A CLI run writes its report to a local file (`--report`, defaulting to
+`<job-id>_report.json`) and emits no CloudWatch metrics, so an ad hoc recovery
+leaves the production report bucket and dashboards alone. A pipeline run writes
+the report to S3 and emits metrics.
+
+Two deliberate differences from window mode:
+
+- **Removed ids are reported, not tombstoned.** Window mode writes a `deleted`
+  row when the repository reports `status="deleted"`. `idDoesNotExist` is a
+  weaker claim that also fires for a typo in an id list or an id from another
+  set, so acting on it would propagate a delete downstream on an unreliable
+  signal.
+- **No window state is written**, so a re-run re-fetches everything. Recording
+  synthetic windows would shift the trigger's resume cursor onto a range that
+  was never harvested. Because there is no progress state to resume from, the
+  state machine does not retry an id run automatically: re-run it against the
+  unfetchable ids from the report instead.
+
+`commit_every` defaults to 10,000 rather than a small batch. Every changeset id
+published costs the transformer roughly a full materialisation of the bib store,
+so committing rarely keeps a large recovery down to a handful of changesets.
+Runs are capped at 50,000 ids, and an empty id list is rejected rather than
+treated as a no-op.
+
 ### Common CLI flags
 
 | Flag                             | Description                                                    |
@@ -143,6 +202,9 @@ uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \
 | `--dry-run`                      | (Reloader only) Preview gaps without processing                |
 | `--reprocess-successful-windows` | (Loader only) Re-harvest windows already marked success        |
 | `--flush-every`                  | (Loader only) Commit records and statuses every N windows      |
+| `--ids` / `--ids-file`           | (Loader id mode) Record ids to fetch, inline or one per line   |
+| `--commit-every`                 | (Loader id mode) Records buffered before committing a batch    |
+| `--report`                       | (Loader id mode) Path for the run report (full id lists)       |
 
 ## Environment prerequisites
 
