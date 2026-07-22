@@ -169,7 +169,7 @@ locals {
         # YYYYMMDDTHHMM shape as trigger.generate_job_id, prefixed so recovery
         # runs stand out in the transformer logs and cannot collide with a
         # harvest job id.
-        Output = "{% $merge([$states.input, {'mode': 'ids', 'job_id': 'idload-' & $substring($replace($replace($states.context.Execution.StartTime, '-', ''), ':', ''), 0, 13)}]) %}"
+        Output = "{% $merge([$states.input, {'job_id': 'idload-' & $substring($replace($replace($states.context.Execution.StartTime, '-', ''), ':', ''), 0, 13)}]) %}"
         Next   = "Run id loader"
       }
       # Same task definition and module as "Run loader"; a separate state purely

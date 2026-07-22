@@ -19,6 +19,7 @@ from adapters.extractors.oai_pmh.models.step_events import (
     UNFETCHABLE_SAMPLE_SIZE,
     OAIPMHIdLoaderEvent,
     OAIPMHIdLoaderResponse,
+    OAIPMHLoaderEvent,
     validate_loader_event,
 )
 from adapters.extractors.oai_pmh.reporting import OAIPMHIdLoadReport
@@ -52,7 +53,6 @@ def _record(identifier: str) -> Record:
 
 def _event(ids: list[str], **overrides: object) -> OAIPMHIdLoaderEvent:
     payload: dict[str, object] = {
-        "mode": "ids",
         "adapter_type": "axiell",
         "job_id": "idload-20250101T0000",
         "ids": ids,
@@ -92,7 +92,6 @@ class TestIdLoaderEvent:
     def test_parses_a_minimal_event(self) -> None:
         event = OAIPMHIdLoaderEvent.model_validate(
             {
-                "mode": "ids",
                 "adapter_type": "axiell",
                 "job_id": "j1",
                 "ids": ["collect:1"],
@@ -121,9 +120,10 @@ class TestIdLoaderEvent:
     def test_allows_a_zero_polite_delay(self) -> None:
         assert _event(["collect:1"], polite_delay_seconds=0).polite_delay_seconds == 0
 
-    def test_mode_discriminates_the_union(self) -> None:
-        """A payload without a mode is still a window event, so stored trigger
-        payloads written before id mode existed keep validating."""
+    def test_field_presence_selects_the_model(self) -> None:
+        """Only window mode has a ``window`` and only id mode has ``ids``, so
+        the union needs no discriminator and stored trigger payloads written
+        before id mode existed keep validating."""
         window_event = validate_loader_event(
             {
                 "adapter_type": "axiell",
@@ -134,17 +134,16 @@ class TestIdLoaderEvent:
                 },
             }
         )
-        assert window_event.mode == "window"
+        assert isinstance(window_event, OAIPMHLoaderEvent)
 
         id_event = validate_loader_event(
             {
-                "mode": "ids",
                 "adapter_type": "axiell",
                 "job_id": "j1",
                 "ids": ["collect:1"],
             }
         )
-        assert id_event.mode == "ids"
+        assert isinstance(id_event, OAIPMHIdLoaderEvent)
 
 
 class TestExecuteIdLoader:

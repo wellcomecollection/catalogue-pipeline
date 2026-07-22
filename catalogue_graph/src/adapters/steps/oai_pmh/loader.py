@@ -578,7 +578,6 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     if id_mode:
         job_id = args.job_id or f"idload-{create_job_id()}"
         id_kwargs: dict[str, Any] = {
-            "mode": "ids",
             "adapter_type": args.adapter_type,
             "job_id": job_id,
             "ids": _read_ids(args),

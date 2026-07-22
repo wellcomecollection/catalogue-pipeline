@@ -7,7 +7,7 @@ and can be used directly or extended by specific adapters.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated, Any, Literal
+from typing import Any
 
 from pydantic import Field, TypeAdapter, field_validator
 
@@ -50,12 +50,6 @@ class OAIPMHLoaderEvent(BaseAdapterEvent):
     records from the OAI-PMH endpoint within the specified window.
     """
 
-    mode: Literal["window"] = "window"
-    """Discriminator selecting the loader's window mode.
-
-    Defaults to ``window`` so trigger payloads and stored events written before
-    id mode existed stay valid."""
-
     window: IncrementalWindow
     """Time range to harvest records from."""
 
@@ -86,9 +80,6 @@ class OAIPMHIdLoaderEvent(BaseAdapterEvent):
     ``job_id`` is required, as in window mode: the state machine mints one, and
     the published event needs it to correlate the downstream transformer run.
     """
-
-    mode: Literal["ids"]
-    """Discriminator selecting the loader's id mode."""
 
     ids: list[str]
     """Record ids to fetch, in ``<namespace>:<local-id>`` form."""
@@ -252,10 +243,9 @@ class OAIPMHIdLoaderResponse(BaseLoaderResponse):
     """First few unfetchable ids. The full list is in the report."""
 
 
-LoaderEvent = Annotated[
-    OAIPMHLoaderEvent | OAIPMHIdLoaderEvent, Field(discriminator="mode")
-]
-"""Either loader mode, selected by the ``mode`` discriminator."""
+LoaderEvent = OAIPMHLoaderEvent | OAIPMHIdLoaderEvent
+"""Either loader mode. Only window mode has a ``window`` and only id mode has
+``ids``, so field presence selects the model."""
 
 LoaderResponse = OAIPMHLoaderResponse | OAIPMHIdLoaderResponse
 
@@ -263,13 +253,5 @@ _LOADER_EVENT_ADAPTER: TypeAdapter[LoaderEvent] = TypeAdapter(LoaderEvent)
 
 
 def validate_loader_event(payload: Any) -> LoaderEvent:
-    """Validate a loader event payload into the model its mode selects.
-
-    A tagged union requires the discriminator to be present, so a payload
-    without ``mode`` would be rejected outright rather than falling back to the
-    field default. The trigger step and every stored event predate id mode and
-    carry no ``mode``, so treat its absence as window mode.
-    """
-    if isinstance(payload, dict) and "mode" not in payload:
-        payload = {**payload, "mode": "window"}
+    """Validate a loader event payload into the model its fields select."""
     return _LOADER_EVENT_ADAPTER.validate_python(payload)
