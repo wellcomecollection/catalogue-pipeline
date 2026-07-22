@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
@@ -96,9 +97,17 @@ def test_facts_delivered_as_tombstones_alongside_adapter_rows(
         namespace=AXIELL_NAMESPACE,
         transformer_type="axiell",
     )
+    fact_time = datetime(2026, 7, 1, 12, 30, tzinfo=UTC)
     _seed_facts(
         deletion_facts_temporary_table,
-        [{"record_id": "collect-1", "guid": "guid-old-1", "changeset": changeset_id}],
+        [
+            {
+                "record_id": "collect-1",
+                "guid": "guid-old-1",
+                "changeset": changeset_id,
+                "last_modified": fact_time,
+            }
+        ],
     )
     # Post-detection state: the record's mapping already points at the new guid
     _seed_mappings(reconciler_temporary_table, {"collect-1": "guid-new-1"})
@@ -121,6 +130,10 @@ def test_facts_delivered_as_tombstones_alongside_adapter_rows(
     tombstone = docs_by_id["Work[axiell-guid/guid-old-1]"]
     assert tombstone["type"] == "Deleted"
     assert tombstone["deletedReason"]["type"] == "DeletedFromSource"
+    # The tombstone's version must derive from the fact's last_modified: the
+    # matcher discards works whose version is lower than the one it has seen,
+    # so an older or wrong version would silently drop the deletion.
+    assert tombstone["version"] == int(fact_time.timestamp())
 
     # The fact delivery is reported alongside the adapter row's work.
     report = read_transformer_report(result)

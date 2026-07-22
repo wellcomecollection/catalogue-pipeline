@@ -126,7 +126,7 @@
       }
     },
     "debug": {
-      "dynamic": false,
+      "dynamic": "false",
       "properties": {
         "indexedTime": {
           "type": "date"
@@ -885,7 +885,7 @@
     },
     "redirectTarget": {
       "type": "object",
-      "dynamic": false
+      "dynamic": "false"
     },
     "type": {
       "type": "keyword"
