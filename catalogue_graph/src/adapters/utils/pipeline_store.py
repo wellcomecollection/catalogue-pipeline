@@ -72,6 +72,20 @@ class PipelineStore(ABC):
             .cast(self.schema)
         )
 
+    def get_namespace_record_count(self) -> int:
+        """Return the number of records in the store namespace.
+
+        Projects only the ``id`` column to avoid loading large content fields.
+        """
+        return (
+            self.table.scan(
+                row_filter=EqualTo("namespace", self.namespace),
+                selected_fields=("id",),
+            )
+            .to_arrow()
+            .num_rows
+        )
+
     def stream_namespace_records(
         self,
         iceberg_filter: BooleanExpression = ALWAYS_TRUE,

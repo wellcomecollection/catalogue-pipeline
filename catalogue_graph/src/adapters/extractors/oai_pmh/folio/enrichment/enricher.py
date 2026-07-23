@@ -78,6 +78,33 @@ def build_item_store_rows(
     return pa.Table.from_pylist(rows, schema=ADAPTER_STORE_ARROW_SCHEMA)
 
 
+def fetch_item_rows(
+    inventory_client: FolioInventoryClient,
+    store_ids: list[str],
+    namespace: str,
+) -> pa.Table | None:
+    """Fetch enriched items for the given bib store ids and return them as an
+    adapter-store Arrow table. Returns ``None`` when the API returns no instances.
+    """
+    uuid_to_store_id = {
+        instance_uuid_from_store_id(store_id): store_id for store_id in store_ids
+    }
+    enriched = inventory_client.enriched_instances(list(uuid_to_store_id))
+    if not enriched:
+        return None
+
+    items_by_store_id: dict[str, FolioEnrichedInstance] = {}
+    for instance in enriched:
+        store_id = uuid_to_store_id.get(instance.instance_id)
+        if store_id is None:
+            raise ValueError(
+                "Enriched instance id matched no requested id: "
+                f"{instance.instance_id!r}"
+            )
+        items_by_store_id[store_id] = instance
+    return build_item_store_rows(items_by_store_id, namespace=namespace)
+
+
 class FolioItemEnricher:
     """Upserts enriched FOLIO items into the items store for a set of bib store ids."""
 
@@ -99,36 +126,19 @@ class FolioItemEnricher:
             logger.info("No instance ids to enrich; skipping")
             return None
 
-        # Map bare instance UUID -> bib store id so results can be re-keyed.
-        uuid_to_store_id = {
-            instance_uuid_from_store_id(store_id): store_id for store_id in store_ids
-        }
-        enriched = self._inventory_client.enriched_instances(list(uuid_to_store_id))
-        if not enriched:
+        rows = fetch_item_rows(
+            self._inventory_client, store_ids, namespace=self._items_store.namespace
+        )
+        if rows is None:
             logger.info("Enrichment returned no instances", requested=len(store_ids))
             return None
 
-        items_by_store_id: dict[str, FolioEnrichedInstance] = {}
-        for instance in enriched:
-            store_id = uuid_to_store_id.get(instance.instance_id)
-            if store_id is None:
-                # A returned instance we cannot match back to a requested id cannot be
-                # joined onto a bib row. Treat it as a critical contract violation and
-                # fail the whole batch rather than silently drop or store an orphan row.
-                raise ValueError(
-                    "Enriched instance id matched no requested id: "
-                    f"{instance.instance_id!r}"
-                )
-            items_by_store_id[store_id] = instance
-        rows = build_item_store_rows(
-            items_by_store_id, namespace=self._items_store.namespace
-        )
         update = self._items_store.incremental_update(rows)
 
         logger.info(
             "Enriched FOLIO items",
             requested=len(store_ids),
-            fetched=len(enriched),
+            fetched=rows.num_rows,
             changeset_id=update.changeset_id if update else None,
             inserted=len(update.inserted_record_ids) if update else 0,
             updated=len(update.updated_record_ids) if update else 0,
