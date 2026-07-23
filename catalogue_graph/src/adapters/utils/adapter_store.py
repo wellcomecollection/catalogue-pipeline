@@ -34,7 +34,7 @@ class AdapterStore(PipelineStore):
         Sync the table to match the new snapshot.
 
         This will insert new records, update changed records, and soft-delete
-        records that are no longer present in the snapshot by setting their content to null.
+        records that are no longer present in the snapshot by setting their deleted flag to True.
         """
         now_timestamp = datetime.now(UTC)
         new_data = self._set_last_modified_timestamp(new_data, now_timestamp)

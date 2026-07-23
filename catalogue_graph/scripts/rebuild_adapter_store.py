@@ -9,7 +9,6 @@ Usage (from catalogue_graph/):
     uv run python scripts/bulk_load_oai_pmh.py --adapter-type axiell
     uv run python scripts/bulk_load_oai_pmh.py --adapter-type folio --use-rest-api-table
 """
-
 from __future__ import annotations
 
 import argparse
@@ -18,19 +17,17 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 import structlog
-from oai_pmh_client.client import OAIClient
-from pyiceberg.expressions import EqualTo
-
 from adapters.extractors.oai_pmh.record_writer import _serialize_metadata
 from adapters.extractors.oai_pmh.registry import AdapterType, get_config
 from adapters.extractors.oai_pmh.runtime import OAIPMHAdapterConfig
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.argparse import add_adapter_event_args
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
+from oai_pmh_client.client import OAIClient
+from pyiceberg.expressions import EqualTo
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
-
 
 def save_snapshot(rows: list[dict[str, Any]], path: str) -> None:
     pl.DataFrame(rows).write_parquet(path)
@@ -92,7 +89,7 @@ def _sync_adapter_store(
     table = pa.Table.from_pylist(rows, schema=ADAPTER_STORE_ARROW_SCHEMA)
 
     logger.info("Running snapshot sync", row_count=len(rows))
-    update = adapter_store.snapshot_sync(table)
+    update = adapter_store.incremental_update(table)
 
     if update:
         logger.info(
