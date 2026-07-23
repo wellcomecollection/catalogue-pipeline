@@ -64,6 +64,13 @@ records into the adapter store."""
 EVENT_BUS_NAME = "catalogue-pipeline-adapter-event-bus"
 
 
+def _iter_snapshot_batches(snapshot_path: str) -> Iterator[pa.Table]:
+    """Yield Arrow tables in batches from a parquet snapshot file."""
+    reader = pq.ParquetFile(snapshot_path)
+    for record_batch in reader.iter_batches(batch_size=BATCH_SIZE):
+        yield pa.Table.from_batches([record_batch]).cast(ADAPTER_STORE_ARROW_SCHEMA)
+
+
 def _download_to_snapshot(
     oai_client: OAIClient, config: OAIPMHAdapterConfig, snapshot_path: str
 ) -> int:
@@ -92,13 +99,6 @@ def _download_to_snapshot(
     return total
 
 
-def _iter_snapshot_batches(snapshot_path: str) -> Iterator[pa.Table]:
-    """Yield Arrow tables in batches from a parquet snapshot file."""
-    reader = pq.ParquetFile(snapshot_path)
-    for record_batch in reader.iter_batches(batch_size=BATCH_SIZE):
-        yield pa.Table.from_batches([record_batch]).cast(ADAPTER_STORE_ARROW_SCHEMA)
-
-
 def _download_items_to_snapshot(
     inventory_client: FolioInventoryClient,
     bib_snapshot_path: str,
@@ -123,7 +123,36 @@ def _download_items_to_snapshot(
     return total
 
 
-def _wipe_store(store: PipelineStore) -> None:
+def _reset_window_cursor(
+    config: OAIPMHRuntimeConfig, now: datetime, *, use_rest_api_table: bool
+) -> None:
+    """Write a synthetic published window row to advance the trigger cursor to now."""
+    window_store = config.build_window_store(use_rest_api_table=use_rest_api_table)
+    synthetic = WindowSummary(
+        window_start=now - timedelta(minutes=1),
+        window_end=now,
+        state="success",
+        attempts=1,
+        record_ids=[],
+        last_error=None,
+        updated_at=now,
+        tags={"published_at": now.isoformat()},
+    )
+    window_store.upsert(synthetic)
+    logger.info("Window cursor reset", published_at=now.isoformat())
+
+
+def _wipe_window_store(
+    config: OAIPMHRuntimeConfig, *, use_rest_api_table: bool
+) -> None:
+    """Hard-delete all rows from the window status table."""
+    window_store = config.build_window_store(use_rest_api_table=use_rest_api_table)
+    row_count = window_store.table.scan().to_arrow().num_rows
+    window_store.table.delete(ALWAYS_TRUE)
+    logger.info("Window store wiped", row_count=row_count)
+
+
+def _wipe_store(store: PipelineStore, store_name: str) -> None:
     current_snapshot = store.table.current_snapshot()
     if current_snapshot:
         logger.info(
@@ -133,7 +162,7 @@ def _wipe_store(store: PipelineStore) -> None:
 
     row_count = store.get_namespace_record_count()
     store.table.delete(EqualTo("namespace", store.namespace))
-    logger.info("Store wiped", namespace=store.namespace, row_count=row_count)
+    logger.info("Store wiped", store_name=store_name, row_count=row_count)
 
 
 def _run_reconcile(
@@ -159,16 +188,6 @@ def _run_reconcile(
     )
 
 
-def _wipe_window_store(
-    config: OAIPMHRuntimeConfig, *, use_rest_api_table: bool
-) -> None:
-    """Hard-delete all rows from the window status table."""
-    window_store = config.build_window_store(use_rest_api_table=use_rest_api_table)
-    row_count = window_store.table.scan().to_arrow().num_rows
-    window_store.table.delete(ALWAYS_TRUE)
-    logger.info("Window store wiped", row_count=row_count)
-
-
 def _confirm_rebuild(adapter_type: AdapterType) -> None:
     """Confirmation gate before any stores are wiped."""
     confirm = input(
@@ -187,25 +206,6 @@ def _confirm_publish(adapter_type: AdapterType, changeset_count: int) -> None:
     ).strip()
     if confirm != "CONFIRM":
         raise SystemExit("Aborted.")
-
-
-def _reset_window_cursor(
-    config: OAIPMHRuntimeConfig, now: datetime, *, use_rest_api_table: bool
-) -> None:
-    """Write a synthetic published window row to advance the trigger cursor to now."""
-    window_store = config.build_window_store(use_rest_api_table=use_rest_api_table)
-    synthetic = WindowSummary(
-        window_start=now - timedelta(minutes=1),
-        window_end=now,
-        state="success",
-        attempts=1,
-        record_ids=[],
-        last_error=None,
-        updated_at=now,
-        tags={"published_at": now.isoformat()},
-    )
-    window_store.upsert(synthetic)
-    logger.info("Window cursor reset", published_at=now.isoformat())
 
 
 def _publish_adapter_event(
@@ -285,8 +285,15 @@ def rebuild_adapter(
         oai_client = config.build_oai_client()
         total = _download_to_snapshot(oai_client, config.config, snapshot_path)
         if total == 0:
-            logger.info("No records returned from OAI-PMH endpoint. Nothing to sync.")
-            return
+            raise RuntimeError(
+                "OAI-PMH endpoint returned 0 records. This is almost certainly "
+                "an error. Aborting to avoid wiping the adapter store."
+            )
+    else:
+        logger.info(
+            "Snapshot already exists. Resuming from existing file (window reset skipped).",
+            path=snapshot_path,
+        )
 
     # Phase 2: Items download (reads bib instance IDs from the bib snapshot).
     folio_items: _FolioItems | None = None
@@ -304,22 +311,27 @@ def rebuild_adapter(
                 items_snapshot_path=folio_items.snapshot_path,
                 namespace=folio_items.store.namespace,
             )
+        else:
+            logger.info(
+                "Items snapshot already exists. Resuming from existing file.",
+                path=folio_items.snapshot_path,
+            )
 
     # Phase 3: Wipe and reload all stores from snapshots.
     adapter_store = config.build_adapter_store(use_rest_api_table=use_rest_api_table)
-    _wipe_store(adapter_store)
+    _wipe_store(adapter_store, store_name="adapter store")
     changeset_ids = _populate_store_from_snapshot(adapter_store, snapshot_path)
     logger.info("All batches loaded", total_changesets=len(changeset_ids))
 
     if folio_items is not None:
-        _wipe_store(folio_items.store)
+        _wipe_store(folio_items.store, store_name="items store")
         _populate_store_from_snapshot(folio_items.store, folio_items.snapshot_path)
 
     if adapter_type == "axiell":
         reconcile_runtime = build_reconcile_runtime(
             adapter_type, use_rest_api_table=use_rest_api_table
         )
-        _wipe_store(reconcile_runtime.reconciler_store)
+        _wipe_store(reconcile_runtime.reconciler_store, store_name="reconciler store")
         _run_reconcile(
             adapter_type,
             job_id,
