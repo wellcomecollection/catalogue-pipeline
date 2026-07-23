@@ -46,7 +46,7 @@ def build_adapter_store_row(
     }
 
 
-class WindowRecordWriter:
+class RecordWriter:
     """Callback for persisting harvested records to an adapter store.
 
     This callback is invoked by WindowHarvestManager for each batch of records
@@ -59,7 +59,7 @@ class WindowRecordWriter:
         namespace: str,
         table_client: AdapterStore,
         job_id: str,
-        window_range: str | None = None,
+        extra_tags: dict[str, str] | None = None,
     ) -> None:
         """Initialize the record writer.
 
@@ -67,14 +67,15 @@ class WindowRecordWriter:
             namespace: Namespace for records in the adapter store.
             table_client: AdapterStore instance for persisting records.
             job_id: Job identifier for tagging records.
-            window_range: Human-readable window range for tagging. ``None`` when
-                the caller is not harvesting a window (the loader's id mode), in
-                which case rows are tagged with the job id alone.
+            extra_tags: Additional tags merged onto every write, alongside
+                job_id. For example, window mode tags rows with the harvested
+                window range; the loader's id mode passes none, so rows are
+                tagged with the job id alone.
         """
         self.namespace = namespace
         self.table_client = table_client
         self.job_id = job_id
-        self.window_range = window_range
+        self.extra_tags = extra_tags
 
     def _build_rows(self, records: list[tuple[str, Record]]) -> list[dict[str, Any]]:
         """Serialize (identifier, Record) pairs into adapter store rows."""
@@ -88,8 +89,8 @@ class WindowRecordWriter:
     @property
     def _tags(self) -> dict[str, str]:
         tags = {"job_id": self.job_id}
-        if self.window_range is not None:
-            tags["window_range"] = self.window_range
+        if self.extra_tags:
+            tags.update(self.extra_tags)
         return tags
 
     def __call__(
@@ -121,8 +122,8 @@ class WindowRecordWriter:
         )
 
 
-class BufferedWindowRecordWriter(WindowRecordWriter):
-    """Record writer that buffers rows across windows and commits per flush.
+class BufferedRecordWriter(RecordWriter):
+    """Record writer that buffers rows across calls and commits per flush.
 
     In the default (unbuffered) mode every window costs one Iceberg commit for
     its records, which dominates wall-clock time on slow catalogs (e.g. S3
@@ -130,7 +131,7 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
     accumulates rows across windows and commits a single
     ``AdapterStore.incremental_update`` per ``flush()`` call.
 
-    Semantics compared to ``WindowRecordWriter``:
+    Semantics compared to ``RecordWriter``:
 
     - ``__call__`` only buffers: it returns ``changeset_id=None`` and an empty
       ``upserted_record_ids`` list, so per-window summaries carry no changeset
@@ -151,7 +152,7 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
         namespace: str,
         table_client: AdapterStore,
         job_id: str,
-        window_range: str | None = None,
+        extra_tags: dict[str, str] | None = None,
         flush_threshold: int | None = None,
     ) -> None:
         """Initialize the buffered writer.
@@ -165,7 +166,7 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
             namespace=namespace,
             table_client=table_client,
             job_id=job_id,
-            window_range=window_range,
+            extra_tags=extra_tags,
         )
         # Keyed by record id so later windows overwrite earlier buffered rows.
         self._buffer: dict[str, dict[str, Any]] = {}

@@ -8,26 +8,26 @@ from lxml import etree
 from oai_pmh_client.models import Header, Record
 
 from adapters.extractors.oai_pmh.record_writer import (
-    BufferedWindowRecordWriter,
-    WindowRecordWriter,
+    BufferedRecordWriter,
+    RecordWriter,
     build_adapter_store_row,
 )
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 
 
-class TestWindowRecordWriterMocked:
+class TestRecordWriterMocked:
     def test_writes_records_to_store(self) -> None:
         mock_store = Mock(spec=AdapterStore)
         mock_store.incremental_update.return_value = Mock(
             changeset_id="123", upserted_record_ids=["rec1"]
         )
 
-        writer = WindowRecordWriter(
+        writer = RecordWriter(
             namespace="test_namespace",
             table_client=mock_store,
             job_id="test_job",
-            window_range="2023-01-01-2023-01-02",
+            extra_tags={"window_range": "2023-01-01-2023-01-02"},
         )
 
         record_header = Header(
@@ -72,11 +72,11 @@ class TestWindowRecordWriterMocked:
     def test_handles_empty_records(self) -> None:
         mock_store = Mock(spec=AdapterStore)
 
-        writer = WindowRecordWriter(
+        writer = RecordWriter(
             namespace="test_namespace",
             table_client=mock_store,
             job_id="test_job",
-            window_range="2023-01-01-2023-01-02",
+            extra_tags={"window_range": "2023-01-01-2023-01-02"},
         )
 
         result = writer([])
@@ -96,11 +96,11 @@ class TestWindowRecordWriterMocked:
             changeset_id="456", upserted_record_ids=["rec1"]
         )
 
-        writer = WindowRecordWriter(
+        writer = RecordWriter(
             namespace="test_namespace",
             table_client=mock_store,
             job_id="test_job",
-            window_range="2023-01-01-2023-01-02",
+            extra_tags={"window_range": "2023-01-01-2023-01-02"},
         )
 
         record_header = Header(
@@ -162,10 +162,8 @@ class TestBuildAdapterStoreRow:
 
 
 class TestBufferedWriterFlushThreshold:
-    def _writer(
-        self, mock_store: Mock, threshold: int | None
-    ) -> BufferedWindowRecordWriter:
-        return BufferedWindowRecordWriter(
+    def _writer(self, mock_store: Mock, threshold: int | None) -> BufferedRecordWriter:
+        return BufferedRecordWriter(
             namespace="ns",
             table_client=mock_store,
             job_id="job",
