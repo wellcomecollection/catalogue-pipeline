@@ -13,6 +13,7 @@ Feature: Other Identifiers extraction from MARC records
     Examples:
       | alternative_number                 | scheme                    | other_identifier |
       | (Bibliographic Number)b11839053    | sierra-system-number      | b11839053        |
+      | (Bibliographic Number).b11839053   | sierra-system-number      | b11839053        |
       | (Sierra Number)i12056868           | sierra-identifier         | i12056868        |
       | (Mimsy reference)WELL-55           | mimsy-reference           | WELL-55          |
       | (WI number)L0023438                | miro-image-number         | L0023438         |

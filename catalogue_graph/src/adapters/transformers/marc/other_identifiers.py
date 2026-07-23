@@ -76,6 +76,13 @@ def format_field(field: Field) -> SourceIdentifier | None:
     if identifier_type == "wellcome-accession-number":
         id_value = id_value.removeprefix("Acc").strip()
 
+    # Axiell Collections holds Sierra bib numbers in the ".b1234567x" notation (an
+    # artifact of the data migration), but the Sierra adapter and the rest of the
+    # pipeline use the canonical "b1234567x". Without stripping the leading dot the
+    # matcher never links an Axiell work to its Sierra record, so they fail to merge.
+    if identifier_type == "sierra-system-number":
+        id_value = id_value.lstrip(".")
+
     if not id_value:
         return None
 
