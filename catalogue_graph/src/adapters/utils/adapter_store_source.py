@@ -9,7 +9,13 @@ from core.source import BaseSource
 logger = structlog.get_logger(__name__)
 
 
-class AdapterStoreSource(BaseSource):
+class RecordSource(BaseSource):
+    """The contract adapter transformers require of their record source."""
+
+    snapshot_id: int | None
+
+
+class AdapterStoreSource(RecordSource):
     def __init__(
         self,
         adapter_store: AdapterStore,

@@ -20,7 +20,7 @@ from adapters.utils.window_harvester import WindowCallbackResult
 logger = structlog.get_logger(__name__)
 
 
-def _serialize_metadata(record: Record) -> str | None:
+def serialize_metadata(record: Record) -> str | None:
     """Serialize OAI-PMH metadata element to XML string."""
     metadata = getattr(record, "metadata", None)
     if metadata is None:
@@ -28,7 +28,25 @@ def _serialize_metadata(record: Record) -> str | None:
     return etree.tostring(metadata, encoding="unicode", pretty_print=False)
 
 
-class WindowRecordWriter:
+def build_adapter_store_row(
+    *, namespace: str, identifier: str, record: Record
+) -> dict[str, Any]:
+    """Serialize one OAI-PMH record into an adapter store row.
+
+    The single definition of the adapter store row shape. A record the source
+    serves without metadata is stored as a tombstone (``deleted=True``).
+    """
+    content = serialize_metadata(record)
+    return {
+        "namespace": namespace,
+        "id": identifier,
+        "content": content,
+        "last_modified": record.header.datestamp,
+        "deleted": content is None,
+    }
+
+
+class RecordWriter:
     """Callback for persisting harvested records to an adapter store.
 
     This callback is invoked by WindowHarvestManager for each batch of records
@@ -41,7 +59,7 @@ class WindowRecordWriter:
         namespace: str,
         table_client: AdapterStore,
         job_id: str,
-        window_range: str,
+        extra_tags: dict[str, str] | None = None,
     ) -> None:
         """Initialize the record writer.
 
@@ -49,35 +67,30 @@ class WindowRecordWriter:
             namespace: Namespace for records in the adapter store.
             table_client: AdapterStore instance for persisting records.
             job_id: Job identifier for tagging records.
-            window_range: Human-readable window range for tagging.
+            extra_tags: Additional tags merged onto every write, alongside
+                job_id. For example, window mode tags rows with the harvested
+                window range; the loader's id mode passes none, so rows are
+                tagged with the job id alone.
         """
         self.namespace = namespace
         self.table_client = table_client
         self.job_id = job_id
-        self.window_range = window_range
+        self.extra_tags = extra_tags
 
     def _build_rows(self, records: list[tuple[str, Record]]) -> list[dict[str, Any]]:
         """Serialize (identifier, Record) pairs into adapter store rows."""
-        rows: list[dict[str, Any]] = []
-        for identifier, record in records:
-            content = _serialize_metadata(record)
-            rows.append(
-                {
-                    "namespace": self.namespace,
-                    "id": identifier,
-                    "content": content,
-                    "last_modified": record.header.datestamp,
-                    "deleted": content is None,
-                }
+        return [
+            build_adapter_store_row(
+                namespace=self.namespace, identifier=identifier, record=record
             )
-        return rows
+            for identifier, record in records
+        ]
 
     @property
     def _tags(self) -> dict[str, str]:
-        return {
-            "job_id": self.job_id,
-            "window_range": self.window_range,
-        }
+        tags = dict(self.extra_tags) if self.extra_tags else {}
+        tags["job_id"] = self.job_id
+        return tags
 
     def __call__(
         self,
@@ -108,8 +121,8 @@ class WindowRecordWriter:
         )
 
 
-class BufferedWindowRecordWriter(WindowRecordWriter):
-    """Record writer that buffers rows across windows and commits per flush.
+class BufferedRecordWriter(RecordWriter):
+    """Record writer that buffers rows across calls and commits per flush.
 
     In the default (unbuffered) mode every window costs one Iceberg commit for
     its records, which dominates wall-clock time on slow catalogs (e.g. S3
@@ -117,7 +130,7 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
     accumulates rows across windows and commits a single
     ``AdapterStore.incremental_update`` per ``flush()`` call.
 
-    Semantics compared to ``WindowRecordWriter``:
+    Semantics compared to ``RecordWriter``:
 
     - ``__call__`` only buffers: it returns ``changeset_id=None`` and an empty
       ``upserted_record_ids`` list, so per-window summaries carry no changeset
@@ -138,18 +151,32 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
         namespace: str,
         table_client: AdapterStore,
         job_id: str,
-        window_range: str,
+        extra_tags: dict[str, str] | None = None,
+        flush_threshold: int | None = None,
     ) -> None:
+        """Initialize the buffered writer.
+
+        Args:
+            flush_threshold: Commit automatically once this many rows are
+                buffered. ``None`` (the default, and what the loader's window
+                mode uses) means the caller drives every flush explicitly.
+        """
         super().__init__(
             namespace=namespace,
             table_client=table_client,
             job_id=job_id,
-            window_range=window_range,
+            extra_tags=extra_tags,
         )
         # Keyed by record id so later windows overwrite earlier buffered rows.
         self._buffer: dict[str, dict[str, Any]] = {}
+        self._flush_threshold = flush_threshold
         self.changeset_ids: list[str] = []
         self.upserted_record_count: int = 0
+
+    @property
+    def pending(self) -> int:
+        """Rows buffered since the last flush."""
+        return len(self._buffer)
 
     def __call__(
         self,
@@ -158,6 +185,9 @@ class BufferedWindowRecordWriter(WindowRecordWriter):
         """Buffer records for a later flush and return placeholder metadata."""
         for row in self._build_rows(records):
             self._buffer[row["id"]] = row
+
+        if self._flush_threshold and len(self._buffer) >= self._flush_threshold:
+            self.flush()
 
         return WindowCallbackResult(
             tags=self._tags, changeset_id=None, upserted_record_ids=[]

@@ -1,8 +1,8 @@
-from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 from adapters.transformers.folio_store_source import FolioStoreSource
 from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.adapter_store_source import AdapterStoreSource
 
 
 class FolioTransformer(MarcXmlTransformer):

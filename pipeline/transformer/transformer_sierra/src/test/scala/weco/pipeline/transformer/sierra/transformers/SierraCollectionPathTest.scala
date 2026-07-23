@@ -111,6 +111,52 @@ class SierraCollectionPathTest
       getCollectionPath(varFields).get shouldBe CollectionPath(path = "12345i")
     }
 
+    it("uses the 099 $$a subfield as identifier when there is no 001") {
+      val varFields = List(
+        VarField(
+          marcTag = Some("099"),
+          subfields = List(Subfield(tag = "a", content = "12345i"))
+        ),
+        VarField(
+          marcTag = Some("774"),
+          subfields = List(
+            Subfield(tag = "t", content = "A Constituent"),
+            Subfield(
+              tag = "w",
+              content =
+                "This value does not matter, it just matters that it exists"
+            )
+          )
+        )
+      )
+      getCollectionPath(varFields).get shouldBe CollectionPath(path = "12345i")
+    }
+
+    it("prefers 001 over 099 when both are present") {
+      val varFields = List(
+        VarField(
+          marcTag = Some("001"),
+          content = Some("00001")
+        ),
+        VarField(
+          marcTag = Some("099"),
+          subfields = List(Subfield(tag = "a", content = "00099"))
+        ),
+        VarField(
+          marcTag = Some("774"),
+          subfields = List(
+            Subfield(tag = "t", content = "A Constituent"),
+            Subfield(
+              tag = "w",
+              content =
+                "This value does not matter, it just matters that it exists"
+            )
+          )
+        )
+      )
+      getCollectionPath(varFields).get shouldBe CollectionPath(path = "00001")
+    }
+
     it(
       "returns the document's own id when a 774 field is found alongside a self-referential 773"
     ) {

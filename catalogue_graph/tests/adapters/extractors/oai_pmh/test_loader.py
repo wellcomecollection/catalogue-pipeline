@@ -17,8 +17,8 @@ from adapters.extractors.oai_pmh.models.step_events import (
     OAIPMHLoaderResponse,
 )
 from adapters.extractors.oai_pmh.record_writer import (
-    BufferedWindowRecordWriter,
-    WindowRecordWriter,
+    BufferedRecordWriter,
+    RecordWriter,
 )
 from adapters.steps.oai_pmh import loader
 from adapters.steps.oai_pmh.loader import LoaderRuntime
@@ -255,6 +255,7 @@ class TestHandler:
 
             response = loader.handler(req, runtime=loader_runtime)
 
+        assert isinstance(response, OAIPMHLoaderResponse)
         assert response.summaries == []
 
     def test_keeps_summaries_when_suppression_disabled(
@@ -277,26 +278,27 @@ class TestHandler:
 
             response = loader.handler(req, runtime=loader_runtime)
 
+        assert isinstance(response, OAIPMHLoaderResponse)
         assert len(response.summaries) == 1
 
 
 # ---------------------------------------------------------------------------
-# WindowRecordWriter tests (adapter-agnostic)
+# RecordWriter tests (adapter-agnostic)
 # ---------------------------------------------------------------------------
 WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
 
 
-class TestWindowRecordWriter:
+class TestRecordWriter:
     def test_persists_window(
         self,
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        writer = WindowRecordWriter(
+        writer = RecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
             job_id="job-123",
-            window_range=WINDOW_RANGE,
+            extra_tags={"window_range": WINDOW_RANGE},
         )
         last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
         result = writer(
@@ -324,11 +326,11 @@ class TestWindowRecordWriter:
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        writer = WindowRecordWriter(
+        writer = RecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
             job_id="job-123",
-            window_range=WINDOW_RANGE,
+            extra_tags={"window_range": WINDOW_RANGE},
         )
         result = writer(records=[])
 
@@ -342,11 +344,11 @@ class TestWindowRecordWriter:
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        writer = WindowRecordWriter(
+        writer = RecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
             job_id="job-123",
-            window_range=WINDOW_RANGE,
+            extra_tags={"window_range": WINDOW_RANGE},
         )
 
         last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
@@ -377,11 +379,11 @@ class TestWindowRecordWriter:
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        writer = WindowRecordWriter(
+        writer = RecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
             job_id="job-123",
-            window_range=WINDOW_RANGE,
+            extra_tags={"window_range": WINDOW_RANGE},
         )
 
         last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
@@ -438,11 +440,11 @@ class TestWindowRecordWriter:
         adapter_store_client: AdapterStore,
         adapter_namespace: str,
     ) -> None:
-        writer = WindowRecordWriter(
+        writer = RecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
             job_id="job-123",
-            window_range=WINDOW_RANGE,
+            extra_tags={"window_range": WINDOW_RANGE},
         )
 
         last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
@@ -531,12 +533,12 @@ class TestLoaderBackfillMode:
         req = _create_loader_event()
 
         legacy = loader.build_harvester(req, loader_runtime)
-        assert type(legacy.record_callback) is WindowRecordWriter
+        assert type(legacy.record_callback) is RecordWriter
         assert legacy.flush_callback is None
 
         loader_runtime.flush_every = 10
         buffered = loader.build_harvester(req, loader_runtime)
-        assert isinstance(buffered.record_callback, BufferedWindowRecordWriter)
+        assert isinstance(buffered.record_callback, BufferedRecordWriter)
         assert buffered.flush_callback == buffered.record_callback.flush
 
     def test_flush_changeset_ids_and_counts_reach_the_response(
@@ -556,7 +558,7 @@ class TestLoaderBackfillMode:
             self: WindowHarvestManager, **kwargs: object
         ) -> list[WindowSummary]:
             # Simulate a flush having committed a changeset during the harvest
-            assert isinstance(self.record_callback, BufferedWindowRecordWriter)
+            assert isinstance(self.record_callback, BufferedRecordWriter)
             self.record_callback.changeset_ids.append("cs-flush-1")
             self.record_callback.upserted_record_count += 1234
             return [summary]
@@ -600,9 +602,13 @@ class TestLoaderBackfillMode:
         captured: dict[str, object] = {}
 
         def fake_build_runtime(
-            config: object, step_config: loader.LoaderStepConfig
+            config: object,
+            step_config: loader.LoaderStepConfig,
+            *,
+            id_mode: bool = False,
         ) -> MagicMock:
             captured["step_config"] = step_config
+            captured["id_mode"] = id_mode
             return MagicMock()
 
         fake_response = MagicMock()
@@ -676,17 +682,17 @@ class TestFromSummariesExtraChangesets:
 
 
 # ---------------------------------------------------------------------------
-# BufferedWindowRecordWriter tests (adapter-agnostic)
+# BufferedRecordWriter tests (adapter-agnostic)
 # ---------------------------------------------------------------------------
-class TestBufferedWindowRecordWriter:
+class TestBufferedRecordWriter:
     def _make_writer(
         self, adapter_store_client: AdapterStore, adapter_namespace: str
-    ) -> BufferedWindowRecordWriter:
-        return BufferedWindowRecordWriter(
+    ) -> BufferedRecordWriter:
+        return BufferedRecordWriter(
             namespace=adapter_namespace,
             table_client=adapter_store_client,
             job_id="job-123",
-            window_range=WINDOW_RANGE,
+            extra_tags={"window_range": WINDOW_RANGE},
         )
 
     def _record(self, content: str | None, when: datetime) -> SimpleNamespace:

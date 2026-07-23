@@ -72,6 +72,18 @@ variable "enable_image_inferrer_schedule" {
   description = "Whether the scheduled image-inferrer state machine is enabled. Set to false as a kill-switch to pause scheduled inference, e.g. during an incident or a large reindex."
 }
 
+variable "enable_adapter_transformer_trigger" {
+  type        = bool
+  default     = false
+  description = "Whether the EventBridge rule that starts the transformer on <adapter>.adapter.completed events is enabled."
+}
+
+variable "enable_id_minter_schedule" {
+  type        = bool
+  default     = false
+  description = "Whether the id-minter sweep schedule and its id-generator id-pool top-up schedule are enabled."
+}
+
 variable "image_inferrer_max_concurrency" {
   type        = number
   default     = 10
