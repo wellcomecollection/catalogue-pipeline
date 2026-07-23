@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  calm-transformer:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    volumes:
+      - ~/.aws:/root/.aws:ro
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - AWS_DEFAULT_REGION=eu-west-1
+      - AWS_REGION=eu-west-1
+      - AWS_EC2_METADATA_DISABLED=true
+      - AWS_ENDPOINT_URL_SQS=http://localstack:4566
+      - AWS_ENDPOINT_URL_SNS=http://localstack:4566
+      - queue_url=http://localstack:4566/000000000000/calm-transformer-queue
+      - sns_topic_arn=arn:aws:sns:eu-west-1:000000000000:calm-transformer-topic
+      - metrics_namespace=calm-transformer
+      - batch_size=100
+      - flush_interval_seconds=30
+    env_file:
+      - .env.local
+    depends_on:
+      localstack:
+        condition: service_healthy
+      localstack-setup:
+        condition: service_completed_successfully
+
+  localstack:
+    image: "public.ecr.aws/localstack/localstack:3.5.0"
+    environment:
+      - SERVICES=sqs,sns
+      - ALLOW_NONSTANDARD_REGIONS=1
+    ports:
+      - "4566:4566"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  localstack-setup:
+    image: "public.ecr.aws/localstack/localstack:3.5.0"
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: []
+    command:
+      - sh
+      - -c
+      - |
+        awslocal sqs create-queue --queue-name calm-transformer-queue --region eu-west-1
+        awslocal sns create-topic --name calm-transformer-topic --region eu-west-1
+    environment:
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=eu-west-1
+    restart: "no"
