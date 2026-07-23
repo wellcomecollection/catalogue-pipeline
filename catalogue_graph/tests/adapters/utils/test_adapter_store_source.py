@@ -5,8 +5,8 @@ from typing import cast
 
 import pyarrow as pa
 
-from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.adapter_store_source import AdapterStoreSource
 from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 from tests.adapters.conftest import AdapterStoreFactory, adapter_records_to_table
 
