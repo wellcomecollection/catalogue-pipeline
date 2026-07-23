@@ -88,9 +88,8 @@ class RecordWriter:
 
     @property
     def _tags(self) -> dict[str, str]:
-        tags = {"job_id": self.job_id}
-        if self.extra_tags:
-            tags.update(self.extra_tags)
+        tags = dict(self.extra_tags) if self.extra_tags else {}
+        tags["job_id"] = self.job_id
         return tags
 
     def __call__(
