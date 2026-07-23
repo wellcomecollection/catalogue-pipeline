@@ -4,8 +4,8 @@ from typing import Any
 
 from pyiceberg.expressions import In
 
-from adapters.transformers.adapter_store_source import AdapterStoreSource
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.adapter_store_source import AdapterStoreSource
 
 # Bib rows are enriched in batches of this size, so the per-batch item lookup (and the
 # items it holds in memory) stays bounded regardless of how many rows are transformed.

@@ -41,8 +41,8 @@ from adapters.extractors.oai_pmh.models.step_events import (
     validate_loader_event,
 )
 from adapters.extractors.oai_pmh.record_writer import (
-    BufferedWindowRecordWriter,
-    WindowRecordWriter,
+    BufferedRecordWriter,
+    RecordWriter,
 )
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.extractors.oai_pmh.reporting import OAIPMHIdLoadReport, OAIPMHLoaderReport
@@ -201,19 +201,15 @@ def build_harvester(
     store = runtime.require_window_store()
     window_generator = runtime.require_window_generator()
 
-    writer_cls = (
-        BufferedWindowRecordWriter if runtime.flush_every else WindowRecordWriter
-    )
+    writer_cls = BufferedRecordWriter if runtime.flush_every else RecordWriter
     record_writer = writer_cls(
         namespace=runtime.adapter_namespace,
         table_client=runtime.table_client,
         job_id=request.job_id,
-        window_range=request.window.to_iso_string(),
+        extra_tags={"window_range": request.window.to_iso_string()},
     )
     flush_callback = (
-        record_writer.flush
-        if isinstance(record_writer, BufferedWindowRecordWriter)
-        else None
+        record_writer.flush if isinstance(record_writer, BufferedRecordWriter) else None
     )
     return WindowHarvestManager(
         store=store,
@@ -264,7 +260,7 @@ def execute_loader(
     # added to the response here.
     extra_changeset_ids: list[str] = []
     extra_upserted_record_count = 0
-    if isinstance(harvester.record_callback, BufferedWindowRecordWriter):
+    if isinstance(harvester.record_callback, BufferedRecordWriter):
         extra_changeset_ids = harvester.record_callback.changeset_ids
         extra_upserted_record_count = harvester.record_callback.upserted_record_count
 
@@ -327,7 +323,7 @@ def execute_id_loader(
     # prefix rather than passing None through to a malformed request.
     metadata_prefix = request.metadata_prefix or runtime.oai_metadata_prefix
 
-    writer = BufferedWindowRecordWriter(
+    writer = BufferedRecordWriter(
         namespace=runtime.adapter_namespace,
         table_client=runtime.table_client,
         job_id=request.job_id,

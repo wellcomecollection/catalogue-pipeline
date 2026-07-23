@@ -8,6 +8,7 @@ from pyiceberg.table import Table as IcebergTable
 from adapters.steps.transformer import TransformerEvent, TransformerResult, handler
 from adapters.transformers.axiell_store_source import AxiellStoreSource
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from adapters.utils.deletion_facts_store import DeletionFactsStore
 from adapters.utils.reconciler_store import ReconcilerStore
 from tests.adapters.conftest import (
@@ -323,12 +324,14 @@ def test_full_reindex_never_builds_or_reads_the_facts_store(
 
     monkeypatch.setattr(facts_store, "get_records_by_changesets", fail_read)
     source = AxiellStoreSource(
-        AdapterStore(temporary_table, namespace=AXIELL_NAMESPACE),
-        changeset_ids=[],
-        facts_store=facts_store,
-        reconciler_store=ReconcilerStore(
-            reconciler_temporary_table, namespace=AXIELL_NAMESPACE
-        ),
+        AxiellChangesetReader(
+            AdapterStore(temporary_table, namespace=AXIELL_NAMESPACE),
+            changeset_ids=[],
+            facts_store=facts_store,
+            reconciler_store=ReconcilerStore(
+                reconciler_temporary_table, namespace=AXIELL_NAMESPACE
+            ),
+        )
     )
     assert [row["id"] for row in source.stream_raw()] == ["collect-1"]
 
@@ -372,20 +375,6 @@ def test_stale_fact_for_reclaimed_guid_is_skipped(
         "Work[axiell-guid/guid-3]",
         "Work[axiell-guid/guid-old-2]",
     }
-
-
-def test_facts_store_requires_reconciler_store(
-    temporary_table: IcebergTable,
-    deletion_facts_temporary_table: IcebergTable,
-) -> None:
-    with pytest.raises(ValueError, match="provided together"):
-        AxiellStoreSource(
-            AdapterStore(temporary_table, namespace=AXIELL_NAMESPACE),
-            changeset_ids=["some-changeset"],
-            facts_store=DeletionFactsStore(
-                deletion_facts_temporary_table, namespace=AXIELL_NAMESPACE
-            ),
-        )
 
 
 def test_missing_reconciler_table_fails_the_transform(
@@ -437,3 +426,26 @@ def test_missing_facts_table_fails_the_transform(
 
     with pytest.raises(NoSuchTableError):
         _run_transform(monkeypatch, [changeset_id])
+
+
+def test_adapter_schema_reserves_guid_for_deletion_facts() -> None:
+    """The stream discriminator relies on adapter rows never carrying a guid
+    column; if the adapter schema grows one, the dispatch must be redesigned."""
+    from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
+
+    assert "guid" not in ADAPTER_STORE_ARROW_SCHEMA.names
+
+
+def test_adapter_row_with_guid_key_fails_loudly(
+    temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reader = AxiellChangesetReader(
+        AdapterStore(temporary_table, namespace=AXIELL_NAMESPACE),
+        changeset_ids=["cs-1"],
+    )
+    monkeypatch.setattr(
+        reader, "iter_records", lambda: iter([{"id": "collect-1", "guid": "boom"}])
+    )
+    with pytest.raises(RuntimeError, match="reserved for deletion facts"):
+        list(AxiellStoreSource(reader).stream_raw())

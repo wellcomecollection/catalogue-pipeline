@@ -16,8 +16,10 @@ The design, record-selection rules and tombstone semantics are specified in
 1. The Axiell adapter finishes a run and emits an `axiell.adapter.completed` EventBridge event.
 2. An EventBridge rule starts the sync Step Function, which invokes the Lambda
    (entrypoint `adapters.steps.axiell_folio_sync.axiell_folio_sync.lambda_handler`).
-3. The step reads the changed rows for the event's `changeset_ids` from the Axiell adapter table (using the same
-   `AXIELL_CONFIG` as the Axiell adapter, so S3 Tables in Lambda and a local sqlite catalog for local runs).
+3. The step reads the changed rows for the event's `changeset_ids` through `AxiellChangesetReader` (using the same
+   `AXIELL_CONFIG` as the Axiell adapter, so S3 Tables in Lambda and a local sqlite catalog for local runs). The
+   reader also exposes the adapter's deletion facts via `iter_deletions()`, which is where authoritative FOLIO
+   deletes (platform#6440) will plug in.
 4. Each record is selected, mapped, and upserted:
    * **Selection** (`is_selected_for_sync`): a record is synced only if it carries the harvest flag (MARC `980 $a`
      present) and is item-level (MARC `351 $c` == `ITEM`). Everything else is skipped.

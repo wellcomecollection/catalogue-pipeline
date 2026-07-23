@@ -29,7 +29,7 @@ All OAI-PMH adapters follow this pattern:
 
 ### Loader (`steps/loader.py`)
 
-- Receives the loader event and spins up a `WindowHarvestManager` with an OAI client plus a per-window `WindowRecordWriter` callback.
+- Receives the loader event and spins up a `WindowHarvestManager` with an OAI client plus a `RecordWriter` callback.
 - For each harvested record, serialises the XML payload into the **Iceberg record table** under the adapter namespace and associates it with the current `job_id`.
 - Updates the window status table with `pending/success/failed` states and attaches tags for `job_id`, `window_key`, and every Iceberg `changeset_id` produced.
 - Returns a `LoaderResponse` containing window results and `changeset_ids`.

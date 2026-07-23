@@ -19,7 +19,7 @@ from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.utils.window_harvester as harvester_mod
-from adapters.extractors.oai_pmh.record_writer import BufferedWindowRecordWriter
+from adapters.extractors.oai_pmh.record_writer import BufferedRecordWriter
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.pipeline_store import PipelineStoreUpdate
 from adapters.utils.window_generator import WindowGenerator
@@ -892,13 +892,13 @@ def _build_buffered_harvester(
     temporary_table: IcebergTable,
     *,
     record_callback: WindowCallback | None = None,
-) -> tuple[WindowHarvestManager, BufferedWindowRecordWriter, AdapterStore, FlushSpies]:
+) -> tuple[WindowHarvestManager, BufferedRecordWriter, AdapterStore, FlushSpies]:
     adapter_store = AdapterStore(temporary_table, namespace="harvest")
-    writer = BufferedWindowRecordWriter(
+    writer = BufferedRecordWriter(
         namespace="harvest",
         table_client=adapter_store,
         job_id="job-1",
-        window_range="range",
+        extra_tags={"window_range": "range"},
     )
     harvester = _build_harvester(
         tmp_path,
@@ -971,11 +971,11 @@ def test_flush_every_persists_failed_windows(
     """Failed windows in deferred mode must still have their summaries
     persisted at the flush boundary."""
     adapter_store = AdapterStore(temporary_table, namespace="harvest")
-    writer = BufferedWindowRecordWriter(
+    writer = BufferedRecordWriter(
         namespace="harvest",
         table_client=adapter_store,
         job_id="job-1",
-        window_range="range",
+        extra_tags={"window_range": "range"},
     )
 
     calls = {"count": 0}
@@ -1105,11 +1105,11 @@ def test_flush_every_crash_between_records_and_statuses_recovers_on_rerun(
     successful, so a rerun re-harvests them and the record upserts converge
     (no duplicate rows)."""
     adapter_store = AdapterStore(temporary_table, namespace="harvest")
-    writer = BufferedWindowRecordWriter(
+    writer = BufferedRecordWriter(
         namespace="harvest",
         table_client=adapter_store,
         job_id="job-1",
-        window_range="range",
+        extra_tags={"window_range": "range"},
     )
     harvester = _build_harvester(
         tmp_path,
