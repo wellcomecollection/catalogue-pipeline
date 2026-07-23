@@ -57,7 +57,7 @@ resource "aws_scheduler_schedule" "minter_id_generator_schedule" {
     role_arn = aws_iam_role.run_minter_id_generator_role.arn
   }
 
-  state = "DISABLED" # DISABLE for now
+  state = var.enable_id_minter_schedule ? "ENABLED" : "DISABLED"
 }
 
 resource "aws_iam_role" "run_minter_id_generator_role" {
