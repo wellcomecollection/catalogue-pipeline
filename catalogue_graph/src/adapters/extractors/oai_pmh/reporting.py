@@ -6,6 +6,7 @@ dimensions, enabling reuse across Axiell, FOLIO, and other adapters.
 
 from __future__ import annotations
 
+from pathlib import PurePosixPath
 from typing import ClassVar
 from uuid import uuid4
 
@@ -61,10 +62,14 @@ class OAIPMHReport(OAIPMHReportBase):
     def s3_uri(self) -> str:
         start = self.window.start_time.strftime("%Y%m%dT%H%M%S")
         end = self.window.end_time.strftime("%Y%m%dT%H%M%S")
-        return (
-            f"s3://{self.report_s3_bucket}/{self.report_s3_prefix}"
-            f"/reports/{self.adapter_type}/{self.label}/{start}_{end}.json"
+        path = PurePosixPath(
+            self.report_s3_prefix,
+            "reports",
+            self.adapter_type,
+            self.label,
+            f"{start}_{end}.json",
         )
+        return f"s3://{self.report_s3_bucket}/{path}"
 
 
 class OAIPMHLoaderReport(OAIPMHReport):
@@ -168,11 +173,14 @@ class OAIPMHIdLoadReport(OAIPMHReportBase):
 
     @property
     def s3_uri(self) -> str:
-        return (
-            f"s3://{self.report_s3_bucket}/{self.report_s3_prefix}"
-            f"/reports/{self.adapter_type}/{self.label}"
-            f"/{self.job_id}_{self.report_id}.json"
+        path = PurePosixPath(
+            self.report_s3_prefix,
+            "reports",
+            self.adapter_type,
+            self.label,
+            f"{self.job_id}_{self.report_id}.json",
         )
+        return f"s3://{self.report_s3_bucket}/{path}"
 
     @classmethod
     def from_id_load(
