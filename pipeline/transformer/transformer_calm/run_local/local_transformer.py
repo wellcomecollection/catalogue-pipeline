@@ -82,11 +82,8 @@ def fetch_es_env(
                 f"es_protocol={es_protocol}",
                 f"es_apikey={es_apikey}",
                 f"es_index={index_name}",
-                # nosemgrep: python.lang.security.audit.hardcoded-credential
                 f"AWS_ACCESS_KEY_ID={frozen_credentials.access_key}",
-                # nosemgrep: python.lang.security.audit.hardcoded-credential
                 f"AWS_SECRET_ACCESS_KEY={frozen_credentials.secret_key}",
-                # nosemgrep: python.lang.security.audit.hardcoded-credential
                 f"AWS_SESSION_TOKEN={frozen_credentials.token or ''}",
                 f"AWS_REGION={aws_region}",
                 f"AWS_DEFAULT_REGION={aws_region}",
