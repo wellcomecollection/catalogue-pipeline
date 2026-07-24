@@ -416,7 +416,9 @@ def command_verify_completion(args: argparse.Namespace) -> int:
             body = json.loads(response.read().decode("utf-8"))
         for doc in body.get("docs", []):
             if not doc.get("found", False):
-                missing_doc_ids.append(doc.get("_id", "<unknown>"))
+                doc_id = doc.get("_id", "")
+                match = re.search(r"calm-record-id/([^\]]+)]", doc_id)
+                missing_doc_ids.append(match.group(1) if match else (doc_id or "<unknown>"))
 
     found_docs = len(doc_ids) - len(missing_doc_ids)
     print(
