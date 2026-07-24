@@ -72,6 +72,19 @@ class PipelineStore(ABC):
             .cast(self.schema)
         )
 
+    def get_namespace_record_count(self) -> int:
+        """Return the number of records in the store namespace.
+
+        Uses pyiceberg's scan count, which answers from file metadata where the
+        partition satisfies the filter and otherwise reads matching files one
+        at a time, so the table is never materialised in full. Projects only
+        the ``id`` column to keep the fallback reads small.
+        """
+        return self.table.scan(
+            row_filter=EqualTo("namespace", self.namespace),
+            selected_fields=("id",),
+        ).count()
+
     def stream_namespace_records(
         self,
         iceberg_filter: BooleanExpression = ALWAYS_TRUE,
