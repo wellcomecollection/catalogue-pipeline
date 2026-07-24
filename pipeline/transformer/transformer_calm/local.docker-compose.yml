@@ -5,12 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.local
-    volumes:
-      - ~/.aws:/root/.aws:ro
     environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - AWS_DEFAULT_REGION=eu-west-1
       - AWS_REGION=eu-west-1
       - AWS_EC2_METADATA_DISABLED=true
@@ -28,6 +23,22 @@ services:
         condition: service_healthy
       localstack-setup:
         condition: service_completed_successfully
+      elasticsearch:
+        condition: service_healthy
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   localstack:
     image: "public.ecr.aws/localstack/localstack:3.5.0"
