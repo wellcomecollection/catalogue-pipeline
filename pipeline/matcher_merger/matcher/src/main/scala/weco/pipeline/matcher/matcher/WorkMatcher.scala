@@ -15,6 +15,7 @@ import weco.pipeline.matcher.models.{
 import weco.pipeline.matcher.services.LockingBuilder
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
+import weco.pipeline_storage.Retriever
 import weco.storage.dynamo.DynamoConfig
 import weco.storage.locking.dynamo.DynamoLockDaoConfig
 import weco.storage.locking.{
@@ -34,7 +35,8 @@ trait WorkStubMatcher {
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
-  lockingService: LockingService[MatcherResult, Future, LockDao[String, UUID]]
+  lockingService: LockingService[MatcherResult, Future, LockDao[String, UUID]],
+  retriever: Retriever[WorkStub]
 )(implicit ec: ExecutionContext)
     extends WorkStubMatcher
     with Logging {
@@ -46,6 +48,18 @@ class WorkMatcher(
 
     withLocks(work, initialLockIds) {
       for {
+        // The work we were given was fetched before we acquired any locks,
+        // so another process may have matched a newer copy of it in the
+        // meantime -- e.g. a re-transform that corrected its merge candidates
+        // at the same version.  If we carried on with a stale copy, we'd
+        // accept it as a last-write-wins update and quietly revert the
+        // corrected graph.
+        //
+        // Check the stored work is still the one we're processing -- if it's
+        // stale, we should bail out and wait for the SQS logic to retry us
+        // with a fresh copy rather than recover.
+        _ <- checkWorkIsCurrent(work)
+
         beforeNodes <- workGraphStore.findAffectedWorks(work.ids)
         afterNodes = WorkGraphUpdater.update(work, beforeNodes)
 
@@ -76,6 +90,24 @@ class WorkMatcher(
       } yield matcherResult
     }
   }
+
+  private def checkWorkIsCurrent(work: WorkStub): Future[Unit] =
+    retriever(Seq(work.id.toString))
+      .flatMap {
+        result =>
+          result.found.get(work.id.toString) match {
+            case Some(latestWork) if latestWork != work =>
+              val t = new RuntimeException(
+                s"Error processing ${work.id}: stored work changed during matching"
+              )
+              Future.failed(t)
+
+            // If the work can't be retrieved (e.g. when the matcher is
+            // driven directly with a work that isn't in the store), carry
+            // on with the copy we were given.
+            case _ => Future.successful(())
+          }
+      }
 
   private def writeUpdate(
     work: WorkStub,
@@ -169,6 +201,7 @@ class WorkMatcher(
 object WorkMatcher extends Logging {
 
   def apply(
+    retriever: Retriever[WorkStub],
     dynamoConfig: DynamoConfig,
     dynamoLockDaoConfig: DynamoLockDaoConfig
   )(
@@ -188,7 +221,7 @@ object WorkMatcher extends Logging {
           dynamoLockDaoConfig
         )
 
-    new WorkMatcher(workGraphStore, lockingService)
+    new WorkMatcher(workGraphStore, lockingService, retriever)
   }
 
 }
