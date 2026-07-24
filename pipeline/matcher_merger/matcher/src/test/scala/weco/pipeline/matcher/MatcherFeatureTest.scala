@@ -50,7 +50,6 @@ class MatcherFeatureTest
   private val g00dcafe = SQSTestLambdaMessage(message = "g00dcafe")
   private val g00dd00d = SQSTestLambdaMessage(message = "g00dd00d")
 
-
   private val LambdaBuilder: WorksMatcher => Downstream => StubLambda =
     StubLambda.curried
 

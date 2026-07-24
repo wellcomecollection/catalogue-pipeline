@@ -7,7 +7,6 @@ import weco.pipeline.matcher.models.{
   SourceWorkData,
   SubgraphId,
   VersionExpectedConflictException,
-  VersionUnexpectedConflictException,
   WorkNode
 }
 
@@ -283,24 +282,97 @@ class WorkGraphUpdaterTest
     }
 
     it(
-      "doesn't process an update for the same version if the work is different from the one stored"
+      "processes an update for the same version if a merge candidate is added"
+    ) {
+      val (workA, workB) = createTwoWorks("A->B")
+      val workC = createOneWork("C")
+
+      val existingVersion = workA.sourceWork.get.version
+
+      val result = WorkGraphUpdater
+        .update(
+          work = createWorkWith(
+            idA,
+            version = existingVersion,
+            mergeCandidateIds = Set(idB, idC)
+          ),
+          affectedNodes = Set(workA, workB, workC)
+        )
+
+      result shouldBe Set(
+        workA
+          .copy(
+            subgraphId = SubgraphId(idA, idB, idC),
+            componentIds = List(idA, idB, idC)
+          )
+          .updateSourceWork(
+            version = existingVersion,
+            mergeCandidateIds = Set(idB, idC)
+          ),
+        workB.copy(
+          subgraphId = SubgraphId(idA, idB, idC),
+          componentIds = List(idA, idB, idC)
+        ),
+        workC.copy(
+          subgraphId = SubgraphId(idA, idB, idC),
+          componentIds = List(idA, idB, idC)
+        )
+      )
+    }
+
+    it(
+      "processes an update for the same version if a merge candidate is removed"
     ) {
       val (workA, workB) = createTwoWorks("A->B")
 
       val existingVersion = workA.sourceWork.get.version
 
-      val thrown = intercept[VersionUnexpectedConflictException] {
-        WorkGraphUpdater
-          .update(
-            work = createWorkWith(
-              idA,
-              version = existingVersion,
-              mergeCandidateIds = Set(idC)
-            ),
-            affectedNodes = Set(workA, workB)
-          )
-      }
-      thrown.getMessage shouldBe s"update failed, work:$idA v$existingVersion already exists with different content! update-ids:Set($idC) != existing-ids:Set($idB)"
+      val result = WorkGraphUpdater
+        .update(
+          work = createWorkWith(
+            idA,
+            version = existingVersion,
+            mergeCandidateIds = Set.empty
+          ),
+          affectedNodes = Set(workA, workB)
+        )
+
+      result shouldBe Set(
+        workA
+          .copy(componentIds = List(idA))
+          .updateSourceWork(version = existingVersion),
+        workB.copy(componentIds = List(idB))
+      )
+    }
+
+    it(
+      "processes an update for the same version if the suppression changes"
+    ) {
+      val (workA, workB) = createTwoWorks("A->B")
+
+      val existingVersion = workA.sourceWork.get.version
+
+      val result = WorkGraphUpdater
+        .update(
+          work = createWorkWith(
+            idA,
+            version = existingVersion,
+            mergeCandidateIds = Set(idB),
+            workType = "Deleted"
+          ),
+          affectedNodes = Set(workA, workB)
+        )
+
+      result shouldBe Set(
+        workA
+          .copy(componentIds = List(idA))
+          .updateSourceWork(
+            version = existingVersion,
+            mergeCandidateIds = Set(idB),
+            suppressed = true
+          ),
+        workB.copy(componentIds = List(idB))
+      )
     }
   }
 

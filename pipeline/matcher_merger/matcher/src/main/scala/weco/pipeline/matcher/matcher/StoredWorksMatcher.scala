@@ -100,7 +100,7 @@ object StoredWorksMatcher {
 
     new StoredWorksMatcher(
       retriever,
-      WorkMatcher(dynamoConfig, dynamoLockDaoConfig)
+      WorkMatcher(retriever, dynamoConfig, dynamoLockDaoConfig)
     )
   }
 

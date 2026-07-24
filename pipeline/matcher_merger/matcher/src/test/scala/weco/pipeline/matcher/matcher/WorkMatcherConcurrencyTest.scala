@@ -5,7 +5,8 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkStubGenerators
-import weco.pipeline.matcher.models.MatcherResult
+import weco.pipeline.matcher.models.{MatcherResult, WorkStub}
+import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
@@ -31,7 +32,11 @@ class WorkMatcherConcurrencyTest
       graphTable =>
         withWorkGraphStore(graphTable) {
           workGraphStore =>
-            val workMatcher = new WorkMatcher(workGraphStore, lockingService)
+            val workMatcher = new WorkMatcher(
+              workGraphStore,
+              lockingService,
+              retriever = new MemoryRetriever[WorkStub]()
+            )
 
             val workA = createWorkWith(
               id = idA,

@@ -11,11 +11,13 @@ import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.generators.WorkNodeGenerators
 import weco.pipeline.matcher.models._
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import weco.pipeline_storage.memory.MemoryRetriever
 import weco.storage.fixtures.DynamoFixtures.Table
 import weco.storage.locking.LockFailure
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
 import java.util.UUID
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -206,7 +208,11 @@ class WorkMatcherTest
           workGraphStore =>
             val work = createWorkStub
 
-            val workMatcher = new WorkMatcher(workGraphStore, lockingService)
+            val workMatcher = new WorkMatcher(
+              workGraphStore,
+              lockingService,
+              retriever = new MemoryRetriever[WorkStub]()
+            )
 
             val result = workMatcher.matchWork(work)
 
@@ -254,7 +260,11 @@ class WorkMatcherTest
                   new MemoryLockingService[MatcherResult, Future]()
 
                 val workMatcher =
-                  new WorkMatcher(workGraphStore, lockingService)
+                  new WorkMatcher(
+                    workGraphStore,
+                    lockingService,
+                    retriever = new MemoryRetriever[WorkStub]()
+                  )
 
                 val result = workMatcher.matchWork(work)
 
@@ -338,6 +348,43 @@ class WorkMatcherTest
                 whenReady(futures) {
                   _ =>
                     putCount shouldBe 1
+                }
+            }
+        }
+    }
+  }
+
+  // The work we're asked to match is fetched from the store before any locks
+  // are taken, so by the time we hold the locks a newer copy may have been
+  // stored and matched -- e.g. a re-transform that corrected the work's merge
+  // candidates at the same version.  If we carried on with the stale copy,
+  // we'd quietly revert the corrected graph.
+  it("bails out if the stored work changed before it acquired the locks") {
+    withWorkGraphTable {
+      graphTable =>
+        withWorkGraphStore(graphTable) {
+          workGraphStore =>
+            val staleWork = createWorkWith(
+              id = idA,
+              version = 1,
+              mergeCandidateIds = Set(idB)
+            )
+            val latestWork = createWorkWith(
+              id = idA,
+              version = 1,
+              mergeCandidateIds = Set(idC)
+            )
+
+            val retriever = new MemoryRetriever[WorkStub](
+              index = mutable.Map(idA.toString -> latestWork)
+            )
+
+            withWorkMatcher(workGraphStore, retriever) {
+              workMatcher =>
+                whenReady(workMatcher.matchWork(staleWork).failed) {
+                  _.getMessage should include(
+                    "stored work changed during matching"
+                  )
                 }
             }
         }
@@ -446,7 +493,9 @@ class WorkMatcherTest
 
             val workMatcher = new WorkMatcher(
               workGraphStore = workGraphStore,
-              lockingService = new MemoryLockingService[MatcherResult, Future]()
+              lockingService =
+                new MemoryLockingService[MatcherResult, Future](),
+              retriever = new MemoryRetriever[WorkStub]()
             )
 
             // We have three works:
