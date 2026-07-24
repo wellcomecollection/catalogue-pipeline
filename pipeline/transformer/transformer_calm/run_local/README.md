@@ -28,7 +28,7 @@ The implementation is a Python CLI (`local_transformer.py`).
     - `elasticsearch/pipeline_storage_<pipeline_date>/port`
     - `elasticsearch/pipeline_storage_<pipeline_date>/protocol`
     - `elasticsearch/pipeline_storage_<pipeline_date>/transformer/api_key`
-  - Writes `.env.local` containing:
+  - Writes `.env` containing:
     - `es_host`, `es_port`, `es_protocol`, `es_apikey`, `es_index`
     - resolved AWS session credentials for the container (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`)
 

@@ -167,7 +167,7 @@ def _ensure_local_es_index(*, env_file: Path, timeout_seconds: int = 120) -> Non
 
 def command_start(args: argparse.Namespace) -> int:
     project_dir = _project_dir()
-    env_file = project_dir / ".env.local"
+    env_file = project_dir / ".env"
 
     fetch_es_env(
         pipeline_date=args.pipeline_date,
@@ -342,7 +342,7 @@ def command_verify_completion(args: argparse.Namespace) -> int:
         raise ValueError("poll_seconds must be a positive integer")
 
     project_dir = _project_dir()
-    env_file = project_dir / ".env.local"
+    env_file = project_dir / ".env"
     file_env = _load_env_file(env_file)
     runtime_env = os.environ.copy()
     runtime_env.update(file_env)
@@ -481,7 +481,7 @@ def _create_parser() -> argparse.ArgumentParser:
         default="local",
         help="Use local Docker Elasticsearch, or the deployed public Elasticsearch host.",
     )
-    fetch_parser.add_argument("--output-env-file", default=".env.local")
+    fetch_parser.add_argument("--output-env-file", default=".env")
     fetch_parser.add_argument("--aws-region", default=os.environ.get("AWS_REGION", "eu-west-1"))
     fetch_parser.add_argument("--aws-profile", default=os.environ.get("AWS_PROFILE", "platform-developer"))
     fetch_parser.set_defaults(
