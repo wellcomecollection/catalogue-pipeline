@@ -2,55 +2,80 @@
 
 ## Rebuilding an adapter store (`rebuild_adapter.py`)
 
-Use this script to do a full rebuild of the Iceberg stores for an OAI-PMH adapter
-(Axiell or FOLIO) from a fresh snapshot. You would typically do this to remove 
-outdated or incorrect data which cannot be removed via the incremental harvest
-path.
+Rebuilds the Iceberg stores for an OAI-PMH adapter (Axiell or FOLIO) from a
+fresh full snapshot. Use it to remove outdated or incorrect data that the
+incremental harvest cannot: the windowed loader only adds and updates, so
+records the source has stopped serving stay in the store forever.
+
+The rebuild emits no downstream deletions. Records that vanished from the
+source leave the store, but their works remain in any populated index and in
+matcher state, so run it against a clean pipeline or wipe the pipeline's
+downstream state first.
+
+`--use-rest-api-table` targets the production S3 Tables catalog and needs the
+platform-developer profile. Without it the script requires
+`--skip-publish-event`, because a local rebuild would otherwise publish real
+events carrying changeset ids that exist only on your machine.
 
 ### Steps
 
-1. **Disable the adapter trigger in AWS.** This stops the normal windowed harvest
-   from running concurrently and writing data that could conflict with the rebuild.
+1. **Disable the adapter's trigger schedule in AWS**, so a windowed harvest
+   cannot run concurrently and write conflicting data.
 
-2. **Run the script.** It will perform the following in order:
+2. **For Axiell, decide what the Axiell→FOLIO sync should see.** The
+   `axiell-folio-sync-adapter-axiell-completed` rule also matches
+   `axiell.adapter.completed`, so publishing the rebuild changesets runs the
+   outbound sync over the whole Axiell set. Disable it unless you want that.
 
-   - Wipe the window status table and write a synthetic window row stamped with the
-     current time. This acts as a cursor: when the trigger is re-enabled it will
-     pick up from this point and harvest anything that changed during the rebuild
-     window. The row is written *before* downloading so that the timestamp is
-     anchored to the start of the rebuild — any OAI-PMH changes that arrive after
-     this point will be absent from the snapshot but will fall inside the next
-     trigger window.
+3. **Run the script.** In order, it will:
 
-   - Download all records from the OAI-PMH endpoint and save them to a local
-     snapshot file. The download can take a while (currently around 3 hours for
-     Axiell). If the rebuild fails at a later step, the snapshot can be reused to
-     resume without re-downloading. When resuming, the window wipe and cursor-reset
-     are skipped — they ran during the original attempt and the cursor is already
-     anchored to the correct time.
+   - Wipe the window status table and write a synthetic window row stamped
+     with the current time. This is the cursor the trigger resumes from. It is
+     written before the download, so changes arriving mid-rebuild are missing
+     from the snapshot but fall inside the next trigger window.
 
-   - *(FOLIO only)* Download all items from the FOLIO API and save them to a
-     separate local snapshot file.
+   - Download every record to a local snapshot file, logging progress against
+     the record count the endpoint reports. This takes hours (around 4 for
+     Axiell). The file is moved into place only on success, so an interrupted
+     download leaves nothing for a later run to trust, and has to start again.
 
-   - Wipe the adapter store.
+   - *(FOLIO only)* Download items for non-deleted bibs to a second snapshot.
 
-   - Load records back into the store in batches using incremental updates. Each
-     batch produces a separate changeset ID. Loading in batches avoids the large
-     memory footprint of a single all-at-once update (50+ GB with current FOLIO
-     data), and means each transformer run stays within the 15-minute AWS Lambda
-     time limit.
+   - Wipe the adapter store and load the snapshot back in batches, each
+     producing its own changeset id. Batching bounds the memory a single update
+     needs, which would otherwise reach 50+ GB for FOLIO. It does not bound the
+     downstream cost: every changeset read scans most of a just-rebuilt table,
+     and each published event triggers a transformer run per wired pipeline.
 
-   - *(Axiell only)* Wipe the reconciler store and run the reconcile step across
-     all batch changesets to populate it with new GUID mappings, used as a
-     baseline for future runs.
+   - *(Axiell only)* Wipe the reconciler store and reconcile the batch
+     changesets, rebuilding the GUID mapping baseline.
 
-   - *(FOLIO only)* Wipe the items store and populate it with new items in batches.
+   - *(FOLIO only)* Wipe and repopulate the items store.
 
-   - Publish an `adapter.completed` EventBridge event for each batch, triggering
-     transformer runs in parallel.
+   - Publish an `adapter.completed` event per changeset, triggering transformer
+     runs in every pipeline whose adapter trigger is enabled.
+     `--publish-interval-seconds` paces that fan-out. A transformer run that
+     times out is terminal for its changeset, so re-publish failed ones by hand.
 
-3. **Re-enable the adapter trigger.** It will see the synthetic cursor and start
-   harvesting from the time the rebuild began.
+4. **Re-enable the adapter trigger** and the sync rule. If the rebuild outran
+   the adapter's lag threshold (6 hours by default), the first run trips the lag
+   circuit breaker and keeps failing, since only a successful run advances the
+   cursor. Raise `MAX_LAG_MINUTES` (`FOLIO_MAX_LAG_MINUTES`) for one run, then
+   revert.
+
+### Resuming
+
+Snapshots are reused if they already exist, so re-running the same command
+after a failure skips the downloads. The wipe-and-load phases always re-run,
+minting fresh changeset ids, so a run that died anywhere after the downloads
+recovers with a plain re-run. Two things to watch:
+
+- A snapshot only reflects the source as of when it was taken, so judge for
+  yourself whether an old one is still safe to rebuild from, or delete it to
+  re-download.
+- If a rebuild is abandoned after the download began, the window history was
+  reset but the stores were not rebuilt, leaving the gap between disabling the
+  trigger and the synthetic cursor uncovered. Re-cover it with the reloader.
 
 ### Usage
 
@@ -69,9 +94,5 @@ uv run python scripts/rebuild_adapter.py \
   --folio-items-snapshot-path /tmp/folio_items.parquet
 ```
 
-If the snapshot file already exists at `--snapshot-path`, the download is skipped
-and the existing file is reused. The same applies to `--folio-items-snapshot-path`.
-This makes it safe to re-run the script after a failure without starting over.
-
-Pass `--skip-publish-event` to load the stores without triggering any downstream
-transformer runs — useful for testing or dry-run validation.
+Pass `--skip-publish-event` to load the stores without triggering downstream
+transformer runs, for testing or dry-run validation.
