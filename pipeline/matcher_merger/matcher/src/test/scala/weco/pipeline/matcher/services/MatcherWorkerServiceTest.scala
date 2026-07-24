@@ -19,7 +19,6 @@ import weco.pipeline.matcher.models.{
 import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline_storage.memory.MemoryRetriever
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class MatcherWorkerServiceTest
@@ -368,7 +367,7 @@ class MatcherWorkerServiceTest
     }
   }
 
-  it("does not match an existing version with different information") {
+  it("matches an existing version with different information") {
     val workAv2 = createWorkWith(
       id = idA,
       version = 2
@@ -381,19 +380,36 @@ class MatcherWorkerServiceTest
         )
       )
 
+    val workBv1 = createWorkWith(
+      id = idB,
+      version = 1
+    )
+
+    val expectedWorkBv1 =
+      Set(
+        MatchedIdentifiers(
+          identifiers = Set(WorkIdentifier(idB, version = 1))
+        )
+      )
+
     implicit val retriever: MemoryRetriever[WorkStub] =
       new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
-    withLocalSqsQueuePair(visibilityTimeout = 1 second) {
+    withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         implicit val q: SQS.Queue = queue
 
         withMatcherService(retriever, queue, messageSender) {
           _ =>
             processAndAssertMatchedWorkIs(workAv2, expectedWorkAv2)
+            processAndAssertMatchedWorkIs(workBv1, expectedWorkBv1)
 
-            // Work V1 is sent but not matched
+            // Work A is re-sent at the same version, but with a merge
+            // candidate pointing at B -- e.g. a transformer change corrected
+            // its merge candidates without the source record changing.
+            //
+            // The matcher accepts the update and links the two works.
             val differentWorkAv2 =
               createWorkWith(
                 id = idA,
@@ -401,10 +417,21 @@ class MatcherWorkerServiceTest
                 mergeCandidateIds = Set(idB)
               )
 
-            sendWork(differentWorkAv2, retriever, queue)
+            processAndAssertMatchedWorkIs(
+              differentWorkAv2,
+              expectedWorks = Set(
+                MatchedIdentifiers(
+                  identifiers = Set(
+                    WorkIdentifier(idA, version = 2),
+                    WorkIdentifier(idB, version = 1)
+                  )
+                )
+              )
+            )
+
             eventually {
               assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, size = 1)
+              assertQueueEmpty(dlq)
             }
         }
     }

@@ -8,7 +8,6 @@ import weco.pipeline.matcher.models.{
   SourceWorkData,
   SubgraphId,
   VersionExpectedConflictException,
-  VersionUnexpectedConflictException,
   WorkNode,
   WorkStub
 }
@@ -58,10 +57,13 @@ object WorkGraphUpdater extends Logging {
             SourceWorkData(_, existingVersion, _, existingMergeCandidateIds)
           )
           if existingVersion == work.version && work.mergeCandidateIds != existingMergeCandidateIds.toSet =>
-        val versionConflictMessage =
-          s"update failed, work:${work.id} v${work.version} already exists with different content! update-ids:${work.mergeCandidateIds} != existing-ids:${existingMergeCandidateIds.toSet}"
-        debug(versionConflictMessage)
-        throw VersionUnexpectedConflictException(versionConflictMessage)
+        // This can happen when a transformer change corrects a work's merge
+        // candidates without the source record itself changing: the work is
+        // re-processed at the same version but with different candidates.
+        // We accept the update (last write wins) so the graph can re-form.
+        warn(
+          s"work:${work.id} v${work.version} resubmitted with different mergeCandidates (${existingMergeCandidateIds.toSet} -> ${work.mergeCandidateIds}); accepting update"
+        )
 
       case _ => ()
     }
