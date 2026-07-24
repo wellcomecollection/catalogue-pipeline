@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -5,6 +6,7 @@ from typing import cast
 
 import pyarrow.parquet as pq
 import pytest
+from lxml import etree
 from oai_pmh_client.client import OAIClient
 from pyiceberg.table import Table as IcebergTable
 
@@ -79,10 +81,83 @@ def test_rebuild_refuses_local_tables_with_publish() -> None:
         )
 
 
+def _list_records_xml(identifiers: list[str], token: str | None) -> etree._Element:
+    """A ListRecords response in the shape the OAI-PMH client parses."""
+    records = "".join(
+        f"""<record><header><identifier>{identifier}</identifier>
+        <datestamp>2026-07-24T00:00:00Z</datestamp></header>
+        <metadata/></record>"""
+        for identifier in identifiers
+    )
+    resumption = (
+        f'<resumptionToken completeListSize="99" cursor="0">{token}</resumptionToken>'
+        if token
+        else "<resumptionToken/>"
+    )
+    return etree.fromstring(
+        '<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/">'
+        f"<ListRecords>{records}{resumption}</ListRecords></OAI-PMH>"
+    )
+
+
+def test_iter_record_pages_follows_resumption_tokens() -> None:
+    """The page iterator drives the client's request loop directly, so it has
+    to keep matching the client's paging behaviour."""
+    requests: list[dict] = []
+
+    def fake_request(verb: str, **params: object) -> etree._Element:
+        requests.append({"verb": verb, **params})
+        if "resumptionToken" in params:
+            return _list_records_xml(["b"], None)
+        return _list_records_xml(["a"], "token-1")
+
+    oai_client = cast(OAIClient, SimpleNamespace(_request=fake_request))
+    config = cast(
+        OAIPMHAdapterConfig,
+        SimpleNamespace(oai_metadata_prefix="marc21", oai_set_spec="collect"),
+    )
+
+    pages = list(rebuild_adapter._iter_record_pages(oai_client, config))
+
+    assert [r.header.identifier for records, _ in pages for r in records] == ["a", "b"]
+    assert [size for _, size in pages] == [99, None]
+    # The first request carries the query, and the token request must not
+    # repeat it.
+    assert requests[0] == {
+        "verb": "ListRecords",
+        "metadataPrefix": "marc21",
+        "set": "collect",
+    }
+    assert requests[1] == {"verb": "ListRecords", "resumptionToken": "token-1"}
+
+
+def _row(identifier: str, namespace: str = "test_namespace") -> dict:
+    """An adapter store row with the required fields filled in."""
+    return {
+        "id": identifier,
+        "namespace": namespace,
+        "content": identifier,
+        "last_modified": datetime.now(UTC),
+        "deleted": None,
+    }
+
+
+def _fake_record(identifier: str) -> SimpleNamespace:
+    return SimpleNamespace(header=SimpleNamespace(identifier=identifier))
+
+
 def _download_stubs(
-    records: object,
+    pages: Iterable[tuple[list, int | None]], monkeypatch: pytest.MonkeyPatch
 ) -> tuple[OAIClient, OAIPMHAdapterConfig]:
-    oai_client = cast(OAIClient, SimpleNamespace(list_records=lambda **_: records))
+    monkeypatch.setattr(
+        rebuild_adapter,
+        "build_adapter_store_row",
+        lambda namespace, identifier, record: _row(identifier, namespace),
+    )
+    monkeypatch.setattr(
+        rebuild_adapter, "_iter_record_pages", lambda *args, **kwargs: iter(pages)
+    )
+    oai_client = cast(OAIClient, SimpleNamespace())
     config = cast(
         OAIPMHAdapterConfig,
         SimpleNamespace(
@@ -94,8 +169,10 @@ def _download_stubs(
     return oai_client, config
 
 
-def test_download_to_snapshot_aborts_on_zero_records(tmp_path: Path) -> None:
-    oai_client, config = _download_stubs(iter([]))
+def test_download_to_snapshot_aborts_on_zero_records(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    oai_client, config = _download_stubs([([], None)], monkeypatch)
     snapshot_path = tmp_path / "snapshot.parquet"
 
     with pytest.raises(RuntimeError, match="returned 0 records"):
@@ -105,14 +182,17 @@ def test_download_to_snapshot_aborts_on_zero_records(tmp_path: Path) -> None:
     assert not (tmp_path / "snapshot.parquet.partial").exists()
 
 
-def test_download_to_snapshot_leaves_no_snapshot_on_failure(tmp_path: Path) -> None:
+def test_download_to_snapshot_leaves_no_snapshot_on_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """An interrupted download must not leave a file at the snapshot path,
     otherwise a resumed run would silently rebuild from incomplete data."""
 
-    def raise_connection_error(_: object) -> object:
+    def fail_mid_download() -> Iterable[tuple[list, int | None]]:
+        yield [_fake_record("a")], 2
         raise ConnectionError("mid-download failure")
 
-    oai_client, config = _download_stubs(map(raise_connection_error, [1]))
+    oai_client, config = _download_stubs(fail_mid_download(), monkeypatch)
     snapshot_path = tmp_path / "snapshot.parquet"
 
     with pytest.raises(ConnectionError):

@@ -21,7 +21,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import itertools
 import json
 import os
 import time
@@ -35,6 +34,7 @@ import pyarrow.compute as pc
 import pyarrow.parquet as pq
 import structlog
 from oai_pmh_client.client import OAIClient
+from oai_pmh_client.models import NS, Record, ResumptionToken
 from pyiceberg.expressions import EqualTo
 from pyiceberg.table import ALWAYS_TRUE
 
@@ -68,6 +68,9 @@ BATCH_SIZE = 50_000
 """Number of rows per batch when writing to the snapshot file and loading
 records into the adapter store."""
 
+PROGRESS_LOG_EVERY = 5_000
+"""Records between download progress log lines."""
+
 EVENT_BUS_NAME = "catalogue-pipeline-adapter-event-bus"
 
 
@@ -78,6 +81,60 @@ def _iter_snapshot_batches(snapshot_path: str) -> Iterator[pa.Table]:
         yield pa.Table.from_batches([record_batch]).cast(ADAPTER_STORE_ARROW_SCHEMA)
 
 
+def _iter_record_pages(
+    oai_client: OAIClient, config: OAIPMHAdapterConfig
+) -> Iterator[tuple[list[Record], int | None]]:
+    """Yield ListRecords pages with the record total the server reports.
+
+    `OAIClient.list_records` keeps the resumption token inside its own loop and
+    yields a flat record stream, which leaves a caller unable to see the
+    completeListSize the token carries. Driving the request loop here exposes
+    it, so a download can report how far through it is. The paging behaviour
+    matches the client's, and this belongs in the oai-pmh-client package once
+    it grows a public API for it.
+    """
+    params: dict[str, str | None] = {
+        "metadataPrefix": config.oai_metadata_prefix,
+        "set": config.oai_set_spec,
+    }
+
+    while True:
+        xml = oai_client._request("ListRecords", **params)
+        records = [
+            Record.from_xml(element)
+            for element in xml.findall("./oai:ListRecords/oai:record", namespaces=NS)
+        ]
+
+        token_element = xml.find(".//oai:resumptionToken", namespaces=NS)
+        token = (
+            ResumptionToken.from_xml(token_element)
+            if token_element is not None and token_element.text
+            else None
+        )
+
+        yield records, token.complete_list_size if token else None
+
+        if token is None:
+            return
+        # When using a resumption token, the original parameters must be omitted.
+        params = {"resumptionToken": token.value}
+
+
+def _log_download_progress(total: int, expected: int | None, started_at: float) -> None:
+    """Log harvest position, rate and estimated time remaining."""
+    elapsed = max(time.time() - started_at, 1e-6)
+    rate = total / elapsed
+    remaining = (expected - total) / rate if expected and expected > total else None
+    logger.info(
+        "Download progress",
+        total=total,
+        expected=expected,
+        percent=round(100 * total / expected, 1) if expected else None,
+        records_per_second=round(rate, 1),
+        eta_minutes=round(remaining / 60) if remaining else None,
+    )
+
+
 def _download_to_snapshot(
     oai_client: OAIClient, config: OAIPMHAdapterConfig, snapshot_path: str
 ) -> int:
@@ -86,28 +143,44 @@ def _download_to_snapshot(
 
     Writes to a `.partial` file moved into place only on success, so an
     interrupted download cannot leave a truncated snapshot for a resumed run
-    to trust.
+    to trust. An interrupted download has to start again: this harvest runs for
+    hours, so run it somewhere it will not be disturbed.
     """
     total = 0
-    records = oai_client.list_records(
-        metadata_prefix=config.oai_metadata_prefix, set_spec=config.oai_set_spec
-    )
+    expected: int | None = None
+    logged_at = 0
+    started_at = time.time()
+    rows: list[dict] = []
     partial_path = f"{snapshot_path}.partial"
+
     with pq.ParquetWriter(partial_path, ADAPTER_STORE_ARROW_SCHEMA) as writer:
-        for batch in itertools.batched(records, BATCH_SIZE):
-            rows = [
+
+        def flush() -> None:
+            writer.write_table(
+                pa.Table.from_pylist(rows, schema=ADAPTER_STORE_ARROW_SCHEMA)
+            )
+            rows.clear()
+
+        for records, complete_list_size in _iter_record_pages(oai_client, config):
+            expected = complete_list_size or expected
+            rows.extend(
                 build_adapter_store_row(
                     namespace=config.adapter_namespace,
                     identifier=record.header.identifier,
                     record=record,
                 )
-                for record in batch
-            ]
-            writer.write_table(
-                pa.Table.from_pylist(rows, schema=ADAPTER_STORE_ARROW_SCHEMA)
+                for record in records
             )
-            total += len(rows)
-            logger.info("Download progress", total=total)
+            total += len(records)
+
+            if total - logged_at >= PROGRESS_LOG_EVERY:
+                _log_download_progress(total, expected, started_at)
+                logged_at = total
+            if len(rows) >= BATCH_SIZE:
+                flush()
+
+        if rows:
+            flush()
 
     if total == 0:
         os.remove(partial_path)
@@ -115,8 +188,19 @@ def _download_to_snapshot(
             "OAI-PMH endpoint returned 0 records. This is almost certainly "
             "an error. Aborting to avoid wiping the adapter store."
         )
+
+    if expected is not None and total != expected:
+        logger.warning(
+            "Downloaded record count does not match the count the server "
+            "reported. The rebuild replaces the store with this snapshot, so "
+            "check the difference before continuing.",
+            total=total,
+            expected=expected,
+            difference=total - expected,
+        )
+
     os.replace(partial_path, snapshot_path)
-    logger.info("Download complete", path=snapshot_path, total=total)
+    logger.info("Download complete", path=snapshot_path, total=total, expected=expected)
     return total
 
 
