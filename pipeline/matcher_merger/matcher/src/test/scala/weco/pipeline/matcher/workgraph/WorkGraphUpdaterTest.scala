@@ -344,6 +344,36 @@ class WorkGraphUpdaterTest
         workB.copy(componentIds = List(idB))
       )
     }
+
+    it(
+      "processes an update for the same version if the suppression changes"
+    ) {
+      val (workA, workB) = createTwoWorks("A->B")
+
+      val existingVersion = workA.sourceWork.get.version
+
+      val result = WorkGraphUpdater
+        .update(
+          work = createWorkWith(
+            idA,
+            version = existingVersion,
+            mergeCandidateIds = Set(idB),
+            workType = "Deleted"
+          ),
+          affectedNodes = Set(workA, workB)
+        )
+
+      result shouldBe Set(
+        workA
+          .copy(componentIds = List(idA))
+          .updateSourceWork(
+            version = existingVersion,
+            mergeCandidateIds = Set(idB),
+            suppressed = true
+          ),
+        workB.copy(componentIds = List(idB))
+      )
+    }
   }
 
   describe("Removing links") {
