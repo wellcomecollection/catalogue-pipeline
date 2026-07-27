@@ -207,6 +207,10 @@ locals {
         "Ecs.CannotPullContainerErrorException",
         "Ecs.ContainerRuntimeTimeoutErrorException",
         "Ecs.EssentialContainerExited",
+        # Mostly a missed heartbeat, meaning the task died. A retry may briefly run
+        # alongside a stalled task, which is safe: extractor and ingestor writes are
+        # idempotent overwrites keyed on the window.
+        "States.Timeout",
       ]
       IntervalSeconds = 1
       MaxAttempts     = 3
