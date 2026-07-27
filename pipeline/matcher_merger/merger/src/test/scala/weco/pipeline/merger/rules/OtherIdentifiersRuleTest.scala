@@ -153,9 +153,7 @@ class OtherIdentifiersRuleTest
             physicalSierraWork.sourceIdentifier,
             miroWork.sourceIdentifier
           ) ++
-          metsWorks.map(
-            _.sourceIdentifier
-          ) ++ axiellWork.data.otherIdentifiers :+
+          metsWorks.map(_.sourceIdentifier) ++ axiellWork.data.otherIdentifiers :+
           physicalSierraWork.data.otherIdentifiers
             .find(_.identifierType.id == IdentifierType.SierraIdentifier.id)
             .get
@@ -239,8 +237,8 @@ class OtherIdentifiersRuleTest
         case FieldMergeResult(otherIdentifiers, mergedSources) =>
           otherIdentifiers should contain theSameElementsAs
             miroWork.sourceIdentifier ::
-            miroWork2.sourceIdentifier ::
-            digmiroSierraWork.data.otherIdentifiers
+              miroWork2.sourceIdentifier ::
+              digmiroSierraWork.data.otherIdentifiers
           mergedSources should contain theSameElementsAs Seq(
             miroWork,
             miroWork2
@@ -315,9 +313,7 @@ class OtherIdentifiersRuleTest
     }
   }
 
-  it(
-    "merges only digcode identifiers from sources' otherIdentifiers into Axiell target"
-  ) {
+  it("merges only digcode identifiers from sources' otherIdentifiers into Axiell target") {
     inside(OtherIdentifiersRule.merge(axiellWork, Seq(sierraWithDigcode))) {
       case FieldMergeResult(otherIdentifiers, _) =>
         otherIdentifiers should contain only (
