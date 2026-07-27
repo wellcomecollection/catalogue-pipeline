@@ -25,13 +25,10 @@ logger = structlog.get_logger(__name__)
 
 MIGRATIONS_DIR = str(Path(__file__).parent / "migrations")
 
-# MySQL ER_ACCESS_DENIED_ERROR. Raised when the password we hold no longer
-# matches the one on the server.
-ACCESS_DENIED_ERROR_CODE = 1045
+ACCESS_DENIED_ERROR_CODE = 1045  # MySQL ER_ACCESS_DENIED_ERROR
 
-# Rotation replaces the password on the server before the new value becomes the
-# current version of the secret, so a connection attempt during that window is
-# denied even though we just read the secret. Retrying picks up the new value.
+# Rotation changes the server password before the new secret version becomes
+# current, so a connect in that window is denied even with a fresh read.
 CONNECT_ATTEMPTS = 3
 RETRY_DELAY_SECONDS = 2
 
@@ -62,13 +59,10 @@ class DBCredentials(NamedTuple):
 
 
 def get_credentials(config: DBConfig) -> DBCredentials:
-    """Resolve the database credentials at the point of use.
+    """Read the credentials from Secrets Manager, or from config if no secret.
 
-    When a secret name is configured the credentials are read from Secrets
-    Manager on every call. That is deliberate: the identifiers cluster uses an
-    AWS-managed master user secret on a 7 day rotation, so anything cached for
-    the lifetime of a warm Lambda will eventually be wrong. Without a secret
-    name (local development, tests) the configured values are used as they are.
+    Reading on every call is deliberate: the secret rotates every 7 days, so
+    anything cached for the lifetime of a warm Lambda eventually goes stale.
     """
     secret_name = config.rds_client.secret_name
     if secret_name is None:
@@ -89,10 +83,10 @@ def _is_access_denied(exc: pymysql.err.OperationalError) -> bool:
 def _connect_with_retry[T](
     config: DBConfig, connect: Callable[[DBCredentials], T]
 ) -> T:
-    """Run ``connect`` with freshly resolved credentials, retrying if denied.
+    """Run ``connect`` with fresh credentials, retrying if access is denied.
 
     Retrying only helps when the credentials can change between attempts, so it
-    is skipped when they come from configuration rather than Secrets Manager.
+    is skipped when they come from config rather than Secrets Manager.
     """
     attempts = CONNECT_ATTEMPTS if config.rds_client.secret_name else 1
 

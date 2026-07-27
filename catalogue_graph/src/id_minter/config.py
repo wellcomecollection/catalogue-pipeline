@@ -22,11 +22,9 @@ RDS_USERNAME = os.getenv("RDS_USERNAME", "id_minter")
 RDS_PASSWORD = os.getenv("RDS_PASSWORD", "id_minter")
 RDS_MAX_CONNECTIONS = int(os.getenv("RDS_MAX_CONNECTIONS", "8"))
 
-# Name of the Secrets Manager secret holding the RDS credentials. When set, the
-# username and password are read from it every time we open a connection,
-# rather than from the env vars above. The identifiers cluster uses an
-# AWS-managed master user secret which rotates every 7 days, and anything
-# resolved at Lambda init goes stale the moment that happens.
+# When set, credentials are read from this secret on every connection instead of
+# from the env vars above. The managed master user secret rotates every 7 days,
+# so anything resolved at Lambda init goes stale.
 RDS_SECRET_NAME = os.getenv("RDS_SECRET_NAME")
 
 # ---------------------------------------------------------------------------
