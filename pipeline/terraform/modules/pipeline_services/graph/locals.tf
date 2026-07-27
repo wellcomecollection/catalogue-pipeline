@@ -206,10 +206,6 @@ locals {
         "Ecs.CannotPullContainerErrorException",
         "Ecs.ContainerRuntimeTimeoutErrorException",
         "Ecs.EssentialContainerExited",
-        # Almost always a missed heartbeat, so the task is dead. waitForTaskToken does
-        # not stop the ECS task, so a retry can run alongside an original that is still
-        # alive, which is safe: writes are idempotent overwrites keyed on the window.
-        # Only the three ECS states set TimeoutSeconds, so this is inert elsewhere.
         "States.Timeout",
       ]
       IntervalSeconds = 1
