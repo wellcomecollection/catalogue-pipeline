@@ -25,6 +25,9 @@ EventValidator = Callable[[str], EventModel]
 # Well under HeartbeatSeconds on the waitForTaskToken states.
 HEARTBEAT_INTERVAL_SECONDS = 60
 
+# Bound the wait for a heartbeat call already in flight.
+HEARTBEAT_JOIN_TIMEOUT_SECONDS = 5
+
 
 class StepFunctionClient(Protocol):
     def send_task_success(self, taskToken: str, output: str) -> None: ...
@@ -107,7 +110,7 @@ def task_heartbeat(
         yield
     finally:
         stop.set()
-        thread.join(timeout=interval_seconds)
+        thread.join(timeout=HEARTBEAT_JOIN_TIMEOUT_SECONDS)
 
 
 def ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
