@@ -21,6 +21,7 @@ data "aws_iam_policy_document" "allow_ingestor_loader_task_token" {
     actions = [
       "states:SendTaskSuccess",
       "states:SendTaskFailure",
+      "states:SendTaskHeartbeat",
     ]
     resources = [
       module.catalogue_graph_ingestor_state_machine.state_machine_arn,

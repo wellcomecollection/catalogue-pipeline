@@ -41,6 +41,7 @@ data "aws_iam_policy_document" "allow_extractor_task_token" {
     actions = [
       "states:SendTaskSuccess",
       "states:SendTaskFailure",
+      "states:SendTaskHeartbeat",
     ]
     resources = [
       module.catalogue_graph_extractor_state_machine.state_machine_arn,
