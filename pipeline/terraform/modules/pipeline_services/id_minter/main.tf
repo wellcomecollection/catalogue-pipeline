@@ -35,6 +35,7 @@ module "id_minter_lambda" {
       PIPELINE_DATE            = var.pipeline_date
       PIPELINE_STEP            = local.pipeline_step // used in CloudWatch metric dimensions
       DOWNSTREAM_SNS_TOPIC_ARN = module.id_minter_output_topic.arn
+      RDS_SECRET_NAME          = var.rds_secret_name
     }
   )
   secret_env_vars = var.secret_env_vars
@@ -60,7 +61,8 @@ module "id_generator_lambda" {
   timeout     = 60 * 5 # 5 Minutes
 
   environment_variables = {
-    PIPELINE_DATE = var.pipeline_date
+    PIPELINE_DATE   = var.pipeline_date
+    RDS_SECRET_NAME = var.rds_secret_name
   }
 
   secret_env_vars = var.secret_env_vars

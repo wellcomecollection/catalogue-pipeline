@@ -47,6 +47,7 @@ module "id_minter_lambda" {
   vpc_config      = local.id_minter_vpc_config
   env_vars        = local.id_minter_env_vars
   secret_env_vars = local.id_minter_secret_env_vars
+  rds_secret_name = local.rds_master_secret_name
   alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 }
 

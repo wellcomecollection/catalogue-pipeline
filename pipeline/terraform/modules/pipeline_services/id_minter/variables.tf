@@ -37,6 +37,14 @@ variable "secret_env_vars" {
   type = map(string)
 }
 
+# Name of the Secrets Manager secret holding the RDS credentials. The Lambdas
+# read it on every connection so that they pick up the automatic 7 day rotation
+# of the managed master user password. Read access comes from the secret refs
+# in secret_env_vars, which cover the same secret.
+variable "rds_secret_name" {
+  type = string
+}
+
 variable "alarm_topic_arn" {
   type = string
 }

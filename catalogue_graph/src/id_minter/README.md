@@ -226,11 +226,18 @@ All settings are sourced from environment variables with sensible defaults for l
 |---|---|---|
 | `RDS_PRIMARY_HOST` | `localhost` | MySQL host |
 | `RDS_PORT` | `3306` | MySQL port |
-| `RDS_USERNAME` | `id_minter` | Database user |
-| `RDS_PASSWORD` | _(empty)_ | Database password |
+| `RDS_USERNAME` | `id_minter` | Database user, ignored when `RDS_SECRET_NAME` is set |
+| `RDS_PASSWORD` | _(empty)_ | Database password, ignored when `RDS_SECRET_NAME` is set |
+| `RDS_SECRET_NAME` | _(unset)_ | Secrets Manager secret holding the database credentials |
 | `IDENTIFIERS_DATABASE` | `identifiers` | Database name |
 | `APPLY_MIGRATIONS` | `false` | Apply yoyo migrations on startup |
 | `ES_SOURCE_INDEX_PREFIX` | `works-source` | Upstream ES index prefix |
 | `ES_TARGET_INDEX_PREFIX` | `works-identified` | Downstream ES index prefix |
 | `ES_SOURCE_INDEX_DATE_SUFFIX` | _(unset — uses `PIPELINE_DATE`)_ | Date suffix for the source index |
 | `ES_TARGET_INDEX_DATE_SUFFIX` | _(unset — uses `PIPELINE_DATE`)_ | Date suffix for the target index |
+
+### Database credentials
+
+In the deployed pipelines `RDS_SECRET_NAME` points at the AWS-managed master user secret for the identifiers cluster, and the username and password are read from it each time a connection is opened. That secret rotates automatically every 7 days, and a warm Lambda holds its environment for far longer than a single invocation, so credentials resolved at init would eventually be rejected. If a connection is refused with an access denied error the credentials are re-read and the connection retried, which also covers a rotation landing mid-invocation.
+
+Locally `RDS_SECRET_NAME` is left unset and `RDS_USERNAME` / `RDS_PASSWORD` are used directly.
