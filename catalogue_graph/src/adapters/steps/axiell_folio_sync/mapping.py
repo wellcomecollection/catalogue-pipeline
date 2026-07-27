@@ -294,6 +294,16 @@ class UpsertResult(BaseModel):
     errors: list[UpsertError] = Field(default_factory=list)
 
 
+class SuppressResult(BaseModel):
+    """The result of :func:`upsert.suppress_by_guid` for a superseded GUID."""
+
+    guid: str
+    instance: EntityResult = Field(default_factory=EntityResult)
+    holdings: EntityResult = Field(default_factory=EntityResult)
+    item: EntityResult = Field(default_factory=EntityResult)
+    errors: list[UpsertError] = Field(default_factory=list)
+
+
 # ── lookup helper (mirrors the YAML map → default → lookup chain) ────────────────
 
 

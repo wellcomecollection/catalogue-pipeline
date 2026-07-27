@@ -19,6 +19,7 @@ from adapters.steps.axiell_folio_sync.mapping import (
 from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
 from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
+from adapters.utils.axiell_changeset_reader import SupersededGuid
 
 # 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title).
 SELECTED = (
@@ -289,3 +290,93 @@ def test_run_sync_passes_ref_cache_to_upsert(monkeypatch: pytest.MonkeyPatch) ->
     )
 
     assert isinstance(captured["ref_cache"], FakeRefCache)
+
+
+# ── Pass 2: reconciler deletions (superseded GUIDs) ───────────────────────────
+
+
+class _SuppressInventory:
+    """FOLIO fake where every entity for a GUID already exists and can be PUT."""
+
+    def __init__(self) -> None:
+        self.put_paths: list[str] = []
+
+    def get(self, path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        list_key = {
+            "/inventory/items": "items",
+            "/holdings-storage/holdings": "holdingsRecords",
+            "/inventory/instances": "instances",
+        }.get(path)
+        return {list_key: [{"id": f"{path}#id"}]} if list_key else {}
+
+    def post(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        raise AssertionError("suppression must not POST")
+
+    def put(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        self.put_paths.append(path)
+        return {}
+
+    def delete(self, path: str) -> dict[str, Any]:
+        raise AssertionError("suppression must not hard-delete")
+
+
+def _superseded(guid: str) -> SupersededGuid:
+    from datetime import UTC, datetime
+
+    return SupersededGuid(
+        fact_id=f"rec/{guid}/cs1",
+        record_id=f"rec-{guid}",
+        guid=guid,
+        changeset_id="cs1",
+        last_modified=datetime(2026, 1, 1, tzinfo=UTC),
+    )
+
+
+def test_deletions_suppress_and_are_reported() -> None:
+    folio = _SuppressInventory()
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [],  # no upsert rows, deletions only
+        FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+        deletions=[_superseded("g1"), _superseded("g2")],
+    )
+
+    assert resp.total_deletions == 2
+    assert resp.counts["deletions"] == 2
+    # 2 guids x 3 entities each suppressed.
+    assert resp.counts["suppressed"] == 6
+    assert resp.total_errors == 0
+    # 2 guids x 3 entities each PUT back suppressed.
+    assert len(folio.put_paths) == 6
+
+
+def test_deletion_failure_recorded_as_error_without_aborting() -> None:
+    folio = _SuppressInventory()
+
+    def boom(path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        raise RuntimeError("folio down")
+
+    folio.put = boom  # type: ignore[method-assign]
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [],
+        FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+        deletions=[_superseded("g1")],
+    )
+
+    assert resp.counts["deletions"] == 1
+    assert resp.counts["suppressed"] == 0
+    assert resp.total_errors == 1
+
+
+def test_no_deletions_leaves_counts_zero() -> None:
+    resp = _run([_row("sel", SELECTED)])
+
+    assert resp.total_deletions == 0
+    assert resp.counts["deletions"] == 0

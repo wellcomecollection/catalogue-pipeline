@@ -28,6 +28,18 @@ class SyncErrorEntry(BaseModel):
     timestamp: str
 
 
+class SyncDeletionEntry(BaseModel):
+    """One superseded-GUID suppression (authoritative delete) in the run report."""
+
+    guid: str
+    record_id: str
+    changeset_id: str
+    instance_action: str | None
+    holdings_action: str | None
+    item_action: str | None
+    timestamp: str
+
+
 class AxiellFolioSyncEvent(BaseModel):
     """Input to the sync step (the ``detail`` of an axiell.adapter.completed event)."""
 
@@ -50,3 +62,4 @@ class AxiellFolioSyncResponse(BaseModel):
     total_successful: int = 0
     total_errors: int = 0
     total_records: int = 0
+    total_deletions: int = 0

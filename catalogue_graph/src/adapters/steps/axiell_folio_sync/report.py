@@ -16,7 +16,11 @@ from typing import ClassVar
 
 from pydantic import Field
 
-from adapters.steps.axiell_folio_sync.models import SyncErrorEntry, SyncSuccessEntry
+from adapters.steps.axiell_folio_sync.models import (
+    SyncDeletionEntry,
+    SyncErrorEntry,
+    SyncSuccessEntry,
+)
 from utils.reporting import PipelineMetric, PipelineReport
 
 PIPELINE_STEP = "axiell_folio_sync"
@@ -30,6 +34,7 @@ class AxiellFolioSyncReport(PipelineReport):
     counts: dict[str, int]
     successful: list[SyncSuccessEntry] = Field(default_factory=list)
     errors: list[SyncErrorEntry] = Field(default_factory=list)
+    deletions: list[SyncDeletionEntry] = Field(default_factory=list)
     s3_bucket: str | None = Field(default=None, exclude=True)
 
     @property
@@ -51,6 +56,9 @@ class AxiellFolioSyncReport(PipelineReport):
             PipelineMetric(name="records_updated", value=self.counts.get("updated", 0)),
             PipelineMetric(
                 name="records_suppressed", value=self.counts.get("suppressed", 0)
+            ),
+            PipelineMetric(
+                name="deletions_processed", value=self.counts.get("deletions", 0)
             ),
             PipelineMetric(name="records_skipped", value=self.counts.get("skipped", 0)),
             PipelineMetric(

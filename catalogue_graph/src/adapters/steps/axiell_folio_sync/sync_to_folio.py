@@ -24,18 +24,22 @@ from adapters.steps.axiell_folio_sync.folio_callables import (
 )
 from adapters.steps.axiell_folio_sync.mapping import (
     MappingError,
-    UpsertResult,
     select_and_build,
 )
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
+    SyncDeletionEntry,
     SyncErrorEntry,
     SyncSuccessEntry,
 )
 from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
-from adapters.steps.axiell_folio_sync.upsert import upsert_from_payloads
+from adapters.steps.axiell_folio_sync.upsert import (
+    suppress_by_guid,
+    upsert_from_payloads,
+)
+from adapters.utils.axiell_changeset_reader import SupersededGuid
 
 logger = structlog.get_logger(__name__)
 
@@ -102,12 +106,79 @@ def _build_error(
     )
 
 
-def _tally_upsert_actions(result: UpsertResult, counts: dict[str, int]) -> None:
-    """Increment counts for each entity action in a successful upsert."""
+# Maps an entity action to its plural count key. "suppress" -> "suppressed"
+# (not "suppressd"), so this cannot be derived by appending "d".
+_ACTION_COUNT_KEY = {
+    "create": "created",
+    "update": "updated",
+    "suppress": "suppressed",
+}
+
+
+def _tally_entity_actions(result: Any, counts: dict[str, int]) -> None:
+    """Increment counts for each entity action in a successful upsert/suppress."""
     for entity in ("instance", "holdings", "item"):
-        action = getattr(result, entity).action
-        if action in ("create", "update", "suppress"):
-            counts[action + "d"] += 1
+        key = _ACTION_COUNT_KEY.get(getattr(result, entity).action)
+        if key:
+            counts[key] += 1
+
+
+def _run_suppressions(
+    deletions: list[SupersededGuid],
+    folio: FolioInventoryOps,
+    counts: dict[str, int],
+    errors_list: list[SyncErrorEntry],
+    *,
+    dry_run: bool,
+) -> tuple[list[SyncDeletionEntry], int]:
+    """Suppress each superseded GUID's FOLIO records (item → holdings → instance).
+
+    A per-GUID FOLIO failure is recorded as an error entry and does not abort the
+    run: the upsert pass has already committed, and the reconciler mapping/ES
+    delete are upstream and independent. Returns the manifest entries for GUIDs
+    that suppressed cleanly, and the count of GUIDs that errored.
+    """
+    entries: list[SyncDeletionEntry] = []
+    error_count = 0
+
+    for superseded in deletions:
+        counts["deletions"] += 1
+        result = suppress_by_guid(superseded.guid, folio, dry_run=dry_run)
+
+        if result.errors:
+            error_count += 1
+            errors_list.append(
+                _build_error(
+                    superseded.guid,
+                    superseded.changeset_id,
+                    "suppress",
+                    [e.model_dump() for e in result.errors],
+                )
+            )
+        else:
+            _tally_entity_actions(result, counts)
+            entries.append(
+                SyncDeletionEntry(
+                    guid=superseded.guid,
+                    record_id=superseded.record_id,
+                    changeset_id=superseded.changeset_id,
+                    instance_action=result.instance.action,
+                    holdings_action=result.holdings.action,
+                    item_action=result.item.action,
+                    timestamp=utc_now_iso(),
+                )
+            )
+
+        logger.info(
+            "suppress_result",
+            guid=superseded.guid,
+            instance=result.instance.action or "skip",
+            holdings=result.holdings.action or "skip",
+            item=result.item.action or "skip",
+            errors=len(result.errors),
+        )
+
+    return entries, error_count
 
 
 # ── core ──────────────────────────────────────────────────────────────────────
@@ -121,11 +192,18 @@ def run_sync(
     *,
     dry_run: bool,
     manifest_bucket: str | None = None,
+    deletions: list[SupersededGuid] | None = None,
 ) -> AxiellFolioSyncResponse:
     """Select, map, and upsert pre-read adapter rows to FOLIO.
 
     Dependencies (rows, ref cache, FOLIO client) are injected so the loop is
     unit-testable without SSM / Iceberg / FOLIO; ``handler`` builds the real ones.
+
+    ``deletions`` carries the reconciler's superseded GUIDs for this changeset
+    batch. They are suppressed in a second pass *after* the upsert pass so a
+    record re-created and superseded in the same batch is handled in write order;
+    the reader has already dropped any GUID reclaimed by a current mapping, so a
+    live record is never suppressed here.
     """
     logger.info(
         "axiell_folio_sync start",
@@ -146,6 +224,8 @@ def run_sync(
         "tombstone": 0,
         "failed": 0,
         "total": 0,
+        # Superseded GUIDs (reconciler deletions) processed in the second pass.
+        "deletions": 0,
     }
 
     for row in rows:
@@ -221,7 +301,7 @@ def run_sync(
             )
         else:
             total_successful += 1
-            _tally_upsert_actions(result, counts)
+            _tally_entity_actions(result, counts)
 
             successful.append(
                 SyncSuccessEntry(
@@ -243,6 +323,12 @@ def run_sync(
             errors=len(result.errors),
         )
 
+    # ── Pass 2: authoritative deletes (reconciler superseded GUIDs) ────────────
+    deletion_entries, deletion_errors = _run_suppressions(
+        deletions or [], folio, counts, errors_list, dry_run=dry_run
+    )
+    total_errors += deletion_errors
+
     report = AxiellFolioSyncReport(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
@@ -250,6 +336,7 @@ def run_sync(
         counts=counts,
         successful=successful,
         errors=errors_list,
+        deletions=deletion_entries,
         s3_bucket=manifest_bucket,
         # The S3 report is written even on dry runs (it is how dry runs are
         # validated); only CloudWatch metrics are suppressed.
@@ -264,6 +351,7 @@ def run_sync(
         total=counts["total"],
         successful=total_successful,
         errors=total_errors,
+        deletions=counts["deletions"],
         dry_run=dry_run,
     )
 
@@ -275,4 +363,5 @@ def run_sync(
         total_successful=total_successful,
         total_errors=total_errors,
         total_records=total_successful + total_errors,
+        total_deletions=counts["deletions"],
     )

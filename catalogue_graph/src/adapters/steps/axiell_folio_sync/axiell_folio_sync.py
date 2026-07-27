@@ -48,7 +48,10 @@ from adapters.steps.axiell_folio_sync.models import (
 )
 from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
-from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
+from adapters.utils.axiell_changeset_reader import (
+    AxiellChangesetReader,
+    SupersededGuid,
+)
 from clients.folio_client import FolioClient, FolioInventoryClient, ssl_context_from_env
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import ecs_handler
@@ -66,26 +69,34 @@ def _read_rows(
     sample_limit: int | None,
     *,
     use_rest_api_table: bool,
-) -> list[dict]:
-    """Read changed Axiell adapter rows via :class:`AxiellChangesetReader`.
+) -> tuple[list[dict], list[SupersededGuid]]:
+    """Read changed Axiell adapter rows and superseded-GUID deletions.
 
     Uses the same ``AXIELL_CONFIG`` as the Axiell adapter, so it works against
     S3 Tables (``use_rest_api_table=True``, production) or the local sqlite
     catalog (``use_rest_api_table=False``, local dev) with no code changes.
-    Read-only: the table is never created. Built without deletion facts, so
-    the sync depends on no other tables; authoritative deletes (platform#6440)
-    would consume ``reader.iter_deletions()`` after the upsert pass.
+    Read-only: the tables are never created.
+
+    Deletion facts are read only for incremental (changeset) runs. The reconcile
+    step in the adapter state machine writes them into the same table bucket
+    before ``axiell.adapter.completed`` fires, and ``iter_deletions`` re-checks
+    each fact against the current reconciler mappings, so a GUID reclaimed by a
+    revert/handoff never suppresses a live record. A sample/reindex run (no
+    changesets) has nothing to overwrite, so it reads no facts and the reader is
+    built without the facts/reconciler tables.
     """
     reader = AxiellChangesetReader.build(
         AXIELL_CONFIG,
         changeset_ids or [],
         use_rest_api_table=use_rest_api_table,
-        with_deletion_facts=False,
+        with_deletion_facts=bool(changeset_ids),
     )
 
     if changeset_ids:
         logger.info("adapter_read", mode="changesets", changeset_ids=changeset_ids)
-        return list(reader.iter_records())
+        records = list(reader.iter_records())
+        deletions = list(reader.iter_deletions())
+        return records, deletions
 
     # Dev/smoke-test fallback: a sample of active records (no changesets given).
     limit = sample_limit or 10
@@ -95,7 +106,7 @@ def _read_rows(
         rows.append(row)
         if len(rows) >= limit:
             break
-    return rows
+    return rows, []
 
 
 # ── entry points ──────────────────────────────────────────────────────────────
@@ -126,12 +137,12 @@ def handler(
     inventory = FolioInventoryClient(client)
     ref_cache = RefCache(inventory).load()
 
-    rows = _read_rows(
+    rows, deletions = _read_rows(
         event.changeset_ids or None,
         event.sample_limit,
         use_rest_api_table=use_rest_api_table,
     )
-    logger.info("adapter_read complete", rows=len(rows))
+    logger.info("adapter_read complete", rows=len(rows), deletions=len(deletions))
 
     return run_sync(
         event,
@@ -140,6 +151,7 @@ def handler(
         inventory,
         dry_run=dry_run,
         manifest_bucket=manifest_bucket,
+        deletions=deletions,
     )
 
 

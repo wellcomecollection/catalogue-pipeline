@@ -24,7 +24,16 @@ from __future__ import annotations
 import structlog
 
 from .folio_callables import FolioInventoryOps
-from .mapping import EntityResult, MappedPayloads, UpsertError, UpsertResult
+from .mapping import (
+    EntityResult,
+    MappedPayloads,
+    SuppressResult,
+    UpsertError,
+    UpsertResult,
+    _holdings_hrid,
+    _instance_hrid,
+    _item_hrid,
+)
 from .ref_cache import RefCache
 
 logger = structlog.get_logger(__name__)
@@ -66,6 +75,39 @@ def _find_by_hrid(
     except Exception as exc:
         logger.warning("hrid lookup failed path=%s hrid=%s error=%s", path, hrid, exc)
         return None
+
+
+def _suppress_entity(
+    folio: FolioInventoryOps,
+    *,
+    search_path: str,
+    list_key: str,
+    write_path_prefix: str,
+    hrid: str,
+    dry_run: bool,
+) -> EntityResult:
+    """Resolve an entity by hrid and set discoverySuppress + staffSuppress.
+
+    Not-found → ``skip`` (the record is already gone). Idempotent: re-suppressing
+    a record whose flags are already true is a harmless PUT, so redelivered
+    deletion facts do not misbehave.
+    """
+    existing = _find_by_hrid(folio, search_path, hrid, list_key)
+    if not existing:
+        return EntityResult(action="skip")
+
+    folio_id: str = existing["id"]
+    if not dry_run:
+        folio.put(
+            f"{write_path_prefix}/{folio_id}",
+            {
+                **_strip_readonly(existing),
+                "discoverySuppress": True,
+                "staffSuppress": True,
+            },
+        )
+        logger.info("suppressed hrid=%s folio_id=%s", hrid, folio_id)
+    return EntityResult(action="suppress", id=folio_id)
 
 
 def _resolve_item_note_types(payload: dict, ref_cache: RefCache) -> dict:
@@ -231,21 +273,14 @@ def upsert_from_payloads(
 
         # ── Item ────────────────────────────────────────────────────────────
         if deleted:
-            existing_item = _find_by_hrid(folio, "/inventory/items", item_hrid, "items")
-            if existing_item:
-                result.item = EntityResult(action="suppress", id=existing_item["id"])
-                if not dry_run:
-                    folio.put(
-                        f"/inventory/items/{existing_item['id']}",
-                        {
-                            **_strip_readonly(existing_item),
-                            "discoverySuppress": True,
-                            "staffSuppress": True,
-                        },
-                    )
-                    logger.info("suppressed item source_id=%s", source_id)
-            else:
-                result.item = EntityResult(action="skip")
+            result.item = _suppress_entity(
+                folio,
+                search_path="/inventory/items",
+                list_key="items",
+                write_path_prefix="/inventory/items",
+                hrid=item_hrid,
+                dry_run=dry_run,
+            )
         else:
             item_payload = {
                 **mapped.item.model_dump(exclude_none=True),
@@ -284,5 +319,60 @@ def upsert_from_payloads(
 
         result.errors.append(UpsertError(type="api", detail=str(exc)))
         logger.error("api error source_id=%s detail=%s", source_id, exc)
+
+    return result
+
+
+# ── reconciler suppression path ─────────────────────────────────────────────────
+
+
+def suppress_by_guid(
+    guid: str,
+    folio: FolioInventoryOps,
+    *,
+    dry_run: bool = False,
+) -> SuppressResult:
+    """Soft-suppress the FOLIO records for a superseded GUID, child-first.
+
+    The reconciler reports a superseded GUID as an authoritative delete (the old
+    work no longer exists). We soft-suppress (discoverySuppress + staffSuppress)
+    rather than hard-delete, so the action is reversible and auditable. The
+    cascade runs item → holdings → instance (child-first) so a live child is
+    never briefly left pointing at a suppressed parent, mirroring the reverse of
+    the create order. Records already gone are skipped; suppression is
+    idempotent, so a redelivered fact simply re-sets flags that are already true.
+
+    A single hrid maps directly from the GUID (``AxC-{entity}-{guid}``), the same
+    scheme the upsert path writes, so no MARC parse or mapping is needed here.
+    """
+    result = SuppressResult(guid=guid)
+    try:
+        result.item = _suppress_entity(
+            folio,
+            search_path="/inventory/items",
+            list_key="items",
+            write_path_prefix="/inventory/items",
+            hrid=_item_hrid(guid),
+            dry_run=dry_run,
+        )
+        result.holdings = _suppress_entity(
+            folio,
+            search_path="/holdings-storage/holdings",
+            list_key="holdingsRecords",
+            write_path_prefix="/holdings-storage/holdings",
+            hrid=_holdings_hrid(guid),
+            dry_run=dry_run,
+        )
+        result.instance = _suppress_entity(
+            folio,
+            search_path="/inventory/instances",
+            list_key="instances",
+            write_path_prefix="/inventory/instances",
+            hrid=_instance_hrid(guid),
+            dry_run=dry_run,
+        )
+    except Exception as exc:
+        result.errors.append(UpsertError(type="api", detail=str(exc)))
+        logger.error("suppress error guid=%s detail=%s", guid, exc)
 
     return result
