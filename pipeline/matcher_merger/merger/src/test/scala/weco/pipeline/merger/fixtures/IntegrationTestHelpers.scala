@@ -301,10 +301,19 @@ trait IntegrationTestHelpers
     notificationsBefore: Int
   )(implicit context: Context): Unit = {
     val newlyIndexed = indexedImageIds -- imagesBefore
-    val newlyNotified = context.imageDownstream.msgSender.messages
+    val newlyNotifiedBodies = context.imageDownstream.msgSender.messages
       .drop(notificationsBefore)
       .map(_.body)
-      .toSet
+    val newlyNotified = newlyNotifiedBodies.toSet
+
+    val duplicates = newlyNotifiedBodies
+      .groupBy(identity)
+      .collect { case (body, occurrences) if occurrences.size > 1 => body }
+
+    assert(
+      duplicates.isEmpty,
+      s"Images ${duplicates.mkString(", ")} were sent downstream more than once in a single pass"
+    )
 
     assert(
       newlyIndexed.subsetOf(newlyNotified),
