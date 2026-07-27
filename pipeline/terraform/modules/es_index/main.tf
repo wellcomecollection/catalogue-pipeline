@@ -26,4 +26,12 @@ resource "elasticstack_elasticsearch_index" "the_index" {
   default_pipeline     = var.default_pipeline
 
   deletion_protection = !var.allow_delete
+
+  # settings_raw is computed and never set here, but the provider marks it unknown
+  # on every plan. That diff propagates: it makes module.elastic look like it has
+  # pending changes, which defers the data sources in any module that depends_on a
+  # value derived from it, so their consumers churn too.
+  lifecycle {
+    ignore_changes = [settings_raw]
+  }
 }
