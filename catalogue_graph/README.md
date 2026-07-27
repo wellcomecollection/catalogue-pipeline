@@ -109,6 +109,26 @@ Lambda function in *full reindex* mode by leaving out the `window` property from
 mode locally, since they are deployed as Lambda functions and processing all records would exceed the 15-minute
 execution time limit.
 
+## Editing the Wellcome name authority
+
+`src/graph/sources/weco_concepts/wellcome_collection_authority.csv` holds the Wellcome Collection's own overrides
+for concept labels, descriptions and images. Each row is keyed by the canonical id of the catalogue concept it
+overrides, and becomes two entities in the graph: a `SourceConcept` node from the monthly pipeline, and a
+`HAS_SOURCE_CONCEPT` edge from the incremental pipeline.
+
+After adding or changing a row, both halves need to run before the override reaches the API:
+
+1. Run the monthly pipeline (or just the `weco_concepts` nodes extractor and bulk loader) so the `SourceConcept`
+   node exists.
+2. Run the incremental pipeline in full reindex mode, i.e. `graph-extractors-incremental-{pipeline_date}` followed
+   by `graph-bulk-loaders-incremental-{pipeline_date}` with the `window` property left out of the input.
+
+Step 2 is required, not optional. The incremental pipeline only extracts concepts attached to works modified inside
+its window, so on the normal 15-minute schedule a newly added row does not get its edge until some work carrying
+that concept happens to be updated. There is no error when this happens: the concept simply keeps its original
+label, description and images. `integration/graph/test_graph_queries.py::test_weco_authority_nodes_link_to_concepts`
+is what catches it.
+
 ## Service overview
 
 The pipeline consists of several Lambda functions, all of which run from a single shared container image

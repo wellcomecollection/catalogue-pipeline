@@ -100,3 +100,10 @@ def test_id_label_checker_never_matches_weco_by_label() -> None:
 
     # Blank Wellcome name authority labels must not turn the empty label into a match.
     assert id_label_checker.get_id("", "Concept") is None
+
+    # The assertions above only fail if weco-authority is added back to
+    # LABEL_MATCH_SOURCES_BY_PRIORITY, because that is the only list `get_id` walks. Assert on the
+    # indexes directly too, so that the guard which keeps weco labels out of them stays honest.
+    assert len(id_label_checker.labels_to_ids["weco-authority"]) == 0
+    assert len(id_label_checker.alternative_labels_to_ids["weco-authority"]) == 0
+    assert len(id_label_checker.ids_to_labels["weco-authority"]) == 3
