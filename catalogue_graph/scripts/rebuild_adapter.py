@@ -453,11 +453,6 @@ def rebuild_adapter(
             )
 
     adapter_store = config.build_adapter_store(use_rest_api_table=use_rest_api_table)
-    reconcile_runtime: ReconcileRuntime | None = None
-    if adapter_type == "axiell":
-        reconcile_runtime = build_reconcile_runtime(
-            adapter_type, use_rest_api_table=use_rest_api_table
-        )
 
     # Phase 3: Wipe and reload all stores from snapshots.
     _wipe_store(adapter_store, store_name="adapter store")
@@ -468,7 +463,13 @@ def rebuild_adapter(
         _wipe_store(folio_items.store, store_name="items store")
         _populate_store_from_snapshot(folio_items.store, folio_items.snapshot_path)
 
-    if reconcile_runtime is not None:
+    if adapter_type == "axiell":
+        # Build the reconcile runtime after the load: a pyiceberg handle is
+        # pinned to the snapshot it opened at, so one built earlier would read
+        # nothing and reconcile would write an empty baseline.
+        reconcile_runtime = build_reconcile_runtime(
+            adapter_type, use_rest_api_table=use_rest_api_table
+        )
         _wipe_store(reconcile_runtime.reconciler_store, store_name="reconciler store")
         _run_reconcile(reconcile_runtime, adapter_type, job_id, changeset_ids)
 
