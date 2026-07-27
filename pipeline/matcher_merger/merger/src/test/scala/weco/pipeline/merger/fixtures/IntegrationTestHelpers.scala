@@ -8,25 +8,49 @@ import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.lambda.Downstream
+import weco.lambda.{Downstream, SQSLambdaMessageFailure, SQSLambdaMessageResult}
 import weco.lambda.helpers.LambdaFixtures
 import weco.pipeline.matcher.MatcherSQSLambda
 import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.matcher.WorksMatcher
-import weco.pipeline.matcher.models.MatcherResult
+import weco.pipeline.matcher.matcher.StoredWorksMatcher
+import weco.pipeline.matcher.models.{MatcherResult, WorkStub}
 import weco.pipeline.merger.config.{MergerConfig, MergerConfigurable}
 import weco.pipeline.merger.{MergeProcessor, MergerSQSLambda}
+import weco.pipeline_storage.{Retriever, RetrieverMultiResult}
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import weco.fixtures.TestWith
 
-// These are in a separate file to avoid cluttering up the integration tests
-// with code that doesn't tell us about the desired matcher/merger behaviour.
+/** Wiring for the matcher/merger integration tests.
+  *
+  * These are in a separate file to avoid cluttering up the integration tests
+  * with code that doesn't tell us about the desired matcher/merger behaviour.
+  *
+  * The two applications are assembled here as close to production as a test
+  * allows:
+  *
+  *   - both are driven through their real Lambda entrypoints, so the tests go
+  *     through the same message handling as the deployed applications
+  *   - the matcher writes its graph to a real DynamoDB table (started by the
+  *     docker-compose.yml in this project), so graph state accumulates from one
+  *     work to the next just as it does in production
+  *   - the matcher and the merger read works from one shared index, mirroring
+  *     the way both read from the identified index in production
+  *
+  * What is faked is the transport between the two: instead of a real queue, the
+  * matcher's output is handed straight to the merger.
+  *
+  * Works are processed one at a time, and each is taken all the way through the
+  * matcher and the merger before the next one starts. Several of these tests
+  * are about the order works arrive in, and that order only means anything if
+  * each work is finished with before the next one begins.
+  */
 trait IntegrationTestHelpers
     extends EitherValues
     with ScalaFutures
@@ -35,43 +59,55 @@ trait IntegrationTestHelpers
     with MergerFixtures
     with WorkGenerators {
 
-  case class StubMatcherLambda(
-    worksMatcher: WorksMatcher,
+  case class IntegrationMatcherLambda(
+    worksMatcher: StoredWorksMatcher,
     downstream: Downstream
   ) extends MatcherSQSLambda[MatcherConfig]
-    with MatcherConfigurable
+      with MatcherConfigurable
 
-  case class StubMergerLambda(
+  case class IntegrationMergerLambda(
     mergeProcessor: MergeProcessor,
     imageMsgSender: MemorySNSDownstream
   ) extends MergerSQSLambda[MergerConfig]
-    with MergerConfigurable
+      with MergerConfigurable
 
-
-  type MatcherDownstream = MemorySNSDownstream
-  type ImageDownstream = MemorySNSDownstream
   type IdentifiedIndex = MemoryRetriever[Work[WorkState.Identified]]
   type MergedIndex = mutable.Map[String, WorkOrImage]
 
-  type Context = (
-    MatcherStub,
-      StubMatcherLambda,
-      StubMergerLambda,
-      ImageDownstream,
-      MatcherDownstream,
-      IdentifiedIndex,
-      MergedIndex
-    )
+  /** The matcher only needs the identifiers from a work, so in production it
+    * reads a cut-down [[WorkStub]] from the identified index. Presenting the
+    * shared index as stubs lets the tests keep a single copy of each work.
+    */
+  private class WorkStubIndex(identifiedIndex: IdentifiedIndex)
+      extends Retriever[WorkStub] {
+    override implicit val ec: ExecutionContext = global
 
-  implicit class ContextOps(context: Context) {
-    val (_, _, _, _, _, _, mergedIndex) = context
+    override def apply(
+      ids: Seq[String]
+    ): Future[RetrieverMultiResult[WorkStub]] =
+      identifiedIndex(ids).map {
+        result =>
+          RetrieverMultiResult(
+            found = result.found.map {
+              case (id, work) => id -> WorkStub(work)
+            },
+            notFound = result.notFound
+          )
+      }(global)
+  }
 
+  case class Context(
+    matcher: IntegrationMatcherLambda,
+    merger: IntegrationMergerLambda,
+    imageDownstream: MemorySNSDownstream,
+    matcherDownstream: MemorySNSDownstream,
+    identifiedIndex: IdentifiedIndex,
+    mergedIndex: MergedIndex
+  ) {
     def getMerged(
-                   originalWork: Work[WorkState.Identified]
-                 ): Work[WorkState.Merged] = {
-
+      originalWork: Work[WorkState.Identified]
+    ): Work[WorkState.Merged] =
       mergedIndex(originalWork.state.canonicalId.underlying).left.value
-    }
 
     def imageData: Seq[ImageData[IdState.Identified]] =
       mergedIndex.values.collect {
@@ -92,32 +128,50 @@ trait IntegrationTestHelpers
       work.data.imageData.head
   }
 
-  def withContext[R](testWith: TestWith[Context, R]): R = {
-    val mergedIndex = mutable.Map[String, WorkOrImage]()
-    val identifiedIndex: MemoryRetriever[Work[WorkState.Identified]] =
-      new MemoryRetriever[Work[WorkState.Identified]]()
+  def withContext[R](testWith: TestWith[Context, R]): R =
+    withWorkGraphTable {
+      graphTable =>
+        withWorkGraphStore(graphTable) {
+          workGraphStore =>
+            val identifiedIndex: IdentifiedIndex =
+              new MemoryRetriever[Work[WorkState.Identified]]()
+            val workStubIndex = new WorkStubIndex(identifiedIndex)
 
-    val matcherDownstream = new MemorySNSDownstream
-    val imageSender: MemorySNSDownstream = new MemorySNSDownstream
+            withWorkMatcher(workGraphStore, workStubIndex) {
+              workMatcher =>
+                val mergedIndex = mutable.Map[String, WorkOrImage]()
+                val matcherDownstream = new MemorySNSDownstream
+                val imageDownstream = new MemorySNSDownstream
 
-    val matcherStub = MatcherStub()
-    val matcher = StubMatcherLambda(matcherStub, matcherDownstream)
+                val matcher = IntegrationMatcherLambda(
+                  new StoredWorksMatcher(workStubIndex, workMatcher),
+                  matcherDownstream
+                )
 
-    val merger: StubMergerLambda = withMergerProcessor(identifiedIndex, mergedIndex) {
-      mergeProcessor => {
-        StubMergerLambda(mergeProcessor, imageSender)
-      }
+                val merger =
+                  withMergerProcessor(identifiedIndex, mergedIndex) {
+                    mergeProcessor =>
+                      IntegrationMergerLambda(mergeProcessor, imageDownstream)
+                  }
+
+                testWith(
+                  Context(
+                    matcher = matcher,
+                    merger = merger,
+                    imageDownstream = imageDownstream,
+                    matcherDownstream = matcherDownstream,
+                    identifiedIndex = identifiedIndex,
+                    mergedIndex = mergedIndex
+                  )
+                )
+            }
+        }
     }
 
-    val context = (matcherStub, matcher, merger, imageSender, matcherDownstream, identifiedIndex, mergedIndex)
-
-    testWith(context)
-  }
-
   def updateInternalWork(
-                          internalWork: Work.Visible[WorkState.Identified],
-                          teiWork: Work.Visible[WorkState.Identified]
-                        ) =
+    internalWork: Work.Visible[WorkState.Identified],
+    teiWork: Work.Visible[WorkState.Identified]
+  ) =
     internalWork
       .copy(version = teiWork.version)
       .mapState(
@@ -125,9 +179,8 @@ trait IntegrationTestHelpers
           state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime)
       )
 
-
   class StateMatcher(right: WorkState.Identified)
-    extends Matcher[WorkState.Merged] {
+      extends Matcher[WorkState.Merged] {
     def apply(left: WorkState.Merged): MatchResult =
       MatchResult(
         left.sourceIdentifier == right.sourceIdentifier &&
@@ -154,14 +207,16 @@ trait IntegrationTestHelpers
   def beRecent(within: Duration = 3 seconds) =
     new InstantMatcher(within)
 
-  def beVisible: Matcher[Work[Merged]] = (left: Work[Merged]) => MatchResult(
-    left.isInstanceOf[Work.Visible[Merged]],
-    s"${left.id} is not visible",
-    s"${left.id} is visible"
-  )
+  def beVisible: Matcher[Work[Merged]] =
+    (left: Work[Merged]) =>
+      MatchResult(
+        left.isInstanceOf[Work.Visible[Merged]],
+        s"${left.id} is not visible",
+        s"${left.id} is visible"
+      )
 
   class RedirectMatcher(expectedRedirectTo: Work.Visible[Identified])
-    extends Matcher[Work[Merged]] {
+      extends Matcher[Work[Merged]] {
     def apply(left: Work[Merged]): MatchResult = {
       left match {
         case w: Work.Redirected[Merged] =>
@@ -186,52 +241,88 @@ trait IntegrationTestHelpers
 
   def processWorks(
     works: Work[WorkState.Identified]*
+  )(implicit context: Context): Unit =
+    works.foreach(processWork)
+
+  /** Put a work into the index and take it through the matcher and then the
+    * merger, as the pipeline does once a work has been identified.
+    */
+  def processWork(
+    work: Work[WorkState.Identified]
   )(implicit context: Context): Unit = {
-    val (matcherStub, matcher, merger, imageSender, matcherDownstream, identifiedIndex, mergedIndex) = context
+    println(
+      s"Processing work ${work.state.sourceIdentifier} (${work.state.canonicalId})"
+    )
 
-    works.foreach {
-      w =>
-        println(
-          s"Processing work ${w.state.sourceIdentifier} (${w.state.canonicalId})"
-        )
-        identifiedIndex.index ++= Map(w.state.canonicalId.underlying -> w)
-    }
+    context.identifiedIndex.index +=
+      (work.state.canonicalId.underlying -> work)
 
-    val canonicalIds = works.map(_.state.canonicalId.underlying).toSet
-
-    // Append the canonical IDs to the matcher stub so that it can return
-    // the expected results when it processes the messages.
-    matcherStub.setShorthandResults(Seq(Set(canonicalIds)))
-
-    whenReady(
-      matcher.processMessages(messages =
-        works.map {
-          work =>  SQSTestLambdaMessage(message = work.state.canonicalId.underlying)
-        }
-      )
-    ) {
-      _ => val matcherResults = matcherDownstream.msgSender
-        .getMessages[MatcherResult]
-        whenReady(
-          merger.processMessages(messages =
-            matcherResults.map(
-              matcherResult => {
-                SQSTestLambdaMessage(message = matcherResult)
-              }
-            )
-          )
-        ) { _ =>
-          // Only images result in an SNS notification; works are processed
-          // downstream via a window-based read of the merged index.
-          val imageCount = mergedIndex.values.count(_.isRight)
-          val sentCount = imageSender.msgSender.messages.size
-          assert(
-            sentCount == imageCount,
-            s"Expected $imageCount image notification(s) but got $sentCount"
-          )
-        }
-    }
+    runMerger(runMatcher(work))
+    assertAllImagesNotified
   }
 
-  def processWork(work: Work[WorkState.Identified])(implicit context: Context): Unit = processWorks(work)(context)
+  private def runMatcher(
+    work: Work[WorkState.Identified]
+  )(implicit context: Context): Seq[MatcherResult] = {
+    val alreadySent =
+      context.matcherDownstream.msgSender.getMessages[MatcherResult].size
+
+    whenReady(
+      context.matcher.processMessages(
+        messages = Seq(
+          SQSTestLambdaMessage(message = work.state.canonicalId.underlying)
+        )
+      )
+    ) {
+      results => assertNoFailures("matcher", results)
+    }
+
+    context.matcherDownstream.msgSender
+      .getMessages[MatcherResult]
+      .drop(alreadySent)
+  }
+
+  private def runMerger(
+    matcherResults: Seq[MatcherResult]
+  )(implicit context: Context): Unit =
+    whenReady(
+      context.merger.processMessages(
+        messages = matcherResults.map(
+          matcherResult => SQSTestLambdaMessage(message = matcherResult)
+        )
+      )
+    ) {
+      results => assertNoFailures("merger", results)
+    }
+
+  private def assertNoFailures(
+    application: String,
+    results: Seq[SQSLambdaMessageResult]
+  ): Unit = {
+    val failures = results.collect {
+      case failure: SQSLambdaMessageFailure => failure.error
+    }
+
+    assert(
+      failures.isEmpty,
+      s"The $application failed to process a message: ${failures.mkString(", ")}"
+    )
+  }
+
+  /** Only images result in a notification; works are picked up downstream by a
+    * window-based read of the merged index.
+    */
+  private def assertAllImagesNotified(implicit context: Context): Unit = {
+    val indexedImages = context.mergedIndex.values.collect {
+      case Right(image) => image.id
+    }.toSet
+
+    val notifiedImages =
+      context.imageDownstream.msgSender.messages.map(_.body).toSet
+
+    assert(
+      indexedImages.subsetOf(notifiedImages),
+      s"Images ${(indexedImages -- notifiedImages).mkString(", ")} were saved but never sent downstream"
+    )
+  }
 }

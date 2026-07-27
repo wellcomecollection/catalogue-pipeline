@@ -427,11 +427,15 @@ class MergerIntegrationTest
         context.getMerged(axiell).data.items.flatMap(_.locations) should
           contain(miro.data.items.head.locations.head)
         And("the Axiell work contains the Miro image")
-        context.getMerged(axiell).data.imageData should contain(miro.singleImage)
+        context.getMerged(axiell).data.imageData should contain(
+          miro.singleImage
+        )
     }
   }
 
-  Scenario("An Axiell work, a Sierra picture work, and a METS work are matched") {
+  Scenario(
+    "An Axiell work, a Sierra picture work, and a METS work are matched"
+  ) {
     withContext {
       implicit context =>
         Given("An Axiell work, a Sierra picture work and a METS work")
@@ -985,9 +989,7 @@ class MergerIntegrationTest
           )
         )
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent before the Sierra record is created") {
+    Scenario("The METS work is sent before the Sierra record is created") {
       withContext {
         implicit context =>
           processWork(metsWork)
@@ -1000,9 +1002,7 @@ class MergerIntegrationTest
       }
     }
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent while the e-bib is suppressed") {
+    Scenario("The METS work is sent while the e-bib is suppressed") {
       withContext {
         implicit context =>
           processWork(sierraSuppressedEbib)
@@ -1015,9 +1015,7 @@ class MergerIntegrationTest
       }
     }
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent after the e-bib is unsuppressed") {
+    Scenario("The METS work is sent after the e-bib is unsuppressed") {
       withContext {
         implicit context =>
           processWork(sierraSuppressedEbib)
