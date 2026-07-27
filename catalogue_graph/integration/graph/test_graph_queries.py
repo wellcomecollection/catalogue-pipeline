@@ -472,6 +472,14 @@ def test_weco_authority_nodes_exist_in_graph() -> None:
 
 
 def test_weco_authority_nodes_link_to_concepts() -> None:
+    """
+    Every Wellcome name authority record should override a catalogue concept.
+
+    The two ways this can fail have different causes, so they are reported separately. A missing
+    Concept node means the CSV names a canonical id which is not (or is no longer) a catalogue
+    concept, which is a problem with the checked-in data. A Concept node with no edge means the
+    incremental pipeline has not produced the edge yet, which is a problem with the pipeline.
+    """
     concept_ids = load_weco_authority_ids()
     rows = [
         {"concept_id": concept_id, "weco_id": f"weco:{concept_id}"}
@@ -481,14 +489,22 @@ def test_weco_authority_nodes_link_to_concepts() -> None:
         """
         UNWIND $rows AS row
         MATCH (concept:Concept {id: row.concept_id})
-        MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
-        RETURN row.concept_id AS id
+        OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(weco:SourceConcept {id: row.weco_id, source: 'weco-authority'})
+        RETURN row.concept_id AS id, weco.id AS weco_id
         """,
         {"rows": rows},
     )
-    matched_ids = {row["id"] for row in response}
-    missing = sorted(set(concept_ids) - matched_ids)
-    assert not missing, (
+    found_concept_ids = {row["id"] for row in response}
+    linked_concept_ids = {row["id"] for row in response if row["weco_id"] is not None}
+
+    unknown_concepts = sorted(set(concept_ids) - found_concept_ids)
+    assert not unknown_concepts, (
+        "The Wellcome name authority names ids which are not catalogue concepts: "
+        + ", ".join(unknown_concepts)
+    )
+
+    unlinked_concepts = sorted(found_concept_ids - linked_concept_ids)
+    assert not unlinked_concepts, (
         "Missing Concept -> weco-authority SourceConcept linkage for ids: "
-        + ", ".join(missing)
+        + ", ".join(unlinked_concepts)
     )

@@ -59,6 +59,24 @@ The state machine is scheduled to run every 15 minutes, processing the latest 15
 the execution starting at 08:00:00 would process all denormalised work documents which were modified between 07:45:00
 and 08:00:00.
 
+### Which pipeline owns which entities
+
+The split between the two pipelines is not just a matter of scheduling. Building a graph from scratch means running
+the monthly pipeline and then the incremental pipeline, so the monthly pipeline may only produce entities whose
+endpoints it creates itself.
+
+Concretely: any edge which starts at a catalogue `Work`, `Concept` or `Image` node must be produced by the
+incremental pipeline, because those nodes do not exist until the incremental extractors have run. Loading such an
+edge from the monthly pipeline fails the bulk load with `FROM_OR_TO_VERTEX_ARE_MISSING`. This applies to
+`Concept -[HAS_SOURCE_CONCEPT]-> SourceConcept` edges from every source, including the Wellcome name authority,
+whose source concept nodes come from the monthly pipeline but whose edges come from the `catalogue_concepts`
+extractor.
+
+There is a matching dependency in the other direction. The incremental `catalogue_concepts` extractor decides which
+source concepts a catalogue concept links to by reading `loc_*__nodes.csv`, `mesh_*__nodes.csv` and
+`weco_concepts__nodes.csv` from `graph-{graph_date}/pipeline-{pipeline_date}/graph_bulk_loader/full/`, so the
+monthly extractors must have run for that `graph_date` before the incremental pipeline can produce concept edges.
+
 ## Running the pipeline manually
 
 State machines can be triggered manually via

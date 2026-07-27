@@ -1,0 +1,4 @@
+:ID,:LABEL,id:String,label:String,source:String,alternative_ids:String,alternative_labels:String,description:String,image_urls:String
+weco:s6s24vd7,SourceConcept,weco:s6s24vd7,,weco-authority,,,A concept overridden by the Wellcome name authority. Most records in the real authority have a blank label like this one.,https://iiif.example.org/image/A0000001/info.json
+weco:kpeywdvq,SourceConcept,weco:kpeywdvq,,weco-authority,,,A concept which has no LoC or MeSH source concept. It still gets a Wellcome name authority edge.,
+weco:aaaaaaaa,SourceConcept,weco:aaaaaaaa,Example concept,weco-authority,,,A record whose label collides with an LoC concept label. It must never win a label match.,

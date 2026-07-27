@@ -2,11 +2,9 @@ from collections.abc import Generator
 from typing import TextIO
 
 from graph.sources.weco_concepts.concepts_source import WeCoConceptsSource
+from graph.transformers.catalogue.id_label_checker import WECO_ID_PREFIX
 from graph.transformers.graph_transformer import GraphBaseTransformer
-from models.graph_edge import (
-    ConceptHasSourceConcept,
-    ConceptHasSourceConceptAttributes,
-)
+from models.graph_edge import BaseEdge
 from models.graph_node import SourceConcept
 
 
@@ -25,8 +23,11 @@ class WeCoConceptsTransformer(GraphBaseTransformer):
         It is the canonical id for an existing record in the graph,
         which may have come from any other source,
         but it is also the id of this source record in the Wellcome name authority.
+
+        `CatalogueConceptsTransformer` relies on this to work out which catalogue concepts the
+        Wellcome name authority holds an override for, so both sides must agree on the prefix.
         """
-        return f"weco:{raw_data['id'].strip()}"
+        return f"{WECO_ID_PREFIX}{raw_data['id'].strip()}"
 
     def transform_node(self, data: dict) -> SourceConcept:
         image_url = data.get("image_url")
@@ -38,19 +39,11 @@ class WeCoConceptsTransformer(GraphBaseTransformer):
             image_urls=image_url.split("||") if image_url else [],
         )
 
-    def extract_edges(self, raw_data: dict) -> Generator[ConceptHasSourceConcept]:
-        """
-        The Wellcome name authority exists mostly to override names and descriptions
-        found in other authorities.
-        All records in this set are expected to have a Wellcome ID that refers
-        to the record it is intended to override.
-        """
-
-        # lookup the id elsewhere and find the corresponding source concept
-        source_id = self._prefixed_id_of(raw_data)
-        concept_id = str(raw_data["id"].strip())
-
-        attributes = ConceptHasSourceConceptAttributes(matched_by="identifier")
-        yield ConceptHasSourceConcept(
-            from_id=concept_id, to_id=source_id, attributes=attributes
+    def extract_edges(self, raw_data: dict) -> Generator[BaseEdge]:
+        raise NotImplementedError(
+            "The Wellcome name authority does not produce edges. Its HAS_SOURCE_CONCEPT edges "
+            "start at a catalogue Concept node, which only the incremental pipeline creates, so "
+            "the monthly pipeline cannot load them. They are produced by "
+            "`CatalogueConceptsTransformer` instead. See "
+            "https://github.com/wellcomecollection/platform/issues/6457."
         )

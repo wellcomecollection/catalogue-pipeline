@@ -118,6 +118,11 @@ def mock_requests_lookup_table(
 def build_test_matrix() -> Generator[tuple[dict, list[MockResponseInput]], Any]:
     for transformer_type in transformer_types:
         for entity_type in entity_types:
+            # The Wellcome name authority only produces nodes. Its HAS_SOURCE_CONCEPT edges are
+            # produced by the catalogue_concepts transformer, so asking for edges here raises.
+            if (transformer_type, entity_type) == ("weco_concepts", "edges"):
+                continue
+
             for stream_destination in stream_destinations:
                 yield (
                     {

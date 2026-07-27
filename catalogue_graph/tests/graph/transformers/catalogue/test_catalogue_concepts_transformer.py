@@ -28,7 +28,7 @@ def get_transformer(
 
 
 def test_catalogue_concepts_transformer_nodes() -> None:
-    add_mock_transformer_outputs_for_ontologies(["loc", "mesh"])
+    add_mock_transformer_outputs_for_ontologies(["loc", "mesh", "weco"])
     add_mock_merged_documents(work_status="Visible")
 
     nodes = list(get_transformer()._stream_nodes())
@@ -44,12 +44,12 @@ def test_catalogue_concepts_transformer_edges() -> None:
     pipeline_date = "2027-12-24"
     graph_date = "2024-12-24"
     add_mock_transformer_outputs_for_ontologies(
-        ["loc", "mesh"], pipeline_date, graph_date
+        ["loc", "mesh", "weco"], pipeline_date, graph_date
     )
     add_mock_merged_documents(pipeline_date, work_status="Visible")
 
     edges = list(get_transformer(pipeline_date, graph_date)._stream_edges())
-    assert len(edges) == 7
+    assert len(edges) == 9
 
     check_bulk_load_edge(
         edges,
@@ -111,12 +111,46 @@ def test_catalogue_concepts_transformer_edges() -> None:
         ),
     )
 
+    # A concept can have a Wellcome name authority override as well as a source concept from
+    # another ontology. (The authority record's label is blank, which must not stop us matching it.)
+    check_bulk_load_edge(
+        edges,
+        ConceptHasSourceConcept(
+            from_type="Concept",
+            to_type="SourceConcept",
+            from_id="s6s24vd7",
+            to_id="weco:s6s24vd7",
+            relationship="HAS_SOURCE_CONCEPT",
+            directed=True,
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="identifier"
+            ),
+        ),
+    )
+
+    # A concept with no source concept in any other ontology still gets its override edge.
+    check_bulk_load_edge(
+        edges,
+        ConceptHasSourceConcept(
+            from_type="Concept",
+            to_type="SourceConcept",
+            from_id="kpeywdvq",
+            to_id="weco:kpeywdvq",
+            relationship="HAS_SOURCE_CONCEPT",
+            directed=True,
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="identifier"
+            ),
+        ),
+    )
+    assert len([edge for edge in edges if edge.from_id == "kpeywdvq"]) == 1
+
 
 def test_mismatched_pipeline_date() -> None:
     pipeline_date = "2027-12-24"
     graph_date = "2027-12-24"
     add_mock_transformer_outputs_for_ontologies(
-        ["loc", "mesh"], pipeline_date, graph_date
+        ["loc", "mesh", "weco"], pipeline_date, graph_date
     )
 
     # Works exist in an index with a different pipeline date
@@ -130,7 +164,7 @@ def test_mismatched_graph_date() -> None:
     pipeline_date = "2027-12-24"
     graph_date = "2027-12-24"
     add_mock_transformer_outputs_for_ontologies(
-        ["loc", "mesh"], pipeline_date, graph_date
+        ["loc", "mesh", "weco"], pipeline_date, graph_date
     )
 
     add_mock_merged_documents("2027-12-24", work_status="Visible")
