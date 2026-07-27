@@ -28,6 +28,10 @@ HEARTBEAT_INTERVAL_SECONDS = 60
 # Bound the wait for a heartbeat call already in flight.
 HEARTBEAT_JOIN_TIMEOUT_SECONDS = 5
 
+# Absorb a transient blip, but let a persistent fault (a missing IAM permission, say)
+# kill the thread well inside HeartbeatSeconds so the step fails rather than stalling.
+MAX_CONSECUTIVE_HEARTBEAT_FAILURES = 3
+
 
 class StepFunctionClient(Protocol):
     def send_task_success(self, taskToken: str, output: str) -> None: ...
@@ -103,8 +107,16 @@ def task_heartbeat(
     def beat() -> None:
         # Beat immediately: HeartbeatSeconds counts from state entry, so provisioning,
         # image pull and startup have already eaten into the budget by now.
+        failures = 0
         while True:
-            stepfunctions_client.send_task_heartbeat(taskToken=task_token)
+            try:
+                stepfunctions_client.send_task_heartbeat(taskToken=task_token)
+                failures = 0
+            except Exception:
+                failures += 1
+                logger.warning("Failed to send task heartbeat", attempt=failures)
+                if failures >= MAX_CONSECUTIVE_HEARTBEAT_FAILURES:
+                    raise
             if stop.wait(interval_seconds):
                 return
 
