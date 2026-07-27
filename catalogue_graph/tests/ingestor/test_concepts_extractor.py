@@ -10,7 +10,7 @@ from tests.mocks import get_mock_neptune_client
 
 SOURCE_CONCEPT_ID = "aaaaaaaa"
 
-# 'th3tx5an' sorts before 'wsg7zfsq', so it is the primary of their 'same as' group.
+# 'th3tx5an' sorts first, so it is the primary.
 UNCONNECTED_PRIMARY_ID = "th3tx5an"
 WORK_CONNECTED_ID = "wsg7zfsq"
 
@@ -37,13 +37,7 @@ def _an_extracted_concept(concept_id: str) -> ExtractedConcept:
 
 
 class StubConceptsExtractor(GraphBaseConceptsExtractor):
-    """
-    A concepts extractor with the Neptune round trips replaced by canned responses.
-
-    `related` maps a source concept ID to the related concept IDs the graph returned for it. Every ID returned by
-    the related concept queries is connected to at least one work, because those queries filter on HAS_CONCEPT.
-    `same_as_groups` maps a concept ID to the other members of its 'same as' group.
-    """
+    """Concepts extractor with canned Neptune responses. IDs in `related` all have works, as the queries filter on HAS_CONCEPT."""
 
     def __init__(
         self, related: dict[str, list[str]], same_as_groups: dict[str, list[str]]
@@ -92,12 +86,7 @@ def test_choose_target_id_falls_back_when_the_primary_is_not_referenced() -> Non
 
 
 def test_related_concept_target_skips_a_primary_with_no_works() -> None:
-    """
-    A related concept must be referred to by an ID which is connected to works.
-
-    Concepts without works are removed from the graph and deleted from the concepts index, so referring to one
-    produces a link which resolves to a 404. See platform#6388.
-    """
+    """See platform#6388: referring to a work-less concept produced a link which 404d."""
     extractor = StubConceptsExtractor(
         related={SOURCE_CONCEPT_ID: [WORK_CONNECTED_ID]},
         same_as_groups={WORK_CONNECTED_ID: [UNCONNECTED_PRIMARY_ID]},
@@ -110,7 +99,7 @@ def test_related_concept_target_skips_a_primary_with_no_works() -> None:
 
 
 def test_related_concepts_still_merge_onto_a_referenced_primary() -> None:
-    """Synonymous related concepts are merged under one entry, keeping the primary ID when it has works itself."""
+    """Synonymous related concepts still merge under the primary when it has works itself."""
     extractor = StubConceptsExtractor(
         related={SOURCE_CONCEPT_ID: [WORK_CONNECTED_ID, UNCONNECTED_PRIMARY_ID]},
         same_as_groups={

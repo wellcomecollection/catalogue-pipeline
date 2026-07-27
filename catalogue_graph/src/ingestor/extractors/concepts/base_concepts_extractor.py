@@ -40,14 +40,7 @@ CONCEPTS_BATCH_SIZE = 40_000
 
 
 def _choose_target_id(primary_id: str, referenced_ids: set[str]) -> str:
-    """
-    Choose which ID to use when referring to a related concept.
-
-    `referenced_ids` are the IDs the graph returned for this related concept, all of which are connected to at least
-    one work (see `get_related_query`). `primary_id` is the primary of their 'same as' group, which may itself have
-    no works. Prefer the primary for consistency with the rest of the ingestor, but fall back to a referenced ID
-    when the primary is not among them.
-    """
+    """Refer to a related concept by an ID which has works. `referenced_ids` all do, the primary might not."""
     if primary_id in referenced_ids:
         return primary_id
 
@@ -167,9 +160,7 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
                     if related.get("relationship_type"):
                         entry["relationship_type"].add(related["relationship_type"])
 
-        # Results are merged under a primary ID, but the primary of a 'same as' group is chosen alphabetically and is
-        # not necessarily connected to any works. Concepts without works are removed from the graph (and therefore
-        # from the concepts index), so pointing at one produces a related concept which resolves to a 404.
+        # Concepts with no works are removed from the index, so referring to one would 404.
         for entries in merged_result.values():
             for primary_related_id, entry in entries.items():
                 entry["id"] = _choose_target_id(
