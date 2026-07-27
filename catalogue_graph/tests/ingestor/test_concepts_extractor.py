@@ -10,9 +10,9 @@ from tests.mocks import get_mock_neptune_client
 
 SOURCE_CONCEPT_ID = "aaaaaaaa"
 
-# 'th3tx5an' sorts first, so it is the primary.
-UNCONNECTED_PRIMARY_ID = "th3tx5an"
-WORK_CONNECTED_ID = "wsg7zfsq"
+# 'th3tx5an' sorts first, so it is the primary of the group.
+PRIMARY_ID = "th3tx5an"
+SIBLING_ID = "wsg7zfsq"
 
 
 def _an_extracted_concept(concept_id: str) -> ExtractedConcept:
@@ -37,14 +37,23 @@ def _an_extracted_concept(concept_id: str) -> ExtractedConcept:
 
 
 class StubConceptsExtractor(GraphBaseConceptsExtractor):
-    """Concepts extractor with canned Neptune responses. IDs in `related` all have works, as the queries filter on HAS_CONCEPT."""
+    """Concepts extractor with canned Neptune responses.
+
+    `related` maps a source concept ID to the related concept IDs the graph returned for it. The related queries
+    collapse each 'same as' group to one arbitrary member, so that is not the full set of members with works.
+    `work_connected` is the set of IDs which have works.
+    """
 
     def __init__(
-        self, related: dict[str, list[str]], same_as_groups: dict[str, list[str]]
+        self,
+        related: dict[str, list[str]],
+        same_as_groups: dict[str, list[str]],
+        work_connected: set[str],
     ) -> None:
         super().__init__(get_mock_neptune_client())
         self.related = related
         self.same_as_groups = same_as_groups
+        self.work_connected = work_connected
 
     def get_concept_ids_to_process(self) -> Generator[str]:
         yield from self.related
@@ -62,6 +71,9 @@ class StubConceptsExtractor(GraphBaseConceptsExtractor):
                 if i in self.same_as_groups
             }
 
+        if query_type == "concept_type":
+            return {i: {"types": ["Concept"]} for i in ids if i in self.work_connected}
+
         return {
             i: {
                 "related": [
@@ -77,38 +89,38 @@ class StubConceptsExtractor(GraphBaseConceptsExtractor):
         return {i: _an_extracted_concept(i) for i in ids}
 
 
-def test_choose_target_id_prefers_the_primary_when_it_is_referenced() -> None:
+def _related_targets(related_ids: list[str], work_connected: set[str]) -> list[str]:
+    extractor = StubConceptsExtractor(
+        related={SOURCE_CONCEPT_ID: related_ids},
+        same_as_groups={PRIMARY_ID: [SIBLING_ID], SIBLING_ID: [PRIMARY_ID]},
+        work_connected=work_connected,
+    )
+    result = extractor._get_related_concepts("broader_than", [SOURCE_CONCEPT_ID])
+    return [r.target.concept.properties.id for r in result[SOURCE_CONCEPT_ID]]
+
+
+def test_choose_target_id_prefers_the_primary() -> None:
     assert _choose_target_id("abcdefgh", {"abcdefgh", "zzzzzzzz"}) == "abcdefgh"
 
 
-def test_choose_target_id_falls_back_when_the_primary_is_not_referenced() -> None:
+def test_choose_target_id_falls_back_to_the_first_candidate() -> None:
     assert _choose_target_id("abcdefgh", {"wwwwwwww", "zzzzzzzz"}) == "wwwwwwww"
 
 
 def test_related_concept_target_skips_a_primary_with_no_works() -> None:
     """See platform#6388: referring to a work-less concept produced a link which 404d."""
-    extractor = StubConceptsExtractor(
-        related={SOURCE_CONCEPT_ID: [WORK_CONNECTED_ID]},
-        same_as_groups={WORK_CONNECTED_ID: [UNCONNECTED_PRIMARY_ID]},
-    )
-
-    result = extractor._get_related_concepts("broader_than", [SOURCE_CONCEPT_ID])
-
-    targets = [r.target.concept.properties.id for r in result[SOURCE_CONCEPT_ID]]
-    assert targets == [WORK_CONNECTED_ID]
+    assert _related_targets([SIBLING_ID], work_connected={SIBLING_ID}) == [SIBLING_ID]
 
 
-def test_related_concepts_still_merge_onto_a_referenced_primary() -> None:
-    """Synonymous related concepts still merge under the primary when it has works itself."""
-    extractor = StubConceptsExtractor(
-        related={SOURCE_CONCEPT_ID: [WORK_CONNECTED_ID, UNCONNECTED_PRIMARY_ID]},
-        same_as_groups={
-            WORK_CONNECTED_ID: [UNCONNECTED_PRIMARY_ID],
-            UNCONNECTED_PRIMARY_ID: [WORK_CONNECTED_ID],
-        },
-    )
+def test_related_concept_target_keeps_a_primary_which_has_works() -> None:
+    """The related query returns one arbitrary group member, which must not displace a valid primary."""
+    assert _related_targets([SIBLING_ID], work_connected={PRIMARY_ID, SIBLING_ID}) == [
+        PRIMARY_ID
+    ]
 
-    result = extractor._get_related_concepts("broader_than", [SOURCE_CONCEPT_ID])
 
-    targets = [r.target.concept.properties.id for r in result[SOURCE_CONCEPT_ID]]
-    assert targets == [UNCONNECTED_PRIMARY_ID]
+def test_related_concepts_merge_onto_one_target() -> None:
+    """Synonymous related concepts merge under a single entry rather than appearing twice."""
+    assert _related_targets(
+        [SIBLING_ID, PRIMARY_ID], work_connected={PRIMARY_ID, SIBLING_ID}
+    ) == [PRIMARY_ID]
