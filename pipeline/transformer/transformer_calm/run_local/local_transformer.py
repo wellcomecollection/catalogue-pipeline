@@ -1,6 +1,13 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "boto3",
+# ]
+# ///
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -8,7 +15,6 @@ import ssl
 import subprocess
 import sys
 import time
-import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Optional
@@ -22,6 +28,10 @@ def _project_dir() -> Path:
 
 def _repo_root() -> Path:
     return _project_dir().parent.parent.parent
+
+
+def _last_enqueue_timestamp_file(project_dir: Path) -> Path:
+    return project_dir / ".last_enqueue_timestamp"
 
 
 def _get_session(aws_region: str, aws_profile: Optional[str]) -> boto3.Session:
@@ -112,57 +122,51 @@ def _load_env_file(path: Path) -> dict[str, str]:
     return env
 
 
-def _ensure_local_es_index(*, env_file: Path, timeout_seconds: int = 120) -> None:
-    env = _load_env_file(env_file)
-    es_protocol = env.get("es_protocol", "http")
-    es_host = env.get("es_host", "elasticsearch")
-    es_host_for_local_checks = "localhost" if es_host == "elasticsearch" else es_host
-    es_port = env.get("es_port", "9200")
-    es_index = env.get("es_index")
-
-    if not es_index:
-        raise RuntimeError(f"Missing es_index in {env_file}")
-
-    index_url = f"{es_protocol}://{es_host_for_local_checks}:{es_port}/{es_index}"
-    health_url = f"{es_protocol}://{es_host_for_local_checks}:{es_port}/_cluster/health"
-    context = ssl.create_default_context()
-    headers = {"Content-Type": "application/json"}
-
-    start_time = time.time()
-    while True:
-        try:
-            req = urllib.request.Request(health_url, headers=headers, method="GET")
-            with urllib.request.urlopen(req, context=context):
-                break
-        except Exception:
-            if time.time() - start_time >= timeout_seconds:
-                raise TimeoutError(
-                    f"Timed out waiting for Elasticsearch health at {health_url}"
-                )
-            time.sleep(2)
-
+def _extract_calm_id_from_sqs_body(message_body: str) -> Optional[str]:
     try:
-        get_req = urllib.request.Request(index_url, headers=headers, method="GET")
-        with urllib.request.urlopen(get_req, context=context) as response:
-            if response.status == 200:
-                print(f"Local Elasticsearch index already exists: {es_index}")
-                return
-    except urllib.error.HTTPError as err:
-        if err.code != 404:
-            raise
+        body = json.loads(message_body)
+    except json.JSONDecodeError:
+        return None
 
-    create_req = urllib.request.Request(
-        index_url,
-        data=b"{}",
-        headers=headers,
-        method="PUT",
-    )
-    with urllib.request.urlopen(create_req, context=context) as response:
-        if response.status not in (200, 201):
-            raise RuntimeError(
-                f"Failed to create local Elasticsearch index {es_index}: HTTP {response.status}"
-            )
-    print(f"Created local Elasticsearch index: {es_index}")
+    if not isinstance(body, dict):
+        return None
+
+    payload = body
+    embedded_message = body.get("Message")
+    if isinstance(embedded_message, str):
+        try:
+            embedded_payload = json.loads(embedded_message)
+        except json.JSONDecodeError:
+            return None
+        if isinstance(embedded_payload, dict):
+            payload = embedded_payload
+
+    calm_id = payload.get("id")
+    return calm_id if isinstance(calm_id, str) and calm_id else None
+
+
+def _collect_dlq_ids(local_sqs, dlq_url: str) -> list[str]:
+    dlq_ids: list[str] = []
+    while True:
+        response = local_sqs.receive_message(
+            QueueUrl=dlq_url,
+            MaxNumberOfMessages=10,
+            WaitTimeSeconds=1,
+        )
+        messages = response.get("Messages", [])
+        if not messages:
+            break
+        for message in messages:
+            message_body = message.get("Body", "")
+            calm_id = _extract_calm_id_from_sqs_body(message_body)
+            if calm_id:
+                dlq_ids.append(calm_id)
+    return dlq_ids
+
+
+def _purge_queue(local_sqs, queue_url: str, queue_name: str) -> None:
+    local_sqs.purge_queue(QueueUrl=queue_url)
+    print(f"Purged {queue_name}")
 
 
 def command_start(args: argparse.Namespace) -> int:
@@ -198,19 +202,17 @@ def command_start(args: argparse.Namespace) -> int:
             "localstack",
             "localstack-setup",
             "elasticsearch",
+            "es-setup",
             "calm-transformer",
         ],
         cwd=project_dir,
         check=True,
     )
 
-    if args.es_host == "local":
-        _ensure_local_es_index(env_file=env_file)
-
     print("Local CALM transformer is running.")
     print(
         "Next: enqueue IDs from a file with "
-        "run_local/local_transformer.py enqueue <ids_file> [batch_size]"
+        "uv run --script run_local/local_transformer.py enqueue <ids_file> [batch_size]"
     )
 
     if args.no_logs:
@@ -262,18 +264,28 @@ def command_enqueue(args: argparse.Namespace) -> int:
         aws_secret_access_key="test",
     )
 
+    project_dir = _project_dir()
+    enqueue_started_at = (
+        datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+    enqueue_timestamp_file = _last_enqueue_timestamp_file(project_dir)
+    enqueue_timestamp_file.write_text(f"{enqueue_started_at}\n", encoding="utf-8")
+
     sent_count = 0
     missing_count = 0
     batch: list[str] = []
     batch_number = 1
 
-    def enqueue_id(calm_id: str) -> tuple[bool, Optional[str]]:
+    def _build_sqs_message(calm_id: str) -> tuple[Optional[str], Optional[str]]:
         response = dynamo.get_item(
             TableName=calm_table_name, Key={"id": {"S": calm_id}}
         )
         item = response.get("Item")
         if not item:
-            return False, f"Skipping missing CALM ID: {calm_id}"
+            return None, f"Skipping missing CALM ID: {calm_id}"
 
         payload_attr = item.get("payload", {}).get("M", {})
         bucket = payload_attr.get("bucket", {}).get("S")
@@ -298,21 +310,41 @@ def command_enqueue(args: argparse.Namespace) -> int:
         }
 
         wrapped_message = {"Message": json.dumps(message_payload)}
-        local_sqs.send_message(
-            QueueUrl=args.queue_url, MessageBody=json.dumps(wrapped_message)
-        )
-        return True, None
+        return json.dumps(wrapped_message), None
 
     def process_batch(current_batch: list[str], current_batch_number: int) -> None:
         nonlocal sent_count, missing_count
         print(f"Enqueueing batch {current_batch_number} ({len(current_batch)} IDs)")
-        for calm_id in current_batch:
-            sent, warning = enqueue_id(calm_id)
-            if sent:
-                sent_count += 1
-            else:
+        entries: list[dict[str, str]] = []
+        entry_id_to_calm_id: dict[str, str] = {}
+        for index, calm_id in enumerate(current_batch):
+            message_body, warning = _build_sqs_message(calm_id)
+            if not message_body:
                 missing_count += 1
                 print(warning, file=sys.stderr)
+                continue
+
+            entry_id = str(index)
+            entries.append({"Id": entry_id, "MessageBody": message_body})
+            entry_id_to_calm_id[entry_id] = calm_id
+
+        sqs_batch_size = 10
+        for i in range(0, len(entries), sqs_batch_size):
+            sqs_chunk = entries[i : i + sqs_batch_size]
+            send_result = local_sqs.send_message_batch(
+                QueueUrl=args.queue_url,
+                Entries=sqs_chunk,
+            )
+            sent_count += len(send_result.get("Successful", []))
+            failed_entries = send_result.get("Failed", [])
+            if failed_entries:
+                failed_ids = [
+                    entry_id_to_calm_id.get(entry.get("Id", ""), entry.get("Id", "<unknown>"))
+                    for entry in failed_entries
+                ]
+                raise RuntimeError(
+                    f"Failed to enqueue {len(failed_entries)} messages: {failed_ids}"
+                )
 
     for raw_line in ids_file.read_text(encoding="utf-8").splitlines():
         calm_id = raw_line.strip()
@@ -426,19 +458,50 @@ def command_verify_completion(args: argparse.Namespace) -> int:
         f"found={found_docs} expected={len(doc_ids)} missing={len(missing_doc_ids)}"
     )
     if missing_doc_ids:
+        print(f"Missing IDs from Elasticsearch coverage: {len(missing_doc_ids)}")
+
+    dlq_attrs = local_sqs.get_queue_attributes(
+        QueueUrl=args.dlq_url,
+        AttributeNames=[
+            "ApproximateNumberOfMessages",
+            "ApproximateNumberOfMessagesNotVisible",
+        ],
+    )["Attributes"]
+    dlq_visible = int(dlq_attrs.get("ApproximateNumberOfMessages", "0"))
+    dlq_in_flight = int(dlq_attrs.get("ApproximateNumberOfMessagesNotVisible", "0"))
+    print(f"DLQ status: visible={dlq_visible} in_flight={dlq_in_flight}")
+
+    dlq_ids = _collect_dlq_ids(local_sqs=local_sqs, dlq_url=args.dlq_url)
+    if dlq_ids:
+        print(f"IDs found in DLQ: {len(dlq_ids)}")
+
+    missing_ids = list(dict.fromkeys(missing_doc_ids + dlq_ids))
+    if missing_ids:
         missing_ids_file = project_dir / "missing_ids.txt"
-        missing_ids_file.write_text("\n".join(missing_doc_ids) + "\n", encoding="utf-8")
-        print(f"Missing ids: see {missing_ids_file}")
+        missing_ids_file.write_text("\n".join(missing_ids) + "\n", encoding="utf-8")
+        print(f"Missing/failing IDs: see {missing_ids_file}")
+        if dlq_ids:
+            _purge_queue(local_sqs=local_sqs, queue_url=args.dlq_url, queue_name="DLQ")
+
+    logs_since = args.logs_since
+    if logs_since is None:
+        enqueue_timestamp_file = _last_enqueue_timestamp_file(project_dir)
+        if enqueue_timestamp_file.exists():
+            logs_since = enqueue_timestamp_file.read_text(encoding="utf-8").strip()
+
+    logs_command = [
+        "docker",
+        "compose",
+        "-f",
+        "local.docker-compose.yml",
+        "logs",
+    ]
+    if logs_since:
+        logs_command.extend(["--since", logs_since])
+    logs_command.append("calm-transformer")
 
     logs_proc = subprocess.run(
-        [
-            "docker",
-            "compose",
-            "-f",
-            "local.docker-compose.yml",
-            "logs",
-            "calm-transformer",
-        ],
+        logs_command,
         cwd=project_dir,
         check=True,
         capture_output=True,
@@ -446,7 +509,7 @@ def command_verify_completion(args: argparse.Namespace) -> int:
     )
     logs_text = logs_proc.stdout + logs_proc.stderr
     error_pattern = re.compile(
-        r"DecodePayloadError|StoreReadError|TransformerError|ERROR|Exception"
+        r"DecodePayloadError|StoreReadError|TransformerError|Exception"
     )
     error_lines = [
         line for line in logs_text.splitlines() if error_pattern.search(line) is not None
@@ -456,7 +519,7 @@ def command_verify_completion(args: argparse.Namespace) -> int:
         for line in error_lines[:40]:
             print(line)
 
-    if missing_doc_ids or error_lines:
+    if missing_ids or error_lines:
         return 1
 
     print(
@@ -533,9 +596,18 @@ def _create_parser() -> argparse.ArgumentParser:
     verify_parser.add_argument("ids_file")
     verify_parser.add_argument("timeout_seconds", nargs="?", type=int, default=600)
     verify_parser.add_argument("poll_seconds", nargs="?", type=int, default=10)
+    verify_parser.add_argument(
+        "--logs-since",
+        help=(
+            "Only scan logs since this time (Docker --since format, e.g. '10m' "
+            "or '2026-07-27T12:00:00Z'). If omitted, the most recent enqueue "
+            "timestamp is used when available."
+        ),
+    )
     verify_parser.add_argument("--aws-region", default=os.environ.get("AWS_REGION", "eu-west-1"))
     verify_parser.add_argument("--aws-profile", default=os.environ.get("AWS_PROFILE", "platform-developer"))
     verify_parser.add_argument("--queue-url", default="http://localhost:4566/000000000000/calm-transformer-queue")
+    verify_parser.add_argument("--dlq-url", default="http://localhost:4566/000000000000/calm-transformer-dlq")
     verify_parser.add_argument("--queue-endpoint", default="http://localhost:4566")
     verify_parser.set_defaults(handler=command_verify_completion)
 

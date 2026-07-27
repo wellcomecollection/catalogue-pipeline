@@ -17,7 +17,7 @@ services:
       - batch_size=100
       - flush_interval_seconds=30
     env_file:
-      - .env.local
+      - .env
     depends_on:
       localstack:
         condition: service_healthy
@@ -25,9 +25,11 @@ services:
         condition: service_completed_successfully
       elasticsearch:
         condition: service_healthy
+      es-setup:
+        condition: service_completed_successfully
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.4
     environment:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
@@ -65,11 +67,57 @@ services:
       - sh
       - -c
       - |
+        set -eu
         awslocal sqs create-queue --queue-name calm-transformer-queue --region eu-west-1
+        awslocal sqs create-queue --queue-name calm-transformer-dlq --region eu-west-1
+        QUEUE_URL=$$(awslocal sqs get-queue-url --queue-name calm-transformer-queue --region eu-west-1 --query QueueUrl --output text)
+        DLQ_URL=$$(awslocal sqs get-queue-url --queue-name calm-transformer-dlq --region eu-west-1 --query QueueUrl --output text)
+        DLQ_ARN=$$(awslocal sqs get-queue-attributes --queue-url "$$DLQ_URL" --attribute-names QueueArn --region eu-west-1 --query Attributes.QueueArn --output text)
+        ATTRIBUTES_JSON=$$(printf '{"RedrivePolicy":"{\\"deadLetterTargetArn\\":\\"%s\\",\\"maxReceiveCount\\":\\"2\\"}"}' "$$DLQ_ARN")
+        awslocal sqs set-queue-attributes \
+          --queue-url "$$QUEUE_URL" \
+          --attributes "$$ATTRIBUTES_JSON" \
+          --region eu-west-1
         awslocal sns create-topic --name calm-transformer-topic --region eu-west-1
     environment:
       - AWS_ENDPOINT_URL=http://localstack:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=eu-west-1
+    restart: "no"
+
+  es-setup:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    env_file:
+      - .env
+    command: >
+      sh -c "
+        set -eu
+        echo 'Waiting for Elasticsearch...' &&
+        until curl -s http://elasticsearch:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'; do
+          sleep 2
+        done &&
+        echo 'Checking if index exists...' &&
+        if curl -s -o /dev/null -w '%{http_code}' http://elasticsearch:9200/${es_index} | grep -q 404; then
+          echo 'Creating index with analysis and mappings...' &&
+          analysis_json=$$(cat /config/analysis.works_source.2026-03-25.json) &&
+          mappings_json=$$(cat /config/mappings.works_source.2026-03-25.json) &&
+          printf '{\"settings\":{\"analysis\":%s},\"mappings\":%s}\n' \"$$analysis_json\" \"$$mappings_json\" > /tmp/es-create-index-payload.json &&
+          create_status=$$(curl -sS -o /tmp/es-create-index-response.json -w '%{http_code}' -X PUT http://elasticsearch:9200/${es_index} -H 'Content-Type: application/json' --data-binary @/tmp/es-create-index-payload.json) &&
+          if [ \"$$create_status\" != '200' ] && [ \"$$create_status\" != '201' ]; then
+            echo \"Index creation failed with HTTP $$create_status\" &&
+            cat /tmp/es-create-index-response.json &&
+            exit 1
+          fi &&
+          echo 'Index created successfully'
+        else
+          echo 'Index already exists, skipping creation'
+        fi
+      "
+    volumes:
+      - ../../../index_config/analysis.works_source.2026-03-25.json:/config/analysis.works_source.2026-03-25.json:ro
+      - ../../../index_config/mappings.works_source.2026-03-25.json:/config/mappings.works_source.2026-03-25.json:ro
     restart: "no"

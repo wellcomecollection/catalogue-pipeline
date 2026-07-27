@@ -16,8 +16,10 @@ The implementation is a Python CLI (`local_transformer.py`).
   - Fetches Elasticsearch env vars from AWS Secrets Manager for a pipeline date (see `fetch-es-env`)
   - Uses an explicit `--index-name` (no index derived from pipeline date)
   - Builds/stages `transformer_calm`
-  - Starts Docker Compose services (`localstack`, queue/topic setup, transformer)
-  - When using local ES (default), waits for ES health and creates the target index if missing
+  - Starts Docker Compose services (`localstack`, queue/topic setup, local Elasticsearch, Elasticsearch index setup, transformer)
+  - The `es-setup` service creates the target index in local Elasticsearch using:
+    - `index_config/analysis.works_source.2026-03-25.json`
+    - `index_config/mappings.works_source.2026-03-25.json`
   - Follows `calm-transformer` logs by default
 
 - `local_transformer.py fetch-es-env`
@@ -35,19 +37,23 @@ The implementation is a Python CLI (`local_transformer.py`).
 - `local_transformer.py enqueue`
   - Reads line-separated CALM IDs from a file
   - For each ID, fetches `payload.bucket`, `payload.key`, `version`, `isDeleted` from DynamoDB (`vhs-calm-adapter` by default)
-  - Sends correctly-shaped messages to local SQS queue
+  - Sends correctly-shaped messages to local SQS queue using `SendMessageBatch` (10 messages per SQS call)
   - Processes IDs in batches (default 100)
 
 - `local_transformer.py verify-completion`
   - Waits until local input queue is drained (`visible=0` and `in_flight=0`)
+  - Checks local DLQ (`calm-transformer-dlq`) for failed messages after 2 receives
   - Checks transformer logs for errors
   - Verifies every input ID has a corresponding ES document ID in the format:
     - `Work[calm-record-id/<id>]`
+  - Writes a combined `missing_ids.txt` file including missing ES IDs and IDs found in DLQ
+  - Purges the DLQ after recording failing IDs so subsequent runs are clean
 
 ## Prerequisites
 
 - Docker + Docker Compose
 - Python 3
+- `uv` (https://docs.astral.sh/uv/)
 - AWS CLI authenticated for platform account access
 - Repo root checked out locally
 - ECR login for pulling the sbt wrapper image:
@@ -66,10 +72,10 @@ Optional env vars:
 ## CLI usage
 
 ```bash
-run_local/local_transformer.py --help
-run_local/local_transformer.py start --help
-run_local/local_transformer.py enqueue --help
-run_local/local_transformer.py verify-completion --help
+uv run --script run_local/local_transformer.py --help
+uv run --script run_local/local_transformer.py start --help
+uv run --script run_local/local_transformer.py enqueue --help
+uv run --script run_local/local_transformer.py verify-completion --help
 ```
 
 ## Steps
@@ -79,13 +85,13 @@ From `pipeline/transformer/transformer_calm`:
 1. Start local services and transformer:
 
 ```bash
-run_local/local_transformer.py start <pipeline_date> --index-name <index_name>
+uv run --script run_local/local_transformer.py start <pipeline_date> --index-name <index_name>
 ```
 
 Example:
 
 ```bash
-run_local/local_transformer.py start 2026-07-03 --index-name works-source-2026-07-03
+uv run --script run_local/local_transformer.py start 2026-07-03 --index-name works-source-2026-07-03
 ```
 
 This command tails `calm-transformer` logs. Press `Ctrl+C` to stop log streaming; containers continue running.
@@ -95,36 +101,45 @@ This default uses local Docker Elasticsearch (`--es-host local`), so writes go t
 To write to the deployed public Elasticsearch instead, pass:
 
 ```bash
-run_local/local_transformer.py start 2026-07-03 --index-name works-source-2026-07-03 --es-host public
+uv run --script run_local/local_transformer.py start 2026-07-03 --index-name works-source-2026-07-03 --es-host public
 ```
 
 2. Enqueue line-separated CALM IDs:
 
 ```bash
-run_local/local_transformer.py enqueue /path/to/calm_ids.txt
+uv run --script run_local/local_transformer.py enqueue /path/to/calm_ids.txt
 ```
 
 3. Optional custom batch size:
 
 ```bash
-run_local/local_transformer.py enqueue /path/to/calm_ids.txt 250
+uv run --script run_local/local_transformer.py enqueue /path/to/calm_ids.txt 250
 ```
 
 4. Verify completion:
 
 ```bash
-run_local/local_transformer.py verify-completion /path/to/calm_ids.txt
+uv run --script run_local/local_transformer.py verify-completion /path/to/calm_ids.txt
 ```
+
+By default, this scans transformer logs from the most recent `enqueue` run timestamp.
 
 Optional timeout/polling controls:
 
 ```bash
-run_local/local_transformer.py verify-completion /path/to/calm_ids.txt 900 15
+uv run --script run_local/local_transformer.py verify-completion /path/to/calm_ids.txt 900 15
+```
+
+Optional explicit log window:
+
+```bash
+uv run --script run_local/local_transformer.py verify-completion /path/to/calm_ids.txt --logs-since 15m
 ```
 
 ## Notes
 
 - The queue URL is fixed to:
   `http://localhost:4566/000000000000/calm-transformer-queue`
+- The queue has a redrive policy to `calm-transformer-dlq` with `maxReceiveCount=2`.
 - Missing IDs are skipped and counted.
-- This workflow enqueues messages; it does not wait for full downstream completion. Check downstream completion with `run_local/local_transformer.py verify-completion`
+- This workflow enqueues messages; it does not wait for full downstream completion. Check downstream completion with `uv run --script run_local/local_transformer.py verify-completion`
