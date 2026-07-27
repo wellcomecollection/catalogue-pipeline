@@ -197,11 +197,13 @@ class MockSNSClient(MockAwsService):
 class MockStepFunctionsClient(MockAwsService):
     task_successes: list[dict[str, str]] = []
     task_failures: list[dict[str, str]] = []
+    task_heartbeats: list[str] = []
 
     @staticmethod
     def reset_mocks() -> None:
         MockStepFunctionsClient.task_successes = []
         MockStepFunctionsClient.task_failures = []
+        MockStepFunctionsClient.task_heartbeats = []
 
     def send_task_success(self, taskToken: str, output: str) -> None:  # noqa: N803
         MockStepFunctionsClient.task_successes.append(
@@ -219,6 +221,9 @@ class MockStepFunctionsClient(MockAwsService):
                 "cause": cause,
             }
         )
+
+    def send_task_heartbeat(self, taskToken: str) -> None:  # noqa: N803
+        MockStepFunctionsClient.task_heartbeats.append(taskToken)
 
 
 class MockBoto3Resource:  # pragma: no cover - structural

@@ -185,10 +185,14 @@ locals {
     },
   ]
 
-  # Safety net for waitForTaskToken ECS steps: if a task crashes before calling
-  # SendTaskSuccess/SendTaskFailure the state would otherwise hang for up to 1 year.
-  # 12 hours is generous for the heaviest monthly extractor/ingestor runs.
+  # Outer bound for waitForTaskToken ECS steps, generous enough for the heaviest
+  # monthly extractor/ingestor runs. Liveness is enforced by the heartbeat below.
   ecs_task_token_timeout_seconds = 12 * 60 * 60 # 12 hours
+
+  # Tasks heartbeat every 60s (HEARTBEAT_INTERVAL_SECONDS in utils/steps.py). This
+  # also covers the cold start before the first heartbeat: Fargate provisioning,
+  # image pull and interpreter startup.
+  ecs_task_token_heartbeat_seconds = 5 * 60 # 5 minutes
 
   state_function_default_retry = [
     {

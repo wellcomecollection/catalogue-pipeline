@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
+import time
 from argparse import ArgumentParser
 
 import pytest
@@ -10,7 +11,7 @@ from pydantic import BaseModel, ValidationError
 
 from tests.mocks import MockStepFunctionsClient
 from utils.logger import ExecutionContext, setup_structlog
-from utils.steps import StepFunctionOutput, ecs_handler
+from utils.steps import StepFunctionOutput, ecs_handler, task_heartbeat
 
 
 class ExampleEvent(BaseModel):
@@ -283,6 +284,31 @@ def test_ecs_handler_without_task_token_none_result(
     assert MockStepFunctionsClient.task_failures == []
 
     assert "Task result" in caplog.text
+
+
+# task_heartbeat tests
+
+
+def test_task_heartbeat_reports_while_running() -> None:
+    with task_heartbeat(MockStepFunctionsClient(), "token-beat", interval_seconds=0.01):
+        for _ in range(200):
+            if MockStepFunctionsClient.task_heartbeats:
+                break
+            time.sleep(0.01)
+
+    assert MockStepFunctionsClient.task_heartbeats[0] == "token-beat"
+
+    # The thread is stopped on exit, so no further heartbeats arrive.
+    sent = len(MockStepFunctionsClient.task_heartbeats)
+    time.sleep(0.05)
+    assert len(MockStepFunctionsClient.task_heartbeats) == sent
+
+
+def test_task_heartbeat_without_token_does_nothing() -> None:
+    with task_heartbeat(None, None, interval_seconds=0.01):
+        time.sleep(0.05)
+
+    assert MockStepFunctionsClient.task_heartbeats == []
 
 
 # StepFunctionOutput tests

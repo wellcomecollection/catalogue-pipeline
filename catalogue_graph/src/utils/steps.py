@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import threading
 from argparse import ArgumentParser
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Concatenate, ParamSpec, Protocol, TypeVar
 
@@ -20,11 +22,17 @@ ResultModel = TypeVar("ResultModel", bound=BaseModel)
 HandlerFunction = Callable[Concatenate[EventModel, Params], ResultModel | None]
 EventValidator = Callable[[str], EventModel]
 
+# Several times smaller than `HeartbeatSeconds` on the waitForTaskToken states, so a
+# few dropped heartbeats in a row are tolerated.
+HEARTBEAT_INTERVAL_SECONDS = 60
+
 
 class StepFunctionClient(Protocol):
     def send_task_success(self, taskToken: str, output: str) -> None: ...
 
     def send_task_failure(self, taskToken: str, error: str, cause: str) -> None: ...
+
+    def send_task_heartbeat(self, taskToken: str) -> None: ...
 
 
 class StepFunctionOutput:
@@ -73,6 +81,40 @@ class StepFunctionOutput:
             logger.error("Task error", error_output=error_output)
 
 
+@contextmanager
+def task_heartbeat(
+    stepfunctions_client: StepFunctionClient | None,
+    task_token: str | None,
+    interval_seconds: float = HEARTBEAT_INTERVAL_SECONDS,
+) -> Iterator[None]:
+    """Report liveness to Step Functions while the wrapped block runs.
+
+    Without it, a task that dies before calling SendTaskSuccess/SendTaskFailure looks
+    the same as one still working, and the calling state hangs until `TimeoutSeconds`.
+    """
+    if stepfunctions_client is None or task_token is None:
+        yield
+        return
+
+    stop = threading.Event()
+
+    def beat() -> None:
+        while not stop.wait(interval_seconds):
+            try:
+                stepfunctions_client.send_task_heartbeat(taskToken=task_token)
+            except Exception:
+                # Best-effort: failing here would turn a blip into a failed window.
+                logger.warning("Failed to send task heartbeat", exc_info=True)
+
+    thread = threading.Thread(target=beat, name="task-heartbeat", daemon=True)
+    thread.start()
+    try:
+        yield
+    finally:
+        stop.set()
+        thread.join(timeout=interval_seconds)
+
+
 def ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
     arg_parser: ArgumentParser,
     handler: Callable[
@@ -108,12 +150,13 @@ def ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
             pipeline_step=pipeline_step,
         )
         event = event_validator(ecs_args.event)
-        result = handler(
-            event,
-            execution_context,
-            *handler_args,  # noqa: B026
-            **handler_kwargs,
-        )
+        with task_heartbeat(stepfunctions_client, task_token):
+            result = handler(
+                event,
+                execution_context,
+                *handler_args,  # noqa: B026
+                **handler_kwargs,
+            )
         step_output.send_success(result)
         logger.info(
             "ECS task completed successfully",
