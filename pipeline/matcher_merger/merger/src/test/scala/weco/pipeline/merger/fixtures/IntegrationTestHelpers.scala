@@ -228,15 +228,15 @@ trait IntegrationTestHelpers
   def processWork(
     work: Work[WorkState.Identified]
   )(implicit context: Context): Unit = {
-    println(
-      s"Processing work ${work.state.sourceIdentifier} (${work.state.canonicalId})"
-    )
-
     context.identifiedIndex.index +=
       (work.state.canonicalId.underlying -> work)
 
+    val imagesBefore = indexedImageIds
+    val notificationsBefore = context.imageDownstream.msgSender.messages.size
+
     runMerger(runMatcher(work))
-    assertAllImagesNotified
+
+    assertImagesNotified(imagesBefore, notificationsBefore)
   }
 
   private def runMatcher(
@@ -287,20 +287,33 @@ trait IntegrationTestHelpers
     )
   }
 
+  private def indexedImageIds(implicit context: Context): Set[String] =
+    context.mergedIndex.values.collect { case Right(image) => image.id }.toSet
+
   /** Only images result in a notification; works are picked up downstream by a
     * window-based read of the merged index.
+    *
+    * Compares what this pass did rather than the whole scenario, so an image
+    * that was notified on an earlier pass can't cover for a later one.
     */
-  private def assertAllImagesNotified(implicit context: Context): Unit = {
-    val indexedImages = context.mergedIndex.values.collect {
-      case Right(image) => image.id
-    }.toSet
-
-    val notifiedImages =
-      context.imageDownstream.msgSender.messages.map(_.body).toSet
+  private def assertImagesNotified(
+    imagesBefore: Set[String],
+    notificationsBefore: Int
+  )(implicit context: Context): Unit = {
+    val newlyIndexed = indexedImageIds -- imagesBefore
+    val newlyNotified = context.imageDownstream.msgSender.messages
+      .drop(notificationsBefore)
+      .map(_.body)
+      .toSet
 
     assert(
-      indexedImages.subsetOf(notifiedImages),
-      s"Images ${(indexedImages -- notifiedImages).mkString(", ")} were saved but never sent downstream"
+      newlyIndexed.subsetOf(newlyNotified),
+      s"Images ${(newlyIndexed -- newlyNotified).mkString(", ")} were saved but not sent downstream"
+    )
+
+    assert(
+      newlyNotified.subsetOf(indexedImageIds),
+      s"Images ${(newlyNotified -- indexedImageIds).mkString(", ")} were sent downstream but never saved"
     )
   }
 }

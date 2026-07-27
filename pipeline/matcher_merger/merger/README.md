@@ -67,8 +67,10 @@ merging bugs have come from.
 Because they use a real graph table, these tests need the containers in
 `docker-compose.yml`:
 
+From the root of the repository:
+
 ```
-docker compose up -d
+docker compose -f pipeline/matcher_merger/merger/docker-compose.yml up -d
 sbt "project merger" "testOnly weco.pipeline.merger.MergerIntegrationTest"
 ```
 
