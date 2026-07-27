@@ -39,6 +39,21 @@ RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
 CONCEPTS_BATCH_SIZE = 40_000
 
 
+def _choose_target_id(primary_id: str, referenced_ids: set[str]) -> str:
+    """
+    Choose which ID to use when referring to a related concept.
+
+    `referenced_ids` are the IDs the graph returned for this related concept, all of which are connected to at least
+    one work (see `get_related_query`). `primary_id` is the primary of their 'same as' group, which may itself have
+    no works. Prefer the primary for consistency with the rest of the ingestor, but fall back to a referenced ID
+    when the primary is not among them.
+    """
+    if primary_id in referenced_ids:
+        return primary_id
+
+    return sorted(referenced_ids)[0]
+
+
 class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
     """Abstract base class for concept extraction from the catalogue graph.
 
@@ -142,14 +157,24 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
                     entry = merged_result[primary_id].setdefault(
                         primary_related_id,
                         {
-                            "id": primary_related_id,
                             "count": 0,
                             "relationship_type": set(),
+                            "referenced_ids": set(),
                         },
                     )
                     entry["count"] += related["count"]
+                    entry["referenced_ids"].add(related["id"])
                     if related.get("relationship_type"):
                         entry["relationship_type"].add(related["relationship_type"])
+
+        # Results are merged under a primary ID, but the primary of a 'same as' group is chosen alphabetically and is
+        # not necessarily connected to any works. Concepts without works are removed from the graph (and therefore
+        # from the concepts index), so pointing at one produces a related concept which resolves to a 404.
+        for entries in merged_result.values():
+            for primary_related_id, entry in entries.items():
+                entry["id"] = _choose_target_id(
+                    primary_related_id, entry["referenced_ids"]
+                )
 
         limit = self.neptune_params["related_to_limit"]
         sorted_result = {
@@ -157,8 +182,12 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
             for concept_id, entries in merged_result.items()
         }
 
-        primary_related_ids = {self.get_primary(i) for i in related_ids}
-        full_related_concepts = self.get_concepts(primary_related_ids)
+        target_ids = {
+            entry["id"]
+            for entries in merged_result.values()
+            for entry in entries.values()
+        }
+        full_related_concepts = self.get_concepts(target_ids)
 
         full_result = defaultdict(list)
         for concept_id in ids:
