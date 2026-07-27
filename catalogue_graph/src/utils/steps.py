@@ -22,8 +22,7 @@ ResultModel = TypeVar("ResultModel", bound=BaseModel)
 HandlerFunction = Callable[Concatenate[EventModel, Params], ResultModel | None]
 EventValidator = Callable[[str], EventModel]
 
-# Several times smaller than `HeartbeatSeconds` on the waitForTaskToken states, so a
-# few dropped heartbeats in a row are tolerated.
+# Well under HeartbeatSeconds on the waitForTaskToken states.
 HEARTBEAT_INTERVAL_SECONDS = 60
 
 
@@ -89,7 +88,7 @@ def task_heartbeat(
 ) -> Iterator[None]:
     """Report liveness to Step Functions while the wrapped block runs.
 
-    Without it, a task that dies before calling SendTaskSuccess/SendTaskFailure looks
+    Without it a task that dies before calling SendTaskSuccess/SendTaskFailure looks
     the same as one still working, and the calling state hangs until `TimeoutSeconds`.
     """
     if stepfunctions_client is None or task_token is None:
@@ -100,11 +99,7 @@ def task_heartbeat(
 
     def beat() -> None:
         while not stop.wait(interval_seconds):
-            try:
-                stepfunctions_client.send_task_heartbeat(taskToken=task_token)
-            except Exception:
-                # Best-effort: failing here would turn a blip into a failed window.
-                logger.warning("Failed to send task heartbeat", exc_info=True)
+            stepfunctions_client.send_task_heartbeat(taskToken=task_token)
 
     thread = threading.Thread(target=beat, name="task-heartbeat", daemon=True)
     thread.start()

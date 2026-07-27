@@ -185,13 +185,12 @@ locals {
     },
   ]
 
-  # Outer bound for waitForTaskToken ECS steps, generous enough for the heaviest
-  # monthly extractor/ingestor runs. Liveness is enforced by the heartbeat below.
+  # Outer bound for waitForTaskToken ECS steps, sized for the monthly run. Liveness
+  # is enforced by the heartbeat below.
   ecs_task_token_timeout_seconds = 12 * 60 * 60 # 12 hours
 
-  # Tasks heartbeat every 60s (HEARTBEAT_INTERVAL_SECONDS in utils/steps.py). This
-  # also covers the cold start before the first heartbeat: Fargate provisioning,
-  # image pull and interpreter startup.
+  # Tasks beat every 60s (HEARTBEAT_INTERVAL_SECONDS in utils/steps.py). The margin
+  # covers cold start before the first beat: provisioning, image pull, interpreter.
   ecs_task_token_heartbeat_seconds = 5 * 60 # 5 minutes
 
   state_function_default_retry = [
@@ -207,9 +206,8 @@ locals {
         "Ecs.CannotPullContainerErrorException",
         "Ecs.ContainerRuntimeTimeoutErrorException",
         "Ecs.EssentialContainerExited",
-        # Mostly a missed heartbeat, meaning the task died. A retry may briefly run
-        # alongside a stalled task, which is safe: extractor and ingestor writes are
-        # idempotent overwrites keyed on the window.
+        # Almost always a missed heartbeat, so the task is dead. A retry may briefly
+        # overlap a stalled one, which is safe: writes are idempotent per window.
         "States.Timeout",
       ]
       IntervalSeconds = 1
