@@ -38,7 +38,6 @@ variable "secret_env_vars" {
 }
 
 # Read on every connection so the Lambdas pick up the 7 day password rotation.
-# Read access comes from the secret_env_vars refs, which cover the same secret.
 variable "rds_secret_name" {
   type = string
 }

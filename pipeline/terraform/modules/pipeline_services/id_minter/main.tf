@@ -70,6 +70,31 @@ module "id_generator_lambda" {
   vpc_config = var.vpc_config
 }
 
+# Granted explicitly rather than relying on the caller happening to list the
+# same secret in secret_env_vars.
+resource "aws_iam_role_policy" "id_minter_rds_secret_read" {
+  name   = "id-minter${local.dash_namespace}-rds-secret-read"
+  role   = module.id_minter_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.rds_secret_read.json
+}
+
+resource "aws_iam_role_policy" "id_generator_rds_secret_read" {
+  count = var.include_id_generator ? 1 : 0
+
+  name   = "id-generator${local.dash_namespace}-rds-secret-read"
+  role   = module.id_generator_lambda[0].lambda_role_name
+  policy = data.aws_iam_policy_document.rds_secret_read.json
+}
+
+data "aws_iam_policy_document" "rds_secret_read" {
+  statement {
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:secret:${var.rds_secret_name}-*",
+    ]
+  }
+}
+
 resource "aws_iam_role_policy" "id_minter_lambda_s3_write" {
   count = var.env_vars.S3_BUCKET != null ? 1 : 0
 

@@ -17,6 +17,7 @@ import boto3
 import pymysql
 import pymysql.cursors
 import structlog
+from botocore.exceptions import ClientError
 from yoyo import get_backend, read_migrations
 
 from id_minter.config import DBConfig
@@ -27,10 +28,11 @@ MIGRATIONS_DIR = str(Path(__file__).parent / "migrations")
 
 ACCESS_DENIED_ERROR_CODE = 1045  # MySQL ER_ACCESS_DENIED_ERROR
 
-# Rotation changes the server password before the new secret version becomes
-# current, so a connect in that window is denied even with a fresh read.
-CONNECT_ATTEMPTS = 3
-RETRY_DELAY_SECONDS = 2
+# Rotation sets the new password on the server before promoting the pending
+# secret version, so a denial is retried against the pending version, then
+# against the current one once the promotion has had time to land.
+RETRY_STAGES = ("AWSCURRENT", "AWSPENDING", "AWSCURRENT")
+RETRY_DELAY_SECONDS = 5
 
 
 class DBCursor(Protocol):
@@ -58,21 +60,37 @@ class DBCredentials(NamedTuple):
     password: str
 
 
-def get_credentials(config: DBConfig) -> DBCredentials:
+def _config_credentials(config: DBConfig) -> DBCredentials:
+    return DBCredentials(
+        username=config.rds_client.username,
+        password=config.rds_client.password,
+    )
+
+
+def get_credentials(
+    config: DBConfig, version_stage: str = "AWSCURRENT"
+) -> DBCredentials | None:
     """Read the credentials from Secrets Manager, or from config if no secret.
 
     Reading on every call is deliberate: the secret rotates every 7 days, so
     anything cached for the lifetime of a warm Lambda eventually goes stale.
+    Returns None if the requested version stage does not exist.
     """
     secret_name = config.rds_client.secret_name
-    if secret_name is None:
-        return DBCredentials(
-            username=config.rds_client.username,
-            password=config.rds_client.password,
-        )
+    if not secret_name:
+        return _config_credentials(config)
 
     client = boto3.Session().client("secretsmanager")
-    secret = json.loads(client.get_secret_value(SecretId=secret_name)["SecretString"])
+    try:
+        response = client.get_secret_value(
+            SecretId=secret_name, VersionStage=version_stage
+        )
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] != "ResourceNotFoundException":
+            raise
+        return None
+
+    secret = json.loads(response["SecretString"])
     return DBCredentials(username=secret["username"], password=secret["password"])
 
 
@@ -88,24 +106,26 @@ def _connect_with_retry[T](
     Retrying only helps when the credentials can change between attempts, so it
     is skipped when they come from config rather than Secrets Manager.
     """
-    attempts = CONNECT_ATTEMPTS if config.rds_client.secret_name else 1
+    if not config.rds_client.secret_name:
+        return connect(_config_credentials(config))
 
-    for attempt in range(1, attempts + 1):
+    for attempt, stage in enumerate(RETRY_STAGES, start=1):
+        last_attempt = attempt == len(RETRY_STAGES)
+        if stage == "AWSCURRENT" and attempt > 1:
+            time.sleep(RETRY_DELAY_SECONDS)
+
+        credentials = get_credentials(config, version_stage=stage)
+        if credentials is None:  # nothing staged for rotation
+            continue
+
         try:
-            return connect(get_credentials(config))
+            return connect(credentials)
         except pymysql.err.OperationalError as exc:
-            if attempt == attempts or not _is_access_denied(exc):
+            if last_attempt or not _is_access_denied(exc):
                 raise
-            delay = RETRY_DELAY_SECONDS * attempt
-            logger.warning(
-                "Database access denied, re-reading credentials before retrying",
-                attempt=attempt,
-                attempts=attempts,
-                retry_in_seconds=delay,
-            )
-            time.sleep(delay)
+            logger.warning("Database access denied, retrying", version_stage=stage)
 
-    raise AssertionError("unreachable")
+    raise RuntimeError(f"No usable credentials in {config.rds_client.secret_name}")
 
 
 def get_connection(

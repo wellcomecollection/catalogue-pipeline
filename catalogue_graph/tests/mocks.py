@@ -13,6 +13,7 @@ from typing import Any, TypedDict
 import elasticsearch
 import polars as pl
 from botocore.credentials import Credentials
+from botocore.exceptions import ClientError
 from polars import DataFrame as PolarsDataFrame
 
 from clients.neptune_client import NeptuneClient
@@ -93,16 +94,38 @@ class MockSecretsManagerClient(MockAwsService):
         cls.calls = []
 
     @classmethod
-    def add_mock_secret(cls, secret_id: str, value: Any) -> None:
-        cls.secrets[secret_id] = value
+    def add_mock_secret(
+        cls, secret_id: str, value: Any, version_stage: str = "AWSCURRENT"
+    ) -> None:
+        cls.secrets[cls._key(secret_id, version_stage)] = value
 
-    def get_secret_value(self, SecretId: str) -> dict:
+    @staticmethod
+    def _key(secret_id: str, version_stage: str) -> str:
+        if version_stage == "AWSCURRENT":
+            return secret_id
+        return f"{secret_id}@{version_stage}"
+
+    def get_secret_value(
+        self,
+        SecretId: str,  # noqa: N803
+        VersionStage: str = "AWSCURRENT",  # noqa: N803
+    ) -> dict:
         self.calls.append(SecretId)
-        if SecretId in self.secrets:
-            secret_value = self.secrets[SecretId]
-        else:
-            raise KeyError(f"Secret value '{SecretId}' does not exist.")
-        return {"SecretString": secret_value}
+        key = self._key(SecretId, VersionStage)
+        if key in self.secrets:
+            return {"SecretString": self.secrets[key]}
+        if VersionStage != "AWSCURRENT":
+            # Secrets Manager reports an unstaged label as a missing value.
+            raise ClientError(
+                {
+                    "Error": {
+                        "Code": "ResourceNotFoundException",
+                        "Message": VersionStage,
+                    }
+                },
+                "GetSecretValue",
+            )
+        raise KeyError(f"Secret value '{SecretId}' does not exist.")
 
 
 class MockS3Paginator:
