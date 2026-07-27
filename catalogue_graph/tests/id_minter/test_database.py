@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pymysql
 import pytest
@@ -13,6 +13,7 @@ from id_minter.config import DBConfig, RDSClientConfig
 from id_minter.database import (
     ACCESS_DENIED_ERROR_CODE,
     RETRY_STAGES,
+    apply_migrations,
     get_connection,
     get_credentials,
 )
@@ -195,3 +196,29 @@ class TestGetConnection:
             get_connection(config_with_secret(secret_name=None))
 
         assert connect.call_count == 1
+
+
+class TestApplyMigrations:
+    def test_retries_with_fresh_credentials_when_access_is_denied(self) -> None:
+        """yoyo connects via pymysql, so migrations retry a rotation the same way."""
+        add_mock_credentials("admin", "stale_password")
+        backend = MagicMock()
+
+        def backend_or_deny(dsn: str) -> Any:
+            if "stale_password" in dsn:
+                add_mock_credentials("admin", "rotated_password")
+                raise access_denied()
+            return backend
+
+        with (
+            patch(
+                "id_minter.database.get_backend", side_effect=backend_or_deny
+            ) as get_backend,
+            patch("id_minter.database.read_migrations"),
+            patch("time.sleep"),
+        ):
+            apply_migrations(config_with_secret())
+
+        assert get_backend.call_count == 2
+        assert "rotated_password" in get_backend.call_args.args[0]
+        backend.apply_migrations.assert_called_once()

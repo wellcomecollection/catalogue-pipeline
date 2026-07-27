@@ -80,6 +80,7 @@ def get_credentials(
     if not secret_name:
         return _config_credentials(config)
 
+    # Not utils.aws.get_secret: that is lru_cached, which is the staleness we avoid.
     client = boto3.Session().client("secretsmanager")
     try:
         response = client.get_secret_value(
