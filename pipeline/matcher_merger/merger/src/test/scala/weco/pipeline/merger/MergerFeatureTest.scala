@@ -140,7 +140,6 @@ class MergerFeatureTest
           )
         }
 
-
         // 4) Now suppose the updates to A and C get processed by the matcher
         // at time t = 6.
         //

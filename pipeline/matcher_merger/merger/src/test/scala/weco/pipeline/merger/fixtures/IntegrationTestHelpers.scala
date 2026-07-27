@@ -27,29 +27,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import weco.fixtures.TestWith
 
-/** Wiring for the matcher/merger integration tests.
-  *
-  * These are in a separate file to avoid cluttering up the integration tests
-  * with code that doesn't tell us about the desired matcher/merger behaviour.
-  *
-  * The two applications are assembled here as close to production as a test
-  * allows:
-  *
-  *   - both are driven through their real Lambda entrypoints, so the tests go
-  *     through the same message handling as the deployed applications
-  *   - the matcher writes its graph to a real DynamoDB table (started by the
-  *     docker-compose.yml in this project), so graph state accumulates from one
-  *     work to the next just as it does in production
-  *   - the matcher and the merger read works from one shared index, mirroring
-  *     the way both read from the identified index in production
-  *
-  * What is faked is the transport between the two: instead of a real queue, the
-  * matcher's output is handed straight to the merger.
-  *
-  * Works are processed one at a time, and each is taken all the way through the
-  * matcher and the merger before the next one starts. Several of these tests
-  * are about the order works arrive in, and that order only means anything if
-  * each work is finished with before the next one begins.
+/** Wiring for the matcher/merger integration tests, kept out of the tests so
+  * they stay a readable description of the behaviour we want. See the README
+  * for what is real here and what is faked.
   */
 trait IntegrationTestHelpers
     extends EitherValues
@@ -74,10 +54,8 @@ trait IntegrationTestHelpers
   type IdentifiedIndex = MemoryRetriever[Work[WorkState.Identified]]
   type MergedIndex = mutable.Map[String, WorkOrImage]
 
-  /** The matcher only needs the identifiers from a work, so in production it
-    * reads a cut-down [[WorkStub]] from the identified index. Presenting the
-    * shared index as stubs lets the tests keep a single copy of each work.
-    */
+  // Presenting the shared index as stubs keeps one copy of each work in a test,
+  // matching the way the matcher reads stubs from the identified index.
   private class WorkStubIndex(identifiedIndex: IdentifiedIndex)
       extends Retriever[WorkStub] {
     override implicit val ec: ExecutionContext = global
