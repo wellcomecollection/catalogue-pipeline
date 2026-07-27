@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import logging
 import sys
+import threading
+import time
 from argparse import ArgumentParser
 
 import pytest
@@ -10,7 +12,12 @@ from pydantic import BaseModel, ValidationError
 
 from tests.mocks import MockStepFunctionsClient
 from utils.logger import ExecutionContext, setup_structlog
-from utils.steps import StepFunctionOutput, ecs_handler
+from utils.steps import (
+    MAX_CONSECUTIVE_HEARTBEAT_FAILURES,
+    StepFunctionOutput,
+    ecs_handler,
+    task_heartbeat,
+)
 
 
 class ExampleEvent(BaseModel):
@@ -283,6 +290,79 @@ def test_ecs_handler_without_task_token_none_result(
     assert MockStepFunctionsClient.task_failures == []
 
     assert "Task result" in caplog.text
+
+
+# task_heartbeat tests
+
+
+def test_task_heartbeat_reports_while_running() -> None:
+    with task_heartbeat(MockStepFunctionsClient(), "token-beat", interval_seconds=0.01):
+        for _ in range(200):
+            if MockStepFunctionsClient.task_heartbeats:
+                break
+            time.sleep(0.01)
+
+    assert MockStepFunctionsClient.task_heartbeats[0] == "token-beat"
+
+    # The thread is stopped on exit, so no further heartbeats arrive.
+    sent = len(MockStepFunctionsClient.task_heartbeats)
+    time.sleep(0.05)
+    assert len(MockStepFunctionsClient.task_heartbeats) == sent
+
+
+class FlakyHeartbeatClient:
+    """Fails the first `failures` heartbeats, then succeeds."""
+
+    def __init__(self, failures: int) -> None:
+        self.failures = failures
+        self.calls = 0
+
+    def send_task_success(self, taskToken: str, output: str) -> None: ...  # noqa: N803
+
+    def send_task_failure(self, taskToken: str, error: str, cause: str) -> None: ...  # noqa: N803
+
+    def send_task_heartbeat(self, taskToken: str) -> None:  # noqa: N803
+        self.calls += 1
+        if self.calls <= self.failures:
+            raise RuntimeError("blip")
+
+
+def _wait_for_calls(client: FlakyHeartbeatClient, target: int) -> None:
+    for _ in range(200):
+        if client.calls >= target:
+            return
+        time.sleep(0.01)
+
+
+def test_task_heartbeat_absorbs_a_transient_failure() -> None:
+    client = FlakyHeartbeatClient(failures=1)
+    target = MAX_CONSECUTIVE_HEARTBEAT_FAILURES + 2
+
+    with task_heartbeat(client, "token-flaky", interval_seconds=0.01):
+        _wait_for_calls(client, target)
+
+    assert client.calls >= target
+
+
+def test_task_heartbeat_gives_up_after_consecutive_failures(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = FlakyHeartbeatClient(failures=1000)
+    # The thread dies by design here; keep its traceback out of the test output.
+    monkeypatch.setattr(threading, "excepthook", lambda args: None)
+
+    with task_heartbeat(client, "token-broken", interval_seconds=0.01):
+        _wait_for_calls(client, MAX_CONSECUTIVE_HEARTBEAT_FAILURES)
+        time.sleep(0.1)
+
+    assert client.calls == MAX_CONSECUTIVE_HEARTBEAT_FAILURES
+
+
+def test_task_heartbeat_without_token_does_nothing() -> None:
+    with task_heartbeat(None, None, interval_seconds=0.01):
+        time.sleep(0.05)
+
+    assert MockStepFunctionsClient.task_heartbeats == []
 
 
 # StepFunctionOutput tests
