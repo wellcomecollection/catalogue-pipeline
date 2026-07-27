@@ -111,8 +111,8 @@ def test_catalogue_concepts_transformer_edges() -> None:
         ),
     )
 
-    # A concept can have a Wellcome name authority override as well as a source concept from
-    # another ontology. (The authority record's label is blank, which must not stop us matching it.)
+    # An authority override sits alongside another ontology's source concept, and the authority
+    # record's blank label must not stop us matching it.
     check_bulk_load_edge(
         edges,
         ConceptHasSourceConcept(

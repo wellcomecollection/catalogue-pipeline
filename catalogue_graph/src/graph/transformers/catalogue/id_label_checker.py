@@ -7,7 +7,6 @@ from utils.types import ConceptSource, ConceptType, TransformerType
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")
 
-# Sources we attempt to match catalogue concept labels against, in order of priority.
 # 'weco-authority' is deliberately absent: see `IdLabelChecker.__init__`.
 LABEL_MATCH_SOURCES_BY_PRIORITY: list[ConceptSource] = [
     "nlm-mesh",
@@ -74,17 +73,15 @@ class IdLabelChecker:
 
                 concept_source = _concept_source_from_id(source_id)
 
-                # The id-keyed dictionaries double as the index of which source ids were bulk loaded,
-                # so every source is recorded in them.
+                # Every source goes into the id-keyed dictionaries, which double as the index of
+                # which ids were bulk loaded.
                 self.ids_to_labels[concept_source][source_id] = label
                 self.ids_to_alternative_labels[concept_source][source_id] = (
                     alternative_labels
                 )
 
-                # The label-keyed dictionaries are only used for label matching, so we only populate
-                # them for the sources we match labels against. In particular, most weco-authority
-                # records have a blank label, which would otherwise map the empty label to a bag of
-                # weco ids, and weco-authority records are meant to be matched by identifier only.
+                # Only label-matched sources go into the reverse dictionaries. Most weco-authority
+                # records have a blank label, which would map the empty label to a bag of weco ids.
                 if concept_source in LABEL_MATCH_SOURCES_BY_PRIORITY:
                     self._add_label_mapping(label, source_id, concept_source)
                     self._add_alternative_label_mappings(
@@ -145,9 +142,8 @@ class IdLabelChecker:
 
     def has_id(self, source_id: str, source: ConceptSource) -> bool:
         """
-        Given a source id from a specific source, return 'True' if a node with that id was bulk
-        loaded into the graph. (Prefer this over `get_label`, which returns an empty string rather
-        than 'None' for a node whose label is blank.)
+        Given a source id from a specific source, return 'True' if it was bulk loaded into the
+        graph. Prefer this over `get_label`, which returns an empty string for a blank label.
         """
         return source_id in self.ids_to_labels[source]
 

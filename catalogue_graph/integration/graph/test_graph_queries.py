@@ -475,10 +475,9 @@ def test_weco_authority_nodes_link_to_concepts() -> None:
     """
     Every Wellcome name authority record should override a catalogue concept.
 
-    The two ways this can fail have different causes, so they are reported separately. A missing
-    Concept node means the CSV names a canonical id which is not (or is no longer) a catalogue
-    concept, which is a problem with the checked-in data. A Concept node with no edge means the
-    incremental pipeline has not produced the edge yet, which is a problem with the pipeline.
+    The two failures are reported separately because they have different causes: a missing Concept
+    node means the CSV names an id which is not a catalogue concept, while a Concept node with no
+    edge means the incremental pipeline has not produced the edge yet.
     """
     concept_ids = load_weco_authority_ids()
     rows = [

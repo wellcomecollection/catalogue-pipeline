@@ -84,9 +84,7 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
                 attributes=attributes,
             )
 
-        # Generate edge to the Wellcome name authority, if it holds an override for this concept.
-        # (A concept can have a Wellcome name authority override as well as a LoC/MeSH source
-        # concept, so this is not mutually exclusive with the two edges above.)
+        # Generate edge to the Wellcome name authority
         if (weco_id := raw_concept.weco_source_concept_id) is not None:
             attributes = ConceptHasSourceConceptAttributes(
                 qualifier=None, matched_by="identifier"

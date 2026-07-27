@@ -65,10 +65,9 @@ locals {
       "transformer_type" : "weco_concepts",
       "entity_type" : "nodes"
     },
-    # There is deliberately no "Wellcome Concept Edges" entry here. The Wellcome name authority's
-    # HAS_SOURCE_CONCEPT edges start at a catalogue Concept node, which only the incremental
-    # pipeline creates, so loading them here fails with FROM_OR_TO_VERTEX_ARE_MISSING against a new
-    # graph. They are produced by the catalogue_concepts transformer below instead.
+    # There is deliberately no "Wellcome Concept Edges" entry. Those edges start at a catalogue
+    # Concept node, which only the incremental pipeline creates, so they are extracted as part of
+    # "Catalogue Concept Edges" below.
     {
       "label" : "Wikidata Linked LoC Concept Nodes",
       "transformer_type" : "wikidata_linked_loc_concepts",
@@ -169,11 +168,11 @@ locals {
       "transformer_type" : "catalogue_concepts",
       "entity_type" : "edges",
       # When bulk loading concept edges, we are expecting a small number of insert failures due to missing
-      # source concept nodes. Catalogue concepts are matched against the LoC/MeSH/Wellcome name authority bulk
-      # load files in S3, which the monthly pipeline refreshes hours before it loads the corresponding nodes
-      # into Neptune, so an edge can reference a newly minted source concept which does not exist in the graph
-      # yet. Neptune drops such edges; the edge is created the next time the referencing work is updated after
-      # the monthly load completes.
+      # source concept nodes. Catalogue concepts are matched against the source ontology bulk load files in S3,
+      # which the monthly pipeline refreshes hours before it loads the corresponding nodes into Neptune, so an
+      # edge can reference a newly minted source concept which does not exist in the graph yet. Neptune drops
+      # such edges; the edge is created the next time the referencing work is updated after the monthly load
+      # completes.
       # When running in incremental mode, we cannot predict how many of these missing source concepts will exist
       # in any given batch, and so we allow any number of insert errors.
       "insert_error_threshold" : 1

@@ -81,7 +81,7 @@ def test_id_label_checker_source_priority() -> None:
 def test_id_label_checker_has_id() -> None:
     id_label_checker = _setup_id_label_checker()
 
-    # A record with a blank label is still found. (Most Wellcome name authority records have one.)
+    # A record with a blank label is still found.
     assert id_label_checker.has_id("weco:s6s24vd7", "weco-authority")
     assert id_label_checker.has_id("sh00000002", "lc-subjects")
 
@@ -101,9 +101,8 @@ def test_id_label_checker_never_matches_weco_by_label() -> None:
     # Blank Wellcome name authority labels must not turn the empty label into a match.
     assert id_label_checker.get_id("", "Concept") is None
 
-    # The assertions above only fail if weco-authority is added back to
-    # LABEL_MATCH_SOURCES_BY_PRIORITY, because that is the only list `get_id` walks. Assert on the
-    # indexes directly too, so that the guard which keeps weco labels out of them stays honest.
+    # `get_id` only walks LABEL_MATCH_SOURCES_BY_PRIORITY, so assert on the indexes directly too,
+    # to keep the guard which excludes weco labels from them honest.
     assert len(id_label_checker.labels_to_ids["weco-authority"]) == 0
     assert len(id_label_checker.alternative_labels_to_ids["weco-authority"]) == 0
     assert len(id_label_checker.ids_to_labels["weco-authority"]) == 3

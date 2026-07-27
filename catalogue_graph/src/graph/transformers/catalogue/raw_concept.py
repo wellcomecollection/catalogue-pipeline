@@ -66,11 +66,8 @@ class RawCatalogueConcept:
     def weco_source_concept_id(self) -> str | None:
         """
         Returns the ID of the Wellcome name authority source concept which overrides this concept,
-        if there is one.
-
-        In the Wellcome name authority, the ID of each record is the canonical ID of the catalogue
-        concept it is intended to override, so the lookup is a direct (prefixed) ID match. A
-        Wellcome name authority override applies no matter which source the concept came from.
+        if present. Authority records are keyed by the canonical ID of the concept they override,
+        whichever source that concept came from, so the lookup is a direct prefixed ID match.
         """
         assert self.id_label_checker is not None
 

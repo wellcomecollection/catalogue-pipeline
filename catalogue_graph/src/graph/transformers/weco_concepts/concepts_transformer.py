@@ -23,9 +23,6 @@ class WeCoConceptsTransformer(GraphBaseTransformer):
         It is the canonical id for an existing record in the graph,
         which may have come from any other source,
         but it is also the id of this source record in the Wellcome name authority.
-
-        `CatalogueConceptsTransformer` relies on this to work out which catalogue concepts the
-        Wellcome name authority holds an override for, so both sides must agree on the prefix.
         """
         return f"{WECO_ID_PREFIX}{raw_data['id'].strip()}"
 
@@ -41,9 +38,7 @@ class WeCoConceptsTransformer(GraphBaseTransformer):
 
     def extract_edges(self, raw_data: dict) -> Generator[BaseEdge]:
         raise NotImplementedError(
-            "The Wellcome name authority does not produce edges. Its HAS_SOURCE_CONCEPT edges "
-            "start at a catalogue Concept node, which only the incremental pipeline creates, so "
-            "the monthly pipeline cannot load them. They are produced by "
-            "`CatalogueConceptsTransformer` instead. See "
-            "https://github.com/wellcomecollection/platform/issues/6457."
+            "Wellcome name authority HAS_SOURCE_CONCEPT edges start at a catalogue Concept node, "
+            "which only the incremental pipeline creates, so `CatalogueConceptsTransformer` "
+            "produces them instead."
         )
