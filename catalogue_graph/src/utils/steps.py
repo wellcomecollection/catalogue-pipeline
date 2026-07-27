@@ -101,8 +101,12 @@ def task_heartbeat(
     stop = threading.Event()
 
     def beat() -> None:
-        while not stop.wait(interval_seconds):
+        # Beat immediately: HeartbeatSeconds counts from state entry, so provisioning,
+        # image pull and startup have already eaten into the budget by now.
+        while True:
             stepfunctions_client.send_task_heartbeat(taskToken=task_token)
+            if stop.wait(interval_seconds):
+                return
 
     thread = threading.Thread(target=beat, name="task-heartbeat", daemon=True)
     thread.start()
