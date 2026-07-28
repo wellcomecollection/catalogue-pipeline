@@ -118,7 +118,9 @@ class ElasticSource(BaseSource):
         on_backoff=_on_request_backoff,
         jitter=backoff.full_jitter,
     )
-    def search(self, slice_index: int, search_after: str | None = None) -> list[dict]:
+    def search(
+        self, slice_index: int, search_after: list[Any] | None = None
+    ) -> list[dict]:
         body: dict[str, Any] = {
             "query": self.query,
             "size": self.batch_size,
