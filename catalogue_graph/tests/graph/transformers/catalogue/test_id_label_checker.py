@@ -6,7 +6,7 @@ from utils.types import OntologyType
 
 
 def _setup_id_label_checker() -> IdLabelChecker:
-    ontologies: list[OntologyType] = ["loc", "mesh"]
+    ontologies: list[OntologyType] = ["loc", "mesh", "weco"]
     pipeline_date = "2025-01-01"
     graph_date = "2026-02-02"
 
@@ -76,3 +76,33 @@ def test_id_label_checker_source_priority() -> None:
 
     # Prioritise matching on MeSH rather than LoC
     assert id_label_checker.get_id("anatomy", "Concept") == "D000715"
+
+
+def test_id_label_checker_has_id() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # A record with a blank label is still found.
+    assert id_label_checker.has_id("weco:s6s24vd7", "weco-authority")
+    assert id_label_checker.has_id("sh00000002", "lc-subjects")
+
+    assert not id_label_checker.has_id("weco:notarealid", "weco-authority")
+
+    # Wellcome name authority ids are prefixed, so the bare canonical id is not one of them.
+    assert not id_label_checker.has_id("s6s24vd7", "weco-authority")
+
+
+def test_id_label_checker_never_matches_weco_by_label() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # 'Example concept' is the label of both an LoC concept and a Wellcome name authority record.
+    # The Wellcome name authority is matched by identifier only, so LoC must still win.
+    assert id_label_checker.get_id("Example concept", "Concept") == "sh85004839"
+
+    # Blank Wellcome name authority labels must not turn the empty label into a match.
+    assert id_label_checker.get_id("", "Concept") is None
+
+    # `get_id` only walks LABEL_MATCH_SOURCES_BY_PRIORITY, so assert on the indexes directly too,
+    # to keep the guard which excludes weco labels from them honest.
+    assert len(id_label_checker.labels_to_ids["weco-authority"]) == 0
+    assert len(id_label_checker.alternative_labels_to_ids["weco-authority"]) == 0
+    assert len(id_label_checker.ids_to_labels["weco-authority"]) == 3

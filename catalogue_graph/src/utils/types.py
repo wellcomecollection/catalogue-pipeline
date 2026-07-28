@@ -29,6 +29,7 @@ OntologyType = Literal[
     "wikidata_linked_loc",
     "wikidata",
     "catalogue",
+    "weco",
 ]
 
 WorkConceptKey = Literal["subjects", "genres", "contributors"]
@@ -93,16 +94,20 @@ CatalogueTransformerType = Literal[
     "catalogue_work_identifiers",
     "catalogue_images",
 ]
+WecoTransformerType = Literal["weco_concepts"]
 TransformerType = Literal[
     LocTransformerType,
     MeshTransformerType,
     WikidataTransformerType,
     CatalogueTransformerType,
-    "weco_concepts",
+    WecoTransformerType,
 ]
 
 FullGraphRemoverType = Literal[
-    LocTransformerType, MeshTransformerType, WikidataTransformerType, "weco_concepts"
+    LocTransformerType,
+    MeshTransformerType,
+    WikidataTransformerType,
+    WecoTransformerType,
 ]
 GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"]
 

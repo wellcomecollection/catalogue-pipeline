@@ -12,6 +12,7 @@ from utils.types import (
     MeshTransformerType,
     OntologyType,
     TransformerType,
+    WecoTransformerType,
     WikidataLinkedLocTransformerType,
     WikidataLinkedMeshTransformerType,
     WikidataTransformerType,
@@ -26,6 +27,7 @@ TRANSFORMERS_BY_ONTOLOGY: dict[OntologyType, tuple[TransformerType, ...]] = {
     "catalogue": get_args(CatalogueTransformerType),
     "wikidata_linked_loc": get_args(WikidataLinkedLocTransformerType),
     "wikidata_linked_mesh": get_args(WikidataLinkedMeshTransformerType),
+    "weco": get_args(WecoTransformerType),
 }
 
 

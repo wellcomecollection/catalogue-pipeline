@@ -59,6 +59,24 @@ The state machine is scheduled to run every 15 minutes, processing the latest 15
 the execution starting at 08:00:00 would process all denormalised work documents which were modified between 07:45:00
 and 08:00:00.
 
+### Which pipeline owns which entities
+
+The split between the two pipelines is not just a matter of scheduling. Building a graph from scratch means running
+the monthly pipeline and then the incremental pipeline, so the monthly pipeline may only produce entities whose
+endpoints it creates itself.
+
+Concretely: any edge which starts at a catalogue `Work`, `Concept` or `Image` node must be produced by the
+incremental pipeline, because those nodes do not exist until the incremental extractors have run. Loading such an
+edge from the monthly pipeline fails the bulk load with `FROM_OR_TO_VERTEX_ARE_MISSING`. This applies to
+`Concept -[HAS_SOURCE_CONCEPT]-> SourceConcept` edges from every source, including the Wellcome name authority,
+whose source concept nodes come from the monthly pipeline but whose edges come from the `catalogue_concepts`
+extractor.
+
+There is a matching dependency in the other direction. The incremental `catalogue_concepts` extractor decides which
+source concepts a catalogue concept links to by reading `loc_*__nodes.csv`, `mesh_*__nodes.csv` and
+`weco_concepts__nodes.csv` from `graph-{graph_date}/pipeline-{pipeline_date}/graph_bulk_loader/full/`, so the
+monthly extractors must have run for that `graph_date` before the incremental pipeline can produce concept edges.
+
 ## Running the pipeline manually
 
 State machines can be triggered manually via
@@ -90,6 +108,26 @@ Lambda function in *full reindex* mode by leaving out the `window` property from
 (e.g. `ingestor_loader` when processing concepts, or `ingestor_indexer` when processing works) only support full reindex
 mode locally, since they are deployed as Lambda functions and processing all records would exceed the 15-minute
 execution time limit.
+
+## Editing the Wellcome name authority
+
+`src/graph/sources/weco_concepts/wellcome_collection_authority.csv` holds the Wellcome Collection's own overrides
+for concept labels, descriptions and images. Each row is keyed by the canonical id of the catalogue concept it
+overrides, and becomes two entities in the graph: a `SourceConcept` node from the monthly pipeline, and a
+`HAS_SOURCE_CONCEPT` edge from the incremental pipeline.
+
+After adding or changing a row, both halves need to run before the override reaches the API:
+
+1. Run the monthly pipeline (or just the `weco_concepts` nodes extractor and bulk loader) so the `SourceConcept`
+   node exists.
+2. Run the incremental pipeline in full reindex mode, i.e. `graph-extractors-incremental-{pipeline_date}` followed
+   by `graph-bulk-loaders-incremental-{pipeline_date}` with the `window` property left out of the input.
+
+Step 2 is required, not optional. The incremental pipeline only extracts concepts attached to works modified inside
+its window, so on the normal 15-minute schedule a newly added row does not get its edge until some work carrying
+that concept happens to be updated. There is no error when this happens: the concept simply keeps its original
+label, description and images. `integration/graph/test_graph_queries.py::test_weco_authority_nodes_link_to_concepts`
+is what catches it.
 
 ## Service overview
 

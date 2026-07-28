@@ -6,19 +6,24 @@ from utils.aws import get_csv_from_s3
 from utils.types import ConceptSource, ConceptType, TransformerType
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")
-SOURCES_BY_PRIORITY: list[ConceptSource] = [
-    "weco-authority",
+
+# 'weco-authority' is deliberately absent: see `IdLabelChecker.__init__`.
+LABEL_MATCH_SOURCES_BY_PRIORITY: list[ConceptSource] = [
     "nlm-mesh",
     "lc-subjects",
     "lc-names",
 ]
 AMBIGUITY_THRESHOLD = 1
 
+WECO_ID_PREFIX = "weco:"
+
 with open(f"{os.path.dirname(__file__)}/data/concept_label_deny_list.txt") as f:
     CONCEPT_DENY_LIST = [line.strip().lower() for line in f]
 
 
 def _concept_source_from_id(source_id: str) -> ConceptSource:
+    if source_id.startswith(WECO_ID_PREFIX):
+        return "weco-authority"
     if source_id[0] == "n":
         return "lc-names"
     if source_id[0] == "s":
@@ -51,13 +56,13 @@ class IdLabelChecker:
         )
 
         for transformer in transformers:
-            event = BulkLoaderEvent(
+            bulk_loader_event = BulkLoaderEvent(
                 transformer_type=transformer,
                 entity_type="nodes",
                 pipeline_date=event.pipeline_date,
                 graph_date=event.graph_date,
             )
-            for row in get_csv_from_s3(event.get_s3_uri()):
+            for row in get_csv_from_s3(bulk_loader_event.get_s3_uri()):
                 source_id = row[":ID"]
                 label = row["label:String"].lower()
                 alternative_labels = [
@@ -67,21 +72,30 @@ class IdLabelChecker:
                 ]
 
                 concept_source = _concept_source_from_id(source_id)
-                self._add_label_mapping(label, source_id, concept_source)
-                self._add_alternative_label_mappings(
-                    alternative_labels, source_id, concept_source
+
+                # Every source goes into the id-keyed dictionaries, which double as the index of
+                # which ids were bulk loaded.
+                self.ids_to_labels[concept_source][source_id] = label
+                self.ids_to_alternative_labels[concept_source][source_id] = (
+                    alternative_labels
                 )
+
+                # Only label-matched sources go into the reverse dictionaries. Most weco-authority
+                # records have a blank label, which would map the empty label to a bag of weco ids.
+                if concept_source in LABEL_MATCH_SOURCES_BY_PRIORITY:
+                    self._add_label_mapping(label, source_id, concept_source)
+                    self._add_alternative_label_mappings(
+                        alternative_labels, source_id, concept_source
+                    )
 
     def _add_label_mapping(
         self, label: str, source_id: str, concept_source: ConceptSource
     ) -> None:
-        self.ids_to_labels[concept_source][source_id] = label
         self.labels_to_ids[concept_source][label].append(source_id)
 
     def _add_alternative_label_mappings(
         self, labels: list[str], source_id: str, concept_source: ConceptSource
     ) -> None:
-        self.ids_to_alternative_labels[concept_source][source_id] = labels
         for label in labels:
             self.alternative_labels_to_ids[concept_source][label].append(source_id)
 
@@ -99,12 +113,12 @@ class IdLabelChecker:
             return None
 
         # First, try to match the concept label to a 'main' source concept label, in order of priority.
-        for source in SOURCES_BY_PRIORITY:
+        for source in LABEL_MATCH_SOURCES_BY_PRIORITY:
             if len(source_ids := self.labels_to_ids[source][label]) > 0:
                 return source_ids[0]
 
         # If no matches found, try matching on alternative labels
-        for source in SOURCES_BY_PRIORITY:
+        for source in LABEL_MATCH_SOURCES_BY_PRIORITY:
             if len(source_ids := self.alternative_labels_to_ids[source][label]) > 0:
                 # If a label matches more the alternative labels of more than 'AMBIGUITY_THRESHOLD' concepts
                 # from any given source ontology, it's too ambiguous, and we shouldn't match it.
@@ -125,6 +139,13 @@ class IdLabelChecker:
                 return source_ids[0]
 
         return None
+
+    def has_id(self, source_id: str, source: ConceptSource) -> bool:
+        """
+        Given a source id from a specific source, return 'True' if it was bulk loaded into the
+        graph. Prefer this over `get_label`, which returns an empty string for a blank label.
+        """
+        return source_id in self.ids_to_labels[source]
 
     def get_label(self, source_id: str, source: ConceptSource) -> str | None:
         """Given a source id from a specific source (e.g. nlm-mesh, lc-subjects), return its label."""
