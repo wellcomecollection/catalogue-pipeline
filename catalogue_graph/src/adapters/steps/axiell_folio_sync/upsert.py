@@ -411,7 +411,9 @@ def _cascade_by_guid(
             )
     except Exception as exc:
         result.errors.append(UpsertError(type="api", detail=str(exc)))
-        logger.error("reconcile cascade error", guid=guid, error=str(exc), exc_info=True)
+        logger.error(
+            "reconcile cascade error", guid=guid, error=str(exc), exc_info=True
+        )
 
     return result
 
