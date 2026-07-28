@@ -4,7 +4,8 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.{MatchResult, Matcher}
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.image.{Image, ImageData}
+import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
@@ -231,7 +232,7 @@ trait IntegrationTestHelpers
     context.identifiedIndex.index +=
       (work.state.canonicalId.underlying -> work)
 
-    val imagesBefore = indexedImageIds
+    val imagesBefore = indexedImages
     val notificationsBefore = context.imageDownstream.msgSender.messages.size
 
     runMerger(runMatcher(work))
@@ -287,20 +288,29 @@ trait IntegrationTestHelpers
     )
   }
 
-  private def indexedImageIds(implicit context: Context): Set[String] =
-    context.mergedIndex.values.collect { case Right(image) => image.id }.toSet
+  private def indexedImages(
+    implicit context: Context
+  ): Map[String, Image[Initial]] =
+    context.mergedIndex.collect {
+      case (id, Right(image)) => id -> image
+    }.toMap
 
   /** Only images result in a notification; works are picked up downstream by a
     * window-based read of the merged index.
     *
     * Compares what this pass did rather than the whole scenario, so an image
-    * that was notified on an earlier pass can't cover for a later one.
+    * that was notified on an earlier pass can't cover for a later one. Compares
+    * stored values, not just ids, so a re-merged image (same id, new content)
+    * must be notified again.
     */
   private def assertImagesNotified(
-    imagesBefore: Set[String],
+    imagesBefore: Map[String, Image[Initial]],
     notificationsBefore: Int
   )(implicit context: Context): Unit = {
-    val newlyIndexed = indexedImageIds -- imagesBefore
+    val imagesAfter = indexedImages
+    val changedOrNew = imagesAfter.collect {
+      case (id, image) if !imagesBefore.get(id).contains(image) => id
+    }.toSet
     val newlyNotifiedBodies = context.imageDownstream.msgSender.messages
       .drop(notificationsBefore)
       .map(_.body)
@@ -316,13 +326,13 @@ trait IntegrationTestHelpers
     )
 
     assert(
-      newlyIndexed.subsetOf(newlyNotified),
-      s"Images ${(newlyIndexed -- newlyNotified).mkString(", ")} were saved but not sent downstream"
+      changedOrNew.subsetOf(newlyNotified),
+      s"Images ${(changedOrNew -- newlyNotified).mkString(", ")} were saved or updated but not sent downstream"
     )
 
     assert(
-      newlyNotified.subsetOf(indexedImageIds),
-      s"Images ${(newlyNotified -- indexedImageIds).mkString(", ")} were sent downstream but never saved"
+      newlyNotified.subsetOf(imagesAfter.keySet),
+      s"Images ${(newlyNotified -- imagesAfter.keySet).mkString(", ")} were sent downstream but never saved"
     )
   }
 }

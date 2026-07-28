@@ -113,6 +113,29 @@ class MergerIntegrationTest
     }
   }
 
+  Scenario("A Miro image is re-notified when its Sierra work arrives later") {
+    withContext {
+      implicit context =>
+        Given("a Miro work and a Sierra work that matches it")
+        val miro = miroIdentifiedWork()
+        val sierra = sierraPhysicalIdentifiedWork()
+          .mergeCandidates(List(createMiroSierraMergeCandidateFor(miro)))
+
+        When("the Miro work is processed first, then the Sierra work")
+        processWork(miro)
+        processWork(sierra)
+
+        Then("the Miro work is redirected to the Sierra work")
+        context.getMerged(miro) should beRedirectedTo(sierra)
+
+        And("the image is notified on both passes")
+        val imageId = miro.singleImage.id.canonicalId.underlying
+        context.imageDownstream.msgSender.messages
+          .map(_.body)
+          .count(_ == imageId) shouldBe 2
+    }
+  }
+
   Scenario("One Sierra and one Ebsco work are matched") {
     withContext {
       implicit context =>
