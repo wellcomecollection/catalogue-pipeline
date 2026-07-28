@@ -13,6 +13,7 @@ import backoff
 import requests
 import structlog
 from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import ApiError, TransportError
 from pydantic import BaseModel
 
 import config
@@ -48,18 +49,33 @@ class MultiGZipSource(BaseSource):
             yield from source.stream_raw()
 
 
-ES_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
-ES_REQUESTS_BACKOFF_INTERVAL = 10
+# Transient ES statuses worth retrying; a 4xx (e.g. bad query) is permanent.
+RETRIABLE_ES_STATUS_CODES = frozenset({429, 502, 503, 504})
+
+# Time budget for retrying a single search: a blip must not fail the extractor and
+# lose a window that has no backfill. Kept under the 15m PIT keep-alive.
+ES_REQUESTS_BACKOFF_MAX_TIME = float(os.environ.get("REQUESTS_BACKOFF_MAX_TIME", "300"))
+ES_REQUESTS_BACKOFF_MAX_INTERVAL = 30
 
 
 class ErrorSentinel(BaseModel):
     exception: Any
 
 
+def _giveup_es_request(exc: Exception) -> bool:
+    if isinstance(exc, ApiError):
+        return exc.status_code not in RETRIABLE_ES_STATUS_CODES
+    return False
+
+
 def _on_request_backoff(backoff_details: Any) -> None:
-    exception_name = type(backoff_details["exception"]).__name__
+    exc = backoff_details["exception"]
     logger.warning(
-        "Elasticsearch request failed, retrying", exception_name=exception_name
+        "Elasticsearch request failed, retrying",
+        exception_name=type(exc).__name__,
+        status_code=getattr(exc, "status_code", None),
+        elapsed_seconds=round(backoff_details["elapsed"]),
+        tries=backoff_details["tries"],
     )
 
 
@@ -92,11 +108,13 @@ class ElasticSource(BaseSource):
             self.pit_id = pit["id"]
 
     @backoff.on_exception(
-        backoff.constant,
-        Exception,
-        max_tries=ES_REQUESTS_BACKOFF_RETRIES,
-        interval=ES_REQUESTS_BACKOFF_INTERVAL,
+        backoff.expo,
+        (TransportError, ApiError),
+        max_time=ES_REQUESTS_BACKOFF_MAX_TIME,
+        max_value=ES_REQUESTS_BACKOFF_MAX_INTERVAL,
+        giveup=_giveup_es_request,
         on_backoff=_on_request_backoff,
+        jitter=backoff.full_jitter,
     )
     def search(self, slice_index: int, search_after: str | None = None) -> list[dict]:
         body: dict[str, Any] = {
