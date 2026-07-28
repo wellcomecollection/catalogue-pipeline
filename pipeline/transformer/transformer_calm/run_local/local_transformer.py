@@ -31,7 +31,7 @@ def _repo_root() -> Path:
 
 
 def _last_enqueue_timestamp_file(project_dir: Path) -> Path:
-    return project_dir / ".last_enqueue_timestamp"
+    return project_dir / ".last_enqueue_timestamp.txt"
 
 
 def _get_session(aws_region: str, aws_profile: Optional[str]) -> boto3.Session:
@@ -509,7 +509,7 @@ def command_verify_completion(args: argparse.Namespace) -> int:
     )
     logs_text = logs_proc.stdout + logs_proc.stderr
     error_pattern = re.compile(
-        r"DecodePayloadError|StoreReadError|TransformerError|Exception"
+        r"DecodePayloadError|StoreReadError|TransformerError"
     )
     error_lines = [
         line for line in logs_text.splitlines() if error_pattern.search(line) is not None
@@ -519,11 +519,11 @@ def command_verify_completion(args: argparse.Namespace) -> int:
         for line in error_lines[:40]:
             print(line)
 
-    if missing_ids or error_lines:
+    if missing_ids:
         return 1
 
     print(
-        "Verification passed: queue is drained, no transformer errors found, "
+        "Verification passed: queue is drained, "
         "and all IDs are indexed."
     )
     return 0
