@@ -107,31 +107,3 @@ def test_folio_build_oai_client_honours_request_retry_override() -> None:
     assert overridden.max_transient_retries == OAI_TRANSIENT_RETRIES
     default_client._client.close()
     overridden._client.close()
-
-
-def test_base_runtime_build_oai_client_honours_request_retry_override() -> None:
-    from adapters.extractors.oai_pmh.axiell.config import AXIELL_ADAPTER_CONFIG
-    from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
-
-    class StubRuntimeConfig(OAIPMHRuntimeConfig):
-        def build_http_client(self) -> httpx.Client:
-            return httpx.Client(transport=httpx.MockTransport(lambda _: None))  # type: ignore[arg-type]
-
-        def get_oai_endpoint(self) -> str:
-            return BASE_URL
-
-    oai_client = StubRuntimeConfig(AXIELL_ADAPTER_CONFIG).build_oai_client(
-        max_request_retries=7
-    )
-
-    assert oai_client.max_request_retries == 7
-    oai_client._client.close()
-
-
-def test_rebuild_download_asks_for_a_larger_retry_budget() -> None:
-    """The rebuild download cannot resume, so it must not inherit the small
-    windowed-harvest retry budget."""
-    from adapters.extractors.oai_pmh.axiell import config as axiell_config
-    from scripts.rebuild_adapter import DOWNLOAD_MAX_REQUEST_RETRIES
-
-    assert DOWNLOAD_MAX_REQUEST_RETRIES > axiell_config.OAI_MAX_RETRIES

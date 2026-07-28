@@ -183,7 +183,7 @@ class OAIPMHRuntimeConfig(ABC):
     ) -> OAIClient:
         """Build the OAI-PMH client for harvesting records."""
         client = http_client or self.build_http_client()
-        # Leave the upstream default in place unless a caller asks otherwise.
+        # Keep the upstream default unless a caller asks otherwise.
         overrides = (
             {}
             if max_request_retries is None

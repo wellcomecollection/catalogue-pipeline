@@ -73,17 +73,12 @@ PROGRESS_LOG_EVERY = 5_000
 """Records between download progress log lines."""
 
 DOWNLOAD_MAX_REQUEST_RETRIES = 5
-"""Total attempts for a request that times out, so four retries. The adapters
-allow a single attempt, which suits windowed harvesting because a failed window
-is retried; this download runs for hours and cannot resume, so a momentarily
-slow page should not end it. Only timeouts are covered: an empty response body
-still ends the download."""
+"""Total attempts per timed-out request. This download cannot resume, so the
+adapters' single attempt is too brittle."""
 
 DOWNLOAD_READ_TIMEOUT_SECONDS = 180.0
-"""Read timeout for download requests. Retrying alone does not help if the
-server is slow rather than momentarily unresponsive, because every attempt
-meets the same deadline. Pages normally arrive in under ten seconds, so this
-waits out a page built under load rather than discarding hours of work."""
+"""Longer than the adapters' 60s, because retries cannot outlast a page that is
+slow on every attempt."""
 
 EVENT_BUS_NAME = "catalogue-pipeline-adapter-event-bus"
 
@@ -150,8 +145,7 @@ def _log_download_progress(total: int, expected: int | None, started_at: float) 
 
 
 def _build_download_client(config: OAIPMHRuntimeConfig) -> OAIClient:
-    """Build an OAI client tuned for one long download rather than a windowed
-    harvest: more attempts, and longer to wait for each one."""
+    """An OAI client tuned for one long download rather than a windowed harvest."""
     http_client = config.build_http_client()
     timeout = http_client.timeout
     http_client.timeout = httpx.Timeout(
