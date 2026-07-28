@@ -37,6 +37,11 @@ variable "secret_env_vars" {
   type = map(string)
 }
 
+# Read on every connection so the Lambdas pick up the 7 day password rotation.
+variable "rds_secret_name" {
+  type = string
+}
+
 variable "alarm_topic_arn" {
   type = string
 }

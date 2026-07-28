@@ -51,6 +51,7 @@ resource "aws_iam_role_policy" "loader_task_sfn_callback" {
         Action = [
           "states:SendTaskSuccess",
           "states:SendTaskFailure",
+          "states:SendTaskHeartbeat",
         ]
         Resource = [
           aws_sfn_state_machine.state_machine.arn,

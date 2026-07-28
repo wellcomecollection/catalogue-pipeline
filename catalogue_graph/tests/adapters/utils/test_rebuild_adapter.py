@@ -297,3 +297,83 @@ def test_rebuild_adapter_orchestration_axiell(
 
     assert len(reconciled) == 1
     assert published == [[changeset_id] for changeset_id in reconciled[0]]
+
+
+def test_reconcile_runtime_sees_the_loaded_records(
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Reconcile must see the loaded rows, so its runtime is built after the load.
+
+    A pyiceberg handle is pinned to the snapshot it opened at, so a runtime built
+    before the load reads nothing. Give build_reconcile_runtime a handle opened
+    at call time, as production does, and assert reconcile sees every record.
+    """
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    window_store = WindowStore(temporary_window_status_table)
+
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [{"id": f"rec{i}", "content": f"content {i}"} for i in range(3)]
+        ),
+        snapshot_path,
+    )
+
+    def build_runtime_with_fresh_handle(
+        adapter_type: str, *, use_rest_api_table: bool
+    ) -> ReconcileRuntime:
+        # Reopen from the catalog like production's build_adapter_store, so the
+        # handle captures the table state at the moment the runtime is built.
+        fresh = temporary_table.catalog.load_table(temporary_table.name())
+        return ReconcileRuntime(
+            adapter_store=AdapterStore(fresh, "test_namespace"),
+            reconciler_store=ReconcilerStore(
+                reconciler_temporary_table, "test_namespace"
+            ),
+            facts_store=DeletionFactsStore(
+                deletion_facts_temporary_table, "test_namespace"
+            ),
+            adapter_name="axiell",
+            namespace="test_namespace",
+        )
+
+    config_stub = SimpleNamespace(
+        build_adapter_store=lambda **kwargs: adapter_store,
+        build_window_store=lambda **kwargs: window_store,
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_reconcile_runtime", build_runtime_with_fresh_handle
+    )
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rows_seen_by_reconcile: list[int] = []
+    original_run_reconcile = rebuild_adapter._run_reconcile
+
+    def recording_run_reconcile(
+        runtime: ReconcileRuntime,
+        adapter_type: str,
+        job_id: str,
+        changeset_ids: list[str],
+    ) -> None:
+        rows_seen_by_reconcile.append(
+            runtime.adapter_store.get_records_by_changesets(changeset_ids).num_rows
+        )
+        original_run_reconcile(runtime, adapter_type, job_id, changeset_ids)
+
+    monkeypatch.setattr(rebuild_adapter, "_run_reconcile", recording_run_reconcile)
+
+    rebuild_adapter.rebuild_adapter(
+        "axiell",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        skip_publish_event=True,
+    )
+
+    # Every loaded record is visible to reconcile; 0 would mean a stale handle.
+    assert rows_seen_by_reconcile == [3]

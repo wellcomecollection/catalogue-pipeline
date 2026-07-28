@@ -26,4 +26,9 @@ resource "elasticstack_elasticsearch_index" "the_index" {
   default_pipeline     = var.default_pipeline
 
   deletion_protection = !var.allow_delete
+
+  # Computed, never set here, but the provider marks it unknown on every plan.
+  lifecycle {
+    ignore_changes = [settings_raw]
+  }
 }
