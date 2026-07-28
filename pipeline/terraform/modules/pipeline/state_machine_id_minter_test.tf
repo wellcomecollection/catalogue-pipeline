@@ -86,6 +86,7 @@ module "id_minter_test" {
   vpc_config      = local.id_minter_test_vpc_config
   env_vars        = local.id_minter_test_env_vars
   secret_env_vars = local.id_minter_test_secret_env_vars
+  rds_secret_name = local.rds_test_master_secret_name
   alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 }
 

@@ -22,6 +22,11 @@ RDS_USERNAME = os.getenv("RDS_USERNAME", "id_minter")
 RDS_PASSWORD = os.getenv("RDS_PASSWORD", "id_minter")
 RDS_MAX_CONNECTIONS = int(os.getenv("RDS_MAX_CONNECTIONS", "8"))
 
+# When set, credentials are read from this secret on every connection instead of
+# from the env vars above. The managed master user secret rotates every 7 days,
+# so anything resolved at Lambda init goes stale.
+RDS_SECRET_NAME: str | None = os.getenv("RDS_SECRET_NAME") or None
+
 # ---------------------------------------------------------------------------
 # Identifiers database and tables
 # ---------------------------------------------------------------------------
@@ -78,6 +83,7 @@ class RDSClientConfig(BaseModel):
     username: str = RDS_USERNAME
     password: str = RDS_PASSWORD
     max_connections: int = RDS_MAX_CONNECTIONS
+    secret_name: str | None = RDS_SECRET_NAME
 
 
 class DBConfig(BaseModel):

@@ -35,6 +35,7 @@ module "id_minter_lambda" {
       PIPELINE_DATE            = var.pipeline_date
       PIPELINE_STEP            = local.pipeline_step // used in CloudWatch metric dimensions
       DOWNSTREAM_SNS_TOPIC_ARN = module.id_minter_output_topic.arn
+      RDS_SECRET_NAME          = var.rds_secret_name
     }
   )
   secret_env_vars = var.secret_env_vars
@@ -60,12 +61,38 @@ module "id_generator_lambda" {
   timeout     = 60 * 5 # 5 Minutes
 
   environment_variables = {
-    PIPELINE_DATE = var.pipeline_date
+    PIPELINE_DATE   = var.pipeline_date
+    RDS_SECRET_NAME = var.rds_secret_name
   }
 
   secret_env_vars = var.secret_env_vars
 
   vpc_config = var.vpc_config
+}
+
+# Granted explicitly rather than relying on the caller happening to list the
+# same secret in secret_env_vars.
+resource "aws_iam_role_policy" "id_minter_rds_secret_read" {
+  name   = "id-minter${local.dash_namespace}-rds-secret-read"
+  role   = module.id_minter_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.rds_secret_read.json
+}
+
+resource "aws_iam_role_policy" "id_generator_rds_secret_read" {
+  count = var.include_id_generator ? 1 : 0
+
+  name   = "id-generator${local.dash_namespace}-rds-secret-read"
+  role   = module.id_generator_lambda[0].lambda_role_name
+  policy = data.aws_iam_policy_document.rds_secret_read.json
+}
+
+data "aws_iam_policy_document" "rds_secret_read" {
+  statement {
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:secret:${var.rds_secret_name}-*",
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "id_minter_lambda_s3_write" {
