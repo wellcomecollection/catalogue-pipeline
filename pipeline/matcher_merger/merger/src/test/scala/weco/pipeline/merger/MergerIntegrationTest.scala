@@ -113,6 +113,29 @@ class MergerIntegrationTest
     }
   }
 
+  Scenario("A Miro image is re-notified when its Sierra work arrives later") {
+    withContext {
+      implicit context =>
+        Given("a Miro work and a Sierra work that matches it")
+        val miro = miroIdentifiedWork()
+        val sierra = sierraPhysicalIdentifiedWork()
+          .mergeCandidates(List(createMiroSierraMergeCandidateFor(miro)))
+
+        When("the Miro work is processed first, then the Sierra work")
+        processWork(miro)
+        processWork(sierra)
+
+        Then("the Miro work is redirected to the Sierra work")
+        context.getMerged(miro) should beRedirectedTo(sierra)
+
+        And("the image is notified on both passes")
+        val imageId = miro.singleImage.id.canonicalId.underlying
+        context.imageDownstream.msgSender.messages
+          .map(_.body)
+          .count(_ == imageId) shouldBe 2
+    }
+  }
+
   Scenario("One Sierra and one Ebsco work are matched") {
     withContext {
       implicit context =>
@@ -427,11 +450,15 @@ class MergerIntegrationTest
         context.getMerged(axiell).data.items.flatMap(_.locations) should
           contain(miro.data.items.head.locations.head)
         And("the Axiell work contains the Miro image")
-        context.getMerged(axiell).data.imageData should contain(miro.singleImage)
+        context.getMerged(axiell).data.imageData should contain(
+          miro.singleImage
+        )
     }
   }
 
-  Scenario("An Axiell work, a Sierra picture work, and a METS work are matched") {
+  Scenario(
+    "An Axiell work, a Sierra picture work, and a METS work are matched"
+  ) {
     withContext {
       implicit context =>
         Given("An Axiell work, a Sierra picture work and a METS work")
@@ -985,9 +1012,7 @@ class MergerIntegrationTest
           )
         )
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent before the Sierra record is created") {
+    Scenario("The METS work is sent before the Sierra record is created") {
       withContext {
         implicit context =>
           processWork(metsWork)
@@ -1000,9 +1025,7 @@ class MergerIntegrationTest
       }
     }
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent while the e-bib is suppressed") {
+    Scenario("The METS work is sent while the e-bib is suppressed") {
       withContext {
         implicit context =>
           processWork(sierraSuppressedEbib)
@@ -1015,9 +1038,7 @@ class MergerIntegrationTest
       }
     }
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent after the e-bib is unsuppressed") {
+    Scenario("The METS work is sent after the e-bib is unsuppressed") {
       withContext {
         implicit context =>
           processWork(sierraSuppressedEbib)
