@@ -49,8 +49,9 @@ class MultiGZipSource(BaseSource):
             yield from source.stream_raw()
 
 
-# Transient ES statuses worth retrying; a 4xx (e.g. bad query) is permanent.
-RETRIABLE_ES_STATUS_CODES = frozenset({429, 502, 503, 504})
+# The two 4xx statuses that clear on a retry; every other 4xx is a permanent
+# problem (bad query, missing index, bad credentials) and fails fast.
+RETRIABLE_4XX_STATUS_CODES = frozenset({408, 429})
 
 # Time budget for retrying a single search: a blip must not fail the extractor and
 # lose a window that has no backfill. Kept under the 15m PIT keep-alive.
@@ -64,7 +65,8 @@ class ErrorSentinel(BaseModel):
 
 def _giveup_es_request(exc: Exception) -> bool:
     if isinstance(exc, ApiError):
-        return exc.status_code not in RETRIABLE_ES_STATUS_CODES
+        status = exc.status_code
+        return 400 <= status < 500 and status not in RETRIABLE_4XX_STATUS_CODES
     return False
 
 

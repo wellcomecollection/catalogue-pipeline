@@ -75,17 +75,34 @@ def test_search_gives_up_immediately_on_non_retriable_status() -> None:
 @pytest.mark.parametrize(
     ("exc", "expected_giveup"),
     [
-        (_api_error(503), False),
-        (_api_error(429), False),
+        # Every 5xx is a blip worth retrying, not just the ones seen so far.
+        (_api_error(500), False),
         (_api_error(502), False),
+        (_api_error(503), False),
         (_api_error(504), False),
+        (_api_error(408), False),
+        (_api_error(429), False),
         (_api_error(400), True),
+        (_api_error(401), True),
+        (_api_error(403), True),
         (_api_error(404), True),
         (ESConnectionError("transport"), False),
     ],
 )
 def test_giveup_predicate(exc: Exception, expected_giveup: bool) -> None:
     assert _giveup_es_request(exc) is expected_giveup
+
+
+def test_search_retries_500_shard_failure() -> None:
+    source = _make_source()
+    source.es_client.search.side_effect = [  # type: ignore[attr-defined]
+        _api_error(500),
+        {"hits": {"hits": []}},
+    ]
+
+    source.search(slice_index=0)
+
+    assert source.es_client.search.call_count == 2  # type: ignore[attr-defined]
 
 
 def test_search_refreshes_pit_id_from_response() -> None:
