@@ -124,7 +124,8 @@ def test_download_client_is_tuned_for_a_long_download(
     assert timeout.read > adapter_timeout.read
     # Widening the read must leave the adapter's other deadlines alone.
     assert (timeout.connect, timeout.write, timeout.pool) == (10.0, 11.0, 12.0)
-    call["http_client"].close()
+    # The download raised, so this also covers the failure path.
+    assert call["http_client"].is_closed
 
 
 def _list_records_xml(identifiers: list[str], token: str | None) -> etree._Element:

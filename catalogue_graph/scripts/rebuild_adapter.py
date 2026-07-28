@@ -144,9 +144,10 @@ def _log_download_progress(total: int, expected: int | None, started_at: float) 
     )
 
 
-def _build_download_client(config: OAIPMHRuntimeConfig) -> OAIClient:
+def _build_download_client(
+    config: OAIPMHRuntimeConfig, http_client: httpx.Client
+) -> OAIClient:
     """An OAI client tuned for one long download rather than a windowed harvest."""
-    http_client = config.build_http_client()
     timeout = http_client.timeout
     http_client.timeout = httpx.Timeout(
         connect=timeout.connect,
@@ -457,8 +458,10 @@ def rebuild_adapter(
             config, datetime.now(UTC), use_rest_api_table=use_rest_api_table
         )
 
-        oai_client = _build_download_client(config)
-        _download_to_snapshot(oai_client, config.config, snapshot_path)
+        # Held open only for the download, so a failed harvest does not leak it.
+        with config.build_http_client() as http_client:
+            oai_client = _build_download_client(config, http_client)
+            _download_to_snapshot(oai_client, config.config, snapshot_path)
 
     # Phase 2: Items download (reads bib instance IDs from the bib snapshot).
     folio_items: _FolioItems | None = None
