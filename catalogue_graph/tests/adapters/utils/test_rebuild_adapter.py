@@ -4,6 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
 
+import httpx
 import pyarrow.parquet as pq
 import pytest
 from lxml import etree
@@ -81,17 +82,19 @@ def test_rebuild_refuses_local_tables_with_publish() -> None:
         )
 
 
-def test_download_asks_for_the_rebuild_retry_budget(
+def test_download_client_is_tuned_for_a_long_download(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """The download must ask for its own retry budget rather than inherit the
-    adapter's windowed-harvest default, which allows no retries at all."""
+    """The download must not inherit the adapter's windowed-harvest settings,
+    which allow no retries and a 60 second read."""
     built_with: list[dict] = []
+    adapter_timeout = httpx.Timeout(connect=10.0, read=60.0, write=11.0, pool=12.0)
 
     class _StopAfterClientBuild(Exception):
         pass
 
     config_stub = SimpleNamespace(
+        build_http_client=lambda: httpx.Client(timeout=adapter_timeout),
         build_oai_client=lambda **kwargs: built_with.append(kwargs),
         config=SimpleNamespace(),
     )
@@ -112,9 +115,16 @@ def test_download_asks_for_the_rebuild_retry_budget(
             snapshot_path=str(tmp_path / "not-yet-downloaded.parquet"),
         )
 
-    assert built_with == [
-        {"max_request_retries": rebuild_adapter.DOWNLOAD_MAX_REQUEST_RETRIES}
-    ]
+    assert len(built_with) == 1
+    call = built_with[0]
+    assert call["max_request_retries"] == rebuild_adapter.DOWNLOAD_MAX_REQUEST_RETRIES
+
+    timeout = call["http_client"].timeout
+    assert timeout.read == rebuild_adapter.DOWNLOAD_READ_TIMEOUT_SECONDS
+    assert timeout.read > adapter_timeout.read
+    # Widening the read must leave the adapter's other deadlines alone.
+    assert (timeout.connect, timeout.write, timeout.pool) == (10.0, 11.0, 12.0)
+    call["http_client"].close()
 
 
 def _list_records_xml(identifiers: list[str], token: str | None) -> etree._Element:

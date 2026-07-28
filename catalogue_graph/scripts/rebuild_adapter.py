@@ -29,6 +29,7 @@ from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
 import boto3
+import httpx
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.parquet as pq
@@ -77,6 +78,12 @@ allow a single attempt, which suits windowed harvesting because a failed window
 is retried; this download runs for hours and cannot resume, so a momentarily
 slow page should not end it. Only timeouts are covered: an empty response body
 still ends the download."""
+
+DOWNLOAD_READ_TIMEOUT_SECONDS = 180.0
+"""Read timeout for download requests. Retrying alone does not help if the
+server is slow rather than momentarily unresponsive, because every attempt
+meets the same deadline. Pages normally arrive in under ten seconds, so this
+waits out a page built under load rather than discarding hours of work."""
 
 EVENT_BUS_NAME = "catalogue-pipeline-adapter-event-bus"
 
@@ -139,6 +146,23 @@ def _log_download_progress(total: int, expected: int | None, started_at: float) 
         percent=round(100 * total / expected, 1) if expected else None,
         records_per_second=round(rate, 1),
         eta_minutes=round(remaining / 60) if remaining else None,
+    )
+
+
+def _build_download_client(config: OAIPMHRuntimeConfig) -> OAIClient:
+    """Build an OAI client tuned for one long download rather than a windowed
+    harvest: more attempts, and longer to wait for each one."""
+    http_client = config.build_http_client()
+    timeout = http_client.timeout
+    http_client.timeout = httpx.Timeout(
+        connect=timeout.connect,
+        read=DOWNLOAD_READ_TIMEOUT_SECONDS,
+        write=timeout.write,
+        pool=timeout.pool,
+    )
+    return config.build_oai_client(
+        http_client=http_client,
+        max_request_retries=DOWNLOAD_MAX_REQUEST_RETRIES,
     )
 
 
@@ -439,9 +463,7 @@ def rebuild_adapter(
             config, datetime.now(UTC), use_rest_api_table=use_rest_api_table
         )
 
-        oai_client = config.build_oai_client(
-            max_request_retries=DOWNLOAD_MAX_REQUEST_RETRIES
-        )
+        oai_client = _build_download_client(config)
         _download_to_snapshot(oai_client, config.config, snapshot_path)
 
     # Phase 2: Items download (reads bib instance IDs from the bib snapshot).
