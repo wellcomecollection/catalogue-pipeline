@@ -38,13 +38,21 @@ def build_http_client(*, token: str | None = None) -> httpx.Client:
     )
 
 
-def build_oai_client(*, http_client: httpx.Client | None = None) -> OAIClient:
+def build_oai_client(
+    *,
+    http_client: httpx.Client | None = None,
+    max_request_retries: int | None = None,
+) -> OAIClient:
     """Build an OAI-PMH client for Axiell."""
     client = http_client or build_http_client()
     return OAIClient(
         _oai_endpoint(),
         client=client,
-        max_request_retries=config.OAI_MAX_RETRIES,
+        max_request_retries=(
+            config.OAI_MAX_RETRIES
+            if max_request_retries is None
+            else max_request_retries
+        ),
         request_backoff_factor=config.OAI_BACKOFF_FACTOR,
         request_max_backoff=config.OAI_BACKOFF_MAX,
         max_transient_retries=config.OAI_TRANSIENT_RETRIES,

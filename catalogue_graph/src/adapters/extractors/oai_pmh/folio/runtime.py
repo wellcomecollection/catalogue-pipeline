@@ -40,7 +40,12 @@ class FolioRuntimeConfig(OAIPMHRuntimeConfig):
         """
         return _build_folio_http_client()
 
-    def build_oai_client(self, *, http_client: httpx.Client | None = None) -> OAIClient:
+    def build_oai_client(
+        self,
+        *,
+        http_client: httpx.Client | None = None,
+        max_request_retries: int | None = None,
+    ) -> OAIClient:
         """Build the OAI-PMH client for harvesting records.
 
         Overrides base to include FOLIO-specific retry configuration.
@@ -49,7 +54,11 @@ class FolioRuntimeConfig(OAIPMHRuntimeConfig):
         return OAIClient(
             self.get_oai_endpoint(),
             client=client,
-            max_request_retries=config.OAI_MAX_RETRIES,
+            max_request_retries=(
+                config.OAI_MAX_RETRIES
+                if max_request_retries is None
+                else max_request_retries
+            ),
             request_backoff_factor=config.OAI_BACKOFF_FACTOR,
             request_max_backoff=config.OAI_BACKOFF_MAX,
             max_transient_retries=config.OAI_TRANSIENT_RETRIES,

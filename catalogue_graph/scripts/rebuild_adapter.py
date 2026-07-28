@@ -71,6 +71,12 @@ records into the adapter store."""
 PROGRESS_LOG_EVERY = 5_000
 """Records between download progress log lines."""
 
+DOWNLOAD_MAX_REQUEST_RETRIES = 5
+"""Timeout retries per request during the download. The adapters configure a
+small budget, which suits windowed harvesting because a failed window is simply
+retried; this download runs for hours and cannot resume, so one slow page
+should not end it."""
+
 EVENT_BUS_NAME = "catalogue-pipeline-adapter-event-bus"
 
 
@@ -432,7 +438,9 @@ def rebuild_adapter(
             config, datetime.now(UTC), use_rest_api_table=use_rest_api_table
         )
 
-        oai_client = config.build_oai_client()
+        oai_client = config.build_oai_client(
+            max_request_retries=DOWNLOAD_MAX_REQUEST_RETRIES
+        )
         _download_to_snapshot(oai_client, config.config, snapshot_path)
 
     # Phase 2: Items download (reads bib instance IDs from the bib snapshot).
