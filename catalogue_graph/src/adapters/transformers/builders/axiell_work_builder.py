@@ -77,8 +77,8 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
 
         # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
         # actual archives but instead guides for researchers, so we suppress them here.
-        ref_no = self.reference_number
-        return ref_no is not None and ref_no.startswith("AMSG")
+        alt_ref_no = self.reference_number
+        return alt_ref_no is not None and alt_ref_no.startswith("AMSG")
 
     @property
     def source_identifier_type(self) -> Id:
