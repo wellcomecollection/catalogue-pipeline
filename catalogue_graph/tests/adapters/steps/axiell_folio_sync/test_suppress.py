@@ -1,8 +1,9 @@
 """Tests for the reconciler delete paths (``suppress_by_guid`` / ``delete_by_guid``).
 
 A superseded GUID from the reconciler is an authoritative delete: the three
-FOLIO records keyed on ``AxC-{entity}-{guid}`` are either soft-suppressed (both
-suppress flags, reversible) or hard-deleted, child-first.
+FOLIO records keyed on ``AxC-{entity}-{guid}`` are either soft-suppressed
+(``discoverySuppress`` on all three, plus ``staffSuppress`` on the instance) or
+hard-deleted, child-first.
 """
 
 from __future__ import annotations

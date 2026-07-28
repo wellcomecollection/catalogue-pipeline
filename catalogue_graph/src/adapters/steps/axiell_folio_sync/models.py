@@ -29,7 +29,7 @@ class SyncErrorEntry(BaseModel):
 
 
 class SyncDeletionEntry(BaseModel):
-    """One superseded-GUID suppression (authoritative delete) in the run report."""
+    """One superseded-GUID action (suppress or hard-delete) in the run report."""
 
     guid: str
     record_id: str

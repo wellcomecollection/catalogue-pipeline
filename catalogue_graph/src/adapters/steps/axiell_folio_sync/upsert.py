@@ -119,7 +119,7 @@ def _suppress_entity(
             f"{write_path_prefix}/{folio_id}",
             {**_strip_readonly(existing), **suppression},
         )
-        logger.info("suppressed hrid=%s folio_id=%s", hrid, folio_id)
+        logger.info("suppressed", hrid=hrid, folio_id=folio_id)
     return EntityResult(action="suppress", id=folio_id)
 
 
@@ -411,7 +411,7 @@ def _cascade_by_guid(
             )
     except Exception as exc:
         result.errors.append(UpsertError(type="api", detail=str(exc)))
-        logger.error("reconcile cascade error guid=%s detail=%s", guid, exc)
+        logger.error("reconcile cascade error", guid=guid, error=str(exc), exc_info=True)
 
     return result
 
