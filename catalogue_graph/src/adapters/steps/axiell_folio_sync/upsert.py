@@ -76,14 +76,20 @@ _STAFF_SUPPRESS_PATHS: frozenset[str] = frozenset({"/inventory/instances"})
 def _find_by_hrid(
     folio: FolioInventoryOps, path: str, hrid: str, list_key: str
 ) -> dict | None:
-    """Return the first FOLIO record matching hrid via CQL, or None."""
-    try:
-        result = folio.get(path, {"query": f'hrid=="{hrid}"', "limit": 1})
-        records = result.get(list_key, [])
-        return records[0] if records else None
-    except Exception as exc:
-        logger.warning("hrid lookup failed path=%s hrid=%s error=%s", path, hrid, exc)
-        return None
+    """Return the first FOLIO record matching hrid via CQL, or None.
+
+    ``None`` means an *empty result* — no record has this hrid. A lookup *failure*
+    (network/FOLIO error) is a different thing and always propagates: it must never
+    be collapsed into "not found", because both callers key an irreversible
+    decision on absence. The delete cascade would report a still-live record as a
+    cleanly-actioned skip (and a deletion fact only arrives once); the upsert path
+    would take the create branch and POST a record that may already exist. Both
+    callers already wrap this in a try/except that records the error and either
+    aborts the cascade or rolls back, so a raised lookup slots straight in.
+    """
+    result = folio.get(path, {"query": f'hrid=="{hrid}"', "limit": 1})
+    records = result.get(list_key, [])
+    return records[0] if records else None
 
 
 def _suppress_entity(
@@ -104,7 +110,8 @@ def _suppress_entity(
 
     Not-found → ``skip`` (the record is already gone). Idempotent: re-suppressing
     a record whose flags are already true is a harmless PUT, so redelivered
-    deletion facts do not misbehave.
+    deletion facts do not misbehave. A failed hrid lookup is not "already gone" —
+    it propagates (see :func:`_find_by_hrid`) so the cascade records it and aborts.
     """
     existing = _find_by_hrid(folio, search_path, hrid, list_key)
     if not existing:
@@ -138,7 +145,10 @@ def _delete_entity(
     on the DELETE as a no-op, so this is idempotent under redelivery/races. A
     non-404 error (e.g. FOLIO 400 because a child still references this record)
     raises, which aborts the parent's delete in :func:`delete_by_guid` — that is
-    intentional, since deleting a parent while a child remains would orphan it.
+    intentional, since deleting a parent while a child remains would orphan it. A
+    failed hrid lookup raises for the same reason (see :func:`_find_by_hrid`), so a
+    swallowed outage cannot let the cascade proceed to the holdings/instance delete
+    while the item may still exist.
     """
     existing = _find_by_hrid(folio, search_path, hrid, list_key)
     if not existing:
@@ -390,9 +400,12 @@ def _cascade_by_guid(
 
     The single try/except is load-bearing for hard delete: if a child op fails,
     the cascade stops before the parent, so a parent is never actioned while a
-    failed child may still reference it. Records already gone are skipped. A hrid
-    maps directly from the GUID (``AxC-{entity}-{guid}``), the same scheme the
-    upsert path writes, so no MARC parse or mapping is needed here.
+    failed child may still reference it. Records already gone are skipped, but a
+    *failed* hrid lookup is not a skip — it raises (see :func:`_find_by_hrid`) into
+    this handler, so an outage during the lookup aborts and records an error rather
+    than reporting a still-live record as a clean deletion. A hrid maps directly
+    from the GUID (``AxC-{entity}-{guid}``), the same scheme the upsert path writes,
+    so no MARC parse or mapping is needed here.
     """
     result = GuidCascadeResult(guid=guid)
     try:

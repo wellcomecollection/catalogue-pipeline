@@ -125,7 +125,7 @@ AWS_PROFILE=platform-developer uv run python -m adapters.steps.axiell_folio_sync
 
 # Specific changesets; pass --live to disable dry run and write to FOLIO
 AWS_PROFILE=platform-developer uv run python -m adapters.steps.axiell_folio_sync.axiell_folio_sync \
-  --use-cli --job-id my-job-123 --changeset-ids 456429b2-6f0e-11f1-afea-525a8567ce81 --use-rest-api-table
+  --use-cli --job-id my-job-123 --changeset-ids <changeset-id> --use-rest-api-table
 ```
 
 Set the `OKAPI_*` environment variables first (see Configuration above).

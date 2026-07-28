@@ -213,3 +213,47 @@ def test_hard_delete_aborts_cascade_when_a_child_fails() -> None:
     # item op raised → holdings and instance were never attempted.
     assert result.holdings.action is None
     assert result.instance.action is None
+
+
+def test_hard_delete_lookup_failure_is_an_error_not_a_skip() -> None:
+    # A FOLIO outage makes the *lookup* raise. That is not "already gone": it must
+    # surface as an error and abort the cascade, otherwise a still-live record is
+    # reported as a clean skip/skip/skip deletion and never retried. In hard-delete
+    # mode a swallowed item lookup would also let holdings/instance be deleted while
+    # the item may still exist.
+    folio = _all_present()
+
+    def boom(path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        raise RuntimeError("folio down")
+
+    folio.get = boom  # type: ignore[method-assign]
+
+    result = delete_by_guid(GUID, folio, dry_run=False)
+
+    assert result.errors
+    assert result.errors[0].type == "api"
+    # item lookup raised → nothing was actioned, child-first abort holds.
+    assert result.item.action is None
+    assert result.holdings.action is None
+    assert result.instance.action is None
+    assert folio.delete_paths == []
+
+
+def test_suppress_lookup_failure_is_an_error_not_a_skip() -> None:
+    # Same outage on the soft-suppress path: a failed lookup must not be reported
+    # as a successfully-actioned (skip) deletion.
+    folio = _all_present()
+
+    def boom(path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        raise RuntimeError("folio down")
+
+    folio.get = boom  # type: ignore[method-assign]
+
+    result = suppress_by_guid(GUID, folio, dry_run=False)
+
+    assert result.errors
+    assert result.errors[0].type == "api"
+    assert result.item.action is None
+    assert result.holdings.action is None
+    assert result.instance.action is None
+    assert folio.put_calls == []
