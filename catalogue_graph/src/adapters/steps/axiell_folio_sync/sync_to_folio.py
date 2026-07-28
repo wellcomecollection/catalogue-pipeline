@@ -23,12 +23,10 @@ from adapters.steps.axiell_folio_sync.folio_callables import (
     FolioInventoryOps,
 )
 from adapters.steps.axiell_folio_sync.mapping import (
-    MappingError,
-    select_and_build,
-)
-from adapters.steps.axiell_folio_sync.mapping import (
     GuidCascadeResult,
+    MappingError,
     UpsertResult,
+    select_and_build,
 )
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
@@ -121,7 +119,9 @@ _ACTION_COUNT_KEY = {
 }
 
 
-def _tally_entity_actions(result: UpsertResult | GuidCascadeResult, counts: dict[str, int]) -> None:
+def _tally_entity_actions(
+    result: UpsertResult | GuidCascadeResult, counts: dict[str, int]
+) -> None:
     """Increment counts for each entity action in a successful upsert/suppress."""
     for entity in ("instance", "holdings", "item"):
         key = _ACTION_COUNT_KEY.get(getattr(result, entity).action)
