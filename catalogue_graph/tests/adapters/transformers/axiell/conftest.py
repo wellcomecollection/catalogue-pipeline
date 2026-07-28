@@ -6,6 +6,7 @@ from pymarc.record import Field, Indicators, Record, Subfield
 def make_axiell_record(
     identifier: str = "test001",
     catalogue_status: str | None = "catalogued",
+    ref_no: str | None = "TestRefNo",
 ) -> Record:
     """Minimal valid Axiell MARC record with all required fields."""
     record = Record()
@@ -14,9 +15,12 @@ def make_axiell_record(
         Field(tag="245", subfields=[Subfield(code="a", value="Test Title")])
     )
     record.add_field(Field(tag="005", data="18530821094530.0"))
-    record.add_field(
-        Field(tag="035", subfields=[Subfield(code="a", value="(Calm RefNo)TestRefNo")])
-    )
+    if ref_no is not None:
+        record.add_field(
+            Field(
+                tag="035", subfields=[Subfield(code="a", value=f"(Calm RefNo){ref_no}")]
+            )
+        )
     record.add_field(Field(tag="351", subfields=[Subfield(code="c", value="Item")]))
 
     if catalogue_status is not None:
