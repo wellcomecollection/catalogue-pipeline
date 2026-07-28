@@ -72,10 +72,11 @@ PROGRESS_LOG_EVERY = 5_000
 """Records between download progress log lines."""
 
 DOWNLOAD_MAX_REQUEST_RETRIES = 5
-"""Timeout retries per request during the download. The adapters configure a
-small budget, which suits windowed harvesting because a failed window is simply
-retried; this download runs for hours and cannot resume, so one slow page
-should not end it."""
+"""Total attempts for a request that times out, so four retries. The adapters
+allow a single attempt, which suits windowed harvesting because a failed window
+is retried; this download runs for hours and cannot resume, so a momentarily
+slow page should not end it. Only timeouts are covered: an empty response body
+still ends the download."""
 
 EVENT_BUS_NAME = "catalogue-pipeline-adapter-event-bus"
 

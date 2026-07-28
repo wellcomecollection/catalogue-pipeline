@@ -81,6 +81,42 @@ def test_rebuild_refuses_local_tables_with_publish() -> None:
         )
 
 
+def test_download_asks_for_the_rebuild_retry_budget(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The download must ask for its own retry budget rather than inherit the
+    adapter's windowed-harvest default, which allows no retries at all."""
+    built_with: list[dict] = []
+
+    class _StopAfterClientBuild(Exception):
+        pass
+
+    config_stub = SimpleNamespace(
+        build_oai_client=lambda **kwargs: built_with.append(kwargs),
+        config=SimpleNamespace(),
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+    monkeypatch.setattr(rebuild_adapter, "_wipe_window_store", lambda *a, **k: None)
+    monkeypatch.setattr(rebuild_adapter, "_reset_window_cursor", lambda *a, **k: None)
+
+    def stop(*args: object, **kwargs: object) -> None:
+        raise _StopAfterClientBuild
+
+    monkeypatch.setattr(rebuild_adapter, "_download_to_snapshot", stop)
+
+    with pytest.raises(_StopAfterClientBuild):
+        rebuild_adapter.rebuild_adapter(
+            "axiell",
+            use_rest_api_table=True,
+            snapshot_path=str(tmp_path / "not-yet-downloaded.parquet"),
+        )
+
+    assert built_with == [
+        {"max_request_retries": rebuild_adapter.DOWNLOAD_MAX_REQUEST_RETRIES}
+    ]
+
+
 def _list_records_xml(identifiers: list[str], token: str | None) -> etree._Element:
     """A ListRecords response in the shape the OAI-PMH client parses."""
     records = "".join(
