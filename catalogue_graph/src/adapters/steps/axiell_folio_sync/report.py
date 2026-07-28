@@ -57,6 +57,7 @@ class AxiellFolioSyncReport(PipelineReport):
             PipelineMetric(
                 name="records_suppressed", value=self.counts.get("suppressed", 0)
             ),
+            PipelineMetric(name="records_deleted", value=self.counts.get("deleted", 0)),
             PipelineMetric(
                 name="deletions_processed", value=self.counts.get("deletions", 0)
             ),

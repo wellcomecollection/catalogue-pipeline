@@ -48,6 +48,9 @@ class AxiellFolioSyncEvent(BaseModel):
     transformer_type: str | None = None
     # ``None`` means "fall back to the DRY_RUN env var" (default true).
     dry_run: bool | None = None
+    # ``None`` means "fall back to the HARD_DELETE env var" (default false). When
+    # true, reconciler deletions hard-delete FOLIO records instead of suppressing.
+    hard_delete: bool | None = None
     # Dev/smoke-test only: cap records processed when no changeset_ids are given.
     sample_limit: int | None = None
 

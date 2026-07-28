@@ -5,7 +5,8 @@ Entry point:
   upsert_from_payloads() — takes the dict produced by mapping.build_payloads()
 
 Enforces write order:  Instance → Holdings → Item.
-Deleted records are soft-suppressed (discoverySuppress + staffSuppress).
+Deleted records are soft-suppressed: discoverySuppress on all three, plus
+staffSuppress on the instance (holdings and items have no staffSuppress field).
 dry_run=True resolves existing records and plans actions but makes no writes.
 
 Result dict shape
@@ -21,13 +22,16 @@ Result dict shape
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Any
+
 import structlog
 
 from .folio_callables import FolioInventoryOps
 from .mapping import (
     EntityResult,
+    GuidCascadeResult,
     MappedPayloads,
-    SuppressResult,
     UpsertError,
     UpsertResult,
     _holdings_hrid,
@@ -61,6 +65,11 @@ def _strip_readonly(record: dict) -> dict:
     return {k: v for k, v in record.items() if k not in _READONLY_FIELDS}
 
 
+# Write-path prefixes whose entity carries a staffSuppress field. Only FOLIO
+# instances do; holdings-storage 422s on it and items silently drop it.
+_STAFF_SUPPRESS_PATHS: frozenset[str] = frozenset({"/inventory/instances"})
+
+
 # ── shared helpers ────────────────────────────────────────────────────────────
 
 
@@ -86,7 +95,12 @@ def _suppress_entity(
     hrid: str,
     dry_run: bool,
 ) -> EntityResult:
-    """Resolve an entity by hrid and set discoverySuppress + staffSuppress.
+    """Resolve an entity by hrid and set its suppression flags.
+
+    discoverySuppress is set on every entity; staffSuppress only on instances,
+    which are the only FOLIO inventory entity with that field. holdings-storage
+    rejects an unknown staffSuppress with a 422, and items silently drop it, so
+    sending it there is at best a no-op and at worst breaks the cascade.
 
     Not-found → ``skip`` (the record is already gone). Idempotent: re-suppressing
     a record whose flags are already true is a harmless PUT, so redelivered
@@ -98,16 +112,43 @@ def _suppress_entity(
 
     folio_id: str = existing["id"]
     if not dry_run:
+        suppression: dict[str, Any] = {"discoverySuppress": True}
+        if write_path_prefix in _STAFF_SUPPRESS_PATHS:
+            suppression["staffSuppress"] = True
         folio.put(
             f"{write_path_prefix}/{folio_id}",
-            {
-                **_strip_readonly(existing),
-                "discoverySuppress": True,
-                "staffSuppress": True,
-            },
+            {**_strip_readonly(existing), **suppression},
         )
         logger.info("suppressed hrid=%s folio_id=%s", hrid, folio_id)
     return EntityResult(action="suppress", id=folio_id)
+
+
+def _delete_entity(
+    folio: FolioInventoryOps,
+    *,
+    search_path: str,
+    list_key: str,
+    write_path_prefix: str,
+    hrid: str,
+    dry_run: bool,
+) -> EntityResult:
+    """Resolve an entity by hrid and hard-delete it.
+
+    Not-found → ``skip`` (already gone); the inventory client also treats a 404
+    on the DELETE as a no-op, so this is idempotent under redelivery/races. A
+    non-404 error (e.g. FOLIO 400 because a child still references this record)
+    raises, which aborts the parent's delete in :func:`delete_by_guid` — that is
+    intentional, since deleting a parent while a child remains would orphan it.
+    """
+    existing = _find_by_hrid(folio, search_path, hrid, list_key)
+    if not existing:
+        return EntityResult(action="skip")
+
+    folio_id: str = existing["id"]
+    if not dry_run:
+        folio.delete(f"{write_path_prefix}/{folio_id}")
+        logger.info("deleted hrid=%s folio_id=%s", hrid, folio_id)
+    return EntityResult(action="delete", id=folio_id)
 
 
 def _resolve_item_note_types(payload: dict, ref_cache: RefCache) -> dict:
@@ -323,7 +364,56 @@ def upsert_from_payloads(
     return result
 
 
-# ── reconciler suppression path ─────────────────────────────────────────────────
+# ── reconciler delete path (suppress / hard-delete) ─────────────────────────────
+
+# The cascade order is child → parent: (attr, search_path, list_key, hrid builder).
+# For hard delete this order is mandatory — FOLIO refuses to delete a parent while
+# a child still references it; for suppress it mirrors the reverse of create order.
+_CASCADE_ENTITIES: list[tuple[str, str, str, Callable[[str], str]]] = [
+    ("item", "/inventory/items", "items", _item_hrid),
+    ("holdings", "/holdings-storage/holdings", "holdingsRecords", _holdings_hrid),
+    ("instance", "/inventory/instances", "instances", _instance_hrid),
+]
+
+# An entity operation: resolve by hrid and apply an action (suppress / delete).
+_EntityOp = Callable[..., EntityResult]
+
+
+def _cascade_by_guid(
+    guid: str,
+    folio: FolioInventoryOps,
+    entity_op: _EntityOp,
+    *,
+    dry_run: bool,
+) -> GuidCascadeResult:
+    """Apply ``entity_op`` to a superseded GUID's records, child-first.
+
+    The single try/except is load-bearing for hard delete: if a child op fails,
+    the cascade stops before the parent, so a parent is never actioned while a
+    failed child may still reference it. Records already gone are skipped. A hrid
+    maps directly from the GUID (``AxC-{entity}-{guid}``), the same scheme the
+    upsert path writes, so no MARC parse or mapping is needed here.
+    """
+    result = GuidCascadeResult(guid=guid)
+    try:
+        for attr, search_path, list_key, hrid_of in _CASCADE_ENTITIES:
+            setattr(
+                result,
+                attr,
+                entity_op(
+                    folio,
+                    search_path=search_path,
+                    list_key=list_key,
+                    write_path_prefix=search_path,
+                    hrid=hrid_of(guid),
+                    dry_run=dry_run,
+                ),
+            )
+    except Exception as exc:
+        result.errors.append(UpsertError(type="api", detail=str(exc)))
+        logger.error("reconcile cascade error guid=%s detail=%s", guid, exc)
+
+    return result
 
 
 def suppress_by_guid(
@@ -331,48 +421,27 @@ def suppress_by_guid(
     folio: FolioInventoryOps,
     *,
     dry_run: bool = False,
-) -> SuppressResult:
+) -> GuidCascadeResult:
     """Soft-suppress the FOLIO records for a superseded GUID, child-first.
 
-    The reconciler reports a superseded GUID as an authoritative delete (the old
-    work no longer exists). We soft-suppress (discoverySuppress + staffSuppress)
-    rather than hard-delete, so the action is reversible and auditable. The
-    cascade runs item → holdings → instance (child-first) so a live child is
-    never briefly left pointing at a suppressed parent, mirroring the reverse of
-    the create order. Records already gone are skipped; suppression is
-    idempotent, so a redelivered fact simply re-sets flags that are already true.
-
-    A single hrid maps directly from the GUID (``AxC-{entity}-{guid}``), the same
-    scheme the upsert path writes, so no MARC parse or mapping is needed here.
+    Reversible and auditable: sets discoverySuppress (and staffSuppress on the
+    instance) rather than hard-deleting. Idempotent — a redelivered fact re-sets
+    flags already true.
     """
-    result = SuppressResult(guid=guid)
-    try:
-        result.item = _suppress_entity(
-            folio,
-            search_path="/inventory/items",
-            list_key="items",
-            write_path_prefix="/inventory/items",
-            hrid=_item_hrid(guid),
-            dry_run=dry_run,
-        )
-        result.holdings = _suppress_entity(
-            folio,
-            search_path="/holdings-storage/holdings",
-            list_key="holdingsRecords",
-            write_path_prefix="/holdings-storage/holdings",
-            hrid=_holdings_hrid(guid),
-            dry_run=dry_run,
-        )
-        result.instance = _suppress_entity(
-            folio,
-            search_path="/inventory/instances",
-            list_key="instances",
-            write_path_prefix="/inventory/instances",
-            hrid=_instance_hrid(guid),
-            dry_run=dry_run,
-        )
-    except Exception as exc:
-        result.errors.append(UpsertError(type="api", detail=str(exc)))
-        logger.error("suppress error guid=%s detail=%s", guid, exc)
+    return _cascade_by_guid(guid, folio, _suppress_entity, dry_run=dry_run)
 
-    return result
+
+def delete_by_guid(
+    guid: str,
+    folio: FolioInventoryOps,
+    *,
+    dry_run: bool = False,
+) -> GuidCascadeResult:
+    """Hard-delete the FOLIO records for a superseded GUID, child-first.
+
+    Irreversible. The child-first order is mandatory (FOLIO enforces referential
+    integrity), and the cascade aborts if a child delete fails so a parent is
+    never deleted while a child remains. The inventory client treats a 404 on the
+    DELETE as a no-op, so redelivered facts and races are handled cleanly.
+    """
+    return _cascade_by_guid(guid, folio, _delete_entity, dry_run=dry_run)

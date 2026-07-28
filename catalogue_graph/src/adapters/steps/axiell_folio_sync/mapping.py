@@ -166,12 +166,12 @@ MATERIAL_TYPE: dict[str, str] = {
     "audio-visual material - visual": "video recording",
     "audio-visual material - e-sound only": "sound recording",
     "audio-visual material - e-visual only": "video recording",
-    "published material": "Books",
+    "published material": "book",
     "archives": "unspecified",
 }
 
 # Fallbacks used when the MARC record carries no value for a resolved field.
-DEFAULT_MATERIAL_TYPE = "Books"
+DEFAULT_MATERIAL_TYPE = "book"
 DEFAULT_LOAN_TYPE = "Can Circulate"
 DEFAULT_LOCATION = "History of Medicine"
 DEFAULT_HOLDINGS_SOURCE = "MARC"
@@ -294,8 +294,13 @@ class UpsertResult(BaseModel):
     errors: list[UpsertError] = Field(default_factory=list)
 
 
-class SuppressResult(BaseModel):
-    """The result of :func:`upsert.suppress_by_guid` for a superseded GUID."""
+class GuidCascadeResult(BaseModel):
+    """Result of a reconciler cascade over one superseded GUID.
+
+    Shared by :func:`upsert.suppress_by_guid` (soft-suppress) and
+    :func:`upsert.delete_by_guid` (hard-delete); the ``action`` on each entity
+    (``suppress`` / ``delete`` / ``skip``) records which was applied.
+    """
 
     guid: str
     instance: EntityResult = Field(default_factory=EntityResult)

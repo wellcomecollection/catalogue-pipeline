@@ -351,6 +351,10 @@ def test_deletions_suppress_and_are_reported() -> None:
     assert resp.total_errors == 0
     # 2 guids x 3 entities each PUT back suppressed.
     assert len(folio.put_paths) == 6
+    # Cleanly-actioned deletions count toward the totals symmetrically with the
+    # upsert pass: a deletions-only run is not reported as zero work.
+    assert resp.total_successful == 2
+    assert resp.total_records == resp.total_successful + resp.total_errors == 2
 
 
 def test_deletion_failure_recorded_as_error_without_aborting() -> None:
@@ -373,6 +377,9 @@ def test_deletion_failure_recorded_as_error_without_aborting() -> None:
     assert resp.counts["deletions"] == 1
     assert resp.counts["suppressed"] == 0
     assert resp.total_errors == 1
+    # An errored GUID is not also counted as a success.
+    assert resp.total_successful == 0
+    assert resp.total_records == 1
 
 
 def test_no_deletions_leaves_counts_zero() -> None:
@@ -380,3 +387,116 @@ def test_no_deletions_leaves_counts_zero() -> None:
 
     assert resp.total_deletions == 0
     assert resp.counts["deletions"] == 0
+
+
+class _DeleteInventory:
+    """FOLIO fake where every entity exists and DELETE is allowed/recorded."""
+
+    def __init__(self) -> None:
+        self.delete_paths: list[str] = []
+        self.put_paths: list[str] = []
+
+    def get(self, path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        list_key = {
+            "/inventory/items": "items",
+            "/holdings-storage/holdings": "holdingsRecords",
+            "/inventory/instances": "instances",
+        }.get(path)
+        return {list_key: [{"id": f"{path}#id"}]} if list_key else {}
+
+    def post(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        raise AssertionError("must not POST")
+
+    def put(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        self.put_paths.append(path)
+        return {}
+
+    def delete(self, path: str) -> dict[str, Any]:
+        self.delete_paths.append(path)
+        return {}
+
+
+def test_hard_delete_mode_deletes_instead_of_suppressing() -> None:
+    folio = _DeleteInventory()
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [],
+        FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+        deletions=[_superseded("g1")],
+        hard_delete=True,
+    )
+
+    assert resp.counts["deletions"] == 1
+    assert resp.counts["deleted"] == 3  # instance + holdings + item
+    assert resp.counts["suppressed"] == 0
+    assert resp.total_errors == 0
+    assert folio.put_paths == []  # hard delete never suppresses
+    assert len(folio.delete_paths) == 3
+
+
+def test_partial_hard_delete_cascade_still_counts_the_executed_child() -> None:
+    # Cascade is item → holdings → instance. The item is irreversibly deleted,
+    # then holdings fails. The already-executed item delete must appear in the
+    # counts (and manifest) rather than vanishing behind the GUID-level error.
+    folio = _DeleteInventory()
+
+    def delete_but_fail_holdings(path: str) -> dict[str, Any]:
+        if path.startswith("/holdings-storage/holdings"):
+            raise RuntimeError("FOLIO 500 deleting holdings")
+        folio.delete_paths.append(path)
+        return {}
+
+    folio.delete = delete_but_fail_holdings  # type: ignore[method-assign]
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [],
+        FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+        deletions=[_superseded("g1")],
+        hard_delete=True,
+    )
+
+    assert resp.counts["deletions"] == 1
+    assert resp.total_errors == 1  # the holdings failure is recorded
+    assert resp.counts["deleted"] == 1  # ...but the item delete is not lost
+    # Only the item was deleted; holdings failed and instance was never reached.
+    assert len(folio.delete_paths) == 1
+    assert folio.delete_paths[0].startswith("/inventory/items")
+
+
+def test_hard_delete_failure_is_reported_under_delete_stage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # A failed hard delete must be recorded with stage="delete", not "suppress",
+    # so operators can tell an irreversible-delete failure from a suppression one.
+    folio = _DeleteInventory()
+
+    def boom(path: str) -> dict[str, Any]:
+        raise RuntimeError("FOLIO 500 deleting item")
+
+    folio.delete = boom  # type: ignore[method-assign]
+
+    captured: dict[str, Any] = {}
+    monkeypatch.setattr(
+        "utils.reporting.pydantic_to_s3_json",
+        lambda model, s3_uri: captured.update(model=model),
+    )
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [],
+        FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+        deletions=[_superseded("g1")],
+        hard_delete=True,
+        manifest_bucket="bucket-1",
+    )
+
+    assert resp.total_errors == 1
+    assert captured["model"].errors[0].stage == "delete"

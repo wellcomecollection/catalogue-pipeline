@@ -1,8 +1,8 @@
-"""Tests for the reconciler suppression path (``suppress_by_guid``).
+"""Tests for the reconciler delete paths (``suppress_by_guid`` / ``delete_by_guid``).
 
 A superseded GUID from the reconciler is an authoritative delete: the three
-FOLIO records keyed on ``AxC-{entity}-{guid}`` are soft-suppressed (both
-suppress flags), child-first, reversibly.
+FOLIO records keyed on ``AxC-{entity}-{guid}`` are either soft-suppressed (both
+suppress flags, reversible) or hard-deleted, child-first.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from adapters.steps.axiell_folio_sync.upsert import suppress_by_guid
+from adapters.steps.axiell_folio_sync.upsert import delete_by_guid, suppress_by_guid
 
 GUID = "1234"
 
@@ -22,6 +22,7 @@ class FakeInventory:
         # search_path -> the record to return for any hrid lookup (None = absent)
         self.existing = existing if existing is not None else {}
         self.put_calls: list[tuple[str, dict[str, Any]]] = []
+        self.delete_paths: list[str] = []
         self.get_paths: list[str] = []
 
     def get(self, path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
@@ -35,14 +36,15 @@ class FakeInventory:
         return {list_key: [record] if record else []}
 
     def post(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
-        raise AssertionError("suppression must not POST")
+        raise AssertionError("reconciler deletes must not POST")
 
     def put(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
         self.put_calls.append((path, dict(payload)))
         return {}
 
     def delete(self, path: str) -> dict[str, Any]:
-        raise AssertionError("suppression must not hard-delete")
+        self.delete_paths.append(path)
+        return {}
 
 
 def _all_present() -> FakeInventory:
@@ -55,7 +57,7 @@ def _all_present() -> FakeInventory:
     )
 
 
-def test_suppresses_all_three_entities_with_both_flags() -> None:
+def test_suppresses_all_three_entities_with_correct_flags() -> None:
     folio = _all_present()
 
     result = suppress_by_guid(GUID, folio, dry_run=False)
@@ -64,10 +66,17 @@ def test_suppresses_all_three_entities_with_both_flags() -> None:
     assert result.holdings.action == "suppress"
     assert result.instance.action == "suppress"
     assert not result.errors
+    assert folio.delete_paths == []  # suppress is reversible, never hard-deletes
 
-    for _, payload in folio.put_calls:
+    # discoverySuppress on every entity; staffSuppress only on the instance,
+    # the sole FOLIO inventory entity that carries that field (holdings-storage
+    # 422s on it, items silently drop it).
+    for path, payload in folio.put_calls:
         assert payload["discoverySuppress"] is True
-        assert payload["staffSuppress"] is True
+        if path.startswith("/inventory/instances/"):
+            assert payload["staffSuppress"] is True
+        else:
+            assert "staffSuppress" not in payload
 
 
 def test_suppresses_child_first() -> None:
@@ -142,3 +151,64 @@ def test_put_failure_is_captured_as_error() -> None:
 
     assert result.errors
     assert result.errors[0].type == "api"
+
+
+# ── hard delete (delete_by_guid) ──────────────────────────────────────────────
+
+
+def test_hard_delete_removes_all_three_child_first() -> None:
+    folio = _all_present()
+
+    result = delete_by_guid(GUID, folio, dry_run=False)
+
+    assert result.item.action == "delete"
+    assert result.holdings.action == "delete"
+    assert result.instance.action == "delete"
+    assert not result.errors
+    assert folio.put_calls == []  # hard delete never suppresses
+    assert folio.delete_paths == [
+        "/inventory/items/item-1",
+        "/holdings-storage/holdings/hold-1",
+        "/inventory/instances/inst-1",
+    ]
+
+
+def test_hard_delete_skips_missing_records() -> None:
+    folio = FakeInventory({})  # nothing exists
+
+    result = delete_by_guid(GUID, folio, dry_run=False)
+
+    assert result.item.action == "skip"
+    assert result.holdings.action == "skip"
+    assert result.instance.action == "skip"
+    assert folio.delete_paths == []
+    assert not result.errors
+
+
+def test_hard_delete_dry_run_plans_without_writing() -> None:
+    folio = _all_present()
+
+    result = delete_by_guid(GUID, folio, dry_run=True)
+
+    assert result.item.action == "delete"
+    assert result.instance.action == "delete"
+    assert folio.delete_paths == []
+
+
+def test_hard_delete_aborts_cascade_when_a_child_fails() -> None:
+    # FOLIO 400s the item delete (e.g. a loan still references it). The cascade
+    # must stop before holdings/instance so a parent is never left orphaned.
+    folio = _all_present()
+
+    def boom(path: str) -> dict[str, Any]:
+        raise RuntimeError("409 item still referenced")
+
+    folio.delete = boom  # type: ignore[method-assign]
+
+    result = delete_by_guid(GUID, folio, dry_run=False)
+
+    assert result.errors
+    assert result.errors[0].type == "api"
+    # item op raised → holdings and instance were never attempted.
+    assert result.holdings.action is None
+    assert result.instance.action is None

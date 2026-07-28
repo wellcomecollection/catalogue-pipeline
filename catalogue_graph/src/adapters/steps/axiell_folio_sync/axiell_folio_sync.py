@@ -27,6 +27,7 @@ Environment variables (injected by Terraform):
   MANIFEST_S3_BUCKET     — S3 bucket name for JSON run reports
   AWS_REGION             — e.g. eu-west-1 (set automatically in Lambda)
   DRY_RUN                — default "true"; event.dry_run overrides
+  HARD_DELETE            — default "false" (suppress); event.hard_delete overrides
 
 For local runs, OKAPI_URL / OKAPI_TENANT / OKAPI_USERNAME / OKAPI_PASSWORD
 override the corresponding SSM fields (and skip SSM if all are set).
@@ -124,6 +125,14 @@ def handler(
 
     env_dry_run = os.environ.get("DRY_RUN", "true").lower() not in ("false", "0", "no")
     dry_run = event.dry_run if event.dry_run is not None else env_dry_run
+    env_hard_delete = os.environ.get("HARD_DELETE", "false").lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+    hard_delete = (
+        event.hard_delete if event.hard_delete is not None else env_hard_delete
+    )
     manifest_bucket = os.environ.get("MANIFEST_S3_BUCKET")
 
     okapi = load_okapi_config()
@@ -152,6 +161,7 @@ def handler(
         dry_run=dry_run,
         manifest_bucket=manifest_bucket,
         deletions=deletions,
+        hard_delete=hard_delete,
     )
 
 
@@ -201,6 +211,11 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         "--live", action="store_true", help="Disable dry-run and write to FOLIO"
     )
     parser.add_argument(
+        "--hard-delete",
+        action="store_true",
+        help="Hard-delete (not suppress) FOLIO records for reconciler deletions",
+    )
+    parser.add_argument(
         "--use-rest-api-table",
         action="store_true",
         help="Read from the S3 Tables catalog instead of the local sqlite catalog",
@@ -212,6 +227,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         changeset_ids=args.changeset_ids or [],
         sample_limit=None if args.changeset_ids else args.sample_limit,
         dry_run=not args.live,
+        hard_delete=args.hard_delete,
     )
     response = handler(event, use_rest_api_table=args.use_rest_api_table)
     print(json.dumps(response.model_dump(mode="json"), indent=2))

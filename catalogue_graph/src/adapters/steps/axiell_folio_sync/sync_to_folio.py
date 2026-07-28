@@ -36,6 +36,7 @@ from adapters.steps.axiell_folio_sync.models import (
 from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
 from adapters.steps.axiell_folio_sync.upsert import (
+    delete_by_guid,
     suppress_by_guid,
     upsert_from_payloads,
 )
@@ -112,6 +113,7 @@ _ACTION_COUNT_KEY = {
     "create": "created",
     "update": "updated",
     "suppress": "suppressed",
+    "delete": "deleted",
 }
 
 
@@ -123,40 +125,44 @@ def _tally_entity_actions(result: Any, counts: dict[str, int]) -> None:
             counts[key] += 1
 
 
-def _run_suppressions(
+def _run_reconcile_deletions(
     deletions: list[SupersededGuid],
     folio: FolioInventoryOps,
     counts: dict[str, int],
     errors_list: list[SyncErrorEntry],
     *,
     dry_run: bool,
+    hard_delete: bool,
 ) -> tuple[list[SyncDeletionEntry], int]:
-    """Suppress each superseded GUID's FOLIO records (item → holdings → instance).
+    """Action each superseded GUID's FOLIO records (item → holdings → instance).
 
-    A per-GUID FOLIO failure is recorded as an error entry and does not abort the
-    run: the upsert pass has already committed, and the reconciler mapping/ES
-    delete are upstream and independent. Returns the manifest entries for GUIDs
-    that suppressed cleanly, and the count of GUIDs that errored.
+    ``hard_delete`` selects irreversible DELETE; otherwise the records are
+    soft-suppressed (the reversible default). A per-GUID FOLIO failure is recorded
+    as an error entry and does not abort the run: the upsert pass has already
+    committed, and the reconciler mapping/ES delete are upstream and independent.
+    Returns the manifest entries for every GUID that actioned at least one entity
+    (including partial cascades that then errored), and the count of GUIDs that
+    errored.
     """
+    action_by_guid = delete_by_guid if hard_delete else suppress_by_guid
+    stage = "delete" if hard_delete else "suppress"
     entries: list[SyncDeletionEntry] = []
     error_count = 0
 
     for superseded in deletions:
         counts["deletions"] += 1
-        result = suppress_by_guid(superseded.guid, folio, dry_run=dry_run)
+        result = action_by_guid(superseded.guid, folio, dry_run=dry_run)
 
-        if result.errors:
-            error_count += 1
-            errors_list.append(
-                _build_error(
-                    superseded.guid,
-                    superseded.changeset_id,
-                    "suppress",
-                    [e.model_dump() for e in result.errors],
-                )
-            )
-        else:
-            _tally_entity_actions(result, counts)
+        # Tally and record whatever was actually actioned, even when the cascade
+        # later failed: a partial hard-delete may have already removed a child
+        # (irreversibly) before erroring on its parent, and that must not vanish
+        # from the counts or the manifest. Entities that never ran carry a null
+        # action, so nothing is over-counted.
+        _tally_entity_actions(result, counts)
+        if any(
+            getattr(result, entity).action
+            for entity in ("instance", "holdings", "item")
+        ):
             entries.append(
                 SyncDeletionEntry(
                     guid=superseded.guid,
@@ -169,8 +175,20 @@ def _run_suppressions(
                 )
             )
 
+        if result.errors:
+            error_count += 1
+            errors_list.append(
+                _build_error(
+                    superseded.guid,
+                    superseded.changeset_id,
+                    stage,
+                    [e.model_dump() for e in result.errors],
+                )
+            )
+
         logger.info(
-            "suppress_result",
+            "reconcile_delete_result",
+            mode="delete" if hard_delete else "suppress",
             guid=superseded.guid,
             instance=result.instance.action or "skip",
             holdings=result.holdings.action or "skip",
@@ -193,6 +211,7 @@ def run_sync(
     dry_run: bool,
     manifest_bucket: str | None = None,
     deletions: list[SupersededGuid] | None = None,
+    hard_delete: bool = False,
 ) -> AxiellFolioSyncResponse:
     """Select, map, and upsert pre-read adapter rows to FOLIO.
 
@@ -200,10 +219,11 @@ def run_sync(
     unit-testable without SSM / Iceberg / FOLIO; ``handler`` builds the real ones.
 
     ``deletions`` carries the reconciler's superseded GUIDs for this changeset
-    batch. They are suppressed in a second pass *after* the upsert pass so a
-    record re-created and superseded in the same batch is handled in write order;
-    the reader has already dropped any GUID reclaimed by a current mapping, so a
-    live record is never suppressed here.
+    batch. They are actioned in a second pass *after* the upsert pass so a record
+    re-created and superseded in the same batch is handled in write order; the
+    reader has already dropped any GUID reclaimed by a current mapping, so a live
+    record is never touched here. ``hard_delete`` selects irreversible DELETE for
+    that pass; the default is reversible soft-suppression.
     """
     logger.info(
         "axiell_folio_sync start",
@@ -220,6 +240,7 @@ def run_sync(
         "created": 0,
         "updated": 0,
         "suppressed": 0,
+        "deleted": 0,
         "skipped": 0,
         "tombstone": 0,
         "failed": 0,
@@ -324,9 +345,20 @@ def run_sync(
         )
 
     # ── Pass 2: authoritative deletes (reconciler superseded GUIDs) ────────────
-    deletion_entries, deletion_errors = _run_suppressions(
-        deletions or [], folio, counts, errors_list, dry_run=dry_run
+    deletion_entries, deletion_errors = _run_reconcile_deletions(
+        deletions or [],
+        folio,
+        counts,
+        errors_list,
+        dry_run=dry_run,
+        hard_delete=hard_delete,
     )
+    # Fold both passes into the totals symmetrically: previously only deletion
+    # *errors* counted, so total_records (= successful + errors) silently dropped
+    # cleanly-actioned deletions. Every processed GUID is either an error or a
+    # success, so successes = processed − errors.
+    deletion_successes = counts["deletions"] - deletion_errors
+    total_successful += deletion_successes
     total_errors += deletion_errors
 
     report = AxiellFolioSyncReport(
