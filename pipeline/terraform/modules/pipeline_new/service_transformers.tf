@@ -32,9 +32,10 @@ locals {
       # expire mid-process and dead-letter. See PipelineStorageStream.
       queue_visibility_timeout_seconds = 90
 
-      # The default 512/1024 saturates on Sierra's volume.
-      cpu    = 2048
-      memory = 4096
+      # The stream transforms pipeline_storage.parallelism (10) records at once,
+      # so Sierra's big records starve on fewer cores.
+      cpu    = 4096
+      memory = 8192
     }
 
     tei = {
