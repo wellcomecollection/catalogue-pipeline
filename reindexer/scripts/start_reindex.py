@@ -3,6 +3,7 @@
 import itertools
 import json
 import math
+import os
 import sys
 
 import boto3
@@ -15,7 +16,7 @@ SOURCES = {
     "miro": "vhs-sourcedata-miro",
     "sierra": "vhs-sierra-sierra-adapter-20200604",
     "mets": "mets-adapter-store-delta",
-    "calm": "vhs-calm-adapter",
+    "calm": None,  # calm always uses --calm-input-file
     "tei": "tei-adapter-store",
 }
 
@@ -79,10 +80,10 @@ def specific_reindex_parameters(record_ids):
 def file_reader_reindex_parameters(path):
     try:
         with open(path, newline="") as file:
-            trimmed_lines = (line.rstrip() for line in file)
+            ids = [line.rstrip() for line in file if line.rstrip()]
             # The reindexer can handle up to 100 IDs at a time, so send them in
             # batches of that size.
-            for chunk in chunked_iterable(trimmed_lines, size=100):
+            for chunk in chunked_iterable(ids, size=100):
                 yield {"ids": chunk, "type": "SpecificReindexParameters"}
     except FileNotFoundError:
         return False
@@ -207,8 +208,25 @@ def verify_specific_ids(*, source, specific_ids):
     "--input-file",
     help="A path to a file containing IDs to use (implies a specific-records reindex)",
 )
+@click.option(
+    "--calm-input-file",
+    help=(
+        "Path to a file of specific record IDs to reindex for calm. Required when "
+        "running a complete reindex that includes calm -- calm never runs a full "
+        "complete reindex."
+    ),
+)
 @click.pass_context
-def start_reindex(ctx, src, dst, mode, input_file):
+def start_reindex(ctx, src, dst, mode, input_file, calm_input_file):
+    if mode == "complete" and src in ["all", "notmiro", "calm"]:
+        if not calm_input_file:
+            sys.exit(
+                f"You must pass --calm-input-file to run a complete reindex of "
+                f"{src!r} -- calm never runs a full complete reindex."
+            )
+        if not os.path.isfile(calm_input_file):
+            sys.exit(f"--calm-input-file {calm_input_file!r} does not exist")
+
     if src in ["all", "notmiro"] + EVENTBRIDGE_REINDEX_TARGETS:
         if mode != "complete":
             sys.exit(f"Reindex source ({src}) only supports --mode=complete")
@@ -227,7 +245,13 @@ def start_reindex(ctx, src, dst, mode, input_file):
             for source in SOURCES.keys():
                 if source == "miro" and src == "notmiro":
                     continue
-                ctx.invoke(start_reindex, src=source, dst=dst, mode=mode)
+                ctx.invoke(
+                    start_reindex,
+                    src=source,
+                    dst=dst,
+                    mode=mode,
+                    calm_input_file=calm_input_file,
+                )
                 print("")
 
             for reindex_target in EVENTBRIDGE_REINDEX_TARGETS:
@@ -239,26 +263,33 @@ def start_reindex(ctx, src, dst, mode, input_file):
     print(f"Starting a standard reindex {src} ~> {dst}")
 
     if mode == "complete":
-        total_segments = how_many_segments(table_name=SOURCES[src])
-        parameters = complete_reindex_parameters(total_segments)
+        if src == "calm":
+            print(f"Using specific IDs from {calm_input_file} for calm")
+            parameters = list(file_reader_reindex_parameters(calm_input_file))
+            if not parameters:
+                sys.exit(f"--calm-input-file {calm_input_file!r} contains no valid IDs")
+        else:
+            total_segments = how_many_segments(table_name=SOURCES[src])
+            parameters = complete_reindex_parameters(total_segments)
     elif mode == "partial":
         max_records = click.prompt("How many records do you want to send?", default=10)
         parameters = partial_reindex_parameters(max_records)
     elif mode == "specific":
-        specified_records_str = click.prompt(
-            "Which records do you want to reindex? (separate multiple IDs with spaces)",
-            type=str,
-        )
-        specified_records = specified_records_str.split()
-        if not specified_records:
-            return sys.exit("You need to specify at least 1 record ID")
+        if input_file:
+            parameters = list(file_reader_reindex_parameters(input_file))
+            if not parameters:
+                return sys.exit(f"Input file {input_file!r} does not exist or contains no IDs")
+        else:
+            specified_records_str = click.prompt(
+                "Which records do you want to reindex? (separate multiple IDs with spaces)",
+                type=str,
+            )
+            specified_records = specified_records_str.split()
+            if not specified_records:
+                return sys.exit("You need to specify at least 1 record ID")
 
-        verify_specific_ids(source=src, specific_ids=specified_records)
-        parameters = specific_reindex_parameters(specified_records)
-    elif input_file:
-        parameters = file_reader_reindex_parameters(input_file)
-        if not parameters:
-            return sys.exit("Specified input file does not exist")
+            verify_specific_ids(source=src, specific_ids=specified_records)
+            parameters = specific_reindex_parameters(specified_records)
     elif not mode:
         return sys.exit("You must specify an input file or a mode")
 

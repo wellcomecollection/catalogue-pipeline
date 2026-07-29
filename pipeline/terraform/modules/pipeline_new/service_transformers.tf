@@ -1,5 +1,9 @@
 locals {
   transformers = {
+    calm = {
+      container_image = local.transformer_calm_image
+    }
+
     mets = {
       container_image = local.transformer_mets_image
 

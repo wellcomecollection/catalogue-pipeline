@@ -18,5 +18,6 @@ locals {
   transformer_mets_image      = local.image_ids["transformer_mets"]
   transformer_tei_image       = local.image_ids["transformer_tei"]
   transformer_sierra_image    = local.image_ids["transformer_sierra"]
+  transformer_calm_image      = local.image_ids["transformer_calm"]
   transformer_ebsco_image     = local.image_ids["transformer_ebsco"]
 }
