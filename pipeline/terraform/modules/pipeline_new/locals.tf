@@ -86,6 +86,7 @@ locals {
     "transformer_mets",
     "transformer_tei",
     "transformer_sierra",
+    "transformer_calm",
     "transformer_ebsco",
   ]
 
@@ -121,6 +122,12 @@ locals {
   tei_adapter_topic_arn = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
   tei_adapter_bucket    = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
 
+  # Calm adapter VHS
+  vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
+
+  # Calm adapter topics
+  calm_adapter_topic_arn   = data.terraform_remote_state.calm_adapter.outputs.calm_adapter_topic_arn
+  calm_deletions_topic_arn = data.terraform_remote_state.calm_adapter.outputs.calm_deletions_topic_arn
 
   # Reindexer topics
   ebsco_reindexer_topic_arn  = data.terraform_remote_state.reindexer.outputs.ebsco_reindexer_topic_arn
@@ -128,6 +135,7 @@ locals {
   sierra_reindexer_topic_arn = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
   mets_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.mets_reindexer_topic_arn
   tei_reindexer_topic_arn    = data.terraform_remote_state.reindexer.outputs.tei_reindexer_topic_arn
+  calm_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.calm_reindexer_topic_arn
 
   infra_critical   = data.terraform_remote_state.catalogue_infra_critical.outputs
   shared_infra     = data.terraform_remote_state.shared_infra.outputs
@@ -167,6 +175,15 @@ locals {
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
       read_policy   = data.aws_iam_policy_document.read_tei_adapter_bucket.json
+    }
+
+    calm = {
+      topics = [
+        local.calm_adapter_topic_arn,
+        local.calm_deletions_topic_arn,
+      ],
+      reindex_topic = local.calm_reindexer_topic_arn,
+      read_policy   = local.vhs_calm_read_policy
     }
   }
 
