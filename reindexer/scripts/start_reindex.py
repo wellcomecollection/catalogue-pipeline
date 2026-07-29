@@ -16,7 +16,7 @@ SOURCES = {
     "miro": "vhs-sourcedata-miro",
     "sierra": "vhs-sierra-sierra-adapter-20200604",
     "mets": "mets-adapter-store-delta",
-    "calm": "vhs-calm-adapter",
+    "calm": None,  # calm always uses --calm-input-file
     "tei": "tei-adapter-store",
 }
 
