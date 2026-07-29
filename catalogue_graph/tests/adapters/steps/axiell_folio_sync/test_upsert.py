@@ -116,3 +116,38 @@ def test_deleted_record_suppression_does_not_trigger_rollbacks_on_success() -> N
 
     assert not result.errors
     assert deleted_paths == []
+
+
+def test_lookup_failure_errors_rather_than_creating_a_duplicate() -> None:
+    # A transient FOLIO outage makes the instance *lookup* raise. This must not be
+    # read as "record absent" and fall through to a POST — that would create a
+    # duplicate (or 422) instead of updating the existing record. It surfaces as an
+    # error and writes nothing.
+    posted_paths: list[str] = []
+
+    class FakeInventory:
+        def get(
+            self, path: str, params: Mapping[str, Any] | None = None
+        ) -> dict[str, Any]:
+            raise RuntimeError("folio down")
+
+        def post(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+            posted_paths.append(path)
+            return {"id": "should-not-happen"}
+
+        def put(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+            return {}
+
+        def delete(self, path: str) -> dict[str, Any]:
+            return {}
+
+    result = upsert_from_payloads(
+        MAPPED,
+        FakeInventory(),
+        dry_run=False,
+    )
+
+    assert result.errors
+    assert result.errors[0].type == "api"
+    assert posted_paths == []
+    assert result.instance.action is None

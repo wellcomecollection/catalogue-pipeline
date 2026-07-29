@@ -27,6 +27,7 @@ Environment variables (injected by Terraform):
   MANIFEST_S3_BUCKET     — S3 bucket name for JSON run reports
   AWS_REGION             — e.g. eu-west-1 (set automatically in Lambda)
   DRY_RUN                — default "true"; event.dry_run overrides
+  HARD_DELETE            — default "false" (suppress); event.hard_delete overrides
 
 For local runs, OKAPI_URL / OKAPI_TENANT / OKAPI_USERNAME / OKAPI_PASSWORD
 override the corresponding SSM fields (and skip SSM if all are set).
@@ -48,7 +49,10 @@ from adapters.steps.axiell_folio_sync.models import (
 )
 from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
-from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
+from adapters.utils.axiell_changeset_reader import (
+    AxiellChangesetReader,
+    SupersededGuid,
+)
 from clients.folio_client import FolioClient, FolioInventoryClient, ssl_context_from_env
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import ecs_handler
@@ -66,26 +70,34 @@ def _read_rows(
     sample_limit: int | None,
     *,
     use_rest_api_table: bool,
-) -> list[dict]:
-    """Read changed Axiell adapter rows via :class:`AxiellChangesetReader`.
+) -> tuple[list[dict], list[SupersededGuid]]:
+    """Read changed Axiell adapter rows and superseded-GUID deletions.
 
     Uses the same ``AXIELL_CONFIG`` as the Axiell adapter, so it works against
     S3 Tables (``use_rest_api_table=True``, production) or the local sqlite
     catalog (``use_rest_api_table=False``, local dev) with no code changes.
-    Read-only: the table is never created. Built without deletion facts, so
-    the sync depends on no other tables; authoritative deletes (platform#6440)
-    would consume ``reader.iter_deletions()`` after the upsert pass.
+    Read-only: the tables are never created.
+
+    Deletion facts are read only for incremental (changeset) runs. The reconcile
+    step in the adapter state machine writes them into the same table bucket
+    before ``axiell.adapter.completed`` fires, and ``iter_deletions`` re-checks
+    each fact against the current reconciler mappings, so a GUID reclaimed by a
+    revert/handoff never suppresses a live record. A sample/reindex run (no
+    changesets) has nothing to overwrite, so it reads no facts and the reader is
+    built without the facts/reconciler tables.
     """
     reader = AxiellChangesetReader.build(
         AXIELL_CONFIG,
         changeset_ids or [],
         use_rest_api_table=use_rest_api_table,
-        with_deletion_facts=False,
+        with_deletion_facts=bool(changeset_ids),
     )
 
     if changeset_ids:
         logger.info("adapter_read", mode="changesets", changeset_ids=changeset_ids)
-        return list(reader.iter_records())
+        records = list(reader.iter_records())
+        deletions = list(reader.iter_deletions())
+        return records, deletions
 
     # Dev/smoke-test fallback: a sample of active records (no changesets given).
     limit = sample_limit or 10
@@ -95,7 +107,7 @@ def _read_rows(
         rows.append(row)
         if len(rows) >= limit:
             break
-    return rows
+    return rows, []
 
 
 # ── entry points ──────────────────────────────────────────────────────────────
@@ -113,6 +125,14 @@ def handler(
 
     env_dry_run = os.environ.get("DRY_RUN", "true").lower() not in ("false", "0", "no")
     dry_run = event.dry_run if event.dry_run is not None else env_dry_run
+    env_hard_delete = os.environ.get("HARD_DELETE", "false").lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+    hard_delete = (
+        event.hard_delete if event.hard_delete is not None else env_hard_delete
+    )
     manifest_bucket = os.environ.get("MANIFEST_S3_BUCKET")
 
     okapi = load_okapi_config()
@@ -126,12 +146,12 @@ def handler(
     inventory = FolioInventoryClient(client)
     ref_cache = RefCache(inventory).load()
 
-    rows = _read_rows(
+    rows, deletions = _read_rows(
         event.changeset_ids or None,
         event.sample_limit,
         use_rest_api_table=use_rest_api_table,
     )
-    logger.info("adapter_read complete", rows=len(rows))
+    logger.info("adapter_read complete", rows=len(rows), deletions=len(deletions))
 
     return run_sync(
         event,
@@ -140,6 +160,8 @@ def handler(
         inventory,
         dry_run=dry_run,
         manifest_bucket=manifest_bucket,
+        deletions=deletions,
+        hard_delete=hard_delete,
     )
 
 
@@ -189,6 +211,11 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         "--live", action="store_true", help="Disable dry-run and write to FOLIO"
     )
     parser.add_argument(
+        "--hard-delete",
+        action="store_true",
+        help="Hard-delete (not suppress) FOLIO records for reconciler deletions",
+    )
+    parser.add_argument(
         "--use-rest-api-table",
         action="store_true",
         help="Read from the S3 Tables catalog instead of the local sqlite catalog",
@@ -200,6 +227,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         changeset_ids=args.changeset_ids or [],
         sample_limit=None if args.changeset_ids else args.sample_limit,
         dry_run=not args.live,
+        hard_delete=args.hard_delete,
     )
     response = handler(event, use_rest_api_table=args.use_rest_api_table)
     print(json.dumps(response.model_dump(mode="json"), indent=2))

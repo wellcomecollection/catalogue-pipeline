@@ -23,6 +23,7 @@ from adapters.steps.axiell_folio_sync.folio_callables import (
     FolioInventoryOps,
 )
 from adapters.steps.axiell_folio_sync.mapping import (
+    GuidCascadeResult,
     MappingError,
     UpsertResult,
     select_and_build,
@@ -30,12 +31,18 @@ from adapters.steps.axiell_folio_sync.mapping import (
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
+    SyncDeletionEntry,
     SyncErrorEntry,
     SyncSuccessEntry,
 )
 from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
-from adapters.steps.axiell_folio_sync.upsert import upsert_from_payloads
+from adapters.steps.axiell_folio_sync.upsert import (
+    delete_by_guid,
+    suppress_by_guid,
+    upsert_from_payloads,
+)
+from adapters.utils.axiell_changeset_reader import SupersededGuid
 
 logger = structlog.get_logger(__name__)
 
@@ -102,12 +109,98 @@ def _build_error(
     )
 
 
-def _tally_upsert_actions(result: UpsertResult, counts: dict[str, int]) -> None:
-    """Increment counts for each entity action in a successful upsert."""
+# Maps an entity action to its plural count key. "suppress" -> "suppressed"
+# (not "suppressd"), so this cannot be derived by appending "d".
+_ACTION_COUNT_KEY = {
+    "create": "created",
+    "update": "updated",
+    "suppress": "suppressed",
+    "delete": "deleted",
+}
+
+
+def _tally_entity_actions(
+    result: UpsertResult | GuidCascadeResult, counts: dict[str, int]
+) -> None:
+    """Increment counts for each entity action in a successful upsert/suppress."""
     for entity in ("instance", "holdings", "item"):
-        action = getattr(result, entity).action
-        if action in ("create", "update", "suppress"):
-            counts[action + "d"] += 1
+        key = _ACTION_COUNT_KEY.get(getattr(result, entity).action)
+        if key:
+            counts[key] += 1
+
+
+def _run_reconcile_deletions(
+    deletions: list[SupersededGuid],
+    folio: FolioInventoryOps,
+    counts: dict[str, int],
+    errors_list: list[SyncErrorEntry],
+    *,
+    dry_run: bool,
+    hard_delete: bool,
+) -> tuple[list[SyncDeletionEntry], int]:
+    """Action each superseded GUID's FOLIO records (item → holdings → instance).
+
+    ``hard_delete`` selects irreversible DELETE; otherwise the records are
+    soft-suppressed (the reversible default). A per-GUID FOLIO failure is recorded
+    as an error entry and does not abort the run: the upsert pass has already
+    committed, and the reconciler mapping/ES delete are upstream and independent.
+    Returns the manifest entries for every GUID that actioned at least one entity
+    (including partial cascades that then errored), and the count of GUIDs that
+    errored.
+    """
+    action_by_guid = delete_by_guid if hard_delete else suppress_by_guid
+    stage = "delete" if hard_delete else "suppress"
+    entries: list[SyncDeletionEntry] = []
+    error_count = 0
+
+    for superseded in deletions:
+        counts["deletions"] += 1
+        result = action_by_guid(superseded.guid, folio, dry_run=dry_run)
+
+        # Tally and record whatever was actually actioned, even when the cascade
+        # later failed: a partial hard-delete may have already removed a child
+        # (irreversibly) before erroring on its parent, and that must not vanish
+        # from the counts or the manifest. Entities that never ran carry a null
+        # action, so nothing is over-counted.
+        _tally_entity_actions(result, counts)
+        if any(
+            getattr(result, entity).action
+            for entity in ("instance", "holdings", "item")
+        ):
+            entries.append(
+                SyncDeletionEntry(
+                    guid=superseded.guid,
+                    record_id=superseded.record_id,
+                    changeset_id=superseded.changeset_id,
+                    instance_action=result.instance.action,
+                    holdings_action=result.holdings.action,
+                    item_action=result.item.action,
+                    timestamp=utc_now_iso(),
+                )
+            )
+
+        if result.errors:
+            error_count += 1
+            errors_list.append(
+                _build_error(
+                    superseded.guid,
+                    superseded.changeset_id,
+                    stage,
+                    [e.model_dump() for e in result.errors],
+                )
+            )
+
+        logger.info(
+            "reconcile_delete_result",
+            mode="delete" if hard_delete else "suppress",
+            guid=superseded.guid,
+            instance=result.instance.action or "skip",
+            holdings=result.holdings.action or "skip",
+            item=result.item.action or "skip",
+            errors=len(result.errors),
+        )
+
+    return entries, error_count
 
 
 # ── core ──────────────────────────────────────────────────────────────────────
@@ -121,11 +214,20 @@ def run_sync(
     *,
     dry_run: bool,
     manifest_bucket: str | None = None,
+    deletions: list[SupersededGuid] | None = None,
+    hard_delete: bool = False,
 ) -> AxiellFolioSyncResponse:
     """Select, map, and upsert pre-read adapter rows to FOLIO.
 
     Dependencies (rows, ref cache, FOLIO client) are injected so the loop is
     unit-testable without SSM / Iceberg / FOLIO; ``handler`` builds the real ones.
+
+    ``deletions`` carries the reconciler's superseded GUIDs for this changeset
+    batch. They are actioned in a second pass *after* the upsert pass so a record
+    re-created and superseded in the same batch is handled in write order; the
+    reader has already dropped any GUID reclaimed by a current mapping, so a live
+    record is never touched here. ``hard_delete`` selects irreversible DELETE for
+    that pass; the default is reversible soft-suppression.
     """
     logger.info(
         "axiell_folio_sync start",
@@ -142,10 +244,13 @@ def run_sync(
         "created": 0,
         "updated": 0,
         "suppressed": 0,
+        "deleted": 0,
         "skipped": 0,
         "tombstone": 0,
         "failed": 0,
         "total": 0,
+        # Superseded GUIDs (reconciler deletions) processed in the second pass.
+        "deletions": 0,
     }
 
     for row in rows:
@@ -221,7 +326,7 @@ def run_sync(
             )
         else:
             total_successful += 1
-            _tally_upsert_actions(result, counts)
+            _tally_entity_actions(result, counts)
 
             successful.append(
                 SyncSuccessEntry(
@@ -243,6 +348,23 @@ def run_sync(
             errors=len(result.errors),
         )
 
+    # ── Pass 2: authoritative deletes (reconciler superseded GUIDs) ────────────
+    deletion_entries, deletion_errors = _run_reconcile_deletions(
+        deletions or [],
+        folio,
+        counts,
+        errors_list,
+        dry_run=dry_run,
+        hard_delete=hard_delete,
+    )
+    # Fold both passes into the totals symmetrically: previously only deletion
+    # *errors* counted, so total_records (= successful + errors) silently dropped
+    # cleanly-actioned deletions. Every processed GUID is either an error or a
+    # success, so successes = processed − errors.
+    deletion_successes = counts["deletions"] - deletion_errors
+    total_successful += deletion_successes
+    total_errors += deletion_errors
+
     report = AxiellFolioSyncReport(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
@@ -250,6 +372,7 @@ def run_sync(
         counts=counts,
         successful=successful,
         errors=errors_list,
+        deletions=deletion_entries,
         s3_bucket=manifest_bucket,
         # The S3 report is written even on dry runs (it is how dry runs are
         # validated); only CloudWatch metrics are suppressed.
@@ -264,6 +387,7 @@ def run_sync(
         total=counts["total"],
         successful=total_successful,
         errors=total_errors,
+        deletions=counts["deletions"],
         dry_run=dry_run,
     )
 
@@ -275,4 +399,5 @@ def run_sync(
         total_successful=total_successful,
         total_errors=total_errors,
         total_records=total_successful + total_errors,
+        total_deletions=counts["deletions"],
     )

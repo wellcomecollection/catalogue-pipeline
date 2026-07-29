@@ -18,9 +18,8 @@ The design, record-selection rules and tombstone semantics are specified in
    (entrypoint `adapters.steps.axiell_folio_sync.axiell_folio_sync.lambda_handler`).
 3. The step reads the changed rows for the event's `changeset_ids` through `AxiellChangesetReader` (using the same
    `AXIELL_CONFIG` as the Axiell adapter, so S3 Tables in Lambda and a local sqlite catalog for local runs). The
-   reader also exposes the adapter's deletion facts via `iter_deletions()`, which is where authoritative FOLIO
-   deletes (platform#6440) will plug in.
-4. Each record is selected, mapped, and upserted:
+   reader also exposes the adapter's deletion facts via `iter_deletions()`, consumed by the reconciliation pass below.
+4. **Pass 1 — upsert.** Each record is selected, mapped, and upserted:
    * **Selection** (`is_selected_for_sync`): a record is synced only if it carries the harvest flag (MARC `980 $a`
      present) and is item-level (MARC `351 $c` == `ITEM`). Everything else is skipped.
    * **Mapping** (`mapping.py`): MARCXML → typed Pydantic payloads for Instance, Holdings and Item. FOLIO reference
@@ -28,14 +27,35 @@ The design, record-selection rules and tombstone semantics are specified in
      FOLIO tenant and reused across warm Lambda starts.
    * **Upsert** (`upsert.py`): writes in Instance → Holdings → Item order via OKAPI, with best-effort rollback if a
      later entity write fails.
-5. Results are published via a single `PipelineReport` (`report.py`): one JSON run report to S3 plus CloudWatch
+5. **Pass 2 — reconciliation deletes** (see [Reconciliation deletes](#reconciliation-deletes) below): the deletion
+   facts from `iter_deletions()` are actioned against FOLIO *after* the upsert pass.
+6. Results are published via a single `PipelineReport` (`report.py`): one JSON run report to S3 plus CloudWatch
    metrics (namespace `catalogue_adapters`; metrics are suppressed on dry runs, the S3 report is not).
 
-Rows with `deleted=true` are counted as advisory tombstones and ignored: the loader's deleted flag is
-unreliable, so we record the signal but do not suppress or remove FOLIO records based on it.
-Authoritative deletes come from the adapter-side reconcile step's deletion facts, delivered by the Axiell
-transformer (see
-[Axiell deletion reconciliation](../../transformers/README.md#axiell-deletion-reconciliation) and RFC 090).
+## Reconciliation deletes
+
+Two distinct delete signals reach this step; only one is authoritative.
+
+**Loader tombstones (`deleted=true`) are advisory only and ignored.** The loader's `deleted` flag is unreliable, so we
+record and metric the signal but never suppress or remove a FOLIO record based on it.
+
+**Authoritative deletes come from the adapter-side reconcile step's deletion facts.** The reconcile step writes
+superseded-GUID facts to Iceberg *before* `axiell.adapter.completed` fires, so the sync consumes them in the same
+invocation — no separate event or Lambda (see RFC 090 and
+[Axiell deletion reconciliation](../../transformers/README.md#axiell-deletion-reconciliation)). `iter_deletions()`
+re-checks each fact against the current reconciler mappings and drops any GUID reclaimed by a live record, so a
+revert/handoff never suppresses the wrong record. The remaining facts are actioned in Pass 2, keyed by
+`AxC-{entity}-{guid}` (the same HRID scheme the upsert path writes), child-first **item → holdings → instance**:
+
+- **Soft-suppress (default, reversible).** `suppress_by_guid` sets `discoverySuppress` on all three entities and
+  `staffSuppress` on the instance only — instances are the sole FOLIO inventory entity with a `staffSuppress` field
+  (holdings-storage rejects it with a 422; items silently drop it). Idempotent under redelivery.
+- **Hard-delete (opt-in, irreversible).** `delete_by_guid`, selected by the event's `hard_delete` field or the
+  `HARD_DELETE` env var. The child-first order is mandatory (FOLIO enforces referential integrity) and the cascade
+  aborts before the parent if a child delete fails, so a parent is never orphaned. A 404 is treated as a no-op, so
+  redelivered facts and races are safe.
+
+A per-GUID failure is recorded as an error entry and does not abort the run.
 
 ## Module layout
 
