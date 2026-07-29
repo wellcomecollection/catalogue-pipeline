@@ -47,8 +47,10 @@ events carrying changeset ids that exist only on your machine.
      downstream cost: every changeset read scans most of a just-rebuilt table,
      and each published event triggers a transformer run per wired pipeline.
 
-   - *(Axiell only)* Wipe the reconciler store and reconcile the batch
-     changesets, rebuilding the GUID mapping baseline.
+   - *(Axiell only)* Wipe the reconciler store and the deletion facts store,
+     then reconcile the batch changesets, rebuilding the GUID mapping baseline.
+     Facts are read by changeset id, and the rebuild replaces every id, so
+     facts written before it can never be delivered.
 
    - *(FOLIO only)* Wipe and repopulate the items store.
 

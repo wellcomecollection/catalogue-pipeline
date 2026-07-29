@@ -499,6 +499,8 @@ def rebuild_adapter(
             adapter_type, use_rest_api_table=use_rest_api_table
         )
         _wipe_store(reconcile_runtime.reconciler_store, store_name="reconciler store")
+        # Facts are read by changeset id, and the rebuild replaces every id.
+        _wipe_store(reconcile_runtime.facts_store, store_name="deletion facts store")
         _run_reconcile(reconcile_runtime, adapter_type, job_id, changeset_ids)
 
     if not skip_publish_event:
