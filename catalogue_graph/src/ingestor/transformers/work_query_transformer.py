@@ -5,6 +5,7 @@ from dateutil import parser
 
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
+from models.pipeline.archive_type import get_archive_type
 from models.pipeline.location import DigitalLocation, PhysicalLocation
 
 from .work_base_transformer import WorkBaseTransformer
@@ -130,6 +131,19 @@ class QueryWorkTransformer(WorkBaseTransformer):
             return None
 
         return self.data.collection_path.label
+
+    @property
+    def archive_type(self) -> str | None:
+        label = self.collection_path_label
+        if label is None:
+            return None
+
+        result = get_archive_type(label)
+        return result.id if result is not None else None
+
+    @property
+    def is_archive_root(self) -> bool:
+        return len(self.hierarchy.ancestors) == 0 and len(self.hierarchy.children) > 0
 
     @property
     def subject_labels(self) -> list[str]:

@@ -1,4 +1,5 @@
 from collections import defaultdict
+import re
 from collections.abc import Generator
 
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
@@ -45,6 +46,13 @@ class DisplayWorkTransformer(WorkBaseTransformer):
             other_identifiers=self.data.other_identifiers,
         )
         yield from DisplayIdentifier.from_all_identifiers(all_ids)
+
+    @property
+    def short_description(self) -> str | None:
+        if self.data.description is None:
+            return None
+        match = re.search(r'[.!?]', self.data.description)
+        return self.data.description[:match.end()].strip() if match else self.data.description.strip() or None
 
     @property
     def thumbnail(self) -> DisplayDigitalLocation | None:

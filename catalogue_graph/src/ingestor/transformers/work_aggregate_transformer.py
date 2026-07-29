@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
+from models.pipeline.archive_type import get_archive_type
 from lookups.languages import from_code
 from models.pipeline.identifier import (
     Identifiable,
@@ -46,6 +47,7 @@ class AggregateWorkTransformer(WorkBaseTransformer):
         super().__init__(extracted)
         self.data = extracted.work.data
         self.state = extracted.work.state
+        self.hierarchy = extracted.hierarchy
 
     @property
     def genres(self) -> Generator[AggregatableField]:
@@ -125,3 +127,13 @@ class AggregateWorkTransformer(WorkBaseTransformer):
             # on individual works pages, but for filtering/aggregating we want to use the canonical labels.
             marc_language = from_code(language.id) or language
             yield AggregatableField(**marc_language.model_dump())
+
+    @property
+    def archive_type(self) -> AggregatableField | None:
+        if self.data.collection_path is None or self.data.collection_path.label is None:
+            return None
+
+        result = get_archive_type(self.data.collection_path.label)
+        if result is None:
+            return None
+        return AggregatableField(id=result.id, label=result.label)
