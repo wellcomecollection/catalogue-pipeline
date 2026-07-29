@@ -1,13 +1,12 @@
 """OKAPI login auth for FOLIO clients.
 
-FOLIO services sit behind OKAPI, whose tokens are short-lived, so a static token
-is not viable for a scheduled adapter. This performs the OKAPI login itself
-(POST ``/authn/login`` with username/password, read the ``x-okapi-token`` response
-header) and re-authenticates once on a 401.
+Handles login to OKAPI (POST ``/authn/login-with-expiry`` with username/password)
+and re-authenticates on 401 errors since tokens are short-lived.
 
-It is an :class:`httpx.Auth`, shared across FOLIO clients: the streaming inventory
-client (``FolioInventoryClient``) and the JSON :class:`~clients.folio_client.FolioClient`
-both compose it onto an ``httpx.Client``.
+Extracts the token from the ``folioAccessToken`` cookie (or ``x-okapi-token`` header
+as fallback) and replays it as the ``x-okapi-token`` request header.
+
+Shared across FOLIO clients via :class:`httpx.Auth`.
 """
 
 from __future__ import annotations
@@ -36,7 +35,7 @@ class OkapiAuth(httpx.Auth):
             raise ValueError(
                 "OKAPI auth requires base_url, tenant, username and password"
             )
-        self._login_url = f"{base_url.rstrip('/')}/authn/login"
+        self._login_url = f"{base_url.rstrip('/')}/authn/login-with-expiry"
         self._tenant = tenant
         self._username = username
         self._password = password
@@ -53,9 +52,16 @@ class OkapiAuth(httpx.Auth):
     def _store_token(self, response: httpx.Response) -> None:
         if response.status_code not in (200, 201):
             raise OkapiLoginError(f"OKAPI login failed ({response.status_code})")
-        token = response.headers.get("x-okapi-token")
+        # /authn/login-with-expiry on Eureka/Keycloak (both prod and the dev sandbox)
+        # delivers the token in the folioAccessToken cookie, not an x-okapi-token header.
+        # Prefer the header if a gateway ever returns one, else read the cookie.
+        token = response.headers.get("x-okapi-token") or response.cookies.get(
+            "folioAccessToken"
+        )
         if not token:
-            raise OkapiLoginError("OKAPI login returned no x-okapi-token header")
+            raise OkapiLoginError(
+                "OKAPI login returned no x-okapi-token header or folioAccessToken cookie"
+            )
         self._token = token
 
     def _apply(self, request: httpx.Request) -> None:
