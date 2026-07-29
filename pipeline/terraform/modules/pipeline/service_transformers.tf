@@ -32,13 +32,10 @@ locals {
     sierra = {
       container_image = local.transformer_sierra_image
 
-      # The largest Sierra bibs take longer than the default 30 seconds to
-      # transform, so they get redelivered and eventually dead-lettered even
-      # though nothing failed.
+      # The biggest bibs take over 30s to transform, so they get dead-lettered.
       queue_visibility_timeout_seconds = 90
 
-      # Sierra records carry every linked item, so the biggest ones are
-      # megabytes of JSON and the task saturates the default 512/1024.
+      # Sierra records carry every linked item, so they saturate the default 512/1024.
       cpu    = 2048
       memory = 4096
     }
