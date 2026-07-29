@@ -276,9 +276,9 @@ def start_reindex(ctx, src, dst, mode, input_file, calm_input_file):
         parameters = partial_reindex_parameters(max_records)
     elif mode == "specific":
         if input_file:
-            parameters = file_reader_reindex_parameters(input_file)
+            parameters = list(file_reader_reindex_parameters(input_file))
             if not parameters:
-                return sys.exit("Specified input file does not exist")
+                return sys.exit(f"Input file {input_file!r} does not exist or contains no IDs")
         else:
             specified_records_str = click.prompt(
                 "Which records do you want to reindex? (separate multiple IDs with spaces)",

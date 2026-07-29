@@ -29,7 +29,9 @@ Notes
 ## Usage
 
 ### start_reindex.py
-Trigger a reindex request to the reindexer. Supports interactive prompts and flags.
+Publishes reindex job messages to the reindexer's SNS topic, then scales up the
+reindexer ECS service so it starts processing immediately. Supports interactive
+prompts and flags.
 
 Examples
 - Interactive (prompts for source, destination, mode):
@@ -38,12 +40,48 @@ Examples
   - uv run start_reindex.py --src sierra --dst catalogue --mode complete
 - Partial reindex (you will be prompted for a record count):
   - uv run start_reindex.py --src sierra --dst catalogue --mode partial
-- Specific records from a file (one ID per line):
-  - uv run start_reindex.py --src calm --dst catalogue --input-file ./ids.txt
-- Run all sources (and EventBridge targets) completely:
-  - uv run start_reindex.py --src all --dst catalogue --mode complete
+- Specific records from a file (one ID per line, blank lines ignored):
+  - uv run start_reindex.py --src sierra --dst catalogue --mode specific --input-file ./ids.txt
+- Specific records typed in interactively:
+  - uv run start_reindex.py --src sierra --dst catalogue --mode specific
+- Reindex every source (and EventBridge targets) completely. calm is never
+  fully scanned (see below), so --calm-input-file is required whenever the
+  reindex touches it:
+  - uv run start_reindex.py --src all --dst catalogue --mode complete --calm-input-file ./third_party_archives.txt
+- Same, but skip Miro (see the Miro note below):
+  - uv run start_reindex.py --src notmiro --dst catalogue --mode complete --calm-input-file ./third_party_archives.txt
 
 Notes
-- Valid sources include: all, notmiro, ebsco, miro, sierra, mets, calm, tei.
-- Modes: complete, partial, specific. For specific you can supply IDs interactively or via --input-file.
+- Valid sources: all, notmiro, ebsco, miro, sierra, mets, calm, tei.
+  - `all` reindexes every source in `SOURCES` plus any EventBridge targets
+    (currently just `ebsco`).
+  - `notmiro` is the same as `all` but skips Miro. Miro is normally run
+    separately, last, once everything else has gone through the
+    matcher/merger -- running it at the same time as other sources risks
+    creating spurious Image records (the script warns and asks for
+    confirmation if you pick `all`).
+- Modes: complete, partial, specific.
+  - complete: reindexes every record for the source (DynamoDB segment scan).
+  - partial: reindexes a sample; you'll be prompted for how many records.
+  - specific: reindexes an explicit list of IDs, either typed in
+    interactively or supplied via `--input-file`.
+- calm never runs a full DynamoDB scan, regardless of mode or how it's
+  invoked (directly with `--src calm`, or via the `--src all` / `--src
+  notmiro` fan-out). Instead, `--mode complete` for calm always reads IDs
+  from `--calm-input-file` and sends them as a specific-records reindex.
+  The script fails fast (before touching any source) if `--calm-input-file`
+  is missing, doesn't exist, or contains no valid IDs.
+- `--input-file` (generic) vs `--calm-input-file` (calm-only): use
+  `--input-file` for an ordinary `--mode specific` reindex of any source;
+  use `--calm-input-file` specifically to satisfy calm's mandatory
+  file-based reindex during a `--mode complete` run.
+- If nothing is currently subscribed to the destination's reindexer output
+  topic, the script warns and asks for confirmation -- it's easy to publish
+  a reindex into the void otherwise.
 - The script assumes the AWS role arn:aws:iam::760097843905:role/platform-developer.
+
+`third_party_archives.txt` is the calm ID list used with `--calm-input-file`
+above.
+Some third-party archive records are not migrated from Calm to Axiell but still need to be available in the public catalogue. 
+A list of these records was provided by Collection Information in July 2026, to be ingested into the pipeline alongside other data sources 
+See https://github.com/wellcomecollection/platform/issues/6448
