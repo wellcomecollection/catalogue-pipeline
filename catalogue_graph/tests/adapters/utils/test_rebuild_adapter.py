@@ -24,6 +24,7 @@ from adapters.utils.window_store import WindowStore
 from adapters.utils.window_summary import WindowSummary
 from tests.adapters.conftest import (
     adapter_records_to_table,
+    deletion_facts_records_to_table,
 )
 
 
@@ -256,7 +257,7 @@ def test_rebuild_adapter_orchestration_axiell(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """End-to-end resume-path run: the store is wiped and rebuilt from the
+    """End-to-end resume-path run: the stores are wiped and rebuilt from the
     snapshot only, reconcile runs over the load changesets, and every load
     changeset is published."""
     adapter_store = AdapterStore(temporary_table, "test_namespace")
@@ -282,12 +283,23 @@ def test_rebuild_adapter_orchestration_axiell(
             tags={"published_at": now.isoformat()},
         )
     )
+    facts_store = DeletionFactsStore(deletion_facts_temporary_table, "test_namespace")
+    # A fact tagged with a changeset id the rebuild is about to replace.
+    facts_store.append_facts(
+        deletion_facts_records_to_table(
+            [
+                {
+                    "record_id": "stale",
+                    "guid": "guid-old-1",
+                    "changeset": "pre-rebuild-changeset",
+                }
+            ]
+        )
+    )
     reconcile_runtime = ReconcileRuntime(
         adapter_store=adapter_store,
         reconciler_store=ReconcilerStore(reconciler_temporary_table, "test_namespace"),
-        facts_store=DeletionFactsStore(
-            deletion_facts_temporary_table, "test_namespace"
-        ),
+        facts_store=facts_store,
         adapter_name="axiell",
         namespace="test_namespace",
     )
@@ -341,6 +353,9 @@ def test_rebuild_adapter_orchestration_axiell(
         for row in adapter_store.get_all_records().to_pylist()
     )
     assert rows == [("kept", "kept content v2"), ("new", "new content")]
+
+    # The pre-rebuild fact is undeliverable once its changeset is gone.
+    assert facts_store.get_all_records().num_rows == 0
 
     assert len(reconciled) == 1
     assert published == [[changeset_id] for changeset_id in reconciled[0]]
