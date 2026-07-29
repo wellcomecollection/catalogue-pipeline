@@ -15,20 +15,25 @@ The transformer pipeline consists of:
 ### Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────────┐    ┌─────────────────┐    ┌───────────────┐
-│  Iceberg Table  │───▶│  MarcXmlTransformer  │───▶│   SourceWork    │───▶│ Elasticsearch │
-│  (Adapter Store)│    │  (Axiell or EBSCO)   │    │   Documents     │    │    Index      │
-└─────────────────┘    └──────────────────────┘    └─────────────────┘    └───────────────┘
+┌─────────────────┐    ┌────────────────────────┐    ┌─────────────────┐    ┌───────────────┐
+│  Iceberg Table  │───▶│  MarcXmlTransformer    │───▶│   SourceWork    │───▶│ Elasticsearch │
+│  (Adapter Store)│    │  (Axiell/EBSCO/FOLIO)  │    │   Documents     │    │    Index      │
+└─────────────────┘    └────────────────────────┘    └─────────────────┘    └───────────────┘
 ```
 
 ### Transformer Types
 
-- **`AxiellTransformer`**: Transforms Axiell/Mimsy records into `InvisibleSourceWork` documents
+- **`AxiellTransformer`**: Transforms Axiell/Mimsy records into `InvisibleSourceWork` documents, and delivers
+  guid-change deletions recorded by the adapter-side reconcile step. See
+  [Axiell deletion reconciliation](#axiell-deletion-reconciliation) for more information
 - **`EbscoTransformer`**: Transforms EBSCO serial records into `VisibleSourceWork` documents
-- **`AxiellReconciler`**: A special Axiell transformer emitting `DeletedSourceWork` documents.
-  See [Axiell reconciler](#axiell-reconciler) section for more information
+- **`FolioTransformer`**: Transforms FOLIO instance records into `VisibleSourceWork` documents, joining a second
+  Iceberg store to attach items. See [FOLIO item enrichment](#folio-item-enrichment) section for more information
 
-Both inherit from `MarcXmlTransformer`, which handles common MARC parsing and deleted record handling.
+All inherit from `MarcXmlTransformer`, which handles common MARC parsing and deleted record handling.
+
+Note: the Axiell to FOLIO *sync* (which writes Axiell records out to FOLIO Inventory rather than into Elasticsearch)
+is not a transformer; it lives in [`adapters/steps/axiell_folio_sync`](../steps/axiell_folio_sync/README.md).
 
 ## Running the Transformer
 
@@ -121,8 +126,8 @@ AWS_PROFILE=platform-developer uv run python -m adapters.steps.transformer \
 
 | Argument                 | Required | Description                                                                                                                               |
 |--------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| `--transformer-type`     | Yes      | Which transformer to run: `axiell`, `ebsco`, or `axiell_reconciler`                                                                       |
-| `--changeset-id`         | No       | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records. Required for `axiell_reconciler`. |
+| `--transformer-type`     | Yes      | Which transformer to run: `axiell`, `ebsco`, or `folio`                                                                                   |
+| `--changeset-id`         | No       | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records.                                   |
 | `--job-id`               | No       | Job identifier for manifest tracking. Defaults to `dev`.                                                                                  |
 | `--use-rest-api-table`   | No       | Use the S3 Tables catalog instead of local storage.                                                                                       |
 | `--es-mode`              | No       | Elasticsearch target: `local` (default) or `public`.                                                                                      |
@@ -157,38 +162,69 @@ The transformer produces:
 - Elasticsearch bulk indexing errors are tracked per-document
 - Up to 1,000 errors are recorded in each manifest to cap file sizes
 
-## Axiell reconciler
+## Axiell deletion reconciliation
 
-The reconciler is a special Axiell transformer which only transforms deleted works. It exists to mitigate the fact that
-primary Axiell identifiers (collectIds) are reusable in the source system. For example, if some identifier `collectId1`
-is assigned to some work `A` and the work gets deleted, `collectId1` can get reassigned to another work `B`. This means
-we can't reliably use collectIds to determine if a given work has been deleted.
+Primary Axiell identifiers (collectIds) are reusable in the source system: if `collectId1` is assigned to some
+work `A` and the record gets deleted, `collectId1` can be reassigned to a new work `B`. This means collectIds
+alone can't tell us when a work has been deleted, so each work also carries a non-reusable GUID (MARC 001).
 
-The solution involves keeping an Iceberg table (called the reconciler store) mapping collectIds to secondary
-non-reusable GUIDs (stored in the content of each work). The reconciler updates the table after each adapter run,
-detects all cases where a given collectId is reassigned from an old GUID to a new one, and emits the old GUID
-as a deleted work.
+Reconciliation is split between the adapter and the transformer:
+
+- **Detection** happens once, in the adapter state machine (`adapters.steps.oai_pmh.reconcile`), between the
+  loader and the completed event. The step diffs each changeset's collectId -> GUID mappings against the
+  reconciler store; when a collectId has moved to a new GUID it appends a row to the append-only deletion
+  facts table (tagged with the triggering changeset id) before committing the updated mappings.
+- **Delivery** is stateless and happens in every pipeline's Axiell transformer: `AxiellStoreSource` streams
+  deletion facts for the run's changeset ids after the adapter rows, and each fact is emitted as a
+  `DeletedSourceWork` for its superseded GUID. A fact whose GUID is an active mapping again (a revert, or a
+  redrive of an old changeset) is skipped, so a stale fact can never tombstone a live work.
+
+Because detection writes durable facts rather than emitting deletions directly, any number of pipeline stacks
+can deliver the same deletion independently. Consumers read through
+`adapters.utils.axiell_changeset_reader.AxiellChangesetReader`, which owns the store wiring and the liveness
+check. The transformer consumes both streams; the Axiell to FOLIO sync reads records through the reader today
+and adopts `iter_deletions()` with platform#6440.
+
+If indexing a tombstone fails, the error lands in the transformer report and fires the per-pipeline
+transformer-failures alarm, but the execution still succeeds. Facts are only read by runs for their original
+changeset ids, so recovery is a manual redrive: re-run the transformer for that pipeline with the failed run's
+changeset ids (idempotent, safe to repeat).
 
 ```mermaid
 ---
-title: reconciler
+title: deletion reconciliation
 ---
 flowchart TD
-    adapter_store[(Adapter Store<br/>collectId: content)] -.-> read
-    Start((Start)) --> read["read changeset from adapter store"]
-    read --> extract["extract all collectId -> guid pairs"]
-    extract --> check["get_rows_to_update"]
-    reconciler_store[(Reconciler Store<br/>collectId: guid)]
-    check -.- reconciler_store
-    check --> choose{Updates? Inserts?}
-    choose -- inserts only --> write["write to reconciler store"]
-    write -.-> reconciler_store
-    write --> stop(((Stop)))
-    choose -- no changes --> stop
-    choose -- updates --> fork[fork]
-    fork --> delete["write DELETED record to transformer store"]
-    fork --> write
-    delete ==> further_downstream
-    transformer_store[(Transformer Store<br/>guid: Work)]
-    delete -.-> transformer_store
+    subgraph adapter["Adapter reconcile step, once per loader run"]
+        loader["loader writes changeset"] --> reconcile["reconcile step:<br/>diff collectId -> guid"]
+        reconciler_store[(Reconciler Store<br/>collectId: guid)]
+        reconcile -.-> reconciler_store
+        reconcile --> facts["append superseded guids"]
+        facts_table[(Deletion Facts<br/>append-only)]
+        facts -.-> facts_table
+        facts --> publish["publish adapter.completed"]
+    end
+    subgraph pipeline["Each pipeline, per completed event"]
+        transform["Axiell transformer:<br/>adapter rows + facts"] --> works["works + DeletedSourceWork"]
+    end
+    publish --> transform
+    facts_table -.-> transform
 ```
+
+## FOLIO item enrichment
+
+The FOLIO transformer differs from the others in that it reads *two* Iceberg tables. The FOLIO OAI-PMH bib record
+carries no item UUIDs, so a separate enrichment step (`adapters.steps.oai_pmh.folio_enrich`, running between the
+loader and the publish event) maintains an items store keyed by instance id. At transform time `FolioStoreSource`
+joins that store onto each bib row (in bounded batches, attached as `enrichment_content`), and `FolioWorkBuilder`
+emits items carrying a `folio-item` source identifier with the inventory UUID.
+
+Transformer-side behaviour to be aware of:
+
+- The items table must exist: a missing table fails the transform (`NoSuchTableError`) rather than silently emitting
+  works without items. On a fresh environment, run one enrichment pass before transforming.
+- An instance that has not been enriched emits no items; the transformer never guesses item identity from MARC 952.
+- Transformation never calls FOLIO. A full reindex joins whatever is already in the items store.
+
+See [Item enrichment](../extractors/oai_pmh/folio/README.md#item-enrichment) in the FOLIO adapter README for the full
+design, including how the items store is populated and kept current.

@@ -28,7 +28,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   ): FieldMergeResult[FieldData] = {
     val items =
       mergeIntoTeiTarget(target, sources)
-        .orElse(mergeIntoCalmTarget(target, sources))
+        .orElse(mergeIntoCalmOrAxiellTarget(target, sources))
         .orElse(mergeMetsIntoSierraTarget(target, sources))
         .orElse(
           mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
@@ -39,7 +39,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val mergedSources = (
       List(
         mergeIntoTeiTarget,
-        mergeIntoCalmTarget,
+        mergeIntoCalmOrAxiellTarget,
         mergeMetsIntoSierraTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget
       ).flatMap {
@@ -127,19 +127,25 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       Nil
     }
 
-  /** When records are harvested from Calm, both a bib and an item record are
-    * created in Sierra. The Sierra item will have more interesting information
-    * about access status, hold count, etc. The Calm items are just stubs.
+  /** When records are harvested from Calm/Axiell, both a bib and an item record
+    * are created in Sierra. The Sierra item will have more interesting
+    * information about access status, hold count, etc. The Calm/Axiell items
+    * are just stubs.
     *
-    * See CalmItems.scala -- the Calm item is only:
+    * See CalmItems.scala and axiell_work_builder.py -- the Calm/Axiell item is
+    * essentially a single item with a ClosedStores PhysicalLocation (and
+    * optional accessConditions), e.g.
     *
-    * Item { locations: [ Location { locationType = ClosedStores } ] }
+    * Item { locations: [ PhysicalLocation { locationType = ClosedStores,
+    * accessConditions = [...] } ] }
     *
-    * For this reason, we keep all the items *except* the Calm item. This means
-    * we'll also pick up any items linked to the Sierra work from METS or Miro.
+    * For this reason, we keep all the items *except* the Calm/Axiell item. This
+    * means we'll also pick up any items linked to the Sierra work from METS or
+    * Miro.
     */
-  private val mergeIntoCalmTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
+  private val mergeIntoCalmOrAxiellTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate =
+      singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or
         singleDigitalItemMiroWork or

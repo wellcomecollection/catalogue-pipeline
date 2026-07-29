@@ -37,14 +37,14 @@ locals {
   )
 }
 
-# This is the new version of the id_minter, that uses the V2 RDS cluster
 module "id_minter_lambda" {
-  source = "./id_minter"
+  source = "../pipeline_services/id_minter"
 
   pipeline_date   = var.pipeline_date
   vpc_config      = local.id_minter_v2_vpc_config
   env_vars        = local.id_minter_v2_env_vars
   secret_env_vars = local.id_minter_v2_secret_env_vars
+  rds_secret_name = local.rds_v2_master_secret_name
   alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 }
 

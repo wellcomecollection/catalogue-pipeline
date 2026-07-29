@@ -12,7 +12,7 @@ import weco.pipeline.merger.models.FieldMergeResult
 
 /** Identifiers are merged as follows:
   *
-  *   - All source identifiers are merged into Calm works
+  *   - All source identifiers are merged into Calm/Axiell works
   *   - Miro identifiers are merged into single or zero item Sierra works
   *   - Sierra works with linked digitised Sierra works have the first of these
   *     linked IDs merged into them
@@ -27,7 +27,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   // from a source work's otherIdentifiers into a target work.
   //
   // - wellcome-digcode is present to persist digcode identifiers from
-  //   Encore records onto Calm target works if they are merged, because
+  //   Encore records onto Calm/Axiell target works if they are merged, because
   //   digcode identifiers are used as a tagging/classification system.
   private val otherIdentifiersTypeAllowList =
     Set(
@@ -44,7 +44,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     val ids = (
       mergeDigitalIntoPhysicalSierraTarget(target, sources) |+|
         mergeIntoTeiTarget(target, sources)
-          .orElse(mergeIntoCalmTarget(target, sources))
+          .orElse(mergeIntoCalmOrAxiellTarget(target, sources))
           .orElse(
             mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
           )
@@ -57,7 +57,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       List(
         mergeIntoEbscoTarget,
         mergeIntoTeiTarget,
-        mergeIntoCalmTarget,
+        mergeIntoCalmOrAxiellTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget,
         mergeMiroIntoDigmiroTarget
       ).flatMap {
@@ -107,11 +107,12 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   private val mergeIntoTeiTarget = new OtherIdentifiersMergeRule {
     val isDefinedForTarget: WorkPredicate = teiWork
     val isDefinedForSource: WorkPredicate =
-      sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork
+      sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
   }
 
-  private val mergeIntoCalmTarget = new OtherIdentifiersMergeRule {
-    val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
+  private val mergeIntoCalmOrAxiellTarget = new OtherIdentifiersMergeRule {
+    val isDefinedForTarget: WorkPredicate =
+      singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or sierraWork or singleDigitalItemMiroWork
   }

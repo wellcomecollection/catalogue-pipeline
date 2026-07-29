@@ -23,7 +23,8 @@ LEVEL_TO_WORK_TYPE_MAPPING: dict[str, WorkType] = {
     "sub-series": "Series",
     "item": "Standard",
     "item part": "Standard",  # Equivalent of CALM 'piece'
-    # TODO: These appeared after the latest migration and are temporary. Remove before release.
+    # TODO: These appeared after the latest migration and are temporary. Remove before release and adjust the
+    # corresponding BDD test (tests/adapters/transformers/axiell/bdd/features/work_type.feature).
     "sub-fonds": "Section",
     "fonds": "Collection",
     "file": "Standard",

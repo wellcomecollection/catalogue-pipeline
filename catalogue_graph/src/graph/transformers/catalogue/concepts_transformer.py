@@ -47,7 +47,7 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
     ) -> Generator[ConceptHasSourceConcept]:
         if self.id_label_checker is None:
             transformers = []
-            for ontology in ("mesh", "loc"):
+            for ontology in ("mesh", "loc", "weco"):
                 transformers += get_transformers_from_ontology(ontology)
 
             self.id_label_checker = IdLabelChecker(transformers, self.event)
@@ -81,5 +81,16 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
             yield ConceptHasSourceConcept(
                 from_id=raw_concept.wellcome_id,
                 to_id=str(raw_concept.source_concept_id),
+                attributes=attributes,
+            )
+
+        # Generate edge to the Wellcome name authority
+        if (weco_id := raw_concept.weco_source_concept_id) is not None:
+            attributes = ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="identifier"
+            )
+            yield ConceptHasSourceConcept(
+                from_id=raw_concept.wellcome_id,
+                to_id=weco_id,
                 attributes=attributes,
             )

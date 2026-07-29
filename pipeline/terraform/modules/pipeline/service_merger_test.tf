@@ -2,7 +2,7 @@
 # .buildkite/pipeline.yml -> merger_test
 
 module "merger_test" {
-  source       = "./merger"
+  source       = "../pipeline_services/merger"
   service_name = "merger_test"
 
   pipeline_date = var.pipeline_date

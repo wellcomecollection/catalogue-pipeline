@@ -1,8 +1,12 @@
 locals {
-  # When item enrichment is enabled, the loader routes through a "Run enrichment"
-  # state before publishing, so both the bib and item changesets exist by the time
-  # "folio.adapter.completed" fires. Otherwise the loader goes straight to publish.
-  loader_next = var.enable_item_enrichment ? "Should enrich?" : "Should publish event?"
+  # When reconciliation is enabled, the loader routes through a "Run reconcile"
+  # state so deletion facts are durably recorded before the completed event
+  # fires; when item enrichment is enabled, it routes through "Run enrichment"
+  # so both the bib and item changesets exist by then. Otherwise the loader
+  # goes straight to publish. No adapter currently enables both, but the
+  # chain composes: reconcile runs first, then enrichment.
+  loader_next    = var.enable_reconciliation ? "Should reconcile?" : local.reconcile_next
+  reconcile_next = var.enable_item_enrichment ? "Should enrich?" : "Should publish event?"
 
   # With published tracking, both the publish and the quiet no-publish paths end
   # in "Mark published", which stamps the covered windows so the trigger resumes
@@ -34,6 +38,56 @@ locals {
       }
     ]...)
   )
+
+  reconcile_states = merge([
+    for _ in range(var.enable_reconciliation ? 1 : 0) : {
+      "Should reconcile?" = {
+        Type = "Choice"
+        Choices = [
+          {
+            Condition = "{% $exists($states.input.changeset_ids[0]) %}"
+            Next      = "Run reconcile"
+          }
+        ]
+        Default = local.reconcile_next
+      }
+      "Run reconcile" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke"
+        Arguments = {
+          FunctionName = one(module.reconcile_lambda[*].lambda.arn)
+          # The loader response carries no adapter identity, so inject it.
+          Payload = "{% $merge([$states.input, {'adapter_type': '${var.namespace}'}]) %}"
+        }
+        # The loader response continues downstream unchanged; the reconcile
+        # response (fact and mapping counts) stays visible in the execution
+        # history.
+        Output = "{% $states.input %}"
+        Next   = local.reconcile_next
+        Retry = [
+          {
+            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
+            IntervalSeconds = 2
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          },
+          {
+            # Iceberg optimistic-concurrency commit conflicts; re-runs dedupe
+            # on deterministic fact ids, so retrying is safe.
+            ErrorEquals     = ["States.ALL"]
+            IntervalSeconds = 5
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          }
+        ]
+        # No Catch: a failed reconcile must fail the execution before
+        # "Publish event" and "Mark published". A guid change never reappears
+        # in a later changeset, so publishing without its facts would lose
+        # the deletion; leaving the windows unstamped makes the next trigger
+        # re-cover them and retry.
+      }
+    }
+  ]...)
 
   enrichment_states = merge([
     for _ in range(var.enable_item_enrichment ? 1 : 0) : {
@@ -84,6 +138,85 @@ locals {
           }
         }
       }, local.covered_keys_passthrough_output)
+    }
+  ]...)
+
+  # The oai_pmh loader has two modes. A scheduled run carries only
+  # {adapter_type} and falls through to the trigger, which produces a window
+  # event. An operator starting an execution with {adapter_type, ids} instead
+  # routes to id mode, which fetches those ids directly. Both converge on the
+  # same publish path, so a recovery reaches the transformer unaided.
+  id_mode_states = merge([
+    for _ in range(local.id_mode_enabled ? 1 : 0) : {
+      "Which mode?" = {
+        Type = "Choice"
+        Choices = [
+          {
+            # Tests for the field, not its first element. An explicitly supplied
+            # but empty list still routes to id mode, where the event validator
+            # rejects it, rather than falling through to a window harvest the
+            # caller never asked for.
+            Condition = "{% $exists($states.input.ids) %}"
+            Next      = "Prepare id run"
+          }
+        ]
+        Default = "Run trigger"
+      }
+      "Prepare id run" = {
+        Type = "Pass"
+        # A window run takes its job id from the trigger. An id run has no
+        # trigger, so mint one from the execution start time in the same
+        # YYYYMMDDTHHMM shape as trigger.generate_job_id, prefixed so recovery
+        # runs stand out in the transformer logs and cannot collide with a
+        # harvest job id.
+        Output = "{% $merge([$states.input, {'job_id': 'idload-' & $substring($replace($replace($states.context.Execution.StartTime, '-', ''), ':', ''), 0, 13)}]) %}"
+        Next   = "Run id loader"
+      }
+      # Same task definition and module as "Run loader"; a separate state purely
+      # so the retry policy can differ. Do not merge the two. A window-mode retry
+      # is cheap and idempotent because already-successful windows are skipped,
+      # but id mode keeps no progress state, so any retry re-fetches every id
+      # from scratch with a politeness delay on each. At the per-run ceiling that
+      # is hours of duplicated load on a source already known to be flaky, so
+      # there are no automatic retries at all: failed ids come back in the
+      # report for a deliberate, smaller second run.
+      "Run id loader" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        Next     = local.loader_next
+        Retry = [
+          {
+            ErrorEquals     = ["States.ALL"]
+            IntervalSeconds = 30
+            MaxAttempts     = 0
+            BackoffRate     = 2.0
+          }
+        ]
+        Arguments = {
+          Cluster        = var.ecs_cluster_arn
+          TaskDefinition = module.loader_ecs_task.task_definition_arn
+          LaunchType     = "FARGATE"
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              AssignPublicIp = "DISABLED"
+              Subnets        = var.subnets
+              SecurityGroups = var.security_group_ids
+            }
+          }
+          Overrides = {
+            ContainerOverrides = [
+              {
+                Name = "${var.namespace}-adapter-loader"
+                Command = [
+                  "-m", "adapters.steps.${local.steps_namespace}.loader",
+                  "--event", "{% $string($states.input) %}",
+                  "--task-token", "{% $states.context.Task.Token %}"
+                ]
+              }
+            ]
+          }
+        }
+      }
     }
   ]...)
 
@@ -217,8 +350,14 @@ locals {
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Adapter pipeline (trigger, loader, publish event)"
-    StartAt       = "Run trigger"
-    States        = merge(local.base_states, local.enrichment_states, local.mark_published_states)
+    StartAt       = local.id_mode_enabled ? "Which mode?" : "Run trigger"
+    States = merge(
+      local.base_states,
+      local.id_mode_states,
+      local.reconcile_states,
+      local.enrichment_states,
+      local.mark_published_states,
+    )
   })
 }
 

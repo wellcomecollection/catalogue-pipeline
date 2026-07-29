@@ -31,7 +31,7 @@ ENV_TAG="env.$PIPELINE_DATE"
 # doesn't.
 ECR_RESPONSE=$(
   aws ecr batch-get-image \
-    --repository-name "uk.ac.wellcome/batcher" \
+    --repository-name "uk.ac.wellcome/matcher" \
     --image-ids imageTag="$ENV_TAG" --output json
 )
 

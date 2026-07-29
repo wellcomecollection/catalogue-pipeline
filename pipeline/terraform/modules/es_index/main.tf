@@ -17,7 +17,7 @@ locals {
 
 resource "elasticstack_elasticsearch_index" "the_index" {
   name                 = local.full_name
-  mappings             = file(local.mappings_file)
+  mappings             = jsonencode(jsondecode(file(local.mappings_file))) # Normalise JSON
   analysis_analyzer    = local.analysis.analyzer
   analysis_normalizer  = local.analysis.normalizer
   analysis_filter      = local.analysis.filter
@@ -26,4 +26,9 @@ resource "elasticstack_elasticsearch_index" "the_index" {
   default_pipeline     = var.default_pipeline
 
   deletion_protection = !var.allow_delete
+
+  # Computed, never set here, but the provider marks it unknown on every plan.
+  lifecycle {
+    ignore_changes = [settings_raw]
+  }
 }

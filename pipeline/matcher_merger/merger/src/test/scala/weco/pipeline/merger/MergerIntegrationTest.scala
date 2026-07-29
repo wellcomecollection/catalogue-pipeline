@@ -113,6 +113,29 @@ class MergerIntegrationTest
     }
   }
 
+  Scenario("A Miro image is re-notified when its Sierra work arrives later") {
+    withContext {
+      implicit context =>
+        Given("a Miro work and a Sierra work that matches it")
+        val miro = miroIdentifiedWork()
+        val sierra = sierraPhysicalIdentifiedWork()
+          .mergeCandidates(List(createMiroSierraMergeCandidateFor(miro)))
+
+        When("the Miro work is processed first, then the Sierra work")
+        processWork(miro)
+        processWork(sierra)
+
+        Then("the Miro work is redirected to the Sierra work")
+        context.getMerged(miro) should beRedirectedTo(sierra)
+
+        And("the image is notified on both passes")
+        val imageId = miro.singleImage.id.canonicalId.underlying
+        context.imageDownstream.msgSender.messages
+          .map(_.body)
+          .count(_ == imageId) shouldBe 2
+    }
+  }
+
   Scenario("One Sierra and one Ebsco work are matched") {
     withContext {
       implicit context =>
@@ -377,6 +400,91 @@ class MergerIntegrationTest
 
         And("the Calm work contains the METS image")
         context.getMerged(calm).data.imageData shouldBe empty
+    }
+  }
+
+  Scenario("An Axiell work and a Sierra work are matched") {
+    withContext {
+      implicit context =>
+        Given("a Sierra work and an Axiell work")
+        val axiell = axiellIdentifiedWork()
+        val sierra = sierraPhysicalIdentifiedWork()
+          .mergeCandidates(List(createAxiellMergeCandidateFor(axiell)))
+
+        When("the works are processed by the matcher/merger")
+        processWorks(sierra, axiell)
+
+        Then("the Sierra work is redirected to the Axiell work")
+        context.getMerged(sierra) should beRedirectedTo(axiell)
+
+        And("the Axiell work contains the Sierra item ID")
+        val axiellItem = context.getMerged(axiell).data.items.head
+        axiellItem.id shouldBe sierra.data.items.head.id
+    }
+  }
+
+  Scenario("An Axiell work, a Sierra work, and a Miro work are matched") {
+    withContext {
+      implicit context =>
+        Given("An Axiell work, a Sierra work and a Miro work")
+        val axiell = axiellIdentifiedWork()
+        val miro = miroIdentifiedWork()
+        val sierra = sierraPhysicalIdentifiedWork()
+          .mergeCandidates(
+            List(
+              createMiroSierraMergeCandidateFor(miro),
+              createAxiellMergeCandidateFor(axiell)
+            )
+          )
+
+        When("the works are processed by the matcher/merger")
+        processWorks(sierra, axiell, miro)
+
+        Then("the Sierra work is redirected to the Axiell work")
+        context.getMerged(sierra) should beRedirectedTo(axiell)
+
+        And("the Miro work is redirected to the Axiell work")
+        context.getMerged(miro) should beRedirectedTo(axiell)
+
+        And("the Axiell work contains the Miro location")
+        context.getMerged(axiell).data.items.flatMap(_.locations) should
+          contain(miro.data.items.head.locations.head)
+        And("the Axiell work contains the Miro image")
+        context.getMerged(axiell).data.imageData should contain(
+          miro.singleImage
+        )
+    }
+  }
+
+  Scenario(
+    "An Axiell work, a Sierra picture work, and a METS work are matched"
+  ) {
+    withContext {
+      implicit context =>
+        Given("An Axiell work, a Sierra picture work and a METS work")
+        val axiell = axiellIdentifiedWork()
+        val sierraPicture = sierraIdentifiedWork()
+          .items(List(createIdentifiedPhysicalItem))
+          .format(Format.Pictures)
+          .mergeCandidates(List(createAxiellMergeCandidateFor(axiell)))
+        val mets = metsIdentifiedWork()
+          .mergeCandidates(List(createMetsMergeCandidateFor(sierraPicture)))
+
+        When("the works are processed by the matcher/merger")
+        processWorks(sierraPicture, axiell, mets)
+
+        Then("the Sierra work is redirected to the Axiell work")
+        context.getMerged(sierraPicture) should beRedirectedTo(axiell)
+
+        And("the METS work is redirected to the Axiell work")
+        context.getMerged(mets) should beRedirectedTo(axiell)
+
+        And("the Axiell work contains the METS location")
+        context.getMerged(axiell).data.items.flatMap(_.locations) should
+          contain(mets.data.items.head.locations.head)
+
+        And("the Axiell work contains no images")
+        context.getMerged(axiell).data.imageData shouldBe empty
     }
   }
 
@@ -715,6 +823,92 @@ class MergerIntegrationTest
     }
   }
 
+  Scenario("A TEI work, an Axiell work, a Sierra work and a METS work") {
+    withContext {
+      implicit context =>
+        Given("four works")
+        val axiellWork =
+          axiellIdentifiedWork()
+            .otherIdentifiers(
+              List(
+                createSourceIdentifierWith(
+                  identifierType = IdentifierType.CalmRefNo
+                ),
+                createSourceIdentifierWith(
+                  identifierType = IdentifierType.CalmAltRefNo
+                )
+              )
+            )
+
+        val sierraWork =
+          sierraIdentifiedWork()
+            .otherIdentifiers(
+              List(
+                createSourceIdentifierWith(
+                  identifierType = IdentifierType.SierraIdentifier
+                ),
+                createSourceIdentifierWith(
+                  identifierType = IdentifierType.WellcomeDigcode
+                )
+              )
+            )
+            .items(List(createIdentifiedPhysicalItem))
+            .mergeCandidates(List(createAxiellMergeCandidateFor(axiellWork)))
+
+        val teiWork = teiIdentifiedWork()
+          .mergeCandidates(List(createTeiBnumberMergeCandidateFor(sierraWork)))
+
+        val metsWork =
+          metsIdentifiedWork()
+            .thumbnail(createDigitalLocation)
+            .items(List(createDigitalItem))
+            .mergeCandidates(List(createMetsMergeCandidateFor(sierraWork)))
+            .invisible(invisibilityReasons =
+              List(InvisibilityReason.MetsWorksAreNotVisible)
+            )
+
+        When("the works are processed by the matcher/merger")
+        processWorks(teiWork, sierraWork, metsWork, axiellWork)
+
+        Then("Everything should be redirected to the TEI work")
+        context.getMerged(sierraWork) should beRedirectedTo(teiWork)
+        context.getMerged(metsWork) should beRedirectedTo(teiWork)
+        context.getMerged(axiellWork) should beRedirectedTo(teiWork)
+
+        And("the TEI work gets all the Axiell and Sierra identifiers")
+        val teiMergedIdentifiers =
+          context
+            .getMerged(teiWork)
+            .data
+            .otherIdentifiers
+
+        teiMergedIdentifiers should contain allElementsOf axiellWork.data.otherIdentifiers :+ axiellWork.state.sourceIdentifier
+        teiMergedIdentifiers should contain allElementsOf sierraWork.data.otherIdentifiers :+ sierraWork.state.sourceIdentifier
+
+        And("it has no METS identifier")
+        teiMergedIdentifiers.filter(
+          _.identifierType == IdentifierType.METS
+        ) shouldBe empty
+
+        And("it only has two items (one physical, one digital)")
+        val teiItems =
+          context
+            .getMerged(teiWork)
+            .data
+            .items
+
+        teiItems should contain allElementsOf sierraWork.data.items
+        teiItems should contain allElementsOf metsWork.data.items
+        teiItems should contain noElementsOf axiellWork.data.items
+
+        And("it gets the METS thumbnail")
+        context
+          .getMerged(teiWork)
+          .data
+          .thumbnail shouldBe metsWork.data.thumbnail
+    }
+  }
+
   Scenario("Miro, Calm and Sierra but the Miro is deleted") {
     withContext {
       implicit context =>
@@ -818,9 +1012,7 @@ class MergerIntegrationTest
           )
         )
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent before the Sierra record is created") {
+    Scenario("The METS work is sent before the Sierra record is created") {
       withContext {
         implicit context =>
           processWork(metsWork)
@@ -833,9 +1025,7 @@ class MergerIntegrationTest
       }
     }
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent while the e-bib is suppressed") {
+    Scenario("The METS work is sent while the e-bib is suppressed") {
       withContext {
         implicit context =>
           processWork(sierraSuppressedEbib)
@@ -848,9 +1038,7 @@ class MergerIntegrationTest
       }
     }
 
-    // TODO: These tests are ignored because the stub matcher does not
-    // update the matcher graph, so we cannot test the order of work processing.
-    ignore("The METS work is sent after the e-bib is unsuppressed") {
+    Scenario("The METS work is sent after the e-bib is unsuppressed") {
       withContext {
         implicit context =>
           processWork(sierraSuppressedEbib)

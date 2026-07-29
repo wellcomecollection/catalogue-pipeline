@@ -8,7 +8,6 @@ import argparse
 import json
 import typing
 from collections.abc import Callable
-from pathlib import PurePosixPath
 from typing import Any, Literal, Protocol, cast
 
 import structlog
@@ -21,27 +20,22 @@ from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.extractors.oai_pmh.folio import config as folio_config
 from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_items_store
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
-from adapters.transformers.axiell_reconciler import AxiellReconciler
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.folio_transformer import FolioTransformer
-from adapters.transformers.manifests import (
-    TransformerManifest,
-    TransformerManifestWriter,
-)
 from adapters.transformers.reporting import TransformerReport
 from adapters.transformers.source_work_transformer import (
     SourceWorkTransformer,
 )
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.reconciler_store import ReconcilerStore
+from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
 
 
-TransformerType = Literal["axiell", "ebsco", "folio", "axiell_reconciler"]
+TransformerType = Literal["axiell", "ebsco", "folio"]
 
 
 class TransformerEvent(BaseModel):
@@ -60,32 +54,28 @@ class AdapterConfig(Protocol):
     S3_PREFIX: str
 
 
+class TransformerResult(TransformerEvent):
+    success_count: int
+    failure_count: int
+    report_s3_uri: str
+
+
 ICEBERG_NAMESPACE_BY_TYPE: dict[TransformerType, str] = {
     "axiell": "axiell",
-    "axiell_reconciler": "axiell",
     "ebsco": "ebsco",
     "folio": "folio",
 }
 
 CONFIG_BY_TYPE: dict[TransformerType, AdapterConfig] = {
     "axiell": cast(AdapterConfig, axiell_config),
-    "axiell_reconciler": cast(AdapterConfig, axiell_config),
     "ebsco": cast(AdapterConfig, ebsco_config),
     "folio": cast(AdapterConfig, folio_config),
 }
 
 ADAPTER_TABLE_BUILDER_BY_TYPE: dict[TransformerType, Callable] = {
     "axiell": AXIELL_CONFIG.build_adapter_table,
-    "axiell_reconciler": AXIELL_CONFIG.build_adapter_table,
     "ebsco": ebsco_helpers.build_adapter_table,
     "folio": FOLIO_CONFIG.build_adapter_table,
-}
-
-BATCHES_S3_PREFIX_BY_TYPE: dict[TransformerType, str] = {
-    "axiell": "transformer/batches",
-    "axiell_reconciler": "reconciler/batches",
-    "ebsco": "transformer/batches",
-    "folio": "transformer/batches",
 }
 
 
@@ -117,7 +107,14 @@ def build_transformer(
     snapshot_id = event.snapshot_id or adapter_store.current_snapshot_id()
 
     if event.transformer_type == "axiell":
-        return AxiellTransformer(adapter_store, event.changeset_ids, snapshot_id)
+        reader = AxiellChangesetReader.build(
+            AXIELL_CONFIG,
+            event.changeset_ids,
+            use_rest_api_table=use_rest_api_table,
+            snapshot_id=snapshot_id,
+            adapter_store=adapter_store,
+        )
+        return AxiellTransformer(reader)
     if event.transformer_type == "ebsco":
         return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
     if event.transformer_type == "folio":
@@ -133,23 +130,6 @@ def build_transformer(
         return FolioTransformer(
             adapter_store, event.changeset_ids, snapshot_id, items_store=items_store
         )
-    if event.transformer_type == "axiell_reconciler":
-        if not event.changeset_ids:
-            # The reconciler doesn't work in the context of a full reindex,
-            # since it doesn't preserve historic deleted work GUIDs (source IDs).
-            raise ValueError(
-                "The reconciler only supports incremental mode. At least one changeset_id required."
-            )
-
-        table = AXIELL_CONFIG.build_reconciler_table(
-            use_rest_api_table=use_rest_api_table,
-            create_if_not_exists=create_if_not_exists,
-        )
-        reconciler_store = ReconcilerStore(table, namespace="axiell")
-        return AxiellReconciler(
-            adapter_store, event.changeset_ids, reconciler_store, snapshot_id
-        )
-
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
 
@@ -159,7 +139,7 @@ def handler(
     es_mode: ElasticsearchMode = "private",
     use_rest_api_table: bool = False,
     create_if_not_exists: bool = False,
-) -> TransformerManifest:
+) -> TransformerResult:
     setup_logging(execution_context)
     logger.info("Processing transformer event", transformer_event=event.model_dump())
     logger.info("Received job_id", job_id=event.job_id)
@@ -187,38 +167,37 @@ def handler(
 
     transformer.stream_to_index(es_client, index_name)
 
-    s3_batches_prefix = BATCHES_S3_PREFIX_BY_TYPE[event.transformer_type]
-    writer = TransformerManifestWriter(
-        job_id=event.job_id,
-        changeset_ids=event.changeset_ids,
-        snapshot_id=transformer.source.snapshot_id,
-        bucket=config.S3_BUCKET,
-        prefix=str(PurePosixPath(config.S3_PREFIX, s3_batches_prefix)),
-    )
-    result = writer.build_manifest(
-        successful_ids=transformer.successful_ids,
-        errors=transformer.errors,
-    )
-
-    success_count = result.successes.count
-    failure_count = result.failures.count if result.failures else 0
-
     logger.info(
         "Transformation complete",
         job_id=event.job_id,
         transformer_type=event.transformer_type,
-        success_count=success_count,
-        failure_count=failure_count,
+        success_count=len(transformer.successful_ids),
+        failure_count=len(transformer.errors),
+        changeset_ids=event.changeset_ids,
+        snapshot_id=transformer.source.snapshot_id,
     )
 
-    TransformerReport(
+    report = TransformerReport(
         pipeline_date=config.PIPELINE_DATE,
         transformer_type=event.transformer_type,
-        success_count=success_count,
-        failure_count=failure_count,
-    ).publish()
+        successful_ids=transformer.successful_ids,
+        errors=transformer.errors,
+        changeset_ids=event.changeset_ids,
+        snapshot_id=transformer.source.snapshot_id,
+        job_id=event.job_id,
+        s3_bucket=config.S3_BUCKET,
+        s3_prefix=config.S3_PREFIX,
+    )
+    report.publish()
 
-    return result
+    return TransformerResult.model_validate(
+        {
+            **event.model_dump(),
+            "success_count": len(transformer.successful_ids),
+            "failure_count": len(transformer.errors),
+            "report_s3_uri": report.s3_uri,
+        },
+    )
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:

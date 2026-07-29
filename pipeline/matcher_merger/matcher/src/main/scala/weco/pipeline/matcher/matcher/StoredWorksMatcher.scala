@@ -5,7 +5,7 @@ import org.scanamo.DynamoFormat
 import weco.elasticsearch.typesafe.{ElasticBuilder, ElasticConfig}
 import weco.pipeline.matcher.models.{MatcherResult, WorkNode, WorkStub}
 import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
-import weco.pipeline_storage.RetrieverMultiResult
+import weco.pipeline_storage.{Retriever, RetrieverMultiResult}
 import weco.storage.dynamo.DynamoConfig
 import weco.storage.locking.dynamo.DynamoLockDaoConfig
 
@@ -21,7 +21,7 @@ trait WorksMatcher {
 }
 
 class StoredWorksMatcher(
-  retriever: ElasticWorkStubRetriever,
+  retriever: Retriever[WorkStub],
   workMatcher: WorkStubMatcher
 )(implicit ec: ExecutionContext)
     extends WorksMatcher
@@ -100,7 +100,7 @@ object StoredWorksMatcher {
 
     new StoredWorksMatcher(
       retriever,
-      WorkMatcher(dynamoConfig, dynamoLockDaoConfig)
+      WorkMatcher(retriever, dynamoConfig, dynamoLockDaoConfig)
     )
   }
 

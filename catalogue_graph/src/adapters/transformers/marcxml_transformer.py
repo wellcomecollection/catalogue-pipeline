@@ -26,28 +26,33 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
         self, rows: Iterable[dict[str, Any]]
     ) -> Generator[tuple[str, SourceWork]]:
         for row in rows:
-            marc_record = self._row_to_marc_record(row)
-            if not marc_record:
-                continue
+            yield from self._transform_row(row)
 
-            row_id, last_modified = row["id"], row["last_modified"]
-            # Item/holdings enrichment content joined on by FolioStoreSource
-            # (None for adapters without an items store).
-            enrichment_content = row.get("enrichment_content")
+    def _transform_row(self, row: dict[str, Any]) -> Generator[tuple[str, SourceWork]]:
+        """Transform a single row, yielding at most one (row_id, work) tuple.
+        Subclasses override this to handle non-MARC rows (e.g. deletion facts)."""
+        marc_record = self._row_to_marc_record(row)
+        if not marc_record:
+            return
 
-            try:
-                if row.get("deleted", False):
-                    yield row_id, self.transform_deleted(marc_record, last_modified)
-                else:
-                    yield (
-                        row_id,
-                        self.transform_record(
-                            marc_record, last_modified, enrichment_content
-                        ),
-                    )
-            except Exception as e:
-                logger.error("Error transforming record", row_id=row_id, error=str(e))
-                self._add_error(e, "transform", row_id)
+        row_id, last_modified = row["id"], row["last_modified"]
+        # Item/holdings enrichment content joined on by FolioStoreSource
+        # (None for adapters without an items store).
+        enrichment_content = row.get("enrichment_content")
+
+        try:
+            if row.get("deleted", False):
+                yield row_id, self.transform_deleted(marc_record, last_modified)
+            else:
+                yield (
+                    row_id,
+                    self.transform_record(
+                        marc_record, last_modified, enrichment_content
+                    ),
+                )
+        except Exception as e:
+            logger.error("Error transforming record", row_id=row_id, error=str(e))
+            self._add_error(e, "transform", row_id)
 
     def transform_record(
         self,

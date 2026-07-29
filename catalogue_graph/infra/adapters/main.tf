@@ -16,17 +16,18 @@ module "ebsco" {
 }
 
 module "axiell" {
-  source              = "./modules/adapter"
-  namespace           = "axiell"
-  steps_namespace     = "oai_pmh"
-  s3_bucket_name      = "wellcomecollection-platform-axiell-adapter"
-  schedule_expression = "rate(15 minutes)"
-  repository_url      = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
-  event_bus_name      = aws_cloudwatch_event_bus.event_bus.name
-  ecs_cluster_arn     = aws_ecs_cluster.adapters.arn
-  subnets             = local.private_subnets
-  security_group_ids  = [aws_security_group.adapter_egress.id]
-  task_repository_url = data.aws_ecr_repository.unified_pipeline_task.repository_url
+  source                = "./modules/adapter"
+  namespace             = "axiell"
+  steps_namespace       = "oai_pmh"
+  s3_bucket_name        = "wellcomecollection-platform-axiell-adapter"
+  schedule_expression   = "rate(15 minutes)"
+  repository_url        = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
+  event_bus_name        = aws_cloudwatch_event_bus.event_bus.name
+  ecs_cluster_arn       = aws_ecs_cluster.adapters.arn
+  subnets               = local.private_subnets
+  security_group_ids    = [aws_security_group.adapter_egress.id]
+  task_repository_url   = data.aws_ecr_repository.unified_pipeline_task.repository_url
+  enable_reconciliation = true
 }
 
 module "folio" {
@@ -49,4 +50,19 @@ module "folio" {
 # but there's currently no other users.
 resource "aws_cloudwatch_event_bus" "event_bus" {
   name = "catalogue-pipeline-adapter-event-bus"
+}
+
+# Axiell to Folio outbound sync. Deployed as part of this stack (shares
+# terraform/adapters.tfstate). Listens for axiell.adapter.completed on the shared
+# bus and upserts changed records into FOLIO Inventory. Runs the sync handler out
+# of the shared unified_pipeline_lambda image; build/deploy locally with
+# `scripts/deploy_lambda.sh axiell-folio-sync-adapter-lambda`. OKAPI credentials come from SSM
+# at runtime (seeded as a placeholder).
+module "axiell_folio_sync" {
+  source               = "./modules/axiell_folio_sync"
+  namespace            = "axiell-folio-sync"
+  repository_url       = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
+  event_bus_name       = aws_cloudwatch_event_bus.event_bus.name
+  s3_table_bucket_arn  = aws_s3tables_table_bucket.axiell_table_bucket.arn
+  manifest_bucket_name = "wellcomecollection-axiell-folio-sync-manifests"
 }

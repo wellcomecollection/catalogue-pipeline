@@ -31,6 +31,15 @@ locals {
 
     sierra = {
       container_image = local.transformer_sierra_image
+
+      # A 30s timeout leaves no headroom over the 30s flush interval, so batches
+      # expire mid-process and dead-letter. See PipelineStorageStream.
+      queue_visibility_timeout_seconds = 90
+
+      # The stream transforms pipeline_storage.parallelism (10) records at once,
+      # so Sierra's big records starve on fewer cores.
+      cpu    = 4096
+      memory = 8192
     }
 
     tei = {

@@ -12,11 +12,11 @@ from typing import Any
 import structlog
 from pydantic import BaseModel, ConfigDict
 
+from core.transformer import TransformationError
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import IdMintingTransformer
-from id_minter.manifests import IdMinterManifestWriter
 from id_minter.models.identifier import IdResolver
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
@@ -28,7 +28,6 @@ from id_minter.sns import publish_ids_to_sns
 from models.incremental_window import IncrementalWindow
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
-from utils.models.manifests import StepManifest
 from utils.steps import create_job_id
 
 logger = structlog.get_logger(__name__)
@@ -41,6 +40,12 @@ class IdMinterRuntime(BaseModel):
     resolver: IdResolver
     source_es_mode: ElasticsearchMode = "private"
     target_es_mode: ElasticsearchMode = "private"
+
+
+class IdMinterResult(StepFunctionMintingRequest):
+    success_count: int
+    failure_count: int
+    report_s3_uri: str
 
 
 def build_runtime(
@@ -62,7 +67,7 @@ def build_runtime(
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
-) -> StepManifest:
+) -> tuple[list[str], list[TransformationError]]:
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
@@ -109,17 +114,7 @@ def execute(
             transformer.successful_ids,
         )
 
-    manifest_writer = IdMinterManifestWriter(
-        job_id=request.job_id,
-        label="id_minter",
-        bucket=runtime.config.s3_bucket,
-        prefix=runtime.config.batch_s3_prefix,
-    )
-
-    return manifest_writer.build_manifest(
-        successful_ids=transformer.successful_ids,
-        errors=transformer.errors,
-    )
+    return transformer.successful_ids, transformer.errors
 
 
 def log_runtime_config(
@@ -158,36 +153,36 @@ def handler(
     event: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
     execution_context: ExecutionContext | None = None,
-) -> StepManifest:
+) -> IdMinterResult:
     setup_logging(execution_context)
     log_runtime_config(runtime, event)
-    response = execute(event, runtime=runtime)
-
-    success_count = response.successes.count
-    failure_count = response.failures.count if response.failures else 0
+    successful_ids, errors = execute(event, runtime=runtime)
 
     logger.info(
         "Minting complete",
-        job_id=response.job_id,
-        success_count=success_count,
-        failure_count=failure_count,
+        job_id=event.job_id,
+        success_count=len(successful_ids),
+        failure_count=len(errors),
     )
 
-    try:
-        IdMinterReport(
-            pipeline_date=runtime.config.pipeline_date,
-            success_count=success_count,
-            failure_count=failure_count,
-        ).publish()
-    # The metric triggers an alarm if failure_count > 0
-    # If publish fails AND we have failure, we raise
-    except Exception as e:
-        logger.warning("Failed to publish metrics", exc_info=True)
-        if failure_count > 0:
-            raise RuntimeError(
-                f"Failed to publish metrics for a run with {failure_count} failures: {response.job_id}"
-            ) from e
-    return response
+    report = IdMinterReport(
+        pipeline_date=runtime.config.pipeline_date,
+        job_id=event.job_id,
+        successful_ids=successful_ids,
+        errors=errors,
+        s3_bucket=runtime.config.s3_bucket,
+        s3_prefix=runtime.config.s3_prefix,
+    )
+    report.publish()
+
+    return IdMinterResult.model_validate(
+        {
+            **event.model_dump(),
+            "success_count": len(successful_ids),
+            "failure_count": len(errors),
+            "report_s3_uri": report.s3_uri,
+        }
+    )
 
 
 def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
@@ -204,7 +199,7 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
         runtime=runtime,
         execution_context=execution_context,
     )
-    return response.model_dump()
+    return response.model_dump(mode="json")
 
 
 def local_handler(parser: argparse.ArgumentParser) -> None:

@@ -1,5 +1,7 @@
 import io
 
+import pytest
+
 from graph.transformers.weco_concepts.concepts_transformer import (
     WeCoConceptsTransformer,
 )
@@ -58,15 +60,15 @@ def test_node_without_images() -> None:
     assert only_node.image_urls == []
 
 
-def test_edges() -> None:
+def test_edges_are_produced_by_the_incremental_pipeline() -> None:
+    """
+    The Wellcome name authority's HAS_SOURCE_CONCEPT edges start at a catalogue Concept node, which
+    only the incremental pipeline creates, so `CatalogueConceptsTransformer` produces them instead.
+    """
     source_data = io.StringIO("""id,label,description,image_url
         aaaaaaaa,Roland le Petour, flatulist to the court of Henry II,
         """)
     transformer = WeCoConceptsTransformer(source_data)
-    batches = list(transformer.stream("edges", 1))
-    assert len(batches[0]) == 1
 
-    only_edge = batches[0][0]
-    assert only_edge.from_id == "aaaaaaaa"
-    assert only_edge.to_id == "weco:aaaaaaaa"
-    assert only_edge.relationship == "HAS_SOURCE_CONCEPT"
+    with pytest.raises(NotImplementedError, match="CatalogueConceptsTransformer"):
+        list(transformer.stream("edges", 1))

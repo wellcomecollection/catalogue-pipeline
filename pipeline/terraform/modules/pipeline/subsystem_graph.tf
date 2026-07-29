@@ -1,5 +1,5 @@
 module "graph_pipeline" {
-  source = "./graph"
+  source = "../pipeline_services/graph"
 
   pipeline_date = var.pipeline_date
   graph_date    = var.graph_date

@@ -67,10 +67,10 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "secretsmanager:GetSecretValue",
       "secretsmanager:DescribeSecret",
     ]
-    resources = [
-      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_endpoint_secret_arn,
-      data.aws_secretsmanager_secret.wc_platform_alerts_slack_webhook.arn,
-    ]
+    resources = concat(
+      values(data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_endpoint_secret_arns),
+      [data.aws_secretsmanager_secret.wc_platform_alerts_slack_webhook.arn],
+    )
   }
 
   statement {
@@ -89,9 +89,7 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "neptune-db:List*"
     ]
 
-    resources = [
-      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
-    ]
+    resources = values(data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arns)
   }
 
   statement {

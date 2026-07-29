@@ -312,6 +312,54 @@ class SierraMergeCandidatesTest
       )
     }
 
+    it("creates an EBSCO merge candidate from the 099 field if there is no 001") {
+      val bibData = bibDataWith099And003("ebs12345e", "EBZ")
+
+      getMergeCandidates(bibData) should contain theSameElementsAs List(
+        MergeCandidate(
+          identifier = SourceIdentifier(
+            identifierType = IdentifierType.EbscoAltLookup,
+            ontologyType = "Work",
+            value = "ebs12345e"
+          ),
+          reason = "EBSCO/Sierra e-resource"
+        )
+      )
+    }
+
+    it("prefers 001 over 099 when both are present") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            content = Some("EBZ"),
+            marcTag = Some("003"),
+            fieldTag = Some("y")
+          ),
+          VarField(
+            content = Some("ebs11111e"),
+            marcTag = Some("001"),
+            fieldTag = Some("o")
+          ),
+          VarField(
+            marcTag = Some("099"),
+            fieldTag = Some("o"),
+            subfields = List(Subfield(tag = "a", content = "ebs22222e"))
+          )
+        )
+      )
+
+      getMergeCandidates(bibData) should contain theSameElementsAs List(
+        MergeCandidate(
+          identifier = SourceIdentifier(
+            identifierType = IdentifierType.EbscoAltLookup,
+            ontologyType = "Work",
+            value = "ebs11111e"
+          ),
+          reason = "EBSCO/Sierra e-resource"
+        )
+      )
+    }
+
     it(
       "only creates an EBSCO merge candidate if the control number matches the expected format"
     ) {
@@ -431,6 +479,25 @@ class SierraMergeCandidatesTest
           content = Some(controlNumber),
           marcTag = Some("001"),
           fieldTag = Some("o")
+        )
+      )
+    )
+
+  private def bibDataWith099And003(
+    controlNumber: String,
+    controlNumberIdentifier: String
+  ) =
+    createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          content = Some(controlNumberIdentifier),
+          marcTag = Some("003"),
+          fieldTag = Some("y")
+        ),
+        VarField(
+          marcTag = Some("099"),
+          fieldTag = Some("o"),
+          subfields = List(Subfield(tag = "a", content = controlNumber))
         )
       )
     )

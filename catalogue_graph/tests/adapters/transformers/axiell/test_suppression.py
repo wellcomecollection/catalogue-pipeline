@@ -46,6 +46,21 @@ def test_missing_status_yields_deleted_work() -> None:
     )
 
 
+@pytest.mark.parametrize("status", ["draft", "in progress", None])
+def test_suppressed_record_without_ref_no_yields_deleted_work(
+    status: str | None,
+) -> None:
+    """Cataloguers create records before assigning a RefNo; suppression must not fail on them."""
+    record = make_axiell_record(catalogue_status=status, ref_no=None)
+    assert isinstance(_transform(record), DeletedSourceWork)
+
+
+def test_catalogued_record_without_ref_no_raises() -> None:
+    record = make_axiell_record(catalogue_status="catalogued", ref_no=None)
+    with pytest.raises(ValueError, match="Missing RefNo"):
+        _transform(record)
+
+
 def test_amsg_alt_ref_no_suppresses_regardless_of_status() -> None:
     record = make_axiell_record()
     record = _with_alt_ref_no(record, "AMSG-Research-Guide-001")

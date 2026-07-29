@@ -9,7 +9,7 @@ from models.pipeline.identifier import (
 )
 from utils.types import ConceptSource
 
-from .id_label_checker import IdLabelChecker
+from .id_label_checker import WECO_ID_PREFIX, IdLabelChecker
 
 
 class RawCatalogueConcept:
@@ -63,6 +63,21 @@ class RawCatalogueConcept:
         return matched_id
 
     @property
+    def weco_source_concept_id(self) -> str | None:
+        """
+        Returns the ID of the Wellcome name authority source concept which overrides this concept,
+        if present. Authority records are keyed by the canonical ID of the concept they override,
+        whichever source that concept came from, so the lookup is a direct prefixed ID match.
+        """
+        assert self.id_label_checker is not None
+
+        weco_id = f"{WECO_ID_PREFIX}{self.wellcome_id}"
+        if self.id_label_checker.has_id(weco_id, "weco-authority"):
+            return weco_id
+
+        return None
+
+    @property
     def has_valid_source_concept(self) -> bool:
         """Checks if the source concept ID format matches the specified source."""
         assert self.id_label_checker is not None
@@ -87,9 +102,6 @@ class RawCatalogueConcept:
 
         # For LoC, we only require that the referenced source identifier exists in the graph.
         if self.source in ("lc-subjects", "lc-names"):
-            return (
-                self.id_label_checker.get_label(self.source_concept_id, self.source)
-                is not None
-            )
+            return self.id_label_checker.has_id(self.source_concept_id, self.source)
 
         return False

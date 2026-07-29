@@ -19,9 +19,9 @@ from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioItemEnric
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
 )
-from adapters.extractors.oai_pmh.folio.enrichment.okapi_auth import OkapiAuth
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import get_local_table, get_rest_api_table
+from clients.folio_client import OkapiAuth
 from utils.aws import get_ssm_parameter
 
 

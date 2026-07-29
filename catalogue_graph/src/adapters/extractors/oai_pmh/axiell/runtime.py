@@ -38,12 +38,20 @@ class AxiellRuntimeConfig(OAIPMHRuntimeConfig):
         """
         return _build_axiell_http_client()
 
-    def build_oai_client(self, *, http_client: httpx.Client | None = None) -> OAIClient:
+    def build_oai_client(
+        self,
+        *,
+        http_client: httpx.Client | None = None,
+        max_request_retries: int | None = None,
+    ) -> OAIClient:
         """Build the OAI-PMH client for harvesting records.
 
         Overrides base to include Axiell-specific retry configuration.
         """
-        return _build_axiell_oai_client(http_client=http_client)
+        return _build_axiell_oai_client(
+            http_client=http_client,
+            max_request_retries=max_request_retries,
+        )
 
     def build_reconciler_table(
         self,
@@ -60,6 +68,24 @@ class AxiellRuntimeConfig(OAIPMHRuntimeConfig):
         if use_rest_api_table:
             return get_rest_api_table(RECONCILER_REST_API_CONFIG, create_if_not_exists)
         return get_local_table(RECONCILER_LOCAL_CONFIG, create_if_not_exists)
+
+    def build_deletion_facts_table(
+        self,
+        *,
+        use_rest_api_table: bool = True,
+        create_if_not_exists: bool = True,
+    ) -> IcebergTable:
+        """Build the Iceberg table for the Axiell deletion facts store."""
+        from adapters.extractors.oai_pmh.axiell.config import (
+            DELETION_FACTS_LOCAL_CONFIG,
+            DELETION_FACTS_REST_API_CONFIG,
+        )
+
+        if use_rest_api_table:
+            return get_rest_api_table(
+                DELETION_FACTS_REST_API_CONFIG, create_if_not_exists
+            )
+        return get_local_table(DELETION_FACTS_LOCAL_CONFIG, create_if_not_exists)
 
 
 # Singleton instance for use by lambda handlers and CLI

@@ -47,7 +47,7 @@ trait MatcherFixtures
   )(testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphStore(graphTable) {
       workGraphStore =>
-        withWorkMatcher(workGraphStore) {
+        withWorkMatcher(workGraphStore, retriever) {
           workMatcher =>
             withActorSystem {
               implicit actorSystem =>
@@ -82,7 +82,8 @@ trait MatcherFixtures
     }
 
   def withWorkMatcher[R](
-    workGraphStore: WorkGraphStore
+    workGraphStore: WorkGraphStore,
+    retriever: Retriever[WorkStub] = new MemoryRetriever[WorkStub]()
   )(testWith: TestWith[WorkMatcher, R]): R = {
     implicit val lockDao: MemoryLockDao[String, UUID] =
       new MemoryLockDao[String, UUID]
@@ -91,7 +92,8 @@ trait MatcherFixtures
 
     val workMatcher = new WorkMatcher(
       workGraphStore = workGraphStore,
-      lockingService = lockingService
+      lockingService = lockingService,
+      retriever = retriever
     )
 
     testWith(workMatcher)
@@ -125,8 +127,9 @@ trait MatcherFixtures
     sendNotificationToSQS(queue, body = work.id.toString)
   }
 
-  case class MatcherStub(shorthandResults: Seq[Set[Set[String]]] = Seq(Set.empty[Set[String]]))
-      extends WorksMatcher {
+  case class MatcherStub(
+    shorthandResults: Seq[Set[Set[String]]] = Seq(Set.empty[Set[String]])
+  ) extends WorksMatcher {
 
     var internalShorthandResults: Seq[Set[Set[String]]] = shorthandResults
 
