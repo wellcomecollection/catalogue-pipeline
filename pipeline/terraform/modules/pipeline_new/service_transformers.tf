@@ -28,10 +28,11 @@ locals {
     sierra = {
       container_image = local.transformer_sierra_image
 
-      # The biggest bibs take over 30s to transform, so they get dead-lettered.
+      # A 30s timeout leaves no headroom over the 30s flush interval, so batches
+      # expire mid-process and dead-letter. See PipelineStorageStream.
       queue_visibility_timeout_seconds = 90
 
-      # Sierra records carry every linked item, so they saturate the default 512/1024.
+      # The default 512/1024 saturates on Sierra's volume.
       cpu    = 2048
       memory = 4096
     }
