@@ -67,16 +67,18 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     """Work builder for Axiell (MARC XML) records."""
 
     def _is_suppresssed(self) -> bool:
-        # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
-        # actual archives but instead guides for researchers, so we suppress them here.
-        ref_no = self.reference_number
-        if ref_no is not None and ref_no.startswith("AMSG"):
+        # If a record does not have a status, or if its status is not listed in
+        # NON_SUPPRESSED_STATUSES, we suppress it. Checked before anything touching
+        # collection_path: newly created records legitimately lack a RefNo, and
+        # suppressing them must not require one.
+        catalogue_status = extract_catalogue_status(self.record)
+        if catalogue_status not in NON_SUPPRESSED_STATUSES:
             return True
 
-        catalogue_status = extract_catalogue_status(self.record)
-
-        # If a record does not have a status, or if its status is not listed in NON_SUPPRESSED_STATUSES, we suppress it
-        return catalogue_status not in NON_SUPPRESSED_STATUSES
+        # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
+        # actual archives but instead guides for researchers, so we suppress them here.
+        alt_ref_no = self.reference_number
+        return alt_ref_no is not None and alt_ref_no.startswith("AMSG")
 
     @property
     def source_identifier_type(self) -> Id:
