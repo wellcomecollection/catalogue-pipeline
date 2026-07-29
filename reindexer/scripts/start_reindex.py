@@ -80,10 +80,10 @@ def specific_reindex_parameters(record_ids):
 def file_reader_reindex_parameters(path):
     try:
         with open(path, newline="") as file:
-            trimmed_lines = (line.rstrip() for line in file)
+            ids = [line.rstrip() for line in file if line.rstrip()]
             # The reindexer can handle up to 100 IDs at a time, so send them in
             # batches of that size.
-            for chunk in chunked_iterable(trimmed_lines, size=100):
+            for chunk in chunked_iterable(ids, size=100):
                 yield {"ids": chunk, "type": "SpecificReindexParameters"}
     except FileNotFoundError:
         return False
@@ -265,7 +265,9 @@ def start_reindex(ctx, src, dst, mode, input_file, calm_input_file):
     if mode == "complete":
         if src == "calm":
             print(f"Using specific IDs from {calm_input_file} for calm")
-            parameters = file_reader_reindex_parameters(calm_input_file)
+            parameters = list(file_reader_reindex_parameters(calm_input_file))
+            if not parameters:
+                sys.exit(f"--calm-input-file {calm_input_file!r} contains no valid IDs")
         else:
             total_segments = how_many_segments(table_name=SOURCES[src])
             parameters = complete_reindex_parameters(total_segments)
