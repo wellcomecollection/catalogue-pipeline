@@ -66,3 +66,44 @@ def test_axiell_runtime_delegates_to_clients_factory() -> None:
     assert isinstance(oai_client, OAIClient)
     assert oai_client.max_transient_retries == config.OAI_TRANSIENT_RETRIES
     oai_client._client.close()
+
+
+def test_axiell_build_oai_client_honours_request_retry_override() -> None:
+    from adapters.extractors.oai_pmh.axiell import clients, config
+    from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
+
+    override = config.OAI_MAX_RETRIES + 4
+
+    with (
+        patch.object(clients, "_oai_token", return_value="test-token"),
+        patch.object(clients, "_oai_endpoint", return_value=BASE_URL),
+    ):
+        oai_client = AXIELL_CONFIG.build_oai_client(max_request_retries=override)
+
+    assert oai_client.max_request_retries == override
+    # The override must not disturb the other retry settings.
+    assert oai_client.max_transient_retries == config.OAI_TRANSIENT_RETRIES
+    assert oai_client.request_backoff_factor == config.OAI_BACKOFF_FACTOR
+    oai_client._client.close()
+
+
+def test_folio_build_oai_client_honours_request_retry_override() -> None:
+    from adapters.extractors.oai_pmh.folio import runtime as folio_runtime
+    from adapters.extractors.oai_pmh.folio.config import (
+        OAI_MAX_RETRIES,
+        OAI_TRANSIENT_RETRIES,
+    )
+
+    override = OAI_MAX_RETRIES + 4
+
+    with patch.object(folio_runtime, "_oai_endpoint", return_value=BASE_URL):
+        config_obj = folio_runtime.FOLIO_CONFIG
+        with patch.object(config_obj, "build_http_client", return_value=httpx.Client()):
+            default_client = config_obj.build_oai_client()
+            overridden = config_obj.build_oai_client(max_request_retries=override)
+
+    assert default_client.max_request_retries == max(1, OAI_MAX_RETRIES)
+    assert overridden.max_request_retries == override
+    assert overridden.max_transient_retries == OAI_TRANSIENT_RETRIES
+    default_client._client.close()
+    overridden._client.close()

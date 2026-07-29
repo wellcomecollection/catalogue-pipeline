@@ -4,6 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
 
+import httpx
 import pyarrow.parquet as pq
 import pytest
 from lxml import etree
@@ -79,6 +80,52 @@ def test_rebuild_refuses_local_tables_with_publish() -> None:
         rebuild_adapter.rebuild_adapter(
             "axiell", use_rest_api_table=False, snapshot_path="/nonexistent"
         )
+
+
+def test_download_client_is_tuned_for_a_long_download(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The download must not inherit the adapter's windowed-harvest settings,
+    which allow no retries and a 60 second read."""
+    built_with: list[dict] = []
+    adapter_timeout = httpx.Timeout(connect=10.0, read=60.0, write=11.0, pool=12.0)
+
+    class _StopAfterClientBuild(Exception):
+        pass
+
+    config_stub = SimpleNamespace(
+        build_http_client=lambda: httpx.Client(timeout=adapter_timeout),
+        build_oai_client=lambda **kwargs: built_with.append(kwargs),
+        config=SimpleNamespace(),
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+    monkeypatch.setattr(rebuild_adapter, "_wipe_window_store", lambda *a, **k: None)
+    monkeypatch.setattr(rebuild_adapter, "_reset_window_cursor", lambda *a, **k: None)
+
+    def stop(*args: object, **kwargs: object) -> None:
+        raise _StopAfterClientBuild
+
+    monkeypatch.setattr(rebuild_adapter, "_download_to_snapshot", stop)
+
+    with pytest.raises(_StopAfterClientBuild):
+        rebuild_adapter.rebuild_adapter(
+            "axiell",
+            use_rest_api_table=True,
+            snapshot_path=str(tmp_path / "not-yet-downloaded.parquet"),
+        )
+
+    assert len(built_with) == 1
+    call = built_with[0]
+    assert call["max_request_retries"] == rebuild_adapter.DOWNLOAD_MAX_REQUEST_RETRIES
+
+    timeout = call["http_client"].timeout
+    assert timeout.read == rebuild_adapter.DOWNLOAD_READ_TIMEOUT_SECONDS
+    assert timeout.read > adapter_timeout.read
+    # Widening the read must leave the adapter's other deadlines alone.
+    assert (timeout.connect, timeout.write, timeout.pool) == (10.0, 11.0, 12.0)
+    # The download raised, so this also covers the failure path.
+    assert call["http_client"].is_closed
 
 
 def _list_records_xml(identifiers: list[str], token: str | None) -> etree._Element:

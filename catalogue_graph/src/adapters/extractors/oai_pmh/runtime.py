@@ -175,10 +175,22 @@ class OAIPMHRuntimeConfig(ABC):
         table = self.build_adapter_table(use_rest_api_table=use_rest_api_table)
         return AdapterStore(table, namespace=self.config.adapter_namespace)
 
-    def build_oai_client(self, *, http_client: httpx.Client | None = None) -> OAIClient:
+    def build_oai_client(
+        self,
+        *,
+        http_client: httpx.Client | None = None,
+        max_request_retries: int | None = None,
+    ) -> OAIClient:
         """Build the OAI-PMH client for harvesting records."""
         client = http_client or self.build_http_client()
+        # Keep the upstream default unless a caller asks otherwise.
+        overrides = (
+            {}
+            if max_request_retries is None
+            else {"max_request_retries": max_request_retries}
+        )
         return OAIClient(
             self.get_oai_endpoint(),
             client=client,
+            **overrides,
         )

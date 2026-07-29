@@ -29,6 +29,7 @@ from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
 import boto3
+import httpx
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.parquet as pq
@@ -70,6 +71,14 @@ records into the adapter store."""
 
 PROGRESS_LOG_EVERY = 5_000
 """Records between download progress log lines."""
+
+DOWNLOAD_MAX_REQUEST_RETRIES = 5
+"""Total attempts per timed-out request. This download cannot resume, so the
+adapters' single attempt is too brittle."""
+
+DOWNLOAD_READ_TIMEOUT_SECONDS = 180.0
+"""Longer than the adapters' 60s, because retries cannot outlast a page that is
+slow on every attempt."""
 
 EVENT_BUS_NAME = "catalogue-pipeline-adapter-event-bus"
 
@@ -132,6 +141,23 @@ def _log_download_progress(total: int, expected: int | None, started_at: float) 
         percent=round(100 * total / expected, 1) if expected else None,
         records_per_second=round(rate, 1),
         eta_minutes=round(remaining / 60) if remaining else None,
+    )
+
+
+def _build_download_client(
+    config: OAIPMHRuntimeConfig, http_client: httpx.Client
+) -> OAIClient:
+    """An OAI client tuned for one long download rather than a windowed harvest."""
+    timeout = http_client.timeout
+    http_client.timeout = httpx.Timeout(
+        connect=timeout.connect,
+        read=DOWNLOAD_READ_TIMEOUT_SECONDS,
+        write=timeout.write,
+        pool=timeout.pool,
+    )
+    return config.build_oai_client(
+        http_client=http_client,
+        max_request_retries=DOWNLOAD_MAX_REQUEST_RETRIES,
     )
 
 
@@ -432,8 +458,10 @@ def rebuild_adapter(
             config, datetime.now(UTC), use_rest_api_table=use_rest_api_table
         )
 
-        oai_client = config.build_oai_client()
-        _download_to_snapshot(oai_client, config.config, snapshot_path)
+        # Held open only for the download, so a failed harvest does not leak it.
+        with config.build_http_client() as http_client:
+            oai_client = _build_download_client(config, http_client)
+            _download_to_snapshot(oai_client, config.config, snapshot_path)
 
     # Phase 2: Items download (reads bib instance IDs from the bib snapshot).
     folio_items: _FolioItems | None = None

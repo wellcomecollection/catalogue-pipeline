@@ -38,12 +38,20 @@ class AxiellRuntimeConfig(OAIPMHRuntimeConfig):
         """
         return _build_axiell_http_client()
 
-    def build_oai_client(self, *, http_client: httpx.Client | None = None) -> OAIClient:
+    def build_oai_client(
+        self,
+        *,
+        http_client: httpx.Client | None = None,
+        max_request_retries: int | None = None,
+    ) -> OAIClient:
         """Build the OAI-PMH client for harvesting records.
 
         Overrides base to include Axiell-specific retry configuration.
         """
-        return _build_axiell_oai_client(http_client=http_client)
+        return _build_axiell_oai_client(
+            http_client=http_client,
+            max_request_retries=max_request_retries,
+        )
 
     def build_reconciler_table(
         self,
