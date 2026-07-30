@@ -42,17 +42,35 @@ then
   emit false
 fi
 
-CURRENT_TAGS=$(
+# A shallow clone answers every ancestry question with "no", which would turn
+# this check off without saying so.
+if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]
+then
+  echo "::warning::shallow checkout, so ancestry cannot be established. Deploying without the backwards check: set fetch-depth 0."
+  emit false
+fi
+
+if ! CURRENT_TAGS=$(
   aws ecr describe-images \
     --repository-name "$REPOSITORY_NAME" \
     --image-ids imageTag="$TARGET_TAG" \
     --query 'imageDetails[0].imageTags' \
-    --output text 2>/dev/null || true
+    --output text 2>&1
 )
+then
+  if [[ "$CURRENT_TAGS" == *ImageNotFoundException* ]]
+  then
+    echo "$TARGET_TAG does not exist in $REPOSITORY_NAME yet, nothing to move backwards"
+  else
+    echo "::warning::could not read $TARGET_TAG from $REPOSITORY_NAME, deploying without the backwards check"
+    echo "$CURRENT_TAGS"
+  fi
+  emit false
+fi
 
 if [[ -z "$CURRENT_TAGS" ]]
 then
-  echo "$TARGET_TAG does not exist in $REPOSITORY_NAME yet, nothing to move backwards"
+  echo "::warning::$TARGET_TAG in $REPOSITORY_NAME reported no tags, deploying without the backwards check"
   emit false
 fi
 
