@@ -39,7 +39,6 @@ variable "skip_final_snapshot" {
   default     = false
 }
 
-
 variable "max_scaling_capacity" {
   type    = number
   default = 8.0
