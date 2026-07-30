@@ -7,6 +7,11 @@ module "es_cluster_2026_07_03" {
 
   cluster_date = "2026-07-03"
 
+  # Sized for the full reindex, matching what 2025-10-02 scales to for one.
+  # Back to the 4g across 3 zones default once wellcomecollection/platform#6445 is signed off.
+  memory     = "30g"
+  node_count = 2
+
   traffic_filter_ids = [
     local.shared_infra["ec_platform_privatelink_traffic_filter_id"],
     local.shared_infra["ec_catalogue_privatelink_traffic_filter_id"],
