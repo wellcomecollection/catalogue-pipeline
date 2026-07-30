@@ -26,13 +26,17 @@ Code is built and deployed by two CI systems.
 
 **Buildkite** builds the Scala applications (transformers, matcher, merger, inferrers, and the source adapters). On a merge to main it publishes each image with its commit tag and `latest`, then triggers two deploy pipelines:
 
-* `catalogue-pipeline-deploy-pipeline` runs `.buildkite/scripts/deploy_latest_pipeline.py`, which chooses the target pipelines (see below) and for each one runs `builds/deploy_catalogue_pipeline.sh`: retag `latest` as `env.<date>`, force a new deployment of the ECS services in the `catalogue-<date>` cluster, and update the `catalogue-<date>-*` lambdas.
+* `catalogue-pipeline-deploy-pipeline` runs `.buildkite/scripts/deploy_latest_pipeline.py`, which chooses the target pipelines (see below) and for each one runs `builds/deploy_catalogue_pipeline.sh`: retag `latest` as `env.<date>` for the Scala and inferrer images, force a new deployment of the ECS services in the `catalogue-<date>` cluster, and update the `catalogue-<date>-*` lambdas. It leaves `unified_pipeline_task` and `unified_pipeline_lambda` alone, because GitHub Actions moves those two tags and having both systems write them let a merge deploy an older commit, or a pull request build, over a newer one.
 * `catalogue-pipeline-deploy-adapters` deploys the shared adapter services (Sierra, Calm, METS, TEI) by moving `env.prod` and redeploying their fixed clusters. Adapters are singletons: they are deployed once and feed every active pipeline.
 
 **GitHub Actions** builds the Python "unified pipeline" images (`unified_pipeline_task` and `unified_pipeline_lambda`) from `catalogue_graph/`. On a merge to main, `catalogue-graph-deploy.yml`:
 
 * retags the images as `prod` and updates the shared adapter trigger lambdas (EBSCO, Axiell, FOLIO);
 * retags the images as `env.<date>` for each target pipeline and updates that pipeline's dated lambdas (id minter, transformer, graph components, image inferrer).
+
+These deploys are serialised, so two runs cannot interleave their retags. Only one can be waiting at a time: a third merge arriving cancels the queued one. That is normally harmless, because the newer deploy writes the same tags, but if that newer run then fails, neither merge is deployed. A cancelled deploy run is worth a look rather than an assumption.
+
+Serialising is not ordering. A deploy joins the queue when its images finish building, not when its commit merged, so a slow build merged first can still land last and put a tag back on the older commit. Nothing detects that today, so a pipeline quietly running stale code is worth ruling out when something looks wrong. See wellcomecollection/platform#6468.
 
 ## Which pipelines get deployed
 
@@ -59,5 +63,13 @@ PIPELINE_DATE="2025-10-02" builds/deploy_catalogue_pipeline.sh tag_images_and_de
 ```
 
 Note that this deploys whatever `latest` currently points at, not a specific commit.
+
+That command covers the Scala and inferrer images only. The Python unified pipeline images are deployed by `Catalogue pipeline: Deploy`, which takes a specific commit:
+
+```console
+gh workflow run catalogue-graph-deploy.yml -f deploy_tag=<commit sha>
+```
+
+Read that one before running it. It deploys to every pipeline `deploy_settings.json` selects, which is all of them while `deploy_all_pipelines` is on, and it also moves `prod` and updates the shared adapter lambdas. Nothing stops it moving a tag to an older commit, so dispatching one rolls back every pipeline it reaches, production included. To put an older commit on one pipeline alone, retag that pipeline's `env.<date>` by hand.
 
 The Buildkite deploy script also looks up the works index currently served by the catalogue API (`/_elasticConfig`) and warns when the newest pipeline is not the production pipeline. Which pipeline is "production" is not recorded anywhere in this repo: it is whichever pipeline's index the [catalogue-api](https://github.com/wellcomecollection/catalogue-api) is configured to serve.
