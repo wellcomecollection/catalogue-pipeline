@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 <<EOF
-Decide whether retagging would move a tag backwards.
+Refuse to move a tag onto a commit that already contains the one being
+deployed, which happens when deploy runs finish out of order.
 
-Deploy runs are not ordered against each other, so one triggered by an earlier
-merge can finish after one triggered by a later merge and put a mutable tag
-back on the older commit. The images carry the commit they were built from as
-a tag, so we can read what the target tag points at now and refuse to move it
-onto an ancestor of that commit.
-
+Images carry their commit as a tag, so we can read where the target tag points.
 Writes skip_push=true|false to GITHUB_OUTPUT. Anything we cannot determine
-(no such tag yet, no commit tag on the image, commit not fetchable) leaves the
-retag to go ahead, so this only ever blocks a move it can prove is backwards.
+deploys as before, so this only blocks a move it can prove is backwards.
 EOF
 
 set -o errexit
@@ -42,8 +37,7 @@ then
   emit false
 fi
 
-# A shallow clone answers every ancestry question with "no", which would turn
-# this check off without saying so.
+# Shallow clones answer every ancestry question with "no".
 if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]
 then
   echo "::warning::shallow checkout, so ancestry cannot be established. Deploying without the backwards check: set fetch-depth 0."
@@ -82,8 +76,7 @@ then
   emit false
 fi
 
-# The tag can point at a merge that landed after the one we are deploying, so
-# that commit is not necessarily in the history we checked out.
+# The tag may point at a merge that landed after ours.
 git fetch --no-tags --quiet origin "$TARGET_COMMIT" 2>/dev/null || true
 
 if ! git cat-file -e "${TARGET_COMMIT}^{commit}" 2>/dev/null

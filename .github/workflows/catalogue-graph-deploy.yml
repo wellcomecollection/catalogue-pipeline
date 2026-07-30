@@ -22,11 +22,8 @@ permissions:
   contents: read
   id-token: write
 
-# Join the deploy queue only when this workflow is the one that was triggered,
-# so a hand-run deploy waits for an automatic one. Called from CI the calling
-# job already holds this group, and claiming it again here would wait on
-# ourselves. The github context in a called workflow is the caller's, so
-# github.workflow names us only when we ran directly.
+# Claim the shared group only when triggered directly: called from CI, the
+# calling job already holds it. github.workflow is the caller's, not ours.
 concurrency:
   group: "${{ github.workflow == 'Catalogue pipeline: Deploy' && 'catalogue-pipeline-deploy' || format('catalogue-pipeline-deploy-{0}', github.run_id) }}"
   cancel-in-progress: false
@@ -52,8 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # The backwards check compares commits, so it needs the history.
-          # Blobs are fetched on demand, which keeps the clone cheap.
+          # Ancestry needs history; blobs are fetched on demand.
           fetch-depth: 0
           filter: blob:none
       - uses: ./.github/actions/retag-docker-image
@@ -63,9 +59,7 @@ jobs:
           source_tag: ${{ inputs.deploy_tag }}
           target_tag: prod
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-          # Guard the automatic path only, so dispatching an older sha stays a
-          # way to roll back. github.event_name is the caller's event, which is
-          # push for a merge and workflow_dispatch when run by hand.
+          # Merges only, so a hand-dispatched older sha can still roll back.
           enforce_forward_only: ${{ github.event_name != 'workflow_dispatch' }}
 
   retag-dated-images:

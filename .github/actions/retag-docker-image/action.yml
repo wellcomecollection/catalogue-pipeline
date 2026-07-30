@@ -32,8 +32,7 @@ runs:
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
 
-    # Compared as a string: a composite action input is always a string, so a
-    # bare `if: ${{ inputs.enforce_forward_only }}` is true even for "false".
+    # A composite input is always a string, so "false" is truthy on its own.
     - name: Check the tag would not move backwards
       id: forward_only
       if: inputs.enforce_forward_only == 'true'

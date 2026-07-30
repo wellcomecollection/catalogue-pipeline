@@ -61,9 +61,8 @@ REPOSITORIES=(
   uk.ac.wellcome/transformer_tei
 )
 
-# GitHub Actions moves these two on every catalogue_graph merge, so tag them
-# here only when bootstrapping a pipeline date: a new stack needs images before
-# its first GitHub deploy, but retagging them on every merge races that deploy.
+# GitHub Actions moves these two on every catalogue_graph merge. Tag them here
+# only to bootstrap a new pipeline date, or the two systems race.
 if [[ "$TASK" == "tag_images" ]]
 then
   REPOSITORIES+=(

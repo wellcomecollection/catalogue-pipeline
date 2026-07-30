@@ -97,10 +97,8 @@ jobs:
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [ build-unified-pipeline-task-image, build-unified-pipeline-lambda-image ]
-    # Deploying moves mutable ECR tags, so overlapping runs can leave a tag on
-    # the older commit. Queue them instead: retagging runs before the lambda
-    # updates that depend on it, so cancelling mid-run would move the tags and
-    # leave the lambdas on the old image.
+    # Deploys move mutable ECR tags, so run one at a time. Queue rather than
+    # cancel: retagging precedes the lambda updates that depend on it.
     concurrency:
       group: catalogue-pipeline-deploy
       cancel-in-progress: false
