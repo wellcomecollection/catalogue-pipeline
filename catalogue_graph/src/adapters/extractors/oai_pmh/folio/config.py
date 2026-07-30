@@ -145,7 +145,7 @@ ITEMS_LOCAL_TABLE_NAME = os.getenv(
 SSM_INVENTORY_URL = os.getenv(
     "FOLIO_SSM_INVENTORY_URL", "/catalogue_pipeline/folio/inventory_api_url"
 )
-# OKAPI login credentials: the enricher authenticates itself (POST /authn/login) and
+# OKAPI login credentials: the enricher authenticates itself (POST /authn/login-with-expiry) and
 # refreshes on 401, rather than using a short-lived static token.
 SSM_INVENTORY_USERNAME = os.getenv(
     "FOLIO_SSM_INVENTORY_USERNAME", "/catalogue_pipeline/folio/inventory_username"
