@@ -16,10 +16,6 @@ inputs:
   role_to_assume:
     description: "Role to assume when accessing ECR"
     required: true
-  enforce_forward_only:
-    description: "Refuse to move target_tag onto an ancestor of the commit it already points at. Needs fetch-depth 0 on the checkout."
-    required: false
-    default: "true"
 runs:
   using: "composite"
   steps:
@@ -32,20 +28,7 @@ runs:
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
 
-    # A composite input is always a string, so "false" is truthy on its own.
-    - name: Check the tag would not move backwards
-      id: forward_only
-      if: inputs.enforce_forward_only == 'true'
-      shell: bash
-      run: |
-        "${{ github.action_path }}/forward_only_check.sh" \
-          "${{ inputs.registry }}" \
-          "${{ inputs.image_name }}" \
-          "${{ inputs.source_tag }}" \
-          "${{ inputs.target_tag }}"
-
     - name: Retag image
-      if: steps.forward_only.outputs.skip_push != 'true'
       shell: bash
       run: |
         echo "Pulling: $SOURCE_FULLNAME"

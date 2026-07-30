@@ -34,7 +34,9 @@ Code is built and deployed by two CI systems.
 * retags the images as `prod` and updates the shared adapter trigger lambdas (EBSCO, Axiell, FOLIO);
 * retags the images as `env.<date>` for each target pipeline and updates that pipeline's dated lambdas (id minter, transformer, graph components, image inferrer).
 
-These deploys are serialised, and a merge will not move a tag onto a commit that already contains it, so out-of-order runs cannot roll a pipeline back. Only one deploy can be waiting at a time: a third merge arriving cancels the queued one. That is normally harmless, because the newer deploy writes the same tags, but if that newer run then fails, neither merge is deployed. A cancelled deploy run is worth a look rather than an assumption.
+These deploys are serialised, so two runs cannot interleave their retags. Only one can be waiting at a time: a third merge arriving cancels the queued one. That is normally harmless, because the newer deploy writes the same tags, but if that newer run then fails, neither merge is deployed. A cancelled deploy run is worth a look rather than an assumption.
+
+Serialising is not ordering. A deploy joins the queue when its images finish building, not when its commit merged, so a slow build merged first can still land last and put a tag back on the older commit. Nothing detects that today, so a pipeline quietly running stale code is worth ruling out when something looks wrong. See wellcomecollection/platform#6468.
 
 ## Which pipelines get deployed
 
@@ -68,6 +70,6 @@ That command covers the Scala and inferrer images only. The Python unified pipel
 gh workflow run catalogue-graph-deploy.yml -f deploy_tag=<commit sha>
 ```
 
-Read that one before running it. It deploys to every pipeline `deploy_settings.json` selects, which is all of them while `deploy_all_pipelines` is on, and it also moves `prod` and updates the shared adapter lambdas. The refusal to move a tag onto an older commit is deliberately off when the workflow is dispatched by hand, so that rolling back is possible, which means dispatching an older commit rolls back every pipeline it reaches, production included. To put an older commit on one pipeline alone, retag that pipeline's `env.<date>` by hand.
+Read that one before running it. It deploys to every pipeline `deploy_settings.json` selects, which is all of them while `deploy_all_pipelines` is on, and it also moves `prod` and updates the shared adapter lambdas. Nothing stops it moving a tag to an older commit, so dispatching one rolls back every pipeline it reaches, production included. To put an older commit on one pipeline alone, retag that pipeline's `env.<date>` by hand.
 
 The Buildkite deploy script also looks up the works index currently served by the catalogue API (`/_elasticConfig`) and warns when the newest pipeline is not the production pipeline. Which pipeline is "production" is not recorded anywhere in this repo: it is whichever pipeline's index the [catalogue-api](https://github.com/wellcomecollection/catalogue-api) is configured to serve.
