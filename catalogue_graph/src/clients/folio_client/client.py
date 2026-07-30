@@ -2,10 +2,11 @@
 
 Used by the Axiell to Folio sync for Inventory upserts. Authentication is the
 shared service-account OKAPI login (:class:`~clients.folio_client.OkapiAuth`):
-``POST /authn/login`` -> ``x-okapi-token``, sent as ``x-okapi-token`` /
-``x-okapi-tenant`` on every request and refreshed once on a 401. The same auth
-is used by the FOLIO inventory enrichment client, so the whole pipeline shares
-one OKAPI auth implementation over ``httpx``.
+``POST /authn/login-with-expiry`` -> ``folioAccessToken`` cookie, whose token is
+replayed as the ``x-okapi-token`` header (alongside the ``x-okapi-tenant`` header)
+on every request and refreshed once on a 401. The same auth is used by the FOLIO
+inventory enrichment client, so the whole pipeline shares one OKAPI auth
+implementation over ``httpx``.
 
 A single ``FolioClient`` (and its underlying ``httpx.Client``) can be reused
 across warm Lambda invocations.

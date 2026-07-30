@@ -105,7 +105,13 @@ module "pipeline" {
         initial   = "images_initial.2026-06-15"
         augmented = "images_augmented.2026-04-29"
       }
-    }
+    },
+    "2026-07-30" = {
+      works = {
+        // Mappings to include new archive-related fields. Future prod index.
+        indexed = "works_indexed.2026-07-30"
+      }
+    },
   }
 
   allow_delete_indices = false

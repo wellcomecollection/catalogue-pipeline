@@ -33,6 +33,11 @@ variable "snapshot_identifier" {
   default = null
 }
 
+variable "skip_final_snapshot" {
+  description = "If true, allow destroy without creating a final snapshot. When false, destroy will fail unless the module is extended to set final_snapshot_identifier."
+  type        = bool
+  default     = false
+}
 
 variable "max_scaling_capacity" {
   type    = number

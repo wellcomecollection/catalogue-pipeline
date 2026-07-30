@@ -32,8 +32,11 @@ module "id_minter_rds_2026_07_03" {
   source = "./modules/id-minter-rds"
 
   name_suffix = "2026-07-03"
-  # Restore from production on July 14, 2026, 04:41 (UTC+01:00)
-  snapshot_identifier = "awsbackup:job-a03d7ad1-17f3-4f12-6993-1c7a19cda33d"
+  # Restore from production on July 30, 2026, 04:00 (UTC+01:00)
+  snapshot_identifier = "awsbackup:job-23667bdb-6b2b-92c9-d653-03f01ced06ce"
+
+  # A restored copy of production; its contents are never worth keeping.
+  skip_final_snapshot = true
 
   vpc_id             = local.vpc_id_new
   private_subnet_ids = local.private_subnets_new
