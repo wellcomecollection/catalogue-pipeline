@@ -52,9 +52,14 @@ Examples
   - uv run start_reindex.py --src notmiro --dst catalogue --mode complete --calm-input-file ./third_party_archives.txt
 
 Notes
-- Valid sources: all, notmiro, ebsco, miro, sierra, mets, calm, tei.
+- Valid sources: all, notmiro, ebsco, axiell, miro, sierra, mets, calm, tei.
   - `all` reindexes every source in `SOURCES` plus any EventBridge targets
-    (currently just `ebsco`).
+    (`ebsco` and `axiell`).
+  - `ebsco` and `axiell` are adapter sources: rather than scanning a table,
+    they publish a `weco.pipeline.reindex.requested` event that re-runs the
+    adapter transformer over the whole adapter store. The event carries a
+    `job_id`, printed when it is sent, which is how the resulting transformer
+    run is traced.
   - `notmiro` is the same as `all` but skips Miro. Miro is normally run
     separately, last, once everything else has gone through the
     matcher/merger -- running it at the same time as other sources risks

@@ -240,7 +240,8 @@ def start_reindex(ctx, src, dst, mode, input_file, calm_input_file):
 
         if src in EVENTBRIDGE_REINDEX_TARGETS:
             print(f"Starting an eventbridge reindex {src} ~> {dst}")
-            send_eventbridge_reindex_event(session, src)
+            job_id = send_eventbridge_reindex_event(session, src)
+            print(f"Sent reindex event for {src} with job_id {job_id}")
         else:
             for source in SOURCES.keys():
                 if source == "miro" and src == "notmiro":
@@ -256,7 +257,8 @@ def start_reindex(ctx, src, dst, mode, input_file, calm_input_file):
 
             for reindex_target in EVENTBRIDGE_REINDEX_TARGETS:
                 print(f"Starting an eventbridge reindex {reindex_target} ~> {dst}")
-                send_eventbridge_reindex_event(session, reindex_target)
+                job_id = send_eventbridge_reindex_event(session, reindex_target)
+                print(f"Sent reindex event for {reindex_target} with job_id {job_id}")
 
         return
 
