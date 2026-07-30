@@ -75,25 +75,26 @@ def test_reauthenticates_once_on_401_via_cookie() -> None:
     assert data_calls == ["cookie-tok-1", "cookie-tok-2"]
 
 
-def test_falls_back_to_x_okapi_token_header() -> None:
-    # Tolerant fallback: if a gateway ever returns the token in an x-okapi-token
-    # header instead of the cookie, use it. Not what prod/dev currently do.
+def test_login_returning_x_okapi_token_header_only_raises() -> None:
+    # /authn/login-with-expiry only ever sets the folioAccessToken cookie, so a
+    # response carrying only an x-okapi-token header (and no cookie) is treated as
+    # a missing token — we deliberately do not read the header.
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/authn/login-with-expiry":
             return httpx.Response(201, headers={"x-okapi-token": "header-tok"})
-        assert request.headers["x-okapi-token"] == "header-tok"
         return httpx.Response(200, json={"ok": True})
 
     client = httpx.Client(auth=_auth(), transport=httpx.MockTransport(handler))
+    with pytest.raises(OkapiLoginError, match="no folioAccessToken cookie"):
+        client.get(f"{BASE}/x")
 
-    assert client.get(f"{BASE}/x").status_code == 200
 
-
-def test_login_without_token_header_or_cookie_raises() -> None:
+def test_login_without_token_cookie_raises() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200)  # no x-okapi-token header or folioAccessToken cookie
+        return httpx.Response(200)  # no folioAccessToken cookie
+
     client = httpx.Client(auth=_auth(), transport=httpx.MockTransport(handler))
-    with pytest.raises(OkapiLoginError, match="no x-okapi-token"):
+    with pytest.raises(OkapiLoginError, match="no folioAccessToken cookie"):
         client.get(f"{BASE}/x")
 
 

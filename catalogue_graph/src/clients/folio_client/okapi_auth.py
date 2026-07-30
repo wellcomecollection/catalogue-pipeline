@@ -3,8 +3,8 @@
 Handles login to OKAPI (POST ``/authn/login-with-expiry`` with username/password)
 and re-authenticates on 401 errors since tokens are short-lived.
 
-Extracts the token from the ``folioAccessToken`` cookie (or ``x-okapi-token`` header
-as fallback) and replays it as the ``x-okapi-token`` request header.
+Extracts the token from the ``folioAccessToken`` cookie and replays it as the
+``x-okapi-token`` request header.
 
 Shared across FOLIO clients via :class:`httpx.Auth`.
 """
@@ -53,13 +53,11 @@ class OkapiAuth(httpx.Auth):
         if response.status_code not in (200, 201):
             raise OkapiLoginError(f"OKAPI login failed ({response.status_code})")
         # /authn/login-with-expiry on Eureka/Keycloak (both prod and the dev sandbox)
-        # delivers the token in the folioAccessToken cookie, not an x-okapi-token header.
-        # Prefer the cookie, with a fallback to x-okapi-token for gateways that still return it.
-        token = response.cookies.get("folioAccessToken") or response.headers.get("x-okapi-token")
+        # always delivers the token in the folioAccessToken cookie, never an
+        # x-okapi-token response header, so the cookie is the only source we read.
+        token = response.cookies.get("folioAccessToken")
         if not token:
-            raise OkapiLoginError(
-                "OKAPI login returned no x-okapi-token header or folioAccessToken cookie"
-            )
+            raise OkapiLoginError("OKAPI login returned no folioAccessToken cookie")
         self._token = token
 
     def _apply(self, request: httpx.Request) -> None:
