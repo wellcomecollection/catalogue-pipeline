@@ -33,10 +33,10 @@ variable "snapshot_identifier" {
   default = null
 }
 
-# Destroy fails without this, as no final snapshot name is set.
 variable "skip_final_snapshot" {
-  type    = bool
-  default = false
+  description = "If true, allow destroy without creating a final snapshot. When false, destroy will fail unless the module is extended to set final_snapshot_identifier."
+  type        = bool
+  default     = false
 }
 
 
