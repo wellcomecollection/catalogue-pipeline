@@ -91,8 +91,7 @@ def test_falls_back_to_x_okapi_token_header() -> None:
 
 def test_login_without_token_header_or_cookie_raises() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200)  # no x-okapi-token header
-
+        return httpx.Response(200)  # no x-okapi-token header or folioAccessToken cookie
     client = httpx.Client(auth=_auth(), transport=httpx.MockTransport(handler))
     with pytest.raises(OkapiLoginError, match="no x-okapi-token"):
         client.get(f"{BASE}/x")

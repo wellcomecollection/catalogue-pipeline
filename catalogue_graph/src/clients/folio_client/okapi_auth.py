@@ -54,10 +54,8 @@ class OkapiAuth(httpx.Auth):
             raise OkapiLoginError(f"OKAPI login failed ({response.status_code})")
         # /authn/login-with-expiry on Eureka/Keycloak (both prod and the dev sandbox)
         # delivers the token in the folioAccessToken cookie, not an x-okapi-token header.
-        # Prefer the header if a gateway ever returns one, else read the cookie.
-        token = response.headers.get("x-okapi-token") or response.cookies.get(
-            "folioAccessToken"
-        )
+        # Prefer the cookie, with a fallback to x-okapi-token for gateways that still return it.
+        token = response.cookies.get("folioAccessToken") or response.headers.get("x-okapi-token")
         if not token:
             raise OkapiLoginError(
                 "OKAPI login returned no x-okapi-token header or folioAccessToken cookie"
