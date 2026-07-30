@@ -102,7 +102,8 @@
         "contributors.agent.label": [],
         "genres.concepts.label": [],
         "collectionPath.label": "GC/176/C/1",
-        "collectionPath.path": "GC176/C/1"
+        "collectionPath.path": "GC176/C/1",
+        "collectionPath.sort": "gc0000000176/c/0000000001"
       },
       "display": {
         "id": "a222zvge",
@@ -354,7 +355,15 @@
             "id": "online",
             "label": "Online"
           }
-        ]
+        ],
+        "archiveType": {
+          "id": "GC",
+          "label": "General collections"
+        },
+        "archiveRoot": {
+          "id": "rqyum5sv",
+          "label": "Twort, Frederick William"
+        }
       },
       "filterableValues": {
         "format.id": "h",
@@ -413,7 +422,10 @@
         "availabilities.id": [
           "closed-stores",
           "online"
-        ]
+        ],
+        "archiveType.id": "GC",
+        "archiveRoot.id": "rqyum5sv",
+        "archiveRoot.title": "Twort, Frederick William"
       }
     },
     "_version": 1751300414000,
@@ -1398,7 +1410,8 @@
         "contributors.agent.label": [],
         "genres.concepts.label": [],
         "collectionPath.label": "UGC 198/8/5/8",
-        "collectionPath.path": "UGC198/8/5/8"
+        "collectionPath.path": "UGC198/8/5/8",
+        "collectionPath.sort": "ugc0000000198/0000000008/0000000005/0000000008"
       },
       "display": {
         "id": "a2242545",
@@ -1604,7 +1617,8 @@
             "type": "Collection"
           }
         ],
-        "type": "Work"
+        "type": "Work",
+        "shortDescription": "<p>Marked number V11."
       },
       "aggregatableValues": {
         "workType": [
@@ -1634,7 +1648,11 @@
             "id": "online",
             "label": "Online"
           }
-        ]
+        ],
+        "archiveRoot": {
+          "id": "uad4jhwg",
+          "label": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland"
+        }
       },
       "filterableValues": {
         "format.id": "h",
@@ -1687,7 +1705,9 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "archiveRoot.id": "uad4jhwg",
+        "archiveRoot.title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland"
       }
     },
     "_version": 1701693347000,
@@ -3622,7 +3642,8 @@
         "contributors.agent.label": [],
         "genres.concepts.label": [],
         "collectionPath.label": "PP/RAS/A.2/1",
-        "collectionPath.path": "PPRAS/A/2/1"
+        "collectionPath.path": "PPRAS/A/2/1",
+        "collectionPath.sort": "ppras/a/0000000002/0000000001"
       },
       "display": {
         "id": "a227y9ye",
@@ -3789,7 +3810,8 @@
             "type": "Collection"
           }
         ],
-        "type": "Work"
+        "type": "Work",
+        "shortDescription": "Note on the German Hospital, 28 May 1940, and its lack of any relationship to the German state; letter to A G Maitland Jones re bombs falling in the vicinity of the hospital, 8 Sep 1940; photographs of the investigation of the bombs by Royal Engineers"
       },
       "aggregatableValues": {
         "workType": [
@@ -3814,7 +3836,15 @@
             "id": "closed-stores",
             "label": "Closed stores"
           }
-        ]
+        ],
+        "archiveType": {
+          "id": "PP",
+          "label": "Personal Papers"
+        },
+        "archiveRoot": {
+          "id": "dupg64pv",
+          "label": "Rast, Dr Hugo"
+        }
       },
       "filterableValues": {
         "format.id": "h",
@@ -3866,7 +3896,10 @@
         ],
         "availabilities.id": [
           "closed-stores"
-        ]
+        ],
+        "archiveType.id": "PP",
+        "archiveRoot.id": "dupg64pv",
+        "archiveRoot.title": "Rast, Dr Hugo"
       }
     },
     "_version": 1753957479000,
