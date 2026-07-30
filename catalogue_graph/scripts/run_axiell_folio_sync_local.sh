@@ -15,7 +15,7 @@
 # CHANGESET_IDS wins if both are set. Any extra args are forwarded to the module:
 #   CHANGESET_IDS=<changeset_id> ./run_axiell_folio_sync_local.sh              # Dry run (default)
 #   CHANGESET_IDS=<changeset_id> ./run_axiell_folio_sync_local.sh --live       # Write to prod FOLIO
-#   CHANGESET_IDS="<changeset_id> def456" ./run_axiell_folio_sync_local.sh     # Multiple changesets
+#   CHANGESET_IDS="<changeset_id> <changeset_id2>" ./run_axiell_folio_sync_local.sh     # Multiple changesets
 #   SAMPLE_LIMIT=10 ./run_axiell_folio_sync_local.sh --live            # Sample 10 active records
 #   FOLIO_TARGET=dev CHANGESET_IDS=<changeset_id> ./run_axiell_folio_sync_local.sh  # Target dev FOLIO
 #   AWS_PROFILE=my-profile CHANGESET_IDS=<changeset_id> ./run_axiell_folio_sync_local.sh --live
@@ -55,10 +55,10 @@ case "$FOLIO_TARGET" in
       --query 'Parameter.Value' \
       --output text)"
 
-    OKAPI_URL="$(echo "$CREDS" | jq -r .url)"
-    OKAPI_TENANT="$(echo "$CREDS" | jq -r .tenant)"
-    OKAPI_USERNAME="$(echo "$CREDS" | jq -r .username)"
-    OKAPI_PASSWORD="$(echo "$CREDS" | jq -r .password)"
+    OKAPI_URL="$(echo "$CREDS" | jq -re '.url // empty')"
+    OKAPI_TENANT="$(echo "$CREDS" | jq -re '.tenant // empty')"
+    OKAPI_USERNAME="$(echo "$CREDS" | jq -re '.username // empty')"
+    OKAPI_PASSWORD="$(echo "$CREDS" | jq -re '.password // empty')"
     ;;
   dev)
     # folio-dev-server sandbox, reached over the SSM tunnel (scripts/tunnel.sh in the

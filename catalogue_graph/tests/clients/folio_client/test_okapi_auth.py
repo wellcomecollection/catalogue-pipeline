@@ -80,9 +80,7 @@ def test_login_returning_x_okapi_token_header_only_raises() -> None:
     # response carrying only an x-okapi-token header (and no cookie) is treated as
     # a missing token — we deliberately do not read the header.
     def handler(request: httpx.Request) -> httpx.Response:
-        if request.url.path == "/authn/login-with-expiry":
-            return httpx.Response(201, headers={"x-okapi-token": "header-tok"})
-        return httpx.Response(200, json={"ok": True})
+        return httpx.Response(201, headers={"x-okapi-token": "header-tok"})
 
     client = httpx.Client(auth=_auth(), transport=httpx.MockTransport(handler))
     with pytest.raises(OkapiLoginError, match="no folioAccessToken cookie"):
