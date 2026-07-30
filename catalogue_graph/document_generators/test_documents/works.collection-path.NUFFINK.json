@@ -43,7 +43,8 @@
       "contributors.agent.label": [],
       "genres.concepts.label": [],
       "collectionPath.label": "NUF/FINK",
-      "collectionPath.path": "NUFFINK"
+      "collectionPath.path": "NUFFINK",
+      "collectionPath.sort": "nuffink"
     },
     "display": {
       "id": "wgtjwcaz",
@@ -114,5 +115,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T16:56:01.966272+00:00"
+  "createdAt": "2026-07-30T15:50:32.481751+00:00"
 }

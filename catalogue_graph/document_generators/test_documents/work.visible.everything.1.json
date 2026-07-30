@@ -696,7 +696,11 @@
           "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
-      "availabilities": []
+      "availabilities": [],
+      "archiveRoot": {
+        "id": "zm2wkrw9",
+        "label": "qKgHe3LiFcH1Yow"
+      }
     },
     "filterableValues": {
       "workType": "Standard",
@@ -766,8 +770,10 @@
         "qKgHe3LiFcH1Yow",
         "yhwsxNZOmV0IIdv"
       ],
-      "availabilities.id": []
+      "availabilities.id": [],
+      "archiveRoot.id": "zm2wkrw9",
+      "archiveRoot.title": "qKgHe3LiFcH1Yow"
     }
   },
-  "createdAt": "2026-06-04T07:07:52.069099+00:00"
+  "createdAt": "2026-07-30T15:50:32.216673+00:00"
 }

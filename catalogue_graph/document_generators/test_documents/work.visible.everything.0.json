@@ -710,7 +710,11 @@
           "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
-      "availabilities": []
+      "availabilities": [],
+      "archiveRoot": {
+        "id": "7vafg1w2",
+        "label": "08emPYDNpZDHkTv"
+      }
     },
     "filterableValues": {
       "workType": "Standard",
@@ -780,8 +784,10 @@
         "08emPYDNpZDHkTv",
         "wZL0ffJl0qmZquS"
       ],
-      "availabilities.id": []
+      "availabilities.id": [],
+      "archiveRoot.id": "7vafg1w2",
+      "archiveRoot.title": "08emPYDNpZDHkTv"
     }
   },
-  "createdAt": "2026-06-04T07:07:52.066552+00:00"
+  "createdAt": "2026-07-30T15:50:32.213416+00:00"
 }
