@@ -39,6 +39,14 @@ RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
 CONCEPTS_BATCH_SIZE = 40_000
 
 
+def _choose_target_id(primary_id: str, candidate_ids: set[str]) -> str:
+    """Refer to a related concept by an ID which has works, keeping the primary whenever it has works itself."""
+    if primary_id in candidate_ids:
+        return primary_id
+
+    return sorted(candidate_ids)[0]
+
+
 class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
     """Abstract base class for concept extraction from the catalogue graph.
 
@@ -118,6 +126,11 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
             for same_as_id in same_as_ids:
                 self.primary_map[same_as_id] = primary_id
 
+    def _get_work_connected_ids(self, concept_ids: Iterable[str]) -> set[str]:
+        """Return the subset of `concept_ids` connected to at least one work, as CONCEPT_TYPE_QUERY joins through
+        HAS_CONCEPT and so yields no row for a concept without works."""
+        return set(self.make_neptune_query("concept_type", concept_ids))
+
     def _get_related_concepts(
         self, query_type: ConceptQuery, ids: Iterable[str]
     ) -> RelatedConcepts:
@@ -142,14 +155,32 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
                     entry = merged_result[primary_id].setdefault(
                         primary_related_id,
                         {
-                            "id": primary_related_id,
                             "count": 0,
                             "relationship_type": set(),
+                            "referenced_ids": set(),
                         },
                     )
                     entry["count"] += related["count"]
+                    entry["referenced_ids"].add(related["id"])
                     if related.get("relationship_type"):
                         entry["relationship_type"].add(related["relationship_type"])
+
+        # Concepts with no works are removed from the index, so referring to one would 404. The related query
+        # collapses each 'same as' group to one arbitrary member, so ask the graph which members have works
+        # rather than relying on whichever member came back.
+        group_ids = {i for r in related_ids for i in self.get_same_as(r)}
+        work_connected_ids = self._get_work_connected_ids(group_ids)
+
+        for entries in merged_result.values():
+            for primary_related_id, entry in entries.items():
+                candidate_ids = {
+                    i
+                    for i in self.get_same_as(primary_related_id)
+                    if i in work_connected_ids
+                }
+                # The related query only returns concepts which have works, so these are a safe fallback.
+                candidate_ids.update(entry["referenced_ids"])
+                entry["id"] = _choose_target_id(primary_related_id, candidate_ids)
 
         limit = self.neptune_params["related_to_limit"]
         sorted_result = {
@@ -157,8 +188,12 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
             for concept_id, entries in merged_result.items()
         }
 
-        primary_related_ids = {self.get_primary(i) for i in related_ids}
-        full_related_concepts = self.get_concepts(primary_related_ids)
+        target_ids = {
+            entry["id"]
+            for entries in merged_result.values()
+            for entry in entries.values()
+        }
+        full_related_concepts = self.get_concepts(target_ids)
 
         full_result = defaultdict(list)
         for concept_id in ids:

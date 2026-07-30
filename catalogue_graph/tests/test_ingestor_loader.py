@@ -543,11 +543,12 @@ def test_ingestor_loader_with_broader_than_concepts(
         include_objects=pass_objects_to_index,
     )
 
-    # We expect a total of 15 API calls:
+    # We expect a total of 17 API calls:
     # * 12 to retrieve the same data as the `test_ingestor_loader_no_related_concepts` test case
     # * 4 to retrieve concept data for broader than concepts
+    # * 1 to find out which broader than concepts have works
     _compare_events(result, expected_event)
-    assert len(MockRequest.calls) == 16
+    assert len(MockRequest.calls) == 17
 
     expected_concept = get_catalogue_concept_mock(["broader_than"])
     s3_uri = _get_result_s3_uri(result, loader_event)
@@ -576,10 +577,10 @@ def test_ingestor_loader_with_related_to_concepts(
         include_objects=pass_objects_to_index,
     )
 
-    # Since we're including two separate groups of related concepts, we expect 4 additional API calls
+    # Since we're including two separate groups of related concepts, we expect 5 additional API calls
     # on top of those in `test_ingestor_loader_with_broader_than_concepts`
     _compare_events(result, expected_event)
-    assert len(MockRequest.calls) == 20
+    assert len(MockRequest.calls) == 22
 
     expected_concept = get_catalogue_concept_mock(["related_to", "people"])
     s3_uri = _get_result_s3_uri(result, loader_event)
