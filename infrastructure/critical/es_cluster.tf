@@ -8,7 +8,7 @@ module "es_cluster_2026_07_03" {
   cluster_date = "2026-07-03"
 
   # Sized for the full reindex, matching what 2025-10-02 scales to for one.
-  # Back to the 4g x 3 default once platform#6445 is signed off.
+  # Back to the 4g across 3 zones default once wellcomecollection/platform#6445 is signed off.
   memory     = "30g"
   node_count = 2
 
