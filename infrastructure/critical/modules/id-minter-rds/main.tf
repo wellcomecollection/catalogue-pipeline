@@ -47,6 +47,7 @@ module "identifiers_v2_serverless_rds_cluster" {
   master_password    = null
 
   snapshot_identifier = var.snapshot_identifier
+  skip_final_snapshot = var.skip_final_snapshot
 
   manage_master_user_password = true
 
