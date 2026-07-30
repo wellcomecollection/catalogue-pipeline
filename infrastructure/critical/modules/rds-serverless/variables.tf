@@ -33,6 +33,12 @@ variable "snapshot_identifier" {
   default = null
 }
 
+# Destroy fails without this, as no final snapshot name is set.
+variable "skip_final_snapshot" {
+  type    = bool
+  default = false
+}
+
 
 variable "max_scaling_capacity" {
   type    = number

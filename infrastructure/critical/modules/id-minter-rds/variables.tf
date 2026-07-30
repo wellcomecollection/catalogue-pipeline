@@ -39,3 +39,9 @@ variable "snapshot_identifier" {
   type        = string
   default     = null
 }
+
+variable "skip_final_snapshot" {
+  description = "Drop the cluster's data on destroy. Only for restored copies."
+  type        = bool
+  default     = false
+}
