@@ -27,7 +27,7 @@ _NUMERIC_SUFFIX_PREFIXES = {"OH", "TP"}
 
 
 class ArchiveType(BaseModel):
-    id: str    # normalised prefix code (e.g. "OH")
+    id: str  # normalised prefix code (e.g. "OH")
     label: str  # human-readable label (e.g. "Oral History")
 
 
@@ -41,7 +41,11 @@ def get_archive_type(collection_path_label: str) -> ArchiveType | None:
     """
     raw_prefix = collection_path_label.split("/")[0]
     match = re.fullmatch(r"([A-Z]+)(\d+)", raw_prefix)
-    normalised = match.group(1) if match and match.group(1) in _NUMERIC_SUFFIX_PREFIXES else raw_prefix
+    normalised = (
+        match.group(1)
+        if match and match.group(1) in _NUMERIC_SUFFIX_PREFIXES
+        else raw_prefix
+    )
     label = COLLECTION_PATH_PREFIX_LABELS.get(normalised)
     if label is None:
         return None

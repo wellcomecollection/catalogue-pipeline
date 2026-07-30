@@ -131,7 +131,7 @@ class QueryWorkTransformer(WorkBaseTransformer):
         path = self.collection_path
         if path is None:
             return None
-        return re.sub(r'\d+', lambda m: m.group().zfill(10), path.lower())
+        return re.sub(r"\d+", lambda m: m.group().zfill(10), path.lower())
 
     @property
     def collection_path_label(self) -> str | None:

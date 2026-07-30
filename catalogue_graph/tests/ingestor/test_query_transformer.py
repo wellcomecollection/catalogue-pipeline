@@ -181,3 +181,61 @@ def test_archive_root_when_no_hierarchy() -> None:
     transformer = QueryWorkTransformer(extracted)
     assert transformer.archive_root_id is None
     assert transformer.archive_root_title is None
+
+
+def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.hierarchy.ancestors = []
+    extracted.hierarchy.children = [
+        WorkHierarchyItem(
+            work=WorkNode.model_validate(
+                {
+                    "~id": "child",
+                    "~labels": ["Work"],
+                    "~properties": Work(id="child", label="Child", type="Work"),
+                }
+            ),
+            parts=1,
+        )
+    ]
+    assert QueryWorkTransformer(extracted).is_archive_root is True
+
+
+def test_is_archive_root_false_when_ancestors_present() -> None:
+    extracted = get_work_with_ancestor()
+    assert QueryWorkTransformer(extracted).is_archive_root is False
+
+
+def test_archive_type_from_collection_path_label() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.work.data.collection_path = CollectionPath(
+        path="PPRAS/A/2/1", label="PP/RAS/A.2/1"
+    )
+    assert QueryWorkTransformer(extracted).archive_type == "PP"
+
+
+def test_archive_type_none_for_unknown_prefix() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.work.data.collection_path = CollectionPath(path="XYZ/1", label="XYZ/1")
+    assert QueryWorkTransformer(extracted).archive_type is None
+
+
+def test_archive_type_none_when_no_collection_path() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.work.data.collection_path = None
+    assert QueryWorkTransformer(extracted).archive_type is None
+
+
+def test_collection_path_sort_pads_numbers_and_lowercases() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.work.data.collection_path = CollectionPath(path="GC176/C/1")
+    assert (
+        QueryWorkTransformer(extracted).collection_path_sort
+        == "gc0000000176/c/0000000001"
+    )
+
+
+def test_collection_path_sort_none_when_no_collection_path() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.work.data.collection_path = None
+    assert QueryWorkTransformer(extracted).collection_path_sort is None

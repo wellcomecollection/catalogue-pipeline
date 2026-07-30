@@ -6,8 +6,8 @@ from pydantic import BaseModel
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
-from models.pipeline.archive_type import get_archive_type
 from lookups.languages import from_code
+from models.pipeline.archive_type import get_archive_type
 from models.pipeline.identifier import (
     Identifiable,
     Identified,

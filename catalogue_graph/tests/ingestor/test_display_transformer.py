@@ -31,6 +31,24 @@ def get_work_fixture() -> VisibleExtractedWork:
     )
 
 
+def test_short_description_truncates_at_first_sentence() -> None:
+    extracted = get_work_fixture()
+    extracted.work.data.description = "First sentence. Second sentence."
+    assert DisplayWorkTransformer(extracted).short_description == "First sentence."
+
+
+def test_short_description_without_sentence_terminator() -> None:
+    extracted = get_work_fixture()
+    extracted.work.data.description = "No terminator here"
+    assert DisplayWorkTransformer(extracted).short_description == "No terminator here"
+
+
+def test_short_description_none_when_no_description() -> None:
+    extracted = get_work_fixture()
+    extracted.work.data.description = None
+    assert DisplayWorkTransformer(extracted).short_description is None
+
+
 def test_concept_standard_labels() -> None:
     extracted = get_work_fixture()
 
