@@ -70,13 +70,29 @@ resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read"
 # State Machine Definition
 locals {
   transformer_state_machine_definition = jsonencode({
-    StartAt = "Run transformer"
+    StartAt = "Whole store or a changeset?"
     States = {
+      # A reindex sends no changeset ids, so the run has to stream the whole
+      # adapter store. That does not fit in the Lambda's 600s, and a timeout is
+      # not retried, so it goes to a Fargate task with no time limit instead.
+      "Whole store or a changeset?" = {
+        Type       = "Choice"
+        InputPath  = "$.detail"
+        Default    = "Run transformer on ECS"
+        OutputPath = "$"
+        Choices = [
+          {
+            Variable  = "$.changeset_ids[0]"
+            IsPresent = true
+            Next      = "Run transformer"
+          }
+        ]
+      }
+
       "Run transformer" = {
-        Type      = "Task"
-        Resource  = module.transformer_lambda.lambda.arn
-        InputPath = "$.detail"
-        Next      = "Success"
+        Type     = "Task"
+        Resource = module.transformer_lambda.lambda.arn
+        Next     = "Success"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -86,6 +102,47 @@ locals {
           }
         ]
       }
+
+      # runTask.sync rather than waitForTaskToken: nothing downstream reads the
+      # result, and .sync surfaces a task that never starts instead of hanging
+      # on a token that is never sent.
+      "Run transformer on ECS" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::ecs:runTask.sync"
+        Next     = "Success"
+        Retry = [
+          {
+            ErrorEquals     = ["ECS.AmazonECSException", "ECS.InvalidParameterException"]
+            IntervalSeconds = 30
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          }
+        ]
+        Parameters = {
+          Cluster        = aws_ecs_cluster.cluster.arn
+          TaskDefinition = module.transformer_ecs_task.task_definition_arn
+          LaunchType     = "FARGATE"
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              AssignPublicIp = "DISABLED"
+              Subnets        = local.network_config.subnets
+              SecurityGroups = [
+                aws_security_group.egress.id,
+                local.network_config.ec_privatelink_security_group_id,
+              ]
+            }
+          }
+          Overrides = {
+            ContainerOverrides = [
+              {
+                "Name"      = "${local.namespace}-transformer"
+                "Command.$" = "States.Array('/app/src/adapters/steps/transformer.py', '--transformer-type', $.transformer_type, '--job-id', $.job_id, '--use-rest-api-table', '--es-mode', 'private')"
+              }
+            ]
+          }
+        }
+      }
+
       "Success" = {
         Type = "Succeed"
       }
@@ -125,6 +182,8 @@ module "transformer_state_machine" {
     "read_ebsco_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
     "read_axiell_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["axiell"].json
     "read_folio_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["folio"].json
+    "run_transformer_ecs_task"   = module.transformer_ecs_task.invoke_policy_document
+    "transformer_run_task_sync"  = data.aws_iam_policy_document.transformer_run_task_sync.json
   }
 }
 

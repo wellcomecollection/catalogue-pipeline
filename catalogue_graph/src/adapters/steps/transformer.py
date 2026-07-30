@@ -247,8 +247,8 @@ def main() -> None:
     parser.add_argument(
         "--es-mode",
         type=str,
-        help="Where to index source work documents. Use 'public' to connect to the production cluster.",
-        choices=["local", "public"],
+        help="Where to index source work documents. 'private' matches the Lambda, and needs to run inside the VPC.",
+        choices=typing.get_args(ElasticsearchMode),
         default="local",
     )
     parser.add_argument(
