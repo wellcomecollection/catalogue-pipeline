@@ -97,6 +97,12 @@ jobs:
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [ build-unified-pipeline-task-image, build-unified-pipeline-lambda-image ]
+    # Deploying moves mutable ECR tags, so overlapping runs can leave a tag on
+    # the older commit. Queue them instead: cancelling could update lambdas
+    # without moving the tags they read.
+    concurrency:
+      group: catalogue-pipeline-deploy
+      cancel-in-progress: false
     uses: ./.github/workflows/catalogue-graph-deploy.yml
     with:
       deploy_tag: ${{ github.sha }}

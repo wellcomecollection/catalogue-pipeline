@@ -48,20 +48,32 @@ then
   exit 1
 fi
 
-ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
-  uk.ac.wellcome/feature_inferrer \
-  uk.ac.wellcome/palette_inferrer \
-  uk.ac.wellcome/aspect_ratio_inferrer \
-  uk.ac.wellcome/matcher \
-  uk.ac.wellcome/merger \
-  uk.ac.wellcome/transformer_calm \
-  uk.ac.wellcome/transformer_mets \
-  uk.ac.wellcome/transformer_miro \
-  uk.ac.wellcome/transformer_sierra \
-  uk.ac.wellcome/transformer_tei \
-  uk.ac.wellcome/unified_pipeline_lambda \
-  uk.ac.wellcome/unified_pipeline_task
-  
+REPOSITORIES=(
+  uk.ac.wellcome/feature_inferrer
+  uk.ac.wellcome/palette_inferrer
+  uk.ac.wellcome/aspect_ratio_inferrer
+  uk.ac.wellcome/matcher
+  uk.ac.wellcome/merger
+  uk.ac.wellcome/transformer_calm
+  uk.ac.wellcome/transformer_mets
+  uk.ac.wellcome/transformer_miro
+  uk.ac.wellcome/transformer_sierra
+  uk.ac.wellcome/transformer_tei
+)
+
+# GitHub Actions moves these two on every catalogue_graph merge, so tag them
+# here only when bootstrapping a pipeline date: a new stack needs images before
+# its first GitHub deploy, but retagging them on every merge races that deploy.
+if [[ "$TASK" == "tag_images" ]]
+then
+  REPOSITORIES+=(
+    uk.ac.wellcome/unified_pipeline_lambda
+    uk.ac.wellcome/unified_pipeline_task
+  )
+fi
+
+ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" "${REPOSITORIES[@]}"
+
 if [[ "$TASK" == "tag_images_and_deploy_services" ]]
 then
   echo "Deploying ECS pipeline services to catalogue-$PIPELINE_DATE"

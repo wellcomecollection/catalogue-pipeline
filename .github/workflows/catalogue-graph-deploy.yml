@@ -22,6 +22,13 @@ permissions:
   contents: read
   id-token: write
 
+# Join the deploy queue only on manual dispatch, so a hand-run deploy waits for
+# an automatic one. When called from CI the calling job already holds this
+# group, and claiming it again here would wait on ourselves.
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && 'catalogue-pipeline-deploy' || format('catalogue-pipeline-deploy-{0}', github.run_id) }}
+  cancel-in-progress: false
+
 jobs:
   discover-pipeline-dates:
     runs-on: ubuntu-latest
