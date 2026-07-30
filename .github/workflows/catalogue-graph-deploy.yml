@@ -22,6 +22,12 @@ permissions:
   contents: read
   id-token: write
 
+# Claim the shared group only when triggered directly: called from CI, the
+# calling job already holds it. github.workflow is the caller's, not ours.
+concurrency:
+  group: "${{ github.workflow == 'Catalogue pipeline: Deploy' && 'catalogue-pipeline-deploy' || format('catalogue-pipeline-deploy-{0}', github.run_id) }}"
+  cancel-in-progress: false
+
 jobs:
   discover-pipeline-dates:
     runs-on: ubuntu-latest

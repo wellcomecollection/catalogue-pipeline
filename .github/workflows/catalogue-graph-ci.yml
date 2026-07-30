@@ -97,6 +97,11 @@ jobs:
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [ build-unified-pipeline-task-image, build-unified-pipeline-lambda-image ]
+    # Deploys move mutable ECR tags, so run one at a time. Queue rather than
+    # cancel: retagging precedes the lambda updates that depend on it.
+    concurrency:
+      group: catalogue-pipeline-deploy
+      cancel-in-progress: false
     uses: ./.github/workflows/catalogue-graph-deploy.yml
     with:
       deploy_tag: ${{ github.sha }}

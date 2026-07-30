@@ -75,7 +75,7 @@ The enrichment step has a local CLI (defaults to local Iceberg tables; pass
 are read from `FOLIO_INVENTORY_URL` / `FOLIO_INVENTORY_USERNAME` /
 `FOLIO_INVENTORY_PASSWORD` / `FOLIO_INVENTORY_TENANT` when set, otherwise from SSM, so
 you can point at a dev or mock endpoint without AWS. The enrichment client logs in to
-OKAPI itself (POST `/authn/login`) and refreshes on 401. These are OKAPI inventory
+OKAPI itself (POST `/authn/login-with-expiry`) and refreshes on 401. These are OKAPI inventory
 credentials, not the OAI feed token; to read them from SSM use
 `AWS_PROFILE=platform-developer`.
 

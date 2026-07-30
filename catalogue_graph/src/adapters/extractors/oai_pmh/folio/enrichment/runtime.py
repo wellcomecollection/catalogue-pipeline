@@ -81,7 +81,7 @@ def build_inventory_http_client() -> httpx.Client:
     """Build an authenticated client for mod-inventory-storage.
 
     ``enrichedInstances`` is an OKAPI/mod-inventory-storage endpoint. OKAPI tokens are
-    short-lived, so the client logs in itself (POST ``/authn/login`` with the
+    short-lived, so the client logs in itself (POST ``/authn/login-with-expiry`` with the
     username/password from ``FOLIO_INVENTORY_*``/SSM) and refreshes on 401, sending
     ``x-okapi-token`` plus ``x-okapi-tenant``. The URL, credentials and tenant all come
     from ``FOLIO_INVENTORY_*`` env vars when set, otherwise SSM.

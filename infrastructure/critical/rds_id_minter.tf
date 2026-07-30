@@ -38,6 +38,9 @@ module "id_minter_rds_2026_07_03" {
   # A restored copy of production; its contents are never worth keeping.
   skip_final_snapshot = true
 
+  # A restored copy of production; its contents are never worth keeping.
+  skip_final_snapshot = true
+
   vpc_id             = local.vpc_id_new
   private_subnet_ids = local.private_subnets_new
   admin_cidr_ingress = local.admin_cidr_ingress
