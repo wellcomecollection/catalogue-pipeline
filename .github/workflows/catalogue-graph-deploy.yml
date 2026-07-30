@@ -51,6 +51,11 @@ jobs:
         image_name: [ unified_pipeline_task, unified_pipeline_lambda ]
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The backwards check compares commits, so it needs the history.
+          # Blobs are fetched on demand, which keeps the clone cheap.
+          fetch-depth: 0
+          filter: blob:none
       - uses: ./.github/actions/retag-docker-image
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
@@ -58,6 +63,10 @@ jobs:
           source_tag: ${{ inputs.deploy_tag }}
           target_tag: prod
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          # Guard the automatic path only, so dispatching an older sha stays a
+          # way to roll back. github.event_name is the caller's event, which is
+          # push for a merge and workflow_dispatch when run by hand.
+          enforce_forward_only: ${{ github.event_name != 'workflow_dispatch' }}
 
   retag-dated-images:
     runs-on: ubuntu-latest
@@ -68,6 +77,9 @@ jobs:
         image_name: [ unified_pipeline_task, unified_pipeline_lambda ]
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          filter: blob:none
       - uses: ./.github/actions/retag-docker-image
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
@@ -75,6 +87,7 @@ jobs:
           source_tag: ${{ inputs.deploy_tag }}
           target_tag: env.${{ matrix.pipeline_date }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          enforce_forward_only: ${{ github.event_name != 'workflow_dispatch' }}
 
   deploy-unified-pipeline-lambdas:
     runs-on: ubuntu-latest
