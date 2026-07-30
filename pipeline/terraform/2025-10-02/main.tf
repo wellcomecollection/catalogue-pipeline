@@ -27,9 +27,9 @@ module "pipeline" {
     (local.pipeline_date) = {
       works = {
         // prod transformers - prod id_minter
-        source = "works_source.2026-03-25"
+        source       = "works_source.2026-03-25"
         // prod id_minter - prod matcher_merger
-        identified = "works_identified.2023-05-26"
+        identified   = "works_identified.2023-05-26"
         // prod matcher_merger - prod graph/ingestor/indexer
         denormalised = "works_denormalised.2025-08-14"
       }
@@ -39,11 +39,11 @@ module "pipeline" {
         // modifiedTime-mapped images-initial-2026-06-15 (see the 2026-06-15 entry below),
         // so nothing writes this index any more. Remove this `initial` entry to delete the
         // old index once we're confident the new path is the source of truth.
-        initial = "empty"
+        initial   = "empty"
         // scala images ingestor - to be deleted when the service is removed
         augmented = "empty"
         // scala images ingestor - to be deleted when the service is removed
-        indexed = "images_indexed.2024-11-14"
+        indexed   = "images_indexed.2024-11-14"
       }
     }
     "2025-10-09" = {
@@ -86,7 +86,7 @@ module "pipeline" {
         // separate operational step. Remove this augmented entry once the index has been deleted.
         augmented = "images_augmented.2026-04-29"
         // prod graph/ingestor/indexer - prod API
-        indexed = "images_indexed.2024-11-14"
+        indexed   = "images_indexed.2024-11-14"
       }
     }
     // Indexes for the new Python image-inferrer state machine.
@@ -105,7 +105,13 @@ module "pipeline" {
         initial   = "images_initial.2026-06-15"
         augmented = "images_augmented.2026-04-29"
       }
-    }
+    },
+    "2026-07-30" = {
+      works = {
+        // Mappings to include new archive-related fields. Future prod index.
+        indexed = "works_indexed.2026-07-30"
+      }
+    },
   }
 
   allow_delete_indices = false
