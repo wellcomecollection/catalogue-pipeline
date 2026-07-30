@@ -69,56 +69,28 @@ resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read"
 
 # State Machine Definition
 locals {
+  # A whole-store transform (a reindex, which carries no changeset ids) has to
+  # stream the entire adapter store in one run, which does not fit in a Lambda.
+  # Rather than route by size, every transform runs as a Fargate task.
   transformer_state_machine_definition = jsonencode({
-    StartAt = "Whole store or a changeset?"
+    QueryLanguage = "JSONata"
+    StartAt       = "Run transformer"
     States = {
-      # A reindex sends no changeset ids, so the run has to stream the whole
-      # adapter store. That does not fit in the Lambda's 600s, and a timeout is
-      # not retried, so it goes to a Fargate task with no time limit instead.
-      "Whole store or a changeset?" = {
-        Type       = "Choice"
-        InputPath  = "$.detail"
-        Default    = "Run transformer on ECS"
-        OutputPath = "$"
-        Choices = [
-          {
-            Variable  = "$.changeset_ids[0]"
-            IsPresent = true
-            Next      = "Run transformer"
-          }
-        ]
-      }
-
       "Run transformer" = {
-        Type     = "Task"
-        Resource = module.transformer_lambda.lambda.arn
-        Next     = "Success"
+        Type             = "Task"
+        Resource         = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        TimeoutSeconds   = local.transformer_task_token_timeout_seconds
+        HeartbeatSeconds = local.transformer_task_token_heartbeat_seconds
+        Next             = "Success"
         Retry = [
           {
-            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
-            IntervalSeconds = 2
-            MaxAttempts     = 3
-            BackoffRate     = 2.0
-          }
-        ]
-      }
-
-      # runTask.sync rather than waitForTaskToken: nothing downstream reads the
-      # result, and .sync surfaces a task that never starts instead of hanging
-      # on a token that is never sent.
-      "Run transformer on ECS" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.sync"
-        Next     = "Success"
-        Retry = [
-          {
-            ErrorEquals     = ["ECS.AmazonECSException", "ECS.InvalidParameterException"]
+            ErrorEquals     = ["States.TaskFailed", "States.Timeout"]
             IntervalSeconds = 30
             MaxAttempts     = 3
             BackoffRate     = 2.0
           }
         ]
-        Parameters = {
+        Arguments = {
           Cluster        = aws_ecs_cluster.cluster.arn
           TaskDefinition = module.transformer_ecs_task.task_definition_arn
           LaunchType     = "FARGATE"
@@ -135,8 +107,12 @@ locals {
           Overrides = {
             ContainerOverrides = [
               {
-                "Name"      = "${local.namespace}-transformer"
-                "Command.$" = "States.Array('/app/src/adapters/steps/transformer.py', '--transformer-type', $.transformer_type, '--job-id', $.job_id, '--use-rest-api-table', '--es-mode', 'private')"
+                Name = "${local.namespace}-transformer"
+                Command = [
+                  "/app/src/adapters/steps/transformer.py",
+                  "--event", "{% $string($states.input.detail) %}",
+                  "--task-token", "{% $states.context.Task.Token %}"
+                ]
               }
             ]
           }
@@ -148,6 +124,12 @@ locals {
       }
     }
   })
+
+  # The task heartbeats every 60s, so the state notices a dead task in minutes
+  # rather than waiting out the timeout. The timeout is the backstop for a run
+  # that never starts heartbeating at all.
+  transformer_task_token_timeout_seconds   = 12 * 60 * 60
+  transformer_task_token_heartbeat_seconds = 5 * 60
 
   transformer_types = {
     ebsco = {
@@ -183,7 +165,6 @@ module "transformer_state_machine" {
     "read_axiell_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["axiell"].json
     "read_folio_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["folio"].json
     "run_transformer_ecs_task"   = module.transformer_ecs_task.invoke_policy_document
-    "transformer_run_task_sync"  = data.aws_iam_policy_document.transformer_run_task_sync.json
   }
 }
 

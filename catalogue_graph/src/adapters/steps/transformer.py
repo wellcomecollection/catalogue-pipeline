@@ -31,6 +31,7 @@ from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from utils.steps import ecs_handler
 
 logger = structlog.get_logger(__name__)
 
@@ -211,8 +212,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     ).model_dump(mode="json")
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Transform adapter data")
+def local_handler(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--transformer-type",
         required=True,
@@ -247,8 +247,8 @@ def main() -> None:
     parser.add_argument(
         "--es-mode",
         type=str,
-        help="Where to index source work documents. 'private' matches the Lambda, and needs to run inside the VPC.",
-        choices=typing.get_args(ElasticsearchMode),
+        help="Where to index source work documents. Use 'public' to connect to the production cluster.",
+        choices=["local", "public"],
         default="local",
     )
     parser.add_argument(
@@ -279,4 +279,22 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Transform adapter data")
+    parser.add_argument(
+        "--use-cli",
+        action="store_true",
+        help="Whether to invoke the local CLI handler instead of the ECS handler.",
+    )
+    args, _ = parser.parse_known_args()
+
+    if args.use_cli:
+        local_handler(parser)
+    else:
+        # This will automatically use `es_mode=private`
+        ecs_handler(
+            arg_parser=parser,
+            handler=handler,
+            event_validator=TransformerEvent.model_validate_json,
+            pipeline_step="adapter_transformer",
+            use_rest_api_table=True,
+        )

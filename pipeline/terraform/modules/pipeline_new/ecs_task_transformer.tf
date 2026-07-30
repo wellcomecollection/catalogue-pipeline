@@ -1,6 +1,5 @@
-# A full-store transform (a reindex, which carries no changeset ids) does not fit
-# in the transformer Lambda's 600s. Harvests and rebuilds arrive pre-chunked into
-# changesets and stay on the Lambda.
+# Every adapter transform runs here. A reindex carries no changeset ids and has to
+# stream the whole adapter store, which does not fit in the Lambda's 600s.
 module "transformer_ecs_task" {
   source = "../ecs_task"
 
@@ -42,19 +41,20 @@ resource "aws_iam_role_policy" "transformer_task_cloudwatch_write" {
   policy = data.aws_iam_policy_document.transformer_lambda_cloudwatch_write.json
 }
 
-# ecs:runTask.sync needs more than the ecs_task module's invoke policy grants: it
-# polls the task and manages an EventBridge rule to hear about completion.
-data "aws_iam_policy_document" "transformer_run_task_sync" {
-  statement {
-    effect  = "Allow"
-    actions = ["ecs:StopTask", "ecs:DescribeTasks"]
-    # ECS task ARNs are only known at run time.
-    resources = ["*"]
-  }
+# The task reports completion with the Step Functions task token it is handed.
+resource "aws_iam_role_policy" "transformer_task_token" {
+  role   = module.transformer_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.transformer_task_token.json
+}
 
+data "aws_iam_policy_document" "transformer_task_token" {
   statement {
-    effect    = "Allow"
-    actions   = ["events:PutTargets", "events:PutRule", "events:DescribeRule"]
-    resources = ["arn:aws:events:eu-west-1:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForECSTaskRule"]
+    effect = "Allow"
+    actions = [
+      "states:SendTaskSuccess",
+      "states:SendTaskFailure",
+      "states:SendTaskHeartbeat",
+    ]
+    resources = ["*"]
   }
 }
