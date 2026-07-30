@@ -53,6 +53,8 @@ class WorkFilterableValues(ElasticsearchModel):
     availabilities_id: list[str] = Field(serialization_alias="availabilities.id")
     is_archive_root: bool | None = Field(serialization_alias="isArchiveRoot")
     archive_type: str | None = Field(serialization_alias="archiveType.id")
+    archive_root_id: str | None = Field(serialization_alias="archiveRoot.id")
+    archive_root_title: str | None = Field(serialization_alias="archiveRoot.title")
 
     @classmethod
     def from_extracted_work(
@@ -91,4 +93,6 @@ class WorkFilterableValues(ElasticsearchModel):
             availabilities_id=[a.id for a in work.state.availabilities],
             is_archive_root=transformer.is_archive_root or None,
             archive_type=transformer.archive_type,
+            archive_root_id=transformer.archive_root_id,
+            archive_root_title=transformer.archive_root_title,
         )

@@ -135,6 +135,19 @@
               "eager_global_ordinals": true
             }
           }
+        },
+        "archiveRoot": {
+          "type": "nested",
+          "properties": {
+            "id": {
+              "type": "keyword",
+              "eager_global_ordinals": true
+            },
+            "label": {
+              "type": "keyword",
+              "eager_global_ordinals": true
+            }
+          }
         }
       }
     },
@@ -328,6 +341,16 @@
               "type": "keyword"
             }
           }
+        },
+        "archiveRoot": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "keyword"
+            }
+          }
         }
       }
     },
@@ -410,13 +433,11 @@
                   "type": "text",
                   "analyzer": "path_analyzer",
                   "search_analyzer": "lowercase_whitespace_tokens"
-                },
-                "sort": {
-                  "type": "icu_collation_keyword",
-                  "language": "en",
-                  "numeric": true
                 }
               }
+            },
+            "sort": {
+              "type": "keyword"
             }
           }
         },
@@ -825,11 +846,6 @@
               "type": "text",
               "analyzer": "path_analyzer",
               "search_analyzer": "lowercase_whitespace_tokens"
-            },
-            "sort": {
-              "type": "icu_collation_keyword",
-              "language": "en",
-              "numeric": true
             }
           }
         },

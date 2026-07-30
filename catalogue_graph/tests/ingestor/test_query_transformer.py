@@ -124,3 +124,60 @@ def test_identifiers_includes_work_canonical_id() -> None:
     identifiers = list(QueryWorkTransformer(extracted).identifiers)
     assert "canonical_id_1" in identifiers
     assert "b_number" in identifiers
+
+
+def test_archive_root_with_ancestors() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.hierarchy.ancestors[0].work.properties.id = "root_id"
+    extracted.hierarchy.ancestors[0].work.properties.label = "Root title"
+
+    transformer = QueryWorkTransformer(extracted)
+    assert transformer.archive_root_id == "root_id"
+    assert transformer.archive_root_title == "Root title"
+
+
+def test_archive_root_when_work_is_root() -> None:
+    fixture = load_json_fixture("ingestor/single_merged.json")
+    work = VisibleMergedWork.model_validate(fixture)
+    work.state.canonical_id = "this_work_id"
+    work.data.title = "This work title"
+
+    extracted = VisibleExtractedWork(
+        work=work,
+        hierarchy=WorkHierarchy(
+            id="some_id",
+            ancestors=[],
+            children=[
+                WorkHierarchyItem(
+                    work=WorkNode.model_validate(
+                        {
+                            "~id": "child",
+                            "~labels": ["Work"],
+                            "~properties": Work(id="child", label="Child", type="Work"),
+                        }
+                    ),
+                    parts=1,
+                )
+            ],
+        ),
+        concepts=[],
+    )
+
+    transformer = QueryWorkTransformer(extracted)
+    assert transformer.archive_root_id == "this_work_id"
+    assert transformer.archive_root_title == "This work title"
+
+
+def test_archive_root_when_no_hierarchy() -> None:
+    fixture = load_json_fixture("ingestor/single_merged.json")
+    work = VisibleMergedWork.model_validate(fixture)
+
+    extracted = VisibleExtractedWork(
+        work=work,
+        hierarchy=WorkHierarchy(id="some_id", ancestors=[], children=[]),
+        concepts=[],
+    )
+
+    transformer = QueryWorkTransformer(extracted)
+    assert transformer.archive_root_id is None
+    assert transformer.archive_root_title is None

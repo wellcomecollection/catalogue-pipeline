@@ -26,6 +26,7 @@ class WorkAggregatableValues(ElasticsearchModel):
         serialization_alias="availabilities"
     )
     archive_type: AggregatableField | None = Field(serialization_alias="archiveType")
+    archive_root: AggregatableField | None = Field(serialization_alias="archiveRoot")
 
     @classmethod
     def from_extracted_work(
@@ -42,4 +43,5 @@ class WorkAggregatableValues(ElasticsearchModel):
             item_licenses=list(transformer.licenses),
             availabilities=list(transformer.availabilities),
             archive_type=transformer.archive_type,
+            archive_root=transformer.archive_root,
         )
