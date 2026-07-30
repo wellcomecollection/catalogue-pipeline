@@ -26,7 +26,7 @@ Code is built and deployed by two CI systems.
 
 **Buildkite** builds the Scala applications (transformers, matcher, merger, inferrers, and the source adapters). On a merge to main it publishes each image with its commit tag and `latest`, then triggers two deploy pipelines:
 
-* `catalogue-pipeline-deploy-pipeline` runs `.buildkite/scripts/deploy_latest_pipeline.py`, which chooses the target pipelines (see below) and for each one runs `builds/deploy_catalogue_pipeline.sh`: retag `latest` as `env.<date>`, force a new deployment of the ECS services in the `catalogue-<date>` cluster, and update the `catalogue-<date>-*` lambdas.
+* `catalogue-pipeline-deploy-pipeline` runs `.buildkite/scripts/deploy_latest_pipeline.py`, which chooses the target pipelines (see below) and for each one runs `builds/deploy_catalogue_pipeline.sh`: retag `latest` as `env.<date>` for the Scala and inferrer images, force a new deployment of the ECS services in the `catalogue-<date>` cluster, and update the `catalogue-<date>-*` lambdas. It leaves `unified_pipeline_task` and `unified_pipeline_lambda` alone, because GitHub Actions moves those two tags and having both systems write them let a merge deploy an older commit, or a pull request build, over a newer one.
 * `catalogue-pipeline-deploy-adapters` deploys the shared adapter services (Sierra, Calm, METS, TEI) by moving `env.prod` and redeploying their fixed clusters. Adapters are singletons: they are deployed once and feed every active pipeline.
 
 **GitHub Actions** builds the Python "unified pipeline" images (`unified_pipeline_task` and `unified_pipeline_lambda`) from `catalogue_graph/`. On a merge to main, `catalogue-graph-deploy.yml`:
@@ -59,5 +59,13 @@ PIPELINE_DATE="2025-10-02" builds/deploy_catalogue_pipeline.sh tag_images_and_de
 ```
 
 Note that this deploys whatever `latest` currently points at, not a specific commit.
+
+That command covers the Scala and inferrer images only. To move the Python unified pipeline images onto an older pipeline, dispatch the `Catalogue pipeline: Deploy` workflow with the commit you want:
+
+```console
+gh workflow run catalogue-graph-deploy.yml -f deploy_tag=<commit sha>
+```
+
+That deploys to every pipeline `deploy_settings.json` selects, so while the flag is off it reaches the most recent pipeline only. Deploying the Python images to an older pipeline on its own means retagging by hand.
 
 The Buildkite deploy script also looks up the works index currently served by the catalogue API (`/_elasticConfig`) and warns when the newest pipeline is not the production pipeline. Which pipeline is "production" is not recorded anywhere in this repo: it is whichever pipeline's index the [catalogue-api](https://github.com/wellcomecollection/catalogue-api) is configured to serve.

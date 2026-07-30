@@ -22,11 +22,13 @@ permissions:
   contents: read
   id-token: write
 
-# Join the deploy queue only on manual dispatch, so a hand-run deploy waits for
-# an automatic one. When called from CI the calling job already holds this
-# group, and claiming it again here would wait on ourselves.
+# Join the deploy queue only when this workflow is the one that was triggered,
+# so a hand-run deploy waits for an automatic one. Called from CI the calling
+# job already holds this group, and claiming it again here would wait on
+# ourselves. The github context in a called workflow is the caller's, so
+# github.workflow names us only when we ran directly.
 concurrency:
-  group: ${{ github.event_name == 'workflow_dispatch' && 'catalogue-pipeline-deploy' || format('catalogue-pipeline-deploy-{0}', github.run_id) }}
+  group: "${{ github.workflow == 'Catalogue pipeline: Deploy' && 'catalogue-pipeline-deploy' || format('catalogue-pipeline-deploy-{0}', github.run_id) }}"
   cancel-in-progress: false
 
 jobs:
