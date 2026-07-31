@@ -168,10 +168,16 @@ class LoaderReport(IngestorReport):
 class IndexerReport(IngestorReport):
     label: ClassVar[str] = "indexer"
     success_count: int
+    version_conflict_count: int = 0
 
     @property
     def metrics(self) -> list[PipelineMetric]:
-        return [PipelineMetric(name="success_count", value=self.success_count)]
+        return [
+            PipelineMetric(name="success_count", value=self.success_count),
+            PipelineMetric(
+                name="version_conflict_count", value=self.version_conflict_count
+            ),
+        ]
 
 
 class DeletionReport(IngestorReport):

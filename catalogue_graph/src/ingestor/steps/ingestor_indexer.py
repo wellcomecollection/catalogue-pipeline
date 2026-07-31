@@ -41,6 +41,18 @@ RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
 }
 
 
+def _is_version_conflict(error: dict[str, typing.Any]) -> bool:
+    """True if a bulk error is a benign `external_gte` version conflict (the
+    document already has a version >= the one we tried to write)."""
+    for action_result in error.values():
+        if (
+            action_result.get("error", {}).get("type")
+            == "version_conflict_engine_exception"
+        ):
+            return True
+    return False
+
+
 def _get_objects_to_index(
     base_event: IngestorStepEvent,
 ) -> Generator[IngestorIndexerObject]:
@@ -125,19 +137,32 @@ def handler(
         total_success_count += success_count
         all_es_errors += es_errors
 
+    version_conflicts = [e for e in all_es_errors if _is_version_conflict(e)]
+    other_errors = [e for e in all_es_errors if not _is_version_conflict(e)]
+
+    if version_conflicts:
+        logger.warning(
+            "Skipped documents already at a newer version (version conflict)",
+            count=len(version_conflicts),
+        )
+
     event_payload = event.model_dump(exclude={"objects_to_index"})
 
     logger.info("Preparing indexer pipeline report")
-    report = IndexerReport(**event_payload, success_count=total_success_count)
+    report = IndexerReport(
+        **event_payload,
+        success_count=total_success_count,
+        version_conflict_count=len(version_conflicts),
+    )
     report.publish()
 
-    if all_es_errors:
+    if other_errors:
         logger.error(
             "Bulk indexing errors encountered",
-            total_errors=len(all_es_errors),
-            first_errors=all_es_errors[:5],
+            total_errors=len(other_errors),
+            first_errors=other_errors[:5],
         )
-        raise RuntimeError(f"Bulk indexing failed with {len(all_es_errors)} error(s)")
+        raise RuntimeError(f"Bulk indexing failed with {len(other_errors)} error(s)")
 
     return IngestorIndexerMonitorLambdaEvent(
         **event_payload,
