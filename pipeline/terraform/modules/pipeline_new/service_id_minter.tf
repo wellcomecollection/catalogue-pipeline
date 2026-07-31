@@ -51,6 +51,6 @@ module "id_minter_lambda" {
   alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 
   # Identifier-dense windows peak ~4.5GB; 2048 OOMs.
-  lambda_memory_size = 6144
+  memory_size = 6144
 }
 

@@ -33,7 +33,7 @@ variable "env_vars" {
   })
 }
 
-variable "lambda_memory_size" {
+variable "memory_size" {
   type    = number
   default = 2048
 }

@@ -6,15 +6,19 @@ locals {
     States = {
       ConstructEvent = {
         Type = "Pass",
-        # Replays may pass an explicit window and job_id; scheduled runs
-        # derive the window end from scheduled_time - 5min.
+        # Replays may pass source_identifiers or an explicit window, plus a
+        # job_id; scheduled runs derive the window end from scheduled_time -
+        # 5min. Shape guards keep malformed input (e.g. window: null) from
+        # reaching the Lambda as "no window", which would mint the full index.
         Output = trimspace(<<-EOT
           {% $merge([
             {'pipeline_date': '${var.pipeline_date}'},
-            {'window': $exists($states.input.window)
-              ? $states.input.window
-              : {'end_time': $fromMillis($toMillis($states.input.scheduled_time) - 300000)}},
-            $exists($states.input.job_id) ? {'job_id': $states.input.job_id} : {}
+            $type($states.input.source_identifiers) = 'array'
+              ? {'source_identifiers': $states.input.source_identifiers}
+              : {'window': $exists($states.input.window.end_time)
+                  ? $states.input.window
+                  : {'end_time': $fromMillis($toMillis($states.input.scheduled_time) - 300000)}},
+            $type($states.input.job_id) = 'string' ? {'job_id': $states.input.job_id} : {}
           ]) %}
         EOT
         ),

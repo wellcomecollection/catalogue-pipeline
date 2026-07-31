@@ -26,7 +26,7 @@ module "id_minter_lambda" {
     command = ["id_minter.steps.id_minter.lambda_handler"]
   }
 
-  memory_size = var.lambda_memory_size
+  memory_size = var.memory_size
   timeout     = 900
 
   environment_variables = merge(
