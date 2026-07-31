@@ -6,13 +6,22 @@ locals {
     States = {
       ConstructEvent = {
         Type = "Pass",
-        Output = {
-          "pipeline_date" : var.pipeline_date,
-          # window end time is 5 minutes before the scheduled time
-          "window" : {
-            "end_time" : "{% $fromMillis($toMillis($states.input.scheduled_time) - 300000) %}"
-          }
-        },
+        # Replays may pass source_identifiers or an explicit window, plus a
+        # job_id; scheduled runs derive the window end from scheduled_time -
+        # 5min. Shape guards keep malformed input (e.g. window: null) from
+        # reaching the Lambda as "no window", which would mint the full index.
+        Output = trimspace(<<-EOT
+          {% $merge([
+            {'pipeline_date': '${var.pipeline_date}'},
+            $type($states.input.source_identifiers) = 'array'
+              ? {'source_identifiers': $states.input.source_identifiers}
+              : {'window': $exists($states.input.window.end_time)
+                  ? $states.input.window
+                  : {'end_time': $fromMillis($toMillis($states.input.scheduled_time) - 300000)}},
+            $type($states.input.job_id) = 'string' ? {'job_id': $states.input.job_id} : {}
+          ]) %}
+        EOT
+        ),
         Next = "InvokeIdMinter"
       }
       InvokeIdMinter = {

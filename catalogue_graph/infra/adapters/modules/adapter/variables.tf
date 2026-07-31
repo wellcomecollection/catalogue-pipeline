@@ -19,6 +19,12 @@ variable "schedule_expression" {
   description = "Schedule pattern for adapter runs"
 }
 
+variable "schedule_enabled" {
+  type        = bool
+  default     = true
+  description = "Whether the adapter run schedule is enabled. Set false to pause a misbehaving adapter without destroying the schedule resource."
+}
+
 variable "event_bus_name" {
   type        = string
   description = "Name of the EventBridge event bus associated with the adapter"
