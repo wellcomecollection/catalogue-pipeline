@@ -9,6 +9,9 @@ Minting IdResolver implementation supporting:
 
 from __future__ import annotations
 
+from collections import defaultdict
+from itertools import batched
+
 import structlog
 
 from id_minter.config import DBConfig
@@ -16,6 +19,9 @@ from id_minter.database import DBConnection, DBCursor, get_connection
 from id_minter.models.identifier import MintRequest, SourceIdentifierKey
 
 logger = structlog.get_logger(__name__)
+
+# Larger chunks exhaust MySQL's range optimizer budget, degrading to a full index scan.
+LOOKUP_CHUNK_SIZE = 1000
 
 
 class MintingResolver:
@@ -81,32 +87,39 @@ class MintingResolver:
         if not source_ids:
             return {}
 
+        return self._lookup_chunked(source_ids)
+
+    def _lookup_chunked(
+        self,
+        source_ids: list[SourceIdentifierKey],
+        for_share: bool = False,
+    ) -> dict[SourceIdentifierKey, str]:
+        """Chunked lookup. FOR SHARE joins whatever transaction is open on self.conn."""
+        groups: dict[tuple[str, str], set[str]] = defaultdict(set)
+        for ontology_type, source_system, source_id in source_ids:
+            groups[(ontology_type, source_system)].add(source_id)
+
+        suffix = " FOR SHARE" if for_share else ""
         cursor = self.conn.cursor()
 
-        # Build query with IN clause for batch lookup of mixed ontology types
-        # Using tuple comparison: (OntologyType, SourceSystem, SourceId) IN ((?, ?, ?), ...)
-        placeholders = ", ".join(["(%s, %s, %s)"] * len(source_ids))
-        params = []
-        for ontology_type, source_system, source_id in source_ids:
-            params.extend([ontology_type, source_system, source_id])
-
-        cursor.execute(
-            f"""
-            SELECT OntologyType, SourceSystem, SourceId, CanonicalId 
-            FROM identifiers 
-            WHERE (OntologyType, SourceSystem, SourceId) IN ({placeholders})
-        """,
-            params,
-        )
-
-        results = cursor.fetchall()
-
-        return {
-            SourceIdentifierKey(
-                row["OntologyType"], row["SourceSystem"], row["SourceId"]
-            ): row["CanonicalId"]
-            for row in results
-        }
+        result: dict[SourceIdentifierKey, str] = {}
+        # Sorted probes are far faster than random order against a large index.
+        for (ontology_type, source_system), values in sorted(groups.items()):
+            for chunk in batched(sorted(values), LOOKUP_CHUNK_SIZE):
+                placeholders = ", ".join(["%s"] * len(chunk))
+                cursor.execute(
+                    f"SELECT OntologyType, SourceSystem, SourceId, CanonicalId"
+                    f" FROM identifiers"
+                    f" WHERE OntologyType = %s AND SourceSystem = %s"
+                    f" AND SourceId IN ({placeholders}){suffix}",
+                    [ontology_type, source_system, *chunk],
+                )
+                for row in cursor.fetchall():
+                    key = SourceIdentifierKey(
+                        row["OntologyType"], row["SourceSystem"], row["SourceId"]
+                    )
+                    result[key] = row["CanonicalId"]
+        return result
 
     def mint_ids(self, requests: list[MintRequest]) -> dict[SourceIdentifierKey, str]:
         """
@@ -374,25 +387,7 @@ class MintingResolver:
             # MySQL's REPEATABLE READ isolation would return the transaction's
             # snapshot, missing rows committed by other transactions since ours
             # started.
-            placeholders = ", ".join(["(%s, %s, %s)"] * len(needs_new_id))
-            params = []
-            for ontology_type, source_system, source_id in needs_new_id:
-                params.extend([ontology_type, source_system, source_id])
-            cursor.execute(
-                f"""
-                SELECT OntologyType, SourceSystem, SourceId, CanonicalId
-                FROM identifiers
-                WHERE (OntologyType, SourceSystem, SourceId) IN ({placeholders})
-                FOR SHARE
-            """,
-                params,
-            )
-            actual = {
-                SourceIdentifierKey(
-                    row["OntologyType"], row["SourceSystem"], row["SourceId"]
-                ): row["CanonicalId"]
-                for row in cursor.fetchall()
-            }
+            actual = self._lookup_chunked(needs_new_id, for_share=True)
 
             # Step 7: Mark only used IDs as 'assigned'
             # ---------------------------------------------------------------------
