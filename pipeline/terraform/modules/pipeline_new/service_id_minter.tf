@@ -49,5 +49,8 @@ module "id_minter_lambda" {
   secret_env_vars = local.id_minter_secret_env_vars
   rds_secret_name = local.rds_master_secret_name
   alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
+
+  # Identifier-dense windows peak ~4.5GB; 2048 OOMs.
+  memory_size = 6144
 }
 
