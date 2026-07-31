@@ -43,5 +43,7 @@ module "id_minter_rds_2026_07_03" {
   admin_cidr_ingress = local.admin_cidr_ingress
   engine_version     = "8.0.mysql_aurora.3.10.3"
 
+  max_scaling_capacity = 32
+
   master_username = data.aws_ssm_parameter.rds_username.value
 }
