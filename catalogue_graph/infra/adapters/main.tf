@@ -31,11 +31,14 @@ module "axiell" {
 }
 
 module "folio" {
-  source                 = "./modules/adapter"
-  namespace              = "folio"
-  steps_namespace        = "oai_pmh"
-  s3_bucket_name         = "wellcomecollection-platform-folio-adapter"
-  schedule_expression    = "rate(15 minutes)"
+  source              = "./modules/adapter"
+  namespace           = "folio"
+  steps_namespace     = "oai_pmh"
+  s3_bucket_name      = "wellcomecollection-platform-folio-adapter"
+  schedule_expression = "rate(15 minutes)"
+  # Paused: overlapping runs were colliding on Iceberg commits, causing a
+  # self-sustaining pileup of failed executions. Re-enable once resolved.
+  schedule_enabled       = false
   repository_url         = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
   event_bus_name         = aws_cloudwatch_event_bus.event_bus.name
   ecs_cluster_arn        = aws_ecs_cluster.adapters.arn
