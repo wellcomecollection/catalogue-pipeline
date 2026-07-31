@@ -6,14 +6,10 @@ locals {
     States = {
       ConstructEvent = {
         Type = "Pass",
-        Output = {
-          "pipeline_date" : var.pipeline_date,
-          # window end time is 5 minutes before the scheduled time
-          "window" : {
-            "end_time" : "{% $fromMillis($toMillis($states.input.scheduled_time) - 300000) %}"
-          }
-        },
-        Next = "InvokeIdMinter"
+        # Replays may pass an explicit window and job_id; scheduled runs
+        # derive the window end from scheduled_time - 5min.
+        Output = "{% $merge([{'pipeline_date': '${var.pipeline_date}'}, {'window': $exists($states.input.window) ? $states.input.window : {'end_time': $fromMillis($toMillis($states.input.scheduled_time) - 300000)}}, $exists($states.input.job_id) ? {'job_id': $states.input.job_id} : {}]) %}",
+        Next   = "InvokeIdMinter"
       }
       InvokeIdMinter = {
         Type     = "Task"
