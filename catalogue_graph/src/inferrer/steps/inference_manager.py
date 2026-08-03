@@ -22,6 +22,8 @@ from elasticsearch import Elasticsearch
 
 from inferrer.adapters import FEATURE_VECTOR_SIZE, INFERRERS, call_inferrer
 from inferrer.image_downloader import (
+    ImageDownloadError,
+    _TransientImageDownloadError,
     delete_image,
     download_image,
     file_url,
@@ -31,6 +33,7 @@ from inferrer.models import (
     InferenceManagerResult,
     InitialImage,
 )
+from inferrer.reporting import InferenceReport
 from ingestor.models.augmented.image import (
     AugmentedImage,
     AugmentedImageState,
@@ -167,11 +170,28 @@ def handler(
 
     images = retrieve_initial_images(es_client, initial_index, ids)
 
-    # All-or-nothing: if any image fails to download, fails an inferrer, or would
-    # produce a poisoned doc, the exception propagates and fails the whole task
-    # (the state machine then retries). We never index a partial/poisoned batch.
+    # All-or-nothing, with one carve-out: an image whose asset permanently fails
+    # to download (e.g. a 404) is skipped and counted, since it would otherwise
+    # deterministically block every other image in the task on each retry. Any
+    # transient download error, inferrer failure, or poisoned doc still fails
+    # the whole task. We never index a partial/poisoned batch.
+    def augment_or_skip(image: InitialImage) -> AugmentedImage | None:
+        try:
+            return augment_image(image)
+        except _TransientImageDownloadError:
+            raise
+        except ImageDownloadError as e:
+            logger.warning(
+                "Skipping image whose asset cannot be downloaded",
+                image_id=image.state.canonical_id,
+                error=str(e),
+            )
+            return None
+
     with ThreadPoolExecutor(max_workers=IMAGE_PARALLELISM) as pool:
-        augmented = list(pool.map(augment_image, images))
+        results = list(pool.map(augment_or_skip, images))
+    augmented = [a for a in results if a is not None]
+    download_failure_count = len(results) - len(augmented)
 
     for image in augmented:
         if image.state.augmented_time is None:
@@ -194,8 +214,18 @@ def handler(
         "Inference complete",
         processed=len(images),
         augmented=len(augmented),
+        download_failures=download_failure_count,
     )
-    return InferenceManagerResult(processed=len(images), augmented=len(augmented))
+    InferenceReport(
+        pipeline_date=event.pipeline_date,
+        augmented_count=len(augmented),
+        download_failure_count=download_failure_count,
+    ).publish()
+    return InferenceManagerResult(
+        processed=len(images),
+        augmented=len(augmented),
+        download_failure_count=download_failure_count,
+    )
 
 
 def event_validator(raw_input: str) -> InferenceManagerEvent:

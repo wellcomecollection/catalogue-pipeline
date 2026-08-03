@@ -182,3 +182,37 @@ resource "aws_iam_role_policy" "inference_manager_s3_read" {
   role   = module.inference_manager_ecs_task.task_role_name
   policy = data.aws_iam_policy_document.inference_manager_s3_read.json
 }
+
+# The task publishes augmented_count and download_failure_count metrics.
+data "aws_iam_policy_document" "inference_manager_cloudwatch_write" {
+  statement {
+    actions   = ["cloudwatch:PutMetricData"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "inference_manager_cloudwatch_write" {
+  role   = module.inference_manager_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.inference_manager_cloudwatch_write.json
+}
+
+# Skipped downloads succeed the task, so the state machine alarm cannot see
+# them; alarm on the metric instead.
+resource "aws_cloudwatch_metric_alarm" "image_inferrer_download_failures" {
+  alarm_name          = "image-inferrer-download-failures-${var.pipeline_date}"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "download_failure_count"
+  namespace           = "catalogue_graph_pipeline"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 0
+  alarm_description   = "The image inferrer skipped images whose assets permanently failed to download"
+
+  dimensions = {
+    pipeline_date = var.pipeline_date
+    pipeline_step = "inference_manager"
+  }
+
+  alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+}
