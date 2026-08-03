@@ -21,10 +21,11 @@ module "pipeline" {
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
-  enable_adapter_transformer_trigger = true
-  enable_id_minter_schedule          = true
-  enable_graph_pipeline_schedule     = true
-  enable_image_inferrer_schedule     = true
+  enable_adapter_transformer_trigger           = true
+  disable_calm_transformer_topic_subscriptions = true
+  enable_id_minter_schedule                    = true
+  enable_graph_pipeline_schedule               = true
+  enable_image_inferrer_schedule               = true
 
   pipeline_date = local.pipeline_date // namespaces services
   graph_date    = "2026-07-03"        // namespaces graph database

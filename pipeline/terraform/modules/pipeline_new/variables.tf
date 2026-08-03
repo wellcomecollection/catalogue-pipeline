@@ -78,6 +78,12 @@ variable "enable_adapter_transformer_trigger" {
   description = "Whether the EventBridge rule that starts the transformer on <adapter>.adapter.completed events is enabled."
 }
 
+variable "disable_calm_transformer_topic_subscriptions" {
+  type        = bool
+  default     = false
+  description = "When true, the calm transformer does not subscribe its input queue to adapter topics in everyday mode."
+}
+
 variable "enable_id_minter_schedule" {
   type        = bool
   default     = false
