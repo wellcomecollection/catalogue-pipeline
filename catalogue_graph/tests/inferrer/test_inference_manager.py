@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from inferrer.adapters import FEATURE_VECTOR_SIZE, INFERRERS
-from inferrer.image_downloader import file_url, local_image_path
+from inferrer.image_downloader import ImageDownloadError, file_url, local_image_path
 from inferrer.models import InferenceManagerEvent
 from inferrer.steps import inference_manager
 from inferrer.steps.inference_manager import (
@@ -20,7 +20,12 @@ from tests.inferrer.factories import (
     initial_image_doc,
     make_initial_image,
 )
-from tests.mocks import MockElasticsearchClient, MockRequest, mock_es_secrets
+from tests.mocks import (
+    MockCloudwatchClient,
+    MockElasticsearchClient,
+    MockRequest,
+    mock_es_secrets,
+)
 from utils.aws import pydantic_to_s3_json
 
 PIPELINE_DATE = "2026-06-01"
@@ -187,3 +192,65 @@ def test_event_validator_parses_inline_event() -> None:
     assert resolved.ids == ["a"]
     assert resolved.pipeline_date == PIPELINE_DATE
     assert resolved.graph_date == "2026-01-01"
+
+
+def test_handler_skips_permanently_undownloadable_image(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A 404 asset is skipped and counted; the rest of the batch still indexes."""
+    monkeypatch.setattr(inference_manager, "IMAGES_ROOT", str(tmp_path))
+    mock_es_secrets("inferrer", PIPELINE_DATE)
+
+    good = make_initial_image("imgA", INFO_JSON_URL)
+    bad_info = "http://iiif.test/image/imgGone/info.json"
+    bad_thumb = "http://iiif.test/image/imgGone/full/!400,400/0/default.jpg"
+    for cid, url in [("imgA", INFO_JSON_URL), ("imgGone", bad_info)]:
+        MockElasticsearchClient.index(
+            index=f"images-initial-{PIPELINE_DATE}",
+            id=cid,
+            document=initial_image_doc(cid, url),
+        )
+    MockRequest.mock_response(method="GET", url=THUMBNAIL_URL, content_bytes=b"jpeg")
+    MockRequest.mock_response(method="GET", url=bad_thumb, status_code=404)
+    _mock_inferrers(file_url(local_image_path(good, str(tmp_path))))
+
+    event = InferenceManagerEvent(
+        pipeline_date=PIPELINE_DATE, graph_date=PIPELINE_DATE, ids=["imgA", "imgGone"]
+    )
+    result = inference_manager.handler(event, es_mode="private")
+
+    assert result.processed == 2
+    assert result.augmented == 1
+    assert result.download_failure_count == 1
+    indexed = MockElasticsearchClient.inputs
+    assert [d["_id"] for d in indexed] == ["imgA"]
+    reported = [
+        m
+        for m in MockCloudwatchClient.metrics_reported
+        if m["metric_name"] == "download_failure_count"
+    ]
+    assert reported and reported[-1]["value"] == 1
+    assert reported[-1]["dimensions"]["pipeline_step"] == "inference_manager"
+
+
+def test_handler_still_fails_on_transient_download_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A retry-exhausted transient failure (e.g. 503) still fails the task."""
+    monkeypatch.setattr(inference_manager, "IMAGES_ROOT", str(tmp_path))
+    monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
+    mock_es_secrets("inferrer", PIPELINE_DATE)
+
+    MockElasticsearchClient.index(
+        index=f"images-initial-{PIPELINE_DATE}",
+        id="imgA",
+        document=initial_image_doc("imgA", INFO_JSON_URL),
+    )
+    MockRequest.mock_response(method="GET", url=THUMBNAIL_URL, status_code=503)
+
+    event = InferenceManagerEvent(
+        pipeline_date=PIPELINE_DATE, graph_date=PIPELINE_DATE, ids=["imgA"]
+    )
+    with pytest.raises(ImageDownloadError):
+        inference_manager.handler(event, es_mode="private")
+    assert MockElasticsearchClient.inputs == []

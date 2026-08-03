@@ -72,11 +72,11 @@ class FindWorkEvent(BasePipelineEvent):
 
 
 class InferenceManagerResult(BaseModel):
-    # An inference task is all-or-nothing: if any requested image cannot be
-    # fully and validly augmented the task fails, so on success `processed`
-    # (initial images found) equals `augmented` (documents written).
+    # All-or-nothing except permanently undownloadable assets, which are
+    # skipped and counted, so processed = augmented + download_failure_count.
     processed: int
     augmented: int
+    download_failure_count: int = 0
 
 
 class FindWorkResult(BaseModel):
