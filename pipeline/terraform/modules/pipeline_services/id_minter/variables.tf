@@ -33,6 +33,11 @@ variable "env_vars" {
   })
 }
 
+variable "memory_size" {
+  type    = number
+  default = 2048
+}
+
 variable "secret_env_vars" {
   type = map(string)
 }

@@ -421,6 +421,7 @@ class MockElasticsearchClient:
     inputs: list[dict] = []
     pit_index: str
     queries: list[dict] = []
+    bulk_errors: list[dict] = []
 
     def __init__(
         self, config: dict, api_key: str, timeout: float | None = None
@@ -440,13 +441,16 @@ class MockElasticsearchClient:
         # Accept elasticsearch.helpers.bulk extra parameters to avoid TypeError in tests
         for op in operations:
             cls.inputs.append(op)
-        return (len(cls.inputs), [])  # emulate success_count, no errors
+        errors = cls.bulk_errors
+        cls.bulk_errors = []
+        return (len(cls.inputs) - len(errors), errors)
 
     @classmethod
     def reset_mocks(cls) -> None:
         cls.inputs = []
         cls.indexed_documents = defaultdict(dict[str, dict])
         cls.queries = []
+        cls.bulk_errors = []
 
     @classmethod
     def index(cls, index: str, id: str, document: dict) -> None:  # noqa: A003

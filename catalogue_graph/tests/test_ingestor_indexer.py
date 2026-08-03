@@ -107,6 +107,7 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
         "ids": None,
         "pit_ids": {"merged": None, "augmented": None},
         "success_count": len(expected_inputs),
+        "version_conflict_count": 0,
     }
 
 
@@ -173,7 +174,97 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
         "ids": None,
         "pit_ids": {"merged": None, "augmented": None},
         "success_count": len(expected_inputs),
+        "version_conflict_count": 0,
     }
+
+
+def _make_bulk_error(error_type: str, doc_id: str = "conflicted-id") -> dict[str, Any]:
+    return {
+        "index": {
+            "_index": "works-indexed",
+            "_id": doc_id,
+            "status": 409,
+            "error": {"type": error_type, "reason": "mock reason"},
+        }
+    }
+
+
+@freeze_time("2025-01-01T12:00:00Z")
+def test_ingestor_indexer_ignores_version_conflicts() -> None:
+    record_type: IngestorType = "works"
+    pipeline_date = "2025-01-01"
+    index_date = "2025-01-01"
+    job_id = "20250930T0930"
+    event = IngestorIndexerLambdaEvent(
+        ingestor_type=record_type,
+        pipeline_date=pipeline_date,
+        graph_date=pipeline_date,
+        index_dates=PipelineIndexDates.model_validate({record_type: index_date}),
+        job_id=job_id,
+        objects_to_index=None,
+    )
+
+    prefix = event.get_path_prefix()
+    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
+    key = f"{prefix}/00000000-00000010.parquet"
+    s3_uri = f"s3://{bucket}/{key}"
+
+    parquet_bytes = load_fixture(f"ingestor/{record_type}/00000000-00000010.parquet")
+    MockS3Client.add_list_objects_response(
+        bucket=bucket,
+        prefix=prefix,
+        contents=[{"Key": key, "Size": len(parquet_bytes)}],
+    )
+    MockSmartOpen.mock_s3_file(s3_uri, parquet_bytes)
+
+    mock_es_secrets(f"{record_type}_ingestor", pipeline_date)
+    expected_inputs = load_json_fixture(f"ingestor/{record_type}/mock_es_inputs.json")
+    MockElasticsearchClient.bulk_errors = [
+        _make_bulk_error("version_conflict_engine_exception")
+    ]
+
+    result = handler(event)
+
+    assert result.success_count == len(expected_inputs) - 1
+
+    report = _read_indexer_report(event)
+    assert report["version_conflict_count"] == 1
+    assert report["success_count"] == len(expected_inputs) - 1
+
+
+@freeze_time("2025-01-01T12:00:00Z")
+def test_ingestor_indexer_raises_on_non_conflict_errors() -> None:
+    record_type: IngestorType = "works"
+    pipeline_date = "2025-01-01"
+    index_date = "2025-01-01"
+    job_id = "20250930T0930"
+    event = IngestorIndexerLambdaEvent(
+        ingestor_type=record_type,
+        pipeline_date=pipeline_date,
+        graph_date=pipeline_date,
+        index_dates=PipelineIndexDates.model_validate({record_type: index_date}),
+        job_id=job_id,
+        objects_to_index=None,
+    )
+
+    prefix = event.get_path_prefix()
+    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
+    key = f"{prefix}/00000000-00000010.parquet"
+    s3_uri = f"s3://{bucket}/{key}"
+
+    parquet_bytes = load_fixture(f"ingestor/{record_type}/00000000-00000010.parquet")
+    MockS3Client.add_list_objects_response(
+        bucket=bucket,
+        prefix=prefix,
+        contents=[{"Key": key, "Size": len(parquet_bytes)}],
+    )
+    MockSmartOpen.mock_s3_file(s3_uri, parquet_bytes)
+
+    mock_es_secrets(f"{record_type}_ingestor", pipeline_date)
+    MockElasticsearchClient.bulk_errors = [_make_bulk_error("mapper_parsing_exception")]
+
+    with pytest.raises(RuntimeError, match="Bulk indexing failed with 1 error"):
+        handler(event)
 
 
 def test_ingestor_indexer_failure_invalid_data_concepts() -> None:

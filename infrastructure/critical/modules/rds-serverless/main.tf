@@ -17,6 +17,8 @@ resource "aws_rds_cluster" "serverless" {
   enable_http_endpoint = true
   deletion_protection  = true
 
+  skip_final_snapshot = var.skip_final_snapshot
+
   manage_master_user_password = var.manage_master_user_password
 
   serverlessv2_scaling_configuration {

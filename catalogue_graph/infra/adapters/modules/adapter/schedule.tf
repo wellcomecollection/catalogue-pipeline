@@ -6,7 +6,7 @@ resource "aws_scheduler_schedule" "adapter_run" {
   }
 
   schedule_expression = var.schedule_expression
-  state               = "ENABLED"
+  state               = var.schedule_enabled ? "ENABLED" : "DISABLED"
 
   target {
     arn      = aws_sfn_state_machine.state_machine.arn
