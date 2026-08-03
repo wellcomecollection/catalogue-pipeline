@@ -3,8 +3,8 @@ module "pipeline" {
 
   reindexing_state = {
     listen_to_reindexer = true
-    scale_up_tasks      = true
-    scale_up_matcher_db = true
+    scale_up_tasks      = false
+    scale_up_matcher_db = false
   }
 
   index_dates = {
