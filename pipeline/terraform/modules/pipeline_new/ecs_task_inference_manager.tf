@@ -188,6 +188,12 @@ data "aws_iam_policy_document" "inference_manager_cloudwatch_write" {
   statement {
     actions   = ["cloudwatch:PutMetricData"]
     resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "cloudwatch:namespace"
+      values   = ["catalogue_graph_pipeline"]
+    }
   }
 }
 
