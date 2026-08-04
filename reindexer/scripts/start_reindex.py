@@ -128,7 +128,8 @@ def publish_messages(job_config_id, topic_arn, parameters):
             TopicArn=topic_arn,
             MessageStructure="json",
             Message=json.dumps({"default": json.dumps(to_publish)}),
-            Subject=f"Source: {__file__}",
+            # Basename, not the full path: SNS caps Subject at 100 characters.
+            Subject=f"Source: {os.path.basename(__file__)}",
         )
         assert resp["ResponseMetadata"]["HTTPStatusCode"] == 200, resp
 

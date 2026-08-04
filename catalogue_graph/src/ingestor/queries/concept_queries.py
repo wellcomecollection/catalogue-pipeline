@@ -15,13 +15,17 @@ CONCEPT_TYPE_QUERY = """
     RETURN concept.id AS id, COLLECT(concept_type) AS types
 """
 
+# SAME_AS hops are bounded: unbounded traversal enumerates edge-distinct paths,
+# which explodes combinatorially in dense clusters and exceeds the Neptune query
+# timeout. The deepest real cluster needs 5 hops (measured 2026-08-01), so 8 is
+# lossless with headroom.
 SOURCE_CONCEPT_QUERY = """
     UNWIND $ids AS id
     MATCH (concept:Concept {`~id`: id})
-    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
+    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..8]->(source_concept)
 
-    RETURN 
-        concept.id AS id, 
+    RETURN
+        concept.id AS id,
         collect(DISTINCT linked_source_concept) AS linked_source_concepts,
         collect(DISTINCT source_concept) AS source_concepts
 """
@@ -30,7 +34,7 @@ SOURCE_CONCEPT_QUERY = """
 SAME_AS_CONCEPT_QUERY = """
     UNWIND $ids AS id
     MATCH (concept:Concept {`~id`: id})
-    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
+    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..8]->(source_concept)
     MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)
     WHERE same_as_concept <> concept
 

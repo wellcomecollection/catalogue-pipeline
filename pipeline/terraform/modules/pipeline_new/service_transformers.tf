@@ -63,7 +63,12 @@ module "transformers" {
 
   source_name = each.key
 
-  adapter_config      = local.adapter_config[each.key]
+  adapter_config = merge(
+    local.adapter_config[each.key],
+    {
+      topics = var.disable_calm_transformer_topic_subscriptions && each.key == "calm" ? [] : local.adapter_config[each.key].topics
+    }
+  )
   listen_to_reindexer = var.reindexing_state.listen_to_reindexer
 
   queue_visibility_timeout_seconds = lookup(each.value, "queue_visibility_timeout_seconds", 30)
