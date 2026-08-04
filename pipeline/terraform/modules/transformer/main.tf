@@ -39,4 +39,3 @@ module "transformer" {
 
   trigger_values = var.trigger_values
 }
-
