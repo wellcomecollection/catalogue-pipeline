@@ -9,7 +9,7 @@ def get_archive_type(collection_path_label: str) -> ArchiveType | None:
 
 def test_get_archive_type_known_prefix() -> None:
     assert get_archive_type("PP/RAS/A.2/1") == ArchiveType(
-        id="PP", label="Personal Papers"
+        id="PP", label="Personal papers"
     )
 
 

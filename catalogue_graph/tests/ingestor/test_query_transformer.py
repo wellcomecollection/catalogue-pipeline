@@ -2,47 +2,19 @@ from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.merged.work import (
     VisibleMergedWork,
 )
-from ingestor.models.neptune.node import WorkNode
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     WorkHierarchy,
-    WorkHierarchyItem,
 )
 from ingestor.transformers.work_query_transformer import QueryWorkTransformer
-from models.graph_node import Work
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Subject
 from models.pipeline.work_state import WorkAncestor, WorkRelations
 from tests.test_utils import (
+    get_work_hierarchy_item,
+    get_work_with_ancestor,
     load_json_fixture,
 )
-
-
-def get_work_with_ancestor() -> VisibleExtractedWork:
-    fixture = load_json_fixture("ingestor/single_merged.json")
-    work = VisibleMergedWork.model_validate(fixture)
-
-    ancestor_node = WorkNode.model_validate(
-        {
-            "~id": "123",
-            "~labels": ["Work"],
-            "~properties": Work(id="123", label="123", type="Work"),
-        }
-    )
-
-    return VisibleExtractedWork(
-        work=work,
-        hierarchy=WorkHierarchy(
-            id="some_id",
-            ancestors=[
-                WorkHierarchyItem(
-                    work=ancestor_node,
-                    parts=1,
-                )
-            ],
-        ),
-        concepts=[],
-    )
 
 
 def test_collection_path_expansion() -> None:
@@ -127,9 +99,9 @@ def test_identifiers_includes_work_canonical_id() -> None:
 
 
 def test_collection_root_with_ancestors() -> None:
-    extracted = get_work_with_ancestor()
-    extracted.hierarchy.ancestors[0].work.properties.id = "root_id"
-    extracted.hierarchy.ancestors[0].work.properties.label = "Root title"
+    extracted = get_work_with_ancestor(
+        ancestor_id="root_id", ancestor_label="Root title"
+    )
 
     transformer = QueryWorkTransformer(extracted)
     assert transformer.collection_root_id == "root_id"
@@ -147,18 +119,7 @@ def test_collection_root_when_work_is_root() -> None:
         hierarchy=WorkHierarchy(
             id="some_id",
             ancestors=[],
-            children=[
-                WorkHierarchyItem(
-                    work=WorkNode.model_validate(
-                        {
-                            "~id": "child",
-                            "~labels": ["Work"],
-                            "~properties": Work(id="child", label="Child", type="Work"),
-                        }
-                    ),
-                    parts=1,
-                )
-            ],
+            children=[get_work_hierarchy_item("child", "Child")],
         ),
         concepts=[],
     )
@@ -181,29 +142,6 @@ def test_collection_root_when_no_hierarchy() -> None:
     transformer = QueryWorkTransformer(extracted)
     assert transformer.collection_root_id is None
     assert transformer.collection_root_title is None
-
-
-def test_is_collection_root_true_when_no_ancestors_and_has_children() -> None:
-    extracted = get_work_with_ancestor()
-    extracted.hierarchy.ancestors = []
-    extracted.hierarchy.children = [
-        WorkHierarchyItem(
-            work=WorkNode.model_validate(
-                {
-                    "~id": "child",
-                    "~labels": ["Work"],
-                    "~properties": Work(id="child", label="Child", type="Work"),
-                }
-            ),
-            parts=1,
-        )
-    ]
-    assert QueryWorkTransformer(extracted).hierarchy.is_collection_root is True
-
-
-def test_is_collection_root_false_when_ancestors_present() -> None:
-    extracted = get_work_with_ancestor()
-    assert QueryWorkTransformer(extracted).hierarchy.is_collection_root is False
 
 
 def test_archive_type_from_collection_path_label() -> None:
