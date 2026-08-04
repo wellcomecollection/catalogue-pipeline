@@ -429,6 +429,100 @@ def create_works_with_collection_paths() -> None:
     )
 
 
+def create_archive_works() -> None:
+    """Create two works from the same archive: its root, and a section within it.
+
+    Between them they cover the fields used by archive browsing: `isArchiveRoot`,
+    `archiveType`, `archiveRoot`, `collectionPath.sort`.
+    """
+    root_work = create_visible_merged_work(
+        title="Papers of Ernst Boris Chain",
+        collection_path=CollectionPath(path="PPEBC", label="PP/EBC"),
+        description=(
+            "<p>Papers of the biochemist Sir Ernst Boris Chain (1906-1979). "
+            "Includes correspondence, laboratory notebooks and photographs.</p>"
+        ),
+        work_type="Collection",
+    )
+    section_work = create_visible_merged_work(
+        title="Correspondence with Howard Florey",
+        collection_path=CollectionPath(path="PPEBC/A/1", label="PP/EBC/A/1"),
+        description=(
+            "Letters and drafts, 1940-1945. "
+            "Includes material relating to the development of penicillin."
+        ),
+        work_type="Section",
+    )
+    # Sits between the two works saved below, so both documents must refer to the same work
+    personal_papers_work = create_visible_merged_work(
+        title="Personal papers",
+        collection_path=CollectionPath(path="PPEBC/A", label="PP/EBC/A"),
+        work_type="Section",
+    )
+
+    # The root of an archive: no ancestors, and children of its own.
+    save_works(
+        [
+            create_visible_extracted_work(
+                ancestors=[],
+                merged_work=root_work,
+                children=[
+                    create_work_hierarchy_item(
+                        parts=1, merged_work=personal_papers_work, work_type="Section"
+                    ),
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Research notebooks",
+                        collection_path=CollectionPath(
+                            path="PPEBC/B", label="PP/EBC/B"
+                        ),
+                        work_type="Section",
+                    ),
+                ],
+            )
+        ],
+        description="the root of an archive",
+        doc_id="works.archive.PPEBC.root",
+    )
+
+    # A section within the same archive. Its children are numbered so that they only sort
+    # correctly (9 before 10) when sorted naturally rather than alphabetically.
+    save_works(
+        [
+            create_visible_extracted_work(
+                # Ancestors are ordered from the closest ancestor to the root of the archive
+                ancestors=[
+                    create_work_hierarchy_item(
+                        parts=1, merged_work=personal_papers_work, work_type="Section"
+                    ),
+                    create_work_hierarchy_item(
+                        parts=2, merged_work=root_work, work_type="Collection"
+                    ),
+                ],
+                merged_work=section_work,
+                children=[
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Letter from Howard Florey, 1944",
+                        collection_path=CollectionPath(
+                            path="PPEBC/A/1/10", label="PP/EBC/A/1/10"
+                        ),
+                    ),
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Letter from Howard Florey, 1943",
+                        collection_path=CollectionPath(
+                            path="PPEBC/A/1/9", label="PP/EBC/A/1/9"
+                        ),
+                    ),
+                ],
+            )
+        ],
+        description="a section within an archive",
+        doc_id="works.archive.PPEBC.section",
+    )
+
+
 def create_works_with_every_format() -> None:
     works = [create_visible_merged_work(format=fmt) for fmt in ALL_FORMATS]
     save_works(
@@ -795,6 +889,7 @@ def generate_all() -> None:
     create_filtered_aggregations_test_examples()
     create_availabilities_test_examples()
     create_works_with_digital_location_dates()
+    create_archive_works()
 
     print(f"Test documents written to {TEST_DOCUMENTS_DIR}")
 

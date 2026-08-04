@@ -1,17 +1,17 @@
 {
-  "description": "a work with a collection path",
-  "id": "k5m7sfjx",
+  "description": "a section within an archive",
+  "id": "p54phijr",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "k5m7sfjx",
+        "id": "p54phijr",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "nIdFebPdMm"
+          "value": "FQ5VXvGoJV"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,15 @@
       "redirectSources": []
     },
     "query": {
-      "id": "k5m7sfjx",
-      "title": "XkZ5kXMLMd39CXq",
+      "id": "p54phijr",
+      "title": "Correspondence with Howard Florey",
+      "description": "Letters and drafts, 1940-1945. Includes material relating to the development of penicillin.",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "nIdFebPdMm",
+      "sourceIdentifier.value": "FQ5VXvGoJV",
       "identifiers.value": [
-        "k5m7sfjx",
-        "nIdFebPdMm"
+        "p54phijr",
+        "FQ5VXvGoJV"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -37,23 +38,28 @@
       "items.id": [],
       "items.shelfmark.value": [],
       "notes.contents": [],
-      "partOf.title": [],
+      "partOf.title": [
+        "Papers of Ernst Boris Chain",
+        "Personal papers"
+      ],
       "production.label": [],
       "subjects.concepts.label": [],
       "contributors.agent.label": [],
       "genres.concepts.label": [],
-      "collectionPath.label": "PP/CRI",
-      "collectionPath.path": "PPCRI",
-      "collectionPath.sort": "PPCRI"
+      "collectionPath.label": "PP/EBC/A/1",
+      "collectionPath.path": "PPEBC/A/1",
+      "collectionPath.sort": "PPEBC/A/0000000001"
     },
     "display": {
-      "id": "k5m7sfjx",
-      "title": "XkZ5kXMLMd39CXq",
+      "id": "p54phijr",
+      "title": "Correspondence with Howard Florey",
       "alternativeTitles": [],
+      "description": "Letters and drafts, 1940-1945. Includes material relating to the development of penicillin.",
+      "shortDescription": "Letters and drafts, 1940-1945.",
       "contributors": [],
       "identifiers": [
         {
-          "value": "nIdFebPdMm",
+          "value": "FQ5VXvGoJV",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -73,9 +79,39 @@
       "formerFrequency": [],
       "designation": [],
       "images": [],
-      "parts": [],
-      "partOf": [],
-      "type": "Work",
+      "parts": [
+        {
+          "id": "4c9l0mra",
+          "title": "Letter from Howard Florey, 1943",
+          "referenceNumber": "PP/EBC/A/1/9",
+          "totalParts": 0,
+          "type": "Work"
+        },
+        {
+          "id": "iwt3j7nt",
+          "title": "Letter from Howard Florey, 1944",
+          "referenceNumber": "PP/EBC/A/1/10",
+          "totalParts": 0,
+          "type": "Work"
+        }
+      ],
+      "partOf": [
+        {
+          "id": "6yky3cq3",
+          "title": "Personal papers",
+          "referenceNumber": "PP/EBC/A",
+          "totalParts": 1,
+          "type": "Section"
+        },
+        {
+          "id": "uy0hyncn",
+          "title": "Papers of Ernst Boris Chain",
+          "referenceNumber": "PP/EBC",
+          "totalParts": 2,
+          "type": "Collection"
+        }
+      ],
+      "type": "Section",
       "archiveType": {
         "id": "PP",
         "type": "ArchiveType",
@@ -94,10 +130,14 @@
       "archiveType": {
         "id": "PP",
         "label": "Personal Papers"
+      },
+      "archiveRoot": {
+        "id": "uy0hyncn",
+        "label": "Papers of Ernst Boris Chain"
       }
     },
     "filterableValues": {
-      "workType": "Standard",
+      "workType": "Section",
       "production.dates.range.from": [],
       "languages.id": [],
       "genres.label": [],
@@ -110,8 +150,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "k5m7sfjx",
-        "nIdFebPdMm"
+        "p54phijr",
+        "FQ5VXvGoJV"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -119,11 +159,19 @@
       "items.identifiers.value": [],
       "items.locations.locationType.id": [],
       "items.locations.createdDate": [],
-      "partOf.id": [],
-      "partOf.title": [],
+      "partOf.id": [
+        "uy0hyncn",
+        "6yky3cq3"
+      ],
+      "partOf.title": [
+        "Papers of Ernst Boris Chain",
+        "Personal papers"
+      ],
       "availabilities.id": [],
-      "archiveType.id": "PP"
+      "archiveType.id": "PP",
+      "archiveRoot.id": "uy0hyncn",
+      "archiveRoot.title": "Papers of Ernst Boris Chain"
     }
   },
-  "createdAt": "2026-08-04T13:20:14.746479+00:00"
+  "createdAt": "2026-08-04T13:22:04.347569+00:00"
 }

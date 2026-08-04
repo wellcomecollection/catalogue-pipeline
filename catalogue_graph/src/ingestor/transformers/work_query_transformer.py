@@ -136,7 +136,7 @@ class QueryWorkTransformer(WorkBaseTransformer):
         # For example, 'A/10/B' < 'A/9/B' (incorrect), but 'A/000010/B' > 'A/000009/B' (correct).
         # The `natural_sort_key` function (used in DisplayWorkTransformer) exists to support
         # the same sorting behaviour.
-        return re.sub(r"\d+", lambda m: m.group().zfill(10), path.lower())
+        return re.sub(r"\d+", lambda m: m.group().zfill(10), path)
 
     @property
     def collection_path_label(self) -> str | None:

@@ -226,12 +226,12 @@ def test_archive_type_none_when_no_collection_path() -> None:
     assert QueryWorkTransformer(extracted).archive_type is None
 
 
-def test_collection_path_sort_pads_numbers_and_lowercases() -> None:
+def test_collection_path_sort_pads_numbers() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.data.collection_path = CollectionPath(path="GC176/C/1")
     assert (
         QueryWorkTransformer(extracted).collection_path_sort
-        == "gc0000000176/c/0000000001"
+        == "GC0000000176/C/0000000001"
     )
 
 

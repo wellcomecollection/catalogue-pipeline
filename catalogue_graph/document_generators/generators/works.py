@@ -29,6 +29,7 @@ from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
 from models.pipeline.work_data import WorkData, WorkType
 from models.pipeline.work_state import WorkRelations
+from utils.types import DisplayWorkType
 
 from .identifiers import create_source_identifier
 from .random import random_alphanumeric, random_canonical_id, rng
@@ -36,6 +37,7 @@ from .random import random_alphanumeric, random_canonical_id, rng
 
 def create_work_data(
     title: str | None = None,
+    description: str | None = None,
     contributors: list[Contributor] | None = None,
     genres: list[Genre] | None = None,
     subjects: list[Subject] | None = None,
@@ -58,6 +60,7 @@ def create_work_data(
 ) -> WorkData:
     return WorkData(
         title=title or random_alphanumeric(15),
+        description=description,
         contributors=contributors or [],
         genres=genres or [],
         subjects=subjects or [],
@@ -96,6 +99,7 @@ def create_merged_work_state(
 
 def create_visible_merged_work(
     title: str | None = None,
+    description: str | None = None,
     contributors: list[Contributor] | None = None,
     genres: list[Genre] | None = None,
     subjects: list[Subject] | None = None,
@@ -121,6 +125,7 @@ def create_visible_merged_work(
         version=1,
         data=create_work_data(
             title=title,
+            description=description,
             contributors=contributors,
             genres=genres,
             subjects=subjects,
@@ -176,21 +181,42 @@ def create_redirected_merged_work() -> RedirectedMergedWork:
 
 
 def create_visible_extracted_work(
-    ancestors: list[WorkHierarchyItem], merged_work: VisibleMergedWork | None = None
+    ancestors: list[WorkHierarchyItem],
+    merged_work: VisibleMergedWork | None = None,
+    children: list[WorkHierarchyItem] | None = None,
 ) -> VisibleExtractedWork:
     merged_work = merged_work or create_visible_merged_work()
     return VisibleExtractedWork(
         work=merged_work,
         hierarchy=WorkHierarchy(
-            id=merged_work.state.canonical_id, ancestors=ancestors or []
+            id=merged_work.state.canonical_id,
+            ancestors=ancestors or [],
+            children=children or [],
         ),
         concepts=[],
     )
 
 
-def create_work_hierarchy_item(parts: int | None = None) -> WorkHierarchyItem:
-    work = create_visible_merged_work()
-    work_node = Work(type="Work", id=work.state.canonical_id, label=work.data.title)
+def create_work_hierarchy_item(
+    parts: int | None = None,
+    title: str | None = None,
+    collection_path: CollectionPath | None = None,
+    work_type: DisplayWorkType = "Work",
+    merged_work: VisibleMergedWork | None = None,
+) -> WorkHierarchyItem:
+    # Pass `merged_work` to place an existing work in another work's hierarchy, so that the
+    # two generated documents refer to each other by the same canonical ID.
+    work = merged_work or create_visible_merged_work(
+        title=title, collection_path=collection_path
+    )
+    path = work.data.collection_path
+    work_node = Work(
+        type=work_type,
+        id=work.state.canonical_id,
+        label=work.data.title,
+        collection_path=path.path if path else None,
+        collection_path_label=path.label if path else None,
+    )
     return WorkHierarchyItem(
         work=WorkNode.model_validate(
             {

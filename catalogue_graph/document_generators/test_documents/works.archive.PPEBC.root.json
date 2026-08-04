@@ -1,17 +1,17 @@
 {
-  "description": "a work with a collection path",
-  "id": "wgtjwcaz",
+  "description": "the root of an archive",
+  "id": "uy0hyncn",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "wgtjwcaz",
+        "id": "uy0hyncn",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "taKAwev9r0"
+          "value": "L5Asm0JQrw"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,15 @@
       "redirectSources": []
     },
     "query": {
-      "id": "wgtjwcaz",
-      "title": "2IZYa4NvPt5IYoL",
+      "id": "uy0hyncn",
+      "title": "Papers of Ernst Boris Chain",
+      "description": "<p>Papers of the biochemist Sir Ernst Boris Chain (1906-1979). Includes correspondence, laboratory notebooks and photographs.</p>",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "taKAwev9r0",
+      "sourceIdentifier.value": "L5Asm0JQrw",
       "identifiers.value": [
-        "wgtjwcaz",
-        "taKAwev9r0"
+        "uy0hyncn",
+        "L5Asm0JQrw"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -42,18 +43,20 @@
       "subjects.concepts.label": [],
       "contributors.agent.label": [],
       "genres.concepts.label": [],
-      "collectionPath.label": "NUF/FINK",
-      "collectionPath.path": "NUFFINK",
-      "collectionPath.sort": "NUFFINK"
+      "collectionPath.label": "PP/EBC",
+      "collectionPath.path": "PPEBC",
+      "collectionPath.sort": "PPEBC"
     },
     "display": {
-      "id": "wgtjwcaz",
-      "title": "2IZYa4NvPt5IYoL",
+      "id": "uy0hyncn",
+      "title": "Papers of Ernst Boris Chain",
       "alternativeTitles": [],
+      "description": "<p>Papers of the biochemist Sir Ernst Boris Chain (1906-1979). Includes correspondence, laboratory notebooks and photographs.</p>",
+      "shortDescription": "<p>Papers of the biochemist Sir Ernst Boris Chain (1906-1979).</p>",
       "contributors": [],
       "identifiers": [
         {
-          "value": "taKAwev9r0",
+          "value": "L5Asm0JQrw",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -73,9 +76,30 @@
       "formerFrequency": [],
       "designation": [],
       "images": [],
-      "parts": [],
+      "parts": [
+        {
+          "id": "6yky3cq3",
+          "title": "Personal papers",
+          "referenceNumber": "PP/EBC/A",
+          "totalParts": 1,
+          "type": "Section"
+        },
+        {
+          "id": "04tpb0s2",
+          "title": "Research notebooks",
+          "referenceNumber": "PP/EBC/B",
+          "totalParts": 0,
+          "type": "Section"
+        }
+      ],
       "partOf": [],
-      "type": "Work"
+      "type": "Collection",
+      "isArchiveRoot": true,
+      "archiveType": {
+        "id": "PP",
+        "type": "ArchiveType",
+        "label": "Personal Papers"
+      }
     },
     "aggregatableValues": {
       "workType": [],
@@ -85,10 +109,18 @@
       "production.dates": [],
       "contributors.agent": [],
       "items.locations.license": [],
-      "availabilities": []
+      "availabilities": [],
+      "archiveType": {
+        "id": "PP",
+        "label": "Personal Papers"
+      },
+      "archiveRoot": {
+        "id": "uy0hyncn",
+        "label": "Papers of Ernst Boris Chain"
+      }
     },
     "filterableValues": {
-      "workType": "Standard",
+      "workType": "Collection",
       "production.dates.range.from": [],
       "languages.id": [],
       "genres.label": [],
@@ -101,8 +133,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "wgtjwcaz",
-        "taKAwev9r0"
+        "uy0hyncn",
+        "L5Asm0JQrw"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -112,8 +144,12 @@
       "items.locations.createdDate": [],
       "partOf.id": [],
       "partOf.title": [],
-      "availabilities.id": []
+      "availabilities.id": [],
+      "isArchiveRoot": true,
+      "archiveType.id": "PP",
+      "archiveRoot.id": "uy0hyncn",
+      "archiveRoot.title": "Papers of Ernst Boris Chain"
     }
   },
-  "createdAt": "2026-08-04T13:20:14.753684+00:00"
+  "createdAt": "2026-08-04T13:20:15.419822+00:00"
 }
