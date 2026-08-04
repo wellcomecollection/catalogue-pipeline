@@ -20,7 +20,7 @@ locals {
   # becoming a full-index scan; an invalid window object fails loudly in the Lambda.
   construct_event_output = trimspace(<<-EOT
     {% $merge([
-      ${jsonencode(merge({ pipeline_date = var.pipeline_date }, var.static_event_fields))},
+      ${jsonencode(merge(var.static_event_fields, { pipeline_date = var.pipeline_date }))},
       $type($states.input.ids) = 'array'
         ? {'ids': $states.input.ids}
         : {'window': $type($states.input.window) = 'object'
