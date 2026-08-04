@@ -7,14 +7,14 @@ module "tei_adapter_w" {
   topic_arns = [module.tei_id_extractor_topic.arn]
 
   queue_name                       = "tei-adapter"
-  queue_visibility_timeout_seconds = 60
+  queue_visibility_timeout_seconds = local.tei_adapter_delete_delay_seconds + local.visibility_timeout_buffer_seconds
   message_retention_seconds        = 4 * 24 * 60 * 60
 
   env_vars = {
     metrics_namespace        = "${local.namespace}_tei_adapter"
     topic_arn                = module.tei_adapter_topic.arn
     parallelism              = 10
-    delete_delay             = "2 minutes"
+    delete_delay             = "${local.tei_adapter_delete_delay_seconds}s"
     tei_adapter_dynamo_table = aws_dynamodb_table.tei_adapter_table.id
   }
 
