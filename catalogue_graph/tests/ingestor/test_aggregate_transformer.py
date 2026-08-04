@@ -99,3 +99,11 @@ def test_archive_root_none_when_no_hierarchy() -> None:
     )
 
     assert AggregateWorkTransformer(extracted).archive_root is None
+
+
+def test_archive_root_none_when_root_ancestor_has_no_label() -> None:
+    # AggregatableField.label is required, so we cannot construct one for a root
+    # ancestor with no label -- the field is omitted entirely in this case.
+    extracted = get_work_with_ancestor()
+    extracted.hierarchy.ancestors[0].work.properties.label = None
+    assert AggregateWorkTransformer(extracted).archive_root is None
