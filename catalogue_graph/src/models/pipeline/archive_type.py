@@ -15,7 +15,7 @@ COLLECTION_PATH_PREFIX_LABELS: dict[str, str] = {
     "GRL": "Genome Research Ltd",
     "OH": "Oral History",
     "PBL": "Published grey literature",
-    "PP": "Personal Papers",
+    "PP": "Personal papers",
     "PSY": "British Psychological Society",
     "SA": "Societies and Associations",
     "TP": "Audio Collections",
