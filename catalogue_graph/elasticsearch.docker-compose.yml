@@ -14,11 +14,6 @@ services:
       - esdata:/usr/share/elasticsearch/data
     networks:
       - elastic
-    command: >
-      bash -c "
-        elasticsearch-plugin install --batch analysis-icu &&
-        docker-entrypoint.sh elasticsearch
-      "
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.12.0
