@@ -1,3 +1,5 @@
+from adapters.transformers.ebsco import production
+from adapters.transformers.ebsco.parsers import period
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
@@ -506,3 +508,26 @@ def test_field_008_multiple_from_dates(
     assert period.range.label == "&#169;1928, &#169;1929-1936"
     assert period.range.from_time == "1928-01-01T00:00:00Z"
     assert period.range.to_time == "1936-12-31T23:59:59.999999999Z"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="008",
+                    data="800121q19791995acafr p o o 0 0engrc",
+                ),
+            ],
+            id="008 q date range",
+        )
+    ],
+indirect=["marc_record"],
+)
+def test_field_008_q_date(marc_record: Record) -> None:
+    production = lone_element(_get_production(marc_record))
+    period = lone_element(production.dates)
+    assert period.range.label == "1979-1995"
+    assert period.range.from_time == "1979-01-01T00:00:00Z"
+    assert period.range.to_time == "1995-12-31T23:59:59.999999999Z"
