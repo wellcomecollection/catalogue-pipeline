@@ -3,9 +3,8 @@
 #     -> FindWork (Lambda: ids in scope, partitioned to S3)
 #       -> ProcessPartitions (Map: one worker per partition ref, bounded by max_concurrency)
 #
-# The find-work Lambda only discovers and slices, so its runtime never depends
-# on how much work the window matched; the long-running processing happens in
-# the injected worker state, one bounded partition at a time.
+# The find-work Lambda only discovers and slices; the injected worker state
+# does the long-running processing, one bounded partition at a time.
 
 module "find_work_lambda" {
   source = "../pipeline_lambda"

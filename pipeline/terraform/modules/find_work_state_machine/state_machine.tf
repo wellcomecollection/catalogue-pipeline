@@ -15,11 +15,9 @@ locals {
     }
   ]
 
-  # Scheduled runs derive the window end from scheduled_time - 5min (indexing
-  # lag); replays may instead pass ids or an explicit window, plus a job_id
-  # and partition_size. The shape guards stop window:null becoming "no window"
-  # (a full-index scan); an object-shaped but invalid window is passed through
-  # so the Lambda rejects it loudly.
+  # Window end = scheduled_time - 5min (indexing lag); replays may pass ids,
+  # an explicit window, job_id or partition_size. The guards stop window:null
+  # becoming a full-index scan; an invalid window object fails loudly in the Lambda.
   construct_event_output = trimspace(<<-EOT
     {% $merge([
       ${jsonencode(merge({ pipeline_date = var.pipeline_date }, var.static_event_fields))},
@@ -43,9 +41,7 @@ locals {
       StartAt         = var.worker_state_name
       States = {
         (var.worker_state_name) = merge(var.worker_state, {
-          # Record a partition that still fails after the worker's own retries,
-          # so the rest of the Map runs; the Output keeps the partition ref and
-          # a truncated error visible in the Map results for triage.
+          # Record a failed partition (ref + truncated error) and keep the Map running.
           Catch = [
             {
               ErrorEquals = ["States.ALL"]
@@ -65,10 +61,8 @@ locals {
     Next   = "CheckPartitionFailures"
   }
 
-  # Failing only after every partition has run means a replay needs to cover
-  # just the failed partitions, not the whole window. When failures are
-  # tolerated the check is a constant-false Choice, so the states stay
-  # structurally identical either way.
+  # Fail only after every partition has run, so a replay covers just the failed
+  # partitions. When tolerated, the Choice is constant-false so the shape stays identical.
   failure_check_states = {
     CheckPartitionFailures = {
       Type = "Choice"

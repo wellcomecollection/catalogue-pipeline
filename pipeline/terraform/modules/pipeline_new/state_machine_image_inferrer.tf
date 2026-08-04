@@ -1,13 +1,9 @@
-# Scheduled image-inference state machine, built on the shared
-# find_work_state_machine module:
-#   ConstructEvent (build the time window from the schedule, or pass through replay input)
-#     -> FindWork (Lambda: ids of images modified in the window, partitioned to S3)
-#       -> ProcessPartitions (Map: one EC2 inference task per partition, runTask.waitForTaskToken)
+# Scheduled image inference on the shared find_work_state_machine module:
+# FindWork partitions the images modified in the window, and each partition
+# runs as an EC2 inference task (runTask.waitForTaskToken).
 #
-# This is the sole image inferrer; it replaced the always-on SQS-driven image_inferrer
-# Scala service, which has been retired. The schedule is gated on
-# var.enable_image_inferrer_schedule.
-# (The unified_pipeline_lambda ECR data source is declared in locals.tf.)
+# This is the sole image inferrer; it replaced the retired SQS-driven Scala
+# service. (The unified_pipeline_lambda ECR data source is declared in locals.tf.)
 
 locals {
   # Generous timeout so EC2 capacity-provider warm-up does not trip the task token.
@@ -16,13 +12,9 @@ locals {
   # Retry transient ECS infrastructure errors only. Application failures (e.g. a
   # poisoned-doc error) are intentionally NOT retried so they surface promptly.
   inference_ecs_retry = [
-    # Capacity/placement contention. When the Map fans out runTask calls
-    # concurrently, ECS can momentarily fail placement with
-    # `ECS.AmazonECSException: Insufficient CPU available` if two tasks race for
-    # the same instance, or while the EC2 capacity provider is still scaling up.
-    # This is transient and clears once a slot frees / the reservation registers,
-    # so retry it generously (long enough to outlast an in-flight task) rather
-    # than letting one placement race abort the whole run.
+    # Placement contention: concurrent runTask calls race for instances
+    # (`Insufficient CPU available`) or hit an ASG still scaling up, so retry
+    # generously (long enough to outlast an in-flight task) rather than abort.
     {
       ErrorEquals     = ["ECS.AmazonECSException"]
       IntervalSeconds = 15
@@ -146,9 +138,8 @@ module "image_inferrer" {
   alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 }
 
-# These resources predate the find_work_state_machine module; the moves keep
-# terraform updating them in place. Removable once every stack using this
-# module has applied.
+# Keep pre-module resources updating in place; removable once every stack
+# using this module has applied.
 
 moved {
   from = module.inference_find_work_lambda
