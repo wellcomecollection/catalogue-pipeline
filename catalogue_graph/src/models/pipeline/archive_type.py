@@ -39,6 +39,9 @@ class ArchiveType(IdLabel):
         up the result in the prefix-to-label mapping.  Returns None when the prefix
         is not recognised.
         """
+        # We use `label` rather than `path` because, for known archive types, only
+        # `label` separates the prefix from the rest of the reference number with a
+        # "/" (e.g. label "PP/CRI" vs path "PPCRI"). `path` has no such separator.
         if not path or not path.label:
             return None
 
