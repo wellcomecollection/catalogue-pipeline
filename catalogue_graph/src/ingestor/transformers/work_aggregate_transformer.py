@@ -7,7 +7,7 @@ from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
 from lookups.languages import from_code
-from models.pipeline.archive_type import get_archive_type
+from models.pipeline.archive_type import ArchiveType
 from models.pipeline.identifier import (
     Identifiable,
     Identified,
@@ -130,10 +130,7 @@ class AggregateWorkTransformer(WorkBaseTransformer):
 
     @property
     def archive_type(self) -> AggregatableField | None:
-        if self.data.collection_path is None or self.data.collection_path.label is None:
-            return None
-
-        result = get_archive_type(self.data.collection_path.label)
+        result = ArchiveType.from_collection_path(self.data.collection_path)
         if result is None:
             return None
         return AggregatableField(id=result.id, label=result.label)
