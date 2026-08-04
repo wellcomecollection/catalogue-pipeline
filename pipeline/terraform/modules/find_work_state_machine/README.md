@@ -20,9 +20,8 @@ image inferrer, a Lambda for the id-minter), one bounded partition at a time.
 `max_concurrency` is the work-in-progress ceiling. Pin it to the worker's real
 capacity rather than picking a number here: the inferrer pins it to the ASG's
 `max_instances`, and the id-minter (moving onto this module in
-wellcomecollection/platform#6486) to its RDS connection budget. It cannot
-exceed 40, the most concurrent iterations an INLINE Map will run; a validation
-rejects higher values that Step Functions would otherwise silently cap.
+wellcomecollection/platform#6486) to its RDS connection budget. An INLINE Map
+runs at most 40 concurrent iterations, whatever the setting.
 
 ## Failure semantics
 

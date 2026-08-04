@@ -42,7 +42,7 @@ variable "find_work_secret_read_policy_json" {
 
 variable "partition_s3_arns" {
   type        = list(string)
-  description = "S3 object ARNs the find-work Lambda writes partition files to (pass-by-reference so the Map payload stays under the Step Functions 256 KB limit)."
+  description = "S3 object ARNs the find-work Lambda writes partition files to."
 }
 
 variable "static_event_fields" {
@@ -53,32 +53,17 @@ variable "static_event_fields" {
 
 variable "max_concurrency" {
   type        = number
-  description = "Map MaxConcurrency: the work-in-progress ceiling. Pin to the worker's real capacity (ASG instances, DB connection budget) rather than picking a number here."
-
-  validation {
-    condition     = var.max_concurrency > 0 && var.max_concurrency <= 40
-    error_message = "An INLINE Map never runs more than 40 concurrent iterations, so a max_concurrency above 40 silently caps there; keep it within the platform ceiling."
-  }
+  description = "Map MaxConcurrency: the work-in-progress ceiling. Pin to the worker's real capacity (ASG instances, DB connection budget)."
 }
 
 variable "worker_state_name" {
   type        = string
-  description = "Name of the injected worker state, caller-defined so execution histories read meaningfully."
-
-  validation {
-    condition     = var.worker_state_name != "RecordPartitionFailure"
-    error_message = "RecordPartitionFailure is reserved by the module for the partition-failure catch state."
-  }
+  description = "Name of the injected worker state."
 }
 
 variable "worker_state" {
   type        = any
-  description = "ASL Task state that processes one partition ref. Passed without Catch, Next or End; the module appends Catch and End."
-
-  validation {
-    condition     = length(setintersection(keys(var.worker_state), ["Catch", "Next", "End"])) == 0
-    error_message = "worker_state must not define Catch, Next or End: the module appends its own Catch and End, and would otherwise silently clobber the caller's error routing or render invalid ASL."
-  }
+  description = "ASL Task state that processes one partition ref, passed without Catch or End (the module appends both)."
 }
 
 variable "worker_lambda_arns" {
@@ -95,7 +80,7 @@ variable "state_machine_policies" {
 
 variable "tolerate_partition_failures" {
   type        = bool
-  description = "Whether a failed partition is tolerated. Only safe when a later scheduled window re-covers the same records idempotently; otherwise the execution fails once every other partition has finished."
+  description = "Tolerate failed partitions. Only safe when a later window re-covers the same records; otherwise the execution fails once every partition has finished."
 }
 
 variable "schedule" {

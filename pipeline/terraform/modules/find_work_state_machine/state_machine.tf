@@ -16,13 +16,10 @@ locals {
   ]
 
   # Scheduled runs derive the window end from scheduled_time - 5min (indexing
-  # lag); the find-work step defaults the start to end - 15min. Replays may
-  # instead pass explicit ids or a window, plus a job_id and partition_size.
-  # Shape guards keep malformed input (e.g. window: null, for which $exists is
-  # true) from reaching the Lambda as "no window", which would scan the full
-  # index. A window that is an object but invalid (e.g. start_time only) is
-  # passed through so the Lambda's validation rejects it loudly, rather than
-  # being silently replaced by the schedule-derived window.
+  # lag); replays may instead pass ids or an explicit window, plus a job_id
+  # and partition_size. The shape guards stop window:null becoming "no window"
+  # (a full-index scan); an object-shaped but invalid window is passed through
+  # so the Lambda rejects it loudly.
   construct_event_output = trimspace(<<-EOT
     {% $merge([
       ${jsonencode(merge({ pipeline_date = var.pipeline_date }, var.static_event_fields))},
@@ -46,16 +43,9 @@ locals {
       StartAt         = var.worker_state_name
       States = {
         (var.worker_state_name) = merge(var.worker_state, {
-          # A partition that still fails after the worker's own retries is
-          # recorded rather than aborting the whole Map, so every other
-          # partition still runs; CheckPartitionFailures decides afterwards
-          # what that means for the execution. The Catch's Output carries the
-          # partition's S3 ref ($states.input here is the state's original
-          # input, the partition ref) and a truncated error into the Map
-          # results, so a failed execution's output identifies what failed and
-          # why without walking per-iteration history. JSONata drops object
-          # keys whose value is undefined, so an unexpected shape degrades to
-          # a bare {partition_failed: true} rather than an error.
+          # Record a partition that still fails after the worker's own retries,
+          # so the rest of the Map runs; the Output keeps the partition ref and
+          # a truncated error visible in the Map results for triage.
           Catch = [
             {
               ErrorEquals = ["States.ALL"]
