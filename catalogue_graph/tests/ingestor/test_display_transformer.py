@@ -54,6 +54,26 @@ def test_short_description_none_when_no_description() -> None:
     assert DisplayWorkTransformer(extracted).short_description is None
 
 
+def test_short_description_closes_unclosed_tag_from_truncation() -> None:
+    extracted = get_work_fixture()
+    extracted.work.data.description = (
+        "<p>Marked number V11. Given by Pontecorvo on 19 April 1977.</p>"
+    )
+    assert (
+        DisplayWorkTransformer(extracted).short_description
+        == "<p>Marked number V11.</p>"
+    )
+
+
+def test_short_description_preserves_inline_formatting() -> None:
+    extracted = get_work_fixture()
+    extracted.work.data.description = "Text with <i>italic</i> word. And more."
+    assert (
+        DisplayWorkTransformer(extracted).short_description
+        == "Text with <i>italic</i> word."
+    )
+
+
 def test_is_archive_root_false_by_default() -> None:
     extracted = get_work_fixture()
     assert DisplayWorkTransformer(extracted).hierarchy.is_archive_root is False
