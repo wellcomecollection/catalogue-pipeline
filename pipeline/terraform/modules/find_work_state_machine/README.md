@@ -20,7 +20,9 @@ image inferrer, a Lambda for the id-minter), one bounded partition at a time.
 `max_concurrency` is the work-in-progress ceiling. Pin it to the worker's real
 capacity rather than picking a number here: the inferrer pins it to the ASG's
 `max_instances`, and the id-minter (moving onto this module in
-wellcomecollection/platform#6486) to its RDS connection budget.
+wellcomecollection/platform#6486) to its RDS connection budget. It cannot
+exceed 40, the most concurrent iterations an INLINE Map will run; a validation
+rejects higher values that Step Functions would otherwise silently cap.
 
 ## Failure semantics
 
@@ -41,6 +43,31 @@ What happens next depends on `tolerate_partition_failures`:
   means a replay only needs to cover the failed partitions, not the whole
   window.
 
+## Retry and alerting
+
+Retries happen at the worker state only, through the caller-injected `Retry`
+policies. They should cover transient infrastructure (plus `Lambda.Unknown` for
+Lambda workers, so a function timeout gets a re-run); re-running a whole
+partition is safe because consumers process idempotently. Once those retries
+exhaust, the partition is recorded and not retried again within the execution.
+Application failures such as a poisoned document would loop forever if retried
+blindly, and the ASL layer cannot tell them apart from stubborn transients, so
+recovery from recorded failures is a deliberate, human-started replay.
+
+Do not redrive a failed execution. The Map state itself never fails (the catch
+records partition failures), so a redrive restarts from `FailPartitions`,
+re-evaluates the same aggregate and fails again. Replay with a fresh
+`StartExecution` as described below.
+
+Alerting rides on the module's state machine alarms (`ExecutionsFailed`,
+`ExecutionsAborted`, `ExecutionsTimedOut`, threshold 0, wired to the chatbot
+topic). With `tolerate_partition_failures = false`, a lost partition fails the
+execution and therefore alerts. With `true`, tolerated failures do not alarm;
+the aggregate counts sit in the execution output but nothing consumes them
+automatically, so consumers in that mode need their own signal for failure
+classes that matter (the inferrer alarms on its `download_failure_count`
+metric).
+
 ## Replaying
 
 Scheduled runs process the window `[scheduled_time - 20min, scheduled_time - 5min]`.
@@ -60,19 +87,26 @@ slip fails validation in the Lambda rather than scanning the full index):
   minutes). Windows slice to arbitrary timestamps, so a dense range can be
   replayed as several smaller executions.
 - `ids`, a JSON array of ids to process instead of a window.
-- `job_id`, recommended whenever consumers write per-run reports; generated ids
-  are minute-granular, so concurrent replays started in the same minute collide.
+- `job_id`, honoured by consumers that stamp per-run reports (the id-minter,
+  whose generated ids are minute-granular, so concurrent replays started in the
+  same minute collide without one). The inferrer's find-work event has no
+  `job_id` field and silently ignores it.
 - `partition_size`, to override the consumer's default ids-per-partition.
 
 Replays are safe to repeat because both consumers process idempotently, and the
 partition files are keyed by scope (window, ids or full), so re-running the
-same input overwrites the previous run's files rather than accumulating.
+same input overwrites the previous run's files rather than accumulating. The
+flip side is that two concurrent replays of the same scope share the same
+partition files and will trample each other; run same-scope replays one at a
+time.
 
 ## Replaying only the failed partitions
 
-The `results` array in the Map output preserves partition order, so the indices
-of entries with `partition_failed: true` identify which partition files failed.
-The files live under the consumer's scope-keyed prefix, for example:
+Each failure record in the Map output's `results` array carries the failed
+partition's `s3_uri` and a truncated `error`, so the execution output alone
+identifies what failed and why. (The array also preserves partition order, so
+positional index works as a fallback.) The files live under the consumer's
+scope-keyed prefix, for example:
 
 ```
 s3://wellcomecollection-catalogue-graph/graph-<graph_date>/pipeline-<date>/<service>/find_work/windows/<start>-<end>/partition-<i>.json

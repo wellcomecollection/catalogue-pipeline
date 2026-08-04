@@ -18,14 +18,17 @@ locals {
   # Scheduled runs derive the window end from scheduled_time - 5min (indexing
   # lag); the find-work step defaults the start to end - 15min. Replays may
   # instead pass explicit ids or a window, plus a job_id and partition_size.
-  # Shape guards keep malformed input (e.g. window: null) from reaching the
-  # Lambda as "no window", which would scan the full index.
+  # Shape guards keep malformed input (e.g. window: null, for which $exists is
+  # true) from reaching the Lambda as "no window", which would scan the full
+  # index. A window that is an object but invalid (e.g. start_time only) is
+  # passed through so the Lambda's validation rejects it loudly, rather than
+  # being silently replaced by the schedule-derived window.
   construct_event_output = trimspace(<<-EOT
     {% $merge([
       ${jsonencode(merge({ pipeline_date = var.pipeline_date }, var.static_event_fields))},
       $type($states.input.ids) = 'array'
         ? {'ids': $states.input.ids}
-        : {'window': $exists($states.input.window.end_time)
+        : {'window': $type($states.input.window) = 'object'
             ? $states.input.window
             : {'end_time': $fromMillis($toMillis($states.input.scheduled_time) - 300000)}},
       $type($states.input.job_id) = 'string' ? {'job_id': $states.input.job_id} : {},
@@ -46,10 +49,17 @@ locals {
           # A partition that still fails after the worker's own retries is
           # recorded rather than aborting the whole Map, so every other
           # partition still runs; CheckPartitionFailures decides afterwards
-          # what that means for the execution.
+          # what that means for the execution. The Catch's Output carries the
+          # partition's S3 ref ($states.input here is the state's original
+          # input, the partition ref) and a truncated error into the Map
+          # results, so a failed execution's output identifies what failed and
+          # why without walking per-iteration history. JSONata drops object
+          # keys whose value is undefined, so an unexpected shape degrades to
+          # a bare {partition_failed: true} rather than an error.
           Catch = [
             {
               ErrorEquals = ["States.ALL"]
+              Output      = "{% {'partition_failed': true, 's3_uri': $states.input.s3_uri, 'error': $substring($string($states.errorOutput), 0, 1000)} %}"
               Next        = "RecordPartitionFailure"
             }
           ]
@@ -57,10 +67,7 @@ locals {
         })
         RecordPartitionFailure = {
           Type = "Pass"
-          Output = {
-            "partition_failed" : true
-          }
-          End = true
+          End  = true
         }
       }
     }
@@ -137,7 +144,7 @@ module "state_machine_alarms" {
   source = "../state_machine_alarms"
 
   state_machine_arn = module.state_machine.state_machine_arn
-  alarm_name_prefix = var.alarm_name_prefix
+  alarm_name_prefix = coalesce(var.alarm_name_prefix, local.slug)
   alarm_name_suffix = "-${var.pipeline_date}"
 
   default_alarm_configuration = {

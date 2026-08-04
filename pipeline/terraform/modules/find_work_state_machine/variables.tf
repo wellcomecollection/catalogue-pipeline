@@ -54,16 +54,31 @@ variable "static_event_fields" {
 variable "max_concurrency" {
   type        = number
   description = "Map MaxConcurrency: the work-in-progress ceiling. Pin to the worker's real capacity (ASG instances, DB connection budget) rather than picking a number here."
+
+  validation {
+    condition     = var.max_concurrency > 0 && var.max_concurrency <= 40
+    error_message = "An INLINE Map never runs more than 40 concurrent iterations, so a max_concurrency above 40 silently caps there; keep it within the platform ceiling."
+  }
 }
 
 variable "worker_state_name" {
   type        = string
   description = "Name of the injected worker state, caller-defined so execution histories read meaningfully."
+
+  validation {
+    condition     = var.worker_state_name != "RecordPartitionFailure"
+    error_message = "RecordPartitionFailure is reserved by the module for the partition-failure catch state."
+  }
 }
 
 variable "worker_state" {
   type        = any
-  description = "ASL Task state that processes one partition ref. Passed without Catch or End; the module appends both."
+  description = "ASL Task state that processes one partition ref. Passed without Catch, Next or End; the module appends Catch and End."
+
+  validation {
+    condition     = length(setintersection(keys(var.worker_state), ["Catch", "Next", "End"])) == 0
+    error_message = "worker_state must not define Catch, Next or End: the module appends its own Catch and End, and would otherwise silently clobber the caller's error routing or render invalid ASL."
+  }
 }
 
 variable "worker_lambda_arns" {
@@ -91,7 +106,9 @@ variable "schedule" {
 }
 
 variable "alarm_name_prefix" {
-  type = string
+  type        = string
+  default     = null
+  description = "Defaults to the hyphenated service name; set only when the alarm naming must differ from it."
 }
 
 variable "alarm_topic_arn" {

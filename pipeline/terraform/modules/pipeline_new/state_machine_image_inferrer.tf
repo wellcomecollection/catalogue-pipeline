@@ -143,8 +143,7 @@ module "image_inferrer" {
     enabled = var.enable_image_inferrer_schedule
   }
 
-  alarm_name_prefix = "image-inferrer"
-  alarm_topic_arn   = local.monitoring_infra["chatbot_topic_arn"]
+  alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 }
 
 # These resources predate the find_work_state_machine module; the moves keep
