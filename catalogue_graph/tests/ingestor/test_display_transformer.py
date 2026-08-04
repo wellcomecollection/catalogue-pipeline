@@ -4,11 +4,14 @@ from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentif
 from ingestor.models.merged.work import (
     VisibleMergedWork,
 )
+from ingestor.models.neptune.node import WorkNode
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     WorkHierarchy,
+    WorkHierarchyItem,
 )
 from ingestor.transformers.work_display_transformer import DisplayWorkTransformer
+from models.graph_node import Work
 from models.pipeline.concept import Subject
 from tests.test_utils import (
     load_json_fixture,
@@ -47,6 +50,28 @@ def test_short_description_none_when_no_description() -> None:
     extracted = get_work_fixture()
     extracted.work.data.description = None
     assert DisplayWorkTransformer(extracted).short_description is None
+
+
+def test_is_archive_root_false_by_default() -> None:
+    extracted = get_work_fixture()
+    assert DisplayWorkTransformer(extracted).is_archive_root is False
+
+
+def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
+    extracted = get_work_fixture()
+    extracted.hierarchy.children = [
+        WorkHierarchyItem(
+            work=WorkNode.model_validate(
+                {
+                    "~id": "child",
+                    "~labels": ["Work"],
+                    "~properties": Work(id="child", label="Child", type="Work"),
+                }
+            ),
+            parts=1,
+        )
+    ]
+    assert DisplayWorkTransformer(extracted).is_archive_root is True
 
 
 def test_concept_standard_labels() -> None:

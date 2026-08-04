@@ -59,6 +59,10 @@ class DisplayWorkTransformer(WorkBaseTransformer):
         )
 
     @property
+    def is_archive_root(self) -> bool:
+        return len(self.hierarchy.ancestors) == 0 and len(self.hierarchy.children) > 0
+
+    @property
     def thumbnail(self) -> DisplayDigitalLocation | None:
         if self.data.thumbnail is None:
             return None

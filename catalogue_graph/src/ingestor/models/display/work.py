@@ -46,6 +46,7 @@ class DisplayWork(ElasticsearchModel):
     parts: list[DisplayRelation]
     part_of: list[DisplayRelation]
     type: DisplayWorkType
+    is_archive_root: bool | None
 
     @classmethod
     def _display_work_type(cls, work_data: WorkData) -> DisplayWorkType:
@@ -90,4 +91,5 @@ class DisplayWork(ElasticsearchModel):
             parts=list(transformer.parts),
             part_of=list(transformer.part_of),
             type=cls._display_work_type(work.data),
+            is_archive_root=transformer.is_archive_root or None,
         )
