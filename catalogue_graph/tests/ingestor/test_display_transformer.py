@@ -36,12 +36,12 @@ def get_work_fixture() -> VisibleExtractedWork:
     )
 
 
-def test_is_archive_root_false_by_default() -> None:
+def test_is_collection_root_false_by_default() -> None:
     extracted = get_work_fixture()
-    assert DisplayWorkTransformer(extracted).hierarchy.is_archive_root is False
+    assert DisplayWorkTransformer(extracted).hierarchy.is_collection_root is False
 
 
-def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
+def test_is_collection_root_true_when_no_ancestors_and_has_children() -> None:
     extracted = get_work_fixture()
     extracted.hierarchy.children = [
         WorkHierarchyItem(
@@ -55,7 +55,7 @@ def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
             parts=1,
         )
     ]
-    assert DisplayWorkTransformer(extracted).hierarchy.is_archive_root is True
+    assert DisplayWorkTransformer(extracted).hierarchy.is_collection_root is True
 
 
 def test_archive_type_from_collection_path_label() -> None:

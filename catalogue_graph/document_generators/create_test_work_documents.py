@@ -224,12 +224,19 @@ def create_works_with_all_includes() -> None:
             former_frequency=["Published in 2001", "Published in 2002"],
             designation=["Designation #1", "Designation #2", "Designation #3"],
             items=[create_item() for _ in range(2)] + [create_unidentifiable_item()],
+            collection_path=CollectionPath(path="SABSA/A/3", label="SA/BSA/A/3"),
         )
 
         work = create_visible_extracted_work(
             ancestors=[
-                create_work_hierarchy_item(parts=5),
-                create_work_hierarchy_item(parts=1),
+                create_work_hierarchy_item(
+                    parts=5,
+                    collection_path=CollectionPath(path="SABSA/A", label="SA/BSA/A"),
+                ),
+                create_work_hierarchy_item(
+                    parts=1,
+                    collection_path=CollectionPath(path="SABSA", label="SA/BSA"),
+                ),
             ],
             merged_work=merged_work,
         )
@@ -432,8 +439,8 @@ def create_works_with_collection_paths() -> None:
 def create_archive_works() -> None:
     """Create two works from the same archive: its root, and a section within it.
 
-    Between them they cover the fields used by archive browsing: `isArchiveRoot`,
-    `archiveType`, `archiveRoot`, `collectionPath.sort`.
+    Between them they cover the fields used by archive browsing: `isCollectionRoot`,
+    `archiveType`, `collectionRoot`, `collectionPath.sort`.
     """
     root_work = create_visible_merged_work(
         title="Papers of Ernst Boris Chain",

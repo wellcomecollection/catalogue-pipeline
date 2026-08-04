@@ -365,7 +365,7 @@
           "id": "GC",
           "label": "General collections"
         },
-        "archiveRoot": {
+        "collectionRoot": {
           "id": "rqyum5sv",
           "label": "Twort, Frederick William"
         }
@@ -429,8 +429,8 @@
           "online"
         ],
         "archiveType.id": "GC",
-        "archiveRoot.id": "rqyum5sv",
-        "archiveRoot.title": "Twort, Frederick William"
+        "collectionRoot.id": "rqyum5sv",
+        "collectionRoot.title": "Twort, Frederick William"
       }
     },
     "_version": 1751300414000,
@@ -1653,7 +1653,7 @@
             "label": "Online"
           }
         ],
-        "archiveRoot": {
+        "collectionRoot": {
           "id": "uad4jhwg",
           "label": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland"
         }
@@ -1710,8 +1710,8 @@
         "availabilities.id": [
           "online"
         ],
-        "archiveRoot.id": "uad4jhwg",
-        "archiveRoot.title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland"
+        "collectionRoot.id": "uad4jhwg",
+        "collectionRoot.title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland"
       }
     },
     "_version": 1701693347000,
@@ -3849,7 +3849,7 @@
           "id": "PP",
           "label": "Personal Papers"
         },
-        "archiveRoot": {
+        "collectionRoot": {
           "id": "dupg64pv",
           "label": "Rast, Dr Hugo"
         }
@@ -3906,8 +3906,8 @@
           "closed-stores"
         ],
         "archiveType.id": "PP",
-        "archiveRoot.id": "dupg64pv",
-        "archiveRoot.title": "Rast, Dr Hugo"
+        "collectionRoot.id": "dupg64pv",
+        "collectionRoot.title": "Rast, Dr Hugo"
       }
     },
     "_version": 1753957479000,

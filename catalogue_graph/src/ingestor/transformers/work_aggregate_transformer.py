@@ -136,14 +136,14 @@ class AggregateWorkTransformer(WorkBaseTransformer):
         return AggregatableField(id=result.id, label=result.label)
 
     @property
-    def archive_root(self) -> AggregatableField | None:
+    def collection_root(self) -> AggregatableField | None:
         if self.hierarchy.ancestors:
             root = self.hierarchy.ancestors[-1].work.properties
             if root.label is None:
                 return None
             return AggregatableField(id=root.id, label=root.label)
 
-        if self.hierarchy.is_archive_root and self.data.title is not None:
+        if self.hierarchy.is_collection_root and self.data.title is not None:
             return AggregatableField(id=self.state.canonical_id, label=self.data.title)
 
         return None

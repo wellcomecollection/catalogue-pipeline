@@ -126,17 +126,17 @@ def test_identifiers_includes_work_canonical_id() -> None:
     assert "b_number" in identifiers
 
 
-def test_archive_root_with_ancestors() -> None:
+def test_collection_root_with_ancestors() -> None:
     extracted = get_work_with_ancestor()
     extracted.hierarchy.ancestors[0].work.properties.id = "root_id"
     extracted.hierarchy.ancestors[0].work.properties.label = "Root title"
 
     transformer = QueryWorkTransformer(extracted)
-    assert transformer.archive_root_id == "root_id"
-    assert transformer.archive_root_title == "Root title"
+    assert transformer.collection_root_id == "root_id"
+    assert transformer.collection_root_title == "Root title"
 
 
-def test_archive_root_when_work_is_root() -> None:
+def test_collection_root_when_work_is_root() -> None:
     fixture = load_json_fixture("ingestor/single_merged.json")
     work = VisibleMergedWork.model_validate(fixture)
     work.state.canonical_id = "this_work_id"
@@ -164,11 +164,11 @@ def test_archive_root_when_work_is_root() -> None:
     )
 
     transformer = QueryWorkTransformer(extracted)
-    assert transformer.archive_root_id == "this_work_id"
-    assert transformer.archive_root_title == "This work title"
+    assert transformer.collection_root_id == "this_work_id"
+    assert transformer.collection_root_title == "This work title"
 
 
-def test_archive_root_when_no_hierarchy() -> None:
+def test_collection_root_when_no_hierarchy() -> None:
     fixture = load_json_fixture("ingestor/single_merged.json")
     work = VisibleMergedWork.model_validate(fixture)
 
@@ -179,11 +179,11 @@ def test_archive_root_when_no_hierarchy() -> None:
     )
 
     transformer = QueryWorkTransformer(extracted)
-    assert transformer.archive_root_id is None
-    assert transformer.archive_root_title is None
+    assert transformer.collection_root_id is None
+    assert transformer.collection_root_title is None
 
 
-def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
+def test_is_collection_root_true_when_no_ancestors_and_has_children() -> None:
     extracted = get_work_with_ancestor()
     extracted.hierarchy.ancestors = []
     extracted.hierarchy.children = [
@@ -198,12 +198,12 @@ def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
             parts=1,
         )
     ]
-    assert QueryWorkTransformer(extracted).hierarchy.is_archive_root is True
+    assert QueryWorkTransformer(extracted).hierarchy.is_collection_root is True
 
 
-def test_is_archive_root_false_when_ancestors_present() -> None:
+def test_is_collection_root_false_when_ancestors_present() -> None:
     extracted = get_work_with_ancestor()
-    assert QueryWorkTransformer(extracted).hierarchy.is_archive_root is False
+    assert QueryWorkTransformer(extracted).hierarchy.is_collection_root is False
 
 
 def test_archive_type_from_collection_path_label() -> None:

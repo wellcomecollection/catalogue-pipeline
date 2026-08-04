@@ -136,7 +136,7 @@
             }
           }
         },
-        "archiveRoot": {
+        "collectionRoot": {
           "type": "nested",
           "properties": {
             "id": {
@@ -332,7 +332,7 @@
         "workType": {
           "type": "keyword"
         },
-        "isArchiveRoot": {
+        "isCollectionRoot": {
           "type": "boolean"
         },
         "archiveType": {
@@ -342,7 +342,7 @@
             }
           }
         },
-        "archiveRoot": {
+        "collectionRoot": {
           "properties": {
             "id": {
               "type": "keyword"

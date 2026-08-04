@@ -49,14 +49,14 @@ def test_archive_type_none_when_no_collection_path() -> None:
     assert AggregateWorkTransformer(extracted).archive_type is None
 
 
-def test_archive_root_with_ancestors() -> None:
+def test_collection_root_with_ancestors() -> None:
     extracted = get_work_with_ancestor()
-    assert AggregateWorkTransformer(extracted).archive_root == AggregatableField(
+    assert AggregateWorkTransformer(extracted).collection_root == AggregatableField(
         id="root_id", label="Root title"
     )
 
 
-def test_archive_root_when_work_is_root() -> None:
+def test_collection_root_when_work_is_root() -> None:
     fixture = load_json_fixture("ingestor/single_merged.json")
     work = VisibleMergedWork.model_validate(fixture)
     work.state.canonical_id = "this_work_id"
@@ -83,12 +83,12 @@ def test_archive_root_when_work_is_root() -> None:
         concepts=[],
     )
 
-    assert AggregateWorkTransformer(extracted).archive_root == AggregatableField(
+    assert AggregateWorkTransformer(extracted).collection_root == AggregatableField(
         id="this_work_id", label="This work title"
     )
 
 
-def test_archive_root_none_when_no_hierarchy() -> None:
+def test_collection_root_none_when_no_hierarchy() -> None:
     fixture = load_json_fixture("ingestor/single_merged.json")
     work = VisibleMergedWork.model_validate(fixture)
 
@@ -98,12 +98,12 @@ def test_archive_root_none_when_no_hierarchy() -> None:
         concepts=[],
     )
 
-    assert AggregateWorkTransformer(extracted).archive_root is None
+    assert AggregateWorkTransformer(extracted).collection_root is None
 
 
-def test_archive_root_none_when_root_ancestor_has_no_label() -> None:
+def test_collection_root_none_when_root_ancestor_has_no_label() -> None:
     # AggregatableField.label is required, so we cannot construct one for a root
     # ancestor with no label -- the field is omitted entirely in this case.
     extracted = get_work_with_ancestor()
     extracted.hierarchy.ancestors[0].work.properties.label = None
-    assert AggregateWorkTransformer(extracted).archive_root is None
+    assert AggregateWorkTransformer(extracted).collection_root is None

@@ -151,18 +151,18 @@ class QueryWorkTransformer(WorkBaseTransformer):
         return result.id if result is not None else None
 
     @property
-    def archive_root_id(self) -> str | None:
+    def collection_root_id(self) -> str | None:
         if self.hierarchy.ancestors:
             return self.hierarchy.ancestors[-1].work.properties.id
-        if self.hierarchy.is_archive_root:
+        if self.hierarchy.is_collection_root:
             return self.state.canonical_id
         return None
 
     @property
-    def archive_root_title(self) -> str | None:
+    def collection_root_title(self) -> str | None:
         if self.hierarchy.ancestors:
             return self.hierarchy.ancestors[-1].work.properties.label
-        if self.hierarchy.is_archive_root:
+        if self.hierarchy.is_collection_root:
             return self.data.title
         return None
 

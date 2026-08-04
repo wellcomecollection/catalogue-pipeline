@@ -36,7 +36,12 @@ class WorkHierarchy(BaseModel):
         return _standardise_work_title(title) in self._ancestor_titles
 
     @property
-    def is_archive_root(self) -> bool:
+    def is_collection_root(self) -> bool:
+        """Returns true if the work is at the top of a collection hierarchy.
+
+        Collection hierarchies come from collection paths, so this includes hierarchies
+        which are not archives (such as those derived from Sierra 773/774 fields).
+        """
         return len(self.ancestors) == 0 and len(self.children) > 0
 
 

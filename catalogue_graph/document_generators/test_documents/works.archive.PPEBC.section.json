@@ -130,7 +130,7 @@
         "id": "PP",
         "label": "Personal Papers"
       },
-      "archiveRoot": {
+      "collectionRoot": {
         "id": "uy0hyncn",
         "label": "Papers of Ernst Boris Chain"
       }
@@ -168,9 +168,9 @@
       ],
       "availabilities.id": [],
       "archiveType.id": "PP",
-      "archiveRoot.id": "uy0hyncn",
-      "archiveRoot.title": "Papers of Ernst Boris Chain"
+      "collectionRoot.id": "uy0hyncn",
+      "collectionRoot.title": "Papers of Ernst Boris Chain"
     }
   },
-  "createdAt": "2026-08-04T14:36:05.403696+00:00"
+  "createdAt": "2026-08-04T14:53:07.079200+00:00"
 }
