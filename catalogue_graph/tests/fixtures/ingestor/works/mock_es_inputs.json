@@ -103,7 +103,7 @@
         "genres.concepts.label": [],
         "collectionPath.label": "GC/176/C/1",
         "collectionPath.path": "GC176/C/1",
-        "collectionPath.sort": "gc0000000176/c/0000000001"
+        "collectionPath.sort": "GC0000000176/C/0000000001"
       },
       "display": {
         "id": "a222zvge",
@@ -1416,7 +1416,7 @@
         "genres.concepts.label": [],
         "collectionPath.label": "UGC 198/8/5/8",
         "collectionPath.path": "UGC198/8/5/8",
-        "collectionPath.sort": "ugc0000000198/0000000008/0000000005/0000000008"
+        "collectionPath.sort": "UGC0000000198/0000000008/0000000005/0000000008"
       },
       "display": {
         "id": "a2242545",
@@ -3647,7 +3647,7 @@
         "genres.concepts.label": [],
         "collectionPath.label": "PP/RAS/A.2/1",
         "collectionPath.path": "PPRAS/A/2/1",
-        "collectionPath.sort": "ppras/a/0000000002/0000000001"
+        "collectionPath.sort": "PPRAS/A/0000000002/0000000001"
       },
       "display": {
         "id": "a227y9ye",

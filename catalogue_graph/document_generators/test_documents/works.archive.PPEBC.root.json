@@ -97,7 +97,7 @@
       "archiveType": {
         "id": "PP",
         "type": "ArchiveType",
-        "label": "Personal Papers"
+        "label": "Personal papers"
       }
     },
     "aggregatableValues": {
@@ -111,7 +111,7 @@
       "availabilities": [],
       "archiveType": {
         "id": "PP",
-        "label": "Personal Papers"
+        "label": "Personal papers"
       },
       "collectionRoot": {
         "id": "uy0hyncn",
@@ -150,5 +150,5 @@
       "collectionRoot.title": "Papers of Ernst Boris Chain"
     }
   },
-  "createdAt": "2026-08-04T14:53:07.072552+00:00"
+  "createdAt": "2026-08-04T16:06:52.374873+00:00"
 }

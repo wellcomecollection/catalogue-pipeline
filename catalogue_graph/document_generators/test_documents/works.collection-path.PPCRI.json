@@ -79,7 +79,7 @@
       "archiveType": {
         "id": "PP",
         "type": "ArchiveType",
-        "label": "Personal Papers"
+        "label": "Personal papers"
       }
     },
     "aggregatableValues": {
@@ -93,7 +93,7 @@
       "availabilities": [],
       "archiveType": {
         "id": "PP",
-        "label": "Personal Papers"
+        "label": "Personal papers"
       }
     },
     "filterableValues": {
@@ -125,5 +125,5 @@
       "archiveType.id": "PP"
     }
   },
-  "createdAt": "2026-08-04T13:20:14.746479+00:00"
+  "createdAt": "2026-08-04T16:06:51.658230+00:00"
 }
