@@ -35,6 +35,10 @@ class WorkHierarchy(BaseModel):
         """Returns true if a given title is used by one of the work's ancestors."""
         return _standardise_work_title(title) in self._ancestor_titles
 
+    @property
+    def is_archive_root(self) -> bool:
+        return len(self.ancestors) == 0 and len(self.children) > 0
+
 
 class ExtractedConcept(BaseModel):
     concept: ConceptNode

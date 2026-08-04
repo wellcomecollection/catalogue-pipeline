@@ -92,6 +92,6 @@ class DisplayWork(ElasticsearchModel):
             parts=list(transformer.parts),
             part_of=list(transformer.part_of),
             type=cls._display_work_type(work.data),
-            is_archive_root=transformer.is_archive_root or None,
+            is_archive_root=extracted.hierarchy.is_archive_root or None,
             archive_type=transformer.archive_type,
         )

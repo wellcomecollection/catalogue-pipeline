@@ -198,12 +198,12 @@ def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
             parts=1,
         )
     ]
-    assert QueryWorkTransformer(extracted).is_archive_root is True
+    assert QueryWorkTransformer(extracted).hierarchy.is_archive_root is True
 
 
 def test_is_archive_root_false_when_ancestors_present() -> None:
     extracted = get_work_with_ancestor()
-    assert QueryWorkTransformer(extracted).is_archive_root is False
+    assert QueryWorkTransformer(extracted).hierarchy.is_archive_root is False
 
 
 def test_archive_type_from_collection_path_label() -> None:

@@ -91,7 +91,7 @@ class WorkFilterableValues(ElasticsearchModel):
             part_of_id=list(transformer.part_of_ids),
             part_of_title=list(transformer.part_of_titles),
             availabilities_id=[a.id for a in work.state.availabilities],
-            is_archive_root=transformer.is_archive_root or None,
+            is_archive_root=extracted.hierarchy.is_archive_root or None,
             archive_type=transformer.archive_type,
             archive_root_id=transformer.archive_root_id,
             archive_root_title=transformer.archive_root_title,

@@ -60,10 +60,6 @@ class DisplayWorkTransformer(WorkBaseTransformer):
         )
 
     @property
-    def is_archive_root(self) -> bool:
-        return len(self.hierarchy.ancestors) == 0 and len(self.hierarchy.children) > 0
-
-    @property
     def archive_type(self) -> DisplayIdLabel | None:
         result = ArchiveType.from_collection_path(self.data.collection_path)
         if result is None:

@@ -56,7 +56,7 @@ def test_short_description_none_when_no_description() -> None:
 
 def test_is_archive_root_false_by_default() -> None:
     extracted = get_work_fixture()
-    assert DisplayWorkTransformer(extracted).is_archive_root is False
+    assert DisplayWorkTransformer(extracted).hierarchy.is_archive_root is False
 
 
 def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
@@ -73,7 +73,7 @@ def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
             parts=1,
         )
     ]
-    assert DisplayWorkTransformer(extracted).is_archive_root is True
+    assert DisplayWorkTransformer(extracted).hierarchy.is_archive_root is True
 
 
 def test_archive_type_from_collection_path_label() -> None:

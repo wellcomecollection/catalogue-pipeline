@@ -146,14 +146,10 @@ class QueryWorkTransformer(WorkBaseTransformer):
         return result.id if result is not None else None
 
     @property
-    def is_archive_root(self) -> bool:
-        return len(self.hierarchy.ancestors) == 0 and len(self.hierarchy.children) > 0
-
-    @property
     def archive_root_id(self) -> str | None:
         if self.hierarchy.ancestors:
             return self.hierarchy.ancestors[-1].work.properties.id
-        if self.is_archive_root:
+        if self.hierarchy.is_archive_root:
             return self.state.canonical_id
         return None
 
@@ -161,7 +157,7 @@ class QueryWorkTransformer(WorkBaseTransformer):
     def archive_root_title(self) -> str | None:
         if self.hierarchy.ancestors:
             return self.hierarchy.ancestors[-1].work.properties.label
-        if self.is_archive_root:
+        if self.hierarchy.is_archive_root:
             return self.data.title
         return None
 
