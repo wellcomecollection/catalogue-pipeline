@@ -321,7 +321,12 @@
             "type": "Collection"
           }
         ],
-        "type": "Work"
+        "type": "Work",
+        "archiveType": {
+          "id": "GC",
+          "label": "General collections",
+          "type": "ArchiveType"
+        }
       },
       "aggregatableValues": {
         "workType": [
@@ -3811,7 +3816,12 @@
           }
         ],
         "type": "Work",
-        "shortDescription": "Note on the German Hospital, 28 May 1940, and its lack of any relationship to the German state; letter to A G Maitland Jones re bombs falling in the vicinity of the hospital, 8 Sep 1940; photographs of the investigation of the bombs by Royal Engineers"
+        "shortDescription": "Note on the German Hospital, 28 May 1940, and its lack of any relationship to the German state; letter to A G Maitland Jones re bombs falling in the vicinity of the hospital, 8 Sep 1940; photographs of the investigation of the bombs by Royal Engineers",
+        "archiveType": {
+          "id": "PP",
+          "label": "Personal Papers",
+          "type": "ArchiveType"
+        }
       },
       "aggregatableValues": {
         "workType": [

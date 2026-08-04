@@ -1,5 +1,6 @@
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.concept import DisplayConcept, DisplaySubject
+from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.merged.work import (
     VisibleMergedWork,
@@ -12,6 +13,7 @@ from ingestor.models.neptune.query_result import (
 )
 from ingestor.transformers.work_display_transformer import DisplayWorkTransformer
 from models.graph_node import Work
+from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Subject
 from tests.test_utils import (
     load_json_fixture,
@@ -72,6 +74,28 @@ def test_is_archive_root_true_when_no_ancestors_and_has_children() -> None:
         )
     ]
     assert DisplayWorkTransformer(extracted).is_archive_root is True
+
+
+def test_archive_type_from_collection_path_label() -> None:
+    extracted = get_work_fixture()
+    extracted.work.data.collection_path = CollectionPath(
+        path="PPRAS/A/2/1", label="PP/RAS/A.2/1"
+    )
+    assert DisplayWorkTransformer(extracted).archive_type == DisplayIdLabel(
+        id="PP", label="Personal Papers", type="ArchiveType"
+    )
+
+
+def test_archive_type_none_for_unknown_prefix() -> None:
+    extracted = get_work_fixture()
+    extracted.work.data.collection_path = CollectionPath(path="XYZ/1", label="XYZ/1")
+    assert DisplayWorkTransformer(extracted).archive_type is None
+
+
+def test_archive_type_none_when_no_collection_path() -> None:
+    extracted = get_work_fixture()
+    extracted.work.data.collection_path = None
+    assert DisplayWorkTransformer(extracted).archive_type is None
 
 
 def test_concept_standard_labels() -> None:

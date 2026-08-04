@@ -1,6 +1,6 @@
 import re
 
-from pydantic import BaseModel
+from models.pipeline.id_label import IdLabel
 
 # Maps collection path label prefixes (top-level reference number segments) to human-readable labels.
 COLLECTION_PATH_PREFIX_LABELS: dict[str, str] = {
@@ -26,12 +26,7 @@ COLLECTION_PATH_PREFIX_LABELS: dict[str, str] = {
 _NUMERIC_SUFFIX_PREFIXES = {"OH", "TP"}
 
 
-class ArchiveType(BaseModel):
-    id: str  # normalised prefix code (e.g. "OH")
-    label: str  # human-readable label (e.g. "Oral History")
-
-
-def get_archive_type(collection_path_label: str) -> ArchiveType | None:
+def get_archive_type(collection_path_label: str) -> IdLabel | None:
     """Return the normalised archive type for a full collection path label.
 
     Extracts the leading segment (e.g. "OH1" from "OH1/B/3"), strips trailing
@@ -49,4 +44,4 @@ def get_archive_type(collection_path_label: str) -> ArchiveType | None:
     label = COLLECTION_PATH_PREFIX_LABELS.get(normalised)
     if label is None:
         return None
-    return ArchiveType(id=normalised, label=label)
+    return IdLabel(id=normalised, label=label)

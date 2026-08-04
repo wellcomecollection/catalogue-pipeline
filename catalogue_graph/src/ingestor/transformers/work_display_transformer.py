@@ -24,6 +24,7 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
+from models.pipeline.archive_type import get_archive_type
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
 from utils.sort import natural_sort_key
@@ -61,6 +62,16 @@ class DisplayWorkTransformer(WorkBaseTransformer):
     @property
     def is_archive_root(self) -> bool:
         return len(self.hierarchy.ancestors) == 0 and len(self.hierarchy.children) > 0
+
+    @property
+    def archive_type(self) -> DisplayIdLabel | None:
+        if self.data.collection_path is None or self.data.collection_path.label is None:
+            return None
+
+        result = get_archive_type(self.data.collection_path.label)
+        if result is None:
+            return None
+        return DisplayIdLabel.from_id_label(result, "ArchiveType")
 
     @property
     def thumbnail(self) -> DisplayDigitalLocation | None:
