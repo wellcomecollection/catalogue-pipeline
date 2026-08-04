@@ -177,3 +177,34 @@ def test_collection_path_sort_none_when_no_collection_path() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.data.collection_path = None
     assert QueryWorkTransformer(extracted).collection_path_sort is None
+
+
+def test_collection_path_sort_orders_archive_tree() -> None:
+    """Sorting on `collection_path_sort` returns a fully open archive tree in order."""
+    extracted = get_work_with_ancestor()
+
+    def sort_key(path: str) -> str:
+        extracted.work.data.collection_path = CollectionPath(path=path)
+        sort_value = QueryWorkTransformer(extracted).collection_path_sort
+        assert sort_value is not None
+        return sort_value
+
+    paths = [
+        "PPEBC/B",
+        "PPEBC/A/1/10",
+        "PPEBC/A/2",
+        "PPEBC/A/1/9",
+        "PPEBC/A/1",
+        "PPEBC",
+    ]
+
+    # Every work comes before its own children and after its preceding siblings,
+    # with numbered siblings ordered by number rather than alphabetically (9 before 10).
+    assert sorted(paths, key=sort_key) == [
+        "PPEBC",
+        "PPEBC/A/1",
+        "PPEBC/A/1/9",
+        "PPEBC/A/1/10",
+        "PPEBC/A/2",
+        "PPEBC/B",
+    ]

@@ -3817,7 +3817,7 @@
         "type": "Work",
         "archiveType": {
           "id": "PP",
-          "label": "Personal Papers",
+          "label": "Personal papers",
           "type": "ArchiveType"
         }
       },
@@ -3847,7 +3847,7 @@
         ],
         "archiveType": {
           "id": "PP",
-          "label": "Personal Papers"
+          "label": "Personal papers"
         },
         "collectionRoot": {
           "id": "dupg64pv",
