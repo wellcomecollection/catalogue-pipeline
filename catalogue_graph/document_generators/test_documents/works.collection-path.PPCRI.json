@@ -75,7 +75,12 @@
       "images": [],
       "parts": [],
       "partOf": [],
-      "type": "Work"
+      "type": "Work",
+      "archiveType": {
+        "id": "PP",
+        "type": "ArchiveType",
+        "label": "Personal Papers"
+      }
     },
     "aggregatableValues": {
       "workType": [],
@@ -120,5 +125,5 @@
       "archiveType.id": "PP"
     }
   },
-  "createdAt": "2026-07-30T15:50:32.474287+00:00"
+  "createdAt": "2026-08-04T09:38:43.829194+00:00"
 }
