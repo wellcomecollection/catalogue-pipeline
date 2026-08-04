@@ -52,6 +52,8 @@ class DisplayWorkTransformer(WorkBaseTransformer):
     def short_description(self) -> str | None:
         if self.data.description is None:
             return None
+
+        # Extract the first sentence of the `description` field
         match = re.search(r"[.!?]", self.data.description)
         return (
             self.data.description[: match.end()].strip()
