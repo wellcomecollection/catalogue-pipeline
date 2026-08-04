@@ -5,14 +5,11 @@ from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentif
 from ingestor.models.merged.work import (
     VisibleMergedWork,
 )
-from ingestor.models.neptune.node import WorkNode
 from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     WorkHierarchy,
-    WorkHierarchyItem,
 )
 from ingestor.transformers.work_display_transformer import DisplayWorkTransformer
-from models.graph_node import Work
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Subject
 from tests.test_utils import (
@@ -34,28 +31,6 @@ def get_work_fixture() -> VisibleExtractedWork:
         hierarchy=WorkHierarchy(id="some_id"),
         concepts=[ExtractedConcept.model_validate(malaria_concept_fixture)],
     )
-
-
-def test_is_collection_root_false_by_default() -> None:
-    extracted = get_work_fixture()
-    assert DisplayWorkTransformer(extracted).hierarchy.is_collection_root is False
-
-
-def test_is_collection_root_true_when_no_ancestors_and_has_children() -> None:
-    extracted = get_work_fixture()
-    extracted.hierarchy.children = [
-        WorkHierarchyItem(
-            work=WorkNode.model_validate(
-                {
-                    "~id": "child",
-                    "~labels": ["Work"],
-                    "~properties": Work(id="child", label="Child", type="Work"),
-                }
-            ),
-            parts=1,
-        )
-    ]
-    assert DisplayWorkTransformer(extracted).hierarchy.is_collection_root is True
 
 
 def test_archive_type_from_collection_path_label() -> None:

@@ -1,36 +1,16 @@
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.merged.work import VisibleMergedWork
-from ingestor.models.neptune.node import WorkNode
-from ingestor.models.neptune.query_result import WorkHierarchy, WorkHierarchyItem
+from ingestor.models.neptune.query_result import WorkHierarchy
 from ingestor.transformers.work_aggregate_transformer import (
     AggregatableField,
     AggregateWorkTransformer,
 )
-from models.graph_node import Work
 from models.pipeline.collection_path import CollectionPath
-from tests.test_utils import load_json_fixture
-
-
-def get_work_with_ancestor() -> VisibleExtractedWork:
-    fixture = load_json_fixture("ingestor/single_merged.json")
-    work = VisibleMergedWork.model_validate(fixture)
-
-    ancestor_node = WorkNode.model_validate(
-        {
-            "~id": "123",
-            "~labels": ["Work"],
-            "~properties": Work(id="root_id", label="Root title", type="Work"),
-        }
-    )
-
-    return VisibleExtractedWork(
-        work=work,
-        hierarchy=WorkHierarchy(
-            id="some_id",
-            ancestors=[WorkHierarchyItem(work=ancestor_node, parts=1)],
-        ),
-        concepts=[],
-    )
+from tests.test_utils import (
+    get_work_hierarchy_item,
+    get_work_with_ancestor,
+    load_json_fixture,
+)
 
 
 def test_archive_type_from_collection_path_label() -> None:
@@ -50,7 +30,9 @@ def test_archive_type_none_when_no_collection_path() -> None:
 
 
 def test_collection_root_with_ancestors() -> None:
-    extracted = get_work_with_ancestor()
+    extracted = get_work_with_ancestor(
+        ancestor_id="root_id", ancestor_label="Root title"
+    )
     assert AggregateWorkTransformer(extracted).collection_root == AggregatableField(
         id="root_id", label="Root title"
     )
@@ -67,18 +49,7 @@ def test_collection_root_when_work_is_root() -> None:
         hierarchy=WorkHierarchy(
             id="some_id",
             ancestors=[],
-            children=[
-                WorkHierarchyItem(
-                    work=WorkNode.model_validate(
-                        {
-                            "~id": "child",
-                            "~labels": ["Work"],
-                            "~properties": Work(id="child", label="Child", type="Work"),
-                        }
-                    ),
-                    parts=1,
-                )
-            ],
+            children=[get_work_hierarchy_item("child", "Child")],
         ),
         concepts=[],
     )
@@ -104,6 +75,5 @@ def test_collection_root_none_when_no_hierarchy() -> None:
 def test_collection_root_none_when_root_ancestor_has_no_label() -> None:
     # AggregatableField.label is required, so we cannot construct one for a root
     # ancestor with no label -- the field is omitted entirely in this case.
-    extracted = get_work_with_ancestor()
-    extracted.hierarchy.ancestors[0].work.properties.label = None
+    extracted = get_work_with_ancestor(ancestor_label=None)
     assert AggregateWorkTransformer(extracted).collection_root is None
