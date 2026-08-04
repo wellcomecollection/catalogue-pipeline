@@ -1622,8 +1622,7 @@
             "type": "Collection"
           }
         ],
-        "type": "Work",
-        "shortDescription": "<p>Marked number V11.</p>"
+        "type": "Work"
       },
       "aggregatableValues": {
         "workType": [
@@ -3816,7 +3815,6 @@
           }
         ],
         "type": "Work",
-        "shortDescription": "Note on the German Hospital, 28 May 1940, and its lack of any relationship to the German state; letter to A G Maitland Jones re bombs falling in the vicinity of the hospital, 8 Sep 1940; photographs of the investigation of the bombs by Royal Engineers",
         "archiveType": {
           "id": "PP",
           "label": "Personal Papers",

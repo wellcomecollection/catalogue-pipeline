@@ -1,8 +1,5 @@
-import re
 from collections import defaultdict
 from collections.abc import Generator
-
-import nh3
 
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
@@ -49,20 +46,6 @@ class DisplayWorkTransformer(WorkBaseTransformer):
             other_identifiers=self.data.other_identifiers,
         )
         yield from DisplayIdentifier.from_all_identifiers(all_ids)
-
-    @property
-    def short_description(self) -> str | None:
-        if self.data.description is None:
-            return None
-
-        # Extract the first sentence of the `description` field
-        match = re.search(r"[.!?]", self.data.description)
-        text = self.data.description[: match.end()] if match else self.data.description
-
-        # Truncating mid-markup can leave a dangling/unclosed tag behind (e.g. an
-        # opening `<p>` with no matching `</p>`). nh3 repairs this while leaving
-        # any inline formatting (e.g. `<i>`, `<b>`) that survived the truncation in place.
-        return nh3.clean(text).strip() or None
 
     @property
     def archive_type(self) -> DisplayIdLabel | None:
