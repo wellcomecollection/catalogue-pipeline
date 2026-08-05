@@ -108,9 +108,7 @@ jobs:
         component:
           # ID Minter V2
           - id-minter
-          - id-minter-test # remove when we're done testing canonical ids inheritance
           - id-generator
-          - id-generator-test # remove when we're done testing canonical ids inheritance
           # Transformer lambdas
           - transformer
           # Graph subsystem lambdas
