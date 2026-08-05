@@ -1,4 +1,4 @@
-from pymarc.record import Field, Subfield
+from pymarc.record import Field, Record, Subfield
 
 from adapters.transformers.axiell.access_status import extract_access_status
 from models.pipeline.access_status import Closed, Open, Restricted
@@ -7,17 +7,11 @@ from tests.adapters.transformers.axiell.conftest import make_axiell_record
 # mypy: allow-untyped-calls
 
 
-def add_506(record, code: str, value: str) -> None:
+def add_506(record: Record, code: str, value: str) -> None:
     record.add_field(Field(tag="506", subfields=[Subfield(code=code, value=value)]))
 
 
-def test_closed_status_maps_to_closed() -> None:
-    record = make_axiell_record()
-    add_506(record, "f", "CLOSED")
-    assert extract_access_status(record) == Closed
-
-
-def test_closed_status_needs_no_closed_until_date() -> None:
+def test_closed_status_maps_to_closed_without_closed_until_date() -> None:
     # Permanently closed material carries CLOSED with no 506 $g at all.
     record = make_axiell_record()
     add_506(record, "f", "CLOSED")
