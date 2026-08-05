@@ -9,7 +9,16 @@ from models.pipeline.identifier import Identifiable, Unidentifiable
 # or &amp;#41; (rparen) as the numbers 40 and 41 respectively.
 RE_DISCARD = re.compile(r"(&(amp;)?.+?;)")
 
-RE_KEEP = re.compile(r"\d{2,4}|-")
+# A digit run immediately followed by just enough dashes to pad it to a
+# 4-character year is a MARC convention for an unknown trailing digit, e.g.
+# "182-" (the 1820s), "19--" (the 1900s). The specific 3+1/2+2/1+3
+# alternatives must come before the general `\d{2,4}` fallback, otherwise a
+# *complete* 4-digit year followed by a real range-separator dash (e.g.
+# "1956-", meaning "1956 onwards") would be mistaken for a partial year.
+RE_KEEP = re.compile(r"\d{3}-(?!-)|\d{2}-{2}(?!-)|\d-{3}(?!-)|\d{2,4}|-")
+
+# Matches a partial year: 1-3 digits padded to 4 characters with dashes.
+RE_PARTIAL_YEAR = re.compile(r"^\d{1,3}-{1,3}$")
 
 # matcher for "nth century" with any single trailing punctuation
 # actually matches any character at all directly after century, but
@@ -31,11 +40,23 @@ def parse_period(
     giving a concrete date/time range.
     >>> parse_period("1988-1990")
     Period(id=Unidentifiable(canonical_id=None, type='Unidentifiable'), label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00Z', to_time='1990-12-31T23:59:59.999999999Z', label='1988-1990'))
+
+    Messy/partial years are recovered where possible.
+    >>> parse_period("1825-[19--?]").range
+    DateTimeRange(from_time='1825-01-01T00:00:00Z', to_time='1999-12-31T23:59:59.999999999Z', label='1825-[19--?]')
+
+    Anything else degrades to a label-only Period rather than raising.
+    >>> parse_period("mid century")
+    Period(id=Unidentifiable(canonical_id=None, type='Unidentifiable'), label='mid century', type='Period', range=None)
     """
     range_fn = century_to_range if "century" in period else to_range
+    try:
+        date_range = range_fn(period)
+    except ValueError:
+        date_range = None
     return Period(
         label=period,
-        range=range_fn(period),
+        range=date_range,
         type="Period",
         id=identifier if identifier else Unidentifiable(),
     )
@@ -92,6 +113,26 @@ def to_range(period: str) -> DateTimeRange:
     '1977'
     >>> r.to_time[:4]
     '1986'
+
+    A trailing dash on a partial year is a MARC convention for an unknown
+    trailing digit - "182-" means somewhere in the 1820s.
+    >>> r = to_range("182-")
+    >>> r.from_time
+    '1820-01-01T00:00:00Z'
+    >>> r.to_time
+    '1829-12-31T23:59:59.999999999Z'
+
+    An open lower bound.
+    >>> r = to_range("- 1792")
+    >>> r.to_time
+    '1792-12-31T23:59:59.999999999Z'
+
+    An abbreviated end year.
+    >>> r = to_range("1742 - 44")
+    >>> r.from_time
+    '1742-01-01T00:00:00Z'
+    >>> r.to_time
+    '1744-12-31T23:59:59.999999999Z'
     """
     from_part, to_part = crack(preprocess(period))
     return DateTimeRange.model_validate(
@@ -142,6 +183,12 @@ def preprocess(period: str) -> str:
     A year might only be two digits, with the century being implied
     >>> preprocess("1961-72 [v. 3, c1973]")
     '1961 - 72 1973'
+
+    A trailing "--" is kept attached to its digits as a single unknown-digit
+    token, rather than being split into separate hyphens by the range
+    separator logic.
+    >>> preprocess("1825-[19--?]")
+    '1825 - 19--'
     """
     return " ".join(RE_KEEP.findall(RE_DISCARD.sub("", period)))
 
@@ -182,29 +229,55 @@ def crack(range_string: str) -> tuple[str, str]:
     It is also possible that the to part consists of multiple years, not all of them being complete
     >>> crack("1961 - 72 1973")
     ('1961', '1973')
+
+    A partial year with no explicit end is its own decade/century - both
+    bounds resolve from the same placeholder (see start_of_year/end_of_year).
+    >>> crack("182-")
+    ('182-', '182-')
+
+    A partial year can appear as the "to" part of a range too.
+    >>> crack("1825 - 19--")
+    ('1825', '19--')
+
+    Non-year content (e.g. roman numerals) can leave a meaningless standalone
+    hyphen behind; it's discarded in favour of the real separator.
+    >>> crack("- 1788 - 1789")
+    ('1788', '1789')
+
+    A trailing hyphen left the same way isn't an abbreviated end year either.
+    >>> crack("1794 - -")
+    ('1794', '')
     """
-    # if it's hyphenated - partition will put the parts in the right place.
-    (from_part, sep, to_part) = range_string.partition("-")
-    from_part = from_part.strip()
-    to_part = to_part.strip()
+    # Split on whitespace rather than partitioning on "-" directly: a
+    # partial year like "19--" has its dashes glued to its digits, so only a
+    # standalone "-" (its own space-separated part) is a real separator.
+    parts = range_string.split(" ")
 
-    if from_part and sep and to_part:
-        # If from_part consists of multiple year entries (e.g. "2024 2025"), extract the lowest one
-        from_part = min(from_part.split(" "))
+    if "-" in parts:
+        # A leading "-" with nothing before it is either an open lower bound
+        # ("- 1812") or a leftover from discarded non-year content preceding
+        # the real range - only the latter if another "-" remains to split on.
+        while parts[0] == "-" and parts.count("-") > 1:
+            parts = parts[1:]
+
+        separator = parts.index("-")
+        from_parts = parts[:separator]
+        # A bare "-" here is noise, not a digit to fill in as an end year.
+        to_parts = [part for part in parts[separator + 1 :] if part != "-"]
+        from_part = min(from_parts) if from_parts else ""
         # Fill in any implied missing numbers in the to part.
-        to_part = max(
-            fill_year_prefix(from_part, to_year) for to_year in to_part.split(" ")
+        to_part = (
+            max(fill_year_prefix(from_part, to_year) for to_year in to_parts)
+            if from_part and to_parts
+            else max(to_parts, default="")
         )
+    elif len(parts) == 1:
+        # it's just one date (or a lone partial year, standing for its own range)
+        from_part = to_part = parts[0]
+    else:
+        from_part, to_part = min(parts), max(parts)
 
-    if not sep:
-        parts = from_part.split(" ")
-        if len(parts) == 1:
-            # it's just one date
-            to_part = from_part
-        else:
-            from_part = min(parts)
-            to_part = max(parts)
-    return from_part.strip(), to_part.strip()
+    return from_part, to_part
 
 
 def fill_year_prefix(from_year: str, to_year: str) -> str:
@@ -235,11 +308,33 @@ def fill_year_prefix(from_year: str, to_year: str) -> str:
     return to_year
 
 
+def resolve_partial_year(year: str, fill: str) -> str:
+    """
+    Fill a partial year's unknown trailing digits with `fill` - "0" resolves
+    the start of its decade/century/millennium, "9" the end.
+    >>> resolve_partial_year("182-", "0")
+    '1820'
+    >>> resolve_partial_year("182-", "9")
+    '1829'
+    >>> resolve_partial_year("19--", "9")
+    '1999'
+
+    A complete year is returned unchanged.
+    >>> resolve_partial_year("1980", "9")
+    '1980'
+    """
+    if RE_PARTIAL_YEAR.fullmatch(year):
+        return year.replace("-", fill)
+    return year
+
+
 def start_of_year(year: str) -> str:
+    year = resolve_partial_year(year, "0")
     return (datetime(int(year), 1, 1) if year else datetime.min).isoformat() + "Z"
 
 
 def end_of_year(year: str) -> str:
+    year = resolve_partial_year(year, "9")
     return (
         (
             datetime(int(year), 12, 31, 23, 59, 59, 1000000 - 1)

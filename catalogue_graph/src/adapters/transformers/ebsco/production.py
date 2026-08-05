@@ -27,7 +27,9 @@ def extract_production(record: Record) -> list[ProductionEvent]:
     if not productions260_264:
         return [production008]
 
-    if not productions260_264[0].dates:
+    # A date that degraded to label-only (no range) isn't useful for
+    # filtering/sorting - prefer the 008 date if it has one to offer.
+    if not any(date.range for date in productions260_264[0].dates):
         productions260_264[0].dates = production008.dates
 
     return productions260_264
