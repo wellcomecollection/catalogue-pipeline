@@ -9,24 +9,23 @@ one per downstream inference task (fanned out by the state machine's Map state).
 
 from __future__ import annotations
 
+import os
 import typing
 from argparse import ArgumentParser
-from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
 
 import structlog
 
+from core.find_work import normalise_lambda_input, write_partitions_to_s3
 from inferrer.models import (
     DEFAULT_PARTITION_SIZE,
     FindWorkEvent,
-    FindWorkRefsResult,
     FindWorkResult,
     InferenceManagerEvent,
-    PartitionRef,
 )
 from inferrer.source import ImagesInitialSource
+from models.find_work import FindWorkRefsResult
 from utils.argparse import add_pipeline_event_args
-from utils.aws import pydantic_to_s3_json
 from utils.elasticsearch import (
     ElasticsearchMode,
     get_client,
@@ -34,9 +33,6 @@ from utils.elasticsearch import (
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
-
-# Concurrency for writing partition files to S3 (one small object per partition).
-S3_WRITE_PARALLELISM = 16
 
 
 def handler(
@@ -69,37 +65,22 @@ def handler(
     return FindWorkResult(partitions=partitions)
 
 
-def write_partitions_to_s3(
-    partitions: list[InferenceManagerEvent], event: FindWorkEvent
-) -> list[PartitionRef]:
-    """Write each partition to S3 and return small refs.
-
-    The state machine's Map then iterates these refs (a few hundred bytes each)
-    rather than the full partitions, keeping the find-work result well under the
-    Step Functions 256 KB state limit. Each inference task resolves its ref back
-    to the full `InferenceManagerEvent` from S3. The partitions are written under
-    a scope-keyed prefix for the run.
-    """
-
-    def write_one(indexed: tuple[int, InferenceManagerEvent]) -> PartitionRef:
-        index, partition = indexed
-        s3_uri = event.partition_s3_uri(index)
-        pydantic_to_s3_json(partition, s3_uri)
-        return PartitionRef(s3_uri=s3_uri, image_count=len(partition.ids or []))
-
-    with ThreadPoolExecutor(max_workers=S3_WRITE_PARALLELISM) as pool:
-        refs = list(pool.map(write_one, enumerate(partitions)))
-
-    logger.info(
-        "Wrote partitions to S3",
-        partition_count=len(refs),
-        s3_prefix="/".join(event.s3_prefix_parts),
-    )
-    return refs
-
-
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
-    parsed_event = FindWorkEvent(**event)
+    # Scope comes from the invocation (scheduled_time or replay input); the
+    # deployment-identity fields come from the environment.
+    parsed_event = FindWorkEvent(
+        **normalise_lambda_input(
+            event,
+            defaults={
+                "pipeline_date": os.environ.get("PIPELINE_DATE"),
+                "graph_date": os.environ.get("GRAPH_DATE"),
+                "index_dates": {
+                    "initial": os.environ.get("INDEX_DATE_INITIAL"),
+                    "augmented": os.environ.get("INDEX_DATE_AUGMENTED"),
+                },
+            },
+        )
+    )
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
         pipeline_step="inference_find_work",
@@ -108,7 +89,11 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
 
     # Hand the partitions off via S3 (pass-by-reference) so the Map's inline
     # payload stays small regardless of how many images the window matched.
-    refs = write_partitions_to_s3(result.partitions, parsed_event)
+    refs = write_partitions_to_s3(
+        result.partitions,
+        [len(p.ids or []) for p in result.partitions],
+        parsed_event,
+    )
     return FindWorkRefsResult(partitions=refs).model_dump(mode="json")
 
 

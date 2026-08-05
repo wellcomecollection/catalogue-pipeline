@@ -1,3 +1,5 @@
+import pytest
+
 from inferrer.models import FindWorkEvent, InferenceManagerEvent
 from inferrer.steps import find_work
 from models.events import PipelineIndexDates
@@ -77,7 +79,7 @@ def test_lambda_handler_writes_partitions_to_s3_and_returns_refs() -> None:
     assert all(
         "/find_work/windows/20260601T0000-20260630T0000/" in r["s3_uri"] for r in refs
     )
-    assert sum(r["image_count"] for r in refs) == 3
+    assert sum(r["count"] for r in refs) == 3
     assert all("ids" not in r for r in refs)
 
     # The refs resolve back to the full partition events in S3.
@@ -88,6 +90,22 @@ def test_lambda_handler_writes_partitions_to_s3_and_returns_refs() -> None:
         assert partition.pipeline_date == PIPELINE_DATE
         resolved_ids += partition.ids or []
     assert sorted(resolved_ids) == ["a", "b", "c"]
+
+
+def test_lambda_handler_accepts_scheduled_time(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PIPELINE_DATE", PIPELINE_DATE)
+    monkeypatch.setenv("GRAPH_DATE", PIPELINE_DATE)
+    mock_es_secrets("inferrer", PIPELINE_DATE)
+    _seed_initial_images(["a"])
+
+    # scheduled_time - 5min lag = window end 12:05; start defaults to 11:50,
+    # covering the seeded modifiedTime of 12:00.
+    result = find_work.lambda_handler(
+        {"scheduled_time": "2026-06-10T12:10:00Z"}, _LambdaContext()
+    )
+    assert len(result["partitions"]) == 1
 
 
 def test_handler_builds_window_query_on_modified_time() -> None:

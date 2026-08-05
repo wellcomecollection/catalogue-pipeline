@@ -1,93 +1,20 @@
-# Work-discovery Lambda for the image-inferrer state machine: queries
-# images-initial for images modified within the scheduled window and partitions
-# their ids for the Map fan-out.
-# (The unified_pipeline_lambda ECR data source is declared in locals.tf.)
-
-module "inference_find_work_lambda" {
-  source = "../pipeline_lambda"
-
-  service_name = "image-inference-find-work"
-  description  = "Finds images needing inference within a time window and partitions them for the image-inferrer state machine."
-
-  pipeline_date       = var.pipeline_date
-  ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
-
-  image_config = {
-    command = ["inferrer.steps.find_work.lambda_handler"]
-  }
-
-  memory_size = 1024
-  timeout     = 300 # 5 minutes
-
-  vpc_config = {
-    subnet_ids = local.network_config.subnets
-    security_group_ids = [
-      local.network_config.ec_privatelink_security_group_id,
-      aws_security_group.egress.id,
-    ]
-  }
-}
-
-# The Lambda reads ES credentials from Secrets Manager at runtime.
-resource "aws_iam_role_policy" "inference_find_work_secret_read" {
-  role   = module.inference_find_work_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.inference_manager_pipeline_storage_secret_read.json
-}
-
-# find_work writes each partition's ids to S3 (pass-by-reference) so the state
-# machine Map payload stays small; the inference task reads them back.
-data "aws_iam_policy_document" "inference_find_work_s3_write" {
-  statement {
-    effect  = "Allow"
-    actions = ["s3:PutObject"]
-    resources = [
-      "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/inferrer/*"
-    ]
-  }
-}
-
-resource "aws_iam_role_policy" "inference_find_work_s3_write" {
-  role   = module.inference_find_work_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.inference_find_work_s3_write.json
-}
-
-# Scheduled image-inference state machine:
-#   ConstructEvent (build the time window from the schedule)
-#     -> FindWork (Lambda: ids of images modified in the window, partitioned)
-#       -> InferImages (Map: one EC2 inference task per partition, runTask.waitForTaskToken)
+# Scheduled image inference on the shared find_work_state_machine module:
+# FindWork partitions the images modified in the window, and each partition
+# runs as an EC2 inference task (runTask.waitForTaskToken).
 #
-# This is the sole image inferrer; it replaced the always-on SQS-driven image_inferrer
-# Scala service, which has been retired. The schedule is gated on
-# var.enable_image_inferrer_schedule.
+# This is the sole image inferrer; it replaced the retired SQS-driven Scala
+# service. (The unified_pipeline_lambda ECR data source is declared in locals.tf.)
 
 locals {
   # Generous timeout so EC2 capacity-provider warm-up does not trip the task token.
   inference_task_token_timeout_seconds = 3 * 60 * 60 # 3 hours
 
-  inference_lambda_retry = [
-    {
-      ErrorEquals = [
-        "Lambda.ServiceException",
-        "Lambda.AWSLambdaException",
-        "Lambda.SdkClientException",
-        "Lambda.TooManyRequestsException",
-      ]
-      IntervalSeconds = 2
-      MaxAttempts     = 3
-      BackoffRate     = 2.0
-    }
-  ]
-
   # Retry transient ECS infrastructure errors only. Application failures (e.g. a
   # poisoned-doc error) are intentionally NOT retried so they surface promptly.
   inference_ecs_retry = [
-    # Capacity/placement contention. When the Map fans out runTask calls
-    # concurrently, ECS can momentarily fail placement with
-    # `ECS.AmazonECSException: Insufficient CPU available` if two tasks race for
-    # the same instance, or while the EC2 capacity provider is still scaling up.
-    # This is transient and clears once a slot frees / the reservation registers,
-    # so retry it generously (long enough to outlast an in-flight task) rather
-    # than letting one placement race abort the whole run.
+    # Placement contention: concurrent runTask calls race for instances
+    # (`Insufficient CPU available`) or hit an ASG still scaling up, so retry
+    # generously (long enough to outlast an in-flight task) rather than abort.
     {
       ErrorEquals     = ["ECS.AmazonECSException"]
       IntervalSeconds = 15
@@ -110,193 +37,145 @@ locals {
       JitterStrategy  = "FULL"
     }
   ]
-
-  image_inferrer_state_machine_definition = jsonencode({
-    QueryLanguage = "JSONata"
-    Comment       = "Find images modified within the window and augment them with inferred data."
-    StartAt       = "ConstructEvent"
-    States = {
-      ConstructEvent = {
-        Type = "Pass"
-        Output = {
-          "pipeline_date" : var.pipeline_date,
-          "graph_date" : var.graph_date,
-          "index_dates" : {
-            "initial" : var.index_dates.initial,
-            "augmented" : var.index_dates.augmented
-          },
-          # Window end is 5 minutes before the scheduled time (indexing lag);
-          # the find-work step defaults the window start to end - 15 minutes.
-          "window" : {
-            "end_time" : "{% $fromMillis($toMillis($states.input.scheduled_time) - 300000) %}"
-          }
-        }
-        Next = "FindWork"
-      }
-
-      FindWork = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::lambda:invoke"
-        Arguments = {
-          FunctionName = module.inference_find_work_lambda.lambda_arn
-          Payload      = "{% $states.input %}"
-        }
-        Output = "{% $states.result.Payload %}"
-        Retry  = local.inference_lambda_retry
-        Next   = "InferImages"
-      }
-
-      InferImages = {
-        Type  = "Map"
-        Items = "{% $states.input.partitions %}"
-        # Matches the inferrer ASG max_instances (local.inference_max_concurrency)
-        # so the Map never fans out more tasks than the capacity provider can place.
-        MaxConcurrency = local.inference_max_concurrency
-        ItemProcessor = {
-          ProcessorConfig = { Mode = "INLINE" }
-          StartAt         = "RunInferenceTask"
-          States = {
-            RunInferenceTask = {
-              Type           = "Task"
-              Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-              TimeoutSeconds = local.inference_task_token_timeout_seconds
-              Retry          = local.inference_ecs_retry
-              Arguments = {
-                Cluster        = aws_ecs_cluster.cluster.arn
-                TaskDefinition = module.inference_manager_ecs_task.task_definition_arn
-                CapacityProviderStrategy = [
-                  {
-                    CapacityProvider = module.inference_capacity_provider.name
-                    Weight           = 1
-                  }
-                ]
-                NetworkConfiguration = {
-                  AwsvpcConfiguration = {
-                    AssignPublicIp = "DISABLED"
-                    Subnets        = local.network_config.subnets
-                    SecurityGroups = [
-                      local.network_config.ec_privatelink_security_group_id,
-                      aws_security_group.egress.id,
-                    ]
-                  }
-                }
-                Overrides = {
-                  ContainerOverrides = [
-                    {
-                      Name = local.inference_manager_container_name
-                      Command = [
-                        "/app/src/inferrer/steps/inference_manager.py",
-                        "--event", "{% $string($states.input) %}",
-                        "--task-token", "{% $states.context.Task.Token %}",
-                      ]
-                    }
-                  ]
-                }
-              }
-              # A partition that still fails after task-level retries (an
-              # exhausted capacity retry, a permanently-missing image, or an ES
-              # error) is recorded and tolerated rather than aborting the whole
-              # Map. Its images are left un-augmented and picked up by a later
-              # window (writes are idempotent external_gte). Without this, one bad
-              # partition fails-fast the entire run.
-              Catch = [
-                {
-                  ErrorEquals = ["States.ALL"]
-                  Next        = "RecordPartitionFailure"
-                }
-              ]
-              End = true
-            }
-            RecordPartitionFailure = {
-              Type = "Pass"
-              Output = {
-                "partition_failed" : true
-              }
-              End = true
-            }
-          }
-        }
-        End = true
-      }
-    }
-  })
 }
 
-module "image_inferrer_state_machine" {
-  source = "../state_machine"
+module "image_inferrer" {
+  source = "../find_work_state_machine"
 
-  name                     = "pipeline-${var.pipeline_date}_image_inferrer"
-  state_machine_definition = local.image_inferrer_state_machine_definition
+  name          = "image_inferrer"
+  pipeline_date = var.pipeline_date
+  comment       = "Find images modified within the window and augment them with inferred data."
 
-  invokable_lambda_arns = [module.inference_find_work_lambda.lambda_arn]
+  ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
 
-  policies_to_attach = {
+  find_work_lambda = {
+    service_name = "image-inference-find-work"
+    description  = "Finds images needing inference within a time window and partitions them for the image-inferrer state machine."
+    command      = ["inferrer.steps.find_work.lambda_handler"]
+    memory_size  = 1024
+    timeout      = 300 # 5 minutes
+    environment_variables = {
+      PIPELINE_DATE        = var.pipeline_date
+      GRAPH_DATE           = var.graph_date
+      INDEX_DATE_INITIAL   = var.index_dates.initial
+      INDEX_DATE_AUGMENTED = var.index_dates.augmented
+    }
+  }
+
+  vpc_config = {
+    subnet_ids = local.network_config.subnets
+    security_group_ids = [
+      local.network_config.ec_privatelink_security_group_id,
+      aws_security_group.egress.id,
+    ]
+  }
+
+  find_work_secret_read_policy_json = data.aws_iam_policy_document.inference_manager_pipeline_storage_secret_read.json
+
+  partition_s3_arns = [
+    "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/inferrer/*"
+  ]
+
+  # Matches the inferrer ASG max_instances (local.inference_max_concurrency)
+  # so the Map never fans out more tasks than the capacity provider can place.
+  max_concurrency = local.inference_max_concurrency
+
+  # A failed partition's images stay un-augmented until the same window is
+  # replayed (writes are idempotent external_gte), so it should not fail the
+  # run; the download_failure_count alarm covers the class that matters.
+  tolerate_partition_failures = true
+
+  worker_state_name = "RunInferenceTask"
+  worker_state = {
+    Type           = "Task"
+    Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+    TimeoutSeconds = local.inference_task_token_timeout_seconds
+    Retry          = local.inference_ecs_retry
+    Arguments = {
+      Cluster        = aws_ecs_cluster.cluster.arn
+      TaskDefinition = module.inference_manager_ecs_task.task_definition_arn
+      CapacityProviderStrategy = [
+        {
+          CapacityProvider = module.inference_capacity_provider.name
+          Weight           = 1
+        }
+      ]
+      NetworkConfiguration = {
+        AwsvpcConfiguration = {
+          AssignPublicIp = "DISABLED"
+          Subnets        = local.network_config.subnets
+          SecurityGroups = [
+            local.network_config.ec_privatelink_security_group_id,
+            aws_security_group.egress.id,
+          ]
+        }
+      }
+      Overrides = {
+        ContainerOverrides = [
+          {
+            Name = local.inference_manager_container_name
+            Command = [
+              "/app/src/inferrer/steps/inference_manager.py",
+              "--event", "{% $string($states.input) %}",
+              "--task-token", "{% $states.context.Task.Token %}",
+            ]
+          }
+        ]
+      }
+    }
+  }
+
+  state_machine_policies = {
     "inference_manager_ecs_task_invoke_policy" = module.inference_manager_ecs_task.invoke_policy_document
   }
-}
 
-module "image_inferrer_state_machine_alarms" {
-  source = "../state_machine_alarms"
-
-  state_machine_arn = module.image_inferrer_state_machine.state_machine_arn
-  alarm_name_prefix = "image-inferrer"
-  alarm_name_suffix = "-${var.pipeline_date}"
-
-  default_alarm_configuration = {
-    alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
-  }
-}
-
-# --- EventBridge schedule -------------------------------------------------- #
-
-resource "aws_scheduler_schedule" "image_inferrer_schedule" {
-  name                = "image-inferrer-schedule-${var.pipeline_date}"
-  schedule_expression = "cron(0,15,30,45 * * * ? *)"
-
-  flexible_time_window {
-    mode = "OFF"
+  schedule = {
+    cron    = "cron(0,15,30,45 * * * ? *)"
+    enabled = var.enable_image_inferrer_schedule
   }
 
-  target {
-    arn      = module.image_inferrer_state_machine.state_machine_arn
-    role_arn = aws_iam_role.run_image_inferrer_role.arn
-
-    input = <<JSON
-    {
-      "scheduled_time": "<aws.scheduler.scheduled-time>"
-    }
-    JSON
-  }
-
-  state = var.enable_image_inferrer_schedule ? "ENABLED" : "DISABLED"
+  alarm_topic_arn = local.monitoring_infra["chatbot_topic_arn"]
 }
 
-resource "aws_iam_role" "run_image_inferrer_role" {
-  name = "run-image-inferrer-role-${var.pipeline_date}"
+# Keep pre-module resources updating in place; removable once every stack
+# using this module has applied.
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect    = "Allow"
-        Principal = { Service = "scheduler.amazonaws.com" }
-        Action    = "sts:AssumeRole"
-      }
-    ]
-  })
+moved {
+  from = module.inference_find_work_lambda
+  to   = module.image_inferrer.module.find_work_lambda
 }
 
-resource "aws_iam_role_policy" "run_image_inferrer_policy" {
-  role = aws_iam_role.run_image_inferrer_role.id
+moved {
+  from = aws_iam_role_policy.inference_find_work_secret_read
+  to   = module.image_inferrer.aws_iam_role_policy.find_work_secret_read
+}
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = "states:StartExecution"
-        Resource = module.image_inferrer_state_machine.state_machine_arn
-      }
-    ]
-  })
+moved {
+  from = aws_iam_role_policy.inference_find_work_s3_write
+  to   = module.image_inferrer.aws_iam_role_policy.find_work_s3_write
+}
+
+moved {
+  from = module.image_inferrer_state_machine
+  to   = module.image_inferrer.module.state_machine
+}
+
+moved {
+  from = module.image_inferrer_state_machine_alarms
+  to   = module.image_inferrer.module.state_machine_alarms
+}
+
+moved {
+  from = aws_scheduler_schedule.image_inferrer_schedule
+  to   = module.image_inferrer.aws_scheduler_schedule.schedule
+}
+
+moved {
+  from = aws_iam_role.run_image_inferrer_role
+  to   = module.image_inferrer.aws_iam_role.run_state_machine
+}
+
+moved {
+  from = aws_iam_role_policy.run_image_inferrer_policy
+  to   = module.image_inferrer.aws_iam_role_policy.run_state_machine
 }

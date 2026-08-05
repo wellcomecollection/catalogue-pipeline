@@ -139,7 +139,7 @@ data "aws_iam_policy_document" "inference_manager_task_token" {
     effect  = "Allow"
     actions = ["states:SendTaskSuccess", "states:SendTaskFailure", "states:SendTaskHeartbeat"]
     resources = [
-      module.image_inferrer_state_machine.state_machine_arn,
+      module.image_inferrer.state_machine_arn,
     ]
   }
 }
