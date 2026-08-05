@@ -33,29 +33,7 @@ module "pipeline" {
         // prod matcher_merger - prod graph/ingestor/indexer
         denormalised = "works_denormalised.2025-08-14"
       }
-      images = {
-        // prod matcher_merger - OLD SQS-driven inference manager.
-        // POST-CUTOVER: orphaned. The merger + Scala inferrer now write/read the
-        // modifiedTime-mapped images-initial-2026-06-15 (see the 2026-06-15 entry below),
-        // so nothing writes this index any more. Remove this `initial` entry to delete the
-        // old index once we're confident the new path is the source of truth.
-        initial = "empty"
-        // scala images ingestor - to be deleted when the service is removed
-        augmented = "empty"
-        // scala images ingestor - to be deleted when the service is removed
-        indexed = "images_indexed.2024-11-14"
-      }
     }
-    "2025-10-09" = {
-      works = {
-        // test matcher_merger - WCSTP dev
-        denormalised = "works_denormalised.2025-08-14"
-      }
-      images = {
-        // test matcher_merger - WCSTP dev
-        initial = "empty"
-      }
-    },
     "2026-01-12" = {
       works = {
         // test transformers - WCSTP dev
@@ -72,19 +50,8 @@ module "pipeline" {
         indexed = "concepts_indexed.2025-06-17"
       }
     },
-    "2026-03-06" = {
-      works = {
-        // test id_minter - test matcher_merger - WCSTP dev
-        identified = "works_identified.2023-05-26"
-      }
-    },
     "2026-04-29" = {
       images = {
-        // Old Scala inference manager output. The Scala service has been retired, so nothing writes this
-        // index now, and the graph read-path reads images-augmented-2026-06-15 (graph_index_dates.augmented).
-        // This index is orphaned; terraform still manages it under deletion_protection, so dropping it is a
-        // separate operational step. Remove this augmented entry once the index has been deleted.
-        augmented = "images_augmented.2026-04-29"
         // prod graph/ingestor/indexer - prod API
         indexed = "images_indexed.2024-11-14"
       }
@@ -114,7 +81,7 @@ module "pipeline" {
     },
   }
 
-  allow_delete_indices = false
+  allow_delete_indices = false // set to true before applying 
 
   # Image-inferrer. The scheduled Python inferrer is the sole inferrer: it reads images-initial-2026-06-15
   # and writes images-augmented-2026-06-15, which the graph read-path also reads.
