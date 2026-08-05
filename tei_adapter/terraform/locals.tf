@@ -13,6 +13,17 @@ locals {
   tei_id_extractor_max_connections = 5
   rds_lock_timeout_seconds         = 10 * 60
 
+  # tei_id_extractor and tei_adapter both delay processing of *Deleted*
+  # messages, to avoid mistaking a file rename (delete-of-old + add-of-new)
+  # for a genuine deletion before the corresponding "changed" message has
+  # landed. Each queue's visibility timeout MUST exceed its own delete
+  # delay by a comfortable margin - otherwise SQS redelivers an in-flight
+  # delete message before the delay finishes, causing it to loop
+  # indefinitely and land in the DLQ without ever completing processing.
+  tei_adapter_delete_delay_seconds      = 2 * 60  # 2 minutes
+  tei_id_extractor_delete_delay_seconds = 30 * 60 # 30 minutes
+  visibility_timeout_buffer_seconds     = 10 * 60 # headroom beyond the delay for actual message processing
+
   monitoring_outputs = data.terraform_remote_state.monitoring.outputs
 
   lambda_error_alarm_arn = local.monitoring_outputs["platform_lambda_error_alerts_topic_arn"]

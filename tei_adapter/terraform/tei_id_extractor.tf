@@ -7,7 +7,7 @@ module "tei_id_extractor_w" {
   topic_arns = [module.tei_updater_lambda.topic_arn]
 
   queue_name                       = "tei-id-extractor"
-  queue_visibility_timeout_seconds = local.rds_lock_timeout_seconds + 30
+  queue_visibility_timeout_seconds = local.tei_id_extractor_delete_delay_seconds + local.visibility_timeout_buffer_seconds
 
   env_vars = {
     metrics_namespace = "${local.namespace}_tei_id_extractor"
@@ -15,7 +15,7 @@ module "tei_id_extractor_w" {
     bucket            = aws_s3_bucket.tei_adapter.id
     parallelism       = 10
     max_connections   = local.tei_id_extractor_max_connections
-    delete_delay      = "30 minutes"
+    delete_delay      = "${local.tei_id_extractor_delete_delay_seconds}s"
     database          = "pathid"
     table             = "pathid"
   }
