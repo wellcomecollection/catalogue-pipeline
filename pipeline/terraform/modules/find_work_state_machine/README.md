@@ -4,11 +4,17 @@ A scheduled scan-and-fan-out state machine for pipeline steps whose work volume
 per window is unbounded:
 
 ```
-ConstructEvent (build the window from the schedule, or pass through replay input)
-  -> FindWork (Lambda: ids in scope, partitioned into files on S3)
-    -> ProcessPartitions (Map: one worker per partition ref, bounded concurrency)
-      -> CheckPartitionFailures (fail loudly, or tolerate and succeed)
+FindWork (Lambda: normalise the input, find the ids in scope, partition to S3)
+  -> ProcessPartitions (Map: one worker per partition ref, bounded concurrency)
+    -> CheckPartitionFailures (fail loudly, or tolerate and succeed)
 ```
+
+The state machine passes its raw invocation payload straight to the find-work
+Lambda, which owns all input handling (`core/find_work.normalise_lambda_input`):
+a scheduled run's `scheduled_time` becomes the window end minus an indexing
+lag, replay input passes through, and deployment identity (pipeline date, graph
+date, index dates) comes from the Lambda's environment. Keeping this in Python
+makes the guards unit-testable instead of living as JSONata in the definition.
 
 The find-work Lambda only discovers ids and slices them, so its runtime does not
 depend on how much work the window matched. Each partition file on S3 holds the
@@ -94,6 +100,8 @@ slip fails validation in the Lambda rather than scanning the full index):
   same minute collide without one). The inferrer's find-work event has no
   `job_id` field and silently ignores it.
 - `partition_size`, to override the consumer's default ids-per-partition.
+- `full: true`, required to run with no ids and no window; without it an
+  unscoped invoke fails rather than scanning the whole index.
 
 Replays are safe to repeat because both consumers process idempotently, and the
 partition files are keyed by scope (window, ids or full), so re-running the

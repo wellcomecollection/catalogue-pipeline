@@ -22,6 +22,8 @@ module "find_work_lambda" {
   memory_size = var.find_work_lambda.memory_size
   timeout     = var.find_work_lambda.timeout
 
+  environment_variables = var.find_work_lambda.environment_variables
+
   vpc_config = var.vpc_config
 }
 

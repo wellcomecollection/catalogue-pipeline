@@ -19,11 +19,12 @@ variable "ecr_repository_name" {
 
 variable "find_work_lambda" {
   type = object({
-    service_name = string
-    description  = string
-    command      = list(string)
-    memory_size  = optional(number, 1024)
-    timeout      = optional(number, 300)
+    service_name          = string
+    description           = string
+    command               = list(string)
+    memory_size           = optional(number, 1024)
+    timeout               = optional(number, 300)
+    environment_variables = optional(map(string), {})
   })
   description = "The work-discovery Lambda: an entrypoint in the unified pipeline image that scans for ids in scope and partitions them to S3."
 }
@@ -43,12 +44,6 @@ variable "find_work_secret_read_policy_json" {
 variable "partition_s3_arns" {
   type        = list(string)
   description = "S3 object ARNs the find-work Lambda writes partition files to."
-}
-
-variable "static_event_fields" {
-  type        = any
-  default     = {}
-  description = "Extra fields merged into every constructed event alongside pipeline_date (e.g. index_dates, graph_date)."
 }
 
 variable "max_concurrency" {

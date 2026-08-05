@@ -54,6 +54,12 @@ module "image_inferrer" {
     command      = ["inferrer.steps.find_work.lambda_handler"]
     memory_size  = 1024
     timeout      = 300 # 5 minutes
+    environment_variables = {
+      PIPELINE_DATE        = var.pipeline_date
+      GRAPH_DATE           = var.graph_date
+      INDEX_DATE_INITIAL   = var.index_dates.initial
+      INDEX_DATE_AUGMENTED = var.index_dates.augmented
+    }
   }
 
   vpc_config = {
@@ -69,14 +75,6 @@ module "image_inferrer" {
   partition_s3_arns = [
     "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/inferrer/*"
   ]
-
-  static_event_fields = {
-    graph_date = var.graph_date
-    index_dates = {
-      initial   = var.index_dates.initial
-      augmented = var.index_dates.augmented
-    }
-  }
 
   # Matches the inferrer ASG max_instances (local.inference_max_concurrency)
   # so the Map never fans out more tasks than the capacity provider can place.

@@ -15,23 +15,6 @@ locals {
     }
   ]
 
-  # Window end = scheduled_time - 5min (indexing lag); replays may pass ids,
-  # an explicit window, job_id or partition_size. The guards stop window:null
-  # becoming a full-index scan; an invalid window object fails loudly in the Lambda.
-  construct_event_output = trimspace(<<-EOT
-    {% $merge([
-      ${jsonencode(merge(var.static_event_fields, { pipeline_date = var.pipeline_date }))},
-      $type($states.input.ids) = 'array'
-        ? {'ids': $states.input.ids}
-        : {'window': $type($states.input.window) = 'object'
-            ? $states.input.window
-            : {'end_time': $fromMillis($toMillis($states.input.scheduled_time) - 300000)}},
-      $type($states.input.job_id) = 'string' ? {'job_id': $states.input.job_id} : {},
-      $type($states.input.partition_size) = 'number' ? {'partition_size': $states.input.partition_size} : {}
-    ]) %}
-  EOT
-  )
-
   process_partitions = {
     Type           = "Map"
     Items          = "{% $states.input.partitions %}"
@@ -84,17 +67,14 @@ locals {
     }
   }
 
+  # The raw invocation payload (scheduled_time, or replay input) goes straight
+  # to the find-work Lambda, which owns all input normalisation and guards.
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = var.comment
-    StartAt       = "ConstructEvent"
+    StartAt       = "FindWork"
     States = merge(
       {
-        ConstructEvent = {
-          Type   = "Pass"
-          Output = local.construct_event_output
-          Next   = "FindWork"
-        }
         FindWork = {
           Type     = "Task"
           Resource = "arn:aws:states:::lambda:invoke"
