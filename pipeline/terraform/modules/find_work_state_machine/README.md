@@ -35,12 +35,15 @@ so every other partition still runs. The Map output carries the aggregate:
 What happens next depends on `tolerate_partition_failures`:
 
 - `true` (image inferrer): the execution succeeds. This is only safe when a
-  later scheduled window re-covers the same records idempotently.
+  missed record stays recoverable, because replaying the same window later
+  re-covers it idempotently (scheduled windows tile with no overlap, so the
+  next one does not). The execution succeeding means nothing alarms, so the
+  consumer also needs its own failure signal (see Retry and alerting).
 - `false` (the id-minter, once adopted): once every partition has finished, the
-  execution fails with `PartitionsFailed`. Nothing re-covers a missed window for
-  these consumers, so a silent skip would be data loss; failing after the Map
-  means a replay only needs to cover the failed partitions, not the whole
-  window.
+  execution fails with `PartitionsFailed`. A tolerated skip would leave the
+  missed records unprocessed with nothing to notice them, so the execution
+  fails loudly instead; failing after the Map means a replay only needs to
+  cover the failed partitions, not the whole window.
 
 ## Retry and alerting
 
