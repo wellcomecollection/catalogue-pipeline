@@ -13,8 +13,6 @@ rather than maintaining a parallel write model here.
 
 from __future__ import annotations
 
-from pathlib import PurePosixPath
-
 from pydantic import BaseModel
 
 import config
@@ -24,6 +22,7 @@ from ingestor.models.augmented.image import (
     ParentWork,
 )
 from models.events import BasePipelineEvent
+from models.find_work import FindWorkEvent as BaseFindWorkEvent
 from models.pipeline.image_state import ImageState
 from models.pipeline.location import DigitalLocation
 from models.pipeline.serialisable import SerialisableModel
@@ -54,7 +53,7 @@ class InferenceManagerEvent(BasePipelineEvent):
     """
 
 
-class FindWorkEvent(BasePipelineEvent):
+class FindWorkEvent(BaseFindWorkEvent):
     """Input for the work-discovery step: a time window (or ids/full)."""
 
     partition_size: int = DEFAULT_PARTITION_SIZE
@@ -62,10 +61,6 @@ class FindWorkEvent(BasePipelineEvent):
     @property
     def s3_service_prefix_parts(self) -> list[str]:
         return [config.INFERRER_S3_PREFIX, "find_work"]
-
-    def partition_s3_uri(self, index: int) -> str:
-        bucket = config.CATALOGUE_GRAPH_S3_BUCKET
-        return f"s3://{bucket}/{PurePosixPath(*self.s3_prefix_parts)}/partition-{index}.json"
 
 
 # --- Step results ---------------------------------------------------------- #
@@ -81,21 +76,3 @@ class InferenceManagerResult(BaseModel):
 
 class FindWorkResult(BaseModel):
     partitions: list[InferenceManagerEvent]
-
-
-class PartitionRef(BaseModel):
-    """A pointer to a partition's `InferenceManagerEvent` stored in S3.
-
-    The work-discovery step writes each partition (its image ids + metadata) to S3
-    and returns these small refs instead of the partitions inline, so the state
-    machine's Map payload stays well under the Step Functions 256 KB state limit
-    even for large windows. Each inference task resolves its ref back to the full
-    event (see `inference_manager.event_validator`).
-    """
-
-    s3_uri: str
-    image_count: int
-
-
-class FindWorkRefsResult(BaseModel):
-    partitions: list[PartitionRef]

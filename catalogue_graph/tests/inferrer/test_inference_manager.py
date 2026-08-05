@@ -175,7 +175,7 @@ def test_event_validator_resolves_s3_ref() -> None:
     )
     pydantic_to_s3_json(partition, s3_uri)
 
-    resolved = event_validator(json.dumps({"s3_uri": s3_uri, "image_count": 2}))
+    resolved = event_validator(json.dumps({"s3_uri": s3_uri, "count": 2}))
 
     assert resolved.ids == ["x", "y"]
     assert resolved.pipeline_date == PIPELINE_DATE

@@ -40,7 +40,10 @@ locals {
         }
       }
     }
-    Output = "{% {'partition_count': $count($states.result), 'failed_partition_count': $count($states.result[partition_failed = true]), 'results': $states.result} %}"
+    # Aggregate counts plus the failure records only: keeping every success
+    # output would let the Map output grow with partition count towards the
+    # 256 KB state limit.
+    Output = "{% {'partition_count': $count($states.result), 'failed_partition_count': $count($states.result[partition_failed = true]), 'failed_partitions': [$states.result[partition_failed = true]]} %}"
     Next   = "CheckPartitionFailures"
   }
 
@@ -60,7 +63,7 @@ locals {
     FailPartitions = {
       Type  = "Fail"
       Error = "PartitionsFailed"
-      Cause = "{% $string($states.input.failed_partition_count) & ' of ' & $string($states.input.partition_count) & ' partitions failed; see the Map results for detail' %}"
+      Cause = "{% $string($states.input.failed_partition_count) & ' of ' & $string($states.input.partition_count) & ' partitions failed; failed_partitions in the Map output has each ref and error' %}"
     }
     Succeeded = {
       Type = "Succeed"

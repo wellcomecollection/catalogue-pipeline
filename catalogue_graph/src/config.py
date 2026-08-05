@@ -25,6 +25,12 @@ INGESTOR_S3_PREFIX = os.environ.get("INGESTOR_S3_PREFIX", INGESTOR_S3_PREFIX_DEF
 INFERRER_S3_PREFIX_DEFAULT = "inferrer"
 INFERRER_S3_PREFIX = os.environ.get("INFERRER_S3_PREFIX", INFERRER_S3_PREFIX_DEFAULT)
 
+# Names find_work partition files in the catalogue-graph bucket, per the
+# *_S3_PREFIX convention; PIPELINE_STEP separately names the id-minter's
+# metric dimension and report path, and namespaced deployments vary it.
+ID_MINTER_S3_PREFIX_DEFAULT = "id_minter"
+ID_MINTER_S3_PREFIX = os.environ.get("ID_MINTER_S3_PREFIX", ID_MINTER_S3_PREFIX_DEFAULT)
+
 BULK_LOADER_S3_PREFIX_DEFAULT = "graph_bulk_loader"
 BULK_LOADER_S3_PREFIX = os.environ.get(
     "BULK_LOADER_S3_PREFIX", BULK_LOADER_S3_PREFIX_DEFAULT

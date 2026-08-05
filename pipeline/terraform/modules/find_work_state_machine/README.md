@@ -25,31 +25,36 @@ image inferrer, a Lambda for the id-minter), one bounded partition at a time.
 
 `max_concurrency` is the work-in-progress ceiling. Pin it to the worker's real
 capacity rather than picking a number here: the inferrer pins it to the ASG's
-`max_instances`, and the id-minter (moving onto this module in
-wellcomecollection/platform#6486) to its RDS connection budget. An INLINE Map
+`max_instances`, and the id-minter to its RDS connection budget. An INLINE Map
 runs at most 40 concurrent iterations, whatever the setting.
 
 ## Failure semantics
 
 A partition that fails after the worker's own retries is caught and recorded,
-so every other partition still runs. The Map output carries the aggregate:
+so every other partition still runs. The Map output carries the aggregate
+counts and the failure records only (successful outputs are dropped, so the
+output cannot grow with partition count towards the 256 KB state limit):
 
 ```json
-{"partition_count": 34, "failed_partition_count": 2, "results": [...]}
+{"partition_count": 34, "failed_partition_count": 1, "failed_partitions": [{"partition_failed": true, "s3_uri": "...", "error": "..."}]}
 ```
 
 What happens next depends on `tolerate_partition_failures`:
 
-- `true` (image inferrer): the execution succeeds. This is only safe when a
-  missed record stays recoverable, because replaying the same window later
-  re-covers it idempotently (scheduled windows tile with no overlap, so the
-  next one does not). The execution succeeding means nothing alarms, so the
+- `true`, used by the image inferrer: the execution succeeds. This is only safe
+  when a missed record stays recoverable, because replaying the same window
+  later re-covers it idempotently (scheduled windows tile with no overlap, so
+  the next one does not). The execution succeeding means nothing alarms, so the
   consumer also needs its own failure signal (see Retry and alerting).
-- `false` (the id-minter, once adopted): once every partition has finished, the
+- `false`, used by the id-minter: once every partition has finished, the
   execution fails with `PartitionsFailed`. A tolerated skip would leave the
   missed records unprocessed with nothing to notice them, so the execution
   fails loudly instead; failing after the Map means a replay only needs to
   cover the failed partitions, not the whole window.
+
+Workers must keep their own outputs small too: the 256 KB limit applies to each
+task result before any projection, so a worker that echoes its input ids back
+would fail on dense partitions after doing all its work.
 
 ## Retry and alerting
 
@@ -94,11 +99,12 @@ slip fails validation in the Lambda rather than scanning the full index):
 - `window`, with `start_time` optional (defaults to `end_time` minus 15
   minutes). Windows slice to arbitrary timestamps, so a dense range can be
   replayed as several smaller executions.
-- `ids`, a JSON array of ids to process instead of a window.
-- `job_id`, honoured by consumers that stamp per-run reports (the id-minter,
-  whose generated ids are minute-granular, so concurrent replays started in the
-  same minute collide without one). The inferrer's find-work event has no
-  `job_id` field and silently ignores it.
+- `ids`, a JSON array of ids to process instead of a window; `source_identifiers`
+  is accepted as an alias, matching the id-minter's older replay shape.
+- `job_id`, honoured by consumers that stamp per-run reports: the id-minter
+  derives per-partition job ids from it (`<job_id>-p000`, `-p001`, ...), which
+  keys its S3 reports. The inferrer's find-work event has no `job_id` field and
+  silently ignores it.
 - `partition_size`, to override the consumer's default ids-per-partition.
 - `full: true`, required to run with no ids and no window; without it an
   unscoped invoke fails rather than scanning the whole index.
@@ -112,10 +118,9 @@ time.
 
 ## Replaying only the failed partitions
 
-Each failure record in the Map output's `results` array carries the failed
+Each record in the Map output's `failed_partitions` array carries the failed
 partition's `s3_uri` and a truncated `error`, so the execution output alone
-identifies what failed and why. (The array also preserves partition order, so
-positional index works as a fallback.) The files live under the consumer's
+identifies what failed and why. The files live under the consumer's
 scope-keyed prefix, for example:
 
 ```

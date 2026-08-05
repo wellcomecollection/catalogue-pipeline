@@ -234,10 +234,7 @@ def event_validator(raw_input: str) -> InferenceManagerEvent:
     # find_work; resolve it to the full partition event. Fall back to an inline
     # event for local/CLI use.
     if isinstance(data, dict) and "s3_uri" in data:
-        event = pydantic_from_s3_json(InferenceManagerEvent, data["s3_uri"])
-        if event is None:
-            raise ValueError(f"Partition not found in S3: {data['s3_uri']}")
-        return event
+        return pydantic_from_s3_json(InferenceManagerEvent, data["s3_uri"])
     return InferenceManagerEvent.model_validate(data)
 
 
