@@ -46,11 +46,11 @@ def test_publish_to_web_no_yields_deleted_work() -> None:
 
 
 @pytest.mark.parametrize("marker", ["yes", None, "unexpected"])
-def test_publish_to_web_yes_or_absent_yields_visible_work(
+def test_publish_to_web_without_explicit_no_yields_visible_work(
     marker: str | None,
 ) -> None:
-    """Records harvested before the stylesheet emitted the marker carry none
-    and must keep their current visibility."""
+    """Only an explicit 'no' suppresses: absent markers (pre-stylesheet
+    harvests) and unexpected values must keep their current visibility."""
     record = make_axiell_record(publish_to_web=marker)
     assert isinstance(_transform(record), VisibleSourceWork)
 

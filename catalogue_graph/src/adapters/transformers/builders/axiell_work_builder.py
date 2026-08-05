@@ -78,8 +78,8 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
 
         # The publish_to_web checkbox decides whether a finished record may go
         # online, separately from its cataloguing status. Only an explicit 'no'
-        # suppresses: records harvested before the stylesheet emitted the
-        # marker carry none and must keep their current visibility.
+        # suppresses: the marker is absent on records harvested before the
+        # stylesheet change, and those must keep their current visibility.
         if extract_publish_to_web(self.record) == "no":
             return True
 

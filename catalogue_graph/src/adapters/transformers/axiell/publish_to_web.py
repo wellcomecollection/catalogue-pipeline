@@ -25,6 +25,8 @@ def extract_publish_to_web(record: Record) -> PublishToWeb | None:
         return None
 
     value = values[0].strip().lower()
-    if value in ("yes", "no"):
-        return value  # type: ignore[return-value]
+    if value == "yes":
+        return "yes"
+    if value == "no":
+        return "no"
     return None
