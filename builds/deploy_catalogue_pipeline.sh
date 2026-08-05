@@ -86,6 +86,6 @@ then
   echo "Deploying λ pipeline services to catalogue-$PIPELINE_DATE"
   "$ROOT/builds/deploy_lambda_services.sh" \
     matcher:matcher \
-    merger:merger \
+    merger:merger
 fi
 
