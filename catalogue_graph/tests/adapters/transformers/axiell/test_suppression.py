@@ -40,6 +40,26 @@ def test_suppressed_statuses_yield_deleted_work(status: str) -> None:
     assert isinstance(_transform(record), DeletedSourceWork)
 
 
+def test_publish_to_web_no_yields_deleted_work() -> None:
+    record = make_axiell_record(publish_to_web="no")
+    assert isinstance(_transform(record), DeletedSourceWork)
+
+
+@pytest.mark.parametrize("marker", ["yes", None, "unexpected"])
+def test_publish_to_web_yes_or_absent_yields_visible_work(
+    marker: str | None,
+) -> None:
+    """Records harvested before the stylesheet emitted the marker carry none
+    and must keep their current visibility."""
+    record = make_axiell_record(publish_to_web=marker)
+    assert isinstance(_transform(record), VisibleSourceWork)
+
+
+def test_publish_to_web_no_without_ref_no_yields_deleted_work() -> None:
+    record = make_axiell_record(publish_to_web="no", ref_no=None)
+    assert isinstance(_transform(record), DeletedSourceWork)
+
+
 def test_missing_status_yields_deleted_work() -> None:
     assert isinstance(
         _transform(make_axiell_record(catalogue_status=None)), DeletedSourceWork
