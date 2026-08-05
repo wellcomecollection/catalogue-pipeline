@@ -82,8 +82,9 @@ module "image_inferrer" {
   # so the Map never fans out more tasks than the capacity provider can place.
   max_concurrency = local.inference_max_concurrency
 
-  # A failed partition's images are left un-augmented and picked up by a later
-  # window (writes are idempotent external_gte), so it should not fail the run.
+  # A failed partition's images stay un-augmented until the same window is
+  # replayed (writes are idempotent external_gte), so it should not fail the
+  # run; the download_failure_count alarm covers the class that matters.
   tolerate_partition_failures = true
 
   worker_state_name = "RunInferenceTask"
