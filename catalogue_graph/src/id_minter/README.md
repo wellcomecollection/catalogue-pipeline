@@ -174,7 +174,18 @@ docker compose -f mysql.docker-compose.yml down -v
 ## Lambda handlers
 
 ### id_minter
-The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects a `StepFunctionMintingRequest` payload in one of three modes:
+The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects either a partition ref from the find-work step, or an inline `StepFunctionMintingRequest` payload in one of three modes:
+
+**Partition ref** (scheduled runs, fanned out by the state machine's Map):
+
+```json
+{
+  "s3_uri": "s3://wellcomecollection-catalogue-graph/graph-prod/pipeline-2026-07-03/id_minter/find_work/windows/20260730T1632-20260730T1634/partition-0.json",
+  "count": 10000
+}
+```
+
+The ref resolves from S3 to a full `StepFunctionMintingRequest` (work ids plus a per-partition `jobId`).
 
 **Window mode** (scheduled runs):
 
@@ -196,15 +207,21 @@ An optional `startTime` can be provided; if omitted it defaults to `endTime - 15
 }
 ```
 
-**Full reprocess mode** (process entire index):
+**Full reprocess mode** (process entire index; requires an explicit opt-in so a
+mistyped invoke cannot fall through to a full-index mint):
 
 ```json
 {
+  "full": true,
   "jobId": "full-reprocess-20260210"
 }
 ```
 
 Supplying both `sourceIdentifiers` and a time window is invalid.
+
+### id_minter find_work
+
+The Lambda entry point is `id_minter.steps.find_work.lambda_handler`. It runs at the start of each state machine execution: it scans `works-source` for the ids indexed within the window (or ids/full scope), partitions them into `StepFunctionMintingRequest`s of `partition_size` work ids (default 10,000), writes each partition to S3 and returns small refs for the Map to fan out. An optional `job_id` in the input becomes the base for per-partition job ids (`-p000`, `-p001`, ...).
 
 ### id_generator
 

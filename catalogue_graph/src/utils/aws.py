@@ -2,7 +2,7 @@ import csv
 import json
 from collections.abc import Generator
 from functools import lru_cache
-from typing import Any
+from typing import Any, Literal, overload
 
 import boto3
 import polars as pl
@@ -114,10 +114,25 @@ def pydantic_to_s3_json(model: BaseModel, s3_uri: str) -> None:
         f.write(model.model_dump_json())
 
 
+@overload
+def pydantic_from_s3_json[T: BaseModel](
+    model_type: type[T], s3_uri: str, ignore_missing: Literal[False] = ...
+) -> T: ...
+
+
+@overload
+def pydantic_from_s3_json[T: BaseModel](
+    model_type: type[T], s3_uri: str, ignore_missing: Literal[True]
+) -> T | None: ...
+
+
 def pydantic_from_s3_json[T: BaseModel](
     model_type: type[T], s3_uri: str, ignore_missing: bool = False
 ) -> T | None:
-    """Create a Pydantic model of type `model_type` from a JSON file stored in S3."""
+    """Create a Pydantic model of type `model_type` from a JSON file stored in S3.
+
+    Without ignore_missing a missing file raises FileNotFoundError, so the
+    return is only Optional when ignore_missing is True."""
     try:
         with smart_open.open(s3_uri, "r") as f:
             return model_type.model_validate_json(f.read())

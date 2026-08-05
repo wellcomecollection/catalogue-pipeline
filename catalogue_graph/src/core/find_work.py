@@ -1,9 +1,22 @@
-"""Shared input handling for find_work steps."""
+"""Shared input handling and partition hand-off for find_work steps."""
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Any
+
+import structlog
+from pydantic import BaseModel
+
+from models.find_work import FindWorkEvent, PartitionRef
+from utils.aws import pydantic_to_s3_json
+
+logger = structlog.get_logger(__name__)
+
+# Concurrency for writing partition files to S3 (one small object per partition).
+S3_WRITE_PARALLELISM = 16
 
 # Window end lags the scheduled time so recently written documents have indexed.
 SCHEDULE_INDEXING_LAG = timedelta(minutes=5)
@@ -40,3 +53,28 @@ def normalise_lambda_input(event: dict, defaults: dict[str, Any]) -> dict:
     for key, value in defaults.items():
         data.setdefault(key, value)
     return data
+
+
+def write_partitions_to_s3(
+    partitions: Sequence[BaseModel],
+    counts: Sequence[int],
+    event: FindWorkEvent,
+) -> list[PartitionRef]:
+    """Write each partition to S3 under the event's scope-keyed prefix and
+    return small refs for the state machine's Map to iterate."""
+
+    def write_one(indexed: tuple[int, BaseModel]) -> PartitionRef:
+        index, partition = indexed
+        s3_uri = event.partition_s3_uri(index)
+        pydantic_to_s3_json(partition, s3_uri)
+        return PartitionRef(s3_uri=s3_uri, count=counts[index])
+
+    with ThreadPoolExecutor(max_workers=S3_WRITE_PARALLELISM) as pool:
+        refs = list(pool.map(write_one, enumerate(partitions)))
+
+    logger.info(
+        "Wrote partitions to S3",
+        partition_count=len(refs),
+        s3_prefix="/".join(event.s3_prefix_parts),
+    )
+    return refs

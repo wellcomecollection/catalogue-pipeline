@@ -79,7 +79,7 @@ def test_lambda_handler_writes_partitions_to_s3_and_returns_refs() -> None:
     assert all(
         "/find_work/windows/20260601T0000-20260630T0000/" in r["s3_uri"] for r in refs
     )
-    assert sum(r["image_count"] for r in refs) == 3
+    assert sum(r["count"] for r in refs) == 3
     assert all("ids" not in r for r in refs)
 
     # The refs resolve back to the full partition events in S3.

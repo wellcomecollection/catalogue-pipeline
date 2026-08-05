@@ -26,6 +26,7 @@ from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
 from models.incremental_window import IncrementalWindow
+from utils.aws import pydantic_from_s3_json
 from utils.elasticsearch import ElasticsearchMode, get_client
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import create_job_id
@@ -42,7 +43,12 @@ class IdMinterRuntime(BaseModel):
     target_es_mode: ElasticsearchMode = "private"
 
 
-class IdMinterResult(StepFunctionMintingRequest):
+class IdMinterResult(BaseModel):
+    """Run summary. Deliberately does not echo source_identifiers: a full
+    partition's id list would blow the Step Functions 256 KB task-output limit."""
+
+    job_id: str
+    window: IncrementalWindow | None = None
     success_count: int
     failure_count: int
     report_s3_uri: str
@@ -190,9 +196,25 @@ def lambda_handler(event: dict, context: Any) -> dict[str, Any]:
         trace_id=get_trace_id(context),
         pipeline_step="id_minter",
     )
-    if "job_id" not in event:
-        event["job_id"] = create_job_id()
-    request = StepFunctionMintingRequest.model_validate(event)
+    if "s3_uri" in event:
+        # A partition ref from the find-work step; resolve the full request
+        # (ids + per-partition job_id) from S3.
+        request = pydantic_from_s3_json(StepFunctionMintingRequest, event["s3_uri"])
+    else:
+        if "job_id" not in event:
+            event["job_id"] = create_job_id()
+        request = StepFunctionMintingRequest.model_validate(event)
+        # Neither ids nor window means a full-index mint; require an explicit
+        # opt-in so a mistyped invoke (e.g. "s3Uri") fails loudly instead.
+        if (
+            request.source_identifiers is None
+            and request.window is None
+            and event.get("full") is not True
+        ):
+            raise ValueError(
+                "Neither source_identifiers nor window given; "
+                "pass 'full': true to mint the entire index."
+            )
     runtime = build_runtime()
     response = handler(
         request,

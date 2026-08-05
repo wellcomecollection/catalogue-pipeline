@@ -51,6 +51,7 @@ from tests.mocks import (
     MockSmartOpen,
     MockSNSClient,
 )
+from utils.aws import pydantic_to_s3_json
 
 pytestmark = pytest.mark.database
 
@@ -690,3 +691,68 @@ class TestBuildMintingSource:
 
         assert source.query == {"match_all": {}}
         assert source.index_name == "works-source-dev"
+
+
+# ---------------------------------------------------------------------------
+# Tests: lambda_handler input dispatch (partition refs and the full-mint guard)
+# ---------------------------------------------------------------------------
+
+
+class TestLambdaHandlerInputDispatch:
+    def test_ref_input_resolves_partition_from_s3(self) -> None:
+        partition = StepFunctionMintingRequest(
+            source_identifiers=["Work[sierra-system-number/b1000001]"],
+            job_id="replay-s01-p000",
+        )
+        s3_uri = "s3://test-bucket/id_minter/find_work/partition-0.json"
+        pydantic_to_s3_json(partition, s3_uri)
+
+        captured: dict = {}
+
+        def fake_handler(event, runtime, execution_context=None):  # type: ignore[no-untyped-def]
+            captured["request"] = event
+            return IdMinterResult(
+                job_id=event.job_id,
+                success_count=1,
+                failure_count=0,
+                report_s3_uri="s3://bucket/report.json",
+            )
+
+        with (
+            patch("id_minter.steps.id_minter.build_runtime", return_value=MagicMock()),
+            patch("id_minter.steps.id_minter.handler", side_effect=fake_handler),
+        ):
+            result = lambda_handler({"s3_uri": s3_uri, "count": 1}, context=None)
+
+        assert captured["request"].source_identifiers == [
+            "Work[sierra-system-number/b1000001]"
+        ]
+        assert captured["request"].job_id == "replay-s01-p000"
+        # The response must not echo the partition's ids: a full partition
+        # would blow the Step Functions 256 KB task-output limit.
+        assert "source_identifiers" not in result
+
+    def test_full_mint_requires_explicit_flag(self) -> None:
+        with pytest.raises(ValueError, match="full"):
+            lambda_handler({"job_id": "accidental-full"}, context=None)
+
+    def test_full_mint_allowed_with_explicit_flag(self) -> None:
+        captured: dict = {}
+
+        def fake_handler(event, runtime, execution_context=None):  # type: ignore[no-untyped-def]
+            captured["request"] = event
+            return IdMinterResult(
+                job_id=event.job_id,
+                success_count=0,
+                failure_count=0,
+                report_s3_uri="s3://bucket/report.json",
+            )
+
+        with (
+            patch("id_minter.steps.id_minter.build_runtime", return_value=MagicMock()),
+            patch("id_minter.steps.id_minter.handler", side_effect=fake_handler),
+        ):
+            lambda_handler({"full": True, "job_id": "deliberate-full"}, context=None)
+
+        assert captured["request"].source_identifiers is None
+        assert captured["request"].window is None
