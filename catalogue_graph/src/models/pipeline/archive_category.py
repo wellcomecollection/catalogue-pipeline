@@ -29,17 +29,19 @@ COLLECTION_PATH_PREFIX_LABELS: dict[str, str] = {
 _NUMERIC_SUFFIX_PREFIXES = {"OH", "TP"}
 
 
-class ArchiveType(IdLabel):
+class ArchiveCategory(IdLabel):
     @classmethod
-    def from_collection_path(cls, path: CollectionPath | None) -> ArchiveType | None:
-        """Return the normalised archive type for a collection path.
+    def from_collection_path(
+        cls, path: CollectionPath | None
+    ) -> ArchiveCategory | None:
+        """Return the normalised archive category for a collection path.
 
         Extracts the leading segment (e.g. "OH1" from "OH1/B/3"), strips trailing
         digits for known numbered sub-collections (e.g. "OH1" -> "OH"), then looks
         up the result in the prefix-to-label mapping.  Returns None when the prefix
         is not recognised.
         """
-        # We use `label` rather than `path` because, for known archive types, only
+        # We use `label` rather than `path` because, for known archive categories, only
         # `label` separates the prefix from the rest of the reference number with a
         # "/" (e.g. label "PP/CRI" vs path "PPCRI"). `path` has no such separator.
         if not path or not path.label:

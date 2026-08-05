@@ -25,9 +25,11 @@ class WorkAggregatableValues(ElasticsearchModel):
     availabilities: list[AggregatableField] = Field(
         serialization_alias="availabilities"
     )
-    archive_type: AggregatableField | None = Field(serialization_alias="archiveType")
+    archive_category: AggregatableField | None = Field(
+        serialization_alias="archive.category"
+    )
     collection_root: AggregatableField | None = Field(
-        serialization_alias="collectionRoot"
+        serialization_alias="collection.root"
     )
 
     @classmethod
@@ -44,6 +46,6 @@ class WorkAggregatableValues(ElasticsearchModel):
             contributors=list(transformer.contributors),
             item_licenses=list(transformer.licenses),
             availabilities=list(transformer.availabilities),
-            archive_type=transformer.archive_type,
+            archive_category=transformer.archive_category,
             collection_root=transformer.collection_root,
         )

@@ -144,24 +144,24 @@ def test_collection_root_when_no_hierarchy() -> None:
     assert transformer.collection_root_title is None
 
 
-def test_archive_type_from_collection_path_label() -> None:
+def test_archive_category_from_collection_path_label() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.data.collection_path = CollectionPath(
         path="PPRAS/A/2/1", label="PP/RAS/A.2/1"
     )
-    assert QueryWorkTransformer(extracted).archive_type == "PP"
+    assert QueryWorkTransformer(extracted).archive_category_id == "PP"
 
 
-def test_archive_type_none_for_unknown_prefix() -> None:
+def test_archive_category_none_for_unknown_prefix() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.data.collection_path = CollectionPath(path="XYZ/1", label="XYZ/1")
-    assert QueryWorkTransformer(extracted).archive_type is None
+    assert QueryWorkTransformer(extracted).archive_category_id is None
 
 
-def test_archive_type_none_when_no_collection_path() -> None:
+def test_archive_category_none_when_no_collection_path() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.data.collection_path = None
-    assert QueryWorkTransformer(extracted).archive_type is None
+    assert QueryWorkTransformer(extracted).archive_category_id is None
 
 
 def test_collection_path_sort_pads_numbers() -> None:

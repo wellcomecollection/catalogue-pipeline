@@ -2,7 +2,9 @@ from collections import defaultdict
 from collections.abc import Generator
 
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
+from ingestor.models.display.archive import DisplayArchive
 from ingestor.models.display.availability import DisplayAvailability
+from ingestor.models.display.collection import DisplayCollection
 from ingestor.models.display.concept import (
     DisplayConcept,
     DisplayContributionRole,
@@ -23,7 +25,7 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
-from models.pipeline.archive_type import ArchiveType
+from models.pipeline.archive_category import ArchiveCategory
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
 from utils.sort import natural_sort_key
@@ -48,11 +50,44 @@ class DisplayWorkTransformer(WorkBaseTransformer):
         yield from DisplayIdentifier.from_all_identifiers(all_ids)
 
     @property
-    def archive_type(self) -> DisplayIdLabel | None:
-        result = ArchiveType.from_collection_path(self.data.collection_path)
-        if result is None:
+    def archive(self) -> DisplayArchive | None:
+        category = ArchiveCategory.from_collection_path(self.data.collection_path)
+        if category is None:
             return None
-        return DisplayIdLabel.from_id_label(result, "ArchiveType")
+
+        return DisplayArchive(
+            category=DisplayIdLabel.from_id_label(category, "ArchiveCategory")
+        )
+
+    @property
+    def collection_root(self) -> DisplayRelation | None:
+        if self.hierarchy.ancestors:
+            # Ancestors are ordered from the closest ancestor to the root of the hierarchy
+            root = self.hierarchy.ancestors[-1]
+            return DisplayRelation.from_neptune_node(root.work, root.parts)
+
+        if self.hierarchy.is_collection_root:
+            # The work is the root of its own hierarchy
+            path = self.data.collection_path
+            return DisplayRelation(
+                id=self.state.canonical_id,
+                title=self.data.title,
+                referenceNumber=path.label if path is not None else None,
+                totalParts=len(self.hierarchy.children),
+                type=self.data.display_work_type,
+            )
+
+        return None
+
+    @property
+    def collection(self) -> DisplayCollection | None:
+        root = self.collection_root
+        is_root = self.hierarchy.is_collection_root or None
+
+        if root is None and is_root is None:
+            return None
+
+        return DisplayCollection(root=root, is_root=is_root)
 
     @property
     def thumbnail(self) -> DisplayDigitalLocation | None:

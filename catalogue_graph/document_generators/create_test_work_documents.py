@@ -439,8 +439,8 @@ def create_works_with_collection_paths() -> None:
 def create_archive_works() -> None:
     """Create two works from the same archive: its root, and a section within it.
 
-    Between them they cover the fields used by archive browsing: `isCollectionRoot`,
-    `archiveType`, `collectionRoot`, `collectionPath.sort`.
+    Between them they cover the fields used by archive browsing (`collection.*`
+    and `archive.*`).
     """
     root_work = create_visible_merged_work(
         title="Papers of Ernst Boris Chain",

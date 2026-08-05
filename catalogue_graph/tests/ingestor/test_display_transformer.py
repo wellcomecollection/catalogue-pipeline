@@ -1,7 +1,10 @@
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
+from ingestor.models.display.archive import DisplayArchive
+from ingestor.models.display.collection import DisplayCollection
 from ingestor.models.display.concept import DisplayConcept, DisplaySubject
 from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
+from ingestor.models.display.relation import DisplayRelation
 from ingestor.models.merged.work import (
     VisibleMergedWork,
 )
@@ -13,6 +16,8 @@ from ingestor.transformers.work_display_transformer import DisplayWorkTransforme
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Subject
 from tests.test_utils import (
+    get_work_hierarchy_item,
+    get_work_with_ancestor,
     load_json_fixture,
 )
 
@@ -33,26 +38,83 @@ def get_work_fixture() -> VisibleExtractedWork:
     )
 
 
-def test_archive_type_from_collection_path_label() -> None:
+def test_archive_category_from_collection_path_label() -> None:
     extracted = get_work_fixture()
     extracted.work.data.collection_path = CollectionPath(
         path="PPRAS/A/2/1", label="PP/RAS/A.2/1"
     )
-    assert DisplayWorkTransformer(extracted).archive_type == DisplayIdLabel(
-        id="PP", label="Personal papers", type="ArchiveType"
+    assert DisplayWorkTransformer(extracted).archive == DisplayArchive(
+        category=DisplayIdLabel(
+            id="PP", label="Personal papers", type="ArchiveCategory"
+        )
     )
 
 
-def test_archive_type_none_for_unknown_prefix() -> None:
+def test_archive_none_for_unknown_prefix() -> None:
     extracted = get_work_fixture()
     extracted.work.data.collection_path = CollectionPath(path="XYZ/1", label="XYZ/1")
-    assert DisplayWorkTransformer(extracted).archive_type is None
+    assert DisplayWorkTransformer(extracted).archive is None
 
 
-def test_archive_type_none_when_no_collection_path() -> None:
+def test_archive_none_when_no_collection_path() -> None:
     extracted = get_work_fixture()
     extracted.work.data.collection_path = None
-    assert DisplayWorkTransformer(extracted).archive_type is None
+    assert DisplayWorkTransformer(extracted).archive is None
+
+
+def test_collection_none_when_no_hierarchy() -> None:
+    # The work has an archive category, but is not part of a collection hierarchy
+    extracted = get_work_fixture()
+    extracted.work.data.collection_path = CollectionPath(
+        path="PPRAS/A/2/1", label="PP/RAS/A.2/1"
+    )
+    assert DisplayWorkTransformer(extracted).collection is None
+
+
+def test_collection_with_ancestors() -> None:
+    extracted = get_work_with_ancestor(
+        ancestor_id="root_id", ancestor_label="Root title"
+    )
+    extracted.work.data.collection_path = CollectionPath(
+        path="PPRAS/A/2/1", label="PP/RAS/A.2/1"
+    )
+
+    assert DisplayWorkTransformer(extracted).collection == DisplayCollection(
+        root=DisplayRelation(
+            id="root_id", title="Root title", totalParts=1, type="Work"
+        ),
+        is_root=None,
+    )
+
+
+def test_collection_when_work_is_root() -> None:
+    fixture = load_json_fixture("ingestor/single_merged.json")
+    work = VisibleMergedWork.model_validate(fixture)
+    work.state.canonical_id = "this_work_id"
+    work.data.title = "This work title"
+    work.data.work_type = "Collection"
+    work.data.collection_path = CollectionPath(path="PPRAS", label="PP/RAS")
+
+    extracted = VisibleExtractedWork(
+        work=work,
+        hierarchy=WorkHierarchy(
+            id="some_id",
+            ancestors=[],
+            children=[get_work_hierarchy_item("child", "Child")],
+        ),
+        concepts=[],
+    )
+
+    assert DisplayWorkTransformer(extracted).collection == DisplayCollection(
+        root=DisplayRelation(
+            id="this_work_id",
+            title="This work title",
+            referenceNumber="PP/RAS",
+            totalParts=1,
+            type="Collection",
+        ),
+        is_root=True,
+    )
 
 
 def test_concept_standard_labels() -> None:

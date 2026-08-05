@@ -652,10 +652,21 @@
         }
       ],
       "type": "Work",
-      "archiveType": {
-        "id": "SA",
-        "type": "ArchiveType",
-        "label": "Societies and Associations"
+      "collection": {
+        "root": {
+          "id": "7vafg1w2",
+          "title": "08emPYDNpZDHkTv",
+          "referenceNumber": "SA/BSA",
+          "totalParts": 1,
+          "type": "Work"
+        }
+      },
+      "archive": {
+        "category": {
+          "id": "SA",
+          "type": "ArchiveCategory",
+          "label": "Societies and Associations"
+        }
       }
     },
     "aggregatableValues": {
@@ -721,11 +732,11 @@
         }
       ],
       "availabilities": [],
-      "archiveType": {
+      "archive.category": {
         "id": "SA",
         "label": "Societies and Associations"
       },
-      "collectionRoot": {
+      "collection.root": {
         "id": "7vafg1w2",
         "label": "08emPYDNpZDHkTv"
       }
@@ -799,10 +810,10 @@
         "wZL0ffJl0qmZquS"
       ],
       "availabilities.id": [],
-      "archiveType.id": "SA",
-      "collectionRoot.id": "7vafg1w2",
-      "collectionRoot.title": "08emPYDNpZDHkTv"
+      "archive.category.id": "SA",
+      "collection.root.id": "7vafg1w2",
+      "collection.root.title": "08emPYDNpZDHkTv"
     }
   },
-  "createdAt": "2026-08-04T15:07:31.298141+00:00"
+  "createdAt": "2026-08-05T12:48:25.375768+00:00"
 }

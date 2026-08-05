@@ -322,10 +322,21 @@
           }
         ],
         "type": "Work",
-        "archiveType": {
-          "id": "GC",
-          "label": "General collections",
-          "type": "ArchiveType"
+        "collection": {
+          "root": {
+            "id": "rqyum5sv",
+            "title": "Twort, Frederick William",
+            "referenceNumber": "GC/176",
+            "totalParts": 3,
+            "type": "Collection"
+          }
+        },
+        "archive": {
+          "category": {
+            "id": "GC",
+            "type": "ArchiveCategory",
+            "label": "General collections"
+          }
         }
       },
       "aggregatableValues": {
@@ -361,11 +372,11 @@
             "label": "Online"
           }
         ],
-        "archiveType": {
+        "archive.category": {
           "id": "GC",
           "label": "General collections"
         },
-        "collectionRoot": {
+        "collection.root": {
           "id": "rqyum5sv",
           "label": "Twort, Frederick William"
         }
@@ -428,9 +439,9 @@
           "closed-stores",
           "online"
         ],
-        "archiveType.id": "GC",
-        "collectionRoot.id": "rqyum5sv",
-        "collectionRoot.title": "Twort, Frederick William"
+        "archive.category.id": "GC",
+        "collection.root.id": "rqyum5sv",
+        "collection.root.title": "Twort, Frederick William"
       }
     },
     "_version": 1751300414000,
@@ -1622,7 +1633,16 @@
             "type": "Collection"
           }
         ],
-        "type": "Work"
+        "type": "Work",
+        "collection": {
+          "root": {
+            "id": "uad4jhwg",
+            "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
+            "referenceNumber": "UGC 198",
+            "totalParts": 10,
+            "type": "Collection"
+          }
+        }
       },
       "aggregatableValues": {
         "workType": [
@@ -1653,7 +1673,7 @@
             "label": "Online"
           }
         ],
-        "collectionRoot": {
+        "collection.root": {
           "id": "uad4jhwg",
           "label": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland"
         }
@@ -1710,8 +1730,8 @@
         "availabilities.id": [
           "online"
         ],
-        "collectionRoot.id": "uad4jhwg",
-        "collectionRoot.title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland"
+        "collection.root.id": "uad4jhwg",
+        "collection.root.title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland"
       }
     },
     "_version": 1701693347000,
@@ -3815,10 +3835,21 @@
           }
         ],
         "type": "Work",
-        "archiveType": {
-          "id": "PP",
-          "label": "Personal papers",
-          "type": "ArchiveType"
+        "collection": {
+          "root": {
+            "id": "dupg64pv",
+            "title": "Rast, Dr Hugo",
+            "referenceNumber": "PP/RAS",
+            "totalParts": 4,
+            "type": "Collection"
+          }
+        },
+        "archive": {
+          "category": {
+            "id": "PP",
+            "type": "ArchiveCategory",
+            "label": "Personal papers"
+          }
         }
       },
       "aggregatableValues": {
@@ -3845,11 +3876,11 @@
             "label": "Closed stores"
           }
         ],
-        "archiveType": {
+        "archive.category": {
           "id": "PP",
           "label": "Personal papers"
         },
-        "collectionRoot": {
+        "collection.root": {
           "id": "dupg64pv",
           "label": "Rast, Dr Hugo"
         }
@@ -3905,9 +3936,9 @@
         "availabilities.id": [
           "closed-stores"
         ],
-        "archiveType.id": "PP",
-        "collectionRoot.id": "dupg64pv",
-        "collectionRoot.title": "Rast, Dr Hugo"
+        "archive.category.id": "PP",
+        "collection.root.id": "dupg64pv",
+        "collection.root.title": "Rast, Dr Hugo"
       }
     },
     "_version": 1753957479000,

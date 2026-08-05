@@ -1,9 +1,10 @@
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.transformers.work_display_transformer import DisplayWorkTransformer
 from models.pipeline.serialisable import ElasticsearchModel
-from models.pipeline.work_data import WorkData
 from utils.types import DisplayWorkType
 
+from .archive import DisplayArchive
+from .collection import DisplayCollection
 from .concept import DisplayConcept, DisplayContributor, DisplayGenre, DisplaySubject
 from .holdings import DisplayHoldings
 from .id_label import DisplayId, DisplayIdLabel
@@ -45,15 +46,8 @@ class DisplayWork(ElasticsearchModel):
     parts: list[DisplayRelation]
     part_of: list[DisplayRelation]
     type: DisplayWorkType
-    is_collection_root: bool | None
-    archive_type: DisplayIdLabel | None
-
-    @classmethod
-    def _display_work_type(cls, work_data: WorkData) -> DisplayWorkType:
-        if work_data.work_type == "Standard":
-            return "Work"
-
-        return work_data.work_type
+    collection: DisplayCollection | None
+    archive: DisplayArchive | None
 
     @classmethod
     def from_extracted_work(cls, extracted: VisibleExtractedWork) -> "DisplayWork":
@@ -89,7 +83,7 @@ class DisplayWork(ElasticsearchModel):
             availabilities=transformer.availabilities,
             parts=list(transformer.parts),
             part_of=list(transformer.part_of),
-            type=cls._display_work_type(work.data),
-            is_collection_root=extracted.hierarchy.is_collection_root or None,
-            archive_type=transformer.archive_type,
+            type=work.data.display_work_type,
+            collection=transformer.collection,
+            archive=transformer.archive,
         )

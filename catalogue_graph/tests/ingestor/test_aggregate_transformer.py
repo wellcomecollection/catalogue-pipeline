@@ -13,20 +13,20 @@ from tests.test_utils import (
 )
 
 
-def test_archive_type_from_collection_path_label() -> None:
+def test_archive_category_from_collection_path_label() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.data.collection_path = CollectionPath(
         path="PPRAS/A/2/1", label="PP/RAS/A.2/1"
     )
-    assert AggregateWorkTransformer(extracted).archive_type == AggregatableField(
+    assert AggregateWorkTransformer(extracted).archive_category == AggregatableField(
         id="PP", label="Personal papers"
     )
 
 
-def test_archive_type_none_when_no_collection_path() -> None:
+def test_archive_category_none_when_no_collection_path() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.data.collection_path = None
-    assert AggregateWorkTransformer(extracted).archive_type is None
+    assert AggregateWorkTransformer(extracted).archive_category is None
 
 
 def test_collection_root_with_ancestors() -> None:

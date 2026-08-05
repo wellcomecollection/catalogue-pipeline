@@ -93,11 +93,22 @@
       ],
       "partOf": [],
       "type": "Collection",
-      "isCollectionRoot": true,
-      "archiveType": {
-        "id": "PP",
-        "type": "ArchiveType",
-        "label": "Personal papers"
+      "collection": {
+        "root": {
+          "id": "uy0hyncn",
+          "title": "Papers of Ernst Boris Chain",
+          "referenceNumber": "PP/EBC",
+          "totalParts": 2,
+          "type": "Collection"
+        },
+        "isRoot": true
+      },
+      "archive": {
+        "category": {
+          "id": "PP",
+          "type": "ArchiveCategory",
+          "label": "Personal papers"
+        }
       }
     },
     "aggregatableValues": {
@@ -109,11 +120,11 @@
       "contributors.agent": [],
       "items.locations.license": [],
       "availabilities": [],
-      "archiveType": {
+      "archive.category": {
         "id": "PP",
         "label": "Personal papers"
       },
-      "collectionRoot": {
+      "collection.root": {
         "id": "uy0hyncn",
         "label": "Papers of Ernst Boris Chain"
       }
@@ -144,11 +155,11 @@
       "partOf.id": [],
       "partOf.title": [],
       "availabilities.id": [],
-      "isCollectionRoot": true,
-      "archiveType.id": "PP",
-      "collectionRoot.id": "uy0hyncn",
-      "collectionRoot.title": "Papers of Ernst Boris Chain"
+      "collection.isRoot": true,
+      "archive.category.id": "PP",
+      "collection.root.id": "uy0hyncn",
+      "collection.root.title": "Papers of Ernst Boris Chain"
     }
   },
-  "createdAt": "2026-08-04T16:06:52.374873+00:00"
+  "createdAt": "2026-08-05T12:48:26.339979+00:00"
 }

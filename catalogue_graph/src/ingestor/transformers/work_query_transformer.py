@@ -6,7 +6,7 @@ from dateutil import parser
 
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
-from models.pipeline.archive_type import ArchiveType
+from models.pipeline.archive_category import ArchiveCategory
 from models.pipeline.location import DigitalLocation, PhysicalLocation
 
 from .work_base_transformer import WorkBaseTransformer
@@ -146,8 +146,8 @@ class QueryWorkTransformer(WorkBaseTransformer):
         return self.data.collection_path.label
 
     @property
-    def archive_type(self) -> str | None:
-        result = ArchiveType.from_collection_path(self.data.collection_path)
+    def archive_category_id(self) -> str | None:
+        result = ArchiveCategory.from_collection_path(self.data.collection_path)
         return result.id if result is not None else None
 
     @property

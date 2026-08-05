@@ -123,29 +123,37 @@
             }
           }
         },
-        "archiveType": {
-          "type": "nested",
+        "archive": {
           "properties": {
-            "id": {
-              "type": "keyword",
-              "eager_global_ordinals": true
-            },
-            "label": {
-              "type": "keyword",
-              "eager_global_ordinals": true
+            "category": {
+              "type": "nested",
+              "properties": {
+                "id": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                },
+                "label": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                }
+              }
             }
           }
         },
-        "collectionRoot": {
-          "type": "nested",
+        "collection": {
           "properties": {
-            "id": {
-              "type": "keyword",
-              "eager_global_ordinals": true
-            },
-            "label": {
-              "type": "keyword",
-              "eager_global_ordinals": true
+            "root": {
+              "type": "nested",
+              "properties": {
+                "id": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                },
+                "label": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                }
+              }
             }
           }
         }
@@ -332,23 +340,31 @@
         "workType": {
           "type": "keyword"
         },
-        "isCollectionRoot": {
-          "type": "boolean"
-        },
-        "archiveType": {
+        "archive": {
           "properties": {
-            "id": {
-              "type": "keyword"
+            "category": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
-        "collectionRoot": {
+        "collection": {
           "properties": {
-            "id": {
-              "type": "keyword"
+            "isRoot": {
+              "type": "boolean"
             },
-            "title": {
-              "type": "keyword"
+            "root": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "title": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         }

@@ -76,10 +76,12 @@
       "parts": [],
       "partOf": [],
       "type": "Work",
-      "archiveType": {
-        "id": "PP",
-        "type": "ArchiveType",
-        "label": "Personal papers"
+      "archive": {
+        "category": {
+          "id": "PP",
+          "type": "ArchiveCategory",
+          "label": "Personal papers"
+        }
       }
     },
     "aggregatableValues": {
@@ -91,7 +93,7 @@
       "contributors.agent": [],
       "items.locations.license": [],
       "availabilities": [],
-      "archiveType": {
+      "archive.category": {
         "id": "PP",
         "label": "Personal papers"
       }
@@ -122,8 +124,8 @@
       "partOf.id": [],
       "partOf.title": [],
       "availabilities.id": [],
-      "archiveType.id": "PP"
+      "archive.category.id": "PP"
     }
   },
-  "createdAt": "2026-08-04T16:06:51.658230+00:00"
+  "createdAt": "2026-08-05T12:48:25.643143+00:00"
 }
