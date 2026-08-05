@@ -32,7 +32,6 @@ logger = structlog.get_logger(__name__)
 #  * PRIVATE: No CALM equivalent. At the moment, only one record has this status (collect:100003386)
 
 # CALM has a few more statuses which currently don't exist in Axiell:
-#  * Closed: Mapped to Closed
 #  * Donor Permission: Mapped to PermissionRequired
 #  * Cannot Be Produced: Mapped to Unavailable
 #  * Temporarily Unavailable: Mapped to TemporarilyUnavailable
@@ -47,6 +46,7 @@ ACCESS_STATUS_MAPPING = {
     "MISSING": Unavailable,
     "SAFEGUARDED": Safeguarded,
     "BYAPPOINTMENT": ByAppointment,
+    "CLOSED": Closed,
 }
 
 
@@ -65,9 +65,10 @@ def extract_access_status(record: Record) -> AccessStatus | None:
     if status in ACCESS_STATUS_MAPPING:
         return ACCESS_STATUS_MAPPING[status]
 
-    # Unlike CALM, Axiell does not currently have a CLOSED status value. To determine if an item is closed,
-    # we use the 'closed until' date instead. If this date is in the future, the item is closed.
-    # This approach produces a ~98% match with the CALM transformer.
+    # Most closed material does not (yet) carry a CLOSED status value: the Calm-to-Axiell
+    # migration delivered Calm's 'Closed' as 'Certain restrictions apply' until the next
+    # data load restores the full status vocabulary. For records without a usable status,
+    # a 'closed until' date in the future marks the item as closed.
     closed_until = extract_closed_until_date(record)
     if closed_until and closed_until >= date.today():
         return Closed
