@@ -577,7 +577,9 @@ def test_partial_year(marc_record: Record) -> None:
                     indicators=Indicators(" ", " "),
                     subfields=[
                         Subfield(code="a", value="London [England] :"),
-                        Subfield(code="c", value="MDCCLXXXVIII.-MDCCLXXXIX. [1788-1789]"),
+                        Subfield(
+                            code="c", value="MDCCLXXXVIII.-MDCCLXXXIX. [1788-1789]"
+                        ),
                     ],
                 ),
             ],

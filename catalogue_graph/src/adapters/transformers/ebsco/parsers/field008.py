@@ -126,7 +126,7 @@ class Field008:
         >>> Field008("||||||m191u195u").maximal_date_range
         '1910-1959'
 
-        Date type q represents a questionable date between two years. 
+        Date type q represents a questionable date between two years.
         We treat it as a range like d and m
         >>> Field008("||||||q19251956").maximal_date_range
         '1925-1956'
@@ -163,7 +163,7 @@ class Field008:
             return f"{date_1.replace('u', '0')}-{date_2.replace('u', '9')}"
 
         if date_type == "q":
-            # q means a questionable date between date 1 and date 2, 
+            # q means a questionable date between date 1 and date 2,
             # but we will treat it like d and m
             date_2 = self.raw_field.date_2
             return f"{date_1.replace('u', '0')}-{date_2.replace('u', '9')}"
