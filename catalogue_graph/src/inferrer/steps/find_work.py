@@ -9,6 +9,7 @@ one per downstream inference task (fanned out by the state machine's Map state).
 
 from __future__ import annotations
 
+import os
 import typing
 from argparse import ArgumentParser
 from concurrent.futures import ThreadPoolExecutor
@@ -16,6 +17,7 @@ from itertools import batched
 
 import structlog
 
+from core.find_work import normalise_lambda_input
 from inferrer.models import (
     DEFAULT_PARTITION_SIZE,
     FindWorkEvent,
@@ -99,7 +101,21 @@ def write_partitions_to_s3(
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
-    parsed_event = FindWorkEvent(**event)
+    # Scope comes from the invocation (scheduled_time or replay input); the
+    # deployment-identity fields come from the environment.
+    parsed_event = FindWorkEvent(
+        **normalise_lambda_input(
+            event,
+            defaults={
+                "pipeline_date": os.environ.get("PIPELINE_DATE"),
+                "graph_date": os.environ.get("GRAPH_DATE"),
+                "index_dates": {
+                    "initial": os.environ.get("INDEX_DATE_INITIAL"),
+                    "augmented": os.environ.get("INDEX_DATE_AUGMENTED"),
+                },
+            },
+        )
+    )
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
         pipeline_step="inference_find_work",
