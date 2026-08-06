@@ -19,6 +19,7 @@ from adapters.transformers.axiell.physical_description import (
 from adapters.transformers.axiell.production import (
     extract_production,
 )
+from adapters.transformers.axiell.publish_to_web import extract_publish_to_web
 from adapters.transformers.axiell.subjects import extract_subjects
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.marc.last_transaction_time import (
@@ -73,6 +74,13 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
         # suppressing them must not require one.
         catalogue_status = extract_catalogue_status(self.record)
         if catalogue_status not in NON_SUPPRESSED_STATUSES:
+            return True
+
+        # The publish_to_web checkbox decides whether a finished record may go
+        # online, separately from its cataloguing status. Only an explicit 'no'
+        # suppresses: the marker is absent on records harvested before the
+        # stylesheet change, and those must keep their current visibility.
+        if extract_publish_to_web(self.record) == "no":
             return True
 
         # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not

@@ -7,6 +7,7 @@ def make_axiell_record(
     identifier: str = "test001",
     catalogue_status: str | None = "catalogued",
     ref_no: str | None = "TestRefNo",
+    publish_to_web: str | None = None,
 ) -> Record:
     """Minimal valid Axiell MARC record with all required fields."""
     record = Record()
@@ -29,6 +30,13 @@ def make_axiell_record(
                 tag="583",
                 indicators=Indicators("0", " "),
                 subfields=[Subfield(code="l", value=catalogue_status)],
+            )
+        )
+    if publish_to_web is not None:
+        record.add_field(
+            Field(
+                tag="981",
+                subfields=[Subfield(code="a", value=publish_to_web)],
             )
         )
     return record
