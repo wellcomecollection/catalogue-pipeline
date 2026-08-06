@@ -1,17 +1,17 @@
 {
   "description": "works whose collection paths only sort correctly when sorted naturally",
-  "id": "i0vc20lw",
+  "id": "bnej8amz",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "i0vc20lw",
+        "id": "bnej8amz",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "vwOcXiCfIv"
+          "value": "BjZ4OcnkJT"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "i0vc20lw",
+      "id": "bnej8amz",
       "title": "Collection path sorting test, no collection path",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "vwOcXiCfIv",
+      "sourceIdentifier.value": "BjZ4OcnkJT",
       "identifiers.value": [
-        "i0vc20lw",
-        "vwOcXiCfIv"
+        "bnej8amz",
+        "BjZ4OcnkJT"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -44,13 +44,13 @@
       "genres.concepts.label": []
     },
     "display": {
-      "id": "i0vc20lw",
+      "id": "bnej8amz",
       "title": "Collection path sorting test, no collection path",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "vwOcXiCfIv",
+          "value": "BjZ4OcnkJT",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -98,8 +98,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "i0vc20lw",
-        "vwOcXiCfIv"
+        "bnej8amz",
+        "BjZ4OcnkJT"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -112,5 +112,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-08-06T09:01:32.892937+00:00"
+  "createdAt": "2026-08-06T10:44:46.203836+00:00"
 }

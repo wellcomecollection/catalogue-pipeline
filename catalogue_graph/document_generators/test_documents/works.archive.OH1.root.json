@@ -1,17 +1,17 @@
 {
-  "description": "works whose collection paths only sort correctly when sorted naturally",
-  "id": "o8epfl02",
+  "description": "the root of an Oral History archive",
+  "id": "pufll8p5",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "o8epfl02",
+        "id": "pufll8p5",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "DZDpwLN8Xa"
+          "value": "0GPz5ASugg"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "o8epfl02",
-      "title": "Collection path sorting test, SA/SRT/C2/010/1",
+      "id": "pufll8p5",
+      "title": "Oral histories of British science",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "DZDpwLN8Xa",
+      "sourceIdentifier.value": "0GPz5ASugg",
       "identifiers.value": [
-        "o8epfl02",
-        "DZDpwLN8Xa"
+        "pufll8p5",
+        "0GPz5ASugg"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -42,18 +42,18 @@
       "subjects.concepts.label": [],
       "contributors.agent.label": [],
       "genres.concepts.label": [],
-      "collectionPath.label": "SA/SRT/C2/010/1",
-      "collectionPath.path": "SASRT/C2/010/1",
-      "collectionPath.sort": "SASRT/C0000000002/0000000010/0000000001"
+      "collectionPath.label": "OH1",
+      "collectionPath.path": "OH1",
+      "collectionPath.sort": "OH0000000001"
     },
     "display": {
-      "id": "o8epfl02",
-      "title": "Collection path sorting test, SA/SRT/C2/010/1",
+      "id": "pufll8p5",
+      "title": "Oral histories of British science",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "DZDpwLN8Xa",
+          "value": "0GPz5ASugg",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -73,14 +73,39 @@
       "formerFrequency": [],
       "designation": [],
       "images": [],
-      "parts": [],
+      "parts": [
+        {
+          "id": "vr6y2ga0",
+          "title": "Interview with a laboratory technician",
+          "referenceNumber": "OH1/A",
+          "totalParts": 0,
+          "type": "Work"
+        },
+        {
+          "id": "dxlgpw7c",
+          "title": "Interview with a research nurse",
+          "referenceNumber": "OH1/B",
+          "totalParts": 0,
+          "type": "Work"
+        }
+      ],
       "partOf": [],
-      "type": "Work",
+      "type": "Collection",
+      "collection": {
+        "root": {
+          "id": "pufll8p5",
+          "title": "Oral histories of British science",
+          "referenceNumber": "OH1",
+          "totalParts": 2,
+          "type": "Collection"
+        },
+        "isRoot": true
+      },
       "archive": {
         "category": {
-          "id": "SA",
+          "id": "OH",
           "type": "ArchiveCategory",
-          "label": "Societies and Associations"
+          "label": "Oral History"
         }
       }
     },
@@ -94,12 +119,16 @@
       "items.locations.license": [],
       "availabilities": [],
       "archive.category": {
-        "id": "SA",
-        "label": "Societies and Associations"
+        "id": "OH",
+        "label": "Oral History"
+      },
+      "collection.root": {
+        "id": "pufll8p5",
+        "label": "Oral histories of British science"
       }
     },
     "filterableValues": {
-      "workType": "Standard",
+      "workType": "Collection",
       "production.dates.range.from": [],
       "languages.id": [],
       "genres.label": [],
@@ -112,8 +141,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "o8epfl02",
-        "DZDpwLN8Xa"
+        "pufll8p5",
+        "0GPz5ASugg"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -124,8 +153,11 @@
       "partOf.id": [],
       "partOf.title": [],
       "availabilities.id": [],
-      "archive.category.id": "SA"
+      "collection.isRoot": true,
+      "archive.category.id": "OH",
+      "collection.root.id": "pufll8p5",
+      "collection.root.title": "Oral histories of British science"
     }
   },
-  "createdAt": "2026-08-06T10:44:46.202631+00:00"
+  "createdAt": "2026-08-06T09:07:55.722008+00:00"
 }

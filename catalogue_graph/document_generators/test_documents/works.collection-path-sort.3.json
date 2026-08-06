@@ -1,17 +1,17 @@
 {
   "description": "works whose collection paths only sort correctly when sorted naturally",
-  "id": "fdgu5yz5",
+  "id": "5dbjd4im",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "fdgu5yz5",
+        "id": "5dbjd4im",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "WvJ8pKouf3"
+          "value": "p4XRtNQNga"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "fdgu5yz5",
+      "id": "5dbjd4im",
       "title": "Collection path sorting test, SA/SRT/C10/1",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "WvJ8pKouf3",
+      "sourceIdentifier.value": "p4XRtNQNga",
       "identifiers.value": [
-        "fdgu5yz5",
-        "WvJ8pKouf3"
+        "5dbjd4im",
+        "p4XRtNQNga"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -47,13 +47,13 @@
       "collectionPath.sort": "SASRT/C0000000010/0000000001"
     },
     "display": {
-      "id": "fdgu5yz5",
+      "id": "5dbjd4im",
       "title": "Collection path sorting test, SA/SRT/C10/1",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "WvJ8pKouf3",
+          "value": "p4XRtNQNga",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -112,8 +112,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "fdgu5yz5",
-        "WvJ8pKouf3"
+        "5dbjd4im",
+        "p4XRtNQNga"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -127,5 +127,5 @@
       "archive.category.id": "SA"
     }
   },
-  "createdAt": "2026-08-06T09:01:32.892530+00:00"
+  "createdAt": "2026-08-06T10:44:46.203325+00:00"
 }

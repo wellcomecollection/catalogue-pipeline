@@ -639,6 +639,35 @@ def create_archive_works() -> None:
         doc_id="works.archive.GC253.item",
     )
 
+    # The root of a third archive, in an archive category whose prefix is numbered
+    # (the category of "OH1" is "OH").
+    save_works(
+        [
+            create_visible_extracted_work(
+                ancestors=[],
+                merged_work=create_visible_merged_work(
+                    title="Oral histories of British science",
+                    collection_path=CollectionPath(path="OH1", label="OH1"),
+                    work_type="Collection",
+                ),
+                children=[
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Interview with a laboratory technician",
+                        collection_path=CollectionPath(path="OH1/A", label="OH1/A"),
+                    ),
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Interview with a research nurse",
+                        collection_path=CollectionPath(path="OH1/B", label="OH1/B"),
+                    ),
+                ],
+            )
+        ],
+        description="the root of an Oral History archive",
+        doc_id="works.archive.OH1.root",
+    )
+
 
 def create_works_with_every_format() -> None:
     works = [create_visible_merged_work(format=fmt) for fmt in ALL_FORMATS]
