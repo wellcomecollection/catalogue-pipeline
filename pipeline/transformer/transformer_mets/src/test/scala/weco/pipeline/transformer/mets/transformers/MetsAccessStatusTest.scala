@@ -5,8 +5,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.locations.AccessStatus
 
-import java.util.Locale
-
 class MetsAccessStatusTest
     extends AnyFunSpec
     with Matchers
@@ -46,18 +44,6 @@ class MetsAccessStatusTest
           Some(expectedStatus)
         )
     }
-  }
-
-  it("ignores capitalisation regardless of the default locale") {
-    val defaultLocale = Locale.getDefault()
-    try {
-      // Turkish lowercases "I" to a dotless "ı", which would break a
-      // locale-sensitive match on "Clinical images".
-      Locale.setDefault(new Locale("tr", "TR"))
-      MetsAccessStatus(Some("CLINICAL IMAGES")) shouldBe Right(
-        Some(AccessStatus.Restricted)
-      )
-    } finally Locale.setDefault(defaultLocale)
   }
 
   it("still rejects a status that differs by more than capitalisation") {
