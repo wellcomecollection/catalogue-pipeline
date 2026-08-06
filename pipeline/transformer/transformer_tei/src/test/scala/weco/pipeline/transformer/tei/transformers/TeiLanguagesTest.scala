@@ -77,18 +77,68 @@ class TeiLanguagesTest
     ))
   }
 
-  it("errors on languages that have more than one lang attribute") {
+  it("reads every language on a node that has both mainLang and otherLangs") {
     val xml =
       teiXml(
         languages = List(
-          <textLang mainLang="id1" otherLangs="id2">Sanskrit</textLang>
+          <textLang mainLang="ar" otherLangs="ota">Arabic</textLang>
+        )
+      )
+
+    TeiLanguages(xml).value shouldBe ((
+      List(Language(id = "ara", label = "Arabic")),
+      Nil
+    ))
+  }
+
+  it("keeps the main language when otherLangs holds several ids") {
+    val xml =
+      teiXml(
+        languages = List(
+          <textLang mainLang="la" otherLangs="grc fr">Latin</textLang>
+        )
+      )
+
+    TeiLanguages(xml).value shouldBe ((
+      List(Language(id = "lat", label = "Latin")),
+      Nil
+    ))
+  }
+
+  it(
+    "puts a multi-language node in a language note when its label names no single language"
+  ) {
+    val xml =
+      teiXml(
+        languages = List(
+          <textLang mainLang="ar" otherLangs="fa">Arabic and Persian</textLang>
         )
       )
 
     val result = TeiLanguages(xml)
 
-    result shouldBe a[Left[_, _]]
-    result.left.get.getMessage should include("language ID")
+    result shouldBe a[Right[_, _]]
+    result.value shouldBe ((
+      Nil,
+      List(Note(NoteType.LanguageNote, "Arabic and Persian"))
+    ))
+  }
+
+  it("does not fail the whole manuscript for a multi-language node") {
+    val xml =
+      teiXml(
+        languages = List(
+          mainLanguage("sa", "Sanskrit"),
+          <textLang mainLang="ar" otherLangs="es">Arabic with interlinear Spanish</textLang>
+        )
+      )
+
+    TeiLanguages(xml).value shouldBe ((
+      List(Language(id = "san", label = "Sanskrit")),
+      List(
+        Note(NoteType.LanguageNote, "Arabic with interlinear Spanish")
+      )
+    ))
   }
 
   it("skips languages without a label") {

@@ -30,55 +30,51 @@ object TeiLanguages extends Logging {
         case (n, Right((languageList, languageNoteList))) =>
           val label = n.text
 
-          val langId = parseLanguageId(n)
-
-          (langId, label) match {
-            case (Right(Some(id)), label) if label.trim.nonEmpty =>
-              appendLanguageOrNote(languageList, languageNoteList, id, label)
-            case (Right(None), label) if label.trim.nonEmpty =>
-              appendNote(languageList, languageNoteList, label)
-            case (Right(_), _) =>
+          (parseLanguageIds(n), label) match {
+            case (_, label) if label.trim.isEmpty =>
               warn(s"Missing label for language node $n")
               Right((languageList, languageNoteList))
-            case (Left(err), _) => Left(err)
+            case (Nil, label) =>
+              appendNote(languageList, languageNoteList, label)
+            case (ids, label) =>
+              appendLanguagesOrNote(languageList, languageNoteList, ids, label)
           }
 
         case (_, Left(err)) => Left(err)
       }
 
-  private def parseLanguageId(n: Node) = {
-    val mainLangId = (n \@ "mainLang").toLowerCase
-    val otherLangId = (n \@ "otherLangs").toLowerCase
-    (mainLangId, otherLangId) match {
-      case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(Some(id1))
-      case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(Some(id2))
-      case (id1, id2) if id2.isEmpty && id1.isEmpty =>
-        Right(None)
-      case _ =>
-        Left(new RuntimeException(s"Multiple language IDs in $n"))
-    }
-  }
+  /** A textLang may name a main language, other languages, or both. Both is how
+    * TEI describes a multi-language manuscript, so read every id rather than
+    * treating the combination as an error.
+    */
+  private def parseLanguageIds(n: Node): List[String] =
+    (Seq(n \@ "mainLang") ++ (n \@ "otherLangs").split("\\s+"))
+      .map(_.toLowerCase.trim)
+      .filter(_.nonEmpty)
+      .distinct
+      .toList
 
-  private def appendLanguageOrNote(
+  private def appendLanguagesOrNote(
     languageList: List[Language],
     languageNoteList: List[Note],
-    id: String,
+    ids: List[String],
     label: String
-  ) =
-    TeiLanguageData(id, label).fold(
-      err => {
-        warn("Could not parse language", err)
-        appendNote(languageList, languageNoteList, label)
-      },
-      appendLanguage(languageList, languageNoteList, _)
-    )
+  ) = {
+    val languages = ids.flatMap {
+      id =>
+        TeiLanguageData(id, label) match {
+          case Right(language) => Some(language)
+          case Left(err) =>
+            warn("Could not parse language", err)
+            None
+        }
+    }
 
-  private def appendLanguage(
-    languageList: List[Language],
-    languageNoteList: List[Note],
-    language: Language
-  ) =
-    Right((language +: languageList, languageNoteList))
+    // The label is shared by every id on the node, so it only becomes a note
+    // when it yielded no language at all.
+    if (languages.isEmpty) appendNote(languageList, languageNoteList, label)
+    else Right((languages ++ languageList, languageNoteList))
+  }
 
   private def appendNote(
     languageList: List[Language],
