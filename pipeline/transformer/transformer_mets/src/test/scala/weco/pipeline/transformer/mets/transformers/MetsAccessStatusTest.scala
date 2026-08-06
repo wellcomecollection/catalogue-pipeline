@@ -19,6 +19,15 @@ class MetsAccessStatusTest
     ("Closed", AccessStatus.Closed)
   )
 
+  // Capitalisation as found in real Archivematica and Goobi packages.
+  val differentlyCasedTestCases = Table(
+    ("accessConditionStatus", "expectedStatus"),
+    ("Restricted Files", AccessStatus.Restricted),
+    ("closed", AccessStatus.Closed),
+    ("OPEN", AccessStatus.Open),
+    ("open with advisory", AccessStatus.OpenWithAdvisory)
+  )
+
   it("creates an access status") {
     forAll(testCases) {
       case (accessConditionStatus, expectedStatus) =>
@@ -26,6 +35,25 @@ class MetsAccessStatusTest
           Some(expectedStatus)
         )
     }
+  }
+
+  it("ignores the capitalisation of the access status") {
+    forAll(differentlyCasedTestCases) {
+      case (accessConditionStatus, expectedStatus) =>
+        MetsAccessStatus(Some(accessConditionStatus)) shouldBe Right(
+          Some(expectedStatus)
+        )
+    }
+  }
+
+  it("still rejects a status that differs by more than capitalisation") {
+    MetsAccessStatus(Some("Restricted")) shouldBe a[Left[_, _]]
+  }
+
+  it("reports the status as written when it cannot be matched") {
+    MetsAccessStatus(Some("Restricted")).left.get.getMessage should include(
+      "Restricted"
+    )
   }
 
   it("returns None if there are no access conditions") {
