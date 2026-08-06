@@ -1,6 +1,6 @@
 import numpy as np
-from PIL import Image
 from joblib import Parallel, delayed
+from PIL import Image
 
 
 class PaletteEncoder:
@@ -70,7 +70,7 @@ class PaletteEncoder:
         """
         average = pixel_array.mean(axis=0)
         r, g, b = average.astype(int)
-        hex = "#{:02x}{:02x}{:02x}".format(r, g, b)
+        hex = f"#{r:02x}{g:02x}{b:02x}"
         return hex
 
     def process_image(self, image: Image):

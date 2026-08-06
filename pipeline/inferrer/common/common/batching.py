@@ -1,5 +1,6 @@
 import asyncio
-from typing import Callable, Dict, Generic, List, TypeVar
+from collections.abc import Callable
+from typing import Generic, TypeVar
 from uuid import UUID, uuid4
 
 from async_timeout import timeout
@@ -37,7 +38,7 @@ class BatchExecutionQueue(Generic[Input, Result]):
 
     def __init__(
         self,
-        sync_batch_processor: Callable[[List[Input]], List[Result]],
+        sync_batch_processor: Callable[[list[Input]], list[Result]],
         batch_size: int,
         timeout: float,
     ):
@@ -45,7 +46,7 @@ class BatchExecutionQueue(Generic[Input, Result]):
         self.batch_size = batch_size
         self.timeout = timeout
         self.queue = asyncio.Queue(batch_size)
-        self.output: Dict[UUID, Result] = {}
+        self.output: dict[UUID, Result] = {}
 
     def __del__(self):
         self.stop_worker()
@@ -133,7 +134,7 @@ class BatchExecutionQueue(Generic[Input, Result]):
         # This implementation is based upon:
         # http://blog.mathieu-leplatre.info/some-python-3-asyncio-snippets.html#consume-queue-in-batches
         while True:
-            batch: List[(UUID, Input)] = []
+            batch: list[(UUID, Input)] = []
             try:
                 with timeout(self.timeout):
                     while len(batch) < self.batch_size:
@@ -149,10 +150,10 @@ class BatchExecutionQueue(Generic[Input, Result]):
 
             if batch:
                 try:
-                    ids, inputs = zip(*batch)
-                    results: List[Result] = self.sync_batch_processor(inputs)
+                    ids, inputs = zip(*batch, strict=True)
+                    results: list[Result] = self.sync_batch_processor(inputs)
                     assert len(results) == len(inputs)
-                    self.output.update(dict(zip(ids, results)))
+                    self.output.update(dict(zip(ids, results, strict=True)))
                 except Exception as e:
                     log.error("Error processing batch", e)
                     raise e from None

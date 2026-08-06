@@ -1,7 +1,8 @@
-import numpy as np
 import base64
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, patch
+
 import main
+import numpy as np
 from fastapi.testclient import TestClient
 
 

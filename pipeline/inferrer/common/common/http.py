@@ -47,8 +47,8 @@ async def fetch_url_json(url, params=None):
         except (
             json.JSONDecodeError,
             aiohttp.client_exceptions.ContentTypeError,
-        ):
-            raise ValueError(f"Couldn't decode json from {url}")
+        ) as e:
+            raise ValueError(f"Couldn't decode json from {url}") from e
 
 
 async def fetch_redirect_url(url, params=None):

@@ -1,14 +1,14 @@
-import numpy as np
 import base64
 from contextlib import asynccontextmanager
 
+import numpy as np
 from fastapi import FastAPI, HTTPException
+from src.feature_extraction import extract_features
+
 from common import http
+from common.batching import BatchExecutionQueue
 from common.image import get_image_from_url
 from common.logging import get_logger
-from common.batching import BatchExecutionQueue
-
-from src.feature_extraction import extract_features
 
 logger = get_logger(__name__)
 
@@ -42,7 +42,7 @@ async def main(query_url: str):
     except ValueError as e:
         error_string = str(e)
         logger.error(error_string)
-        raise HTTPException(status_code=404, detail=error_string)
+        raise HTTPException(status_code=404, detail=error_string) from e
 
     features = await batch_inferrer_queue.execute(image)
     normalised_features = features / np.linalg.norm(features, axis=0, keepdims=True)

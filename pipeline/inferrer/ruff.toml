@@ -1,0 +1,27 @@
+# Pin the rule set so a new ruff release's default selection can't break CI.
+# Mirrors catalogue_graph/pyproject.toml.
+line-length = 88
+# Not inferred from the per-inferrer pyproject.toml files, so state it here.
+target-version = "py310"
+
+[lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+ignore = ["E501"]
+
+[lint.isort]
+# Without this, the `common/` directory makes a bare `common` import look
+# first-party while `common.image` does not, splitting the two apart.
+known-first-party = ["common"]

@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
+
 from common import http
 from common.image import get_image_from_url
 from common.logging import get_logger
@@ -42,7 +43,7 @@ async def main(query_url: str):
     except ValueError as e:
         error_string = str(e)
         logger.error(error_string)
-        raise HTTPException(status_code=404, detail=error_string)
+        raise HTTPException(status_code=404, detail=error_string) from e
 
     aspect_ratio = image.width / image.height
     logger.info(f"extracted aspect ratio from url: {query_url}")
