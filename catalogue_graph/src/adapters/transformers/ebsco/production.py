@@ -12,8 +12,19 @@ from pymarc.record import Record
 from adapters.transformers.ebsco.parsers.field008 import Field008
 from adapters.transformers.ebsco.parsers.period import parse_period
 from adapters.transformers.utils.text_utils import normalise_label
-from models.pipeline.concept import Concept
+from models.pipeline.concept import Concept, Period
+from models.pipeline.identifier import Unidentifiable
 from models.pipeline.production import ProductionEvent
+
+
+def _parse_period_or_bare_label(label: str) -> Period:
+    # The Scala pipeline's PeriodParser returns an empty result for labels it
+    # cannot parse, producing a Period with no range. Match that here instead
+    # of failing the whole record.
+    try:
+        return parse_period(label)
+    except ValueError:
+        return Period(label=label, id=Unidentifiable())
 
 
 def extract_production(record: Record) -> list[ProductionEvent]:
@@ -42,7 +53,7 @@ def extract_production_from_008(record: Record) -> ProductionEvent | None:
     field008 = Field008(field.data)
     date_range_str = field008.maximal_date_range
     if date_range_str is not None:
-        period = parse_period(date_range_str)
+        period = _parse_period_or_bare_label(date_range_str)
         if period:
             place = field008.place_of_production
             places = (
@@ -103,7 +114,7 @@ def single_production_event(field: Field) -> ProductionEvent | None:
         for subfield in field.get_subfields("b")
     ]
     dates = [
-        parse_period(normalise_label(subfield, "Period"))
+        _parse_period_or_bare_label(normalise_label(subfield, "Period"))
         for subfield in field.get_subfields("c")
     ]
     function = None
@@ -123,7 +134,7 @@ def single_production_event(field: Field) -> ProductionEvent | None:
             for subfield in field.get_subfields("f")
         ]
         dates += [
-            parse_period(normalise_label(subfield, "Period"))
+            _parse_period_or_bare_label(normalise_label(subfield, "Period"))
             for subfield in field.get_subfields("g")
         ]
         function = Concept(label=normalise_label("Manufacture", "Concept"))
