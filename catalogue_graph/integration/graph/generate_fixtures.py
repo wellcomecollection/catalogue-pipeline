@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from getpass import getuser
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from clients.neptune_client import NeptuneClient
 from ingestor.extractors.concepts.base_concepts_extractor import CONCEPT_QUERY_PARAMS
@@ -131,7 +131,7 @@ def row_to_ancestor_work_ids(item: dict[str, Any]) -> list[str]:
 class FixtureSpec:
     name: str
     query: str
-    id_label: str  # "Concept" or "Work"
+    id_label: Literal["Concept", "Work"]
     row_to_values: Callable[[dict[str, Any]], list[str]]
     expected_fixture_name: str
     empty_ids_fixture_name: str | None
