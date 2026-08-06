@@ -154,17 +154,12 @@ class Field008:
                 return f"{date_1.replace('u', '0')}-{date_1.replace('u', '9')}"
             return date_1
 
-        if date_type in "dm":
-            # these two have subtly different meanings in MARC,
-            # but for our purposes, they both represent a range.
+        if date_type in "dmq":
+            # d, m, and q all have subtly different meanings in MARC,
+            # for our purposes, we will treat all three the same, as a range of dates.
             # d is an actual range of publication of a continuing resource
-            # m is a pair of dates for a multipart item.
-            date_2 = self.raw_field.date_2
-            return f"{date_1.replace('u', '0')}-{date_2.replace('u', '9')}"
-
-        if date_type == "q":
-            # q means a questionable date between date 1 and date 2,
-            # but we will treat it like d and m
+            # m is a pair of dates for a multipart item
+            # q is a questionable date between two years
             date_2 = self.raw_field.date_2
             return f"{date_1.replace('u', '0')}-{date_2.replace('u', '9')}"
 
