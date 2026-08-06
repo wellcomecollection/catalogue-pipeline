@@ -7,7 +7,13 @@ from models.pipeline.identifier import Identifiable, Unidentifiable
 # Explicitly discard SGML escape sequences and doubly-escaped sequences.
 # This prevents the RE_KEEP sequence misinterpreting &#40; (lparen)
 # or &amp;#41; (rparen) as the numbers 40 and 41 respectively.
-RE_DISCARD = re.compile(r"(&(amp;)?.+?;)")
+#
+# Square brackets are also discarded. They're already meaningless to RE_KEEP
+# (only digits and hyphens survive), but a bracket sitting between two digits
+# of the same year - e.g. "1[841-1849]", really "1841-1849" with a stray
+# bracket inserted - would otherwise split what should be a single 4-digit
+# year into an isolated "1" (dropped, being a single digit) and "841".
+RE_DISCARD = re.compile(r"(&(amp;)?.+?;)|[\[\]]")
 
 RE_KEEP = re.compile(r"\d{2,4}|-")
 

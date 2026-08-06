@@ -125,6 +125,11 @@ class Field008:
         '1900-2009'
         >>> Field008("||||||m191u195u").maximal_date_range
         '1910-1959'
+
+        Date type q represents a questionable date between two years.
+        We treat it as a range like d and m
+        >>> Field008("||||||q19251956").maximal_date_range
+        '1925-1956'
         """
         date_type = self.raw_field.date_type
         if date_type in "n|":
@@ -149,11 +154,12 @@ class Field008:
                 return f"{date_1.replace('u', '0')}-{date_1.replace('u', '9')}"
             return date_1
 
-        if date_type in "dm":
-            # these two have subtly different meanings in MARC,
-            # but for our purposes, they both represent a range.
+        if date_type in "dmq":
+            # d, m, and q all have subtly different meanings in MARC,
+            # for our purposes, we will treat all three the same, as a range of dates.
             # d is an actual range of publication of a continuing resource
-            # m is a pair of dates for a multipart item.
+            # m is a pair of dates for a multipart item
+            # q is a questionable date between two years
             date_2 = self.raw_field.date_2
             return f"{date_1.replace('u', '0')}-{date_2.replace('u', '9')}"
 

@@ -9,7 +9,7 @@ from adapters.steps.transformer import (
     build_transformer,
     handler,
 )
-from tests.adapters.extractors.ebsco.helpers import prepare_changeset
+from tests.adapters.extractors.ebsco.helpers import lone_element, prepare_changeset
 from tests.adapters.transformers.conftest import read_transformer_report
 from tests.mocks import MockElasticsearchClient
 
@@ -79,6 +79,55 @@ def test_transformer_end_to_end_with_local_table(
         for op in MockElasticsearchClient.inputs
     }
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
+
+
+def test_transformer_survives_messy_production_date(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """
+    Real record ebs375800e: its 260$c date ("MDCCLXXXVIII.-MDCCLXXXIX.
+    [1788-1789]") used to crash the whole record's transform.
+    """
+    records_by_id = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
+        "ebs375800e": (
+            "<record><leader>00000cas a22000003  4500</leader>"
+            "<controlfield tag='001'>ebs375800e</controlfield>"
+            "<controlfield tag='008'>970128d17881789enkwr p o ||| 0  |a0eng c</controlfield>"
+            "<datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Lounger's miscellany</subfield></datafield>"
+            "<datafield tag='260' ind1=' ' ind2=' '>"
+            "<subfield code='a'>London [England] :</subfield>"
+            "<subfield code='c'>MDCCLXXXVIII.-MDCCLXXXIX. [1788-1789]</subfield>"
+            "</datafield>"
+            "</record>"
+        ),
+    }
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=EBSCO_NAMESPACE,
+        transformer_type="ebsco",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-01-01",
+    )
+
+    assert result.success_count == 2
+    assert result.failure_count == 0
+
+    by_id = {op["_id"]: op["_source"] for op in MockElasticsearchClient.inputs}
+    production = lone_element(
+        by_id["Work[ebsco-alt-lookup/ebs375800e]"]["data"]["production"]
+    )
+    period = lone_element(production["dates"])
+    assert period["range"]["from"] == "1788-01-01T00:00:00Z"
+    assert period["range"]["to"] == "1789-12-31T23:59:59.999999999Z"
 
 
 def test_transformer_end_to_end_includes_deletions(

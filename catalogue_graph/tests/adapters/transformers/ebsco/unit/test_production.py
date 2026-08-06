@@ -506,3 +506,139 @@ def test_field_008_multiple_from_dates(
     assert period.range.label == "&#169;1928, &#169;1929-1936"
     assert period.range.from_time == "1928-01-01T00:00:00Z"
     assert period.range.to_time == "1936-12-31T23:59:59.999999999Z"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="008",
+                    data="800121q19791995acafr p o o 0 0engrc",
+                ),
+            ],
+            id="008 q date range",
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_field_008_q_date(marc_record: Record) -> None:
+    production = lone_element(_get_production(marc_record))
+    period = lone_element(production.dates)
+    assert period.range.label == "1979-1995"
+    assert period.range.from_time == "1979-01-01T00:00:00Z"
+    assert period.range.to_time == "1995-12-31T23:59:59.999999999Z"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(tag="008", data="820413d182519uuenkmr p o 0 0 eng d"),
+                Field(tag="260", subfields=[Subfield(code="c", value="1825-[19--?]")]),
+            ]
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_partial_year(marc_record: Record) -> None:
+    """
+    A date that can't be parsed as a range falls back to the 008 date.
+    """
+    production = lone_element(_get_production(marc_record))
+    period = lone_element(production.dates)
+    assert period.range.label == "1825-1999"
+    assert period.range.from_time == "1825-01-01T00:00:00Z"
+    assert period.range.to_time == "1999-12-31T23:59:59.999999999Z"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(tag="008", data="100930d18411849ne ar   o     0    0dut c"),
+                Field(
+                    tag="264",
+                    indicators=Indicators(" ", "1"),
+                    subfields=[Subfield(code="c", value="1[841-1849]")],
+                ),
+            ]
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_bracket_typo_does_not_cause_digit_to_be_dropped(marc_record: Record) -> None:
+    """
+    A bracket inserted in the middle of a year, e.g. "1[841-1849]", must not
+    cause the digit before it to be dropped.
+    """
+    production = lone_element(_get_production(marc_record))
+    period = lone_element(production.dates)
+    assert period.range.from_time == "1841-01-01T00:00:00Z"
+    assert period.range.to_time == "1849-12-31T23:59:59.999999999Z"
+
+
+@pytest.mark.parametrize(
+    "marc_record, expected_range",
+    [
+        pytest.param(
+            [
+                Field(tag="008", data="970128d17881789enkwr p o ||| 0  |a0eng c"),
+                Field(
+                    tag="260",
+                    subfields=[
+                        Subfield(
+                            code="c", value="MDCCLXXXVIII.-MDCCLXXXIX. [1788-1789]"
+                        )
+                    ],
+                ),
+            ],
+            ("1788-01-01T00:00:00Z", "1789-12-31T23:59:59.999999999Z"),
+        ),
+        pytest.param(
+            [
+                Field(tag="008", data="840111s1794    xxu|||| o     00| | eng c"),
+                Field(tag="260", subfields=[Subfield(code="c", value="--1794-- ")]),
+            ],
+            ("1794-01-01T00:00:00Z", "1794-12-31T23:59:59.999999999Z"),
+        ),
+    ],
+    indirect=["marc_record"],
+)
+def test_messy_dates_fall_back_to_008(
+    marc_record: Record, expected_range: tuple[str, str]
+) -> None:
+    """
+    A label that can't be parsed as a range falls back to the 008 date.
+    """
+    production = lone_element(_get_production(marc_record))
+    period = lone_element(production.dates)
+    assert (period.range.from_time, period.range.to_time) == expected_range
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="260",
+                    subfields=[
+                        Subfield(code="a", value="Somewhere"),
+                        Subfield(code="c", value="mid century"),
+                    ],
+                )
+            ]
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_unparseable_date_degrades_to_label_only(marc_record: Record) -> None:
+    production = lone_element(_get_production(marc_record))
+    assert lone_element(production.places).label == "Somewhere"
+    period = lone_element(production.dates)
+    assert period.label == "mid century"
+    assert period.range is None
