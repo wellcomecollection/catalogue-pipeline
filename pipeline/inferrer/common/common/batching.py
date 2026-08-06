@@ -134,7 +134,7 @@ class BatchExecutionQueue(Generic[Input, Result]):
         # This implementation is based upon:
         # http://blog.mathieu-leplatre.info/some-python-3-asyncio-snippets.html#consume-queue-in-batches
         while True:
-            batch: list[(UUID, Input)] = []
+            batch: list[tuple[UUID, Input]] = []
             try:
                 with timeout(self.timeout):
                     while len(batch) < self.batch_size:
@@ -151,11 +151,11 @@ class BatchExecutionQueue(Generic[Input, Result]):
             if batch:
                 try:
                     ids, inputs = zip(*batch, strict=True)
-                    results: list[Result] = self.sync_batch_processor(inputs)
+                    results: list[Result] = self.sync_batch_processor(list(inputs))
                     assert len(results) == len(inputs)
                     self.output.update(dict(zip(ids, results, strict=True)))
                 except Exception as e:
-                    log.error("Error processing batch", e)
+                    log.exception("Error processing batch")
                     raise e from None
                 finally:
                     self.__mark_queue_done(len(batch))
