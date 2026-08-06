@@ -4,7 +4,7 @@ MARCXML reading primitives + the CanonicalRecord intermediate model.
 This module knows *how* to pull values out of MARCXML (namespace handling,
 control vs. data fields) but deliberately not *which* MARC field feeds which
 record field — that single source of truth lives in ``mapping.MARC_SOURCE``.
-``mapping.parse_marcxml()`` drives the ``extract()`` primitive below from that
+``builders._extract_record()`` drives the ``extract()`` primitive below from that
 table to populate a :class:`CanonicalRecord`.
 """
 
@@ -27,19 +27,12 @@ class CanonicalRecord:
     """Intermediate model extracted from a single MARCXML record."""
 
     source_id: str
-    instance_hrid: str
-    holdings_hrid: str
-    title: str | None = None
-    location_code: str | None = None
-    call_number: str | None = None
-    call_number_prefix: str | None = None
-    shelving_order: str | None = None
-    barcode: str | None = None
-    material_type_code: str | None = None
-    loan_type_code: str | None = None
-    copy_number: str | None = None
-    volume: str | None = None
-    electronic_access_uri: str | None = None
+    title: str | None = None  # 245$a
+    object_number: str | None = None  # 035$a — AxC local identifier
+    object_category: str | None = None  # 655$a — feeds material type
+    current_location: str | None = None  # 852$b — AxC current location
+    barcode: str | None = None  # 949$a
+    loan_type_code: str | None = None  # 949$l
     deleted: bool = False
 
 
