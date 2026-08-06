@@ -76,6 +76,16 @@
       "parts": [],
       "partOf": [],
       "type": "Work",
+      "collection": {
+        "root": {
+          "id": "k5m7sfjx",
+          "title": "XkZ5kXMLMd39CXq",
+          "referenceNumber": "PP/CRI",
+          "totalParts": 0,
+          "type": "Work"
+        },
+        "isRoot": true
+      },
       "archive": {
         "category": {
           "id": "PP",
@@ -96,6 +106,10 @@
       "archive.category": {
         "id": "PP",
         "label": "Personal papers"
+      },
+      "collection.root": {
+        "id": "k5m7sfjx",
+        "label": "XkZ5kXMLMd39CXq"
       }
     },
     "filterableValues": {
@@ -124,8 +138,11 @@
       "partOf.id": [],
       "partOf.title": [],
       "availabilities.id": [],
-      "archive.category.id": "PP"
+      "collection.isRoot": true,
+      "archive.category.id": "PP",
+      "collection.root.id": "k5m7sfjx",
+      "collection.root.title": "XkZ5kXMLMd39CXq"
     }
   },
-  "createdAt": "2026-08-05T12:48:25.643143+00:00"
+  "createdAt": "2026-08-06T16:13:32.458555+00:00"
 }

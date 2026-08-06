@@ -43,6 +43,7 @@ def test_collection_root_when_work_is_root() -> None:
     work = VisibleMergedWork.model_validate(fixture)
     work.state.canonical_id = "this_work_id"
     work.data.title = "This work title"
+    work.data.collection_path = CollectionPath(path="PPRAS", label="PP/RAS")
 
     extracted = VisibleExtractedWork(
         work=work,

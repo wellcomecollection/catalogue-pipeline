@@ -17,24 +17,6 @@ from tests.test_utils import (
 )
 
 
-def test_collection_path_expansion() -> None:
-    extracted = get_work_with_ancestor()
-    extracted.work.data.collection_path = CollectionPath(path="456/789")
-    extracted.hierarchy.ancestors[0].work.properties.collection_path = "123/456"
-    assert QueryWorkTransformer(extracted).collection_path == "123/456/789"
-
-    extracted.work.data.collection_path = CollectionPath(path="456/789")
-    extracted.hierarchy.ancestors[0].work.properties.collection_path = "789"
-    assert QueryWorkTransformer(extracted).collection_path == "456/789"
-
-
-def test_collection_path_no_expansion() -> None:
-    extracted = get_work_with_ancestor()
-    extracted.work.data.collection_path = CollectionPath(path="123/456/789")
-    extracted.hierarchy.ancestors[0].work.properties.collection_path = "456/789"
-    assert QueryWorkTransformer(extracted).collection_path == "123/456/789"
-
-
 def test_series_ancestor_deduplication() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.state.relations = WorkRelations(
@@ -113,6 +95,7 @@ def test_collection_root_when_work_is_root() -> None:
     work = VisibleMergedWork.model_validate(fixture)
     work.state.canonical_id = "this_work_id"
     work.data.title = "This work title"
+    work.data.collection_path = CollectionPath(path="PPRAS", label="PP/RAS")
 
     extracted = VisibleExtractedWork(
         work=work,
@@ -121,6 +104,25 @@ def test_collection_root_when_work_is_root() -> None:
             ancestors=[],
             children=[get_work_hierarchy_item("child", "Child")],
         ),
+        concepts=[],
+    )
+
+    transformer = QueryWorkTransformer(extracted)
+    assert transformer.collection_root_id == "this_work_id"
+    assert transformer.collection_root_title == "This work title"
+
+
+def test_collection_root_when_work_is_root_without_children() -> None:
+    # Some collection roots have no children in the public catalogue, but are still roots
+    fixture = load_json_fixture("ingestor/single_merged.json")
+    work = VisibleMergedWork.model_validate(fixture)
+    work.state.canonical_id = "this_work_id"
+    work.data.title = "This work title"
+    work.data.collection_path = CollectionPath(path="PPRAS", label="PP/RAS")
+
+    extracted = VisibleExtractedWork(
+        work=work,
+        hierarchy=WorkHierarchy(id="some_id", ancestors=[], children=[]),
         concepts=[],
     )
 

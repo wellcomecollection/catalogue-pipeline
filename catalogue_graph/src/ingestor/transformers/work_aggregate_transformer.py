@@ -3,7 +3,6 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
 from lookups.languages import from_code
@@ -43,12 +42,6 @@ def get_unique(aggregatable: list[AggregatableField]) -> Generator[AggregatableF
 
 
 class AggregateWorkTransformer(WorkBaseTransformer):
-    def __init__(self, extracted: VisibleExtractedWork):
-        super().__init__(extracted)
-        self.data = extracted.work.data
-        self.state = extracted.work.state
-        self.hierarchy = extracted.hierarchy
-
     @property
     def genres(self) -> Generator[AggregatableField]:
         aggregatable = []
@@ -143,7 +136,7 @@ class AggregateWorkTransformer(WorkBaseTransformer):
                 return None
             return AggregatableField(id=root.id, label=root.label)
 
-        if self.hierarchy.is_collection_root and self.data.title is not None:
+        if self.is_collection_root and self.data.title is not None:
             return AggregatableField(id=self.state.canonical_id, label=self.data.title)
 
         return None

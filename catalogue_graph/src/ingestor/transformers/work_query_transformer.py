@@ -28,9 +28,6 @@ def get_unique(items: Iterable[str]) -> list[str]:
 class QueryWorkTransformer(WorkBaseTransformer):
     def __init__(self, extracted: VisibleExtractedWork):
         super().__init__(extracted)
-        self.data = extracted.work.data
-        self.state = extracted.work.state
-        self.hierarchy = extracted.hierarchy
         self.concepts = extracted.concepts
 
     @property
@@ -109,26 +106,8 @@ class QueryWorkTransformer(WorkBaseTransformer):
             yield from image.id.get_identifier_values()
 
     @property
-    def collection_path(self) -> str | None:
-        if self.data.collection_path is None:
-            return None
-
-        # Some works (e.g. works in the Fallaize Collection) store incomplete collection paths which only consist
-        # of <parent ID>/<work ID>. We want to index the full collection path for querying purposes, so we construct
-        # it here using ancestors paths. For example, given the collection path 'C/D' and ancestors collections paths
-        # 'B/C', 'A/B', and 'A', return 'A/B/C/D'.
-        path_fragments = self.data.collection_path.path.split("/")
-        for a in self.hierarchy.ancestors:
-            if ancestor_path := a.work.properties.collection_path:
-                ancestor_path_fragments = ancestor_path.split("/")
-                if ancestor_path_fragments[-1] == path_fragments[0]:
-                    path_fragments = ancestor_path_fragments[:-1] + path_fragments
-
-        return "/".join(path_fragments)
-
-    @property
     def collection_path_sort(self) -> str | None:
-        path = self.collection_path
+        path = self.collection_path_path
         if path is None:
             return None
 
@@ -154,7 +133,7 @@ class QueryWorkTransformer(WorkBaseTransformer):
     def collection_root_id(self) -> str | None:
         if self.hierarchy.ancestors:
             return self.hierarchy.ancestors[-1].work.properties.id
-        if self.hierarchy.is_collection_root:
+        if self.is_collection_root:
             return self.state.canonical_id
         return None
 
@@ -162,7 +141,7 @@ class QueryWorkTransformer(WorkBaseTransformer):
     def collection_root_title(self) -> str | None:
         if self.hierarchy.ancestors:
             return self.hierarchy.ancestors[-1].work.properties.label
-        if self.hierarchy.is_collection_root:
+        if self.is_collection_root:
             return self.data.title
         return None
 

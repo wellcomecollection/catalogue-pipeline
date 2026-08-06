@@ -1,7 +1,6 @@
 from collections import defaultdict
 from collections.abc import Generator
 
-from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.archive import DisplayArchive
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.collection import DisplayCollection
@@ -34,12 +33,6 @@ from .work_base_transformer import WorkBaseTransformer
 
 
 class DisplayWorkTransformer(WorkBaseTransformer):
-    def __init__(self, extracted: VisibleExtractedWork):
-        super().__init__(extracted)
-        self.data = extracted.work.data
-        self.state = extracted.work.state
-        self.hierarchy = extracted.hierarchy
-
     @property
     def identifiers(self) -> Generator[DisplayIdentifier]:
         all_ids = Identified(
@@ -66,7 +59,7 @@ class DisplayWorkTransformer(WorkBaseTransformer):
             root = self.hierarchy.ancestors[-1]
             return DisplayRelation.from_neptune_node(root.work, root.parts)
 
-        if self.hierarchy.is_collection_root:
+        if self.is_collection_root:
             # The work is the root of its own hierarchy
             path = self.data.collection_path
             return DisplayRelation(
@@ -82,7 +75,7 @@ class DisplayWorkTransformer(WorkBaseTransformer):
     @property
     def collection(self) -> DisplayCollection | None:
         root = self.collection_root
-        is_root = self.hierarchy.is_collection_root or None
+        is_root = self.is_collection_root or None
 
         if root is None and is_root is None:
             return None
