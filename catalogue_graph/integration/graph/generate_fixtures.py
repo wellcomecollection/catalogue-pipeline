@@ -1,18 +1,24 @@
 """Regenerate JSON fixtures for graph integration tests.
 
 Usage:
+    # Regenerate all fixtures
     AWS_PROFILE=platform-developer uv run integration/graph/generate_fixtures.py
+
+    # Regenerate only specific fixtures (matches test_graph_queries.py MATCH_CASES names)
+    AWS_PROFILE=platform-developer uv run integration/graph/generate_fixtures.py --fixtures concept_people concept_related_to
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import random
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from getpass import getuser
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from clients.neptune_client import NeptuneClient
 from ingestor.extractors.concepts.base_concepts_extractor import CONCEPT_QUERY_PARAMS
@@ -121,6 +127,122 @@ def row_to_ancestor_work_ids(item: dict[str, Any]) -> list[str]:
     return [a["work"]["~id"] for a in item["ancestors"]]
 
 
+@dataclass
+class FixtureSpec:
+    name: str
+    query: str
+    id_label: Literal["Concept", "Work"]
+    row_to_values: Callable[[dict[str, Any]], list[str]]
+    expected_fixture_name: str
+    empty_ids_fixture_name: str | None
+
+
+FIXTURE_SPECS: list[FixtureSpec] = [
+    FixtureSpec(
+        name="concept_types",
+        query=CONCEPT_TYPE_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_types,
+        expected_fixture_name="concept_types_by_concept_id",
+        empty_ids_fixture_name=None,
+    ),
+    FixtureSpec(
+        name="concept_frequent_collaborators",
+        query=FREQUENT_COLLABORATORS_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_frequent_collaborators_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_frequent_collaborators",
+    ),
+    FixtureSpec(
+        name="concept_same_as",
+        query=SAME_AS_CONCEPT_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_same_as_ids,
+        expected_fixture_name="concept_same_as_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_same_as",
+    ),
+    FixtureSpec(
+        name="concept_related_to",
+        query=RELATED_TO_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_related_to_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_related_to",
+    ),
+    FixtureSpec(
+        name="concept_related_topics",
+        query=RELATED_TOPICS_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_related_topics_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_related_topics",
+    ),
+    FixtureSpec(
+        name="concept_fields_of_work",
+        query=FIELDS_OF_WORK_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_fields_of_work_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_fields_of_work",
+    ),
+    FixtureSpec(
+        name="concept_narrower_than",
+        query=NARROWER_THAN_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_narrower_than_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_narrower_than",
+    ),
+    FixtureSpec(
+        name="concept_broader_than",
+        query=BROADER_THAN_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_broader_than_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_broader_than",
+    ),
+    FixtureSpec(
+        name="concept_people",
+        query=PEOPLE_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_people_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_people",
+    ),
+    FixtureSpec(
+        name="concept_has_founder",
+        query=HAS_FOUNDER_QUERY,
+        id_label="Concept",
+        row_to_values=row_to_related_ids,
+        expected_fixture_name="concept_has_founder_by_concept_id",
+        empty_ids_fixture_name="concept_ids_without_has_founder",
+    ),
+    FixtureSpec(
+        name="work_ancestors",
+        query=WORK_ANCESTORS_QUERY,
+        id_label="Work",
+        row_to_values=row_to_ancestor_work_ids,
+        expected_fixture_name="work_ancestors_by_work_id",
+        empty_ids_fixture_name="work_ids_without_ancestors",
+    ),
+]
+
+FIXTURE_NAMES = [spec.name for spec in FIXTURE_SPECS]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--fixtures",
+        nargs="+",
+        choices=FIXTURE_NAMES,
+        default=None,
+        help="Only regenerate these fixtures (default: regenerate all).",
+    )
+    return parser.parse_args()
+
+
 def confirm_regeneration() -> str:
     print(
         "\n".join(
@@ -143,104 +265,31 @@ def confirm_regeneration() -> str:
 
 
 def main() -> None:
+    args = parse_args()
+    selected_names = args.fixtures or FIXTURE_NAMES
+    specs = [spec for spec in FIXTURE_SPECS if spec.name in selected_names]
+
     reason = confirm_regeneration()
-    append_regeneration_log(reason=reason)
+    append_regeneration_log(
+        reason=f"{reason} (fixtures: {', '.join(spec.name for spec in specs)})"
+    )
 
     graph_date = input("Enter the graph date (e.g. 2025-01-01): ").strip()
     client = NeptuneClient(graph_date)
 
-    # Get a sample of `ID_POOL_SIZE` random concept and work IDs.
-    random_concept_ids = sample_ids(client=client, label="Concept")
-    random_work_ids = sample_ids(client=client, label="Work")
+    # Only fetch the ID pools actually needed by the selected fixtures.
+    id_labels = {spec.id_label for spec in specs}
+    id_pools = {label: sample_ids(client=client, label=label) for label in id_labels}
 
-    generate_fixture_set(
-        client=client,
-        query=CONCEPT_TYPE_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_types,
-        expected_fixture_name="concept_types_by_concept_id",
-        empty_ids_fixture_name=None,
-    )
-    generate_fixture_set(
-        client=client,
-        query=FREQUENT_COLLABORATORS_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_related_ids,
-        expected_fixture_name="concept_frequent_collaborators_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_frequent_collaborators",
-    )
-    generate_fixture_set(
-        client=client,
-        query=SAME_AS_CONCEPT_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_same_as_ids,
-        expected_fixture_name="concept_same_as_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_same_as",
-    )
-    generate_fixture_set(
-        client=client,
-        query=RELATED_TO_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_related_ids,
-        expected_fixture_name="concept_related_to_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_related_to",
-    )
-    generate_fixture_set(
-        client=client,
-        query=RELATED_TOPICS_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_related_ids,
-        expected_fixture_name="concept_related_topics_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_related_topics",
-    )
-    generate_fixture_set(
-        client=client,
-        query=FIELDS_OF_WORK_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_related_ids,
-        expected_fixture_name="concept_fields_of_work_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_fields_of_work",
-    )
-    generate_fixture_set(
-        client=client,
-        query=NARROWER_THAN_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_related_ids,
-        expected_fixture_name="concept_narrower_than_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_narrower_than",
-    )
-    generate_fixture_set(
-        client=client,
-        query=BROADER_THAN_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_related_ids,
-        expected_fixture_name="concept_broader_than_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_broader_than",
-    )
-    generate_fixture_set(
-        client=client,
-        query=PEOPLE_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_related_ids,
-        expected_fixture_name="concept_people_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_people",
-    )
-    generate_fixture_set(
-        client=client,
-        query=HAS_FOUNDER_QUERY,
-        ids=random_concept_ids,
-        row_to_values=row_to_related_ids,
-        expected_fixture_name="concept_has_founder_by_concept_id",
-        empty_ids_fixture_name="concept_ids_without_has_founder",
-    )
-    generate_fixture_set(
-        client=client,
-        query=WORK_ANCESTORS_QUERY,
-        ids=random_work_ids,
-        row_to_values=row_to_ancestor_work_ids,
-        expected_fixture_name="work_ancestors_by_work_id",
-        empty_ids_fixture_name="work_ids_without_ancestors",
-    )
+    for spec in specs:
+        generate_fixture_set(
+            client=client,
+            query=spec.query,
+            ids=id_pools[spec.id_label],
+            row_to_values=spec.row_to_values,
+            expected_fixture_name=spec.expected_fixture_name,
+            empty_ids_fixture_name=spec.empty_ids_fixture_name,
+        )
 
 
 if __name__ == "__main__":
