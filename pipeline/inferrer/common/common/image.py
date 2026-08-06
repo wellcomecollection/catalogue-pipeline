@@ -18,7 +18,7 @@ async def get_image_from_url(image_url, size=None):
 
     try:
         image = Image.open(BytesIO(image_pointer))
-    except UnidentifiedImageError:
+    except UnidentifiedImageError as e:
         # If this error gets thrown from inside Pillow, it only has the BytesIO
         # object, and we get the moderately unhelpful error:
         #
@@ -26,7 +26,9 @@ async def get_image_from_url(image_url, size=None):
         #
         # Rethrowing it with the image URL should give us more context if/when
         # this error occurs.
-        raise UnidentifiedImageError("cannot identify image from URL %r" % image_url)
+        raise UnidentifiedImageError(
+            f"cannot identify image from URL {image_url!r}"
+        ) from e
 
     if size:
         image = image.resize((size, size), resample=Image.BILINEAR)
@@ -37,8 +39,8 @@ async def get_local_image(path):
     try:
         async with AIOFile(path, "rb") as afp:
             return await afp.read()
-    except FileNotFoundError:
-        raise ValueError(f"{path} does not exist")
+    except FileNotFoundError as e:
+        raise ValueError(f"{path} does not exist") from e
 
 
 def is_valid_image(response):
@@ -63,8 +65,8 @@ async def get_remote_image(url):
 def get_image_url_from_iiif_url(iiif_url, input_size=224):
     try:
         image = IIIFImageClient.init_from_url(iiif_url)
-    except ParseError:
-        raise ValueError(f"{iiif_url} is not a valid iiif URL")
+    except ParseError as e:
+        raise ValueError(f"{iiif_url} is not a valid iiif URL") from e
 
     if "dlcs" in image.api_endpoint:
         # DLCS provides a thumbnails service which only serves certain sizes of

@@ -2,12 +2,12 @@ import base64
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
+from palette_encoder import PaletteEncoder
+
 from common import http
 from common.batching import BatchExecutionQueue
 from common.image import get_image_from_url
 from common.logging import get_logger
-
-from palette_encoder import PaletteEncoder
 
 logger = get_logger(__name__)
 
@@ -43,7 +43,7 @@ async def main(query_url: str):
     except ValueError as e:
         error_string = str(e)
         logger.error(error_string)
-        raise HTTPException(status_code=404, detail=error_string)
+        raise HTTPException(status_code=404, detail=error_string) from e
 
     palette_result = await batch_inferrer_queue.execute(image)
     logger.info(f"extracted color palette from url: {query_url}")

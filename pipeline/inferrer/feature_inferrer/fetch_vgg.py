@@ -1,4 +1,5 @@
 import os
+
 from torch.hub import load_state_dict_from_url
 from torchvision.models import VGG16_Weights
 

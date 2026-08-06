@@ -1,6 +1,6 @@
 import numpy as np
-from PIL import Image
 from joblib import Parallel, delayed
+from PIL import Image
 
 
 class PaletteEncoder:
@@ -55,7 +55,7 @@ class PaletteEncoder:
 
         return histogram.flatten()
 
-    def average_color_hex(self, pixel_array: np.ndarray) -> np.ndarray:
+    def average_color_hex(self, pixel_array: np.ndarray) -> str:
         """
         Extract the average color of the input image and return it as a hex
         string.
@@ -65,13 +65,12 @@ class PaletteEncoder:
                 The flattened array of RGB pixels from the input image
 
         Returns:
-            np.ndarray:
-                The flattened color histogram as a 1D numpy array.
+            str:
+                The average color as a hex string, e.g. "#1a2b3c".
         """
         average = pixel_array.mean(axis=0)
         r, g, b = average.astype(int)
-        hex = "#{:02x}{:02x}{:02x}".format(r, g, b)
-        return hex
+        return f"#{r:02x}{g:02x}{b:02x}"
 
     def process_image(self, image: Image):
         rgb_image = image.convert("RGB").resize(
