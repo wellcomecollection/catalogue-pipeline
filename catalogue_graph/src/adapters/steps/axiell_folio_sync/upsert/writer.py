@@ -139,6 +139,6 @@ def upsert_from_payloads(
                 )
 
         result.errors.append(UpsertError(type="api", detail=str(exc)))
-        logger.error("api error source_id=%s detail=%s", source_id, exc)
+        logger.error("api_error", source_id=source_id, error=str(exc), exc_info=True)
 
     return result

@@ -23,7 +23,7 @@ class Status(BaseModel):
 
 
 class Note(BaseModel):
-    # noteType is resolved to itemNoteTypeId later by upsert._resolve_item_note_types.
+    # noteType is resolved to itemNoteTypeId later by upsert.entities._resolve_item_note_types.
     model_config = ConfigDict(extra="allow")
     note: str
     noteType: str | None = None

@@ -204,7 +204,7 @@ def test_upsert_errors_recorded_as_structured_entries(
             errors=[UpsertError(type="instance_put_failed", detail="FOLIO said no")],
         )
 
-    monkeypatch.setattr(run_sync_mod, "upsert_from_payloads",failing_upsert)
+    monkeypatch.setattr(run_sync_mod, "upsert_from_payloads", failing_upsert)
 
     captured: dict[str, Any] = {}
     monkeypatch.setattr(
