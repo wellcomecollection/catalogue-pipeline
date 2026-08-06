@@ -208,3 +208,26 @@ def test_collection_path_sort_orders_archive_tree() -> None:
         "PPEBC/A/2",
         "PPEBC/B",
     ]
+
+
+def test_collection_path_sort_ignores_leading_zeroes_and_letters() -> None:
+    """Numbers sort numerically despite leading zeroes or letters in the same segment.
+
+    These are the paths used by the `works.collection-path-sort` test documents.
+    """
+    extracted = get_work_with_ancestor()
+
+    def sort_key(path: str) -> str:
+        extracted.work.data.collection_path = CollectionPath(path=path)
+        sort_value = QueryWorkTransformer(extracted).collection_path_sort
+        assert sort_value is not None
+        return sort_value
+
+    paths = ["SASRT/C10/1", "SASRT/C2/010", "SASRT/C2/010/1", "SASRT/C2/9"]
+
+    assert sorted(paths, key=sort_key) == [
+        "SASRT/C2/9",
+        "SASRT/C2/010",
+        "SASRT/C2/010/1",
+        "SASRT/C10/1",
+    ]

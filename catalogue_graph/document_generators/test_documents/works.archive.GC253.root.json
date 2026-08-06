@@ -1,0 +1,156 @@
+{
+  "description": "the root of a General Collections archive",
+  "id": "gmf8ycys",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "gmf8ycys",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "5OLwaQOu3v"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "gmf8ycys",
+      "title": "Papers relating to the history of vaccination",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "5OLwaQOu3v",
+      "identifiers.value": [
+        "gmf8ycys",
+        "5OLwaQOu3v"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [],
+      "items.id": [],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": [],
+      "collectionPath.label": "GC/253",
+      "collectionPath.path": "GC253",
+      "collectionPath.sort": "GC0000000253"
+    },
+    "display": {
+      "id": "gmf8ycys",
+      "title": "Papers relating to the history of vaccination",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "5OLwaQOu3v",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [],
+      "holdings": [],
+      "availabilities": [],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [
+        {
+          "id": "m70k1brq",
+          "title": "Correspondence",
+          "referenceNumber": "GC/253/A",
+          "totalParts": 1,
+          "type": "Series"
+        }
+      ],
+      "partOf": [],
+      "type": "Collection",
+      "collection": {
+        "root": {
+          "id": "gmf8ycys",
+          "title": "Papers relating to the history of vaccination",
+          "referenceNumber": "GC/253",
+          "totalParts": 1,
+          "type": "Collection"
+        },
+        "isRoot": true
+      },
+      "archive": {
+        "category": {
+          "id": "GC",
+          "type": "ArchiveCategory",
+          "label": "General collections"
+        }
+      }
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [],
+      "availabilities": [],
+      "archive.category": {
+        "id": "GC",
+        "label": "General collections"
+      },
+      "collection.root": {
+        "id": "gmf8ycys",
+        "label": "Papers relating to the history of vaccination"
+      }
+    },
+    "filterableValues": {
+      "workType": "Collection",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "gmf8ycys",
+        "5OLwaQOu3v"
+      ],
+      "items.locations.license.id": [],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [],
+      "items.identifiers.value": [],
+      "items.locations.locationType.id": [],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": [],
+      "collection.isRoot": true,
+      "archive.category.id": "GC",
+      "collection.root.id": "gmf8ycys",
+      "collection.root.title": "Papers relating to the history of vaccination"
+    }
+  },
+  "createdAt": "2026-08-06T09:01:32.829289+00:00"
+}
