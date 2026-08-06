@@ -2,11 +2,14 @@ package weco.pipeline.transformer.mets.transformers
 
 import weco.catalogue.internal_model.locations.AccessStatus
 
+import java.util.Locale
+
 object MetsAccessStatus {
 
   /** Access statuses are hand-entered in the source METS, so capitalisation
     * varies and carries no meaning. Match on the lowercased value, as
-    * MetsLicence already does for licences.
+    * MetsLicence already does for licences. Lowercasing is pinned to
+    * Locale.ROOT so the match cannot depend on the JVM's default locale.
     */
   def apply(
     accessConditionStatus: Option[String]
@@ -14,7 +17,7 @@ object MetsAccessStatus {
     accessConditionStatus match {
       case None => Right(None)
       case Some(status) =>
-        status.toLowerCase match {
+        status.toLowerCase(Locale.ROOT) match {
           // e.g. b21718969
           case "open" => Right(Some(AccessStatus.Open))
 
