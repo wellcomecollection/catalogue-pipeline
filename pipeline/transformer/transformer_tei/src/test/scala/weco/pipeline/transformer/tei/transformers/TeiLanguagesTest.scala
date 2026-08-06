@@ -81,6 +81,23 @@ class TeiLanguagesTest
     val xml =
       teiXml(
         languages = List(
+          <textLang mainLang="grc" otherLangs="el">Greek</textLang>
+        )
+      )
+
+    TeiLanguages(xml).value shouldBe ((
+      List(
+        Language(id = "grc", label = "Greek, Ancient (to 1453)"),
+        Language(id = "gre", label = "Greek, Modern (1453- )")
+      ),
+      Nil
+    ))
+  }
+
+  it("keeps the language of the id that maps when another id does not") {
+    val xml =
+      teiXml(
+        languages = List(
           <textLang mainLang="ar" otherLangs="ota">Arabic</textLang>
         )
       )
