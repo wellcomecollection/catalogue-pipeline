@@ -165,7 +165,9 @@ LOCAL_IDENTIFIER_FIELD = FieldMap(
 FIELDS: tuple[FieldMap, ...] = (
     FieldMap("source_id", marc="001"),  # Axiell GUID — identifies the record
     FieldMap("title", marc="245$a"),  # → instance.title
-    FieldMap("object_number", marc="035$a"),  # → instance.identifiers (local identifier)
+    FieldMap(
+        "object_number", marc="035$a"
+    ),  # → instance.identifiers (local identifier)
     MATERIAL_TYPE_FIELD,  # → item.materialType
     LOCATION_FIELD,  # → holdings/item location + Axiell location note
     FieldMap("barcode", marc="949$a"),  # → item.barcode

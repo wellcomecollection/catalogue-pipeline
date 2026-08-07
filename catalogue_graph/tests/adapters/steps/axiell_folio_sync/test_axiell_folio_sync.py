@@ -285,7 +285,7 @@ def test_run_sync_passes_ref_cache_to_upsert(monkeypatch: pytest.MonkeyPatch) ->
             item=EntityResult(action="create"),
         )
 
-    monkeypatch.setattr(run_sync_mod, "upsert_from_payloads",fake_upsert)
+    monkeypatch.setattr(run_sync_mod, "upsert_from_payloads", fake_upsert)
 
     run_sync(
         AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
