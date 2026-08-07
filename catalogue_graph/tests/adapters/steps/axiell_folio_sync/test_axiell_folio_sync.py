@@ -11,14 +11,15 @@ from typing import Any
 
 import pytest
 
-import adapters.steps.axiell_folio_sync.sync_to_folio as sync_to_folio_mod
-from adapters.steps.axiell_folio_sync.mapping import (
+import adapters.steps.axiell_folio_sync.run_axiell_folio_sync as run_sync_mod
+from adapters.steps.axiell_folio_sync.folio.okapi import load_okapi_config
+from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
+from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
+from adapters.steps.axiell_folio_sync.results import (
     EntityResult,
     UpsertResult,
 )
-from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
-from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
-from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
+from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
 from adapters.utils.axiell_changeset_reader import SupersededGuid
 
 # 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title).
@@ -60,6 +61,9 @@ class FakeRefCache:
 
     def resolve_item_note_type(self, name: str | None) -> str:
         return "note-uuid"
+
+    def resolve_identifier_type(self, name: str | None) -> str:
+        return "idtype-uuid"
 
 
 def _row(row_id: str, content: str) -> dict[str, Any]:
@@ -103,13 +107,15 @@ def _run(rows: list[dict[str, Any]]) -> Any:
     )
 
 
-def test_skips_unselected_and_upserts_selected() -> None:
+def test_processes_all_records_selection_gate_disabled() -> None:
+    # Selection gate is disabled ("run for all"): the record without a 980 $a harvest
+    # flag is no longer skipped — both rows are built and upserted.
     resp = _run([_row("sel", SELECTED), _row("unsel", UNSELECTED)])
 
     assert resp.counts["total"] == 2
-    assert resp.counts["skipped"] == 1  # UNSELECTED has no 980 $a
-    assert resp.total_successful == 1  # SELECTED planned an upsert
-    assert resp.counts["created"] == 3  # instance + holdings + item (dry-run plan)
+    assert resp.counts["skipped"] == 0  # nothing skipped now
+    assert resp.total_successful == 2  # both planned an upsert
+    assert resp.counts["created"] == 6  # 2 records x (instance + holdings + item)
     assert resp.total_errors == 0
 
 
@@ -186,7 +192,7 @@ def test_upsert_errors_recorded_as_structured_entries(
 ) -> None:
     # The upsert stage reports a list of per-entity error dicts, exercising the
     # list branch of SyncErrorEntry.error (other stages use the str branch).
-    from adapters.steps.axiell_folio_sync.mapping import UpsertError
+    from adapters.steps.axiell_folio_sync.results import UpsertError
 
     def failing_upsert(*args: Any, **kwargs: Any) -> UpsertResult:
         return UpsertResult(
@@ -198,7 +204,7 @@ def test_upsert_errors_recorded_as_structured_entries(
             errors=[UpsertError(type="instance_put_failed", detail="FOLIO said no")],
         )
 
-    monkeypatch.setattr(sync_to_folio_mod, "upsert_from_payloads", failing_upsert)
+    monkeypatch.setattr(run_sync_mod, "upsert_from_payloads", failing_upsert)
 
     captured: dict[str, Any] = {}
     monkeypatch.setattr(
@@ -279,7 +285,7 @@ def test_run_sync_passes_ref_cache_to_upsert(monkeypatch: pytest.MonkeyPatch) ->
             item=EntityResult(action="create"),
         )
 
-    monkeypatch.setattr(sync_to_folio_mod, "upsert_from_payloads", fake_upsert)
+    monkeypatch.setattr(run_sync_mod, "upsert_from_payloads", fake_upsert)
 
     run_sync(
         AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
@@ -500,3 +506,72 @@ def test_hard_delete_failure_is_reported_under_delete_stage(
 
     assert resp.total_errors == 1
     assert captured["model"].errors[0].stage == "delete"
+
+
+@pytest.mark.parametrize(
+    ("current_location", "expected"),
+    [
+        ("215", "hicon"),
+        ("215-3", "hicon"),
+        ("  183abc", "hicon"),
+        ("183", "hicon"),
+        ("21", "21"),  # too short to match the 215 prefix
+        ("STACK", "STACK"),  # unrelated code passes through unchanged
+        ("", ""),
+        (None, None),
+    ],
+)
+def test_folio_location_prefix_override(
+    current_location: str | None, expected: str | None
+) -> None:
+    from adapters.steps.axiell_folio_sync.mapping import _folio_location
+
+    assert _folio_location(current_location) == expected
+
+
+def test_object_number_maps_to_local_identifier() -> None:
+    # AxC object_number (035$a) becomes a "Local identifier" on the instance.
+    from adapters.steps.axiell_folio_sync.mapping import (
+        CanonicalRecord,
+        build_instance,
+    )
+
+    rec = CanonicalRecord(source_id="g1", title="A Title", object_number=" AxC-12345 ")
+    instance = build_instance(rec, FakeRefCache())  # type: ignore[arg-type]
+
+    assert instance.identifiers is not None
+    assert len(instance.identifiers) == 1
+    identifier = instance.identifiers[0]
+    assert identifier.value == "AxC-12345"  # trimmed
+    assert identifier.identifierTypeId == "idtype-uuid"
+
+
+def test_no_object_number_yields_no_identifiers() -> None:
+    # 035$a absent (or blank) -> identifiers omitted entirely, not an empty list.
+    from adapters.steps.axiell_folio_sync.mapping import (
+        CanonicalRecord,
+        build_instance,
+    )
+
+    for object_number in (None, "", "   "):
+        rec = CanonicalRecord(
+            source_id="g1", title="A Title", object_number=object_number
+        )
+        instance = build_instance(rec, FakeRefCache())  # type: ignore[arg-type]
+        assert instance.identifiers is None
+
+
+def test_material_type_lookup_is_case_insensitive() -> None:
+    # AxC object_category values carry their own (mixed) case; the field's lookup
+    # table folds keys to lowercase so a cased source value still resolves. Guard
+    # against the fold being dropped (which would silently strand every entry).
+    from adapters.steps.axiell_folio_sync.mapping import (
+        MATERIAL_TYPE,
+        MATERIAL_TYPE_FIELD,
+    )
+
+    assert MATERIAL_TYPE_FIELD.table is not None
+    assert all(key == key.lower() for key in MATERIAL_TYPE_FIELD.table)
+    for source_value, folio_name in MATERIAL_TYPE.items():
+        # Every entry is reachable via the lowercased incoming value.
+        assert MATERIAL_TYPE_FIELD.table[source_value.lower()] == folio_name
