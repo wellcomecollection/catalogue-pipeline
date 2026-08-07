@@ -16,7 +16,6 @@ from pymarc.record import Record
 from ..folio import RefCache
 from .config import (
     AXIELL_LOCATION_NOTE_TYPE,
-    HARVEST_FLAG_SPEC,
     HOLDINGS_SOURCE_FIELD,
     LOAN_TYPE_FIELD,
     LOCAL_IDENTIFIER_FIELD,
@@ -175,18 +174,14 @@ def _assemble_payloads(
 def is_selected_for_sync(xml_content: str) -> bool:
     """Whether a record should be synced to FOLIO.
 
-    True only when it carries the harvest flag (MARC ``980 $a`` present) and is of
-    record type ITEM (MARC ``351 $c`` == "ITEM", case-insensitive). Records that
-    fail either check are skipped entirely — never created, updated or suppressed.
+    True only for item-level records (MARC ``351 $c`` == "ITEM", case-insensitive);
+    everything else is skipped entirely — never created, updated or suppressed.
 
-    NOTE: intentionally retained. The runtime path (``select_and_build``) currently
-    gates on record type only ("run for all"); the 980 $a harvest-flag gate here is
-    kept for a planned re-enable. Do not delete as dead code — wire this back into
-    ``select_and_build`` when the harvest gate is turned on.
+    NOTE: the ``980 $a`` harvest-flag gate is removed for now ("run for all"), so
+    selection is item-level only. To re-enable it, add the ``980 $a`` check back
+    here and in ``select_and_build``.
     """
     root = parse_xml(xml_content)
-    if not extract(root, HARVEST_FLAG_SPEC):
-        return False
     record_type = (extract(root, "351$c") or "").strip().upper()
     return record_type == RECORD_TYPE_ITEM
 
