@@ -171,19 +171,7 @@ locals {
         for idx in local.images_initial_list : idx.name
       ])
     }
-    path_concatenator = {
-      read  = [for idx in local.works_denormalised_list : idx.name]
-      write = [for idx in local.works_denormalised_list : idx.name]
-    }
-    relation_embedder = {
-      read  = [for idx in local.works_denormalised_list : idx.name]
-      write = [for idx in local.works_denormalised_list : idx.name]
-    }
     # TODO: Remove `work_ingestor` once we switch to new Python ingestor service
-    work_ingestor = {
-      read  = [for idx in local.works_denormalised_list : idx.name]
-      write = [for idx in local.works_indexed_list : idx.name]
-    }
     inferrer = {
       read  = [for idx in local.images_initial_list : idx.name]
       write = [for idx in local.images_augmented_list : idx.name]
@@ -195,10 +183,6 @@ locals {
         for idx in local.images_augmented_list : idx.name
       ])
       write = []
-    }
-    image_ingestor = {
-      read  = [for idx in local.images_augmented_list : idx.name]
-      write = [for idx in local.images_indexed_list : idx.name]
     }
     concepts_ingestor = {
       read  = [for idx in local.works_denormalised_list : idx.name]
