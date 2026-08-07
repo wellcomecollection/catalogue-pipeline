@@ -11,7 +11,7 @@ from collections.abc import Callable
 from typing import Any, Literal, Protocol, cast
 
 import structlog
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from adapters.extractors.ebsco import config as ebsco_config
 from adapters.extractors.ebsco import helpers as ebsco_helpers
@@ -37,12 +37,47 @@ logger = structlog.get_logger(__name__)
 
 TransformerType = Literal["axiell", "ebsco", "folio"]
 
+STEP_FUNCTIONS_STATE_LIMIT_BYTES = 262_144
+# Live adapter stores: axiell ids are 17 chars, ebsco 8-13, folio a fixed 81.
+ASSUMED_MAX_ID_LENGTH = 100
+
+MAX_IDS_PER_RUN = int(
+    STEP_FUNCTIONS_STATE_LIMIT_BYTES * 0.9 // (ASSUMED_MAX_ID_LENGTH + 3)
+)
+"""Bounded by the Step Functions state limit above; distinct from the
+OAI-PMH loader's MAX_IDS_PER_RUN (50,000), which bounds run time, not
+payload size."""
+
 
 class TransformerEvent(BaseModel):
     transformer_type: TransformerType
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
+    ids: list[str] | None = None
+    """Adapter store record ids to transform. Mutually exclusive with
+    changeset_ids; an explicitly empty list is rejected, not treated as
+    none."""
     snapshot_id: int | None = None
+
+    @model_validator(mode="after")
+    def _check_ids(self) -> "TransformerEvent":
+        if self.ids is None:
+            return self
+        if self.changeset_ids:
+            raise ValueError(
+                "ids and changeset_ids are mutually exclusive; supply one or "
+                "the other, not both"
+            )
+        if not self.ids:
+            raise ValueError(
+                "ids was supplied but is empty; an id run needs at least one record id"
+            )
+        if len(self.ids) > MAX_IDS_PER_RUN:
+            raise ValueError(
+                f"{len(self.ids)} ids exceeds the {MAX_IDS_PER_RUN} per-run "
+                f"ceiling; split the work across several runs"
+            )
+        return self
 
 
 class AdapterConfig(Protocol):
