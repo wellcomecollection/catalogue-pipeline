@@ -6,7 +6,7 @@ from itertools import chain
 
 from pymarc.field import Field
 
-from adapters.transformers.ebsco.parsers.period import (
+from adapters.transformers.marc.parsers.period import (
     RE_4_DIGIT_DATE_RANGE,
     RE_NTH_CENTURY,
     parse_period,
