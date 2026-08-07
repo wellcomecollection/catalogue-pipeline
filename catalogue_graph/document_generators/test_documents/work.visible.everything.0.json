@@ -90,7 +90,10 @@
         "genre-X44wADd",
         "uID5uqbHcmxfn3H",
         "eaDFUCd6ZAFDChf"
-      ]
+      ],
+      "collectionPath.label": "SA/BSA/A/3",
+      "collectionPath.path": "SABSA/A/3",
+      "collectionPath.sort": "SABSA/A/0000000003"
     },
     "display": {
       "id": "i4c7c9yl",
@@ -636,17 +639,35 @@
         {
           "id": "29jcl6cu",
           "title": "wZL0ffJl0qmZquS",
+          "referenceNumber": "SA/BSA/A",
           "totalParts": 5,
           "type": "Work"
         },
         {
           "id": "7vafg1w2",
           "title": "08emPYDNpZDHkTv",
+          "referenceNumber": "SA/BSA",
           "totalParts": 1,
           "type": "Work"
         }
       ],
-      "type": "Work"
+      "type": "Work",
+      "collection": {
+        "root": {
+          "id": "7vafg1w2",
+          "title": "08emPYDNpZDHkTv",
+          "referenceNumber": "SA/BSA",
+          "totalParts": 1,
+          "type": "Work"
+        }
+      },
+      "archive": {
+        "category": {
+          "id": "SA",
+          "type": "ArchiveCategory",
+          "label": "Societies and Associations"
+        }
+      }
     },
     "aggregatableValues": {
       "workType": [],
@@ -710,7 +731,15 @@
           "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
-      "availabilities": []
+      "availabilities": [],
+      "archive.category": {
+        "id": "SA",
+        "label": "Societies and Associations"
+      },
+      "collection.root": {
+        "id": "7vafg1w2",
+        "label": "08emPYDNpZDHkTv"
+      }
     },
     "filterableValues": {
       "workType": "Standard",
@@ -780,8 +809,11 @@
         "08emPYDNpZDHkTv",
         "wZL0ffJl0qmZquS"
       ],
-      "availabilities.id": []
+      "availabilities.id": [],
+      "archive.category.id": "SA",
+      "collection.root.id": "7vafg1w2",
+      "collection.root.title": "08emPYDNpZDHkTv"
     }
   },
-  "createdAt": "2026-06-04T07:07:52.066552+00:00"
+  "createdAt": "2026-08-05T12:48:25.375768+00:00"
 }

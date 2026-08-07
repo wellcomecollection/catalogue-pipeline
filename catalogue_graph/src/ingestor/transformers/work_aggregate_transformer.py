@@ -3,10 +3,10 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
 from lookups.languages import from_code
+from models.pipeline.archive_category import ArchiveCategory
 from models.pipeline.identifier import (
     Identifiable,
     Identified,
@@ -42,11 +42,6 @@ def get_unique(aggregatable: list[AggregatableField]) -> Generator[AggregatableF
 
 
 class AggregateWorkTransformer(WorkBaseTransformer):
-    def __init__(self, extracted: VisibleExtractedWork):
-        super().__init__(extracted)
-        self.data = extracted.work.data
-        self.state = extracted.work.state
-
     @property
     def genres(self) -> Generator[AggregatableField]:
         aggregatable = []
@@ -125,3 +120,23 @@ class AggregateWorkTransformer(WorkBaseTransformer):
             # on individual works pages, but for filtering/aggregating we want to use the canonical labels.
             marc_language = from_code(language.id) or language
             yield AggregatableField(**marc_language.model_dump())
+
+    @property
+    def archive_category(self) -> AggregatableField | None:
+        result = ArchiveCategory.from_collection_path(self.data.collection_path)
+        if result is None:
+            return None
+        return AggregatableField(id=result.id, label=result.label)
+
+    @property
+    def collection_root(self) -> AggregatableField | None:
+        if self.hierarchy.ancestors:
+            root = self.hierarchy.ancestors[-1].work.properties
+            if root.label is None:
+                return None
+            return AggregatableField(id=root.id, label=root.label)
+
+        if self.is_collection_root and self.data.title is not None:
+            return AggregatableField(id=self.state.canonical_id, label=self.data.title)
+
+        return None

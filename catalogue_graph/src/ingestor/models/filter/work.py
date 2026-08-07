@@ -51,6 +51,12 @@ class WorkFilterableValues(ElasticsearchModel):
     part_of_id: list[str] = Field(serialization_alias="partOf.id")
     part_of_title: list[str] = Field(serialization_alias="partOf.title")
     availabilities_id: list[str] = Field(serialization_alias="availabilities.id")
+    collection_is_root: bool | None = Field(serialization_alias="collection.isRoot")
+    archive_category_id: str | None = Field(serialization_alias="archive.category.id")
+    collection_root_id: str | None = Field(serialization_alias="collection.root.id")
+    collection_root_title: str | None = Field(
+        serialization_alias="collection.root.title"
+    )
 
     @classmethod
     def from_extracted_work(
@@ -87,4 +93,8 @@ class WorkFilterableValues(ElasticsearchModel):
             part_of_id=list(transformer.part_of_ids),
             part_of_title=list(transformer.part_of_titles),
             availabilities_id=[a.id for a in work.state.availabilities],
+            collection_is_root=transformer.is_collection_root or None,
+            archive_category_id=transformer.archive_category_id,
+            collection_root_id=transformer.collection_root_id,
+            collection_root_title=transformer.collection_root_title,
         )

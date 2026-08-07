@@ -12,7 +12,7 @@ from models.pipeline.location import DigitalLocation
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
 from models.pipeline.serialisable import SerialisableModel
-from utils.types import WorkType
+from utils.types import DisplayWorkType, WorkType
 
 
 class WorkData(SerialisableModel):
@@ -42,3 +42,11 @@ class WorkData(SerialisableModel):
     current_frequency: str | None = None
     former_frequency: list[str] = Field(default_factory=list)
     designation: list[str] = Field(default_factory=list)
+
+    @property
+    def display_work_type(self) -> DisplayWorkType:
+        """The work type as exposed to the API ('Standard' works are displayed as 'Work')."""
+        if self.work_type == "Standard":
+            return "Work"
+
+        return self.work_type
