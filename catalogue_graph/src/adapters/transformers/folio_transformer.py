@@ -26,7 +26,10 @@ class FolioTransformer(MarcXmlTransformer):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None,
+        ids: list[str] | None = None,
     ) -> AdapterStoreSource:
+        # ids is not yet wired for FOLIO; build_transformer rejects it before
+        # a FolioTransformer is ever constructed with one.
         return FolioStoreSource(
             adapter_store, changeset_ids, snapshot_id, items_store=self._items_store
         )

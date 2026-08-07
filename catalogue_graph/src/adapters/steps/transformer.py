@@ -141,6 +141,14 @@ def build_transformer(
 
     snapshot_id = event.snapshot_id or adapter_store.current_snapshot_id()
 
+    if event.ids and event.transformer_type in ("axiell", "folio"):
+        # Not yet wired: AxiellChangesetReader and FolioTransformer don't
+        # thread ids through to their sources, so falling through here would
+        # silently ignore ids and read every active record instead.
+        raise ValueError(
+            f"id-mode transforms are not yet supported for {event.transformer_type!r}"
+        )
+
     if event.transformer_type == "axiell":
         reader = AxiellChangesetReader.build(
             AXIELL_CONFIG,
@@ -151,7 +159,9 @@ def build_transformer(
         )
         return AxiellTransformer(reader)
     if event.transformer_type == "ebsco":
-        return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
+        return EbscoTransformer(
+            adapter_store, event.changeset_ids, snapshot_id, ids=event.ids
+        )
     if event.transformer_type == "folio":
         # Join the enriched items store so FOLIO works carry items with stable
         # `folio-item` identifiers.
@@ -209,6 +219,7 @@ def handler(
         success_count=len(transformer.successful_ids),
         failure_count=len(transformer.errors),
         changeset_ids=event.changeset_ids,
+        ids=event.ids,
         snapshot_id=transformer.source.snapshot_id,
     )
 
@@ -218,6 +229,7 @@ def handler(
         successful_ids=transformer.successful_ids,
         errors=transformer.errors,
         changeset_ids=event.changeset_ids,
+        ids=event.ids or [],
         snapshot_id=transformer.source.snapshot_id,
         job_id=event.job_id,
         s3_bucket=config.S3_BUCKET,
@@ -246,6 +258,19 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     ).model_dump(mode="json")
 
 
+def _read_ids(args: argparse.Namespace) -> list[str] | None:
+    """Collect record ids from --id and/or --ids-file. None (not an empty
+    list) if neither was given, so the event's changeset/reindex path is
+    untouched."""
+    if not args.ids and not args.ids_file:
+        return None
+    ids = list(args.ids or [])
+    if args.ids_file:
+        with open(args.ids_file, encoding="utf-8") as f:
+            ids += [line.strip() for line in f if line.strip()]
+    return ids
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Transform adapter data")
     parser.add_argument(
@@ -260,6 +285,21 @@ def main() -> None:
         action="append",
         default=[],
         help="Changeset identifier to transform (repeatable)",
+    )
+    parser.add_argument(
+        "--id",
+        dest="ids",
+        action="append",
+        default=None,
+        help="Record id to transform (repeatable). Mutually exclusive with "
+        "--changeset-id.",
+    )
+    parser.add_argument(
+        "--ids-file",
+        type=str,
+        default=None,
+        help="Path to a file of record ids, one per line. Mutually exclusive "
+        "with --changeset-id.",
     )
     parser.add_argument(
         "--snapshot-id",
@@ -296,6 +336,7 @@ def main() -> None:
     event = TransformerEvent(
         transformer_type=args.transformer_type,
         changeset_ids=args.changeset_ids,
+        ids=_read_ids(args),
         snapshot_id=args.snapshot_id,
         job_id=args.job_id,
     )
