@@ -10,7 +10,7 @@ from adapters.transformers.axiell.dates import (
     extract_production_end_date,
     extract_production_start_date,
 )
-from adapters.transformers.ebsco.parsers.period import parse_period
+from adapters.transformers.marc.parsers.period import parse_period
 from adapters.transformers.marc.common import (
     non_empty_subfields,
 )
