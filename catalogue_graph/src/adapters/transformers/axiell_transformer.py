@@ -31,7 +31,10 @@ class AxiellTransformer(MarcXmlTransformer):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None,
+        ids: list[str] | None = None,
     ) -> RecordSource:
+        # ids is not yet wired for Axiell; build_transformer rejects it before
+        # an AxiellTransformer is ever constructed with one.
         return AxiellStoreSource(self._reader)
 
     @property

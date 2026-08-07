@@ -10,9 +10,13 @@ class EbscoTransformer(MarcXmlTransformer):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None,
+        ids: list[str] | None = None,
     ) -> None:
         super().__init__(
-            adapter_store, changeset_ids=changeset_ids, snapshot_id=snapshot_id
+            adapter_store,
+            changeset_ids=changeset_ids,
+            snapshot_id=snapshot_id,
+            ids=ids,
         )
 
     @property

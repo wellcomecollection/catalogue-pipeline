@@ -2,6 +2,7 @@ from collections.abc import Generator
 from typing import Any
 
 import structlog
+from pyiceberg.expressions import In
 
 from adapters.utils.adapter_store import AdapterStore
 from core.source import BaseSource
@@ -21,10 +22,17 @@ class AdapterStoreSource(RecordSource):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None = None,
+        ids: list[str] | None = None,
     ):
+        if changeset_ids and ids:
+            raise ValueError(
+                "changeset_ids and ids are mutually exclusive; supply one or "
+                "the other, not both"
+            )
         self.adapter_store = adapter_store
         self.changeset_ids = changeset_ids
         self.snapshot_id = snapshot_id
+        self.ids = ids
 
     def stream_raw(self) -> Generator[dict[str, Any]]:
         if self.changeset_ids:
@@ -33,6 +41,16 @@ class AdapterStoreSource(RecordSource):
             # whole (possibly multi-changeset) table alongside the Arrow copy.
             table = self.adapter_store.get_records_by_changesets(
                 self.changeset_ids, self.snapshot_id
+            )
+            for batch in table.to_batches():
+                yield from self._process_rows(batch.to_pylist())
+        elif self.ids:
+            # Includes soft-deleted rows, for the same reason as the changeset
+            # path: tombstones must overwrite live documents downstream. The
+            # store is sorted on id, so this filter prunes row groups rather
+            # than scanning the whole namespace.
+            table = self.adapter_store.get_namespace_records(
+                In("id", self.ids), self.snapshot_id
             )
             for batch in table.to_batches():
                 yield from self._process_rows(batch.to_pylist())
