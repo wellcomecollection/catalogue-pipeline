@@ -131,6 +131,7 @@ def _delete_entity(
     if not dry_run:
         folio.delete(f"{write_path_prefix}/{folio_id}")
         logger.info("deleted", hrid=hrid, folio_id=folio_id)
+    return EntityResult(action="delete", id=folio_id)
 
 
 def _resolve_item_note_types(payload: dict, ref_cache: RefCache) -> dict:
