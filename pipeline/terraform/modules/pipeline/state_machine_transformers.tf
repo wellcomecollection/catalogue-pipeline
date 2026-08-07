@@ -97,16 +97,6 @@ locals {
       adapter_detail_type  = "ebsco.adapter.completed"
       reindex_target_value = "ebsco"
     }
-    axiell = {
-      adapter_source       = "axiell.adapter"
-      adapter_detail_type  = "axiell.adapter.completed"
-      reindex_target_value = "axiell"
-    }
-    folio = {
-      adapter_source       = "folio.adapter"
-      adapter_detail_type  = "folio.adapter.completed"
-      reindex_target_value = "folio"
-    }
   }
 }
 
