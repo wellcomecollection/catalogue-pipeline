@@ -106,7 +106,8 @@ trait TransformerEventProcessor[Payload <: SourcePayload, SourceData]
               Right(Some((transformedWork, key)))
             case err: Throwable =>
               warn(
-                s"Unable to retrieve work $key, sending without reconciliation: $err"
+                s"Unable to retrieve work $key, sending without reconciliation",
+                err
               )
               Right(Some((transformedWork, key)))
           }
