@@ -134,26 +134,28 @@ class TeiIdExtractorWorkerServiceTest
       "docs/example.xml"
     )
 
-    excludedPaths.foreach {
-      path =>
-        withWorkerService(httpClient = neverCallClient) {
-          case (QueuePair(queue, dlq), messageSender, store, _) =>
-            val message =
+    withWorkerService(httpClient = neverCallClient) {
+      case (QueuePair(queue, dlq), messageSender, store, _) =>
+        excludedPaths.foreach {
+          path =>
+            sendNotificationToSQS(
+              queue,
               s"""
         {
           "path": "$path",
           "uri": "$repoUrl/git/blobs/4bfe74311d86293447f173108190a4b4664d68ea",
           "timeModified": "2021-05-27T14:05:00Z"
         }""".stripMargin
+            )
+        }
 
-            sendNotificationToSQS(queue, message)
-
-            eventually {
-              store.entries.keySet shouldBe empty
-              messageSender.messages shouldBe empty
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
-            }
+        // If any of these stopped being excluded, neverCallClient would fail the
+        // fetch and the message would end up on the DLQ.
+        eventually {
+          store.entries.keySet shouldBe empty
+          messageSender.messages shouldBe empty
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
         }
     }
   }
