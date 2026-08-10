@@ -224,12 +224,19 @@ def create_works_with_all_includes() -> None:
             former_frequency=["Published in 2001", "Published in 2002"],
             designation=["Designation #1", "Designation #2", "Designation #3"],
             items=[create_item() for _ in range(2)] + [create_unidentifiable_item()],
+            collection_path=CollectionPath(path="SABSA/A/3", label="SA/BSA/A/3"),
         )
 
         work = create_visible_extracted_work(
             ancestors=[
-                create_work_hierarchy_item(parts=5),
-                create_work_hierarchy_item(parts=1),
+                create_work_hierarchy_item(
+                    parts=5,
+                    collection_path=CollectionPath(path="SABSA/A", label="SA/BSA/A"),
+                ),
+                create_work_hierarchy_item(
+                    parts=1,
+                    collection_path=CollectionPath(path="SABSA", label="SA/BSA"),
+                ),
             ],
             merged_work=merged_work,
         )
@@ -426,6 +433,239 @@ def create_works_with_collection_paths() -> None:
         ),
         description="a work with a collection path",
         doc_id="works.collection-path.NUFFINK",
+    )
+
+
+def create_works_with_sortable_collection_paths() -> None:
+    """Create works whose collection paths exercise `collectionPath.sort`.
+
+    Sorting on `collectionPath.sort` must order an archive as a reader would browse
+    it: every work before its own children, and numbered siblings in numeric order.
+    """
+    collection_paths = [
+        ("SASRT/C2/9", "SA/SRT/C2/9"),
+        # Leading zeroes do not affect the position of a sibling ("010" is 10, after 9)
+        ("SASRT/C2/010", "SA/SRT/C2/010"),
+        # A child comes after its parent, but before its parent's next sibling
+        ("SASRT/C2/010/1", "SA/SRT/C2/010/1"),
+        # Numbers are ordered numerically even within an alphanumeric segment,
+        # so everything under "C2" comes before "C10"
+        ("SASRT/C10/1", "SA/SRT/C10/1"),
+    ]
+
+    works = [
+        create_visible_merged_work(
+            title=f"Collection path sorting test, {label}",
+            collection_path=CollectionPath(path=path, label=label),
+        )
+        for path, label in collection_paths
+    ]
+    works.append(
+        create_visible_merged_work(
+            title="Collection path sorting test, no collection path"
+        )
+    )
+
+    save_works(
+        works,
+        description="works whose collection paths only sort correctly when sorted naturally",
+        doc_id="works.collection-path-sort",
+    )
+
+
+def create_archive_works() -> None:
+    """Create works from two archives, covering every position in a hierarchy
+    (and so every combination of the `collection.*` and `archive.*` fields).
+    """
+    root_work = create_visible_merged_work(
+        title="Papers of Ernst Boris Chain",
+        collection_path=CollectionPath(path="PPEBC", label="PP/EBC"),
+        description=(
+            "<p>Papers of the biochemist Sir Ernst Boris Chain (1906-1979). "
+            "Includes correspondence, laboratory notebooks and photographs.</p>"
+        ),
+        work_type="Collection",
+    )
+    section_work = create_visible_merged_work(
+        title="Correspondence with Howard Florey",
+        collection_path=CollectionPath(path="PPEBC/A/1", label="PP/EBC/A/1"),
+        description=(
+            "Letters and drafts, 1940-1945. "
+            "Includes material relating to the development of penicillin."
+        ),
+        work_type="Section",
+    )
+    # Sits between the two works saved below, so both documents must refer to the same work
+    personal_papers_work = create_visible_merged_work(
+        title="Personal papers",
+        collection_path=CollectionPath(path="PPEBC/A", label="PP/EBC/A"),
+        work_type="Section",
+    )
+
+    # The root of an archive: no ancestors, and children of its own.
+    save_works(
+        [
+            create_visible_extracted_work(
+                ancestors=[],
+                merged_work=root_work,
+                children=[
+                    create_work_hierarchy_item(
+                        parts=1, merged_work=personal_papers_work, work_type="Section"
+                    ),
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Research notebooks",
+                        collection_path=CollectionPath(
+                            path="PPEBC/B", label="PP/EBC/B"
+                        ),
+                        work_type="Section",
+                    ),
+                ],
+            )
+        ],
+        description="the root of an archive",
+        doc_id="works.archive.PPEBC.root",
+    )
+
+    # A section within the same archive. Its children are numbered so that they only sort
+    # correctly (9 before 10) when sorted naturally rather than alphabetically.
+    save_works(
+        [
+            create_visible_extracted_work(
+                # Ancestors are ordered from the closest ancestor to the root of the archive
+                ancestors=[
+                    create_work_hierarchy_item(
+                        parts=1, merged_work=personal_papers_work, work_type="Section"
+                    ),
+                    create_work_hierarchy_item(
+                        parts=2, merged_work=root_work, work_type="Collection"
+                    ),
+                ],
+                merged_work=section_work,
+                children=[
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Letter from Howard Florey, 1944",
+                        collection_path=CollectionPath(
+                            path="PPEBC/A/1/10", label="PP/EBC/A/1/10"
+                        ),
+                    ),
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Letter from Howard Florey, 1943",
+                        collection_path=CollectionPath(
+                            path="PPEBC/A/1/9", label="PP/EBC/A/1/9"
+                        ),
+                    ),
+                ],
+            )
+        ],
+        description="a section within an archive",
+        doc_id="works.archive.PPEBC.section",
+    )
+
+    # A second archive, in a different archive category (GC rather than PP). Its three
+    # works cover every position in a hierarchy: the root, the middle, and the bottom.
+    gc_root_work = create_visible_merged_work(
+        title="Papers relating to the history of vaccination",
+        collection_path=CollectionPath(path="GC253", label="GC/253"),
+        work_type="Collection",
+    )
+    # The works below sit in each other's hierarchies, so all three documents must
+    # refer to the same works.
+    gc_series_work = create_visible_merged_work(
+        title="Correspondence",
+        collection_path=CollectionPath(path="GC253/A", label="GC/253/A"),
+        work_type="Series",
+    )
+    gc_item_work = create_visible_merged_work(
+        title="Letter from Edward Jenner to an unidentified correspondent",
+        collection_path=CollectionPath(path="GC253/A/2", label="GC/253/A/2"),
+    )
+
+    # The root of the archive: no ancestors, and a child of its own.
+    save_works(
+        [
+            create_visible_extracted_work(
+                ancestors=[],
+                merged_work=gc_root_work,
+                children=[
+                    create_work_hierarchy_item(
+                        parts=1, merged_work=gc_series_work, work_type="Series"
+                    )
+                ],
+            )
+        ],
+        description="the root of a General Collections archive",
+        doc_id="works.archive.GC253.root",
+    )
+
+    # In the middle of the archive: ancestors and children, so not a root itself.
+    save_works(
+        [
+            create_visible_extracted_work(
+                ancestors=[
+                    create_work_hierarchy_item(
+                        parts=1, merged_work=gc_root_work, work_type="Collection"
+                    )
+                ],
+                merged_work=gc_series_work,
+                children=[
+                    create_work_hierarchy_item(parts=0, merged_work=gc_item_work)
+                ],
+            )
+        ],
+        description="a series within a General Collections archive",
+        doc_id="works.archive.GC253.series",
+    )
+
+    # At the bottom of the archive: ancestors, but no children of its own.
+    save_works(
+        [
+            create_visible_extracted_work(
+                # Ancestors are ordered from the closest ancestor to the root of the archive
+                ancestors=[
+                    create_work_hierarchy_item(
+                        parts=1, merged_work=gc_series_work, work_type="Series"
+                    ),
+                    create_work_hierarchy_item(
+                        parts=1, merged_work=gc_root_work, work_type="Collection"
+                    ),
+                ],
+                merged_work=gc_item_work,
+            )
+        ],
+        description="an item within a General Collections archive",
+        doc_id="works.archive.GC253.item",
+    )
+
+    # The root of a third archive, in an archive category whose prefix is numbered
+    # (the category of "OH1" is "OH").
+    save_works(
+        [
+            create_visible_extracted_work(
+                ancestors=[],
+                merged_work=create_visible_merged_work(
+                    title="Oral histories of British science",
+                    collection_path=CollectionPath(path="OH1", label="OH1"),
+                    work_type="Collection",
+                ),
+                children=[
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Interview with a laboratory technician",
+                        collection_path=CollectionPath(path="OH1/A", label="OH1/A"),
+                    ),
+                    create_work_hierarchy_item(
+                        parts=0,
+                        title="Interview with a research nurse",
+                        collection_path=CollectionPath(path="OH1/B", label="OH1/B"),
+                    ),
+                ],
+            )
+        ],
+        description="the root of an Oral History archive",
+        doc_id="works.archive.OH1.root",
     )
 
 
@@ -795,6 +1035,8 @@ def generate_all() -> None:
     create_filtered_aggregations_test_examples()
     create_availabilities_test_examples()
     create_works_with_digital_location_dates()
+    create_archive_works()
+    create_works_with_sortable_collection_paths()
 
     print(f"Test documents written to {TEST_DOCUMENTS_DIR}")
 

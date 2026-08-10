@@ -1,3 +1,4 @@
+import re
 from collections.abc import Generator, Iterable
 
 import structlog
@@ -5,6 +6,7 @@ from dateutil import parser
 
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
+from models.pipeline.archive_category import ArchiveCategory
 from models.pipeline.location import DigitalLocation, PhysicalLocation
 
 from .work_base_transformer import WorkBaseTransformer
@@ -26,9 +28,6 @@ def get_unique(items: Iterable[str]) -> list[str]:
 class QueryWorkTransformer(WorkBaseTransformer):
     def __init__(self, extracted: VisibleExtractedWork):
         super().__init__(extracted)
-        self.data = extracted.work.data
-        self.state = extracted.work.state
-        self.hierarchy = extracted.hierarchy
         self.concepts = extracted.concepts
 
     @property
@@ -107,22 +106,16 @@ class QueryWorkTransformer(WorkBaseTransformer):
             yield from image.id.get_identifier_values()
 
     @property
-    def collection_path(self) -> str | None:
-        if self.data.collection_path is None:
+    def collection_path_sort(self) -> str | None:
+        path = self.collection_path_path
+        if path is None:
             return None
 
-        # Some works (e.g. works in the Fallaize Collection) store incomplete collection paths which only consist
-        # of <parent ID>/<work ID>. We want to index the full collection path for querying purposes, so we construct
-        # it here using ancestors paths. For example, given the collection path 'C/D' and ancestors collections paths
-        # 'B/C', 'A/B', and 'A', return 'A/B/C/D'.
-        path_fragments = self.data.collection_path.path.split("/")
-        for a in self.hierarchy.ancestors:
-            if ancestor_path := a.work.properties.collection_path:
-                ancestor_path_fragments = ancestor_path.split("/")
-                if ancestor_path_fragments[-1] == path_fragments[0]:
-                    path_fragments = ancestor_path_fragments[:-1] + path_fragments
-
-        return "/".join(path_fragments)
+        # Pad all numeric segments with zeroes so that collection paths sort naturally.
+        # For example, 'A/10/B' < 'A/9/B' (incorrect), but 'A/000010/B' > 'A/000009/B' (correct).
+        # The `natural_sort_key` function (used in DisplayWorkTransformer) exists to support
+        # the same sorting behaviour.
+        return re.sub(r"\d+", lambda m: m.group().zfill(10), path)
 
     @property
     def collection_path_label(self) -> str | None:
@@ -130,6 +123,27 @@ class QueryWorkTransformer(WorkBaseTransformer):
             return None
 
         return self.data.collection_path.label
+
+    @property
+    def archive_category_id(self) -> str | None:
+        result = ArchiveCategory.from_collection_path(self.data.collection_path)
+        return result.id if result is not None else None
+
+    @property
+    def collection_root_id(self) -> str | None:
+        if self.hierarchy.ancestors:
+            return self.hierarchy.ancestors[-1].work.properties.id
+        if self.is_collection_root:
+            return self.state.canonical_id
+        return None
+
+    @property
+    def collection_root_title(self) -> str | None:
+        if self.hierarchy.ancestors:
+            return self.hierarchy.ancestors[-1].work.properties.label
+        if self.is_collection_root:
+            return self.data.title
+        return None
 
     @property
     def subject_labels(self) -> list[str]:

@@ -1,17 +1,17 @@
 {
-  "description": "a work with a collection path",
-  "id": "k5m7sfjx",
+  "description": "works whose collection paths only sort correctly when sorted naturally",
+  "id": "i0vc20lw",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "k5m7sfjx",
+        "id": "i0vc20lw",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "nIdFebPdMm"
+          "value": "vwOcXiCfIv"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "k5m7sfjx",
-      "title": "XkZ5kXMLMd39CXq",
+      "id": "i0vc20lw",
+      "title": "Collection path sorting test, SA/SRT/C2/010",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "nIdFebPdMm",
+      "sourceIdentifier.value": "vwOcXiCfIv",
       "identifiers.value": [
-        "k5m7sfjx",
-        "nIdFebPdMm"
+        "i0vc20lw",
+        "vwOcXiCfIv"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -42,18 +42,18 @@
       "subjects.concepts.label": [],
       "contributors.agent.label": [],
       "genres.concepts.label": [],
-      "collectionPath.label": "PP/CRI",
-      "collectionPath.path": "PPCRI",
-      "collectionPath.sort": "PPCRI"
+      "collectionPath.label": "SA/SRT/C2/010",
+      "collectionPath.path": "SASRT/C2/010",
+      "collectionPath.sort": "SASRT/C0000000002/0000000010"
     },
     "display": {
-      "id": "k5m7sfjx",
-      "title": "XkZ5kXMLMd39CXq",
+      "id": "i0vc20lw",
+      "title": "Collection path sorting test, SA/SRT/C2/010",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "nIdFebPdMm",
+          "value": "vwOcXiCfIv",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -76,21 +76,11 @@
       "parts": [],
       "partOf": [],
       "type": "Work",
-      "collection": {
-        "root": {
-          "id": "k5m7sfjx",
-          "title": "XkZ5kXMLMd39CXq",
-          "referenceNumber": "PP/CRI",
-          "totalParts": 0,
-          "type": "Work"
-        },
-        "isRoot": true
-      },
       "archive": {
         "category": {
-          "id": "PP",
+          "id": "SA",
           "type": "ArchiveCategory",
-          "label": "Personal papers"
+          "label": "Societies and Associations"
         }
       }
     },
@@ -104,12 +94,8 @@
       "items.locations.license": [],
       "availabilities": [],
       "archive.category": {
-        "id": "PP",
-        "label": "Personal papers"
-      },
-      "collection.root": {
-        "id": "k5m7sfjx",
-        "label": "XkZ5kXMLMd39CXq"
+        "id": "SA",
+        "label": "Societies and Associations"
       }
     },
     "filterableValues": {
@@ -126,8 +112,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "k5m7sfjx",
-        "nIdFebPdMm"
+        "i0vc20lw",
+        "vwOcXiCfIv"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -138,11 +124,8 @@
       "partOf.id": [],
       "partOf.title": [],
       "availabilities.id": [],
-      "collection.isRoot": true,
-      "archive.category.id": "PP",
-      "collection.root.id": "k5m7sfjx",
-      "collection.root.title": "XkZ5kXMLMd39CXq"
+      "archive.category.id": "SA"
     }
   },
-  "createdAt": "2026-08-06T16:13:32.458555+00:00"
+  "createdAt": "2026-08-06T10:44:46.202051+00:00"
 }

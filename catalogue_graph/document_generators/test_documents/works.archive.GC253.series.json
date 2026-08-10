@@ -1,17 +1,17 @@
 {
-  "description": "a work with a collection path",
-  "id": "k5m7sfjx",
+  "description": "a series within a General Collections archive",
+  "id": "m70k1brq",
   "document": {
     "type": "Visible",
     "debug": {
       "source": {
-        "id": "k5m7sfjx",
+        "id": "m70k1brq",
         "identifier": {
           "identifierType": {
             "id": "sierra-system-number"
           },
           "ontologyType": "Work",
-          "value": "nIdFebPdMm"
+          "value": "pi2JgwZJnS"
         },
         "version": 1,
         "modifiedTime": "2025-01-01T00:00:00Z"
@@ -22,14 +22,14 @@
       "redirectSources": []
     },
     "query": {
-      "id": "k5m7sfjx",
-      "title": "XkZ5kXMLMd39CXq",
+      "id": "m70k1brq",
+      "title": "Correspondence",
       "alternativeTitles": [],
       "languages.label": [],
-      "sourceIdentifier.value": "nIdFebPdMm",
+      "sourceIdentifier.value": "pi2JgwZJnS",
       "identifiers.value": [
-        "k5m7sfjx",
-        "nIdFebPdMm"
+        "m70k1brq",
+        "pi2JgwZJnS"
       ],
       "images.id": [],
       "images.identifiers.value": [],
@@ -37,23 +37,25 @@
       "items.id": [],
       "items.shelfmark.value": [],
       "notes.contents": [],
-      "partOf.title": [],
+      "partOf.title": [
+        "Papers relating to the history of vaccination"
+      ],
       "production.label": [],
       "subjects.concepts.label": [],
       "contributors.agent.label": [],
       "genres.concepts.label": [],
-      "collectionPath.label": "PP/CRI",
-      "collectionPath.path": "PPCRI",
-      "collectionPath.sort": "PPCRI"
+      "collectionPath.label": "GC/253/A",
+      "collectionPath.path": "GC253/A",
+      "collectionPath.sort": "GC0000000253/A"
     },
     "display": {
-      "id": "k5m7sfjx",
-      "title": "XkZ5kXMLMd39CXq",
+      "id": "m70k1brq",
+      "title": "Correspondence",
       "alternativeTitles": [],
       "contributors": [],
       "identifiers": [
         {
-          "value": "nIdFebPdMm",
+          "value": "pi2JgwZJnS",
           "type": "Identifier",
           "identifierType": {
             "id": "sierra-system-number",
@@ -73,24 +75,39 @@
       "formerFrequency": [],
       "designation": [],
       "images": [],
-      "parts": [],
-      "partOf": [],
-      "type": "Work",
-      "collection": {
-        "root": {
-          "id": "k5m7sfjx",
-          "title": "XkZ5kXMLMd39CXq",
-          "referenceNumber": "PP/CRI",
+      "parts": [
+        {
+          "id": "0ccmajfm",
+          "title": "Letter from Edward Jenner to an unidentified correspondent",
+          "referenceNumber": "GC/253/A/2",
           "totalParts": 0,
           "type": "Work"
-        },
-        "isRoot": true
+        }
+      ],
+      "partOf": [
+        {
+          "id": "gmf8ycys",
+          "title": "Papers relating to the history of vaccination",
+          "referenceNumber": "GC/253",
+          "totalParts": 1,
+          "type": "Collection"
+        }
+      ],
+      "type": "Series",
+      "collection": {
+        "root": {
+          "id": "gmf8ycys",
+          "title": "Papers relating to the history of vaccination",
+          "referenceNumber": "GC/253",
+          "totalParts": 1,
+          "type": "Collection"
+        }
       },
       "archive": {
         "category": {
-          "id": "PP",
+          "id": "GC",
           "type": "ArchiveCategory",
-          "label": "Personal papers"
+          "label": "General collections"
         }
       }
     },
@@ -104,16 +121,16 @@
       "items.locations.license": [],
       "availabilities": [],
       "archive.category": {
-        "id": "PP",
-        "label": "Personal papers"
+        "id": "GC",
+        "label": "General collections"
       },
       "collection.root": {
-        "id": "k5m7sfjx",
-        "label": "XkZ5kXMLMd39CXq"
+        "id": "gmf8ycys",
+        "label": "Papers relating to the history of vaccination"
       }
     },
     "filterableValues": {
-      "workType": "Standard",
+      "workType": "Series",
       "production.dates.range.from": [],
       "languages.id": [],
       "genres.label": [],
@@ -126,8 +143,8 @@
       "contributors.agent.id": [],
       "contributors.agent.sourceIdentifier": [],
       "identifiers.value": [
-        "k5m7sfjx",
-        "nIdFebPdMm"
+        "m70k1brq",
+        "pi2JgwZJnS"
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
@@ -135,14 +152,17 @@
       "items.identifiers.value": [],
       "items.locations.locationType.id": [],
       "items.locations.createdDate": [],
-      "partOf.id": [],
-      "partOf.title": [],
+      "partOf.id": [
+        "gmf8ycys"
+      ],
+      "partOf.title": [
+        "Papers relating to the history of vaccination"
+      ],
       "availabilities.id": [],
-      "collection.isRoot": true,
-      "archive.category.id": "PP",
-      "collection.root.id": "k5m7sfjx",
-      "collection.root.title": "XkZ5kXMLMd39CXq"
+      "archive.category.id": "GC",
+      "collection.root.id": "gmf8ycys",
+      "collection.root.title": "Papers relating to the history of vaccination"
     }
   },
-  "createdAt": "2026-08-06T16:13:32.458555+00:00"
+  "createdAt": "2026-08-06T09:01:32.836856+00:00"
 }

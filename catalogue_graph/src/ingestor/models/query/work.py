@@ -44,6 +44,7 @@ class QueryWork(ElasticsearchModel):
         serialization_alias="collectionPath.label"
     )
     collection_path_path: str | None = Field(serialization_alias="collectionPath.path")
+    collection_path_sort: str | None = Field(serialization_alias="collectionPath.sort")
 
     @classmethod
     def from_extracted_work(cls, extracted: VisibleExtractedWork) -> "QueryWork":
@@ -53,7 +54,8 @@ class QueryWork(ElasticsearchModel):
         return QueryWork(
             id=work.state.canonical_id,
             collection_path_label=transformer.collection_path_label,
-            collection_path_path=transformer.collection_path,
+            collection_path_path=transformer.collection_path_path,
+            collection_path_sort=transformer.collection_path_sort,
             alternative_titles=work.data.alternative_titles,
             contributors_agent_label=transformer.contributor_agent_labels,
             genres_concepts_label=list(transformer.genre_concept_labels),
