@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{
+  DeletedReason,
   Format,
   InternalWork,
   InvisibilityReason,
@@ -1138,6 +1139,58 @@ class PlatformMergerTest
         _.data.thumbnail shouldBe metsWork.data.thumbnail
       }
     }
+
+    it("deletes the inner works of a deleted TEI work") {
+      val stubs = List(createInternalWorkStub, createInternalWorkStub)
+      val deletedTeiWork = teiIdentifiedWork()
+        .mapState { _.copy(internalWorkStubs = stubs) }
+        .deleted()
+
+      val result = merger.merge(works = Seq(deletedTeiWork))
+
+      result.resultWorks should have size 3
+
+      val deletedWorks = result.resultWorks.collect {
+        case w: Work.Deleted[Identified] => w
+      }
+      deletedWorks.map(_.state.canonicalId) should contain theSameElementsAs
+        deletedTeiWork.state.canonicalId +: stubs.map(_.canonicalId)
+
+      val innerWorks =
+        deletedWorks.filterNot(
+          _.state.canonicalId == deletedTeiWork.state.canonicalId
+        )
+      innerWorks.foreach {
+        w =>
+          w.deletedReason shouldBe DeletedReason.TeiDeletedInMerger
+          w.version shouldBe deletedTeiWork.version
+          w.state.sourceModifiedTime shouldBe deletedTeiWork.state.sourceModifiedTime
+      }
+    }
+
+    it(
+      "deletes the inner works of a deleted TEI work alongside a visible target"
+    ) {
+      val stubs = List(createInternalWorkStub, createInternalWorkStub)
+      val deletedTeiWork = teiIdentifiedWork()
+        .mapState { _.copy(internalWorkStubs = stubs) }
+        .deleted()
+
+      val sierraWork = sierraPhysicalIdentifiedWork()
+
+      val result = merger.merge(works = Seq(sierraWork, deletedTeiWork))
+
+      result.resultWorks should have size 4
+
+      result.resultWorks.collect {
+        case w: Work.Visible[Identified] => w.state.canonicalId
+      } shouldBe Seq(sierraWork.state.canonicalId)
+
+      result.resultWorks.collect {
+        case w: Work.Deleted[Identified] => w.state.canonicalId
+      } should contain theSameElementsAs
+        deletedTeiWork.state.canonicalId +: stubs.map(_.canonicalId)
+    }
   }
 
   it("passes a Folio work through the merger unchanged") {
@@ -1167,4 +1220,13 @@ class PlatformMergerTest
     val mergedWork = mergedWorks.head.asInstanceOf[Work.Visible[Merged]]
     mergedWork.data shouldBe axiellWork.data
   }
+
+  private def createInternalWorkStub: InternalWork.Identified =
+    InternalWork.Identified(
+      sourceIdentifier = createTeiSourceIdentifier,
+      canonicalId = createCanonicalId,
+      workData = WorkData(
+        title = Some(s"tei-inner-${randomAlphanumeric(length = 10)}")
+      )
+    )
 }

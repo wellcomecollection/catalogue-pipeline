@@ -227,6 +227,56 @@ class TransformerWorkerTest
     }
 
     it(
+      "indexes the work returned by reconcileWithStored, not the transformed one"
+    ) {
+      // The whole point of reconcileWithStored is that its result is what
+      // leaves the transformer. Computing it and then forwarding the original
+      // would be silent, so assert on what actually gets indexed.
+      val reconcilingTransformer = new ExampleTransformer {
+        override def reconcileWithStored(
+          newWork: Work[Source],
+          storedWork: Work[Source]
+        ): Work[Source] =
+          newWork match {
+            case w: Work.Visible[Source] =>
+              w.copy(
+                data = w.data.copy(
+                  title = w.data.title.map(_ + " [reconciled]")
+                )
+              )
+            case other => other
+          }
+      }
+
+      withWorker(transformer = reconcilingTransformer) {
+        case (_, QueuePair(queue, dlq), workIndexer, _, store) =>
+          implicit val s: MemoryVersionedStore[S3ObjectLocation, ExampleData] =
+            store
+          val payload = createPayloadWith(version = 1)
+
+          // Nothing stored yet, so there is nothing to reconcile against.
+          sendNotificationToSQS(queue, payload)
+          eventually {
+            workIndexer.index should have size 1
+            workIndexer.index.values.head.data.title.get should not include
+              "[reconciled]"
+          }
+
+          // Now a stored work exists, so the reconciled work is what should
+          // be indexed.
+          sendNotificationToSQS(queue, setPayloadVersion(payload, 2))
+          eventually {
+            assertQueueEmpty(dlq)
+            assertQueueEmpty(queue)
+            workIndexer.index.values.head.version shouldBe 2
+            workIndexer.index.values.head.data.title.get should include(
+              "[reconciled]"
+            )
+          }
+      }
+    }
+
+    it(
       "re-sends a Work if the stored Work has the same version and the same data"
     ) {
       withWorker() {
