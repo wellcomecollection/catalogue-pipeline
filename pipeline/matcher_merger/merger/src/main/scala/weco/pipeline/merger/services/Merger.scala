@@ -160,6 +160,17 @@ trait Merger extends MergerLogging {
     * Removals are read from the works going in rather than the ones coming out,
     * because a TEI work that loses the merge is redirected and its stubs are
     * dropped on the way.
+    *
+    * WARNING: removals are never pruned, so a parent re-emits a delete for
+    * every stub it has ever lost, on every merge. That is harmless for an id
+    * that was renamed and never seen again, but wrong for one that MOVED to
+    * another manuscript under the same id: this parent deletes it on every
+    * update, while the new parent only revives it when the new parent itself
+    * changes, so the work flips between deleted and visible depending on which
+    * was touched last. Fixing it properly needs state this stage does not have,
+    * either a record of which removals have already been actioned or a lookup
+    * of who currently claims the id. Worth designing in when the merger is
+    * rewritten in Python rather than bolting onto this one.
     */
   private def deletedInternalWorks(
     works: Seq[Work[Identified]],

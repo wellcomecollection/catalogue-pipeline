@@ -394,7 +394,23 @@ class TeiTransformerTest
       )
 
       reconciled.state.internalWorkStubs shouldBe List(kept)
-      reconciled.state.removedInternalWorkStubs shouldBe List(removed)
+      idsOf(reconciled.state.removedInternalWorkStubs) shouldBe
+        List(removed.sourceIdentifier)
+    }
+
+    it("drops the data from a removed stub, keeping only its identity") {
+      // The list is never pruned, so keeping the data would grow the record
+      // forever. The merger only needs the ids to delete the work.
+      val removed = createInternalWorkSource
+      removed.workData.title should not be empty
+
+      val reconciled = new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = visibleWorkWithStubs(Nil),
+        storedWork = visibleWorkWithStubs(List(removed))
+      )
+
+      reconciled.state.removedInternalWorkStubs.head.workData shouldBe
+        WorkData[Unidentified]()
     }
 
     it("records nothing when the record still has every stub") {
@@ -420,10 +436,11 @@ class TeiTransformerTest
         )
       )
 
-      reconciled.state.removedInternalWorkStubs should contain theSameElementsAs List(
-        removedEarlier,
-        removedNow
-      )
+      idsOf(reconciled.state.removedInternalWorkStubs) should
+        contain theSameElementsAs List(
+          removedEarlier.sourceIdentifier,
+          removedNow.sourceIdentifier
+        )
     }
 
     it("drops a removal when the stub comes back") {
@@ -451,7 +468,8 @@ class TeiTransformerTest
           newWork = visibleWorkWithStubs(Nil),
           storedWork = present
         )
-      removed.state.removedInternalWorkStubs shouldBe List(revived)
+      idsOf(removed.state.removedInternalWorkStubs) shouldBe
+        List(revived.sourceIdentifier)
 
       val restored =
         transformer.reconcileWithStored(newWork = present, storedWork = removed)
@@ -465,7 +483,8 @@ class TeiTransformerTest
           storedWork = restored
         )
         .state
-        .removedInternalWorkStubs shouldBe List(revived)
+        .removedInternalWorkStubs
+        .map(_.sourceIdentifier) shouldBe List(revived.sourceIdentifier)
     }
 
     it("is a fixed point on an already-reconciled record") {
@@ -554,6 +573,9 @@ class TeiTransformerTest
       ),
       data = WorkData[Unidentified](title = Some("A TEI manuscript"))
     )
+
+  private def idsOf(stubs: List[InternalWork.Source]): List[SourceIdentifier] =
+    stubs.map(_.sourceIdentifier)
 
   private def createInternalWorkSource: InternalWork.Source =
     InternalWork.Source(

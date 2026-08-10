@@ -9,6 +9,7 @@ import weco.catalogue.internal_model.work.{
   DeletedReason,
   InternalWork,
   Work,
+  WorkData,
   WorkState
 }
 import weco.catalogue.source_model.tei.{
@@ -77,6 +78,9 @@ class TeiTransformer(teiReader: Readable[S3ObjectLocation, String])
 
     (storedState.internalWorkStubs ++ storedState.removedInternalWorkStubs)
       .filterNot(stub => present.contains(stub.sourceIdentifier))
+      // The merger only needs the ids to delete the work, and this list is
+      // never pruned, so keeping the data would grow the record forever.
+      .map(_.copy(workData = WorkData()))
       .distinct
   }
 
