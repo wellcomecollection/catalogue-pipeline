@@ -125,7 +125,11 @@ class TeiIdExtractorWorkerService[Dest](
       // e.g. stuff that's been written for collaboration on external projects.
       //
       // See https://github.com/wellcomecollection/catalogue-pipeline/issues/2197#issuecomment-1249665377
-      "Arabic/Fihrist/"
+      "Arabic/Fihrist/",
+      // Calm manuscript exports waiting to be edited by hand. They are moved to
+      // "Calm manuscripts" once they are fit to publish, and only then should
+      // they reach the catalogue.
+      "systems-transformation/"
     )
     val isInExcludedDir = excludedDirs.exists(dir => path.startsWith(dir))
 

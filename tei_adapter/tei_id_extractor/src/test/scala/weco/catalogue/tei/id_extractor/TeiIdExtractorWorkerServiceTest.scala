@@ -119,6 +119,45 @@ class TeiIdExtractorWorkerServiceTest
     }
   }
 
+  it("a message for a file in an excluded directory is ignored") {
+    val neverCallClient = new HttpClient {
+      override def singleRequest(request: HttpRequest): Future[HttpResponse] =
+        Future.failed(new Throwable("This should never be called!"))
+    }
+
+    // These files carry a perfectly good xml:id, so nothing but the path stops
+    // them reaching the catalogue.
+    val excludedPaths = Seq(
+      "systems-transformation/MS_94.xml",
+      "Arabic/Fihrist/MS_Arabic_1.xml",
+      "Templates/template.xml",
+      "docs/example.xml"
+    )
+
+    excludedPaths.foreach {
+      path =>
+        withWorkerService(httpClient = neverCallClient) {
+          case (QueuePair(queue, dlq), messageSender, store, _) =>
+            val message =
+              s"""
+        {
+          "path": "$path",
+          "uri": "$repoUrl/git/blobs/4bfe74311d86293447f173108190a4b4664d68ea",
+          "timeModified": "2021-05-27T14:05:00Z"
+        }""".stripMargin
+
+            sendNotificationToSQS(queue, message)
+
+            eventually {
+              store.entries.keySet shouldBe empty
+              messageSender.messages shouldBe empty
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
+        }
+    }
+  }
+
   it("an older message for a file changed is ignored") {
     withWorkerService() {
       case (QueuePair(queue, dlq), messageSender, store, bucket) =>
