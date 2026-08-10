@@ -110,7 +110,7 @@ def fetch(
     cfg, eff_ns, dirs, sources = _load_and_prepare(
         config, source_config, namespace, output_dir, hash_buckets
     )
-    fetch_both(sources, dirs["raw"], cfg.filter_query)
+    fetch_both(sources, dirs["raw"], {s.id: cfg.effective_filter_query(s.id) for s in sources})
     console.print(f"Fetch complete namespace={eff_ns}")
 
 
@@ -192,7 +192,7 @@ def run_all(
     cfg, eff_ns, dirs, sources = _load_and_prepare(
         config, source_config, namespace, output_dir, hash_buckets
     )
-    fetch_both(sources, dirs["raw"], cfg.filter_query)
+    fetch_both(sources, dirs["raw"], {s.id: cfg.effective_filter_query(s.id) for s in sources})
     bucket_filter = _parse_bucket_filter(bucket, cfg.hash_bucket_count)
 
     for source in sources:
