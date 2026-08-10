@@ -141,10 +141,10 @@ def build_transformer(
 
     snapshot_id = event.snapshot_id or adapter_store.current_snapshot_id()
 
-    if event.ids and event.transformer_type in ("axiell", "folio"):
-        # Not yet wired: AxiellChangesetReader and FolioTransformer don't
-        # thread ids through to their sources, so falling through here would
-        # silently ignore ids and read every active record instead.
+    if event.ids and event.transformer_type == "axiell":
+        # Not yet wired: AxiellChangesetReader doesn't thread ids through to
+        # its source, so falling through here would silently ignore ids and
+        # read every active record instead.
         raise ValueError(
             f"id-mode transforms are not yet supported for {event.transformer_type!r}"
         )
@@ -173,7 +173,11 @@ def build_transformer(
             use_rest_api_table=use_rest_api_table, create_if_not_exists=False
         )
         return FolioTransformer(
-            adapter_store, event.changeset_ids, snapshot_id, items_store=items_store
+            adapter_store,
+            event.changeset_ids,
+            snapshot_id,
+            ids=event.ids,
+            items_store=items_store,
         )
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
