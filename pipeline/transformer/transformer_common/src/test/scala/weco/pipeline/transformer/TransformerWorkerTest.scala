@@ -452,7 +452,17 @@ class TransformerWorkerTest
         transformer = needsStoredWork,
         transformedWorkRetriever = Some(brokenRetriever)
       ) {
-        case (_, QueuePair(queue, dlq), workIndexer, workKeySender, store) =>
+        case (
+              worker,
+              QueuePair(queue, dlq),
+              workIndexer,
+              workKeySender,
+              store
+            ) =>
+          whenReady(worker.processEvent(createPayload(store))) {
+            _.left.value shouldBe a[StoredWorkRetrievalError[_]]
+          }
+
           sendNotificationToSQS(queue, createPayload(store))
 
           eventually {

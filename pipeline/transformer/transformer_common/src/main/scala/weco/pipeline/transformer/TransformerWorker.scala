@@ -33,6 +33,8 @@ case class TransformerError[SourceData, Key](
   sourceData: SourceData,
   key: Key
 ) extends TransformerWorkerError(t.getMessage)
+case class StoredWorkRetrievalError[Key](t: Throwable, key: Key)
+    extends TransformerWorkerError(t.getMessage)
 
 trait SourceDataRetriever[Payload, SourceData] {
   def lookupSourceData(
@@ -104,10 +106,12 @@ trait TransformerEventProcessor[Payload <: SourcePayload, SourceData]
             case err: RetrieverNotFoundException =>
               debug(s"No stored work for $key: $err")
               Right(Some((transformedWork, key)))
-            // A work that needs the stored one is left to fail, so the message
-            // is retried rather than sent in a state we know to be wrong.
+            // A work that needs the stored one fails, so the message is
+            // retried rather than sent in a state we know to be wrong.
             case err: Throwable
-                if !transformer.requiresStoredWork(transformedWork) =>
+                if transformer.requiresStoredWork(transformedWork) =>
+              Left(StoredWorkRetrievalError(err, key))
+            case err: Throwable =>
               warn(
                 s"Unable to retrieve work $key, sending without reconciliation",
                 err
@@ -255,6 +259,11 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
               case TransformerError(t, sourceData, key) =>
                 error(
                   s"$transformerName: TransformerError on $sourceData with $key ($t)"
+                )
+              case StoredWorkRetrievalError(t, key) =>
+                error(
+                  s"$transformerName: StoredWorkRetrievalError on $key; this work cannot be sent without the stored work to reconcile against",
+                  t
                 )
             }
 
