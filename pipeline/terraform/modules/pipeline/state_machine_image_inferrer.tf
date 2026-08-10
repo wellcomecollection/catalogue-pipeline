@@ -97,12 +97,13 @@ locals {
       JitterStrategy  = "FULL"
     },
     {
+      # ErrorEquals is an exact, case-sensitive match, so the prefix is ECS., not Ecs.
       ErrorEquals = [
-        "Ecs.ServerException",
-        "Ecs.ThrottlingException",
-        "Ecs.TaskFailedToStartException",
-        "Ecs.CannotPullContainerErrorException",
-        "Ecs.ContainerRuntimeTimeoutErrorException",
+        "ECS.ServerException",
+        "ECS.ThrottlingException",
+        "ECS.TaskFailedToStartException",
+        "ECS.CannotPullContainerErrorException",
+        "ECS.ContainerRuntimeTimeoutErrorException",
       ]
       IntervalSeconds = 5
       MaxAttempts     = 3
