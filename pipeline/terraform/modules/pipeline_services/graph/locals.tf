@@ -194,17 +194,18 @@ locals {
 
   state_function_default_retry = [
     {
+      # ErrorEquals is an exact, case-sensitive match, so the prefix is ECS., not Ecs.
       ErrorEquals = [
         "Lambda.ServiceException",
         "Lambda.AWSLambdaException",
         "Lambda.SdkClientException",
         "Lambda.TooManyRequestsException",
-        "Ecs.ServerException",
-        "Ecs.ThrottlingException",
-        "Ecs.TaskFailedToStartException",
-        "Ecs.CannotPullContainerErrorException",
-        "Ecs.ContainerRuntimeTimeoutErrorException",
-        "Ecs.EssentialContainerExited",
+        "ECS.ServerException",
+        "ECS.ThrottlingException",
+        "ECS.TaskFailedToStartException",
+        "ECS.CannotPullContainerErrorException",
+        "ECS.ContainerRuntimeTimeoutErrorException",
+        "ECS.EssentialContainerExited",
         "States.Timeout",
       ]
       IntervalSeconds = 1
