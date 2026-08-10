@@ -73,7 +73,7 @@ trait Merger extends MergerLogging {
     val outcome = mergeWorks(works)
     outcome.copy(
       resultWorks =
-        outcome.resultWorks ++ deletedInternalWorks(outcome.resultWorks)
+        outcome.resultWorks ++ deletedInternalWorks(works, outcome.resultWorks)
     )
   }
 
@@ -152,36 +152,50 @@ trait Merger extends MergerLogging {
       }
   }
 
-  /** Inner works are synthesised from the parent's stubs on every merge, so
-    * deleting a parent has to delete them explicitly.
+  /** Inner works are synthesised from the parent's stubs on every merge, so an
+    * inner work only stops being made when its stub goes. Both ways that
+    * happens, the whole parent being deleted and a single stub being removed
+    * from it, leave a work behind that has to be deleted explicitly.
+    *
+    * Removals are read from the works going in rather than the ones coming out,
+    * because a TEI work that loses the merge is redirected and its stubs are
+    * dropped on the way.
     */
   private def deletedInternalWorks(
+    works: Seq[Work[Identified]],
     resultWorks: Seq[Work[Identified]]
   ): Seq[Work.Deleted[Identified]] = {
     val alreadyEmitted = resultWorks.map(_.state.canonicalId).toSet
 
-    resultWorks
+    val deletedParents = resultWorks
       .collect { case w: Work.Deleted[Identified] => w }
-      .flatMap {
+      .flatMap(
+        parent => parent.state.internalWorkStubs.map(deleteChildOf(parent))
+      )
+
+    val removedStubs = works
+      .flatMap(
         parent =>
-          parent.state.internalWorkStubs.map {
-            case InternalWork.Identified(sourceIdentifier, canonicalId, _) =>
-              Work.Deleted[Identified](
-                version = parent.version,
-                state = Identified(
-                  sourceIdentifier = sourceIdentifier,
-                  canonicalId = canonicalId,
-                  sourceModifiedTime = parent.state.sourceModifiedTime
-                ),
-                deletedReason = DeletedReason.TeiDeletedInMerger
-              )
-          }
-      }
-      .filterNot {
-        child => alreadyEmitted.contains(child.state.canonicalId)
-      }
-      .distinct
+          parent.state.removedInternalWorkStubs.map(deleteChildOf(parent))
+      )
+
+    (deletedParents ++ removedStubs).filterNot {
+      child => alreadyEmitted.contains(child.state.canonicalId)
+    }.distinct
   }
+
+  private def deleteChildOf(
+    parent: Work[Identified]
+  )(stub: InternalWork.Identified): Work.Deleted[Identified] =
+    Work.Deleted[Identified](
+      version = parent.version,
+      state = Identified(
+        sourceIdentifier = stub.sourceIdentifier,
+        canonicalId = stub.canonicalId,
+        sourceModifiedTime = parent.state.sourceModifiedTime
+      ),
+      deletedReason = DeletedReason.TeiDeletedInMerger
+    )
 
   private def redirectSourceToTarget(
     target: Work.Visible[Identified]

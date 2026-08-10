@@ -182,7 +182,10 @@ object WorkState {
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identifiable]] = Nil,
     internalWorkStubs: List[InternalWork.Source] = Nil,
-    relations: Relations = Relations.none
+    relations: Relations = Relations.none,
+    // Stubs this work used to have. The merger synthesises inner works from
+    // internalWorkStubs, so dropping one silently orphans its work.
+    removedInternalWorkStubs: List[InternalWork.Source] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -199,7 +202,8 @@ object WorkState {
     sourceModifiedTime: Instant,
     mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil,
     internalWorkStubs: List[InternalWork.Identified] = Nil,
-    relations: Relations = Relations.none
+    relations: Relations = Relations.none,
+    removedInternalWorkStubs: List[InternalWork.Identified] = Nil
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified

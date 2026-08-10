@@ -66,6 +66,26 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
     )
   }
 
+  it("parses a stored Work that predates removedInternalWorkStubs") {
+    // Every work already in works-source and works-identified was written
+    // without this field, and the transformer reads them back to reconcile.
+    val stored: Work[WorkState.Identified] = identifiedWork()
+    val encoded = io.circe.parser.parse(toJson(stored).get).right.get
+    val state = encoded.hcursor.downField("state")
+
+    // Fails if the field moves and the removal below stops doing anything.
+    state.keys.get should contain("removedInternalWorkStubs")
+
+    val withoutField = state
+      .withFocus(_.mapObject(_.remove("removedInternalWorkStubs")))
+      .top
+      .get
+
+    fromJson[Work[WorkState.Identified]](
+      withoutField.noSpaces
+    ).get.state.removedInternalWorkStubs shouldBe empty
+  }
+
   it("preserves redirect sources when transitioning Work.Visible") {
     val redirectSources = (1 to 3).map {
       _ =>

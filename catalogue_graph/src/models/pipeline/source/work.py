@@ -9,6 +9,7 @@ class SourceWorkState(WorkState):
     # We don't need the internal_work_stubs in python, but to allow
     # deserialisation in the scala pipeline, we include them here.
     internal_work_stubs: list[str] = Field(default_factory=list)
+    removed_internal_work_stubs: list[str] = Field(default_factory=list)
     merge_candidates: list[MergeCandidate] = Field(default_factory=list)
     modified_time: str
 
