@@ -19,4 +19,9 @@ trait Transformer[SourceData] {
     newWork: Work[Source],
     storedWork: Work[Source]
   ): Work[Source] = newWork
+
+  /** Whether this work would be wrong without the stored work to reconcile
+    * against. If it would, the transformer fails rather than sending it.
+    */
+  def requiresStoredWork(newWork: Work[Source]): Boolean = false
 }

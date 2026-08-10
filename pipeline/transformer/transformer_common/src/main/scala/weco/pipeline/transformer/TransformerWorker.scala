@@ -104,7 +104,10 @@ trait TransformerEventProcessor[Payload <: SourcePayload, SourceData]
             case err: RetrieverNotFoundException =>
               debug(s"No stored work for $key: $err")
               Right(Some((transformedWork, key)))
-            case err: Throwable =>
+            // A work that needs the stored one is left to fail, so the message
+            // is retried rather than sent in a state we know to be wrong.
+            case err: Throwable
+                if !transformer.requiresStoredWork(transformedWork) =>
               warn(
                 s"Unable to retrieve work $key, sending without reconciliation",
                 err

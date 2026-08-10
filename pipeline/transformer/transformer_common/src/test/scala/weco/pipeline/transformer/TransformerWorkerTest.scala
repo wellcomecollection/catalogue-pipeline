@@ -15,7 +15,7 @@ import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.transformer.example._
 import weco.pipeline.transformer.result.Result
-import weco.pipeline_storage.RetrieverNotFoundException
+import weco.pipeline_storage.{Retriever, RetrieverNotFoundException}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 import weco.storage.Version
@@ -435,6 +435,60 @@ class TransformerWorkerTest
       }
     }
 
+    it(
+      "if the retriever errors and the transformer needs the stored work"
+    ) {
+      val brokenRetriever =
+        new MemoryRetriever[Work[Source]](index = mutable.Map()) {
+          override def apply(id: String): Future[Work[Source]] =
+            Future.failed(new RuntimeException("BOOM!"))
+        }
+
+      val needsStoredWork = new ExampleTransformer {
+        override def requiresStoredWork(newWork: Work[Source]): Boolean = true
+      }
+
+      withWorker(
+        transformer = needsStoredWork,
+        transformedWorkRetriever = Some(brokenRetriever)
+      ) {
+        case (_, QueuePair(queue, dlq), workIndexer, workKeySender, store) =>
+          sendNotificationToSQS(queue, createPayload(store))
+
+          eventually {
+            assertQueueHasSize(dlq, size = 1)
+            assertQueueEmpty(queue)
+
+            // Indexing it would overwrite the stored work we failed to read.
+            workIndexer.index shouldBe empty
+            workKeySender.messages shouldBe empty
+          }
+      }
+    }
+
+    it(
+      "but sends the work anyway if the transformer doesn't need the stored work"
+    ) {
+      val brokenRetriever =
+        new MemoryRetriever[Work[Source]](index = mutable.Map()) {
+          override def apply(id: String): Future[Work[Source]] =
+            Future.failed(new RuntimeException("BOOM!"))
+        }
+
+      withWorker(transformedWorkRetriever = Some(brokenRetriever)) {
+        case (_, QueuePair(queue, dlq), workIndexer, workKeySender, store) =>
+          sendNotificationToSQS(queue, createPayload(store))
+
+          eventually {
+            assertQueueEmpty(dlq)
+            assertQueueEmpty(queue)
+
+            workIndexer.index should have size 1
+            workKeySender.messages should have size 1
+          }
+      }
+    }
+
     it("if it can't send the key of the indexed work") {
       val brokenSender = new MemoryMessageSender() {
         override def send(body: String): Try[Unit] =
@@ -467,6 +521,7 @@ class TransformerWorkerTest
         initialEntries = Map.empty
       ),
     transformer: Transformer[ExampleData] = new ExampleTransformer,
+    transformedWorkRetriever: Option[Retriever[Work[Source]]] = None,
     visibilityTimeout: FiniteDuration = 1.second
   )(
     testWith: TestWith[
@@ -488,7 +543,7 @@ class TransformerWorkerTest
           sender = workKeySender
         ) {
           pipelineStream =>
-            val retriever =
+            val retriever = transformedWorkRetriever.getOrElse(
               new MemoryRetriever[Work[Source]](index = mutable.Map()) {
                 override def apply(id: String): Future[Work[Source]] =
                   workIndexer.index.get(id) match {
@@ -497,6 +552,7 @@ class TransformerWorkerTest
                       Future.failed(new RetrieverNotFoundException(id))
                   }
               }
+            )
 
             val worker = new TransformerWorker(
               transformer = transformer,

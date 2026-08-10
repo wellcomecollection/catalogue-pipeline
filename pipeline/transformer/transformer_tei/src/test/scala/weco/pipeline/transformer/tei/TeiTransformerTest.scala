@@ -374,6 +374,26 @@ class TeiTransformerTest
     }
   }
 
+  describe("deciding whether the stored work is required") {
+    it("requires it for a delete that has no stubs of its own") {
+      new TeiTransformer(emptyStore).requiresStoredWork(
+        deletedWork()
+      ) shouldBe true
+    }
+
+    it("does not require it for a delete that already carries its stubs") {
+      new TeiTransformer(emptyStore).requiresStoredWork(
+        deletedWorkWithStubs(List(createInternalWorkSource))
+      ) shouldBe false
+    }
+
+    it("does not require it for a work that isn't a delete") {
+      new TeiTransformer(emptyStore).requiresStoredWork(
+        visibleWorkWithStubs(stubs = Nil)
+      ) shouldBe false
+    }
+  }
+
   private val deleteId = "manuscript_15651"
   private val deleteSourceIdentifier = SourceIdentifier(
     identifierType = IdentifierType.Tei,

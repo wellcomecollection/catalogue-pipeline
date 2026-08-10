@@ -50,6 +50,15 @@ class TeiTransformer(teiReader: Readable[S3ObjectLocation, String])
       case _ => newWork
     }
 
+  /** Sending a deletion without its stubs loses them for good: it overwrites
+    * the stored work that held them, so a replay has nothing left to read.
+    */
+  override def requiresStoredWork(newWork: Work[Source]): Boolean =
+    newWork match {
+      case w: Work.Deleted[Source] => w.state.internalWorkStubs.isEmpty
+      case _                       => false
+    }
+
   private def handleTeiDelete(id: String, version: Int, time: Instant) =
     Right(
       Work.Deleted[Source](
