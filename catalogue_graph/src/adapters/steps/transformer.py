@@ -141,20 +141,13 @@ def build_transformer(
 
     snapshot_id = event.snapshot_id or adapter_store.current_snapshot_id()
 
-    if event.ids and event.transformer_type == "axiell":
-        # Not yet wired: AxiellChangesetReader doesn't thread ids through to
-        # its source, so falling through here would silently ignore ids and
-        # read every active record instead.
-        raise ValueError(
-            f"id-mode transforms are not yet supported for {event.transformer_type!r}"
-        )
-
     if event.transformer_type == "axiell":
         reader = AxiellChangesetReader.build(
             AXIELL_CONFIG,
             event.changeset_ids,
             use_rest_api_table=use_rest_api_table,
             snapshot_id=snapshot_id,
+            ids=event.ids,
             adapter_store=adapter_store,
         )
         return AxiellTransformer(reader)
