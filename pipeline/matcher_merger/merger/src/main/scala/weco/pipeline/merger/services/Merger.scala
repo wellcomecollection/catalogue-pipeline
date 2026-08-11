@@ -70,6 +70,14 @@ trait Merger extends MergerLogging {
     }
 
   def merge(works: Seq[Work[Identified]]): MergerOutcome = {
+    val outcome = mergeWorks(works)
+    outcome.copy(
+      resultWorks =
+        outcome.resultWorks ++ deletedInternalWorks(outcome.resultWorks)
+    )
+  }
+
+  private def mergeWorks(works: Seq[Work[Identified]]): MergerOutcome = {
     works match {
       case Seq(target: Work.Visible[Identified]) =>
         logIntentions(target, Nil)
@@ -142,6 +150,37 @@ trait Merger extends MergerLogging {
             )
           )
       }
+  }
+
+  /** Inner works are synthesised from the parent's stubs on every merge, so
+    * deleting a parent has to delete them explicitly.
+    */
+  private def deletedInternalWorks(
+    resultWorks: Seq[Work[Identified]]
+  ): Seq[Work.Deleted[Identified]] = {
+    val alreadyEmitted = resultWorks.map(_.state.canonicalId).toSet
+
+    resultWorks
+      .collect { case w: Work.Deleted[Identified] => w }
+      .flatMap {
+        parent =>
+          parent.state.internalWorkStubs.map {
+            case InternalWork.Identified(sourceIdentifier, canonicalId, _) =>
+              Work.Deleted[Identified](
+                version = parent.version,
+                state = Identified(
+                  sourceIdentifier = sourceIdentifier,
+                  canonicalId = canonicalId,
+                  sourceModifiedTime = parent.state.sourceModifiedTime
+                ),
+                deletedReason = DeletedReason.TeiDeletedInMerger
+              )
+          }
+      }
+      .filterNot {
+        child => alreadyEmitted.contains(child.state.canonicalId)
+      }
+      .distinct
   }
 
   private def redirectSourceToTarget(

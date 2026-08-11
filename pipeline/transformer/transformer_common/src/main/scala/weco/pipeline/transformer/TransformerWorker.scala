@@ -11,7 +11,11 @@ import weco.catalogue.internal_model.Implicits._
 import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline_storage.Indexable._
-import weco.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.pipeline_storage.{
+  PipelineStorageStream,
+  Retriever,
+  RetrieverNotFoundException
+}
 import weco.storage.{Identified, ReadError, Version}
 import io.circe.optics.JsonPath._
 import weco.typesafe.Runnable
@@ -29,6 +33,8 @@ case class TransformerError[SourceData, Key](
   sourceData: SourceData,
   key: Key
 ) extends TransformerWorkerError(t.getMessage)
+case class StoredWorkRetrievalError[Key](t: Throwable, key: Key)
+    extends TransformerWorkerError(t.getMessage)
 
 trait SourceDataRetriever[Payload, SourceData] {
   def lookupSourceData(
@@ -84,8 +90,10 @@ trait TransformerEventProcessor[Payload <: SourcePayload, SourceData]
           .apply(workIndexable.id(transformedWork))
           .map {
             storedWork =>
-              if (shouldSend(transformedWork, storedWork)) {
-                Right(Some((transformedWork, key)))
+              val reconciledWork =
+                transformer.reconcileWithStored(transformedWork, storedWork)
+              if (shouldSend(reconciledWork, storedWork)) {
+                Right(Some((reconciledWork, key)))
               } else {
                 info(
                   s"$transformerName: from $key transformed work with id ${transformedWork.id}; already in pipeline so not re-sending"
@@ -94,8 +102,20 @@ trait TransformerEventProcessor[Payload <: SourcePayload, SourceData]
               }
           }
           .recover {
+            // Not-found is the normal first sighting of a record, so it stays quiet.
+            case err: RetrieverNotFoundException =>
+              debug(s"No stored work for $key: $err")
+              Right(Some((transformedWork, key)))
+            // A work that needs the stored one fails, so the message is
+            // retried rather than sent in a state we know to be wrong.
+            case err: Throwable
+                if transformer.requiresStoredWork(transformedWork) =>
+              Left(StoredWorkRetrievalError(err, key))
             case err: Throwable =>
-              debug(s"Unable to retrieve work $key: $err")
+              warn(
+                s"Unable to retrieve work $key, sending without reconciliation",
+                err
+              )
               Right(Some((transformedWork, key)))
           }
 
@@ -239,6 +259,11 @@ final class TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest](
               case TransformerError(t, sourceData, key) =>
                 error(
                   s"$transformerName: TransformerError on $sourceData with $key ($t)"
+                )
+              case StoredWorkRetrievalError(t, key) =>
+                error(
+                  s"$transformerName: StoredWorkRetrievalError on $key; this work cannot be sent without the stored work to reconcile against",
+                  t
                 )
             }
 

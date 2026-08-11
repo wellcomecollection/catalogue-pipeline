@@ -32,6 +32,33 @@ class TeiTransformer(teiReader: Readable[S3ObjectLocation, String])
         handleTeiDelete(id, version, time)
     }
 
+  /** A deletion has no XML to parse, so the inner works it used to have are
+    * only knowable from the previously stored work. The merger needs them to
+    * delete the children.
+    */
+  override def reconcileWithStored(
+    newWork: Work[Source],
+    storedWork: Work[Source]
+  ): Work[Source] =
+    newWork match {
+      case w: Work.Deleted[Source] if w.state.internalWorkStubs.isEmpty =>
+        w.copy(
+          state = w.state.copy(
+            internalWorkStubs = storedWork.state.internalWorkStubs
+          )
+        )
+      case _ => newWork
+    }
+
+  /** Sending a deletion without its stubs loses them for good: it overwrites
+    * the stored work that held them, so a replay has nothing left to read.
+    */
+  override def requiresStoredWork(newWork: Work[Source]): Boolean =
+    newWork match {
+      case w: Work.Deleted[Source] => w.state.internalWorkStubs.isEmpty
+      case _                       => false
+    }
+
   private def handleTeiDelete(id: String, version: Int, time: Instant) =
     Right(
       Work.Deleted[Source](
