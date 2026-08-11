@@ -16,7 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # Bumped whenever the mapping rules change; stamped into every payload's meta.
-VERSION = "2.5.0"
+VERSION = "2.6.0"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────
@@ -50,7 +50,8 @@ DEFAULT_LOAN_TYPE = "Can circulate"
 DEFAULT_LOCATION = "History of Medicine"
 DEFAULT_HOLDINGS_SOURCE = "MARC"
 AXIELL_LOCATION_NOTE_TYPE = "Axiell location"
-# FOLIO instance identifier type used for the AxC object_number (035$a).
+# FOLIO instance identifier type used for the AxC object_number
+# (the (AltRefNo)-prefixed 035$a).
 LOCAL_IDENTIFIER_TYPE = "Local identifier"
 
 # AxC current_location (MARC 852$b) values whose leading digits map to a fixed
@@ -152,7 +153,8 @@ HOLDINGS_SOURCE_FIELD = FieldMap(
     label="holdings source",
 )
 # instance.identifiers[].identifierTypeId is a constant ("Local identifier"); the
-# identifier *value* passes through from object_number (035$a) in build_instance.
+# identifier *value* passes through from object_number (the (AltRefNo)-prefixed
+# 035$a) in build_instance.
 LOCAL_IDENTIFIER_FIELD = FieldMap(
     None,
     resolver="resolve_identifier_type",
@@ -166,8 +168,8 @@ FIELDS: tuple[FieldMap, ...] = (
     FieldMap("source_id", marc="001"),  # Axiell GUID — identifies the record
     FieldMap("title", marc="245$a"),  # → instance.title
     FieldMap(
-        "object_number", marc="035$a"
-    ),  # → instance.identifiers (local identifier)
+        "object_number", marc="035$a(AltRefNo)"
+    ),  # (AltRefNo)-prefixed 035$a → instance.identifiers (local identifier)
     MATERIAL_TYPE_FIELD,  # → item.materialType
     LOCATION_FIELD,  # → holdings/item location + Axiell location note
     FieldMap("barcode", marc="949$a"),  # → item.barcode

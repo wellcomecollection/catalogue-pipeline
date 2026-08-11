@@ -529,6 +529,38 @@ def test_folio_location_prefix_override(
     assert _folio_location(current_location) == expected
 
 
+def test_object_number_extracts_the_altrefno_035_stripped() -> None:
+    # A record carries several 035$a subfields, one per identifier scheme (all
+    # prefixed by the XSLT); object_number must be the (AltRefNo) one, not the first
+    # 035$a (Adlib serialisation order is arbitrary), with its prefix stripped.
+    from adapters.steps.axiell_folio_sync.mapping import extract, parse_xml
+
+    xml = (
+        "<record>"
+        "<controlfield tag='001'>g1</controlfield>"
+        "<datafield tag='035'><subfield code='a'>(accession number)Acc123</subfield></datafield>"
+        "<datafield tag='035'><subfield code='a'>(AltRefNo)SA/BSI/A/1</subfield></datafield>"
+        "<datafield tag='035'><subfield code='a'>(Bibliographic Number)b12345</subfield></datafield>"
+        "</record>"
+    )
+    assert extract(parse_xml(xml), "035$a(AltRefNo)") == "SA/BSI/A/1"
+
+
+def test_object_number_absent_when_no_altrefno_035() -> None:
+    # No (AltRefNo) 035$a -> object_number is absent, so an accession- or Sierra-only
+    # record gets no Local identifier (rather than picking the wrong 035$a).
+    from adapters.steps.axiell_folio_sync.mapping import extract, parse_xml
+
+    xml = (
+        "<record>"
+        "<controlfield tag='001'>g1</controlfield>"
+        "<datafield tag='035'><subfield code='a'>(accession number)Acc123</subfield></datafield>"
+        "<datafield tag='035'><subfield code='a'>(Bibliographic Number)b12345</subfield></datafield>"
+        "</record>"
+    )
+    assert extract(parse_xml(xml), "035$a(AltRefNo)") is None
+
+
 def test_object_number_maps_to_local_identifier() -> None:
     # AxC object_number (035$a) becomes a "Local identifier" on the instance.
     from adapters.steps.axiell_folio_sync.mapping import (

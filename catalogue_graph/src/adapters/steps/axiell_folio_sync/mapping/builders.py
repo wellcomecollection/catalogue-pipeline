@@ -102,8 +102,9 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
 def build_instance(rec: CanonicalRecord, ref: RefCache) -> Instance:
     if not rec.title:
         raise MappingError(f"Missing 245$a (title) for source_id={rec.source_id}")
-    # AxC object_number (035$a) becomes a "Local identifier" on the instance.
-    # Absent when the record carries no 035$a — omit identifiers entirely then.
+    # AxC object_number (the (AltRefNo)-prefixed 035$a) becomes a "Local identifier"
+    # on the instance. Absent when the record carries no (AltRefNo) 035$a — omit
+    # identifiers entirely then.
     identifiers = None
     object_number = (rec.object_number or "").strip()
     if object_number:

@@ -14,7 +14,10 @@ from dataclasses import dataclass
 
 from pymarc.record import Record
 
-from adapters.transformers.marc.common import first_non_empty_subfield
+from adapters.transformers.marc.common import (
+    first_non_empty_subfield,
+    non_empty_subfields,
+)
 from utils.marc import parse_single_marc_record
 
 
@@ -28,7 +31,7 @@ class CanonicalRecord:
 
     source_id: str
     title: str | None = None  # 245$a
-    object_number: str | None = None  # 035$a — AxC local identifier
+    object_number: str | None = None  # (AltRefNo) 035$a, prefix stripped — AxC local id
     object_category: str | None = None  # 655$a — feeds material type
     current_location: str | None = None  # 852$b — AxC current location
     barcode: str | None = None  # 949$a
@@ -47,11 +50,27 @@ def parse_xml(xml_content: str) -> Record:
 def extract(record: Record, spec: str) -> str | None:
     """Extract one value using ``"TAG$subfield"`` (datafield) or ``"TAG"`` (controlfield).
 
+    A datafield spec may carry an optional MARC-035-style ``"(Prefix)"`` namespace
+    qualifier — e.g. ``"035$a(AltRefNo)"`` — to pick the subfield whose value carries
+    that ``(Prefix)value`` namespace and return the bare ``value`` with the prefix
+    stripped. This is needed because a record can hold several ``035$a`` subfields,
+    one per identifier scheme (``(Calm RefNo)``, ``(AltRefNo)``, ``(accession number)``,
+    Sierra bib numbers, …); the first non-empty one is whatever order Adlib serialised.
+    Prefix parsing mirrors ``transformers.marc.other_identifiers.format_field``.
+
     This is the only field-access primitive callers need; the table of which
     spec feeds which record field lives in ``mapping.MARC_SOURCE``.
     """
     if "$" in spec:
         tag, code = spec.split("$", 1)
+        code, _, prefix = code.partition("(")
+        if prefix:
+            # Restore the leading "(" the partition stripped: "(AltRefNo)".
+            wanted = f"({prefix}"
+            for subfield in non_empty_subfields(tag.strip(), code.strip(), record):
+                if subfield.startswith(wanted):
+                    return subfield[len(wanted) :].strip() or None
+            return None
         return first_non_empty_subfield(tag.strip(), code.strip(), record)
     # Control field (e.g. 001, 003, 005, 008)
     tag = spec.strip()
