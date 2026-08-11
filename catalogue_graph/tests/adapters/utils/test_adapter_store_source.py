@@ -4,6 +4,7 @@ from collections.abc import Generator
 from typing import cast
 
 import pyarrow as pa
+import pytest
 
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.adapter_store_source import AdapterStoreSource
@@ -83,6 +84,70 @@ def test_stream_raw_empty_changeset_yields_nothing(
     source = AdapterStoreSource(store, changeset_ids=["nonexistent"])
 
     assert list(source.stream_raw()) == []
+
+
+def test_stream_raw_id_path_yields_only_requested_ids(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """With ids and no changeset ids, stream_raw yields only the named rows."""
+    store = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first"},
+            {"id": "rec002", "content": "second"},
+            {"id": "rec003", "content": "third"},
+        ]
+    )
+    source = AdapterStoreSource(store, changeset_ids=[], ids=["rec001", "rec003"])
+
+    rows = list(source.stream_raw())
+
+    assert sorted(row["id"] for row in rows) == ["rec001", "rec003"]
+
+
+def test_stream_raw_id_path_includes_deleted_rows_with_content(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """A soft-deleted row matching a requested id is streamed with its
+    preserved content, so it can overwrite a live document downstream."""
+    store = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "active"},
+            {
+                "id": "rec002",
+                "content": "deleted with content preserved",
+                "deleted": True,
+            },
+        ]
+    )
+    source = AdapterStoreSource(store, changeset_ids=[], ids=["rec001", "rec002"])
+
+    rows = {row["id"]: row for row in source.stream_raw()}
+
+    assert sorted(rows) == ["rec001", "rec002"]
+    assert rows["rec002"]["deleted"] is True
+    assert rows["rec002"]["content"] == "deleted with content preserved"
+
+
+def test_stream_raw_id_path_no_matching_ids_yields_nothing(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Ids that match no row yield an empty stream, not a fallback reindex."""
+    store = adapter_store_with_records([{"id": "rec001", "content": "first"}])
+    source = AdapterStoreSource(store, changeset_ids=[], ids=["nonexistent"])
+
+    assert list(source.stream_raw()) == []
+
+
+def test_rejects_changeset_ids_combined_with_ids(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Both being set is rejected outright, not silently resolved by picking
+    one, so a caller that passes both by mistake gets a clear error instead
+    of a confusing partial result."""
+    store = adapter_store_with_records([{"id": "rec001", "content": "first"}])
+
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        AdapterStoreSource(store, changeset_ids=["changeset-1"], ids=["rec001"])
 
 
 class _ClosableBatchStream:

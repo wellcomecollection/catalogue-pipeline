@@ -128,6 +128,8 @@ AWS_PROFILE=platform-developer uv run python -m adapters.steps.transformer \
 |--------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | `--transformer-type`     | Yes      | Which transformer to run: `axiell`, `ebsco`, or `folio`                                                                                   |
 | `--changeset-id`         | No       | Changeset ID to transform. Can be repeated for multiple changesets. If omitted, transforms all records.                                   |
+| `--id`                   | No       | Record id to transform (repeatable). Mutually exclusive with `--changeset-id`. Combines with `--ids-file` if both are given.              |
+| `--ids-file`             | No       | Path to a file of record ids, one per line. Mutually exclusive with `--changeset-id`. Combines with `--id` if both are given.             |
 | `--job-id`               | No       | Job identifier for manifest tracking. Defaults to `dev`.                                                                                  |
 | `--use-rest-api-table`   | No       | Use the S3 Tables catalog instead of local storage.                                                                                       |
 | `--es-mode`              | No       | Elasticsearch target: `local` (default) or `public`.                                                                                      |
@@ -144,6 +146,19 @@ In production, the transformer runs as a Lambda function. The event structure:
   "changeset_ids": [
     "changeset-001",
     "changeset-002"
+  ]
+}
+```
+
+To re-transform a specific set of already-stored records instead — e.g. after a transformer bug fix, or to recover records missing from the index — supply `ids` instead of `changeset_ids`. The two are mutually exclusive; an explicitly empty `ids` list is rejected rather than falling through to a full reindex:
+
+```json
+{
+  "transformer_type": "ebsco",
+  "job_id": "idload-20250116",
+  "ids": [
+    "ebs00001",
+    "ebs00002"
   ]
 }
 ```
@@ -189,6 +204,14 @@ If indexing a tombstone fails, the error lands in the transformer report and fir
 transformer-failures alarm, but the execution still succeeds. Facts are only read by runs for their original
 changeset ids, so recovery is a manual redrive: re-run the transformer for that pipeline with the failed run's
 changeset ids (idempotent, safe to repeat).
+
+**Id-mode runs never deliver deletion facts.** Facts are recorded and read per-changeset (a fact means "this GUID
+was superseded, as detected during changeset C"), and there is no equivalent per-id query. An id-mode run only
+re-transforms the named records via `iter_records()`; `iter_deletions()` returns nothing when `changeset_ids` is
+empty, whether that's because the run is a full reindex or an id-mode run. This is intentional: id-mode exists to
+re-transform records that are already known to be current (a bad field, a spot fix after a transformer change),
+not to replay historical deletions — those are already delivered by the ordinary changeset-driven run that
+detected them.
 
 ```mermaid
 ---

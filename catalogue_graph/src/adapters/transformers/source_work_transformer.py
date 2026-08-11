@@ -22,10 +22,11 @@ class SourceWorkTransformer(ElasticBaseTransformer[SourceWork], ABC):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None = None,
+        ids: list[str] | None = None,
     ) -> None:
         super().__init__()
         self.source: RecordSource = self._build_source(
-            adapter_store, changeset_ids, snapshot_id
+            adapter_store, changeset_ids, snapshot_id, ids
         )
 
     def _build_source(
@@ -33,10 +34,11 @@ class SourceWorkTransformer(ElasticBaseTransformer[SourceWork], ABC):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None,
+        ids: list[str] | None = None,
     ) -> RecordSource:
         """Build the record source. Subclasses override this to supply a
         source-specific subclass (e.g. `FolioStoreSource`)."""
-        return AdapterStoreSource(adapter_store, changeset_ids, snapshot_id)
+        return AdapterStoreSource(adapter_store, changeset_ids, snapshot_id, ids)
 
     @property
     @abstractmethod

@@ -25,9 +25,10 @@ class FolioStoreSource(AdapterStoreSource):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None = None,
+        ids: list[str] | None = None,
         items_store: AdapterStore | None = None,
     ):
-        super().__init__(adapter_store, changeset_ids, snapshot_id)
+        super().__init__(adapter_store, changeset_ids, snapshot_id, ids)
         self.items_store = items_store
 
     def _process_rows(self, rows: list[dict[str, Any]]) -> Generator[dict[str, Any]]:
