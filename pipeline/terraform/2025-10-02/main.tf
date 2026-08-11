@@ -41,10 +41,6 @@ module "pipeline" {
       }
     },
     "2026-03-03" = {
-      works = {
-        // prod graph/ingestor/indexer - prod API
-        indexed = "works_indexed.2024-11-14"
-      }
       concepts = {
         // prod graph/ingestor/indexer - prod API
         indexed = "concepts_indexed.2025-06-17"
@@ -75,7 +71,7 @@ module "pipeline" {
     },
     "2026-07-30" = {
       works = {
-        // Mappings to include new archive-related fields. Future prod index.
+        // prod graph/ingestor/indexer - prod API (archive-related fields)
         indexed = "works_indexed.2026-07-30"
       }
     },
