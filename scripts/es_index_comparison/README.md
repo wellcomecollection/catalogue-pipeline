@@ -82,6 +82,26 @@ filter_query:
     term:
       state.sourceIdentifier.identifierType.id: ebsco-alt-lookup
 
+# OPTIONAL: per-side queries keyed by index source, overriding filter_query
+# for that side. Use when the two sides need different filters, e.g. comparing
+# works that changed source system but kept their document ids.
+filter_queries:
+  prod-works-source:
+    query:
+      term:
+        state.sourceIdentifier.identifierType.id: calm-record-id
+  stage-works-source:
+    query:
+      term:
+        state.sourceIdentifier.identifierType.id: axiell-guid
+
+# OPTIONAL: restrict both sides to an explicit id population, one id per line
+# (blank lines and # comments skipped), instead of embedding ids in this file.
+# Relative paths resolve against this config's directory. ids_format wraps
+# each line into a document id. ANDed with filter_query/filter_queries.
+ids_file: ../../../reindexer/scripts/third_party_archives.txt
+ids_format: "Work[calm-record-id/{}]"
+
 # OPTIONAL: patterns for paths to ignore in diffs
 ignore_fields:
   - version

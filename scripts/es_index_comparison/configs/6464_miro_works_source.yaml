@@ -1,0 +1,25 @@
+# platform#6464 section 2: Miro works at works-source. Counts are at exact
+# parity (421,608 both sides); expectation is zero real differences, since
+# only Axiell should have changed between the pipelines.
+
+index_sources:
+  - prod-works-source
+  - new-works-source
+
+filter_query:
+  query:
+    term:
+      state.sourceIdentifier.identifierType.id: miro-image-number
+
+ignore_fields:
+  # Per-run ingest stamp.
+  - indexed_at
+  # Processing version counter, always differs between full runs.
+  - version
+  # Per-run transform stamp.
+  - state.modifiedTime
+
+sample_size: 30
+hash_bucket_count: 6
+namespace: 6464-miro-works-source
+output_dir: data

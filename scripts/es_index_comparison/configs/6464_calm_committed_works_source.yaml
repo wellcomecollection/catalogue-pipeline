@@ -1,0 +1,25 @@
+# platform#6464 section 2: the committed CALM subset at works-source.
+# Production transforms all of CALM but the new pipeline only reindexes the
+# third-party subset, so both sides are restricted to that population.
+# The population is the reindexer's own list rather than an embedded id
+# list; document ids at works-source are Work[calm-record-id/<uuid>].
+
+index_sources:
+  - prod-works-source
+  - new-works-source
+
+ids_file: ../../../reindexer/scripts/third_party_archives.txt
+ids_format: "Work[calm-record-id/{}]"
+
+ignore_fields:
+  # Per-run ingest stamp.
+  - indexed_at
+  # Processing version counter, always differs between full runs.
+  - version
+  # Per-run transform stamp.
+  - state.modifiedTime
+
+sample_size: 30
+hash_bucket_count: 4
+namespace: 6464-calm-committed-works-source
+output_dir: data
