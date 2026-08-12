@@ -25,7 +25,7 @@ from .items import (
 from .languages import create_language
 from .notes import create_note
 from .production import create_production_event
-from .random import random_alphanumeric, reset
+from .random import random_alphanumeric, random_canonical_id, reset
 from .works import (
     create_deleted_merged_work,
     create_invisible_merged_work,
@@ -65,5 +65,6 @@ __all__ = [
     "create_visible_extracted_work",
     "create_work_hierarchy_item",
     "random_alphanumeric",
+    "random_canonical_id",
     "reset",
 ]

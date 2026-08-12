@@ -1,0 +1,72 @@
+{
+  "description": "a genre concept with a hierarchy but no description",
+  "id": "o2y0cz0c",
+  "document": {
+    "query": {
+      "id": "o2y0cz0c",
+      "identifiers": [
+        {
+          "value": "kceqskch4",
+          "identifierType": "lc-gmgpc"
+        }
+      ],
+      "label": "Emu engravings",
+      "alternativeLabels": [],
+      "type": "Genre"
+    },
+    "display": {
+      "id": "o2y0cz0c",
+      "identifiers": [
+        {
+          "value": "kceqskch4",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "lc-gmgpc",
+            "type": "IdentifierType",
+            "label": "Library of Congress Thesaurus for Graphic Materials"
+          }
+        }
+      ],
+      "label": "Emu engravings",
+      "displayLabel": "Emu engravings",
+      "alternativeLabels": [],
+      "type": "Genre",
+      "relatedConcepts": {
+        "relatedTo": [],
+        "fieldsOfWork": [],
+        "narrowerThan": [
+          {
+            "label": "Engravings",
+            "id": "406twyqj",
+            "conceptType": "Genre"
+          }
+        ],
+        "broaderThan": [
+          {
+            "label": "Wood emu engravings",
+            "id": "9a3fvc8r",
+            "conceptType": "Genre"
+          },
+          {
+            "label": "Steel emu engravings",
+            "id": "ip4wswit",
+            "conceptType": "Genre"
+          }
+        ],
+        "people": [],
+        "frequentCollaborators": [],
+        "relatedTopics": [
+          {
+            "label": "Flightless finery",
+            "id": "y0famvkp",
+            "conceptType": "Concept"
+          }
+        ],
+        "foundedBy": []
+      },
+      "sameAs": [],
+      "displayImages": []
+    }
+  },
+  "createdAt": "2026-08-12T14:16:18.377480+00:00"
+}
