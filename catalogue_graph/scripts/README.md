@@ -79,6 +79,19 @@ recovers with a plain re-run. Two things to watch:
   reset but the stores were not rebuilt, leaving the gap between disabling the
   trigger and the synthetic cursor uncovered. Re-cover it with the reloader.
 
+### Wipe only
+
+`--wipe-only` wipes the same stores the rebuild would (adapter store, plus
+reconciler and deletion facts for Axiell, plus items for FOLIO) and stops:
+no download, reload, reconcile or events. Use it when the clear and the
+rebuild have to happen at different times, for example clearing ahead of a
+bulk load in the source system and rebuilding once the load has landed.
+
+It leaves the window store and harvest cursor alone, so disable the harvest
+schedule first and keep it disabled until the rebuild: an incremental harvest
+against a wiped store repopulates it with whatever the source serves. The
+pre-wipe Iceberg snapshot ids are logged for time-travel rollback.
+
 ### Usage
 
 ```bash
@@ -94,6 +107,12 @@ uv run python scripts/rebuild_adapter.py \
   --use-rest-api-table \
   --snapshot-path /tmp/folio.parquet \
   --folio-items-snapshot-path /tmp/folio_items.parquet
+
+# Wipe without rebuilding
+uv run python scripts/rebuild_adapter.py \
+  --adapter-type axiell \
+  --use-rest-api-table \
+  --wipe-only
 ```
 
 Pass `--skip-publish-event` to load the stores without triggering downstream

@@ -25,6 +25,7 @@ from adapters.utils.window_summary import WindowSummary
 from tests.adapters.conftest import (
     adapter_records_to_table,
     deletion_facts_records_to_table,
+    reconciler_records_to_table,
 )
 
 
@@ -359,6 +360,100 @@ def test_rebuild_adapter_orchestration_axiell(
 
     assert len(reconciled) == 1
     assert published == [[changeset_id] for changeset_id in reconciled[0]]
+
+
+def test_wipe_only_axiell_empties_the_stores_and_stops(
+    temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """--wipe-only empties the adapter, reconciler and facts stores and does
+    nothing else: the config stub has no window store and no download client,
+    so touching either fails the test, and no events are published. Runs on
+    local tables without skip_publish_event, since the local-table publish
+    guard must not apply to a wipe."""
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table([{"id": "rec001", "content": "stale"}])
+    )
+    reconciler_store = ReconcilerStore(reconciler_temporary_table, "test_namespace")
+    reconciler_temporary_table.append(
+        reconciler_records_to_table([{"id": "rec001", "guid": "guid-1"}])
+    )
+    facts_store = DeletionFactsStore(deletion_facts_temporary_table, "test_namespace")
+    facts_store.append_facts(
+        deletion_facts_records_to_table(
+            [{"record_id": "rec001", "guid": "guid-1", "changeset": "c1"}]
+        )
+    )
+    reconcile_runtime = ReconcileRuntime(
+        adapter_store=adapter_store,
+        reconciler_store=reconciler_store,
+        facts_store=facts_store,
+        adapter_name="axiell",
+        namespace="test_namespace",
+    )
+    config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: adapter_store)
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_reconcile_runtime", lambda *a, **k: reconcile_runtime
+    )
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+    published: list[object] = []
+    monkeypatch.setattr(
+        rebuild_adapter, "_publish_adapter_event", lambda *a: published.append(a)
+    )
+
+    rebuild_adapter.rebuild_adapter("axiell", wipe_only=True)
+
+    assert adapter_store.get_all_records().num_rows == 0
+    assert reconciler_store.get_all_records().num_rows == 0
+    assert facts_store.get_all_records().num_rows == 0
+    assert published == []
+
+
+def test_wipe_only_folio_empties_bib_and_items_stores_and_stops(
+    temporary_table: IcebergTable,
+    items_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """--wipe-only on FOLIO empties both the bib and items stores and does
+    nothing else: the config stub has no window store and no download client,
+    so touching either fails the test, and no events are published."""
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table([{"id": "rec001", "content": "stale bib"}])
+    )
+    items_store = AdapterStore(items_temporary_table, "items_namespace")
+    items_temporary_table.append(
+        adapter_records_to_table(
+            [{"id": "item001", "content": "stale item"}], namespace="items_namespace"
+        )
+    )
+    config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: adapter_store)
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_items_store", lambda **kwargs: items_store
+    )
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+    published: list[object] = []
+    monkeypatch.setattr(
+        rebuild_adapter, "_publish_adapter_event", lambda *a: published.append(a)
+    )
+
+    rebuild_adapter.rebuild_adapter("folio", wipe_only=True)
+
+    assert adapter_store.get_all_records().num_rows == 0
+    assert items_store.get_all_records().num_rows == 0
+    assert published == []
+
+
+def test_wipe_only_refuses_snapshot_paths() -> None:
+    with pytest.raises(ValueError, match="wipe-only takes no snapshots"):
+        rebuild_adapter.rebuild_adapter(
+            "axiell", wipe_only=True, snapshot_path="/tmp/leftover.parquet"
+        )
 
 
 def test_reconcile_runtime_sees_the_loaded_records(
