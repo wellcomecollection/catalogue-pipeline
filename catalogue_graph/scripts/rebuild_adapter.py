@@ -571,12 +571,13 @@ def main() -> None:
         description="Rebuild an OAI-PMH adapter store from a full snapshot"
     )
     add_adapter_event_args(parser)
-    parser.add_argument(
+    target = parser.add_mutually_exclusive_group(required=True)
+    target.add_argument(
         "--snapshot-path",
         metavar="PATH",
-        help="Path to the bib records snapshot file. If the file already exists, the download is skipped and the existing snapshot is used. Required unless --wipe-only.",
+        help="Path to the bib records snapshot file. If the file already exists, the download is skipped and the existing snapshot is used.",
     )
-    parser.add_argument(
+    target.add_argument(
         "--wipe-only",
         action="store_true",
         help="Wipe the adapter's stores and stop: no download, reload, reconcile or events. Leaves the window store and harvest cursor alone, so disable the harvest schedule first.",
