@@ -334,6 +334,36 @@ def test_transformer_id_run_includes_deleted_rows_as_tombstones(
     assert deleted["deletedReason"]["type"] == "DeletedFromSource"
 
 
+def test_transformer_id_run_reports_unmatched_ids(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    records_by_id = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
+    }
+    prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=EBSCO_NAMESPACE,
+        transformer_type="ebsco",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        ids=["ebs00001", "ebs-does-not-exist"],
+        index_date="2025-01-01",
+    )
+
+    assert result.success_count == 1
+    assert result.failure_count == 0
+    assert result.unmatched_count == 1
+
+    report = read_transformer_report(result)
+    assert report["unmatched_ids"] == ["ebs-does-not-exist"]
+
+
 def test_transformer_id_run_report_key_is_not_reindex(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:

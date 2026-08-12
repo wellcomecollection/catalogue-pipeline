@@ -107,6 +107,18 @@ def test_records_by_id_yields_only_named_records_including_tombstones(
     assert rows["collect-2"]["content"] == MARCXML
 
 
+def test_records_by_id_tracks_unmatched_ids(temporary_table: IcebergTable) -> None:
+    """An id that matches no store row is surfaced on the reader once
+    iter_records has been fully consumed, so a recovery run can report it."""
+    _seed_adapter_rows(temporary_table, [{"id": "collect-1", "content": MARCXML}])
+
+    reader = _reader(temporary_table, [], ids=["collect-1", "collect-missing"])
+    rows = {row["id"]: row for row in reader.iter_records()}
+
+    assert set(rows) == {"collect-1"}
+    assert reader.unmatched_ids == ["collect-missing"]
+
+
 def test_deletions_are_typed_and_liveness_filtered(
     temporary_table: IcebergTable,
     deletion_facts_temporary_table: IcebergTable,
