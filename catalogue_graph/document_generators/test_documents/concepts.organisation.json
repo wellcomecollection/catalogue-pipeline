@@ -1,12 +1,12 @@
 {
   "description": "an organisation concept with founders and people",
-  "id": "w4kndkkv",
+  "id": "c8rip4ws",
   "document": {
     "query": {
-      "id": "w4kndkkv",
+      "id": "c8rip4ws",
       "identifiers": [
         {
-          "value": "hqhm6cqla",
+          "value": "rwl85o2ni",
           "identifierType": "lc-names"
         }
       ],
@@ -15,10 +15,10 @@
       "type": "Organisation"
     },
     "display": {
-      "id": "w4kndkkv",
+      "id": "c8rip4ws",
       "identifiers": [
         {
-          "value": "hqhm6cqla",
+          "value": "rwl85o2ni",
           "type": "Identifier",
           "identifierType": {
             "id": "lc-names",
@@ -31,7 +31,7 @@
       "displayLabel": "Dodo Preservation Society",
       "alternativeLabels": [],
       "description": {
-        "text": "bUrhToxYkvB0dgYj2Soc0KO67IMRebhOmM1Khzfx",
+        "text": "Mbm9lThEnUZd7RbIBNg1qeoePtwBldGDcMgSzmqw",
         "sourceLabel": "weco-authority"
       },
       "type": "Organisation",
@@ -43,12 +43,12 @@
         "people": [
           {
             "label": "Ostrich, Olga",
-            "id": "qeoetw1l",
+            "id": "2la406tw",
             "conceptType": "Person"
           },
           {
             "label": "Flamingo, Florence",
-            "id": "d63cgzmq",
+            "id": "yqj9a3fv",
             "conceptType": "Person"
           }
         ],
@@ -57,7 +57,7 @@
         "foundedBy": [
           {
             "label": "Pemberton, Petronella",
-            "id": "h4ndb81g",
+            "id": "ndkkv7qh",
             "relationshipType": "has_founder",
             "conceptType": "Person"
           }
@@ -67,5 +67,5 @@
       "displayImages": []
     }
   },
-  "createdAt": "2026-08-12T14:16:18.371697+00:00"
+  "createdAt": "2026-08-12T14:54:27.668118+00:00"
 }

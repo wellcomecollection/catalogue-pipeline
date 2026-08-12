@@ -1,20 +1,20 @@
 {
   "description": "a person concept with every field populated",
-  "id": "f8z7r7pn",
+  "id": "oxkv1dgj",
   "document": {
     "query": {
-      "id": "f8z7r7pn",
+      "id": "oxkv1dgj",
       "identifiers": [
         {
-          "value": "5rl08alrc",
+          "value": "2soc0ko67",
           "identifierType": "lc-names"
         },
         {
-          "value": "fqps6ywfu",
+          "value": "imrebhomm",
           "identifierType": "wikidata"
         },
         {
-          "value": "nhflov2mp",
+          "value": "1khzfx1hc",
           "identifierType": "viaf"
         }
       ],
@@ -26,10 +26,10 @@
       "type": "Person"
     },
     "display": {
-      "id": "f8z7r7pn",
+      "id": "oxkv1dgj",
       "identifiers": [
         {
-          "value": "5rl08alrc",
+          "value": "2soc0ko67",
           "type": "Identifier",
           "identifierType": {
             "id": "lc-names",
@@ -38,7 +38,7 @@
           }
         },
         {
-          "value": "fqps6ywfu",
+          "value": "imrebhomm",
           "type": "Identifier",
           "identifierType": {
             "id": "wikidata",
@@ -47,7 +47,7 @@
           }
         },
         {
-          "value": "nhflov2mp",
+          "value": "1khzfx1hc",
           "type": "Identifier",
           "identifierType": {
             "id": "viaf",
@@ -121,9 +121,43 @@
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/image/Vrwi4j7c/full/full/0/default.jpg",
           "type": "DigitalLocation"
+        },
+        {
+          "locationType": {
+            "id": "iiif-image",
+            "type": "LocationType",
+            "label": "IIIF Image API"
+          },
+          "license": {
+            "id": "cc-by",
+            "type": "License",
+            "label": "Attribution 4.0 International (CC BY 4.0)",
+            "url": "http://creativecommons.org/licenses/by/4.0/"
+          },
+          "accessConditions": [
+            {
+              "method": {
+                "id": "view-online",
+                "type": "AccessMethod",
+                "label": "View online"
+              },
+              "status": {
+                "id": "open",
+                "type": "AccessStatus",
+                "label": "Open"
+              },
+              "terms": "Terms: 6YwfuNhFLO",
+              "note": "Note: 2mpbUrh",
+              "type": "AccessCondition"
+            }
+          ],
+          "url": "https://iiif.wellcomecollection.org/image/V1f5s71i/full/full/0/default.jpg",
+          "credit": "Credit line: z1THrHZp2n",
+          "linkText": "Link text: L08ALrCFQP",
+          "type": "DigitalLocation"
         }
       ]
     }
   },
-  "createdAt": "2026-08-12T14:16:18.364770+00:00"
+  "createdAt": "2026-08-12T14:54:27.661687+00:00"
 }

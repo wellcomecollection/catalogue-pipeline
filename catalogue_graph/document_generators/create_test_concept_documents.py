@@ -20,8 +20,12 @@ from ingestor.models.indexable.concept import (
     RelatedConcepts,
 )
 from ingestor.transformers.raw_concept import get_source_concept_url
+from models.pipeline.access_condition import AccessCondition
+from models.pipeline.access_method import ViewOnline
+from models.pipeline.access_status import Open
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import SourceIdentifier
+from models.pipeline.location import DigitalLocation, LocationType
 from utils.types import ConceptType
 
 from .generators import random_alphanumeric, random_canonical_id, reset
@@ -86,6 +90,27 @@ def create_display_image() -> DisplayDigitalLocation:
         locationType=DisplayLocationType.from_id("iiif-image"),
         accessConditions=[],
     )
+
+
+def create_licensed_display_image() -> DisplayDigitalLocation:
+    """A display image exercising every DigitalLocation field the spec documents."""
+    image_ref = f"V{random_alphanumeric(7).lower()}"
+    location = DigitalLocation(
+        url=f"https://iiif.wellcomecollection.org/image/{image_ref}/full/full/0/default.jpg",
+        location_type=LocationType(id="iiif-image"),
+        license=Id(id="cc-by"),
+        credit=f"Credit line: {random_alphanumeric()}",
+        link_text=f"Link text: {random_alphanumeric()}",
+        access_conditions=[
+            AccessCondition(
+                method=ViewOnline,
+                status=Open,
+                terms=f"Terms: {random_alphanumeric()}",
+                note=f"Note: {random_alphanumeric()}",
+            )
+        ],
+    )
+    return DisplayDigitalLocation.from_digital_location(location)
 
 
 @freeze_time("2001-01-01T01:01:01Z")
@@ -157,7 +182,7 @@ def create_person_concept() -> None:
             ],
         ),
         same_as=[random_canonical_id(), random_canonical_id()],
-        display_images=[create_display_image()],
+        display_images=[create_display_image(), create_licensed_display_image()],
     )
     save_documents(
         [concept],
