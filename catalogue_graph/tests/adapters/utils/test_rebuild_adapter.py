@@ -413,6 +413,42 @@ def test_wipe_only_axiell_empties_the_stores_and_stops(
     assert published == []
 
 
+def test_wipe_only_folio_empties_bib_and_items_stores_and_stops(
+    temporary_table: IcebergTable,
+    items_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """--wipe-only on FOLIO empties both the bib and items stores and does
+    nothing else: the config stub has no window store and no download client,
+    so touching either fails the test, and no events are published."""
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table([{"id": "rec001", "content": "stale bib"}])
+    )
+    items_store = AdapterStore(items_temporary_table, "items_namespace")
+    items_temporary_table.append(
+        adapter_records_to_table(
+            [{"id": "item001", "content": "stale item"}], namespace="items_namespace"
+        )
+    )
+    config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: adapter_store)
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_items_store", lambda **kwargs: items_store
+    )
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+    published: list[object] = []
+    monkeypatch.setattr(
+        rebuild_adapter, "_publish_adapter_event", lambda *a: published.append(a)
+    )
+
+    rebuild_adapter.rebuild_adapter("folio", wipe_only=True)
+
+    assert adapter_store.get_all_records().num_rows == 0
+    assert items_store.get_all_records().num_rows == 0
+    assert published == []
+
+
 def test_wipe_only_refuses_snapshot_paths() -> None:
     with pytest.raises(ValueError, match="wipe-only takes no snapshots"):
         rebuild_adapter.rebuild_adapter(
