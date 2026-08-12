@@ -42,17 +42,14 @@ from typing import Any
 
 import structlog
 
-from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
+from adapters.steps.axiell_folio_sync.axiell_adapter_read import read_rows
+from adapters.steps.axiell_folio_sync.folio import RefCache
+from adapters.steps.axiell_folio_sync.folio.okapi import load_okapi_config
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
 )
-from adapters.steps.axiell_folio_sync.ref_cache import RefCache
-from adapters.steps.axiell_folio_sync.sync_to_folio import load_okapi_config, run_sync
-from adapters.utils.axiell_changeset_reader import (
-    AxiellChangesetReader,
-    SupersededGuid,
-)
+from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
 from clients.folio_client import FolioClient, FolioInventoryClient, ssl_context_from_env
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import ecs_handler
@@ -60,54 +57,6 @@ from utils.steps import ecs_handler
 logger = structlog.get_logger(__name__)
 
 PIPELINE_STEP = "axiell_folio_sync"
-
-
-# ── adapter store read ────────────────────────────────────────────────────────
-
-
-def _read_rows(
-    changeset_ids: list[str] | None,
-    sample_limit: int | None,
-    *,
-    use_rest_api_table: bool,
-) -> tuple[list[dict], list[SupersededGuid]]:
-    """Read changed Axiell adapter rows and superseded-GUID deletions.
-
-    Uses the same ``AXIELL_CONFIG`` as the Axiell adapter, so it works against
-    S3 Tables (``use_rest_api_table=True``, production) or the local sqlite
-    catalog (``use_rest_api_table=False``, local dev) with no code changes.
-    Read-only: the tables are never created.
-
-    Deletion facts are read only for incremental (changeset) runs. The reconcile
-    step in the adapter state machine writes them into the same table bucket
-    before ``axiell.adapter.completed`` fires, and ``iter_deletions`` re-checks
-    each fact against the current reconciler mappings, so a GUID reclaimed by a
-    revert/handoff never suppresses a live record. A sample/reindex run (no
-    changesets) has nothing to overwrite, so it reads no facts and the reader is
-    built without the facts/reconciler tables.
-    """
-    reader = AxiellChangesetReader.build(
-        AXIELL_CONFIG,
-        changeset_ids or [],
-        use_rest_api_table=use_rest_api_table,
-        with_deletion_facts=bool(changeset_ids),
-    )
-
-    if changeset_ids:
-        logger.info("adapter_read", mode="changesets", changeset_ids=changeset_ids)
-        records = list(reader.iter_records())
-        deletions = list(reader.iter_deletions())
-        return records, deletions
-
-    # Dev/smoke-test fallback: a sample of active records (no changesets given).
-    limit = sample_limit or 10
-    logger.info("adapter_read", mode="sample", limit=limit)
-    rows: list[dict] = []
-    for row in reader.iter_records():
-        rows.append(row)
-        if len(rows) >= limit:
-            break
-    return rows, []
 
 
 # ── entry points ──────────────────────────────────────────────────────────────
@@ -120,7 +69,8 @@ def handler(
     execution_context: ExecutionContext | None = None,
 ) -> AxiellFolioSyncResponse:
     """Build the real dependencies (OKAPI client, ref cache, adapter rows) and
-    hand them to :func:`run_sync`."""
+    hand them to :func:`run_sync`.
+    """
     setup_logging(execution_context)
 
     env_dry_run = os.environ.get("DRY_RUN", "true").lower() not in ("false", "0", "no")
@@ -146,7 +96,7 @@ def handler(
     inventory = FolioInventoryClient(client)
     ref_cache = RefCache(inventory).load()
 
-    rows, deletions = _read_rows(
+    rows, deletions = read_rows(
         event.changeset_ids or None,
         event.sample_limit,
         use_rest_api_table=use_rest_api_table,
@@ -229,7 +179,10 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         dry_run=not args.live,
         hard_delete=args.hard_delete,
     )
-    response = handler(event, use_rest_api_table=args.use_rest_api_table)
+    response = handler(
+        event,
+        use_rest_api_table=args.use_rest_api_table,
+    )
     print(json.dumps(response.model_dump(mode="json"), indent=2))
 
 

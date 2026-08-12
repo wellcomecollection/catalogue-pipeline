@@ -61,13 +61,13 @@ A per-GUID failure is recorded as an error entry and does not abort the run.
 
 | Module                 | Responsibility                                                       |
 | ---------------------- | -------------------------------------------------------------------- |
-| `axiell_folio_sync.py` | Lambda/ECS/CLI entrypoints; builds real dependencies                  |
-| `sync_to_folio.py`     | OKAPI credential resolution and the select → map → upsert loop       |
-| `mapper.py`            | MARCXML extraction primitives and the `CanonicalRecord` model        |
-| `mapping.py`           | MARC → FOLIO payload mapping and record selection (single source of truth) |
-| `ref_cache.py`         | Cache of FOLIO tenant reference-data UUIDs                           |
-| `upsert.py`            | FOLIO Inventory write orchestration and rollback                     |
-| `folio_callables.py`   | `FolioInventoryOps` protocol decoupling this package from the client |
+| `axiell_folio_sync.py` | Lambda/ECS/CLI entrypoints; builds real dependencies          |
+| `axiell_adapter_read.py` | Adapter-store read (changed rows + superseded-GUID deletions)      |
+| `run_axiell_folio_sync.py` | The select → map → upsert loop over adapter rows                 |
+| `mapping/`             | MARC → FOLIO payload mapping and record selection (single source of truth): `marc` (MARCXML primitives + `CanonicalRecord`), `config` (field table), `builders`, `payloads` |
+| `folio/`               | FOLIO client seam: `okapi` (OKAPI credential resolution), `callables` (`FolioInventoryOps` protocol), `ref_cache` (tenant reference-data UUIDs) |
+| `upsert/`              | FOLIO Inventory write layer: `entities` (single-entity ops), `writer` (create/update), `reconcile` (suppress/delete cascade) |
+| `results.py`           | Upsert outcome models (`UpsertResult` / `GuidCascadeResult` …)       |
 | `models.py` / `report.py` | Step event/response/report-entry models; the S3 + CloudWatch run report |
 
 The OKAPI HTTP client itself lives in [`clients/folio_client`](../../../clients/folio_client/).
