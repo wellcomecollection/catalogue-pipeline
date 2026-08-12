@@ -50,8 +50,8 @@ def test_transformer_end_to_end_with_local_table(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id = {
-        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield></record>",
-        "fo00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title Two</subfield></datafield></record>",
+        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000001</subfield></datafield></record>",
+        "fo00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title Two</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000002</subfield></datafield></record>",
     }
     changeset_id = prepare_changeset(
         temporary_table,
@@ -80,7 +80,10 @@ def test_transformer_end_to_end_with_local_table(
 
     report = read_transformer_report(result)
     assert sorted(report["successful_ids"]) == sorted(
-        [f"Work[folio-instance/{i}]" for i in records_by_id]
+        [
+            "Work[folio-instance/10000000-0000-0000-0000-000000000001]",
+            "Work[folio-instance/10000000-0000-0000-0000-000000000002]",
+        ]
     )
 
 
@@ -88,9 +91,9 @@ def test_transformer_end_to_end_includes_deletions(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id: dict[str, tuple[str, bool] | str] = {
-        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield></record>",
+        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000001</subfield></datafield></record>",
         "fo00003": (
-            "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Folio Work</subfield></datafield></record>",
+            "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Folio Work</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000003</subfield></datafield></record>",
             True,
         ),
     }
@@ -115,13 +118,15 @@ def test_transformer_end_to_end_includes_deletions(
     report = read_transformer_report(result)
     assert sorted(report["successful_ids"]) == sorted(
         [
-            "Work[folio-instance/fo00001]",
-            "Work[folio-instance/fo00003]",
+            "Work[folio-instance/10000000-0000-0000-0000-000000000001]",
+            "Work[folio-instance/10000000-0000-0000-0000-000000000003]",
         ]
     )
 
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
-    deleted = by_id["Work[folio-instance/fo00003]"]["_source"]
+    deleted = by_id["Work[folio-instance/10000000-0000-0000-0000-000000000003]"][
+        "_source"
+    ]
     assert deleted["type"] == "Deleted"
     assert deleted["deletedReason"]["type"] == "DeletedFromSource"
     assert deleted["deletedReason"]["info"] == "Marked as deleted from source"
@@ -132,7 +137,7 @@ def test_transformer_includes_suppressions(
 ) -> None:
     """Test that records marked with FOLIO suppression marker ($t=1 in MARC 999) are treated as deleted."""
     records_by_id = {
-        "fo00005": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00005</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Visible Folio Work</marc:subfield></marc:datafield></record>',
+        "fo00005": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00005</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Visible Folio Work</marc:subfield></marc:datafield><marc:datafield tag="999" ind1="f" ind2="f"><marc:subfield code="i">10000000-0000-0000-0000-000000000005</marc:subfield></marc:datafield></record>',
         "fo00006": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00006</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Suppressed Folio Work</marc:subfield></marc:datafield><marc:datafield tag="999" ind1="f" ind2="f"><marc:subfield code="i">73822760-c6e3-4be4-a644-fe97fb32567f</marc:subfield><marc:subfield code="t">1</marc:subfield></marc:datafield></record>',
     }
     changeset_id = prepare_changeset(
@@ -157,11 +162,15 @@ def test_transformer_includes_suppressions(
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
 
     # Visible record should be transformed normally
-    visible = by_id["Work[folio-instance/fo00005]"]["_source"]
+    visible = by_id["Work[folio-instance/10000000-0000-0000-0000-000000000005]"][
+        "_source"
+    ]
     assert visible["type"] == "Visible"
 
     # Suppressed record should be treated as deleted with SuppressedFromSource reason
-    suppressed = by_id["Work[folio-instance/fo00006]"]["_source"]
+    suppressed = by_id["Work[folio-instance/73822760-c6e3-4be4-a644-fe97fb32567f]"][
+        "_source"
+    ]
     assert suppressed["type"] == "Deleted"
     assert suppressed["deletedReason"]["type"] == "SuppressedFromSource"
     assert suppressed["deletedReason"]["info"] == "Folio"
@@ -171,7 +180,7 @@ def test_transformer_includes_predecessor_identifier(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id = {
-        "fo00004": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00004</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio With Predecessor</subfield></datafield><datafield tag='907' ind1=' ' ind2=' '><subfield code='a'>b12345679</subfield></datafield></record>",
+        "fo00004": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00004</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio With Predecessor</subfield></datafield><datafield tag='907' ind1=' ' ind2=' '><subfield code='a'>b12345679</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000004</subfield></datafield></record>",
     }
     changeset_id = prepare_changeset(
         temporary_table,
@@ -193,7 +202,9 @@ def test_transformer_includes_predecessor_identifier(
     assert result.failure_count == 0
 
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
-    source = by_id["Work[folio-instance/fo00004]"]["_source"]
+    source = by_id["Work[folio-instance/10000000-0000-0000-0000-000000000004]"][
+        "_source"
+    ]
     assert source["type"] == "Visible"
     assert source["state"]["predecessorIdentifier"] == {
         "identifierType": {"id": "sierra-system-number"},
@@ -206,9 +217,9 @@ def test_transformer_id_run_transforms_only_named_ids(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id = {
-        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield></record>",
-        "fo00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title Two</subfield></datafield></record>",
-        "fo00003": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Not requested</subfield></datafield></record>",
+        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000001</subfield></datafield></record>",
+        "fo00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title Two</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000002</subfield></datafield></record>",
+        "fo00003": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Not requested</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000003</subfield></datafield></record>",
     }
     # The changeset id is irrelevant to an id run; only seed the store.
     prepare_changeset(
@@ -234,8 +245,8 @@ def test_transformer_id_run_transforms_only_named_ids(
 
     indexed_ids = {op["_id"] for op in MockElasticsearchClient.inputs}
     assert indexed_ids == {
-        "Work[folio-instance/fo00001]",
-        "Work[folio-instance/fo00002]",
+        "Work[folio-instance/10000000-0000-0000-0000-000000000001]",
+        "Work[folio-instance/10000000-0000-0000-0000-000000000002]",
     }
 
 
@@ -243,9 +254,9 @@ def test_transformer_id_run_includes_deleted_rows_as_tombstones(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id: dict[str, tuple[str, bool] | str] = {
-        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield></record>",
+        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000001</subfield></datafield></record>",
         "fo00003": (
-            "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Folio Work</subfield></datafield></record>",
+            "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Folio Work</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000003</subfield></datafield></record>",
             True,
         ),
     }
@@ -269,7 +280,9 @@ def test_transformer_id_run_includes_deleted_rows_as_tombstones(
     assert result.failure_count == 0
 
     by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
-    deleted = by_id["Work[folio-instance/fo00003]"]["_source"]
+    deleted = by_id["Work[folio-instance/10000000-0000-0000-0000-000000000003]"][
+        "_source"
+    ]
     assert deleted["type"] == "Deleted"
     assert deleted["deletedReason"]["type"] == "DeletedFromSource"
 
@@ -278,7 +291,7 @@ def test_transformer_id_run_report_key_is_not_reindex(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id = {
-        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield></record>",
+        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000001</subfield></datafield></record>",
     }
     prepare_changeset(
         temporary_table,
@@ -303,3 +316,30 @@ def test_transformer_id_run_report_key_is_not_reindex(
     report = read_transformer_report(result)
     assert report["ids"] == ["fo00001"]
     assert report["changeset_ids"] == []
+
+
+def test_transformer_source_identifier_requires_instance_uuid(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A FOLIO record without a 999 $i instance UUID must fail loudly rather than fall back to the 001 HRID."""
+    records_by_id = {
+        "fo00007": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00007</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Without Instance UUID</subfield></datafield></record>",
+    }
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2026-01-01",
+    )
+
+    assert result.success_count == 0
+    assert result.failure_count == 1

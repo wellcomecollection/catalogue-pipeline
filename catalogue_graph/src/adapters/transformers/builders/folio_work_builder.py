@@ -24,6 +24,20 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
         return Id(id="folio-instance")
 
     @property
+    def source_identifier_value(self) -> str:
+        """Return the source identifier value for this work.
+
+        For FOLIO, this is the instance UUID from the MARC record.
+        """
+        for field in self.record.get_fields("999"):
+            if uuid := field.get_subfields("i"):
+                return uuid[0]
+
+        raise ValueError(
+            "FOLIO MARC record is missing instance UUID in field 999 subfield i"
+        )
+    
+    @property
     def predecessor_identifier(self) -> WorkSourceIdentifier | None:
         if (value := extract_sierra_predecessor_id(self.record)) is not None:
             return WorkSourceIdentifier(
