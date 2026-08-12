@@ -1,0 +1,96 @@
+name: Sync test documents to catalogue-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "catalogue_graph/document_generators/test_documents/**"
+  workflow_dispatch:
+
+jobs:
+  sync-test-documents:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          # Both stored as repo secrets, following catalogue-api's
+          # sync-openapi-spec.yml (not content-api, which uses Variables).
+          client-id: ${{ secrets.SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+          repositories: catalogue-api
+
+      - name: Checkout catalogue-pipeline
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sparse-checkout: catalogue_graph/document_generators/test_documents
+
+      - name: Checkout catalogue-api
+        uses: actions/checkout@v6
+        with:
+          repository: wellcomecollection/catalogue-api
+          token: ${{ steps.app-token.outputs.token }}
+          path: catalogue-api
+
+      # --delete mirrors removals; the target directory holds nothing but
+      # copies of these fixtures.
+      - name: Copy test documents
+        run: |
+          rsync --archive --delete \
+            catalogue_graph/document_generators/test_documents/ \
+            catalogue-api/common/search/src/test/resources/test_documents/
+
+      # git status, not git diff: new fixture files are untracked and
+      # invisible to diff.
+      - name: Check for changes
+        id: changes
+        run: |
+          cd catalogue-api
+          if git status --porcelain -- common/search/src/test/resources/test_documents | grep -q .; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changes == 'true'
+        run: |
+          cd catalogue-api
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Create branch
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BRANCH_NAME="auto-sync/test-documents-$TIMESTAMP"
+          git checkout -b $BRANCH_NAME
+
+          # Commit and push
+          git add common/search/src/test/resources/test_documents
+          git commit -m "Update test documents from catalogue-pipeline"
+          git push origin $BRANCH_NAME
+
+          # Open PR
+          PR_NUMBER=$(curl -s -X POST \
+            -H "Authorization: Bearer ${{ steps.app-token.outputs.token }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/wellcomecollection/catalogue-api/pulls \
+            -d '{
+              "title": "🤖 Auto-sync: Update test documents from catalogue-pipeline",
+              "head": "'"$BRANCH_NAME"'",
+              "base": "main",
+              "body": "This PR copies `catalogue_graph/document_generators/test_documents/` from `wellcomecollection/catalogue-pipeline` into `common/search/src/test/resources/test_documents/`, replacing a manual run of `copy_test_documents.py`.\n\nIf `OpenApiSpecResponseTest` fails on this PR, the pipeline display model has changed shape and `reference/catalogue.yaml` needs updating on this branch before merge.\n\n**Triggered by commit:** wellcomecollection/catalogue-pipeline@${{ github.sha }}\n\nSee wellcomecollection/platform#6514 for context."
+            }' | jq -r '.number')
+
+          # Request review from digital-platform team
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ steps.app-token.outputs.token }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/wellcomecollection/catalogue-api/pulls/$PR_NUMBER/requested_reviewers \
+            -d '{"team_reviewers": ["digital-platform"]}'
