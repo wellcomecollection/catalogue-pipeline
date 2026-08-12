@@ -13,11 +13,13 @@ from .locations import create_digital_location, create_physical_location
 def create_item(
     locations: list | None = None,
     other_identifiers: list[SourceIdentifier] | None = None,
+    title: str | None = None,
+    note: str | None = None,
 ) -> Item:
     if locations is None:
         locations = [create_digital_location(location_type_id="iiif-image")]
     item_id = create_identified(other_identifiers=other_identifiers)
-    return Item(id=item_id, locations=locations)
+    return Item(id=item_id, title=title, note=note, locations=locations)
 
 
 def create_unidentifiable_item(locations: list | None = None) -> Item:
