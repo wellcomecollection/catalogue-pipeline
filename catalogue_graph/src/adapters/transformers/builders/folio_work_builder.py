@@ -1,5 +1,6 @@
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
+from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
@@ -25,18 +26,26 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def source_identifier_value(self) -> str:
-        """Return the source identifier value for this work.
+        value: str = extract_instance_uuid(self.record)
+        return value
 
-        For FOLIO, this is the instance UUID from the MARC record.
-        """
-        for field in self.record.get_fields("999"):
-            if uuid := field.get_subfields("i"):
-                return uuid[0]
+    @property
+    def other_identifiers(self) -> list[SourceIdentifier]:
+        identifiers = super().other_identifiers + [
+            WorkSourceIdentifier(
+                identifier_type=Id(id="folio-instance-hrid"),
+                value=extract_hrid(self.record),
+            )
+        ]
+        if (bnumber := extract_sierra_predecessor_id(self.record)) is not None:
+            identifiers.append(
+                WorkSourceIdentifier(
+                    identifier_type=Id(id="sierra-system-number"),
+                    value=bnumber,
+                )
+            )
+        return identifiers
 
-        raise ValueError(
-            "FOLIO MARC record is missing instance UUID in field 999 subfield i"
-        )
-    
     @property
     def predecessor_identifier(self) -> WorkSourceIdentifier | None:
         if (value := extract_sierra_predecessor_id(self.record)) is not None:

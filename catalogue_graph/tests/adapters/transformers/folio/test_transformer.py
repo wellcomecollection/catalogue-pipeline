@@ -211,6 +211,58 @@ def test_transformer_includes_predecessor_identifier(
         "ontologyType": "Work",
         "value": "b12345679",
     }
+    assert source["data"]["otherIdentifiers"] == [
+        {
+            "identifierType": {"id": "folio-instance-hrid"},
+            "ontologyType": "Work",
+            "value": "fo00004",
+        },
+        {
+            "identifierType": {"id": "sierra-system-number"},
+            "ontologyType": "Work",
+            "value": "b12345679",
+        },
+    ]
+
+
+def test_transformer_other_identifiers_without_predecessor(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A FOLIO record with no 907 predecessor still gets the HRID otherIdentifier,
+    but no sierra-system-number entry."""
+    records_by_id = {
+        "fo00008": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00008</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Without Predecessor</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000008</subfield></datafield></record>",
+    }
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2026-01-01",
+    )
+
+    assert result.success_count == 1
+    assert result.failure_count == 0
+
+    by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
+    source = by_id["Work[folio-instance/10000000-0000-0000-0000-000000000008]"][
+        "_source"
+    ]
+    assert source["data"]["otherIdentifiers"] == [
+        {
+            "identifierType": {"id": "folio-instance-hrid"},
+            "ontologyType": "Work",
+            "value": "fo00008",
+        },
+    ]
 
 
 def test_transformer_id_run_transforms_only_named_ids(
