@@ -1,0 +1,26 @@
+# platform#6464 section 2: METS works at works-source. Counts showed the
+# Invisible near-doubling is entirely METS (6,753 vs 4,205 at denormalised);
+# type is assigned at transform, so this diff should expose the flips and
+# what changed alongside them.
+
+index_sources:
+  - prod-works-source
+  - new-works-source
+
+filter_query:
+  query:
+    term:
+      state.sourceIdentifier.identifierType.id: mets
+
+ignore_fields:
+  # Per-run ingest stamp.
+  - indexed_at
+  # Processing version counter, always differs between full runs.
+  - version
+  # Per-run transform stamp, differs on every doc (EBSCO run confirmed).
+  - state.modifiedTime
+
+sample_size: 30
+hash_bucket_count: 6
+namespace: 6464-mets-works-source
+output_dir: data

@@ -2,8 +2,13 @@ import json
 import os
 from typing import Any
 
+from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
+from ingestor.models.merged.work import VisibleMergedWork
+from ingestor.models.neptune.node import WorkNode
+from ingestor.models.neptune.query_result import WorkHierarchy, WorkHierarchyItem
 from models.events import BulkLoaderEvent
 from models.graph_edge import BaseEdge
+from models.graph_node import Work
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 from utils.ontology import get_transformers_from_ontology
 from utils.types import OntologyType, TransformerType, WorkStatus
@@ -26,6 +31,39 @@ def load_json_fixture(file_name: str) -> Any:
 def load_jsonl_fixture(file_name: str) -> list[Any]:
     with open(_get_fixture_path(file_name)) as f:
         return [json.loads(line) for line in f]
+
+
+def get_work_hierarchy_item(
+    work_id: str, label: str | None = None, parts: int = 1
+) -> WorkHierarchyItem:
+    """Build a hierarchy item (an ancestor or a child) for a work with the given id."""
+    return WorkHierarchyItem(
+        work=WorkNode.model_validate(
+            {
+                "~id": work_id,
+                "~labels": ["Work"],
+                "~properties": Work(id=work_id, label=label, type="Work"),
+            }
+        ),
+        parts=parts,
+    )
+
+
+def get_work_with_ancestor(
+    ancestor_id: str = "123", ancestor_label: str | None = "123"
+) -> VisibleExtractedWork:
+    """Build an extracted work with a single ancestor, and no children."""
+    fixture = load_json_fixture("ingestor/single_merged.json")
+    work = VisibleMergedWork.model_validate(fixture)
+
+    return VisibleExtractedWork(
+        work=work,
+        hierarchy=WorkHierarchy(
+            id="some_id",
+            ancestors=[get_work_hierarchy_item(ancestor_id, ancestor_label)],
+        ),
+        concepts=[],
+    )
 
 
 def add_mock_transformer_outputs(

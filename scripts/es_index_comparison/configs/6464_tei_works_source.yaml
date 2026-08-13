@@ -1,0 +1,26 @@
+# platform#6464 section 2 pilot: TEI works at works-source, new pipeline vs
+# production. TEI is at exact count parity (1,553 both sides) with stable
+# `Work[tei-manuscript-id/...]` ids, so membership should be clean and every
+# field difference is a real transformer or model change.
+#
+# Deliberately minimal ignore list on the first pass: run, read
+# diffs/field_frequency.json, promote legitimately-differing fields here with
+# a comment, re-run.
+
+index_sources:
+  - prod-works-source
+  - new-works-source
+
+filter_query:
+  query:
+    term:
+      state.sourceIdentifier.identifierType.id: tei-manuscript-id
+
+ignore_fields:
+  # Per-run ingest stamp.
+  - indexed_at
+
+sample_size: 20
+hash_bucket_count: 2
+namespace: 6464-tei-works-source
+output_dir: data

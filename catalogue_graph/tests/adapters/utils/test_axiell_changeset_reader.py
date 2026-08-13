@@ -32,12 +32,14 @@ MARCXML = (
 def _reader(
     adapter_table: IcebergTable,
     changeset_ids: list[str],
+    ids: list[str] | None = None,
     facts_table: IcebergTable | None = None,
     reconciler_table: IcebergTable | None = None,
 ) -> AxiellChangesetReader:
     return AxiellChangesetReader(
         AdapterStore(adapter_table, namespace=NAMESPACE),
         changeset_ids,
+        ids=ids,
         facts_store=(
             DeletionFactsStore(facts_table, namespace=NAMESPACE)
             if facts_table is not None
@@ -73,6 +75,31 @@ def test_records_pass_through_unchanged_including_tombstones(
 
     rows = {
         row["id"]: row for row in _reader(temporary_table, changeset_ids).iter_records()
+    }
+
+    assert set(rows) == {"collect-1", "collect-2"}
+    assert rows["collect-2"]["deleted"] is True
+    assert rows["collect-2"]["content"] == MARCXML
+
+
+def test_records_by_id_yields_only_named_records_including_tombstones(
+    temporary_table: IcebergTable,
+) -> None:
+    # The changeset id is irrelevant to an id run; only seed the store.
+    _seed_adapter_rows(
+        temporary_table,
+        [
+            {"id": "collect-1", "content": MARCXML},
+            {"id": "collect-2", "content": MARCXML, "deleted": True},
+            {"id": "collect-3", "content": MARCXML},
+        ],
+    )
+
+    rows = {
+        row["id"]: row
+        for row in _reader(
+            temporary_table, [], ids=["collect-1", "collect-2"]
+        ).iter_records()
     }
 
     assert set(rows) == {"collect-1", "collect-2"}
@@ -156,6 +183,30 @@ def test_no_changesets_yields_no_deletions_and_reads_no_facts(
     assert list(reader.iter_deletions()) == []
 
 
+def test_ids_mode_yields_no_deletions_and_reads_no_facts(
+    temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An id-mode run only re-transforms named records; it does not replay
+    superseded-guid deletion facts, which are keyed by changeset, not id."""
+    reader = _reader(
+        temporary_table,
+        [],
+        ids=["collect-1"],
+        facts_table=deletion_facts_temporary_table,
+        reconciler_table=reconciler_temporary_table,
+    )
+    assert reader.facts_store is not None
+
+    def fail_read(*args: Any, **kwargs: Any) -> None:
+        raise AssertionError("facts must not be read during an id-mode run")
+
+    monkeypatch.setattr(reader.facts_store, "get_records_by_changesets", fail_read)
+    assert list(reader.iter_deletions()) == []
+
+
 def test_facts_store_requires_reconciler_store(
     temporary_table: IcebergTable,
     deletion_facts_temporary_table: IcebergTable,
@@ -214,3 +265,15 @@ def test_build_reuses_injected_adapter_store(temporary_table: IcebergTable) -> N
     )
     assert reader.adapter_store is adapter_store
     assert config.adapter_builds == 0
+
+
+def test_build_threads_ids_onto_reader(temporary_table: IcebergTable) -> None:
+    config = _CountingConfig(temporary_table)
+    reader = AxiellChangesetReader.build(
+        config,
+        [],
+        use_rest_api_table=False,
+        ids=["collect-1", "collect-2"],
+    )
+    assert reader.ids == ["collect-1", "collect-2"]
+    assert reader.changeset_ids == []

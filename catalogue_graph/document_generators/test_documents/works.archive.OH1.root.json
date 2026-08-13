@@ -1,0 +1,163 @@
+{
+  "description": "the root of an Oral History archive",
+  "id": "pufll8p5",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "pufll8p5",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "0GPz5ASugg"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "pufll8p5",
+      "title": "Oral histories of British science",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "0GPz5ASugg",
+      "identifiers.value": [
+        "pufll8p5",
+        "0GPz5ASugg"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [],
+      "items.id": [],
+      "items.shelfmark.value": [],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [],
+      "genres.concepts.label": [],
+      "collectionPath.label": "OH1",
+      "collectionPath.path": "OH1",
+      "collectionPath.sort": "OH0000000001"
+    },
+    "display": {
+      "id": "pufll8p5",
+      "title": "Oral histories of British science",
+      "alternativeTitles": [],
+      "contributors": [],
+      "identifiers": [
+        {
+          "value": "0GPz5ASugg",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [],
+      "holdings": [],
+      "availabilities": [],
+      "production": [],
+      "languages": [],
+      "notes": [],
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [
+        {
+          "id": "vr6y2ga0",
+          "title": "Interview with a laboratory technician",
+          "referenceNumber": "OH1/A",
+          "totalParts": 0,
+          "type": "Work"
+        },
+        {
+          "id": "dxlgpw7c",
+          "title": "Interview with a research nurse",
+          "referenceNumber": "OH1/B",
+          "totalParts": 0,
+          "type": "Work"
+        }
+      ],
+      "partOf": [],
+      "type": "Collection",
+      "collection": {
+        "root": {
+          "id": "pufll8p5",
+          "title": "Oral histories of British science",
+          "referenceNumber": "OH1",
+          "totalParts": 2,
+          "type": "Collection"
+        },
+        "isRoot": true
+      },
+      "archive": {
+        "category": {
+          "id": "OH",
+          "type": "ArchiveCategory",
+          "label": "Oral History"
+        }
+      }
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [],
+      "contributors.agent": [],
+      "items.locations.license": [],
+      "availabilities": [],
+      "archive.category": {
+        "id": "OH",
+        "label": "Oral History"
+      },
+      "collection.root": {
+        "id": "pufll8p5",
+        "label": "Oral histories of British science"
+      }
+    },
+    "filterableValues": {
+      "workType": "Collection",
+      "production.dates.range.from": [],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [],
+      "contributors.agent.id": [],
+      "contributors.agent.sourceIdentifier": [],
+      "identifiers.value": [
+        "pufll8p5",
+        "0GPz5ASugg"
+      ],
+      "items.locations.license.id": [],
+      "items.locations.accessConditions.status.id": [],
+      "items.id": [],
+      "items.identifiers.value": [],
+      "items.locations.locationType.id": [],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": [],
+      "collection.isRoot": true,
+      "archive.category.id": "OH",
+      "collection.root.id": "pufll8p5",
+      "collection.root.title": "Oral histories of British science"
+    }
+  },
+  "createdAt": "2026-08-06T09:07:55.722008+00:00"
+}

@@ -18,7 +18,7 @@ module "pipeline" {
   graph_index_dates = {
     merged    = "2025-10-02"
     augmented = "2026-06-15"
-    works     = "2026-03-03"
+    works     = "2026-07-30"
     concepts  = "2026-03-03"
     images    = "2026-04-29"
   }

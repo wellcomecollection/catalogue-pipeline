@@ -13,6 +13,9 @@ DEFAULT_OUTPUT_DIR = "data"
 class AppConfig:
     index_sources: List[str]
     filter_query: Dict[str, Any] | None = None
+    filter_queries: Dict[str, Dict[str, Any]] | None = None
+    ids_file: Path | None = None
+    ids_format: str | None = None
     ignore_fields: List[str] = field(default_factory=list)
     sample_size: int = 10
     loading_chunk_size: int = 100_000
@@ -27,9 +30,52 @@ class AppConfig:
         stamp = time.strftime("%Y%m%d-%H%M%S")
         return f"{base}-{stamp}"
 
+    def effective_filter_query(self, source_id: str) -> Dict[str, Any] | None:
+        """Resolve the fetch query for one index source.
+
+        A per-source entry in filter_queries takes precedence over the shared
+        filter_query. An ids_file constraint applies to both sources and is
+        ANDed with whichever filter applies.
+        """
+        per_source = (self.filter_queries or {}).get(source_id)
+        base = per_source if per_source is not None else self.filter_query
+        ids = self._load_ids()
+        if ids is None:
+            return base
+        ids_clause: Dict[str, Any] = {"ids": {"values": ids}}
+        if base is None:
+            return {"query": ids_clause}
+        # Configs give filters as a full search body ({"query": ...}).
+        inner = base.get("query", base)
+        return {"query": {"bool": {"filter": [ids_clause, inner]}}}
+
+    def _load_ids(self) -> List[str] | None:
+        if self.ids_file is None:
+            return None
+        ids = []
+        with self.ids_file.open("r") as f:
+            for line in f:
+                value = line.strip()
+                if not value or value.startswith("#"):
+                    continue
+                ids.append(self.ids_format.format(value) if self.ids_format else value)
+        if not ids:
+            raise ValueError(f"ids_file {self.ids_file} contains no ids")
+        return ids
+
     def validate(self) -> None:
         if len(self.index_sources) != 2:
             raise ValueError("Config 'index_sources' must contain exactly two identifiers.")
+        if self.filter_queries:
+            unknown = sorted(set(self.filter_queries) - set(self.index_sources))
+            if unknown:
+                raise ValueError(
+                    f"filter_queries keys {unknown} do not match any index source."
+                )
+        if self.ids_format and self.ids_file is None:
+            raise ValueError("ids_format requires ids_file")
+        if self.ids_file is not None and not self.ids_file.exists():
+            raise ValueError(f"ids_file not found: {self.ids_file}")
         if self.sample_size <= 0:
             raise ValueError("sample_size must be > 0")
         if self.loading_chunk_size <= 0:
@@ -51,9 +97,14 @@ def load_config(path: str | Path, overrides: Dict[str, Any] | None = None) -> Ap
             if v is not None:
                 raw[k] = v
 
+    raw_ids_file = raw.get("ids_file")
     cfg = AppConfig(
         index_sources=raw.get("index_sources", []),
         filter_query=raw.get("filter_query"),
+        filter_queries=raw.get("filter_queries"),
+        # Relative ids_file paths resolve against the config file's directory.
+        ids_file=(p.parent / raw_ids_file).resolve() if raw_ids_file else None,
+        ids_format=raw.get("ids_format"),
         ignore_fields=raw.get("ignore_fields", []) or [],
         sample_size=raw.get("sample_size", 10),
         loading_chunk_size=raw.get("loading_chunk_size", 100_000),

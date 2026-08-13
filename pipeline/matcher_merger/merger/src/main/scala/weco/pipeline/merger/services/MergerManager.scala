@@ -16,8 +16,9 @@ class MergerManager(val mergerRules: Merger) {
     val works = maybeWorks.flatten
     if (works.size == maybeWorks.size) {
       val result = mergerRules.merge(works)
-      // TEI works can have internal works, which are added to
-      // resultWorks by the Merger, so the number of resulting works can be
+      // TEI works can have internal works, which the Merger adds to
+      // resultWorks (as visible works from a live parent, or as deleted works
+      // from a deleted parent), so the number of resulting works can be
       // greater than modifiedWorks.size
       assert(result.resultWorks.size >= works.size)
       result

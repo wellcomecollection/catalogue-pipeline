@@ -1,0 +1,49 @@
+# platform#6464 section 2: Axiell works against their CALM predecessors at
+# works-identified, where canonical-id inheritance gives both sides the same
+# document id.
+#
+# The round 1 runs pinned the population to the 206,430 Axiell-owned
+# canonical ids exported from the id-minter database. This filters each side
+# by source identifier type instead: same field comparison for the shared
+# ids, but membership differences (CALM works with no Axiell successor, and
+# any Axiell works minting fresh ids) now appear in the only_in lists and
+# need attributing rather than being pre-excluded.
+#
+# For a shake-down subset run before committing to the full set, use the
+# hash bucket filter (e.g. `compare -b 0`) rather than an id list.
+
+index_sources:
+  - prod-works-identified
+  - new-works-identified
+
+filter_queries:
+  prod-works-identified:
+    query:
+      term:
+        state.sourceIdentifier.identifierType.id: calm-record-id
+  new-works-identified:
+    query:
+      term:
+        state.sourceIdentifier.identifierType.id: axiell-guid
+
+ignore_fields:
+  # Per-run stamps and counters.
+  - indexed_at
+  - version
+  - state.modifiedTime
+  - state.sourceModifiedTime
+  # The source swap itself: identifiers, relations and predecessor linkage
+  # legitimately differ between a CALM work and its Axiell successor.
+  - state.sourceIdentifier
+  - state.sourceIdentifier.**
+  - state.relations
+  - state.relations.**
+  - state.predecessorIdentifier
+  - state.predecessorIdentifier.**
+  - state.mergeCandidates[].id.type
+  - data.production[].dates[].type
+
+sample_size: 40
+hash_bucket_count: 8
+namespace: 6464-axiell-calm-identified-full
+output_dir: data

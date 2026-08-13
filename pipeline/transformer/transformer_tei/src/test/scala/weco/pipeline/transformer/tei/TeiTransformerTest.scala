@@ -25,6 +25,7 @@ import weco.storage.store.memory.MemoryStore
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
+import scala.util.Random
 
 class TeiTransformerTest
     extends AnyFunSpec
@@ -308,6 +309,283 @@ class TeiTransformerTest
       )
     )
   }
+
+  describe("reconciling a delete with the stored work") {
+    it("copies the internal work stubs from the stored work") {
+      val stubs = List(createInternalWorkSource, createInternalWorkSource)
+      val reconciled = new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = deletedWork(),
+        storedWork = visibleWorkWithStubs(stubs)
+      )
+
+      reconciled shouldBe a[Work.Deleted[_]]
+      reconciled.state.internalWorkStubs shouldBe stubs
+    }
+
+    it("carries forward a removal the merger has not acted on yet") {
+      // The transformer indexes before it sends, so a removal can be stored
+      // while its delete is still unsent. A deletion arriving in that window
+      // must not drop it, or the inner work is orphaned for good.
+      val kept = createInternalWorkSource
+      val removed = createInternalWorkSource
+
+      val reconciled = new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = deletedWork(),
+        storedWork =
+          visibleWorkWith(stubs = List(kept), removed = List(removed))
+      )
+
+      reconciled.state.internalWorkStubs shouldBe List(kept)
+      reconciled.state.removedInternalWorkStubs shouldBe List(removed)
+    }
+
+    it("leaves the delete alone if the stored work has no stubs") {
+      val delete = deletedWork()
+      new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = delete,
+        storedWork = visibleWorkWithStubs(stubs = Nil)
+      ) shouldBe delete
+    }
+
+    it("keeps the stubs it already has rather than taking the stored ones") {
+      // The guard that makes this hold is what stops a replay overwriting a
+      // delete that has already been reconciled, which would resend forever.
+      val alreadyReconciled = List(createInternalWorkSource)
+      val different = List(createInternalWorkSource, createInternalWorkSource)
+
+      val reconciled = new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = deletedWorkWithStubs(alreadyReconciled),
+        storedWork = visibleWorkWithStubs(different)
+      )
+
+      reconciled.state.internalWorkStubs shouldBe alreadyReconciled
+      reconciled.state.internalWorkStubs should not be different
+    }
+
+    it("is a fixed point on an already-reconciled delete") {
+      // Replays have to be stable: a second delete must produce the same
+      // document as the stored one, or it re-sends forever.
+      val stubs = List(createInternalWorkSource)
+      val transformer = new TeiTransformer(emptyStore)
+      val reconciled = transformer.reconcileWithStored(
+        newWork = deletedWork(),
+        storedWork = visibleWorkWithStubs(stubs)
+      )
+
+      transformer.reconcileWithStored(
+        newWork = deletedWork(),
+        storedWork = reconciled
+      ) shouldBe reconciled
+      transformer.reconcileWithStored(
+        newWork = reconciled,
+        storedWork = reconciled
+      ) shouldBe reconciled
+    }
+  }
+
+  describe("reconciling a changed record with the stored work") {
+    it("records a stub the record no longer has") {
+      val kept = createInternalWorkSource
+      val removed = createInternalWorkSource
+
+      val reconciled = new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = visibleWorkWithStubs(List(kept)),
+        storedWork = visibleWorkWithStubs(List(kept, removed))
+      )
+
+      reconciled.state.internalWorkStubs shouldBe List(kept)
+      idsOf(reconciled.state.removedInternalWorkStubs) shouldBe
+        List(removed.sourceIdentifier)
+    }
+
+    it("drops the data from a removed stub, keeping only its identity") {
+      // The list is never pruned, so keeping the data would grow the record
+      // forever. The merger only needs the ids to delete the work.
+      val removed = createInternalWorkSource
+      removed.workData.title should not be empty
+
+      val reconciled = new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = visibleWorkWithStubs(Nil),
+        storedWork = visibleWorkWithStubs(List(removed))
+      )
+
+      reconciled.state.removedInternalWorkStubs.head.workData shouldBe
+        WorkData[Unidentified]()
+    }
+
+    it("records nothing when the record still has every stub") {
+      val newWork = visibleWorkWithStubs(List(createInternalWorkSource))
+      new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = newWork,
+        storedWork = newWork
+      ) shouldBe newWork
+    }
+
+    it("keeps removals the stored work already carried") {
+      // A stub is only seen to go once, on the version that drops it, so the
+      // list has to accumulate rather than be recomputed each time.
+      val kept = createInternalWorkSource
+      val removedEarlier = createInternalWorkSource
+      val removedNow = createInternalWorkSource
+
+      val reconciled = new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = visibleWorkWithStubs(List(kept)),
+        storedWork = visibleWorkWith(
+          stubs = List(kept, removedNow),
+          removed = List(removedEarlier)
+        )
+      )
+
+      idsOf(reconciled.state.removedInternalWorkStubs) should
+        contain theSameElementsAs List(
+          removedEarlier.sourceIdentifier,
+          removedNow.sourceIdentifier
+        )
+    }
+
+    it("drops a removal when the stub comes back") {
+      // Deleting a work that the record has readopted would take a live inner
+      // work out of the catalogue.
+      val restored = createInternalWorkSource
+
+      val reconciled = new TeiTransformer(emptyStore).reconcileWithStored(
+        newWork = visibleWorkWithStubs(List(restored)),
+        storedWork = visibleWorkWith(stubs = Nil, removed = List(restored))
+      )
+
+      reconciled.state.removedInternalWorkStubs shouldBe empty
+    }
+
+    it("brings a stub back cleanly when the record is revived") {
+      // Removed then readded: the merger has to stop deleting it and start
+      // making it again, so the removal must not survive the revival.
+      val revived = createInternalWorkSource
+      val transformer = new TeiTransformer(emptyStore)
+
+      val present = visibleWorkWithStubs(List(revived))
+      val removed =
+        transformer.reconcileWithStored(
+          newWork = visibleWorkWithStubs(Nil),
+          storedWork = present
+        )
+      idsOf(removed.state.removedInternalWorkStubs) shouldBe
+        List(revived.sourceIdentifier)
+
+      val restored =
+        transformer.reconcileWithStored(newWork = present, storedWork = removed)
+      restored.state.internalWorkStubs shouldBe List(revived)
+      restored.state.removedInternalWorkStubs shouldBe empty
+
+      // And a second removal is still caught after the revival.
+      transformer
+        .reconcileWithStored(
+          newWork = visibleWorkWithStubs(Nil),
+          storedWork = restored
+        )
+        .state
+        .removedInternalWorkStubs
+        .map(_.sourceIdentifier) shouldBe List(revived.sourceIdentifier)
+    }
+
+    it("is a fixed point on an already-reconciled record") {
+      val kept = createInternalWorkSource
+      val removed = createInternalWorkSource
+      val transformer = new TeiTransformer(emptyStore)
+
+      val reconciled = transformer.reconcileWithStored(
+        newWork = visibleWorkWithStubs(List(kept)),
+        storedWork = visibleWorkWithStubs(List(kept, removed))
+      )
+
+      transformer.reconcileWithStored(
+        newWork = visibleWorkWithStubs(List(kept)),
+        storedWork = reconciled
+      ) shouldBe reconciled
+    }
+  }
+
+  describe("deciding whether the stored work is required") {
+    it("requires it for a delete that has no stubs of its own") {
+      new TeiTransformer(emptyStore).requiresStoredWork(
+        deletedWork()
+      ) shouldBe true
+    }
+
+    it("does not require it for a delete that already carries its stubs") {
+      new TeiTransformer(emptyStore).requiresStoredWork(
+        deletedWorkWithStubs(List(createInternalWorkSource))
+      ) shouldBe false
+    }
+
+    it("requires it for a changed record, where removals are only visible") {
+      // Nothing in the XML says which stubs used to be there.
+      new TeiTransformer(emptyStore).requiresStoredWork(
+        visibleWorkWithStubs(stubs = Nil)
+      ) shouldBe true
+    }
+  }
+
+  private val deleteId = "manuscript_15651"
+  private val deleteSourceIdentifier = SourceIdentifier(
+    identifierType = IdentifierType.Tei,
+    ontologyType = "Work",
+    value = deleteId
+  )
+  private val deleteTime = instantInLast30Days
+
+  private def emptyStore = new MemoryStore[S3ObjectLocation, String](Map.empty)
+
+  private def deletedWork(): Work[Source] =
+    Work.Deleted[Source](
+      version = 1,
+      state = Source(deleteSourceIdentifier, deleteTime),
+      deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
+    )
+
+  private def deletedWorkWithStubs(
+    stubs: List[InternalWork.Source]
+  ): Work[Source] =
+    Work.Deleted[Source](
+      version = 1,
+      state = Source(
+        sourceIdentifier = deleteSourceIdentifier,
+        sourceModifiedTime = deleteTime,
+        internalWorkStubs = stubs
+      ),
+      deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
+    )
+
+  private def visibleWorkWithStubs(
+    stubs: List[InternalWork.Source]
+  ): Work[Source] = visibleWorkWith(stubs = stubs, removed = Nil)
+
+  private def visibleWorkWith(
+    stubs: List[InternalWork.Source],
+    removed: List[InternalWork.Source]
+  ): Work[Source] =
+    Work.Visible[Source](
+      version = 1,
+      state = Source(
+        sourceIdentifier = deleteSourceIdentifier,
+        sourceModifiedTime = deleteTime,
+        internalWorkStubs = stubs,
+        removedInternalWorkStubs = removed
+      ),
+      data = WorkData[Unidentified](title = Some("A TEI manuscript"))
+    )
+
+  private def idsOf(stubs: List[InternalWork.Source]): List[SourceIdentifier] =
+    stubs.map(_.sourceIdentifier)
+
+  private def createInternalWorkSource: InternalWork.Source =
+    InternalWork.Source(
+      sourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.Tei,
+        ontologyType = "Work",
+        value = s"${deleteId}_${Random.alphanumeric.take(6).mkString}"
+      ),
+      workData = WorkData[Unidentified](title = Some("An inner work"))
+    )
 
   private def transformToWork(filename: String)(
     id: String,

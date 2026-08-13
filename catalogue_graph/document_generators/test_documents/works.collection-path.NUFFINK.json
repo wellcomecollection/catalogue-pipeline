@@ -43,7 +43,8 @@
       "contributors.agent.label": [],
       "genres.concepts.label": [],
       "collectionPath.label": "NUF/FINK",
-      "collectionPath.path": "NUFFINK"
+      "collectionPath.path": "NUFFINK",
+      "collectionPath.sort": "NUFFINK"
     },
     "display": {
       "id": "wgtjwcaz",
@@ -74,7 +75,17 @@
       "images": [],
       "parts": [],
       "partOf": [],
-      "type": "Work"
+      "type": "Work",
+      "collection": {
+        "root": {
+          "id": "wgtjwcaz",
+          "title": "2IZYa4NvPt5IYoL",
+          "referenceNumber": "NUF/FINK",
+          "totalParts": 0,
+          "type": "Work"
+        },
+        "isRoot": true
+      }
     },
     "aggregatableValues": {
       "workType": [],
@@ -84,7 +95,11 @@
       "production.dates": [],
       "contributors.agent": [],
       "items.locations.license": [],
-      "availabilities": []
+      "availabilities": [],
+      "collection.root": {
+        "id": "wgtjwcaz",
+        "label": "2IZYa4NvPt5IYoL"
+      }
     },
     "filterableValues": {
       "workType": "Standard",
@@ -111,8 +126,11 @@
       "items.locations.createdDate": [],
       "partOf.id": [],
       "partOf.title": [],
-      "availabilities.id": []
+      "availabilities.id": [],
+      "collection.isRoot": true,
+      "collection.root.id": "wgtjwcaz",
+      "collection.root.title": "2IZYa4NvPt5IYoL"
     }
   },
-  "createdAt": "2026-06-03T16:56:01.966272+00:00"
+  "createdAt": "2026-08-06T16:13:32.466078+00:00"
 }

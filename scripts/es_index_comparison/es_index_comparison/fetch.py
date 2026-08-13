@@ -39,9 +39,12 @@ def fetch_index(
 def fetch_both(
     sources: List[ResolvedIndexSource],
     raw_dir: Path,
-    query: Dict[str, Any] | None,
+    queries: Dict[str, Dict[str, Any] | None],
 ) -> Dict[str, Path]:
-    """Fetch documents for each index source, instantiating clients per cluster."""
+    """Fetch documents for each index source, instantiating clients per cluster.
+
+    queries maps index-source id to the fetch query for that side (or None).
+    """
 
     results: Dict[str, Path] = {}
     clients: Dict[Tuple[str, str, str], Elasticsearch] = {}
@@ -57,7 +60,7 @@ def fetch_both(
             console.log(
                 f"Fetching index {source.index} (source={source.id}, cluster={source.cluster_id}) to {out_file}"
             )
-            fetch_index(es, source.index, out_file, query)
+            fetch_index(es, source.index, out_file, queries.get(source.id))
             results[source.id] = out_file
     finally:
         for es in clients.values():

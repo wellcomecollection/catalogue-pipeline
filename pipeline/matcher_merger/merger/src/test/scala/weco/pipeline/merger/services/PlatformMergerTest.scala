@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{
+  DeletedReason,
   Format,
   InternalWork,
   InvisibilityReason,
@@ -1138,6 +1139,122 @@ class PlatformMergerTest
         _.data.thumbnail shouldBe metsWork.data.thumbnail
       }
     }
+
+    it("deletes the inner works of a deleted TEI work") {
+      val stubs = List(createInternalWorkStub, createInternalWorkStub)
+      val deletedTeiWork = teiIdentifiedWork()
+        .mapState { _.copy(internalWorkStubs = stubs) }
+        .deleted()
+
+      val result = merger.merge(works = Seq(deletedTeiWork))
+
+      result.resultWorks should have size 3
+
+      val deletedWorks = result.resultWorks.collect {
+        case w: Work.Deleted[Identified] => w
+      }
+      deletedWorks.map(_.state.canonicalId) should contain theSameElementsAs
+        deletedTeiWork.state.canonicalId +: stubs.map(_.canonicalId)
+
+      val innerWorks =
+        deletedWorks.filterNot(
+          _.state.canonicalId == deletedTeiWork.state.canonicalId
+        )
+      innerWorks.foreach {
+        w =>
+          w.deletedReason shouldBe DeletedReason.TeiDeletedInMerger
+          w.version shouldBe deletedTeiWork.version
+          w.state.sourceModifiedTime shouldBe deletedTeiWork.state.sourceModifiedTime
+      }
+    }
+
+    it(
+      "deletes the inner works of a deleted TEI work alongside a visible target"
+    ) {
+      val stubs = List(createInternalWorkStub, createInternalWorkStub)
+      val deletedTeiWork = teiIdentifiedWork()
+        .mapState { _.copy(internalWorkStubs = stubs) }
+        .deleted()
+
+      val sierraWork = sierraPhysicalIdentifiedWork()
+
+      val result = merger.merge(works = Seq(sierraWork, deletedTeiWork))
+
+      result.resultWorks should have size 4
+
+      result.resultWorks.collect {
+        case w: Work.Visible[Identified] => w.state.canonicalId
+      } shouldBe Seq(sierraWork.state.canonicalId)
+
+      result.resultWorks.collect {
+        case w: Work.Deleted[Identified] => w.state.canonicalId
+      } should contain theSameElementsAs
+        deletedTeiWork.state.canonicalId +: stubs.map(_.canonicalId)
+    }
+
+    it("deletes an inner work whose stub has been removed from the record") {
+      val kept = createInternalWorkStub
+      val removed = createInternalWorkStub
+      val teiWork = teiIdentifiedWork().mapState {
+        _.copy(
+          internalWorkStubs = List(kept),
+          removedInternalWorkStubs = List(removed)
+        )
+      }
+
+      val result = merger.merge(works = Seq(teiWork))
+
+      result.resultWorks.collect {
+        case w: Work.Visible[Identified] => w.state.canonicalId
+      } should contain theSameElementsAs Seq(
+        teiWork.state.canonicalId,
+        kept.canonicalId
+      )
+
+      val deleted = result.resultWorks.collect {
+        case w: Work.Deleted[Identified] => w
+      }
+      deleted.map(_.state.canonicalId) shouldBe Seq(removed.canonicalId)
+      deleted.head.deletedReason shouldBe DeletedReason.TeiDeletedInMerger
+    }
+
+    it("deletes removed inner works of a TEI work that loses the merge") {
+      // An EBSCO work outranks TEI, so the TEI work is redirected and its
+      // stubs are dropped from the result. The removals still have to happen.
+      val removed = createInternalWorkStub
+      val teiWork = teiIdentifiedWork().mapState {
+        _.copy(removedInternalWorkStubs = List(removed))
+      }
+      val ebscoWork = ebscoIdentifiedWork()
+
+      val result = merger.merge(works = Seq(ebscoWork, teiWork))
+
+      result.resultWorks.collect {
+        case w: Work.Deleted[Identified] => w.state.canonicalId
+      } shouldBe Seq(removed.canonicalId)
+    }
+
+    it("never deletes an inner work it has just emitted") {
+      // The transformer drops a stub from the removed list when the record
+      // takes it back, so the two lists should not overlap. If they ever do,
+      // the live work has to win over the delete.
+      val contested = createInternalWorkStub
+      val teiWork = teiIdentifiedWork().mapState {
+        _.copy(
+          internalWorkStubs = List(contested),
+          removedInternalWorkStubs = List(contested)
+        )
+      }
+
+      val result = merger.merge(works = Seq(teiWork))
+
+      result.resultWorks.collect {
+        case w: Work.Deleted[Identified] => w.state.canonicalId
+      } shouldBe empty
+      result.resultWorks.collect {
+        case w: Work.Visible[Identified] => w.state.canonicalId
+      } should contain(contested.canonicalId)
+    }
   }
 
   it("passes a Folio work through the merger unchanged") {
@@ -1167,4 +1284,13 @@ class PlatformMergerTest
     val mergedWork = mergedWorks.head.asInstanceOf[Work.Visible[Merged]]
     mergedWork.data shouldBe axiellWork.data
   }
+
+  private def createInternalWorkStub: InternalWork.Identified =
+    InternalWork.Identified(
+      sourceIdentifier = createTeiSourceIdentifier,
+      canonicalId = createCanonicalId,
+      workData = WorkData(
+        title = Some(s"tei-inner-${randomAlphanumeric(length = 10)}")
+      )
+    )
 }

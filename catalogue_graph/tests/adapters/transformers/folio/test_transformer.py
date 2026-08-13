@@ -16,6 +16,8 @@ def _run_transform(
     monkeypatch: pytest.MonkeyPatch,
     *,
     changeset_ids: list[str] | None = None,
+    ids: list[str] | None = None,
+    job_id: str = "20260101T1200",
     index_date: str | None = None,
     pipeline_date: str = "dev",
 ) -> TransformerResult:
@@ -32,8 +34,9 @@ def _run_transform(
 
     event = TransformerEvent(
         transformer_type="folio",
-        job_id="20260101T1200",
+        job_id=job_id,
         changeset_ids=changeset_ids or [],
+        ids=ids,
     )
 
     return handler(
@@ -197,3 +200,106 @@ def test_transformer_includes_predecessor_identifier(
         "ontologyType": "Work",
         "value": "b12345679",
     }
+
+
+def test_transformer_id_run_transforms_only_named_ids(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    records_by_id = {
+        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield></record>",
+        "fo00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title Two</subfield></datafield></record>",
+        "fo00003": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Not requested</subfield></datafield></record>",
+    }
+    # The changeset id is irrelevant to an id run; only seed the store.
+    prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        ids=["fo00001", "fo00002"],
+        index_date="2026-01-01",
+    )
+
+    assert result.success_count == 2
+    assert result.failure_count == 0
+    assert result.changeset_ids == []
+    assert result.ids == ["fo00001", "fo00002"]
+
+    indexed_ids = {op["_id"] for op in MockElasticsearchClient.inputs}
+    assert indexed_ids == {
+        "Work[folio-instance/fo00001]",
+        "Work[folio-instance/fo00002]",
+    }
+
+
+def test_transformer_id_run_includes_deleted_rows_as_tombstones(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    records_by_id: dict[str, tuple[str, bool] | str] = {
+        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield></record>",
+        "fo00003": (
+            "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Folio Work</subfield></datafield></record>",
+            True,
+        ),
+    }
+    prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        ids=["fo00001", "fo00003"],
+        index_date="2026-01-01",
+    )
+
+    assert result.success_count == 2
+    assert result.failure_count == 0
+
+    by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
+    deleted = by_id["Work[folio-instance/fo00003]"]["_source"]
+    assert deleted["type"] == "Deleted"
+    assert deleted["deletedReason"]["type"] == "DeletedFromSource"
+
+
+def test_transformer_id_run_report_key_is_not_reindex(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    records_by_id = {
+        "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield></record>",
+    }
+    prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    result = _run_transform(
+        monkeypatch,
+        ids=["fo00001"],
+        index_date="2026-01-01",
+        job_id="idload-20260101T1200",
+    )
+
+    assert (
+        result.report_s3_uri
+        == "s3://wellcomecollection-platform-folio-adapter/pipeline-dev/folio/dev/idload__idload-20260101T1200.json"
+    )
+
+    report = read_transformer_report(result)
+    assert report["ids"] == ["fo00001"]
+    assert report["changeset_ids"] == []

@@ -1,0 +1,22 @@
+# platform#6464 section 2: EBSCO works at works-source. Counts showed the new
+# pipeline 108 lower; only_in lists from this run name the missing records.
+
+index_sources:
+  - prod-works-source
+  - new-works-source
+
+filter_query:
+  query:
+    term:
+      state.sourceIdentifier.identifierType.id: ebsco-alt-lookup
+
+ignore_fields:
+  # Per-run ingest stamp.
+  - indexed_at
+  # Processing version counter, always differs between full runs.
+  - version
+
+sample_size: 20
+hash_bucket_count: 4
+namespace: 6464-ebsco-works-source
+output_dir: data
