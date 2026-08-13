@@ -111,7 +111,7 @@ module "transformer_state_machine" {
   ]
 
   policies_to_attach = {
-    "read_ebsco_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
+    "read_ebsco_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
   }
 }
 

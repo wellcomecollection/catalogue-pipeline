@@ -1,6 +1,6 @@
 locals {
   adapter_buckets = {
-    ebsco  = local.ebsco_adapter_bucket
+    ebsco = local.ebsco_adapter_bucket
   }
 }
 
