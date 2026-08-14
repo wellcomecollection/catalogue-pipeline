@@ -20,6 +20,9 @@ _MINIMAL_RECORD = (
     "<datafield tag='245' ind1='0' ind2='0'>"
     "<subfield code='a'>Title {id}</subfield>"
     "</datafield>"
+    "<datafield tag='999' ind1='f' ind2='f'>"
+    "<subfield code='i'>{id}</subfield>"
+    "</datafield>"
     "</record>"
 )
 
