@@ -15,6 +15,10 @@ class RecordSource(BaseSource):
 
     snapshot_id: int | None
 
+    unmatched_ids: list[str]
+    """Requested ids (id-mode only) that matched no row in the store. Only
+    meaningful once `stream_raw` has been fully consumed; empty otherwise."""
+
 
 class AdapterStoreSource(RecordSource):
     def __init__(
@@ -33,6 +37,7 @@ class AdapterStoreSource(RecordSource):
         self.changeset_ids = changeset_ids
         self.snapshot_id = snapshot_id
         self.ids = ids
+        self.unmatched_ids = []
 
     def stream_raw(self) -> Generator[dict[str, Any]]:
         if self.changeset_ids:
@@ -49,11 +54,25 @@ class AdapterStoreSource(RecordSource):
             # path: tombstones must overwrite live documents downstream. The
             # store is sorted on id, so this filter prunes row groups rather
             # than scanning the whole namespace.
+            # Deduped so a requested id given twice isn't double-counted in
+            # unmatched_ids below.
+            unique_ids = list(dict.fromkeys(self.ids))
             table = self.adapter_store.get_namespace_records(
-                In("id", self.ids), self.snapshot_id
+                In("id", unique_ids), self.snapshot_id
             )
+            seen_ids: set[str] = set()
             for batch in table.to_batches():
-                yield from self._process_rows(batch.to_pylist())
+                rows = batch.to_pylist()
+                seen_ids.update(row["id"] for row in rows)
+                yield from self._process_rows(rows)
+
+            self.unmatched_ids = [id_ for id_ in unique_ids if id_ not in seen_ids]
+            if self.unmatched_ids:
+                logger.warning(
+                    "Requested ids matched no row in the store",
+                    unmatched_ids=self.unmatched_ids,
+                    unmatched_count=len(self.unmatched_ids),
+                )
         else:
             logger.info("No changeset_id provided; performing full reindex of records.")
 

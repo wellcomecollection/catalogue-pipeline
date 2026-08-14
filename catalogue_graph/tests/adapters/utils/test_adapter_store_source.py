@@ -136,6 +136,44 @@ def test_stream_raw_id_path_no_matching_ids_yields_nothing(
     source = AdapterStoreSource(store, changeset_ids=[], ids=["nonexistent"])
 
     assert list(source.stream_raw()) == []
+    assert source.unmatched_ids == ["nonexistent"]
+
+
+def test_stream_raw_id_path_tracks_unmatched_ids_alongside_matches(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Ids that match a row are excluded from unmatched_ids; ids that don't
+    are recorded, so an operator can tell exactly which of theirs were missed."""
+    store = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "first"},
+            {"id": "rec002", "content": "second"},
+        ]
+    )
+    source = AdapterStoreSource(
+        store, changeset_ids=[], ids=["rec001", "rec002", "missing-1", "missing-2"]
+    )
+
+    rows = list(source.stream_raw())
+
+    assert sorted(row["id"] for row in rows) == ["rec001", "rec002"]
+    assert sorted(source.unmatched_ids) == ["missing-1", "missing-2"]
+
+
+def test_stream_raw_id_path_dedupes_unmatched_ids(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """A requested id repeated in the input is only reported once when it
+    matches nothing, so duplicates in an operator's list don't inflate the
+    unmatched count."""
+    store = adapter_store_with_records([{"id": "rec001", "content": "first"}])
+    source = AdapterStoreSource(
+        store, changeset_ids=[], ids=["nonexistent", "nonexistent"]
+    )
+
+    list(source.stream_raw())
+
+    assert source.unmatched_ids == ["nonexistent"]
 
 
 def test_rejects_changeset_ids_combined_with_ids(

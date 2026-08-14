@@ -19,6 +19,7 @@ class AxiellStoreSource(RecordSource):
     def __init__(self, reader: AxiellChangesetReader):
         self.reader = reader
         self.snapshot_id = reader.snapshot_id
+        self.unmatched_ids: list[str] = []
 
     def stream_raw(self) -> Generator[dict[str, Any]]:
         for row in self.reader.iter_records():
@@ -31,6 +32,7 @@ class AxiellStoreSource(RecordSource):
                     "deletion facts in this stream"
                 )
             yield row
+        self.unmatched_ids = self.reader.unmatched_ids
         for deletion in self.reader.iter_deletions():
             yield {
                 "id": deletion.fact_id,
