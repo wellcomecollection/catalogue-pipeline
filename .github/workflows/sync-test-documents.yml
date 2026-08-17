@@ -37,6 +37,17 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           path: catalogue-api
 
+      # A fixed branch name stops auto-PRs stacking up while one sits open.
+      # Starting from the branch's existing state preserves any spec work
+      # already pushed there, and makes change detection relative to what the
+      # open PR already has.
+      - name: Check out the auto-sync branch if it already exists
+        run: |
+          cd catalogue-api
+          if git fetch origin auto-sync/test-documents; then
+            git checkout auto-sync/test-documents
+          fi
+
       # --delete mirrors removals; the target directory holds nothing but
       # copies of these fixtures.
       - name: Copy test documents
@@ -57,7 +68,7 @@ jobs:
             echo "changes=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Pull Request
+      - name: Create or update Pull Request
         if: steps.changes.outputs.changes == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -68,15 +79,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Create branch
-          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-          BRANCH_NAME="auto-sync/test-documents-$TIMESTAMP"
-          git checkout -b $BRANCH_NAME
+          BRANCH_NAME="auto-sync/test-documents"
+          if [ "$(git branch --show-current)" != "$BRANCH_NAME" ]; then
+            git checkout -b "$BRANCH_NAME"
+          fi
 
           # Commit and push
           git add common/search/src/test/resources/test_documents
           git commit -m "Update test documents from catalogue-pipeline"
-          git push origin $BRANCH_NAME
+          git push origin "$BRANCH_NAME"
 
           # gh, unlike curl -s, fails the step on API errors
           cat > "$RUNNER_TEMP/pr-body.md" <<'EOF'
@@ -89,10 +100,25 @@ jobs:
           See wellcomecollection/platform#6514 for context.
           EOF
 
-          gh pr create \
+          # An open PR for the fixed branch already covers this sync; a comment
+          # records the extra trigger commit the PR body can't name.
+          OPEN_PR=$(gh pr list \
             --repo wellcomecollection/catalogue-api \
             --head "$BRANCH_NAME" \
-            --base main \
-            --title "🤖 Auto-sync: Update test documents from catalogue-pipeline" \
-            --body-file "$RUNNER_TEMP/pr-body.md" \
-            --reviewer wellcomecollection/digital-platform
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$OPEN_PR" ]; then
+            gh pr comment "$OPEN_PR" \
+              --repo wellcomecollection/catalogue-api \
+              --body "Synced further test document changes, triggered by commit: wellcomecollection/catalogue-pipeline@${{ github.sha }}"
+          else
+            gh pr create \
+              --repo wellcomecollection/catalogue-api \
+              --head "$BRANCH_NAME" \
+              --base main \
+              --title "🤖 Auto-sync: Update test documents from catalogue-pipeline" \
+              --body-file "$RUNNER_TEMP/pr-body.md" \
+              --reviewer wellcomecollection/digital-platform
+          fi
