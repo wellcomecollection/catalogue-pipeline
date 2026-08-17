@@ -227,6 +227,30 @@ locals {
       JitterStrategy  = "FULL"
     }
   ]
+
+  # Covers what the extractor's in-process retry does not: core/source.py retries
+  # TransportError and ApiError for up to five minutes, but GZipSource streams over
+  # raw requests and is not retried at all. NotFoundError is deliberately absent,
+  # because pit_id is fixed in the state input, so a retry reuses the expired PIT.
+  # Two attempts, to stay inside the 15m PIT keep-alive.
+  transient_extractor_retry = [
+    {
+      # Matched by exact name, so both spellings are needed: requests raises
+      # ConnectTimeout/ReadTimeout on the GZipSource path, elasticsearch raises
+      # ConnectionTimeout once its in-process budget is spent.
+      ErrorEquals = [
+        "ChunkedEncodingError",
+        "ConnectionError",
+        "ConnectTimeout",
+        "ReadTimeout",
+        "ConnectionTimeout",
+      ]
+      IntervalSeconds = 5
+      MaxAttempts     = 2
+      BackoffRate     = 2
+      JitterStrategy  = "FULL"
+    }
+  ]
 }
 
 data "aws_vpc" "vpc" {
