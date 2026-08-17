@@ -1,13 +1,13 @@
 {
   "description": "a genre concept with a hierarchy but no description",
-  "id": "d0m9fiaz",
+  "id": "o2y0cz0c",
   "document": {
     "query": {
-      "id": "d0m9fiaz",
+      "id": "o2y0cz0c",
       "identifiers": [
         {
-          "value": "8rauanatw",
-          "identifierType": "lc-gmgpc"
+          "value": "kceqskch4",
+          "identifierType": "label-derived"
         }
       ],
       "label": "Emu engravings",
@@ -15,15 +15,15 @@
       "type": "Genre"
     },
     "display": {
-      "id": "d0m9fiaz",
+      "id": "o2y0cz0c",
       "identifiers": [
         {
-          "value": "8rauanatw",
+          "value": "kceqskch4",
           "type": "Identifier",
           "identifierType": {
-            "id": "lc-gmgpc",
+            "id": "label-derived",
             "type": "IdentifierType",
-            "label": "Library of Congress Thesaurus for Graphic Materials"
+            "label": "Identifier derived from the label of the referent"
           }
         }
       ],
@@ -37,19 +37,19 @@
         "narrowerThan": [
           {
             "label": "Engravings",
-            "id": "ty0famvk",
+            "id": "406twyqj",
             "conceptType": "Genre"
           }
         ],
         "broaderThan": [
           {
             "label": "Wood emu engravings",
-            "id": "po2y0cz0",
+            "id": "9a3fvc8r",
             "conceptType": "Genre"
           },
           {
             "label": "Steel emu engravings",
-            "id": "ck2eqk27",
+            "id": "ip4wswit",
             "conceptType": "Genre"
           }
         ],
@@ -58,7 +58,7 @@
         "relatedTopics": [
           {
             "label": "Flightless finery",
-            "id": "59ac5ut3",
+            "id": "y0famvkp",
             "conceptType": "Concept"
           }
         ],
@@ -68,5 +68,5 @@
       "displayImages": []
     }
   },
-  "createdAt": "2026-08-12T14:54:27.673711+00:00"
+  "createdAt": "2026-08-17T13:35:43.345831+00:00"
 }
