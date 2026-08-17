@@ -36,11 +36,20 @@ credentials live in Secrets Manager; the store scan works with
 
 ## The import CSV
 
-Columns are `RecordID,Bnumber,RefNo`: the CALM RecordID to match the AxC
-record on, the b number to write, and the AxC record's RefNo as a human
-cross-check. These headers are a working guess pending agreement with
-collections staff on the Collections Import tool's expectations; only the
-headers and column order should need changing.
+Columns follow the format agreed with collections staff on 2026-08-17:
+
+```
+object_number,alternative_number,alternative_number.type
+WT/D/1/20/1/35/95,b33174192,Bibliographic Number
+```
+
+`object_number` is the archive reference (RefNo) the import matches AxC
+records on, `alternative_number` is the b number to write, and
+`alternative_number.type` is the constant `Bibliographic Number`. Because the
+import matches on RefNo rather than the CALM RecordID, the build step uses
+the 907 join to derive each record's RefNo and withholds rows where several
+AxC records share one (`ambiguous_refnos.csv`) or where the matched record
+has no RefNo at all.
 
 RecordIDs with several bibs produce one row each (035 is repeatable).
 Conflicts, where AxC already cites a different b number, are excluded from

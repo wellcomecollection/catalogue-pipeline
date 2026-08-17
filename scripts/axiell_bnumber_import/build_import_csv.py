@@ -4,15 +4,20 @@
 Joins pairs.csv (see extract_pairs.py) against the live Axiell adapter store,
 keyed on the CALM RecordID each AxC record carries in MARC 907, and writes:
 
-- the import CSV (RecordID, Bnumber, RefNo) for records matched in AxC that
-  do not already cite the b number
+- the import CSV in the agreed format (object_number = the record's RefNo,
+  alternative_number = the b number, alternative_number.type = the constant
+  "Bibliographic Number") for records matched in AxC that do not already cite
+  the b number
 - conflicts.csv where the AxC record cites a different b number
+- ambiguous_refnos.csv where several AxC records share the RefNo the import
+  would match on
 - unmatched.csv for pairs with no AxC record (expected for manuscripts moving
   to TEI and returned PSY material)
 - report.md with the counts
 
-Column headers on the import CSV are a working guess pending agreement with
-collections staff. Tracked in wellcomecollection/platform#6525.
+The Axiell import matches records on object_number, so the join here on the
+CALM RecordID is what derives and verifies each record's RefNo before it is
+used as the match key. Tracked in wellcomecollection/platform#6525.
 
 Run from the repo root with the catalogue_graph environment:
 
@@ -102,9 +107,16 @@ def main() -> None:
 
     by_uuid = scan_axiell_store()
 
+    refno_owners: dict[str, set[str]] = {}
+    for uuid, record in by_uuid.items():
+        if record["refno"]:
+            refno_owners.setdefault(record["refno"], set()).add(uuid)
+
     to_import: list[list[str]] = []
     already: list[list[str]] = []
     conflicts: list[list[str]] = []
+    ambiguous: list[list[str]] = []
+    no_refno: list[list[str]] = []
     unmatched: list[list[str]] = []
     for uuid, b_number in pairs:
         record = by_uuid.get(uuid)
@@ -116,24 +128,33 @@ def main() -> None:
             conflicts.append(
                 [uuid, b_number, ";".join(sorted(record["bnumbers"])), record["refno"]]
             )
+        elif not record["refno"]:
+            no_refno.append([uuid, b_number])
+        elif len(refno_owners[record["refno"]]) > 1:
+            ambiguous.append([record["refno"], uuid, b_number])
         else:
-            to_import.append([uuid, b_number, record["refno"]])
+            to_import.append([record["refno"], b_number, "Bibliographic Number"])
 
     if args.since:
         with args.since.open() as f:
-            previous = {(r["RecordID"], r["Bnumber"]) for r in csv.DictReader(f)}
+            previous = {
+                (r["object_number"], r["alternative_number"]) for r in csv.DictReader(f)
+            }
         to_import = [row for row in to_import if (row[0], row[1]) not in previous]
 
     out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)
     write_csv(
-        out / "axiell_bnumber_import.csv", ["RecordID", "Bnumber", "RefNo"], to_import
+        out / "axiell_bnumber_import.csv",
+        ["object_number", "alternative_number", "alternative_number.type"],
+        to_import,
     )
     write_csv(
         out / "conflicts.csv",
         ["RecordID", "Bnumber", "axc_bnumbers", "RefNo"],
         conflicts,
     )
+    write_csv(out / "ambiguous_refnos.csv", ["RefNo", "RecordID", "Bnumber"], ambiguous)
     write_csv(out / "unmatched.csv", ["RecordID", "Bnumber"], unmatched)
 
     report = "\n".join(
@@ -145,6 +166,8 @@ def main() -> None:
             + (" (delta since previous CSV)" if args.since else ""),
             f"- already present in AxC: {len(already)}",
             f"- conflicts (AxC cites a different b number): {len(conflicts)}",
+            f"- RefNo shared by several AxC records: {len(ambiguous)}",
+            f"- AxC record has no RefNo to match on: {len(no_refno)}",
             f"- no AxC record for the RecordID: {len(unmatched)}",
             "",
         ]
