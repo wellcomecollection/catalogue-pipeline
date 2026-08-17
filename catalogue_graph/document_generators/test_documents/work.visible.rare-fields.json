@@ -1,0 +1,277 @@
+{
+  "description": "a work with every rarely-populated display field",
+  "id": "4cbgoe8p",
+  "document": {
+    "type": "Visible",
+    "debug": {
+      "source": {
+        "id": "4cbgoe8p",
+        "identifier": {
+          "identifierType": {
+            "id": "sierra-system-number"
+          },
+          "ontologyType": "Work",
+          "value": "3QF59FdNQJ"
+        },
+        "version": 1,
+        "modifiedTime": "2025-01-01T00:00:00Z"
+      },
+      "mergedTime": "2025-01-01T00:00:00Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
+      "mergeCandidates": [],
+      "redirectSources": []
+    },
+    "query": {
+      "id": "4cbgoe8p",
+      "title": "A work with every rarely-populated display field",
+      "referenceNumber": "WA/HMM/BU/1",
+      "physicalDescription": "1 volume ; 23 cm",
+      "alternativeTitles": [],
+      "languages.label": [],
+      "sourceIdentifier.value": "3QF59FdNQJ",
+      "identifiers.value": [
+        "4cbgoe8p",
+        "3QF59FdNQJ"
+      ],
+      "images.id": [],
+      "images.identifiers.value": [],
+      "items.identifiers.value": [
+        "Y14y2h0Rzl"
+      ],
+      "items.id": [
+        "l5mem3bu"
+      ],
+      "items.shelfmark.value": [
+        "Shelfmark: NaTDHzrYbX"
+      ],
+      "notes.contents": [],
+      "partOf.title": [],
+      "production.label": [
+        "London",
+        "Printed for the author",
+        "1897"
+      ],
+      "subjects.concepts.label": [],
+      "contributors.agent.label": [
+        "Wellcome, Henry Solomon, Sir"
+      ],
+      "genres.concepts.label": []
+    },
+    "display": {
+      "id": "4cbgoe8p",
+      "title": "A work with every rarely-populated display field",
+      "alternativeTitles": [],
+      "referenceNumber": "WA/HMM/BU/1",
+      "physicalDescription": "1 volume ; 23 cm",
+      "createdDate": {
+        "label": "1897",
+        "type": "Period"
+      },
+      "contributors": [
+        {
+          "agent": {
+            "id": "xoptq11r",
+            "label": "Wellcome, Henry Solomon, Sir",
+            "identifiers": [
+              {
+                "value": "sibpiNFnJJ",
+                "type": "Identifier",
+                "identifierType": {
+                  "id": "sierra-system-number",
+                  "type": "IdentifierType",
+                  "label": "Sierra system number"
+                }
+              }
+            ],
+            "type": "Person"
+          },
+          "roles": [
+            {
+              "label": "author",
+              "type": "ContributionRole"
+            }
+          ],
+          "primary": true,
+          "type": "Contributor"
+        }
+      ],
+      "identifiers": [
+        {
+          "value": "3QF59FdNQJ",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "sierra-system-number",
+            "type": "IdentifierType",
+            "label": "Sierra system number"
+          }
+        }
+      ],
+      "subjects": [],
+      "genres": [],
+      "items": [
+        {
+          "id": "l5mem3bu",
+          "identifiers": [
+            {
+              "value": "Y14y2h0Rzl",
+              "type": "Identifier",
+              "identifierType": {
+                "id": "sierra-system-number",
+                "type": "IdentifierType",
+                "label": "Sierra system number"
+              }
+            }
+          ],
+          "title": "Copy 1, with manuscript annotations",
+          "note": "In poor condition; handle with care",
+          "locations": [
+            {
+              "locationType": {
+                "id": "closed-stores",
+                "type": "LocationType",
+                "label": "Closed stores"
+              },
+              "license": {
+                "id": "pdm",
+                "type": "License",
+                "label": "Public Domain Mark",
+                "url": "https://creativecommons.org/share-your-work/public-domain/pdm/"
+              },
+              "accessConditions": [
+                {
+                  "method": {
+                    "id": "manual-request",
+                    "type": "AccessMethod",
+                    "label": "Manual request"
+                  },
+                  "status": {
+                    "id": "restricted",
+                    "type": "AccessStatus",
+                    "label": "Restricted"
+                  },
+                  "terms": "Permission must be obtained from the depositor",
+                  "note": "This file is closed for data protection reasons",
+                  "type": "AccessCondition"
+                }
+              ],
+              "label": "locationLabel",
+              "shelfmark": "Shelfmark: NaTDHzrYbX",
+              "type": "PhysicalLocation"
+            }
+          ],
+          "type": "Item"
+        }
+      ],
+      "holdings": [],
+      "availabilities": [],
+      "production": [
+        {
+          "label": "London : Printed for the author, 1897",
+          "places": [
+            {
+              "label": "London",
+              "type": "Place"
+            }
+          ],
+          "agents": [
+            {
+              "label": "Printed for the author",
+              "type": "Agent"
+            }
+          ],
+          "dates": [
+            {
+              "label": "1897",
+              "type": "Period"
+            }
+          ],
+          "function": {
+            "label": "Printing",
+            "type": "Concept"
+          },
+          "type": "ProductionEvent"
+        }
+      ],
+      "languages": [],
+      "notes": [],
+      "currentFrequency": "Quarterly, 1897-1902",
+      "formerFrequency": [],
+      "designation": [],
+      "images": [],
+      "parts": [],
+      "partOf": [],
+      "type": "Work"
+    },
+    "aggregatableValues": {
+      "workType": [],
+      "genres": [],
+      "subjects": [],
+      "languages": [],
+      "production.dates": [
+        {
+          "id": "1897",
+          "label": "1897"
+        }
+      ],
+      "contributors.agent": [
+        {
+          "id": "xoptq11r",
+          "label": "Wellcome, Henry Solomon, Sir"
+        }
+      ],
+      "items.locations.license": [
+        {
+          "id": "pdm",
+          "label": "Public Domain Mark"
+        }
+      ],
+      "availabilities": []
+    },
+    "filterableValues": {
+      "workType": "Standard",
+      "production.dates.range.from": [
+        -2303596800000
+      ],
+      "languages.id": [],
+      "genres.label": [],
+      "genres.concepts.id": [],
+      "genres.concepts.sourceIdentifier": [],
+      "subjects.label": [],
+      "subjects.concepts.id": [],
+      "subjects.concepts.sourceIdentifier": [],
+      "contributors.agent.label": [
+        "Wellcome, Henry Solomon, Sir"
+      ],
+      "contributors.agent.id": [
+        "xoptq11r"
+      ],
+      "contributors.agent.sourceIdentifier": [
+        "sibpiNFnJJ"
+      ],
+      "identifiers.value": [
+        "4cbgoe8p",
+        "3QF59FdNQJ"
+      ],
+      "items.locations.license.id": [
+        "pdm"
+      ],
+      "items.locations.accessConditions.status.id": [
+        "restricted"
+      ],
+      "items.id": [
+        "l5mem3bu"
+      ],
+      "items.identifiers.value": [
+        "Y14y2h0Rzl"
+      ],
+      "items.locations.locationType.id": [
+        "closed-stores"
+      ],
+      "items.locations.createdDate": [],
+      "partOf.id": [],
+      "partOf.title": [],
+      "availabilities.id": []
+    }
+  },
+  "createdAt": "2026-08-12T10:26:31.357044+00:00"
+}

@@ -17,7 +17,7 @@ from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from models.graph_node import Work
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Contributor, Genre, Subject
+from models.pipeline.concept import Concept, Contributor, Genre, Subject
 from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Id, Language
@@ -38,6 +38,10 @@ from .random import random_alphanumeric, random_canonical_id, rng
 def create_work_data(
     title: str | None = None,
     description: str | None = None,
+    physical_description: str | None = None,
+    reference_number: str | None = None,
+    created_date: Concept | None = None,
+    current_frequency: str | None = None,
     contributors: list[Contributor] | None = None,
     genres: list[Genre] | None = None,
     subjects: list[Subject] | None = None,
@@ -61,6 +65,10 @@ def create_work_data(
     return WorkData(
         title=title or random_alphanumeric(15),
         description=description,
+        physical_description=physical_description,
+        reference_number=reference_number,
+        created_date=created_date,
+        current_frequency=current_frequency,
         contributors=contributors or [],
         genres=genres or [],
         subjects=subjects or [],
@@ -100,6 +108,10 @@ def create_merged_work_state(
 def create_visible_merged_work(
     title: str | None = None,
     description: str | None = None,
+    physical_description: str | None = None,
+    reference_number: str | None = None,
+    created_date: Concept | None = None,
+    current_frequency: str | None = None,
     contributors: list[Contributor] | None = None,
     genres: list[Genre] | None = None,
     subjects: list[Subject] | None = None,
@@ -126,6 +138,10 @@ def create_visible_merged_work(
         data=create_work_data(
             title=title,
             description=description,
+            physical_description=physical_description,
+            reference_number=reference_number,
+            created_date=created_date,
+            current_frequency=current_frequency,
             contributors=contributors,
             genres=genres,
             subjects=subjects,
