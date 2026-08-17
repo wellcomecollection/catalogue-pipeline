@@ -214,6 +214,19 @@ locals {
       JitterStrategy  = "FULL"
     }
   ]
+
+  # Matched on its own so that a permanent NeptuneRequestError, and the poller's
+  # fatal "Load failed", still fail on the first attempt. What counts as transient
+  # is decided in catalogue_graph/src/clients/neptune_client.py.
+  transient_neptune_retry = [
+    {
+      ErrorEquals     = ["TransientNeptuneError"]
+      IntervalSeconds = 5
+      MaxAttempts     = 3
+      BackoffRate     = 2
+      JitterStrategy  = "FULL"
+    }
+  ]
 }
 
 data "aws_vpc" "vpc" {

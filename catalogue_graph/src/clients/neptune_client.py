@@ -7,6 +7,7 @@ from collections.abc import Iterable, Iterator
 
 import backoff
 import boto3
+import botocore.exceptions
 import requests
 import structlog
 from botocore.auth import SigV4Auth
@@ -33,6 +34,32 @@ ALLOW_DATABASE_RESET = False
 
 NEPTUNE_MAX_PARALLEL_QUERIES = 10
 NEPTUNE_QUERY_THREAD_COUNT = 5
+
+# Status alone is not enough: ConstraintViolationException is a 400 that Neptune
+# documents as transient. Status is the fallback when there is no error body.
+# https://docs.aws.amazon.com/neptune/latest/userguide/errors-engine-codes.html
+TRANSIENT_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+TRANSIENT_ERROR_CODES = frozenset({"ConstraintViolationException"})
+
+
+class NeptuneRequestError(Exception):
+    """A non-200 response from Neptune."""
+
+
+class TransientNeptuneError(NeptuneRequestError):
+    """A retryable failure, typed so that Step Functions can match it by name."""
+
+
+def _is_transient(raw_response: requests.Response) -> bool:
+    try:
+        body = raw_response.json()
+    except ValueError:
+        body = None
+
+    if isinstance(body, dict) and body.get("code") in TRANSIENT_ERROR_CODES:
+        return True
+
+    return raw_response.status_code in TRANSIENT_STATUS_CODES
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -75,7 +102,12 @@ class NeptuneClient:
 
     @backoff.on_exception(
         backoff.constant,
-        Exception,
+        # botocore covers credential resolution, which happens inside this method.
+        (
+            TransientNeptuneError,
+            requests.exceptions.RequestException,
+            botocore.exceptions.BotoCoreError,
+        ),
         max_tries=NEPTUNE_REQUESTS_BACKOFF_RETRIES,
         interval=NEPTUNE_REQUESTS_BACKOFF_INTERVAL,
         on_backoff=on_request_backoff,
@@ -101,7 +133,9 @@ class NeptuneClient:
             )
 
         if raw_response.status_code != 200:
-            raise Exception(raw_response.content)
+            if _is_transient(raw_response):
+                raise TransientNeptuneError(raw_response.content)
+            raise NeptuneRequestError(raw_response.content)
 
         response: dict = raw_response.json()
         return response
