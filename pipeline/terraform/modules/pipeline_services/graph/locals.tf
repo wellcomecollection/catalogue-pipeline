@@ -235,9 +235,14 @@ locals {
   # Two attempts, to stay inside the 15m PIT keep-alive.
   transient_extractor_retry = [
     {
+      # Matched by exact name, so both spellings are needed: requests raises
+      # ConnectTimeout/ReadTimeout on the GZipSource path, elasticsearch raises
+      # ConnectionTimeout once its in-process budget is spent.
       ErrorEquals = [
         "ChunkedEncodingError",
         "ConnectionError",
+        "ConnectTimeout",
+        "ReadTimeout",
         "ConnectionTimeout",
       ]
       IntervalSeconds = 5
