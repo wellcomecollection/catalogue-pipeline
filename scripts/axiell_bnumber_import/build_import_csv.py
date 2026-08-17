@@ -4,20 +4,21 @@
 Joins pairs.csv (see extract_pairs.py) against the live Axiell adapter store,
 keyed on the CALM RecordID each AxC record carries in MARC 907, and writes:
 
-- the import CSV in the agreed format (object_number = the record's RefNo,
-  alternative_number = the b number, alternative_number.type = the constant
-  "Bibliographic Number") for records matched in AxC that do not already cite
-  the b number
+- the import CSV in the agreed format (object_number = the record's public
+  reference, the AltRefNo; alternative_number = the b number;
+  alternative_number.type = the constant "Bibliographic Number") for records
+  matched in AxC that do not already cite the b number
 - conflicts.csv where the AxC record cites a different b number
-- ambiguous_refnos.csv where several AxC records share the RefNo the import
-  would match on
+- ambiguous_refs.csv where several AxC records share the public reference the
+  import would match on
+- no_public_ref.csv where the matched record carries no AltRefNo to match on
 - unmatched.csv for pairs with no AxC record (expected for manuscripts moving
   to TEI and returned PSY material)
 - report.md with the counts
 
 The Axiell import matches records on object_number, so the join here on the
-CALM RecordID is what derives and verifies each record's RefNo before it is
-used as the match key. Tracked in wellcomecollection/platform#6525.
+CALM RecordID is what derives and verifies each record's public reference
+before it is used as the match key. Tracked in wellcomecollection/platform#6525.
 
 Run from the repo root with the catalogue_graph environment:
 
@@ -68,13 +69,21 @@ def scan_axiell_store() -> dict[str, dict]:
             if not RE_UUID.match(uuid):
                 continue
             refno = ""
+            altrefno = ""
             bnumbers = set()
             for prefix, value in RE_035.findall(content):
                 if prefix == "Calm RefNo" and not refno:
                     refno = value.strip()
+                elif prefix == "AltRefNo" and not altrefno:
+                    altrefno = value.strip()
                 elif prefix == "Bibliographic Number":
                     bnumbers.add(value.strip().lstrip("."))
-            by_uuid[uuid] = {"record_id": rid, "refno": refno, "bnumbers": bnumbers}
+            by_uuid[uuid] = {
+                "record_id": rid,
+                "refno": refno,
+                "altrefno": altrefno,
+                "bnumbers": bnumbers,
+            }
     print(
         f"Scanned {scanned} adapter store rows, {len(by_uuid)} with a 907 RecordID",
         file=sys.stderr,
@@ -107,16 +116,16 @@ def main() -> None:
 
     by_uuid = scan_axiell_store()
 
-    refno_owners: dict[str, set[str]] = {}
+    ref_owners: dict[str, set[str]] = {}
     for uuid, record in by_uuid.items():
-        if record["refno"]:
-            refno_owners.setdefault(record["refno"], set()).add(uuid)
+        if record["altrefno"]:
+            ref_owners.setdefault(record["altrefno"], set()).add(uuid)
 
     to_import: list[list[str]] = []
     already: list[list[str]] = []
     conflicts: list[list[str]] = []
     ambiguous: list[list[str]] = []
-    no_refno: list[list[str]] = []
+    no_public_ref: list[list[str]] = []
     unmatched: list[list[str]] = []
     for uuid, b_number in pairs:
         record = by_uuid.get(uuid)
@@ -126,14 +135,20 @@ def main() -> None:
             already.append([uuid, b_number])
         elif record["bnumbers"]:
             conflicts.append(
-                [uuid, b_number, ";".join(sorted(record["bnumbers"])), record["refno"]]
+                [
+                    uuid,
+                    b_number,
+                    ";".join(sorted(record["bnumbers"])),
+                    record["altrefno"],
+                    record["refno"],
+                ]
             )
-        elif not record["refno"]:
-            no_refno.append([uuid, b_number])
-        elif len(refno_owners[record["refno"]]) > 1:
-            ambiguous.append([record["refno"], uuid, b_number])
+        elif not record["altrefno"]:
+            no_public_ref.append([uuid, b_number, record["refno"]])
+        elif len(ref_owners[record["altrefno"]]) > 1:
+            ambiguous.append([record["altrefno"], uuid, b_number])
         else:
-            to_import.append([record["refno"], b_number, "Bibliographic Number"])
+            to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
 
     if args.since:
         with args.since.open() as f:
@@ -151,10 +166,15 @@ def main() -> None:
     )
     write_csv(
         out / "conflicts.csv",
-        ["RecordID", "Bnumber", "axc_bnumbers", "RefNo"],
+        ["RecordID", "Bnumber", "axc_bnumbers", "AltRefNo", "RefNo"],
         conflicts,
     )
-    write_csv(out / "ambiguous_refnos.csv", ["RefNo", "RecordID", "Bnumber"], ambiguous)
+    write_csv(
+        out / "ambiguous_refs.csv", ["AltRefNo", "RecordID", "Bnumber"], ambiguous
+    )
+    write_csv(
+        out / "no_public_ref.csv", ["RecordID", "Bnumber", "RefNo"], no_public_ref
+    )
     write_csv(out / "unmatched.csv", ["RecordID", "Bnumber"], unmatched)
 
     report = "\n".join(
@@ -166,8 +186,8 @@ def main() -> None:
             + (" (delta since previous CSV)" if args.since else ""),
             f"- already present in AxC: {len(already)}",
             f"- conflicts (AxC cites a different b number): {len(conflicts)}",
-            f"- RefNo shared by several AxC records: {len(ambiguous)}",
-            f"- AxC record has no RefNo to match on: {len(no_refno)}",
+            f"- public ref (AltRefNo) shared by several AxC records: {len(ambiguous)}",
+            f"- AxC record has no AltRefNo to match on: {len(no_public_ref)}",
             f"- no AxC record for the RecordID: {len(unmatched)}",
             "",
         ]
