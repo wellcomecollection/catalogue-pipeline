@@ -97,16 +97,6 @@ locals {
       adapter_detail_type  = "ebsco.adapter.completed"
       reindex_target_value = "ebsco"
     }
-    axiell = {
-      adapter_source       = "axiell.adapter"
-      adapter_detail_type  = "axiell.adapter.completed"
-      reindex_target_value = "axiell"
-    }
-    folio = {
-      adapter_source       = "folio.adapter"
-      adapter_detail_type  = "folio.adapter.completed"
-      reindex_target_value = "folio"
-    }
   }
 }
 
@@ -121,9 +111,7 @@ module "transformer_state_machine" {
   ]
 
   policies_to_attach = {
-    "read_ebsco_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
-    "read_axiell_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["axiell"].json
-    "read_folio_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["folio"].json
+    "read_ebsco_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
   }
 }
 

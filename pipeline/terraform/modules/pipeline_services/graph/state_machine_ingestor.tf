@@ -12,7 +12,7 @@ module "catalogue_graph_ingestor_state_machine" {
         Resource         = "arn:aws:states:::ecs:runTask.waitForTaskToken"
         TimeoutSeconds   = local.ecs_task_token_timeout_seconds
         HeartbeatSeconds = local.ecs_task_token_heartbeat_seconds
-        Retry            = local.state_function_default_retry,
+        Retry            = concat(local.state_function_default_retry, local.transient_neptune_retry),
         Next             = "Run indexer"
         Arguments = {
           Cluster        = var.ecs_cluster_arn

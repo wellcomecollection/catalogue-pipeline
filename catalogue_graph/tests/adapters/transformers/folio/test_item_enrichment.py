@@ -36,7 +36,9 @@ BIB_RECORD = (
     "<controlfield tag='005'>20261225123045.0</controlfield>"
     "<controlfield tag='001'>{id}</controlfield>"
     "<datafield tag='245' ind1='0' ind2='0'>"
-    "<subfield code='a'>Folio With Items</subfield></datafield></record>"
+    "<subfield code='a'>Folio With Items</subfield></datafield>"
+    "<datafield tag='999' ind1='f' ind2='f'>"
+    "<subfield code='i'>{id}</subfield></datafield></record>"
 )
 
 

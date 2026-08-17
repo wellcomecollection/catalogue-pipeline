@@ -92,6 +92,7 @@ class AdapterConfig(Protocol):
 class TransformerResult(TransformerEvent):
     success_count: int
     failure_count: int
+    unmatched_count: int
     report_s3_uri: str
 
 
@@ -217,6 +218,7 @@ def handler(
         failure_count=len(transformer.errors),
         changeset_ids=event.changeset_ids,
         ids=event.ids,
+        unmatched_count=len(transformer.source.unmatched_ids),
         snapshot_id=transformer.source.snapshot_id,
     )
 
@@ -225,6 +227,7 @@ def handler(
         transformer_type=event.transformer_type,
         successful_ids=transformer.successful_ids,
         errors=transformer.errors,
+        unmatched_ids=transformer.source.unmatched_ids,
         changeset_ids=event.changeset_ids,
         ids=event.ids or [],
         snapshot_id=transformer.source.snapshot_id,
@@ -239,6 +242,7 @@ def handler(
             **event.model_dump(),
             "success_count": len(transformer.successful_ids),
             "failure_count": len(transformer.errors),
+            "unmatched_count": len(transformer.source.unmatched_ids),
             "report_s3_uri": report.s3_uri,
         },
     )

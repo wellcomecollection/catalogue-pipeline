@@ -90,6 +90,7 @@ class AxiellChangesetReader:
         self.ids = ids
         self.facts_store = facts_store
         self.reconciler_store = reconciler_store
+        self.unmatched_ids: list[str] = []
 
     @classmethod
     def build(
@@ -158,6 +159,7 @@ class AxiellChangesetReader:
             ids=self.ids,
         )
         yield from source.stream_raw()
+        self.unmatched_ids = source.unmatched_ids
 
     def iter_deletions(self) -> Generator[SupersededGuid]:
         """Yield the changesets' deletion facts that are still deliverable.

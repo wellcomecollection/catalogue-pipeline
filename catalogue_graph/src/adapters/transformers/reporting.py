@@ -21,6 +21,7 @@ class TransformerReport(PipelineReport):
 
     successful_ids: list[str]
     errors: list[TransformationError]
+    unmatched_ids: list[str]
 
     s3_bucket: str = Field(exclude=True)
     s3_prefix: str = Field(exclude=True)

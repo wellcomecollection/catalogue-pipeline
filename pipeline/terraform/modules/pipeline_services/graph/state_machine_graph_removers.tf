@@ -31,7 +31,7 @@ module "catalogue_graph_removers_monthly_state_machine" {
                   "graph_date" : var.graph_date,
                 }
               },
-              Retry = local.state_function_default_retry,
+              Retry = concat(local.state_function_default_retry, local.transient_neptune_retry),
               End   = true
             }
           }
@@ -88,7 +88,7 @@ module "catalogue_graph_removers_incremental_state_machine" {
                 FunctionName = module.graph_remover_incremental_lambda.lambda_arn,
                 Payload      = "{% $states.input %}"
               },
-              Retry = local.state_function_default_retry,
+              Retry = concat(local.state_function_default_retry, local.transient_neptune_retry),
               End   = true
             }
           }

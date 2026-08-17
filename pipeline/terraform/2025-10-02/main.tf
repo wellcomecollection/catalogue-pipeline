@@ -34,12 +34,6 @@ module "pipeline" {
         denormalised = "works_denormalised.2025-08-14"
       }
     }
-    "2026-01-12" = {
-      works = {
-        // test transformers - WCSTP dev
-        source = "works_source.2026-03-25"
-      }
-    },
     "2026-03-03" = {
       works = {
         // prod graph/ingestor/indexer - prod API

@@ -28,7 +28,7 @@ locals {
         // matcher_merger - graph/ingestor/indexer
         denormalised = "works_denormalised.2025-08-14"
         // graph/ingestor/indexer - API
-        indexed = "works_indexed.2026-07-30"
+        indexed = "works_indexed.2026-07-03"
       }
       images = {
         // matcher_merger - images_inferrer
