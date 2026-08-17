@@ -13,7 +13,7 @@ module "catalogue_graph_extractor_state_machine" {
         Output           = "{% $states.input %}"
         TimeoutSeconds   = local.ecs_task_token_timeout_seconds
         HeartbeatSeconds = local.ecs_task_token_heartbeat_seconds
-        Retry            = local.state_function_default_retry,
+        Retry            = concat(local.state_function_default_retry, local.transient_extractor_retry),
         Next             = "Success"
         Arguments = {
           Cluster        = var.ecs_cluster_arn
