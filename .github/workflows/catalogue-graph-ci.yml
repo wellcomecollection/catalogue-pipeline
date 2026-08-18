@@ -43,13 +43,9 @@ jobs:
   build-unified-pipeline-task-image:
     runs-on: ubuntu-latest
     needs: [ python-checks ]
-    # Dependabot and fork runs have no repo secrets, so build without pushing.
-    env:
-      ECR_ROLE_ARN: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
     steps:
       - uses: actions/checkout@v7
-      - if: env.ECR_ROLE_ARN != ''
-        uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
+      - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           folder: catalogue_graph
@@ -57,28 +53,16 @@ jobs:
           dockerfile: task.Dockerfile
           tag: ${{ github.sha }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          # Dependabot and fork runs have no repo secrets, so build without pushing.
+          push: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN != '' }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
-      - name: Build image without pushing
-        if: env.ECR_ROLE_ARN == ''
-        working-directory: catalogue_graph
-        run: |
-          docker build . \
-            -f task.Dockerfile \
-            --build-arg pythonversion=$(cat .python-version) \
-            --provenance=false \
-            --target unified_pipeline_task \
-            --tag "unified_pipeline_task:${{ github.sha }}"
 
   build-unified-pipeline-lambda-image:
     runs-on: ubuntu-latest
     needs: [ python-checks ]
-    # Dependabot and fork runs have no repo secrets, so build without pushing.
-    env:
-      ECR_ROLE_ARN: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
     steps:
       - uses: actions/checkout@v7
-      - if: env.ECR_ROLE_ARN != ''
-        uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
+      - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           folder: catalogue_graph
@@ -86,17 +70,9 @@ jobs:
           dockerfile: lambda.Dockerfile
           tag: ${{ github.sha }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          # Dependabot and fork runs have no repo secrets, so build without pushing.
+          push: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN != '' }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
-      - name: Build image without pushing
-        if: env.ECR_ROLE_ARN == ''
-        working-directory: catalogue_graph
-        run: |
-          docker build . \
-            -f lambda.Dockerfile \
-            --build-arg pythonversion=$(cat .python-version) \
-            --provenance=false \
-            --target unified_pipeline_lambda \
-            --tag "unified_pipeline_lambda:${{ github.sha }}"
 
   integration:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
