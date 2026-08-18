@@ -1,8 +1,10 @@
 from datetime import datetime
+from unittest.mock import MagicMock
 
 import pytest
 from pymarc.record import Field, Record, Subfield
 
+import adapters.transformers.builders.axiell_work_builder as axiell_work_builder
 from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
 from tests.adapters.transformers.axiell.conftest import make_axiell_record
@@ -56,6 +58,28 @@ def test_catalogue_status_does_not_affect_visible_work(status: str | None) -> No
 def test_catalogue_status_does_not_rescue_suppressed_work(status: str | None) -> None:
     record = make_axiell_record(catalogue_status=status, publish_to_web="no")
     assert isinstance(_transform(record), DeletedSourceWork)
+
+
+@pytest.mark.parametrize("marker", [None, "unexpected"])
+def test_anomalous_marker_suppression_logs_warning(
+    marker: str | None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A missing/unrecognised marker is an anomaly; it must not suppress silently."""
+    mock_logger = MagicMock()
+    monkeypatch.setattr(axiell_work_builder, "logger", mock_logger)
+    record = make_axiell_record(publish_to_web=marker)
+    assert isinstance(_transform(record), DeletedSourceWork)
+    mock_logger.warning.assert_called_once()
+
+
+def test_explicit_no_suppression_does_not_log(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mock_logger = MagicMock()
+    monkeypatch.setattr(axiell_work_builder, "logger", mock_logger)
+    record = make_axiell_record(publish_to_web="no")
+    assert isinstance(_transform(record), DeletedSourceWork)
+    mock_logger.warning.assert_not_called()
 
 
 @pytest.mark.parametrize("marker", ["no", None])

@@ -15,7 +15,10 @@ from adapters.transformers.axiell.physical_description import (
 from adapters.transformers.axiell.production import (
     extract_production,
 )
-from adapters.transformers.axiell.publish_to_web import extract_publish_to_web
+from adapters.transformers.axiell.publish_to_web import (
+    extract_publish_to_web,
+    is_publishable,
+)
 from adapters.transformers.axiell.subjects import extract_subjects
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.marc.last_transaction_time import (
@@ -59,11 +62,21 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
 
     def _is_suppressed(self) -> bool:
         # The publish_to_web checkbox is the sole publish authority (collections
-        # decision): only an explicit 'yes' publishes, anything else including an
-        # absent marker fails closed. Checked before anything touching
-        # collection_path: newly created records legitimately lack a RefNo, and
-        # suppressing them must not require one.
-        if extract_publish_to_web(self.record) != "yes":
+        # decision). Checked before anything touching collection_path: newly
+        # created records legitimately lack a RefNo, and suppressing them must
+        # not require one.
+        if not is_publishable(self.record):
+            # An absent or unrecognised marker is a stylesheet/harvest anomaly,
+            # not a cataloguer's 'no': log it so a regression that stops
+            # emitting 981 cannot silently retract the whole catalogue.
+            if extract_publish_to_web(self.record) is None:
+                logger.warning(
+                    "Suppressing record without an explicit publish_to_web marker",
+                    record_id=self.source_identifier_value,
+                    raw_values=[
+                        field.get("a") for field in self.record.get_fields("981")
+                    ],
+                )
             return True
 
         # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
