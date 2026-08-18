@@ -1,9 +1,10 @@
 """
 FOLIO reference data cache.
 
-Fetches location codes, material types, loan types, and instance type UUIDs
-once at startup from a live FOLIO tenant and caches them for the lifetime of
-the process. All lookups are case-insensitive.
+Fetches location codes, material types, loan types, holdings sources, item note
+types, identifier types, and the instance type UUID once at startup from a live
+FOLIO tenant and caches them for the lifetime of the process. All lookups are
+case-insensitive.
 
 Usage
 ─────
@@ -12,6 +13,8 @@ Usage
     material_type_uuid = cache.resolve_material_type("book")
     loan_type_uuid = cache.resolve_loan_type("Can circulate")
     holdings_source_uuid = cache.resolve_holdings_source("MARC")
+    item_note_type_uuid = cache.resolve_item_note_type("Axiell location")
+    identifier_type_uuid = cache.resolve_identifier_type("Local identifier")
 """
 
 from __future__ import annotations
@@ -20,7 +23,7 @@ from typing import Any, cast
 
 import structlog
 
-from .folio_callables import FolioInventoryOps
+from .callables import FolioInventoryOps
 
 logger = structlog.get_logger(__name__)
 
@@ -44,6 +47,7 @@ class RefCache:
         self._loan_types: dict[str, str] = {}  # name.lower() → UUID
         self._holdings_sources: dict[str, str] = {}  # name.lower() → UUID
         self._item_note_types: dict[str, str] = {}  # name.lower() → UUID
+        self._identifier_types: dict[str, str] = {}  # name.lower() → UUID
         self._instance_type_id: str | None = None
         self._loaded = False
 
@@ -76,6 +80,12 @@ class RefCache:
         )
         self._item_note_types = self._build_map(item_note_type_records, key="name")
         logger.info("RefCache: %d item note types", len(self._item_note_types))
+
+        identifier_type_records = self._fetch_records(
+            "/identifier-types", "identifierTypes"
+        )
+        self._identifier_types = self._build_map(identifier_type_records, key="name")
+        logger.info("RefCache: %d identifier types", len(self._identifier_types))
 
         self._instance_type_id = self._fetch_instance_type_id()
         logger.info("RefCache: instance type id = %s", self._instance_type_id)
@@ -127,6 +137,10 @@ class RefCache:
     def resolve_item_note_type(self, name: str | None) -> str | None:
         """Return the FOLIO UUID for an item note type name, or None."""
         return self._item_note_types.get((name or "").lower())
+
+    def resolve_identifier_type(self, name: str | None) -> str | None:
+        """Return the FOLIO UUID for an instance identifier type name, or None."""
+        return self._identifier_types.get((name or "").lower())
 
     def instance_type_id(self) -> str:
         if not self._instance_type_id:

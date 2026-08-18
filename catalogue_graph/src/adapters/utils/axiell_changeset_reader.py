@@ -75,6 +75,7 @@ class AxiellChangesetReader:
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None = None,
+        ids: list[str] | None = None,
         facts_store: DeletionFactsStore | None = None,
         reconciler_store: ReconcilerStore | None = None,
     ) -> None:
@@ -86,8 +87,10 @@ class AxiellChangesetReader:
         self.adapter_store = adapter_store
         self.changeset_ids = changeset_ids
         self.snapshot_id = snapshot_id
+        self.ids = ids
         self.facts_store = facts_store
         self.reconciler_store = reconciler_store
+        self.unmatched_ids: list[str] = []
 
     @classmethod
     def build(
@@ -97,6 +100,7 @@ class AxiellChangesetReader:
         *,
         use_rest_api_table: bool,
         snapshot_id: int | None = None,
+        ids: list[str] | None = None,
         adapter_store: AdapterStore | None = None,
         with_deletion_facts: bool = True,
     ) -> "AxiellChangesetReader":
@@ -133,7 +137,8 @@ class AxiellChangesetReader:
         return cls(
             adapter_store,
             changeset_ids,
-            snapshot_id,
+            snapshot_id=snapshot_id,
+            ids=ids,
             facts_store=facts_store,
             reconciler_store=reconciler_store,
         )
@@ -148,9 +153,13 @@ class AxiellChangesetReader:
         reindex mode) — consumers that only want a sample must break early.
         """
         source = AdapterStoreSource(
-            self.adapter_store, self.changeset_ids, self.snapshot_id
+            self.adapter_store,
+            self.changeset_ids,
+            snapshot_id=self.snapshot_id,
+            ids=self.ids,
         )
         yield from source.stream_raw()
+        self.unmatched_ids = source.unmatched_ids
 
     def iter_deletions(self) -> Generator[SupersededGuid]:
         """Yield the changesets' deletion facts that are still deliverable.

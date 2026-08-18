@@ -11,7 +11,7 @@ from collections.abc import Callable
 from typing import Any, Literal, Protocol, cast
 
 import structlog
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from adapters.extractors.ebsco import config as ebsco_config
 from adapters.extractors.ebsco import helpers as ebsco_helpers
@@ -37,12 +37,47 @@ logger = structlog.get_logger(__name__)
 
 TransformerType = Literal["axiell", "ebsco", "folio"]
 
+STEP_FUNCTIONS_STATE_LIMIT_BYTES = 262_144
+# Live adapter stores: axiell ids are 17 chars, ebsco 8-13, folio a fixed 81.
+ASSUMED_MAX_ID_LENGTH = 100
+
+MAX_IDS_PER_RUN = int(
+    STEP_FUNCTIONS_STATE_LIMIT_BYTES * 0.9 // (ASSUMED_MAX_ID_LENGTH + 3)
+)
+"""Bounded by the Step Functions state limit above; distinct from the
+OAI-PMH loader's MAX_IDS_PER_RUN (50,000), which bounds run time, not
+payload size."""
+
 
 class TransformerEvent(BaseModel):
     transformer_type: TransformerType
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
+    ids: list[str] | None = None
+    """Adapter store record ids to transform. Mutually exclusive with
+    changeset_ids; an explicitly empty list is rejected, not treated as
+    none."""
     snapshot_id: int | None = None
+
+    @model_validator(mode="after")
+    def _check_ids(self) -> "TransformerEvent":
+        if self.ids is None:
+            return self
+        if self.changeset_ids:
+            raise ValueError(
+                "ids and changeset_ids are mutually exclusive; supply one or "
+                "the other, not both"
+            )
+        if not self.ids:
+            raise ValueError(
+                "ids was supplied but is empty; an id run needs at least one record id"
+            )
+        if len(self.ids) > MAX_IDS_PER_RUN:
+            raise ValueError(
+                f"{len(self.ids)} ids exceeds the {MAX_IDS_PER_RUN} per-run "
+                f"ceiling; split the work across several runs"
+            )
+        return self
 
 
 class AdapterConfig(Protocol):
@@ -57,6 +92,7 @@ class AdapterConfig(Protocol):
 class TransformerResult(TransformerEvent):
     success_count: int
     failure_count: int
+    unmatched_count: int
     report_s3_uri: str
 
 
@@ -112,11 +148,14 @@ def build_transformer(
             event.changeset_ids,
             use_rest_api_table=use_rest_api_table,
             snapshot_id=snapshot_id,
+            ids=event.ids,
             adapter_store=adapter_store,
         )
         return AxiellTransformer(reader)
     if event.transformer_type == "ebsco":
-        return EbscoTransformer(adapter_store, event.changeset_ids, snapshot_id)
+        return EbscoTransformer(
+            adapter_store, event.changeset_ids, snapshot_id, ids=event.ids
+        )
     if event.transformer_type == "folio":
         # Join the enriched items store so FOLIO works carry items with stable
         # `folio-item` identifiers.
@@ -128,7 +167,11 @@ def build_transformer(
             use_rest_api_table=use_rest_api_table, create_if_not_exists=False
         )
         return FolioTransformer(
-            adapter_store, event.changeset_ids, snapshot_id, items_store=items_store
+            adapter_store,
+            event.changeset_ids,
+            snapshot_id,
+            ids=event.ids,
+            items_store=items_store,
         )
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
@@ -174,6 +217,8 @@ def handler(
         success_count=len(transformer.successful_ids),
         failure_count=len(transformer.errors),
         changeset_ids=event.changeset_ids,
+        ids=event.ids,
+        unmatched_count=len(transformer.source.unmatched_ids),
         snapshot_id=transformer.source.snapshot_id,
     )
 
@@ -182,7 +227,9 @@ def handler(
         transformer_type=event.transformer_type,
         successful_ids=transformer.successful_ids,
         errors=transformer.errors,
+        unmatched_ids=transformer.source.unmatched_ids,
         changeset_ids=event.changeset_ids,
+        ids=event.ids or [],
         snapshot_id=transformer.source.snapshot_id,
         job_id=event.job_id,
         s3_bucket=config.S3_BUCKET,
@@ -195,6 +242,7 @@ def handler(
             **event.model_dump(),
             "success_count": len(transformer.successful_ids),
             "failure_count": len(transformer.errors),
+            "unmatched_count": len(transformer.source.unmatched_ids),
             "report_s3_uri": report.s3_uri,
         },
     )
@@ -211,6 +259,19 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     ).model_dump(mode="json")
 
 
+def _read_ids(args: argparse.Namespace) -> list[str] | None:
+    """Collect record ids from --id and/or --ids-file. None (not an empty
+    list) if neither was given, so the event's changeset/reindex path is
+    untouched."""
+    if not args.ids and not args.ids_file:
+        return None
+    ids = list(args.ids or [])
+    if args.ids_file:
+        with open(args.ids_file, encoding="utf-8") as f:
+            ids += [line.strip() for line in f if line.strip()]
+    return ids
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Transform adapter data")
     parser.add_argument(
@@ -225,6 +286,21 @@ def main() -> None:
         action="append",
         default=[],
         help="Changeset identifier to transform (repeatable)",
+    )
+    parser.add_argument(
+        "--id",
+        dest="ids",
+        action="append",
+        default=None,
+        help="Record id to transform (repeatable). Mutually exclusive with "
+        "--changeset-id.",
+    )
+    parser.add_argument(
+        "--ids-file",
+        type=str,
+        default=None,
+        help="Path to a file of record ids, one per line. Mutually exclusive "
+        "with --changeset-id.",
     )
     parser.add_argument(
         "--snapshot-id",
@@ -261,6 +337,7 @@ def main() -> None:
     event = TransformerEvent(
         transformer_type=args.transformer_type,
         changeset_ids=args.changeset_ids,
+        ids=_read_ids(args),
         snapshot_id=args.snapshot_id,
         job_id=args.job_id,
     )

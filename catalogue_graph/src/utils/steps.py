@@ -78,9 +78,12 @@ class StepFunctionOutput:
             logger.error(
                 "Sending task failure to Step Functions", error_output=error_output
             )
+            # Step Functions matches Retry/Catch on this name, so send the real
+            # exception type. Class names cannot contain a dot, so they can never
+            # collide with the Lambda./ECS./States. prefixes already matched on.
             self.stepfunctions_client.send_task_failure(
                 taskToken=self.task_token,
-                error="IngestorLoaderError",
+                error=type(error).__name__,
                 cause=error_output,
             )
         else:

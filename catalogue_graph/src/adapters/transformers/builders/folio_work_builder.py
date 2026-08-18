@@ -1,5 +1,6 @@
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
+from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
@@ -22,6 +23,28 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def source_identifier_type(self) -> Id:
         return Id(id="folio-instance")
+
+    @property
+    def source_identifier_value(self) -> str:
+        value: str = extract_instance_uuid(self.record)
+        return value
+
+    @property
+    def other_identifiers(self) -> list[SourceIdentifier]:
+        identifiers = super().other_identifiers + [
+            WorkSourceIdentifier(
+                identifier_type=Id(id="folio-instance-hrid"),
+                value=extract_hrid(self.record),
+            )
+        ]
+        if (bnumber := extract_sierra_predecessor_id(self.record)) is not None:
+            identifiers.append(
+                WorkSourceIdentifier(
+                    identifier_type=Id(id="sierra-system-number"),
+                    value=bnumber,
+                )
+            )
+        return identifiers
 
     @property
     def predecessor_identifier(self) -> WorkSourceIdentifier | None:

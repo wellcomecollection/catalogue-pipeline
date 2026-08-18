@@ -15,7 +15,7 @@ module "catalogue_graph_bulk_loader_state_machine" {
           "FunctionName" : module.bulk_loader_lambda.lambda_arn,
           "Payload.$" : "$"
         },
-        Retry = local.state_function_default_retry,
+        Retry = concat(local.state_function_default_retry, local.transient_neptune_retry),
         "Next" : "Wait 5 seconds"
       },
       "Wait 5 seconds" : {
@@ -31,7 +31,7 @@ module "catalogue_graph_bulk_loader_state_machine" {
           "FunctionName" : module.bulk_load_poller_lambda.lambda_arn,
           "Payload.$" : "$"
         },
-        Retry = local.state_function_default_retry,
+        Retry = concat(local.state_function_default_retry, local.transient_neptune_retry),
         "Next" : "Load complete?"
       },
       "Load complete?" : {

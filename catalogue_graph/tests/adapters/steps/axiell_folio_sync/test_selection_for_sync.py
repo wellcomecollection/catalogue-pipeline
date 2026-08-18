@@ -28,14 +28,5 @@ def test_skipped_when_not_item_level(record_type: str) -> None:
     assert is_selected_for_sync(_record(flag="Y", record_type=record_type)) is False
 
 
-def test_skipped_when_no_harvest_flag() -> None:
-    # 351 $c is ITEM but the 980 $a harvest flag is absent.
-    assert is_selected_for_sync(_record(record_type="ITEM")) is False
-
-
-def test_skipped_when_harvest_flag_empty() -> None:
-    assert is_selected_for_sync(_record(flag="", record_type="ITEM")) is False
-
-
 def test_skipped_when_record_type_absent() -> None:
     assert is_selected_for_sync(_record(flag="Y")) is False

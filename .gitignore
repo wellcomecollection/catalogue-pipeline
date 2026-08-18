@@ -4,6 +4,7 @@
 *.iml
 .lambda_hashes.json
 terraform.plan
+*.tfplan
 .terraform
 **/.terraform
 shared_infra/.releases

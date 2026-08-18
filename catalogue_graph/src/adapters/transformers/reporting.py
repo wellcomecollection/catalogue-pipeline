@@ -15,11 +15,13 @@ class TransformerReport(PipelineReport):
     pipeline_date: str
     transformer_type: str
     changeset_ids: list[str]
+    ids: list[str]
     job_id: str
     snapshot_id: int | None = None
 
     successful_ids: list[str]
     errors: list[TransformationError]
+    unmatched_ids: list[str]
 
     s3_bucket: str = Field(exclude=True)
     s3_prefix: str = Field(exclude=True)
@@ -48,8 +50,8 @@ class TransformerReport(PipelineReport):
 
     @property
     def s3_uri(self) -> str:
-        changeset_label = "_".join(self.changeset_ids) or "reindex"
-        file_name = f"{changeset_label}__{self.job_id}.json"
+        run_label = "idload" if self.ids else "_".join(self.changeset_ids) or "reindex"
+        file_name = f"{run_label}__{self.job_id}.json"
         path = PurePosixPath(
             f"pipeline-{self.pipeline_date}",
             self.transformer_type,

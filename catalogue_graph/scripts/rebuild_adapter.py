@@ -13,9 +13,15 @@ and the existing snapshot is reused. Similarly for --folio-items-snapshot-path.
 Snapshot files are only ever moved into place after a complete, successful
 write, so an existing file is always safe to resume from.
 
+With --wipe-only the stores are wiped and left empty, for a clear that runs
+ahead of a later rebuild. The window store and harvest cursor are untouched,
+so disable the harvest schedule first or incremental harvests will repopulate
+the store.
+
 Usage:
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet
     uv run python scripts/rebuild_adapter.py --adapter-type folio --use-rest-api-table --snapshot-path /tmp/folio.parquet --folio-items-snapshot-path /tmp/folio_items.parquet
+    uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --wipe-only
 """
 
 from __future__ import annotations
@@ -363,6 +369,16 @@ def _confirm_rebuild(adapter_type: AdapterType) -> None:
         raise SystemExit("Aborted.")
 
 
+def _confirm_wipe_only(adapter_type: AdapterType) -> None:
+    """Confirmation gate before the stores are wiped and left empty."""
+    confirm = input(
+        f"WARNING: about to wipe all stores for '{adapter_type}' and leave "
+        "them empty (no rebuild). Type CONFIRM to proceed: "
+    ).strip()
+    if confirm != "CONFIRM":
+        raise SystemExit("Aborted.")
+
+
 def _confirm_publish(adapter_type: AdapterType, changeset_count: int) -> None:
     """Confirm before publishing EventBridge events for each changeset."""
     confirm = input(
@@ -432,12 +448,13 @@ def rebuild_adapter(
     adapter_type: AdapterType,
     *,
     use_rest_api_table: bool = False,
-    snapshot_path: str,
+    snapshot_path: str | None = None,
     folio_items_snapshot_path: str | None = None,
     skip_publish_event: bool = False,
     publish_interval_seconds: float = 0.0,
+    wipe_only: bool = False,
 ) -> None:
-    if not use_rest_api_table and not skip_publish_event:
+    if not wipe_only and not use_rest_api_table and not skip_publish_event:
         raise ValueError(
             "--skip-publish-event is required without --use-rest-api-table: "
             "a local-table rebuild would still publish real adapter.completed "
@@ -445,7 +462,42 @@ def rebuild_adapter(
             "ids that only exist locally."
         )
 
+    if wipe_only and (
+        snapshot_path is not None or folio_items_snapshot_path is not None
+    ):
+        raise ValueError(
+            "--wipe-only takes no snapshots: it wipes the stores and stops "
+            "(for FOLIO, both the bib and items stores)"
+        )
+
     config = get_config(adapter_type)
+
+    if wipe_only:
+        _confirm_wipe_only(adapter_type)
+        _wipe_store(
+            config.build_adapter_store(use_rest_api_table=use_rest_api_table),
+            store_name="adapter store",
+        )
+        if adapter_type == "folio":
+            _wipe_store(
+                build_items_store(use_rest_api_table=use_rest_api_table),
+                store_name="items store",
+            )
+        if adapter_type == "axiell":
+            reconcile_runtime = build_reconcile_runtime(
+                adapter_type, use_rest_api_table=use_rest_api_table
+            )
+            _wipe_store(
+                reconcile_runtime.reconciler_store, store_name="reconciler store"
+            )
+            _wipe_store(
+                reconcile_runtime.facts_store, store_name="deletion facts store"
+            )
+        return
+
+    if snapshot_path is None:
+        raise ValueError("--snapshot-path is required to rebuild")
+
     job_id = create_job_id()
 
     _confirm_rebuild(adapter_type)
@@ -519,11 +571,16 @@ def main() -> None:
         description="Rebuild an OAI-PMH adapter store from a full snapshot"
     )
     add_adapter_event_args(parser)
-    parser.add_argument(
+    target = parser.add_mutually_exclusive_group(required=True)
+    target.add_argument(
         "--snapshot-path",
         metavar="PATH",
-        required=True,
         help="Path to the bib records snapshot file. If the file already exists, the download is skipped and the existing snapshot is used.",
+    )
+    target.add_argument(
+        "--wipe-only",
+        action="store_true",
+        help="Wipe the adapter's stores and stop: no download, reload, reconcile or events. Leaves the window store and harvest cursor alone, so disable the harvest schedule first.",
     )
     parser.add_argument(
         "--folio-items-snapshot-path",
@@ -560,6 +617,7 @@ def main() -> None:
         folio_items_snapshot_path=args.folio_items_snapshot_path,
         skip_publish_event=args.skip_publish_event,
         publish_interval_seconds=args.publish_interval_seconds,
+        wipe_only=args.wipe_only,
     )
 
 

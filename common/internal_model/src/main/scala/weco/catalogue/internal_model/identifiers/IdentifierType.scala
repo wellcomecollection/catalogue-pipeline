@@ -51,6 +51,16 @@ object IdentifierType extends Enum[IdentifierType] {
     val label = "Folio instance"
   }
 
+  case object FolioItem extends IdentifierType {
+    val id = "folio-item"
+    val label = "Folio item"
+  }
+
+  case object FolioInstanceHrid extends IdentifierType {
+    val id = "folio-instance-hrid"
+    val label = "Folio instance HRID"
+  }
+
   case object SierraIdentifier extends IdentifierType {
     val id = "sierra-identifier"
     val label = "Sierra identifier"

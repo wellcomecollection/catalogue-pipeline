@@ -33,7 +33,7 @@ from models.pipeline.access_condition import (
 from models.pipeline.access_method import AccessMethod
 from models.pipeline.access_status import AccessStatus, AccessStatusRelationship
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Concept, Genre, Period, Subject
+from models.pipeline.concept import Concept, Contributor, Genre, Period, Subject
 from models.pipeline.format import (
     FORMAT_LABEL_MAPPING,
     Audio,
@@ -42,7 +42,7 @@ from models.pipeline.format import (
     Journals,
     Pictures,
 )
-from models.pipeline.id_label import Id, Language
+from models.pipeline.id_label import Id, Label, Language
 from models.pipeline.identifier import Identified, SourceIdentifier
 from models.pipeline.production import ProductionEvent
 
@@ -1009,6 +1009,75 @@ def create_works_with_digital_location_dates() -> None:
     )
 
 
+def create_work_with_rarely_populated_fields() -> None:
+    """A deliberately maximal work covering display fields no other fixture populates.
+
+    Every field documented in the catalogue API's OpenAPI spec should appear in at
+    least one of these fixtures (see wellcomecollection/platform#6514).
+    """
+    access_condition = AccessCondition(
+        method=AccessMethod(type="ManualRequest"),
+        status=AccessStatus(type="Restricted"),
+        terms="Permission must be obtained from the depositor",
+        note="This file is closed for data protection reasons",
+    )
+    item = create_item(
+        title="Copy 1, with manuscript annotations",
+        note="In poor condition; handle with care",
+        locations=[
+            create_physical_location(
+                location_type_id="closed-stores",
+                access_conditions=[access_condition],
+            )
+        ],
+    )
+
+    # The production concepts are identified, although the display transformer
+    # currently only surfaces their labels.
+    production = ProductionEvent(
+        label="London : Printed for the author, 1897",
+        places=[
+            create_concept(
+                label="London", concept_type="Place", identifier_ontology_type="Place"
+            )
+        ],
+        agents=[
+            create_concept(
+                label="Printed for the author",
+                concept_type="Agent",
+                identifier_ontology_type="Agent",
+            )
+        ],
+        dates=[create_period_for_year("1897")],
+        function=Concept(label="Printing"),
+    )
+
+    # An identified agent, so its identifiers appear in the display document.
+    contributor = Contributor(
+        agent=create_concept(
+            label="Wellcome, Henry Solomon, Sir",
+            concept_type="Person",
+            identifier_ontology_type="Person",
+        ),
+        roles=[Label(label="author")],
+    )
+
+    save_work(
+        work=create_visible_merged_work(
+            title="A work with every rarely-populated display field",
+            physical_description="1 volume ; 23 cm",
+            reference_number="WA/HMM/BU/1",
+            created_date=create_period_for_year("1897"),
+            current_frequency="Quarterly, 1897-1902",
+            contributors=[contributor],
+            production=[production],
+            items=[item],
+        ),
+        description="a work with every rarely-populated display field",
+        doc_id="work.visible.rare-fields",
+    )
+
+
 def generate_all() -> None:
     reset()
 
@@ -1037,6 +1106,7 @@ def generate_all() -> None:
     create_works_with_digital_location_dates()
     create_archive_works()
     create_works_with_sortable_collection_paths()
+    create_work_with_rarely_populated_fields()
 
     print(f"Test documents written to {TEST_DOCUMENTS_DIR}")
 

@@ -55,6 +55,14 @@ def _907_field(value: str) -> Field:
     )
 
 
+def _999_field(instance_uuid: str) -> Field:
+    return Field(
+        tag="999",
+        indicators=Indicators("f", "f"),
+        subfields=[Subfield(code="i", value=instance_uuid)],
+    )
+
+
 def read_transformer_report(result: TransformerResult) -> dict:
     with open(MockSmartOpen.file_lookup[result.report_s3_uri], encoding="utf-8") as f:
         report: dict = json.loads(f.read())

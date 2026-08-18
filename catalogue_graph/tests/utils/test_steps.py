@@ -124,7 +124,7 @@ def test_ecs_handler_reports_failure(
     assert len(MockStepFunctionsClient.task_failures) == 1
     failure = MockStepFunctionsClient.task_failures[0]
     assert failure["taskToken"] == token
-    assert failure["error"] == "IngestorLoaderError"
+    assert failure["error"] == "RuntimeError"
     cause = json.loads(failure["cause"])
     assert cause["message"] == "unexpected kaboom"
     assert cause["type"] == "RuntimeError"
@@ -419,7 +419,7 @@ def test_step_function_output_send_failure_reports(
     assert len(MockStepFunctionsClient.task_failures) == 1
     failure = MockStepFunctionsClient.task_failures[0]
     assert failure["taskToken"] == "token-555"
-    assert failure["error"] == "IngestorLoaderError"
+    assert failure["error"] == "RuntimeError"
     cause = json.loads(failure["cause"])
     assert cause["message"] == "boom"
     assert cause["type"] == "RuntimeError"
@@ -436,3 +436,15 @@ def test_step_function_output_send_failure_without_token_logs(
 
     assert MockStepFunctionsClient.task_failures == []
     assert "Task error" in caplog.text
+
+
+def test_step_function_output_send_failure_names_the_exception_type() -> None:
+    # The name is what Step Functions matches Retry/Catch on, so distinct
+    # exception types must not collapse to one string.
+    output = StepFunctionOutput("token-666", MockStepFunctionsClient())
+
+    output.send_failure(ValueError("bad input"))
+    output.send_failure(TimeoutError("too slow"))
+
+    errors = [f["error"] for f in MockStepFunctionsClient.task_failures]
+    assert errors == ["ValueError", "TimeoutError"]

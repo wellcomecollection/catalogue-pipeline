@@ -1,8 +1,9 @@
-"""Core sync loop and OKAPI configuration for the Axiell to Folio sync step.
+"""Core sync loop for the Axiell to Folio sync step.
 
 Extracted from ``axiell_folio_sync.py`` for readability. Contains:
-- ``load_okapi_config`` — resolves FOLIO credentials from env / SSM
 - ``run_sync`` — the select → map → upsert loop over adapter rows
+
+OKAPI credential resolution lives in ``folio.okapi.load_okapi_config``.
 
 RFC 090 references below point at the design spec:
 https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync
@@ -10,22 +11,14 @@ https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync
 
 from __future__ import annotations
 
-import json
-import os
 from datetime import UTC, datetime
-from functools import lru_cache
 from typing import Any, cast
 
-import boto3
 import structlog
 
-from adapters.steps.axiell_folio_sync.folio_callables import (
-    FolioInventoryOps,
-)
+from adapters.steps.axiell_folio_sync.folio import FolioInventoryOps, RefCache
 from adapters.steps.axiell_folio_sync.mapping import (
-    GuidCascadeResult,
     MappingError,
-    UpsertResult,
     select_and_build,
 )
 from adapters.steps.axiell_folio_sync.models import (
@@ -35,8 +28,11 @@ from adapters.steps.axiell_folio_sync.models import (
     SyncErrorEntry,
     SyncSuccessEntry,
 )
-from adapters.steps.axiell_folio_sync.ref_cache import RefCache
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
+from adapters.steps.axiell_folio_sync.results import (
+    GuidCascadeResult,
+    UpsertResult,
+)
 from adapters.steps.axiell_folio_sync.upsert import (
     delete_by_guid,
     suppress_by_guid,
@@ -50,47 +46,6 @@ logger = structlog.get_logger(__name__)
 def utc_now_iso() -> str:
     """Timezone-aware UTC timestamp in ISO 8601."""
     return datetime.now(UTC).isoformat()
-
-
-# ── lazy singletons (survive across warm Lambda invocations) ──────────────────
-
-
-@lru_cache(maxsize=1)
-def _ssm() -> Any:
-    return boto3.client("ssm", region_name=os.environ["AWS_REGION"])
-
-
-# ── OKAPI config ──────────────────────────────────────────────────────────────
-
-
-def load_okapi_config() -> dict[str, str]:
-    """FOLIO OKAPI url/tenant/username/password from env and/or SSM.
-
-    Per-field env overrides (OKAPI_URL / OKAPI_TENANT / OKAPI_USERNAME /
-    OKAPI_PASSWORD) let local runs skip SSM entirely; in Lambda these usually
-    come from the OKAPI_SECRET_PARAM SecureString JSON.
-    """
-    data: dict[str, str] = {}
-    param_name = os.environ.get("OKAPI_SECRET_PARAM")
-    if param_name:
-        param = _ssm().get_parameter(Name=param_name, WithDecryption=True)
-        data = json.loads(param["Parameter"]["Value"])
-
-    merged = {
-        "url": os.environ.get("OKAPI_URL") or data.get("url"),
-        "tenant": os.environ.get("OKAPI_TENANT") or data.get("tenant"),
-        "username": os.environ.get("OKAPI_USERNAME") or data.get("username"),
-        "password": os.environ.get("OKAPI_PASSWORD") or data.get("password"),
-    }
-    missing = [key for key, value in merged.items() if not value]
-    if missing:
-        missing_list = ", ".join(missing)
-        raise ValueError(
-            "Missing OKAPI configuration fields: "
-            f"{missing_list}. Provide OKAPI_* env vars or set OKAPI_SECRET_PARAM."
-        )
-
-    return cast("dict[str, str]", merged)
 
 
 # ── sync loop helpers ─────────────────────────────────────────────────────────

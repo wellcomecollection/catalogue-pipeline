@@ -23,6 +23,7 @@ class AxiellTransformer(MarcXmlTransformer):
         super().__init__(
             adapter_store=reader.adapter_store,
             changeset_ids=reader.changeset_ids,
+            ids=reader.ids,
             snapshot_id=reader.snapshot_id,
         )
 
@@ -31,6 +32,7 @@ class AxiellTransformer(MarcXmlTransformer):
         adapter_store: AdapterStore,
         changeset_ids: list[str],
         snapshot_id: int | None,
+        ids: list[str] | None = None,
     ) -> RecordSource:
         return AxiellStoreSource(self._reader)
 

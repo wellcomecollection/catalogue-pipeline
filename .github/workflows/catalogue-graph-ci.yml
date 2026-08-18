@@ -53,6 +53,8 @@ jobs:
           dockerfile: task.Dockerfile
           tag: ${{ github.sha }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          # Dependabot and fork runs have no repo secrets, so build without pushing.
+          push: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN != '' }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
   build-unified-pipeline-lambda-image:
@@ -68,6 +70,8 @@ jobs:
           dockerfile: lambda.Dockerfile
           tag: ${{ github.sha }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          # Dependabot and fork runs have no repo secrets, so build without pushing.
+          push: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN != '' }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
   integration:
