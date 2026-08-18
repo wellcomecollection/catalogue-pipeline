@@ -11,8 +11,8 @@ from tests.mocks import MockElasticsearchClient
 AXIELL_NAMESPACE = AXIELL_CONFIG.config.adapter_namespace
 
 
-TEST_RECORD_ONE = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield><datafield tag='035'><subfield code='a'>(Calm RefNo)A/B</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield><datafield tag='583' ind1='0'><subfield code='l'>catalogued</subfield></datafield></record>"
-TEST_RECORD_TWO = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title Two</subfield></datafield><datafield tag='035'><subfield code='a'>(Calm RefNo)A/B/C</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield><datafield tag='583' ind1='0'><subfield code='l'>catalogued</subfield></datafield></record>"
+TEST_RECORD_ONE = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield><datafield tag='035'><subfield code='a'>(Calm RefNo)A/B</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield><datafield tag='583' ind1='0'><subfield code='l'>catalogued</subfield></datafield><datafield tag='981'><subfield code='a'>yes</subfield></datafield></record>"
+TEST_RECORD_TWO = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title Two</subfield></datafield><datafield tag='035'><subfield code='a'>(Calm RefNo)A/B/C</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield><datafield tag='583' ind1='0'><subfield code='l'>catalogued</subfield></datafield><datafield tag='981'><subfield code='a'>yes</subfield></datafield></record>"
 
 
 def _run_transform(
@@ -151,7 +151,7 @@ def test_transformer_end_to_end_includes_deletions(
 def test_transformer_id_run_transforms_only_named_ids(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    not_requested = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Not requested</subfield></datafield><datafield tag='035'><subfield code='a'>(Calm RefNo)A/B/D</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield><datafield tag='583' ind1='0'><subfield code='l'>catalogued</subfield></datafield></record>"
+    not_requested = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Not requested</subfield></datafield><datafield tag='035'><subfield code='a'>(Calm RefNo)A/B/D</subfield></datafield><datafield tag='351'><subfield code='c'>item</subfield></datafield><datafield tag='583' ind1='0'><subfield code='l'>catalogued</subfield></datafield><datafield tag='981'><subfield code='a'>yes</subfield></datafield></record>"
     records_by_id = {
         "ax00001": TEST_RECORD_ONE,
         "ax00002": TEST_RECORD_TWO,

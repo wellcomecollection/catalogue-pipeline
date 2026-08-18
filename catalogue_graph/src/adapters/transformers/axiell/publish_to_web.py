@@ -16,9 +16,10 @@ PublishToWeb = Literal["yes", "no"]
 def extract_publish_to_web(record: Record) -> PublishToWeb | None:
     """Extract the explicit publish-to-web marker from 981 $a.
 
-    Returns None when the marker is absent (records harvested before the
-    stylesheet emitted it) or carries an unexpected value; callers must treat
-    None as publishable so pre-marker harvests keep their current visibility.
+    Returns None when the marker is absent or carries an unexpected value.
+    The stylesheet emits the marker on every record, so None means a pre-marker
+    or anomalous harvest; callers must fail closed and treat only an explicit
+    'yes' as publishable.
     """
     values = non_empty_subfields("981", "a", record)
     if not values:
