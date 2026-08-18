@@ -53,8 +53,10 @@ def scan_axiell_store() -> dict[str, dict]:
     )
     by_uuid: dict[str, dict] = {}
     scanned = 0
+    # The store schema allows several sources per table; take only Axiell rows.
     reader = table.scan(
-        selected_fields=("id", "content", "deleted")
+        row_filter=f"namespace = '{AXIELL_ADAPTER_CONFIG.adapter_namespace}'",
+        selected_fields=("id", "content", "deleted"),
     ).to_arrow_batch_reader()
     for batch in reader:
         d = batch.to_pydict()
