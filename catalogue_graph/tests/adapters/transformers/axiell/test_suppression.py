@@ -55,6 +55,29 @@ def test_publish_to_web_without_explicit_no_yields_visible_work(
     assert isinstance(_transform(record), VisibleSourceWork)
 
 
+def test_draft_with_publish_to_web_yes_yields_visible_work() -> None:
+    """CALM 'not yet available' records migrate as draft; an explicit 'yes'
+    marks their description as publishable."""
+    record = make_axiell_record(catalogue_status="draft", publish_to_web="yes")
+    assert isinstance(_transform(record), VisibleSourceWork)
+
+
+@pytest.mark.parametrize("marker", ["no", None, "unexpected"])
+def test_draft_without_explicit_yes_yields_deleted_work(marker: str | None) -> None:
+    record = make_axiell_record(catalogue_status="draft", publish_to_web=marker)
+    assert isinstance(_transform(record), DeletedSourceWork)
+
+
+@pytest.mark.parametrize("status", ["in progress", None])
+def test_publish_to_web_yes_does_not_publish_other_suppressed_statuses(
+    status: str | None,
+) -> None:
+    """Only draft gets the 'yes' escape hatch; a record with no cataloguing
+    status must never go live."""
+    record = make_axiell_record(catalogue_status=status, publish_to_web="yes")
+    assert isinstance(_transform(record), DeletedSourceWork)
+
+
 def test_publish_to_web_no_without_ref_no_yields_deleted_work() -> None:
     record = make_axiell_record(publish_to_web="no", ref_no=None)
     assert isinstance(_transform(record), DeletedSourceWork)
@@ -83,6 +106,12 @@ def test_catalogued_record_without_ref_no_raises() -> None:
 
 def test_amsg_alt_ref_no_suppresses_regardless_of_status() -> None:
     record = make_axiell_record()
+    record = _with_alt_ref_no(record, "AMSG-Research-Guide-001")
+    assert isinstance(_transform(record), DeletedSourceWork)
+
+
+def test_amsg_alt_ref_no_suppresses_publishable_draft() -> None:
+    record = make_axiell_record(catalogue_status="draft", publish_to_web="yes")
     record = _with_alt_ref_no(record, "AMSG-Research-Guide-001")
     assert isinstance(_transform(record), DeletedSourceWork)
 

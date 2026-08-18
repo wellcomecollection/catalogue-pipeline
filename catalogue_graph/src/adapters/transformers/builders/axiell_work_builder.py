@@ -68,19 +68,24 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     """Work builder for Axiell (MARC XML) records."""
 
     def _is_suppresssed(self) -> bool:
-        # If a record does not have a status, or if its status is not listed in
-        # NON_SUPPRESSED_STATUSES, we suppress it. Checked before anything touching
-        # collection_path: newly created records legitimately lack a RefNo, and
-        # suppressing them must not require one.
+        # Status checks come before anything touching collection_path: newly created
+        # records legitimately lack a RefNo, and suppressing them must not require one.
         catalogue_status = extract_catalogue_status(self.record)
-        if catalogue_status not in NON_SUPPRESSED_STATUSES:
-            return True
+        publish_to_web = extract_publish_to_web(self.record)
 
-        # The publish_to_web checkbox decides whether a finished record may go
-        # online, separately from its cataloguing status. Only an explicit 'no'
-        # suppresses: the marker is absent on records harvested before the
+        # A record with a finished status stays visible unless publish_to_web is an
+        # explicit 'no': the marker is absent on records harvested before the
         # stylesheet change, and those must keep their current visibility.
-        if extract_publish_to_web(self.record) == "no":
+        finished_and_publishable = (
+            catalogue_status in NON_SUPPRESSED_STATUSES and publish_to_web != "no"
+        )
+
+        # CALM's 'not yet available' records (description published, material not yet
+        # ready for readers) migrate as draft; an explicit 'yes' marks exactly those
+        # drafts as having a publishable description.
+        draft_and_publishable = catalogue_status == "draft" and publish_to_web == "yes"
+
+        if not (finished_and_publishable or draft_and_publishable):
             return True
 
         # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
