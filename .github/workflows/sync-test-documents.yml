@@ -1,0 +1,124 @@
+name: Sync test documents to catalogue-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "catalogue_graph/document_generators/test_documents/**"
+  workflow_dispatch:
+
+jobs:
+  sync-test-documents:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          # Both stored as repo secrets, following catalogue-api's
+          # sync-openapi-spec.yml (not content-api, which uses Variables).
+          client-id: ${{ secrets.SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+          repositories: catalogue-api
+
+      - name: Checkout catalogue-pipeline
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sparse-checkout: catalogue_graph/document_generators/test_documents
+
+      - name: Checkout catalogue-api
+        uses: actions/checkout@v6
+        with:
+          repository: wellcomecollection/catalogue-api
+          token: ${{ steps.app-token.outputs.token }}
+          path: catalogue-api
+
+      # A fixed branch name stops auto-PRs stacking up while one sits open.
+      # Starting from the branch's existing state preserves any spec work
+      # already pushed there, and makes change detection relative to what the
+      # open PR already has.
+      - name: Check out the auto-sync branch if it already exists
+        run: |
+          cd catalogue-api
+          if git fetch origin auto-sync/test-documents; then
+            git checkout auto-sync/test-documents
+          fi
+
+      # --delete mirrors removals; the target directory holds nothing but
+      # copies of these fixtures.
+      - name: Copy test documents
+        run: |
+          rsync --archive --delete \
+            catalogue_graph/document_generators/test_documents/ \
+            catalogue-api/common/search/src/test/resources/test_documents/
+
+      # git status, not git diff: new fixture files are untracked and
+      # invisible to diff.
+      - name: Check for changes
+        id: changes
+        run: |
+          cd catalogue-api
+          if git status --porcelain -- common/search/src/test/resources/test_documents | grep -q .; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or update Pull Request
+        if: steps.changes.outputs.changes == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          cd catalogue-api
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          BRANCH_NAME="auto-sync/test-documents"
+          if [ "$(git branch --show-current)" != "$BRANCH_NAME" ]; then
+            git checkout -b "$BRANCH_NAME"
+          fi
+
+          # Commit and push
+          git add common/search/src/test/resources/test_documents
+          git commit -m "Update test documents from catalogue-pipeline"
+          git push origin "$BRANCH_NAME"
+
+          # gh, unlike curl -s, fails the step on API errors
+          cat > "$RUNNER_TEMP/pr-body.md" <<'EOF'
+          This PR copies `catalogue_graph/document_generators/test_documents/` from `wellcomecollection/catalogue-pipeline` into `common/search/src/test/resources/test_documents/`, replacing a manual run of `copy_test_documents.py`.
+
+          If `OpenApiSpecResponseTest` fails on this PR, the pipeline display model has changed shape and `reference/catalogue.yaml` needs updating on this branch before merge.
+
+          **Triggered by commit:** wellcomecollection/catalogue-pipeline@${{ github.sha }}
+
+          See wellcomecollection/platform#6514 for context.
+          EOF
+
+          # An open PR for the fixed branch already covers this sync; a comment
+          # records the extra trigger commit the PR body can't name.
+          OPEN_PR=$(gh pr list \
+            --repo wellcomecollection/catalogue-api \
+            --head "$BRANCH_NAME" \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$OPEN_PR" ]; then
+            gh pr comment "$OPEN_PR" \
+              --repo wellcomecollection/catalogue-api \
+              --body "Synced further test document changes, triggered by commit: wellcomecollection/catalogue-pipeline@${{ github.sha }}"
+          else
+            gh pr create \
+              --repo wellcomecollection/catalogue-api \
+              --head "$BRANCH_NAME" \
+              --base main \
+              --title "🤖 Auto-sync: Update test documents from catalogue-pipeline" \
+              --body-file "$RUNNER_TEMP/pr-body.md" \
+              --reviewer wellcomecollection/digital-platform
+          fi
