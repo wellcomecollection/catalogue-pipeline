@@ -1,10 +1,6 @@
 import structlog
 
 from adapters.transformers.axiell.access_status import extract_access_status
-from adapters.transformers.axiell.catalogue_status import (
-    AxiellCatalogueStatus,
-    extract_catalogue_status,
-)
 from adapters.transformers.axiell.contributors import extract_contributors
 from adapters.transformers.axiell.description import extract_description
 from adapters.transformers.axiell.format import extract_format
@@ -19,7 +15,10 @@ from adapters.transformers.axiell.physical_description import (
 from adapters.transformers.axiell.production import (
     extract_production,
 )
-from adapters.transformers.axiell.publish_to_web import extract_publish_to_web
+from adapters.transformers.axiell.publish_to_web import (
+    extract_publish_to_web,
+    is_publishable,
+)
 from adapters.transformers.axiell.subjects import extract_subjects
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.marc.last_transaction_time import (
@@ -58,29 +57,26 @@ from utils.types import WorkType
 logger = structlog.get_logger(__name__)
 
 
-NON_SUPPRESSED_STATUSES: set[AxiellCatalogueStatus] = {
-    "catalogued",
-    "partially complete",
-}
-
-
 class AxiellWorkBuilder(MarcXmlWorkBuilder):
     """Work builder for Axiell (MARC XML) records."""
 
-    def _is_suppresssed(self) -> bool:
-        # If a record does not have a status, or if its status is not listed in
-        # NON_SUPPRESSED_STATUSES, we suppress it. Checked before anything touching
-        # collection_path: newly created records legitimately lack a RefNo, and
-        # suppressing them must not require one.
-        catalogue_status = extract_catalogue_status(self.record)
-        if catalogue_status not in NON_SUPPRESSED_STATUSES:
-            return True
-
-        # The publish_to_web checkbox decides whether a finished record may go
-        # online, separately from its cataloguing status. Only an explicit 'no'
-        # suppresses: the marker is absent on records harvested before the
-        # stylesheet change, and those must keep their current visibility.
-        if extract_publish_to_web(self.record) == "no":
+    def _is_suppressed(self) -> bool:
+        # The publish_to_web checkbox is the sole publish authority (collections
+        # decision). Checked before anything touching collection_path: newly
+        # created records legitimately lack a RefNo, and suppressing them must
+        # not require one.
+        if not is_publishable(self.record):
+            # An absent or unrecognised marker is a stylesheet/harvest anomaly,
+            # not a cataloguer's 'no': log it so a regression that stops
+            # emitting 981 cannot silently retract the whole catalogue.
+            if extract_publish_to_web(self.record) is None:
+                logger.warning(
+                    "Suppressing record without an explicit publish_to_web marker",
+                    record_id=self.source_identifier_value,
+                    raw_values=[
+                        field.get("a") for field in self.record.get_fields("981")
+                    ],
+                )
             return True
 
         # Records prefixed with AMSG (Archives and Manuscripts Resource Guides) are not
@@ -212,7 +208,7 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
         )
 
     def transform_work(self) -> VisibleSourceWork | DeletedSourceWork:
-        if self._is_suppresssed():
+        if self._is_suppressed():
             return self.transform_deleted_work(
                 deleted_reason=SuppressedFromSource(info="Axiell")
             )
