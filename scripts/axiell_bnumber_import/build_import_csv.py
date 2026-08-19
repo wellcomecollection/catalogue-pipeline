@@ -124,6 +124,14 @@ def main() -> None:
         type=Path,
         help="Output of check_bnumbers.py; lets dead-valued conflicts import",
     )
+    parser.add_argument(
+        "--include-live-conflicts",
+        action="store_true",
+        help="Also import our b number where the record cites a different live "
+        "one (collections decision of 2026-08-19: import ours, the duplicate "
+        "cataloguing is resolved on the Axiell side); conflicts.csv is still "
+        "written for that follow-up",
+    )
     args = parser.parse_args()
 
     with args.pairs.open() as f:
@@ -165,12 +173,13 @@ def main() -> None:
                 status.get(normalise(b), ("unknown", "", ""))
                 for b in sorted(record["bnumbers"])
             ]
-            if status and all(
-                s in ("deleted", "absent", "malformed") for s, _, _ in resolved
+            if args.include_live_conflicts or (
+                status
+                and all(s in ("deleted", "absent", "malformed") for s, _, _ in resolved)
             ):
                 # Nothing usable is lost whether the import appends or replaces.
                 to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
-            else:
+            if not all(s in ("deleted", "absent", "malformed") for s, _, _ in resolved):
                 conflicts.append(
                     [
                         record["altrefno"],

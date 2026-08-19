@@ -65,9 +65,11 @@ rows where several AxC records share one (`ambiguous_refs.csv`) or where the
 matched record has no AltRefNo at all (`no_public_ref.csv`).
 
 RecordIDs with several bibs produce one row each (035 is repeatable).
-Conflicts, where AxC already cites a different live b number, are excluded
-from the import CSV and reported for review with each existing value's
-Sierra status. Pairs with no AxC record are expected
+Conflicts, where AxC already cites a different live b number, are reported
+with each existing value's Sierra status, format and title. By default they
+are excluded from the import CSV; with `--include-live-conflicts` our value
+is imported anyway, per the collections decision of 2026-08-19 that the
+harvest b number wins and the duplicate cataloguing is resolved in Axiell. Pairs with no AxC record are expected
 for manuscripts moving to TEI and for returned PSY material.
 
 ## Re-running
