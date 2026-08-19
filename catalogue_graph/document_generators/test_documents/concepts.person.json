@@ -1,0 +1,129 @@
+{
+  "description": "a person concept with every field populated",
+  "id": "f8z7r7pn",
+  "document": {
+    "query": {
+      "id": "f8z7r7pn",
+      "identifiers": [
+        {
+          "value": "5rl08alrc",
+          "identifierType": "lc-names"
+        },
+        {
+          "value": "fqps6ywfu",
+          "identifierType": "wikidata"
+        },
+        {
+          "value": "nhflov2mp",
+          "identifierType": "viaf"
+        }
+      ],
+      "label": "Pemberton, Petronella",
+      "alternativeLabels": [
+        "P. Pemberton",
+        "Pemberton, Petronella, 1888-1976"
+      ],
+      "type": "Person"
+    },
+    "display": {
+      "id": "f8z7r7pn",
+      "identifiers": [
+        {
+          "value": "5rl08alrc",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "lc-names",
+            "type": "IdentifierType",
+            "label": "Library of Congress Name authority records"
+          }
+        },
+        {
+          "value": "fqps6ywfu",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "wikidata",
+            "type": "IdentifierType",
+            "label": "Wikidata"
+          }
+        },
+        {
+          "value": "nhflov2mp",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "viaf",
+            "type": "IdentifierType",
+            "label": "VIAF: The Virtual International Authority File"
+          }
+        }
+      ],
+      "label": "Pemberton, Petronella",
+      "displayLabel": "Petronella Pemberton",
+      "alternativeLabels": [
+        "P. Pemberton",
+        "Pemberton, Petronella, 1888-1976"
+      ],
+      "description": {
+        "text": "2yW4Acq9GFz6Y1t9EwL56nGisiWgNZq6ITZM5jtg",
+        "sourceLabel": "wikidata",
+        "sourceUrl": "https://www.wikidata.org/wiki/ue52rvejg"
+      },
+      "type": "Person",
+      "relatedConcepts": {
+        "relatedTo": [
+          {
+            "label": "Pemberton, Percival",
+            "id": "w1un9427",
+            "relationshipType": "has_sibling",
+            "conceptType": "Person"
+          },
+          {
+            "label": "Aardvark antics",
+            "id": "qd9afza5",
+            "conceptType": "Concept"
+          }
+        ],
+        "fieldsOfWork": [
+          {
+            "label": "Badger ballet",
+            "id": "vpuemopj",
+            "conceptType": "Concept"
+          },
+          {
+            "label": "Capybara cartography",
+            "id": "82ffu65g",
+            "conceptType": "Concept"
+          }
+        ],
+        "narrowerThan": [],
+        "broaderThan": [],
+        "people": [],
+        "frequentCollaborators": [
+          {
+            "label": "Ostrich, Olga",
+            "id": "t9sh9v8n",
+            "conceptType": "Person"
+          }
+        ],
+        "relatedTopics": [],
+        "foundedBy": []
+      },
+      "sameAs": [
+        "9s2fyups",
+        "lmlcq4ef"
+      ],
+      "displayImages": [
+        {
+          "locationType": {
+            "id": "iiif-image",
+            "type": "LocationType",
+            "label": "IIIF Image API"
+          },
+          "accessConditions": [],
+          "url": "https://iiif.wellcomecollection.org/image/Vrwi4j7c/full/full/0/default.jpg",
+          "type": "DigitalLocation"
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-08-17T13:35:43.331832+00:00"
+}

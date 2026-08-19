@@ -1,0 +1,71 @@
+{
+  "description": "an organisation concept with founders and people",
+  "id": "w4kndkkv",
+  "document": {
+    "query": {
+      "id": "w4kndkkv",
+      "identifiers": [
+        {
+          "value": "hqhm6cqla",
+          "identifierType": "lc-names"
+        }
+      ],
+      "label": "Dodo Preservation Society",
+      "alternativeLabels": [],
+      "type": "Organisation"
+    },
+    "display": {
+      "id": "w4kndkkv",
+      "identifiers": [
+        {
+          "value": "hqhm6cqla",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "lc-names",
+            "type": "IdentifierType",
+            "label": "Library of Congress Name authority records"
+          }
+        }
+      ],
+      "label": "Dodo Preservation Society",
+      "displayLabel": "Dodo Preservation Society",
+      "alternativeLabels": [],
+      "description": {
+        "text": "bUrhToxYkvB0dgYj2Soc0KO67IMRebhOmM1Khzfx",
+        "sourceLabel": "weco-authority"
+      },
+      "type": "Organisation",
+      "relatedConcepts": {
+        "relatedTo": [],
+        "fieldsOfWork": [],
+        "narrowerThan": [],
+        "broaderThan": [],
+        "people": [
+          {
+            "label": "Ostrich, Olga",
+            "id": "qeoetw1l",
+            "conceptType": "Person"
+          },
+          {
+            "label": "Flamingo, Florence",
+            "id": "d63cgzmq",
+            "conceptType": "Person"
+          }
+        ],
+        "frequentCollaborators": [],
+        "relatedTopics": [],
+        "foundedBy": [
+          {
+            "label": "Pemberton, Petronella",
+            "id": "h4ndb81g",
+            "relationshipType": "has_founder",
+            "conceptType": "Person"
+          }
+        ]
+      },
+      "sameAs": [],
+      "displayImages": []
+    }
+  },
+  "createdAt": "2026-08-17T13:35:43.339082+00:00"
+}

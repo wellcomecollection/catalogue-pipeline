@@ -1,0 +1,79 @@
+{
+  "description": "a place concept with identifiers from multiple sources",
+  "id": "jrbccnq9",
+  "document": {
+    "query": {
+      "id": "jrbccnq9",
+      "identifiers": [
+        {
+          "value": "u8x8k62c2",
+          "identifierType": "lc-subjects"
+        },
+        {
+          "value": "v9smpftp5",
+          "identifierType": "nlm-mesh"
+        }
+      ],
+      "label": "Lower Quokka-on-the-Wold",
+      "alternativeLabels": [
+        "Quokka-on-the-Wold, Lower"
+      ],
+      "type": "Place"
+    },
+    "display": {
+      "id": "jrbccnq9",
+      "identifiers": [
+        {
+          "value": "u8x8k62c2",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "lc-subjects",
+            "type": "IdentifierType",
+            "label": "Library of Congress Subject Headings (LCSH)"
+          }
+        },
+        {
+          "value": "v9smpftp5",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "nlm-mesh",
+            "type": "IdentifierType",
+            "label": "Medical Subject Headings (MeSH) identifier"
+          }
+        }
+      ],
+      "label": "Lower Quokka-on-the-Wold",
+      "displayLabel": "Lower Quokka-on-the-Wold",
+      "alternativeLabels": [
+        "Quokka-on-the-Wold, Lower"
+      ],
+      "description": {
+        "text": "F6JMWa4cFut1DdZ04ZAmJ9Of1Uiaz8RAuanaTWa0",
+        "sourceLabel": "wikidata",
+        "sourceUrl": "https://www.wikidata.org/wiki/rhngmhmpm"
+      },
+      "type": "Place",
+      "relatedConcepts": {
+        "relatedTo": [
+          {
+            "label": "Upper Quokka",
+            "id": "trlg4zfb",
+            "conceptType": "Place"
+          }
+        ],
+        "fieldsOfWork": [],
+        "narrowerThan": [],
+        "broaderThan": [],
+        "people": [],
+        "frequentCollaborators": [],
+        "relatedTopics": [],
+        "foundedBy": []
+      },
+      "sameAs": [
+        "r2hqi7wh"
+      ],
+      "displayImages": []
+    }
+  },
+  "createdAt": "2026-08-17T13:35:43.352322+00:00"
+}

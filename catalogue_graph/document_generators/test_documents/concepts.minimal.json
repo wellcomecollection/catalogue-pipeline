@@ -1,0 +1,34 @@
+{
+  "description": "a minimal concept with no identifiers, description, or related concepts",
+  "id": "sxz9ish4",
+  "document": {
+    "query": {
+      "id": "sxz9ish4",
+      "identifiers": [],
+      "label": "Nondescript notions",
+      "alternativeLabels": [],
+      "type": "Concept"
+    },
+    "display": {
+      "id": "sxz9ish4",
+      "identifiers": [],
+      "label": "Nondescript notions",
+      "displayLabel": "Nondescript notions",
+      "alternativeLabels": [],
+      "type": "Concept",
+      "relatedConcepts": {
+        "relatedTo": [],
+        "fieldsOfWork": [],
+        "narrowerThan": [],
+        "broaderThan": [],
+        "people": [],
+        "frequentCollaborators": [],
+        "relatedTopics": [],
+        "foundedBy": []
+      },
+      "sameAs": [],
+      "displayImages": []
+    }
+  },
+  "createdAt": "2026-08-17T13:35:43.367460+00:00"
+}

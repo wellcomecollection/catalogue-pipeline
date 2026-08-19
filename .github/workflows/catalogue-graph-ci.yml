@@ -36,6 +36,7 @@ jobs:
         run: |
           uv run python -m document_generators.create_test_work_documents
           uv run python -m document_generators.create_test_image_documents
+          uv run python -m document_generators.create_test_concept_documents
       - name: Check for uncommitted changes
         working-directory: catalogue_graph
         run: git diff --exit-code document_generators/test_documents/

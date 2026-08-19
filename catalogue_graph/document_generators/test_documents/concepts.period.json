@@ -1,0 +1,55 @@
+{
+  "description": "a period concept with a label-derived identifier",
+  "id": "aijrvvxf",
+  "document": {
+    "query": {
+      "id": "aijrvvxf",
+      "identifiers": [
+        {
+          "value": "vxnccrkjl",
+          "identifierType": "label-derived"
+        }
+      ],
+      "label": "The Wombat Renaissance",
+      "alternativeLabels": [],
+      "type": "Period"
+    },
+    "display": {
+      "id": "aijrvvxf",
+      "identifiers": [
+        {
+          "value": "vxnccrkjl",
+          "type": "Identifier",
+          "identifierType": {
+            "id": "label-derived",
+            "type": "IdentifierType",
+            "label": "Identifier derived from the label of the referent"
+          }
+        }
+      ],
+      "label": "The Wombat Renaissance",
+      "displayLabel": "The Wombat Renaissance",
+      "alternativeLabels": [],
+      "type": "Period",
+      "relatedConcepts": {
+        "relatedTo": [],
+        "fieldsOfWork": [],
+        "narrowerThan": [],
+        "broaderThan": [],
+        "people": [],
+        "frequentCollaborators": [],
+        "relatedTopics": [
+          {
+            "label": "Marsupial modernism",
+            "id": "31x8lnys",
+            "conceptType": "Concept"
+          }
+        ],
+        "foundedBy": []
+      },
+      "sameAs": [],
+      "displayImages": []
+    }
+  },
+  "createdAt": "2026-08-17T13:35:43.359723+00:00"
+}
