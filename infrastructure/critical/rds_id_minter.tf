@@ -17,8 +17,8 @@ module "id_minter_rds_2026_07_03" {
   source = "./modules/id-minter-rds"
 
   name_suffix = "2026-07-03"
-  # Restore from production on August 17, 2026, 04:00 (UTC+01:00)
-  snapshot_identifier = "awsbackup:job-74fac66a-d4a1-f82e-bda3-92c19d19d21c"
+  # Restore from production on August 19, 2026, 04:00 (UTC+01:00)
+  snapshot_identifier = "awsbackup:job-7adec63f-19b6-5ff9-272d-f39aad1a79a8"
 
   # A restored copy of production; its contents are never worth keeping.
   skip_final_snapshot = true
