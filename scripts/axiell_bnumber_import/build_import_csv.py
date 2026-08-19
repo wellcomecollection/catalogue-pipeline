@@ -8,7 +8,9 @@ keyed on the CALM RecordID each AxC record carries in MARC 907, and writes:
   reference, the AltRefNo; alternative_number = the b number;
   alternative_number.type = the constant "Bibliographic Number") for records
   matched in AxC that do not already cite the b number
-- conflicts.csv where the AxC record cites a different b number
+- conflicts.csv where the AxC record cites a different b number that is
+  still live in Sierra (with --bnumber-status, conflicts whose existing value
+  is dead in Sierra are imported instead of withheld)
 - ambiguous_refs.csv where several AxC records share the public reference the
   import would match on
 - no_public_ref.csv where the matched record carries no AltRefNo to match on
@@ -36,6 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "catalogue_graph" /
 
 from adapters.extractors.oai_pmh.axiell.config import AXIELL_ADAPTER_CONFIG
 from adapters.utils.iceberg import get_rest_api_table
+from check_bnumbers import normalise
 
 RE_907 = re.compile(
     r'tag="907"[^>]*>.*?<(?:marc:)?subfield code="a">([^<]*)</', re.DOTALL
@@ -109,6 +112,11 @@ def main() -> None:
         type=Path,
         help="A previous import CSV; only rows not already in it are emitted",
     )
+    parser.add_argument(
+        "--bnumber-status",
+        type=Path,
+        help="Output of check_bnumbers.py; lets dead-valued conflicts import",
+    )
     args = parser.parse_args()
 
     with args.pairs.open() as f:
@@ -117,6 +125,12 @@ def main() -> None:
         ]
 
     by_uuid = scan_axiell_store()
+
+    status: dict[str, tuple[str, str]] = {}
+    if args.bnumber_status:
+        with args.bnumber_status.open() as f:
+            for r in csv.DictReader(f):
+                status[r["bnumber"]] = (r["status"], r["sierra_format"])
 
     ref_owners: dict[str, set[str]] = {}
     for uuid, record in by_uuid.items():
@@ -136,15 +150,26 @@ def main() -> None:
         elif b_number in record["bnumbers"]:
             already.append([uuid, b_number])
         elif record["bnumbers"]:
-            conflicts.append(
-                [
-                    uuid,
-                    b_number,
-                    ";".join(sorted(record["bnumbers"])),
-                    record["altrefno"],
-                    record["refno"],
-                ]
-            )
+            statuses = [
+                status.get(normalise(b), ("unknown", ""))[0]
+                for b in sorted(record["bnumbers"])
+            ]
+            if status and all(
+                s in ("deleted", "absent", "malformed") for s in statuses
+            ):
+                # Nothing usable is lost whether the import appends or replaces.
+                to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
+            else:
+                conflicts.append(
+                    [
+                        uuid,
+                        b_number,
+                        ";".join(sorted(record["bnumbers"])),
+                        ";".join(statuses),
+                        record["altrefno"],
+                        record["refno"],
+                    ]
+                )
         elif not record["altrefno"]:
             no_public_ref.append([uuid, b_number, record["refno"]])
         elif len(ref_owners[record["altrefno"]]) > 1:
@@ -168,7 +193,14 @@ def main() -> None:
     )
     write_csv(
         out / "conflicts.csv",
-        ["RecordID", "Bnumber", "axc_bnumbers", "AltRefNo", "RefNo"],
+        [
+            "RecordID",
+            "Bnumber",
+            "axc_bnumbers",
+            "axc_bnumber_status",
+            "AltRefNo",
+            "RefNo",
+        ],
         conflicts,
     )
     write_csv(

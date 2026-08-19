@@ -7,7 +7,7 @@ CALM-synced Sierra bibs retire without FOLIO successors.
 Background: RFC 092 ([wellcomecollection/docs#164](https://github.com/wellcomecollection/docs/pull/164)),
 tracked in [wellcomecollection/platform#6525](https://github.com/wellcomecollection/platform/issues/6525).
 
-## The two steps
+## The steps
 
 1. `extract_pairs.py` reads the production pipeline's `works-source` index and
    emits `pairs.csv`: one row per Sierra bib carrying a `calm-record-id` merge
@@ -30,9 +30,22 @@ tracked in [wellcomecollection/platform#6525](https://github.com/wellcomecollect
        python scripts/axiell_bnumber_import/build_import_csv.py
    ```
 
-`extract_pairs.py` needs `platform-developer` because the pipeline ES
-credentials live in Secrets Manager; the store scan works with
-`platform-read_only`.
+3. Optionally, `check_bnumbers.py` resolves every `035 (Bibliographic
+   Number)` already in the store against the Sierra source works and writes
+   `bnumber_status.csv` (live, deleted, or absent, with the Sierra record's
+   format and title). Passing that file to step 2 as `--bnumber-status`
+   imports conflict rows whose existing value is dead in Sierra, since
+   nothing usable is lost whether the import appends or replaces, and leaves
+   only live-valued conflicts withheld for review.
+
+   ```
+   AWS_PROFILE=platform-developer uv run --project catalogue_graph \
+       python scripts/axiell_bnumber_import/check_bnumbers.py
+   ```
+
+`extract_pairs.py` and `check_bnumbers.py` need `platform-developer` because
+the pipeline ES credentials live in Secrets Manager; the store scan alone
+works with `platform-read_only`.
 
 ## The import CSV
 
@@ -52,8 +65,9 @@ rows where several AxC records share one (`ambiguous_refs.csv`) or where the
 matched record has no AltRefNo at all (`no_public_ref.csv`).
 
 RecordIDs with several bibs produce one row each (035 is repeatable).
-Conflicts, where AxC already cites a different b number, are excluded from
-the import CSV and reported for review. Pairs with no AxC record are expected
+Conflicts, where AxC already cites a different live b number, are excluded
+from the import CSV and reported for review with each existing value's
+Sierra status. Pairs with no AxC record are expected
 for manuscripts moving to TEI and for returned PSY material.
 
 ## Re-running
