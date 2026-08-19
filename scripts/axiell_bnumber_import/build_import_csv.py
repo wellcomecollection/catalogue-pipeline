@@ -38,8 +38,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "catalogue_graph" /
 
 from adapters.extractors.oai_pmh.axiell.config import AXIELL_ADAPTER_CONFIG
 from adapters.utils.iceberg import get_rest_api_table
+
 from check_bnumbers import normalise
 
+RE_245 = re.compile(
+    r'tag="245"[^>]*>.*?<(?:marc:)?subfield code="a">([^<]*)</', re.DOTALL
+)
 RE_907 = re.compile(
     r'tag="907"[^>]*>.*?<(?:marc:)?subfield code="a">([^<]*)</', re.DOTALL
 )
@@ -75,6 +79,8 @@ def scan_axiell_store() -> dict[str, dict]:
                 continue
             refno = ""
             altrefno = ""
+            m245 = RE_245.search(content)
+            title = m245.group(1).strip() if m245 else ""
             bnumbers = set()
             for prefix, value in RE_035.findall(content):
                 if prefix == "Calm RefNo" and not refno:
@@ -87,6 +93,7 @@ def scan_axiell_store() -> dict[str, dict]:
                 "record_id": rid,
                 "refno": refno,
                 "altrefno": altrefno,
+                "title": title,
                 "bnumbers": bnumbers,
             }
     print(
@@ -126,11 +133,15 @@ def main() -> None:
 
     by_uuid = scan_axiell_store()
 
-    status: dict[str, tuple[str, str]] = {}
+    status: dict[str, tuple[str, str, str]] = {}
     if args.bnumber_status:
         with args.bnumber_status.open() as f:
             for r in csv.DictReader(f):
-                status[r["bnumber"]] = (r["status"], r["sierra_format"])
+                status[r["bnumber"]] = (
+                    r["status"],
+                    r["sierra_format"],
+                    r["sierra_title"],
+                )
 
     ref_owners: dict[str, set[str]] = {}
     for uuid, record in by_uuid.items():
@@ -150,24 +161,27 @@ def main() -> None:
         elif b_number in record["bnumbers"]:
             already.append([uuid, b_number])
         elif record["bnumbers"]:
-            statuses = [
-                status.get(normalise(b), ("unknown", ""))[0]
+            resolved = [
+                status.get(normalise(b), ("unknown", "", ""))
                 for b in sorted(record["bnumbers"])
             ]
             if status and all(
-                s in ("deleted", "absent", "malformed") for s in statuses
+                s in ("deleted", "absent", "malformed") for s, _, _ in resolved
             ):
                 # Nothing usable is lost whether the import appends or replaces.
                 to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
             else:
                 conflicts.append(
                     [
-                        uuid,
-                        b_number,
-                        ";".join(sorted(record["bnumbers"])),
-                        ";".join(statuses),
                         record["altrefno"],
                         record["refno"],
+                        record["title"],
+                        b_number,
+                        ";".join(sorted(record["bnumbers"])),
+                        ";".join(s for s, _, _ in resolved),
+                        ";".join(f for _, f, _ in resolved),
+                        ";".join(ti for _, _, ti in resolved),
+                        uuid,
                     ]
                 )
         elif not record["altrefno"]:
@@ -194,12 +208,15 @@ def main() -> None:
     write_csv(
         out / "conflicts.csv",
         [
-            "RecordID",
-            "Bnumber",
-            "axc_bnumbers",
-            "axc_bnumber_status",
             "AltRefNo",
             "RefNo",
+            "axc_title",
+            "our_bnumber",
+            "axc_bnumbers",
+            "axc_bnumber_status",
+            "axc_bnumber_sierra_format",
+            "axc_bnumber_sierra_title",
+            "RecordID",
         ],
         conflicts,
     )
