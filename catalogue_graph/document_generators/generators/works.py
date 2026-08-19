@@ -232,6 +232,7 @@ def create_work_hierarchy_item(
         label=work.data.title,
         collection_path=path.path if path else None,
         collection_path_label=path.label if path else None,
+        availabilities=[a.id for a in work.state.availabilities],
     )
     return WorkHierarchyItem(
         work=WorkNode.model_validate(

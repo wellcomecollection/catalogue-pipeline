@@ -2,7 +2,10 @@ from collections import defaultdict
 from collections.abc import Generator
 
 from ingestor.models.display.archive import DisplayArchive
-from ingestor.models.display.availability import DisplayAvailability
+from ingestor.models.display.availability import (
+    DisplayAvailability,
+    is_available_online,
+)
 from ingestor.models.display.collection import DisplayCollection
 from ingestor.models.display.concept import (
     DisplayConcept,
@@ -68,6 +71,9 @@ class DisplayWorkTransformer(WorkBaseTransformer):
                 referenceNumber=path.label if path is not None else None,
                 totalParts=len(self.hierarchy.children),
                 type=self.data.display_work_type,
+                isAvailableOnline=is_available_online(
+                    [a.id for a in self.state.availabilities]
+                ),
             )
 
         return None

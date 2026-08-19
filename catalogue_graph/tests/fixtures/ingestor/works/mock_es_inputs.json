@@ -311,6 +311,7 @@
             "title": "Case against the Medical Research Council",
             "referenceNumber": "GC/176/C",
             "totalParts": 2,
+            "isAvailableOnline": false,
             "type": "Section"
           },
           {
@@ -318,6 +319,7 @@
             "title": "Twort, Frederick William",
             "referenceNumber": "GC/176",
             "totalParts": 3,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         ],
@@ -328,6 +330,7 @@
             "title": "Twort, Frederick William",
             "referenceNumber": "GC/176",
             "totalParts": 3,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         },
@@ -1277,6 +1280,7 @@
           {
             "title": "Eighteenth Century Collections Online",
             "totalParts": 0,
+            "isAvailableOnline": false,
             "type": "Series"
           }
         ],
@@ -1651,6 +1655,7 @@
             "title": "'Somatic cell genetics and others'",
             "referenceNumber": "UGC 198/8/5",
             "totalParts": 11,
+            "isAvailableOnline": false,
             "type": "Series"
           },
           {
@@ -1658,6 +1663,7 @@
             "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, lectures and broadcasts",
             "referenceNumber": "UGC 198/8",
             "totalParts": 8,
+            "isAvailableOnline": false,
             "type": "Section"
           },
           {
@@ -1665,6 +1671,7 @@
             "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
             "referenceNumber": "UGC 198",
             "totalParts": 10,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         ],
@@ -1675,6 +1682,7 @@
             "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
             "referenceNumber": "UGC 198",
             "totalParts": 10,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         }
@@ -2025,11 +2033,13 @@
           {
             "title": "Early European Books : Printed sources to 1700",
             "totalParts": 0,
+            "isAvailableOnline": false,
             "type": "Series"
           },
           {
             "title": "Early European Books.",
             "totalParts": 0,
+            "isAvailableOnline": false,
             "type": "Series"
           }
         ],
@@ -3003,11 +3013,13 @@
           {
             "title": "Early European Books : Printed sources to 1700",
             "totalParts": 0,
+            "isAvailableOnline": false,
             "type": "Series"
           },
           {
             "title": "Early European Books.",
             "totalParts": 0,
+            "isAvailableOnline": false,
             "type": "Series"
           }
         ],
@@ -3512,6 +3524,7 @@
           {
             "title": "Medical Heritage Library",
             "totalParts": 0,
+            "isAvailableOnline": false,
             "type": "Series"
           }
         ],
@@ -3897,6 +3910,7 @@
             "title": "German Hospital",
             "referenceNumber": "PP/RAS/A.2",
             "totalParts": 2,
+            "isAvailableOnline": false,
             "type": "Section"
           },
           {
@@ -3904,6 +3918,7 @@
             "title": "Personal and Miscellaneous",
             "referenceNumber": "PP/RAS/A",
             "totalParts": 2,
+            "isAvailableOnline": false,
             "type": "Section"
           },
           {
@@ -3911,6 +3926,7 @@
             "title": "Rast, Dr Hugo",
             "referenceNumber": "PP/RAS",
             "totalParts": 4,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         ],
@@ -3921,6 +3937,7 @@
             "title": "Rast, Dr Hugo",
             "referenceNumber": "PP/RAS",
             "totalParts": 4,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         },
@@ -4277,11 +4294,13 @@
           {
             "title": "Early European Books : Printed sources to 1700",
             "totalParts": 0,
+            "isAvailableOnline": false,
             "type": "Series"
           },
           {
             "title": "Early European Books.",
             "totalParts": 0,
+            "isAvailableOnline": false,
             "type": "Series"
           }
         ],

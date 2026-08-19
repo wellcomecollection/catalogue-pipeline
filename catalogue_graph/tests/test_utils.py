@@ -38,7 +38,10 @@ def load_jsonl_fixture(file_name: str) -> list[Any]:
 
 
 def get_work_hierarchy_item(
-    work_id: str, label: str | None = None, parts: int = 1
+    work_id: str,
+    label: str | None = None,
+    parts: int = 1,
+    availabilities: list[str] | None = None,
 ) -> WorkHierarchyItem:
     """Build a hierarchy item (an ancestor or a child) for a work with the given id."""
     return WorkHierarchyItem(
@@ -46,7 +49,12 @@ def get_work_hierarchy_item(
             {
                 "~id": work_id,
                 "~labels": ["Work"],
-                "~properties": Work(id=work_id, label=label, type="Work"),
+                "~properties": Work(
+                    id=work_id,
+                    label=label,
+                    type="Work",
+                    availabilities=availabilities or [],
+                ),
             }
         ),
         parts=parts,

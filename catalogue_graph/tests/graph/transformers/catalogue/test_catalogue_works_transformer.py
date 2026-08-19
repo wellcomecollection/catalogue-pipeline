@@ -26,6 +26,7 @@ def test_catalogue_works_transformer_nodes() -> None:
         alternative_labels=[],
         reference_number=None,
         collection_path="147150i/569755i",
+        availabilities=["closed-stores", "online"],
     )
     assert any(node == expected_work for node in nodes)
 

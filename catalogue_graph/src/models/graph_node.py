@@ -53,6 +53,8 @@ class Work(BaseNode):
     reference_number: str | None = None
     collection_path: str | None = None
     collection_path_label: str | None = None
+    # Availability ids (e.g. 'online'), as stored in `state.availabilities` in the merged index.
+    availabilities: list[str] = []
 
 
 class Image(BaseNode):

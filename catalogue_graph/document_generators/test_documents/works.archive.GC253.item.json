@@ -17,7 +17,7 @@
         "modifiedTime": "2025-01-01T00:00:00Z"
       },
       "mergedTime": "2025-01-01T00:00:00Z",
-      "indexedTime": "2001-01-01T00:01:01Z",
+      "indexedTime": "2001-01-01T01:01:01Z",
       "mergeCandidates": [],
       "redirectSources": []
     },
@@ -69,7 +69,13 @@
       "genres": [],
       "items": [],
       "holdings": [],
-      "availabilities": [],
+      "availabilities": [
+        {
+          "id": "online",
+          "type": "Availability",
+          "label": "Online"
+        }
+      ],
       "production": [],
       "languages": [],
       "notes": [],
@@ -83,6 +89,7 @@
           "title": "Correspondence",
           "referenceNumber": "GC/253/A",
           "totalParts": 1,
+          "isAvailableOnline": false,
           "type": "Series"
         },
         {
@@ -90,6 +97,7 @@
           "title": "Papers relating to the history of vaccination",
           "referenceNumber": "GC/253",
           "totalParts": 1,
+          "isAvailableOnline": false,
           "type": "Collection"
         }
       ],
@@ -100,6 +108,7 @@
           "title": "Papers relating to the history of vaccination",
           "referenceNumber": "GC/253",
           "totalParts": 1,
+          "isAvailableOnline": false,
           "type": "Collection"
         }
       },
@@ -120,7 +129,12 @@
       "contributors.agent": [],
       "items.locations.license": [],
       "items.locations.accessConditions.method": [],
-      "availabilities": [],
+      "availabilities": [
+        {
+          "id": "online",
+          "label": "Online"
+        }
+      ],
       "archive.category": {
         "id": "GC",
         "label": "General collections"
@@ -162,11 +176,13 @@
         "Papers relating to the history of vaccination",
         "Correspondence"
       ],
-      "availabilities.id": [],
+      "availabilities.id": [
+        "online"
+      ],
       "archive.category.id": "GC",
       "collection.root.id": "gmf8ycys",
       "collection.root.title": "Papers relating to the history of vaccination"
     }
   },
-  "createdAt": "2026-08-19T12:38:54.129757+00:00"
+  "createdAt": "2026-08-19T14:58:29.550432+00:00"
 }
