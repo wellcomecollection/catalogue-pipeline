@@ -362,6 +362,16 @@
             "label": "In copyright"
           }
         ],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "online-request",
+            "label": "Online request"
+          },
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -412,6 +422,10 @@
         "items.locations.accessConditions.status.id": [
           "open",
           "open-with-advisory"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "online-request",
+          "view-online"
         ],
         "items.id": [
           "wdtdsz2g"
@@ -987,6 +1001,20 @@
             "label": "In copyright"
           }
         ],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "online-request",
+            "label": "Online request"
+          },
+          {
+            "id": "not-requestable",
+            "label": "Not requestable"
+          },
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -1050,6 +1078,11 @@
         "items.locations.accessConditions.status.id": [
           "open",
           "open"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "online-request",
+          "not-requestable",
+          "view-online"
         ],
         "items.id": [
           "v9m3ewes",
@@ -1272,6 +1305,7 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [],
         "availabilities": [
           {
             "id": "online",
@@ -1306,6 +1340,7 @@
         ],
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [],
+        "items.locations.accessConditions.method.id": [],
         "items.id": [],
         "items.identifiers.value": [],
         "items.locations.locationType.id": [],
@@ -1667,6 +1702,12 @@
             "label": "In copyright"
           }
         ],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -1708,6 +1749,9 @@
         ],
         "items.locations.accessConditions.status.id": [
           "open-with-advisory"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],
@@ -2024,6 +2068,12 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -2068,6 +2118,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "licensed-resources"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],
@@ -2591,6 +2644,12 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "online-request",
+            "label": "Online request"
+          }
+        ],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -2653,6 +2712,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "open"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "online-request"
         ],
         "items.id": [
           "vphnmzg9"
@@ -2988,6 +3050,12 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -3035,6 +3103,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "licensed-resources"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],
@@ -3497,6 +3568,12 @@
             "label": "Public Domain Mark"
           }
         ],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -3556,6 +3633,9 @@
         ],
         "items.locations.accessConditions.status.id": [
           "open"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],
@@ -3870,6 +3950,12 @@
         ],
         "contributors.agent": [],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "online-request",
+            "label": "Online request"
+          }
+        ],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -3911,6 +3997,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "open"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "online-request"
         ],
         "items.id": [
           "bf3zp84j"
@@ -4231,6 +4320,12 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -4275,6 +4370,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "licensed-resources"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],

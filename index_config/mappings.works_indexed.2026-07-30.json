@@ -50,6 +50,23 @@
           "properties": {
             "locations": {
               "properties": {
+                "accessConditions": {
+                  "properties": {
+                    "method": {
+                      "type": "nested",
+                      "properties": {
+                        "id": {
+                          "type": "keyword",
+                          "eager_global_ordinals": true
+                        },
+                        "label": {
+                          "type": "keyword",
+                          "eager_global_ordinals": true
+                        }
+                      }
+                    }
+                  }
+                },
                 "license": {
                   "type": "nested",
                   "properties": {
@@ -297,6 +314,13 @@
                 "accessConditions": {
                   "properties": {
                     "status": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "method": {
                       "properties": {
                         "id": {
                           "type": "keyword"

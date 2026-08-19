@@ -17,7 +17,7 @@
         "modifiedTime": "2025-01-01T00:00:00Z"
       },
       "mergedTime": "2025-01-01T00:00:00Z",
-      "indexedTime": "2001-01-01T01:01:01Z",
+      "indexedTime": "2001-01-01T00:01:01Z",
       "mergeCandidates": [],
       "redirectSources": []
     },
@@ -131,6 +131,12 @@
           "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
+      "items.locations.accessConditions.method": [
+        {
+          "id": "view-online",
+          "label": "View online"
+        }
+      ],
       "availabilities": [
         {
           "id": "online",
@@ -161,6 +167,9 @@
       "items.locations.accessConditions.status.id": [
         "open"
       ],
+      "items.locations.accessConditions.method.id": [
+        "view-online"
+      ],
       "items.id": [],
       "items.identifiers.value": [],
       "items.locations.locationType.id": [
@@ -174,5 +183,5 @@
       ]
     }
   },
-  "createdAt": "2026-06-03T16:56:02.585794+00:00"
+  "createdAt": "2026-08-19T12:38:54.054116+00:00"
 }
