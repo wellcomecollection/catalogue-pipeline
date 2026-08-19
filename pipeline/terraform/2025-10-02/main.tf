@@ -71,7 +71,7 @@ module "pipeline" {
     },
   }
 
-  allow_delete_indices = false 
+  allow_delete_indices = false
 
   # Image-inferrer. The scheduled Python inferrer is the sole inferrer: it reads images-initial-2026-06-15
   # and writes images-augmented-2026-06-15, which the graph read-path also reads.
