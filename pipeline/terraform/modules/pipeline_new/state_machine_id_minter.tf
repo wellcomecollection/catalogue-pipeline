@@ -46,8 +46,9 @@ module "id_minter" {
     service_name = "id-minter-find-work"
     description  = "Finds works needing id minting within a time window and partitions them for the id-minter state machine."
     command      = ["id_minter.steps.find_work.lambda_handler"]
-    # Sized for full-scope replays, which materialise every matching id.
-    memory_size = 2048
+    # Sized for reindex-density windows, which materialise every matching id;
+    # 2048 OOMed on ~15-min windows during the round 2 bulk load.
+    memory_size = 8192
     timeout     = 600
     # Index name and ES secrets are env-derived, matching the minter itself.
     environment_variables = {
