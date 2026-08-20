@@ -111,6 +111,11 @@ object IdentifierType extends Enum[IdentifierType] {
     val label = "Axiell Guid"
   }
 
+  case object MimsyReference extends IdentifierType {
+    val id = "mimsy-reference"
+    val label = "Mimsy reference"
+  }
+
   case object ISBN extends IdentifierType {
     val id = "isbn"
     val label = "International Standard Book Number"
