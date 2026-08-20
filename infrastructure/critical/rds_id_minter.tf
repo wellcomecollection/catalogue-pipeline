@@ -20,7 +20,11 @@ module "id_minter_rds_2026_07_03" {
   # Restore from production on August 19, 2026, 04:00 (UTC+01:00)
   snapshot_identifier = "awsbackup:job-7adec63f-19b6-5ff9-272d-f39aad1a79a8"
 
-  # A restored copy of production; its contents are never worth keeping.
+  # A restored copy of production, respun from a fresh snapshot each testing round,
+  # so its contents are disposable for now. After switchover, the respin taken
+  # inside the freeze becomes the production registry and must be kept.
+  # Phase 6 of https://github.com/wellcomecollection/platform/issues/6541 removes
+  # skip_final_snapshot; read it before clearing this.
   skip_final_snapshot = true
 
   vpc_id             = local.vpc_id_new
