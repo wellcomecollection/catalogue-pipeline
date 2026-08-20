@@ -5,7 +5,7 @@ def datetime_from_005(value_005: str) -> datetime:
     """
     Converts a MARC 005 field string in 'YYYYMMDDHHMMSS.f' format to a datetime.
 
-    MARC 005 values are defined as UTC, so the returned datetime is timezone-aware.
+    Interpret MARC 005 values as UTC, so the returned datetime is timezone-aware.
     Returning a naive datetime would make downstream conversions (e.g.
     `convert_datetime_to_utc_iso`, which calls `astimezone`) interpret the value as
     system-local time and shift it by the local UTC offset.
