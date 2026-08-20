@@ -50,6 +50,23 @@
           "properties": {
             "locations": {
               "properties": {
+                "accessConditions": {
+                  "properties": {
+                    "method": {
+                      "type": "nested",
+                      "properties": {
+                        "id": {
+                          "type": "keyword",
+                          "eager_global_ordinals": true
+                        },
+                        "label": {
+                          "type": "keyword",
+                          "eager_global_ordinals": true
+                        }
+                      }
+                    }
+                  }
+                },
                 "license": {
                   "type": "nested",
                   "properties": {
@@ -140,32 +157,6 @@
             }
           }
         },
-        "archiveRoot": {
-          "type": "nested",
-          "properties": {
-            "id": {
-              "type": "keyword",
-              "eager_global_ordinals": true
-            },
-            "label": {
-              "type": "keyword",
-              "eager_global_ordinals": true
-            }
-          }
-        },
-        "archiveType": {
-          "type": "nested",
-          "properties": {
-            "id": {
-              "type": "keyword",
-              "eager_global_ordinals": true
-            },
-            "label": {
-              "type": "keyword",
-              "eager_global_ordinals": true
-            }
-          }
-        },
         "collection": {
           "properties": {
             "root": {
@@ -180,19 +171,6 @@
                   "eager_global_ordinals": true
                 }
               }
-            }
-          }
-        },
-        "collectionRoot": {
-          "type": "nested",
-          "properties": {
-            "id": {
-              "type": "keyword",
-              "eager_global_ordinals": true
-            },
-            "label": {
-              "type": "keyword",
-              "eager_global_ordinals": true
             }
           }
         }
@@ -302,6 +280,13 @@
                           "type": "keyword"
                         }
                       }
+                    },
+                    "method": {
+                      "properties": {
+                        "id": {
+                          "type": "keyword"
+                        }
+                      }
                     }
                   }
                 },
@@ -390,23 +375,6 @@
             }
           }
         },
-        "archiveRoot": {
-          "properties": {
-            "id": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "keyword"
-            }
-          }
-        },
-        "archiveType": {
-          "properties": {
-            "id": {
-              "type": "keyword"
-            }
-          }
-        },
         "collection": {
           "properties": {
             "isRoot": {
@@ -423,22 +391,6 @@
               }
             }
           }
-        },
-        "collectionRoot": {
-          "properties": {
-            "id": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "keyword"
-            }
-          }
-        },
-        "isArchiveRoot": {
-          "type": "boolean"
-        },
-        "isCollectionRoot": {
-          "type": "boolean"
         }
       }
     },
