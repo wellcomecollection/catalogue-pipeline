@@ -182,3 +182,22 @@ resource "aws_iam_role_policy" "inference_manager_s3_read" {
   role   = module.inference_manager_ecs_task.task_role_name
   policy = data.aws_iam_policy_document.inference_manager_s3_read.json
 }
+
+# The task publishes augmented_count and download_failure_count metrics.
+data "aws_iam_policy_document" "inference_manager_cloudwatch_write" {
+  statement {
+    actions   = ["cloudwatch:PutMetricData"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "cloudwatch:namespace"
+      values   = ["catalogue_graph_pipeline"]
+    }
+  }
+}
+
+resource "aws_iam_role_policy" "inference_manager_cloudwatch_write" {
+  role   = module.inference_manager_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.inference_manager_cloudwatch_write.json
+}
