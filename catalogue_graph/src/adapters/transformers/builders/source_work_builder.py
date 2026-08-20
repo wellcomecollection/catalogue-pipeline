@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import UTC, datetime
 
 import dateutil.parser
 
@@ -46,7 +46,7 @@ class SourceWorkBuilder(ABC):
         return SourceWorkState(
             source_identifier=self.source_identifier,
             source_modified_time=self.source_modified_time,
-            modified_time=convert_datetime_to_utc_iso(datetime.now()),
+            modified_time=convert_datetime_to_utc_iso(datetime.now(UTC)),
         )
 
     @property

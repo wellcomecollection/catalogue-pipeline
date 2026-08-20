@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from ingestor.models.merged.work import (
     DeletedMergedWork,
@@ -38,7 +38,7 @@ class WorkDebug(ElasticsearchModel):
                 modified_time=work.state.source_modified_time,
             ),
             merged_time=work.state.merged_time,
-            indexed_time=convert_datetime_to_utc_iso(datetime.now()),
+            indexed_time=convert_datetime_to_utc_iso(datetime.now(UTC)),
             merge_candidates=work.state.merge_candidates,
         )
 
