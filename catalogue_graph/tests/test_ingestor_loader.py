@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, cast
 
 import polars as pl
@@ -679,9 +679,7 @@ def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
     invisible_work = [i for i in items if i["type"] == "Invisible"][0]
     redirected_work = [i for i in items if i["type"] == "Redirected"][0]
 
-    # Time is frozen in local timezone, convert_datetime_to_utc_iso will handle conversion
-    now = datetime.now()
-    now_iso = convert_datetime_to_utc_iso(now)
+    now_iso = convert_datetime_to_utc_iso(datetime.now(UTC))
 
     assert DeletedIndexableWork(**deleted_work) == DeletedIndexableWork(
         debug=DeletedWorkDebug(

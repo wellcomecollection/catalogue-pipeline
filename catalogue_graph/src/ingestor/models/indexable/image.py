@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from ingestor.extractors.images.images_extractor import ExtractedImage
 from ingestor.models.aggregate.image import ImageAggregatableValues
@@ -39,6 +39,8 @@ class IndexableImage(IndexableRecord):
             aggregatable_values=ImageAggregatableValues.from_extracted_image(extracted),
             filterable_values=ImageFilterableValues.from_extracted_image(extracted),
             vector_values=ImageVectorValues.from_augmented_image(extracted.image),
-            debug=ImageDebug(indexed_time=convert_datetime_to_utc_iso(datetime.now())),
+            debug=ImageDebug(
+                indexed_time=convert_datetime_to_utc_iso(datetime.now(UTC))
+            ),
             modified_time=extracted.image.modified_time,
         )
