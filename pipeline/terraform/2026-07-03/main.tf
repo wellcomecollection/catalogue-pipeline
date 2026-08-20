@@ -5,10 +5,8 @@ module "pipeline" {
     listen_to_reindexer = true
     # Sized for the round 2 full reindex (platform#6505); back to false after
     # the comparison signs off.
-    scale_up_tasks = true
-    # ~$135/day flat: applied last before the reindex starts, reverted first
-    # after the comparison signs off.
-    scale_up_matcher_db = true
+    scale_up_tasks      = true
+    scale_up_matcher_db = false
   }
 
   index_dates = {
