@@ -28,6 +28,7 @@ IDENTIFIER_LABEL_MAPPING = {
     "calm-ref-no": "Calm RefNo",
     "calm-altref-no": "Calm AltRefNo",
     "calm-record-id": "Calm RecordIdentifier",
+    "mimsy-reference": "Mimsy reference",
     "isbn": "International Standard Book Number",
     "issn": "ISSN",
     "mets": "METS",
