@@ -29,10 +29,18 @@ from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
 from utils.sort import natural_sort_key
 
+from .short_description import derive_short_description
 from .work_base_transformer import WorkBaseTransformer
 
 
 class DisplayWorkTransformer(WorkBaseTransformer):
+    @property
+    def short_description(self) -> str | None:
+        """Archive collection roots only, which is the population the browse cards need."""
+        if not self.is_collection_root or self.archive is None:
+            return None
+        return derive_short_description(self.data.description)
+
     @property
     def identifiers(self) -> Generator[DisplayIdentifier]:
         all_ids = Identified(

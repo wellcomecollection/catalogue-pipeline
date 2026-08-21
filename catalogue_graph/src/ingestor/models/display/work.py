@@ -22,6 +22,7 @@ class DisplayWork(ElasticsearchModel):
     alternative_titles: list[str]
     reference_number: str | None
     description: str | None
+    short_description: str | None = None
     physical_description: str | None
     work_type: DisplayIdLabel | None
     lettering: str | None
@@ -60,6 +61,7 @@ class DisplayWork(ElasticsearchModel):
             alternative_titles=work.data.alternative_titles,
             reference_number=work.data.reference_number,
             description=work.data.description,
+            short_description=transformer.short_description,
             physical_description=work.data.physical_description,
             work_type=transformer.work_type,
             lettering=work.data.lettering,
