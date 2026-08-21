@@ -641,6 +641,7 @@
           "title": "wZL0ffJl0qmZquS",
           "referenceNumber": "SA/BSA/A",
           "totalParts": 5,
+          "isAvailableOnline": false,
           "type": "Work"
         },
         {
@@ -648,6 +649,7 @@
           "title": "08emPYDNpZDHkTv",
           "referenceNumber": "SA/BSA",
           "totalParts": 1,
+          "isAvailableOnline": false,
           "type": "Work"
         }
       ],
@@ -658,6 +660,7 @@
           "title": "08emPYDNpZDHkTv",
           "referenceNumber": "SA/BSA",
           "totalParts": 1,
+          "isAvailableOnline": false,
           "type": "Work"
         }
       },
@@ -731,6 +734,7 @@
           "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
+      "items.locations.accessConditions.method": [],
       "availabilities": [],
       "archive.category": {
         "id": "SA",
@@ -787,6 +791,7 @@
         "cc-by"
       ],
       "items.locations.accessConditions.status.id": [],
+      "items.locations.accessConditions.method.id": [],
       "items.id": [
         "e2p26gmk",
         "c3wirubz"
@@ -815,5 +820,5 @@
       "collection.root.title": "08emPYDNpZDHkTv"
     }
   },
-  "createdAt": "2026-08-05T12:48:25.375768+00:00"
+  "createdAt": "2026-08-19T14:58:27.522546+00:00"
 }

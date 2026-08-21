@@ -5,6 +5,7 @@ import structlog
 from dateutil import parser
 
 from ingestor.extractors.works.base_works_extractor import VisibleExtractedWork
+from ingestor.models.display.access_method import DisplayAccessMethod
 from ingestor.models.display.access_status import DisplayAccessStatus
 from models.pipeline.archive_category import ArchiveCategory
 from models.pipeline.location import DigitalLocation, PhysicalLocation
@@ -240,6 +241,13 @@ class QueryWorkTransformer(WorkBaseTransformer):
                     )
                     if display_status is not None:
                         yield display_status.id
+
+    @property
+    def access_condition_method_ids(self) -> Generator[str]:
+        for item in self.data.items:
+            for location in item.locations:
+                for condition in location.access_conditions:
+                    yield DisplayAccessMethod.from_access_condition(condition).id
 
     @property
     def license_ids(self) -> Generator[str]:

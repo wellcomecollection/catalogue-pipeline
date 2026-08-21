@@ -102,6 +102,7 @@
       ],
       "contributors.agent": [],
       "items.locations.license": [],
+      "items.locations.accessConditions.method": [],
       "availabilities": []
     },
     "filterableValues": {
@@ -125,6 +126,7 @@
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
+      "items.locations.accessConditions.method.id": [],
       "items.id": [],
       "items.identifiers.value": [],
       "items.locations.locationType.id": [],
@@ -134,5 +136,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-02T13:48:26.007905+00:00"
+  "createdAt": "2026-08-19T14:58:27.476708+00:00"
 }

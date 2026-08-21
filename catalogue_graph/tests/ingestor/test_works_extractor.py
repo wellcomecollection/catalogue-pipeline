@@ -104,6 +104,7 @@ def test_with_ancestors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     extracted_items = list(get_extractor().extract_raw())
     assert len(extracted_items) == 1
+
     assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
         hierarchy=WorkHierarchy(
@@ -111,6 +112,14 @@ def test_with_ancestors(monkeypatch: pytest.MonkeyPatch) -> None:
         ),
         concepts=[],
     )
+
+    # The graph stores availabilities as a single `||`-separated string, which must be
+    # split back into a list of availability ids.
+    item = extracted_items[0]
+    assert isinstance(item, VisibleExtractedWork)
+    children = item.hierarchy.children
+    assert children[0].work.properties.availabilities == ["closed-stores", "online"]
+    assert children[1].work.properties.availabilities == []
 
 
 def test_with_concepts(monkeypatch: pytest.MonkeyPatch) -> None:

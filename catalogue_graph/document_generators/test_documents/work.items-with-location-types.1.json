@@ -143,6 +143,7 @@
           "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
+      "items.locations.accessConditions.method": [],
       "availabilities": []
     },
     "filterableValues": {
@@ -167,6 +168,7 @@
         "cc-by"
       ],
       "items.locations.accessConditions.status.id": [],
+      "items.locations.accessConditions.method.id": [],
       "items.id": [
         "q6a7e0h0"
       ],
@@ -183,5 +185,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T16:56:02.165333+00:00"
+  "createdAt": "2026-08-19T14:58:28.807046+00:00"
 }

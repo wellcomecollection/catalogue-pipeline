@@ -79,6 +79,7 @@
           "title": "Interview with a laboratory technician",
           "referenceNumber": "OH1/A",
           "totalParts": 0,
+          "isAvailableOnline": false,
           "type": "Work"
         },
         {
@@ -86,6 +87,7 @@
           "title": "Interview with a research nurse",
           "referenceNumber": "OH1/B",
           "totalParts": 0,
+          "isAvailableOnline": false,
           "type": "Work"
         }
       ],
@@ -97,6 +99,7 @@
           "title": "Oral histories of British science",
           "referenceNumber": "OH1",
           "totalParts": 2,
+          "isAvailableOnline": false,
           "type": "Collection"
         },
         "isRoot": true
@@ -117,6 +120,7 @@
       "production.dates": [],
       "contributors.agent": [],
       "items.locations.license": [],
+      "items.locations.accessConditions.method": [],
       "availabilities": [],
       "archive.category": {
         "id": "OH",
@@ -146,6 +150,7 @@
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
+      "items.locations.accessConditions.method.id": [],
       "items.id": [],
       "items.identifiers.value": [],
       "items.locations.locationType.id": [],
@@ -159,5 +164,5 @@
       "collection.root.title": "Oral histories of British science"
     }
   },
-  "createdAt": "2026-08-06T09:07:55.722008+00:00"
+  "createdAt": "2026-08-19T14:58:29.558623+00:00"
 }

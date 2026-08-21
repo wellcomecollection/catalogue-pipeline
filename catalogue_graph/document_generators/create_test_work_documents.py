@@ -581,6 +581,9 @@ def create_archive_works() -> None:
     gc_item_work = create_visible_merged_work(
         title="Letter from Edward Jenner to an unidentified correspondent",
         collection_path=CollectionPath(path="GC253/A/2", label="GC/253/A/2"),
+        # Available online, so that relations pointing at this work (such as its parent's
+        # `parts`) report `isAvailableOnline: true`
+        availabilities=[Id(id="online")],
     )
 
     # The root of the archive: no ancestors, and a child of its own.

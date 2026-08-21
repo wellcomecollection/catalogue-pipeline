@@ -111,6 +111,7 @@
           "label": "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)"
         }
       ],
+      "items.locations.accessConditions.method": [],
       "availabilities": []
     },
     "filterableValues": {
@@ -134,6 +135,7 @@
         "cc-by-nc"
       ],
       "items.locations.accessConditions.status.id": [],
+      "items.locations.accessConditions.method.id": [],
       "items.id": [],
       "items.identifiers.value": [],
       "items.locations.locationType.id": [
@@ -145,5 +147,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T16:56:01.862879+00:00"
+  "createdAt": "2026-08-19T14:58:27.767527+00:00"
 }
