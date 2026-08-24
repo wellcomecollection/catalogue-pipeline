@@ -1,0 +1,40 @@
+# platform#6507 section 3: the round 2 Axiell works against their CALM
+# predecessors at works-identified, shared canonical ids.
+#
+# Population pinned by ids_file (the round 1 method): the Axiell-owned
+# canonical ids exported from works-identified-2026-07-03 on 2026-08-21.
+# The 6464 config's per-side filter_queries cannot work at works-identified:
+# state.sourceIdentifier is not an indexed field there on either cluster,
+# so a term filter silently matches nothing. The ids clause needs no mapping
+# support and applies to both sides.
+
+index_sources:
+  - prod-works-identified
+  - new-works-identified
+
+ids_file: ../data/6507_axiell_canonical_ids.txt
+
+ignore_fields:
+  # Per-run stamps and counters.
+  - indexed_at
+  - version
+  - state.modifiedTime
+  - state.sourceModifiedTime
+  # The source swap itself: identifiers, relations and predecessor linkage
+  # legitimately differ between a CALM work and its Axiell successor.
+  - state.sourceIdentifier
+  - state.sourceIdentifier.**
+  - state.relations
+  - state.relations.**
+  - state.predecessorIdentifier
+  - state.predecessorIdentifier.**
+  - state.mergeCandidates[].id.type
+  - data.production[].dates[].type
+  # Added to the internal model after round 1's baseline; absent on the CALM
+  # side by construction, so it is comparison noise here.
+  - state.removedInternalWorkStubs
+
+sample_size: 40
+hash_bucket_count: 8
+namespace: 6507-axiell-calm-identified-full
+output_dir: data
