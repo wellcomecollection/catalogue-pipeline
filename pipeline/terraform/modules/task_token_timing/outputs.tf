@@ -3,7 +3,7 @@
 # travel: a value sized for Fargate will kill a healthy EC2 task during cold start.
 #
 # The timeout is an outer bound on the whole state. Liveness is the heartbeat's job:
-# tasks beat every 60s (HEARTBEAT_INTERVAL_SECONDS in catalogue_graph utils/steps.py),
+# tasks beat every 60s (HEARTBEAT_INTERVAL_SECONDS in catalogue_graph/src/utils/steps.py),
 # so the heartbeat only has to cover the gap before the first beat, which is however
 # long the task takes to actually start running.
 
