@@ -2,7 +2,8 @@
 # predecessors at works-identified, shared canonical ids.
 #
 # Population pinned by ids_file (the round 1 method): the Axiell-owned
-# canonical ids exported from works-identified-2026-07-03 on 2026-08-21.
+# canonical ids from works-identified-2026-07-03. The file is gitignored;
+# regenerate it with `uv run python generate_6507_ids.py` before running.
 # The 6464 config's per-side filter_queries cannot work at works-identified:
 # state.sourceIdentifier is not an indexed field there on either cluster,
 # so a term filter silently matches nothing. The ids clause needs no mapping
