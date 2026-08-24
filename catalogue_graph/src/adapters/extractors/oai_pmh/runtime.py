@@ -165,9 +165,14 @@ class OAIPMHRuntimeConfig(ABC):
             self._config.local_window_status_iceberg_config, create_if_not_exists
         )
 
-    def build_window_store(self, *, use_rest_api_table: bool = True) -> WindowStore:
+    def build_window_store(
+        self, *, use_rest_api_table: bool = True, create_if_not_exists: bool = True
+    ) -> WindowStore:
         """Build the window status store for tracking harvest progress."""
-        table = self._build_window_status_table(use_rest_api_table=use_rest_api_table)
+        table = self._build_window_status_table(
+            use_rest_api_table=use_rest_api_table,
+            create_if_not_exists=create_if_not_exists,
+        )
         return WindowStore(table)
 
     def build_adapter_store(self, *, use_rest_api_table: bool = True) -> AdapterStore:
