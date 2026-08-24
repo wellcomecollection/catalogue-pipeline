@@ -3,9 +3,7 @@ module "pipeline" {
 
   reindexing_state = {
     listen_to_reindexer = true
-    # Sized for the round 2 full reindex (platform#6505). Matcher DB is back to
-    # normal; keep tasks scaled up until image stages finish and verification passes.
-    scale_up_tasks      = true
+    scale_up_tasks      = false
     scale_up_matcher_db = false
   }
 
