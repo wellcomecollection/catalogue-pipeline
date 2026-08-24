@@ -16,9 +16,7 @@ def extract_subjects(record: Record) -> list[Subject]:
     # ("<p>" originally, "(LCSH) " since the round 2 load; WEL-271 will move
     # this to an Authority field). Strip it so labels display clean and the
     # label-derived identifier matches the same term from other sources.
-    labels = [
-        label.removeprefix("<p>").removeprefix("(LCSH) ") for label in labels
-    ]
+    labels = [label.removeprefix("<p>").removeprefix("(LCSH) ") for label in labels]
 
     subjects = []
     for label in labels:
