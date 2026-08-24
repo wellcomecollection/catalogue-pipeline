@@ -102,10 +102,17 @@ locals {
         Default = "Should publish event?"
       }
       "Run enrichment" = merge({
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        Next     = "Should publish event?"
+        Type           = "Task"
+        Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        TimeoutSeconds = var.task_token_timeout_seconds
+        Next           = "Should publish event?"
         Retry = [
+          {
+            # A timed-out token means the task is gone, so retrying only waits
+            # again. Fail now; the next scheduled run re-covers the window.
+            ErrorEquals = ["States.Timeout"]
+            MaxAttempts = 0
+          },
           {
             ErrorEquals     = ["States.ALL"]
             IntervalSeconds = 30
@@ -181,9 +188,10 @@ locals {
       # there are no automatic retries at all: failed ids come back in the
       # report for a deliberate, smaller second run.
       "Run id loader" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        Next     = local.loader_next
+        Type           = "Task"
+        Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        TimeoutSeconds = var.task_token_timeout_seconds
+        Next           = local.loader_next
         Retry = [
           {
             ErrorEquals     = ["States.ALL"]
@@ -240,10 +248,17 @@ locals {
       ]
     }
     "Run loader" = {
-      Type     = "Task"
-      Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-      Next     = local.loader_next
+      Type           = "Task"
+      Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+      TimeoutSeconds = var.task_token_timeout_seconds
+      Next           = local.loader_next
       Retry = [
+        {
+          # A timed-out token means the task is gone, so retrying only waits
+          # again. Fail now; the next scheduled run re-covers the window.
+          ErrorEquals = ["States.Timeout"]
+          MaxAttempts = 0
+        },
         {
           ErrorEquals     = ["States.ALL"]
           IntervalSeconds = 30
