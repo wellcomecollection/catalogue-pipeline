@@ -47,3 +47,19 @@ Feature: Subjects extraction from Axiell MARC records
     Given the MARC record has a 653 field with subfield "a" value "<p>Surgery."
     When I transform the MARC record
     Then the only subject has the label "Surgery"
+
+  Scenario: Leading (LCSH) marker is stripped from label
+    Given the MARC record has a 653 field with subfield "a" value "(LCSH) Biography"
+    When I transform the MARC record
+    Then the only subject has the label "Biography"
+    And its only concept has the label "Biography"
+
+  Scenario: (LCSH) marker stripped alongside trailing period
+    Given the MARC record has a 653 field with subfield "a" value "(LCSH) Autobiography."
+    When I transform the MARC record
+    Then the only subject has the label "Autobiography"
+
+  Scenario: A parenthetical that is not the LCSH marker is kept
+    Given the MARC record has a 653 field with subfield "a" value "(Unrelated) Heading"
+    When I transform the MARC record
+    Then the only subject has the label "(Unrelated) Heading"
