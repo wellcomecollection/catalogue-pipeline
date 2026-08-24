@@ -67,3 +67,14 @@ variable "enable_reconciliation" {
   default     = false
   description = "Run a reconcile state between Run loader and Publish event, recording guid-change deletion facts before the completed event fires. Axiell-only; leave false for other adapters."
 }
+
+variable "task_token_timeout_seconds" {
+  type    = number
+  default = 21600
+  # An ECS task that dies without calling SendTaskSuccess leaves the state
+  # waiting forever: one axiell run sat at "Run loader" for 31 days. Normal runs
+  # take about 70s, the longest observed legitimate run 2h50m, and a full Axiell
+  # harvest about 4h, so 6h fails a stranded token the same day while leaving a
+  # full harvest room.
+  description = "How long a waitForTaskToken state waits for its ECS task before failing."
+}
