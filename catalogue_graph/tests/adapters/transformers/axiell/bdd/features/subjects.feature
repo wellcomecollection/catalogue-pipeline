@@ -53,6 +53,15 @@ Feature: Subjects extraction from Axiell MARC records
     When I transform the MARC record
     Then the only subject has the label "Biography"
     And its only concept has the label "Biography"
+    And it has the id.source_identifier.value "biography"
+
+  Scenario: A marked and an unmarked term derive the same concept identifier
+    Given the MARC record has a 653 field with subfield "a" value "(LCSH) Biography"
+    And the MARC record has another 653 field with subfield "a" value "Biography"
+    When I transform the MARC record
+    Then there are 2 subjects
+    And the 1st subject has the id.source_identifier.value "biography"
+    And the 2nd subject has the id.source_identifier.value "biography"
 
   Scenario: (LCSH) marker stripped alongside trailing period
     Given the MARC record has a 653 field with subfield "a" value "(LCSH) Autobiography."
