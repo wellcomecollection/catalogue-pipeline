@@ -87,6 +87,37 @@ CLASS_QUERIES = {
         },
         "what_to_look_at": "Digitised items open in the viewer from the archive work",
     },
+    "reference-number-search": {
+        "query": {
+            "bool": {"must": [UUID_SOURCE, {"exists": {"field": "query.referenceNumber"}}]}
+        },
+        "use_reference_number": True,
+        "what_to_look_at": "Type the reference number (source_key) into site search; this work should be the top result, with and without spaces",
+    },
+    "contributors": {
+        "query": {
+            "bool": {"must": [UUID_SOURCE, {"exists": {"field": "query.contributors.agent.label"}}]}
+        },
+        "what_to_look_at": "Contributor names display and their links lead to a sensible person page with this work listed",
+    },
+    "languages": {
+        "query": {
+            "bool": {"must": [UUID_SOURCE, {"exists": {"field": "query.languages.label"}}]}
+        },
+        "what_to_look_at": "Language displays and the language filter finds the work",
+    },
+    "alternative-titles": {
+        "query": {
+            "bool": {"must": [UUID_SOURCE, {"exists": {"field": "query.alternativeTitles"}}]}
+        },
+        "what_to_look_at": "Searching the variant title finds the work; both titles visible on the work page",
+    },
+    "closed-until-notes": {
+        "query": {
+            "bool": {"must": [UUID_SOURCE, {"match_phrase": {"query.notes.contents": "Closed until"}}]}
+        },
+        "what_to_look_at": "Access status should show as Closed with the closure date, not Restricted or Open (the round 2 load lost Closed; the round 3 load should carry it)",
+    },
 }
 
 
@@ -109,7 +140,7 @@ def rows_for(es, index, entry, cls, sample=False):
         index=index,
         size=50 if sample else 5,
         query=entry["query"],
-        source=["display.title", "query.identifiers.value"],
+        source=["display.title", "query.identifiers.value", "query.referenceNumber"],
         # Stable candidate order so the seeded sample is reproducible.
         sort=[{"query.id": "asc"}],
     )
@@ -137,6 +168,8 @@ def rows_for(es, index, entry, cls, sample=False):
         values = q.get("identifiers.value") or q.get("identifiers", {}).get("value", [])
         others = [v for v in values if v != h["_id"]]
         source_id = next((v for v in others if uuid_re.match(v)), others[0] if others else "")
+        if entry.get("use_reference_number"):
+            source_id = q.get("referenceNumber", source_id)
         out.append(
             {
                 "class": cls,
