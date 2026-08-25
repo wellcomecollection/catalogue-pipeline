@@ -28,7 +28,7 @@ client = NeptuneClient(graph_date)
 
 The guard matters: an empty or `prod` graph date selects the legacy production cluster (see `NeptuneClient.namespace`), and client-setup patterns copied from notebooks arrive with the date unset.
 
-## Before deleting: map the incident edges
+## Count before deleting
 
 Count the edges each doomed label touches, so the post-clear check is an exact prediction instead of an impression:
 
