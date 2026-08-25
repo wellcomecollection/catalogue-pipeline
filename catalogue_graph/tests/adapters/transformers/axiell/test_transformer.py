@@ -148,6 +148,47 @@ def test_transformer_end_to_end_includes_deletions(
     assert deleted["deletedReason"]["info"] == "Marked as deleted from source"
 
 
+def test_transformer_skips_records_with_no_id_without_failing(
+    temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Axiell-native records have an empty 001; they are skipped, not failed."""
+    empty_001 = "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'></controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Created in Axiell</subfield></datafield></record>"
+    records_by_id = {
+        "ax00001": TEST_RECORD_ONE,
+        "110209585": empty_001,
+    }
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=AXIELL_NAMESPACE,
+        transformer_type="axiell",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-01-01",
+        facts_table=deletion_facts_temporary_table,
+        reconciler_table=reconciler_temporary_table,
+    )
+
+    assert result.success_count == 1
+    assert result.failure_count == 0
+
+    report = read_transformer_report(result)
+    assert report["successful_ids"] == ["Work[axiell-guid/ax00001]"]
+    assert report["errors"] == []
+
+    indexed_ids = {op["_id"] for op in MockElasticsearchClient.inputs}
+    assert indexed_ids == {"Work[axiell-guid/ax00001]"}
+
+
 def test_transformer_id_run_transforms_only_named_ids(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
