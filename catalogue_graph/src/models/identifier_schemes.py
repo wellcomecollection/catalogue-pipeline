@@ -26,7 +26,8 @@ def _scheme(
     scheme_id: str, label: str, in_scala_model: bool = True
 ) -> IdentifierScheme:
     scheme = IdentifierScheme(scheme_id, label, in_scala_model)
-    assert scheme_id not in _registry, f"duplicate scheme id: {scheme_id}"
+    if scheme_id in _registry:
+        raise ValueError(f"duplicate scheme id: {scheme_id}")
     _registry[scheme_id] = scheme
     return scheme
 

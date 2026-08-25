@@ -21,7 +21,10 @@ SCALA_IDENTIFIER_TYPE_PATH = (
 
 def scala_scheme_ids() -> set[str]:
     return set(
-        re.findall(r'val id = "([^"]+)"', SCALA_IDENTIFIER_TYPE_PATH.read_text())
+        re.findall(
+            r'val id = "([^"]+)"',
+            SCALA_IDENTIFIER_TYPE_PATH.read_text(encoding="utf-8"),
+        )
     )
 
 
