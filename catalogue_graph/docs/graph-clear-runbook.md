@@ -15,17 +15,18 @@ The split works because every `HAS_SOURCE_CONCEPT` edge originates on the `Conce
 
 ## Access
 
-Runs locally, no tunnel needed: the clusters sit in public subnets with port 8182 open and IAM database auth. `platform-developer` carries `neptune-db:DeleteDataViaQuery` on the dated clusters. If in doubt, verify with `iam simulate-principal-policy` against the cluster's `neptune-db` resource id (not the RDS-style ARN).
+Runs locally, no tunnel needed: the clusters accept direct connections with IAM database auth. `platform-developer` carries `neptune-db:DeleteDataViaQuery` on the dated clusters. If in doubt, verify with `iam simulate-principal-policy` against the cluster's `neptune-db` resource id (not the RDS-style ARN).
 
 ```python
 # AWS_PROFILE=platform-developer, from catalogue_graph/ with PYTHONPATH=src
 from clients.neptune_client import NeptuneClient
 
-client = NeptuneClient("2026-07-03")  # the graph date, never empty
-assert "2026-07-03" in client.neptune_endpoint
+graph_date = "2026-07-03"
+assert graph_date not in ("", "prod")
+client = NeptuneClient(graph_date)
 ```
 
-The endpoint assertion matters: client-setup patterns copied from notebooks default to the production graph when the date is empty.
+The guard matters: an empty or `prod` graph date selects the legacy production cluster (see `NeptuneClient.namespace`), and client-setup patterns copied from notebooks arrive with the date unset.
 
 ## Before deleting: map the incident edges
 
