@@ -36,6 +36,12 @@ from .work_base_transformer import WorkBaseTransformer
 class DisplayWorkTransformer(WorkBaseTransformer):
     @property
     def short_description(self) -> str | None:
+        # """Collection roots, excluding TEI manuscripts."""
+        # TEI_IDENTIFIER_TYPE = "tei-manuscript-id"
+        # if not self.is_collection_root:
+        #     return None
+        # if self.state.source_identifier.identifier_type.id == TEI_IDENTIFIER_TYPE:
+        #     return None
         """Archive collection roots only, which is the population the browse cards need."""
         if not self.is_collection_root or self.archive is None:
             return None
