@@ -1,8 +1,8 @@
 # Clearing catalogue entities from a Neptune graph
 
-How to clear the catalogue-derived population from a dated Neptune cluster while keeping the ontology, so a pipeline can be rebuilt without re-running the monthly authority load. Run for real on `catalogue-graph-2026-07-03` during the round 1 and round 2 migration-testing clears (wellcomecollection/platform#6461 phase 4, wellcomecollection/platform#6503 phase 4).
+How to clear the catalogue-derived population from a dated Neptune cluster (`catalogue-graph-<graph_date>`) while keeping the ontology, so a pipeline can be rebuilt without reloading the authority data.
 
-How long it takes: the 2026-07-30 clear removed ~183k catalogue nodes in about 4 minutes, roughly 45k nodes a minute. Scale that by the current population, which you should count first anyway (see the verification section): on 2026-08-25 the cluster held 2,169,565 catalogue nodes (Work 1,171,074, Concept 617,395, Image 123,457, PathIdentifier 257,639), which at the measured rate is about 45 to 50 minutes. Edge-heavy nodes delete slower, so treat it as a floor.
+How long it takes: measured throughput is roughly 45k nodes a minute (see the measured runs at the end). Count the current population first, which you should do anyway for verification, and scale accordingly. Edge-heavy nodes delete slower, so treat the estimate as a floor.
 
 ## What gets deleted and what stays
 
@@ -36,7 +36,7 @@ Count the edges each doomed label touches, so the post-clear check is an exact p
 MATCH (n:Work)-[e]->() RETURN type(e), COUNT(*)
 ```
 
-and the inbound equivalent, for each of the four labels. The trap this catches: `HAS_PARENT` carries both the `PathIdentifier` archive hierarchy and ontology parentage, so its count legitimately drops during a catalogue clear. On 2026-07-30 it went 1,980,673 to 1,979,571, exactly the 1,102 PathIdentifier-to-PathIdentifier edges counted beforehand. Without the pre-count that drop reads as ontology damage.
+and the inbound equivalent, for each of the four labels. The trap this catches: `HAS_PARENT` carries both the `PathIdentifier` archive hierarchy and ontology parentage, so its count legitimately drops during a catalogue clear, by exactly the number of PathIdentifier-to-PathIdentifier edges counted beforehand. Without the pre-count that drop reads as ontology damage.
 
 ## The clear
 
@@ -47,11 +47,21 @@ for label in ["Work", "Concept", "Image", "PathIdentifier"]:
     client.delete_all_nodes_with_label(label)
 ```
 
-Never use `_reset_database`. It is hard-disabled for a reason: it would destroy the ontology and force a monthly-load re-run.
+`_reset_database` wipes the ontology too and is disabled behind `ALLOW_DATABASE_RESET = False` in `neptune_client.py`, so using it is a deliberate code change rather than an option of this procedure.
+
+## Alternative: reset and reload
+
+A full reset followed by re-running the bulk loaders over the existing monthly files (the `graph-bulk-loaders-monthly-<graph_date>` state machine, loading from the `graph_bulk_loader` S3 prefix) rebuilds the ontology in around 30 minutes, without the incident-edge analysis this procedure needs. At large catalogue populations it can be faster than label-scoped deletion. The trade-offs: it requires flipping the safety constant above, and any authority edges loaded incrementally since the monthly files were generated may need a further load to restore. Prefer the label-scoped clear when the catalogue population is small or the ontology's currency matters; prefer reset-and-reload when the catalogue population dwarfs the deletion budget.
 
 ## Verification
 
 A full-graph census (`MATCH (n) RETURN labels(n), COUNT(*)`) fails with `TimeLimitExceededException` on a populated cluster, as does the all-edges equivalent. Verify with label-scoped and type-scoped counts, which return in seconds:
 
 - The four catalogue labels count 0, as do `HAS_CONCEPT`, `HAS_SOURCE_CONCEPT`, `HAS_PATH_IDENTIFIER` and `HAS_IMAGE`.
-- The ontology counts match the pre-clear counts minus the predicted drops. Reference values after the 2026-07-30 clear: `SourceConcept` 547,083, `SourceLocation` 306,090, `SourceName` 13,584,104; `NARROWER_THAN` 630,371, `SAME_AS` 3,549,966, `RELATED_TO` 254,497, `HAS_FIELD_OF_WORK` 497,754, `HAS_FOUNDER` 15,168, `HAS_PARENT` 1,979,571.
+- The ontology counts match the pre-clear counts minus the predicted drops.
+
+## Measured runs
+
+- 2026-07-30, `catalogue-graph-2026-07-03`, round 1 clear (wellcomecollection/platform#6461 phase 4): ~183k catalogue nodes in about 4 minutes. `HAS_PARENT` dropped 1,980,673 to 1,979,571, exactly the 1,102 PathIdentifier-to-PathIdentifier edges predicted. Post-clear ontology counts: `SourceConcept` 547,083, `SourceLocation` 306,090, `SourceName` 13,584,104; `NARROWER_THAN` 630,371, `SAME_AS` 3,549,966, `RELATED_TO` 254,497, `HAS_FIELD_OF_WORK` 497,754, `HAS_FOUNDER` 15,168, `HAS_PARENT` 1,979,571.
+- Round 2 clear ran the same procedure (wellcomecollection/platform#6503 phase 4).
+- 2026-08-25 census of the same cluster for planning the round 3 clear: 2,169,565 catalogue nodes (Work 1,171,074, Concept 617,395, Image 123,457, PathIdentifier 257,639), about 45 to 50 minutes at measured throughput.
