@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any, cast
 
 import pytest
+import structlog.testing
 from elasticsearch import Elasticsearch
 
 from adapters.utils.adapter_store import AdapterStore
@@ -124,6 +125,161 @@ def test_transform_handles_transform_record_exception(
     assert transformer.errors
     assert transformer.errors[0].stage == "transform"
     assert "boom: bad data" in transformer.errors[0].detail
+
+
+MISSING_001_XML = (
+    "<record>"
+    "<leader>00000nam a2200000   4500</leader>"
+    "<datafield tag='245' ind1='0' ind2='0'>"
+    "<subfield code='a'>No Id At All</subfield>"
+    "</datafield>"
+    "</record>"
+)
+
+EMPTY_001_XML = (
+    "<record>"
+    "<leader>00000nam a2200000   4500</leader>"
+    "<controlfield tag='001'></controlfield>"
+    "<datafield tag='245' ind1='0' ind2='0'>"
+    "<subfield code='a'>Empty Id</subfield>"
+    "</datafield>"
+    "</record>"
+)
+
+
+def test_transform_skips_record_with_missing_001(adapter_store: AdapterStore) -> None:
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
+
+    works = list(
+        transformer.transform(
+            [
+                {
+                    "id": "work3",
+                    "content": MISSING_001_XML,
+                    "last_modified": datetime.now(),
+                }
+            ]
+        )
+    )
+
+    assert works == []
+    assert transformer.errors == []
+
+
+def test_transform_skips_record_with_empty_001(adapter_store: AdapterStore) -> None:
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
+
+    works = list(
+        transformer.transform(
+            [{"id": "work4", "content": EMPTY_001_XML, "last_modified": datetime.now()}]
+        )
+    )
+
+    assert works == []
+    assert transformer.errors == []
+
+
+def test_transform_skips_deleted_record_without_001(
+    adapter_store: AdapterStore,
+) -> None:
+    """An id-less deleted row must not emit a tombstone either."""
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
+
+    works = list(
+        transformer.transform(
+            [
+                {
+                    "id": "work5",
+                    "content": MISSING_001_XML,
+                    "last_modified": datetime.now(),
+                    "deleted": True,
+                }
+            ]
+        )
+    )
+
+    assert works == []
+    assert transformer.errors == []
+
+
+def test_stream_to_index_skips_id_less_records_and_warns_per_record(
+    adapter_store: AdapterStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    missing_title_xml = (
+        "<record>"
+        "<leader>00000nam a2200000   4500</leader>"
+        "<controlfield tag='001'>idbad</controlfield>"
+        "</record>"
+    )
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
+    transformer.source = _StubSource(  # type: ignore[assignment]
+        [
+            {
+                "id": "id1",
+                "content": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>id1</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Title 1</subfield></datafield></record>",
+                "last_modified": datetime.now(),
+            },
+            {"id": "id2", "content": MISSING_001_XML, "last_modified": datetime.now()},
+            {"id": "id3", "content": EMPTY_001_XML, "last_modified": datetime.now()},
+            {
+                "id": "idbad",
+                "content": missing_title_xml,
+                "last_modified": datetime.now(),
+            },
+        ]
+    )
+
+    # Cached structlog config makes capture_logs unreliable; patch the module logger.
+    logger = structlog.testing.CapturingLogger()
+    monkeypatch.setattr("adapters.transformers.marcxml_transformer.logger", logger)
+
+    MockElasticsearchClient.inputs.clear()
+    es_client = MockElasticsearchClient({}, "")
+    transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
+
+    # The valid record is indexed as before.
+    assert {a["_id"] for a in MockElasticsearchClient.inputs} == {"Work[marc-test/id1]"}
+
+    # Other failure classes still count as failures.
+    assert len(transformer.errors) == 1
+    assert transformer.errors[0].row_id == "idbad"
+    assert "Missing title field (245)" in transformer.errors[0].detail
+
+    # Id-less records are skipped with a warning naming each row.
+    warnings = [
+        call
+        for call in logger.calls
+        if call.args
+        and call.args[0] == "Skipping record with a missing or empty id field (001)"
+    ]
+    assert all(call.method_name == "warning" for call in warnings)
+    assert {call.kwargs["row_id"] for call in warnings} == {"id2", "id3"}
+
+
+def test_stream_to_index_no_skip_warning_when_all_records_have_ids(
+    adapter_store: AdapterStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
+    transformer.source = _StubSource(  # type: ignore[assignment]
+        [
+            {
+                "id": "id1",
+                "content": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>id1</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Title 1</subfield></datafield></record>",
+                "last_modified": datetime.now(),
+            }
+        ]
+    )
+
+    logger = structlog.testing.CapturingLogger()
+    monkeypatch.setattr("adapters.transformers.marcxml_transformer.logger", logger)
+
+    MockElasticsearchClient.inputs.clear()
+    es_client = MockElasticsearchClient({}, "")
+    transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
+
+    assert not [
+        call for call in logger.calls if call.args and "Skipping record" in call.args[0]
+    ]
 
 
 def test_stream_to_index_success_no_errors(
