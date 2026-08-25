@@ -6,8 +6,12 @@
 # service. (The unified_pipeline_lambda ECR data source is declared in locals.tf.)
 
 locals {
-  # Generous timeout so EC2 capacity-provider warm-up does not trip the task token.
+  # Outer bound on the whole state. Liveness is the heartbeat's job.
   inference_task_token_timeout_seconds = 3 * 60 * 60 # 3 hours
+
+  # These tasks launch on an EC2 capacity provider running at min=0, so they wait
+  # far longer than a Fargate task before they can beat. See modules/task_token_timing.
+  inference_task_token_heartbeat_seconds = module.task_token_timing.ec2_capacity_provider_heartbeat_seconds
 
   # Retry transient ECS infrastructure errors only. Application failures (e.g. a
   # poisoned-doc error) are intentionally NOT retried so they surface promptly.
@@ -88,10 +92,11 @@ module "image_inferrer" {
 
   worker_state_name = "RunInferenceTask"
   worker_state = {
-    Type           = "Task"
-    Resource       = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-    TimeoutSeconds = local.inference_task_token_timeout_seconds
-    Retry          = local.inference_ecs_retry
+    Type             = "Task"
+    Resource         = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+    TimeoutSeconds   = local.inference_task_token_timeout_seconds
+    HeartbeatSeconds = local.inference_task_token_heartbeat_seconds
+    Retry            = local.inference_ecs_retry
     Arguments = {
       Cluster        = aws_ecs_cluster.cluster.arn
       TaskDefinition = module.inference_manager_ecs_task.task_definition_arn
@@ -179,4 +184,8 @@ moved {
 moved {
   from = aws_iam_role_policy.run_image_inferrer_policy
   to   = module.image_inferrer.aws_iam_role_policy.run_state_machine
+}
+
+module "task_token_timing" {
+  source = "../task_token_timing"
 }

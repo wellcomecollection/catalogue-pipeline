@@ -102,10 +102,18 @@ locals {
         Default = "Should publish event?"
       }
       "Run enrichment" = merge({
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        Next     = "Should publish event?"
+        Type             = "Task"
+        Resource         = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        TimeoutSeconds   = var.task_token_timeout_seconds
+        HeartbeatSeconds = local.task_token_heartbeat_seconds
+        Next             = "Should publish event?"
         Retry = [
+          {
+            # A timed-out token means the task is gone, so retrying only waits
+            # again. Fail now; the next scheduled run re-covers the window.
+            ErrorEquals = ["States.Timeout"]
+            MaxAttempts = 0
+          },
           {
             ErrorEquals     = ["States.ALL"]
             IntervalSeconds = 30
@@ -181,9 +189,11 @@ locals {
       # there are no automatic retries at all: failed ids come back in the
       # report for a deliberate, smaller second run.
       "Run id loader" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-        Next     = local.loader_next
+        Type             = "Task"
+        Resource         = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        TimeoutSeconds   = var.task_token_timeout_seconds
+        HeartbeatSeconds = local.task_token_heartbeat_seconds
+        Next             = local.loader_next
         Retry = [
           {
             ErrorEquals     = ["States.ALL"]
@@ -240,10 +250,18 @@ locals {
       ]
     }
     "Run loader" = {
-      Type     = "Task"
-      Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
-      Next     = local.loader_next
+      Type             = "Task"
+      Resource         = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+      TimeoutSeconds   = var.task_token_timeout_seconds
+      HeartbeatSeconds = local.task_token_heartbeat_seconds
+      Next             = local.loader_next
       Retry = [
+        {
+          # A timed-out token means the task is gone, so retrying only waits
+          # again. Fail now; the next scheduled run re-covers the window.
+          ErrorEquals = ["States.Timeout"]
+          MaxAttempts = 0
+        },
         {
           ErrorEquals     = ["States.ALL"]
           IntervalSeconds = 30
@@ -412,4 +430,14 @@ resource "aws_sfn_state_machine" "state_machine" {
 resource "aws_cloudwatch_log_group" "state_machine_logs" {
   name              = "/aws/stepfunctions/${var.namespace}-adapter-pipeline"
   retention_in_days = 14
+}
+
+module "task_token_timing" {
+  source = "../../../../../pipeline/terraform/modules/task_token_timing"
+}
+
+locals {
+  # Every adapter task is Fargate, so the shared Fargate margin applies. The timeout
+  # above stays an outer bound: liveness is this heartbeat's job.
+  task_token_heartbeat_seconds = module.task_token_timing.fargate_heartbeat_seconds
 }

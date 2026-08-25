@@ -144,10 +144,11 @@ resource "aws_dynamodb_table" "lock_table" {
     read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 1000 : 0
     write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 0
 
-    warm_throughput {
-      read_units_per_second  = 12000
-      write_units_per_second = 6216
-    }
+    # No warm_throughput here on purpose. DynamoDB raises it by itself as usage
+    # grows and will not let it be lowered again, so a declared figure goes stale
+    # after the first heavy reindex and then plans a reduction that can never
+    # apply. 6216 was the live value captured in July for that reason and drifted
+    # straight back. Declaring a higher one would hold, but pre-warming is billed.
   }
 
   ttl {

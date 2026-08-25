@@ -188,9 +188,9 @@ locals {
   # is enforced by the heartbeat below.
   ecs_task_token_timeout_seconds = 12 * 60 * 60 # 12 hours
 
-  # Tasks beat every 60s (HEARTBEAT_INTERVAL_SECONDS in utils/steps.py). The margin
-  # covers cold start before the first beat: provisioning, image pull, interpreter.
-  ecs_task_token_heartbeat_seconds = 5 * 60 # 5 minutes
+  # These tasks are Fargate, so they start in about 45s and only need the shared
+  # Fargate margin. See modules/task_token_timing for why the value is not one number.
+  ecs_task_token_heartbeat_seconds = module.task_token_timing.fargate_heartbeat_seconds
 
   state_function_default_retry = [
     {
@@ -268,4 +268,8 @@ data "aws_ecr_repository" "unified_pipeline_lambda" {
 
 data "aws_ecr_repository" "unified_pipeline_task" {
   name = "uk.ac.wellcome/unified_pipeline_task"
+}
+
+module "task_token_timing" {
+  source = "../../task_token_timing"
 }
