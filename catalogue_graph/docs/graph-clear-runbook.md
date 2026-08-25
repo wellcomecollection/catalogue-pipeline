@@ -51,7 +51,7 @@ for label in ["Work", "Concept", "Image", "PathIdentifier"]:
 
 ## Alternative: reset and reload
 
-A full reset followed by re-running the bulk loaders over the existing monthly files (the `graph-bulk-loaders-monthly-<graph_date>` state machine, loading from the `graph_bulk_loader` S3 prefix) rebuilds the ontology in around 30 minutes, without the incident-edge analysis this procedure needs. At large catalogue populations it can be faster than label-scoped deletion. The trade-offs: it requires flipping the safety constant above, and any authority edges loaded incrementally since the monthly files were generated may need a further load to restore. Prefer the label-scoped clear when the catalogue population is small or the ontology's currency matters; prefer reset-and-reload when the catalogue population dwarfs the deletion budget.
+A full reset followed by re-running the bulk loaders over the existing monthly files (the `graph-bulk-loaders-monthly-<graph_date>` state machine, loading from the `graph_bulk_loader` S3 prefix) rebuilds the ontology in around 30 minutes, without the incident-edge analysis this procedure needs. At large catalogue populations it can be faster than label-scoped deletion. The trade-off is that it requires flipping the safety constant above. Authority edges need no extra step under either method: edges from catalogue nodes to SourceConcepts are re-emitted by the incremental pipeline during the post-clear reindex from the persisted monthly outputs, and authority-to-authority edges reload from those same files. Prefer the label-scoped clear when the catalogue population is small; prefer reset-and-reload when it dwarfs the deletion budget.
 
 ## Verification
 
