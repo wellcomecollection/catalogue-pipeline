@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import Any
 
 import structlog
-from elasticsearch import Elasticsearch
 from pymarc.record import Record
 
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
@@ -20,23 +19,9 @@ logger = structlog.get_logger(__name__)
 
 
 class MarcXmlTransformer(SourceWorkTransformer, ABC):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.skipped_no_id_count = 0
-
     @property
     @abstractmethod
     def work_builder(self) -> type[MarcXmlWorkBuilder]: ...
-
-    def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
-        self.skipped_no_id_count = 0
-        super().stream_to_index(es_client, index_name)
-        # One summary line per run instead of a warning per record (platform#6619).
-        if self.skipped_no_id_count:
-            logger.warning(
-                "Skipped records with a missing or empty id field (001)",
-                skipped_count=self.skipped_no_id_count,
-            )
 
     def transform(
         self, rows: Iterable[dict[str, Any]]
@@ -54,7 +39,10 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
         # A record with no id cannot be processed for any source, so skip it
         # (no work, no deletion, no failure) rather than error in the builder.
         if not has_id(marc_record):
-            self.skipped_no_id_count += 1
+            logger.warning(
+                "Skipping record with a missing or empty id field (001)",
+                row_id=row["id"],
+            )
             return
 
         row_id, last_modified = row["id"], row["last_modified"]

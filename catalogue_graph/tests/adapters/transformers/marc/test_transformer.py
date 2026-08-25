@@ -164,7 +164,6 @@ def test_transform_skips_record_with_missing_001(adapter_store: AdapterStore) ->
 
     assert works == []
     assert transformer.errors == []
-    assert transformer.skipped_no_id_count == 1
 
 
 def test_transform_skips_record_with_empty_001(adapter_store: AdapterStore) -> None:
@@ -178,7 +177,6 @@ def test_transform_skips_record_with_empty_001(adapter_store: AdapterStore) -> N
 
     assert works == []
     assert transformer.errors == []
-    assert transformer.skipped_no_id_count == 1
 
 
 def test_transform_skips_deleted_record_without_001(
@@ -202,10 +200,9 @@ def test_transform_skips_deleted_record_without_001(
 
     assert works == []
     assert transformer.errors == []
-    assert transformer.skipped_no_id_count == 1
 
 
-def test_stream_to_index_skips_id_less_records_and_logs_summary_once(
+def test_stream_to_index_skips_id_less_records_and_warns_per_record(
     adapter_store: AdapterStore, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     missing_title_xml = (
@@ -248,20 +245,18 @@ def test_stream_to_index_skips_id_less_records_and_logs_summary_once(
     assert transformer.errors[0].row_id == "idbad"
     assert "Missing title field (245)" in transformer.errors[0].detail
 
-    # Id-less records are skipped with one summary line for the whole run.
-    assert transformer.skipped_no_id_count == 2
-    summaries = [
+    # Id-less records are skipped with a warning naming each row.
+    warnings = [
         call
         for call in logger.calls
         if call.args
-        and call.args[0] == "Skipped records with a missing or empty id field (001)"
+        and call.args[0] == "Skipping record with a missing or empty id field (001)"
     ]
-    assert len(summaries) == 1
-    assert summaries[0].method_name == "warning"
-    assert summaries[0].kwargs["skipped_count"] == 2
+    assert all(call.method_name == "warning" for call in warnings)
+    assert {call.kwargs["row_id"] for call in warnings} == {"id2", "id3"}
 
 
-def test_stream_to_index_no_summary_when_nothing_skipped(
+def test_stream_to_index_no_skip_warning_when_all_records_have_ids(
     adapter_store: AdapterStore, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     transformer = MarcXmlTransformerForTests(adapter_store, [])
@@ -282,9 +277,8 @@ def test_stream_to_index_no_summary_when_nothing_skipped(
     es_client = MockElasticsearchClient({}, "")
     transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
 
-    assert transformer.skipped_no_id_count == 0
     assert not [
-        call for call in logger.calls if call.args and "Skipped records" in call.args[0]
+        call for call in logger.calls if call.args and "Skipping record" in call.args[0]
     ]
 
 
