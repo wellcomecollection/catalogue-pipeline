@@ -6,7 +6,7 @@ How to rebuild a non-production id-minter RDS cluster (`identifiers-v2-serverles
 
 Set `snapshot_identifier` in the module in `infrastructure/critical/rds_id_minter.tf` to a recovery point from `id-minter-backup-vault` (production backups land daily at 03:00 UTC, 30-day retention). This forces replacement of the cluster and its instance. The three endpoint secrets are replaced only at the version level, so the secret names the lambdas resolve are unchanged and just their values move.
 
-Never merge the `snapshot_identifier` change ahead of the respin window. `infrastructure/critical` is shared and applied by hand, so the next person to apply it for any reason triggers the replacement, and it fails partway because deletion protection has to be lifted manually first (`aws rds modify-db-cluster --no-deletion-protection`).
+Never merge a `snapshot_identifier` change that has not been applied. `infrastructure/critical` is shared and applied by hand, so a merged but unapplied change is triggered by the next person to apply the root for any reason, and it fails partway because deletion protection has to be lifted manually first (`aws rds modify-db-cluster --no-deletion-protection`).
 
 ## Steps that are not in terraform
 
