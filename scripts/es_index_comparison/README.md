@@ -203,7 +203,7 @@ Every cross-cluster run needs these in `ignore_fields`, or they drown the signal
 
 ### Deleted works legitimately differ
 
-A work Deleted in both clusters can still diff on `state.internalWorkStubs`: a long-lived pipeline retains pre-deletion stubs (the merger needs them to delete already-minted inner works) while a freshly reindexed pipeline never minted those inner works and holds none. This is representation, not data loss.
+A work that is `Deleted` in both clusters can still diff on `state.internalWorkStubs`: a long-lived pipeline retains pre-deletion stubs (the merger needs them to delete already-minted inner works) while a freshly reindexed pipeline never minted those inner works and holds none. This is representation, not data loss.
 
 ### Size buckets for the corpus
 

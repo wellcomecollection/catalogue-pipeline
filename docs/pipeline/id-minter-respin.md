@@ -1,10 +1,10 @@
 # Respinning a dated id-minter cluster from a production snapshot
 
-How to rebuild a non-production id-minter RDS cluster (`identifiers-v2-serverless-<pipeline_date>`) from a fresh production snapshot, so a testing pipeline mints ids consistent with production. Run for real during the migration-testing clears (wellcomecollection/platform#6461 phase 3 and successors); these are the parts that are not obvious from the terraform.
+How to rebuild a non-production id-minter RDS cluster (`identifiers-v2-serverless-<pipeline_date>`) from a fresh production snapshot, so a testing pipeline mints ids consistent with production. This procedure ran for real during the migration-testing clears (wellcomecollection/platform#6461 phase 3 and successors); these are the parts that are not obvious from the terraform.
 
 ## The change is declarative
 
-Set `snapshot_identifier` in the module in `infrastructure/critical/rds_id_minter.tf` to a recovery point from `id-minter-backup-vault` (production backups land daily at 03:00 UTC, 30-day retention). This forces replacement: the cluster, its instance, and the three endpoint secret versions. Only the secret versions replace, so the secret names the lambdas resolve are unchanged.
+Set `snapshot_identifier` in the module in `infrastructure/critical/rds_id_minter.tf` to a recovery point from `id-minter-backup-vault` (production backups land daily at 03:00 UTC, 30-day retention). This forces replacement of the cluster and its instance. The three endpoint secrets are replaced only at the version level, so the secret names the lambdas resolve are unchanged and just their values move.
 
 Never merge the `snapshot_identifier` change ahead of the respin window. `infrastructure/critical` is shared and applied by hand, so the next person to apply it for any reason triggers the replacement, and it fails partway because deletion protection has to be lifted manually first (`aws rds modify-db-cluster --no-deletion-protection`).
 

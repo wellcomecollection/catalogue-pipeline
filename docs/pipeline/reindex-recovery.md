@@ -4,7 +4,7 @@ What to do when parts of a reindex fail or go missing. Everything here was learn
 
 ## The funnel, and why gaps are silent
 
-Works flow works-source, works-identified (id-minter), matcher, merger, works-denormalised, then ingest windows into works-indexed. The id-minter and the graph ingest are windowed: a scheduled tick covers a recent time slice (`indexed_at` in works-source for the id-minter, `state.mergedTime` in works-denormalised for ingest). Windows only ever cover the recent past, so anything that lands outside them is not picked up later, with zero failures anywhere. Compare stage counts (source vs identified, denormalised vs indexed) to find gaps; do not rely on alarms.
+Works flow through works-source, works-identified (id-minter), matcher, merger and works-denormalised, then ingest windows carry them into works-indexed. The id-minter and the graph ingest are windowed: a scheduled tick covers a recent time slice (`indexed_at` in works-source for the id-minter, `state.mergedTime` in works-denormalised for ingest). Windows only ever cover the recent past, so anything that lands outside them is not picked up later, with zero failures anywhere. Compare stage counts (source vs identified, denormalised vs indexed) to find gaps; do not rely on alarms.
 
 ## Rules that hold everywhere
 
