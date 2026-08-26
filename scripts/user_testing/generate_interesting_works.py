@@ -9,8 +9,11 @@ resolves canonical ids and links at generation time, because Axiell-only
 canonical ids re-mint on every id-minter respin. Run it AFTER the round's
 reindex, against that round's pipeline date:
 
-    AWS_PROFILE=platform-read_only uv run generate_interesting_works.py \
+    AWS_PROFILE=platform-developer uv run generate_interesting_works.py \
         --pipeline-date 2026-07-03 --out interesting-works.csv
+
+The pipeline_storage secrets need platform-developer; pass the profile via
+AWS_PROFILE or --profile.
 
 Each row: class, source_key, title, canonical_id, url, what_to_look_at.
 Curated entries keep their stable keys in CURATED below; class samples are
@@ -121,8 +124,9 @@ CLASS_QUERIES = {
 }
 
 
-def es_client(pipeline_date: str) -> elasticsearch.Elasticsearch:
-    sm = boto3.client("secretsmanager", region_name="eu-west-1")
+def es_client(pipeline_date: str, profile: str | None = None) -> elasticsearch.Elasticsearch:
+    session = boto3.Session(profile_name=profile) if profile else boto3.Session()
+    sm = session.client("secretsmanager", region_name="eu-west-1")
     prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
 
     def secret(name: str) -> str:
@@ -187,9 +191,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pipeline-date", required=True)
     ap.add_argument("--out", default="interesting-works.csv")
+    ap.add_argument("--profile", default=None, help="AWS profile for the secrets lookup (or set AWS_PROFILE)")
     args = ap.parse_args()
 
-    es = es_client(args.pipeline_date)
+    es = es_client(args.pipeline_date, args.profile)
     index = f"works-indexed-{args.pipeline_date}"
 
     rows = []
