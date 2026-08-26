@@ -94,7 +94,7 @@ trait Merger extends MergerLogging {
   private def partitionAudiovisual(
     works: Seq[Work[Identified]]
   ): Seq[Seq[Work[Identified]]] =
-    if (!findTarget(works).exists(sierraWork)) {
+    if (works.size < 2 || !findTarget(works).exists(sierraWork)) {
       Seq(works)
     } else {
       val avEbibs = works.filter(sierraDigitisedAv)

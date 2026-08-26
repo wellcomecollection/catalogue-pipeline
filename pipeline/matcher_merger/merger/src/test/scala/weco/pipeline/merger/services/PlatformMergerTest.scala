@@ -891,6 +891,91 @@ class PlatformMergerTest
     redirected.head.redirectTarget.canonicalId shouldBe workForEbib.state.canonicalId
   }
 
+  it(
+    "merges a METS work that names the physical bib into it once the e-bibs are carved out"
+  ) {
+    val physical = sierraIdentifiedWork()
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+    val ebibs = (1 to 2).map {
+      _ =>
+        sierraIdentifiedWork()
+          .format(Format.Audio)
+          .mergeCandidates(List(createSierraPairMergeCandidateFor(physical)))
+    }.toList
+    val metsForEbibs = ebibs.map {
+      ebib =>
+        identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+          .mergeCandidates(List(createMetsMergeCandidateFor(ebib)))
+          .items(List(createDigitalItem))
+          .invisible()
+    }
+    val metsForPhysical =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(List(createMetsMergeCandidateFor(physical)))
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val result = merger
+      .merge(physical :: ebibs ++ metsForEbibs :+ metsForPhysical)
+      .mergedWorksWithTime(now)
+
+    val redirects = result
+      .collect { case w: Work.Redirected[Merged] => w }
+      .map(w => w.id -> w.redirectTarget.canonicalId)
+      .toMap
+    redirects shouldBe Map(
+      metsForEbibs(0).id -> ebibs(0).state.canonicalId,
+      metsForEbibs(1).id -> ebibs(1).state.canonicalId,
+      metsForPhysical.id -> physical.state.canonicalId
+    )
+    result
+      .collect { case w: Work.Visible[Merged] if w.id == physical.id => w }
+      .head
+      .data
+      .items
+      .flatMap(_.locations) should contain theSameElementsAs
+      physical.data.items.flatMap(_.locations) ++ metsForPhysical.data.items
+        .flatMap(_.locations)
+  }
+
+  it(
+    "keeps a METS work linked to several audiovisual e-bibs in the main group"
+  ) {
+    val physical = sierraIdentifiedWork()
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+    val ebibs = (1 to 2).map {
+      _ =>
+        sierraIdentifiedWork()
+          .format(Format.Audio)
+          .mergeCandidates(List(createSierraPairMergeCandidateFor(physical)))
+    }.toList
+    val ambiguousMets =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(ebibs.map(createMetsMergeCandidateFor))
+        .items(List(createDigitalItem))
+        .invisible()
+    val metsForFirstEbib =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(List(createMetsMergeCandidateFor(ebibs(0))))
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val result = merger
+      .merge(physical :: ebibs ++ List(ambiguousMets, metsForFirstEbib))
+      .mergedWorksWithTime(now)
+
+    val redirects = result
+      .collect { case w: Work.Redirected[Merged] => w }
+      .map(w => w.id -> w.redirectTarget.canonicalId)
+      .toMap
+    redirects(metsForFirstEbib.id) shouldBe ebibs(0).state.canonicalId
+    redirects.get(ambiguousMets.id) should not contain ebibs(
+      0
+    ).state.canonicalId
+  }
+
   it("gives each audiovisual e-bib its own METS work") {
     // Based on a real example: a two-sided audio cassette catalogued as one
     // physical bib and two e-bibs, both linking to the physical bib via 776.
