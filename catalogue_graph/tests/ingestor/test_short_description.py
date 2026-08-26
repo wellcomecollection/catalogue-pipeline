@@ -49,6 +49,17 @@ def test_first_sentence_of_a_plain_description(description: str, expected: str) 
             "(she died in 1956).",
         ),
         ("UCL Inst. of Urology 17 Sept 2003", "UCL Inst. of Urology 17 Sept 2003"),
+        # Bibliographic abbreviations from manuscript-level records.
+        (
+            "The 38 ll. at the beginning contain medical notes and prescriptions.",
+            "The 38 ll. at the beginning contain medical notes and prescriptions.",
+        ),
+        (
+            "Liber amicorum: containing 98 signed entries by various late 18th cent. "
+            "celebrities, mainly German.",
+            "Liber amicorum: containing 98 signed entries by various late 18th cent. "
+            "celebrities, mainly German.",
+        ),
     ],
 )
 def test_abbreviations_do_not_end_the_sentence(description: str, expected: str) -> None:

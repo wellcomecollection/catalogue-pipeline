@@ -34,6 +34,8 @@ ABBREVIATIONS = {
     "decd", "exors", "mons", "rt", "ult", "inst", "fl", "ser", "cat", "bros",
     "sr", "jr", "gen", "maj", "messrs", "mme", "mlle", "capt", "col", "lt", "sgt", "hon",
     "ibid", "op", "viz",
+    # Bibliographic description of manuscripts: leaves, manuscripts, century, regarding.
+    "l", "ll", "ms", "mss", "cent", "re", "esqre",
 }  # fmt: skip
 
 # Preceded by start-of-string or a non-word, non-dot character, so brackets and quotes count as
@@ -186,11 +188,18 @@ def _join_stubs(sentences: list[str]) -> list[str]:
     return joined
 
 
+# Manuscript-level records often have a bare title as their whole description ("Contents",
+# "Arzneibuch.", "Correspondence."). One or two words is a title or a fragment, not something
+# that works as a browse card, so publish nothing rather than a stub.
+MINIMUM_WORDS = 3
+
+
 def derive_short_description(description: str | None) -> str | None:
     """First sentence of the description that describes the collection rather than its cataloguing.
 
-    Returns None when the description is empty. Deliberately does not truncate: the value stays
-    exactly as catalogued and the display decides how much of it to show.
+    Returns None when the description is empty, is entirely cataloguing notes, or yields fewer
+    than MINIMUM_WORDS. Deliberately does not truncate: the value stays exactly as catalogued
+    and the display decides how much of it to show.
     """
     if not description or not description.strip():
         return None
@@ -217,8 +226,11 @@ def derive_short_description(description: str | None) -> str | None:
             and re.search(r"[A-Za-z]", sentence)
         ]
     )
-    if candidates:
-        return candidates[0]
+    if not candidates:
+        # Everything was a note. Publishing one would be worse than publishing nothing.
+        return None
 
-    # Everything was boilerplate. Publishing the notice would be worse than publishing nothing.
-    return None
+    value = candidates[0]
+    if len(value.split()) < MINIMUM_WORDS:
+        return None
+    return value
