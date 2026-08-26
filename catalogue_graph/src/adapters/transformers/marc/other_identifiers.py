@@ -11,6 +11,8 @@ import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
+from models import identifier_schemes
+from models.identifier_schemes import IdentifierScheme
 from models.pipeline.identifier import Id, SourceIdentifier
 
 logger = structlog.get_logger(__name__)
@@ -25,13 +27,13 @@ def extract_other_identifiers(record: Record) -> list[SourceIdentifier]:
 
 
 ORIGIN_CODE_TO_ID_TYPE = {
-    "Bibliographic Number": "sierra-system-number",
-    "Mimsy reference": "mimsy-reference",
-    "Sierra Number": "sierra-identifier",
-    "WI number": "miro-image-number",
-    "accession number": "wellcome-accession-number",
-    "Calm RefNo": "calm-ref-no",
-    "AltRefNo": "calm-altref-no",
+    "Bibliographic Number": identifier_schemes.SIERRA_SYSTEM_NUMBER,
+    "Mimsy reference": identifier_schemes.MIMSY_REFERENCE,
+    "Sierra Number": identifier_schemes.SIERRA_IDENTIFIER,
+    "WI number": identifier_schemes.MIRO_IMAGE_NUMBER,
+    "accession number": identifier_schemes.WELLCOME_ACCESSION_NUMBER,
+    "Calm RefNo": identifier_schemes.CALM_REF_NO,
+    "AltRefNo": identifier_schemes.CALM_ALTREF_NO,
     # "Library Reference Number" is handled specially in format_field
     # Two other id schemes exist, but I don't know what to do with them.
     # "SCM loan accession number": ,
@@ -73,27 +75,27 @@ def format_field(field: Field) -> SourceIdentifier | None:
     # Axiell records always have a redundant "Acc" prefix, even when it is not followed by a value.
     # We remove the prefix as a temporary fix.
     # TODO: This issue should be fixed at source.
-    if identifier_type == "wellcome-accession-number":
+    if identifier_type == identifier_schemes.WELLCOME_ACCESSION_NUMBER:
         id_value = id_value.removeprefix("Acc").strip()
 
     # Axiell Collections holds Sierra bib numbers in the ".b1234567x" notation (an
     # artifact of the data migration), but the Sierra adapter and the rest of the
     # pipeline use the canonical "b1234567x". Without stripping the leading dot the
     # matcher never links an Axiell work to its Sierra record, so they fail to merge.
-    if identifier_type == "sierra-system-number":
+    if identifier_type == identifier_schemes.SIERRA_SYSTEM_NUMBER:
         id_value = id_value.lstrip(".")
 
     if not id_value:
         return None
 
     return SourceIdentifier(
-        identifier_type=Id(id=identifier_type), ontology_type="Work", value=id_value
+        identifier_type=Id(id=identifier_type.id), ontology_type="Work", value=id_value
     )
 
 
-def which_identifier_type(prefix: str, id_value: str) -> str | None:
+def which_identifier_type(prefix: str, id_value: str) -> IdentifierScheme | None:
     if prefix == "Library Reference Number":
         if "/" in id_value:
-            return "calm-altref-no"
-        return "iconographic-number"
+            return identifier_schemes.CALM_ALTREF_NO
+        return identifier_schemes.ICONOGRAPHIC_NUMBER
     return ORIGIN_CODE_TO_ID_TYPE.get(prefix)

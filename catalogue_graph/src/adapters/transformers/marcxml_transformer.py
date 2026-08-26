@@ -7,6 +7,7 @@ import structlog
 from pymarc.record import Record
 
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
+from adapters.transformers.marc.identifier import has_id
 from adapters.transformers.source_work_transformer import SourceWorkTransformer
 from ingestor.models.shared.deleted_reason import DeletedFromSource
 from models.pipeline.source.work import (
@@ -33,6 +34,15 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
         Subclasses override this to handle non-MARC rows (e.g. deletion facts)."""
         marc_record = self._row_to_marc_record(row)
         if not marc_record:
+            return
+
+        # A record with no id cannot be processed for any source, so skip it
+        # (no work, no deletion, no failure) rather than error in the builder.
+        if not has_id(marc_record):
+            logger.warning(
+                "Skipping record with a missing or empty id field (001)",
+                row_id=row["id"],
+            )
             return
 
         row_id, last_modified = row["id"], row["last_modified"]
