@@ -2,6 +2,13 @@
 
 A reindex operation runs the source data from the [adapters](docs/adapters/README.md) through the pipeline causing it to be re-transformed / matched & merged as appropriate.
 
+## Related runbooks
+
+- [Recovering a reindex](docs/pipeline/reindex-recovery.md): finding and fixing silent gaps, window replays, redrive traps.
+- [Respinning the id-minter from a production snapshot](docs/pipeline/id-minter-respin.md): part of clearing a pipeline for a fresh reindex.
+- [Clearing catalogue entities from a Neptune graph](catalogue_graph/docs/graph-clear-runbook.md).
+- [Comparing indexes across pipelines](scripts/es_index_comparison/README.md), including methodology notes from the migration testing rounds.
+
 ## How to run a reindex
 
 To run a reindex follow these steps:
