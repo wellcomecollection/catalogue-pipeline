@@ -2,6 +2,13 @@
 
 A reindex operation runs the source data from the [adapters](docs/adapters/README.md) through the pipeline causing it to be re-transformed / matched & merged as appropriate.
 
+## Related runbooks
+
+- [Recovering a reindex](docs/pipeline/reindex-recovery.md): finding and fixing silent gaps, window replays, redrive traps.
+- [Respinning the id-minter from a production snapshot](docs/pipeline/id-minter-respin.md): part of clearing a pipeline for a fresh reindex.
+- [Clearing catalogue entities from a Neptune graph](catalogue_graph/docs/graph-clear-runbook.md): keeping the ontology while wiping catalogue nodes.
+- [Comparing indexes across pipelines](scripts/es_index_comparison/README.md): methodology notes from the migration testing rounds.
+
 ## How to run a reindex
 
 To run a reindex follow these steps:
@@ -11,13 +18,13 @@ To run a reindex follow these steps:
 
 ### Terraform a new pipeline
 
-Copy one of the per-pipeline folders in `pipeline/terraform` – these are labelled with the date of the pipeline.
+Copy one of the per-pipeline folders in `pipeline/terraform`; these are labelled with the date of the pipeline.
 Rename the new folder with the date of your pipeline (usually the current date).
 
 By default CI deploys new code only to the most recent dated pipeline; while running more than one pipeline you can set `deploy_all_pipelines` in `pipeline/terraform/deploy_settings.json` to keep all of them on the latest code.
 See [the deployment docs](docs/pipeline/deployment.md) for how deployment works.
 
-Update the `reindexing_state` variables in `main.tf` – you want them all to be `true` if you're about to do a complete reindex, as this adds extra capacity and scaling to the pipeline.
+Update the `reindexing_state` variables in `main.tf`: you want them all to be `true` if you're about to do a complete reindex, as this adds extra capacity and scaling to the pipeline.
 
 NOTE: once the reindexing of the new pipeline has completed, change `true` to `false` then `terraform apply` the changes to scale ES clusters/services down.
 ⚠️ This can only be performed once a day so time it right!

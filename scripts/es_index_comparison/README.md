@@ -1,6 +1,6 @@
 # es_index_comparison
 
-A Python CLI (uv project) to fetch documents from two Elasticsearch indices, materialize them locally (NDJSON gzip + Parquet shards), and compute deep, field-level diffs with flexible ignore patterns. Multiple analyses can be run side-by-side—each with its own YAML config and output namespace.
+A Python CLI (uv project) to fetch documents from two Elasticsearch indices, materialize them locally (NDJSON gzip + Parquet shards), and compute deep, field-level diffs with flexible ignore patterns. Multiple analyses can be run side by side, each with its own YAML config and output namespace.
 
 ## Features
 - Fetch only (read-only) from Elasticsearch using cloud_id + api_key (never writes back).
@@ -184,6 +184,36 @@ The tool only calls Elasticsearch `GET`/`_search` via scan/scroll helpers; it pe
 - Use `-b/--bucket` to rerun only the partitions that matter (ideal for debugging or partial rechecks).
 - Polars operations are columnar; ensure adequate disk space for Parquet.
 - Re-run `compare` without `fetch`/`convert` after adjusting ignore patterns.
+
+## Methodology notes from the migration testing rounds
+
+Practice from the round 1 and round 2 comparisons (wellcomecollection/platform#6464, wellcomecollection/platform#6507). The committed `6464_*` and `6507_*` configs are working examples.
+
+The comparison that matters is the Axiell one (`*_axiell_calm_identified_full`), because it checks works that changed source system, from Calm records to Axiell records, against the production versions they replace. The METS, Miro, TEI and EBSCO configs compare the same source data through the same transformer code on both sides; they are optional safety checks for regressions, and matching per-source index counts between the pipelines is normally enough to skip them.
+
+### Always run a positive control
+
+Before trusting any zero-result query, run a query you know matches against the same index and field. Most "confirmed absent" results during the testing rounds came from querying unsearchable fields.
+
+- `state.sourceIdentifier` and `otherIdentifiers` are `_source`-only in the pipeline indices.
+- works-source is searchable via `query_string`; the downstream indices only via their `query.*` fields.
+- Source-filtered search responses return dotted keys (`_source["query"]["identifiers.value"]`), not nested objects.
+
+### Know the index keys
+
+works-identified, works-denormalised and works-indexed are keyed by canonical work id; works-source by `Work[<scheme>/<value>]`. An mget by source id against a downstream index always misses. Canonical ids for works absent from production re-mint on every id-minter respin, so pin populations with an `ids_file` (resolved relative to the config directory; see `generate_6507_ids.py` for reproducing one from a source config) rather than baking canonical ids into configs.
+
+### Expected noise fields
+
+Every cross-cluster run needs these in `ignore_fields`, or every document diffs: `indexed_at` (per-run ingest stamp), `version` (processing counter), `state.modifiedTime` (per-run transform stamp). Two more appear as diffs but are model differences rather than data: `state.removedInternalWorkStubs` exists only on pipelines built after the field was added (null vs `[]` or missing-key diffs on every document), and `state.sourceModifiedTime` can differ in serialization precision (microseconds vs milliseconds) between transformer generations. Post-filter these from `diffs.jsonl` rather than editing committed configs whose ignore lists document a past round.
+
+### Deleted works legitimately differ
+
+A work that is `Deleted` in both clusters can still diff on `state.internalWorkStubs`: a long-lived pipeline retains pre-deletion stubs (the merger needs them to delete already-minted inner works) while a freshly reindexed pipeline never minted those inner works and holds none, so the diff reflects representation rather than lost data.
+
+### Size buckets for the corpus
+
+The compare loads one hash bucket per side into memory. On the METS works-source corpus (~365k docs of full pipeline `_source`) the default `hash_bucket_count: 6` repeatedly exhausted memory and stalled for hours; raise the bucket count for large corpora so each bucket fits comfortably. Membership counts (`only_in_a`/`only_in_b`) stream in the progress log per bucket, so a killed run still yields a usable membership verdict.
 
 ## Exit Codes
 - `0` success
