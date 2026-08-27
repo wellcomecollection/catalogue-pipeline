@@ -11,7 +11,7 @@ COPY pyproject.toml uv.lock ./
 
 # Install uv and pip-system-certs
 # pip-system-certs allows using system CA certificates when making HTTPS requests
-RUN pip install uv
+RUN pip install uv==0.12.6
 
 # Install git and clean up apt cache
 RUN apt-get update && apt-get install -y ca-certificates git && rm -rf /var/lib/apt/lists/*
@@ -26,7 +26,7 @@ RUN pip install pip-system-certs==5.3
 
 # Install the locked dependencies into the system interpreter.
 # --locked fails the build if uv.lock is out of date with pyproject.toml.
-# --inexact keeps packages outside the lock (pip-system-certs above, the runtime's own).
+# --inexact keeps packages outside the lock, such as pip-system-certs above.
 # The project itself is not installed because src/ is copied in below.
 RUN UV_PROJECT_ENVIRONMENT=/usr/local uv sync --locked --inexact --no-dev --no-install-project
 

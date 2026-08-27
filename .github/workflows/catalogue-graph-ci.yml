@@ -31,6 +31,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.12.6"
       - name: Check uv.lock matches pyproject.toml
         working-directory: catalogue_graph
         run: uv lock --check
@@ -52,7 +54,7 @@ jobs:
 
   build-unified-pipeline-task-image:
     runs-on: ubuntu-latest
-    needs: [ python-checks ]
+    needs: [ python-checks, check-lockfile ]
     steps:
       - uses: actions/checkout@v7
       - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
@@ -69,7 +71,7 @@ jobs:
 
   build-unified-pipeline-lambda-image:
     runs-on: ubuntu-latest
-    needs: [ python-checks ]
+    needs: [ python-checks, check-lockfile ]
     steps:
       - uses: actions/checkout@v7
       - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
