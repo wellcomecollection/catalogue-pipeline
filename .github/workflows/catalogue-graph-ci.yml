@@ -26,6 +26,15 @@ jobs:
         with:
           folder: catalogue_graph
 
+  check-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Check uv.lock matches pyproject.toml
+        working-directory: catalogue_graph
+        run: uv lock --check
+
   check-test-documents:
     runs-on: ubuntu-latest
     steps:
