@@ -6,7 +6,7 @@ whole description would be unreadable in a test.
 
 import pytest
 
-from ingestor.models.display.short_description import derive_short_description
+from ingestor.transformers.short_description import derive_short_description
 
 
 @pytest.mark.parametrize(

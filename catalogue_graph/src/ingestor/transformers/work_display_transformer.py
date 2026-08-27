@@ -27,7 +27,7 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
-from ingestor.models.display.short_description import derive_short_description
+from ingestor.transformers.short_description import derive_short_description
 from models.pipeline.archive_category import ArchiveCategory
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
