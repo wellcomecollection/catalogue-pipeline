@@ -244,3 +244,19 @@ def test_including_lead_in_is_closed_not_joined(
 ) -> None:
     """What follows is usually a truncated list, so end the sentence rather than pull the list in."""
     assert derive_short_description(description) == expected
+
+
+@pytest.mark.parametrize(
+    "description",
+    [
+        "This collection is uncatalogued. Interim description pending cataloguing: "
+        "Papers of the Society.",
+        "<p>Uncatalogued</p><p>Interim description pending cataloguing: Papers of the "
+        "Society.</p>",
+    ],
+)
+def test_a_notice_after_another_note_still_yields_the_description(
+    description: str,
+) -> None:
+    """The notice can arrive in the second sentence, so the split cannot only look at the first."""
+    assert derive_short_description(description) == "Papers of the Society."

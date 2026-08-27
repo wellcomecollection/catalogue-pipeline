@@ -161,16 +161,24 @@ def _merge_abbreviations(sentences: list[str]) -> list[str]:
     return merged
 
 
-def _split_leading_notice(sentences: list[str]) -> list[str]:
-    """Make a notice glued to the description its own sentence, so the filter can drop it."""
-    if not sentences:
-        return sentences
-    match = _NOTICE.match(sentences[0])
-    if not match:
-        return sentences
-    notice = sentences[0][: match.end()].strip()
-    rest = sentences[0][match.end() :].strip()
-    return [notice] + ([rest] if rest else []) + sentences[1:]
+def _split_notices(sentences: list[str]) -> list[str]:
+    """Make a notice glued to the description its own sentence, so the filter can drop it.
+
+    Applied to every sentence, not just the first: a record can open with one note and carry
+    the colon-separated notice in the sentence after it, and filtering that sentence whole
+    would take the description with it.
+    """
+    split: list[str] = []
+    for sentence in sentences:
+        match = _NOTICE.match(sentence)
+        if match is None:
+            split.append(sentence)
+            continue
+        split.append(sentence[: match.end()].strip())
+        rest = sentence[match.end() :].strip()
+        if rest:
+            split.append(rest)
+    return split
 
 
 # "..., including:" introduces a list, and what follows is usually shelfmarks rather than prose.
@@ -218,7 +226,7 @@ def derive_short_description(description: str | None) -> str | None:
     if not blocks:
         return None
 
-    sentences = _split_leading_notice(
+    sentences = _split_notices(
         [
             sentence
             for block in blocks
