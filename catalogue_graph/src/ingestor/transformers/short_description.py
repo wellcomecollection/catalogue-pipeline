@@ -6,7 +6,7 @@ archive collection roots, which is the population the archive browse cards need.
 The difficulty is not finding the sentence boundary. Two independent splitters agree on 97% of
 collection roots. It is that a correctly extracted first sentence is often a note about the state
 of the cataloguing rather than a description of the collection, which is what the boilerplate
-filter below is for. See catalogue_graph/notebooks/short_description_extraction.ipynb for the
+filter below is for. See wellcomecollection/catalogue-short-description-experiment for the
 measurements behind each step.
 """
 
