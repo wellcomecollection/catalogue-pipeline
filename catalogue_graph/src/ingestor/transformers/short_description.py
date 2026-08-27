@@ -173,6 +173,16 @@ def _split_leading_notice(sentences: list[str]) -> list[str]:
     return [notice] + ([rest] if rest else []) + sentences[1:]
 
 
+# "..., including:" introduces a list, and what follows is usually shelfmarks rather than prose.
+# The lead-in reads as a complete description once the colon becomes a full stop, so close it
+# here rather than letting _join_stubs pull the first list item in.
+_TRAILING_INCLUDING = re.compile(r",?\s*including\s*:\s*$", re.I)
+
+
+def _close_including(sentence: str) -> str:
+    return _TRAILING_INCLUDING.sub(".", sentence)
+
+
 def _join_stubs(sentences: list[str]) -> list[str]:
     """Attach a colon-terminated lead-in to whatever follows it.
 
@@ -189,9 +199,9 @@ def _join_stubs(sentences: list[str]) -> list[str]:
 
 
 # Manuscript-level records often have a bare title as their whole description ("Contents",
-# "Arzneibuch.", "Correspondence."). One or two words is a title or a fragment, not something
+# "Arzneibuch.", "Correspondence."). One word is a title or a fragment, not something
 # that works as a browse card, so publish nothing rather than a stub.
-MINIMUM_WORDS = 3
+MINIMUM_WORDS = 2
 
 
 def derive_short_description(description: str | None) -> str | None:
@@ -215,6 +225,10 @@ def derive_short_description(description: str | None) -> str | None:
             for sentence in _merge_abbreviations(_split_sentences(block))
         ]
     )
+
+    # Before joining, so a lead-in ending "including:" is closed off rather than pulling in
+    # the list that follows it.
+    sentences = [_close_including(sentence) for sentence in sentences]
 
     candidates = _join_stubs(
         [

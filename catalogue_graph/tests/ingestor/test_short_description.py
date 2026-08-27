@@ -219,3 +219,28 @@ def test_a_real_description_mentioning_sensitive_material_is_kept() -> None:
         "sensitive material relating to clinical trials."
     )
     assert derive_short_description(description) == description
+
+
+@pytest.mark.parametrize(
+    ("description", "expected"),
+    [
+        # The lead-in ends its own <p>, with the list in a following <ul>.
+        (
+            "<p>The archive contains material created by Audrey Amiss over the course of "
+            "her life, including:</p><ul><li>Sketchbooks</li><li>Artworks</li></ul>",
+            "The archive contains material created by Audrey Amiss over the course of her "
+            "life.",
+        ),
+        # No comma before it, and the list is shelfmarks rather than prose.
+        (
+            "<p>Comprises certificates awarded to Henry Walpole Hooper, including:</p>"
+            "<p>MS.7112/1: Certificate of matriculation, University of London.</p>",
+            "Comprises certificates awarded to Henry Walpole Hooper.",
+        ),
+    ],
+)
+def test_including_lead_in_is_closed_not_joined(
+    description: str, expected: str
+) -> None:
+    """What follows is usually a truncated list, so end the sentence rather than pull the list in."""
+    assert derive_short_description(description) == expected
