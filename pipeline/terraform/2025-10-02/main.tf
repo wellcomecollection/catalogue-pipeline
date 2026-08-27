@@ -65,12 +65,12 @@ module "pipeline" {
     },
     "2026-07-30" = {
       works = {
-        // prod graph/ingestor/indexer - prod API (archive-related fields)
         indexed = "works_indexed.2026-07-30"
       }
     },
     "2026-08-20" = {
       works = {
+        // prod graph/ingestor/indexer - prod API (archive-related fields)
         indexed = "works_indexed.2026-08-20"
       }
     },
