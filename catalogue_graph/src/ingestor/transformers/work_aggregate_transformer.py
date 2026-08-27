@@ -3,6 +3,7 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
+from ingestor.models.display.access_method import DisplayAccessMethod
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
 from lookups.languages import from_code
@@ -89,6 +90,21 @@ class AggregateWorkTransformer(WorkBaseTransformer):
                 if display_license is not None:
                     aggregatable.append(
                         AggregatableField(**display_license.model_dump())
+                    )
+
+        yield from get_unique(aggregatable)
+
+    @property
+    def access_methods(self) -> Generator[AggregatableField]:
+        aggregatable = []
+        for item in self.data.items:
+            for loc in item.locations:
+                for condition in loc.access_conditions:
+                    display_method = DisplayAccessMethod.from_access_condition(
+                        condition
+                    )
+                    aggregatable.append(
+                        AggregatableField(**display_method.model_dump())
                     )
 
         yield from get_unique(aggregatable)

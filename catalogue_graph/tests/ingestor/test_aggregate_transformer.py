@@ -5,8 +5,12 @@ from ingestor.transformers.work_aggregate_transformer import (
     AggregatableField,
     AggregateWorkTransformer,
 )
+from models.pipeline.access_condition import AccessCondition
+from models.pipeline.access_method import OnlineRequest, ViewOnline
+from models.pipeline.access_status import Open, Restricted
 from models.pipeline.collection_path import CollectionPath
 from tests.test_utils import (
+    get_item_with_access_conditions,
     get_work_hierarchy_item,
     get_work_with_ancestor,
     load_json_fixture,
@@ -27,6 +31,23 @@ def test_archive_category_none_when_no_collection_path() -> None:
     extracted = get_work_with_ancestor()
     extracted.work.data.collection_path = None
     assert AggregateWorkTransformer(extracted).archive_category is None
+
+
+def test_access_methods() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.work.data.items = [
+        get_item_with_access_conditions(
+            AccessCondition(method=ViewOnline, status=Open),
+            AccessCondition(method=OnlineRequest, status=Restricted),
+        ),
+        # Methods shared with another item are only aggregated once
+        get_item_with_access_conditions(AccessCondition(method=ViewOnline)),
+    ]
+
+    assert list(AggregateWorkTransformer(extracted).access_methods) == [
+        AggregatableField(id="view-online", label="View online"),
+        AggregatableField(id="online-request", label="Online request"),
+    ]
 
 
 def test_collection_root_with_ancestors() -> None:

@@ -38,6 +38,9 @@ class WorkFilterableValues(ElasticsearchModel):
     items_locations_access_conditions_status_id: list[str] = Field(
         serialization_alias="items.locations.accessConditions.status.id"
     )
+    items_locations_access_conditions_method_id: list[str] = Field(
+        serialization_alias="items.locations.accessConditions.method.id"
+    )
     items_id: list[str] = Field(serialization_alias="items.id")
     items_identifiers_value: list[str] = Field(
         serialization_alias="items.identifiers.value"
@@ -85,6 +88,9 @@ class WorkFilterableValues(ElasticsearchModel):
             items_locations_license_id=list(transformer.license_ids),
             items_locations_access_conditions_status_id=list(
                 transformer.access_condition_status_ids
+            ),
+            items_locations_access_conditions_method_id=list(
+                transformer.access_condition_method_ids
             ),
             items_id=list(transformer.item_ids),
             items_identifiers_value=list(transformer.item_identifiers),

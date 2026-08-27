@@ -50,6 +50,11 @@ class RawCatalogueWork:
         return reference_number
 
     @property
+    def availabilities(self) -> list[str]:
+        availabilities: list[dict] = self.work_state.get("availabilities", [])
+        return [a["id"] for a in availabilities]
+
+    @property
     def concepts(self) -> list[WorkConcept]:
         processed = set()
         work_concepts: list[WorkConcept] = []

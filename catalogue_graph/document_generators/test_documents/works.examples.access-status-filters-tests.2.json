@@ -140,6 +140,12 @@
           "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
+      "items.locations.accessConditions.method": [
+        {
+          "id": "manual-request",
+          "label": "Manual request"
+        }
+      ],
       "availabilities": []
     },
     "filterableValues": {
@@ -165,6 +171,9 @@
       "items.locations.accessConditions.status.id": [
         "closed"
       ],
+      "items.locations.accessConditions.method.id": [
+        "manual-request"
+      ],
       "items.id": [
         "d5ftm6w1"
       ],
@@ -180,5 +189,5 @@
       "availabilities.id": []
     }
   },
-  "createdAt": "2026-06-03T16:56:02.511460+00:00"
+  "createdAt": "2026-08-19T14:58:29.344236+00:00"
 }

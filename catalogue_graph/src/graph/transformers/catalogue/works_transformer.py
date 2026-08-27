@@ -18,6 +18,7 @@ ES_FIELDS = [
     "data.alternativeTitles",
     "data.workType",
     "state.canonicalId",
+    "state.availabilities",
     "data.subjects",
     "data.contributors",
     "data.genres",
@@ -46,6 +47,7 @@ class CatalogueWorksTransformer(GraphBaseTransformer):
             reference_number=raw_work.reference_number,
             collection_path=raw_work.raw_path,
             collection_path_label=raw_work.path_label,
+            availabilities=raw_work.availabilities,
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[WorkHasConcept]:

@@ -69,7 +69,13 @@
       "genres": [],
       "items": [],
       "holdings": [],
-      "availabilities": [],
+      "availabilities": [
+        {
+          "id": "online",
+          "type": "Availability",
+          "label": "Online"
+        }
+      ],
       "production": [],
       "languages": [],
       "notes": [],
@@ -83,6 +89,7 @@
           "title": "Correspondence",
           "referenceNumber": "GC/253/A",
           "totalParts": 1,
+          "isAvailableOnline": false,
           "type": "Series"
         },
         {
@@ -90,6 +97,7 @@
           "title": "Papers relating to the history of vaccination",
           "referenceNumber": "GC/253",
           "totalParts": 1,
+          "isAvailableOnline": false,
           "type": "Collection"
         }
       ],
@@ -100,6 +108,7 @@
           "title": "Papers relating to the history of vaccination",
           "referenceNumber": "GC/253",
           "totalParts": 1,
+          "isAvailableOnline": false,
           "type": "Collection"
         }
       },
@@ -119,7 +128,13 @@
       "production.dates": [],
       "contributors.agent": [],
       "items.locations.license": [],
-      "availabilities": [],
+      "items.locations.accessConditions.method": [],
+      "availabilities": [
+        {
+          "id": "online",
+          "label": "Online"
+        }
+      ],
       "archive.category": {
         "id": "GC",
         "label": "General collections"
@@ -148,6 +163,7 @@
       ],
       "items.locations.license.id": [],
       "items.locations.accessConditions.status.id": [],
+      "items.locations.accessConditions.method.id": [],
       "items.id": [],
       "items.identifiers.value": [],
       "items.locations.locationType.id": [],
@@ -160,11 +176,13 @@
         "Papers relating to the history of vaccination",
         "Correspondence"
       ],
-      "availabilities.id": [],
+      "availabilities.id": [
+        "online"
+      ],
       "archive.category.id": "GC",
       "collection.root.id": "gmf8ycys",
       "collection.root.title": "Papers relating to the history of vaccination"
     }
   },
-  "createdAt": "2026-08-06T09:01:32.843322+00:00"
+  "createdAt": "2026-08-19T14:58:29.550432+00:00"
 }
