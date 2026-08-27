@@ -863,6 +863,250 @@ class PlatformMergerTest
     visibleWorks(workForEbib.id).data.items shouldBe workForMets.data.items
   }
 
+  it("still merges a METS work that names the physical bib into the e-bib") {
+    val workForPhysicalCassette = sierraIdentifiedWork()
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+
+    val workForEbib = sierraIdentifiedWork()
+      .format(Format.Audio)
+      .mergeCandidates(
+        List(createSierraPairMergeCandidateFor(workForPhysicalCassette))
+      )
+
+    val workForMets =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(
+          List(createMetsMergeCandidateFor(workForPhysicalCassette))
+        )
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val result = merger
+      .merge(List(workForPhysicalCassette, workForEbib, workForMets))
+      .mergedWorksWithTime(now)
+
+    val redirected = result.collect { case w: Work.Redirected[Merged] => w }
+    redirected.map(_.id) shouldBe List(workForMets.id)
+    redirected.head.redirectTarget.canonicalId shouldBe workForEbib.state.canonicalId
+  }
+
+  it(
+    "merges a METS work that names the physical bib into it once the e-bibs are carved out"
+  ) {
+    val physical = sierraIdentifiedWork()
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+    val ebibs = (1 to 2).map {
+      _ =>
+        sierraIdentifiedWork()
+          .format(Format.Audio)
+          .mergeCandidates(List(createSierraPairMergeCandidateFor(physical)))
+    }.toList
+    val metsForEbibs = ebibs.map {
+      ebib =>
+        identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+          .mergeCandidates(List(createMetsMergeCandidateFor(ebib)))
+          .items(List(createDigitalItem))
+          .invisible()
+    }
+    val metsForPhysical =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(List(createMetsMergeCandidateFor(physical)))
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val result = merger
+      .merge(physical :: ebibs ++ metsForEbibs :+ metsForPhysical)
+      .mergedWorksWithTime(now)
+
+    val redirects = result
+      .collect { case w: Work.Redirected[Merged] => w }
+      .map(w => w.id -> w.redirectTarget.canonicalId)
+      .toMap
+    redirects shouldBe Map(
+      metsForEbibs(0).id -> ebibs(0).state.canonicalId,
+      metsForEbibs(1).id -> ebibs(1).state.canonicalId,
+      metsForPhysical.id -> physical.state.canonicalId
+    )
+    result
+      .collect { case w: Work.Visible[Merged] if w.id == physical.id => w }
+      .head
+      .data
+      .items
+      .flatMap(_.locations) should contain theSameElementsAs
+      physical.data.items.flatMap(_.locations) ++ metsForPhysical.data.items
+        .flatMap(_.locations)
+  }
+
+  it(
+    "redirects a METS work linked to several audiovisual e-bibs to the e-bib that was not carved out"
+  ) {
+    val physical = sierraIdentifiedWork()
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+    val ebibs = (1 to 2).map {
+      _ =>
+        sierraIdentifiedWork()
+          .format(Format.Audio)
+          .mergeCandidates(List(createSierraPairMergeCandidateFor(physical)))
+    }.toList
+    val ambiguousMets =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(ebibs.map(createMetsMergeCandidateFor))
+        .items(List(createDigitalItem))
+        .invisible()
+    val metsForFirstEbib =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(List(createMetsMergeCandidateFor(ebibs(0))))
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val result = merger
+      .merge(physical :: ebibs ++ List(ambiguousMets, metsForFirstEbib))
+      .mergedWorksWithTime(now)
+
+    val redirects = result
+      .collect { case w: Work.Redirected[Merged] => w }
+      .map(w => w.id -> w.redirectTarget.canonicalId)
+      .toMap
+    redirects(metsForFirstEbib.id) shouldBe ebibs(0).state.canonicalId
+    redirects(ambiguousMets.id) shouldBe ebibs(1).state.canonicalId
+  }
+
+  it(
+    "redirects a METS work linked to several audiovisual e-bibs to the physical bib once every e-bib is carved out"
+  ) {
+    val physical = sierraIdentifiedWork()
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+    val ebibs = (1 to 2).map {
+      _ =>
+        sierraIdentifiedWork()
+          .format(Format.Audio)
+          .mergeCandidates(List(createSierraPairMergeCandidateFor(physical)))
+    }.toList
+    val metsForEbibs = ebibs.map {
+      ebib =>
+        identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+          .mergeCandidates(List(createMetsMergeCandidateFor(ebib)))
+          .items(List(createDigitalItem))
+          .invisible()
+    }
+    val ambiguousMets =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(ebibs.map(createMetsMergeCandidateFor))
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val result = merger
+      .merge(physical :: ebibs ++ metsForEbibs :+ ambiguousMets)
+      .mergedWorksWithTime(now)
+
+    val redirects = result
+      .collect { case w: Work.Redirected[Merged] => w }
+      .map(w => w.id -> w.redirectTarget.canonicalId)
+      .toMap
+    redirects shouldBe Map(
+      metsForEbibs(0).id -> ebibs(0).state.canonicalId,
+      metsForEbibs(1).id -> ebibs(1).state.canonicalId,
+      ambiguousMets.id -> physical.state.canonicalId
+    )
+  }
+
+  it("gives each audiovisual e-bib its own METS work") {
+    // Based on a real example: a two-sided audio cassette catalogued as one
+    // physical bib and two e-bibs, both linking to the physical bib via 776.
+    // Both METS works were being attached to whichever e-bib was elected as
+    // the cluster target, leaving the other e-bib with no manifest.
+    //
+    // See https://github.com/wellcomecollection/platform/issues/6643
+    val workForPhysicalCassette = sierraIdentifiedWork()
+      .title("A physical cassette tape")
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+
+    val workForSideA = sierraIdentifiedWork()
+      .title("Side A")
+      .format(Format.Audio)
+      .items(
+        List(
+          createUnidentifiableItemWith(locations = List(createDigitalLocation))
+        )
+      )
+      .mergeCandidates(
+        List(createSierraPairMergeCandidateFor(workForPhysicalCassette))
+      )
+
+    val workForSideB = sierraIdentifiedWork()
+      .title("Side B")
+      .format(Format.Audio)
+      .mergeCandidates(
+        List(createSierraPairMergeCandidateFor(workForPhysicalCassette))
+      )
+
+    val metsForSideA =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(List(createMetsMergeCandidateFor(workForSideA)))
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val metsForSideB =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(List(createMetsMergeCandidateFor(workForSideB)))
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val sierraWorks = List(workForPhysicalCassette, workForSideA, workForSideB)
+
+    // The outcome must not depend on the order the works arrive in
+    forAll(
+      Table(
+        "works",
+        sierraWorks ++ List(metsForSideA, metsForSideB),
+        List(
+          metsForSideB,
+          workForSideB,
+          workForSideA,
+          metsForSideA,
+          workForPhysicalCassette
+        )
+      )
+    ) {
+      works =>
+        val result = merger.merge(works).mergedWorksWithTime(now)
+
+        val visibleWorks = result
+          .collect { case w: Work.Visible[_] => w }
+          .map(w => w.id -> w)
+          .toMap
+        val redirectedWorks = result
+          .collect { case w: Work.Redirected[Merged] => w }
+          .map(w => w.id -> w.redirectTarget.canonicalId)
+          .toMap
+
+        visibleWorks.keys should contain theSameElementsAs sierraWorks.map(_.id)
+        redirectedWorks shouldBe Map(
+          metsForSideA.id -> workForSideA.state.canonicalId,
+          metsForSideB.id -> workForSideB.state.canonicalId
+        )
+
+        visibleWorks(
+          workForPhysicalCassette.id
+        ).data.items shouldBe workForPhysicalCassette.data.items
+        visibleWorks(workForSideA.id).data.items shouldBe
+          List(
+            workForSideA.data.items.head.copy(
+              locations =
+                workForSideA.data.items.head.locations ++ metsForSideA.data.items.head.locations
+            )
+          )
+        visibleWorks(
+          workForSideB.id
+        ).data.items shouldBe metsForSideB.data.items
+    }
+  }
+
   it("ignores online resources for physical/digital bib merging rules") {
     // This test case is based on a real example of three related works that
     // were being merged incorrectly.  In particular, the METS work (and associated

@@ -1,6 +1,10 @@
 package weco.pipeline.merger.services
 
-import weco.catalogue.internal_model.identifiers.{DataState, IdState}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  DataState,
+  IdState
+}
 import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work._
@@ -13,6 +17,7 @@ import weco.pipeline.merger.models.{
   WorkMergingOps
 }
 import weco.pipeline.merger.rules._
+import weco.pipeline.merger.rules.WorkPredicates.{sierraDigitisedAv, sierraWork}
 
 /*
  * The implementor of a Merger must provide:
@@ -70,12 +75,61 @@ trait Merger extends MergerLogging {
     }
 
   def merge(works: Seq[Work[Identified]]): MergerOutcome = {
-    val outcome = mergeWorks(works)
-    outcome.copy(
-      resultWorks =
-        outcome.resultWorks ++ deletedInternalWorks(works, outcome.resultWorks)
+    val outcomes = partitionAudiovisual(works).map(mergeWorks)
+    val resultWorks = outcomes.flatMap(_.resultWorks)
+    MergerOutcome(
+      resultWorks = resultWorks ++ deletedInternalWorks(works, resultWorks),
+      imagesWithSources = outcomes.flatMap(_.imagesWithSources)
     )
   }
+
+  /** AV bibs are never merged with each other, but their 776 links still put a
+    * physical bib and all of its e-bibs in one cluster, so whole-cluster
+    * merging elected one arbitrary e-bib and gave it every METS manifest. Carve
+    * each AV e-bib out with the works linked directly to it and merge the rest
+    * as before.
+    *
+    * See https://github.com/wellcomecollection/platform/issues/6643
+    */
+  private def partitionAudiovisual(
+    works: Seq[Work[Identified]]
+  ): Seq[Seq[Work[Identified]]] =
+    if (works.size < 2 || !findTarget(works).exists(sierraWork)) {
+      Seq(works)
+    } else {
+      val avEbibs = works.filter(sierraDigitisedAv)
+      val others = works.filterNot(sierraWork)
+
+      def linked(a: Work[Identified], b: Work[Identified]): Boolean =
+        a.state.mergeCandidates.exists(_.id.canonicalId == b.state.canonicalId)
+
+      val ownerOf: Map[CanonicalId, CanonicalId] = others.flatMap {
+        other =>
+          avEbibs.filter(e => linked(other, e) || linked(e, other)) match {
+            case Seq(single) =>
+              Some(other.state.canonicalId -> single.state.canonicalId)
+            case Nil => None
+            case several =>
+              warn(
+                s"${describeWork(other)} is linked to several audiovisual e-bibs, leaving it in the main group: ${describeWorks(several)}"
+              )
+              None
+          }
+      }.toMap
+
+      val groups = avEbibs.flatMap {
+        ebib =>
+          val attached = others.filter(
+            o =>
+              ownerOf.get(o.state.canonicalId).contains(ebib.state.canonicalId)
+          )
+          if (attached.isEmpty) None else Some(ebib +: attached)
+      }
+      val carved = groups.flatten.map(_.state.canonicalId).toSet
+      val remainder = works.filterNot(w => carved.contains(w.state.canonicalId))
+
+      if (remainder.isEmpty) groups else groups :+ remainder
+    }
 
   private def mergeWorks(works: Seq[Work[Identified]]): MergerOutcome = {
     works match {
