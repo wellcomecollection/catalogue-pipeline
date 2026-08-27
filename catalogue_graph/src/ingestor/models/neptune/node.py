@@ -12,7 +12,12 @@ class NeptuneBaseNode(BaseModel):
     @classmethod
     def process_lists(cls, data: dict) -> dict:
         data = data.copy()
-        list_fields = ["alternative_labels", "alternative_ids", "image_urls"]
+        list_fields = [
+            "alternative_labels",
+            "alternative_ids",
+            "image_urls",
+            "availabilities",
+        ]
         for field in list_fields:
             if field in data:
                 # The catalogue graph stores lists as strings, with individual items separated by `||`.

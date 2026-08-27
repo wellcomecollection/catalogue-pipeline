@@ -3,12 +3,15 @@ from pydantic import BaseModel
 from ingestor.models.neptune.node import WorkNode
 from models.pipeline.work_state import WorkAncestor
 
+from .availability import is_available_online
+
 
 class DisplayRelation(BaseModel):
     id: str | None
     title: str | None
     referenceNumber: str | None = None
     totalParts: int
+    isAvailableOnline: bool | None = None
     type: str = "Work"
 
     @staticmethod
@@ -19,6 +22,7 @@ class DisplayRelation(BaseModel):
             type=node.properties.type,
             referenceNumber=node.properties.collection_path_label,
             totalParts=total_parts,
+            isAvailableOnline=is_available_online(node.properties.availabilities),
         )
 
     @staticmethod
@@ -29,4 +33,7 @@ class DisplayRelation(BaseModel):
             title=ancestor.title,
             type=ancestor.work_type,
             totalParts=ancestor.num_children,
+            # A series is not a work in its own right, so it has no online availability to report
+            # `isAvailableOnline` is left unset (and so omitted from the document) rather than set to `false`,
+            # which would imply the series is known not to be available online.
         )

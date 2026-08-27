@@ -9,6 +9,10 @@ from ingestor.models.neptune.query_result import WorkHierarchy, WorkHierarchyIte
 from models.events import BulkLoaderEvent
 from models.graph_edge import BaseEdge
 from models.graph_node import Work
+from models.pipeline.access_condition import AccessCondition
+from models.pipeline.identifier import Unidentifiable
+from models.pipeline.item import Item
+from models.pipeline.location import DigitalLocation, LocationType
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 from utils.ontology import get_transformers_from_ontology
 from utils.types import OntologyType, TransformerType, WorkStatus
@@ -34,7 +38,10 @@ def load_jsonl_fixture(file_name: str) -> list[Any]:
 
 
 def get_work_hierarchy_item(
-    work_id: str, label: str | None = None, parts: int = 1
+    work_id: str,
+    label: str | None = None,
+    parts: int = 1,
+    availabilities: list[str] | None = None,
 ) -> WorkHierarchyItem:
     """Build a hierarchy item (an ancestor or a child) for a work with the given id."""
     return WorkHierarchyItem(
@@ -42,10 +49,29 @@ def get_work_hierarchy_item(
             {
                 "~id": work_id,
                 "~labels": ["Work"],
-                "~properties": Work(id=work_id, label=label, type="Work"),
+                "~properties": Work(
+                    id=work_id,
+                    label=label,
+                    type="Work",
+                    availabilities=availabilities or [],
+                ),
             }
         ),
         parts=parts,
+    )
+
+
+def get_item_with_access_conditions(*access_conditions: AccessCondition) -> Item:
+    """Build an item with a single digital location carrying the given access conditions."""
+    return Item(
+        id=Unidentifiable(),
+        locations=[
+            DigitalLocation(
+                url="https://example.com/1",
+                location_type=LocationType(id="iiif-presentation"),
+                access_conditions=list(access_conditions),
+            )
+        ],
     )
 
 

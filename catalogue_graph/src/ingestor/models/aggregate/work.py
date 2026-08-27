@@ -22,6 +22,9 @@ class WorkAggregatableValues(ElasticsearchModel):
     item_licenses: list[AggregatableField] = Field(
         serialization_alias="items.locations.license"
     )
+    item_access_methods: list[AggregatableField] = Field(
+        serialization_alias="items.locations.accessConditions.method"
+    )
     availabilities: list[AggregatableField] = Field(
         serialization_alias="availabilities"
     )
@@ -45,6 +48,7 @@ class WorkAggregatableValues(ElasticsearchModel):
             languages=list(transformer.languages),
             contributors=list(transformer.contributors),
             item_licenses=list(transformer.licenses),
+            item_access_methods=list(transformer.access_methods),
             availabilities=list(transformer.availabilities),
             archive_category=transformer.archive_category,
             collection_root=transformer.collection_root,

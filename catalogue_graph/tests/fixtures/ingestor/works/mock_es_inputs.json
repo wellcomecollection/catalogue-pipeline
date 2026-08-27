@@ -311,6 +311,7 @@
             "title": "Case against the Medical Research Council",
             "referenceNumber": "GC/176/C",
             "totalParts": 2,
+            "isAvailableOnline": false,
             "type": "Section"
           },
           {
@@ -318,6 +319,7 @@
             "title": "Twort, Frederick William",
             "referenceNumber": "GC/176",
             "totalParts": 3,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         ],
@@ -328,6 +330,7 @@
             "title": "Twort, Frederick William",
             "referenceNumber": "GC/176",
             "totalParts": 3,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         },
@@ -360,6 +363,16 @@
           {
             "id": "inc",
             "label": "In copyright"
+          }
+        ],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "online-request",
+            "label": "Online request"
+          },
+          {
+            "id": "view-online",
+            "label": "View online"
           }
         ],
         "availabilities": [
@@ -412,6 +425,10 @@
         "items.locations.accessConditions.status.id": [
           "open",
           "open-with-advisory"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "online-request",
+          "view-online"
         ],
         "items.id": [
           "wdtdsz2g"
@@ -987,6 +1004,20 @@
             "label": "In copyright"
           }
         ],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "online-request",
+            "label": "Online request"
+          },
+          {
+            "id": "not-requestable",
+            "label": "Not requestable"
+          },
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -1050,6 +1081,11 @@
         "items.locations.accessConditions.status.id": [
           "open",
           "open"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "online-request",
+          "not-requestable",
+          "view-online"
         ],
         "items.id": [
           "v9m3ewes",
@@ -1272,6 +1308,7 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [],
         "availabilities": [
           {
             "id": "online",
@@ -1306,6 +1343,7 @@
         ],
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [],
+        "items.locations.accessConditions.method.id": [],
         "items.id": [],
         "items.identifiers.value": [],
         "items.locations.locationType.id": [],
@@ -1616,6 +1654,7 @@
             "title": "'Somatic cell genetics and others'",
             "referenceNumber": "UGC 198/8/5",
             "totalParts": 11,
+            "isAvailableOnline": false,
             "type": "Series"
           },
           {
@@ -1623,6 +1662,7 @@
             "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, lectures and broadcasts",
             "referenceNumber": "UGC 198/8",
             "totalParts": 8,
+            "isAvailableOnline": false,
             "type": "Section"
           },
           {
@@ -1630,6 +1670,7 @@
             "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
             "referenceNumber": "UGC 198",
             "totalParts": 10,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         ],
@@ -1640,6 +1681,7 @@
             "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
             "referenceNumber": "UGC 198",
             "totalParts": 10,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         }
@@ -1665,6 +1707,12 @@
           {
             "id": "inc",
             "label": "In copyright"
+          }
+        ],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
           }
         ],
         "availabilities": [
@@ -1708,6 +1756,9 @@
         ],
         "items.locations.accessConditions.status.id": [
           "open-with-advisory"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],
@@ -2024,6 +2075,12 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -2068,6 +2125,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "licensed-resources"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],
@@ -2591,6 +2651,12 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "online-request",
+            "label": "Online request"
+          }
+        ],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -2653,6 +2719,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "open"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "online-request"
         ],
         "items.id": [
           "vphnmzg9"
@@ -2988,6 +3057,12 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -3035,6 +3110,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "licensed-resources"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],
@@ -3497,6 +3575,12 @@
             "label": "Public Domain Mark"
           }
         ],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -3556,6 +3640,9 @@
         ],
         "items.locations.accessConditions.status.id": [
           "open"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],
@@ -3817,6 +3904,7 @@
             "title": "German Hospital",
             "referenceNumber": "PP/RAS/A.2",
             "totalParts": 2,
+            "isAvailableOnline": false,
             "type": "Section"
           },
           {
@@ -3824,6 +3912,7 @@
             "title": "Personal and Miscellaneous",
             "referenceNumber": "PP/RAS/A",
             "totalParts": 2,
+            "isAvailableOnline": false,
             "type": "Section"
           },
           {
@@ -3831,6 +3920,7 @@
             "title": "Rast, Dr Hugo",
             "referenceNumber": "PP/RAS",
             "totalParts": 4,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         ],
@@ -3841,6 +3931,7 @@
             "title": "Rast, Dr Hugo",
             "referenceNumber": "PP/RAS",
             "totalParts": 4,
+            "isAvailableOnline": false,
             "type": "Collection"
           }
         },
@@ -3870,6 +3961,12 @@
         ],
         "contributors.agent": [],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "online-request",
+            "label": "Online request"
+          }
+        ],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -3911,6 +4008,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "open"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "online-request"
         ],
         "items.id": [
           "bf3zp84j"
@@ -4231,6 +4331,12 @@
           }
         ],
         "items.locations.license": [],
+        "items.locations.accessConditions.method": [
+          {
+            "id": "view-online",
+            "label": "View online"
+          }
+        ],
         "availabilities": [
           {
             "id": "online",
@@ -4275,6 +4381,9 @@
         "items.locations.license.id": [],
         "items.locations.accessConditions.status.id": [
           "licensed-resources"
+        ],
+        "items.locations.accessConditions.method.id": [
+          "view-online"
         ],
         "items.id": [],
         "items.identifiers.value": [],

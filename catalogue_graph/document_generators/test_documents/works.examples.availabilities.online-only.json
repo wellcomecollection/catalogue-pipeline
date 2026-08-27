@@ -131,6 +131,12 @@
           "label": "Attribution 4.0 International (CC BY 4.0)"
         }
       ],
+      "items.locations.accessConditions.method": [
+        {
+          "id": "view-online",
+          "label": "View online"
+        }
+      ],
       "availabilities": [
         {
           "id": "online",
@@ -161,6 +167,9 @@
       "items.locations.accessConditions.status.id": [
         "open"
       ],
+      "items.locations.accessConditions.method.id": [
+        "view-online"
+      ],
       "items.id": [],
       "items.identifiers.value": [],
       "items.locations.locationType.id": [
@@ -174,5 +183,5 @@
       ]
     }
   },
-  "createdAt": "2026-06-03T16:56:02.585794+00:00"
+  "createdAt": "2026-08-19T14:58:29.452786+00:00"
 }

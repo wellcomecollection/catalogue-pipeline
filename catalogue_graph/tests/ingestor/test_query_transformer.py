@@ -7,10 +7,14 @@ from ingestor.models.neptune.query_result import (
     WorkHierarchy,
 )
 from ingestor.transformers.work_query_transformer import QueryWorkTransformer
+from models.pipeline.access_condition import AccessCondition
+from models.pipeline.access_method import OnlineRequest, ViewOnline
+from models.pipeline.access_status import Open, Restricted
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Subject
 from models.pipeline.work_state import WorkAncestor, WorkRelations
 from tests.test_utils import (
+    get_item_with_access_conditions,
     get_work_hierarchy_item,
     get_work_with_ancestor,
     load_json_fixture,
@@ -78,6 +82,26 @@ def test_identifiers_includes_work_canonical_id() -> None:
     identifiers = list(QueryWorkTransformer(extracted).identifiers)
     assert "canonical_id_1" in identifiers
     assert "b_number" in identifiers
+
+
+def test_access_condition_ids() -> None:
+    extracted = get_work_with_ancestor()
+    extracted.work.data.items = [
+        get_item_with_access_conditions(
+            AccessCondition(method=ViewOnline, status=Open),
+            AccessCondition(method=OnlineRequest, status=Restricted),
+        ),
+        get_item_with_access_conditions(AccessCondition(method=ViewOnline)),
+    ]
+
+    transformer = QueryWorkTransformer(extracted)
+    assert list(transformer.access_condition_method_ids) == [
+        "view-online",
+        "online-request",
+        "view-online",
+    ]
+    # Access conditions without a status do not contribute a filterable status
+    assert list(transformer.access_condition_status_ids) == ["open", "restricted"]
 
 
 def test_collection_root_with_ancestors() -> None:
