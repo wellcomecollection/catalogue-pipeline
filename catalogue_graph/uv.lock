@@ -192,7 +192,7 @@ requires-dist = [
     { name = "pyiceberg", extras = ["sql-sqlite", "pyiceberg-core"], specifier = ">=0.9.1" },
     { name = "pymarc", specifier = ">=5.3.1" },
     { name = "pymysql", specifier = ">=1.0.0" },
-    { name = "pysbd", specifier = ">=0.3.4" },
+    { name = "pysbd", specifier = "==0.3.4" },
     { name = "python-dateutil" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "requests" },

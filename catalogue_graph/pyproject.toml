@@ -34,7 +34,7 @@ dependencies = [
     "cryptography>=48.0.1",
     "yoyo-migrations>=8.2.0",
     "nh3>=0.3",
-    "pysbd=0.3.4",
+    "pysbd==0.3.4",
     "httpx>=0.28",
 ]
 
