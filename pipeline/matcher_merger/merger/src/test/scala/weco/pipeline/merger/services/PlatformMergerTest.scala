@@ -940,7 +940,7 @@ class PlatformMergerTest
   }
 
   it(
-    "keeps a METS work linked to several audiovisual e-bibs in the main group"
+    "redirects a METS work linked to several audiovisual e-bibs to the e-bib that was not carved out"
   ) {
     val physical = sierraIdentifiedWork()
       .format(Format.Audio)
@@ -971,9 +971,47 @@ class PlatformMergerTest
       .map(w => w.id -> w.redirectTarget.canonicalId)
       .toMap
     redirects(metsForFirstEbib.id) shouldBe ebibs(0).state.canonicalId
-    redirects.get(ambiguousMets.id) should not contain ebibs(
-      0
-    ).state.canonicalId
+    redirects(ambiguousMets.id) shouldBe ebibs(1).state.canonicalId
+  }
+
+  it(
+    "redirects a METS work linked to several audiovisual e-bibs to the physical bib once every e-bib is carved out"
+  ) {
+    val physical = sierraIdentifiedWork()
+      .format(Format.Audio)
+      .items(List(createIdentifiedPhysicalItem))
+    val ebibs = (1 to 2).map {
+      _ =>
+        sierraIdentifiedWork()
+          .format(Format.Audio)
+          .mergeCandidates(List(createSierraPairMergeCandidateFor(physical)))
+    }.toList
+    val metsForEbibs = ebibs.map {
+      ebib =>
+        identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+          .mergeCandidates(List(createMetsMergeCandidateFor(ebib)))
+          .items(List(createDigitalItem))
+          .invisible()
+    }
+    val ambiguousMets =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .mergeCandidates(ebibs.map(createMetsMergeCandidateFor))
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val result = merger
+      .merge(physical :: ebibs ++ metsForEbibs :+ ambiguousMets)
+      .mergedWorksWithTime(now)
+
+    val redirects = result
+      .collect { case w: Work.Redirected[Merged] => w }
+      .map(w => w.id -> w.redirectTarget.canonicalId)
+      .toMap
+    redirects shouldBe Map(
+      metsForEbibs(0).id -> ebibs(0).state.canonicalId,
+      metsForEbibs(1).id -> ebibs(1).state.canonicalId,
+      ambiguousMets.id -> physical.state.canonicalId
+    )
   }
 
   it("gives each audiovisual e-bib its own METS work") {
