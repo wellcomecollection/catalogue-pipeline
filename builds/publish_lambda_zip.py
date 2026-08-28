@@ -50,15 +50,18 @@ def create_zip(src, dst):
                 zf.write(absname, arcname)
 
 
-# Matches the Lambda runtimes and builds/test.python.Dockerfile; the build
-# agent's own Python is older than some of our pinned dependencies allow.
+# The Python the pinned requirements were compiled for (see each lambda's
+# requirements.txt header); the build agent's own Python is older than some
+# of the pins allow. common/window_generator still runs on python3.9 but its
+# dependencies are pure Python, so the same wheels work there.
 PYTHON_IMAGE = "python:3.10"
 
 
 def install_requirements(reqs_file, target):
     """
-    Install pinned dependencies into the target directory using the Lambda
-    runtime's Python (and x86_64 Linux wheels) rather than the build agent's.
+    Install pinned dependencies into the target directory using the Python the
+    requirements were compiled for, and x86_64 Linux wheels, rather than the
+    build agent's. Binary-only so nothing tries to compile inside the image.
     """
     subprocess.check_call(
         [
@@ -74,8 +77,11 @@ def install_requirements(reqs_file, target):
             "--volume",
             f"{target}:/target",
             PYTHON_IMAGE,
+            "python",
+            "-m",
             "pip",
             "install",
+            "--only-binary=:all:",
             "--no-cache-dir",
             "--requirement",
             "/requirements.txt",
