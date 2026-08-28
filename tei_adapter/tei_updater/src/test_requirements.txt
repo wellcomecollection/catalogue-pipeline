@@ -23,7 +23,7 @@ charset-normalizer==3.4.7
     # via
     #   -r requirements.txt
     #   requests
-cryptography==48.0.0
+cryptography==50.0.1
     # via moto
 deepdiff==8.6.2
     # via -r requirements.txt
@@ -86,7 +86,7 @@ typing-extensions==4.15.0
     # via
     #   cryptography
     #   exceptiongroup
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   -r requirements.txt
     #   botocore
