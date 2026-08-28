@@ -16,11 +16,11 @@ module "ebsco" {
 }
 
 module "axiell" {
-  source                = "./modules/adapter"
-  namespace             = "axiell"
-  steps_namespace       = "oai_pmh"
-  s3_bucket_name        = "wellcomecollection-platform-axiell-adapter"
-  schedule_expression   = "rate(15 minutes)"
+  source              = "./modules/adapter"
+  namespace           = "axiell"
+  steps_namespace     = "oai_pmh"
+  s3_bucket_name      = "wellcomecollection-platform-axiell-adapter"
+  schedule_expression = "rate(15 minutes)"
   # Paused for the round 3 clear (platform#6623): keeps the adapter store empty
   # between the phase 6a wipe and the post-load rebuild.
   schedule_enabled      = false
