@@ -36,16 +36,32 @@ jobs:
           repository: wellcomecollection/catalogue-api
           token: ${{ steps.app-token.outputs.token }}
           path: catalogue-api
+          # The merge below needs main and the branch to share history.
+          fetch-depth: 0
 
       # A fixed branch name stops auto-PRs stacking up while one sits open.
       # Starting from the branch's existing state preserves any spec work
       # already pushed there, and makes change detection relative to what the
       # open PR already has.
-      - name: Check out the auto-sync branch if it already exists
+      #
+      # Merging main stops that state going stale. Fixtures often need index
+      # mappings or schema changes that landed on main after the branch was cut,
+      # and without this the PR sits red until someone refreshes it by hand.
+      - name: Check out the auto-sync branch and bring it up to date with main
         run: |
           cd catalogue-api
+          # The App token, not github-actions, is what pushes these commits.
+          git config user.name "wellcome-collection[bot]"
+          git config user.email "88187424+wellcome-collection[bot]@users.noreply.github.com"
+
           if git fetch origin auto-sync/test-documents; then
             git checkout auto-sync/test-documents
+
+            if ! git merge --no-edit origin/main; then
+              git merge --abort || true
+              echo "::error::auto-sync/test-documents conflicts with main. Resolve it on the branch, then re-run this workflow."
+              exit 1
+            fi
           fi
 
       # --delete mirrors removals; the target directory holds nothing but
@@ -74,10 +90,6 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           cd catalogue-api
-
-          # Configure git
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           BRANCH_NAME="auto-sync/test-documents"
           if [ "$(git branch --show-current)" != "$BRANCH_NAME" ]; then
