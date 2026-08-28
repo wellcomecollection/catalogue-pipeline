@@ -14,7 +14,7 @@ Works flow through works-source, works-identified (id-minter), matcher, merger a
 
 ## Resuming a paused OAI harvest
 
-The OAI trigger has a lag breaker: it refuses to run when the last successful window ended more than `MAX_LAG_MINUTES` ago (env var on the trigger lambda, default 360). A harvest paused for longer than that trips the breaker on its first scheduled run after resuming. The trigger emits one window from the cursor to now, so a single successful run catches up in full; the options, in order of preference: resume within the breaker's limit of the last harvest activity so it never trips; or bump `MAX_LAG_MINUTES` on the trigger lambda's environment for one scheduled tick and revert it. The lambda event cannot disable the check; `enforce_lag` is only a local CLI option.
+The OAI trigger has a lag breaker: it refuses to run when the last successful window ended more than the configured max lag ago (default 360 minutes; `MAX_LAG_MINUTES` for Axiell, `FOLIO_MAX_LAG_MINUTES` for Folio). A harvest paused for longer than that trips the breaker on its first scheduled run after resuming. The trigger emits one window from the cursor to now, so a single successful run catches up in full; the options, in order of preference: resume within the breaker's limit of the last harvest activity so it never trips; or bump the relevant `*_MAX_LAG_MINUTES` env var on the trigger lambda's environment for one scheduled tick and revert it. The lambda event cannot disable the check; `--enforce-lag` is only a local CLI option.
 
 ## Replaying id-minter windows
 
