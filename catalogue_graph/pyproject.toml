@@ -31,9 +31,10 @@ dependencies = [
     "structlog>=24.1.0",
     "python-dotenv>=1.0.0",
     "pymysql>=1.0.0",
-    "cryptography>=48.0.1",
+    "cryptography>=50.0.0",
     "yoyo-migrations>=8.2.0",
     "nh3>=0.3",
+    "pysbd==0.3.4",
     "httpx>=0.28",
 ]
 
@@ -114,5 +115,5 @@ exclude = ["build/.*"]
 
 # Ignore untyped imports for external libraries without stubs
 [[tool.mypy.overrides]]
-module = ["pyarrow.*", "boto3.*", "smart_open.*", "pymarc.*", "oai_pmh_client.*", "pymysql.*", "yoyo.*"]
+module = ["pyarrow.*", "boto3.*", "smart_open.*", "pymarc.*", "oai_pmh_client.*", "pymysql.*", "yoyo.*", "pysbd.*"]
 ignore_missing_imports = true
