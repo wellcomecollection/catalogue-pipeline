@@ -1,8 +1,11 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
+  # Quiesced while the pipeline's stateful parts are cleared for round 3
+  # (platform#6623), so nothing writes into the state being wiped. Back on for
+  # the reindex, along with the enable_* flags below.
   reindexing_state = {
-    listen_to_reindexer = true
+    listen_to_reindexer = false
     scale_up_tasks      = false
     scale_up_matcher_db = false
   }
@@ -21,11 +24,11 @@ module "pipeline" {
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
-  enable_adapter_transformer_trigger           = true
+  enable_adapter_transformer_trigger           = false
   disable_calm_transformer_topic_subscriptions = true
-  enable_id_minter_schedule                    = true
-  enable_graph_pipeline_schedule               = true
-  enable_image_inferrer_schedule               = true
+  enable_id_minter_schedule                    = false
+  enable_graph_pipeline_schedule               = false
+  enable_image_inferrer_schedule               = false
 
   pipeline_date = local.pipeline_date // namespaces services
   graph_date    = "2026-07-03"        // namespaces graph database
