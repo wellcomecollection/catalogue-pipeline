@@ -9,7 +9,7 @@ import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
 import java.time.Instant
-import scala.xml.Elem
+import scala.xml.NodeSeq
 
 class TeiXmlTest
     extends AnyFunSpec
@@ -74,42 +74,35 @@ class TeiXmlTest
     result.left.get.getMessage should include("title")
   }
 
-  describe("bNumber") {
-    it("parses a tei xml and returns TeiData with bNumber") {
+  describe("bNumbers") {
+    it("parses a tei xml and returns TeiData with a bNumber") {
       val bnumber = createSierraBibNumber.withCheckDigit
 
       TeiXml(
         id,
-        teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
+        teiXml(id = id, identifiers = sierraIdentifiers(bnumber))
           .toString()
-      ).flatMap(_.parse).value.bNumber shouldBe Some(bnumber)
+      ).flatMap(_.parse).value.bNumbers shouldBe List(bnumber)
     }
 
-    it("fails if there's more than one b-number in the XML") {
-      val bnumber = createSierraBibNumber.withCheckDigit
+    it("returns no bNumbers if there are none in the XML") {
+      TeiXml(id, teiXml(id = id).toString())
+        .flatMap(_.parse)
+        .value
+        .bNumbers shouldBe empty
+    }
 
-      val xmlValue: Elem = <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
-        <teiHeader>
-          <fileDesc>
-            <sourceDesc>
-              <msDesc xml:lang="en" xml:id="MS_Arabic_1">
-                <msIdentifier>
-                  {sierraIdentifiers(bnumber)}
-                  {sierraIdentifiers(bnumber)}
-                </msIdentifier>
-                <msContents>
-                </msContents>
-              </msDesc>
-            </sourceDesc>
-          </fileDesc>
-        </teiHeader>
-      </TEI>
+    it("returns every b-number if there's more than one in the XML") {
+      val bnumbers =
+        (1 to 3).map(_ => createSierraBibNumber.withCheckDigit).toList
 
-      val xml = new TeiXml(xmlValue)
-
-      val err = xml.parse
-      err shouldBe a[Left[_, _]]
-      err.left.value shouldBe a[RuntimeException]
+      TeiXml(
+        id,
+        teiXml(
+          id = id,
+          identifiers = NodeSeq.fromSeq(bnumbers.flatMap(sierraIdentifiers))
+        ).toString()
+      ).flatMap(_.parse).value.bNumbers shouldBe bnumbers
     }
   }
 

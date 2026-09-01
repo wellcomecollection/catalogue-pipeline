@@ -35,7 +35,7 @@ class TeiDataTest
     val teiData = TeiData(
       id = id,
       title = title,
-      bNumber = Some(bnumber),
+      bNumbers = List(bnumber),
       description = description,
       languages = languages,
       notes = languageNotes
@@ -76,7 +76,7 @@ class TeiDataTest
     val teiData = TeiData(
       id = "id",
       title = "This is the title",
-      bNumber = Some("fjhsdg"),
+      bNumbers = List("fjhsdg"),
       description = Some("This is the description"),
       languages = List(Language("ara", "Arabic"))
     )
@@ -84,6 +84,60 @@ class TeiDataTest
     val work = teiData.toWork(Instant.now(), 1)
 
     work.state.mergeCandidates shouldBe empty
+  }
+
+  it("creates a mergeCandidate for every bnumber") {
+    val bnumbers =
+      (1 to 3).map(_ => createSierraBibNumber.withCheckDigit).toList
+
+    val teiData = TeiData(
+      id = "id",
+      title = "This is the title",
+      bNumbers = bnumbers
+    )
+
+    val work = teiData.toWork(Instant.now(), 1)
+
+    work.state.mergeCandidates shouldBe bnumbers.map {
+      bnumber =>
+        MergeCandidate(
+          createSierraSystemSourceIdentifierWith(value = bnumber),
+          reason = "Bnumber present in TEI file"
+        )
+    }
+  }
+
+  it("skips invalid bnumbers but keeps the valid ones") {
+    val bnumber = createSierraBibNumber.withCheckDigit
+
+    val teiData = TeiData(
+      id = "id",
+      title = "This is the title",
+      bNumbers = List("fjhsdg", bnumber)
+    )
+
+    val work = teiData.toWork(Instant.now(), 1)
+
+    work.state.mergeCandidates shouldBe List(
+      MergeCandidate(
+        createSierraSystemSourceIdentifierWith(value = bnumber),
+        reason = "Bnumber present in TEI file"
+      )
+    )
+  }
+
+  it("deduplicates repeated bnumbers") {
+    val bnumber = createSierraBibNumber.withCheckDigit
+
+    val teiData = TeiData(
+      id = "id",
+      title = "This is the title",
+      bNumbers = List(bnumber, bnumber)
+    )
+
+    val work = teiData.toWork(Instant.now(), 1)
+
+    work.state.mergeCandidates should have size 1
   }
 
   it("transforms authors in nestedData") {
@@ -122,7 +176,7 @@ class TeiDataTest
     val teiData = TeiData(
       id = "id",
       title = "This is the title",
-      bNumber = Some("fjhsdg"),
+      bNumbers = List("fjhsdg"),
       description = Some("This is the description"),
       nestedTeiData = List(firstInnerTeiData, secondInnerTeiData)
     )

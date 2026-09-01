@@ -1351,6 +1351,49 @@ class PlatformMergerTest
       visibleWorks.loneElement.state.canonicalId shouldBe teiWork.state.canonicalId
     }
 
+    // A manuscript can be catalogued as several Calm records, each with its
+    // own Sierra bib, all describing what is one TEI file. The TEI file names
+    // every one of those bibs, so the whole group should collapse onto it.
+    it("merges several Sierra bibs and their Calm records into one TEI work") {
+      val sierraWorks = (1 to 3).map(_ => sierraPhysicalIdentifiedWork()).toList
+      val calmWorks = (1 to 3).map(_ => calmIdentifiedWork()).toList
+
+      val teiWork = teiIdentifiedWork()
+        .mergeCandidates(sierraWorks.map(createTeiBnumberMergeCandidateFor))
+
+      val result = merger
+        .merge(works = teiWork +: (sierraWorks ++ calmWorks))
+        .mergedWorksWithTime(now)
+
+      val redirectedWorks = result.collect {
+        case w: Work.Redirected[Merged] => w
+      }
+      val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
+
+      visibleWorks.loneElement.state.canonicalId shouldBe teiWork.state.canonicalId
+
+      redirectedWorks.map(_.state.canonicalId) should contain theSameElementsAs
+        (sierraWorks ++ calmWorks).map(_.state.canonicalId)
+      redirectedWorks.map(_.redirectTarget.canonicalId).distinct shouldBe
+        List(teiWork.state.canonicalId)
+    }
+
+    it("takes the items from every Sierra bib merged into a TEI work") {
+      val sierraWorks = (1 to 3).map(_ => sierraPhysicalIdentifiedWork()).toList
+
+      val teiWork = teiIdentifiedWork()
+        .mergeCandidates(sierraWorks.map(createTeiBnumberMergeCandidateFor))
+
+      val result = merger
+        .merge(works = teiWork +: sierraWorks)
+        .mergedWorksWithTime(now)
+
+      val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
+
+      visibleWorks.loneElement.data.items should contain theSameElementsAs
+        sierraWorks.flatMap(_.data.items)
+    }
+
     it("copies the thumbnail to the inner works") {
       val teiWork = teiIdentifiedWork()
         .mapState {

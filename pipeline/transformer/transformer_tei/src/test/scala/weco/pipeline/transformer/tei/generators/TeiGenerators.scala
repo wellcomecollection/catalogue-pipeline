@@ -9,7 +9,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   def teiXml(
     id: String = randomAlphanumeric(),
     refNo: NodeSeq = idnoMsId("test title"),
-    identifiers: Option[Elem] = None,
+    identifiers: NodeSeq = NodeSeq.Empty,
     summary: Option[Elem] = None,
     languages: List[Elem] = Nil,
     items: List[Elem] = Nil,
@@ -30,7 +30,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
           <sourceDesc>
             <msDesc xml:lang="en" xml:id="MS_Arabic_1">
               <msIdentifier>
-                {identifiers.getOrElse(NodeSeq.Empty)}
+                {identifiers}
               </msIdentifier>
               {msContents(summary, languages, items, authors)}
               {parts}
