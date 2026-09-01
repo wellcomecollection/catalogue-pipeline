@@ -15,7 +15,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 # Install uv
-RUN pip install uv 
+RUN pip install uv==0.12.6
 
 # Install ca-certificates and git
 RUN dnf install -y ca-certificates git && dnf clean all
@@ -28,10 +28,12 @@ RUN update-ca-trust extract
 # This is installed separately from the main package to avoid affecting local development.
 RUN pip install pip-system-certs==5.3
 
-# Install dependencies and the package using uv pip install
-# uv pip install works with the system Python environment and installs from uv.lock
-# --system installs to system Python instead of requiring a virtual environment  
-RUN uv pip install --system .
+# Install the locked dependencies into the system interpreter.
+# --locked fails the build if uv.lock is out of date with pyproject.toml.
+# --inexact keeps packages outside the lock: pip-system-certs above and awslambdaric,
+# without which the Lambda cannot bootstrap.
+# The project itself is not installed because src/ is copied in below.
+RUN UV_PROJECT_ENVIRONMENT=/var/lang uv sync --locked --inexact --no-dev --no-install-project
 
 # Copy application source code
 COPY src/ ${LAMBDA_TASK_ROOT}
