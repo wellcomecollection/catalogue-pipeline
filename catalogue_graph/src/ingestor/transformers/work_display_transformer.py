@@ -27,6 +27,7 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
+from ingestor.transformers.short_description import derive_short_description
 from models.pipeline.archive_category import ArchiveCategory
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
@@ -36,6 +37,16 @@ from .work_base_transformer import WorkBaseTransformer
 
 
 class DisplayWorkTransformer(WorkBaseTransformer):
+    @property
+    def short_description(self) -> str | None:
+        """Collection roots, excluding TEI manuscripts."""
+        TEI_IDENTIFIER_TYPE = "tei-manuscript-id"
+        if not self.is_collection_root:
+            return None
+        if self.state.source_identifier.identifier_type.id == TEI_IDENTIFIER_TYPE:
+            return None
+        return derive_short_description(self.data.description)
+
     @property
     def identifiers(self) -> Generator[DisplayIdentifier]:
         all_ids = Identified(
