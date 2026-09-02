@@ -36,7 +36,7 @@ class TeiXml(val xml: Elem) extends Logging {
       subjects = TeiSubjects(xml)
     )
 
-  /** All the identifiers of the TEI file are in a `msIdentifier` bloc. We need
+  /** All the identifiers of the TEI file are in a `msIdentifier` block. We need
     * the `altIdentifier` nodes where `type` is `Sierra.` <TEI> <teiHeader>
     * <fileDesc> <sourceDesc> <msDesc xml:lang="en" xml:id="MS_Arabic_1">
     * <msIdentifier> <altIdentifier type="former"> <idno>WMS. Or. 1a
