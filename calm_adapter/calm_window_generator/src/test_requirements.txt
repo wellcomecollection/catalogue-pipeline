@@ -4,14 +4,14 @@
 #
 #    pip-compile test_requirements.in
 #
-boto3==1.43.3
+boto3==1.42.97
     # via -r requirements.txt
-botocore==1.43.3
+botocore==1.42.97
     # via
     #   -r requirements.txt
     #   boto3
     #   s3transfer
-click==8.3.3
+click==8.1.8
     # via -r requirements.txt
 coverage==7.13.5
     # via -r test_requirements.in
@@ -36,7 +36,7 @@ python-dateutil==2.9.0.post0
     # via
     #   -r requirements.txt
     #   botocore
-s3transfer==0.17.0
+s3transfer==0.16.1
     # via
     #   -r requirements.txt
     #   boto3
@@ -50,7 +50,7 @@ tqdm==4.67.3
     # via -r requirements.txt
 typing-extensions==4.15.0
     # via exceptiongroup
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   -r requirements.txt
     #   botocore

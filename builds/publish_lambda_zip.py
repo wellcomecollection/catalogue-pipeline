@@ -50,6 +50,47 @@ def create_zip(src, dst):
                 zf.write(absname, arcname)
 
 
+# The Python the pinned requirements were compiled for (see each lambda's
+# requirements.txt header); the build agent's own Python is older than some
+# of the pins allow. common/window_generator still runs on python3.9 but its
+# dependencies are pure Python, so the same wheels work there.
+PYTHON_IMAGE = "python:3.10"
+
+
+def install_requirements(reqs_file, target):
+    """
+    Install pinned dependencies into the target directory using the Python the
+    requirements were compiled for, and x86_64 Linux wheels, rather than the
+    build agent's. Binary-only so nothing tries to compile inside the image.
+    """
+    subprocess.check_call(
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--platform",
+            "linux/amd64",
+            "--user",
+            f"{os.getuid()}:{os.getgid()}",
+            "--volume",
+            f"{os.path.abspath(reqs_file)}:/requirements.txt:ro",
+            "--volume",
+            f"{target}:/target",
+            PYTHON_IMAGE,
+            "python",
+            "-m",
+            "pip",
+            "install",
+            "--only-binary=:all:",
+            "--no-cache-dir",
+            "--requirement",
+            "/requirements.txt",
+            "--target",
+            "/target",
+        ]
+    )
+
+
 def build_lambda_local(path, name):
     """
     Construct a Lambda ZIP bundle on the local disk.  Returns the path to
@@ -96,9 +137,7 @@ def build_lambda_local(path, name):
     ]:
         if os.path.exists(reqs_file):
             print(f"*** Installing dependencies from {reqs_file}")
-            subprocess.check_call(
-                ["pip3", "install", "--requirement", reqs_file, "--target", target]
-            )
+            install_requirements(reqs_file=reqs_file, target=target)
         else:
             print(f"*** No requirements.txt found at {reqs_file}")
 
