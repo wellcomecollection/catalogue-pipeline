@@ -4,7 +4,7 @@
 
 ### Checklist
 
-- [ ] Does this change the display model the catalogue API returns? If so, regenerate the test documents under `catalogue_graph/document_generators/test_documents`. After merge, `sync-test-documents.yml` copies them into `wellcomecollection/catalogue-api` as an auto-PR, where OpenAPI contract tests validate the published spec against them; expect that PR to fail CI until the spec documents the new shape.
+- [ ] Does this change the display model the catalogue API returns? If so, regenerate the test documents under `catalogue_graph/document_generators/test_documents`. After merge, `sync-test-documents.yml` copies them into `wellcomecollection/catalogue-api` as an auto-PR, where OpenAPI contract tests validate the published spec against them; expect that PR to fail CI until the spec (`catalogue-api/reference/catalogue.yaml`) documents the new shape.
 
 ## How to test
 
