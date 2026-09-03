@@ -10,11 +10,12 @@ locals {
 output "id_minter_rds" {
   value = {
     for name, instance in local.id_minter_rds_instances : name => {
-      cluster_id                = instance.rds_cluster_id
-      cluster_arn               = instance.rds_cluster_arn
-      ingress_security_group_id = instance.ingress_security_group_id
-      master_user_secret_arn    = instance.master_user_secret_arn
-      subnet_group_name         = instance.subnet_group_name
+      cluster_id                    = instance.rds_cluster_id
+      cluster_arn                   = instance.rds_cluster_arn
+      ingress_security_group_id     = instance.ingress_security_group_id
+      master_user_secret_arn        = instance.master_user_secret_arn
+      identifiers_api_read_role_arn = instance.identifiers_api_read_role_arn
+      subnet_group_name             = instance.subnet_group_name
     }
   }
 }

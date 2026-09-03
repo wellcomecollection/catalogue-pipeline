@@ -34,6 +34,12 @@ variable "name_suffix" {
   default     = ""
 }
 
+variable "data_api_consumer_role_arns" {
+  description = "Role ARNs allowed to assume this cluster's Data API role. No role is created when empty."
+  type        = list(string)
+  default     = []
+}
+
 variable "snapshot_identifier" {
   description = "Optional identifier (or ARN) of an RDS cluster snapshot to restore from on initial creation."
   type        = string
