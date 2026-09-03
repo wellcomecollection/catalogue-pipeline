@@ -31,7 +31,7 @@ import java.time.Instant
 case class TeiData(
   id: String,
   title: String,
-  bNumber: Option[String] = None,
+  bNumbers: List[String] = Nil,
   referenceNumber: Option[ReferenceNumber] = None,
   description: Option[String] = None,
   languages: List[Language] = Nil,
@@ -86,21 +86,20 @@ case class TeiData(
       value = id
     )
 
-  private def mergeCandidates: List[MergeCandidate[Identifiable]] = {
-    val bNumberMergeCandidate = for {
-      id <- bNumber
-      sourceIdentifier <- SourceIdentifier(
-        identifierType = IdentifierType.SierraSystemNumber,
-        ontologyType = "Work",
-        value = id
-      ).validatedWithWarning
-    } yield MergeCandidate(
-      identifier = sourceIdentifier,
-      reason = "Bnumber present in TEI file"
-    )
-
-    bNumberMergeCandidate.toList
-  }
+  // A manuscript can be catalogued in more than one Sierra record, so we may
+  // get several b numbers. Each one becomes a merge candidate.
+  private def mergeCandidates: List[MergeCandidate[Identifiable]] =
+    bNumbers.distinct.flatMap {
+      bNumber =>
+        SourceIdentifier(
+          identifierType = IdentifierType.SierraSystemNumber,
+          ontologyType = "Work",
+          value = bNumber
+        ).validatedWithWarning
+          .map(
+            MergeCandidate(_, reason = "Bnumber present in TEI file")
+          )
+    }
   implicit class InternalWorkOps(internalWorks: List[InternalWork.Source]) {
     def withLanguage(
       topLevel: WorkData[Unidentified]

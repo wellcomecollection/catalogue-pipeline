@@ -15,7 +15,6 @@ class TeiXml(val xml: Elem) extends Logging {
   def parse: Result[TeiData] =
     for {
       title <- title
-      bNumber <- bNumber
       summary <- summary
       languageData <- TeiLanguages(xml)
       (languages, languageNotes) = languageData
@@ -25,7 +24,7 @@ class TeiXml(val xml: Elem) extends Logging {
     } yield TeiData(
       id = id,
       title = title,
-      bNumber = bNumber,
+      bNumbers = bNumbers,
       referenceNumber = Some(referenceNumber),
       description = summary,
       languages = languages,
@@ -37,24 +36,22 @@ class TeiXml(val xml: Elem) extends Logging {
       subjects = TeiSubjects(xml)
     )
 
-  /** All the identifiers of the TEI file are in a `msIdentifier` bloc. We need
-    * the `altIdentifier` node where `type` is `Sierra.` <TEI> <teiHeader>
+  /** All the identifiers of the TEI file are in a `msIdentifier` block. We need
+    * the `altIdentifier` nodes where `type` is `Sierra.` <TEI> <teiHeader>
     * <fileDesc> <sourceDesc> <msDesc xml:lang="en" xml:id="MS_Arabic_1">
     * <msIdentifier> <altIdentifier type="former"> <idno>WMS. Or. 1a
     * (Iskandar)</idno> </altIdentifier> <altIdentifier type="former">
     * <idno>WMS. Or. 1a</idno> </altIdentifier> <altIdentifier type="Sierra">
     * <idno>b1234567</idno> </altIdentifier> </msIdentifier> ... </TEI>
+    *
+    * A manuscript may be catalogued in more than one Sierra record, in which
+    * case there are several such nodes and each one becomes a merge candidate.
     */
-  private def bNumber: Result[Option[String]] = {
+  private def bNumbers: List[String] = {
     val identifiersNodes = xml \\ "msDesc" \ "msIdentifier" \ "altIdentifier"
-    val seq = (identifiersNodes.filter(
+    (identifiersNodes.filter(
       n => (n \@ "type").toLowerCase == "sierra"
-    ) \ "idno").toList
-    seq match {
-      case List(node) => Right(Some(node.text.trim))
-      case Nil        => Right(None)
-      case _ => Left(new RuntimeException("More than one sierra bnumber node!"))
-    }
+    ) \ "idno").map(_.text.trim).toList
   }
 
   private def summary: Result[Option[String]] = TeiOps.summary(xml \\ "msDesc")
