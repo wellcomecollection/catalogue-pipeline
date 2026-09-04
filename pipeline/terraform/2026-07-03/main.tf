@@ -7,7 +7,9 @@ module "pipeline" {
   reindexing_state = {
     listen_to_reindexer = false
     scale_up_tasks      = false
-    scale_up_matcher_db = false
+    # ~$135/day flat: applied last before the reindex starts, reverted first
+    # after the comparison signs off.
+    scale_up_matcher_db = true
   }
 
   index_dates = {
