@@ -10,6 +10,10 @@ output "master_user_secret_arn" {
   value = module.identifiers_v2_serverless_rds_cluster.master_user_secret_arn
 }
 
+output "identifiers_api_read_role_arn" {
+  value = one(aws_iam_role.identifiers_api_read[*].arn)
+}
+
 output "ingress_security_group_id" {
   value = aws_security_group.rds_v2_ingress_security_group.id
 }
