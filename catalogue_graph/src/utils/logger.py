@@ -73,11 +73,14 @@ def setup_structlog() -> None:
     processors = [p for p in processors if p is not None]
 
     # Configure structlog
+    # Loggers are deliberately not cached: a cached logger keeps the processor
+    # chain it was first used with, so anything that logs before setup_structlog()
+    # runs would keep rendering with the default config for the life of the process.
     structlog.configure(
         processors=processors,
         wrapper_class=structlog.stdlib.BoundLogger,
         logger_factory=structlog.stdlib.LoggerFactory(),
-        cache_logger_on_first_use=True,
+        cache_logger_on_first_use=False,
     )
 
     # Configure standard library logging to output to stderr so that
