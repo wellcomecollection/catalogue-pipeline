@@ -5,8 +5,8 @@ from datetime import datetime
 from typing import Any, cast
 
 import pytest
-import structlog.testing
 from elasticsearch import Elasticsearch
+from structlog.testing import capture_logs
 
 from adapters.utils.adapter_store import AdapterStore
 from core.source import BaseSource
@@ -203,7 +203,7 @@ def test_transform_skips_deleted_record_without_001(
 
 
 def test_stream_to_index_skips_id_less_records_and_warns_per_record(
-    adapter_store: AdapterStore, monkeypatch: pytest.MonkeyPatch
+    adapter_store: AdapterStore,
 ) -> None:
     missing_title_xml = (
         "<record>"
@@ -229,13 +229,10 @@ def test_stream_to_index_skips_id_less_records_and_warns_per_record(
         ]
     )
 
-    # Cached structlog config makes capture_logs unreliable; patch the module logger.
-    logger = structlog.testing.CapturingLogger()
-    monkeypatch.setattr("adapters.transformers.marcxml_transformer.logger", logger)
-
     MockElasticsearchClient.inputs.clear()
     es_client = MockElasticsearchClient({}, "")
-    transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
+    with capture_logs() as logs:
+        transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
 
     # The valid record is indexed as before.
     assert {a["_id"] for a in MockElasticsearchClient.inputs} == {"Work[marc-test/id1]"}
@@ -247,17 +244,16 @@ def test_stream_to_index_skips_id_less_records_and_warns_per_record(
 
     # Id-less records are skipped with a warning naming each row.
     warnings = [
-        call
-        for call in logger.calls
-        if call.args
-        and call.args[0] == "Skipping record with a missing or empty id field (001)"
+        log
+        for log in logs
+        if log["event"] == "Skipping record with a missing or empty id field (001)"
     ]
-    assert all(call.method_name == "warning" for call in warnings)
-    assert {call.kwargs["row_id"] for call in warnings} == {"id2", "id3"}
+    assert all(log["log_level"] == "warning" for log in warnings)
+    assert {log["row_id"] for log in warnings} == {"id2", "id3"}
 
 
 def test_stream_to_index_no_skip_warning_when_all_records_have_ids(
-    adapter_store: AdapterStore, monkeypatch: pytest.MonkeyPatch
+    adapter_store: AdapterStore,
 ) -> None:
     transformer = MarcXmlTransformerForTests(adapter_store, [])
     transformer.source = _StubSource(  # type: ignore[assignment]
@@ -270,16 +266,12 @@ def test_stream_to_index_no_skip_warning_when_all_records_have_ids(
         ]
     )
 
-    logger = structlog.testing.CapturingLogger()
-    monkeypatch.setattr("adapters.transformers.marcxml_transformer.logger", logger)
-
     MockElasticsearchClient.inputs.clear()
     es_client = MockElasticsearchClient({}, "")
-    transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
+    with capture_logs() as logs:
+        transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
 
-    assert not [
-        call for call in logger.calls if call.args and "Skipping record" in call.args[0]
-    ]
+    assert not [log for log in logs if "Skipping record" in log["event"]]
 
 
 def test_stream_to_index_success_no_errors(

@@ -1,6 +1,6 @@
-import logging
 from collections.abc import Generator
 
+import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
@@ -15,7 +15,7 @@ from models.pipeline.concept import Concept, Subject
 from models.pipeline.identifier import Identifiable
 from utils.types import RawConceptType
 
-logger: logging.Logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 def _get_main_label(field: Field) -> str:
@@ -126,7 +126,11 @@ def extract_subject(field: Field) -> Subject | None:
     if len(a_subfields) == 0 or not "".join(s.strip() for s in a_subfields):
         return None
     if len(a_subfields) > 1:
-        logger.error(f"Repeated Non-repeating field $a found in {field.tag} field")
+        logger.error(
+            "Repeated non-repeating subfield $a",
+            tag=field.tag,
+            count=len(a_subfields),
+        )
 
     # Concept construction with original semantics (preserving Python rules while adopting separator changes)
     main_label = _get_main_label(field)
