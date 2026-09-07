@@ -1,12 +1,12 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
-  # Scaled up for the round 3 full reindex (platform#6624). The matcher DB comes
-  # back down as soon as the reindex finishes; tasks follow once the queues drain.
+  # Matching is done for round 3, so the matcher DB goes back to on demand.
+  # Tasks stay up until the comparison signs off (platform#6642).
   reindexing_state = {
     listen_to_reindexer = true
     scale_up_tasks      = true
-    scale_up_matcher_db = true
+    scale_up_matcher_db = false
   }
 
   index_dates = {
