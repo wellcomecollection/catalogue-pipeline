@@ -1,3 +1,4 @@
+import os
 from collections.abc import Generator
 from typing import Any
 
@@ -23,6 +24,11 @@ from utils.aws import get_secret
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption("--skip-db", action="store_true", help="Skip database tests")
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    # Cached loggers would hide their events from structlog.testing.capture_logs().
+    os.environ["LOG_CACHE_LOGGERS"] = "false"
 
 
 def pytest_collection_modifyitems(
