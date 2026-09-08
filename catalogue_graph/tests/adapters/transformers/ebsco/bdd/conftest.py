@@ -187,7 +187,7 @@ def _errors_logged(captured_logs: list[EventDict], message: str) -> list[EventDi
     return [
         entry
         for entry in captured_logs
-        if entry["log_level"] == "error" and entry["event"] == message
+        if entry.get("log_level") == "error" and entry.get("event") == message
     ]
 
 
