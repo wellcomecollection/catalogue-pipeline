@@ -1,5 +1,9 @@
 locals {
   identifiers_api_read_count = length(var.data_api_consumer_role_arns) > 0 ? 1 : 0
+
+  data_api_consumer_account_roots = distinct([
+    for arn in var.data_api_consumer_role_arns : "arn:aws:iam::${split(":", arn)[4]}:root"
+  ])
 }
 
 resource "aws_iam_role" "identifiers_api_read" {
@@ -17,7 +21,13 @@ data "aws_iam_policy_document" "identifiers_api_assume" {
 
     principals {
       type        = "AWS"
-      identifiers = var.data_api_consumer_role_arns
+      identifiers = local.data_api_consumer_account_roots
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:PrincipalArn"
+      values   = var.data_api_consumer_role_arns
     }
   }
 }
@@ -39,6 +49,11 @@ data "aws_iam_policy_document" "identifiers_api_read" {
 
   # The Data API reads the credential on the caller's behalf, so the caller needs
   # access to the secret as well as to the cluster.
+  #
+  # This is the cluster master secret, so the grant is admin-level on the registry
+  # until https://github.com/wellcomecollection/platform/issues/6533 creates a
+  # SELECT-only user with its own secret. Point this at that secret when it lands,
+  # and do not add further consumers to data_api_consumer_role_arns before then.
   statement {
     actions   = ["secretsmanager:GetSecretValue"]
     resources = [module.identifiers_v2_serverless_rds_cluster.master_user_secret_arn]
