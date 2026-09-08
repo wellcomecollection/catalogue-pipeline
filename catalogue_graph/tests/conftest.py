@@ -28,7 +28,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 def pytest_configure(config: pytest.Config) -> None:
     # Cached loggers would hide their events from structlog.testing.capture_logs().
-    os.environ["LOG_CACHE_LOGGERS"] = "false"
+    os.environ.setdefault("LOG_CACHE_LOGGERS", "false")
 
 
 def pytest_collection_modifyitems(
