@@ -5,6 +5,7 @@ from adapters.transformers.marc.edition import extract_edition
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
 )
+from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
@@ -67,6 +68,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
             )
 
         return None
+
+    @property
+    def former_frequency(self) -> list[str]:
+        return extract_former_frequency(self.record)
 
     @property
     def items(self) -> list[Item]:
