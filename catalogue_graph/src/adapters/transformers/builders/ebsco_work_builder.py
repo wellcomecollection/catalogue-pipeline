@@ -1,10 +1,3 @@
-from models.pipeline.concept import Contributor, Genre, Subject
-from models.pipeline.format import Format
-from models.pipeline.holdings import Holdings
-from models.pipeline.id_label import Language
-from models.pipeline.identifier import Id, SourceIdentifier
-from models.pipeline.production import ProductionEvent
-
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.ebsco.contributors import extract_contributors
 from adapters.transformers.ebsco.designation import extract_designation
@@ -17,6 +10,12 @@ from adapters.transformers.ebsco.production import extract_production
 from adapters.transformers.ebsco.subjects import extract_subjects
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.edition import extract_edition
+from models.pipeline.concept import Contributor, Genre, Subject
+from models.pipeline.format import Format
+from models.pipeline.holdings import Holdings
+from models.pipeline.id_label import Language
+from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.production import ProductionEvent
 
 
 class EbscoWorkBuilder(MarcXmlWorkBuilder):
