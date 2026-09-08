@@ -35,4 +35,8 @@ module "id_minter_rds_2026_07_03" {
   max_scaling_capacity = 32
 
   master_username = data.aws_ssm_parameter.rds_username.value
+
+  data_api_consumer_role_arns = [
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-stage",
+  ]
 }
