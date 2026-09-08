@@ -51,6 +51,17 @@ def add_field(
     marc_record.add_field(Field(tag=tag, indicators=indicators, subfields=subfields))
 
 
+empty_field_step_regex = parsers.re(
+    r"the MARC record has (?:a|another) (?P<tag>\d{3}) field with no subfields"
+)
+
+
+@given(empty_field_step_regex)
+def add_empty_field(marc_record: Record, tag: str) -> None:
+    """A malformed data field: present in the record, but wholly empty."""
+    marc_record.add_field(Field(tag=tag))
+
+
 replace_field_step_regex = parsers.re(
     r"the MARC record's only (?P<tag>\d{3}) field"
     r'(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)"|)'
