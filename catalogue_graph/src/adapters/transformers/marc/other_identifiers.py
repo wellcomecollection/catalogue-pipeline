@@ -59,7 +59,7 @@ def format_field(field: Field) -> SourceIdentifier | None:
         return None
     prefix, rpar, id_value = a_subfield[1:].partition(")")
     if not rpar:
-        logger.error("identifier without namespace prefix: %s", a_subfield)
+        logger.error("Identifier without namespace prefix", identifier_value=a_subfield)
         return None
     identifier_type = which_identifier_type(prefix, id_value)
     if identifier_type is None:
