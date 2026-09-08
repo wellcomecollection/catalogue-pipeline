@@ -17,4 +17,4 @@ Feature: The bare minimum MARC record for an item
     Given a MARC record with field 001 "abc123"
     And the MARC record has a 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001"
     And the MARC record has a 245 field with subfield "a" value ""
-    Then transforming the record raises ValueError
+    Then transforming the record raises ValueError "Empty title field (245) after processing subfields"

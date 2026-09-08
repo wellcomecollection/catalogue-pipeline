@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Generator, Sequence
+from collections.abc import Sequence
 from datetime import datetime
 from typing import Any, cast
 
-import pytest
 from pymarc.record import Field, Record, Subfield
 from pytest_bdd import given, parsers, then, when
-from structlog.testing import capture_logs
-from structlog.typing import EventDict
 
 from adapters.transformers.builders.ebsco_work_builder import EbscoWorkBuilder
 from models.pipeline.identifier import Id
@@ -17,17 +14,11 @@ from models.pipeline.source.work import VisibleSourceWork
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
+from tests.gherkin_steps.logs import *
 from tests.gherkin_steps.marc import *
 from tests.gherkin_steps.work import *
 
 # mypy: allow-untyped-calls
-
-
-@pytest.fixture(autouse=True)
-def captured_logs() -> Generator[list[EventDict], None, None]:
-    """Collect structlog events emitted while transforming a record; caplog does not see them."""
-    with capture_logs() as entries:
-        yield entries
 
 
 def _normalise_attr_phrase(attr_phrase: str) -> str:
@@ -181,39 +172,6 @@ def context_concept_value(
     concept = thing.concepts[_ordinal_index(ord)]
     assert getattr(concept, property) == value
     context["concept"] = concept
-
-
-def _errors_logged(captured_logs: list[EventDict], message: str) -> list[EventDict]:
-    return [
-        entry
-        for entry in captured_logs
-        if entry["log_level"] == "error" and entry["event"] == message
-    ]
-
-
-def _captured_report(captured_logs: list[EventDict]) -> str:
-    if not captured_logs:
-        return "No events were logged."
-    return "Logged events were:\n" + "\n".join(str(entry) for entry in captured_logs)
-
-
-@then(parsers.parse('an error "{message}" is logged'))
-def step_error_logged(captured_logs: list[EventDict], message: str) -> None:
-    assert _errors_logged(captured_logs, message), (
-        f'Expected an error logged with message: "{message}". '
-        + _captured_report(captured_logs)
-    )
-
-
-@then(parsers.parse('an error "{message}" is logged with {key} "{value}"'))
-def step_error_logged_with(
-    captured_logs: list[EventDict], message: str, key: str, value: str
-) -> None:
-    matches = _errors_logged(captured_logs, message)
-    assert any(str(entry.get(key)) == value for entry in matches), (
-        f'Expected an error logged with message: "{message}" and {key}="{value}". '
-        + _captured_report(captured_logs)
-    )
 
 
 # ------------- Utility accessors ------------- #

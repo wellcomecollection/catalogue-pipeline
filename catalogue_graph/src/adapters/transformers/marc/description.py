@@ -12,7 +12,6 @@ And any present repeating $u subfields
 $u - Uniform Resource Identifier (R)
 """
 
-import logging
 from collections.abc import Iterable
 from itertools import chain
 
@@ -20,8 +19,6 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.transformers.utils.html import format_as_html_link
-
-logger = logging.getLogger("transformer/description")
 
 
 def extract_description(record: Record) -> str | None:
