@@ -1,6 +1,10 @@
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
+from adapters.transformers.marc.edition import extract_edition
+from adapters.transformers.marc.physical_description import (
+    extract_physical_description,
+)
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
@@ -29,6 +33,14 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     def source_identifier_value(self) -> str:
         value: str = extract_instance_uuid(self.record)
         return value
+
+    @property
+    def physical_description(self) -> str | None:
+        return extract_physical_description(self.record)
+
+    @property
+    def edition(self) -> str | None:
+        return extract_edition(self.record)
 
     @property
     def other_identifiers(self) -> list[SourceIdentifier]:
