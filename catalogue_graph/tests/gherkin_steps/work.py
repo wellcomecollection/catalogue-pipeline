@@ -25,6 +25,8 @@ def context() -> dict[str, Any]:
 ATTR_ALIASES: dict[str, str] = {
     "designation": "designation",
     "designations": "designation",
+    "former frequency": "former_frequency",
+    "former frequencies": "former_frequency",
     "alternative title": "alternative_titles",
     "alternative titles": "alternative_titles",
     "genre": "genres",

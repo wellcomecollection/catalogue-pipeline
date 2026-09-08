@@ -1,6 +1,7 @@
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
+from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
@@ -55,6 +56,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
             )
 
         return None
+
+    @property
+    def former_frequency(self) -> list[str]:
+        return extract_former_frequency(self.record)
 
     @property
     def items(self) -> list[Item]:
