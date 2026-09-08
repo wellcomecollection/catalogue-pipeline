@@ -6,9 +6,9 @@ from adapters.transformers.marc.physical_description import (
     extract_physical_description,
 )
 from adapters.transformers.marc.former_frequency import extract_former_frequency
+from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
-)
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from models.pipeline.identifier import (
     Id,
@@ -72,6 +72,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def former_frequency(self) -> list[str]:
         return extract_former_frequency(self.record)
+
+    @property
+    def current_frequency(self) -> str | None:
+        return extract_current_frequency(self.record)
 
     @property
     def items(self) -> list[Item]:

@@ -1,9 +1,6 @@
 """Tests covering extraction of MARC 310 into a current frequency string.
 
 https://www.loc.gov/marc/bibliographic/bd310.html
-
-Although the extractor currently lives under the EBSCO adapter module, these
-are MARC-field level tests and can be shared across adapters.
 """
 
 from __future__ import annotations
@@ -11,7 +8,7 @@ from __future__ import annotations
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.transformers.ebsco.current_frequency import extract_current_frequency
+from adapters.transformers.marc.current_frequency import extract_current_frequency
 
 
 def test_no_frequency(marc_record: Record) -> None:
