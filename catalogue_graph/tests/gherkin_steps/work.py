@@ -23,6 +23,7 @@ def context() -> dict[str, Any]:
 # Attribute phrase -> model attribute mapping (extendable)
 # ------------------------------------------------------------------
 ATTR_ALIASES: dict[str, str] = {
+    "current frequency": "current_frequency",
     "designation": "designation",
     "designations": "designation",
     "alternative title": "alternative_titles",
@@ -262,12 +263,14 @@ def child_list_member_with_datatable(
 
 @then(parsers.parse('the work\'s {attr} is "{value}"'))
 def work_attr_is(work: SourceWork, attr: str, value: str) -> None:
+    attr = _normalise_attr_phrase(attr)
     actual = drill_through_dots(work.data, attr)
     assert actual == value, f"Expected work.data.{attr} == {value!r}, got {actual!r}"
 
 
 @then(parsers.parse("the work's {attr} is absent"))
 def work_attr_is_absent(work: SourceWork, attr: str) -> None:
+    attr = _normalise_attr_phrase(attr)
     actual = drill_through_dots(work.data, attr)
     assert actual is None, f"Expected work.data.{attr} to be absent, got {actual!r}"
 
