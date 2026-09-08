@@ -55,23 +55,27 @@ Feature: title (MARC 245)
     Then the work's title is "cyntaf [un] ail trydydd"
 
   Scenario: A record with no 245 field fails to transform
-    Then transforming the record raises ValueError
+    Then transforming the record raises ValueError "Missing title field (245)"
+
+  Scenario: A 245 field with no subfields at all fails to transform
+    Given the MARC record has a 245 field with no subfields
+    Then transforming the record raises ValueError "Empty title field (245) after processing subfields"
 
   Scenario: A 245 with no suitable subfields fails to transform
     Given the MARC record has a 245 field with subfield "7" value "the back of a lorry"
-    Then transforming the record raises ValueError
+    Then transforming the record raises ValueError "Empty title field (245) after processing subfields"
 
   Scenario: A 245 whose only suitable subfield is ǂh fails to transform
     # A trailing ǂh is discarded, so this is the same as having no subfields
     Given the MARC record has a 245 field with subfield "h" value "the back of a lorry"
-    Then transforming the record raises ValueError
+    Then transforming the record raises ValueError "Empty title field (245) after processing subfields"
 
   # Deliberate improvements on the Scala, which returns a blank title in the
   # first case and mishandles the pathological second case by its own admission.
 
   Scenario: A 245 with only whitespace content fails to transform
     Given the MARC record has a 245 field with subfield "a" value "   "
-    Then transforming the record raises ValueError
+    Then transforming the record raises ValueError "Empty title field (245) after processing subfields"
 
   Scenario: Only the trailing ǂh is dropped when an earlier ǂh has identical content
     Given the MARC record has a 245 field with subfield "a" value "cyntaf" and subfield "h" value "ail" and subfield "p" value "trydydd" and subfield "h" value "ail"
