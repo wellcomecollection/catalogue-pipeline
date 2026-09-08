@@ -1,8 +1,8 @@
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
-from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.edition import extract_edition
+from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
 )
