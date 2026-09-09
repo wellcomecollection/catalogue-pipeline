@@ -1,6 +1,7 @@
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
+from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.edition import extract_edition
 from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.physical_description import (
@@ -68,6 +69,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
             )
 
         return None
+
+    @property
+    def current_frequency(self) -> str | None:
+        return extract_current_frequency(self.record)
 
     @property
     def former_frequency(self) -> list[str]:
