@@ -2,7 +2,6 @@ Feature: current frequency (MARC 310)
   The current frequency is built from MARC 310 subfields ǂa and ǂb, joined with
   a space in the order they appear in the field. 310 is repeatable, and all of a
   record's 310s are flattened into one string, again joined with a space and with
-
   no separator marking the field boundary. Subfields and fields with no content
   are dropped. A record with no usable 310 has no current frequency.
 
