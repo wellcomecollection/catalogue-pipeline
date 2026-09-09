@@ -1,0 +1,22 @@
+# Backstage-format description of this repository, gathered into
+# https://github.com/wellcomecollection/catalog. Folders that deploy
+# independently describe themselves in their own catalog-info.yaml, listed
+# here as Location targets.
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: catalogue-pipeline
+  description: The data pipeline services extracting and transforming catalogue data
+  annotations:
+    github.com/project-slug: wellcomecollection/catalogue-pipeline
+spec:
+  owner: digital-platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: catalogue-pipeline-units
+spec:
+  type: url
+  targets:
+    - ./catalogue_graph/catalog-info.yaml

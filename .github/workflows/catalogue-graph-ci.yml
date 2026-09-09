@@ -16,6 +16,8 @@ on:
 permissions:
   contents: read
   id-token: write
+  # The called deploy workflow records a GitHub Deployment
+  deployments: write
 
 jobs:
   python-checks:
