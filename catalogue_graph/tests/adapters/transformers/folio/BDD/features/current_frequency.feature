@@ -2,8 +2,8 @@ Feature: current frequency (MARC 310)
   The current frequency is built from MARC 310 subfields ǂa and ǂb, joined with
   a space in the order they appear in the field. 310 is repeatable, and all of a
   record's 310s are flattened into one string, again joined with a space and with
-  no separator marking the field boundary. A record with no usable 310 has no
-  current frequency.
+  no separator marking the field boundary. Subfields and fields with no content
+  are dropped. A record with no usable 310 has no current frequency.
 
   These scenarios mirror the unit tests of the Scala transformers this replaces
   (MarcCurrentFrequencyTest.scala and SierraCurrentFrequencyTest.scala),
@@ -58,10 +58,29 @@ Feature: current frequency (MARC 310)
     When I transform the MARC record
     Then the work's current frequency is "Annual, 2007-2012 Solsticial, 2004-2006"
 
-  # Deliberate divergence from the Scala, which trims only the joined field and
-  # so emits a double space here.
+  # Deliberate divergences from the Scala, which joins empty subfields and
+  # fields and so emits stray whitespace. Only the first occurs in the data.
 
   Scenario: Surrounding whitespace is stripped from each subfield before joining
     Given the MARC record has a 310 field with subfield "a" value "6 no. a year, " and subfield "b" value "<Feb. 1981->"
     When I transform the MARC record
     Then the work's current frequency is "6 no. a year, <Feb. 1981->"
+
+  Scenario: A subfield with no content is dropped rather than joined
+    Given the MARC record has a 310 field with subfield "a" value "Annual," and subfield "b" value " "
+    And the MARC record has another 310 field with subfield "a" value "Solsticial,"
+    When I transform the MARC record
+    Then the work's current frequency is "Annual, Solsticial,"
+
+  Scenario: A leading 310 with no content is dropped rather than joined
+    Given the MARC record has a 310 field with subfield "a" value " "
+    And the MARC record has another 310 field with subfield "a" value "Annual,"
+    When I transform the MARC record
+    Then the work's current frequency is "Annual,"
+
+  Scenario: A 310 with no content between two others is dropped rather than joined
+    Given the MARC record has a 310 field with subfield "a" value "Annual,"
+    And the MARC record has another 310 field with subfield "a" value " "
+    And the MARC record has another 310 field with subfield "a" value "Solsticial,"
+    When I transform the MARC record
+    Then the work's current frequency is "Annual, Solsticial,"
