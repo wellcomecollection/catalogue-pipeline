@@ -93,16 +93,13 @@ def test_make_link_from_url(marc_record: Record) -> None:
 )
 def test_only_urls_create_links(marc_record: Record) -> None:
     """Non-URL URIs are treated as text, and a warning is logged."""
-    with capture_logs() as cap_logs:
+    with capture_logs() as logs:
         assert (
             extract_description(marc_record)
             == "<p>summary source urn:isbn:9781455841653</p>"
         )
 
-    assert any(
-        "$u subfield doesn't look like a URL" in log.get("event", "")
-        for log in cap_logs
-    )
+    assert any(log["event"] == "$u subfield doesn't look like a URL" for log in logs)
 
 
 @pytest.mark.parametrize(

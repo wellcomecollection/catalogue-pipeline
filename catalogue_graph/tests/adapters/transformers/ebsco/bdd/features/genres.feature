@@ -13,7 +13,7 @@ Feature: Extracting genres from MARC 655
   it should be discarded and an error logged
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo" and subfield "a" value "Rominimal"
     When I transform the MARC record
-    Then an error "Repeated Non-repeating field $a found in 655 field" is logged
+    Then an error "Repeated non-repeating subfield $a" is logged with tag "655"
     And there are no genres
 
   Scenario: A simple genre

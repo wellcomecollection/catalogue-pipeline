@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import logging
-
+import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
@@ -17,7 +16,7 @@ from adapters.transformers.utils.text_utils import (
 )
 from models.pipeline.concept import Concept, Genre
 
-logger: logging.Logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 def build_primary_concept(field: Field) -> Concept | None:
@@ -58,7 +57,11 @@ def extract_genre(field: Field) -> Genre | None:
         return None
     if len(a_subfields) > 1:
         # Keep parity with existing behaviour: log and discard whole field
-        logger.error("Repeated Non-repeating field $a found in 655 field")
+        logger.error(
+            "Repeated non-repeating subfield $a",
+            tag=field.tag,
+            count=len(a_subfields),
+        )
         return None
 
     # Build hyphen-separated label consistent with Scala implementation.

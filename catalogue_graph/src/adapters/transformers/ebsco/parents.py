@@ -6,13 +6,12 @@ See https://github.com/wellcomecollection/docs/tree/main/rfcs/045-sierra-work-re
 At present, all parent links behave as though they link to a Series.
 """
 
-import logging
-
+import structlog
 from pymarc.record import Record
 
 from models.pipeline.work_state import WorkAncestor
 
-logger: logging.Logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 SUBFIELD_TAGS: dict[str, list[str]] = {
     "440": ["a"],
@@ -40,12 +39,17 @@ def get_parents(record: Record) -> list[WorkAncestor]:
     for field in record.get_fields(*SUBFIELD_TAGS.keys()):
         subfields = field.get_subfields(*SUBFIELD_TAGS[field.tag])
         if len(subfields) == 0:
-            logger.warning(f"No {field.tag} Series relationship found for {field}.")
+            logger.warning(
+                "No Series relationship found", tag=field.tag, field=str(field)
+            )
             continue
 
         if len(subfields) > 1:
             logger.warning(
-                f"Ambiguous {field.tag} Series relationship found for {field}."
+                "Ambiguous Series relationship found",
+                tag=field.tag,
+                field=str(field),
+                count=len(subfields),
             )
 
         title = subfields[0].removesuffix(";").removesuffix(",").strip()
