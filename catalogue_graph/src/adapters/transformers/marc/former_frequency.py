@@ -15,4 +15,4 @@ def extract_former_frequency(record: Record) -> list[str]:
 
 
 def format_field(field: Field) -> str:
-    return " ".join(value.strip() for value in field.get_subfields("a", "b"))
+    return " ".join(value.strip() for value in field.get_subfields("a", "b")).strip()
