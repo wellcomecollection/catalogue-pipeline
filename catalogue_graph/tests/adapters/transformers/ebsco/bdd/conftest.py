@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import logging
 import re
 from collections.abc import Sequence
 from datetime import datetime
 from typing import Any, cast
 
-from _pytest.logging import LogCaptureFixture
 from pymarc.record import Field, Record, Subfield
 from pytest_bdd import given, parsers, then, when
 
@@ -16,12 +14,11 @@ from models.pipeline.source.work import VisibleSourceWork
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
+from tests.gherkin_steps.logs import *
 from tests.gherkin_steps.marc import *
 from tests.gherkin_steps.work import *
 
 # mypy: allow-untyped-calls
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 
 def _normalise_attr_phrase(attr_phrase: str) -> str:
@@ -175,20 +172,6 @@ def context_concept_value(
     concept = thing.concepts[_ordinal_index(ord)]
     assert getattr(concept, property) == value
     context["concept"] = concept
-
-
-@then(parsers.parse('an error "{message}" is logged'))
-def step_error_logged(caplog: LogCaptureFixture, message: str) -> None:
-    matches = [
-        rec
-        for rec in caplog.records
-        if rec.levelno >= logging.ERROR and rec.getMessage() == message
-    ]
-    assert matches, (
-        f'Expected an ERROR log with message: "{message}". '
-        f"Captured log messages were:\n"
-        + "\n".join(f"[{r.levelname}] {r.getMessage()}" for r in caplog.records)
-    )
 
 
 # ------------- Utility accessors ------------- #

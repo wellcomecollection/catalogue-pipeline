@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import logging
 from datetime import UTC, datetime, timedelta
+
+import structlog
 
 from models.incremental_window import IncrementalWindow
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 ALIGNMENT_EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
 DEFAULT_WINDOW_MINUTES = 15
@@ -81,12 +82,12 @@ class WindowGenerator:
             cursor = win_end
 
         logger.info(
-            "Generated %d windows covering %s -> %s (size=%d minutes, allow_partial=%s)",
-            len(windows),
-            start_time.isoformat(),
-            effective_end_time.isoformat(),
-            self.window_minutes,
-            self.allow_partial_final_window,
+            "Generated windows",
+            count=len(windows),
+            start_time=start_time.isoformat(),
+            end_time=effective_end_time.isoformat(),
+            window_minutes=self.window_minutes,
+            allow_partial_final_window=self.allow_partial_final_window,
         )
 
         return windows

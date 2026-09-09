@@ -77,7 +77,7 @@ def setup_structlog() -> None:
         processors=processors,
         wrapper_class=structlog.stdlib.BoundLogger,
         logger_factory=structlog.stdlib.LoggerFactory(),
-        cache_logger_on_first_use=True,
+        cache_logger_on_first_use=os.environ.get("LOG_CACHE_LOGGERS") != "false",
     )
 
     # Configure standard library logging to output to stderr so that
