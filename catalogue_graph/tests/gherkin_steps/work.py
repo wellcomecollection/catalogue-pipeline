@@ -26,6 +26,8 @@ ATTR_ALIASES: dict[str, str] = {
     "current frequency": "current_frequency",
     "designation": "designation",
     "designations": "designation",
+    "former frequency": "former_frequency",
+    "former frequencies": "former_frequency",
     "alternative title": "alternative_titles",
     "alternative titles": "alternative_titles",
     "genre": "genres",

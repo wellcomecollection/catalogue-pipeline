@@ -3,6 +3,7 @@ from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuil
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.edition import extract_edition
+from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
 )
@@ -72,6 +73,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def current_frequency(self) -> str | None:
         return extract_current_frequency(self.record)
+
+    @property
+    def former_frequency(self) -> list[str]:
+        return extract_former_frequency(self.record)
 
     @property
     def items(self) -> list[Item]:
