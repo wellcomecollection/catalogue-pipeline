@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/wellcomecollection/deploy-tracker/main/schema/deploy-tracker.schema.json
+# Deploy tracker config for the catalogue_graph unit: the Python lambdas the
+# "Catalogue pipeline: Deploy" workflow updates. Only pull requests touching
+# this directory are reported. Deployments carry task deploy:catalogue_graph.
+# There is no stage and no HTTP surface, so no checkpoints: "deployed" is as
+# far as the tracker can see.
+version: 1
+
+slack:
+  channel: "#wc-deploys"
+
+environments:
+  prod: {}
+
+labels: true
+pr_comments: true
