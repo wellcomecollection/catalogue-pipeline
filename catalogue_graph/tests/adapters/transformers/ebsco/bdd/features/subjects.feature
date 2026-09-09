@@ -11,7 +11,7 @@ Feature: Extracting subjects from 6xx fields
     There are some records out of our control where multiple "a" has occurred
       Given the MARC record has a 600 field with indicators "" "0" with subfield "a" value "Joseph Pujol" and subfield "a" value "Roland"
       When I transform the MARC record
-      Then an error "Repeated Non-repeating field $a found in 600 field" is logged
+      Then an error "Repeated non-repeating subfield $a" is logged with tag "600"
       And the only subject has the label "Joseph Pujol Roland"
 
   Rule: A subject is extracted for each relevant field

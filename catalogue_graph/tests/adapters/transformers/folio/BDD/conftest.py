@@ -12,6 +12,7 @@ from models.pipeline.source.work import VisibleSourceWork
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
+from tests.gherkin_steps.logs import *
 from tests.gherkin_steps.marc import *
 from tests.gherkin_steps.work import *
 
