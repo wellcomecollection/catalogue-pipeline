@@ -14,7 +14,8 @@ Event shape (from EventBridge axiell.adapter.completed event):
     "job_id": "adapter-job-xyz-123",
     "transformer_type": "axiell",
     "dry_run": true,
-    "sample_limit": 50
+    "sample_limit": 50,
+    "folio_target": "dev"
   }
 
 The adapter table is read via the shared ``AXIELL_CONFIG`` /
@@ -24,10 +25,16 @@ so no Iceberg-specific env vars.
 
 Environment variables (injected by Terraform):
   OKAPI_SECRET_PARAM     — SSM path to {"url":…, "tenant":…, "username":…, "password":…}
+  OKAPI_DEV_SECRET_PARAM — the same, for the folio-dev-server sandbox (only set
+                           when the dev target is enabled in Terraform)
   MANIFEST_S3_BUCKET     — S3 bucket name for JSON run reports
   AWS_REGION             — e.g. eu-west-1 (set automatically in Lambda)
   DRY_RUN                — default "true"; event.dry_run overrides
   HARD_DELETE            — default "false" (suppress); event.hard_delete overrides
+  FOLIO_TARGET           — default "prod"; event.folio_target overrides. "dev"
+                           targets the sandbox, and reaching it needs the Lambda
+                           VPC-attached to the sandbox subnet (see
+                           docs/axiell-folio-sync-lambda-dev-instance.md).
 
 For local runs, OKAPI_URL / OKAPI_TENANT / OKAPI_USERNAME / OKAPI_PASSWORD
 override the corresponding SSM fields (and skip SSM if all are set).
@@ -44,7 +51,10 @@ import structlog
 
 from adapters.steps.axiell_folio_sync.axiell_adapter_read import read_rows
 from adapters.steps.axiell_folio_sync.folio import RefCache
-from adapters.steps.axiell_folio_sync.folio.okapi import load_okapi_config
+from adapters.steps.axiell_folio_sync.folio.okapi import (
+    load_okapi_config,
+    resolve_folio_target,
+)
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
@@ -85,7 +95,10 @@ def handler(
     )
     manifest_bucket = os.environ.get("MANIFEST_S3_BUCKET")
 
-    okapi = load_okapi_config()
+    folio_target = resolve_folio_target(event.folio_target)
+    okapi = load_okapi_config(folio_target)
+    # Logged so a run's manifest can always be tied back to the instance it hit.
+    logger.info("folio target resolved", folio_target=folio_target, url=okapi["url"])
     client = FolioClient(
         okapi["url"].rstrip("/"),
         okapi["tenant"],
@@ -170,6 +183,16 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="Read from the S3 Tables catalog instead of the local sqlite catalog",
     )
+    parser.add_argument(
+        "--folio-target",
+        choices=["prod", "dev"],
+        default=None,
+        help=(
+            "FOLIO instance to target: 'prod' (EBSCO SaaS) or 'dev' (the "
+            "folio-dev-server sandbox). Defaults to the FOLIO_TARGET env var, "
+            "then 'prod'."
+        ),
+    )
     args = parser.parse_args()
 
     event = AxiellFolioSyncEvent(
@@ -178,6 +201,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         sample_limit=None if args.changeset_ids else args.sample_limit,
         dry_run=not args.live,
         hard_delete=args.hard_delete,
+        folio_target=args.folio_target,
     )
     response = handler(
         event,

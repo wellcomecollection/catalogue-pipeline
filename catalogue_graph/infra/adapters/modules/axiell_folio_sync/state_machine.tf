@@ -9,12 +9,25 @@ locals {
         Resource = "arn:aws:states:::lambda:invoke"
         Arguments = {
           FunctionName = module.sync_lambda.lambda.arn
+          # Every field the sync step accepts is mapped through. Anything omitted
+          # here is silently dropped by the time it reaches the Lambda — Pydantic
+          # ignores unknown keys — so a run would fall back to the env default
+          # with no indication the event asked for something else.
           Payload = {
             changeset_ids    = "{% $states.input.detail.changeset_ids %}"
             job_id           = "{% $states.input.detail.job_id %}"
             transformer_type = "{% $exists($states.input.detail.transformer_type) ? $states.input.detail.transformer_type : null %}"
             sample_limit     = "{% $exists($states.input.detail.sample_limit) ? $states.input.detail.sample_limit : null %}"
             dry_run          = "{% $exists($states.input.detail.dry_run) ? $states.input.detail.dry_run : ${var.dry_run_default} %}"
+            hard_delete      = "{% $exists($states.input.detail.hard_delete) ? $states.input.detail.hard_delete : null %}"
+            # Resolved here rather than deferred to the Lambda's FOLIO_TARGET env
+            # var, and for the same reason dry_run is: this path is the automated
+            # every-15-minutes pipeline, and it must not follow a temporary switch
+            # made for hand-driven testing. scripts/folio_dev_session.sh flips that
+            # env var to point *direct* invocations at the sandbox; baking the
+            # value in at apply time keeps the scheduled runs on production
+            # regardless. An event that names a target still wins.
+            folio_target = "{% $exists($states.input.detail.folio_target) ? $states.input.detail.folio_target : '${var.folio_default_target}' %}"
           }
         }
         Output = "{% $states.result.Payload %}"

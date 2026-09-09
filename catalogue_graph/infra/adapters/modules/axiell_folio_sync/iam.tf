@@ -15,9 +15,12 @@ data "aws_kms_alias" "ssm" {
 
 data "aws_iam_policy_document" "sync_ssm_read" {
   statement {
-    effect    = "Allow"
-    actions   = ["ssm:GetParameter"]
-    resources = [aws_ssm_parameter.okapi_credentials.arn]
+    effect  = "Allow"
+    actions = ["ssm:GetParameter"]
+    resources = concat(
+      [aws_ssm_parameter.okapi_credentials.arn],
+      aws_ssm_parameter.okapi_credentials_dev[*].arn,
+    )
   }
   statement {
     effect    = "Allow"

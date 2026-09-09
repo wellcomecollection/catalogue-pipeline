@@ -6,13 +6,19 @@ fakes (a stub ref cache + FOLIO callables) rather than patching module globals.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
+import adapters.steps.axiell_folio_sync.folio.okapi as okapi_mod
 import adapters.steps.axiell_folio_sync.run_axiell_folio_sync as run_sync_mod
-from adapters.steps.axiell_folio_sync.folio.okapi import load_okapi_config
+from adapters.steps.axiell_folio_sync.folio.okapi import (
+    load_okapi_config,
+    resolve_folio_target,
+)
 from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
 from adapters.steps.axiell_folio_sync.results import (
@@ -139,20 +145,111 @@ def test_loader_tombstone_is_advisory_not_suppressed() -> None:
     assert resp.total_errors == 0
 
 
+OKAPI_ENV_VARS = (
+    "OKAPI_URL",
+    "OKAPI_TENANT",
+    "OKAPI_USERNAME",
+    "OKAPI_PASSWORD",
+    "OKAPI_SECRET_PARAM",
+    "OKAPI_DEV_SECRET_PARAM",
+    "FOLIO_TARGET",
+)
+
+
+def _clear_okapi_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    for key in OKAPI_ENV_VARS:
+        monkeypatch.delenv(key, raising=False)
+
+
+def _stub_ssm(monkeypatch: pytest.MonkeyPatch, params: Mapping[str, Any]) -> list[str]:
+    """Serve the given SSM parameter values, recording which names were fetched."""
+    fetched: list[str] = []
+
+    class FakeSsm:
+        def get_parameter(self, Name: str, WithDecryption: bool) -> dict[str, Any]:  # noqa: N803
+            fetched.append(Name)
+            return {"Parameter": {"Value": json.dumps(params[Name])}}
+
+    monkeypatch.setattr(okapi_mod, "_ssm", lambda: FakeSsm())
+    return fetched
+
+
 def test_load_okapi_config_raises_clear_error_for_missing_fields(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    for key in (
-        "OKAPI_URL",
-        "OKAPI_TENANT",
-        "OKAPI_USERNAME",
-        "OKAPI_PASSWORD",
-        "OKAPI_SECRET_PARAM",
-    ):
-        monkeypatch.delenv(key, raising=False)
+    _clear_okapi_env(monkeypatch)
 
     with pytest.raises(ValueError, match="Missing OKAPI configuration fields"):
         load_okapi_config()
+
+
+def test_load_okapi_config_dev_target_reads_the_dev_parameter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("OKAPI_SECRET_PARAM", "/prod/okapi")
+    monkeypatch.setenv("OKAPI_DEV_SECRET_PARAM", "/dev/okapi")
+    fetched = _stub_ssm(
+        monkeypatch,
+        {
+            "/prod/okapi": {
+                "url": "https://folio.example.org",
+                "tenant": "wellcome",
+                "username": "prod-user",
+                "password": "prod-pw",
+            },
+            "/dev/okapi": {
+                "url": "http://sandbox.internal:8000",
+                "tenant": "diku",
+                "username": "diku_admin",
+                "password": "dev-pw",
+            },
+        },
+    )
+
+    config = load_okapi_config("dev")
+
+    assert config["url"] == "http://sandbox.internal:8000"
+    assert config["tenant"] == "diku"
+    # The prod parameter is never even read on a dev-targeted run.
+    assert fetched == ["/dev/okapi"]
+
+
+def test_load_okapi_config_dev_target_does_not_fall_back_to_prod(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Dev target with no dev parameter configured must fail rather than quietly
+    # writing to the production tenant.
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("OKAPI_SECRET_PARAM", "/prod/okapi")
+
+    with pytest.raises(ValueError, match="OKAPI_DEV_SECRET_PARAM"):
+        load_okapi_config("dev")
+
+
+def test_folio_target_defaults_to_prod_and_env_var_is_a_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_okapi_env(monkeypatch)
+    assert resolve_folio_target() == "prod"
+    assert resolve_folio_target("dev") == "dev"
+
+    monkeypatch.setenv("FOLIO_TARGET", "dev")
+    assert resolve_folio_target() == "dev"
+    # An explicit target still wins over the env var.
+    assert resolve_folio_target("prod") == "prod"
+
+
+def test_unknown_folio_target_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_okapi_env(monkeypatch)
+
+    with pytest.raises(ValueError, match="Unknown FOLIO target 'staging'"):
+        resolve_folio_target("staging")
+
+
+def test_event_rejects_an_unknown_folio_target() -> None:
+    with pytest.raises(ValidationError):
+        AxiellFolioSyncEvent.model_validate({"job_id": "j1", "folio_target": "staging"})
 
 
 def test_report_written_to_s3_on_dry_run(monkeypatch: pytest.MonkeyPatch) -> None:
