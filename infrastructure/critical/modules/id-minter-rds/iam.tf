@@ -48,14 +48,10 @@ data "aws_iam_policy_document" "identifiers_api_read" {
   }
 
   # The Data API reads the credential on the caller's behalf, so the caller needs
-  # access to the secret as well as to the cluster.
-  #
-  # This is the cluster master secret, so the grant is admin-level on the registry
-  # until https://github.com/wellcomecollection/platform/issues/6533 creates a
-  # SELECT-only user with its own secret. Point this at that secret when it lands,
-  # and do not add further consumers to data_api_consumer_role_arns before then.
+  # access to the secret as well as to the cluster. This is the API's own
+  # SELECT-only credential, not the cluster master secret.
   statement {
     actions   = ["secretsmanager:GetSecretValue"]
-    resources = [module.identifiers_v2_serverless_rds_cluster.master_user_secret_arn]
+    resources = [aws_secretsmanager_secret.identifiers_api_read[0].arn]
   }
 }

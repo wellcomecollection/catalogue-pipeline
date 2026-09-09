@@ -23,3 +23,17 @@ aws stepfunctions start-execution \
 ```
 
 The `id` field must contain only letters, digits, and hyphens, and the resulting `ExportTaskIdentifier` (`id-exp-{id}`) must be at most 60 characters. When triggered by EventBridge, the event ID (a UUID) is used automatically.
+
+## Identifiers API read-only credential (id-minter)
+
+The Identifiers API reads the registry as `identifiers_api_read`, a user with `SELECT` on one table, rather than as the master user. Terraform creates the secret and configures its rotation; the database user and the secret's first value come from `create_identifiers_api_user.sh`, so that no password passes through terraform state.
+
+After applying to a cluster with `data_api_consumer_role_arns` set, run the script with platform account credentials, passing the cluster and the secret terraform created:
+
+```bash
+./create_identifiers_api_user.sh \
+  identifiers-v2-serverless-2026-07-03 \
+  rds/identifiers-v2-serverless-2026-07-03/identifiers_api_read
+```
+
+Each run resets the password and rewrites the secret, so it is safe to repeat, and it needs repeating for any other cluster the API reads. Rotation does not fire on creation because the secret is empty until the script has run, so trigger the first one with `aws secretsmanager rotate-secret`.
