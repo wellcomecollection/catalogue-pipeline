@@ -8,11 +8,12 @@ identifier types that were stored there
 """
 
 import structlog
+from pymarc.field import Field
+from pymarc.record import Record
+
 from models import identifier_schemes
 from models.identifier_schemes import IdentifierScheme
 from models.pipeline.identifier import Id, SourceIdentifier
-from pymarc.field import Field
-from pymarc.record import Record
 
 logger = structlog.get_logger(__name__)
 
