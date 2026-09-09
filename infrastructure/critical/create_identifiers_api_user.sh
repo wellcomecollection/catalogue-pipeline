@@ -79,8 +79,11 @@ PASSWORD="$(
 echo "Creating ${DB_USER} and granting SELECT on ${DB_NAME}.${DB_TABLE}"
 
 # CREATE then ALTER so a re-run sets the password whether or not the user exists.
+# REVOKE before GRANT so a re-run leaves exactly SELECT, rather than adding it to
+# whatever the user already had.
 run_as_master <<< "CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${PASSWORD}'"
 run_as_master <<< "ALTER USER '${DB_USER}'@'%' IDENTIFIED BY '${PASSWORD}'"
+run_as_master <<< "REVOKE IF EXISTS ALL PRIVILEGES, GRANT OPTION FROM '${DB_USER}'@'%'"
 run_as_master <<< "GRANT SELECT ON \`${DB_NAME}\`.\`${DB_TABLE}\` TO '${DB_USER}'@'%'"
 
 echo "Writing ${SECRET_ID}"
