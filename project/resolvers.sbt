@@ -10,10 +10,6 @@ val codeArtifact: Seq[Resolver] = codeArtifactToken.map(_ =>
 // and dedupes, so overriding externalResolvers alone leaves the mirror last.
 sbtResolvers := (Seq(Resolver.defaultLocal) ++ codeArtifact ++ sbtResolvers.value).distinct
 
-// The Zinc compiler bridge for this build is resolved via the launcher's boot
-// repositories, which put Maven Central first regardless of the above.
-scalaCompilerBridgeResolvers := (Seq(Resolver.defaultLocal) ++ codeArtifact ++ scalaCompilerBridgeResolvers.value).distinct
-
 credentials ++= codeArtifactToken.map(token =>
   Credentials(
     "wellcomecollection-maven-mirror/wellcomecollection-maven-mirror",
