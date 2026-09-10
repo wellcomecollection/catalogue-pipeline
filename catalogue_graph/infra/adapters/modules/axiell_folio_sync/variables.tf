@@ -23,13 +23,8 @@ variable "lambda_timeout_seconds" {
 variable "lambda_memory_mb" {
   description = "Lambda memory in MB"
   type        = number
-  # 512 OOM-killed the function: loading the RefCache (seven reference
-  # collections at limit=2000) exhausts it before any record is processed.
-  # Measured peaks for a *single-record* run at 2048 on 2026-09-09 were 722 MB
-  # against the dev tenant and 867 MB against prod (prod carries more reference
-  # data), so 1024 would leave only ~15% headroom before per-record cost is
-  # added. 2048 also cuts the run from ~6.3s to ~1.9s, as Lambda scales CPU
-  # with memory.
+  # Loading the RefCache alone peaks near 870 MB against prod, so anything below
+  # about 1 GB is OOM-killed before a record is processed.
   default = 2048
 }
 
@@ -56,11 +51,8 @@ variable "dry_run_default" {
   default     = true
 }
 
-# ── FOLIO dev server target (opt-in; prod is unaffected when disabled) ───────
-#
-# The dev server has no public endpoint, so reaching it needs the Lambda's ENIs
-# in its VPC. Enabling this creates a second OKAPI SecureString and sets
-# OKAPI_DEV_SECRET_PARAM, which the step reads only for folio_target="dev" runs.
+# FOLIO dev server target. Enabling it attaches the Lambda to the VPC and adds a
+# second OKAPI SecureString, read only by folio_target="dev" runs.
 # See docs/axiell-folio-sync-lambda-dev-instance.md.
 variable "folio_dev_target_enabled" {
   description = "Attach the Lambda to the FOLIO dev server's subnets and give it a dev OKAPI parameter. Runs still default to prod; a run opts in with folio_target=\"dev\"."
@@ -80,14 +72,8 @@ variable "folio_dev_security_group_ids" {
   default     = []
 }
 
-# Sets the FOLIO_TARGET env var, which resolve_folio_target uses when an event
-# does not name a target itself. An event that *does* name one still wins, so
-# this changes the default rather than forcing anything.
-#
-# Setting this to "dev" redirects every run that does not say otherwise —
-# including the scheduled EventBridge → Step Functions pipeline — at the sandbox.
-# It requires folio_dev_target_enabled; without it OKAPI_DEV_SECRET_PARAM is
-# unset and runs fail rather than silently falling back to production.
+# Sets FOLIO_TARGET, and the target the state machine falls back to. "dev"
+# points the scheduled runs at the sandbox and requires folio_dev_target_enabled.
 variable "folio_default_target" {
   description = "FOLIO instance to use when an event does not specify one: \"prod\" (EBSCO SaaS) or \"dev\" (the sandbox, which requires folio_dev_target_enabled)."
   type        = string
@@ -97,21 +83,6 @@ variable "folio_default_target" {
     condition     = contains(["prod", "dev"], var.folio_default_target)
     error_message = "folio_default_target must be \"prod\" or \"dev\"."
   }
-}
-
-# Composed by the caller from live data rather than written out by hand, so a
-# rebuild of the sandbox (which changes its private IP) does not leave a stale
-# url behind. ``password_secret_id`` names a Secrets Manager entry; the password
-# itself is read at plan time and never appears in this configuration.
-variable "folio_dev_okapi" {
-  description = "OKAPI connection for the FOLIO dev server. Null when folio_dev_target_enabled is false."
-  type = object({
-    url                = string
-    tenant             = string
-    username           = string
-    password_secret_id = string
-  })
-  default = null
 }
 
 variable "max_sync_retries" {

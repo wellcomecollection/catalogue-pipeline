@@ -69,26 +69,13 @@ module "axiell_folio_sync" {
   s3_table_bucket_arn  = aws_s3tables_table_bucket.axiell_table_bucket.arn
   manifest_bucket_name = "wellcomecollection-axiell-folio-sync-manifests"
 
-  # Off by default; see folio_dev_sandbox.tf for what enabling entails. The FOLIO
-  # dev server is in the catalogue VPC, so the ENIs go in the same private
-  # subnets as the adapter ECS tasks above.
+  # The FOLIO dev server shares the catalogue VPC, so the ENIs go in the same
+  # private subnets as the adapter ECS tasks above. See folio_dev_sandbox.tf.
   folio_dev_target_enabled     = local.folio_dev_target_enabled
   folio_dev_subnets            = local.folio_dev_target_enabled ? local.private_subnets : []
   folio_dev_security_group_ids = aws_security_group.folio_sync_dev[*].id
 
-  # The scheduled pipeline stays on production. Reaching the sandbox is a
-  # per-invocation opt-in: {"folio_target": "dev"} on the event. Setting this to
-  # "dev" would redirect the every-15-minutes automated runs too, which is not
-  # what we want while the sandbox is only up during working hours.
+  # Scheduled runs stay on production. Reaching the sandbox is a per-invocation
+  # opt-in, with {"folio_target": "dev"} on the event.
   folio_default_target = "prod"
-
-  # The sandbox's OKAPI connection. The url tracks the instance's live private IP
-  # (see folio_dev_sandbox.tf); the password is read from the Secrets Manager
-  # entry the sandbox already publishes, so nothing here is filled in by hand.
-  folio_dev_okapi = local.folio_dev_target_enabled ? {
-    url                = local.folio_dev_okapi_url
-    tenant             = "diku"
-    username           = "diku_admin"
-    password_secret_id = "folio-sandbox/diku-admin-password"
-  } : null
 }

@@ -1,40 +1,34 @@
 #!/usr/bin/env bash
 #
-# Start / end a FOLIO dev-sandbox session for the deployed sync Lambda.
-#
-# The sandbox is only up during working hours, so the deployed Lambda's default
-# target is "prod" (see infra/adapters/main.tf). This script pairs the two manual
-# steps of a testing session: bring the sandbox up, and point the Lambda's
-# default at it — then put both back.
+# Start and end a FOLIO dev-sandbox session for the deployed sync Lambda.
 #
 #   ./folio_dev_session.sh on      start the sandbox, switch FOLIO_TARGET to dev
 #   ./folio_dev_session.sh off     switch FOLIO_TARGET back to prod, stop the sandbox
 #   ./folio_dev_session.sh status  show the sandbox state and the current target
 #
-# Scope: this affects *direct* invocations of the Lambda only. The scheduled
-# every-15-minutes pipeline (adapter -> EventBridge -> Step Functions) resolves
-# its target in the state machine definition, which is baked at apply time from
-# folio_default_target, so it stays on production throughout a session.
+# This affects direct invocations only. Scheduled runs take their target from the
+# state machine, which is baked at apply time, so they stay on production. A
+# folio_target on the event still wins over both.
 #
-# Per-invocation targeting still works and still wins over this: a payload with
-# {"folio_target": "prod"} goes to prod even mid-session.
-#
-# NOTE: "on" leaves the Lambda's environment differing from Terraform, which
-# declares FOLIO_TARGET=prod. A `terraform apply` during a session silently puts
-# the default back to prod. That is a safe direction to fail, but it does mean a
-# long session can end without you noticing — `status` will tell you.
+# "on" leaves the Lambda's environment out of step with Terraform, so a
+# terraform apply mid-session puts FOLIO_TARGET back to prod. Run `status` to
+# check.
 set -euo pipefail
 
 AWS_PROFILE="${AWS_PROFILE:-platform-developer}"
 AWS_REGION="${AWS_REGION:-eu-west-1}"
 FUNCTION_NAME="${FUNCTION_NAME:-axiell-folio-sync-adapter-lambda}"
 INSTANCE_NAME="${INSTANCE_NAME:-folio-sandbox}"
+DEV_PARAM="${DEV_PARAM:-/catalogue_pipeline/axiell-folio-sync/okapi_credentials_dev}"
+PASSWORD_SECRET_ID="${PASSWORD_SECRET_ID:-folio-sandbox/diku-admin-password}"
+TENANT="${TENANT:-diku}"
+USERNAME="${USERNAME:-diku_admin}"
+API_PORT="${API_PORT:-8000}"
 export AWS_PROFILE AWS_REGION
 
 aws_() { aws --region "$AWS_REGION" "$@"; }
 
-# Looked up by tag rather than pinned: the sandbox has been rebuilt more than
-# once, and each rebuild changes both the instance id and its private IP.
+# Looked up by tag, because a rebuild changes both the id and the private IP.
 instance_id() {
   aws_ ec2 describe-instances \
     --filters "Name=tag:Name,Values=$INSTANCE_NAME" \
@@ -57,8 +51,8 @@ current_target() {
     --query 'Environment.Variables.FOLIO_TARGET' --output text
 }
 
-# The whole Variables map has to be resent, so merge rather than overwrite —
-# otherwise OKAPI_SECRET_PARAM and friends are silently dropped.
+# The whole Variables map is resent, so merge rather than overwrite. Overwriting
+# drops OKAPI_SECRET_PARAM and the rest.
 set_target() {
   local target="$1" env_json
   env_json=$(aws_ lambda get-function-configuration --function-name "$FUNCTION_NAME" \
@@ -72,18 +66,27 @@ set_target() {
   echo "FOLIO_TARGET is now '$target'"
 }
 
-# The url in SSM is managed by Terraform from the instance's live IP. If the box
-# was rebuilt without a subsequent apply, they drift and every dev run fails with
-# a connection timeout that looks like a network fault.
-check_url_matches() {
-  local ip="$1" url
-  url=$(aws_ ssm get-parameter --with-decryption \
-    --name /catalogue_pipeline/axiell-folio-sync/okapi_credentials_dev \
-    --query 'Parameter.Value' --output text 2>/dev/null | jq -re '.url' 2>/dev/null || echo "")
-  if [[ -n "$url" && "$url" != *"$ip"* ]]; then
-    echo "WARNING: SSM dev url is '$url' but the sandbox is at $ip." >&2
-    echo "         Run 'terraform apply' in infra/adapters to refresh it." >&2
-  fi
+# Populate the dev OKAPI SecureString, which Terraform only seeds with
+# placeholders. Rewritten on every
+# `on`, because a rebuilt sandbox changes the url and a stale one fails as a
+# connection timeout.
+refresh_dev_credentials() {
+  local ip="$1" pw req
+  pw=$(aws_ secretsmanager get-secret-value --secret-id "$PASSWORD_SECRET_ID" \
+    --query SecretString --output text)
+
+  # Passed by file, not on the command line, where `ps` would expose it.
+  req=$(mktemp); chmod 600 "$req"
+  trap 'rm -f "$req"' RETURN
+
+  jq -n --arg name "$DEV_PARAM" \
+    --arg v "$(jq -nc --arg url "http://$ip:$API_PORT" --arg t "$TENANT" \
+      --arg u "$USERNAME" --arg p "$pw" \
+      '{url:$url, tenant:$t, username:$u, password:$p}')" \
+    '{Name:$name, Value:$v, Type:"SecureString", Overwrite:true}' >"$req"
+
+  aws_ ssm put-parameter --cli-input-json "file://$req" >/dev/null
+  echo "Refreshed $DEV_PARAM (url http://$ip:$API_PORT, tenant $TENANT)"
 }
 
 id=$(instance_id)
@@ -102,7 +105,7 @@ on)
   fi
   ip=$(instance_ip "$id")
   echo "Sandbox $id running at $ip"
-  check_url_matches "$ip"
+  refresh_dev_credentials "$ip"
   set_target dev
   echo
   echo "NOTE: FOLIO (Kong on :8000) takes a few minutes to come up after the"
@@ -116,7 +119,7 @@ off)
   ;;
 status)
   target=$(current_target)
-  # An unset env var is not an error: resolve_folio_target falls back to prod.
+  # Unset is not an error. resolve_folio_target falls back to prod.
   [[ "$target" == "None" || -z "$target" ]] && target="unset (resolves to prod)"
   printf 'sandbox      %s (%s)\n' "$id" "$(instance_state "$id")"
   printf 'private ip   %s\n' "$(instance_ip "$id")"
