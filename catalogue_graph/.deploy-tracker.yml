@@ -7,7 +7,7 @@
 version: 1
 
 slack:
-  channel: "#wc-deploys"
+  channel: "#wc-platform-deploys"
 
 environments:
   prod: {}
