@@ -19,12 +19,13 @@ def extract_designation(record: Record) -> list[str]:
 
 
 def _designation(field: Field) -> str:
-    """362 ǂa is a non-repeatable field. If it does repeat, log an error and take the first value."""
+    """362 ǂa is a non-repeatable subfield. If it does repeat, log an error and take the first value."""
     values = field.get_subfields("a")
     if len(values) > 1:
         logger.error(
             "Repeated non-repeating subfield $a",
             tag=field.tag,
             count=len(values),
+            field=str(field),
         )
     return values[0].strip() if values else ""

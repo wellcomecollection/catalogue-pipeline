@@ -44,15 +44,6 @@ Feature: designation (MARC 362)
     And the 1st designation is "VFP"
     And the 2nd designation is "GCU"
 
-  # Deliberate divergence: the Scala makes the whole work invisible, we log and
-  # take the first.
-
-  Scenario: The first ǂa is used when a 362 erroneously repeats it
-    Given the MARC record has a 362 field with subfield "a" value "Cyntaf" and subfield "a" value "Ail"
-    When I transform the MARC record
-    Then an error "Repeated non-repeating subfield $a" is logged with tag "362"
-    And the only designation is "Cyntaf"
-
   # Ported from SierraDesignationTest.scala.
 
   Scenario: ǂz is ignored alongside ǂa
@@ -69,3 +60,12 @@ Feature: designation (MARC 362)
     Then there are 2 designations
     And the 1st designation is "Vol. 51, no. 2, 3 (summer 1988)-"
     And the 2nd designation is "Ceased with v. 59, no. 1 published in 1998."
+
+  # Deliberate divergence: the Scala makes the whole work invisible, we log and
+  # take the first.
+
+  Scenario: The first ǂa is used when a 362 erroneously repeats it
+    Given the MARC record has a 362 field with subfield "a" value "Cyntaf" and subfield "a" value "Ail"
+    When I transform the MARC record
+    Then an error "Repeated non-repeating subfield $a" is logged with tag "362"
+    And the only designation is "Cyntaf"
