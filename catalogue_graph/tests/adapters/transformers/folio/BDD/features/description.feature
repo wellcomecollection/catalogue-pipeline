@@ -10,7 +10,7 @@ Feature: description (MARC 520)
     And the MARC record has a 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001"
     And the MARC record has a 245 field with subfield "a" value "Some Title"
 
-  # Ported from MarcDescriptionTest.scala.
+  # Ported from MarcDescriptionTest.scala and SierraDescriptionTest.scala.
 
   Scenario: A record with no 520 field has no description
     When I transform the MARC record
@@ -26,6 +26,19 @@ Feature: description (MARC 520)
     When I transform the MARC record
     Then the work's description is "<p>Descriptions..are definitions of a more lax and fanciful kind.</p>"
 
+  # Taken from Sierra b20646604, FOLIO 67cfbfe2-b589-5477-b15e-832edf0b6941.
+
+  Scenario: A description is built from ǂa and ǂc
+    Given the MARC record has a 520 field with subfields:
+      | code | value                                                    |
+      | a    | "This book is about the ethics of nursing and midwifery" |
+      | c    | Provided by publisher.                                   |
+    When I transform the MARC record
+    Then the work's description is:
+      """
+      <p>"This book is about the ethics of nursing and midwifery" Provided by publisher.</p>
+      """
+
   Scenario: Subfields ǂa, ǂb, ǂc and ǂu are concatenated
     Given the MARC record has a 520 field with subfield "a" value "As there is a fine name, now-a-days, for every thing," and subfield "b" value "I suppose that ‘Hygeist’ is the polite description of quack doctor." and subfield "c" value "London Magazine, 1826" and subfield "u" value "http://example.com/"
     When I transform the MARC record
@@ -35,6 +48,11 @@ Feature: description (MARC 520)
     Given the MARC record has a 520 field with subfield "a" value "For her owne person, It beggerd all discription." and subfield "u" value "http://example.com/6347939" and subfield "u" value "http://example.com/5877688"
     When I transform the MARC record
     Then the work's description is "<p>For her owne person, It beggerd all discription. <a href="http://example.com/6347939">http://example.com/6347939</a> <a href="http://example.com/5877688">http://example.com/5877688</a></p>"
+
+  Scenario: A field with both a URL and a non-URL ǂu links only the URL
+    Given the MARC record has a 520 field with subfield "a" value "Picking particular pears in Poland." and subfield "b" value "Selecting sumptious starfruit in Spain." and subfield "u" value "https://fruitpicking.org/" and subfield "u" value "A website about fruitpicking"
+    When I transform the MARC record
+    Then the work's description is "<p>Picking particular pears in Poland. Selecting sumptious starfruit in Spain. <a href="https://fruitpicking.org/">https://fruitpicking.org/</a> A website about fruitpicking</p>"
 
   Scenario: Whitespace surrounding the description is trimmed
     Given the MARC record has a 520 field with subfield "a" value "	   Shapen in maner of a lop-webbe aftur the olde descripcioun.   "
@@ -72,8 +90,8 @@ Feature: description (MARC 520)
     When I transform the MARC record
     Then the work's description is "<p>I suppose that ‘Hygeist’ is the polite description of quack doctor. As there is a fine name, now-a-days, for every thing, London Magazine, 1826 <a href="http://example.com/">http://example.com/</a></p>"
 
-  # The Scala throws, making the whole work invisible. The Python pipeline logs
-  # an error and keeps the first occurrence, as it does for other non-repeatable
+  # Scala throws an exception, making the whole work invisible. The Python pipeline
+  # logs an error and keeps the first occurrence, as it does for other non-repeatable
   # fields. At the time of writing, there is one FOLIO record (Sierra b28676178)
   # with a repeating non-repeatable subfield in MARC 520.
 
@@ -81,7 +99,7 @@ Feature: description (MARC 520)
     Given the MARC record has a 520 field with subfield "<code>" value "Cyntaf" and subfield "<code>" value "Ail"
     When I transform the MARC record
     Then the work's description is "<p>Cyntaf</p>"
-    And an error "Multiple instances of non-repeatable subfield in field 520" is logged with subfield "<code>"
+    And an error "Repeated non-repeating subfield in field 520" is logged with subfield "<code>"
 
     Examples:
       | code |
