@@ -48,8 +48,9 @@ def get_field_values(field: Field) -> Iterator[str]:
             continue
         if code in seen:
             logger.error(
-                "Multiple instances of non-repeatable subfield in field 520",
+                "Repeated non-repeating subfield in field 520",
                 subfield=code,
+                field=str(field),
             )
             continue
         seen.add(code)

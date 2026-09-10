@@ -74,7 +74,8 @@ Feature: description (MARC 520)
 
   # The Scala throws, making the whole work invisible. The Python pipeline logs
   # an error and keeps the first occurrence, as it does for other non-repeatable
-  # fields. One FOLIO record (Sierra b28676178) needs this.
+  # fields. At the time of writing, there is one FOLIO record (Sierra b28676178)
+  # with a repeating non-repeatable subfield in MARC 520.
 
   Scenario Outline: A 520 repeating a non-repeatable subfield uses the first occurrence
     Given the MARC record has a 520 field with subfield "<code>" value "Cyntaf" and subfield "<code>" value "Ail"
