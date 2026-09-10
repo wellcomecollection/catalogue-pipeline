@@ -88,11 +88,16 @@ Feature: description (MARC 520)
       | b    |
       | c    |
 
-  # The Scala emits an empty paragraph in the first case and a stray blank
-  # separator in the second.
+  # The Scala implementation emits an empty paragraph in the first two cases
+  # and a stray blank separator in the third.
 
   Scenario: A 520 whose subfields are blank contributes no empty paragraph
     Given the MARC record has a 520 field with subfield "a" value "   "
+    When I transform the MARC record
+    Then the work's description is absent
+
+  Scenario: A 520 with multiple blank subfields contributes no empty paragraph
+    Given the MARC record has a 520 field with subfield "a" value "   " and subfield "b" value "   " and subfield "u" value "   "
     When I transform the MARC record
     Then the work's description is absent
 

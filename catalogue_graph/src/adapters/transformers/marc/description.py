@@ -34,7 +34,7 @@ def extract_description(record: Record) -> str | None:
 
 
 def format_field(field: Field) -> str:
-    contents = " ".join(get_field_values(field))
+    contents = " ".join(non_empty(get_field_values(field)))
     if not contents:
         return ""
     return f"<p>{contents}</p>"
