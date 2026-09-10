@@ -54,7 +54,7 @@ def _selected_subfield_values(field_245: Field) -> list[str]:
 def extract_title(marc_record: Record) -> str:
     fields_245 = marc_record.get_fields("245")
     if len(fields_245) > 1:
-        logger.warning(
+        logger.error(
             "Multiple instances of non-repeatable varfield with tag 245",
             count=len(fields_245),
         )
