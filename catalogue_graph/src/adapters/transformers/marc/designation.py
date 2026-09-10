@@ -26,5 +26,6 @@ def _designation(field: Field) -> str:
             "Repeated non-repeating subfield $a",
             tag=field.tag,
             count=len(values),
+            field=str(field),
         )
     return values[0].strip() if values else ""
