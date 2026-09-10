@@ -4,6 +4,7 @@ from adapters.transformers.folio.identifier import extract_hrid, extract_instanc
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.edition import extract_edition
 from adapters.transformers.marc.former_frequency import extract_former_frequency
+from adapters.transformers.marc.languages import extract_languages
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
 )
@@ -11,6 +12,7 @@ from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
+from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
     Id,
     Identifiable,
@@ -38,6 +40,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def physical_description(self) -> str | None:
         return extract_physical_description(self.record)
+
+    @property
+    def languages(self) -> list[Language]:
+        return extract_languages(self.record)
 
     @property
     def edition(self) -> str | None:
