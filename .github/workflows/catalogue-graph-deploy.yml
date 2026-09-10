@@ -21,6 +21,7 @@ on:
 permissions:
   contents: read
   id-token: write
+  deployments: write
 
 # Claim the shared group only when triggered directly: called from CI, the
 # calling job already holds it. github.workflow is the caller's, not ours.
@@ -29,6 +30,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # One GitHub Deployment per run, for the deploy tracker: the tag is the
+  # commit being deployed. Task names the catalogue_graph unit.
+  start-deployment:
+    runs-on: ubuntu-latest
+    outputs:
+      id: ${{ steps.create.outputs.id }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Create GitHub Deployment
+        id: create
+        run: |
+          id=$(gh api "repos/$GITHUB_REPOSITORY/deployments" --input - --jq .id <<EOF
+          {"ref": "${{ inputs.deploy_tag }}", "environment": "prod",
+           "task": "deploy:catalogue_graph", "auto_merge": false,
+           "required_contexts": [], "description": "catalogue_graph lambdas"}
+          EOF
+          )
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+          gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" \
+            -f state=in_progress \
+            -f log_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > /dev/null
+
   discover-pipeline-dates:
     runs-on: ubuntu-latest
     outputs:
@@ -43,6 +67,7 @@ jobs:
 
   retag-prod-images:
     runs-on: ubuntu-latest
+    needs: [ start-deployment ]
     strategy:
       matrix:
         image_name: [ unified_pipeline_task, unified_pipeline_lambda ]
@@ -58,7 +83,7 @@ jobs:
 
   retag-dated-images:
     runs-on: ubuntu-latest
-    needs: [ discover-pipeline-dates ]
+    needs: [ start-deployment, discover-pipeline-dates ]
     strategy:
       matrix:
         pipeline_date: ${{ fromJSON(needs.discover-pipeline-dates.outputs.pipeline_dates) }}
@@ -134,3 +159,24 @@ jobs:
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           aws_region: eu-west-1
           lambda_suffix: ${{ matrix.component }}
+
+  finish-deployment:
+    if: always() && needs.start-deployment.outputs.id != ''
+    runs-on: ubuntu-latest
+    needs:
+      - start-deployment
+      - discover-pipeline-dates
+      - deploy-unified-pipeline-lambdas
+      - deploy-dated-unified-pipeline-lambdas
+    env:
+      GH_TOKEN: ${{ github.token }}
+      # Any deploy job not succeeding is a failed deployment
+      STATE: ${{ (needs.deploy-unified-pipeline-lambdas.result == 'success' && needs.deploy-dated-unified-pipeline-lambdas.result == 'success') && 'success' || 'failure' }}
+      DATES: ${{ join(fromJSON(needs.discover-pipeline-dates.outputs.pipeline_dates), ', ') }}
+    steps:
+      - name: Report deployment outcome
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/deployments/${{ needs.start-deployment.outputs.id }}/statuses" \
+            -f state="$STATE" \
+            -f description="catalogue_graph lambdas; pipelines: $DATES" \
+            -f log_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > /dev/null

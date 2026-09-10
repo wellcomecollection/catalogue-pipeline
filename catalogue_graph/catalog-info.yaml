@@ -1,0 +1,17 @@
+# Backstage-format description of this folder's software, gathered into
+# https://github.com/wellcomecollection/catalog. The Component points at the
+# deploy tracker config in this directory.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: catalogue-graph
+  description: Python lambdas for the catalogue adapters, graph and dated pipelines
+  annotations:
+    github.com/project-slug: wellcomecollection/catalogue-pipeline
+    backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/catalogue_graph/
+    wellcomecollection.org/deploy-tracker: .deploy-tracker.yml
+spec:
+  type: service
+  lifecycle: production
+  owner: digital-platform
+  system: catalogue-pipeline
