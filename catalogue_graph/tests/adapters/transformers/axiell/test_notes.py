@@ -89,7 +89,7 @@ def test_506_terms_of_use_normalised_by_axiell_logic() -> None:
 def test_540_text_content_not_emitted_as_terms_of_use() -> None:
     """540 $a text is ignored by the Axiell terms-of-use logic.
 
-    The Axiell path reads 540 $g (a restricted-until date), not $a. A record
+    The Axiell path reads 540 $g (a restrictedor-closed-until date), not $a. A record
     with only a 540 $a value therefore produces no TERMS_OF_USE note, whereas
     the base MARC logic would have emitted one verbatim.
     """
