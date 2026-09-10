@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Create the Identifiers API's read-only database user on an id-minter cluster
-# and write its credentials into the secret Terraform created for it
-# (platform#6533).
+# Make an id-minter cluster agree with the Identifiers API's credential secret
+# (platform#6533): create the read-only MySQL user if it is missing, set its
+# password to the one Terraform generated, and grant it SELECT on one table.
 #
-# Runs as the cluster master user, over the Data API so it needs no VPC access.
-# Re-running resets the password and rewrites the secret. Run it once per cluster
-# the API reads: again for production, and again for the FOLIO registry.
+# Run after applying Terraform, and again after changing the password there.
+# Re-running is safe. It runs as the cluster master user over the Data API, so it
+# needs no VPC access.
 #
 # Usage:
 #   ./create_identifiers_api_user.sh \
@@ -19,14 +19,8 @@ set -o pipefail
 CLUSTER_IDENTIFIER="${1:?usage: $0 <cluster-identifier> <secret-id>}"
 SECRET_ID="${2:?usage: $0 <cluster-identifier> <secret-id>}"
 
-DB_USER="identifiers_api_read"
 DB_NAME="identifiers"
 DB_TABLE="identifiers"
-
-# Kept in step with excludeCharacters in
-# modules/id-minter-rds/identifiers_api_credential.tf, so rotated passwords stay
-# compatible. Change them together.
-EXCLUDE_CHARACTERS="\"'@/\\\`"
 
 REQUEST_FILE="$(mktemp)"
 chmod 600 "${REQUEST_FILE}"
@@ -34,15 +28,27 @@ trap 'rm -f "${REQUEST_FILE}"' EXIT
 
 echo "Resolving ${CLUSTER_IDENTIFIER}"
 
-read -r CLUSTER_ARN MASTER_SECRET_ARN DB_HOST DB_PORT < <(
+read -r CLUSTER_ARN MASTER_SECRET_ARN < <(
   aws rds describe-db-clusters \
     --db-cluster-identifier "${CLUSTER_IDENTIFIER}" \
-    --query 'DBClusters[0].[DBClusterArn,MasterUserSecret.SecretArn,Endpoint,Port]' \
+    --query 'DBClusters[0].[DBClusterArn,MasterUserSecret.SecretArn]' \
     --output text
 )
 
 if [[ -z "${MASTER_SECRET_ARN}" || "${MASTER_SECRET_ARN}" == "None" ]]; then
   echo "No master user secret on ${CLUSTER_IDENTIFIER}" >&2
+  exit 1
+fi
+
+echo "Reading ${SECRET_ID}"
+
+SECRET="$(aws secretsmanager get-secret-value --secret-id "${SECRET_ID}" --output json)"
+SECRET_ARN="$(printf '%s' "${SECRET}" | jq -r '.ARN')"
+DB_USER="$(printf '%s' "${SECRET}" | jq -r '.SecretString | fromjson | .username')"
+PASSWORD="$(printf '%s' "${SECRET}" | jq -r '.SecretString | fromjson | .password')"
+
+if [[ -z "${DB_USER}" || "${DB_USER}" == "null" ]]; then
+  echo "${SECRET_ID} has no username; has Terraform been applied?" >&2
   exit 1
 fi
 
@@ -67,55 +73,15 @@ run_as_master() {
     >/dev/null
 }
 
-PASSWORD="$(
-  aws secretsmanager get-random-password \
-    --password-length 32 \
-    --exclude-characters "${EXCLUDE_CHARACTERS}" \
-    --require-each-included-type \
-    --query RandomPassword \
-    --output text
-)"
+echo "Setting up ${DB_USER} with SELECT on ${DB_NAME}.${DB_TABLE}"
 
-echo "Creating ${DB_USER} and granting SELECT on ${DB_NAME}.${DB_TABLE}"
-
-# CREATE then ALTER so a re-run sets the password whether or not the user exists.
-# REVOKE before GRANT so a re-run leaves exactly SELECT, rather than adding it to
-# whatever the user already had.
+# CREATE then ALTER so the password is set whether or not the user exists, and
+# REVOKE before GRANT so the result is exactly SELECT rather than SELECT plus
+# whatever was there before.
 run_as_master <<< "CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${PASSWORD}'"
 run_as_master <<< "ALTER USER '${DB_USER}'@'%' IDENTIFIED BY '${PASSWORD}'"
 run_as_master <<< "REVOKE IF EXISTS ALL PRIVILEGES, GRANT OPTION FROM '${DB_USER}'@'%'"
 run_as_master <<< "GRANT SELECT ON \`${DB_NAME}\`.\`${DB_TABLE}\` TO '${DB_USER}'@'%'"
-
-echo "Writing ${SECRET_ID}"
-
-# engine, host, port and dbname are for the rotation function; the Data API reads
-# only username and password.
-jq -n \
-  --arg secretId "${SECRET_ID}" \
-  --arg host "${DB_HOST}" \
-  --argjson port "${DB_PORT}" \
-  --arg username "${DB_USER}" \
-  --arg dbname "${DB_NAME}" \
-  --rawfile password <(printf '%s' "${PASSWORD}") \
-  '{
-    SecretId: $secretId,
-    SecretString: ({
-      engine: "mysql",
-      host: $host,
-      port: $port,
-      username: $username,
-      password: $password,
-      dbname: $dbname
-    } | tostring)
-  }' > "${REQUEST_FILE}"
-
-SECRET_ARN="$(
-  aws secretsmanager put-secret-value \
-    --cli-input-json "file://${REQUEST_FILE}" \
-    --no-cli-pager \
-    --query ARN \
-    --output text
-)"
 
 echo "Verifying ${DB_USER} can read"
 
@@ -144,6 +110,5 @@ if delete_error="$(
 fi
 
 echo "  refused with: ${delete_error}"
-
 echo
-echo "Done. Secret: ${SECRET_ARN}"
+echo "Done."

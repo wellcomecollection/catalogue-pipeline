@@ -26,7 +26,7 @@ The `id` field must contain only letters, digits, and hyphens, and the resulting
 
 ## Identifiers API read-only credential (id-minter)
 
-The Identifiers API reads the registry as `identifiers_api_read`, a user with `SELECT` on one table, rather than as the master user. Terraform creates the secret and configures its rotation; the database user and the secret's first value come from `create_identifiers_api_user.sh`, so that no password passes through terraform state.
+The Identifiers API reads the registry as `identifiers_api_read`, a user with `SELECT` on one table, rather than as the master user. Terraform generates the password and holds it in the credential secret; creating the MySQL user is SQL, so `create_identifiers_api_user.sh` does that part and sets the user's password to match the secret.
 
 After applying to a cluster with `data_api_consumer_role_arns` set, run the script with platform account credentials, passing the cluster and the secret terraform created:
 
@@ -36,4 +36,4 @@ After applying to a cluster with `data_api_consumer_role_arns` set, run the scri
   rds/identifiers-v2-serverless-2026-07-03/identifiers_api_read
 ```
 
-Each run resets the password and rewrites the secret, so it is safe to repeat, and it needs repeating for any other cluster the API reads. Rotation does not fire on creation because the secret is empty until the script has run, so trigger the first one with `aws secretsmanager rotate-secret`.
+It is safe to re-run, and it needs running for any other cluster the API reads. The password does not rotate on a schedule: to change it, replace `random_password.identifiers_api_read` in terraform, apply, and run the script again.
