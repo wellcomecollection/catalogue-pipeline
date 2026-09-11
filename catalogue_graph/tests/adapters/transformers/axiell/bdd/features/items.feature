@@ -37,7 +37,7 @@ Feature: Items from Axiell MARC records
     Then there is 1 item
     And the item has no access conditions
 
-  Scenario: 506 $f sets the access condition and a closed-until date does not change it
+  Scenario: 506 $f sets the access condition and a 506 $g date does not change it
     Given the MARC record has a 506 field with subfield "f" value "OPEN" and subfield "g" value "2030-01-01"
     When I transform the MARC record
     Then there is 1 item

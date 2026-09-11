@@ -18,7 +18,7 @@ def test_closed_status_maps_to_closed_without_closed_until_date() -> None:
     assert extract_access_status(record) == Closed
 
 
-def test_closed_until_date_does_not_affect_the_status() -> None:
+def test_until_date_does_not_affect_the_status() -> None:
     # 506 $g holds the restricted-until or closed-until date. It is the note text
     # that reads it; the status comes from $f alone.
     record = make_axiell_record()
@@ -37,4 +37,13 @@ def test_no_access_status_field_maps_to_none() -> None:
     # 506 $f is the only source of access status. A record without one has none,
     # whatever else the 506 field carries.
     record = make_axiell_record()
+    assert extract_access_status(record) is None
+
+
+def test_future_until_date_without_a_status_is_not_closed() -> None:
+    # A future 506 $g used to infer Closed when no recognised $f was present.
+    # That inference is gone: $g now holds either a restricted-until or a
+    # closed-until date, so it cannot say which status applies.
+    record = make_axiell_record()
+    add_506(record, "g", "2999-01-01")
     assert extract_access_status(record) is None
