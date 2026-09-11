@@ -56,7 +56,11 @@ jobs:
           AWS_SESSION_TOKEN: ${{ steps.aws_credentials.outputs.aws-session-token }}
 
       # sbt runs as root inside the container and leaves the mounted caches
-      # root-owned, which the cache action cannot read when it saves them.
-      - name: Make the caches readable
+      # root-owned, which the cache action cannot read when it saves them. The
+      # container cannot simply run as the runner instead: run_sbt.sh restores
+      # the prebaked plugins and compiler bridges from root's home.
+      - name: Take ownership of the caches
         if: always()
-        run: sudo chown -R "$USER" ~/.cache/coursier ~/.sbt ~/.ivy2 || true
+        run: |
+          mkdir -p ~/.cache/coursier ~/.sbt ~/.ivy2
+          sudo chown -R "$(id -u):$(id -g)" ~/.cache/coursier ~/.sbt ~/.ivy2
