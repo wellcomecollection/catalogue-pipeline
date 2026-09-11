@@ -1,6 +1,6 @@
-# This store is the only copy of the CALM records now that the adapter has
-# stopped harvesting, and the bucket has no versioning, so guard the table
-# against accidental deletion and keep a recovery window.
+# The production pipeline reads CALM works straight out of this store, and with
+# the adapter no longer harvesting there is nothing left that can rebuild it.
+# Guard the table against accidental deletion and keep a recovery window.
 # See wellcomecollection/platform#6689.
 module "vhs" {
   source             = "git::github.com/wellcomecollection/terraform-aws-vhs.git//single-version-store?ref=v4.3.0"
