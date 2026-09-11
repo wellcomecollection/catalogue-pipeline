@@ -11,7 +11,7 @@ module "calm_indexer" {
   ]
 
   min_capacity = 0
-  max_capacity = 1
+  max_capacity = local.indexing_enabled ? 1 : 0
 
   env_vars = {
     es_index          = "calm_catalog"

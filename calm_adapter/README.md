@@ -5,18 +5,23 @@ The CALM adapter fetches new records from CALM and keeps our copy of the CALM da
 
 ## Harvesting is switched off
 
-CALM went read-only on 2026-09-10 ahead of the Axiell Collections migration, so
-we stopped harvesting from it (wellcomecollection/platform#6689). Both schedules
-are disabled in terraform via `harvesting_enabled` and `deletion_checking_enabled`
-in [terraform/locals.tf](terraform/locals.tf), which turns off the window
-generator, the deletion check initiator and the deletion checker service.
+CALM went read-only on 2026-09-10 ahead of the Axiell Collections migration, and
+we no longer harvest from it. See wellcomecollection/platform#6689.
 
-Everything else is still in place. The adapter store keeps the records it already
-holds, and the production pipeline still transforms CALM works out of it. To run a
-one-off query against CALM, invoke the window generator Lambda directly: the
-schedule is disabled but the service behind it is not.
+Three flags in [terraform/locals.tf](terraform/locals.tf) hold this in place.
+`harvesting_enabled` disables the window generator's schedule,
+`deletion_checking_enabled` disables the deletion check initiator's schedule and
+scales the deletion checker to zero, and `indexing_enabled` scales the indexer
+to zero.
 
-Decommissioning the CALM code and infrastructure is a separate, later piece of work.
+The adapter store keeps the records it already holds, and the production pipeline
+still transforms CALM works out of it. The adapter service and the `calm-windows`
+queue are untouched, so a one-off re-harvest still works by running the window
+generator CLI locally, as described below. The deletion checker and the indexer
+have no running tasks, so anything published to their queues will sit there
+unconsumed until it ages out to the DLQ.
+
+Decommissioning the CALM code and infrastructure is separate, later work.
 
 ## Key services/libraries
 

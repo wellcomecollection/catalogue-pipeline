@@ -26,10 +26,10 @@ There's no publicly available documentation, but there's a [CALM API guide][api_
 
 ## How we get updates
 
-> We stopped harvesting from CALM on 2026-09-10, when it went read-only ahead of
-> the Axiell Collections migration (wellcomecollection/platform#6689). The polling
-> and deletion-checking schedules below are disabled. Our copy of the records is
-> frozen at that point, and the pipeline still transforms works out of it.
+> We no longer harvest from CALM. It went read-only on 2026-09-10 ahead of the
+> Axiell Collections migration, so the polling and deletion-checking schedules
+> described below are disabled (wellcomecollection/platform#6689). Our copy of
+> the records stays as it is, and the pipeline still transforms works out of it.
 
 *   We poll CALM on a fixed interval, and retrieve any records which have been created or modified since the last poll.
 

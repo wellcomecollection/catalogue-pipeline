@@ -16,11 +16,13 @@ locals {
 
   calm_api_url = "https://archives.wellcome.org/CalmAPI/ContentService.asmx"
 
-  # CALM went read-only on 2026-09-10 ahead of the Axiell Collections migration,
-  # so we no longer harvest from it. See wellcomecollection/platform#6689.
-  # The adapter store is untouched: the production pipeline still reads it.
+  # CALM is read-only ahead of the Axiell Collections migration, so we do not
+  # harvest from it, check it for deletions, or index it for reporting. The
+  # adapter store stays in place for the production pipeline to read.
+  # See wellcomecollection/platform#6689.
   harvesting_enabled        = false
   deletion_checking_enabled = false
+  indexing_enabled          = false
 
   window_generator_interval = "60 minutes"
   deletion_check_interval   = "7 days"
