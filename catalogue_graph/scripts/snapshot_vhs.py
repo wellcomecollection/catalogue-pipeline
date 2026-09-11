@@ -6,10 +6,10 @@ current: the bucket holds every version a record has ever had, so the snapshot
 scans the table, reads the object each row points at, and writes one parquet
 row per record.
 
-This exists because a VHS becomes the only copy of its source dataset once its
-adapter stops harvesting, which is happening to the CALM store under
+This exists because a VHS stops being rebuildable once its adapter stops
+harvesting, which is happening to the CALM store under
 wellcomecollection/platform#6689. The other two stores have the same shape and
-will reach the same point as their sources are retired.
+reach the same point as their sources are retired.
 
 The snapshot is written to a `.partial` file and moved into place only on a
 complete, successful run, so a file at the output path is always whole.
