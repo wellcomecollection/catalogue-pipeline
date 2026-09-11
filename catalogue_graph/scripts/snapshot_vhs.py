@@ -22,12 +22,15 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
+import decimal
 import json
 import os
 import time
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any
 
 import boto3
@@ -62,11 +65,19 @@ set for a sensible wall-clock rather than to saturate anything."""
 
 PROGRESS_LOG_EVERY = 25_000
 
+EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
+"""Stand-in `last_modified` for a row whose object could not be read. The
+column is non-optional, and a row like that is reported separately anyway."""
+
 
 # The first six fields match ADAPTER_STORE_ICEBERG_SCHEMA in
 # adapters/utils/schemata.py, so selecting them gives a table that loads
-# through the adapter store's own snapshot path. `version` and `s3_key` are
-# VHS-specific provenance on top.
+# through the adapter store's own snapshot path. test_snapshot_vhs.py holds
+# the two to that promise. The rest is VHS-specific provenance.
+#
+# `last_modified` is the S3 object's timestamp, so for a record marked deleted
+# it is when the last live body was written rather than when the deletion was
+# recorded. The deletion is only ever a DynamoDB-side fact.
 VHS_SNAPSHOT_ICEBERG_SCHEMA = Schema(
     NestedField(field_id=1, name="namespace", field_type=StringType(), required=True),
     NestedField(field_id=2, name="id", field_type=StringType(), required=True),
@@ -84,6 +95,12 @@ VHS_SNAPSHOT_ICEBERG_SCHEMA = Schema(
     ),
     NestedField(field_id=7, name="version", field_type=IntegerType(), required=True),
     NestedField(field_id=8, name="s3_key", field_type=StringType(), required=True),
+    # The whole DynamoDB row, verbatim. Some stores keep state here that exists
+    # nowhere else: Miro rows carry `isClearedForCatalogueAPI`, `events` and
+    # `overrides`, which are curated by hand through scripts/suppress_miro and
+    # are not in the S3 body. Naming the fields we know about would quietly
+    # drop the ones we do not.
+    NestedField(field_id=9, name="index_row", field_type=StringType(), required=True),
 )
 VHS_SNAPSHOT_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(VHS_SNAPSHOT_ICEBERG_SCHEMA)
 
@@ -95,6 +112,10 @@ class VHSStoreConfig:
     id_field: str | None = None
     """Key in the record body holding the record's own id, where the body has
     one. Used to check the DynamoDB row and the S3 object agree."""
+    deleted_table_name: str | None = None
+    """Companion table holding records deleted from the main one. Sierra moved
+    its pre-2018 deletions out rather than marking them in place, so a snapshot
+    that reads only the main table silently omits them."""
 
 
 VHS_STORES: dict[str, VHSStoreConfig] = {
@@ -102,7 +123,9 @@ VHS_STORES: dict[str, VHSStoreConfig] = {
         table_name="vhs-calm-adapter", namespace="calm", id_field="id"
     ),
     "sierra": VHSStoreConfig(
-        table_name="vhs-sierra-sierra-adapter-20200604", namespace="sierra"
+        table_name="vhs-sierra-sierra-adapter-20200604",
+        namespace="sierra",
+        deleted_table_name="vhs-sierra-sierra-adapter-20200604-deleted",
     ),
     "miro": VHSStoreConfig(table_name="vhs-sourcedata-miro", namespace="miro"),
 }
@@ -117,13 +140,26 @@ class IndexRow:
     bucket: str
     key: str
     deleted: bool
+    raw: str
+    """The whole row as JSON, so nothing a store keeps here is lost."""
 
 
 class SnapshotError(Exception):
     pass
 
 
-def _parse_index_row(item: dict[str, Any]) -> IndexRow:
+def _json_default(value: Any) -> Any:
+    """Render the types boto3's deserialiser produces that JSON has no place for."""
+    if isinstance(value, decimal.Decimal):
+        return int(value) if value == int(value) else float(value)
+    if isinstance(value, set):
+        return sorted(value)
+    if isinstance(value, bytes | bytearray):
+        return base64.b64encode(value).decode("ascii")
+    raise TypeError(f"Cannot serialise {type(value).__name__} to JSON")
+
+
+def _parse_index_row(item: dict[str, Any], *, deleted: bool = False) -> IndexRow:
     """Read a VHS index row.
 
     The S3 location lives under `payload` in some stores and `location` in
@@ -140,14 +176,12 @@ def _parse_index_row(item: dict[str, Any]) -> IndexRow:
         version=int(item["version"]),
         bucket=location["bucket"],
         key=location["key"],
-        deleted=bool(item.get("isDeleted", False)),
+        deleted=deleted or bool(item.get("isDeleted", False)),
+        raw=json.dumps(item, default=_json_default, sort_keys=True),
     )
 
 
-def scan_index(dynamodb_resource: Any, table_name: str) -> list[IndexRow]:
-    """Read every row of the VHS index table, scanning segments in parallel."""
-    client = dynamodb_resource.meta.client
-
+def _scan_table(client: Any, table_name: str, *, deleted: bool) -> list[IndexRow]:
     def scan_segment(segment: int) -> list[IndexRow]:
         rows: list[IndexRow] = []
         paginator = client.get_paginator("scan")
@@ -155,7 +189,9 @@ def scan_index(dynamodb_resource: Any, table_name: str) -> list[IndexRow]:
             TableName=table_name, Segment=segment, TotalSegments=SCAN_SEGMENTS
         )
         for page in pages:
-            rows.extend(_parse_index_row(item) for item in page["Items"])
+            rows.extend(
+                _parse_index_row(item, deleted=deleted) for item in page["Items"]
+            )
         return rows
 
     started_at = time.time()
@@ -164,54 +200,74 @@ def scan_index(dynamodb_resource: Any, table_name: str) -> list[IndexRow]:
         rows = [row for segment_rows in segments for row in segment_rows]
 
     logger.info(
-        "Index scanned",
+        "Table scanned",
         table_name=table_name,
         rows=len(rows),
         seconds=round(time.time() - started_at),
     )
+    return rows
+
+
+def scan_index(dynamodb_resource: Any, config: VHSStoreConfig) -> list[IndexRow]:
+    """Read every row of the store's index, including its deleted companion."""
+    client = dynamodb_resource.meta.client
+
+    rows = _scan_table(client, config.table_name, deleted=False)
     if not rows:
         raise SnapshotError(
-            f"Table {table_name} returned 0 rows. This is almost certainly an "
-            "error rather than an empty store."
+            f"Table {config.table_name} returned 0 rows. This is almost "
+            "certainly an error rather than an empty store."
         )
+
+    if config.deleted_table_name is not None:
+        rows.extend(_scan_table(client, config.deleted_table_name, deleted=True))
+
     return rows
 
 
 def _fetch_row(s3_client: Any, config: VHSStoreConfig, row: IndexRow) -> dict[str, Any]:
-    """Read one record body and turn it into a snapshot row."""
+    """Read one record body and turn it into a snapshot row.
+
+    A row that cannot be read keeps its index fields and gets a null `content`,
+    so one bad object does not cost a 17-minute run over the other 408,709.
+    Whether the run may finish with any of these is the caller's decision.
+    """
+    content: str | None = None
+    last_modified = None
+
     try:
         response = s3_client.get_object(Bucket=row.bucket, Key=row.key)
-    except Exception as error:
-        raise SnapshotError(
-            f"Could not read {row.bucket}/{row.key} for record {row.id}: {error}"
-        ) from error
-
-    content = response["Body"].read().decode("utf8")
-
-    try:
+        last_modified = response["LastModified"]
+        content = response["Body"].read().decode("utf8")
         body = json.loads(content)
-    except json.JSONDecodeError as error:
-        raise SnapshotError(
-            f"Body at {row.bucket}/{row.key} for record {row.id} is not JSON: {error}"
-        ) from error
 
-    if config.id_field is not None:
-        body_id = body.get(config.id_field)
-        if body_id != row.id:
+        if config.id_field is not None and body.get(config.id_field) != row.id:
             raise SnapshotError(
-                f"Record {row.id} points at {row.key}, whose {config.id_field} "
-                f"is {body_id!r}. The index and the body disagree."
+                f"its {config.id_field} is {body.get(config.id_field)!r}, so "
+                "the index and the body disagree"
             )
+    except Exception as error:
+        logger.error(
+            "Could not read record body",
+            record_id=row.id,
+            bucket=row.bucket,
+            key=row.key,
+            error=str(error),
+        )
+        content = None
 
     return {
         "namespace": config.namespace,
         "id": row.id,
         "content": content,
         "changeset": None,
-        "last_modified": response["LastModified"],
+        # Falls back to the epoch only for a row whose object could not be
+        # read, which the caller has to account for before the run counts.
+        "last_modified": last_modified or EPOCH,
         "deleted": row.deleted,
         "version": row.version,
         "s3_key": row.key,
+        "index_row": row.raw,
     }
 
 
@@ -225,17 +281,24 @@ def write_snapshot(
     config: VHSStoreConfig,
     rows: list[IndexRow],
     output_path: str,
+    *,
+    allow_unreadable: int = 0,
 ) -> int:
     """Fetch every record body and write the snapshot, returning the row count.
 
     Writes to a `.partial` file moved into place only once the whole run has
     succeeded, so an interrupted run cannot leave a truncated snapshot behind
     for someone to mistake for a complete one.
+
+    Unreadable bodies are collected rather than raised on, so a run surfaces
+    every bad record at once instead of one per 17-minute attempt, and then
+    fails at the end unless `allow_unreadable` covers them.
     """
     partial_path = f"{output_path}.partial"
     written = 0
     started_at = time.time()
     logged_at = 0
+    unreadable = 0
 
     try:
         with (
@@ -250,6 +313,7 @@ def write_snapshot(
                     pa.Table.from_pylist(records, schema=VHS_SNAPSHOT_ARROW_SCHEMA)
                 )
                 written += len(records)
+                unreadable += sum(1 for r in records if r["content"] is None)
 
                 if written - logged_at >= PROGRESS_LOG_EVERY:
                     elapsed = max(time.time() - started_at, 1e-6)
@@ -260,6 +324,14 @@ def write_snapshot(
                         records_per_second=round(written / elapsed, 1),
                     )
                     logged_at = written
+
+        if unreadable > allow_unreadable:
+            raise SnapshotError(
+                f"{unreadable} record(s) had no readable body, over the "
+                f"{allow_unreadable} allowed. Each one was logged above. Fix "
+                "them and run again, or pass --allow-unreadable to accept a "
+                "snapshot with null content for those records."
+            )
     except BaseException:
         # A partial file left next to the output is the one thing that could
         # be mistaken for a snapshot, so never leave one behind.
@@ -267,13 +339,20 @@ def write_snapshot(
             os.remove(partial_path)
         raise
 
+    if unreadable:
+        logger.warning("Snapshot has records with no body", unreadable=unreadable)
+
     os.replace(partial_path, output_path)
     return written
 
 
 def verify_snapshot(output_path: str, rows: list[IndexRow]) -> None:
-    """Check the written file against the index it was built from."""
-    table = pq.read_table(output_path, columns=["id", "deleted"])
+    """Re-read the written file and check it against the index it came from.
+
+    This reads the file back from disk rather than trusting the writer, so it
+    catches a truncated or unreadable parquet as much as a miscount.
+    """
+    table = pq.read_table(output_path, columns=["id", "deleted", "content"])
 
     if table.num_rows != len(rows):
         raise SnapshotError(
@@ -281,11 +360,10 @@ def verify_snapshot(output_path: str, rows: list[IndexRow]) -> None:
         )
 
     snapshot_ids = set(table.column("id").to_pylist())
-    missing = {row.id for row in rows} - snapshot_ids
-    if missing:
+    if snapshot_ids != {row.id for row in rows}:
         raise SnapshotError(
-            f"{len(missing)} record(s) in the index are not in the snapshot, "
-            f"for example {sorted(missing)[:3]}"
+            "The ids in the snapshot are not the ids in the index, despite the "
+            "counts matching"
         )
 
     logger.info(
@@ -317,12 +395,20 @@ def snapshot_vhs(
     *,
     upload_to: str | None = None,
     limit: int | None = None,
+    allow_unreadable: int = 0,
     session: Any | None = None,
 ) -> int:
     config = VHS_STORES[store]
+
+    if limit is not None:
+        if limit < 1:
+            raise ValueError(f"--limit must be at least 1, got {limit}")
+        if upload_to is not None:
+            raise ValueError("--limit writes a partial file, so it cannot be uploaded")
+
     session = session or boto3.Session()
 
-    rows = scan_index(session.resource("dynamodb"), config.table_name)
+    rows = scan_index(session.resource("dynamodb"), config)
 
     if limit is not None:
         logger.warning(
@@ -340,12 +426,12 @@ def snapshot_vhs(
     s3_client = session.client(
         "s3", config=BotocoreConfig(max_pool_connections=FETCH_WORKERS)
     )
-    written = write_snapshot(s3_client, config, rows, output_path)
+    written = write_snapshot(
+        s3_client, config, rows, output_path, allow_unreadable=allow_unreadable
+    )
     verify_snapshot(output_path, rows)
 
     if upload_to is not None:
-        if limit is not None:
-            raise ValueError("--limit writes a partial file, so it cannot be uploaded")
         upload_snapshot(s3_client, output_path, upload_to)
 
     return written
@@ -378,6 +464,13 @@ def main() -> None:
         metavar="N",
         help="Fetch only the first N records, to smoke-test against real data. The file this writes is not a snapshot and cannot be uploaded.",
     )
+    parser.add_argument(
+        "--allow-unreadable",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Finish the run even if up to N records have no readable body. Those rows keep their index fields and get null content.",
+    )
     args = parser.parse_args()
 
     setup_logging(
@@ -385,7 +478,11 @@ def main() -> None:
     )
 
     written = snapshot_vhs(
-        args.store, args.output_path, upload_to=args.upload_to, limit=args.limit
+        args.store,
+        args.output_path,
+        upload_to=args.upload_to,
+        limit=args.limit,
+        allow_unreadable=args.allow_unreadable,
     )
     logger.info("Snapshot complete", store=args.store, rows=written)
 
