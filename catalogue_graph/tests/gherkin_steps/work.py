@@ -263,11 +263,29 @@ def child_list_member_with_datatable(
         assert member == row[0]
 
 
+def _assert_work_attr(work: SourceWork, attr_phrase: str, expected: str) -> None:
+    """Assert that a work attribute equals expected."""
+    attr = _normalise_attr_phrase(attr_phrase)
+    actual = drill_through_dots(work.data, attr)
+    assert actual == expected, (
+        f"Expected work.data.{attr} == {expected!r}, got {actual!r}"
+    )
+
+
 @then(parsers.parse('the work\'s {attr} is "{value}"'))
 def work_attr_is(work: SourceWork, attr: str, value: str) -> None:
-    attr = _normalise_attr_phrase(attr)
-    actual = drill_through_dots(work.data, attr)
-    assert actual == value, f"Expected work.data.{attr} == {value!r}, got {actual!r}"
+    _assert_work_attr(work, attr, value)
+
+
+@then(parsers.parse("the work's {attr} is:"))
+def work_attr_is_multiline(work: SourceWork, docstring: str, attr: str) -> None:
+    """Assert a work attribute against a Gherkin docstring.
+
+    Gherkin step text is a single line with no escape sequences, so values
+    containing newlines (such as a description built from several MARC 520
+    fields) can only be expressed as a docstring.
+    """
+    _assert_work_attr(work, attr, docstring)
 
 
 @then(parsers.parse("the work's {attr} is absent"))

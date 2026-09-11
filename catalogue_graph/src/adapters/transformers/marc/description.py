@@ -10,32 +10,51 @@ $c - Assigning source (NR)
 
 And any present repeating $u subfields
 $u - Uniform Resource Identifier (R)
+
+Each 520 field becomes one <p> paragraph, and the paragraphs are joined with
+newlines. Subfields a, b and c are emitted in the order they appear in the
+field, followed by any $u subfields.
 """
 
-from collections.abc import Iterable
-from itertools import chain
+from collections.abc import Iterator
 
+import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.transformers.marc.common import non_empty
 from adapters.transformers.utils.html import format_as_html_link
+
+logger = structlog.get_logger(__name__)
 
 
 def extract_description(record: Record) -> str | None:
-    return (
-        "\n".join(format_field(field) for field in record.get_fields("520")).strip()
-        or None
-    )
+    paragraphs = non_empty(format_field(field) for field in record.get_fields("520"))
+    return "\n".join(paragraphs) or None
 
 
 def format_field(field: Field) -> str:
-    contents = " ".join(chain(get_plain_field_values(field), get_u_field_values(field)))
+    contents = " ".join(non_empty(get_field_values(field)))
+    if not contents:
+        return ""
     return f"<p>{contents}</p>"
 
 
-def get_plain_field_values(field: Field) -> Iterable[str]:
-    return (value.strip() for value in field.get_subfields("a", "b", "c"))
+def get_field_values(field: Field) -> Iterator[str]:
+    """Yield $a, $b and $c in the order they appear, then any $u as links."""
+    seen: set[str] = set()
+    for code, value in field:
+        if code not in ("a", "b", "c"):
+            continue
+        if code in seen:
+            logger.error(
+                "Repeated non-repeating subfield in field 520",
+                subfield=code,
+                field=str(field),
+            )
+            continue
+        seen.add(code)
+        yield value.strip()
 
-
-def get_u_field_values(field: Field) -> Iterable[str]:
-    return (format_as_html_link(value) for value in field.get_subfields("u"))
+    for value in field.get_subfields("u"):
+        yield format_as_html_link(value)
