@@ -11,7 +11,8 @@ on:
   pull_request:
     paths:
       - ".github/workflows/scala-ci-trial.yml"
-      - "common/transformer_marc_xml/**"
+      - "pipeline/transformer/transformer_marc_xml/**"
+      - "pipeline/transformer/transformer_marc_common/**"
       - "project/**"
       - "build.sbt"
       - "builds/**"
@@ -24,6 +25,9 @@ jobs:
   test:
     name: transformer_marc_xml (library)
     runs-on: ubuntu-latest
+    # Pull requests from forks get no repository secrets, so the role ARN would
+    # be empty and assuming it would fail before any of this ran.
+    if: github.event.pull_request.head.repo.fork != true
     steps:
       - name: Check out project
         uses: actions/checkout@v7
@@ -48,12 +52,11 @@ jobs:
       - name: Restore the coursier cache
         uses: coursier/cache-action@v6
 
+      # No AWS credentials are passed through to sbt. Docker is already
+      # authenticated to ECR by the step above, and this build needs no AWS
+      # access: build.sbt imports an AWS credentials provider but never uses it.
       - name: Run tests
         run: ./builds/run_sbt_tests.sh transformer_marc_xml
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.aws_credentials.outputs.aws-access-key-id }}
-          AWS_SECRET_KEY: ${{ steps.aws_credentials.outputs.aws-secret-access-key }}
-          AWS_SESSION_TOKEN: ${{ steps.aws_credentials.outputs.aws-session-token }}
 
       # sbt runs as root inside the container and leaves the mounted caches
       # root-owned, which the cache action cannot read when it saves them. The
