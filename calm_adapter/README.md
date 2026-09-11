@@ -1,7 +1,8 @@
 # CALM adapter
 
 CALM is our archive catalogue.
-The CALM adapter fetches new records from CALM and keeps our copy of the CALM database up-to-date.
+The CALM adapter fetched new records from CALM and kept our copy of the CALM database up to date.
+It no longer runs, and our copy stays as it was on 2026-09-10.
 
 ## Harvesting is switched off
 
@@ -33,6 +34,7 @@ Decommissioning the CALM code and infrastructure is separate, later work.
     [api_guide]: https://us-east-1.console.aws.amazon.com/s3/object/wellcomecollection-platform-infra?prefix=Calm.API.Guide.pdf&region=eu-west-1
 
 *   The `calm_adapter` service fetches updated records from CALM.
+    It is still deployed, but nothing sends it work while harvesting is off.
 
     It receives queries from the `calm_window_generator`, which tell it what sort of records to fetch.
     e.g.
@@ -51,6 +53,7 @@ Decommissioning the CALM code and infrastructure is separate, later work.
 
     The window generator runs as a Lambda on a fixed schedule, or it can be run locally if you want to do a one-off query.
     e.g. you can refetch all the records modified on a given day.
+    The schedule is disabled, so the local CLI is the only way it runs now.
 
     TODO: Should we rename this to "query generator"?
 
@@ -61,6 +64,8 @@ Decommissioning the CALM code and infrastructure is separate, later work.
 
     Because we want to spot when records are deleted, we have the `calm_deletion_checker` that polls CALM to look for deleted records (by looking for every record we know about, and checking if it's still in the API).
     It's triggered by the `calm_deletion_check_initiator`.
+    Both are switched off, and CALM is read-only, so there are no new deletions to find.
 
 *   The `calm_indexer` service indexes CALM records in the reporting cluster.
     This is meant for ad hoc analysis of the CALM data, e.g. when designing a new transformation rule.
+    It is scaled to zero, so the `calm_catalog` index holds whatever it last indexed.
