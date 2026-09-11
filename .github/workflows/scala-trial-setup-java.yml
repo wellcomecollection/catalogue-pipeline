@@ -1,0 +1,44 @@
+name: "Scala trial: sbt without the wrapper"
+
+# Experiment, not for merging. Runs the same tests as the library trial in
+# wellcomecollection/catalogue-pipeline#3648, but with sbt installed on the
+# runner instead of the sbt_wrapper container.
+#
+# What that costs: no prebaked plugins or compiler bridges, so the first run
+# fetches and compiles them. What it buys: no Docker, no ECR, and so no AWS
+# credentials at all. The JDK is pinned to Temurin 11 to match the image.
+#
+# Compare its duration against the wrapper-based trial on the same project.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/scala-trial-setup-java.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: transformer_marc_xml (no wrapper)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v7
+
+      - name: Set up the JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "11"
+
+      - name: Set up sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Restore the coursier cache
+        uses: coursier/cache-action@v6
+
+      # No CODEARTIFACT_AUTH_TOKEN, so this resolves from Maven Central and the
+      # build prints "Dependency resolution: Maven Central only".
+      - name: Run tests
+        run: sbt "project transformer_marc_xml" test
