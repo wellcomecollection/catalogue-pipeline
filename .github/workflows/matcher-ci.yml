@@ -32,6 +32,12 @@ jobs:
 
       # The pull-only role the formatting workflow uses. Nothing here publishes,
       # so all we need is permission to fetch the sbt_wrapper image.
+      #
+      # No CODEARTIFACT_AUTH_TOKEN, so the build resolves from Maven Central
+      # rather than our mirror. That is deliberate for now and tracked in
+      # wellcomecollection/platform#6701: minting a token needs a permission no
+      # role here has, and CodeArtifact throttles per account, so routing this
+      # through it would add load to the quota that was already failing.
       - name: Configure AWS credentials
         id: aws_credentials
         uses: aws-actions/configure-aws-credentials@v6
