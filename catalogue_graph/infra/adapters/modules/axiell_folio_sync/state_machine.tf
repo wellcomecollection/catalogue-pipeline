@@ -9,12 +9,19 @@ locals {
         Resource = "arn:aws:states:::lambda:invoke"
         Arguments = {
           FunctionName = module.sync_lambda.lambda.arn
+          # Every field the sync step accepts is mapped through. Anything left
+          # out is dropped silently, because Pydantic ignores unknown keys.
           Payload = {
             changeset_ids    = "{% $states.input.detail.changeset_ids %}"
             job_id           = "{% $states.input.detail.job_id %}"
             transformer_type = "{% $exists($states.input.detail.transformer_type) ? $states.input.detail.transformer_type : null %}"
             sample_limit     = "{% $exists($states.input.detail.sample_limit) ? $states.input.detail.sample_limit : null %}"
             dry_run          = "{% $exists($states.input.detail.dry_run) ? $states.input.detail.dry_run : ${var.dry_run_default} %}"
+            hard_delete      = "{% $exists($states.input.detail.hard_delete) ? $states.input.detail.hard_delete : null %}"
+            # Baked in at apply time rather than read from the Lambda's
+            # FOLIO_TARGET, so scheduled runs are unaffected when
+            # scripts/folio_dev_session.sh switches direct invocations to dev.
+            folio_target = "{% $exists($states.input.detail.folio_target) ? $states.input.detail.folio_target : '${var.folio_default_target}' %}"
           }
         }
         Output = "{% $states.result.Payload %}"

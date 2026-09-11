@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+
+# The FOLIO instances a run can target. This is the single definition: the
+# registry mapping each one to its SSM parameter env var (``okapi.py``) is typed
+# by it, so adding a target there without adding it here is a type error.
+FolioTarget = Literal["prod", "dev"]
 
 
 class SyncSuccessEntry(BaseModel):
@@ -51,6 +56,10 @@ class AxiellFolioSyncEvent(BaseModel):
     # ``None`` means "fall back to the HARD_DELETE env var" (default false). When
     # true, reconciler deletions hard-delete FOLIO records instead of suppressing.
     hard_delete: bool | None = None
+    # Which FOLIO instance to write to: "prod" (EBSCO SaaS) or "dev" (the
+    # folio-dev-server sandbox). ``None`` falls back to the FOLIO_TARGET env var,
+    # which itself defaults to "prod".
+    folio_target: FolioTarget | None = None
     # Dev/smoke-test only: cap records processed when no changeset_ids are given.
     sample_limit: int | None = None
 

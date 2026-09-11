@@ -68,4 +68,14 @@ module "axiell_folio_sync" {
   event_bus_name       = aws_cloudwatch_event_bus.event_bus.name
   s3_table_bucket_arn  = aws_s3tables_table_bucket.axiell_table_bucket.arn
   manifest_bucket_name = "wellcomecollection-axiell-folio-sync-manifests"
+
+  # The FOLIO dev server shares the catalogue VPC, so the ENIs go in the same
+  # private subnets as the adapter ECS tasks above. See folio_dev_sandbox.tf.
+  folio_dev_target_enabled     = local.folio_dev_target_enabled
+  folio_dev_subnets            = local.folio_dev_target_enabled ? local.private_subnets : []
+  folio_dev_security_group_ids = aws_security_group.folio_sync_dev[*].id
+
+  # Scheduled runs stay on production. Reaching the sandbox is a per-invocation
+  # opt-in, with {"folio_target": "dev"} on the event.
+  folio_default_target = "prod"
 }

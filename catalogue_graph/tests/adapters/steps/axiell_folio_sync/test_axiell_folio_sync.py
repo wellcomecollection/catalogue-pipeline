@@ -6,14 +6,26 @@ fakes (a stub ref cache + FOLIO callables) rather than patching module globals.
 
 from __future__ import annotations
 
+import argparse
+import json
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, get_args
 
 import pytest
+from pydantic import ValidationError
 
+import adapters.steps.axiell_folio_sync.axiell_folio_sync as sync_mod
+import adapters.steps.axiell_folio_sync.folio.okapi as okapi_mod
 import adapters.steps.axiell_folio_sync.run_axiell_folio_sync as run_sync_mod
-from adapters.steps.axiell_folio_sync.folio.okapi import load_okapi_config
-from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
+from adapters.steps.axiell_folio_sync.folio.okapi import (
+    load_okapi_config,
+    resolve_folio_target,
+)
+from adapters.steps.axiell_folio_sync.models import (
+    AxiellFolioSyncEvent,
+    AxiellFolioSyncResponse,
+    FolioTarget,
+)
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
 from adapters.steps.axiell_folio_sync.results import (
     EntityResult,
@@ -139,20 +151,264 @@ def test_loader_tombstone_is_advisory_not_suppressed() -> None:
     assert resp.total_errors == 0
 
 
+OKAPI_ENV_VARS = (
+    "OKAPI_URL",
+    "OKAPI_TENANT",
+    "OKAPI_USERNAME",
+    "OKAPI_PASSWORD",
+    "OKAPI_SECRET_PARAM",
+    "OKAPI_DEV_SECRET_PARAM",
+    "FOLIO_TARGET",
+)
+
+
+def _clear_okapi_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    for key in OKAPI_ENV_VARS:
+        monkeypatch.delenv(key, raising=False)
+
+
+def _stub_ssm(monkeypatch: pytest.MonkeyPatch, params: Mapping[str, Any]) -> list[str]:
+    """Serve the given SSM parameter values, recording which names were fetched."""
+    fetched: list[str] = []
+
+    class FakeSsm:
+        def get_parameter(self, Name: str, WithDecryption: bool) -> dict[str, Any]:  # noqa: N803
+            fetched.append(Name)
+            return {"Parameter": {"Value": json.dumps(params[Name])}}
+
+    monkeypatch.setattr(okapi_mod, "_ssm", lambda: FakeSsm())
+    return fetched
+
+
 def test_load_okapi_config_raises_clear_error_for_missing_fields(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    for key in (
-        "OKAPI_URL",
-        "OKAPI_TENANT",
-        "OKAPI_USERNAME",
-        "OKAPI_PASSWORD",
-        "OKAPI_SECRET_PARAM",
-    ):
-        monkeypatch.delenv(key, raising=False)
+    _clear_okapi_env(monkeypatch)
 
     with pytest.raises(ValueError, match="Missing OKAPI configuration fields"):
         load_okapi_config()
+
+
+def test_load_okapi_config_dev_target_reads_the_dev_parameter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("OKAPI_SECRET_PARAM", "/prod/okapi")
+    monkeypatch.setenv("OKAPI_DEV_SECRET_PARAM", "/dev/okapi")
+    fetched = _stub_ssm(
+        monkeypatch,
+        {
+            "/prod/okapi": {
+                "url": "https://folio.example.org",
+                "tenant": "wellcome",
+                "username": "prod-user",
+                "password": "prod-pw",
+            },
+            "/dev/okapi": {
+                "url": "http://sandbox.internal:8000",
+                "tenant": "diku",
+                "username": "diku_admin",
+                "password": "dev-pw",
+            },
+        },
+    )
+
+    config = load_okapi_config("dev")
+
+    assert config["url"] == "http://sandbox.internal:8000"
+    assert config["tenant"] == "diku"
+    # The prod parameter is never even read on a dev-targeted run.
+    assert fetched == ["/dev/okapi"]
+
+
+def test_load_okapi_config_dev_target_does_not_fall_back_to_prod(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Dev target with no dev parameter configured must fail rather than quietly
+    # writing to the production tenant.
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("OKAPI_SECRET_PARAM", "/prod/okapi")
+
+    with pytest.raises(ValueError, match="OKAPI_DEV_SECRET_PARAM"):
+        load_okapi_config("dev")
+
+
+def test_folio_target_defaults_to_prod_and_env_var_is_a_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _clear_okapi_env(monkeypatch)
+    assert resolve_folio_target() == "prod"
+    assert resolve_folio_target("dev") == "dev"
+
+    monkeypatch.setenv("FOLIO_TARGET", "dev")
+    assert resolve_folio_target() == "dev"
+    # An explicit target still wins over the env var.
+    assert resolve_folio_target("prod") == "prod"
+
+
+def test_unknown_folio_target_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    _clear_okapi_env(monkeypatch)
+
+    with pytest.raises(ValueError, match="Unknown FOLIO target 'staging'"):
+        resolve_folio_target("staging")
+
+
+def test_every_folio_target_has_a_secret_parameter() -> None:
+    """The registry and the FolioTarget type must stay in step.
+
+    Typing SECRET_PARAM_ENV_VARS as dict[FolioTarget, str] makes a key that is not
+    a valid target a type error, but not the reverse: widening FolioTarget without
+    adding to the registry only fails at runtime, on a run against the new target.
+    """
+    assert set(okapi_mod.SECRET_PARAM_ENV_VARS) == set(get_args(FolioTarget))
+    assert okapi_mod.DEFAULT_FOLIO_TARGET in okapi_mod.SECRET_PARAM_ENV_VARS
+
+
+@pytest.mark.parametrize("given", ["DEV", " dev ", "Dev", "\tdev\n"])
+def test_folio_target_is_normalised(
+    monkeypatch: pytest.MonkeyPatch, given: str
+) -> None:
+    # Accepted from an env var or a hand-written event without exact casing.
+    _clear_okapi_env(monkeypatch)
+    assert resolve_folio_target(given) == "dev"
+
+    monkeypatch.setenv("FOLIO_TARGET", given)
+    assert resolve_folio_target() == "dev"
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_blank_folio_target_falls_back_to_prod(
+    monkeypatch: pytest.MonkeyPatch, blank: str
+) -> None:
+    # An empty env var is treated as unset rather than as an unknown target.
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("FOLIO_TARGET", blank)
+    assert resolve_folio_target() == "prod"
+    assert resolve_folio_target(blank) == "prod"
+
+
+def test_event_rejects_an_unknown_folio_target() -> None:
+    with pytest.raises(ValidationError):
+        AxiellFolioSyncEvent.model_validate({"job_id": "j1", "folio_target": "staging"})
+
+
+@pytest.mark.parametrize(
+    ("folio_target", "expected_url", "expected_param"),
+    [
+        ("prod", "https://folio.example.org", "/prod/okapi"),
+        ("dev", "http://sandbox.internal:8000", "/dev/okapi"),
+    ],
+)
+def test_handler_builds_the_client_for_the_target_on_the_event(
+    monkeypatch: pytest.MonkeyPatch,
+    folio_target: str,
+    expected_url: str,
+    expected_param: str,
+) -> None:
+    """The event's folio_target must reach the FOLIO client that gets built.
+
+    resolve_folio_target and load_okapi_config are covered directly elsewhere.
+    This covers the wiring between them and an actual event, which is where a
+    dropped folio_target silently sends a dev-targeted run to production.
+    """
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("OKAPI_SECRET_PARAM", "/prod/okapi")
+    monkeypatch.setenv("OKAPI_DEV_SECRET_PARAM", "/dev/okapi")
+    fetched = _stub_ssm(
+        monkeypatch,
+        {
+            "/prod/okapi": {
+                "url": "https://folio.example.org",
+                "tenant": "wellcome",
+                "username": "prod-user",
+                "password": "prod-pw",
+            },
+            "/dev/okapi": {
+                "url": "http://sandbox.internal:8000",
+                "tenant": "diku",
+                "username": "diku_admin",
+                "password": "dev-pw",
+            },
+        },
+    )
+
+    built: dict[str, Any] = {}
+
+    class FakeFolioClient:
+        def __init__(self, url: str, tenant: str, **kwargs: Any) -> None:
+            built["url"] = url
+            built["tenant"] = tenant
+            built["username"] = kwargs.get("username")
+
+    class FakeRefCache:
+        def __init__(self, _inventory: Any) -> None:
+            pass
+
+        def load(self) -> FakeRefCache:
+            return self
+
+    monkeypatch.setattr(sync_mod, "FolioClient", FakeFolioClient)
+    monkeypatch.setattr(sync_mod, "FolioInventoryClient", lambda client: client)
+    monkeypatch.setattr(sync_mod, "ssl_context_from_env", lambda: None)
+    monkeypatch.setattr(sync_mod, "RefCache", FakeRefCache)
+    monkeypatch.setattr(sync_mod, "read_rows", lambda *a, **kw: ([], []))
+    monkeypatch.setattr(
+        sync_mod,
+        "run_sync",
+        lambda event, *a, **kw: AxiellFolioSyncResponse(
+            job_id=event.job_id, dry_run=True
+        ),
+    )
+
+    event = AxiellFolioSyncEvent(job_id="j1", folio_target=folio_target)
+    sync_mod.handler(event, use_rest_api_table=False)
+
+    assert built["url"] == expected_url
+    # Only the parameter for the requested target is read, so a run can never
+    # pick up the other instance's credentials.
+    assert fetched == [expected_param]
+
+
+def _run_local_handler(
+    monkeypatch: pytest.MonkeyPatch, argv: list[str]
+) -> AxiellFolioSyncEvent:
+    """Drive local_handler with the given CLI args, returning the event it built."""
+    captured: dict[str, AxiellFolioSyncEvent] = {}
+
+    def fake_handler(event: AxiellFolioSyncEvent, **kwargs: Any) -> Any:
+        captured["event"] = event
+        return AxiellFolioSyncResponse(job_id=event.job_id, dry_run=True)
+
+    monkeypatch.setattr(sync_mod, "handler", fake_handler)
+    monkeypatch.setattr("sys.argv", ["axiell_folio_sync", *argv])
+    sync_mod.local_handler(argparse.ArgumentParser())
+    return captured["event"]
+
+
+def test_cli_folio_target_flag_reaches_the_event(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    event = _run_local_handler(monkeypatch, ["--job-id", "j1", "--folio-target", "dev"])
+
+    assert event.folio_target == "dev"
+    # Dry-run unless --live is passed, so a dev smoke test cannot write by default.
+    assert event.dry_run is True
+    capsys.readouterr()
+
+
+def test_cli_folio_target_defaults_to_none_so_the_env_var_applies(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # None rather than "prod": the CLI must not override FOLIO_TARGET by default.
+    event = _run_local_handler(monkeypatch, ["--job-id", "j1"])
+
+    assert event.folio_target is None
+    capsys.readouterr()
+
+
+def test_cli_rejects_an_unknown_folio_target(monkeypatch: pytest.MonkeyPatch) -> None:
+    with pytest.raises(SystemExit):
+        _run_local_handler(monkeypatch, ["--job-id", "j1", "--folio-target", "staging"])
 
 
 def test_report_written_to_s3_on_dry_run(monkeypatch: pytest.MonkeyPatch) -> None:

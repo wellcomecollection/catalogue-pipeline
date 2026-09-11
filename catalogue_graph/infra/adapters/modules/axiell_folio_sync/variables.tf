@@ -23,7 +23,9 @@ variable "lambda_timeout_seconds" {
 variable "lambda_memory_mb" {
   description = "Lambda memory in MB"
   type        = number
-  default     = 512
+  # Loading the RefCache alone peaks near 870 MB against prod, so anything below
+  # about 1 GB is OOM-killed before a record is processed.
+  default = 2048
 }
 
 variable "event_bus_name" {
@@ -47,6 +49,40 @@ variable "dry_run_default" {
   description = "Default dry_run value for the Lambda. Set to false once validated against FOLIO."
   type        = bool
   default     = true
+}
+
+# FOLIO dev server target. Enabling it attaches the Lambda to the VPC and adds a
+# second OKAPI SecureString, read only by folio_target="dev" runs.
+# See docs/axiell-folio-sync-lambda-dev-instance.md.
+variable "folio_dev_target_enabled" {
+  description = "Attach the Lambda to the FOLIO dev server's subnets and give it a dev OKAPI parameter. Runs still default to prod; a run opts in with folio_target=\"dev\"."
+  type        = bool
+  default     = false
+}
+
+variable "folio_dev_subnets" {
+  description = "Private subnets for the sync Lambda's ENIs when folio_dev_target_enabled is true (the catalogue VPC private subnets, where the FOLIO dev server runs)"
+  type        = list(string)
+  default     = []
+}
+
+variable "folio_dev_security_group_ids" {
+  description = "Security groups for the sync Lambda's ENIs when folio_dev_target_enabled is true; must be VPC-scoped to the catalogue VPC"
+  type        = list(string)
+  default     = []
+}
+
+# Sets FOLIO_TARGET, and the target the state machine falls back to. "dev"
+# points the scheduled runs at the sandbox and requires folio_dev_target_enabled.
+variable "folio_default_target" {
+  description = "FOLIO instance to use when an event does not specify one: \"prod\" (EBSCO SaaS) or \"dev\" (the sandbox, which requires folio_dev_target_enabled)."
+  type        = string
+  default     = "prod"
+
+  validation {
+    condition     = contains(["prod", "dev"], var.folio_default_target)
+    error_message = "folio_default_target must be \"prod\" or \"dev\"."
+  }
 }
 
 variable "max_sync_retries" {
