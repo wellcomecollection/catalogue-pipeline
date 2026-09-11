@@ -1,0 +1,56 @@
+name: "Scala trial: build an app image"
+
+# Experiment, not for merging. Does an app's Docker image build on a hosted
+# runner? This is the part of a Buildkite app step that the library trial in
+# wellcomecollection/catalogue-pipeline#3648 deliberately left out: sbt stage
+# followed by a docker build from the project's own Dockerfile.
+#
+# It stops short of pushing. No role available to GitHub Actions can push these
+# ECR repositories, so publishing needs new IAM before it can be tried.
+#
+# sierra_merger is the smallest app: one local dependency, and a single stage
+# Dockerfile over the staged output.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/scala-trial-app-image.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-image:
+    name: sierra_merger (image)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.fork != true
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v7
+
+      - name: Configure AWS credentials
+        id: aws_credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.GHA_SCALA_FORMATTING_ROLE_ARN }}
+          output-credentials: true
+
+      - name: Log in to private ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Restore the coursier cache
+        uses: coursier/cache-action@v6
+
+      - name: Build the app image
+        run: ./builds/build_sbt_image.sh sierra_merger "ref.${GITHUB_SHA:0:7}"
+
+      - name: Show what was built
+        run: docker image inspect "sierra_merger:ref.${GITHUB_SHA:0:7}" --format 'size {{.Size}} bytes, layers {{len .RootFS.Layers}}'
+
+      - name: Take ownership of the caches
+        if: always()
+        run: |
+          mkdir -p ~/.cache/coursier ~/.sbt ~/.ivy2
+          sudo chown -R "$(id -u):$(id -g)" ~/.cache/coursier ~/.sbt ~/.ivy2
