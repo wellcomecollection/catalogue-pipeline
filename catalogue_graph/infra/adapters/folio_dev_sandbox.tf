@@ -11,10 +11,15 @@
 # {"folio_target": "dev"} on the event. Runs without it go to prod.
 #
 # See docs/axiell-folio-sync-lambda-dev-instance.md.
-locals {
-  folio_dev_target_enabled = true
+variable "folio_dev_target_enabled" {
+  description = "Enable Lambda connectivity to the FOLIO dev sandbox."
+  type        = bool
+  default     = false
+}
 
-  folio_dev_api_port = 8000 # Kong/Eureka gateway, plain HTTP
+locals {
+  folio_dev_target_enabled = var.folio_dev_target_enabled
+  folio_dev_api_port       = 8000 # Kong/Eureka gateway, plain HTTP
 }
 
 # The sandbox's security group, owned by

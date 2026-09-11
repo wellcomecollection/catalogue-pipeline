@@ -71,19 +71,20 @@ set_target() {
 # `on`, because a rebuilt sandbox changes the url and a stale one fails as a
 # connection timeout.
 refresh_dev_credentials() {
-  local ip="$1" pw req
+  local ip="$1" pw req pw_file
   pw=$(aws_ secretsmanager get-secret-value --secret-id "$PASSWORD_SECRET_ID" \
     --query SecretString --output text)
 
-  # Passed by file, not on the command line, where `ps` would expose it.
-  req=$(mktemp); chmod 600 "$req"
-  trap 'rm -f "$req"' RETURN
+  # Keep the password out of process arguments.
+  req=$(mktemp); pw_file=$(mktemp)
+  chmod 600 "$req" "$pw_file"
+  trap 'rm -f "$req" "$pw_file"' RETURN
+  printf '%s' "$pw" >"$pw_file"
 
   jq -n --arg name "$DEV_PARAM" \
-    --arg v "$(jq -nc --arg url "http://$ip:$API_PORT" --arg t "$TENANT" \
-      --arg u "$USERNAME" --arg p "$pw" \
-      '{url:$url, tenant:$t, username:$u, password:$p}')" \
-    '{Name:$name, Value:$v, Type:"SecureString", Overwrite:true}' >"$req"
+    --arg url "http://$ip:$API_PORT" --arg t "$TENANT" \
+    --arg u "$USERNAME" --rawfile p "$pw_file" \
+    '{Name:$name, Value: ({url:$url, tenant:$t, username:$u, password:$p} | tojson), Type:"SecureString", Overwrite:true}' >"$req"
 
   aws_ ssm put-parameter --cli-input-json "file://$req" >/dev/null
   echo "Refreshed $DEV_PARAM (url http://$ip:$API_PORT, tenant $TENANT)"
