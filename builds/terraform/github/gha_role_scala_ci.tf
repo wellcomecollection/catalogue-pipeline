@@ -29,10 +29,11 @@ module "gha_scala_ci_role" {
   policy_document = data.aws_iam_policy_document.gha_scala_ci.json
   role_name       = "scala-ci"
 
-  # Scoped to main rather than the whole repository, because this role can
-  # overwrite the floating 'latest' tag that deploys resolve. Pull request
-  # builds can build an image but never push one.
-  github_repository = "wellcomecollection/catalogue-pipeline:ref:refs/heads/main"
+  # TEMPORARY, for testing the push from the experiment branch. Change to
+  # refs/heads/main and re-apply before this merges: the role can overwrite the
+  # floating 'latest' tag that deploys resolve, so it should not be assumable
+  # from an arbitrary branch.
+  github_repository = "wellcomecollection/catalogue-pipeline:ref:refs/heads/rk-gha-app-image"
 
   github_oidc_provider_arn = data.terraform_remote_state.aws_account_infrastructure.outputs.github_openid_connect_provider_arn
 }
