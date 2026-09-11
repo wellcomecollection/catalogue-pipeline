@@ -398,3 +398,18 @@ def test_snapshot_schema_still_matches_the_adapter_store() -> None:
     assert [(f.name, f.field_type, f.required) for f in snapshot_fields] == [
         (f.name, f.field_type, f.required) for f in adapter_fields
     ]
+
+
+def test_write_snapshot_cleans_up_when_the_final_move_fails(tmp_path: Path) -> None:
+    """The move into place is the last thing that can fail, and it consumes the
+    partial file, so a failure there must not leave one behind either."""
+    rows, s3_client = build_store(["rec001"])
+    # A directory at the output path makes os.replace fail, standing in for any
+    # unwritable destination.
+    output_path = tmp_path / "calm.parquet"
+    output_path.mkdir()
+
+    with pytest.raises(OSError):
+        write_snapshot(s3_client, CALM, rows, str(output_path))
+
+    assert list(tmp_path.iterdir()) == [output_path]

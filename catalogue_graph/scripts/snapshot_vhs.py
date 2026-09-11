@@ -332,6 +332,12 @@ def write_snapshot(
                 "them and run again, or pass --allow-unreadable to accept a "
                 "snapshot with null content for those records."
             )
+        if unreadable:
+            logger.warning("Snapshot has records with no body", unreadable=unreadable)
+
+        # Inside the cleanup scope: a move that fails, say onto an unwritable
+        # path, would otherwise leave the partial file it was meant to consume.
+        os.replace(partial_path, output_path)
     except BaseException:
         # A partial file left next to the output is the one thing that could
         # be mistaken for a snapshot, so never leave one behind.
@@ -339,10 +345,6 @@ def write_snapshot(
             os.remove(partial_path)
         raise
 
-    if unreadable:
-        logger.warning("Snapshot has records with no body", unreadable=unreadable)
-
-    os.replace(partial_path, output_path)
     return written
 
 
