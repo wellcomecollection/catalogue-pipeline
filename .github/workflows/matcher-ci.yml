@@ -46,12 +46,6 @@ jobs:
       - name: Restore the coursier cache
         uses: coursier/cache-action@v6
 
-      # Elasticsearch binds a non-loopback address here, so it runs its
-      # bootstrap checks, and a runner's default of 65530 is under the 262144
-      # it requires.
-      - name: Raise vm.max_map_count for Elasticsearch
-        run: sudo sysctl -w vm.max_map_count=262144
-
       # Starts the service containers through the host's Docker socket, which
       # run_sbt_task_in_docker.sh mounts into the sbt container.
       - name: Run tests
