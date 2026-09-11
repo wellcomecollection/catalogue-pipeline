@@ -1,20 +1,22 @@
-name: "Scala trial: build an app image"
+name: "Scala trial: build and push an app image"
 
-# Experiment, not for merging. Does an app's Docker image build on a hosted
+# Experiment, not for merging. Does an app's image build and push from a hosted
 # runner? This is the part of a Buildkite app step that the library trial in
-# wellcomecollection/catalogue-pipeline#3648 deliberately left out: sbt stage
-# followed by a docker build from the project's own Dockerfile.
+# wellcomecollection/catalogue-pipeline#3648 left out: sbt stage, a docker build
+# from the project's own Dockerfile, and a push to ECR.
 #
-# It stops short of pushing. No role available to GitHub Actions can push these
-# ECR repositories, so publishing needs new IAM before it can be tried.
+# Triggered by push rather than pull_request on purpose. GitHub's OIDC subject
+# for a pull_request run is "repo:<owner>/<repo>:pull_request", so a role scoped
+# to a branch ref cannot be assumed from one. The scala-ci role is scoped to
+# this branch while we test.
 #
 # sierra_merger is the smallest app: one local dependency, and a single stage
 # Dockerfile over the staged output.
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/scala-trial-app-image.yml"
+  push:
+    branches:
+      - rk-gha-app-image
 
 permissions:
   contents: read
@@ -24,7 +26,6 @@ jobs:
   build-image:
     name: sierra_merger (image)
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.fork != true
     steps:
       - name: Check out project
         uses: actions/checkout@v7
@@ -34,7 +35,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: eu-west-1
-          role-to-assume: ${{ secrets.GHA_SCALA_FORMATTING_ROLE_ARN }}
+          role-to-assume: ${{ secrets.SCALA_CI_ROLE_ARN }}
           output-credentials: true
 
       - name: Log in to private ECR
@@ -46,8 +47,15 @@ jobs:
       - name: Build the app image
         run: ./builds/build_sbt_image.sh sierra_merger "ref.${GITHUB_SHA:0:7}"
 
-      - name: Show what was built
-        run: docker image inspect "sierra_merger:ref.${GITHUB_SHA:0:7}" --format 'size {{.Size}} bytes, layers {{len .RootFS.Layers}}'
+      # Deliberately not builds/publish_sbt_image_to_ecr.sh: that also pushes
+      # the floating 'latest' tag, which deploys resolve, so running it from a
+      # branch would point production at an experiment build. This pushes one
+      # throwaway tag that no tooling reads, and it can be deleted afterwards.
+      - name: Push the image under a throwaway tag
+        run: |
+          registry=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          docker tag "sierra_merger:ref.${GITHUB_SHA:0:7}" "$registry/sierra_merger:gha-trial.${GITHUB_SHA:0:7}"
+          docker push "$registry/sierra_merger:gha-trial.${GITHUB_SHA:0:7}"
 
       - name: Take ownership of the caches
         if: always()
