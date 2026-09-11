@@ -8,15 +8,18 @@ name: "Matcher: test, build and push"
 # elasticsearch) and it depends on internal_model, pipeline_storage_typesafe
 # and lambda, so it exercises the whole path rather than a corner of it.
 #
-# Runs on every pull request and every push to main, matching what the Buildkite
-# matrix did. No paths filter: the matcher depends on enough of the repository
-# that listing the paths would eventually miss one.
+# Triggered by push rather than pull_request. A pull_request trigger fired when
+# this branch's PR was opened but not on later pushes to it, with no run created
+# and no error reported, so it is not something to build on until understood.
+# No paths filter: the matcher depends on enough of the repository that listing
+# the paths would eventually miss one.
 
 on:
-  pull_request:
   push:
     branches:
       - main
+      # Temporary, so the branch exercises the workflow. Remove before merging.
+      - rk-matcher-gha
 
 permissions:
   contents: read
@@ -26,7 +29,6 @@ jobs:
   matcher:
     name: matcher (app)
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.fork != true
     steps:
       - name: Check out project
         uses: actions/checkout@v7
