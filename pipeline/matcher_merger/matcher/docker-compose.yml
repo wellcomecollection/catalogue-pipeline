@@ -23,3 +23,9 @@ services:
       - "discovery.type=single-node"
       - "xpack.security.enabled=false"
       - "action.auto_create_index=false"
+      # The JDK bundled with 8.4.0 throws a NullPointerException out of its
+      # cgroup detection on a cgroups v2 host, which is what GitHub Actions
+      # runners use, and the container exits before Elasticsearch starts.
+      # Turning off container support skips that detection; the heap is set
+      # explicitly because that is what container support would otherwise size.
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g -XX:-UseContainerSupport"

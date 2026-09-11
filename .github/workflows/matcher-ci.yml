@@ -52,9 +52,10 @@ jobs:
       - name: Restore the coursier cache
         uses: coursier/cache-action@v6
 
-      # Elasticsearch 8 binds a non-loopback address here, which puts it in
-      # production mode and enforces its bootstrap checks. Runners default to
-      # 65530, well under the 262144 it demands, so it exits at startup.
+      # Elasticsearch binds a non-loopback address here, so it runs its
+      # bootstrap checks, and a runner's default of 65530 is under the 262144
+      # it requires. Not what made it crash before, but it would be the next
+      # thing to stop it.
       - name: Raise vm.max_map_count for Elasticsearch
         run: sudo sysctl -w vm.max_map_count=262144
 
