@@ -1,0 +1,62 @@
+name: "Scala CI trial: transformer_marc_xml"
+
+# A trial of running our Scala tests on GitHub Actions instead of Buildkite.
+# It gates nothing: Buildkite runs the same tests and still decides the merge.
+# The point is to measure whether a hosted runner plus a restored coursier
+# cache is fast enough, and to stop depending on one NAT address that Maven
+# Central rate-limits. See wellcomecollection/platform#6698.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/scala-ci-trial.yml"
+      - "common/transformer_marc_xml/**"
+      - "project/**"
+      - "build.sbt"
+      - "builds/**"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  test:
+    name: transformer_marc_xml (library)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v7
+
+      # All we need from this role is permission to pull the sbt_wrapper image.
+      # It is the one the formatting workflow already assumes; a trial does not
+      # justify its own role, but a permanent workflow would want one.
+      - name: Configure AWS credentials
+        id: aws_credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.GHA_SCALA_FORMATTING_ROLE_ARN }}
+          output-credentials: true
+
+      - name: Log in to private ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Without CODEARTIFACT_AUTH_TOKEN the build resolves from Maven Central,
+      # so this needs no CodeArtifact permissions. Add the token later if the
+      # cache alone does not keep us under the rate limits.
+      - name: Restore the coursier cache
+        uses: coursier/cache-action@v6
+
+      - name: Run tests
+        run: ./builds/run_sbt_tests.sh transformer_marc_xml
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.aws_credentials.outputs.aws-access-key-id }}
+          AWS_SECRET_KEY: ${{ steps.aws_credentials.outputs.aws-secret-access-key }}
+          AWS_SESSION_TOKEN: ${{ steps.aws_credentials.outputs.aws-session-token }}
+
+      # sbt runs as root inside the container and leaves the mounted caches
+      # root-owned, which the cache action cannot read when it saves them.
+      - name: Make the caches readable
+        if: always()
+        run: sudo chown -R "$USER" ~/.cache/coursier ~/.sbt ~/.ivy2 || true
