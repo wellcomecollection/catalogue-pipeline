@@ -1,0 +1,59 @@
+name: "Scala trial: tests that need docker-compose"
+
+# Experiment, not for merging. Most of our projects start service containers
+# for their tests, which the library trial in
+# wellcomecollection/catalogue-pipeline#3648 avoided by picking one that does
+# not. This runs one that does.
+#
+# The awkward part is nesting: sbt runs inside the sbt_wrapper container, and
+# the sbt-docker-compose plugin then starts sibling containers through the
+# host's Docker socket, which run_sbt_task_in_docker.sh mounts. It also uses
+# --net host so sbt can reach them on localhost. Whether that holds on a hosted
+# runner is the thing being tested.
+#
+# sierra_merger needs one localstack container on port 4566.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/scala-trial-docker-compose.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  test:
+    name: sierra_merger (docker-compose)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.fork != true
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v7
+
+      - name: Configure AWS credentials
+        id: aws_credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.GHA_SCALA_FORMATTING_ROLE_ARN }}
+          output-credentials: true
+
+      - name: Log in to private ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Restore the coursier cache
+        uses: coursier/cache-action@v6
+
+      - name: Run tests
+        run: ./builds/run_sbt_tests.sh sierra_merger
+
+      - name: Show any containers left behind
+        if: always()
+        run: docker ps -a --format '{{.Names}} {{.Image}} {{.Status}}'
+
+      - name: Take ownership of the caches
+        if: always()
+        run: |
+          mkdir -p ~/.cache/coursier ~/.sbt ~/.ivy2
+          sudo chown -R "$(id -u):$(id -g)" ~/.cache/coursier ~/.sbt ~/.ivy2
