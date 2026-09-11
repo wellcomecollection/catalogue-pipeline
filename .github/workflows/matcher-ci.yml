@@ -1,16 +1,16 @@
-name: "Matcher: test, build and push"
+name: "Matcher: test and build"
 
-# The matcher's Buildkite app step, moved here. Deploys stay in Buildkite: this
-# publishes the image, and the deploy pipeline retags it.
+# Runs the matcher's tests and builds its image on GitHub Actions, alongside the
+# Buildkite step rather than instead of it. Buildkite still publishes the image
+# and still deploys, so nothing here can affect what is running.
 #
-# The matcher is the most demanding app we have, which is why it went first:
-# its tests start three service containers (localstack, dynamodb-local and
-# elasticsearch) and it depends on internal_model, pipeline_storage_typesafe
-# and lambda, so it exercises the whole path rather than a corner of it.
+# The matcher is the most demanding app we have: its tests start three service
+# containers (localstack, dynamodb-local and elasticsearch) and it depends on
+# internal_model, pipeline_storage_typesafe and lambda, so it exercises the whole
+# path rather than a corner of it.
 #
-# Runs on every pull request and every push to main, matching what the Buildkite
-# matrix did. No paths filter: the matcher depends on enough of the repository
-# that listing the paths would eventually miss one.
+# No paths filter: the matcher depends on enough of the repository that listing
+# the paths would eventually miss one.
 
 on:
   pull_request:
@@ -30,17 +30,14 @@ jobs:
       - name: Check out project
         uses: actions/checkout@v7
 
-      # Two roles by design. Only main publishes, so only main needs the role
-      # that can push; pull requests get the pull-only role, which is all they
-      # need to fetch the sbt_wrapper image. The push role is scoped to
-      # refs/heads/main and could not be assumed from a pull request anyway:
-      # GitHub's OIDC subject for those runs is "repo:<owner>/<repo>:pull_request".
+      # The pull-only role the formatting workflow uses. Nothing here publishes,
+      # so all we need is permission to fetch the sbt_wrapper image.
       - name: Configure AWS credentials
         id: aws_credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: eu-west-1
-          role-to-assume: ${{ github.ref == 'refs/heads/main' && secrets.SCALA_CI_ROLE_ARN || secrets.GHA_SCALA_FORMATTING_ROLE_ARN }}
+          role-to-assume: ${{ secrets.GHA_SCALA_FORMATTING_ROLE_ARN }}
           output-credentials: true
 
       - name: Log in to private ECR
@@ -51,8 +48,7 @@ jobs:
 
       # Elasticsearch binds a non-loopback address here, so it runs its
       # bootstrap checks, and a runner's default of 65530 is under the 262144
-      # it requires. Not what made it crash before, but it would be the next
-      # thing to stop it.
+      # it requires.
       - name: Raise vm.max_map_count for Elasticsearch
         run: sudo sysctl -w vm.max_map_count=262144
 
@@ -72,10 +68,6 @@ jobs:
 
       - name: Build the image
         run: ./builds/build_sbt_image.sh matcher "$GITHUB_SHA"
-
-      - name: Publish the image
-        if: github.ref == 'refs/heads/main'
-        run: ./builds/publish_sbt_image_to_ecr.sh matcher "$GITHUB_SHA"
 
       # sbt runs as root inside the container and leaves the mounted caches
       # root-owned, which the cache action cannot read when it saves them.
