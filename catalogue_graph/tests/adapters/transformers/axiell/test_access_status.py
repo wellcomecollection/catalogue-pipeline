@@ -40,6 +40,15 @@ def test_no_access_status_field_maps_to_none() -> None:
     assert extract_access_status(record) is None
 
 
+def test_future_until_date_with_an_unrecognised_status_is_not_closed() -> None:
+    # The other side of the same removal: an unrecognised $f used to fall through
+    # to the date and come back Closed.
+    record = make_axiell_record()
+    add_506(record, "f", "PRIVATE")
+    add_506(record, "g", "2999-01-01")
+    assert extract_access_status(record) is None
+
+
 def test_future_until_date_without_a_status_is_not_closed() -> None:
     # A future 506 $g used to infer Closed when no recognised $f was present.
     # That inference is gone: $g now holds either a restricted-until or a
