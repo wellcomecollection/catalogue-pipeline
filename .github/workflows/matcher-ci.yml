@@ -50,10 +50,25 @@ jobs:
       - name: Restore the coursier cache
         uses: coursier/cache-action@v6
 
+      # Elasticsearch 8 binds a non-loopback address here, which puts it in
+      # production mode and enforces its bootstrap checks. Runners default to
+      # 65530, well under the 262144 it demands, so it exits at startup.
+      - name: Raise vm.max_map_count for Elasticsearch
+        run: sudo sysctl -w vm.max_map_count=262144
+
       # Starts the service containers through the host's Docker socket, which
       # run_sbt_task_in_docker.sh mounts into the sbt container.
       - name: Run tests
         run: ./builds/run_sbt_tests.sh matcher
+
+      - name: Show the service containers if the tests failed
+        if: failure()
+        run: |
+          docker ps -a --format '{{.Names}} {{.Image}} {{.Status}}'
+          for name in $(docker ps -aq); do
+            echo "=== $name"
+            docker logs --tail 40 "$name" 2>&1 || true
+          done
 
       - name: Build the image
         run: ./builds/build_sbt_image.sh matcher "$GITHUB_SHA"
