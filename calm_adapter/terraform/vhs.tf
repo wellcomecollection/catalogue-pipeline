@@ -1,8 +1,15 @@
+# This store is the only copy of the CALM records now that the adapter has
+# stopped harvesting, and the bucket has no versioning, so guard the table
+# against accidental deletion and keep a recovery window.
+# See wellcomecollection/platform#6689.
 module "vhs" {
-  source             = "git::github.com/wellcomecollection/terraform-aws-vhs.git//single-version-store?ref=v4.0.5"
+  source             = "git::github.com/wellcomecollection/terraform-aws-vhs.git//single-version-store?ref=v4.3.0"
   bucket_name_prefix = "wellcomecollection-vhs-"
   table_name_prefix  = "vhs-"
   name               = local.namespace
+
+  deletion_protection_enabled    = true
+  point_in_time_recovery_enabled = true
 }
 
 resource "aws_iam_role_policy" "vhs_adapter_readwrite" {
