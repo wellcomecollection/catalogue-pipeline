@@ -1,0 +1,71 @@
+name: "Matcher: test, build and push"
+
+# The matcher's Buildkite app step, moved here. Deploys stay in Buildkite: this
+# publishes the image, and the deploy pipeline retags it.
+#
+# The matcher is the most demanding app we have, which is why it went first:
+# its tests start three service containers (localstack, dynamodb-local and
+# elasticsearch) and it depends on internal_model, pipeline_storage_typesafe
+# and lambda, so it exercises the whole path rather than a corner of it.
+#
+# Runs on every pull request and every push to main, matching what the Buildkite
+# matrix did. No paths filter: the matcher depends on enough of the repository
+# that listing the paths would eventually miss one.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  matcher:
+    name: matcher (app)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.fork != true
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v7
+
+      # Two roles by design. Only main publishes, so only main needs the role
+      # that can push; pull requests get the pull-only role, which is all they
+      # need to fetch the sbt_wrapper image. The push role is scoped to
+      # refs/heads/main and could not be assumed from a pull request anyway:
+      # GitHub's OIDC subject for those runs is "repo:<owner>/<repo>:pull_request".
+      - name: Configure AWS credentials
+        id: aws_credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ github.ref == 'refs/heads/main' && secrets.SCALA_CI_ROLE_ARN || secrets.GHA_SCALA_FORMATTING_ROLE_ARN }}
+          output-credentials: true
+
+      - name: Log in to private ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Restore the coursier cache
+        uses: coursier/cache-action@v6
+
+      # Starts the service containers through the host's Docker socket, which
+      # run_sbt_task_in_docker.sh mounts into the sbt container.
+      - name: Run tests
+        run: ./builds/run_sbt_tests.sh matcher
+
+      - name: Build the image
+        run: ./builds/build_sbt_image.sh matcher "$GITHUB_SHA"
+
+      - name: Publish the image
+        if: github.ref == 'refs/heads/main'
+        run: ./builds/publish_sbt_image_to_ecr.sh matcher "$GITHUB_SHA"
+
+      # sbt runs as root inside the container and leaves the mounted caches
+      # root-owned, which the cache action cannot read when it saves them.
+      - name: Take ownership of the caches
+        if: always()
+        run: |
+          mkdir -p ~/.cache/coursier ~/.sbt ~/.ivy2
+          sudo chown -R "$(id -u):$(id -g)" ~/.cache/coursier ~/.sbt ~/.ivy2

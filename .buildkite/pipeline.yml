@@ -40,7 +40,8 @@ steps:
       - "calm_adapter"
       - "calm_deletion_checker"
       - "calm_indexer"
-      - "matcher"
+      # matcher builds and publishes in GitHub Actions, see matcher-ci.yml.
+      # Deploys still happen here.
       - "merger"
       - "mets_adapter"
       - "reindex_worker"
