@@ -25,6 +25,9 @@ permissions:
 jobs:
   matcher:
     name: matcher (app)
+    # Dependabot and fork runs have no repo secrets, so they cannot pull
+    # sbt_wrapper from ECR. Buildkite still runs the matcher on those PRs.
+    if: github.actor != 'dependabot[bot]' && github.event.pull_request.head.repo.fork != true
     runs-on: ubuntu-latest
     steps:
       - name: Check out project
