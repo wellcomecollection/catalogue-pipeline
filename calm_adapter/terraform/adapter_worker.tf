@@ -28,7 +28,7 @@ module "calm_adapter" {
   }
 
   min_capacity = 0
-  max_capacity = 2
+  max_capacity = local.harvesting_enabled ? 2 : 0
 
   cpu    = 512
   memory = 1024
