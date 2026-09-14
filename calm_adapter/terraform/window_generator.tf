@@ -11,6 +11,8 @@ module "window_generator_lambda" {
   env_vars = {
     TOPIC_ARN = aws_sns_topic.calm_windows_topic.arn
   }
+
+  events_enabled = local.harvesting_enabled
 }
 
 data "aws_iam_policy_document" "publish_to_windows_topic" {
