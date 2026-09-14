@@ -164,8 +164,11 @@ def _parse_index_row(item: dict[str, Any], *, deleted: bool = False) -> IndexRow
 
     The S3 location lives under `payload` in some stores and `location` in
     others. The key is taken verbatim and never rebuilt from the version,
-    because the CALM deletion checker bumps the version without writing a new
-    object, leaving the two disagreeing for deleted records.
+    because the CALM deletion checker bumps the version by one without writing
+    a new object. In the 2026-09-14 CALM snapshot that left 29,762 records,
+    all of them deleted, with a row version one ahead of the version in their
+    key. The other 120,313 deleted records still agree, so the version alone
+    cannot say which records are affected.
     """
     location = item.get("payload") or item.get("location")
     if not location:
