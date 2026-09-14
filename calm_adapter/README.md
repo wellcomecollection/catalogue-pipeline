@@ -22,7 +22,8 @@ harvesting stopped is in
 
 None of the adapter, the deletion checker or the indexer has any running tasks or
 any capacity to start one, so nothing can write to the store. Anything published
-to their queues sits there unconsumed until it ages out to the DLQ. Re-harvesting
+to their queues is never received, so it never reaches a DLQ either: SQS deletes
+it when the queue's four-day retention period ends, leaving no trace. Re-harvesting
 would mean setting `harvesting_enabled` back to `true` and applying, which would
 also let the store drift from that snapshot.
 
