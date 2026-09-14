@@ -99,13 +99,18 @@ Feature: description (MARC 520)
     Given the MARC record has a 520 field with subfield "<code>" value "Cyntaf" and subfield "<code>" value "Ail"
     When I transform the MARC record
     Then the work's description is "<p>Cyntaf</p>"
-    And an error "Repeated non-repeating subfield in field 520" is logged with subfield "<code>"
+    And an error "Repeated non-repeating subfield" is logged with tag "520" and subfield "<code>"
 
     Examples:
       | code |
       | a    |
       | b    |
       | c    |
+
+  Scenario: A blank first occurrence of a non-repeatable subfield is skipped
+    Given the MARC record has a 520 field with subfield "a" value "   " and subfield "a" value "Ail"
+    When I transform the MARC record
+    Then the work's description is "<p>Ail</p>"
 
   # The Scala implementation emits an empty paragraph in the first two cases
   # and a stray blank separator in the third.
