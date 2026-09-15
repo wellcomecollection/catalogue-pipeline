@@ -19,12 +19,13 @@ from tests.mocks import MockRequest, MockResponse
 
 
 def _patch_get_sequence(monkeypatch: MonkeyPatch, items: list) -> dict:
-    """Patch requests.get to return/raise each item in turn; counts calls."""
+    """Patch requests.get to return/raise each item in turn; records the calls."""
     seq = iter(items)
-    state = {"calls": 0}
+    state: dict = {"calls": 0, "urls": []}
 
     def fake_get(url: str, timeout: float | None = None, **kwargs: object) -> object:
         state["calls"] += 1
+        state["urls"].append(url)
         item = next(seq)
         if isinstance(item, Exception):
             raise item
@@ -111,6 +112,21 @@ def test_download_retries_connection_error_then_succeeds(
 
     assert path.read_bytes() == b"ok"
     assert state["calls"] == 2
+
+
+def test_download_does_not_retry_an_empty_200_body(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    image = make_initial_image("imgA", "http://iiif.test/image/imgA/info.json")
+    state = _patch_get_sequence(monkeypatch, [MockResponse(200, content=b"")])
+
+    with pytest.raises(ImageDownloadError, match="empty body") as excinfo:
+        download_image(image, str(tmp_path), timeout=5)
+
+    # One attempt only: CloudFront would serve the same cached body to a retry.
+    assert state["calls"] == 1
+    # Not transient, so the manager skips and counts it rather than failing the task.
+    assert not isinstance(excinfo.value, image_downloader._TransientImageDownloadError)
 
 
 def test_download_raises_after_exhausting_transient_retries(
