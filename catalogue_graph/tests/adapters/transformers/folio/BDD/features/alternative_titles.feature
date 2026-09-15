@@ -99,25 +99,8 @@ Feature: alternative titles (MARC 130/240/242/246)
     When I transform the MARC record
     Then the only alternative title is "Papers on ventilation DNLM"
 
-  # A deliberate improvement on the Scala, which joins ǂ6 into the title and so
-  # emits titles prefixed with a linkage number, e.g. "880-03 Sokohi".
-
-  Scenario: ǂ6, which links to an 880 field, is dropped
-    Given the MARC record has a 240 field with indicators "1" "0" with subfields:
-      | code | value                 |
-      | 6    | 880-02                |
-      | a    | Velikosvetskie obedy. |
-      | l    | English               |
-    When I transform the MARC record
-    Then the only alternative title is "Velikosvetskie obedy. English"
-
   Scenario: An empty field yields no alternative title
     Given the MARC record has a 130 field with subfield "a" value ""
-    When I transform the MARC record
-    Then there are no alternative titles
-
-  Scenario: A field devoid of useful content yields no alternative title
-    Given the MARC record has a 130 field with subfield "a" value "     "
     When I transform the MARC record
     Then there are no alternative titles
 
@@ -143,8 +126,23 @@ Feature: alternative titles (MARC 130/240/242/246)
       | What You Will |
       | Motocrossed   |
 
-  # A deliberate improvement on the Scala, which neither trims the joined value
-  # nor deduplicates on the trimmed one, and so returns both of these.
+  # Everything below diverges from the Scala on purpose. The Scala joins ǂ6 into
+  # the title, and neither trims the joined value nor deduplicates on the trimmed
+  # one.
+
+  Scenario: ǂ6, which links to an 880 field, is dropped
+    Given the MARC record has a 240 field with indicators "1" "0" with subfields:
+      | code | value                 |
+      | 6    | 880-02                |
+      | a    | Velikosvetskie obedy. |
+      | l    | English               |
+    When I transform the MARC record
+    Then the only alternative title is "Velikosvetskie obedy. English"
+
+  Scenario: A field devoid of useful content yields no alternative title
+    Given the MARC record has a 130 field with subfield "a" value "     "
+    When I transform the MARC record
+    Then there are no alternative titles
 
   Scenario: Titles differing only by surrounding whitespace are one title
     Given the MARC record has a 130 field with subfield "a" value "Motocrossed"
