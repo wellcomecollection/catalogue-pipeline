@@ -73,7 +73,7 @@ module "axiell_folio_sync" {
   # private subnets as the adapter ECS tasks above. See folio_dev_sandbox.tf.
   folio_dev_target_enabled     = local.folio_dev_target_enabled
   folio_dev_subnets            = local.folio_dev_target_enabled ? local.private_subnets : []
-  folio_dev_security_group_ids = aws_security_group.folio_sync_dev[*].id
+  folio_dev_security_group_ids = [aws_security_group.folio_sync_dev.id]
 
   # Scheduled runs stay on production. Reaching the sandbox is a per-invocation
   # opt-in, with {"folio_target": "dev"} on the event.

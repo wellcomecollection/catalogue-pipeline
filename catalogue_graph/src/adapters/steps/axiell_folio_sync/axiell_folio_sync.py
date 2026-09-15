@@ -122,6 +122,7 @@ def handler(
         ref_cache,
         inventory,
         dry_run=dry_run,
+        folio_target=folio_target,
         manifest_bucket=manifest_bucket,
         deletions=deletions,
         hard_delete=hard_delete,

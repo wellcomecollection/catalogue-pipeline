@@ -37,7 +37,7 @@ module "sync_lambda" {
         # Iceberg-specific env vars are needed here.
         DRY_RUN = tostring(var.dry_run_default)
         # Used when an event does not name a target. The event still wins.
-        FOLIO_TARGET = var.folio_default_target
+        FOLIO_TARGET = local.folio_default_target
       },
       # Set only for the dev target, so a folio_target="dev" run without it fails
       # rather than using the prod credentials.

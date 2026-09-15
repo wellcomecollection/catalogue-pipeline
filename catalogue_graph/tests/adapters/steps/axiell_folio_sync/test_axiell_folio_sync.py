@@ -352,21 +352,28 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
     monkeypatch.setattr(sync_mod, "ssl_context_from_env", lambda: None)
     monkeypatch.setattr(sync_mod, "RefCache", FakeRefCache)
     monkeypatch.setattr(sync_mod, "read_rows", lambda *a, **kw: ([], []))
-    monkeypatch.setattr(
-        sync_mod,
-        "run_sync",
-        lambda event, *a, **kw: AxiellFolioSyncResponse(
-            job_id=event.job_id, dry_run=True
-        ),
-    )
+
+    ran: dict[str, Any] = {}
+
+    def fake_run_sync(event: AxiellFolioSyncEvent, *a: Any, **kw: Any) -> Any:
+        ran.update(kw)
+        return AxiellFolioSyncResponse(
+            job_id=event.job_id, dry_run=True, folio_target=kw["folio_target"]
+        )
+
+    monkeypatch.setattr(sync_mod, "run_sync", fake_run_sync)
 
     event = AxiellFolioSyncEvent(job_id="j1", folio_target=folio_target)
-    sync_mod.handler(event, use_rest_api_table=False)
+    response = sync_mod.handler(event, use_rest_api_table=False)
 
     assert built["url"] == expected_url
     # Only the parameter for the requested target is read, so a run can never
     # pick up the other instance's credentials.
     assert fetched == [expected_param]
+    # The resolved target reaches run_sync, so it lands in the manifest...
+    assert ran["folio_target"] == folio_target
+    # ...and comes back in the response the caller sees.
+    assert response.folio_target == folio_target
 
 
 def _run_local_handler(
@@ -377,7 +384,9 @@ def _run_local_handler(
 
     def fake_handler(event: AxiellFolioSyncEvent, **kwargs: Any) -> Any:
         captured["event"] = event
-        return AxiellFolioSyncResponse(job_id=event.job_id, dry_run=True)
+        return AxiellFolioSyncResponse(
+            job_id=event.job_id, dry_run=True, folio_target="prod"
+        )
 
     monkeypatch.setattr(sync_mod, "handler", fake_handler)
     monkeypatch.setattr("sys.argv", ["axiell_folio_sync", *argv])
@@ -516,7 +525,9 @@ def test_no_s3_report_with_empty_string_bucket(
 
 
 def test_report_s3_uri_requires_bucket() -> None:
-    report = AxiellFolioSyncReport(job_id="job-1", dry_run=True, counts={})
+    report = AxiellFolioSyncReport(
+        job_id="job-1", dry_run=True, folio_target="prod", counts={}
+    )
 
     with pytest.raises(ValueError, match="No S3 bucket configured"):
         _ = report.s3_uri

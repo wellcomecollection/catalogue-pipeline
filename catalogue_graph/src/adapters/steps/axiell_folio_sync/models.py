@@ -69,6 +69,11 @@ class AxiellFolioSyncResponse(BaseModel):
 
     job_id: str
     dry_run: bool
+    # The instance actually written to, resolved rather than as requested. This
+    # is the caller's confirmation of where a run went: an image too old to know
+    # about folio_target omits the field entirely, so a run that silently fell
+    # back to prod shows up in the response rather than only in the logs.
+    folio_target: FolioTarget
     manifest_s3_path: str | None = None
     counts: dict[str, int] = Field(default_factory=dict)
     total_successful: int = 0

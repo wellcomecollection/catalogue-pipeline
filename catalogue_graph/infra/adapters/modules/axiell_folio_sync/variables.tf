@@ -75,14 +75,9 @@ variable "folio_dev_security_group_ids" {
 # Sets FOLIO_TARGET, and the target the state machine falls back to. "dev"
 # points the scheduled runs at the sandbox and requires folio_dev_target_enabled.
 variable "folio_default_target" {
-  description = "FOLIO instance to use when an event does not specify one: \"prod\" (EBSCO SaaS) or \"dev\" (the sandbox, which requires folio_dev_target_enabled)."
+  description = "FOLIO instance to use when an event does not specify one: \"prod\" (EBSCO SaaS) or \"dev\" (the sandbox). \"dev\" is ignored unless folio_dev_target_enabled is also set. An unrecognised value fails at runtime in resolve_folio_target."
   type        = string
   default     = "prod"
-
-  validation {
-    condition     = contains(["prod", "dev"], var.folio_default_target)
-    error_message = "folio_default_target must be \"prod\" or \"dev\"."
-  }
 }
 
 variable "max_sync_retries" {
