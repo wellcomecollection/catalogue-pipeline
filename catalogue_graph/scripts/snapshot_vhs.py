@@ -110,20 +110,28 @@ class VHSStoreConfig:
     id_field: str | None = None
     """Key in the record body holding the record's own id, where the body has
     one. Used to check the DynamoDB row and the S3 object agree."""
-    deleted_table_name: str | None = None
-    """Companion table holding records deleted from the main one. Sierra moved
-    its pre-2018 deletions out rather than marking them in place, so a snapshot
-    that reads only the main table silently omits them."""
+    all_rows_deleted: bool = False
+    """Every row in the table is a deleted record, for a table that marks
+    deletion by where a row lives rather than by a flag on the row."""
 
 
+# Sierra is snapshotted as two files, one per table, so each is a faithful copy.
+# RFC 043 moved bibs deleted before 2018 out of the live table, which is all the
+# pipeline reads. A 2023 reharvest recreated 95,749 of them in the live table,
+# so those ids are in both files; on 2026-09-15 every pair was equivalent.
+# Sierra rows carry no isDeleted, so `deleted` in the live file is false even
+# for deleted bibs. Sierra's own deletion state is in the bib record.
 VHS_STORES: dict[str, VHSStoreConfig] = {
     "calm": VHSStoreConfig(
         table_name="vhs-calm-adapter", namespace="calm", id_field="id"
     ),
     "sierra": VHSStoreConfig(
-        table_name="vhs-sierra-sierra-adapter-20200604",
+        table_name="vhs-sierra-sierra-adapter-20200604", namespace="sierra"
+    ),
+    "sierra-deleted": VHSStoreConfig(
+        table_name="vhs-sierra-sierra-adapter-20200604-deleted",
         namespace="sierra",
-        deleted_table_name="vhs-sierra-sierra-adapter-20200604-deleted",
+        all_rows_deleted=True,
     ),
     "miro": VHSStoreConfig(table_name="vhs-sourcedata-miro", namespace="miro"),
 }
@@ -210,19 +218,17 @@ def _scan_table(client: Any, table_name: str, *, deleted: bool) -> list[IndexRow
 
 
 def scan_index(dynamodb_resource: Any, config: VHSStoreConfig) -> list[IndexRow]:
-    """Read every row of the store's index, including its deleted companion."""
-    client = dynamodb_resource.meta.client
-
-    rows = _scan_table(client, config.table_name, deleted=False)
+    """Read every row of the store's index table."""
+    rows = _scan_table(
+        dynamodb_resource.meta.client,
+        config.table_name,
+        deleted=config.all_rows_deleted,
+    )
     if not rows:
         raise SnapshotError(
             f"Table {config.table_name} returned 0 rows. This is almost "
             "certainly an error rather than an empty store."
         )
-
-    if config.deleted_table_name is not None:
-        rows.extend(_scan_table(client, config.deleted_table_name, deleted=True))
-
     return rows
 
 
@@ -364,6 +370,12 @@ def verify_snapshot(output_path: str, rows: list[IndexRow]) -> None:
         )
 
     snapshot_ids = set(table.column("id").to_pylist())
+    if len(snapshot_ids) != table.num_rows:
+        raise SnapshotError(
+            f"Snapshot has {table.num_rows - len(snapshot_ids)} duplicate id(s). "
+            "A single table cannot hold these, so the rows came from more than "
+            "one place."
+        )
     if snapshot_ids != {row.id for row in rows}:
         raise SnapshotError(
             "The ids in the snapshot are not the ids in the index, despite the "
