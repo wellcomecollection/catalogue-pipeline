@@ -10,17 +10,22 @@ CALM went read-only on 2026-09-10 ahead of the Axiell Collections migration, and
 we no longer harvest from it. See wellcomecollection/platform#6689.
 
 Three flags in [terraform/locals.tf](terraform/locals.tf) hold this in place.
-`harvesting_enabled` disables the window generator's schedule,
-`deletion_checking_enabled` disables the deletion check initiator's schedule and
-scales the deletion checker to zero, and `indexing_enabled` scales the indexer
-to zero.
+`harvesting_enabled` disables the window generator's schedule and scales the
+adapter to zero, `deletion_checking_enabled` disables the deletion check
+initiator's schedule and scales the deletion checker to zero, and
+`indexing_enabled` scales the indexer to zero.
 
 The adapter store keeps the records it already holds, and the production pipeline
-still transforms CALM works out of it. The adapter service and the `calm-windows`
-queue are untouched, so a one-off re-harvest still works by running the window
-generator CLI locally, as described below. The deletion checker and the indexer
-have no running tasks, so anything published to their queues will sit there
-unconsumed until it ages out to the DLQ.
+still transforms CALM works out of it. A snapshot of the store as it stood when
+harvesting stopped is in
+`s3://wellcomecollection-platform-infra/vhs_snapshots/vhs-calm-adapter/`.
+
+None of the adapter, the deletion checker or the indexer has any running tasks or
+any capacity to start one, so nothing can write to the store. Anything published
+to their queues is never received, so it never reaches a DLQ either: SQS deletes
+it when the queue's four-day retention period ends, leaving no trace. Re-harvesting
+would mean setting `harvesting_enabled` back to `true` and applying, which would
+also let the store drift from that snapshot.
 
 Decommissioning the CALM code and infrastructure is separate, later work.
 
@@ -34,7 +39,7 @@ Decommissioning the CALM code and infrastructure is separate, later work.
     [api_guide]: https://us-east-1.console.aws.amazon.com/s3/object/wellcomecollection-platform-infra?prefix=Calm.API.Guide.pdf&region=eu-west-1
 
 *   The `calm_adapter` service fetches updated records from CALM.
-    It is still deployed, but nothing sends it work while harvesting is off.
+    It is still deployed, but scaled to zero while harvesting is off.
 
     It receives queries from the `calm_window_generator`, which tell it what sort of records to fetch.
     e.g.
@@ -53,7 +58,8 @@ Decommissioning the CALM code and infrastructure is separate, later work.
 
     The window generator runs as a Lambda on a fixed schedule, or it can be run locally if you want to do a one-off query.
     e.g. you can refetch all the records modified on a given day.
-    The schedule is disabled, so the local CLI is the only way it runs now.
+    The schedule is disabled, and running the CLI now only queues windows, since
+    the adapter has no capacity to pick them up.
 
     TODO: Should we rename this to "query generator"?
 
