@@ -358,6 +358,7 @@ def verify_snapshot(output_path: str, rows: list[IndexRow]) -> None:
     This reads the file back from disk rather than trusting the writer, so it
     catches a truncated or unreadable parquet as much as a miscount.
     """
+    # content is read only to prove the column decodes; nothing else uses it.
     table = pq.read_table(output_path, columns=["id", "deleted", "content"])
 
     if table.num_rows != len(rows):
