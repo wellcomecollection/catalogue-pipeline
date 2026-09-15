@@ -96,6 +96,7 @@ DEFAULT_ARGS=(
   --use-cli
   --job-id "$JOB_ID"
   --use-rest-api-table
+  --folio-target "$FOLIO_TARGET"
 )
 if [[ -n "$CHANGESET_IDS" ]]; then
   # shellcheck disable=SC2206
