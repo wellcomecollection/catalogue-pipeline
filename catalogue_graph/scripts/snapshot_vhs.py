@@ -70,11 +70,8 @@ EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
 column is non-optional, and a row like that is reported separately anyway."""
 
 
-# The first six fields match ADAPTER_STORE_ICEBERG_SCHEMA in
-# adapters/utils/schemata.py, so selecting them gives a table that loads
-# through the adapter store's own snapshot path. A test in
-# test_snapshot_vhs.py fails if the two drift apart. The rest is VHS-specific
-# provenance.
+# The first six fields share names and types with ADAPTER_STORE_ICEBERG_SCHEMA
+# for familiarity only; nothing loads these snapshots into Iceberg.
 #
 # `last_modified` is the S3 object's timestamp, so for a record marked deleted
 # it is when the last live body was written rather than when the deletion was

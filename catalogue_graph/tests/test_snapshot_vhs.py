@@ -386,20 +386,6 @@ def test_snapshot_vhs_rejects_uploading_a_limited_run(tmp_path: Path) -> None:
         )
 
 
-def test_snapshot_schema_still_matches_the_adapter_store() -> None:
-    """The first six fields are deliberately the adapter store's, so a snapshot
-    loads through its path. Nothing else enforces that if schemata.py moves."""
-    from adapters.utils.schemata import ADAPTER_STORE_ICEBERG_SCHEMA
-    from scripts.snapshot_vhs import VHS_SNAPSHOT_ICEBERG_SCHEMA
-
-    adapter_fields = ADAPTER_STORE_ICEBERG_SCHEMA.fields
-    snapshot_fields = VHS_SNAPSHOT_ICEBERG_SCHEMA.fields[: len(adapter_fields)]
-
-    assert [(f.name, f.field_type, f.required) for f in snapshot_fields] == [
-        (f.name, f.field_type, f.required) for f in adapter_fields
-    ]
-
-
 def test_write_snapshot_cleans_up_when_the_final_move_fails(tmp_path: Path) -> None:
     """The move into place is the last thing that can fail, and it consumes the
     partial file, so a failure there must not leave one behind either."""
