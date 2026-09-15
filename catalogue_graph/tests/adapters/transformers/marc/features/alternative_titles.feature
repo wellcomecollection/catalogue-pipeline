@@ -46,18 +46,6 @@ Feature: MARC record alternative titles extraction
     When I transform the MARC record
     Then there are 0 alternative titles
 
-  # A deliberate improvement on the Scala, which joins ǂ6 into the title and so
-  # emits titles prefixed with a linkage number, e.g. "880-03 Sokohi".
-
-  Scenario: Drops ǂ6, which links to an 880 field
-    Given the MARC record has a 240 field with indicators "1" "0" with subfields:
-      | code | value                 |
-      | 6    | 880-02                |
-      | a    | Velikosvetskie obedy. |
-      | l    | English               |
-    When I transform the MARC record
-    Then the only alternative title is "Velikosvetskie obedy. English"
-
   Scenario: Excludes caption titles (246 with 2nd indicator 6)
     Given the MARC record has a 130 field with subfield "a" value "Westminster review (London, England : 1852)"
     And the MARC record has another 246 field with indicators "0" "6" with subfield "a" value "Westminster and foreign quarterly review"
@@ -67,11 +55,6 @@ Feature: MARC record alternative titles extraction
   Scenario: Only caption titles (should yield none)
     Given the MARC record has a 246 field with indicators "0" "6" with subfield "a" value "This is a caption"
     And the MARC record has another 246 field with indicators "1" "6" with subfield "a" value "Another caption"
-    When I transform the MARC record
-    Then there are 0 alternative titles
-
-  Scenario: Whitespace-only title should be ignored
-    Given the MARC record has a 130 field with subfield "a" value "     "
     When I transform the MARC record
     Then there are 0 alternative titles
 
@@ -99,15 +82,32 @@ Feature: MARC record alternative titles extraction
       | What You Will |
       | Motocrossed   |
 
-  Scenario: Duplicate titles differing only by surrounding spaces
-    Given the MARC record has a 130 field with subfield "a" value "Motocrossed"
-    And the MARC record has another 246 field with indicators "0" "0" with subfield "a" value "  Motocrossed  "
-    When I transform the MARC record
-    Then there are 1 alternative titles
-    And the 1st alternative title is "Motocrossed"
-
   Scenario: Alternative title constructed from multiple subfields
     Given the MARC record has a 130 field with subfield "a" value "What You Will" with subfield "r" value "in G flat Major" with subfield "l" value "with Ayapeneco subtitles"
     When I transform the MARC record
     Then there are 1 alternative titles
     And the 1st alternative title is "What You Will in G flat Major with Ayapeneco subtitles"
+
+  # Everything below diverges from the Scala implementation (MarcAlternativeTitles.scala)
+  # on purpose. Scala joins ǂ6 into the title, and neither trims the joined value nor
+  # deduplicates on the trimmed one.
+
+  Scenario: Drops ǂ6, which links to an 880 field
+    Given the MARC record has a 240 field with indicators "1" "0" with subfields:
+      | code | value                 |
+      | 6    | 880-02                |
+      | a    | Velikosvetskie obedy. |
+      | l    | English               |
+    When I transform the MARC record
+    Then the only alternative title is "Velikosvetskie obedy. English"
+
+  Scenario: Whitespace-only title should be ignored
+    Given the MARC record has a 130 field with subfield "a" value "     "
+    When I transform the MARC record
+    Then there are 0 alternative titles
+
+  Scenario: Duplicate titles differing only by surrounding spaces
+    Given the MARC record has a 130 field with subfield "a" value "Motocrossed"
+    And the MARC record has another 246 field with indicators "0" "0" with subfield "a" value "  Motocrossed  "
+    When I transform the MARC record
+    Then the only alternative title is "Motocrossed"

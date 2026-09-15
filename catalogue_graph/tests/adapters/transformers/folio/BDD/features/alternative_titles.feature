@@ -22,132 +22,189 @@ Feature: alternative titles (MARC 130/240/242/246)
     And the MARC record has a 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001"
     And the MARC record has a 245 field with subfield "a" value "Some Title"
 
-  # Ported from MarcAlternativeTitlesTest.scala.
-
-  Scenario: A record with none of the four fields has no alternative titles
-    Given the MARC record has a 999 field with subfield "a" value "mafeesh"
+  Scenario: A record with no 130, 240, 242 or 246 has no alternative titles
+    Given the MARC record has a 251 field with subfield "a" value "Xigua"
     When I transform the MARC record
     Then there are no alternative titles
-
-  Scenario: An alternative title is taken from 130
-    Given the MARC record has a 130 field with subfield "a" value "Memoirs of Sundry Transactions from the World in the Moon"
-    When I transform the MARC record
-    Then the only alternative title is "Memoirs of Sundry Transactions from the World in the Moon"
-
-  Scenario: An alternative title is taken from 240
-    Given the MARC record has a 240 field with indicators "1" "0" with subfield "a" value "Velikosvetskie obedy."
-    When I transform the MARC record
-    Then the only alternative title is "Velikosvetskie obedy."
-
-  Scenario: An alternative title is taken from 246
-    Given the MARC record has a 246 field with indicators "3" "1" with subfield "a" value "Poetry of skiing"
-    When I transform the MARC record
-    Then the only alternative title is "Poetry of skiing"
-
-  Scenario: An alternative title is taken from 242
-    Given the MARC record has a 242 field with indicators "0" "0" with subfield "a" value "Morbid changes in the walls of veins in arteriosclerosis"
-    When I transform the MARC record
-    Then the only alternative title is "Morbid changes in the walls of veins in arteriosclerosis"
-
-  Scenario: All of a field's subfields are joined, in the order they appear
-    Given the MARC record has a 130 field with subfield "a" value "What You Will" and subfield "r" value "in G flat Major" and subfield "l" value "with Ayapeneco subtitles"
-    When I transform the MARC record
-    Then the only alternative title is "What You Will in G flat Major with Ayapeneco subtitles"
-
-  # 242 ǂy is the language code of the translated title. Joining every subfield
-  # means it lands in the title text, as it does in the Scala.
-
-  Scenario: 242 ǂy is joined into the title like any other subfield
-    Given the MARC record has a 242 field with indicators "0" "0" with subfield "a" value "Ways to prevent live burials." and subfield "y" value "eng"
-    When I transform the MARC record
-    Then the only alternative title is "Ways to prevent live burials. eng"
-
-  Scenario: A 246 caption title (second indicator "6") is excluded
-    Given the MARC record has a 130 field with subfield "a" value "Westminster review (London, England : 1852)"
-    And the MARC record has another 246 field with indicators "0" "6" with subfield "a" value "Westminster and foreign quarterly review"
-    When I transform the MARC record
-    Then the only alternative title is "Westminster review (London, England : 1852)"
-
-  Scenario: A record with nothing but caption titles has no alternative titles
-    Given the MARC record has a 246 field with indicators "0" "6" with subfield "a" value "This is a caption"
-    And the MARC record has another 246 field with indicators "1" "6" with subfield "a" value "Another caption"
-    When I transform the MARC record
-    Then there are no alternative titles
-
-  Scenario: ǂ5 UkLW is dropped from the title
-    Given the MARC record has a 246 field with indicators "1" " " with subfields:
-      | code | value                                  |
-      | i    | Previous title, replaced January 2025: |
-      | a    | Marseilles: Plague, 1721               |
-      | 5    | UkLW                                   |
-    When I transform the MARC record
-    Then the only alternative title is "Previous title, replaced January 2025: Marseilles: Plague, 1721"
-
-  Scenario: A field whose only content is ǂ5 UkLW yields no alternative title
-    Given the MARC record has a 246 field with subfield "5" value "UkLW"
-    When I transform the MARC record
-    Then there are no alternative titles
-
-  # Only an exact match is dropped. Wellcome's own records hold ǂ5 values
-  # belonging to other institutions, which are part of the title as catalogued.
-
-  Scenario: A ǂ5 value other than UkLW is kept
-    Given the MARC record has a 246 field with indicators "1" "8" with subfields:
-      | code | value                 |
-      | a    | Papers on ventilation |
-      | 5    | DNLM                  |
-    When I transform the MARC record
-    Then the only alternative title is "Papers on ventilation DNLM"
-
-  # A deliberate improvement on the Scala, which joins ǂ6 into the title and so
-  # emits titles prefixed with a linkage number, e.g. "880-03 Sokohi".
-
-  Scenario: ǂ6, which links to an 880 field, is dropped
-    Given the MARC record has a 240 field with indicators "1" "0" with subfields:
-      | code | value                 |
-      | 6    | 880-02                |
-      | a    | Velikosvetskie obedy. |
-      | l    | English               |
-    When I transform the MARC record
-    Then the only alternative title is "Velikosvetskie obedy. English"
 
   Scenario: An empty field yields no alternative title
     Given the MARC record has a 130 field with subfield "a" value ""
     When I transform the MARC record
     Then there are no alternative titles
 
-  Scenario: A field devoid of useful content yields no alternative title
-    Given the MARC record has a 130 field with subfield "a" value "     "
+  Scenario: A field whose content is entirely filtered out yields no alternative title
+    Given the MARC record has a 246 field with subfield "5" value "UkLW"
     When I transform the MARC record
     Then there are no alternative titles
 
-  Scenario: Titles are returned in the order their fields appear in the record
-    Given the MARC record has a 246 field with indicators "3" "1" with subfield "a" value "Poetry of skiing"
-    And the MARC record has another 130 field with subfield "a" value "What You Will"
-    And the MARC record has another 242 field with indicators "0" "0" with subfield "a" value "Calomel in dropsies"
-    And the MARC record has another 240 field with indicators "0" "0" with subfield "a" value "Your Own Thing"
+  Scenario: A 246 with second indicator 6 is a caption title and is ignored
+    Given the MARC record has a 246 field with indicators " " "6" with subfield "a" value "I am a caption"
     When I transform the MARC record
-    Then the work has 4 alternative titles:
-      | Poetry of skiing    |
-      | What You Will       |
-      | Calomel in dropsies |
-      | Your Own Thing      |
+    Then there are no alternative titles
 
-  Scenario: The same title from different fields is deduplicated
-    Given the MARC record has a 130 field with subfield "a" value "What You Will"
-    And the MARC record has another 240 field with indicators "0" "0" with subfield "a" value "What You Will"
-    And the MARC record has another 246 field with indicators "0" "0" with subfield "a" value "What You Will"
-    And the MARC record has another 246 field with indicators "0" "0" with subfield "a" value "Motocrossed"
+  Scenario Outline: An alternative title is extracted from <tag>
+    Given the MARC record has a <tag> field with subfield "a" value "mafeesh"
+    When I transform the MARC record
+    Then the only alternative title is "mafeesh"
+
+    Examples:
+      | tag |
+      | 130 |
+      | 240 |
+      | 242 |
+      | 246 |
+
+  Scenario: All subfields of 130 are concatenated in document order
+    Given the MARC record has a 130 field with subfields:
+      | code | value |
+      | a    | A     |
+      | d    | D     |
+      | f    | F     |
+      | g    | G     |
+      | h    | H     |
+      | k    | K     |
+      | l    | L     |
+      | m    | M     |
+      | n    | N     |
+      | o    | O     |
+      | p    | P     |
+      | r    | R     |
+      | s    | S     |
+      | t    | T     |
+      | 0    | 0     |
+      | 1    | 1     |
+      | 2    | 2     |
+      | 7    | 7     |
+      | 8    | 8     |
+    When I transform the MARC record
+    Then the only alternative title is "A D F G H K L M N O P R S T 0 1 2 7 8"
+
+  Scenario: All subfields of 240 are concatenated in document order
+    Given the MARC record has a 240 field with subfields:
+      | code | value |
+      | a    | A     |
+      | d    | D     |
+      | f    | F     |
+      | g    | G     |
+      | h    | H     |
+      | k    | K     |
+      | l    | L     |
+      | m    | M     |
+      | n    | N     |
+      | o    | O     |
+      | p    | P     |
+      | r    | R     |
+      | s    | S     |
+      | 0    | 0     |
+      | 1    | 1     |
+      | 2    | 2     |
+      | 7    | 7     |
+      | 8    | 8     |
+    When I transform the MARC record
+    Then the only alternative title is "A D F G H K L M N O P R S 0 1 2 7 8"
+
+  Scenario: All subfields of 242 are concatenated in document order
+    Given the MARC record has a 242 field with subfields:
+      | code | value |
+      | a    | A     |
+      | b    | B     |
+      | c    | C     |
+      | h    | H     |
+      | n    | N     |
+      | p    | P     |
+      | y    | Y     |
+    When I transform the MARC record
+    Then the only alternative title is "A B C H N P Y"
+
+  Scenario: All subfields of 246 are concatenated in document order
+    Given the MARC record has a 246 field with subfields:
+      | code | value |
+      | a    | A     |
+      | b    | B     |
+      | f    | F     |
+      | g    | G     |
+      | h    | H     |
+      | i    | I     |
+      | n    | N     |
+      | p    | P     |
+      | 5    | 5     |
+      | 7    | 7     |
+      | 8    | 8     |
+    When I transform the MARC record
+    Then the only alternative title is "A B F G H I N P 5 7 8"
+
+  Scenario: A 246 ǂ5 of UkLW is dropped and a sibling ǂ5 is kept
+    Given the MARC record has a 246 field with subfields:
+      | code | value    |
+      | a    | Pinakes  |
+      | 5    | UkLW     |
+      | 5    | Mouseion |
+    When I transform the MARC record
+    Then the only alternative title is "Pinakes Mouseion"
+
+  Scenario: A ǂ5 whose content is not UkLW is kept
+    Given the MARC record has a 246 field with indicators " " "1" with subfields:
+      | code | value   |
+      | a    | Apples  |
+      | 5    | Oranges |
+      | 5    | Carrots |
+    When I transform the MARC record
+    Then the only alternative title is "Apples Oranges Carrots"
+
+  Scenario: Titles are returned in the order their fields appear in the record
+    Given the MARC record has a 130 field with subfield "a" value "Bananas"
+    And the MARC record has a 240 field with subfield "a" value "Apples"
+    And the MARC record has a 246 field with subfield "a" value "Cherries"
+    When I transform the MARC record
+    Then the work has 3 alternative titles:
+      | Bananas  |
+      | Apples   |
+      | Cherries |
+
+  Scenario: Repeated fields with the same tag each contribute a title
+    Given the MARC record has a 240 field with subfield "a" value "Apples"
+    And the MARC record has another 240 field with subfield "a" value "Durian"
     When I transform the MARC record
     Then the work has 2 alternative titles:
-      | What You Will |
-      | Motocrossed   |
+      | Apples |
+      | Durian |
 
-  # A deliberate improvement on the Scala, which neither trims the joined value
-  # nor deduplicates on the trimmed one, and so returns both of these.
-
-  Scenario: Titles differing only by surrounding whitespace are one title
-    Given the MARC record has a 130 field with subfield "a" value "Motocrossed"
-    And the MARC record has another 246 field with indicators "0" "0" with subfield "a" value "  Motocrossed  "
+  Scenario: Titles are extracted from all relevant fields
+    Given the MARC record has a 130 field with subfield "a" value "I'm very well acquainted too"
+    And the MARC record has a 240 field with subfield "a" value "with matters mathematical"
+    And the MARC record has a 246 field with subfield "a" value "I understand equations"
+    And the MARC record has another 246 field with subfield "a" value "both simple"
+    And the MARC record has another 240 field with subfield "a" value "and quadratical"
+    And the MARC record has another 130 field with subfield "a" value "About binomial theorem I am teeming with a lot o' news"
+    And the MARC record has a 242 field with subfield "a" value "Ikh hob a klugn kop un ikh farshtey Einstein's teyoriye"
     When I transform the MARC record
-    Then the only alternative title is "Motocrossed"
+    Then the work has 7 alternative titles:
+      | I'm very well acquainted too                            |
+      | with matters mathematical                               |
+      | I understand equations                                  |
+      | both simple                                             |
+      | and quadratical                                         |
+      | About binomial theorem I am teeming with a lot o' news  |
+      | Ikh hob a klugn kop un ikh farshtey Einstein's teyoriye |
+
+  Scenario: Duplicate alternative titles are not returned
+    Given the MARC record has a 130 field with subfield "a" value "With many cheerful facts about the square of the hypotenuse"
+    And the MARC record has a 240 field with subfield "a" value "With many cheerful facts about the square of the hypotenuse"
+    And the MARC record has a 246 field with subfield "a" value "With many cheerful facts about the square of the hypotenuse"
+    And the MARC record has a 242 field with subfield "a" value "With many cheerful facts about the square of the hypoten-potenuse"
+    And the MARC record has another 246 field with subfield "a" value "With many cheerful facts about the square of the hypoten-potenuse"
+    When I transform the MARC record
+    Then the work has 2 alternative titles:
+      | With many cheerful facts about the square of the hypotenuse       |
+      | With many cheerful facts about the square of the hypoten-potenuse |
+
+  Scenario: Only 246 filters on a second indicator of 6
+    Given the MARC record has a 130 field with indicators " " "6" with subfield "a" value "I am not a caption"
+    And the MARC record has a 246 field with indicators " " "6" with subfield "a" value "I am a caption"
+    And the MARC record has a 240 field with indicators " " "6" with subfield "a" value "Nor am I"
+    And the MARC record has a 242 field with indicators " " "6" with subfield "a" value "Heller ikkje meg"
+    When I transform the MARC record
+    Then the work has 3 alternative titles:
+      | I am not a caption |
+      | Nor am I           |
+      | Heller ikkje meg   |
