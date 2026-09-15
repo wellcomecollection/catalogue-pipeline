@@ -74,10 +74,12 @@ imports them anyway, which is only useful for inspecting the full set.
 The level is the first non-empty MARC 351 `$c`, matched case-insensitively.
 351 is repeatable and its casing varies across the migrated data, so this
 follows what the transformer does in
-`adapters/transformers/axiell/organisation_and_arrangement.py`. Note that
-"Item part", CALM's old "piece" level, is withheld as things stand, because
-the 2026-09-10 run gives no evidence either way on whether Axiell will save
-one. The per-level counts in `report.md` say how many rows that costs.
+`adapters/transformers/axiell/organisation_and_arrangement.py`. The match on
+Item is exact, so "Item part", CALM's old "piece" level, is withheld too.
+Whether Axiell saves a record at that level is unresolved: the 2026-09-10 run
+attempted every level, so if it carried Item part rows and none of them are
+among the 516 failures, they belong in the import. The per-level counts in
+`report.md` say how many rows that is worth.
 
 The adapter store holds each record as serialised MARC XML, so subfield
 values are XML-unescaped before use. Without that, the 53 records whose
