@@ -282,6 +282,7 @@ Session.vim
 tags
 # metals scala language server
 .metals
+metals.sbt
 # bloop scala build server
 .bloop
 .bsp

@@ -28,12 +28,8 @@ def _date_from(record: Record, field: str, subfield: str) -> date | None:
     return _try_parse_date(value) if value else None
 
 
-def extract_closed_until_date(record: Record) -> date | None:
+def extract_restricted_or_closed_until_date(record: Record) -> date | None:
     return _date_from(record, "506", "g")
-
-
-def extract_restricted_until_date(record: Record) -> date | None:
-    return _date_from(record, "540", "g")
 
 
 def _parse_production_date(value: str, month: int, day: int) -> date | None:

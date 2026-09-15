@@ -30,7 +30,9 @@ class IndexableWork(IndexableRecord):
         return self.debug.source.id
 
     def get_modified_time(self) -> datetime:
-        return datetime.fromisoformat(self.debug.source.modified_time)
+        # Versioned by merge time, not source modified time: re-merging a work leaves the
+        # source record untouched, so source time cannot order two merges of the same work.
+        return datetime.fromisoformat(self.debug.merged_time)
 
     @staticmethod
     def from_raw_document(work: dict) -> "IndexableWork":

@@ -17,6 +17,7 @@ from typing import ClassVar
 from pydantic import Field
 
 from adapters.steps.axiell_folio_sync.models import (
+    FolioTarget,
     SyncDeletionEntry,
     SyncErrorEntry,
     SyncSuccessEntry,
@@ -31,6 +32,8 @@ class AxiellFolioSyncReport(PipelineReport):
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
     dry_run: bool
+    # Ties a stored manifest to the FOLIO instance it describes.
+    folio_target: FolioTarget
     counts: dict[str, int]
     successful: list[SyncSuccessEntry] = Field(default_factory=list)
     errors: list[SyncErrorEntry] = Field(default_factory=list)

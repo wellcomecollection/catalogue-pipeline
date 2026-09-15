@@ -22,7 +22,7 @@ import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.transformers.marc.common import non_empty
+from adapters.transformers.marc.common import non_empty, non_repeatable_subfields
 from adapters.transformers.utils.html import format_as_html_link
 
 logger = structlog.get_logger(__name__)
@@ -42,18 +42,6 @@ def format_field(field: Field) -> str:
 
 def get_field_values(field: Field) -> Iterator[str]:
     """Yield $a, $b and $c in the order they appear, then any $u as links."""
-    seen: set[str] = set()
-    for code, value in field:
-        if code not in ("a", "b", "c"):
-            continue
-        if code in seen:
-            logger.error(
-                "Multiple instances of non-repeatable subfield in field 520",
-                subfield=code,
-            )
-            continue
-        seen.add(code)
-        yield value.strip()
-
+    yield from non_repeatable_subfields(field, "a", "b", "c")
     for value in field.get_subfields("u"):
         yield format_as_html_link(value)
