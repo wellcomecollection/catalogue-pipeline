@@ -64,17 +64,25 @@ build step uses the 907 join to derive each record's AltRefNo and withholds
 rows where several AxC records share one (`ambiguous_refs.csv`) or where the
 matched record has no AltRefNo at all (`no_public_ref.csv`).
 
-Only records at Item level (MARC 351 `$c`) are imported. Axiell's archive
-hierarchy has no equivalent of CALM's "Item part", and it refuses to save any
-record above Item with "A location may not be set for this type of record",
-even though the import sets no location. Withheld rows go to
-`wrong_level.csv`; `--all-levels` imports them anyway, which is only useful
-for inspecting the full set. The 2026-09-10 import run failed on 516 rows
-this way, every one of them above Item.
+Only records at Item level are imported. Axiell refuses to save a record
+above Item with "A location may not be set for this type of record", even
+though the import sets no location: the 2026-09-10 run failed on 516 rows
+this way, every one of them above Item. Withheld rows go to
+`wrong_level.csv`, and `report.md` counts them by level; `--all-levels`
+imports them anyway, which is only useful for inspecting the full set.
 
-MARC subfield values are XML, so references are decoded before use. Without
-that, the 53 records whose AltRefNo contains an ampersand go into the CSV as
-`MSS.1055-1061 &amp; 7126` and Axiell reports them as having no match.
+The level is the first non-empty MARC 351 `$c`, matched case-insensitively.
+351 is repeatable and its casing varies across the migrated data, so this
+follows what the transformer does in
+`adapters/transformers/axiell/organisation_and_arrangement.py`. Note that
+"Item part", CALM's old "piece" level, is withheld as things stand, because
+the 2026-09-10 run gives no evidence either way on whether Axiell will save
+one. The per-level counts in `report.md` say how many rows that costs.
+
+The adapter store holds each record as serialised MARC XML, so subfield
+values are XML-unescaped before use. Without that, the 53 records whose
+AltRefNo contains an ampersand go into the CSV as `MSS.1055-1061 &amp; 7126`
+and Axiell reports them as having no match.
 
 RecordIDs with several bibs produce one row each (035 is repeatable).
 Conflicts, where AxC already cites a different live b number, are reported

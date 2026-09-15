@@ -31,11 +31,11 @@ Run from the repo root with the catalogue_graph environment:
 
 import argparse
 import csv
-import html
 import re
 import sys
 from collections import Counter
 from pathlib import Path
+from xml.sax.saxutils import unescape
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "catalogue_graph" / "src"))
 
@@ -59,15 +59,24 @@ RE_351 = re.compile(
 RE_SUBFIELD_C = re.compile(r'<(?:marc:)?subfield code="c">([^<]*)</')
 RE_UUID = re.compile(r"^[0-9a-fA-F-]{36}$")
 
-# The Axiell archive hierarchy has no equivalent of CALM's "Item part", and
 # Axiell rejects a save on any level above Item ("A location may not be set
-# for this type of record"), so only Item rows are importable.
-IMPORTABLE_LEVELS = frozenset({"Item"})
+# for this type of record"), so only Item rows are importable. Lowercased, as
+# the transformer does: 351 $c casing varies across the migrated data.
+IMPORTABLE_LEVELS = frozenset({"item"})
 
 
 def text(value: str) -> str:
-    """MARC subfield values are XML, so &amp; in a reference has to be decoded."""
-    return html.unescape(value).strip()
+    """The store holds serialised XML, so &amp; in a reference has to be decoded."""
+    return unescape(value).strip()
+
+
+def extract_level(content: str) -> str:
+    """First non-empty 351 $c, as the transformer takes it: 351 is repeatable."""
+    for field in RE_351.finditer(content):
+        for value in RE_SUBFIELD_C.findall(field.group(1)):
+            if level := text(value):
+                return level
+    return ""
 
 
 def scan_axiell_store() -> dict[str, dict]:
@@ -98,11 +107,7 @@ def scan_axiell_store() -> dict[str, dict]:
             altrefno = ""
             m245 = RE_245.search(content)
             title = text(m245.group(1)) if m245 else ""
-            level = ""
-            m351 = RE_351.search(content)
-            if m351:
-                msub = RE_SUBFIELD_C.search(m351.group(1))
-                level = text(msub.group(1)) if msub else ""
+            level = extract_level(content)
             bnumbers = set()
             for prefix, value in RE_035.findall(content):
                 if prefix == "Calm RefNo" and not refno:
@@ -194,7 +199,7 @@ def main() -> None:
     wrong_level: list[list[str]] = []
 
     def add_import(record: dict, b_number: str) -> None:
-        if args.all_levels or record["level"].casefold() in {level.casefold() for level in IMPORTABLE_LEVELS}:
+        if args.all_levels or record["level"].lower() in IMPORTABLE_LEVELS:
             to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
         else:
             wrong_level.append(
