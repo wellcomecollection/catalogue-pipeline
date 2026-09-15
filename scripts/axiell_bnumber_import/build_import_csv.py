@@ -194,7 +194,7 @@ def main() -> None:
     wrong_level: list[list[str]] = []
 
     def add_import(record: dict, b_number: str) -> None:
-        if args.all_levels or record["level"] in IMPORTABLE_LEVELS:
+        if args.all_levels or record["level"].casefold() in {level.casefold() for level in IMPORTABLE_LEVELS}:
             to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
         else:
             wrong_level.append(
