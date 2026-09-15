@@ -88,9 +88,9 @@ Feature: MARC record alternative titles extraction
     Then there are 1 alternative titles
     And the 1st alternative title is "What You Will in G flat Major with Ayapeneco subtitles"
 
-  # Everything below diverges from the Scala on purpose. The Scala joins ǂ6 into
-  # the title, and neither trims the joined value nor deduplicates on the trimmed
-  # one.
+  # Everything below diverges from the Scala implementation (MarcAlternativeTitles.scala)
+  # on purpose. Scala joins ǂ6 into the title, and neither trims the joined value nor
+  # deduplicates on the trimmed one.
 
   Scenario: Drops ǂ6, which links to an 880 field
     Given the MARC record has a 240 field with indicators "1" "0" with subfields:
@@ -110,5 +110,4 @@ Feature: MARC record alternative titles extraction
     Given the MARC record has a 130 field with subfield "a" value "Motocrossed"
     And the MARC record has another 246 field with indicators "0" "0" with subfield "a" value "  Motocrossed  "
     When I transform the MARC record
-    Then there are 1 alternative titles
-    And the 1st alternative title is "Motocrossed"
+    Then the only alternative title is "Motocrossed"
