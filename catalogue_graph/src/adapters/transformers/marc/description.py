@@ -10,32 +10,35 @@ $c - Assigning source (NR)
 
 And any present repeating $u subfields
 $u - Uniform Resource Identifier (R)
+
+Each 520 field becomes one <p> paragraph, and the paragraphs are joined with
+newlines. Subfields a, b and c are emitted in the order they appear in the
+field, followed by any $u subfields.
 """
 
-from collections.abc import Iterable
-from itertools import chain
+from collections.abc import Iterator
 
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.transformers.marc.common import non_empty, non_repeatable_subfields
 from adapters.transformers.utils.html import format_as_html_link
 
 
 def extract_description(record: Record) -> str | None:
-    return (
-        "\n".join(format_field(field) for field in record.get_fields("520")).strip()
-        or None
-    )
+    paragraphs = non_empty(format_field(field) for field in record.get_fields("520"))
+    return "\n".join(paragraphs) or None
 
 
 def format_field(field: Field) -> str:
-    contents = " ".join(chain(get_plain_field_values(field), get_u_field_values(field)))
+    contents = " ".join(non_empty(get_field_values(field)))
+    if not contents:
+        return ""
     return f"<p>{contents}</p>"
 
 
-def get_plain_field_values(field: Field) -> Iterable[str]:
-    return (value.strip() for value in field.get_subfields("a", "b", "c"))
-
-
-def get_u_field_values(field: Field) -> Iterable[str]:
-    return (format_as_html_link(value) for value in field.get_subfields("u"))
+def get_field_values(field: Field) -> Iterator[str]:
+    """Yield $a, $b and $c in the order they appear, then any $u as links."""
+    yield from non_repeatable_subfields(field, "a", "b", "c")
+    for value in field.get_subfields("u"):
+        yield format_as_html_link(value)
