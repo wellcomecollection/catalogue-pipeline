@@ -301,7 +301,7 @@ def test_event_rejects_an_unknown_folio_target() -> None:
 )
 def test_handler_builds_the_client_for_the_target_on_the_event(
     monkeypatch: pytest.MonkeyPatch,
-    folio_target: str,
+    folio_target: FolioTarget,
     expected_url: str,
     expected_param: str,
 ) -> None:
