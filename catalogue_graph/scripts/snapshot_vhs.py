@@ -72,8 +72,9 @@ column is non-optional, and a row like that is reported separately anyway."""
 
 # The first six fields match ADAPTER_STORE_ICEBERG_SCHEMA in
 # adapters/utils/schemata.py, so selecting them gives a table that loads
-# through the adapter store's own snapshot path. test_snapshot_vhs.py holds
-# the two to that promise. The rest is VHS-specific provenance.
+# through the adapter store's own snapshot path. A test in
+# test_snapshot_vhs.py fails if the two drift apart. The rest is VHS-specific
+# provenance.
 #
 # `last_modified` is the S3 object's timestamp, so for a record marked deleted
 # it is when the last live body was written rather than when the deletion was
@@ -404,6 +405,11 @@ def snapshot_vhs(
     session: Any | None = None,
 ) -> int:
     config = VHS_STORES[store]
+
+    if allow_unreadable < 0:
+        raise ValueError(
+            f"--allow-unreadable must be at least 0, got {allow_unreadable}"
+        )
 
     if limit is not None:
         if limit < 1:

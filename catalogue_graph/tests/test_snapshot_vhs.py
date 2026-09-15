@@ -413,3 +413,9 @@ def test_write_snapshot_cleans_up_when_the_final_move_fails(tmp_path: Path) -> N
         write_snapshot(s3_client, CALM, rows, str(output_path))
 
     assert list(tmp_path.iterdir()) == [output_path]
+
+
+def test_snapshot_vhs_rejects_a_negative_unreadable_allowance(tmp_path: Path) -> None:
+    """A negative allowance would fail even a fully readable run, since 0 > -1."""
+    with pytest.raises(ValueError, match="must be at least 0"):
+        snapshot_vhs("calm", str(tmp_path / "calm.parquet"), allow_unreadable=-1)
