@@ -10,7 +10,6 @@ Feature: description (MARC 520)
     And the MARC record has a 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001"
     And the MARC record has a 245 field with subfield "a" value "Some Title"
 
-
   # Ported from MarcDescriptionTest.scala and SierraDescriptionTest.scala.
 
   Scenario: A record with no 520 field has no description
@@ -50,15 +49,10 @@ Feature: description (MARC 520)
     When I transform the MARC record
     Then the work's description is "<p>For her owne person, It beggerd all discription. <a href="http://example.com/6347939">http://example.com/6347939</a> <a href="http://example.com/5877688">http://example.com/5877688</a></p>"
 
-  <<<<<<< HEAD
-  =======
-
   Scenario: A field with both a URL and a non-URL ǂu links only the URL
     Given the MARC record has a 520 field with subfield "a" value "Picking particular pears in Poland." and subfield "b" value "Selecting sumptious starfruit in Spain." and subfield "u" value "https://fruitpicking.org/" and subfield "u" value "A website about fruitpicking"
     When I transform the MARC record
     Then the work's description is "<p>Picking particular pears in Poland. Selecting sumptious starfruit in Spain. <a href="https://fruitpicking.org/">https://fruitpicking.org/</a> A website about fruitpicking</p>"
-
-  >>>>>>> main
 
   Scenario: Whitespace surrounding the description is trimmed
     Given the MARC record has a 520 field with subfield "a" value "	   Shapen in maner of a lop-webbe aftur the olde descripcioun.   "
