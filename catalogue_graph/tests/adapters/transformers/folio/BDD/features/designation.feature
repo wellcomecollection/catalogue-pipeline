@@ -67,5 +67,5 @@ Feature: designation (MARC 362)
   Scenario: The first ǂa is used when a 362 erroneously repeats it
     Given the MARC record has a 362 field with subfield "a" value "Cyntaf" and subfield "a" value "Ail"
     When I transform the MARC record
-    Then an error "Repeated non-repeating subfield $a" is logged with tag "362"
+    Then an error "Repeated non-repeating subfield" is logged with tag "362" and subfield "a"
     And the only designation is "Cyntaf"
