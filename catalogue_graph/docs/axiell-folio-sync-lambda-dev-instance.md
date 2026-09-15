@@ -100,8 +100,7 @@ security group that already exists.
    terraform output -raw axiell_folio_sync_dev_security_group_id
    ```
 
-   The variable is false by default, so every other apply leaves the Lambda off the VPC and
-   creates none of this. That also means anyone applying without it will tear the sandbox
+The variable is false by default, so every other apply leaves the Lambda off the VPC and does not create the dev SecureString. The ENI security group and its egress rule are intentionally kept for a stable id and are harmless when detached.
    wiring back down, so a session that has to survive someone else's apply needs the variable
    set in a tfvars file rather than passed on the command line.
 
