@@ -49,8 +49,8 @@ def should_create_range(label: str) -> bool:
      False
     """
     return (
-        RE_NTH_CENTURY.match(label) is not None
-        or RE_4_DIGIT_DATE_RANGE.match(label) is not None
+        RE_NTH_CENTURY.fullmatch(label) is not None
+        or RE_4_DIGIT_DATE_RANGE.fullmatch(label) is not None
     )
 
 
