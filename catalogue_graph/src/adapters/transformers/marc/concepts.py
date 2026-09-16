@@ -1,10 +1,11 @@
+"""Shared helpers for building concepts from 6xx fields.
+
+Each subdivision subfield becomes a concept whose type depends on the subfield code.
+"""
+
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable
-from itertools import chain
-
-from pymarc.field import Field
 
 from adapters.transformers.marc.parsers.period import (
     RE_4_DIGIT_DATE_RANGE,
@@ -14,82 +15,26 @@ from adapters.transformers.marc.parsers.period import (
 from adapters.transformers.utils.text_utils import (
     normalise_label,
 )
-from models.pipeline.concept import Concept
+from models.pipeline.concept import Concept, Period
 from models.pipeline.identifier import Identifiable, Unidentifiable
 from utils.types import RawConceptType
 
-"""Helpers for MARC label + subdivision handling (e.g. subjects, genres).
-
-Scala implementation (`MarcCommonLabelSubdivisions`) builds labels by:
-  label = $a followed by other subdivision subfields joined with " - "
-and trims trailing period.
-
-Differences adopted here per project guidance:
-  - We keep broader trailing punctuation trimming on individual concept labels
-    (.,;:) via `clean_concept_label`.
-  - The joined label only trims a final period (matching original Scala intent)
-    but we reuse the cleaned subfield content, so punctuation beyond period is
-    already removed from concept labels.
-
-Subdivision code → concept type mapping mirrors Scala:
-  v,x → Concept; y → Period; z → Place.
-
-Primary concept type is provided by caller (e.g. Genre, Person, etc.).
-"""
-
 SUBDIVISION_CODES: list[str] = ["v", "x", "y", "z"]
-LABEL_SUBFIELD_CODES: list[str] = ["a"] + SUBDIVISION_CODES
 SUBFIELD_TYPE_MAP: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
-
-
-def _field_subfields(field: Field, codes: Iterable[str]) -> list[str]:
-    return field.get_subfields(*codes)
-
-
-def build_label_with_subdivisions(field: Field) -> str:
-    """Construct overall label: $a plus subdivision subfields joined by ' - '.
-
-    Mirrors Scala MarcCommonLabelSubdivisions#getLabel logic except we apply
-    broader per-subfield punctuation trimming earlier (see text_utils).
-    The full label only has a trailing period trimmed to match Scala behaviour.
-    """
-    primary = _field_subfields(field, ["a"])  # we allow single $a
-    subdivisions = _field_subfields(field, SUBDIVISION_CODES)
-    ordered = list(chain(primary, subdivisions))
-    label = " - ".join(s.strip() for s in ordered)
-    # Trim only trailing period from full label (Scala behaviour)
-    return label.rstrip(".")
-
-
-def build_subdivision_concepts(field: Field) -> list[Concept]:
-    """Return subdivision concepts (v,x → Concept; y → Period; z → Place).
-
-    Identifier is always label-derived. Trailing punctuation trimmed via
-    clean_concept_label. This is the shared subdivision builder used by
-    specific ontology transformers (e.g. Genre, Subject).
-    """
-    concepts: list[Concept] = []
-    for subfield in field.subfields:
-        code = getattr(subfield, "code", "")
-        if code not in SUBDIVISION_CODES:
-            continue
-
-        ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
-        concepts.append(build_concept(subfield.value, ontology_type))
-
-    return concepts
 
 
 def should_create_range(label: str) -> bool:
     """
-    The scala transformer doesn't create a range for all parseable periods in subdivisions
-    So far, I have only seen them for:
+    Whether a Period label is one the Python parser handles: a century or a
+    range of four-digit years. This is a deliberate subset of the Scala
+    PeriodParser grammar, which also handles exact dates, decades, seasons,
+    qualifiers such as "early" or "ca.", BC years and half-bounded ranges.
+    Labels outside the subset get no range rather than a wrong one.
 
-     Centuries
      >>> should_create_range("19th century")
      True
-
-     Ranges consisting of one or two four-digit years
+     >>> should_create_range("18th cent.")
+     True
      >>> should_create_range("1901")
      True
      >>> should_create_range("1904-")
@@ -97,17 +42,20 @@ def should_create_range(label: str) -> bool:
      >>> should_create_range("1601-1666")
      True
 
-     But not ranges with three-digit years
+     The whole label must match, so a date with a day or a parenthetical
+     qualifier is left alone:
+     >>> should_create_range("1851 Nov. 27")
+     False
+     >>> should_create_range("1714-1727 (George Ier)")
+     False
      >>> should_create_range("501-1066")
      False
-
-     Or ranges with other content
      >>> should_create_range("Siege of Bielefeld 1820-1856")
      False
     """
     return (
-        RE_NTH_CENTURY.match(label) is not None
-        or RE_4_DIGIT_DATE_RANGE.match(label) is not None
+        RE_NTH_CENTURY.fullmatch(label) is not None
+        or RE_4_DIGIT_DATE_RANGE.fullmatch(label) is not None
     )
 
 
@@ -178,14 +126,11 @@ def build_concept(
         else Unidentifiable()
     )
 
-    if raw_type == "Period" and should_create_range(label):
-        return parse_period(label, identifier=id)
-    else:
-        return Concept(
-            id=id,
-            label=label,
-            type=raw_type,
-        )
+    if raw_type == "Period":
+        if should_create_range(label):
+            return parse_period(label, identifier=id)
+        return Period(id=id, label=label)
+    return Concept(id=id, label=label, type=raw_type)
 
 
 def get_concept_identifier(label: str, raw_type: RawConceptType) -> Identifiable:

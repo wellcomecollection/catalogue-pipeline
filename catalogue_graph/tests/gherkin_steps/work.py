@@ -184,6 +184,36 @@ def its_only_list_member_has(
     return member
 
 
+@then(
+    parsers.re(
+        r'its (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) has the (?P<sub_attr>.*) "(?P<value>.*)"'
+    )
+)
+def its_nth_list_member_has(
+    antecedent: Any, index: str, attr_phrase: str, sub_attr: str, value: str
+) -> None:
+    member = _list_member_nth(antecedent, index, attr_phrase)
+    actual = drill_through_dots(member, sub_attr)
+    assert actual == value, (
+        f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
+    )
+
+
+@then(
+    parsers.re(
+        r"its (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) has no (?P<sub_attr>\S+)"
+    )
+)
+def its_nth_list_member_lacks(
+    antecedent: Any, index: str, attr_phrase: str, sub_attr: str
+) -> None:
+    member = _list_member_nth(antecedent, index, attr_phrase)
+    actual = drill_through_dots(member, sub_attr)
+    assert actual is None, (
+        f"Expected {attr_phrase}.{sub_attr} at position {index} to be absent, got {actual!r}"
+    )
+
+
 @then(parsers.parse("its only {attr_phrase} has no {sub_attr}"))
 def its_only_list_member_lacks(
     antecedent: Any, attr_phrase: str, sub_attr: str
