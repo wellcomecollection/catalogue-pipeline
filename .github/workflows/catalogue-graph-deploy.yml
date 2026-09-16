@@ -33,6 +33,8 @@ jobs:
   # One GitHub Deployment per run, for the deploy tracker: the tag is the
   # commit being deployed. Task names the catalogue_graph unit.
   start-deployment:
+    # The role only trusts main, so skip rather than fail a dispatch from elsewhere.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       id: ${{ steps.create.outputs.id }}
@@ -54,6 +56,7 @@ jobs:
             -f log_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > /dev/null
 
   discover-pipeline-dates:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       pipeline_dates: ${{ steps.discover.outputs.pipeline_dates }}

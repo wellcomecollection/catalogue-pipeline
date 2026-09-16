@@ -11,6 +11,10 @@ module "id_minter_rds" {
   engine_version     = "8.0.mysql_aurora.3.10.3"
 
   master_username = data.aws_ssm_parameter.rds_username.value
+
+  data_api_consumer_role_arns = [
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-prod",
+  ]
 }
 
 module "id_minter_rds_2026_07_03" {

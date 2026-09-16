@@ -67,9 +67,9 @@ jobs:
           dockerfile: task.Dockerfile
           tag: ${{ github.sha }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-          # Dependabot and fork runs have no repo secrets, so build without pushing.
-          push: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN != '' }}
-          publish_latest: ${{ github.ref == 'refs/heads/main' }}
+          # Only main publishes: the role is scoped to main, so PR images are not pushed.
+          push: ${{ github.ref == 'refs/heads/main' }}
+          publish_latest: true
 
   build-unified-pipeline-lambda-image:
     runs-on: ubuntu-latest
@@ -84,9 +84,9 @@ jobs:
           dockerfile: lambda.Dockerfile
           tag: ${{ github.sha }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-          # Dependabot and fork runs have no repo secrets, so build without pushing.
-          push: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN != '' }}
-          publish_latest: ${{ github.ref == 'refs/heads/main' }}
+          # Only main publishes: the role is scoped to main, so PR images are not pushed.
+          push: ${{ github.ref == 'refs/heads/main' }}
+          publish_latest: true
 
   integration:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'

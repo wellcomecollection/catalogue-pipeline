@@ -12,7 +12,12 @@ services:
     ports:
       - "45678:8000"
   elasticsearch:
-    image: "docker.elastic.co/elasticsearch/elasticsearch:8.4.0"
+    # 8.11.4 rather than the 8.4.0 the other projects pin: the JDK bundled with
+    # 8.4.0 throws a NullPointerException out of its cgroup detection on a
+    # cgroups v2 host, which is what GitHub Actions runners use, so the
+    # container exits before Elasticsearch starts. This one bundles JDK 21.
+    # The others want the same bump when they move off Buildkite.
+    image: "docker.elastic.co/elasticsearch/elasticsearch:8.11.4"
     ports:
       - "9200:9200"
       - "9300:9300"
