@@ -21,7 +21,7 @@ RE_KEEP = re.compile(r"\d{2,4}|-")
 # actually matches any character at all directly after century, but
 # it's most likely to be a comma or dot, and it is more permissive if
 # we allow anything there.
-RE_NTH_CENTURY = re.compile(r"(\d+)\w{2} century.?")
+RE_NTH_CENTURY = re.compile(r"(\d+)\w{2} cent(?:ury|\.)?")
 
 # Matcher for date ranges consisting of four-digit years.
 # The scala transformer does not create ranges for subdivisions
@@ -38,7 +38,11 @@ def parse_period(
     >>> parse_period("1988-1990")
     Period(id=Unidentifiable(canonical_id=None, type='Unidentifiable'), label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00Z', to_time='1990-12-31T23:59:59.999999999Z', label='1988-1990'))
     """
-    range_fn = century_to_range if "century" in period else to_range
+    range_fn = (
+        century_to_range
+        if RE_NTH_CENTURY.match(period) or "century" in period
+        else to_range
+    )
     return Period(
         label=period,
         range=range_fn(period),
