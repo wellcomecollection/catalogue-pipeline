@@ -170,19 +170,11 @@ def generate_operations(
 ) -> Generator[dict]:
     for datum in indexable_data:
         source = json.loads(datum.model_dump_json(exclude_none=True))
-        version = int(datum.get_modified_time().timestamp() * 1000)  # epoch millis
-
-        # Documents whose modified date is set to the start of the Unix epoch will
-        # have a version of 0. We floor this to 100 for backward compatibility with
-        # documents which use Elasticsearch's default versioning (which increments
-        # every time a given document is reindexed). This won't be needed after we
-        # do a full reindex.
-        version = max(100, version)
 
         yield {
             "_index": index_name,
             "_id": datum.get_id(),
             "_source": source,
-            "_version": version,
+            "_version": datum.get_version(),
             "_version_type": "external_gte",
         }

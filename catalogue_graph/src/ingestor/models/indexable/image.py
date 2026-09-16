@@ -6,6 +6,7 @@ from ingestor.models.debug.image import ImageDebug
 from ingestor.models.display.image import DisplayImage
 from ingestor.models.filter.image import ImageFilterableValues
 from ingestor.models.indexable.record import IndexableRecord
+from ingestor.models.indexable.version import version_from_modified_time
 from ingestor.models.query.image import QueryImage
 from ingestor.models.vector.image import ImageVectorValues
 from utils.timezone import convert_datetime_to_utc_iso
@@ -23,9 +24,9 @@ class IndexableImage(IndexableRecord):
     def get_id(self) -> str:
         return self.query.id
 
-    def get_modified_time(self) -> datetime:
-        # Set by the merger service
-        return datetime.fromisoformat(self.modified_time)
+    def get_version(self) -> int:
+        # modified_time is set by the merger service
+        return version_from_modified_time(datetime.fromisoformat(self.modified_time))
 
     @staticmethod
     def from_raw_document(image: dict) -> "IndexableImage":
