@@ -1,10 +1,9 @@
 import pytest
 from pymarc.record import Field, Subfield
 
-from adapters.transformers.ebsco.genres import build_primary_concept
-from adapters.transformers.ebsco.label_subdivisions import (
-    build_label_with_subdivisions,
+from adapters.transformers.marc.genres import (
     build_subdivision_concepts,
+    extract_genre,
 )
 from models.pipeline.identifier import Identifiable
 
@@ -24,8 +23,9 @@ def test_label_join_uses_hyphen_separator() -> None:
             ("z", "Dublin."),
         ],
     )
-    label = build_label_with_subdivisions(field)
-    assert label == "Disco Polo - Specimens - Literature - 1897-1900 - Dublin"
+    genre = extract_genre(field)
+    assert genre is not None
+    assert genre.label == "Disco Polo - Specimens - Literature - 1897-1900 - Dublin"
 
 
 def test_concept_types_for_subdivisions() -> None:
@@ -33,10 +33,9 @@ def test_concept_types_for_subdivisions() -> None:
         "655",
         [("a", "Music"), ("y", "1990-2000"), ("z", "London."), ("v", "Scores")],
     )
-    primary_concept = build_primary_concept(field)
-    concepts = (
-        [primary_concept] if primary_concept else []
-    ) + build_subdivision_concepts(field)
+    genre = extract_genre(field)
+    assert genre is not None
+    concepts = genre.concepts
     labels = [c.label for c in concepts]
     types = [c.type for c in concepts]
 

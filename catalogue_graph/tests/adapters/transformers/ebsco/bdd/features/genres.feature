@@ -9,12 +9,14 @@ Feature: Extracting genres from MARC 655
     Then there are no genres
 
   Scenario: A poorly formed genre
-  "a" is a non-repeating field. if there is more than one,
-  it should be discarded and an error logged
+  "a" is a non-repeating subfield. If there is more than one, the first is used
+  and an error logged. This deliberately diverges from the Scala, which joins
+  every "a" into the label and makes a concept of each.
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo" and subfield "a" value "Rominimal"
     When I transform the MARC record
-    Then an error "Repeated non-repeating subfield $a" is logged with tag "655"
-    And there are no genres
+    Then an error "Repeated non-repeating subfield" is logged with tag "655" and subfield "a"
+    And the only genre has the label "Disco Polo"
+    And that genre has 1 concept
 
   Scenario: A simple genre
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
