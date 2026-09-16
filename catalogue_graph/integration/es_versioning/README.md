@@ -39,10 +39,17 @@ restated, so these tests cannot drift from what the ingestor writes. `version_en
 holds the rest: the two encodings we have shipped, the two readings of the original
 suggestion, and the bit-packed alternative that was considered and not shipped.
 
-**A version is a non-negative int64, which drives the whole encoding.** A decimal is
-rejected outright, with no rounding to fall back on, and writing both epochs end to end
-gives 23 digits against the 19 of `Long.MAX`. A negative version is refused, which rules
-out any encoding that could go negative for a pre-1970 source time.
+**A version is a non-negative int64, which drives the whole encoding.** Writing both
+epochs end to end gives 23 digits against the 19 of `Long.MAX`. A negative version is
+refused, which rules out any encoding that could go negative for a pre-1970 source time.
+
+**A decimal version is worse than invalid on the path that matters.** The index API
+refuses to parse one, because there the version is a URL query parameter. The bulk API
+takes the integer part and discards the rest, and the write succeeds: no error, no
+conflict, nothing to notice. A decimal of source seconds and merge millis would therefore
+have been accepted by the ingestor and quietly degraded to ordering by source seconds
+alone, which is the behaviour PR #3649 set out to fix. Both halves are tested, because
+the query-parameter rejection on its own gives a misleading picture.
 
 **Ordering is lexicographic on (sourceModifiedTime, mergedTime).** Seven scenarios cover
 the cases where source order and merge order disagree, and the real test is stronger: all

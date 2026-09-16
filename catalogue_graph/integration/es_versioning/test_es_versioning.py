@@ -99,10 +99,14 @@ def _write(
     [decimal_string(S_OLD, M_EARLY), "100.9"],
     ids=["the-suggested-decimal", "a-decimal-that-would-truncate-cleanly"],
 )
-def test_a_decimal_version_is_rejected(
+def test_the_index_api_rejects_a_decimal_version(
     es_client: Elasticsearch, works_index: str, work_document: dict, version: str
 ) -> None:
-    """An external version is an integer, and there is no rounding to fall back on."""
+    """Here the version travels as a URL query parameter, which refuses to parse.
+
+    The bulk API is more forgiving and does not, which is the path that matters. See
+    test_the_bulk_api_silently_truncates_a_decimal_version.
+    """
     accepted, status, reason = _write(
         es_client, works_index, work_document, "decimal", version
     )
@@ -110,6 +114,48 @@ def test_a_decimal_version_is_rejected(
     assert not accepted
     assert status == 400
     assert "Failed to parse long parameter [version]" in reason
+
+
+@pytest.mark.parametrize(
+    "version",
+    [1619481599.1761916, "1619481599.1761915398269", 100.9],
+    ids=["a-python-float", "a-decimal-string", "a-decimal-that-truncates-cleanly"],
+)
+def test_the_bulk_api_silently_truncates_a_decimal_version(
+    es_client: Elasticsearch,
+    works_index: str,
+    work_document: dict,
+    version: float | str,
+) -> None:
+    """The reason a decimal version is dangerous rather than merely invalid.
+
+    In a bulk request the version is a value in the action metadata, not a query
+    parameter, and that parser takes the integer part and discards the rest. The write
+    succeeds. Nothing errors and nothing conflicts.
+
+    A decimal of source seconds and merge millis would therefore have been accepted on
+    the path the ingestor uses, and quietly degraded to ordering by source seconds alone,
+    which is the behaviour PR #3649 set out to fix.
+    """
+    doc_id = f"bulk-decimal-{version}"
+
+    success, errors = helpers.bulk(
+        es_client,
+        [
+            {
+                "_index": works_index,
+                "_id": doc_id,
+                "_source": build_work(work_document, 1, S_OLD, M_EARLY),
+                "_version": version,
+                "_version_type": "external_gte",
+            }
+        ],
+        raise_on_error=False,
+        stats_only=False,
+    )
+
+    assert (success, errors) == (1, [])
+    assert stored_work(es_client, works_index, doc_id)[1] == int(float(version))
 
 
 def test_writing_both_epochs_end_to_end_overflows_the_version_field(
