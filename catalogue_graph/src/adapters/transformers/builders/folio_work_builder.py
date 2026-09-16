@@ -1,15 +1,3 @@
-from ingestor.models.shared.deleted_reason import SuppressedFromSource
-from models.pipeline.concept import Genre
-from models.pipeline.id_label import Language
-from models.pipeline.identifier import (
-    Id,
-    Identifiable,
-    SourceIdentifier,
-    WorkSourceIdentifier,
-)
-from models.pipeline.item import Item
-from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
-
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
@@ -25,6 +13,17 @@ from adapters.transformers.marc.physical_description import (
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
+from ingestor.models.shared.deleted_reason import SuppressedFromSource
+from models.pipeline.concept import Genre
+from models.pipeline.id_label import Language
+from models.pipeline.identifier import (
+    Id,
+    Identifiable,
+    SourceIdentifier,
+    WorkSourceIdentifier,
+)
+from models.pipeline.item import Item
+from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
 
 # The source-identifier type for a FOLIO item. The id-minter turns this plus the
 # item UUID into a stable canonical id for the public catalogue.
