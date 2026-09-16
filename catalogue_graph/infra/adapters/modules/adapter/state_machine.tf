@@ -365,11 +365,66 @@ locals {
     }
   ]...)
 
+  # Overlapping executions collide on Iceberg commits: two loaders harvesting
+  # the same windows both write to the adapter store, one commit loses, and
+  # the retries only repeat the collision. So before doing anything, a run
+  # lists the executions of this state machine and stops if another one is
+  # still running.
+  #
+  # The stopped run fails and surfaces through an alarm, for two reasons:
+  # 1) Someone who triggered it manually (e.g. an ID-mode recovery) must not be
+  #    left thinking it succeeded.
+  # 2) A normal run takes about a minute and two scheduled runs are 15 minutes apart.
+  #    A collision means the previous execution is unusually long, which is something
+  #    we should know about.
+  #
+  # No data is skipped. The trigger resumes from the last published window,
+  # so whichever run comes next covers the range the stopped run would have.
+  guard_states = {
+    "Already running?" = {
+      Type     = "Task"
+      Resource = "arn:aws:states:::aws-sdk:sfn:listExecutions"
+      Arguments = {
+        StateMachineArn = "{% $states.context.StateMachine.Id %}"
+        StatusFilter    = "RUNNING"
+      }
+      Assign = {
+        other_executions = "{% [$states.result.Executions[ExecutionArn != $states.context.Execution.Id].{'name': Name, 'started': StartDate}] %}"
+      }
+      Output = "{% $states.input %}"
+      Next   = "Skip if running"
+      Retry = [
+        {
+          ErrorEquals     = ["States.ALL"]
+          IntervalSeconds = 2
+          MaxAttempts     = 3
+          BackoffRate     = 2.0
+        }
+      ]
+    }
+    "Skip if running" = {
+      Type = "Choice"
+      Choices = [
+        {
+          Condition = "{% $count($other_executions) > 0 %}"
+          Next      = "Already running"
+        }
+      ]
+      Default = local.id_mode_enabled ? "Which mode?" : "Run trigger"
+    }
+    "Already running" = {
+      Type  = "Fail"
+      Error = "AlreadyRunning"
+      Cause = "{% 'Aborted. Another execution is still running: ' & $string($other_executions) & '. Concurrent runs collide on Iceberg commits. The other run is probably harvesting an unusually large window (e.g. after a bulk update in the source system), or is stuck. The next run will cover the skipped range.' %}"
+    }
+  }
+
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Adapter pipeline (trigger, loader, publish event)"
-    StartAt       = local.id_mode_enabled ? "Which mode?" : "Run trigger"
+    StartAt       = "Already running?"
     States = merge(
+      local.guard_states,
       local.base_states,
       local.id_mode_states,
       local.reconcile_states,
