@@ -238,7 +238,6 @@ def test_handler_skips_image_with_an_empty_body(
 ) -> None:
     """An empty 200 is skipped and counted; the rest of the batch still indexes."""
     monkeypatch.setattr(inference_manager, "IMAGES_ROOT", str(tmp_path))
-    monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
     mock_es_secrets("inferrer", PIPELINE_DATE)
 
     good = make_initial_image("imgA", INFO_JSON_URL)

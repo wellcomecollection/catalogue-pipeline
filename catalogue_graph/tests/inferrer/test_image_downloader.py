@@ -19,13 +19,12 @@ from tests.mocks import MockRequest, MockResponse
 
 
 def _patch_get_sequence(monkeypatch: MonkeyPatch, items: list) -> dict:
-    """Patch requests.get to return/raise each item in turn; records the calls."""
+    """Patch requests.get to return/raise each item in turn; counts calls."""
     seq = iter(items)
-    state: dict = {"calls": 0, "urls": []}
+    state = {"calls": 0}
 
     def fake_get(url: str, timeout: float | None = None, **kwargs: object) -> object:
         state["calls"] += 1
-        state["urls"].append(url)
         item = next(seq)
         if isinstance(item, Exception):
             raise item
