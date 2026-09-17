@@ -70,6 +70,8 @@ That command covers the Scala and inferrer images only. The Python unified pipel
 gh workflow run catalogue-graph-deploy.yml -f deploy_tag=<commit sha>
 ```
 
+The sha must be a commit on main. Pull request runs build the images but do not push them, and the workflow only assumes its AWS role when dispatched from main.
+
 Read that one before running it. It deploys to every pipeline `deploy_settings.json` selects, which is all of them while `deploy_all_pipelines` is on, and it also moves `prod` and updates the shared adapter lambdas. Nothing stops it moving a tag to an older commit, so dispatching one rolls back every pipeline it reaches, production included. To put an older commit on one pipeline alone, retag that pipeline's `env.<date>` by hand.
 
 The Buildkite deploy script also looks up the works index currently served by the catalogue API (`/_elasticConfig`) and warns when the newest pipeline is not the production pipeline. Which pipeline is "production" is not recorded anywhere in this repo: it is whichever pipeline's index the [catalogue-api](https://github.com/wellcomecollection/catalogue-api) is configured to serve.
