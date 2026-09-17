@@ -7,20 +7,18 @@ import re
 
 from pymarc.record import Record
 
+from adapters.transformers.marc.common import first_non_empty_subfield
+
 # Six numeric characters in the pattern hhmmss, as required by the field definition.
 HHMMSS = re.compile(r"[0-9]{6}")
 
 
 def extract_duration(record: Record) -> int | None:
-    """Total playing time in seconds, from the first 306 ǂa read as hhmmss"""
-    values = [
-        value
-        for field in record.get_fields("306")
-        for value in field.get_subfields("a")
-    ]
-    if not values:
+    """Total playing time in seconds, from the first non-blank 306 ǂa read as hhmmss"""
+    value = first_non_empty_subfield("306", "a", record)
+    if value is None:
         return None
-    return _parse_hhmmss(values[0])
+    return _parse_hhmmss(value)
 
 
 def _parse_hhmmss(value: str) -> int | None:

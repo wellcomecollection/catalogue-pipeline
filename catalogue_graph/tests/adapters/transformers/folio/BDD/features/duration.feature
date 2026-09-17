@@ -63,3 +63,12 @@ Feature: duration (MARC 306)
     Given the MARC record has a 306 field with subfield "a" value "00500"
     When I transform the MARC record
     Then the work's duration is absent
+
+  # A deliberate divergence from the Scala implementation, which does not trim
+  # the value, so a trailing space makes a fourth pair and the duration is dropped.
+  # The Python pipeline strips whitespace before checking for six digits.
+
+  Scenario: Surrounding whitespace in a 306 is ignored
+    Given the MARC record has a 306 field with subfield "a" value "000400 "
+    When I transform the MARC record
+    Then the work's duration is 240
