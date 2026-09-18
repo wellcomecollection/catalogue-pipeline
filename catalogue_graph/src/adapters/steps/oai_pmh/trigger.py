@@ -25,7 +25,7 @@ from adapters.extractors.oai_pmh.models.step_events import (
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
 from adapters.utils.window_notifier import WindowNotifier
-from adapters.utils.window_reporter import WindowReporter
+from adapters.utils.window_reporter import WindowCoverageReport, WindowReporter
 from adapters.utils.window_store import WindowStore
 from clients.chatbot_notifier import ChatbotNotifier
 from models.events import IncrementalWindow, ScheduledEvent
@@ -53,6 +53,7 @@ class TriggerRuntime(BaseModel):
     window_lookback_days: int
     max_lag_minutes: int
     max_pending_windows: int | None = None
+    auto_retry_failed_windows: bool = True
     oai_metadata_prefix: str
     oai_set_spec: str | None = None
     adapter_name: str
@@ -72,6 +73,36 @@ def _determine_start(
     if cursor_end is not None:
         return cursor_end
     return now - timedelta(days=window_lookback_days)
+
+
+def _determine_retry_start(
+    stranded_report: WindowCoverageReport,
+    now: datetime,
+    window_lookback_days: int,
+    max_lag_minutes: int,
+) -> datetime | None:
+    """Return the start of the oldest gap behind the cursor worth retrying.
+
+    Gaps older than the lookback are left for an operator. So is a backlog
+    larger than the lag tolerance, which would delay new windows for too long.
+    """
+    horizon = now - timedelta(days=window_lookback_days)
+    retryable = [gap for gap in stranded_report.coverage_gaps if gap.start >= horizon]
+    if not retryable:
+        return None
+
+    backlog_minutes = sum(
+        (gap.end - gap.start).total_seconds() / 60 for gap in retryable
+    )
+    if backlog_minutes > max_lag_minutes:
+        logger.warning(
+            "Gap backlog too large to retry automatically",
+            backlog_minutes=backlog_minutes,
+            max_lag_minutes=max_lag_minutes,
+        )
+        return None
+
+    return min(gap.start for gap in retryable)
 
 
 def _enforce_lag(
@@ -97,6 +128,7 @@ def build_window_request(
     runtime: TriggerRuntime,
     now: datetime,
     job_id: str | None = None,
+    window: IncrementalWindow | None = None,
 ) -> OAIPMHLoaderEvent:
     """Build a loader event for the next harvesting window.
 
@@ -104,6 +136,7 @@ def build_window_request(
         runtime: Trigger runtime with store and configuration.
         now: Current timestamp for window calculations.
         job_id: Optional job identifier (generated if not provided).
+        window: Operator-supplied range, used as given when present.
 
     Returns:
         OAIPMHLoaderEvent to pass to the loader step.
@@ -111,6 +144,18 @@ def build_window_request(
     Raises:
         RuntimeError: If adapter is too far behind (lag check) or no windows ready.
     """
+    if window is not None:
+        # An operator backfill: no cursor, lag check or gap report applies.
+        return OAIPMHLoaderEvent(
+            job_id=job_id or f"backfill-{generate_job_id(now)}",
+            adapter_type=runtime.adapter_name,
+            window=window,
+            metadata_prefix=runtime.oai_metadata_prefix,
+            set_spec=runtime.oai_set_spec,
+            max_windows=runtime.max_pending_windows,
+            window_minutes=runtime.window_minutes,
+        )
+
     reporter = WindowReporter(store=runtime.store)
 
     # Resume from the last window whose changesets made it through the whole
@@ -143,15 +188,28 @@ def build_window_request(
     ).astimezone(UTC)
     end_time = now.astimezone(UTC)
 
-    # Generate report for notification using start_time as range_end.
-    # This ensures we only report gaps that WON'T be covered by this batch.
+    # Gaps behind the cursor are never revisited by the rolling range, so reach
+    # back to the oldest one. The loader skips the published windows in between.
+    stranded_report = reporter.coverage_report(range_end=start_time)
+    retry_from = None
+    if runtime.auto_retry_failed_windows:
+        retry_from = _determine_retry_start(
+            stranded_report,
+            now,
+            runtime.window_lookback_days,
+            runtime.max_lag_minutes,
+        )
+    if retry_from is not None:
+        logger.info("Retrying gaps behind the cursor", retry_from=retry_from)
+        start_time = retry_from.astimezone(UTC)
+
     if runtime.notifier:
-        notification_report = reporter.coverage_report(range_end=start_time)
-        logger.info("Window coverage report", summary=notification_report.summary())
+        logger.info("Window coverage report", summary=stranded_report.summary())
         runtime.notifier.notify_if_gaps(
-            report=notification_report,
+            report=stranded_report,
             job_id=job_id,
             trigger_time=now,
+            retry_from=retry_from,
         )
     else:
         # Log the preliminary report summary when no notifier
@@ -197,6 +255,7 @@ def handler(
         runtime=runtime,
         now=now,
         job_id=event.job_id,
+        window=event.window,
     )
 
 
@@ -239,6 +298,8 @@ def build_runtime(
             chatbot_notifier=chatbot_notifier,
             table_name=table_name,
             adapter_name=config.config.adapter_name,
+            # Both OAI-PMH adapters are scheduled once per window.
+            run_interval_minutes=config.config.window_minutes,
         )
 
     return TriggerRuntime(
@@ -250,6 +311,7 @@ def build_runtime(
         or config.config.window_lookback_days,
         max_lag_minutes=config.config.max_lag_minutes,
         max_pending_windows=config.config.max_pending_windows,
+        auto_retry_failed_windows=config.config.auto_retry_failed_windows,
         oai_metadata_prefix=config.config.oai_metadata_prefix,
         oai_set_spec=config.config.oai_set_spec,
         adapter_name=config.config.adapter_name,
@@ -283,11 +345,20 @@ def lambda_handler(
         trace_id=get_trace_id(context),
         pipeline_step=f"{config.config.pipeline_step_prefix}_trigger",
     )
+    # A "window" key marks an operator backfill of that range. Anything but
+    # null is validated, so a malformed window fails instead of running as scheduled.
+    window = (
+        IncrementalWindow.model_validate(event["window"])
+        if event.get("window") is not None
+        else None
+    )
+    job_id = generate_job_id(event_time)
     loader_event = handler(
         OAIPMHTriggerEvent(
             now=event_time,
-            job_id=generate_job_id(event_time),
+            job_id=f"backfill-{job_id}" if window else job_id,
             adapter_type=adapter_type,
+            window=window,
         ),
         runtime=runtime,
         execution_context=execution_context,

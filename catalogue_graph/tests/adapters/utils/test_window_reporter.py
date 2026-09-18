@@ -389,3 +389,30 @@ def test_coverage_report_with_gap_between_overlapping_groups(tmp_path: Path) -> 
     assert len(report.coverage_gaps) == 1
     assert report.coverage_gaps[0].start == start + timedelta(minutes=30)
     assert report.coverage_gaps[0].end == start + timedelta(hours=1)
+
+
+def test_coverage_gaps_record_when_they_were_stranded(tmp_path: Path) -> None:
+    store = _build_store(tmp_path)
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+    quarter = timedelta(minutes=15)
+    published_at = datetime(2025, 1, 1, 13, 5, tzinfo=UTC)
+    tags = {"published_at": published_at.isoformat()}
+
+    # failed, success, failed, success: one gap before the first success, one between
+    _insert_window(store, start, start + quarter, "failed")
+    _insert_window(store, start + quarter, start + 2 * quarter, "success", tags=tags)
+    _insert_window(store, start + 2 * quarter, start + 3 * quarter, "failed")
+    _insert_window(
+        store, start + 3 * quarter, start + 4 * quarter, "success", tags=tags
+    )
+
+    report = WindowReporter(store).coverage_report()
+
+    assert [(gap.start, gap.end) for gap in report.coverage_gaps] == [
+        (start, start + quarter),
+        (start + 2 * quarter, start + 3 * quarter),
+    ]
+    assert [gap.stranded_at for gap in report.coverage_gaps] == [
+        published_at,
+        published_at,
+    ]

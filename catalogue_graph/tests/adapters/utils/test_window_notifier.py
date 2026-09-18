@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
 
@@ -436,3 +436,58 @@ def test_single_gap_formatting(notifier: WindowNotifier) -> None:
     assert "2025-12-01 12:30" in text
     assert "(2.5h)" in text
     assert "...and" not in text  # No remaining gaps message
+
+
+def _long_stranded_report() -> WindowCoverageReport:
+    return WindowCoverageReport(
+        range_start=datetime(2025, 12, 1, 0, 0, tzinfo=UTC),
+        range_end=datetime(2025, 12, 2, 0, 0, tzinfo=UTC),
+        total_windows=5,
+        coverage_gaps=[
+            CoverageGap(
+                start=datetime(2025, 12, 1, 10, 0, tzinfo=UTC),
+                end=datetime(2025, 12, 1, 10, 30, tzinfo=UTC),
+                stranded_at=datetime(2025, 12, 1, 11, 0, tzinfo=UTC),
+            )
+        ],
+    )
+
+
+def test_digest_run_is_judged_in_utc(notifier: WindowNotifier) -> None:
+    """10:13+02:00 is the 08:13 UTC digest run; 08:13+02:00 is not."""
+    plus_two = timezone(timedelta(hours=2))
+
+    notifier.notify_if_gaps(
+        report=_long_stranded_report(),
+        trigger_time=datetime(2025, 12, 2, 8, 13, tzinfo=plus_two),
+    )
+    assert len(MockSNSClient.publish_calls) == 0
+
+    notifier.notify_if_gaps(
+        report=_long_stranded_report(),
+        trigger_time=datetime(2025, 12, 2, 10, 13, tzinfo=plus_two),
+    )
+    assert len(MockSNSClient.publish_calls) == 1
+
+
+def test_timing_follows_the_run_interval(
+    mock_chatbot_notifier: ChatbotNotifier,
+) -> None:
+    """With hourly runs, a retried gap gets three hours before it is reported."""
+    hourly = WindowNotifier(
+        chatbot_notifier=mock_chatbot_notifier,
+        table_name="axiell_window_status.window_status",
+        adapter_name="axiell",
+        run_interval_minutes=60,
+    )
+    report = _long_stranded_report()
+    gap = report.coverage_gaps[0]
+    assert gap.stranded_at is not None
+
+    for hours, expected in ((2, 0), (3, 1), (5, 1)):
+        hourly.notify_if_gaps(
+            report=report,
+            trigger_time=gap.stranded_at + timedelta(hours=hours, minutes=30),
+            retry_from=gap.start,
+        )
+        assert len(MockSNSClient.publish_calls) == expected
