@@ -16,7 +16,7 @@ locals {
             job_id           = "{% $states.input.detail.job_id %}"
             transformer_type = "{% $exists($states.input.detail.transformer_type) ? $states.input.detail.transformer_type : null %}"
             sample_limit     = "{% $exists($states.input.detail.sample_limit) ? $states.input.detail.sample_limit : null %}"
-            dry_run          = "{% $exists($states.input.detail.dry_run) ? $states.input.detail.dry_run : ${var.dry_run_default} %}"
+            dry_run          = "{% $exists($states.input.detail.dry_run) ? $states.input.detail.dry_run : ${local.dry_run_default} %}"
             hard_delete      = "{% $exists($states.input.detail.hard_delete) ? $states.input.detail.hard_delete : null %}"
             # Baked in at apply time rather than read from the Lambda's
             # FOLIO_TARGET, so scheduled runs keep their target even if that env
