@@ -23,7 +23,7 @@ module "lambda" {
     TIMEOUT_IN_MINUTES = local.timeout_in_minutes
   }
 
-  runtime = "python3.9"
+  runtime = "python3.12"
 
   timeout = local.timeout_in_minutes * 60
 }
