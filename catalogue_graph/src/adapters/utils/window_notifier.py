@@ -6,11 +6,12 @@ coverage gaps, including gap details and trigger context.
 
 from __future__ import annotations
 
-from datetime import datetime
+import json
+from datetime import datetime, timedelta
 
 from clients.chatbot_notifier import ChatbotMessage, ChatbotNotifier
 
-from .window_reporter import WindowCoverageReport
+from .window_reporter import CoverageGap, WindowCoverageReport
 
 
 class WindowNotifier:
@@ -21,6 +22,11 @@ class WindowNotifier:
     - Limited list of gap details (first 5) to prevent message overflow
     - Trigger context (job_id, timestamp) for debugging
     - Thread grouping by 6-hour chunks to prevent spam
+
+    A gap the trigger is retrying is not reported until the retries have had
+    RETRY_GRACE_RUNS scheduled runs to close it. A gap is reported on the run
+    where it first becomes reportable, and after that once a day in the
+    DIGEST_HOUR_UTC run.
 
     Example:
         >>> from clients.chatbot_notifier import ChatbotNotifier
@@ -36,12 +42,15 @@ class WindowNotifier:
     """
 
     MAX_GAPS_TO_DISPLAY = 5
+    RETRY_GRACE_RUNS = 3
+    DIGEST_HOUR_UTC = 8
 
     def __init__(
         self,
         chatbot_notifier: ChatbotNotifier,
         table_name: str,
         adapter_name: str,
+        window_minutes: int = 15,
     ) -> None:
         """Initialize the WindowNotifier.
 
@@ -49,26 +58,32 @@ class WindowNotifier:
             chatbot_notifier: ChatbotNotifier instance for sending messages.
             table_name: Fully qualified table name (e.g., "namespace.table").
             adapter_name: Adapter type used in remediation commands.
+            window_minutes: Minutes between scheduled runs.
         """
         self.chatbot_notifier = chatbot_notifier
         self.table_name = table_name
         self.adapter_name = adapter_name
+        self.window_minutes = window_minutes
 
     def notify_if_gaps(
         self,
         report: WindowCoverageReport,
         job_id: str | None = None,
         trigger_time: datetime | None = None,
+        retry_from: datetime | None = None,
     ) -> None:
-        """Send notification if coverage gaps are detected.
+        """Send notification if coverage gaps are due a report.
 
         Args:
             report: Window coverage report containing gap information.
             job_id: Optional job identifier for context.
             trigger_time: Optional trigger timestamp for context and threading.
+            retry_from: Start of the range this run retries, if it retries any gaps.
         """
-        if not report.coverage_gaps:
+        gaps = self._gaps_to_report(report.coverage_gaps, trigger_time, retry_from)
+        if not gaps:
             return
+        report = report.model_copy(update={"coverage_gaps": gaps})
 
         message = self._format_message(report, job_id, trigger_time)
         thread_id = self._generate_thread_id(trigger_time) if trigger_time else None
@@ -87,6 +102,41 @@ class WindowNotifier:
                 enable_custom_actions=False,
             )
         )
+
+    def _gaps_to_report(
+        self,
+        gaps: list[CoverageGap],
+        trigger_time: datetime | None,
+        retry_from: datetime | None,
+    ) -> list[CoverageGap]:
+        """Return the gaps to report on this run, or none if no report is due."""
+        if trigger_time is None:
+            return gaps
+
+        interval = timedelta(minutes=self.window_minutes)
+        is_digest_run = (
+            trigger_time.hour == self.DIGEST_HOUR_UTC
+            and trigger_time.minute < self.window_minutes
+        )
+
+        reportable = []
+        newly_reportable = False
+        for gap in gaps:
+            retrying = retry_from is not None and gap.start >= retry_from
+            grace = interval * self.RETRY_GRACE_RUNS if retrying else timedelta(0)
+            if gap.stranded_at is None:
+                # Age unknown, so it cannot be throttled: always report it.
+                reportable.append(gap)
+                newly_reportable = True
+                continue
+            age = trigger_time - gap.stranded_at
+            if age < grace:
+                continue
+            reportable.append(gap)
+            if age < grace + interval:
+                newly_reportable = True
+
+        return reportable if newly_reportable or is_digest_run else []
 
     def _format_message(
         self,
@@ -166,23 +216,18 @@ class WindowNotifier:
         window_start = first_gap.start.strftime("%Y-%m-%dT%H:%M:%SZ")
         window_end = last_gap.end.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        # Use provided job_id or generate a descriptive one
-        reload_job_id = job_id or f"gap-reload-{first_gap.start.strftime('%Y%m%d')}"
-
-        command = (
-            f"AWS_PROFILE=platform-developer \\\n"
-            f"uv run python -m adapters.steps.oai_pmh.reloader \\\n"
-            f"  --adapter-type {self.adapter_name} \\\n"
-            f"  --job-id {reload_job_id} \\\n"
-            f"  --window-start {window_start} \\\n"
-            f"  --window-end {window_end} \\\n"
-            f"  --use-rest-api-table"
+        execution_input = json.dumps(
+            {
+                "adapter_type": self.adapter_name,
+                "window": {"start_time": window_start, "end_time": window_end},
+            }
         )
 
         return [
-            f"Run locally to reload gaps:\n```bash\n{command}\n```",
-            "Add `--dry-run` flag to preview without processing",
-            "Add --window-minutes to adjust window size if needed",
+            f"Start an execution of the `{self.adapter_name}-adapter` state machine "
+            f"with this input to backfill the range:\n```json\n{execution_input}\n```",
+            "The run skips windows that are already published and sends what it "
+            "harvests on to the transformer",
         ]
 
     def _build_context(

@@ -53,6 +53,12 @@ class OAIPMHAdapterConfig(AdapterConfig):
     max_pending_windows: int | None
     """Maximum windows to process in a single batch (None = unlimited)."""
 
+    auto_retry_failed_windows: bool = True
+    """Whether the trigger reaches back to retry gaps behind the cursor."""
+
+    event_bus_name: str | None = None
+    """Event bus for adapter completed events (used by the reloader)."""
+
     # ---------------------------------------------------------------------------
     # OAI-PMH endpoint configuration
     # ---------------------------------------------------------------------------

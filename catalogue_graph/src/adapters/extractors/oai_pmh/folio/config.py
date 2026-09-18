@@ -99,7 +99,9 @@ AUTO_RETRY_FAILED_WINDOWS = (
 # ---------------------------------------------------------------------------
 # EventBridge integration
 # ---------------------------------------------------------------------------
-EVENT_BUS_NAME = os.getenv("FOLIO_EVENT_BUS_NAME", "catalogue-pipeline-events")
+EVENT_BUS_NAME = os.getenv(
+    "FOLIO_EVENT_BUS_NAME", "catalogue-pipeline-adapter-event-bus"
+)
 TRIGGER_DETAIL_TYPE = os.getenv("FOLIO_TRIGGER_DETAIL_TYPE", "FolioWindowRequested")
 LOADER_DETAIL_TYPE = os.getenv("FOLIO_LOADER_DETAIL_TYPE", "FolioWindowLoaded")
 
@@ -193,6 +195,8 @@ FOLIO_ADAPTER_CONFIG = OAIPMHAdapterConfig(
     window_lookback_days=WINDOW_LOOKBACK_DAYS,
     max_lag_minutes=MAX_LAG_MINUTES,
     max_pending_windows=MAX_PENDING_WINDOWS,
+    auto_retry_failed_windows=AUTO_RETRY_FAILED_WINDOWS,
+    event_bus_name=EVENT_BUS_NAME,
     # OAI-PMH
     oai_metadata_prefix=OAI_METADATA_PREFIX,
     oai_set_spec=OAI_SET_SPEC,

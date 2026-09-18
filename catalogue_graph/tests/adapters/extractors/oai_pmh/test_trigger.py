@@ -22,6 +22,7 @@ from adapters.steps.oai_pmh.trigger import (
 from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_store import WindowStore
 from clients.chatbot_notifier import ChatbotNotifier
+from models.incremental_window import IncrementalWindow
 from tests.adapters.extractors.oai_pmh.conftest import (
     create_window_row,
     populate_window_store,
@@ -39,6 +40,7 @@ def _create_trigger_runtime(
     window_lookback_days: int | None = None,
     max_lag_minutes: int | None = None,
     max_pending_windows: int | None = None,
+    auto_retry_failed_windows: bool = True,
 ) -> TriggerRuntime:
     """Create a TriggerRuntime for testing."""
     cfg = adapter_runtime_config.config
@@ -50,6 +52,7 @@ def _create_trigger_runtime(
         window_lookback_days=window_lookback_days or cfg.window_lookback_days,
         max_lag_minutes=max_lag_minutes or cfg.max_lag_minutes,
         max_pending_windows=max_pending_windows or cfg.max_pending_windows,
+        auto_retry_failed_windows=auto_retry_failed_windows,
         oai_metadata_prefix=cfg.oai_metadata_prefix,
         oai_set_spec=cfg.oai_set_spec,
         adapter_name=cfg.adapter_name,
@@ -167,7 +170,10 @@ class TestBuildWindowRequest:
                 ),
             ],
         )
-        runtime = _create_trigger_runtime(store, adapter_runtime_config)
+        # Random widths can leave gaps between the rows; only the cursor matters here
+        runtime = _create_trigger_runtime(
+            store, adapter_runtime_config, auto_retry_failed_windows=False
+        )
 
         request = build_window_request(runtime=runtime, now=now)
 
@@ -350,7 +356,7 @@ class TestBuildWindowRequest:
 # Window gap notification tests (parameterized across adapters)
 # ---------------------------------------------------------------------------
 class TestWindowGapNotifications:
-    def test_notifies_when_gaps_detected(
+    def test_retries_recent_gap_without_notifying(
         self,
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
@@ -389,12 +395,12 @@ class TestWindowGapNotifications:
 
         request = build_window_request(runtime=runtime, now=now, job_id="20251202T1200")
 
-        # Should have sent a notification (there's a 2-hour gap between windows)
-        assert len(MockSNSClient.publish_calls) == 1
+        # The 2-hour gap became stranded 5 minutes ago and this run retries it,
+        # so it is still inside its grace period.
+        assert len(MockSNSClient.publish_calls) == 0
 
-        # Should still create the window request
         assert request.job_id == "20251202T1200"
-        assert request.window.start_time == second_end
+        assert request.window.start_time == first_end
         assert request.window.end_time == now
 
     def test_does_not_notify_without_gaps(
@@ -539,7 +545,7 @@ class TestWindowGapNotifications:
         assert request.window.start_time == last_success_end
         assert request.window.end_time == now
 
-    def test_notifies_for_historical_gaps_only(
+    def test_retries_historical_gaps_within_grace(
         self,
         temporary_window_status_table: IcebergTable,
         adapter_runtime_config: OAIPMHRuntimeConfig,
@@ -583,12 +589,218 @@ class TestWindowGapNotifications:
 
         request = build_window_request(runtime=runtime, now=now, job_id="20251202T1200")
 
-        # SHOULD have sent a notification for the historical gap
+        # The historical gap became stranded 30 minutes ago: retried, not yet reported
+        assert len(MockSNSClient.publish_calls) == 0
+
+        # The request reaches back to the historical gap
+        assert request.window.start_time == window1_end
+        assert request.window.end_time == now
+
+
+def _notifier() -> WindowNotifier:
+    return WindowNotifier(
+        chatbot_notifier=ChatbotNotifier(
+            sns_client=MockSNSClient(),
+            topic_arn="arn:aws:sns:eu-west-1:123456789012:test-topic",
+        ),
+        table_name="test_table.window_status",
+        adapter_name="test-adapter",
+    )
+
+
+class TestStrandedGapRetry:
+    """A failed window behind the cursor is retried, then reported if it persists."""
+
+    @staticmethod
+    def _rows_with_stranded_gap(
+        now: datetime, stranded_for: timedelta, gap_age: timedelta = timedelta(hours=20)
+    ) -> tuple[list, datetime]:
+        gap_start = now - gap_age
+        gap_end = gap_start + timedelta(minutes=30)
+        stranded_at = now - stranded_for
+        rows = [
+            create_window_row(gap_start - timedelta(minutes=15), gap_start),
+            create_window_row(gap_start, gap_start + timedelta(minutes=15), "failed"),
+            create_window_row(gap_start + timedelta(minutes=15), gap_end, "failed"),
+            create_window_row(
+                gap_end,
+                now - timedelta(minutes=15),
+                tags={"published_at": stranded_at.isoformat()},
+            ),
+        ]
+        return rows, gap_start
+
+    def test_reaches_back_to_stranded_gap(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        now = datetime(2025, 12, 2, 12, 13, tzinfo=UTC)
+        rows, gap_start = self._rows_with_stranded_gap(now, timedelta(minutes=10))
+        store = populate_window_store(temporary_window_status_table, rows)
+        runtime = _create_trigger_runtime(store, adapter_runtime_config)
+
+        request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == gap_start
+        assert request.window.end_time == now
+
+    def test_can_be_switched_off(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        now = datetime(2025, 12, 2, 12, 13, tzinfo=UTC)
+        rows, _ = self._rows_with_stranded_gap(now, timedelta(minutes=10))
+        store = populate_window_store(temporary_window_status_table, rows)
+        runtime = _create_trigger_runtime(
+            store, adapter_runtime_config, auto_retry_failed_windows=False
+        )
+
+        request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == now - timedelta(minutes=15)
+
+    def test_leaves_gaps_older_than_lookback(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        now = datetime(2025, 12, 2, 12, 13, tzinfo=UTC)
+        rows, _ = self._rows_with_stranded_gap(
+            now, timedelta(minutes=10), gap_age=timedelta(days=3)
+        )
+        store = populate_window_store(temporary_window_status_table, rows)
+        runtime = _create_trigger_runtime(
+            store, adapter_runtime_config, window_lookback_days=2, enforce_lag=False
+        )
+
+        request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == now - timedelta(minutes=15)
+
+    def test_leaves_backlog_larger_than_lag_tolerance(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        now = datetime(2025, 12, 2, 12, 13, tzinfo=UTC)
+        rows, _ = self._rows_with_stranded_gap(now, timedelta(minutes=10))
+        store = populate_window_store(temporary_window_status_table, rows)
+        # The gap is 30 minutes long
+        runtime = _create_trigger_runtime(
+            store, adapter_runtime_config, max_lag_minutes=20, enforce_lag=False
+        )
+
+        request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == now - timedelta(minutes=15)
+
+    @pytest.mark.parametrize(
+        "stranded_for, now, expected_notifications",
+        [
+            # Inside the grace period: retries get a chance first
+            (timedelta(minutes=40), datetime(2025, 12, 2, 12, 13, tzinfo=UTC), 0),
+            # First run after three retries failed
+            (timedelta(minutes=50), datetime(2025, 12, 2, 12, 13, tzinfo=UTC), 1),
+            # Already reported: quiet until the digest run
+            (timedelta(hours=3), datetime(2025, 12, 2, 12, 13, tzinfo=UTC), 0),
+            (timedelta(hours=3), datetime(2025, 12, 2, 8, 13, tzinfo=UTC), 1),
+            (timedelta(hours=3), datetime(2025, 12, 2, 8, 28, tzinfo=UTC), 0),
+        ],
+    )
+    def test_reports_once_then_daily(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+        stranded_for: timedelta,
+        now: datetime,
+        expected_notifications: int,
+    ) -> None:
+        rows, _ = self._rows_with_stranded_gap(now, stranded_for)
+        store = populate_window_store(temporary_window_status_table, rows)
+        runtime = _create_trigger_runtime(
+            store, adapter_runtime_config, notifier=_notifier()
+        )
+
+        build_window_request(runtime=runtime, now=now)
+
+        assert len(MockSNSClient.publish_calls) == expected_notifications
+
+    def test_reports_unretried_gap_straight_away(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        now = datetime(2025, 12, 2, 12, 13, tzinfo=UTC)
+        rows, _ = self._rows_with_stranded_gap(now, timedelta(minutes=10))
+        store = populate_window_store(temporary_window_status_table, rows)
+        runtime = _create_trigger_runtime(
+            store,
+            adapter_runtime_config,
+            notifier=_notifier(),
+            auto_retry_failed_windows=False,
+        )
+
+        build_window_request(runtime=runtime, now=now)
+
         assert len(MockSNSClient.publish_calls) == 1
 
-        # The request should cover from last_success_end to now
-        assert request.window.start_time == window2_end
-        assert request.window.end_time == now
+
+class TestOperatorWindow:
+    def test_uses_supplied_window_as_given(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        now = datetime(2025, 12, 2, 12, 13, tzinfo=UTC)
+        # A cursor far enough behind to trip the lag breaker on a normal run
+        stale_end = now - timedelta(days=2)
+        store = populate_window_store(
+            temporary_window_status_table,
+            [create_window_row(stale_end - timedelta(minutes=15), stale_end)],
+        )
+        runtime = _create_trigger_runtime(
+            store, adapter_runtime_config, notifier=_notifier()
+        )
+        window = IncrementalWindow(
+            start_time=datetime(2025, 11, 1, 9, 0, tzinfo=UTC),
+            end_time=datetime(2025, 11, 1, 10, 0, tzinfo=UTC),
+        )
+
+        request = build_window_request(runtime=runtime, now=now, window=window)
+
+        assert request.window == window
+        assert request.job_id == "backfill-20251202T1213"
+        assert len(MockSNSClient.publish_calls) == 0
+
+    def test_lambda_handler_reads_window_from_event(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        store = populate_window_store(temporary_window_status_table, [])
+        runtime = _create_trigger_runtime(store, adapter_runtime_config)
+        monkeypatch.setattr(trigger, "get_config", lambda _: adapter_runtime_config)
+        monkeypatch.setattr(trigger, "build_runtime", lambda _: runtime)
+
+        response = trigger.lambda_handler(
+            {
+                "adapter_type": adapter_runtime_config.config.adapter_name,
+                "time": "2025-12-02T12:13:00Z",
+                "window": {
+                    "start_time": "2025-11-01T09:00:00Z",
+                    "end_time": "2025-11-01T10:00:00Z",
+                },
+            },
+            None,
+        )
+
+        assert response["job_id"] == "backfill-20251202T1213"
+        loader_event = OAIPMHLoaderEvent.model_validate(response)
+        assert loader_event.window.start_time == datetime(2025, 11, 1, 9, tzinfo=UTC)
+        assert loader_event.window.end_time == datetime(2025, 11, 1, 10, tzinfo=UTC)
 
 
 # ---------------------------------------------------------------------------

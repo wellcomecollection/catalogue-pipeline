@@ -18,6 +18,9 @@ from .window_summary import (
 class CoverageGap(BaseModel):
     start: datetime
     end: datetime
+    stranded_at: datetime | None = None
+    """When the harvest moved past this gap: the publish (or write) time of
+    the first successful window after it. None when nothing follows the gap."""
 
 
 class WindowFailure(BaseModel):
@@ -352,7 +355,13 @@ class WindowReporter:
             gap_start = merged_intervals[i][1]
             gap_end = merged_intervals[i + 1][0]
             if gap_start < gap_end:
-                coverage_gaps.append(CoverageGap(start=gap_start, end=gap_end))
+                coverage_gaps.append(
+                    CoverageGap(
+                        start=gap_start,
+                        end=gap_end,
+                        stranded_at=self._stranded_at(successful_rows, gap_end),
+                    )
+                )
 
         # Find gap after the last successful window
         last_end = merged_intervals[-1][1]
@@ -360,6 +369,21 @@ class WindowReporter:
             coverage_gaps.append(CoverageGap(start=last_end, end=range_end))
 
         return coverage_gaps
+
+    @staticmethod
+    def _stranded_at(successful_rows: list, gap_end: datetime) -> datetime | None:
+        """Return when the first successful window after a gap was completed."""
+        following = [
+            row
+            for row in successful_rows
+            if ensure_datetime_utc(row.window_start) >= gap_end
+        ]
+        if not following:
+            return None
+        first = min(following, key=lambda row: ensure_datetime_utc(row.window_start))
+        return published_at_from_tags(first.tags) or ensure_datetime_utc(
+            first.updated_at
+        )
 
     def _extract_failures(self, sorted_rows: list) -> list[WindowFailure]:
         """Extract failure details from all windows.
