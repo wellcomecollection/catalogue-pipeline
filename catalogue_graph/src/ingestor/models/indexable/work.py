@@ -12,6 +12,7 @@ from ingestor.models.debug.work import (
 from ingestor.models.display.work import DisplayWork
 from ingestor.models.filter.work import WorkFilterableValues
 from ingestor.models.indexable.record import IndexableRecord
+from ingestor.models.indexable.version import version_from_source_and_merged_time
 from ingestor.models.merged.work import (
     DeletedMergedWork,
     InvisibleMergedWork,
@@ -29,10 +30,13 @@ class IndexableWork(IndexableRecord):
     def get_id(self) -> str:
         return self.debug.source.id
 
-    def get_modified_time(self) -> datetime:
-        # Versioned by merge time, not source modified time: re-merging a work leaves the
-        # source record untouched, so source time cannot order two merges of the same work.
-        return datetime.fromisoformat(self.debug.merged_time)
+    def get_version(self) -> int:
+        # Both timestamps are needed: re-merging a work leaves the source record
+        # untouched, and a stale message can merge old source data after a newer merge.
+        return version_from_source_and_merged_time(
+            datetime.fromisoformat(self.debug.source.modified_time),
+            datetime.fromisoformat(self.debug.merged_time),
+        )
 
     @staticmethod
     def from_raw_document(work: dict) -> "IndexableWork":

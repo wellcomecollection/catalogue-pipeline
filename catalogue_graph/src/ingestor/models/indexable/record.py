@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
 
 from models.pipeline.serialisable import ElasticsearchModel
 
@@ -10,7 +9,12 @@ class IndexableRecord(ElasticsearchModel, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_modified_time(self) -> datetime:
+    def get_version(self) -> int:
+        """The external Elasticsearch version this record is written with.
+
+        Higher wins: a write is refused if the stored document is already at a higher
+        version. See ingestor.models.indexable.version for how each record type orders.
+        """
         raise NotImplementedError
 
     @staticmethod

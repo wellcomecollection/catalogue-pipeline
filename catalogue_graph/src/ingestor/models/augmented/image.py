@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from ingestor.models.indexable.record import IndexableRecord
+from ingestor.models.indexable.version import version_from_modified_time
 from models.pipeline.identifier import Identified
 from models.pipeline.image_state import ImageState
 from models.pipeline.location import DigitalLocation
@@ -36,5 +37,5 @@ class AugmentedImage(IndexableRecord):
     def get_id(self) -> str:
         return self.state.id()
 
-    def get_modified_time(self) -> datetime:
-        return datetime.fromisoformat(self.modified_time)
+    def get_version(self) -> int:
+        return version_from_modified_time(datetime.fromisoformat(self.modified_time))

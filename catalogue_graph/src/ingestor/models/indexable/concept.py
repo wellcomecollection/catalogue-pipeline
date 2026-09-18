@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.indexable.record import IndexableRecord
+from ingestor.models.indexable.version import version_from_modified_time
 from utils.types import ConceptType
 
 
@@ -65,8 +66,9 @@ class IndexableConcept(IndexableRecord):
     def get_id(self) -> str:
         return self.query.id
 
-    def get_modified_time(self) -> datetime:
-        return datetime.now(UTC)
+    def get_version(self) -> int:
+        # Concepts are rebuilt wholesale rather than updated, so the run time orders them.
+        return version_from_modified_time(datetime.now(UTC))
 
     @staticmethod
     def from_raw_document(concept: dict) -> "IndexableConcept":
