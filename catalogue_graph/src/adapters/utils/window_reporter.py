@@ -348,7 +348,13 @@ class WindowReporter:
         # Find gaps before the first successful window
         first_start = merged_intervals[0][0]
         if range_start < first_start:
-            coverage_gaps.append(CoverageGap(start=range_start, end=first_start))
+            coverage_gaps.append(
+                CoverageGap(
+                    start=range_start,
+                    end=first_start,
+                    stranded_at=self._stranded_at(successful_rows, first_start),
+                )
+            )
 
         # Find gaps between successful windows
         for i in range(len(merged_intervals) - 1):

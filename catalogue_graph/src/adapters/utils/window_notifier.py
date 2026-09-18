@@ -7,7 +7,7 @@ coverage gaps, including gap details and trigger context.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from clients.chatbot_notifier import ChatbotMessage, ChatbotNotifier
 
@@ -50,7 +50,7 @@ class WindowNotifier:
         chatbot_notifier: ChatbotNotifier,
         table_name: str,
         adapter_name: str,
-        window_minutes: int = 15,
+        run_interval_minutes: int = 15,
     ) -> None:
         """Initialize the WindowNotifier.
 
@@ -58,12 +58,12 @@ class WindowNotifier:
             chatbot_notifier: ChatbotNotifier instance for sending messages.
             table_name: Fully qualified table name (e.g., "namespace.table").
             adapter_name: Adapter type used in remediation commands.
-            window_minutes: Minutes between scheduled runs.
+            run_interval_minutes: Minutes between scheduled runs.
         """
         self.chatbot_notifier = chatbot_notifier
         self.table_name = table_name
         self.adapter_name = adapter_name
-        self.window_minutes = window_minutes
+        self.run_interval_minutes = run_interval_minutes
 
     def notify_if_gaps(
         self,
@@ -113,10 +113,11 @@ class WindowNotifier:
         if trigger_time is None:
             return gaps
 
-        interval = timedelta(minutes=self.window_minutes)
+        interval = timedelta(minutes=self.run_interval_minutes)
+        trigger_utc = trigger_time.astimezone(UTC)
         is_digest_run = (
-            trigger_time.hour == self.DIGEST_HOUR_UTC
-            and trigger_time.minute < self.window_minutes
+            trigger_utc.hour == self.DIGEST_HOUR_UTC
+            and trigger_utc.minute < self.run_interval_minutes
         )
 
         reportable = []
