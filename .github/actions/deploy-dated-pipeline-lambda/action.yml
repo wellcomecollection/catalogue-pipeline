@@ -58,7 +58,7 @@ runs:
 
     - name: Deploy Lambda to pipeline date image
       if: steps.check.outputs.exists == 'true'
-      uses: ./.github/actions/deploy-lambda-image
+      uses: wellcomecollection/.github/.github/actions/deploy-lambda-image@main
       with:
         lambda_name: ${{ steps.lambda.outputs.lambda_name }}
         registry: ${{ inputs.registry }}
@@ -66,3 +66,4 @@ runs:
         deploy_tag: env.${{ inputs.pipeline_date }}
         role_to_assume: ${{ inputs.role_to_assume }}
         aws_region: ${{ inputs.aws_region }}
+        publish: true
