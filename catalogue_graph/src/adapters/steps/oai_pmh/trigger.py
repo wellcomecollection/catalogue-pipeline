@@ -298,7 +298,8 @@ def build_runtime(
             chatbot_notifier=chatbot_notifier,
             table_name=table_name,
             adapter_name=config.config.adapter_name,
-            window_minutes=cfg.window_minutes or config.config.window_minutes,
+            # Both OAI-PMH adapters are scheduled once per window.
+            run_interval_minutes=config.config.window_minutes,
         )
 
     return TriggerRuntime(
@@ -344,10 +345,11 @@ def lambda_handler(
         trace_id=get_trace_id(context),
         pipeline_step=f"{config.config.pipeline_step_prefix}_trigger",
     )
-    # A "window" key marks an operator backfill of that range.
+    # A "window" key marks an operator backfill of that range. Anything but
+    # null is validated, so a malformed window fails instead of running as scheduled.
     window = (
         IncrementalWindow.model_validate(event["window"])
-        if event.get("window")
+        if event.get("window") is not None
         else None
     )
     job_id = generate_job_id(event_time)

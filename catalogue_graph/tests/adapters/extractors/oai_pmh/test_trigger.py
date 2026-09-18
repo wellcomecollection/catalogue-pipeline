@@ -802,6 +802,28 @@ class TestOperatorWindow:
         assert loader_event.window.start_time == datetime(2025, 11, 1, 9, tzinfo=UTC)
         assert loader_event.window.end_time == datetime(2025, 11, 1, 10, tzinfo=UTC)
 
+    def test_lambda_handler_rejects_empty_window(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        store = populate_window_store(temporary_window_status_table, [])
+        runtime = _create_trigger_runtime(store, adapter_runtime_config)
+        monkeypatch.setattr(trigger, "get_config", lambda _: adapter_runtime_config)
+        monkeypatch.setattr(trigger, "build_runtime", lambda _: runtime)
+
+        # Must not fall through to a scheduled run of the cursor-derived range
+        with pytest.raises(ValueError, match="end_time is required"):
+            trigger.lambda_handler(
+                {
+                    "adapter_type": adapter_runtime_config.config.adapter_name,
+                    "time": "2025-12-02T12:13:00Z",
+                    "window": {},
+                },
+                None,
+            )
+
 
 # ---------------------------------------------------------------------------
 # handler tests
