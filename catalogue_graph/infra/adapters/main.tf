@@ -82,9 +82,9 @@ module "axiell_folio_sync" {
   # The sandbox is stopped out of hours by folio-dev-server, and the Axiell
   # adapter publishes every 15 minutes, so the trigger is confined to the
   # working day. Starts an hour after the sandbox does, to let Kong come up.
-  trigger_window = {
+  trigger_window = local.folio_dev_target_enabled ? {
     start_expression = "cron(0 9 ? * MON-FRI *)"
     stop_expression  = "cron(30 17 ? * MON-FRI *)"
     timezone         = "Europe/London"
-  }
+  } : null
 }
