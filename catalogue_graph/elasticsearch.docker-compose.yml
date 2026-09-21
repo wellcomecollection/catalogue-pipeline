@@ -1,39 +1,28 @@
-# Local Elasticsearch for development and the integration tests under integration/.
-# Pinned to the version the deployed pipeline_storage clusters run, so local behaviour
-# matches production.
+version: '3.7'
+
 services:
   elasticsearch:
+    # Matches the version the deployed pipeline_storage clusters run.
     image: docker.elastic.co/elasticsearch/elasticsearch:9.1.4
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - xpack.security.enrollment.enabled=false
-      - xpack.license.self_generated.type=basic
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-      - ingest.geoip.downloader.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
       - "9200:9200"
     volumes:
       - esdata:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 40
     networks:
       - elastic
 
   kibana:
     image: docker.elastic.co/kibana/kibana:9.1.4
     container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
       - "5601:5601"
     depends_on:
-      elasticsearch:
-        condition: service_healthy
+      - elasticsearch
     networks:
       - elastic
 
