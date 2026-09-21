@@ -24,6 +24,7 @@ from adapters.extractors.oai_pmh.models.step_events import (
 )
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
+from adapters.utils.window_generator import ALIGNMENT_EPOCH
 from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_reporter import WindowCoverageReport, WindowReporter
 from adapters.utils.window_store import WindowStore
@@ -123,6 +124,18 @@ def _enforce_lag(
         )
 
 
+def _require_aligned_start(window: IncrementalWindow, window_minutes: int) -> None:
+    """Reject a start that would key its first sub-window off the stored grid."""
+    delta = timedelta(minutes=window_minutes)
+    offset = (window.start_time_utc - ALIGNMENT_EPOCH) % delta
+    if offset:
+        raise ValueError(
+            f"window.start_time {window.start_time_utc.isoformat()} is not on a "
+            f"{window_minutes}-minute boundary; the enclosing window starts at "
+            f"{(window.start_time_utc - offset).isoformat()}"
+        )
+
+
 def build_window_request(
     *,
     runtime: TriggerRuntime,
@@ -137,15 +150,18 @@ def build_window_request(
         now: Current timestamp for window calculations.
         job_id: Optional job identifier (generated if not provided).
         window: Operator-supplied range, used as given when present.
+            Its start must sit on a window_minutes boundary.
 
     Returns:
         OAIPMHLoaderEvent to pass to the loader step.
 
     Raises:
         RuntimeError: If adapter is too far behind (lag check) or no windows ready.
+        ValueError: If an operator window starts off the window grid.
     """
     if window is not None:
         # An operator backfill: no cursor, lag check or gap report applies.
+        _require_aligned_start(window, runtime.window_minutes)
         return OAIPMHLoaderEvent(
             job_id=job_id or f"backfill-{generate_job_id(now)}",
             adapter_type=runtime.adapter_name,

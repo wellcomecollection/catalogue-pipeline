@@ -127,6 +127,8 @@ Start an execution of the adapter's state machine (`axiell-adapter`, `folio-adap
 }
 ```
 
+`start_time` must sit on a window boundary (:00, :15, :30 or :45 with 15-minute windows). The trigger rejects any other start, because its first sub-window would match no stored row and be harvested and published a second time.
+
 The run harvests the unfinished windows in the range, skips the published ones, and carries the result through reconcile, enrichment, the completed event and the published stamp like a scheduled run. Its job id is prefixed `backfill-`. If a scheduled run is in flight the execution fails with `AlreadyRunning` and can be started again once that run ends.
 
 Do not follow a local reload with an id-mode run to publish the records. The store already holds them, so id mode finds nothing changed and emits no changeset.

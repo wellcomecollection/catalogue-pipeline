@@ -774,6 +774,26 @@ class TestOperatorWindow:
         assert request.job_id == "backfill-20251202T1213"
         assert len(MockSNSClient.publish_calls) == 0
 
+    def test_rejects_a_start_off_the_window_grid(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        store = populate_window_store(temporary_window_status_table, [])
+        runtime = _create_trigger_runtime(store, adapter_runtime_config)
+        # 13:37 would harvest 13:37-13:45, a key no stored row carries
+        window = IncrementalWindow(
+            start_time=datetime(2025, 11, 1, 13, 37, tzinfo=UTC),
+            end_time=datetime(2025, 11, 1, 15, 0, tzinfo=UTC),
+        )
+
+        with pytest.raises(ValueError, match="2025-11-01T13:30:00"):
+            build_window_request(
+                runtime=runtime,
+                now=datetime(2025, 12, 2, 12, 13, tzinfo=UTC),
+                window=window,
+            )
+
     def test_lambda_handler_reads_window_from_event(
         self,
         monkeypatch: pytest.MonkeyPatch,
