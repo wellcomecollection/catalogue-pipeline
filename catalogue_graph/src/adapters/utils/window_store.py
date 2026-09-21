@@ -95,15 +95,25 @@ class WindowStore:
         rows = self.list_in_range(start_time, end_time)
         return {row.window_key: row for row in rows}
 
-    def upsert(self, record: WindowSummary) -> None:
-        """Replace any existing row for this window, in a single Iceberg commit."""
+    def upsert(self, record: WindowSummary, *, known_new: bool = False) -> None:
+        """Replace any existing row for this window, in a single Iceberg commit.
+
+        An overwrite plans its delete by reading every manifest, so its cost
+        grows with each commit since the last compaction. ``known_new=True``
+        appends instead. Only pass it when this table object has seen no row
+        for the key: the commit fails if another writer got in since.
+        """
         arrow = pa.Table.from_pylist(
             [record.model_dump()], schema=WINDOW_STATUS_ARROW_SCHEMA
         )
         with self._lock, self.table.transaction() as tx:
-            tx.overwrite(
-                arrow, overwrite_filter=EqualTo("window_key", str(record.window_key))
-            )
+            if known_new:
+                tx.append(arrow)
+            else:
+                tx.overwrite(
+                    arrow,
+                    overwrite_filter=EqualTo("window_key", str(record.window_key)),
+                )
 
     def upsert_many(self, records: list[WindowSummary]) -> None:
         """Replace any existing rows for these windows, in a single Iceberg commit.

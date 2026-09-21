@@ -2,11 +2,13 @@ from collections.abc import Sequence
 from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 import pytest
 from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
+from pyiceberg.manifest import ManifestFile
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.window_store import (
@@ -311,6 +313,49 @@ def test_upsert_many_writes_and_replaces_rows(tmp_path: Path) -> None:
     t1_key = _summary(t1).window_key
     assert stored[t1_key].state == "success"
     assert stored[t1_key].attempts == 2
+
+
+@pytest.mark.parametrize(
+    ("known_new", "expected_manifest_reads"),
+    # An overwrite reads every earlier commit's manifest: 0 + 1 + 2 + 3.
+    [(True, 0), (False, 6)],
+)
+def test_upsert_known_new_skips_delete_planning(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    known_new: bool,
+    expected_manifest_reads: int,
+) -> None:
+    table = _create_table(
+        catalog_uri=f"sqlite:///{tmp_path / 'catalog.db'}",
+        warehouse_path=tmp_path / "warehouse",
+        namespace="harvest",
+        table_name=f"window_status_{uuid4().hex}",
+        catalog_name=f"catalog_{uuid4().hex}",
+    )
+    store = WindowStore(table)
+
+    # Snapshot operations can't tell the two paths apart: an overwrite whose
+    # filter matches nothing is also recorded as an append.
+    manifest_reads = 0
+    original_fetch = ManifestFile.fetch_manifest_entry
+
+    def counting_fetch(self: ManifestFile, *args: Any, **kwargs: Any) -> Any:
+        nonlocal manifest_reads
+        manifest_reads += 1
+        return original_fetch(self, *args, **kwargs)
+
+    monkeypatch.setattr(ManifestFile, "fetch_manifest_entry", counting_fetch)
+
+    start = datetime(2025, 1, 1, 10, 0, tzinfo=UTC)
+    for offset in range(4):
+        store.upsert(
+            _summary(start + timedelta(minutes=15 * offset)), known_new=known_new
+        )
+
+    assert manifest_reads == expected_manifest_reads
+    monkeypatch.undo()
+    assert len(store.load_status_map()) == 4
 
 
 def test_upsert_many_with_empty_list_is_a_noop(tmp_path: Path) -> None:

@@ -16,6 +16,7 @@ from lxml import etree
 from oai_pmh_client.models import Header, Record
 from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
+from pyiceberg.manifest import ManifestFile
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.utils.window_harvester as harvester_mod
@@ -445,6 +446,103 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
     assert len(client.calls) - initial_calls == 1
 
 
+def test_new_windows_skip_delete_planning(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """A catch-up over windows with no status row must not pay for an overwrite."""
+    harvester = _build_harvester(tmp_path, [])
+    manifest_reads = 0
+    original_fetch = ManifestFile.fetch_manifest_entry
+
+    def counting_fetch(self: ManifestFile, *args: Any, **kwargs: Any) -> Any:
+        nonlocal manifest_reads
+        manifest_reads += 1
+        return original_fetch(self, *args, **kwargs)
+
+    # Patched after the status map load, which legitimately reads manifests.
+    original_harvest_windows = harvester.harvest_windows
+
+    def harvest_windows_counting_reads(*args: Any, **kwargs: Any) -> Any:
+        monkeypatch.setattr(ManifestFile, "fetch_manifest_entry", counting_fetch)
+        try:
+            return original_harvest_windows(*args, **kwargs)
+        finally:
+            monkeypatch.setattr(ManifestFile, "fetch_manifest_entry", original_fetch)
+
+    harvester.harvest_windows = harvest_windows_counting_reads  # type: ignore[method-assign]
+
+    summaries = harvester.harvest_range(time_range=_window_range(hours=2))
+
+    assert len(summaries) == 8
+    assert manifest_reads == 0
+    assert len(harvester.store.list_in_range()) == 8
+
+
+def test_multi_batch_new_window_leaves_one_row(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Only a window's first write appends; later ones replace that row."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+    records = [_make_record(f"id:{i}") for i in range(3)]
+    harvester = _build_harvester(tmp_path, records)
+
+    harvester.harvest_range(time_range=_window_range(hours=1), max_windows=1)
+
+    rows = harvester.store.list_in_range()
+    assert len(rows) == 1
+    assert rows[0].state == "success"
+    assert rows[0].record_ids == ["id:0", "id:1", "id:2"]
+
+
+def test_retried_failed_window_replaces_its_row(tmp_path: Path) -> None:
+    harvester = _build_harvester(
+        tmp_path, [_make_record("id:1")], record_callback=FailingProcessor()
+    )
+    time_range = _window_range(hours=1)
+    harvester.harvest_range(time_range=time_range, max_windows=1)
+    assert [row.state for row in harvester.store.list_in_range()] == ["failed"]
+
+    harvester.record_callback = StubWindowProcessor()
+    harvester.harvest_range(time_range=time_range, max_windows=1)
+
+    rows = harvester.store.list_in_range()
+    assert [row.state for row in rows] == ["success"]
+    assert rows[0].attempts == 2
+
+
+def test_reprocessing_successful_windows_leaves_one_row_each(tmp_path: Path) -> None:
+    harvester = _build_harvester(tmp_path, [])
+    time_range = _window_range(hours=1)
+    harvester.harvest_range(time_range=time_range)
+
+    harvester.harvest_range(time_range=time_range, reprocess_successful_windows=True)
+
+    assert len(harvester.store.list_in_range()) == 4
+
+
+def test_first_write_that_raises_is_not_retried_as_an_append(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """A commit that raised may still have landed, so the next write overwrites."""
+    monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
+    harvester = _build_harvester(tmp_path, [_make_record("id:1")])
+    original_upsert = harvester.store.upsert
+    known_new_flags: list[bool] = []
+
+    def landing_then_raising(record: WindowSummary, *, known_new: bool = False) -> None:
+        known_new_flags.append(known_new)
+        original_upsert(record, known_new=known_new)
+        if len(known_new_flags) == 1:
+            raise RuntimeError("response lost")
+
+    harvester.store.upsert = landing_then_raising  # type: ignore[method-assign]
+
+    harvester.harvest_range(time_range=_window_range(hours=1), max_windows=1)
+
+    assert known_new_flags == [True, False]
+    assert len(harvester.store.list_in_range()) == 1
+
+
 class BatchTracker:
     """Callback that records per-batch invocations and returns a changeset per batch."""
 
@@ -612,9 +710,9 @@ def test_batching_intermediate_writes_to_store(
 
     original_upsert = harvester.store.upsert
 
-    def capturing_upsert(summary: WindowSummary) -> None:
+    def capturing_upsert(summary: WindowSummary, *, known_new: bool = False) -> None:
         store_snapshots.append(summary.model_copy(deep=True))
-        original_upsert(summary)
+        original_upsert(summary, known_new=known_new)
 
     harvester.store.upsert = capturing_upsert  # type: ignore[assignment]
 
@@ -656,9 +754,9 @@ def test_batching_upserted_record_count_grows_across_intermediate_writes(
 
     original_upsert = harvester.store.upsert
 
-    def capturing_upsert(summary: WindowSummary) -> None:
+    def capturing_upsert(summary: WindowSummary, *, known_new: bool = False) -> None:
         store_snapshots.append(summary.model_copy(deep=True))
-        original_upsert(summary)
+        original_upsert(summary, known_new=known_new)
 
     harvester.store.upsert = capturing_upsert  # type: ignore[assignment]
 
@@ -872,9 +970,9 @@ class FlushSpies:
             self.incremental_update_calls.append(new_data.num_rows)
             return original_incremental_update(new_data)
 
-        def spy_upsert(record: WindowSummary) -> None:
+        def spy_upsert(record: WindowSummary, *, known_new: bool = False) -> None:
             self.upsert_calls.append(record.model_copy(deep=True))
-            original_upsert(record)
+            original_upsert(record, known_new=known_new)
 
         def spy_upsert_many(records: list[WindowSummary]) -> None:
             self.upsert_many_calls.append(
