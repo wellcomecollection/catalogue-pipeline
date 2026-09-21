@@ -8,6 +8,12 @@ module "pipeline" {
     scale_up_matcher_db      = false
   }
 
+  # Frozen for the production switchover (platform#6541): nothing new is
+  # transformed from the adapter bus, minted, or carried into the served indices.
+  enable_adapter_transformer_trigger = false
+  enable_id_minter_schedule          = false
+  enable_graph_pipeline_schedule     = false
+
   # Default values for a new pipeline
   # graph_index_dates = {
   #   merged   = local.pipeline_date
