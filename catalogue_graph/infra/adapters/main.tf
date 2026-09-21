@@ -28,6 +28,9 @@ module "axiell" {
   security_group_ids    = [aws_security_group.adapter_egress.id]
   task_repository_url   = data.aws_ecr_repository.unified_pipeline_task.repository_url
   enable_reconciliation = true
+
+  # Paused from the UAT to prod OAI-PMH switch until the store rebuild (platform#6717)
+  schedule_enabled = false
 }
 
 module "folio" {
