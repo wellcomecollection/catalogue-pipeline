@@ -8,14 +8,10 @@
 # {"folio_target": "dev"} to target the sandbox; otherwise runs use prod.
 #
 # See docs/axiell-folio-sync-lambda-dev-instance.md.
-variable "folio_dev_target_enabled" {
-  description = "Enable Lambda connectivity to the FOLIO dev sandbox."
-  type        = bool
-  default     = false
-}
-
 locals {
-  folio_dev_target_enabled = var.folio_dev_target_enabled
+  # A local, not a variable: this root is applied by several people, and an
+  # apply that omits a -var would destroy the hand-filled dev SecureString.
+  folio_dev_target_enabled = true
 }
 
 # Security group for the sync Lambda's ENIs.
