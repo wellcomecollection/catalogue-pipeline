@@ -300,6 +300,7 @@ def _set_overrides(*, miro_id, message: str, override_key: str, override_value: 
     }
 
     overrides = item.get("overrides", {})
+    old_value = overrides.get(override_key)
     overrides[override_key] = override_value
 
     try:
@@ -348,6 +349,7 @@ def _remove_override(*, miro_id, message: str, override_key: str):
     }
 
     overrides = item.get("overrides", {})
+    old_value = overrides.get(override_key)
 
     try:
         del overrides[override_key]
