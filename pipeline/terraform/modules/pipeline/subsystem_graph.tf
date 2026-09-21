@@ -3,6 +3,8 @@ module "graph_pipeline" {
 
   pipeline_date = var.pipeline_date
   graph_date    = var.graph_date
+
+  enable_schedule = var.enable_graph_pipeline_schedule
   index_dates = {
     merged    = var.graph_index_dates.merged
     augmented = var.graph_index_dates.augmented
