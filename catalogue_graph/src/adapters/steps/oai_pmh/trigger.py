@@ -31,6 +31,7 @@ from adapters.utils.window_store import WindowStore
 from clients.chatbot_notifier import ChatbotNotifier
 from models.events import IncrementalWindow, ScheduledEvent
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
+from utils.timezone import ensure_datetime_utc
 
 logger = structlog.get_logger(__name__)
 
@@ -64,7 +65,7 @@ class TriggerRuntime(BaseModel):
 
 def generate_job_id(timestamp: datetime) -> str:
     """Generate a job ID from a timestamp."""
-    return timestamp.astimezone(UTC).strftime("%Y%m%dT%H%M")
+    return ensure_datetime_utc(timestamp).strftime("%Y%m%dT%H%M")
 
 
 def _determine_start(
@@ -159,6 +160,9 @@ def build_window_request(
         RuntimeError: If adapter is too far behind (lag check) or no windows ready.
         ValueError: If an operator window starts off the window grid.
     """
+    # A naive timestamp (hand-typed --at or execution input) is read as UTC.
+    now = ensure_datetime_utc(now)
+
     if window is not None:
         # An operator backfill: no cursor, lag check or gap report applies.
         _require_aligned_start(window, runtime.window_minutes)

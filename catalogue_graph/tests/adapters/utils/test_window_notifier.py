@@ -453,6 +453,14 @@ def _long_stranded_report() -> WindowCoverageReport:
     )
 
 
+def test_naive_trigger_time_is_read_as_utc(notifier: WindowNotifier) -> None:
+    notifier.notify_if_gaps(
+        report=_long_stranded_report(),
+        trigger_time=datetime(2025, 12, 2, 8, 13),
+    )
+    assert len(MockSNSClient.publish_calls) == 1
+
+
 def test_digest_run_is_judged_in_utc(notifier: WindowNotifier) -> None:
     """10:13+02:00 is the 08:13 UTC digest run; 08:13+02:00 is not."""
     plus_two = timezone(timedelta(hours=2))

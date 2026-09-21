@@ -7,6 +7,7 @@ Tests are parameterized to run with both Axiell and FOLIO configurations.
 from __future__ import annotations
 
 import random
+import time
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -18,6 +19,7 @@ from adapters.steps.oai_pmh import trigger
 from adapters.steps.oai_pmh.trigger import (
     TriggerRuntime,
     build_window_request,
+    generate_job_id,
 )
 from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_store import WindowStore
@@ -57,6 +59,17 @@ def _create_trigger_runtime(
         oai_set_spec=cfg.oai_set_spec,
         adapter_name=cfg.adapter_name,
     )
+
+
+def test_job_id_reads_a_naive_timestamp_as_utc(monkeypatch: pytest.MonkeyPatch) -> None:
+    # astimezone() would read a naive value as local time, an hour off in BST
+    monkeypatch.setenv("TZ", "Europe/London")
+    time.tzset()
+    try:
+        assert generate_job_id(datetime(2025, 7, 1, 12, 13)) == "20250701T1213"
+    finally:
+        monkeypatch.undo()
+        time.tzset()
 
 
 # ---------------------------------------------------------------------------
@@ -641,6 +654,25 @@ class TestStrandedGapRetry:
         runtime = _create_trigger_runtime(store, adapter_runtime_config)
 
         request = build_window_request(runtime=runtime, now=now)
+
+        assert request.window.start_time == gap_start
+        assert request.window.end_time == now
+
+    def test_reads_a_naive_now_as_utc(
+        self,
+        temporary_window_status_table: IcebergTable,
+        adapter_runtime_config: OAIPMHRuntimeConfig,
+    ) -> None:
+        now = datetime(2025, 12, 2, 12, 13, tzinfo=UTC)
+        rows, gap_start = self._rows_with_stranded_gap(now, timedelta(minutes=10))
+        store = populate_window_store(temporary_window_status_table, rows)
+        runtime = _create_trigger_runtime(
+            store, adapter_runtime_config, notifier=_notifier()
+        )
+
+        request = build_window_request(
+            runtime=runtime, now=now.replace(tzinfo=None), job_id="naive"
+        )
 
         assert request.window.start_time == gap_start
         assert request.window.end_time == now

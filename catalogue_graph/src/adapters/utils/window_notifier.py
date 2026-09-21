@@ -7,9 +7,10 @@ coverage gaps, including gap details and trigger context.
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 
 from clients.chatbot_notifier import ChatbotMessage, ChatbotNotifier
+from utils.timezone import ensure_datetime_utc
 
 from .window_reporter import CoverageGap, WindowCoverageReport
 
@@ -114,7 +115,7 @@ class WindowNotifier:
             return gaps
 
         interval = timedelta(minutes=self.run_interval_minutes)
-        trigger_utc = trigger_time.astimezone(UTC)
+        trigger_utc = ensure_datetime_utc(trigger_time)
         is_digest_run = (
             trigger_utc.hour == self.DIGEST_HOUR_UTC
             and trigger_utc.minute < self.run_interval_minutes
@@ -130,7 +131,7 @@ class WindowNotifier:
                 reportable.append(gap)
                 newly_reportable = True
                 continue
-            age = trigger_time - gap.stranded_at
+            age = trigger_utc - gap.stranded_at
             if age < grace:
                 continue
             reportable.append(gap)
