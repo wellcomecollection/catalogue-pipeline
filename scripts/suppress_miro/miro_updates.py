@@ -238,6 +238,19 @@ def _get_work_and_image(miro_id):
     return work, image
 
 
+def _print_dlcs_origin(resp):
+    # Unsuppressing needs this, and DLCS forgets it once the image is deleted
+    try:
+        origin = resp.json()["origin"]
+    except (ValueError, KeyError, TypeError):
+        origin = None
+
+    if origin:
+        print(f"  Origin URL: {origin}")
+    else:
+        print("✗ Could not read the origin URL from the DLCS response", file=sys.stderr)
+
+
 def _check_dlcs_server(miro_id):
     resp = dlcs_api_client().get(
         f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
@@ -249,21 +262,27 @@ def _check_dlcs_server(miro_id):
         print(f"✗ Error checking DLCS server for {miro_id}: {resp.status_code}", file=sys.stderr)
     else:
         print(f"✓ Image {miro_id} found on DLCS server")
-        # Unsuppressing needs this, and DLCS forgets it once the image is deleted
-        print(f"  Origin URL: {resp.json().get('origin')}")
+        _print_dlcs_origin(resp)
 
 
-def _check_ingestor_es_clients():
-    pipeline_date, _, _ = _get_current_pipeline_and_indices()
-    for name, get_client in [
-        ("works", work_ingestor_es_client),
-        ("images", image_ingestor_es_client),
+def check_ingestor_es_clients():
+    """
+    Check the ingestor API keys can write to the indices the API serves.
+    """
+    pipeline_date, works_index, images_index = _get_current_pipeline_and_indices()
+    for get_client, index in [
+        (work_ingestor_es_client, works_index),
+        (image_ingestor_es_client, images_index),
     ]:
         try:
-            get_client(date=pipeline_date)
-            print(f"✓ Elasticsearch write key found for the {name} ingestor")
+            resp = get_client(date=pipeline_date).security.has_privileges(
+                index=[{"names": [index], "privileges": ["index", "delete"]}]
+            )
+            if not resp["has_all_requested"]:
+                raise RuntimeError("the API key lacks index/delete privileges")
+            print(f"✓ Elasticsearch API key can write to {index}")
         except Exception as e:
-            print(f"✗ Could not get an Elasticsearch write key for the {name} ingestor: {e}", file=sys.stderr)
+            print(f"✗ Elasticsearch API key cannot write to {index}: {e}", file=sys.stderr)
 
 
 def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
@@ -497,6 +516,12 @@ def _remove_image_from_dlcs(*, miro_id):
     # Wellcome = customer 2, Miro = space 8
     # See https://wellcome.slack.com/archives/CBT40CMKQ/p1621496639019200?thread_ts=1621495275.018100&cid=CBT40CMKQ
     try:
+        existing = dlcs_api_client().get(
+            f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
+        )
+        if existing.status_code == 200:
+            _print_dlcs_origin(existing)
+
         resp = dlcs_api_client().delete(
             f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
         )
@@ -550,7 +575,6 @@ def run_pre_suppression_checks(miro_id):
     _get_vhs_sourcedata_miro_ddb_item(miro_id)
     work, _ = _get_work_and_image(miro_id)
     _check_mets_adapter_store(work)
-    _check_ingestor_es_clients()
     _check_dlcs_server(miro_id)
 
 
