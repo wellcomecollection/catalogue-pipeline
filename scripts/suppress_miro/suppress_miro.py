@@ -85,6 +85,7 @@ def valid_ids(id_source):
                 raise click.ClickException(
                     f"{single_id} doesn't look like a Miro ID and isn't the identifier of a catalogue record containing a Miro ID"
                 )
+            yield miro_id
 
 
 if __name__ == "__main__":

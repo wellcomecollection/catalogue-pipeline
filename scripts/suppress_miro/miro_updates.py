@@ -39,12 +39,12 @@ def api_es_client(date):
 
 @functools.lru_cache()
 def work_ingestor_es_client(date):
-    return get_ingestor_es_client(date=date, doc_type="work")
+    return get_ingestor_es_client(date=date, doc_type="works")
 
 
 @functools.lru_cache()
 def image_ingestor_es_client(date):
-    return get_ingestor_es_client(date=date, doc_type="image")
+    return get_ingestor_es_client(date=date, doc_type="images")
 
 
 @functools.lru_cache()
@@ -177,6 +177,9 @@ def _get_vhs_sourcedata_miro_ddb_item(miro_id):
         return item
 
 def _check_mets_adapter_store(work):
+    if work is None:
+        return
+
     identifiers = work["_source"]["query"]["identifiers.value"]
     
     for maybeMetsIdentifier in identifiers:
@@ -246,6 +249,21 @@ def _check_dlcs_server(miro_id):
         print(f"✗ Error checking DLCS server for {miro_id}: {resp.status_code}", file=sys.stderr)
     else:
         print(f"✓ Image {miro_id} found on DLCS server")
+        # Unsuppressing needs this, and DLCS forgets it once the image is deleted
+        print(f"  Origin URL: {resp.json().get('origin')}")
+
+
+def _check_ingestor_es_clients():
+    pipeline_date, _, _ = _get_current_pipeline_and_indices()
+    for name, get_client in [
+        ("works", work_ingestor_es_client),
+        ("images", image_ingestor_es_client),
+    ]:
+        try:
+            get_client(date=pipeline_date)
+            print(f"✓ Elasticsearch write key found for the {name} ingestor")
+        except Exception as e:
+            print(f"✗ Could not get an Elasticsearch write key for the {name} ingestor: {e}", file=sys.stderr)
 
 
 def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
@@ -532,6 +550,7 @@ def run_pre_suppression_checks(miro_id):
     _get_vhs_sourcedata_miro_ddb_item(miro_id)
     work, _ = _get_work_and_image(miro_id)
     _check_mets_adapter_store(work)
+    _check_ingestor_es_clients()
     _check_dlcs_server(miro_id)
 
 
