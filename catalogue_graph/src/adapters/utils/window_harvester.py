@@ -97,8 +97,6 @@ class BatchProgress(BaseModel):
     batches_failed: int = 0
     last_error: str | None = None
     attempts: int = 1
-    row_known_absent: bool = False
-    """No status row exists for this window yet, so the first write can append."""
 
     @property
     def final_state(self) -> WindowState:
@@ -161,6 +159,9 @@ class WindowHarvestManager:
         self.record_callback = record_callback
         self.default_tags = dict(default_tags or {})
         self.flush_callback = flush_callback
+        # Windows with no status row, whose first write can skip the
+        # overwrite's delete planning. Only harvest_range fills this.
+        self._absent_window_keys: set[str] = set()
 
     def harvest_range(
         self,
@@ -187,7 +188,7 @@ class WindowHarvestManager:
 
         reused_summaries: list[WindowSummary] = []
         summary_map: dict[str, WindowSummary] = {}
-        new_window_keys: set[str] = set()
+        self._absent_window_keys = set()
 
         if reprocess_successful_windows:
             pending_windows = list(candidate_windows)
@@ -203,8 +204,12 @@ class WindowHarvestManager:
                     reused_summaries.append(existing_summary)
                 else:
                     pending_windows.append(window)
-                    if existing_summary is None:
-                        new_window_keys.add(window.to_iso_string())
+
+            self._absent_window_keys = {
+                window.to_iso_string()
+                for window in pending_windows
+                if window.to_iso_string() not in summary_map
+            }
 
         if max_windows is not None:
             pending_windows = pending_windows[:max_windows]
@@ -217,10 +222,7 @@ class WindowHarvestManager:
         )
 
         new_summaries = self.harvest_windows(
-            pending_windows,
-            summary_map=summary_map,
-            new_window_keys=new_window_keys,
-            flush_every=flush_every,
+            pending_windows, summary_map=summary_map, flush_every=flush_every
         )
 
         combined_summaries = reused_summaries + new_summaries
@@ -232,13 +234,9 @@ class WindowHarvestManager:
         windows: Sequence[IncrementalWindow],
         *,
         summary_map: dict[str, WindowSummary] | None = None,
-        new_window_keys: set[str] | None = None,
         flush_every: int | None = None,
     ) -> list[WindowSummary]:
         """Process windows sequentially, optionally batching store commits.
-
-        ``new_window_keys`` names windows the caller has checked have no status
-        row, which lets their first write skip the overwrite's delete planning.
 
         See ``harvest_range`` for the semantics (and crash trade-offs) of
         ``flush_every``.
@@ -260,7 +258,6 @@ class WindowHarvestManager:
             summary = self.process_window(
                 window,
                 existing_summary=existing_summary,
-                row_known_absent=window.to_iso_string() in (new_window_keys or ()),
                 defer_store_writes=defer_store_writes,
             )
             summaries.append(summary)
@@ -287,7 +284,10 @@ class WindowHarvestManager:
         upserts) rather than marking never-committed windows as successful.
         """
         changeset_id = self.flush_callback() if self.flush_callback else None
-        self.store.upsert_many(pending_summaries)
+        keys = {summary.window_key for summary in pending_summaries}
+        known_new = keys <= self._absent_window_keys
+        self._absent_window_keys -= keys
+        self.store.upsert_many(pending_summaries, known_new=known_new)
         logger.info(
             "Flushed window batch",
             window_count=len(pending_summaries),
@@ -299,7 +299,6 @@ class WindowHarvestManager:
         window: IncrementalWindow,
         *,
         existing_summary: WindowSummary | None = None,
-        row_known_absent: bool = False,
         defer_store_writes: bool = False,
     ) -> WindowSummary:
         """Harvest a single window and return its summary.
@@ -319,9 +318,7 @@ class WindowHarvestManager:
             ids_to_skip = set(existing_summary.record_ids)
         else:
             progress = BatchProgress(
-                window=window,
-                tags=WindowSummaryTags(other_tags=self.default_tags),
-                row_known_absent=row_known_absent and existing_summary is None,
+                window=window, tags=WindowSummaryTags(other_tags=self.default_tags)
             )
             ids_to_skip = set()
 
@@ -348,7 +345,7 @@ class WindowHarvestManager:
 
         summary = progress.to_summary(is_final=True)
         if not defer_store_writes:
-            self._persist(progress, summary)
+            self._persist(summary)
 
         if summary.state == "success":
             logger.info(
@@ -403,14 +400,15 @@ class WindowHarvestManager:
             # Failing to persist the window summary for a specific batch is not a critical error. The only summary
             # which must be persisted (and whose failure to persist should cause the run to fail) is the final one.
             try:
-                self._persist(progress, progress.to_summary(is_final=False))
+                self._persist(progress.to_summary(is_final=False))
                 logger.info("Updated window summary")
             except Exception as e:
                 logger.warning("Failed to persist batch window summary", error=repr(e))
 
-    def _persist(self, progress: BatchProgress, summary: WindowSummary) -> None:
-        # Cleared before the write: a commit that raised may still have landed.
-        known_new, progress.row_known_absent = progress.row_known_absent, False
+    def _persist(self, summary: WindowSummary) -> None:
+        # Forgotten even if the write raises: that costs one overwrite at worst.
+        known_new = summary.window_key in self._absent_window_keys
+        self._absent_window_keys.discard(summary.window_key)
         self.store.upsert(summary, known_new=known_new)
 
     def _records_with_ids(

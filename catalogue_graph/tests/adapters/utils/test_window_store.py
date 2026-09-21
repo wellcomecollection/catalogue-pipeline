@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 from pyiceberg.catalog.sql import SqlCatalog
-from pyiceberg.exceptions import NamespaceAlreadyExistsError
+from pyiceberg.exceptions import CommitFailedException, NamespaceAlreadyExistsError
 from pyiceberg.manifest import ManifestFile
 from pyiceberg.table import Table as IcebergTable
 
@@ -315,16 +315,9 @@ def test_upsert_many_writes_and_replaces_rows(tmp_path: Path) -> None:
     assert stored[t1_key].attempts == 2
 
 
-@pytest.mark.parametrize(
-    ("known_new", "expected_manifest_reads"),
-    # An overwrite reads every earlier commit's manifest: 0 + 1 + 2 + 3.
-    [(True, 0), (False, 6)],
-)
+@pytest.mark.parametrize("known_new", [True, False])
 def test_upsert_known_new_skips_delete_planning(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    known_new: bool,
-    expected_manifest_reads: int,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, known_new: bool
 ) -> None:
     table = _create_table(
         catalog_uri=f"sqlite:///{tmp_path / 'catalog.db'}",
@@ -353,9 +346,37 @@ def test_upsert_known_new_skips_delete_planning(
             _summary(start + timedelta(minutes=15 * offset)), known_new=known_new
         )
 
-    assert manifest_reads == expected_manifest_reads
+    # The overwrite case is the control: it shows the counter sees delete planning.
+    assert (manifest_reads == 0) is known_new
     monkeypatch.undo()
     assert len(store.load_status_map()) == 4
+
+
+def test_known_new_append_from_a_stale_table_is_rejected(tmp_path: Path) -> None:
+    """known_new relies on this: a write since our last read fails the commit."""
+    table_name = f"window_status_{uuid4().hex}"
+    catalog_name = f"catalog_{uuid4().hex}"
+
+    def open_store() -> WindowStore:
+        return WindowStore(
+            _create_table(
+                catalog_uri=f"sqlite:///{tmp_path / 'catalog.db'}",
+                warehouse_path=tmp_path / "warehouse",
+                namespace="harvest",
+                table_name=table_name,
+                catalog_name=catalog_name,
+            )
+        )
+
+    ours, theirs = open_store(), open_store()
+    t1 = datetime(2025, 1, 1, 10, 0, tzinfo=UTC)
+
+    theirs.upsert(_summary(t1))
+    with pytest.raises(CommitFailedException):
+        ours.upsert(_summary(t1, state="failed"), known_new=True)
+
+    ours.table.refresh()
+    assert [row.state for row in ours.list_in_range()] == ["success"]
 
 
 def test_upsert_many_with_empty_list_is_a_noop(tmp_path: Path) -> None:

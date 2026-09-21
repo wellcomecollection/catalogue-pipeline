@@ -115,11 +115,14 @@ class WindowStore:
                     overwrite_filter=EqualTo("window_key", str(record.window_key)),
                 )
 
-    def upsert_many(self, records: list[WindowSummary]) -> None:
+    def upsert_many(
+        self, records: list[WindowSummary], *, known_new: bool = False
+    ) -> None:
         """Replace any existing rows for these windows, in a single Iceberg commit.
 
         Behaves like calling ``upsert`` for each record but costs one commit
         instead of one per row. Records must have distinct window keys.
+        ``known_new`` means every record is new; see ``upsert``.
         """
         if not records:
             return
@@ -133,7 +136,10 @@ class WindowStore:
             schema=WINDOW_STATUS_ARROW_SCHEMA,
         )
         with self._lock, self.table.transaction() as tx:
-            tx.overwrite(arrow, overwrite_filter=In("window_key", window_keys))
+            if known_new:
+                tx.append(arrow)
+            else:
+                tx.overwrite(arrow, overwrite_filter=In("window_key", window_keys))
 
     def list_by_state(self, state: str) -> list[dict[str, Any]]:
         """Return rows filtered by state (e.g. success, failed)."""

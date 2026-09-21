@@ -446,8 +446,9 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
     assert len(client.calls) - initial_calls == 1
 
 
+@pytest.mark.parametrize("flush_every", [None, 3])
 def test_new_windows_skip_delete_planning(
-    tmp_path: Path, monkeypatch: MonkeyPatch
+    tmp_path: Path, monkeypatch: MonkeyPatch, flush_every: int | None
 ) -> None:
     """A catch-up over windows with no status row must not pay for an overwrite."""
     harvester = _build_harvester(tmp_path, [])
@@ -471,7 +472,9 @@ def test_new_windows_skip_delete_planning(
 
     harvester.harvest_windows = harvest_windows_counting_reads  # type: ignore[method-assign]
 
-    summaries = harvester.harvest_range(time_range=_window_range(hours=2))
+    summaries = harvester.harvest_range(
+        time_range=_window_range(hours=2), flush_every=flush_every
+    )
 
     assert len(summaries) == 8
     assert manifest_reads == 0
@@ -523,7 +526,7 @@ def test_reprocessing_successful_windows_leaves_one_row_each(tmp_path: Path) -> 
 def test_first_write_that_raises_is_not_retried_as_an_append(
     tmp_path: Path, monkeypatch: MonkeyPatch
 ) -> None:
-    """A commit that raised may still have landed, so the next write overwrites."""
+    """After a first write of unknown outcome, the next write overwrites."""
     monkeypatch.setattr(harvester_mod, "BATCH_SIZE", 1)
     harvester = _build_harvester(tmp_path, [_make_record("id:1")])
     original_upsert = harvester.store.upsert
@@ -974,11 +977,13 @@ class FlushSpies:
             self.upsert_calls.append(record.model_copy(deep=True))
             original_upsert(record, known_new=known_new)
 
-        def spy_upsert_many(records: list[WindowSummary]) -> None:
+        def spy_upsert_many(
+            records: list[WindowSummary], *, known_new: bool = False
+        ) -> None:
             self.upsert_many_calls.append(
                 [summary.model_copy(deep=True) for summary in records]
             )
-            original_upsert_many(records)
+            original_upsert_many(records, known_new=known_new)
 
         adapter_store.incremental_update = spy_incremental_update  # type: ignore[method-assign]
         harvester.store.upsert = spy_upsert  # type: ignore[method-assign]
@@ -1228,7 +1233,9 @@ def test_flush_every_crash_between_records_and_statuses_recovers_on_rerun(
 
     original_upsert_many = harvester.store.upsert_many
 
-    def crashing_upsert_many(records: list[WindowSummary]) -> None:
+    def crashing_upsert_many(
+        records: list[WindowSummary], *, known_new: bool = False
+    ) -> None:
         raise RuntimeError("simulated crash after record flush")
 
     harvester.store.upsert_many = crashing_upsert_many  # type: ignore[method-assign]
