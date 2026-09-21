@@ -136,9 +136,11 @@ locals {
             ContainerOverrides = [
               {
                 Name = "${var.namespace}-adapter-enrichment"
+                # Only what the step reads: ECS caps overrides at 8192 characters,
+                # and a catch-up's covered_window_keys alone exceed that.
                 Command = [
                   "-m", "adapters.steps.${local.steps_namespace}.folio_enrich",
-                  "--event", "{% $string($states.input) %}",
+                  "--event", "{% $string({'job_id': $states.input.job_id, 'changeset_ids': $states.input.changeset_ids}) %}",
                   "--task-token", "{% $states.context.Task.Token %}"
                 ]
               }
