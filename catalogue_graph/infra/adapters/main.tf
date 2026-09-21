@@ -21,6 +21,7 @@ module "axiell" {
   steps_namespace       = "oai_pmh"
   s3_bucket_name        = "wellcomecollection-platform-axiell-adapter"
   schedule_expression   = "rate(15 minutes)"
+  schedule_enabled      = false # Paused for the OAI-PMH prod switch (platform#6717) until the store rebuild (platform#6541)
   repository_url        = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
   event_bus_name        = aws_cloudwatch_event_bus.event_bus.name
   ecs_cluster_arn       = aws_ecs_cluster.adapters.arn
