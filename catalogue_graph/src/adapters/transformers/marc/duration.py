@@ -26,5 +26,10 @@ def _parse_hhmmss(value: str) -> int | None:
     if not HHMMSS.fullmatch(value):
         return None
 
+    # Strictly speaking, durations with `minutes` > 60 or `seconds` > 60 are invalid. We parse them anyway, mirroring
+    # the Scala transformer. There are a few Sierra works with `minutes` > 60, and parsing them gives the duration the
+    # cataloguer intended. For example, `b28511414` has an invalid duration of `008000`, which parses as 80 minutes,
+    # and its 300 field (`1 videocassette (80 min.)`) corroborates that value.
+    # TODO: Durations are mostly unpopulated in Folio. Revisit this after the next migration.
     hours, minutes, seconds = (int(value[i : i + 2]) for i in range(0, 6, 2))
     return hours * 3600 + minutes * 60 + seconds
