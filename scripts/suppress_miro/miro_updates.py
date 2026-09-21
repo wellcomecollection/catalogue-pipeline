@@ -8,7 +8,7 @@ import functools
 import json
 import sys
 import re
-import os
+import subprocess
 
 import boto3
 import httpx
@@ -396,10 +396,13 @@ def update_miro_image_suppressions_doc():
 
     # create a workflow_dispatch event to trigger the update_miro_suppressions_doc.yml workflow
     # the Github CLI is required
-    os.system(
-        f"gh workflow run update_miro_suppressions_doc.yml "
-        f"--repo wellcomecollection/private "
-        f"--field committer='{git('config', 'user.name')} <{git('config', 'user.email')}>'"
+    committer = f"{git('config', 'user.name')} <{git('config', 'user.email')}>"
+    subprocess.run(
+        [
+            "gh", "workflow", "run", "update_miro_suppressions_doc.yml",
+            "--repo", "wellcomecollection/private",
+            "--field", f"committer={committer}",
+        ]
     )
 
 
