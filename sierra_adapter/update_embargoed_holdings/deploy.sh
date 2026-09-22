@@ -11,6 +11,7 @@ pushd "$ROOT/sierra_adapter/update_embargoed_holdings"
   pip3 install \
     --target . \
     --platform manylinux2014_x86_64 \
+    --python-version 3.12 \
     --only-binary=:all: \
     -r requirements.txt
   zip -r ../update_embargoed_holdings.zip *
