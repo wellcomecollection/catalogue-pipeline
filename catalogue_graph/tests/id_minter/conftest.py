@@ -131,10 +131,14 @@ def make_source_identifier(
 def make_work_doc(
     source_identifier: dict | None = None,
     items: list[dict] | None = None,
+    source_modified_time: str = "2024-09-24T19:26:50Z",
 ) -> dict:
     si = source_identifier or make_source_identifier()
     doc: dict[str, Any] = {
-        "state": {"sourceIdentifier": si},
+        "state": {
+            "sourceIdentifier": si,
+            "sourceModifiedTime": source_modified_time,
+        },
         "data": {"title": "Test Work"},
     }
     if items:
