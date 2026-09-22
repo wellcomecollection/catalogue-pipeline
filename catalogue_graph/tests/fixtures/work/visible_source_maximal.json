@@ -35,23 +35,32 @@
     "lettering": "Lettering",
     "createdDate": {
       "id": {
-        "canonicalId": "canon10",
+        "sourceIdentifier": {
+          "identifierType": {
+            "id": "ID14"
+          },
+          "ontologyType": "catalogue",
+          "value": "val14"
+        },
         "otherIdentifiers": [
           {
-            "identifierType": {"id": "ID110"},
+            "identifierType": {
+              "id": "ID114"
+            },
             "ontologyType": "catalogue",
-            "value": "val110"
+            "value": "val114"
           }
         ],
-        "sourceIdentifier": {
-          "identifierType": {"id": "ID10"},
-          "ontologyType": "catalogue",
-          "value": "val10"
-        },
+        "canonicalId": "canon14",
         "type": "Identified"
       },
-      "label": "Concept Label",
-      "type": "Concept"
+      "label": "1900-1910",
+      "type": "Period",
+      "range": {
+        "from": "1900-01-01",
+        "to": "1910-12-31",
+        "label": null
+      }
     },
     "subjects": [
       {
