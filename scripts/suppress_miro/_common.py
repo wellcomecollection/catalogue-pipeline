@@ -90,4 +90,4 @@ def get_date_from_index_name(index_name):
 
 def git(*args, **kwargs):
     """Run a Git command and return its output."""
-    subprocess.check_call(["git"] + list(args), **kwargs)
+    return subprocess.check_output(["git"] + list(args), **kwargs).decode().strip()

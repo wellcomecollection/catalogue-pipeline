@@ -8,8 +8,10 @@ The `axiell_folio_sync` Lambda can write to either FOLIO instance:
 | `dev` | the `folio-sandbox` EC2 instance, Kong on `:8000` | the catalogue VPC |
 
 The sandbox has no public IP and no inbound ports, so the Lambda has to be attached to the VPC to
-reach it. That is gated behind the `folio_dev_target_enabled` input variable, which is false by
-default, so it has to be turned on for an apply rather than being on all the time.
+reach it. That is gated behind the `folio_dev_target_enabled` local in
+`infra/adapters/folio_dev_sandbox.tf`, which is currently `true`. It is set in code because
+several people apply this root, and a flag passed on the command line would be dropped by the
+next person's apply, taking the hand-filled dev SecureString with it.
 
 ## How a run picks its target
 
@@ -92,17 +94,17 @@ FOLIO's gateway listens on `0.0.0.0:8000` over plain HTTP, so the OKAPI url is
 This takes an apply in each repo, in this order. The sandbox's ingress rule has to reference a
 security group that already exists.
 
-1. In `catalogue_graph/infra/adapters`, apply with the sandbox resources turned on, then read
-   the ENI security group's id:
+1. In `catalogue_graph/infra/adapters`, set `folio_dev_target_enabled = true` in
+   `folio_dev_sandbox.tf` through a pull request, apply, then read the ENI security group's id:
 
    ```bash
-   terraform apply -var 'folio_dev_target_enabled=true'
+   terraform apply
    terraform output -raw axiell_folio_sync_dev_security_group_id
    ```
 
-The variable is false by default, so every other apply leaves the Lambda off the VPC and does not create the dev SecureString. The ENI security group and its egress rule are intentionally kept for a stable id and are harmless when detached.
-   wiring back down, so a session that has to survive someone else's apply needs the variable
-   set in a tfvars file rather than passed on the command line.
+   While the local is `false`, an apply leaves the Lambda off the VPC and does not create the
+   dev SecureString. The ENI security group and its egress rule are kept either way for a
+   stable id, and are harmless when detached.
 
 2. In `folio-dev-server/terraform`, open Kong to that group:
 
@@ -181,9 +183,10 @@ because the url follows the instance's private IP.
 
 ## Rollback
 
-In `catalogue_graph/infra/adapters`, apply without `-var 'folio_dev_target_enabled=true'`, which
-is the default. The Lambda drops its ENIs and returns to the Lambda-managed network, and the dev
-parameter is destroyed with it. One apply, no ordering to observe.
+In `catalogue_graph/infra/adapters`, set `folio_dev_target_enabled = false` in
+`folio_dev_sandbox.tf` through a pull request and apply. The Lambda drops its ENIs and returns to
+the Lambda-managed network, and the dev parameter is destroyed with it, including the credentials
+filled in by hand. One apply, no ordering to observe.
 
 The ENI security group is deliberately left in place rather than destroyed. Lambda deletes its
 ENIs asynchronously, so destroying the group in the same apply that detaches the function fails
