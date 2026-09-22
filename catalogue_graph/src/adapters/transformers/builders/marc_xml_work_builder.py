@@ -10,7 +10,7 @@ from adapters.transformers.marc.identifier import extract_id
 from adapters.transformers.marc.other_identifiers import extract_other_identifiers
 from adapters.transformers.marc.title import extract_title
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Concept, Contributor, Genre, Subject
+from models.pipeline.concept import Contributor, Genre, Period, Subject
 from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Language
@@ -85,7 +85,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
         return None
 
     @property
-    def created_date(self) -> Concept | None:
+    def created_date(self) -> Period | None:
         return None
 
     @property
