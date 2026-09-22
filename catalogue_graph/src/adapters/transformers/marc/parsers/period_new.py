@@ -20,7 +20,8 @@ ORD = r"(?:st|nd|rd|th)"
 YEAR = r"(\d{4})"
 DAY = rf"(\d{{1,2}}){ORD}?"
 QUAL = r"(early|middle|mid|late)"
-# early / mid / late thirds of a century (years 0-39, 30-69, 60-99) and of a decade (0-3, 3-6, 6-9), as the Scala has them
+
+# early / mid / late thirds of a century (years 0-39, 30-69, 60-99) and of a decade (0-3, 3-6, 6-9)
 CENTURY_PART = {
     None: (0, 99),
     "early": (0, 39),
@@ -35,6 +36,7 @@ DECADE_PART = {
     "middle": (3, 6),
     "late": (6, 9),
 }
+
 ROMAN = {"m": 1000, "d": 500, "c": 100, "l": 50, "x": 10, "v": 5, "i": 1}
 SEASON = {
     "spring": (3, 5),
@@ -43,9 +45,10 @@ SEASON = {
     "fall": (9, 11),
     "winter": (12, 2),
 }
+
 Span = tuple[date, date]  # inclusive
 MIN, MAX = date(1, 1, 1), date(9999, 12, 31)
-LATEST_YEAR = 2030  # anything later is a typo or a Hebrew-calendar year
+LATEST_YEAR = 2040  # anything later is a typo or a Hebrew-calendar year
 
 
 def normalise(text: str, source: str) -> str:
@@ -69,11 +72,6 @@ def normalise(text: str, source: str) -> str:
     text = re.sub(r"(?<!\d{4}),", " ", text)
     # a month joined to its year by a hyphen, "Sep-1965": separate them so the hyphen is not read as a range
     text = re.sub(rf"\b{MONTH}-(?=\d{{4}}\b)", r"\1 ", text)
-    # "©" and "cop." mark a copyright year, which is exact: drop the marker
-    text = re.sub(r"\b(©|cop\.)\s*", "", text)
-    if source == "marc":
-        # a publication year then a copyright year, "1890, c1887": keep only the publication year
-        text = re.sub(r"(\d{4}),\s*c\d{4}", r"\1", text)
     # a circa word before a digit or a month name becomes "~"; a bare "c" before digits is copyright in marc
     # (dropped) and circa in axiell (becomes "~")
     text = re.sub(
@@ -108,17 +106,12 @@ def atom(text: str) -> Span | None:
         # circa: a year widens by 10 before and 9 after, a decade or century by 10 at each end;
         # months, days and seasons are not widened
         span = atom(text[1:].strip())
-        return (
-            widen(span, -10, 9 if span[0].year == span[1].year else 10)
-            if span
-            and (span[0].month, span[0].day, span[1].month, span[1].day)
-            == (1, 1, 12, 31)
-            else span
-        )
-    # "1984"
-    if (m := re.fullmatch(YEAR, text)) and 0 < int(m[1]) <= LATEST_YEAR:
-        y = int(m[1])
-        return date(y, 1, 1), date(y, 12, 31)
+        if span and span == widen(span, 0, 0):  # whole years only
+            return widen(span, -10, 9 if span[0].year == span[1].year else 10)
+        return span
+    # "1984", "476"
+    if re.fullmatch(r"\d{3,4}", text) and 0 < int(text) <= LATEST_YEAR:
+        return date(int(text), 1, 1), date(int(text), 12, 31)
     # "1970s", "early 1970s"
     if m := re.fullmatch(rf"(?:{QUAL} )?(\d{{3}})0s", text):
         y, (lo, hi) = int(m[2]) * 10, DECADE_PART[m[1]]
@@ -174,7 +167,7 @@ def parse(text: str, source: str = "marc") -> Span | None:
         return span
     # open start: anything ending in "to X", or "before X", or "-X": "To 1500", "Early works to 1800", "-1953"
     if (m := re.fullmatch(r"(?:[^\d]*\bto|before|-)\s?(.+)", text)) and (
-        span := atom(m[1]) or years(m[1])
+        span := atom(m[1])
     ):
         return MIN, span[1]
     # "pre 1900", "post-1965": ten years before, or nine years after
@@ -183,9 +176,6 @@ def parse(text: str, source: str = "marc") -> Span | None:
     # open end: "after 1817", "1994-"
     if (m := re.fullmatch(r"after (.+)|(.+?)-", text)) and (span := atom(m[1] or m[2])):
         return span[0], MAX
-    # two bare numbers of up to four digits, "476-1268": short years in a span
-    if m := re.fullmatch(r"(\d{1,4})-(\d{3,4})", text):
-        return date(int(m[1]), 1, 1), date(int(m[2]), 12, 31)
     # "X-Y", "between X and Y", "X to Y", or "X/Y" when there is no hyphen: a range of two atoms
     if (
         m := re.fullmatch(r"(?:between )?(.+?)(?:-| and | to )(.+)|(.+?)/(.+)", text)
@@ -194,47 +184,22 @@ def parse(text: str, source: str = "marc") -> Span | None:
     return fallback(text)
 
 
-def years(text: str) -> Span | None:
-    """A bare year of up to four digits, "476"."""
-    if re.fullmatch(r"\d{1,4}", text) and 0 < int(text) <= LATEST_YEAR:
-        return date(int(text), 1, 1), date(int(text), 12, 31)
-    return None
-
-
 def range_of(left: str, right: str) -> Span | None:
-    """Two atoms joined; a side missing its year, month or 'century' borrows it from the other."""
+    """Two atoms joined; a left side without a year borrows the tail of the right side."""
     right = right.replace("centuries", "century")
-    # "19th-20th centuries": the left ordinal gets its "century" from the right
-    if re.fullmatch(rf"(?:{QUAL} )?\d{{1,2}}{ORD}", left) and "cent" in right:
-        left += " century"
-    a, b = atom(left), atom(right)
-    if a and b:
-        return a[0], b[1]
-    year = re.search(YEAR, left) or re.search(YEAR, right)
-    if not year:
-        return None
     # a right side of one or two digits, "1897-99" or "1750-1": complete it from the left year
-    if re.fullmatch(r"\d{1,2}", right):
+    if re.fullmatch(r"\d{1,2}", right) and (year := re.search(YEAR, left)):
         right = year[1][: 4 - len(right)] + right
-    # a bare day on the left, "12-19 january 1990" or "20th-21st april 1920": it gets the right's month and year
-    if re.fullmatch(DAY, left) and (
-        m := re.fullmatch(rf"{DAY} ({MONTH} {YEAR})", right)
-    ):
-        left += " " + m[2]
-    # no year on the left, "may-june 1960": it gets the right's year
-    elif not re.search(YEAR, left):
-        left += " " + year[1]
-    # no year on the right, "1960 may-june": it gets the left's year
-    if not re.search(YEAR, right):
-        right += " " + year[1]
+    # "may-june 1960", "12-19 january 1990", "late 19th-early 20th century": the left takes what the right
+    # has beyond the left's own words, "1960", "january 1990", "century"
+    if not (re.search(YEAR, left) or atom(left)):
+        left = " ".join([left, *(right.split()[len(left.split()) :] or [right])])
     a, b = atom(left) or fallback(left), atom(right) or fallback(right)
     return (a[0], b[1]) if a and b else None
 
 
 def fallback(text: str) -> Span | None:
-    """Span the four-digit years present, if any and if nothing looks like a longer number."""
-    if re.search(r"\d{5}", text):
-        return None
+    """Span the four-digit years present, if any."""
     # exactly four digits, not preceded by "+": "U+2019" in "Coup d U+2019 état, 1797" is not a year
     years = [
         int(y)
