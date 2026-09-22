@@ -219,6 +219,8 @@ mistyped invoke cannot fall through to a full-index mint):
 
 Supplying both `sourceIdentifiers` and a time window is invalid.
 
+Documents are written to `works-identified` with `external_gte` versioning on `sourceModifiedTime`, so a run carrying an older copy of a work cannot overwrite a newer one written by an overlapping run. A write rejected this way is counted as `superseded` in the report and the work is not sent on to the matcher, since the newer copy already was. Re-driving a work at an unchanged source time is accepted.
+
 ### id_minter find_work
 
 The Lambda entry point is `id_minter.steps.find_work.lambda_handler`. It runs at the start of each state machine execution: it scans `works-source` for the ids indexed within the window (or ids/full scope), partitions them into `StepFunctionMintingRequest`s of `partition_size` work ids (default 10,000), writes each partition to S3 and returns small refs for the Map to fan out. An optional `job_id` in the input becomes the base for per-partition job ids (`-p000`, `-p001`, ...).
