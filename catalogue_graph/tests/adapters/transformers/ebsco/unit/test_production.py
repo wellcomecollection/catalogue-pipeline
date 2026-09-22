@@ -545,11 +545,11 @@ def test_field_008_q_date(marc_record: Record) -> None:
 )
 def test_partial_year(marc_record: Record) -> None:
     """
-    A placeholder century in the label is read as the whole century, so the 008 is not needed.
+    A date that can't be parsed as a range falls back to the 008 date.
     """
     production = lone_element(_get_production(marc_record))
     period = lone_element(production.dates)
-    assert period.range.label == "1825-[19--?]"
+    assert period.range.label == "1825-1999"
     assert period.range.from_time == "1825-01-01T00:00:00Z"
     assert period.range.to_time == "1999-12-31T23:59:59.999999999Z"
 

@@ -6,7 +6,11 @@ from itertools import chain
 
 from pymarc.field import Field
 
-from adapters.transformers.marc.parsers.period import parse_period
+from adapters.transformers.marc.parsers.period import (
+    RE_4_DIGIT_DATE_RANGE,
+    RE_NTH_CENTURY,
+    parse_period,
+)
 from adapters.transformers.utils.text_utils import (
     normalise_label,
 )
@@ -76,6 +80,37 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
     return concepts
 
 
+def should_create_range(label: str) -> bool:
+    """
+    The scala transformer doesn't create a range for all parseable periods in subdivisions
+    So far, I have only seen them for:
+
+     Centuries
+     >>> should_create_range("19th century")
+     True
+
+     Ranges consisting of one or two four-digit years
+     >>> should_create_range("1901")
+     True
+     >>> should_create_range("1904-")
+     True
+     >>> should_create_range("1601-1666")
+     True
+
+     But not ranges with three-digit years
+     >>> should_create_range("501-1066")
+     False
+
+     Or ranges with other content
+     >>> should_create_range("Siege of Bielefeld 1820-1856")
+     False
+    """
+    return (
+        RE_NTH_CENTURY.match(label) is not None
+        or RE_4_DIGIT_DATE_RANGE.match(label) is not None
+    )
+
+
 def normalise_period_id_label(label: str) -> str:
     """
     Period id values are preprocessed for standard normalisation
@@ -143,7 +178,7 @@ def build_concept(
         else Unidentifiable()
     )
 
-    if raw_type == "Period":
+    if raw_type == "Period" and should_create_range(label):
         return parse_period(label, identifier=id)
     else:
         return Concept(
