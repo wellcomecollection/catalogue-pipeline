@@ -31,6 +31,7 @@ ATTR_ALIASES: dict[str, str] = {
     "alternative title": "alternative_titles",
     "alternative titles": "alternative_titles",
     "genre": "genres",
+    "language": "languages",
     "subject": "subjects",
     "concept": "concepts",
     "other identifier": "other_identifiers",
