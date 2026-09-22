@@ -1,14 +1,11 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
-  # Re-enabled after the in-freeze id-minter respin (wellcomecollection/platform#6718
-  # phase 7, which also replays the id-minter windows across the quiesce span).
-  # The matcher DB scale-up goes on last, once that replay verifies, for the
-  # switchover reindex (wellcomecollection/platform#6719).
+  # Matcher stage sized for the switchover reindex (wellcomecollection/platform#6719); about $135/day while on.
   reindexing_state = {
     listen_to_reindexer = true
     scale_up_tasks      = true
-    scale_up_matcher_db = false
+    scale_up_matcher_db = true
   }
 
   index_dates = {
