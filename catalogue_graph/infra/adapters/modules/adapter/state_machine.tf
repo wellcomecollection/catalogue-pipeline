@@ -373,15 +373,16 @@ locals {
   # lists the executions of this state machine and stops if another one is
   # still running.
   #
-  # The stopped run fails and surfaces through an alarm, for two reasons:
-  # 1) Someone who triggered it manually (e.g. an ID-mode recovery) must not be
-  #    left thinking it succeeded.
-  # 2) A normal run takes about a minute and two scheduled runs are 15 minutes apart.
-  #    A collision means the previous execution is unusually long, which is something
-  #    we should know about.
+  # The stopped run succeeds with an explanation in its output rather than
+  # failing. A collision only means the previous run is long, which happens
+  # on every bulk update in the source, and each guard failure put the
+  # ExecutionsFailed alarm into ALARM for hours (2026-09-21). Stuck runs are
+  # still caught: the trigger's lag breaker fails once the published cursor
+  # is older than its limit, and the coverage report notifies on gaps.
   #
   # No data is skipped. The trigger resumes from the last published window,
   # so whichever run comes next covers the range the stopped run would have.
+  # Someone who started the run by hand sees the skip in its output.
   guard_states = {
     "Already running?" = {
       Type     = "Task"
@@ -415,9 +416,12 @@ locals {
       Default = local.id_mode_enabled ? "Which mode?" : "Run trigger"
     }
     "Already running" = {
-      Type  = "Fail"
-      Error = "AlreadyRunning"
-      Cause = "{% 'Aborted. Another execution is still running: ' & $string($other_executions) & '. Concurrent runs collide on Iceberg commits. The other run is probably harvesting an unusually large window (e.g. after a bulk update in the source system), or is stuck. The next run will cover the skipped range.' %}"
+      Type = "Succeed"
+      Output = {
+        skipped          = "AlreadyRunning"
+        other_executions = "{% $other_executions %}"
+        reason           = "Another execution is still running. Concurrent runs collide on Iceberg commits. The other run is probably harvesting an unusually large window (e.g. after a bulk update in the source system), or is stuck. The next run will cover the skipped range."
+      }
     }
   }
 
