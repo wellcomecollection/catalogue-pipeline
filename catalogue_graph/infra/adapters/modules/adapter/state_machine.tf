@@ -373,15 +373,14 @@ locals {
   # lists the executions of this state machine and stops if another one is
   # still running.
   #
-  # The stopped run fails and surfaces through an alarm, for two reasons:
-  # 1) Someone who triggered it manually (e.g. an ID-mode recovery) must not be
-  #    left thinking it succeeded.
-  # 2) A normal run takes about a minute and two scheduled runs are 15 minutes apart.
-  #    A collision means the previous execution is unusually long, which is something
-  #    we should know about.
+  # A skipped scheduled run succeeds, with the skip in its output: collisions
+  # are routine after a bulk update in the source, and a Fail here alarms on
+  # every one. No data is skipped, because the trigger resumes from the last
+  # published window. A dead loader is caught by its task heartbeat, after
+  # which the next run reaches the trigger's lag breaker.
   #
-  # No data is skipped. The trigger resumes from the last published window,
-  # so whichever run comes next covers the range the stopped run would have.
+  # An id-mode run still fails when skipped: nothing later re-covers its ids,
+  # so the operator who started it must not see a green execution.
   guard_states = {
     "Already running?" = {
       Type     = "Task"
@@ -406,20 +405,41 @@ locals {
     }
     "Skip if running" = {
       Type = "Choice"
-      Choices = [
-        {
-          Condition = "{% $count($other_executions) > 0 %}"
-          Next      = "Already running"
-        }
-      ]
+      Choices = concat(
+        [
+          for _ in range(local.id_mode_enabled ? 1 : 0) : {
+            Condition = "{% $count($other_executions) > 0 and $exists($states.input.ids) %}"
+            Next      = "Already running (id mode)"
+          }
+        ],
+        [
+          {
+            Condition = "{% $count($other_executions) > 0 %}"
+            Next      = "Already running"
+          }
+        ]
+      )
       Default = local.id_mode_enabled ? "Which mode?" : "Run trigger"
     }
     "Already running" = {
-      Type  = "Fail"
-      Error = "AlreadyRunning"
-      Cause = "{% 'Aborted. Another execution is still running: ' & $string($other_executions) & '. Concurrent runs collide on Iceberg commits. The other run is probably harvesting an unusually large window (e.g. after a bulk update in the source system), or is stuck. The next run will cover the skipped range.' %}"
+      Type = "Succeed"
+      Output = {
+        skipped          = "AlreadyRunning"
+        other_executions = "{% $other_executions %}"
+        reason           = "Skipped: another execution is still running. The next scheduled run covers this range."
+      }
     }
   }
+
+  id_mode_guard_states = merge([
+    for _ in range(local.id_mode_enabled ? 1 : 0) : {
+      "Already running (id mode)" = {
+        Type  = "Fail"
+        Error = "AlreadyRunning"
+        Cause = "{% 'Aborted: another execution is still running (' & $string($other_executions) & '). Start this id run again once it has finished.' %}"
+      }
+    }
+  ]...)
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
@@ -427,6 +447,7 @@ locals {
     StartAt       = "Already running?"
     States = merge(
       local.guard_states,
+      local.id_mode_guard_states,
       local.base_states,
       local.id_mode_states,
       local.reconcile_states,
