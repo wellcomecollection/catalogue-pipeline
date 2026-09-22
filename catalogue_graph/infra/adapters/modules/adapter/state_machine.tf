@@ -426,7 +426,7 @@ locals {
       Output = {
         skipped          = "AlreadyRunning"
         other_executions = "{% $other_executions %}"
-        reason           = "{% 'Another execution is still running: ' & $string($other_executions) & '. Concurrent runs collide on Iceberg commits. The other run is probably harvesting an unusually large window (e.g. after a bulk update in the source system), or is stuck. The next scheduled run covers the skipped range.' %}"
+        reason           = "Skipped: another execution is still running. The next scheduled run covers this range."
       }
     }
   }
@@ -436,7 +436,7 @@ locals {
       "Already running (id mode)" = {
         Type  = "Fail"
         Error = "AlreadyRunning"
-        Cause = "{% 'Aborted. Another execution is still running: ' & $string($other_executions) & '. Concurrent runs collide on Iceberg commits. Nothing re-covers an id run, so start it again once the other execution has finished.' %}"
+        Cause = "{% 'Aborted: another execution is still running (' & $string($other_executions) & '). Start this id run again once it has finished.' %}"
       }
     }
   ]...)
