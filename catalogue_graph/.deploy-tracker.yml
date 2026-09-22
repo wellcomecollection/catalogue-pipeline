@@ -1,32 +1,20 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/wellcomecollection/deploy-tracker/main/schema/deploy-tracker.schema.json
 #
-# Deploy tracker config for the catalogue_graph unit: the lambdas and tasks
-# .github/workflows/catalogue-graph-deploy.yml updates on every merge here.
-# Buildkite tags the same two images only to bootstrap a new pipeline date, and
-# deploys the rest of this repository, which no unit covers yet. Only pull
-# requests touching this directory are reported, and deployments carry task
-# deploy:catalogue_graph. There is no stage and no HTTP surface, so no
-# checkpoints: "deployed" is as far as the tracker can see.
+# The lambdas and tasks .github/workflows/catalogue-graph-deploy.yml updates.
+# No HTTP surface, so no checkpoints: "deployed" is as far as the tracker sees.
 version: 1
 
 slack:
   channel: "#wc-platform-deploys"
 
 services:
-  # No paths, so it claims everything the development service below does not.
-  # A directory added later is reported rather than quietly dropped, which is
-  # the safer way round: a deploy reported that did not ship is visible, and one
-  # that shipped and was not reported is not.
+  # No paths, so anything not listed below is reported. Erring that way round:
+  # a deploy reported that did not ship is visible, the reverse is not.
   catalogue-graph:
 
-  # Not deployed by any environment, which is what holds these back. Neither
-  # lambda.Dockerfile nor task.Dockerfile copies any of them into an image: both
-  # take src/, pyproject.toml, uv.lock and certs/, and the lambda adds the single
-  # file infra/lambda_extensions/secrets_extension.py, which is why the tests
-  # beside it are listed here. infra/adapters/ and infra/graph/ are Terraform
-  # that no workflow applies, so a change there is not shipped by this deploy.
-  # document_generators/ is run by CI and feeds fixtures to catalogue-api, but
-  # nothing in an image imports it.
+  # Deployed by nothing, which is what holds these back. Neither Dockerfile
+  # copies any of them: both take src/, pyproject.toml, uv.lock and certs/, and
+  # the lambda adds infra/lambda_extensions/secrets_extension.py alone.
   development:
     paths:
       - tests/
@@ -37,6 +25,7 @@ services:
       - document_generators/
       - scripts/
       - infra/lambda_extensions/tests/
+      # Terraform, applied by no workflow
       - infra/adapters/
       - infra/graph/
       - docker-compose.yml
