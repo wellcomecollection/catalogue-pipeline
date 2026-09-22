@@ -40,7 +40,10 @@ module "id_minter_rds_2026_07_03" {
 
   master_username = data.aws_ssm_parameter.rds_username.value
 
+  # The prod role is trusted ahead of the switchover repoint
+  # (wellcomecollection/catalogue-api#1008) so that cutover needs no apply here.
   data_api_consumer_role_arns = [
     "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-stage",
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-prod",
   ]
 }
