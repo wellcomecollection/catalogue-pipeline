@@ -134,16 +134,15 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
                 for i in batch_ids
                 if i not in batch_error_ids and i not in batch_superseded_ids
             ]
+            batch_superseded = [i for i in batch_ids if i in batch_superseded_ids]
             self.successful_ids.extend(batch_success_ids)
-            self.superseded_ids.extend(
-                i for i in batch_ids if i in batch_superseded_ids
-            )
+            self.superseded_ids.extend(batch_superseded)
             # A superseded row needs no retry, so it commits alongside the successes.
             self._commit(
                 raw_batch,
                 {
                     self.source_id_to_row_id[i]
-                    for i in batch_success_ids + list(batch_superseded_ids)
+                    for i in batch_success_ids + batch_superseded
                 },
                 {self.source_id_to_row_id[i] for i in batch_error_ids},
             )

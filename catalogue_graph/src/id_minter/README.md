@@ -219,7 +219,7 @@ mistyped invoke cannot fall through to a full-index mint):
 
 Supplying both `sourceIdentifiers` and a time window is invalid.
 
-Documents are written to `works-identified` with `external_gte` versioning on `sourceModifiedTime`, so a run carrying an older copy of a work cannot overwrite a newer one written by an overlapping run. A write rejected this way is counted as `superseded` in the report and the work is not sent on to the matcher, since the newer copy already was. Re-driving a work at an unchanged source time is accepted.
+Documents are written to `works-identified` with `external_gte` versioning on `sourceModifiedTime`, so a run carrying an older copy of a work cannot overwrite a newer one written by an overlapping run. A write rejected this way is counted as `superseded` in the report rather than failed, and the work is still sent on to the matcher, which reads the newer copy. Re-driving a work at an unchanged source time is accepted.
 
 ### id_minter find_work
 

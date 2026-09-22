@@ -50,6 +50,7 @@ class IdMinterResult(BaseModel):
     job_id: str
     window: IncrementalWindow | None = None
     success_count: int
+    superseded_count: int = 0
     failure_count: int
     report_s3_uri: str
 
@@ -114,11 +115,11 @@ def execute(
     )
     transformer.stream_to_index(target_client, target_index)
 
-    if runtime.config.downstream_sns_topic_arn and transformer.successful_ids:
-        publish_ids_to_sns(
-            runtime.config.downstream_sns_topic_arn,
-            transformer.successful_ids,
-        )
+    # Superseded works are forwarded too: the matcher reads the newer copy, and a run
+    # that died between indexing and publishing is covered by the next one.
+    ids_to_publish = transformer.successful_ids + transformer.superseded_ids
+    if runtime.config.downstream_sns_topic_arn and ids_to_publish:
+        publish_ids_to_sns(runtime.config.downstream_sns_topic_arn, ids_to_publish)
 
     return transformer.successful_ids, transformer.superseded_ids, transformer.errors
 
@@ -187,6 +188,7 @@ def handler(
         {
             **event.model_dump(),
             "success_count": len(successful_ids),
+            "superseded_count": len(superseded_ids),
             "failure_count": len(errors),
             "report_s3_uri": report.s3_uri,
         }

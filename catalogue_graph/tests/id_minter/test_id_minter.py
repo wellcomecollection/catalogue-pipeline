@@ -258,6 +258,7 @@ class TestHandlerWithRealResolver:
         assert isinstance(response, IdMinterResult)
         assert response.job_id == "handler-integration"
         assert response.success_count == 1
+        assert response.superseded_count == 0
         assert response.failure_count == 0
         assert get_canonical_status(ids_db, "hand0001") == "assigned"
 
@@ -558,12 +559,14 @@ class TestSnsPublishing:
                 published_ids.add(msg["default"])
         assert published_ids == set(ids)
 
-    def test_superseded_ids_are_not_published(
+    def test_superseded_ids_are_still_published(
         self,
         mock_es: None,
         ids_db: pymysql.connections.Connection,
     ) -> None:
-        """A write rejected by the version guard is not sent to the matcher."""
+        """A write rejected by the version guard is reported as superseded and still
+        forwarded, so the matcher sees the newer copy even if the run that wrote it
+        died before publishing."""
         from tests.mocks import MockElasticsearchClient
 
         seed_free_ids(ids_db, ["sup00001", "sup00002"])
@@ -604,8 +607,7 @@ class TestSnsPublishing:
             for call in MockSNSClient.publish_batch_request_entries
             for e in call["PublishBatchRequestEntries"]
         }
-        assert published == set(successful_ids)
-        assert "sup00001" not in published
+        assert published == {"sup00001", "sup00002"}
 
     def test_no_sns_publish_when_topic_arn_is_none(
         self,

@@ -70,6 +70,12 @@ class IdMintingTransformer(ElasticBaseTransformer):
                 continue
 
             try:
+                self._get_document_version(raw_doc)
+            except Exception as e:
+                self._add_error(e, "version", str(si))
+                continue
+
+            try:
                 mint_requests = extract_source_identifiers(raw_doc)
             except Exception as e:
                 self._add_error(e, "embed", str(si))

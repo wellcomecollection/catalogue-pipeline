@@ -467,13 +467,23 @@ class TestDocumentVersion:
         }
         assert self._transformer()._get_document_version(record) == expected
 
-    def test_epoch_start_is_floored_to_100(self) -> None:
+    def test_epoch_start_is_floored(self) -> None:
         """Miro works are dated 1970-01-01; a version of 0 would never beat the
         internal versions left by earlier unversioned writes."""
         record = {
             "state": {"canonicalId": "x", "sourceModifiedTime": "1970-01-01T00:00:00Z"}
         }
-        assert self._transformer()._get_document_version(record) == 100
+        assert self._transformer()._get_document_version(record) == 1_000_000
+
+    def test_naive_time_is_read_as_utc(self) -> None:
+        naive = {
+            "state": {"canonicalId": "x", "sourceModifiedTime": "2024-09-24T19:26:50"}
+        }
+        aware = {
+            "state": {"canonicalId": "x", "sourceModifiedTime": "2024-09-24T19:26:50Z"}
+        }
+        t = self._transformer()
+        assert t._get_document_version(naive) == t._get_document_version(aware)
 
     def test_later_source_time_gives_higher_version(self) -> None:
         earlier = {
@@ -488,10 +498,38 @@ class TestDocumentVersion:
         t = self._transformer()
         assert t._get_document_version(later) > t._get_document_version(earlier)
 
-    def test_missing_source_modified_time_raises(self) -> None:
-        record = {"state": {"canonicalId": "x"}}
-        with pytest.raises(KeyError):
-            self._transformer()._get_document_version(record)
+    @pytest.mark.parametrize("bad_time", [None, "", "not a date"])
+    def test_bad_source_modified_time_is_a_row_error(
+        self, bad_time: str | None
+    ) -> None:
+        """One unparseable date must not fail the whole partition."""
+        bad = _make_work_doc(_make_source_identifier(value="b1000001"))
+        if bad_time is None:
+            del bad["state"]["sourceModifiedTime"]
+        else:
+            bad["state"]["sourceModifiedTime"] = bad_time
+        good = _make_work_doc(_make_source_identifier(value="b1000002"))
+        resolver = FakeResolver(
+            ids={
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "bad00001",
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000002"
+                ): "good0002",
+            }
+        )
+        MockElasticsearchClient.reset_mocks()
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([bad, good]), resolver=resolver
+        )
+
+        transformer.stream_to_index(es_client, "works-identified-dev")
+
+        assert transformer.successful_ids == ["good0002"]
+        assert [e.stage for e in transformer.errors] == ["version"]
+        assert transformer.errors[0].row_id == "Work[sierra-system-number/b1000001]"
 
     def test_bulk_actions_carry_the_guard(self) -> None:
         record = {

@@ -1,7 +1,7 @@
 import json
 import os
 from collections.abc import Generator, Sequence
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Literal, cast
 
 import backoff
@@ -178,11 +178,22 @@ def is_version_conflict(error: dict[str, Any]) -> bool:
     return False
 
 
+# Floor for external versions. Documents written before external versioning carry
+# Elasticsearch's per-write counter (39 at most in production), which a versioned
+# write must exceed once so the guard can take over.
+EXTERNAL_VERSION_FLOOR = 1_000_000
+
+
+def version_from_datetime(modified_time: datetime) -> int:
+    """External version for a modified time: epoch millis, floored."""
+    if modified_time.tzinfo is None:
+        modified_time = modified_time.replace(tzinfo=UTC)
+    return max(EXTERNAL_VERSION_FLOOR, int(modified_time.timestamp() * 1000))
+
+
 def version_from_modified_time(modified_time: str) -> int:
-    """External version for an ISO 8601 modified time: epoch millis, floored at 100
-    so it always beats a document still on Elasticsearch's default versioning."""
-    version = int(datetime.fromisoformat(modified_time).timestamp() * 1000)
-    return max(100, version)
+    """External version for an ISO 8601 modified time string."""
+    return version_from_datetime(datetime.fromisoformat(modified_time))
 
 
 def generate_operations(
@@ -190,19 +201,10 @@ def generate_operations(
 ) -> Generator[dict]:
     for datum in indexable_data:
         source = json.loads(datum.model_dump_json(exclude_none=True))
-        version = int(datum.get_modified_time().timestamp() * 1000)  # epoch millis
-
-        # Documents whose modified date is set to the start of the Unix epoch will
-        # have a version of 0. We floor this to 100 for backward compatibility with
-        # documents which use Elasticsearch's default versioning (which increments
-        # every time a given document is reindexed). This won't be needed after we
-        # do a full reindex.
-        version = max(100, version)
-
         yield {
             "_index": index_name,
             "_id": datum.get_id(),
             "_source": source,
-            "_version": version,
+            "_version": version_from_datetime(datum.get_modified_time()),
             "_version_type": "external_gte",
         }

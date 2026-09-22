@@ -125,12 +125,13 @@ def handler(
         total_success_count += success_count
         all_es_errors += es_errors
 
-    version_conflicts = [
-        e for e in all_es_errors if utils.elasticsearch.is_version_conflict(e)
-    ]
-    other_errors = [
-        e for e in all_es_errors if not utils.elasticsearch.is_version_conflict(e)
-    ]
+    version_conflicts: list[dict[str, typing.Any]] = []
+    other_errors: list[dict[str, typing.Any]] = []
+    for e in all_es_errors:
+        if utils.elasticsearch.is_version_conflict(e):
+            version_conflicts.append(e)
+        else:
+            other_errors.append(e)
 
     if version_conflicts:
         logger.warning(
