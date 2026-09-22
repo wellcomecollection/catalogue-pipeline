@@ -1,8 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/wellcomecollection/deploy-tracker/main/schema/deploy-tracker.schema.json
 #
-# Deploy tracker config for the catalogue_graph unit: the Python lambdas and
-# tasks the "Catalogue pipeline: Deploy" workflow updates. Only pull requests
-# touching this directory are reported, and deployments carry task
+# Deploy tracker config for the catalogue_graph unit: the lambdas and tasks
+# .github/workflows/catalogue-graph-deploy.yml updates on every merge here.
+# Buildkite tags the same two images only to bootstrap a new pipeline date, and
+# deploys the rest of this repository, which no unit covers yet. Only pull
+# requests touching this directory are reported, and deployments carry task
 # deploy:catalogue_graph. There is no stage and no HTTP surface, so no
 # checkpoints: "deployed" is as far as the tracker can see.
 version: 1
