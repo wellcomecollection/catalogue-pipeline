@@ -1,12 +1,13 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
-  # Quiesced for the switchover clear (wellcomecollection/platform#6718): nothing
-  # downstream of works-source runs until phase 7 re-enables it after the
-  # in-freeze id-minter respin. The legacy transformers keep writing works-source.
+  # Re-enabled after the in-freeze id-minter respin (wellcomecollection/platform#6718
+  # phase 7, which also replays the id-minter windows across the quiesce span).
+  # The matcher DB scale-up goes on last, once that replay verifies, for the
+  # switchover reindex (wellcomecollection/platform#6719).
   reindexing_state = {
-    listen_to_reindexer = false
-    scale_up_tasks      = true # kept from round 3 for the reindex that follows
+    listen_to_reindexer = true
+    scale_up_tasks      = true
     scale_up_matcher_db = false
   }
 
@@ -24,11 +25,11 @@ module "pipeline" {
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
-  enable_adapter_transformer_trigger           = false
+  enable_adapter_transformer_trigger           = true
   disable_calm_transformer_topic_subscriptions = true
-  enable_id_minter_schedule                    = false
-  enable_graph_pipeline_schedule               = false
-  enable_image_inferrer_schedule               = false
+  enable_id_minter_schedule                    = true
+  enable_graph_pipeline_schedule               = true
+  enable_image_inferrer_schedule               = true
 
   pipeline_date = local.pipeline_date // namespaces services
   graph_date    = "2026-07-03"        // namespaces graph database
