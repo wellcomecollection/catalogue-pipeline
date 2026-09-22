@@ -10,6 +10,7 @@ S3_BUCKET="wellcomecollection-platform-infra"
 S3_KEY="lambdas/sierra_adapter/sierra_progress_reporter.zip"
 FUNCTION_NAME="sierra-adapter-20200604-sierra_progress_reporter"
 
+# The agent's pip runs on 3.9 and checks Requires-Python against itself, not --python-version.
 echo "Building sierra_progress_reporter.zip"
 pushd "$ROOT/sierra_adapter/sierra_progress_reporter"
   pip3 install \
@@ -17,6 +18,7 @@ pushd "$ROOT/sierra_adapter/sierra_progress_reporter"
     --platform manylinux2014_x86_64 \
     --python-version 3.12 \
     --only-binary=:all: \
+    --ignore-requires-python \
     -r requirements.txt
 
   zip -r ../sierra_progress_reporter.zip ./*
