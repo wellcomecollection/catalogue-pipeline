@@ -263,7 +263,7 @@ def child_list_member_with_datatable(
         assert member == row[0]
 
 
-def _assert_work_attr(work: SourceWork, attr_phrase: str, expected: str) -> None:
+def _assert_work_attr(work: SourceWork, attr_phrase: str, expected: object) -> None:
     """Assert that a work attribute equals expected."""
     attr = _normalise_attr_phrase(attr_phrase)
     actual = drill_through_dots(work.data, attr)
@@ -286,6 +286,11 @@ def work_attr_is_multiline(work: SourceWork, docstring: str, attr: str) -> None:
     fields) can only be expressed as a docstring.
     """
     _assert_work_attr(work, attr, docstring)
+
+
+@then(parsers.parse("the work's {attr} is {value:d}"))
+def work_attr_is_int(work: SourceWork, attr: str, value: int) -> None:
+    _assert_work_attr(work, attr, value)
 
 
 @then(parsers.parse("the work's {attr} is absent"))
