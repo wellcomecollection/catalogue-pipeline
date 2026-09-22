@@ -73,7 +73,7 @@ def build_runtime(
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
-) -> tuple[list[str], list[TransformationError]]:
+) -> tuple[list[str], list[str], list[TransformationError]]:
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
@@ -120,7 +120,7 @@ def execute(
             transformer.successful_ids,
         )
 
-    return transformer.successful_ids, transformer.errors
+    return transformer.successful_ids, transformer.superseded_ids, transformer.errors
 
 
 def log_runtime_config(
@@ -162,12 +162,13 @@ def handler(
 ) -> IdMinterResult:
     setup_logging(execution_context)
     log_runtime_config(runtime, event)
-    successful_ids, errors = execute(event, runtime=runtime)
+    successful_ids, superseded_ids, errors = execute(event, runtime=runtime)
 
     logger.info(
         "Minting complete",
         job_id=event.job_id,
         success_count=len(successful_ids),
+        superseded_count=len(superseded_ids),
         failure_count=len(errors),
     )
 
@@ -175,6 +176,7 @@ def handler(
         pipeline_date=runtime.config.pipeline_date,
         job_id=event.job_id,
         successful_ids=successful_ids,
+        superseded_ids=superseded_ids,
         errors=errors,
         s3_bucket=runtime.config.s3_bucket,
         s3_prefix=runtime.config.s3_prefix,

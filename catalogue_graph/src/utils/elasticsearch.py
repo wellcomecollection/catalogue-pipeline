@@ -1,6 +1,7 @@
 import json
 import os
 from collections.abc import Generator, Sequence
+from datetime import datetime
 from typing import Any, Literal, cast
 
 import backoff
@@ -163,6 +164,25 @@ def index_es_batch(
     # Since we called `bulk` with `stats_only=False`, we know that es_errors is a list of dicts
     es_errors = cast(list[dict[str, Any]], es_errors)
     return success_count, es_errors
+
+
+def is_version_conflict(error: dict[str, Any]) -> bool:
+    """True if a bulk error is a benign `external_gte` version conflict (the
+    document already has a version >= the one we tried to write)."""
+    for action_result in error.values():
+        if (
+            action_result.get("error", {}).get("type")
+            == "version_conflict_engine_exception"
+        ):
+            return True
+    return False
+
+
+def version_from_modified_time(modified_time: str) -> int:
+    """External version for an ISO 8601 modified time: epoch millis, floored at 100
+    so it always beats a document still on Elasticsearch's default versioning."""
+    version = int(datetime.fromisoformat(modified_time).timestamp() * 1000)
+    return max(100, version)
 
 
 def generate_operations(

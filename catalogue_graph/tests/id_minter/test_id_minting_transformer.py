@@ -66,10 +66,14 @@ def _make_source_identifier(
 def _make_work_doc(
     source_identifier: dict | None = None,
     items: list[dict] | None = None,
+    source_modified_time: str = "2024-09-24T19:26:50Z",
 ) -> dict:
     si = source_identifier or _make_source_identifier()
     doc: dict[str, Any] = {
-        "state": {"sourceIdentifier": si},
+        "state": {
+            "sourceIdentifier": si,
+            "sourceModifiedTime": source_modified_time,
+        },
         "data": {"title": "Test Work"},
     }
     if items:
@@ -290,8 +294,11 @@ class TestStreamToIndex:
         assert indexed["_index"] == "works-identified-dev"
         assert indexed["_id"] == "abcd1234"
         assert indexed["_source"]["state"]["canonicalId"] == "abcd1234"
+        assert indexed["_version"] == 1727206010000  # 2024-09-24T19:26:50Z
+        assert indexed["_version_type"] == "external_gte"
         assert not transformer.errors
         assert transformer.successful_ids == ["abcd1234"]
+        assert transformer.superseded_ids == []
 
     def test_tracks_indexing_errors(self, monkeypatch: pytest.MonkeyPatch) -> None:
         si = _make_source_identifier()
@@ -336,6 +343,169 @@ class TestStreamToIndex:
         assert len(transformer.errors) == 1
         assert transformer.errors[0].stage == "index"
         assert "mapper_parsing_exception" in transformer.errors[0].detail
+
+    def test_version_conflict_is_superseded_not_failed(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A newer copy already in the index is not an error and is not re-notified."""
+        docs = [
+            _make_work_doc(_make_source_identifier(value="b1000001")),
+            _make_work_doc(_make_source_identifier(value="b1000002")),
+        ]
+        resolver = FakeResolver(
+            ids={
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "stale001",
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000002"
+                ): "fresh002",
+            }
+        )
+
+        def fake_bulk(
+            client: Any,
+            actions: Any,
+            raise_on_error: bool = True,
+            stats_only: bool = False,
+        ) -> tuple[int, list]:
+            actions_list = list(actions)
+            return len(actions_list) - 1, [
+                {
+                    "index": {
+                        "_id": "stale001",
+                        "status": 409,
+                        "error": {
+                            "type": "version_conflict_engine_exception",
+                            "reason": "current version [1727206010001] is higher",
+                        },
+                    }
+                }
+            ]
+
+        monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+
+        MockElasticsearchClient.reset_mocks()
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource(docs),
+            resolver=resolver,
+        )
+
+        transformer.stream_to_index(es_client, "works-identified-dev")
+
+        assert transformer.errors == []
+        assert transformer.successful_ids == ["fresh002"]
+        assert transformer.superseded_ids == ["stale001"]
+
+    def test_superseded_ids_reset_between_runs(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        doc = _make_work_doc()
+        resolver = FakeResolver(
+            ids={
+                SourceIdentifierKey(
+                    "Work", "sierra-system-number", "b1000001"
+                ): "abcd1234"
+            }
+        )
+        conflict = {
+            "index": {
+                "_id": "abcd1234",
+                "status": 409,
+                "error": {"type": "version_conflict_engine_exception"},
+            }
+        }
+        responses = [[conflict], []]
+
+        def fake_bulk(client: Any, actions: Any, **kwargs: Any) -> tuple[int, list]:
+            n = len(list(actions))
+            errors = responses.pop(0)
+            return n - len(errors), errors
+
+        monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([doc]), resolver=resolver
+        )
+
+        transformer.stream_to_index(es_client, "works-identified-dev")
+        assert transformer.superseded_ids == ["abcd1234"]
+        assert transformer.successful_ids == []
+
+        transformer.stream_to_index(es_client, "works-identified-dev")
+        assert transformer.superseded_ids == []
+        assert transformer.successful_ids == ["abcd1234"]
+
+
+# ---------------------------------------------------------------------------
+# Tests: document version from sourceModifiedTime
+# ---------------------------------------------------------------------------
+
+
+class TestDocumentVersion:
+    def _transformer(self) -> IdMintingTransformer:
+        return IdMintingTransformer(
+            minting_source=_StubSource([]), resolver=FakeResolver()
+        )
+
+    @pytest.mark.parametrize(
+        ("source_modified_time", "expected"),
+        [
+            ("2019-09-13T08:49:23.967Z", 1568364563967),
+            ("2020-06-19T16:37:48Z", 1592584668000),
+            ("2024-09-24T19:26:50+00:00", 1727206010000),
+            # Nine-digit fractions from the Scala transformers are truncated to millis.
+            ("2021-04-26T23:59:59.999999999Z", 1619481599999),
+        ],
+    )
+    def test_version_is_source_modified_time_in_millis(
+        self, source_modified_time: str, expected: int
+    ) -> None:
+        record = {
+            "state": {"canonicalId": "x", "sourceModifiedTime": source_modified_time}
+        }
+        assert self._transformer()._get_document_version(record) == expected
+
+    def test_epoch_start_is_floored_to_100(self) -> None:
+        """Miro works are dated 1970-01-01; a version of 0 would never beat the
+        internal versions left by earlier unversioned writes."""
+        record = {
+            "state": {"canonicalId": "x", "sourceModifiedTime": "1970-01-01T00:00:00Z"}
+        }
+        assert self._transformer()._get_document_version(record) == 100
+
+    def test_later_source_time_gives_higher_version(self) -> None:
+        earlier = {
+            "state": {"canonicalId": "x", "sourceModifiedTime": "2026-03-20T16:48:06Z"}
+        }
+        later = {
+            "state": {
+                "canonicalId": "x",
+                "sourceModifiedTime": "2026-03-20T16:48:06.001Z",
+            }
+        }
+        t = self._transformer()
+        assert t._get_document_version(later) > t._get_document_version(earlier)
+
+    def test_missing_source_modified_time_raises(self) -> None:
+        record = {"state": {"canonicalId": "x"}}
+        with pytest.raises(KeyError):
+            self._transformer()._get_document_version(record)
+
+    def test_bulk_actions_carry_the_guard(self) -> None:
+        record = {
+            "state": {
+                "canonicalId": "abcd1234",
+                "sourceModifiedTime": "2019-09-13T08:49:23.967Z",
+            }
+        }
+        (action,) = self._transformer()._generate_bulk_load_actions(
+            [record], "works-identified-dev"
+        )
+        assert action["_id"] == "abcd1234"
+        assert action["_version"] == 1568364563967
+        assert action["_version_type"] == "external_gte"
 
 
 # ---------------------------------------------------------------------------

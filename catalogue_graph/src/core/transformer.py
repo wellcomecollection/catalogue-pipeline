@@ -7,9 +7,7 @@ from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 from core.source import BaseSource
-from utils.elasticsearch import (
-    index_es_batch,
-)
+from utils.elasticsearch import index_es_batch, is_version_conflict
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -33,6 +31,8 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
     def __init__(self) -> None:
         super().__init__()
         self.successful_ids: list[str] = []
+        # Rejected by an external_gte version guard: the index already holds a newer copy.
+        self.superseded_ids: list[str] = []
         self.errors: list[TransformationError] = []
         self.error_ids: set[str] = set()
 
@@ -94,6 +94,7 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
     def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
         # Reset run-specific state so manifests reflect the current execution only
         self.successful_ids.clear()
+        self.superseded_ids.clear()
         self.errors.clear()
         self.source_id_to_row_id.clear()
 
@@ -104,8 +105,12 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
             _, es_errors = index_es_batch(es_client, es_actions)
 
             batch_error_ids = set()
+            batch_superseded_ids = set()
             for e in es_errors:
                 source_id = e["index"]["_id"]
+                if is_version_conflict(e):
+                    batch_superseded_ids.add(source_id)
+                    continue
                 batch_error_ids.add(source_id)
 
                 row_id = self.source_id_to_row_id[source_id]
@@ -117,12 +122,29 @@ class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
                 )
                 self._add_error(e, "index", row_id)
 
+            if batch_superseded_ids:
+                logger.warning(
+                    "Skipped documents already at a newer version",
+                    count=len(batch_superseded_ids),
+                )
+
             batch_ids = [a["_id"] for a in es_actions]
-            batch_success_ids = [i for i in batch_ids if i not in batch_error_ids]
+            batch_success_ids = [
+                i
+                for i in batch_ids
+                if i not in batch_error_ids and i not in batch_superseded_ids
+            ]
             self.successful_ids.extend(batch_success_ids)
+            self.superseded_ids.extend(
+                i for i in batch_ids if i in batch_superseded_ids
+            )
+            # A superseded row needs no retry, so it commits alongside the successes.
             self._commit(
                 raw_batch,
-                {self.source_id_to_row_id[i] for i in batch_success_ids},
+                {
+                    self.source_id_to_row_id[i]
+                    for i in batch_success_ids + list(batch_superseded_ids)
+                },
                 {self.source_id_to_row_id[i] for i in batch_error_ids},
             )
 

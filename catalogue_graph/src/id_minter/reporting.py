@@ -16,6 +16,7 @@ class IdMinterReport(PipelineReport):
     pipeline_date: str
     job_id: str
     successful_ids: list[str]
+    superseded_ids: list[str] = []
     errors: list[TransformationError]
 
     s3_bucket: str = Field(exclude=True)
@@ -38,6 +39,7 @@ class IdMinterReport(PipelineReport):
         return [
             PipelineMetric(name="success_count", value=len(self.successful_ids)),
             PipelineMetric(name="failure_count", value=len(self.errors)),
+            PipelineMetric(name="superseded_count", value=len(self.superseded_ids)),
         ]
 
     @property

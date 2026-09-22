@@ -125,7 +125,7 @@ class TestExecuteWithRealResolver:
         runtime = _build_runtime(ids_db)
 
         with stub_transformer_source([doc]):
-            successful_ids, errors = execute(minting_request, runtime=runtime)
+            successful_ids, _, errors = execute(minting_request, runtime=runtime)
 
         assert successful_ids == ["mint0001"]
         assert errors == []
@@ -153,7 +153,7 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source(docs):
-            successful_ids, errors = execute(request, runtime=runtime)
+            successful_ids, _, errors = execute(request, runtime=runtime)
 
         assert len(successful_ids) == 3
         assert errors == []
@@ -184,7 +184,7 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, errors = execute(request, runtime=runtime)
+            successful_ids, _, errors = execute(request, runtime=runtime)
 
         assert successful_ids == ["exist001"]
         assert errors == []
@@ -210,7 +210,7 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, errors = execute(request, runtime=runtime)
+            successful_ids, _, errors = execute(request, runtime=runtime)
 
         assert len(successful_ids) == 1
         assert errors == []
@@ -350,6 +350,7 @@ class TestMetricsPublishing:
         assert "failure_count" in metrics
         assert metrics["success_count"]["value"] == 1
         assert metrics["failure_count"]["value"] == 0
+        assert metrics["superseded_count"]["value"] == 0
         assert metrics["success_count"]["dimensions"] == {
             "pipeline_date": "2024-01-01",
             "pipeline_step": "id_minter",
@@ -557,6 +558,55 @@ class TestSnsPublishing:
                 published_ids.add(msg["default"])
         assert published_ids == set(ids)
 
+    def test_superseded_ids_are_not_published(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """A write rejected by the version guard is not sent to the matcher."""
+        from tests.mocks import MockElasticsearchClient
+
+        seed_free_ids(ids_db, ["sup00001", "sup00002"])
+        docs = [
+            make_work_doc(
+                make_source_identifier("Work", "sierra-system-number", "b7101")
+            ),
+            make_work_doc(
+                make_source_identifier("Work", "sierra-system-number", "b7102")
+            ),
+        ]
+
+        runtime = _build_runtime(ids_db, downstream_sns_topic_arn=TEST_SNS_TOPIC_ARN)
+        request = StepFunctionMintingRequest(
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
+            job_id="sns-superseded",
+        )
+
+        with stub_transformer_source(docs):
+            # Both free ids get assigned, so one of the two docs is sup00001.
+            MockElasticsearchClient.bulk_errors = [
+                {
+                    "index": {
+                        "_id": "sup00001",
+                        "status": 409,
+                        "error": {"type": "version_conflict_engine_exception"},
+                    }
+                }
+            ]
+            successful_ids, superseded_ids, errors = execute(request, runtime=runtime)
+
+        assert errors == []
+        assert set(successful_ids) | set(superseded_ids) == {"sup00001", "sup00002"}
+        assert superseded_ids == ["sup00001"]
+
+        published = {
+            json.loads(e["Message"])["default"]
+            for call in MockSNSClient.publish_batch_request_entries
+            for e in call["PublishBatchRequestEntries"]
+        }
+        assert published == set(successful_ids)
+        assert "sup00001" not in published
+
     def test_no_sns_publish_when_topic_arn_is_none(
         self,
         mock_es: None,
@@ -575,7 +625,7 @@ class TestSnsPublishing:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, _ = execute(request, runtime=runtime)
+            successful_ids, _, _ = execute(request, runtime=runtime)
 
         assert len(successful_ids) == 1
         assert len(MockSNSClient.publish_batch_request_entries) == 0
