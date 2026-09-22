@@ -27,7 +27,9 @@ The dates are inclusive. A single year runs from 1 January to 31 December, a mon
 first to its last day, a single day is the same date twice. For `"unparseable"` and
 `"ambiguous"`, elements 3 and 4 are `null`.
 
-Output exactly one array for every input id. No commentary before or after.
+Output exactly one array for every input id, copying the id verbatim and never repeating,
+altering or inventing one. Arrays only, never objects, with nothing before the first array or
+after the last.
 
 ## Rules
 
@@ -62,8 +64,10 @@ decade 1990 to 1999, `201?` is 2010 to 2019, `19--`, `19??` and `[19 ]` are the 
 A single unknown decade digit inside a range works the same way: `1875-[19--?]` is 1875 to 1999.
 
 **Punctuation.** Ignore square brackets, parentheses, question marks, commas and trailing full
-stops around a date. `[1929]`, `1929?` and `1929.` are all 1929. Brackets adjacent to digits
-are typos: `174[2]` is 1742.
+stops around a date. `[1929]`, `1929?` and `1929.` are all 1929. A question mark after a
+complete year marks doubt and never widens it: `[1920?]` is 1920 to 1920, qualifier `exact`.
+Only a question mark standing in for a missing digit widens, as the Placeholder rule
+describes. Brackets adjacent to digits are typos: `174[2]` is 1742.
 
 **Corrections.** When a bracketed date follows a bare date, or the string contains `i.e.`, the
 bracketed or `i.e.` date is the cataloguer's correction and it alone is the answer. `1709 [1710]`
@@ -79,7 +83,8 @@ it, ignoring any dots or commas between its groups, so `M.DCC.XLV.` is 1745 and 
 **Centuries.** The Nth century runs from year (N-1)00 to (N-1)99, so the 19th century is 1800 to
 1899 and the 1st century is 1 to 99. `early`, `mid`/`middle` and `late` mean years 00-39, 30-69
 and 60-99 of the century. Two qualifiers span from the first's start to the second's end, so `mid
-to late 20th century` is 1930 to 1999. `19th-20th centuries` is 1800 to 1999.
+to late 20th century` is 1930 to 1999. `19th-20th centuries` is 1800 to 1999, and each side of a
+range keeps its own qualifier: `late 19th-early 20th century` is 1860 to 1939.
 
 **Decades.** `1930s` is 1930 to 1939. `early`, `mid` and `late` mean years 0-3, 3-6 and 6-9 of
 the decade. `2000s` is a decade, 2000 to 2009.
@@ -149,6 +154,8 @@ Input:
 {"id": "e14", "source": "marc", "text": "2971 [1792]"}
 {"id": "e15", "source": "marc", "text": "M.DCC.XLV."}
 {"id": "e16", "source": "marc", "text": "1890, c1887"}
+{"id": "e17", "source": "marc", "text": "[1920?]"}
+{"id": "e18", "source": "marc", "text": "[192?]"}
 ```
 
 Output:
@@ -170,6 +177,8 @@ Output:
 ["e14", "range", "1792-01-01", "1792-12-31", "exact", "correction taken"]
 ["e15", "range", "1745-01-01", "1745-12-31", "exact", "roman numeral converted"]
 ["e16", "range", "1890-01-01", "1890-12-31", "exact", "copyright date ignored"]
+["e17", "range", "1920-01-01", "1920-12-31", "exact", null]
+["e18", "range", "1920-01-01", "1929-12-31", "approximate", null]
 ```
 
 # User message, per batch

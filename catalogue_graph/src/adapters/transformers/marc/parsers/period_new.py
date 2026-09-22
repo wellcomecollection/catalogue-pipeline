@@ -1,12 +1,12 @@
 """Period parser: a few exact date atoms, a few range forms, then year extraction.
 
-parse("14 Nov 2007")       -> (date(2007, 11, 14), date(2007, 11, 14))
-parse("1970s")             -> (date(1970, 1, 1), date(1979, 12, 31))
-parse("May-June 1960")     -> (date(1960, 5, 1), date(1960, 6, 30))
-parse("19th-20th centuries") -> (date(1800, 1, 1), date(1999, 12, 31))
-parse("[199?]")            -> (date(1990, 1, 1), date(1999, 12, 31))
+parse("14 Nov 2007")           -> (date(2007, 11, 14), date(2007, 11, 14))
+parse("1970s")                 -> (date(1970, 1, 1), date(1979, 12, 31))
+parse("May-June 1960")         -> (date(1960, 5, 1), date(1960, 6, 30))
+parse("19th-20th centuries")   -> (date(1800, 1, 1), date(1999, 12, 31))
+parse("[199?]")                -> (date(1990, 1, 1), date(1999, 12, 31))
 parse("c.1955-1984", "axiell") -> (date(1945, 1, 1), date(1984, 12, 31))
-parse("Ancient")           -> None
+parse("Ancient")               -> None
 """
 
 import calendar
@@ -72,10 +72,10 @@ def normalise(text: str, source: str) -> str:
     text = re.sub(r"(?<!\d{4}),", " ", text)
     # a month joined to its year by a hyphen, "Sep-1965": separate them so the hyphen is not read as a range
     text = re.sub(rf"\b{MONTH}-(?=\d{{4}}\b)", r"\1 ", text)
-    # a circa word before a digit or a month name becomes "~"; a bare "c" before digits is copyright in marc
-    # (dropped) and circa in axiell (becomes "~")
+    # a circa word before a digit or a month name becomes "~"; a bare "c" before digits, or a lone "c"
+    # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~")
     text = re.sub(
-        r"\b(c\.|ca\.|circa|approximately|about|approx\.?)\s*(?=[\da-z])|\bc\s?(?=\d)",
+        r"\b(c\.|ca\.|circa|approximately|about|approx\.?)\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
         lambda m: "~" if m.group(1) or source == "axiell" else "",
         text,
     )
@@ -158,7 +158,12 @@ def widen(span: Span, before: int, after: int) -> Span:
 
 
 def parse(text: str, source: str = "marc") -> Span | None:
-    """Inclusive (start, end) dates for a period string, or None if it says nothing datable."""
+    """Inclusive (start, end) dates for a period string, or None if it says nothing datable.
+
+    `source` is "marc" or "axiell" and decides what a bare "c" before a year means. In MARC it is a
+    copyright date (AACR2 1.4F6 writes c1963; the 008 codes such dates as a plain single year). In
+    Axiell it means circa: 99% of Axiell c-dates carry 046 dates ten years either side of the year.
+    """
     text = normalise(text, source)
     # "1820 or 1821", "1719, 1720": two dates offered, not a range
     if " or " in text or re.search(r"\d{4}\s*,\s*\D*\d{4}", text):
