@@ -1,6 +1,6 @@
 """Turn a free-text period, "c.1955-1984" or "Mid 19th century", into inclusive (start, end) dates.
 
-The work happens in four stages, each a function below:
+Parsing happens in four stages, each of which is a function below:
 
 1. `normalise` lower-cases the text, takes cataloguers' corrections, rewrites placeholder digits,
    strips noise and marks circa dates with a leading "~".
@@ -20,8 +20,10 @@ parse("Ancient")               -> None
 import calendar
 import re
 from datetime import date
+from typing import Literal
 
 Span = tuple[date, date]
+Source = Literal["marc", "axiell"]
 MIN, MAX = date(1, 1, 1), date(9999, 12, 31)
 LATEST_YEAR = 2040  # anything later is a typo or a Hebrew-calendar year
 
@@ -61,29 +63,26 @@ SEASON = {
 ROMAN = {"m": 1000, "d": 500, "c": 100, "l": 50, "x": 10, "v": 5, "i": 1}
 
 
-def parse(text: str, source: str = "marc") -> Span | None:
+def parse(text: str, source: Source = "marc") -> Span | None:
     """Inclusive (start, end) dates for a period string, or None if it says nothing datable.
 
-    `source` is "marc" or "axiell" and decides what a bare "c" before a year means. In MARC it is a
-    copyright date (AACR2 1.4F6 writes c1963; the 008 codes such dates as a plain single year). In
-    Axiell it means circa: 99% of Axiell c-dates carry 046 dates ten years either side of the year.
+    `source` matters for one thing: a bare "c" before a year. In MARC it marks a copyright date,
+    so "c1963" is the year 1963. In Axiell it means circa, so "c1930" is widened like any other
+    approximate date (see `circa`).
     """
     text = normalise(text, source)
-    # "1820 or 1821", "1719, 1720": two dates offered, not a range. In the FOLIO 008, ascending comma
-    # pairs are coded as a range 72% of the time but as a single date 18%, and descending pairs are
-    # reprint or copyright pairs where the first year alone is right. Neither reading is safe, so
-    # neither is made; production falls back to the 008 range.
+
+    # Two dates like "1820 or 1821" or "1719, 1720" are ambiguous. A comma pair can be a range, but
+    # it can also be a publication year followed by an earlier copyright or original year, so no
+    # range is returned and production falls back to the 008 date where available.
     if " or " in text or re.search(r"\d{4}\s*,\s*\D*\d{4}", text):
         return None
     if span := atom(text):
         return span
     if span := open_range(text):
         return span
-    # "X-Y", "between X and Y", "X to Y", or "X/Y" when there is no hyphen
-    if (
-        m := re.fullmatch(r"(?:between )?(.+?)(?:-| and | to )(.+)|(.+?)/(.+)", text)
-    ) and (span := closed_range(m[1] or m[3], m[2] or m[4])):
-        # a range that runs backwards, "1657-1562", is refused rather than guessed at
+    if span := closed_range(text):
+        # a range that runs backwards, "1657-1562", is dropped
         return span if span[0] <= span[1] else None
     return fallback(text)
 
@@ -91,7 +90,7 @@ def parse(text: str, source: str = "marc") -> Span | None:
 # --- stage 1: normalise -------------------------------------------------------------------------
 
 
-def normalise(text: str, source: str) -> str:
+def normalise(text: str, source: Source) -> str:
     """Lower-case, take corrections, expand placeholders, drop noise and mark circa dates with "~"."""
     text = take_corrections(text.lower())
     text = expand_placeholders(text)
@@ -100,7 +99,7 @@ def normalise(text: str, source: str) -> str:
     # a whole string of roman numerals starting with m and containing c, "m.dcc.xlv": a year of 1100 to 1999
     if re.fullmatch(r"\s*m[mdclxvi.,\s]*c[mdclxvi.,\s]*", text):
         text = str(roman(text))
-    # "~" before early / mid / late, "c. early 20th century": the subrange is the answer, no widening
+    # "c. early 20th century": the early / mid / late part is kept and the circa marker dropped, so it is not widened
     text = re.sub(r"~(?=early|mid|late)", "", text)
     text = re.sub(r"\s*-\s*", "-", text)
     return re.sub(r"\s+", " ", text).strip(" .")
@@ -136,8 +135,8 @@ def strip_noise(text: str) -> str:
     return re.sub(rf"\b{MONTH}-(?=\d{{4}}\b)", r"\1 ", text)
 
 
-def mark_circa(text: str, source: str) -> str:
-    """Replace circa markers with "~" and drop copyright markers, so `atom` sees one convention."""
+def mark_circa(text: str, source: Source) -> str:
+    """Replace circa markers with "~" and drop copyright markers."""
     # a circa word before a digit or a month name becomes "~"; a bare "c" before digits, or a lone "c"
     # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~")
     return re.sub(
@@ -278,8 +277,13 @@ def open_range(text: str) -> Span | None:
     return None
 
 
-def closed_range(left: str, right: str) -> Span | None:
+def closed_range(text: str) -> Span | None:
     """Two atoms joined, from the start of the left one to the end of the right one."""
+    # "X-Y", "between X and Y", "X to Y", or "X/Y" when there is no hyphen
+    m = re.fullmatch(r"(?:between )?(.+?)(?:-| and | to )(.+)|(.+?)/(.+)", text)
+    if not m:
+        return None
+    left, right = m[1] or m[3], m[2] or m[4]
     right = complete_short_year(left, right.replace("centuries", "century"))
     left = borrow_from_right(left, right)
     a, b = atom(left) or fallback(left), atom(right) or fallback(right)

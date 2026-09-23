@@ -1,6 +1,6 @@
 """A Period concept from a free-text date, using the period parser for its range."""
 
-from adapters.transformers.marc.parsers.period import parse
+from adapters.transformers.marc.parsers.period import Source, parse
 from models.pipeline.concept import DateTimeRange, Period
 from models.pipeline.identifier import Identifiable, Unidentifiable
 
@@ -8,9 +8,9 @@ from models.pipeline.identifier import Identifiable, Unidentifiable
 def parse_period(
     label: str,
     identifier: Identifiable | Unidentifiable | None = None,
-    source: str = "marc",
+    source: Source = "marc",
 ) -> Period:
-    """A Period for the label, with a range when the label can be read as dates; `source` as in `parse`."""
+    """A Period for the label, with a range when the label can be read as dates."""
     span = parse(label, source)
     date_range = (
         DateTimeRange(
