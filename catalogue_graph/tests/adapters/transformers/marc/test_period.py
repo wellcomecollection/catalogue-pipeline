@@ -2,7 +2,8 @@ from datetime import date
 
 import pytest
 
-from adapters.transformers.marc.parsers.period import parse, parse_period
+from adapters.transformers.marc.parsers.period import parse
+from adapters.transformers.marc.period import parse_period
 from models.pipeline.identifier import Identifiable
 
 
@@ -52,6 +53,10 @@ from models.pipeline.identifier import Identifiable
         ("M.DCC.XLV.", date(1745, 1, 1), date(1745, 12, 31)),
         ("MDCCLXXXVIII.-MDCCLXXXIX. [1788-1789]", date(1788, 1, 1), date(1789, 12, 31)),
         ("Revolution, 1775-1783", date(1775, 1, 1), date(1783, 12, 31)),
+        ("29 February 1975", date(1975, 1, 1), date(1975, 12, 31)),
+        ("31/04/1994", date(1994, 1, 1), date(1994, 12, 31)),
+        ("1/94 [January 1994]", date(1994, 1, 1), date(1994, 12, 31)),
+        ("c. 005", date(1, 1, 1), date(14, 12, 31)),
         ("c1977.", date(1977, 1, 1), date(1977, 12, 31)),
         ("©1981", date(1981, 1, 1), date(1981, 12, 31)),
         ("[ca. 1750?]", date(1740, 1, 1), date(1759, 12, 31)),

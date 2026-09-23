@@ -13,7 +13,7 @@ from adapters.transformers.axiell.dates import (
 from adapters.transformers.marc.common import (
     non_empty_subfields,
 )
-from adapters.transformers.marc.parsers.period import parse_period
+from adapters.transformers.marc.period import parse_period
 from models.pipeline.concept import DateTimeRange, Period
 from models.pipeline.identifier import Unidentifiable
 from models.pipeline.production import ProductionEvent
