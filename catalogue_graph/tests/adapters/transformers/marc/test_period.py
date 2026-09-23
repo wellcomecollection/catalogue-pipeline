@@ -67,6 +67,7 @@ from models.pipeline.identifier import Identifiable
         ("c1977.", date(1977, 1, 1), date(1977, 12, 31)),
         ("©1981", date(1981, 1, 1), date(1981, 12, 31)),
         ("[ca. 1750?]", date(1740, 1, 1), date(1759, 12, 31)),
+        ("ca. c. 1750", date(1740, 1, 1), date(1759, 12, 31)),
         ("[approximately 1800?]", date(1790, 1, 1), date(1809, 12, 31)),
         ("c.1960s", date(1950, 1, 1), date(1979, 12, 31)),
         ("c. 18th century", date(1690, 1, 1), date(1809, 12, 31)),

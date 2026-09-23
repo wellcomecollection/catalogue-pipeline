@@ -108,8 +108,8 @@ def normalise(text: str, source: Source) -> str:
 
 def convert_roman_numerals(text: str) -> str:
     """Write each roman numeral of two or more letters as a number, "anno m.dcc.xlv" as "anno 1745"."""
-    # Identify candidate roman numerals via a regex and send them to `roman_numeral`, which rejects
-    # invalid candidates like "civil" or "mill".
+    # Identify candidate roman numerals via a regex and send them to `roman_numeral`, which converts
+    # them to integers, returning `None` for invalid candidates like "civil" or "mill".
     return re.sub(
         r"\b[mdclxvi][mdclxvij.,\s]*[mdclxvij]\b",
         lambda m: str(roman_numeral(m[0]) or m[0]),
@@ -153,11 +153,13 @@ def mark_circa(text: str, source: Source) -> str:
     """Replace circa markers with "~" and drop copyright markers."""
     # a circa word before a digit or a month name becomes "~"; a bare "c" before digits, or a lone "c"
     # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~")
-    return re.sub(
+    text = re.sub(
         r"\b(c\.|ca\.|circa|approximately|about|approx\.?)\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
         lambda m: "~" if m.group(1) or source == "axiell" else "",
         text,
     )
+    # a doubled marker, "ca. c. 1750", is still one circa
+    return re.sub(r"~+", "~", text)
 
 
 # --- stage 2: atoms -------------------------------------------------------------------------------
@@ -289,9 +291,11 @@ def closed_range(text: str) -> Span | None:
     m = re.fullmatch(r"(?:between )?(.+?)(?:-| and | to )(.+)|(.+?)/(.+)", text)
     if not m:
         return None
-    left, right = m[1] or m[3], m[2] or m[4]
+    left, right = (m[1] or m[3]).strip(" ."), (m[2] or m[4]).strip(" .")
     right = complete_short_year(left, right.replace("centuries", "century"))
     left = borrow_from_right(left, right)
+    if left.endswith(right) and (span := atom(left)):
+        return span  # "mid-1970s": the hyphen joined one expression, not two
     a, b = atom(left) or fallback(left), atom(right) or fallback(right)
     return (a[0], b[1]) if a and b else None
 
