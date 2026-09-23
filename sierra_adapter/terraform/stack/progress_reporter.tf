@@ -9,4 +9,6 @@ module "progress_reporter" {
   lambda_error_alarm_arn = var.lambda_error_alarm_arn
 
   namespace = local.namespace_hyphen
+
+  skipped_resource_types = var.progress_reporter_skipped_resource_types
 }

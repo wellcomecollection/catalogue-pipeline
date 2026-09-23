@@ -43,4 +43,6 @@ module "sierra-adapter-20200604" {
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
   elastic_cloud_vpce_sg_id = data.terraform_remote_state.shared_infra.outputs["ec_platform_privatelink_sg_id"]
+
+  progress_reporter_skipped_resource_types = var.sierra_bibs_updates_enabled ? [] : ["bibs"]
 }
