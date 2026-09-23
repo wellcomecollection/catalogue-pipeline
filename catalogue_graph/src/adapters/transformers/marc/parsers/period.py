@@ -105,6 +105,14 @@ def end_of_month(year: int, month: int) -> date:
     return date(year, month, calendar.monthrange(year, month)[1])
 
 
+def single_day(year: int, month: int, day: int) -> Span | None:
+    try:
+        d = date(year, month, day)
+    except ValueError:  # "29 February 1975", "31/04/1994"
+        return None
+    return d, d
+
+
 # Each atom matches a whole string and returns an inclusive (start, end) span.
 def atom(text: str) -> Span | None:
     if text.startswith("~"):
@@ -118,14 +126,16 @@ def atom(text: str) -> Span | None:
     if re.fullmatch(r"\d{3,4}", text) and 0 < int(text) <= LATEST_YEAR:
         return date(int(text), 1, 1), date(int(text), 12, 31)
     # "1970s", "early 1970s"
-    if m := re.fullmatch(rf"(?:{QUAL} )?(\d{{3}})0s", text):
+    if (m := re.fullmatch(rf"(?:{QUAL} )?(\d{{3}})0s", text)) and int(m[2]) > 0:
         y, (lo, hi) = int(m[2]) * 10, DECADE_PART[m[1]]
         return date(y + lo, 1, 1), date(y + hi, 12, 31)
     # "19th century", "19 cent.", "mid-19th century", "mid to late 19th century"
-    if m := re.fullmatch(
-        rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL} )?(\d{{1,2}}){ORD}? ?cent(?:ury|\.)?",
-        text,
-    ):
+    if (
+        m := re.fullmatch(
+            rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL} )?(\d{{1,2}}){ORD}? ?cent(?:ury|\.)?",
+            text,
+        )
+    ) and int(m[3]) > 0:
         start = (int(m[3]) - 1) * 100
         # "mid to late" spans mid's start to late's end
         lo, hi = CENTURY_PART[m[1] or m[2]][0], CENTURY_PART[m[2] or m[1]][1]
@@ -141,25 +151,23 @@ def atom(text: str) -> Span | None:
         return date(y, mo, 1), end_of_month(y, mo)
     # "14 nov 2007", "14th nov. 2007"
     if m := re.fullmatch(rf"{DAY} {MONTH} {YEAR}", text):
-        d = date(int(m[3]), MONTHS[m[2]], int(m[1]))
-        return d, d
+        return single_day(int(m[3]), MONTHS[m[2]], int(m[1]))
     # "november 14 2007" (the comma is already gone)
     if m := re.fullmatch(rf"{MONTH} {DAY} {YEAR}", text):
-        d = date(int(m[3]), MONTHS[m[1]], int(m[2]))
-        return d, d
+        return single_day(int(m[3]), MONTHS[m[1]], int(m[2]))
     # "1851 nov 27"
     if m := re.fullmatch(rf"{YEAR} {MONTH} {DAY}", text):
-        d = date(int(m[1]), MONTHS[m[2]], int(m[3]))
-        return d, d
+        return single_day(int(m[1]), MONTHS[m[2]], int(m[3]))
     # "14/11/2007", "14.11.2007": day first
     if m := re.fullmatch(r"(\d{1,2})[/.](\d{1,2})[/.](\d{4})", text):
-        d = date(int(m[3]), int(m[2]), int(m[1]))
-        return d, d
+        return single_day(int(m[3]), int(m[2]), int(m[1]))
     return None
 
 
 def widen(span: Span, before: int, after: int) -> Span:
-    return date(span[0].year + before, 1, 1), date(span[1].year + after, 12, 31)
+    start_year = max(span[0].year + before, MIN.year)
+    end_year = min(span[1].year + after, MAX.year)
+    return date(start_year, 1, 1), date(end_year, 12, 31)
 
 
 def parse(text: str, source: str = "marc") -> Span | None:
@@ -170,7 +178,10 @@ def parse(text: str, source: str = "marc") -> Span | None:
     Axiell it means circa: 99% of Axiell c-dates carry 046 dates ten years either side of the year.
     """
     text = normalise(text, source)
-    # "1820 or 1821", "1719, 1720": two dates offered, not a range
+    # "1820 or 1821", "1719, 1720": two dates offered, not a range. In the FOLIO 008, ascending comma
+    # pairs are coded as a range 72% of the time but as a single date 18%, and descending pairs are
+    # reprint or copyright pairs where the first year alone is right. Neither reading is safe, so
+    # neither is made; production falls back to the 008 range.
     if " or " in text or re.search(r"\d{4}\s*,\s*\D*\d{4}", text):
         return None
     if span := atom(text):
