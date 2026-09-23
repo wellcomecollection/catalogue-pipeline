@@ -163,7 +163,12 @@ def widen(span: Span, before: int, after: int) -> Span:
 
 
 def parse(text: str, source: str = "marc") -> Span | None:
-    """Inclusive (start, end) dates for a period string, or None if it says nothing datable."""
+    """Inclusive (start, end) dates for a period string, or None if it says nothing datable.
+
+    `source` is "marc" or "axiell" and decides what a bare "c" before a year means. In MARC it is a
+    copyright date (AACR2 1.4F6 writes c1963; the 008 codes such dates as a plain single year). In
+    Axiell it means circa: 99% of Axiell c-dates carry 046 dates ten years either side of the year.
+    """
     text = normalise(text, source)
     # "1820 or 1821", "1719, 1720": two dates offered, not a range
     if " or " in text or re.search(r"\d{4}\s*,\s*\D*\d{4}", text):
@@ -221,11 +226,7 @@ def parse_period(
     identifier: Identifiable | Unidentifiable | None = None,
     source: str = "marc",
 ) -> Period:
-    """A Period for the label, with a range when the label can be read as dates.
-
-    `source` is "marc" or "axiell": a bare "c" before a year is a copyright date in MARC
-    and means circa in Axiell.
-    """
+    """A Period for the label, with a range when the label can be read as dates; `source` as in `parse`."""
     span = parse(label, source)
     date_range = (
         DateTimeRange(
