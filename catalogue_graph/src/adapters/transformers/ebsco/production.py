@@ -10,7 +10,7 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.transformers.ebsco.parsers.field008 import Field008
-from adapters.transformers.marc.parsers.period import parse_period
+from adapters.transformers.marc.period import parse_period
 from adapters.transformers.utils.text_utils import normalise_label
 from models.pipeline.concept import Concept
 from models.pipeline.production import ProductionEvent

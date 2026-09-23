@@ -6,7 +6,7 @@ from itertools import chain
 
 from pymarc.field import Field
 
-from adapters.transformers.marc.parsers.period import parse_period
+from adapters.transformers.marc.period import parse_period
 from adapters.transformers.utils.text_utils import (
     normalise_label,
 )
