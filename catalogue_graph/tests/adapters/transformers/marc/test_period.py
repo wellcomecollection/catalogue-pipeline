@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from adapters.transformers.marc.parsers.period import parse
+from adapters.transformers.marc.parsers.period import Source, parse
 from adapters.transformers.marc.period import parse_period
 from models.pipeline.identifier import Identifiable
 
@@ -51,6 +51,13 @@ from models.pipeline.identifier import Identifiable
         ("1709 [1710]", date(1710, 1, 1), date(1710, 12, 31)),
         ("5782 [i.e. 1782]", date(1782, 1, 1), date(1782, 12, 31)),
         ("M.DCC.XLV.", date(1745, 1, 1), date(1745, 12, 31)),
+        ("MDLXII", date(1562, 1, 1), date(1562, 12, 31)),
+        ("Anno M.D.XXXI.", date(1531, 1, 1), date(1531, 12, 31)),
+        ("M.DCC.XLV.-M.DCC.L.", date(1745, 1, 1), date(1750, 12, 31)),
+        ("MDCCLXXVIII. [1787]", date(1787, 1, 1), date(1787, 12, 31)),
+        ("MDCCXCVI, 1796.", date(1796, 1, 1), date(1796, 12, 31)),
+        ("1854 [ie 1855]", date(1855, 1, 1), date(1855, 12, 31)),
+        ("Anno dñi M.D.xxviij [1528]", date(1528, 1, 1), date(1528, 12, 31)),
         ("MDCCLXXXVIII.-MDCCLXXXIX. [1788-1789]", date(1788, 1, 1), date(1789, 12, 31)),
         ("Revolution, 1775-1783", date(1775, 1, 1), date(1783, 12, 31)),
         ("29 February 1975", date(1975, 1, 1), date(1975, 12, 31)),
@@ -102,7 +109,7 @@ def test_parse_nothing(text: str) -> None:
     ],
 )
 def test_bare_c_is_copyright_in_marc_and_circa_in_axiell(
-    source: str, start: date, end: date
+    source: Source, start: date, end: date
 ) -> None:
     assert parse("c1959", source) == (start, end)
 

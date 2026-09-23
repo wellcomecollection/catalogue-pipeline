@@ -2,8 +2,8 @@
 
 Parsing happens in four stages, each of which is a function below:
 
-1. `normalise` lower-cases the text, takes cataloguers' corrections, rewrites placeholder digits,
-   strips noise and marks circa dates with a leading "~".
+1. `normalise` lower-cases the text, writes roman numerals as numbers, takes cataloguers'
+   corrections, rewrites placeholder digits, strips noise and marks circa dates with a leading "~".
 2. `atom` reads a whole string as one date expression: a year, decade, century, season, month or day.
 3. `open_range` and `closed_range` read strings with one or two atoms joined by "to", "-", "and" or "/".
 4. `fallback` spans whatever four-digit years are left when nothing else matched.
@@ -21,6 +21,8 @@ import calendar
 import re
 from datetime import date
 from typing import Literal
+
+from adapters.transformers.marc.parsers.roman import roman_numeral
 
 Span = tuple[date, date]
 Source = Literal["marc", "axiell"]
@@ -60,7 +62,6 @@ SEASON = {
     "fall": (9, 11),
     "winter": (12, 2),
 }
-ROMAN = {"m": 1000, "d": 500, "c": 100, "l": 50, "x": 10, "v": 5, "i": 1}
 
 
 def parse(text: str, source: Source = "marc") -> Span | None:
@@ -74,8 +75,9 @@ def parse(text: str, source: Source = "marc") -> Span | None:
 
     # Two dates like "1820 or 1821" or "1719, 1720" are ambiguous. A comma pair can be a range, but
     # it can also be a publication year followed by an earlier copyright or original year, so no
-    # range is returned and production falls back to the 008 date where available.
-    if " or " in text or re.search(r"\d{4}\s*,\s*\D*\d{4}", text):
+    # range is returned and production falls back to the 008 date where available. The same year
+    # twice, "MDCCXCVI, 1796", is not a pair.
+    if " or " in text or re.search(r"(\d{4})\s*,\s*\D*(?!\1)\d{4}", text):
         return None
     if span := atom(text):
         return span
@@ -91,26 +93,38 @@ def parse(text: str, source: Source = "marc") -> Span | None:
 
 
 def normalise(text: str, source: Source) -> str:
-    """Lower-case, take corrections, expand placeholders, drop noise and mark circa dates with "~"."""
-    text = take_corrections(text.lower())
+    """Lower-case, write roman numerals as numbers, take corrections, expand placeholders, drop noise
+    and mark circa dates with "~"."""
+    text = convert_roman_numerals(text.lower())
+    text = take_corrections(text)
     text = expand_placeholders(text)
     text = strip_noise(text)
     text = mark_circa(text, source)
-    # a whole string of roman numerals starting with m and containing c, "m.dcc.xlv": a year of 1100 to 1999
-    if re.fullmatch(r"\s*m[mdclxvi.,\s]*c[mdclxvi.,\s]*", text):
-        text = str(roman(text))
     # "c. early 20th century": the early / mid / late part is kept and the circa marker dropped, so it is not widened
     text = re.sub(r"~(?=early|mid|late)", "", text)
     text = re.sub(r"\s*-\s*", "-", text)
     return re.sub(r"\s+", " ", text).strip(" .")
 
 
+def convert_roman_numerals(text: str) -> str:
+    """Write each roman numeral of two or more letters as a number, "anno m.dcc.xlv" as "anno 1745"."""
+    # Identify candidate roman numerals via a regex and send them to `roman_numeral`, which rejects
+    # invalid candidates like "civil" or "mill".
+    return re.sub(
+        r"\b[mdclxvi][mdclxvij.,\s]*[mdclxvij]\b",
+        lambda m: str(roman_numeral(m[0]) or m[0]),
+        text,
+    )
+
+
 def take_corrections(text: str) -> str:
     """Keep only the cataloguer's correction where one is given."""
-    # everything up to and including "i.e." goes: the correction after it replaces the transcribed date
-    text = re.sub(r"^.*?\bi\.\s?e\.", "", text)
-    # a year followed by a bracketed year, "1709 [1710]" or "1709. [1710?]": keep only the bracketed correction
-    return re.sub(r"\b\d{4}[.,]?\s*\[(\d{4})\??\]", r"[\1]", text)
+    # everything up to and including "i.e.", also written "ie." or "i.e", goes when a date follows it:
+    # the correction replaces the transcribed date
+    text = re.sub(r"^.*?\bi\.?\s?e\b\.?(?=.*\d)", "", text)
+    # a number followed by a bracketed year, "1709 [1710]", "1709. [1710?]" or "[1606] [1706]": keep only
+    # the bracketed correction. A hyphen between them, "1700-[1703]", is a range, not a correction.
+    return re.sub(r"\b\d{3,4}[.,'\s\]]*\[(\d{4})\??\]", r"[\1]", text)
 
 
 def expand_placeholders(text: str) -> str:
@@ -143,14 +157,6 @@ def mark_circa(text: str, source: Source) -> str:
         r"\b(c\.|ca\.|circa|approximately|about|approx\.?)\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
         lambda m: "~" if m.group(1) or source == "axiell" else "",
         text,
-    )
-
-
-def roman(text: str) -> int:
-    values = [ROMAN[ch] for ch in text if ch in ROMAN]
-    return sum(
-        -v if i + 1 < len(values) and v < values[i + 1] else v
-        for i, v in enumerate(values)
     )
 
 
