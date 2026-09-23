@@ -9,5 +9,6 @@ variable "skipped_resource_types" {
   type    = list(string)
   default = []
 }
+
 variable "namespace" {
 }
