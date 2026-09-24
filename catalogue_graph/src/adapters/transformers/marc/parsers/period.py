@@ -35,8 +35,8 @@ def plausible(year: int) -> bool:
     return 0 < year <= LATEST_YEAR
 
 
-# The vocabulary, and the regex fragments built from it. MONTH matches full and abbreviated English
-# names with an optional dot.
+# The vocabulary, and the regex fragments built from it.
+# MONTH matches full and abbreviated English names with an optional dot.
 MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
 MONTHS |= {m.lower(): i for i, m in enumerate(calendar.month_abbr) if m} | {"sept": 9}
 SEASONS = {
@@ -52,9 +52,7 @@ DATE_WORDS = set(MONTHS) | set(SEASONS) | QUALIFIERS | RANGE_WORDS
 
 MONTH = "(" + "|".join(sorted(MONTHS, key=len, reverse=True)) + r")\.?"
 QUAL = "(" + "|".join(sorted(QUALIFIERS, key=len, reverse=True)) + ")"
-QUALIFIED = (
-    rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL}[ -])?"  # "mid ", "mid-", "mid to late "
-)
+QUALIFIED = rf"(?:{QUAL}\.?(?:[ -]?to[ -]|[ -]))?(?:{QUAL}\.?[ -])?"  # "mid ", "mid-", "mid to late "
 ORD = r"(?:st|nd|rd|th)"
 YEAR = r"(\d{4})"
 DAY = rf"(\d{{1,2}}){ORD}?"
@@ -117,12 +115,12 @@ def drop_leading_words(text: str) -> str:
     """Drop leading words that are not part of the date, so "revolution 1775-1783" reads as
     "1775-1783", "printed in october 1789" as "october 1789" and "n.d. ~1984" as "~1984"."""
     words = text.split(" ")
-    date_tokens = [i for i, word in enumerate(words) if not is_plain_word(word)]
-    if not date_tokens:
+    first_date_at = next((i for i, w in enumerate(words) if not is_plain_word(w)), None)
+    if first_date_at is None:
         return text  # no parsable date ("ancient", "no date")
     # keep the run of date words leading up to the first date token: "mid to late" before
     # "20th century", but not "middle ages" before "500-1500"
-    keep = date_tokens[0]
+    keep = first_date_at
     while keep > 0 and is_date_word(words[keep - 1]):
         keep -= 1
     return " ".join(words[keep:])
@@ -190,8 +188,8 @@ def strip_noise(text: str) -> str:
     """Drop the punctuation that carries no date information."""
     # a bracket touching a digit, "174[2]" or "1[7]17", is a typo: drop it
     text = re.sub(r"(?<=\d)[\[\]]|[\[\]](?=\d)", "", text)
-    # remaining brackets, parentheses, question marks and copyright signs are noise
-    text = re.sub(r"[\[\]()<>?©]", " ", text)
+    # remaining brackets, parentheses, quotation marks, question marks and copyright signs are noise
+    text = re.sub(r"[\[\]()<>?©\"]", " ", text)
     # "1920's": the apostrophe is not part of the decade
     text = re.sub(r"(\d)'s\b", r"\1s", text)
     # runs of hyphens: leading or trailing ones are noise, "--1797." is 1797; inside, "1875--85" is one range
@@ -201,7 +199,8 @@ def strip_noise(text: str) -> str:
     text = re.sub(r"(?<!\d{4}),", " ", text)
     # a month joined to its year by a hyphen, "Sep-1965": separate them so the hyphen is not read as a range
     text = re.sub(rf"\b{MONTH}-(?=\d{{4}}\b)", r"\1 ", text)
-    # a month or a range word run into its year, "Dec1936" or "before1965": put the space back
+    # a month, day or range word run into what follows, "Dec1936", "31October" or "before1965": put the space back
+    text = re.sub(rf"(\d)(?={MONTH})", r"\1 ", text)
     text = re.sub(rf"\b{MONTH}(?=\d)", r"\1 ", text)
     text = re.sub(r"\b(before|after)(?=\d)", r"\1 ", text)
     return re.sub(rf"\b(\d{{1,2}})-(?={MONTH})", r"\1 ", text)
@@ -215,7 +214,7 @@ def mark_circa(text: str, source: Source) -> str:
     # a circa word before a digit or a month name becomes "~"; a bare "c" before digits, or a lone "c"
     # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~")
     text = re.sub(
-        r"\b(c\.|ca\.|circa|approximately|about|approx(?:\.|\b))\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
+        r"\b(c\.|ca\.|circa|circ(?:\.|\b)|approximately|about|approx(?:\.|\b))\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
         lambda m: "~" if m.group(1) or source == "axiell" else "",
         text,
     )

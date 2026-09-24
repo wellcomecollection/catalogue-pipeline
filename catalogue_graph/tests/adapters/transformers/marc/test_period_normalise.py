@@ -143,6 +143,8 @@ def test_expand_placeholders(text: str, expected: str) -> None:
         ("19 dec1936", "19 dec 1936"),
         ("march 1999-june1999", "march 1999-june 1999"),
         ("sept1965", "sept 1965"),
+        ("31october 1820", "31 october 1820"),
+        ('"1951"', "1951"),
         ("not before1965", "not before 1965"),
     ],
 )
@@ -173,6 +175,9 @@ def test_strip_noise(text: str, expected: str) -> None:
         ("c1977-c1987", "marc", "1977-1987"),
         ("c1977-c1987", "axiell", "~1977-~1987"),
         ("circa1750", "marc", "~1750"),
+        ("circ. 1750", "marc", "~1750"),
+        ("circ 1750", "marc", "~1750"),
+        ("circular 1900", "marc", "circular 1900"),
         ("c.1930s", "marc", "~1930s"),
         ("about early 1800s", "marc", "~early 1800s"),
         ("ca. c. 1750", "marc", "~1750"),

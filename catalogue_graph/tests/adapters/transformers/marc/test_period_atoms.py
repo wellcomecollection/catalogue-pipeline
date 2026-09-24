@@ -78,6 +78,8 @@ def test_decade(text: str, expected: Span | None) -> None:
         ("early-mid 20th century", years(1900, 1969)),
         ("mid 19th century", years(1830, 1869)),
         ("mid-19th century", years(1830, 1869)),
+        ("mid.-18th century", years(1730, 1769)),
+        ("mid. 19th century", years(1830, 1869)),
         ("middle 19th century", years(1830, 1869)),
         ("late 20th century", years(1960, 1999)),
         ("mid to late 19th century", years(1830, 1899)),
