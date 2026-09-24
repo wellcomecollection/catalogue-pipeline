@@ -3,6 +3,7 @@
 from datetime import date
 
 import pytest
+
 from adapters.transformers.marc.parsers.period import (
     MAX,
     MIN,
