@@ -14,7 +14,6 @@ from adapters.transformers.marc.parsers.period import (
     end_of_month,
     month,
     season,
-    single_day,
     widen,
     year,
 )
@@ -31,8 +30,6 @@ def years(start: int, end: int) -> Span:
         ("476", years(476, 476)),
         ("0476", years(476, 476)),
         ("2040", years(2040, 2040)),  # LATEST_YEAR
-        ("2041", None),
-        ("0000", None),
         ("19", None),
         ("12345", None),
         ("1984.", None),
@@ -53,8 +50,6 @@ def test_year(text: str, expected: Span | None) -> None:
         ("middle 1970s", years(1973, 1976)),
         ("late 1970s", years(1976, 1979)),
         ("0500s", years(500, 509)),
-        ("0000s", None),
-        ("6400s", None),
         ("1970s.", None),
         ("1970's", None),
         ("early-1970s", years(1970, 1973)),
@@ -79,9 +74,7 @@ def test_decade(text: str, expected: Span | None) -> None:
         ("2nd century", years(100, 199)),
         ("3rd century", years(200, 299)),
         ("21st century", years(2000, 2099)),
-        ("0th century", None),
         ("100th century", None),
-        ("22nd century", None),
         ("early-mid 20th century", years(1900, 1969)),
         ("mid 19th century", years(1830, 1869)),
         ("mid-19th century", years(1830, 1869)),
@@ -111,8 +104,6 @@ def test_century(text: str, expected: Span | None) -> None:
         ("winter 1963", (date(1963, 12, 1), date(1964, 2, 29))),  # into a leap year
         ("winter 2040", (date(2040, 12, 1), date(2041, 2, 28))),
         ("spring 96", None),
-        ("spring 0000", None),
-        ("spring 3000", None),
         ("spring", None),
         ("spring-1996", None),
     ],
@@ -132,8 +123,6 @@ def test_season(text: str, expected: Span | None) -> None:
         ("feb 2000", (date(2000, 2, 1), date(2000, 2, 29))),
         ("feb 1900", (date(1900, 2, 1), date(1900, 2, 28))),  # 1900 was not a leap year
         ("nov 07", None),
-        ("nov 0000", None),
-        ("nov 3000", None),
         ("novem 2007", None),
         ("2007 nov", (date(2007, 11, 1), date(2007, 11, 30))),
     ],
@@ -153,14 +142,7 @@ def test_month(text: str, expected: Span | None) -> None:
         ("14/11/2007", (date(2007, 11, 14), date(2007, 11, 14))),
         ("14.11.2007", (date(2007, 11, 14), date(2007, 11, 14))),
         ("29 february 1976", (date(1976, 2, 29), date(1976, 2, 29))),
-        ("29 february 1975", None),
-        ("31/04/1994", None),
-        ("11/14/2007", None),  # month first is not read
-        ("0 nov 2007", None),
-        ("32 nov 2007", None),
         ("14 nov 07", None),
-        ("14 nov 0000", None),
-        ("31/12/2500", None),
         ("14-11-2007", None),
         ("2007-11-14", None),
     ],
@@ -182,6 +164,24 @@ def test_day(text: str, expected: Span | None) -> None:
         ("1984", years(1984, 1984)),
         ("1984.", None),
         ("~abc", None),
+        # implausible or impossible years, refused here rather than in the individual atoms
+        ("11/14/2007", None),  # month first is not read
+        ("spring 0000", None),
+        ("spring 3000", None),
+        ("nov 3000", None),
+        ("31/04/1994", None),
+        ("14 nov 0000", None),
+        ("31/12/2500", None),
+        ("0 nov 2007", None),
+        ("32 nov 2007", None),
+        ("0000", None),
+        ("2041", None),
+        ("0000s", None),
+        ("6400s", None),
+        ("0th century", None),
+        ("22nd century", None),
+        ("nov 0000", None),
+        ("29 february 1975", None),
         ("~", None),
         ("", None),
     ],
@@ -236,19 +236,3 @@ def test_widen(span: Span, before: int, after: int, expected: Span) -> None:
 )
 def test_end_of_month(year_: int, month_: int, expected: int) -> None:
     assert end_of_month(year_, month_) == date(year_, month_, expected)
-
-
-@pytest.mark.parametrize(
-    "year_, month_, day_, expected",
-    [
-        (2007, 11, 14, (date(2007, 11, 14), date(2007, 11, 14))),
-        (1976, 2, 29, (date(1976, 2, 29), date(1976, 2, 29))),
-        (1975, 2, 29, None),
-        (1994, 4, 31, None),
-        (2007, 13, 1, None),
-        (0, 11, 14, None),
-        (2500, 11, 14, None),
-    ],
-)
-def test_single_day(year_: int, month_: int, day_: int, expected: Span | None) -> None:
-    assert single_day(year_, month_, day_) == expected

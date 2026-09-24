@@ -35,44 +35,39 @@ def plausible(year: int) -> bool:
     return 0 < year <= LATEST_YEAR
 
 
-# Regex fragments. MONTH matches full and abbreviated English names with an optional dot.
+# The vocabulary, and the regex fragments built from it. MONTH matches full and abbreviated English
+# names with an optional dot.
 MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
 MONTHS |= {m.lower(): i for i, m in enumerate(calendar.month_abbr) if m} | {"sept": 9}
-MONTH = r"(" + "|".join(sorted(MONTHS, key=len, reverse=True)) + r")\.?"
-ORD = r"(?:st|nd|rd|th)"
-YEAR = r"(\d{4})"
-DAY = rf"(\d{{1,2}}){ORD}?"
-QUAL = r"(early|middle|mid|late)"
-
-# early / mid / late thirds of a century (years 0-39, 30-69, 60-99) and of a decade (0-3, 3-6, 6-9)
-CENTURY_PART = {
-    None: (0, 99),
-    "early": (0, 39),
-    "mid": (30, 69),
-    "middle": (30, 69),
-    "late": (60, 99),
-}
-DECADE_PART = {
-    None: (0, 9),
-    "early": (0, 3),
-    "mid": (3, 6),
-    "middle": (3, 6),
-    "late": (6, 9),
-}
-
-# Seasons as (first month, last month); winter runs into the following year.
-SEASON = {
+SEASONS = {
     "spring": (3, 5),
     "summer": (6, 8),
     "autumn": (9, 11),
     "fall": (9, 11),
     "winter": (12, 2),
 }
-
-# words that are part of a date expression and must survive at the start of the text
 QUALIFIERS = {"early", "middle", "mid", "late"}
 RANGE_WORDS = {"to", "and", "before", "after", "not", "pre", "post", "between"}
-DATE_WORDS = set(MONTHS) | set(SEASON) | QUALIFIERS | RANGE_WORDS
+DATE_WORDS = set(MONTHS) | set(SEASONS) | QUALIFIERS | RANGE_WORDS
+
+MONTH = "(" + "|".join(sorted(MONTHS, key=len, reverse=True)) + r")\.?"
+QUAL = "(" + "|".join(sorted(QUALIFIERS, key=len, reverse=True)) + ")"
+QUALIFIED = (
+    rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL}[ -])?"  # "mid ", "mid-", "mid to late "
+)
+ORD = r"(?:st|nd|rd|th)"
+YEAR = r"(\d{4})"
+DAY = rf"(\d{{1,2}}){ORD}?"
+
+# early / mid / late as tenths of a decade or century: years 0-3, 3-6 and 6-9 of a decade, 00-39,
+# 30-69 and 60-99 of a century
+PART = {
+    None: (0, 10),
+    "early": (0, 4),
+    "mid": (3, 7),
+    "middle": (3, 7),
+    "late": (6, 10),
+}
 
 
 def parse(text: str, source: Source = "marc") -> Span | None:
@@ -209,7 +204,6 @@ def strip_noise(text: str) -> str:
     # a month or a range word run into its year, "Dec1936" or "before1965": put the space back
     text = re.sub(rf"\b{MONTH}(?=\d)", r"\1 ", text)
     text = re.sub(r"\b(before|after)(?=\d)", r"\1 ", text)
-    # a day joined to its month by a hyphen, "27-Aug-1917": separate them
     return re.sub(rf"\b(\d{{1,2}})-(?={MONTH})", r"\1 ", text)
 
 
@@ -237,65 +231,58 @@ def atom(text: str) -> Span | None:
     if text.startswith("~"):
         return circa(atom(text[1:].strip()))
     for rule in (year, decade, century, season, month, day):
-        if span := rule(text):
+        try:
+            span = rule(text)
+        except ValueError:  # a date that does not exist: "29 february 1975", "nov 0000"
+            return None
+        if span and plausible(span[0].year):
             return span
     return None
 
 
 def year(text: str) -> Span | None:
     """ "1984", "476"."""
-    if re.fullmatch(r"\d{3,4}", text) and plausible(int(text)):
+    if re.fullmatch(r"\d{3,4}", text):
         return date(int(text), 1, 1), date(int(text), 12, 31)
     return None
 
 
 def decade(text: str) -> Span | None:
     """ "1970s", "early 1970s", "mid-1970s", "early to mid 1970s"."""
-    m = re.fullmatch(
-        rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL}[ -])?(\d{{3}})0s", text
-    )
-    if not m or not plausible(int(m[3]) * 10):  # "0000s", "6400s"
-        return None
-    start = int(m[3]) * 10
-    # "early to mid" spans early's start to mid's end
-    lo, hi = DECADE_PART[m[1] or m[2]][0], DECADE_PART[m[2] or m[1]][1]
-    return date(start + lo, 1, 1), date(start + hi, 12, 31)
+    if m := re.fullmatch(
+        rf"{QUALIFIED}(?!000)(\d{{3}})0s", text
+    ):  # "0000s" is no decade
+        return part(int(m[3]) * 10, 10, m[1], m[2])
+    return None
 
 
 def century(text: str) -> Span | None:
     """ "19th century", "19 cent.", "mid-19th century", "mid to late 19th century"."""
-    m = re.fullmatch(
-        rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL}[ -])?(\d{{1,2}}){ORD}? ?cent(?:ury|\.)?",
-        text,
+    if m := re.fullmatch(rf"{QUALIFIED}(\d{{1,2}}){ORD}? ?cent(?:ury|\.)?", text):
+        return part((int(m[3]) - 1) * 100, 100, m[1], m[2])
+    return None
+
+
+def part(start: int, length: int, first: str | None, second: str | None) -> Span:
+    """The early / mid / late part of a decade or century, or all of it; "mid to late" runs from
+    mid's start to late's end. The 1st century starts in year 1."""
+    lo, hi = PART[first or second][0], PART[second or first][1]
+    return date(max(start + length * lo // 10, 1), 1, 1), date(
+        start + length * hi // 10 - 1, 12, 31
     )
-    if not m:
-        return None
-    start = (int(m[3]) - 1) * 100
-    if not plausible(
-        start + 1
-    ):  # the century's first year: none for the 0th, too late for the 22nd
-        return None
-    # "mid to late" spans mid's start to late's end
-    lo, hi = CENTURY_PART[m[1] or m[2]][0], CENTURY_PART[m[2] or m[1]][1]
-    # the 1st century starts in year 1
-    return date(max(start + lo, 1), 1, 1), date(start + hi, 12, 31)
 
 
 def season(text: str) -> Span | None:
     """ "winter 1962", which runs into 1963."""
-    if (m := re.fullmatch(rf"({'|'.join(SEASON)}) {YEAR}", text)) and plausible(
-        int(m[2])
-    ):
-        y, (first, last) = int(m[2]), SEASON[m[1]]
+    if m := re.fullmatch(rf"({'|'.join(SEASONS)}) {YEAR}", text):
+        y, (first, last) = int(m[2]), SEASONS[m[1]]
         return date(y, first, 1), end_of_month(y + (last < first), last)
     return None
 
 
 def month(text: str) -> Span | None:
     """ "nov 2007", "november 2007", "1887 nov"."""
-    if (m := re.fullmatch(rf"{MONTH} {YEAR}|{YEAR} {MONTH}", text)) and plausible(
-        int(m[2] or m[3])
-    ):
+    if m := re.fullmatch(rf"{MONTH} {YEAR}|{YEAR} {MONTH}", text):
         y, mo = int(m[2] or m[3]), MONTHS[m[1] or m[4]]
         return date(y, mo, 1), end_of_month(y, mo)
     return None
@@ -318,6 +305,14 @@ def day(text: str) -> Span | None:
     return None
 
 
+def single_day(year: int, month: int, day: int) -> Span:
+    return date(year, month, day), date(year, month, day)
+
+
+def end_of_month(year: int, month: int) -> date:
+    return date(year, month, calendar.monthrange(year, month)[1])
+
+
 def circa(span: Span | None) -> Span | None:
     """Widen an approximate span: a year by 10 before and 9 after, a decade or century by 10 at each end."""
     if span is None or span != widen(
@@ -331,20 +326,6 @@ def widen(span: Span, before: int, after: int) -> Span:
     start_year = max(span[0].year + before, MIN.year)
     end_year = min(span[1].year + after, MAX.year)
     return date(start_year, 1, 1), date(end_year, 12, 31)
-
-
-def end_of_month(year: int, month: int) -> date:
-    return date(year, month, calendar.monthrange(year, month)[1])
-
-
-def single_day(year: int, month: int, day: int) -> Span | None:
-    if not plausible(year):
-        return None
-    try:
-        d = date(year, month, day)
-    except ValueError:  # "29 February 1975", "31/04/1994"
-        return None
-    return d, d
 
 
 # --- stage 3: ranges ------------------------------------------------------------------------------
