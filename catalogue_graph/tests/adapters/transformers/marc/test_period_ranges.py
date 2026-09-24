@@ -3,7 +3,6 @@
 from datetime import date
 
 import pytest
-
 from adapters.transformers.marc.parsers.period import (
     MAX,
     MIN,
@@ -24,10 +23,8 @@ def years(start: int, end: int) -> Span:
     "text, expected",
     [
         ("to 1500", (MIN, date(1500, 12, 31))),
-        (
-            "early works to 1800",
-            None,
-        ),  # normalise drops "early works" before this is reached
+        # normalise drops "early works" first, so open_range only ever sees "to 1800"
+        ("early works to 1800", None),
         ("before 1800", (MIN, date(1800, 12, 31))),
         ("-1953", (MIN, date(1953, 12, 31))),
         ("to 168", (MIN, date(168, 12, 31))),
@@ -42,26 +39,23 @@ def years(start: int, end: int) -> Span:
         ("1994-", (date(1994, 1, 1), MAX)),
         ("1970s-", (date(1970, 1, 1), MAX)),
         ("nov 2007-", (date(2007, 11, 1), MAX)),
-        (
-            "~1994-",
-            (date(1984, 1, 1), MAX),
-        ),  # a circa start is widened, the end stays open
+        # a circa start is widened, the end stays open
+        ("~1994-", (date(1984, 1, 1), MAX)),
         ("pre 1900", years(1890, 1900)),
         ("post-1965", years(1965, 1974)),
         ("pre 1900s", (MIN, date(1899, 12, 31))),
         ("post 19th century", (date(1900, 1, 1), MAX)),
-        (
-            "pre 1st century",
-            None,
-        ),  # nothing lies before it, and the day before MIN does not exist
-        ("pre nov 2007", years(1997, 2007)),  # widening works in whole years
+        # the 1st century starts at MIN, so there is nothing before it
+        ("pre 1st century", None),
+        # a month is widened in whole years, like a year
+        ("pre nov 2007", years(1997, 2007)),
         ("to 12", None),
         ("to", None),
         ("before", None),
         ("after", None),
         ("-", None),
         ("-1994-", None),
-        ("1994-1995", None),  # closed, for closed_range
+        ("1994-1995", None),  # a closed range, left to closed_range
         ("may to june 1960", None),
         ("1984", None),
     ],
@@ -89,7 +83,8 @@ def test_open_range(text: str, expected: Span | None) -> None:
         ("1933 july 1.-1933 july 31.", (date(1933, 7, 1), date(1933, 7, 31))),
         ("~1955-1984", years(1945, 1984)),
         ("~1955-~1984", years(1945, 1993)),
-        ("mid-1970s", years(1973, 1976)),  # one expression split by its own hyphen
+        # not a range: the hyphen joins the qualifier to its decade
+        ("mid-1970s", years(1973, 1976)),
         ("mid-late 1960s", years(1963, 1969)),
         ("spring to autumn 1990", (date(1990, 3, 1), date(1990, 11, 30))),
         ("early to mid 1970s", years(1970, 1976)),

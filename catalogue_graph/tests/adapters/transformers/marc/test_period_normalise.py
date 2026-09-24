@@ -74,7 +74,9 @@ def test_convert_roman_numerals(text: str, expected: str) -> None:
         ("aug. 67 [august 1967]", "[august 1967]"),
         ("1/94 [january 1994]", "[january 1994]"),
         ("12 may [1750]", "12 may [1750]"),
-        ("sep 1984-[dec 1986]", "sep 1984-[dec 1986]"),  # a range end, not an expansion
+        # a range whose end is bracketed, not an abbreviated date followed by its full form,
+        # "aug. 67 [august 1967]"
+        ("sep 1984-[dec 1986]", "sep 1984-[dec 1986]"),
     ],
 )
 def test_take_corrections(text: str, expected: str) -> None:

@@ -29,7 +29,7 @@ def years(start: int, end: int) -> Span:
         ("1984", years(1984, 1984)),
         ("476", years(476, 476)),
         ("0476", years(476, 476)),
-        ("2040", years(2040, 2040)),  # LATEST_YEAR
+        ("2040", years(2040, 2040)),  # the latest plausible year
         ("19", None),
         ("12345", None),
         ("1984.", None),
@@ -86,7 +86,7 @@ def test_decade(text: str, expected: Span | None) -> None:
         ("mid-to-late 19th century", years(1830, 1899)),
         ("early to late 19th century", years(1800, 1899)),
         ("early to mid-20th century", years(1900, 1969)),
-        ("late 19th-early 20th century", None),  # a range, for closed_range
+        ("late 19th-early 20th century", None),  # a range, left to closed_range
         ("19th centuries", None),
         ("19th century.", None),
     ],
@@ -166,8 +166,8 @@ def test_day(text: str, expected: Span | None) -> None:
         ("1984", years(1984, 1984)),
         ("1984.", None),
         ("~abc", None),
-        # implausible or impossible years, refused here rather than in the individual atoms
-        ("11/14/2007", None),  # month first is not read
+        ("11/14/2007", None),  # month-first numeric dates are not read
+        # implausible or impossible dates, refused here rather than in the individual atoms
         ("spring 0000", None),
         ("spring 3000", None),
         ("nov 3000", None),
