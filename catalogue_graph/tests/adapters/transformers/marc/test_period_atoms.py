@@ -56,7 +56,7 @@ def test_year(text: str, expected: Span | None) -> None:
         ("0000s", None),
         ("1970s.", None),
         ("1970's", None),
-        ("early-1970s", None),  # the hyphen makes it a range for closed_range to join
+        ("early-1970s", years(1970, 1973)),
         ("early mid 1970s", None),
         ("197s", None),
     ],
@@ -125,7 +125,7 @@ def test_season(text: str, expected: Span | None) -> None:
         ("feb 1900", (date(1900, 2, 1), date(1900, 2, 28))),  # 1900 was not a leap year
         ("nov 07", None),
         ("novem 2007", None),
-        ("2007 nov", None),
+        ("2007 nov", (date(2007, 11, 1), date(2007, 11, 30))),
     ],
 )
 def test_month(text: str, expected: Span | None) -> None:

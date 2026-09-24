@@ -6,6 +6,7 @@ import pytest
 from adapters.transformers.marc.parsers.period import (
     Source,
     convert_roman_numerals,
+    drop_leading_words,
     expand_placeholders,
     mark_circa,
     normalise,
@@ -121,6 +122,10 @@ def test_expand_placeholders(text: str, expected: str) -> None:
         ("1965-sep", "1965-sep"),
         ("12-19 january 1990", "12-19 january 1990"),
         ("[?]", ""),
+        ("19 dec1936", "19 dec 1936"),
+        ("march 1999-june1999", "march 1999-june 1999"),
+        ("sept1965", "sept 1965"),
+        ("not before1965", "not before 1965"),
     ],
 )
 def test_strip_noise(text: str, expected: str) -> None:
@@ -133,7 +138,7 @@ def test_strip_noise(text: str, expected: str) -> None:
         ("c1977", "marc", "1977"),
         ("c 1977", "marc", "1977"),
         ("c jul 1993", "marc", "jul 1993"),
-        ("1890, c1887", "marc", "1890, 1887"),
+        ("1890, c1887", "marc", "1890"),
         ("c1959", "axiell", "~1959"),
         ("c 1959", "axiell", "~1959"),
         ("c jul 1993", "axiell", "~jul 1993"),
@@ -170,11 +175,11 @@ def test_mark_circa(text: str, source: Source, expected: str) -> None:
         ("c1977.", "marc", "1977"),
         ("[ca. 1750?]", "marc", "~1750"),
         ("MDCCLXXV. [1775]", "marc", "1775"),
-        ("Anno M.D.XXXI.", "marc", "anno 1531"),
+        ("Anno M.D.XXXI.", "marc", "1531"),
         ("[1900]-[1910]", "marc", "1900-1910"),
         ("1994 -", "marc", "1994-"),
         ("c. early 20th century", "marc", "early 20th century"),
-        ("Revolution, 1775-1783", "marc", "revolution 1775-1783"),
+        ("Revolution, 1775-1783", "marc", "1775-1783"),
         ("Sep-1965", "marc", "sep 1965"),
         ("  19th century.  ", "marc", "19th century"),
         ("c.1955-1984", "axiell", "~1955-1984"),
@@ -189,7 +194,40 @@ def test_mark_circa(text: str, source: Source, expected: str) -> None:
         ("1[841-1849]", "marc", "1841-1849"),
         ("19??-1944.", "marc", "20th century-1944"),
         ("ca. c. 1750", "marc", "~1750"),
+        ("n.d. c. 1984", "marc", "~1984"),
+        ("Middle Ages, 500-1500.", "marc", "500-1500"),
+        ("Printed in October, 1789.", "marc", "october 1789"),
     ],
 )
 def test_normalise(text: str, source: Source, expected: str) -> None:
     assert normalise(text, source) == expected
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("revolution 1775-1783", "1775-1783"),
+        ("printed in october 1789", "october 1789"),
+        ("n.d. ~1984", "~1984"),
+        ("undated 20th century", "20th century"),
+        ("middle ages 500-1500", "500-1500"),
+        ("heian period 794-1185", "794-1185"),
+        ("mid 19th century", "mid 19th century"),
+        ("early works to 1800", "to 1800"),  # "early" here is not a qualifier
+        ("early church ~30-600", "~30-600"),
+        ("late antiquity 300-600", "300-600"),
+        ("spring term 1990", "1990"),
+        ("oct and nov 1949", "oct and nov 1949"),
+        ("to nov 2007", "to nov 2007"),
+        ("mid to late 20th century", "mid to late 20th century"),
+        ("not before 1804", "not before 1804"),
+        ("winter 1962", "winter 1962"),
+        ("nov. 2007", "nov. 2007"),
+        ("ancient", "ancient"),
+        ("no date", "no date"),
+        ("1984", "1984"),
+        ("~1930", "~1930"),
+    ],
+)
+def test_drop_leading_words(text: str, expected: str) -> None:
+    assert drop_leading_words(text) == expected

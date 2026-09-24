@@ -12,16 +12,10 @@ def parse_period(
 ) -> Period:
     """A Period for the label, with a range when the label can be read as dates."""
     span = parse(label, source)
-    date_range = (
-        DateTimeRange(
-            label=label,
-            **{
-                "from": span[0].isoformat() + "T00:00:00Z",
-                # the Scala pipeline's end of day has nanosecond precision
-                "to": span[1].isoformat() + "T23:59:59.999999999Z",
-            },
-        )
-        if span
-        else None
-    )
+    date_range = None
+    if span:
+        from_ = span[0].isoformat() + "T00:00:00Z"
+        # the Scala pipeline's end of day has nanosecond precision
+        to_ = span[1].isoformat() + "T23:59:59.999999999Z"
+        date_range = DateTimeRange(label=label, **{"from": from_, "to": to_})
     return Period(label=label, range=date_range, id=identifier or Unidentifiable())

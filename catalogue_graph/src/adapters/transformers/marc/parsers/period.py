@@ -63,6 +63,11 @@ SEASON = {
     "winter": (12, 2),
 }
 
+# words that are part of a date expression and must survive at the start of the text
+QUALIFIERS = {"early", "middle", "mid", "late"}
+RANGE_WORDS = {"to", "and", "before", "after", "not", "pre", "post", "between"}
+DATE_WORDS = set(MONTHS) | set(SEASON) | QUALIFIERS | RANGE_WORDS
+
 
 def parse(text: str, source: Source = "marc") -> Span | None:
     """Inclusive (start, end) dates for a period string, or None if it says nothing datable.
@@ -93,8 +98,8 @@ def parse(text: str, source: Source = "marc") -> Span | None:
 
 
 def normalise(text: str, source: Source) -> str:
-    """Lower-case, write roman numerals as numbers, take corrections, expand placeholders, drop noise
-    and mark circa dates with "~"."""
+    """Lower-case, write roman numerals as numbers, take corrections, expand placeholders, drop noise,
+    mark circa dates with "~" and drop leading words that are not part of the date."""
     text = convert_roman_numerals(text.lower())
     text = take_corrections(text)
     text = expand_placeholders(text)
@@ -103,15 +108,41 @@ def normalise(text: str, source: Source) -> str:
     # "c. early 20th century": the early / mid / late part is kept and the circa marker dropped, so it is not widened
     text = re.sub(r"~(?=early|mid|late)", "", text)
     text = re.sub(r"\s*-\s*", "-", text)
-    return re.sub(r"\s+", " ", text).strip(" .")
+    text = re.sub(r"\s+", " ", text).strip(" .")
+    return drop_leading_words(text)
+
+
+def drop_leading_words(text: str) -> str:
+    """Drop leading words that are not part of the date, so "revolution 1775-1783" reads as
+    "1775-1783", "printed in october 1789" as "october 1789" and "n.d. ~1984" as "~1984"."""
+    words = text.split(" ")
+    date_tokens = [i for i, word in enumerate(words) if not is_plain_word(word)]
+    if not date_tokens:
+        return text  # no parsable date ("ancient", "no date")
+    # keep the run of date words leading up to the first date token: "mid to late" before
+    # "20th century", but not "middle ages" before "500-1500"
+    keep = date_tokens[0]
+    while keep > 0 and is_date_word(words[keep - 1]):
+        keep -= 1
+    return " ".join(words[keep:])
+
+
+def is_plain_word(token: str) -> bool:
+    """Letters, with dots or apostrophes, and at most a trailing comma: "revolution", "n.d.", "period,"."""
+    return re.fullmatch(r"[a-z][a-z'.]*,?", token) is not None
+
+
+def is_date_word(token: str) -> bool:
+    return token.strip(".,") in DATE_WORDS
 
 
 def convert_roman_numerals(text: str) -> str:
     """Write each roman numeral of two or more letters as a number, "anno m.dcc.xlv" as "anno 1745"."""
     # Identify candidate roman numerals via a regex and send them to `roman_numeral`, which converts
-    # them to integers, returning `None` for invalid candidates like "civil" or "mill".
+    # them to integers, returning `None` for invalid candidates like "civil" or "mill". A candidate
+    # may not start inside an abbreviation such as "n.d. c.".
     return re.sub(
-        r"\b[mdclxvi][mdclxvij.,\s]*[mdclxvij]\b",
+        r"(?<![a-z]\.)\b[mdclxvi][mdclxvij.,\s]*[mdclxvij]\b",
         lambda m: str(roman_numeral(m[0]) or m[0]),
         text,
     )
@@ -142,15 +173,23 @@ def strip_noise(text: str) -> str:
     # a bracket touching a digit, "174[2]" or "1[7]17", is a typo: drop it
     text = re.sub(r"(?<=\d)[\[\]]|[\[\]](?=\d)", "", text)
     # remaining brackets, parentheses, question marks and copyright signs are noise
-    text = re.sub(r"[\[\]()?©]", " ", text)
+    text = re.sub(r"[\[\]()<>?©]", " ", text)
     # a comma not directly after a year, "Revolution, 1775" or "March 8, 1800", is noise; "1719, 1720" keeps its comma
     text = re.sub(r"(?<!\d{4}),", " ", text)
     # a month joined to its year by a hyphen, "Sep-1965": separate them so the hyphen is not read as a range
-    return re.sub(rf"\b{MONTH}-(?=\d{{4}}\b)", r"\1 ", text)
+    text = re.sub(rf"\b{MONTH}-(?=\d{{4}}\b)", r"\1 ", text)
+    # a month or a range word run into its year, "Dec1936" or "before1965": put the space back
+    text = re.sub(rf"\b{MONTH}(?=\d)", r"\1 ", text)
+    text = re.sub(r"\b(before|after)(?=\d)", r"\1 ", text)
+    # a day joined to its month by a hyphen, "27-Aug-1917": separate them
+    return re.sub(rf"\b(\d{{1,2}})-(?={MONTH})", r"\1 ", text)
 
 
 def mark_circa(text: str, source: Source) -> str:
     """Replace circa markers with "~" and drop copyright markers."""
+    if source == "marc":
+        # a publication year then a copyright year, "1985, c1983" or "2014, cop. 1991": the publication year
+        text = re.sub(r"(\d{4}),\s*(?:c\.?|cop\.)\s?\d{4}", r"\1", text)
     # a circa word before a digit or a month name becomes "~"; a bare "c" before digits, or a lone "c"
     # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~")
     text = re.sub(
@@ -183,8 +222,8 @@ def year(text: str) -> Span | None:
 
 
 def decade(text: str) -> Span | None:
-    """ "1970s", "early 1970s"."""
-    m = re.fullmatch(rf"(?:{QUAL} )?(\d{{3}})0s", text)
+    """ "1970s", "early 1970s", "mid-1970s"."""
+    m = re.fullmatch(rf"(?:{QUAL}[ -])?(\d{{3}})0s", text)
     if not m or int(m[2]) == 0:  # "0000s" would start in year 0
         return None
     start, (lo, hi) = int(m[2]) * 10, DECADE_PART[m[1]]
@@ -215,9 +254,9 @@ def season(text: str) -> Span | None:
 
 
 def month(text: str) -> Span | None:
-    """ "nov 2007", "november 2007"."""
-    if m := re.fullmatch(rf"{MONTH} {YEAR}", text):
-        y, mo = int(m[2]), MONTHS[m[1]]
+    """ "nov 2007", "november 2007", "1887 nov"."""
+    if m := re.fullmatch(rf"{MONTH} {YEAR}|{YEAR} {MONTH}", text):
+        y, mo = int(m[2] or m[3]), MONTHS[m[1] or m[4]]
         return date(y, mo, 1), end_of_month(y, mo)
     return None
 
