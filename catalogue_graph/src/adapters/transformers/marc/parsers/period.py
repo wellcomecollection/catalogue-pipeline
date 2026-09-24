@@ -177,9 +177,11 @@ def expand_placeholders(text: str) -> str:
     # but a bracket precedes the digits: rewrite as "20th century"
     return re.sub(
         r"\b(\d{2})(?:--(?!\s*\d)|\?\?| (?=\]))|(?<![^\[])(\d{2})-\??(?=\]|$)",
-        lambda m: f"{int(m[1] or m[2]) + 1}th century"
-        if plausible(int(m[1] or m[2]) * 100)
-        else m[0],
+        lambda m: (
+            f"{int(m[1] or m[2]) + 1}th century"
+            if plausible(int(m[1] or m[2]) * 100)
+            else m[0]
+        ),
         text,
     )
 
