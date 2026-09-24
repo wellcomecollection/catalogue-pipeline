@@ -50,6 +50,10 @@ def years(start: int, end: int) -> Span:
         ("post-1965", years(1965, 1974)),
         ("pre 1900s", (MIN, date(1899, 12, 31))),
         ("post 19th century", (date(1900, 1, 1), MAX)),
+        (
+            "pre 1st century",
+            None,
+        ),  # nothing lies before it, and the day before MIN does not exist
         ("pre nov 2007", years(1997, 2007)),  # widening works in whole years
         ("to 12", None),
         ("to", None),

@@ -341,6 +341,8 @@ def open_range(text: str) -> Span | None:
     # "post 19th century", they simply mean before or after it
     if (m := re.fullmatch(r"(pre|post)[- ](.+)", text)) and (span := atom(m[2])):
         if span[0].year != span[1].year:
+            if span[0] == MIN or span[1] == MAX:
+                return None
             return (
                 (MIN, span[0] - timedelta(days=1))
                 if m[1] == "pre"

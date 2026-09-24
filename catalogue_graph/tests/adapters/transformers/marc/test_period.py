@@ -130,6 +130,7 @@ def test_parse(text: str, start: date, end: date) -> None:
         "1657-1562.",
         "2971",
         "12345",
+        "pre 1st century",
         "Nov 0000",
         "Nov 3000",
         "6400s",
