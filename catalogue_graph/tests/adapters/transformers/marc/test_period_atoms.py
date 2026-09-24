@@ -54,10 +54,14 @@ def test_year(text: str, expected: Span | None) -> None:
         ("late 1970s", years(1976, 1979)),
         ("0500s", years(500, 509)),
         ("0000s", None),
+        ("6400s", None),
         ("1970s.", None),
         ("1970's", None),
         ("early-1970s", years(1970, 1973)),
-        ("early mid 1970s", None),
+        ("early to mid 1970s", years(1970, 1976)),
+        ("mid-to-late 1970s", years(1973, 1979)),
+        ("early mid 1970s", years(1970, 1976)),
+        ("early to mid-1970s", years(1970, 1976)),
         ("197s", None),
     ],
 )
@@ -77,6 +81,7 @@ def test_decade(text: str, expected: Span | None) -> None:
         ("21st century", years(2000, 2099)),
         ("0th century", None),
         ("100th century", None),
+        ("22nd century", None),
         ("early-mid 20th century", years(1900, 1969)),
         ("mid 19th century", years(1830, 1869)),
         ("mid-19th century", years(1830, 1869)),
@@ -85,6 +90,7 @@ def test_decade(text: str, expected: Span | None) -> None:
         ("mid to late 19th century", years(1830, 1899)),
         ("mid-to-late 19th century", years(1830, 1899)),
         ("early to late 19th century", years(1800, 1899)),
+        ("early to mid-20th century", years(1900, 1969)),
         ("late 19th-early 20th century", None),  # a range, for closed_range
         ("19th centuries", None),
         ("19th century.", None),
@@ -105,6 +111,8 @@ def test_century(text: str, expected: Span | None) -> None:
         ("winter 1963", (date(1963, 12, 1), date(1964, 2, 29))),  # into a leap year
         ("winter 2040", (date(2040, 12, 1), date(2041, 2, 28))),
         ("spring 96", None),
+        ("spring 0000", None),
+        ("spring 3000", None),
         ("spring", None),
         ("spring-1996", None),
     ],
@@ -124,6 +132,8 @@ def test_season(text: str, expected: Span | None) -> None:
         ("feb 2000", (date(2000, 2, 1), date(2000, 2, 29))),
         ("feb 1900", (date(1900, 2, 1), date(1900, 2, 28))),  # 1900 was not a leap year
         ("nov 07", None),
+        ("nov 0000", None),
+        ("nov 3000", None),
         ("novem 2007", None),
         ("2007 nov", (date(2007, 11, 1), date(2007, 11, 30))),
     ],
@@ -149,6 +159,8 @@ def test_month(text: str, expected: Span | None) -> None:
         ("0 nov 2007", None),
         ("32 nov 2007", None),
         ("14 nov 07", None),
+        ("14 nov 0000", None),
+        ("31/12/2500", None),
         ("14-11-2007", None),
         ("2007-11-14", None),
     ],
@@ -234,6 +246,8 @@ def test_end_of_month(year_: int, month_: int, expected: int) -> None:
         (1975, 2, 29, None),
         (1994, 4, 31, None),
         (2007, 13, 1, None),
+        (0, 11, 14, None),
+        (2500, 11, 14, None),
     ],
 )
 def test_single_day(year_: int, month_: int, day_: int, expected: Span | None) -> None:

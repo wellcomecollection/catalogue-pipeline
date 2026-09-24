@@ -24,14 +24,21 @@ def years(start: int, end: int) -> Span:
     "text, expected",
     [
         ("to 1500", (MIN, date(1500, 12, 31))),
-        ("early works to 1800", (MIN, date(1800, 12, 31))),
+        (
+            "early works to 1800",
+            None,
+        ),  # normalise drops "early works" before this is reached
         ("before 1800", (MIN, date(1800, 12, 31))),
         ("-1953", (MIN, date(1953, 12, 31))),
         ("to 168", (MIN, date(168, 12, 31))),
         ("to 1500s", (MIN, date(1509, 12, 31))),
         ("to 19th century", (MIN, date(1899, 12, 31))),
         ("to nov 2007", (MIN, date(2007, 11, 30))),
+        ("early to 1800", (MIN, date(1800, 12, 31))),
         ("after 1817", (date(1817, 1, 1), MAX)),
+        ("not before 1804", (date(1804, 1, 1), MAX)),
+        ("not after 1850", (MIN, date(1850, 12, 31))),
+        ("1900-present", (date(1900, 1, 1), MAX)),
         ("1994-", (date(1994, 1, 1), MAX)),
         ("1970s-", (date(1970, 1, 1), MAX)),
         ("nov 2007-", (date(2007, 11, 1), MAX)),
@@ -41,8 +48,8 @@ def years(start: int, end: int) -> Span:
         ),  # a circa start is widened, the end stays open
         ("pre 1900", years(1890, 1900)),
         ("post-1965", years(1965, 1974)),
-        ("pre 1900s", years(1890, 1909)),
-        ("post 19th century", years(1800, 1908)),
+        ("pre 1900s", (MIN, date(1899, 12, 31))),
+        ("post 19th century", (date(1900, 1, 1), MAX)),
         ("pre nov 2007", years(1997, 2007)),  # widening works in whole years
         ("to 12", None),
         ("to", None),
@@ -51,6 +58,7 @@ def years(start: int, end: int) -> Span:
         ("-", None),
         ("-1994-", None),
         ("1994-1995", None),  # closed, for closed_range
+        ("may to june 1960", None),
         ("1984", None),
     ],
 )
@@ -79,6 +87,8 @@ def test_open_range(text: str, expected: Span | None) -> None:
         ("~1955-~1984", years(1945, 1993)),
         ("mid-1970s", years(1973, 1976)),  # one expression split by its own hyphen
         ("mid-late 1960s", years(1963, 1969)),
+        ("spring to autumn 1990", (date(1990, 3, 1), date(1990, 11, 30))),
+        ("early to mid 1970s", years(1970, 1976)),
         ("1994/1995-1996", years(1994, 1996)),
         ("1657-1562", years(1657, 1562)),  # backwards; `parse` drops it
         ("1984", None),
@@ -99,6 +109,7 @@ def test_closed_range(text: str, expected: Span | None) -> None:
         ("1897", "99", "1899"),
         ("1750", "1", "1751"),
         ("1750", "51", "1751"),
+        ("1970s", "80s", "1980s"),
         ("2004", "9", "2009"),
         ("may 1960", "9", "1969"),
         ("mid 1970s", "9", "1979"),

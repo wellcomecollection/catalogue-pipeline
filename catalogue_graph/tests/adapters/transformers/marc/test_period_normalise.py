@@ -36,7 +36,10 @@ def spaced(text: str) -> str:
         ("vol. ii", "vol. 2"),
         ("m dcc xlix", "1749"),
         ("xvii1737", "xvii1737"),
+        # a known limitation: two numerals joined by ", " are one invalid candidate, since a single
+        # numeral may also be written with commas, "m, dcc, xcvi"
         ("mdcclxi, mdcclxiii", "mdcclxi, mdcclxiii"),
+        ("m, dcc, xcvi", "1796"),
         ("m.dcc.lxl", "m.dcc.lxl"),
         ("MDCC", "MDCC"),
     ],
@@ -68,6 +71,10 @@ def test_convert_roman_numerals(text: str, expected: str) -> None:
         ("1709 [1710-1711]", "1709 [1710-1711]"),
         ("1709 (1710)", "1709 (1710)"),
         ("1709 [10]", "1709 [10]"),
+        ("aug. 67 [august 1967]", "[august 1967]"),
+        ("1/94 [january 1994]", "[january 1994]"),
+        ("12 may [1750]", "12 may [1750]"),
+        ("sep 1984-[dec 1986]", "sep 1984-[dec 1986]"),  # a range end, not an expansion
     ],
 )
 def test_take_corrections(text: str, expected: str) -> None:
@@ -79,10 +86,18 @@ def test_take_corrections(text: str, expected: str) -> None:
     [
         ("199?", "1990s"),
         ("192-", "1920s"),
+        ("640-", "640-"),  # there is no decade 6400s
+        ("99--", "99--"),
         ("[201 ]", "[2010s]"),
         ("[190 .]", "[1900s.]"),
         ("19--", "20th century"),
         ("19??", "20th century"),
+        ("[19-?]", "[20th century]"),
+        ("[19-]", "[20th century]"),
+        ("18-19th century", "18-19th century"),
+        ("1990 march 12-", "1990 march 12-"),
+        ("an 11--1803", "an 11--1803"),
+        ("1829-19??", "1829-20th century"),
         ("[19 ]", "[20th century]"),
         ("1875-[19--?]", "1875-[20th century?]"),
         ("1994-", "1994-"),
@@ -93,7 +108,7 @@ def test_take_corrections(text: str, expected: str) -> None:
         ("199-1999", "199-1999"),
         ("1990-", "1990-"),
         ("[2000 ]", "[2000 ]"),
-        ("[18-]", "[18-]"),
+        ("[18-]", "[19th century]"),
         ("[1---]", "[1---]"),
     ],
 )
@@ -122,6 +137,9 @@ def test_expand_placeholders(text: str, expected: str) -> None:
         ("1965-sep", "1965-sep"),
         ("12-19 january 1990", "12-19 january 1990"),
         ("[?]", ""),
+        ("1920's", "1920s"),
+        ("--1797.", "1797."),
+        ("1875--85", "1875-85"),
         ("19 dec1936", "19 dec 1936"),
         ("march 1999-june1999", "march 1999-june 1999"),
         ("sept1965", "sept 1965"),
@@ -162,6 +180,7 @@ def test_strip_noise(text: str, expected: str) -> None:
         ("c", "axiell", "c"),
         ("c.", "axiell", "c."),
         ("circa", "marc", "circa"),
+        ("1750 approximately", "marc", "1750 approximately"),
     ],
 )
 def test_mark_circa(text: str, source: Source, expected: str) -> None:

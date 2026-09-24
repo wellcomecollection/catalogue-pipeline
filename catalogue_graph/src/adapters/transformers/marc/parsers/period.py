@@ -19,7 +19,7 @@ parse("Ancient")               -> None
 
 import calendar
 import re
-from datetime import date
+from datetime import date, timedelta
 from typing import Literal
 
 from adapters.transformers.marc.parsers.roman import roman_numeral
@@ -28,6 +28,12 @@ Span = tuple[date, date]
 Source = Literal["marc", "axiell"]
 MIN, MAX = date(1, 1, 1), date(9999, 12, 31)
 LATEST_YEAR = 2040  # anything later is a typo or a Hebrew-calendar year
+
+
+def plausible(year: int) -> bool:
+    """Every year the parser produces passes this check, whatever form it was written in."""
+    return 0 < year <= LATEST_YEAR
+
 
 # Regex fragments. MONTH matches full and abbreviated English names with an optional dot.
 MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
@@ -155,16 +161,33 @@ def take_corrections(text: str) -> str:
     text = re.sub(r"^.*?\bi\.?\s?e\b\.?(?=.*\d)", "", text)
     # a number followed by a bracketed year, "1709 [1710]", "1709. [1710?]" or "[1606] [1706]": keep only
     # the bracketed correction. A hyphen between them, "1700-[1703]", is a range, not a correction.
-    return re.sub(r"\b\d{3,4}[.,'\s\]]*\[(\d{4})\??\]", r"[\1]", text)
+    text = re.sub(r"\b\d{3,4}[.,'\s\]]*\[(\d{4})\??\]", r"[\1]", text)
+    # an abbreviated date followed by its bracketed expansion, "Aug. 67 [August 1967]" or
+    # "1/94 [January 1994]": keep only the expansion
+    return re.sub(
+        rf"^\[?[a-z.\s]*\d{{1,2}}(?:/\d{{2,4}})?\.?\s*\(?\[({MONTH} ?\d{{4}})\??\]",
+        r"[\1]",
+        text,
+    )
 
 
 def expand_placeholders(text: str) -> str:
     """Rewrite years with unknown final digits as the decade or century they stand for."""
-    # three digits then a placeholder, "199?", "192-" or "[201 ]": rewrite as the decade "1990s"
-    text = re.sub(r"\b(\d{3})(?:[-?](?!\d)| (?=[\].]))", r"\g<1>0s", text)
-    # two digits then a placeholder, "19--", "19??" or "[19 ]": rewrite as "20th century"
+    # three digits then a placeholder, "199?", "192-" or "[201 ]": rewrite as the decade "1990s";
+    # "640-" is an open range from the year 640, since there is no decade 6400s
+    text = re.sub(
+        r"\b(\d{3})(?:[-?](?!\d)| (?=[\].]))",
+        lambda m: f"{m[1]}0s" if plausible(int(m[1]) * 10) else m[0],
+        text,
+    )
+    # two digits then a placeholder, "19--", "19??" or "[19 ]", or "[19-?]" and "19-" where nothing
+    # but a bracket precedes the digits: rewrite as "20th century"
     return re.sub(
-        r"\b(\d{2})(?:--|\?\?| (?=\]))", lambda m: f"{int(m[1]) + 1}th century", text
+        r"\b(\d{2})(?:--(?!\s*\d)|\?\?| (?=\]))|(?<![^\[])(\d{2})-\??(?=\]|$)",
+        lambda m: f"{int(m[1] or m[2]) + 1}th century"
+        if plausible(int(m[1] or m[2]) * 100)
+        else m[0],
+        text,
     )
 
 
@@ -174,6 +197,11 @@ def strip_noise(text: str) -> str:
     text = re.sub(r"(?<=\d)[\[\]]|[\[\]](?=\d)", "", text)
     # remaining brackets, parentheses, question marks and copyright signs are noise
     text = re.sub(r"[\[\]()<>?©]", " ", text)
+    # "1920's": the apostrophe is not part of the decade
+    text = re.sub(r"(\d)'s\b", r"\1s", text)
+    # runs of hyphens: leading or trailing ones are noise, "--1797." is 1797; inside, "1875--85" is one range
+    text = re.sub(r"^\s*-{2,}|-{2,}\s*$", " ", text)
+    text = re.sub(r"-{2,}", "-", text)
     # a comma not directly after a year, "Revolution, 1775" or "March 8, 1800", is noise; "1719, 1720" keeps its comma
     text = re.sub(r"(?<!\d{4}),", " ", text)
     # a month joined to its year by a hyphen, "Sep-1965": separate them so the hyphen is not read as a range
@@ -193,7 +221,7 @@ def mark_circa(text: str, source: Source) -> str:
     # a circa word before a digit or a month name becomes "~"; a bare "c" before digits, or a lone "c"
     # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~")
     text = re.sub(
-        r"\b(c\.|ca\.|circa|approximately|about|approx\.?)\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
+        r"\b(c\.|ca\.|circa|approximately|about|approx(?:\.|\b))\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
         lambda m: "~" if m.group(1) or source == "axiell" else "",
         text,
     )
@@ -216,29 +244,37 @@ def atom(text: str) -> Span | None:
 
 def year(text: str) -> Span | None:
     """ "1984", "476"."""
-    if re.fullmatch(r"\d{3,4}", text) and 0 < int(text) <= LATEST_YEAR:
+    if re.fullmatch(r"\d{3,4}", text) and plausible(int(text)):
         return date(int(text), 1, 1), date(int(text), 12, 31)
     return None
 
 
 def decade(text: str) -> Span | None:
-    """ "1970s", "early 1970s", "mid-1970s"."""
-    m = re.fullmatch(rf"(?:{QUAL}[ -])?(\d{{3}})0s", text)
-    if not m or int(m[2]) == 0:  # "0000s" would start in year 0
+    """ "1970s", "early 1970s", "mid-1970s", "early to mid 1970s"."""
+    m = re.fullmatch(
+        rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL}[ -])?(\d{{3}})0s", text
+    )
+    if not m or not plausible(int(m[3]) * 10):  # "0000s", "6400s"
         return None
-    start, (lo, hi) = int(m[2]) * 10, DECADE_PART[m[1]]
+    start = int(m[3]) * 10
+    # "early to mid" spans early's start to mid's end
+    lo, hi = DECADE_PART[m[1] or m[2]][0], DECADE_PART[m[2] or m[1]][1]
     return date(start + lo, 1, 1), date(start + hi, 12, 31)
 
 
 def century(text: str) -> Span | None:
     """ "19th century", "19 cent.", "mid-19th century", "mid to late 19th century"."""
     m = re.fullmatch(
-        rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL} )?(\d{{1,2}}){ORD}? ?cent(?:ury|\.)?",
+        rf"(?:{QUAL}(?:[ -]?to[ -]|[ -]))?(?:{QUAL}[ -])?(\d{{1,2}}){ORD}? ?cent(?:ury|\.)?",
         text,
     )
-    if not m or int(m[3]) == 0:  # there is no 0th century
+    if not m:
         return None
     start = (int(m[3]) - 1) * 100
+    if not plausible(
+        start + 1
+    ):  # the century's first year: none for the 0th, too late for the 22nd
+        return None
     # "mid to late" spans mid's start to late's end
     lo, hi = CENTURY_PART[m[1] or m[2]][0], CENTURY_PART[m[2] or m[1]][1]
     # the 1st century starts in year 1
@@ -247,7 +283,9 @@ def century(text: str) -> Span | None:
 
 def season(text: str) -> Span | None:
     """ "winter 1962", which runs into 1963."""
-    if m := re.fullmatch(rf"({'|'.join(SEASON)}) {YEAR}", text):
+    if (m := re.fullmatch(rf"({'|'.join(SEASON)}) {YEAR}", text)) and plausible(
+        int(m[2])
+    ):
         y, (first, last) = int(m[2]), SEASON[m[1]]
         return date(y, first, 1), end_of_month(y + (last < first), last)
     return None
@@ -255,7 +293,9 @@ def season(text: str) -> Span | None:
 
 def month(text: str) -> Span | None:
     """ "nov 2007", "november 2007", "1887 nov"."""
-    if m := re.fullmatch(rf"{MONTH} {YEAR}|{YEAR} {MONTH}", text):
+    if (m := re.fullmatch(rf"{MONTH} {YEAR}|{YEAR} {MONTH}", text)) and plausible(
+        int(m[2] or m[3])
+    ):
         y, mo = int(m[2] or m[3]), MONTHS[m[1] or m[4]]
         return date(y, mo, 1), end_of_month(y, mo)
     return None
@@ -298,6 +338,8 @@ def end_of_month(year: int, month: int) -> date:
 
 
 def single_day(year: int, month: int, day: int) -> Span | None:
+    if not plausible(year):
+        return None
     try:
         d = date(year, month, day)
     except ValueError:  # "29 February 1975", "31/04/1994"
@@ -310,16 +352,25 @@ def single_day(year: int, month: int, day: int) -> Span | None:
 
 def open_range(text: str) -> Span | None:
     """An atom with one side left open."""
-    # open start: anything ending in "to X", or "before X", or "-X": "To 1500", "Early works to 1800", "-1953"
-    if (m := re.fullmatch(r"(?:[^\d]*\bto|before|-)\s?(.+)", text)) and (
-        span := atom(m[1])
+    # open start: "to 1500", "early to 1800", "before 1800", "not after 1850", "-1953"
+    if (m := re.fullmatch(rf"(?:(?:{QUAL} )?to|before|not after|-)\s?(.+)", text)) and (
+        span := atom(m[2])
     ):
         return MIN, span[1]
-    # "pre 1900", "post-1965": ten years before, or nine years after
+    # "pre 1900", "post-1965": ten years before, or nine years after; before a decade or century,
+    # "post 19th century", they simply mean before or after it
     if (m := re.fullmatch(r"(pre|post)[- ](.+)", text)) and (span := atom(m[2])):
+        if span[0].year != span[1].year:
+            return (
+                (MIN, span[0] - timedelta(days=1))
+                if m[1] == "pre"
+                else (span[1] + timedelta(days=1), MAX)
+            )
         return widen(span, -10, 0) if m[1] == "pre" else widen(span, 0, 9)
-    # open end: "after 1817", "1994-"
-    if (m := re.fullmatch(r"after (.+)|(.+?)-", text)) and (span := atom(m[1] or m[2])):
+    # open end: "after 1817", "not before 1804", "1994-", "1900-present"
+    if (m := re.fullmatch(r"(?:after|not before) (.+)|(.+?)-(?:present)?", text)) and (
+        span := atom(m[1] or m[2])
+    ):
         return span[0], MAX
     return None
 
@@ -340,9 +391,10 @@ def closed_range(text: str) -> Span | None:
 
 
 def complete_short_year(left: str, right: str) -> str:
-    """ "1897-99" and "1750-1": a right side of one or two digits takes its leading digits from the left year."""
-    if re.fullmatch(r"\d{1,2}", right) and (year := re.search(YEAR, left)):
-        return year[1][: 4 - len(right)] + right
+    """ "1897-99", "1750-1" and "1970s-80s": a right side of one or two digits takes its leading
+    digits from the left year."""
+    if (m := re.fullmatch(r"(\d{1,2})s?", right)) and (year := re.search(YEAR, left)):
+        return year[1][: 4 - len(m[1])] + right
     return right
 
 
@@ -365,9 +417,7 @@ def fallback(text: str) -> Span | None:
     """Span the four-digit years present, if any."""
     # exactly four digits, not preceded by "+": "U+2019" in "Coup d U+2019 état, 1797" is not a year
     years = [
-        int(y)
-        for y in re.findall(r"(?<![\d+])\d{4}(?!\d)", text)
-        if 0 < int(y) <= LATEST_YEAR
+        int(y) for y in re.findall(r"(?<![\d+])\d{4}(?!\d)", text) if plausible(int(y))
     ]
     if not years:
         return None
