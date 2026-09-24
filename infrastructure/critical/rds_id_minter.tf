@@ -21,8 +21,9 @@ module "id_minter_rds_2026_07_03" {
   source = "./modules/id-minter-rds"
 
   name_suffix = "2026-07-03"
-  # Restore from production on September 4, 2026, 04:00 (UTC+01:00)
-  snapshot_identifier = "awsbackup:job-31137725-b2a2-c855-6296-1a624a3dc2c0"
+  # Restore from production on September 24, 2026, 04:00 (UTC+01:00), the first
+  # backup after the switchover freeze time of 2026-09-23 16:35:31 BST.
+  snapshot_identifier = "awsbackup:job-e62ac7a0-482a-b8bd-2e26-5328c4479d96"
 
   # A restored copy of production, respun from a fresh snapshot each testing round,
   # so its contents are disposable for now. After switchover, the respin taken
