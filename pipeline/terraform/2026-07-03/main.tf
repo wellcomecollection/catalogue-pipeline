@@ -1,12 +1,11 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
-  # Matching is done for round 3, so the matcher DB goes back to on demand.
-  # Tasks stay up until the comparison signs off (platform#6642).
+  # Matcher stage sized for the switchover reindex (wellcomecollection/platform#6719); about $135/day while on.
   reindexing_state = {
     listen_to_reindexer = true
     scale_up_tasks      = true
-    scale_up_matcher_db = false
+    scale_up_matcher_db = true
   }
 
   index_dates = {
