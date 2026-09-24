@@ -25,12 +25,7 @@ module "id_minter_rds_2026_07_03" {
   # backup after the switchover freeze time of 2026-09-23 16:35:31 BST.
   snapshot_identifier = "awsbackup:job-e62ac7a0-482a-b8bd-2e26-5328c4479d96"
 
-  # A restored copy of production, respun from a fresh snapshot each testing round,
-  # so its contents are disposable for now. After switchover, the respin taken
-  # inside the freeze becomes the production registry and must be kept.
-  # Phase 6 of https://github.com/wellcomecollection/platform/issues/6541 removes
-  # skip_final_snapshot; read it before clearing this.
-  skip_final_snapshot = true
+  # Production registry after the switchover (wellcomecollection/platform#6541); never drop its data.
 
   vpc_id             = local.vpc_id_new
   private_subnet_ids = local.private_subnets_new
