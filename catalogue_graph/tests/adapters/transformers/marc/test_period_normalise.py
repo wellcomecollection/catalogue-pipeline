@@ -221,6 +221,8 @@ def test_mark_circa(text: str, source: Source, expected: str) -> None:
         ("n.d. c. 1984", "marc", "~1984"),
         ("Middle Ages, 500-1500.", "marc", "500-1500"),
         ("Printed in October, 1789.", "marc", "october 1789"),
+        ("mid-1970s-1980s", "marc", "mid 1970s-1980s"),
+        ("late 19th-early 20th century", "marc", "late 19th-early 20th century"),
     ],
 )
 def test_normalise(text: str, source: Source, expected: str) -> None:

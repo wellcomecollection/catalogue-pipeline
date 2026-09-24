@@ -15,6 +15,12 @@ parse("19th-20th centuries")   -> (date(1800, 1, 1), date(1999, 12, 31))
 parse("[199?]")                -> (date(1990, 1, 1), date(1999, 12, 31))
 parse("c.1955-1984", "axiell") -> (date(1945, 1, 1), date(1984, 12, 31))
 parse("Ancient")               -> None
+
+Departures from the Scala PeriodParser:
+    - "1900s" and "2000s" are decades (1900-1909), not centuries
+    - Years before 1 AD, "30 B.C.", give None, because `datetime.date` cannot represent them
+    - Two years joined by a comma, "1719, 1720", give None rather than a span covering both
+    - A bare "c" before a year in MARC is a copyright date, so "c1977" is 1977, not 1967-1986
 """
 
 import calendar
@@ -83,14 +89,9 @@ def parse(text: str, source: Source = "marc") -> Span | None:
     # twice, "MDCCXCVI, 1796", is not a pair.
     if " or " in text or re.search(r"(\d{4})\s*,\s*\D*(?!\1)\d{4}", text):
         return None
-    if span := atom(text):
-        return span
-    if span := open_range(text):
-        return span
-    if span := closed_range(text):
-        # a range that runs backwards, "1657-1562", is dropped
-        return span if span[0] <= span[1] else None
-    return fallback(text)
+    span = atom(text) or open_range(text) or closed_range(text) or fallback(text)
+    # a range that runs backwards, "1657-1562" or "late to early 1970s", is dropped
+    return span if span and span[0] <= span[1] else None
 
 
 # --- stage 1: normalise -------------------------------------------------------------------------
@@ -107,6 +108,8 @@ def normalise(text: str, source: Source) -> str:
     # "c. early 20th century": the early / mid / late part is kept and the circa marker dropped, so it is not widened
     text = re.sub(r"~(?=early|mid|late)", "", text)
     text = re.sub(r"\s*-\s*", "-", text)
+    # "mid-1970s-1980s": a qualifier's own hyphen is not a range separator
+    text = re.sub(r"\b(early|middle|mid|late)\.?-(?=\d)", r"\1 ", text)
     text = re.sub(r"\s+", " ", text).strip(" .")
     return drop_leading_words(text)
 
