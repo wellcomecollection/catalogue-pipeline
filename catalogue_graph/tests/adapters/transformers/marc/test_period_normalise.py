@@ -42,6 +42,10 @@ def spaced(text: str) -> str:
         ("m, dcc, xcvi", "1796"),
         ("m.dcc.lxl", "m.dcc.lxl"),
         ("MDCC", "MDCC"),
+        ("c. m.dcc.xlv.", "c. 1745."),
+        ("c mcml", "c 1950"),
+        ("n.d. c.", "n.d. c."),
+        ("a. c. mdclxxxii. [1682]", "a. c. 1682. [1682]"),
     ],
 )
 def test_convert_roman_numerals(text: str, expected: str) -> None:
@@ -188,6 +192,8 @@ def test_strip_noise(text: str, expected: str) -> None:
         ("c.", "axiell", "c."),
         ("circa", "marc", "circa"),
         ("1750 approximately", "marc", "1750 approximately"),
+        ("a. c. 1682", "marc", "a. c. 1682"),  # anno Christi, not circa
+        ("a.c. 1682", "axiell", "a.c. 1682"),
     ],
 )
 def test_mark_circa(text: str, source: Source, expected: str) -> None:

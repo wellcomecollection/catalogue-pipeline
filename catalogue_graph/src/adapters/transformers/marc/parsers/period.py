@@ -81,6 +81,9 @@ def parse(text: str, source: Source = "marc") -> Span | None:
     so "c1963" is the year 1963. In Axiell it means circa, so "c1930" is widened like any other
     approximate date (see `circa`).
     """
+    # a year before 1 AD, "30 B.C.", cannot be a `date`, so a string with one gives no range
+    if re.search(r"\bb\.?\s?c(?:\.?\s?e)?\b", text.lower()):
+        return None
     text = normalise(text, source)
 
     # Two dates like "1820 or 1821" or "1719, 1720" are ambiguous. A comma pair can be a range, but
@@ -142,9 +145,10 @@ def convert_roman_numerals(text: str) -> str:
     """Write each roman numeral of two or more letters as a number, "anno m.dcc.xlv" as "anno 1745"."""
     # Identify candidate roman numerals via a regex and send them to `roman_numeral`, which converts
     # them to integers, returning `None` for invalid candidates like "civil" or "mill". A candidate
-    # may not start inside an abbreviation such as "n.d. c.".
+    # may not start inside an abbreviation such as "n.d. c.", nor with a circa "c" followed by a space,
+    # so "c. mcml" reads as "c. 1950".
     return re.sub(
-        r"(?<![a-z]\.)\b[mdclxvi][mdclxvij.,\s]*[mdclxvij]\b",
+        r"(?<![a-z]\.)(?!c\.?\s)\b[mdclxvi][mdclxvij.,\s]*[mdclxvij]\b",
         lambda m: str(roman_numeral(m[0]) or m[0]),
         text,
     )
@@ -217,9 +221,10 @@ def mark_circa(text: str, source: Source) -> str:
         # a publication year then a copyright year, "1985, c1983" or "2014, cop. 1991": the publication year
         text = re.sub(r"(\d{4}),\s*(?:c\.?|cop\.)\s?\d{4}", r"\1", text)
     # a circa word before a digit or a month name becomes "~"; a bare "c" before digits, or a lone "c"
-    # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~")
+    # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~"). The "c" of
+    # "a. c." (anno Christi) is neither.
     text = re.sub(
-        r"\b(c\.|ca\.|circa|circ(?:\.|\b)|approximately|about|approx(?:\.|\b))\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
+        r"(?<!\ba\.)(?<!\ba\.\s)\b(c\.|ca\.|circa|circ(?:\.|\b)|approximately|about|approx(?:\.|\b))\s*(?=[\da-z])|\bc(?:\s?(?=\d)| (?=[a-z]))",
         lambda m: "~" if m.group(1) or source == "axiell" else "",
         text,
     )
