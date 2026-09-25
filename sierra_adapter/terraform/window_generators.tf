@@ -5,6 +5,7 @@ module "bibs_window_generator" {
 
   window_length_minutes    = 2
   trigger_interval_minutes = 1
+  enabled                  = var.sierra_bibs_updates_enabled
 
   lambda_error_alarm_arn = local.lambda_error_alarm_arn
   infra_bucket           = var.infra_bucket
