@@ -15,7 +15,8 @@ module "lambda" {
   runtime = "python3.12"
 
   environment_variables = {
-    BUCKET = var.s3_adapter_bucket_name
+    BUCKET                 = var.s3_adapter_bucket_name
+    SKIPPED_RESOURCE_TYPES = join(",", var.skipped_resource_types)
   }
 
   log_retention_in_days = 30

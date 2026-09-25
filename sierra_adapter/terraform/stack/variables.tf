@@ -38,3 +38,8 @@ variable "reporting_reindex_topic_arn" {
 variable "elastic_cloud_vpce_sg_id" {
   type = string
 }
+
+variable "progress_reporter_skipped_resource_types" {
+  type    = list(string)
+  default = []
+}

@@ -116,10 +116,19 @@ def consolidate_windows(sess, *, bucket, resource_type):
                 )
 
 
+def get_skipped_resource_types():
+    return {
+        r.strip()
+        for r in os.environ.get("SKIPPED_RESOURCE_TYPES", "").split(",")
+        if r.strip()
+    }
+
+
 def main(event=None, _ctxt=None):
     sess = boto3.Session()
 
     bucket = os.environ["BUCKET"]
+    skipped = get_skipped_resource_types()
 
     slack_webhook = get_secret_string(
         sess, SecretId="sierra_adapter/critical_slack_webhook"
@@ -129,6 +138,10 @@ def main(event=None, _ctxt=None):
     error_lines = []
 
     for resource_type in ("bibs", "holdings", "items", "orders"):
+        if resource_type in skipped:
+            print(f"Skipping report for {resource_type}: updates are paused")
+            continue
+
         print(f"Preparing report for {resource_type}…")
         try:
             process_report(sess, bucket=bucket, resource_type=resource_type)
@@ -140,6 +153,10 @@ def main(event=None, _ctxt=None):
 
     if errors:
         error_lines.insert(0, "There are gaps in the %s data." % "/".join(errors))
+
+        if skipped:
+            paused = "/".join(sorted(skipped))
+            error_lines.append(f"Not checked because updates are paused: {paused}.")
 
         error_lines.append(
             "You can fix this by running `$ python sierra_adapter/build_missing_windows.py` in the root of the catalogue repo."

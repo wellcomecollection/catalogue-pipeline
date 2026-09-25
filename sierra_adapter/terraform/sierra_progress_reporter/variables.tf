@@ -4,5 +4,11 @@ variable "s3_adapter_bucket_name" {}
 variable "infra_bucket" {}
 
 variable "lambda_error_alarm_arn" {}
+
+variable "skipped_resource_types" {
+  type    = list(string)
+  default = []
+}
+
 variable "namespace" {
 }
