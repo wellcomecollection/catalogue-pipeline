@@ -85,8 +85,9 @@ module "catalogue_graph_ingestor_state_machine" {
             # the event carries `ids` (a targeted by-id re-ingest): the loader/indexer treat `ids` as
             # "ingest these", but the deletions step treats the same `ids` as "delete these" (see
             # ingestor_deletions.py), so without this guard a by-id run would index those ids and then
-            # immediately delete them from the live index.
-            "Condition" : "{% $states.input.ingestor_type in ['concepts', 'images'] and $count($states.input.ids) = 0 %}",
+            # immediately delete them from the live index. Windowed events carry `ids` as null, which
+            # JSONata counts as one item, so null is tested explicitly.
+            "Condition" : "{% $states.input.ingestor_type in ['concepts', 'images'] and ($states.input.ids = null or $count($states.input.ids) = 0) %}",
             "Next" : "Run deletions"
           }
         ]
