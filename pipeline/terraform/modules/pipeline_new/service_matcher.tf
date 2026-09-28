@@ -17,7 +17,10 @@ module "matcher" {
   secret_env_vars = var.elastic.pipeline_storage_es_service_secrets["matcher"]
 
   queue_config = {
-    # Twice the lambda timeout, so an in-flight batch is never redelivered
+    # Twice the lambda timeout: enough that an in-flight batch is never redelivered,
+    # but deliberately below the AWS 6x guidance. Works waiting on a DynamoDB lock
+    # (60 s expiry) are retried by visibility expiry, so a 6x value would make
+    # every lock conflict wait 570 s per attempt and slow merge convergence.
     visibility_timeout_seconds = var.reindexing_state.scale_up_matcher_db ? 600 : 180
     max_receive_count          = 10
     batching_window_seconds    = 30
