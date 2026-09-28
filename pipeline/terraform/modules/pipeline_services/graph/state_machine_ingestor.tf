@@ -81,13 +81,15 @@ module "catalogue_graph_ingestor_state_machine" {
         Type = "Choice"
         Choices = [
           {
-            # Reconciliation deletions only make sense for a full/window-driven run. Skip them when
-            # the event carries `ids` (a targeted by-id re-ingest): the loader/indexer treat `ids` as
-            # "ingest these", but the deletions step treats the same `ids` as "delete these" (see
-            # ingestor_deletions.py), so without this guard a by-id run would index those ids and then
-            # immediately delete them from the live index. Windowed events carry `ids` as null, which
-            # JSONata counts as one item, so null is tested explicitly.
-            "Condition" : "{% $states.input.ingestor_type in ['concepts', 'images'] and ($states.input.ids = null or $count($states.input.ids) = 0) %}",
+            # Reconciliation deletions only make sense for a windowed run, whose graph removers have
+            # written the window's parquet of removed ids. Skip them when the event carries `ids`
+            # (a targeted by-id re-ingest): the loader/indexer treat `ids` as "ingest these", but the
+            # deletions step treats the same `ids` as "delete these" (see ingestor_deletions.py), so
+            # without this guard a by-id run would index those ids and then immediately delete them
+            # from the live index. Skip full-mode runs (no window) too: nothing writes their parquet.
+            # The indexer emits `ids` as JSON null, which JSONata counts as one item, so null is
+            # tested explicitly.
+            "Condition" : "{% $states.input.ingestor_type in ['concepts', 'images'] and $states.input.window != null and ($states.input.ids = null or $count($states.input.ids) = 0) %}",
             "Next" : "Run deletions"
           }
         ]
@@ -101,8 +103,15 @@ module "catalogue_graph_ingestor_state_machine" {
           FunctionName = module.ingestor_deletions_lambda.lambda_arn,
           Payload      = "{% $states.input %}"
         },
-        Retry = local.state_function_default_retry,
-        Next  = "Success"
+        # Deletions run after the loader and indexer have committed, so a transient S3 or
+        # Elasticsearch error inside the function gets a retry rather than failing the window.
+        Retry = concat(local.state_function_default_retry, [{
+          ErrorEquals     = ["States.TaskFailed"]
+          IntervalSeconds = 30
+          MaxAttempts     = 2
+          BackoffRate     = 2
+        }]),
+        Next = "Success"
       },
       Success = {
         Type = "Succeed"
