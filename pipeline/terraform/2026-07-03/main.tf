@@ -1,11 +1,13 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
-  # Matcher stage sized for the switchover reindex (wellcomecollection/platform#6719); about $135/day while on.
+  # Matcher stage at steady-state sizing with its tables on demand: the switchover
+  # reindex (wellcomecollection/platform#6719) is done. Tasks stay scaled up and
+  # the reindexer subscriptions stay on; this pipeline is production.
   reindexing_state = {
     listen_to_reindexer = true
     scale_up_tasks      = true
-    scale_up_matcher_db = true
+    scale_up_matcher_db = false
   }
 
   index_dates = {

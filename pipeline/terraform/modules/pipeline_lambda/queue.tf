@@ -38,4 +38,7 @@ resource "aws_lambda_event_source_mapping" "event_source_mapping" {
   # See: https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-polling-behavior
   batch_size                         = var.queue_config.batch_size
   maximum_batching_window_in_seconds = var.queue_config.batching_window_seconds
+
+  # Without this, a partial batch failure deletes every message in the batch
+  function_response_types = var.queue_config.report_batch_item_failures ? ["ReportBatchItemFailures"] : null
 }
