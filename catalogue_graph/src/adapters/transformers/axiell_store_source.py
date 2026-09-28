@@ -9,7 +9,7 @@ class AxiellStoreSource(RecordSource):
     """Adapts an AxiellChangesetReader to the transformer's RecordSource.
 
     Interleaves the reader's two streams into the single dict stream that
-    `stream_to_index` batches: adapter rows first, then deletion facts as
+    `stream_to` batches: adapter rows first, then deletion facts as
     dicts carrying a `guid` key, which adapter rows never do;
     `AxiellTransformer._transform_row` discriminates on that key. That dict
     shape is a private convention of this module — other consumers should use

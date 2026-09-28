@@ -125,10 +125,10 @@ class TestExecuteWithRealResolver:
         runtime = _build_runtime(ids_db)
 
         with stub_transformer_source([doc]):
-            successful_ids, _, errors = execute(minting_request, runtime=runtime)
+            result = execute(minting_request, runtime=runtime)
 
-        assert successful_ids == ["mint0001"]
-        assert errors == []
+        assert result.accepted_ids == ["mint0001"]
+        assert result.errors == []
         assert get_canonical_status(ids_db, "mint0001") == "assigned"
 
     def test_mints_ids_for_multiple_works(
@@ -153,11 +153,11 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source(docs):
-            successful_ids, _, errors = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert len(successful_ids) == 3
-        assert errors == []
-        assert set(successful_ids) == {"multi001", "multi002", "multi003"}
+        assert len(result.accepted_ids) == 3
+        assert result.errors == []
+        assert set(result.accepted_ids) == {"multi001", "multi002", "multi003"}
 
         for cid in ["multi001", "multi002", "multi003"]:
             assert get_canonical_status(ids_db, cid) == "assigned"
@@ -184,10 +184,10 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, _, errors = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert successful_ids == ["exist001"]
-        assert errors == []
+        assert result.accepted_ids == ["exist001"]
+        assert result.errors == []
         # The spare free ID should still be free
         assert get_canonical_status(ids_db, "spare001") == "free"
 
@@ -210,10 +210,10 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, _, errors = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert len(successful_ids) == 1
-        assert errors == []
+        assert len(result.accepted_ids) == 1
+        assert result.errors == []
 
         # Verify both IDs were claimed from the pool
         for cid in ["nest0001", "nest0002"]:
@@ -596,11 +596,14 @@ class TestSnsPublishing:
                     }
                 }
             ]
-            successful_ids, superseded_ids, errors = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert errors == []
-        assert set(successful_ids) | set(superseded_ids) == {"sup00001", "sup00002"}
-        assert superseded_ids == ["sup00001"]
+        assert result.errors == []
+        assert set(result.accepted_ids) | set(result.superseded_ids) == {
+            "sup00001",
+            "sup00002",
+        }
+        assert result.superseded_ids == ["sup00001"]
 
         published = {
             json.loads(e["Message"])["default"]
@@ -627,9 +630,9 @@ class TestSnsPublishing:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, _, _ = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert len(successful_ids) == 1
+        assert len(result.accepted_ids) == 1
         assert len(MockSNSClient.publish_batch_request_entries) == 0
 
     def test_no_sns_publish_when_no_successful_ids(

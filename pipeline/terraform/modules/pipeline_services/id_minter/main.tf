@@ -114,6 +114,49 @@ data "aws_iam_policy_document" "id_minter_s3_write" {
   }
 }
 
+# The minter creates the namespace and table on first use, so the policy covers
+# those as well as the data and metadata commits.
+resource "aws_iam_role_policy" "id_minter_s3_tables_write" {
+  count = var.env_vars.S3_TABLES_BUCKET != null ? 1 : 0
+
+  name   = "id-minter${local.dash_namespace}-s3-tables-write"
+  role   = module.id_minter_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.id_minter_s3_tables_write[0].json
+}
+
+data "aws_iam_policy_document" "id_minter_s3_tables_write" {
+  count = var.env_vars.S3_TABLES_BUCKET != null ? 1 : 0
+
+  statement {
+    actions = [
+      "s3tables:CreateNamespace",
+      "s3tables:GetNamespace",
+      "s3tables:ListNamespaces",
+      "s3tables:CreateTable",
+      "s3tables:ListTables",
+      "s3tables:GetTableBucket",
+      "s3tables:GetTableMetadataLocation",
+    ]
+    resources = [
+      "arn:aws:s3tables:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:bucket/${var.env_vars.S3_TABLES_BUCKET}",
+      "arn:aws:s3tables:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:bucket/${var.env_vars.S3_TABLES_BUCKET}/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3tables:GetTableMetadataLocation",
+      "s3tables:GetTable",
+      "s3tables:GetTableData",
+      "s3tables:PutTableData",
+      "s3tables:UpdateTableMetadataLocation",
+    ]
+    resources = [
+      "arn:aws:s3tables:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:bucket/${var.env_vars.S3_TABLES_BUCKET}/table/*",
+    ]
+  }
+}
+
 resource "aws_iam_role_policy" "id_minter_cloudwatch_write_policy" {
   role   = module.id_minter_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.id_minter_cloudwatch_write.json

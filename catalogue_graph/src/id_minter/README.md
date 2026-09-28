@@ -221,6 +221,8 @@ Supplying both `sourceIdentifiers` and a time window is invalid.
 
 Documents are written to `works-identified` with `external_gte` versioning on `sourceModifiedTime`, so a run carrying an older copy of a work cannot overwrite a newer one written by an overlapping run. A write rejected this way is counted as `superseded` in the report rather than failed, and the work is still sent on to the matcher, which reads the newer copy. Re-driving a work at an unchanged source time is accepted.
 
+With `ENABLE_ICEBERG_WRITES=true` (locally `--enable-iceberg-writes`), every minted document is also appended to the `works_identified` Iceberg table defined in `merger/schemata.py`, one row per write, whether or not the index accepted it. The table is never updated in place: a reader takes the row with the highest `version`, then the latest `last_modified`, which is the same rule the index enforces with its version guard. A commit that loses to another writer is retried against the new snapshot. Table name, namespace and S3 Tables bucket come from the `WORKS_IDENTIFIED_*` and `S3_TABLES_BUCKET` variables read in `merger/config.py`; the table is created on first use.
+
 ### id_minter find_work
 
 The Lambda entry point is `id_minter.steps.find_work.lambda_handler`. It runs at the start of each state machine execution: it scans `works-source` for the ids indexed within the window (or ids/full scope), partitions them into `StepFunctionMintingRequest`s of `partition_size` work ids (default 10,000), writes each partition to S3 and returns small refs for the Map to fan out. An optional `job_id` in the input becomes the base for per-partition job ids (`-p000`, `-p001`, ...).

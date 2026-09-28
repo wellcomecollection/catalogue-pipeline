@@ -2,19 +2,29 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Generator
 from typing import Any, cast
+from uuid import uuid1
 
 import pytest
 from elasticsearch import Elasticsearch
+from pyiceberg.table import Table as IcebergTable
 
+from adapters.utils.iceberg import LocalIcebergTableConfig, get_local_table
+from core.document import Document
+from core.sinks import ElasticsearchSink
+from core.transformer import SinkResult
+from id_minter.iceberg import IcebergSink
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import (
     IdMintingTransformer,
+    document_version,
 )
 from id_minter.models.identifier import SourceIdentifierKey
+from merger.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from models.pipeline.identifier import SourceIdentifier
-from tests.mocks import MockElasticsearchClient
+from tests.mocks import ListSink, MockElasticsearchClient
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -128,7 +138,7 @@ class TestTransform:
         results = list(transformer.transform([doc]))
 
         assert len(results) == 1
-        row_id, embedded = results[0]
+        row_id, embedded = results[0].source_id, results[0].body
         assert row_id == "Work[sierra-system-number/b1000001]"
         assert embedded["state"]["canonicalId"] == "abcd1234"
 
@@ -163,7 +173,7 @@ class TestTransform:
         results = list(transformer.transform([doc]))
 
         assert len(results) == 1
-        _, embedded = results[0]
+        embedded = results[0].body
         assert embedded["state"]["canonicalId"] == "abcd1234"
         assert embedded["state"]["type"] == "Identified"
         assert "identifiedType" not in embedded["state"]
@@ -211,11 +221,13 @@ class TestTransform:
             resolver=FakeResolver(),
         )
 
-        results = list(transformer.transform([doc]))
+        sink = ListSink()
+        result = transformer.stream_to(sink)
+        results = sink.documents
 
         assert results == []
-        assert len(transformer.errors) == 1
-        assert transformer.errors[0].stage == "extract_id"
+        assert len(result.errors) == 1
+        assert result.errors[0].stage == "extract_id"
 
     def test_records_error_on_embedding_failure(self) -> None:
         si = _make_source_identifier()
@@ -238,32 +250,43 @@ class TestTransform:
             resolver=FailingResolver(),
         )
 
-        results = list(transformer.transform([doc]))
+        sink = ListSink()
+        result = transformer.stream_to(sink)
+        results = sink.documents
 
         assert results == []
-        assert len(transformer.errors) == 1
-        assert transformer.errors[0].stage == "embed"
-        assert transformer.errors[0].row_id == "Work[sierra-system-number/b1000001]"
+        assert len(result.errors) == 1
+        assert result.errors[0].stage == "embed"
+        assert result.errors[0].row_id == "Work[sierra-system-number/b1000001]"
 
 
 # ---------------------------------------------------------------------------
-# Tests: _get_document_id
+# Tests: document identity
 # ---------------------------------------------------------------------------
 
 
-class TestGetDocumentId:
-    def test_returns_canonical_id(self) -> None:
+class TestDocumentIdentity:
+    def test_target_id_is_canonical_id(self) -> None:
+        doc = _make_work_doc(_make_source_identifier())
         transformer = IdMintingTransformer(
-            minting_source=_StubSource([]),
-            resolver=FakeResolver(),
+            minting_source=_StubSource([doc]),
+            resolver=FakeResolver(
+                ids={
+                    SourceIdentifierKey(
+                        "Work", "sierra-system-number", "b1000001"
+                    ): "abcd1234"
+                }
+            ),
         )
 
-        record = {"state": {"canonicalId": "abcd1234", "sourceIdentifier": {}}}
-        assert transformer._get_document_id(record) == "abcd1234"
+        (document,) = transformer.transform([doc])
+
+        assert document.target_id == "abcd1234"
+        assert document.version == 1727206010000  # 2024-09-24T19:26:50Z
 
 
 # ---------------------------------------------------------------------------
-# Tests: stream_to_index (integration)
+# Tests: stream_to (integration)
 # ---------------------------------------------------------------------------
 
 
@@ -287,7 +310,9 @@ class TestStreamToIndex:
             resolver=resolver,
         )
 
-        transformer.stream_to_index(es_client, "works-identified-dev")
+        result = transformer.stream_to(
+            ElasticsearchSink(es_client, "works-identified-dev")
+        )
 
         assert len(MockElasticsearchClient.inputs) == 1
         indexed = MockElasticsearchClient.inputs[0]
@@ -296,9 +321,9 @@ class TestStreamToIndex:
         assert indexed["_source"]["state"]["canonicalId"] == "abcd1234"
         assert indexed["_version"] == 1727206010000  # 2024-09-24T19:26:50Z
         assert indexed["_version_type"] == "external_gte"
-        assert not transformer.errors
-        assert transformer.successful_ids == ["abcd1234"]
-        assert transformer.superseded_ids == []
+        assert not result.errors
+        assert result.accepted_ids == ["abcd1234"]
+        assert result.superseded_ids == []
 
     def test_tracks_indexing_errors(self, monkeypatch: pytest.MonkeyPatch) -> None:
         si = _make_source_identifier()
@@ -338,11 +363,13 @@ class TestStreamToIndex:
             resolver=resolver,
         )
 
-        transformer.stream_to_index(es_client, "works-identified-dev")
+        result = transformer.stream_to(
+            ElasticsearchSink(es_client, "works-identified-dev")
+        )
 
-        assert len(transformer.errors) == 1
-        assert transformer.errors[0].stage == "index"
-        assert "mapper_parsing_exception" in transformer.errors[0].detail
+        assert len(result.errors) == 1
+        assert result.errors[0].stage == "index"
+        assert "mapper_parsing_exception" in result.errors[0].detail
 
     def test_version_conflict_is_superseded_not_failed(
         self, monkeypatch: pytest.MonkeyPatch
@@ -392,11 +419,13 @@ class TestStreamToIndex:
             resolver=resolver,
         )
 
-        transformer.stream_to_index(es_client, "works-identified-dev")
+        result = transformer.stream_to(
+            ElasticsearchSink(es_client, "works-identified-dev")
+        )
 
-        assert transformer.errors == []
-        assert transformer.successful_ids == ["fresh002"]
-        assert transformer.superseded_ids == ["stale001"]
+        assert result.errors == []
+        assert result.accepted_ids == ["fresh002"]
+        assert result.superseded_ids == ["stale001"]
 
     def test_superseded_ids_reset_between_runs(
         self, monkeypatch: pytest.MonkeyPatch
@@ -429,13 +458,17 @@ class TestStreamToIndex:
             minting_source=_StubSource([doc]), resolver=resolver
         )
 
-        transformer.stream_to_index(es_client, "works-identified-dev")
-        assert transformer.superseded_ids == ["abcd1234"]
-        assert transformer.successful_ids == []
+        result = transformer.stream_to(
+            ElasticsearchSink(es_client, "works-identified-dev")
+        )
+        assert result.superseded_ids == ["abcd1234"]
+        assert result.accepted_ids == []
 
-        transformer.stream_to_index(es_client, "works-identified-dev")
-        assert transformer.superseded_ids == []
-        assert transformer.successful_ids == ["abcd1234"]
+        result = transformer.stream_to(
+            ElasticsearchSink(es_client, "works-identified-dev")
+        )
+        assert result.superseded_ids == []
+        assert result.accepted_ids == ["abcd1234"]
 
 
 # ---------------------------------------------------------------------------
@@ -465,7 +498,7 @@ class TestDocumentVersion:
         record = {
             "state": {"canonicalId": "x", "sourceModifiedTime": source_modified_time}
         }
-        assert self._transformer()._get_document_version(record) == expected
+        assert document_version(record) == expected
 
     def test_epoch_start_is_floored(self) -> None:
         """Miro works are dated 1970-01-01; a version of 0 would never beat the
@@ -473,7 +506,7 @@ class TestDocumentVersion:
         record = {
             "state": {"canonicalId": "x", "sourceModifiedTime": "1970-01-01T00:00:00Z"}
         }
-        assert self._transformer()._get_document_version(record) == 1_000_000
+        assert document_version(record) == 1_000_000
 
     def test_naive_time_is_read_as_utc(self) -> None:
         naive = {
@@ -482,8 +515,7 @@ class TestDocumentVersion:
         aware = {
             "state": {"canonicalId": "x", "sourceModifiedTime": "2024-09-24T19:26:50Z"}
         }
-        t = self._transformer()
-        assert t._get_document_version(naive) == t._get_document_version(aware)
+        assert document_version(naive) == document_version(aware)
 
     def test_later_source_time_gives_higher_version(self) -> None:
         earlier = {
@@ -495,8 +527,7 @@ class TestDocumentVersion:
                 "sourceModifiedTime": "2026-03-20T16:48:06.001Z",
             }
         }
-        t = self._transformer()
-        assert t._get_document_version(later) > t._get_document_version(earlier)
+        assert document_version(later) > document_version(earlier)
 
     @pytest.mark.parametrize("bad_time", [None, "", "not a date"])
     def test_bad_source_modified_time_is_a_row_error(
@@ -525,11 +556,13 @@ class TestDocumentVersion:
             minting_source=_StubSource([bad, good]), resolver=resolver
         )
 
-        transformer.stream_to_index(es_client, "works-identified-dev")
+        result = transformer.stream_to(
+            ElasticsearchSink(es_client, "works-identified-dev")
+        )
 
-        assert transformer.successful_ids == ["good0002"]
-        assert [e.stage for e in transformer.errors] == ["version"]
-        assert transformer.errors[0].row_id == "Work[sierra-system-number/b1000001]"
+        assert result.accepted_ids == ["good0002"]
+        assert [e.stage for e in result.errors] == ["version"]
+        assert result.errors[0].row_id == "Work[sierra-system-number/b1000001]"
 
     def test_bulk_actions_carry_the_guard(self) -> None:
         record = {
@@ -538,9 +571,18 @@ class TestDocumentVersion:
                 "sourceModifiedTime": "2019-09-13T08:49:23.967Z",
             }
         }
-        (action,) = self._transformer()._generate_bulk_load_actions(
-            [record], "works-identified-dev"
+        document = Document(
+            source_id="row",
+            target_id="abcd1234",
+            body=record,
+            version=document_version(record),
         )
+        MockElasticsearchClient.reset_mocks()
+        sink = ElasticsearchSink(
+            cast(Elasticsearch, MockElasticsearchClient({}, "")), "works-identified-dev"
+        )
+        sink.write([document])
+        (action,) = MockElasticsearchClient.inputs
         assert action["_id"] == "abcd1234"
         assert action["_version"] == 1568364563967
         assert action["_version_type"] == "external_gte"
@@ -593,7 +635,7 @@ class TestBatchedMinting:
             SourceIdentifierKey("Work", "sierra-system-number", "b1000002"),
             SourceIdentifierKey("Work", "sierra-system-number", "b1000003"),
         }
-        canonical_ids = {row_id: doc["state"]["canonicalId"] for row_id, doc in results}
+        canonical_ids = {d.source_id: d.body["state"]["canonicalId"] for d in results}
         assert canonical_ids == {
             "Work[sierra-system-number/b1000001]": "aaaa1111",
             "Work[sierra-system-number/b1000002]": "bbbb2222",
@@ -682,16 +724,12 @@ class TestBatchedMinting:
             resolver=resolver,
         )
 
-        results = list(transformer.transform([doc_good, doc_bad, doc_other]))
+        result = transformer.stream_to(ListSink())
 
         # The two good works survive; the bad one is recorded as an embed error.
-        row_ids = {row_id for row_id, _ in results}
-        assert row_ids == {
-            "Work[sierra-system-number/b1000001]",
-            "Work[sierra-system-number/b1000003]",
-        }
-        assert len(transformer.errors) == 1
-        err = transformer.errors[0]
+        assert set(result.accepted_ids) == {"aaaa1111", "cccc3333"}
+        assert len(result.errors) == 1
+        err = result.errors[0]
         assert err.stage == "embed"
         assert err.row_id == "Work[sierra-system-number/b1000002]"
 
@@ -718,12 +756,11 @@ class TestBatchedMinting:
             resolver=resolver,
         )
 
-        results = list(transformer.transform([good, broken]))
+        result = transformer.stream_to(ListSink())
 
-        assert len(results) == 1
-        assert results[0][0] == "Work[sierra-system-number/b1000001]"
-        assert len(transformer.errors) == 1
-        assert transformer.errors[0].stage == "extract_id"
+        assert result.accepted_ids == ["aaaa1111"]
+        assert len(result.errors) == 1
+        assert result.errors[0].stage == "extract_id"
         # The broken doc shouldn't have made it into the resolver call.
         assert len(resolver.mint_calls) == 1
         sids_in_call = {req[0] for req in resolver.mint_calls[0]}
@@ -797,7 +834,7 @@ class TestBatchedMinting:
         # the resolver (because the chunk references the same source id with
         # two different predecessors); the next two are the per-work
         # fallback, one mint_ids call per work.
-        assert {row_id for row_id, _ in results} == {
+        assert {d.source_id for d in results} == {
             "Work[sierra-system-number/b1000001]",
             "Work[sierra-system-number/b1000002]",
         }
@@ -805,3 +842,150 @@ class TestBatchedMinting:
         for call in resolver.mint_calls[1:]:
             work_keys = {req[0] for req in call if req[0][0] == "Work"}
             assert len(work_keys) == 1
+
+
+# ---------------------------------------------------------------------------
+# Tests: parallel append-only Iceberg writes
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def works_identified_table() -> Generator[IcebergTable]:
+    config = LocalIcebergTableConfig(
+        table_name=f"works_identified_{uuid1().hex}",
+        namespace="test",
+        db_name="test_catalog",
+        iceberg_schema=WORKS_IDENTIFIED_ICEBERG_SCHEMA,
+    )
+    table = get_local_table(config)
+    try:
+        yield table
+    finally:
+        table.catalog.drop_table(f"test.{config.table_name}")
+
+
+def _make_identified_source_doc(value: str) -> dict:
+    doc = _make_work_doc(_make_source_identifier(value=value))
+    doc["type"] = "Visible"
+    doc["version"] = 1727206010
+    return doc
+
+
+def _resolver_for(values_to_ids: dict[str, str]) -> FakeResolver:
+    return FakeResolver(
+        ids={
+            SourceIdentifierKey("Work", "sierra-system-number", value): canonical_id
+            for value, canonical_id in values_to_ids.items()
+        }
+    )
+
+
+def _stream_with_iceberg(
+    transformer: IdMintingTransformer, es_client: Elasticsearch, table: IcebergTable
+) -> SinkResult:
+    """Index into Elasticsearch and append to the Iceberg table; returns the index result."""
+    result, _ = transformer.stream_to_many(
+        ElasticsearchSink(es_client, "works-identified-dev"),
+        IcebergSink(table),
+    )
+    return result
+
+
+class TestIcebergWrites:
+    def test_appends_indexed_documents(
+        self, works_identified_table: IcebergTable
+    ) -> None:
+        docs = [_make_identified_source_doc(f"b100000{i}") for i in (1, 2)]
+
+        MockElasticsearchClient.reset_mocks()
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource(docs),
+            resolver=_resolver_for({"b1000001": "aaaa0001", "b1000002": "aaaa0002"}),
+        )
+
+        _stream_with_iceberg(transformer, es_client, works_identified_table)
+
+        rows = sorted(
+            works_identified_table.scan().to_arrow().to_pylist(), key=lambda r: r["id"]
+        )
+        assert [r["id"] for r in rows] == ["aaaa0001", "aaaa0002"]
+        assert rows[0]["version"] == 1727206010
+        assert rows[0]["type"] == "Visible"
+        assert rows[0]["source_identifier_type"] == "sierra-system-number"
+        assert rows[0]["source_identifier_value"] == "b1000001"
+        assert rows[0]["merge_candidate_ids"] == []
+        assert json.loads(rows[0]["content"])["state"]["canonicalId"] == "aaaa0001"
+        assert rows[0]["last_modified"] is not None
+
+    def test_writes_every_document_whatever_the_index_decides(
+        self, works_identified_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Superseded and failed documents still reach the table; readers resolve versions."""
+        docs = [_make_identified_source_doc(f"b100000{i}") for i in (1, 2, 3)]
+
+        def fake_bulk(
+            client: Any,
+            actions: Any,
+            raise_on_error: bool = True,
+            stats_only: bool = False,
+        ) -> tuple[int, list]:
+            actions_list = list(actions)
+            return len(actions_list) - 2, [
+                {
+                    "index": {
+                        "_id": "stale001",
+                        "status": 409,
+                        "error": {"type": "version_conflict_engine_exception"},
+                    }
+                },
+                {
+                    "index": {
+                        "_id": "broke002",
+                        "status": 500,
+                        "error": {"type": "mapper_parsing_exception"},
+                    }
+                },
+            ]
+
+        monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+
+        MockElasticsearchClient.reset_mocks()
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource(docs),
+            resolver=_resolver_for(
+                {"b1000001": "stale001", "b1000002": "broke002", "b1000003": "fine0003"}
+            ),
+        )
+
+        result = _stream_with_iceberg(transformer, es_client, works_identified_table)
+
+        rows = works_identified_table.scan().to_arrow().to_pylist()
+        assert sorted(r["id"] for r in rows) == ["broke002", "fine0003", "stale001"]
+        assert result.accepted_ids == ["fine0003"]
+        assert result.superseded_ids == ["stale001"]
+        assert [e.row_id for e in result.errors] == [
+            "Work[sierra-system-number/b1000002]"
+        ]
+
+    def test_iceberg_failure_does_not_fail_the_run(
+        self, works_identified_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        def broken_append(table: IcebergTable, documents: list[dict]) -> int:
+            raise RuntimeError("catalog unreachable")
+
+        monkeypatch.setattr("id_minter.iceberg.append_identified_works", broken_append)
+
+        MockElasticsearchClient.reset_mocks()
+        es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([_make_identified_source_doc("b1000001")]),
+            resolver=_resolver_for({"b1000001": "aaaa0001"}),
+        )
+
+        result = _stream_with_iceberg(transformer, es_client, works_identified_table)
+
+        assert result.accepted_ids == ["aaaa0001"]
+        assert result.errors == []
+        assert works_identified_table.scan().to_arrow().num_rows == 0

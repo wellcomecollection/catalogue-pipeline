@@ -17,7 +17,21 @@ from botocore.exceptions import ClientError
 from polars import DataFrame as PolarsDataFrame
 
 from clients.neptune_client import NeptuneClient
+from core.document import Document
+from core.sinks import WriteResult
 from utils.elasticsearch import get_client
+
+
+class ListSink:
+    """A sink that accepts every document and keeps them, for inspecting a transformer's output."""
+
+    def __init__(self) -> None:
+        self.documents: list[Document] = []
+
+    def write(self, documents: list[Document]) -> WriteResult:
+        self.documents.extend(documents)
+        return WriteResult(accepted=list(documents))
+
 
 MOCK_CREDENTIALS = Credentials(
     access_key="test_access_key",
