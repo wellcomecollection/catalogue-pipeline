@@ -7,7 +7,8 @@ from pymarc.record import Record
 from adapters.transformers.builders.source_work_builder import SourceWorkBuilder
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.adapter_store_source import AdapterStoreSource, RecordSource
-from core.transformer import ElasticBaseTransformer
+from core.document import Document
+from core.transformer import BatchTransformer
 from models.pipeline.source.work import (
     SourceWork,
 )
@@ -16,7 +17,7 @@ from utils.marc import parse_single_marc_record
 logger = structlog.get_logger(__name__)
 
 
-class SourceWorkTransformer(ElasticBaseTransformer[SourceWork], ABC):
+class SourceWorkTransformer(BatchTransformer, ABC):
     def __init__(
         self,
         adapter_store: AdapterStore,
@@ -48,8 +49,12 @@ class SourceWorkTransformer(ElasticBaseTransformer[SourceWork], ABC):
         by each concrete transformer.
         """
 
-    def _get_document_id(self, record: SourceWork) -> str:
-        return record.state.id()
+    def document(self, source_id: str, work: SourceWork) -> Document:
+        return Document(
+            source_id=source_id,
+            target_id=work.state.id(),
+            body=work.model_dump(exclude_none=True, mode="json"),
+        )
 
     def _row_to_marc_record(self, row: dict[str, Any]) -> Record | None:
         """

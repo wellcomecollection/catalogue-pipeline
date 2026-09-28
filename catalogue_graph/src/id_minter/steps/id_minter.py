@@ -7,14 +7,17 @@ Follows the runtime / handler pattern used by the EBSCO adapter loader.
 from __future__ import annotations
 
 import argparse
-from typing import Any
+from typing import Any, Literal
 
 import structlog
 from pydantic import BaseModel, ConfigDict
+from pyiceberg.table import Table as IcebergTable
 
-from core.transformer import TransformationError
+from core.sinks import ElasticsearchSink, Sink
+from core.transformer import SinkResult
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
+from id_minter.iceberg import IcebergSink
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import IdMintingTransformer
 from id_minter.models.identifier import IdResolver
@@ -25,6 +28,7 @@ from id_minter.reporting import IdMinterReport
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.sns import publish_ids_to_sns
+from merger.config import get_works_identified_table
 from models.incremental_window import IncrementalWindow
 from utils.aws import pydantic_from_s3_json
 from utils.elasticsearch import ElasticsearchMode, get_client
@@ -41,6 +45,7 @@ class IdMinterRuntime(BaseModel):
     resolver: IdResolver
     source_es_mode: ElasticsearchMode = "private"
     target_es_mode: ElasticsearchMode = "private"
+    iceberg_table: IcebergTable | None = None
 
 
 class IdMinterResult(BaseModel):
@@ -60,21 +65,29 @@ def build_runtime(
     resolver: IdResolver | None = None,
     source_es_mode: ElasticsearchMode = "private",
     target_es_mode: ElasticsearchMode = "private",
+    iceberg_table_mode: Literal["rest", "local"] = "rest",
 ) -> IdMinterRuntime:
     cfg = config_obj or ID_MINTER_CONFIG
     res = resolver or MintingResolver(cfg)
+    iceberg_table = None
+    if cfg.enable_iceberg_writes:
+        iceberg_table = get_works_identified_table(
+            use_rest_api_table=iceberg_table_mode == "rest", create_if_not_exists=True
+        )
+
     return IdMinterRuntime(
         config=cfg,
         resolver=res,
         source_es_mode=source_es_mode,
         target_es_mode=target_es_mode,
+        iceberg_table=iceberg_table,
     )
 
 
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
-) -> tuple[list[str], list[str], list[TransformationError]]:
+) -> SinkResult:
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
@@ -109,19 +122,22 @@ def execute(
         es_client=source_client,
         index_name=source_index,
     )
-    transformer = IdMintingTransformer(
-        elastic_source,
-        resolver=runtime.resolver,
-    )
-    transformer.stream_to_index(target_client, target_index)
+    transformer = IdMintingTransformer(elastic_source, resolver=runtime.resolver)
+
+    # Documents also go to an experimental Iceberg table when enabled.
+    sinks: list[Sink] = [ElasticsearchSink(target_client, target_index)]
+    if runtime.iceberg_table is not None:
+        sinks.append(IcebergSink(runtime.iceberg_table))
+
+    result, *_ = transformer.stream_to_many(*sinks)
 
     # Superseded works are forwarded too: the matcher reads the newer copy, and a run
     # that died between indexing and publishing is covered by the next one.
-    ids_to_publish = transformer.successful_ids + transformer.superseded_ids
+    ids_to_publish = result.accepted_ids + result.superseded_ids
     if runtime.config.downstream_sns_topic_arn and ids_to_publish:
         publish_ids_to_sns(runtime.config.downstream_sns_topic_arn, ids_to_publish)
 
-    return transformer.successful_ids, transformer.superseded_ids, transformer.errors
+    return result
 
 
 def log_runtime_config(
@@ -149,6 +165,7 @@ def log_runtime_config(
         source_es=f"{runtime.source_es_mode} → {cfg.source_index_name}",
         target_es=f"{runtime.target_es_mode} → {cfg.target_index_name}",
         downstream_sns=cfg.downstream_sns_topic_arn or "disabled",
+        iceberg_writes="yes" if cfg.enable_iceberg_writes else "no",
         mode=request.source_scope.mode_label,
         identifiers=request.source_identifiers,
         window=request.window.model_dump() if request.window else None,
@@ -163,22 +180,22 @@ def handler(
 ) -> IdMinterResult:
     setup_logging(execution_context)
     log_runtime_config(runtime, event)
-    successful_ids, superseded_ids, errors = execute(event, runtime=runtime)
+    result = execute(event, runtime=runtime)
 
     logger.info(
         "Minting complete",
         job_id=event.job_id,
-        success_count=len(successful_ids),
-        superseded_count=len(superseded_ids),
-        failure_count=len(errors),
+        success_count=len(result.accepted_ids),
+        superseded_count=len(result.superseded_ids),
+        failure_count=len(result.errors),
     )
 
     report = IdMinterReport(
         pipeline_date=runtime.config.pipeline_date,
         job_id=event.job_id,
-        successful_ids=successful_ids,
-        superseded_ids=superseded_ids,
-        errors=errors,
+        successful_ids=result.accepted_ids,
+        superseded_ids=result.superseded_ids,
+        errors=result.errors,
         s3_bucket=runtime.config.s3_bucket,
         s3_prefix=runtime.config.s3_prefix,
     )
@@ -187,9 +204,9 @@ def handler(
     return IdMinterResult.model_validate(
         {
             **event.model_dump(),
-            "success_count": len(successful_ids),
-            "superseded_count": len(superseded_ids),
-            "failure_count": len(errors),
+            "success_count": len(result.accepted_ids),
+            "superseded_count": len(result.superseded_ids),
+            "failure_count": len(result.errors),
             "report_s3_uri": report.s3_uri,
         }
     )
@@ -318,6 +335,18 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         default="local",
         help="Elasticsearch mode for writing indexed documents. Default: local.",
     )
+    parser.add_argument(
+        "--enable-iceberg-writes",
+        action="store_true",
+        default=False,
+        help="Also append the indexed documents to the works identified Iceberg table.",
+    )
+    parser.add_argument(
+        "--iceberg-table-mode",
+        choices=["rest", "local"],
+        default="local",
+        help="Iceberg catalog for --enable-iceberg-writes: S3 Tables or the local one. Default: local.",
+    )
 
     args = parser.parse_args()
 
@@ -341,6 +370,8 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         overrides["source_index_date_suffix"] = args.source_index_date_suffix
     if args.target_index_date_suffix:
         overrides["target_index_date_suffix"] = args.target_index_date_suffix
+    if args.enable_iceberg_writes:
+        overrides["enable_iceberg_writes"] = True
 
     config_obj = IdMinterConfig(**overrides) if overrides else None
     cfg = config_obj or ID_MINTER_CONFIG
@@ -356,6 +387,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         resolver=resolver,
         source_es_mode=args.source_es_mode,
         target_es_mode=args.target_es_mode,
+        iceberg_table_mode=args.iceberg_table_mode,
     )
 
     if args.dry_run:
