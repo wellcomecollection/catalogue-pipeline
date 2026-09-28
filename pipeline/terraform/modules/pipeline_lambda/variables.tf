@@ -66,6 +66,9 @@ variable "queue_config" {
 
     # Scaling configuration
     maximum_concurrency = optional(number, 2)
+
+    # Let the handler report per-message failures so only those messages are retried
+    report_batch_item_failures = optional(bool, false)
   })
   default = null
 }
