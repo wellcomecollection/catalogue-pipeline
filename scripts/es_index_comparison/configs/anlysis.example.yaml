@@ -6,7 +6,7 @@
 
 # Exactly TWO indices to compare (required)
 indexes:
-  - works-source-2025-10-02
+  - works-source-2026-07-03
   - works-source-2025-10-06
 
 # Optional Elasticsearch query DSL (omit for match_all). This example filters

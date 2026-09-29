@@ -110,7 +110,7 @@ To write to the public identified index instead:
 ```bash
 uv run python -m id_minter.steps.id_minter \
     --source-identifiers 'Work[sierra-system-number/b1000001]' \
-    --pipeline-date 2025-10-02 \
+    --pipeline-date 2026-07-03 \
     --target-es-mode public
 ```
 

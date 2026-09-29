@@ -59,7 +59,7 @@ clusters:
 index_sources:
   prod-works-source:
     cluster: production
-    index: works-source-2025-10-02
+    index: works-source-2026-07-03
 ```
 
 Analysis configs reference the identifiers (`prod-works-source`) instead of raw index names. The
