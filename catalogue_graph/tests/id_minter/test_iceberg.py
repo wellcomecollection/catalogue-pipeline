@@ -7,7 +7,7 @@ import pytest
 from pyiceberg.exceptions import CommitFailedException
 
 from id_minter.iceberg import MAX_COMMIT_ATTEMPTS, append_identified_works
-from merger.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
+from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 
 
 def _document(canonical_id: str, version: int = 3) -> dict:

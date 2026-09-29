@@ -22,7 +22,7 @@ from id_minter.id_minting_transformer import (
     document_version,
 )
 from id_minter.models.identifier import SourceIdentifierKey
-from merger.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
+from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from models.pipeline.identifier import SourceIdentifier
 from tests.mocks import ListSink, MockElasticsearchClient
 
