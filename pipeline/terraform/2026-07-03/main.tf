@@ -1,11 +1,12 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
-  # Matcher stage at steady-state sizing with its tables on demand: the switchover
-  # reindex (wellcomecollection/platform#6719) is done. Tasks stay scaled up and
-  # the reindexer subscriptions stay on; this pipeline is production.
+  # This pipeline is production since the switchover (wellcomecollection/platform#6541):
+  # tasks stay scaled up, the matcher stage runs at steady-state sizing with its tables
+  # on demand, and it no longer listens to the reindexer, so a reindex into another
+  # pipeline cannot reach it.
   reindexing_state = {
-    listen_to_reindexer = true
+    listen_to_reindexer = false
     scale_up_tasks      = true
     scale_up_matcher_db = false
   }
