@@ -26,7 +26,7 @@ assert graph_date not in ("", "prod")
 client = NeptuneClient(graph_date)
 ```
 
-The guard matters: an empty or `prod` graph date selects the legacy production cluster (see `NeptuneClient.namespace`), and client-setup patterns copied from notebooks arrive with the date unset.
+The guard matters: an empty or `prod` graph date selects the legacy cluster used by the frozen 2025-10-02 pipeline (see `NeptuneClient.namespace`), and client-setup patterns copied from notebooks arrive with the date unset.
 
 ## Count before deleting
 
