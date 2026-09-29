@@ -4,16 +4,18 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
+from freezegun import freeze_time
 from pyiceberg.exceptions import CommitFailedException
 
-from id_minter.iceberg import MAX_COMMIT_ATTEMPTS, append_identified_works
+from core.document import Document
+from id_minter.iceberg import COMMIT_BACKOFF_MAX_TIME, append_identified_works
 from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 
 
-def _document(canonical_id: str, version: int = 3) -> dict:
-    return {
+def _document(canonical_id: str, version: int = 1727206010000) -> Document:
+    body = {
         "type": "Visible",
-        "version": version,
+        "version": 3,
         "state": {
             "canonicalId": canonical_id,
             "sourceIdentifier": {
@@ -26,6 +28,12 @@ def _document(canonical_id: str, version: int = 3) -> dict:
         },
         "data": {"title": "Test Work"},
     }
+    return Document(
+        source_id="Work[sierra-system-number/b1000001]",
+        target_id=canonical_id,
+        body=body,
+        version=version,
+    )
 
 
 def _table(*append_outcomes: Exception | None) -> MagicMock:
@@ -50,18 +58,21 @@ class TestAppendIdentifiedWorks:
 
     def test_one_row_per_document(self) -> None:
         table = _table(None)
-        documents = [_document("aaaa0001"), _document("aaaa0002", version=7)]
+        documents = [
+            _document("aaaa0001"),
+            _document("aaaa0002", version=1727206010001),
+        ]
 
         assert append_identified_works(table, documents) == 2
 
         rows = table.append.call_args.args[0]
         assert rows.column("id").to_pylist() == ["aaaa0001", "aaaa0002"]
-        assert rows.column("version").to_pylist() == [3, 7]
+        assert rows.column("version").to_pylist() == [1727206010000, 1727206010001]
         assert rows.column("merge_candidate_ids").to_pylist() == [
             ["efgh5678"],
             ["efgh5678"],
         ]
-        assert json.loads(rows.column("content")[0].as_py()) == documents[0]
+        assert json.loads(rows.column("content")[0].as_py()) == documents[0].body
         assert len(set(rows.column("last_modified").to_pylist())) == 1
 
     def test_retries_after_losing_the_commit(self) -> None:
@@ -71,9 +82,23 @@ class TestAppendIdentifiedWorks:
         assert table.append.call_count == 2
         assert table.refresh.call_count == 2
 
-    def test_gives_up_after_max_attempts(self) -> None:
-        table = _table(*[CommitFailedException("snapshot moved")] * MAX_COMMIT_ATTEMPTS)
+    def test_gives_up_when_the_time_budget_runs_out(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        table = MagicMock()
+        table.schema.return_value = WORKS_IDENTIFIED_ICEBERG_SCHEMA
+        table.append.side_effect = CommitFailedException("snapshot moved")
 
-        with pytest.raises(CommitFailedException):
-            append_identified_works(table, [_document("aaaa0001")])
-        assert table.append.call_count == MAX_COMMIT_ATTEMPTS
+        sleeps: list[float] = []
+
+        def sleep(seconds: float) -> None:
+            sleeps.append(seconds)
+            clock.tick(seconds)
+
+        with freeze_time() as clock:
+            monkeypatch.setattr("time.sleep", sleep)
+            with pytest.raises(CommitFailedException):
+                append_identified_works(table, [_document("aaaa0001")])
+
+        assert table.append.call_count == len(sleeps) + 1
+        assert sum(sleeps) == pytest.approx(COMMIT_BACKOFF_MAX_TIME)

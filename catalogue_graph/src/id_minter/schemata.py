@@ -5,18 +5,20 @@ from pyiceberg.schema import Schema
 from pyiceberg.table.sorting import SortField, SortOrder
 from pyiceberg.transforms import IdentityTransform
 from pyiceberg.types import (
-    IntegerType,
     ListType,
+    LongType,
     NestedField,
     StringType,
     TimestamptzType,
 )
 
+from core.document import Document
+
 # One row per identified work, written by the id minter. The graph columns are
 # promoted out of `content` so the matcher can read them without parsing documents.
 WORKS_IDENTIFIED_ICEBERG_SCHEMA = Schema(
     NestedField(field_id=1, name="id", field_type=StringType(), required=True),
-    NestedField(field_id=2, name="version", field_type=IntegerType(), required=True),
+    NestedField(field_id=2, name="version", field_type=LongType(), required=True),
     NestedField(field_id=3, name="type", field_type=StringType(), required=True),
     NestedField(
         field_id=4,
@@ -49,19 +51,20 @@ WORKS_IDENTIFIED_SORT_ORDER = SortOrder(
 )
 
 
-def works_identified_row(document: dict, last_modified: datetime) -> dict:
-    """A table row for one identified work document."""
-    state = document["state"]
+def works_identified_row(document: Document, last_modified: datetime) -> dict:
+    """A table row for one identified work, versioned like its index write."""
+    body = document.body
+    state = body["state"]
     return {
         "id": state["canonicalId"],
-        "version": document["version"],
-        "type": document["type"],
+        "version": document.version,
+        "type": body["type"],
         "source_identifier_type": state["sourceIdentifier"]["identifierType"]["id"],
         "source_identifier_value": state["sourceIdentifier"]["value"],
         "merge_candidate_ids": [
             candidate["id"]["canonicalId"]
             for candidate in state.get("mergeCandidates", [])
         ],
-        "content": json.dumps(document),
+        "content": json.dumps(body),
         "last_modified": last_modified,
     }

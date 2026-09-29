@@ -910,7 +910,8 @@ class TestIcebergWrites:
             works_identified_table.scan().to_arrow().to_pylist(), key=lambda r: r["id"]
         )
         assert [r["id"] for r in rows] == ["aaaa0001", "aaaa0002"]
-        assert rows[0]["version"] == 1727206010
+        # The index guard version (source time in ms), not the body's own version.
+        assert rows[0]["version"] == 1727206010000
         assert rows[0]["type"] == "Visible"
         assert rows[0]["source_identifier_type"] == "sierra-system-number"
         assert rows[0]["source_identifier_value"] == "b1000001"

@@ -12,6 +12,7 @@ Skip with:
 
 from __future__ import annotations
 
+import argparse
 import json
 from datetime import datetime
 from typing import cast
@@ -24,7 +25,7 @@ from elasticsearch import Elasticsearch
 
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.id_minting_source import IdMintingSource
-from id_minter.models.identifier import SourceIdentifierKey
+from id_minter.models.identifier import IdResolver, SourceIdentifierKey
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
 )
@@ -32,9 +33,11 @@ from id_minter.resolvers.minting_resolver import MintingResolver
 from id_minter.steps.id_minter import (
     IdMinterResult,
     IdMinterRuntime,
+    build_runtime,
     execute,
     handler,
     lambda_handler,
+    local_handler,
 )
 from models.incremental_window import IncrementalWindow
 from tests.id_minter.conftest import (
@@ -811,3 +814,50 @@ class TestLambdaHandlerInputDispatch:
 
         assert captured["request"].source_identifiers is None
         assert captured["request"].window is None
+
+
+class TestBuildRuntime:
+    def test_iceberg_setup_failure_disables_iceberg_writes(self) -> None:
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            enable_iceberg_writes=True,
+        )
+
+        with patch(
+            "id_minter.steps.id_minter.get_works_identified_table",
+            side_effect=RuntimeError("no route to S3 Tables"),
+        ):
+            runtime = build_runtime(config, resolver=MagicMock(spec=IdResolver))
+
+        assert runtime.iceberg_table is None
+
+    def test_dry_run_does_not_create_iceberg_table(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "id_minter",
+                "--dry-run",
+                "--enable-iceberg-writes",
+                "--iceberg-table-mode",
+                "rest",
+            ],
+        )
+
+        with (
+            patch(
+                "id_minter.steps.id_minter.DataApiIdResolver",
+                return_value=MagicMock(spec=IdResolver),
+            ),
+            patch("id_minter.steps.id_minter.log_runtime_config"),
+            patch(
+                "id_minter.steps.id_minter.get_works_identified_table",
+                side_effect=RuntimeError("table does not exist"),
+            ) as get_table,
+        ):
+            local_handler(argparse.ArgumentParser())
+
+        get_table.assert_called_once_with(
+            use_rest_api_table=True, create_if_not_exists=False
+        )

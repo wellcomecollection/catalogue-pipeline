@@ -2,6 +2,7 @@
 
 import os
 from datetime import UTC, datetime
+from typing import Any
 
 import backoff
 import pyarrow as pa
@@ -60,8 +61,9 @@ def get_works_identified_table(
 
 
 # Concurrent minter partitions race on the table commit and the loser retries against
-# the new snapshot. Appends never conflict on data, so a few attempts are enough.
-MAX_COMMIT_ATTEMPTS = 4
+# the new snapshot. The budget covers queuing behind the other partitions, well inside the Lambda timeout.
+COMMIT_BACKOFF_MAX_TIME = 120
+COMMIT_BACKOFF_MAX_INTERVAL = 10
 
 
 class IcebergSink:
@@ -75,14 +77,14 @@ class IcebergSink:
 
     def write(self, documents: list[Document]) -> WriteResult:
         try:
-            append_identified_works(self.table, [d.body for d in documents])
+            append_identified_works(self.table, documents)
         except Exception:
             logger.exception("Iceberg append failed", documents=len(documents))
             return WriteResult()
         return WriteResult(accepted=list(documents))
 
 
-def append_identified_works(table: IcebergTable, documents: list[dict]) -> int:
+def append_identified_works(table: IcebergTable, documents: list[Document]) -> int:
     """Append one row per document and return how many were written.
 
     Rows are never updated, so writes from overlapping runs cannot lose each other.
@@ -100,8 +102,21 @@ def append_identified_works(table: IcebergTable, documents: list[dict]) -> int:
     return rows.num_rows
 
 
+def _on_commit_backoff(backoff_details: Any) -> None:
+    logger.warning(
+        "Iceberg commit lost to another writer, retrying",
+        elapsed_seconds=round(backoff_details["elapsed"]),
+        tries=backoff_details["tries"],
+    )
+
+
 @backoff.on_exception(
-    backoff.expo, CommitFailedException, max_tries=MAX_COMMIT_ATTEMPTS, factor=0.2
+    backoff.expo,
+    CommitFailedException,
+    factor=0.5,
+    max_time=COMMIT_BACKOFF_MAX_TIME,
+    max_value=COMMIT_BACKOFF_MAX_INTERVAL,
+    on_backoff=_on_commit_backoff,
 )
 def _commit(table: IcebergTable, rows: pa.Table) -> None:
     """Commit against the table's current snapshot; a lost race is retried after a refresh."""

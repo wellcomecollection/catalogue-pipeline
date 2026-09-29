@@ -65,14 +65,22 @@ def build_runtime(
     source_es_mode: ElasticsearchMode = "private",
     target_es_mode: ElasticsearchMode = "private",
     iceberg_table_mode: Literal["rest", "local"] = "rest",
+    create_iceberg_table: bool = True,
 ) -> IdMinterRuntime:
     cfg = config_obj or ID_MINTER_CONFIG
     res = resolver or MintingResolver(cfg)
     iceberg_table = None
     if cfg.enable_iceberg_writes:
-        iceberg_table = get_works_identified_table(
-            use_rest_api_table=iceberg_table_mode == "rest", create_if_not_exists=True
-        )
+        # The table is experimental, so failing to load or create it must not stop minting.
+        try:
+            iceberg_table = get_works_identified_table(
+                use_rest_api_table=iceberg_table_mode == "rest",
+                create_if_not_exists=create_iceberg_table,
+            )
+        except Exception:
+            logger.exception(
+                "Could not load the Iceberg table; skipping Iceberg writes"
+            )
 
     return IdMinterRuntime(
         config=cfg,
@@ -387,6 +395,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         source_es_mode=args.source_es_mode,
         target_es_mode=args.target_es_mode,
         iceberg_table_mode=args.iceberg_table_mode,
+        create_iceberg_table=not args.dry_run,
     )
 
     if args.dry_run:
