@@ -100,7 +100,11 @@ def lookup_sierra(pipeline_date: str, es_mode: str, values: set[str]) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pipeline-date", default="2026-07-03")
+    parser.add_argument(
+        "--pipeline-date",
+        default="2026-07-03",
+        help="Pipeline whose Elasticsearch cluster to read (default: %(default)s)",
+    )
     parser.add_argument("--es-mode", default="public", choices=["public", "private"])
     parser.add_argument("--output", default="bnumber_status.csv", type=Path)
     args = parser.parse_args()
