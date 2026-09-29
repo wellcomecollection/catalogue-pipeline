@@ -11,10 +11,8 @@ locals {
 module "catalogue_graph_neptune_cluster" {
   source = "./modules/catalogue_graph"
 
-  # The legacy cluster, created before graph dates and still used by the frozen
-  # 2025-10-02 pipeline. The empty graph_date preserves its name (catalogue-graph);
-  # Neptune cluster names cannot be changed, so a date would destroy it. Remove it
-  # with that pipeline (wellcomecollection/platform#6726) and make graph dates mandatory.
+  # Legacy cluster, kept for the frozen 2025-10-02 pipeline; the empty graph_date preserves its
+  # catalogue-graph name (renaming destroys it). Remove with wellcomecollection/platform#6726.
   graph_date                 = ""
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id

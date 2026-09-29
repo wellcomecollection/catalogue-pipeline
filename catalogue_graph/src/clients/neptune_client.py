@@ -88,10 +88,8 @@ class NeptuneClient:
 
     @property
     def namespace(self) -> str:
-        # The current production cluster was created before we introduced graph dates. Its graph date is blank to
-        # preserve its Neptune cluster ID. In places which do not support empty labels (SSM, CloudWatch metrics, S3),
-        # the cluster is labelled `prod`, so both `` and `prod` refer to the same legacy production cluster.
-        # This is confusing, but temporary. Once we switch to a new (dated) cluster, we will be able to remove this.
+        # The legacy cluster (2025-10-02 pipeline only) predates graph dates, so its date is blank; where empty
+        # labels are unsupported (SSM, CloudWatch, S3) it is `prod`. Remove with wellcomecollection/platform#6726.
         if self.graph_date in ("prod", ""):
             return "catalogue-graph"
 
