@@ -26,9 +26,10 @@ live store has the newer last_modified (the snapshot on a tie), records only in
 the store are kept, and the merged rows replace the store. The window store and
 harvest cursor are untouched, so harvesting resumes where it was paused. For
 Axiell the reconciler and deletion facts are kept and the load is reconciled
-against them, so a guid change still becomes a deletion fact. The merge is
-written to `<snapshot>.merged.parquet`, reused if the load has to re-run, and
-renamed to `.loaded` once loaded.
+against them, so a guid change on a newer datestamp still becomes a deletion
+fact (the reconciler skips a tie, as a harvest would). The merge is written to
+`<snapshot>.merged.parquet`, reused if the load has to re-run, and renamed to
+`.loaded` once loaded.
 
 Usage:
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet
@@ -724,8 +725,8 @@ def rebuild_adapter(
             _wipe_store(
                 reconcile_runtime.facts_store, store_name="deletion facts store"
             )
-        # A merge reconciles against the existing baseline, so a guid change
-        # still becomes a deletion fact.
+        # A merge reconciles against the existing baseline, so a guid change on
+        # a newer datestamp still becomes a deletion fact.
         changesets_with_facts = _run_reconcile(
             reconcile_runtime, adapter_type, job_id, changeset_ids
         )

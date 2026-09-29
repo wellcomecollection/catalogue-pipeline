@@ -109,7 +109,8 @@ it instead, so the pause covers only the load:
    twice, its newest copy is used, and a deletion taken from the snapshot keeps
    the live record's content, so the transformer can still emit it. For Axiell
    the reconciler and deletion facts are kept and the load is reconciled
-   against them, so a guid change becomes a deletion fact; with
+   against them, so a guid change on a newer datestamp becomes a deletion
+   fact (a tied datestamp keeps the old mapping, as a harvest would); with
    `--skip-publish-event` the script warns with the changesets that got facts,
    since nothing will deliver them. The window store and cursor are untouched,
    so re-enable the schedule afterwards with no lag override.
