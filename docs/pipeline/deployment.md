@@ -59,7 +59,7 @@ Turn the flag on when several pipelines should all track main, for example durin
 To deploy an older pipeline manually while the flag is off, run:
 
 ```console
-PIPELINE_DATE="2026-07-03" builds/deploy_catalogue_pipeline.sh tag_images_and_deploy_services
+PIPELINE_DATE="YYYY-MM-DD" builds/deploy_catalogue_pipeline.sh tag_images_and_deploy_services
 ```
 
 Note that this deploys whatever `latest` currently points at, not a specific commit.
