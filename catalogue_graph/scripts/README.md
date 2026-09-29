@@ -106,14 +106,20 @@ it instead, so the pause covers only the load:
    Each record keeps whichever of the snapshot and the live store has the newer
    `last_modified` (the snapshot wins a tie), records only in the store are
    kept, and the merged rows replace the store. If a snapshot record appears
-   twice, its newest copy is used. For Axiell the reconciler and deletion
-   facts are kept and the load is reconciled against them, so a guid change
-   becomes a deletion fact; with `--skip-publish-event` the script warns if
-   any were written, since nothing will deliver them. The window store and
-   cursor are untouched, so re-enable the schedule afterwards with no lag
-   override. The merge is written to `<snapshot>.merged.parquet`, and a re-run
-   after a failed load reuses it rather than merging against a half-loaded
-   store.
+   twice, its newest copy is used, and a deletion taken from the snapshot keeps
+   the live record's content, so the transformer can still emit it. For Axiell
+   the reconciler and deletion facts are kept and the load is reconciled
+   against them, so a guid change becomes a deletion fact; with
+   `--skip-publish-event` the script warns with the changesets that got facts,
+   since nothing will deliver them. The window store and cursor are untouched,
+   so re-enable the schedule afterwards with no lag override.
+
+The merge is written to `<snapshot>.merged.parquet`. A re-run after a failed
+load reuses it rather than merging against a half-loaded store, and a merge
+older than the snapshot is refused. Once loaded it is renamed to `.loaded`, so
+a later refresh merges afresh. If a run fails after the load, in reconcile or
+while publishing, a re-run reloads under new changeset ids: any deletion facts
+the failed run wrote stay tagged with its changesets, so deliver those by hand.
 
 With `--skip-publish-event`, records edited after their last harvest but before
 the pause come from the snapshot with the same datestamp a later harvest would

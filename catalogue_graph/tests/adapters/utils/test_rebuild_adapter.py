@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -695,7 +696,9 @@ def test_merge_with_store_keeps_the_newer_row_and_leaves_the_cursor(
     }
     windows = window_store.table.scan().to_arrow().to_pylist()
     assert [(w["window_start"], w["window_end"]) for w in windows] == [(t2, t3)]
-    assert (tmp_path / "snapshot.parquet.merged.parquet").exists()
+    # Retired once loaded, so a later refresh cannot reuse it.
+    assert not (tmp_path / "snapshot.parquet.merged.parquet").exists()
+    assert (tmp_path / "snapshot.parquet.merged.parquet.loaded").exists()
 
 
 def _marcxml(guid: str) -> str:
@@ -860,3 +863,67 @@ def test_merge_reconciles_against_the_existing_baseline(
         (m["id"], m["guid"]) for m in reconciler_store.get_all_records().to_pylist()
     }
     assert mappings == {("collect-1", "guid-new")}
+
+
+def test_merge_gives_a_snapshot_tombstone_the_live_content(
+    temporary_table: IcebergTable, tmp_path: Path
+) -> None:
+    """The transformer needs the record body to emit a deletion, so a tombstone
+    from the snapshot keeps the live row's content, as a harvest would."""
+    t1, t2 = (datetime(2026, 9, 29, hour, tzinfo=UTC) for hour in (1, 2))
+    store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [{"id": "deleted_at_source", "content": "record body", "last_modified": t1}]
+        )
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [
+                {
+                    "id": "deleted_at_source",
+                    "content": None,
+                    "last_modified": t2,
+                    "deleted": True,
+                }
+            ]
+        ),
+        snapshot_path,
+    )
+    merged_path = tmp_path / "merged.parquet"
+
+    rebuild_adapter._merge_with_store(store, str(snapshot_path), str(merged_path))
+
+    rows = pq.read_table(merged_path).to_pylist()
+    assert [(r["content"], r["deleted"], r["last_modified"]) for r in rows] == [
+        ("record body", True, t2)
+    ]
+
+
+def test_merge_refuses_a_merge_left_from_an_earlier_refresh(
+    temporary_table: IcebergTable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    merged_path = tmp_path / "snapshot.parquet.merged.parquet"
+    pq.write_table(
+        adapter_records_to_table([{"id": "a", "content": "old"}]), merged_path
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table([{"id": "a", "content": "new"}]), snapshot_path
+    )
+    old = snapshot_path.stat().st_mtime - 60
+    os.utime(merged_path, (old, old))
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: adapter_store)
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    with pytest.raises(ValueError, match="left from an earlier refresh"):
+        rebuild_adapter.rebuild_adapter(
+            "folio",
+            use_rest_api_table=True,
+            snapshot_path=str(snapshot_path),
+            merge_with_store=True,
+            skip_publish_event=True,
+        )
