@@ -18,10 +18,20 @@ ahead of a later rebuild. The window store and harvest cursor are untouched,
 so disable the harvest schedule first or incremental harvests will repopulate
 the store.
 
+To refresh the store in place with a short harvest pause, split the rebuild in
+two. --download-only writes the snapshot and changes nothing else, so it can
+run while the adapter keeps harvesting. Then pause the harvest schedule and run
+with --merge-with-store: each record keeps whichever of the snapshot and the
+live store has the newer last_modified (the snapshot on a tie), records only in
+the store are kept, and the merged rows replace the store. The window store and
+harvest cursor are untouched, so harvesting resumes where it was paused.
+
 Usage:
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet
     uv run python scripts/rebuild_adapter.py --adapter-type folio --use-rest-api-table --snapshot-path /tmp/folio.parquet --folio-items-snapshot-path /tmp/folio_items.parquet
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --wipe-only
+    uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet --download-only
+    uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet --merge-with-store --skip-publish-event
 """
 
 from __future__ import annotations
@@ -32,7 +42,7 @@ import os
 import time
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
-from typing import NamedTuple
+from typing import NamedTuple, cast
 
 import boto3
 import httpx
@@ -437,6 +447,58 @@ def _populate_store_from_snapshot(store: AdapterStore, snapshot_path: str) -> li
     return changeset_ids
 
 
+def _merge_with_store(
+    store: AdapterStore, snapshot_path: str, merged_path: str
+) -> dict[str, int]:
+    """Write the snapshot merged with the live store to `merged_path`.
+
+    Each id keeps the row with the newer last_modified; the snapshot wins a tie,
+    because it carries the source's current serialisation. Ids only in the store
+    are kept, since the harvest may have seen them after the download reached
+    that part of the list. Returns how many rows came from each side.
+    """
+    snapshot = pq.read_table(snapshot_path).cast(ADAPTER_STORE_ARROW_SCHEMA)
+    live = store.get_namespace_records()
+
+    def last_modified_by_id(table: pa.Table) -> dict[str, datetime]:
+        return dict(
+            zip(
+                cast(list[str], table.column("id").to_pylist()),
+                cast(list[datetime], table.column("last_modified").to_pylist()),
+                strict=True,
+            )
+        )
+
+    snapshot_times = last_modified_by_id(snapshot)
+    live_times = last_modified_by_id(live)
+    from_live = {
+        record_id
+        for record_id, live_time in live_times.items()
+        if record_id not in snapshot_times or live_time > snapshot_times[record_id]
+    }
+    counts = {
+        "from_snapshot": len(snapshot_times.keys() - from_live),
+        "from_store_newer": len(from_live & snapshot_times.keys()),
+        "store_only": len(from_live - snapshot_times.keys()),
+        "snapshot_only": len(snapshot_times.keys() - live_times.keys()),
+    }
+
+    live_filter = pa.array(sorted(from_live), type=pa.string())
+    merged = pa.concat_tables(
+        [
+            snapshot.filter(~pc.field("id").isin(live_filter)),
+            live.filter(pc.field("id").isin(live_filter)),
+        ]
+    )
+    partial_path = f"{merged_path}.partial"
+    pq.write_table(merged, partial_path)
+    os.replace(partial_path, merged_path)
+    logger.info(
+        "Snapshot merged with store", path=merged_path, rows=merged.num_rows, **counts
+    )
+    return counts
+
+
 class _FolioItems(NamedTuple):
     """Bundles the items snapshot path and store so they can be treated as a single optional."""
 
@@ -453,7 +515,33 @@ def rebuild_adapter(
     skip_publish_event: bool = False,
     publish_interval_seconds: float = 0.0,
     wipe_only: bool = False,
+    download_only: bool = False,
+    merge_with_store: bool = False,
 ) -> None:
+    if download_only or merge_with_store:
+        if download_only and merge_with_store:
+            raise ValueError("--download-only and --merge-with-store are separate runs")
+        if snapshot_path is None or folio_items_snapshot_path is not None:
+            raise ValueError(
+                "--download-only and --merge-with-store take --snapshot-path and "
+                "no items snapshot"
+            )
+        if download_only and os.path.exists(snapshot_path):
+            raise ValueError(f"--download-only refuses to overwrite {snapshot_path}")
+        if merge_with_store and not os.path.exists(snapshot_path):
+            raise ValueError(
+                f"--merge-with-store needs a downloaded snapshot at {snapshot_path}; "
+                "run --download-only first"
+            )
+
+    if download_only:
+        assert snapshot_path is not None  # checked above
+        config = get_config(adapter_type)
+        with config.build_http_client() as http_client:
+            oai_client = _build_download_client(config, http_client)
+            _download_to_snapshot(oai_client, config.config, snapshot_path)
+        return
+
     if not wipe_only and not use_rest_api_table and not skip_publish_event:
         raise ValueError(
             "--skip-publish-event is required without --use-rest-api-table: "
@@ -534,9 +622,15 @@ def rebuild_adapter(
 
     adapter_store = config.build_adapter_store(use_rest_api_table=use_rest_api_table)
 
+    # Merge before the wipe, so it reads the live store as the paused harvest left it.
+    load_path = snapshot_path
+    if merge_with_store:
+        load_path = f"{snapshot_path}.merged.parquet"
+        _merge_with_store(adapter_store, snapshot_path, load_path)
+
     # Phase 3: Wipe and reload all stores from snapshots.
     _wipe_store(adapter_store, store_name="adapter store")
-    changeset_ids = _populate_store_from_snapshot(adapter_store, snapshot_path)
+    changeset_ids = _populate_store_from_snapshot(adapter_store, load_path)
     logger.info("All batches loaded", total_changesets=len(changeset_ids))
 
     if folio_items is not None:
@@ -587,6 +681,17 @@ def main() -> None:
         metavar="PATH",
         help="(FOLIO only) Path to the items snapshot file. If provided, the FOLIO items store is also rebuilt. If the file already exists, the items download is skipped.",
     )
+    in_place = parser.add_mutually_exclusive_group()
+    in_place.add_argument(
+        "--download-only",
+        action="store_true",
+        help="Download the snapshot to --snapshot-path and stop, touching no store, window or cursor, so the adapter can keep harvesting.",
+    )
+    in_place.add_argument(
+        "--merge-with-store",
+        action="store_true",
+        help="Load a snapshot from --download-only merged with the live store (newer last_modified wins, snapshot on a tie) and leave the window store and cursor alone. Pause the harvest schedule first.",
+    )
     parser.add_argument(
         "--skip-publish-event",
         action="store_true",
@@ -618,6 +723,8 @@ def main() -> None:
         skip_publish_event=args.skip_publish_event,
         publish_interval_seconds=args.publish_interval_seconds,
         wipe_only=args.wipe_only,
+        download_only=args.download_only,
+        merge_with_store=args.merge_with_store,
     )
 
 

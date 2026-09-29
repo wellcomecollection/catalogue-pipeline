@@ -92,6 +92,28 @@ schedule first and keep it disabled until the rebuild: an incremental harvest
 against a wiped store repopulates it with whatever the source serves. The
 pre-wipe Iceberg snapshot ids are logged for time-travel rollback.
 
+### Refresh in place
+
+When the source's serialisation changes without moving record datestamps (a
+stylesheet change, for example), the store only picks it up from a full
+download, but a normal rebuild pauses harvesting for the whole download. Split
+it instead, so the pause covers only the load:
+
+1. `--download-only` writes the snapshot and touches nothing else: no store,
+   window store or cursor. The adapter keeps harvesting meanwhile.
+2. Disable the harvest schedule, back up the store if you want a rollback copy
+   beyond Iceberg's snapshot retention, then run with `--merge-with-store`.
+   Each record keeps whichever of the snapshot and the live store has the newer
+   `last_modified` (the snapshot wins a tie), records only in the store are
+   kept, and the merged rows (also written to `<snapshot>.merged.parquet`)
+   replace the store. Reconcile runs as in a rebuild. The window store and
+   cursor are untouched, so re-enable the schedule afterwards with no lag
+   override.
+
+With `--skip-publish-event`, records edited after their last harvest but before
+the pause come from the snapshot with the same datestamp a later harvest would
+bring, which the store rejects as not newer. Transform those by id.
+
 ### Usage
 
 ```bash
@@ -113,6 +135,19 @@ uv run python scripts/rebuild_adapter.py \
   --adapter-type axiell \
   --use-rest-api-table \
   --wipe-only
+
+# Refresh in place: download while harvesting, then pause and merge
+uv run python scripts/rebuild_adapter.py \
+  --adapter-type axiell \
+  --use-rest-api-table \
+  --snapshot-path /tmp/axiell.parquet \
+  --download-only
+uv run python scripts/rebuild_adapter.py \
+  --adapter-type axiell \
+  --use-rest-api-table \
+  --snapshot-path /tmp/axiell.parquet \
+  --merge-with-store \
+  --skip-publish-event
 ```
 
 Pass `--skip-publish-event` to load the stores without triggering downstream

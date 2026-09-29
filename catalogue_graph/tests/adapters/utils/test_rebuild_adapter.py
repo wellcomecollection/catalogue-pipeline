@@ -534,3 +534,165 @@ def test_reconcile_runtime_sees_the_loaded_records(
 
     # Every loaded record is visible to reconcile; 0 would mean a stale handle.
     assert rows_seen_by_reconcile == [3]
+
+
+def test_download_only_writes_the_snapshot_and_nothing_else(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--download-only must leave every store, the window store and the cursor
+    alone, so the adapter can keep harvesting: the config stub has no store
+    builders, so touching any of them fails the test."""
+    snapshot_path = tmp_path / "snapshot.parquet"
+
+    class _Client:
+        def __enter__(self) -> "_Client":
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            pass
+
+    config_stub = SimpleNamespace(
+        build_http_client=lambda: _Client(), config=SimpleNamespace()
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "_build_download_client", lambda config, http_client: None
+    )
+
+    def fake_download(oai_client: object, config: object, path: str) -> int:
+        pq.write_table(adapter_records_to_table([{"id": "a", "content": "x"}]), path)
+        return 1
+
+    monkeypatch.setattr(rebuild_adapter, "_download_to_snapshot", fake_download)
+
+    def no_prompt(*args: object) -> str:
+        raise AssertionError("--download-only must not prompt")
+
+    monkeypatch.setattr("builtins.input", no_prompt)
+
+    rebuild_adapter.rebuild_adapter(
+        "axiell",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        download_only=True,
+    )
+
+    assert snapshot_path.exists()
+
+
+def test_download_only_refuses_an_existing_snapshot(tmp_path: Path) -> None:
+    snapshot_path = tmp_path / "snapshot.parquet"
+    snapshot_path.write_bytes(b"")
+    with pytest.raises(ValueError, match="refuses to overwrite"):
+        rebuild_adapter.rebuild_adapter(
+            "axiell", snapshot_path=str(snapshot_path), download_only=True
+        )
+
+
+def test_merge_with_store_needs_a_downloaded_snapshot(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="run --download-only first"):
+        rebuild_adapter.rebuild_adapter(
+            "axiell",
+            use_rest_api_table=True,
+            snapshot_path=str(tmp_path / "missing.parquet"),
+            merge_with_store=True,
+            skip_publish_event=True,
+        )
+
+
+def test_merge_with_store_keeps_the_newer_row_and_leaves_the_cursor(
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Each id keeps the newer of snapshot and live store (snapshot on a tie),
+    store-only ids survive, and the window store is not touched."""
+    t1, t2, t3 = (datetime(2026, 9, 29, hour, tzinfo=UTC) for hour in (1, 2, 3))
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [
+                {"id": "older_in_store", "content": "store", "last_modified": t1},
+                {"id": "newer_in_store", "content": "store", "last_modified": t3},
+                {"id": "store_only", "content": "store", "last_modified": t2},
+                {
+                    "id": "deleted_in_store",
+                    "content": "store",
+                    "last_modified": t3,
+                    "deleted": True,
+                },
+                {"id": "tie", "content": "store", "last_modified": t2},
+            ]
+        )
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [
+                {"id": "older_in_store", "content": "snapshot", "last_modified": t2},
+                {"id": "newer_in_store", "content": "snapshot", "last_modified": t2},
+                {"id": "deleted_in_store", "content": "snapshot", "last_modified": t1},
+                {"id": "tie", "content": "snapshot", "last_modified": t2},
+                {"id": "snapshot_only", "content": "snapshot", "last_modified": t2},
+            ]
+        ),
+        snapshot_path,
+    )
+    window_store = WindowStore(temporary_window_status_table)
+    window_store.upsert(
+        WindowSummary(
+            window_start=t2,
+            window_end=t3,
+            state="success",
+            attempts=1,
+            record_ids=[],
+            last_error=None,
+            updated_at=t3,
+            tags={"published_at": t3.isoformat()},
+        )
+    )
+    reconcile_runtime = ReconcileRuntime(
+        adapter_store=adapter_store,
+        reconciler_store=ReconcilerStore(reconciler_temporary_table, "test_namespace"),
+        facts_store=DeletionFactsStore(
+            deletion_facts_temporary_table, "test_namespace"
+        ),
+        adapter_name="axiell",
+        namespace="test_namespace",
+    )
+    config_stub = SimpleNamespace(
+        build_adapter_store=lambda **kwargs: adapter_store,
+        build_window_store=lambda **kwargs: window_store,
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_reconcile_runtime", lambda *a, **k: reconcile_runtime
+    )
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rebuild_adapter.rebuild_adapter(
+        "axiell",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        merge_with_store=True,
+        skip_publish_event=True,
+    )
+
+    rows = {
+        row["id"]: (row["content"], bool(row["deleted"]))
+        for row in adapter_store.get_all_records().to_pylist()
+    }
+    assert rows == {
+        "older_in_store": ("snapshot", False),
+        "newer_in_store": ("store", False),
+        "store_only": ("store", False),
+        "deleted_in_store": ("store", True),
+        "tie": ("snapshot", False),
+        "snapshot_only": ("snapshot", False),
+    }
+    windows = window_store.table.scan().to_arrow().to_pylist()
+    assert [(w["window_start"], w["window_end"]) for w in windows] == [(t2, t3)]
+    assert (tmp_path / "snapshot.parquet.merged.parquet").exists()
