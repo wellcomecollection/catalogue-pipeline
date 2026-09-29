@@ -696,3 +696,167 @@ def test_merge_with_store_keeps_the_newer_row_and_leaves_the_cursor(
     windows = window_store.table.scan().to_arrow().to_pylist()
     assert [(w["window_start"], w["window_end"]) for w in windows] == [(t2, t3)]
     assert (tmp_path / "snapshot.parquet.merged.parquet").exists()
+
+
+def _marcxml(guid: str) -> str:
+    return (
+        "<record><leader>00000nam a2200000   4500</leader>"
+        "<controlfield tag='005'>20251225123045.0</controlfield>"
+        f"<controlfield tag='001'>{guid}</controlfield>"
+        "<datafield tag='245' ind1='0' ind2='0'>"
+        f"<subfield code='a'>Title for {guid}</subfield></datafield>"
+        "</record>"
+    )
+
+
+def test_merge_keeps_the_newest_copy_of_a_duplicated_snapshot_id(
+    temporary_table: IcebergTable, tmp_path: Path
+) -> None:
+    t1, t2, t3 = (datetime(2026, 9, 29, hour, tzinfo=UTC) for hour in (1, 2, 3))
+    store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [{"id": "edited", "content": "store", "last_modified": t2}]
+        )
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [
+                {"id": "edited", "content": "snapshot newer", "last_modified": t3},
+                {"id": "edited", "content": "snapshot older", "last_modified": t1},
+            ]
+        ),
+        snapshot_path,
+    )
+    merged_path = tmp_path / "merged.parquet"
+
+    rebuild_adapter._merge_with_store(store, str(snapshot_path), str(merged_path))
+
+    rows = pq.read_table(merged_path).to_pylist()
+    assert [(r["id"], r["content"]) for r in rows] == [("edited", "snapshot newer")]
+
+
+def test_merge_re_run_reuses_the_existing_merge(
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """After a failed load the store is partial, so a re-run must load the
+    existing merge instead of merging again against the half-loaded store."""
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table([{"id": "half_loaded", "content": "partial"}])
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table([{"id": "a", "content": "snapshot"}]), snapshot_path
+    )
+    merged_path = tmp_path / "snapshot.parquet.merged.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [
+                {"id": "a", "content": "from the first merge"},
+                {"id": "store_only", "content": "from the first merge"},
+            ]
+        ),
+        merged_path,
+    )
+    config_stub = SimpleNamespace(
+        build_adapter_store=lambda **kwargs: adapter_store,
+        build_window_store=lambda **kwargs: WindowStore(temporary_window_status_table),
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rebuild_adapter.rebuild_adapter(
+        "folio",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        merge_with_store=True,
+        skip_publish_event=True,
+    )
+
+    rows = sorted(
+        (r["id"], r["content"]) for r in adapter_store.get_all_records().to_pylist()
+    )
+    assert rows == [
+        ("a", "from the first merge"),
+        ("store_only", "from the first merge"),
+    ]
+
+
+def test_merge_reconciles_against_the_existing_baseline(
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A merge keeps the reconciler and facts, so a record whose guid changed
+    produces a deletion fact and an undelivered fact survives."""
+    t1, t2 = (datetime(2026, 9, 29, hour, tzinfo=UTC) for hour in (1, 2))
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [{"id": "collect-1", "content": _marcxml("guid-old"), "last_modified": t1}]
+        )
+    )
+    reconciler_store = ReconcilerStore(reconciler_temporary_table, "test_namespace")
+    reconciler_temporary_table.append(
+        reconciler_records_to_table(
+            [{"id": "collect-1", "guid": "guid-old", "last_modified": t1}]
+        )
+    )
+    facts_store = DeletionFactsStore(deletion_facts_temporary_table, "test_namespace")
+    facts_store.append_facts(
+        deletion_facts_records_to_table(
+            [{"record_id": "collect-9", "guid": "guid-9", "changeset": "earlier"}]
+        )
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [{"id": "collect-1", "content": _marcxml("guid-new"), "last_modified": t2}]
+        ),
+        snapshot_path,
+    )
+
+    def build_runtime(
+        adapter_type: str, *, use_rest_api_table: bool
+    ) -> ReconcileRuntime:
+        fresh = temporary_table.catalog.load_table(temporary_table.name())
+        return ReconcileRuntime(
+            adapter_store=AdapterStore(fresh, "test_namespace"),
+            reconciler_store=reconciler_store,
+            facts_store=facts_store,
+            adapter_name="axiell",
+            namespace="test_namespace",
+        )
+
+    config_stub = SimpleNamespace(
+        build_adapter_store=lambda **kwargs: adapter_store,
+        build_window_store=lambda **kwargs: WindowStore(temporary_window_status_table),
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(rebuild_adapter, "build_reconcile_runtime", build_runtime)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rebuild_adapter.rebuild_adapter(
+        "axiell",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        merge_with_store=True,
+        skip_publish_event=True,
+    )
+
+    facts = {
+        (f["record_id"], f["guid"]) for f in facts_store.get_all_records().to_pylist()
+    }
+    assert facts == {("collect-9", "guid-9"), ("collect-1", "guid-old")}
+    mappings = {
+        (m["id"], m["guid"]) for m in reconciler_store.get_all_records().to_pylist()
+    }
+    assert mappings == {("collect-1", "guid-new")}

@@ -24,7 +24,10 @@ run while the adapter keeps harvesting. Then pause the harvest schedule and run
 with --merge-with-store: each record keeps whichever of the snapshot and the
 live store has the newer last_modified (the snapshot on a tie), records only in
 the store are kept, and the merged rows replace the store. The window store and
-harvest cursor are untouched, so harvesting resumes where it was paused.
+harvest cursor are untouched, so harvesting resumes where it was paused. For
+Axiell the reconciler and deletion facts are kept and the load is reconciled
+against them, so a guid change still becomes a deletion fact. The merge is
+written to `<snapshot>.merged.parquet` and reused if the load has to re-run.
 
 Usage:
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet
@@ -340,14 +343,14 @@ def _run_reconcile(
     adapter_type: str,
     job_id: str,
     changeset_ids: list[str],
-) -> None:
-    """Run the reconcile step once per changeset.
+) -> int:
+    """Run the reconcile step once per changeset and return the facts written.
 
     One call over all of them would materialise the whole store as dicts. Each
-    record id appears in one changeset and the baseline was just wiped, so the
-    result is the same.
+    record id appears in one changeset, so the result is the same.
     """
     total_inserted = 0
+    total_facts = 0
     for changeset_id in changeset_ids:
         event = ReconcileEvent(
             job_id=job_id,
@@ -356,17 +359,22 @@ def _run_reconcile(
         )
         response = reconcile_handler(event, runtime)
         total_inserted += response.mappings_inserted
+        total_facts += response.facts_written
         logger.info(
             "Reconciled changeset",
             changeset_id=changeset_id,
             mappings_inserted=response.mappings_inserted,
+            mappings_updated=response.mappings_updated,
+            facts_written=response.facts_written,
             skipped=response.skipped,
         )
     logger.info(
         "Reconcile complete",
         changesets=len(changeset_ids),
         mappings_inserted=total_inserted,
+        facts_written=total_facts,
     )
+    return total_facts
 
 
 def _confirm_rebuild(adapter_type: AdapterType) -> None:
@@ -447,6 +455,17 @@ def _populate_store_from_snapshot(store: AdapterStore, snapshot_path: str) -> li
     return changeset_ids
 
 
+def _newest_row_per_id(table: pa.Table) -> pa.Table:
+    """Keep one row per id, the one with the newest last_modified.
+
+    A record edited while a long download runs can appear twice in the list.
+    """
+    ordered = table.sort_by([("id", "ascending"), ("last_modified", "descending")])
+    ids = ordered.column("id").to_pylist()
+    keep = [i == 0 or ids[i] != ids[i - 1] for i in range(len(ids))]
+    return ordered.filter(pa.array(keep))
+
+
 def _merge_with_store(
     store: AdapterStore, snapshot_path: str, merged_path: str
 ) -> dict[str, int]:
@@ -457,7 +476,9 @@ def _merge_with_store(
     are kept, since the harvest may have seen them after the download reached
     that part of the list. Returns how many rows came from each side.
     """
-    snapshot = pq.read_table(snapshot_path).cast(ADAPTER_STORE_ARROW_SCHEMA)
+    snapshot = _newest_row_per_id(
+        pq.read_table(snapshot_path).cast(ADAPTER_STORE_ARROW_SCHEMA)
+    )
     live = store.get_namespace_records()
 
     def last_modified_by_id(table: pa.Table) -> dict[str, datetime]:
@@ -626,7 +647,12 @@ def rebuild_adapter(
     load_path = snapshot_path
     if merge_with_store:
         load_path = f"{snapshot_path}.merged.parquet"
-        _merge_with_store(adapter_store, snapshot_path, load_path)
+        # After a failed load the store is partial, so a re-run must reuse the
+        # merge rather than recompute it against the half-loaded store.
+        if os.path.exists(load_path):
+            logger.info("Reusing existing merged snapshot", path=load_path)
+        else:
+            _merge_with_store(adapter_store, snapshot_path, load_path)
 
     # Phase 3: Wipe and reload all stores from snapshots.
     _wipe_store(adapter_store, store_name="adapter store")
@@ -644,10 +670,26 @@ def rebuild_adapter(
         reconcile_runtime = build_reconcile_runtime(
             adapter_type, use_rest_api_table=use_rest_api_table
         )
-        _wipe_store(reconcile_runtime.reconciler_store, store_name="reconciler store")
-        # Facts are read by changeset id, and the rebuild replaces every id.
-        _wipe_store(reconcile_runtime.facts_store, store_name="deletion facts store")
-        _run_reconcile(reconcile_runtime, adapter_type, job_id, changeset_ids)
+        if not merge_with_store:
+            _wipe_store(
+                reconcile_runtime.reconciler_store, store_name="reconciler store"
+            )
+            # Facts are read by changeset id, and the rebuild replaces every id.
+            _wipe_store(
+                reconcile_runtime.facts_store, store_name="deletion facts store"
+            )
+        # A merge reconciles against the existing baseline, so a guid change
+        # still becomes a deletion fact.
+        facts_written = _run_reconcile(
+            reconcile_runtime, adapter_type, job_id, changeset_ids
+        )
+        if facts_written and skip_publish_event:
+            logger.warning(
+                "Deletion facts were written for changesets that will not be "
+                "published; deliver them before relying on the index",
+                facts_written=facts_written,
+                changeset_ids=changeset_ids,
+            )
 
     if not skip_publish_event:
         _confirm_publish(adapter_type, len(changeset_ids))

@@ -105,10 +105,15 @@ it instead, so the pause covers only the load:
    beyond Iceberg's snapshot retention, then run with `--merge-with-store`.
    Each record keeps whichever of the snapshot and the live store has the newer
    `last_modified` (the snapshot wins a tie), records only in the store are
-   kept, and the merged rows (also written to `<snapshot>.merged.parquet`)
-   replace the store. Reconcile runs as in a rebuild. The window store and
+   kept, and the merged rows replace the store. If a snapshot record appears
+   twice, its newest copy is used. For Axiell the reconciler and deletion
+   facts are kept and the load is reconciled against them, so a guid change
+   becomes a deletion fact; with `--skip-publish-event` the script warns if
+   any were written, since nothing will deliver them. The window store and
    cursor are untouched, so re-enable the schedule afterwards with no lag
-   override.
+   override. The merge is written to `<snapshot>.merged.parquet`, and a re-run
+   after a failed load reuses it rather than merging against a half-loaded
+   store.
 
 With `--skip-publish-event`, records edited after their last harvest but before
 the pause come from the snapshot with the same datestamp a later harvest would
