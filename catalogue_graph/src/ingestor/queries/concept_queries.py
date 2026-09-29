@@ -90,11 +90,19 @@ def get_related_query(
         WITH concept,
             relationship_edge.relationship_type AS relationship_type,
             linked_related_source_concept,
+            related_concept,
+            COUNT(work) AS related_work_count
+        ORDER BY related_work_count DESC, related_concept.id
+
+        /* Represent each related source concept by its most-used Wellcome concept. */
+        WITH concept,
+            relationship_type,
+            linked_related_source_concept,
             collect(related_concept.id) AS related_ids,
-            COUNT(work) AS work_count
-        
+            SUM(related_work_count) AS work_count
+
         WITH concept, relationship_type, head(related_ids) AS related_id, SUM(work_count) AS work_count
-        ORDER BY work_count DESC
+        ORDER BY work_count DESC, related_id
 
         RETURN
             concept.id AS id,
