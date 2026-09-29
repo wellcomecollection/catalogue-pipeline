@@ -83,7 +83,7 @@ def load_source_configuration(path: str | Path) -> SourceConfiguration:
     if not p.exists():
         raise FileNotFoundError(
             f"Source configuration file not found: {p}. "
-            "Create it from configs/source_configration.example.yaml."
+            "Create it from configs/source_configuration.example.yaml."
         )
 
     with p.open("r") as f:
