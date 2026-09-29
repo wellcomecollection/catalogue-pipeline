@@ -156,7 +156,7 @@ def test_borrow_from_right(left: str, right: str, expected: str) -> None:
         ("coup d u+2019 état 1797", years(1797, 1797)),
         ("+1984", None),
         ("12345", None),
-        ("2041", None),
+        ("2100", None),
         ("0000", None),
         ("19th century", None),
         ("abc", None),

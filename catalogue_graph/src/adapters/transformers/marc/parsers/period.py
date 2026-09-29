@@ -2,8 +2,9 @@
 
 Parsing happens in four stages, each of which is a function below:
 
-1. `normalise` lower-cases the text, writes roman numerals as numbers, takes cataloguers'
-   corrections, rewrites placeholder digits, strips noise and marks circa dates with a leading "~".
+1. `normalise` lower-cases the text, writes roman numerals as numbers, drops years from different
+   calendars, takes cataloguers' corrections, rewrites placeholder digits, strips noise, drops
+   copyright years and marks circa dates with a leading "~".
 2. `atom` reads a whole string as one date expression: a year, decade, century, season, month or day.
 3. `open_range` and `closed_range` read strings with one or two atoms joined by "to", "-", "and" or "/".
 4. `fallback` spans whatever four-digit years are left when nothing else matched.
@@ -33,7 +34,7 @@ from adapters.transformers.marc.parsers.roman import roman_numeral
 Span = tuple[date, date]
 Source = Literal["marc", "axiell"]
 MIN, MAX = date(1, 1, 1), date(9999, 12, 31)
-LATEST_YEAR = 2040  # anything later is a typo or a Hebrew-calendar year
+LATEST_YEAR = 2099  # anything later is a typo or a Hebrew-calendar year
 
 
 def plausible(year: int) -> bool:
@@ -101,12 +102,15 @@ def parse(text: str, source: Source = "marc") -> Span | None:
 
 
 def normalise(text: str, source: Source) -> str:
-    """Lower-case, write roman numerals as numbers, take corrections, expand placeholders, drop noise,
-    mark circa dates with "~" and drop leading words that are not part of the date."""
+    """Lower-case, write roman numerals as numbers, drop non-AD years, take corrections, expand
+    placeholders, drop noise and copyright years, mark circa dates with "~" and drop leading words
+    that are not part of the date."""
     text = convert_roman_numerals(text.lower())
+    text = drop_other_calendars(text)
     text = take_corrections(text)
     text = expand_placeholders(text)
     text = strip_noise(text)
+    text = drop_copyright(text, source)
     text = mark_circa(text, source)
     # "c. early 20th century": the early / mid / late part is kept and the circa marker dropped, so it is not widened
     text = re.sub(r"~(?=early|mid|late)", "", text)
@@ -142,16 +146,53 @@ def is_date_word(token: str) -> bool:
 
 
 def convert_roman_numerals(text: str) -> str:
-    """Write each roman numeral of two or more letters as a number, "anno m.dcc.xlv" as "anno 1745"."""
+    """Write each roman numeral of two or more letters as a number, "anno m.dcc.xlv" as "anno 1745".
+
+    When the text also has a year written in digits, numerals are dropped instead of converted.
+    There they either repeat that year, as in "mdcclxxv. [1775]", or are words and abbreviations
+    that happen to be spelled with numeral letters, such as "mix" or "mi.".
+    """
+    has_year = re.search(r"(?<!\d)\d{3,4}(?!\d)", text) is not None
+
+    def replace(m: re.Match[str]) -> str:
+        value = roman_numeral(m[0])
+        if value is None:
+            return m[0]
+        return "" if has_year else str(value)
+
     # Identify candidate roman numerals via a regex and send them to `roman_numeral`, which converts
     # them to integers, returning `None` for invalid candidates like "civil" or "mill". A candidate
     # may not start inside an abbreviation such as "n.d. c.", nor with a circa "c" followed by a space,
     # so "c. mcml" reads as "c. 1950".
     return re.sub(
-        r"(?<![a-z]\.)(?!c\.?\s)\b[mdclxvi][mdclxvij.,\s]*[mdclxvij]\b",
-        lambda m: str(roman_numeral(m[0]) or m[0]),
+        r"(?<![a-z]\.)(?!c\.?\s)\b[mdclxvi][mdclxvij.,\s]*[mdclxvij]\b", replace, text
+    )
+
+
+def drop_other_calendars(text: str) -> str:
+    """Drop years marked as Vikram Samvat ("saṃvat", "sambat", "saṃ.", "vikramābde"), Saka
+    ("śake", "śāke", "śaka", "śakābdāḥ"), Hijri ("a.h.") or Anno Mundi ("a.m."), so
+    "saṃvat 1953 [1896 a.d.]" reads as "[1896 a.d.]".
+
+    Every other year is read as an AD year, including "san 1880 ī." (Īsavī, the Christian era).
+    Unmarked Hebrew years such as "5619" are left to `plausible`, and French Republican ("an viii")
+    and Japanese ("shōwa 48") years are too small to be read as years.
+    """
+    # "saṃvat" and "sambat" also end compounds such as "śrīsaṃvat", so they need no word boundary
+    return re.sub(
+        r"(?:sa[mṃṁ]\S{0,2}[vb]at|vikram\S*|\bsa[mṃṁ]\.?|\b[sś][aā]k[aeā]\S*|\ba\.\s?[hm]\.)\s*\d+",
+        " ",
         text,
     )
+
+
+def drop_copyright(text: str, source: Source) -> str:
+    """Drop copyright markers, and the copyright year after a publication year, "2002, ©1999"."""
+    # a bare "c" before digits is copyright in marc and circa in axiell (see `mark_circa`)
+    marker = r"©|\bcop\.|\bcopyright\b" + (r"|\bc(?=\s?\d)" if source == "marc" else "")
+    text = re.sub(rf"(?:{marker})\s*", "©", text)
+    text = re.sub(r"(\d{4}),\s*©\d{4}", r"\1", text)
+    return text.replace("©", " ")
 
 
 def take_corrections(text: str) -> str:
@@ -197,8 +238,8 @@ def strip_noise(text: str) -> str:
     """Drop the punctuation that carries no date information."""
     # a bracket touching a digit, "174[2]" or "1[7]17", is a typo: drop it
     text = re.sub(r"(?<=\d)[\[\]]|[\[\]](?=\d)", "", text)
-    # remaining brackets, parentheses, quotation marks, question marks and copyright signs are noise
-    text = re.sub(r"[\[\]()<>?©\"]", " ", text)
+    # remaining brackets, parentheses, quotation marks and question marks are noise
+    text = re.sub(r"[\[\]()<>?\"]", " ", text)
     # "1920's": the apostrophe is not part of the decade
     text = re.sub(r"(\d)'s\b", r"\1s", text)
     # runs of hyphens: leading or trailing ones are noise, "--1797." is 1797; inside, "1875--85" is one range
@@ -217,9 +258,6 @@ def strip_noise(text: str) -> str:
 
 def mark_circa(text: str, source: Source) -> str:
     """Replace circa markers with "~" and drop copyright markers."""
-    if source == "marc":
-        # a publication year then a copyright year, "1985, c1983" or "2014, cop. 1991": the publication year
-        text = re.sub(r"(\d{4}),\s*(?:c\.?|cop\.)\s?\d{4}", r"\1", text)
     # a circa word before a digit or a month name becomes "~"; a bare "c" before digits, or a lone "c"
     # before a word, is copyright in marc (dropped) and circa in axiell (becomes "~"). The "c" of
     # "a. c." (anno Christi) is neither.

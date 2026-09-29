@@ -6,7 +6,9 @@ import pytest
 from adapters.transformers.marc.parsers.period import (
     Source,
     convert_roman_numerals,
+    drop_copyright,
     drop_leading_words,
+    drop_other_calendars,
     expand_placeholders,
     mark_circa,
     normalise,
@@ -24,9 +26,9 @@ def spaced(text: str) -> str:
     [
         ("m.dcc.xlv.", "1745."),
         ("anno m.d.xxxi.", "anno 1531."),
-        ("mdcclxxv. [1775]", "1775. [1775]"),
+        ("mdcclxxv. [1775]", ". [1775]"),  # dropped beside a year in digits
         ("m.dcc.xlv.-m.dcc.l.", "1745.-1750."),
-        ("m.d.xxviij [1528]", "1528 [1528]"),
+        ("m.d.xxviij [1528]", " [1528]"),
         ("an viii", "an 8"),
         ("printed in the year, mdciii", "printed in the year, 1603"),
         ("civil war", "civil war"),
@@ -34,6 +36,9 @@ def spaced(text: str) -> str:
         ("mid 19th century", "mid 19th century"),
         ("c1977", "c1977"),
         ("vol. ii", "vol. 2"),
+        ("mi. 1985", ". 1985"),
+        ("mix 1990", " 1990"),
+        ("12 may mdccxc", "12 may 1790"),  # a day is not a year
         ("m dcc xlix", "1749"),
         ("xvii1737", "xvii1737"),
         # a known limitation: two numerals joined by ", " are one invalid candidate, since a single
@@ -45,11 +50,36 @@ def spaced(text: str) -> str:
         ("c. m.dcc.xlv.", "c. 1745."),
         ("c mcml", "c 1950"),
         ("n.d. c.", "n.d. c."),
-        ("a. c. mdclxxxii. [1682]", "a. c. 1682. [1682]"),
+        ("a. c. mdclxxxii. [1682]", "a. c. . [1682]"),
     ],
 )
 def test_convert_roman_numerals(text: str, expected: str) -> None:
     assert convert_roman_numerals(text) == expected
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("saṃvat 1953 [1896 a.d.]", "[1896 a.d.]"),
+        ("samvat 1943 [1886 a.d.]", "[1886 a.d.]"),
+        ("mi. jyeṣṭhaśukla 5 saṃ. 1936 [1879 a.d.]", "mi. jyeṣṭhaśukla 5 [1879 a.d.]"),
+        ("śrīsamvat 1934 [1877 a.d.]", "śrī [1877 a.d.]"),
+        ("śake 1788 [1866 a.d.]", "[1866 a.d.]"),
+        ("saṃvat 1935 śāke 1800 [1878 a.d.]", "[1878 a.d.]"),
+        ("t.p. gives sambat 1935 [1878 a.d.]", "t.p. gives [1878 a.d.]"),
+        ("vikramābde 1891 [1834 a.d.]", "[1834 a.d.]"),
+        ("san 1880 ī.", "san 1880 ī."),  # Īsavī, the Christian era
+        ("balsam 1900", "balsam 1900"),
+        ("osaka 1990", "osaka 1990"),
+        ("śakābdāḥ 1800 [1878 a.d.]", "[1878 a.d.]"),
+        ("a.h. 1027 =1618", "=1618"),
+        ("a.m. 5526. [i.e. 1766]", ". [i.e. 1766]"),
+        ("durmatināmasaṃvatsare 1783", "durmatināmasaṃvatsare 1783"),
+        ("1896", "1896"),
+    ],
+)
+def test_drop_other_calendars(text: str, expected: str) -> None:
+    assert spaced(drop_other_calendars(text)) == expected
 
 
 @pytest.mark.parametrize(
@@ -129,7 +159,7 @@ def test_expand_placeholders(text: str, expected: str) -> None:
         ("1[7]17", "1717"),
         ("[1929]", "1929"),
         ("(1929?)", "1929"),
-        ("©1981", "1981"),
+        ("©1981", "©1981"),
         ("revolution, 1775-1783", "revolution 1775-1783"),
         ("march 8, 1800", "march 8 1800"),
         ("1719, 1720", "1719, 1720"),
@@ -137,7 +167,6 @@ def test_expand_placeholders(text: str, expected: str) -> None:
         ("may-june 1960", "may-june 1960"),
         ("[[1706]", "1706"),
         ("1[841-1849]", "1841-1849"),
-        ("©1928, ©1929-1936", "1928, 1929-1936"),
         ("sept.-1965", "sept 1965"),
         ("mid-1970s", "mid-1970s"),
         ("1965-sep", "1965-sep"),
@@ -164,7 +193,6 @@ def test_strip_noise(text: str, expected: str) -> None:
         ("c1977", "marc", "1977"),
         ("c 1977", "marc", "1977"),
         ("c jul 1993", "marc", "jul 1993"),
-        ("1890, c1887", "marc", "1890"),
         ("c1959", "axiell", "~1959"),
         ("c 1959", "axiell", "~1959"),
         ("c jul 1993", "axiell", "~jul 1993"),
@@ -198,6 +226,27 @@ def test_strip_noise(text: str, expected: str) -> None:
 )
 def test_mark_circa(text: str, source: Source, expected: str) -> None:
     assert mark_circa(text, source) == expected
+
+
+@pytest.mark.parametrize(
+    "text, source, expected",
+    [
+        ("©1981", "marc", "1981"),
+        ("© 1981", "marc", "1981"),
+        ("cop. 1991", "marc", "1991"),
+        ("copyright 2017", "marc", "2017"),
+        ("c1977", "marc", "1977"),
+        ("c1977", "axiell", "c1977"),  # circa in axiell, see `mark_circa`
+        ("c.1930", "marc", "c.1930"),  # circa, not copyright
+        ("2002, ©1999", "marc", "2002"),
+        ("1890, c1887", "marc", "1890"),
+        ("2014, cop. 1991", "marc", "2014"),
+        ("1911, c.1930", "marc", "1911, c.1930"),
+        ("©1928, ©1929-1936", "marc", "1928-1936"),
+    ],
+)
+def test_drop_copyright(text: str, source: Source, expected: str) -> None:
+    assert spaced(drop_copyright(text, source)) == expected
 
 
 @pytest.mark.parametrize(

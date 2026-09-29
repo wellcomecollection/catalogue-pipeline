@@ -29,7 +29,7 @@ def years(start: int, end: int) -> Span:
         ("1984", years(1984, 1984)),
         ("476", years(476, 476)),
         ("0476", years(476, 476)),
-        ("2040", years(2040, 2040)),  # the latest plausible year
+        ("2099", years(2099, 2099)),  # the latest plausible year
         ("19", None),
         ("12345", None),
         ("1984.", None),
@@ -104,7 +104,7 @@ def test_century(text: str, expected: Span | None) -> None:
         ("fall 1967", (date(1967, 9, 1), date(1967, 11, 30))),
         ("winter 1962", (date(1962, 12, 1), date(1963, 2, 28))),
         ("winter 1963", (date(1963, 12, 1), date(1964, 2, 29))),  # into a leap year
-        ("winter 2040", (date(2040, 12, 1), date(2041, 2, 28))),
+        ("winter 2099", (date(2099, 12, 1), date(2100, 2, 28))),
         ("spring 96", None),
         ("spring", None),
         ("spring-1996", None),
@@ -177,7 +177,7 @@ def test_day(text: str, expected: Span | None) -> None:
         ("0 nov 2007", None),
         ("32 nov 2007", None),
         ("0000", None),
-        ("2041", None),
+        ("2100", None),
         ("0000s", None),
         ("6400s", None),
         ("0th century", None),
