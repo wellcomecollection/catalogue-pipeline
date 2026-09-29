@@ -18,7 +18,7 @@ locals {
     S3_BUCKET                   = "wellcomecollection-platform-id-minter"
     S3_PREFIX                   = "prod"
 
-    # Experimental parallel copy of works-identified; set to "true" to enable.
+    # Experimental parallel copy of works-identified
     ENABLE_ICEBERG_WRITES       = "false"
     WORKS_IDENTIFIED_TABLE_NAME = "works_identified_${replace(var.pipeline_date, "-", "_")}"
     S3_TABLES_BUCKET            = "wellcomecollection-platform-catalogue-pipeline"
