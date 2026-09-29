@@ -874,7 +874,14 @@ def test_merge_gives_a_snapshot_tombstone_the_live_content(
     store = AdapterStore(temporary_table, "test_namespace")
     temporary_table.append(
         adapter_records_to_table(
-            [{"id": "deleted_at_source", "content": "record body", "last_modified": t1}]
+            [
+                {
+                    "id": "deleted_at_source",
+                    "content": "record body",
+                    "last_modified": t1,
+                },
+                {"id": "edited", "content": "old body", "last_modified": t1},
+            ]
         )
     )
     snapshot_path = tmp_path / "snapshot.parquet"
@@ -886,7 +893,14 @@ def test_merge_gives_a_snapshot_tombstone_the_live_content(
                     "content": None,
                     "last_modified": t2,
                     "deleted": True,
-                }
+                },
+                {"id": "edited", "content": "new body", "last_modified": t2},
+                {
+                    "id": "deleted_unseen",
+                    "content": None,
+                    "last_modified": t2,
+                    "deleted": True,
+                },
             ]
         ),
         snapshot_path,
@@ -896,9 +910,13 @@ def test_merge_gives_a_snapshot_tombstone_the_live_content(
     rebuild_adapter._merge_with_store(store, str(snapshot_path), str(merged_path))
 
     rows = pq.read_table(merged_path).to_pylist()
-    assert [(r["content"], r["deleted"], r["last_modified"]) for r in rows] == [
-        ("record body", True, t2)
-    ]
+    assert {
+        r["id"]: (r["content"], bool(r["deleted"]), r["last_modified"]) for r in rows
+    } == {
+        "deleted_at_source": ("record body", True, t2),
+        "edited": ("new body", False, t2),
+        "deleted_unseen": (None, True, t2),
+    }
 
 
 def test_merge_refuses_a_merge_left_from_an_earlier_refresh(

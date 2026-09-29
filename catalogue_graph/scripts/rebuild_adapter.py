@@ -478,14 +478,30 @@ def _keep_content_for_tombstones(chosen: pa.Table, live: pa.Table) -> pa.Table:
     The transformer needs the record body to emit the deletion, and the store
     keeps it the same way when a harvest brings a deletion.
     """
-    live_content = dict(
-        zip(live.column("id").to_pylist(), live.column("content").to_pylist(), strict=False)
+    content = chosen.column("content")
+    ids = chosen.column("id")
+    is_tombstone = pc.fill_null(
+        pc.and_kleene(
+            chosen.column("deleted"),
+            pc.or_kleene(pc.is_null(content), pc.equal(content, pa.scalar(""))),
+        ),
+        False,
     )
-    rows = chosen.to_pylist()
-    for row in rows:
-        if row["deleted"] and not row["content"]:
-            row["content"] = live_content.get(row["id"])
-    return pa.Table.from_pylist(rows, schema=ADAPTER_STORE_ARROW_SCHEMA)
+    tombstone_ids = chosen.filter(is_tombstone).column("id").combine_chunks()
+    live_tombstones = live.filter(
+        pc.field("id").isin(tombstone_ids.cast(live.schema.field("id").type))
+    )
+    live_content = pc.take(
+        live_tombstones.column("content"),
+        pc.index_in(
+            ids, value_set=live_tombstones.column("id").combine_chunks().cast(ids.type)
+        ),
+    )
+    return chosen.set_column(
+        chosen.schema.get_field_index("content"),
+        "content",
+        pc.if_else(is_tombstone, live_content, content),
+    ).cast(ADAPTER_STORE_ARROW_SCHEMA)
 
 
 def _merge_with_store(
