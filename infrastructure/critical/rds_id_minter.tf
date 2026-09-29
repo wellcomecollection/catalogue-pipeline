@@ -12,8 +12,7 @@ module "id_minter_rds" {
 
   master_username = data.aws_ssm_parameter.rds_username.value
 
-  # No Identifiers API environment reads this registry since the switchover
-  # repoint (wellcomecollection/catalogue-api#1008); both read the 2026-07-03 one.
+  # No Identifiers API environment reads this registry; both read the 2026-07-03 one.
   data_api_consumer_role_arns = []
 }
 
@@ -36,8 +35,7 @@ module "id_minter_rds_2026_07_03" {
 
   master_username = data.aws_ssm_parameter.rds_username.value
 
-  # Both Identifiers API environments read this registry, the production one
-  # since the switchover repoint (wellcomecollection/catalogue-api#1008).
+  # Both Identifiers API environments read this registry.
   data_api_consumer_role_arns = [
     "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-stage",
     "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-prod",
