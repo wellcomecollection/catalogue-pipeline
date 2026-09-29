@@ -5,17 +5,16 @@ locals {
     module.catalogue_graph_neptune_cluster_2026_07_03
   ]
 
-  production_cluster = module.catalogue_graph_neptune_cluster
+  production_cluster = module.catalogue_graph_neptune_cluster_2026_07_03
 }
 
 module "catalogue_graph_neptune_cluster" {
   source = "./modules/catalogue_graph"
 
-  # This is the current production cluster, which was created before we introduced graph dates.
-  # It has an empty graph_date to preserve its Neptune cluster name (catalogue-graph),
-  # otherwise Terraform would destroy it (Neptune cluster names cannot be changed).
-  # Eventually, we will switch to a new (dated) production cluster, at which point
-  # we can destroy this one and make graph dates mandatory.
+  # The legacy cluster, created before graph dates and still used by the frozen
+  # 2025-10-02 pipeline. The empty graph_date preserves its name (catalogue-graph);
+  # Neptune cluster names cannot be changed, so a date would destroy it. Remove it
+  # with that pipeline (wellcomecollection/platform#6726) and make graph dates mandatory.
   graph_date                 = ""
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
@@ -52,6 +51,7 @@ module "catalogue_graph_neptune_cluster_dev" {
 module "catalogue_graph_neptune_cluster_2026_07_03" {
   source = "./modules/catalogue_graph"
 
+  # The production cluster since the 2026-09-29 switchover (wellcomecollection/platform#6541).
   graph_date                 = "2026-07-03"
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
