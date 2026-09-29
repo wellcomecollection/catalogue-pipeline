@@ -1,10 +1,12 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
-  # Matching is done for round 3, so the matcher DB goes back to on demand.
-  # Tasks stay up until the comparison signs off (platform#6642).
+  # This pipeline is production since the switchover (wellcomecollection/platform#6541):
+  # tasks stay scaled up, the matcher stage runs at steady-state sizing with its tables
+  # on demand, and it no longer listens to the reindexer, so a reindex into another
+  # pipeline cannot reach it.
   reindexing_state = {
-    listen_to_reindexer = true
+    listen_to_reindexer = false
     scale_up_tasks      = true
     scale_up_matcher_db = false
   }

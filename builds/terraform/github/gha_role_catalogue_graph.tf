@@ -1,8 +1,10 @@
 module "gha_catalogue_graph_ci_role" {
   source = "github.com/wellcomecollection/terraform-aws-gha-role?ref=v1.0.0"
 
+  # Scoped to main: the role deploys and reads secrets, so it should not be
+  # assumable from a branch or a pull request. PR runs build without pushing.
   policy_document          = data.aws_iam_policy_document.gha_catalogue_graph_ci.json
-  github_repository        = "wellcomecollection/catalogue-pipeline"
+  github_repository        = "wellcomecollection/catalogue-pipeline:ref:refs/heads/main"
   role_name                = "catalogue-graph-ci"
   github_oidc_provider_arn = data.terraform_remote_state.aws_account_infrastructure.outputs.github_openid_connect_provider_arn
 }

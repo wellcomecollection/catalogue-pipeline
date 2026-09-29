@@ -80,6 +80,20 @@ variable "folio_default_target" {
   default     = "prod"
 }
 
+# Confines the EventBridge trigger to a daily window. Null leaves it enabled all
+# the time, which is what production wants. Set it while the scheduled pipeline
+# targets the dev sandbox, so the sync does not run against a stopped instance
+# overnight. See trigger_window.tf.
+variable "trigger_window" {
+  description = "Daily window during which the sync trigger is enabled. Null means always enabled."
+  type = object({
+    start_expression = string
+    stop_expression  = string
+    timezone         = string
+  })
+  default = null
+}
+
 variable "max_sync_retries" {
   description = "Maximum number of retry attempts for Lambda invocation in the Step Function"
   type        = number

@@ -12,7 +12,7 @@ module "lambda" {
   alarm_topic_arn = var.lambda_error_alarm_arn
   timeout         = 900
 
-  runtime = "python3.9"
+  runtime = "python3.12"
 
   environment_variables = {
     BUCKET = var.s3_adapter_bucket_name

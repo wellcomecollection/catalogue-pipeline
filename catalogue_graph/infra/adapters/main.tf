@@ -21,6 +21,7 @@ module "axiell" {
   steps_namespace       = "oai_pmh"
   s3_bucket_name        = "wellcomecollection-platform-axiell-adapter"
   schedule_expression   = "rate(15 minutes)"
+  schedule_enabled      = true # Resumed after the switchover store rebuild (platform#6541 phase 4); the trigger emits one catch-up window from the cursor
   repository_url        = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
   event_bus_name        = aws_cloudwatch_event_bus.event_bus.name
   ecs_cluster_arn       = aws_ecs_cluster.adapters.arn
@@ -31,14 +32,12 @@ module "axiell" {
 }
 
 module "folio" {
-  source              = "./modules/adapter"
-  namespace           = "folio"
-  steps_namespace     = "oai_pmh"
-  s3_bucket_name      = "wellcomecollection-platform-folio-adapter"
-  schedule_expression = "rate(15 minutes)"
-  # Paused: overlapping runs were colliding on Iceberg commits, causing a
-  # self-sustaining pileup of failed executions. Re-enable once resolved.
-  schedule_enabled       = false
+  source                 = "./modules/adapter"
+  namespace              = "folio"
+  steps_namespace        = "oai_pmh"
+  s3_bucket_name         = "wellcomecollection-platform-folio-adapter"
+  schedule_expression    = "rate(15 minutes)"
+  schedule_enabled       = true
   repository_url         = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
   event_bus_name         = aws_cloudwatch_event_bus.event_bus.name
   ecs_cluster_arn        = aws_ecs_cluster.adapters.arn
@@ -75,7 +74,18 @@ module "axiell_folio_sync" {
   folio_dev_subnets            = local.folio_dev_target_enabled ? local.private_subnets : []
   folio_dev_security_group_ids = [aws_security_group.folio_sync_dev.id]
 
-  # Scheduled runs stay on production. Reaching the sandbox is a per-invocation
-  # opt-in, with {"folio_target": "dev"} on the event.
-  folio_default_target = "prod"
+  # Scheduled runs target the sandbox and write for real, so the whole pipeline
+  # is exercised end to end before any of it writes to production. dry_run is
+  # clamped in the module so this can only ever write while the target is dev.
+  folio_default_target = "dev"
+  dry_run_default      = false
+
+  # The sandbox is stopped out of hours by folio-dev-server, and the Axiell
+  # adapter publishes every 15 minutes, so the trigger is confined to the
+  # working day. Starts an hour after the sandbox does, to let Kong come up.
+  trigger_window = local.folio_dev_target_enabled ? {
+    start_expression = "cron(0 9 ? * MON-FRI *)"
+    stop_expression  = "cron(30 17 ? * MON-FRI *)"
+    timezone         = "Europe/London"
+  } : null
 }

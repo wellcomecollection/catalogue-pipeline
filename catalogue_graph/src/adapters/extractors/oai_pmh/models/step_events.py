@@ -42,6 +42,10 @@ class OAIPMHTriggerEvent(BaseAdapterEvent):
     """Timestamp to use as 'now' for window calculations.
     If None, uses current time. Useful for testing and replay."""
 
+    window: IncrementalWindow | None = None
+    """Explicit range to harvest instead of the computed one. Lets an operator
+    backfill a range through the whole state machine."""
+
 
 class OAIPMHLoaderEvent(BaseAdapterEvent):
     """Event payload for the loader step in window mode.

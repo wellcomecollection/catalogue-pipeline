@@ -321,7 +321,7 @@ def test_snapshot_vhs_scans_fetches_and_verifies(tmp_path: Path) -> None:
 
 
 class FakeMultiTableDynamoResource:
-    """Serves different items per table, so the deleted companion is visible."""
+    """Serves different items per table, so it shows which table a store reads."""
 
     def __init__(self, items_by_table: dict[str, list[dict]]) -> None:
         outer = self
@@ -346,29 +346,49 @@ class FakeMultiTableDynamoResource:
         self.meta = type("Meta", (), {"client": Client()})()
 
 
-def test_scan_index_includes_the_deleted_companion_table() -> None:
-    """Sierra moved its pre-2018 deletions into a separate table rather than
-    marking them in place, so reading only the main table loses 557,348 of them."""
-    resource = FakeMultiTableDynamoResource(
-        {
-            "vhs-sierra-sierra-adapter-20200604": [index_item("live001")],
-            "vhs-sierra-sierra-adapter-20200604-deleted": [index_item("gone001")],
-        }
+SIERRA_TABLES = {
+    "vhs-sierra-sierra-adapter-20200604": [
+        index_item("live001"),
+        index_item("both001"),
+    ],
+    "vhs-sierra-sierra-adapter-20200604-deleted": [
+        index_item("gone001"),
+        index_item("both001"),
+    ],
+}
+
+
+def test_sierra_live_store_reads_only_the_live_table() -> None:
+    """The live file is what the pipeline read, so it must not pull in the
+    deleted table, which would duplicate the ids a reharvest recreated."""
+    rows = scan_index(FakeMultiTableDynamoResource(SIERRA_TABLES), VHS_STORES["sierra"])
+
+    assert sorted(row.id for row in rows) == ["both001", "live001"]
+    assert all(row.deleted is False for row in rows)
+
+
+def test_sierra_deleted_store_reads_only_the_deleted_table_and_marks_it() -> None:
+    rows = scan_index(
+        FakeMultiTableDynamoResource(SIERRA_TABLES), VHS_STORES["sierra-deleted"]
     )
 
-    rows = scan_index(resource, VHS_STORES["sierra"])
-
-    by_id = {row.id: row for row in rows}
-    assert by_id["live001"].deleted is False
-    assert by_id["gone001"].deleted is True
+    assert sorted(row.id for row in rows) == ["both001", "gone001"]
+    assert all(row.deleted is True for row in rows)
 
 
-def test_scan_index_leaves_a_store_without_a_companion_table_alone() -> None:
-    resource = FakeMultiTableDynamoResource(
-        {"vhs-calm-adapter": [index_item("rec001")]}
-    )
+def test_verify_snapshot_rejects_duplicate_ids(tmp_path: Path) -> None:
+    """One table cannot hold the same id twice, so a duplicate means rows were
+    combined from more than one table."""
+    rows = [
+        _parse_index_row(index_item("rec001", version=1)),
+        _parse_index_row(index_item("rec001", version=2)),
+    ]
+    s3_client = FakeS3Client({row.key: calm_body("rec001") for row in rows})
+    output_path = str(tmp_path / "calm.parquet")
+    write_snapshot(s3_client, CALM, rows, output_path)
 
-    assert len(scan_index(resource, CALM)) == 1
+    with pytest.raises(SnapshotError, match="1 duplicate id"):
+        verify_snapshot(output_path, rows)
 
 
 @pytest.mark.parametrize("limit", [0, -1])

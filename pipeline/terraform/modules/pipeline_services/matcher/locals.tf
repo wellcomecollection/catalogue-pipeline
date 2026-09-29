@@ -8,12 +8,10 @@ locals {
   graph_table_billing_mode = var.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
   lock_table_billing_mode  = var.scale_up_matcher_db ? "PROVISIONED" : "PAY_PER_REQUEST"
 
-  lock_timeout = 1 * 60
-
-  # The records in the locktable expire after local.lock_timeout
-  # The matcher is able to override locks that have expired
-  # Wait slightly longer to make sure locks are expired
-  queue_visibility_timeout_seconds = local.lock_timeout + 30
+  # Locks expire after this and are never renewed, so it must not be shorter
+  # than the lambda timeout or a slow match can lose its lock mid-write.
+  # The queue visibility timeout, set by the caller, must exceed it.
+  lock_timeout = var.timeout
 
   # Epistemic status of this comment: somewhat speculative.
   #

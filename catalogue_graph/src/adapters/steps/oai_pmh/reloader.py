@@ -3,6 +3,9 @@
 Analyzes window coverage gaps within a specified time range and re-harvests
 missing windows by invoking the loader handler for each gap. Intended primarily
 for local troubleshooting and manual gap remediation.
+
+Nothing here reconciles, enriches or publishes what it loads. To repair a live
+adapter, start a state machine execution with a ``window`` input instead.
 """
 
 from __future__ import annotations

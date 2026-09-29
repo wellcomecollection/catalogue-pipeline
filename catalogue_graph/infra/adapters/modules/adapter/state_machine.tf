@@ -136,9 +136,11 @@ locals {
             ContainerOverrides = [
               {
                 Name = "${var.namespace}-adapter-enrichment"
+                # Only what the step reads: ECS caps overrides at 8192 characters,
+                # and a catch-up's covered_window_keys alone exceed that.
                 Command = [
                   "-m", "adapters.steps.${local.steps_namespace}.folio_enrich",
-                  "--event", "{% $string($states.input) %}",
+                  "--event", "{% $string({'job_id': $states.input.job_id, 'changeset_ids': $states.input.changeset_ids}) %}",
                   "--task-token", "{% $states.context.Task.Token %}"
                 ]
               }
@@ -365,11 +367,87 @@ locals {
     }
   ]...)
 
+  # Overlapping executions collide on Iceberg commits: two loaders harvesting
+  # the same windows both write to the adapter store, one commit loses, and
+  # the retries only repeat the collision. So before doing anything, a run
+  # lists the executions of this state machine and stops if another one is
+  # still running.
+  #
+  # A skipped scheduled run succeeds, with the skip in its output: collisions
+  # are routine after a bulk update in the source, and a Fail here alarms on
+  # every one. No data is skipped, because the trigger resumes from the last
+  # published window. A dead loader is caught by its task heartbeat, after
+  # which the next run reaches the trigger's lag breaker.
+  #
+  # An id-mode run still fails when skipped: nothing later re-covers its ids,
+  # so the operator who started it must not see a green execution.
+  guard_states = {
+    "Already running?" = {
+      Type     = "Task"
+      Resource = "arn:aws:states:::aws-sdk:sfn:listExecutions"
+      Arguments = {
+        StateMachineArn = "{% $states.context.StateMachine.Id %}"
+        StatusFilter    = "RUNNING"
+      }
+      Assign = {
+        other_executions = "{% [$states.result.Executions[ExecutionArn != $states.context.Execution.Id].{'name': Name, 'started': StartDate}] %}"
+      }
+      Output = "{% $states.input %}"
+      Next   = "Skip if running"
+      Retry = [
+        {
+          ErrorEquals     = ["States.ALL"]
+          IntervalSeconds = 2
+          MaxAttempts     = 3
+          BackoffRate     = 2.0
+        }
+      ]
+    }
+    "Skip if running" = {
+      Type = "Choice"
+      Choices = concat(
+        [
+          for _ in range(local.id_mode_enabled ? 1 : 0) : {
+            Condition = "{% $count($other_executions) > 0 and $exists($states.input.ids) %}"
+            Next      = "Already running (id mode)"
+          }
+        ],
+        [
+          {
+            Condition = "{% $count($other_executions) > 0 %}"
+            Next      = "Already running"
+          }
+        ]
+      )
+      Default = local.id_mode_enabled ? "Which mode?" : "Run trigger"
+    }
+    "Already running" = {
+      Type = "Succeed"
+      Output = {
+        skipped          = "AlreadyRunning"
+        other_executions = "{% $other_executions %}"
+        reason           = "Skipped: another execution is still running. The next scheduled run covers this range."
+      }
+    }
+  }
+
+  id_mode_guard_states = merge([
+    for _ in range(local.id_mode_enabled ? 1 : 0) : {
+      "Already running (id mode)" = {
+        Type  = "Fail"
+        Error = "AlreadyRunning"
+        Cause = "{% 'Aborted: another execution is still running (' & $string($other_executions) & '). Start this id run again once it has finished.' %}"
+      }
+    }
+  ]...)
+
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Adapter pipeline (trigger, loader, publish event)"
-    StartAt       = local.id_mode_enabled ? "Which mode?" : "Run trigger"
+    StartAt       = "Already running?"
     States = merge(
+      local.guard_states,
+      local.id_mode_guard_states,
       local.base_states,
       local.id_mode_states,
       local.reconcile_states,

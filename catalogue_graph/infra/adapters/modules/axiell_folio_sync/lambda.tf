@@ -35,7 +35,7 @@ module "sync_lambda" {
         MANIFEST_S3_BUCKET = aws_s3_bucket.axiell_folio_sync_manifests.bucket
         # The adapter table is read via AXIELL_CONFIG/AdapterStore, so no
         # Iceberg-specific env vars are needed here.
-        DRY_RUN = tostring(var.dry_run_default)
+        DRY_RUN = tostring(local.dry_run_default)
         # Used when an event does not name a target. The event still wins.
         FOLIO_TARGET = local.folio_default_target
       },

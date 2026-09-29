@@ -8,6 +8,12 @@ module "pipeline" {
     scale_up_matcher_db      = false
   }
 
+  # Frozen for the production switchover (platform#6541): nothing new is
+  # transformed from the adapter bus, minted, or carried into the served indices.
+  enable_adapter_transformer_trigger = false
+  enable_id_minter_schedule          = false
+  enable_graph_pipeline_schedule     = false
+
   # Default values for a new pipeline
   # graph_index_dates = {
   #   merged   = local.pipeline_date
@@ -87,8 +93,8 @@ module "pipeline" {
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
-  # The current production Neptune cluster was created before we introduced graph dates.
-  # An empty string preserves its existing cluster name. Switch to a real date when we switch to a dated cluster.
+  # The legacy Neptune cluster predates graph dates; the empty string preserves its name.
+  # Production is the dated 2026-07-03 cluster. Both go with wellcomecollection/platform#6726.
   graph_date    = ""
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date

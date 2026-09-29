@@ -26,6 +26,7 @@ uv run suppress_miro.py [OPTIONS]
 - `--id-source`: File containing newline-separated list of MIRO IDs (default: stdin). IDs can be either catalogue identifiers or Miro image numbers.
 - `--message`: Required. Reason for suppression (e.g., a link to a Slack message explaining the take down request).
 - `--dry-run`: Flag to check that the resources required to perform the suppression are available, without actually performing the suppression.  
+  The dry run prints the DLCS origin URL of each image. Keep it, because unsuppressing needs it and DLCS no longer has it once the image is deleted.
 
 ### Examples
 

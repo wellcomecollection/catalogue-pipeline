@@ -106,6 +106,24 @@ variable "graph_index_dates" {
   })
 }
 
+variable "enable_adapter_transformer_trigger" {
+  type        = bool
+  default     = true
+  description = "Whether the EventBridge rules that start the transformer on <adapter>.adapter.completed events are enabled."
+}
+
+variable "enable_id_minter_schedule" {
+  type        = bool
+  default     = true
+  description = "Whether the id-minter sweep schedule and its id-generator id-pool top-up schedule are enabled. Set to false to stop all minting in this pipeline's registry."
+}
+
+variable "enable_graph_pipeline_schedule" {
+  type        = bool
+  default     = true
+  description = "Whether the scheduled graph-pipeline state machines are enabled. Set to false to stop updates reaching the served indices."
+}
+
 variable "enable_image_inferrer_schedule" {
   type        = bool
   default     = true

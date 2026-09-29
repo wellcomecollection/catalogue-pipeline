@@ -3,13 +3,13 @@ name: "Scala auto-formatting"
 
 on: push
 
-permissions:
-  id-token: write
-  contents: write
-
 jobs:
   autoformat:
     uses: wellcomecollection/.github/.github/workflows/scala_formatting.yml@main
-    secrets: inherit
+    permissions:
+      id-token: write
+      contents: write
+    secrets:
+      GHA_SCALA_FORMATTING_ROLE_ARN: ${{ secrets.GHA_SCALA_FORMATTING_ROLE_ARN }}
 
   # TO DO add sbt warnings report from .reports/scalafmt.out

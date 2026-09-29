@@ -1,17 +1,3 @@
-from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
-from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
-from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
-from adapters.transformers.marc.current_frequency import extract_current_frequency
-from adapters.transformers.marc.designation import extract_designation
-from adapters.transformers.marc.edition import extract_edition
-from adapters.transformers.marc.former_frequency import extract_former_frequency
-from adapters.transformers.marc.genres import extract_genres
-from adapters.transformers.marc.physical_description import (
-    extract_physical_description,
-)
-from adapters.transformers.marc.predecessor_identifier import (
-    extract_sierra_predecessor_id,
-)
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from models.pipeline.concept import Genre
 from models.pipeline.identifier import (
@@ -22,6 +8,22 @@ from models.pipeline.identifier import (
 )
 from models.pipeline.item import Item
 from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
+
+from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
+from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
+from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
+from adapters.transformers.marc.current_frequency import extract_current_frequency
+from adapters.transformers.marc.designation import extract_designation
+from adapters.transformers.marc.duration import extract_duration
+from adapters.transformers.marc.edition import extract_edition
+from adapters.transformers.marc.former_frequency import extract_former_frequency
+from adapters.transformers.marc.genres import extract_genres
+from adapters.transformers.marc.physical_description import (
+    extract_physical_description,
+)
+from adapters.transformers.marc.predecessor_identifier import (
+    extract_sierra_predecessor_id,
+)
 
 # The source-identifier type for a FOLIO item. The id-minter turns this plus the
 # item UUID into a stable canonical id for the public catalogue.
@@ -88,6 +90,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def genres(self) -> list[Genre]:
         return extract_genres(self.record)
+
+    @property
+    def duration(self) -> int | None:
+        return extract_duration(self.record)
 
     @property
     def items(self) -> list[Item]:

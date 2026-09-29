@@ -1,10 +1,9 @@
-"""Download IIIF thumbnails for inference and clean them up afterwards.
+"""Download IIIF images at thumbnail size for inference and clean them up afterwards.
 
-Ports `inference_manager/.../services/ImageDownloader.scala`. We fetch the DLCS
-400x400 thumbnail (cheap, served from the thumbnail service rather than the
-image server), write it to a per-image directory under a shared root, hand the
-inferrers a `file://` URL, and delete the file (and its now-empty directory)
-once inference is done.
+Ports `inference_manager/.../services/ImageDownloader.scala`. We request the
+`iiif-image` location at 400x400, write it to a per-image directory under a
+shared root, hand the inferrers a `file://` URL, and delete the file (and its
+now-empty directory) once inference is done.
 """
 
 from __future__ import annotations
@@ -20,11 +19,11 @@ from inferrer.models import InitialImage
 
 IIIF_IMAGE_LOCATION_TYPE = "iiif-image"
 INFO_JSON = "info.json"
-# DLCS serves a fixed set of thumbnail sizes without touching the image server.
+# A size IIIF keeps a derivative for, so the request is served without a render.
 THUMBNAIL_SUFFIX = "full/!400,400/0/default.jpg"
 
 # Transient HTTP statuses worth retrying: gateway/overload errors from the IIIF
-# thumbnail service that typically clear on a retry. A single un-retried 502 here
+# image API that typically clear on a retry. A single un-retried 502 here
 # fails the whole all-or-nothing inference task (and, with the state machine's
 # fail-fast Map, can abort an entire run), so retry these rather than failing.
 TRANSIENT_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
@@ -43,7 +42,8 @@ class _TransientImageDownloadError(ImageDownloadError):
 
     Subclasses `ImageDownloadError` so that, once the `backoff` retries are
     exhausted and this propagates, callers catching `ImageDownloadError` still
-    handle it.
+    handle it. The inference manager re-raises this rather than skipping, so a
+    retry-exhausted transient failure fails the whole task.
     """
 
 
@@ -78,7 +78,7 @@ def file_url(path: Path) -> str:
     factor=DOWNLOAD_BACKOFF_SECONDS,
 )
 def _fetch_image(url: str, timeout: float) -> requests.Response:
-    """GET the thumbnail, retrying transient failures with exponential backoff.
+    """GET the image, retrying transient failures with exponential backoff.
 
     The `backoff` decorator retries transient HTTP statuses (raised as
     `_TransientImageDownloadError`) and transport errors
@@ -87,6 +87,14 @@ def _fetch_image(url: str, timeout: float) -> requests.Response:
     """
     response = requests.get(url, timeout=timeout)
     if response.status_code == 200:
+        # The IIIF image server intermittently answers 200 with an empty body,
+        # which CloudFront then caches for `s-maxage` (28 days), so a retry would
+        # only re-read it. Permanent like a 404: skipped, counted, alarmed, rather
+        # than written to disk to fail as an opaque 500 inside the sidecars.
+        if not response.content:
+            raise ImageDownloadError(
+                f"Image request for {url} returned 200 with an empty body"
+            )
         return response
 
     message = f"Image request for {url} failed with status {response.status_code}"

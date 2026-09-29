@@ -1,7 +1,7 @@
 import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
-  lazy val defaultVersion = "32.43.5"
+  lazy val defaultVersion = "32.44.0"
   lazy val versions = new {
     val typesafe = defaultVersion
     val fixtures = defaultVersion
@@ -90,7 +90,7 @@ object ExternalDependencies {
     val apacheCommons = "1.12.0"
     val awsLambdaClient = "2.6.0"
     val awsLambdaEvents = "3.15.0"
-    val awsSSO = "2.31.54"
+    val awsSSO = "2.55.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "2.3.3"

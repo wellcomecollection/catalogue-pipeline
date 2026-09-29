@@ -233,6 +233,43 @@ def test_handler_skips_permanently_undownloadable_image(
     assert reported[-1]["dimensions"]["pipeline_step"] == "inference_manager"
 
 
+def test_handler_skips_image_with_an_empty_body(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An empty 200 is skipped and counted; the rest of the batch still indexes."""
+    monkeypatch.setattr(inference_manager, "IMAGES_ROOT", str(tmp_path))
+    mock_es_secrets("inferrer", PIPELINE_DATE)
+
+    good = make_initial_image("imgA", INFO_JSON_URL)
+    empty_info = "http://iiif.test/image/imgEmpty/info.json"
+    empty_thumb = "http://iiif.test/image/imgEmpty/full/!400,400/0/default.jpg"
+    for cid, url in [("imgA", INFO_JSON_URL), ("imgEmpty", empty_info)]:
+        MockElasticsearchClient.index(
+            index=f"images-initial-{PIPELINE_DATE}",
+            id=cid,
+            document=initial_image_doc(cid, url),
+        )
+    MockRequest.mock_response(method="GET", url=THUMBNAIL_URL, content_bytes=b"jpeg")
+    MockRequest.mock_response(method="GET", url=empty_thumb, content_bytes=b"")
+    _mock_inferrers(file_url(local_image_path(good, str(tmp_path))))
+
+    event = InferenceManagerEvent(
+        pipeline_date=PIPELINE_DATE, graph_date=PIPELINE_DATE, ids=["imgA", "imgEmpty"]
+    )
+    result = inference_manager.handler(event, es_mode="private")
+
+    assert result.processed == 2
+    assert result.augmented == 1
+    assert result.download_failure_count == 1
+    assert [d["_id"] for d in MockElasticsearchClient.inputs] == ["imgA"]
+    reported = [
+        m
+        for m in MockCloudwatchClient.metrics_reported
+        if m["metric_name"] == "download_failure_count"
+    ]
+    assert reported and reported[-1]["value"] == 1
+
+
 def test_handler_still_fails_on_transient_download_error(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
