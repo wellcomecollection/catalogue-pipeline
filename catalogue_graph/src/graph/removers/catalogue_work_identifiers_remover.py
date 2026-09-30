@@ -88,10 +88,15 @@ class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemoverIncremental):
 
     def get_edge_ids_to_remove(self) -> Iterator[str]:
         """Return stale HAS_PATH_IDENTIFIER and HAS_PARENT edges of the works in scope."""
+        # A node shared by works in different batches is reconciled once per batch
+        yielded_parent_edge_ids: set[str] = set()
         for batch in batched(self.work_source.stream_raw(), BATCH_SIZE):
             works = [RawCatalogueWork(document) for document in batch]
             yield from self._get_stale_path_identifier_edge_ids(works)
-            yield from self._get_stale_parent_edge_ids(works)
+            for edge_id in self._get_stale_parent_edge_ids(works):
+                if edge_id not in yielded_parent_edge_ids:
+                    yielded_parent_edge_ids.add(edge_id)
+                    yield edge_id
 
     def _get_stale_path_identifier_edge_ids(
         self, works: list[RawCatalogueWork]
