@@ -36,6 +36,8 @@ class SinkResult:
     accepted_ids: list[str] = field(default_factory=list)
     # Rejected because the sink already held a newer copy; no retry needed.
     superseded_ids: list[str] = field(default_factory=list)
+    # Rejected by the sink. Unlike `errors`, never capped.
+    failed_ids: list[str] = field(default_factory=list)
     errors: list[TransformationError] = field(default_factory=list)
 
 
@@ -92,16 +94,16 @@ class BatchTransformer(BaseTransformer):
                 written = sink.write(transformed_batch)
                 result.accepted_ids.extend(d.target_id for d in written.accepted)
                 result.superseded_ids.extend(d.target_id for d in written.superseded)
+                result.failed_ids.extend(d.target_id for d, _ in written.failed)
                 for document, error in written.failed:
-                    logger.warning(
-                        "Write failed",
-                        sink=type(sink).__name__,
-                        source_id=document.source_id,
-                        target_id=document.target_id,
-                        error=error,
-                    )
                     if len(result.errors) < MAX_ERRORS:
                         result.errors.append(_error(error, "index", document.source_id))
+                if written.failed:
+                    logger.warning(
+                        "Writes failed",
+                        sink=type(sink).__name__,
+                        count=len(written.failed),
+                    )
                 if written.superseded:
                     logger.warning(
                         "Skipped documents already at a newer version",
@@ -110,5 +112,5 @@ class BatchTransformer(BaseTransformer):
                     )
 
         for result in results:
-            result.errors = self._errors + result.errors
+            result.errors = (self._errors + result.errors)[:MAX_ERRORS]
         return results

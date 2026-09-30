@@ -13,11 +13,11 @@ import structlog
 from pydantic import BaseModel, ConfigDict
 from pyiceberg.table import Table as IcebergTable
 
-from core.sinks import ElasticsearchSink, Sink
+from core.sinks import ElasticsearchSink, IcebergSink, Sink
 from core.transformer import SinkResult
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
 from id_minter.database import apply_migrations
-from id_minter.iceberg import IcebergSink, get_works_identified_table
+from id_minter.iceberg import get_works_identified_table
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import IdMintingTransformer
 from id_minter.models.identifier import IdResolver
@@ -27,6 +27,7 @@ from id_minter.models.step_events import (
 from id_minter.reporting import IdMinterReport
 from id_minter.resolvers.data_api_resolver import DataApiIdResolver
 from id_minter.resolvers.minting_resolver import MintingResolver
+from id_minter.schemata import works_identified_row
 from id_minter.sns import publish_ids_to_sns
 from models.incremental_window import IncrementalWindow
 from utils.aws import pydantic_from_s3_json
@@ -134,7 +135,7 @@ def execute(
     # Documents also go to an experimental Iceberg table when enabled.
     sinks: list[Sink] = [ElasticsearchSink(target_client, target_index)]
     if runtime.iceberg_table is not None:
-        sinks.append(IcebergSink(runtime.iceberg_table))
+        sinks.append(IcebergSink(runtime.iceberg_table, works_identified_row))
 
     result, *_ = transformer.stream_to_many(*sinks)
 

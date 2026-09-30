@@ -13,16 +13,15 @@ from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.iceberg import LocalIcebergTableConfig, get_local_table
 from core.document import Document
-from core.sinks import ElasticsearchSink
+from core.sinks import ElasticsearchSink, IcebergSink
 from core.transformer import SinkResult
-from id_minter.iceberg import IcebergSink
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.id_minting_transformer import (
     IdMintingTransformer,
     document_version,
 )
 from id_minter.models.identifier import SourceIdentifierKey
-from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
+from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA, works_identified_row
 from models.pipeline.identifier import SourceIdentifier
 from tests.mocks import ListSink, MockElasticsearchClient
 
@@ -882,13 +881,13 @@ def _resolver_for(values_to_ids: dict[str, str]) -> FakeResolver:
 
 def _stream_with_iceberg(
     transformer: IdMintingTransformer, es_client: Elasticsearch, table: IcebergTable
-) -> SinkResult:
-    """Index into Elasticsearch and append to the Iceberg table; returns the index result."""
-    result, _ = transformer.stream_to_many(
+) -> tuple[SinkResult, SinkResult]:
+    """Index into Elasticsearch and append to the Iceberg table; returns both results."""
+    index_result, iceberg_result = transformer.stream_to_many(
         ElasticsearchSink(es_client, "works-identified-dev"),
-        IcebergSink(table),
+        IcebergSink(table, works_identified_row),
     )
-    return result
+    return index_result, iceberg_result
 
 
 class TestIcebergWrites:
@@ -960,7 +959,9 @@ class TestIcebergWrites:
             ),
         )
 
-        result = _stream_with_iceberg(transformer, es_client, works_identified_table)
+        result, iceberg_result = _stream_with_iceberg(
+            transformer, es_client, works_identified_table
+        )
 
         rows = works_identified_table.scan().to_arrow().to_pylist()
         assert sorted(r["id"] for r in rows) == ["broke002", "fine0003", "stale001"]
@@ -969,14 +970,20 @@ class TestIcebergWrites:
         assert [e.row_id for e in result.errors] == [
             "Work[sierra-system-number/b1000002]"
         ]
+        assert sorted(iceberg_result.accepted_ids) == [
+            "broke002",
+            "fine0003",
+            "stale001",
+        ]
+        assert iceberg_result.failed_ids == []
 
     def test_iceberg_failure_does_not_fail_the_run(
         self, works_identified_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        def broken_append(table: IcebergTable, documents: list[dict]) -> int:
+        def broken_append(rows: Any) -> None:
             raise RuntimeError("catalog unreachable")
 
-        monkeypatch.setattr("id_minter.iceberg.append_identified_works", broken_append)
+        monkeypatch.setattr(works_identified_table, "append", broken_append)
 
         MockElasticsearchClient.reset_mocks()
         es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
@@ -985,8 +992,13 @@ class TestIcebergWrites:
             resolver=_resolver_for({"b1000001": "aaaa0001"}),
         )
 
-        result = _stream_with_iceberg(transformer, es_client, works_identified_table)
+        result, iceberg_result = _stream_with_iceberg(
+            transformer, es_client, works_identified_table
+        )
 
         assert result.accepted_ids == ["aaaa0001"]
         assert result.errors == []
+        # The dropped row is visible on the Iceberg result, so the gap can be backfilled.
+        assert iceberg_result.accepted_ids == []
+        assert iceberg_result.failed_ids == ["aaaa0001"]
         assert works_identified_table.scan().to_arrow().num_rows == 0

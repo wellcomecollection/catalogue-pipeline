@@ -8,8 +8,8 @@ from freezegun import freeze_time
 from pyiceberg.exceptions import CommitFailedException
 
 from core.document import Document
-from id_minter.iceberg import COMMIT_BACKOFF_MAX_TIME, append_identified_works
-from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
+from core.sinks import COMMIT_BACKOFF_MAX_TIME, IcebergSink
+from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA, works_identified_row
 
 
 def _document(canonical_id: str, version: int = 1727206010000) -> Document:
@@ -49,11 +49,14 @@ def no_backoff(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("time.sleep", lambda seconds: None)
 
 
-class TestAppendIdentifiedWorks:
+class TestWorksIdentifiedSink:
     def test_nothing_to_write(self) -> None:
         table = _table()
 
-        assert append_identified_works(table, []) == 0
+        result = IcebergSink(table, works_identified_row).write([])
+
+        assert result.accepted == []
+        assert result.failed == []
         table.append.assert_not_called()
 
     def test_one_row_per_document(self) -> None:
@@ -63,8 +66,9 @@ class TestAppendIdentifiedWorks:
             _document("aaaa0002", version=1727206010001),
         ]
 
-        assert append_identified_works(table, documents) == 2
+        result = IcebergSink(table, works_identified_row).write(documents)
 
+        assert result.accepted == documents
         rows = table.append.call_args.args[0]
         assert rows.column("id").to_pylist() == ["aaaa0001", "aaaa0002"]
         assert rows.column("version").to_pylist() == [1727206010000, 1727206010001]
@@ -77,8 +81,11 @@ class TestAppendIdentifiedWorks:
 
     def test_retries_after_losing_the_commit(self) -> None:
         table = _table(CommitFailedException("snapshot moved"), None)
+        documents = [_document("aaaa0001")]
 
-        assert append_identified_works(table, [_document("aaaa0001")]) == 1
+        result = IcebergSink(table, works_identified_row).write(documents)
+
+        assert result.accepted == documents
         assert table.append.call_count == 2
         assert table.refresh.call_count == 2
 
@@ -88,6 +95,7 @@ class TestAppendIdentifiedWorks:
         table = MagicMock()
         table.schema.return_value = WORKS_IDENTIFIED_ICEBERG_SCHEMA
         table.append.side_effect = CommitFailedException("snapshot moved")
+        documents = [_document("aaaa0001"), _document("aaaa0002")]
 
         sleeps: list[float] = []
 
@@ -97,8 +105,11 @@ class TestAppendIdentifiedWorks:
 
         with freeze_time() as clock:
             monkeypatch.setattr("time.sleep", sleep)
-            with pytest.raises(CommitFailedException):
-                append_identified_works(table, [_document("aaaa0001")])
+            result = IcebergSink(table, works_identified_row).write(documents)
 
+        # Every document is reported as failed rather than raising into the run.
+        assert result.accepted == []
+        assert [document for document, _ in result.failed] == documents
+        assert all(isinstance(e, CommitFailedException) for _, e in result.failed)
         assert table.append.call_count == len(sleeps) + 1
         assert sum(sleeps) == pytest.approx(COMMIT_BACKOFF_MAX_TIME)
