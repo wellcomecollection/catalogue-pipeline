@@ -349,7 +349,7 @@ OUTSIDE_WINDOW = "2024-12-01T00:00:00Z"
 
 
 def add_path_work(
-    work_id: str, path: str, identifier: str, merged_time: str = IN_WINDOW
+    work_id: str, path: str, identifier: str, merged_time: str | None = IN_WINDOW
 ) -> None:
     MockElasticsearchClient.index(
         "works-denormalised-dev",
@@ -363,7 +363,7 @@ def add_path_work(
                     "ontologyType": "Work",
                     "value": f"priref-{work_id}",
                 },
-                "mergedTime": merged_time,
+                **({"mergedTime": merged_time} if merged_time else {}),
             },
             "data": {
                 "collectionPath": {"path": path},
@@ -502,6 +502,28 @@ def test_work_identifiers_moved_record_removes_stale_parent_edge() -> None:
     run_work_identifiers_edge_remover()
 
     check_work_identifiers_deleted_edges(set(edges_to_remove))
+
+
+def test_work_identifiers_window_excludes_works_without_merged_time() -> None:
+    # An Elasticsearch range query never matches a document missing the field
+    add_path_work("refno001", "PP/ABC", "PP/ABC")
+    add_path_work("notime01", "PP/XYZ", "PP/XYZ", merged_time=None)
+
+    mock_neptune_get_edges_response(
+        ["refno001"],
+        edge_label="HAS_PATH_IDENTIFIER",
+        results=[
+            {"id": "refno001", "edge_ids": ["HAS_PATH_IDENTIFIER:refno001-->PP/ABC"]}
+        ],
+    )
+    mock_neptune_get_parent_edges_response(
+        ["PP/ABC"], results=[{"id": "PP/ABC", "edge_ids": ["HAS_PARENT:PP/ABC-->PP"]}]
+    )
+    mock_work_identifiers_edge_removal([])
+
+    run_work_identifiers_edge_remover()
+
+    check_work_identifiers_deleted_edges(set())
 
 
 def test_work_identifiers_unchanged_records_remove_nothing() -> None:

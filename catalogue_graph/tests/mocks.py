@@ -508,7 +508,7 @@ class MockElasticsearchClient:
                 for key in field.split("."):
                     value = value.get(key) if isinstance(value, dict) else None
                 if value is None:
-                    continue
+                    return False
                 parsed = self._parse_utc(value)
                 if "gte" in bounds and parsed < self._parse_utc(bounds["gte"]):
                     return False
