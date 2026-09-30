@@ -7,14 +7,13 @@ from __future__ import annotations
 
 import re
 
-from models.pipeline.concept import Concept
-from models.pipeline.identifier import Identifiable, Unidentifiable
-from utils.types import RawConceptType
-
 from adapters.transformers.marc.period import parse_period
 from adapters.transformers.utils.text_utils import (
     normalise_label,
 )
+from models.pipeline.concept import Concept
+from models.pipeline.identifier import Identifiable, Unidentifiable
+from utils.types import RawConceptType
 
 SUBDIVISION_CODES: list[str] = ["v", "x", "y", "z"]
 SUBFIELD_TYPE_MAP: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
@@ -89,12 +88,7 @@ def build_concept(
 
     if raw_type == "Period":
         return parse_period(label, identifier=id)
-    else:
-        return Concept(
-            id=id,
-            label=label,
-            type=raw_type,
-        )
+    return Concept(id=id, label=label, type=raw_type)
 
 
 def get_concept_identifier(label: str, raw_type: RawConceptType) -> Identifiable:
