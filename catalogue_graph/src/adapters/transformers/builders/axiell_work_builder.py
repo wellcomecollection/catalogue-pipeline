@@ -123,15 +123,17 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
             return self._part_of_collection_path()
         return self._ref_no_collection_path()
 
-    def _alt_ref_no(self) -> str | None:
-        alt_ref_no = None
-        for identifier in self.other_identifiers:
-            if identifier.identifier_type.id == "calm-altref-no":
-                alt_ref_no = identifier.value
-        return alt_ref_no
+    def _object_number(self) -> str | None:
+        # Only the (AltRefNo) 035: a "Library Reference Number" containing "/" also
+        # becomes calm-altref-no, and would give a key that 982 links don't use.
+        for field in self.record.get_fields("035"):
+            value = field.get("a") or ""
+            if value.startswith("(AltRefNo)"):
+                return value.removeprefix("(AltRefNo)") or None
+        return None
 
     def _part_of_collection_path(self) -> CollectionPath:
-        object_number = self._alt_ref_no()
+        object_number = self._object_number()
         if object_number is None:
             raise ValueError(
                 f"Missing object number on work '{self.source_identifier_value}'."

@@ -58,6 +58,15 @@ Feature: Collection path and reference number extraction from Axiell MARC record
     Then the work's collection_path.path is "axiell:SA|CB|2|41|/axiell:SA|CB|2|41|43|"
     And the work's collection_path.label is "SA/CB/2/41/43/"
 
+  Scenario: part_of mode keys on the AltRefNo, not a Library Reference Number
+    Given the Axiell collection path source is "part_of"
+    And the MARC record has a 035 field with subfield "a" value "(AltRefNo)WF/CW/02/01"
+    And the MARC record has a 035 field with subfield "a" value "(Library Reference Number)WF/CW/02/02"
+    And the MARC record has a 982 field with subfield "a" value "110000001" and subfield "b" value "WF/CW/02"
+    When I transform the MARC record
+    Then the work's collection_path.path is "axiell:WF|CW|02/axiell:WF|CW|02|01"
+    And the work's collection_path.label is "WF/CW/02/01"
+
   Scenario: part_of mode does not need a RefNo
     Given the Axiell collection path source is "part_of"
     And the MARC record's only 035 field with subfield "a" value "(AltRefNo)PP/MIA/1"
