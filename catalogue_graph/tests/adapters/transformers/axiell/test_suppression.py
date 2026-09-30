@@ -5,6 +5,7 @@ import pytest
 from pymarc.record import Field, Record, Subfield
 
 import adapters.transformers.builders.axiell_work_builder as axiell_work_builder
+from adapters.extractors.oai_pmh.axiell import config as axiell_config
 from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
 from tests.adapters.transformers.axiell.conftest import make_axiell_record
@@ -82,19 +83,39 @@ def test_explicit_no_suppression_does_not_log(
     mock_logger.warning.assert_not_called()
 
 
+@pytest.mark.parametrize("source", ["refno", "part_of"])
 @pytest.mark.parametrize("marker", ["no", None])
 def test_suppressed_record_without_ref_no_yields_deleted_work(
-    marker: str | None,
+    marker: str | None, source: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Cataloguers create records before assigning a RefNo; suppression must not fail on them."""
+    monkeypatch.setattr(axiell_config, "AXIELL_COLLECTION_PATH_SOURCE", source)
     record = make_axiell_record(publish_to_web=marker, ref_no=None)
     assert isinstance(_transform(record), DeletedSourceWork)
 
 
-def test_publishable_record_without_ref_no_raises() -> None:
+def test_publishable_record_without_ref_no_raises_in_refno_mode() -> None:
     record = make_axiell_record(publish_to_web="yes", ref_no=None)
     with pytest.raises(ValueError, match="Missing RefNo"):
         _transform(record)
+
+
+def test_publishable_record_without_ref_no_is_visible_in_part_of_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(axiell_config, "AXIELL_COLLECTION_PATH_SOURCE", "part_of")
+    record = make_axiell_record(publish_to_web="yes", ref_no=None, part_of="PP/ABC")
+    record = _with_alt_ref_no(record, "PP/ABC/1")
+    assert isinstance(_transform(record), VisibleSourceWork)
+
+
+def test_amsg_alt_ref_no_suppresses_record_without_ref_no_in_part_of_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(axiell_config, "AXIELL_COLLECTION_PATH_SOURCE", "part_of")
+    record = make_axiell_record(publish_to_web="yes", ref_no=None)
+    record = _with_alt_ref_no(record, "AMSG-Research-Guide-001")
+    assert isinstance(_transform(record), DeletedSourceWork)
 
 
 def test_amsg_alt_ref_no_suppresses_publishable_record() -> None:

@@ -1,5 +1,8 @@
+from functools import cached_property
+
 import structlog
 
+from adapters.extractors.oai_pmh.axiell import config as axiell_config
 from adapters.transformers.axiell.access_status import extract_access_status
 from adapters.transformers.axiell.contributors import extract_contributors
 from adapters.transformers.axiell.description import extract_description
@@ -57,6 +60,11 @@ from utils.types import WorkType
 logger = structlog.get_logger(__name__)
 
 
+def _pointer_key(object_number: str) -> str:
+    # "/" separates path segments, so it cannot appear inside a key.
+    return "axiell:" + object_number.replace("/", "|")
+
+
 class AxiellWorkBuilder(MarcXmlWorkBuilder):
     """Work builder for Axiell (MARC XML) records."""
 
@@ -108,8 +116,51 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
         last_modified = extract_last_transaction_time_to_datetime(self.record)
         return convert_datetime_to_utc_iso(last_modified)
 
-    @property
+    # Cached so the multiple-982 warning is logged once per record.
+    @cached_property
     def collection_path(self) -> CollectionPath:
+        if axiell_config.AXIELL_COLLECTION_PATH_SOURCE == "part_of":
+            return self._part_of_collection_path()
+        return self._ref_no_collection_path()
+
+    def _alt_ref_no(self) -> str | None:
+        alt_ref_no = None
+        for identifier in self.other_identifiers:
+            if identifier.identifier_type.id == "calm-altref-no":
+                alt_ref_no = identifier.value
+        return alt_ref_no
+
+    def _part_of_collection_path(self) -> CollectionPath:
+        object_number = self._alt_ref_no()
+        if object_number is None:
+            raise ValueError(
+                f"Missing object number on work '{self.source_identifier_value}'."
+            )
+        own_key = _pointer_key(object_number)
+
+        # 982 is the parent link ($a priref, $b object number); none means a root.
+        part_of_fields = self.record.get_fields("982")
+        if not part_of_fields:
+            return CollectionPath(path=own_key, label=object_number)
+        if len(part_of_fields) > 1:
+            logger.warning(
+                "Record has more than one 982 parent link; using the first",
+                record_id=self.source_identifier_value,
+                parent_object_numbers=[field.get("b") for field in part_of_fields],
+            )
+
+        parent_object_number = part_of_fields[0].get("b")
+        if not parent_object_number:
+            raise ValueError(
+                f"982 without a parent object number on work "
+                f"'{self.source_identifier_value}'."
+            )
+        return CollectionPath(
+            path=f"{_pointer_key(parent_object_number)}/{own_key}",
+            label=object_number,
+        )
+
+    def _ref_no_collection_path(self) -> CollectionPath:
         ref_no, alt_ref_no = None, None
 
         # Search for calm-ref-no and calm-altref-no identifiers, extracted into the other_identifiers field
