@@ -45,6 +45,13 @@ ATTR_ALIASES: dict[str, str] = {
 }
 
 
+SUB_ATTR_ALIASES: dict[str, str] = {
+    "source identifier value": "id.source_identifier.value",
+    "source identifier type": "id.source_identifier.identifier_type.id",
+    "source identifier ontology type": "id.source_identifier.ontology_type",
+}
+
+
 def _normalise_attr_phrase(attr_phrase: str) -> str:
     key = attr_phrase.strip().lower()
     return ATTR_ALIASES.get(key, key.replace(" ", "_"))
@@ -257,7 +264,7 @@ def list_member_nth_has(
 
 
 def drill_through_dots(obj: Any, path: str) -> Any:
-    parts = path.split(".")
+    parts = SUB_ATTR_ALIASES.get(path.strip().lower(), path).split(".")
     current = obj
     for part in parts:
         current = getattr(current, part)
