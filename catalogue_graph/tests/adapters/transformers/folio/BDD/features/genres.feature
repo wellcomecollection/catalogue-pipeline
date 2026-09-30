@@ -4,8 +4,8 @@ Feature: genres (MARC 655)
   are a GenreConcept for ǂa followed by one concept per subdivision, typed by
   subfield code. Only ǂa can carry an authority identifier, taken from ǂ0
   when the second indicator names a scheme we support; every other concept
-  gets a label-derived identifier. Genres with the same label are
-  deduplicated, keeping the first.
+  gets a label-derived identifier. Identical genres are deduplicated,
+  keeping the first.
 
   These scenarios mirror the unit tests of the Scala transformer this
   replaces (SierraGenresTest.scala), including its test data, so the two
@@ -108,19 +108,26 @@ Feature: genres (MARC 655)
     And its 1st concept has the source identifier ontology type "Genre"
     And its 1st concept has the source identifier value "mesh/456"
 
-  # Known divergences from the Scala. Each is deliberate unless it says otherwise.
-
-  Scenario: A Library of Congress identifier in ǂ0 is not used
-  The Scala reads ǂ0 as an LCSH or LC Names identifier when the second
-  indicator is 0. The Python does not support those schemes yet and falls
-  back to a label-derived identifier. Not deliberate: no live 655 carries a
-  usable one, and the 61 that carry a local identifier there would make the
-  Scala throw.
+  Scenario: An LCSH identifier is taken from ǂ0 when the second indicator is 0
     Given the MARC record has a 655 field with indicators "" "0" with subfield "a" value "absence" and subfield "0" value "sh85060628"
     When I transform the MARC record
     Then the only genre has the label "absence"
+    And its 1st concept has the source identifier type "lc-subjects"
+    And its 1st concept has the source identifier ontology type "Genre"
+    And its 1st concept has the source identifier value "sh85060628"
+
+  # Known divergences from the Scala. Each is deliberate unless it says otherwise.
+
+  Scenario: A ǂ0 that is not an LoC identifier is logged and falls back to the label
+  The Scala throws on an unrecognised LoC prefix, failing the whole work. The
+  only live cases are 62 migrated Hindi manuscripts whose local code "MASHINI"
+  sat in ǂ9 in Sierra and was moved to ǂ0 by the FOLIO migration.
+    Given the MARC record has a 655 field with indicators "" "0" with subfield "a" value "Manuscripts" and subfield "x" value "Hindi" and subfield "0" value "MASHINI"
+    When I transform the MARC record
+    Then an error "Could not determine LoC scheme from identifier" is logged with tag "655" and value "MASHINI"
+    And the only genre has the label "Manuscripts - Hindi"
     And its 1st concept has the source identifier type "label-derived"
-    And its 1st concept has the source identifier value "absence"
+    And its 1st concept has the source identifier value "manuscripts"
 
   Scenario: A chronological subdivision the Python parser can read gets a range
     Given the MARC record has a 655 field with subfield "a" value "A Content" and subfield "y" value "18th cent."
@@ -137,16 +144,6 @@ Feature: genres (MARC 655)
     When I transform the MARC record
     Then the only genre has the label "Electronic books"
     And its 1st concept has the label "Electronic books"
-
-  Scenario: Genres with the same label are deduplicated even when their identifiers differ
-  The Scala deduplicates whole Genre objects, so two "Periodicals" with
-  different ǂ0 or ǂ2 both survive and the work shows the label twice. The
-  Python deduplicates on label and keeps the first.
-    Given the MARC record has a 655 field with indicators "" "2" with subfield "a" value "Periodicals" and subfield "0" value "D020492"
-    And the MARC record has another 655 field with indicators "" "7" with subfield "a" value "Periodicals." and subfield "2" value "rbgenr"
-    When I transform the MARC record
-    Then the only genre has the label "Periodicals"
-    And its 1st concept has the source identifier type "nlm-mesh"
 
   Scenario: A repeated ǂa is logged and only the first used
   The Scala joins every ǂa into the label and makes a GenreConcept of each.

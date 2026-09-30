@@ -20,18 +20,16 @@ from models.pipeline.concept import Concept, Genre
 
 
 def extract_genres(record: Record) -> list[Genre]:
-    """One Genre per 655, deduplicated on label; the first occurrence wins."""
+    """One Genre per 655; identical genres are deduplicated, the first occurrence wins."""
     return distinct(
         non_empty(extract_genre(field) for field in record.get_fields("655"))
     )
 
 
 def distinct(genres: list[Genre]) -> list[Genre]:
-    seen = set()
-    result = []
+    result: list[Genre] = []
     for genre in genres:
-        if genre.label not in seen:
-            seen.add(genre.label)
+        if genre not in result:
             result.append(genre)
     return result
 
