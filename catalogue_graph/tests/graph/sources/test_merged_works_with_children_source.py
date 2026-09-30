@@ -151,6 +151,28 @@ def test_stream_raw_strips_trailing_slash_from_paths(
     mock_get_child.assert_called_once_with({"A/B", "B"})
 
 
+def test_stream_raw_batches_prefixes_by_clause_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Partial-path works contribute two prefixes each, so batching must count prefixes, not works
+    works = [_make_work("w1", path="A/B"), _make_work("w2", path="C/D")]
+    _with_primary_works(monkeypatch, works)
+    monkeypatch.setattr(
+        "graph.sources.merged_works_with_children_source.MAX_BOOL_CLAUSES", 3
+    )
+
+    source = _make_source()
+    mock_get_child = MagicMock(return_value=MagicMock(stream_raw=lambda: iter([])))
+    monkeypatch.setattr(
+        MergedWorksWithChildrenSource, "_get_child_source", mock_get_child
+    )
+
+    list(source.stream_raw())
+    batches = [call.args[0] for call in mock_get_child.call_args_list]
+    assert [len(b) for b in batches] == [3, 1]
+    assert set().union(*batches) == {"A/B", "B", "C/D", "D"}
+
+
 def test_prefixes_for_full_path_work_are_deduplicated() -> None:
     # Axiell in RefNo mode: the path is the work's own RefNo, so it is also its path identifier
     work = _make_work("w1", path="PP/ABC/1", other_identifiers=["PP/ABC/1"])
