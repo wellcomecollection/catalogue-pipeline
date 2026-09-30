@@ -348,3 +348,35 @@ class NeptuneClient:
 
         result = self.run_parallel_query(node_ids, query)
         return {node_id: set(item["edge_ids"]) for node_id, item in result.items()}
+
+    def get_path_identifier_parent_edges(
+        self, node_ids: Iterable[str]
+    ) -> dict[str, set[str]]:
+        """Return a dictionary mapping each path identifier ID to the IDs of its outgoing HAS_PARENT edges."""
+        # Directed and label-restricted, so that children's edges and concept HAS_PARENT edges are never included
+        query = """
+            UNWIND $ids AS id
+            MATCH (n:PathIdentifier {`~id`: id})-[e:HAS_PARENT]->()
+            RETURN id(n) AS id, collect(id(e)) AS edge_ids
+        """
+
+        result = self.run_parallel_query(node_ids, query)
+        return {node_id: set(item["edge_ids"]) for node_id, item in result.items()}
+
+    def get_path_identifier_work_ids(
+        self, node_ids: Iterable[str]
+    ) -> dict[str, set[str]]:
+        """Return a dictionary mapping each path identifier ID to the IDs of the works linked to it."""
+        query = """
+            UNWIND $ids AS id
+            MATCH (w:Work)-[:HAS_PATH_IDENTIFIER]->(n:PathIdentifier {`~id`: id})
+            RETURN id(n) AS id, collect(id(w)) AS work_ids
+        """
+
+        result = self.run_parallel_query(node_ids, query)
+        return {node_id: set(item["work_ids"]) for node_id, item in result.items()}
+
+    def get_path_identifier_parent_edge_count(self) -> int:
+        query = "MATCH (:PathIdentifier)-[e:HAS_PARENT]->() RETURN count(e) AS count"
+        edge_count: int = self.run_open_cypher_query(query)[0]["count"]
+        return edge_count
