@@ -160,10 +160,10 @@ def test_prefixes_for_full_path_work_are_deduplicated() -> None:
 
 def test_prefixes_for_pointer_mode_work_include_path_identifier() -> None:
     work = _make_work(
-        "w1", path="axiell:PP/ABC/axiell:PP|ABC|1", other_identifiers=["PP/ABC/1"]
+        "w1", path="axiell:PP|ABC/axiell:PP|ABC|1", other_identifiers=["PP/ABC/1"]
     )
     assert child_path_prefixes(work) == {
-        "axiell:PP/ABC/axiell:PP|ABC|1",
+        "axiell:PP|ABC/axiell:PP|ABC|1",
         "axiell:PP|ABC|1",
     }
 
