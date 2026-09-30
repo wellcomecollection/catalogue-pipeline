@@ -1,6 +1,15 @@
+import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
+from adapters.extractors.oai_pmh.axiell import config as axiell_config
+
 # mypy: allow-untyped-calls
+
+
+@pytest.fixture(autouse=True)
+def refno_collection_path_source(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The import-time value follows the shell env; tests must not.
+    monkeypatch.setattr(axiell_config, "AXIELL_COLLECTION_PATH_SOURCE", "refno")
 
 
 def make_axiell_record(

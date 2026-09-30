@@ -27,7 +27,8 @@ Feature: Collection path and reference number extraction from Axiell MARC record
     And the work's reference_number is "PP/MIA/1"
 
   Scenario: RefNo mode ignores the 982 parent link
-    Given the MARC record has a 035 field with subfield "a" value "(AltRefNo)PP/MIA/1"
+    Given the Axiell collection path source is "refno"
+    And the MARC record has a 035 field with subfield "a" value "(AltRefNo)PP/MIA/1"
     And the MARC record has a 982 field with subfield "a" value "110000001" and subfield "b" value "PP/MIA"
     When I transform the MARC record
     Then the work's collection_path.path is "TestRefNo"

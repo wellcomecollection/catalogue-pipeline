@@ -94,7 +94,10 @@ def test_suppressed_record_without_ref_no_yields_deleted_work(
     assert isinstance(_transform(record), DeletedSourceWork)
 
 
-def test_publishable_record_without_ref_no_raises_in_refno_mode() -> None:
+def test_publishable_record_without_ref_no_raises_in_refno_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(axiell_config, "AXIELL_COLLECTION_PATH_SOURCE", "refno")
     record = make_axiell_record(publish_to_web="yes", ref_no=None)
     with pytest.raises(ValueError, match="Missing RefNo"):
         _transform(record)

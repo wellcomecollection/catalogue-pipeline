@@ -1,3 +1,4 @@
+import importlib
 from datetime import datetime
 
 import pytest
@@ -23,7 +24,11 @@ def test_unknown_collection_path_source_fails(value: str) -> None:
         _parse_collection_path_source(value)
 
 
-def test_collection_path_source_defaults_to_refno() -> None:
+def test_collection_path_source_defaults_to_refno(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("AXIELL_COLLECTION_PATH_SOURCE", raising=False)
+    importlib.reload(axiell_config)
     assert axiell_config.AXIELL_COLLECTION_PATH_SOURCE == "refno"
 
 
