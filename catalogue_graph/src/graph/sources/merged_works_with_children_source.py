@@ -22,7 +22,8 @@ def _regexp_literal(value: str) -> str:
 
 
 def child_path_prefixes(work: dict) -> set[str]:
-    # Children's paths start with the parent's full path or, in pointer mode, with its path identifier
+    # Children's paths start with the parent's full path or its path identifier. The latter covers Axiell
+    # with AXIELL_COLLECTION_PATH_SOURCE=part_of, where a child's path is '<parent key>/<own key>' from the 982
     raw_work = RawCatalogueWork(work)
     return {p for p in (raw_work.path, raw_work.path_identifier) if p}
 

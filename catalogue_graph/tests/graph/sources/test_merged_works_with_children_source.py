@@ -180,7 +180,7 @@ def test_prefixes_for_full_path_work_are_deduplicated() -> None:
     assert _child_regexps(child_path_prefixes(work)) == ['"pp/abc/1"/[^/]+']
 
 
-def test_prefixes_for_pointer_mode_work_include_path_identifier() -> None:
+def test_prefixes_for_part_of_mode_work_include_path_identifier() -> None:
     work = _make_work(
         "w1", path="axiell:PP|ABC/axiell:PP|ABC|1", other_identifiers=["PP/ABC/1"]
     )
@@ -190,7 +190,7 @@ def test_prefixes_for_pointer_mode_work_include_path_identifier() -> None:
     }
 
 
-def test_prefixes_for_pointer_mode_root_are_deduplicated() -> None:
+def test_prefixes_for_part_of_mode_root_are_deduplicated() -> None:
     work = _make_work("w1", path="axiell:PP|ABC", other_identifiers=["PP/ABC"])
     assert child_path_prefixes(work) == {"axiell:PP|ABC"}
 
