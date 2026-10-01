@@ -3,7 +3,14 @@ Functions for extracting data from the 008 control field
 https://www.loc.gov/marc/bibliographic/bd008a.html
 """
 
+import re
+from datetime import date
+from typing import NamedTuple
+
+from pymarc.record import Record
+
 from adapters.transformers.ebsco.parsers.positional_field import PositionalField
+from adapters.transformers.marc.parsers.period import MAX, Span
 from lookups import places
 
 
@@ -65,6 +72,11 @@ class Field008:
     def __init__(self, field_content: str):
         self.raw_field = RawField008(field_content)
 
+    @classmethod
+    def from_record(cls, record: Record) -> "Field008 | None":
+        raw = RawField008.from_record(record)
+        return cls(raw.field_value) if raw else None
+
     @property
     def place_of_production(self) -> str | None:
         """
@@ -80,88 +92,73 @@ class Field008:
         return places.from_code(self.raw_field.placecode)
 
     @property
-    def maximal_date_range(self) -> str | None:
-        """
-        date type "|" represents "no attempt to code", and "n" unknown, return None for either of these
-        >>> Field008("|||||||1979uuuu").maximal_date_range
-        >>> Field008("||||||n1979uuuu").maximal_date_range
-
-        In a date, u represents an unknown digit.  In a "from" date, replace with 0
-        >>> Field008("||||||u19uuuuuu").maximal_date_range
-        '1900-'
-
-        date type "u" represensts a continuing source where we don't know the end date.
-        assume that it is ongoing.
-        >>> Field008("||||||u1979uuuu").maximal_date_range
-        '1979-'
-
-        date type "c" represensts a continuing source where we know it is still being published
-        >>> Field008("||||||u19799999").maximal_date_range
-        '1979-'
-
-        date type "s" represents a single year
-        >>> Field008("||||||s1925uuuu").maximal_date_range
-        '1925'
-
-        If there is uncertainty in a single year, return a range from earliest to latest possible year.
-        >>> Field008("||||||s192uuuuu").maximal_date_range
-        '1920-1929'
-
-        Date types r and t behave identically to s - although they are expected to contain two dates,
-        we only care about the first one.
-        >>> Field008("||||||r192u2009").maximal_date_range
-        '1920-1929'
-        >>> Field008("||||||t192u1956").maximal_date_range
-        '1920-1929'
-
-        Date types d and m both represent a range, and we want both dates
-        >>> Field008("||||||d19252009").maximal_date_range
-        '1925-2009'
-        >>> Field008("||||||m19011956").maximal_date_range
-        '1901-1956'
-
-        Partial years are 0-filled in date 1 and 9-filled in date 2
-        >>> Field008("||||||d19uu200u").maximal_date_range
-        '1900-2009'
-        >>> Field008("||||||m191u195u").maximal_date_range
-        '1910-1959'
-
-        Date type q represents a questionable date between two years.
-        We treat it as a range like d and m
-        >>> Field008("||||||q19251956").maximal_date_range
-        '1925-1956'
-        """
+    def dates(self) -> "Field008Dates | None":
+        """The dates coded in characters 6-14."""
         date_type = self.raw_field.date_type
-        if date_type in "n|":
-            # Unknown or no attempt to code
+        date_1 = year_bounds(self.raw_field.date_1)
+        if date_1 is None:
             return None
-
-        # If all four digits are unknown, return `None` (instead of interpreting the year as '0000', which is invalid)
-        date_1 = self.raw_field.date_1
-        if date_1 == "uuuu":
-            return None
-
+        # s single date, r reprint, t publication and copyright, p release and production: date 1 only
+        if date_type in "srtp":
+            return single(date_1)
+        # c currently published, u status unknown: open-ended
         if date_type in "cu":
-            # u=status unknown, so date_2 should be uuuu, but we don't care.
-            # c=continuing, so date_2 should be 9999, but we don't care.
-            return f"{date_1.replace('u', '0')}-"
-
-        if date_type in "srt":
-            # s = single date,
-            # rt = reprint/pub+copyright - both scenarios we are only interested in date 1
-            # a single date
-            if "u" in date_1:
-                return f"{date_1.replace('u', '0')}-{date_1.replace('u', '9')}"
-            return date_1
-
+            return span(date_1.earliest, None)
+        # d ceased publication, m multipart, q questionable: a range, open when date 2 is 9999 or unknown
         if date_type in "dmq":
-            # d, m, and q all have subtly different meanings in MARC,
-            # for our purposes, we will treat all three the same, as a range of dates.
-            # d is an actual range of publication of a continuing resource
-            # m is a pair of dates for a multipart item
-            # q is a questionable date between two years
-            date_2 = self.raw_field.date_2
-            return f"{date_1.replace('u', '0')}-{date_2.replace('u', '9')}"
+            date_2 = (
+                None
+                if self.raw_field.date_2 == "9999"
+                else year_bounds(self.raw_field.date_2)
+            )
+            return span(date_1.earliest, date_2 and date_2.latest)
+        # e detailed date: date 2 holds the month and day
+        month_day = self.raw_field.date_2
+        if date_type == "e" and date_1.exact and month_day.isdigit():
+            try:
+                day = date(date_1.earliest, int(month_day[:2]), int(month_day[2:]))
+            except ValueError:
+                return None
+            return Field008Dates(f"{day:%Y/%m/%d}", (day, day))
+        return None
 
-        # Otherwise, throw it.
-        raise NotImplementedError(f"unexpected MARC008 date type value: {date_type}")
+
+class Field008Dates(NamedTuple):
+    label: str
+    span: Span
+
+
+class YearBounds(NamedTuple):
+    earliest: int
+    latest: int
+
+    @property
+    def exact(self) -> bool:
+        return self.earliest == self.latest
+
+
+def year_bounds(value: str) -> YearBounds | None:
+    """The earliest and latest year a coded date can stand for: "192u" is 1920 to 1929."""
+    is_valid = re.fullmatch(r"\d[\du]{3}", value)
+    if not is_valid or not (earliest := int(value.replace("u", "0"))):
+        return None
+    return YearBounds(earliest, int(value.replace("u", "9")))
+
+
+def single(bounds: YearBounds) -> Field008Dates:
+    """One coded date: "1925", or "1920-1929" for "192u"."""
+    label = (
+        f"{bounds.earliest:04d}"
+        if bounds.exact
+        else f"{bounds.earliest:04d}-{bounds.latest:04d}"
+    )
+    return Field008Dates(
+        label, (date(bounds.earliest, 1, 1), date(bounds.latest, 12, 31))
+    )
+
+
+def span(earliest: int, latest: int | None) -> Field008Dates:
+    """A range between two coded dates: "1979-1995", or "1979-" when open-ended."""
+    label = f"{earliest:04d}-" if latest is None else f"{earliest:04d}-{latest:04d}"
+    end = MAX if latest is None else date(latest, 12, 31)
+    return Field008Dates(label, (date(earliest, 1, 1), end))
