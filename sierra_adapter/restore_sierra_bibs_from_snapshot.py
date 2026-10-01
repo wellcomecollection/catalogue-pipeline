@@ -325,6 +325,8 @@ def main(ids_file, snapshot, output, dry_run, yes, limit, workers, table):
     if dry_run:
         click.echo("\nDry run: nothing written. Pass --execute to write.")
         return
+    # Empty the output first, so it never lists ids restored by an earlier run.
+    write_id_file(output, [])
     if counts[RESTORE] == 0:
         click.echo("\nNothing to restore.")
         return

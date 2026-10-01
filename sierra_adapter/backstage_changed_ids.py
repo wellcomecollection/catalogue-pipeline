@@ -267,14 +267,19 @@ def main(snapshot, output_dir, classify_ids, table, segments, workers):
             fg="red",
         )
 
-    if classify_ids and result.changed:
-        rows = classify(
-            session.client("s3", config=config),
-            snapshot_file,
-            result.changed,
-            live_rows,
-            snapshot_index,
-            workers,
+    if classify_ids:
+        # Always rewrite these, so an empty run can't leave stale ids from an earlier one.
+        rows = (
+            classify(
+                session.client("s3", config=config),
+                snapshot_file,
+                result.changed,
+                live_rows,
+                snapshot_index,
+                workers,
+            )
+            if result.changed
+            else []
         )
         with open(os.path.join(output_dir, "changed_classified.csv"), "w") as f:
             writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)

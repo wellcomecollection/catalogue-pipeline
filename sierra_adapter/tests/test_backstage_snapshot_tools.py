@@ -7,6 +7,7 @@ import pytest
 from click.testing import CliRunner
 from moto import mock_aws
 
+import backstage_changed_ids as changed_ids
 import restore_sierra_bibs_from_snapshot as restore
 from backstage_changed_ids import classify_one, compare
 from sierra_vhs_snapshot import (
@@ -298,3 +299,55 @@ def test_run_from_snapshot_refuses_ids_missing_from_snapshot(aws, tmp_path):
         (ID, restore.RESTORE),
     ]
     assert _keys(s3) == before
+
+
+def test_cli_execute_with_nothing_to_restore_empties_stale_output(aws, tmp_path):
+    snap = tmp_path / "snap.parquet"
+    unchanged = json.dumps(body(bib_record=BACKSTAGE_BIB))
+    pq.write_table(pa.table({"id": [ID], "content": [unchanged]}), snap)
+    ids = tmp_path / "ids.txt"
+    ids.write_text(f"{ID}\n")
+    output = tmp_path / "restored.txt"
+    output.write_text("1111111\n2222222\n")
+
+    result = CliRunner().invoke(
+        restore.main,
+        [
+            "--ids-file",
+            str(ids),
+            "--snapshot",
+            str(snap),
+            "--output",
+            str(output),
+            "--execute",
+            "--yes",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "Nothing to restore" in result.output
+    assert output.read_text() == ""
+
+
+def test_classify_with_no_changes_empties_stale_outputs(aws, tmp_path):
+    snap = tmp_path / "snap.parquet"
+    pq.write_table(
+        pa.table({"id": [ID], "version": [5], "s3_key": [f"{ID}/5/old.json"]}), snap
+    )
+    out = tmp_path / "out"
+    out.mkdir()
+    for name in ("changed_bib.txt", "changed_other.txt"):
+        (out / name).write_text("1111111\n")
+    (out / "changed_classified.csv").write_text("stale\n")
+
+    result = CliRunner().invoke(
+        changed_ids.main,
+        ["--snapshot", str(snap), "--output-dir", str(out), "--classify"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert (out / "changed_bib.txt").read_text() == ""
+    assert (out / "changed_other.txt").read_text() == ""
+    assert (out / "changed_classified.csv").read_text().splitlines() == [
+        ",".join(changed_ids.CSV_FIELDS)
+    ]
