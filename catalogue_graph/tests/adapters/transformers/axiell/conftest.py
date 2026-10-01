@@ -1,6 +1,15 @@
+import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
+from adapters.extractors.oai_pmh.axiell import config as axiell_config
+
 # mypy: allow-untyped-calls
+
+
+@pytest.fixture(autouse=True)
+def refno_collection_path_source(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The import-time value follows the shell env; tests must not.
+    monkeypatch.setattr(axiell_config, "AXIELL_COLLECTION_PATH_SOURCE", "refno")
 
 
 def make_axiell_record(
@@ -8,6 +17,7 @@ def make_axiell_record(
     catalogue_status: str | None = "catalogued",
     ref_no: str | None = "TestRefNo",
     publish_to_web: str | None = "yes",
+    part_of: str | None = None,
 ) -> Record:
     """Minimal valid Axiell MARC record with all required fields.
 
@@ -41,6 +51,17 @@ def make_axiell_record(
             Field(
                 tag="981",
                 subfields=[Subfield(code="a", value=publish_to_web)],
+            )
+        )
+    if part_of is not None:
+        # 982 is the parent link: $a parent priref, $b parent object number.
+        record.add_field(
+            Field(
+                tag="982",
+                subfields=[
+                    Subfield(code="a", value="100000000"),
+                    Subfield(code="b", value=part_of),
+                ],
             )
         )
     return record
