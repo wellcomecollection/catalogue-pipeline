@@ -50,7 +50,7 @@ def test_concept_types_for_subdivisions() -> None:
         ("50 B.C.", "50 bc"),
         ("ca. 50 B.C.", "ca 50 bc"),
         ("Gaul, ca. 50 B.C.", "gaul, ca 50 bc"),
-        ("Monica. N.O.R.A.D. A.B.C. BBQ", "monica. n.o.r.a.d. a.b.c. bbq"),
+        ("Monica. N.O.R.A.D. A.B.C. BBQ", "monica norad abc bbq"),
     ],
 )
 def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:

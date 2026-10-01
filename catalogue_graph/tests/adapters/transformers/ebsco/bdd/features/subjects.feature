@@ -291,6 +291,8 @@ Feature: Extracting subjects from 6xx fields
         | 0    | sh85083064 |
       When I transform the MARC record
       Then the only subject has the label "Medicine"
+      And that subject has the source identifier value "sh85083064"
+      And that subject has the source identifier type "lc-subjects"
       And that subject's only concept has the label "Medicine"
       And that subject's only concept has the identifier value "sh85083064"
       And that subject's only concept has the identifier type "lc-subjects"

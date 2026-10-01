@@ -19,37 +19,40 @@ SUBDIVISION_CODES: list[str] = ["v", "x", "y", "z"]
 SUBFIELD_TYPE_MAP: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
 
 
+# Match Scala pipeline preprocessing (PeriodParser.preprocess) so that label-derived
+# concept identifiers agree across pipelines. One deliberate divergence: A bare "fl"
+# is left alone, otherwise a word like "Influenza" would become "inuenza".
+LEADING_ROMAN_NUMERAL = r'^"?(?=[mdclxvi.,\s]{3,})m*[.,]?\s?(c[md]|d?c*)[.,]?\s?(x[cl]|l?x*)[.,]?\s?(i[xv]|v?i*)\b'
+PERIOD_ID_NOISE = re.compile(
+    "|".join(
+        [
+            r"\[gaps\]",
+            "floruit",
+            r"fl\.",
+            "between",
+            r'[()\[\]?."©]',
+            LEADING_ROMAN_NUMERAL,
+        ]
+    )
+)
+
+
 def normalise_period_id_label(label: str) -> str:
     """
-    Period id values are preprocessed for standard normalisation
-    by removing the dots from certain datetime abbreviations.
-    A.D. and B.C become ad and bc
-    >>> normalise_period_id_label("2000 A.D.")
-    '2000 ad'
-    >>> normalise_period_id_label("One Million Years B.C.")
-    'One Million Years bc'
-
-    ca. becomes ca
-    >>> normalise_period_id_label("ca. 1066")
-    'ca 1066'
-    >>> normalise_period_id_label("teatime, ca. 1066")
-    'teatime, ca 1066'
-
-    Each of these substitutions is subject to constraints,
-    A.D. and B.C. are only replaced when preceded by a space
-    >>> normalise_period_id_label("N.O.R.A.D. Santa Tracker")
-    'N.O.R.A.D. Santa Tracker'
-
-    ca. is only replaced either at the beginning of the label,
-    or when preceded by a space
-    >>> normalise_period_id_label("Monica.")
-    'Monica.'
+    Strip punctuation, qualifiers and a leading roman numeral from a Period label, so
+    that renderings of the same period share an id.
+    >>> normalise_period_id_label("MDCCLXXXVII. [1787]")
+    '1787'
+    >>> normalise_period_id_label("1851 Nov. 27.")
+    '1851 nov 27'
+    >>> normalise_period_id_label("To 1763 (New France)")
+    'to 1763 new france'
+    >>> normalise_period_id_label("fl. 1620-1650")
+    '1620-1650'
+    >>> normalise_period_id_label("Influenza Epidemic, 1918-1919.")
+    'influenza epidemic, 1918-1919'
     """
-    return re.sub(
-        r"((?<=^)|(?<=\s))ca\.",
-        "ca",
-        label.replace(" A.D.", " ad").replace(" B.C.", " bc"),
-    )
+    return PERIOD_ID_NOISE.sub("", label.lower()).strip()
 
 
 def type_specific_id_normalisation(label: str, ontology_type: str) -> str | None:

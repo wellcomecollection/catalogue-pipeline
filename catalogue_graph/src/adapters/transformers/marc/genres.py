@@ -40,12 +40,11 @@ def extract_genre(field: Field) -> Genre | None:
     if primary is None:
         return None
 
+    identifier = extract_identifier(field, "Genre")
     return Genre(
         label=normalise_label(build_label(primary, field), "GenreConcept"),
         concepts=[
-            build_concept(
-                primary, "GenreConcept", identifier=extract_identifier(field, "Genre")
-            ),
+            build_concept(primary, "GenreConcept", identifier=identifier),
             *build_subdivision_concepts(field),
         ],
     )
