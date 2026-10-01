@@ -12,6 +12,7 @@ Skip with:
 
 from __future__ import annotations
 
+import argparse
 import json
 from datetime import datetime
 from typing import cast
@@ -21,20 +22,24 @@ import pymysql
 import pymysql.connections
 import pytest
 from elasticsearch import Elasticsearch
+from pyiceberg.table import Table as IcebergTable
 
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.id_minting_source import IdMintingSource
-from id_minter.models.identifier import SourceIdentifierKey
+from id_minter.models.identifier import IdResolver, SourceIdentifierKey
 from id_minter.models.step_events import (
     StepFunctionMintingRequest,
 )
 from id_minter.resolvers.minting_resolver import MintingResolver
+from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from id_minter.steps.id_minter import (
     IdMinterResult,
     IdMinterRuntime,
+    build_runtime,
     execute,
     handler,
     lambda_handler,
+    local_handler,
 )
 from models.incremental_window import IncrementalWindow
 from tests.id_minter.conftest import (
@@ -125,10 +130,10 @@ class TestExecuteWithRealResolver:
         runtime = _build_runtime(ids_db)
 
         with stub_transformer_source([doc]):
-            successful_ids, _, errors = execute(minting_request, runtime=runtime)
+            result = execute(minting_request, runtime=runtime)
 
-        assert successful_ids == ["mint0001"]
-        assert errors == []
+        assert result.accepted_ids == ["mint0001"]
+        assert result.errors == []
         assert get_canonical_status(ids_db, "mint0001") == "assigned"
 
     def test_mints_ids_for_multiple_works(
@@ -153,11 +158,11 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source(docs):
-            successful_ids, _, errors = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert len(successful_ids) == 3
-        assert errors == []
-        assert set(successful_ids) == {"multi001", "multi002", "multi003"}
+        assert len(result.accepted_ids) == 3
+        assert result.errors == []
+        assert set(result.accepted_ids) == {"multi001", "multi002", "multi003"}
 
         for cid in ["multi001", "multi002", "multi003"]:
             assert get_canonical_status(ids_db, cid) == "assigned"
@@ -184,10 +189,10 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, _, errors = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert successful_ids == ["exist001"]
-        assert errors == []
+        assert result.accepted_ids == ["exist001"]
+        assert result.errors == []
         # The spare free ID should still be free
         assert get_canonical_status(ids_db, "spare001") == "free"
 
@@ -210,10 +215,10 @@ class TestExecuteWithRealResolver:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, _, errors = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert len(successful_ids) == 1
-        assert errors == []
+        assert len(result.accepted_ids) == 1
+        assert result.errors == []
 
         # Verify both IDs were claimed from the pool
         for cid in ["nest0001", "nest0002"]:
@@ -428,6 +433,103 @@ class TestMetricsPublishing:
         assert metrics["success_count"]["value"] == 0
         assert metrics["failure_count"]["value"] == 1
 
+    def test_publishes_iceberg_failure_count_when_the_append_fails(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """A dropped Iceberg row is a metric; the run and its report are unaffected."""
+        seed_free_ids(ids_db, ["iceb0001"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b6004")
+        doc = make_work_doc(si)
+
+        broken_table = MagicMock(spec=IcebergTable)
+        broken_table.schema.return_value = WORKS_IDENTIFIED_ICEBERG_SCHEMA
+        broken_table.append.side_effect = RuntimeError("catalog unreachable")
+
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="2024-01-01",
+            enable_iceberg_writes=True,
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=MintingResolver.from_connection(ids_db),
+            source_es_mode="local",
+            target_es_mode="local",
+            iceberg_table=broken_table,
+        )
+        request = StepFunctionMintingRequest(
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
+            job_id="metrics-test-iceberg",
+        )
+
+        with stub_transformer_source([doc]):
+            response = handler(request, runtime=runtime)
+
+        assert response.success_count == 1
+        assert response.failure_count == 0
+
+        metrics = {m["metric_name"]: m for m in MockCloudwatchClient.metrics_reported}
+        assert metrics["failure_count"]["value"] == 0
+        assert metrics["iceberg_failure_count"]["value"] == 1
+        assert metrics["iceberg_failure_count"]["dimensions"] == {
+            "pipeline_date": "2024-01-01",
+            "pipeline_step": "id_minter",
+        }
+
+        with open(
+            MockSmartOpen.file_lookup[response.report_s3_uri], encoding="utf-8"
+        ) as f:
+            report = json.loads(f.read())
+        assert report["successful_ids"] == ["iceb0001"]
+        assert not any("iceberg" in key for key in report)
+
+    def test_a_metric_publishing_failure_does_not_fail_the_run(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        seed_free_ids(ids_db, ["iceb0002"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b6005")
+        doc = make_work_doc(si)
+
+        table = MagicMock(spec=IcebergTable)
+        table.schema.return_value = WORKS_IDENTIFIED_ICEBERG_SCHEMA
+
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="2024-01-01",
+            enable_iceberg_writes=True,
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=MintingResolver.from_connection(ids_db),
+            source_es_mode="local",
+            target_es_mode="local",
+            iceberg_table=table,
+        )
+        request = StepFunctionMintingRequest(
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
+            job_id="metrics-test-iceberg-publish",
+        )
+
+        with (
+            stub_transformer_source([doc]),
+            patch(
+                "id_minter.steps.id_minter.MetricReporter",
+                side_effect=RuntimeError("cloudwatch unavailable"),
+            ),
+        ):
+            response = handler(request, runtime=runtime)
+
+        assert response.success_count == 1
+        assert response.failure_count == 0
+
 
 # ---------------------------------------------------------------------------
 # Tests: S3 report publishing
@@ -596,11 +698,14 @@ class TestSnsPublishing:
                     }
                 }
             ]
-            successful_ids, superseded_ids, errors = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert errors == []
-        assert set(successful_ids) | set(superseded_ids) == {"sup00001", "sup00002"}
-        assert superseded_ids == ["sup00001"]
+        assert result.errors == []
+        assert set(result.accepted_ids) | set(result.superseded_ids) == {
+            "sup00001",
+            "sup00002",
+        }
+        assert result.superseded_ids == ["sup00001"]
 
         published = {
             json.loads(e["Message"])["default"]
@@ -627,9 +732,9 @@ class TestSnsPublishing:
         )
 
         with stub_transformer_source([doc]):
-            successful_ids, _, _ = execute(request, runtime=runtime)
+            result = execute(request, runtime=runtime)
 
-        assert len(successful_ids) == 1
+        assert len(result.accepted_ids) == 1
         assert len(MockSNSClient.publish_batch_request_entries) == 0
 
     def test_no_sns_publish_when_no_successful_ids(
@@ -808,3 +913,50 @@ class TestLambdaHandlerInputDispatch:
 
         assert captured["request"].source_identifiers is None
         assert captured["request"].window is None
+
+
+class TestBuildRuntime:
+    def test_iceberg_setup_failure_disables_iceberg_writes(self) -> None:
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            enable_iceberg_writes=True,
+        )
+
+        with patch(
+            "id_minter.steps.id_minter.get_works_identified_table",
+            side_effect=RuntimeError("no route to S3 Tables"),
+        ):
+            runtime = build_runtime(config, resolver=MagicMock(spec=IdResolver))
+
+        assert runtime.iceberg_table is None
+
+    def test_dry_run_does_not_create_iceberg_table(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "id_minter",
+                "--dry-run",
+                "--enable-iceberg-writes",
+                "--iceberg-table-mode",
+                "rest",
+            ],
+        )
+
+        with (
+            patch(
+                "id_minter.steps.id_minter.DataApiIdResolver",
+                return_value=MagicMock(spec=IdResolver),
+            ),
+            patch("id_minter.steps.id_minter.log_runtime_config"),
+            patch(
+                "id_minter.steps.id_minter.get_works_identified_table",
+                side_effect=RuntimeError("table does not exist"),
+            ) as get_table,
+        ):
+            local_handler(argparse.ArgumentParser())
+
+        get_table.assert_called_once_with(
+            use_rest_api_table=True, create_if_not_exists=False
+        )

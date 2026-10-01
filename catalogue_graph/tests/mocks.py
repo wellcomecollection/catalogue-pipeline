@@ -17,7 +17,21 @@ from botocore.exceptions import ClientError
 from polars import DataFrame as PolarsDataFrame
 
 from clients.neptune_client import NeptuneClient
+from core.document import Document
+from core.sinks import WriteResult
 from utils.elasticsearch import get_client
+
+
+class ListSink:
+    """A sink that accepts every document and keeps them, for inspecting a transformer's output."""
+
+    def __init__(self) -> None:
+        self.documents: list[Document] = []
+
+    def write(self, documents: list[Document]) -> WriteResult:
+        self.documents.extend(documents)
+        return WriteResult(accepted=list(documents))
+
 
 MOCK_CREDENTIALS = Credentials(
     access_key="test_access_key",
@@ -422,6 +436,8 @@ class MockElasticsearchClient:
     pit_index: str
     queries: list[dict] = []
     bulk_errors: list[dict] = []
+    # Off by default because many fixtures fall outside the windows their tests use
+    apply_range_filters: bool = False
 
     def __init__(
         self, config: dict, api_key: str, timeout: float | None = None
@@ -451,6 +467,7 @@ class MockElasticsearchClient:
         cls.indexed_documents = defaultdict(dict[str, dict])
         cls.queries = []
         cls.bulk_errors = []
+        cls.apply_range_filters = False
 
     @classmethod
     def index(cls, index: str, id: str, document: dict) -> None:  # noqa: A003
@@ -487,6 +504,32 @@ class MockElasticsearchClient:
             ids = query["ids"]["values"]
         return ids
 
+    @staticmethod
+    def _parse_utc(value: str) -> datetime.datetime:
+        parsed = datetime.datetime.fromisoformat(value)
+        if parsed.tzinfo is None:
+            return parsed.replace(tzinfo=datetime.UTC)
+        return parsed
+
+    def _matches_range_filters(self, query: dict, document: dict) -> bool:
+        if not self.apply_range_filters:
+            return True
+
+        clauses = [query, *query.get("bool", {}).get("must", [])]
+        for clause in clauses:
+            for field, bounds in clause.get("range", {}).items():
+                value: Any = document["_source"]
+                for key in field.split("."):
+                    value = value.get(key) if isinstance(value, dict) else None
+                if value is None:
+                    return False
+                parsed = self._parse_utc(value)
+                if "gte" in bounds and parsed < self._parse_utc(bounds["gte"]):
+                    return False
+                if "lte" in bounds and parsed > self._parse_utc(bounds["lte"]):
+                    return False
+        return True
+
     def search(self, body: dict) -> dict:  # noqa: D401
         self.queries.append(body["query"])
         search_after = body.get("search_after")
@@ -497,6 +540,8 @@ class MockElasticsearchClient:
         for document in sorted_documents:
             item = {**document, "sort": document["_id"]}
             if filtered_ids is not None and document["_id"] not in filtered_ids:
+                continue
+            if not self._matches_range_filters(body["query"], document):
                 continue
             if search_after is None or item["sort"] > search_after:
                 items.append(item)

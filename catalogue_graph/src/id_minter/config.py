@@ -46,6 +46,11 @@ ES_TARGET_INDEX_PREFIX = os.getenv("ES_TARGET_INDEX_PREFIX", "works-identified")
 DOWNSTREAM_SNS_TOPIC_ARN = os.getenv("DOWNSTREAM_SNS_TOPIC_ARN")
 
 # ---------------------------------------------------------------------------
+# Write works to an experimental append-only Iceberg table, alongside Elasticsearch.
+# ---------------------------------------------------------------------------
+ENABLE_ICEBERG_WRITES = os.getenv("ENABLE_ICEBERG_WRITES", "false").lower() == "true"
+
+# ---------------------------------------------------------------------------
 # S3 manifest output
 # ---------------------------------------------------------------------------
 S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-id-minter")
@@ -99,6 +104,7 @@ class IdMinterConfig(DBConfig):
     source_index_prefix: str = ES_SOURCE_INDEX_PREFIX
     target_index_prefix: str = ES_TARGET_INDEX_PREFIX
     downstream_sns_topic_arn: str | None = DOWNSTREAM_SNS_TOPIC_ARN
+    enable_iceberg_writes: bool = ENABLE_ICEBERG_WRITES
     pipeline_date: str = PIPELINE_DATE
     source_index_date_suffix: str | None = ES_SOURCE_INDEX_DATE_SUFFIX
     target_index_date_suffix: str | None = ES_TARGET_INDEX_DATE_SUFFIX

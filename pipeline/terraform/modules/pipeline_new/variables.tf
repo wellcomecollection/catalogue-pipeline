@@ -78,10 +78,27 @@ variable "enable_adapter_transformer_trigger" {
   description = "Whether the EventBridge rule that starts the transformer on <adapter>.adapter.completed events is enabled."
 }
 
+variable "axiell_collection_path_source" {
+  type        = string
+  default     = "refno"
+  description = "Where the Axiell transformer builds the collection path from: \"refno\" (Calm RefNo) or \"part_of\" (the parent link exported as MARC 982)."
+
+  validation {
+    condition     = contains(["refno", "part_of"], var.axiell_collection_path_source)
+    error_message = "axiell_collection_path_source must be \"refno\" or \"part_of\"."
+  }
+}
+
 variable "disable_calm_transformer_topic_subscriptions" {
   type        = bool
   default     = false
   description = "When true, the calm transformer does not subscribe its input queue to adapter topics in everyday mode."
+}
+
+variable "disable_sierra_transformer_topic_subscriptions" {
+  type        = bool
+  default     = false
+  description = "When true, the sierra transformer does not subscribe its input queue to the Sierra adapter topics. Changes made meanwhile are not replayed when this is turned off; they need a reindex or redrive from the VHS."
 }
 
 variable "enable_id_minter_schedule" {

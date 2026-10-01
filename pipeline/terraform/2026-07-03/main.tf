@@ -31,6 +31,9 @@ module "pipeline" {
   enable_graph_pipeline_schedule               = true
   enable_image_inferrer_schedule               = true
 
+  # Paused around the Backstage authority load into Sierra (wellcomecollection/platform#6723).
+  disable_sierra_transformer_topic_subscriptions = true
+
   pipeline_date = local.pipeline_date // namespaces services
   graph_date    = "2026-07-03"        // namespaces graph database
   rds_id_minter = "2026-07-03"        // id-minter RDS cluster to use
