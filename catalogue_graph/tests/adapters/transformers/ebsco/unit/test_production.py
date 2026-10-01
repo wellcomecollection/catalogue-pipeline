@@ -535,6 +535,48 @@ def test_field_008_q_date(marc_record: Record) -> None:
     "marc_record",
     [
         pytest.param(
+            [Field(tag="008", data="800121d19759999acafr p o o 0 0engrc")],
+            id="008 still being published",
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_field_008_open_end(marc_record: Record) -> None:
+    production = lone_element(_get_production(marc_record))
+    period = lone_element(production.dates)
+    assert production.label == period.label == period.range.label == "1975-"
+    assert period.range.from_time == "1975-01-01T00:00:00Z"
+    assert period.range.to_time == "9999-12-31T23:59:59.999999999Z"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [Field(tag="008", data="930713e17910501acafr p o o 0 0engrc")],
+            id="008 detailed date",
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_field_008_detailed_date(marc_record: Record) -> None:
+    period = lone_element(lone_element(_get_production(marc_record)).dates)
+    assert period.range.label == "1791/05/01"
+    assert period.range.from_time == "1791-05-01T00:00:00Z"
+    assert period.range.to_time == "1791-05-01T23:59:59.999999999Z"
+
+
+def test_field_008_unsupported_date_type(marc_record: Record) -> None:
+    marc_record.add_field(  # type: ignore[no-untyped-call]
+        Field(tag="008", data="750101i19751980xxu")
+    )
+    assert _get_production(marc_record) == []
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
             [
                 Field(tag="008", data="820413d182519uuenkmr p o 0 0 eng d"),
                 Field(tag="260", subfields=[Subfield(code="c", value="1825-[19--?]")]),
