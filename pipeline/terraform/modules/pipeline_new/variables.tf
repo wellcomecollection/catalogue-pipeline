@@ -95,6 +95,12 @@ variable "disable_calm_transformer_topic_subscriptions" {
   description = "When true, the calm transformer does not subscribe its input queue to adapter topics in everyday mode."
 }
 
+variable "disable_sierra_transformer_topic_subscriptions" {
+  type        = bool
+  default     = false
+  description = "When true, the sierra transformer does not subscribe its input queue to the Sierra adapter topics. Changes made meanwhile are not replayed when this is turned off; they need a reindex or redrive from the VHS."
+}
+
 variable "enable_id_minter_schedule" {
   type        = bool
   default     = false

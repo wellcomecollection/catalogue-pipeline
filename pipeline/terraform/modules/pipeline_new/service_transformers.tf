@@ -66,7 +66,10 @@ module "transformers" {
   adapter_config = merge(
     local.adapter_config[each.key],
     {
-      topics = var.disable_calm_transformer_topic_subscriptions && each.key == "calm" ? [] : local.adapter_config[each.key].topics
+      topics = (
+        (var.disable_calm_transformer_topic_subscriptions && each.key == "calm") ||
+        (var.disable_sierra_transformer_topic_subscriptions && each.key == "sierra")
+      ) ? [] : local.adapter_config[each.key].topics
     }
   )
   listen_to_reindexer = var.reindexing_state.listen_to_reindexer
