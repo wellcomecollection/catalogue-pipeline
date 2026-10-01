@@ -4,6 +4,8 @@ from core.source import ElasticSource
 from models.events import BasePipelineEvent
 from utils.elasticsearch import get_merged_index_name
 
+MERGED_TIME_FIELD = "state.mergedTime"
+
 
 class MergedWorksSource(ElasticSource):
     def __init__(
@@ -17,7 +19,7 @@ class MergedWorksSource(ElasticSource):
         super().__init__(
             es_client=es_client,
             index_name=get_merged_index_name(event),
-            query=event.to_elasticsearch_query("state.mergedTime", query),
+            query=event.to_elasticsearch_query(MERGED_TIME_FIELD, query),
             pit_id=event.pit_ids.merged,
             fields=fields,
             slice_count=slice_count or event.slice_count,
