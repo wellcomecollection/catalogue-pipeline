@@ -92,6 +92,22 @@ Feature: genres (MARC 655)
     And its 2nd concept has the label "X Content"
     And its 3rd concept has the label "V Content"
 
+  Scenario: ǂy gives a Period with a parsed range
+    Given the MARC record has a 655 field with subfield "y" value "MDCCLXXXVII. [1787]" and subfield "a" value "A Content"
+    When I transform the MARC record
+    Then the only genre has the label "A Content - MDCCLXXXVII. [1787]"
+    And it has 2 concepts
+    And its 1st concept has the type "GenreConcept"
+    And its 1st concept has the label "A Content"
+    And its 1st concept has the source identifier value "a content"
+    And its 2nd concept has the type "Period"
+    And its 2nd concept has the label "MDCCLXXXVII. [1787]"
+    And its 2nd concept has the source identifier ontology type "Period"
+    And its 2nd concept has the source identifier value "1787"
+    And its 2nd concept has the range.from_time "1787-01-01T00:00:00Z"
+    And its 2nd concept has the range.to_time "1787-12-31T23:59:59.999999999Z"
+    And its 2nd concept has the range.label "MDCCLXXXVII. [1787]"
+
   Scenario: ǂz gives a Place
     Given the MARC record has a 655 field with subfield "z" value "Z Content" and subfield "a" value "A Content"
     When I transform the MARC record
@@ -127,10 +143,10 @@ Feature: genres (MARC 655)
     And its 1st concept has the source identifier type "label-derived"
     And its 1st concept has the source identifier value "manuscripts"
 
-  Scenario: A bare "fl" in a chronological subdivision is kept in the identifier
+  Scenario: "fl" inside a word in a chronological subdivision is kept in the identifier
   The Scala strips the string "fl" from Period labels when deriving the id, as an
   abbreviation of floruit, which also removes it from the middle of words:
-  "Influenza" becomes "inuenza". The Python strips "fl." and "floruit" only.
+  "Influenza" becomes "inuenza". The Python only strips "fl" as a whole word.
     Given the MARC record has a 655 field with subfield "a" value "Broadsides" and subfield "y" value "Influenza Epidemic, 1918-1919."
     When I transform the MARC record
     Then the only genre has the label "Broadsides - Influenza Epidemic, 1918-1919"
