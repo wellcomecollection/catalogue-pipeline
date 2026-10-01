@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import Literal, cast, get_args
 
 from adapters.extractors.oai_pmh.runtime import OAIPMHAdapterConfig
 from adapters.utils.iceberg import (
@@ -116,6 +117,23 @@ ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "transformer_axiell")
 ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "works-source")
 ES_MODE = os.getenv("ES_MODE", "private")
 
+CollectionPathSource = Literal["refno", "part_of"]
+
+
+def _parse_collection_path_source(value: str) -> CollectionPathSource:
+    # Fail at start-up: a typo must not quietly fall back to either mode.
+    if value not in get_args(CollectionPathSource):
+        raise ValueError(
+            f"AXIELL_COLLECTION_PATH_SOURCE must be one of "
+            f"{get_args(CollectionPathSource)}, got {value!r}"
+        )
+    return cast(CollectionPathSource, value)
+
+
+AXIELL_COLLECTION_PATH_SOURCE = _parse_collection_path_source(
+    os.getenv("AXIELL_COLLECTION_PATH_SOURCE", "refno")
+)
+
 # Manifest storage configuration
 S3_BUCKET = os.getenv(
     "S3_BUCKET",
@@ -136,6 +154,7 @@ AXIELL_ADAPTER_CONFIG = OAIPMHAdapterConfig(
     window_lookback_days=WINDOW_LOOKBACK_DAYS,
     max_lag_minutes=MAX_LAG_MINUTES,
     max_pending_windows=MAX_PENDING_WINDOWS,
+    auto_retry_failed_windows=AUTO_RETRY_FAILED_WINDOWS,
     # OAI-PMH
     oai_metadata_prefix=OAI_METADATA_PREFIX,
     oai_set_spec=OAI_SET_SPEC,

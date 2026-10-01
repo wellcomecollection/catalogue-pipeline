@@ -13,6 +13,7 @@ from id_minter.embedder import embed_canonical_ids, extract_source_identifiers
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.models.identifier import IdResolver, MintRequest
 from models.pipeline.identifier import SourceIdentifier
+from utils.elasticsearch import version_from_modified_time
 
 logger = structlog.get_logger(__name__)
 
@@ -66,6 +67,12 @@ class IdMintingTransformer(ElasticBaseTransformer):
                 )
             except Exception as e:
                 self._add_error(e, "extract_id", str(raw_doc.get("state", {})))
+                continue
+
+            try:
+                self._get_document_version(raw_doc)
+            except Exception as e:
+                self._add_error(e, "version", str(si))
                 continue
 
             try:
@@ -132,12 +139,18 @@ class IdMintingTransformer(ElasticBaseTransformer):
     def _get_document_id(self, record: dict) -> str:
         return str(record["state"]["canonicalId"])
 
+    def _get_document_version(self, record: dict) -> int:
+        return version_from_modified_time(record["state"]["sourceModifiedTime"])
+
     def _generate_bulk_load_actions(
         self, records: Iterable[dict], index_name: str
     ) -> Generator[dict[str, Any]]:
+        # Guard on source time so an overlapping run cannot overwrite a newer copy.
         for record in records:
             yield {
                 "_index": index_name,
                 "_id": self._get_document_id(record),
                 "_source": record,
+                "_version": self._get_document_version(record),
+                "_version_type": "external_gte",
             }

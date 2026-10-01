@@ -12,24 +12,19 @@ module "id_minter_rds" {
 
   master_username = data.aws_ssm_parameter.rds_username.value
 
-  data_api_consumer_role_arns = [
-    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-prod",
-  ]
+  # No Identifiers API environment reads this registry; both read the 2026-07-03 one.
+  data_api_consumer_role_arns = []
 }
 
 module "id_minter_rds_2026_07_03" {
   source = "./modules/id-minter-rds"
 
   name_suffix = "2026-07-03"
-  # Restore from production on September 4, 2026, 04:00 (UTC+01:00)
-  snapshot_identifier = "awsbackup:job-31137725-b2a2-c855-6296-1a624a3dc2c0"
+  # Restore from production on September 24, 2026, 04:00 (UTC+01:00), the first
+  # backup after the switchover freeze time of 2026-09-23 16:35:31 BST.
+  snapshot_identifier = "awsbackup:job-e62ac7a0-482a-b8bd-2e26-5328c4479d96"
 
-  # A restored copy of production, respun from a fresh snapshot each testing round,
-  # so its contents are disposable for now. After switchover, the respin taken
-  # inside the freeze becomes the production registry and must be kept.
-  # Phase 6 of https://github.com/wellcomecollection/platform/issues/6541 removes
-  # skip_final_snapshot; read it before clearing this.
-  skip_final_snapshot = true
+  # Production registry after the switchover (wellcomecollection/platform#6541); never drop its data.
 
   vpc_id             = local.vpc_id_new
   private_subnet_ids = local.private_subnets_new
@@ -40,7 +35,9 @@ module "id_minter_rds_2026_07_03" {
 
   master_username = data.aws_ssm_parameter.rds_username.value
 
+  # Both Identifiers API environments read this registry.
   data_api_consumer_role_arns = [
     "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-stage",
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-prod",
   ]
 }

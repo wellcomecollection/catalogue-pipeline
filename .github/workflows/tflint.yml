@@ -32,4 +32,8 @@ jobs:
 
       - name: Run tflint on all Terraform roots
         shell: bash
+        # tflint --init downloads rulesets from GitHub; unauthenticated calls
+        # share the runner IP's rate limit and fail with a 403.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: builds/run_tflint.sh

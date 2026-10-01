@@ -60,12 +60,22 @@ class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
         self.neptune_client = neptune_client
         self.entity_type = entity_type
 
-    def remove(self, force_pass: bool = False) -> list[str]:
+    def validate_removal(self, ids: list[str], force_pass: bool) -> None:
         if self.entity_type == "nodes":
             total_count = self.get_total_node_count()
+        else:
+            total_count = self.get_total_edge_count()
+
+        validate_fractional_change(
+            modified_size=len(ids),
+            total_size=total_count,
+            force_pass=force_pass,
+        )
+
+    def remove(self, force_pass: bool = False) -> list[str]:
+        if self.entity_type == "nodes":
             ids_to_remove = self.get_node_ids_to_remove()
         elif self.entity_type == "edges":
-            total_count = self.get_total_edge_count()
             ids_to_remove = self.get_edge_ids_to_remove()
         else:
             raise ValueError(f"Unknown entity type: {self.entity_type}")
@@ -85,11 +95,7 @@ class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
 
         # This is part of a safety mechanism. If the fraction of removed nodes/edges of the given type exceeds
         # `DEFAULT_THRESHOLD` (set to 20%), an exception will be raised.
-        validate_fractional_change(
-            modified_size=len(existing_ids),
-            total_size=total_count,
-            force_pass=force_pass,
-        )
+        self.validate_removal(existing_ids, force_pass)
 
         self.neptune_client.delete_entities_by_id(existing_ids, self.entity_type)
 

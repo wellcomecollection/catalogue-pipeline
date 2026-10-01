@@ -25,6 +25,9 @@ All OAI-PMH adapters follow this pattern:
 - Computes the next `[window_start, window_end)` range using the most recent successful entry, defaulting to a configurable look-back if no history exists.
 - Generates a canonical `job_id` (UTC `YYYYMMDDTHHMM`), embeds OAI metadata parameters, and publishes a loader event.
 - Optionally enforces the maximum lag window before allowing the run to proceed.
+- Retries gaps behind the cursor. A window that failed while later windows succeeded is never reached by the rolling range, so the trigger starts the range at the oldest such gap. The loader skips windows that are already published, so the extra range costs one status lookup. Gaps older than the look-back are left alone, and so is a backlog longer than the maximum lag. `AUTO_RETRY_FAILED_WINDOWS=false` switches this off.
+- Reports gaps behind the cursor to Slack. A gap being retried is reported once three scheduled runs have failed to close it. Any gap is reported when it first qualifies and then once a day in the 08:00 UTC run.
+- Accepts an operator `window` in the event and passes it to the loader as given, with no cursor, lag check or gap report (see [Backfilling a range in a live adapter](#backfilling-a-range-in-a-live-adapter)).
 - CLI flags: `--window-minutes`, `--lookback-days`, `--job-id`, `--at`, `--enforce-lag`.
 
 ### Loader (`steps/loader.py`)
@@ -110,6 +113,27 @@ uv run python -m adapters.steps.transformer --transformer-type {axiell,folio} \
 ```
 
 ### 4. Reloader → fill coverage gaps
+
+The reloader writes records and window rows but does not reconcile, enrich or publish them, so the transformer never sees what it loads. Use it against local tables. For a live adapter, backfill through the state machine.
+
+#### Backfilling a range in a live adapter
+
+Start an execution of the adapter's state machine (`axiell-adapter`, `folio-adapter`) with a `window`:
+
+```json
+{
+  "adapter_type": "axiell",
+  "window": { "start_time": "2025-12-01T13:30:00Z", "end_time": "2025-12-01T14:00:00Z" }
+}
+```
+
+`start_time` must sit on a window boundary (:00, :15, :30 or :45 with 15-minute windows). The trigger rejects any other start, because its first sub-window would match no stored row and be harvested and published a second time.
+
+The run harvests the unfinished windows in the range, skips the published ones, and carries the result through reconcile, enrichment, the completed event and the published stamp like a scheduled run. Its job id is prefixed `backfill-`. If a scheduled run is in flight the execution fails with `AlreadyRunning` and can be started again once that run ends.
+
+Do not follow a local reload with an id-mode run to publish the records. The store already holds them, so id mode finds nothing changed and emits no changeset.
+
+#### Running the reloader locally
 
 ```bash
 uv run python -m adapters.steps.oai_pmh.reloader --adapter-type {axiell,folio} \

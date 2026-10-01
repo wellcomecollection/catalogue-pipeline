@@ -14,6 +14,8 @@ module "lambda" {
   # we should never be worrying about the timeout.
   timeout = 5 * 60
 
+  runtime = "python3.12"
+
   environment_variables = {
     HOLDINGS_READER_TOPIC_ARN = var.topic_arn
   }

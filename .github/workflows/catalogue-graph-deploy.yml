@@ -117,14 +117,14 @@ jobs:
             axiell-adapter-reconcile,
           ]
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/deploy-lambda-image
+      - uses: wellcomecollection/.github/.github/actions/deploy-lambda-image@main
         with:
           lambda_name: ${{ matrix.lambda_name }}
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           image_name: unified_pipeline_lambda
           deploy_tag: prod
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          publish: true
 
   deploy-dated-unified-pipeline-lambdas:
     name: Deploy dated unified pipeline lambdas

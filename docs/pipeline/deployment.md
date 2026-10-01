@@ -14,7 +14,7 @@ All container images live in ECR under `760097843905.dkr.ecr.eu-west-1.amazonaws
 
 * a commit tag (the git SHA), which is immutable and ties an image to its source;
 * `latest`, the most recently published image in a repository;
-* floating environment tags, which are what running infrastructure actually references. Dated pipeline services reference `env.<date>` (e.g. `env.2025-10-02`); shared services such as adapters reference `env.prod` or `prod`.
+* floating environment tags, which are what running infrastructure actually references. Dated pipeline services reference `env.<date>` (e.g. `env.2026-07-03`); shared services such as adapters reference `env.prod` or `prod`.
 
 Terraform bakes the `env.<date>` reference into ECS task definitions and lambda configuration once. Routine deployments never run Terraform: they move the floating tag to a new image and then tell ECS or Lambda to redeploy.
 
@@ -59,7 +59,7 @@ Turn the flag on when several pipelines should all track main, for example durin
 To deploy an older pipeline manually while the flag is off, run:
 
 ```console
-PIPELINE_DATE="2025-10-02" builds/deploy_catalogue_pipeline.sh tag_images_and_deploy_services
+PIPELINE_DATE="YYYY-MM-DD" builds/deploy_catalogue_pipeline.sh tag_images_and_deploy_services
 ```
 
 Note that this deploys whatever `latest` currently points at, not a specific commit.

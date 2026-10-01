@@ -40,6 +40,7 @@ variable "queue_config" {
     batch_size                 = optional(number, 1)
     batching_window_seconds    = optional(number, null)
     maximum_concurrency        = optional(number, 2)
+    report_batch_item_failures = optional(bool, false)
   })
   default = null
 }

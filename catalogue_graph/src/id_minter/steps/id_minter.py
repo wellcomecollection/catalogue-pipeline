@@ -50,6 +50,7 @@ class IdMinterResult(BaseModel):
     job_id: str
     window: IncrementalWindow | None = None
     success_count: int
+    superseded_count: int = 0
     failure_count: int
     report_s3_uri: str
 
@@ -73,7 +74,7 @@ def build_runtime(
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
-) -> tuple[list[str], list[TransformationError]]:
+) -> tuple[list[str], list[str], list[TransformationError]]:
     if runtime.config.apply_migrations:
         logger.info("Applying database migrations")
         apply_migrations(runtime.config)
@@ -114,13 +115,13 @@ def execute(
     )
     transformer.stream_to_index(target_client, target_index)
 
-    if runtime.config.downstream_sns_topic_arn and transformer.successful_ids:
-        publish_ids_to_sns(
-            runtime.config.downstream_sns_topic_arn,
-            transformer.successful_ids,
-        )
+    # Superseded works are forwarded too: the matcher reads the newer copy, and a run
+    # that died between indexing and publishing is covered by the next one.
+    ids_to_publish = transformer.successful_ids + transformer.superseded_ids
+    if runtime.config.downstream_sns_topic_arn and ids_to_publish:
+        publish_ids_to_sns(runtime.config.downstream_sns_topic_arn, ids_to_publish)
 
-    return transformer.successful_ids, transformer.errors
+    return transformer.successful_ids, transformer.superseded_ids, transformer.errors
 
 
 def log_runtime_config(
@@ -162,12 +163,13 @@ def handler(
 ) -> IdMinterResult:
     setup_logging(execution_context)
     log_runtime_config(runtime, event)
-    successful_ids, errors = execute(event, runtime=runtime)
+    successful_ids, superseded_ids, errors = execute(event, runtime=runtime)
 
     logger.info(
         "Minting complete",
         job_id=event.job_id,
         success_count=len(successful_ids),
+        superseded_count=len(superseded_ids),
         failure_count=len(errors),
     )
 
@@ -175,6 +177,7 @@ def handler(
         pipeline_date=runtime.config.pipeline_date,
         job_id=event.job_id,
         successful_ids=successful_ids,
+        superseded_ids=superseded_ids,
         errors=errors,
         s3_bucket=runtime.config.s3_bucket,
         s3_prefix=runtime.config.s3_prefix,
@@ -185,6 +188,7 @@ def handler(
         {
             **event.model_dump(),
             "success_count": len(successful_ids),
+            "superseded_count": len(superseded_ids),
             "failure_count": len(errors),
             "report_s3_uri": report.s3_uri,
         }

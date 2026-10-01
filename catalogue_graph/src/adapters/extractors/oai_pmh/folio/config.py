@@ -193,6 +193,7 @@ FOLIO_ADAPTER_CONFIG = OAIPMHAdapterConfig(
     window_lookback_days=WINDOW_LOOKBACK_DAYS,
     max_lag_minutes=MAX_LAG_MINUTES,
     max_pending_windows=MAX_PENDING_WINDOWS,
+    auto_retry_failed_windows=AUTO_RETRY_FAILED_WINDOWS,
     # OAI-PMH
     oai_metadata_prefix=OAI_METADATA_PREFIX,
     oai_set_spec=OAI_SET_SPEC,

@@ -7,56 +7,17 @@ from __future__ import annotations
 
 import re
 
-from adapters.transformers.marc.parsers.period import (
-    RE_4_DIGIT_DATE_RANGE,
-    RE_NTH_CENTURY,
-    parse_period,
-)
-from adapters.transformers.utils.text_utils import (
-    normalise_label,
-)
-from models.pipeline.concept import Concept, Period
+from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identifiable, Unidentifiable
 from utils.types import RawConceptType
 
+from adapters.transformers.marc.period import parse_period
+from adapters.transformers.utils.text_utils import (
+    normalise_label,
+)
+
 SUBDIVISION_CODES: list[str] = ["v", "x", "y", "z"]
 SUBFIELD_TYPE_MAP: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
-
-
-def should_create_range(label: str) -> bool:
-    """
-    Whether a Period label is one the Python parser handles: a century or a
-    range of four-digit years. This is a deliberate subset of the Scala
-    PeriodParser grammar, which also handles exact dates, decades, seasons,
-    qualifiers such as "early" or "ca.", BC years and half-bounded ranges.
-    Labels outside the subset get no range rather than a wrong one.
-
-     >>> should_create_range("19th century")
-     True
-     >>> should_create_range("18th cent.")
-     True
-     >>> should_create_range("1901")
-     True
-     >>> should_create_range("1904-")
-     True
-     >>> should_create_range("1601-1666")
-     True
-
-     The whole label must match, so a date with a day or a parenthetical
-     qualifier is left alone:
-     >>> should_create_range("1851 Nov. 27")
-     False
-     >>> should_create_range("1714-1727 (George Ier)")
-     False
-     >>> should_create_range("501-1066")
-     False
-     >>> should_create_range("Siege of Bielefeld 1820-1856")
-     False
-    """
-    return (
-        RE_NTH_CENTURY.fullmatch(label) is not None
-        or RE_4_DIGIT_DATE_RANGE.fullmatch(label) is not None
-    )
 
 
 def normalise_period_id_label(label: str) -> str:
@@ -127,10 +88,13 @@ def build_concept(
     )
 
     if raw_type == "Period":
-        if should_create_range(label):
-            return parse_period(label, identifier=id)
-        return Period(id=id, label=label)
-    return Concept(id=id, label=label, type=raw_type)
+        return parse_period(label, identifier=id)
+    else:
+        return Concept(
+            id=id,
+            label=label,
+            type=raw_type,
+        )
 
 
 def get_concept_identifier(label: str, raw_type: RawConceptType) -> Identifiable:

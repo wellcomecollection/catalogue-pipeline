@@ -1,6 +1,6 @@
 # Read-only access to the bulk load S3 bucket, scoped to the graph-specific prefix.
 # When graph_date is empty, falls back to the "graph-prod" prefix.
-# This fallback is temporary and can be removed once we retire the current production cluster.
+# The fallback goes with the legacy cluster (wellcomecollection/platform#6726).
 locals {
   bulk_load_prefix = var.graph_date != "" ? "graph-${var.graph_date}" : "graph-prod"
 }
