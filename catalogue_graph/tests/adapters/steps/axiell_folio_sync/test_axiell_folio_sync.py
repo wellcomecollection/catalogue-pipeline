@@ -34,13 +34,15 @@ from adapters.steps.axiell_folio_sync.results import (
 from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
 from adapters.utils.axiell_changeset_reader import SupersededGuid
 
-# 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title).
+# 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title),
+# 984 $b (normal location — required, the shelf location FOLIO is given).
 SELECTED = (
     "<record>"
     "<controlfield tag='001'>guid-1</controlfield>"
     "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
     "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
     "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
+    "<datafield tag='984'><subfield code='b'>NORMAL/PATH</subfield></datafield>"
     "</record>"
 )
 # Item-level with a title but no 980 $a harvest flag -> not selected.
@@ -49,6 +51,7 @@ UNSELECTED = (
     "<controlfield tag='001'>guid-2</controlfield>"
     "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
     "<datafield tag='245'><subfield code='a'>Skip me</subfield></datafield>"
+    "<datafield tag='984'><subfield code='b'>NORMAL/PATH</subfield></datafield>"
     "</record>"
 )
 
@@ -775,25 +778,59 @@ def test_hard_delete_failure_is_reported_under_delete_stage(
     assert captured["model"].errors[0].stage == "delete"
 
 
+# The agreed AxC → FOLIO location mapping (LOCATION_RULES). Matching is on the
+# leading code of the hierarchy, which is why the path and leaf spellings of the
+# same location agree, and why "2150" does not match the "215" rule.
 @pytest.mark.parametrize(
-    ("current_location", "expected"),
+    ("axiell_location", "expected"),
     [
-        ("215", "hicon"),
-        ("215-3", "hicon"),
-        ("  183abc", "hicon"),
-        ("183", "hicon"),
-        ("21", "21"),  # too short to match the 215 prefix
-        ("STACK", "STACK"),  # unrelated code passes through unchanged
+        # Euston Road: 215 and 183, as a path (984$b) and as a leaf (984$c).
+        ("215/215;B11/215;B11;MR/215;B11;MR;84", "AxC Euston Road"),
+        ("215;B11;MR;84;3;7", "AxC Euston Road"),
+        ("215", "AxC Euston Road"),
+        ("183/183;4.44/183;4.44;FR", "AxC Euston Road"),
+        ("183", "AxC Euston Road"),
+        ("  215/215;B11  ", "AxC Euston Road"),  # surrounding whitespace
+        # Deepstore: an exact code, alone or heading a path.
+        ("Deepstore", "AxC Deepstore"),
+        ("Deepstore/DS;1", "AxC Deepstore"),
+        # Constantine London West: a prefix, so anything CLW… matches.
+        ("CLW", "AxC Constantine London West"),
+        ("CLW123/CLW;A", "AxC Constantine London West"),
+        # Codes that merely start with the digits of a rule must NOT match: the
+        # leading code is compared whole.
+        ("2150/x", "2150/x"),
+        ("215A;B", "215A;B"),
+        ("21", "21"),
+        # Anything unlisted passes through, to resolve as a FOLIO code or name or
+        # else be reported as unresolved.
+        ("STACK", "STACK"),
         ("", ""),
         (None, None),
     ],
 )
-def test_folio_location_prefix_override(
-    current_location: str | None, expected: str | None
+def test_folio_location_rules(
+    axiell_location: str | None, expected: str | None
 ) -> None:
     from adapters.steps.axiell_folio_sync.mapping import _folio_location
 
-    assert _folio_location(current_location) == expected
+    assert _folio_location(axiell_location) == expected
+
+
+def test_every_location_rule_names_its_folio_hierarchy() -> None:
+    """The parent names are documentation, not lookup keys, but they are what was
+    agreed and what someone provisioning the tenant needs, so none may be blank."""
+    from adapters.steps.axiell_folio_sync.mapping import (
+        FOLIO_INSTITUTION,
+        LOCATION_RULES,
+    )
+
+    assert FOLIO_INSTITUTION == "Wellcome Collection"
+    assert len(LOCATION_RULES) == 3
+    for rule in LOCATION_RULES:
+        assert rule.location.startswith("AxC ")
+        assert rule.campus and rule.library
+        assert rule.codes or rule.prefixes
 
 
 def test_object_number_extracts_the_altrefno_035_stripped() -> None:

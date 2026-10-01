@@ -28,10 +28,8 @@ RECORD_TYPE_ITEM = "ITEM"  # only item-level records are synced
 
 # ── normalization tables & defaults ─────────────────────────────────────────────
 
-# Axiell object_category (MARC 655$a) → FOLIO standard material-type name.
-# Keys carry the AxC object_category value in its real (mixed) case for readability;
-# matching is case-insensitive — MATERIAL_TYPE_FIELD folds these keys to lowercase
-# and `_resolve` lowercases the incoming value before lookup.
+# Axiell object_category (MARC 655$a) to FOLIO material type; matching is
+# case-insensitive.
 # Values reflect the AxC object_category mappings agreed in the Folio Axiell Mapping.
 MATERIAL_TYPE: dict[str, str] = {
     "Archives - Non Digital": "archive",
@@ -44,34 +42,120 @@ MATERIAL_TYPE: dict[str, str] = {
     "Visual Material - Non-digital": "non-projected graphic",
 }
 
+
+# Map Axiell access categories (MARC 506$f) to FOLIO item statuses.
+# Values are FOLIO's fixed item-status values and need no resolver.
+# Confirm "Restricted" and "Withdrawn" against the tenant's FOLIO version;
+# see rfcs/collection-information-questions.md section 6.
+ACCESS_ITEM_STATUS: dict[str, str] = {
+    "OPEN": "Available",
+    "OPENWITHADVISORY": "Available",
+    "RESTRICTED": "Restricted",
+    "PERMISSIONREQUIRED": "Restricted",
+    "SAFEGUARDED": "Restricted",
+    "CLOSED": "Restricted",
+    "MISSING": "Missing",
+    "DEACCESSIONED": "Withdrawn",
+    "DATAISSUES": "Unavailable",
+}
+
 # Fallbacks used when the MARC record carries no value for a resolved field.
 DEFAULT_MATERIAL_TYPE = "book"
+# The default loan type, and currently the only one any item gets: no AxC field
+# is mapped to the loan type, so nothing ever overrides this.
+#
+# AxC has two candidate sources, and it is not settled which should drive this or
+# whether open archival material should circulate at all. The access category
+# (506$f) was mapped here for a time, and so was the use restriction (540$a).
+
 DEFAULT_LOAN_TYPE = "Can circulate"
-DEFAULT_LOCATION = "History of Medicine"
+# Same principle for the item status: no access category means the item is not
+# presented as available. A category that is present but unrecognised does not
+# reach this default either. _item_status raises instead.
+DEFAULT_ITEM_STATUS = "Unavailable"
 DEFAULT_HOLDINGS_SOURCE = "MARC"
-AXIELL_LOCATION_NOTE_TYPE = "Axiell location"
+# Prefix for AxC's current location (852$b) in administrativeNotes. It identifies
+# the note for replacement on updates. If changed after syncing begins, continue
+# matching the old label to avoid orphaning or duplicating existing notes.
+AXIELL_LOCATION_NOTE_PREFIX = "Axiell Current Location"
 # FOLIO instance identifier type used for the AxC object_number
 # (the (AltRefNo)-prefixed 035$a).
 LOCAL_IDENTIFIER_TYPE = "Local identifier"
 
-# AxC current_location (MARC 852$b) values whose leading digits map to a fixed
-# FOLIO location, overriding the normal code/name lookup. First match wins.
-LOCATION_PREFIX_OVERRIDES: dict[str, tuple[str, ...]] = {
-    "hicon": ("215", "183"),
-}
+# AxC current_location (MARC 852$b) codes that map to fixed FOLIO locations.
+# FOLIO's location hierarchy is institution → campus → library → location, but the
+# sync resolves a single *leaf* location UUID: RefCache indexes locations by code
+# and name only, and a leaf implies its parents. The parent names are recorded on
+# Parent names document the agreed hierarchy but are not used for lookup.
+FOLIO_INSTITUTION = "Wellcome Collection"
 
 
-def _folio_location(current_location: str | None) -> str | None:
-    """Resolve an AxC current_location to the FOLIO location to look up.
+@dataclass(frozen=True)
+class LocationRule:
+    """One AxC normal-location → FOLIO location rule.
 
-    Applies the :data:`LOCATION_PREFIX_OVERRIDES` prefix rules; when none match,
-    returns ``current_location`` unchanged for the normal code/name → default chain.
+    Matching is on the *leading code* of the AxC location hierarchy — see
+    :func:`_folio_location` for why that is the unit, rather than a prefix of the
+    whole string. ``codes`` match that code exactly; ``prefixes`` match its start.
     """
-    value = (current_location or "").strip()
-    for folio_location, prefixes in LOCATION_PREFIX_OVERRIDES.items():
-        if value.startswith(prefixes):
-            return folio_location
-    return current_location
+
+    location: str  # FOLIO leaf location name — the only part that is resolved
+    campus: str
+    library: str
+    codes: tuple[str, ...] = ()  # leading code, matched exactly
+    prefixes: tuple[str, ...] = ()  # leading code, matched by prefix
+
+
+# The agreed AxC → FOLIO location mapping. First match wins.
+LOCATION_RULES: tuple[LocationRule, ...] = (
+    LocationRule(
+        codes=("215", "183"),
+        location="AxC Euston Road",
+        campus="Euston Road (Axiell)",
+        library="Axiell sync",
+    ),
+    LocationRule(
+        codes=("Deepstore",),
+        location="AxC Deepstore",
+        campus="Deepstore",
+        library="Offsite (DS)",
+    ),
+    LocationRule(
+        prefixes=("CLW",),
+        location="AxC Constantine London West",
+        campus="Constantine London West",
+        library="Axiell sync",
+    ),
+)
+
+
+def _leading_location_code(context: str | None) -> str:
+    """The first code of an AxC location hierarchy path.
+
+    AxC nests the hierarchy two ways at once: the path is "/"-separated and each
+    segment is a ";"-separated code, so a real 984$b looks like
+    ``"215/215;B11/215;B11;MR/…"`` and its leaf (984$c) like ``"215;B11;MR;84"``.
+    Taking the first component of each split yields ``"215"`` from either spelling.
+    """
+    return (context or "").strip().split("/")[0].split(";")[0].strip()
+
+
+def _folio_location(location: str | None) -> str | None:
+    """Resolve an AxC location to the FOLIO leaf location name to look up.
+
+    Matches :data:`LOCATION_RULES` against the *leading code* rather than against
+    the raw string: the codes are the hierarchy's own units, so ``"215"`` cannot
+    also swallow ``"2150"`` or ``"215A"``, which a bare ``startswith("215")``
+    would. When no rule matches, the value is returned unchanged so it can still
+    resolve as a FOLIO code or name — and, failing that, be reported as an
+    unresolved location rather than quietly shelved somewhere plausible.
+    """
+    code = _leading_location_code(location)
+    if code:
+        for rule in LOCATION_RULES:
+            if code in rule.codes or (rule.prefixes and code.startswith(rule.prefixes)):
+                return rule.location
+    return location
 
 
 def _instance_hrid(source_id: str) -> str:
@@ -96,7 +180,7 @@ def _item_hrid(source_id: str) -> str:
 #
 # Resolved fields (value → FOLIO tenant UUID) are named constants so the builders
 # reference the exact same row they are extracted from; plain passthrough fields
-# (title, barcode, …) that need no tenant lookup appear inline in ``FIELDS``.
+# (title and so on) that need no tenant lookup appear inline in ``FIELDS``.
 
 
 @dataclass(frozen=True)
@@ -106,7 +190,9 @@ class FieldMap:
 
     ``marc`` is ``None`` for a FOLIO field with no AxC source (resolved from a
     constant, e.g. the holdings source). ``resolver`` is ``None`` for a plain
-    passthrough field (title, barcode) that needs no FOLIO tenant lookup.
+    passthrough field (title) that needs no FOLIO tenant lookup.
+    ``required`` and ``default`` are mutually exclusive: a field either has
+    something to fall back on or it fails when the record carries no value.
     """
 
     canonical: str | None  # CanonicalRecord attribute name (None = no AxC source)
@@ -115,7 +201,8 @@ class FieldMap:
     default: str | None = None  # fallback when the record carries no value
     label: str | None = None  # human label used in MappingError messages
     table: dict[str, str] | None = None  # AxC-code → FOLIO-name normalization
-    location: bool = False  # apply LOCATION_PREFIX_OVERRIDES before resolving
+    location: bool = False  # apply LOCATION_RULES before resolving
+    required: bool = False  # no value → MappingError, instead of a default
 
 
 # Resolved fields → FOLIO tenant UUIDs. Referenced by both FIELDS (extraction)
@@ -130,17 +217,31 @@ MATERIAL_TYPE_FIELD = FieldMap(
     # lowercases the incoming AxC value) matches whatever case AxC sends.
     table={key.lower(): value for key, value in MATERIAL_TYPE.items()},
 )
-LOCATION_FIELD = FieldMap(
+# The AxC *current* location. Extraction only: it feeds the administrative note
+# verbatim and is no longer resolved to a FOLIO location UUID — the shelf location
+# comes from NORMAL_LOCATION_FIELD below. Hence no resolver and no default.
+CURRENT_LOCATION_FIELD = FieldMap(
     "current_location",
     marc="852$b",
-    resolver="resolve_location",
-    default=DEFAULT_LOCATION,
-    label="location",
-    location=True,
 )
+# AxC normal location maps to FOLIO permanentLocation. The XSLT writes it to
+# local field 984 ($b), which avoids 983 because that field already carries part
+# references; 984 is otherwise unused in this harvest.
+#
+# `required=True` means missing or unknown normal locations fail the record
+# instead of silently creating a plausible but wrong default location.
+NORMAL_LOCATION_FIELD = FieldMap(
+    "normal_location",
+    marc="984$b",
+    resolver="resolve_location",
+    label="normal location",
+    location=True,
+    required=True,
+)
+# item.permanentLoanType is resolved from a constant, not from any AxC field.
+# See DEFAULT_LOAN_TYPE above for why, and for what it costs.
 LOAN_TYPE_FIELD = FieldMap(
-    "loan_type_code",
-    marc="949$l",
+    None,
     resolver="resolve_loan_type",
     default=DEFAULT_LOAN_TYPE,
     label="loan type",
@@ -171,9 +272,9 @@ FIELDS: tuple[FieldMap, ...] = (
         "object_number", marc="035$a(AltRefNo)"
     ),  # (AltRefNo)-prefixed 035$a → instance.identifiers (local identifier)
     MATERIAL_TYPE_FIELD,  # → item.materialType
-    LOCATION_FIELD,  # → holdings/item location + Axiell location note
-    FieldMap("barcode", marc="949$a"),  # → item.barcode
-    LOAN_TYPE_FIELD,  # → item.permanentLoanType
+    CURRENT_LOCATION_FIELD,  # → the Axiell Current Location admin note (verbatim)
+    NORMAL_LOCATION_FIELD,  # → holdings.permanentLocationId + item.permanentLocation
+    FieldMap("access_category", marc="506$f"),  # → item.status, via ACCESS_ITEM_STATUS
 )
 
 # Inbound extraction map derived from FIELDS: CanonicalRecord attr → MARC spec.

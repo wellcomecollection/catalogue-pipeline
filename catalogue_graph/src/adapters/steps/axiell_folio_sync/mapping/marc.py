@@ -34,8 +34,16 @@ class CanonicalRecord:
     object_number: str | None = None  # (AltRefNo) 035$a, prefix stripped — AxC local id
     object_category: str | None = None  # 655$a — feeds material type
     current_location: str | None = None  # 852$b — AxC current location
-    barcode: str | None = None  # 949$a
-    loan_type_code: str | None = None  # 949$l
+    # 984$b — AxC normal (home) location. Where the item lives, as opposed to
+    # current_location, which is where it is right now: a loan or reading-room
+    # request moves the latter and leaves this alone. Extracted but not yet mapped
+    # to a FOLIO field — see docs/axiell-folio-mapping-gaps.md §4.
+    normal_location: str | None = None
+    # 506$f — the standardized access term (OPEN, CLOSED, RESTRICTED, …).
+    # Feeds the item's status; see config.ACCESS_ITEM_STATUS. It does not feed the
+    # loan type, which is a constant while Collection Information decides what
+    # should drive it. See config.DEFAULT_LOAN_TYPE.
+    access_category: str | None = None
     deleted: bool = False
 
 

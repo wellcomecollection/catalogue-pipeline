@@ -69,6 +69,12 @@ class AxiellFolioSyncReport(PipelineReport):
                 name="records_tombstoned", value=self.counts.get("tombstone", 0)
             ),
             PipelineMetric(name="records_failed", value=self.counts.get("failed", 0)),
+            # Not a failure: the record synced, but an unclaimable location note
+            # was left behind on the item. Alarm-worthy only if it trends up.
+            PipelineMetric(
+                name="stray_location_notes",
+                value=self.counts.get("stray_location_notes", 0),
+            ),
             PipelineMetric(name="records_processed", value=self.counts.get("total", 0)),
         ]
 

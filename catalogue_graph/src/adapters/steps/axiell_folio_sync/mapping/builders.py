@@ -15,13 +15,15 @@ from pymarc.record import Record
 
 from ..folio import RefCache
 from .config import (
-    AXIELL_LOCATION_NOTE_TYPE,
+    ACCESS_ITEM_STATUS,
+    AXIELL_LOCATION_NOTE_PREFIX,
+    DEFAULT_ITEM_STATUS,
     HOLDINGS_SOURCE_FIELD,
     LOAN_TYPE_FIELD,
     LOCAL_IDENTIFIER_FIELD,
-    LOCATION_FIELD,
     MARC_SOURCE,
     MATERIAL_TYPE_FIELD,
+    NORMAL_LOCATION_FIELD,
     RECORD_TYPE_ITEM,
     VERSION,
     FieldMap,
@@ -38,8 +40,8 @@ from .payloads import (
     Instance,
     Item,
     MappedPayloads,
-    Note,
     PayloadMeta,
+    Status,
 )
 
 # ── extraction ──────────────────────────────────────────────────────────────────
@@ -79,6 +81,11 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
     """
     raw = getattr(rec, field.canonical) if field.canonical else None
     value = (raw or "").strip()
+    if field.required and not value:
+        raise MappingError(
+            f"Missing {field.label} (MARC {field.marc}) for source_id={rec.source_id}"
+            " — required, with no default to fall back on"
+        )
     if field.location:
         value = (_folio_location(value) or "").strip()
     if field.table:
@@ -129,23 +136,58 @@ def build_holdings(rec: CanonicalRecord, ref: RefCache) -> Holdings:
     return Holdings(
         hrid=_holdings_hrid(rec.source_id),
         sourceId=_resolve(HOLDINGS_SOURCE_FIELD, rec, ref),
-        permanentLocationId=_resolve(LOCATION_FIELD, rec, ref),
+        permanentLocationId=_resolve(NORMAL_LOCATION_FIELD, rec, ref),
     )
+
+
+def _item_status(rec: CanonicalRecord) -> Status:
+    """The FOLIO item status, from the AxC access category.
+
+    This is not resolved through :func:`_resolve` like the other mapped fields.
+    Item statuses are a fixed enum in the FOLIO item schema rather than tenant
+    reference data, so the table value is the final answer and there is nothing
+    to look up.
+
+    An absent category takes ``DEFAULT_ITEM_STATUS``, because an item of unknown
+    access state should not be presented as available. A category that is present
+    but unrecognised raises instead: an absent value is a data gap, an
+    unrecognised one is a mapping gap, and only the second should stop a record.
+
+    This is the only thing that reads the access category, so the guard has to
+    live here. The loan type used to raise on an unmapped category as well, but
+    it no longer reads the field.
+    """
+    category = (rec.access_category or "").strip()
+    if not category:
+        return Status(name=DEFAULT_ITEM_STATUS)
+    name = ACCESS_ITEM_STATUS.get(category.upper())
+    if name is None:
+        raise MappingError(
+            f"Unrecognised access category {category!r} for item status:"
+            " add it to ACCESS_ITEM_STATUS or fix the MARC"
+        )
+    return Status(name=name)
 
 
 def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
     return Item(
         hrid=_item_hrid(rec.source_id),
         materialType=IdRef(id=_resolve(MATERIAL_TYPE_FIELD, rec, ref)),
+        status=_item_status(rec),
         permanentLoanType=IdRef(id=_resolve(LOAN_TYPE_FIELD, rec, ref)),
-        permanentLocation=IdRef(id=_resolve(LOCATION_FIELD, rec, ref)),
-        barcode=rec.barcode,
-        notes=[
-            Note(
-                note=rec.current_location or "unknown",
-                noteType=AXIELL_LOCATION_NOTE_TYPE,
-                staffOnly=False,
-            )
+        permanentLocation=IdRef(id=_resolve(NORMAL_LOCATION_FIELD, rec, ref)),
+        # The AxC current location is kept as an *administrative* note, not a
+        # typed one: it is an internal audit trail of where the item actually is,
+        # and an administrative note needs no item note type to exist in the
+        # tenant. The label is part of the string because an administrative note
+        # carries no type to identify it by.
+        #
+        # Always emitted, "unknown" included: the note is absent from the payload
+        # otherwise, and _upsert_entity merges payload over the existing record,
+        # so omitting it would leave a previous location in place rather than
+        # clearing it.
+        administrativeNotes=[
+            f"{AXIELL_LOCATION_NOTE_PREFIX}: {rec.current_location or 'unknown'}"
         ],
     )
 
