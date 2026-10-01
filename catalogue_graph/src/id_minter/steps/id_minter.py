@@ -7,12 +7,14 @@ Follows the runtime / handler pattern used by the EBSCO adapter loader.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 from typing import Any, Literal
 
 import structlog
 from pydantic import BaseModel, ConfigDict
 from pyiceberg.table import Table as IcebergTable
 
+from clients.metric_reporter import MetricReporter
 from core.sinks import ElasticsearchSink, IcebergSink, Sink
 from core.transformer import SinkResult
 from id_minter.config import ID_MINTER_CONFIG, IdMinterConfig
@@ -92,6 +94,28 @@ def build_runtime(
     )
 
 
+def publish_iceberg_failure_count(config: IdMinterConfig, result: SinkResult) -> None:
+    """
+    Temporary helper publishing rows rejected by the experimental sink as a metric.
+    The sink is experimental, so a failure to publish must not fail the run.
+    """
+    logger.info("Iceberg writes complete", failure_count=len(result.failed_ids))
+    if config.pipeline_date == "dev":
+        return
+    try:
+        MetricReporter("catalogue_graph_pipeline").put_metric_data(
+            metric_name="iceberg_failure_count",
+            value=len(result.failed_ids),
+            timestamp=datetime.now(),
+            dimensions={
+                "pipeline_date": config.pipeline_date,
+                "pipeline_step": IdMinterReport.label,
+            },
+        )
+    except Exception:
+        logger.exception("Could not publish the Iceberg failure count")
+
+
 def execute(
     request: StepFunctionMintingRequest,
     runtime: IdMinterRuntime,
@@ -137,13 +161,18 @@ def execute(
     if runtime.iceberg_table is not None:
         sinks.append(IcebergSink(runtime.iceberg_table, works_identified_row))
 
-    result, *_ = transformer.stream_to_many(*sinks)
+    result, *iceberg_results = transformer.stream_to_many(*sinks)
 
     # Superseded works are forwarded too: the matcher reads the newer copy, and a run
     # that died between indexing and publishing is covered by the next one.
     ids_to_publish = result.accepted_ids + result.superseded_ids
     if runtime.config.downstream_sns_topic_arn and ids_to_publish:
         publish_ids_to_sns(runtime.config.downstream_sns_topic_arn, ids_to_publish)
+
+    # Published here, not through the report, so the experimental sink's results
+    # don't have to be threaded through the handler. Remove with the experiment.
+    for iceberg_result in iceberg_results:
+        publish_iceberg_failure_count(runtime.config, iceberg_result)
 
     return result
 

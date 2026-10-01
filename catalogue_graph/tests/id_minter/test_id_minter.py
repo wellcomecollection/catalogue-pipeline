@@ -22,6 +22,7 @@ import pymysql
 import pymysql.connections
 import pytest
 from elasticsearch import Elasticsearch
+from pyiceberg.table import Table as IcebergTable
 
 from id_minter.config import IdMinterConfig, RDSClientConfig
 from id_minter.id_minting_source import IdMintingSource
@@ -30,6 +31,7 @@ from id_minter.models.step_events import (
     StepFunctionMintingRequest,
 )
 from id_minter.resolvers.minting_resolver import MintingResolver
+from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from id_minter.steps.id_minter import (
     IdMinterResult,
     IdMinterRuntime,
@@ -430,6 +432,103 @@ class TestMetricsPublishing:
         metrics = {m["metric_name"]: m for m in MockCloudwatchClient.metrics_reported}
         assert metrics["success_count"]["value"] == 0
         assert metrics["failure_count"]["value"] == 1
+
+    def test_publishes_iceberg_failure_count_when_the_append_fails(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """A dropped Iceberg row is a metric; the run and its report are unaffected."""
+        seed_free_ids(ids_db, ["iceb0001"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b6004")
+        doc = make_work_doc(si)
+
+        broken_table = MagicMock(spec=IcebergTable)
+        broken_table.schema.return_value = WORKS_IDENTIFIED_ICEBERG_SCHEMA
+        broken_table.append.side_effect = RuntimeError("catalog unreachable")
+
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="2024-01-01",
+            enable_iceberg_writes=True,
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=MintingResolver.from_connection(ids_db),
+            source_es_mode="local",
+            target_es_mode="local",
+            iceberg_table=broken_table,
+        )
+        request = StepFunctionMintingRequest(
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
+            job_id="metrics-test-iceberg",
+        )
+
+        with stub_transformer_source([doc]):
+            response = handler(request, runtime=runtime)
+
+        assert response.success_count == 1
+        assert response.failure_count == 0
+
+        metrics = {m["metric_name"]: m for m in MockCloudwatchClient.metrics_reported}
+        assert metrics["failure_count"]["value"] == 0
+        assert metrics["iceberg_failure_count"]["value"] == 1
+        assert metrics["iceberg_failure_count"]["dimensions"] == {
+            "pipeline_date": "2024-01-01",
+            "pipeline_step": "id_minter",
+        }
+
+        with open(
+            MockSmartOpen.file_lookup[response.report_s3_uri], encoding="utf-8"
+        ) as f:
+            report = json.loads(f.read())
+        assert report["successful_ids"] == ["iceb0001"]
+        assert not any("iceberg" in key for key in report)
+
+    def test_a_metric_publishing_failure_does_not_fail_the_run(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        seed_free_ids(ids_db, ["iceb0002"])
+
+        si = make_source_identifier("Work", "sierra-system-number", "b6005")
+        doc = make_work_doc(si)
+
+        table = MagicMock(spec=IcebergTable)
+        table.schema.return_value = WORKS_IDENTIFIED_ICEBERG_SCHEMA
+
+        config = IdMinterConfig(
+            rds_client=RDSClientConfig(password="id_minter"),
+            apply_migrations=False,
+            pipeline_date="2024-01-01",
+            enable_iceberg_writes=True,
+        )
+        runtime = IdMinterRuntime(
+            config=config,
+            resolver=MintingResolver.from_connection(ids_db),
+            source_es_mode="local",
+            target_es_mode="local",
+            iceberg_table=table,
+        )
+        request = StepFunctionMintingRequest(
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
+            job_id="metrics-test-iceberg-publish",
+        )
+
+        with (
+            stub_transformer_source([doc]),
+            patch(
+                "id_minter.steps.id_minter.MetricReporter",
+                side_effect=RuntimeError("cloudwatch unavailable"),
+            ),
+        ):
+            response = handler(request, runtime=runtime)
+
+        assert response.success_count == 1
+        assert response.failure_count == 0
 
 
 # ---------------------------------------------------------------------------
