@@ -399,6 +399,68 @@ class SierraContributorsTest
       )
     }
 
+    it("gets an LC Names identifier from a URI in subfield ǂ0") {
+      // Based on Backstage authority-control output
+      val varFields = List(
+        VarField(
+          marcTag = "100",
+          subfields = List(
+            Subfield(tag = "a", content = "Brücke, Ernst Wilhelm von,"),
+            Subfield(tag = "d", content = "1819-1892"),
+            Subfield(
+              tag = "0",
+              content = "http://id.loc.gov/authorities/names/n83211267"
+            )
+          )
+        ),
+        VarField(
+          marcTag = "700",
+          subfields = List(
+            Subfield(tag = "a", content = "Huxley, Aldous,"),
+            Subfield(tag = "d", content = "1894-1963"),
+            Subfield(
+              tag = "0",
+              content = "https://id.loc.gov/authorities/names/n80057246"
+            )
+          )
+        )
+      )
+
+      val contributors =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+      contributors.map(_.agent.id) shouldBe List(
+        Identifiable(
+          SourceIdentifier(IdentifierType.LCNames, "Person", "n83211267")
+        ),
+        Identifiable(
+          SourceIdentifier(IdentifierType.LCNames, "Person", "n80057246")
+        )
+      )
+    }
+
+    it(
+      "uses a label-derived identifier if subfield ǂ0 is not a valid LoC identifier"
+    ) {
+      val name = "Gerald the garlic"
+      val varFields = List(
+        VarField(
+          marcTag = "100",
+          subfields = List(
+            Subfield(tag = "a", content = name),
+            Subfield(tag = "0", content = "shsh85100861")
+          )
+        )
+      )
+
+      val List(contributor) =
+        SierraContributors(createSierraBibDataWith(varFields = varFields))
+
+      contributor.agent should have(
+        'label(name),
+        labelDerivedPersonId(name.toLowerCase)
+      )
+    }
+
     it("normalises Person contributor labels") {
       val varFields = List(
         VarField(
