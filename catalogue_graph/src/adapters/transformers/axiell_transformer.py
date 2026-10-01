@@ -10,8 +10,8 @@ from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.adapter_store_source import RecordSource
 from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
+from core.document import Document
 from ingestor.models.shared.deleted_reason import DeletedFromSource
-from models.pipeline.source.work import SourceWork
 
 logger = structlog.get_logger(__name__)
 
@@ -40,7 +40,7 @@ class AxiellTransformer(MarcXmlTransformer):
     def work_builder(self) -> type[AxiellWorkBuilder]:
         return AxiellWorkBuilder
 
-    def _transform_row(self, row: dict[str, Any]) -> Generator[tuple[str, SourceWork]]:
+    def _transform_row(self, row: dict[str, Any]) -> Generator[Document]:
         # Deletion facts (appended by AxiellStoreSource) carry a `guid` key;
         # adapter rows never do. Each fact tombstones its superseded guid.
         if "guid" in row:
@@ -48,7 +48,7 @@ class AxiellTransformer(MarcXmlTransformer):
             # bad fact cannot fail the whole transform run.
             try:
                 builder = ReconcilerWorkBuilder(row["guid"], row["last_modified"])
-                yield (
+                yield self.document(
                     row["id"],
                     builder.transform_deleted_work(deleted_reason=DeletedFromSource()),
                 )
