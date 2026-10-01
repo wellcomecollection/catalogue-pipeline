@@ -42,6 +42,19 @@ def step_error_logged(captured_logs: list[EventDict], message: str) -> None:
     )
 
 
+@then(parsers.parse('a warning "{message}" is logged'))
+def step_warning_logged(captured_logs: list[EventDict], message: str) -> None:
+    warnings = [
+        entry
+        for entry in captured_logs
+        if entry.get("log_level") == "warning" and entry.get("event") == message
+    ]
+    assert warnings, (
+        f'Expected a warning logged with message: "{message}". '
+        + _captured_report(captured_logs)
+    )
+
+
 @then(parsers.re(r'an error "(?P<message>[^"]*)" is logged with (?P<pairs>.+)'))
 def step_error_logged_with(
     captured_logs: list[EventDict], message: str, pairs: str
