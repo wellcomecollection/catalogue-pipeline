@@ -8,6 +8,7 @@ import re
 import structlog
 from pymarc.field import Field
 
+from adapters.transformers.marc.common import non_empty
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import Identifiable, SourceIdentifier
 
@@ -30,8 +31,8 @@ def extract_identifier(field: Field, ontology_type: str) -> Identifiable | None:
     Returns None if there is no ǂ0, if repeated ǂ0 values disagree, if the scheme
     is any other, or if an LoC identifier has an unrecognised prefix.
     """
-    values = list(
-        dict.fromkeys(normalise_identifier(v) for v in field.get_subfields("0"))
+    values = non_empty(
+        list(dict.fromkeys(normalise_identifier(v) for v in field.get_subfields("0")))
     )
     if not values:
         return None
