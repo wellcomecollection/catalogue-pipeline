@@ -397,8 +397,8 @@ def mock_neptune_get_path_identifier_works_response(
 ) -> None:
     add_neptune_mock_response(
         expected_query="""UNWIND $ids AS id
-            MATCH (w:Work)-[:HAS_PATH_IDENTIFIER]->(n:PathIdentifier {`~id`: id})
-            RETURN id(n) AS id, collect(id(w)) AS work_ids
+            MATCH (s:Work)-[:HAS_PATH_IDENTIFIER]->(n:PathIdentifier {`~id`: id})
+            RETURN id(n) AS id, collect(id(s)) AS source_ids
         """,
         expected_params={"ids": node_ids},
         mock_results=results,
@@ -488,8 +488,8 @@ def test_work_identifiers_moved_record_removes_stale_parent_edge() -> None:
     mock_neptune_get_path_identifier_works_response(
         ["axiell:A", "axiell:B"],
         results=[
-            {"id": "axiell:A", "work_ids": ["moved001"]},
-            {"id": "axiell:B", "work_ids": ["rootwork"]},
+            {"id": "axiell:A", "source_ids": ["moved001"]},
+            {"id": "axiell:B", "source_ids": ["rootwork"]},
         ],
     )
     edges_to_remove = [
@@ -596,7 +596,7 @@ def test_work_identifiers_shared_node_keeps_edges_of_works_outside_window(
         results=[
             {
                 "id": "axiell:S",
-                "work_ids": ["inwind02", "inwindow", "outside1", "outside2"],
+                "source_ids": ["inwind02", "inwindow", "outside1", "outside2"],
             }
         ],
     )
@@ -669,7 +669,7 @@ def test_work_identifiers_shared_node_across_batches(
     )
     mock_neptune_get_path_identifier_works_response(
         ["axiell:S"],
-        results=[{"id": "axiell:S", "work_ids": ["inwind02", "inwindow"]}],
+        results=[{"id": "axiell:S", "source_ids": ["inwind02", "inwindow"]}],
     )
     # The existing-ids mock matches its exact ID list, so a repeated yield would fail here
     edges_to_remove = ["HAS_PARENT:axiell:S-->axiell:OLD"]
@@ -695,7 +695,7 @@ def test_work_identifiers_parent_edge_safety_threshold() -> None:
         results=[{"id": "axiell:A", "edge_ids": ["HAS_PARENT:axiell:A-->axiell:OLD"]}],
     )
     mock_neptune_get_path_identifier_works_response(
-        ["axiell:A"], results=[{"id": "axiell:A", "work_ids": ["moved001"]}]
+        ["axiell:A"], results=[{"id": "axiell:A", "source_ids": ["moved001"]}]
     )
     edges_to_remove = ["HAS_PARENT:axiell:A-->axiell:OLD"]
     # One of four path identifier HAS_PARENT edges, although tiny against HAS_PATH_IDENTIFIER

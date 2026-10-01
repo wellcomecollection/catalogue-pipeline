@@ -76,7 +76,9 @@ class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemoverIncremental):
         )
         validate_fractional_change(
             modified_size=parent_edge_count,
-            total_size=self.neptune_client.get_path_identifier_parent_edge_count(),
+            total_size=self.neptune_client.get_total_edge_count(
+                "HAS_PARENT", source_label="PathIdentifier"
+            ),
             force_pass=force_pass,
         )
 
@@ -117,8 +119,12 @@ class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemoverIncremental):
             if work.path_identifier is not None:
                 expected_edges[work.path_identifier] |= _get_parent_edge_ids(work)
 
-        graph_edges = self.neptune_client.get_path_identifier_parent_edges(
-            expected_edges.keys()
+        # Directed and label-restricted, so children's edges and concept HAS_PARENT edges are never included
+        graph_edges = self.neptune_client.get_node_edges(
+            expected_edges.keys(),
+            edge_label="HAS_PARENT",
+            node_label="PathIdentifier",
+            outgoing_only=True,
         )
         candidates = {
             node_id: stale_edge_ids
@@ -130,8 +136,11 @@ class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemoverIncremental):
 
         # Works outside this batch or window can share a node, and their parent edges must stay
         batch_work_ids = {w.wellcome_id for w in works}
-        linked_work_ids = self.neptune_client.get_path_identifier_work_ids(
-            candidates.keys()
+        linked_work_ids = self.neptune_client.get_source_node_ids(
+            candidates.keys(),
+            edge_label="HAS_PATH_IDENTIFIER",
+            node_label="PathIdentifier",
+            source_label="Work",
         )
         other_work_ids = set().union(*linked_work_ids.values()) - batch_work_ids
         for work in self._get_works_by_id(other_work_ids):
