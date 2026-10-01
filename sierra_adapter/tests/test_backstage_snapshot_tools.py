@@ -13,6 +13,7 @@ from sierra_vhs_snapshot import (
     BUCKET,
     TABLE_NAME,
     changed_marc_tags,
+    iter_snapshot_batches,
     iter_snapshot_rows,
     read_id_file,
 )
@@ -275,3 +276,25 @@ def test_cli_defaults_to_dry_run(aws, tmp_path, monkeypatch):
     assert _row(dynamodb) == before_row
     assert _keys(s3) == before_keys
     assert not output.exists()
+
+
+def test_iter_snapshot_batches_bounds_batch_size(tmp_path):
+    path = tmp_path / "snap.parquet"
+    pq.write_table(pa.table({"id": ["1", "2", "3"], "content": ["a", "b", "c"]}), path)
+    batches = list(iter_snapshot_batches(pq.ParquetFile(path), ["1", "2", "3"], 2))
+    assert [len(b) for b in batches] == [2, 1]
+
+
+def test_run_from_snapshot_refuses_ids_missing_from_snapshot(aws, tmp_path):
+    dynamodb, s3 = aws
+    path = tmp_path / "snap.parquet"
+    pq.write_table(pa.table({"id": [ID], "content": [json.dumps(SNAPSHOT_BODY)]}), path)
+    before = _keys(s3)
+    plans = restore.run_from_snapshot(
+        ["9999999", ID], pq.ParquetFile(path), dynamodb, s3, execute=False
+    )
+    assert [(p.id, p.outcome) for p in plans] == [
+        ("9999999", restore.REFUSED),
+        (ID, restore.RESTORE),
+    ]
+    assert _keys(s3) == before

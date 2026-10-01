@@ -43,7 +43,7 @@ from sierra_vhs_snapshot import (
     TABLE_NAME,
     bib_data,
     changed_marc_tags,
-    iter_snapshot_rows,
+    iter_snapshot_batches,
     open_snapshot,
     read_snapshot_index,
     write_id_file,
@@ -156,12 +156,8 @@ def classify(
     old S3 key, because prune_sierra_adapter_s3_entries.py deletes superseded
     versions from the bucket.
     """
-    snapshot_bodies = {
-        row["id"]: row["content"]
-        for row in iter_snapshot_rows(snapshot_file, changed, ["content"])
-    }
 
-    def fetch(record_id: str) -> dict:
+    def fetch(record_id: str, snapshot_bodies: dict[str, str | None]) -> dict:
         row = live_rows[record_id]
         result = {
             "id": record_id,
@@ -179,8 +175,15 @@ def classify(
             result["error"] = str(error)
         return result
 
+    results: list[dict] = []
+    seen: set[str] = set()
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        return list(pool.map(fetch, changed))
+        # One batch of snapshot bodies in memory at a time.
+        for batch in iter_snapshot_batches(snapshot_file, changed):
+            results.extend(pool.map(lambda i, b=batch: fetch(i, b), batch))
+            seen |= batch.keys()
+        results.extend(fetch(i, {}) for i in changed if i not in seen)
+    return sorted(results, key=lambda r: r["id"])
 
 
 CSV_FIELDS = [

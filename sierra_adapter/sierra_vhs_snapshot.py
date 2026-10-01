@@ -78,6 +78,20 @@ def iter_snapshot_rows(
         yield from rows.to_pylist()
 
 
+def iter_snapshot_batches(
+    snapshot: pq.ParquetFile, ids: Iterable[str], batch_size: int = 5000
+) -> Iterator[dict[str, str | None]]:
+    """Yield {id: content} maps of roughly batch_size, so memory stays bounded."""
+    batch: dict[str, str | None] = {}
+    for row in iter_snapshot_rows(snapshot, ids, ["content"]):
+        batch[row["id"]] = row["content"]
+        if len(batch) >= batch_size:
+            yield batch
+            batch = {}
+    if batch:
+        yield batch
+
+
 def read_id_file(path: str) -> list[str]:
     """Read one VHS id per line, ignoring blank lines and # comments."""
     ids: list[str] = []

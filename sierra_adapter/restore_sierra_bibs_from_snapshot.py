@@ -48,7 +48,7 @@ from sierra_vhs_snapshot import (
     TABLE_NAME,
     bib_data,
     changed_marc_tags,
-    iter_snapshot_rows,
+    iter_snapshot_batches,
     open_snapshot,
     read_id_file,
     write_id_file,
@@ -232,6 +232,21 @@ def run(
         return list(pool.map(process, ids))
 
 
+def run_from_snapshot(
+    ids: list[str], snapshot_file, dynamodb, s3, **kwargs
+) -> list[Plan]:
+    """run() over the snapshot one batch at a time, so bodies are never all in memory."""
+    plans: dict[str, Plan] = {}
+    for batch in iter_snapshot_batches(snapshot_file, ids):
+        for plan in run(list(batch), batch, dynamodb, s3, **kwargs):
+            plan.new_body = None
+            plans[plan.id] = plan
+    for record_id in ids:
+        if record_id not in plans:
+            plans[record_id] = plan_one(record_id, None, None, None)
+    return [plans[record_id] for record_id in ids]
+
+
 def describe(plan: Plan) -> str:
     if plan.outcome in (RESTORE, RESTORED):
         tags = " ".join(plan.changed_tags[:12])
@@ -289,17 +304,12 @@ def main(ids_file, snapshot, output, dry_run, yes, limit, workers, table):
     s3 = session.client("s3", config=config)
 
     click.echo(f"Reading {len(ids):,} id(s) from {snapshot}", err=True)
-    snapshot_bodies: dict[str, str | None] = {
-        row["id"]: row["content"]
-        for row in iter_snapshot_rows(
-            open_snapshot(snapshot, session), ids, ["content"]
-        )
-    }
+    snapshot_file = open_snapshot(snapshot, session)
 
     # Plan everything read-only first, so the operator sees the whole picture
     # before confirming. Execute mode re-reads each row before it writes.
-    plans = run(
-        ids, snapshot_bodies, dynamodb, s3, table=table, execute=False, workers=workers
+    plans = run_from_snapshot(
+        ids, snapshot_file, dynamodb, s3, table=table, execute=False, workers=workers
     )
     for plan in plans:
         click.echo(describe(plan))
@@ -325,9 +335,9 @@ def main(ids_file, snapshot, output, dry_run, yes, limit, workers, table):
         )
 
     to_restore = [p.id for p in plans if p.outcome == RESTORE]
-    results = run(
+    results = run_from_snapshot(
         to_restore,
-        snapshot_bodies,
+        snapshot_file,
         dynamodb,
         s3,
         table=table,
