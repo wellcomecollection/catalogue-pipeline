@@ -289,8 +289,9 @@ class NeptuneClient:
         """Removes all edges with the specified ids from the graph."""
         return self.delete_entities_by_id(ids, "edges")
 
-    def get_total_edge_count(self, label: str) -> int:
-        query = f"MATCH ()-[e:{label}]->() RETURN count(e) AS count"
+    def get_total_edge_count(self, label: str, source_label: str | None = None) -> int:
+        source = f":{source_label}" if source_label else ""
+        query = f"MATCH ({source})-[e:{label}]->() RETURN count(e) AS count"
         edge_count: int = self.run_open_cypher_query(query)[0]["count"]
         return edge_count
 
@@ -337,14 +338,39 @@ class NeptuneClient:
             yield item["id"]
 
     def get_node_edges(
-        self, node_ids: Iterable[str], edge_label: str
+        self,
+        node_ids: Iterable[str],
+        edge_label: str,
+        node_label: str | None = None,
+        outgoing_only: bool = False,
     ) -> dict[str, set[str]]:
         """Return a dictionary mapping each ID to a set of edge IDs of the specified edge type."""
+        node = f":{node_label}" if node_label else ""
+        arrow = ">" if outgoing_only else ""
         query = f"""
             UNWIND $ids AS id
-            MATCH (n {{`~id`: id}})-[e:{edge_label}]-()
+            MATCH (n{node} {{`~id`: id}})-[e:{edge_label}]-{arrow}()
             RETURN id(n) AS id, collect(id(e)) AS edge_ids
         """
 
         result = self.run_parallel_query(node_ids, query)
         return {node_id: set(item["edge_ids"]) for node_id, item in result.items()}
+
+    def get_source_node_ids(
+        self,
+        node_ids: Iterable[str],
+        edge_label: str,
+        node_label: str | None = None,
+        source_label: str | None = None,
+    ) -> dict[str, set[str]]:
+        """Return a dictionary mapping each ID to the IDs of the nodes with an edge of the specified type into it."""
+        node = f":{node_label}" if node_label else ""
+        source = f":{source_label}" if source_label else ""
+        query = f"""
+            UNWIND $ids AS id
+            MATCH (s{source})-[:{edge_label}]->(n{node} {{`~id`: id}})
+            RETURN id(n) AS id, collect(id(s)) AS source_ids
+        """
+
+        result = self.run_parallel_query(node_ids, query)
+        return {node_id: set(item["source_ids"]) for node_id, item in result.items()}

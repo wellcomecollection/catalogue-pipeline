@@ -5,6 +5,7 @@ import pydantic
 import pytest
 from freezegun import freeze_time
 
+import graph.removers.catalogue_work_identifiers_remover as remover_module
 from graph.steps.graph_remover_incremental import lambda_handler
 from tests.mocks import (
     MockCloudwatchClient,
@@ -79,10 +80,12 @@ def mock_neptune_delete_edges_response(edge_ids: list[str]) -> None:
     )
 
 
-def mock_neptune_get_edges_response(node_ids: list[str], results: list[dict]) -> None:
+def mock_neptune_get_edges_response(
+    node_ids: list[str], results: list[dict], edge_label: str = "HAS_CONCEPT"
+) -> None:
     add_neptune_mock_response(
-        expected_query="""UNWIND $ids AS id
-            MATCH (n {`~id`: id})-[e:HAS_CONCEPT]-()
+        expected_query=f"""UNWIND $ids AS id
+            MATCH (n {{`~id`: id}})-[e:{edge_label}]-()
             RETURN id(n) AS id, collect(id(e)) AS edge_ids
         """,
         expected_params={"ids": node_ids},
@@ -338,3 +341,372 @@ def test_graph_remover_incremental_id_mode() -> None:
             ]
         }
     }
+
+
+WORK_IDENTIFIERS_WINDOW = {"end_time": "2025-01-01T12:00"}
+IN_WINDOW = "2025-01-01T11:50:00Z"
+OUTSIDE_WINDOW = "2024-12-01T00:00:00Z"
+
+
+def add_path_work(
+    work_id: str, path: str, identifier: str, merged_time: str | None = IN_WINDOW
+) -> None:
+    MockElasticsearchClient.index(
+        "works-denormalised-dev",
+        work_id,
+        {
+            "type": "Visible",
+            "state": {
+                "canonicalId": work_id,
+                "sourceIdentifier": {
+                    "identifierType": {"id": "axiell-priref"},
+                    "ontologyType": "Work",
+                    "value": f"priref-{work_id}",
+                },
+                **({"mergedTime": merged_time} if merged_time else {}),
+            },
+            "data": {
+                "collectionPath": {"path": path},
+                "otherIdentifiers": [
+                    {
+                        "identifierType": {"id": "calm-altref-no"},
+                        "ontologyType": "Work",
+                        "value": identifier,
+                    }
+                ],
+            },
+        },
+    )
+
+
+def mock_neptune_get_parent_edges_response(
+    node_ids: list[str], results: list[dict]
+) -> None:
+    add_neptune_mock_response(
+        expected_query="""UNWIND $ids AS id
+            MATCH (n:PathIdentifier {`~id`: id})-[e:HAS_PARENT]->()
+            RETURN id(n) AS id, collect(id(e)) AS edge_ids
+        """,
+        expected_params={"ids": node_ids},
+        mock_results=results,
+    )
+
+
+def mock_neptune_get_path_identifier_works_response(
+    node_ids: list[str], results: list[dict]
+) -> None:
+    add_neptune_mock_response(
+        expected_query="""UNWIND $ids AS id
+            MATCH (s:Work)-[:HAS_PATH_IDENTIFIER]->(n:PathIdentifier {`~id`: id})
+            RETURN id(n) AS id, collect(id(s)) AS source_ids
+        """,
+        expected_params={"ids": node_ids},
+        mock_results=results,
+    )
+
+
+def mock_neptune_get_path_identifier_parent_edge_count(count: int) -> None:
+    add_neptune_mock_response(
+        expected_query="MATCH (:PathIdentifier)-[e:HAS_PARENT]->() RETURN count(e) AS count",
+        expected_params=None,
+        mock_results=[{"count": count}],
+    )
+
+
+def mock_work_identifiers_edge_removal(
+    edges_to_remove: list[str],
+    has_path_identifier_count: int = 1000,
+    has_parent_count: int = 1000,
+) -> None:
+    mock_neptune_get_total_edge_count("HAS_PATH_IDENTIFIER", has_path_identifier_count)
+    mock_neptune_get_path_identifier_parent_edge_count(has_parent_count)
+    mock_neptune_get_existing_edges_response(sorted(edges_to_remove))
+    mock_neptune_delete_edges_response(sorted(edges_to_remove))
+    mock_neptune_secrets("dev")
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
+
+
+def run_work_identifiers_edge_remover(force_pass: bool = False) -> None:
+    MockElasticsearchClient.apply_range_filters = True
+    lambda_handler(
+        {
+            "transformer_type": "catalogue_work_identifiers",
+            "entity_type": "edges",
+            "pipeline_date": "dev",
+            "graph_date": "dev",
+            "window": WORK_IDENTIFIERS_WINDOW,
+            "force_pass": force_pass,
+        },
+        None,
+    )
+
+
+def check_work_identifiers_deleted_edges(expected_ids: set[str]) -> None:
+    s3_uri = get_remover_s3_uri(
+        "dev",
+        "dev",
+        "windows/20250101T1145-20250101T1200/deleted_ids/catalogue_work_identifiers__edges.parquet",
+    )
+    with MockSmartOpen.open(s3_uri, "rb") as f:
+        df = pl.read_parquet(f)
+        ids = pl.Series(df.select(pl.first())).to_list() if len(df.columns) else []
+        assert set(ids) == expected_ids
+
+
+def test_work_identifiers_moved_record_removes_stale_parent_edge() -> None:
+    add_path_work("moved001", "axiell:NEW/axiell:A", "A")
+    add_path_work("rootwork", "axiell:B", "B")
+
+    mock_neptune_get_edges_response(
+        ["moved001", "rootwork"],
+        edge_label="HAS_PATH_IDENTIFIER",
+        results=[
+            {
+                "id": "moved001",
+                "edge_ids": [
+                    "HAS_PATH_IDENTIFIER:moved001-->axiell:A",
+                    "HAS_PATH_IDENTIFIER:moved001-->axiell:A-OLD",
+                ],
+            },
+            {"id": "rootwork", "edge_ids": ["HAS_PATH_IDENTIFIER:rootwork-->axiell:B"]},
+        ],
+    )
+    mock_neptune_get_parent_edges_response(
+        ["axiell:A", "axiell:B"],
+        results=[
+            {
+                "id": "axiell:A",
+                "edge_ids": [
+                    "HAS_PARENT:axiell:A-->axiell:NEW",
+                    "HAS_PARENT:axiell:A-->axiell:OLD",
+                ],
+            },
+            # A record with no 982 is a root, so any parent edge it has is stale
+            {"id": "axiell:B", "edge_ids": ["HAS_PARENT:axiell:B-->axiell:X"]},
+        ],
+    )
+    mock_neptune_get_path_identifier_works_response(
+        ["axiell:A", "axiell:B"],
+        results=[
+            {"id": "axiell:A", "source_ids": ["moved001"]},
+            {"id": "axiell:B", "source_ids": ["rootwork"]},
+        ],
+    )
+    edges_to_remove = [
+        "HAS_PATH_IDENTIFIER:moved001-->axiell:A-OLD",
+        "HAS_PARENT:axiell:A-->axiell:OLD",
+        "HAS_PARENT:axiell:B-->axiell:X",
+    ]
+    mock_work_identifiers_edge_removal(edges_to_remove)
+
+    run_work_identifiers_edge_remover()
+
+    check_work_identifiers_deleted_edges(set(edges_to_remove))
+
+
+def test_work_identifiers_window_excludes_works_without_merged_time() -> None:
+    # An Elasticsearch range query never matches a document missing the field
+    add_path_work("refno001", "PP/ABC", "PP/ABC")
+    add_path_work("notime01", "PP/XYZ", "PP/XYZ", merged_time=None)
+
+    mock_neptune_get_edges_response(
+        ["refno001"],
+        edge_label="HAS_PATH_IDENTIFIER",
+        results=[
+            {"id": "refno001", "edge_ids": ["HAS_PATH_IDENTIFIER:refno001-->PP/ABC"]}
+        ],
+    )
+    mock_neptune_get_parent_edges_response(
+        ["PP/ABC"], results=[{"id": "PP/ABC", "edge_ids": ["HAS_PARENT:PP/ABC-->PP"]}]
+    )
+    mock_work_identifiers_edge_removal([])
+
+    run_work_identifiers_edge_remover()
+
+    check_work_identifiers_deleted_edges(set())
+
+
+def test_work_identifiers_unchanged_records_remove_nothing() -> None:
+    # RefNo mode: each path matches the work's RefNo, so its parent is the path minus the last fragment
+    add_path_work("refno001", "PP/ABC", "PP/ABC")
+    add_path_work("refno002", "PP/ABC/1", "PP/ABC/1")
+
+    mock_neptune_get_edges_response(
+        ["refno001", "refno002"],
+        edge_label="HAS_PATH_IDENTIFIER",
+        results=[
+            {"id": "refno001", "edge_ids": ["HAS_PATH_IDENTIFIER:refno001-->PP/ABC"]},
+            {
+                "id": "refno002",
+                "edge_ids": ["HAS_PATH_IDENTIFIER:refno002-->PP/ABC/1"],
+            },
+        ],
+    )
+    mock_neptune_get_parent_edges_response(
+        ["PP/ABC", "PP/ABC/1"],
+        results=[
+            {"id": "PP/ABC", "edge_ids": ["HAS_PARENT:PP/ABC-->PP"]},
+            {"id": "PP/ABC/1", "edge_ids": ["HAS_PARENT:PP/ABC/1-->PP/ABC"]},
+        ],
+    )
+    # No work lookup is mocked, so the remover must not look for other works sharing these nodes
+    mock_work_identifiers_edge_removal([])
+
+    run_work_identifiers_edge_remover()
+
+    check_work_identifiers_deleted_edges(set())
+
+
+def test_work_identifiers_shared_node_keeps_edges_of_works_outside_window(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(remover_module, "WORK_LOOKUP_BATCH_SIZE", 1)
+    add_path_work("inwindow", "axiell:NEW/axiell:S", "S")
+    add_path_work("inwind02", "axiell:NEW2/axiell:S", "S")
+    # Shares node axiell:S but was last merged outside the window
+    add_path_work("outside1", "axiell:OTHER/axiell:S", "S", merged_time=OUTSIDE_WINDOW)
+    # Still linked to axiell:S in the graph, but its current path points elsewhere
+    add_path_work("outside2", "axiell:Z/axiell:T", "T", merged_time=OUTSIDE_WINDOW)
+
+    mock_neptune_get_edges_response(
+        ["inwind02", "inwindow"],
+        edge_label="HAS_PATH_IDENTIFIER",
+        results=[
+            {"id": "inwindow", "edge_ids": ["HAS_PATH_IDENTIFIER:inwindow-->axiell:S"]},
+            {"id": "inwind02", "edge_ids": ["HAS_PATH_IDENTIFIER:inwind02-->axiell:S"]},
+        ],
+    )
+    mock_neptune_get_parent_edges_response(
+        ["axiell:S"],
+        results=[
+            {
+                "id": "axiell:S",
+                "edge_ids": [
+                    "HAS_PARENT:axiell:S-->axiell:NEW",
+                    "HAS_PARENT:axiell:S-->axiell:NEW2",
+                    "HAS_PARENT:axiell:S-->axiell:OTHER",
+                    "HAS_PARENT:axiell:S-->axiell:Z",
+                    "HAS_PARENT:axiell:S-->axiell:OLD",
+                ],
+            }
+        ],
+    )
+    mock_neptune_get_path_identifier_works_response(
+        ["axiell:S"],
+        results=[
+            {
+                "id": "axiell:S",
+                "source_ids": ["inwind02", "inwindow", "outside1", "outside2"],
+            }
+        ],
+    )
+    edges_to_remove = [
+        "HAS_PARENT:axiell:S-->axiell:OLD",
+        "HAS_PARENT:axiell:S-->axiell:Z",
+    ]
+    mock_work_identifiers_edge_removal(edges_to_remove)
+
+    run_work_identifiers_edge_remover()
+
+    check_work_identifiers_deleted_edges(set(edges_to_remove))
+    # Works sharing the node are looked up by ID, one chunk at a time, without the window filter
+    # Each lookup pages through search_after, so repeated queries are collapsed
+    distinct_queries: list[dict] = []
+    for query in MockElasticsearchClient.queries:
+        if query not in distinct_queries:
+            distinct_queries.append(query)
+    assert distinct_queries[-2:] == [
+        {
+            "bool": {
+                "must": [
+                    {
+                        "bool": {
+                            "must": [
+                                {"match": {"type": "Visible"}},
+                                {"exists": {"field": "data.collectionPath.path"}},
+                            ]
+                        }
+                    },
+                    {"ids": {"values": [work_id]}},
+                ]
+            }
+        }
+        for work_id in ["outside1", "outside2"]
+    ]
+
+
+def test_work_identifiers_shared_node_across_batches(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # One work per batch, so each batch must keep the parent edge the other batch's work implies
+    monkeypatch.setattr(remover_module, "BATCH_SIZE", 1)
+    add_path_work("inwindow", "axiell:NEW/axiell:S", "S")
+    add_path_work("inwind02", "axiell:NEW2/axiell:S", "S")
+
+    for work_id in ["inwindow", "inwind02"]:
+        mock_neptune_get_edges_response(
+            [work_id],
+            edge_label="HAS_PATH_IDENTIFIER",
+            results=[
+                {
+                    "id": work_id,
+                    "edge_ids": [f"HAS_PATH_IDENTIFIER:{work_id}-->axiell:S"],
+                }
+            ],
+        )
+    mock_neptune_get_parent_edges_response(
+        ["axiell:S"],
+        results=[
+            {
+                "id": "axiell:S",
+                "edge_ids": [
+                    "HAS_PARENT:axiell:S-->axiell:NEW",
+                    "HAS_PARENT:axiell:S-->axiell:NEW2",
+                    "HAS_PARENT:axiell:S-->axiell:OLD",
+                ],
+            }
+        ],
+    )
+    mock_neptune_get_path_identifier_works_response(
+        ["axiell:S"],
+        results=[{"id": "axiell:S", "source_ids": ["inwind02", "inwindow"]}],
+    )
+    # The existing-ids mock matches its exact ID list, so a repeated yield would fail here
+    edges_to_remove = ["HAS_PARENT:axiell:S-->axiell:OLD"]
+    mock_work_identifiers_edge_removal(edges_to_remove)
+
+    run_work_identifiers_edge_remover()
+
+    check_work_identifiers_deleted_edges(set(edges_to_remove))
+
+
+def test_work_identifiers_parent_edge_safety_threshold() -> None:
+    add_path_work("moved001", "axiell:NEW/axiell:A", "A")
+
+    mock_neptune_get_edges_response(
+        ["moved001"],
+        edge_label="HAS_PATH_IDENTIFIER",
+        results=[
+            {"id": "moved001", "edge_ids": ["HAS_PATH_IDENTIFIER:moved001-->axiell:A"]}
+        ],
+    )
+    mock_neptune_get_parent_edges_response(
+        ["axiell:A"],
+        results=[{"id": "axiell:A", "edge_ids": ["HAS_PARENT:axiell:A-->axiell:OLD"]}],
+    )
+    mock_neptune_get_path_identifier_works_response(
+        ["axiell:A"], results=[{"id": "axiell:A", "source_ids": ["moved001"]}]
+    )
+    edges_to_remove = ["HAS_PARENT:axiell:A-->axiell:OLD"]
+    # One of four path identifier HAS_PARENT edges, although tiny against HAS_PATH_IDENTIFIER
+    mock_work_identifiers_edge_removal(
+        edges_to_remove, has_path_identifier_count=100_000, has_parent_count=4
+    )
+
+    with pytest.raises(
+        ValueError, match="Fractional change 0.25 exceeds threshold 0.2!"
+    ):
+        run_work_identifiers_edge_remover()
+
+    run_work_identifiers_edge_remover(force_pass=True)
+    check_work_identifiers_deleted_edges(set(edges_to_remove))
