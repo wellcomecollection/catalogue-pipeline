@@ -59,17 +59,9 @@ def format_field(field: Field) -> SourceIdentifier | None:
         return None
     prefix, rpar, id_value = a_subfield[1:].partition(")")
     if not rpar:
-        logger.error("Identifier without namespace prefix", identifier_value=a_subfield)
         return None
     identifier_type = which_identifier_type(prefix, id_value)
     if identifier_type is None:
-        # Do not warn about known ignored prefixes. We don't have a use for them
-        # and logging them would clutter the logs.
-        if prefix not in IGNORED_PREFIXES:
-            logger.warning(
-                "Unknown identifier prefix", prefix=prefix, identifier_value=a_subfield
-            )
-
         return None
 
     # Axiell records always have a redundant "Acc" prefix, even when it is not followed by a value.
