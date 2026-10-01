@@ -2,9 +2,10 @@ module "pipeline" {
   source = "../modules/pipeline_new"
 
   # Builds Axiell archive trees from the 982 parent link (wellcomecollection/platform#6725).
-  # Everything starts off; the reindex apply turns these on once the graph ontology is loaded.
+  # Listens to the reindexer at normal sizing for the partial reindex; the full reindex
+  # also scales up tasks and the matcher DB.
   reindexing_state = {
-    listen_to_reindexer = false
+    listen_to_reindexer = true
     scale_up_tasks      = false
     scale_up_matcher_db = false
   }
@@ -23,11 +24,11 @@ module "pipeline" {
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
-  enable_adapter_transformer_trigger           = false
+  enable_adapter_transformer_trigger           = true
   disable_calm_transformer_topic_subscriptions = true
-  enable_id_minter_schedule                    = false
-  enable_graph_pipeline_schedule               = false
-  enable_image_inferrer_schedule               = false
+  enable_id_minter_schedule                    = true
+  enable_graph_pipeline_schedule               = true
+  enable_image_inferrer_schedule               = true
 
   axiell_collection_path_source = "part_of"
 
