@@ -12,8 +12,11 @@ module "id_minter_rds" {
 
   master_username = data.aws_ssm_parameter.rds_username.value
 
-  # No Identifiers API environment reads this registry; both read the 2026-07-03 one.
-  data_api_consumer_role_arns = []
+  # The stage Identifiers API reads this registry temporarily, so that its load
+  # test (wellcomecollection/platform#6536) does not load the production one.
+  data_api_consumer_role_arns = [
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-stage",
+  ]
 }
 
 module "id_minter_rds_2026_07_03" {
