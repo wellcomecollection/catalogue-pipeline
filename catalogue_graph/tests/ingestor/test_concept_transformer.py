@@ -465,8 +465,8 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
         query=ConceptQuery(
             id="id",
             identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
-            label="MeSH label",
-            alternativeLabels=[],
+            label="Wellcome Label",
+            alternativeLabels=["MeSH label"],
             type="Person",
         ),
         display=ConceptDisplay(
@@ -481,9 +481,9 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
                     ),
                 )
             ],
-            label="MeSH label",
+            label="Wellcome Label",
             displayLabel="Wellcome Label",
-            alternativeLabels=[],
+            alternativeLabels=["MeSH label"],
             description=ConceptDescription(
                 text="Wellcome Description",
                 sourceLabel="weco-authority",
