@@ -1,7 +1,7 @@
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.label_subdivisions import build_concept
 from adapters.transformers.marc.common import non_empty_subfields
+from adapters.transformers.marc.concepts import build_concept
 from models.pipeline.concept import Subject
 
 
