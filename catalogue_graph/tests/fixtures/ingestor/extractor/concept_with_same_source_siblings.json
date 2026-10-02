@@ -1,0 +1,115 @@
+{
+  "concept": {
+    "~id": "hv3ueb5k",
+    "~labels": [
+      "Concept"
+    ],
+    "~properties": {
+      "id": "hv3ueb5k",
+      "label": "Caricatures",
+      "source": "nlm-mesh"
+    }
+  },
+  "source_concepts": [
+    {
+      "~id": "sh85020238",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "sh85020238",
+        "source": "lc-subjects",
+        "label": "Caricatures and cartoons"
+      }
+    },
+    {
+      "~id": "D019493",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "D019493",
+        "source": "nlm-mesh",
+        "label": "Cartoon",
+        "alternative_labels": "Cartoons"
+      }
+    },
+    {
+      "~id": "D019492",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "D019492",
+        "source": "nlm-mesh",
+        "label": "Caricature",
+        "alternative_labels": "Caricatures"
+      }
+    },
+    {
+      "~id": "Q1",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "Q1",
+        "source": "wikidata",
+        "label": "Wikidata label without description"
+      }
+    },
+    {
+      "~id": "Q2",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "Q2",
+        "source": "wikidata",
+        "label": "Wikidata label",
+        "description": "Wikidata description"
+      }
+    },
+    {
+      "~id": "weco0001",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "weco0001",
+        "source": "weco-authority",
+        "label": ""
+      }
+    }
+  ],
+  "linked_source_concepts": [
+    {
+      "~id": "sh85020238",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "sh85020238",
+        "source": "lc-subjects",
+        "label": "Caricatures and cartoons"
+      }
+    },
+    {
+      "~id": "D019492",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "D019492",
+        "source": "nlm-mesh",
+        "label": "Caricature",
+        "alternative_labels": "Caricatures"
+      }
+    }
+  ],
+  "same_as": [
+    "e5drba69"
+  ],
+  "types": [
+    "Genre"
+  ]
+}
