@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 
+from adapters.transformers.utils.text_utils import trim_trailing_period
 from models.events import BasePipelineEvent, BulkLoaderEvent
 from utils.aws import get_csv_from_s3
 from utils.types import ConceptSource, ConceptType, TransformerType
@@ -91,16 +92,20 @@ class IdLabelChecker:
     def _add_label_mapping(
         self, label: str, source_id: str, concept_source: ConceptSource
     ) -> None:
-        self.labels_to_ids[concept_source][label].append(source_id)
+        self.labels_to_ids[concept_source][self._normalise_label(label)].append(
+            source_id
+        )
 
     def _add_alternative_label_mappings(
         self, labels: list[str], source_id: str, concept_source: ConceptSource
     ) -> None:
-        for label in labels:
+        # Dedupe so "X" and "X." on one record do not make the key ambiguous.
+        for label in dict.fromkeys(self._normalise_label(label) for label in labels):
             self.alternative_labels_to_ids[concept_source][label].append(source_id)
 
     def _normalise_label(self, label: str) -> str:
-        return label.lower()
+        # Matches the label-derived id normalisation, so "X" and "X." share a key.
+        return trim_trailing_period(label.lower())
 
     def get_id(self, label: str, concept_type: ConceptType) -> str | None:
         """

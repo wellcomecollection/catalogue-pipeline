@@ -2,6 +2,7 @@ from collections.abc import Generator
 
 from elasticsearch import Elasticsearch
 
+from adapters.transformers.utils.text_utils import trim_trailing_period
 from graph.sources.catalogue.concepts_source import (
     CatalogueConceptsSource,
     ExtractedWorkConcept,
@@ -36,9 +37,14 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
 
         self.id_lookup.add(raw_concept.wellcome_id)
 
+        label = raw_concept.label
+        # Works sharing a label-derived id can differ by a trailing stop; strip it so the node label is stable.
+        if raw_concept.source == "label-derived":
+            label = trim_trailing_period(label)
+
         return Concept(
             id=raw_concept.wellcome_id,
-            label=raw_concept.label,
+            label=label,
             source=raw_concept.source,
         )
 

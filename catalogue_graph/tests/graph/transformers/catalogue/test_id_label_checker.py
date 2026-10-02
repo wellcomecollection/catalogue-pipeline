@@ -106,3 +106,26 @@ def test_id_label_checker_never_matches_weco_by_label() -> None:
     assert len(id_label_checker.labels_to_ids["weco-authority"]) == 0
     assert len(id_label_checker.alternative_labels_to_ids["weco-authority"]) == 0
     assert len(id_label_checker.ids_to_labels["weco-authority"]) == 3
+
+
+def test_id_label_checker_ignores_trailing_stop() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # LoC label without a stop, catalogue label with one
+    assert id_label_checker.get_id("Wesley, John, 1703-1791.", "Person") == "n79060434"
+    assert id_label_checker.get_id("Wesley, John, 1703-1791", "Person") == "n79060434"
+
+    # LoC label with a stop, catalogue label without one
+    assert id_label_checker.get_id("Fossil tacos", "Concept") == "sh00000076"
+    assert id_label_checker.get_id("Fossil tacos.", "Concept") == "sh00000076"
+
+    # Alternative labels differing only by a stop on one record are not ambiguous
+    assert id_label_checker.get_id("Taco fossils", "Concept") == "sh00000076"
+
+
+def test_id_label_checker_keeps_ellipsis() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    assert id_label_checker.get_id("Tacos and so on...", "Concept") == "sh00000077"
+    assert id_label_checker.get_id("Tacos and so on", "Concept") is None
+    assert id_label_checker.get_id("Tacos and so on.", "Concept") is None
