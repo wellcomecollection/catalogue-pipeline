@@ -36,6 +36,8 @@ def _item_record(
     return (
         "<record>"
         "<controlfield tag='001'>guid-1</controlfield>"
+        # 980 $a is the harvest flag; without it nothing is selected.
+        "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
         f"{fields}"
@@ -125,6 +127,8 @@ def _record_with_locations(
     return (
         "<record>"
         "<controlfield tag='001'>guid-1</controlfield>"
+        # 980 $a is the harvest flag; without it nothing is selected.
+        "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
         f"{fields}"
@@ -241,6 +245,8 @@ def _record_with_access(category: str | None) -> str:
     return (
         "<record>"
         "<controlfield tag='001'>guid-1</controlfield>"
+        # 980 $a is the harvest flag; without it nothing is selected.
+        "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
         "<datafield tag='984'><subfield code='b'>215;HOME 1</subfield></datafield>"
@@ -307,13 +313,18 @@ def _status_from(category: str | None) -> str:
     [
         ("OPEN", "Available"),
         ("OPENWITHADVISORY", "Available"),
-        ("RESTRICTED", "Restricted"),
+        # Available, not Restricted: restricted material can be requested
+        # online, and the reader signs to accept the viewing conditions before
+        # it is handed over.
+        ("RESTRICTED", "Available"),
         ("PERMISSIONREQUIRED", "Restricted"),
         ("SAFEGUARDED", "Restricted"),
         ("CLOSED", "Restricted"),
         ("MISSING", "Missing"),
         ("DEACCESSIONED", "Withdrawn"),
-        ("DATAISSUES", "Unavailable"),
+        # Unknown, not Unavailable: the record's data is wrong, so the item's
+        # real state has not been established.
+        ("DATAISSUES", "Unknown"),
     ],
 )
 def test_access_category_selects_the_item_status(category: str, expected: str) -> None:

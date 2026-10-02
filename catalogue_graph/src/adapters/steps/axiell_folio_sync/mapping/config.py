@@ -50,13 +50,21 @@ MATERIAL_TYPE: dict[str, str] = {
 ACCESS_ITEM_STATUS: dict[str, str] = {
     "OPEN": "Available",
     "OPENWITHADVISORY": "Available",
-    "RESTRICTED": "Restricted",
+    # Available, not Restricted. Restricted material is genuinely available and
+    # can be requested online. The restriction is that the reader signs to agree
+    # to the conditions of viewing restricted material, and they do that before
+    # the material is handed over, so it does not affect whether the item can be
+    # requested or produced.
+    "RESTRICTED": "Available",
     "PERMISSIONREQUIRED": "Restricted",
     "SAFEGUARDED": "Restricted",
     "CLOSED": "Restricted",
     "MISSING": "Missing",
     "DEACCESSIONED": "Withdrawn",
-    "DATAISSUES": "Unavailable",
+    # The record's own data is known to be wrong, so the item's real state is
+    # not known. "Unknown" says that, where "Unavailable" would assert something
+    # about the item that nobody has established.
+    "DATAISSUES": "Unknown",
 }
 
 # Fallbacks used when the MARC record carries no value for a resolved field.

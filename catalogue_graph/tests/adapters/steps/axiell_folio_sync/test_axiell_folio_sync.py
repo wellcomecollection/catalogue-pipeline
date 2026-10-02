@@ -122,15 +122,15 @@ def _run(rows: list[dict[str, Any]]) -> Any:
     )
 
 
-def test_processes_all_records_selection_gate_disabled() -> None:
-    # Selection gate is disabled ("run for all"): the record without a 980 $a harvest
-    # flag is no longer skipped — both rows are built and upserted.
+def test_skips_records_without_the_harvest_flag() -> None:
+    # The 980 $a harvest flag is the opt-in. The record that carries no flag is
+    # skipped entirely: not created, not updated, not suppressed, and not an error.
     resp = _run([_row("sel", SELECTED), _row("unsel", UNSELECTED)])
 
     assert resp.counts["total"] == 2
-    assert resp.counts["skipped"] == 0  # nothing skipped now
-    assert resp.total_successful == 2  # both planned an upsert
-    assert resp.counts["created"] == 6  # 2 records x (instance + holdings + item)
+    assert resp.counts["skipped"] == 1
+    assert resp.total_successful == 1  # only the flagged row planned an upsert
+    assert resp.counts["created"] == 3  # instance + holdings + item
     assert resp.total_errors == 0
 
 

@@ -18,6 +18,7 @@ from .config import (
     ACCESS_ITEM_STATUS,
     AXIELL_LOCATION_NOTE_PREFIX,
     DEFAULT_ITEM_STATUS,
+    HARVEST_FLAG_SPEC,
     HOLDINGS_SOURCE_FIELD,
     LOAN_TYPE_FIELD,
     LOCAL_IDENTIFIER_FIELD,
@@ -217,14 +218,26 @@ def _assemble_payloads(
 def is_selected_for_sync(xml_content: str) -> bool:
     """Whether a record should be synced to FOLIO.
 
-    True only for item-level records (MARC ``351 $c`` == "ITEM", case-insensitive);
-    everything else is skipped entirely — never created, updated or suppressed.
+    Two gates, both read from the harvested MARCXML, and both have to pass:
 
-    NOTE: the ``980 $a`` harvest-flag gate is removed for now ("run for all"), so
-    selection is item-level only. To re-enable it, add the ``980 $a`` check back
-    here and in ``select_and_build``.
+    1. the harvest flag (``980 $a``) is present and non-empty, meaning the record
+       is opted in to the FOLIO sync, and
+    2. the record is item-level (``351 $c`` == "ITEM", case-insensitive).
+
+    A record failing either is skipped entirely: never created, updated or
+    suppressed. The flag is the curator-facing opt-in, so an unflagged record is
+    not a data problem and nothing is reported for it.
     """
     root = parse_xml(xml_content)
+    return _passes_selection_gates(root)
+
+
+def _passes_selection_gates(root: Record) -> bool:
+    """The selection gates, shared by :func:`is_selected_for_sync` and
+    :func:`select_and_build` so the two can never disagree."""
+    harvest_flag = (extract(root, HARVEST_FLAG_SPEC) or "").strip()
+    if not harvest_flag:
+        return False
     record_type = (extract(root, "351$c") or "").strip().upper()
     return record_type == RECORD_TYPE_ITEM
 
@@ -237,14 +250,12 @@ def select_and_build(
 ) -> MappedPayloads | None:
     """Select and build in one pass — parses XML only once.
 
-    Returns ``None`` when the record is not item-level (MARC ``351$c`` != "ITEM").
-    Raises on malformed XML or mapping errors.
+    Returns ``None`` when the record fails either selection gate: no ``980 $a``
+    harvest flag, or not item-level. Raises on malformed XML or mapping errors.
     """
     root = parse_xml(xml_content)
 
-    # Selection gate: only sync item-level records.
-    record_type = (extract(root, "351$c") or "").strip().upper()
-    if record_type != RECORD_TYPE_ITEM:
+    if not _passes_selection_gates(root):
         return None
 
     rec = _extract_record(root, deleted=deleted)
