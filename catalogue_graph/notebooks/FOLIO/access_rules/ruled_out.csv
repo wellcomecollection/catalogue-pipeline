@@ -1,0 +1,7 @@
+kind,value,reason
+status,OpenWithAdvisory,No Sierra or FOLIO field carries it for items; whether open-shelves items should show it is an open question for Collection Information
+status,LicensedResources,Digital locations only
+method,ViewOnline,Digital locations only
+field,terms,Never set as in Sierra; everything a reader is told goes in the note
+input,suppression,Decides whether an item is shown at all; handled by item filtering in #6608 before this table
+input,ill-policy,Not set on any holdings record in the tenant; neither the Sierra rule nor the Collection Information mapping depends on it
