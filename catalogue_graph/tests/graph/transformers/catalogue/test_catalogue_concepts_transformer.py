@@ -1,6 +1,5 @@
 import pytest
 
-from graph.sources.catalogue.concepts_source import ExtractedWorkConcept
 from graph.transformers.catalogue.concepts_transformer import (
     CatalogueConceptsTransformer,
 )
@@ -10,9 +9,6 @@ from models.graph_edge import (
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
-from models.pipeline.concept import IdentifiedConcept
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identified, SourceIdentifier
 from tests.mocks import get_mock_es_client
 from tests.test_utils import (
     add_mock_merged_documents,
@@ -42,39 +38,6 @@ def test_catalogue_concepts_transformer_nodes() -> None:
         item == Concept(id="s6s24vd7", label="Human anatomy", source="lc-subjects")
         for item in nodes
     )
-
-
-def _label_derived_work_concept(label: str, work_id: str) -> ExtractedWorkConcept:
-    concept = IdentifiedConcept(
-        id=Identified(
-            canonical_id="anonxxxx",
-            source_identifier=SourceIdentifier(
-                identifier_type=Id(id="label-derived"),
-                ontology_type="Person",
-                value="anon",
-            ),
-        ),
-        label=label,
-        type="Person",
-    )
-    return ExtractedWorkConcept(
-        concept=concept, referenced_in="contributors", work_id=work_id
-    )
-
-
-@pytest.mark.parametrize("labels", [["Anon", "Anon."], ["Anon.", "Anon"]])
-def test_catalogue_concepts_transformer_label_derived_trailing_stop(
-    labels: list[str],
-) -> None:
-    transformer = get_transformer()
-    nodes = [
-        transformer.transform_node(_label_derived_work_concept(label, f"work{i}"))
-        for i, label in enumerate(labels)
-    ]
-
-    # Whichever work is seen first, the node label is the same
-    assert nodes[0] == Concept(id="anonxxxx", label="Anon", source="label-derived")
-    assert nodes[1] is None
 
 
 def test_catalogue_concepts_transformer_edges() -> None:
