@@ -101,7 +101,7 @@ def get_priority_label(
     """
     for source in source_priority:
         if source == "label-derived":
-            if label := raw_concept.concept.properties.label:
+            if (label := raw_concept.concept.properties.label) is not None:
                 return label, source
             continue
 
