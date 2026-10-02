@@ -1,6 +1,6 @@
 # FOLIO data profile
 
-Step 3 of [folio_access_conditions_plan.md](folio_access_conditions_plan.md), for platform#6589. It profiles the FOLIO fields an access rule could read and crosswalks each migrated item to what readers are told today. The tables come from [folio_access_conditions.ipynb](folio_access_conditions.ipynb).
+It profiles the FOLIO fields an access rule could read and crosswalks each migrated item to what readers are told today. The tables come from a notebook,folio_access_conditions.ipynb, not included in this PR. 
 
 The data is a read-only pull of the production tenant (`api-wellcome.folio.ebsco.com`) taken on 2026-10-01: 478,390 items, 592,865 holdings and the reference data. The baseline is the served index `works-indexed-2026-07-03`, scrolled the same day, as described in [current_access_rules.md](current_access_rules.md).
 

@@ -1,6 +1,6 @@
 # Current access condition rules
 
-Step 1 of [folio_access_conditions_plan.md](folio_access_conditions_plan.md), for platform#6589. This is what readers are told today about whether they can request a physical item, and the rules that produce it, before any FOLIO mapping is proposed.
+This is what readers are told today about whether they can request a physical item, and the rules that produce it, before any FOLIO mapping is proposed.
 
 Volumes come from the served production index `works-indexed-2026-07-03` (named in `search-templates.json` on 2026-10-01), scrolled on 2026-10-01. Every physical item on a visible work was mapped back to the Sierra branch that produced it, using each branch's output signature (method, status and fixed note). Every item matched a branch. Counts are distinct items: 4,513 Sierra items appear on more than one work, mostly TEI manuscripts and bound-with volumes, and are counted once.
 

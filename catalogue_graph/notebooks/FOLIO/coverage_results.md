@@ -1,6 +1,6 @@
 # Coverage check results
 
-Runs the draft decision table ([access_rules/decision_table.md](access_rules/decision_table.md)) over every item in the production tenant, as pulled on 2026-10-01, and compares each outcome with what readers are told today in the served index `works-indexed-2026-07-03`. The tables come from [folio_access_coverage.ipynb](folio_access_coverage.ipynb).
+Runs the draft decision table ([access_rules/decision_table.md](access_rules/decision_table.md)) over every item in the production tenant, as pulled on 2026-10-01, and compares each outcome with what readers are told today in the served index `works-indexed-2026-07-03`. The tables come from a notebook, folio_access_coverage.ipynb, not included in this PR. 
 
 The check runs twice. The **today** run uses the tenant as it sits. The **target** run applies the changes Collection Information's mapping (`QA_Wellcome_AccessStatusMapping.xlsx`) intends but the tenant doesn't hold yet: bound-with items get the status Intellectual item, digitisation items get In process (non-requestable), the 11 closed items get the CLOSED code, and non-requestable states get the loan type "Can't circulate".
 
