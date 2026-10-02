@@ -1,6 +1,6 @@
 # Coverage check results
 
-Step 5 of [folio_access_conditions_plan.md](folio_access_conditions_plan.md), for platform#6589. It runs the draft decision table ([access_rules/decision_table.md](access_rules/decision_table.md)) over every item in the production tenant, as pulled on 2026-10-01, and compares each outcome with what readers are told today in the served index `works-indexed-2026-07-03`. The tables come from [folio_access_coverage.ipynb](folio_access_coverage.ipynb).
+Runs the draft decision table ([access_rules/decision_table.md](access_rules/decision_table.md)) over every item in the production tenant, as pulled on 2026-10-01, and compares each outcome with what readers are told today in the served index `works-indexed-2026-07-03`. The tables come from [folio_access_coverage.ipynb](folio_access_coverage.ipynb).
 
 The check runs twice. The **today** run uses the tenant as it sits. The **target** run applies the changes Collection Information's mapping (`QA_Wellcome_AccessStatusMapping.xlsx`) intends but the tenant doesn't hold yet: bound-with items get the status Intellectual item, digitisation items get In process (non-requestable), the 11 closed items get the CLOSED code, and non-requestable states get the loan type "Can't circulate".
 
@@ -61,7 +61,16 @@ The `by-appointment` deviation affects only 3 items in the tenant. Almost all of
 
 ### Unexplained
 
-4 items today, 3 in the target run. They are small enough to check one by one with Collection Information, and they don't point to a missing row.
+4 items today, 3 in the target run. All four can be requested online in Sierra today, and none points to a missing row: each comes down to the item's data in the tenant.
+
+| Sierra item | In the tenant | Table gives | Why |
+|---|---|---|---|
+| `i18578391` | Available, no statistical code, Closed stores (`sgeph`), ephemera | `fallback` | The OPAC message didn't come across in the migration, so nothing says the item is requestable. It needs the ONLINE REQUEST code. |
+| `i16104894` | Available, no statistical code, Closed stores (`sgeph`), ephemera | `fallback` | Same as above. |
+| `i21785880` | Available, ONLINE REQUEST, placeholder location `migration`, book | `fallback` | The placeholder location has no location type, so `online-request` (closed stores only) can't match. Sierra has the item in closed stores, so it needs moving to its closed-stores location. |
+| `i14744995` | Available, ONLINE REQUEST, library `bwith` ("bound in above"), book | `bound-with-interim` | FOLIO files it as bound-with, but Sierra treats it as requestable in its own right, probably through its cross-item location fallback. Whether it really is bound-with needs deciding. |
+
+In the target run, `i14744995` is no longer unexplained: with the status Intellectual item it reaches `bound-with` and moves to the decision category, alongside the 324 contained-in items, because whether it should stay requestable is the same policy question. That's why the count drops to 3.
 
 ## Rows
 

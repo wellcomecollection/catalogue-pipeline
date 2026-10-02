@@ -1,6 +1,6 @@
 # FOLIO access condition decision table
 
-Draft for platform#6589: a proposal for review and sign-off, not settled policy. It maps the state of a FOLIO item onto the access condition a reader sees, which is a method, an optional status and an optional note. Step 4 of [folio_access_conditions_plan.md](../folio_access_conditions_plan.md).
+Draft for platform#6589: a proposal for review and sign-off, not settled policy. It maps the state of a FOLIO item onto the access condition a reader sees, which is a method, an optional status and an optional note.
 
 The table rests on three sources: the current Sierra rule ([current_access_rules.md](../current_access_rules.md)), the production tenant as pulled on 2026-10-01 ([folio_data_profile.md](../folio_data_profile.md)), and Collection Information's draft mapping, "Access States - FOLIO mapping draft" (`QA_Wellcome_AccessStatusMapping.xlsx`). Where the tenant doesn't yet hold what Collection Information intends, the row is written for the intended state and marked as pending further data migration.
 
@@ -159,7 +159,7 @@ In the served index, 4,305 items have a display note moved onto the access condi
 
 These need Collection Information, or whoever owns reading-room policy, to decide:
 
-- **Open shelves.** Should open-shelves items show an access status (open, or open with advisory), or none as today?
+- **Open shelves.** Should open-shelves items show an access status (open, or open with advisory), or none as today? 
 - **Audiovisual material types.** Item types 15, 17 and 18 (moving image and sound) aren't migrated yet. The tenant has three empty material types that look like their targets: audio format non-requestable, video format requestable and video format non-requestable. Sierra makes all three item types non-requestable online, so which of them becomes "video format requestable", and whether it really should be requestable, needs confirming.
 - **Exhibition.** The 27 exhibit items sit in the placeholder location `migration`, and their exhibition text is a staff-only note. Should they move to the "Exhibitions" location, and should the text become a public note so readers can see where the item is?
 - **Digitisation.** Collection Information's mapping has no requesting rule for digitisation, and suggests a temporary location as an alternative to the status In process (non-requestable). The row covers both the code and the status. Which will be used?
