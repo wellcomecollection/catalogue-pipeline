@@ -1,4 +1,6 @@
 import os
+import re
+import unicodedata
 from collections import defaultdict
 
 from adapters.transformers.utils.text_utils import trim_trailing_period
@@ -33,6 +35,39 @@ def _concept_source_from_id(source_id: str) -> ConceptSource:
         return "nlm-mesh"
 
     raise ValueError(f"Unexpected source id {source_id}")
+
+
+def _label_tokens(label: str) -> list[str]:
+    folded = unicodedata.normalize("NFKD", label).encode("ascii", "ignore").decode()
+    return [token for token in re.split(r"[^a-z0-9]+", folded.lower()) if token]
+
+
+def _name_tokens(heading_tokens: list[str]) -> list[str]:
+    """
+    The tokens of an LC Names heading before its first date. Name-title headings append the title
+    after the dates ("January, Brendan, 1972- Da Vinci"), and the title must not count as the name.
+    """
+    for index, token in enumerate(heading_tokens):
+        if token.isdigit():
+            return heading_tokens[:index] or heading_tokens
+
+    return heading_tokens
+
+
+def _is_plausible_name_alias(label: str, preferred_label: str) -> bool:
+    """
+    LC Names aliases are mostly RDA date variants of the preferred form ("Gerrish, Samuel, d. 1741"
+    for "Gerrish, Samuel, -1741"). An alias sharing no token with the preferred name is a homonym
+    ("Bliss" for the ECSIS Symposium), and a bare surname cannot identify one specific person
+    ("Cook" for "Cook, Stephen S."). See wellcomecollection/platform#6679 for the census.
+    """
+    label_tokens = _label_tokens(label)
+    preferred_tokens = _label_tokens(preferred_label)
+
+    if not set(label_tokens) & set(_name_tokens(preferred_tokens)):
+        return False
+
+    return not (len(label_tokens) == 1 and len(preferred_tokens) > 1)
 
 
 class IdLabelChecker:
@@ -139,6 +174,13 @@ class IdLabelChecker:
 
                 # Try not to match things to people/organisations
                 if concept_type not in AGENT_TYPES and source == "lc-names":
+                    continue
+
+                # MeSH and LCSH aliases are mostly plural or expanded forms of the heading and are
+                # kept as they are; only LC Names aliases are checked against the preferred label.
+                if source == "lc-names" and not _is_plausible_name_alias(
+                    label, self.ids_to_labels[source][source_ids[0]]
+                ):
                     continue
 
                 return source_ids[0]

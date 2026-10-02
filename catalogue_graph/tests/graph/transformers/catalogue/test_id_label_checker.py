@@ -129,3 +129,40 @@ def test_id_label_checker_keeps_ellipsis() -> None:
     assert id_label_checker.get_id("Tacos and so on...", "Concept") == "sh00000077"
     assert id_label_checker.get_id("Tacos and so on", "Concept") is None
     assert id_label_checker.get_id("Tacos and so on.", "Concept") is None
+
+
+def test_id_label_checker_keeps_lc_names_aliases_sharing_a_token() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # An RDA date variant shares the name with the preferred label
+    assert (
+        id_label_checker.get_id("Gerrish, Samuel, d. 1741", "Person") == "no2008120722"
+    )
+
+    # Matching on the preferred label is not subject to the alias check
+    assert id_label_checker.get_id("Cook, Stephen S.", "Person") == "n97016028"
+
+
+def test_id_label_checker_rejects_unrelated_lc_names_aliases() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # An initialism which is someone else's alias
+    assert id_label_checker.get_id("Bliss", "Agent") is None
+
+    # A name which is an alias of a different person
+    assert id_label_checker.get_id("Leonardo da Vinci", "Agent") is None
+    assert id_label_checker.get_id("LUCIFER", "Person") is None
+
+
+def test_id_label_checker_rejects_bare_surname_lc_names_aliases() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # A surname alone shares a token with the preferred label but cannot identify one person
+    assert id_label_checker.get_id("Cook", "Agent") is None
+
+
+def test_id_label_checker_alias_check_is_lc_names_only() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # LCSH aliases are kept without any token in common with the preferred label
+    assert id_label_checker.get_id("Lithographs", "Genre") == "sh85077598"
