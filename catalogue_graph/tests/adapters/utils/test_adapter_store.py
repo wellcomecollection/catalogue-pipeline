@@ -4,12 +4,16 @@ Tests for general AdapterStore utility methods.
 These tests cover methods that are not specific to either incremental_update or snapshot_sync:
 - get_all_records
 - get_records_by_changeset
+- overwrite_records
 """
 
 from datetime import UTC, datetime
 from operator import itemgetter
 from typing import cast
 
+import pyarrow as pa
+import pyarrow.compute as pc
+import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.adapter_store import AdapterStore
@@ -452,3 +456,53 @@ def test_stream_active_namespace_records_batches_match_store_schema(
 
     assert len(batches) > 0
     assert all(batch.schema == ADAPTER_STORE_ARROW_SCHEMA for batch in batches)
+
+
+# =============================================================================
+# overwrite_records tests
+# =============================================================================
+
+
+def test_overwrite_records_keeps_last_modified_and_sets_changeset(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """Existing rows are overwritten in place under the given changeset."""
+    original_time = datetime(2026, 1, 1, tzinfo=UTC)
+    client = adapter_store_with_records(
+        [
+            {"id": "rec001", "content": "old", "last_modified": original_time},
+            {"id": "rec002", "content": "untouched", "last_modified": original_time},
+        ]
+    )
+    row = client.get_namespace_records().filter(pc.field("id") == "rec001")
+    row = row.set_column(
+        row.schema.get_field_index("content"), "content", pa.array(["new"])
+    )
+
+    assert client.overwrite_records(row, "changeset-1") == ["rec001"]
+
+    records = {r["id"]: r for r in client.get_namespace_records().to_pylist()}
+    assert len(records) == 2
+    assert records["rec001"]["content"] == "new"
+    assert records["rec001"]["changeset"] == "changeset-1"
+    assert records["rec001"]["last_modified"] == original_time
+    assert records["rec002"]["content"] == "untouched"
+
+
+def test_overwrite_records_refuses_missing_ids(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    """A missing id fails the whole call rather than being inserted."""
+    client = adapter_store_with_records([{"id": "rec001", "content": "old"}])
+    snapshot_id = client.current_snapshot_id()
+    rows = adapter_records_to_table(
+        [
+            {"id": "rec001", "content": "new"},
+            {"id": "rec999", "content": "not stored"},
+        ]
+    )
+
+    with pytest.raises(ValueError, match="rec999"):
+        client.overwrite_records(rows, "changeset-1")
+
+    assert client.current_snapshot_id() == snapshot_id
