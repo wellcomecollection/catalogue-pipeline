@@ -7,14 +7,18 @@ deletion fact before committing the new mappings. Facts must land first: the
 mappings commit destroys the diff, and a guid change never reappears in a
 later changeset. Re-runs are idempotent (facts deduplicate on deterministic
 ids; the mappings commit is guid-compared and timestamp-gated).
+
+Last, it heals children's 982 links left stale by a parent renumber (see
+part_of_heal).
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import time
 from collections import defaultdict
-from typing import Any
+from typing import Any, cast
 
 import pyarrow as pa
 import structlog
@@ -23,6 +27,7 @@ from pyiceberg.expressions import In
 
 from adapters.extractors.oai_pmh.registry import get_config
 from adapters.steps.oai_pmh.guid_mapping import rows_to_mappings
+from adapters.steps.oai_pmh.part_of_heal import heal_stale_part_of
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.deletion_facts_store import DeletionFactsStore
 from adapters.utils.reconciler_store import ReconcilerStore
@@ -51,6 +56,7 @@ class ReconcileResponse(BaseModel):
     mappings_inserted: int
     mappings_updated: int
     skipped: int
+    part_of_healed: int
 
 
 class ReconcileRuntime(BaseModel):
@@ -104,6 +110,28 @@ def handler(
     mappings_inserted = len(commit_result.inserted_record_ids) if commit_result else 0
     mappings_updated = len(commit_result.updated_record_ids) if commit_result else 0
 
+    # Last, so facts and mappings are durable first. Superseded ids come from
+    # the facts store, not `candidates`, so a re-run still skips them.
+    heal_started = time.monotonic()
+    superseded_ids = set(
+        cast(
+            list[str],
+            runtime.facts_store.get_records_by_changesets(event.changeset_ids)
+            .column("record_id")
+            .to_pylist(),
+        )
+    )
+    heal = heal_stale_part_of(runtime.adapter_store, rows, superseded_ids)
+    heal_seconds = round(time.monotonic() - heal_started, 2)
+    if heal.superseded_parent_ids:
+        logger.warning(
+            "Skipped part-of heal for children of parents whose guid changed",
+            adapter=runtime.adapter_name,
+            job_id=event.job_id,
+            parent_ids=heal.superseded_parent_ids,
+            stale_children=heal.superseded_stale_children,
+        )
+
     logger.info(
         "Reconcile step complete",
         adapter=runtime.adapter_name,
@@ -114,6 +142,10 @@ def handler(
         mappings_inserted=mappings_inserted,
         mappings_updated=mappings_updated,
         skipped=len(skipped_ids),
+        part_of_scanned=heal.scanned_rows,
+        part_of_candidates=heal.candidate_rows,
+        part_of_healed=len(heal.healed_ids),
+        part_of_seconds=heal_seconds,
     )
     return ReconcileResponse(
         job_id=event.job_id,
@@ -124,6 +156,7 @@ def handler(
         mappings_inserted=mappings_inserted,
         mappings_updated=mappings_updated,
         skipped=len(skipped_ids),
+        part_of_healed=len(heal.healed_ids),
     )
 
 
