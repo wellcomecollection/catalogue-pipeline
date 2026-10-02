@@ -38,15 +38,15 @@ def _concept_source_from_id(source_id: str) -> ConceptSource:
 
 
 def _label_tokens(label: str) -> list[str]:
-    folded = unicodedata.normalize("NFKD", label).encode("ascii", "ignore").decode()
-    return [token for token in re.split(r"[^a-z0-9]+", folded.lower()) if token]
+    # Strip diacritics but keep non-Latin scripts, which would otherwise tokenise to nothing.
+    folded = "".join(
+        c for c in unicodedata.normalize("NFKD", label) if not unicodedata.combining(c)
+    )
+    return [token for token in re.split(r"[\W_]+", folded.lower()) if token]
 
 
 def _name_tokens(heading_tokens: list[str]) -> list[str]:
-    """
-    The tokens of an LC Names heading before its first date. Name-title headings append the title
-    after the dates ("January, Brendan, 1972- Da Vinci"), and the title must not count as the name.
-    """
+    """Tokens before the first date, so a name-title heading's title does not count as the name."""
     for index, token in enumerate(heading_tokens):
         if token.isdigit():
             return heading_tokens[:index] or heading_tokens
@@ -55,19 +55,14 @@ def _name_tokens(heading_tokens: list[str]) -> list[str]:
 
 
 def _is_plausible_name_alias(label: str, preferred_label: str) -> bool:
-    """
-    LC Names aliases are mostly RDA date variants of the preferred form ("Gerrish, Samuel, d. 1741"
-    for "Gerrish, Samuel, -1741"). An alias sharing no token with the preferred name is a homonym
-    ("Bliss" for the ECSIS Symposium), and a bare surname cannot identify one specific person
-    ("Cook" for "Cook, Stephen S."). See wellcomecollection/platform#6679 for the census.
-    """
+    """Reject homonym aliases and bare surnames; see wellcomecollection/platform#6679 for the census."""
     label_tokens = _label_tokens(label)
-    preferred_tokens = _label_tokens(preferred_label)
+    name_tokens = _name_tokens(_label_tokens(preferred_label))
 
-    if not set(label_tokens) & set(_name_tokens(preferred_tokens)):
+    if not set(label_tokens) & set(name_tokens):
         return False
 
-    return not (len(label_tokens) == 1 and len(preferred_tokens) > 1)
+    return not (len(label_tokens) == 1 and len(name_tokens) > 1)
 
 
 class IdLabelChecker:
@@ -139,7 +134,7 @@ class IdLabelChecker:
             self.alternative_labels_to_ids[concept_source][label].append(source_id)
 
     def _normalise_label(self, label: str) -> str:
-        # Matches the label-derived id normalisation, so "X" and "X." share a key.
+        # Mirrors the label-derived id's trailing-stop handling, so "X" and "X." share a key.
         return trim_trailing_period(label.lower())
 
     def get_id(self, label: str, concept_type: ConceptType) -> str | None:

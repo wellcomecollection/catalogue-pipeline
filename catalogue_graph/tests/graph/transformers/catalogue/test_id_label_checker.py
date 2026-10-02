@@ -166,3 +166,13 @@ def test_id_label_checker_alias_check_is_lc_names_only() -> None:
 
     # LCSH aliases are kept without any token in common with the preferred label
     assert id_label_checker.get_id("Lithographs", "Genre") == "sh85077598"
+
+
+def test_id_label_checker_alias_check_ignores_dates_and_script() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # A mononym alias is not a bare surname when the heading is the same name plus dates
+    assert id_label_checker.get_id("Avicenna", "Person") == "n00000032"
+
+    # Non-Latin labels keep their tokens rather than folding to nothing
+    assert id_label_checker.get_id("Иванов, И., 1900-1980", "Person") == "n00000033"

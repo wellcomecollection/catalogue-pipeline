@@ -50,12 +50,7 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
         )
 
     def _collect_label_derived_types(self) -> dict[str, Counter[ConceptType]]:
-        """
-        Count the types each label-derived concept carries across every work in scope, in a pass
-        over the source ahead of the edge stream. Edges are emitted the first time an id is seen
-        and works stream in no fixed order, so the first work's type would make the matched source
-        concept depend on the run.
-        """
+        """Extra pass over the source: works stream in no fixed order, so the first-seen type is run-dependent."""
         types: dict[str, Counter[ConceptType]] = defaultdict(Counter)
         for extracted in self.source.stream_raw():
             raw_concept = RawCatalogueConcept(extracted.concept)

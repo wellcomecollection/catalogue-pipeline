@@ -58,10 +58,7 @@ class RawCatalogueConcept:
     def get_label_matched_source_concept_id(
         self, concept_type: ConceptType
     ) -> str | None:
-        """
-        Returns the id of a source concept matched on label. Takes the type explicitly because
-        one canonical id serves a label on every work, whatever type each work gives it.
-        """
+        """Takes the type explicitly: one canonical id serves a label on every work, whatever type each gives it."""
         assert self.id_label_checker is not None
 
         return self.id_label_checker.get_id(self.label, concept_type)
