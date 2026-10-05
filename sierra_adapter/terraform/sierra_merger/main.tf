@@ -33,7 +33,7 @@ module "sierra_merger" {
   omit_queue_url = true
 
   min_capacity = 0
-  max_capacity = 3
+  max_capacity = var.max_capacity
 
   # TODO: Does the Sierra adapter need service discovery?
   service_discovery_namespace_id = var.namespace_id
