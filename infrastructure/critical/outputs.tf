@@ -57,6 +57,12 @@ output "vhs_miro_assumable_read_role" {
   value = module.vhs_miro.assumable_read_role
 }
 
+# S3 Tables
+
+output "catalogue_pipeline_table_bucket_name" {
+  value = aws_s3tables_table_bucket.catalogue_pipeline.name
+}
+
 # Elasticsearch cluster
 
 output "es_cluster_2026_07_03" {
