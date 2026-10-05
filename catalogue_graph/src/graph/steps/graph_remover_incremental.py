@@ -1,5 +1,6 @@
 import argparse
 import typing
+from datetime import UTC, datetime
 
 import polars as pl
 import structlog
@@ -54,8 +55,11 @@ def handler(
     remover = get_remover(event, es_mode)
     deleted_ids = remover.remove(event.force_pass)
 
-    # Write removed IDs to a parquet file
-    s3_file_uri = event.get_s3_uri("parquet", "deleted_ids")
+    # Write removed IDs to a parquet file. Full runs share one S3 prefix, so date them to keep every run's log.
+    folder = "deleted_ids"
+    if event.window is None and not event.ids:
+        folder += f"/{datetime.now(UTC):%Y%m%dT%H%M}"
+    s3_file_uri = event.get_s3_uri("parquet", folder)
     df_to_s3_parquet(pl.DataFrame(deleted_ids), s3_file_uri)
 
     report = IncrementalGraphRemoverReport(

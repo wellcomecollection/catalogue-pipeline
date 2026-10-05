@@ -50,6 +50,9 @@ class CatalogueConceptsGraphRemover(BaseGraphRemoverIncremental):
             concept_id = row[":ID"]
             yield concept_id, expected_edges.pop(concept_id, set())
 
+        # Concepts only present in the edges file still need their graph edges checked
+        yield from expected_edges.items()
+
     def get_graph_edges(self, concept_ids: Iterable[str]) -> dict[str, set[str]]:
         return self.neptune_client.get_node_edges(
             concept_ids,
@@ -59,8 +62,8 @@ class CatalogueConceptsGraphRemover(BaseGraphRemoverIncremental):
         )
 
     def get_edge_ids_to_remove(self) -> Iterator[str]:
-        # A window or id run extracts only some works, so its edges cannot say which graph edges are stale
-        if self.event.window is not None or self.event.ids:
+        # A window extracts only some works, so its edges cannot say which graph edges are stale
+        if self.event.window is not None:
             return iter(())
 
         return super().get_edge_ids_to_remove()

@@ -97,3 +97,31 @@ def test_full_run_removes_edges_absent_from_the_extract() -> None:
         "node_label": "Concept",
         "outgoing_only": True,
     }
+
+
+def test_concepts_only_in_the_edges_file_are_still_checked() -> None:
+    remover, neptune_client = _make_remover()
+    extra_edge = {
+        ":ID": "HAS_SOURCE_CONCEPT:concept04-->D000002",
+        ":START_ID": "concept04",
+        ":END_ID": "D000002",
+    }
+    neptune_client.get_node_edges.return_value = {
+        "concept04": {
+            "HAS_SOURCE_CONCEPT:concept04-->D000002",
+            "HAS_SOURCE_CONCEPT:concept04-->D000003",
+        }
+    }
+
+    def fake_csv(s3_uri: str) -> list[dict]:
+        if s3_uri.endswith("catalogue_concepts__edges.csv"):
+            return [extra_edge]
+        return []
+
+    with patch(
+        "graph.removers.catalogue_concepts_remover.get_csv_from_s3",
+        side_effect=fake_csv,
+    ):
+        removed = list(remover.get_edge_ids_to_remove())
+
+    assert removed == ["HAS_SOURCE_CONCEPT:concept04-->D000003"]
