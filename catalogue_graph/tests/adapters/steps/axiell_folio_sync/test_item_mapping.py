@@ -40,6 +40,7 @@ def _item_record(
         "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
+        "<datafield tag='655'><subfield code='a'>Archives - Non-digital</subfield></datafield>"
         f"{fields}"
         "</record>"
     )
@@ -131,6 +132,7 @@ def _record_with_locations(
         "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
+        "<datafield tag='655'><subfield code='a'>Archives - Non-digital</subfield></datafield>"
         f"{fields}"
         "</record>"
     )
@@ -249,6 +251,7 @@ def _record_with_access(category: str | None) -> str:
         "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
+        "<datafield tag='655'><subfield code='a'>Archives - Non-digital</subfield></datafield>"
         "<datafield tag='984'><subfield code='b'>215;HOME 1</subfield></datafield>"
         f"{access}"
         "</record>"
@@ -346,3 +349,61 @@ def test_the_status_carries_the_restriction_the_loan_type_does_not() -> None:
     for everything. ."""
     assert _status_from("CLOSED") == "Restricted"
     assert _loan_type_for("CLOSED") == "Can circulate"
+
+
+# ── material type: required, with no default ──────────────────────────────────
+#
+# 655$a used to default to "book" when absent, which was wrong for every record
+# it applied to: this is an archival corpus. A category that is present but
+# unmapped already failed, because the raw AxC value resolves to nothing in the
+# tenant, so removing the default makes the absent case behave the same way.
+
+
+def _record_with_category(category: str | None) -> str:
+    fields = (
+        f"<datafield tag='655'><subfield code='a'>{category}</subfield></datafield>"
+        if category is not None
+        else ""
+    )
+    return (
+        "<record>"
+        "<controlfield tag='001'>guid-1</controlfield>"
+        "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
+        "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
+        "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
+        "<datafield tag='984'><subfield code='b'>215;HOME 1</subfield></datafield>"
+        f"{fields}"
+        "</record>"
+    )
+
+
+def test_a_record_without_a_material_type_fails() -> None:
+    """No default: 115 records in the corpus carry no 655$a, and they are now
+    reported rather than typed `book`."""
+    with pytest.raises(MappingError, match="Missing material type"):
+        select_and_build(_record_with_category(None), FakeRefCache())  # type: ignore[arg-type]
+
+
+def test_a_material_type_unknown_to_the_tenant_fails() -> None:
+    """Unchanged by removing the default, and the reason removing it is safe: an
+    unmapped category never reached the default anyway. `Visual Material` is
+    real, on 4,347 records, and the tenant has no such material type."""
+
+    class EmptyRefCache(FakeRefCache):
+        def resolve_material_type(self, name: str | None) -> Any:
+            return None
+
+    with pytest.raises(MappingError, match="Unresolved material type"):
+        select_and_build(
+            _record_with_category("Visual Material"),
+            EmptyRefCache(),  # type: ignore[arg-type]
+        )
+
+
+def test_a_mapped_material_type_still_resolves() -> None:
+    mapped = select_and_build(
+        _record_with_category("Archives - Non-digital"),
+        FakeRefCache(),  # type: ignore[arg-type]
+    )
+    assert mapped is not None
+    assert mapped.item.materialType.id == "mat-uuid"

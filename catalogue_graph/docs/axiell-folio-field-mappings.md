@@ -19,13 +19,19 @@ Mapping version: **2.6.0** (`config.VERSION`), stamped into every payload's
 
 ## What gets synced
 
-A record is synced only if it is item-level, meaning MARC `351 $c` equals `ITEM`
-(case-insensitive). Anything else is skipped completely: it is never created,
-updated, or suppressed.
+Two gates, and a record has to pass both:
 
-There is also a harvest-flag gate in the config (`980 $a`), but it is currently
-turned off so the sync runs for all item-level records. Selection is item-level
-only for now.
+| Gate | MARC | Rule |
+| --- | --- | --- |
+| Harvest flag | `980 $a` | Present and non-empty. This is the curator-facing opt-in to the FOLIO sync. |
+| Record level | `351 $c` | Equals `ITEM`, case-insensitive. |
+
+A record failing either is skipped completely: never created, updated, or
+suppressed, and not reported as an error. An unflagged record is a deliberate
+opt-out rather than a data problem.
+
+Both gates live in `_passes_selection_gates`, which `is_selected_for_sync` and
+`select_and_build` share so the two cannot disagree.
 
 ## How MARC fields are read
 
@@ -95,7 +101,7 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 | `hrid` | `AxC-item-<001>` | MARC `001` | Required. |
 | `holdingsRecordId` | Parent holdings UUID | Injected by the upsert orchestrator | Not set when the payload is built. |
 | `status.name` | Item-status name | MARC `506 $f` (access category), via `ACCESS_ITEM_STATUS` (default `Unavailable`) | Table value is final; statuses are a fixed FOLIO enum, not tenant reference data. **Create-only**: mod-circulation owns the field once the item exists, so updates send FOLIO's own status back and an AxC access change does not propagate. See `_CREATE_ONLY_FIELDS` in `upsert/entities.py`, and `rfcs/collection-information-questions.md` section 6. |
-| `materialType.id` | Material-type UUID | MARC `655 $a`, via `resolve_material_type` (default `book`) | Uses the normalization table below. |
+| `materialType.id` | Material-type UUID | MARC `655 $a`, via `resolve_material_type` | Uses the normalization table below. No default: an absent or unmapped category fails the record. |
 | `permanentLoanType.id` | `Can circulate` UUID | Constant, via `resolve_loan_type` | **No AxC mapping**, pending Collection Information |
 | `permanentLocation.id` | FOLIO location UUID | MARC `984 $b` (AxC **normal** location), via `resolve_location` | Same source and rules as the holdings location above, so the two always agree. |
 | `administrativeNotes[]` | `"Axiell Current Location: <852 $b>"` | MARC `852 $b`, or `unknown` when absent | Keeps the raw AxC current location as an administrative note. A plain string, so no item note type has to exist in the tenant. The label is in the string because an administrative note carries no type, and is also what the upsert matches on to reclaim the note. Always written, so an update cannot leave a stale location behind. |
@@ -107,8 +113,8 @@ the raw AxC value through these steps in order:
 
 1. Start with the raw AxC value.
 2. If the field is **required** and that value is empty, raise a `MappingError`
-   immediately, because there is no default to fall back on. Only the normal location is
-   required today.
+   immediately, because there is no default to fall back on. The normal location
+   and the material type are the required fields today.
 3. Apply the location rules (location fields only), which resolve the AxC hierarchy
    to a FOLIO location name.
 4. Apply the normalization table (if the field has one).
@@ -132,7 +138,8 @@ case-insensitive.
 | Moving Image - Non Digital / Non-digital | `film` |
 | Sound - Non Digital / Non-digital | `audio format requestable` |
 | Visual Material - Non Digital / Non-digital | `non-projected graphic` |
-| Anything else, or absent | `book` (default) |
+| Anything else | `MappingError`: the raw value resolves to nothing in the tenant |
+| *(absent)* | `MappingError`: required, with no default |
 
 ### Access category to item status
 
@@ -204,7 +211,7 @@ Used when the record has no value for a resolved field.
 
 | Field | Default |
 | --- | --- |
-| Material type | `book` |
+| Material type | **None, the record fails instead** |
 | Loan type | `Can circulate`, the only value any item gets |
 | Item status | `Unavailable` |
 | Holdings source | `MARC` |
@@ -232,7 +239,7 @@ Taken from `config.FIELDS`.
 | `normal_location` | `984$b` | holdings/item permanent location |
 | `access_category` | `506$f` | item status |
 | record selection | `351$c` | must be `ITEM` |
-| harvest flag | `980$a` | disabled gate |
+| harvest flag | `980$a` | must be present and non-empty |
 
 ## Code locations
 

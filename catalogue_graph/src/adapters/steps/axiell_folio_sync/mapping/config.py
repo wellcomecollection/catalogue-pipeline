@@ -68,7 +68,11 @@ ACCESS_ITEM_STATUS: dict[str, str] = {
 }
 
 # Fallbacks used when the MARC record carries no value for a resolved field.
-DEFAULT_MATERIAL_TYPE = "book"
+#
+# The material type has none. It used to default to "book", which was wrong for
+# every record it applied to: this is an archival corpus and none of them is a
+# book. A record with no 655$a now fails and is reported, rather than being given
+# a plausible-looking wrong type that nothing surfaces. See MATERIAL_TYPE_FIELD.
 # The default loan type, and currently the only one any item gets: no AxC field
 # is mapped to the loan type, so nothing ever overrides this.
 #
@@ -219,8 +223,12 @@ MATERIAL_TYPE_FIELD = FieldMap(
     "object_category",
     marc="655$a",
     resolver="resolve_material_type",
-    default=DEFAULT_MATERIAL_TYPE,
     label="material type",
+    # Required, with no default. An AxC category that is present but unmapped
+    # already failed the record, because the raw value resolves to nothing in the
+    # tenant; this makes an absent category behave the same way instead of
+    # silently typing it "book".
+    required=True,
     # Fold keys to lowercase so the case-insensitive lookup in `_resolve` (which
     # lowercases the incoming AxC value) matches whatever case AxC sends.
     table={key.lower(): value for key, value in MATERIAL_TYPE.items()},

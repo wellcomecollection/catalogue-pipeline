@@ -44,11 +44,23 @@ All counts are item-level only (`351$c == ITEM`); percentages are of 187,996.
 | *(absent)* | 115 | | **`book`** |
 | `Archives - Hybrid`, `Pictures` | 2 | | **`book`** |
 
-**9,944 records (5.3%) are typed `book` and none is a book.** Unmapped values
-fall silently to `DEFAULT_MATERIAL_TYPE`. Two causes: the table maps
-`Visual Material - Non Digital` but AxC only ever says `Visual Material`, so the
-agreed `non-projected graphic` rule has never fired; and the four `- Non Digital`
-(spaced) keys match nothing, because AxC emits `- Non-digital`.
+**9,944 records (5.3%) do not resolve to a usable material type.** Two causes:
+the table maps `Visual Material - Non Digital` but AxC only ever says
+`Visual Material`, so the agreed `non-projected graphic` rule has never fired;
+and the four `- Non Digital` (spaced) keys match nothing, because AxC emits
+`- Non-digital`.
+
+Those 9,944 split in two, and they fail rather than defaulting:
+
+- **9,829 carry a category the table does not map.** The raw AxC value is passed
+  to the tenant, which has no such material type, so the record fails with
+  `Unresolved material type`. This was already true before the default was
+  removed: an unmapped value never reached the default.
+- **115 carry no `655$a` at all.** These used to take the `book` default. The
+  default has now been removed, so they fail with `Missing material type`.
+
+So nothing is silently typed `book` any more, and the earlier claim in this
+section that 9,944 records were is wrong: only the 115 ever were.
 
 ### Proposed mapping
 
@@ -72,18 +84,19 @@ mapped to the requestable half. So the three digital rows also decide whether a
 reader can request them, which is the same question section 2 asks. **Decide
 sections 1 and 2 together.**
 
-### The default
+### The default: removed
 
-| | Option | Consequence |
-| --- | --- | --- |
-| A | Keep `book` | Status quo. Wrong for an archival corpus, and silent. |
-| B | Default to `archive` | Still silent, but right far more often: 93.7% of the corpus is archival. |
-| C | No default, fail the record | An unmapped category becomes an error row someone acts on. |
+There is no longer a material-type default. A record with no `655$a`, like one
+with a category the table does not map, now fails and is reported.
 
-**Recommended: B for the 115 records with no `655$a`, C for unrecognised
-values.** An absent category is a data gap; an unrecognised one is a mapping
-gap, and only the second should stop a record. This is how the access category
-already behaves.
+The options considered were to keep `book`, to default to `archive` (right far
+more often, since 93.7% of the corpus is archival, but still silent), or to have
+no default at all. The last was chosen: `book` was wrong for every one of the 115
+records it applied to, and a plausible-looking wrong material type is worse than
+an error row, because this tenant encodes requestability in the material type.
+
+**To confirm:** is failing the right behaviour for the 115 records with no
+category, or would you rather they defaulted to `archive` and synced?
 
 ---
 
