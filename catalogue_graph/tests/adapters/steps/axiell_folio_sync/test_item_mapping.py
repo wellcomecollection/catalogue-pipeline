@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
 
 from adapters.steps.axiell_folio_sync.mapping import (
@@ -47,27 +45,34 @@ def _item_record(
 
 
 class FakeRefCache:
-    """Resolves every reference-data name to a stub UUID (no FOLIO calls)."""
+    """Resolves every reference-data name to a stub UUID (no FOLIO calls).
+
+    The return types mirror the real ``RefCache``, whose resolvers all return
+    ``str | None``. Narrowing them to ``str`` here would stop a subclass that
+    returns ``None`` for an unknown name from overriding them, and returning
+    ``None`` is exactly what several tests need in order to make ``_resolve``
+    raise.
+    """
 
     def instance_type_id(self) -> str:
         return "itype-uuid"
 
-    def resolve_location(self, name: str | None) -> str:
+    def resolve_location(self, name: str | None) -> str | None:
         return "loc-uuid"
 
-    def resolve_holdings_source(self, name: str | None) -> str:
+    def resolve_holdings_source(self, name: str | None) -> str | None:
         return "src-uuid"
 
-    def resolve_material_type(self, name: str | None) -> str:
+    def resolve_material_type(self, name: str | None) -> str | None:
         return "mat-uuid"
 
-    def resolve_loan_type(self, name: str | None) -> str:
+    def resolve_loan_type(self, name: str | None) -> str | None:
         return "loan-uuid"
 
-    def resolve_item_note_type(self, name: str | None) -> str:
+    def resolve_item_note_type(self, name: str | None) -> str | None:
         return "note-uuid"
 
-    def resolve_identifier_type(self, name: str | None) -> str:
+    def resolve_identifier_type(self, name: str | None) -> str | None:
         return "idtype-uuid"
 
 
@@ -207,7 +212,7 @@ def test_a_normal_location_unknown_to_the_tenant_fails() -> None:
     """Same for a location the tenant has never heard of."""
 
     class EmptyRefCache(FakeRefCache):
-        def resolve_location(self, name: str | None) -> Any:
+        def resolve_location(self, name: str | None) -> str | None:
             return None
 
     with pytest.raises(MappingError, match="Unresolved normal location"):
@@ -392,7 +397,7 @@ def test_a_material_type_unknown_to_the_tenant_fails() -> None:
     real, on 4,347 records, and the tenant has no such material type."""
 
     class EmptyRefCache(FakeRefCache):
-        def resolve_material_type(self, name: str | None) -> Any:
+        def resolve_material_type(self, name: str | None) -> str | None:
             return None
 
     with pytest.raises(MappingError, match="Unresolved material type"):
@@ -469,7 +474,7 @@ def test_the_retired_spaced_keys_are_gone() -> None:
     assert not [key for key in MATERIAL_TYPE if " - Non Digital" in key]
 
     class EmptyRefCache(FakeRefCache):
-        def resolve_material_type(self, name: str | None) -> Any:
+        def resolve_material_type(self, name: str | None) -> str | None:
             return None
 
     with pytest.raises(MappingError, match="Unresolved material type"):
