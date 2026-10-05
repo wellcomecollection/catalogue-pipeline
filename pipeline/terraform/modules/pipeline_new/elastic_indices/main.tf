@@ -77,6 +77,13 @@ locals {
       read  = ["*"]
       write = []
     }
+    # Read-only monitoring for operators and agent sessions without the superuser.
+    monitoring_read_only = {
+      read            = ["*"]
+      write           = []
+      cluster         = ["monitor"]
+      read_privileges = ["read", "view_index_metadata", "monitor"]
+    }
     transformer = {
       // ebsco
       read  = []
@@ -178,6 +185,8 @@ module "pipeline_services" {
   name                = each.key
   read_from           = each.value.read
   write_to            = each.value.write
+  read_privileges     = try(each.value.read_privileges, ["read"])
+  cluster_privileges  = try(each.value.cluster, [])
   pipeline_date       = var.pipeline_date
   expose_to_catalogue = contains(var.catalogue_account_services, each.key)
   providers = {
