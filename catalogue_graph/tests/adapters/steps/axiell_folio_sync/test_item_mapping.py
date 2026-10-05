@@ -407,3 +407,71 @@ def test_a_mapped_material_type_still_resolves() -> None:
     )
     assert mapped is not None
     assert mapped.item.materialType.id == "mat-uuid"
+
+
+@pytest.mark.parametrize(
+    ("category", "expected"),
+    [
+        ("Archives - Non-digital", "archive"),
+        ("Archives - Digital", "archive"),
+        ("Archives - Hybrid", "archive"),
+        ("Moving Image - Non-digital", "film"),
+        ("Moving Image - Digital", "video format non-requestable"),
+        ("Sound - Non-digital", "audio format requestable"),
+        ("Sound - Digital", "audio format non-requestable"),
+        # AxC says plain "Visual Material", never "Visual Material - Non-digital".
+        ("Visual Material", "non-projected graphic"),
+        ("Pictures", "non-projected graphic"),
+    ],
+)
+def test_object_category_selects_the_material_type(
+    category: str, expected: str
+) -> None:
+    """Every value that occurs in the corpus resolves, and to the agreed type."""
+    asked: list[str | None] = []
+
+    class RecordingRefCache(FakeRefCache):
+        def resolve_material_type(self, name: str | None) -> str:
+            asked.append(name)
+            return "mat-uuid"
+
+    mapped = select_and_build(
+        _record_with_category(category),
+        RecordingRefCache(),  # type: ignore[arg-type]
+    )
+    assert mapped is not None
+    assert asked == [expected]
+
+
+def test_material_type_matching_is_case_insensitive() -> None:
+    asked: list[str | None] = []
+
+    class RecordingRefCache(FakeRefCache):
+        def resolve_material_type(self, name: str | None) -> str:
+            asked.append(name)
+            return "mat-uuid"
+
+    select_and_build(
+        _record_with_category("ARCHIVES - NON-DIGITAL"),
+        RecordingRefCache(),  # type: ignore[arg-type]
+    )
+    assert asked == ["archive"]
+
+
+def test_the_retired_spaced_keys_are_gone() -> None:
+    """The four "- Non Digital" (spaced) keys matched nothing in the corpus, so
+    they were removed. Matching is not whitespace-insensitive, so a record using
+    that spelling now fails rather than resolving."""
+    from adapters.steps.axiell_folio_sync.mapping import MATERIAL_TYPE
+
+    assert not [key for key in MATERIAL_TYPE if " - Non Digital" in key]
+
+    class EmptyRefCache(FakeRefCache):
+        def resolve_material_type(self, name: str | None) -> Any:
+            return None
+
+    with pytest.raises(MappingError, match="Unresolved material type"):
+        select_and_build(
+            _record_with_category("Archives - Non Digital"),
+            EmptyRefCache(),  # type: ignore[arg-type]
+        )

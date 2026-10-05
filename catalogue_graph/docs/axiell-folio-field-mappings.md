@@ -134,12 +134,23 @@ case-insensitive.
 
 | AxC object_category (`655 $a`) | FOLIO material type |
 | --- | --- |
-| Archives - Non Digital / Non-digital | `archive` |
-| Moving Image - Non Digital / Non-digital | `film` |
-| Sound - Non Digital / Non-digital | `audio format requestable` |
-| Visual Material - Non Digital / Non-digital | `non-projected graphic` |
+| `Archives - Non-digital` | `archive` |
+| `Archives - Digital` | `archive` |
+| `Archives - Hybrid` | `archive` |
+| `Moving Image - Non-digital` | `film` |
+| `Moving Image - Digital` | `video format non-requestable` |
+| `Sound - Non-digital` | `audio format requestable` |
+| `Sound - Digital` | `audio format non-requestable` |
+| `Visual Material` | `non-projected graphic` |
+| `Pictures` | `non-projected graphic` |
 | Anything else | `MappingError`: the raw value resolves to nothing in the tenant |
 | *(absent)* | `MappingError`: required, with no default |
+
+The digital rows take the `non-requestable` halves because this tenant encodes
+requestability in the material type, and a digital surrogate is not the carrier a
+reader requests. Those three are still to be confirmed with Collection
+Information. For the AxC value distribution behind this table, see
+[axiell-folio-mapping-options.md](axiell-folio-mapping-options.md) section 1.
 
 ### Access category to item status
 
@@ -176,7 +187,7 @@ may be requested). Both have been mapped here and reverted pending Collection
 Information, which also has to say whether open archival material should
 circulate at all. See `rfcs/collection-information-questions.md` section 5.
 
-Until then a reader can request any item, including the 9,819 whose access note
+Until then a reader can request any item, including those whose access note
 reads *"This item is closed and cannot be accessed"*. Settle before a
 production run.
 

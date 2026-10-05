@@ -32,39 +32,38 @@ All counts are item-level only (`351$c == ITEM`); percentages are of 187,996.
 
 ### What AxC sends: `655$a`
 
-| `655$a` | Item records | | Resolves to |
+| `655$a` | Item records | | Now resolves to |
 | --- | ---: | --- | --- |
 | `Archives - Non-digital` | 176,110 | 93.7% | `archive` |
-| `Visual Material` | 4,347 | 2.3% | **`book`** |
-| `Sound - Digital` | 2,860 | 1.5% | **`book`** |
-| `Archives - Digital` | 2,535 | 1.3% | **`book`** |
+| `Visual Material` | 4,347 | 2.3% | `non-projected graphic` |
+| `Sound - Digital` | 2,860 | 1.5% | `audio format non-requestable` |
+| `Archives - Digital` | 2,535 | 1.3% | `archive` |
 | `Moving Image - Non-digital` | 1,048 | 0.6% | `film` |
 | `Sound - Non-digital` | 894 | 0.5% | `audio format requestable` |
-| `Moving Image - Digital` | 85 | | **`book`** |
-| *(absent)* | 115 | | **`book`** |
-| `Archives - Hybrid`, `Pictures` | 2 | | **`book`** |
+| `Moving Image - Digital` | 85 | | `video format non-requestable` |
+| `Archives - Hybrid`, `Pictures` | 2 | | `archive`, `non-projected graphic` |
+| *(absent)* | 115 | | nothing: the record fails |
 
-**9,944 records (5.3%) do not resolve to a usable material type.** Two causes:
-the table maps `Visual Material - Non Digital` but AxC only ever says
-`Visual Material`, so the agreed `non-projected graphic` rule has never fired;
-and the four `- Non Digital` (spaced) keys match nothing, because AxC emits
-`- Non-digital`.
+Every value in the corpus now resolves, covering 187,882 of 187,997 item
+records. Only the 115 with no `655$a` fail.
 
-Those 9,944 split in two, and they fail rather than defaulting:
+**What this fixed.** 9,829 records (5.2%) previously did not resolve at all. Two
+causes, both key mistakes rather than missing targets: the table mapped
+`Visual Material - Non Digital` while AxC only ever says `Visual Material`, so
+the agreed `non-projected graphic` rule had never once fired; and the four
+`- Non Digital` (spaced) keys matched nothing, because AxC emits `- Non-digital`.
+Those four have been removed and the real values added.
 
-- **9,829 carry a category the table does not map.** The raw AxC value is passed
-  to the tenant, which has no such material type, so the record fails with
-  `Unresolved material type`. This was already true before the default was
-  removed: an unmapped value never reached the default.
-- **115 carry no `655$a` at all.** These used to take the `book` default. The
-  default has now been removed, so they fail with `Missing material type`.
+*(An earlier version of this section said 9,944 records were silently typed
+`book`. That was wrong: an unmapped value was passed to the tenant, resolved to
+nothing and failed the record. Only the 115 with no category ever took the
+default, which has since been removed too.)*
 
-So nothing is silently typed `book` any more, and the earlier claim in this
-section that 9,944 records were is wrong: only the 115 ever were.
+### The mapping: implemented
 
-### Proposed mapping
-
-The tenant has 29 material types and nothing needs provisioning.
+Live in `config.MATERIAL_TYPE`. The tenant has 29 material types and nothing
+needed provisioning: every target below already exists. The three rows marked
+**needs CI** are implemented on the reasoning given and are the ones to confirm.
 
 | `655$a` | Records | Proposed | Why |
 | --- | ---: | --- | --- |
@@ -76,7 +75,7 @@ The tenant has 29 material types and nothing needs provisioning.
 | `Sound - Non-digital` | 894 | `audio format requestable` | unchanged |
 | **`Sound - Digital`** | 2,860 | `audio format non-requestable` | **needs CI**: digital surrogate, not the carrier a reader requests |
 | **`Moving Image - Digital`** | 85 | `video format non-requestable` | **needs CI**: as above |
-| **`Archives - Digital`** | 2,535 | `computer media` | **needs CI**: no digital-archive type exists; `migration` is the alternative |
+| **`Archives - Digital`** | 2,535 | `archive` | **needs CI**: no digital-archive type exists, so the same intellectual form as the non-digital archives. `computer media` and `migration` are the alternatives |
 
 **This tenant encodes requestability in the material type** (note the
 `requestable` / `non-requestable` pairs), and `Sound - Non-digital` is already

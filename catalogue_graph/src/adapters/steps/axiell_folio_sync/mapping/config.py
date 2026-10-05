@@ -28,18 +28,32 @@ RECORD_TYPE_ITEM = "ITEM"  # only item-level records are synced
 
 # ── normalization tables & defaults ─────────────────────────────────────────────
 
-# Axiell object_category (MARC 655$a) to FOLIO material type; matching is
-# case-insensitive.
-# Values reflect the AxC object_category mappings agreed in the Folio Axiell Mapping.
+# Axiell object_category (MARC 655$a) to FOLIO material type. Matching is
+# case-insensitive but not whitespace-insensitive, so the key has to be the exact
+# string AxC sends.
+#
+# Every key here is a value that actually occurs in the corpus, and every target
+# exists in the FOLIO tenant, so nothing needs provisioning. The table covers
+# 187,882 of 187,997 item records; the remaining 115 carry no 655$a and fail,
+# because there is no default (see MATERIAL_TYPE_FIELD).
+#
+# The digital rows are the ones to confirm with Collection Information, because
+# this tenant encodes requestability in the material type: a digital surrogate is
+# not the physical carrier a reader requests, hence the non-requestable halves.
+# See docs/axiell-folio-mapping-options.md section 1.
 MATERIAL_TYPE: dict[str, str] = {
-    "Archives - Non Digital": "archive",
     "Archives - Non-digital": "archive",
-    "Moving Image - Non Digital": "film",
+    "Archives - Digital": "archive",
+    "Archives - Hybrid": "archive",
     "Moving Image - Non-digital": "film",
-    "Sound - Non Digital": "audio format requestable",
+    "Moving Image - Digital": "video format non-requestable",
     "Sound - Non-digital": "audio format requestable",
-    "Visual Material - Non Digital": "non-projected graphic",
-    "Visual Material - Non-digital": "non-projected graphic",
+    "Sound - Digital": "audio format non-requestable",
+    # AxC says plain "Visual Material", never "Visual Material - Non-digital".
+    # The old key was a near-miss, so the agreed non-projected graphic rule had
+    # never once fired.
+    "Visual Material": "non-projected graphic",
+    "Pictures": "non-projected graphic",
 }
 
 
