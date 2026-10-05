@@ -11,11 +11,7 @@ fields where the mapping is wrong or undecided: **material type** and **access**
 | **Material type**, from object_category (`655$a`) | **Partly defined.** Three digital rows and the default need an answer. Section 1. |
 
 For what the sync maps today see
-[axiell-folio-field-mappings.md](axiell-folio-field-mappings.md); for the full
-list of gaps see [axiell-folio-mapping-gaps.md](axiell-folio-mapping-gaps.md);
-the questions themselves are in
-[../rfcs/collection-information-questions.md](../rfcs/collection-information-questions.md).
-
+[axiell-folio-field-mappings.md](axiell-folio-field-mappings.md)
 ## Provenance
 
 | | Source | Date |
