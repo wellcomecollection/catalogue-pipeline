@@ -85,12 +85,8 @@ class IncrementalWindow(BaseModel):
             end_time=datetime.fromisoformat(end_str),
         )
 
-    def to_elasticsearch_query(self, field_name: str) -> dict:
-        return {
-            "range": {
-                field_name: {
-                    "gte": self.start_time.isoformat(),
-                    "lte": self.end_time.isoformat(),
-                }
-            }
-        }
+    def to_elasticsearch_query(self, field_name: str, lower_bound: bool = True) -> dict:
+        bounds = {"lte": self.end_time.isoformat()}
+        if lower_bound:
+            bounds["gte"] = self.start_time.isoformat()
+        return {"range": {field_name: bounds}}

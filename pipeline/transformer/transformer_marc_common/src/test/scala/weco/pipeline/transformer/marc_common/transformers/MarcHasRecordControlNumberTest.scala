@@ -133,7 +133,7 @@ class MarcHasRecordControlNumberTest
       actualSourceIdentifier shouldBe expectedSourceIdentifier
     }
 
-    it("throws an exception on an invalid LoC identifier") {
+    it("rejects an invalid LoC identifier without throwing") {
       forAll(
         Table(
           "identifier",
@@ -143,23 +143,100 @@ class MarcHasRecordControlNumberTest
           // We don't use Children's Subject Headings
           "sj97002429",
           // Sometimes, there are odd typos
-          "shsh85100861"
+          "shsh85100861",
+          // A URI form we don't recognise
+          "http://id.loc.gov/authorities/genreForms/gf2014026110"
         )
       ) {
         identifier =>
           val field =
             create655FieldWith(indicator2 = "0", identifierValue = identifier)
-          assertThrows[IllegalArgumentException] {
-            MarcHasRecordControlNumber
-              .apply(
-                field = field,
-                ontologyType = ontologyType
-              )
-              .allSourceIdentifiers
-              .loneElement
-
-          }
+          MarcHasRecordControlNumber.apply(
+            field = field,
+            ontologyType = ontologyType
+          ) shouldBe IdState.Unidentifiable
       }
+    }
+  }
+
+  describe("an identifier written as a URI") {
+    it("strips the URI prefix, over http or https") {
+      forAll(
+        Table(
+          ("indicator2", "identifier", "identifierType", "value"),
+          (
+            "0",
+            "http://id.loc.gov/authorities/names/n90650979",
+            IdentifierType.LCNames,
+            "n90650979"
+          ),
+          (
+            "0",
+            "https://id.loc.gov/authorities/names/no2008087861",
+            IdentifierType.LCNames,
+            "no2008087861"
+          ),
+          (
+            "0",
+            "http://id.loc.gov/authorities/subjects/sh85062285",
+            IdentifierType.LCSubjects,
+            "sh85062285"
+          ),
+          (
+            "0",
+            "https://id.loc.gov/authorities/subjects/sh85062285",
+            IdentifierType.LCSubjects,
+            "sh85062285"
+          ),
+          (
+            "2",
+            "http://id.nlm.nih.gov/mesh/D004364",
+            IdentifierType.MESH,
+            "D004364"
+          ),
+          (
+            "2",
+            "https://id.nlm.nih.gov/mesh/D004364",
+            IdentifierType.MESH,
+            "D004364"
+          )
+        )
+      ) {
+        (indicator2, identifier, identifierType, value) =>
+          val field = create655FieldWith(
+            indicator2 = indicator2,
+            identifierValue = identifier
+          )
+
+          MarcHasRecordControlNumber
+            .apply(field = field, ontologyType = ontologyType)
+            .allSourceIdentifiers
+            .loneElement shouldBe SourceIdentifier(
+            identifierType = identifierType,
+            value = value,
+            ontologyType = ontologyType
+          )
+      }
+    }
+
+    it("treats a URI and a bare id for the same authority as one identifier") {
+      val field = MarcField(
+        marcTag = "610",
+        indicator2 = "0",
+        subfields = Seq(
+          MarcSubfield("0", "n  86810287"),
+          MarcSubfield("0", "http://id.loc.gov/authorities/names/n86810287")
+        )
+      )
+
+      MarcHasRecordControlNumber
+        .apply(field = field, ontologyType = "Organisation")
+        .allSourceIdentifiers
+        .loneElement shouldBe SourceIdentifier(
+        identifierType = IdentifierType.LCNames,
+        value = "n86810287",
+        ontologyType = "Organisation"
+      )
     }
   }
 

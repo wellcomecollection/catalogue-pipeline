@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Generator, Iterable
+from dataclasses import dataclass
 from itertools import batched
 from typing import Any
 
 import structlog
 
-from core.transformer import ElasticBaseTransformer
+from core.document import Document
+from core.transformer import BatchTransformer
 from id_minter.embedder import embed_canonical_ids, extract_source_identifiers
 from id_minter.id_minting_source import IdMintingSource
 from id_minter.models.identifier import IdResolver, MintRequest
@@ -23,13 +25,22 @@ logger = structlog.get_logger(__name__)
 DEFAULT_MINT_BATCH_SIZE = 500
 
 
-# Per-work data carried through the batched mint pipeline:
-# (row_id, raw_doc, mint_requests) where mint_requests is the list returned by
-# extract_source_identifiers(raw_doc).
-_WorkEntry = tuple[str, dict, list[MintRequest]]
+@dataclass
+class _PendingWork:
+    """A validated source document waiting for its canonical ids."""
+
+    source_id: str
+    raw_doc: dict
+    version: int
+    mint_requests: list[MintRequest]
 
 
-class IdMintingTransformer(ElasticBaseTransformer):
+def document_version(raw_doc: dict) -> int:
+    """Guards index writes on source time, so an overlapping run cannot overwrite a newer copy."""
+    return version_from_modified_time(raw_doc["state"]["sourceModifiedTime"])
+
+
+class IdMintingTransformer(BatchTransformer):
     """Fetches work documents, embeds canonical IDs via an IdResolver, and indexes them.
 
     Uses ``IdMintingSource`` to fetch documents from the works-source index
@@ -54,12 +65,12 @@ class IdMintingTransformer(ElasticBaseTransformer):
         self.resolver = resolver
         self.mint_batch_size = mint_batch_size
 
-    def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, dict]]:
+    def transform(self, raw_nodes: Iterable[Any]) -> Generator[Document]:
         for chunk in batched(raw_nodes, self.mint_batch_size):
             yield from self._transform_chunk(chunk)
 
-    def _transform_chunk(self, raw_docs: Iterable[dict]) -> Generator[tuple[str, dict]]:
-        works_in_batch: list[_WorkEntry] = []
+    def _transform_chunk(self, raw_docs: Iterable[dict]) -> Generator[Document]:
+        works_in_batch: list[_PendingWork] = []
         for raw_doc in raw_docs:
             try:
                 si = SourceIdentifier.model_validate(
@@ -70,7 +81,7 @@ class IdMintingTransformer(ElasticBaseTransformer):
                 continue
 
             try:
-                self._get_document_version(raw_doc)
+                version = document_version(raw_doc)
             except Exception as e:
                 self._add_error(e, "version", str(si))
                 continue
@@ -81,7 +92,9 @@ class IdMintingTransformer(ElasticBaseTransformer):
                 self._add_error(e, "embed", str(si))
                 continue
 
-            works_in_batch.append((str(si), raw_doc, mint_requests))
+            works_in_batch.append(
+                _PendingWork(str(si), raw_doc, version, mint_requests)
+            )
 
         if not works_in_batch:
             return
@@ -101,13 +114,12 @@ class IdMintingTransformer(ElasticBaseTransformer):
                 exc_info=True,
             )
             for work in works_in_batch:
-                row_id, _, _ = work
                 try:
                     yield from self._mint_and_embed([work])
                 except Exception as e:
-                    self._add_error(e, "embed", row_id)
+                    self._add_error(e, "embed", work.source_id)
 
-    def _mint_and_embed(self, works: list[_WorkEntry]) -> Generator[tuple[str, dict]]:
+    def _mint_and_embed(self, works: list[_PendingWork]) -> Generator[Document]:
         """Mint canonical IDs for ``works`` in a single resolver call, then embed.
 
         Used by both the batch path (whole chunk) and the per-work fallback
@@ -115,9 +127,7 @@ class IdMintingTransformer(ElasticBaseTransformer):
         raises so callers can decide whether to fall back; ``embed_canonical_ids``
         errors are reported per-work via ``self._add_error``.
         """
-        combined_requests: list[MintRequest] = []
-        for _, _, mint_requests in works:
-            combined_requests.extend(mint_requests)
+        combined_requests = [r for work in works for r in work.mint_requests]
 
         id_map = self.resolver.mint_ids(combined_requests)
 
@@ -128,29 +138,15 @@ class IdMintingTransformer(ElasticBaseTransformer):
             ids_embedded=len(id_map),
         )
 
-        for row_id, raw_doc, _ in works:
+        for work in works:
             try:
-                embedded = embed_canonical_ids(raw_doc, id_map)
+                embedded = embed_canonical_ids(work.raw_doc, id_map)
             except Exception as e:
-                self._add_error(e, "embed", row_id)
+                self._add_error(e, "embed", work.source_id)
                 continue
-            yield row_id, embedded
-
-    def _get_document_id(self, record: dict) -> str:
-        return str(record["state"]["canonicalId"])
-
-    def _get_document_version(self, record: dict) -> int:
-        return version_from_modified_time(record["state"]["sourceModifiedTime"])
-
-    def _generate_bulk_load_actions(
-        self, records: Iterable[dict], index_name: str
-    ) -> Generator[dict[str, Any]]:
-        # Guard on source time so an overlapping run cannot overwrite a newer copy.
-        for record in records:
-            yield {
-                "_index": index_name,
-                "_id": self._get_document_id(record),
-                "_source": record,
-                "_version": self._get_document_version(record),
-                "_version_type": "external_gte",
-            }
+            yield Document(
+                source_id=work.source_id,
+                target_id=str(embedded["state"]["canonicalId"]),
+                body=embedded,
+                version=work.version,
+            )

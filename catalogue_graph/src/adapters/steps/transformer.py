@@ -29,6 +29,7 @@ from adapters.transformers.source_work_transformer import (
 )
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
+from core.sinks import ElasticsearchSink
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -208,14 +209,14 @@ def handler(
         api_key_name=config.ES_API_KEY_NAME,
     )
 
-    transformer.stream_to_index(es_client, index_name)
+    result = transformer.stream_to(ElasticsearchSink(es_client, index_name))
 
     logger.info(
         "Transformation complete",
         job_id=event.job_id,
         transformer_type=event.transformer_type,
-        success_count=len(transformer.successful_ids),
-        failure_count=len(transformer.errors),
+        success_count=len(result.accepted_ids),
+        failure_count=len(result.errors),
         changeset_ids=event.changeset_ids,
         ids=event.ids,
         unmatched_count=len(transformer.source.unmatched_ids),
@@ -225,8 +226,8 @@ def handler(
     report = TransformerReport(
         pipeline_date=config.PIPELINE_DATE,
         transformer_type=event.transformer_type,
-        successful_ids=transformer.successful_ids,
-        errors=transformer.errors,
+        successful_ids=result.accepted_ids,
+        errors=result.errors,
         unmatched_ids=transformer.source.unmatched_ids,
         changeset_ids=event.changeset_ids,
         ids=event.ids or [],
@@ -240,8 +241,8 @@ def handler(
     return TransformerResult.model_validate(
         {
             **event.model_dump(),
-            "success_count": len(transformer.successful_ids),
-            "failure_count": len(transformer.errors),
+            "success_count": len(result.accepted_ids),
+            "failure_count": len(result.errors),
             "unmatched_count": len(transformer.source.unmatched_ids),
             "report_s3_uri": report.s3_uri,
         },

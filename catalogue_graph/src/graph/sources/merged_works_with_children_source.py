@@ -5,7 +5,7 @@ from typing import Any
 import structlog
 from elasticsearch import Elasticsearch
 
-from graph.sources.merged_works_source import MergedWorksSource
+from graph.sources.merged_works_source import MERGED_TIME_FIELD, MergedWorksSource
 from graph.transformers.catalogue.raw_work import RawCatalogueWork
 from models.events import BasePipelineEvent, PipelinePitIds
 
@@ -56,7 +56,15 @@ class MergedWorksWithChildrenSource(MergedWorksSource):
         ]
 
         child_query = {"bool": {"should": child_clauses, "minimum_should_match": 1}}
-        full_query = {"bool": {"must": [self.base_query, child_query]}}
+        must_clauses = [self.base_query, child_query]
+        if self.event.window is not None:
+            # A child merged later has no Work node yet, so would leave an orphan node; its own window covers it
+            must_clauses.append(
+                self.event.window.to_elasticsearch_query(
+                    MERGED_TIME_FIELD, lower_bound=False
+                )
+            )
+        full_query = {"bool": {"must": must_clauses}}
 
         unscoped_event = self.event.model_copy(update={"window": None, "ids": None})
         unscoped_event.pit_ids = PipelinePitIds(merged=self.pit_id)

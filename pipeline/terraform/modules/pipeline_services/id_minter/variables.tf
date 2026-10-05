@@ -30,6 +30,11 @@ variable "env_vars" {
     APPLY_MIGRATIONS            = optional(string, "false")
     S3_BUCKET                   = optional(string)
     S3_PREFIX                   = optional(string, "dev")
+    # Experimental append-only copy of works-identified in S3 Tables.
+    ENABLE_ICEBERG_WRITES       = optional(string, "false")
+    WORKS_IDENTIFIED_TABLE_NAME = optional(string)
+    WORKS_IDENTIFIED_NAMESPACE  = optional(string)
+    S3_TABLES_BUCKET            = optional(string)
   })
 }
 

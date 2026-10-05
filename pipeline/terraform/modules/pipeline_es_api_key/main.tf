@@ -1,14 +1,18 @@
 locals {
-  read_descriptor = {
-    indices = [
-      {
-        # Set explicitly: the provider reports the default, so omitting it causes a perpetual diff.
-        allow_restricted_indices = false,
-        names                    = var.read_from
-        privileges               = ["read"]
-      }
-    ]
-  }
+  # Only emit "cluster" when requested so existing index-only keys keep their descriptor unchanged.
+  read_descriptor = merge(
+    {
+      indices = [
+        {
+          # Set explicitly: the provider reports the default, so omitting it causes a perpetual diff.
+          allow_restricted_indices = false,
+          names                    = var.read_from
+          privileges               = var.read_privileges
+        }
+      ]
+    },
+    length(var.cluster_privileges) > 0 ? { cluster = var.cluster_privileges } : {}
+  )
 
   write_descriptor = {
     indices = [
@@ -20,15 +24,11 @@ locals {
     ]
   }
 
-  role_descriptors = length(var.write_to) > 0 && length(var.read_from) > 0 ? {
-    read  = local.read_descriptor
-    write = local.write_descriptor
-    } : (length(var.read_from) > 0 ?
-    {
-      read = local.read_descriptor
-      } : {
-      write = local.write_descriptor
-  })
+  # merge rather than a conditional: the two descriptors no longer share a type once "cluster" is optional.
+  role_descriptors = merge(
+    length(var.read_from) > 0 ? { read = local.read_descriptor } : {},
+    length(var.write_to) > 0 ? { write = local.write_descriptor } : {},
+  )
 }
 
 resource "elasticstack_elasticsearch_security_api_key" "pipeline_service" {

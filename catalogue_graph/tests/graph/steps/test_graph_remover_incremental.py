@@ -710,3 +710,121 @@ def test_work_identifiers_parent_edge_safety_threshold() -> None:
 
     run_work_identifiers_edge_remover(force_pass=True)
     check_work_identifiers_deleted_edges(set(edges_to_remove))
+
+
+def mock_neptune_get_disconnected_path_identifier_nodes(node_ids: list) -> None:
+    add_neptune_mock_response(
+        expected_query="MATCH (n: PathIdentifier) WHERE NOT (n)-[:HAS_PATH_IDENTIFIER]-() RETURN id(n) AS id",
+        expected_params={},
+        mock_results=[{"id": i} for i in node_ids],
+    )
+
+
+def mock_work_identifiers_node_removal(
+    disconnected_ids: list[str], nodes_to_remove: list[str], node_count: int = 1000
+) -> None:
+    mock_neptune_get_total_node_count("PathIdentifier", node_count)
+    mock_neptune_get_disconnected_path_identifier_nodes(disconnected_ids)
+    mock_neptune_get_existing_nodes_response(nodes_to_remove)
+    mock_neptune_delete_nodes_response(nodes_to_remove)
+    mock_neptune_secrets("dev")
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="dev")
+
+
+def run_work_identifiers_node_remover(force_pass: bool = False) -> None:
+    MockElasticsearchClient.apply_range_filters = True
+    lambda_handler(
+        {
+            "transformer_type": "catalogue_work_identifiers",
+            "entity_type": "nodes",
+            "pipeline_date": "dev",
+            "graph_date": "dev",
+            "window": WORK_IDENTIFIERS_WINDOW,
+            "force_pass": force_pass,
+        },
+        None,
+    )
+
+
+def check_work_identifiers_deleted_nodes(expected_ids: set[str]) -> None:
+    s3_uri = get_remover_s3_uri(
+        "dev",
+        "dev",
+        "windows/20250101T1145-20250101T1200/deleted_ids/catalogue_work_identifiers__nodes.parquet",
+    )
+    with MockSmartOpen.open(s3_uri, "rb") as f:
+        df = pl.read_parquet(f)
+        ids = pl.Series(df.select(pl.first())).to_list() if len(df.columns) else []
+        assert set(ids) == expected_ids
+
+
+def test_work_identifiers_nodes_keeps_disconnected_node_with_visible_work() -> None:
+    # Merged after the window, so its Work node and HAS_PATH_IDENTIFIER edge are not in the graph yet
+    add_path_work(
+        "future01", "axiell:P/axiell:C", "C", merged_time="2025-01-01T12:10:00Z"
+    )
+    # RefNo mode: the full path is the path identifier
+    add_path_work("refno001", "PP/ABC/1", "PP/ABC/1", merged_time=OUTSIDE_WINDOW)
+    mock_work_identifiers_node_removal(
+        disconnected_ids=["axiell:C", "PP/ABC/1", "axiell:GONE"],
+        nodes_to_remove=["axiell:GONE"],
+    )
+
+    run_work_identifiers_node_remover()
+
+    check_work_identifiers_deleted_nodes({"axiell:GONE"})
+
+
+def test_work_identifiers_nodes_removes_node_left_behind_by_moved_record() -> None:
+    # The work now maps to axiell:A2, so nothing maps to its old node axiell:A
+    add_path_work("moved001", "axiell:NEW/axiell:A2", "A2", merged_time=OUTSIDE_WINDOW)
+    mock_work_identifiers_node_removal(
+        disconnected_ids=["axiell:A"], nodes_to_remove=["axiell:A"]
+    )
+
+    run_work_identifiers_node_remover()
+
+    check_work_identifiers_deleted_nodes({"axiell:A"})
+    # The scan covers the whole merged index, not just the window
+    assert MockElasticsearchClient.queries[-1] == {
+        "bool": {
+            "must": [
+                {"match": {"type": "Visible"}},
+                {"exists": {"field": "data.collectionPath.path"}},
+            ]
+        }
+    }
+
+
+def test_work_identifiers_nodes_skips_es_scan_without_disconnected_nodes() -> None:
+    mock_work_identifiers_node_removal(disconnected_ids=[], nodes_to_remove=[])
+
+    run_work_identifiers_node_remover()
+
+    check_work_identifiers_deleted_nodes(set())
+    assert MockElasticsearchClient.queries == []
+
+
+def test_work_identifiers_nodes_threshold_counts_only_removed_ids() -> None:
+    # Five disconnected of ten nodes, but four still have a work, so one in ten is removed
+    for i in range(4):
+        add_path_work(f"future0{i}", f"axiell:P/axiell:C{i}", f"C{i}")
+    disconnected = [f"axiell:C{i}" for i in range(4)] + ["axiell:GONE"]
+    mock_work_identifiers_node_removal(
+        disconnected_ids=disconnected, nodes_to_remove=["axiell:GONE"], node_count=10
+    )
+
+    run_work_identifiers_node_remover()
+
+    check_work_identifiers_deleted_nodes({"axiell:GONE"})
+
+
+def test_work_identifiers_nodes_threshold_still_fails_on_large_removal() -> None:
+    mock_work_identifiers_node_removal(
+        disconnected_ids=["axiell:GONE1", "axiell:GONE2", "axiell:GONE3"],
+        nodes_to_remove=["axiell:GONE1", "axiell:GONE2", "axiell:GONE3"],
+        node_count=10,
+    )
+
+    with pytest.raises(ValueError, match="Fractional change 0.3 exceeds threshold"):
+        run_work_identifiers_node_remover()
