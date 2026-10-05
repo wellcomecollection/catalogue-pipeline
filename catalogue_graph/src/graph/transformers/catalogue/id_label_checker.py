@@ -1,6 +1,9 @@
 import os
+import re
+import unicodedata
 from collections import defaultdict
 
+from adapters.transformers.utils.text_utils import trim_trailing_period
 from models.events import BasePipelineEvent, BulkLoaderEvent
 from utils.aws import get_csv_from_s3
 from utils.types import ConceptSource, ConceptType, TransformerType
@@ -32,6 +35,34 @@ def _concept_source_from_id(source_id: str) -> ConceptSource:
         return "nlm-mesh"
 
     raise ValueError(f"Unexpected source id {source_id}")
+
+
+def _label_tokens(label: str) -> list[str]:
+    # Strip diacritics but keep non-Latin scripts, which would otherwise tokenise to nothing.
+    folded = "".join(
+        c for c in unicodedata.normalize("NFKD", label) if not unicodedata.combining(c)
+    )
+    return [token for token in re.split(r"[\W_]+", folded.lower()) if token]
+
+
+def _name_tokens(heading_tokens: list[str]) -> list[str]:
+    """Tokens before the first date, so a name-title heading's title does not count as the name."""
+    for index, token in enumerate(heading_tokens):
+        if token.isdigit():
+            return heading_tokens[:index] or heading_tokens
+
+    return heading_tokens
+
+
+def _is_plausible_name_alias(label: str, preferred_label: str) -> bool:
+    """Reject homonym aliases and bare surnames; see wellcomecollection/platform#6679 for the census."""
+    label_tokens = _label_tokens(label)
+    name_tokens = _name_tokens(_label_tokens(preferred_label))
+
+    if not set(label_tokens) & set(name_tokens):
+        return False
+
+    return not (len(label_tokens) == 1 and len(name_tokens) > 1)
 
 
 class IdLabelChecker:
@@ -91,16 +122,20 @@ class IdLabelChecker:
     def _add_label_mapping(
         self, label: str, source_id: str, concept_source: ConceptSource
     ) -> None:
-        self.labels_to_ids[concept_source][label].append(source_id)
+        self.labels_to_ids[concept_source][self._normalise_label(label)].append(
+            source_id
+        )
 
     def _add_alternative_label_mappings(
         self, labels: list[str], source_id: str, concept_source: ConceptSource
     ) -> None:
-        for label in labels:
+        # Dedupe so "X" and "X." on one record do not make the key ambiguous.
+        for label in dict.fromkeys(self._normalise_label(label) for label in labels):
             self.alternative_labels_to_ids[concept_source][label].append(source_id)
 
     def _normalise_label(self, label: str) -> str:
-        return label.lower()
+        # Mirrors the label-derived id's trailing-stop handling, so "X" and "X." share a key.
+        return trim_trailing_period(label.lower())
 
     def get_id(self, label: str, concept_type: ConceptType) -> str | None:
         """
@@ -134,6 +169,13 @@ class IdLabelChecker:
 
                 # Try not to match things to people/organisations
                 if concept_type not in AGENT_TYPES and source == "lc-names":
+                    continue
+
+                # MeSH and LCSH aliases are mostly plural or expanded forms of the heading and are
+                # kept as they are; only LC Names aliases are checked against the preferred label.
+                if source == "lc-names" and not _is_plausible_name_alias(
+                    label, self.ids_to_labels[source][source_ids[0]]
+                ):
                     continue
 
                 return source_ids[0]
