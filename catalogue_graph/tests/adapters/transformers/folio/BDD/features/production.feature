@@ -11,7 +11,7 @@ Feature: production (MARC 260, 264 and 008)
 
   These scenarios mirror the unit tests of the Scala transformer this
   replaces (SierraProductionTest.scala), including its test data, so the two
-  can be compared directly.
+  can be compared directly. Deliberate divergences are grouped at the end.
 
   https://www.loc.gov/marc/bibliographic/bd260.html
   https://www.loc.gov/marc/bibliographic/bd264.html
@@ -151,30 +151,6 @@ Feature: production (MARC 260, 264 and 008)
     And its 2nd date has the label "1983"
     And its 3rd date has the label "copyright 2005"
 
-  # The Scala test uses a 264 with no subfields, which gives an event with an
-  # empty label. The Python pipeline drops events with an empty label, so
-  # these scenarios add a place.
-  Scenario Outline: The second indicator of a 264 gives the function
-    Given the MARC record has a 264 field with indicators " " "<ind2>" with subfield "a" value "London"
-    When I transform the MARC record
-    Then the only production has the function.label "<function>"
-
-    Examples:
-      | ind2 | function     |
-      | 0    | Production   |
-      | 1    | Publication  |
-      | 2    | Distribution |
-      | 3    | Manufacture  |
-
-  # A deliberate divergence from the Scala implementation, which fails the
-  # whole record with a CataloguingException. The Python pipeline logs an
-  # error and skips the field. Neither Sierra nor FOLIO holds such a record.
-  Scenario: A 264 with an unrecognised second indicator is skipped
-    Given the MARC record has a 264 field with indicators " " "x" with subfield "a" value "London"
-    When I transform the MARC record
-    Then there are no productions
-    And an error "Unrecognised second indicator for production function" is logged with indicator2 "x"
-
   Scenario: A 264 copyright statement (second indicator 4) is ignored
     Given the MARC record has a 264 field with indicators " " "4" with subfield "c" value "copyright 2005"
     And the MARC record has another 264 field with indicators " " "3" with subfield "a" value "Cambridge :" and subfield "b" value "Kinsey Printing Company"
@@ -212,18 +188,9 @@ Feature: production (MARC 260, 264 and 008)
     And its 1st date has the label "1981-"
 
   Scenario: 264 place, agent and date labels lose their trailing punctuation
-    Given the MARC record has a 264 field with indicators " " "1" with subfields:
-      | code | value          |
-      | a    | Boston:        |
-      | a    | Cambridge :    |
-      | b    | ABC Publishers, |
-      | b    | Iverson Ltd. , |
-      | c    | 2002.          |
-      | c    | 1983 .         |
-      | c    | copyright 2005. |
+    Given the MARC record has a 264 field with indicators " " "1" with subfield "a" value "Boston:" and subfield "a" value "Cambridge : " and subfield "b" value "ABC Publishers," and subfield "b" value "Iverson Ltd. , " and subfield "c" value "2002." and subfield "c" value "1983 ." and subfield "c" value "copyright 2005."
     When I transform the MARC record
-    Then there is 1 production
-    And the 1st production has the label "Boston: Cambridge : ABC Publishers, Iverson Ltd. , 2002. 1983 . copyright 2005."
+    Then the only production has the label "Boston: Cambridge :  ABC Publishers, Iverson Ltd. ,  2002. 1983 . copyright 2005."
     And its 1st place has the label "Boston"
     And its 2nd place has the label "Cambridge"
     And its 1st agent has the label "ABC Publishers"
@@ -235,6 +202,24 @@ Feature: production (MARC 260, 264 and 008)
   Scenario: When both 260 and 264 are present, the 264 is used
     Given the MARC record has a 260 field with subfield "a" value "Paris"
     And the MARC record has a 264 field with indicators " " "0" with subfield "a" value "London"
+    When I transform the MARC record
+    Then the only production has the label "London"
+    And it has the function.label "Production"
+    And its 1st place has the label "London"
+
+  Scenario: The 260 is used when the only 264 is a copyright statement
+    Given the MARC record has a 260 field with subfield "a" value "Paris"
+    And the MARC record has a 264 field with indicators " " "4" with subfield "a" value "London"
+    When I transform the MARC record
+    Then the only production has the label "Paris"
+    And it has no function
+    And its 1st place has the label "Paris"
+
+  Scenario: Copyright and blank-indicator 264s beside a valid one are ignored without falling back to the 260
+    Given the MARC record has a 260 field with subfield "a" value "Paris"
+    And the MARC record has a 264 field with indicators " " "0" with subfield "a" value "London"
+    And the MARC record has another 264 field with indicators " " "4" with subfield "a" value "Test" and subfield "b" value "Test" and subfield "c" value "Test"
+    And the MARC record has another 264 field with indicators " " " " with subfield "a" value "Berlin"
     When I transform the MARC record
     Then the only production has the label "London"
     And it has the function.label "Production"
@@ -324,3 +309,29 @@ Feature: production (MARC 260, 264 and 008)
     And its 1st date has the label "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴"
     And its 1st date has the range.from_time "1972-01-01T00:00:00Z"
     And its 1st date has the range.to_time "1972-12-31T23:59:59.999999999Z"
+
+  # Everything below is a deliberate divergence from the Scala implementation.
+
+  # The Scala test uses a 264 with no subfields, which gives an event with an
+  # empty label. The Python pipeline drops events with an empty label, so
+  # these scenarios add a place.
+  Scenario Outline: The second indicator of a 264 gives the function
+    Given the MARC record has a 264 field with indicators " " "<ind2>" with subfield "a" value "London"
+    When I transform the MARC record
+    Then the only production has the function.label "<function>"
+
+    Examples:
+      | ind2 | function     |
+      | 0    | Production   |
+      | 1    | Publication  |
+      | 2    | Distribution |
+      | 3    | Manufacture  |
+
+  # The Scala fails the whole record with a CataloguingException. The Python
+  # pipeline logs an error and skips the field. Neither Sierra nor FOLIO holds
+  # such a record.
+  Scenario: A 264 with an unrecognised second indicator is skipped
+    Given the MARC record has a 264 field with indicators " " "x" with subfield "a" value "London"
+    When I transform the MARC record
+    Then there are no productions
+    And an error "Unrecognised second indicator for production function" is logged with indicator2 "x"
