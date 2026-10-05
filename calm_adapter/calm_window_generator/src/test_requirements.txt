@@ -50,7 +50,7 @@ tqdm==4.67.3
     # via -r requirements.txt
 typing-extensions==4.15.0
     # via exceptiongroup
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   -r requirements.txt
     #   botocore
