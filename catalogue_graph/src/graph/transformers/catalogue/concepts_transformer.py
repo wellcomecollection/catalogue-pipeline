@@ -53,8 +53,8 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
         """Extra pass over the source: works stream in no fixed order, so the first-seen type is run-dependent."""
         # In a windowed run the vote covers only the window's works, so a window with an
         # unusual type mix can match a different type from a full run, which votes over
-        # every work. The census found 28 label-derived concepts with a type-dependent
-        # outcome, 17 of them with a majority of 80% or more.
+        # every work. The nightly full edge re-extract and stale-edge removal converge the
+        # graph on the full vote (wellcomecollection/platform#6739).
         types: dict[str, Counter[ConceptType]] = defaultdict(Counter)
         for extracted in self.source.stream_raw():
             raw_concept = RawCatalogueConcept(extracted.concept)

@@ -37,6 +37,22 @@ resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
   state = var.enable_schedule ? "ENABLED" : "DISABLED"
 }
 
+resource "aws_scheduler_schedule" "graph_concepts_full" {
+  name                = "graph-concepts-full-run-${var.pipeline_date}"
+  schedule_expression = "cron(30 2 * * ? *)" # Nightly at 02:30 UTC, clear of the monthly run
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  target {
+    arn      = module.catalogue_graph_concepts_full_state_machine.state_machine_arn
+    role_arn = aws_iam_role.run_graph_pipeline_role.arn
+  }
+
+  state = var.enable_schedule ? "ENABLED" : "DISABLED"
+}
+
 resource "aws_iam_role" "run_graph_pipeline_role" {
   name = "run-graph-pipeline-role-${var.pipeline_date}"
 
@@ -66,7 +82,8 @@ resource "aws_iam_policy" "start_graph_pipeline" {
         Resource = [
           module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn,
           module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn,
-          module.catalogue_graph_pipeline_incremental_trigger_state_machine.state_machine_arn
+          module.catalogue_graph_pipeline_incremental_trigger_state_machine.state_machine_arn,
+          module.catalogue_graph_concepts_full_state_machine.state_machine_arn
         ]
       }
     ]
