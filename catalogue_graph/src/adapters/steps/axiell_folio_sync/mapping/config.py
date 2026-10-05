@@ -36,11 +36,6 @@ RECORD_TYPE_ITEM = "ITEM"  # only item-level records are synced
 # exists in the FOLIO tenant, so nothing needs provisioning. The table covers
 # 187,882 of 187,997 item records; the remaining 115 carry no 655$a and fail,
 # because there is no default (see MATERIAL_TYPE_FIELD).
-#
-# The digital rows are the ones to confirm with Collection Information, because
-# this tenant encodes requestability in the material type: a digital surrogate is
-# not the physical carrier a reader requests, hence the non-requestable halves.
-# See docs/axiell-folio-mapping-options.md section 1.
 MATERIAL_TYPE: dict[str, str] = {
     "Archives - Non-digital": "archive",
     "Archives - Digital": "archive",
@@ -81,23 +76,14 @@ ACCESS_ITEM_STATUS: dict[str, str] = {
     "DATAISSUES": "Unknown",
 }
 
-# Fallbacks used when the MARC record carries no value for a resolved field.
-#
-# The material type has none. It used to default to "book", which was wrong for
-# every record it applied to: this is an archival corpus and none of them is a
-# book. A record with no 655$a now fails and is reported, rather than being given
-# a plausible-looking wrong type that nothing surfaces. See MATERIAL_TYPE_FIELD.
-# The default loan type, and currently the only one any item gets: no AxC field
-# is mapped to the loan type, so nothing ever overrides this.
-#
-# AxC has two candidate sources, and it is not settled which should drive this or
-# whether open archival material should circulate at all. The access category
-# (506$f) was mapped here for a time, and so was the use restriction (540$a).
+# Fallbacks when MARC data is missing.
+# Material type has no default; records without 655$a fail rather than getting a
+# misleading type. See MATERIAL_TYPE_FIELD.
+# Loan type defaults to "Can circulate"; no AxC field currently overrides it.
 
 DEFAULT_LOAN_TYPE = "Can circulate"
-# Same principle for the item status: no access category means the item is not
-# presented as available. A category that is present but unrecognised does not
-# reach this default either. _item_status raises instead.
+# Item status defaults to "Unavailable"; unrecognised access categories raise
+# instead of silently falling through.
 DEFAULT_ITEM_STATUS = "Unavailable"
 DEFAULT_HOLDINGS_SOURCE = "MARC"
 # Prefix for AxC's current location (852$b) in administrativeNotes. It identifies
@@ -179,21 +165,12 @@ def _leading_location_code(context: str | None) -> str:
 
 
 def _folio_location(location: str | None) -> str | None:
-    """Resolve an AxC location to the FOLIO leaf location name to look up.
+    """Resolve an AxC location to the matching FOLIO leaf location.
 
-    Matches :data:`LOCATION_RULES` against the *leading code* rather than against
-    the raw string: the codes are the hierarchy's own units, so ``"215"`` cannot
-    also swallow ``"2150"`` or ``"215A"``, which a bare ``startswith("215")``
-    would.
-
-    When no rule matches, the *leading code* is what falls through to the FOLIO
-    code/name lookup — not the raw value. Returning the raw value made that
-    fallback unreachable for real data: ``984$b`` is a hierarchy path like
-    ``"444/444;B11/…"``, which no tenant knows as a code or a name, so an
-    unlisted-but-valid location failed the record instead of resolving. The
-    leading code is the part a FOLIO location code can actually equal. A location
-    still unknown to the tenant is then reported as unresolved rather than
-    quietly shelved somewhere plausible.
+    Match on the leading code (before "/" or ";") so hierarchy units like
+    ``"215"`` do not swallow values like ``"2150"`` or ``"215A"``. If no rule
+    matches, fall back to that leading code for tenant lookup; unresolved
+    locations are reported instead of being silently shelved.
     """
     code = _leading_location_code(location)
     if not code:

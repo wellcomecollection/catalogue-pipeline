@@ -144,19 +144,8 @@ def build_holdings(rec: CanonicalRecord, ref: RefCache) -> Holdings:
 def _item_status(rec: CanonicalRecord) -> Status:
     """The FOLIO item status, from the AxC access category.
 
-    This is not resolved through :func:`_resolve` like the other mapped fields.
-    Item statuses are a fixed enum in the FOLIO item schema rather than tenant
-    reference data, so the table value is the final answer and there is nothing
-    to look up.
-
-    An absent category takes ``DEFAULT_ITEM_STATUS``, because an item of unknown
-    access state should not be presented as available. A category that is present
-    but unrecognised raises instead: an absent value is a data gap, an
-    unrecognised one is a mapping gap, and only the second should stop a record.
-
-    This is the only thing that reads the access category, so the guard has to
-    live here. The loan type used to raise on an unmapped category as well, but
-    it no longer reads the field.
+    Statuses are fixed FOLIO enums, not tenant reference data. Missing
+    categories use the default; unrecognised categories raise a mapping error.
     """
     category = (rec.access_category or "").strip()
     if not category:

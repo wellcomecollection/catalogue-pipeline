@@ -41,21 +41,8 @@ _READONLY_FIELDS: frozenset[str] = frozenset(
 # instances do; holdings-storage 422s on it and items silently drop it.
 _STAFF_SUPPRESS_PATHS: frozenset[str] = frozenset({"/inventory/instances"})
 
-# Fields the sync sets when it creates an entity but must not send on update.
-#
-# This is a different problem from _READONLY_FIELDS. FOLIO accepts these on a
-# PUT; the trouble is that our value would win. item.status is mandatory
-# (mod-inventory's item schema lists it in "required", and status.name must be
-# one of a fixed enum), which is why the payload carries one at all. But once the
-# item exists, mod-circulation owns the field: check out, check in, requests,
-# transit and the lost workflows all write it, as do staff marking an item
-# Missing or Withdrawn. An update therefore leaves FOLIO's value alone rather
-# than resetting a checked-out item to Available, which would also discard
-# status.date, the read-only record of when the status really changed.
-#
-# These fields are required on update as well as on create, so an update cannot
-# simply drop them. It reads FOLIO's current value and sends that back, keeping
-# ours only as a backstop. See :func:`_payload_for_update`.
+# Fields required on create whose values FOLIO or another module owns after
+# creation. Updates preserve FOLIO's current value; see :func:`_payload_for_update`.
 _CREATE_ONLY_FIELDS: frozenset[str] = frozenset({"status"})
 
 
