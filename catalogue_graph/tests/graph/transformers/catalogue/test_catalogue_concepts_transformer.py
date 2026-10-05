@@ -9,7 +9,7 @@ from models.graph_edge import (
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
-from tests.mocks import get_mock_es_client
+from tests.mocks import MockElasticsearchClient, get_mock_es_client
 from tests.test_utils import (
     add_mock_merged_documents,
     add_mock_transformer_outputs_for_ontologies,
@@ -144,6 +144,77 @@ def test_catalogue_concepts_transformer_edges() -> None:
         ),
     )
     assert len([edge for edge in edges if edge.from_id == "kpeywdvq"]) == 1
+
+
+def _label_derived_concept(label: str, concept_type: str) -> dict:
+    return {
+        "id": {
+            "canonicalId": "cpindex1",
+            "sourceIdentifier": {
+                "identifierType": {"id": "label-derived"},
+                "ontologyType": concept_type,
+                "value": label.lower(),
+            },
+            "otherIdentifiers": [],
+            "type": "Identified",
+        },
+        "label": label,
+        "type": concept_type,
+    }
+
+
+def _add_mock_work(pipeline_date: str, work_id: str, data: dict) -> None:
+    MockElasticsearchClient.index(
+        f"works-denormalised-{pipeline_date}",
+        work_id,
+        {
+            "state": {"canonicalId": work_id},
+            "type": "Visible",
+            "data": {"subjects": [], "contributors": [], "genres": [], **data},
+        },
+    )
+
+
+@pytest.mark.parametrize("person_work_id", ["aaaaaaaa", "zzzzzzzz"])
+def test_catalogue_concepts_transformer_matches_on_the_most_common_type(
+    person_work_id: str,
+) -> None:
+    """
+    "Consumer price index" is a MeSH alternative label, which the type guard refuses for a
+    Person. The label is a Person on one work and a Concept on two, so the match must use
+    Concept whichever work streams first (the mock client streams works in id order).
+    """
+    pipeline_date = "2027-12-24"
+    graph_date = "2024-12-24"
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc", "mesh", "weco"], pipeline_date, graph_date
+    )
+
+    label = "Consumer price index"
+    subject = {**_label_derived_concept(label, "Concept")}
+    subject["concepts"] = [_label_derived_concept(label, "Concept")]
+    contributor = {
+        "id": {"type": "Unidentifiable"},
+        "agent": _label_derived_concept(label, "Person"),
+        "roles": [],
+        "primary": True,
+    }
+
+    _add_mock_work(pipeline_date, person_work_id, {"contributors": [contributor]})
+    _add_mock_work(pipeline_date, "mmmmmmmm", {"subjects": [subject]})
+    _add_mock_work(pipeline_date, "nnnnnnnn", {"subjects": [subject]})
+
+    edges = list(get_transformer(pipeline_date, graph_date)._stream_edges())
+
+    assert edges == [
+        ConceptHasSourceConcept(
+            from_id="cpindex1",
+            to_id="D004467",
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="label"
+            ),
+        )
+    ]
 
 
 def test_mismatched_pipeline_date() -> None:

@@ -15,6 +15,9 @@ module "bibs_merger" {
 
   resource_type = "bibs"
 
+  # Backstage-scale loads write ~300k bibs/hour; each task merges ~10/s.
+  max_capacity = 12
+
   container_image   = local.sierra_merger_image
   updates_topic_arn = module.bibs_reader_new.topic_arn
 

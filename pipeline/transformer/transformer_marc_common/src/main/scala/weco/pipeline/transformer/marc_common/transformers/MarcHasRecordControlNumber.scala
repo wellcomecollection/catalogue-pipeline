@@ -10,6 +10,8 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.marc_common.models.MarcField
 
+import scala.util.{Failure, Success, Try}
+
 // Implements logic for finding a source identifier for varFields with
 // MARC tag 648, 650, 651 and 655.  These are the fields we use for genre
 // and subject.
@@ -28,20 +30,26 @@ import weco.pipeline.transformer.marc_common.models.MarcField
 
 trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
   protected val defaultSecondIndicator: String = ""
-  private val urlLocPrefix: String = "http://idlocgov/authorities/subjects/"
-  private val urlNlmPrefix: String = "https://idnlmnihgov/mesh/"
+  // Dots are already stripped by the time these are matched
+  private val urlPrefixes: Seq[String] = Seq(
+    "http://idlocgov/authorities/subjects/",
+    "https://idlocgov/authorities/subjects/",
+    "http://idlocgov/authorities/names/",
+    "https://idlocgov/authorities/names/",
+    "http://idnlmnihgov/mesh/",
+    "https://idnlmnihgov/mesh/"
+  )
 
   protected def getLabel(field: MarcField): Option[String] =
     Option(field.subfields.filter(_.tag == "a").map(_.content).mkString(" "))
       .filter(_.isEmpty)
 
   protected def normalise(identifier: String): String = {
-    identifier
-      // Sort out dodgy punctuation and spacing
-      .replaceAll("[,.\\s]", "")
-      // Remove URL prefixes which exist on some otherwise valid LCSH or MeSH IDs
-      .stripPrefix(urlLocPrefix)
-      .stripPrefix(urlNlmPrefix)
+    // Sort out dodgy punctuation and spacing
+    val compacted = identifier.replaceAll("[,.\\s]", "")
+    // Remove URL prefixes from LCSH, LC Names and MeSH IDs
+    urlPrefixes
+      .foldLeft(compacted)(_ stripPrefix _)
       // Remove "(DNLM)" prefixes from MeSH IDs, which are an artefact of the original Sierra import
       .stripPrefix("(DNLM)")
   }
@@ -108,12 +116,22 @@ trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
 
     getIdentifierSubfieldContents(field) match {
       case Seq(subfieldContent) =>
-        getSourceIdentifier(
-          indicator2 = indicator2,
-          identifierValue = subfieldContent,
-          ontologyType = ontologyType
-        ).map(IdState.Identifiable(_))
-          .getOrElse(IdState.Unidentifiable)
+        Try(
+          getSourceIdentifier(
+            indicator2 = indicator2,
+            identifierValue = subfieldContent,
+            ontologyType = ontologyType
+          )
+        ) match {
+          case Success(Some(sourceIdentifier)) =>
+            IdState.Identifiable(sourceIdentifier)
+          case Success(None) => IdState.Unidentifiable
+          // Reject a bad identifier without failing the whole work
+          case Failure(e: IllegalArgumentException) =>
+            warn(s"${e.getMessage}, falling back to the label on $field")
+            getLabelDerivedIdentifier(ontologyType, field)
+          case Failure(e) => throw e
+        }
       case Nil =>
         getLabelDerivedIdentifier(ontologyType, field)
       case values =>

@@ -23,3 +23,8 @@ variable "namespace" {}
 variable "interservice_security_group_id" {}
 
 variable "fargate_service_boilerplate" {}
+
+variable "max_capacity" {
+  type    = number
+  default = 3
+}
