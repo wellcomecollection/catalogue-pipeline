@@ -17,7 +17,10 @@ logger = structlog.get_logger(__name__)
 # Punctuation is stripped before these are matched, so the dots are gone.
 URL_PREFIXES = (
     "http://idlocgov/authorities/subjects/",
+    "https://idlocgov/authorities/subjects/",
     "http://idlocgov/authorities/names/",
+    "https://idlocgov/authorities/names/",
+    "http://idnlmnihgov/mesh/",
     "https://idnlmnihgov/mesh/",
     "(DNLM)",
 )

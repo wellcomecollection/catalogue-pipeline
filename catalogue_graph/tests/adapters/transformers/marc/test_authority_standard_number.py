@@ -4,7 +4,10 @@ import pytest
 from pymarc.record import Field, Indicators, Subfield
 from structlog.testing import capture_logs
 
-from adapters.transformers.ebsco.authority_standard_number import extract_identifier
+from adapters.transformers.marc.authority_standard_number import (
+    extract_identifier,
+    normalise_identifier,
+)
 from models.pipeline.identifier import SourceIdentifier
 
 
@@ -57,16 +60,72 @@ def test_strips_dnlm_prefix() -> None:
     assert identifier.value == "D049671"
 
 
-@pytest.mark.parametrize("value", ["D000934", "sj97002429", "shsh85100861"])
+@pytest.mark.parametrize(
+    "value",
+    [
+        "D000934",
+        "sj97002429",
+        "shsh85100861",
+        "http://id.loc.gov/authorities/genreForms/gf2014026110",
+    ],
+)
 def test_an_invalid_loc_identifier_is_logged_and_dropped(value: str) -> None:
-    """The Scala throws here; the Python logs an error and leaves the concept label-derived."""
     with capture_logs() as logs:
         assert extract_identifier(_field("0", value), "Concept") is None
     assert [
         entry["value"]
         for entry in logs
         if entry["event"] == "Could not determine LoC scheme from identifier"
-    ] == [value]
+    ] == [normalise_identifier(value)]
+
+
+@pytest.mark.parametrize(
+    ("indicator2", "value", "identifier_type", "expected"),
+    [
+        ("0", "http://id.loc.gov/authorities/names/n90650979", "lc-names", "n90650979"),
+        (
+            "0",
+            "https://id.loc.gov/authorities/names/no2008087861",
+            "lc-names",
+            "no2008087861",
+        ),
+        (
+            "0",
+            "http://id.loc.gov/authorities/subjects/sh85062285",
+            "lc-subjects",
+            "sh85062285",
+        ),
+        (
+            "0",
+            "https://id.loc.gov/authorities/subjects/sh85062285",
+            "lc-subjects",
+            "sh85062285",
+        ),
+        ("2", "http://id.nlm.nih.gov/mesh/D004364", "nlm-mesh", "D004364"),
+        ("2", "https://id.nlm.nih.gov/mesh/D004364", "nlm-mesh", "D004364"),
+    ],
+)
+def test_strips_the_uri_prefix_over_http_or_https(
+    indicator2: str, value: str, identifier_type: str, expected: str
+) -> None:
+    identifier = _source_identifier(_field(indicator2, value))
+    assert identifier.identifier_type.id == identifier_type
+    assert identifier.value == expected
+
+
+def test_treats_a_uri_and_a_bare_id_for_the_same_authority_as_one_identifier() -> None:
+    field = Field(
+        tag="610",
+        indicators=Indicators(" ", "0"),
+        subfields=[
+            Subfield(code="0", value="n  86810287"),
+            Subfield(code="0", value="http://id.loc.gov/authorities/names/n86810287"),
+        ],
+    )
+    identifier = _source_identifier(field, ontology_type="Organisation")
+    assert identifier.identifier_type.id == "lc-names"
+    assert identifier.value == "n86810287"
+    assert identifier.ontology_type == "Organisation"
 
 
 def test_finds_a_mesh_identifier() -> None:

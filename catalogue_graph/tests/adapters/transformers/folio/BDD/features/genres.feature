@@ -132,16 +132,15 @@ Feature: genres (MARC 655)
     And its 1st concept has the source identifier ontology type "Genre"
     And its 1st concept has the source identifier value "sh85060628"
 
-  # Deliberate divergences from the Scala
-
   Scenario: A ǂ0 that is not an LoC identifier is logged and falls back to the label
-  The Scala throws on an unrecognised LoC prefix, failing the whole work.
     Given the MARC record has a 655 field with indicators "" "0" with subfield "a" value "Manuscripts" and subfield "x" value "Hindi" and subfield "0" value "MASHINI"
     When I transform the MARC record
     Then an error "Could not determine LoC scheme from identifier" is logged with tag "655" and value "MASHINI"
     And the only genre has the label "Manuscripts - Hindi"
     And its 1st concept has the source identifier type "label-derived"
     And its 1st concept has the source identifier value "manuscripts"
+
+  # Deliberate divergences from the Scala
 
   Scenario: "fl" inside a word in a chronological subdivision is kept in the identifier
   The Scala strips the string "fl" from Period labels when deriving the id, as an
