@@ -184,8 +184,10 @@ def test_the_shelf_location_comes_from_the_normal_location() -> None:
     )
 
     assert mapped is not None
-    # Holdings and item both resolve, and only ever on the normal location.
-    assert resolved == ["NORMAL/PATH", "NORMAL/PATH"]
+    # Holdings and item both resolve, and only ever on the normal location — as
+    # its leading code, which is the part a FOLIO location code can equal; the
+    # whole "/"-separated path never resolves against the tenant.
+    assert resolved == ["NORMAL", "NORMAL"]
     assert mapped.item.administrativeNotes == [
         f"{AXIELL_LOCATION_NOTE_PREFIX}: CURRENT/PATH"
     ]

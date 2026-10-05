@@ -14,7 +14,7 @@ Holdings record, and an Item. It does this through the FOLIO Inventory API.
 | MARC extraction primitive | `src/adapters/steps/axiell_folio_sync/mapping/marc.py` |
 | Payload contracts | `src/adapters/steps/axiell_folio_sync/mapping/payloads.py` |
 
-Mapping version: **2.6.0** (`config.VERSION`), stamped into every payload's
+Mapping version: **2.6.1** (`config.VERSION`), stamped into every payload's
 `meta` block so you can tell which rules produced a given record.
 
 ## What gets synced
@@ -199,6 +199,8 @@ segment is `;`-separated, so `984 $b` reads `215/215;B11/215;B11;MR/...` and its
 (`984 $c`) reads `215;B11;MR;84`. Taking the first component of each split gives
 `215` from either spelling, which is the unit these rules match. Comparing whole
 codes rather than string prefixes also means `215` cannot swallow `2150` or `215A`.
+Code and prefix matching is case-insensitive, as every other lookup in the mapping
+is: AxC does not control its own casing, and `resolve_location` folds case too.
 
 First match wins. FOLIO's hierarchy is institution, campus, library, location,
 but only the leaf is resolved (`RefCache` indexes by code and name, and a leaf
@@ -212,9 +214,8 @@ throughout.
 | `Deepstore` | Deepstore | Offsite (DS) | `AxC Deepstore` |
 | starts `CLW` | Constantine London West | Axiell sync | `AxC Constantine London West` |
 
-A location matching no rule is passed through to the ordinary FOLIO code/name
-lookup, and fails as an unresolved location if the tenant does not know it. There
-is no default.
+A location matching no rule falls through to the ordinary FOLIO code/name lookup
+as its **leading code**, not as the raw `984 $b` value:. There is no default.
 
 ### Defaults
 
@@ -259,4 +260,4 @@ Taken from `config.FIELDS`.
 - MARC extraction: `src/adapters/steps/axiell_folio_sync/mapping/marc.py`
 - payload contracts: `src/adapters/steps/axiell_folio_sync/mapping/payloads.py`
 
-Mapping version: `2.6.0` (`config.VERSION`).
+Mapping version: `2.6.1` (`config.VERSION`).

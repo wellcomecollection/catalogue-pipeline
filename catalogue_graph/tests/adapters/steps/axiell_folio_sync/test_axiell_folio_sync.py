@@ -799,14 +799,21 @@ def test_hard_delete_failure_is_reported_under_delete_stage(
         # Constantine London West: a prefix, so anything CLW… matches.
         ("CLW", "AxC Constantine London West"),
         ("CLW123/CLW;A", "AxC Constantine London West"),
+        # Rules are case-insensitive, like every other lookup in the mapping:
+        # AxC does not control its own casing and resolve_location folds case,
+        # so a re-cased code must not slip past the rule that owns it.
+        ("deepstore", "AxC Deepstore"),
+        ("DEEPSTORE/ds;1", "AxC Deepstore"),
+        ("clw123", "AxC Constantine London West"),
         # Codes that merely start with the digits of a rule must NOT match: the
         # leading code is compared whole.
-        ("2150/x", "2150/x"),
-        ("215A;B", "215A;B"),
+        ("2150/x", "2150"),
+        ("215A;B", "215A"),
         ("21", "21"),
-        # Anything unlisted passes through, to resolve as a FOLIO code or name or
-        # else be reported as unresolved.
+        # Anything unlisted falls through as its *leading code*, which is the part
+        # a FOLIO location code can equal — a whole hierarchy path never resolves.
         ("STACK", "STACK"),
+        ("444/444;B11/444;B11;MR", "444"),
         ("", ""),
         (None, None),
     ],
@@ -822,12 +829,8 @@ def test_folio_location_rules(
 def test_every_location_rule_names_its_folio_hierarchy() -> None:
     """The parent names are documentation, not lookup keys, but they are what was
     agreed and what someone provisioning the tenant needs, so none may be blank."""
-    from adapters.steps.axiell_folio_sync.mapping import (
-        FOLIO_INSTITUTION,
-        LOCATION_RULES,
-    )
+    from adapters.steps.axiell_folio_sync.mapping import LOCATION_RULES
 
-    assert FOLIO_INSTITUTION == "Wellcome Collection"
     assert len(LOCATION_RULES) == 3
     for rule in LOCATION_RULES:
         assert rule.location.startswith("AxC ")

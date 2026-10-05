@@ -16,7 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # Bumped whenever the mapping rules change; stamped into every payload's meta.
-VERSION = "2.6.0"
+VERSION = "2.6.1"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────
@@ -108,12 +108,12 @@ AXIELL_LOCATION_NOTE_PREFIX = "Axiell Current Location"
 # (the (AltRefNo)-prefixed 035$a).
 LOCAL_IDENTIFIER_TYPE = "Local identifier"
 
-# AxC current_location (MARC 852$b) codes that map to fixed FOLIO locations.
+# AxC normal-location (MARC 984$b) codes that map to fixed FOLIO locations.
 # FOLIO's location hierarchy is institution → campus → library → location, but the
 # sync resolves a single *leaf* location UUID: RefCache indexes locations by code
-# and name only, and a leaf implies its parents. The parent names are recorded on
-# Parent names document the agreed hierarchy but are not used for lookup.
-FOLIO_INSTITUTION = "Wellcome Collection"
+# and name only, and a leaf implies its parents. Every rule below sits under the
+# "Wellcome Collection" institution; each rule records its campus and library so
+# the agreed hierarchy is reviewable here, but only ``location`` is ever looked up.
 
 
 @dataclass(frozen=True)
@@ -123,13 +123,25 @@ class LocationRule:
     Matching is on the *leading code* of the AxC location hierarchy — see
     :func:`_folio_location` for why that is the unit, rather than a prefix of the
     whole string. ``codes`` match that code exactly; ``prefixes`` match its start.
+    Both are case-insensitive, like every other lookup in this module: AxC is not
+    a controlled source of casing, and ``resolve_location`` folds case too, so a
+    rule must not be the one thing that a re-cased value slips past.
     """
 
     location: str  # FOLIO leaf location name — the only part that is resolved
+    # The agreed parent names. Reference only: a leaf location implies its
+    # parents in FOLIO, so nothing here is sent or resolved.
     campus: str
     library: str
-    codes: tuple[str, ...] = ()  # leading code, matched exactly
-    prefixes: tuple[str, ...] = ()  # leading code, matched by prefix
+    codes: tuple[str, ...] = ()  # leading code, matched exactly (case-insensitive)
+    prefixes: tuple[str, ...] = ()  # leading code, matched by prefix (case-insensitive)
+
+    def matches(self, code: str) -> bool:
+        """Whether ``code`` — a leading location code — selects this rule."""
+        folded = code.casefold()
+        if folded in {known.casefold() for known in self.codes}:
+            return True
+        return any(folded.startswith(prefix.casefold()) for prefix in self.prefixes)
 
 
 # The agreed AxC → FOLIO location mapping. First match wins.
@@ -172,16 +184,24 @@ def _folio_location(location: str | None) -> str | None:
     Matches :data:`LOCATION_RULES` against the *leading code* rather than against
     the raw string: the codes are the hierarchy's own units, so ``"215"`` cannot
     also swallow ``"2150"`` or ``"215A"``, which a bare ``startswith("215")``
-    would. When no rule matches, the value is returned unchanged so it can still
-    resolve as a FOLIO code or name — and, failing that, be reported as an
-    unresolved location rather than quietly shelved somewhere plausible.
+    would.
+
+    When no rule matches, the *leading code* is what falls through to the FOLIO
+    code/name lookup — not the raw value. Returning the raw value made that
+    fallback unreachable for real data: ``984$b`` is a hierarchy path like
+    ``"444/444;B11/…"``, which no tenant knows as a code or a name, so an
+    unlisted-but-valid location failed the record instead of resolving. The
+    leading code is the part a FOLIO location code can actually equal. A location
+    still unknown to the tenant is then reported as unresolved rather than
+    quietly shelved somewhere plausible.
     """
     code = _leading_location_code(location)
-    if code:
-        for rule in LOCATION_RULES:
-            if code in rule.codes or (rule.prefixes and code.startswith(rule.prefixes)):
-                return rule.location
-    return location
+    if not code:
+        return location
+    for rule in LOCATION_RULES:
+        if rule.matches(code):
+            return rule.location
+    return code
 
 
 def _instance_hrid(source_id: str) -> str:
