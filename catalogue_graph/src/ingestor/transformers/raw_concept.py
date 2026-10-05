@@ -187,26 +187,16 @@ class RawNeptuneConcept:
 
     @property
     def alternative_labels(self) -> list[str]:
+        # Every source's preferred heading stays searchable, not just the one chosen as the label
         alternative_labels: set[str] = set()
         for source_concept in self.raw_concept.source_concepts:
-            for alternative_label in source_concept.properties.alternative_labels:
-                if len(alternative_label) > 0:
-                    standardised_label = standardise_label(alternative_label)
-                    if standardised_label is not None:
-                        alternative_labels.add(standardised_label)
+            properties = source_concept.properties
+            for label in [properties.label, *properties.alternative_labels]:
+                if standardised := standardise_label(label):
+                    alternative_labels.add(standardised)
 
-        # Keep the heading displaced by a weco-authority label searchable
-        label, source = get_priority_label(self.raw_concept, QUERY_SOURCE_PRIORITY)
-        if source == "weco-authority":
-            next_sources = [s for s in QUERY_SOURCE_PRIORITY if s != source]
-            try:
-                displaced, _ = get_priority_label(self.raw_concept, next_sources)
-                if displaced != label:
-                    alternative_labels.add(displaced)
-            except MissingLabelError:
-                pass
-
-        return sorted(list(alternative_labels))
+        alternative_labels -= {self.label, self.display_label}
+        return sorted(alternative_labels)
 
     @property
     def description(self) -> ConceptDescription | None:

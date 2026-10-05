@@ -105,7 +105,23 @@ def test_a_blank_weco_authority_label_falls_through() -> None:
 
     assert result.query.label == "Caricature"
     assert result.display.displayLabel == "Caricature"
-    assert result.query.alternativeLabels == ["Caricatures", "Cartoons"]
+    assert "" not in result.query.alternativeLabels
+
+
+def test_every_other_source_heading_is_an_alternative_label() -> None:
+    # The MeSH sibling, the LCSH heading and both Wikidata labels stay searchable; the chosen label does not repeat
+    result = _transform(load_json_fixture(SIBLINGS_FIXTURE))
+
+    assert result.query.label == "Caricature"
+    assert result.query.alternativeLabels == [
+        "Caricatures",
+        "Caricatures and cartoons",
+        "Cartoon",
+        "Cartoons",
+        "Wikidata label",
+        "Wikidata label without description",
+    ]
+    assert result.display.alternativeLabels == result.query.alternativeLabels
 
 
 def test_a_source_concept_without_a_description_does_not_blank_another() -> None:
@@ -118,7 +134,7 @@ def test_a_source_concept_without_a_description_does_not_blank_another() -> None
     )
 
 
-def test_weco_authority_wins_query_and_display_and_keeps_the_displaced_heading() -> (
+def test_weco_authority_wins_query_and_display_and_keeps_the_displaced_headings() -> (
     None
 ):
     mock_concept = load_json_fixture(SIBLINGS_FIXTURE)
@@ -128,7 +144,29 @@ def test_weco_authority_wins_query_and_display_and_keeps_the_displaced_heading()
 
     assert result.query.label == "Cartoons"
     assert result.display.displayLabel == "Cartoons"
-    assert result.query.alternativeLabels == ["Caricature", "Caricatures", "Cartoons"]
+    assert result.query.alternativeLabels == [
+        "Caricature",
+        "Caricatures",
+        "Caricatures and cartoons",
+        "Cartoon",
+        "Wikidata label",
+        "Wikidata label without description",
+    ]
+    assert result.display.alternativeLabels == result.query.alternativeLabels
+
+
+def test_query_and_display_labels_are_not_alternative_labels() -> None:
+    # LC Names outranks Wikidata for querying but not for display, so the two labels differ and both must be dropped
+    mock_concept = load_json_fixture(SIBLINGS_FIXTURE)
+    for source_id in ["sh85020238", "D019492", "D019493"]:
+        _source_concept(mock_concept, source_id)["~properties"]["source"] = "lc-names"
+
+    result = _transform(mock_concept)
+
+    assert result.query.label == "Caricature"
+    assert result.display.displayLabel == "Wikidata label without description"
+    assert "Caricature" not in result.query.alternativeLabels
+    assert "Wikidata label without description" not in result.query.alternativeLabels
     assert result.display.alternativeLabels == result.query.alternativeLabels
 
 
@@ -149,4 +187,5 @@ def test_lowest_id_weco_authority_wins_whether_or_not_another_is_linked(
 
     assert result.query.label == "Another Wellcome Label"
     assert result.display.displayLabel == "Another Wellcome Label"
-    assert "Wellcome Label" not in result.query.alternativeLabels
+    assert "Wellcome Label" in result.query.alternativeLabels
+    assert "Another Wellcome Label" not in result.query.alternativeLabels
