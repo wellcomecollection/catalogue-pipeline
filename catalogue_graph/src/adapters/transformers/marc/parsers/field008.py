@@ -9,8 +9,8 @@ from typing import NamedTuple
 
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.parsers.positional_field import PositionalField
 from adapters.transformers.marc.parsers.period import MAX, Span
+from adapters.transformers.marc.parsers.positional_field import PositionalField
 from lookups import places
 
 
@@ -65,7 +65,7 @@ class RawField008(PositionalField):
         >>> RawField008("800121d19791995acafr p o o   0    0engrc").date_type
         'd'
         """
-        return self.field_value[6]
+        return self.field_value[6:7]
 
 
 class Field008:
@@ -99,13 +99,13 @@ class Field008:
         if date_1 is None:
             return None
         # s single date, r reprint, t publication and copyright, p release and production: date 1 only
-        if date_type in "srtp":
+        if date_type in {"s", "r", "t", "p"}:
             return single(date_1)
         # c currently published, u status unknown: open-ended
-        if date_type in "cu":
+        if date_type in {"c", "u"}:
             return span(date_1.earliest, None)
         # d ceased publication, m multipart, q questionable: a range, open when date 2 is 9999 or unknown
-        if date_type in "dmq":
+        if date_type in {"d", "m", "q"}:
             date_2 = (
                 None
                 if self.raw_field.date_2 == "9999"
@@ -138,8 +138,13 @@ class YearBounds(NamedTuple):
 
 
 def year_bounds(value: str) -> YearBounds | None:
-    """The earliest and latest year a coded date can stand for: "192u" is 1920 to 1929."""
-    is_valid = re.fullmatch(r"\d[\du]{3}", value)
+    """The earliest and latest year a coded date can stand for: "192u" is 1920 to 1929.
+
+    Like the Scala parser, this reads "u" digits only as a decade ("199u") or
+    a century ("19uu"). A millennium ("1uuu") is too wide to be a useful date,
+    so it returns None.
+    """
+    is_valid = re.fullmatch(r"\d{2}(?:\d[\du]|uu)", value)
     if not is_valid or not (earliest := int(value.replace("u", "0"))):
         return None
     return YearBounds(earliest, int(value.replace("u", "9")))

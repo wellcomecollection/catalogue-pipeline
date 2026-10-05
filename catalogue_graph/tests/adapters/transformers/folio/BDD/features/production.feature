@@ -314,7 +314,9 @@ Feature: production (MARC 260, 264 and 008)
 
   # The Scala test uses a 264 with no subfields, which gives an event with an
   # empty label. The Python pipeline drops events with an empty label, so
-  # these scenarios add a place.
+  # these scenarios add a place. The same applies to a 260 whose only
+  # subfield is empty, which the Scala keeps as an event with an empty label
+  # and an empty date.
   Scenario Outline: The second indicator of a 264 gives the function
     Given the MARC record has a 264 field with indicators " " "<ind2>" with subfield "a" value "London"
     When I transform the MARC record
@@ -335,3 +337,26 @@ Feature: production (MARC 260, 264 and 008)
     When I transform the MARC record
     Then there are no productions
     And an error "Unrecognised second indicator for production function" is logged with indicator2 "x"
+
+  Scenario: A 260 whose only subfield is empty gives no production event
+    Given the MARC record has a 260 field with subfield "c" value ""
+    And the MARC record's only 008 field with the value "040325xx                  engdd         ntduua"
+    When I transform the MARC record
+    Then there are no productions
+
+  # The Scala ignores the 008 altogether when a record has more than one.
+  Scenario: The first of two 008 fields is used
+    Given the MARC record's only 008 field with the value "790922s1757    enk||||      o00||||eng ccam   "
+    And the MARC record has another 008 field with the value "790922s1999    enk||||      o00||||eng ccam   "
+    When I transform the MARC record
+    Then the only production has the label "1757"
+
+  # The Scala keeps the empty ǂc label on the date it takes from the 008.
+  Scenario: The 008 supplies the date label too when the 264 date is empty
+    Given the MARC record's only 008 field with the value "890724s1703    enk"
+    And the MARC record has a 264 field with indicators " " "1" with subfield "a" value "[London? :" and subfield "c" value ""
+    When I transform the MARC record
+    Then the only production has the label "[London? : "
+    And it has 1 date
+    And its 1st date has the label "1703"
+    And its 1st date has the range.from_time "1703-01-01T00:00:00Z"

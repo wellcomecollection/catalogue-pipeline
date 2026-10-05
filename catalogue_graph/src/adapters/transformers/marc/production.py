@@ -12,7 +12,7 @@ import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.parsers.field008 import Field008
+from adapters.transformers.marc.parsers.field008 import Field008
 from adapters.transformers.marc.period import parse_period, period_from_span
 from adapters.transformers.utils.text_utils import normalise_label
 from models.pipeline.concept import Concept, Period
@@ -52,7 +52,9 @@ def extract_production(
 
 
 def _with_date_from(event: ProductionEvent, donor: Period) -> ProductionEvent:
-    label = event.dates[0].label if event.dates else donor.label
+    label = (
+        event.dates[0].label if event.dates and event.dates[0].label else donor.label
+    )
     return event.model_copy(
         update={"dates": [donor.model_copy(update={"label": label})]}
     )
