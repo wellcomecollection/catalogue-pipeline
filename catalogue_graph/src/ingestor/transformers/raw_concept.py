@@ -7,7 +7,6 @@ from ingestor.models.indexable.concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
-from ingestor.models.neptune.node import SourceConceptNode
 from ingestor.models.neptune.query_result import ExtractedConcept
 from models.graph_node import SourceConcept
 from models.pipeline.id_label import Id
@@ -68,27 +67,13 @@ def get_ordered_source_concepts(
     raw_concept: ExtractedConcept, source: ConceptSource
 ) -> list[SourceConcept]:
     """
-    Return the source concepts from `source`, with the concept's own linked source concepts first, then the rest of
-    its 'same as' group, each sorted by id. This keeps the choice independent of the order Neptune returns them in.
+    Return every source concept from `source` across the concept's whole 'same as' group, sorted by id. Selection is
+    group-wide so that all members share a label: the site's "View all" links filter works by that label.
     """
-    linked = [
-        sc
-        for sc in raw_concept.linked_source_concepts
-        if sc.properties.source == source
+    nodes = [sc for sc in raw_concept.source_concepts if sc.properties.source == source]
+    return [
+        sc.properties for sc in sorted(nodes, key=lambda n: (n.properties.id, n.id))
     ]
-    linked_ids = {sc.id for sc in linked}
-    rest = [
-        sc
-        for sc in raw_concept.source_concepts
-        if sc.properties.source == source and sc.id not in linked_ids
-    ]
-
-    def by_id(nodes: list[SourceConceptNode]) -> list[SourceConcept]:
-        return [
-            sc.properties for sc in sorted(nodes, key=lambda n: (n.properties.id, n.id))
-        ]
-
-    return by_id(linked) + by_id(rest)
 
 
 def get_priority_label(

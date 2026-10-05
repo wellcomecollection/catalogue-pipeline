@@ -54,8 +54,8 @@ def test_concept_does_not_depend_on_source_concept_order(fixture: str) -> None:
             assert _transform(shuffled) == expected
 
 
-def test_linked_source_concept_beats_a_same_source_sibling() -> None:
-    # The concept links to Caricature (D019492); Cartoon (D019493) only joins via the same-as group
+def test_lowest_id_wins_across_the_same_source_group() -> None:
+    # Caricature (D019492) and Cartoon (D019493) are both MeSH; the lower id wins
     result = _transform(load_json_fixture(SIBLINGS_FIXTURE))
 
     assert result.query.label == "Caricature"
@@ -66,11 +66,38 @@ def test_linked_source_concept_beats_a_same_source_sibling() -> None:
     ]
 
 
-def test_linked_source_concept_beats_a_lower_id_sibling() -> None:
+def test_a_lower_id_sibling_beats_the_linked_source_concept() -> None:
+    # The concept links to Caricature (D019492), but Cartoon joins the group with a lower id
     mock_concept = load_json_fixture(SIBLINGS_FIXTURE)
     _source_concept(mock_concept, "D019493")["~properties"]["id"] = "D000001"
 
-    assert _transform(mock_concept).display.displayLabel == "Caricature"
+    assert _transform(mock_concept).display.displayLabel == "Cartoon"
+
+
+def test_same_as_group_members_share_a_label() -> None:
+    # Two members of one group linked to different MeSH nodes must agree on the label,
+    # since the site's "View all" links filter works by that label
+    caricature = load_json_fixture(SIBLINGS_FIXTURE)
+    cartoon = {
+        **caricature,
+        "concept": {
+            **caricature["concept"],
+            "~id": "e5drba69",
+            "~properties": {**caricature["concept"]["~properties"], "id": "e5drba69"},
+        },
+        "linked_source_concepts": [_source_concept(caricature, "D019493")],
+        "same_as": ["hv3ueb5k"],
+    }
+
+    caricature_result = _transform(caricature)
+    cartoon_result = _transform(cartoon)
+
+    assert caricature_result.display.displayLabel == "Caricature"
+    assert cartoon_result.display.displayLabel == caricature_result.display.displayLabel
+    assert cartoon_result.query.label == caricature_result.query.label
+    assert cartoon_result.query.identifiers == [
+        ConceptIdentifier(value="D019493", identifierType="nlm-mesh")
+    ]
 
 
 def test_a_blank_weco_authority_label_falls_through() -> None:
@@ -105,28 +132,21 @@ def test_weco_authority_wins_query_and_display_and_keeps_the_displaced_heading()
     assert result.display.alternativeLabels == result.query.alternativeLabels
 
 
-def test_linked_weco_authority_beats_a_lower_id_weco_authority_sibling() -> None:
+@pytest.mark.parametrize("higher_id_is_linked", [False, True])
+def test_lowest_id_weco_authority_wins_whether_or_not_another_is_linked(
+    higher_id_is_linked: bool,
+) -> None:
     mock_concept = load_json_fixture(WECO_FIXTURE)
-    mock_concept["linked_source_concepts"].append(
-        _source_concept(mock_concept, "qwertyu34")
-    )
+    if higher_id_is_linked:
+        mock_concept["linked_source_concepts"].append(
+            _source_concept(mock_concept, "qwertyu34")
+        )
     mock_concept["source_concepts"].append(
         _a_source_concept("aaaaaaaa", "weco-authority", "Another Wellcome Label")
     )
 
     result = _transform(mock_concept)
 
-    assert result.query.label == "Wellcome Label"
-    assert result.display.displayLabel == "Wellcome Label"
-
-
-def test_lowest_id_breaks_a_tie_between_unlinked_weco_authority_concepts() -> None:
-    mock_concept = load_json_fixture(WECO_FIXTURE)
-    mock_concept["source_concepts"].append(
-        _a_source_concept("aaaaaaaa", "weco-authority", "Another Wellcome Label")
-    )
-
-    result = _transform(mock_concept)
-
+    assert result.query.label == "Another Wellcome Label"
     assert result.display.displayLabel == "Another Wellcome Label"
     assert "Wellcome Label" not in result.query.alternativeLabels
