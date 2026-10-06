@@ -8,7 +8,7 @@ from __future__ import annotations
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.authority_standard_number import extract_identifier
+from adapters.transformers.marc.authority_standard_number import extract_identifier
 from adapters.transformers.marc.common import non_empty, non_repeatable_subfield
 from adapters.transformers.marc.concepts import (
     SUBDIVISION_CODES,

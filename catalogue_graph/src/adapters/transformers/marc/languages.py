@@ -1,6 +1,10 @@
 """
-Extracting languages from the Sierra LANG fixed field (MARC 998 ǂf), falling
-back to the MARC language code in 008/35-37, plus additional languages from 041.
+Extracting languages from the MARC language code in 008/35-37, plus additional
+languages from 041.
+
+The Sierra LANG fixed field, which the Scala transformer reads, is carried into
+Folio as 998 ǂf. Folio's MARC-to-Instance mapping does not read ǂf at all, so
+nothing maintains it; 008/35-37 and 041 ǂa are the fields it maps to languages.
 
 https://www.loc.gov/marc/bibliographic/bd008a.html
 https://www.loc.gov/marc/bibliographic/bd041.html
@@ -26,9 +30,10 @@ SUPPRESSED_CODES = {
 def extract_languages(record: Record) -> list[Language]:
     """The primary language first, then 041 ǂa in document order, deduplicated."""
     codes = [_primary_code(record)] + [
-        value
+        code
         for field in record.get_fields("041")
         for value in field.get_subfields("a")
+        for code in _split_packed_codes(value)
     ]
 
     languages: list[Language] = []
@@ -41,22 +46,29 @@ def extract_languages(record: Record) -> list[Language]:
 
 
 def _primary_code(record: Record) -> str | None:
-    """Prefer 998 ǂf, the Sierra LANG field, which is curated where 008/35-37 is often
-    left as fill characters, `und`, or stale. A blank ǂf is a deliberate "no language",
-    so only a missing ǂf falls back to 008.
-
-    TODO: 998 is a Sierra field carried over by the migration. Confirm whether FOLIO
-    keeps maintaining ǂf, or whether records edited in FOLIO update only 008/35-37,
-    in which case the preference here should flip after cutover.
-    """
-    for field in record.get_fields("998"):
-        if values := field.get_subfields("f"):
-            return values[0]
-
+    """The primary language is the MARC language code in 008/35-37."""
     if field_008 := RawField008.from_record(record):
         return field_008.languagecode
 
     return None
+
+
+def _split_packed_codes(value: str) -> list[str]:
+    """Some 041 ǂa subfields pack several codes together (e.g. "engger").
+
+    Folio's own MARC-to-Instance mapping splits ǂa every three characters. We only do
+    so when every chunk is a real language code, so that note text landing in ǂa is
+    still reported rather than read as languages.
+    """
+    code = value.strip().lower()
+    if len(code) <= 3 or len(code) % 3:
+        return [value]
+
+    chunks = [code[i : i + 3] for i in range(0, len(code), 3)]
+    if all(from_code(chunk) is not None for chunk in chunks):
+        return chunks
+
+    return [value]
 
 
 def _resolve(code: str | None) -> Language | None:
@@ -66,8 +78,6 @@ def _resolve(code: str | None) -> Language | None:
 
     language = from_code(code.strip().lower())
     if language is None:
-        # TODO: Some 041 ǂa values pack several codes into one subfield (e.g. "engger").
-        # Matching the Scala, these are dropped; they could be split into 3-character codes.
         logger.error("Unrecognised language code", code=code)
         return None
 

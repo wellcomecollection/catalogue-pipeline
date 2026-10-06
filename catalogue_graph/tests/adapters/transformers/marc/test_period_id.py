@@ -17,10 +17,11 @@ from models.pipeline.identifier import Identifiable
         ("between 1900 and 1910", "1900 and 1910"),
         ("fl. 1620-1650", "1620-1650"),
         ("floruit 1620", "1620"),
+        ("fl 1620", "1620"),
         ("2000 A.D.", "2000 ad"),
         ("One Million Years B.C.", "one million years bc"),
         ("ca. 1066", "ca 1066"),
-        # a bare "fl" is not an abbreviation, so the word keeps its letters
+        # "fl" inside a word is not an abbreviation, so the word keeps its letters
         ("Influenza Epidemic, 1918-1919.", "influenza epidemic, 1918-1919"),
         ("Flavians, 69-96.", "flavians, 69-96"),
     ],

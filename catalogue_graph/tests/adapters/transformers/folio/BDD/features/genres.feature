@@ -92,6 +92,22 @@ Feature: genres (MARC 655)
     And its 2nd concept has the label "X Content"
     And its 3rd concept has the label "V Content"
 
+  Scenario: ǂy gives a Period with a parsed range
+    Given the MARC record has a 655 field with subfield "y" value "MDCCLXXXVII. [1787]" and subfield "a" value "A Content"
+    When I transform the MARC record
+    Then the only genre has the label "A Content - MDCCLXXXVII. [1787]"
+    And it has 2 concepts
+    And its 1st concept has the type "GenreConcept"
+    And its 1st concept has the label "A Content"
+    And its 1st concept has the source identifier value "a content"
+    And its 2nd concept has the type "Period"
+    And its 2nd concept has the label "MDCCLXXXVII. [1787]"
+    And its 2nd concept has the source identifier ontology type "Period"
+    And its 2nd concept has the source identifier value "1787"
+    And its 2nd concept has the range.from_time "1787-01-01T00:00:00Z"
+    And its 2nd concept has the range.to_time "1787-12-31T23:59:59.999999999Z"
+    And its 2nd concept has the range.label "MDCCLXXXVII. [1787]"
+
   Scenario: ǂz gives a Place
     Given the MARC record has a 655 field with subfield "z" value "Z Content" and subfield "a" value "A Content"
     When I transform the MARC record
@@ -116,10 +132,7 @@ Feature: genres (MARC 655)
     And its 1st concept has the source identifier ontology type "Genre"
     And its 1st concept has the source identifier value "sh85060628"
 
-  # Deliberate divergences from the Scala
-
   Scenario: A ǂ0 that is not an LoC identifier is logged and falls back to the label
-  The Scala throws on an unrecognised LoC prefix, failing the whole work.
     Given the MARC record has a 655 field with indicators "" "0" with subfield "a" value "Manuscripts" and subfield "x" value "Hindi" and subfield "0" value "MASHINI"
     When I transform the MARC record
     Then an error "Could not determine LoC scheme from identifier" is logged with tag "655" and value "MASHINI"
@@ -127,14 +140,24 @@ Feature: genres (MARC 655)
     And its 1st concept has the source identifier type "label-derived"
     And its 1st concept has the source identifier value "manuscripts"
 
-  Scenario: A bare "fl" in a chronological subdivision is kept in the identifier
+  # Deliberate divergences from the Scala
+
+  Scenario: "fl" inside a word in a chronological subdivision is kept in the identifier
   The Scala strips the string "fl" from Period labels when deriving the id, as an
   abbreviation of floruit, which also removes it from the middle of words:
-  "Influenza" becomes "inuenza". The Python strips "fl." and "floruit" only.
+  "Influenza" becomes "inuenza". The Python only strips "fl" as a whole word.
     Given the MARC record has a 655 field with subfield "a" value "Broadsides" and subfield "y" value "Influenza Epidemic, 1918-1919."
     When I transform the MARC record
     Then the only genre has the label "Broadsides - Influenza Epidemic, 1918-1919"
     And its 2nd concept has the source identifier value "influenza epidemic, 1918-1919"
+
+  Scenario: A chronological subdivision made only of stripped characters keeps a label-derived identifier
+  The Scala strips a lone Roman numeral or qualifier from the label and derives an
+  empty identifier, so unrelated periods share an id. The Python falls back to the label.
+    Given the MARC record has a 655 field with subfield "a" value "Broadsides" and subfield "y" value "MDCCLXXXVII."
+    When I transform the MARC record
+    Then the only genre has the label "Broadsides - MDCCLXXXVII"
+    And its 2nd concept has the source identifier value "mdcclxxxvii"
 
   Scenario: The concept label for Electronic Books is lower-cased along with the genre label
   The Scala replaces "Electronic Books" in the genre label only, leaving the

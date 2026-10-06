@@ -7,14 +7,13 @@ from __future__ import annotations
 
 import re
 
-from models.pipeline.concept import Concept
-from models.pipeline.identifier import Identifiable, Unidentifiable
-from utils.types import RawConceptType
-
 from adapters.transformers.marc.period import parse_period
 from adapters.transformers.utils.text_utils import (
     normalise_label,
 )
+from models.pipeline.concept import Concept
+from models.pipeline.identifier import Identifiable, Unidentifiable
+from utils.types import RawConceptType
 
 SUBDIVISION_CODES: list[str] = ["v", "x", "y", "z"]
 SUBFIELD_TYPE_MAP: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
@@ -26,6 +25,7 @@ PERIOD_ID_NOISE = re.compile(
             r"\[gaps\]",
             "floruit",
             r"fl\.",
+            r"\bfl\b",
             "between",
             r'[()\[\]?."©]',
             LEADING_ROMAN_NUMERAL,
@@ -36,8 +36,8 @@ PERIOD_ID_NOISE = re.compile(
 
 def normalise_period_id_label(label: str) -> str:
     # Match Scala pipeline preprocessing (PeriodParser.preprocess) so that label-derived
-    # concept identifiers agree across pipelines. One deliberate divergence: A bare "fl"
-    # is left alone, otherwise a word like "Influenza" would become "inuenza".
+    # concept identifiers agree across pipelines. One deliberate divergence: "fl" is only
+    # stripped as a whole word, otherwise "Influenza" would become "inuenza".
     return PERIOD_ID_NOISE.sub("", label.lower()).strip()
 
 
@@ -49,7 +49,7 @@ def label_for_identifier(raw_label: str, label: str, ontology_type: str) -> str:
         # re-mint organisation canonical ids.
         return raw_label
     if ontology_type == "Period":
-        return normalise_period_id_label(raw_label)
+        return normalise_period_id_label(raw_label) or label
     return label
 
 
