@@ -8,8 +8,9 @@ would have written. Nothing is minted, the index is not written to, and nothing
 is published downstream.
 
 Works the table already holds at the index's version or newer are skipped, so a
-rerun after a failure picks up where the last one stopped and rows the minter
-wrote meanwhile are not duplicated.
+rerun after a failure picks up where the last one stopped. Works the minter
+appends while the backfill runs may be written twice at the same version; the
+read rule (highest version, then latest last_modified) makes that harmless.
 
 Usage:
     AWS_PROFILE=platform-developer uv run python scripts/backfill_works_identified.py --pipeline-date 2026-09-30 --es-mode public --dry-run
@@ -178,6 +179,8 @@ def main() -> None:
         help="Load the table and count the index, but append nothing.",
     )
     args = parser.parse_args()
+    if args.limit is not None and args.limit < 1:
+        parser.error(f"--limit must be at least 1, got {args.limit}")
 
     setup_logging(
         ExecutionContext(
