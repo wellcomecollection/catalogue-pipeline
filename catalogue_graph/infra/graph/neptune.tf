@@ -12,9 +12,9 @@ locals {
 module "catalogue_graph_neptune_cluster" {
   source = "./modules/catalogue_graph"
 
-  # Legacy cluster, kept for the frozen 2025-10-02 pipeline; the empty graph_date preserves its
-  # catalogue-graph name (renaming destroys it). Remove with wellcomecollection/platform#6726.
+  # Legacy cluster for the 2025-10-02 pipeline, destroyed 2026-10-06; removed with wellcomecollection/platform#6726.
   graph_date                 = ""
+  skip_final_snapshot        = true
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
   private_subnets            = local.private_subnets

@@ -28,3 +28,9 @@ variable "graph_date" {
   description = "Date associated with this graph instance (YYYY-MM-DD), incorporated into the namespace."
 }
 
+variable "skip_final_snapshot" {
+  type        = bool
+  description = "Drop the cluster without a final snapshot on destroy. Only for a cluster being decommissioned."
+  default     = false
+}
+
