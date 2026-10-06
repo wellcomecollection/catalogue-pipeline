@@ -164,6 +164,9 @@ def single(bounds: YearBounds) -> Field008Dates:
 
 def span(earliest: int, latest: int | None) -> Field008Dates:
     """A range between two coded dates: "1979-1995", or "1979-" when open-ended."""
+    # Reverse backwards pairs (e.g. "m16571562")
+    if latest is not None and latest < earliest:
+        earliest, latest = latest, earliest
     label = f"{earliest:04d}-" if latest is None else f"{earliest:04d}-{latest:04d}"
     end = MAX if latest is None else date(latest, 12, 31)
     return Field008Dates(label, (date(earliest, 1, 1), end))

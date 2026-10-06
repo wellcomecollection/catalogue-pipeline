@@ -131,3 +131,16 @@ def test_short_field() -> None:
 )
 def test_dates_the_scala_parser_rejects(dates: str, expected: Field008Dates) -> None:
     assert Field008(f"750101{dates}xxu").dates == expected
+
+
+# Deliberate divergence: the Scala parser keeps the range backwards.
+@pytest.mark.parametrize(
+    "dates, expected",
+    [
+        ("m16571562", years("1562-1657", 1562, 1657)),
+        ("d19811974", years("1974-1981", 1974, 1981)),
+        ("q19881987", years("1987-1988", 1987, 1988)),
+    ],
+)
+def test_backwards_dates_are_reversed(dates: str, expected: Field008Dates) -> None:
+    assert Field008(f"750101{dates}xxu").dates == expected
