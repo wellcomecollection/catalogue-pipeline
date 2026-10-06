@@ -28,7 +28,9 @@ object MarcAlternativeTitles extends MarcDataTransformer {
   }
 
   private def alternativeTitle(field: MarcField): String =
-    field.subfields.withoutUKLW.map(_.content).mkString(" ")
+    field.subfields.withoutControlSubfields.withoutUKLW
+      .map(_.content)
+      .mkString(" ")
 
   implicit private class FieldsOps(fields: Seq[MarcField]) {
 
@@ -42,10 +44,15 @@ object MarcAlternativeTitles extends MarcDataTransformer {
       }
   }
   implicit private class SubfieldsOps(subfields: Seq[MarcSubfield]) {
+    // $0 and $1 hold authority URIs, $6 and $8 link fields: none is title text.
+    private val controlSubfields = Set("0", "1", "6", "8")
+
+    def withoutControlSubfields: Seq[MarcSubfield] =
+      subfields.filterNot(subfield => controlSubfields.contains(subfield.tag))
+
     // Any $5 subfield with contents `UkLW` is Wellcome Library-specific and
     // should be omitted.
     def withoutUKLW: Seq[MarcSubfield] =
       subfields.filterNot(_ == MarcSubfield("5", "UkLW"))
-
   }
 }
