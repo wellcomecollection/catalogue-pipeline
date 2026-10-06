@@ -1,9 +1,9 @@
 module "pipeline" {
-  source = "../modules/pipeline_new"
+  source = "../modules/pipeline"
 
   # Builds Axiell archive trees from the 982 parent link (wellcomecollection/platform#6725).
   reindexing_state = {
-    listen_to_reindexer = true
+    listen_to_reindexer = false
     scale_up_tasks      = false
     scale_up_matcher_db = false
   }

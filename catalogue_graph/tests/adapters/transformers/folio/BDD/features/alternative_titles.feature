@@ -54,6 +54,7 @@ Feature: alternative titles (MARC 130/240/242/246)
       | 242 |
       | 246 |
 
+  # The control subfields 0, 1, 6 and 8 are omitted from titles; 2 and 7 are kept as before.
   Scenario: All subfields of 130 are concatenated in document order
     Given the MARC record has a 130 field with subfields:
       | code | value |
@@ -71,13 +72,10 @@ Feature: alternative titles (MARC 130/240/242/246)
       | r    | R     |
       | s    | S     |
       | t    | T     |
-      | 0    | 0     |
-      | 1    | 1     |
       | 2    | 2     |
       | 7    | 7     |
-      | 8    | 8     |
     When I transform the MARC record
-    Then the only alternative title is "A D F G H K L M N O P R S T 0 1 2 7 8"
+    Then the only alternative title is "A D F G H K L M N O P R S T 2 7"
 
   Scenario: All subfields of 240 are concatenated in document order
     Given the MARC record has a 240 field with subfields:
@@ -95,13 +93,10 @@ Feature: alternative titles (MARC 130/240/242/246)
       | p    | P     |
       | r    | R     |
       | s    | S     |
-      | 0    | 0     |
-      | 1    | 1     |
       | 2    | 2     |
       | 7    | 7     |
-      | 8    | 8     |
     When I transform the MARC record
-    Then the only alternative title is "A D F G H K L M N O P R S 0 1 2 7 8"
+    Then the only alternative title is "A D F G H K L M N O P R S 2 7"
 
   Scenario: All subfields of 242 are concatenated in document order
     Given the MARC record has a 242 field with subfields:
@@ -129,9 +124,8 @@ Feature: alternative titles (MARC 130/240/242/246)
       | p    | P     |
       | 5    | 5     |
       | 7    | 7     |
-      | 8    | 8     |
     When I transform the MARC record
-    Then the only alternative title is "A B F G H I N P 5 7 8"
+    Then the only alternative title is "A B F G H I N P 5 7"
 
   Scenario: A 246 ǂ5 of UkLW is dropped and a sibling ǂ5 is kept
     Given the MARC record has a 246 field with subfields:
