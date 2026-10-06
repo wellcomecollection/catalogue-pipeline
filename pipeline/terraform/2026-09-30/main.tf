@@ -1,5 +1,5 @@
 module "pipeline" {
-  source = "../modules/pipeline_new"
+  source = "../modules/pipeline"
 
   # Builds Axiell archive trees from the 982 parent link (wellcomecollection/platform#6725).
   reindexing_state = {
