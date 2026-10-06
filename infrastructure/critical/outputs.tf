@@ -2,7 +2,6 @@
 
 locals {
   id_minter_rds_instances = {
-    prod         = module.id_minter_rds
     "2026-07-03" = module.id_minter_rds_2026_07_03
   }
 }
@@ -20,30 +19,6 @@ output "id_minter_rds" {
     }
   }
 }
-
-# Legacy flat outputs for the prod cluster — retained for backwards
-# compatibility with downstream stacks reading via terraform_remote_state.
-output "rds_v2_serverless_cluster_id" {
-  value = module.id_minter_rds.rds_cluster_id
-}
-
-output "rds_v2_serverless_cluster_arn" {
-  value = module.id_minter_rds.rds_cluster_arn
-}
-
-output "rds_v2_access_security_group_id" {
-  value = module.id_minter_rds.ingress_security_group_id
-}
-
-output "rds_v2_master_user_secret_arn" {
-  value = module.id_minter_rds.master_user_secret_arn
-}
-
-output "rds_subnet_group_name" {
-  value = module.id_minter_rds.subnet_group_name
-}
-
-# Miro Hybrid Store
 
 output "vhs_miro_read_policy" {
   value = module.vhs_miro.read_policy
