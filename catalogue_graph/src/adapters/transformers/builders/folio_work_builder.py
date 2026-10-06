@@ -6,6 +6,7 @@ from adapters.transformers.marc.designation import extract_designation
 from adapters.transformers.marc.duration import extract_duration
 from adapters.transformers.marc.edition import extract_edition
 from adapters.transformers.marc.former_frequency import extract_former_frequency
+from adapters.transformers.marc.genres import extract_genres
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
 )
@@ -14,6 +15,7 @@ from adapters.transformers.marc.predecessor_identifier import (
 )
 from adapters.transformers.marc.production import extract_production
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
+from models.pipeline.concept import Genre
 from models.pipeline.identifier import (
     Id,
     Identifiable,
@@ -85,6 +87,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def former_frequency(self) -> list[str]:
         return extract_former_frequency(self.record)
+
+    @property
+    def genres(self) -> list[Genre]:
+        return extract_genres(self.record)
 
     @property
     def duration(self) -> int | None:

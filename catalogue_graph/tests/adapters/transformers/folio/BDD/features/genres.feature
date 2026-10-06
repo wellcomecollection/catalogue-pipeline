@@ -1,0 +1,182 @@
+Feature: genres (MARC 655)
+  A genre is built from each MARC 655. Its label is ǂa followed by the
+  subdivision subfields in document order, joined with " - ". Its concepts
+  are a GenreConcept for ǂa followed by one concept per subdivision, typed by
+  subfield code. Only ǂa can carry an authority identifier, taken from ǂ0
+  when the second indicator names a scheme we support; every other concept
+  gets a label-derived identifier. Identical genres are deduplicated,
+  keeping the first.
+
+  These scenarios mirror the unit tests of the Scala transformer this
+  replaces (SierraGenresTest.scala), including its test data, so the two
+  can be compared directly.
+
+  https://www.loc.gov/marc/bibliographic/bd655.html
+
+  Background:
+    Given a MARC record with field 001 "abc123"
+    And the MARC record has a 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001"
+    And the MARC record has a 245 field with subfield "a" value "Some Title"
+
+  Scenario: A record with no 655 has no genres
+    When I transform the MARC record
+    Then there are no genres
+
+  Scenario: Each 655 gives a genre
+    Given the MARC record has a 655 field with subfield "a" value "A1 Content" and subfield "z" value "Z1 Content"
+    And the MARC record has another 655 field with subfield "a" value "A2 Content" and subfield "v" value "V2 Content"
+    When I transform the MARC record
+    Then there are 2 genres
+    And the 1st genre has the label "A1 Content - Z1 Content"
+    And the 2nd genre has the label "A2 Content - V2 Content"
+
+  Scenario: A 655 with an empty label gives no genre
+    Given the MARC record has a 655 field with subfield "2" value "rbgenr"
+    And the MARC record has another 655 field with subfield "a" value "A2 Content" and subfield "v" value "V2 Content"
+    When I transform the MARC record
+    Then the only genre has the label "A2 Content - V2 Content"
+
+  Scenario: Genres are deduplicated once transformed
+    Given the MARC record has a 655 field with subfield "a" value "Electronic journals"
+    And the MARC record has another 655 field with subfield "a" value "Electronic journals"
+    And the MARC record has another 655 field with subfield "a" value "Periodical"
+    And the MARC record has another 655 field with subfield "a" value "Periodicals" and subfield "2" value "rbgenr"
+    And the MARC record has another 655 field with subfield "a" value "Periodicals" and subfield "2" value "lcgft"
+    When I transform the MARC record
+    Then there are 3 genres
+    And the 1st genre has the label "Electronic journals"
+    And the 2nd genre has the label "Periodical"
+    And the 3rd genre has the label "Periodicals"
+
+  Scenario: A 655 with only ǂa gives a genre with a single concept
+    Given the MARC record has a 655 field with subfield "a" value "A Content"
+    When I transform the MARC record
+    Then the only genre has the label "A Content"
+    And it has 1 concept
+    And its 1st concept has the type "GenreConcept"
+    And its 1st concept has the source identifier type "label-derived"
+    And its 1st concept has the source identifier ontology type "Genre"
+    And its 1st concept has the source identifier value "a content"
+
+  Scenario: Trailing punctuation is stripped
+    Given the MARC record has a 655 field with subfield "a" value "Printed books."
+    When I transform the MARC record
+    Then the only genre has the label "Printed books"
+    And its 1st concept has the label "Printed books"
+    And its 1st concept has the source identifier value "printed books"
+
+  Scenario: ǂa and ǂv give a GenreConcept and a Concept
+    Given the MARC record has a 655 field with subfield "a" value "A Content" and subfield "v" value "V Content"
+    When I transform the MARC record
+    Then the only genre has the label "A Content - V Content"
+    And it has 2 concepts
+    And its 1st concept has the type "GenreConcept"
+    And its 1st concept has the label "A Content"
+    And its 1st concept has the source identifier value "a content"
+    And its 2nd concept has the type "Concept"
+    And its 2nd concept has the label "V Content"
+    And its 2nd concept has the source identifier value "v content"
+
+  Scenario: ǂa is always the first concept, wherever it appears in the field
+    Given the MARC record has a 655 field with subfield "v" value "V Content" and subfield "a" value "A Content"
+    When I transform the MARC record
+    Then the only genre has the label "A Content - V Content"
+    And its 1st concept has the label "A Content"
+    And its 2nd concept has the label "V Content"
+
+  Scenario: Subdivisions keep their document order
+    Given the MARC record has a 655 field with subfield "a" value "A Content" and subfield "x" value "X Content" and subfield "v" value "V Content"
+    When I transform the MARC record
+    Then the only genre has the label "A Content - X Content - V Content"
+    And it has 3 concepts
+    And its 2nd concept has the label "X Content"
+    And its 3rd concept has the label "V Content"
+
+  Scenario: ǂy gives a Period with a parsed range
+    Given the MARC record has a 655 field with subfield "y" value "MDCCLXXXVII. [1787]" and subfield "a" value "A Content"
+    When I transform the MARC record
+    Then the only genre has the label "A Content - MDCCLXXXVII. [1787]"
+    And it has 2 concepts
+    And its 1st concept has the type "GenreConcept"
+    And its 1st concept has the label "A Content"
+    And its 1st concept has the source identifier value "a content"
+    And its 2nd concept has the type "Period"
+    And its 2nd concept has the label "MDCCLXXXVII. [1787]"
+    And its 2nd concept has the source identifier ontology type "Period"
+    And its 2nd concept has the source identifier value "1787"
+    And its 2nd concept has the range.from_time "1787-01-01T00:00:00Z"
+    And its 2nd concept has the range.to_time "1787-12-31T23:59:59.999999999Z"
+    And its 2nd concept has the range.label "MDCCLXXXVII. [1787]"
+
+  Scenario: ǂz gives a Place
+    Given the MARC record has a 655 field with subfield "z" value "Z Content" and subfield "a" value "A Content"
+    When I transform the MARC record
+    Then the only genre has the label "A Content - Z Content"
+    And its 2nd concept has the type "Place"
+    And its 2nd concept has the label "Z Content"
+    And its 2nd concept has the source identifier value "z content"
+
+  Scenario: A MeSH identifier is taken from ǂ0 when the second indicator is 2
+    Given the MARC record has a 655 field with indicators "" "2" with subfield "a" value "abolition" and subfield "0" value "mesh/456"
+    When I transform the MARC record
+    Then the only genre has the label "abolition"
+    And its 1st concept has the source identifier type "nlm-mesh"
+    And its 1st concept has the source identifier ontology type "Genre"
+    And its 1st concept has the source identifier value "mesh/456"
+
+  Scenario: An LCSH identifier is taken from ǂ0 when the second indicator is 0
+    Given the MARC record has a 655 field with indicators "" "0" with subfield "a" value "absence" and subfield "0" value "sh85060628"
+    When I transform the MARC record
+    Then the only genre has the label "absence"
+    And its 1st concept has the source identifier type "lc-subjects"
+    And its 1st concept has the source identifier ontology type "Genre"
+    And its 1st concept has the source identifier value "sh85060628"
+
+  Scenario: A ǂ0 that is not an LoC identifier is logged and falls back to the label
+    Given the MARC record has a 655 field with indicators "" "0" with subfield "a" value "Manuscripts" and subfield "x" value "Hindi" and subfield "0" value "MASHINI"
+    When I transform the MARC record
+    Then an error "Could not determine LoC scheme from identifier" is logged with tag "655" and value "MASHINI"
+    And the only genre has the label "Manuscripts - Hindi"
+    And its 1st concept has the source identifier type "label-derived"
+    And its 1st concept has the source identifier value "manuscripts"
+
+  # Deliberate divergences from the Scala
+
+  Scenario: "fl" inside a word in a chronological subdivision is kept in the identifier
+  The Scala strips the string "fl" from Period labels when deriving the id, as an
+  abbreviation of floruit, which also removes it from the middle of words:
+  "Influenza" becomes "inuenza". The Python only strips "fl" as a whole word.
+    Given the MARC record has a 655 field with subfield "a" value "Broadsides" and subfield "y" value "Influenza Epidemic, 1918-1919."
+    When I transform the MARC record
+    Then the only genre has the label "Broadsides - Influenza Epidemic, 1918-1919"
+    And its 2nd concept has the source identifier value "influenza epidemic, 1918-1919"
+
+  Scenario: A chronological subdivision made only of stripped characters keeps a label-derived identifier
+  The Scala strips a lone Roman numeral or qualifier from the label and derives an
+  empty identifier, so unrelated periods share an id. The Python falls back to the label.
+    Given the MARC record has a 655 field with subfield "a" value "Broadsides" and subfield "y" value "MDCCLXXXVII."
+    When I transform the MARC record
+    Then the only genre has the label "Broadsides - MDCCLXXXVII"
+    And its 2nd concept has the source identifier value "mdcclxxxvii"
+
+  Scenario: The concept label for Electronic Books is lower-cased along with the genre label
+  The Scala replaces "Electronic Books" in the genre label only, leaving the
+  concept label as catalogued. The Python applies the same replacement to both.
+    Given the MARC record has a 655 field with subfield "a" value "Electronic Books."
+    When I transform the MARC record
+    Then the only genre has the label "Electronic books"
+    And its 1st concept has the label "Electronic books"
+
+  Scenario: A repeated ǂa is logged and only the first used
+  The Scala joins every ǂa into the label and makes a GenreConcept of each.
+    Given the MARC record has a 655 field with subfield "a" value "Hindi language" and subfield "a" value "Dictionaries."
+    When I transform the MARC record
+    Then an error "Repeated non-repeating subfield" is logged with tag "655" and subfield "a"
+    And the only genre has the label "Hindi language"
+    And it has 1 concept
+
+  Scenario: A 655 with subdivisions but no ǂa gives no genre
+  The Scala builds a genre from the subdivisions alone, with no primary concept.
+    Given the MARC record has a 655 field with subfield "x" value "English" and subfield "y" value "18th century"
+    When I transform the MARC record
+    Then there are no genres

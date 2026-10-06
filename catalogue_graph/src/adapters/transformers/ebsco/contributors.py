@@ -14,7 +14,7 @@ https://www.loc.gov/marc/bibliographic/bd711.html
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.label_subdivisions import (
+from adapters.transformers.marc.concepts import (
     build_concept,
 )
 from adapters.transformers.utils.text_utils import (

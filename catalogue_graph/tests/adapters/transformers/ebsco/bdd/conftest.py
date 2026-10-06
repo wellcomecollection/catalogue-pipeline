@@ -157,7 +157,7 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
 def context_has(
     context: dict[str, Any], thing_name: str, property: str, value: str
 ) -> None:
-    assert getattr(context[thing_name], property) == value
+    assert drill_through_dots(context[thing_name], property) == value
 
 
 @then(
