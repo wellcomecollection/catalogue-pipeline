@@ -188,8 +188,12 @@ def main() -> None:
     index_name = get_standard_index_name(
         "works-identified", args.index_date or args.pipeline_date
     )
+    # Gzip cuts a 10,000-document page over the public endpoint from ~20 s to a few seconds.
     es_client = get_client(
-        args.api_key_name, args.pipeline_date, cast(ElasticsearchMode, args.es_mode)
+        args.api_key_name,
+        args.pipeline_date,
+        cast(ElasticsearchMode, args.es_mode),
+        http_compress=True,
     )
     load_table = table_loader(
         args.table_name or f"works_identified_{args.pipeline_date.replace('-', '_')}"
