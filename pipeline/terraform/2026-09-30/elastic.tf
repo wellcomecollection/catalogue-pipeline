@@ -47,7 +47,7 @@ locals {
 }
 
 module "elastic" {
-  source = "../modules/pipeline_new/elastic_indices"
+  source = "../modules/pipeline/elastic_indices"
 
   pipeline_date              = local.pipeline_date
   es_cluster                 = local.es_cluster

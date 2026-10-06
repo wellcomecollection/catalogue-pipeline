@@ -19,9 +19,9 @@ locals {
     S3_PREFIX                   = "prod"
 
     # Experimental parallel copy of works-identified
-    ENABLE_ICEBERG_WRITES       = "false"
+    ENABLE_ICEBERG_WRITES       = tostring(var.enable_id_minter_iceberg_writes)
     WORKS_IDENTIFIED_TABLE_NAME = "works_identified_${replace(var.pipeline_date, "-", "_")}"
-    S3_TABLES_BUCKET            = "wellcomecollection-platform-catalogue-pipeline"
+    S3_TABLES_BUCKET            = local.infra_critical.catalogue_pipeline_table_bucket_name
   }
 
   # Extract the secret name from the full ARN.

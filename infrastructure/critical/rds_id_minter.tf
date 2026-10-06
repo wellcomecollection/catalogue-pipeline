@@ -2,23 +2,6 @@ data "aws_ssm_parameter" "rds_username" {
   name = "/aws/reference/secretsmanager/catalogue/id_minter/rds_user"
 }
 
-module "id_minter_rds" {
-  source = "./modules/id-minter-rds"
-
-  vpc_id             = local.vpc_id_new
-  private_subnet_ids = local.private_subnets_new
-  admin_cidr_ingress = local.admin_cidr_ingress
-  engine_version     = "8.0.mysql_aurora.3.10.3"
-
-  master_username = data.aws_ssm_parameter.rds_username.value
-
-  # The stage Identifiers API reads this registry temporarily, so that its load
-  # test (wellcomecollection/platform#6536) does not load the production one.
-  data_api_consumer_role_arns = [
-    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-stage",
-  ]
-}
-
 module "id_minter_rds_2026_07_03" {
   source = "./modules/id-minter-rds"
 

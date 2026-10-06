@@ -1,4 +1,26 @@
-from pydantic import BaseModel, field_validator
+import re
+from datetime import date
+from typing import Annotated
+
+from pydantic import AfterValidator, BaseModel, field_validator
+
+GRAPH_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def validate_graph_date(value: str) -> str:
+    """Every Neptune cluster is dated (YYYY-MM-DD) or 'dev'; see infra/graph/neptune.tf."""
+    if value == "dev":
+        return value
+    try:
+        if GRAPH_DATE_PATTERN.match(value):
+            date.fromisoformat(value)
+            return value
+    except ValueError:
+        pass
+    raise ValueError(f"graph_date must be a date (YYYY-MM-DD) or 'dev', got {value!r}")
+
+
+GraphDate = Annotated[str, AfterValidator(validate_graph_date)]
 
 
 class PipelineIndexDates(BaseModel):
@@ -17,8 +39,7 @@ class GraphPipelineScope(BaseModel):
     indexes a given execution should read from and write to.
     """
 
-    # empty graph_date = legacy pre-dated prod cluster (see infra/graph/neptune.tf)
-    graph_date: str
+    graph_date: GraphDate
     pipeline_date: str
     index_dates: PipelineIndexDates = PipelineIndexDates()
 

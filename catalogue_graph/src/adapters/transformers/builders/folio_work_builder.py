@@ -1,15 +1,3 @@
-from ingestor.models.shared.deleted_reason import SuppressedFromSource
-from models.pipeline.concept import Genre
-from models.pipeline.id_label import Language
-from models.pipeline.identifier import (
-    Id,
-    Identifiable,
-    SourceIdentifier,
-    WorkSourceIdentifier,
-)
-from models.pipeline.item import Item
-from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
-
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
@@ -26,6 +14,19 @@ from adapters.transformers.marc.physical_description import (
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
+from adapters.transformers.marc.production import extract_production
+from ingestor.models.shared.deleted_reason import SuppressedFromSource
+from models.pipeline.concept import Genre
+from models.pipeline.id_label import Language
+from models.pipeline.identifier import (
+    Id,
+    Identifiable,
+    SourceIdentifier,
+    WorkSourceIdentifier,
+)
+from models.pipeline.item import Item
+from models.pipeline.production import ProductionEvent
+from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
 
 # The source-identifier type for a FOLIO item. The id-minter turns this plus the
 # item UUID into a stable canonical id for the public catalogue.
@@ -100,6 +101,15 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def duration(self) -> int | None:
         return extract_duration(self.record)
+
+    @property
+    def production(self) -> list[ProductionEvent]:
+        # TODO: the Sept 2026 migration gave every bib with no 008 field in Sierra
+        # a placeholder 008 (`260903s2026    xx`), so the 008 fallback assigns the
+        # year 2026 to ~1.9k works. Not handled here, as the data should be fixed
+        # at source. Check that a later migration has removed the placeholders
+        # (wellcomecollection/platform#6749).
+        return extract_production(self.record, prefer="264")
 
     @property
     def items(self) -> list[Item]:

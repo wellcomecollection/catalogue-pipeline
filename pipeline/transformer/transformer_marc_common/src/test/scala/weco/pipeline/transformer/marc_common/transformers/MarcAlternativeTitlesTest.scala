@@ -125,6 +125,33 @@ class MarcAlternativeTitlesTest
               )
             ).loneElement shouldBe expectedTitle
           }
+          it(s"omits the control subfields $$0, $$1, $$6 and $$8 of $tag") {
+            info("$0 and $1 carry authority URIs, $6 and $8 field linkage")
+            MarcAlternativeTitles(
+              MarcTestRecord(
+                fields = Seq(
+                  MarcField(
+                    marcTag = tag,
+                    subfields = Seq(
+                      MarcSubfield(tag = "6", content = "880-01"),
+                      MarcSubfield(tag = "a", content = "Pinakes."),
+                      MarcSubfield(tag = "h", content = "Greek"),
+                      MarcSubfield(
+                        tag = "0",
+                        content =
+                          "http://id.loc.gov/authorities/names/n00000000"
+                      ),
+                      MarcSubfield(
+                        tag = "1",
+                        content = "http://id.loc.gov/rwo/agents/n00000000"
+                      ),
+                      MarcSubfield(tag = "8", content = "1\\p")
+                    )
+                  )
+                )
+              )
+            ).loneElement shouldBe "Pinakes. Greek"
+          }
           if (tag == "246") {
             it("ignores subfield 246$5 if its value is UkLW") {
               info("$5UkLW is Wellcome Library-specific and should be omitted")
@@ -329,12 +356,8 @@ class MarcAlternativeTitlesTest
       "r",
       "s",
       "t",
-      "0",
-      "1",
       "2",
-      "6",
-      "7",
-      "8"
+      "7"
     ),
     "240" -> Seq(
       "a",
@@ -350,14 +373,10 @@ class MarcAlternativeTitlesTest
       "p",
       "r",
       "s",
-      "0",
-      "1",
       "2",
-      "6",
-      "7",
-      "8"
+      "7"
     ),
-    "246" -> Seq("a", "b", "f", "g", "h", "i", "n", "p", "5", "6", "7", "8"),
+    "246" -> Seq("a", "b", "f", "g", "h", "i", "n", "p", "5", "7"),
     "242" -> Seq("a", "b", "c", "h", "n", "p", "y")
   )
 }
