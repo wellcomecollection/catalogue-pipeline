@@ -8,7 +8,7 @@ import config
 from clients.neptune_client import NeptuneClient
 from graph.steps.pit_opener import lambda_handler as pit_opener_lambda
 from ingestor.steps import ingestor_deletions, ingestor_indexer
-from models.events import BulkLoaderEvent
+from models.events import BulkLoaderEvent, BulkLoadPollerEvent
 from tests.mocks import (
     MockCloudwatchClient,
     MockS3Client,
@@ -232,16 +232,35 @@ def test_neptune_client_graph_date_selects_endpoint() -> None:
     assert dev_client.neptune_endpoint == "dev-endpoint"
 
 
-def test_neptune_client_rejects_empty_graph_date() -> None:
-    with pytest.raises(ValueError, match="graph_date is required"):
-        NeptuneClient("")
+INVALID_GRAPH_DATES = [
+    "",
+    "prod",
+    " 2026-07-03",
+    "2026-7-3",
+    "2026-99-99",
+    "2026-02-30",
+]
 
 
-def test_pipeline_event_rejects_empty_graph_date() -> None:
-    with pytest.raises(ValidationError):
+@pytest.mark.parametrize("graph_date", INVALID_GRAPH_DATES)
+def test_neptune_client_rejects_invalid_graph_date(graph_date: str) -> None:
+    with pytest.raises(ValueError, match="graph_date must be a date"):
+        NeptuneClient(graph_date)
+
+
+@pytest.mark.parametrize("graph_date", INVALID_GRAPH_DATES)
+def test_pipeline_event_rejects_invalid_graph_date(graph_date: str) -> None:
+    with pytest.raises(ValidationError, match="graph_date must be a date"):
         BulkLoaderEvent(
             pipeline_date="2025-01-01",
-            graph_date="",
+            graph_date=graph_date,
             transformer_type="loc_concepts",
             entity_type="nodes",
         )
+
+
+@pytest.mark.parametrize("graph_date", ["dev", "2026-07-03"])
+def test_poller_event_accepts_valid_graph_date(graph_date: str) -> None:
+    assert (
+        BulkLoadPollerEvent(load_id="x", graph_date=graph_date).graph_date == graph_date
+    )

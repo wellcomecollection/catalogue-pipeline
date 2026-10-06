@@ -15,6 +15,7 @@ from botocore.awsrequest import AWSRequest
 
 import config
 from models.neptune_bulk_loader import BulkLoadStatusResponse
+from models.pipeline_scope import validate_graph_date
 from utils.aws import get_secret
 from utils.streaming import process_stream_in_parallel
 from utils.types import EntityType
@@ -73,13 +74,8 @@ class NeptuneClient:
     """
 
     def __init__(self, graph_date: str) -> None:
-        if not graph_date:
-            raise ValueError(
-                "graph_date is required: every Neptune cluster is dated (or 'dev')"
-            )
-
         self.session = boto3.Session()
-        self.graph_date = graph_date
+        self.graph_date = validate_graph_date(graph_date)
 
         endpoint_secret_name = f"{self.namespace}/{config.NEPTUNE_HOST_SECRET_NAME}"
         logger.info("Creating Neptune client", graph_date=graph_date)

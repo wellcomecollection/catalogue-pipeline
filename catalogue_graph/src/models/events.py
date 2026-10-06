@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 import config
 from models.incremental_window import IncrementalWindow
-from models.pipeline_scope import GraphPipelineScope, PipelineIndexDates
+from models.pipeline_scope import GraphDate, GraphPipelineScope, PipelineIndexDates
 from models.source_scope import SourceScope
 from utils.types import (
     CatalogueTransformerType,
@@ -153,7 +153,7 @@ class BulkLoaderEvent(GraphPipelineEvent):
 class BulkLoadPollerEvent(BaseModel):
     load_id: str
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
-    graph_date: str = Field(min_length=1)
+    graph_date: GraphDate
 
 
 class GraphRemoverEvent(GraphPipelineEvent):
