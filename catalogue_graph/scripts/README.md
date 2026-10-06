@@ -164,3 +164,27 @@ uv run python scripts/rebuild_adapter.py \
 
 Pass `--skip-publish-event` to load the stores without triggering downstream
 transformer runs, for testing or dry-run validation.
+
+## Backfilling a works_identified Iceberg table (`backfill_works_identified.py`)
+
+The id minter appends to its pipeline's `works_identified_<date>` table only
+from the moment `ENABLE_ICEBERG_WRITES` is turned on, so a table switched on
+mid-life covers a fraction of the index. This script reads the pipeline's
+`works-identified` index and appends one row per work, versioned on
+`sourceModifiedTime` the way the minter versions its own rows. It mints
+nothing, writes nothing to the index and publishes nothing downstream.
+
+It needs a role that can write to the table (the platform-developer profile)
+and read the pipeline's Elasticsearch secrets. The table must already exist;
+the script does not create it. Start with `--dry-run`, which loads the table
+and counts the index without appending, then `--limit N` for a smoke test.
+
+```bash
+AWS_PROFILE=platform-developer uv run python scripts/backfill_works_identified.py --pipeline-date 2026-09-30 --es-mode public --dry-run
+AWS_PROFILE=platform-developer uv run python scripts/backfill_works_identified.py --pipeline-date 2026-09-30 --es-mode public
+```
+
+The table is append-only, so a run that fails part-way leaves the rows it
+wrote and a rerun duplicates them. Readers take the highest `version` then the
+latest `last_modified` per id, so this costs space rather than correctness.
+Incremental minter writes can carry on during the backfill for the same reason.
