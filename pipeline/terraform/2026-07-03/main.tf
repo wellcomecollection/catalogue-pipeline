@@ -1,5 +1,5 @@
 module "pipeline" {
-  source = "../modules/pipeline_new"
+  source = "../modules/pipeline"
 
   # This pipeline is production since the switchover (wellcomecollection/platform#6541):
   # tasks stay scaled up, the matcher stage runs at steady-state sizing with its tables
