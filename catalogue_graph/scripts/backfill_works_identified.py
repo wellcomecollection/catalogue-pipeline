@@ -170,7 +170,7 @@ def main() -> None:
         "--limit",
         type=int,
         metavar="N",
-        help="Read only the first N documents, to smoke-test against real data.",
+        help="Read only the first N documents, to smoke-test against real data. Expect one search error afterwards: closing the point in time is what stops the reader.",
     )
     parser.add_argument(
         "--dry-run",
