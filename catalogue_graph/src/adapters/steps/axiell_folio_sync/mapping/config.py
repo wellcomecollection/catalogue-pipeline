@@ -216,6 +216,10 @@ class FieldMap:
     passthrough field (title) that needs no FOLIO tenant lookup.
     ``required`` and ``default`` are mutually exclusive: a field either has
     something to fall back on or it fails when the record carries no value.
+
+    ``strict_table`` makes ``table`` the permitted vocabulary: unmapped values
+    fail instead of being passed to the resolver. Use it when the table encodes
+    a decision, not just a spelling, to prevent unintended FOLIO matches.
     """
 
     canonical: str | None  # CanonicalRecord attribute name (None = no AxC source)
@@ -226,6 +230,7 @@ class FieldMap:
     table: dict[str, str] | None = None  # AxC-code → FOLIO-name normalization
     location: bool = False  # apply LOCATION_RULES before resolving
     required: bool = False  # no value → MappingError, instead of a default
+    strict_table: bool = False  # value absent from `table` → MappingError
 
 
 # Resolved fields → FOLIO tenant UUIDs. Referenced by both FIELDS (extraction)
@@ -235,11 +240,10 @@ MATERIAL_TYPE_FIELD = FieldMap(
     marc="655$a",
     resolver="resolve_material_type",
     label="material type",
-    # Required, with no default. An AxC category that is present but unmapped
-    # already failed the record, because the raw value resolves to nothing in the
-    # tenant; this makes an absent category behave the same way instead of
-    # silently typing it "book".
+    # Required, with no default: a record carrying no 655$a fails rather than
+    # being given a plausible-looking wrong type.
     required=True,
+    strict_table=True,
     # Fold keys to lowercase so the case-insensitive lookup in `_resolve` (which
     # lowercases the incoming AxC value) matches whatever case AxC sends.
     table={key.lower(): value for key, value in MATERIAL_TYPE.items()},

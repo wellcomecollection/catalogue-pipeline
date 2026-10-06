@@ -6,6 +6,7 @@ import pytest
 
 from adapters.steps.axiell_folio_sync.mapping import (
     AXIELL_LOCATION_NOTE_PREFIX,
+    MATERIAL_TYPE,
     Item,
     MappingError,
     select_and_build,
@@ -468,17 +469,109 @@ def test_material_type_matching_is_case_insensitive() -> None:
 def test_the_retired_spaced_keys_are_gone() -> None:
     """The four "- Non Digital" (spaced) keys matched nothing in the corpus, so
     they were removed. Matching is not whitespace-insensitive, so a record using
-    that spelling now fails rather than resolving."""
-    from adapters.steps.axiell_folio_sync.mapping import MATERIAL_TYPE
+    that spelling fails.
 
+    It fails as Unmapped rather than Unresolved: strict_table rejects it at the
+    table, before the resolver is consulted. Previously it only failed because
+    no tenant happens to carry a material type called "Archives - Non Digital",
+    which was incidental rather than enforced."""
     assert not [key for key in MATERIAL_TYPE if " - Non Digital" in key]
 
-    class EmptyRefCache(FakeRefCache):
+    with pytest.raises(MappingError, match="Unmapped material type"):
+        select_and_build(
+            _record_with_category("Archives - Non Digital"),
+            FakeRefCache(),  # type: ignore[arg-type]
+        )
+
+
+# -- the material-type table is the agreed vocabulary ------------------------
+#
+# required=True only rejects an absent 655$a. On its own it does not make the
+# table exhaustive: _resolve used to hand an unmapped value to the resolver
+# unchanged, and RefCache.resolve_material_type accepts any name the tenant
+# carries. So an AxC value of "archive", "computer media" or even "book" synced
+# successfully without appearing in MATERIAL_TYPE at all, taking whatever
+# requestability that FOLIO material type has. strict_table closes that.
+
+
+class TenantRefCache(FakeRefCache):
+    """Resolves only the material types the prod tenant actually carries.
+
+    FakeRefCache resolves everything, which hides this class of bug: the point
+    here is a value the tenant knows but the mapping table does not.
+    """
+
+    TENANT_MATERIAL_TYPES = {
+        "archive",
+        "audio format non-requestable",
+        "audio format requestable",
+        "book",
+        "computer media",
+        "film",
+        "migration",
+        "non-projected graphic",
+        "serial",
+        "video format non-requestable",
+    }
+
+    def resolve_material_type(self, name: str | None) -> str | None:
+        return (
+            "mat-uuid" if (name or "").lower() in self.TENANT_MATERIAL_TYPES else None
+        )
+
+
+@pytest.mark.parametrize(
+    "category",
+    [
+        # Each of these is a real FOLIO material-type name on the tenant, so the
+        # resolver would accept it. None is an AxC object_category.
+        "archive",
+        "ARCHIVE",
+        "computer media",
+        "migration",
+        "serial",
+        # The one that matters most: the default was removed so that nothing is
+        # silently typed "book", and an AxC value of "book" must not reinstate it.
+        "book",
+    ],
+)
+def test_a_value_the_tenant_knows_but_the_table_does_not_is_rejected(
+    category: str,
+) -> None:
+    with pytest.raises(MappingError, match="Unmapped material type"):
+        select_and_build(
+            _record_with_category(category),
+            TenantRefCache(),  # type: ignore[arg-type]
+        )
+
+
+@pytest.mark.parametrize("category", sorted(MATERIAL_TYPE))
+def test_every_table_entry_still_resolves(category: str) -> None:
+    """The strict check must not reject the vocabulary itself."""
+    mapped = select_and_build(
+        _record_with_category(category),
+        TenantRefCache(),  # type: ignore[arg-type]
+    )
+    assert mapped is not None
+    assert mapped.item.materialType.id == "mat-uuid"
+
+
+def test_the_three_failure_modes_are_distinguishable() -> None:
+    """An operator reading the error needs to know which of these happened, as
+    the fix differs: extend the table, fix the MARC, or provision the tenant."""
+    with pytest.raises(MappingError, match="Missing material type"):
+        select_and_build(_record_with_category(None), TenantRefCache())  # type: ignore[arg-type]
+
+    with pytest.raises(MappingError, match="Unmapped material type"):
+        select_and_build(_record_with_category("serial"), TenantRefCache())  # type: ignore[arg-type]
+
+    # In the table, but the tenant does not carry the name it maps to.
+    class NoMaterialTypes(FakeRefCache):
         def resolve_material_type(self, name: str | None) -> str | None:
             return None
 
     with pytest.raises(MappingError, match="Unresolved material type"):
         select_and_build(
-            _record_with_category("Archives - Non Digital"),
-            EmptyRefCache(),  # type: ignore[arg-type]
+            _record_with_category("Archives - Non-digital"),
+            NoMaterialTypes(),  # type: ignore[arg-type]
         )

@@ -143,12 +143,19 @@ case-insensitive.
 | `Sound - Digital` | `audio format non-requestable` |
 | `Visual Material` | `non-projected graphic` |
 | `Pictures` | `non-projected graphic` |
-| Anything else | `MappingError`: the raw value resolves to nothing in the tenant |
+| Anything else | `MappingError`: the table is the agreed vocabulary, so a value outside it is rejected before the tenant is consulted |
 | *(absent)* | `MappingError`: required, with no default |
 
 The digital rows take the `non-requestable` halves because this tenant encodes
 requestability in the material type, and a digital surrogate is not the carrier a
-reader requests. Those three are still to be confirmed with Collection
+reader requests.
+
+That same fact is why the table is strict (`strict_table` on
+`MATERIAL_TYPE_FIELD`). Being required only rejects an absent `655 $a`; on its
+own it would not stop an unmapped value, because `_resolve` hands an unmapped
+value to the resolver unchanged and `resolve_material_type` accepts any name the
+tenant carries. A new AxC value of `archive`, `computer media` or even `book`
+would then sync with a requestability nobody agreed. Those three are still to be confirmed with Collection
 Information. For the AxC value distribution behind this table, see
 [axiell-folio-mapping-options.md](axiell-folio-mapping-options.md) section 1.
 

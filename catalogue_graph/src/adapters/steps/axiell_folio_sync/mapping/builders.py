@@ -78,7 +78,8 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
     there is no AxC source), applies the location prefix rules and normalization
     ``table``, then looks the resulting name up in the FOLIO tenant.
 
-    Raises :class:`MappingError` if the resolved name is unknown to the tenant.
+    Raises :class:`MappingError` if the resolved name is unknown to the tenant,
+    or if the field sets ``strict_table`` and the value is not in its table.
     """
     raw = getattr(rec, field.canonical) if field.canonical else None
     value = (raw or "").strip()
@@ -90,7 +91,19 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
     if field.location:
         value = (_folio_location(value) or "").strip()
     if field.table:
-        value = field.table.get(value.lower(), value)
+        mapped = field.table.get(value.lower())
+        if mapped is None and value and field.strict_table:
+            # Checked before the resolver, because the resolver would accept any
+            # name the tenant happens to carry and the table is the agreed
+            # vocabulary. Without this an unmapped AxC value reaches FOLIO with
+            # whatever semantics that name has there.
+            raise MappingError(
+                f"Unmapped {field.label} {value!r} (MARC {field.marc}) for"
+                f" source_id={rec.source_id} — add it to the mapping table,"
+                " which is the agreed vocabulary, rather than relying on the"
+                " tenant to know the raw AxC value"
+            )
+        value = value if mapped is None else mapped
     if not value:
         value = field.default or ""
     if field.resolver is None:
