@@ -107,8 +107,8 @@ def test_short_field() -> None:
 
 
 # Deliberate divergences: the Scala parser gives no date for any of these,
-# for the reason given on each. The Python parser reads any "u" digit and
-# ignores date 2 wherever it does not need it.
+# for the reason given on each. The Python parser accepts decade/century
+# "u" forms and ignores date 2 wherever it does not need it.
 @pytest.mark.parametrize(
     "dates, expected",
     [
