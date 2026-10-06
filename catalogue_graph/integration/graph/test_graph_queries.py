@@ -5,6 +5,8 @@ deselected by default in pytest config.
 
 Usage:
     GRAPH_DATE=2026-01-01 AWS_PROFILE=platform-developer uv run pytest -m "integration"
+
+Fixtures live under fixtures/<GRAPH_DATE>/ so each live graph has its own set.
 """
 
 import csv
@@ -57,7 +59,13 @@ def neptune_client() -> NeptuneClient:
 
 @cache
 def load_json_fixture(name: str) -> Any:
-    path = Path(__file__).parent / "fixtures" / f"{name}.json"
+    # Fixtures are per graph date; generate a folder with generate_fixtures.py before a switch.
+    path = Path(__file__).parent / "fixtures" / str(GRAPH_DATE) / f"{name}.json"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"No fixtures for graph date {GRAPH_DATE!r} at {path.parent}. "
+            f"Run generate_fixtures.py --graph-date {GRAPH_DATE} to create them."
+        )
     return json.loads(path.read_text())
 
 
