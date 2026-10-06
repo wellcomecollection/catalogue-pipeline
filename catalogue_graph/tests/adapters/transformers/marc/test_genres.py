@@ -1,9 +1,10 @@
 import pytest
-from pymarc.record import Field, Subfield
+from pymarc.record import Field, Indicators, Record, Subfield
 
 from adapters.transformers.marc.genres import (
     build_subdivision_concepts,
     extract_genre,
+    extract_genres,
 )
 from models.pipeline.identifier import Identifiable
 
@@ -62,3 +63,28 @@ def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:
     identifier = concepts[0].id
     assert isinstance(identifier, Identifiable)
     assert identifier.source_identifier.value == period_id
+
+
+def test_genres_with_the_same_label_but_different_identifiers_are_both_kept() -> None:
+    record = Record(
+        fields=[
+            Field(
+                tag="655",
+                indicators=Indicators(" ", "0"),
+                subfields=[
+                    Subfield(code="a", value="Electronic journals"),
+                    Subfield(code="0", value="sh92000896"),
+                ],
+            ),
+            _field("655", [("a", "Electronic journals")]),
+        ]
+    )
+
+    genres = extract_genres(record)
+
+    assert [genre.label for genre in genres] == ["Electronic journals"] * 2
+    ids = [genre.concepts[0].id for genre in genres]
+    assert [i.source_identifier.value for i in ids if isinstance(i, Identifiable)] == [
+        "sh92000896",
+        "electronic journals",
+    ]

@@ -151,6 +151,14 @@ Feature: genres (MARC 655)
     Then the only genre has the label "Broadsides - Influenza Epidemic, 1918-1919"
     And its 2nd concept has the source identifier value "influenza epidemic, 1918-1919"
 
+  Scenario: A chronological subdivision made only of stripped characters keeps a label-derived identifier
+  The Scala strips a lone Roman numeral or qualifier from the label and derives an
+  empty identifier, so unrelated periods share an id. The Python falls back to the label.
+    Given the MARC record has a 655 field with subfield "a" value "Broadsides" and subfield "y" value "MDCCLXXXVII."
+    When I transform the MARC record
+    Then the only genre has the label "Broadsides - MDCCLXXXVII"
+    And its 2nd concept has the source identifier value "mdcclxxxvii"
+
   Scenario: The concept label for Electronic Books is lower-cased along with the genre label
   The Scala replaces "Electronic Books" in the genre label only, leaving the
   concept label as catalogued. The Python applies the same replacement to both.

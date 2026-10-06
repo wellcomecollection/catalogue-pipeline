@@ -49,7 +49,7 @@ def label_for_identifier(raw_label: str, label: str, ontology_type: str) -> str:
         # re-mint organisation canonical ids.
         return raw_label
     if ontology_type == "Period":
-        return normalise_period_id_label(raw_label)
+        return normalise_period_id_label(raw_label) or label
     return label
 
 

@@ -32,3 +32,20 @@ def test_period_id_strips_punctuation_qualifiers_and_roman_numerals(
     identifier = build_concept(label, "Period").id
     assert isinstance(identifier, Identifiable)
     assert identifier.source_identifier.value == expected
+
+
+@pytest.mark.parametrize(
+    ("label", "expected"),
+    [
+        ("MDCCLXXXVII.", "mdcclxxxvii"),
+        ("MDCC", "mdcc"),
+        ("[?]", "[?]"),
+        ("fl.", "fl"),
+    ],
+)
+def test_period_id_falls_back_to_the_label_when_nothing_is_left(
+    label: str, expected: str
+) -> None:
+    identifier = build_concept(label, "Period").id
+    assert isinstance(identifier, Identifiable)
+    assert identifier.source_identifier.value == expected
