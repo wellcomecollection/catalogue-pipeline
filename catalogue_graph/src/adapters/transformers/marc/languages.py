@@ -13,7 +13,7 @@ https://www.loc.gov/marc/bibliographic/bd041.html
 import structlog
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.parsers.field008 import RawField008
+from adapters.transformers.marc.parsers.field008 import RawField008
 from lookups.languages import from_code
 from models.pipeline.id_label import Language
 
