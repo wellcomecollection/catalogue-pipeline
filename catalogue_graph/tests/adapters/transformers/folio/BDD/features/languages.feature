@@ -1,14 +1,15 @@
 Feature: languages (MARC 008/35-37 and 041)
   The primary language comes from the MARC language code in 008/35-37, and
   additional languages from 041 ǂa in document order. Codes are trimmed and
-  lowercased, resolved against the MARC language code list The primary language
-  comes first and the list is deduplicated.
+  lowercased, resolved against the MARC language code list, and codes that say
+  nothing about the language are suppressed. The primary language comes first
+  and the list is deduplicated.
 
   These scenarios mirror the unit tests of the Scala transformer this replaces
   (SierraLanguagesTest.scala), including its test data, so the two can be
   compared directly. Where the Scala reads the Sierra LANG fixed field, these
-  read 008/35-37: Folio carries LANG over as 998 ǂf, but its MARC-to-Instance
-  mapping never reads ǂf, so nothing maintains it.
+  read 008/35-37: Folio carries LANG over as 998 ǂf but does not update it when
+  a record is edited, so it is not a dependable source.
 
   https://www.loc.gov/marc/bibliographic/bd008a.html
   https://www.loc.gov/marc/bibliographic/bd041.html
