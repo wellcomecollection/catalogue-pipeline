@@ -24,17 +24,20 @@ def extract_alternative_titles(record: Record) -> list[str]:
     return distinct(non_blank_titles)
 
 
+# ǂ0 and ǂ1 hold authority URIs, ǂ6 and ǂ8 link fields: none is title text.
+CONTROL_SUBFIELDS = {"0", "1", "6", "8"}
+
+
 def format_field(field: Field) -> str:
     """
     Join the field's subfields, omitting those that are not part of the title.
 
-    ǂ5 UkLW is a Wellcome-internal marker, and ǂ6 is a link to an 880 field.
-    Other ǂ5 values (e.g. DNLM) are kept.
+    ǂ5 UkLW is a Wellcome-internal marker; other ǂ5 values (e.g. DNLM) are kept.
     """
     return " ".join(
         subfield.value
         for subfield in field.subfields
-        if subfield.code != "6"
+        if subfield.code not in CONTROL_SUBFIELDS
         and not (subfield.code == "5" and subfield.value == "UkLW")
     )
 

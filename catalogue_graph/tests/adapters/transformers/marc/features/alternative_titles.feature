@@ -88,10 +88,6 @@ Feature: MARC record alternative titles extraction
     Then there are 1 alternative titles
     And the 1st alternative title is "What You Will in G flat Major with Ayapeneco subtitles"
 
-  # Everything below diverges from the Scala implementation (MarcAlternativeTitles.scala)
-  # on purpose. Scala joins ǂ6 into the title, and neither trims the joined value nor
-  # deduplicates on the trimmed one.
-
   Scenario: Drops ǂ6, which links to an 880 field
     Given the MARC record has a 240 field with indicators "1" "0" with subfields:
       | code | value                 |
@@ -100,6 +96,20 @@ Feature: MARC record alternative titles extraction
       | l    | English               |
     When I transform the MARC record
     Then the only alternative title is "Velikosvetskie obedy. English"
+
+  Scenario: Drops the authority URI and linkage subfields ǂ0, ǂ1 and ǂ8
+    Given the MARC record has a 240 field with indicators "1" "0" with subfields:
+      | code | value                                                |
+      | a    | Aphorisms.                                           |
+      | l    | Latin                                                |
+      | 0    | http://id.loc.gov/authorities/names/n00000000        |
+      | 1    | http://id.loc.gov/rwo/agents/n00000000               |
+      | 8    | 1\p                                                  |
+    When I transform the MARC record
+    Then the only alternative title is "Aphorisms. Latin"
+
+  # Everything below diverges from the Scala implementation (MarcAlternativeTitles.scala)
+  # on purpose. Scala neither trims the joined value nor deduplicates on the trimmed one.
 
   Scenario: Whitespace-only title should be ignored
     Given the MARC record has a 130 field with subfield "a" value "     "
