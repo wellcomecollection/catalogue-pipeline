@@ -4,6 +4,18 @@ variable "read_from" {
   description = "List of indices this API key allows reading from"
 }
 
+variable "read_privileges" {
+  type        = list(string)
+  default     = ["read"]
+  description = "Index privileges granted on the read_from indices"
+}
+
+variable "cluster_privileges" {
+  type        = list(string)
+  default     = []
+  description = "Cluster privileges added to the read role descriptor, eg. ['monitor']; empty omits the cluster entry"
+}
+
 variable "write_to" {
   type        = list(string)
   default     = []

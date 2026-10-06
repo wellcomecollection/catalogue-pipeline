@@ -15,6 +15,7 @@ from utils.types import ConceptSource, ConceptType
 
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY: list[ConceptSource] = [
+    "weco-authority",
     "nlm-mesh",
     "lc-subjects",
     "lc-names",
@@ -62,6 +63,19 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str | None:
     raise ValueError(f"Unknown source: {source}")
 
 
+def get_ordered_source_concepts(
+    raw_concept: ExtractedConcept, source: ConceptSource
+) -> list[SourceConcept]:
+    """
+    Return every source concept from `source` across the concept's whole 'same as' group, sorted by id. Selection is
+    group-wide so that all members share a label: the site's "View all" links filter works by that label.
+    """
+    nodes = [sc for sc in raw_concept.source_concepts if sc.properties.source == source]
+    return [
+        sc.properties for sc in sorted(nodes, key=lambda n: (n.properties.id, n.id))
+    ]
+
+
 def get_priority_label(
     raw_concept: ExtractedConcept,
     source_priority: list[ConceptSource],
@@ -70,17 +84,16 @@ def get_priority_label(
     Given a concept and its source concepts, extract the corresponding labels and return the highest-priority one.
     (For example, if a `label` field exists in both Wikidata and MeSH, we always prioritise the MeSH one.)
     """
-
-    labels = {"label-derived": raw_concept.concept.properties.label}
-
-    for source_concept in raw_concept.source_concepts:
-        properties = source_concept.properties
-        source = properties.source
-        labels[source] = standardise_label(properties.label)
-
     for source in source_priority:
-        if (value := labels.get(source)) is not None:
-            return value, source
+        if source == "label-derived":
+            if (label := raw_concept.concept.properties.label) is not None:
+                return label, source
+            continue
+
+        for source_concept in get_ordered_source_concepts(raw_concept, source):
+            # Treat a blank label as missing so that it falls through to the next source
+            if standardised := standardise_label(source_concept.label):
+                return standardised, source
 
     raise MissingLabelError(
         f"Concept {raw_concept.concept.properties.id} does not have a label."
@@ -153,7 +166,10 @@ class RawNeptuneConcept:
             ConceptIdentifier(
                 value=linked.properties.id, identifierType=linked.properties.source
             )
-            for linked in self.raw_concept.linked_source_concepts
+            for linked in sorted(
+                self.raw_concept.linked_source_concepts,
+                key=lambda sc: (sc.properties.source, sc.properties.id),
+            )
         ]
 
     @property
@@ -171,42 +187,34 @@ class RawNeptuneConcept:
 
     @property
     def alternative_labels(self) -> list[str]:
+        # Every source's preferred heading stays searchable, not just the one chosen as the label
         alternative_labels: set[str] = set()
         for source_concept in self.raw_concept.source_concepts:
-            for alternative_label in source_concept.properties.alternative_labels:
-                if len(alternative_label) > 0:
-                    standardised_label = standardise_label(alternative_label)
-                    if standardised_label is not None:
-                        alternative_labels.add(standardised_label)
+            properties = source_concept.properties
+            for label in [properties.label, *properties.alternative_labels]:
+                if standardised := standardise_label(label):
+                    alternative_labels.add(standardised)
 
-        return sorted(list(alternative_labels))
+        alternative_labels -= {self.label, self.display_label}
+        return sorted(alternative_labels)
 
     @property
     def description(self) -> ConceptDescription | None:
         # Only extract descriptions from Wikidata or weco-authority (MeSH also stores descriptions, but we should not surface them).
-        description_sources = (
-            source_concept
-            for source_concept in self.raw_concept.source_concepts
-            if source_concept.properties.source in ["weco-authority", "wikidata"]
-        )
-        # TODO: Prefer weco-authority descriptions when they exist.
-        # Set to None if weco-authority has the blanking keyword.
-        # Fall through to wikidata if empty.
-        candidate_descriptions = {
-            k: v
-            for k, v in (
-                self._description_from_concept(source_concept.properties)
-                for source_concept in description_sources
-            )
-        }
-        weco_description = candidate_descriptions.get("weco-authority")
-
+        weco_description = self._first_description("weco-authority")
         if weco_description is None:
-            return candidate_descriptions.get("wikidata")
+            return self._first_description("wikidata")
 
         if weco_description.text == "empty":
             return None
         return weco_description
+
+    def _first_description(self, source: ConceptSource) -> ConceptDescription | None:
+        for source_concept in get_ordered_source_concepts(self.raw_concept, source):
+            _, description = self._description_from_concept(source_concept)
+            if description is not None:
+                return description
+        return None
 
     @staticmethod
     def _description_from_concept(
@@ -248,8 +256,9 @@ class RawNeptuneConcept:
         # Currently, weco-authority is the only source that has images
         # so only extract from there to avoid surprises if we eventually
         # add others
-        for source_concept in self.raw_concept.source_concepts:
-            properties = source_concept.properties
-            if properties.source == "weco-authority":
-                return self._display_images_from_concept(properties)
+        for source_concept in get_ordered_source_concepts(
+            self.raw_concept, "weco-authority"
+        ):
+            if images := self._display_images_from_concept(source_concept):
+                return images
         return []

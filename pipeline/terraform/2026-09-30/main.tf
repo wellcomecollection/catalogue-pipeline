@@ -2,11 +2,10 @@ module "pipeline" {
   source = "../modules/pipeline_new"
 
   # Builds Axiell archive trees from the 982 parent link (wellcomecollection/platform#6725).
-  # Scaled up for the full reindex; scale the matcher DB back down once the works funnel closes.
   reindexing_state = {
     listen_to_reindexer = true
-    scale_up_tasks      = true
-    scale_up_matcher_db = true
+    scale_up_tasks      = false
+    scale_up_matcher_db = false
   }
 
   index_dates = {

@@ -49,11 +49,13 @@ class StubConceptsExtractor(GraphBaseConceptsExtractor):
         related: dict[str, list[str]],
         same_as_groups: dict[str, list[str]],
         work_connected: set[str],
+        relationship_types: dict[str, str] | None = None,
     ) -> None:
         super().__init__(get_mock_neptune_client())
         self.related = related
         self.same_as_groups = same_as_groups
         self.work_connected = work_connected
+        self.relationship_types = relationship_types or {}
 
     def get_concept_ids_to_process(self) -> Generator[str]:
         yield from self.related
@@ -77,7 +79,11 @@ class StubConceptsExtractor(GraphBaseConceptsExtractor):
         return {
             i: {
                 "related": [
-                    {"id": related_id, "count": 1, "relationship_type": None}
+                    {
+                        "id": related_id,
+                        "count": 1,
+                        "relationship_type": self.relationship_types.get(related_id),
+                    }
                     for related_id in self.related[i]
                 ]
             }
@@ -124,3 +130,62 @@ def test_related_concepts_merge_onto_one_target() -> None:
     assert _related_targets(
         [SIBLING_ID, PRIMARY_ID], work_connected={PRIMARY_ID, SIBLING_ID}
     ) == [PRIMARY_ID]
+
+
+def test_related_concept_relationship_type_is_chosen_deterministically() -> None:
+    extractor = StubConceptsExtractor(
+        related={SOURCE_CONCEPT_ID: [SIBLING_ID, PRIMARY_ID]},
+        same_as_groups={PRIMARY_ID: [SIBLING_ID], SIBLING_ID: [PRIMARY_ID]},
+        work_connected={PRIMARY_ID, SIBLING_ID},
+        relationship_types={PRIMARY_ID: "has_sibling", SIBLING_ID: "has_parent"},
+    )
+    result = extractor._get_related_concepts("related_to", [SOURCE_CONCEPT_ID])
+
+    assert [r.relationship_type for r in result[SOURCE_CONCEPT_ID]] == ["has_parent"]
+
+
+def test_same_as_map_does_not_depend_on_row_order() -> None:
+    other_id = "zzzzzzzz"
+    extractor = StubConceptsExtractor(
+        related={},
+        same_as_groups={
+            SIBLING_ID: [other_id, PRIMARY_ID],
+            other_id: [SIBLING_ID, PRIMARY_ID],
+            PRIMARY_ID: [other_id, SIBLING_ID],
+        },
+        work_connected=set(),
+    )
+    extractor._update_same_as_map([other_id, SIBLING_ID, PRIMARY_ID])
+
+    expected = [PRIMARY_ID, SIBLING_ID, other_id]
+    assert [extractor.get_same_as(i) for i in expected] == [expected] * 3
+
+
+def _a_source_concept(source_concept_id: str) -> dict:
+    return {
+        "~id": source_concept_id,
+        "~labels": ["SourceConcept"],
+        "~properties": {"id": source_concept_id, "source": "nlm-mesh"},
+    }
+
+
+def test_resolved_source_concepts_are_sorted() -> None:
+    extractor = StubConceptsExtractor(
+        related={},
+        same_as_groups={SIBLING_ID: [PRIMARY_ID], PRIMARY_ID: [SIBLING_ID]},
+        work_connected=set(),
+    )
+    extractor._update_same_as_map([SIBLING_ID])
+    source_concepts_batch = {
+        PRIMARY_ID: {"source_concepts": [_a_source_concept("D019493")]},
+        SIBLING_ID: {
+            "source_concepts": [
+                _a_source_concept("D019494"),
+                _a_source_concept("D019492"),
+            ]
+        },
+    }
+
+    resolved = extractor._resolve_source_concepts(SIBLING_ID, source_concepts_batch)
+
+    assert [sc.id for sc in resolved] == ["D019492", "D019493", "D019494"]
