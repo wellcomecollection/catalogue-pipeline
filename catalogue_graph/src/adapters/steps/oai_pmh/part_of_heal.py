@@ -9,6 +9,7 @@ downstream with it.
 
 from __future__ import annotations
 
+import itertools
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -27,6 +28,8 @@ ID_PREFIX = "collect:"
 OBJECT_NUMBER_PREFIX = "(AltRefNo)"
 
 _PARSER = etree.XMLParser(resolve_entities=False)
+# RE2 rejects an alternation of ~200k ids (a full reload) as too large; 50k compiles.
+REGEX_CHUNK_SIZE = 10_000
 
 
 @dataclass(frozen=True)
@@ -35,6 +38,7 @@ class _Parent:
     object_number: str
     changeset: str
     superseded: bool
+    content: str
 
 
 @dataclass
@@ -44,6 +48,7 @@ class PartOfHealResult:
     healed_ids: list[str] = field(default_factory=list)
     superseded_parent_ids: list[str] = field(default_factory=list)
     superseded_stale_children: int = 0
+    changed_parent_ids: list[str] = field(default_factory=list)
 
 
 def _parse(content: str | None) -> Any | None:
@@ -85,8 +90,19 @@ def _parents(
             object_number=object_number,
             changeset=row["changeset"],
             superseded=row["id"] in superseded_ids,
+            content=row["content"],
         )
     return parents
+
+
+def _candidates(batch: pa.RecordBatch, patterns: list[str]) -> pa.RecordBatch:
+    """Rows whose content mentions any parent priref, as a cheap superset prefilter."""
+    content = batch.column("content")
+    # Null content gives a null match, which filter drops.
+    mask = pc.match_substring_regex(content, patterns[0])
+    for pattern in patterns[1:]:
+        mask = pc.or_kleene(mask, pc.match_substring_regex(content, pattern))
+    return batch.filter(mask)
 
 
 def _patch(content: str, parents: dict[str, _Parent]) -> tuple[str, _Parent] | None:
@@ -127,8 +143,11 @@ def heal_stale_part_of(
 
     # Pinned so the scan reads the same rows the changeset read did.
     snapshot_id = adapter_store.current_snapshot_id()
-    # Cheap superset prefilter, so lxml only parses likely children.
-    pattern = ">(?:" + "|".join(re.escape(p) for p in sorted(parents)) + ")<"
+    # Chunked so the pattern size is bounded whatever the changeset size.
+    patterns = [
+        ">(?:" + "|".join(re.escape(p) for p in chunk) + ")<"
+        for chunk in itertools.batched(sorted(parents), REGEX_CHUNK_SIZE)
+    ]
     live = Or(EqualTo("deleted", False), IsNull("deleted"))
     reader = adapter_store.table.scan(
         row_filter=And(EqualTo("namespace", adapter_store.namespace), live),
@@ -141,10 +160,7 @@ def heal_stale_part_of(
     try:
         for batch in reader:
             result.scanned_rows += batch.num_rows
-            # Null content gives a null match, which filter drops.
-            candidates = batch.filter(
-                pc.match_substring_regex(pc.field("content"), pattern)
-            )
+            candidates = _candidates(batch, patterns)
             result.candidate_rows += candidates.num_rows
             for row_id, content in zip(
                 cast(list[str], candidates.column("id").to_pylist()),
@@ -167,13 +183,33 @@ def heal_stale_part_of(
         return result
 
     # Read the latest rows and drop any changed since the scan, so a newer
-    # loader write is never overwritten.
+    # loader write is never overwritten and a parent renumbered again since the
+    # changeset read is not healed to its old number.
     adapter_store.table.refresh()
+    parent_ids = {parent.record_id for _, _, parent in patched.values()}
+    latest_parents = {
+        row["id"]: row
+        for row in adapter_store.get_namespace_records(
+            In("id", sorted(parent_ids))
+        ).to_pylist()
+    }
+    changed_parents = {
+        parent.record_id
+        for _, _, parent in patched.values()
+        if (latest := latest_parents.get(parent.record_id)) is None
+        or latest["changeset"] != parent.changeset
+        or latest["content"] != parent.content
+    }
+    result.changed_parent_ids = sorted(changed_parents)
     current = adapter_store.get_namespace_records(In("id", list(patched)))
     rows_by_changeset: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in current.to_pylist():
         old_content, new_content, parent = patched[row["id"]]
-        if row["deleted"] or row["content"] != old_content:
+        if (
+            row["deleted"]
+            or row["content"] != old_content
+            or parent.record_id in changed_parents
+        ):
             continue
         row["content"] = new_content
         rows_by_changeset[parent.changeset].append(row)

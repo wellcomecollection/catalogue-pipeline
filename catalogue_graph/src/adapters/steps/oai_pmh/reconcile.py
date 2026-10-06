@@ -131,6 +131,13 @@ def handler(
             parent_ids=heal.superseded_parent_ids,
             stale_children=heal.superseded_stale_children,
         )
+    if heal.changed_parent_ids:
+        logger.warning(
+            "Skipped part-of heal for parents rewritten since the changeset read",
+            adapter=runtime.adapter_name,
+            job_id=event.job_id,
+            parent_ids=heal.changed_parent_ids,
+        )
 
     logger.info(
         "Reconcile step complete",

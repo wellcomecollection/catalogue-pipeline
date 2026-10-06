@@ -10,6 +10,7 @@ import pyarrow as pa
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.steps.oai_pmh import part_of_heal
 from adapters.steps.oai_pmh.reconcile import (
     ReconcileEvent,
     ReconcileResponse,
@@ -341,3 +342,50 @@ def test_child_changed_after_the_scan_is_left_alone(
     assert after[CHILD_1]["content"] == newer_child
     assert after[CHILD_1]["last_modified"] == LATER_TIME
     assert after[CHILD_2]["changeset"] == changeset_id
+
+
+def test_parent_rewritten_after_the_scan_skips_its_children(
+    runtime: ReconcileRuntime, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _seed_family(runtime)
+    changeset_id = _load(runtime, {PARENT: _parent("TEST/2")}, UPDATE_TIME)
+    before = _rows(runtime)
+    table = runtime.adapter_store.table
+    refresh = table.refresh
+
+    def loader_write_then_refresh() -> IcebergTable:
+        monkeypatch.undo()
+        _load(runtime, {PARENT: _parent("TEST/3")}, LATER_TIME)
+        return refresh()
+
+    monkeypatch.setattr(table, "refresh", loader_write_then_refresh)
+
+    response = _run(runtime, [changeset_id])
+
+    assert response.part_of_healed == 0
+    after = _rows(runtime)
+    for child in (CHILD_1, CHILD_2):
+        assert after[child]["content"] == before[child]["content"]
+        assert after[child]["changeset"] == before[child]["changeset"]
+
+
+def test_prefilter_is_chunked_by_parent_count(
+    runtime: ReconcileRuntime, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(part_of_heal, "REGEX_CHUNK_SIZE", 1)
+    _seed_family(runtime)
+    other_parent = _marc("100005", "TEST/5", stamp="20260702120000.0")
+    changeset_id = _load(
+        runtime,
+        {
+            PARENT: _parent("TEST/2", stamp="20260702120000.0"),
+            "collect:100005": other_parent,
+        },
+        UPDATE_TIME,
+    )
+
+    response = _run(runtime, [changeset_id])
+
+    assert response.part_of_healed == 2
+    after = _rows(runtime)
+    assert "TEST/2" in after[CHILD_1]["content"]
