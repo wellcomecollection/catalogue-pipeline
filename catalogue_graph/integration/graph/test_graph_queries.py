@@ -5,6 +5,9 @@ deselected by default in pytest config.
 
 Usage:
     GRAPH_DATE=2026-01-01 AWS_PROFILE=platform-developer uv run pytest -m "integration"
+
+Fixtures live under fixtures/<GRAPH_DATE>/ so each live graph has its own set. The
+legacy cluster (empty date or 'prod') has no fixtures and is not supported here.
 """
 
 import csv
@@ -43,21 +46,31 @@ from ingestor.queries.work_queries import (
 pytestmark = pytest.mark.integration
 
 
-GRAPH_DATE = os.environ.get("GRAPH_DATE")
+def graph_date() -> str:
+    value = os.environ.get("GRAPH_DATE")
+    if not value:
+        raise ValueError(
+            "GRAPH_DATE environment variable must be set to run integration tests"
+        )
+    return value
 
 
 @lru_cache(maxsize=1)
 def neptune_client() -> NeptuneClient:
-    if GRAPH_DATE is None:
-        raise ValueError(
-            "GRAPH_DATE environment variable must be set to run integration tests"
-        )
-    return NeptuneClient(GRAPH_DATE)
+    return NeptuneClient(graph_date())
 
 
 @cache
 def load_json_fixture(name: str) -> Any:
-    path = Path(__file__).parent / "fixtures" / f"{name}.json"
+    # Fixtures are per graph date; generate a folder with generate_fixtures.py before a switch.
+    date = graph_date()
+    path = Path(__file__).parent / "fixtures" / date / f"{name}.json"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"No fixtures for graph date {date} at {path.parent}. "
+            f"Run `uv run integration/graph/generate_fixtures.py --graph-date {date}` "
+            "from catalogue_graph/ to create them."
+        )
     return json.loads(path.read_text())
 
 

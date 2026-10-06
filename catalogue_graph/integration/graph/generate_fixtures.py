@@ -1,11 +1,11 @@
 """Regenerate JSON fixtures for graph integration tests.
 
 Usage:
-    # Regenerate all fixtures
-    AWS_PROFILE=platform-developer uv run integration/graph/generate_fixtures.py
+    # Regenerate all fixtures for one graph date (written to fixtures/<graph_date>/)
+    AWS_PROFILE=platform-developer uv run integration/graph/generate_fixtures.py --graph-date 2026-01-01
 
     # Regenerate only specific fixtures (matches test_graph_queries.py MATCH_CASES names)
-    AWS_PROFILE=platform-developer uv run integration/graph/generate_fixtures.py --fixtures concept_people concept_related_to
+    AWS_PROFILE=platform-developer uv run integration/graph/generate_fixtures.py --graph-date 2026-01-01 --fixtures concept_people concept_related_to
 """
 
 from __future__ import annotations
@@ -41,20 +41,24 @@ ID_POOL_SIZE = 20_000
 REGENERATION_LOG_NAME = "REGENERATION_LOG.md"
 
 
-def write_fixture(name: str, data: dict[str, Any] | list[str]) -> None:
-    path = Path(__file__).parent / "fixtures" / f"{name}.json"
+FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+
+def write_fixture(graph_date: str, name: str, data: dict[str, Any] | list[str]) -> None:
+    # One folder per graph date, so CI follows the production graph date without a regeneration.
+    path = FIXTURES_DIR / graph_date / f"{name}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
     print(f"Wrote fixture: {path}")
 
 
 def append_regeneration_log(*, reason: str) -> None:
-    fixtures_dir = Path(__file__).parent / "fixtures"
-    path = fixtures_dir / REGENERATION_LOG_NAME
+    path = FIXTURES_DIR / REGENERATION_LOG_NAME
 
     timestamp = datetime.now(UTC).isoformat(timespec="seconds")
     username = getuser()
 
-    fixtures_dir.mkdir(parents=True, exist_ok=True)
+    FIXTURES_DIR.mkdir(parents=True, exist_ok=True)
     is_new_or_empty = (not path.exists()) or path.stat().st_size == 0
 
     cleaned_reason = " ".join(reason.splitlines()).strip()
@@ -77,6 +81,7 @@ def sample_ids(*, client: Any, label: str) -> list[str]:
 def generate_fixture_set(
     *,
     client: Any,
+    graph_date: str,
     query: str,
     ids: list[str],
     row_to_values: Callable[[dict[str, Any]], list[str]],
@@ -100,13 +105,13 @@ def generate_fixture_set(
 
     sampled_ids = set(random.sample(sorted(mappings), FIXTURE_SAMPLE_SIZE))
     sampled_mappings = {k: v for k, v in mappings.items() if k in sampled_ids}
-    write_fixture(expected_fixture_name, sampled_mappings)
+    write_fixture(graph_date, expected_fixture_name, sampled_mappings)
 
     if empty_ids_fixture_name is None:
         return
 
     random_missing = random.sample(sorted(missing_ids), FIXTURE_SAMPLE_SIZE)
-    write_fixture(empty_ids_fixture_name, random_missing)
+    write_fixture(graph_date, empty_ids_fixture_name, random_missing)
 
 
 def row_to_types(item: dict[str, Any]) -> list[str]:
@@ -240,6 +245,11 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Only regenerate these fixtures (default: regenerate all).",
     )
+    parser.add_argument(
+        "--graph-date",
+        default=None,
+        help="Graph date to query and the fixtures folder to write (prompted if omitted).",
+    )
     return parser.parse_args()
 
 
@@ -270,11 +280,11 @@ def main() -> None:
     specs = [spec for spec in FIXTURE_SPECS if spec.name in selected_names]
 
     reason = confirm_regeneration()
-    append_regeneration_log(
-        reason=f"{reason} (fixtures: {', '.join(spec.name for spec in specs)})"
-    )
-
-    graph_date = input("Enter the graph date (e.g. 2025-01-01): ").strip()
+    graph_date = (
+        args.graph_date
+        if args.graph_date is not None
+        else input("Enter the graph date (e.g. 2025-01-01): ")
+    ).strip()
     client = NeptuneClient(graph_date)
 
     # Only fetch the ID pools actually needed by the selected fixtures.
@@ -284,12 +294,18 @@ def main() -> None:
     for spec in specs:
         generate_fixture_set(
             client=client,
+            graph_date=graph_date,
             query=spec.query,
             ids=id_pools[spec.id_label],
             row_to_values=spec.row_to_values,
             expected_fixture_name=spec.expected_fixture_name,
             empty_ids_fixture_name=spec.empty_ids_fixture_name,
         )
+
+    # Log only once every fixture is written, so a failed run leaves no misleading entry.
+    append_regeneration_log(
+        reason=f"{reason} (graph: {graph_date}; fixtures: {', '.join(spec.name for spec in specs)})"
+    )
 
 
 if __name__ == "__main__":
