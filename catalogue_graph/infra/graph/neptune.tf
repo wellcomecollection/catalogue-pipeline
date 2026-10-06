@@ -31,7 +31,8 @@ module "catalogue_graph_neptune_cluster_dev" {
 module "catalogue_graph_neptune_cluster_2026_07_03" {
   source = "./modules/catalogue_graph"
 
-  # The production cluster since the 2026-09-29 switchover (wellcomecollection/platform#6541).
+  # Previous production cluster, kept while the 2026-07-03 pipeline remains the fallback
+  # (wellcomecollection/platform#6743).
   graph_date                 = "2026-07-03"
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
@@ -48,8 +49,8 @@ module "catalogue_graph_neptune_cluster_2026_07_03" {
 module "catalogue_graph_neptune_cluster_2026_09_30" {
   source = "./modules/catalogue_graph"
 
-  # For the 2026-09-30 pipeline, which builds Axiell trees from the 982 parent link
-  # (wellcomecollection/platform#6725).
+  # The production cluster since the 2026-10-06 switch (wellcomecollection/platform#6743);
+  # builds Axiell trees from the 982 parent link (wellcomecollection/platform#6725).
   graph_date                 = "2026-09-30"
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
