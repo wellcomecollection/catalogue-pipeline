@@ -4,7 +4,7 @@ import pytest
 from pymarc.record import Field, Indicators, Subfield
 from structlog.testing import capture_logs
 
-from adapters.transformers.ebsco.authority_standard_number import extract_identifier
+from adapters.transformers.marc.authority_standard_number import extract_identifier
 from models.pipeline.identifier import SourceIdentifier
 
 

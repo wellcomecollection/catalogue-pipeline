@@ -29,7 +29,8 @@ SUPPRESSED_CODES = {
 
 def extract_languages(record: Record) -> list[Language]:
     """The primary language first, then 041 ǂa in document order, deduplicated."""
-    codes = [_primary_code(record)] + [
+    primary_code = _primary_code(record)
+    other_codes = [
         code
         for field in record.get_fields("041")
         for value in field.get_subfields("a")
@@ -37,7 +38,7 @@ def extract_languages(record: Record) -> list[Language]:
     ]
 
     languages: list[Language] = []
-    for code in codes:
+    for code in [primary_code] + other_codes:
         language = _resolve(code)
         if language is not None and language not in languages:
             languages.append(language)
