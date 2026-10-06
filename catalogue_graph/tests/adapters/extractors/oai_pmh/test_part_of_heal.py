@@ -309,6 +309,46 @@ def test_parent_and_child_in_the_same_changeset(runtime: ReconcileRuntime) -> No
     assert after[CHILD_1]["changeset"] == after[CHILD_2]["changeset"] == changeset_id
 
 
+def test_children_are_tagged_with_their_own_parents_changeset(
+    runtime: ReconcileRuntime,
+) -> None:
+    _seed_family(runtime)
+    second_parent = "collect:100010"
+    second_child = "collect:100011"
+    _load(
+        runtime,
+        {
+            second_parent: _marc("100010", "SECOND/1"),
+            second_child: _marc(
+                "100011", "SECOND/1/100011", parent=("100010", "SECOND/1")
+            ),
+        },
+        BASELINE_TIME,
+    )
+    first = _load(runtime, {PARENT: _parent("TEST/2")}, UPDATE_TIME)
+    second = _load(runtime, {second_parent: _marc("100010", "SECOND/2")}, LATER_TIME)
+
+    response = _run(runtime, [first, second])
+
+    assert response.part_of_healed == 3
+    after = _rows(runtime)
+    assert '<subfield code="b">TEST/2</subfield>' in after[CHILD_1]["content"]
+    assert '<subfield code="b">SECOND/2</subfield>' in after[second_child]["content"]
+    assert after[CHILD_1]["changeset"] == after[CHILD_2]["changeset"] == first
+    assert after[second_child]["changeset"] == second
+
+    store = runtime.adapter_store
+    assert set(store.get_records_by_changesets([first]).column("id").to_pylist()) == {
+        PARENT,
+        CHILD_1,
+        CHILD_2,
+    }
+    assert set(store.get_records_by_changesets([second]).column("id").to_pylist()) == {
+        second_parent,
+        second_child,
+    }
+
+
 def test_rerun_after_heal_is_a_no_op(runtime: ReconcileRuntime) -> None:
     _seed_family(runtime)
     changeset_id = _load(runtime, {PARENT: _parent("TEST/2")}, UPDATE_TIME)
