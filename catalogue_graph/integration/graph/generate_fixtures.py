@@ -281,11 +281,10 @@ def main() -> None:
 
     reason = confirm_regeneration()
     graph_date = (
-        args.graph_date or input("Enter the graph date (e.g. 2025-01-01): ").strip()
-    )
-    append_regeneration_log(
-        reason=f"{reason} (graph: {graph_date}; fixtures: {', '.join(spec.name for spec in specs)})"
-    )
+        args.graph_date
+        if args.graph_date is not None
+        else input("Enter the graph date (e.g. 2025-01-01): ")
+    ).strip()
     client = NeptuneClient(graph_date)
 
     # Only fetch the ID pools actually needed by the selected fixtures.
@@ -302,6 +301,11 @@ def main() -> None:
             expected_fixture_name=spec.expected_fixture_name,
             empty_ids_fixture_name=spec.empty_ids_fixture_name,
         )
+
+    # Log only once every fixture is written, so a failed run leaves no misleading entry.
+    append_regeneration_log(
+        reason=f"{reason} (graph: {graph_date}; fixtures: {', '.join(spec.name for spec in specs)})"
+    )
 
 
 if __name__ == "__main__":

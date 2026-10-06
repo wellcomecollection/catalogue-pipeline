@@ -45,26 +45,29 @@ from ingestor.queries.work_queries import (
 pytestmark = pytest.mark.integration
 
 
-GRAPH_DATE = os.environ.get("GRAPH_DATE")
+def graph_date() -> str:
+    value = os.environ.get("GRAPH_DATE")
+    if not value:
+        raise ValueError(
+            "GRAPH_DATE environment variable must be set to run integration tests"
+        )
+    return value
 
 
 @lru_cache(maxsize=1)
 def neptune_client() -> NeptuneClient:
-    if GRAPH_DATE is None:
-        raise ValueError(
-            "GRAPH_DATE environment variable must be set to run integration tests"
-        )
-    return NeptuneClient(GRAPH_DATE)
+    return NeptuneClient(graph_date())
 
 
 @cache
 def load_json_fixture(name: str) -> Any:
     # Fixtures are per graph date; generate a folder with generate_fixtures.py before a switch.
-    path = Path(__file__).parent / "fixtures" / str(GRAPH_DATE) / f"{name}.json"
+    date = graph_date()
+    path = Path(__file__).parent / "fixtures" / date / f"{name}.json"
     if not path.exists():
         raise FileNotFoundError(
-            f"No fixtures for graph date {GRAPH_DATE!r} at {path.parent}. "
-            f"Run generate_fixtures.py --graph-date {GRAPH_DATE} to create them."
+            f"No fixtures for graph date {date} at {path.parent}. "
+            f"Run generate_fixtures.py --graph-date {date} to create them."
         )
     return json.loads(path.read_text())
 
