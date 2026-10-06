@@ -101,7 +101,8 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
         # TODO: the Sept 2026 migration gave every bib with no 008 field in Sierra
         # a placeholder 008 (`260903s2026    xx`), so the 008 fallback assigns the
         # year 2026 to ~1.9k works. Not handled here, as the data should be fixed
-        # at source. Check that a later migration has removed the placeholders.
+        # at source. Check that a later migration has removed the placeholders
+        # (wellcomecollection/platform#6749).
         return extract_production(self.record, prefer="264")
 
     @property
