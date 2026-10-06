@@ -397,6 +397,35 @@ def test_harvest_range_returns_existing_successful_summary_with_tags(
     assert summary.tags["changeset_id"] == "cs-123"
 
 
+def test_harvest_range_leaves_out_published_windows(tmp_path: Path) -> None:
+    """A published window's changeset must not be re-emitted by a later run."""
+    harvester = _build_harvester(tmp_path, [])
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    end = start + timedelta(minutes=harvester.window_minutes)
+    harvester.store.upsert(
+        WindowSummary(
+            window_start=start,
+            window_end=end,
+            state="success",
+            attempts=1,
+            last_error=None,
+            record_ids=["existing-1"],
+            updated_at=end,
+            tags={
+                "changeset_ids": '["cs-123"]',
+                "published_at": end.isoformat(),
+            },
+        )
+    )
+
+    summaries = harvester.harvest_range(
+        time_range=IncrementalWindow(start_time=start, end_time=end),
+        reprocess_successful_windows=False,
+    )
+
+    assert summaries == []
+
+
 def test_harvest_range_handles_partial_success_across_runs(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)

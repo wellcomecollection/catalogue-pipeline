@@ -5,13 +5,15 @@ import structlog
 from pymarc.record import Record
 
 from adapters.transformers.axiell.access_status import extract_access_status
-from adapters.transformers.axiell.dates import (
-    extract_closed_until_date,
-    extract_restricted_until_date,
-)
+from adapters.transformers.axiell.dates import extract_restricted_or_closed_until_date
 from adapters.transformers.marc.common import first_non_empty_subfield
 from adapters.transformers.marc.identifier import extract_id
-from models.pipeline.access_status import Closed, PermissionRequired, Restricted
+from models.pipeline.access_status import (
+    AccessStatus,
+    Closed,
+    PermissionRequired,
+    Restricted,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -51,75 +53,63 @@ def _has_restrictions(text: str) -> bool:
     return "restricted" in lower or "restrictions" in lower
 
 
-def extract_terms_of_use(record: Record) -> str | None:
-    """Construct a 'terms of use' note from various access fields."""
-    conditions = extract_access_conditions(record)
-    access_status = extract_access_status(record)
-    closed_until = extract_closed_until_date(record)
-    restricted_until = extract_restricted_until_date(record)
+def _until_label(
+    access_status: AccessStatus | None, conditions: str | None
+) -> str | None:
+    """The word that introduces the date.
 
-    # No conditions and no dates: nothing useful to output
-    if not conditions and not closed_until and not restricted_until:
-        return None
-
-    # Conditions with no dates: return them as-is
-    if conditions and not closed_until and not restricted_until:
-        return conditions
-
-    # Closed status with a closed until date
-    if access_status == Closed and closed_until:
-        closed_until_message = f"Closed until {_display_date(closed_until)}."
-        if not conditions:
-            return closed_until_message
-
-        # Don't repeat the access status/date if they're already included in the text
-        if "closed" in conditions.lower() and _contains_date(conditions, closed_until):
-            return conditions
-
-        return f"{conditions} {closed_until_message}"
-
-    # Restricted status with a restricted until date
-    if access_status == Restricted and restricted_until:
-        restricted_until_message = (
-            f"Restricted until {_display_date(restricted_until)}."
-        )
-
-        if not conditions:
-            return restricted_until_message
-
-        if "restricted" in conditions.lower() and _contains_date(
-            conditions, restricted_until
-        ):
-            return conditions
-
-        return f"{conditions} {restricted_until_message}"
-
-    # PermissionRequired with a restricted until date where conditions already mention
-    # both permission and restrictions
+    Axiell holds the restricted-until and closed-until date in the same 506 $g
+    subfield, so the status is what says which of the two it is. A status that
+    says neither cannot label a date. PermissionRequired counts as restricted,
+    but only when the conditions already talk about permission and restrictions.
+    """
+    if access_status == Closed:
+        return "Closed"
+    if access_status == Restricted:
+        return "Restricted"
     if (
         access_status == PermissionRequired
-        and restricted_until
         and conditions
         and "permission" in conditions.lower()
         and _has_restrictions(conditions)
     ):
-        if _contains_date(conditions, restricted_until):
-            return conditions
-        return f"{conditions} Restricted until {_display_date(restricted_until)}."
+        return "Restricted"
+    return None
 
-    # Catch-all: log a warning and combine what we have. This affects very few
-    # records and typically reflects a data issue in the source system.
-    logger.warning(
-        "Unclear how to create a 'terms of use' note",
-        record_id=extract_id(record),
+
+def _already_stated(conditions: str, label: str, until: date) -> bool:
+    """Whether the conditions text already carries both the word and the date."""
+    stated = (
+        _has_restrictions(conditions)
+        if label == "Restricted"
+        else label.lower() in conditions.lower()
     )
+    return stated and _contains_date(conditions, until)
 
-    parts = []
-    if conditions:
-        parts.append(conditions)
-    if restricted_until:
-        parts.append(f"Restricted until {_display_date(restricted_until)}.")
-    if closed_until:
-        parts.append(f"Closed until {_display_date(closed_until)}.")
 
-    return " ".join(parts) if parts else None
+def extract_terms_of_use(record: Record) -> str | None:
+    """Construct a 'terms of use' note from 506 $a, $f and $g."""
+    conditions = extract_access_conditions(record)
+    until = extract_restricted_or_closed_until_date(record)
+
+    if not until:
+        return conditions
+
+    label = _until_label(extract_access_status(record), conditions)
+    if label is None:
+        # Catch-all: a date with no status to label it. Keep the conditions and
+        # drop the date rather than assert an access status the record does not
+        # give. This affects very few records and typically reflects a data
+        # issue in the source system.
+        logger.warning(
+            "Unclear how to create a 'terms of use' note",
+            record_id=extract_id(record),
+        )
+        return conditions
+
+    sentence = f"{label} until {_display_date(until)}."
+    if not conditions:
+        return sentence
+    if _already_stated(conditions, label, until):
+        return conditions
+    return f"{conditions} {sentence}"

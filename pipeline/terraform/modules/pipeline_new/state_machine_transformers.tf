@@ -37,6 +37,8 @@ module "transformer_lambda" {
       PIPELINE_DATE = var.pipeline_date
       INDEX_DATE    = var.index_dates.source
       S3_PREFIX     = "prod"
+      # One Lambda serves every transformer type; only Axiell reads this.
+      AXIELL_COLLECTION_PATH_SOURCE = var.axiell_collection_path_source
     }
   }
 }

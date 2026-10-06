@@ -8,7 +8,7 @@ inputs:
     description: "Secrets Manager secret id/name for the Slack failure alert webhook"
     required: true
   graph_date:
-    description: "Neptune graph date (empty string for the legacy production cluster)"
+    description: "Neptune graph date; fixtures must exist under catalogue_graph/integration/graph/fixtures/<date>/"
     required: true
 runs:
   using: "composite"

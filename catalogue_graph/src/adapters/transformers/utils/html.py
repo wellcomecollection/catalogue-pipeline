@@ -91,10 +91,10 @@ def is_url(maybe_url: str) -> bool:
 
 
 def format_as_html_link(maybe_url: str) -> str:
-    """Format $u subfield contents as an HTML link if valid URL, otherwise return contents unchanged."""
+    """Format $u subfield contents as an HTML link if valid URL, otherwise return the trimmed contents."""
     trimmed = maybe_url.strip()
     if is_url(trimmed):
         return f'<a href="{trimmed}">{trimmed}</a>'
 
-    logger.warning("$u subfield doesn't look like a URL", value=maybe_url)
-    return maybe_url
+    logger.warning("$u subfield doesn't look like a URL", value=trimmed)
+    return trimmed

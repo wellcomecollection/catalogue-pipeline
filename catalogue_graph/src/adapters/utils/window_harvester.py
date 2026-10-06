@@ -16,7 +16,7 @@ from models.incremental_window import IncrementalWindow
 
 from .window_generator import WindowGenerator
 from .window_store import WindowStore
-from .window_summary import WindowState, WindowSummary
+from .window_summary import WindowState, WindowSummary, published_at_from_tags
 
 logger = structlog.get_logger(__name__)
 
@@ -197,7 +197,10 @@ class WindowHarvestManager:
             for window in candidate_windows:
                 existing_summary = summary_map.get(window.to_iso_string())
                 if existing_summary and existing_summary.state == "success":
-                    reused_summaries.append(existing_summary)
+                    # Published windows are finished. Reusing them would re-emit
+                    # their changesets whenever the range reaches back to a gap.
+                    if published_at_from_tags(existing_summary.tags) is None:
+                        reused_summaries.append(existing_summary)
                 else:
                     pending_windows.append(window)
 

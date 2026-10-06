@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements.in
 #
-anyio==4.13.0
+anyio==4.14.2
     # via
     #   elasticsearch
     #   httpx
@@ -97,7 +97,7 @@ tzlocal==5.3.1
     # via
     #   dateparser
     #   maya
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   botocore
     #   elastic-transport

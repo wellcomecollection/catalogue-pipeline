@@ -24,7 +24,7 @@ uv run es-index-compare --help
 ## Quick Start
 ```bash
 # 1. Copy the example source configuration and fill in secrets locally
-cp es_index_comparison/configs/source_configration.example.yaml \
+cp es_index_comparison/configs/source_configuration.example.yaml \
   es_index_comparison/configs/source_configuration.yaml
 #   Edit the new file with cluster cloud IDs and API keys (never committed)
 
@@ -48,7 +48,7 @@ uv run es-index-compare compare --namespace pipeline-reindex-audit
 
 ## Source Configuration
 All cluster credentials now live in `configs/source_configuration.yaml`, which is deliberately
-ignored by Git. The example file `source_configration.example.yaml` shows the structure:
+ignored by Git. The example file `source_configuration.example.yaml` shows the structure:
 
 ```yaml
 clusters:
@@ -59,7 +59,7 @@ clusters:
 index_sources:
   prod-works-source:
     cluster: production
-    index: works-source-2025-10-02
+    index: works-source-2026-07-03
 ```
 
 Analysis configs reference the identifiers (`prod-works-source`) instead of raw index names. The

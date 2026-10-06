@@ -4,13 +4,13 @@ import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.transformers.ebsco.authority_standard_number import extract_identifier
-from adapters.transformers.ebsco.label_subdivisions import (
+from adapters.transformers.marc.authority_standard_number import extract_identifier
+from adapters.transformers.marc.common import non_empty
+from adapters.transformers.marc.concepts import (
     SUBDIVISION_CODES,
     SUBFIELD_TYPE_MAP,
     build_concept,
 )
-from adapters.transformers.marc.common import non_empty
 from models.pipeline.concept import Concept, Subject
 from models.pipeline.identifier import Identifiable
 from utils.types import RawConceptType

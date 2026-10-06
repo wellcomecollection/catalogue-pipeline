@@ -24,6 +24,7 @@ from adapters.steps.axiell_folio_sync.mapping import (
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
+    FolioTarget,
     SyncDeletionEntry,
     SyncErrorEntry,
     SyncSuccessEntry,
@@ -168,6 +169,7 @@ def run_sync(
     folio: FolioInventoryOps,
     *,
     dry_run: bool,
+    folio_target: FolioTarget = "prod",
     manifest_bucket: str | None = None,
     deletions: list[SupersededGuid] | None = None,
     hard_delete: bool = False,
@@ -324,6 +326,7 @@ def run_sync(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
         dry_run=dry_run,
+        folio_target=folio_target,
         counts=counts,
         successful=successful,
         errors=errors_list,
@@ -349,6 +352,7 @@ def run_sync(
     return AxiellFolioSyncResponse(
         job_id=event.job_id,
         dry_run=dry_run,
+        folio_target=folio_target,
         manifest_s3_path=manifest_path,
         counts=counts,
         total_successful=total_successful,

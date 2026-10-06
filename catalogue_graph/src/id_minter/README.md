@@ -110,7 +110,7 @@ To write to the public identified index instead:
 ```bash
 uv run python -m id_minter.steps.id_minter \
     --source-identifiers 'Work[sierra-system-number/b1000001]' \
-    --pipeline-date 2025-10-02 \
+    --pipeline-date 2026-07-03 \
     --target-es-mode public
 ```
 
@@ -218,6 +218,10 @@ mistyped invoke cannot fall through to a full-index mint):
 ```
 
 Supplying both `sourceIdentifiers` and a time window is invalid.
+
+Documents are written to `works-identified` with `external_gte` versioning on `sourceModifiedTime`, so a run carrying an older copy of a work cannot overwrite a newer one written by an overlapping run. A write rejected this way is counted as `superseded` in the report rather than failed, and the work is still sent on to the matcher, which reads the newer copy. Re-driving a work at an unchanged source time is accepted.
+
+With `ENABLE_ICEBERG_WRITES=true` (locally `--enable-iceberg-writes`), every minted document is also appended to the `works_identified` Iceberg table defined in `id_minter/schemata.py`, one row per write, whether or not the index accepted it. The table is never updated in place: each row's `version` is the one the index write was guarded on (`sourceModifiedTime` in milliseconds), so a reader takes the row with the highest `version`, then the latest `last_modified`. A commit that loses to another writer is retried against the new snapshot. Table name, namespace and S3 Tables bucket come from the `WORKS_IDENTIFIED_*` and `S3_TABLES_BUCKET` variables read in `id_minter/iceberg.py`; the table is created on first use. If the table can't be loaded or created, or an append fails, the error is logged and minting carries on.
 
 ### id_minter find_work
 

@@ -105,7 +105,8 @@ def test_catalogue_concept_from_neptune_result() -> None:
     assert result == expected_result
 
 
-def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> None:
+def test_catalogue_concept_other_source_headings_become_alternative_labels() -> None:
+    # No source has alternative labels, but the headings not chosen as the label are still kept
     mock_concept = load_json_fixture("ingestor/extractor/concept_single.json")
 
     expected_result = IndexableConcept(
@@ -113,7 +114,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
             id="id",
             identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
             label="MeSH label",
-            alternativeLabels=[],
+            alternativeLabels=["LoC label", "Wikidata label"],
             type="Person",
         ),
         display=ConceptDisplay(
@@ -130,7 +131,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
             ],
             label="MeSH label",
             displayLabel="MeSH label",
-            alternativeLabels=[],
+            alternativeLabels=["LoC label", "Wikidata label"],
             description=ConceptDescription(
                 text="Description",
                 sourceLabel="wikidata",
@@ -174,7 +175,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
                 ConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
             ],
             label="Waves",
-            alternativeLabels=["Mechanical waves", "Waves"],
+            alternativeLabels=["Mechanical waves", "Wave"],
             type="Concept",
         ),
         display=ConceptDisplay(
@@ -191,7 +192,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
             ],
             label="Waves",
             displayLabel="Waves",
-            alternativeLabels=["Mechanical waves", "Waves"],
+            alternativeLabels=["Mechanical waves", "Wave"],
             description=ConceptDescription(
                 text="Repeated oscillation about a stable equilibrium",
                 sourceLabel="wikidata",
@@ -244,7 +245,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
                 ConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
             ],
             label="Waves",
-            alternativeLabels=["Mechanical waves", "Waves"],
+            alternativeLabels=["Mechanical waves", "Wave"],
             type="Concept",
         ),
         display=ConceptDisplay(
@@ -261,7 +262,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
             ],
             label="Waves",
             displayLabel="Waves",
-            alternativeLabels=["Mechanical waves", "Waves"],
+            alternativeLabels=["Mechanical waves", "Wave"],
             description=ConceptDescription(
                 text="Repeated oscillation about a stable equilibrium",
                 sourceLabel="wikidata",
@@ -322,7 +323,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
                 ConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
             ],
             label="Waves",
-            alternativeLabels=["Mechanical waves", "Waves"],
+            alternativeLabels=["Mechanical waves", "Wave"],
             type="Concept",
         ),
         display=ConceptDisplay(
@@ -339,7 +340,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
             ],
             label="Waves",
             displayLabel="Waves",
-            alternativeLabels=["Mechanical waves", "Waves"],
+            alternativeLabels=["Mechanical waves", "Wave"],
             description=ConceptDescription(
                 text="Repeated oscillation about a stable equilibrium",
                 sourceLabel="wikidata",
@@ -465,8 +466,8 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
         query=ConceptQuery(
             id="id",
             identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
-            label="MeSH label",
-            alternativeLabels=[],
+            label="Wellcome Label",
+            alternativeLabels=["LoC label", "MeSH label", "Wikidata label"],
             type="Person",
         ),
         display=ConceptDisplay(
@@ -481,9 +482,9 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
                     ),
                 )
             ],
-            label="MeSH label",
+            label="Wellcome Label",
             displayLabel="Wellcome Label",
-            alternativeLabels=[],
+            alternativeLabels=["LoC label", "MeSH label", "Wikidata label"],
             description=ConceptDescription(
                 text="Wellcome Description",
                 sourceLabel="weco-authority",

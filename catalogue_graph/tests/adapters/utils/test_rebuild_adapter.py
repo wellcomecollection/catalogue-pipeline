@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -534,3 +535,413 @@ def test_reconcile_runtime_sees_the_loaded_records(
 
     # Every loaded record is visible to reconcile; 0 would mean a stale handle.
     assert rows_seen_by_reconcile == [3]
+
+
+def test_download_only_writes_the_snapshot_and_nothing_else(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--download-only must leave every store, the window store and the cursor
+    alone, so the adapter can keep harvesting: the config stub has no store
+    builders, so touching any of them fails the test."""
+    snapshot_path = tmp_path / "snapshot.parquet"
+
+    class _Client:
+        def __enter__(self) -> "_Client":
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            pass
+
+    config_stub = SimpleNamespace(
+        build_http_client=lambda: _Client(), config=SimpleNamespace()
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "_build_download_client", lambda config, http_client: None
+    )
+
+    def fake_download(oai_client: object, config: object, path: str) -> int:
+        pq.write_table(adapter_records_to_table([{"id": "a", "content": "x"}]), path)
+        return 1
+
+    monkeypatch.setattr(rebuild_adapter, "_download_to_snapshot", fake_download)
+
+    def no_prompt(*args: object) -> str:
+        raise AssertionError("--download-only must not prompt")
+
+    monkeypatch.setattr("builtins.input", no_prompt)
+
+    rebuild_adapter.rebuild_adapter(
+        "axiell",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        download_only=True,
+    )
+
+    assert snapshot_path.exists()
+
+
+def test_download_only_refuses_an_existing_snapshot(tmp_path: Path) -> None:
+    snapshot_path = tmp_path / "snapshot.parquet"
+    snapshot_path.write_bytes(b"")
+    with pytest.raises(ValueError, match="refuses to overwrite"):
+        rebuild_adapter.rebuild_adapter(
+            "axiell", snapshot_path=str(snapshot_path), download_only=True
+        )
+
+
+def test_merge_with_store_needs_a_downloaded_snapshot(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="run --download-only first"):
+        rebuild_adapter.rebuild_adapter(
+            "axiell",
+            use_rest_api_table=True,
+            snapshot_path=str(tmp_path / "missing.parquet"),
+            merge_with_store=True,
+            skip_publish_event=True,
+        )
+
+
+def test_merge_with_store_keeps_the_newer_row_and_leaves_the_cursor(
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Each id keeps the newer of snapshot and live store (snapshot on a tie),
+    store-only ids survive, and the window store is not touched."""
+    t1, t2, t3 = (datetime(2026, 9, 29, hour, tzinfo=UTC) for hour in (1, 2, 3))
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [
+                {"id": "older_in_store", "content": "store", "last_modified": t1},
+                {"id": "newer_in_store", "content": "store", "last_modified": t3},
+                {"id": "store_only", "content": "store", "last_modified": t2},
+                {
+                    "id": "deleted_in_store",
+                    "content": "store",
+                    "last_modified": t3,
+                    "deleted": True,
+                },
+                {"id": "tie", "content": "store", "last_modified": t2},
+            ]
+        )
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [
+                {"id": "older_in_store", "content": "snapshot", "last_modified": t2},
+                {"id": "newer_in_store", "content": "snapshot", "last_modified": t2},
+                {"id": "deleted_in_store", "content": "snapshot", "last_modified": t1},
+                {"id": "tie", "content": "snapshot", "last_modified": t2},
+                {"id": "snapshot_only", "content": "snapshot", "last_modified": t2},
+            ]
+        ),
+        snapshot_path,
+    )
+    window_store = WindowStore(temporary_window_status_table)
+    window_store.upsert(
+        WindowSummary(
+            window_start=t2,
+            window_end=t3,
+            state="success",
+            attempts=1,
+            record_ids=[],
+            last_error=None,
+            updated_at=t3,
+            tags={"published_at": t3.isoformat()},
+        )
+    )
+    reconcile_runtime = ReconcileRuntime(
+        adapter_store=adapter_store,
+        reconciler_store=ReconcilerStore(reconciler_temporary_table, "test_namespace"),
+        facts_store=DeletionFactsStore(
+            deletion_facts_temporary_table, "test_namespace"
+        ),
+        adapter_name="axiell",
+        namespace="test_namespace",
+    )
+    config_stub = SimpleNamespace(
+        build_adapter_store=lambda **kwargs: adapter_store,
+        build_window_store=lambda **kwargs: window_store,
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_reconcile_runtime", lambda *a, **k: reconcile_runtime
+    )
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rebuild_adapter.rebuild_adapter(
+        "axiell",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        merge_with_store=True,
+        skip_publish_event=True,
+    )
+
+    rows = {
+        row["id"]: (row["content"], bool(row["deleted"]))
+        for row in adapter_store.get_all_records().to_pylist()
+    }
+    assert rows == {
+        "older_in_store": ("snapshot", False),
+        "newer_in_store": ("store", False),
+        "store_only": ("store", False),
+        "deleted_in_store": ("store", True),
+        "tie": ("snapshot", False),
+        "snapshot_only": ("snapshot", False),
+    }
+    windows = window_store.table.scan().to_arrow().to_pylist()
+    assert [(w["window_start"], w["window_end"]) for w in windows] == [(t2, t3)]
+    # Retired once loaded, so a later refresh cannot reuse it.
+    assert not (tmp_path / "snapshot.parquet.merged.parquet").exists()
+    assert (tmp_path / "snapshot.parquet.merged.parquet.loaded").exists()
+
+
+def _marcxml(guid: str) -> str:
+    return (
+        "<record><leader>00000nam a2200000   4500</leader>"
+        "<controlfield tag='005'>20251225123045.0</controlfield>"
+        f"<controlfield tag='001'>{guid}</controlfield>"
+        "<datafield tag='245' ind1='0' ind2='0'>"
+        f"<subfield code='a'>Title for {guid}</subfield></datafield>"
+        "</record>"
+    )
+
+
+def test_merge_keeps_the_newest_copy_of_a_duplicated_snapshot_id(
+    temporary_table: IcebergTable, tmp_path: Path
+) -> None:
+    t1, t2, t3 = (datetime(2026, 9, 29, hour, tzinfo=UTC) for hour in (1, 2, 3))
+    store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [{"id": "edited", "content": "store", "last_modified": t2}]
+        )
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [
+                {"id": "edited", "content": "snapshot newer", "last_modified": t3},
+                {"id": "edited", "content": "snapshot older", "last_modified": t1},
+            ]
+        ),
+        snapshot_path,
+    )
+    merged_path = tmp_path / "merged.parquet"
+
+    rebuild_adapter._merge_with_store(store, str(snapshot_path), str(merged_path))
+
+    rows = pq.read_table(merged_path).to_pylist()
+    assert [(r["id"], r["content"]) for r in rows] == [("edited", "snapshot newer")]
+
+
+def test_merge_re_run_reuses_the_existing_merge(
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """After a failed load the store is partial, so a re-run must load the
+    existing merge instead of merging again against the half-loaded store."""
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table([{"id": "half_loaded", "content": "partial"}])
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table([{"id": "a", "content": "snapshot"}]), snapshot_path
+    )
+    merged_path = tmp_path / "snapshot.parquet.merged.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [
+                {"id": "a", "content": "from the first merge"},
+                {"id": "store_only", "content": "from the first merge"},
+            ]
+        ),
+        merged_path,
+    )
+    config_stub = SimpleNamespace(
+        build_adapter_store=lambda **kwargs: adapter_store,
+        build_window_store=lambda **kwargs: WindowStore(temporary_window_status_table),
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rebuild_adapter.rebuild_adapter(
+        "folio",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        merge_with_store=True,
+        skip_publish_event=True,
+    )
+
+    rows = sorted(
+        (r["id"], r["content"]) for r in adapter_store.get_all_records().to_pylist()
+    )
+    assert rows == [
+        ("a", "from the first merge"),
+        ("store_only", "from the first merge"),
+    ]
+
+
+def test_merge_reconciles_against_the_existing_baseline(
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A merge keeps the reconciler and facts, so a record whose guid changed
+    produces a deletion fact and an undelivered fact survives."""
+    t1, t2 = (datetime(2026, 9, 29, hour, tzinfo=UTC) for hour in (1, 2))
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [{"id": "collect-1", "content": _marcxml("guid-old"), "last_modified": t1}]
+        )
+    )
+    reconciler_store = ReconcilerStore(reconciler_temporary_table, "test_namespace")
+    reconciler_temporary_table.append(
+        reconciler_records_to_table(
+            [{"id": "collect-1", "guid": "guid-old", "last_modified": t1}]
+        )
+    )
+    facts_store = DeletionFactsStore(deletion_facts_temporary_table, "test_namespace")
+    facts_store.append_facts(
+        deletion_facts_records_to_table(
+            [{"record_id": "collect-9", "guid": "guid-9", "changeset": "earlier"}]
+        )
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [{"id": "collect-1", "content": _marcxml("guid-new"), "last_modified": t2}]
+        ),
+        snapshot_path,
+    )
+
+    def build_runtime(
+        adapter_type: str, *, use_rest_api_table: bool
+    ) -> ReconcileRuntime:
+        fresh = temporary_table.catalog.load_table(temporary_table.name())
+        return ReconcileRuntime(
+            adapter_store=AdapterStore(fresh, "test_namespace"),
+            reconciler_store=reconciler_store,
+            facts_store=facts_store,
+            adapter_name="axiell",
+            namespace="test_namespace",
+        )
+
+    config_stub = SimpleNamespace(
+        build_adapter_store=lambda **kwargs: adapter_store,
+        build_window_store=lambda **kwargs: WindowStore(temporary_window_status_table),
+    )
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(rebuild_adapter, "build_reconcile_runtime", build_runtime)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rebuild_adapter.rebuild_adapter(
+        "axiell",
+        use_rest_api_table=True,
+        snapshot_path=str(snapshot_path),
+        merge_with_store=True,
+        skip_publish_event=True,
+    )
+
+    facts = {
+        (f["record_id"], f["guid"]) for f in facts_store.get_all_records().to_pylist()
+    }
+    assert facts == {("collect-9", "guid-9"), ("collect-1", "guid-old")}
+    mappings = {
+        (m["id"], m["guid"]) for m in reconciler_store.get_all_records().to_pylist()
+    }
+    assert mappings == {("collect-1", "guid-new")}
+
+
+def test_merge_gives_a_snapshot_tombstone_the_live_content(
+    temporary_table: IcebergTable, tmp_path: Path
+) -> None:
+    """The transformer needs the record body to emit a deletion, so a tombstone
+    from the snapshot keeps the live row's content, as a harvest would."""
+    t1, t2 = (datetime(2026, 9, 29, hour, tzinfo=UTC) for hour in (1, 2))
+    store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [
+                {
+                    "id": "deleted_at_source",
+                    "content": "record body",
+                    "last_modified": t1,
+                },
+                {"id": "edited", "content": "old body", "last_modified": t1},
+            ]
+        )
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [
+                {
+                    "id": "deleted_at_source",
+                    "content": None,
+                    "last_modified": t2,
+                    "deleted": True,
+                },
+                {"id": "edited", "content": "new body", "last_modified": t2},
+                {
+                    "id": "deleted_unseen",
+                    "content": None,
+                    "last_modified": t2,
+                    "deleted": True,
+                },
+            ]
+        ),
+        snapshot_path,
+    )
+    merged_path = tmp_path / "merged.parquet"
+
+    rebuild_adapter._merge_with_store(store, str(snapshot_path), str(merged_path))
+
+    rows = pq.read_table(merged_path).to_pylist()
+    assert {
+        r["id"]: (r["content"], bool(r["deleted"]), r["last_modified"]) for r in rows
+    } == {
+        "deleted_at_source": ("record body", True, t2),
+        "edited": ("new body", False, t2),
+        "deleted_unseen": (None, True, t2),
+    }
+
+
+def test_merge_refuses_a_merge_left_from_an_earlier_refresh(
+    temporary_table: IcebergTable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    merged_path = tmp_path / "snapshot.parquet.merged.parquet"
+    pq.write_table(
+        adapter_records_to_table([{"id": "a", "content": "old"}]), merged_path
+    )
+    snapshot_path = tmp_path / "snapshot.parquet"
+    pq.write_table(
+        adapter_records_to_table([{"id": "a", "content": "new"}]), snapshot_path
+    )
+    old = snapshot_path.stat().st_mtime - 60
+    os.utime(merged_path, (old, old))
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: adapter_store)
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    with pytest.raises(ValueError, match="left from an earlier refresh"):
+        rebuild_adapter.rebuild_adapter(
+            "folio",
+            use_rest_api_table=True,
+            snapshot_path=str(snapshot_path),
+            merge_with_store=True,
+            skip_publish_event=True,
+        )

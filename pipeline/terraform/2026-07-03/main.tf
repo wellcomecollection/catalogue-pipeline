@@ -1,12 +1,14 @@
 module "pipeline" {
   source = "../modules/pipeline_new"
 
-  # Scaled up for the round 3 full reindex (platform#6624). The matcher DB comes
-  # back down as soon as the reindex finishes; tasks follow once the queues drain.
+  # This pipeline is production since the switchover (wellcomecollection/platform#6541):
+  # tasks stay scaled up, the matcher stage runs at steady-state sizing with its tables
+  # on demand, and it no longer listens to the reindexer, so a reindex into another
+  # pipeline cannot reach it.
   reindexing_state = {
-    listen_to_reindexer = true
+    listen_to_reindexer = false
     scale_up_tasks      = true
-    scale_up_matcher_db = true
+    scale_up_matcher_db = false
   }
 
   index_dates = {
@@ -28,6 +30,9 @@ module "pipeline" {
   enable_id_minter_schedule                    = true
   enable_graph_pipeline_schedule               = true
   enable_image_inferrer_schedule               = true
+
+  # Paused around the Backstage authority load into Sierra (wellcomecollection/platform#6723).
+  disable_sierra_transformer_topic_subscriptions = true
 
   pipeline_date = local.pipeline_date // namespaces services
   graph_date    = "2026-07-03"        // namespaces graph database

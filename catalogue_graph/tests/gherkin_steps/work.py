@@ -46,6 +46,13 @@ ATTR_ALIASES: dict[str, str] = {
 }
 
 
+SUB_ATTR_ALIASES: dict[str, str] = {
+    "source identifier value": "id.source_identifier.value",
+    "source identifier type": "id.source_identifier.identifier_type.id",
+    "source identifier ontology type": "id.source_identifier.ontology_type",
+}
+
+
 def _normalise_attr_phrase(attr_phrase: str) -> str:
     key = attr_phrase.strip().lower()
     return ATTR_ALIASES.get(key, key.replace(" ", "_"))
@@ -185,6 +192,36 @@ def its_only_list_member_has(
     return member
 
 
+@then(
+    parsers.re(
+        r'its (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) has the (?P<sub_attr>.*) "(?P<value>.*)"'
+    )
+)
+def its_nth_list_member_has(
+    antecedent: Any, index: str, attr_phrase: str, sub_attr: str, value: str
+) -> None:
+    member = _list_member_nth(antecedent, index, attr_phrase)
+    actual = drill_through_dots(member, sub_attr)
+    assert actual == value, (
+        f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
+    )
+
+
+@then(
+    parsers.re(
+        r"its (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) has no (?P<sub_attr>\S+)"
+    )
+)
+def its_nth_list_member_lacks(
+    antecedent: Any, index: str, attr_phrase: str, sub_attr: str
+) -> None:
+    member = _list_member_nth(antecedent, index, attr_phrase)
+    actual = drill_through_dots(member, sub_attr)
+    assert actual is None, (
+        f"Expected {attr_phrase}.{sub_attr} at position {index} to be absent, got {actual!r}"
+    )
+
+
 @then(parsers.parse("its only {attr_phrase} has no {sub_attr}"))
 def its_only_list_member_lacks(
     antecedent: Any, attr_phrase: str, sub_attr: str
@@ -228,7 +265,7 @@ def list_member_nth_has(
 
 
 def drill_through_dots(obj: Any, path: str) -> Any:
-    parts = path.split(".")
+    parts = SUB_ATTR_ALIASES.get(path.strip().lower(), path).split(".")
     current = obj
     for part in parts:
         current = getattr(current, part)
@@ -264,11 +301,34 @@ def child_list_member_with_datatable(
         assert member == row[0]
 
 
+def _assert_work_attr(work: SourceWork, attr_phrase: str, expected: object) -> None:
+    """Assert that a work attribute equals expected."""
+    attr = _normalise_attr_phrase(attr_phrase)
+    actual = drill_through_dots(work.data, attr)
+    assert actual == expected, (
+        f"Expected work.data.{attr} == {expected!r}, got {actual!r}"
+    )
+
+
 @then(parsers.parse('the work\'s {attr} is "{value}"'))
 def work_attr_is(work: SourceWork, attr: str, value: str) -> None:
-    attr = _normalise_attr_phrase(attr)
-    actual = drill_through_dots(work.data, attr)
-    assert actual == value, f"Expected work.data.{attr} == {value!r}, got {actual!r}"
+    _assert_work_attr(work, attr, value)
+
+
+@then(parsers.parse("the work's {attr} is:"))
+def work_attr_is_multiline(work: SourceWork, docstring: str, attr: str) -> None:
+    """Assert a work attribute against a Gherkin docstring.
+
+    Gherkin step text is a single line with no escape sequences, so values
+    containing newlines (such as a description built from several MARC 520
+    fields) can only be expressed as a docstring.
+    """
+    _assert_work_attr(work, attr, docstring)
+
+
+@then(parsers.parse("the work's {attr} is {value:d}"))
+def work_attr_is_int(work: SourceWork, attr: str, value: int) -> None:
+    _assert_work_attr(work, attr, value)
 
 
 @then(parsers.parse("the work's {attr} is absent"))

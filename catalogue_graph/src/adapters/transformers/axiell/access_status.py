@@ -5,12 +5,9 @@ Extract access status from field
 https://www.loc.gov/marc/bibliographic/bd506.html
 """
 
-from datetime import date
-
 import structlog
 from pymarc.record import Record
 
-from adapters.transformers.axiell.dates import extract_closed_until_date
 from adapters.transformers.marc.common import non_empty_subfields
 from adapters.transformers.marc.identifier import extract_id
 from models.pipeline.access_status import (
@@ -64,14 +61,6 @@ def extract_access_status(record: Record) -> AccessStatus | None:
 
     if status in ACCESS_STATUS_MAPPING:
         return ACCESS_STATUS_MAPPING[status]
-
-    # Most closed material does not (yet) carry a CLOSED status value: the Calm-to-Axiell
-    # migration delivered Calm's 'Closed' as 'Certain restrictions apply' until the next
-    # data load restores the full status vocabulary. For records without a usable status,
-    # a 'closed until' date in the future marks the item as closed.
-    closed_until = extract_closed_until_date(record)
-    if closed_until and closed_until >= date.today():
-        return Closed
 
     if status is not None:
         logger.warning(

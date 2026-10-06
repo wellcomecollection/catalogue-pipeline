@@ -1,6 +1,6 @@
 # Output maps keyed by graph_date.
 
-# Note: the legacy production cluster uses an empty string ("") graph_date, so prod is keyed by "" in these maps.
+# Note: the legacy cluster uses an empty string ("") graph_date, so it is keyed by "" in these maps.
 output "neptune_cluster_arns" {
   value = { for cluster in local.neptune_clusters : cluster.graph_date => cluster.neptune_cluster_arn }
 }

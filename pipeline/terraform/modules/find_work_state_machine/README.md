@@ -41,16 +41,16 @@ output cannot grow with partition count towards the 256 KB state limit):
 
 What happens next depends on `tolerate_partition_failures`:
 
-- `true`, used by the image inferrer: the execution succeeds. This is only safe
+- `true`, currently used by nothing: the execution succeeds. This is only safe
   when a missed record stays recoverable, because replaying the same window
   later re-covers it idempotently (scheduled windows tile with no overlap, so
   the next one does not). The execution succeeding means nothing alarms, so the
   consumer also needs its own failure signal (see Retry and alerting).
-- `false`, used by the id-minter: once every partition has finished, the
-  execution fails with `PartitionsFailed`. A tolerated skip would leave the
-  missed records unprocessed with nothing to notice them, so the execution
-  fails loudly instead; failing after the Map means a replay only needs to
-  cover the failed partitions, not the whole window.
+- `false`, used by the id-minter and the image inferrer: once every partition
+  has finished, the execution fails with `PartitionsFailed`. A tolerated skip
+  would leave the missed records unprocessed with nothing to notice them, so
+  the execution fails loudly instead; failing after the Map means a replay only
+  needs to cover the failed partitions, not the whole window.
 
 Workers must keep their own outputs small too: the 256 KB limit applies to each
 task result before any projection, so a worker that echoes its input ids back
@@ -78,8 +78,9 @@ topic). With `tolerate_partition_failures = false`, a lost partition fails the
 execution and therefore alerts. With `true`, tolerated failures do not alarm;
 the aggregate counts sit in the execution output but nothing consumes them
 automatically, so consumers in that mode need their own signal for failure
-classes that matter (the inferrer alarms on its `download_failure_count`
-metric).
+classes that matter. A consumer may want both: the inferrer fails the execution
+on a lost partition, and separately alarms on its `download_failure_count`
+metric for assets it deliberately skips without failing.
 
 ## Replaying
 

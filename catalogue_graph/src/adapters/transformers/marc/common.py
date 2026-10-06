@@ -1,6 +1,10 @@
 from collections.abc import Callable, Iterable
 
+import structlog
+from pymarc.field import Field
 from pymarc.record import Record
+
+logger = structlog.get_logger(__name__)
 
 
 def mandatory_field(marc_code: str, field_name: str) -> Callable:
@@ -47,6 +51,25 @@ def first_non_empty_subfield(
 
 def get_a_subfields(field_code: str, record: Record) -> list[str]:
     return non_empty_subfields(field_code, "a", record)
+
+
+def non_repeatable_subfield(field: Field, code: str) -> str | None:
+    """First non-blank value of a subfield that must not repeat. Logs an error if it does."""
+    values = non_empty(value.strip() for value in field.get_subfields(code))
+    if len(values) > 1:
+        logger.error(
+            "Repeated non-repeating subfield",
+            tag=field.tag,
+            subfield=code,
+            field=str(field),
+        )
+    return values[0] if values else None
+
+
+def non_repeatable_subfields(field: Field, *codes: str) -> list[str]:
+    """First non-blank value of each given subfield, in order of first appearance."""
+    present = dict.fromkeys(code for code, _ in field if code in codes)
+    return non_empty(non_repeatable_subfield(field, code) for code in present)
 
 
 def non_empty[T](value: Iterable[T | None]) -> list[T]:

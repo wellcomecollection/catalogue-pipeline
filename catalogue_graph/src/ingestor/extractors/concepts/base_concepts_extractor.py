@@ -107,7 +107,7 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
                     SourceConceptNode.model_validate(linked_sc)
                 )
 
-        return list(resolved_source_concepts.values())
+        return [resolved_source_concepts[i] for i in sorted(resolved_source_concepts)]
 
     def _update_same_as_map(self, concept_ids: Iterable[str]) -> None:
         """Given a list of concept IDs, retrieve all synonymous ('same as') concepts and store them in a lookup table"""
@@ -116,8 +116,9 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
 
         result = self.make_neptune_query("same_as_concept", concept_ids)
 
-        for concept_id, item in result.items():
-            same_as_ids = [concept_id] + item["same_as_ids"]
+        # Sorted so that the map does not depend on the order Neptune returns rows and ids in
+        for concept_id, item in sorted(result.items()):
+            same_as_ids = sorted({concept_id, *item["same_as_ids"]})
 
             # Alphabetical ID-based prioritisation
             primary_id = sorted(same_as_ids)[0]
@@ -201,7 +202,7 @@ class GraphBaseConceptsExtractor(GraphBaseExtractor, StreamingExtractor, ABC):
                 related_concept = ExtractedRelatedConcept(
                     target=full_related_concepts[entry["id"]],
                     # Pick one relationship type if present, else None
-                    relationship_type=next(iter(entry["relationship_type"]), None),
+                    relationship_type=min(entry["relationship_type"], default=None),
                 )
 
                 full_result[concept_id].append(related_concept)

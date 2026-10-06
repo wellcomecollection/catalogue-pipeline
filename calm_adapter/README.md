@@ -1,7 +1,33 @@
 # CALM adapter
 
 CALM is our archive catalogue.
-The CALM adapter fetches new records from CALM and keeps our copy of the CALM database up-to-date.
+The CALM adapter fetched new records from CALM and kept our copy of the CALM database up to date.
+It no longer runs, and our copy stays as it was on 2026-09-10.
+
+## Harvesting is switched off
+
+CALM went read-only on 2026-09-10 ahead of the Axiell Collections migration, and
+we no longer harvest from it. See wellcomecollection/platform#6689.
+
+Three flags in [terraform/locals.tf](terraform/locals.tf) hold this in place.
+`harvesting_enabled` disables the window generator's schedule and scales the
+adapter to zero, `deletion_checking_enabled` disables the deletion check
+initiator's schedule and scales the deletion checker to zero, and
+`indexing_enabled` scales the indexer to zero.
+
+The adapter store keeps the records it already holds, and the production pipeline
+still transforms CALM works out of it. A snapshot of the store as it stood when
+harvesting stopped is in
+`s3://wellcomecollection-platform-infra/vhs_snapshots/vhs-calm-adapter/`.
+
+None of the adapter, the deletion checker or the indexer has any running tasks or
+any capacity to start one, so nothing can write to the store. Anything published
+to their queues is never received, so it never reaches a DLQ either: SQS deletes
+it when the queue's four-day retention period ends, leaving no trace. Re-harvesting
+would mean setting `harvesting_enabled` back to `true` and applying, which would
+also let the store drift from that snapshot.
+
+Decommissioning the CALM code and infrastructure is separate, later work.
 
 ## Key services/libraries
 
@@ -13,6 +39,7 @@ The CALM adapter fetches new records from CALM and keeps our copy of the CALM da
     [api_guide]: https://us-east-1.console.aws.amazon.com/s3/object/wellcomecollection-platform-infra?prefix=Calm.API.Guide.pdf&region=eu-west-1
 
 *   The `calm_adapter` service fetches updated records from CALM.
+    It is still deployed, but scaled to zero while harvesting is off.
 
     It receives queries from the `calm_window_generator`, which tell it what sort of records to fetch.
     e.g.
@@ -31,6 +58,8 @@ The CALM adapter fetches new records from CALM and keeps our copy of the CALM da
 
     The window generator runs as a Lambda on a fixed schedule, or it can be run locally if you want to do a one-off query.
     e.g. you can refetch all the records modified on a given day.
+    The schedule is disabled, and running the CLI now only queues windows, since
+    the adapter has no capacity to pick them up.
 
     TODO: Should we rename this to "query generator"?
 
@@ -41,6 +70,8 @@ The CALM adapter fetches new records from CALM and keeps our copy of the CALM da
 
     Because we want to spot when records are deleted, we have the `calm_deletion_checker` that polls CALM to look for deleted records (by looking for every record we know about, and checking if it's still in the API).
     It's triggered by the `calm_deletion_check_initiator`.
+    Both are switched off, and CALM is read-only, so there are no new deletions to find.
 
 *   The `calm_indexer` service indexes CALM records in the reporting cluster.
     This is meant for ad hoc analysis of the CALM data, e.g. when designing a new transformation rule.
+    It is scaled to zero, so the `calm_catalog` index holds whatever it last indexed.

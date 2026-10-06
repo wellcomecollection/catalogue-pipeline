@@ -147,6 +147,21 @@ resource "aws_iam_policy" "state_machine_lambda_policy" {
   })
 }
 
+# Lets the "Already running?" state list this machine's own executions.
+resource "aws_iam_role_policy" "state_machine_list_executions" {
+  role = aws_iam_role.state_machine_role.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["states:ListExecutions"]
+        Resource = [aws_sfn_state_machine.state_machine.arn]
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy" "state_machine_ecs_run_task" {
   role   = aws_iam_role.state_machine_role.name
   policy = module.loader_ecs_task.invoke_policy_document

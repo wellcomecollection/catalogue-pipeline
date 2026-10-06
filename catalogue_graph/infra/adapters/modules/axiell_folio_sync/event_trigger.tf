@@ -42,6 +42,14 @@ resource "aws_cloudwatch_event_rule" "axiell_adapter_completed" {
       transformer_type = ["axiell"]
     }
   })
+
+  # Trigger-window schedules own this after apply; ignore state changes so an
+  # out-of-hours apply cannot re-enable the trigger against a stopped sandbox.
+  state = local.trigger_window_enabled ? "DISABLED" : "ENABLED"
+
+  lifecycle {
+    ignore_changes = [state]
+  }
 }
 
 resource "aws_cloudwatch_event_target" "axiell_sync_step_function" {

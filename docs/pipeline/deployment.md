@@ -14,7 +14,7 @@ All container images live in ECR under `760097843905.dkr.ecr.eu-west-1.amazonaws
 
 * a commit tag (the git SHA), which is immutable and ties an image to its source;
 * `latest`, the most recently published image in a repository;
-* floating environment tags, which are what running infrastructure actually references. Dated pipeline services reference `env.<date>` (e.g. `env.2025-10-02`); shared services such as adapters reference `env.prod` or `prod`.
+* floating environment tags, which are what running infrastructure actually references. Dated pipeline services reference `env.<date>` (e.g. `env.2026-07-03`); shared services such as adapters reference `env.prod` or `prod`.
 
 Terraform bakes the `env.<date>` reference into ECS task definitions and lambda configuration once. Routine deployments never run Terraform: they move the floating tag to a new image and then tell ECS or Lambda to redeploy.
 
@@ -52,14 +52,14 @@ By default, both CI systems deploy to a single pipeline: the one with the lexico
 
 When `deploy_all_pipelines` is `true`, every dated pipeline directory is deployed on each merge to main. Buildkite reads the file in `deploy_latest_pipeline.py`; GitHub Actions reads it in the `discover-pipeline-dates` job (`.github/actions/discover-pipeline-dates`). A failure deploying one pipeline does not stop the others, but the build fails at the end if any pipeline failed.
 
-Pipelines do not all run the same set of services: newer stacks built from the composable `pipeline_new` module may have fewer ECS services or lambdas than the older stack. The deploy scripts check that each target exists in the pipeline being deployed and skip missing ones with a warning rather than failing.
+Pipelines do not all run the same set of services, since the composable `pipeline_new` module lets each dated stack enable a different subset. The deploy scripts check that each target exists in the pipeline being deployed and skip missing ones with a warning rather than failing.
 
 Turn the flag on when several pipelines should all track main, for example during an extended migration where an old and a new pipeline run side by side. Leave it off (the default) whenever an older pipeline is deliberately pinned, for example when a code change is incompatible with an older pipeline's index mappings. Flipping the flag is a pull request against `deploy_settings.json`.
 
 To deploy an older pipeline manually while the flag is off, run:
 
 ```console
-PIPELINE_DATE="2025-10-02" builds/deploy_catalogue_pipeline.sh tag_images_and_deploy_services
+PIPELINE_DATE="YYYY-MM-DD" builds/deploy_catalogue_pipeline.sh tag_images_and_deploy_services
 ```
 
 Note that this deploys whatever `latest` currently points at, not a specific commit.
@@ -69,6 +69,8 @@ That command covers the Scala and inferrer images only. The Python unified pipel
 ```console
 gh workflow run catalogue-graph-deploy.yml -f deploy_tag=<commit sha>
 ```
+
+The sha must be a commit on main. Pull request runs build the images but do not push them, and the workflow only assumes its AWS role when dispatched from main.
 
 Read that one before running it. It deploys to every pipeline `deploy_settings.json` selects, which is all of them while `deploy_all_pipelines` is on, and it also moves `prod` and updates the shared adapter lambdas. Nothing stops it moving a tag to an older commit, so dispatching one rolls back every pipeline it reaches, production included. To put an older commit on one pipeline alone, retag that pipeline's `env.<date>` by hand.
 

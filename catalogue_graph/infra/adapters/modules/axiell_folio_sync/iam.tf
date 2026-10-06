@@ -15,9 +15,12 @@ data "aws_kms_alias" "ssm" {
 
 data "aws_iam_policy_document" "sync_ssm_read" {
   statement {
-    effect    = "Allow"
-    actions   = ["ssm:GetParameter"]
-    resources = [aws_ssm_parameter.okapi_credentials.arn]
+    effect  = "Allow"
+    actions = ["ssm:GetParameter"]
+    resources = concat(
+      [aws_ssm_parameter.okapi_credentials.arn],
+      aws_ssm_parameter.okapi_credentials_dev[*].arn,
+    )
   }
   statement {
     effect    = "Allow"
@@ -32,7 +35,9 @@ resource "aws_iam_role_policy" "sync_ssm_read" {
   policy = data.aws_iam_policy_document.sync_ssm_read.json
 }
 
-# CloudWatch: put custom metrics scoped to the AxiellFolioSync namespace.
+# CloudWatch: put custom metrics, scoped to the namespace the report actually
+# publishes to (AxiellFolioSyncReport.metric_namespace). The condition only bites
+# on live runs, because dry runs skip metric publishing entirely.
 data "aws_iam_policy_document" "sync_cloudwatch" {
   statement {
     effect    = "Allow"
@@ -41,7 +46,7 @@ data "aws_iam_policy_document" "sync_cloudwatch" {
     condition {
       test     = "StringEquals"
       variable = "cloudwatch:namespace"
-      values   = ["AxiellFolioSync"]
+      values   = ["catalogue_adapters"]
     }
   }
 }

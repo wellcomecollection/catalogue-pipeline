@@ -1,21 +1,20 @@
 from collections.abc import Generator, Iterable
+from dataclasses import dataclass, field
 from itertools import batched
-from typing import Any, TypeVar
+from typing import Any
 
 import structlog
-from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
+from core.document import Document
+from core.sinks import Sink
 from core.source import BaseSource
-from utils.elasticsearch import (
-    index_es_batch,
-)
-
-T = TypeVar("T", bound=BaseModel)
 
 logger = structlog.get_logger(__name__)
 
-ES_BULK_INDEX_BATCH_SIZE = 10_000
+BATCH_SIZE = 10_000
+# Only the first errors are kept, to cap manifest file sizes.
+MAX_ERRORS = 1_000
 
 
 class BaseTransformer:
@@ -29,107 +28,89 @@ class TransformationError(BaseModel):
     detail: str
 
 
-class ElasticBaseTransformer[T: BaseModel](BaseTransformer):
+@dataclass
+class SinkResult:
+    """What one sink made of a run. Errors include records that failed to transform,
+    since those reached no sink."""
+
+    accepted_ids: list[str] = field(default_factory=list)
+    # Rejected because the sink already held a newer copy; no retry needed.
+    superseded_ids: list[str] = field(default_factory=list)
+    # Rejected by the sink. Unlike `errors`, never capped.
+    failed_ids: list[str] = field(default_factory=list)
+    errors: list[TransformationError] = field(default_factory=list)
+
+
+def _error(exception: Exception | dict, stage: str, row_id: str) -> TransformationError:
+    return TransformationError(stage=stage, row_id=row_id, detail=str(exception)[:500])
+
+
+class BatchTransformer(BaseTransformer):
+    """Transforms a source's records into documents in batches and writes each batch to sinks."""
+
     def __init__(self) -> None:
         super().__init__()
-        self.successful_ids: list[str] = []
-        self.errors: list[TransformationError] = []
-        self.error_ids: set[str] = set()
-
-        self.source_id_to_row_id: dict[str, str] = {}
+        self._errors: list[TransformationError] = []
+        self._error_row_ids: set[str] = set()
 
     def _add_error(self, exception: Exception | dict, stage: str, row_id: str) -> None:
-        error = TransformationError(
-            stage=stage, row_id=row_id, detail=str(exception)[:500]
-        )
-        # Only keep track of the first 1000 errors to cap manifest file sizes
-        if len(self.errors) < 1_000 and row_id not in self.error_ids:
-            self.error_ids.add(row_id)
-            self.errors.append(error)
+        if len(self._errors) < MAX_ERRORS and row_id not in self._error_row_ids:
+            self._error_row_ids.add(row_id)
+            self._errors.append(_error(exception, stage, row_id))
 
-    def transform(self, raw_nodes: Iterable[Any]) -> Generator[tuple[str, T]]:
-        """Transform a batch of raw items into (row_id, T) tuples."""
+    def transform(self, raw_nodes: Iterable[Any]) -> Generator[Document]:
+        """Transform a batch of raw items into documents."""
         raise NotImplementedError(
             "Each transformer must implement a `transform` method."
         )
 
-    def _get_document_id(self, record: T) -> str:
-        """Extract the document ID for Elasticsearch indexing."""
-        raise NotImplementedError(
-            "Each transformer must implement a `_get_document_id` method."
-        )
-
-    def _transform_batches(self) -> Generator[tuple[list[Any], list[T]]]:
+    def _transform_batches(self) -> Generator[list[Document]]:
         """
         Extracts documents from the specified source and transforms them. The `source` must define
         a `stream_raw` method.
         """
         raw_works = self.source.stream_raw()
-        for raw_batch in batched(raw_works, ES_BULK_INDEX_BATCH_SIZE):
-            transformed_batch = []
-            for row_id, record in self.transform(raw_batch):
-                source_id = self._get_document_id(record)
-                self.source_id_to_row_id[source_id] = row_id
-                transformed_batch.append(record)
-
+        for raw_batch in batched(raw_works, BATCH_SIZE):
+            transformed_batch = list(self.transform(raw_batch))
             logger.info(
                 "Transformed batch",
                 transformed_count=len(transformed_batch),
                 batch_size=len(raw_batch),
             )
+            yield transformed_batch
 
-            yield list(raw_batch), transformed_batch
+    def stream_to(self, sink: Sink) -> SinkResult:
+        """Write every batch to the sink and return its result."""
+        (result,) = self.stream_to_many(sink)
+        return result
 
-    def _generate_bulk_load_actions(
-        self, records: Iterable[T], index_name: str
-    ) -> Generator[dict[str, Any]]:
-        for record in records:
-            source = record.model_dump(exclude_none=True, mode="json")
-            yield {
-                "_index": index_name,
-                "_id": self._get_document_id(record),
-                "_source": source,
-            }
+    def stream_to_many(self, *sinks: Sink) -> list[SinkResult]:
+        """Write every batch to each sink and return one result per sink."""
+        self._errors, self._error_row_ids = [], set()
+        results = [SinkResult() for _ in sinks]
 
-    def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
-        # Reset run-specific state so manifests reflect the current execution only
-        self.successful_ids.clear()
-        self.errors.clear()
-        self.source_id_to_row_id.clear()
+        for transformed_batch in self._transform_batches():
+            for sink, result in zip(sinks, results, strict=True):
+                written = sink.write(transformed_batch)
+                result.accepted_ids.extend(d.target_id for d in written.accepted)
+                result.superseded_ids.extend(d.target_id for d in written.superseded)
+                result.failed_ids.extend(d.target_id for d, _ in written.failed)
+                for document, error in written.failed:
+                    if len(result.errors) < MAX_ERRORS:
+                        result.errors.append(_error(error, "index", document.source_id))
+                if written.failed:
+                    logger.warning(
+                        "Writes failed",
+                        sink=type(sink).__name__,
+                        count=len(written.failed),
+                    )
+                if written.superseded:
+                    logger.warning(
+                        "Skipped documents already at a newer version",
+                        sink=type(sink).__name__,
+                        count=len(written.superseded),
+                    )
 
-        for raw_batch, transformed_batch in self._transform_batches():
-            es_actions = list(
-                self._generate_bulk_load_actions(transformed_batch, index_name)
-            )
-            _, es_errors = index_es_batch(es_client, es_actions)
-
-            batch_error_ids = set()
-            for e in es_errors:
-                source_id = e["index"]["_id"]
-                batch_error_ids.add(source_id)
-
-                row_id = self.source_id_to_row_id[source_id]
-                logger.warning(
-                    "Indexing error",
-                    row_id=row_id,
-                    source_id=source_id,
-                    error=e,
-                )
-                self._add_error(e, "index", row_id)
-
-            batch_ids = [a["_id"] for a in es_actions]
-            batch_success_ids = [i for i in batch_ids if i not in batch_error_ids]
-            self.successful_ids.extend(batch_success_ids)
-            self._commit(
-                raw_batch,
-                {self.source_id_to_row_id[i] for i in batch_success_ids},
-                {self.source_id_to_row_id[i] for i in batch_error_ids},
-            )
-
-    def _commit(
-        self,
-        raw_batch: Iterable[Any],
-        success_row_ids: set[str],
-        error_row_ids: set[str],
-    ) -> None:
-        """Optional post-index commit hook called once per source batch."""
+        for result in results:
+            result.errors = (self._errors + result.errors)[:MAX_ERRORS]
+        return results

@@ -16,6 +16,7 @@ keyed on the CALM RecordID each AxC record carries in MARC 907, and writes:
 - no_public_ref.csv where the matched record carries no AltRefNo to match on
 - unmatched.csv for pairs with no AxC record (expected for manuscripts moving
   to TEI and returned PSY material)
+- wrong_level.csv for records above Item level, which Axiell refuses to save
 - report.md with the counts
 
 The Axiell import matches records on object_number, so the join here on the
@@ -32,7 +33,9 @@ import argparse
 import csv
 import re
 import sys
+from collections import Counter
 from pathlib import Path
+from xml.sax.saxutils import unescape
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "catalogue_graph" / "src"))
 
@@ -50,11 +53,34 @@ RE_907 = re.compile(
 RE_035 = re.compile(
     r'tag="035"[^>]*>\s*<(?:marc:)?subfield code="a">\s*\(([^)]+)\)([^<]*)</', re.DOTALL
 )
+RE_351 = re.compile(
+    r'<(?:marc:)?datafield tag="351"[^>]*>(.*?)</(?:marc:)?datafield>', re.DOTALL
+)
+RE_SUBFIELD_C = re.compile(r'<(?:marc:)?subfield code="c">([^<]*)</')
 RE_UUID = re.compile(r"^[0-9a-fA-F-]{36}$")
+
+# Axiell rejects a save on any level above Item ("A location may not be set
+# for this type of record"), so only Item rows are importable. Lowercased, as
+# the transformer does: 351 $c casing varies across the migrated data.
+IMPORTABLE_LEVELS = frozenset({"item"})
+
+
+def text(value: str) -> str:
+    """The store holds serialised XML, so &amp; in a reference has to be decoded."""
+    return unescape(value).strip()
+
+
+def extract_level(content: str) -> str:
+    """First non-empty 351 $c, as the transformer takes it: 351 is repeatable."""
+    for field in RE_351.finditer(content):
+        for value in RE_SUBFIELD_C.findall(field.group(1)):
+            if level := text(value):
+                return level
+    return ""
 
 
 def scan_axiell_store() -> dict[str, dict]:
-    """Map each record's 907 CALM RecordID to its RefNo and existing b numbers."""
+    """Map each record's 907 CALM RecordID to its RefNo, level and b numbers."""
     table = get_rest_api_table(
         AXIELL_ADAPTER_CONFIG.rest_api_iceberg_config, create_if_not_exists=False
     )
@@ -80,20 +106,22 @@ def scan_axiell_store() -> dict[str, dict]:
             refno = ""
             altrefno = ""
             m245 = RE_245.search(content)
-            title = m245.group(1).strip() if m245 else ""
+            title = text(m245.group(1)) if m245 else ""
+            level = extract_level(content)
             bnumbers = set()
             for prefix, value in RE_035.findall(content):
                 if prefix == "Calm RefNo" and not refno:
-                    refno = value.strip()
+                    refno = text(value)
                 elif prefix == "AltRefNo" and not altrefno:
-                    altrefno = value.strip()
+                    altrefno = text(value)
                 elif prefix == "Bibliographic Number":
-                    bnumbers.add(value.strip().lstrip("."))
+                    bnumbers.add(text(value).lstrip("."))
             by_uuid[uuid] = {
                 "record_id": rid,
                 "refno": refno,
                 "altrefno": altrefno,
                 "title": title,
+                "level": level,
                 "bnumbers": bnumbers,
             }
     print(
@@ -123,6 +151,12 @@ def main() -> None:
         "--bnumber-status",
         type=Path,
         help="Output of check_bnumbers.py; lets dead-valued conflicts import",
+    )
+    parser.add_argument(
+        "--all-levels",
+        action="store_true",
+        help="Import every hierarchy level, not just Item. Axiell rejects the "
+        "save on levels above Item, so this is only for inspecting the full set",
     )
     parser.add_argument(
         "--include-live-conflicts",
@@ -162,6 +196,16 @@ def main() -> None:
     ambiguous: list[list[str]] = []
     no_public_ref: list[list[str]] = []
     unmatched: list[list[str]] = []
+    wrong_level: list[list[str]] = []
+
+    def add_import(record: dict, b_number: str) -> None:
+        if args.all_levels or record["level"].lower() in IMPORTABLE_LEVELS:
+            to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
+        else:
+            wrong_level.append(
+                [record["altrefno"], b_number, record["level"] or "<none>"]
+            )
+
     for uuid, b_number in pairs:
         record = by_uuid.get(uuid)
         if record is None:
@@ -178,7 +222,7 @@ def main() -> None:
                 and all(s in ("deleted", "absent", "malformed") for s, _, _ in resolved)
             ):
                 # Nothing usable is lost whether the import appends or replaces.
-                to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
+                add_import(record, b_number)
             if not all(s in ("deleted", "absent", "malformed") for s, _, _ in resolved):
                 conflicts.append(
                     [
@@ -198,7 +242,7 @@ def main() -> None:
         elif len(ref_owners[record["altrefno"]]) > 1:
             ambiguous.append([record["altrefno"], uuid, b_number])
         else:
-            to_import.append([record["altrefno"], b_number, "Bibliographic Number"])
+            add_import(record, b_number)
 
     if args.since:
         with args.since.open() as f:
@@ -236,6 +280,7 @@ def main() -> None:
         out / "no_public_ref.csv", ["RecordID", "Bnumber", "RefNo"], no_public_ref
     )
     write_csv(out / "unmatched.csv", ["RecordID", "Bnumber"], unmatched)
+    write_csv(out / "wrong_level.csv", ["AltRefNo", "Bnumber", "level"], wrong_level)
 
     report = "\n".join(
         [
@@ -249,6 +294,16 @@ def main() -> None:
             f"- public ref (AltRefNo) shared by several AxC records: {len(ambiguous)}",
             f"- AxC record has no AltRefNo to match on: {len(no_public_ref)}",
             f"- no AxC record for the RecordID: {len(unmatched)}",
+            f"- withheld, level above Item: {len(wrong_level)}",
+            "",
+            "Levels withheld:",
+            *(
+                f"  - {level}: {count}"
+                for level, count in sorted(
+                    Counter(row[2] for row in wrong_level).items(),
+                    key=lambda kv: -kv[1],
+                )
+            ),
             "",
         ]
     )

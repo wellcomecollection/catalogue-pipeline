@@ -2,20 +2,18 @@ locals {
   neptune_clusters = [
     module.catalogue_graph_neptune_cluster,
     module.catalogue_graph_neptune_cluster_dev,
-    module.catalogue_graph_neptune_cluster_2026_07_03
+    module.catalogue_graph_neptune_cluster_2026_07_03,
+    module.catalogue_graph_neptune_cluster_2026_09_30
   ]
 
-  production_cluster = module.catalogue_graph_neptune_cluster
+  production_cluster = module.catalogue_graph_neptune_cluster_2026_07_03
 }
 
 module "catalogue_graph_neptune_cluster" {
   source = "./modules/catalogue_graph"
 
-  # This is the current production cluster, which was created before we introduced graph dates.
-  # It has an empty graph_date to preserve its Neptune cluster name (catalogue-graph),
-  # otherwise Terraform would destroy it (Neptune cluster names cannot be changed).
-  # Eventually, we will switch to a new (dated) production cluster, at which point
-  # we can destroy this one and make graph dates mandatory.
+  # Legacy cluster, kept for the frozen 2025-10-02 pipeline; the empty graph_date preserves its
+  # catalogue-graph name (renaming destroys it). Remove with wellcomecollection/platform#6726.
   graph_date                 = ""
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
@@ -52,7 +50,26 @@ module "catalogue_graph_neptune_cluster_dev" {
 module "catalogue_graph_neptune_cluster_2026_07_03" {
   source = "./modules/catalogue_graph"
 
+  # The production cluster since the 2026-09-29 switchover (wellcomecollection/platform#6541).
   graph_date                 = "2026-07-03"
+  namespace                  = local.namespace
+  vpc_id                     = local.vpc_id
+  private_subnets            = local.private_subnets
+  public_subnets             = local.public_subnets
+  bulk_loader_s3_bucket_name = aws_s3_bucket.catalogue_graph_bucket.bucket
+
+  providers = {
+    aws     = aws
+    aws.dns = aws.dns
+  }
+}
+
+module "catalogue_graph_neptune_cluster_2026_09_30" {
+  source = "./modules/catalogue_graph"
+
+  # For the 2026-09-30 pipeline, which builds Axiell trees from the 982 parent link
+  # (wellcomecollection/platform#6725).
+  graph_date                 = "2026-09-30"
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
   private_subnets            = local.private_subnets

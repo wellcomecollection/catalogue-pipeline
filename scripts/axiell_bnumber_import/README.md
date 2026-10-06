@@ -64,6 +64,43 @@ build step uses the 907 join to derive each record's AltRefNo and withholds
 rows where several AxC records share one (`ambiguous_refs.csv`) or where the
 matched record has no AltRefNo at all (`no_public_ref.csv`).
 
+Only records at Item level are imported. Axiell refuses to save a record
+above Item with "A location may not be set for this type of record", even
+though the import sets no location: the 2026-09-10 run failed on 516 rows
+this way, every one of them above Item. Withheld rows go to
+`wrong_level.csv`, and `report.md` counts them by level; `--all-levels`
+imports them anyway, which is only useful for inspecting the full set.
+
+The level is the first non-empty MARC 351 `$c`, matched case-insensitively,
+following what the transformer does in
+`adapters/transformers/axiell/organisation_and_arrangement.py`. 351 is
+repeatable, so reading only the first field would record an empty level for a
+record whose first one carries no `$c`. Every value in the store is title case
+today, so the case-insensitive match is there because the transformer's
+`work_type` BDD feature treats varying case as possible, not because the
+current data needs it.
+
+Levels across the 208,776 records carrying a 907 RecordID, on 2026-09-15:
+187,070 Item, 8,745 Series, 5,918 Sub-series, 2,844 Section, 2,359
+Sub-section, 1,162 Collection, 562 Item part, and 116 with no level at all.
+So the 516 failures of 2026-09-10 are much smaller than the 21,028
+above-Item records here, because the pairs come from Sierra bibs and skew
+heavily item-level.
+
+The match on Item is exact, so the 562 records at "Item part", CALM's old
+"piece" level, are withheld as well. That is untested rather than known to
+fail: 2026-09-10 attempted every level, and its 516 failures are all
+described as above Item, so either that load carried no Item part rows or
+Axiell saved them. 562 is the ceiling on what excluding them costs, and
+fewer in practice, since only records paired with a Sierra b number reach
+the import at all. Settle it by importing a handful with
+`IMPORTABLE_LEVELS` widened and seeing whether Axiell accepts them.
+
+The adapter store holds each record as serialised MARC XML, so subfield
+values are XML-unescaped before use. Without that, the 53 records whose
+AltRefNo contains an ampersand go into the CSV as `MSS.1055-1061 &amp; 7126`
+and Axiell reports them as having no match.
+
 RecordIDs with several bibs produce one row each (035 is repeatable).
 Conflicts, where AxC already cites a different live b number, are reported
 with each existing value's Sierra status, format and title. By default they
