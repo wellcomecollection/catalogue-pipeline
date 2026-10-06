@@ -184,7 +184,9 @@ AWS_PROFILE=platform-developer uv run python scripts/backfill_works_identified.p
 AWS_PROFILE=platform-developer uv run python scripts/backfill_works_identified.py --pipeline-date 2026-09-30 --es-mode public
 ```
 
-The table is append-only, so a run that fails part-way leaves the rows it
-wrote and a rerun duplicates them. Readers take the highest `version` then the
-latest `last_modified` per id, so this costs space rather than correctness.
-Incremental minter writes can carry on during the backfill for the same reason.
+Before reading the index the script loads every `(id, version)` the table
+already holds and skips works the table has at that version or newer, so a run
+that fails part-way can be rerun and converges rather than duplicating rows,
+and the minter's own writes can carry on during the backfill. The table is
+reloaded for each append so a long run picks up renewed AWS credentials, and
+the Elasticsearch read retries transient errors the way the minter's does.
