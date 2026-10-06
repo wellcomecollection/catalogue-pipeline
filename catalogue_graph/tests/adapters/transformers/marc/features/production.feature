@@ -45,6 +45,15 @@ Feature: Production event extraction from MARC records
     When I transform the MARC record
     Then the only production has the function.label "Production"
 
+  # From MarcProductionTest.scala: the shared transformer prefers 260 unless told otherwise
+  Scenario: When both 260 and 264 are present, the 260 is used
+    Given the MARC record has a 260 field with subfield "a" value "Paris"
+    And the MARC record has a 264 field with indicators " " "0" with subfield "a" value "London"
+    When I transform the MARC record
+    Then the only production has the label "Paris"
+    And it has no function
+    And its only place has the label "Paris"
+
   Scenario: Multiple 260 fields produce multiple production events
     Given the MARC record has a 260 field with subfield "a" value "London :" and subfield "b" value "Wellcome Library," and subfield "c" value "1900"
     And the MARC record has another 260 field with subfield "a" value "New York :" and subfield "b" value "Columbia University Press," and subfield "c" value "2000"

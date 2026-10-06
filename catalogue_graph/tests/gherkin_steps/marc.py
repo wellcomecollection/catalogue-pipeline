@@ -95,6 +95,15 @@ def replace_control_field(marc_record: Record, tag: str, data: str) -> Record:
 
 @given(
     parsers.re(
+        r'the MARC record has another (?P<tag>\d{3}) field with the value "(?P<data>.+)"'
+    )
+)
+def add_control_field(marc_record: Record, tag: str, data: str) -> None:
+    marc_record.add_field(Field(tag=tag, data=data))
+
+
+@given(
+    parsers.re(
         r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)")? with subfields:'
     )
 )
