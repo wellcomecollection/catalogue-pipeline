@@ -59,7 +59,7 @@ S3_PREFIX = os.getenv("S3_PREFIX", "dev")
 # ---------------------------------------------------------------------------
 # RDS Data API (for local/CLI access without direct DB connectivity)
 # ---------------------------------------------------------------------------
-RDS_CLUSTER_ID = os.getenv("RDS_CLUSTER_ID", "identifiers-v2-serverless")
+RDS_CLUSTER_ID = os.getenv("RDS_CLUSTER_ID", "identifiers-v2-serverless-2026-07-03")
 RDS_REGION = os.getenv("RDS_REGION", "eu-west-1")
 
 # ---------------------------------------------------------------------------
