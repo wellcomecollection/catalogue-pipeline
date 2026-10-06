@@ -6,7 +6,8 @@ deselected by default in pytest config.
 Usage:
     GRAPH_DATE=2026-01-01 AWS_PROFILE=platform-developer uv run pytest -m "integration"
 
-Fixtures live under fixtures/<GRAPH_DATE>/ so each live graph has its own set.
+Fixtures live under fixtures/<GRAPH_DATE>/ so each live graph has its own set. The
+legacy cluster (empty date or 'prod') has no fixtures and is not supported here.
 """
 
 import csv
@@ -67,7 +68,8 @@ def load_json_fixture(name: str) -> Any:
     if not path.exists():
         raise FileNotFoundError(
             f"No fixtures for graph date {date} at {path.parent}. "
-            f"Run generate_fixtures.py --graph-date {date} to create them."
+            f"Run `uv run integration/graph/generate_fixtures.py --graph-date {date}` "
+            "from catalogue_graph/ to create them."
         )
     return json.loads(path.read_text())
 
