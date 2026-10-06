@@ -8,8 +8,8 @@ from adapters.transformers.ebsco.subjects import extract_subjects
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.designation import extract_designation
 from adapters.transformers.marc.edition import extract_edition
-from adapters.transformers.marc.production import extract_production
 from adapters.transformers.marc.genres import extract_genres
+from adapters.transformers.marc.production import extract_production
 from models.pipeline.concept import Contributor, Genre, Subject
 from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
