@@ -279,8 +279,8 @@ def test_the_loan_type_is_a_constant(category: str | None) -> None:
     Collection Information decides what should drive it.
 
     This is the behaviour that makes 15,869 access-restricted records
-    requestable. It is recorded as a question rather than a decision; see
-    rfcs/collection-information-questions.md section 5.
+    requestable. It is a question still open with Collection Information rather
+    than a decision, which is why it is pinned as a test.
     """
     assert _loan_type_for(category) == "Can circulate"
 

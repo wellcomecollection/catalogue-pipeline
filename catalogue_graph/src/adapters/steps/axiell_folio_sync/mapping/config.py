@@ -34,7 +34,7 @@ RECORD_TYPE_ITEM = "ITEM"  # only item-level records are synced
 #
 # Every key here is a value that actually occurs in the corpus, and every target
 # exists in the FOLIO tenant, so nothing needs provisioning. The table covers
-# 187,882 of 187,997 item records; the remaining 115 carry no 655$a and fail,
+# 187,881 of 187,996 item records; the remaining 115 carry no 655$a and fail,
 # because there is no default (see MATERIAL_TYPE_FIELD).
 MATERIAL_TYPE: dict[str, str] = {
     "Archives - Non-digital": "archive",
@@ -54,8 +54,8 @@ MATERIAL_TYPE: dict[str, str] = {
 
 # Map Axiell access categories (MARC 506$f) to FOLIO item statuses.
 # Values are FOLIO's fixed item-status values and need no resolver.
-# Confirm "Restricted" and "Withdrawn" against the tenant's FOLIO version;
-# see rfcs/collection-information-questions.md section 6.
+# "Restricted" and "Withdrawn" have not been seen in use on the prod tenant and
+# should be confirmed against its FOLIO version before this is relied on.
 ACCESS_ITEM_STATUS: dict[str, str] = {
     "OPEN": "Available",
     "OPENWITHADVISORY": "Available",
@@ -265,8 +265,9 @@ NORMAL_LOCATION_FIELD = FieldMap(
     location=True,
     required=True,
 )
-# item.permanentLoanType is resolved from a constant, not from any AxC field.
-# See DEFAULT_LOAN_TYPE above for why, and for what it costs.
+# item.permanentLoanType is resolved from a constant, not from any AxC field:
+# nothing in the AxC record reaches the loan type, so every item is
+# DEFAULT_LOAN_TYPE. The cost is that access-restricted items are requestable.
 LOAN_TYPE_FIELD = FieldMap(
     None,
     resolver="resolve_loan_type",

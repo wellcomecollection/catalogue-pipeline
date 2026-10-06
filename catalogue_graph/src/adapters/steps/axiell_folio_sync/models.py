@@ -21,9 +21,9 @@ class SyncSuccessEntry(BaseModel):
     holdings_action: str | None
     item_action: str | None
     timestamp: str
-    # Administrative notes on the item that look like one of ours but carry
-    # neither marker, so a duplicate was left behind. Empty for almost every
-    # record; non-empty means someone should reconcile that item by hand.
+    # Administrative notes on the item that mention Axiell but no longer carry
+    # our label, so a duplicate was left behind. Empty for almost every record;
+    # non-empty means someone should reconcile that item by hand.
     stray_location_notes: list[str] = Field(default_factory=list)
 
 

@@ -16,7 +16,7 @@ For what the sync maps today see
 
 | | Source | Date |
 | --- | --- | --- |
-| AxC values and counts | Full scan of the Axiell adapter table, 209,374 rows, **187,996 item-level**, 0 parse errors, via [`notebooks/axiell_adapter_field_coverage.ipynb`](../notebooks/axiell_adapter_field_coverage.ipynb) | 2026-09-29 |
+| AxC values and counts | Full scan of the Axiell adapter table, 209,374 rows, **187,996 item-level**, 0 parse errors | 2026-09-29 |
 | FOLIO values | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
 | AxC to MARC provenance | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
 
@@ -40,7 +40,7 @@ All counts are item-level only (`351$c == ITEM`); percentages are of 187,996.
 | `Archives - Hybrid`, `Pictures` | 2 | | `archive`, `non-projected graphic` |
 | *(absent)* | 115 | | nothing: the record fails |
 
-Every value in the corpus now resolves, covering 187,882 of 187,997 item
+Every value in the corpus now resolves, covering 187,881 of 187,996 item
 records. Only the 115 with no `655$a` fail.
 
 **What this fixed.** 9,829 records (5.2%) previously did not resolve at all. Two
@@ -196,8 +196,7 @@ enforced.
    is that an AxC access change never reaches an item that already exists. If
    that is not acceptable, the proposal is split ownership: the sync may
    overwrite only the statuses it derives (`Available`, `Restricted`, `Missing`,
-   `Withdrawn`, `Unavailable`) and leaves circulation statuses alone. See
-   section 6 of the questions doc for the three options side by side.
+   `Withdrawn`, `Unavailable`) and leaves circulation statuses alone.
 6. **Should `506$a` / `506$g` / `540$g` be carried as an item note?** Free text
    on 24.1% of records and a date on 8.1%; the only way a date-bounded
    restriction can be represented at all.

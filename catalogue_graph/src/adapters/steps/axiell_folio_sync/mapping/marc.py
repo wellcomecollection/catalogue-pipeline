@@ -36,8 +36,9 @@ class CanonicalRecord:
     current_location: str | None = None  # 852$b — AxC current location
     # 984$b — AxC normal (home) location. Where the item lives, as opposed to
     # current_location, which is where it is right now: a loan or reading-room
-    # request moves the latter and leaves this alone. Extracted but not yet mapped
-    # to a FOLIO field — see docs/axiell-folio-mapping-gaps.md §4.
+    # request moves the latter and leaves this alone. This is the sole source of
+    # the FOLIO location on both the holdings and the item, and it is required
+    # with no default. See config.NORMAL_LOCATION_FIELD.
     normal_location: str | None = None
     # 506$f — the standardized access term (OPEN, CLOSED, RESTRICTED, …).
     # Feeds the item's status; see config.ACCESS_ITEM_STATUS. It does not feed the

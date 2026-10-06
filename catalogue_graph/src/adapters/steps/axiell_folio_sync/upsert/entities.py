@@ -251,7 +251,7 @@ def _upsert_entity(
     Resolve an entity by hrid and create or update it.
 
     ``stray_notes`` is an optional sink: any existing administrative note that
-    looks like one of ours but carries neither marker is appended to it, for the
+    mentions Axiell but does not carry our label is appended to it, for the
     caller to record. Populated on dry runs too, so a dry run surfaces the same
     warning as a real one.
 

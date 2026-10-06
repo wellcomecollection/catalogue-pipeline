@@ -35,8 +35,8 @@ class UpsertResult(BaseModel):
     holdings: EntityResult = Field(default_factory=EntityResult)
     item: EntityResult = Field(default_factory=EntityResult)
     errors: list[UpsertError] = Field(default_factory=list)
-    # Existing administrative notes that look like ours but carry neither marker
-    # — see upsert.entities._stray_location_notes. Reported, never actioned.
+    # Existing administrative notes that mention Axiell but do not carry our
+    # label; see upsert.entities._stray_location_notes. Reported, never actioned.
     stray_location_notes: list[str] = Field(default_factory=list)
 
 

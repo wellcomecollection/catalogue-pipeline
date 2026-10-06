@@ -100,7 +100,7 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 | --- | --- | --- | --- |
 | `hrid` | `AxC-item-<001>` | MARC `001` | Required. |
 | `holdingsRecordId` | Parent holdings UUID | Injected by the upsert orchestrator | Not set when the payload is built. |
-| `status.name` | Item-status name | MARC `506 $f` (access category), via `ACCESS_ITEM_STATUS` (default `Unavailable`) | Table value is final; statuses are a fixed FOLIO enum, not tenant reference data. **Create-only**: mod-circulation owns the field once the item exists, so updates send FOLIO's own status back and an AxC access change does not propagate. See `_CREATE_ONLY_FIELDS` in `upsert/entities.py`, and `rfcs/collection-information-questions.md` section 6. |
+| `status.name` | Item-status name | MARC `506 $f` (access category), via `ACCESS_ITEM_STATUS` (default `Unavailable`) | Table value is final; statuses are a fixed FOLIO enum, not tenant reference data. **Create-only**: mod-circulation owns the field once the item exists, so updates send FOLIO's own status back and an AxC access change does not propagate. See `_CREATE_ONLY_FIELDS` in `upsert/entities.py`. |
 | `materialType.id` | Material-type UUID | MARC `655 $a`, via `resolve_material_type` | Uses the normalization table below. No default: an absent or unmapped category fails the record. |
 | `permanentLoanType.id` | `Can circulate` UUID | Constant, via `resolve_loan_type` | **No AxC mapping**, pending Collection Information |
 | `permanentLocation.id` | FOLIO location UUID | MARC `984 $b` (AxC **normal** location), via `resolve_location` | Same source and rules as the holdings location above, so the two always agree. |
@@ -185,7 +185,7 @@ loan type, so nothing overrides it. Two candidates are unsettled: the access
 category (`506 $f`, who may access it) and the use restriction (`540 $a`, how it
 may be requested). Both have been mapped here and reverted pending Collection
 Information, which also has to say whether open archival material should
-circulate at all. See `rfcs/collection-information-questions.md` section 5.
+circulate at all.
 
 Until then a reader can request any item, including those whose access note
 reads *"This item is closed and cannot be accessed"*. Settle before a
@@ -234,8 +234,7 @@ Used when the record has no value for a resolved field.
 The location is deliberately the exception. It used to default to
 `History of Medicine`, which meant an unmapped or unknown location produced a real,
 plausible-looking, wrong shelf. It is now `required`, so such a record is reported
-as an error for someone to act on. See
-[the gaps doc](axiell-folio-mapping-gaps.md) section 4.
+as an error for someone to act on.
 
 ## Full inbound MARC field map
 
