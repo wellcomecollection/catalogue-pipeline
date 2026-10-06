@@ -96,7 +96,8 @@ class Field008:
         """The dates coded in characters 6-14."""
         date_type = self.raw_field.date_type
         date_1 = year_bounds(self.raw_field.date_1)
-        if date_1 is None:
+        # 9999 in date 1 stands for an unknown year
+        if date_1 is None or date_1.earliest == 9999:
             return None
         # s single date, r reprint, t publication and copyright, p release and production: date 1 only
         if date_type in {"s", "r", "t", "p"}:

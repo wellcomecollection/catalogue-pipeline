@@ -144,3 +144,8 @@ def test_dates_the_scala_parser_rejects(dates: str, expected: Field008Dates) -> 
 )
 def test_backwards_dates_are_reversed(dates: str, expected: Field008Dates) -> None:
     assert Field008(f"750101{dates}xxu").dates == expected
+
+
+# Deliberate divergence: the Scala parser reads a date 1 of 9999 as the year 9999.
+def test_unknown_year() -> None:
+    assert Field008("260730s9999    xx ").dates is None
