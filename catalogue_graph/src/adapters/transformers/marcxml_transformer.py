@@ -9,6 +9,7 @@ from pymarc.record import Record
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.marc.identifier import has_id
 from adapters.transformers.source_work_transformer import SourceWorkTransformer
+from core.document import Document
 from ingestor.models.shared.deleted_reason import DeletedFromSource
 from models.pipeline.source.work import (
     DeletedSourceWork,
@@ -23,14 +24,12 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
     @abstractmethod
     def work_builder(self) -> type[MarcXmlWorkBuilder]: ...
 
-    def transform(
-        self, rows: Iterable[dict[str, Any]]
-    ) -> Generator[tuple[str, SourceWork]]:
+    def transform(self, rows: Iterable[dict[str, Any]]) -> Generator[Document]:
         for row in rows:
             yield from self._transform_row(row)
 
-    def _transform_row(self, row: dict[str, Any]) -> Generator[tuple[str, SourceWork]]:
-        """Transform a single row, yielding at most one (row_id, work) tuple.
+    def _transform_row(self, row: dict[str, Any]) -> Generator[Document]:
+        """Transform a single row, yielding at most one document.
         Subclasses override this to handle non-MARC rows (e.g. deletion facts)."""
         marc_record = self._row_to_marc_record(row)
         if not marc_record:
@@ -51,15 +50,14 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
         enrichment_content = row.get("enrichment_content")
 
         try:
+            work: SourceWork
             if row.get("deleted", False):
-                yield row_id, self.transform_deleted(marc_record, last_modified)
+                work = self.transform_deleted(marc_record, last_modified)
             else:
-                yield (
-                    row_id,
-                    self.transform_record(
-                        marc_record, last_modified, enrichment_content
-                    ),
+                work = self.transform_record(
+                    marc_record, last_modified, enrichment_content
                 )
+            yield self.document(row_id, work)
         except Exception as e:
             logger.error("Error transforming record", row_id=row_id, error=str(e))
             self._add_error(e, "transform", row_id)

@@ -2,6 +2,7 @@ from collections import defaultdict
 from collections.abc import Iterable, Iterator
 from itertools import batched
 
+import structlog
 from elasticsearch import Elasticsearch
 
 from clients.neptune_client import NeptuneClient
@@ -19,6 +20,8 @@ from models.graph_edge import (
 from utils.safety import validate_fractional_change
 
 from .base_graph_remover_incremental import BATCH_SIZE, BaseGraphRemoverIncremental
+
+logger = structlog.get_logger(__name__)
 
 HAS_PARENT_EDGE_ID_PREFIX = "HAS_PARENT:"
 WORK_LOOKUP_BATCH_SIZE = 1000
@@ -83,10 +86,43 @@ class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemoverIncremental):
         )
 
     def get_node_ids_to_remove(self) -> Iterator[str]:
-        """Remove the IDs of all path identifier nodes which are not connected to any works"""
-        yield from self.neptune_client.get_disconnected_node_ids(
-            node_label="PathIdentifier", edge_label="HAS_PATH_IDENTIFIER"
+        """Return path identifier nodes with no work in the graph and no Visible work mapping to them in ES."""
+        disconnected_ids = set(
+            self.neptune_client.get_disconnected_node_ids(
+                node_label="PathIdentifier", edge_label="HAS_PATH_IDENTIFIER"
+            )
         )
+        if not disconnected_ids:
+            return
+
+        # A node waiting for its work's own window must stay, as deleting it drops its children's HAS_PARENT edges
+        kept_ids = disconnected_ids & self._get_expected_path_identifiers()
+        logger.info(
+            "Kept disconnected path identifier nodes which a Visible work still maps to",
+            disconnected_count=len(disconnected_ids),
+            kept_count=len(kept_ids),
+            removable_count=len(disconnected_ids) - len(kept_ids),
+        )
+        yield from sorted(disconnected_ids - kept_ids)
+
+    def _get_expected_path_identifiers(self) -> set[str]:
+        # Mid-reindex there are tens of thousands of candidates and path suffixes aren't indexed, so scan once
+        unscoped_event = self.event.model_copy(
+            update={
+                "window": None,
+                "ids": None,
+                "pit_ids": PipelinePitIds(merged=self.work_source.pit_id),
+            }
+        )
+        source = MergedWorksSource(
+            unscoped_event, es_client=self.es_client, query=ES_QUERY, fields=ES_FIELDS
+        )
+        path_identifiers: set[str] = set()
+        for document in source.stream_raw():
+            path_identifier = RawCatalogueWork(document).path_identifier
+            if path_identifier is not None:
+                path_identifiers.add(path_identifier)
+        return path_identifiers
 
     def get_edge_ids_to_remove(self) -> Iterator[str]:
         """Return stale HAS_PATH_IDENTIFIER and HAS_PARENT edges of the works in scope."""

@@ -13,6 +13,7 @@ from adapters.transformers.marc.physical_description import (
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
+from adapters.transformers.marc.production import extract_production
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from models.pipeline.concept import Genre
 from models.pipeline.identifier import (
@@ -22,6 +23,7 @@ from models.pipeline.identifier import (
     WorkSourceIdentifier,
 )
 from models.pipeline.item import Item
+from models.pipeline.production import ProductionEvent
 from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
 
 # The source-identifier type for a FOLIO item. The id-minter turns this plus the
@@ -93,6 +95,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def duration(self) -> int | None:
         return extract_duration(self.record)
+
+    @property
+    def production(self) -> list[ProductionEvent]:
+        return extract_production(self.record, prefer="264")
 
     @property
     def items(self) -> list[Item]:

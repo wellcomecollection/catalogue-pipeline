@@ -449,6 +449,74 @@ class SierraConceptSubjectsTest
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers
   }
 
+  it(s"gets identifiers from URIs in subfield $$0") {
+    // Based on Backstage authority-control output
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "650",
+          indicator2 = "0",
+          subfields = List(
+            Subfield(tag = "a", content = "Kidneys"),
+            Subfield(tag = "x", content = "Diseases"),
+            Subfield(
+              tag = "0",
+              content = "http://id.loc.gov/authorities/subjects/sh85072261"
+            )
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "650",
+          indicator2 = "2",
+          subfields = List(
+            Subfield(tag = "a", content = "Drug Industry"),
+            Subfield(tag = "0", content = "http://id.nlm.nih.gov/mesh/D004364")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "651",
+          indicator2 = "0",
+          subfields = List(
+            Subfield(tag = "a", content = "London (England)"),
+            Subfield(
+              tag = "0",
+              content = "https://id.loc.gov/authorities/names/n79005665"
+            )
+          )
+        )
+      )
+    )
+
+    SierraConceptSubjects(bibId, bibData)
+      .map(_.id)
+      .flatMap(_.allSourceIdentifiers) shouldBe List(
+      SourceIdentifier(IdentifierType.LCSubjects, "Concept", "sh85072261"),
+      SourceIdentifier(IdentifierType.MESH, "Concept", "D004364"),
+      SourceIdentifier(IdentifierType.LCNames, "Place", "n79005665")
+    )
+  }
+
+  it("uses a label-derived identifier if subfield ǂ0 is not a valid LoC id") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "650",
+          indicator2 = "0",
+          subfields = List(
+            Subfield(tag = "a", content = "Medicine"),
+            Subfield(tag = "0", content = "shsh85083064")
+          )
+        )
+      )
+    )
+
+    val List(subject) = SierraConceptSubjects(bibId, bibData)
+    subject should have(
+      'label("Medicine"),
+      labelDerivedConceptId("medicine")
+    )
+  }
+
   it("ignores subject with second indicator 7") {
     // TODO, I think the desired state is a bit more complex.
     // We ignore identified fields with second indicators other than 0 and 2

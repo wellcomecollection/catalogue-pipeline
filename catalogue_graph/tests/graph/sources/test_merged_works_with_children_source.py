@@ -1,4 +1,5 @@
 import re
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -10,6 +11,8 @@ from graph.sources.merged_works_with_children_source import (
     child_path_prefixes,
 )
 from models.events import BasePipelineEvent
+from models.incremental_window import IncrementalWindow
+from tests.mocks import MockElasticsearchClient
 
 
 def _make_work(
@@ -261,3 +264,61 @@ def _matches(pattern: str, value: str) -> bool:
     literal, rest = pattern[1:].split('"', 1)
     assert rest == "/[^/]+"
     return re.fullmatch(re.escape(literal) + "/[^/]+", value) is not None
+
+
+WINDOW = {"start_time": "2025-01-01T11:45", "end_time": "2025-01-01T12:00"}
+
+
+def _index_work(work_id: str, path: str, merged_time: str) -> None:
+    work = _make_work(work_id, path=path)
+    work["state"]["mergedTime"] = merged_time
+    MockElasticsearchClient.index("works-denormalised-dev", work_id, work)
+
+
+def _stream_ids(**scope: Any) -> list[str]:
+    MockElasticsearchClient.apply_range_filters = True
+    event = BasePipelineEvent(pipeline_date="dev", graph_date="dev", **scope)
+    es_client = MockElasticsearchClient({}, "")
+    source = MergedWorksWithChildrenSource(
+        event=event,
+        es_client=es_client,  # type: ignore[arg-type]
+        query={"match": {"type": "Visible"}},
+    )
+    return [w["state"]["canonicalId"] for w in source.stream_raw()]
+
+
+def _index_parent_and_children() -> None:
+    _index_work("parent01", "A", "2025-01-01T11:50:00Z")
+    _index_work("oldchild", "A/X", "2024-12-01T00:00:00Z")
+    _index_work("newchild", "A/Z", "2025-01-01T12:05:00Z")
+
+
+def test_window_child_query_bounds_merged_time_by_window_end() -> None:
+    event = BasePipelineEvent(
+        pipeline_date="dev",
+        graph_date="dev",
+        window=IncrementalWindow.model_validate(WINDOW),
+    )
+    es_client = MagicMock()
+    es_client.open_point_in_time.return_value = {"id": "some_pit_id"}
+    source = MergedWorksWithChildrenSource(event=event, es_client=es_client)
+
+    must = source._get_child_source({"A"}).query["bool"]["must"]
+    assert must[2] == {"range": {"state.mergedTime": {"lte": "2025-01-01T12:00:00"}}}
+
+
+def test_window_child_lookup_excludes_children_merged_after_window_end() -> None:
+    # The mock ignores the regexp, so every in-range work is treated as a child
+    _index_parent_and_children()
+    assert _stream_ids(window=WINDOW) == ["parent01", "oldchild"]
+
+
+@pytest.mark.parametrize(
+    "scope", [{"ids": ["parent01"]}, {}], ids=["ids mode", "full mode"]
+)
+def test_child_lookup_unbounded_outside_window_mode(scope: dict) -> None:
+    _index_parent_and_children()
+    streamed_ids = _stream_ids(**scope)
+
+    assert "newchild" in streamed_ids
+    assert not any("range" in str(q) for q in MockElasticsearchClient.queries)

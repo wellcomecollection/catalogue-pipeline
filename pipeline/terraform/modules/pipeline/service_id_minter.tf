@@ -14,6 +14,11 @@ locals {
     ES_TARGET_INDEX_DATE_SUFFIX = "2025-10-02"
     S3_BUCKET                   = "wellcomecollection-platform-id-minter"
     S3_PREFIX                   = "prod"
+
+    # Experimental parallel copy of works-identified
+    ENABLE_ICEBERG_WRITES       = "false"
+    WORKS_IDENTIFIED_TABLE_NAME = "works_identified_${replace(var.pipeline_date, "-", "_")}"
+    S3_TABLES_BUCKET            = "wellcomecollection-platform-catalogue-pipeline"
   }
 
   # Extract the secret name from the full ARN.
