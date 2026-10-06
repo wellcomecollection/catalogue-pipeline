@@ -39,8 +39,12 @@ variable "ecs_cluster_arn" {
 
 variable "graph_date" {
   type        = string
-  description = "Graph date identifying the Neptune cluster for this pipeline run. Empty string = legacy pre-dated prod cluster."
-  default     = ""
+  description = "Graph date identifying the Neptune cluster for this pipeline run (YYYY-MM-DD, or 'dev')."
+
+  validation {
+    condition     = var.graph_date == "dev" || can(regex("^\\d{4}-\\d{2}-\\d{2}$", var.graph_date))
+    error_message = "graph_date must be a date (YYYY-MM-DD) or 'dev'."
+  }
 }
 
 variable "enable_schedule" {

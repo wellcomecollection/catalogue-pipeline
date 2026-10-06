@@ -6,8 +6,7 @@ deselected by default in pytest config.
 Usage:
     GRAPH_DATE=2026-01-01 AWS_PROFILE=platform-developer uv run pytest -m "integration"
 
-Fixtures live under fixtures/<GRAPH_DATE>/ so each live graph has its own set. The
-legacy cluster (empty date or 'prod') has no fixtures and is not supported here.
+Fixtures live under fixtures/<GRAPH_DATE>/ so each live graph has its own set.
 """
 
 import csv

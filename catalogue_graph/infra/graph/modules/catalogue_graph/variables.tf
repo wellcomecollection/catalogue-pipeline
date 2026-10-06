@@ -25,7 +25,12 @@ variable "bulk_loader_s3_bucket_name" {
 
 variable "graph_date" {
   type        = string
-  description = "Date associated with this graph instance (YYYY-MM-DD), incorporated into the namespace."
+  description = "Date associated with this graph instance (YYYY-MM-DD, or 'dev'), incorporated into the namespace."
+
+  validation {
+    condition     = var.graph_date == "dev" || can(regex("^\\d{4}-\\d{2}-\\d{2}$", var.graph_date))
+    error_message = "graph_date must be a date (YYYY-MM-DD) or 'dev'."
+  }
 }
 
 variable "skip_final_snapshot" {

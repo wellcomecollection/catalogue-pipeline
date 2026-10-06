@@ -73,6 +73,11 @@ class NeptuneClient:
     """
 
     def __init__(self, graph_date: str) -> None:
+        if not graph_date:
+            raise ValueError(
+                "graph_date is required: every Neptune cluster is dated (or 'dev')"
+            )
+
         self.session = boto3.Session()
         self.graph_date = graph_date
 
@@ -88,11 +93,6 @@ class NeptuneClient:
 
     @property
     def namespace(self) -> str:
-        # The legacy cluster (2025-10-02 pipeline only) predates graph dates, so its date is blank; where empty
-        # labels are unsupported (SSM, CloudWatch, S3) it is `prod`. Remove with wellcomecollection/platform#6726.
-        if self.graph_date in ("prod", ""):
-            return "catalogue-graph"
-
         return f"catalogue-graph-{self.graph_date}"
 
     def _get_client_url(self) -> str:

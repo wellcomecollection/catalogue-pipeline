@@ -1,30 +1,11 @@
 locals {
   neptune_clusters = [
-    module.catalogue_graph_neptune_cluster,
     module.catalogue_graph_neptune_cluster_dev,
     module.catalogue_graph_neptune_cluster_2026_07_03,
     module.catalogue_graph_neptune_cluster_2026_09_30
   ]
 
   production_cluster = module.catalogue_graph_neptune_cluster_2026_07_03
-}
-
-module "catalogue_graph_neptune_cluster" {
-  source = "./modules/catalogue_graph"
-
-  # Legacy cluster for the 2025-10-02 pipeline, destroyed 2026-10-06; removed with wellcomecollection/platform#6726.
-  graph_date                 = ""
-  skip_final_snapshot        = true
-  namespace                  = local.namespace
-  vpc_id                     = local.vpc_id
-  private_subnets            = local.private_subnets
-  public_subnets             = local.public_subnets
-  bulk_loader_s3_bucket_name = aws_s3_bucket.catalogue_graph_bucket.bucket
-
-  providers = {
-    aws     = aws
-    aws.dns = aws.dns
-  }
 }
 
 module "catalogue_graph_neptune_cluster_dev" {
@@ -85,6 +66,6 @@ module "catalogue_graph_neptune_cluster_2026_09_30" {
 resource "aws_ssm_parameter" "production_graph_date" {
   name        = "/catalogue_graph/production_graph_date"
   type        = "String"
-  description = "The graph_date of the current production Neptune cluster (or 'prod' for the legacy cluster), read by CI."
-  value       = local.production_cluster.graph_date != "" ? local.production_cluster.graph_date : "prod"
+  description = "The graph_date of the current production Neptune cluster, read by CI."
+  value       = local.production_cluster.graph_date
 }

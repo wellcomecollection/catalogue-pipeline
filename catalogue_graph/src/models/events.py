@@ -69,7 +69,7 @@ class BasePipelineEvent(SourceScope, GraphPipelineScope):
             graph-{graph_date}/pipeline-{pipeline_date}/{service_prefix(es)}/{scope}
 
         where:
-            - ``graph_date`` identifies the Neptune graph cluster (temporarily defaults to ``prod``)
+            - ``graph_date`` identifies the Neptune graph cluster
             - ``pipeline_date`` identifies the pipeline service stack
             - service-specific segment(s) are provided by ``s3_service_prefix_parts``
             - ``scope`` reflects the pipeline run mode:
@@ -80,7 +80,7 @@ class BasePipelineEvent(SourceScope, GraphPipelineScope):
         parts: list[str] = []
 
         parts += [
-            f"graph-{self.graph_date or 'prod'}",
+            f"graph-{self.graph_date}",
             f"pipeline-{self.pipeline_date}",
         ]
 
@@ -153,7 +153,7 @@ class BulkLoaderEvent(GraphPipelineEvent):
 class BulkLoadPollerEvent(BaseModel):
     load_id: str
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
-    graph_date: str
+    graph_date: str = Field(min_length=1)
 
 
 class GraphRemoverEvent(GraphPipelineEvent):

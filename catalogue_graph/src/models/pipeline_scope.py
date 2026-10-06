@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class PipelineIndexDates(BaseModel):
@@ -17,8 +17,8 @@ class GraphPipelineScope(BaseModel):
     indexes a given execution should read from and write to.
     """
 
-    # empty graph_date = legacy pre-dated prod cluster (see infra/graph/neptune.tf)
-    graph_date: str
+    # Every Neptune cluster is dated (or "dev"); see infra/graph/neptune.tf.
+    graph_date: str = Field(min_length=1)
     pipeline_date: str
     index_dates: PipelineIndexDates = PipelineIndexDates()
 

@@ -2,6 +2,7 @@ import argparse
 import sys
 
 import pytest
+from pydantic import ValidationError
 
 import config
 from clients.neptune_client import NeptuneClient
@@ -109,7 +110,7 @@ def test_es_mode_validation_allows_expected_pairs() -> None:
     parser = argparse.ArgumentParser()
     add_pipeline_event_args(parser, {"graph_date", "es_mode"})
 
-    prod_args = parser.parse_args(["--graph-date", "prod", "--es-mode", "public"])
+    prod_args = parser.parse_args(["--graph-date", "2026-07-03", "--es-mode", "public"])
     validate_es_mode_for_writes(parser, prod_args)
 
     dev_args = parser.parse_args(["--graph-date", "dev", "--es-mode", "local"])
@@ -229,3 +230,18 @@ def test_neptune_client_graph_date_selects_endpoint() -> None:
         in MockSecretsManagerClient.calls
     )
     assert dev_client.neptune_endpoint == "dev-endpoint"
+
+
+def test_neptune_client_rejects_empty_graph_date() -> None:
+    with pytest.raises(ValueError, match="graph_date is required"):
+        NeptuneClient("")
+
+
+def test_pipeline_event_rejects_empty_graph_date() -> None:
+    with pytest.raises(ValidationError):
+        BulkLoaderEvent(
+            pipeline_date="2025-01-01",
+            graph_date="",
+            transformer_type="loc_concepts",
+            entity_type="nodes",
+        )
