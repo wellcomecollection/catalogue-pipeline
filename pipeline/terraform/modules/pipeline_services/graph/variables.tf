@@ -42,7 +42,7 @@ variable "graph_date" {
   description = "Graph date identifying the Neptune cluster for this pipeline run (YYYY-MM-DD, or 'dev')."
 
   validation {
-    condition     = var.graph_date == "dev" || can(regex("^\\d{4}-\\d{2}-\\d{2}$", var.graph_date))
+    condition     = var.graph_date == "dev" || can(formatdate("YYYY-MM-DD", "${var.graph_date}T00:00:00Z"))
     error_message = "graph_date must be a date (YYYY-MM-DD) or 'dev'."
   }
 }

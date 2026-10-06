@@ -28,7 +28,7 @@ variable "graph_date" {
   description = "Date associated with this graph instance (YYYY-MM-DD, or 'dev'), incorporated into the namespace."
 
   validation {
-    condition     = var.graph_date == "dev" || can(regex("^\\d{4}-\\d{2}-\\d{2}$", var.graph_date))
+    condition     = var.graph_date == "dev" || can(formatdate("YYYY-MM-DD", "${var.graph_date}T00:00:00Z"))
     error_message = "graph_date must be a date (YYYY-MM-DD) or 'dev'."
   }
 }
