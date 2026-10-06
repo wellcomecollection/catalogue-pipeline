@@ -1,10 +1,10 @@
 import pytest
-from pymarc.record import Field, Subfield
+from pymarc.record import Field, Indicators, Record, Subfield
 
-from adapters.transformers.ebsco.genres import build_primary_concept
-from adapters.transformers.ebsco.label_subdivisions import (
-    build_label_with_subdivisions,
+from adapters.transformers.marc.genres import (
     build_subdivision_concepts,
+    extract_genre,
+    extract_genres,
 )
 from models.pipeline.identifier import Identifiable
 
@@ -24,8 +24,9 @@ def test_label_join_uses_hyphen_separator() -> None:
             ("z", "Dublin."),
         ],
     )
-    label = build_label_with_subdivisions(field)
-    assert label == "Disco Polo - Specimens - Literature - 1897-1900 - Dublin"
+    genre = extract_genre(field)
+    assert genre is not None
+    assert genre.label == "Disco Polo - Specimens - Literature - 1897-1900 - Dublin"
 
 
 def test_concept_types_for_subdivisions() -> None:
@@ -33,10 +34,9 @@ def test_concept_types_for_subdivisions() -> None:
         "655",
         [("a", "Music"), ("y", "1990-2000"), ("z", "London."), ("v", "Scores")],
     )
-    primary_concept = build_primary_concept(field)
-    concepts = (
-        [primary_concept] if primary_concept else []
-    ) + build_subdivision_concepts(field)
+    genre = extract_genre(field)
+    assert genre is not None
+    concepts = genre.concepts
     labels = [c.label for c in concepts]
     types = [c.type for c in concepts]
 
@@ -51,7 +51,7 @@ def test_concept_types_for_subdivisions() -> None:
         ("50 B.C.", "50 bc"),
         ("ca. 50 B.C.", "ca 50 bc"),
         ("Gaul, ca. 50 B.C.", "gaul, ca 50 bc"),
-        ("Monica. N.O.R.A.D. A.B.C. BBQ", "monica. n.o.r.a.d. a.b.c. bbq"),
+        ("Monica. N.O.R.A.D. A.B.C. BBQ", "monica norad abc bbq"),
     ],
 )
 def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:
@@ -63,3 +63,28 @@ def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:
     identifier = concepts[0].id
     assert isinstance(identifier, Identifiable)
     assert identifier.source_identifier.value == period_id
+
+
+def test_genres_with_the_same_label_but_different_identifiers_are_both_kept() -> None:
+    record = Record(
+        fields=[
+            Field(
+                tag="655",
+                indicators=Indicators(" ", "0"),
+                subfields=[
+                    Subfield(code="a", value="Electronic journals"),
+                    Subfield(code="0", value="sh92000896"),
+                ],
+            ),
+            _field("655", [("a", "Electronic journals")]),
+        ]
+    )
+
+    genres = extract_genres(record)
+
+    assert [genre.label for genre in genres] == ["Electronic journals"] * 2
+    ids = [genre.concepts[0].id for genre in genres]
+    assert [i.source_identifier.value for i in ids if isinstance(i, Identifiable)] == [
+        "sh92000896",
+        "electronic journals",
+    ]
