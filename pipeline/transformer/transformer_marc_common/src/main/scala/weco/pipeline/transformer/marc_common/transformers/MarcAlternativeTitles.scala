@@ -43,10 +43,10 @@ object MarcAlternativeTitles extends MarcDataTransformer {
           field.marcTag == "246" && field.indicator2 == "6"
       }
   }
-  implicit private class SubfieldsOps(subfields: Seq[MarcSubfield]) {
-    // $0 and $1 hold authority URIs, $6 and $8 link fields: none is title text.
-    private val controlSubfields = Set("0", "1", "6", "8")
+  // $0 and $1 hold authority URIs, $6 and $8 link fields: none is title text.
+  private val controlSubfields = Set("0", "1", "6", "8")
 
+  implicit private class SubfieldsOps(subfields: Seq[MarcSubfield]) {
     def withoutControlSubfields: Seq[MarcSubfield] =
       subfields.filterNot(subfield => controlSubfields.contains(subfield.tag))
 
@@ -54,5 +54,6 @@ object MarcAlternativeTitles extends MarcDataTransformer {
     // should be omitted.
     def withoutUKLW: Seq[MarcSubfield] =
       subfields.filterNot(_ == MarcSubfield("5", "UkLW"))
+
   }
 }
