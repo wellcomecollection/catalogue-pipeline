@@ -28,6 +28,9 @@ module "pipeline" {
   enable_graph_pipeline_schedule               = true
   enable_image_inferrer_schedule               = true
 
+  # Trial of the works_identified Iceberg table (wellcomecollection/platform#6742).
+  enable_id_minter_iceberg_writes = true
+
   axiell_collection_path_source = "part_of"
 
   pipeline_date = local.pipeline_date // namespaces services

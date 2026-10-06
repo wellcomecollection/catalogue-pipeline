@@ -22,11 +22,10 @@ Runs locally, no tunnel needed: the clusters accept direct connections with IAM 
 from clients.neptune_client import NeptuneClient
 
 graph_date = "2026-07-03"
-assert graph_date not in ("", "prod")
 client = NeptuneClient(graph_date)
 ```
 
-The guard matters: an empty or `prod` graph date selects the legacy cluster used by the frozen 2025-10-02 pipeline (see `NeptuneClient.namespace`), and client-setup patterns copied from notebooks arrive with the date unset.
+Every cluster is dated (or `dev`), and `NeptuneClient` rejects an empty date, so a client-setup snippet copied from a notebook with the date unset fails rather than connecting somewhere unexpected.
 
 ## Count before deleting
 
