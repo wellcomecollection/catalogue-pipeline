@@ -5,7 +5,7 @@ locals {
     module.catalogue_graph_neptune_cluster_2026_09_30
   ]
 
-  production_cluster = module.catalogue_graph_neptune_cluster_2026_07_03
+  production_cluster = module.catalogue_graph_neptune_cluster_2026_09_30
 }
 
 module "catalogue_graph_neptune_cluster_dev" {
