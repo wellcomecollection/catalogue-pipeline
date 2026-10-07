@@ -30,6 +30,7 @@ locals {
   base_manager_cpu         = 1024
   base_aspect_ratio_cpu    = 2048
   base_aspect_ratio_memory = 2048
+  base_palette_memory      = 2048
 
   # When we're not reindexing, we halve the size of these tasks, because
   # they won't be getting as many updates.
@@ -39,12 +40,11 @@ locals {
   manager_cpu         = var.reindexing_state.scale_up_tasks ? local.base_manager_cpu : floor(local.base_manager_cpu / 2)
   aspect_ratio_cpu    = var.reindexing_state.scale_up_tasks ? local.base_aspect_ratio_cpu : floor(local.base_aspect_ratio_cpu / 2)
   aspect_ratio_memory = var.reindexing_state.scale_up_tasks ? local.base_aspect_ratio_memory : floor(local.base_aspect_ratio_memory / 2)
+  # The palette inferrer peaks at ~300 MB while the feature inferrer (VGG-19)
+  # was OOM-killed at an even half-share, so the feature inferrer gets the rest.
+  palette_inferrer_memory = var.reindexing_state.scale_up_tasks ? local.base_palette_memory : floor(local.base_palette_memory / 2)
 
   log_router_memory = 50
-
-  # The palette inferrer peaks at ~300 MB while the feature inferrer (VGG-19)
-  # was OOM-killed at an even half-share, so it gets the rest of the instance.
-  palette_inferrer_memory = 1024
 
   inferrer_cpu            = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
   feature_inferrer_memory = local.total_memory - local.manager_memory - local.aspect_ratio_memory - local.palette_inferrer_memory - local.log_router_memory
