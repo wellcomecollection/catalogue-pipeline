@@ -8,7 +8,7 @@ fields where the mapping is wrong or undecided: **material type** and **access**
 | --- | --- |
 | **Item status**, from the access category (`506$f`) | **Defined and implemented.** CI to Confirm the table in section 2. |
 | **Loan type** | **Open.** No AxC field is mapped, so every item is `Can circulate`. Section 2 and question 1. |
-| **Material type**, from object_category (`655$a`) | **Partly defined.** Three digital rows and the default need an answer. Section 1. |
+| **Material type**, from object_category (`655$a`) | **Partly defined.** The three digital rows need an answer; the default is removed, to confirm. Section 1. |
 
 For what the sync maps today see
 [axiell-folio-field-mappings.md](axiell-folio-field-mappings.md)
@@ -19,8 +19,11 @@ For what the sync maps today see
 | AxC values and counts | Full scan of the Axiell adapter table, 209,374 rows, **187,996 item-level**, 0 parse errors | 2026-09-29 |
 | FOLIO values | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
 | AxC to MARC provenance | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
+| `984` and `540` coverage | Re-scan of the same table after a newer stylesheet reached the live feed, 187,997 item-level | 2026-10-06 |
 
-All counts are item-level only (`351$c == ITEM`); percentages are of 187,996.
+All counts are item-level only (`351$c == ITEM`); percentages are of 187,996,
+except the `984` and `540` figures in section 2, which come from the later scan
+and are of 187,997. The corpus grew by one record between the two.
 
 ---
 
@@ -84,6 +87,15 @@ sections 1 and 2 together.**
 There is no longer a material-type default. A record with no `655$a`, like one
 with a category the table does not map, now fails and is reported.
 
+The table is also authoritative. Being required only rejects an absent `655$a`;
+it would not on its own stop a value the table does not carry, because an
+unmapped value used to be handed to the tenant unchanged and still resolved if
+the tenant knew a material type by that name. An AxC value of `archive`,
+`computer media` or even `book` therefore synced without appearing in the table
+at all, taking whatever requestability that FOLIO type has. The table is now
+checked before the tenant is consulted, so the agreed vocabulary is the only
+one that syncs.
+
 The options considered were to keep `book`, to default to `archive` (right far
 more often, since 93.7% of the corpus is archival, but still silent), or to have
 no default at all. The last was chosen: `book` was wrong for every one of the 115
@@ -104,19 +116,48 @@ category, or would you rather they defaulted to `archive` and synced?
 | `access_status/value` | `506$f` | **Who** may access it | 187,687 (99.8%) |
 | `access_category.notes` | `506$a` | Free text, 609 distinct | 45,327 (24.1%) |
 | `closed_until` | `506$g` | Date access opens | 15,291 (8.1%) |
-| `use_restriction.restriction` | `540$a` | **How** it may be requested | **0 (0.0%)** |
+| `use_restriction.restriction` | `540$a` | **How** it may be requested | 23,804 (12.7%) |
 | `use_restriction.date` | `540$g` | Date the restriction lifts | **0 (0.0%)** |
+| `location.default.context` | `984$b` | Where the item lives | 23,482 (12.5%) |
 | loan-type code (retired) | `949$l` | nothing, it is empty | 0 (0.0%) |
+
+`984$b` is in the table because it is the sole source of the FOLIO location and
+is required with no default, so its coverage bounds what can sync at all,
+whatever is decided below.
 
 `506$f` distribution: `OPEN` 171,804 (91.4%), `CLOSED` 9,819 (5.2%),
 `RESTRICTED` 5,496 (2.9%), `PERMISSIONREQUIRED` 356, *absent* 309, `MISSING`
 160, `DATAISSUES` 24, `OPENWITHADVISORY` 14, `DEACCESSIONED` 13, `SAFEGUARDED` 1.
 
-**`540` is emitted by the stylesheet but absent from the harvest.** The
-stylesheet has mapped `UseRestriction` to `540` since 2026-06-11 and both
-item-level sample records produce it, yet the 2026-09-29 scan found `540$a` on 0
-of 187,996. The live OAI feed is probably running an older stylesheet. Until
-that is resolved there is no `540` data to measure.
+**`540` and `984` arrived on 2026-10-06, on an eighth of the corpus.** Both were
+absent from the whole table when scanned on 2026-10-02 and again on 2026-10-05,
+then appeared the next day: a newer stylesheet has reached the live OAI feed.
+Coverage is partial, which looks like a backfill rather than a finished one.
+
+Of the 183,871 records that pass both selection gates, 23,384 carry both fields,
+328 carry `540$a` only, 7 carry `984$b` only, and **160,152 (87.1%) carry
+neither**. Because `984$b` is required with no default, a run today would write
+about 23,000 records and fail about 160,000. The adapter refresh that would
+populate the rest is tracked in wellcomecollection/platform#6746.
+
+**The use-restriction vocabulary is six terms, not the two the samples showed,
+and the real values are not doubled:**
+
+| `540$a` | Records (selectable) |
+| --- | ---: |
+| `Online request` | 14,067 |
+| `By appointment` | 7,799 |
+| `Unavailable` | 1,591 |
+| `Restricted` | 253 |
+| `Manual request` | 1 |
+| `By approval` | 1 |
+
+Four of those were unknown when option B below was first drafted. `Unavailable`
+in particular, on 1,591 records, does not obviously mean reading-room access,
+so the mapping cannot be assumed to collapse to a single loan type.
+
+`540$g` is still at 0% even on records that carry `540$a`, so either no record
+has a date or it is not being exported.
 
 ### Defined: `506$f` to item status
 
@@ -163,14 +204,22 @@ Two shapes to choose between:
 | | Approach | Note |
 | --- | --- | --- |
 | **A** | The access category drives it | Deployable now. `CLOSED` gives `Unavailable`, `RESTRICTED` gives `Reading room`, and `OPEN` is question 1. |
-| **B** | The use restriction drives it, with the access category as a ceiling it can only narrow | Better matched to what a loan type means, but blocked until `540` reaches the harvest. The ceiling is what stops a permissive restriction making a `CLOSED` item requestable. |
+| **B** | The use restriction drives it, with the access category as a ceiling it can only narrow | Better matched to what a loan type means, and no longer blocked: `540$a` is now in the harvest on 12.7% of records. The ceiling is what stops a permissive restriction making a `CLOSED` item requestable. |
 
-Evidence for B, from the stylesheet's own samples: an `OPEN` record carrying
-`Online request`, and a `RESTRICTED` one carrying `By appointment` with a
-`540$g` of 2066-01-01. An item that must be requested online is not one a reader
-can borrow, and only `540$a` says so. Note that a loan type has no time
-dimension, so a date-bounded restriction can only be recorded as a note, never
-enforced.
+B was blocked until 2026-10-06 because `540` was absent. It no longer is, so the
+choice is live. What it still lacks is coverage, not data: deciding B commits to
+a field present on an eighth of the corpus, so it pairs with the adapter refresh
+in wellcomecollection/platform#6746.
+
+Evidence for B: `540$a` names the request mechanism where the access category
+only implies it. `Online request` alone is on 14,067 records, and an item a
+reader must request online is not one they can borrow, which no `506$f` value
+says. Against it: four of the six terms were unknown when B was drafted, and
+`Unavailable` on 1,591 records may not map to a reading-room loan type at all,
+so the mapping needs the full thesaurus before it can be written.
+
+Note that a loan type has no time dimension, so a date-bounded restriction could
+only ever be recorded as a note, never enforced. `540$g` is at 0% anyway.
 
 ---
 
@@ -201,9 +250,27 @@ enforced.
    on 24.1% of records and a date on 8.1%; the only way a date-bounded
    restriction can be represented at all.
 7. **Should an unrecognised `655$a` or `506$f` fail the record, or default?**
-   As implemented for access: absent takes the safe default, present-but-
-   unrecognised fails. A new AxC category would then halt those records until
-   someone maps it.
+   The two now differ. For the material type neither case defaults: absent and
+   unmapped both fail. For the access category an absent value takes the safe
+   default (`Unavailable` status) and an unrecognised one fails. Either way a
+   new AxC value halts those records until someone maps it, which is the
+   intended trade: a halted record is visible, a defaulted one is not.
+8. **When the Harvest flag is unticked on a record that has already synced,
+   should its FOLIO records be suppressed, or left?** This one sits outside the
+   two fields above, but it is a decision only you can take and it is otherwise
+   easy to miss.
+
+   Today they are left. The record stops passing the selection gate, so it is
+   counted as skipped and never updated again, while its instance, holdings and
+   item stay in FOLIO unsuppressed with whatever data they last had. Nothing
+   reclaims them: the only delete path is the reconciler, which works from
+   superseded GUIDs, and a flag removal is not a delete signal.
+
+   That is current behaviour rather than an agreed rule, and it is the less safe
+   of the two readings. If curators untick Harvest to withdraw something from
+   the LMS, that intent is silently dropped. Tracked in
+   wellcomecollection/platform#6663, which also asks for the answer to be
+   recorded here.
 
 ## Before implementing
 
@@ -211,9 +278,18 @@ enforced.
 version; and that the chosen loan types behave as expected in the request path
 (the names exist, their circulation rules have not been examined).
 
-**On the AxC side:** which stylesheet the live OAI feed runs (the blocker for
-option B); the full use-restriction thesaurus, since only `Online request` and
-`By appointment` are known; and whether `use_restriction.restriction.lref` can
-be emitted as `540$0`, so a mapping can key on a thesaurus id rather than a
-display string that Axiell sometimes stores doubled
-(`"By appointmentBy appointment"`).
+**On the AxC side**, two of the three are now answered:
+
+- ~~Which stylesheet the live OAI feed runs.~~ A newer one landed on 2026-10-06
+  and both `984` and `540` now arrive. What remains is coverage: 87.1% of
+  selectable records still carry neither, tracked in
+  wellcomecollection/platform#6746.
+- **The full use-restriction thesaurus.** Six terms are now visible in the data,
+  but whether that is the whole vocabulary or only what the backfill has reached
+  so far is unknown, and the loan-type mapping cannot be written without it.
+- ~~Whether the values arrive doubled.~~ They do not. The doubling
+  (`"By appointmentBy appointment"`) appeared only in the stylesheet's committed
+  sample; the harvested values are clean. Emitting
+  `use_restriction.restriction.lref` as `540$0` is therefore no longer needed to
+  work around it, though keying on a thesaurus id would still survive a term
+  being renamed.
