@@ -26,9 +26,16 @@ Two gates, and a record has to pass both:
 | Harvest flag | `980 $a` | Present and non-empty. This is the curator-facing opt-in to the FOLIO sync. |
 | Record level | `351 $c` | Equals `ITEM`, case-insensitive. |
 
-A record failing either is skipped completely: never created, updated, or
-suppressed, and not reported as an error. An unflagged record is a deliberate
-opt-out rather than a data problem.
+A record failing either gate is skipped: not created, not updated, not
+suppressed, and not counted as an error.
+
+**The un-flag case is undecided.** Unticking Harvest on a record that has
+already synced leaves its FOLIO instance, holdings and item in place,
+unsuppressed and no longer updated. The only delete path is the reconciler,
+which works from superseded GUIDs, so a flag removal is not a delete signal and
+nothing reclaims the record. Whether it should instead suppress them is open
+with Collection Information on wellcomecollection/platform#6663. This is the
+current behaviour, not an agreed rule.
 
 Both gates live in `_passes_selection_gates`, which `is_selected_for_sync` and
 `select_and_build` share so the two cannot disagree.

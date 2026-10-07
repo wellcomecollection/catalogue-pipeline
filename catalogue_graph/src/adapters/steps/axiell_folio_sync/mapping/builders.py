@@ -226,9 +226,16 @@ def is_selected_for_sync(xml_content: str) -> bool:
        is opted in to the FOLIO sync, and
     2. the record is item-level (``351 $c`` == "ITEM", case-insensitive).
 
-    A record failing either is skipped entirely: never created, updated or
-    suppressed. The flag is the curator-facing opt-in, so an unflagged record is
-    not a data problem and nothing is reported for it.
+    A record failing either gate is skipped: not created, not updated, not
+    suppressed, and not counted as an error.
+
+    The un-flag case is undecided. Unticking Harvest on a record that has
+    already synced leaves its FOLIO instance, holdings and item in place,
+    unsuppressed and no longer updated: the only delete path is the reconciler,
+    which works from superseded GUIDs, so a flag removal is not a delete signal
+    and nothing reclaims the record. Whether it should instead suppress them is
+    open with Collection Information on wellcomecollection/platform#6663. This
+    is the current behaviour, not an agreed rule.
     """
     root = parse_xml(xml_content)
     return _passes_selection_gates(root)
