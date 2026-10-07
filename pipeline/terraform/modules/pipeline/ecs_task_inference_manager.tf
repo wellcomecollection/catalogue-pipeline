@@ -42,8 +42,12 @@ locals {
 
   log_router_memory = 50
 
-  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
-  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory - local.log_router_memory))
+  # The palette inferrer peaks at ~300 MB while the feature inferrer (VGG-19)
+  # was OOM-killed at an even half-share, so it gets the rest of the instance.
+  palette_inferrer_memory = 1024
+
+  inferrer_cpu            = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
+  feature_inferrer_memory = local.total_memory - local.manager_memory - local.aspect_ratio_memory - local.palette_inferrer_memory - local.log_router_memory
 }
 
 module "inference_manager_ecs_task" {
@@ -82,7 +86,7 @@ module "inference_manager_ecs_task" {
     feature_inferrer = {
       image           = local.feature_inferrer_image
       cpu             = local.inferrer_cpu
-      memory          = local.inferrer_memory
+      memory          = local.feature_inferrer_memory
       env_vars        = { PORT = local.feature_inferrer_port }
       secret_env_vars = {}
       mount_points = [
@@ -99,7 +103,7 @@ module "inference_manager_ecs_task" {
     palette_inferrer = {
       image           = local.palette_inferrer_image
       cpu             = local.inferrer_cpu
-      memory          = local.inferrer_memory
+      memory          = local.palette_inferrer_memory
       env_vars        = { PORT = local.palette_inferrer_port }
       secret_env_vars = {}
       mount_points = [
