@@ -1,7 +1,10 @@
 import base64
 
 import pytest
+import requests
+from _pytest.monkeypatch import MonkeyPatch
 
+from inferrer import adapters
 from inferrer.adapters import (
     FEATURE_VECTOR_SIZE,
     INFERRERS,
@@ -14,7 +17,7 @@ from inferrer.adapters import (
     parse_palette,
 )
 from tests.inferrer.factories import encode_floats
-from tests.mocks import MockRequest
+from tests.mocks import MockRequest, MockResponse
 
 
 def _inferrer(name: str) -> Inferrer:
@@ -77,3 +80,44 @@ def test_call_inferrer_non_200_raises() -> None:
     )
     with pytest.raises(InferrerError):
         call_inferrer(inferrer, "file:///data/x/default.jpg", timeout=5)
+
+
+def _patch_get_sequence(monkeypatch: MonkeyPatch, items: list) -> dict:
+    """Patch requests.get to return/raise each item in turn; counts calls."""
+    seq = iter(items)
+    state = {"calls": 0}
+
+    def fake_get(url: str, **kwargs: object) -> object:
+        state["calls"] += 1
+        item = next(seq)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    monkeypatch.setattr(adapters.requests, "get", fake_get)
+    monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
+    return state
+
+
+def test_call_inferrer_retries_dropped_connection(monkeypatch: MonkeyPatch) -> None:
+    state = _patch_get_sequence(
+        monkeypatch,
+        [
+            requests.exceptions.ConnectionError("Remote end closed connection"),
+            MockResponse(200, json_data={"aspect_ratio": 2.0}),
+        ],
+    )
+    result = call_inferrer(_inferrer("aspect_ratio"), "file:///data/x/default.jpg", 5)
+    assert result["aspect_ratio"] == 2.0
+    assert state["calls"] == 2
+
+
+def test_call_inferrer_gives_up_on_persistent_connection_errors(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(adapters, "CONNECTION_RETRY_SECONDS", 0)
+    _patch_get_sequence(
+        monkeypatch, [requests.exceptions.ConnectionError("refused")] * 5
+    )
+    with pytest.raises(requests.exceptions.ConnectionError):
+        call_inferrer(_inferrer("feature"), "file:///data/x/default.jpg", 5)

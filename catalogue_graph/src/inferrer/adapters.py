@@ -14,7 +14,14 @@ import struct
 from collections.abc import Callable
 from dataclasses import dataclass
 
+import backoff
 import requests
+
+# A killed sidecar worker drops its in-flight requests and takes ~11s to restart,
+# so retry dropped connections for long enough to outlast a restart.
+CONNECTION_RETRY_SECONDS = float(
+    os.environ.get("INFERRER_CONNECTION_RETRY_SECONDS", "60")
+)
 
 # A VGG-19 feature vector has exactly 4096 dimensions; anything else is treated
 # as an absent feature vector (parity with `FeatureVectorInferrerAdapter`).
@@ -82,6 +89,15 @@ INFERRERS: list[Inferrer] = [
 ]
 
 
+@backoff.on_exception(
+    backoff.expo,
+    requests.exceptions.ConnectionError,
+    max_time=lambda: CONNECTION_RETRY_SECONDS,
+)
+def _get(url: str, file_url: str, timeout: float) -> requests.Response:
+    return requests.get(url, params={"query_url": file_url}, timeout=timeout)
+
+
 def call_inferrer(inferrer: Inferrer, file_url: str, timeout: float) -> dict:
     """Call a single inferrer and return its partial `InferredData` contribution.
 
@@ -89,11 +105,7 @@ def call_inferrer(inferrer: Inferrer, file_url: str, timeout: float) -> dict:
     `parseResponse`), so the caller can drop an image that did not get a
     response from every inferrer.
     """
-    response = requests.get(
-        f"{inferrer.base_url}{inferrer.path}",
-        params={"query_url": file_url},
-        timeout=timeout,
-    )
+    response = _get(f"{inferrer.base_url}{inferrer.path}", file_url, timeout)
     if response.status_code != 200:
         raise InferrerError(
             f"{inferrer.name} inferrer request failed with status "
