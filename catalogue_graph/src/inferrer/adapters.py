@@ -13,9 +13,13 @@ import os
 import struct
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 import backoff
 import requests
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 # A killed sidecar worker drops its in-flight requests and takes ~11s to restart,
 # so retry dropped connections for long enough to outlast a restart.
@@ -89,10 +93,21 @@ INFERRERS: list[Inferrer] = [
 ]
 
 
+def _on_connection_backoff(backoff_details: Any) -> None:
+    # Keeps a sidecar restart (usually an OOM kill) visible once retries hide it.
+    logger.warning(
+        "Inferrer connection dropped, retrying",
+        url=backoff_details["args"][0],
+        error=str(backoff_details["exception"]),
+        tries=backoff_details["tries"],
+    )
+
+
 @backoff.on_exception(
     backoff.expo,
     requests.exceptions.ConnectionError,
     max_time=lambda: CONNECTION_RETRY_SECONDS,
+    on_backoff=_on_connection_backoff,
 )
 def _get(url: str, file_url: str, timeout: float) -> requests.Response:
     return requests.get(url, params={"query_url": file_url}, timeout=timeout)

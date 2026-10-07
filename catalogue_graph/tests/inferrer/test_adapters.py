@@ -1,4 +1,6 @@
 import base64
+import itertools
+from collections.abc import Iterable
 
 import pytest
 import requests
@@ -82,7 +84,9 @@ def test_call_inferrer_non_200_raises() -> None:
         call_inferrer(inferrer, "file:///data/x/default.jpg", timeout=5)
 
 
-def _patch_get_sequence(monkeypatch: MonkeyPatch, items: list) -> dict:
+def _patch_get_sequence(
+    monkeypatch: MonkeyPatch, items: Iterable, no_sleep: bool = True
+) -> dict:
     """Patch requests.get to return/raise each item in turn; counts calls."""
     seq = iter(items)
     state = {"calls": 0}
@@ -95,7 +99,8 @@ def _patch_get_sequence(monkeypatch: MonkeyPatch, items: list) -> dict:
         return item
 
     monkeypatch.setattr(adapters.requests, "get", fake_get)
-    monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
+    if no_sleep:
+        monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
     return state
 
 
@@ -115,9 +120,13 @@ def test_call_inferrer_retries_dropped_connection(monkeypatch: MonkeyPatch) -> N
 def test_call_inferrer_gives_up_on_persistent_connection_errors(
     monkeypatch: MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(adapters, "CONNECTION_RETRY_SECONDS", 0)
-    _patch_get_sequence(
-        monkeypatch, [requests.exceptions.ConnectionError("refused")] * 5
+    # Real sleeps here: backoff caps each wait at the remaining 0.05s budget.
+    monkeypatch.setattr(adapters, "CONNECTION_RETRY_SECONDS", 0.05)
+    state = _patch_get_sequence(
+        monkeypatch,
+        itertools.repeat(requests.exceptions.ConnectionError("refused")),
+        no_sleep=False,
     )
     with pytest.raises(requests.exceptions.ConnectionError):
         call_inferrer(_inferrer("feature"), "file:///data/x/default.jpg", 5)
+    assert state["calls"] > 1
