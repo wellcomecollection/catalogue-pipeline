@@ -104,6 +104,20 @@ Feature: languages (MARC 008/35-37 and 041)
     When I transform the MARC record
     Then there are no languages
 
+  Scenario: An obsolete code and its replacement count as one language, keeping the current code
+    # Scala deduplicates on code and label, so "scc" and "srp" both appear as Serbian
+    Given the MARC record's only 008 field with the value "140303s1958    enk     s     000 0 scc  "
+    And the MARC record has a 041 field with subfield "a" value "srp"
+    When I transform the MARC record
+    Then the only language has the label "Serbian"
+    And the only language has the id "srp"
+
+  Scenario: The current code is kept whichever field it comes from
+    Given the MARC record's only 008 field with the value "140303s1958    enk     s     000 0 srp  "
+    And the MARC record has a 041 field with subfield "a" value "scc"
+    When I transform the MARC record
+    Then the only language has the id "srp"
+
   Scenario: 998 ǂf is not consulted, even when it carries a different language
     # Folio does not maintain ǂf after migration, so 008/35-37 is authoritative
     Given the MARC record's only 008 field with the value "140303s1958    enk     s     000 0 ger  "
