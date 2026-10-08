@@ -93,7 +93,7 @@ def test_transformer_end_to_end_includes_deletions(
     records_by_id: dict[str, tuple[str, bool] | str] = {
         "fo00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Folio Title One</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000001</subfield></datafield></record>",
         "fo00003": (
-            "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Folio Work</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000003</subfield></datafield></record>",
+            "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00003</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Deleted Folio Work</subfield></datafield><datafield tag='907' ind1=' ' ind2=' '><subfield code='a'>b10000003</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000003</subfield></datafield></record>",
             True,
         ),
     }
@@ -130,6 +130,7 @@ def test_transformer_end_to_end_includes_deletions(
     assert deleted["type"] == "Deleted"
     assert deleted["deletedReason"]["type"] == "DeletedFromSource"
     assert deleted["deletedReason"]["info"] == "Marked as deleted from source"
+    assert deleted["state"]["predecessorIdentifier"]["value"] == "b10000003"
 
 
 def test_transformer_includes_suppressions(
@@ -138,7 +139,7 @@ def test_transformer_includes_suppressions(
     """Test that records marked with FOLIO suppression marker ($t=1 in MARC 999) are treated as deleted."""
     records_by_id = {
         "fo00005": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00005</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Visible Folio Work</marc:subfield></marc:datafield><marc:datafield tag="999" ind1="f" ind2="f"><marc:subfield code="i">10000000-0000-0000-0000-000000000005</marc:subfield></marc:datafield></record>',
-        "fo00006": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00006</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Suppressed Folio Work</marc:subfield></marc:datafield><marc:datafield tag="999" ind1="f" ind2="f"><marc:subfield code="i">73822760-c6e3-4be4-a644-fe97fb32567f</marc:subfield><marc:subfield code="t">1</marc:subfield></marc:datafield></record>',
+        "fo00006": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00006</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Suppressed Folio Work</marc:subfield></marc:datafield><marc:datafield tag="907" ind1=" " ind2=" "><marc:subfield code="a">b10000006</marc:subfield></marc:datafield><marc:datafield tag="999" ind1="f" ind2="f"><marc:subfield code="i">73822760-c6e3-4be4-a644-fe97fb32567f</marc:subfield><marc:subfield code="t">1</marc:subfield></marc:datafield></record>',
     }
     changeset_id = prepare_changeset(
         temporary_table,
@@ -174,6 +175,12 @@ def test_transformer_includes_suppressions(
     assert suppressed["type"] == "Deleted"
     assert suppressed["deletedReason"]["type"] == "SuppressedFromSource"
     assert suppressed["deletedReason"]["info"] == "Folio"
+    # Carried so a record first seen suppressed still inherits its Sierra id
+    assert suppressed["state"]["predecessorIdentifier"] == {
+        "identifierType": {"id": "sierra-system-number"},
+        "ontologyType": "Work",
+        "value": "b10000006",
+    }
 
 
 def test_transformer_includes_predecessor_identifier(

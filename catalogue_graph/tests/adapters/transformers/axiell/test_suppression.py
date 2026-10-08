@@ -9,6 +9,7 @@ from adapters.extractors.oai_pmh.axiell import config as axiell_config
 from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
 from tests.adapters.transformers.axiell.conftest import make_axiell_record
+from tests.adapters.transformers.conftest import _907_field
 
 # mypy: allow-untyped-calls
 
@@ -131,3 +132,32 @@ def test_non_amsg_alt_ref_no_does_not_suppress() -> None:
     record = make_axiell_record(publish_to_web="yes")
     record = _with_alt_ref_no(record, "PP/ABC/1")
     assert isinstance(_transform(record), VisibleSourceWork)
+
+
+CALM_ID = "10000000-0000-4000-8000-000000000001"
+OTHER_CALM_ID = "20000000-0000-4000-8000-000000000002"
+
+
+def test_suppressed_work_carries_calm_predecessor() -> None:
+    """Without the predecessor, a record first seen suppressed is minted a fresh id."""
+    record = make_axiell_record(publish_to_web="no")
+    record.add_field(_907_field(CALM_ID))
+    work = _transform(record)
+    assert isinstance(work, DeletedSourceWork)
+    assert work.state.predecessor_identifier is not None
+    assert work.state.predecessor_identifier.identifier_type.id == "calm-record-id"
+    assert work.state.predecessor_identifier.value == CALM_ID
+
+
+def test_suppressed_work_without_907_has_no_predecessor() -> None:
+    work = _transform(make_axiell_record(publish_to_web="no"))
+    assert isinstance(work, DeletedSourceWork)
+    assert work.state.predecessor_identifier is None
+
+
+def test_suppressed_work_with_conflicting_907_values_raises() -> None:
+    record = make_axiell_record(publish_to_web="no")
+    record.add_field(_907_field(CALM_ID))
+    record.add_field(_907_field(OTHER_CALM_ID))
+    with pytest.raises(ValueError, match="Multiple distinct instances of varfield"):
+        _transform(record)
