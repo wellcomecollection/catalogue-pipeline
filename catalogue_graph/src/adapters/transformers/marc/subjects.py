@@ -16,7 +16,7 @@ from adapters.transformers.utils.text_utils import (
     trim_trailing_period,
 )
 from models.pipeline.concept import Concept, Subject
-from models.pipeline.identifier import Identifiable
+from models.pipeline.identifier import Identifiable, Unidentifiable
 from utils.types import RawConceptType
 
 logger = structlog.get_logger(__name__)
@@ -29,7 +29,7 @@ def _get_main_label(field: Field) -> str:
 
 
 def _primary_concept_label(field: Field) -> str:
-    """The primary concept's label: the main label trimmed by heading type."""
+    """Trim the main label as the heading type requires."""
     return CONCEPT_LABEL_TRANSFORMS[field.tag](_get_main_label(field))
 
 
@@ -58,20 +58,14 @@ def label_transform_648_650_651(field: Field) -> str:
 def subdivision_concepts_600(field: Field) -> Generator[Concept]:
     # Only x yields a subdivision concept, with its label as catalogued
     for raw_label in field.get_subfields("x"):
-        yield build_concept(
-            raw_label, "Concept", is_identifiable=False, label=raw_label
-        )
+        yield build_concept(raw_label, "Concept", Unidentifiable())
 
 
 def subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
     for subfield in field.subfields:
         if subfield.code in SUBDIVISION_CODES:
             ontology_type = SUBFIELD_TYPE_MAP.get(subfield.code, "Concept")
-            yield build_concept(
-                subfield.value,
-                ontology_type,
-                label=trim_trailing_period(subfield.value),
-            )
+            yield build_concept(trim_trailing_period(subfield.value), ontology_type)
 
 
 # Subjects are listed by heading type in this order purely for parity with the Scala pipeline
@@ -117,9 +111,9 @@ SUBDIVISION_TRANSFORMS = {
 
 def is_subject_to_keep(field: Field) -> bool:
     """
-    Whether the heading is from LCSH or LC Names, from MeSH, or from one of the
-    ǂ2 vocabularies we have adopted. The second indicator names the thesaurus:
-    https://www.loc.gov/marc/bibliographic/bd650.html
+    True for headings from LCSH or LC Names, from MeSH, or from an adopted ǂ2 vocabulary.
+
+    The second indicator names the thesaurus: https://www.loc.gov/marc/bibliographic/bd650.html
     """
     return field.indicators is not None and (
         field.indicators.second in ["0", "2"]
@@ -132,9 +126,9 @@ def is_subject_to_keep(field: Field) -> bool:
 
 def is_from_standard_thesaurus(field: Field) -> bool:
     """
-    Whether the heading's second indicator names its thesaurus itself rather
-    than deferring to ǂ2. This is the rule of the Scala Sierra transformer,
-    which drops every ǂ2-sourced heading.
+    True for headings whose second indicator names a thesaurus, false for those sourced from ǂ2.
+
+    This is the rule of the Scala Sierra transformer, which drops every ǂ2-sourced heading.
     """
     return field.indicators is not None and field.indicators.second != "7"
 
@@ -142,7 +136,7 @@ def is_from_standard_thesaurus(field: Field) -> bool:
 def extract_subjects(
     record: Record, keep: Callable[[Field], bool] = is_subject_to_keep
 ) -> list[Subject]:
-    """The subjects of the 6xx headings that `keep` accepts, by heading type, without repeats."""
+    """Extract a subject from each 6xx heading that `keep` accepts, grouped by heading type and deduplicated."""
     return distinct(
         non_empty(
             extract_subject(field)
@@ -184,12 +178,8 @@ def extract_subject(field: Field) -> Subject | None:
     else:
         primary_identifier = None
 
-    primary_label = _primary_concept_label(field)
     primary_concept = build_concept(
-        primary_label,
-        ontology_type,
-        identifier=primary_identifier,
-        label=primary_label,
+        _primary_concept_label(field), ontology_type, primary_identifier
     )
 
     return Subject(

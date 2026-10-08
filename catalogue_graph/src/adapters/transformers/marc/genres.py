@@ -40,7 +40,9 @@ def extract_genre(field: Field) -> Genre | None:
     return Genre(
         label=normalise_label(build_label(primary, field), "GenreConcept"),
         concepts=[
-            build_concept(primary, "GenreConcept", identifier=identifier),
+            build_concept(
+                normalise_label(primary, "GenreConcept"), "GenreConcept", identifier
+            ),
             *build_subdivision_concepts(field),
         ],
     )
@@ -54,8 +56,10 @@ def build_label(primary: str, field: Field) -> str:
 
 def build_subdivision_concepts(field: Field) -> list[Concept]:
     """One label-derived concept per subdivision subfield, in document order."""
-    return [
-        build_concept(subfield.value, SUBFIELD_TYPE_MAP.get(subfield.code, "Concept"))
-        for subfield in field.subfields
-        if subfield.code in SUBDIVISION_CODES
-    ]
+    concepts = []
+    for subfield in field.subfields:
+        if subfield.code in SUBDIVISION_CODES:
+            concept_type = SUBFIELD_TYPE_MAP.get(subfield.code, "Concept")
+            label = normalise_label(subfield.value, concept_type)
+            concepts.append(build_concept(label, concept_type))
+    return concepts
