@@ -34,13 +34,16 @@ from adapters.steps.axiell_folio_sync.results import (
 from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
 from adapters.utils.axiell_changeset_reader import SupersededGuid
 
-# 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title).
+# 001 (guid), 980 $a (harvest flag), 351 $c (record type), 245 $a (title),
+# 984 $b (normal location — required, the shelf location FOLIO is given).
 SELECTED = (
     "<record>"
     "<controlfield tag='001'>guid-1</controlfield>"
     "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
     "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
     "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
+    "<datafield tag='655'><subfield code='a'>Archives - Non-digital</subfield></datafield>"
+    "<datafield tag='984'><subfield code='b'>NORMAL/PATH</subfield></datafield>"
     "</record>"
 )
 # Item-level with a title but no 980 $a harvest flag -> not selected.
@@ -49,6 +52,8 @@ UNSELECTED = (
     "<controlfield tag='001'>guid-2</controlfield>"
     "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
     "<datafield tag='245'><subfield code='a'>Skip me</subfield></datafield>"
+    "<datafield tag='655'><subfield code='a'>Archives - Non-digital</subfield></datafield>"
+    "<datafield tag='984'><subfield code='b'>NORMAL/PATH</subfield></datafield>"
     "</record>"
 )
 
@@ -119,15 +124,15 @@ def _run(rows: list[dict[str, Any]]) -> Any:
     )
 
 
-def test_processes_all_records_selection_gate_disabled() -> None:
-    # Selection gate is disabled ("run for all"): the record without a 980 $a harvest
-    # flag is no longer skipped — both rows are built and upserted.
+def test_skips_records_without_the_harvest_flag() -> None:
+    # The 980 $a harvest flag is the opt-in. The record that carries no flag is
+    # skipped entirely: not created, not updated, not suppressed, and not an error.
     resp = _run([_row("sel", SELECTED), _row("unsel", UNSELECTED)])
 
     assert resp.counts["total"] == 2
-    assert resp.counts["skipped"] == 0  # nothing skipped now
-    assert resp.total_successful == 2  # both planned an upsert
-    assert resp.counts["created"] == 6  # 2 records x (instance + holdings + item)
+    assert resp.counts["skipped"] == 1
+    assert resp.total_successful == 1  # only the flagged row planned an upsert
+    assert resp.counts["created"] == 3  # instance + holdings + item
     assert resp.total_errors == 0
 
 
@@ -775,25 +780,62 @@ def test_hard_delete_failure_is_reported_under_delete_stage(
     assert captured["model"].errors[0].stage == "delete"
 
 
+# The agreed AxC → FOLIO location mapping (LOCATION_RULES). Matching is on the
+# leading code of the hierarchy, which is why the path and leaf spellings of the
+# same location agree, and why "2150" does not match the "215" rule.
 @pytest.mark.parametrize(
-    ("current_location", "expected"),
+    ("axiell_location", "expected"),
     [
-        ("215", "hicon"),
-        ("215-3", "hicon"),
-        ("  183abc", "hicon"),
-        ("183", "hicon"),
-        ("21", "21"),  # too short to match the 215 prefix
-        ("STACK", "STACK"),  # unrelated code passes through unchanged
+        # Euston Road: 215 and 183, as a path (984$b) and as a leaf (984$c).
+        ("215/215;B11/215;B11;MR/215;B11;MR;84", "AxC Euston Road"),
+        ("215;B11;MR;84;3;7", "AxC Euston Road"),
+        ("215", "AxC Euston Road"),
+        ("183/183;4.44/183;4.44;FR", "AxC Euston Road"),
+        ("183", "AxC Euston Road"),
+        ("  215/215;B11  ", "AxC Euston Road"),  # surrounding whitespace
+        # Deepstore: an exact code, alone or heading a path.
+        ("Deepstore", "AxC Deepstore"),
+        ("Deepstore/DS;1", "AxC Deepstore"),
+        # Constantine London West: a prefix, so anything CLW… matches.
+        ("CLW", "AxC Constantine London West"),
+        ("CLW123/CLW;A", "AxC Constantine London West"),
+        # Rules are case-insensitive, like every other lookup in the mapping:
+        # AxC does not control its own casing and resolve_location folds case,
+        # so a re-cased code must not slip past the rule that owns it.
+        ("deepstore", "AxC Deepstore"),
+        ("DEEPSTORE/ds;1", "AxC Deepstore"),
+        ("clw123", "AxC Constantine London West"),
+        # Codes that merely start with the digits of a rule must NOT match: the
+        # leading code is compared whole.
+        ("2150/x", "2150"),
+        ("215A;B", "215A"),
+        ("21", "21"),
+        # Anything unlisted falls through as its *leading code*, which is the part
+        # a FOLIO location code can equal — a whole hierarchy path never resolves.
+        ("STACK", "STACK"),
+        ("444/444;B11/444;B11;MR", "444"),
         ("", ""),
         (None, None),
     ],
 )
-def test_folio_location_prefix_override(
-    current_location: str | None, expected: str | None
+def test_folio_location_rules(
+    axiell_location: str | None, expected: str | None
 ) -> None:
     from adapters.steps.axiell_folio_sync.mapping import _folio_location
 
-    assert _folio_location(current_location) == expected
+    assert _folio_location(axiell_location) == expected
+
+
+def test_every_location_rule_names_its_folio_hierarchy() -> None:
+    """The parent names are documentation, not lookup keys, but they are what was
+    agreed and what someone provisioning the tenant needs, so none may be blank."""
+    from adapters.steps.axiell_folio_sync.mapping import LOCATION_RULES
+
+    assert len(LOCATION_RULES) == 3
+    for rule in LOCATION_RULES:
+        assert rule.location.startswith("AxC ")
+        assert rule.campus and rule.library
+        assert rule.codes or rule.prefixes
 
 
 def test_object_number_extracts_the_altrefno_035_stripped() -> None:

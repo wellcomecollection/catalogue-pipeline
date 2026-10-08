@@ -13,7 +13,7 @@ Usage
     material_type_uuid = cache.resolve_material_type("book")
     loan_type_uuid = cache.resolve_loan_type("Can circulate")
     holdings_source_uuid = cache.resolve_holdings_source("MARC")
-    item_note_type_uuid = cache.resolve_item_note_type("Axiell location")
+    item_note_type_uuid = cache.resolve_item_note_type("Note")
     identifier_type_uuid = cache.resolve_identifier_type("Local identifier")
 """
 
