@@ -1,6 +1,7 @@
 from lookups.languages import (
     _iter_languages,
     _load_language_xml,
+    is_obsolete,
     load_language_name_to_codes_map,
 )
 
@@ -67,3 +68,20 @@ def test_name_variants_present_in_name_to_codes_map() -> None:
     mapping = load_language_name_to_codes_map()
     assert "Atjeh" in mapping
     assert "ace" in mapping["Atjeh"]
+
+
+# --- is_obsolete -------------------------------------------------------------
+
+
+def test_obsolete_code_is_obsolete() -> None:
+    assert is_obsolete("scr")
+    assert is_obsolete("scc")
+
+
+def test_current_code_is_not_obsolete() -> None:
+    assert not is_obsolete("hrv")
+    assert not is_obsolete("eng")
+
+
+def test_unknown_code_is_not_obsolete() -> None:
+    assert not is_obsolete("???")
