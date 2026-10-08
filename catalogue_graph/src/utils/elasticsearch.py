@@ -120,7 +120,10 @@ def get_pipeline_config(
 
 
 def get_client(
-    api_key_name: str, pipeline_date: str, es_mode: ElasticsearchMode = "private"
+    api_key_name: str,
+    pipeline_date: str,
+    es_mode: ElasticsearchMode = "private",
+    http_compress: bool = False,
 ) -> elasticsearch.Elasticsearch:
     config = get_pipeline_config(pipeline_date, es_mode, api_key_name)
 
@@ -128,7 +131,9 @@ def get_client(
     logger.info(
         "Creating Elasticsearch client", es_mode=es_mode, host_config=host_config
     )
-    return elasticsearch.Elasticsearch(host_config, api_key=config.apikey, timeout=60)
+    return elasticsearch.Elasticsearch(
+        host_config, api_key=config.apikey, timeout=60, http_compress=http_compress
+    )
 
 
 @es_transient_retry
