@@ -1,6 +1,7 @@
 """
 Extracting languages from the MARC language code in 008/35-37, plus additional
-languages from 041.
+languages from 041. EBSCO works carry only the primary language; FOLIO works
+carry both.
 
 The Sierra LANG fixed field, which the Scala transformer reads, is carried into
 Folio as 998 ǂf. Folio's MARC-to-Instance mapping does not read ǂf at all, so
@@ -27,20 +28,24 @@ SUPPRESSED_CODES = {
 }
 
 
+def extract_primary_language(record: Record) -> Language | None:
+    """The language coded in 008/35-37."""
+    return _resolve(_primary_code(record))
+
+
 def extract_languages(record: Record) -> list[Language]:
     """The primary language first, then 041 ǂa in document order, deduplicated."""
-    codes = [_primary_code(record)] + [
-        code
-        for field in record.get_fields("041")
-        for value in field.get_subfields("a")
-        for code in _split_packed_codes(value)
-    ]
-
     languages: list[Language] = []
-    for code in codes:
-        language = _resolve(code)
-        if language is not None and language not in languages:
-            languages.append(language)
+    primary = extract_primary_language(record)
+    if primary is not None:
+        languages.append(primary)
+
+    for field in record.get_fields("041"):
+        for value in field.get_subfields("a"):
+            for code in _split_packed_codes(value):
+                language = _resolve(code)
+                if language is not None and language not in languages:
+                    languages.append(language)
 
     return languages
 
