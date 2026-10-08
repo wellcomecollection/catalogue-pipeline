@@ -4,6 +4,7 @@ import re
 from collections.abc import Generator
 
 import pytest
+import structlog
 from pytest_bdd import parsers, then
 from structlog.testing import capture_logs
 from structlog.typing import EventDict
@@ -12,7 +13,7 @@ from structlog.typing import EventDict
 @pytest.fixture(autouse=True)
 def captured_logs() -> Generator[list[EventDict], None, None]:
     """Collect structlog events emitted while transforming a record; caplog does not see them."""
-    with capture_logs() as entries:
+    with capture_logs(processors=[structlog.contextvars.merge_contextvars]) as entries:
         yield entries
 
 
