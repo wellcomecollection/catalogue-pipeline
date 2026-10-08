@@ -1,15 +1,11 @@
-"""Tests covering extraction of subjects from MARC subject fields (e.g. 610).
-
-Although the implementation currently lives under `adapters.transformers.ebsco.subjects`,
-these tests are MARC-field level and can be shared across adapters.
-"""
+"""Tests covering extraction of subjects from MARC subject fields (e.g. 610)."""
 
 from __future__ import annotations
 
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
-from adapters.transformers.ebsco.subjects import extract_subjects
+from adapters.transformers.marc.subjects import extract_subjects
 from models.pipeline.identifier import Identifiable
 
 
@@ -55,5 +51,5 @@ def test_single_subject(marc_record: Record) -> None:
 
     assert subject.concepts[0].label == "A B"
     assert isinstance(subject.concepts[0].id, Identifiable)
-    assert subject.concepts[0].id.source_identifier.value == "a b"
+    assert subject.concepts[0].id.source_identifier.value == "a b c d e"
     assert subject.concepts[0].type == "Organisation"

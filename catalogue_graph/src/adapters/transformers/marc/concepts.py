@@ -59,8 +59,11 @@ def build_concept(
     preserve_trailing_period: bool = False,
     is_identifiable: bool = True,
     identifier: Identifiable | None = None,
+    label: str | None = None,
 ) -> Concept:
-    label = normalise_label(raw_label, raw_type, preserve_trailing_period)
+    """A concept for the label, which is normalised by type unless `label` is given."""
+    if label is None:
+        label = normalise_label(raw_label, raw_type, preserve_trailing_period)
     label_for_id = label_for_identifier(raw_label, label, raw_type)
 
     id = identifier or (

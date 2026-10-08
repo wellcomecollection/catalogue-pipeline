@@ -14,8 +14,12 @@ from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_predecessor_id,
 )
 from adapters.transformers.marc.production import extract_production
+from adapters.transformers.marc.subjects import (
+    extract_subjects,
+    is_from_standard_thesaurus,
+)
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
-from models.pipeline.concept import Genre
+from models.pipeline.concept import Genre, Subject
 from models.pipeline.identifier import (
     Id,
     Identifiable,
@@ -91,6 +95,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def genres(self) -> list[Genre]:
         return extract_genres(self.record)
+
+    @property
+    def subjects(self) -> list[Subject]:
+        return extract_subjects(self.record, keep=is_from_standard_thesaurus)
 
     @property
     def duration(self) -> int | None:

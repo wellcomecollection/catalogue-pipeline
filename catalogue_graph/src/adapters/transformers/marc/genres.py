@@ -9,7 +9,11 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.transformers.marc.authority_standard_number import extract_identifier
-from adapters.transformers.marc.common import non_empty, non_repeatable_subfield
+from adapters.transformers.marc.common import (
+    distinct,
+    non_empty,
+    non_repeatable_subfield,
+)
 from adapters.transformers.marc.concepts import (
     SUBDIVISION_CODES,
     SUBFIELD_TYPE_MAP,
@@ -24,14 +28,6 @@ def extract_genres(record: Record) -> list[Genre]:
     return distinct(
         non_empty(extract_genre(field) for field in record.get_fields("655"))
     )
-
-
-def distinct(genres: list[Genre]) -> list[Genre]:
-    result: list[Genre] = []
-    for genre in genres:
-        if genre not in result:
-            result.append(genre)
-    return result
 
 
 def extract_genre(field: Field) -> Genre | None:
