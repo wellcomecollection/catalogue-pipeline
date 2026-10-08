@@ -125,23 +125,6 @@ Feature: languages (MARC 008/35-37 and 041)
     When I transform the MARC record
     Then the only language has the label "German"
 
-  Scenario: A 041 ǂa packing several codes is split every three characters
-    # Folio's own mapping splits ǂa this way. No live record in either system uses
-    # the convention (it appears only on suppressed Folio bibs)
-    Given the MARC record has a 041 field with subfield "a" value "engger"
-    When I transform the MARC record
-    Then the work has 2 languages with label:
-      | English |
-      | German  |
-
-  Scenario: A value that merely looks packed is left whole and logged
-    # Only split when every chunk is a real code, so note text in ǂa is not
-    # read as a list of languages
-    Given the MARC record has a 041 field with subfield "a" value "xxxyyy"
-    When I transform the MARC record
-    Then an error "Unrecognised language code" is logged with code "xxxyyy"
-    And there are no languages
-
   Scenario: A mistyped primary code is dropped and logged
     # "jap" is not a MARC code; the code for Japanese is "jpn"
     Given the MARC record's only 008 field with the value "140303s1958    enk     s     000 0 jap  "

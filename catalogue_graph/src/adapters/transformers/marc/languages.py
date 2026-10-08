@@ -40,11 +40,10 @@ def extract_languages(record: Record) -> list[Language]:
         languages[primary.label] = primary
 
     for field in record.get_fields("041"):
-        for value in field.get_subfields("a"):
-            for code in _split_packed_codes(value):
-                language = _resolve(code, tag="041")
-                if language is not None:
-                    _add(languages, language)
+        for code in field.get_subfields("a"):
+            language = _resolve(code, tag="041")
+            if language is not None:
+                _add(languages, language)
 
     return list(languages.values())
 
@@ -54,24 +53,6 @@ def _add(languages: dict[str, Language], language: Language) -> None:
     existing = languages.get(language.label)
     if existing is None or (is_obsolete(existing.id) and not is_obsolete(language.id)):
         languages[language.label] = language
-
-
-def _split_packed_codes(value: str) -> list[str]:
-    """Some 041 ǂa subfields pack several codes together (e.g. "engger").
-
-    Folio's own MARC-to-Instance mapping splits ǂa every three characters. We only do
-    so when every chunk is a real language code, so that note text landing in ǂa is
-    still reported rather than read as languages.
-    """
-    code = value.strip().lower()
-    if len(code) <= 3 or len(code) % 3:
-        return [value]
-
-    chunks = [code[i : i + 3] for i in range(0, len(code), 3)]
-    if all(from_code(chunk) is not None for chunk in chunks):
-        return chunks
-
-    return [value]
 
 
 def _resolve(code: str, tag: str) -> Language | None:
