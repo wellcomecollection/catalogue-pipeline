@@ -112,7 +112,8 @@ Feature: languages (MARC 008/35-37 and 041)
     Then the only language has the label "German"
 
   Scenario: A 041 ǂa packing several codes is split every three characters
-    # Folio's own mapping splits ǂa this way; 408 records use the convention
+    # Folio's own mapping splits ǂa this way. No live record in either system uses
+    # the convention (it appears only on suppressed Folio bibs)
     Given the MARC record has a 041 field with subfield "a" value "engger"
     When I transform the MARC record
     Then the work has 2 languages with label:

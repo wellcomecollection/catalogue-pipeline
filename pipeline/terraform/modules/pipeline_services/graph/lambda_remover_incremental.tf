@@ -56,6 +56,12 @@ data "aws_iam_policy_document" "graph_remover_incremental_s3_policy" {
   }
 }
 
+# Read the full-extract bulk-load files the concepts remover compares against the graph
+resource "aws_iam_role_policy" "graph_remover_incremental_lambda_s3_bulk_load_read_policy" {
+  role   = module.graph_remover_incremental_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.s3_bulk_load_read.json
+}
+
 resource "aws_iam_role_policy" "graph_remover_incremental_ecs_read_pipeline_secrets_policy" {
   role   = module.graph_remover_incremental_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read_denormalised_read_only.json

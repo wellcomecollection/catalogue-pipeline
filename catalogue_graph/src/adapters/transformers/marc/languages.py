@@ -3,10 +3,6 @@ Extracting languages from the MARC language code in 008/35-37, plus additional
 languages from 041. EBSCO works carry only the primary language; FOLIO works
 carry both.
 
-The Sierra LANG fixed field, which the Scala transformer reads, is carried into
-Folio as 998 ǂf. Folio's MARC-to-Instance mapping does not read ǂf at all, so
-nothing maintains it; 008/35-37 and 041 ǂa are the fields it maps to languages.
-
 https://www.loc.gov/marc/bibliographic/bd008a.html
 https://www.loc.gov/marc/bibliographic/bd041.html
 """
