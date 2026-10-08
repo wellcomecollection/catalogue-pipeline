@@ -402,3 +402,35 @@ def test_transformer_source_identifier_requires_instance_uuid(
 
     assert result.success_count == 0
     assert result.failure_count == 1
+
+
+def test_transformer_drops_suppressed_record_with_conflicting_907_values(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A suppressed record extracts its predecessor too, so conflicting 907s drop it."""
+    records_by_id = {
+        "fo00010": '<record xmlns:marc="http://www.loc.gov/MARC21/slim"><marc:leader>00422nam a2200109Ia 4500</marc:leader><marc:controlfield tag="001">fo00010</marc:controlfield><marc:controlfield tag="005">20260610153507.9</marc:controlfield><marc:datafield tag="245" ind1="1" ind2="0"><marc:subfield code="a">Test record</marc:subfield></marc:datafield><marc:datafield tag="907" ind1=" " ind2=" "><marc:subfield code="a">b10000001</marc:subfield></marc:datafield><marc:datafield tag="907" ind1=" " ind2=" "><marc:subfield code="a">b20000002</marc:subfield></marc:datafield><marc:datafield tag="999" ind1="f" ind2="f"><marc:subfield code="i">10000000-0000-0000-0000-000000000010</marc:subfield><marc:subfield code="t">1</marc:subfield></marc:datafield></record>',
+    }
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2026-01-01",
+    )
+
+    assert result.success_count == 0
+    assert result.failure_count == 1
+    assert MockElasticsearchClient.inputs == []
+
+    errors = read_transformer_report(result)["errors"]
+    assert [e["row_id"] for e in errors] == ["fo00010"]
+    assert "Multiple distinct instances of varfield with tag 907" in errors[0]["detail"]
