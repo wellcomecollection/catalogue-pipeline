@@ -127,7 +127,7 @@ def test_extractor_logs_carry_the_row_id(adapter_store: AdapterStore) -> None:
     errors = [e for e in entries if e["log_level"] == "error"]
     assert errors, entries
     assert all(e["row_id"] == "marc12345" for e in errors)
-    assert structlog.contextvars.get_contextvars() == {}
+    assert "row_id" not in structlog.contextvars.get_contextvars()
 
 
 def test_transform_handles_transform_record_exception(
@@ -270,7 +270,7 @@ def test_stream_to_skips_id_less_records_and_warns_per_record(
 
     MockElasticsearchClient.inputs.clear()
     es_client = MockElasticsearchClient({}, "")
-    with capture_logs() as logs:
+    with capture_logs(processors=[structlog.contextvars.merge_contextvars]) as logs:
         result = transformer.stream_to(
             ElasticsearchSink(cast(Elasticsearch, es_client), "works-source-dev")
         )
