@@ -118,6 +118,25 @@ The circulation and open-request rows come before every code row. In Sierra, a h
 
 `fallback` makes sure every shown item gets an access condition. Evaluation step counts the items reaching it as unmatched, because each one is a case the table doesn't explain.
 
+## Sierra's rules for requesting
+
+In Sierra, `SierraRulesForRequesting.scala` is an intermediate step. It turns five item fields into a verdict (requestable, needs manual request, on open shelves and so on), and `SierraItemAccess.scala` turns that verdict into the access condition. This table doesn't port that structure. It reads the same information from FOLIO directly, so the rules for requesting are absorbed into the rows above, not carried over as a separate step. Each rule group ended up in one of three places:
+
+| Rule group, by the Sierra field it reads | Where it went |
+|---|---|
+| Item status (fixed field 88): missing, on search, withdrawn, unavailable, closed, safeguarded, data issues, bound-with | the status rows: `missing`, `withdrawn`, `on-search`, `unavailable`, `data-issues`, `bound-with`; closed and safeguarded via their statistical codes |
+| Loan rule (fixed field 87) and the on-holdshelf status: in use by another reader | the circulation rows for what the item status shows, and `open-request` for holds, live only (#6654) |
+| OPAC message (fixed field 108): manual request, unavailable, at digitisation | the statistical code rows: `manual-request`, `by-appointment`, `digitisation` |
+| Item type (fixed field 61): exhibition reserve, no public message, manual request | material type: `on-exhibition-material`, `computer-media`; the audiovisual item types aren't migrating to FOLIO |
+| Location code (fixed field 79), open shelves list | the OPEN SHELVES statistical code, which nearly all items in those locations carry (108,977 of the 108,985 Sierra open-shelves items in FOLIO) |
+| Location code, offsite manual request list | `offsite-manual-request` |
+| Location code, the other lists (contact us, digitisation `temp` codes, no public message, most of the manual request list) | dropped: none of these codes holds a live Sierra item (see [location_codes.md](../location_codes.md)) |
+| Location code, data protection list and `harcl` | not yet decided; see below |
+
+The coverage check is the evidence this holds. The table gives the same outcome as Sierra for 99.41% of the items found in both systems, and no rule-for-requesting outcome is left unexplained.
+
+That evidence covers migrated items only. Archives aren't in FOLIO yet, and they're where the remaining location-based rules apply: the data protection codes (`sc#ac` and others, about 51,500 Sierra items) and `harcl` (3,596). When the Axiell to FOLIO sync mapping is settled, it has to be decided whether those restrictions come across as an access status, from the Axiell record's 506 `$f`, as a rule on the sync's `AxC` locations, or not at all. That's the one part of the rules for requesting whose fate is still open.
+
 ## Deviations from the Sierra rule
 
 `by-appointment` corrects a gap in the current logic. Sierra only treats an item as by appointment when its status is Permission required. Items with the status Available and the OPAC message By appointment match no branch, so they get the generic fallback note: about 25,700 items in the served index, and unhandled since RFC 042's 2021 list. Collection Information's mapping gives every by-appointment item the status Available, so FOLIO can't tell the two apart, and the row treats both as by appointment. Few of the items affected are in the tenant today (6 of 600 sampled), because most are archives awaiting the Axiell sync or audiovisual items not yet migrated. So the size of this deviation can't be measured yet.
