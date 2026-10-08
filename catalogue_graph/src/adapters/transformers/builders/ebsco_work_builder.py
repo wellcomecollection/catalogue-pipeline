@@ -2,13 +2,13 @@ from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuil
 from adapters.transformers.ebsco.contributors import extract_contributors
 from adapters.transformers.ebsco.format import extract_format
 from adapters.transformers.ebsco.holdings import extract_holdings
-from adapters.transformers.ebsco.language import extract_languages
 from adapters.transformers.ebsco.other_identifiers import extract_other_identifiers
 from adapters.transformers.ebsco.subjects import extract_subjects
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.designation import extract_designation
 from adapters.transformers.marc.edition import extract_edition
 from adapters.transformers.marc.genres import extract_genres
+from adapters.transformers.marc.languages import extract_primary_language
 from adapters.transformers.marc.production import extract_production
 from models.pipeline.concept import Contributor, Genre, Subject
 from models.pipeline.format import Format
@@ -53,7 +53,8 @@ class EbscoWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def languages(self) -> list[Language]:
-        return extract_languages(self.record)
+        language = extract_primary_language(self.record)
+        return [language] if language is not None else []
 
     @property
     def holdings(self) -> list[Holdings]:

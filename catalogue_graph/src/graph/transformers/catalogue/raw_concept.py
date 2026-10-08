@@ -7,7 +7,7 @@ from models.pipeline.concept import (
 from models.pipeline.identifier import (
     SourceIdentifier,
 )
-from utils.types import ConceptSource, ConceptType
+from utils.types import ConceptSource
 
 from .id_label_checker import WECO_ID_PREFIX, IdLabelChecker
 
@@ -54,14 +54,6 @@ class RawCatalogueConcept:
             source_id = source_id.replace(self.mesh_qualifier, "")
 
         return source_id
-
-    def get_label_matched_source_concept_id(
-        self, concept_type: ConceptType
-    ) -> str | None:
-        """Takes the type explicitly: one canonical id serves a label on every work, whatever type each gives it."""
-        assert self.id_label_checker is not None
-
-        return self.id_label_checker.get_id(self.label, concept_type)
 
     @property
     def weco_source_concept_id(self) -> str | None:
