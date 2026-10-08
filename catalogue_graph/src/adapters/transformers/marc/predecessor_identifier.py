@@ -17,7 +17,9 @@ def extract_predecessor_id(record: Record) -> str | None:
     pred_id = list({val.lstrip(".") for val in pred_id})
 
     if len(pred_id) > 1:
-        raise ValueError("Multiple distinct instances of varfield with tag 907")
+        raise ValueError(
+            f"Multiple distinct instances of varfield with tag 907: {sorted(pred_id)}"
+        )
     if not pred_id:
         return None
 
@@ -32,7 +34,7 @@ def extract_sierra_predecessor_id(record: Record) -> str | None:
 
     if not SIERRA_SYSTEM_NUMBER_RE.match(identifier):
         raise ValueError(
-            "Predecessor identifier does not match Sierra system number format"
+            f"Predecessor identifier does not match Sierra system number format: {identifier!r}"
         )
 
     return identifier
@@ -45,6 +47,8 @@ def extract_calm_predecessor_id(record: Record) -> str | None:
         return None
 
     if not UUID_RE.match(identifier):
-        raise ValueError("Predecessor identifier does not match CALM record ID format")
+        raise ValueError(
+            f"Predecessor identifier does not match CALM record ID format: {identifier!r}"
+        )
 
     return identifier
