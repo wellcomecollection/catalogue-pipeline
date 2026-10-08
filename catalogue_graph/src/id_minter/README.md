@@ -180,7 +180,7 @@ The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects
 
 ```json
 {
-  "s3_uri": "s3://wellcomecollection-catalogue-graph/graph-prod/pipeline-2026-07-03/id_minter/find_work/windows/20260730T1632-20260730T1634/partition-0.json",
+  "s3_uri": "s3://wellcomecollection-catalogue-graph/graph-2026-07-03/pipeline-2026-07-03/id_minter/find_work/windows/20260730T1632-20260730T1634/partition-0.json",
   "count": 10000
 }
 ```

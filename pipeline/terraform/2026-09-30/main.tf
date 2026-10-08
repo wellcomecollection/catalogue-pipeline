@@ -1,9 +1,9 @@
 module "pipeline" {
-  source = "../modules/pipeline_new"
+  source = "../modules/pipeline"
 
   # Builds Axiell archive trees from the 982 parent link (wellcomecollection/platform#6725).
   reindexing_state = {
-    listen_to_reindexer = true
+    listen_to_reindexer = false
     scale_up_tasks      = false
     scale_up_matcher_db = false
   }
@@ -27,6 +27,9 @@ module "pipeline" {
   enable_id_minter_schedule                    = true
   enable_graph_pipeline_schedule               = true
   enable_image_inferrer_schedule               = true
+
+  # Trial of the works_identified Iceberg table (wellcomecollection/platform#6742).
+  enable_id_minter_iceberg_writes = true
 
   axiell_collection_path_source = "part_of"
 

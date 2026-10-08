@@ -2,6 +2,7 @@ from pymarc.record import Record
 
 from adapters.transformers.marc.common import non_empty_subfields
 from adapters.transformers.marc.concepts import build_concept
+from adapters.transformers.utils.text_utils import normalise_label
 from models.pipeline.concept import Subject
 
 
@@ -20,7 +21,7 @@ def extract_subjects(record: Record) -> list[Subject]:
 
     subjects = []
     for label in labels:
-        nested_concept = build_concept(label, "Concept")
+        nested_concept = build_concept(normalise_label(label, "Concept"), "Concept")
         subjects.append(
             Subject(
                 id=nested_concept.id,

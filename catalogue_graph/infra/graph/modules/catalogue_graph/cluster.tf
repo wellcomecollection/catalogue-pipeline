@@ -11,6 +11,7 @@ resource "aws_neptune_cluster" "catalogue_graph_cluster" {
   ]
   neptune_subnet_group_name = aws_db_subnet_group.neptune_subnet_group.name
   iam_roles                 = [aws_iam_role.catalogue_graph_cluster.arn]
+  skip_final_snapshot       = var.skip_final_snapshot
 
   # Set minimum capacity to 1 NCU, and maximum capacity to 32 NCUs.
   serverless_v2_scaling_configuration {

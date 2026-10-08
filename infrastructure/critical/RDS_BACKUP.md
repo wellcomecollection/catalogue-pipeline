@@ -37,7 +37,7 @@ s3://wellcomecollection-platform-id-minter/
               part-00000.gz.parquet
 ```
 
-The `<cluster-name>` comes from the EventBridge event's `detail.resourceName` (e.g. `identifiers-v2-serverless`). The `<date>` is derived from the Step Functions execution start time.
+The `<cluster-name>` comes from the EventBridge event's `detail.resourceName` (e.g. `identifiers-v2-serverless-2026-07-03`). The `<date>` is derived from the Step Functions execution start time.
 
 Each export is encrypted with the `alias/id-minter-rds-export` KMS key.
 
@@ -54,7 +54,7 @@ The state machine expects three input fields:
 ```bash
 aws stepfunctions start-execution \
   --state-machine-arn arn:aws:states:eu-west-1:760097843905:stateMachine:id-minter-rds-export \
-  --input '{"id":"manual-2026-03-24","detail":{"resourceName":"identifiers-v2-serverless"},"resources":["arn:aws:rds:eu-west-1:760097843905:cluster-snapshot:awsbackup:job-XXXX"]}'
+  --input '{"id":"manual-2026-03-24","detail":{"resourceName":"identifiers-v2-serverless-2026-07-03"},"resources":["arn:aws:rds:eu-west-1:760097843905:cluster-snapshot:awsbackup:job-XXXX"]}'
 ```
 
 To find available recovery points:

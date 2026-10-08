@@ -16,6 +16,7 @@ from pymarc.record import Record
 
 from adapters.transformers.marc.concepts import (
     build_concept,
+    label_derived_identifier,
 )
 from adapters.transformers.utils.text_utils import (
     normalise_label,
@@ -73,8 +74,17 @@ def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
     raw_label = label_from_field(field, label_subfields[tag[1:]])
+    label = normalise_label(raw_label, contributor_type, preserve_trailing_period=True)
+
+    # Organisation identifiers derive from the label as catalogued, as in the Scala
+    # pipeline. Normalising them would re-mint organisation canonical ids
+    identifier_label = raw_label if contributor_type == "Organisation" else label
     return Contributor(
-        agent=build_concept(raw_label, contributor_type, preserve_trailing_period=True),
+        agent=build_concept(
+            label,
+            contributor_type,
+            label_derived_identifier(identifier_label, contributor_type),
+        ),
         roles=roles(field),
         primary=is_primary(tag),
     )

@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from pyiceberg.expressions import And, BooleanExpression, EqualTo, IsNull, Or
+from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Or
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 
@@ -64,6 +64,33 @@ class AdapterStore(PipelineStore):
             inserts = self._set_last_modified_timestamp(inserts, now_timestamp)
 
         return self._commit_changeset(changes, inserts)
+
+    def overwrite_records(self, rows: pa.Table, changeset_id: str) -> list[str]:
+        """Overwrite existing rows under ``changeset_id``, keeping last_modified.
+
+        For derived repairs that must travel with an existing changeset, so it
+        skips incremental_update's newer-timestamp gate.
+        """
+        rows = self.normalise_table(rows)
+        if rows.num_rows == 0:
+            return []
+        ids = self._extract_ids(rows)
+        if len(set(ids)) != len(ids):
+            raise ValueError("overwrite_records was given duplicate ids")
+        id_filter = And(EqualTo("namespace", self.namespace), In("id", ids))
+        existing = self.table.scan(row_filter=id_filter, selected_fields=("id",))
+        # tx.overwrite appends rows its filter doesn't match, so check first.
+        missing = set(ids) - set(existing.to_arrow().column("id").to_pylist())
+        if missing:
+            raise ValueError(
+                f"overwrite_records only overwrites existing rows; missing: "
+                f"{sorted(missing)}"
+            )
+        with self.table.transaction() as tx:
+            tx.overwrite(
+                self._set_changeset_id(rows, changeset_id), overwrite_filter=id_filter
+            )
+        return ids
 
     def get_active_namespace_records(
         self,

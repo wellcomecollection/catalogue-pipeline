@@ -582,9 +582,8 @@ def mock_es_secrets(
 
 
 def mock_neptune_secrets(graph_date: str = "dev") -> None:
-    date_infix = f"-{graph_date}" if graph_date else ""
     MockSecretsManagerClient.add_mock_secret(
-        f"catalogue-graph{date_infix}/neptune-cluster-endpoint", "test-public-host.com"
+        f"catalogue-graph-{graph_date}/neptune-cluster-endpoint", "test-public-host.com"
     )
 
 

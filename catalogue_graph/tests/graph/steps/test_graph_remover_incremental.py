@@ -100,6 +100,7 @@ def check_deleted_ids_log(s3_uri: str, expected_ids: set[str]) -> None:
         assert set(ids) == expected_ids
 
 
+@freeze_time("2024-06-06T12:00:00")
 def test_graph_remover_incremental_concept_nodes() -> None:
     disconnected_ids = ["byzuqyr5", "vjfb76xy"]
     mock_neptune_get_total_node_count("Concept", 100)
@@ -118,14 +119,64 @@ def test_graph_remover_incremental_concept_nodes() -> None:
     lambda_handler(event, None)
 
     s3_uri = get_remover_s3_uri(
-        "dev", "dev", "full/deleted_ids/catalogue_concepts__nodes.parquet"
+        "dev", "dev", "full/deleted_ids/20240606T1200/catalogue_concepts__nodes.parquet"
     )
     check_deleted_ids_log(s3_uri, set(disconnected_ids))
 
 
+@freeze_time("2024-06-06T12:00:00")
 def test_graph_remover_incremental_concept_edges() -> None:
     mock_neptune_secrets("2024-06-06")
     mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
+
+    # The latest full extract says which source concept edges each concept should have
+    bulk_load_prefix = (
+        f"s3://{BUCKET}/graph-2024-06-06/pipeline-2024-06-06/graph_bulk_loader/full"
+    )
+    MockSmartOpen.mock_s3_file(
+        f"{bulk_load_prefix}/catalogue_concepts__nodes.csv",
+        ":ID,:LABEL,id:String\nconcept01,Concept,concept01\nconcept02,Concept,concept02\n",
+    )
+    MockSmartOpen.mock_s3_file(
+        f"{bulk_load_prefix}/catalogue_concepts__edges.csv",
+        ":ID,:START_ID,:END_ID,:TYPE\n"
+        "HAS_SOURCE_CONCEPT:concept01-->sh00000001,concept01,sh00000001,HAS_SOURCE_CONCEPT\n",
+    )
+
+    add_neptune_mock_response(
+        expected_query="MATCH (:Concept)-[e:HAS_SOURCE_CONCEPT]->() RETURN count(e) AS count",
+        expected_params=None,
+        mock_results=[{"count": 1000}],
+    )
+    add_neptune_mock_response(
+        expected_query="""UNWIND $ids AS id
+            MATCH (n:Concept {`~id`: id})-[e:HAS_SOURCE_CONCEPT]->()
+            RETURN id(n) AS id, collect(id(e)) AS edge_ids
+        """,
+        expected_params={"ids": ["concept01", "concept02"]},
+        mock_results=[
+            {
+                "id": "concept01",
+                "edge_ids": [
+                    "HAS_SOURCE_CONCEPT:concept01-->sh00000001",
+                    "HAS_SOURCE_CONCEPT:concept01-->n00000001",  # should be removed
+                ],
+            },
+            {
+                "id": "concept02",
+                "edge_ids": [
+                    "HAS_SOURCE_CONCEPT:concept02-->D000001"
+                ],  # should be removed
+            },
+        ],
+    )
+    edges_to_remove = [
+        "HAS_SOURCE_CONCEPT:concept01-->n00000001",
+        "HAS_SOURCE_CONCEPT:concept02-->D000001",
+    ]
+    mock_neptune_get_existing_edges_response(edges_to_remove)
+    mock_neptune_delete_edges_response(edges_to_remove)
+
     event = {
         "transformer_type": "catalogue_concepts",
         "entity_type": "edges",
@@ -135,14 +186,41 @@ def test_graph_remover_incremental_concept_edges() -> None:
     lambda_handler(event, None)
 
     s3_uri = get_remover_s3_uri(
-        "2024-06-06", "2024-06-06", "full/deleted_ids/catalogue_concepts__edges.parquet"
+        "2024-06-06",
+        "2024-06-06",
+        "full/deleted_ids/20240606T1200/catalogue_concepts__edges.parquet",
+    )
+    check_deleted_ids_log(s3_uri, set(edges_to_remove))
+
+
+@freeze_time("2024-06-06T12:00:00")
+def test_graph_remover_incremental_concept_edges_in_a_window_removes_nothing() -> None:
+    mock_neptune_secrets("2024-06-06")
+    mock_es_secrets(service_name="graph_extractor", pipeline_date="2024-06-06")
+    add_neptune_mock_response(
+        expected_query="MATCH (:Concept)-[e:HAS_SOURCE_CONCEPT]->() RETURN count(e) AS count",
+        expected_params=None,
+        mock_results=[{"count": 1000}],
+    )
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "edges",
+        "pipeline_date": "2024-06-06",
+        "graph_date": "2024-06-06",
+        "window": {"end_time": "2024-06-06T12:00"},
+    }
+    lambda_handler(event, None)
+
+    s3_uri = get_remover_s3_uri(
+        "2024-06-06",
+        "2024-06-06",
+        "windows/20240606T1145-20240606T1200/deleted_ids/catalogue_concepts__edges.parquet",
     )
     with MockSmartOpen.open(s3_uri, "rb") as f:
-        df = pl.read_parquet(f)
-        # There are no concept edges to remove
-        assert len(df) == 0
+        assert len(pl.read_parquet(f)) == 0
 
 
+@freeze_time("2024-06-06T12:00:00")
 def test_graph_remover_incremental_work_edges() -> None:
     # Add three visible works to the merged index.
     add_mock_merged_documents("2024-06-06", work_status="Visible")
@@ -196,11 +274,14 @@ def test_graph_remover_incremental_work_edges() -> None:
     lambda_handler(event, None)
 
     s3_uri = get_remover_s3_uri(
-        "2024-06-06", "2024-06-06", "full/deleted_ids/catalogue_works__edges.parquet"
+        "2024-06-06",
+        "2024-06-06",
+        "full/deleted_ids/20240606T1200/catalogue_works__edges.parquet",
     )
     check_deleted_ids_log(s3_uri, set(edges_to_remove))
 
 
+@freeze_time("2024-06-06T12:00:00")
 def test_graph_remover_incremental_work_nodes() -> None:
     # Add one invisible work to the merged index
     add_mock_merged_documents("dev", work_status="Invisible")
@@ -219,7 +300,7 @@ def test_graph_remover_incremental_work_nodes() -> None:
     lambda_handler(event, None)
 
     s3_uri = get_remover_s3_uri(
-        "dev", "dev", "full/deleted_ids/catalogue_works__nodes.parquet"
+        "dev", "dev", "full/deleted_ids/20240606T1200/catalogue_works__nodes.parquet"
     )
     check_deleted_ids_log(s3_uri, {"sghsneca"})
 
@@ -237,6 +318,7 @@ def test_graph_remover_catalogue_failure() -> None:
         lambda_handler(event, None)
 
 
+@freeze_time("2024-06-06T12:00:00")
 def test_graph_remover_safety_mechanism() -> None:
     disconnected_ids = ["byzuqyr5", "vjfb76xy"]
     mock_neptune_get_total_node_count("Concept", 9)
@@ -263,7 +345,7 @@ def test_graph_remover_safety_mechanism() -> None:
     event["force_pass"] = True
     lambda_handler(event, None)
     s3_uri = get_remover_s3_uri(
-        "dev", "dev", "full/deleted_ids/catalogue_concepts__nodes.parquet"
+        "dev", "dev", "full/deleted_ids/20240606T1200/catalogue_concepts__nodes.parquet"
     )
     check_deleted_ids_log(s3_uri, set(disconnected_ids))
 

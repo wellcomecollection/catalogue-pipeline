@@ -207,6 +207,12 @@ def its_nth_list_member_has(
     )
 
 
+@then(parsers.parse("it has no {sub_attr}"))
+def antecedent_lacks_attr(antecedent: Any, sub_attr: str) -> None:
+    actual = drill_through_dots(antecedent, sub_attr)
+    assert actual is None, f"Expected {sub_attr} to be absent, got {actual!r}"
+
+
 @then(
     parsers.re(
         r"its (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) has no (?P<sub_attr>\S+)"

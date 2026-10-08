@@ -15,6 +15,7 @@ from botocore.awsrequest import AWSRequest
 
 import config
 from models.neptune_bulk_loader import BulkLoadStatusResponse
+from models.pipeline_scope import validate_graph_date
 from utils.aws import get_secret
 from utils.streaming import process_stream_in_parallel
 from utils.types import EntityType
@@ -74,7 +75,7 @@ class NeptuneClient:
 
     def __init__(self, graph_date: str) -> None:
         self.session = boto3.Session()
-        self.graph_date = graph_date
+        self.graph_date = validate_graph_date(graph_date)
 
         endpoint_secret_name = f"{self.namespace}/{config.NEPTUNE_HOST_SECRET_NAME}"
         logger.info("Creating Neptune client", graph_date=graph_date)
@@ -88,11 +89,6 @@ class NeptuneClient:
 
     @property
     def namespace(self) -> str:
-        # The legacy cluster (2025-10-02 pipeline only) predates graph dates, so its date is blank; where empty
-        # labels are unsupported (SSM, CloudWatch, S3) it is `prod`. Remove with wellcomecollection/platform#6726.
-        if self.graph_date in ("prod", ""):
-            return "catalogue-graph"
-
         return f"catalogue-graph-{self.graph_date}"
 
     def _get_client_url(self) -> str:

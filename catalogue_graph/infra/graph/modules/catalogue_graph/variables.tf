@@ -25,6 +25,17 @@ variable "bulk_loader_s3_bucket_name" {
 
 variable "graph_date" {
   type        = string
-  description = "Date associated with this graph instance (YYYY-MM-DD), incorporated into the namespace."
+  description = "Date associated with this graph instance (YYYY-MM-DD, or 'dev'), incorporated into the namespace."
+
+  validation {
+    condition     = var.graph_date == "dev" || can(formatdate("YYYY-MM-DD", "${var.graph_date}T00:00:00Z"))
+    error_message = "graph_date must be a date (YYYY-MM-DD) or 'dev'."
+  }
+}
+
+variable "skip_final_snapshot" {
+  type        = bool
+  description = "Drop the cluster without a final snapshot on destroy. Only for a cluster being decommissioned."
+  default     = false
 }
 

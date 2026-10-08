@@ -8,9 +8,6 @@ from __future__ import annotations
 import re
 
 from adapters.transformers.marc.period import parse_period
-from adapters.transformers.utils.text_utils import (
-    normalise_label,
-)
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identifiable, Unidentifiable
 from utils.types import RawConceptType
@@ -41,39 +38,22 @@ def normalise_period_id_label(label: str) -> str:
     return PERIOD_ID_NOISE.sub("", label.lower()).strip()
 
 
-def label_for_identifier(raw_label: str, label: str, ontology_type: str) -> str:
-    """The text a concept's label-derived identifier is built from."""
-    if ontology_type == "Organisation":
-        # Match the Scala pipeline, which derives organisation identifiers from the label as
-        # catalogued without normalisation. This is an oversight, but normalising here would
-        # re-mint organisation canonical ids.
-        return raw_label
-    if ontology_type == "Period":
-        return normalise_period_id_label(raw_label) or label
-    return label
-
-
 def build_concept(
-    raw_label: str,
-    raw_type: RawConceptType,
-    preserve_trailing_period: bool = False,
-    is_identifiable: bool = True,
-    identifier: Identifiable | None = None,
+    label: str,
+    concept_type: RawConceptType,
+    given_identifier: Identifiable | Unidentifiable | None = None,
 ) -> Concept:
-    label = normalise_label(raw_label, raw_type, preserve_trailing_period)
-    label_for_id = label_for_identifier(raw_label, label, raw_type)
+    """Build a concept from a label. Without an identifier, one is derived from the label."""
+    identifier = given_identifier or label_derived_identifier(label, concept_type)
+    if concept_type == "Period":
+        return parse_period(label, identifier=identifier)
+    return Concept(id=identifier, label=label, type=concept_type)
 
-    id = identifier or (
-        get_concept_identifier(label_for_id, raw_type)
-        if is_identifiable
-        else Unidentifiable()
+
+def label_derived_identifier(label: str, concept_type: RawConceptType) -> Identifiable:
+    """Derive an identifier from a concept's label, for concepts with no authority identifier."""
+    if concept_type == "Period":
+        label = normalise_period_id_label(label) or label
+    return Identifiable.identifier_from_text(
+        label, Concept.type_to_display_type(concept_type)
     )
-
-    if raw_type == "Period":
-        return parse_period(label, identifier=id)
-    return Concept(id=id, label=label, type=raw_type)
-
-
-def get_concept_identifier(label: str, raw_type: RawConceptType) -> Identifiable:
-    concept_type = Concept.type_to_display_type(raw_type)
-    return Identifiable.identifier_from_text(label, concept_type)
