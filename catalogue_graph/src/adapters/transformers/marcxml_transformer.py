@@ -26,7 +26,11 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
 
     def transform(self, rows: Iterable[dict[str, Any]]) -> Generator[Document]:
         for row in rows:
-            yield from self._transform_row(row)
+            # Bind the row id so every log line emitted while transforming the
+            # record references it, including those from the field extractors.
+            with structlog.contextvars.bound_contextvars(row_id=row["id"]):
+                documents = list(self._transform_row(row))
+            yield from documents
 
     def _transform_row(self, row: dict[str, Any]) -> Generator[Document]:
         """Transform a single row, yielding at most one document.
@@ -38,10 +42,7 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
         # A record with no id cannot be processed for any source, so skip it
         # (no work, no deletion, no failure) rather than error in the builder.
         if not has_id(marc_record):
-            logger.warning(
-                "Skipping record with a missing or empty id field (001)",
-                row_id=row["id"],
-            )
+            logger.warning("Skipping record with a missing or empty id field (001)")
             return
 
         row_id, last_modified = row["id"], row["last_modified"]
@@ -59,7 +60,7 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
                 )
             yield self.document(row_id, work)
         except Exception as e:
-            logger.error("Error transforming record", row_id=row_id, error=str(e))
+            logger.error("Error transforming record", error=str(e))
             self._add_error(e, "transform", row_id)
 
     def transform_record(

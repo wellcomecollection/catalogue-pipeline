@@ -53,9 +53,7 @@ class AxiellTransformer(MarcXmlTransformer):
                     builder.transform_deleted_work(deleted_reason=DeletedFromSource()),
                 )
             except Exception as e:
-                logger.error(
-                    "Error transforming deletion fact", row_id=row["id"], error=str(e)
-                )
+                logger.error("Error transforming deletion fact", error=str(e))
                 self._add_error(e, "transform", row["id"])
         else:
             yield from super()._transform_row(row)
