@@ -1,10 +1,9 @@
 module "pipeline" {
   source = "../modules/pipeline"
 
-  # This pipeline is production since the switchover (wellcomecollection/platform#6541):
-  # tasks stay scaled up, the matcher stage runs at steady-state sizing with its tables
-  # on demand, and it no longer listens to the reindexer, so a reindex into another
-  # pipeline cannot reach it.
+  # Frozen since production moved to 2026-09-30 (wellcomecollection/platform#6743), pending
+  # decommission (wellcomecollection/platform#6748). It no longer listens to the reindexer,
+  # so a reindex into another pipeline cannot reach it.
   reindexing_state = {
     listen_to_reindexer = false
     scale_up_tasks      = true
@@ -25,11 +24,11 @@ module "pipeline" {
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
-  enable_adapter_transformer_trigger           = true
+  enable_adapter_transformer_trigger           = false
   disable_calm_transformer_topic_subscriptions = true
-  enable_id_minter_schedule                    = true
-  enable_graph_pipeline_schedule               = true
-  enable_image_inferrer_schedule               = true
+  enable_id_minter_schedule                    = false
+  enable_graph_pipeline_schedule               = false
+  enable_image_inferrer_schedule               = false
 
   # Paused around the Backstage authority load into Sierra (wellcomecollection/platform#6723).
   disable_sierra_transformer_topic_subscriptions = true
