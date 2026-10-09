@@ -91,12 +91,8 @@ trait Merger extends MergerLogging {
   private def linked(a: Work[Identified], b: Work[Identified]): Boolean =
     a.state.mergeCandidates.exists(_.id.canonicalId == b.state.canonicalId)
 
-  /** Several bibs can link the same Miro image, which puts them, and every METS
-    * or Axiell work linked to them, in one cluster. Whole-cluster merging then
-    * gave the target all of their METS items, or let an Axiell target take its
-    * siblings' bibs. Merge each set of works that is linked other than through
-    * a Miro work separately, keeping the Miro works with the cluster's target
-    * as before.
+  /** Bibs linked only through a shared Miro image must not pool their METS or
+    * Axiell works on one target.
     *
     * See https://github.com/wellcomecollection/platform/issues/6750
     */
@@ -104,7 +100,6 @@ trait Merger extends MergerLogging {
     works: Seq[Work[Identified]]
   ): Seq[Seq[Work[Identified]]] = {
     val (miroWorks, others) = works.partition(miroWork)
-    val miroIds = miroWorks.map(_.state.canonicalId).toSet
 
     val components = others.foldLeft(List.empty[Seq[Work[Identified]]]) {
       (components, work) =>
@@ -114,28 +109,33 @@ trait Merger extends MergerLogging {
         (touching.flatten :+ work) :: apart
     }
 
+    def linksTo(c: Seq[Work[Identified]], miro: Work[Identified]): Boolean =
+      c.exists(linked(_, miro))
+
     // Works the matcher grouped without a direct link stay with the target
-    val bridged = components.filter(
-      _.exists(
-        _.state.mergeCandidates.exists(
-          mc => miroIds.contains(mc.id.canonicalId)
-        )
-      )
-    )
+    val bridged = components.filter(c => miroWorks.exists(linksTo(c, _)))
 
     findTarget(works) match {
       case Some(target) if bridged.size > 1 =>
         val carved = bridged.filterNot(
           _.exists(_.state.canonicalId == target.state.canonicalId)
         )
-        val carvedIds = carved.flatten.map(_.state.canonicalId).toSet
-        val ordered = carved.map(
-          c =>
-            works.filter(
-              w => c.exists(_.state.canonicalId == w.state.canonicalId)
+        // A Miro work goes with the target unless only one carved group links it
+        val groupOf: Map[CanonicalId, Int] = carved.zipWithIndex.flatMap {
+          case (c, i) =>
+            val ownMiro = miroWorks.filter(
+              m => linksTo(c, m) && bridged.count(linksTo(_, m)) == 1
             )
-        )
-        works.filterNot(w => carvedIds.contains(w.state.canonicalId)) +: ordered
+            (c ++ ownMiro).map(_.state.canonicalId -> i)
+        }.toMap
+
+        val (carvedWorks, remainder) =
+          works.partition(w => groupOf.contains(w.state.canonicalId))
+        remainder +: carvedWorks
+          .groupBy(w => groupOf(w.state.canonicalId))
+          .toSeq
+          .sortBy(_._1)
+          .map(_._2)
       case _ => Seq(works)
     }
   }
