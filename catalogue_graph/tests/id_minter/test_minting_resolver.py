@@ -600,6 +600,50 @@ class TestRaceConditions:
         result = MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
         assert result[sid] == "legacy62"
 
+    def test_lost_inheritance_rolls_back_whole_batch(
+        self,
+        ids_db: pymysql.connections.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """One lost inheritance fails the batch before anything is committed."""
+        seed_free_ids(ids_db, ["race0101"])
+        new_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6101")
+        win_pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6102")
+        win_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6102")
+        lose_pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6103")
+        lose_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6103")
+        seed_identifier(ids_db, win_pred, "legacy71")
+        seed_identifier(ids_db, lose_pred, "legacy72")
+        self._commit_between_lookup_and_insert(monkeypatch, lose_sid, "fresh073")
+
+        with pytest.raises(ValueError, match="Predecessor mismatch"):
+            MintingResolver.from_connection(ids_db).mint_ids(
+                [(new_sid, None), (win_sid, win_pred), (lose_sid, lose_pred)]
+            )
+
+        assert get_identifier_row(ids_db, new_sid) is None
+        assert get_identifier_row(ids_db, win_sid) is None
+        assert get_canonical_status(ids_db, "race0101") == "free"
+        row = get_identifier_row(ids_db, lose_sid)
+        assert row is not None
+        assert row["CanonicalId"] == "fresh073"
+
+    def test_inherited_row_missing_from_reread_raises(
+        self,
+        ids_db: pymysql.connections.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """A case-variant row collides with the insert but isn't returned for our key."""
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6004")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6004")
+        seed_identifier(ids_db, pred, "legacy64")
+        self._commit_between_lookup_and_insert(
+            monkeypatch, SourceIdentifierKey("Work", "folio", "ac-6004"), "fresh064"
+        )
+
+        with pytest.raises(ValueError, match="not found after insert"):
+            MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
+
 
 # ---------------------------------------------------------------------------
 # mint_ids — transaction atomicity
