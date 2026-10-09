@@ -15,6 +15,7 @@ import structlog
 
 from id_minter.config import IdMinterConfig
 from id_minter.models.identifier import MintRequest, SourceIdentifierKey
+from id_minter.resolvers.predecessors import check_predecessor_matches
 
 logger = structlog.get_logger(__name__)
 
@@ -109,11 +110,14 @@ class DataApiIdResolver:
 
     def mint_ids(self, requests: list[MintRequest]) -> dict[SourceIdentifierKey, str]:
         source_ids = [src for src, _ in requests]
-        result = self.lookup_ids(source_ids)
-        missing = set(source_ids) - set(result)
+        predecessors = {src: pred for src, pred in requests if pred is not None}
+        found = self.lookup_ids(list(set(source_ids) | set(predecessors.values())))
+        missing = set(source_ids) - set(found)
         if missing:
             raise NotImplementedError(
                 f"DataApiIdResolver cannot mint new IDs. "
                 f"{len(missing)} identifier(s) not found in the database."
             )
-        return result
+        for sid in source_ids:
+            check_predecessor_matches(sid, predecessors.get(sid), found)
+        return {sid: found[sid] for sid in source_ids}

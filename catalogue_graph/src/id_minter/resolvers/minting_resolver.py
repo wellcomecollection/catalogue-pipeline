@@ -17,6 +17,7 @@ import structlog
 from id_minter.config import DBConfig
 from id_minter.database import DBConnection, DBCursor, get_connection
 from id_minter.models.identifier import MintRequest, SourceIdentifierKey
+from id_minter.resolvers.predecessors import check_predecessor_matches
 
 logger = structlog.get_logger(__name__)
 
@@ -217,13 +218,7 @@ class MintingResolver:
         for sid in source_ids:
             if sid in found:
                 # Predecessor is only read on first mint, so a disagreement would never surface.
-                pred = predecessors.get(sid)
-                if pred is not None and pred in found and found[pred] != found[sid]:
-                    raise ValueError(
-                        f"Predecessor mismatch for {sid[0]}/{sid[1]}/{sid[2]}: "
-                        f"registered as {found[sid]}, but predecessor "
-                        f"{pred[0]}/{pred[1]}/{pred[2]} is {found[pred]}"
-                    )
+                check_predecessor_matches(sid, predecessors.get(sid), found)
                 result[sid] = found[sid]
                 logger.debug(
                     "Resolved ID",
