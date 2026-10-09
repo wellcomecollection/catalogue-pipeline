@@ -84,7 +84,7 @@ def verify(
 
 
 @click.command()
-@click.option("--pipeline-date", default="2026-07-03", show_default=True,
+@click.option("--pipeline-date", default="2026-09-30", show_default=True,
               help="Selects the pipeline_storage_<date> cluster to connect to.")
 @click.option("--source-index", required=True, help="Index to reindex from.")
 @click.option("--dest-index", required=True, help="Index to reindex into.")

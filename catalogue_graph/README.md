@@ -262,7 +262,7 @@ docker push 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/unified_
 
 # Update a particular Lambda function to use the new image
 aws lambda update-function-code \
---function-name catalogue-2026-07-03-my_lambda_name \
+--function-name catalogue-2026-09-30-my_lambda_name \
 --image-uri 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/unified_pipeline_lambda:dev \
 --profile platform-developer \
 --publish

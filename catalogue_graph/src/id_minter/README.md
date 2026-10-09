@@ -110,7 +110,7 @@ To write to the public identified index instead:
 ```bash
 uv run python -m id_minter.steps.id_minter \
     --source-identifiers 'Work[sierra-system-number/b1000001]' \
-    --pipeline-date 2026-07-03 \
+    --pipeline-date 2026-09-30 \
     --target-es-mode public
 ```
 
@@ -180,7 +180,7 @@ The Lambda entry point is `id_minter.steps.id_minter.lambda_handler`. It expects
 
 ```json
 {
-  "s3_uri": "s3://wellcomecollection-catalogue-graph/graph-2026-07-03/pipeline-2026-07-03/id_minter/find_work/windows/20260730T1632-20260730T1634/partition-0.json",
+  "s3_uri": "s3://wellcomecollection-catalogue-graph/graph-2026-09-30/pipeline-2026-09-30/id_minter/find_work/windows/20260730T1632-20260730T1634/partition-0.json",
   "count": 10000
 }
 ```
