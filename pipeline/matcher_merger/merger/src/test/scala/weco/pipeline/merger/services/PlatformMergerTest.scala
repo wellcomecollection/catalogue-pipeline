@@ -1572,6 +1572,139 @@ class PlatformMergerTest
     mergedWork.data shouldBe axiellWork.data
   }
 
+  // See https://github.com/wellcomecollection/platform/issues/6750
+  describe("bibs that link the same Miro work") {
+    def redirectsIn(result: Seq[Work[Merged]]) =
+      result
+        .collect { case w: Work.Redirected[Merged] => w }
+        .map(w => w.id -> w.redirectTarget.canonicalId)
+        .toMap
+
+    def visibleIn(
+      result: Seq[Work[Merged]],
+      work: Work[Identified]
+    ): Work.Visible[Merged] =
+      result.collectFirst {
+        case w: Work.Visible[Merged] if w.id == work.id => w
+      }.get
+
+    it("gives each bib its own METS work") {
+      val sharedMiro = miroIdentifiedWork()
+      val bibs = (1 to 2).map {
+        _ =>
+          sierraPhysicalIdentifiedWork()
+            .format(Format.Pictures)
+            .mergeCandidates(
+              List(createMiroSierraMergeCandidateFor(sharedMiro))
+            )
+      }.toList
+      val metsForBibs = bibs.map {
+        bib =>
+          identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+            .mergeCandidates(List(createMetsMergeCandidateFor(bib)))
+            .items(List(createDigitalItem))
+            .invisible()
+      }
+
+      val works = sharedMiro :: bibs ++ metsForBibs
+      val target = merger.findTarget(works).get
+      val result = merger.merge(works).mergedWorksWithTime(now)
+
+      redirectsIn(result) shouldBe Map(
+        metsForBibs(0).id -> bibs(0).state.canonicalId,
+        metsForBibs(1).id -> bibs(1).state.canonicalId,
+        sharedMiro.id -> target.state.canonicalId
+      )
+      bibs.zip(metsForBibs).foreach {
+        case (bib, mets) =>
+          visibleIn(result, bib).data.items.flatMap(
+            _.locations
+          ) should contain allElementsOf
+            (bib.data.items ++ mets.data.items).flatMap(_.locations)
+      }
+    }
+
+    it("leaves a bib without its own METS work unchanged") {
+      val sharedMiro = miroIdentifiedWork()
+      val bibs = (1 to 2).map {
+        _ =>
+          sierraPhysicalIdentifiedWork()
+            .format(Format.Books)
+            .mergeCandidates(
+              List(createMiroSierraMergeCandidateFor(sharedMiro))
+            )
+      }.toList
+      val mets =
+        identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+          .mergeCandidates(List(createMetsMergeCandidateFor(bibs(1))))
+          .items(List(createDigitalItem))
+          .invisible()
+
+      val result = merger
+        .merge(sharedMiro :: bibs ++ List(mets))
+        .mergedWorksWithTime(now)
+
+      redirectsIn(result).get(mets.id) shouldBe Some(bibs(1).state.canonicalId)
+      visibleIn(result, bibs(0)).data.items shouldBe bibs(0).data.items
+    }
+
+    it("gives a bib the Miro work that only it links") {
+      val sharedMiro = miroIdentifiedWork()
+      val ownMiro = miroIdentifiedWork()
+      val targetBib = sierraPhysicalIdentifiedWork()
+        .format(Format.Pictures)
+        .mergeCandidates(List(createMiroSierraMergeCandidateFor(sharedMiro)))
+      val otherBib = sierraPhysicalIdentifiedWork()
+        .format(Format.Pictures)
+        .mergeCandidates(
+          List(
+            createMiroSierraMergeCandidateFor(sharedMiro),
+            createMiroSierraMergeCandidateFor(ownMiro)
+          )
+        )
+
+      val works = List(targetBib, otherBib, sharedMiro, ownMiro)
+      merger.findTarget(works) shouldBe Some(targetBib)
+      val result = merger.merge(works).mergedWorksWithTime(now)
+
+      redirectsIn(result) shouldBe Map(
+        sharedMiro.id -> targetBib.state.canonicalId,
+        ownMiro.id -> otherBib.state.canonicalId
+      )
+    }
+
+    it("gives each Axiell work only its own bib") {
+      val sharedMiro = miroIdentifiedWork()
+      val axiellWorks = (1 to 2).map(_ => axiellIdentifiedWork()).toList
+      val bibs = axiellWorks.map {
+        axiell =>
+          sierraPhysicalIdentifiedWork()
+            .mergeCandidates(
+              List(
+                createAxiellMergeCandidateFor(axiell),
+                createMiroSierraMergeCandidateFor(sharedMiro)
+              )
+            )
+      }
+
+      val works = sharedMiro :: axiellWorks ++ bibs
+      val target = merger.findTarget(works).get
+      val result = merger.merge(works).mergedWorksWithTime(now)
+
+      redirectsIn(result) shouldBe Map(
+        bibs(0).id -> axiellWorks(0).state.canonicalId,
+        bibs(1).id -> axiellWorks(1).state.canonicalId,
+        sharedMiro.id -> target.state.canonicalId
+      )
+      axiellWorks.zip(bibs).foreach {
+        case (axiell, bib) =>
+          visibleIn(result, axiell).data.items.map(_.id) should contain(
+            bib.data.items.head.id
+          )
+      }
+    }
+  }
+
   private def createInternalWorkStub: InternalWork.Identified =
     InternalWork.Identified(
       sourceIdentifier = createTeiSourceIdentifier,

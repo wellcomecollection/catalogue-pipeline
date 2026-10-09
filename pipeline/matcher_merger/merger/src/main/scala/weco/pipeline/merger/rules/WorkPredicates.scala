@@ -43,6 +43,7 @@ object WorkPredicates {
 
   val ebscoWork: WorkPredicate = ebscoIdentified
   val sierraWork: WorkPredicate = sierraIdentified
+  val miroWork: WorkPredicate = miroIdentified
   val zeroItem: WorkPredicate = work => work.data.items.isEmpty
   val singleItem: WorkPredicate = work => work.data.items.size == 1
   val multiItem: WorkPredicate = work => work.data.items.size > 1
