@@ -6,6 +6,8 @@ from typing import Any, Literal, overload
 
 import boto3
 import polars as pl
+import pyarrow as pa
+import pyarrow.parquet as pq
 import smart_open
 import structlog
 from pydantic import BaseModel
@@ -92,6 +94,13 @@ def df_from_s3_parquet(s3_file_uri: str) -> pl.DataFrame:
         df = pl.read_parquet(f)
 
     return df
+
+
+def table_from_s3_parquet(s3_file_uri: str, columns: list[str]) -> pa.Table:
+    """Read a parquet file from S3, reading only the named columns. Nested fields use dotted paths."""
+    transport_params = {"client": boto3.client("s3")}
+    with smart_open.open(s3_file_uri, "rb", transport_params=transport_params) as f:
+        return pq.read_table(f, columns=columns)
 
 
 def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str) -> None:
