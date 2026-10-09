@@ -434,3 +434,35 @@ def test_transformer_drops_suppressed_record_with_conflicting_907_values(
     errors = read_transformer_report(result)["errors"]
     assert [e["row_id"] for e in errors] == ["fo00010"]
     assert "Multiple distinct instances of varfield with tag 907" in errors[0]["detail"]
+
+
+def test_transformer_drops_record_with_conflicting_907_values(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    records_by_id = {
+        "fo00009": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20261225123045.0</controlfield><controlfield tag='001'>fo00009</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Test record</subfield></datafield><datafield tag='907' ind1=' ' ind2=' '><subfield code='a'>.b10000001</subfield></datafield><datafield tag='907' ind1=' ' ind2=' '><subfield code='a'>.b20000002</subfield></datafield><datafield tag='999' ind1='f' ind2='f'><subfield code='i'>10000000-0000-0000-0000-000000000009</subfield></datafield></record>",
+    }
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        records_by_id,
+        namespace=FOLIO_NAMESPACE,
+        transformer_type="folio",
+    )
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2026-01-01",
+    )
+
+    assert result.success_count == 0
+    assert result.failure_count == 1
+    assert MockElasticsearchClient.inputs == []
+
+    errors = read_transformer_report(result)["errors"]
+    assert len(errors) == 1
+    assert errors[0]["row_id"] == "fo00009"
+    assert "['b10000001', 'b20000002']" in errors[0]["detail"]
