@@ -1,0 +1,28 @@
+rule_id,item_status,statistical_code,loan_type,library,location_type,location_code,material_type,open_request,method,status,note,display_note,data_state,baseline_equivalent,rationale
+missing,Missing,,,,,,,,NotRequestable,Unavailable,missing,condition-note-wins,today,missing,Status overrides the statistical code as in Sierra
+withdrawn,Withdrawn,,,,,,,,NotRequestable,Unavailable,withdrawn,condition-note-wins,today,withdrawn,Status overrides the statistical code as in Sierra
+data-issues,Unknown,,,,,,,,NotRequestable,,contact,condition-note-wins,today,unmapped-fallback,Collection Information maps Sierra data issues to status Unknown with a hardcoded statement
+on-search,Declared lost,,,,,,,,NotRequestable,,contact,condition-note-wins,pending-migration,unmapped-fallback,Collection Information maps Sierra on search to Declared lost; no item has it yet
+bound-with,Intellectual item,,,,,,,,NotRequestable,,top-item,condition-note-wins,today,request-top-item,Collection Information target for bound-with and contained-in items; today only cwith has the status
+bound-with-interim,,,,bwith|cwith,,,,,NotRequestable,,top-item,condition-note-wins,today,request-top-item,Catches bwith items still Available until they get status Intellectual item; keyed on library because their codes are unreliable
+digitisation,,DIGITISATION,,,,,,,NotRequestable,TemporarilyUnavailable,digitisation,condition-note-wins,today,unavailable-digitisation,Before unavailable because today's digitisation items have status Unavailable
+digitisation-status,In process (non-requestable),,,,,,,,NotRequestable,TemporarilyUnavailable,digitisation,condition-note-wins,pending-migration,unavailable-digitisation,Collection Information target status for digitisation
+closed,,CLOSED,,,,,,,NotRequestable,Closed,,condition-note-wins,pending-migration,closed,Today's closed items carry UNAVAILABLE and reach the unavailable row instead
+unavailable,Unavailable,,,,,,,,NotRequestable,TemporarilyUnavailable,assessment,condition-note-wins,today,unavailable-assessment,Minor deviation: Sierra also required OPAC message Unavailable
+in-circulation-closed-stores,Checked out|Awaiting pickup|Paged|In transit|Awaiting delivery,,,,closed-stores,,,,NotRequestable,TemporarilyUnavailable,in-use,condition-note-wins,today,closed-stores-on-hold-or-in-use,Holds and loans win over the requesting rules as in Sierra
+in-circulation-open-shelves,Checked out|Awaiting pickup|Paged|In transit|Awaiting delivery,,,,open-shelves,,,,OpenShelves,TemporarilyUnavailable,in-use,condition-note-wins,today,open-shelves-in-use-or-on-loan,Holds and loans win over the requesting rules as in Sierra
+open-request,,,,,closed-stores,,,true,NotRequestable,TemporarilyUnavailable,in-use,condition-note-wins,live-only,closed-stores-on-hold-or-in-use,Only the items service (#6654) knows about open requests
+on-exhibition,,,,,on-exhibition,,,,NotRequestable,,exhibition,condition-note-wins,pending-migration,on-exhibition,Exhibition location is empty and the exhibition text is a staff-only note today
+on-exhibition-material,,,,,,,exhibit,,NotRequestable,,exhibition,condition-note-wins,today,on-exhibition,Exhibit items sit in the placeholder location migration today
+safeguarded,,SAFEGUARDED,,,,,,,NotRequestable,Safeguarded,,condition-note-wins,today,safeguarded,Staff can request in the tenant; the public cannot
+restricted,,RESTRICTED,,,closed-stores,,,,OnlineRequest,Restricted,,condition-note-wins,today,closed-stores-restricted,Kept Available and Can circulate so it stays requestable
+by-appointment,,BY APPOINTMENT,,,,,,,ManualRequest,ByAppointment,,condition-note-wins,today,by-appointment,Deviation: corrects the Sierra gap where status Available with By appointment reached unmapped-fallback
+donor-permission,,DONOR PERMISSION,,,,,,,ManualRequest,PermissionRequired,,condition-note-wins,no-items,donor-permission,Policy guard; no item has this code in either system
+manual-request,,MANUAL REQUEST,,,,,,,ManualRequest,,manual-request,display-note-wins-if-manual-request,today,closed-stores-manual-request,A display note that explains how to ask replaces the placeholder
+offsite-manual-request,,,,,,ofvn1|scmwc|sgmoh|somet|somge|sompr|somsy,,,NotRequestable,,contact,condition-note-wins,today,unmapped-fallback,Sierra's rules for requesting need a manual request for these location codes; unless coded MANUAL REQUEST they never reach online request
+computer-media,,,,,,,computer media,,NotRequestable,,contact,condition-note-wins,today,unmapped-fallback,Sierra item type 14 needs a manual request and never reaches online request
+audiovisual-non-requestable,,,,,,,audio format non-requestable|video format non-requestable,,NotRequestable,,contact,condition-note-wins,no-items,unmapped-fallback,Sierra item types 15 17 18 get no public message; not migrated yet
+not-circulating,,,Can't circulate|Unavailable,,,,,,NotRequestable,,contact,condition-note-wins,pending-migration,unmapped-fallback,Collection Information uses loan type to decide whether the request button shows
+open-shelves,,OPEN SHELVES,,,open-shelves,,,,OpenShelves,,,condition-note-wins,today,open-shelves-available,Sierra gives open-shelves items no access status
+online-request,,ONLINE REQUEST,,,closed-stores,,,,OnlineRequest,Open,,condition-note-wins,today,closed-stores-online-request,
+fallback,,,,,,,,,NotRequestable,,contact,condition-note-wins,catch-all,unmapped-fallback,Items reaching this row are counted as unmatched

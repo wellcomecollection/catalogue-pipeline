@@ -1,0 +1,9 @@
+note,text
+missing,This item is missing.
+withdrawn,This item is withdrawn.
+top-item,Please request top item.
+digitisation,This item is being digitised and is currently unavailable.
+assessment,This item is undergoing internal assessment or conservation work.
+in-use,Item is in use by another reader. Please ask at Library Enquiry Desk.
+manual-request,"This item needs to be ordered manually. Please ask a member of staff, or email <a href=""mailto:library@wellcomecollection.org"">library@wellcomecollection.org</a>."
+contact,"This item cannot be requested online. Please contact <a href=""mailto:library@wellcomecollection.org"">library@wellcomecollection.org</a> for more information."
