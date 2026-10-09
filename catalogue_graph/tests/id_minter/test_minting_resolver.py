@@ -572,6 +572,33 @@ class TestTransactionAtomicity:
         assert get_identifier_row(ids_db, ok_sid) is None
         assert get_identifier_row(ids_db, bad_sid) is None
 
+    def test_predecessor_mismatch_rolls_back_whole_batch(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """A mismatch anywhere in a batch fails it before any insert or pool claim."""
+        seed_free_ids(ids_db, ["atom0101"])
+        new_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-9101")
+        inherit_sid: SourceIdentifierKey = SourceIdentifierKey(
+            "Work", "folio", "AC-9102"
+        )
+        inherit_pred: SourceIdentifierKey = SourceIdentifierKey(
+            "Work", "sierra", "b9102"
+        )
+        bad_sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-9103")
+        bad_pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b9103")
+        seed_identifier(ids_db, inherit_pred, "legacy02")
+        seed_identifier(ids_db, bad_pred, "legacy03")
+        seed_identifier(ids_db, bad_sid, "fresh003")
+
+        with pytest.raises(ValueError, match="Predecessor mismatch"):
+            MintingResolver.from_connection(ids_db).mint_ids(
+                [(new_sid, None), (inherit_sid, inherit_pred), (bad_sid, bad_pred)]
+            )
+
+        assert get_identifier_row(ids_db, new_sid) is None
+        assert get_identifier_row(ids_db, inherit_sid) is None
+        assert get_canonical_status(ids_db, "atom0101") == "free"
+
     def test_pool_exhaustion_rolls_back_with_predecessor(
         self, ids_db: pymysql.connections.Connection
     ) -> None:

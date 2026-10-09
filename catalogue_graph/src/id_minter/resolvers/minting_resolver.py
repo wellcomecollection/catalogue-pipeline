@@ -127,7 +127,8 @@ class MintingResolver:
 
         This is the optimized batch path that minimizes database round-trips:
         1. Batch lookup all source IDs + predecessor IDs (single query)
-        2. Fail fast if any predecessors are missing
+        2. Fail fast if any predecessors are missing, or a registered source ID
+           disagrees with its registered predecessor
         3. Batch INSERT for predecessor inheritance cases
         4. Batch claim free IDs from pool (FOR UPDATE SKIP LOCKED)
         5. Batch INSERT for new ID cases
@@ -215,8 +216,7 @@ class MintingResolver:
         # return the existing canonical ID. This is the idempotent "lookup" path.
         for sid in source_ids:
             if sid in found:
-                # The predecessor is only read on first mint, so a registered work that
-                # disagrees with its registered predecessor would otherwise never surface.
+                # Predecessor is only read on first mint, so a disagreement would never surface.
                 pred = predecessors.get(sid)
                 if pred is not None and pred in found and found[pred] != found[sid]:
                     raise ValueError(
