@@ -540,6 +540,66 @@ class TestRaceConditions:
         unused = (all_pool - used_pool).pop()
         assert get_canonical_status(ids_db, unused) == "free"
 
+    def _commit_between_lookup_and_insert(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        sid: SourceIdentifierKey,
+        winner_id: str,
+    ) -> None:
+        """Another minter stores ``sid`` after our lookup and before our INSERT."""
+        original_lookup = MintingResolver.lookup_ids
+
+        def lookup_then_race(
+            self_: MintingResolver, source_ids: list[SourceIdentifierKey]
+        ) -> dict[SourceIdentifierKey, str]:
+            result = original_lookup(self_, source_ids)
+            winner = open_second_connection()
+            try:
+                seed_identifier(winner, sid, winner_id)
+            finally:
+                winner.close()
+            return result
+
+        monkeypatch.setattr(MintingResolver, "lookup_ids", lookup_then_race)
+
+    def test_inheritance_losing_to_fresh_mint_raises(
+        self,
+        ids_db: pymysql.connections.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """The winner minted a fresh ID, so returning the predecessor's would index an ID the registry doesn't hold."""
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6001")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6001")
+        seed_identifier(ids_db, pred, "legacy61")
+        self._commit_between_lookup_and_insert(monkeypatch, sid, "fresh061")
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                "Predecessor mismatch for Work/folio/AC-6001: registered as fresh061, "
+                "but predecessor Work/sierra/b6001 is legacy61"
+            ),
+        ):
+            MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
+
+        row = get_identifier_row(ids_db, sid)
+        assert row is not None
+        assert row["CanonicalId"] == "fresh061"
+
+    def test_inheritance_losing_to_same_inheritance_returns_predecessor_id(
+        self,
+        ids_db: pymysql.connections.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Two minters inheriting the same predecessor agree, so the loser just returns it."""
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6002")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6002")
+        seed_identifier(ids_db, pred, "legacy62")
+        self._commit_between_lookup_and_insert(monkeypatch, sid, "legacy62")
+
+        result = MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
+        assert result[sid] == "legacy62"
+
 
 # ---------------------------------------------------------------------------
 # mint_ids — transaction atomicity

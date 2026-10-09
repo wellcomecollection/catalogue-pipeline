@@ -300,13 +300,23 @@ class MintingResolver:
             """,
                 params,
             )
+            # The no-op insert hides a concurrent mint that stored another id first.
+            stored = self._lookup_chunked(
+                [source_key for source_key, _ in needs_inheritance], for_share=True
+            )
 
             for source_key, canonical_id in needs_inheritance:
-                result[source_key] = canonical_id
                 pred = predecessors[source_key]
                 assert (
                     pred is not None
                 )  # needs_inheritance only contains source ids with a predecessor
+                if source_key in stored:
+                    check_predecessor_matches(
+                        source_key,
+                        pred,
+                        {source_key: stored[source_key], pred: canonical_id},
+                    )
+                result[source_key] = canonical_id
                 logger.debug(
                     "Resolved ID",
                     source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
