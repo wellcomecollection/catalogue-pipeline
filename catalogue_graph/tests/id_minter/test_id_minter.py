@@ -231,6 +231,59 @@ class TestExecuteWithRealResolver:
         assert indexed_doc["state"]["canonicalId"] is not None
         assert indexed_doc["items"][0]["canonicalId"] is not None
 
+    def test_predecessor_mismatch_fails_only_that_work(
+        self,
+        mock_es: None,
+        ids_db: pymysql.connections.Connection,
+    ) -> None:
+        """A registered work whose predecessor has another canonical ID fails; the rest of the batch mints."""
+        seed_identifier(
+            ids_db,
+            SourceIdentifierKey("Work", "sierra-system-number", "b1000001"),
+            "legacy01",
+        )
+        seed_identifier(
+            ids_db,
+            SourceIdentifierKey("Work", "axiell-guid", "test-guid-1"),
+            "legacy01",
+        )
+        seed_identifier(
+            ids_db,
+            SourceIdentifierKey("Work", "sierra-system-number", "b2000002"),
+            "legacy02",
+        )
+        seed_identifier(
+            ids_db,
+            SourceIdentifierKey("Work", "axiell-guid", "test-guid-2"),
+            "fresh002",
+        )
+
+        matching = make_work_doc(
+            make_source_identifier("Work", "axiell-guid", "test-guid-1")
+        )
+        matching["state"]["predecessorIdentifier"] = make_source_identifier(
+            "Work", "sierra-system-number", "b1000001"
+        )
+        mismatched = make_work_doc(
+            make_source_identifier("Work", "axiell-guid", "test-guid-2")
+        )
+        mismatched["state"]["predecessorIdentifier"] = make_source_identifier(
+            "Work", "sierra-system-number", "b2000002"
+        )
+
+        runtime = _build_runtime(ids_db)
+        request = StepFunctionMintingRequest(
+            window=IncrementalWindow.model_validate({"end_time": END_TIME}),
+            job_id="integration-test-predecessor-mismatch",
+        )
+
+        with stub_transformer_source([matching, mismatched]):
+            result = execute(request, runtime=runtime)
+
+        assert result.accepted_ids == ["legacy01"]
+        assert len(result.errors) == 1
+        assert "Predecessor mismatch" in str(result.errors[0])
+
 
 # ---------------------------------------------------------------------------
 # Tests: handler() with real resolver

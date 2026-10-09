@@ -240,6 +240,29 @@ class TestPredecessorInheritance:
         result = MintingResolver.from_connection(ids_db).mint_ids([(new_sid, None)])
         assert result[new_sid] == "stable01"
 
+    def test_registered_work_with_matching_predecessor_returns_stored_id(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """Registered work and predecessor share a canonical ID: lookup path is unchanged."""
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b5555")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-5555")
+        seed_identifier(ids_db, pred, "shared01")
+        seed_identifier(ids_db, sid, "shared01")
+
+        result = MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
+        assert result[sid] == "shared01"
+
+    def test_registered_work_with_unregistered_predecessor_returns_stored_id(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """A predecessor that was never minted doesn't block an already-registered work."""
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6666")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6666")
+        seed_identifier(ids_db, sid, "own00001")
+
+        result = MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
+        assert result[sid] == "own00001"
+
 
 # ---------------------------------------------------------------------------
 # mint_ids — idempotency
@@ -304,6 +327,29 @@ class TestErrorCases:
             MintingResolver.from_connection(ids_db).mint_ids([(new_sid, missing_pred)])
 
         assert count_identifier_rows(ids_db) == 0
+
+    def test_registered_work_with_mismatched_predecessor_raises(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        """Registered work whose predecessor has another canonical ID → ValueError, nothing changed."""
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b7777")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-7777")
+        seed_identifier(ids_db, pred, "legacy77")
+        seed_identifier(ids_db, sid, "fresh077")
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                "Predecessor mismatch for Work/folio/AC-7777: registered as fresh077, "
+                "but predecessor Work/sierra/b7777 is legacy77"
+            ),
+        ):
+            MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
+
+        row = get_identifier_row(ids_db, sid)
+        assert row is not None
+        assert row["CanonicalId"] == "fresh077"
+        assert count_identifier_rows(ids_db) == 2
 
     def test_pool_fully_exhausted_raises(
         self, ids_db: pymysql.connections.Connection
