@@ -105,9 +105,9 @@ class RelabelledWorks(BaseModel):
     """The works to re-ingest because a concept they display was relabelled."""
 
     concept_count: int
-    # Zero when `over_limit` is set, since the works are not resolved in that case.
     work_count: int
-    work_ids: list[str]
+    # Batched because the works ingestor's event has to fit in an ECS container override.
+    work_id_batches: list[list[str]]
     over_limit: bool
 
 

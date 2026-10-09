@@ -10,6 +10,7 @@ See wellcomecollection/platform#6764.
 
 import argparse
 import typing
+from itertools import batched
 from pathlib import PurePosixPath
 from typing import cast
 
@@ -32,9 +33,17 @@ logger = structlog.get_logger(__name__)
 
 JOB_PREFIX = "job-"
 
+# A job folder only counts once its ingest finished, or a run which failed before writing any
+# documents would look like an ingest in which every concept had vanished.
+COMPLETED_JOB_MARKER = "report.indexer.json"
+
 # Works copy the display label, so that is the field a work goes stale against.
 ID_COLUMN = "query.id"
 LABEL_COLUMN = "display.displayLabel"
+
+# The works ingestor passes its event to ECS as a container override, and ECS caps those at
+# 8192 characters, which about 640 IDs reach.
+WORK_IDS_PER_BATCH = 400
 
 
 def _paginate_keys(bucket: str, prefix: str) -> typing.Iterator[str]:
@@ -44,12 +53,12 @@ def _paginate_keys(bucket: str, prefix: str) -> typing.Iterator[str]:
             yield s3_object["Key"]
 
 
-def _list_job_names(bucket: str, prefix: str) -> list[str]:
-    """Return the name of every full concepts ingest under the prefix, oldest first."""
+def _list_completed_job_names(bucket: str, prefix: str) -> list[str]:
+    """Return the name of every finished full concepts ingest under the prefix, oldest first."""
     job_names = set()
     for key in _paginate_keys(bucket, f"{prefix}/"):
-        folder = key[len(prefix) :].lstrip("/").split("/")[0]
-        if folder.startswith(JOB_PREFIX):
+        folder, _, file_name = key[len(prefix) :].lstrip("/").partition("/")
+        if folder.startswith(JOB_PREFIX) and file_name == COMPLETED_JOB_MARKER:
             job_names.add(folder)
 
     # Job names carry a timestamp, so sorting them as strings sorts them by time.
@@ -80,7 +89,7 @@ def get_relabelled_concept_ids(
     bucket = config.CATALOGUE_GRAPH_S3_BUCKET
     prefix = str(PurePosixPath(*event.s3_prefix_parts))
 
-    job_names = _list_job_names(bucket, prefix)
+    job_names = _list_completed_job_names(bucket, prefix)
     if len(job_names) < 2:
         logger.info("Too few full concepts ingests to compare", count=len(job_names))
         return (job_names[-1] if job_names else None), []
@@ -139,7 +148,7 @@ def handler(
 
     latest_job, concept_ids = get_relabelled_concept_ids(event)
 
-    work_ids = []
+    work_ids: list[str] = []
     if concept_ids and len(concept_ids) <= event.max_work_ids:
         work_ids = get_work_ids(NeptuneClient(event.graph_date), concept_ids)
 
@@ -151,20 +160,25 @@ def handler(
             work_count=len(work_ids),
             max_work_ids=event.max_work_ids,
         )
+        work_ids = []
 
-    report_event = event.model_copy(update={"job_id": latest_job or event.job_id})
+    job_id = latest_job.removeprefix(JOB_PREFIX) if latest_job else event.job_id
     report = RelabelledWorksReport(
-        **report_event.model_dump(exclude={"max_work_ids"}),
+        **event.model_copy(update={"job_id": job_id}).model_dump(
+            exclude={"max_work_ids"}
+        ),
         concept_count=len(concept_ids),
-        work_count=0 if over_limit else len(work_ids),
+        work_count=len(work_ids),
         over_limit=over_limit,
     )
     report.publish()
 
     return RelabelledWorks(
         concept_count=len(concept_ids),
-        work_count=0 if over_limit else len(work_ids),
-        work_ids=[] if over_limit else work_ids,
+        work_count=len(work_ids),
+        work_id_batches=[
+            list(batch) for batch in batched(work_ids, WORK_IDS_PER_BATCH)
+        ],
         over_limit=over_limit,
     )
 

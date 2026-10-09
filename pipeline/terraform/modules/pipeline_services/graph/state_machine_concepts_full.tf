@@ -117,9 +117,9 @@ module "catalogue_graph_concepts_full_state_machine" {
         Retry      = concat(local.state_function_default_retry, local.transient_neptune_retry)
         ResultPath = "$"
         ResultSelector = {
-          "work_ids.$"   = "$.Payload.work_ids"
-          "work_count.$" = "$.Payload.work_count"
-          "over_limit.$" = "$.Payload.over_limit"
+          "work_id_batches.$" = "$.Payload.work_id_batches"
+          "work_count.$"      = "$.Payload.work_count"
+          "over_limit.$"      = "$.Payload.over_limit"
         }
         Next = "Any works to refresh?"
       },
@@ -143,17 +143,33 @@ module "catalogue_graph_concepts_full_state_machine" {
         ]
         Default = "Success"
       },
+      # One ingest per batch: the works ingestor passes its event to ECS as a container
+      # override, and ECS caps those at 8192 characters.
       "Refresh works" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2"
-        Parameters = {
-          StateMachineArn = module.catalogue_graph_ingestor_state_machine.state_machine_arn
-          Input = {
-            ingestor_type = "works"
-            pipeline_date = var.pipeline_date
-            graph_date    = var.graph_date
-            index_dates   = var.index_dates
-            "ids.$"       = "$.work_ids"
+        Type           = "Map"
+        ItemsPath      = "$.work_id_batches"
+        MaxConcurrency = 1
+        ItemProcessor = {
+          ProcessorConfig = {
+            Mode = "INLINE"
+          }
+          StartAt = "Refresh a batch of works"
+          States = {
+            "Refresh a batch of works" = {
+              Type     = "Task"
+              Resource = "arn:aws:states:::states:startExecution.sync:2"
+              Parameters = {
+                StateMachineArn = module.catalogue_graph_ingestor_state_machine.state_machine_arn
+                Input = {
+                  ingestor_type = "works"
+                  pipeline_date = var.pipeline_date
+                  graph_date    = var.graph_date
+                  index_dates   = var.index_dates
+                  "ids.$"       = "$$.Map.Item.Value"
+                }
+              }
+              End = true
+            }
           }
         }
         Next = "Success"

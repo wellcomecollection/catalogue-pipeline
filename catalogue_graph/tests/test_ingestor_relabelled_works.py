@@ -5,14 +5,16 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from ingestor.models.step_events import IngestorRelabelledWorksLambdaEvent
-from ingestor.steps.ingestor_relabelled_works import handler
+from ingestor.steps.ingestor_relabelled_works import WORK_IDS_PER_BATCH, handler
 from tests.mocks import MockS3Client, MockSmartOpen
 
 BUCKET = "wellcomecollection-catalogue-graph"
 PREFIX = "graph-dev/pipeline-dev/ingestor_concepts/index-dev/full"
 
 
-def _mock_job(job_name: str, concepts: dict[str, str]) -> str:
+def _mock_job(
+    job_name: str, concepts: dict[str, str], finished: bool = True
+) -> list[str]:
     """Write one ingest job's concept documents, keyed by id with their display label."""
     key = f"{PREFIX}/{job_name}/00000000-00000010.parquet"
 
@@ -31,11 +33,21 @@ def _mock_job(job_name: str, concepts: dict[str, str]) -> str:
     MockS3Client.add_list_objects_response(
         BUCKET, f"{PREFIX}/{job_name}/", [{"Key": key}]
     )
-    return key
+
+    # The indexer's report is what marks the job as finished.
+    if finished:
+        return [key, f"{PREFIX}/{job_name}/report.indexer.json"]
+    return [key]
 
 
-def _mock_jobs(jobs: dict[str, dict[str, str]]) -> None:
-    keys = [_mock_job(name, concepts) for name, concepts in jobs.items()]
+def _mock_jobs(
+    jobs: dict[str, dict[str, str]],
+    unfinished: dict[str, dict[str, str]] | None = None,
+) -> None:
+    keys = [key for name, concepts in jobs.items() for key in _mock_job(name, concepts)]
+    for name, concepts in (unfinished or {}).items():
+        keys += _mock_job(name, concepts, finished=False)
+
     MockS3Client.add_list_objects_response(
         BUCKET, f"{PREFIX}/", [{"Key": key} for key in keys]
     )
@@ -66,7 +78,7 @@ def test_returns_the_works_of_a_relabelled_concept() -> None:
     result, neptune_client = _run({"concept1": {"work0001", "work0002"}})
 
     assert result.concept_count == 1
-    assert result.work_ids == ["work0001", "work0002"]
+    assert result.work_id_batches == [["work0001", "work0002"]]
     assert result.work_count == 2
     assert result.over_limit is False
     neptune_client.get_source_node_ids.assert_called_once_with(
@@ -88,7 +100,7 @@ def test_returns_nothing_when_no_label_changed() -> None:
     result, neptune_client = _run()
 
     assert result.concept_count == 0
-    assert result.work_ids == []
+    assert result.work_id_batches == []
     neptune_client.get_source_node_ids.assert_not_called()
 
 
@@ -154,7 +166,7 @@ def test_reports_and_stops_when_too_many_concepts_changed() -> None:
 
     assert result.over_limit is True
     assert result.concept_count == 2
-    assert result.work_ids == []
+    assert result.work_id_batches == []
     assert result.work_count == 0
     neptune_client.get_source_node_ids.assert_not_called()
 
@@ -171,4 +183,35 @@ def test_reports_and_stops_when_too_many_works_would_be_refreshed() -> None:
 
     assert result.over_limit is True
     assert result.concept_count == 1
-    assert result.work_ids == []
+    assert result.work_id_batches == []
+
+
+def test_ignores_a_job_whose_ingest_did_not_finish() -> None:
+    # Counting the unfinished job would compare it against the one before and find nothing.
+    _mock_jobs(
+        {
+            "job-20250101T0000": {"concept1": "Old label"},
+            "job-20250102T0000": {"concept1": "New label"},
+        },
+        unfinished={"job-20250103T0000": {"concept1": "New label"}},
+    )
+
+    result, _ = _run({"concept1": {"work0001"}})
+
+    assert result.concept_count == 1
+    assert result.work_id_batches == [["work0001"]]
+
+
+def test_batches_work_ids_to_fit_an_ecs_override() -> None:
+    _mock_jobs(
+        {
+            "job-20250101T0000": {"concept1": "Old label"},
+            "job-20250102T0000": {"concept1": "New label"},
+        }
+    )
+    works = {f"work{i:04d}" for i in range(WORK_IDS_PER_BATCH + 1)}
+
+    result, _ = _run({"concept1": works}, max_work_ids=WORK_IDS_PER_BATCH + 1)
+
+    assert result.work_count == WORK_IDS_PER_BATCH + 1
+    assert [len(batch) for batch in result.work_id_batches] == [WORK_IDS_PER_BATCH, 1]
