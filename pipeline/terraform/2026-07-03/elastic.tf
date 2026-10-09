@@ -49,8 +49,8 @@ locals {
 module "elastic" {
   source = "../modules/pipeline/elastic_indices"
 
-  pipeline_date              = local.pipeline_date
-  es_cluster                 = local.es_cluster
+  pipeline_date = local.pipeline_date
+  es_cluster    = local.es_cluster
   # Lets the decommission destroy drop these indices (wellcomecollection/platform#6748).
   allow_delete_indices       = true
   index_config               = local.index_config
