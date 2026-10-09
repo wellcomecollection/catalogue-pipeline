@@ -17,7 +17,11 @@ import weco.pipeline.merger.models.{
   WorkMergingOps
 }
 import weco.pipeline.merger.rules._
-import weco.pipeline.merger.rules.WorkPredicates.{sierraDigitisedAv, sierraWork}
+import weco.pipeline.merger.rules.WorkPredicates.{
+  miroWork,
+  sierraDigitisedAv,
+  sierraWork
+}
 
 /*
  * The implementor of a Merger must provide:
@@ -75,12 +79,65 @@ trait Merger extends MergerLogging {
     }
 
   def merge(works: Seq[Work[Identified]]): MergerOutcome = {
-    val outcomes = partitionAudiovisual(works).map(mergeWorks)
+    val outcomes =
+      partitionSharedMiro(works).flatMap(partitionAudiovisual).map(mergeWorks)
     val resultWorks = outcomes.flatMap(_.resultWorks)
     MergerOutcome(
       resultWorks = resultWorks ++ deletedInternalWorks(works, resultWorks),
       imagesWithSources = outcomes.flatMap(_.imagesWithSources)
     )
+  }
+
+  private def linked(a: Work[Identified], b: Work[Identified]): Boolean =
+    a.state.mergeCandidates.exists(_.id.canonicalId == b.state.canonicalId)
+
+  /** Several bibs can link the same Miro image, which puts them, and every METS
+    * or Axiell work linked to them, in one cluster. Whole-cluster merging then
+    * gave the target all of their METS items, or let an Axiell target take its
+    * siblings' bibs. Merge each set of works that is linked other than through
+    * a Miro work separately, keeping the Miro works with the cluster's target
+    * as before.
+    *
+    * See https://github.com/wellcomecollection/platform/issues/6750
+    */
+  private def partitionSharedMiro(
+    works: Seq[Work[Identified]]
+  ): Seq[Seq[Work[Identified]]] = {
+    val (miroWorks, others) = works.partition(miroWork)
+    val miroIds = miroWorks.map(_.state.canonicalId).toSet
+
+    val components = others.foldLeft(List.empty[Seq[Work[Identified]]]) {
+      (components, work) =>
+        val (touching, apart) = components.partition(
+          _.exists(w => linked(w, work) || linked(work, w))
+        )
+        (touching.flatten :+ work) :: apart
+    }
+
+    // Works the matcher grouped without a direct link stay with the target
+    val bridged = components.filter(
+      _.exists(
+        _.state.mergeCandidates.exists(
+          mc => miroIds.contains(mc.id.canonicalId)
+        )
+      )
+    )
+
+    findTarget(works) match {
+      case Some(target) if bridged.size > 1 =>
+        val carved = bridged.filterNot(
+          _.exists(_.state.canonicalId == target.state.canonicalId)
+        )
+        val carvedIds = carved.flatten.map(_.state.canonicalId).toSet
+        val ordered = carved.map(
+          c =>
+            works.filter(
+              w => c.exists(_.state.canonicalId == w.state.canonicalId)
+            )
+        )
+        works.filterNot(w => carvedIds.contains(w.state.canonicalId)) +: ordered
+      case _ => Seq(works)
+    }
   }
 
   /** AV bibs are never merged with each other, but their 776 links still put a
@@ -99,9 +156,6 @@ trait Merger extends MergerLogging {
     } else {
       val avEbibs = works.filter(sierraDigitisedAv)
       val others = works.filterNot(sierraWork)
-
-      def linked(a: Work[Identified], b: Work[Identified]): Boolean =
-        a.state.mergeCandidates.exists(_.id.canonicalId == b.state.canonicalId)
 
       val ownerOf: Map[CanonicalId, CanonicalId] = others.flatMap {
         other =>
