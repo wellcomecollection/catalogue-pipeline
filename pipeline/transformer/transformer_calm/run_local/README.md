@@ -91,7 +91,7 @@ uv run --script run_local/local_transformer.py start <pipeline_date> --index-nam
 Example:
 
 ```bash
-uv run --script run_local/local_transformer.py start 2026-07-03 --index-name works-source-2026-07-03
+uv run --script run_local/local_transformer.py start 2026-09-30 --index-name works-source-2026-09-30
 ```
 
 This command tails `calm-transformer` logs. Press `Ctrl+C` to stop log streaming; containers continue running.
@@ -101,7 +101,7 @@ This default uses local Docker Elasticsearch (`--es-host local`), so writes go t
 To write to the deployed public Elasticsearch instead, pass:
 
 ```bash
-uv run --script run_local/local_transformer.py start 2026-07-03 --index-name works-source-2026-07-03 --es-host public
+uv run --script run_local/local_transformer.py start 2026-09-30 --index-name works-source-2026-09-30 --es-host public
 ```
 
 2. Enqueue line-separated CALM IDs:

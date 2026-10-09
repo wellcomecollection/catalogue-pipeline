@@ -10,7 +10,7 @@ canonical ids re-mint on every id-minter respin. Run it AFTER the round's
 reindex, against that round's pipeline date:
 
     AWS_PROFILE=platform-developer uv run generate_interesting_works.py \
-        --pipeline-date 2026-07-03 --out interesting-works.csv
+        --pipeline-date 2026-09-30 --out interesting-works.csv
 
 The pipeline_storage secrets need platform-developer; pass the profile via
 AWS_PROFILE or --profile.
