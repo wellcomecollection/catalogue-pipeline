@@ -178,10 +178,38 @@ In the served index, 4,305 items have a display note moved onto the access condi
 
 These need Collection Information, or whoever owns reading-room policy, to decide:
 
-- **Open shelves.** Should open-shelves items show an access status (open, or open with advisory), or none as today? 
-- **Audiovisual material types.** Item types 15, 17 and 18 (moving image and sound) aren't migrated yet. The tenant has three empty material types that look like their targets: audio format non-requestable, video format requestable and video format non-requestable. Sierra makes all three item types non-requestable online, so which of them becomes "video format requestable", and whether it really should be requestable, needs confirming.
+- **Open shelves.** **RESOLVED** Should open-shelves items show an access status (open, or open with advisory), or none as today?
+
+  Collection Information's answer on PR #3736:
+
+  > As discussed, there doesn't need to be any change to how `open-shelves` items look online. We spoke about "Status" online, doesn't actually mean Item Status nor is it coming from STATUS (Sierra) - "open shelves" is an OPAC MSG and will be a Statistical Code (Item) in Folio.
+  >
+  > The default Item Status = Available when Stat Code = Open Shelves. If the Item Status is Missing, Declared Lost (On Search), Unknown or Withdrawn this will be determined by the decision table.
+- **Audiovisual material types.** **RESOLVED** Item types 15, 17 and 18 (moving image and sound) aren't migrated yet. The tenant has three empty material types that look like their targets: audio format non-requestable, video format requestable and video format non-requestable. Sierra makes all three item types non-requestable online, so which of them becomes "video format requestable", and whether it really should be requestable, needs confirming.
+
+  Collection Information's answer on PR #3736:
+
+  > AV (and visual/art) will not be migrating to Folio. It is planned to move from Sierra to Axiell Collections later this year-before March 2027 Go Live.
 - **Exhibition.** The 27 exhibit items sit in the placeholder location `migration`, and their exhibition text is a staff-only note. Should they move to the "Exhibitions" location, and should the text become a public note so readers can see where the item is?
+
+  Collection Information's answer on PR #3736:
+
+  > This question is bound-up in how Exhibitions intend to use (or not) Folio for recording exhibitions data.
+  >
+  > In Folio future state, we may want to make use of a temporary location (we have set up Wellcome Collection (Institution) > Eustom Road (Campus) > On exhibition (Library) > On exhibition (location) for now. This means that other item data like Item Type, Item Status and Statistical codes don't have to be manually edited to replicate the Sierra situation, which was automated.
 - **Digitisation.** Collection Information's mapping has no requesting rule for digitisation, and suggests a temporary location as an alternative to the status In process (non-requestable). The row covers both the code and the status. Which will be used?
-- **Location rules.** 66 of the 81 location codes in Sierra's rules for requesting have no FOLIO location yet, including the data protection codes. If that material is migrated, its location-based rules need restating against FOLIO locations.
+
+  Collection Information's answer on PR #3736:
+
+  > Nothing has been mapped here, the data is similar to Sierra with Item Status = Unavailable and Statistical Code (OPAC MSG) = @ Digitisation. But the intention is to change this.
+  >
+  > Similarly to Exhibitions, we intend to test changing the temporary location for digitisation and we have set up Wellcome Collection (Institution) > Eustom Road (Campus) > Digitisation (Library) > Digitisation (location) for post-Go Live playing around with.
+- **Location rules.** Sierra's rules for requesting name 80 distinct location codes, and 66 of them have no FOLIO location yet (see [location_codes.md](../location_codes.md)):
+  - 58 have no live Sierra items. They're stale entries in the rules configuration and need nothing.
+  - 6 are data protection codes (`sc#ac` and others, about 51,500 Sierra items). I think they mostly or entirely apply to archive items, so their restriction would come across with the Axiell sync rather than the Sierra migration.
+  - `harcl` (3,596 items) keeps offsite deepstore archives unrequestable. It's the same case as the data protection codes.
+  - `gblip` makes its items manual request. It's set on one item, a departmental copy of the BMJ (`i18699145`) on a suppressed bib (`b1497535x`), so readers never see it.
+
+  What's left to decide is whether the data protection and `harcl` restrictions come across with the Axiell sync, which depends on the sync's mapping.
 - **Contained-in items.** 324 contained-in ephemera items (`cwith`, status Intellectual item in the tenant) can be requested online in Sierra today. Collection Information's mapping makes all contained-in items not requestable, so these 324 would stop being requestable. Is that intended?
 - **Axiell-synced items.** Their mapping is still pending, so this table makes no claim about them.
