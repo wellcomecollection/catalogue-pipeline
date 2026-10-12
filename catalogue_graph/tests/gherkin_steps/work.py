@@ -43,6 +43,8 @@ ATTR_ALIASES: dict[str, str] = {
     "date": "dates",
     "place": "places",
     "agent": "agents",
+    "ancestor": "state.relations.ancestors",
+    "ancestors": "state.relations.ancestors",
 }
 
 
@@ -50,6 +52,7 @@ SUB_ATTR_ALIASES: dict[str, str] = {
     "source identifier value": "id.source_identifier.value",
     "source identifier type": "id.source_identifier.identifier_type.id",
     "source identifier ontology type": "id.source_identifier.ontology_type",
+    "work type": "work_type",
 }
 
 
@@ -59,11 +62,17 @@ def _normalise_attr_phrase(attr_phrase: str) -> str:
 
 
 def _get_attr_list(parent: Any, attr_phrase: str) -> Any:
-    """Resolve attribute phrase to list-like attribute."""
+    """Resolve attribute phrase to list-like attribute.
+
+    On a work, lists live on the data, except relations, which live on the state.
+    """
     attr_name = _normalise_attr_phrase(attr_phrase)
-    if hasattr(parent, attr_name):
-        return getattr(parent, attr_name)
-    return []
+    if isinstance(parent, SourceWork):
+        parent = parent if attr_name.startswith("state.") else parent.data
+    try:
+        return drill_through_dots(parent, attr_name)
+    except AttributeError:
+        return []
 
 
 def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
@@ -120,7 +129,7 @@ def one_list_member(work: SourceWork, attr_phrase: str) -> None:
 
 @then(parsers.parse("there are {count:d} {attr_phrase}"))
 def list_member_count(work: SourceWork, count: int, attr_phrase: str) -> None:
-    values: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
+    values: Sequence[Any] = _get_attr_list(work, attr_phrase)
     assert len(values) == count, (
         f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
     )
@@ -247,7 +256,7 @@ def its_only_list_member_lacks(
 def list_member_nth_is(
     work: SourceWork, index: str | int, attr_phrase: str, value: str
 ) -> Any:
-    nth_member = _list_member_nth(work.data, index, attr_phrase)
+    nth_member = _list_member_nth(work, index, attr_phrase)
     assert nth_member == value, (
         f"Expected {attr_phrase} at position {index} == {value!r}, got {nth_member!r}"
     )
@@ -263,7 +272,7 @@ def list_member_nth_is(
 def list_member_nth_has(
     work: SourceWork, index: str | int, attr_phrase: str, sub_attr: str, value: str
 ) -> Any:
-    nth_member = _list_member_nth(work.data, index, attr_phrase)
+    nth_member = _list_member_nth(work, index, attr_phrase)
     actual = drill_through_dots(nth_member, sub_attr)
     assert actual == value, (
         f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
@@ -287,7 +296,7 @@ def child_list_member_has_with_datatable(
     attr_phrase: str,
     sub_attr: str,
 ) -> None:
-    members: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
+    members: Sequence[Any] = _get_attr_list(work, attr_phrase)
     assert len(members) == count, (
         f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
     )
@@ -300,7 +309,7 @@ def child_list_member_has_with_datatable(
 def child_list_member_with_datatable(
     work: SourceWork, datatable: list[list[str]], count: str, attr_phrase: str
 ) -> None:
-    members: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
+    members: Sequence[Any] = _get_attr_list(work, attr_phrase)
     assert len(members) == int(count), (
         f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
     )
