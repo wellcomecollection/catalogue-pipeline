@@ -205,6 +205,14 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
             }
         )
 
+    @property
+    def deleted_work_state(self) -> SourceWorkState:
+        # The id-minter only reads the predecessor on first mint, so a record first seen
+        # suppressed must carry it or it keeps a fresh id when published.
+        return super().deleted_work_state.model_copy(
+            update={"predecessor_identifier": self.predecessor_identifier}
+        )
+
     def transform_visible_work(self) -> VisibleSourceWork:
         return VisibleSourceWork(
             version=self.version,

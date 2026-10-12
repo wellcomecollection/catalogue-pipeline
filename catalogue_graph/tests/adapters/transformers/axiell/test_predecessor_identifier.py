@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 import pytest
@@ -52,18 +53,30 @@ def test_deduplicates_identical_907_fields(marc_record: Record) -> None:
     indirect=True,
 )
 def test_raises_when_multiple_distinct_907_values(marc_record: Record) -> None:
-    with pytest.raises(ValueError, match="Multiple distinct instances of varfield"):
+    values = sorted([VALID_UUID, ANOTHER_VALID_UUID])
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"Multiple distinct instances of varfield with tag 907: {values}"
+        ),
+    ):
         _ = get_work_builder(marc_record).predecessor_identifier
 
 
 @pytest.mark.parametrize(
-    "marc_record",
+    "marc_record,value",
     [
-        (_907_field("1234567"),),
-        (_907_field("2637bb639ffa-4a51-93d9-be35038d39f9"),),
+        ((_907_field("1234567"),), "1234567"),
+        (
+            (_907_field("2637bb639ffa-4a51-93d9-be35038d39f9"),),
+            "2637bb639ffa-4a51-93d9-be35038d39f9",
+        ),
     ],
     indirect=["marc_record"],
 )
-def test_raises_for_invalid_calm_identifier(marc_record: Record) -> None:
-    with pytest.raises(ValueError, match="does not match CALM record ID format"):
+def test_raises_for_invalid_calm_identifier(marc_record: Record, value: str) -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(f"does not match CALM record ID format: '{value}'"),
+    ):
         _ = get_work_builder(marc_record).predecessor_identifier

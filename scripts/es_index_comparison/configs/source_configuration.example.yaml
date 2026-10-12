@@ -19,7 +19,7 @@ clusters:
 index_sources:
   prod-works-source:
     cluster: production
-    index: works-source-2026-07-03
+    index: works-source-2026-09-30
   stage-works-source:
     cluster: staging
     index: works-source-<other-date>

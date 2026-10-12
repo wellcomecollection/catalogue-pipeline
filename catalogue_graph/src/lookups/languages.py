@@ -69,6 +69,20 @@ def _iter_languages(
             yield code, name
 
 
+@cache
+def load_obsolete_codes() -> frozenset[str]:
+    doc = _load_language_xml()
+    elements = doc.findall(
+        "c:languages/c:language/c:code[@status='obsolete']",
+        namespaces={"c": CODELIST_NS},
+    )
+    return frozenset(element.text for element in elements if element.text)
+
+
+def is_obsolete(language_code: str) -> bool:
+    return language_code in load_obsolete_codes()
+
+
 def from_code(language_code: str) -> Language | None:
     if language_name := load_language_code_to_name_map().get(language_code):
         return Language(id=language_code, label=language_name)

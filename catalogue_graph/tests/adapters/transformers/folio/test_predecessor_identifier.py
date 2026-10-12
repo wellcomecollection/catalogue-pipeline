@@ -1,5 +1,6 @@
 """Tests for FOLIO predecessor identifier extraction (MARC 907 $a → Sierra system number)."""
 
+import re
 from datetime import datetime
 
 import pytest
@@ -53,12 +54,32 @@ def test_deduplicates_identical_907_fields(marc_record: Record) -> None:
 
 
 @pytest.mark.parametrize(
-    "marc_record",
-    [(INSTANCE_UUID, _907_field("b12345679"), _907_field("b99999990"))],
-    indirect=True,
+    "marc_record,values",
+    [
+        (
+            (INSTANCE_UUID, _907_field("b20000002"), _907_field("b10000001")),
+            ["b10000001", "b20000002"],
+        ),
+        (
+            (INSTANCE_UUID, _907_field("b10000001"), _907_field("b10000001.")),
+            ["b10000001", "b10000001."],
+        ),
+        (
+            (INSTANCE_UUID, _907_field("b10000001"), _907_field("10000001")),
+            ["10000001", "b10000001"],
+        ),
+    ],
+    indirect=["marc_record"],
 )
-def test_raises_when_multiple_distinct_907_values(marc_record: Record) -> None:
-    with pytest.raises(ValueError, match="Multiple distinct instances of varfield"):
+def test_raises_when_multiple_distinct_907_values(
+    marc_record: Record, values: list[str]
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"Multiple distinct instances of varfield with tag 907: {values}"
+        ),
+    ):
         _ = get_work_builder(marc_record).predecessor_identifier
 
 
@@ -70,11 +91,16 @@ def test_raises_when_multiple_distinct_907_values(marc_record: Record) -> None:
         ((INSTANCE_UUID, _907_field("b1234567")), "b1234567"),
         ((INSTANCE_UUID, _907_field("b123456789")), "b123456789"),
         ((INSTANCE_UUID, _907_field("x12345679")), "x12345679"),
+        ((INSTANCE_UUID, _907_field("b10000001.")), "b10000001."),
+        ((INSTANCE_UUID, _907_field("10000001")), "10000001"),
     ],
     indirect=["marc_record"],
 )
 def test_raises_for_invalid_sierra_system_number(
     marc_record: Record, value: str
 ) -> None:
-    with pytest.raises(ValueError, match="does not match Sierra system number format"):
+    with pytest.raises(
+        ValueError,
+        match=re.escape(f"does not match Sierra system number format: '{value}'"),
+    ):
         _ = get_work_builder(marc_record).predecessor_identifier

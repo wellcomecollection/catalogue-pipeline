@@ -14,7 +14,7 @@ All container images live in ECR under `760097843905.dkr.ecr.eu-west-1.amazonaws
 
 * a commit tag (the git SHA), which is immutable and ties an image to its source;
 * `latest`, the most recently published image in a repository;
-* floating environment tags, which are what running infrastructure actually references. Dated pipeline services reference `env.<date>` (e.g. `env.2026-07-03`); shared services such as adapters reference `env.prod` or `prod`.
+* floating environment tags, which are what running infrastructure actually references. Dated pipeline services reference `env.<date>` (e.g. `env.2026-09-30`); shared services such as adapters reference `env.prod` or `prod`.
 
 Terraform bakes the `env.<date>` reference into ECS task definitions and lambda configuration once. Routine deployments never run Terraform: they move the floating tag to a new image and then tell ECS or Lambda to redeploy.
 

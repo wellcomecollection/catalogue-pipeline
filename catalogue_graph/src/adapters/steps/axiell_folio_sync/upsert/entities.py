@@ -15,6 +15,7 @@ from typing import Any
 import structlog
 
 from ..folio import FolioInventoryOps, RefCache
+from ..mapping import AXIELL_LOCATION_NOTE_PREFIX
 from ..results import EntityResult
 
 logger = structlog.get_logger(__name__)
@@ -40,10 +41,86 @@ _READONLY_FIELDS: frozenset[str] = frozenset(
 # instances do; holdings-storage 422s on it and items silently drop it.
 _STAFF_SUPPRESS_PATHS: frozenset[str] = frozenset({"/inventory/instances"})
 
+# Fields required on create whose values FOLIO or another module owns after
+# creation. Updates preserve FOLIO's current value; see :func:`_payload_for_update`.
+_CREATE_ONLY_FIELDS: frozenset[str] = frozenset({"status"})
+
 
 def _strip_readonly(record: dict) -> dict:
     """Remove computed read-only fields that FOLIO rejects on PUT."""
     return {k: v for k, v in record.items() if k not in _READONLY_FIELDS}
+
+
+def _payload_for_update(existing: dict, payload: dict) -> dict:
+    """The payload as it should be applied to a record FOLIO already holds.
+
+    Create-only fields take the value read back from FOLIO, so an update cannot
+    overwrite state another module owns. Ours stays only as a backstop for a
+    fetched record that carries none, because these fields are required on update
+    too and dropping the key outright would make the PUT invalid.
+
+    In practice the hrid lookup returns the whole record, since
+    ``GET /inventory/items`` answers with full ``item.json`` objects, so the
+    backstop should never be the one that applies.
+    """
+    updated = dict(payload)
+    for field in _CREATE_ONLY_FIELDS & payload.keys():
+        if field in existing:
+            updated[field] = existing[field]
+    return updated
+
+
+def _is_axiell_location_note(note: object) -> bool:
+    """True for the one administrative note this sync owns.
+
+    Matched on the label alone — ``administrativeNotes`` is a bare list of strings
+    with no id or type, so reading the text back is the only identity available.
+    Case-insensitive, so a note whose capitalisation was "corrected" in the FOLIO
+    UI is still reclaimed rather than duplicated alongside a new one.
+
+    A note whose label has been reworded is indistinguishable from a cataloguer's
+    own and is deliberately left alone; :func:`_stray_location_notes` reports it.
+    """
+    if not isinstance(note, str):
+        return False
+    return note.strip().lower().startswith(f"{AXIELL_LOCATION_NOTE_PREFIX.lower()}:")
+
+
+def _merge_admin_notes(existing: list, incoming: list) -> list:
+    """Replace only the Axiell location note, keeping every other note.
+
+    ``administrativeNotes`` is a flat list of strings with no ids, so the shallow
+    payload-wins merge in :func:`_upsert_entity` would swap the whole list for the
+    single note the mapping builds, silently dropping anything a cataloguer added
+    in FOLIO. Ours is identified by :func:`_is_axiell_location_note`; the rest are
+    preserved in their original order, ours appended last.
+    """
+    kept = [note for note in existing if not _is_axiell_location_note(note)]
+    return kept + list(incoming)
+
+
+# Substring that makes a note *look* like a location note the sync wrote.
+# Deliberately broad: a false positive costs a log line, a false negative lets a
+# duplicate accumulate unseen, which is the thing being guarded against.
+_STRAY_NOTE_HINT = "axiell"
+
+
+def _stray_location_notes(existing: list) -> list[str]:
+    """Notes that mention Axiell but do not carry our label.
+
+    Almost always a location note whose label was edited away in the FOLIO UI:
+    the sync can no longer claim it, so it writes a fresh note and the old one
+    stays behind as a duplicate. Nothing can be done about that automatically — at
+    that point the note is indistinguishable from one a cataloguer wrote — but it
+    can be surfaced rather than accumulating silently, which is all this does.
+    """
+    return [
+        note
+        for note in existing
+        if isinstance(note, str)
+        and _STRAY_NOTE_HINT in note.lower()
+        and not _is_axiell_location_note(note)
+    ]
 
 
 def _find_by_hrid(
@@ -168,17 +245,44 @@ def _upsert_entity(
     hrid: str,
     payload: dict,
     dry_run: bool,
+    stray_notes: list[str] | None = None,
 ) -> tuple[str, str | None]:
     """
     Resolve an entity by hrid and create or update it.
+
+    ``stray_notes`` is an optional sink: any existing administrative note that
+    mentions Axiell but does not carry our label is appended to it, for the
+    caller to record. Populated on dry runs too, so a dry run surfaces the same
+    warning as a real one.
 
     Returns (action, folio_id).
     """
     existing = _find_by_hrid(folio, search_path, hrid, list_key)
     if existing:
         folio_id: str | None = existing["id"]
+        existing_notes = existing.get("administrativeNotes") or []
+        # Only meaningful for the entity the sync actually writes notes to.
+        if "administrativeNotes" in payload:
+            strays = _stray_location_notes(existing_notes)
+            if strays:
+                logger.warning(
+                    "stray_location_notes",
+                    hrid=hrid,
+                    folio_id=folio_id,
+                    notes=strays,
+                )
+                if stray_notes is not None:
+                    stray_notes.extend(strays)
         if not dry_run:
-            merged = {**_strip_readonly(existing), **payload, "id": folio_id}
+            merged = {
+                **_strip_readonly(existing),
+                **_payload_for_update(existing, payload),
+                "id": folio_id,
+            }
+            if "administrativeNotes" in payload:
+                merged["administrativeNotes"] = _merge_admin_notes(
+                    existing_notes, payload["administrativeNotes"]
+                )
             folio.put(f"{write_path_prefix}/{folio_id}", merged)
             logger.info("updated hrid=%s folio_id=%s", hrid, folio_id)
         return "update", folio_id

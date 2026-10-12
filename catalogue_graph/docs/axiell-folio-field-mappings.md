@@ -14,18 +14,31 @@ Holdings record, and an Item. It does this through the FOLIO Inventory API.
 | MARC extraction primitive | `src/adapters/steps/axiell_folio_sync/mapping/marc.py` |
 | Payload contracts | `src/adapters/steps/axiell_folio_sync/mapping/payloads.py` |
 
-Mapping version: **2.6.0** (`config.VERSION`). This is stamped into every
-payload's `meta` block so you can tell which rules produced a given record.
+Mapping version: **2.6.1** (`config.VERSION`), stamped into every payload's
+`meta` block so you can tell which rules produced a given record.
 
 ## What gets synced
 
-A record is synced only if it is item-level, meaning MARC `351 $c` equals `ITEM`
-(case-insensitive). Anything else is skipped completely: it is never created,
-updated, or suppressed.
+Two gates, and a record has to pass both:
 
-There is also a harvest-flag gate in the config (`980 $a`), but it is currently
-turned off so the sync runs for all item-level records. Selection is item-level
-only for now.
+| Gate | MARC | Rule |
+| --- | --- | --- |
+| Harvest flag | `980 $a` | Present and non-empty. This is the curator-facing opt-in to the FOLIO sync. |
+| Record level | `351 $c` | Equals `ITEM`, case-insensitive. |
+
+A record failing either gate is skipped: not created, not updated, not
+suppressed, and not counted as an error.
+
+**The un-flag case is undecided.** Unticking Harvest on a record that has
+already synced leaves its FOLIO instance, holdings and item in place,
+unsuppressed and no longer updated. The only delete path is the reconciler,
+which works from superseded GUIDs, so a flag removal is not a delete signal and
+nothing reclaims the record. Whether it should instead suppress them is open
+with Collection Information on wellcomecollection/platform#6663. This is the
+current behaviour, not an agreed rule.
+
+Both gates live in `_passes_selection_gates`, which `is_selected_for_sync` and
+`select_and_build` share so the two cannot disagree.
 
 ## How MARC fields are read
 
@@ -84,7 +97,7 @@ contract.
 | `hrid` | `AxC-holding-<001>` | MARC `001` | Required. |
 | `instanceId` | Parent instance UUID | Injected by the upsert orchestrator | Not set when the payload is built. |
 | `sourceId` | Holdings-source UUID | Constant, via `resolve_holdings_source` (default `MARC`) | |
-| `permanentLocationId` | FOLIO location UUID | MARC `852 $b`, via `resolve_location` (default `History of Medicine`) | Location prefix overrides apply, see below. |
+| `permanentLocationId` | FOLIO location UUID | MARC `984 $b` (AxC **normal** location), via `resolve_location` | The location rules below apply. No default: a missing `984 $b`, or a location the tenant does not know, fails the record with a `MappingError`. |
 
 ## Item
 
@@ -94,12 +107,11 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 | --- | --- | --- | --- |
 | `hrid` | `AxC-item-<001>` | MARC `001` | Required. |
 | `holdingsRecordId` | Parent holdings UUID | Injected by the upsert orchestrator | Not set when the payload is built. |
-| `status.name` | `Available` | Constant | |
-| `materialType.id` | Material-type UUID | MARC `655 $a`, via `resolve_material_type` (default `book`) | Uses the normalization table below. |
-| `permanentLoanType.id` | Loan-type UUID | MARC `949 $l`, via `resolve_loan_type` (default `Can circulate`) | |
-| `permanentLocation.id` | FOLIO location UUID | MARC `852 $b`, via `resolve_location` (default `History of Medicine`) | Same source as the holdings location. |
-| `barcode` | Barcode string | MARC `949 $a` | Passed through as-is, optional. |
-| `notes[]` | `{note, noteType: "Axiell location", staffOnly: false}` | MARC `852 $b`, or `unknown` when absent | Keeps the raw AxC current location as a note. |
+| `status.name` | Item-status name | MARC `506 $f` (access category), via `ACCESS_ITEM_STATUS` (default `Unavailable`) | Table value is final; statuses are a fixed FOLIO enum, not tenant reference data. **Create-only**: mod-circulation owns the field once the item exists, so updates send FOLIO's own status back and an AxC access change does not propagate. See `_CREATE_ONLY_FIELDS` in `upsert/entities.py`. |
+| `materialType.id` | Material-type UUID | MARC `655 $a`, via `resolve_material_type` | Uses the normalization table below. No default: an absent or unmapped category fails the record. |
+| `permanentLoanType.id` | `Can circulate` UUID | Constant, via `resolve_loan_type` | **No AxC mapping**, pending Collection Information |
+| `permanentLocation.id` | FOLIO location UUID | MARC `984 $b` (AxC **normal** location), via `resolve_location` | Same source and rules as the holdings location above, so the two always agree. |
+| `administrativeNotes[]` | `"Axiell Current Location: <852 $b>"` | MARC `852 $b`, or `unknown` when absent | Keeps the raw AxC current location as an administrative note. A plain string, so no item note type has to exist in the tenant. The label is in the string because an administrative note carries no type, and is also what the upsert matches on to reclaim the note. Always written, so an update cannot leave a stale location behind. |
 
 ## How values are resolved to FOLIO UUIDs
 
@@ -107,13 +119,20 @@ For any field that needs a FOLIO tenant UUID, `_resolve` in `builders.py` runs
 the raw AxC value through these steps in order:
 
 1. Start with the raw AxC value.
-2. Apply the location prefix overrides (location fields only).
-3. Apply the normalization table (if the field has one).
-4. Fall back to the default if the value is now empty.
-5. Look the resulting name up through the matching `RefCache` resolver to get a UUID.
+2. If the field is **required** and that value is empty, raise a `MappingError`
+   immediately, because there is no default to fall back on. The normal location
+   and the material type are the required fields today.
+3. Apply the location rules (location fields only), which resolve the AxC hierarchy
+   to a FOLIO location name.
+4. Apply the normalization table (if the field has one).
+5. Fall back to the field's default if the value is now empty. A required field has
+   no default, so this step never applies to one.
+6. Look the resulting name up through the matching `RefCache` resolver to get a UUID.
 
 If the resolved name is unknown to the FOLIO tenant, the sync raises a
 `MappingError` instead of sending a payload that FOLIO would reject with a 422.
+Either way the record is reported as an error rather than written. Nothing is
+silently substituted.
 
 ### Material type
 
@@ -122,20 +141,95 @@ case-insensitive.
 
 | AxC object_category (`655 $a`) | FOLIO material type |
 | --- | --- |
-| Archives - Non Digital / Non-digital | `archive` |
-| Moving Image - Non Digital / Non-digital | `film` |
-| Sound - Non Digital / Non-digital | `audio format requestable` |
-| Visual Material - Non Digital / Non-digital | `non-projected graphic` |
-| Anything else, or absent | `book` (default) |
+| `Archives - Non-digital` | `archive` |
+| `Archives - Digital` | `archive` |
+| `Archives - Hybrid` | `archive` |
+| `Moving Image - Non-digital` | `film` |
+| `Moving Image - Digital` | `video format non-requestable` |
+| `Sound - Non-digital` | `audio format requestable` |
+| `Sound - Digital` | `audio format non-requestable` |
+| `Visual Material` | `non-projected graphic` |
+| `Pictures` | `non-projected graphic` |
+| Anything else | `MappingError`: the table is the agreed vocabulary, so a value outside it is rejected before the tenant is consulted |
+| *(absent)* | `MappingError`: required, with no default |
 
-### Location prefix overrides
+The digital rows take the `non-requestable` halves because this tenant encodes
+requestability in the material type, and a digital surrogate is not the carrier a
+reader requests.
 
-If the AxC current location (`852 $b`) starts with certain digits, it maps to a
-fixed FOLIO location before the normal lookup runs. The first match wins.
+That same fact is why the table is strict (`strict_table` on
+`MATERIAL_TYPE_FIELD`). Being required only rejects an absent `655 $a`; on its
+own it would not stop an unmapped value, because `_resolve` hands an unmapped
+value to the resolver unchanged and `resolve_material_type` accepts any name the
+tenant carries. A new AxC value of `archive`, `computer media` or even `book`
+would then sync with a requestability nobody agreed. Those three are still to be confirmed with Collection
+Information. For the AxC value distribution behind this table, see
+[axiell-folio-mapping-options.md](axiell-folio-mapping-options.md) section 1.
 
-| `852 $b` starts with | FOLIO location |
+### Access category to item status
+
+`access_category` (`506 $f`) maps to a FOLIO item status. Case-insensitive.
+Values are FOLIO's fixed enum, so nothing is resolved against the tenant.
+
+| AxC access category (`506 $f`) | FOLIO item status |
 | --- | --- |
-| `215` or `183` | `hicon` |
+| `OPEN`, `OPENWITHADVISORY` | `Available` |
+| `RESTRICTED` | `Available` (see below) |
+| `PERMISSIONREQUIRED`, `SAFEGUARDED`, `CLOSED` | `Restricted` |
+| `MISSING` | `Missing` |
+| `DEACCESSIONED` | `Withdrawn` |
+| `DATAISSUES` | `Unknown` |
+| *(absent)* | `Unavailable` (`DEFAULT_ITEM_STATUS`) |
+| *(present but unrecognised)* | `MappingError` |
+
+**`RESTRICTED` is `Available`, not `Restricted`.** Restricted material is
+genuinely available and can be requested online. The restriction is that the
+reader signs to agree to the conditions of viewing restricted material, and they
+do that before the material is handed over, so it does not affect whether the
+item can be requested or produced.
+
+Two caveats: `Restricted` and `Withdrawn` are unconfirmed on this tenant's FOLIO
+version, and the status is create-only, so a later access change in AxC does not
+reach an existing item.
+
+### Loan type: no mapping
+
+Every item takes the default, `Can circulate`. No AxC field is mapped to the
+loan type, so nothing overrides it. Two candidates are unsettled: the access
+category (`506 $f`, who may access it) and the use restriction (`540 $a`, how it
+may be requested). Both have been mapped here and reverted pending Collection
+Information, which also has to say whether open archival material should
+circulate at all.
+
+Until then a reader can request any item, including those whose access note
+reads *"This item is closed and cannot be accessed"*. Settle before a
+production run.
+
+### Location rules
+
+The AxC normal location (`984 $b`) maps to a FOLIO location by the **leading code**
+of its hierarchy. AxC nests two ways at once: the path is `/`-separated and each
+segment is `;`-separated, so `984 $b` reads `215/215;B11/215;B11;MR/...` and its leaf
+(`984 $c`) reads `215;B11;MR;84`. Taking the first component of each split gives
+`215` from either spelling, which is the unit these rules match. Comparing whole
+codes rather than string prefixes also means `215` cannot swallow `2150` or `215A`.
+Code and prefix matching is case-insensitive, as every other lookup in the mapping
+is: AxC does not control its own casing, and `resolve_location` folds case too.
+
+First match wins. FOLIO's hierarchy is institution, campus, library, location,
+but only the leaf is resolved (`RefCache` indexes by code and name, and a leaf
+implies its parents); the parents are listed because they are what was agreed and
+what provisioning the tenant requires. The institution is `Wellcome Collection`
+throughout.
+
+| Leading code | Campus | Library | FOLIO location (resolved) |
+| --- | --- | --- | --- |
+| `215` or `183` | Euston Road (Axiell) | Axiell sync | `AxC Euston Road` |
+| `Deepstore` | Deepstore | Offsite (DS) | `AxC Deepstore` |
+| starts `CLW` | Constantine London West | Axiell sync | `AxC Constantine London West` |
+
+A location matching no rule falls through to the ordinary FOLIO code/name lookup
+as its **leading code**, not as the raw `984 $b` value:. There is no default.
 
 ### Defaults
 
@@ -143,12 +237,18 @@ Used when the record has no value for a resolved field.
 
 | Field | Default |
 | --- | --- |
-| Material type | `book` |
-| Loan type | `Can circulate` |
-| Location | `History of Medicine` |
+| Material type | **None, the record fails instead** |
+| Loan type | `Can circulate`, the only value any item gets |
+| Item status | `Unavailable` |
 | Holdings source | `MARC` |
 | Identifier type | `Local identifier` |
-| Item note type | `Axiell location` |
+| Administrative note label | `Axiell Current Location` |
+| **Location** | **None, the record fails instead** |
+
+The location is deliberately the exception. It used to default to
+`History of Medicine`, which meant an unmapped or unknown location produced a real,
+plausible-looking, wrong shelf. It is now `required`, so such a record is reported
+as an error for someone to act on.
 
 ## Full inbound MARC field map
 
@@ -156,12 +256,21 @@ Taken from `config.FIELDS`.
 
 | CanonicalRecord field | MARC spec | Feeds |
 | --- | --- | --- |
-| `source_id` | `001` | All HRIDs, and `meta.source_id` |
-| `title` | `245$a` | `instance.title` |
-| `object_number` | `035$a(AltRefNo)` | `instance.identifiers[].value` (Local identifier) |
-| `object_category` | `655$a` | `item.materialType` |
-| `current_location` | `852$b` | Holdings and item location, plus the Axiell location note |
-| `barcode` | `949$a` | `item.barcode` |
-| `loan_type_code` | `949$l` | `item.permanentLoanType` |
-| Record selection | `351$c` | Must be `ITEM` for the record to sync |
-| Harvest flag | `980$a` | Opt-in gate, currently disabled |
+| `source_id` | `001` | HRIDs, `meta.source_id` |
+| `title` | `245$a` | instance title |
+| `object_number` | `035$a(AltRefNo)` | local identifier |
+| `object_category` | `655$a` | material type |
+| `current_location` | `852$b` | admin note |
+| `normal_location` | `984$b` | holdings/item permanent location |
+| `access_category` | `506$f` | item status |
+| record selection | `351$c` | must be `ITEM` |
+| harvest flag | `980$a` | must be present and non-empty |
+
+## Code locations
+
+- mapping config: `src/adapters/steps/axiell_folio_sync/mapping/config.py`
+- builders: `src/adapters/steps/axiell_folio_sync/mapping/builders.py`
+- MARC extraction: `src/adapters/steps/axiell_folio_sync/mapping/marc.py`
+- payload contracts: `src/adapters/steps/axiell_folio_sync/mapping/payloads.py`
+
+Mapping version: `2.6.1` (`config.VERSION`).

@@ -212,6 +212,33 @@ class TestTransform:
         assert len(resolver.mint_calls) == 1
         assert (item_key, pred_key) in resolver.mint_calls[0]
 
+    def test_passes_predecessor_of_deleted_work_to_resolver(self) -> None:
+        """A suppressed work's predecessor reaches the resolver, so its first mint inherits."""
+        work_si = _make_source_identifier("Work", "axiell-guid", "test-guid-1")
+        pred_si = _make_source_identifier("Work", "calm-record-id", "test-calm-1")
+        doc = {
+            "type": "Deleted",
+            "deletedReason": {"type": "SuppressedFromSource", "info": "Axiell"},
+            "state": {
+                "sourceIdentifier": work_si,
+                "predecessorIdentifier": pred_si,
+                "sourceModifiedTime": "2024-09-24T19:26:50Z",
+            },
+        }
+
+        work_key = SourceIdentifierKey("Work", "axiell-guid", "test-guid-1")
+        pred_key = SourceIdentifierKey("Work", "calm-record-id", "test-calm-1")
+        resolver = FakeResolver(ids={work_key: "abcd1234"})
+
+        transformer = IdMintingTransformer(
+            minting_source=_StubSource([doc]),
+            resolver=resolver,
+        )
+
+        list(transformer.transform([doc]))
+
+        assert resolver.mint_calls == [[(work_key, pred_key)]]
+
     def test_records_error_on_missing_state(self) -> None:
         doc: dict[str, Any] = {"data": {"title": "no state"}}
 

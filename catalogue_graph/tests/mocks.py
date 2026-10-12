@@ -440,7 +440,11 @@ class MockElasticsearchClient:
     apply_range_filters: bool = False
 
     def __init__(
-        self, config: dict, api_key: str, timeout: float | None = None
+        self,
+        config: dict,
+        api_key: str,
+        timeout: float | None = None,
+        http_compress: bool = False,
     ) -> None:  # noqa: D401
         pass
 

@@ -1,18 +1,18 @@
+"""Tests covering extraction of the primary language from MARC 008/35-37.
+
+https://www.loc.gov/marc/bibliographic/bd008a.html
+"""
+
+from __future__ import annotations
+
 import pytest
 from pymarc.record import Field, Record
 
-from models.pipeline.id_label import Language
-from tests.adapters.extractors.ebsco.helpers import lone_element
-
-from ..ebsco_test_transformer import transform_ebsco_record
-
-
-def _get_languages(marc_record: Record) -> list[Language]:
-    return transform_ebsco_record(marc_record).data.languages
+from adapters.transformers.marc.languages import extract_primary_language
 
 
 def test_no_008_no_language(marc_record: Record) -> None:
-    assert _get_languages(marc_record) == []
+    assert extract_primary_language(marc_record) is None
 
 
 @pytest.mark.parametrize(
@@ -21,7 +21,7 @@ def test_no_008_no_language(marc_record: Record) -> None:
     indirect=True,
 )
 def test_no_attempt_to_code_language(marc_record: Record) -> None:
-    assert _get_languages(marc_record) == []
+    assert extract_primary_language(marc_record) is None
 
 
 @pytest.mark.parametrize(
@@ -30,7 +30,7 @@ def test_no_attempt_to_code_language(marc_record: Record) -> None:
     indirect=True,
 )
 def test_unknown_language(marc_record: Record) -> None:
-    assert _get_languages(marc_record) == []
+    assert extract_primary_language(marc_record) is None
 
 
 @pytest.mark.parametrize(
@@ -39,7 +39,8 @@ def test_unknown_language(marc_record: Record) -> None:
     indirect=True,
 )
 def test_known_language(marc_record: Record) -> None:
-    language = lone_element(_get_languages(marc_record))
+    language = extract_primary_language(marc_record)
+    assert language is not None
     assert language.id == "lat"
     assert language.label == "Latin"
 
@@ -49,11 +50,5 @@ def test_known_language(marc_record: Record) -> None:
     [(Field(tag="008", data="980407c19909999caumr p o     0   a0mul c"),)],
     indirect=True,
 )
-def test_multi_language(marc_record: Record) -> None:
-    """
-    The source data format only supports one language, but there
-    is a "language" called "Multiple Languages"
-    """
-    language = lone_element(_get_languages(marc_record))
-    assert language.id == "mul"
-    assert language.label == "Multiple languages"
+def test_multiple_languages_code_is_suppressed(marc_record: Record) -> None:
+    assert extract_primary_language(marc_record) is None

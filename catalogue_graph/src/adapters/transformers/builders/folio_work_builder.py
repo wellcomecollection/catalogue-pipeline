@@ -7,6 +7,7 @@ from adapters.transformers.marc.duration import extract_duration
 from adapters.transformers.marc.edition import extract_edition
 from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.genres import extract_genres
+from adapters.transformers.marc.languages import extract_languages
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
 )
@@ -21,6 +22,7 @@ from adapters.transformers.marc.subjects import (
 )
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from models.pipeline.concept import Genre, Subject
+from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
     Id,
     Identifiable,
@@ -49,6 +51,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def physical_description(self) -> str | None:
         return extract_physical_description(self.record)
+
+    @property
+    def languages(self) -> list[Language]:
+        return extract_languages(self.record)
 
     @property
     def edition(self) -> str | None:
