@@ -31,9 +31,10 @@ module "catalogue_graph_neptune_cluster_dev" {
 module "catalogue_graph_neptune_cluster_2026_07_03" {
   source = "./modules/catalogue_graph"
 
-  # Previous production cluster, kept while the 2026-07-03 pipeline remains the fallback
-  # (wellcomecollection/platform#6743).
+  # Previous production cluster, being decommissioned with the 2026-07-03 pipeline
+  # (wellcomecollection/platform#6748).
   graph_date                 = "2026-07-03"
+  skip_final_snapshot        = true
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
   private_subnets            = local.private_subnets
