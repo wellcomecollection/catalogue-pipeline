@@ -105,16 +105,21 @@ Feature: parents (MARC 440, 490, 773 and 830)
     When I transform the MARC record
     Then the only ancestor has the title "A Series"
 
-  Scenario: Several different relevant fields each yield a parent
+  # The Sierra API lists fields grouped by Sierra field tag, with the 773 host
+  # item ahead of the 4xx and 830 series fields, so the Scala test's input is in
+  # that order. FOLIO records are in MARC tag order, and the FOLIO builder puts
+  # the 773 first to keep the parents of the works it replaces in the same order.
+
+  Scenario: Several different relevant fields each yield a parent, host item first
     Given the MARC record has a 440 field with subfield "a" value "A Series"
     And the MARC record has a 490 field with subfield "a" value "Another Series"
     And the MARC record has a 773 field with subfield "t" value "A Host"
     And the MARC record has a 830 field with subfield "a" value "Yet Another Series"
     When I transform the MARC record
     Then the work has 4 ancestors with title:
+      | A Host |
       | A Series |
       | Another Series |
-      | A Host |
       | Yet Another Series |
 
   Scenario Outline: A repeated relevant field yields a parent for each occurrence
