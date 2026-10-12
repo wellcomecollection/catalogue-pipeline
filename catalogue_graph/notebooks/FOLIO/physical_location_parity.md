@@ -2,7 +2,7 @@
 
 For every FOLIO item that is also shown in the catalogue, this check builds the item's `PhysicalLocation` from FOLIO data alone, using the rules found in [location_codes.md](location_codes.md) and the [decision table](access_rules/decision_table.md), and compares it with the `PhysicalLocation` readers see today. It covers the item's location and access condition only, which is what platform#6584 and platform#6589 need.
 
-The data was captured on 2026-10-09, and [folio_physical_location_parity.ipynb](folio_physical_location_parity.ipynb) reproduces the check:
+The data was captured on 2026-10-09 by an analysis notebook which is not stored in this repository:
 - **FOLIO:** a read-only pull of the production tenant's items (478,406), holdings, bound-with parts and reference data.
 - **Catalogue:** each Sierra item's `PhysicalLocation` from the served works index, `works-indexed-2026-09-30`. This is a newer index than the one the earlier comparisons used.
 
