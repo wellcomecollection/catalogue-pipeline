@@ -37,7 +37,15 @@ def get_parents(record: Record) -> list[WorkAncestor]:
     seen_titles = set()
     titles: list[str] = []
     for field in record.get_fields(*SUBFIELD_TAGS.keys()):
-        subfields = field.get_subfields(*SUBFIELD_TAGS[field.tag])
+        # Subfield codes are listed in priority order. A 773 host item entry normally
+        # carries the host's author in ǂa and its title in ǂt, so ǂt must win
+        # regardless of where it appears in the field.
+        subfields: list[str] = []
+        for code in SUBFIELD_TAGS[field.tag]:
+            subfields = field.get_subfields(code)
+            if subfields:
+                break
+
         if len(subfields) == 0:
             logger.warning(
                 "No Series relationship found", tag=field.tag, field=str(field)
