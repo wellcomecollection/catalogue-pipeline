@@ -178,7 +178,7 @@ platform#6731 changes the location rows: permanent location from 983 `$b` (the n
 
 | Sierra input | What it drives today | FOLIO candidate, to check in step 3 |
 |---|---|---|
-| OPAC message | online, manual, restricted, by appointment, donor permission, safeguarded | loan type, or a typed item note, if the migration carried it |
+| OPAC message | online, manual, restricted, by appointment, donor permission, safeguarded | statistical code |
 | hold count, loan rule, holdshelf status | the in-use branches | live request and loan state, available to the items service (#6654), not to the transform |
 | due date | the on-loan branches | loans, live only |
 | location codes in the rules for requesting | manual request, open shelves, unavailable, digitisation | FOLIO location, if the migration kept the granularity (#6584 says it's coarser) |
