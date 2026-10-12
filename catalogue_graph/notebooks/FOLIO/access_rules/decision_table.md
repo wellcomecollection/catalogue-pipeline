@@ -204,12 +204,16 @@ These need Collection Information, or whoever owns reading-room policy, to decid
   > Nothing has been mapped here, the data is similar to Sierra with Item Status = Unavailable and Statistical Code (OPAC MSG) = @ Digitisation. But the intention is to change this.
   >
   > Similarly to Exhibitions, we intend to test changing the temporary location for digitisation and we have set up Wellcome Collection (Institution) > Eustom Road (Campus) > Digitisation (Library) > Digitisation (location) for post-Go Live playing around with.
-- **Location rules.** Sierra's rules for requesting name 80 distinct location codes, and 66 of them have no FOLIO location yet (see [location_codes.md](../location_codes.md)):
+- **Location rules.** **RESOLVED AS FAR AS SIERRA/FOLIO IS CONCERNED** Sierra's rules for requesting name 80 distinct location codes, and 66 of them have no FOLIO location yet (see [location_codes.md](../location_codes.md)):
   - 58 have no live Sierra items. They're stale entries in the rules configuration and need nothing.
   - 6 are data protection codes (`sc#ac` and others, about 51,500 Sierra items). I think they mostly or entirely apply to archive items, so their restriction would come across with the Axiell sync rather than the Sierra migration.
   - `harcl` (3,596 items) keeps offsite deepstore archives unrequestable. It's the same case as the data protection codes.
   - `gblip` makes its items manual request. It's set on one item, a departmental copy of the BMJ (`i18699145`) on a suppressed bib (`b1497535x`), so readers never see it.
 
   What's left to decide is whether the data protection and `harcl` restrictions come across with the Axiell sync, which depends on the sync's mapping.
-- **Contained-in items.** 324 contained-in ephemera items (`cwith`, status Intellectual item in the tenant) can be requested online in Sierra today. Collection Information's mapping makes all contained-in items not requestable, so these 324 would stop being requestable. Is that intended?
+   
+- **Contained-in items.** **RESOLVED FOR NOW, TO BE REVISITED AFTER INVENTORY** 324 contained-in ephemera items (`cwith`, status Intellectual item in the tenant) can be requested online in Sierra today. Collection Information's mapping makes all contained-in items not requestable, so these 324 would stop being requestable. Is that intended?
+
+  > Any items that have cwith currently, won't have this is the future (once inventoried). The item record will be edited and the location code changed as part of this. As long as the items have a cwith they won't be requestable online, and we need to make sure they'll have a code that makes them fall into the expected/correct access conditions when they're updated/inventoried. Until inventoried, we treat these items as `cwith`, ie. not requestable. 
+
 - **Axiell-synced items.** Their mapping is still pending, so this table makes no claim about them.
