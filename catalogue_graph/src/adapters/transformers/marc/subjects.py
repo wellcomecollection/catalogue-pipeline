@@ -109,7 +109,7 @@ SUBDIVISION_TRANSFORMS = {
 }
 
 
-def is_subject_to_keep(field: Field) -> bool:
+def is_from_adopted_vocabulary(field: Field) -> bool:
     """
     True for headings from LCSH or LC Names, from MeSH, or from an adopted ǂ2 vocabulary.
 
@@ -134,7 +134,7 @@ def is_from_standard_thesaurus(field: Field) -> bool:
 
 
 def extract_subjects(
-    record: Record, keep: Callable[[Field], bool] = is_subject_to_keep
+    record: Record, keep: Callable[[Field], bool] = is_from_adopted_vocabulary
 ) -> list[Subject]:
     """Extract a subject from each 6xx heading that `keep` accepts, grouped by heading type and deduplicated."""
     return distinct(
