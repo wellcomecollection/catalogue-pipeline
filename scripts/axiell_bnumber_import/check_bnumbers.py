@@ -102,7 +102,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--pipeline-date",
-        default="2026-07-03",
+        default="2026-09-30",
         help="Pipeline whose Elasticsearch cluster to read (default: %(default)s)",
     )
     parser.add_argument("--es-mode", default="public", choices=["public", "private"])
