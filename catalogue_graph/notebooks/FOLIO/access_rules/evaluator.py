@@ -41,6 +41,7 @@ class FolioItemState:
     item_status: str | None = None
     statistical_code: str | None = None
     loan_type: str | None = None
+    temporary_loan_type: str | None = None
     library: str | None = None
     location_code: str | None = None
     material_type: str | None = None
@@ -93,7 +94,8 @@ def inputs(state: FolioItemState) -> dict[str, str]:
     return {
         "item_status": state.item_status or "",
         "statistical_code": state.statistical_code or "",
-        "loan_type": state.loan_type or "",
+        # FOLIO circulation uses the temporary loan type when one is set.
+        "loan_type": state.temporary_loan_type or state.loan_type or "",
         "library": state.library or "",
         "location_code": state.location_code or "",
         # Not a FOLIO field: derived from the location until #6584 defines location types.
