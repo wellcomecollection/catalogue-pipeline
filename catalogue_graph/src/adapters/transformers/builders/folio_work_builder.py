@@ -15,6 +15,7 @@ from adapters.transformers.marc.predecessor_identifier import (
 )
 from adapters.transformers.marc.production import extract_production
 from adapters.transformers.marc.subjects import (
+    SIERRA_TAG_ORDER,
     extract_subjects,
     is_from_standard_thesaurus,
 )
@@ -98,7 +99,9 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def subjects(self) -> list[Subject]:
-        return extract_subjects(self.record, keep=is_from_standard_thesaurus)
+        return extract_subjects(
+            self.record, keep=is_from_standard_thesaurus, tag_order=SIERRA_TAG_ORDER
+        )
 
     @property
     def duration(self) -> int | None:
