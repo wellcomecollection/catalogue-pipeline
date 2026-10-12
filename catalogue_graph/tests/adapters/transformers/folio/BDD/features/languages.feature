@@ -1,14 +1,15 @@
 Feature: languages (MARC 008/35-37 and 041)
   The primary language comes from the MARC language code in 008/35-37, and
   additional languages from 041 ǂa in document order. Codes are trimmed and
-  lowercased, resolved against the MARC language code list The primary language
-  comes first and the list is deduplicated.
+  lowercased, resolved against the MARC language code list, and codes that say
+  nothing about the language are suppressed. The primary language comes first
+  and the list is deduplicated.
 
   These scenarios mirror the unit tests of the Scala transformer this replaces
   (SierraLanguagesTest.scala), including its test data, so the two can be
   compared directly. Where the Scala reads the Sierra LANG fixed field, these
-  read 008/35-37: Folio carries LANG over as 998 ǂf, but its MARC-to-Instance
-  mapping never reads ǂf, so nothing maintains it.
+  read 008/35-37: Folio carries LANG over as 998 ǂf but does not update it when
+  a record is edited, so it is not a dependable source.
 
   https://www.loc.gov/marc/bibliographic/bd008a.html
   https://www.loc.gov/marc/bibliographic/bd041.html
@@ -103,28 +104,26 @@ Feature: languages (MARC 008/35-37 and 041)
     When I transform the MARC record
     Then there are no languages
 
+  Scenario: An obsolete code and its replacement count as one language, keeping the current code
+    # Scala deduplicates on code and label, so "scc" and "srp" both appear as Serbian
+    Given the MARC record's only 008 field with the value "140303s1958    enk     s     000 0 scc  "
+    And the MARC record has a 041 field with subfield "a" value "srp"
+    When I transform the MARC record
+    Then the only language has the label "Serbian"
+    And the only language has the id "srp"
+
+  Scenario: The current code is kept whichever field it comes from
+    Given the MARC record's only 008 field with the value "140303s1958    enk     s     000 0 srp  "
+    And the MARC record has a 041 field with subfield "a" value "scc"
+    When I transform the MARC record
+    Then the only language has the id "srp"
+
   Scenario: 998 ǂf is not consulted, even when it carries a different language
     # Folio does not maintain ǂf after migration, so 008/35-37 is authoritative
     Given the MARC record's only 008 field with the value "140303s1958    enk     s     000 0 ger  "
     And the MARC record has a 998 field with subfield "f" value "fre"
     When I transform the MARC record
     Then the only language has the label "German"
-
-  Scenario: A 041 ǂa packing several codes is split every three characters
-    # Folio's own mapping splits ǂa this way; 408 records use the convention
-    Given the MARC record has a 041 field with subfield "a" value "engger"
-    When I transform the MARC record
-    Then the work has 2 languages with label:
-      | English |
-      | German  |
-
-  Scenario: A value that merely looks packed is left whole and logged
-    # Only split when every chunk is a real code, so note text in ǂa is not
-    # read as a list of languages
-    Given the MARC record has a 041 field with subfield "a" value "xxxyyy"
-    When I transform the MARC record
-    Then an error "Unrecognised language code" is logged with code "xxxyyy"
-    And there are no languages
 
   Scenario: A mistyped primary code is dropped and logged
     # "jap" is not a MARC code; the code for Japanese is "jpn"

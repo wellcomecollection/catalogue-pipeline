@@ -63,13 +63,13 @@ class SourceWorkTransformer(BatchTransformer, ABC):
         row_id, content = row["id"], row.get("content")
 
         if not content:
-            logger.error("Row has no content; cannot transform", row_id=row_id)
+            logger.error("Row has no content; cannot transform")
             self._add_error(Exception("Missing content"), "transform", row_id)
             return None
 
         try:
             return parse_single_marc_record(content)
         except Exception as e:
-            logger.error("Failed to parse MARC record", row_id=row_id, error=str(e))
+            logger.error("Failed to parse MARC record", error=str(e))
             self._add_error(e, "parse", row["id"])
             return None

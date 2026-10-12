@@ -15,13 +15,16 @@ from pymarc.record import Record
 
 from ..folio import RefCache
 from .config import (
-    AXIELL_LOCATION_NOTE_TYPE,
+    ACCESS_ITEM_STATUS,
+    AXIELL_LOCATION_NOTE_PREFIX,
+    DEFAULT_ITEM_STATUS,
+    HARVEST_FLAG_SPEC,
     HOLDINGS_SOURCE_FIELD,
     LOAN_TYPE_FIELD,
     LOCAL_IDENTIFIER_FIELD,
-    LOCATION_FIELD,
     MARC_SOURCE,
     MATERIAL_TYPE_FIELD,
+    NORMAL_LOCATION_FIELD,
     RECORD_TYPE_ITEM,
     VERSION,
     FieldMap,
@@ -38,8 +41,8 @@ from .payloads import (
     Instance,
     Item,
     MappedPayloads,
-    Note,
     PayloadMeta,
+    Status,
 )
 
 # ── extraction ──────────────────────────────────────────────────────────────────
@@ -75,14 +78,32 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
     there is no AxC source), applies the location prefix rules and normalization
     ``table``, then looks the resulting name up in the FOLIO tenant.
 
-    Raises :class:`MappingError` if the resolved name is unknown to the tenant.
+    Raises :class:`MappingError` if the resolved name is unknown to the tenant,
+    or if the field sets ``strict_table`` and the value is not in its table.
     """
     raw = getattr(rec, field.canonical) if field.canonical else None
     value = (raw or "").strip()
+    if field.required and not value:
+        raise MappingError(
+            f"Missing {field.label} (MARC {field.marc}) for source_id={rec.source_id}"
+            " — required, with no default to fall back on"
+        )
     if field.location:
         value = (_folio_location(value) or "").strip()
     if field.table:
-        value = field.table.get(value.lower(), value)
+        mapped = field.table.get(value.lower())
+        if mapped is None and value and field.strict_table:
+            # Checked before the resolver, because the resolver would accept any
+            # name the tenant happens to carry and the table is the agreed
+            # vocabulary. Without this an unmapped AxC value reaches FOLIO with
+            # whatever semantics that name has there.
+            raise MappingError(
+                f"Unmapped {field.label} {value!r} (MARC {field.marc}) for"
+                f" source_id={rec.source_id} — add it to the mapping table,"
+                " which is the agreed vocabulary, rather than relying on the"
+                " tenant to know the raw AxC value"
+            )
+        value = value if mapped is None else mapped
     if not value:
         value = field.default or ""
     if field.resolver is None:
@@ -129,23 +150,47 @@ def build_holdings(rec: CanonicalRecord, ref: RefCache) -> Holdings:
     return Holdings(
         hrid=_holdings_hrid(rec.source_id),
         sourceId=_resolve(HOLDINGS_SOURCE_FIELD, rec, ref),
-        permanentLocationId=_resolve(LOCATION_FIELD, rec, ref),
+        permanentLocationId=_resolve(NORMAL_LOCATION_FIELD, rec, ref),
     )
+
+
+def _item_status(rec: CanonicalRecord) -> Status:
+    """The FOLIO item status, from the AxC access category.
+
+    Statuses are fixed FOLIO enums, not tenant reference data. Missing
+    categories use the default; unrecognised categories raise a mapping error.
+    """
+    category = (rec.access_category or "").strip()
+    if not category:
+        return Status(name=DEFAULT_ITEM_STATUS)
+    name = ACCESS_ITEM_STATUS.get(category.upper())
+    if name is None:
+        raise MappingError(
+            f"Unrecognised access category {category!r} for item status:"
+            " add it to ACCESS_ITEM_STATUS or fix the MARC"
+        )
+    return Status(name=name)
 
 
 def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
     return Item(
         hrid=_item_hrid(rec.source_id),
         materialType=IdRef(id=_resolve(MATERIAL_TYPE_FIELD, rec, ref)),
+        status=_item_status(rec),
         permanentLoanType=IdRef(id=_resolve(LOAN_TYPE_FIELD, rec, ref)),
-        permanentLocation=IdRef(id=_resolve(LOCATION_FIELD, rec, ref)),
-        barcode=rec.barcode,
-        notes=[
-            Note(
-                note=rec.current_location or "unknown",
-                noteType=AXIELL_LOCATION_NOTE_TYPE,
-                staffOnly=False,
-            )
+        permanentLocation=IdRef(id=_resolve(NORMAL_LOCATION_FIELD, rec, ref)),
+        # The AxC current location is kept as an *administrative* note, not a
+        # typed one: it is an internal audit trail of where the item actually is,
+        # and an administrative note needs no item note type to exist in the
+        # tenant. The label is part of the string because an administrative note
+        # carries no type to identify it by.
+        #
+        # Always emitted, "unknown" included: the note is absent from the payload
+        # otherwise, and _upsert_entity merges payload over the existing record,
+        # so omitting it would leave a previous location in place rather than
+        # clearing it.
+        administrativeNotes=[
+            f"{AXIELL_LOCATION_NOTE_PREFIX}: {rec.current_location or 'unknown'}"
         ],
     )
 
@@ -175,14 +220,33 @@ def _assemble_payloads(
 def is_selected_for_sync(xml_content: str) -> bool:
     """Whether a record should be synced to FOLIO.
 
-    True only for item-level records (MARC ``351 $c`` == "ITEM", case-insensitive);
-    everything else is skipped entirely — never created, updated or suppressed.
+    Two gates, both read from the harvested MARCXML, and both have to pass:
 
-    NOTE: the ``980 $a`` harvest-flag gate is removed for now ("run for all"), so
-    selection is item-level only. To re-enable it, add the ``980 $a`` check back
-    here and in ``select_and_build``.
+    1. the harvest flag (``980 $a``) is present and non-empty, meaning the record
+       is opted in to the FOLIO sync, and
+    2. the record is item-level (``351 $c`` == "ITEM", case-insensitive).
+
+    A record failing either gate is skipped: not created, not updated, not
+    suppressed, and not counted as an error.
+
+    The un-flag case is undecided. Unticking Harvest on a record that has
+    already synced leaves its FOLIO instance, holdings and item in place,
+    unsuppressed and no longer updated: the only delete path is the reconciler,
+    which works from superseded GUIDs, so a flag removal is not a delete signal
+    and nothing reclaims the record. Whether it should instead suppress them is
+    open with Collection Information on wellcomecollection/platform#6663. This
+    is the current behaviour, not an agreed rule.
     """
     root = parse_xml(xml_content)
+    return _passes_selection_gates(root)
+
+
+def _passes_selection_gates(root: Record) -> bool:
+    """The selection gates, shared by :func:`is_selected_for_sync` and
+    :func:`select_and_build` so the two can never disagree."""
+    harvest_flag = (extract(root, HARVEST_FLAG_SPEC) or "").strip()
+    if not harvest_flag:
+        return False
     record_type = (extract(root, "351$c") or "").strip().upper()
     return record_type == RECORD_TYPE_ITEM
 
@@ -195,14 +259,12 @@ def select_and_build(
 ) -> MappedPayloads | None:
     """Select and build in one pass — parses XML only once.
 
-    Returns ``None`` when the record is not item-level (MARC ``351$c`` != "ITEM").
-    Raises on malformed XML or mapping errors.
+    Returns ``None`` when the record fails either selection gate: no ``980 $a``
+    harvest flag, or not item-level. Raises on malformed XML or mapping errors.
     """
     root = parse_xml(xml_content)
 
-    # Selection gate: only sync item-level records.
-    record_type = (extract(root, "351$c") or "").strip().upper()
-    if record_type != RECORD_TYPE_ITEM:
+    if not _passes_selection_gates(root):
         return None
 
     rec = _extract_record(root, deleted=deleted)

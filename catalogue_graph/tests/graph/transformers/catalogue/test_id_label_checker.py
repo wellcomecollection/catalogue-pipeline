@@ -1,3 +1,5 @@
+import unicodedata
+
 from graph.transformers.catalogue.id_label_checker import IdLabelChecker
 from models.events import BasePipelineEvent
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies
@@ -121,6 +123,14 @@ def test_id_label_checker_ignores_trailing_stop() -> None:
 
     # Alternative labels differing only by a stop on one record are not ambiguous
     assert id_label_checker.get_id("Taco fossils", "Concept") == "sh00000076"
+
+
+def test_id_label_checker_matches_decomposed_labels() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # LoC label precomposed, catalogue label decomposed
+    decomposed = unicodedata.normalize("NFD", "Linné, Carl von, 1707-1778")
+    assert id_label_checker.get_id(decomposed, "Person") == "n00000034"
 
 
 def test_id_label_checker_keeps_ellipsis() -> None:

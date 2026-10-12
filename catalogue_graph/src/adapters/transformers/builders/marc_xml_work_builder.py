@@ -3,11 +3,11 @@ from datetime import datetime
 from pymarc.record import Record
 
 from adapters.transformers.builders.source_work_builder import SourceWorkBuilder
-from adapters.transformers.ebsco.parents import get_parents
 from adapters.transformers.marc.alternative_titles import extract_alternative_titles
 from adapters.transformers.marc.description import extract_description
 from adapters.transformers.marc.identifier import extract_id
 from adapters.transformers.marc.other_identifiers import extract_other_identifiers
+from adapters.transformers.marc.parents import get_parents
 from adapters.transformers.marc.title import extract_title
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Concept, Contributor, Genre, Subject
@@ -203,6 +203,14 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
                 "predecessor_identifier": self.predecessor_identifier,
                 "relations": WorkRelations(ancestors=self.ancestors),
             }
+        )
+
+    @property
+    def deleted_work_state(self) -> SourceWorkState:
+        # The id-minter only reads the predecessor on first mint, so a record first seen
+        # suppressed must carry it or it keeps a fresh id when published.
+        return super().deleted_work_state.model_copy(
+            update={"predecessor_identifier": self.predecessor_identifier}
         )
 
     def transform_visible_work(self) -> VisibleSourceWork:

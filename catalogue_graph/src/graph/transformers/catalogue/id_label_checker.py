@@ -135,7 +135,8 @@ class IdLabelChecker:
 
     def _normalise_label(self, label: str) -> str:
         # Mirrors the label-derived id's trailing-stop handling, so "X" and "X." share a key.
-        return trim_trailing_period(label.lower())
+        # NFC because some catalogue labels arrive decomposed while LoC and MeSH are precomposed.
+        return trim_trailing_period(unicodedata.normalize("NFC", label).lower())
 
     def get_id(self, label: str, concept_type: ConceptType) -> str | None:
         """

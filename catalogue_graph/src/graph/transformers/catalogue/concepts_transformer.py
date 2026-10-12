@@ -32,6 +32,7 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
 
         self.id_label_checker: IdLabelChecker | None = None
         self.label_derived_types: dict[str, Counter[ConceptType]] | None = None
+        self.label_derived_spellings: dict[str, Counter[str]] = {}
         self.id_lookup: set = set()
         self.event = event
 
@@ -49,20 +50,24 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
             source=raw_concept.source,
         )
 
-    def _collect_label_derived_types(self) -> dict[str, Counter[ConceptType]]:
-        """Extra pass over the source: works stream in no fixed order, so the first-seen type is run-dependent."""
+    def _collect_label_derived_variants(
+        self,
+    ) -> tuple[dict[str, Counter[ConceptType]], dict[str, Counter[str]]]:
+        """Extra pass over the source: works stream in no fixed order, so the first-seen type and label are run-dependent."""
         # In a windowed run the vote covers only the window's works, so a window with an
         # unusual type mix can match a different type from a full run, which votes over
         # every work. The nightly full edge re-extract and stale-edge removal converge the
         # graph on the full vote (wellcomecollection/platform#6739).
         types: dict[str, Counter[ConceptType]] = defaultdict(Counter)
+        spellings: dict[str, Counter[str]] = defaultdict(Counter)
         for extracted in self.source.stream_raw():
             raw_concept = RawCatalogueConcept(extracted.concept)
             if raw_concept.source == "label-derived":
                 types[raw_concept.wellcome_id][raw_concept.type] += 1
+                spellings[raw_concept.wellcome_id][raw_concept.label] += 1
 
-        logger.info("Collected label-derived concept types", count=len(types))
-        return types
+        logger.info("Collected label-derived concept variants", count=len(types))
+        return types, spellings
 
     def _get_match_type(self, raw_concept: RawCatalogueConcept) -> ConceptType:
         """The most common type across works, with the most specific type as tie-break."""
@@ -81,6 +86,22 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
             ]
         )
 
+    def _get_label_matched_id(self, raw_concept: RawCatalogueConcept) -> str | None:
+        """Try every spelling folded into this id, most common first, so the match does not depend on stream order."""
+        assert self.id_label_checker is not None
+
+        match_type = self._get_match_type(raw_concept)
+        spellings = self.label_derived_spellings.get(
+            raw_concept.wellcome_id
+        ) or Counter([raw_concept.label])
+        for label, _ in sorted(spellings.items(), key=lambda item: (-item[1], item[0])):
+            if (
+                source_id := self.id_label_checker.get_id(label, match_type)
+            ) is not None:
+                return source_id
+
+        return None
+
     def extract_edges(
         self, raw_data: ExtractedWorkConcept
     ) -> Generator[ConceptHasSourceConcept]:
@@ -92,7 +113,9 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
             self.id_label_checker = IdLabelChecker(transformers, self.event)
 
         if self.label_derived_types is None:
-            self.label_derived_types = self._collect_label_derived_types()
+            self.label_derived_types, self.label_derived_spellings = (
+                self._collect_label_derived_variants()
+            )
 
         raw_concept = RawCatalogueConcept(raw_data.concept, self.id_label_checker)
 
@@ -104,12 +127,7 @@ class CatalogueConceptsTransformer(GraphBaseTransformer):
         # Generate edge via label
         if (
             raw_concept.source == "label-derived"
-            and (
-                source_id := raw_concept.get_label_matched_source_concept_id(
-                    self._get_match_type(raw_concept)
-                )
-            )
-            is not None
+            and (source_id := self._get_label_matched_id(raw_concept)) is not None
         ):
             attributes = ConceptHasSourceConceptAttributes(
                 qualifier=None, matched_by="label"

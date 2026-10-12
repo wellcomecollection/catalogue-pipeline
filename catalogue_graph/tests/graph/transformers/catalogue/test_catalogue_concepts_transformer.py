@@ -217,6 +217,43 @@ def test_catalogue_concepts_transformer_matches_on_the_most_common_type(
     ]
 
 
+@pytest.mark.parametrize("clean_work_id", ["aaaaaaaa", "zzzzzzzz"])
+def test_catalogue_concepts_transformer_matches_on_any_spelling(
+    clean_work_id: str,
+) -> None:
+    """
+    Spellings that fold to one label-derived id share it, so a mis-encoded spelling on most
+    works must not stop the clean one matching, whichever work streams first.
+    """
+    pipeline_date = "2027-12-24"
+    graph_date = "2024-12-24"
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc", "mesh", "weco"], pipeline_date, graph_date
+    )
+
+    def subject(label: str) -> dict:
+        return {
+            **_label_derived_concept(label, "Concept"),
+            "concepts": [_label_derived_concept(label, "Concept")],
+        }
+
+    _add_mock_work(pipeline_date, clean_work_id, {"subjects": [subject("Tacos")]})
+    _add_mock_work(pipeline_date, "mmmmmmmm", {"subjects": [subject("Tac�os")]})
+    _add_mock_work(pipeline_date, "nnnnnnnn", {"subjects": [subject("Tac�os")]})
+
+    edges = list(get_transformer(pipeline_date, graph_date)._stream_edges())
+
+    assert edges == [
+        ConceptHasSourceConcept(
+            from_id="cpindex1",
+            to_id="sh00000002",
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="label"
+            ),
+        )
+    ]
+
+
 def test_mismatched_pipeline_date() -> None:
     pipeline_date = "2027-12-24"
     graph_date = "2027-12-24"

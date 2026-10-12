@@ -62,8 +62,12 @@ class Item(BaseModel):
     materialType: IdRef
     permanentLoanType: IdRef
     permanentLocation: IdRef
-    barcode: str | None = None
+    # Typed notes (each resolved to an itemNoteTypeId by
+    # upsert.entities._resolve_item_note_types). The mapping emits none today —
+    # the AxC current location goes to administrativeNotes instead.
     notes: list[Note] | None = None
+    # Plain untyped strings; no tenant note type needed.
+    administrativeNotes: list[str] | None = None
 
 
 class PayloadMeta(BaseModel):

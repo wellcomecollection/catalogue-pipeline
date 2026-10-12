@@ -208,6 +208,10 @@ def run_sync(
         "total": 0,
         # Superseded GUIDs (reconciler deletions) processed in the second pass.
         "deletions": 0,
+        # Records whose item carried a location note the sync could no longer
+        # claim, so a duplicate was left behind. Not an error: nothing failed and
+        # nothing was lost, but each one needs reconciling by hand in FOLIO.
+        "stray_location_notes": 0,
     }
 
     for row in rows:
@@ -293,8 +297,11 @@ def run_sync(
                     holdings_action=result.holdings.action,
                     item_action=result.item.action,
                     timestamp=utc_now_iso(),
+                    stray_location_notes=result.stray_location_notes,
                 )
             )
+            if result.stray_location_notes:
+                counts["stray_location_notes"] += 1
 
         logger.info(
             "upsert_result",

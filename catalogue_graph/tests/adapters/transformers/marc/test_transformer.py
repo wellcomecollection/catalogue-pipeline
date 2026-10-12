@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any, cast
 
 import pytest
+import structlog
 from elasticsearch import Elasticsearch
 from structlog.testing import capture_logs
 
@@ -97,6 +98,36 @@ def test_transform_valid_marcxml_returns_work(adapter_store: AdapterStore) -> No
     assert document.body["data"]["title"] == "A Useful Title"
     # Null fields (e.g. predecessorIdentifier) must not reach the index
     assert "predecessorIdentifier" not in document.body["state"]
+
+
+def test_extractor_logs_carry_the_row_id(adapter_store: AdapterStore) -> None:
+    """Field extractors log without knowing the record; the transformer binds its id."""
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
+
+    xml = (
+        "<record>"
+        "<leader>00000nam a2200000   4500</leader>"
+        "<controlfield tag='001'>marc12345</controlfield>"
+        "<datafield tag='245' ind1='0' ind2='0'>"
+        "<subfield code='a'>First title</subfield>"
+        "</datafield>"
+        "<datafield tag='245' ind1='0' ind2='0'>"
+        "<subfield code='a'>Second title</subfield>"
+        "</datafield>"
+        "</record>"
+    )
+
+    with capture_logs(processors=[structlog.contextvars.merge_contextvars]) as entries:
+        list(
+            transformer.transform(
+                [{"id": "marc12345", "content": xml, "last_modified": datetime.now()}]
+            )
+        )
+
+    errors = [e for e in entries if e["log_level"] == "error"]
+    assert errors, entries
+    assert all(e["row_id"] == "marc12345" for e in errors)
+    assert "row_id" not in structlog.contextvars.get_contextvars()
 
 
 def test_transform_handles_transform_record_exception(
@@ -239,7 +270,7 @@ def test_stream_to_skips_id_less_records_and_warns_per_record(
 
     MockElasticsearchClient.inputs.clear()
     es_client = MockElasticsearchClient({}, "")
-    with capture_logs() as logs:
+    with capture_logs(processors=[structlog.contextvars.merge_contextvars]) as logs:
         result = transformer.stream_to(
             ElasticsearchSink(cast(Elasticsearch, es_client), "works-source-dev")
         )
