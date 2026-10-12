@@ -1673,6 +1673,27 @@ class PlatformMergerTest
       )
     }
 
+    it("never gives the target a Miro work it does not link") {
+      val miroForAB = miroIdentifiedWork()
+      val miroForBC = miroIdentifiedWork()
+      def pictureBib(miros: Work[Identified]*) =
+        sierraPhysicalIdentifiedWork()
+          .format(Format.Pictures)
+          .mergeCandidates(miros.map(createMiroSierraMergeCandidateFor).toList)
+      val bibA = pictureBib(miroForAB)
+      val bibB = pictureBib(miroForAB, miroForBC)
+      val bibC = pictureBib(miroForBC)
+
+      val works = List(bibA, bibB, bibC, miroForAB, miroForBC)
+      merger.findTarget(works) shouldBe Some(bibA)
+      val result = merger.merge(works).mergedWorksWithTime(now)
+
+      redirectsIn(result) shouldBe Map(
+        miroForAB.id -> bibA.state.canonicalId,
+        miroForBC.id -> bibB.state.canonicalId
+      )
+    }
+
     it("gives each Axiell work only its own bib") {
       val sharedMiro = miroIdentifiedWork()
       val axiellWorks = (1 to 2).map(_ => axiellIdentifiedWork()).toList

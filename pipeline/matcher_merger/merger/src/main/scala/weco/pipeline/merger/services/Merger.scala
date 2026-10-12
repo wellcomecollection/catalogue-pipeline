@@ -120,11 +120,20 @@ trait Merger extends MergerLogging {
         val carved = bridged.filterNot(
           _.exists(_.state.canonicalId == target.state.canonicalId)
         )
-        // A Miro work goes with the target unless only one carved group links it
+        // A Miro work goes to whichever group linking it wins target precedence
+        val miroOwner: Map[CanonicalId, Seq[Work[Identified]]] =
+          miroWorks.flatMap {
+            m =>
+              val linking = bridged.filter(linksTo(_, m))
+              findTarget(works.filter(w => linking.exists(_.contains(w))))
+                .flatMap(t => linking.find(_.contains(t)))
+                .map(m.state.canonicalId -> _)
+          }.toMap
+
         val groupOf: Map[CanonicalId, Int] = carved.zipWithIndex.flatMap {
           case (c, i) =>
             val ownMiro = miroWorks.filter(
-              m => linksTo(c, m) && bridged.count(linksTo(_, m)) == 1
+              m => miroOwner.get(m.state.canonicalId).contains(c)
             )
             (c ++ ownMiro).map(_.state.canonicalId -> i)
         }.toMap
