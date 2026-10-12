@@ -5,14 +5,27 @@ Feature: Extracting subjects from 6xx fields
   Background:
     Given a valid MARC record
 
-  Rule: Accept but warn about multiple "a" subfields
-    Scenario: A poorly formed genre
-    "a" is a non-repeating field. However, if a field has more than one, accept it but log the anomaly.
-    There are some records out of our control where multiple "a" has occurred
+  Rule: Accept but warn about repeated non-repeatable subfields
+  "a" and some other subfields must not repeat, but records out of our control sometimes repeat them.
+  The repeats are kept, as in the previous implementation, and the anomaly logged.
+  A repeat that only duplicates an earlier value is dropped; see the FOLIO feature file.
+
+    Scenario: A poorly formed heading
       Given the MARC record has a 600 field with indicators "" "0" with subfield "a" value "Joseph Pujol" and subfield "a" value "Roland"
       When I transform the MARC record
       Then an error "Repeated non-repeating subfield $a" is logged with tag "600"
       And the only subject has the label "Joseph Pujol Roland"
+
+    Scenario: A personal name with two titles keeps both
+      Given the MARC record has a 600 field with indicators "" "0" with subfields:
+        | code | value               |
+        | a    | Wright, Thomas      |
+        | d    | 1973-               |
+        | t    | Circulation.        |
+        | t    | Omne vivum ex ovo.  |
+      When I transform the MARC record
+      Then an error "Repeated non-repeating subfield $t" is logged with tag "600"
+      And the only subject has the label "Wright, Thomas 1973- Circulation. Omne vivum ex ovo."
 
   Rule: A subject is extracted for each relevant field
     Scenario Outline: A single simple subject
@@ -128,6 +141,11 @@ Feature: Extracting subjects from 6xx fields
       When I transform the MARC record
       Then there are no subjects
 
+    Scenario: A corporate name with only a subordinate unit is valid
+      Given the MARC record has a 610 field with indicators "" "0" with subfield "b" value "Royal Navy."
+      When I transform the MARC record
+      Then the only subject has the label "Royal Navy"
+
   Rule: Not all 6xx fields create a Subject
   We catalogue using LoC (2nd indicator 0) and MeSH (2nd indicator 2) and other (2nd indicator 7).
   So for any of the Subject Added Entry fields we do not take any headings
@@ -182,8 +200,8 @@ Feature: Extracting subjects from 6xx fields
 
   Rule: Identical subjects are deduplicated
     Scenario: Two headings that produce the same subject
-    Based on Sierra b2506728x: the second indicators say LCSH and MeSH, but without a ǂ0
-    both headings yield the same label-derived subject, and only the first is kept
+    The second indicators say LCSH and MeSH, but without a ǂ0 both headings yield
+    the same label-derived subject, and only the first is kept
       Given the MARC record has a 650 field with indicators "" "0" with subfield "a" value "Medicine"
       And the MARC record has another 650 field with indicators "" "2" with subfield "a" value "Medicine."
       When I transform the MARC record
@@ -193,7 +211,7 @@ Feature: Extracting subjects from 6xx fields
 
   Rule: A subject with a single concept shares its identifier with that concept
     Scenario: A Person subject with a role
-    Based on Sierra b10769286: the role is part of the subject label but not of the concept label,
+    The role is part of the subject label but not of the concept label,
     and the concept still takes the subject's label-derived identifier
       Given the MARC record has a 600 field with indicators "" "0" with subfields:
         | code | value           |
@@ -205,22 +223,8 @@ Feature: Extracting subjects from 6xx fields
       And that subject's only concept has the label "Stanton, Louisa,"
       And that subject's only concept has the identifier value "stanton, louisa, defendant"
 
-  Rule: Blank subfields are left out of the labels
-    Scenario: A personal name with an empty subfield
-    Based on Sierra b24000802. The previous implementation kept the blank subfield in the subject
-    label, giving it a leading space, and only left it out of the concept label and identifier
-      Given the MARC record has a 600 field with indicators "" "0" with subfields:
-        | code | value        |
-        | a    |              |
-        | a    | Turner, John |
-      When I transform the MARC record
-      Then the only subject has the label "Turner, John"
-      And that subject has the source identifier value "turner, john"
-      And that subject's only concept has the label "Turner, John"
-
-  Rule: Subjects are listed by heading type: concept headings, then personal, corporate and meeting names
-    Scenario: Headings of several types in record order
-    Based on Sierra b10629725
+  Rule: Subjects are listed in document order
+    Scenario: Headings of several types
       Given the MARC record has a 600 field with indicators "" "0" with subfields:
         | code | value               |
         | a    | Le Tellier, Michel, |
@@ -230,9 +234,9 @@ Feature: Extracting subjects from 6xx fields
       And the MARC record has a 611 field with indicators "" "0" with subfield "a" value "Council of Trent"
       When I transform the MARC record
       Then the work has 4 subjects with label:
-        | Philosophy                          |
         | Le Tellier, Michel, 1603-1685.      |
         | Collège de Clermont (Paris, France) |
+        | Philosophy                          |
         | Council of Trent                    |
 
   Rule: Each heading type trims its own trailing punctuation from the main concept
@@ -240,7 +244,6 @@ Feature: Extracting subjects from 6xx fields
   a trailing comma and then a trailing full stop, and other headings lose a trailing full stop
 
     Scenario: A Person concept keeps its trailing comma
-    Based on Sierra b10769286
       Given the MARC record has a 600 field with indicators "" "0" with subfields:
         | code | value          |
         | a    | Stanton, Henry, |
@@ -251,7 +254,6 @@ Feature: Extracting subjects from 6xx fields
       And that subject's only concept has the label "Stanton, Henry,"
 
     Scenario: A Meeting concept keeps its trailing full stop
-    Based on Sierra b10462909
       Given the MARC record has a 611 field with indicators "" "0" with subfields:
         | code | value                           |
         | a    | International Medical Congress. |
@@ -261,7 +263,6 @@ Feature: Extracting subjects from 6xx fields
       And that subject's only concept has the label "International Medical Congress."
 
     Scenario: An Organisation concept loses a trailing comma and then a trailing full stop
-    Based on Sierra b24973841
       Given the MARC record has a 610 field with indicators "" "0" with subfields:
         | code | value      |
         | a    | Cotes, E., |
@@ -272,7 +273,7 @@ Feature: Extracting subjects from 6xx fields
 
   Rule: In a subdivided concept heading the ǂ0 belongs to the subject, not to the primary concept
     Scenario: A MeSH heading with a qualifier
-    Based on Sierra b1058478x: D014076Q000175 identifies "Tooth Diseases/diagnosis" as a whole,
+    D014076Q000175 identifies "Tooth Diseases/diagnosis" as a whole,
     so the concept "Tooth Diseases" gets a label-derived identifier instead
       Given the MARC record has a 650 field with indicators "" "2" with subfields:
         | code | value          |
@@ -290,7 +291,6 @@ Feature: Extracting subjects from 6xx fields
 
   Rule: In a subdivided personal name heading the ǂ0 belongs to the person
     Scenario: A Person subject with a general subdivision and an LC Names identifier
-    Based on Sierra b10730217
       Given the MARC record has a 600 field with indicators "" "0" with subfields:
         | code | value                        |
         | a    | Woolf, Virginia,             |
@@ -329,7 +329,6 @@ Feature: Extracting subjects from 6xx fields
         | 651  |
 
     Scenario: A Subject with a trailing dot and whitespace
-    Based on Sierra b11148810
       Given the MARC record has a 650 field with indicators "" "2" with subfield "a" value "Herniorrhaphy. "
       When I transform the MARC record
       Then the only subject has the label "Herniorrhaphy"

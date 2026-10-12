@@ -21,7 +21,7 @@ Runs locally, no tunnel needed: the clusters accept direct connections with IAM 
 # AWS_PROFILE=platform-developer, from catalogue_graph/ with PYTHONPATH=src
 from clients.neptune_client import NeptuneClient
 
-graph_date = "2026-07-03"
+graph_date = "2026-09-30"
 client = NeptuneClient(graph_date)
 ```
 

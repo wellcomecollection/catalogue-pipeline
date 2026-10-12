@@ -1,7 +1,6 @@
 locals {
   neptune_clusters = [
     module.catalogue_graph_neptune_cluster_dev,
-    module.catalogue_graph_neptune_cluster_2026_07_03,
     module.catalogue_graph_neptune_cluster_2026_09_30
   ]
 
@@ -16,24 +15,6 @@ module "catalogue_graph_neptune_cluster_dev" {
   # Its experimental/non-production status is codified in the graph pipeline, which includes a safety
   # mechanism stopping us from combining the 'dev' graph date with production ES indexes.
   graph_date                 = "dev"
-  namespace                  = local.namespace
-  vpc_id                     = local.vpc_id
-  private_subnets            = local.private_subnets
-  public_subnets             = local.public_subnets
-  bulk_loader_s3_bucket_name = aws_s3_bucket.catalogue_graph_bucket.bucket
-
-  providers = {
-    aws     = aws
-    aws.dns = aws.dns
-  }
-}
-
-module "catalogue_graph_neptune_cluster_2026_07_03" {
-  source = "./modules/catalogue_graph"
-
-  # Previous production cluster, kept while the 2026-07-03 pipeline remains the fallback
-  # (wellcomecollection/platform#6743).
-  graph_date                 = "2026-07-03"
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
   private_subnets            = local.private_subnets

@@ -2,7 +2,7 @@ name: "Deploy Dated Pipeline Lambda"
 description: "Uses the dated pipeline image (env.{date}) to deploy the catalogue-{date}-{lambda_suffix} lambda."
 inputs:
   pipeline_date:
-    description: "Pipeline date identifying the target pipeline (e.g. 2026-07-03)"
+    description: "Pipeline date identifying the target pipeline (e.g. 2026-09-30)"
     required: true
   registry:
     description: "ECR registry hostname"
