@@ -105,23 +105,6 @@ Feature: parents (MARC 440, 490, 773 and 830)
     When I transform the MARC record
     Then the only ancestor has the title "A Series"
 
-  # The Sierra API lists fields grouped by Sierra field tag, with the 773 host
-  # item ahead of the 4xx and 830 series fields, so the Scala test's input is in
-  # that order. FOLIO records are in MARC tag order, and the FOLIO builder puts
-  # the 773 first to keep the parents of the works it replaces in the same order.
-
-  Scenario: Several different relevant fields each yield a parent, host item first
-    Given the MARC record has a 440 field with subfield "a" value "A Series"
-    And the MARC record has a 490 field with subfield "a" value "Another Series"
-    And the MARC record has a 773 field with subfield "t" value "A Host"
-    And the MARC record has a 830 field with subfield "a" value "Yet Another Series"
-    When I transform the MARC record
-    Then the work has 4 ancestors with title:
-      | A Host |
-      | A Series |
-      | Another Series |
-      | Yet Another Series |
-
   Scenario Outline: A repeated relevant field yields a parent for each occurrence
     Given the MARC record has a <tag> field with subfield "a" value "A Series"
     And the MARC record has another <tag> field with subfield "a" value "Another Series"
@@ -192,3 +175,23 @@ Feature: parents (MARC 440, 490, 773 and 830)
     Given the MARC record has a 773 field with subfield "s" value "A title from 773ǂs" and subfield "a" value "A title from 773ǂa"
     When I transform the MARC record
     Then the only ancestor has the title "A title from 773ǂa"
+
+  # The Scala transformer keeps parents in the order the fields arrive. In
+  # production they arrive from the Sierra API, which lists fields grouped by
+  # Sierra field tag, so the 773 host item comes before the 4xx and 830 series
+  # fields. The Scala test builds its fields by hand in 440, 490, 773, 830 order
+  # and expects that order back. FOLIO records are in MARC tag order, and the
+  # FOLIO builder puts the 773 first to match the works it replaces, so this
+  # scenario expects the host item first instead.
+
+  Scenario: Several different relevant fields each yield a parent, host item first
+    Given the MARC record has a 440 field with subfield "a" value "A Series"
+    And the MARC record has a 490 field with subfield "a" value "Another Series"
+    And the MARC record has a 773 field with subfield "t" value "A Host"
+    And the MARC record has a 830 field with subfield "a" value "Yet Another Series"
+    When I transform the MARC record
+    Then the work has 4 ancestors with title:
+      | A Host |
+      | A Series |
+      | Another Series |
+      | Yet Another Series |

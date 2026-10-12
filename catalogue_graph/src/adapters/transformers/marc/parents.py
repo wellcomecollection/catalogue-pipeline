@@ -50,7 +50,9 @@ def get_parents(
     for field in fields:
         # Subfield codes are listed in priority order. A 773 host item entry normally
         # carries the host's author in ǂa and its title in ǂt, so ǂt must win
-        # regardless of where it appears in the field.
+        # regardless of where it appears in the field. Scala also warns when ǂa and
+        # ǂt appear together, but that is standard cataloguing and would only add
+        # noise, so the ambiguity warning below covers a repeated winning code only.
         subfields: list[str] = []
         for code in SUBFIELD_TAGS[field.tag]:
             subfields = field.get_subfields(code)
