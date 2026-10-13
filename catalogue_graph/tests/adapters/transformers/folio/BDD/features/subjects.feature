@@ -84,36 +84,36 @@ Feature: subjects (MARC 6xx)
 
   Scenario: A heading from an adopted local vocabulary is ignored too
     Unlike for EBSCO, a Homosaurus heading is dropped with every other ǂ2-sourced heading
-      Given the MARC record has a 650 field with indicators "" "7" with subfield "a" value "Lesbian history" and subfield "2" value "homoit"
-      When I transform the MARC record
-      Then there are no subjects
+    Given the MARC record has a 650 field with indicators "" "7" with subfield "a" value "Lesbian history" and subfield "2" value "homoit"
+    When I transform the MARC record
+    Then there are no subjects
 
   Scenario: A heading whose second indicator does not name a supported scheme is kept
     Based on Sierra b1000046x. Second indicator 4 means the source is not specified
-      Given the MARC record has a 648 field with indicators "" "4" with subfield "a" value "19th century."
-      When I transform the MARC record
-      Then the only subject has the label "19th century"
-      And it has the source identifier type "label-derived"
-      And its only concept has the type "Period"
+    Given the MARC record has a 648 field with indicators "" "4" with subfield "a" value "19th century."
+    When I transform the MARC record
+    Then the only subject has the label "19th century"
+    And it has the source identifier type "label-derived"
+    And its only concept has the type "Period"
 
-  Scenario: No identifier is taken from a personal name heading whose second indicator is not 0
+  Scenario: A MeSH identifier is taken from a personal name heading with second indicator 2
     The Scala transformer gives this subject a label-derived identifier. Python reads
     second indicator 2 as MeSH for every heading type, so the ǂ0 is kept as a MeSH identifier
-      Given the MARC record has a 600 field with indicators "" "2" with subfield "a" value "Gerry the Garlic" and subfield "0" value "mesh/456"
-      When I transform the MARC record
-      Then the only subject has the label "Gerry the Garlic"
-      And its only concept has the label "Gerry the Garlic"
-      And it has the source identifier type "nlm-mesh"
-      And it has the source identifier value "mesh/456"
+    Given the MARC record has a 600 field with indicators "" "2" with subfield "a" value "Gerry the Garlic" and subfield "0" value "mesh/456"
+    When I transform the MARC record
+    Then the only subject has the label "Gerry the Garlic"
+    And its only concept has the label "Gerry the Garlic"
+    And it has the source identifier type "nlm-mesh"
+    And it has the source identifier value "mesh/456"
 
   Scenario: A blank second indicator does not imply LC Names
     The Scala Sierra transformer assumes LC Names when the second indicator is blank.
     Python leaves the identifier label-derived, so the ǂ0 is not used
-      Given the MARC record has a 610 field with subfield "a" value "ACME Corp" and subfield "0" value "n81290903210"
-      When I transform the MARC record
-      Then the only subject has the label "ACME Corp"
-      And it has the source identifier type "label-derived"
-      And it has the source identifier value "acme corp"
+    Given the MARC record has a 610 field with subfield "a" value "ACME Corp" and subfield "0" value "n81290903210"
+    When I transform the MARC record
+    Then the only subject has the label "ACME Corp"
+    And it has the source identifier type "label-derived"
+    And it has the source identifier value "acme corp"
 
   Scenario: Blank subfields are left out of the subject label
     Based on Sierra b24000802. Scala keeps the blank subfield in the subject label,
