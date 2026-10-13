@@ -152,12 +152,15 @@ def handler(
     if concept_ids and len(concept_ids) <= event.max_work_ids:
         work_ids = get_work_ids(NeptuneClient(event.graph_date), concept_ids)
 
-    over_limit = max(len(concept_ids), len(work_ids)) > event.max_work_ids
+    # Held before the batches are suppressed, so the report still sizes the refusal.
+    work_count = len(work_ids)
+
+    over_limit = max(len(concept_ids), work_count) > event.max_work_ids
     if over_limit:
         logger.warning(
             "Too many relabelled concepts to refresh their works by id",
             concept_count=len(concept_ids),
-            work_count=len(work_ids),
+            work_count=work_count,
             max_work_ids=event.max_work_ids,
         )
         work_ids = []
@@ -168,14 +171,14 @@ def handler(
             exclude={"max_work_ids"}
         ),
         concept_count=len(concept_ids),
-        work_count=len(work_ids),
+        work_count=work_count,
         over_limit=over_limit,
     )
     report.publish()
 
     return RelabelledWorks(
         concept_count=len(concept_ids),
-        work_count=len(work_ids),
+        work_count=work_count,
         work_id_batches=[
             list(batch) for batch in batched(work_ids, WORK_IDS_PER_BATCH)
         ],

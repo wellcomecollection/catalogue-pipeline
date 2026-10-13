@@ -184,6 +184,8 @@ def test_reports_and_stops_when_too_many_works_would_be_refreshed() -> None:
     assert result.over_limit is True
     assert result.concept_count == 1
     assert result.work_id_batches == []
+    # The count is what a human sizes the refusal by, so it survives the suppression.
+    assert result.work_count == 2
 
 
 def test_ignores_a_job_whose_ingest_did_not_finish() -> None:
