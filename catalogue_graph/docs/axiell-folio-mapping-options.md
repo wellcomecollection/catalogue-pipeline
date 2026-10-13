@@ -12,7 +12,7 @@ maps today, see
 | **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 89.8% of records; 13,284 (7.2%) match no rule and fail. The only thing failing records today. | [Section 1](#1-permanent-location-incomplete-and-failing-13284-records), [questions 1 to 3](#location) |
 | **Loan type** | **Proposed, not agreed.** Constant `Can circulate` for every record today. The proposal derives it from `540$a` (use restriction). | [Section 2](#2-loan-type-proposed-not-agreed), [questions 4 and 5](#loan-type) |
 | **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
-| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming, and note that `Restricted` does not block a request. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
+| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
 | **Identifier format** (HRID) | **Implemented.** A 45 to 49 character string built from the AxC GUID. Whether that format is acceptable is open, and it cannot change after the first run. | [Question 10](#identifiers) |
 | **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | [Question 9](#material-type-and-selection) |
 
@@ -63,17 +63,17 @@ both the holdings and the item, required with no default. Three rules map it,
 matching on the leading code of the AxC hierarchy, case-insensitively, first
 match wins. A `984$b` of `215/215;B11/215;B11;MR/...` matches on `215`.
 
-| Leading code | FOLIO location | Records | |
-| --- | --- | ---: | --- |
-| `215` | `AxC Euston Road` | 141,967 | 77.2% |
-| `183` | `AxC Euston Road` | 23,151 | 12.6% |
-| `Deepstore` | `AxC Deepstore` | 94 | |
-| starts `CLW` | `AxC Constantine London West` | 8 | |
-| **no rule matches** | bare code sent to FOLIO | **13,284** | **7.2%** |
-| *(no usable `984$b`)* | fails today | 5,388 | 2.9% |
+| Rule | Matches | FOLIO location | Records | |
+| --- | --- | --- | ---: | --- |
+| 1 | codes `215`, `183` | `AxC Euston Road` | 165,118 | 89.8% |
+| 2 | code `Deepstore` | `AxC Deepstore` | 94 | |
+| 3 | prefix `CLW` | `AxC Constantine London West` | 8 | |
+| | **no rule matches** | bare code sent to FOLIO | **13,284** | **7.2%** |
+| | *(no usable `984$b`)* | fails today | 5,388 | 2.9% |
 
-Two rules carry 89.8% of the corpus. The other two match 102 records between
-them.
+One rule does almost all the work. Rule 1 carries 89.8% of selectable records
+through its two codes, `215` on 141,967 and `183` on 23,151. Rules 2 and 3 match
+102 records between them.
 
 **The 13,284 fall-throughs span 2,460 distinct codes, and most are not
 locations:**
@@ -151,10 +151,17 @@ not something they have agreed.
 The default for an absent `540$a` is `Can circulate`, since 4,020 of those 4,096
 records carry `506$f` (access category) of `OPEN`.
 
-**A loan type does not gate requests.** It feeds the circulation rules that set
-loan period and renewability. Whether a request is accepted comes from the item
-status, through mod-circulation's `RequestTypeItemStatusWhiteList`, so no choice
-here makes closed material unrequestable. That is question 5.
+**Requestability has two gates, and the loan type feeds one of them.**
+mod-circulation selects a request policy from the circulation rules, which match
+on `loanTypeId` among their criteria, and rejects a request type the selected
+policy disallows. Separately it checks the item status against
+`RequestTypeItemStatusWhiteList`. A request has to pass both.
+
+So changing the loan type **can** change requestability, through which request
+policy applies. Whether it does here depends on this tenant's request policies
+and circulation rules, and neither has been examined. Nothing in this section
+should be read as settling what the loan type does or does not control; see
+question 5.
 
 **`Can circulate` only has effect through a loan policy, and none has been
 examined.** A zero-day or in-house policy makes it mean "issued in the reading
@@ -287,15 +294,25 @@ should be confirmed against this tenant's FOLIO version.
    `Unavailable` for the 9,205 that cannot be produced. Then confirm what loan
    policy the circulation rules attach to `Can circulate`, which is what decides
    whether archival material can leave the building.
-5. **Is `Restricted` meant to stop a request?** It does not. In
-   mod-circulation's `RequestTypeItemStatusWhiteList` on master, `Restricted`
-   allows page, hold and recall (`pageRules.put(RESTRICTED, true)`), the same as
-   `Available` does for paging. `Unavailable`, `Unknown` and `Withdrawn` allow
-   none. So mapping `CLOSED`, `PERMISSIONREQUIRED` and `SAFEGUARDED` to
-   `Restricted` changes what FOLIO displays while a request on those items is
-   still accepted. `Unavailable` is the status that blocks. That affects 10,176
-   records. The dev instance has no `Restricted` items today, so the first run
-   after a clear is the chance to confirm the behaviour there.
+5. **Is `Restricted` meant to stop a request?** On the status gate alone it
+   does not. In mod-circulation's `RequestTypeItemStatusWhiteList` on master,
+   `Restricted` allows page, hold and recall (`pageRules.put(RESTRICTED, true)`),
+   the same as `Available` does for paging. So mapping `CLOSED`,
+   `PERMISSIONREQUIRED` and `SAFEGUARDED` to `Restricted` changes what FOLIO
+   displays without changing what that gate permits, across 10,176 records.
+
+   The whitelist is not permissive everywhere, though. `Unavailable`, `Unknown`
+   and `Withdrawn` allow no request type at all, and `Missing` permits only
+   holds. Under the table in section 4 that already constrains 517 records: 320
+   with no access category, 24 `DATAISSUES`, 13 `DEACCESSIONED`, and 160
+   `MISSING` limited to holds.
+
+   The second gate is the request policy, which the circulation rules select
+   using `loanTypeId` among their criteria, so the loan type is part of this too.
+   **The tenant's request policies and circulation rules need checking before
+   concluding what any of this permits.** The dev instance has no `Restricted`
+   items today, so the first run after a clear is the chance to observe the
+   behaviour there.
 
 ### Item status
 

@@ -195,13 +195,16 @@ item can be requested or produced.
 
 Three caveats. `Restricted` and `Withdrawn` are unconfirmed on this tenant's
 FOLIO version. The status is create-only, so a later access change in AxC does
-not reach an existing item. And **`Restricted` does not stop a request**: in
-mod-circulation's `RequestTypeItemStatusWhiteList`, `Restricted` permits page,
-hold and recall just as `Available` does for paging, while `Unavailable`,
-`Unknown` and `Withdrawn` permit none. So mapping `CLOSED`,
+not reach an existing item. And **`Restricted` does not stop a request on the
+status gate**: in mod-circulation's `RequestTypeItemStatusWhiteList`,
+`Restricted` permits page, hold and recall just as `Available` does for paging,
+so mapping `CLOSED`,
 `PERMISSIONREQUIRED` and `SAFEGUARDED` to `Restricted` changes what FOLIO
-displays without changing what can be requested. See the options document,
-question 5.
+displays without changing what that gate permits. The whitelist does block
+elsewhere: `Unavailable`, `Unknown` and `Withdrawn` permit no request type, and
+`Missing` permits only holds. The status is one of two gates, the other being
+the request policy selected by the circulation rules, so neither gate alone
+settles requestability. See the options document, question 5.
 
 ### Loan type: no mapping
 
@@ -210,12 +213,14 @@ loan type, so nothing overrides it. A mapping driven by the use restriction
 (`540 $a`, how it may be requested) is proposed but not agreed; see the options
 document, section 2.
 
-A reader can currently request any item, including those whose access note reads
-*"This item is closed and cannot be accessed"*. Note that the loan type is not
-what causes this and settling it will not fix it: requestability is governed by
-the item status, through mod-circulation's request whitelist, so `Unavailable`
-is the status that blocks. The loan type governs loan period and renewability
-once a loan is possible.
+Items with access note *"This item is closed and cannot be accessed"* remain
+requestable: `Restricted` permits paging under the status whitelist.
+
+Requests must pass both the item-status whitelist and the request policy.
+mod-circulation selects that policy from circulation rules, which include
+`loanTypeId`. Loan type also affects loan period and renewability through the
+loan policy. This tenant's rules and policies have not been examined, so its
+effect here is unknown. See the options document, section 2.
 
 ### Location rules
 
