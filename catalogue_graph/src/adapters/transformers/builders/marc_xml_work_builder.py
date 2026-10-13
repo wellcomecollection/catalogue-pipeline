@@ -3,11 +3,11 @@ from datetime import datetime
 from pymarc.record import Record
 
 from adapters.transformers.builders.source_work_builder import SourceWorkBuilder
-from adapters.transformers.ebsco.parents import get_parents
 from adapters.transformers.marc.alternative_titles import extract_alternative_titles
 from adapters.transformers.marc.description import extract_description
 from adapters.transformers.marc.identifier import extract_id
 from adapters.transformers.marc.other_identifiers import extract_other_identifiers
+from adapters.transformers.marc.parents import get_parents
 from adapters.transformers.marc.title import extract_title
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Concept, Contributor, Genre, Subject
