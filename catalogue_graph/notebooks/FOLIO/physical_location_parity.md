@@ -54,7 +54,7 @@ Each item is counted once, under the first cause that fits.
 | Shelfmark | 605 | 334 differ, 261 of them the renumbered conference volumes (`sgmc2`, `M32255` against `18459`). 271 have a FOLIO call number but no shelfmark in the catalogue, because Sierra reads only 949 `$a` with field tag `c`. |
 | Location code `none` | 327 | Sierra's "none" location gives no location type, so the catalogue shows no location. FOLIO's `none` location sits in the Closed stores library, so the library rule makes it closed stores. The mapping needs `none` to give no location. |
 | Contained-in ephemera | 324 | The `cwith` ephemera will be inventoried and its location code updated. Until then, not requestable in FOLIO, requestable in Sierra, with a different shelfmark. |
-| Circulation | 225 | Holds and loans that only the items service (#6654) can see. |
+| Circulation | 225 | Holds and loans that only the items service (platform#6654) can see. |
 | Manual against online request | 190 | Drift: MANUAL REQUEST in FOLIO, online request in Sierra now. |
 | Label rename | 140 | "Student Coll (Med Lit)" became "Student Coll. (Med Lit)" (139 items), and one item in "Medical Collection" sits in "History of Medicine". |
 | Other access drift | 131 | The item's statistical code in FOLIO disagrees with Sierra's current OPAC message, in small groups. Not looked at one by one. |

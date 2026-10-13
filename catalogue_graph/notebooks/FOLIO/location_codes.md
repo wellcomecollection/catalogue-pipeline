@@ -31,7 +31,7 @@ So the library material has migrated almost completely. The gap is archives, vis
 
 ## Items in both Sierra and FOLIO
 
-The migration is what #6584 maps, so the most useful comparison is per item: for each item in both systems, does FOLIO hold the same location data Sierra does? Items are joined on the Sierra item number, which FOLIO keeps in `formerIds`. 474,131 FOLIO items are also live in Sierra, and 469,799 of them are shown in the catalogue today.
+The migration is what platform#6584 maps, so the most useful comparison is per item: for each item in both systems, does FOLIO hold the same location data Sierra does? Items are joined on the Sierra item number, which FOLIO keeps in `formerIds`. 474,131 FOLIO items are also live in Sierra, and 469,799 of them are shown in the catalogue today.
 
 ### Location code
 
@@ -47,7 +47,7 @@ The rest are single items.
 
 ### Where FOLIO keeps the location
 
-FOLIO holds the location on the holdings record, not the item. No migrated item has a permanent location of its own and none has a temporary location, so each item's effective location is its holdings record's location, for every item. For #6584's question of which of the effective, permanent and temporary locations is authoritative, today that's the holdings location, which FOLIO surfaces as the item's effective location. Temporary locations aren't used yet, but Collection Information intends to use them for exhibitions and digitisation, and the effective location picks those up when they are.
+FOLIO holds the location on the holdings record, not the item. No migrated item has a permanent location of its own and none has a temporary location, so each item's effective location is its holdings record's location, for every item. For platform#6584's question of which of the effective, permanent and temporary locations is authoritative, today that's the holdings location, which FOLIO surfaces as the item's effective location. Temporary locations aren't used yet, but Collection Information intends to use them for exhibitions and digitisation, and the effective location picks those up when they are.
 
 ### Location type
 
@@ -59,7 +59,7 @@ Today's location types come from Sierra's location names. A type derived provisi
 | open shelves | `bwith` or `cwith` | 408 |
 | on exhibition | `migration` placeholder | 55 |
 
-Bound-with and contained-in items get their type in Sierra from the cross-item fallback: when an item's location is "bound in above" or "contained in above", it takes the one location type the other items on the bib share. FOLIO keeps these as the `bwith` and `cwith` locations, so "bound in above" does survive the migration, and the transform needs the same fallback, or another way to type these 36,254 items. That answers one of #6584's questions, against the earlier indication from harvested MARC that these values had gone.
+Bound-with and contained-in items get their type in Sierra from the cross-item fallback: when an item's location is "bound in above" or "contained in above", it takes the one location type the other items on the bib share. FOLIO keeps these as the `bwith` and `cwith` locations, so "bound in above" does survive the migration, and the transform needs the same fallback, or another way to type these 36,254 items. That answers one of platform#6584's questions, against the earlier indication from harvested MARC that these values had gone.
 
 ### Label
 
@@ -70,9 +70,9 @@ Where the catalogue shows the source location's own name (every type except clos
 The catalogue's shelfmark comes from the Sierra item's 949 `$a` with field tag `c`, and is hidden for archives and manuscripts and for most iconographic items. Against that:
 
 - FOLIO's effective call number equals the catalogue's shelfmark for 99.81% of the 467,837 items that show one.
-- The item-level call number and the holdings call number are identical on every migrated item, so the two candidate sources in #6584 never disagree today.
+- The item-level call number and the holdings call number are identical on every migrated item, so the two candidate sources in platform#6584 never disagree today.
 - The 875 that differ are the 324 ephemera wrongly migrated as contained-in (`EPH/791/18` against `EPH+32:18`, see above), the renumbered conference volumes (`M32255` against `18459`), and 182 journals in `seser` whose FOLIO call numbers use title abbreviations (`PHI /9`) where Sierra shows `EPB/S/…`.
-- 269 items show no shelfmark in the catalogue but have a FOLIO call number. If the transform keeps Sierra's rules for hiding shelfmarks, it needs their inputs, which #6570 and #6548 are settling.
+- 269 items show no shelfmark in the catalogue but have a FOLIO call number. If the transform keeps Sierra's rules for hiding shelfmarks, it needs their inputs, which platform#6570 and platform#6548 are settling.
 
 ## Sierra locations with no FOLIO location
 
