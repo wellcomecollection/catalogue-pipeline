@@ -20,7 +20,8 @@ Feature: subjects (MARC 6xx)
     And the MARC record has a 245 field with subfield "a" value "Some Title"
 
   Scenario: Subjects are listed by heading type, as the Sierra transformer lists them
-    Based on Sierra b10629725. Concept headings come first, then personal, corporate and meeting names
+    Concept headings first, then personal, corporate and meeting names, as Scala runs one
+    transformer per heading type. Within each group, fields keep their document order
     Given the MARC record has a 600 field with indicators "" "0" with subfields:
       | code | value               |
       | a    | Le Tellier, Michel, |
@@ -36,7 +37,7 @@ Feature: subjects (MARC 6xx)
       | Council of Trent                    |
 
   Scenario: A topical heading with two "a" subfields gives a concept for each
-    Mirrors "retrieves Concepts from multiple ǂa subfields" in SierraConceptSubjectsTest.scala, based on Sierra b23990739
+    Based on Sierra b23990739
     Given the MARC record has a 650 field with indicators "" "0" with subfields:
       | code | value                |
       | a    | Geography            |
@@ -50,7 +51,7 @@ Feature: subjects (MARC 6xx)
     And its 3rd concept has the source identifier value "early works to 1800"
 
   Scenario: The "a" subfields come first in the label whatever their position
-    Mirrors "groups ǂa subfield content at the start" in SierraConceptSubjectsTest.scala, based on Sierra b17617558
+    Based on Sierra b17617558
     Given the MARC record has a 650 field with indicators "" "0" with subfields:
       | code | value         |
       | a    | Death notices |
@@ -67,6 +68,58 @@ Feature: subjects (MARC 6xx)
     And its 4th concept has the type "Period"
     And its 4th concept has the source identifier value "19th century"
 
+  Scenario: Whitespace around a topical term is left out of its identifier
+    Based on Sierra b14653746
+    Given the MARC record has a 650 field with indicators "" "0" with subfield "a" value " Yellowstone National Park"
+    When I transform the MARC record
+    Then the only subject has the source identifier value "yellowstone national park"
+    And its only concept has the source identifier value "yellowstone national park"
+
+  Scenario: Whitespace around a geographic subdivision is left out of its identifier
+    Based on Sierra b3083353x. The Scala test leaves out the ǂa, which the bib does have
+    Given the MARC record has a 650 field with indicators "" "0" with subfield "a" value "Reproductive rights" and subfield "z" value "United States. "
+    When I transform the MARC record
+    Then the only subject has the label "Reproductive rights - United States"
+    And its 2nd concept has the type "Place"
+    And its 2nd concept has the source identifier value "united states"
+
+  Scenario: A corporate name heading uses repeated subordinate units in its label
+    Given the MARC record has a 610 field with indicators "" "0" with subfields:
+      | code | value          |
+      | a    | United States. |
+      | b    | Army.          |
+      | b    | Cavalry, 7th.  |
+      | b    | Company E,     |
+      | e    | depicted.      |
+    When I transform the MARC record
+    Then the only subject has the label "United States. Army. Cavalry, 7th. Company E, depicted"
+
+  Scenario: A corporate name heading with a ǂ0 and second indicator 0 gets an LC Names identifier
+    Given the MARC record has a 610 field with indicators "" "0" with subfield "a" value "ACME Corp" and subfield "0" value "n81290903210"
+    When I transform the MARC record
+    Then the only subject has the label "ACME Corp"
+    And it has the source identifier type "lc-names"
+    And it has the source identifier value "n81290903210"
+    And it has the source identifier ontology type "Organisation"
+
+  Scenario: Repeated ǂ0 with the same value give one identifier
+    Given the MARC record has a 610 field with indicators "" "0" with subfield "a" value "ACME Corp" and subfield "0" value "  n1234" and subfield "0" value "n1234"
+    When I transform the MARC record
+    Then the only subject has the source identifier type "lc-names"
+    And it has the source identifier value "n1234"
+
+  Scenario: A corporate name heading with no subfields gives no subject
+    Given the MARC record has a 610 field with no subfields
+    When I transform the MARC record
+    Then there are no subjects
+
+  Scenario: Each corporate name heading gives a subject
+    Given the MARC record has a 610 field with indicators "" "0" with subfield "a" value "ACME Corp."
+    And the MARC record has another 610 field with indicators "" "0" with subfield "a" value "BBC."
+    And the MARC record has another 610 field with indicators "" "0" with subfield "a" value "Charlie's Chocolate Factory."
+    When I transform the MARC record
+    Then there are 3 subjects
+
   Scenario: A heading with second indicator 7 is ignored
     Given the MARC record has a 650 field with indicators "" "7" with subfield "a" value "absence" and subfield "0" value "lcsh/123"
     And the MARC record has another 650 field with indicators "" "2" with subfield "a" value "abolition" and subfield "0" value "mesh/456"
@@ -82,7 +135,7 @@ Feature: subjects (MARC 6xx)
     When I transform the MARC record
     Then there are no subjects
 
-  Scenario: A heading from an adopted local vocabulary is ignored too
+  Scenario: A heading from an adopted local vocabulary is ignored
     Unlike for EBSCO, a Homosaurus heading is dropped with every other ǂ2-sourced heading
     Given the MARC record has a 650 field with indicators "" "7" with subfield "a" value "Lesbian history" and subfield "2" value "homoit"
     When I transform the MARC record
@@ -95,6 +148,8 @@ Feature: subjects (MARC 6xx)
     Then the only subject has the label "19th century"
     And it has the source identifier type "label-derived"
     And its only concept has the type "Period"
+
+  # Everything below is a deliberate divergence from the Scala implementation.
 
   Scenario: A MeSH identifier is taken from a personal name heading with second indicator 2
     The Scala transformer gives this subject a label-derived identifier. Python reads
@@ -154,7 +209,7 @@ Feature: subjects (MARC 6xx)
       | t    | Order of things,  |
       | d    | 1926-1984.        |
     When I transform the MARC record
-    Then an error "Repeated non-repeating subfield $d" is logged with tag "600"
+    Then an error "Repeated non-repeating subfield" is logged with tag "600" and subfield "d"
     And the only subject has the label "Foucault, Michel, 1926-1984. Order of things,"
 
   Scenario: The concept of a name heading derives its identifier from its own label
@@ -171,3 +226,13 @@ Feature: subjects (MARC 6xx)
     And it has 1 concept
     And its 1st concept has the label "Stanton, Louisa,"
     And its 1st concept has the source identifier value "stanton, louisa,"
+
+  Scenario: A corporate name heading with two different ǂ0 gets a label-derived identifier
+    Scala leaves the concept unidentifiable
+    Given the MARC record has a 610 field with indicators "" "0" with subfield "a" value "ACME Corp" and subfield "0" value "n12345" and subfield "0" value "n67890"
+    When I transform the MARC record
+    Then a warning "Multiple identifier subfields" is logged
+    And the only subject has the label "ACME Corp"
+    And it has the source identifier type "label-derived"
+    And its only concept has the source identifier type "label-derived"
+    And it has the source identifier value "acme corp"
