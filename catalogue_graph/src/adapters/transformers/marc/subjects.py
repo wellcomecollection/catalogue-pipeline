@@ -23,7 +23,7 @@ from utils.types import RawConceptType
 logger = structlog.get_logger(__name__)
 
 
-def _primary_labels(field: Field) -> list[str]:
+def primary_concept_labels(field: Field) -> list[str]:
     """
     The label of each primary concept: one per ǂa on a concept heading, or the
     joined name subfields on a name heading, as in the Scala pipeline.
@@ -33,12 +33,12 @@ def _primary_labels(field: Field) -> list[str]:
     invalid MARC, to mirror Scala: in existing data the repeat holds useful
     information, such as a second title or language.
     """
-    main_label_codes = MAIN_LABEL_SUBFIELDS.get(field.tag, ["a"])
+    main_heading_codes = MAIN_HEADING_SUBFIELDS.get(field.tag, ["a"])
     non_repeatable_codes = NON_REPEATABLE_SUBFIELDS.get(field.tag, ["a"])
     values = []
     seen: defaultdict[str, set[str]] = defaultdict(set)
     for code, value in field:
-        if code not in main_label_codes or not value.strip():
+        if code not in main_heading_codes or not value.strip():
             continue
         if code in non_repeatable_codes and seen[code]:
             logger.error(
@@ -55,46 +55,46 @@ def _primary_labels(field: Field) -> list[str]:
     return [" ".join(values)] if field.tag in NAME_HEADINGS else values
 
 
-def label_transform_600(field: Field, main_label: str) -> str:
+def build_subject_label_600(field: Field, main_heading: str) -> str:
     # The role (ǂe) and general subdivisions (ǂx) follow the name
     roles = field.get_subfields("e")
     subdivisions = field.get_subfields("x")
-    return " ".join([main_label, *roles, *subdivisions])
+    return " ".join([main_heading, *roles, *subdivisions])
 
 
-def label_transform_610(field: Field, main_label: str) -> str:
+def build_subject_label_610(field: Field, main_heading: str) -> str:
     # The location, date and relator term (ǂc ǂd ǂe) follow the name
     qualifiers = field.get_subfields("c", "d", "e")
-    return " ".join([main_label, *qualifiers])
+    return " ".join([main_heading, *qualifiers])
 
 
-def label_transform_611(field: Field, main_label: str) -> str:
-    return main_label
+def build_subject_label_611(field: Field, main_heading: str) -> str:
+    return main_heading
 
 
-def label_transform_648_650_651(field: Field, main_label: str) -> str:
+def build_subject_label_648_650_651(field: Field, main_heading: str) -> str:
     subdivisions = field.get_subfields(*SUBDIVISION_CODES)
-    return " - ".join([main_label, *subdivisions])
+    return " - ".join([main_heading, *subdivisions])
 
 
-def subdivision_concepts_600(field: Field) -> Generator[Concept]:
+def build_subdivision_concepts_600(field: Field) -> Generator[Concept]:
     # Only x yields a subdivision concept, with its label as catalogued
     for raw_label in field.get_subfields("x"):
         yield build_concept(raw_label, "Concept", Unidentifiable())
 
 
-def subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
+def build_subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
     for subfield in field.subfields:
         if subfield.code in SUBDIVISION_CODES:
-            ontology_type = SUBFIELD_TYPE_MAP.get(subfield.code, "Concept")
-            yield build_concept(trim_trailing_period(subfield.value), ontology_type)
+            concept_type = SUBFIELD_TYPE_MAP.get(subfield.code, "Concept")
+            yield build_concept(trim_trailing_period(subfield.value), concept_type)
 
 
 SUBJECT_TAGS = ["600", "610", "611", "648", "650", "651"]
 # The Sierra transformer lists subjects by heading type: concept headings, then
 # personal, corporate and meeting names, each group in document order
 SIERRA_TAG_ORDER = [["650", "648", "651"], ["600"], ["610"], ["611"]]
-FIELD_TO_TYPE: dict[str, RawConceptType] = {
+TAG_TO_CONCEPT_TYPE: dict[str, RawConceptType] = {
     "600": "Person",
     "610": "Organisation",
     "611": "Meeting",
@@ -103,23 +103,23 @@ FIELD_TO_TYPE: dict[str, RawConceptType] = {
 }
 # Personal, corporate and meeting names; the other headings are concepts, periods and places
 NAME_HEADINGS = ["600", "610", "611"]
-MAIN_LABEL_SUBFIELDS = {
+MAIN_HEADING_SUBFIELDS = {
     "600": ["a", "b", "c", "d", "t", "p", "n", "q", "l"],
     "610": ["a", "b"],
     "611": ["a", "c", "d"],
 }
-# The main label subfields that MARC does not allow to repeat, per heading type
+# The main heading subfields that MARC does not allow to repeat, per heading type
 NON_REPEATABLE_SUBFIELDS = {"600": ["a", "b", "d", "t", "q", "l"]}
-LABEL_TRANSFORMS = {
-    "600": label_transform_600,
-    "610": label_transform_610,
-    "611": label_transform_611,
-    "648": label_transform_648_650_651,
-    "650": label_transform_648_650_651,
-    "651": label_transform_648_650_651,
+SUBJECT_LABEL_BUILDERS = {
+    "600": build_subject_label_600,
+    "610": build_subject_label_610,
+    "611": build_subject_label_611,
+    "648": build_subject_label_648_650_651,
+    "650": build_subject_label_648_650_651,
+    "651": build_subject_label_648_650_651,
 }
 # The trailing punctuation each heading type trims, as in the Scala pipeline
-CONCEPT_LABEL_TRANSFORMS: dict[str, Callable[[str], str]] = {
+PRIMARY_CONCEPT_LABEL_TRIMS: dict[str, Callable[[str], str]] = {
     "600": lambda label: label,
     "610": lambda label: trim_trailing_period(trim_trailing(label, ",")),
     "611": lambda label: trim_trailing(label, ","),
@@ -127,13 +127,13 @@ CONCEPT_LABEL_TRANSFORMS: dict[str, Callable[[str], str]] = {
     "650": trim_trailing_period,
     "651": lambda label: trim_trailing(trim_trailing_period(label), ":"),
 }
-SUBDIVISION_TRANSFORMS = {
-    "600": subdivision_concepts_600,
+SUBDIVISION_CONCEPT_BUILDERS = {
+    "600": build_subdivision_concepts_600,
     "610": lambda _: [],
     "611": lambda _: [],
-    "648": subdivision_concepts_648_650_651,
-    "650": subdivision_concepts_648_650_651,
-    "651": subdivision_concepts_648_650_651,
+    "648": build_subdivision_concepts_648_650_651,
+    "650": build_subdivision_concepts_648_650_651,
+    "651": build_subdivision_concepts_648_650_651,
 }
 
 
@@ -183,43 +183,48 @@ def extract_subjects(
 
 
 def extract_subject(field: Field) -> Subject | None:
-    primary_labels = _primary_labels(field)
-    if not primary_labels:
+    concept_labels = primary_concept_labels(field)
+    if not concept_labels:
         return None
-    main_label = " - ".join(primary_labels)
+    main_heading = " - ".join(concept_labels)
 
-    ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
-    label = LABEL_TRANSFORMS[field.tag](field, main_label)
+    concept_type = TAG_TO_CONCEPT_TYPE.get(field.tag, "Concept")
+    subject_label = SUBJECT_LABEL_BUILDERS[field.tag](field, main_heading)
     # Person labels keep their trailing period, as in the Scala pipeline
     if field.tag != "600":
-        label = trim_trailing_period(label)
+        subject_label = trim_trailing_period(subject_label)
 
-    identifier = extract_identifier(field, ontology_type)
-    subject_id = identifier or Identifiable.identifier_from_text(label, ontology_type)
-    subdivision_concepts = list(SUBDIVISION_TRANSFORMS[field.tag](field))
+    authority_id = extract_identifier(field, concept_type)
+    subject_id = authority_id or Identifiable.identifier_from_text(
+        subject_label, concept_type
+    )
+    subdivision_concepts = list(SUBDIVISION_CONCEPT_BUILDERS[field.tag](field))
 
-    # A sole concept shares the subject's identifier. In a subdivided concept heading the ǂ0 names the whole heading
-    # so the primary concept is label-derived. In a subdivided personal name heading it names the person.
-    # Several primary concepts are each label-derived; the Scala pipeline gives them all the heading's identifier.
-    primary_identifier: Identifiable | None
-    if len(primary_labels) == 1 and not subdivision_concepts:
-        primary_identifier = subject_id
-    elif field.tag == "600":
-        primary_identifier = identifier
+    # The ǂ0 identifies the primary concept only when the heading is a name or a single
+    # ǂa with no subdivisions. Without a ǂ0 the id is derived from the untrimmed heading,
+    # as in the Scala pipeline. Otherwise the ǂ0 identifies the heading as a whole,
+    # and build_concept derives each primary concept id from its own label.
+    primary_concept_id: Identifiable | None
+    if field.tag in NAME_HEADINGS or (
+        len(concept_labels) == 1 and not subdivision_concepts
+    ):
+        primary_concept_id = authority_id or Identifiable.identifier_from_text(
+            main_heading, concept_type
+        )
     else:
-        primary_identifier = None
+        primary_concept_id = None
 
     primary_concepts = [
         build_concept(
-            CONCEPT_LABEL_TRANSFORMS[field.tag](primary_label),
-            ontology_type,
-            primary_identifier,
+            PRIMARY_CONCEPT_LABEL_TRIMS[field.tag](concept_label),
+            concept_type,
+            primary_concept_id,
         )
-        for primary_label in primary_labels
+        for concept_label in concept_labels
     ]
 
     return Subject(
-        label=label,
+        label=subject_label,
         id=subject_id,
         concepts=[*primary_concepts, *subdivision_concepts],
     )

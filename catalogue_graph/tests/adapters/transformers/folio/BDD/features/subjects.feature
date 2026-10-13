@@ -156,3 +156,18 @@ Feature: subjects (MARC 6xx)
     When I transform the MARC record
     Then an error "Repeated non-repeating subfield $d" is logged with tag "600"
     And the only subject has the label "Foucault, Michel, 1926-1984. Order of things,"
+
+  Scenario: The concept of a name heading derives its identifier from its own label
+    Based on Sierra b10769286. Scala's ontology type harmonisation gives the sole concept
+    of a subject the subject's identifier, here "stanton, louisa, defendant", so the role
+    leaks into the concept's identifier
+    Given the MARC record has a 600 field with indicators "" "0" with subfields:
+      | code | value            |
+      | a    | Stanton, Louisa, |
+      | e    | defendant        |
+    When I transform the MARC record
+    Then the only subject has the label "Stanton, Louisa, defendant"
+    And it has the source identifier value "stanton, louisa, defendant"
+    And it has 1 concept
+    And its 1st concept has the label "Stanton, Louisa,"
+    And its 1st concept has the source identifier value "stanton, louisa,"
