@@ -10,11 +10,12 @@ maps today, see
 | Mapping | State | Where |
 | --- | --- | --- |
 | **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 89.8% of records; 13,284 (7.2%) match no rule and fail. The only thing failing records today. | [Section 1](#1-permanent-location-incomplete-and-failing-13284-records), [questions 1 to 3](#location) |
-| **Loan type** | **Proposed, not agreed.** Constant `Can circulate` for every record today. The proposal derives it from `540$a` (use restriction). | [Section 2](#2-loan-type-proposed-not-agreed), [questions 4 and 5](#loan-type) |
+| **Loan type** | **Proposed, not agreed.** Constant `Can circulate` for every record today. The proposal derives it from `540$a` (use restriction): `Can circulate` for `Online request` and `Restricted` only, `Unavailable` for the rest. | [Section 2](#2-loan-type-proposed-not-agreed), [questions 4 and 5](#loan-type) |
 | **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
 | **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
 | **Identifier format** (HRID) | **Implemented.** A 45 to 49 character string built from the AxC GUID. Whether that format is acceptable is open, and it cannot change after the first run. | [Question 10](#identifiers) |
 | **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | [Question 9](#material-type-and-selection) |
+| **Deletion** of a Collect record | **Implemented, both ways.** Suppresses by default; `HARD_DELETE` switches it to an irreversible delete. Which one is policy, not development. | [Question 11](#deletion) |
 
 Nothing in this document is implemented beyond what the State column says is
 implemented. The code is unchanged pending these answers.
@@ -39,6 +40,7 @@ and it is section 1.**
 | --- | --- | --- |
 | All AxC counts | Full scan of `axiell_adapter_table`: 209,374 rows, 131 deleted, 188,019 item-level, 0 parse errors, 183,892 passing both selection gates | 2026-10-12 |
 | Location rule coverage | Same table, applying `LOCATION_RULES` to the leading code of every selectable `984$b` (normal location). Pure code, no FOLIO call | 2026-10-13 |
+| `540$a` and the loan-type mapping | Same table, applying the mapping in section 2 to every selectable record and cross-tabulating the result against `506$f`. Confirms 0 multi-valued records and the eight-term vocabulary | 2026-10-13 |
 | FOLIO reference data | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
 | AxC to MARC | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
 
@@ -138,18 +140,28 @@ vocabulary.
 
 ### The proposal
 
-Everything consultable is `Can circulate`, open and conditioned alike; only the
-three states where the item cannot be produced fall outside it. `Reading room`
-is deliberately unused. This is what we are putting to Collection Information,
-not something they have agreed.
+Only `Online request` and `Restricted` circulate. Everything else, including an
+absent `540$a`, is `Unavailable`. `Reading room` is deliberately unused. This is
+what we are putting to Collection Information, not something they have agreed.
 
-| `540$a` (use restriction) | Records | **Proposed loan type** |
-| --- | ---: | --- |
-| `Online request`, `By appointment`, `By approval`, `Manual request`, `Restricted`, *(absent)* | 174,687 | `Can circulate` |
-| `Unavailable`, `Missing`, `Deaccessioned` | 9,205 | `Unavailable` |
+| `540$a` (use restriction) | Records | | **Proposed loan type** |
+| --- | ---: | --- | --- |
+| `Online request` | 143,787 | 78.2% | `Can circulate` |
+| `Restricted` | 5,144 | 2.8% | `Can circulate` |
+| `By appointment` | 21,314 | 11.6% | `Unavailable` |
+| `Unavailable` | 9,192 | 5.0% | `Unavailable` |
+| *(absent)* | 4,096 | 2.2% | `Unavailable` |
+| `By approval` | 345 | 0.2% | `Unavailable` |
+| `Missing` | 7 | | `Unavailable` |
+| `Deaccessioned` | 6 | | `Unavailable` |
+| `Manual request` | 1 | | `Unavailable` |
 
-The default for an absent `540$a` is `Can circulate`, since 4,020 of those 4,096
-records carry `506$f` (access category) of `OPEN`.
+That gives `Can circulate` on 148,931 records (81.0%) and `Unavailable` on
+34,961 (19.0%), summing to 183,892.
+
+96.5% of circulating records are open, and 80 have an access category that
+restricts access; see the ceiling discussion below.
+
 
 **Requestability has two gates, and the loan type feeds one of them.**
 mod-circulation selects a request policy from the circulation rules, which match
@@ -166,14 +178,14 @@ question 5.
 **`Can circulate` only has effect through a loan policy, and none has been
 examined.** A zero-day or in-house policy makes it mean "issued in the reading
 room"; a standard lending policy means unique archival material can leave the
-building. 174,687 records depend on which it is, including 5,489 whose access is
-conditioned.
+building. 148,931 records depend on which it is, 5,144 of them `Restricted`
+material whose access is conditioned.
 
-### Recommended addition: the access category as a ceiling
+### The access category as a ceiling: now largely unnecessary
 
-`540$a` (use restriction) and `506$f` (access category) agree almost everywhere,
-but 453 records carry a permissive mechanism on a category that restricts
-access, and all 453 resolve to `Can circulate` under the table above:
+`540$a` (use restriction) and `506$f` (access category) agree almost everywhere.
+455 records carry a value on a category that restricts access, all of which
+circulated under an earlier draft of this mapping:
 
 | `540$a` (use restriction) | `506$f` (access category) | Records |
 | --- | --- | ---: |
@@ -253,7 +265,8 @@ Every value is in FOLIO's fixed item-status enum, so nothing needs provisioning.
 | --- | ---: | --- |
 | `OPEN`, `OPENWITHADVISORY` | 171,830 | `Available` |
 | `RESTRICTED` | 5,496 | `Available` |
-| `PERMISSIONREQUIRED`, `SAFEGUARDED`, `CLOSED` | 10,176 | `Restricted` |
+| `PERMISSIONREQUIRED`, `SAFEGUARDED` | 357 | `Restricted` |
+| `CLOSED` | 9,819 | `Unavailable` |
 | `MISSING` | 160 | `Missing` |
 | `DATAISSUES` | 24 | `Unknown` |
 | `DEACCESSIONED` | 13 | `Withdrawn` |
@@ -290,31 +303,21 @@ should be confirmed against this tenant's FOLIO version.
 
 ### Loan type
 
-4. Confirm `Can circulate` for everything consultable, 174,687 records, and
-   `Unavailable` for the 9,205 that cannot be produced. Then confirm what loan
-   policy the circulation rules attach to `Can circulate`, which is what decides
-   whether archival material can leave the building.
-5. **Is `Restricted` meant to stop a request?** On the status gate alone it
-   does not. In mod-circulation's `RequestTypeItemStatusWhiteList` on master,
-   `Restricted` allows page, hold and recall (`pageRules.put(RESTRICTED, true)`),
-   the same as `Available` does for paging. So mapping `CLOSED`,
-   `PERMISSIONREQUIRED` and `SAFEGUARDED` to `Restricted` changes what FOLIO
-   displays without changing what that gate permits, across 10,176 records.
+4. Confirm `Can circulate` for `Online request` and `Restricted`, 148,931
+   records, and `Unavailable` for the other 34,961. Note that this gives
+   `Unavailable` to 25,023 records whose access category is `OPEN`, almost all
+   of them `By appointment`. Then confirm what loan policy the circulation rules
+   attach to `Can circulate`, which is what decides whether archival material
+   can leave the building.
 
-   The whitelist is not permissive everywhere, though. `Unavailable`, `Unknown`
-   and `Withdrawn` allow no request type at all, and `Missing` permits only
-   holds. Under the table in section 4 that already constrains 517 records: 320
-   with no access category, 24 `DATAISSUES`, 13 `DEACCESSIONED`, and 160
-   `MISSING` limited to holds.
-
-   The second gate is the request policy, which the circulation rules select
-   using `loanTypeId` among their criteria, so the loan type is part of this too.
-   **The tenant's request policies and circulation rules need checking before
-   concluding what any of this permits.** The dev instance has no `Restricted`
-   items today, so the first run after a clear is the chance to observe the
-   behaviour there.
 
 ### Item status
+5. **Is `Restricted` meant to stop a request?** On the item-status gate alone,
+   it does not: `Restricted` is pageable in mod-circulation, like `Available`.
+   The 357 `Restricted` records (`PERMISSIONREQUIRED` and `SAFEGUARDED`) are
+   therefore fully pageable, subject to the tenant's request policy and
+   circulation rules. `Unavailable`, `Unknown` and `Withdrawn` block requests,
+   while `Missing` allows holds only.
 
 6. Is "set the item status once, when the item is created" good enough? The cost
    is that an AxC access change never reaches an existing item. If that is not
@@ -367,6 +370,31 @@ should be confirmed against this tenant's FOLIO version.
     singular where FOLIO's entity is a holdings record. And whether FOLIO
     constrains hrid length or character set has not been verified.
 
+### Deletion
+
+11. **When a Collect record is deleted, should its FOLIO records be suppressed
+    or hard deleted?** Both paths are implemented and the choice is a runtime
+    flag, so this is a policy decision rather than development work.
+
+    | | What happens | Reversible |
+    | --- | --- | --- |
+    | **Suppress** (default) | `discoverySuppress` set on the instance, holdings and item; `staffSuppress` on the instance as well, since it is the only entity FOLIO gives that field | Yes. The records stay, out of discovery, and can be unsuppressed |
+    | **Hard delete** | the item, then the holdings, then the instance are DELETEd | **No** |
+
+    Today it suppresses. `HARD_DELETE` defaults to `false`, and the per-run
+    `hard_delete` flag on the event overrides it, so switching is a
+    configuration change.
+
+    Points worth weighing. Suppression keeps an audit trail but can leave
+    deleted records visible to cataloguers. Hard delete avoids orphaning parent
+    records by deleting child records first, but it is irreversible; if a delete
+    is issued in error, the sync would only recreate the records if the AxC
+    record reappeared and passed the harvest gate again.
+
+    This is different from question 9: there, unticking Harvest means nothing
+    reaches FOLIO at all; here, Collect sends an actual deletion fact and the
+    sync acts on it.
+
 ---
 
 ## Before implementing
@@ -381,17 +409,3 @@ loan; and that the three `AxC *` location names still resolve, last confirmed
 already a FOLIO identifier, the sync may be creating duplicates of records that
 already exist, which would be a correctness problem rather than a mapping
 choice. Worth establishing before a production run.
-
-**On the AxC side**, the full use-restriction thesaurus. Eight terms are visible
-as of 2026-10-12, up from six on 2026-10-06, and that growth while the field was
-being read is the reason to doubt the list is complete.
-
-**Measurements still owed:** the exact count of records that would get
-`Can circulate` despite a restricting access category (the 453 above is a
-floor), and whether any fall-through location code happens to resolve on the
-tenant.
-
-wellcomecollection/platform#6746 tracks the adapter refresh that was expected to
-populate `984$b` (normal location). That has largely happened through the
-stylesheet rollout, so the issue should be re-read against these figures rather
-than actioned as written.
