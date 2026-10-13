@@ -18,16 +18,17 @@ Locations are matched on code. For migrated locations, FOLIO kept the Sierra cod
 | Codes only on this side | 20, holding 159,917 items | 14 |
 | Items | 915,628 | 478,404 |
 
-The difference in items is almost entirely three collections:
+The difference in items is almost entirely these collections:
 
 | Collection | Sierra items | FOLIO items |
 |---|---|---|
-| Archives and manuscripts (`scm…`, `sc#…`, `swm…`, `har…` codes) | 348,078 | 5,933 |
+| Archives (`scm…`, `sc#…`, `har…` codes) | 338,526 | 35 |
+| Western Manuscripts (`swm…` codes) | 9,552 | 5,898 |
 | Visual (`sicon`, `hicon`) | 79,445 | 0 |
 | Moving image and sound (`mfvac`, `mfohc`) | 14,169 | 139 |
 | Everything else, in codes FOLIO has | 473,460 | 472,172 |
 
-So the library material has migrated almost completely. The gap is archives, visual and audiovisual material, and none of it is meant to migrate from Sierra to FOLIO: it lands in Axiell Collections instead. Visual and audiovisual material moves from Sierra to Axiell Collections later this year, before the March 2027 go-live (Collection Information, on PR #3736, 2026-10-07). Archive records are already catalogued in Axiell Collections, and the Sierra items counted here are the copies the CALM harvest created.
+So the library material has migrated almost completely. Most of the gap is archives, visual and audiovisual material, and none of it is meant to migrate from Sierra to FOLIO: it lands in Axiell Collections instead. Western Manuscripts are the exception: 62% of their items are in FOLIO and 38% aren't, and it isn't clear whether they're meant to migrate at all (see Findings). Visual and audiovisual material moves from Sierra to Axiell Collections later this year, before the March 2027 go-live (Collection Information, on PR #3736, 2026-10-07). Archive records are already catalogued in Axiell Collections, and the Sierra items counted here are the copies the CALM harvest created.
 
 ## Items in both Sierra and FOLIO
 
@@ -121,9 +122,25 @@ The `AxC` locations belong to the Axiell to FOLIO sync. Their first handful of i
 
 ## Findings
 
-**The gap is archives, visual and audiovisual material, and it's expected.** None of it migrates from Sierra to FOLIO; it lands in Axiell Collections. Visual and audiovisual material, including `sicon` (Closed stores Visual, 78,082 items) and the moving image and sound codes, moves from Sierra to Axiell Collections before the March 2027 go-live. Archive records are catalogued in Axiell Collections already. Whether any of this material then reaches FOLIO, through the Axiell to FOLIO sync, depends on that sync's mapping, which is still pending.
+**Most of the gap is archives, visual and audiovisual material, and it's expected.** None of it migrates from Sierra to FOLIO; it lands in Axiell Collections. Visual and audiovisual material, including `sicon` (Closed stores Visual, 78,082 items) and the moving image and sound codes, moves from Sierra to Axiell Collections before the March 2027 go-live. Archive records are catalogued in Axiell Collections already. Whether any of this material then reaches FOLIO, through the Axiell to FOLIO sync, depends on that sync's mapping, which is still pending.
 
-**Western Manuscripts migrated only in part.** Across the `swms` codes, about 62% of the items are in FOLIO, and `swms6` has none of its 624. A partial migration of one collection looks more like a filter or a data issue than a decision, so it's worth checking.
+**Western Manuscripts migrated only in part.** 5,898 of the 9,552 live Sierra items in the `swm…` codes are in FOLIO, about 62%. Counts are from Sierra on 2026-10-13 and the FOLIO pull of 2026-10-09:
+
+| Code | Name | Sierra items | FOLIO items |
+|---|---|---|---|
+| `swms4` | Closed stores WMS 4 | 3,423 | 2,577 |
+| `swms3` | Closed stores WMS 3 | 3,137 | 2,000 |
+| `swms2` | Closed stores WMS 2 | 1,080 | 790 |
+| `swms6` | Closed stores WMS 6 | 624 | 0 |
+| `swms7` | Closed stores WMS 7 | 519 | 149 |
+| `swmam` | Closed stores WMS Amer. | 304 | 90 |
+| `swmlo` | Closed stores WMS MSL | 161 | 158 |
+| `swm#6`, `swm#3`, `swm#4`, `swm#m` | Unrequestable WMS 6, 3, 4, Amer. | 117 | 0, no FOLIO location |
+| `swms5` | Closed stores WMS 5 | 99 | 69 |
+| `swms1` | Closed stores WMS 1 | 72 | 49 |
+| `swmal` | Closed stores Batak mss | 16 | 16 |
+
+Every code is short except `swmal` and nearly `swmlo`, and `swms6` and the unrequestable codes have nothing. Whether Western Manuscripts are meant to migrate to FOLIO isn't clear. Either way a partial migration looks more like a filter or a data issue than a decision, so it needs raising with Collection Information: if they're meant to be in FOLIO, 3,654 items are missing, and if they aren't, 5,898 are there by mistake. The four unrequestable codes are on Sierra's data protection list, and have no FOLIO location to land in. If they're meant to migrate, their restriction needs a home in FOLIO first.
 
 **About 700 more items have "No location" in FOLIO than in Sierra.** FOLIO's `none` location holds 1,110 items, against 391 in Sierra's. Some migrated items may have been given "No location" because their Sierra location wasn't mapped.
 
@@ -147,4 +164,4 @@ Sierra's rules for requesting name 80 distinct location codes. 58 of them have n
 | offsite manual request | 2 | 29 | 2 |
 | manual request | 2 | 9 | 1 |
 
-The location-based rules that FOLIO can't express yet therefore come down to the data protection codes and `harcl`, all of them archive locations, plus one manual request item in `gblip` ("215 Information Point"). That item is a departmental copy of the BMJ (`i18699145`, status "Dept material") on a suppressed bib, so readers never see it and the location is effectively obsolete. They'll matter once archives arrive, and how they apply then depends on the Axiell mapping, which is still pending.
+The location-based rules that FOLIO can't express yet therefore come down to the data protection codes and `harcl`, plus one manual request item in `gblip` ("215 Information Point"). That item is a departmental copy of the BMJ (`i18699145`, status "Dept material") on a suppressed bib, so readers never see it and the location is effectively obsolete. The data protection codes cover both archives (`sc#…`, about 51,400 items) and Western Manuscripts (`swm#…`, 117 items). The archive codes, and `harcl`, matter once archives arrive through the Axiell to FOLIO sync, and how they apply then depends on its mapping, which is still pending. The Western Manuscripts codes matter only if those items migrate to FOLIO, which is part of the question above.
