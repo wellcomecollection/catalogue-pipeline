@@ -73,7 +73,7 @@ The catalogue's shelfmark comes from the Sierra item's 949 `$a` with field tag `
 - FOLIO's effective call number equals the catalogue's shelfmark for 99.81% of the 467,837 items that show one.
 - The item-level call number and the holdings call number are identical on every migrated item, so the two candidate sources in platform#6584 never disagree today.
 - The 875 that differ are the 324 ephemera wrongly migrated as contained-in (`EPH/791/18` against `EPH+32:18`, see above), the renumbered conference volumes (`M32255` against `18459`), and 182 journals in `seser` whose FOLIO call numbers use title abbreviations (`PHI /9`) where Sierra shows `EPB/S/…`.
-- 269 items show no shelfmark in the catalogue but have a FOLIO call number. If the transform keeps Sierra's rules for hiding shelfmarks, it needs their inputs, which platform#6570 and platform#6548 are settling.
+- 269 items show no shelfmark in the catalogue but have a FOLIO call number. Their call numbers come from the Sierra item's `callNumber` field and are ordinary shelfmarks; see the Shelfmark section of [location_mapping.md](location_mapping.md).
 
 ## Sierra locations with no FOLIO location
 
@@ -119,6 +119,8 @@ The FOLIO location exists, but most of its Sierra items aren't in it.
 | `wslor`, `wsrer`, `sobte` | Student Coll. reprints, reprints (ref only), Closed stores P.B. Telugu | Open shelves, Closed stores | 1 | 1 |
 
 The `AxC` locations belong to the Axiell to FOLIO sync. Their first handful of items has arrived. `elro` holds electronic holdings, which platform#6612 covers.
+
+`sslor` and `sobte` do exist in Sierra, but only on suppressed items, which the Sierra counts here leave out. All 100 `sslor` items are suppressed in Sierra and in FOLIO. `sobte` holds one item, `i16640998`, which is suppressed in Sierra but not in FOLIO, so it would start showing in the catalogue once FOLIO is the source. That's a migration discrepancy for Collection Information to fix or confirm.
 
 ## Findings
 
