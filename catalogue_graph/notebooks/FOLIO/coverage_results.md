@@ -57,7 +57,7 @@ Today, 11 of the 12 are the closed items: they carry UNAVAILABLE in the tenant, 
 
 ### Intended
 
-The `by-appointment` deviation affects only 3 items in the tenant. Almost all of the roughly 25,700 items it corrects in the served index are archives awaiting the Axiell sync, or audiovisual items not yet migrated.
+The `by-appointment` deviation affects only 3 items in the tenant. Almost all of the roughly 25,700 items it corrects in the served index are archives awaiting the Axiell sync, or audiovisual items, which don't migrate from Sierra and reach FOLIO via Axiell sync.
 
 ### Unexplained
 
@@ -110,7 +110,7 @@ Seven rows reach no item today, and each one has a reason:
 | `on-exhibition` | pending migration; the "Exhibitions" location is empty |
 | `open-request` | live only |
 | `donor-permission` | no item has the code in either system; kept as a policy guard |
-| `audiovisual-non-requestable` | no audiovisual items migrated yet |
+| `audiovisual-non-requestable` | no audiovisual items in the tenant; they reach FOLIO only through the Axiell sync, and only the digital ones would land on this row |
 
 ## Fallback
 
