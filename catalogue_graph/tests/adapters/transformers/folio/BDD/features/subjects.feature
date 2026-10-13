@@ -236,3 +236,14 @@ Feature: subjects (MARC 6xx)
     And it has the source identifier type "label-derived"
     And its only concept has the source identifier type "label-derived"
     And it has the source identifier value "acme corp"
+
+  Scenario: A ǂ0 under an unsupported scheme leaves the subject identifier label-derived
+    Scala gives the subject an Unidentifiable identifier when the second indicator names
+    a scheme it does not read, such as 4, and a ǂ0 is present. Python ignores the ǂ0 and
+    derives the identifier from the label, as it does for the concept
+    Given the MARC record has a 650 field with indicators "" "4" with subfield "a" value "Medicine" and subfield "0" value "sh85083064"
+    When I transform the MARC record
+    Then the only subject has the label "Medicine"
+    And it has the source identifier type "label-derived"
+    And it has the source identifier value "medicine"
+    And its only concept has the source identifier type "label-derived"
