@@ -7,11 +7,11 @@ import re
 from datetime import date
 from typing import NamedTuple
 
-from lookups import places
 from pymarc.record import Record
 
 from adapters.transformers.marc.parsers.period import MAX, Span
 from adapters.transformers.marc.parsers.positional_field import PositionalField
+from lookups import places
 
 
 class RawField008(PositionalField):

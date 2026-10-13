@@ -9,8 +9,9 @@ At present, all parent links behave as though they link to a Series.
 from collections.abc import Sequence
 
 import structlog
-from models.pipeline.work_state import WorkAncestor
 from pymarc.record import Record
+
+from models.pipeline.work_state import WorkAncestor
 
 logger = structlog.get_logger(__name__)
 
