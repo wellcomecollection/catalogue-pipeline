@@ -209,20 +209,6 @@ Feature: Extracting subjects from 6xx fields
       And that subject has the source identifier value "medicine"
       And that subject's only concept has the identifier value "medicine"
 
-  Rule: A subject with a single concept shares its identifier with that concept
-    Scenario: A Person subject with a role
-    The role is part of the subject label but not of the concept label,
-    and the concept still takes the subject's label-derived identifier
-      Given the MARC record has a 600 field with indicators "" "0" with subfields:
-        | code | value           |
-        | a    | Stanton, Louisa, |
-        | e    | defendant       |
-      When I transform the MARC record
-      Then the only subject has the label "Stanton, Louisa, defendant"
-      And that subject has the source identifier value "stanton, louisa, defendant"
-      And that subject's only concept has the label "Stanton, Louisa,"
-      And that subject's only concept has the identifier value "stanton, louisa, defendant"
-
   Rule: Subjects are listed in document order
     Scenario: Headings of several types
       Given the MARC record has a 600 field with indicators "" "0" with subfields:

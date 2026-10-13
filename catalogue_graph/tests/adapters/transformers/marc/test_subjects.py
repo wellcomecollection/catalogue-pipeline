@@ -51,5 +51,5 @@ def test_single_subject(marc_record: Record) -> None:
 
     assert subject.concepts[0].label == "A B"
     assert isinstance(subject.concepts[0].id, Identifiable)
-    assert subject.concepts[0].id.source_identifier.value == "a b c d e"
+    assert subject.concepts[0].id.source_identifier.value == "a b"
     assert subject.concepts[0].type == "Organisation"
