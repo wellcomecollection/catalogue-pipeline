@@ -8,6 +8,7 @@ from adapters.transformers.marc.edition import extract_edition
 from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.genres import extract_genres
 from adapters.transformers.marc.languages import extract_languages
+from adapters.transformers.marc.parents import get_parents
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
 )
@@ -27,10 +28,16 @@ from models.pipeline.identifier import (
 from models.pipeline.item import Item
 from models.pipeline.production import ProductionEvent
 from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
+from models.pipeline.work_state import WorkAncestor
 
 # The source-identifier type for a FOLIO item. The id-minter turns this plus the
 # item UUID into a stable canonical id for the public catalogue.
 FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
+
+# The Sierra API lists fields grouped by Sierra field tag (host item, series, uniform
+# title), so the works FOLIO replaces have their parents in this order rather than
+# in MARC tag order.
+SIERRA_PARENT_TAG_ORDER = ("773", "440", "490", "830")
 
 
 class FolioWorkBuilder(MarcXmlWorkBuilder):
@@ -85,6 +92,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def designation(self) -> list[str]:
         return extract_designation(self.record)
+
+    @property
+    def ancestors(self) -> list[WorkAncestor]:
+        return get_parents(self.record, tag_order=SIERRA_PARENT_TAG_ORDER)
 
     @property
     def current_frequency(self) -> str | None:
