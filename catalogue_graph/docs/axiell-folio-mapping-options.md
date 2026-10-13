@@ -9,12 +9,12 @@ maps today, see
 
 | Mapping | State | Where |
 | --- | --- | --- |
-| **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 89.8% of records; 13,284 (7.2%) match no rule and fail. The only thing failing records today. | Section 1, questions 1 to 3 |
-| **Loan type** | **Proposed, not agreed.** Constant `Can circulate` for every record today. The proposal derives it from `540$a` (use restriction). | Section 2, questions 4 and 5 |
-| **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | Section 3, questions 7 and 8 |
-| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming, and note that `Restricted` does not block a request. Create-only, so an AxC access change never reaches an existing item. | Section 4, questions 5 and 6 |
-| **Identifier format** (HRID) | **Implemented.** A 45 to 49 character string built from the AxC GUID. Whether that format is acceptable is open, and it cannot change after the first run. | Question 10 |
-| **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | Question 9 |
+| **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 89.8% of records; 13,284 (7.2%) match no rule and fail. The only thing failing records today. | [Section 1](#1-permanent-location-incomplete-and-failing-13284-records), [questions 1 to 3](#location) |
+| **Loan type** | **Proposed, not agreed.** Constant `Can circulate` for every record today. The proposal derives it from `540$a` (use restriction). | [Section 2](#2-loan-type-proposed-not-agreed), [questions 4 and 5](#loan-type) |
+| **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
+| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming, and note that `Restricted` does not block a request. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
+| **Identifier format** (HRID) | **Implemented.** A 45 to 49 character string built from the AxC GUID. Whether that format is acceptable is open, and it cannot change after the first run. | [Question 10](#identifiers) |
+| **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | [Question 9](#material-type-and-selection) |
 
 Nothing in this document is implemented beyond what the State column says is
 implemented. The code is unchanged pending these answers.
@@ -271,7 +271,7 @@ should be confirmed against this tenant's FOLIO version.
 
 ## 5. Decisions needed from Collection Information
 
-**Location** (section 1, the only thing failing records today)
+### Location
 
 1. Should a `984$b` (normal location) whose leading code matches no rule fail
    the record outright, as the material type now does, rather than being passed
@@ -281,7 +281,7 @@ should be confirmed against this tenant's FOLIO version.
 3. Do the 8,228 box-number records need more rules, or a stylesheet fix so that
    `984$b` always carries its site prefix?
 
-**Loan type** (section 2)
+### Loan type
 
 4. Confirm `Can circulate` for everything consultable, 174,687 records, and
    `Unavailable` for the 9,205 that cannot be produced. Then confirm what loan
@@ -297,7 +297,7 @@ should be confirmed against this tenant's FOLIO version.
    records. The dev instance has no `Restricted` items today, so the first run
    after a clear is the chance to confirm the behaviour there.
 
-**Item status** (section 4)
+### Item status
 
 6. Is "set the item status once, when the item is created" good enough? The cost
    is that an AxC access change never reaches an existing item. If that is not
@@ -305,7 +305,7 @@ should be confirmed against this tenant's FOLIO version.
    statuses it derives (`Available`, `Restricted`, `Missing`, `Withdrawn`,
    `Unavailable`) and leaves circulation statuses alone.
 
-**Material type and selection**
+### Material type and selection
 
 7. What material type for `Sound - Digital`, `Archives - Digital` and
    `Moving Image - Digital`? Because requestability is encoded in the material
@@ -323,7 +323,7 @@ should be confirmed against this tenant's FOLIO version.
    something from the LMS, that intent is silently dropped. Tracked in
    wellcomecollection/platform#6663.
 
-**Identifiers**
+### Identifiers
 
 10. **Is the FOLIO identifier format acceptable?** Each record gets a
     predictable hrid built from the Axiell GUID in `001` (record identifier),
