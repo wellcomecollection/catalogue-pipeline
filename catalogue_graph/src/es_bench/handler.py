@@ -17,6 +17,7 @@ from typing import Any
 
 import boto3
 import structlog
+from botocore.config import Config
 
 from es_bench.bench import (
     get_client,
@@ -81,7 +82,13 @@ def invoke_many(
     function_name: str, event: dict[str, Any], parallel: int
 ) -> list[dict[str, Any]]:
     """Invoke the harness Lambda `parallel` times at once with the same event."""
-    client = boto3.client("lambda")
+    # A matrix invocation can run for most of the Lambda's 15 minutes.
+    client = boto3.client(
+        "lambda",
+        config=Config(
+            read_timeout=900, connect_timeout=10, retries={"max_attempts": 0}
+        ),
+    )
     payload = json.dumps(event).encode()
 
     def one(index: int) -> dict[str, Any]:
