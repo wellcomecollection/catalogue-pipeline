@@ -7,6 +7,8 @@ module "project" {
   name      = "pipeline-storage-${local.pipeline_date}"
   region_id = local.region_id
 
+  search_power = var.search_power
+
   traffic_filter_ids = concat(
     var.attach_private_policy ? [ec_serverless_traffic_filter.private.id] : [],
     length(var.allowed_ip_cidrs) > 0 ? [ec_serverless_traffic_filter.ip[0].id] : [],

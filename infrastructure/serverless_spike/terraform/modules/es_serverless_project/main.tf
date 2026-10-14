@@ -9,9 +9,9 @@ resource "ec_elasticsearch_project" "project" {
     tags = var.tags
   }
 
-  # search_lake is left unset so the defaults can be read back, and the
-  # On-demand tier set in the console must not be reverted by a plan.
-  lifecycle {
-    ignore_changes = [search_lake]
+  # Unset at creation so the defaults could be read back (100 and 7 on 2026-10-14).
+  search_lake = var.search_power == null && var.boost_window == null ? null : {
+    search_power = var.search_power
+    boost_window = var.boost_window
   }
 }
