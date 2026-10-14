@@ -383,16 +383,22 @@ def load_slice(
 def ping(client: Elasticsearch, spec: PingSpec) -> dict[str, Any]:
     """Round-trip latency of the cheapest request, for private against public."""
     latencies: list[float] = []
-    info: dict[str, Any] = {}
+    detail: dict[str, Any] = {}
     for _ in range(spec.requests):
         t0 = time.perf_counter()
-        info = dict(client.info().body)
+        if spec.index is None:
+            info = dict(client.info().body)
+            detail = {
+                "version": info.get("version", {}),
+                "cluster_name": info.get("cluster_name"),
+            }
+        else:
+            detail = {
+                "index": spec.index,
+                "exists": bool(client.indices.exists(index=spec.index)),
+            }
         latencies.append((time.perf_counter() - t0) * 1000)
-    return {
-        "version": info.get("version", {}),
-        "cluster_name": info.get("cluster_name"),
-        "latency": latency_stats(latencies).model_dump(),
-    }
+    return {**detail, "latency": latency_stats(latencies).model_dump()}
 
 
 def timed(label: str, fn: Callable[[], dict[str, Any]]) -> dict[str, Any]:

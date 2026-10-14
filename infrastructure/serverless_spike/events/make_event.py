@@ -64,7 +64,7 @@ def main() -> None:
             },
         )
     elif args.mode == "ping":
-        event.update(mode="ping", ping={"requests": 50})
+        event.update(mode="ping", ping={"requests": 50, "index": dest})
     elif args.mode == "scroll":
         event.update(mode="scroll", scroll={"index": dest, "keep_alive": "30m"})
     else:

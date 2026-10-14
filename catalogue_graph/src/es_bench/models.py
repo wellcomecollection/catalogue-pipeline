@@ -68,6 +68,8 @@ class LoadSpec(BaseModel):
 
 class PingSpec(BaseModel):
     requests: int = 50
+    # Service keys carry index privileges only, so ping an index rather than the root.
+    index: str | None = None
 
 
 class BenchEvent(BaseModel):
