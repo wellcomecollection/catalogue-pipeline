@@ -110,7 +110,6 @@ Seven rows reach no item today, and each one has a reason:
 | `on-exhibition` | pending migration; the "Exhibitions" location is empty |
 | `open-request` | live only |
 | `donor-permission` | no item has the code in either system; kept as a policy guard |
-| `audiovisual-non-requestable` | no audiovisual items in the tenant; they reach FOLIO only through the Axiell sync, and only the digital ones would land on this row |
 
 ## Fallback
 
