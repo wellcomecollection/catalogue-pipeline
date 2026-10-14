@@ -216,7 +216,7 @@ def _pit_page(
     slice_id: int,
     slice_max: int,
     search_after: list[Any] | None,
-) -> list[dict[str, Any]]:
+) -> tuple[str, list[dict[str, Any]]]:
     body: dict[str, Any] = {
         "size": size,
         "pit": {"id": pit_id, "keep_alive": keep_alive},
@@ -227,7 +227,11 @@ def _pit_page(
         body["slice"] = {"id": slice_id, "max": slice_max}
     if search_after is not None:
         body["search_after"] = search_after
-    return cast(list[dict[str, Any]], client.search(body=body)["hits"]["hits"])
+    response = client.search(body=body)
+    # The PIT id can change between requests; the next page must use the newest one.
+    return cast(str, response.get("pit_id", pit_id)), cast(
+        list[dict[str, Any]], response["hits"]["hits"]
+    )
 
 
 def sample_docs(client: Elasticsearch, spec: SampleSpec) -> list[Doc]:
@@ -242,7 +246,7 @@ def sample_docs(client: Elasticsearch, spec: SampleSpec) -> list[Doc]:
         search_after: list[Any] | None = None
         while len(collected) < per_slice:
             size = min(spec.page_size, per_slice - len(collected))
-            hits = _pit_page(
+            _, hits = _pit_page(
                 client,
                 pit_id,
                 spec.keep_alive,
@@ -348,7 +352,7 @@ def load_slice(
     try:
         with ThreadPoolExecutor(max_workers=spec.concurrency) as pool:
             while time.perf_counter() - started < spec.deadline_seconds:
-                hits = _pit_page(
+                pit_id, hits = _pit_page(
                     source_client,
                     pit_id,
                     spec.keep_alive,
