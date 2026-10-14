@@ -66,11 +66,13 @@ Each of the three records gets a predictable HRID built from the AxC GUID (MARC
 `001`). This is what links the three records together and lets deletion facts
 find the right FOLIO records later.
 
+The AxC GUID is a 36-character UUID, so an HRID is 45 to 49 characters.
+
 | Record | HRID pattern | Example |
 | --- | --- | --- |
-| Instance | `AxC-instance-<001>` | `AxC-instance-guid-001` |
-| Holdings | `AxC-holding-<001>` | `AxC-holding-guid-001` |
-| Item | `AxC-item-<001>` | `AxC-item-guid-001` |
+| Instance | `AxC-instance-<001>` | `AxC-instance-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
+| Holdings | `AxC-holding-<001>` | `AxC-holding-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
+| Item | `AxC-item-<001>` | `AxC-item-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
 
 ## Instance
 
@@ -124,7 +126,10 @@ the raw AxC value through these steps in order:
    and the material type are the required fields today.
 3. Apply the location rules (location fields only), which resolve the AxC hierarchy
    to a FOLIO location name.
-4. Apply the normalization table (if the field has one).
+4. Apply the normalization table (if the field has one). If the field also sets
+   `strict_table` and the value is not in the table, raise a `MappingError` here,
+   before the resolver is consulted. The material type is the only strict field
+   today.
 5. Fall back to the field's default if the value is now empty. A required field has
    no default, so this step never applies to one.
 6. Look the resulting name up through the matching `RefCache` resolver to get a UUID.
@@ -162,9 +167,9 @@ That same fact is why the table is strict (`strict_table` on
 own it would not stop an unmapped value, because `_resolve` hands an unmapped
 value to the resolver unchanged and `resolve_material_type` accepts any name the
 tenant carries. A new AxC value of `archive`, `computer media` or even `book`
-would then sync with a requestability nobody agreed. Those three are still to be confirmed with Collection
-Information. For the AxC value distribution behind this table, see
-[axiell-folio-mapping-options.md](axiell-folio-mapping-options.md) section 1.
+would then sync with a requestability nobody agreed. For the AxC value
+distribution behind this table, see
+[axiell-folio-mapping-options.md](axiell-folio-mapping-options.md) section 3.
 
 ### Access category to item status
 
@@ -188,22 +193,34 @@ reader signs to agree to the conditions of viewing restricted material, and they
 do that before the material is handed over, so it does not affect whether the
 item can be requested or produced.
 
-Two caveats: `Restricted` and `Withdrawn` are unconfirmed on this tenant's FOLIO
-version, and the status is create-only, so a later access change in AxC does not
-reach an existing item.
+Three caveats. `Restricted` and `Withdrawn` are unconfirmed on this tenant's
+FOLIO version. The status is create-only, so a later access change in AxC does
+not reach an existing item. And **`Restricted` does not stop a request on the
+status gate**: in mod-circulation's `RequestTypeItemStatusWhiteList`,
+`Restricted` permits page, hold and recall just as `Available` does for paging,
+so mapping `CLOSED`,
+`PERMISSIONREQUIRED` and `SAFEGUARDED` to `Restricted` changes what FOLIO
+displays without changing what that gate permits. The whitelist does block
+elsewhere: `Unavailable`, `Unknown` and `Withdrawn` permit no request type, and
+`Missing` permits only holds. The status is one of two gates, the other being
+the request policy selected by the circulation rules, so neither gate alone
+settles requestability. See the options document, question 5.
 
 ### Loan type: no mapping
 
 Every item takes the default, `Can circulate`. No AxC field is mapped to the
-loan type, so nothing overrides it. Two candidates are unsettled: the access
-category (`506 $f`, who may access it) and the use restriction (`540 $a`, how it
-may be requested). Both have been mapped here and reverted pending Collection
-Information, which also has to say whether open archival material should
-circulate at all.
+loan type, so nothing overrides it. A mapping driven by the use restriction
+(`540 $a`, how it may be requested) is proposed but not agreed; see the options
+document, section 2.
 
-Until then a reader can request any item, including those whose access note
-reads *"This item is closed and cannot be accessed"*. Settle before a
-production run.
+Items with access note *"This item is closed and cannot be accessed"* remain
+requestable: `Restricted` permits paging under the status whitelist.
+
+Requests must pass both the item-status whitelist and the request policy.
+mod-circulation selects that policy from circulation rules, which include
+`loanTypeId`. Loan type also affects loan period and renewability through the
+loan policy. This tenant's rules and policies have not been examined, so its
+effect here is unknown. See the options document, section 2.
 
 ### Location rules
 
@@ -229,7 +246,8 @@ throughout.
 | starts `CLW` | Constantine London West | Axiell sync | `AxC Constantine London West` |
 
 A location matching no rule falls through to the ordinary FOLIO code/name lookup
-as its **leading code**, not as the raw `984 $b` value:. There is no default.
+as its **leading code**, not as the raw `984 $b` value. There is no default, so a
+leading code the tenant does not know fails the record.
 
 ### Defaults
 
