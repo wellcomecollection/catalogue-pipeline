@@ -54,7 +54,7 @@ FOLIO holds the location on the holdings record, not the item. No migrated item 
 
 Today's location types come from Sierra's location names. A type derived provisionally from the FOLIO library (Closed stores and Offsite as closed stores, Open shelves as open shelves) gives the same type for every item except two groups:
 
-| Catalogue today | FOLIO library | Items |
+| Catalogue today | FOLIO location | Items |
 |---|---|---|
 | closed stores | `bwith` or `cwith` (bound in above, contained in above) | 35,846 |
 | open shelves | `bwith` or `cwith` | 408 |
@@ -144,7 +144,7 @@ The `AxC` locations belong to the Axiell to FOLIO sync. Their first handful of i
 
 Every code is short except `swmal` and nearly `swmlo`, and `swms6` and the unrequestable codes have nothing. Whether Western Manuscripts are meant to migrate to FOLIO isn't clear. Either way a partial migration looks more like a filter or a data issue than a decision, so it needs raising with Collection Information: if they're meant to be in FOLIO, 3,654 items are missing, and if they aren't, 5,898 are there by mistake. The four unrequestable codes are on Sierra's data protection list, and have no FOLIO location to land in. If they're meant to migrate, their restriction needs a home in FOLIO first.
 
-**About 700 more items have "No location" in FOLIO than in Sierra.** FOLIO's `none` location holds 1,110 items, against 391 in Sierra's. Some migrated items may have been given "No location" because their Sierra location wasn't mapped.
+**FOLIO's `none` location holds 1,110 items, against 391 in Sierra's, but the extra items are suppressed.** 781 of the 1,110 are suppressed from discovery in FOLIO, so they aren't shown at all. Of the other 329, 327 have no location in the catalogue today, and the remaining 2 are Missing in FOLIO while Sierra now shows them in closed stores, which is drift since the migration snapshot (checked 2026-10-13 against `works-indexed-2026-09-30`).
 
 **Some codes hold more items in FOLIO than in Sierra:** `sgmc2` (234 in Sierra, 751 in FOLIO), `wslob` (66 against 326), `cwith` (2,192 against 2,517), `setra` (1,350 against 1,692) and a few more. Items have probably moved in Sierra since the migration snapshot, the same drift the access condition coverage check found.
 
