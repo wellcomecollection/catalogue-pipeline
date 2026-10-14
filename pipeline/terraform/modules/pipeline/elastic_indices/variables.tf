@@ -9,8 +9,10 @@ variable "es_cluster" {
     public_host        = string
     port               = string
     protocol           = string
-    read_only_username = string
-    read_only_password = string
+    read_only_username = optional(string)
+    read_only_password = optional(string)
+    # Set for a serverless project, which has no native realm for basic auth.
+    api_key = optional(string)
   })
   sensitive   = true
   description = "Elasticsearch cluster connection details (from infrastructure/critical outputs)."
