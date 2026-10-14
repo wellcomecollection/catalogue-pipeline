@@ -8,6 +8,7 @@ from adapters.transformers.marc.edition import extract_edition
 from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.genres import extract_genres
 from adapters.transformers.marc.languages import extract_languages
+from adapters.transformers.marc.lettering import extract_lettering
 from adapters.transformers.marc.parents import get_parents
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
@@ -61,6 +62,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def edition(self) -> str | None:
         return extract_edition(self.record)
+
+    @property
+    def lettering(self) -> str | None:
+        return extract_lettering(self.record)
 
     @property
     def other_identifiers(self) -> list[SourceIdentifier]:
