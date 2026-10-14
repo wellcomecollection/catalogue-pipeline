@@ -40,7 +40,11 @@ The serverless endpoints carry no port suffix, so the hosted module's split-on-c
 
 ### 3. Clients
 
-elasticsearch-py 8.12.1 (the catalogue_graph pin) and elastic4s 8.9.5 with the REST client 8.9.2 both work unchanged, including `ElasticIndexer`'s `external_gte` bulks and `ElasticSourceRetriever`'s multi-get. The 9.x client bump was not exercised; nothing in these runs needed it. The catalogue API's multi-cluster path was not deployed against the project; the secrets it would read exist under the usual names in the catalogue account.
+elasticsearch-py 8.12.1 (the catalogue_graph pin) and elastic4s 8.9.5 with the REST client 8.9.2 both work unchanged, including `ElasticIndexer`'s `external_gte` bulks and `ElasticSourceRetriever`'s multi-get. elasticsearch-py 9.5.1 also works with the same harness code: an index-level ping, a 30-slice point-in-time sample from the project and bulk writes, with no deprecation warnings, so the 9.x bump is open to the pipeline but not required by serverless.
+
+The real works ingestor ran its indexer step locally against the project (`ingestor.steps.ingestor_indexer --use-cli`, public endpoint, the `works_ingestor` key) over two loader files from the 2026-09-30 full job staged under a spike-only prefix, and indexed 20,000 documents in two batches with no failures.
+
+The catalogue API's multi-cluster path ran locally from a catalogue-api checkout with a `multiCluster.serverless-spike` entry pointing at the spike's `public_host` and `catalogue_api/api_key` secrets, as the multi-cluster guide prescribes for local use. `MultiElasticConfigParser` found the entry, the API built the client, and `?elasticCluster=serverless-spike` returned works pages, a `london` query and a genre aggregation from `works-indexed-2026-10-14-serverless` while a copy of works-indexed was still filling it. The entry was not deployed to stage or production.
 
 ### 4. Reads
 
