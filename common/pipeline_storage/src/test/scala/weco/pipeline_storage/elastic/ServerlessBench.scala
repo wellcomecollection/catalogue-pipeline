@@ -14,9 +14,10 @@ import scala.concurrent.{Await, ExecutionContext, Future}
   * concurrent single-document bulks.
   *
   * Hosts and keys come from ES_BENCH_SOURCE_HOST, ES_BENCH_SOURCE_KEY,
-  * ES_BENCH_TARGET_HOST and ES_BENCH_TARGET_KEY. Run with
-  * sbt "pipeline_storage/Test/runMain weco.pipeline_storage.elastic.ServerlessBench
-  * --source-index=... --target-index=... --docs=2000 --bulk-size=1 --concurrency=50"
+  * ES_BENCH_TARGET_HOST and ES_BENCH_TARGET_KEY. Run with sbt
+  * "pipeline_storage/Test/runMain weco.pipeline_storage.elastic.ServerlessBench
+  * --source-index=... --target-index=... --docs=2000 --bulk-size=1
+  * --concurrency=50"
   */
 object ServerlessBench extends App {
   implicit val ec: ExecutionContext = ExecutionContext.global
@@ -42,7 +43,8 @@ object ServerlessBench extends App {
     sys.env.getOrElse(name, sys.error(s"$name is not set"))
 
   val sourceIndex = opt("source-index", "works-denormalised-2026-09-30")
-  val targetIndex = opt("target-index", "works-denormalised-2026-10-14-serverless")
+  val targetIndex =
+    opt("target-index", "works-denormalised-2026-10-14-serverless")
   val docCount = opt("docs", "2000").toInt
   val bulkSize = opt("bulk-size", "1").toInt
   val concurrency = opt("concurrency", "50").toInt
@@ -76,7 +78,8 @@ object ServerlessBench extends App {
         RawDoc(
           id = s"$label-b$bulkSize-c$concurrency-${hit.id}",
           version = version,
-          json = io.circe.parser.parse(hit.sourceAsString).fold(throw _, identity)
+          json =
+            io.circe.parser.parse(hit.sourceAsString).fold(throw _, identity)
         )
     }
   require(docs.nonEmpty, s"no documents read from $sourceIndex")
@@ -90,27 +93,39 @@ object ServerlessBench extends App {
 
   def percentile(sorted: Seq[Double], fraction: Double): Double =
     if (sorted.isEmpty) 0
-    else sorted(math.min(sorted.size - 1, math.max(0, math.ceil(fraction * sorted.size).toInt - 1)))
+    else
+      sorted(
+        math.min(
+          sorted.size - 1,
+          math.max(0, math.ceil(fraction * sorted.size).toInt - 1)
+        )
+      )
 
   (1 to rounds).foreach {
     round =>
       val bulks = docs.grouped(bulkSize).toSeq
       val started = System.nanoTime()
       // Like MergerSQSLambda.processMessages: Future.sequence over a batch, one bulk per message.
+      // Groups run one after another so only `concurrency` bulks are in flight at once.
       val outcomes: Seq[(Double, Boolean)] = Await.result(
-        Future
-          .traverse(bulks.grouped(concurrency).toSeq) {
-            group =>
-              Future.sequence(group.map {
-                bulk =>
-                  val t0 = System.nanoTime()
-                  indexer(bulk).map {
-                    result =>
-                      ((System.nanoTime() - t0) / 1e6, result.isRight)
-                  }
-              })
-          }
-          .map(_.flatten),
+        bulks
+          .grouped(concurrency)
+          .foldLeft(Future.successful(Seq.empty[(Double, Boolean)])) {
+            (acc, group) =>
+              acc.flatMap {
+                done =>
+                  Future
+                    .sequence(group.map {
+                      bulk =>
+                        val t0 = System.nanoTime()
+                        indexer(bulk).map {
+                          result =>
+                            ((System.nanoTime() - t0) / 1e6, result.isRight)
+                        }
+                    })
+                    .map(done ++ _)
+              }
+          },
         30.minutes
       )
       val wall = (System.nanoTime() - started) / 1e9
@@ -119,9 +134,13 @@ object ServerlessBench extends App {
       val written = docs.size - failed * bulkSize
       println(
         s"""{"label":"$label","round":$round,"bulk_size":$bulkSize,"concurrency":$concurrency,""" +
-          s""""docs":$written,"wall_seconds":${"%.2f".format(wall)},"docs_per_second":${"%.1f"
+          s""""docs":$written,"wall_seconds":${"%.2f".format(
+              wall
+            )},"docs_per_second":${"%.1f"
               .format(written / wall)},""" +
-          s""""p50_ms":${"%.1f".format(percentile(latencies, 0.5))},"p95_ms":${"%.1f"
+          s""""p50_ms":${"%.1f".format(
+              percentile(latencies, 0.5)
+            )},"p95_ms":${"%.1f"
               .format(percentile(latencies, 0.95))},"p99_ms":${"%.1f"
               .format(percentile(latencies, 0.99))},"failed_bulks":$failed}"""
       )
