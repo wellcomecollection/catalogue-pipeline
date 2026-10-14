@@ -219,8 +219,9 @@ locals {
       "elasticsearch/pipeline_storage_${var.pipeline_date}/es_username"  = var.es_cluster.username
       "elasticsearch/pipeline_storage_${var.pipeline_date}/es_password"  = var.es_cluster.password
     },
-    # The native read_only user only exists on hosted clusters.
-    var.es_cluster.read_only_username == null ? {} : {
+    # The native read_only user only exists on hosted clusters. The test is
+    # unmarked so the map's keys stay usable in for_each.
+    nonsensitive(var.es_cluster.read_only_username == null) ? {} : {
       "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_username" = var.es_cluster.read_only_username
       "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_password" = var.es_cluster.read_only_password
     }
