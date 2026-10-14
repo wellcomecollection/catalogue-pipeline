@@ -166,6 +166,10 @@ Elasticsearch ingestor Lambda functions:
 * `ingestor_deletions`: Removes indexed concepts from Elasticsearch if corresponding 'Concept' nodes were removed from
   the catalogue graph. Uses the append-only log of deleted IDs created by the `graph_remover` to decide which
   documents to remove.
+* `ingestor_relabelled_works`: Compares the last two full concepts ingests and returns the IDs of the works which
+  display a concept whose label changed, so the nightly `graph-concepts-full` state machine can re-ingest them. Work
+  documents hold a copy of the concept's label, and nothing else marks a work as changed when its concept changes.
+  Above `max_work_ids` it writes a report and returns no IDs, leaving the decision to a human.
 
 ### Processing mode compatibility
 
