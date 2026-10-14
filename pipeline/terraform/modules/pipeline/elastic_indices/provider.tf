@@ -17,9 +17,8 @@ terraform {
 
 provider "elasticstack" {
   elasticsearch {
-    api_key   = var.es_cluster.api_key
-    username  = var.es_cluster.api_key == null ? var.es_cluster.username : null
-    password  = var.es_cluster.api_key == null ? var.es_cluster.password : null
+    username  = var.es_cluster.username
+    password  = var.es_cluster.password
     endpoints = [var.es_cluster.https_endpoint]
   }
 }

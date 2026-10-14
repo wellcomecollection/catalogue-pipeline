@@ -1,5 +1,5 @@
 # Phase 1: apply with -target=module.project. The elasticstack.serverless
-# provider reads the bootstrap key this creates, so nothing else can plan
+# provider reads the credentials this creates, so nothing else can plan
 # until it exists.
 module "project" {
   source = "./modules/es_serverless_project"

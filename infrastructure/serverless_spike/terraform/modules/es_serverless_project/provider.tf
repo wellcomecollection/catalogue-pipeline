@@ -9,8 +9,8 @@ terraform {
   }
 }
 
-# Project credentials are only exported at creation, so the bootstrap key is
-# minted here with them and everything downstream authenticates with the key.
+# Only here so Terraform can destroy the bootstrap key the first design
+# created. Remove once that destroy has applied.
 provider "elasticstack" {
   elasticsearch {
     username  = ec_elasticsearch_project.project.credentials.username

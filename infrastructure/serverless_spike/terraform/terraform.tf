@@ -48,12 +48,13 @@ provider "aws" {
 
 provider "ec" {}
 
-# Phase 2 provider: the bootstrap key only exists once module.project has applied.
+# Phase 2 provider: the credentials only exist once module.project has applied.
 provider "elasticstack" {
   alias = "serverless"
 
   elasticsearch {
-    api_key   = module.project.es_cluster.api_key
+    username  = module.project.es_cluster.username
+    password  = module.project.es_cluster.password
     endpoints = [module.project.es_cluster.https_endpoint]
   }
 }

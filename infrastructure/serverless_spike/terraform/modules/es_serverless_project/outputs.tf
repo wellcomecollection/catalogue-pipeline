@@ -8,7 +8,10 @@ locals {
 
 # The same shape infrastructure/critical emits for a hosted cluster, so the
 # elastic_indices module takes it unchanged. Port is the literal 443 because
-# the serverless URL may carry no port suffix to split on.
+# the serverless URL carries no port suffix to split on. Terraform keeps using
+# the creation-time basic credentials: a request authenticated by an API key
+# cannot create keys with privileges, so a bootstrap key cannot mint the
+# per-service keys.
 output "es_cluster" {
   sensitive = true
   value = {
@@ -21,7 +24,6 @@ output "es_cluster" {
     protocol           = "https"
     read_only_username = null
     read_only_password = null
-    api_key            = elasticstack_elasticsearch_security_api_key.bootstrap.encoded
   }
 }
 

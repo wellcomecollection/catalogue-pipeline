@@ -11,8 +11,6 @@ variable "es_cluster" {
     protocol           = string
     read_only_username = optional(string)
     read_only_password = optional(string)
-    # Set for a serverless project, which has no native realm for basic auth.
-    api_key = optional(string)
   })
   sensitive   = true
   description = "Elasticsearch cluster connection details (from infrastructure/critical outputs)."

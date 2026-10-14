@@ -15,21 +15,3 @@ resource "ec_elasticsearch_project" "project" {
     ignore_changes = [search_lake]
   }
 }
-
-resource "elasticstack_elasticsearch_security_api_key" "bootstrap" {
-  name = "${var.name}-terraform-bootstrap"
-
-  role_descriptors = jsonencode({
-    bootstrap = {
-      # monitor: the elasticstack provider reads the root endpoint before every resource.
-      cluster = ["manage_api_key", "manage_pipeline", "monitor"]
-      indices = [
-        {
-          names                    = ["*"]
-          privileges               = ["all"]
-          allow_restricted_indices = false
-        }
-      ]
-    }
-  })
-}
