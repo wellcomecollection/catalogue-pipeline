@@ -355,9 +355,9 @@ should be confirmed against this tenant's FOLIO version.
     | Holdings | `AxC-holding-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 48 |
     | Item | `AxC-item-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 45 |
 
-   The `AxC-` prefix identifies the record as synced from Axiell; the hrid also
-   includes the record type and Axiell GUID, making each record easy to find
-   and identify. The human-readable archival reference is carried, but
+    The `AxC-` prefix identifies the record as synced from Axiell; the hrid also
+    includes the record type and Axiell GUID, making each record easy to find
+    and identify. The human-readable archival reference is carried, but
     as the instance's `Local identifier` (for example `WMS/Amer.147`, from
     `035$a(AltRefNo)`, the object number), not as the hrid.
 
@@ -404,8 +404,3 @@ should be confirmed against this tenant's FOLIO version.
 rules attach to `Can circulate` and whether `Unavailable` genuinely prevents a
 loan; and that the three `AxC *` location names still resolve, last confirmed
 2026-09-29.
-
-**`907$a`**, a UUID present on every harvested record, is unidentified. If it is
-already a FOLIO identifier, the sync may be creating duplicates of records that
-already exist, which would be a correctness problem rather than a mapping
-choice. Worth establishing before a production run.
