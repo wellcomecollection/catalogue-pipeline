@@ -20,6 +20,7 @@ import structlog
 from botocore.config import Config
 
 from es_bench.bench import (
+    count_index,
     get_client,
     load_slice,
     ping,
@@ -59,6 +60,11 @@ def run(event: BenchEvent) -> dict[str, Any]:
         result = timed(
             "load", lambda: load_slice(source_client, target_client, load, version)
         )
+    elif event.mode == "count":
+        if event.count is None:
+            raise ValueError("count needs count")
+        count = event.count
+        result = timed("count", lambda: count_index(target_client, count))
     else:
         ping_spec = event.ping
         result = timed("ping", lambda: ping(target_client, ping_spec))
