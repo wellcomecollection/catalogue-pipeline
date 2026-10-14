@@ -21,7 +21,8 @@ resource "elasticstack_elasticsearch_security_api_key" "bootstrap" {
 
   role_descriptors = jsonencode({
     bootstrap = {
-      cluster = ["manage_api_key", "manage_pipeline"]
+      # monitor: the elasticstack provider reads the root endpoint before every resource.
+      cluster = ["manage_api_key", "manage_pipeline", "monitor"]
       indices = [
         {
           names                    = ["*"]
