@@ -40,6 +40,9 @@ def main() -> None:
     parser.add_argument("--slice-id", type=int, default=0)
     parser.add_argument("--slice-max", type=int, default=8)
     parser.add_argument("--version", type=int, default=None)
+    parser.add_argument("--bulk-sizes", type=int, nargs="+", default=BULK_SIZES)
+    parser.add_argument("--concurrencies", type=int, nargs="+", default=CONCURRENCIES)
+    parser.add_argument("--id-prefix", default=None)
     args = parser.parse_args()
 
     event: dict = {"target": TARGETS[args.target]}
@@ -49,7 +52,11 @@ def main() -> None:
         cells = (
             [{"bulk_size": 1, "concurrency": 50}]
             if args.mode == "merger_shape"
-            else [{"bulk_size": b, "concurrency": c} for b in BULK_SIZES for c in CONCURRENCIES]
+            else [
+                {"bulk_size": b, "concurrency": c}
+                for b in args.bulk_sizes
+                for c in args.concurrencies
+            ]
         )
         event.update(
             mode="write_matrix",
@@ -59,7 +66,7 @@ def main() -> None:
                 "index": dest,
                 "cells": cells,
                 "docs_per_cell": args.docs_per_cell,
-                "id_prefix": args.mode,
+                "id_prefix": args.id_prefix or args.mode,
                 "version": args.version,
             },
         )
