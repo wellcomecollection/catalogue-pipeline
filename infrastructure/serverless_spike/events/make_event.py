@@ -31,7 +31,9 @@ CONCURRENCIES = [1, 5, 10, 30, 60]
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["write_matrix", "merger_shape", "ping", "scroll", "load"])
+    parser.add_argument(
+        "mode", choices=["write_matrix", "merger_shape", "ping", "scroll", "load", "count"]
+    )
     parser.add_argument("--target", required=True, choices=sorted(TARGETS))
     parser.add_argument("--source", default="hosted_public", choices=sorted(TARGETS))
     parser.add_argument("--index", default=None)
@@ -74,6 +76,8 @@ def main() -> None:
         )
     elif args.mode == "ping":
         event.update(mode="ping", ping={"requests": 50, "index": dest})
+    elif args.mode == "count":
+        event.update(mode="count", count={"index": dest, "cardinality_field": "state.canonicalId"})
     elif args.mode == "scroll":
         event.update(mode="scroll", scroll={"index": dest, "keep_alive": "30m"})
     else:

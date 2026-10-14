@@ -17,6 +17,7 @@ from elasticsearch import Elasticsearch
 
 from es_bench.models import (
     CellResult,
+    CountSpec,
     EsTarget,
     LatencyStats,
     LoadSpec,
@@ -370,6 +371,8 @@ def load_slice(
     return {
         "slice_id": spec.slice_id,
         "copied": copied,
+        "item_429s": sum(o.item_429s for o in outcomes),
+        "item_errors": sum(o.item_errors for o in outcomes),
         "exhausted": exhausted,
         "search_after": None if exhausted else search_after,
         "wall_seconds": wall,
@@ -379,6 +382,26 @@ def load_slice(
         "http_429s": sum(1 for o in outcomes if o.status == 429),
         "failed_requests": sum(1 for o in outcomes if not 200 <= o.status < 300),
     }
+
+
+def count_index(client: Elasticsearch, spec: CountSpec) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "index": spec.index,
+        "count": int(client.count(index=spec.index)["count"]),
+    }
+    if spec.cardinality_field:
+        aggs = {
+            "distinct": {
+                "cardinality": {
+                    "field": spec.cardinality_field,
+                    "precision_threshold": 40000,
+                }
+            }
+        }
+        response = client.search(index=spec.index, size=0, aggs=aggs)
+        result["cardinality_field"] = spec.cardinality_field
+        result["distinct"] = int(response["aggregations"]["distinct"]["value"])
+    return result
 
 
 def ping(client: Elasticsearch, spec: PingSpec) -> dict[str, Any]:

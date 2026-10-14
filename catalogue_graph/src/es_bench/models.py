@@ -68,6 +68,12 @@ class LoadSpec(BaseModel):
     deadline_seconds: int = 780
 
 
+class CountSpec(BaseModel):
+    index: str
+    # Distinct values of this keyword field, for coverage checks after a load.
+    cardinality_field: str | None = None
+
+
 class PingSpec(BaseModel):
     requests: int = 50
     # Service keys carry index privileges only, so ping an index rather than the root.
@@ -75,13 +81,14 @@ class PingSpec(BaseModel):
 
 
 class BenchEvent(BaseModel):
-    mode: Literal["write_matrix", "scroll", "load", "ping"]
+    mode: Literal["write_matrix", "scroll", "load", "ping", "count"]
     source: EsTarget | None = None
     target: EsTarget
     sample: SampleSpec | None = None
     write: WriteSpec | None = None
     scroll: ScrollSpec | None = None
     load: LoadSpec | None = None
+    count: CountSpec | None = None
     ping: PingSpec = Field(default_factory=PingSpec)
 
 
