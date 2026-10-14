@@ -53,6 +53,11 @@ def get_a_subfields(field_code: str, record: Record) -> list[str]:
     return non_empty_subfields(field_code, "a", record)
 
 
+def non_blank_subfields(field: Field, *codes: str) -> list[str]:
+    """Values of the given subfields in document order, leaving out blank ones."""
+    return [value for value in field.get_subfields(*codes) if value.strip()]
+
+
 def non_repeatable_subfield(field: Field, code: str) -> str | None:
     """First non-blank value of a subfield that must not repeat. Logs an error if it does."""
     values = non_empty(value.strip() for value in field.get_subfields(code))
@@ -74,3 +79,12 @@ def non_repeatable_subfields(field: Field, *codes: str) -> list[str]:
 
 def non_empty[T](value: Iterable[T | None]) -> list[T]:
     return [value for value in value if value]
+
+
+def distinct[T](values: Iterable[T]) -> list[T]:
+    """Remove repeated values, keeping the first occurrence of each in place."""
+    result: list[T] = []
+    for value in values:
+        if value not in result:
+            result.append(value)
+    return result
