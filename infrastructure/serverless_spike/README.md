@@ -4,7 +4,7 @@ Throwaway stack for [platform#6714](https://github.com/wellcomecollection/platfo
 
 ## What it creates
 
-- `modules/es_serverless_project`: an `ec_elasticsearch_project` in `aws-eu-west-1`, a bootstrap API key minted with the creation-time credentials, and the nine-key `es_cluster` object the `elastic_indices` module takes, with port set to the literal 443 and `api_key` set.
+- `modules/es_serverless_project`: an `ec_elasticsearch_project` in `aws-eu-west-1` and the nine-key `es_cluster` object the `elastic_indices` module takes, carrying the creation-time basic credentials, port set to the literal 443, and null `read_only` fields. Terraform keeps using those credentials: a request authenticated by an API key cannot create keys with privileges, so a bootstrap key could not mint the per-service keys.
 - `indices.tf`: `elastic_indices` under pipeline date `2026-10-14-serverless`, so the indices, the `set-indexed-at` pipeline, the per-service keys and the connection secrets exist under the usual names in both accounts. Plus a `bench` key that can write only the spike's own indices.
 - `hosted.tf`: `works-denormalised-2026-10-14-serverless-hosted-comparator` on the hosted cluster with the same mapping, and a `bench_hosted` key that writes only that index and reads the 2026-09-30 indices for sampling.
 - `network.tf`: an interface endpoint to the serverless endpoint service, a private hosted zone for `private.eu-west-1.aws.elastic.cloud` with a wildcard CNAME, and an `ec_serverless_traffic_filter` on the endpoint. The policy is attached to the project only when `attach_private_policy` is true, because any attached policy rejects unmatched sources with 403. `allowed_ip_cidrs` adds an IP policy for a laptop.
@@ -12,7 +12,7 @@ Throwaway stack for [platform#6714](https://github.com/wellcomecollection/platfo
 
 ## Applying
 
-The `elasticstack.serverless` provider authenticates with the bootstrap key, so the project has to exist before anything else can plan:
+The `elasticstack.serverless` provider authenticates with the project's creation-time credentials, so the project has to exist before anything else can plan:
 
 ```
 ./run_terraform.sh init
@@ -20,9 +20,9 @@ The `elasticstack.serverless` provider authenticates with the bootstrap key, so 
 ./run_terraform.sh plan -out=PLANFILE
 ```
 
-After the second apply, set the On-demand tier in the console and run a plan to read the `search_lake` values back into the `project` output. The project's `search_lake` is in `ignore_changes`, so the plan will not revert it.
+After the second apply, `search_power` and `boost_window` can be set as variables (the console offered no tier labels for this project; 28 is the API floor); unset, the project keeps its defaults, which read back as 100 and 7.
 
-To test the private path, apply once more with `-var attach_private_policy=true`, and with `-var 'allowed_ip_cidrs=["LAPTOP/32"]'` if the laptop still needs access. A laptop without an IP policy should then get 403 from the public endpoint.
+To test the private path, apply once more with `-var attach_private_policy=true`, and with `-var 'allowed_ip_cidrs=["LAPTOP/32"]'` for any operator address that still needs access, Terraform's own included: once a policy is attached every unmatched source gets 403, and the provider reports that as resources not found.
 
 ## Running the harness
 
