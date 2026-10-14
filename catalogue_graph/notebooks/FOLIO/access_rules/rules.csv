@@ -9,10 +9,10 @@ digitisation,,DIGITISATION,,,,,,,NotRequestable,TemporarilyUnavailable,digitisat
 digitisation-status,In process (non-requestable),,,,,,,,NotRequestable,TemporarilyUnavailable,digitisation,condition-note-wins,pending-migration,unavailable-digitisation,Collection Information target status for digitisation
 closed,,CLOSED,,,,,,,NotRequestable,Closed,,condition-note-wins,pending-migration,closed,Today's closed items carry UNAVAILABLE and reach the unavailable row instead
 unavailable,Unavailable,,,,,,,,NotRequestable,TemporarilyUnavailable,assessment,condition-note-wins,today,unavailable-assessment,Minor deviation: Sierra also required OPAC message Unavailable
+safeguarded,,SAFEGUARDED,,,,,,,NotRequestable,Safeguarded,,condition-note-wins,today,safeguarded,Staff can request in the tenant; the public cannot
 in-circulation-closed-stores,Checked out|Awaiting pickup|Paged|In transit|Awaiting delivery,,,,closed-stores,,,,NotRequestable,TemporarilyUnavailable,in-use,condition-note-wins,today,closed-stores-on-hold-or-in-use,Holds and loans win over the requesting rules as in Sierra
 in-circulation-open-shelves,Checked out|Awaiting pickup|Paged|In transit|Awaiting delivery,,,,open-shelves,,,,OpenShelves,TemporarilyUnavailable,in-use,condition-note-wins,today,open-shelves-in-use-or-on-loan,Holds and loans win over the requesting rules as in Sierra
 open-request,,,,,closed-stores,,,true,NotRequestable,TemporarilyUnavailable,in-use,condition-note-wins,live-only,closed-stores-on-hold-or-in-use,Only the items service (#6654) knows about open requests
-safeguarded,,SAFEGUARDED,,,,,,,NotRequestable,Safeguarded,,condition-note-wins,today,safeguarded,Staff can request in the tenant; the public cannot
 on-exhibition,,,,,on-exhibition,,,,NotRequestable,,exhibition,condition-note-wins,pending-migration,on-exhibition,Exhibition location is empty and the exhibition text is a staff-only note today
 on-exhibition-material,,,,,,,exhibit,,NotRequestable,,exhibition,condition-note-wins,today,on-exhibition,Exhibit items sit in the placeholder location migration today
 restricted,,RESTRICTED,,,closed-stores,,,,OnlineRequest,Restricted,,condition-note-wins,today,closed-stores-restricted,Kept Available and Can circulate so it stays requestable

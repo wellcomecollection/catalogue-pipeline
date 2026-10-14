@@ -61,10 +61,10 @@ First match wins, so order matters. A blank cell matches anything, and `|` separ
 | `digitisation` | code DIGITISATION, or status In process (non-requestable) | not requestable | temporarily unavailable | digitisation | `unavailable-digitisation` | today, and pending migration for the new status |
 | `closed` | code CLOSED | not requestable | closed | | `closed` | pending migration |
 | `unavailable` | status Unavailable | not requestable | temporarily unavailable | assessment | `unavailable-assessment` | today |
+| `safeguarded` | code SAFEGUARDED | not requestable | safeguarded | | `safeguarded` | today |
 | `in-circulation-closed-stores` | status Checked out, Awaiting pickup, Paged, In transit or Awaiting delivery; closed stores | not requestable | temporarily unavailable | in use | `closed-stores-on-hold-or-in-use` | today |
 | `in-circulation-open-shelves` | same statuses; open shelves | open shelves | temporarily unavailable | in use | `open-shelves-in-use-or-on-loan` | today |
 | `open-request` | open request; closed stores | not requestable | temporarily unavailable | in use | `closed-stores-on-hold-or-in-use` | live only |
-| `safeguarded` | code SAFEGUARDED | not requestable | safeguarded | | `safeguarded` | today |
 | `on-exhibition` | location type on exhibition, or material type exhibit | not requestable | | exhibition text, or contact when there is none | `on-exhibition` | pending migration for the location and the text |
 | `restricted` | code RESTRICTED; closed stores | online request | restricted | | `closed-stores-restricted` | today |
 | `by-appointment` | code BY APPOINTMENT | manual request | by appointment | | `by-appointment`, with a deviation (below) | today |
@@ -103,7 +103,9 @@ Item status rows come first because a status overrides the statistical code, as 
 
 `closed` comes before `unavailable` for the same reason. Today the 11 closed items carry UNAVAILABLE, not CLOSED, so until that's migrated they reach `unavailable` and show temporarily unavailable instead of closed.
 
-The circulation and open-request rows come before every code row. In Sierra, a hold or a loan wins over the requesting rules, because the specific branches all require a hold count of zero. Circulation shows up in the FOLIO item status, so the transform can see it at transform time (116 items today), and the items service refreshes it live.
+The circulation and open-request rows come before every code row except `safeguarded`. In Sierra, a hold or a loan wins over the requesting rules, because the specific branches all require a hold count of zero. Circulation shows up in the FOLIO item status, so the transform can see it at transform time (116 items today), and the items service refreshes it live.
+
+`safeguarded` comes before the circulation rows because Sierra's safeguarded branch doesn't check the hold count and sits above its hold and in-use branches, so a safeguarded item on hold or on loan still shows as safeguarded. All 14 safeguarded items are Available today, but staff can request them in the tenant, so a safeguarded item will be Paged or Checked out at some point.
 
 `not-circulating` sits after the restricted states and before `open-shelves` and `online-request`. Collection Information keeps by appointment, donor permission, restricted and safeguarded items "Can circulate", so staff can request them in the tenant. For the rest, its target uses loan type to decide whether the request button shows. An item coded ONLINE REQUEST but given a non-circulating loan type is therefore not offered online. No such loan type exists in the tenant yet.
 
