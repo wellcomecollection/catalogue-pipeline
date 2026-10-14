@@ -370,7 +370,11 @@ def load_slice(
                 copied += sum(o.docs for o in page_outcomes if 200 <= o.status < 300)
                 search_after = hits[-1]["sort"]
     finally:
-        source_client.close_point_in_time(id=pit_id)
+        # An expired PIT 404s on close and must not hide the slice's result.
+        try:
+            source_client.close_point_in_time(id=pit_id)
+        except elasticsearch.NotFoundError:
+            logger.warning("point in time already gone", slice_id=spec.slice_id)
     wall = time.perf_counter() - started
     return {
         "slice_id": spec.slice_id,
