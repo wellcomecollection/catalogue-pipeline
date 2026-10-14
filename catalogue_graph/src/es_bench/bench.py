@@ -191,7 +191,8 @@ def run_cell(
     wall = time.perf_counter() - started
 
     succeeded = [o for o in outcomes if 200 <= o.status < 300]
-    written = sum(o.docs for o in succeeded)
+    # A 200 bulk can still reject items; those documents were not written.
+    written = sum(o.docs - o.item_429s - o.item_errors for o in succeeded)
     return CellResult(
         bulk_size=cell.bulk_size,
         concurrency=cell.concurrency,
@@ -244,11 +245,12 @@ def sample_docs(client: Elasticsearch, spec: SampleSpec) -> list[Doc]:
     def read_slice(slice_id: int) -> list[Doc]:
         collected: list[Doc] = []
         search_after: list[Any] | None = None
+        slice_pit_id = pit_id
         while len(collected) < per_slice:
             size = min(spec.page_size, per_slice - len(collected))
-            _, hits = _pit_page(
+            slice_pit_id, hits = _pit_page(
                 client,
-                pit_id,
+                slice_pit_id,
                 spec.keep_alive,
                 size,
                 slice_id,
@@ -367,7 +369,14 @@ def load_slice(
                 docs: list[Doc] = [(hit["_id"], hit["_source"]) for hit in hits]
                 page_outcomes = list(pool.map(work, chunked(docs, spec.bulk_size)))
                 outcomes.extend(page_outcomes)
-                copied += sum(o.docs for o in page_outcomes if 200 <= o.status < 300)
+                copied += sum(
+                    o.docs - o.item_429s - o.item_errors
+                    for o in page_outcomes
+                    if 200 <= o.status < 300
+                )
+                if any(not 200 <= o.status < 300 for o in page_outcomes):
+                    # Stop here so a resume from search_after re-reads this page.
+                    break
                 search_after = hits[-1]["sort"]
     finally:
         # An expired PIT 404s on close and must not hide the slice's result.
