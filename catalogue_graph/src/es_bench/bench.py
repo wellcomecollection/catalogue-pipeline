@@ -58,6 +58,7 @@ def get_client(target: EsTarget) -> Elasticsearch:
         api_key=resolved.api_key,
         request_timeout=resolved.request_timeout,
         http_compress=resolved.http_compress,
+        connections_per_node=resolved.connections_per_node,
     )
 
 

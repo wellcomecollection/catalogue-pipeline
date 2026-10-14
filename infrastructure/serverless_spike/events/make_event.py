@@ -45,7 +45,7 @@ def main() -> None:
     parser.add_argument("--id-prefix", default=None)
     args = parser.parse_args()
 
-    event: dict = {"target": TARGETS[args.target]}
+    event: dict = {"target": dict(TARGETS[args.target])}
     dest = args.index or DEST_INDEX[args.target]
 
     if args.mode in ("write_matrix", "merger_shape"):
@@ -58,6 +58,8 @@ def main() -> None:
                 for c in args.concurrencies
             ]
         )
+        # Pool one connection per in-flight bulk so the target, not the client, sets the ceiling.
+        event["target"]["connections_per_node"] = max(10, max(c["concurrency"] for c in cells))
         event.update(
             mode="write_matrix",
             source=TARGETS[args.source],
@@ -75,6 +77,7 @@ def main() -> None:
     elif args.mode == "scroll":
         event.update(mode="scroll", scroll={"index": dest, "keep_alive": "30m"})
     else:
+        event["target"]["connections_per_node"] = 10
         event.update(
             mode="load",
             source=TARGETS[args.source],

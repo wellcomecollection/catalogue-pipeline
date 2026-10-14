@@ -19,6 +19,8 @@ class EsTarget(BaseModel):
     api_key: str | None = None
     http_compress: bool = False
     request_timeout: int = 120
+    # elasticsearch-py pools 10 connections per node by default, which caps in-flight bulks.
+    connections_per_node: int = 10
 
 
 class SampleSpec(BaseModel):
