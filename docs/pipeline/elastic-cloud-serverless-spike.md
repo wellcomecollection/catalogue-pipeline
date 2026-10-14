@@ -6,7 +6,7 @@ Results of the spike in [platform#6714](https://github.com/wellcomecollection/pl
 
 I think the FOLIO environment should run on a serverless project. Nothing in the pipeline's code needs to change for the store itself, the provider and client stack all work against it, private connectivity works, and the cost estimate in platform-infrastructure#560 puts it below a hosted clone of the pipeline cluster in every month and well below it in a reindex month. The price is write latency: every bulk request takes about 260 ms whatever its size, so stages that write one document at a time run at a fraction of their hosted rate unless they keep more requests in flight. For the FOLIO environment that is a slower reindex, not a failure.
 
-I do not think these results decide production. The search side of the bill under the public API's query load was not measured and is the widest line in the cost estimate; a project under real query traffic would be the next spike.
+I do not think these results decide production. The search side of the bill under the public API's query load was not measured and is the widest line in the cost estimate. The way forward for that decision is set out at the end.
 
 ## What was built
 
@@ -66,6 +66,17 @@ Works from the delta VPC through a new interface endpoint to Elastic's serverles
 - Search power: 28 for the FOLIO environment; revisit from the usage page.
 - Code: the `clusterhealth` route in the search API, `reindex_index.py` and `get_reindex_status.py` moving from basic auth to a key with `monitor`, retiring `create_pipeline_storage_users.py`, and the `e_port` fallback in the merger's `application.conf`. The 9.x Python client bump can wait.
 - Worth doing for the merger regardless: raise the REST client's connections per route to match its in-flight batch.
+
+## Way forward for production
+
+The production question is whether a serverless project can carry the public API's query load at an acceptable cost and latency, and nothing in this spike measured search under load. I think the route is a second, bounded spike once the FOLIO environment exists, in this order:
+
+1. Hold production-shaped data in a project: works-indexed, images-indexed and concepts-indexed at full size, loaded by the real ingestors from an existing graph date, with the images index's dense vectors in place so the project's general-purpose profile is tested against them.
+2. Put the public API's real query mix on it without serving users from it. The catalogue API's multi-cluster mechanism already supports a non-default alias, so the production API can carry a `serverless` entry with the default cluster untouched. catalogue-api's `search_profiling` and `load_test` tools drive the API's search templates at a chosen rate with varied terms; replaying the real production query mix against the alias would need the API's access logs as their input. Measure latency percentiles against the API's own alarms (p95 at ten seconds) and the works and images query times the hosted cluster reports today.
+3. Read the search VCU-hours and the search-above-baseline line from the usage page for that week at Performant, then at the On-demand floor, and put both into the estimate in platform-infrastructure#560 in place of the extrapolated line.
+4. Decide on cost and the latency figures together. If Performant holds the query mix at today's latencies, the comparison is the measured monthly figure against the hosted cluster's; if it needs High availability, the same reading at that setting.
+
+Two things from this spike go into that one regardless: an operator IP policy next to PrivateLink, since any attached policy locks Terraform and the scripts out otherwise, and the merger's connection pool raised to its in-flight batch, since single-document writers are the stages the write floor penalises most. Elastic support is also worth a question on what search power the console's three tiers set, since this project never showed the labels.
 
 ## Open items
 
