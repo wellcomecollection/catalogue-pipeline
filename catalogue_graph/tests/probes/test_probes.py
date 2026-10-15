@@ -208,6 +208,16 @@ def test_unfilled_credentials_are_recorded_as_setup_error(
     assert _summary(_metrics(capsys)) == [("sierra", "setup", "error")]
 
 
+def test_incomplete_credentials_are_recorded_as_setup_error(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(handler, "get_ssm_parameter", lambda name: "{}")
+    assert not _run("sierra", lambda request: httpx.Response(200))
+    [metric] = _metrics(capsys)
+    assert (metric["Step"], metric["Outcome"]) == ("setup", "error")
+    assert "url, key, secret" in metric["error"]
+
+
 def test_oai_error_in_200_is_an_error(capsys: pytest.CaptureFixture[str]) -> None:
     def respond(request: httpx.Request) -> httpx.Response:
         if request.url.params["verb"] == "Identify":

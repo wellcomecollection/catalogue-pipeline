@@ -25,6 +25,14 @@ PROBES: dict[str, Callable[[dict, httpx.Client, Timer], None]] = {
     "ebsco_ftp": vendors.ebsco_ftp,
 }
 
+REQUIRED_FIELDS = {
+    "sierra": ("url", "key", "secret"),
+    "axiell_oai": ("url", "token"),
+    "folio_oai": ("url", "token"),
+    "folio_okapi": ("url", "tenant", "username", "password"),
+    "ebsco_ftp": ("server", "username", "password", "remote_dir"),
+}
+
 CREDENTIALS_PREFIX = os.getenv(
     "CREDENTIALS_PREFIX", "/catalogue_pipeline/third_party_probes"
 )
@@ -34,6 +42,9 @@ def run(vendor: str, client: httpx.Client | None = None) -> bool:
     try:
         probe = PROBES[vendor]
         creds = json.loads(get_ssm_parameter(f"{CREDENTIALS_PREFIX}/{vendor}"))
+        missing = [k for k in REQUIRED_FIELDS[vendor] if not creds.get(k)]
+        if missing:
+            raise ValueError(f"credentials missing {', '.join(missing)}")
     except Exception as e:
         # Recorded so a missing or unfilled parameter shows on the dashboard.
         emit(vendor, "setup", "error", 0, error=repr(e)[:500])
