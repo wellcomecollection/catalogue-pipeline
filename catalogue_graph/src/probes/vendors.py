@@ -5,6 +5,7 @@ would hide the slow and failed calls we want to measure.
 """
 
 import os
+import re
 from datetime import UTC, datetime, timedelta
 from ftplib import FTP
 
@@ -12,7 +13,8 @@ import httpx
 
 from probes.emf import Timer
 
-TIMEOUT_SECONDS = 30
+# Matches the adapters' OAI read timeout, so a probe timeout means the adapter would fail too.
+TIMEOUT_SECONDS = 60
 CONNECT_TIMEOUT_SECONDS = 10
 
 
@@ -47,6 +49,18 @@ def sierra(creds: dict, client: httpx.Client, timed: Timer) -> None:
             resp.raise_for_status()
 
 
+class OaiError(Exception):
+    pass
+
+
+def _check_oai(resp: httpx.Response) -> None:
+    # OAI-PMH reports protocol errors inside a 200; an empty window is fine.
+    resp.raise_for_status()
+    codes = set(re.findall(r'<error code="([^"]+)"', resp.text)) - {"noRecordsMatch"}
+    if codes:
+        raise OaiError(", ".join(sorted(codes)))
+
+
 def _oai(
     creds: dict,
     client: httpx.Client,
@@ -58,20 +72,22 @@ def _oai(
     headers = {auth_header: creds["token"]}
 
     with timed("identify"):
-        client.get(
-            creds["url"], params={"verb": "Identify"}, headers=headers
-        ).raise_for_status()
+        _check_oai(
+            client.get(creds["url"], params={"verb": "Identify"}, headers=headers)
+        )
 
     with timed("read"):
-        client.get(
-            creds["url"],
-            params={
-                "verb": "ListIdentifiers",
-                "from": _iso(_an_hour_ago()),
-                **list_params,
-            },
-            headers=headers,
-        ).raise_for_status()
+        _check_oai(
+            client.get(
+                creds["url"],
+                params={
+                    "verb": "ListIdentifiers",
+                    "from": _iso(_an_hour_ago()),
+                    **list_params,
+                },
+                headers=headers,
+            )
+        )
 
 
 def axiell_oai(creds: dict, client: httpx.Client, timed: Timer) -> None:
@@ -117,13 +133,16 @@ def folio_okapi(creds: dict, client: httpx.Client, timed: Timer) -> None:
 
 
 def ebsco_ftp(creds: dict, client: httpx.Client, timed: Timer) -> None:
-    with timed("auth"):
-        ftp = FTP(creds["server"], timeout=TIMEOUT_SECONDS)
-        ftp.login(creds["username"], creds["password"])
-        ftp.cwd(creds["remote_dir"])
-
+    ftp = FTP(timeout=TIMEOUT_SECONDS)
     try:
+        with timed("auth"):
+            ftp.connect(creds["server"])
+            ftp.login(creds["username"], creds["password"])
+            ftp.cwd(creds["remote_dir"])
+
         with timed("read"):
             ftp.nlst()
+
+        ftp.quit()
     finally:
         ftp.close()

@@ -152,9 +152,14 @@ def test_folio_okapi_searches_by_hrid(capsys: pytest.CaptureFixture[str]) -> Non
 
 class FakeFTP:
     fail_login = False
+    instances: list["FakeFTP"] = []
 
-    def __init__(self, server: str, timeout: int) -> None:
-        self.closed = False
+    def __init__(self, timeout: int) -> None:
+        self.calls: list[str] = []
+        FakeFTP.instances.append(self)
+
+    def connect(self, server: str) -> None:
+        self.calls.append("connect")
 
     def login(self, user: str, password: str) -> None:
         if self.fail_login:
@@ -166,8 +171,11 @@ class FakeFTP:
     def nlst(self) -> list[str]:
         return ["a.xml"]
 
+    def quit(self) -> None:
+        self.calls.append("quit")
+
     def close(self) -> None:
-        self.closed = True
+        self.calls.append("close")
 
 
 def test_ebsco_ftp(
@@ -179,7 +187,46 @@ def test_ebsco_ftp(
         ("ebsco_ftp", "auth", "ok"),
         ("ebsco_ftp", "read", "ok"),
     ]
+    assert FakeFTP.instances[-1].calls == ["connect", "quit", "close"]
 
+
+def test_ebsco_ftp_closes_connection_when_login_fails(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(vendors, "FTP", FakeFTP)
     monkeypatch.setattr(FakeFTP, "fail_login", True)
     assert not _run("ebsco_ftp", lambda request: httpx.Response(500))
     assert _summary(_metrics(capsys)) == [("ebsco_ftp", "auth", "timeout")]
+    assert FakeFTP.instances[-1].calls == ["connect", "close"]
+
+
+def test_unfilled_credentials_are_recorded_as_setup_error(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(handler, "get_ssm_parameter", lambda name: "placeholder")
+    assert not _run("sierra", lambda request: httpx.Response(200))
+    assert _summary(_metrics(capsys)) == [("sierra", "setup", "error")]
+
+
+def test_oai_error_in_200_is_an_error(capsys: pytest.CaptureFixture[str]) -> None:
+    def respond(request: httpx.Request) -> httpx.Response:
+        if request.url.params["verb"] == "Identify":
+            return httpx.Response(200, text="<OAI-PMH/>")
+        return httpx.Response(
+            200, text='<OAI-PMH><error code="badArgument"/></OAI-PMH>'
+        )
+
+    assert not _run("folio_oai", respond)
+    [_, read] = _metrics(capsys)
+    assert (read["Step"], read["Outcome"]) == ("read", "error")
+    assert "badArgument" in read["error"]
+
+
+def test_oai_no_records_match_is_ok(capsys: pytest.CaptureFixture[str]) -> None:
+    def respond(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200, text='<OAI-PMH><error code="noRecordsMatch"/></OAI-PMH>'
+        )
+
+    assert _run("folio_oai", respond)
+    assert _summary(_metrics(capsys))[-1] == ("folio_oai", "read", "ok")

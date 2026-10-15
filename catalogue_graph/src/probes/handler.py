@@ -12,7 +12,7 @@ import httpx
 import structlog
 
 from probes import vendors
-from probes.emf import Timer, timer_for
+from probes.emf import Timer, emit, timer_for
 from utils.aws import get_ssm_parameter
 
 logger = structlog.get_logger(__name__)
@@ -31,8 +31,15 @@ CREDENTIALS_PREFIX = os.getenv(
 
 
 def run(vendor: str, client: httpx.Client | None = None) -> bool:
-    probe = PROBES[vendor]
-    creds = json.loads(get_ssm_parameter(f"{CREDENTIALS_PREFIX}/{vendor}"))
+    try:
+        probe = PROBES[vendor]
+        creds = json.loads(get_ssm_parameter(f"{CREDENTIALS_PREFIX}/{vendor}"))
+    except Exception as e:
+        # Recorded so a missing or unfilled parameter shows on the dashboard.
+        emit(vendor, "setup", "error", 0, error=repr(e)[:500])
+        logger.exception("Probe setup failed", vendor=vendor)
+        return False
+
     timeout = httpx.Timeout(
         vendors.TIMEOUT_SECONDS, connect=vendors.CONNECT_TIMEOUT_SECONDS
     )

@@ -43,7 +43,8 @@ module "probe_lambda" {
   }
 
   memory_size = 256
-  timeout     = 120
+  # Two steps at up to 10s connect plus 60s read each.
+  timeout = 180
 
   # Same egress path as the adapter ECS tasks, so any vendor IP allowlisting applies.
   vpc_config = {
@@ -57,6 +58,12 @@ module "probe_lambda" {
       FOLIO_PROBE_INSTANCE_HRID = "in00008304342"
     }
   }
+}
+
+# The scheduler's retry_policy does not cover Lambda's own async retries.
+resource "aws_lambda_function_event_invoke_config" "probe" {
+  function_name          = module.probe_lambda.lambda.function_name
+  maximum_retry_attempts = 0
 }
 
 data "aws_iam_policy_document" "probe_ssm_read" {
@@ -172,8 +179,9 @@ resource "aws_cloudwatch_dashboard" "probes" {
             yAxis  = { left = { min = 0, max = 100 } }
             metrics = [
               [{
-                # Every run attempts the first step, and a run only reaches "read" if it passed.
-                expression = "100 * SUM(SEARCH('{third_party_probes,Vendor,Step,Outcome} Vendor=\"${vendor}\" Step=\"read\" Outcome=\"ok\"', 'SampleCount', 300)) / SUM(SEARCH('{third_party_probes,Vendor,Step,Outcome} Vendor=\"${vendor}\" Step=\"${local.probe_vendors[vendor][0]}\"', 'SampleCount', 300))"
+                # Every run records either a setup error or its first step, and only reaches
+                # "read" if that passed. FILL keeps a total outage at 0 rather than blank.
+                expression = "100 * FILL(SUM(SEARCH('{third_party_probes,Vendor,Step,Outcome} Vendor=\"${vendor}\" Step=\"read\" Outcome=\"ok\"', 'SampleCount', 300)), 0) / SUM(SEARCH('{third_party_probes,Vendor,Step,Outcome} Vendor=\"${vendor}\" (Step=\"${local.probe_vendors[vendor][0]}\" OR Step=\"setup\")', 'SampleCount', 300))"
                 label      = "runs where read succeeded"
               }]
             ]
