@@ -24,10 +24,25 @@ that uses it. The view never returns ``hrId``, staff-only notes or
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    computed_field,
+    model_validator,
+)
 from pydantic.alias_generators import to_camel
+
+
+def _strip_to_none(value: str | None) -> str | None:
+    # A blank value must not mask a fallback, e.g. enumeration over volume.
+    return (value or "").strip() or None
+
+
+OptionalText = Annotated[str | None, AfterValidator(_strip_to_none)]
 
 
 class FolioModel(BaseModel):
@@ -42,8 +57,8 @@ class FolioEnrichedItem(FolioModel):
     """
 
     id: str
-    volume: str | None = None
-    enumeration: str | None = None
+    volume: OptionalText = None
+    enumeration: OptionalText = None
 
 
 class FolioEnrichedInstance(FolioModel):
