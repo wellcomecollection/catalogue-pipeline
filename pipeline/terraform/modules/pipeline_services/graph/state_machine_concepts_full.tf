@@ -3,6 +3,10 @@
 # whole-catalogue vote, the remover drops the edges it no longer produces, and a full
 # concepts ingest carries the result into the concepts index.
 # See wellcomecollection/platform#6739.
+#
+# Work documents hold a copy of each concept's label, so the run finishes by comparing this
+# ingest's labels with the previous one's and re-ingesting the works which quote a concept
+# that changed. See wellcomecollection/platform#6764.
 locals {
   concepts_full_extractor_input = {
     transformer_type = "catalogue_concepts"
@@ -97,6 +101,77 @@ module "catalogue_graph_concepts_full_state_machine" {
             index_dates   = var.index_dates
           }
         }
+        Next = "Find relabelled works"
+      },
+      "Find relabelled works" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke"
+        Parameters = {
+          FunctionName = module.ingestor_relabelled_works_lambda.lambda_arn
+          Payload = {
+            pipeline_date = var.pipeline_date
+            graph_date    = var.graph_date
+            index_dates   = var.index_dates
+          }
+        }
+        Retry      = concat(local.state_function_default_retry, local.transient_neptune_retry)
+        ResultPath = "$"
+        ResultSelector = {
+          "work_id_batches.$" = "$.Payload.work_id_batches"
+          "work_count.$"      = "$.Payload.work_count"
+          "over_limit.$"      = "$.Payload.over_limit"
+        }
+        Next = "Any works to refresh?"
+      },
+      "Any works to refresh?" = {
+        Type = "Choice"
+        Choices = [
+          {
+            # Above the limit the Lambda reports and returns no ids, leaving the decision to a human.
+            And = [
+              {
+                Variable      = "$.over_limit"
+                BooleanEquals = false
+              },
+              {
+                Variable           = "$.work_count"
+                NumericGreaterThan = 0
+              }
+            ]
+            Next = "Refresh works"
+          }
+        ]
+        Default = "Success"
+      },
+      # One ingest per batch: the works ingestor passes its event to ECS as a container
+      # override, and ECS caps those at 8192 characters.
+      "Refresh works" = {
+        Type           = "Map"
+        ItemsPath      = "$.work_id_batches"
+        MaxConcurrency = 1
+        ItemProcessor = {
+          ProcessorConfig = {
+            Mode = "INLINE"
+          }
+          StartAt = "Refresh a batch of works"
+          States = {
+            "Refresh a batch of works" = {
+              Type     = "Task"
+              Resource = "arn:aws:states:::states:startExecution.sync:2"
+              Parameters = {
+                StateMachineArn = module.catalogue_graph_ingestor_state_machine.state_machine_arn
+                Input = {
+                  ingestor_type = "works"
+                  pipeline_date = var.pipeline_date
+                  graph_date    = var.graph_date
+                  index_dates   = var.index_dates
+                  "ids.$"       = "$$.Map.Item.Value"
+                }
+              }
+              End = true
+            }
+          }
+        }
         Next = "Success"
       },
       Success = {
@@ -112,7 +187,8 @@ module "catalogue_graph_concepts_full_state_machine" {
   ]
 
   invokable_lambda_arns = [
-    module.graph_remover_incremental_lambda.lambda_arn
+    module.graph_remover_incremental_lambda.lambda_arn,
+    module.ingestor_relabelled_works_lambda.lambda_arn
   ]
 }
 

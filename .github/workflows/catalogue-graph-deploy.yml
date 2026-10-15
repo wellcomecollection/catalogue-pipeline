@@ -146,6 +146,7 @@ jobs:
           - graph-bulk-loader
           - graph-remover-incremental
           - graph-ingestor-deletions
+          - graph-ingestor-relabelled-works
           # Work-discovery lambdas for the scheduled state machines.
           - image-inference-find-work
           - id-minter-find-work

@@ -93,6 +93,24 @@ class IngestorIndexerMonitorLambdaEvent(IngestorStepEvent):
     success_count: int
 
 
+class IngestorRelabelledWorksLambdaEvent(IngestorStepEvent):
+    ingestor_type: IngestorType = "concepts"
+    # The job is discovered by listing S3, so callers do not supply one.
+    job_id: str = "unknown"
+    # A Step Functions payload is capped, and a refresh this large is a decision for a human.
+    max_work_ids: int = 5000
+
+
+class RelabelledWorks(BaseModel):
+    """The works to re-ingest because a concept they display was relabelled."""
+
+    concept_count: int
+    work_count: int
+    # Batched because the works ingestor's event has to fit in an ECS container override.
+    work_id_batches: list[list[str]]
+    over_limit: bool
+
+
 class IngestorDeletionsLambdaEvent(IngestorStepEvent):
     force_pass: bool = False
     ingestor_type: IngestorDeletionsType

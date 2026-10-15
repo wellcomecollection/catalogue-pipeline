@@ -180,6 +180,20 @@ class IndexerReport(IngestorReport):
         ]
 
 
+class RelabelledWorksReport(IngestorReport):
+    label: ClassVar[str] = "relabelled_works"
+    concept_count: int
+    work_count: int
+    over_limit: bool
+
+    @property
+    def metrics(self) -> list[PipelineMetric]:
+        return [
+            PipelineMetric(name="concept_count", value=self.concept_count),
+            PipelineMetric(name="work_count", value=self.work_count),
+        ]
+
+
 class DeletionReport(IngestorReport):
     label: ClassVar[str] = "deletions"
     deleted_count: int

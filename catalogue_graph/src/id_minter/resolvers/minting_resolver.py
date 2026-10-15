@@ -130,10 +130,11 @@ class MintingResolver:
         1. Batch lookup all source IDs + predecessor IDs (single query)
         2. Fail fast if any predecessors are missing, or a registered source ID
            disagrees with its registered predecessor
-        3. Batch INSERT for predecessor inheritance cases
+        3. Batch INSERT for predecessor inheritance cases, then re-read them
+           (race detection: a concurrent mint may have stored another ID)
         4. Batch claim free IDs from pool (FOR UPDATE SKIP LOCKED)
         5. Batch INSERT for new ID cases
-        6. Verify which IDs were actually assigned (race detection)
+        6. Verify which new IDs were actually assigned (race detection)
         7. Mark only used IDs as 'assigned', commit transaction
 
         All operations occur within a single transaction for atomicity.
@@ -147,8 +148,9 @@ class MintingResolver:
             Dict mapping source_id -> canonical_id for all inputs
 
         Raises:
-            ValueError: If a predecessor is specified but not found, or a registered
-                source ID's predecessor is registered under a different canonical ID
+            ValueError: If a predecessor is specified but not found, or a source ID
+                is registered (before or concurrently) under a different canonical ID
+                from its predecessor
             RuntimeError: If free ID pool is exhausted
 
         Example:
@@ -284,7 +286,9 @@ class MintingResolver:
         # database server. ON DUPLICATE KEY UPDATE is used for idempotency: if a
         # concurrent process already inserted any of these mappings, the duplicate
         # rows become no-ops ("CanonicalId = CanonicalId") instead of aborting the
-        # statement. Per-row semantics are unchanged.
+        # statement. A no-op can hide a concurrent mint that stored a different
+        # canonical ID, so the rows are re-read FOR SHARE (as in Step 6) and a
+        # mismatch raises rather than returning an ID the registry doesn't hold.
         if needs_inheritance:
             row_placeholder = "(%s, %s, %s, %s)"
             values_clause = ", ".join([row_placeholder] * len(needs_inheritance))
@@ -300,13 +304,27 @@ class MintingResolver:
             """,
                 params,
             )
+            stored = self._lookup_chunked(
+                [source_key for source_key, _ in needs_inheritance], for_share=True
+            )
 
             for source_key, canonical_id in needs_inheritance:
-                result[source_key] = canonical_id
                 pred = predecessors[source_key]
                 assert (
                     pred is not None
                 )  # needs_inheritance only contains source ids with a predecessor
+                # A miss means the row can't be confirmed (e.g. stored under other casing).
+                if source_key not in stored:
+                    raise ValueError(
+                        f"Inherited row for {source_key[0]}/{source_key[1]}/"
+                        f"{source_key[2]} not found after insert"
+                    )
+                check_predecessor_matches(
+                    source_key,
+                    pred,
+                    {source_key: stored[source_key], pred: canonical_id},
+                )
+                result[source_key] = canonical_id
                 logger.debug(
                     "Resolved ID",
                     source_id=f"{source_key[0]}[{source_key[1]}/{source_key[2]}]",
