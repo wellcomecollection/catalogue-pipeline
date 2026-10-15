@@ -87,9 +87,10 @@ class DataApiIdResolver:
                         {"name": "sys", "value": {"stringValue": source_system}},
                     ]
                 )
-                # Keyed by the requested value, as SourceId compares case-insensitively.
+                # Keyed by the requested value, as SourceId compares under its
+                # collation; JOIN_ORDER keeps one PK lookup per value.
                 sql = (
-                    f"SELECT r.req AS RequestedId, i.CanonicalId "
+                    f"SELECT /*+ JOIN_ORDER(r, i) */ r.req AS RequestedId, i.CanonicalId "
                     f"FROM (VALUES {rows}) AS r(req) "
                     f"JOIN `{self._table_name}` i "
                     f"ON i.OntologyType = :ont AND i.SourceSystem = :sys "

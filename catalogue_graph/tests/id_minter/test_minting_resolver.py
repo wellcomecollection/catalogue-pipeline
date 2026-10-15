@@ -36,6 +36,21 @@ from tests.id_minter.conftest import (
     seed_identifier,
 )
 
+
+def _miss_rereads(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make FOR SHARE re-reads return nothing, as if the row couldn't be confirmed."""
+    original_lookup = MintingResolver._lookup_chunked
+
+    def reread_misses(
+        self_: MintingResolver,
+        source_ids: list[SourceIdentifierKey],
+        for_share: bool = False,
+    ) -> dict[SourceIdentifierKey, str]:
+        return {} if for_share else original_lookup(self_, source_ids)
+
+    monkeypatch.setattr(MintingResolver, "_lookup_chunked", reread_misses)
+
+
 # ---------------------------------------------------------------------------
 # lookup_ids
 # ---------------------------------------------------------------------------
@@ -315,16 +330,20 @@ class TestCaseVariants:
     """Source IDs differing only in case resolve to the stored row."""
 
     def test_lookup_returns_stored_id_under_requested_casing(
-        self, ids_db: pymysql.connections.Connection
+        self,
+        ids_db: pymysql.connections.Connection,
+        caplog: pytest.LogCaptureFixture,
     ) -> None:
         seed_identifier(
             ids_db, SourceIdentifierKey("Work", "sierra", "b9001"), "case0001"
         )
         requested: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "B9001")
 
-        result = MintingResolver.from_connection(ids_db).lookup_ids([requested])
+        with caplog.at_level("INFO"):
+            result = MintingResolver.from_connection(ids_db).lookup_ids([requested])
 
         assert result == {requested: "case0001"}
+        assert "Work/sierra/B9001 -> b9001" in caplog.text
 
     def test_mint_returns_stored_id_without_claiming(
         self, ids_db: pymysql.connections.Connection
@@ -377,16 +396,7 @@ class TestCaseVariants:
         """A minted ID the re-read can't return fails the batch rather than going missing."""
         seed_free_ids(ids_db, ["free0005"])
         sid: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b9005")
-        original_lookup = MintingResolver._lookup_chunked
-
-        def reread_misses(
-            self_: MintingResolver,
-            source_ids: list[SourceIdentifierKey],
-            for_share: bool = False,
-        ) -> dict[SourceIdentifierKey, str]:
-            return {} if for_share else original_lookup(self_, source_ids)
-
-        monkeypatch.setattr(MintingResolver, "_lookup_chunked", reread_misses)
+        _miss_rereads(monkeypatch)
 
         with pytest.raises(ValueError, match="unresolved after minting"):
             MintingResolver.from_connection(ids_db).mint_ids([(sid, None)])
@@ -748,16 +758,7 @@ class TestRaceConditions:
         pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6005")
         sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6005")
         seed_identifier(ids_db, pred, "legacy65")
-        original_lookup = MintingResolver._lookup_chunked
-
-        def reread_misses(
-            self_: MintingResolver,
-            source_ids: list[SourceIdentifierKey],
-            for_share: bool = False,
-        ) -> dict[SourceIdentifierKey, str]:
-            return {} if for_share else original_lookup(self_, source_ids)
-
-        monkeypatch.setattr(MintingResolver, "_lookup_chunked", reread_misses)
+        _miss_rereads(monkeypatch)
 
         with pytest.raises(ValueError, match="not found after insert"):
             MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])

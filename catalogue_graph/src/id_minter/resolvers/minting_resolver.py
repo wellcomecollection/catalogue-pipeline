@@ -97,7 +97,8 @@ class MintingResolver:
     ) -> dict[SourceIdentifierKey, str]:
         """Chunked lookup. FOR SHARE joins whatever transaction is open on self.conn.
 
-        Keyed by the requested value, as SourceId compares case-insensitively.
+        Keyed by the requested value, as SourceId compares under its collation
+        (ignoring case and some accents), so a variant resolves to the stored row.
         """
         groups: dict[tuple[str, str], set[str]] = defaultdict(set)
         for ontology_type, source_system, source_id in source_ids:
@@ -107,12 +108,16 @@ class MintingResolver:
         cursor = self.conn.cursor()
 
         result: dict[SourceIdentifierKey, str] = {}
+        variants: list[str] = []
         # Sorted probes are far faster than random order against a large index.
         for (ontology_type, source_system), values in sorted(groups.items()):
             for chunk in batched(sorted(values), LOOKUP_CHUNK_SIZE):
                 rows = ", ".join(["ROW(%s)"] * len(chunk))
+                # JOIN_ORDER keeps one PK lookup per value; a hash join would scan
+                # (and under FOR SHARE, lock) the whole source system.
                 cursor.execute(
-                    f"SELECT r.req AS RequestedId, i.CanonicalId"
+                    f"SELECT /*+ JOIN_ORDER(r, i) */"
+                    f" r.req AS RequestedId, i.SourceId AS StoredId, i.CanonicalId"
                     f" FROM (VALUES {rows}) AS r(req)"
                     f" JOIN identifiers i"
                     f" ON i.OntologyType = %s AND i.SourceSystem = %s"
@@ -124,6 +129,17 @@ class MintingResolver:
                         ontology_type, source_system, row["RequestedId"]
                     )
                     result[key] = row["CanonicalId"]
+                    if row["StoredId"] != row["RequestedId"]:
+                        variants.append(
+                            f"{ontology_type}/{source_system}/{row['RequestedId']}"
+                            f" -> {row['StoredId']}"
+                        )
+        if variants:
+            logger.info(
+                "Resolved source IDs to stored variants",
+                count=len(variants),
+                examples=variants[:5],
+            )
         return result
 
     def mint_ids(self, requests: list[MintRequest]) -> dict[SourceIdentifierKey, str]:

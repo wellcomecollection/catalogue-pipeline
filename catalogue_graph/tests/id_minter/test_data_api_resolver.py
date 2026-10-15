@@ -53,14 +53,23 @@ def test_lookup_keys_rows_by_requested_value() -> None:
     """A stored case variant comes back under the casing that was asked for."""
     resolver = DataApiIdResolver.__new__(DataApiIdResolver)
     resolver._table_name = "identifiers"
-    calls: list[str] = []
+    calls: list[tuple[str, list[dict]]] = []
 
     def execute(sql: str, parameters: list[dict]) -> list[dict[str, str]]:
-        calls.append(sql)
+        calls.append((sql, parameters))
         return [{"RequestedId": "B1001", "CanonicalId": "case0001"}]
 
     resolver._execute = execute  # type: ignore[method-assign]
     requested = SourceIdentifierKey("Work", "sierra", "B1001")
+    other = SourceIdentifierKey("Work", "sierra", "b1002")
 
-    assert resolver.lookup_ids([requested]) == {requested: "case0001"}
-    assert "AS r(req)" in calls[0]
+    assert resolver.lookup_ids([requested, other]) == {requested: "case0001"}
+
+    sql, parameters = calls[0]
+    assert "FROM (VALUES ROW(:sid0), ROW(:sid1)) AS r(req)" in sql
+    assert {p["name"]: p["value"]["stringValue"] for p in parameters} == {
+        "sid0": "B1001",
+        "sid1": "b1002",
+        "ont": "Work",
+        "sys": "sierra",
+    }
