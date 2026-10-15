@@ -6,7 +6,11 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.transformers.marc.authority_standard_number import extract_identifier
-from adapters.transformers.marc.common import distinct, non_empty
+from adapters.transformers.marc.common import (
+    distinct,
+    non_blank_subfields,
+    non_empty,
+)
 from adapters.transformers.marc.concepts import (
     SUBDIVISION_CODES,
     SUBFIELD_TYPE_MAP,
@@ -42,9 +46,10 @@ def primary_concept_labels(field: Field) -> list[str]:
             continue
         if code in non_repeatable_codes and seen[code]:
             logger.error(
-                f"Repeated non-repeating subfield ${code}",
+                "Repeated non-repeating subfield",
                 tag=field.tag,
                 field=str(field),
+                subfield=code,
             )
             if value.strip() in seen[code]:
                 continue
@@ -52,19 +57,21 @@ def primary_concept_labels(field: Field) -> list[str]:
         values.append(value)
 
     # A name heading has one primary concept, a concept heading one per ǂa
-    return [" ".join(values)] if field.tag in NAME_HEADINGS else values
+    if field.tag in NAME_HEADINGS and values:
+        return [" ".join(values)]
+    return values
 
 
 def build_subject_label_600(field: Field, main_heading: str) -> str:
     # The role (ǂe) and general subdivisions (ǂx) follow the name
-    roles = field.get_subfields("e")
-    subdivisions = field.get_subfields("x")
+    roles = non_blank_subfields(field, "e")
+    subdivisions = non_blank_subfields(field, "x")
     return " ".join([main_heading, *roles, *subdivisions])
 
 
 def build_subject_label_610(field: Field, main_heading: str) -> str:
     # The location, date and relator term (ǂc ǂd ǂe) follow the name
-    qualifiers = field.get_subfields("c", "d", "e")
+    qualifiers = non_blank_subfields(field, "c", "d", "e")
     return " ".join([main_heading, *qualifiers])
 
 
@@ -73,26 +80,27 @@ def build_subject_label_611(field: Field, main_heading: str) -> str:
 
 
 def build_subject_label_648_650_651(field: Field, main_heading: str) -> str:
-    subdivisions = field.get_subfields(*SUBDIVISION_CODES)
+    subdivisions = non_blank_subfields(field, *SUBDIVISION_CODES)
     return " - ".join([main_heading, *subdivisions])
 
 
 def build_subdivision_concepts_600(field: Field) -> Generator[Concept]:
     # Only x yields a subdivision concept, with its label as catalogued
-    for raw_label in field.get_subfields("x"):
+    for raw_label in non_blank_subfields(field, "x"):
         yield build_concept(raw_label, "Concept", Unidentifiable())
 
 
 def build_subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
     for subfield in field.subfields:
-        if subfield.code in SUBDIVISION_CODES:
+        if subfield.code in SUBDIVISION_CODES and subfield.value.strip():
             concept_type = SUBFIELD_TYPE_MAP.get(subfield.code, "Concept")
             yield build_concept(trim_trailing_period(subfield.value), concept_type)
 
 
 SUBJECT_TAGS = ["600", "610", "611", "648", "650", "651"]
-# The Sierra transformer lists subjects by heading type: concept headings, then
-# personal, corporate and meeting names, each group in document order
+# The Sierra transformer runs one transformer per heading type, so it lists concept
+# headings first, then personal, corporate and meeting names. Within each group it
+# keeps the order the Sierra API returns the fields in, which is MARC document order
 SIERRA_TAG_ORDER = [["650", "648", "651"], ["600"], ["610"], ["611"]]
 TAG_TO_CONCEPT_TYPE: dict[str, RawConceptType] = {
     "600": "Person",

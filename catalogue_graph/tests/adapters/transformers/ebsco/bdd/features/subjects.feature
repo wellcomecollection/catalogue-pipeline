@@ -7,13 +7,13 @@ Feature: Extracting subjects from 6xx fields
 
   Rule: Accept but warn about repeated non-repeatable subfields
   "a" and some other subfields must not repeat, but records out of our control sometimes repeat them.
-  The repeats are kept, as in the previous implementation, and the anomaly logged.
-  A repeat that only duplicates an earlier value is dropped; see the FOLIO feature file.
+  The repeats are kept and the anomaly logged, unless a repeat only duplicates an earlier value,
+  in which case it is dropped (see the FOLIO feature file).
 
     Scenario: A poorly formed heading
       Given the MARC record has a 600 field with indicators "" "0" with subfield "a" value "Joseph Pujol" and subfield "a" value "Roland"
       When I transform the MARC record
-      Then an error "Repeated non-repeating subfield $a" is logged with tag "600"
+      Then an error "Repeated non-repeating subfield" is logged with tag "600" and subfield "a"
       And the only subject has the label "Joseph Pujol Roland"
 
     Scenario: A personal name with two titles keeps both
@@ -24,7 +24,7 @@ Feature: Extracting subjects from 6xx fields
         | t    | Circulation.        |
         | t    | Omne vivum ex ovo.  |
       When I transform the MARC record
-      Then an error "Repeated non-repeating subfield $t" is logged with tag "600"
+      Then an error "Repeated non-repeating subfield" is logged with tag "600" and subfield "t"
       And the only subject has the label "Wright, Thomas 1973- Circulation. Omne vivum ex ovo."
 
   Rule: A subject is extracted for each relevant field
