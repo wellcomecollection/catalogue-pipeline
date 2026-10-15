@@ -38,6 +38,7 @@ ATTR_ALIASES: dict[str, str] = {
     "note": "notes",
     "item": "items",
     "contributor": "contributors",
+    "role": "roles",
     "production": "production",
     "productions": "production",
     "date": "dates",
@@ -213,6 +214,27 @@ def its_nth_list_member_has(
     actual = drill_through_dots(member, sub_attr)
     assert actual == value, (
         f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
+    )
+
+
+@then(parsers.re(r"it is (?P<flag>primary|not primary)"))
+def antecedent_primary(antecedent: Any, flag: str) -> None:
+    assert antecedent.primary == (flag == "primary"), (
+        f"Expected {flag}, got primary={antecedent.primary!r}"
+    )
+
+
+@then(
+    parsers.re(
+        r"the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) is (?P<flag>primary|not primary)"
+    )
+)
+def list_member_nth_primary(
+    work: SourceWork, index: str, attr_phrase: str, flag: str
+) -> None:
+    member = _list_member_nth(work, index, attr_phrase)
+    assert member.primary == (flag == "primary"), (
+        f"Expected {attr_phrase} at position {index} to be {flag}, got primary={member.primary!r}"
     )
 
 
