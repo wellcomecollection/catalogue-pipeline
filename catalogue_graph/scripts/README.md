@@ -52,7 +52,7 @@ events carrying changeset ids that exist only on your machine.
      Facts are read by changeset id, and the rebuild replaces every id, so
      facts written before it can never be delivered.
 
-   - *(FOLIO only)* Wipe and repopulate the items store.
+   - *(FOLIO only)* Wipe and repopulate the inventory store.
 
    - Publish an `adapter.completed` event per changeset, triggering transformer
      runs in every pipeline whose adapter trigger is enabled.
@@ -126,6 +126,34 @@ With `--skip-publish-event`, records edited after their last harvest but before
 the pause come from the snapshot with the same datestamp a later harvest would
 bring, which the store rejects as not newer. Transform those by id.
 
+### FOLIO holdings and items only
+
+`--folio-inventory-only` wipes and reloads the inventory store alone,
+for when FOLIO's inventory data has changed in ways the enrichment step can't
+catch up with incrementally. The enrichment step only upserts the instances in
+each harvest window, so rows for instances FOLIO no longer returns stay in the
+store until it is reloaded from scratch.
+
+It reads the active instance ids from the live bib store, fetches
+`items-and-holdings` for them into `--folio-inventory-snapshot-path`, then wipes
+the store and loads the snapshot. A failed download leaves the store as it was.
+The bib store, window store and cursor are untouched and no events are
+published.
+
+Disable the FOLIO adapter schedule for the whole run, and re-enable it after.
+Otherwise the enrichment step's writes during the run are lost to the wipe, or
+overwritten by older copies from the snapshot. The skipped windows are
+harvested when it resumes.
+
+Works don't change until they are next transformed, because the transformer is
+triggered by bib changesets and reads this store as it goes. Run a FOLIO
+reindex afterwards to bring every work up to date.
+
+Unlike the full rebuild, it never reuses a snapshot. The fetch takes about 15
+minutes, and reloading from an old snapshot would wipe current rows and roll
+changed instances back without any sign that it had. A file already at the
+path is replaced once the new download succeeds.
+
 ### Usage
 
 ```bash
@@ -140,7 +168,14 @@ uv run python scripts/rebuild_adapter.py \
   --adapter-type folio \
   --use-rest-api-table \
   --snapshot-path /tmp/folio.parquet \
-  --folio-items-snapshot-path /tmp/folio_items.parquet
+  --folio-inventory-snapshot-path /tmp/folio_inventory.parquet
+
+# FOLIO inventory store only
+uv run python scripts/rebuild_adapter.py \
+  --adapter-type folio \
+  --use-rest-api-table \
+  --folio-inventory-only \
+  --folio-inventory-snapshot-path /tmp/folio_inventory.parquet
 
 # Wipe without rebuilding
 uv run python scripts/rebuild_adapter.py \
