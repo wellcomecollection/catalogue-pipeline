@@ -496,3 +496,17 @@ Feature: contributors (MARC 1xx and 7xx names)
     And its 1st role has the label "author"
     And the 2nd contributor has the agent.label "National Association for the Promotion of Social Science (Great Britain)"
     And it has the agent.id.source_identifier.value "national association for the promotion of social science (great britain)"
+
+  Scenario: Every trailing comma is trimmed from a name
+    Based on Sierra b28673773 and b33038491. The Scala transformer trims one
+    comma from an organisation or meeting and two from a person, so it keeps
+    "Regional AIDS Group,"
+    Given the MARC record has a 710 field with subfield "a" value "Regional AIDS Group,," and subfield "e" value "author," and subfield "e" value "publisher."
+    And the MARC record has a 700 field with subfield "a" value "Oskenbay, Moldir, ," and subfield "e" value "author."
+    When I transform the MARC record
+    Then the work has 2 contributors with agent.label:
+      | Regional AIDS Group |
+      | Oskenbay, Moldir    |
+    And the work has 2 contributors with agent.id.source_identifier.value:
+      | regional aids group,, |
+      | oskenbay, moldir      |

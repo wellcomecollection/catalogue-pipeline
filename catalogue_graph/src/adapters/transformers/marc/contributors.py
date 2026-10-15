@@ -10,13 +10,18 @@ https://www.loc.gov/marc/bibliographic/bd710.html
 https://www.loc.gov/marc/bibliographic/bd711.html
 """
 
+import re
+
 import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.transformers.marc.authority_standard_number import extract_identifier
-from adapters.transformers.marc.common import non_blank_subfields, non_empty
-from adapters.transformers.utils.text_utils import trim_trailing
+from adapters.transformers.marc.common import (
+    distinct,
+    non_blank_subfields,
+    non_empty,
+)
 from models.pipeline.concept import Concept, Contributor
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import Identifiable
@@ -39,6 +44,7 @@ LABEL_SUBFIELDS = {
 # The relator term is ǂe on personal and corporate names and ǂj on meeting names.
 # Personal names also take ǂj, for an attribution such as "Follower of"
 ROLE_SUBFIELDS = {"00": ["e", "j"], "10": ["e"], "11": ["j"]}
+TRAILING_COMMAS = re.compile(r"(\s*,)+\s*$")
 
 
 def extract_contributors(record: Record) -> list[Contributor]:
@@ -52,8 +58,6 @@ def extract_contributors(record: Record) -> list[Contributor]:
 
 def extract_contributor(field: Field) -> Contributor | None:
     kind = field.tag[1:]
-    # Subfield values are stripped, so stray whitespace in the catalogue data does
-    # not reach a label or an identifier. The Scala pipeline keeps it
     raw_label = " ".join(
         value.strip() for value in non_blank_subfields(field, *LABEL_SUBFIELDS[kind])
     )
@@ -61,23 +65,23 @@ def extract_contributor(field: Field) -> Contributor | None:
         logger.error("Name field without a label", tag=field.tag, field=str(field))
         return None
 
-    concept_type = agent_type(field)
+    concept_type = get_agent_type(field)
     label, identifier_label = agent_labels(raw_label, concept_type)
     # A name's ǂ0 holds an LC Names identifier; its second indicator names no scheme
-    identifier = extract_identifier(
-        field, concept_type, scheme="lc-names"
-    ) or Identifiable.identifier_from_text(identifier_label, concept_type)
+    authority_id = extract_identifier(field, concept_type, scheme="lc-names")
+    agent_id = authority_id or Identifiable.identifier_from_text(
+        identifier_label, concept_type
+    )
+    roles = field.get_subfields(*ROLE_SUBFIELDS[kind])
+
     return Contributor(
-        agent=Concept(id=identifier, label=label, type=concept_type),
-        roles=[
-            Label(label=role.strip().removesuffix("."))
-            for role in field.get_subfields(*ROLE_SUBFIELDS[kind])
-        ],
+        agent=Concept(id=agent_id, label=label, type=concept_type),
+        roles=[Label(label=role.strip().removesuffix(".")) for role in roles],
         primary=field.tag.startswith("1"),
     )
 
 
-def agent_type(field: Field) -> RawConceptType:
+def get_agent_type(field: Field) -> RawConceptType:
     """
     Return the type of agent a name field denotes.
 
@@ -99,31 +103,13 @@ def agent_labels(raw_label: str, concept_type: RawConceptType) -> tuple[str, str
     """
     if concept_type == "Agent":
         return raw_label, raw_label
-    label = trim_trailing(raw_label, ",")
-    if concept_type == "Person":
-        # The Scala pipeline trims a Person label twice, so a second comma goes too
-        label = trim_trailing(label, ",")
-        return label, label
-    return label, raw_label
+    label = TRAILING_COMMAS.sub("", raw_label)
+    return label, label if concept_type == "Person" else raw_label
 
 
 def distinct_contributors(contributors: list[Contributor]) -> list[Contributor]:
-    """
-    Filter duplicates from `contributors`, fronting primary contributors, but otherwise preserving order.
-    An entry is a duplicate if it matches apart from the value of primary.
-    """
-    # Primary contributors should go first
-    sorted_contributors = sorted(contributors, key=lambda c: not c.primary)
-
-    seen_contributors = set()
-    deduplicated = []
-    for contributor in sorted_contributors:
-        # Use a normalised representation (with `primary=False`) for comparison
-        contributor_key = contributor.model_copy(
-            update={"primary": False}
-        ).model_dump_json()
-        if contributor_key not in seen_contributors:
-            deduplicated.append(contributor)
-            seen_contributors.add(contributor_key)
-
-    return deduplicated
+    """Remove repeated contributors and move primary ones to the front."""
+    return distinct(
+        sorted(contributors, key=lambda c: not c.primary),
+        key=lambda c: (c.agent, c.roles),
+    )
