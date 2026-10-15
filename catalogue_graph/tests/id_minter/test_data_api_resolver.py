@@ -47,3 +47,20 @@ def test_still_refuses_to_mint_unregistered_source_ids() -> None:
     resolver = _StubResolver({PRED: "legacy01"})
     with pytest.raises(NotImplementedError, match="cannot mint new IDs"):
         resolver.mint_ids([(SID, PRED)])
+
+
+def test_lookup_keys_rows_by_requested_value() -> None:
+    """A stored case variant comes back under the casing that was asked for."""
+    resolver = DataApiIdResolver.__new__(DataApiIdResolver)
+    resolver._table_name = "identifiers"
+    calls: list[str] = []
+
+    def execute(sql: str, parameters: list[dict]) -> list[dict[str, str]]:
+        calls.append(sql)
+        return [{"RequestedId": "B1001", "CanonicalId": "case0001"}]
+
+    resolver._execute = execute  # type: ignore[method-assign]
+    requested = SourceIdentifierKey("Work", "sierra", "B1001")
+
+    assert resolver.lookup_ids([requested]) == {requested: "case0001"}
+    assert "AS r(req)" in calls[0]
