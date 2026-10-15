@@ -154,15 +154,14 @@ resource "aws_cloudwatch_dashboard" "probes" {
             region = "eu-west-1"
             view   = "timeSeries"
             period = 300
-            metrics = flatten([
-              for j, step in local.probe_vendors[vendor] : [
-                for stat in ["p50", "p90", "p99"] : [
-                  "third_party_probes", "Duration",
-                  "Vendor", vendor, "Step", step, "Outcome", "ok",
-                  { stat = stat, label = "${step} ${stat}" }
-                ]
+            # One row per step and stat; flatten would also flatten the rows themselves.
+            metrics = [
+              for pair in setproduct(local.probe_vendors[vendor], ["p50", "p90", "p99"]) : [
+                "third_party_probes", "Duration",
+                "Vendor", vendor, "Step", pair[0], "Outcome", "ok",
+                { stat = pair[1], label = "${pair[0]} ${pair[1]}" }
               ]
-            ])
+            ]
           }
         },
         {
