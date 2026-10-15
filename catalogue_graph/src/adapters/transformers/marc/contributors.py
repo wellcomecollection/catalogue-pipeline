@@ -67,7 +67,9 @@ def extract_contributor(field: Field) -> Contributor | None:
 
     concept_type = get_agent_type(field)
     label, identifier_label = agent_labels(raw_label, concept_type)
-    # A name's ǂ0 holds an LC Names identifier; its second indicator names no scheme
+
+    # Unlike subject and genre fields, name fields do not name a thesaurus in their
+    # second indicator, and so we pass the scheme explicitly.
     authority_id = extract_identifier(field, concept_type, scheme="lc-names")
     agent_id = authority_id or Identifiable.identifier_from_text(
         identifier_label, concept_type
