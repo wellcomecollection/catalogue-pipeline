@@ -10,8 +10,6 @@ from adapters.transformers.marc.common import non_empty_subfields
 from adapters.transformers.marc.identifier import extract_id
 from models.pipeline.work_data import WorkType
 
-# TODO: There is a single Axiell work with the level 'Work' (collect:200000001). What work type should we map it to?
-
 # All raw level values are lowercased for consistency.
 # In Axiell, nested subsection levels which existed in CALM (subsection, subsubsection, etc.)
 # are collapsed to a single 'sub-section' level.
@@ -23,11 +21,6 @@ LEVEL_TO_WORK_TYPE_MAPPING: dict[str, WorkType] = {
     "sub-series": "Series",
     "item": "Standard",
     "item part": "Standard",  # Equivalent of CALM 'piece'
-    # TODO: These appeared after the latest migration and are temporary. Remove before release and adjust the
-    # corresponding BDD test (tests/adapters/transformers/axiell/bdd/features/work_type.feature).
-    "sub-fonds": "Section",
-    "fonds": "Collection",
-    "file": "Standard",
 }
 
 
