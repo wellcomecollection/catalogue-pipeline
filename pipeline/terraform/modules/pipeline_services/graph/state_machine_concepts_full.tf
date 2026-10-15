@@ -149,6 +149,10 @@ module "catalogue_graph_concepts_full_state_machine" {
         Type           = "Map"
         ItemsPath      = "$.work_id_batches"
         MaxConcurrency = 1
+        # $$.Map.Item.Value resolves only here, not in the states inside ItemProcessor.
+        ItemSelector = {
+          "ids.$" = "$$.Map.Item.Value"
+        }
         ItemProcessor = {
           ProcessorConfig = {
             Mode = "INLINE"
@@ -165,7 +169,7 @@ module "catalogue_graph_concepts_full_state_machine" {
                   pipeline_date = var.pipeline_date
                   graph_date    = var.graph_date
                   index_dates   = var.index_dates
-                  "ids.$"       = "$$.Map.Item.Value"
+                  "ids.$"       = "$.ids"
                 }
               }
               End = true
