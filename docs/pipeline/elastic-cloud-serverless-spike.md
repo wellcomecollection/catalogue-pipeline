@@ -52,7 +52,7 @@ A 30-slice point in time (the `core/source.py` constant) returned a complete sam
 
 ### 5. Cost
 
-The estimate, the year's hosted cost lines it is set against, and the one measured serverless anchor are in platform-infrastructure#560, which is private because it carries billing figures. The project is now at search power 28, the API floor, because the console did not offer the On-demand, Performant and High availability labels for it, so the tier-to-integer mapping the issue asked for could not be read. Its usage page after a day idle gives the baseline at that setting.
+The estimate, the year's hosted cost lines it is set against, and the one measured serverless anchor are in platform-infrastructure#560, which is private because it carries billing figures. The project is now at search power 28, the API floor, because the console did not offer the On-demand, Performant and High availability labels for it, so the tier-to-integer mapping the issue asked for could not be read. Elastic's billing API itemises the project's usage per day. Idle at search power 28 with about 4.4 GB retained, it used about 0.039 search VCU an hour (2026-10-15, 00:00 to 10:00 UTC), and the day of the load tests used 10.5 ingest VCU-hours for roughly 9 million documents written, about 1.2 per million. Those readings now carry the FOLIO environment's estimate in place of the extrapolated figures.
 
 ### 6. Private connectivity
 
@@ -81,5 +81,5 @@ Two things from this spike go into that one regardless: an operator IP policy ne
 ## Open items
 
 - The sliced point-in-time read of works-denormalised-2026-09-30 on the hosted cluster returned 3,096,696, 2,871,430 and 2,977,706 documents in three runs against 3,057,028 in the index, with each slice's count taking one of two values. The index has one primary shard. `core/source.py` reads the same index the same way with 30 slices; a counted read there is worth doing before trusting a single extractor pass.
-- The spike project's usage page after a day at search power 28, and a month-by-month export of the semantic prototype's serverless lines, replace the two assumed figures in the cost estimate.
+- The spike project's usage for the whole of 2026-10-15, re-read from the billing API to confirm the idle figure is not understated by feed lag, and a month-by-month export of the semantic prototype's serverless lines.
 - Destroy the spike stack through review-gate once those are read.
