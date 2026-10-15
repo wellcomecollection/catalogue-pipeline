@@ -1,295 +1,406 @@
-# Axiell to FOLIO: material type and access mapping
+# Axiell to FOLIO mapping: what is missing
 
-A decision document for Collection Information, not a description of the code.
-It sets what AxC sends beside what the FOLIO prod tenant offers, for the two
-fields where the mapping is wrong or undecided: **material type** and **access**.
+A decision document for Collection Information. It covers the fields where the
+mapping is incomplete, undecided or absent, in that order. For what the sync
+maps today, see
+[axiell-folio-field-mappings.md](axiell-folio-field-mappings.md).
 
-| | State |
-| --- | --- |
-| **Item status**, from the access category (`506$f`) | **Defined and implemented.** CI to Confirm the table in section 2. |
-| **Loan type** | **Open.** No AxC field is mapped, so every item is `Can circulate`. Section 2 and question 1. |
-| **Material type**, from object_category (`655$a`) | **Partly defined.** The three digital rows need an answer; the default is removed, to confirm. Section 1. |
+## State
 
-For what the sync maps today see
-[axiell-folio-field-mappings.md](axiell-folio-field-mappings.md)
+| Mapping | State | Where |
+| --- | --- | --- |
+| **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 89.8% of records; 13,284 (7.2%) match no rule and fail. The only thing failing records today. | [Section 1](#1-permanent-location-incomplete-and-failing-13284-records), [questions 1 to 3](#location) |
+| **Loan type** | **Proposed, not agreed.** Constant `Can circulate` for every record today. The proposal derives it from `540$a` (use restriction): `Can circulate` for `Online request` and `Restricted` only, `Unavailable` for the rest. | [Section 2](#2-loan-type-proposed-not-agreed), [questions 4 and 5](#loan-type) |
+| **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
+| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
+| **Identifier format** (HRID) | **Implemented.** A 45 to 49 character string built from the AxC GUID. Whether that format is acceptable is open, and it cannot change after the first run. | [Question 10](#identifiers) |
+| **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | [Question 9](#material-type-and-selection) |
+| **Deletion** of a Collect record | **Implemented, both ways.** Suppresses by default; `HARD_DELETE` switches it to an irreversible delete. Which one is policy, not development. | [Question 11](#deletion) |
+
+Nothing in this document is implemented beyond what the State column says is
+implemented. The code is unchanged pending these answers.
+
+## Where a run stands today
+
+| | Records | of selectable |
+| --- | ---: | --- |
+| would sync | 165,220 | 89.8% |
+| fails: no `984$b` (normal location) at all | 5,388 | 2.9% |
+| fails: `984$b` matches no location rule | 13,284 | 7.2% |
+| **total failures** | **18,672** | **10.2%** |
+
+Of 188,019 item-level records, 4,127 (2.2%) carry no harvest flag and are
+skipped, leaving 183,892 selectable. Nothing fails on material type, title,
+identifier or access category. **The location is the only thing failing records,
+and it is section 1.**
+
 ## Provenance
 
 | | Source | Date |
 | --- | --- | --- |
-| AxC values and counts | Full scan of the Axiell adapter table, 209,374 rows, **187,996 item-level**, 0 parse errors | 2026-09-29 |
-| FOLIO values | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
-| AxC to MARC provenance | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
-| `984` and `540` coverage | Re-scan of the same table after a newer stylesheet reached the live feed, 187,997 item-level | 2026-10-06 |
+| All AxC counts | Full scan of `axiell_adapter_table`: 209,374 rows, 131 deleted, 188,019 item-level, 0 parse errors, 183,892 passing both selection gates | 2026-10-12 |
+| Location rule coverage | Same table, applying `LOCATION_RULES` to the leading code of every selectable `984$b` (normal location). Pure code, no FOLIO call | 2026-10-13 |
+| `540$a` and the loan-type mapping | Same table, applying the mapping in section 2 to every selectable record and cross-tabulating the result against `506$f`. Confirms 0 multi-valued records and the eight-term vocabulary | 2026-10-13 |
+| FOLIO reference data | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
+| AxC to MARC | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
 
-All counts are item-level only (`351$c == ITEM`); percentages are of 187,996,
-except the `984` and `540` figures in section 2, which come from the later scan
-and are of 187,997. The corpus grew by one record between the two.
+Counts are item-level only (record level `351$c == ITEM`), so percentages are of
+188,019 unless they are stated against the 183,892 selectable. `984$b` (normal
+location) and `540$a` (use restriction) only began arriving on 2026-10-06 and
+reached their current coverage by 2026-10-08, so any figure for them dated
+earlier is superseded.
+
+One caveat on the readiness table: the 2026-10-12 scan ran against a reference
+cache that resolved every tenant lookup, so it could not see a value FOLIO would
+reject and reported 5,388 failures. The 2026-10-13 location scan supplies the
+13,284 it could not see. The material-type figures are unaffected, because that
+table is checked before the resolver.
 
 ---
 
-## 1. Material type
+## 1. Permanent location: incomplete, and failing 13,284 records
 
-### What AxC sends: `655$a`
+`984$b` (the AxC normal location) is the sole source of the FOLIO location on
+both the holdings and the item, required with no default. Three rules map it,
+matching on the leading code of the AxC hierarchy, case-insensitively, first
+match wins. A `984$b` of `215/215;B11/215;B11;MR/...` matches on `215`.
 
-| `655$a` | Item records | | Now resolves to |
+| Rule | Matches | FOLIO location | Records | |
+| --- | --- | --- | ---: | --- |
+| 1 | codes `215`, `183` | `AxC Euston Road` | 165,118 | 89.8% |
+| 2 | code `Deepstore` | `AxC Deepstore` | 94 | |
+| 3 | prefix `CLW` | `AxC Constantine London West` | 8 | |
+| | **no rule matches** | bare code sent to FOLIO | **13,284** | **7.2%** |
+| | *(no usable `984$b`)* | fails today | 5,388 | 2.9% |
+
+One rule does almost all the work. Rule 1 carries 89.8% of selectable records
+through its two codes, `215` on 141,967 and `183` on 23,151. Rules 2 and 3 match
+102 records between them.
+
+**The 13,284 fall-throughs span 2,460 distinct codes, and most are not
+locations:**
+
+| | Records | Example `984$b` |
+| --- | ---: | --- |
+| the born-digital storage service | 5,056 | `wellcomecollection-storage/born-digital` |
+| box numbers and shelfmarks | 8,228 | `Box 489: B000002594886`, `Box O/S 123`, `7/1/Box 208`, `MIS/Box 2` |
+
+The box-number group is the more revealing: those records carry no site prefix
+at all, so the leading component is the box itself. `984$b` is not uniformly
+shaped and the leading-code rule assumes it is, which no amount of rule-adding
+fixes cleanly.
+
+The born-digital group is a different problem. `wellcomecollection-storage` is a
+storage service, not a shelf, so 5,056 items have no physical location to map.
+
+**What happens to an unmatched code.** It is not rejected by the mapping. The
+bare leading code is passed to FOLIO, which syncs the record if the tenant knows
+a location by that code or name and fails it with `Unresolved normal location`
+otherwise. Nobody would have provisioned `Box 489: B000002594886` as a location,
+so in practice these fail, but which of the two happens is decided by the tenant
+rather than by anything agreed here.
+
+**To decide:** questions 1, 2 and 3.
+
+---
+
+## 2. Loan type: proposed, not agreed
+
+Every item is written `Can circulate` today, undifferentiated, because no AxC
+field is mapped to the loan type. The tenant has six loan types and none needs
+provisioning: `Can circulate`, `Course reserves`, `ILL`, `Reading room`,
+`Selected`, `Unavailable`.
+
+### What AxC sends: `540$a` (use restriction)
+
+Present on 183,615 item records (97.7%). Eight terms, measured per record over
+the 183,892 selectable:
+
+| `540$a` | Records | |
+| --- | ---: | --- |
+| `Online request` | 143,787 | 78.2% |
+| `By appointment` | 21,314 | 11.6% |
+| `Unavailable` | 9,192 | 5.0% |
+| `Restricted` | 5,144 | 2.8% |
+| `By approval` | 345 | 0.2% |
+| `Missing` | 7 | |
+| `Deaccessioned` | 6 | |
+| `Manual request` | 1 | |
+| *(absent)* | 4,096 | 2.2% |
+
+These reconcile to 183,892. **No record carries more than one distinct value**,
+so the mapping is a plain lookup needing no precedence rule, which matters
+because `extract()` reads the first non-empty subfield.
+
+Two cautions. The vocabulary grew from six terms to eight between 2026-10-06 and
+2026-10-12, with `Missing` and `Deaccessioned` appearing late, so it may not be
+complete. And those two, plus `Unavailable`, describe access or disposal states
+rather than request mechanisms, so `540$a` is not a clean single-purpose
+vocabulary.
+
+### The proposal
+
+Only `Online request` and `Restricted` circulate. Everything else, including an
+absent `540$a`, is `Unavailable`. `Reading room` is deliberately unused. This is
+what we are putting to Collection Information, not something they have agreed.
+
+| `540$a` (use restriction) | Records | | **Proposed loan type** |
 | --- | ---: | --- | --- |
-| `Archives - Non-digital` | 176,110 | 93.7% | `archive` |
-| `Visual Material` | 4,347 | 2.3% | `non-projected graphic` |
-| `Sound - Digital` | 2,860 | 1.5% | `audio format non-requestable` |
-| `Archives - Digital` | 2,535 | 1.3% | `archive` |
-| `Moving Image - Non-digital` | 1,048 | 0.6% | `film` |
-| `Sound - Non-digital` | 894 | 0.5% | `audio format requestable` |
-| `Moving Image - Digital` | 85 | | `video format non-requestable` |
-| `Archives - Hybrid`, `Pictures` | 2 | | `archive`, `non-projected graphic` |
-| *(absent)* | 115 | | nothing: the record fails |
+| `Online request` | 143,787 | 78.2% | `Can circulate` |
+| `Restricted` | 5,144 | 2.8% | `Can circulate` |
+| `By appointment` | 21,314 | 11.6% | `Unavailable` |
+| `Unavailable` | 9,192 | 5.0% | `Unavailable` |
+| *(absent)* | 4,096 | 2.2% | `Unavailable` |
+| `By approval` | 345 | 0.2% | `Unavailable` |
+| `Missing` | 7 | | `Unavailable` |
+| `Deaccessioned` | 6 | | `Unavailable` |
+| `Manual request` | 1 | | `Unavailable` |
 
-Every value in the corpus now resolves, covering 187,881 of 187,996 item
-records. Only the 115 with no `655$a` fail.
+That gives `Can circulate` on 148,931 records (81.0%) and `Unavailable` on
+34,961 (19.0%), summing to 183,892.
 
-**What this fixed.** 9,829 records (5.2%) previously did not resolve at all. Two
-causes, both key mistakes rather than missing targets: the table mapped
-`Visual Material - Non Digital` while AxC only ever says `Visual Material`, so
-the agreed `non-projected graphic` rule had never once fired; and the four
-`- Non Digital` (spaced) keys matched nothing, because AxC emits `- Non-digital`.
-Those four have been removed and the real values added.
+96.5% of circulating records are open, and 80 have an access category that
+restricts access; see the ceiling discussion below.
 
-*(An earlier version of this section said 9,944 records were silently typed
-`book`. That was wrong: an unmapped value was passed to the tenant, resolved to
-nothing and failed the record. Only the 115 with no category ever took the
-default, which has since been removed too.)*
 
-### The mapping: implemented
+**Requestability has two gates, and the loan type feeds one of them.**
+mod-circulation selects a request policy from the circulation rules, which match
+on `loanTypeId` among their criteria, and rejects a request type the selected
+policy disallows. Separately it checks the item status against
+`RequestTypeItemStatusWhiteList`. A request has to pass both.
 
-Live in `config.MATERIAL_TYPE`. The tenant has 29 material types and nothing
-needed provisioning: every target below already exists. The three rows marked
-**needs CI** are implemented on the reasoning given and are the ones to confirm.
+So changing the loan type **can** change requestability, through which request
+policy applies. Whether it does here depends on this tenant's request policies
+and circulation rules, and neither has been examined. Nothing in this section
+should be read as settling what the loan type does or does not control; see
+question 5.
 
-| `655$a` | Records | Proposed | Why |
-| --- | ---: | --- | --- |
-| `Archives - Non-digital` | 176,110 | `archive` | unchanged |
-| `Archives - Hybrid` | 1 | `archive` | same intellectual form |
-| `Visual Material` | 4,347 | `non-projected graphic` | the agreed target; only the key was wrong |
-| `Pictures` | 1 | `non-projected graphic` | same form |
-| `Moving Image - Non-digital` | 1,048 | `film` | unchanged |
-| `Sound - Non-digital` | 894 | `audio format requestable` | unchanged |
-| **`Sound - Digital`** | 2,860 | `audio format non-requestable` | **needs CI**: digital surrogate, not the carrier a reader requests |
-| **`Moving Image - Digital`** | 85 | `video format non-requestable` | **needs CI**: as above |
-| **`Archives - Digital`** | 2,535 | `archive` | **needs CI**: no digital-archive type exists, so the same intellectual form as the non-digital archives. `computer media` and `migration` are the alternatives |
+**`Can circulate` only has effect through a loan policy, and none has been
+examined.** A zero-day or in-house policy makes it mean "issued in the reading
+room"; a standard lending policy means unique archival material can leave the
+building. 148,931 records depend on which it is, 5,144 of them `Restricted`
+material whose access is conditioned.
+
+### The access category as a ceiling: now largely unnecessary
+
+`540$a` (use restriction) and `506$f` (access category) agree almost everywhere.
+455 records carry a value on a category that restricts access, all of which
+circulated under an earlier draft of this mapping:
+
+| `540$a` (use restriction) | `506$f` (access category) | Records |
+| --- | --- | ---: |
+| `By approval` | `PERMISSIONREQUIRED` | 343 |
+| `Online request` | `MISSING` | 67 |
+| `By appointment` | `MISSING` | 16 |
+| `By appointment` | `PERMISSIONREQUIRED` | 13 |
+| `Online request` | `DATAISSUES` | 11 |
+| `By approval` | `SAFEGUARDED` | 1 |
+| `Manual request` | `MISSING` | 1 |
+| `By appointment` | `CLOSED` | 1 |
+| | **total** | **453** |
+
+A ceiling letting the access category narrow but never widen would send all 453
+to `Unavailable`. Excluding the `By approval` on `PERMISSIONREQUIRED` pairing,
+which is arguably not a conflict since approval is how permission is granted,
+gives a narrower ceiling moving **110 records** and leaving that workflow alone.
+That is the version worth taking.
+
+**The 453 is a floor.** It was measured by looking only for the four request
+mechanisms on a restricting category. Now that `Restricted` and an absent
+`540$a` also yield `Can circulate`, more records qualify: `CLOSED` totals 9,819
+while only 8,851 carry `540$a` of `Unavailable`, so roughly 950 closed records
+take their loan type from something else. The exact total is unmeasured and
+should be known before implementing.
+
+Separately, 332 records say `Unavailable` in `540$a` while `506$f` says `OPEN`.
+A ceiling does not catch these; under the table above they take `Unavailable`.
+
+**Not implemented.** `DEFAULT_LOAN_TYPE` remains the constant `Can circulate`
+for every record. That coincides with what the proposal gives consultable
+material, but the 9,205 it would mark `Unavailable` are currently
+`Can circulate` too. Nothing changes in the code until CI confirms the table.
+
+---
+
+## 3. Material type: three rows need a decision
+
+Implemented and exhaustive over the corpus. The tenant has 29 material types and
+every target already exists.
+
+| `655$a` (object category) | Records | | Maps to | |
+| --- | ---: | --- | --- | --- |
+| `Archives - Non-digital` | 176,133 | 93.7% | `archive` | |
+| `Visual Material` | 4,347 | 2.3% | `non-projected graphic` | |
+| **`Sound - Digital`** | 2,860 | 1.5% | `audio format non-requestable` | **needs CI** |
+| **`Archives - Digital`** | 2,535 | 1.3% | `archive` | **needs CI** |
+| `Moving Image - Non-digital` | 1,048 | 0.6% | `film` | |
+| `Sound - Non-digital` | 894 | 0.5% | `audio format requestable` | |
+| **`Moving Image - Digital`** | 85 | | `video format non-requestable` | **needs CI** |
+| `Pictures` | 1 | | `non-projected graphic` | |
+| `Archives - Hybrid` | 1 | | `archive` | |
+| *(absent)* | 115 | | nothing: the record fails | |
 
 **This tenant encodes requestability in the material type** (note the
-`requestable` / `non-requestable` pairs), and `Sound - Non-digital` is already
-mapped to the requestable half. So the three digital rows also decide whether a
-reader can request them, which is the same question section 2 asks. **Decide
-sections 1 and 2 together.**
+`requestable` / `non-requestable` pairs). So the three digital rows also decide
+whether a reader can request that material, which is why they need an answer
+rather than a default. The reasoning applied is that a digital surrogate is not
+the carrier a reader requests, and that no digital-archive type exists so
+`Archives - Digital` takes the same intellectual form as the rest;
+`computer media` and `migration` are the alternatives.
 
-### The default: removed
+The table is strict: a value absent from it fails the record before the tenant
+is consulted, and there is no default. A new AxC term therefore halts those
+records until someone maps it. No value in the corpus currently falls outside
+the table.
 
-There is no longer a material-type default. A record with no `655$a`, like one
-with a category the table does not map, now fails and is reported.
-
-The table is also authoritative. Being required only rejects an absent `655$a`;
-it would not on its own stop a value the table does not carry, because an
-unmapped value used to be handed to the tenant unchanged and still resolved if
-the tenant knew a material type by that name. An AxC value of `archive`,
-`computer media` or even `book` therefore synced without appearing in the table
-at all, taking whatever requestability that FOLIO type has. The table is now
-checked before the tenant is consulted, so the agreed vocabulary is the only
-one that syncs.
-
-The options considered were to keep `book`, to default to `archive` (right far
-more often, since 93.7% of the corpus is archival, but still silent), or to have
-no default at all. The last was chosen: `book` was wrong for every one of the 115
-records it applied to, and a plausible-looking wrong material type is worse than
-an error row, because this tenant encodes requestability in the material type.
-
-**To confirm:** is failing the right behaviour for the 115 records with no
-category, or would you rather they defaulted to `archive` and synced?
+**To decide:** questions 7 and 8.
 
 ---
 
-## 2. Access
+## 4. Item status: implemented, needs confirming
 
-### What AxC sends
+Every value is in FOLIO's fixed item-status enum, so nothing needs provisioning.
 
-| AxC field | MARC | Says | Item records |
-| --- | --- | --- | ---: |
-| `access_status/value` | `506$f` | **Who** may access it | 187,687 (99.8%) |
-| `access_category.notes` | `506$a` | Free text, 609 distinct | 45,327 (24.1%) |
-| `closed_until` | `506$g` | Date access opens | 15,291 (8.1%) |
-| `use_restriction.restriction` | `540$a` | **How** it may be requested | 23,804 (12.7%) |
-| `use_restriction.date` | `540$g` | Date the restriction lifts | **0 (0.0%)** |
-| `location.default.context` | `984$b` | Where the item lives | 23,482 (12.5%) |
-| loan-type code (retired) | `949$l` | nothing, it is empty | 0 (0.0%) |
-
-`984$b` is in the table because it is the sole source of the FOLIO location and
-is required with no default, so its coverage bounds what can sync at all,
-whatever is decided below.
-
-`506$f` distribution: `OPEN` 171,804 (91.4%), `CLOSED` 9,819 (5.2%),
-`RESTRICTED` 5,496 (2.9%), `PERMISSIONREQUIRED` 356, *absent* 309, `MISSING`
-160, `DATAISSUES` 24, `OPENWITHADVISORY` 14, `DEACCESSIONED` 13, `SAFEGUARDED` 1.
-
-**`540` and `984` arrived on 2026-10-06, on an eighth of the corpus.** Both were
-absent from the whole table when scanned on 2026-10-02 and again on 2026-10-05,
-then appeared the next day: a newer stylesheet has reached the live OAI feed.
-Coverage is partial, which looks like a backfill rather than a finished one.
-
-Of the 183,871 records that pass both selection gates, 23,384 carry both fields,
-328 carry `540$a` only, 7 carry `984$b` only, and **160,152 (87.1%) carry
-neither**. Because `984$b` is required with no default, a run today would write
-about 23,000 records and fail about 160,000. The adapter refresh that would
-populate the rest is tracked in wellcomecollection/platform#6746.
-
-**The use-restriction vocabulary is six terms, not the two the samples showed,
-and the real values are not doubled:**
-
-| `540$a` | Records (selectable) |
-| --- | ---: |
-| `Online request` | 14,067 |
-| `By appointment` | 7,799 |
-| `Unavailable` | 1,591 |
-| `Restricted` | 253 |
-| `Manual request` | 1 |
-| `By approval` | 1 |
-
-Four of those were unknown when option B below was first drafted. `Unavailable`
-in particular, on 1,591 records, does not obviously mean reading-room access,
-so the mapping cannot be assumed to collapse to a single loan type.
-
-`540$g` is still at 0% even on records that carry `540$a`, so either no record
-has a date or it is not being exported.
-
-### Defined: `506$f` to item status
-
-Implemented. Every value is in FOLIO's fixed item-status enum, so nothing needs
-provisioning.
-
-| `506$f` | Records | Item status |
+| `506$f` (access category) | Records | Item status |
 | --- | ---: | --- |
-| `OPEN`, `OPENWITHADVISORY` | 171,818 | `Available` |
+| `OPEN`, `OPENWITHADVISORY` | 171,830 | `Available` |
 | `RESTRICTED` | 5,496 | `Available` |
-| `PERMISSIONREQUIRED`, `SAFEGUARDED`, `CLOSED` | 10,176 | `Restricted` |
+| `PERMISSIONREQUIRED`, `SAFEGUARDED` | 357 | `Restricted` |
+| `CLOSED` | 9,819 | `Unavailable` |
 | `MISSING` | 160 | `Missing` |
-| `DEACCESSIONED` | 13 | `Withdrawn` |
 | `DATAISSUES` | 24 | `Unknown` |
-| *absent* | 309 | `Unavailable` |
+| `DEACCESSIONED` | 13 | `Withdrawn` |
+| *(absent)* | 320 | `Unavailable` |
 
 `RESTRICTED` maps to `Available` because restricted material is genuinely
 available and can be requested online. The restriction is that the reader signs
 to agree to the viewing conditions, which happens before the material is handed
 over, so it does not affect whether the item can be requested or produced.
 
+The status is **create-only**: the sync sends it on create, and on later runs
+reads the item back and sends FOLIO's own status unchanged, because circulation
+owns the field once the item exists. An AxC access change therefore never
+reaches an existing item. That is question 6.
+
 `Restricted` and `Withdrawn` did not appear in a 5,000-item prod sample and
-should be confirmed against the tenant's FOLIO version. Statuses observed in
-use: `Available`, `Missing`, `Intellectual item`, `Unknown`, `Unavailable`,
-`Awaiting pickup`.
+should be confirmed against this tenant's FOLIO version.
 
-### Open: the loan type
-
-Every item is written as `Can circulate`, the default and currently the only
-value, because no AxC field is mapped to the loan type. Both candidates have
-been mapped here and reverted pending your answer.
-
-**Consequence:** all **15,869 records (8.4%) whose category restricts access**,
-including the 9,819 whose own access note reads *"This item is closed and cannot
-be accessed"*, are requestable. The item status does carry the restriction, so
-FOLIO displays them correctly while the request path does not. **Settle before
-any production run.**
-
-The tenant has 6 loan types and nothing needs provisioning: `Can circulate`,
-`Course reserves`, `ILL`, `Reading room`, `Selected`, `Unavailable`.
-
-Two shapes to choose between:
-
-| | Approach | Note |
-| --- | --- | --- |
-| **A** | The access category drives it | Deployable now. `CLOSED` gives `Unavailable`, `RESTRICTED` gives `Reading room`, and `OPEN` is question 1. |
-| **B** | The use restriction drives it, with the access category as a ceiling it can only narrow | Better matched to what a loan type means, and no longer blocked: `540$a` is now in the harvest on 12.7% of records. The ceiling is what stops a permissive restriction making a `CLOSED` item requestable. |
-
-B was blocked until 2026-10-06 because `540` was absent. It no longer is, so the
-choice is live. What it still lacks is coverage, not data: deciding B commits to
-a field present on an eighth of the corpus, so it pairs with the adapter refresh
-in wellcomecollection/platform#6746.
-
-Evidence for B: `540$a` names the request mechanism where the access category
-only implies it. `Online request` alone is on 14,067 records, and an item a
-reader must request online is not one they can borrow, which no `506$f` value
-says. Against it: four of the six terms were unknown when B was drafted, and
-`Unavailable` on 1,591 records may not map to a reading-room loan type at all,
-so the mapping needs the full thesaurus before it can be written.
-
-Note that a loan type has no time dimension, so a date-bounded restriction could
-only ever be recorded as a note, never enforced. `540$g` is at 0% anyway.
+**To decide:** questions 5 and 6.
 
 ---
 
-## 3. What we need from Collection Information
+## 5. Decisions needed from Collection Information
 
-1. **Should open archival material be `Can circulate` or `Reading room`?**
-   Covers **171,804 records, 91.4% of everything the sync writes**, the widest
-   blast radius here. `Reading room` exists precisely for material that does not
-   circulate, which is how archival collections are often held.
-2. **Which field should drive the loan type:** the access category, the use
-   restriction, or both with the category as a ceiling? (Section 2, A or B.)
-3. **What material type for the three digital categories?** `Sound - Digital`,
-   `Archives - Digital`, `Moving Image - Digital`. Because this tenant encodes
-   requestability in the material type, that choice also decides whether a
-   reader can request them.
-4. **Is the item-status table in section 2 right?** In particular, should `CLOSED` be
-   `Restricted` or `Unavailable`?
-5. **Is "set the item status once, when the item is created" good enough?**
-   That is what the sync does today: it sends the derived status on create, and
-   on every run after that it reads the item back from FOLIO and sends FOLIO's
-   own status unchanged. Circulation owns the field once the item exists, so
-   writing it every run would reset a checked-out item to `Available`. The cost
-   is that an AxC access change never reaches an item that already exists. If
-   that is not acceptable, the proposal is split ownership: the sync may
-   overwrite only the statuses it derives (`Available`, `Restricted`, `Missing`,
-   `Withdrawn`, `Unavailable`) and leaves circulation statuses alone.
-6. **Should `506$a` / `506$g` / `540$g` be carried as an item note?** Free text
-   on 24.1% of records and a date on 8.1%; the only way a date-bounded
-   restriction can be represented at all.
-7. **Should an unrecognised `655$a` or `506$f` fail the record, or default?**
-   The two now differ. For the material type neither case defaults: absent and
-   unmapped both fail. For the access category an absent value takes the safe
-   default (`Unavailable` status) and an unrecognised one fails. Either way a
-   new AxC value halts those records until someone maps it, which is the
-   intended trade: a halted record is visible, a defaulted one is not.
-8. **When the Harvest flag is unticked on a record that has already synced,
-   should its FOLIO records be suppressed, or left?** This one sits outside the
-   two fields above, but it is a decision only you can take and it is otherwise
-   easy to miss.
+### Location
 
-   Today they are left. The record stops passing the selection gate, so it is
-   counted as skipped and never updated again, while its instance, holdings and
-   item stay in FOLIO unsuppressed with whatever data they last had. Nothing
-   reclaims them: the only delete path is the reconciler, which works from
-   superseded GUIDs, and a flag removal is not a delete signal.
+1. Should a `984$b` (normal location) whose leading code matches no rule fail
+   the record outright, as the material type now does, rather than being passed
+   to FOLIO to land wherever it happens to match?
+2. What location should the 5,056 born-digital items take, if any? Should they
+   be in this sync at all?
+3. Do the 8,228 box-number records need more rules, or a stylesheet fix so that
+   `984$b` always carries its site prefix?
 
-   That is current behaviour rather than an agreed rule, and it is the less safe
-   of the two readings. If curators untick Harvest to withdraw something from
-   the LMS, that intent is silently dropped. Tracked in
-   wellcomecollection/platform#6663, which also asks for the answer to be
-   recorded here.
+### Loan type
+
+4. Confirm `Can circulate` for `Online request` and `Restricted`, 148,931
+   records, and `Unavailable` for the other 34,961. Note that this gives
+   `Unavailable` to 25,023 records whose access category is `OPEN`, almost all
+   of them `By appointment`. Then confirm what loan policy the circulation rules
+   attach to `Can circulate`, which is what decides whether archival material
+   can leave the building.
+
+
+### Item status
+5. **Is `Restricted` meant to stop a request?** On the item-status gate alone,
+   it does not: `Restricted` is pageable in mod-circulation, like `Available`.
+   The 357 `Restricted` records (`PERMISSIONREQUIRED` and `SAFEGUARDED`) are
+   therefore fully pageable, subject to the tenant's request policy and
+   circulation rules. `Unavailable`, `Unknown` and `Withdrawn` block requests,
+   while `Missing` allows holds only.
+
+6. Is "set the item status once, when the item is created" good enough? The cost
+   is that an AxC access change never reaches an existing item. If that is not
+   acceptable, the proposal is split ownership: the sync overwrites only the
+   statuses it derives (`Available`, `Restricted`, `Missing`, `Withdrawn`,
+   `Unavailable`) and leaves circulation statuses alone.
+
+### Material type and selection
+
+7. What material type for `Sound - Digital`, `Archives - Digital` and
+   `Moving Image - Digital`? Because requestability is encoded in the material
+   type, that choice also decides whether a reader can request them.
+8. Is failing the right behaviour for the 115 records with no `655$a` (object
+   category), or would you rather they defaulted to `archive` and synced?
+9. **When the Harvest flag is unticked on a record that has already synced,
+   should its FOLIO records be suppressed, or left?** Today they are left: the
+   record stops passing the selection gate, so it is skipped and never updated
+   again, while its instance, holdings and item stay in FOLIO unsuppressed with
+   whatever data they last had. Nothing reclaims them, because the only delete
+   path is the reconciler working from superseded GUIDs and a flag removal is
+   not a delete signal. That is current behaviour rather than an agreed rule,
+   and it is the less safe reading: if curators untick Harvest to withdraw
+   something from the LMS, that intent is silently dropped. Tracked in
+   wellcomecollection/platform#6663.
+
+### Identifiers
+
+10. **Is the FOLIO identifier format acceptable?** Each record gets a
+    predictable hrid built from the Axiell GUID in `001` (record identifier),
+    which is always a 36-character UUID:
+
+    | FOLIO record | hrid | Length |
+    | --- | --- | ---: |
+    | Instance | `AxC-instance-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 49 |
+    | Holdings | `AxC-holding-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 48 |
+    | Item | `AxC-item-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 45 |
+
+    The `AxC-` prefix identifies the record as synced from Axiell; the hrid also
+    includes the record type and Axiell GUID, making each record easy to find
+    and identify. The human-readable archival reference is carried, but
+    as the instance's `Local identifier` (for example `WMS/Amer.147`, from
+    `035$a(AltRefNo)`, the object number), not as the hrid.
+
+    **This needs settling before the first production run.** The hrid is how the
+    sync finds its own records again on every later run, and how the reconciler
+    resolves deletions, so changing the format afterwards would orphan every
+    record already written.
+
+    Two smaller points. The prefixes are inconsistent: `AxC-holding-` is
+    singular where FOLIO's entity is a holdings record. And whether FOLIO
+    constrains hrid length or character set has not been verified.
+
+### Deletion
+
+11. **When a Collect record is deleted, should its FOLIO records be suppressed
+    or hard deleted?** Both paths are implemented and the choice is a runtime
+    flag, so this is a policy decision rather than development work.
+
+    | | What happens | Reversible |
+    | --- | --- | --- |
+    | **Suppress** (default) | `discoverySuppress` set on the instance, holdings and item; `staffSuppress` on the instance as well, since it is the only entity FOLIO gives that field | Yes. The records stay, out of discovery, and can be unsuppressed |
+    | **Hard delete** | the item, then the holdings, then the instance are DELETEd | **No** |
+
+    Today it suppresses. `HARD_DELETE` defaults to `false`, and the per-run
+    `hard_delete` flag on the event overrides it, so switching is a
+    configuration change.
+
+    Points worth weighing. Suppression keeps an audit trail but can leave
+    deleted records visible to cataloguers. Hard delete avoids orphaning parent
+    records by deleting child records first, but it is irreversible; if a delete
+    is issued in error, the sync would only recreate the records if the AxC
+    record reappeared and passed the harvest gate again.
+
+    This is different from question 9: there, unticking Harvest means nothing
+    reaches FOLIO at all; here, Collect sends an actual deletion fact and the
+    sync acts on it.
+
+---
 
 ## Before implementing
 
-**On the tenant:** that `Restricted` and `Withdrawn` are accepted by this FOLIO
-version; and that the chosen loan types behave as expected in the request path
-(the names exist, their circulation rules have not been examined).
-
-**On the AxC side**, two of the three are now answered:
-
-- ~~Which stylesheet the live OAI feed runs.~~ A newer one landed on 2026-10-06
-  and both `984` and `540` now arrive. What remains is coverage: 87.1% of
-  selectable records still carry neither, tracked in
-  wellcomecollection/platform#6746.
-- **The full use-restriction thesaurus.** Six terms are now visible in the data,
-  but whether that is the whole vocabulary or only what the backfill has reached
-  so far is unknown, and the loan-type mapping cannot be written without it.
-- ~~Whether the values arrive doubled.~~ They do not. The doubling
-  (`"By appointmentBy appointment"`) appeared only in the stylesheet's committed
-  sample; the harvested values are clean. Emitting
-  `use_restriction.restriction.lref` as `540$0` is therefore no longer needed to
-  work around it, though keying on a thesaurus id would still survive a term
-  being renamed.
+**On the FOLIO tenant**, none of these verified: that `Restricted` and
+`Withdrawn` are accepted by this FOLIO version; what loan policy the circulation
+rules attach to `Can circulate` and whether `Unavailable` genuinely prevents a
+loan; and that the three `AxC *` location names still resolve, last confirmed
+2026-09-29.

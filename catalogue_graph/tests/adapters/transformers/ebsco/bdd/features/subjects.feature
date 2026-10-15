@@ -5,14 +5,27 @@ Feature: Extracting subjects from 6xx fields
   Background:
     Given a valid MARC record
 
-  Rule: Accept but warn about multiple "a" subfields
-    Scenario: A poorly formed genre
-    "a" is a non-repeating field. However, if a field has more than one, accept it but log the anomaly.
-    There are some records out of our control where multiple "a" has occurred
+  Rule: Accept but warn about repeated non-repeatable subfields
+  "a" and some other subfields must not repeat, but records out of our control sometimes repeat them.
+  The repeats are kept and the anomaly logged, unless a repeat only duplicates an earlier value,
+  in which case it is dropped (see the FOLIO feature file).
+
+    Scenario: A poorly formed heading
       Given the MARC record has a 600 field with indicators "" "0" with subfield "a" value "Joseph Pujol" and subfield "a" value "Roland"
       When I transform the MARC record
-      Then an error "Repeated non-repeating subfield $a" is logged with tag "600"
+      Then an error "Repeated non-repeating subfield" is logged with tag "600" and subfield "a"
       And the only subject has the label "Joseph Pujol Roland"
+
+    Scenario: A personal name with two titles keeps both
+      Given the MARC record has a 600 field with indicators "" "0" with subfields:
+        | code | value               |
+        | a    | Wright, Thomas      |
+        | d    | 1973-               |
+        | t    | Circulation.        |
+        | t    | Omne vivum ex ovo.  |
+      When I transform the MARC record
+      Then an error "Repeated non-repeating subfield" is logged with tag "600" and subfield "t"
+      And the only subject has the label "Wright, Thomas 1973- Circulation. Omne vivum ex ovo."
 
   Rule: A subject is extracted for each relevant field
     Scenario Outline: A single simple subject
@@ -128,6 +141,11 @@ Feature: Extracting subjects from 6xx fields
       When I transform the MARC record
       Then there are no subjects
 
+    Scenario: A corporate name with only a subordinate unit is valid
+      Given the MARC record has a 610 field with indicators "" "0" with subfield "b" value "Royal Navy."
+      When I transform the MARC record
+      Then the only subject has the label "Royal Navy"
+
   Rule: Not all 6xx fields create a Subject
   We catalogue using LoC (2nd indicator 0) and MeSH (2nd indicator 2) and other (2nd indicator 7).
   So for any of the Subject Added Entry fields we do not take any headings
@@ -180,6 +198,101 @@ Feature: Extracting subjects from 6xx fields
         | 0 | kadoc    |
         | 0 | galestne |
 
+  Rule: Identical subjects are deduplicated
+    Scenario: Two headings that produce the same subject
+    The second indicators say LCSH and MeSH, but without a ǂ0 both headings yield
+    the same label-derived subject, and only the first is kept
+      Given the MARC record has a 650 field with indicators "" "0" with subfield "a" value "Medicine"
+      And the MARC record has another 650 field with indicators "" "2" with subfield "a" value "Medicine."
+      When I transform the MARC record
+      Then the only subject has the label "Medicine"
+      And that subject has the source identifier value "medicine"
+      And that subject's only concept has the identifier value "medicine"
+
+  Rule: Subjects are listed in document order
+    Scenario: Headings of several types
+      Given the MARC record has a 600 field with indicators "" "0" with subfields:
+        | code | value               |
+        | a    | Le Tellier, Michel, |
+        | d    | 1603-1685.          |
+      And the MARC record has a 610 field with indicators "" "0" with subfield "a" value "Collège de Clermont (Paris, France)"
+      And the MARC record has a 650 field with indicators "" "0" with subfield "a" value "Philosophy."
+      And the MARC record has a 611 field with indicators "" "0" with subfield "a" value "Council of Trent"
+      When I transform the MARC record
+      Then the work has 4 subjects with label:
+        | Le Tellier, Michel, 1603-1685.      |
+        | Collège de Clermont (Paris, France) |
+        | Philosophy                          |
+        | Council of Trent                    |
+
+  Rule: Each heading type trims its own trailing punctuation from the main concept
+  Personal names are kept as catalogued, meeting names lose a trailing comma, corporate names lose
+  a trailing comma and then a trailing full stop, and other headings lose a trailing full stop
+
+    Scenario: A Person concept keeps its trailing comma
+      Given the MARC record has a 600 field with indicators "" "0" with subfields:
+        | code | value          |
+        | a    | Stanton, Henry, |
+        | e    | plaintiff      |
+        | 0    | nb2002074447   |
+      When I transform the MARC record
+      Then the only subject has the label "Stanton, Henry, plaintiff"
+      And that subject's only concept has the label "Stanton, Henry,"
+
+    Scenario: A Meeting concept keeps its trailing full stop
+      Given the MARC record has a 611 field with indicators "" "0" with subfields:
+        | code | value                           |
+        | a    | International Medical Congress. |
+        | 0    | n  87106542                     |
+      When I transform the MARC record
+      Then the only subject has the label "International Medical Congress"
+      And that subject's only concept has the label "International Medical Congress."
+
+    Scenario: An Organisation concept loses a trailing comma and then a trailing full stop
+      Given the MARC record has a 610 field with indicators "" "0" with subfields:
+        | code | value      |
+        | a    | Cotes, E., |
+        | e    | printer.   |
+      When I transform the MARC record
+      Then the only subject has the label "Cotes, E., printer"
+      And that subject's only concept has the label "Cotes, E"
+
+  Rule: In a subdivided concept heading the ǂ0 belongs to the subject, not to the primary concept
+    Scenario: A MeSH heading with a qualifier
+    D014076Q000175 identifies "Tooth Diseases/diagnosis" as a whole,
+    so the concept "Tooth Diseases" gets a label-derived identifier instead
+      Given the MARC record has a 650 field with indicators "" "2" with subfields:
+        | code | value          |
+        | a    | Tooth Diseases |
+        | x    | diagnosis      |
+        | 0    | D014076Q000175 |
+      When I transform the MARC record
+      Then the only subject has the label "Tooth Diseases - diagnosis"
+      And that subject has the source identifier value "D014076Q000175"
+      And that subject has the source identifier type "nlm-mesh"
+      And it has 2 concepts:
+        | label          | id.source_identifier.value | id.source_identifier.identifier_type.id |
+        | Tooth Diseases | tooth diseases             | label-derived                           |
+        | diagnosis      | diagnosis                  | label-derived                           |
+
+  Rule: In a subdivided personal name heading the ǂ0 belongs to the person
+    Scenario: A Person subject with a general subdivision and an LC Names identifier
+      Given the MARC record has a 600 field with indicators "" "0" with subfields:
+        | code | value                        |
+        | a    | Woolf, Virginia,             |
+        | d    | 1882-1941.                   |
+        | t    | To the lighthouse            |
+        | x    | Criticism and interpretation. |
+        | 0    | n  79041870                  |
+      When I transform the MARC record
+      Then the only subject has the label "Woolf, Virginia, 1882-1941. To the lighthouse Criticism and interpretation."
+      And that subject has the source identifier value "n79041870"
+      And it has 2 concepts:
+        | type    | label                                         | id.type        |
+        | Person  | Woolf, Virginia, 1882-1941. To the lighthouse | Identifiable   |
+        | Concept | Criticism and interpretation.                 | Unidentifiable |
+      And that subject's 1st concept has the identifier value "n79041870"
+
   Rule: Trailing full stops are removed in Subjects, apart from Person subjects, and also in the concepts that make up a subject
   This is a bug in the previous implementation that we need to replicate for comparison purposes.
   Once the comparison is successful we should be able to remove the dot from a Person as well.
@@ -200,6 +313,12 @@ Feature: Extracting subjects from 6xx fields
         | 648  |
         | 650  |
         | 651  |
+
+    Scenario: A Subject with a trailing dot and whitespace
+      Given the MARC record has a 650 field with indicators "" "2" with subfield "a" value "Herniorrhaphy. "
+      When I transform the MARC record
+      Then the only subject has the label "Herniorrhaphy"
+      And that subject's only concept has the label "Herniorrhaphy"
 
     Scenario: A Subject with trailing dots in all the concepts
       Given the MARC record has a 650 field with indicators "" "0" with subfields:
