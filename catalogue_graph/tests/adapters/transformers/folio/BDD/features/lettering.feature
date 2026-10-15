@@ -59,8 +59,13 @@ Feature: lettering (MARC 246)
   # not catalogued in FOLIO, so there is no material type to test and 514 is
   # never used; the "non-visual material" case above is the only one ported.
   #
-  # The Scala keeps blank ǂa values in the join, padding the result with
-  # stray line breaks.
+  # The Scala trims nothing and keeps blank ǂa values in the join, padding
+  # the result with stray spaces and line breaks.
+
+  Scenario: Surrounding whitespace is stripped from each ǂa before joining
+    Given the MARC record has a 246 field with indicators "3" "6" with subfield "a" value "Jesus-Hilfe: " and subfield "b" value "Das Aussätzigen-asyl der Brüdergemeine in Jerusalem"
+    When I transform the MARC record
+    Then the work's lettering is "Jesus-Hilfe:"
 
   Scenario: Blank caption-title ǂa values are dropped rather than padding the result
     Given the MARC record has a 246 field with indicators "" "6" with subfield "a" value "   "
