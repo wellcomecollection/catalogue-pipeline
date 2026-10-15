@@ -47,7 +47,7 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
 
         row_id, last_modified = row["id"], row["last_modified"]
         # Item/holdings enrichment content joined on by FolioStoreSource
-        # (None for adapters without an items store).
+        # (None for adapters without an inventory store).
         enrichment_content = row.get("enrichment_content")
 
         try:

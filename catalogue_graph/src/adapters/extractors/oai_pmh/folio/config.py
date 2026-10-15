@@ -125,20 +125,20 @@ S3_PREFIX = os.getenv("S3_PREFIX", "dev")
 
 
 # ---------------------------------------------------------------------------
-# Item enrichment
+# holdings and Items enrichment
 #
 # A second Iceberg store, populated from mod-inventory-storage's
-# `oai-pmh-view/enrichedInstances`, holding each instance's items and holdings
-# (with UUIDs) keyed by instance id. It mirrors the adapter-store shape and is
+# `inventory-hierarchy/items-and-holdings`, holding each instance's raw items and
+# holdings record keyed by instance id. It mirrors the adapter-store shape and is
 # joined onto the bib store at transform time. See
 # https://github.com/wellcomecollection/catalogue-pipeline/pull/3438.
 # ---------------------------------------------------------------------------
-ITEMS_NAMESPACE = os.getenv("FOLIO_ITEMS_NAMESPACE", "folio-items")
-ITEMS_REST_API_TABLE_NAME = os.getenv(
-    "FOLIO_ITEMS_REST_API_TABLE_NAME", "folio_items_table"
+INVENTORY_NAMESPACE = os.getenv("FOLIO_INVENTORY_STORE_NAMESPACE", "folio-inventory")
+INVENTORY_REST_API_TABLE_NAME = os.getenv(
+    "FOLIO_INVENTORY_STORE_REST_API_TABLE_NAME", "folio_inventory_table"
 )
-ITEMS_LOCAL_TABLE_NAME = os.getenv(
-    "FOLIO_ITEMS_LOCAL_TABLE_NAME", "folio_items_local_table"
+INVENTORY_LOCAL_TABLE_NAME = os.getenv(
+    "FOLIO_INVENTORY_STORE_LOCAL_TABLE_NAME", "folio_inventory_local_table"
 )
 
 # mod-inventory-storage connectivity (distinct from the OAI-PMH feed).
@@ -156,14 +156,15 @@ SSM_INVENTORY_PASSWORD = os.getenv(
 SSM_INVENTORY_TENANT = os.getenv(
     "FOLIO_SSM_INVENTORY_TENANT", "/catalogue_pipeline/folio/inventory_tenant"
 )
-ENRICH_BATCH_SIZE = int(os.getenv("FOLIO_ENRICH_BATCH_SIZE", "50"))
+# Measured in wellcomecollection/platform#6581: under 1s and about 1.3 MB per call.
+ENRICH_BATCH_SIZE = int(os.getenv("FOLIO_ENRICH_BATCH_SIZE", "1000"))
 ENRICH_SKIP_SUPPRESSED = (
     os.getenv("FOLIO_ENRICH_SKIP_SUPPRESSED", "false").lower() == "true"
 )
 
-# Iceberg table configs for the items store (reusing the adapter-store schema).
-ITEMS_REST_API_ICEBERG_CONFIG = RestApiIcebergTableConfig(
-    table_name=ITEMS_REST_API_TABLE_NAME,
+# Iceberg table configs for the inventory store (reusing the adapter-store schema).
+INVENTORY_REST_API_ICEBERG_CONFIG = RestApiIcebergTableConfig(
+    table_name=INVENTORY_REST_API_TABLE_NAME,
     namespace=REST_API_NAMESPACE,
     iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
     sort_order=ADAPTER_STORE_SORT_ORDER,
@@ -171,8 +172,8 @@ ITEMS_REST_API_ICEBERG_CONFIG = RestApiIcebergTableConfig(
     region=AWS_REGION,
     account_id=AWS_ACCOUNT_ID,
 )
-ITEMS_LOCAL_ICEBERG_CONFIG = LocalIcebergTableConfig(
-    table_name=ITEMS_LOCAL_TABLE_NAME,
+INVENTORY_LOCAL_ICEBERG_CONFIG = LocalIcebergTableConfig(
+    table_name=INVENTORY_LOCAL_TABLE_NAME,
     namespace=LOCAL_NAMESPACE,
     iceberg_schema=ADAPTER_STORE_ICEBERG_SCHEMA,
     sort_order=ADAPTER_STORE_SORT_ORDER,

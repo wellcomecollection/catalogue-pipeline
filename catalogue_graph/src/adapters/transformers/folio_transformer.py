@@ -12,10 +12,10 @@ class FolioTransformer(MarcXmlTransformer):
         changeset_ids: list[str],
         snapshot_id: int | None,
         ids: list[str] | None = None,
-        items_store: AdapterStore | None = None,
+        inventory_store: AdapterStore | None = None,
     ) -> None:
         # Stored before super().__init__, which builds the source via _build_source.
-        self._items_store = items_store
+        self._inventory_store = inventory_store
         super().__init__(
             adapter_store, changeset_ids=changeset_ids, snapshot_id=snapshot_id, ids=ids
         )
@@ -32,7 +32,7 @@ class FolioTransformer(MarcXmlTransformer):
             changeset_ids,
             snapshot_id,
             ids=ids,
-            items_store=self._items_store,
+            inventory_store=self._inventory_store,
         )
 
     @property
