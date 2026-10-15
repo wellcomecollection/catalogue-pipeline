@@ -5,7 +5,7 @@ would hide the slow and failed calls we want to measure.
 """
 
 import os
-import re
+import xml.etree.ElementTree as ET
 from datetime import UTC, datetime, timedelta
 from ftplib import FTP
 
@@ -56,7 +56,13 @@ class OaiError(Exception):
 def _check_oai(resp: httpx.Response) -> None:
     # OAI-PMH reports protocol errors inside a 200; an empty window is fine.
     resp.raise_for_status()
-    codes = set(re.findall(r'<error code="([^"]+)"', resp.text)) - {"noRecordsMatch"}
+    # Raises on a body that is not XML, such as a proxy's HTML error page.
+    root = ET.fromstring(resp.content)
+    codes = {
+        el.get("code", "")
+        for el in root.iter()
+        if isinstance(el.tag, str) and el.tag.rsplit("}", 1)[-1] == "error"
+    } - {"noRecordsMatch"}
     if codes:
         raise OaiError(", ".join(sorted(codes)))
 

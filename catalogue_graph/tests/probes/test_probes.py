@@ -218,18 +218,33 @@ def test_incomplete_credentials_are_recorded_as_setup_error(
     assert "url, key, secret" in metric["error"]
 
 
-def test_oai_error_in_200_is_an_error(capsys: pytest.CaptureFixture[str]) -> None:
+@pytest.mark.parametrize(
+    "error_xml",
+    [
+        '<OAI-PMH><error code="badArgument"/></OAI-PMH>',
+        "<OAI-PMH><error code='badArgument'/></OAI-PMH>",
+        '<oai:OAI-PMH xmlns:oai="http://www.openarchives.org/OAI/2.0/">'
+        '<oai:error code="badArgument"/></oai:OAI-PMH>',
+    ],
+)
+def test_oai_error_in_200_is_an_error(
+    error_xml: str, capsys: pytest.CaptureFixture[str]
+) -> None:
     def respond(request: httpx.Request) -> httpx.Response:
         if request.url.params["verb"] == "Identify":
             return httpx.Response(200, text="<OAI-PMH/>")
-        return httpx.Response(
-            200, text='<OAI-PMH><error code="badArgument"/></OAI-PMH>'
-        )
+        return httpx.Response(200, text=error_xml)
 
     assert not _run("folio_oai", respond)
     [_, read] = _metrics(capsys)
     assert (read["Step"], read["Outcome"]) == ("read", "error")
     assert "badArgument" in read["error"]
+
+
+def test_oai_non_xml_200_is_an_error(capsys: pytest.CaptureFixture[str]) -> None:
+    html = "<html><body><p>Down for maintenance<br></body></html>"
+    assert not _run("axiell_oai", lambda request: httpx.Response(200, text=html))
+    assert _summary(_metrics(capsys)) == [("axiell_oai", "identify", "error")]
 
 
 def test_oai_no_records_match_is_ok(capsys: pytest.CaptureFixture[str]) -> None:
