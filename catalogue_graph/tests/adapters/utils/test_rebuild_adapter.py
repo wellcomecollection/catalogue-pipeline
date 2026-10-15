@@ -16,6 +16,7 @@ import scripts.rebuild_adapter as rebuild_adapter
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
 )
+from adapters.extractors.oai_pmh.folio.enrichment.models import FolioInventoryRecord
 from adapters.extractors.oai_pmh.runtime import OAIPMHAdapterConfig
 from adapters.steps.oai_pmh.reconcile import ReconcileRuntime
 from adapters.utils.adapter_store import AdapterStore
@@ -53,7 +54,7 @@ def test_populate_store_from_snapshot(
     assert store.get_all_records().num_rows == 2
 
 
-def test_download_items_to_snapshot_aborts_on_zero_items(
+def test_download_inventory_to_snapshot_aborts_on_zero_items(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     bib_snapshot_path = tmp_path / "bibs.parquet"
@@ -62,19 +63,21 @@ def test_download_items_to_snapshot_aborts_on_zero_items(
         bib_snapshot_path,
     )
     monkeypatch.setattr(
-        rebuild_adapter, "fetch_item_rows", lambda *args, **kwargs: None
+        rebuild_adapter, "fetch_inventory_rows", lambda *args, **kwargs: None
     )
-    items_snapshot_path = tmp_path / "items.parquet"
+    inventory_snapshot_path = tmp_path / "items.parquet"
 
-    with pytest.raises(RuntimeError, match="0 items"):
-        rebuild_adapter._download_items_to_snapshot(
+    with pytest.raises(RuntimeError, match="0 instances"):
+        rebuild_adapter._download_inventory_to_snapshot(
             cast(FolioInventoryClient, SimpleNamespace()),
-            bib_snapshot_path=str(bib_snapshot_path),
-            items_snapshot_path=str(items_snapshot_path),
+            bib_id_batches=rebuild_adapter._active_ids_from_snapshot(
+                str(bib_snapshot_path)
+            ),
+            inventory_snapshot_path=str(inventory_snapshot_path),
             namespace="test_namespace",
         )
 
-    assert not items_snapshot_path.exists()
+    assert not inventory_snapshot_path.exists()
     assert not (tmp_path / "items.parquet.partial").exists()
 
 
@@ -414,28 +417,29 @@ def test_wipe_only_axiell_empties_the_stores_and_stops(
     assert published == []
 
 
-def test_wipe_only_folio_empties_bib_and_items_stores_and_stops(
+def test_wipe_only_folio_empties_bib_and_inventory_stores_and_stops(
     temporary_table: IcebergTable,
-    items_temporary_table: IcebergTable,
+    inventory_temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """--wipe-only on FOLIO empties both the bib and items stores and does
+    """--wipe-only on FOLIO empties both the bib and inventory stores and does
     nothing else: the config stub has no window store and no download client,
     so touching either fails the test, and no events are published."""
     adapter_store = AdapterStore(temporary_table, "test_namespace")
     temporary_table.append(
         adapter_records_to_table([{"id": "rec001", "content": "stale bib"}])
     )
-    items_store = AdapterStore(items_temporary_table, "items_namespace")
-    items_temporary_table.append(
+    inventory_store = AdapterStore(inventory_temporary_table, "inventory_namespace")
+    inventory_temporary_table.append(
         adapter_records_to_table(
-            [{"id": "item001", "content": "stale item"}], namespace="items_namespace"
+            [{"id": "item001", "content": "stale item"}],
+            namespace="inventory_namespace",
         )
     )
     config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: adapter_store)
     monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
     monkeypatch.setattr(
-        rebuild_adapter, "build_items_store", lambda **kwargs: items_store
+        rebuild_adapter, "build_inventory_store", lambda **kwargs: inventory_store
     )
     monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
     published: list[object] = []
@@ -446,8 +450,141 @@ def test_wipe_only_folio_empties_bib_and_items_stores_and_stops(
     rebuild_adapter.rebuild_adapter("folio", wipe_only=True)
 
     assert adapter_store.get_all_records().num_rows == 0
-    assert items_store.get_all_records().num_rows == 0
+    assert inventory_store.get_all_records().num_rows == 0
     assert published == []
+
+
+class _FakeInventoryClient:
+    def __init__(self, records: dict[str, dict]) -> None:
+        self.records = records
+        self.requested: list[str] = []
+
+    def items_and_holdings(self, instance_ids: list[str]) -> list[FolioInventoryRecord]:
+        self.requested.extend(instance_ids)
+        return [
+            FolioInventoryRecord(data=self.records[i])
+            for i in instance_ids
+            if i in self.records
+        ]
+
+
+def test_folio_inventory_only_wipes_and_reloads_the_inventory_store(
+    temporary_table: IcebergTable,
+    inventory_temporary_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Only the inventory store changes: rows for instances FOLIO no longer returns
+    are dropped, deleted bibs are not fetched, and nothing is published. The
+    config stub has no window store, so touching it fails the test."""
+    bib_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table(
+            [
+                {"id": "oai:folio:set/uuid-1", "content": "bib 1"},
+                {"id": "oai:folio:set/uuid-2", "content": "bib 2"},
+                {"id": "oai:folio:set/uuid-3", "content": "bib 3", "deleted": True},
+            ]
+        )
+    )
+    inventory_store = AdapterStore(inventory_temporary_table, "inventory_namespace")
+    inventory_temporary_table.append(
+        adapter_records_to_table(
+            [
+                {"id": "oai:folio:set/uuid-1", "content": "stale"},
+                {"id": "oai:folio:set/uuid-gone", "content": "stale"},
+            ],
+            namespace="inventory_namespace",
+        )
+    )
+    client = _FakeInventoryClient(
+        {"uuid-1": {"instanceId": "uuid-1", "holdings": [], "items": [{"id": "a"}]}}
+    )
+    config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: bib_store)
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_inventory_store", lambda **kwargs: inventory_store
+    )
+    monkeypatch.setattr(rebuild_adapter, "build_folio_inventory_client", lambda: client)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+    published: list[object] = []
+    monkeypatch.setattr(
+        rebuild_adapter, "_publish_adapter_event", lambda *a: published.append(a)
+    )
+
+    rebuild_adapter.rebuild_adapter(
+        "folio",
+        folio_inventory_snapshot_path=str(tmp_path / "items.parquet"),
+        folio_inventory_only=True,
+    )
+
+    assert sorted(client.requested) == ["uuid-1", "uuid-2"]
+    rows = inventory_store.get_active_namespace_records().to_pylist()
+    assert [r["id"] for r in rows] == ["oai:folio:set/uuid-1"]
+    assert "stale" not in rows[0]["content"]
+    assert published == []
+
+
+def test_folio_inventory_only_never_reuses_an_existing_snapshot(
+    temporary_table: IcebergTable,
+    inventory_temporary_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An old snapshot at the path is replaced by a fresh fetch, not loaded."""
+    bib_store = AdapterStore(temporary_table, "test_namespace")
+    temporary_table.append(
+        adapter_records_to_table([{"id": "oai:folio:set/uuid-1", "content": "bib"}])
+    )
+    inventory_store = AdapterStore(inventory_temporary_table, "inventory_namespace")
+    items_path = tmp_path / "items.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [{"id": "oai:folio:set/uuid-1", "content": "old snapshot"}],
+            namespace="inventory_namespace",
+        ),
+        items_path,
+    )
+    client = _FakeInventoryClient(
+        {"uuid-1": {"instanceId": "uuid-1", "holdings": [], "items": []}}
+    )
+    config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: bib_store)
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_inventory_store", lambda **kwargs: inventory_store
+    )
+    monkeypatch.setattr(rebuild_adapter, "build_folio_inventory_client", lambda: client)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rebuild_adapter.rebuild_adapter(
+        "folio",
+        folio_inventory_snapshot_path=str(items_path),
+        folio_inventory_only=True,
+    )
+
+    assert client.requested == ["uuid-1"]
+    rows = inventory_store.get_active_namespace_records().to_pylist()
+    assert [r["content"] for r in rows] != ["old snapshot"]
+    assert "uuid-1" in rows[0]["content"]
+
+
+def test_folio_inventory_only_refuses_other_adapters_and_modes(tmp_path: Path) -> None:
+    items_path = str(tmp_path / "items.parquet")
+    with pytest.raises(ValueError, match="only supported for FOLIO"):
+        rebuild_adapter.rebuild_adapter(
+            "axiell",
+            folio_inventory_snapshot_path=items_path,
+            folio_inventory_only=True,
+        )
+    with pytest.raises(ValueError, match="needs --folio-inventory-snapshot-path"):
+        rebuild_adapter.rebuild_adapter("folio", folio_inventory_only=True)
+    with pytest.raises(ValueError, match="takes no other mode"):
+        rebuild_adapter.rebuild_adapter(
+            "folio",
+            snapshot_path=str(tmp_path / "bibs.parquet"),
+            folio_inventory_snapshot_path=items_path,
+            folio_inventory_only=True,
+        )
 
 
 def test_wipe_only_refuses_snapshot_paths() -> None:

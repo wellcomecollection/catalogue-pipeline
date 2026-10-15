@@ -1,39 +1,42 @@
+import json
+from typing import Any
+
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioItemEnricher
+from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioInventoryEnricher
 from adapters.extractors.oai_pmh.folio.enrichment.models import (
     FolioEnrichedInstance,
-    FolioEnrichedItem,
+    FolioInventoryRecord,
 )
 from adapters.utils.adapter_store import AdapterStore
+from tests.adapters.transformers.folio.helpers import folio_record
 
-ITEMS_NAMESPACE = "folio-items"
+INVENTORY_NAMESPACE = "folio-inventory"
 
 
 class FakeInventoryClient:
     """Returns canned enrichment responses keyed by instance id."""
 
-    def __init__(self, responses: dict[str, FolioEnrichedInstance]) -> None:
+    def __init__(self, responses: dict[str, dict[str, Any]]) -> None:
         self.responses = responses
         self.calls: list[list[str]] = []
 
-    def enriched_instances(
-        self, instance_ids: list[str]
-    ) -> list[FolioEnrichedInstance]:
+    def items_and_holdings(self, instance_ids: list[str]) -> list[FolioInventoryRecord]:
         self.calls.append(list(instance_ids))
-        return [self.responses[i] for i in instance_ids if i in self.responses]
+        return [
+            FolioInventoryRecord(data=self.responses[i])
+            for i in instance_ids
+            if i in self.responses
+        ]
 
 
-def _instance(instance_id: str, item_ids: list[str]) -> FolioEnrichedInstance:
-    return FolioEnrichedInstance(
-        instance_id=instance_id,
-        items=[FolioEnrichedItem(id=i) for i in item_ids],
-    )
+def _instance(instance_id: str, item_ids: list[str]) -> dict[str, Any]:
+    return folio_record(instance_id, [{"id": i} for i in item_ids])
 
 
 def _store(table: IcebergTable) -> AdapterStore:
-    return AdapterStore(table, namespace=ITEMS_NAMESPACE)
+    return AdapterStore(table, namespace=INVENTORY_NAMESPACE)
 
 
 def test_enrich_writes_item_rows(temporary_table: IcebergTable) -> None:
@@ -44,7 +47,7 @@ def test_enrich_writes_item_rows(temporary_table: IcebergTable) -> None:
         }
     )
     store = _store(temporary_table)
-    enricher = FolioItemEnricher(client, store)  # type: ignore[arg-type]
+    enricher = FolioInventoryEnricher(client, store)  # type: ignore[arg-type]
 
     update = enricher.enrich(["inst-1", "inst-2"])
 
@@ -62,7 +65,7 @@ def test_enrich_writes_item_rows(temporary_table: IcebergTable) -> None:
 def test_enrich_is_idempotent_when_unchanged(temporary_table: IcebergTable) -> None:
     client = FakeInventoryClient({"inst-1": _instance("inst-1", ["item-a"])})
     store = _store(temporary_table)
-    enricher = FolioItemEnricher(client, store)  # type: ignore[arg-type]
+    enricher = FolioInventoryEnricher(client, store)  # type: ignore[arg-type]
 
     first = enricher.enrich(["inst-1"])
     assert first is not None
@@ -75,7 +78,7 @@ def test_enrich_is_idempotent_when_unchanged(temporary_table: IcebergTable) -> N
 def test_enrich_updates_changed_items(temporary_table: IcebergTable) -> None:
     client = FakeInventoryClient({"inst-1": _instance("inst-1", ["item-a"])})
     store = _store(temporary_table)
-    enricher = FolioItemEnricher(client, store)  # type: ignore[arg-type]
+    enricher = FolioInventoryEnricher(client, store)  # type: ignore[arg-type]
 
     enricher.enrich(["inst-1"])
 
@@ -94,7 +97,7 @@ def test_enrich_updates_changed_items(temporary_table: IcebergTable) -> None:
 def test_enrich_empty_input_is_noop(temporary_table: IcebergTable) -> None:
     client = FakeInventoryClient({})
     store = _store(temporary_table)
-    enricher = FolioItemEnricher(client, store)  # type: ignore[arg-type]
+    enricher = FolioInventoryEnricher(client, store)  # type: ignore[arg-type]
 
     assert enricher.enrich([]) is None
     assert client.calls == []
@@ -110,7 +113,7 @@ def test_enrich_keys_by_oai_id_but_queries_bare_uuid(
     # The API returns results keyed by the bare instance UUID.
     client = FakeInventoryClient({uuid: _instance(uuid, ["item-a"])})
     store = _store(temporary_table)
-    enricher = FolioItemEnricher(client, store)  # type: ignore[arg-type]
+    enricher = FolioInventoryEnricher(client, store)  # type: ignore[arg-type]
 
     update = enricher.enrich([store_id])
 
@@ -129,11 +132,26 @@ def test_enrich_raises_when_returned_id_matches_no_request(
 ) -> None:
     """An instance the API returns whose id matches no requested id cannot be re-keyed
     onto a bib row, so enrichment fails loudly rather than storing an orphan row."""
-    client = FakeInventoryClient(
-        {"inst-1": FolioEnrichedInstance(instance_id="unexpected", items=[])}
-    )
+    client = FakeInventoryClient({"inst-1": folio_record("unexpected", [])})
     store = _store(temporary_table)
-    enricher = FolioItemEnricher(client, store)  # type: ignore[arg-type]
+    enricher = FolioInventoryEnricher(client, store)  # type: ignore[arg-type]
 
     with pytest.raises(ValueError, match="matched no requested id"):
         enricher.enrich(["inst-1"])
+
+
+def test_enrich_stores_the_whole_record(temporary_table: IcebergTable) -> None:
+    """Holdings and fields the models don't parse are kept for later mappings."""
+    record = {
+        "instanceId": "inst-1",
+        "modeOfIssuance": "serial",
+        "holdings": [{"id": "hold-1", "holdingsStatements": [{"statement": "v. 1"}]}],
+        "items": [{"id": "item-a", "holdingsRecordId": "hold-1", "tags": {}}],
+    }
+    store = _store(temporary_table)
+    enricher = FolioInventoryEnricher(FakeInventoryClient({"inst-1": record}), store)  # type: ignore[arg-type]
+
+    enricher.enrich(["inst-1"])
+
+    rows = {r["id"]: r for r in store.get_active_namespace_records().to_pylist()}
+    assert json.loads(rows["inst-1"]["content"]) == record
