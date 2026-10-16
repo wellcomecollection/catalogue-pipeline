@@ -73,3 +73,25 @@ def test_lookup_keys_rows_by_requested_value() -> None:
         "ont": "Work",
         "sys": "sierra",
     }
+
+
+def test_lookup_reads_aliased_columns_from_data_api_labels() -> None:
+    """The Data API reports an alias as the column label, not its name."""
+    resolver = DataApiIdResolver.__new__(DataApiIdResolver)
+    resolver._table_name = "identifiers"
+    resolver._cluster_arn = resolver._secret_arn = resolver._database = "test"
+
+    class _RdsData:
+        def execute_statement(self, **_: object) -> dict:
+            return {
+                "columnMetadata": [
+                    {"name": "req", "label": "RequestedId"},
+                    {"name": "CanonicalId", "label": "CanonicalId"},
+                ],
+                "records": [[{"stringValue": "B1001"}, {"stringValue": "case0001"}]],
+            }
+
+    resolver._rds_data = _RdsData()
+    requested = SourceIdentifierKey("Work", "sierra", "B1001")
+
+    assert resolver.lookup_ids([requested]) == {requested: "case0001"}
