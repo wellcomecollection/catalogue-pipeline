@@ -52,7 +52,11 @@ class DataApiIdResolver:
             parameters=parameters,
             includeResultMetadata=True,
         )
-        columns = [col["name"] for col in response.get("columnMetadata", [])]
+        # label carries a column alias; name is the underlying column.
+        columns = [
+            col.get("label") or col["name"]
+            for col in response.get("columnMetadata", [])
+        ]
         rows: list[dict[str, str]] = []
         for record in response.get("records", []):
             row = {
