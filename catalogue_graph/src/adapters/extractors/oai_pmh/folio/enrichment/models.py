@@ -17,8 +17,8 @@ on and serialises the record. ``FolioEnrichedInstance`` and ``FolioEnrichedItem`
 are the read side, parsed from the stored record at transform time.
 
 Only the fields the transform reads are modelled; add a field alongside the code
-that uses it. The view never returns ``hrId``, staff-only notes or
-``administrativeNotes``.
+that uses it. The view doesn't return ``hrId``, staff-only notes or
+``hrid`` will be returned by the view once https://github.com/folio-org/mod-inventory-storage/pull/1382 is released.
 """
 
 from __future__ import annotations
