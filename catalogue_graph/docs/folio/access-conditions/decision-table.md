@@ -4,7 +4,7 @@ Draft for platform#6589: a proposal for review and sign-off, not settled policy.
 
 The table rests on three sources: the current Sierra rule ([current_access_rules.md](https://github.com/wellcomecollection/catalogue-pipeline/blob/48e70e7d8820178d26e0e38fc2ba0f0f3e627cf4/catalogue_graph/notebooks/FOLIO/current_access_rules.md)), the production tenant as pulled on 2026-10-01 ([folio_data_profile.md](https://github.com/wellcomecollection/catalogue-pipeline/blob/48e70e7d8820178d26e0e38fc2ba0f0f3e627cf4/catalogue_graph/notebooks/FOLIO/folio_data_profile.md)), and Collection Information's draft mapping, "Access States - FOLIO mapping draft" (`QA_Wellcome_AccessStatusMapping.xlsx`). Where the tenant doesn't yet hold what Collection Information intends, the row is written for the intended state and marked as pending further data migration.
 
-Nothing here ships. Once signed off, the table moves into the transform (#6608) and the items service (#6654), so both read the same rules.
+Nothing here ships. Once signed off, the table moves into the transform (platform#6608) and the items service (platform#6654), so both read the same rules.
 
 The machine-readable version sits next to this file: `rules.csv` (the rows, with model values for method and status) and `notes.csv` (the note texts). The evidence behind the table, including the coverage check against the catalogue ([coverage_results.md](https://github.com/wellcomecollection/catalogue-pipeline/blob/48e70e7d8820178d26e0e38fc2ba0f0f3e627cf4/catalogue_graph/notebooks/FOLIO/coverage_results.md)) and the evaluator that applied these rules to every item ([evaluator.py](https://github.com/wellcomecollection/catalogue-pipeline/blob/48e70e7d8820178d26e0e38fc2ba0f0f3e627cf4/catalogue_graph/notebooks/FOLIO/access_rules/evaluator.py)), is kept with catalogue-pipeline#3736. Where a row below matches on one input or another, `rules.csv` splits it into two rows, so `digitisation` and `on-exhibition` each have a second row there (`digitisation-status`, `on-exhibition-material`).
 
@@ -19,7 +19,7 @@ The table reads five fields of the FOLIO item, plus one live input.
 | Loan type: the temporary loan type when one is set, otherwise the permanent one | `loan_type` | Can circulate, Unavailable. A temporary loan type is set on one item. |
 | Effective location | `library`, `location_code`, `location_type` | 198 locations in six libraries: Closed stores, Open shelves, Offsite (DS), `bwith`, `cwith`, Laptops |
 | Material type, the migrated Sierra item type under the same name | `material_type` | book, serial, boundwidth, ephemera, computer media, exhibit and 15 others |
-| Open request on the item | `open_request` | live only: the items service (#6654) knows it, the transform doesn't |
+| Open request on the item | `open_request` | live only: the items service (platform#6654) knows it, the transform doesn't |
 
 ### Why each one is needed
 
@@ -27,12 +27,12 @@ The table reads five fields of the FOLIO item, plus one live input.
 
 **Statistical code** is where the Sierra OPAC message went in the migration, one code per Sierra value. It decides most outcomes, and it's the only field that tells restricted, by appointment, safeguarded and donor permission items apart. Those items are deliberately Available and "Can circulate" in FOLIO, so that staff can still request them, which means neither the status nor the loan type can express their restriction.
 
-**Loan type** is needed because the Collection Information mapping makes it the field FOLIO uses to decide whether an item can circulate at all: it drives the request button and FOLIO's own circulation rules, and most non-requestable states get the loan type "Can't circulate". The access condition has to agree with that, or a reader would be shown an online request for an item FOLIO then refuses, which is the case #6622 is trying to avoid. So an item coded ONLINE REQUEST but given a non-circulating loan type isn't offered online (`not-circulating`). The table reads the temporary loan type when one is set, and the permanent one otherwise, because that's the loan type FOLIO's circulation rules apply. The restricted states sit above that row, so their "Can circulate" loan type never matters. In the tenant today, loan type barely separates anything: no "Can't circulate" loan type exists yet, and the row reaches 6 items. It's in the table for the target state, which is pending further data migration.
+**Loan type** is needed because the Collection Information mapping makes it the field FOLIO uses to decide whether an item can circulate at all: it drives the request button and FOLIO's own circulation rules, and most non-requestable states get the loan type "Can't circulate". The access condition has to agree with that, or a reader would be shown an online request for an item FOLIO then refuses, which is the case platform#6622 is trying to avoid. So an item coded ONLINE REQUEST but given a non-circulating loan type isn't offered online (`not-circulating`). The table reads the temporary loan type when one is set, and the permanent one otherwise, because that's the loan type FOLIO's circulation rules apply. The restricted states sit above that row, so their "Can circulate" loan type never matters. In the tenant today, loan type barely separates anything: no "Can't circulate" loan type exists yet, and the row reaches 6 items. It's in the table for the target state, which is pending further data migration.
 
 **Effective location** is one FOLIO field, read three ways:
 - `library` is the library the location belongs to. It identifies bound-with and contained-in items (`bwith`, `cwith`), whose statistical codes are unreliable.
 - `location_code` is the location's code, which for migrated locations is the Sierra location code. It carries the one location-code rule from Sierra's rules for requesting that still applies to migrated items (`offsite-manual-request`).
-- `location_type` isn't a FOLIO field at all. It's derived from the library until #6584 settles location types: Closed stores and Offsite (DS) are closed stores, Open shelves is open shelves, and On Exhibition is on exhibition (no migrated item is in it today). `bwith`, `cwith` and Laptops have no location type, and neither does the placeholder location `migration`, which sits under Open shelves but holds 43 items that are not on the open shelves (most of them exhibit items).
+- `location_type` isn't a FOLIO field at all. It's derived from the library until platform#6584 settles location types: Closed stores and Offsite (DS) are closed stores, Open shelves is open shelves, and On Exhibition is on exhibition (no migrated item is in it today). `bwith`, `cwith` and Laptops have no location type, and neither does the placeholder location `migration`, which sits under Open shelves but holds 43 items that are not on the open shelves (most of them exhibit items).
 
 **Material type** is the Sierra item type under the same name, and Sierra's rules for requesting use item types to block online requesting for computer media, exhibit and audiovisual material. It decides 31 items today: 5 computer media and 26 exhibit.
 
@@ -44,7 +44,7 @@ The issue also names ILL policy and the suppression flag. Neither is an input.
 
 ILL policy isn't set on any holdings record in the tenant, and neither the Sierra rule nor the Collection Information mapping depends on it.
 
-Suppression decides whether an item is shown at all, which happens before this table, in the item filtering of #6608. An item that is shown always gets an access condition from the table.
+Suppression decides whether an item is shown at all, which happens before this table, in the item filtering of platform#6608. An item that is shown always gets an access condition from the table.
 
 ## Rows
 
@@ -126,7 +126,7 @@ In Sierra, `SierraRulesForRequesting.scala` is an intermediate step. It turns fi
 | Rule group, by the Sierra field it reads | Where it went |
 |---|---|
 | Item status (fixed field 88): missing, on search, withdrawn, unavailable, closed, safeguarded, data issues, bound-with | the status rows: `missing`, `withdrawn`, `on-search`, `unavailable`, `data-issues`, `bound-with`; closed and safeguarded via their statistical codes |
-| Loan rule (fixed field 87) and the on-holdshelf status: in use by another reader | the circulation rows for what the item status shows, and `open-request` for holds, live only (#6654) |
+| Loan rule (fixed field 87) and the on-holdshelf status: in use by another reader | the circulation rows for what the item status shows, and `open-request` for holds, live only (platform#6654) |
 | OPAC message (fixed field 108): manual request, unavailable, at digitisation | the statistical code rows: `manual-request`, `by-appointment`, `digitisation` |
 | Item type (fixed field 61): exhibition reserve, no public message, manual request | material type: `on-exhibition-material`, `computer-media`; nothing for audiovisual material, which doesn't migrate |
 | Location code (fixed field 79), open shelves list | the OPEN SHELVES statistical code, which nearly all items in those locations carry (108,977 of the 108,985 Sierra open-shelves items in FOLIO) |
@@ -148,7 +148,7 @@ That evidence covers migrated items only. Archives aren't in FOLIO yet, and they
 
 | Value | Why it is never produced |
 |---|---|
-| open with advisory | No Sierra or FOLIO field carries it for items. Collection Information groups open shelves under "Open/Open With advisory", but the Sierra rule gives open-shelves items no status. Which is meant is an open question below. |
+| open with advisory | No Sierra or FOLIO field carries it for items. Collection Information groups open shelves under "Open/Open With advisory", but the Sierra rule gives open-shelves items no status, and Collection Information has confirmed they keep none (see Decisions below). |
 | licensed resources | Digital locations only, outside this table. Addressed by platform#6612 |
 | view online | Digital locations only, outside this table. Addressed by platform#6612 |
 | `terms` | Never set, as in Sierra. Everything a reader is told goes in the note. |
@@ -175,22 +175,39 @@ A display note that is neither stays on the item.
 
 In the served index, 4,305 items have a display note moved onto the access condition this way, and 7,041 migrated items carry a public display note.
 
-## Open questions
+## Decisions
 
-These need Collection Information, or whoever owns reading-room policy, to decide:
+Collection Information has settled these on PR #3736:
 
-- **Open shelves.** **RESOLVED** Should open-shelves items show an access status (open, or open with advisory), or none as today?
+- **Open shelves.** Open-shelves items show no access status, as today. "Open shelves" is a statistical code in FOLIO, not an item status, and the item status of an open-shelves item is Available by default. A status of Missing, Declared Lost (On Search), Unknown or Withdrawn goes through the table like any other item.
 
-  Collection Information's answer on PR #3736:
+  Collection Information's answer:
 
   > As discussed, there doesn't need to be any change to how `open-shelves` items look online. We spoke about "Status" online, doesn't actually mean Item Status nor is it coming from STATUS (Sierra) - "open shelves" is an OPAC MSG and will be a Statistical Code (Item) in Folio.
   >
   > The default Item Status = Available when Stat Code = Open Shelves. If the Item Status is Missing, Declared Lost (On Search), Unknown or Withdrawn this will be determined by the decision table.
-- **Audiovisual material types.** **RESOLVED** Item types 15, 17 and 18 (moving image and sound) aren't in the tenant and won't be: audiovisual material moves from Sierra to Axiell Collections, not to FOLIO. It reaches FOLIO only through the Axiell sync, so the table has no audiovisual row and leaves its access to the sync's mapping (see "Axiell-synced items" below).
+- **Audiovisual material types.** Item types 15, 17 and 18 (moving image and sound) aren't in the tenant and won't be: audiovisual material moves from Sierra to Axiell Collections, not to FOLIO. It reaches FOLIO only through the Axiell sync, so the table has no audiovisual row and leaves its access to the sync's mapping (see "Axiell-synced items" below).
 
-  Collection Information's answer on PR #3736:
+  Collection Information's answer:
 
   > AV (and visual/art) will not be migrating to Folio. It is planned to move from Sierra to Axiell Collections later this year-before March 2027 Go Live.
+- **Location rules.** Sierra's rules for requesting name 80 distinct location codes, and 66 of them have no FOLIO location yet (see [location_codes.md](https://github.com/wellcomecollection/catalogue-pipeline/blob/963a528f5f60e368a58988fa6a8419641a57e6bf/catalogue_graph/notebooks/FOLIO/location_codes.md)). None of them needs a rule for migrated Sierra items:
+  - 58 have no live Sierra items. They're stale entries in the rules configuration and need nothing.
+  - 6 are data protection codes (`sc#ac` and others, about 51,500 Sierra items). I think they mostly or entirely apply to archive items, so their restriction would come across with the Axiell sync rather than the Sierra migration.
+  - `harcl` (3,596 items) keeps offsite deepstore archives unrequestable. It's the same case as the data protection codes.
+  - `gblip` makes its items manual request. It's set on one item, a departmental copy of the BMJ (`i18699145`) on a suppressed bib (`b1497535x`), so readers never see it.
+
+  Whether the data protection and `harcl` restrictions come across with the Axiell sync is still open, under "Axiell-synced items" below.
+- **Contained-in items.** Contained-in items aren't requestable online, as Collection Information's mapping says. This stops 324 contained-in ephemera items (`cwith`, status Intellectual item in the tenant) being requestable online, as they are in Sierra today. It holds until the items are inventoried, when the item records are edited and the `cwith` code replaced, so the decision will be revisited then.
+
+  Collection Information's answer:
+
+  > Any items that have cwith currently, won't have this is the future (once inventoried). The item record will be edited and the location code changed as part of this. As long as the items have a cwith they won't be requestable online, and we need to make sure they'll have a code that makes them fall into the expected/correct access conditions when they're updated/inventoried.
+
+## Open questions
+
+These need Collection Information, or whoever owns reading-room policy, to decide:
+
 - **Exhibition.** The 27 exhibit items sit in the placeholder location `migration`, and their exhibition text is a staff-only note. Should they move to the "Exhibitions" location, and should the text become a public note so readers can see where the item is?
 
   Collection Information's answer on PR #3736:
@@ -205,16 +222,4 @@ These need Collection Information, or whoever owns reading-room policy, to decid
   > Nothing has been mapped here, the data is similar to Sierra with Item Status = Unavailable and Statistical Code (OPAC MSG) = @ Digitisation. But the intention is to change this.
   >
   > Similarly to Exhibitions, we intend to test changing the temporary location for digitisation and we have set up Wellcome Collection (Institution) > Eustom Road (Campus) > Digitisation (Library) > Digitisation (location) for post-Go Live playing around with.
-- **Location rules.** **RESOLVED AS FAR AS SIERRA/FOLIO IS CONCERNED** Sierra's rules for requesting name 80 distinct location codes, and 66 of them have no FOLIO location yet (see [location_codes.md](https://github.com/wellcomecollection/catalogue-pipeline/blob/963a528f5f60e368a58988fa6a8419641a57e6bf/catalogue_graph/notebooks/FOLIO/location_codes.md)):
-  - 58 have no live Sierra items. They're stale entries in the rules configuration and need nothing.
-  - 6 are data protection codes (`sc#ac` and others, about 51,500 Sierra items). I think they mostly or entirely apply to archive items, so their restriction would come across with the Axiell sync rather than the Sierra migration.
-  - `harcl` (3,596 items) keeps offsite deepstore archives unrequestable. It's the same case as the data protection codes.
-  - `gblip` makes its items manual request. It's set on one item, a departmental copy of the BMJ (`i18699145`) on a suppressed bib (`b1497535x`), so readers never see it.
-
-  What's left to decide is whether the data protection and `harcl` restrictions come across with the Axiell sync, which depends on the sync's mapping.
-   
-- **Contained-in items.** **RESOLVED FOR NOW, TO BE REVISITED AFTER INVENTORY** 324 contained-in ephemera items (`cwith`, status Intellectual item in the tenant) can be requested online in Sierra today. Collection Information's mapping makes all contained-in items not requestable, so these 324 would stop being requestable. Is that intended?
-
-CI has confirmed that "Any items that have cwith currently, won't have this is the future (once inventoried). The item record will be edited and the location code changed as part of this. As long as the items have a cwith they won't be requestable online, and we need to make sure they'll have a code that makes them fall into the expected/correct access conditions when they're updated/inventoried."
-
-- **Axiell-synced items.** Their mapping is still pending, so this table makes no claim about them. The sync writes no statistical code and sets every loan type to Can circulate, so a synced item that isn't caught by its status reaches the fallback today. That includes audiovisual material, which the sync maps to video format non-requestable, audio format non-requestable, film or audio format requestable. Whether any of it should be requestable is for the sync's access mapping to say through a statistical code, as for any other item. The 116 migrated Sierra items already typed audio format requestable (`mfvac`) are requestable online today, through their ONLINE REQUEST code.
+- **Axiell-synced items.** Their mapping is still pending, so this table makes no claim about them. The sync writes no statistical code and sets every loan type to Can circulate, so a synced item that isn't caught by its status reaches the fallback today. That includes audiovisual material, which the sync maps to video format non-requestable, audio format non-requestable, film or audio format requestable. Whether any of it should be requestable is for the sync's access mapping to say through a statistical code, as for any other item. The same mapping decides whether the data protection and `harcl` restrictions (see Location rules above) come across with the sync. The 116 migrated Sierra items already typed audio format requestable (`mfvac`) are requestable online today, through their ONLINE REQUEST code.
