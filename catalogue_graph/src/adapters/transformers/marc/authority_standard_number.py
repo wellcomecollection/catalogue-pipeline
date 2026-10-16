@@ -1,9 +1,10 @@
 """
-Identifiers for 6xx and 655 headings from ǂ0, per the second indicator.
+Identifiers from a field's ǂ0, for subject and genre headings and for names.
 https://www.loc.gov/marc/bibliographic/bd655.html
 """
 
 import re
+from typing import Literal
 
 import structlog
 from pymarc.field import Field
@@ -24,15 +25,26 @@ URL_PREFIXES = (
     "https://idnlmnihgov/mesh/",
     "(DNLM)",
 )
+MarcScheme = Literal["lc-subjects", "lc-names", "nlm-mesh"]
+# Library of Congress identifiers start with a scheme prefix: "sh" for LCSH, and
+# one of several starting with "n" (n, no, nb, nr, ...) for LC Names
+LOC_PREFIXES: dict[MarcScheme, str] = {"lc-subjects": "sh", "lc-names": "n[a-z]*"}
+
+INDICATED_SCHEMES: dict[str, list[MarcScheme]] = {
+    "0": ["lc-subjects", "lc-names"],
+    "2": ["nlm-mesh"],
+}
 
 
-def extract_identifier(field: Field, ontology_type: str) -> Identifiable | None:
+def extract_identifier(
+    field: Field, ontology_type: str, scheme: MarcScheme | None = None
+) -> Identifiable | None:
     """
-    Build an Identifiable from a heading's ǂ0.
+    Build an Identifiable from a field's ǂ0. If `scheme` is not provided, it is
+    derived from the second indicator: 0 for Library of Congress, 2 for MeSH.
 
-    The second indicator names the scheme: 0 for Library of Congress, 2 for MeSH.
-    Returns None if there is no ǂ0, if repeated ǂ0 values disagree, if the scheme
-    is any other, or if an LoC identifier has an unrecognised prefix.
+    Returns `None` if there is no ǂ0, if repeated ǂ0 values disagree, or if
+    a Library of Congress identifier lacks its scheme's prefix.
     """
     values = non_empty(
         list(dict.fromkeys(normalise_identifier(v) for v in field.get_subfields("0")))
@@ -42,41 +54,32 @@ def extract_identifier(field: Field, ontology_type: str) -> Identifiable | None:
     if len(values) > 1:
         logger.warning("Multiple identifier subfields", tag=field.tag, field=str(field))
         return None
-    identifier_type = _identifier_type(field, values[0])
-    if identifier_type is None:
+    value = values[0]
+
+    indicator2 = field.indicators.second if field.indicators else ""
+    candidates = [scheme] if scheme else INDICATED_SCHEMES.get(indicator2, [])
+    scheme = next((s for s in candidates if _has_scheme_prefix(value, s)), None)
+    if scheme is None:
+        if candidates:
+            logger.error(
+                "Could not determine LoC scheme from identifier",
+                tag=field.tag,
+                value=value,
+            )
         return None
     return Identifiable.from_source_identifier(
         SourceIdentifier(
-            identifier_type=Id(id=identifier_type),
-            ontology_type=ontology_type,
-            value=values[0],
+            identifier_type=Id(id=scheme), ontology_type=ontology_type, value=value
         )
     )
 
 
-def _identifier_type(field: Field, value: str) -> str | None:
-    indicator2 = field.indicators.second if field.indicators else None
-    if indicator2 == "0":
-        return _loc_scheme(field, value)
-    if indicator2 == "2":
-        return "nlm-mesh"
-    return None
-
-
-def _loc_scheme(field: Field, value: str) -> str | None:
-    # Indicator 0 covers both LCSH and LC Names. LCSH identifiers are always prefixed
-    # with "sh". LC Names use several prefixes (n, no, nb, nr, ...), so any values
-    # starting with "n" is accepted.
+def _has_scheme_prefix(value: str, scheme: MarcScheme) -> bool:
+    """True if the identifier has the scheme's prefix. Only the LoC schemes have one."""
+    if scheme not in LOC_PREFIXES:
+        return True
     prefix = re.split(r"\d", value, maxsplit=1)[0]
-    if prefix == "sh":
-        return "lc-subjects"
-    if prefix.startswith("n"):
-        return "lc-names"
-
-    logger.error(
-        "Could not determine LoC scheme from identifier", tag=field.tag, value=value
-    )
-    return None
+    return re.fullmatch(LOC_PREFIXES[scheme], prefix) is not None
 
 
 def normalise_identifier(value: str) -> str:
