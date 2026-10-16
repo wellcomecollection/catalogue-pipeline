@@ -1,4 +1,4 @@
-"""Tests for DataApiIdResolver.mint_ids() with its lookup stubbed, so no AWS is needed."""
+"""Tests for DataApiIdResolver, with its lookup or Data API client stubbed so no AWS is needed."""
 
 import pytest
 
@@ -49,49 +49,47 @@ def test_still_refuses_to_mint_unregistered_source_ids() -> None:
         resolver.mint_ids([(SID, PRED)])
 
 
+class _StubRdsData:
+    """Answers execute_statement in the Data API's response shape and records calls."""
+
+    def __init__(self, column_metadata: list[dict], records: list[list[dict]]) -> None:
+        self.response = {"columnMetadata": column_metadata, "records": records}
+        self.calls: list[dict] = []
+
+    def execute_statement(self, **kwargs: object) -> dict:
+        self.calls.append(kwargs)
+        return self.response
+
+
+def _resolver_with_data_api(rds_data: _StubRdsData) -> DataApiIdResolver:
+    resolver = DataApiIdResolver.__new__(DataApiIdResolver)
+    resolver._cluster_arn = resolver._secret_arn = resolver._database = "test"
+    resolver._table_name = "identifiers"
+    resolver._rds_data = rds_data
+    return resolver
+
+
 def test_lookup_keys_rows_by_requested_value() -> None:
     """A stored case variant comes back under the casing that was asked for."""
-    resolver = DataApiIdResolver.__new__(DataApiIdResolver)
-    resolver._table_name = "identifiers"
-    calls: list[tuple[str, list[dict]]] = []
-
-    def execute(sql: str, parameters: list[dict]) -> list[dict[str, str]]:
-        calls.append((sql, parameters))
-        return [{"RequestedId": "B1001", "CanonicalId": "case0001"}]
-
-    resolver._execute = execute  # type: ignore[method-assign]
+    rds_data = _StubRdsData(
+        # The Data API gives an alias as the label; a column without one falls back to its name.
+        column_metadata=[
+            {"name": "req", "label": "RequestedId"},
+            {"name": "CanonicalId"},
+        ],
+        records=[[{"stringValue": "B1001"}, {"stringValue": "case0001"}]],
+    )
+    resolver = _resolver_with_data_api(rds_data)
     requested = SourceIdentifierKey("Work", "sierra", "B1001")
     other = SourceIdentifierKey("Work", "sierra", "b1002")
 
     assert resolver.lookup_ids([requested, other]) == {requested: "case0001"}
 
-    sql, parameters = calls[0]
-    assert "FROM (VALUES ROW(:sid0), ROW(:sid1)) AS r(req)" in sql
-    assert {p["name"]: p["value"]["stringValue"] for p in parameters} == {
+    call = rds_data.calls[0]
+    assert "FROM (VALUES ROW(:sid0), ROW(:sid1)) AS r(req)" in str(call["sql"])
+    assert {p["name"]: p["value"]["stringValue"] for p in call["parameters"]} == {
         "sid0": "B1001",
         "sid1": "b1002",
         "ont": "Work",
         "sys": "sierra",
     }
-
-
-def test_lookup_reads_aliased_columns_from_data_api_labels() -> None:
-    """The Data API reports an alias as the column label, not its name."""
-    resolver = DataApiIdResolver.__new__(DataApiIdResolver)
-    resolver._table_name = "identifiers"
-    resolver._cluster_arn = resolver._secret_arn = resolver._database = "test"
-
-    class _RdsData:
-        def execute_statement(self, **_: object) -> dict:
-            return {
-                "columnMetadata": [
-                    {"name": "req", "label": "RequestedId"},
-                    {"name": "CanonicalId", "label": "CanonicalId"},
-                ],
-                "records": [[{"stringValue": "B1001"}, {"stringValue": "case0001"}]],
-            }
-
-    resolver._rds_data = _RdsData()
-    requested = SourceIdentifierKey("Work", "sierra", "B1001")
-
-    assert resolver.lookup_ids([requested]) == {requested: "case0001"}
