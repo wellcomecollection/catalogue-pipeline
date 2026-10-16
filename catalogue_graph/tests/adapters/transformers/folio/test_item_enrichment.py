@@ -22,7 +22,12 @@ from adapters.transformers.folio_store_source import FolioStoreSource
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Identifiable
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
-from tests.adapters.transformers.folio.helpers import folio_record, make_inventory_store
+from tests.adapters.transformers.folio.helpers import (
+    fixture_item_ids,
+    fixture_record,
+    folio_record,
+    make_inventory_store,
+)
 from tests.mocks import MockElasticsearchClient
 from utils.marc import parse_single_marc_record
 
@@ -43,9 +48,7 @@ BIB_RECORD = (
 # Unit: FolioWorkBuilder builds items from joined enrichment content
 # ---------------------------------------------------------------------------
 def test_work_builder_emits_items_with_folio_item_identifier() -> None:
-    enriched = folio_record(
-        "inst-1", [{"id": "item-uuid-1", "enumeration": "no. 1"}, {"id": "item-uuid-2"}]
-    )
+    enriched = fixture_record("inst-1")
     record = parse_single_marc_record(BIB_RECORD.format(id="inst-1"))
     builder = FolioWorkBuilder(
         record,
@@ -54,14 +57,18 @@ def test_work_builder_emits_items_with_folio_item_identifier() -> None:
     )
 
     items = builder.items
-    assert len(items) == 2
+    assert [
+        item.id.source_identifier.value
+        for item in items
+        if isinstance(item.id, Identifiable)
+    ] == fixture_item_ids()
 
     first = items[0]
     assert isinstance(first.id, Identifiable)
     assert first.id.source_identifier.identifier_type.id == "folio-item"
     assert first.id.source_identifier.ontology_type == "Item"
-    assert first.id.source_identifier.value == "item-uuid-1"
-    assert first.title == "no. 1"
+    # No item in the tenant sets enumeration, so the title comes from volume.
+    assert first.title == enriched["items"][0]["volume"]
 
 
 @pytest.mark.parametrize(
@@ -120,13 +127,7 @@ def test_transformer_attaches_enriched_items(
         transformer_type="folio",
     )
 
-    inventory_store = make_inventory_store(
-        {
-            "inst-1": folio_record(
-                "inst-1", [{"id": "item-uuid-1"}, {"id": "item-uuid-2"}]
-            )
-        }
-    )
+    inventory_store = make_inventory_store({"inst-1": fixture_record("inst-1")})
     monkeypatch.setattr(
         "adapters.steps.transformer.build_inventory_store",
         lambda **kwargs: inventory_store,
@@ -148,8 +149,7 @@ def test_transformer_attaches_enriched_items(
     source = by_id["Work[folio-instance/inst-1]"]["_source"]
 
     assert _item_identifiers(source) == [
-        ("folio-item", "item-uuid-1"),
-        ("folio-item", "item-uuid-2"),
+        ("folio-item", item_id) for item_id in fixture_item_ids()
     ]
 
 
@@ -230,7 +230,7 @@ def test_transformer_fails_when_inventory_store_is_missing(
 # Scale: the item lookup is id-scoped and batched, not a full-namespace load
 # ---------------------------------------------------------------------------
 def _one_item_instance(instance_id: str) -> dict:
-    return folio_record(instance_id, [{"id": f"item-{instance_id}"}])
+    return fixture_record(instance_id)
 
 
 def test_enrichment_fetches_only_requested_ids(

@@ -13,7 +13,7 @@ from adapters.steps.oai_pmh.folio_enrich import (
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import LocalIcebergTableConfig, get_local_table
 from tests.adapters.conftest import adapter_records_to_table
-from tests.adapters.transformers.folio.helpers import folio_record
+from tests.adapters.transformers.folio.helpers import fixture_record
 
 BIB_NAMESPACE = "folio"
 INVENTORY_NAMESPACE = "folio-inventory"
@@ -68,8 +68,8 @@ def test_run_enrichment_populates_inventory_store(
     inventory_store = _local_store(INVENTORY_NAMESPACE)
     client = FakeInventoryClient(
         {
-            "inst-1": folio_record("inst-1", [{"id": "item-a"}]),
-            "inst-2": folio_record("inst-2", [{"id": "item-b"}]),
+            "inst-1": fixture_record("inst-1"),
+            "inst-2": fixture_record("inst-2"),
         }
     )
     enricher = FolioInventoryEnricher(client, inventory_store)  # type: ignore[arg-type]

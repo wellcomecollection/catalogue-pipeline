@@ -6,6 +6,7 @@ import pytest
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
 )
+from tests.adapters.transformers.folio.helpers import fixture_record
 
 
 def _client(handler: object, **kwargs: object) -> FolioInventoryClient:
@@ -22,19 +23,13 @@ def test_items_and_holdings_posts_instance_ids_and_parses_response() -> None:
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen_requests.append(request)
-        return httpx.Response(
-            200,
-            json=[
-                {"instanceId": "i-1", "items": [{"id": "item-1"}]},
-                {"instanceId": "i-2", "items": [{"id": "item-2"}]},
-            ],
-        )
+        return httpx.Response(200, json=[fixture_record("i-1"), fixture_record("i-2")])
 
     client = _client(handler)
     result = client.items_and_holdings(["i-1", "i-2"])
 
     assert [r.instance_id for r in result] == ["i-1", "i-2"]
-    assert result[0].data["items"][0]["id"] == "item-1"
+    assert [r.data for r in result] == [fixture_record("i-1"), fixture_record("i-2")]
 
     assert len(seen_requests) == 1
     request = seen_requests[0]
@@ -51,7 +46,7 @@ def test_items_and_holdings_batches_requests() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         ids = json.loads(request.content)["instanceIds"]
         batches.append(ids)
-        return httpx.Response(200, json=[{"instanceId": i} for i in ids])
+        return httpx.Response(200, json=[fixture_record(i) for i in ids])
 
     client = _client(handler, batch_size=2)
     result = client.items_and_holdings(["a", "b", "c", "d", "e"])
@@ -72,9 +67,7 @@ def test_items_and_holdings_deduplicates_ids() -> None:
 
 def test_items_and_holdings_parses_ndjson() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
-        body = "\n".join(
-            json.dumps(r) for r in [{"instanceId": "i-1"}, {"instanceId": "i-2"}]
-        )
+        body = "\n".join(json.dumps(fixture_record(i)) for i in ["i-1", "i-2"])
         return httpx.Response(200, text=body)
 
     client = _client(handler)
@@ -83,26 +76,15 @@ def test_items_and_holdings_parses_ndjson() -> None:
 
 
 def test_items_and_holdings_parses_concatenated_json_stream() -> None:
-    """The live endpoint streams concatenated objects with no array or newlines."""
+    """The endpoint streams concatenated objects with no array or newlines."""
 
     def handler(request: httpx.Request) -> httpx.Response:
-        body = (
-            '{"instanceId":"i-1","holdings":[],"items":[]}'
-            '{"instanceId":"i-2","holdings":[],'
-            '"items":[{"id":"item-9b59","materialType":"book"}]}'
-        )
+        body = json.dumps(fixture_record("i-1")) + json.dumps(fixture_record("i-2"))
         return httpx.Response(200, text=body)
 
     client = _client(handler)
     result = client.items_and_holdings(["i-1", "i-2"])
-    assert [r.data for r in result] == [
-        {"instanceId": "i-1", "holdings": [], "items": []},
-        {
-            "instanceId": "i-2",
-            "holdings": [],
-            "items": [{"id": "item-9b59", "materialType": "book"}],
-        },
-    ]
+    assert [r.data for r in result] == [fixture_record("i-1"), fixture_record("i-2")]
 
 
 def test_items_and_holdings_empty_input_makes_no_request() -> None:
@@ -116,14 +98,11 @@ def test_items_and_holdings_empty_input_makes_no_request() -> None:
 def test_items_and_holdings_fails_the_batch_when_an_item_has_no_id() -> None:
     """An item with no id cannot mint a stable identifier, so the fetch fails."""
 
+    broken = fixture_record("i-2")
+    del broken["items"][3]["id"]
+
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(
-            200,
-            json=[
-                {"instanceId": "i-1", "items": [{"id": "item-1"}]},
-                {"instanceId": "i-2", "items": [{"barcode": "123"}]},
-            ],
-        )
+        return httpx.Response(200, json=[fixture_record("i-1"), broken])
 
     with pytest.raises(ValueError, match="missing an id"):
         _client(handler).items_and_holdings(["i-1", "i-2"])

@@ -29,6 +29,7 @@ from tests.adapters.conftest import (
     deletion_facts_records_to_table,
     reconciler_records_to_table,
 )
+from tests.adapters.transformers.folio.helpers import fixture_record
 
 
 def test_populate_store_from_snapshot(
@@ -497,9 +498,7 @@ def test_folio_inventory_only_wipes_and_reloads_the_inventory_store(
             namespace="inventory_namespace",
         )
     )
-    client = _FakeInventoryClient(
-        {"uuid-1": {"instanceId": "uuid-1", "holdings": [], "items": [{"id": "a"}]}}
-    )
+    client = _FakeInventoryClient({"uuid-1": fixture_record("uuid-1")})
     config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: bib_store)
     monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
     monkeypatch.setattr(
@@ -545,9 +544,7 @@ def test_folio_inventory_only_never_reuses_an_existing_snapshot(
         ),
         items_path,
     )
-    client = _FakeInventoryClient(
-        {"uuid-1": {"instanceId": "uuid-1", "holdings": [], "items": []}}
-    )
+    client = _FakeInventoryClient({"uuid-1": fixture_record("uuid-1")})
     config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: bib_store)
     monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
     monkeypatch.setattr(
@@ -592,9 +589,7 @@ def test_full_folio_rebuild_refetches_the_inventory_but_reuses_the_bib_snapshot(
         ),
         inventory_path,
     )
-    client = _FakeInventoryClient(
-        {"uuid-1": {"instanceId": "uuid-1", "holdings": [], "items": []}}
-    )
+    client = _FakeInventoryClient({"uuid-1": fixture_record("uuid-1")})
     config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: adapter_store)
     monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
     monkeypatch.setattr(

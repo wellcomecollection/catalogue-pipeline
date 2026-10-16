@@ -7,12 +7,29 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import FolioInventoryRe
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import LocalIcebergTableConfig, get_local_table
 from tests.adapters.conftest import adapter_records_to_table
+from tests.test_utils import load_json_fixture
 
 INVENTORY_NAMESPACE = "folio-inventory"
 
+# A response captured from the tenant for wellcomecollection/platform#6581: a serial with 27
+# holdings records and 61 items, barcodes replaced with placeholders.
+INVENTORY_FIXTURE = "folio/items_and_holdings_64125966.json"
+
+
+def fixture_record(instance_id: str | None = None) -> dict[str, Any]:
+    """The fixture record, optionally under another instance id."""
+    record: dict[str, Any] = load_json_fixture(INVENTORY_FIXTURE)
+    if instance_id is not None:
+        record["instanceId"] = instance_id
+    return record
+
+
+def fixture_item_ids() -> list[str]:
+    return [item["id"] for item in fixture_record()["items"]]
+
 
 def folio_record(instance_id: str, items: list[dict[str, Any]]) -> dict[str, Any]:
-    """A minimal raw items-and-holdings record, as the endpoint returns it."""
+    """A minimal raw record, for edge cases the fixture doesn't cover."""
     return {"instanceId": instance_id, "holdings": [], "items": items}
 
 
