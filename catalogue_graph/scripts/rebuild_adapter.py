@@ -1,17 +1,19 @@
 """Rebuild all Iceberg stores for an OAI-PMH adapter from a full snapshot.
 
 Downloads every record from the adapter's OAI-PMH endpoint (and, for FOLIO,
-the mod-inventory-storage items API), wipes the relevant stores, and reloads
-from the snapshots. Resets the harvest window cursor and publishes the
+the mod-inventory-storage items-and-holdings API), wipes the relevant stores,
+and reloads from the snapshots. Resets the harvest window cursor and publishes the
 resulting changesets to downstream consumers (transformers).
 
 The rebuild emits no downstream deletions: run it against a clean pipeline,
 or wipe the pipeline's downstream state first.
 
 If the snapshot file already exists at --snapshot-path, the download is skipped
-and the existing snapshot is reused. Similarly for --folio-items-snapshot-path.
-Snapshot files are only ever moved into place after a complete, successful
-write, so an existing file is always safe to resume from.
+and the existing snapshot is reused. Snapshot files are only ever moved into
+place after a complete, successful write, so an existing file is always safe to
+resume from. The FOLIO inventory snapshot is the exception: it is always fetched
+afresh, replacing any file at --folio-inventory-snapshot-path, because one older
+than the cursor reset would leave rows stale that no harvest re-fetches.
 
 With --wipe-only the stores are wiped and left empty, for a clear that runs
 ahead of a later rebuild. The window store and harvest cursor are untouched,
@@ -31,12 +33,23 @@ fact (the reconciler skips a tie, as a harvest would). The merge is written to
 `<snapshot>.merged.parquet`, reused if the load has to re-run, and renamed to
 `.loaded` once loaded.
 
+For FOLIO, --folio-inventory-only rebuilds just the inventory store: it
+fetches items-and-holdings for every active instance in the live bib store,
+then wipes the store and reloads it, so rows for instances FOLIO no longer
+returns are dropped. It always fetches afresh, never reusing a snapshot,
+because a reload from an old one would roll the store back. The bib store, window store and cursor are untouched and
+no events are published. Disable the adapter schedule first, or the enrichment
+step's writes during the run are lost to the wipe or overwritten by older
+copies. Transformers read the store at transform time, so works only pick up
+the new content when they are next transformed.
+
 Usage:
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet
-    uv run python scripts/rebuild_adapter.py --adapter-type folio --use-rest-api-table --snapshot-path /tmp/folio.parquet --folio-items-snapshot-path /tmp/folio_items.parquet
+    uv run python scripts/rebuild_adapter.py --adapter-type folio --use-rest-api-table --snapshot-path /tmp/folio.parquet --folio-inventory-snapshot-path /tmp/folio_inventory.parquet
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --wipe-only
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet --download-only
     uv run python scripts/rebuild_adapter.py --adapter-type axiell --use-rest-api-table --snapshot-path /tmp/axiell.parquet --merge-with-store --skip-publish-event
+    uv run python scripts/rebuild_adapter.py --adapter-type folio --use-rest-api-table --folio-inventory-only --folio-inventory-snapshot-path /tmp/folio_inventory.parquet
 """
 
 from __future__ import annotations
@@ -45,7 +58,7 @@ import argparse
 import json
 import os
 import time
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from datetime import UTC, datetime, timedelta
 from typing import NamedTuple, cast
 
@@ -57,10 +70,10 @@ import pyarrow.parquet as pq
 import structlog
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.models import NS, Record, ResumptionToken
-from pyiceberg.expressions import EqualTo
+from pyiceberg.expressions import And, EqualTo, IsNull, Or
 from pyiceberg.table import ALWAYS_TRUE
 
-from adapters.extractors.oai_pmh.folio.enrichment.enricher import fetch_item_rows
+from adapters.extractors.oai_pmh.folio.enrichment.enricher import fetch_inventory_rows
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
 )
@@ -68,7 +81,7 @@ from adapters.extractors.oai_pmh.folio.enrichment.runtime import (
     build_inventory_client as build_folio_inventory_client,
 )
 from adapters.extractors.oai_pmh.folio.enrichment.runtime import (
-    build_items_store,
+    build_inventory_store,
 )
 from adapters.extractors.oai_pmh.record_writer import build_adapter_store_row
 from adapters.extractors.oai_pmh.registry import AdapterType, get_config
@@ -251,48 +264,70 @@ def _download_to_snapshot(
     return total
 
 
-def _download_items_to_snapshot(
+def _active_ids_from_snapshot(bib_snapshot_path: str) -> Iterator[list[str]]:
+    """Yield batches of non-deleted bib ids from a bib snapshot."""
+    reader = pq.ParquetFile(bib_snapshot_path)
+    for record_batch in reader.iter_batches(
+        batch_size=BATCH_SIZE, columns=["id", "deleted"]
+    ):
+        batch = pa.Table.from_batches([record_batch])
+        not_deleted = pc.field("deleted").is_null() | (
+            pc.field("deleted") == False  # noqa: E712
+        )
+        active = batch.filter(not_deleted)
+        yield [v for v in active.column("id").to_pylist() if v]
+
+
+def _active_ids_from_store(store: AdapterStore) -> Iterator[list[str]]:
+    """Yield batches of non-deleted ids from the live store, reading only the id column."""
+    row_filter = And(
+        EqualTo("namespace", store.namespace),
+        Or(EqualTo("deleted", False), IsNull("deleted")),
+    )
+    reader = store.table.scan(
+        row_filter=row_filter, selected_fields=("id",)
+    ).to_arrow_batch_reader()
+    for record_batch in reader:
+        ids = [v for v in record_batch.column("id").to_pylist() if v]
+        for start in range(0, len(ids), BATCH_SIZE):
+            yield ids[start : start + BATCH_SIZE]
+
+
+def _download_inventory_to_snapshot(
     inventory_client: FolioInventoryClient,
-    bib_snapshot_path: str,
-    items_snapshot_path: str,
+    bib_id_batches: Iterable[list[str]],
+    inventory_snapshot_path: str,
     namespace: str,
 ) -> int:
-    """Fetch enriched FOLIO items for every active bib and write them to a parquet
-    snapshot. Reads bib ids from the bib snapshot in batches, skipping
-    tombstoned bibs, and writes one row per instance. Atomic, like the bib
-    snapshot.
+    """Fetch FOLIO items and holdings for the given bib ids and write them to a
+    parquet snapshot, one row per instance. Atomic, like the bib snapshot.
     """
     total = 0
-    reader = pq.ParquetFile(bib_snapshot_path)
-    partial_path = f"{items_snapshot_path}.partial"
+    partial_path = f"{inventory_snapshot_path}.partial"
     with pq.ParquetWriter(partial_path, ADAPTER_STORE_ARROW_SCHEMA) as writer:
-        for record_batch in reader.iter_batches(
-            batch_size=BATCH_SIZE, columns=["id", "deleted"]
-        ):
-            batch = pa.Table.from_batches([record_batch])
-            not_deleted = pc.field("deleted").is_null() | (
-                pc.field("deleted") == False  # noqa: E712
-            )
-            active = batch.filter(not_deleted)
-            store_ids: list[str] = [v for v in active.column("id").to_pylist() if v]
+        for store_ids in bib_id_batches:
             if not store_ids:
                 continue
-            rows = fetch_item_rows(inventory_client, store_ids, namespace=namespace)
+            rows = fetch_inventory_rows(
+                inventory_client, store_ids, namespace=namespace
+            )
             if rows is None:
                 continue
             writer.write_table(rows)
             total += rows.num_rows
-            logger.info("Items download progress", total=total)
+            logger.info("Inventory download progress", total=total)
 
     if total == 0:
         os.remove(partial_path)
         raise RuntimeError(
-            "FOLIO items download returned 0 items across all bibs. This is "
+            "FOLIO inventory download returned 0 instances across all bibs. This is "
             "almost certainly an error (e.g. the enrichment endpoint returning "
-            "empty responses). Aborting to avoid wiping the items store."
+            "empty responses). Aborting to avoid wiping the inventory store."
         )
-    os.replace(partial_path, items_snapshot_path)
-    logger.info("Items download complete", path=items_snapshot_path, total=total)
+    os.replace(partial_path, inventory_snapshot_path)
+    logger.info(
+        "Inventory download complete", path=inventory_snapshot_path, total=total
+    )
     return total
 
 
@@ -389,6 +424,17 @@ def _confirm_rebuild(adapter_type: AdapterType) -> None:
     confirm = input(
         f"WARNING: about to wipe all stores for '{adapter_type}' and rebuild "
         "from a full snapshot. Type CONFIRM to proceed: "
+    ).strip()
+    if confirm != "CONFIRM":
+        raise SystemExit("Aborted.")
+
+
+def _confirm_inventory_rebuild() -> None:
+    """Confirmation gate before the FOLIO inventory store is wiped."""
+    confirm = input(
+        "WARNING: about to wipe the FOLIO inventory store and reload it "
+        "from the snapshot. Disable the FOLIO adapter schedule first. "
+        "Type CONFIRM to proceed: "
     ).strip()
     if confirm != "CONFIRM":
         raise SystemExit("Aborted.")
@@ -559,11 +605,55 @@ def _merge_with_store(
     return counts
 
 
-class _FolioItems(NamedTuple):
-    """Bundles the items snapshot path and store so they can be treated as a single optional."""
+class _FolioInventory(NamedTuple):
+    """Bundles the inventory snapshot path and store so they can be treated as a single optional."""
 
     snapshot_path: str
     store: AdapterStore
+
+
+def _fetch_inventory_snapshot(
+    bib_id_batches: Iterable[list[str]], inventory_snapshot_path: str, namespace: str
+) -> None:
+    """Fetch the inventory for the given bib ids, always afresh.
+
+    An existing snapshot is never reused: the fetch is short, and an old one would
+    roll the store back without any sign.
+    """
+    if os.path.exists(inventory_snapshot_path):
+        logger.info(
+            "Replacing existing inventory snapshot once the download succeeds",
+            path=inventory_snapshot_path,
+        )
+    _download_inventory_to_snapshot(
+        build_folio_inventory_client(),
+        bib_id_batches=bib_id_batches,
+        inventory_snapshot_path=inventory_snapshot_path,
+        namespace=namespace,
+    )
+
+
+def rebuild_folio_inventory(
+    inventory_snapshot_path: str, *, use_rest_api_table: bool
+) -> None:
+    """Wipe and reload the FOLIO inventory store for the live bib store.
+
+    The download reads ids from the live bib store and happens before the wipe,
+    so a failed download leaves the store as it was.
+    """
+    inventory_store = build_inventory_store(use_rest_api_table=use_rest_api_table)
+    bib_store = get_config("folio").build_adapter_store(
+        use_rest_api_table=use_rest_api_table
+    )
+    _fetch_inventory_snapshot(
+        _active_ids_from_store(bib_store),
+        inventory_snapshot_path,
+        namespace=inventory_store.namespace,
+    )
+
+    _confirm_inventory_rebuild()
+    _wipe_store(inventory_store, store_name="inventory store")
+    _populate_store_from_snapshot(inventory_store, inventory_snapshot_path)
 
 
 def rebuild_adapter(
@@ -571,20 +661,38 @@ def rebuild_adapter(
     *,
     use_rest_api_table: bool = False,
     snapshot_path: str | None = None,
-    folio_items_snapshot_path: str | None = None,
+    folio_inventory_snapshot_path: str | None = None,
     skip_publish_event: bool = False,
     publish_interval_seconds: float = 0.0,
     wipe_only: bool = False,
     download_only: bool = False,
     merge_with_store: bool = False,
+    folio_inventory_only: bool = False,
 ) -> None:
+    if folio_inventory_only:
+        if adapter_type != "folio":
+            raise ValueError("--folio-inventory-only is only supported for FOLIO")
+        if folio_inventory_snapshot_path is None:
+            raise ValueError(
+                "--folio-inventory-only needs --folio-inventory-snapshot-path"
+            )
+        if snapshot_path is not None or wipe_only or download_only or merge_with_store:
+            raise ValueError(
+                "--folio-inventory-only rebuilds only the inventory store and takes no "
+                "other mode or bib snapshot"
+            )
+        rebuild_folio_inventory(
+            folio_inventory_snapshot_path, use_rest_api_table=use_rest_api_table
+        )
+        return
+
     if download_only or merge_with_store:
         if download_only and merge_with_store:
             raise ValueError("--download-only and --merge-with-store are separate runs")
-        if snapshot_path is None or folio_items_snapshot_path is not None:
+        if snapshot_path is None or folio_inventory_snapshot_path is not None:
             raise ValueError(
                 "--download-only and --merge-with-store take --snapshot-path and "
-                "no items snapshot"
+                "no inventory snapshot"
             )
         if download_only and os.path.exists(snapshot_path):
             raise ValueError(f"--download-only refuses to overwrite {snapshot_path}")
@@ -611,11 +719,11 @@ def rebuild_adapter(
         )
 
     if wipe_only and (
-        snapshot_path is not None or folio_items_snapshot_path is not None
+        snapshot_path is not None or folio_inventory_snapshot_path is not None
     ):
         raise ValueError(
             "--wipe-only takes no snapshots: it wipes the stores and stops "
-            "(for FOLIO, both the bib and items stores)"
+            "(for FOLIO, both the bib and inventory stores)"
         )
 
     config = get_config(adapter_type)
@@ -628,8 +736,8 @@ def rebuild_adapter(
         )
         if adapter_type == "folio":
             _wipe_store(
-                build_items_store(use_rest_api_table=use_rest_api_table),
-                store_name="items store",
+                build_inventory_store(use_rest_api_table=use_rest_api_table),
+                store_name="inventory store",
             )
         if adapter_type == "axiell":
             reconcile_runtime = build_reconcile_runtime(
@@ -663,22 +771,19 @@ def rebuild_adapter(
             oai_client = _build_download_client(config, http_client)
             _download_to_snapshot(oai_client, config.config, snapshot_path)
 
-    # Phase 2: Items download (reads bib instance IDs from the bib snapshot).
-    folio_items: _FolioItems | None = None
-    if folio_items_snapshot_path is not None:
-        folio_items = _FolioItems(
-            snapshot_path=folio_items_snapshot_path,
-            store=build_items_store(use_rest_api_table=use_rest_api_table),
+    # Phase 2: Inventory download (reads bib instance IDs from the bib snapshot).
+    # Always afresh, so it is never older than the cursor reset above.
+    folio_inventory: _FolioInventory | None = None
+    if folio_inventory_snapshot_path is not None:
+        folio_inventory = _FolioInventory(
+            snapshot_path=folio_inventory_snapshot_path,
+            store=build_inventory_store(use_rest_api_table=use_rest_api_table),
         )
-
-        if not os.path.exists(folio_items.snapshot_path):
-            inventory_client = build_folio_inventory_client()
-            _download_items_to_snapshot(
-                inventory_client,
-                bib_snapshot_path=snapshot_path,
-                items_snapshot_path=folio_items.snapshot_path,
-                namespace=folio_items.store.namespace,
-            )
+        _fetch_inventory_snapshot(
+            _active_ids_from_snapshot(snapshot_path),
+            folio_inventory.snapshot_path,
+            namespace=folio_inventory.store.namespace,
+        )
 
     adapter_store = config.build_adapter_store(use_rest_api_table=use_rest_api_table)
 
@@ -706,9 +811,11 @@ def rebuild_adapter(
         # Loaded, so a later run must merge afresh rather than reuse this file.
         os.replace(load_path, f"{load_path}.loaded")
 
-    if folio_items is not None:
-        _wipe_store(folio_items.store, store_name="items store")
-        _populate_store_from_snapshot(folio_items.store, folio_items.snapshot_path)
+    if folio_inventory is not None:
+        _wipe_store(folio_inventory.store, store_name="inventory store")
+        _populate_store_from_snapshot(
+            folio_inventory.store, folio_inventory.snapshot_path
+        )
 
     if adapter_type == "axiell":
         # Build the reconcile runtime after the load: a pyiceberg handle is
@@ -764,10 +871,15 @@ def main() -> None:
         action="store_true",
         help="Wipe the adapter's stores and stop: no download, reload, reconcile or events. Leaves the window store and harvest cursor alone, so disable the harvest schedule first.",
     )
+    target.add_argument(
+        "--folio-inventory-only",
+        action="store_true",
+        help="(FOLIO only) Wipe and reload only the inventory store, from items-and-holdings for every active instance in the live bib store. Always fetches afresh into --folio-inventory-snapshot-path, replacing any file there. Touches no other store, window or cursor and publishes no events. Disable the adapter schedule first.",
+    )
     parser.add_argument(
-        "--folio-items-snapshot-path",
+        "--folio-inventory-snapshot-path",
         metavar="PATH",
-        help="(FOLIO only) Path to the items snapshot file. If provided, the FOLIO items store is also rebuilt. If the file already exists, the items download is skipped.",
+        help="(FOLIO only) Path to the inventory snapshot file. If provided, the FOLIO inventory store is also rebuilt. The inventory is always fetched afresh, replacing any file there.",
     )
     in_place = parser.add_mutually_exclusive_group()
     in_place.add_argument(
@@ -798,21 +910,22 @@ def main() -> None:
         ExecutionContext(trace_id=get_trace_id(), pipeline_step="rebuild_adapter")
     )
 
-    if args.folio_items_snapshot_path is not None and args.adapter_type != "folio":
+    if args.folio_inventory_snapshot_path is not None and args.adapter_type != "folio":
         raise ValueError(
-            "folio_items_snapshot_path is only supported for adapter_type='folio'"
+            "folio_inventory_snapshot_path is only supported for adapter_type='folio'"
         )
 
     rebuild_adapter(
         args.adapter_type,
         use_rest_api_table=args.use_rest_api_table,
         snapshot_path=args.snapshot_path,
-        folio_items_snapshot_path=args.folio_items_snapshot_path,
+        folio_inventory_snapshot_path=args.folio_inventory_snapshot_path,
         skip_publish_event=args.skip_publish_event,
         publish_interval_seconds=args.publish_interval_seconds,
         wipe_only=args.wipe_only,
         download_only=args.download_only,
         merge_with_store=args.merge_with_store,
+        folio_inventory_only=args.folio_inventory_only,
     )
 
 

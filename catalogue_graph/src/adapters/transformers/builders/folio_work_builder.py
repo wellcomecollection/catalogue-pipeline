@@ -139,7 +139,7 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
         Each item carries a `folio-item` source identifier with its inventory UUID,
         so the id-minter can assign a stable canonical id. Without enrichment content
-        (e.g. an instance not yet enriched, or a full reindex before the items store
+        (e.g. an instance not yet enriched, or a full reindex before the inventory store
         is populated) this falls back to no items rather than guessing from MARC 952.
         """
         if not self.enrichment_content:
