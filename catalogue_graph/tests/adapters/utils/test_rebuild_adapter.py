@@ -568,6 +568,56 @@ def test_folio_inventory_only_never_reuses_an_existing_snapshot(
     assert "uuid-1" in rows[0]["content"]
 
 
+def test_full_folio_rebuild_refetches_the_inventory_but_reuses_the_bib_snapshot(
+    temporary_table: IcebergTable,
+    inventory_temporary_table: IcebergTable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An existing bib snapshot is resumed from, but an existing inventory
+    snapshot is replaced: one older than the cursor would leave rows stale. The
+    config stub has no window store, so resetting the cursor fails the test."""
+    adapter_store = AdapterStore(temporary_table, "test_namespace")
+    inventory_store = AdapterStore(inventory_temporary_table, "inventory_namespace")
+    snapshot_path = tmp_path / "bibs.parquet"
+    pq.write_table(
+        adapter_records_to_table([{"id": "oai:folio:set/uuid-1", "content": "bib"}]),
+        snapshot_path,
+    )
+    inventory_path = tmp_path / "inventory.parquet"
+    pq.write_table(
+        adapter_records_to_table(
+            [{"id": "oai:folio:set/uuid-1", "content": "old snapshot"}],
+            namespace="inventory_namespace",
+        ),
+        inventory_path,
+    )
+    client = _FakeInventoryClient(
+        {"uuid-1": {"instanceId": "uuid-1", "holdings": [], "items": []}}
+    )
+    config_stub = SimpleNamespace(build_adapter_store=lambda **kwargs: adapter_store)
+    monkeypatch.setattr(rebuild_adapter, "get_config", lambda adapter_type: config_stub)
+    monkeypatch.setattr(
+        rebuild_adapter, "build_inventory_store", lambda **kwargs: inventory_store
+    )
+    monkeypatch.setattr(rebuild_adapter, "build_folio_inventory_client", lambda: client)
+    monkeypatch.setattr("builtins.input", lambda *args: "CONFIRM")
+
+    rebuild_adapter.rebuild_adapter(
+        "folio",
+        snapshot_path=str(snapshot_path),
+        folio_inventory_snapshot_path=str(inventory_path),
+        skip_publish_event=True,
+    )
+
+    assert client.requested == ["uuid-1"]
+    [row] = inventory_store.get_active_namespace_records().to_pylist()
+    assert row["content"] != "old snapshot"
+    assert [r["content"] for r in adapter_store.get_all_records().to_pylist()] == [
+        "bib"
+    ]
+
+
 def test_folio_inventory_only_refuses_other_adapters_and_modes(tmp_path: Path) -> None:
     items_path = str(tmp_path / "items.parquet")
     with pytest.raises(ValueError, match="only supported for FOLIO"):

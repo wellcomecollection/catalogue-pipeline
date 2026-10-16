@@ -1,17 +1,19 @@
 """Rebuild all Iceberg stores for an OAI-PMH adapter from a full snapshot.
 
 Downloads every record from the adapter's OAI-PMH endpoint (and, for FOLIO,
-the mod-inventory-storage items API), wipes the relevant stores, and reloads
-from the snapshots. Resets the harvest window cursor and publishes the
+the mod-inventory-storage items-and-holdings API), wipes the relevant stores,
+and reloads from the snapshots. Resets the harvest window cursor and publishes the
 resulting changesets to downstream consumers (transformers).
 
 The rebuild emits no downstream deletions: run it against a clean pipeline,
 or wipe the pipeline's downstream state first.
 
 If the snapshot file already exists at --snapshot-path, the download is skipped
-and the existing snapshot is reused. Similarly for --folio-inventory-snapshot-path.
-Snapshot files are only ever moved into place after a complete, successful
-write, so an existing file is always safe to resume from.
+and the existing snapshot is reused. Snapshot files are only ever moved into
+place after a complete, successful write, so an existing file is always safe to
+resume from. The FOLIO inventory snapshot is the exception: it is always fetched
+afresh, replacing any file at --folio-inventory-snapshot-path, because one older
+than the cursor reset would leave rows stale that no harvest re-fetches.
 
 With --wipe-only the stores are wiped and left empty, for a clear that runs
 ahead of a later rebuild. The window store and harvest cursor are untouched,
@@ -604,10 +606,31 @@ def _merge_with_store(
 
 
 class _FolioInventory(NamedTuple):
-    """Bundles the items snapshot path and store so they can be treated as a single optional."""
+    """Bundles the inventory snapshot path and store so they can be treated as a single optional."""
 
     snapshot_path: str
     store: AdapterStore
+
+
+def _fetch_inventory_snapshot(
+    bib_id_batches: Iterable[list[str]], inventory_snapshot_path: str, namespace: str
+) -> None:
+    """Fetch the inventory for the given bib ids, always afresh.
+
+    An existing snapshot is never reused: the fetch is short, and an old one would
+    roll the store back without any sign.
+    """
+    if os.path.exists(inventory_snapshot_path):
+        logger.info(
+            "Replacing existing inventory snapshot once the download succeeds",
+            path=inventory_snapshot_path,
+        )
+    _download_inventory_to_snapshot(
+        build_folio_inventory_client(),
+        bib_id_batches=bib_id_batches,
+        inventory_snapshot_path=inventory_snapshot_path,
+        namespace=namespace,
+    )
 
 
 def rebuild_folio_inventory(
@@ -616,23 +639,15 @@ def rebuild_folio_inventory(
     """Wipe and reload the FOLIO inventory store for the live bib store.
 
     The download reads ids from the live bib store and happens before the wipe,
-    so a failed download leaves the store as it was. It always runs: the fetch
-    is short, and reloading from an old snapshot would silently roll the store
-    back.
+    so a failed download leaves the store as it was.
     """
     inventory_store = build_inventory_store(use_rest_api_table=use_rest_api_table)
-    if os.path.exists(inventory_snapshot_path):
-        logger.info(
-            "Replacing existing items snapshot once the download succeeds",
-            path=inventory_snapshot_path,
-        )
     bib_store = get_config("folio").build_adapter_store(
         use_rest_api_table=use_rest_api_table
     )
-    _download_inventory_to_snapshot(
-        build_folio_inventory_client(),
-        bib_id_batches=_active_ids_from_store(bib_store),
-        inventory_snapshot_path=inventory_snapshot_path,
+    _fetch_inventory_snapshot(
+        _active_ids_from_store(bib_store),
+        inventory_snapshot_path,
         namespace=inventory_store.namespace,
     )
 
@@ -677,7 +692,7 @@ def rebuild_adapter(
         if snapshot_path is None or folio_inventory_snapshot_path is not None:
             raise ValueError(
                 "--download-only and --merge-with-store take --snapshot-path and "
-                "no items snapshot"
+                "no inventory snapshot"
             )
         if download_only and os.path.exists(snapshot_path):
             raise ValueError(f"--download-only refuses to overwrite {snapshot_path}")
@@ -757,21 +772,18 @@ def rebuild_adapter(
             _download_to_snapshot(oai_client, config.config, snapshot_path)
 
     # Phase 2: Inventory download (reads bib instance IDs from the bib snapshot).
+    # Always afresh, so it is never older than the cursor reset above.
     folio_inventory: _FolioInventory | None = None
     if folio_inventory_snapshot_path is not None:
         folio_inventory = _FolioInventory(
             snapshot_path=folio_inventory_snapshot_path,
             store=build_inventory_store(use_rest_api_table=use_rest_api_table),
         )
-
-        if not os.path.exists(folio_inventory.snapshot_path):
-            inventory_client = build_folio_inventory_client()
-            _download_inventory_to_snapshot(
-                inventory_client,
-                bib_id_batches=_active_ids_from_snapshot(snapshot_path),
-                inventory_snapshot_path=folio_inventory.snapshot_path,
-                namespace=folio_inventory.store.namespace,
-            )
+        _fetch_inventory_snapshot(
+            _active_ids_from_snapshot(snapshot_path),
+            folio_inventory.snapshot_path,
+            namespace=folio_inventory.store.namespace,
+        )
 
     adapter_store = config.build_adapter_store(use_rest_api_table=use_rest_api_table)
 
@@ -867,7 +879,7 @@ def main() -> None:
     parser.add_argument(
         "--folio-inventory-snapshot-path",
         metavar="PATH",
-        help="(FOLIO only) Path to the items snapshot file. If provided, the FOLIO inventory store is also rebuilt. If the file already exists, the items download is skipped.",
+        help="(FOLIO only) Path to the inventory snapshot file. If provided, the FOLIO inventory store is also rebuilt. The inventory is always fetched afresh, replacing any file there.",
     )
     in_place = parser.add_mutually_exclusive_group()
     in_place.add_argument(
