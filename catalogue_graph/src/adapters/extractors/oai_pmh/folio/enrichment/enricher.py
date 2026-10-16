@@ -136,7 +136,7 @@ class FolioInventoryEnricher:
         update = self._inventory_store.incremental_update(rows)
 
         logger.info(
-            "Enriched FOLIO items",
+            "Enriched FOLIO inventory",
             requested=len(store_ids),
             fetched=rows.num_rows,
             changeset_id=update.changeset_id if update else None,
