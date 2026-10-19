@@ -185,12 +185,13 @@ object TeiContributors extends LabelDerivedIdentifiers {
     */
   private def parseLabelFromHandNode(handNote: Node) =
     Right(
+      // The Calm export writes <handNote scribe="sole"/> when it has no scribe
       Some(
         handNote.child
           .collect { case node if node.label != "locus" => node.text }
           .mkString
           .trim
-      )
+      ).filter(_.nonEmpty)
     )
 
   private def addIdsToMap(

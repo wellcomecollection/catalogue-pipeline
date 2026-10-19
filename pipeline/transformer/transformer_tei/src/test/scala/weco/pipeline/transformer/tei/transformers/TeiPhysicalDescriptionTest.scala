@@ -324,4 +324,39 @@ class TeiPhysicalDescriptionTest
 
     result shouldBe Some("dimensions: width 35 cm, length 35 cm")
   }
+
+  it("skips empty dims in the dim format") {
+    val result = TeiPhysicalDescription(
+      teiXml(
+        id,
+        physDesc = Some(
+          physDesc(objectDesc =
+            Some(
+              objectDesc(
+                material = None,
+                support = None,
+                extent = Some(
+                  extent(
+                    label = "3 pages",
+                    dimensions = List(
+                      <dimensions unit="cm" type="leaf">
+              <dim type="width">35</dim>
+              <dim type="length"></dim>
+            </dimensions>,
+                      <dimensions unit="cm" type="written">
+              <dim type="width"/>
+              <dim type="length"/>
+            </dimensions>
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+
+    result shouldBe Some("3 pages; leaf dimensions: width 35 cm")
+  }
 }

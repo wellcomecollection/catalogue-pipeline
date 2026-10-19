@@ -524,6 +524,26 @@ class TeiContributorsTest
       result.value shouldBe Map.empty
     }
 
+    it("ignores handNote if it has a scribe attribute but no name") {
+      val result = TeiContributors.scribes(
+        teiXml(
+          id,
+          physDesc = Some(
+            physDesc(handNotes =
+              List(
+                <handNote scribe="sole"/>,
+                <handNote scribe="sole"></handNote>,
+                handNotes(label = "  ", scribe = Some("sole"))
+              )
+            )
+          )
+        ),
+        id
+      )
+
+      result.value shouldBe Map.empty
+    }
+
     it(
       "returns the scribes with the itemId if the node has a target attribute"
     ) {
