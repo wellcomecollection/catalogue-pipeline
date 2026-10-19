@@ -41,13 +41,3 @@ Feature: Extracting contributors from 1xx and 7xx name fields
     Then the only contributor has the agent.label "Randolph"
     And its 1st role has the label "Editor"
     And its 2nd role has the label "Translator:"
-
-  Scenario: Agents of different types with the same name collapse into one Person
-    Their label-derived identifiers match, so the Organisation takes the Person
-    type and the two are no longer distinct
-    Given the MARC record has a 100 field with subfield "a" value "Dora Milaje"
-    And the MARC record has a 710 field with subfield "a" value "Dora Milaje"
-    When I transform the MARC record
-    Then the only contributor has the agent.label "Dora Milaje"
-    And it has the agent.type "Person"
-    And it is primary

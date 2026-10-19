@@ -52,9 +52,9 @@ Feature: contributors (MARC 1xx and 7xx names)
       | shallot swimmers                 |
       | sammys meet the sammys at sammys |
     And the 1st contributor is primary
-    And the 3rd contributor is primary
+    And the 2nd contributor is primary
     And the 4th contributor is not primary
-    And the 6th contributor is not primary
+    And the 5th contributor is not primary
 
   Scenario: A personal name label combines subfields a, b, c and d
     Given the MARC record has a 100 field with subfields:
@@ -147,13 +147,7 @@ Feature: contributors (MARC 1xx and 7xx names)
 
   Scenario: Repeated ǂ0 with inconsistent spacing and punctuation give one identifier
     Based on Sierra b3017492
-    Given the MARC record has a 100 field with subfields:
-      | code | value            |
-      | a    | Wanda the watercress |
-      | 0    | nlcsh 2055034    |
-      | 0    |   nlcsh2055034   |
-      | 0    |  nlc sh 2055034  |
-      | 0    | nlcsh 2055034.,  |
+    Given the MARC record has a 100 field with subfield "a" value "Wanda the watercress" and subfield "0" value "nlcsh 2055034" and subfield "0" value "  nlcsh2055034 " and subfield "0" value " nlc sh 2055034" and subfield "0" value "nlcsh 2055034.,"
     When I transform the MARC record
     Then the only contributor has the agent.label "Wanda the watercress"
     And it has the agent.type "Person"
@@ -256,12 +250,7 @@ Feature: contributors (MARC 1xx and 7xx names)
     And it has the agent.id.source_identifier.value "nlcsh7212"
 
   Scenario: Repeated ǂ0 with inconsistent spacing on a corporate name give one identifier
-    Given the MARC record has a 110 field with subfields:
-      | code | value             |
-      | a    | Charlie the chive |
-      | 0    | nlcsh 6791210     |
-      | 0    |   nlcsh6791210    |
-      | 0    |  nlc sh 6791210   |
+    Given the MARC record has a 110 field with subfield "a" value "Charlie the chive" and subfield "0" value "nlcsh 6791210" and subfield "0" value "  nlcsh6791210 " and subfield "0" value " nlc sh 6791210"
     When I transform the MARC record
     Then the only contributor has the agent.label "Charlie the chive"
     And it has the agent.id.source_identifier.identifier_type.id "lc-names"
@@ -415,14 +404,15 @@ Feature: contributors (MARC 1xx and 7xx names)
     Then the only contributor has the agent.type "<type>"
     And it has <roles> roles
     And its 1st role has the label "<first role>"
+    And its <last> role has the label "<last role>"
     Examples:
-      | tag | type         | roles | first role |
-      | 100 | Person       | 2     | E          |
-      | 700 | Person       | 2     | E          |
-      | 110 | Organisation | 1     | E          |
-      | 710 | Organisation | 1     | E          |
-      | 111 | Meeting      | 1     | J          |
-      | 711 | Meeting      | 1     | J          |
+      | tag | type         | roles | first role | last | last role |
+      | 100 | Person       | 2     | E          | 2nd  | J         |
+      | 700 | Person       | 2     | E          | 2nd  | J         |
+      | 110 | Organisation | 1     | E          | 1st  | E         |
+      | 710 | Organisation | 1     | E          | 1st  | E         |
+      | 111 | Meeting      | 1     | J          | 1st  | J         |
+      | 711 | Meeting      | 1     | J          | 1st  | J         |
 
   Scenario: Duplicates are found on the whole contributor, not the name alone
     Only the two added entries identical to the main entry are dropped. An
@@ -457,6 +447,19 @@ Feature: contributors (MARC 1xx and 7xx names)
       | Snorri Sturluson |
     And the 1st contributor is primary
     And the 2nd contributor is not primary
+
+  Scenario: Added entries that repeat identified main entries are dropped
+    From MarcContributorsTest.scala
+    Given the MARC record has a 100 field with subfield "a" value "Sæmundr fróði" and subfield "0" value "n97018003"
+    And the MARC record has another 100 field with subfield "a" value "Snorri Sturluson" and subfield "0" value "n50000553"
+    And the MARC record has a 700 field with subfield "a" value "Sæmundr fróði" and subfield "0" value "n97018003"
+    And the MARC record has another 700 field with subfield "a" value "Snorri Sturluson" and subfield "0" value "n50000553"
+    When I transform the MARC record
+    Then the work has 2 contributors with agent.label:
+      | Sæmundr fróði    |
+      | Snorri Sturluson |
+    And the 1st contributor is primary
+    And the 2nd contributor is primary
 
   Scenario: An Agent and a Person that share an identifier are both Persons
     From MarcContributorsTest.scala. The identifier shows the Agent and the Person
@@ -535,3 +538,29 @@ Feature: contributors (MARC 1xx and 7xx names)
     Then the only contributor has the agent.label "Caldwell, Charles"
     And it has the agent.id.source_identifier.identifier_type.id "lc-names"
     And it has the agent.id.source_identifier.value "n81140510"
+
+  Scenario: Agents of different types with the same name collapse into one Person
+    Their label-derived identifiers match, so the Organisation takes the Person
+    type and the two are no longer distinct. The Scala transformer also makes
+    both a Person, but deduplicates before harmonising and then compares whole
+    contributors, so it keeps a primary and a non-primary copy
+    Given the MARC record has a 100 field with subfield "a" value "Dora Milaje"
+    And the MARC record has a 710 field with subfield "a" value "Dora Milaje"
+    When I transform the MARC record
+    Then the only contributor has the agent.label "Dora Milaje"
+    And it has the agent.type "Person"
+    And it is primary
+
+  Scenario: A subject takes the more specific type of a contributor with the same identifier
+    Based on Sierra b21916329. The Scala transformer only ever retypes the
+    contributor, to whatever type the subject has, so it demotes this Person
+    to a Concept and leaves the subject alone
+    Given the MARC record has a 700 field with subfield "a" value "Cuvierian Natural History Society."
+    And the MARC record has a 650 field with indicators "" "0" with subfield "a" value "Cuvierian Natural History Society."
+    When I transform the MARC record
+    Then the only contributor has the agent.label "Cuvierian Natural History Society."
+    And it has the agent.type "Person"
+    And it has the agent.id.source_identifier.value "cuvierian natural history society"
+    And the only subject has the label "Cuvierian Natural History Society"
+    And it has the id.source_identifier.ontology_type "Person"
+    And its only concept has the type "Person"
