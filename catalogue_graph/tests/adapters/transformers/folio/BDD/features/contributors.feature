@@ -510,3 +510,28 @@ Feature: contributors (MARC 1xx and 7xx names)
     And the work has 2 contributors with agent.id.source_identifier.value:
       | regional aids group,, |
       | oskenbay, moldir      |
+
+  Scenario: A Subject Headings identifier on a name field is rejected
+    Only an LC Names ǂ0 is accepted on a name field. The Scala transformer
+    gives this contributor an "lc-subjects" identifier
+    Given the MARC record has a 700 field with subfield "a" value "Nationalism" and subfield "0" value "sh 85090150"
+    When I transform the MARC record
+    Then the only contributor has the agent.label "Nationalism"
+    And it has the agent.id.source_identifier.identifier_type.id "label-derived"
+    And it has the agent.id.source_identifier.value "nationalism"
+
+  Scenario: The second indicator of a name field does not affect its identifier
+    The Scala transformer leaves this agent unidentified
+    Given the MARC record has a 700 field with indicators "1" "1" with subfield "a" value "Caldwell, Charles" and subfield "0" value "n 81140510"
+    When I transform the MARC record
+    Then the only contributor has the agent.label "Caldwell, Charles"
+    And it has the agent.id.source_identifier.identifier_type.id "lc-names"
+    And it has the agent.id.source_identifier.value "n81140510"
+
+  Scenario: An empty ǂ0 beside a real one is ignored
+    The Scala transformer gives this contributor a label-derived identifier
+    Given the MARC record has a 700 field with subfield "a" value "Caldwell, Charles" and subfield "0" value "" and subfield "0" value "n 81140510"
+    When I transform the MARC record
+    Then the only contributor has the agent.label "Caldwell, Charles"
+    And it has the agent.id.source_identifier.identifier_type.id "lc-names"
+    And it has the agent.id.source_identifier.value "n81140510"

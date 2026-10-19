@@ -3,7 +3,13 @@
 import pytest
 
 from adapters.transformers.marc.harmonisation import harmonise_types
-from models.pipeline.concept import Concept, Contributor, Subject
+from models.pipeline.concept import (
+    Concept,
+    Contributor,
+    DateTimeRange,
+    Period,
+    Subject,
+)
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import Identifiable, SourceIdentifier
 from utils.types import RawConceptType
@@ -146,3 +152,25 @@ def test_concepts_with_different_identifiers_are_left_alone() -> None:
         )
     ]
     assert harmonise_types(subjects, contributors) == (subjects, contributors)
+
+
+def test_a_period_keeps_its_range() -> None:
+    """Scala rebuilt every harmonised concept from its type, identifier and label, so a Period lost its range."""
+    period = Period(
+        label="19th century",
+        id=_identifiable("Period"),
+        range=DateTimeRange.model_validate(
+            {"from": "1800-01-01T00:00:00Z", "to": "1899-12-31T23:59:59Z"}
+        ),
+    )
+    subjects, _ = harmonise_types(
+        [
+            Subject(
+                label="19th century", id=_identifiable("Period"), concepts=[period]
+            ),
+            _subject("1800s", "Concept"),
+        ],
+        [],
+    )
+    assert [_ontology_type(subject) for subject in subjects] == ["Period", "Period"]
+    assert subjects[0].concepts[0] == period
