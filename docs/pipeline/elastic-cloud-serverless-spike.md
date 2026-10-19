@@ -4,7 +4,7 @@ Results of the spike in [platform#6714](https://github.com/wellcomecollection/pl
 
 ## Recommendation
 
-I think the FOLIO environment should run on a serverless project. Nothing in the pipeline's code needs to change for the store itself, the provider and client stack all work against it, private connectivity works, and the cost estimate in platform-infrastructure#560 puts it below a hosted clone of the pipeline cluster in every month and well below it in a reindex month. The price is write latency: every bulk request takes about 260 ms whatever its size, so stages that write one document at a time run at a fraction of their hosted rate unless they keep more requests in flight. For the FOLIO environment that is a slower reindex, not a failure.
+I think the FOLIO environment should run on a serverless project. Nothing in the pipeline's code needs to change for the store itself, the provider and client stack all work against it, private connectivity works, and the cost estimate in platform-infrastructure#560 puts it below a hosted clone of the pipeline cluster in every month and well below it in a reindex month. The price is write latency: every bulk request takes about 260 ms whatever its size, so stages that write one document per request run at a fraction of their hosted rate. Only the merger writes that way today, and batching its writes recovers the rate (measured below). Until it does, the FOLIO environment has a slower reindex, not a failure.
 
 I do not think these results decide production. The search side of the bill under the public API's query load was not measured and is the widest line in the cost estimate. The way forward for that decision is set out at the end.
 
@@ -28,7 +28,17 @@ Bulk latency on the project is flat at 258 to 290 ms p50 for every bulk size up 
 | 100, 10 | 3,308 | 10,965 | 3.3 |
 | 100, 60 | 7,097 | 13,426 | 1.9 |
 
-The merger's shape, 30 invocations at once each with 50 single-document bulks in flight through a ten-connection pool (the Elasticsearch REST client default the merger runs with): 1,115 docs/s aggregate on serverless against 13,124 on hosted, each serverless invocation pinned at 38 docs/s by ten connections times the floor. At the merger's 30-invocation ceiling that puts a floor of about 46 minutes of merger wall time on a 3.06 million work reindex, against about 4 minutes hosted, before the merger's own reads and merging. Raising the pool to the 50 the merger has in flight recovers less than that suggests. The same fan-out at 50 connections (2026-10-19) ran at 2,512 docs/s aggregate, 84 to 85 per invocation, with bulk p50 rising from about 260 ms to 510 ms as 1,500 single-document bulks queued on the project, still with no 429s; on hosted it made no difference (13,828 docs/s, bound by the harness Lambdas). Raising `maxConnPerRoute` in scala-libs' `ElasticClientBuilder` would therefore take the merger floor for a full reindex from about 46 minutes to about 20, against about 4 hosted. Same-day control at ten connections: 1,089 docs/s.
+The merger writes one bulk request per matcher result (`MergeProcessor.process`), so a Lambda batch of 50 becomes 50 single-document requests in flight, through the REST client's default ten connections per route. Reproduced as 30 invocations at once, each writing 5,000 real documents in that shape and in alternatives, against the project's private path (2026-10-14 and 2026-10-19):
+
+| shape per invocation | serverless docs/s | bulk p50 | requests in flight |
+|---|---|---|---|
+| 50 single-document bulks, 10 connections (the merger today) | 1,089 to 1,115 | 1.3 s | 300 |
+| 50 single-document bulks, 50 connections | 2,512 | 0.51 s | 1,500 |
+| 100 single-document bulks, 100 connections | 2,539 | 1.0 s | 3,000 |
+| one bulk of 50 | 5,190 | 0.29 s | 30 |
+| bulks of 50, five in flight | 20,161 | 0.36 s | 150 |
+
+Hosted ran the merger's shape at 13,124 to 13,828 docs/s. On serverless, single-document writes top out at about 2,500 a second however many are in flight: doubling concurrency from 50 to 100 doubled latency and added nothing, and search power made no difference (the same run at 100 and at 28 gave 1,115 and 1,089). Batching is the lever. Writing a batch's merged works as one bulk doubles the best single-document figure with a tenth of the requests, and five such bulks in flight beat hosted's current merger figure. At the merger's 30-invocation ceiling, a 3.06 million work reindex spends a floor of about 46 minutes writing in today's shape, about 10 minutes with one bulk per batch and under 3 with a few bulks in flight, against about 4 on hosted, before the merger's own reads and merging. No run returned a 429.
 
 A full copy of works-denormalised (3.06 million documents) from the hosted cluster into the project, in eight parallel Lambda slices with bulks of 500 and four in flight each, ran three times at 15,000 to 17,900 docs/s aggregate, 166 to 206 s each, no rejections, and a random-id check found 100% of the source present afterwards. The transformers already write bulks of up to 100, and the Python ingestors write through `helpers.bulk`, so the stages that matter for a reindex already have the shape that suits serverless.
 
@@ -65,7 +75,7 @@ Works from the delta VPC through a new interface endpoint to Elastic's serverles
 - Networking: interface endpoint, security group and private hosted zone in each VPC that needs the project, a `vpce` policy, and an `ip` policy for operator addresses. The spike creates these in its own root because platform-infrastructure pins ec 0.5.0; the go decision should pick between bumping that provider or keeping them in the pipeline repo's critical root.
 - Search power: 28 for the FOLIO environment; revisit from the usage page.
 - Code: the `clusterhealth` route in the search API, `reindex_index.py` and `get_reindex_status.py` moving from basic auth to a key with `monitor`, retiring `create_pipeline_storage_users.py`, and the `e_port` fallback in the merger's `application.conf`. The 9.x Python client bump can wait.
-- Worth doing for the merger regardless: raise the REST client's connections per route to match its in-flight batch.
+- Worth doing for the merger regardless: index each Lambda batch's merged works and images through `ElasticIndexer` as one or a few bulk requests, rather than one per matcher result. It is the change that removes serverless's write penalty for the merger, and it should help hosted too.
 
 ## Way forward for production
 
@@ -76,7 +86,7 @@ The production question is whether a serverless project can carry the public API
 3. Read the search VCU-hours and the search-above-baseline line from the usage page for that week at Performant, then at the On-demand floor, and put both into the estimate in platform-infrastructure#560 in place of the extrapolated line.
 4. Decide on cost and the latency figures together. If Performant holds the query mix at today's latencies, the comparison is the measured monthly figure against the hosted cluster's; if it needs High availability, the same reading at that setting.
 
-Two things from this spike go into that one regardless: an operator IP policy next to PrivateLink, since any attached policy locks Terraform and the scripts out otherwise, and the merger's connection pool raised to its in-flight batch, which measured as a 2.3 times gain on serverless, since single-document writers are the stages the write floor penalises most. Elastic support is also worth a question on what search power the console's three tiers set, since this project never showed the labels.
+Two things from this spike go into that one regardless: an operator IP policy next to PrivateLink, since any attached policy locks Terraform and the scripts out otherwise, and the merger writing each batch as a few bulk requests instead of one per matcher result, which measured as roughly a fivefold to twentyfold gain on serverless. Elastic support is also worth a question on what search power the console's three tiers set, since this project never showed the labels.
 
 ## Open items
 
