@@ -1,7 +1,7 @@
 Feature: lettering (MARC 246)
   Lettering comes from MARC 246 ǂa where the second indicator is "6", which
-  marks a caption title. The first indicator is ignored. Each matching ǂa is
-  taken in record order and the values are joined with a blank line.
+  marks a caption title. Each matching ǂa is taken in record order and the
+  values are joined with a blank line.
 
   These scenarios mirror the unit tests of the Scala transformer this
   replaces (SierraLetteringTest.scala), including its test data, so the two
@@ -13,8 +13,6 @@ Feature: lettering (MARC 246)
     Given a MARC record with field 001 "abc123"
     And the MARC record has a 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001"
     And the MARC record has a 245 field with subfield "a" value "Some Title"
-
-  # Ported from SierraLetteringTest.scala.
 
   Scenario: A second indicator of 6 on a field other than 246 is not lettering
     Given the MARC record has a 300 field with indicators "" "6" with subfield "a" value "Alas, ailments are annoying"
@@ -47,6 +45,8 @@ Feature: lettering (MARC 246)
       Enterprising eskimos exile every eagle
       """
 
+  # Scala's "non-visual material" case
+
   Scenario: A 514 does not contribute to lettering
     Given the MARC record has a 514 field with subfield "a" value "Lettering continues: Comment va  le malade? Hélas Monsieur, il est mort ce matin à six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
     And the MARC record has a 246 field with indicators "" "6" with subfield "a" value "Le médecin et la garde malade. H.D. ..."
@@ -55,11 +55,12 @@ Feature: lettering (MARC 246)
 
   # Known divergences from the Scala.
   #
-  # The Scala appends 514 ǂa for material type "k" (Pictures). Pictures are
-  # not catalogued in FOLIO, so there is no material type to test and 514 is
-  # never used; the "non-visual material" case above is the only one ported.
+  # The Scala also extracts lettering from 514 ǂa for material type "k" (Pictures).
+  # Pictures do not exist in FOLIO yet and they will be synced to FOLIO from Axiell,
+  # possibly as suppressed stubs, so the 514 extraction logic may be ported to the
+  # Axiell transformer instead. See wellcomecollection/platform#6570.
   #
-  # The Scala trims nothing and keeps blank ǂa values in the join, padding
+  # The Scala does not trim and keeps blank ǂa values in the join, padding
   # the result with stray spaces and line breaks.
 
   Scenario: Surrounding whitespace is stripped from each ǂa before joining

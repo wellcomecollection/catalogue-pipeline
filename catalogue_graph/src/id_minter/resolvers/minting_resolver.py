@@ -95,7 +95,11 @@ class MintingResolver:
         source_ids: list[SourceIdentifierKey],
         for_share: bool = False,
     ) -> dict[SourceIdentifierKey, str]:
-        """Chunked lookup. FOR SHARE joins whatever transaction is open on self.conn."""
+        """Chunked lookup. FOR SHARE joins whatever transaction is open on self.conn.
+
+        Keyed by the requested value, as SourceId compares under its collation
+        (ignoring case and some accents), so a variant resolves to the stored row.
+        """
         groups: dict[tuple[str, str], set[str]] = defaultdict(set)
         for ontology_type, source_system, source_id in source_ids:
             groups[(ontology_type, source_system)].add(source_id)
@@ -104,22 +108,38 @@ class MintingResolver:
         cursor = self.conn.cursor()
 
         result: dict[SourceIdentifierKey, str] = {}
+        variants: list[str] = []
         # Sorted probes are far faster than random order against a large index.
         for (ontology_type, source_system), values in sorted(groups.items()):
             for chunk in batched(sorted(values), LOOKUP_CHUNK_SIZE):
-                placeholders = ", ".join(["%s"] * len(chunk))
+                rows = ", ".join(["ROW(%s)"] * len(chunk))
+                # JOIN_ORDER keeps one PK lookup per value; a hash join would scan
+                # (and under FOR SHARE, lock) the whole source system.
                 cursor.execute(
-                    f"SELECT OntologyType, SourceSystem, SourceId, CanonicalId"
-                    f" FROM identifiers"
-                    f" WHERE OntologyType = %s AND SourceSystem = %s"
-                    f" AND SourceId IN ({placeholders}){suffix}",
-                    [ontology_type, source_system, *chunk],
+                    f"SELECT /*+ JOIN_ORDER(r, i) */"
+                    f" r.req AS RequestedId, i.SourceId AS StoredId, i.CanonicalId"
+                    f" FROM (VALUES {rows}) AS r(req)"
+                    f" JOIN identifiers i"
+                    f" ON i.OntologyType = %s AND i.SourceSystem = %s"
+                    f" AND i.SourceId = r.req{suffix}",
+                    [*chunk, ontology_type, source_system],
                 )
                 for row in cursor.fetchall():
                     key = SourceIdentifierKey(
-                        row["OntologyType"], row["SourceSystem"], row["SourceId"]
+                        ontology_type, source_system, row["RequestedId"]
                     )
                     result[key] = row["CanonicalId"]
+                    if row["StoredId"] != row["RequestedId"]:
+                        variants.append(
+                            f"{ontology_type}/{source_system}/{row['RequestedId']}"
+                            f" -> {row['StoredId']}"
+                        )
+        if variants:
+            logger.info(
+                "Resolved source IDs to stored variants",
+                count=len(variants),
+                examples=variants[:5],
+            )
         return result
 
     def mint_ids(self, requests: list[MintRequest]) -> dict[SourceIdentifierKey, str]:
@@ -313,7 +333,7 @@ class MintingResolver:
                 assert (
                     pred is not None
                 )  # needs_inheritance only contains source ids with a predecessor
-                # A miss means the row can't be confirmed (e.g. stored under other casing).
+                # A miss means the row can't be confirmed.
                 if source_key not in stored:
                     raise ValueError(
                         f"Inherited row for {source_key[0]}/{source_key[1]}/"
@@ -468,6 +488,15 @@ class MintingResolver:
                 """,
                     list(used_canonical_ids),
                 )
+
+        # An unresolved ID would leave its node unidentified without any error.
+        unresolved = [sid for sid in source_ids if sid not in result]
+        if unresolved:
+            first = unresolved[0]
+            raise ValueError(
+                f"{len(unresolved)} source ID(s) unresolved after minting, "
+                f"e.g. {first[0]}/{first[1]}/{first[2]}"
+            )
 
         # Commit the transaction - all INSERTs and UPDATEs are atomically applied.
         # If anything fails before this point, the entire transaction is rolled back
