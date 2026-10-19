@@ -46,6 +46,12 @@ def main() -> None:
     parser.add_argument("--bulk-sizes", type=int, nargs="+", default=BULK_SIZES)
     parser.add_argument("--concurrencies", type=int, nargs="+", default=CONCURRENCIES)
     parser.add_argument("--id-prefix", default=None)
+    parser.add_argument(
+        "--connections",
+        type=int,
+        default=None,
+        help="Connection pool size; merger_shape defaults to 10, the REST client default.",
+    )
     args = parser.parse_args()
 
     event: dict = {"target": dict(TARGETS[args.target])}
@@ -62,7 +68,13 @@ def main() -> None:
             ]
         )
         # Pool one connection per in-flight bulk so the target, not the client, sets the ceiling.
-        event["target"]["connections_per_node"] = max(10, max(c["concurrency"] for c in cells))
+        if args.connections is not None:
+            event["target"]["connections_per_node"] = args.connections
+        elif args.mode == "merger_shape":
+            # The merger's REST client pools ten connections per route.
+            event["target"]["connections_per_node"] = 10
+        else:
+            event["target"]["connections_per_node"] = max(10, max(c["concurrency"] for c in cells))
         event.update(
             mode="write_matrix",
             source=TARGETS[args.source],
