@@ -1,4 +1,5 @@
 import pytest
+
 from adapters.transformers.marc.concepts import label_derived_identifier
 from models.pipeline.identifier import Identifiable
 
