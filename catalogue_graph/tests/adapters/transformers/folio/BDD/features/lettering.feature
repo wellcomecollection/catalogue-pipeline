@@ -1,7 +1,7 @@
 Feature: lettering (MARC 246)
   Lettering comes from MARC 246 ǂa where the second indicator is "6", which
-  marks a caption title. The first indicator is ignored. Each matching ǂa is
-  taken in record order and the values are joined with a blank line.
+  marks a caption title. Each matching ǂa is taken in record order and the
+  values are joined with a blank line.
 
   These scenarios mirror the unit tests of the Scala transformer this
   replaces (SierraLetteringTest.scala), including its test data, so the two
@@ -13,8 +13,6 @@ Feature: lettering (MARC 246)
     Given a MARC record with field 001 "abc123"
     And the MARC record has a 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001"
     And the MARC record has a 245 field with subfield "a" value "Some Title"
-
-  # Ported from SierraLetteringTest.scala.
 
   Scenario: A second indicator of 6 on a field other than 246 is not lettering
     Given the MARC record has a 300 field with indicators "" "6" with subfield "a" value "Alas, ailments are annoying"
@@ -59,7 +57,7 @@ Feature: lettering (MARC 246)
   # not catalogued in FOLIO, so there is no material type to test and 514 is
   # never used; the "non-visual material" case above is the only one ported.
   #
-  # The Scala trims nothing and keeps blank ǂa values in the join, padding
+  # The Scala does not trim and keeps blank ǂa values in the join, padding
   # the result with stray spaces and line breaks.
 
   Scenario: Surrounding whitespace is stripped from each ǂa before joining
