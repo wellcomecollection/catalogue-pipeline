@@ -1,6 +1,21 @@
+from ingestor.models.shared.deleted_reason import SuppressedFromSource
+from models.pipeline.concept import Contributor, Genre, Subject
+from models.pipeline.id_label import Language
+from models.pipeline.identifier import (
+    Id,
+    Identifiable,
+    SourceIdentifier,
+    WorkSourceIdentifier,
+)
+from models.pipeline.item import Item
+from models.pipeline.production import ProductionEvent
+from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
+from models.pipeline.work_state import WorkAncestor
+
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
+from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.designation import extract_designation
 from adapters.transformers.marc.duration import extract_duration
@@ -22,19 +37,6 @@ from adapters.transformers.marc.subjects import (
     extract_subjects,
     is_from_standard_thesaurus,
 )
-from ingestor.models.shared.deleted_reason import SuppressedFromSource
-from models.pipeline.concept import Genre, Subject
-from models.pipeline.id_label import Language
-from models.pipeline.identifier import (
-    Id,
-    Identifiable,
-    SourceIdentifier,
-    WorkSourceIdentifier,
-)
-from models.pipeline.item import Item
-from models.pipeline.production import ProductionEvent
-from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
-from models.pipeline.work_state import WorkAncestor
 
 # The source-identifier type for a FOLIO item. The id-minter turns this plus the
 # item UUID into a stable canonical id for the public catalogue.
@@ -114,6 +116,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def former_frequency(self) -> list[str]:
         return extract_former_frequency(self.record)
+
+    @property
+    def contributors(self) -> list[Contributor]:
+        return extract_contributors(self.record)
 
     @property
     def genres(self) -> list[Genre]:

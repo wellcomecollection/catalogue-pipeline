@@ -81,10 +81,14 @@ def non_empty[T](value: Iterable[T | None]) -> list[T]:
     return [value for value in value if value]
 
 
-def distinct[T](values: Iterable[T]) -> list[T]:
+def distinct[T](
+    values: Iterable[T], key: Callable[[T], object] = lambda value: value
+) -> list[T]:
     """Remove repeated values, keeping the first occurrence of each in place."""
     result: list[T] = []
+    seen: list[object] = []
     for value in values:
-        if value not in result:
+        if key(value) not in seen:
+            seen.append(key(value))
             result.append(value)
     return result

@@ -1,6 +1,5 @@
 import pytest
-
-from adapters.transformers.marc.concepts import build_concept
+from adapters.transformers.marc.concepts import label_derived_identifier
 from models.pipeline.identifier import Identifiable
 
 
@@ -29,6 +28,23 @@ from models.pipeline.identifier import Identifiable
 def test_period_id_strips_punctuation_qualifiers_and_roman_numerals(
     label: str, expected: str
 ) -> None:
-    identifier = build_concept(label, "Period").id
+    identifier = label_derived_identifier(label, "Period")
+    assert isinstance(identifier, Identifiable)
+    assert identifier.source_identifier.value == expected
+
+
+@pytest.mark.parametrize(
+    ("label", "expected"),
+    [
+        ("MDCCLXXXVII.", "mdcclxxxvii"),
+        ("MDCC", "mdcc"),
+        ("[?]", "[?]"),
+        ("fl.", "fl"),
+    ],
+)
+def test_period_id_falls_back_to_the_label_when_nothing_is_left(
+    label: str, expected: str
+) -> None:
+    identifier = label_derived_identifier(label, "Period")
     assert isinstance(identifier, Identifiable)
     assert identifier.source_identifier.value == expected

@@ -66,7 +66,7 @@ def setup_structlog() -> None:
             k: v for k, v in event_dict.items() if v is not None
         },
         # Choose renderer based on environment
-        _get_renderer(),
+        *_get_renderers(),
     ]
 
     # Filter out None processors
@@ -75,7 +75,7 @@ def setup_structlog() -> None:
     # Configure structlog
     structlog.configure(
         processors=processors,
-        wrapper_class=structlog.stdlib.BoundLogger,
+        wrapper_class=SingleLineExceptionLogger,
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=os.environ.get("LOG_CACHE_LOGGERS") != "false",
     )
@@ -89,15 +89,29 @@ def setup_structlog() -> None:
     )
 
 
-def _get_renderer() -> structlog.types.Processor:
-    """Get appropriate renderer based on environment."""
+class SingleLineExceptionLogger(structlog.stdlib.BoundLogger):
+    """
+    Logs exceptions through error(), as stdlib's Logger.exception would print
+    the traceback on the lines after the JSON, which are not parsed with it.
+    """
+
+    def exception(self, event: str | None = None, *args: Any, **kw: Any) -> Any:
+        kw.setdefault("exc_info", True)
+        return self.error(event, *args, **kw)
+
+
+def _get_renderers() -> list[structlog.types.Processor]:
+    """Get appropriate renderers based on environment."""
 
     if hasattr(sys.stderr, "isatty") and sys.stderr.isatty():
         # Colored console output for local development
-        return structlog.dev.ConsoleRenderer(colors=True)
+        return [structlog.dev.ConsoleRenderer(colors=True)]
     else:
         # JSON output for production/containers
-        return structlog.processors.JSONRenderer()
+        return [
+            structlog.processors.format_exc_info,
+            structlog.processors.JSONRenderer(),
+        ]
 
 
 def bind_execution_context(context: ExecutionContext) -> None:
