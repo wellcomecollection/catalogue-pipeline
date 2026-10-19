@@ -28,8 +28,6 @@ def extract_format(record: Record) -> Format:
     # Unlike CALM records, Axiell records can have more than one format
     raw_formats = extract_raw_formats(record)
 
-    # TODO: This is a port of the Scala logic, but do we want to change it?
-    # There are some other format values which might fall under ArchivesDigital, such as 'digital'
     if "Archives - Digital" in raw_formats:
         return ArchivesDigital
 

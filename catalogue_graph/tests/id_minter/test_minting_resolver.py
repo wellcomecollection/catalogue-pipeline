@@ -36,6 +36,21 @@ from tests.id_minter.conftest import (
     seed_identifier,
 )
 
+
+def _miss_rereads(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make FOR SHARE re-reads return nothing, as if the row couldn't be confirmed."""
+    original_lookup = MintingResolver._lookup_chunked
+
+    def reread_misses(
+        self_: MintingResolver,
+        source_ids: list[SourceIdentifierKey],
+        for_share: bool = False,
+    ) -> dict[SourceIdentifierKey, str]:
+        return {} if for_share else original_lookup(self_, source_ids)
+
+    monkeypatch.setattr(MintingResolver, "_lookup_chunked", reread_misses)
+
+
 # ---------------------------------------------------------------------------
 # lookup_ids
 # ---------------------------------------------------------------------------
@@ -304,6 +319,90 @@ class TestIdempotency:
         assert result[sid_a] != result[sid_b]
         # Only 2 of the 4 pool IDs should have been claimed
         assert count_assigned_ids(ids_db) == 2
+
+
+# ---------------------------------------------------------------------------
+# case variants
+# ---------------------------------------------------------------------------
+
+
+class TestCaseVariants:
+    """Source IDs differing only in case resolve to the stored row."""
+
+    def test_lookup_returns_stored_id_under_requested_casing(
+        self,
+        ids_db: pymysql.connections.Connection,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        seed_identifier(
+            ids_db, SourceIdentifierKey("Work", "sierra", "b9001"), "case0001"
+        )
+        requested: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "B9001")
+
+        with caplog.at_level("INFO"):
+            result = MintingResolver.from_connection(ids_db).lookup_ids([requested])
+
+        assert result == {requested: "case0001"}
+        assert "Work/sierra/B9001 -> b9001" in caplog.text
+
+    def test_mint_returns_stored_id_without_claiming(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        seed_identifier(
+            ids_db, SourceIdentifierKey("Work", "sierra", "b9002"), "case0002"
+        )
+        seed_free_ids(ids_db, ["free0001"])
+        requested: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "B9002")
+
+        result = MintingResolver.from_connection(ids_db).mint_ids([(requested, None)])
+
+        assert result == {requested: "case0002"}
+        assert count_identifier_rows(ids_db) == 1
+        assert get_canonical_status(ids_db, "free0001") == "free"
+
+    def test_both_casings_in_one_batch_share_one_id(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        seed_free_ids(ids_db, ["free0002", "free0003"])
+        upper: SourceIdentifierKey = SourceIdentifierKey("Work", "calm", "TEST/1")
+        lower: SourceIdentifierKey = SourceIdentifierKey("Work", "calm", "test/1")
+
+        result = MintingResolver.from_connection(ids_db).mint_ids(
+            [(upper, None), (lower, None)]
+        )
+
+        assert result[upper] == result[lower]
+        assert count_identifier_rows(ids_db) == 1
+        assert count_assigned_ids(ids_db) == 1
+
+    def test_inherits_from_case_variant_predecessor(
+        self, ids_db: pymysql.connections.Connection
+    ) -> None:
+        seed_identifier(
+            ids_db, SourceIdentifierKey("Work", "sierra", "b9004"), "case0004"
+        )
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-9004")
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "B9004")
+
+        result = MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
+
+        assert result == {sid: "case0004"}
+
+    def test_unresolved_id_raises_and_commits_nothing(
+        self,
+        ids_db: pymysql.connections.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """A minted ID the re-read can't return fails the batch rather than going missing."""
+        seed_free_ids(ids_db, ["free0005"])
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b9005")
+        _miss_rereads(monkeypatch)
+
+        with pytest.raises(ValueError, match="unresolved after minting"):
+            MintingResolver.from_connection(ids_db).mint_ids([(sid, None)])
+
+        assert get_identifier_row(ids_db, sid) is None
+        assert get_canonical_status(ids_db, "free0005") == "free"
 
 
 # ---------------------------------------------------------------------------
@@ -628,18 +727,38 @@ class TestRaceConditions:
         assert row is not None
         assert row["CanonicalId"] == "fresh073"
 
-    def test_inherited_row_missing_from_reread_raises(
+    def test_inheritance_losing_to_case_variant_mint_raises(
         self,
         ids_db: pymysql.connections.Connection,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """A case-variant row collides with the insert but isn't returned for our key."""
+        """A case-variant winner is our row, so its fresh ID fails the predecessor check."""
         pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6004")
         sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6004")
         seed_identifier(ids_db, pred, "legacy64")
         self._commit_between_lookup_and_insert(
             monkeypatch, SourceIdentifierKey("Work", "folio", "ac-6004"), "fresh064"
         )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                "Predecessor mismatch for Work/folio/AC-6004: registered as fresh064, "
+                "but predecessor Work/sierra/b6004 is legacy64"
+            ),
+        ):
+            MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
+
+    def test_inherited_row_missing_from_reread_raises(
+        self,
+        ids_db: pymysql.connections.Connection,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """An inherited row the re-read can't return is never reported as resolved."""
+        pred: SourceIdentifierKey = SourceIdentifierKey("Work", "sierra", "b6005")
+        sid: SourceIdentifierKey = SourceIdentifierKey("Work", "folio", "AC-6005")
+        seed_identifier(ids_db, pred, "legacy65")
+        _miss_rereads(monkeypatch)
 
         with pytest.raises(ValueError, match="not found after insert"):
             MintingResolver.from_connection(ids_db).mint_ids([(sid, pred)])
