@@ -17,6 +17,7 @@ from ..folio import RefCache
 from .config import (
     ACCESS_ITEM_STATUS,
     AXIELL_LOCATION_NOTE_PREFIX,
+    CURRENT_LOCATION_NOTE_TYPE_FIELD,
     DEFAULT_ITEM_STATUS,
     HARVEST_FLAG_SPEC,
     HOLDINGS_SOURCE_FIELD,
@@ -25,6 +26,7 @@ from .config import (
     MARC_SOURCE,
     MATERIAL_TYPE_FIELD,
     NORMAL_LOCATION_FIELD,
+    NORMAL_LOCATION_NOTE_TYPE_FIELD,
     RECORD_TYPE_ITEM,
     VERSION,
     FieldMap,
@@ -41,6 +43,7 @@ from .payloads import (
     Instance,
     Item,
     MappedPayloads,
+    Note,
     PayloadMeta,
     Status,
 )
@@ -103,6 +106,8 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
                 " which is the agreed vocabulary, rather than relying on the"
                 " tenant to know the raw AxC value"
             )
+        if mapped is None and field.unmapped_to_default:
+            value = ""  # falls through to the default below
         value = value if mapped is None else mapped
     if not value:
         value = field.default or ""
@@ -172,6 +177,29 @@ def _item_status(rec: CanonicalRecord) -> Status:
     return Status(name=name)
 
 
+def _location_notes(rec: CanonicalRecord, ref: RefCache) -> list[Note]:
+    """The typed item notes carrying the raw AxC current and normal locations.
+
+    Not staff-only, so the FOLIO enrichment endpoint can read them. Both are
+    always emitted, current location as "unknown" when 852$b is absent, for the
+    same reason as the administrative note: the upsert replaces notes of these
+    types, and a note left out would leave the previous value in place. The
+    normal location is required by the time this runs, so it is never absent.
+    """
+    return [
+        Note(
+            note=rec.current_location or "unknown",
+            itemNoteTypeId=_resolve(CURRENT_LOCATION_NOTE_TYPE_FIELD, rec, ref),
+            staffOnly=False,
+        ),
+        Note(
+            note=rec.normal_location or "unknown",
+            itemNoteTypeId=_resolve(NORMAL_LOCATION_NOTE_TYPE_FIELD, rec, ref),
+            staffOnly=False,
+        ),
+    ]
+
+
 def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
     return Item(
         hrid=_item_hrid(rec.source_id),
@@ -179,11 +207,10 @@ def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
         status=_item_status(rec),
         permanentLoanType=IdRef(id=_resolve(LOAN_TYPE_FIELD, rec, ref)),
         permanentLocation=IdRef(id=_resolve(NORMAL_LOCATION_FIELD, rec, ref)),
-        # The AxC current location is kept as an *administrative* note, not a
-        # typed one: it is an internal audit trail of where the item actually is,
-        # and an administrative note needs no item note type to exist in the
-        # tenant. The label is part of the string because an administrative note
-        # carries no type to identify it by.
+        # The AxC current location is also kept as an administrative note, an
+        # internal audit trail of where the item actually is, alongside the typed
+        # note in `notes`. The label is part of the string because an
+        # administrative note carries no type to identify it by.
         #
         # Always emitted, "unknown" included: the note is absent from the payload
         # otherwise, and _upsert_entity merges payload over the existing record,
@@ -192,6 +219,7 @@ def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
         administrativeNotes=[
             f"{AXIELL_LOCATION_NOTE_PREFIX}: {rec.current_location or 'unknown'}"
         ],
+        notes=_location_notes(rec, ref),
     )
 
 

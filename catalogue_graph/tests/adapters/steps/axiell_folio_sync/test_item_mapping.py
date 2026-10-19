@@ -1,12 +1,15 @@
-"""The AxC current location becomes an administrative note on the FOLIO item."""
+"""The AxC locations become notes on the FOLIO item, and the item mapping rules."""
 
 from __future__ import annotations
 
 import pytest
 
 from adapters.steps.axiell_folio_sync.mapping import (
+    AXIELL_CURRENT_LOCATION_NOTE_TYPE,
     AXIELL_LOCATION_NOTE_PREFIX,
+    AXIELL_NORMAL_LOCATION_NOTE_TYPE,
     MATERIAL_TYPE,
+    USE_RESTRICTION_LOAN_TYPE,
     Item,
     MappingError,
     select_and_build,
@@ -98,14 +101,65 @@ def test_administrative_note_is_written_even_when_852b_is_absent() -> None:
     assert item.administrativeNotes == [f"{AXIELL_LOCATION_NOTE_PREFIX}: unknown"]
 
 
-def test_no_typed_item_note_is_emitted() -> None:
-    """The location used to be a typed note, which needed an "Axiell location"
-    item note type to exist in the tenant. It no longer does.
-    """
+class NoteTypeRefCache(FakeRefCache):
+    """Resolves each item note type to a UUID derived from its name, so a test
+    can tell which type each note was given."""
+
+    def resolve_item_note_type(self, name: str | None) -> str | None:
+        return f"uuid-of:{name}"
+
+
+def test_both_locations_become_typed_item_notes() -> None:
+    mapped = select_and_build(
+        _item_record("215;ROOM 3", "215;HOME 1"),
+        NoteTypeRefCache(),  # type: ignore[arg-type]
+    )
+    assert mapped is not None
+
+    assert mapped.item.model_dump(exclude_none=True)["notes"] == [
+        {
+            "note": "215;ROOM 3",
+            "itemNoteTypeId": f"uuid-of:{AXIELL_CURRENT_LOCATION_NOTE_TYPE}",
+            "staffOnly": False,
+        },
+        {
+            "note": "215;HOME 1",
+            "itemNoteTypeId": f"uuid-of:{AXIELL_NORMAL_LOCATION_NOTE_TYPE}",
+            "staffOnly": False,
+        },
+    ]
+
+
+def test_the_current_location_note_is_written_even_when_852b_is_absent() -> None:
+    """Always emitted, like the administrative note, so an update replaces a
+    stale current location rather than leaving it in place."""
+    item = _build_item(None)
+
+    assert item.notes is not None
+    assert item.notes[0].note == "unknown"
+
+
+def test_the_administrative_note_is_kept_alongside_the_typed_notes() -> None:
     item = _build_item("215;ROOM 3")
 
-    assert item.notes is None
-    assert "notes" not in item.model_dump(exclude_none=True)
+    assert item.administrativeNotes == [f"{AXIELL_LOCATION_NOTE_PREFIX}: 215;ROOM 3"]
+    assert item.notes is not None
+    assert len(item.notes) == 2
+
+
+@pytest.mark.parametrize(
+    "missing", [AXIELL_CURRENT_LOCATION_NOTE_TYPE, AXIELL_NORMAL_LOCATION_NOTE_TYPE]
+)
+def test_a_note_type_unknown_to_the_tenant_fails(missing: str) -> None:
+    """An untyped note could not be recognised on the next update, so it would
+    be duplicated every run. Failing the record is the safer outcome."""
+
+    class MissingNoteTypeRefCache(FakeRefCache):
+        def resolve_item_note_type(self, name: str | None) -> str | None:
+            return None if name == missing else "note-uuid"
+
+    with pytest.raises(MappingError, match="Unresolved item note type"):
+        select_and_build(_item_record(), MissingNoteTypeRefCache())  # type: ignore[arg-type]
 
 
 # ── AxC normal (home) location, MARC 984 ──────────────────────────────────────
@@ -223,12 +277,10 @@ def test_a_normal_location_unknown_to_the_tenant_fails() -> None:
         )
 
 
-# ── loan type: a constant, pending Collection Information ─────────────────────
+# ── loan type, from the use restriction (MARC 540 $a) ─────────────────────────
 #
-# Nothing in the AxC record maps to the loan type. Both candidate sources, the
-# access category (506$f) and the use restriction (540$a), were mapped here at
-# points and are reverted until CI settles which should drive it, and whether
-# open archival material should circulate at all. Every item is "Can circulate".
+# Only the two terms whose material can be requested circulate. Everything else,
+# including an absent 540$a and a term the table does not list, is "Unavailable".
 
 
 class RecordingRefCache(FakeRefCache):
@@ -246,12 +298,20 @@ class RecordingRefCache(FakeRefCache):
 KNOWN_LOAN_TYPES = {"Can circulate", "Reading room", "Unavailable"}
 
 
-def _record_with_access(category: str | None) -> str:
+def _record_with_access(
+    category: str | None, use_restriction: str | None = None
+) -> str:
     access = (
         f"<datafield tag='506'><subfield code='f'>{category}</subfield></datafield>"
         if category is not None
         else ""
     )
+    if use_restriction is not None:
+        access += (
+            "<datafield tag='540'>"
+            f"<subfield code='a'>{use_restriction}</subfield>"
+            "</datafield>"
+        )
     return (
         "<record>"
         "<controlfield tag='001'>guid-1</controlfield>"
@@ -266,38 +326,63 @@ def _record_with_access(category: str | None) -> str:
     )
 
 
-def _loan_type_for(category: str | None) -> str | None:
+def _loan_type_for(
+    use_restriction: str | None, category: str | None = "OPEN"
+) -> str | None:
     ref = RecordingRefCache()
-    mapped = select_and_build(_record_with_access(category), ref)  # type: ignore[arg-type]
+    mapped = select_and_build(_record_with_access(category, use_restriction), ref)  # type: ignore[arg-type]
     assert mapped is not None
     return ref.loan_type_names[-1]
 
 
-@pytest.mark.parametrize("category", ["OPEN", "CLOSED", "RESTRICTED", None])
-def test_the_loan_type_is_a_constant(category: str | None) -> None:
-    """Every item gets the default loan type, "Can circulate", whatever its
-    access category says. No AxC field is mapped to the loan type while
-    Collection Information decides what should drive it.
+@pytest.mark.parametrize(
+    ("use_restriction", "expected"),
+    [
+        ("Online request", "Can circulate"),
+        ("Restricted", "Can circulate"),
+        ("By appointment", "Unavailable"),
+        ("Unavailable", "Unavailable"),
+        ("By approval", "Unavailable"),
+        ("Missing", "Unavailable"),
+        ("Deaccessioned", "Unavailable"),
+        ("Manual request", "Unavailable"),
+    ],
+)
+def test_use_restriction_selects_the_loan_type(
+    use_restriction: str, expected: str
+) -> None:
+    assert _loan_type_for(use_restriction) == expected
 
-    This is the behaviour that makes 15,869 access-restricted records
-    requestable. It is a question still open with Collection Information rather
-    than a decision, which is why it is pinned as a test.
-    """
-    assert _loan_type_for(category) == "Can circulate"
+
+def test_every_table_term_is_tested() -> None:
+    """A term added to the table without a row above would go untested."""
+    assert len(USE_RESTRICTION_LOAN_TYPE) == 8
+
+
+def test_absent_use_restriction_gives_unavailable() -> None:
+    assert _loan_type_for(None) == "Unavailable"
+
+
+def test_an_unlisted_use_restriction_gives_unavailable_rather_than_failing() -> None:
+    """The vocabulary has grown before. A new term is treated as not
+    requestable, and is never passed to the tenant as a loan type name."""
+    assert _loan_type_for("Ask at the desk") == "Unavailable"
+
+
+def test_use_restriction_matching_is_case_insensitive() -> None:
+    assert _loan_type_for("ONLINE REQUEST") == "Can circulate"
 
 
 def test_the_access_category_does_not_reach_the_loan_type() -> None:
-    """A CLOSED item is still "Can circulate". The restriction shows up in the
-    item status instead, so FOLIO displays it correctly while the request path
-    does not."""
-    assert _loan_type_for("CLOSED") == "Can circulate"
+    """The loan type reads 540$a only. A CLOSED item that AxC marks for online
+    request still circulates, and its restriction shows in the item status."""
+    assert _loan_type_for("Online request", category="CLOSED") == "Can circulate"
     assert _status_from(category="CLOSED") == "Restricted"
 
 
 def test_unrecognised_access_category_still_raises() -> None:
-    """Nothing maps "PRIVATE". The item status reads the category even though the
-    loan type no longer does, so the record still fails rather than being guessed
-    at."""
+    """Nothing maps "PRIVATE". The item status reads the category, so the record
+    still fails rather than being guessed at."""
     with pytest.raises(MappingError, match="PRIVATE"):
         select_and_build(_record_with_access("PRIVATE"), RecordingRefCache())  # type: ignore[arg-type]
 
@@ -349,14 +434,6 @@ def test_absent_access_category_gives_an_unavailable_status() -> None:
 
 def test_item_status_matching_is_case_insensitive() -> None:
     assert _status_from(category="Closed") == "Restricted"
-
-
-def test_the_status_carries_the_restriction_the_loan_type_does_not() -> None:
-    """Where the two FOLIO fields now stand: a CLOSED item displays as
-    "Restricted" but is still requestable, because the loan type is the default
-    for everything. ."""
-    assert _status_from("CLOSED") == "Restricted"
-    assert _loan_type_for("CLOSED") == "Can circulate"
 
 
 # ── material type: required, with no default ──────────────────────────────────
