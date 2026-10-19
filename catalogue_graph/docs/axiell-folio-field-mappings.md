@@ -223,8 +223,9 @@ An unlisted term does not fail the record and is never passed to the tenant as a
 loan type name (`unmapped_to_default` on the `FieldMap`). The access category
 (`506 $f`) does not reach the loan type; it drives the item status only.
 
-Items with access note *"This item is closed and cannot be accessed"* remain
-requestable: `Restricted` permits paging under the status whitelist.
+Items with access note *"This item is closed and cannot be accessed"* are not
+blocked by the status gate alone: `Restricted` permits paging. Their loan type
+now depends on `540 $a`, and requestability also depends on the request policy.
 
 Requests must pass both the item-status whitelist and the request policy.
 mod-circulation selects that policy from circulation rules, which include

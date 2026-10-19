@@ -106,8 +106,9 @@ rather than by anything agreed here.
 
 ## 2. Loan type: implemented
 
-Every item is written `Can circulate` today, undifferentiated, because no AxC
-field is mapped to the loan type. The tenant has six loan types and none needs
+The permanent loan type comes from `540$a`: `Online request` and `Restricted`
+map to `Can circulate`; all other or absent values map to `Unavailable`.
+The tenant has six loan types and none needs
 provisioning: `Can circulate`, `Course reserves`, `ILL`, `Reading room`,
 `Selected`, `Unavailable`.
 
