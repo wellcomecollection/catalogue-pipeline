@@ -458,6 +458,21 @@ Feature: contributors (MARC 1xx and 7xx names)
     And the 1st contributor is primary
     And the 2nd contributor is not primary
 
+  Scenario: An Agent and a Person that share an identifier are both Persons
+    From MarcContributorsTest.scala. The identifier shows the Agent and the Person
+    are the same, so the Agent takes the more specific type
+    Given the MARC record has a 100 field with subfield "a" value "Sæmundr fróði" and subfield "t" value "Codex Regius" and subfield "0" value "n97018003"
+    And the MARC record has another 100 field with subfield "a" value "Snorri Sturluson" and subfield "t" value "Gylfaginning" and subfield "0" value "n50000553"
+    And the MARC record has a 700 field with subfield "a" value "Sæmundr fróði" and subfield "0" value "n97018003"
+    And the MARC record has another 700 field with subfield "a" value "Snorri Sturluson" and subfield "0" value "n50000553"
+    When I transform the MARC record
+    Then the work has 4 contributors with agent.type:
+      | Person |
+      | Person |
+      | Person |
+      | Person |
+    And the 1st contributor has the agent.id.source_identifier.ontology_type "Person"
+
   # Everything below is a deliberate divergence from the Scala implementation.
 
   Scenario: An LC Names identifier on an analytical added entry keeps its scheme
@@ -470,21 +485,6 @@ Feature: contributors (MARC 1xx and 7xx names)
     And it has the agent.type "Agent"
     And it has the agent.id.source_identifier.identifier_type.id "lc-names"
     And it has the agent.id.source_identifier.value "n85086880"
-
-  Scenario: An Agent and a Person that share an identifier each keep their type
-    From MarcContributorsTest.scala. The Scala transformer harmonises the types
-    of contributors with the same identifier to the most specific one, so it
-    turns both Agents into Persons
-    Given the MARC record has a 100 field with subfield "a" value "Sæmundr fróði" and subfield "t" value "Codex Regius" and subfield "0" value "n97018003"
-    And the MARC record has another 100 field with subfield "a" value "Snorri Sturluson" and subfield "t" value "Gylfaginning" and subfield "0" value "n50000553"
-    And the MARC record has a 700 field with subfield "a" value "Sæmundr fróði" and subfield "0" value "n97018003"
-    And the MARC record has another 700 field with subfield "a" value "Snorri Sturluson" and subfield "0" value "n50000553"
-    When I transform the MARC record
-    Then the work has 4 contributors with agent.type:
-      | Agent  |
-      | Agent  |
-      | Person |
-      | Person |
 
   Scenario: Whitespace around a subfield value is left out of the label, the identifier and the roles
     Based on Sierra b20452482 and b33850021. The Scala transformer keeps the

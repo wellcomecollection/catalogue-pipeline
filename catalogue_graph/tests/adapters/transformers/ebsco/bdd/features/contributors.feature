@@ -24,16 +24,16 @@ Feature: Extracting contributors from 1xx and 7xx name fields
   Scenario: Only a Person's identifier derives from the trimmed label
     Given the MARC record has a 100 field with subfield "a" value "SCC,"
     And the MARC record has a 110 field with subfield "a" value "SCC,"
-    And the MARC record has a 111 field with subfield "a" value "SCC,"
+    And the MARC record has a 111 field with subfield "a" value "SCC Congress,"
     When I transform the MARC record
     Then the work has 3 contributors with agent.label:
-      | SCC |
-      | SCC |
-      | SCC |
+      | SCC          |
+      | SCC          |
+      | SCC Congress |
     And the work has 3 contributors with agent.id.source_identifier.value:
-      | scc  |
-      | scc, |
-      | scc, |
+      | scc           |
+      | scc,          |
+      | scc congress, |
 
   Scenario: Only a trailing full stop is trimmed from a role, not other punctuation
     Given the MARC record has a 700 field with subfield "a" value "Randolph" and subfield "e" value "Editor." and subfield "e" value "Translator:"
@@ -42,15 +42,12 @@ Feature: Extracting contributors from 1xx and 7xx name fields
     And its 1st role has the label "Editor"
     And its 2nd role has the label "Translator:"
 
-  Scenario: Agents of different types with the same name stay distinct
-    The Scala transformer harmonises the two to a Person, since their
-    label-derived identifiers match, and then collapses them into one contributor
+  Scenario: Agents of different types with the same name collapse into one Person
+    Their label-derived identifiers match, so the Organisation takes the Person
+    type and the two are no longer distinct
     Given the MARC record has a 100 field with subfield "a" value "Dora Milaje"
     And the MARC record has a 710 field with subfield "a" value "Dora Milaje"
     When I transform the MARC record
-    Then the work has 2 contributors with agent.label:
-      | Dora Milaje |
-      | Dora Milaje |
-    And the work has 2 contributors with agent.type:
-      | Person       |
-      | Organisation |
+    Then the only contributor has the agent.label "Dora Milaje"
+    And it has the agent.type "Person"
+    And it is primary
