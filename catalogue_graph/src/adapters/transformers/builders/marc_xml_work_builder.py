@@ -5,6 +5,7 @@ from pymarc.record import Record
 from adapters.transformers.builders.source_work_builder import SourceWorkBuilder
 from adapters.transformers.marc.alternative_titles import extract_alternative_titles
 from adapters.transformers.marc.description import extract_description
+from adapters.transformers.marc.harmonisation import harmonise_work_data
 from adapters.transformers.marc.identifier import extract_id
 from adapters.transformers.marc.other_identifiers import extract_other_identifiers
 from adapters.transformers.marc.parents import get_parents
@@ -217,7 +218,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
         return VisibleSourceWork(
             version=self.version,
             state=self.visible_work_state,
-            data=self.work_data,
+            data=harmonise_work_data(self.work_data),
         )
 
     def transform_work(self) -> SourceWork:

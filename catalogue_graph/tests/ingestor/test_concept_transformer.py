@@ -19,13 +19,11 @@ from ingestor.models.neptune.query_result import (
 from ingestor.transformers.concepts_transformer import (
     IngestorConceptsTransformer,
 )
-from ingestor.transformers.raw_concept import (
-    get_most_specific_concept_type,
-)
 from models.events import BasePipelineEvent
 from tests import neptune_generators as ng
 from tests.mocks import get_mock_es_client, get_mock_neptune_client
 from tests.test_utils import load_json_fixture
+from utils.concept_types import get_most_specific_concept_type
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_to": [],
