@@ -75,7 +75,8 @@ def extract_identifier(
 
 
 def _has_scheme_prefix(value: str, scheme: MarcScheme) -> bool:
-    """True if the identifier has the scheme's prefix. Only the LoC schemes have one."""
+    """True if the identifier has the scheme's prefix"""
+    # Only validate LoC identifier prefixes, matching Scala
     if scheme not in LOC_PREFIXES:
         return True
     prefix = re.split(r"\d", value, maxsplit=1)[0]
