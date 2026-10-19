@@ -45,6 +45,8 @@ Feature: lettering (MARC 246)
       Enterprising eskimos exile every eagle
       """
 
+  # Scala's "non-visual material" case
+
   Scenario: A 514 does not contribute to lettering
     Given the MARC record has a 514 field with subfield "a" value "Lettering continues: Comment va  le malade? Hélas Monsieur, il est mort ce matin à six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
     And the MARC record has a 246 field with indicators "" "6" with subfield "a" value "Le médecin et la garde malade. H.D. ..."
@@ -53,9 +55,10 @@ Feature: lettering (MARC 246)
 
   # Known divergences from the Scala.
   #
-  # The Scala appends 514 ǂa for material type "k" (Pictures). Pictures are
-  # not catalogued in FOLIO, so there is no material type to test and 514 is
-  # never used; the "non-visual material" case above is the only one ported.
+  # The Scala also extracts lettering from 514 ǂa for material type "k" (Pictures).
+  # Pictures do not exist in FOLIO yet and they will be synced to FOLIO from Axiell,
+  # possibly as suppressed stubs, so the 514 extraction logic may be ported to the
+  # Axiell transformer instead. See wellcomecollection/platform#6570.
   #
   # The Scala does not trim and keeps blank ǂa values in the join, padding
   # the result with stray spaces and line breaks.
