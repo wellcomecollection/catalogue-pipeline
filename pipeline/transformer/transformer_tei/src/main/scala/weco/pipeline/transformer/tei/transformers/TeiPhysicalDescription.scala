@@ -138,7 +138,6 @@ object TeiPhysicalDescription {
           val str = dim.text.trim
           appendUnit(s"$label $str".trim, unitStr)
       }
-      .filterNot(_.isEmpty)
       .mkString(", ")
   }
 

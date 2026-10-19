@@ -524,7 +524,7 @@ class TeiContributorsTest
       result.value shouldBe Map.empty
     }
 
-    it("ignores handNote if it has a scribe attribute but no name") {
+    it("ignores a scribe with an empty name") {
       val result = TeiContributors.scribes(
         teiXml(
           id,
@@ -533,7 +533,14 @@ class TeiContributorsTest
               List(
                 <handNote scribe="sole"/>,
                 <handNote scribe="sole"></handNote>,
-                handNotes(label = "  ", scribe = Some("sole"))
+                handNotes(label = "  ", scribe = Some("sole")),
+                handNotes(persNames = List(<persName role="scr"/>)),
+                handNotes(persNames =
+                  List(
+                    <persName role="scr" type="original"/>,
+                    <persName role="scr">Test Scribe</persName>
+                  )
+                )
               )
             )
           )
