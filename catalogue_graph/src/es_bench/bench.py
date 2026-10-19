@@ -339,9 +339,14 @@ def load_slice(
 ) -> dict[str, Any]:
     """Copy one slice until done or the deadline, returning where to resume."""
     started = time.perf_counter()
-    pit_id = source_client.open_point_in_time(
-        index=spec.source_index, keep_alive=spec.keep_alive
-    )["id"]
+    owns_pit = spec.pit_id is None
+    pit_id = (
+        source_client.open_point_in_time(
+            index=spec.source_index, keep_alive=spec.keep_alive
+        )["id"]
+        if owns_pit
+        else cast(str, spec.pit_id)
+    )
     search_after = spec.search_after
     outcomes: list[RequestOutcome] = []
     copied = 0
@@ -379,11 +384,12 @@ def load_slice(
                     break
                 search_after = hits[-1]["sort"]
     finally:
-        # An expired PIT 404s on close and must not hide the slice's result.
-        try:
-            source_client.close_point_in_time(id=pit_id)
-        except elasticsearch.NotFoundError:
-            logger.warning("point in time already gone", slice_id=spec.slice_id)
+        # A shared PIT belongs to the caller. An expired one 404s on close.
+        if owns_pit:
+            try:
+                source_client.close_point_in_time(id=pit_id)
+            except elasticsearch.NotFoundError:
+                logger.warning("point in time already gone", slice_id=spec.slice_id)
     wall = time.perf_counter() - started
     return {
         "slice_id": spec.slice_id,

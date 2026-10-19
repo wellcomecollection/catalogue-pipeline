@@ -80,6 +80,6 @@ Two things from this spike go into that one regardless: an operator IP policy ne
 
 ## Open items
 
-- The sliced point-in-time read of works-denormalised-2026-09-30 on the hosted cluster returned 3,096,696, 2,871,430 and 2,977,706 documents in three runs against 3,057,028 in the index, with each slice's count taking one of two values. The index has one primary shard. `core/source.py` reads the same index the same way with 30 slices; a counted read there is worth doing before trusting a single extractor pass.
+- Each slice of the harness's load opened its own point in time, and separate PITs do not partition an index the same way: counting the eight slices of works-denormalised-2026-09-30 under one shared PIT summed to the index count exactly, while one PIT per slice summed to 3,017,408 and 3,078,858 against 3,057,038 (2026-10-19). That is why the three loads read different totals. The harness now takes a shared `pit_id` for a load. `core/source.py` opens one PIT and shares it across its slices, so the graph extractor is unaffected. The project's coverage was checked by random-id lookup after the loads, so the load results stand.
 - The spike project's usage for the whole of 2026-10-15, re-read from the billing API to confirm the idle figure is not understated by feed lag, and a month-by-month export of the semantic prototype's serverless lines.
 - Destroy the spike stack through review-gate once those are read.

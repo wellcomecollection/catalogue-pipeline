@@ -4,7 +4,7 @@
     ./make_event.py write_matrix --target serverless_public > /tmp/wm.json
     ./make_event.py ping --target serverless_private
     ./make_event.py scroll --target hosted_public --index works-denormalised-2026-09-30
-    ./make_event.py load --target serverless_public --slice-id 0 --slice-max 8
+    ./make_event.py load --target serverless_public --slice-id 0 --slice-max 8 --pit-id PIT
 
 Source documents always come from the hosted 2026-09-30 indices through the
 hosted bench key, so every target writes the same documents.
@@ -41,6 +41,7 @@ def main() -> None:
     parser.add_argument("--sample-count", type=int, default=5000)
     parser.add_argument("--slice-id", type=int, default=0)
     parser.add_argument("--slice-max", type=int, default=8)
+    parser.add_argument("--pit-id", default=None, help="Shared PIT for all slices of one load.")
     parser.add_argument("--version", type=int, default=None)
     parser.add_argument("--bulk-sizes", type=int, nargs="+", default=BULK_SIZES)
     parser.add_argument("--concurrencies", type=int, nargs="+", default=CONCURRENCIES)
@@ -90,6 +91,7 @@ def main() -> None:
                 "dest_index": dest,
                 "slice_id": args.slice_id,
                 "slice_max": args.slice_max,
+                "pit_id": args.pit_id,
             },
             write={"index": dest, "cells": [], "version": args.version or 1},
         )

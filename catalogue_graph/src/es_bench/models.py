@@ -66,6 +66,8 @@ class LoadSpec(BaseModel):
     keep_alive: str = "10m"
     search_after: list[object] | None = None
     deadline_seconds: int = 780
+    # Slices of one copy must share a PIT; separate PITs partition differently.
+    pit_id: str | None = None
 
 
 class CountSpec(BaseModel):
