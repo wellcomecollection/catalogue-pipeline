@@ -52,7 +52,11 @@ class DataApiIdResolver:
             parameters=parameters,
             includeResultMetadata=True,
         )
-        columns = [col["name"] for col in response.get("columnMetadata", [])]
+        # label carries a column alias; name is the underlying column.
+        columns = [
+            col.get("label") or col["name"]
+            for col in response.get("columnMetadata", [])
+        ]
         rows: list[dict[str, str]] = []
         for record in response.get("records", []):
             row = {
@@ -76,7 +80,7 @@ class DataApiIdResolver:
         for (ontology_type, source_system), values in batches.items():
             for i in range(0, len(values), _BATCH_SIZE):
                 chunk = values[i : i + _BATCH_SIZE]
-                placeholders = ", ".join(f":sid{j}" for j in range(len(chunk)))
+                rows = ", ".join(f"ROW(:sid{j})" for j in range(len(chunk)))
                 params: list[dict[str, Any]] = [
                     {"name": f"sid{j}", "value": {"stringValue": v}}
                     for j, v in enumerate(chunk)
@@ -87,17 +91,18 @@ class DataApiIdResolver:
                         {"name": "sys", "value": {"stringValue": source_system}},
                     ]
                 )
+                # Keyed by the requested value, as SourceId compares under its
+                # collation; JOIN_ORDER keeps one PK lookup per value.
                 sql = (
-                    f"SELECT OntologyType, SourceSystem, SourceId, CanonicalId "
-                    f"FROM `{self._table_name}` "
-                    f"WHERE OntologyType = :ont AND SourceSystem = :sys "
-                    f"AND SourceId IN ({placeholders})"
+                    f"SELECT /*+ JOIN_ORDER(r, i) */ r.req AS RequestedId, i.CanonicalId "
+                    f"FROM (VALUES {rows}) AS r(req) "
+                    f"JOIN `{self._table_name}` i "
+                    f"ON i.OntologyType = :ont AND i.SourceSystem = :sys "
+                    f"AND i.SourceId = r.req"
                 )
                 for row in self._execute(sql, params):
                     key = SourceIdentifierKey(
-                        row["OntologyType"],
-                        row["SourceSystem"],
-                        row["SourceId"],
+                        ontology_type, source_system, row["RequestedId"]
                     )
                     result[key] = row["CanonicalId"]
 
