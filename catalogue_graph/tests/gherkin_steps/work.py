@@ -217,25 +217,31 @@ def its_nth_list_member_has(
     )
 
 
-@then(parsers.re(r"it is (?P<flag>primary|not primary)"))
-def antecedent_primary(antecedent: Any, flag: str) -> None:
-    assert antecedent.primary == (flag == "primary"), (
-        f"Expected {flag}, got primary={antecedent.primary!r}"
+def _assert_flag(obj: Any, negation: str, attr: str, where: str) -> None:
+    actual = drill_through_dots(obj, attr)
+    expected = not negation
+    assert actual is expected, (
+        f"Expected {where} to be {negation}{attr}, got {attr}={actual!r}"
     )
+
+
+@then(parsers.re(r"it is (?P<negation>not )?(?P<attr>[\w.]+)"))
+def antecedent_is(antecedent: Any, negation: str | None, attr: str) -> None:
+    _assert_flag(antecedent, negation or "", attr, "it")
 
 
 @then(
     parsers.re(
-        r"the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) is (?P<flag>primary|not primary)"
-    )
+        r"the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) is (?P<negation>not )?(?P<attr>[\w.]+)"
+    ),
+    target_fixture="antecedent",
 )
-def list_member_nth_primary(
-    work: SourceWork, index: str, attr_phrase: str, flag: str
-) -> None:
+def list_member_nth_is_flag(
+    work: SourceWork, index: str, attr_phrase: str, negation: str | None, attr: str
+) -> Any:
     member = _list_member_nth(work, index, attr_phrase)
-    assert member.primary == (flag == "primary"), (
-        f"Expected {attr_phrase} at position {index} to be {flag}, got primary={member.primary!r}"
-    )
+    _assert_flag(member, negation or "", attr, f"{attr_phrase} at position {index}")
+    return member
 
 
 @then(parsers.parse("it has no {sub_attr}"))
