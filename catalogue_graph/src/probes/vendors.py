@@ -16,6 +16,8 @@ from probes.emf import Timer
 # Matches the adapters' OAI read timeout, so a probe timeout means the adapter would fail too.
 TIMEOUT_SECONDS = 60
 CONNECT_TIMEOUT_SECONDS = 10
+# ftplib's timeout is per socket operation; about a dozen per run must fit the 180s Lambda timeout.
+FTP_TIMEOUT_SECONDS = 10
 
 
 def _an_hour_ago() -> datetime:
@@ -139,7 +141,7 @@ def folio_okapi(creds: dict, client: httpx.Client, timed: Timer) -> None:
 
 
 def ebsco_ftp(creds: dict, client: httpx.Client, timed: Timer) -> None:
-    ftp = FTP(timeout=TIMEOUT_SECONDS)
+    ftp = FTP(timeout=FTP_TIMEOUT_SECONDS)
     try:
         with timed("auth"):
             ftp.connect(creds["server"])
