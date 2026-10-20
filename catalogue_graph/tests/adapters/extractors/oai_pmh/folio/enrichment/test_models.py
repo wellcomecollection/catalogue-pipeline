@@ -6,6 +6,7 @@ import pytest
 from adapters.extractors.oai_pmh.folio.enrichment.models import (
     FolioEnrichedInstance,
     FolioInventoryRecord,
+    parse_inventory_records,
 )
 from tests.adapters.transformers.folio.helpers import fixture_record
 
@@ -114,3 +115,18 @@ def test_record_raises_when_item_links_to_no_holdings(
         record["items"][3]["holdingsRecordId"] = holdings_record_id
     with pytest.raises(ValueError, match="links to no holdings record"):
         FolioInventoryRecord(data=record)
+
+
+def test_parse_inventory_records_rejects_each_bad_record_on_its_own() -> None:
+    broken = fixture_record("i-2")
+    del broken["holdings"][1]["id"]
+    no_instance = fixture_record()
+    del no_instance["instanceId"]
+
+    fetch = parse_inventory_records([fixture_record("i-1"), broken, no_instance])
+
+    assert [r.instance_id for r in fetch.records] == ["i-1"]
+    assert [(r.instance_id, r.reason) for r in fetch.rejected] == [
+        ("i-2", "FOLIO holdings on instance 'i-2' is missing an id"),
+        (None, "FOLIO items-and-holdings record is missing instanceId"),
+    ]

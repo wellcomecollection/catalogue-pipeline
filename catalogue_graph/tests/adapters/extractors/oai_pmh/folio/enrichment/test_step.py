@@ -4,7 +4,11 @@ from uuid import uuid1
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioInventoryEnricher
-from adapters.extractors.oai_pmh.folio.enrichment.models import FolioInventoryRecord
+from adapters.extractors.oai_pmh.folio.enrichment.models import (
+    InventoryFetch,
+    parse_inventory_records,
+)
+from adapters.extractors.oai_pmh.reporting import OAIPMHEnrichmentReport
 from adapters.steps.oai_pmh.folio_enrich import (
     EnrichmentEvent,
     collect_instance_ids,
@@ -23,12 +27,10 @@ class FakeInventoryClient:
     def __init__(self, responses: dict[str, dict[str, Any]]) -> None:
         self.responses = responses
 
-    def items_and_holdings(self, instance_ids: list[str]) -> list[FolioInventoryRecord]:
-        return [
-            FolioInventoryRecord(data=self.responses[i])
-            for i in instance_ids
-            if i in self.responses
-        ]
+    def items_and_holdings(self, instance_ids: list[str]) -> InventoryFetch:
+        return parse_inventory_records(
+            [self.responses[i] for i in instance_ids if i in self.responses]
+        )
 
 
 def _local_store(namespace: str) -> AdapterStore:
@@ -82,6 +84,7 @@ def test_run_enrichment_populates_inventory_store(
 
     assert response.changeset_ids == [changeset_id]
     assert len(response.items_changeset_ids) == 1
+    assert (response.requested_count, response.rejected_count) == (2, 0)
 
     stored_ids = {
         r["id"] for r in inventory_store.get_active_namespace_records().to_pylist()
@@ -102,3 +105,15 @@ def test_run_enrichment_with_no_changes_returns_empty_items_changeset(
         enricher,
     )
     assert response.items_changeset_ids == []
+
+
+def test_enrichment_report_emits_the_rejected_count() -> None:
+    report = OAIPMHEnrichmentReport(
+        adapter_type="folio", job_id="job-1", requested_count=5, rejected_record_count=2
+    )
+    assert {m.name: m.value for m in report.metrics} == {
+        "requested_count": 5,
+        "rejected_record_count": 2,
+    }
+    assert report.metric_dimensions == {"adapter_type": "folio"}
+    assert report.label == "adapter_enrichment"

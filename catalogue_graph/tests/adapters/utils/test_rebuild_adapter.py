@@ -16,7 +16,10 @@ import scripts.rebuild_adapter as rebuild_adapter
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
 )
-from adapters.extractors.oai_pmh.folio.enrichment.models import FolioInventoryRecord
+from adapters.extractors.oai_pmh.folio.enrichment.models import (
+    InventoryFetch,
+    parse_inventory_records,
+)
 from adapters.extractors.oai_pmh.runtime import OAIPMHAdapterConfig
 from adapters.steps.oai_pmh.reconcile import ReconcileRuntime
 from adapters.utils.adapter_store import AdapterStore
@@ -64,7 +67,7 @@ def test_download_inventory_to_snapshot_aborts_on_zero_items(
         bib_snapshot_path,
     )
     monkeypatch.setattr(
-        rebuild_adapter, "fetch_inventory_rows", lambda *args, **kwargs: None
+        rebuild_adapter, "fetch_inventory_rows", lambda *args, **kwargs: (None, [])
     )
     inventory_snapshot_path = tmp_path / "items.parquet"
 
@@ -460,13 +463,11 @@ class _FakeInventoryClient:
         self.records = records
         self.requested: list[str] = []
 
-    def items_and_holdings(self, instance_ids: list[str]) -> list[FolioInventoryRecord]:
+    def items_and_holdings(self, instance_ids: list[str]) -> InventoryFetch:
         self.requested.extend(instance_ids)
-        return [
-            FolioInventoryRecord(data=self.records[i])
-            for i in instance_ids
-            if i in self.records
-        ]
+        return parse_inventory_records(
+            [self.records[i] for i in instance_ids if i in self.records]
+        )
 
 
 def test_folio_inventory_only_wipes_and_reloads_the_inventory_store(

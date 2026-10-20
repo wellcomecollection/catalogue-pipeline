@@ -31,6 +31,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    ValidationError,
     computed_field,
     model_validator,
 )
@@ -79,8 +80,9 @@ class FolioInventoryRecord(BaseModel):
     Only the ids the store depends on are checked: a record without an instance
     id cannot be keyed to a bib row, an item without an id cannot mint a stable
     identifier, and an item must link to a holdings record in the same response
-    for the transform to fall back to it. Any failure fails the whole batch.
-    Everything else is stored as it comes and parsed at transform time.
+    for the transform to fall back to it. A record that fails is rejected on its
+    own (see ``parse_inventory_records``). Everything else is stored as it comes
+    and parsed at transform time.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -98,11 +100,6 @@ class FolioInventoryRecord(BaseModel):
                     f"FOLIO item on instance {self.instance_id!r} is missing an id"
                 )
 
-        # Broken holdings fail the batch rather than being logged and stored: one
-        # bad record then blocks its batch until FOLIO fixes it, but a stored one
-        # would only surface later as a wrong or missing location at transform
-        # time. The 2026-10-13 baseline had no such records, and the migration is
-        # still reshaping holdings, so a failure here is worth hearing about.
         holdings_ids: set[str] = set()
         for holdings in self.data.get("holdings") or []:
             holdings_id = holdings.get("id")
@@ -137,3 +134,36 @@ class FolioInventoryRecord(BaseModel):
         ``incremental_update`` skips it.
         """
         return json.dumps(self.data, sort_keys=True, separators=(",", ":"))
+
+
+class RejectedInventoryRecord(BaseModel):
+    """A response record left out of the store, and why."""
+
+    instance_id: str | None
+    reason: str
+
+
+class InventoryFetch(BaseModel):
+    """The records from an items-and-holdings fetch, split into stored and rejected."""
+
+    records: list[FolioInventoryRecord] = Field(default_factory=list)
+    rejected: list[RejectedInventoryRecord] = Field(default_factory=list)
+
+
+def parse_inventory_records(raw: list[dict[str, Any]]) -> InventoryFetch:
+    """Validate each raw record on its own, so one bad record doesn't hold up the rest.
+
+    A rejected instance keeps its last stored row, and is fetched again once a fix
+    in FOLIO advances its OAI datestamp.
+    """
+    fetch = InventoryFetch()
+    for data in raw:
+        try:
+            fetch.records.append(FolioInventoryRecord(data=data))
+        except ValidationError as e:
+            reason = str(e.errors()[0]["msg"]).removeprefix("Value error, ")
+            instance_id = data.get("instanceId") if isinstance(data, dict) else None
+            fetch.rejected.append(
+                RejectedInventoryRecord(instance_id=instance_id, reason=reason)
+            )
+    return fetch

@@ -25,6 +25,7 @@ from pydantic import BaseModel, Field
 from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioInventoryEnricher
 from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_enricher
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
+from adapters.extractors.oai_pmh.reporting import OAIPMHEnrichmentReport
 from adapters.utils.adapter_store import AdapterStore
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import ecs_handler
@@ -45,6 +46,8 @@ class EnrichmentResponse(BaseModel):
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
     items_changeset_ids: list[str] = Field(default_factory=list)
+    requested_count: int = 0
+    rejected_count: int = 0
 
 
 def collect_instance_ids(
@@ -71,13 +74,15 @@ def run_enrichment(
         count=len(instance_ids),
     )
 
-    update = enricher.enrich(instance_ids)
+    update, rejected = enricher.enrich(instance_ids)
     items_changeset_ids = [update.changeset_id] if update else []
 
     return EnrichmentResponse(
         job_id=event.job_id,
         changeset_ids=event.changeset_ids,
         items_changeset_ids=items_changeset_ids,
+        requested_count=len(instance_ids),
+        rejected_count=len(rejected),
     )
 
 
@@ -90,7 +95,15 @@ def handler(
     setup_logging(execution_context)
     bib_store = FOLIO_CONFIG.build_adapter_store(use_rest_api_table=use_rest_api_table)
     enricher = build_enricher(use_rest_api_table=use_rest_api_table)
-    return run_enrichment(event, bib_store, enricher)
+    response = run_enrichment(event, bib_store, enricher)
+    OAIPMHEnrichmentReport(
+        adapter_type=FOLIO_CONFIG.config.adapter_name,
+        job_id=event.job_id,
+        requested_count=response.requested_count,
+        rejected_record_count=response.rejected_count,
+        emit_metrics=use_rest_api_table,
+    ).publish()
+    return response
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
