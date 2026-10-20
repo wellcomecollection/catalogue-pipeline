@@ -99,6 +99,30 @@ def _merge_admin_notes(existing: list, incoming: list) -> list:
     return kept + list(incoming)
 
 
+def _merge_item_notes(existing: list, incoming: list) -> list:
+    """Replace the notes of the types the payload carries, keeping every other note.
+
+    Without this the shallow payload-wins merge in :func:`_upsert_entity` would
+    swap the item's whole ``notes`` list for the ones the mapping builds, dropping
+    anything a cataloguer added in FOLIO. Unlike ``administrativeNotes``, a typed
+    note identifies itself by ``itemNoteTypeId``, so every existing note of an
+    incoming type is the sync's own and is replaced, and no label is matched.
+    Notes of other types, and untyped ones, are kept in their original order, the
+    incoming notes appended last.
+    """
+    owned_types = {
+        note["itemNoteTypeId"]
+        for note in incoming
+        if isinstance(note, dict) and note.get("itemNoteTypeId")
+    }
+    kept = [
+        note
+        for note in existing
+        if not (isinstance(note, dict) and note.get("itemNoteTypeId") in owned_types)
+    ]
+    return kept + list(incoming)
+
+
 # Substring that makes a note *look* like a location note the sync wrote.
 # Deliberately broad: a false positive costs a log line, a false negative lets a
 # duplicate accumulate unseen, which is the thing being guarded against.
@@ -282,6 +306,10 @@ def _upsert_entity(
             if "administrativeNotes" in payload:
                 merged["administrativeNotes"] = _merge_admin_notes(
                     existing_notes, payload["administrativeNotes"]
+                )
+            if "notes" in payload:
+                merged["notes"] = _merge_item_notes(
+                    existing.get("notes") or [], payload["notes"]
                 )
             folio.put(f"{write_path_prefix}/{folio_id}", merged)
             logger.info("updated hrid=%s folio_id=%s", hrid, folio_id)
