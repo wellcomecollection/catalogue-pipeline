@@ -210,16 +210,22 @@ resource "elasticstack_elasticsearch_ingest_pipeline" "set_indexed_at" {
 
 # Cluster connection secrets
 locals {
-  connection_secrets_kv_map = {
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/public_host"           = var.es_cluster.public_host
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/private_host"          = var.es_cluster.private_host
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/port"                  = var.es_cluster.port
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/protocol"              = var.es_cluster.protocol
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/es_username"           = var.es_cluster.username
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/es_password"           = var.es_cluster.password
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_username" = var.es_cluster.read_only_username
-    "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_password" = var.es_cluster.read_only_password
-  }
+  connection_secrets_kv_map = merge(
+    {
+      "elasticsearch/pipeline_storage_${var.pipeline_date}/public_host"  = var.es_cluster.public_host
+      "elasticsearch/pipeline_storage_${var.pipeline_date}/private_host" = var.es_cluster.private_host
+      "elasticsearch/pipeline_storage_${var.pipeline_date}/port"         = var.es_cluster.port
+      "elasticsearch/pipeline_storage_${var.pipeline_date}/protocol"     = var.es_cluster.protocol
+      "elasticsearch/pipeline_storage_${var.pipeline_date}/es_username"  = var.es_cluster.username
+      "elasticsearch/pipeline_storage_${var.pipeline_date}/es_password"  = var.es_cluster.password
+    },
+    # The native read_only user only exists on hosted clusters. The test is
+    # unmarked so the map's keys stay usable in for_each.
+    nonsensitive(var.es_cluster.read_only_username == null) ? {} : {
+      "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_username" = var.es_cluster.read_only_username
+      "elasticsearch/pipeline_storage_${var.pipeline_date}/read_only/es_password" = var.es_cluster.read_only_password
+    }
+  )
 }
 
 module "pipeline_storage_connection_secrets" {
