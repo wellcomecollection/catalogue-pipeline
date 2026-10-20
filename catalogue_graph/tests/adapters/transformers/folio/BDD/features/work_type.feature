@@ -47,6 +47,6 @@ Feature: work type
     Then the work's work type is "Standard"
 
   Scenario: A collection-level leader does not change the work type
-    Given the MARC record's leader is "00000ncm a2200000 a 4500"
+    Given the MARC record's leader is "00000ntc a2200000 a 4500"
     When I transform the MARC record
     Then the work's work type is "Standard"
