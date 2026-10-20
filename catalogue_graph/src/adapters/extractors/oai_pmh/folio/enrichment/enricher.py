@@ -47,10 +47,22 @@ from adapters.utils.schemata import ADAPTER_STORE_ARROW_SCHEMA
 
 logger = structlog.get_logger(__name__)
 
-# Rejecting this many records, and this share of a fetch, looks like a systemic
-# break (a FOLIO change, say) rather than a few bad records, so it fails the step.
-REJECTED_COUNT_TO_FAIL = 10
-REJECTED_SHARE_TO_FAIL = 0.01
+# Rejecting more than this many records, or this share of a large fetch, looks like
+# a systemic break (a FOLIO change, say) rather than a few bad records.
+REJECTED_FLOOR = 10
+REJECTED_SHARE = 0.01
+
+
+class SystemicRejectionError(ValueError):
+    """Too many records rejected in one fetch; carries them so they can be reported."""
+
+    def __init__(self, rejected: list[RejectedInventoryRecord], total: int) -> None:
+        self.rejected = rejected
+        self.total = total
+        super().__init__(
+            f"Rejected {len(rejected)} of {total} FOLIO inventory records, "
+            "which looks like a systemic problem rather than a few bad records"
+        )
 
 
 class InventoryRows(NamedTuple):
@@ -136,14 +148,8 @@ def fetch_inventory_rows(
             reason=r.reason,
         )
     total = len(records_by_store_id) + len(rejected)
-    if (
-        len(rejected) >= REJECTED_COUNT_TO_FAIL
-        and len(rejected) > REJECTED_SHARE_TO_FAIL * total
-    ):
-        raise ValueError(
-            f"Rejected {len(rejected)} of {total} FOLIO inventory records, "
-            "which looks like a systemic problem rather than a few bad records"
-        )
+    if len(rejected) > max(REJECTED_FLOOR, REJECTED_SHARE * total):
+        raise SystemicRejectionError(rejected, total)
 
     if not records_by_store_id:
         return InventoryRows(None, rejected)

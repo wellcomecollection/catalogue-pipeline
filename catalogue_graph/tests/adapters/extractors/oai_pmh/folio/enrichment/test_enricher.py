@@ -6,8 +6,9 @@ import pytest
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.extractors.oai_pmh.folio.enrichment.enricher import (
-    REJECTED_COUNT_TO_FAIL,
+    REJECTED_FLOOR,
     FolioInventoryEnricher,
+    SystemicRejectionError,
 )
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
@@ -182,7 +183,7 @@ def test_enrich_fails_when_rejections_look_systemic(
 ) -> None:
     """Many rejections at once look like a FOLIO-wide change, not a few bad records."""
     responses = {}
-    for n in range(REJECTED_COUNT_TO_FAIL):
+    for n in range(REJECTED_FLOOR + 1):
         record = fixture_record(f"inst-{n}")
         del record["holdings"][0]["id"]
         responses[f"inst-{n}"] = record
@@ -190,8 +191,9 @@ def test_enrich_fails_when_rejections_look_systemic(
     store = _store(temporary_table)
     enricher = FolioInventoryEnricher(client, store)  # type: ignore[arg-type]
 
-    with pytest.raises(ValueError, match="systemic"):
+    with pytest.raises(SystemicRejectionError) as raised:
         enricher.enrich(list(responses))
+    assert len(raised.value.rejected) == REJECTED_FLOOR + 1
     assert store.get_active_namespace_records().num_rows == 0
 
 
@@ -231,3 +233,22 @@ def test_enrich_stores_the_fixture_unchanged(temporary_table: IcebergTable) -> N
     stored = FolioEnrichedInstance.from_store_content(row["content"])
     assert len(stored.items) == 61
     assert len(json.loads(row["content"])["holdings"]) == 27
+
+
+def test_enrich_tolerates_rejections_up_to_the_floor(
+    temporary_table: IcebergTable,
+) -> None:
+    """A small window can have a few bad records without failing the step."""
+    responses = {}
+    for n in range(REJECTED_FLOOR):
+        record = fixture_record(f"inst-{n}")
+        del record["holdings"][0]["id"]
+        responses[f"inst-{n}"] = record
+    client = FakeInventoryClient(responses)
+    store = _store(temporary_table)
+    enricher = FolioInventoryEnricher(client, store)  # type: ignore[arg-type]
+
+    update, rejected = enricher.enrich(list(responses))
+
+    assert update is None
+    assert len(rejected) == REJECTED_FLOOR

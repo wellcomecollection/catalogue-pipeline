@@ -1,14 +1,20 @@
 from typing import Any
 from uuid import uuid1
 
+import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioInventoryEnricher
+from adapters.extractors.oai_pmh.folio.enrichment.enricher import (
+    REJECTED_FLOOR,
+    FolioInventoryEnricher,
+    SystemicRejectionError,
+)
 from adapters.extractors.oai_pmh.folio.enrichment.models import (
     InventoryFetch,
+    RejectedInventoryRecord,
     parse_inventory_records,
 )
-from adapters.extractors.oai_pmh.reporting import OAIPMHEnrichmentReport
+from adapters.extractors.oai_pmh.folio.enrichment.reporting import FolioEnrichmentReport
 from adapters.steps.oai_pmh.folio_enrich import (
     EnrichmentEvent,
     collect_instance_ids,
@@ -107,13 +113,62 @@ def test_run_enrichment_with_no_changes_returns_empty_items_changeset(
     assert response.items_changeset_ids == []
 
 
-def test_enrichment_report_emits_the_rejected_count() -> None:
-    report = OAIPMHEnrichmentReport(
-        adapter_type="folio", job_id="job-1", requested_count=5, rejected_record_count=2
+def test_run_enrichment_reports_rejections_before_failing(
+    temporary_table: IcebergTable,
+) -> None:
+    """The rejected list is reported even when the step fails on systemic rejection."""
+    ids = [f"inst-{n}" for n in range(REJECTED_FLOOR + 1)]
+    bib_store = AdapterStore(temporary_table, BIB_NAMESPACE)
+    changeset_id = _seed_bib_changeset(bib_store, ids)
+    broken = {}
+    for i in ids:
+        record = fixture_record(i)
+        del record["holdings"][0]["id"]
+        broken[i] = record
+    client = FakeInventoryClient(broken)
+    enricher = FolioInventoryEnricher(client, _local_store(INVENTORY_NAMESPACE))  # type: ignore[arg-type]
+    reports: list[tuple[int, int, bool]] = []
+
+    with pytest.raises(SystemicRejectionError):
+        run_enrichment(
+            EnrichmentEvent(job_id="job-1", changeset_ids=[changeset_id]),
+            bib_store,
+            enricher,
+            lambda requested, rejected, failed: reports.append(
+                (requested, len(rejected), failed)
+            ),
+        )
+
+    assert reports == [(len(ids), len(ids), True)]
+
+
+def test_report_writes_the_rejected_list_only_when_there_is_one() -> None:
+    rejected = [RejectedInventoryRecord(instance_id="i-1", reason="missing an id")]
+    report = FolioEnrichmentReport.build(
+        adapter_type="folio",
+        job_id="20261020T1200",
+        requested_count=5,
+        rejected=rejected,
+        report_s3_bucket="bucket",
+        report_s3_prefix="prod",
+    )
+    assert report.publish_to_s3
+    assert report.s3_uri.startswith(
+        "s3://bucket/prod/reports/folio/adapter_enrichment/20261020T1200_"
     )
     assert {m.name: m.value for m in report.metrics} == {
         "requested_count": 5,
-        "rejected_record_count": 2,
+        "rejected_record_count": 1,
     }
-    assert report.metric_dimensions == {"adapter_type": "folio"}
-    assert report.label == "adapter_enrichment"
+    assert report.model_dump(mode="json")["rejected"] == [
+        {"instance_id": "i-1", "reason": "missing an id"}
+    ]
+
+    clean = FolioEnrichmentReport.build(
+        adapter_type="folio",
+        job_id="20261020T1200",
+        requested_count=5,
+        rejected=[],
+        report_s3_bucket="bucket",
+    )
+    assert not clean.publish_to_s3

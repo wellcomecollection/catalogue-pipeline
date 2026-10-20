@@ -234,28 +234,3 @@ class OAIPMHIdLoadReport(OAIPMHReportBase):
             ),
             PipelineMetric(name="changeset_count", value=self.changeset_count),
         ]
-
-
-class OAIPMHEnrichmentReport(OAIPMHReportBase):
-    """Enrichment step report, so rejected inventory records can be alarmed on."""
-
-    label: ClassVar[str] = "adapter_enrichment"
-    job_id: str
-    requested_count: int
-    rejected_record_count: int
-
-    emit_metrics: bool = True
-    """Publish CloudWatch metrics. Disabled for local runs."""
-
-    @property
-    def publish_to_cloudwatch(self) -> bool:
-        return self.emit_metrics
-
-    @property
-    def metrics(self) -> list[PipelineMetric]:
-        return [
-            PipelineMetric(name="requested_count", value=self.requested_count),
-            PipelineMetric(
-                name="rejected_record_count", value=self.rejected_record_count
-            ),
-        ]

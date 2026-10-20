@@ -17,15 +17,19 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import Any, cast
+from typing import Any, Protocol, cast
 
 import structlog
 from pydantic import BaseModel, Field
 
-from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioInventoryEnricher
+from adapters.extractors.oai_pmh.folio.enrichment.enricher import (
+    FolioInventoryEnricher,
+    SystemicRejectionError,
+)
+from adapters.extractors.oai_pmh.folio.enrichment.models import RejectedInventoryRecord
+from adapters.extractors.oai_pmh.folio.enrichment.reporting import FolioEnrichmentReport
 from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_enricher
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
-from adapters.extractors.oai_pmh.reporting import OAIPMHEnrichmentReport
 from adapters.utils.adapter_store import AdapterStore
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import ecs_handler
@@ -61,12 +65,29 @@ def collect_instance_ids(
     return list(dict.fromkeys(instance_ids))
 
 
+class RejectionReporter(Protocol):
+    def __call__(
+        self, requested: int, rejected: list[RejectedInventoryRecord], failed: bool
+    ) -> None: ...
+
+
+def _no_report(
+    requested: int, rejected: list[RejectedInventoryRecord], failed: bool
+) -> None:
+    pass
+
+
 def run_enrichment(
     event: EnrichmentEvent,
     bib_store: AdapterStore,
     enricher: FolioInventoryEnricher,
+    report: RejectionReporter = _no_report,
 ) -> EnrichmentResponse:
-    """Core enrichment logic: changed bib instances -> upserted item rows."""
+    """Core enrichment logic: changed bib instances -> upserted item rows.
+
+    ``report`` is called with the rejected records before the step fails on
+    systemic rejection too, so the list survives the run that needs it most.
+    """
     instance_ids = collect_instance_ids(bib_store, event.changeset_ids)
     logger.info(
         "Collected changed instance ids for enrichment",
@@ -74,7 +95,12 @@ def run_enrichment(
         count=len(instance_ids),
     )
 
-    update, rejected = enricher.enrich(instance_ids)
+    try:
+        update, rejected = enricher.enrich(instance_ids)
+    except SystemicRejectionError as e:
+        report(len(instance_ids), e.rejected, True)
+        raise
+    report(len(instance_ids), rejected, False)
     items_changeset_ids = [update.changeset_id] if update else []
 
     return EnrichmentResponse(
@@ -95,15 +121,24 @@ def handler(
     setup_logging(execution_context)
     bib_store = FOLIO_CONFIG.build_adapter_store(use_rest_api_table=use_rest_api_table)
     enricher = build_enricher(use_rest_api_table=use_rest_api_table)
-    response = run_enrichment(event, bib_store, enricher)
-    OAIPMHEnrichmentReport(
-        adapter_type=FOLIO_CONFIG.config.adapter_name,
-        job_id=event.job_id,
-        requested_count=response.requested_count,
-        rejected_record_count=response.rejected_count,
-        emit_metrics=use_rest_api_table,
-    ).publish()
-    return response
+    config = FOLIO_CONFIG.config
+
+    def report(
+        requested: int, rejected: list[RejectedInventoryRecord], failed: bool
+    ) -> None:
+        FolioEnrichmentReport.build(
+            adapter_type=config.adapter_name,
+            job_id=event.job_id,
+            requested_count=requested,
+            rejected=rejected,
+            failed=failed,
+            # Local runs keep the list in the logs only.
+            report_s3_bucket=config.report_s3_bucket if use_rest_api_table else None,
+            report_s3_prefix=config.report_s3_prefix,
+            emit_metrics=use_rest_api_table,
+        ).publish()
+
+    return run_enrichment(event, bib_store, enricher, report)
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
