@@ -12,7 +12,7 @@ import httpx
 import structlog
 
 from probes import vendors
-from probes.emf import Timer, emit, timer_for
+from probes.emf import Timer, emit, emit_run, timer_for
 from utils.aws import get_ssm_parameter
 
 logger = structlog.get_logger(__name__)
@@ -39,6 +39,12 @@ CREDENTIALS_PREFIX = os.getenv(
 
 
 def run(vendor: str, client: httpx.Client | None = None) -> bool:
+    ok = _run(vendor, client)
+    emit_run(vendor, ok)
+    return ok
+
+
+def _run(vendor: str, client: httpx.Client | None) -> bool:
     try:
         probe = PROBES[vendor]
         creds = json.loads(get_ssm_parameter(f"{CREDENTIALS_PREFIX}/{vendor}"))
