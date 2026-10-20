@@ -78,6 +78,12 @@ variable "enable_adapter_transformer_trigger" {
   description = "Whether the EventBridge rule that starts the transformer on <adapter>.adapter.completed events is enabled."
 }
 
+variable "enable_folio_transformer" {
+  type        = bool
+  default     = false
+  description = "Whether FOLIO adapter and reindex events start this pipeline's transformer. Only the FOLIO environment sets it, so FOLIO works stay out of production."
+}
+
 variable "axiell_collection_path_source" {
   type        = string
   default     = "refno"
