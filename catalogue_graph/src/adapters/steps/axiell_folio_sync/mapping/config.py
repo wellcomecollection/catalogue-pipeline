@@ -16,7 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # Bumped whenever the mapping rules change; stamped into every payload's meta.
-VERSION = "2.6.1"
+VERSION = "2.8.0"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────
@@ -34,8 +34,9 @@ RECORD_TYPE_ITEM = "ITEM"  # only item-level records are synced
 #
 # Every key here is a value that actually occurs in the corpus, and every target
 # exists in the FOLIO tenant, so nothing needs provisioning. The table covers
-# 187,881 of 187,996 item records; the remaining 115 carry no 655$a and fail,
-# because there is no default (see MATERIAL_TYPE_FIELD).
+# every 655$a value present in the corpus; records carrying no 655$a at all fail,
+# because there is no default (see MATERIAL_TYPE_FIELD). For the dated coverage
+# figures see docs/axiell-folio-mapping-options.md, which carries the provenance.
 MATERIAL_TYPE: dict[str, str] = {
     "Archives - Non-digital": "archive",
     "Archives - Digital": "archive",
@@ -76,12 +77,29 @@ ACCESS_ITEM_STATUS: dict[str, str] = {
     "DATAISSUES": "Unknown",
 }
 
+# AxC use restriction (MARC 540$a) to FOLIO loan type name. Keys are the terms
+# AxC sends, matched case-insensitively. Only the two terms whose material can be
+# requested circulate; every other term, an absent 540$a, and a term not listed
+# here get DEFAULT_LOAN_TYPE. Unlike the material type, an unlisted term does not
+# fail the record: the vocabulary has grown before, and "Unavailable" is the safe
+# reading of a term nobody has mapped.
+USE_RESTRICTION_LOAN_TYPE: dict[str, str] = {
+    "Online request": "Can circulate",
+    "Restricted": "Can circulate",
+    "By appointment": "Unavailable",
+    "Unavailable": "Unavailable",
+    "By approval": "Unavailable",
+    "Missing": "Unavailable",
+    "Deaccessioned": "Unavailable",
+    "Manual request": "Unavailable",
+}
+
 # Fallbacks when MARC data is missing.
 # Material type has no default; records without 655$a fail rather than getting a
 # misleading type. See MATERIAL_TYPE_FIELD.
-# Loan type defaults to "Can circulate"; no AxC field currently overrides it.
+# Loan type defaults to "Unavailable", for an absent or unlisted 540$a.
 
-DEFAULT_LOAN_TYPE = "Can circulate"
+DEFAULT_LOAN_TYPE = "Unavailable"
 # Item status defaults to "Unavailable"; unrecognised access categories raise
 # instead of silently falling through.
 DEFAULT_ITEM_STATUS = "Unavailable"
@@ -90,6 +108,12 @@ DEFAULT_HOLDINGS_SOURCE = "MARC"
 # the note for replacement on updates. If changed after syncing begins, continue
 # matching the old label to avoid orphaning or duplicating existing notes.
 AXIELL_LOCATION_NOTE_PREFIX = "Axiell Current Location"
+# FOLIO item note types for the typed location notes. Each must exist in the
+# tenant (Settings, Inventory, Items, Item note types). The upsert identifies
+# the sync's own notes by these types, so every existing note of either type is
+# replaced on update, including one added by hand in FOLIO.
+AXIELL_CURRENT_LOCATION_NOTE_TYPE = "Axiell Current Location"
+AXIELL_NORMAL_LOCATION_NOTE_TYPE = "Axiell Normal Location"
 # FOLIO instance identifier type used for the AxC object_number
 # (the (AltRefNo)-prefixed 035$a).
 LOCAL_IDENTIFIER_TYPE = "Local identifier"
@@ -220,6 +244,11 @@ class FieldMap:
     ``strict_table`` makes ``table`` the permitted vocabulary: unmapped values
     fail instead of being passed to the resolver. Use it when the table encodes
     a decision, not just a spelling, to prevent unintended FOLIO matches.
+
+    ``unmapped_to_default`` also keeps unmapped values away from the resolver,
+    but gives them ``default`` instead of failing. Use it when the table is a
+    decision and the default is a safe answer for a value nobody has mapped.
+    The two are mutually exclusive.
     """
 
     canonical: str | None  # CanonicalRecord attribute name (None = no AxC source)
@@ -231,6 +260,7 @@ class FieldMap:
     location: bool = False  # apply LOCATION_RULES before resolving
     required: bool = False  # no value → MappingError, instead of a default
     strict_table: bool = False  # value absent from `table` → MappingError
+    unmapped_to_default: bool = False  # value absent from `table` → `default`
 
 
 # Resolved fields → FOLIO tenant UUIDs. Referenced by both FIELDS (extraction)
@@ -249,8 +279,9 @@ MATERIAL_TYPE_FIELD = FieldMap(
     table={key.lower(): value for key, value in MATERIAL_TYPE.items()},
 )
 # The AxC *current* location. Extraction only: it feeds the administrative note
-# verbatim and is no longer resolved to a FOLIO location UUID — the shelf location
-# comes from NORMAL_LOCATION_FIELD below. Hence no resolver and no default.
+# and the Axiell Current Location item note verbatim, and is not resolved to a
+# FOLIO location UUID, because the shelf location comes from
+# NORMAL_LOCATION_FIELD below. Hence no resolver and no default.
 CURRENT_LOCATION_FIELD = FieldMap(
     "current_location",
     marc="852$b",
@@ -269,14 +300,34 @@ NORMAL_LOCATION_FIELD = FieldMap(
     location=True,
     required=True,
 )
-# item.permanentLoanType is resolved from a constant, not from any AxC field:
-# nothing in the AxC record reaches the loan type, so every item is
-# DEFAULT_LOAN_TYPE. The cost is that access-restricted items are requestable.
+# item.permanentLoanType comes from the AxC use restriction (540$a), through
+# USE_RESTRICTION_LOAN_TYPE. An absent or unlisted term gets DEFAULT_LOAN_TYPE
+# rather than reaching the resolver, where a raw AxC term such as "Unavailable"
+# could match a tenant loan type by accident.
 LOAN_TYPE_FIELD = FieldMap(
-    None,
+    "use_restriction",
+    marc="540$a",
     resolver="resolve_loan_type",
     default=DEFAULT_LOAN_TYPE,
     label="loan type",
+    table={key.lower(): value for key, value in USE_RESTRICTION_LOAN_TYPE.items()},
+    unmapped_to_default=True,
+)
+# The note types of the two typed location notes on the item. Resolved from a
+# constant, like the loan type. A note type the tenant does not know fails the
+# record: an untyped note could not be told apart from a cataloguer's on the next
+# update, so writing one would leave a duplicate behind every run.
+CURRENT_LOCATION_NOTE_TYPE_FIELD = FieldMap(
+    None,
+    resolver="resolve_item_note_type",
+    default=AXIELL_CURRENT_LOCATION_NOTE_TYPE,
+    label="item note type",
+)
+NORMAL_LOCATION_NOTE_TYPE_FIELD = FieldMap(
+    None,
+    resolver="resolve_item_note_type",
+    default=AXIELL_NORMAL_LOCATION_NOTE_TYPE,
+    label="item note type",
 )
 # holdings.sourceId is resolved from a constant, not from any AxC field.
 HOLDINGS_SOURCE_FIELD = FieldMap(
@@ -304,9 +355,10 @@ FIELDS: tuple[FieldMap, ...] = (
         "object_number", marc="035$a(AltRefNo)"
     ),  # (AltRefNo)-prefixed 035$a → instance.identifiers (local identifier)
     MATERIAL_TYPE_FIELD,  # → item.materialType
-    CURRENT_LOCATION_FIELD,  # → the Axiell Current Location admin note (verbatim)
-    NORMAL_LOCATION_FIELD,  # → holdings.permanentLocationId + item.permanentLocation
+    CURRENT_LOCATION_FIELD,  # → Axiell Current Location admin and item notes
+    NORMAL_LOCATION_FIELD,  # → permanent locations + Axiell Normal Location note
     FieldMap("access_category", marc="506$f"),  # → item.status, via ACCESS_ITEM_STATUS
+    LOAN_TYPE_FIELD,  # → item.permanentLoanType, via USE_RESTRICTION_LOAN_TYPE
 )
 
 # Inbound extraction map derived from FIELDS: CanonicalRecord attr → MARC spec.
