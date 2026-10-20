@@ -77,9 +77,10 @@ class FolioInventoryRecord(BaseModel):
     """A raw items-and-holdings record as stored, validated on construction.
 
     Only the ids the store depends on are checked: a record without an instance
-    id cannot be keyed to a bib row, and an item without an id cannot mint a
-    stable identifier, so either fails the whole batch. Everything else is stored
-    as it comes and parsed at transform time.
+    id cannot be keyed to a bib row, an item without an id cannot mint a stable
+    identifier, and an item must link to a holdings record in the same response
+    for the transform to fall back to it. Any failure fails the whole batch.
+    Everything else is stored as it comes and parsed at transform time.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -95,6 +96,32 @@ class FolioInventoryRecord(BaseModel):
             if not item.get("id"):
                 raise ValueError(
                     f"FOLIO item on instance {self.instance_id!r} is missing an id"
+                )
+
+        # Broken holdings fail the batch rather than being logged and stored: one
+        # bad record then blocks its batch until FOLIO fixes it, but a stored one
+        # would only surface later as a wrong or missing location at transform
+        # time. The 2026-10-13 baseline had no such records, and the migration is
+        # still reshaping holdings, so a failure here is worth hearing about.
+        holdings_ids: set[str] = set()
+        for holdings in self.data.get("holdings") or []:
+            holdings_id = holdings.get("id")
+            if not holdings_id:
+                raise ValueError(
+                    f"FOLIO holdings on instance {self.instance_id!r} is missing an id"
+                )
+            if holdings_id in holdings_ids:
+                raise ValueError(
+                    f"FOLIO holdings {holdings_id!r} appears twice on instance "
+                    f"{self.instance_id!r}"
+                )
+            holdings_ids.add(holdings_id)
+
+        for item in self.data.get("items") or []:
+            if item.get("holdingsRecordId") not in holdings_ids:
+                raise ValueError(
+                    f"FOLIO item {item['id']!r} on instance {self.instance_id!r} "
+                    "links to no holdings record in the response"
                 )
         return self
 

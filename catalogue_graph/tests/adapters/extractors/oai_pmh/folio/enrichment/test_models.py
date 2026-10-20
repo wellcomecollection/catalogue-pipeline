@@ -87,3 +87,30 @@ def test_record_raises_when_instance_missing_id() -> None:
     del record["instanceId"]
     with pytest.raises(ValueError, match="missing instanceId"):
         FolioInventoryRecord(data=record)
+
+
+def test_record_raises_when_holdings_missing_id() -> None:
+    record = fixture_record()
+    del record["holdings"][2]["id"]
+    with pytest.raises(ValueError, match="holdings on instance .* is missing an id"):
+        FolioInventoryRecord(data=record)
+
+
+def test_record_raises_when_holdings_id_repeats() -> None:
+    record = fixture_record()
+    record["holdings"][2]["id"] = record["holdings"][0]["id"]
+    with pytest.raises(ValueError, match="appears twice"):
+        FolioInventoryRecord(data=record)
+
+
+@pytest.mark.parametrize("holdings_record_id", [None, "not-in-this-response"])
+def test_record_raises_when_item_links_to_no_holdings(
+    holdings_record_id: str | None,
+) -> None:
+    record = fixture_record()
+    if holdings_record_id is None:
+        del record["items"][3]["holdingsRecordId"]
+    else:
+        record["items"][3]["holdingsRecordId"] = holdings_record_id
+    with pytest.raises(ValueError, match="links to no holdings record"):
+        FolioInventoryRecord(data=record)
