@@ -12,7 +12,8 @@ case class MergerConfig(
   identifiedWorkIndex: String,
   denormalisedWorkIndex: String,
   initialImageIndex: String,
-  imageDownstreamTarget: DownstreamTarget
+  imageDownstreamTarget: DownstreamTarget,
+  batchIndexing: Boolean
 ) extends ApplicationConfig
 
 trait MergerConfigurable extends LambdaConfigurable[MergerConfig] {
@@ -28,6 +29,7 @@ trait MergerConfigurable extends LambdaConfigurable[MergerConfig] {
       denormalisedWorkIndex =
         rawConfig.requireString("es.denormalised-works.index"),
       initialImageIndex = rawConfig.requireString("es.initial-images.index"),
-      imageDownstreamTarget = buildDownstreamTarget(rawConfig, "image-sender")
+      imageDownstreamTarget = buildDownstreamTarget(rawConfig, "image-sender"),
+      batchIndexing = rawConfig.getBoolean("merger.batch-indexing")
     )
 }

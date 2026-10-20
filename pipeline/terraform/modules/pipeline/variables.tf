@@ -131,3 +131,9 @@ variable "elastic_vpce_security_group_id" {
   default     = null
   description = "Security group of the Elasticsearch interface endpoint; null uses the hosted PrivateLink group. Set for a serverless project."
 }
+
+variable "merger_batch_indexing" {
+  type        = bool
+  default     = false
+  description = "Have the merger index each batch in one call; see the batch_indexing variable of the merger service."
+}
