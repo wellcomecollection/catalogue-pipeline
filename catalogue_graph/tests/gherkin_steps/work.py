@@ -54,6 +54,11 @@ SUB_ATTR_ALIASES: dict[str, str] = {
     "source identifier type": "id.source_identifier.identifier_type.id",
     "source identifier ontology type": "id.source_identifier.ontology_type",
     "work type": "work_type",
+    "agent label": "agent.label",
+    "agent type": "agent.type",
+    "agent identifier value": "agent.id.source_identifier.value",
+    "agent identifier type": "agent.id.source_identifier.identifier_type.id",
+    "agent identifier ontology type": "agent.id.source_identifier.ontology_type",
 }
 
 
