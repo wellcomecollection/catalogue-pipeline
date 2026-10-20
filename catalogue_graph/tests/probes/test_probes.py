@@ -44,9 +44,14 @@ def _run(vendor: str, respond: Handler) -> bool:
     )
 
 
-def _metrics(capsys: pytest.CaptureFixture[str]) -> list[dict[str, Any]]:
+def _records(capsys: pytest.CaptureFixture[str]) -> list[dict[str, Any]]:
     lines = capsys.readouterr().out.splitlines()
     return [json.loads(line) for line in lines if line.startswith('{"_aws"')]
+
+
+def _metrics(capsys: pytest.CaptureFixture[str]) -> list[dict[str, Any]]:
+    """Step Duration records only, without the per-run RunSuccess record."""
+    return [r for r in _records(capsys) if "Step" in r]
 
 
 def _summary(metrics: list[dict[str, Any]]) -> list[tuple[str, str, str]]:
@@ -255,3 +260,31 @@ def test_oai_no_records_match_is_ok(capsys: pytest.CaptureFixture[str]) -> None:
 
     assert _run("folio_oai", respond)
     assert _summary(_metrics(capsys))[-1] == ("folio_oai", "read", "ok")
+
+
+@pytest.mark.parametrize(
+    ("respond", "ssm_value", "expected"),
+    [
+        (lambda request: httpx.Response(200, text="<OAI-PMH/>"), None, 1),
+        (lambda request: httpx.Response(503), None, 0),
+        (lambda request: httpx.Response(200), "placeholder", 0),
+    ],
+    ids=["ok", "step-failed", "setup-failed"],
+)
+def test_each_run_emits_one_run_success_record(
+    respond: Handler,
+    ssm_value: str | None,
+    expected: int,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    if ssm_value is not None:
+        monkeypatch.setattr(handler, "get_ssm_parameter", lambda name: ssm_value)
+
+    _run("folio_oai", respond)
+
+    [run] = [r for r in _records(capsys) if "RunSuccess" in r]
+    assert (run["Vendor"], run["RunSuccess"]) == ("folio_oai", expected)
+    emf = run["_aws"]["CloudWatchMetrics"][0]
+    assert emf["Dimensions"] == [["Vendor"]]
+    assert emf["Metrics"] == [{"Name": "RunSuccess", "Unit": "None"}]

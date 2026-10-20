@@ -50,6 +50,25 @@ def emit(
     print(json.dumps(record), flush=True)
 
 
+def emit_run(vendor: str, ok: bool) -> None:
+    """One sample per run, so availability is an average with no cross-step maths."""
+    record = {
+        "_aws": {
+            "Timestamp": int(time.time() * 1000),
+            "CloudWatchMetrics": [
+                {
+                    "Namespace": NAMESPACE,
+                    "Dimensions": [["Vendor"]],
+                    "Metrics": [{"Name": "RunSuccess", "Unit": "None"}],
+                }
+            ],
+        },
+        "Vendor": vendor,
+        "RunSuccess": 1 if ok else 0,
+    }
+    print(json.dumps(record), flush=True)
+
+
 def timer_for(vendor: str) -> Timer:
     @contextmanager
     def timed(step: str) -> Iterator[None]:
