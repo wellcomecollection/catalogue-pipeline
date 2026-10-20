@@ -3,13 +3,7 @@
 # Code: catalogue_graph/src/probes.
 
 locals {
-  probe_vendors = {
-    sierra      = ["auth", "read"]
-    axiell_oai  = ["identify", "read"]
-    folio_oai   = ["identify", "read"]
-    folio_okapi = ["auth", "read"]
-    ebsco_ftp   = ["auth", "read"]
-  }
+  probe_vendors            = toset(["sierra", "axiell_oai", "folio_oai", "folio_okapi", "ebsco_ftp"])
   probe_credentials_prefix = "/catalogue_pipeline/third_party_probes"
 }
 
@@ -135,58 +129,4 @@ resource "aws_scheduler_schedule" "probe" {
       maximum_retry_attempts = 0
     }
   }
-}
-
-resource "aws_cloudwatch_dashboard" "probes" {
-  dashboard_name = "third-party-probes"
-
-  dashboard_body = jsonencode({
-    widgets = flatten([
-      for i, vendor in keys(local.probe_vendors) : [
-        {
-          type   = "metric"
-          x      = 0
-          y      = i * 6
-          width  = 16
-          height = 6
-          properties = {
-            title  = "${vendor}: successful step duration (ms)"
-            region = "eu-west-1"
-            view   = "timeSeries"
-            period = 300
-            # One row per step and stat; flatten would also flatten the rows themselves.
-            metrics = [
-              for pair in setproduct(local.probe_vendors[vendor], ["p50", "p90", "p99"]) : [
-                "third_party_probes", "Duration",
-                "Vendor", vendor, "Step", pair[0], "Outcome", "ok",
-                { stat = pair[1], label = "${pair[0]} ${pair[1]}" }
-              ]
-            ]
-          }
-        },
-        {
-          type   = "metric"
-          x      = 16
-          y      = i * 6
-          width  = 8
-          height = 6
-          properties = {
-            title  = "${vendor}: success rate (%)"
-            region = "eu-west-1"
-            view   = "timeSeries"
-            period = 300
-            yAxis  = { left = { min = 0, max = 100 } }
-            metrics = [
-              [{
-                # Every run records either a setup error or its first step, and only reaches
-                # "read" if that passed. FILL keeps a total outage at 0 rather than blank.
-                expression = "100 * FILL(SUM(SEARCH('{third_party_probes,Vendor,Step,Outcome} Vendor=\"${vendor}\" Step=\"read\" Outcome=\"ok\"', 'SampleCount', 300)), 0) / SUM(SEARCH('{third_party_probes,Vendor,Step,Outcome} Vendor=\"${vendor}\" (Step=\"${local.probe_vendors[vendor][0]}\" OR Step=\"setup\")', 'SampleCount', 300))"
-                label      = "runs where read succeeded"
-              }]
-            ]
-          }
-        },
-      ]
-    ])
-  })
 }

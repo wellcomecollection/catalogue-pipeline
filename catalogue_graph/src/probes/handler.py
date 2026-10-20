@@ -46,7 +46,7 @@ def run(vendor: str, client: httpx.Client | None = None) -> bool:
         if missing:
             raise ValueError(f"credentials missing {', '.join(missing)}")
     except Exception as e:
-        # Recorded so a missing or unfilled parameter shows on the dashboard.
+        # Recorded so a missing or unfilled parameter shows in the metrics.
         emit(vendor, "setup", "error", 0, error=repr(e)[:500])
         logger.exception("Probe setup failed", vendor=vendor)
         return False
