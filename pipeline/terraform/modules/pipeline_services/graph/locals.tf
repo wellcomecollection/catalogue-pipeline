@@ -1,5 +1,5 @@
 locals {
-  ec_privatelink_security_group_id = data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id
+  ec_privatelink_security_group_id = coalesce(var.elastic_vpce_security_group_id, data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id)
 
   slack_webhook = "catalogue_graph_reporter/slack_webhook"
 

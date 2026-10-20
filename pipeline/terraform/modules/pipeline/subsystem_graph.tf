@@ -25,4 +25,6 @@ module "graph_pipeline" {
   }
 
   enable_schedule = var.enable_graph_pipeline_schedule
+
+  elastic_vpce_security_group_id = var.elastic_vpce_security_group_id
 }

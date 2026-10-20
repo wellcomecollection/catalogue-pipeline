@@ -198,7 +198,7 @@ locals {
     vpc_id  = local.catalogue_vpcs["catalogue_vpc_delta_id"]
     subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
 
-    ec_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
+    ec_privatelink_security_group_id = coalesce(var.elastic_vpce_security_group_id, local.shared_infra["ec_platform_privatelink_sg_id"])
 
     traffic_filters = [
       local.shared_infra["ec_platform_privatelink_traffic_filter_id"],

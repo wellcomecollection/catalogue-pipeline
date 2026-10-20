@@ -125,3 +125,9 @@ variable "image_inferrer_max_concurrency" {
     `reindexing_state.scale_up_tasks` overrides both to the larger fixed size.)
   EOT
 }
+
+variable "elastic_vpce_security_group_id" {
+  type        = string
+  default     = null
+  description = "Security group of the Elasticsearch interface endpoint; null uses the hosted PrivateLink group. Set for a serverless project."
+}
