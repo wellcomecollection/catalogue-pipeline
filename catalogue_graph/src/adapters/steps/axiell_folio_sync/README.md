@@ -134,8 +134,8 @@ Set the `OKAPI_*` environment variables first (see Configuration above).
 
 Terraform lives in [`infra/adapters/modules/axiell_folio_sync`](../../../../infra/adapters/modules/axiell_folio_sync/):
 the Lambda (running the shared `unified_pipeline_lambda` image), the Step Function, the EventBridge rule, the manifest
-bucket, the SSM parameter, and IAM. Deploy code changes with:
+bucket, the SSM parameter, and IAM.
 
-```bash
-./scripts/deploy_lambda.sh axiell-folio-sync-adapter-lambda
-```
+Code changes reach the Lambda through CI: merging to main builds the image, and the catalogue pipeline deploy workflow
+points the function at the `prod` tag along with the other adapter lambdas. To try unmerged code, push a `:dev` image
+with `./scripts/deploy_lambda.sh axiell-folio-sync-adapter-lambda`; the next deploy from main replaces it.
