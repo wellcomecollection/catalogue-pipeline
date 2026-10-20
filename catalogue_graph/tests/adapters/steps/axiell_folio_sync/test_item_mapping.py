@@ -335,19 +335,19 @@ def _loan_type_for(
     return ref.loan_type_names[-1]
 
 
-@pytest.mark.parametrize(
-    ("use_restriction", "expected"),
-    [
-        ("Online request", "Can circulate"),
-        ("Restricted", "Can circulate"),
-        ("By appointment", "Unavailable"),
-        ("Unavailable", "Unavailable"),
-        ("By approval", "Unavailable"),
-        ("Missing", "Unavailable"),
-        ("Deaccessioned", "Unavailable"),
-        ("Manual request", "Unavailable"),
-    ],
-)
+USE_RESTRICTION_CASES = [
+    ("Online request", "Can circulate"),
+    ("Restricted", "Can circulate"),
+    ("By appointment", "Unavailable"),
+    ("Unavailable", "Unavailable"),
+    ("By approval", "Unavailable"),
+    ("Missing", "Unavailable"),
+    ("Deaccessioned", "Unavailable"),
+    ("Manual request", "Unavailable"),
+]
+
+
+@pytest.mark.parametrize(("use_restriction", "expected"), USE_RESTRICTION_CASES)
 def test_use_restriction_selects_the_loan_type(
     use_restriction: str, expected: str
 ) -> None:
@@ -355,8 +355,13 @@ def test_use_restriction_selects_the_loan_type(
 
 
 def test_every_table_term_is_tested() -> None:
-    """A term added to the table without a row above would go untested."""
-    assert len(USE_RESTRICTION_LOAN_TYPE) == 8
+    """The cases above name exactly the table's terms.
+
+    Compared as sets rather than counted, so a term added to the table, or
+    renamed there while a case keeps the old spelling, fails here.
+    """
+    tested = {term for term, _ in USE_RESTRICTION_CASES}
+    assert tested == set(USE_RESTRICTION_LOAN_TYPE)
 
 
 def test_absent_use_restriction_gives_unavailable() -> None:
