@@ -1,6 +1,13 @@
 locals {
   ec_privatelink_security_group_id = coalesce(var.elastic_vpce_security_group_id, data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id)
 
+  # ECS tasks ship logs to the hosted logging cluster through FireLens, so
+  # they keep the hosted endpoint's group alongside the storage one.
+  ecs_privatelink_security_group_ids = distinct([
+    local.ec_privatelink_security_group_id,
+    data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id,
+  ])
+
   slack_webhook = "catalogue_graph_reporter/slack_webhook"
 
   vpc_id          = data.terraform_remote_state.platform_infra.outputs.catalogue_vpc_delta_id
