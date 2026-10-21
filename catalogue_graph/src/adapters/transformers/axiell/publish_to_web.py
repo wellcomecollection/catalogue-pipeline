@@ -1,7 +1,8 @@
 """
 Extract the publish-to-web markers from local fields emitted by the OAI stylesheet
 981 - $a - 'yes' or 'no', from the Axiell publish_to_web checkbox
-983 - $a - 'x' when the "for deletion?" free checkbox is ticked, absent otherwise
+985 - $a - 'x' when the "for deletion?" free checkbox is ticked, absent otherwise
+      (983 is the Parts child-link field, not a marker)
 """
 
 from typing import Literal
@@ -38,4 +39,4 @@ def is_publishable(record: Record) -> bool:
 
 def is_marked_for_deletion(record: Record) -> bool:
     """A ticked "for deletion?" checkbox suppresses the record whatever 981 says."""
-    return bool(non_empty_subfields("983", "a", record))
+    return bool(non_empty_subfields("985", "a", record))

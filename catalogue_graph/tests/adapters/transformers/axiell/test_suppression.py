@@ -62,6 +62,21 @@ def test_unticked_for_deletion_checkbox_leaves_work_visible() -> None:
     assert isinstance(_transform(record), VisibleSourceWork)
 
 
+def test_parts_child_links_are_not_a_deletion_marker() -> None:
+    """983 carries child links; a parent with children must stay visible."""
+    record = make_axiell_record(publish_to_web="yes")
+    record.add_field(
+        Field(
+            tag="983",
+            subfields=[
+                Subfield(code="a", value="100002"),
+                Subfield(code="b", value="TEST/1/1"),
+            ],
+        )
+    )
+    assert isinstance(_transform(record), VisibleSourceWork)
+
+
 @pytest.mark.parametrize(
     "status", ["catalogued", "draft", "partially complete", "in progress", None]
 )
