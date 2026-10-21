@@ -1,7 +1,7 @@
 """Tests for FOLIO item enrichment at transform time.
 
 Covers both the unit level (FolioWorkBuilder emitting items from enrichment
-content) and the end-to-end join (the transformer handler joining the items store
+content) and the end-to-end join (the transformer handler joining the inventory store
 onto the bib store and producing works with `folio-item` item identifiers).
 """
 
@@ -13,10 +13,7 @@ from pyiceberg.expressions import In
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.extractors.oai_pmh.folio.config as adapter_config
-from adapters.extractors.oai_pmh.folio.enrichment.models import (
-    FolioEnrichedInstance,
-    FolioEnrichedItem,
-)
+from adapters.extractors.oai_pmh.folio.enrichment.models import FolioInventoryRecord
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.steps.transformer import TransformerEvent, handler
 from adapters.transformers import folio_store_source
@@ -25,7 +22,12 @@ from adapters.transformers.folio_store_source import FolioStoreSource
 from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Identifiable
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
-from tests.adapters.transformers.folio.helpers import make_items_store
+from tests.adapters.transformers.folio.helpers import (
+    fixture_item_ids,
+    fixture_record,
+    folio_record,
+    make_inventory_store,
+)
 from tests.mocks import MockElasticsearchClient
 from utils.marc import parse_single_marc_record
 
@@ -46,29 +48,49 @@ BIB_RECORD = (
 # Unit: FolioWorkBuilder builds items from joined enrichment content
 # ---------------------------------------------------------------------------
 def test_work_builder_emits_items_with_folio_item_identifier() -> None:
-    enriched = FolioEnrichedInstance(
-        instance_id="inst-1",
-        items=[
-            FolioEnrichedItem(id="item-uuid-1", enumeration="no. 1"),
-            FolioEnrichedItem(id="item-uuid-2"),
-        ],
-    )
+    enriched = fixture_record("inst-1")
     record = parse_single_marc_record(BIB_RECORD.format(id="inst-1"))
     builder = FolioWorkBuilder(
         record,
         datetime.now(UTC),
-        enrichment_content=enriched.to_store_content(),
+        enrichment_content=FolioInventoryRecord(data=enriched).to_store_content(),
     )
 
     items = builder.items
-    assert len(items) == 2
+    assert [
+        item.id.source_identifier.value
+        for item in items
+        if isinstance(item.id, Identifiable)
+    ] == fixture_item_ids()
 
     first = items[0]
     assert isinstance(first.id, Identifiable)
     assert first.id.source_identifier.identifier_type.id == "folio-item"
     assert first.id.source_identifier.ontology_type == "Item"
-    assert first.id.source_identifier.value == "item-uuid-1"
-    assert first.title == "no. 1"
+    # No item in the tenant sets enumeration, so the title comes from volume.
+    assert first.title == enriched["items"][0]["volume"]
+
+
+@pytest.mark.parametrize(
+    "item, title",
+    [
+        ({"id": "a", "enumeration": "   ", "volume": "Vol. 1"}, "Vol. 1"),
+        ({"id": "a", "enumeration": " no. 1 ", "volume": "Vol. 1"}, "no. 1"),
+        ({"id": "a", "volume": "  "}, None),
+    ],
+)
+def test_work_builder_title_ignores_blank_and_padded_values(
+    item: dict, title: str | None
+) -> None:
+    record = parse_single_marc_record(BIB_RECORD.format(id="inst-1"))
+    builder = FolioWorkBuilder(
+        record,
+        datetime.now(UTC),
+        enrichment_content=FolioInventoryRecord(
+            data=folio_record("inst-1", [item])
+        ).to_store_content(),
+    )
+    assert builder.items[0].title == title
 
 
 def test_work_builder_emits_no_items_without_enrichment() -> None:
@@ -78,7 +100,7 @@ def test_work_builder_emits_no_items_without_enrichment() -> None:
 
 
 # ---------------------------------------------------------------------------
-# End-to-end: the transformer joins the items store onto bib records
+# End-to-end: the transformer joins the inventory store onto bib records
 # ---------------------------------------------------------------------------
 def _item_identifiers(source: dict) -> list[tuple[str, str]]:
     """Return (identifier_type_id, value) for each item on a work _source."""
@@ -105,20 +127,10 @@ def test_transformer_attaches_enriched_items(
         transformer_type="folio",
     )
 
-    items_store = make_items_store(
-        {
-            "inst-1": FolioEnrichedInstance(
-                instance_id="inst-1",
-                items=[
-                    FolioEnrichedItem(id="item-uuid-1"),
-                    FolioEnrichedItem(id="item-uuid-2"),
-                ],
-            )
-        }
-    )
+    inventory_store = make_inventory_store({"inst-1": fixture_record("inst-1")})
     monkeypatch.setattr(
-        "adapters.steps.transformer.build_items_store",
-        lambda **kwargs: items_store,
+        "adapters.steps.transformer.build_inventory_store",
+        lambda **kwargs: inventory_store,
     )
 
     MockElasticsearchClient.inputs.clear()
@@ -137,8 +149,7 @@ def test_transformer_attaches_enriched_items(
     source = by_id["Work[folio-instance/inst-1]"]["_source"]
 
     assert _item_identifiers(source) == [
-        ("folio-item", "item-uuid-1"),
-        ("folio-item", "item-uuid-2"),
+        ("folio-item", item_id) for item_id in fixture_item_ids()
     ]
 
 
@@ -157,10 +168,10 @@ def test_transformer_emits_no_items_when_instance_not_enriched(
         transformer_type="folio",
     )
 
-    items_store = make_items_store({})  # empty items store
+    inventory_store = make_inventory_store({})  # empty inventory store
     monkeypatch.setattr(
-        "adapters.steps.transformer.build_items_store",
-        lambda **kwargs: items_store,
+        "adapters.steps.transformer.build_inventory_store",
+        lambda **kwargs: inventory_store,
     )
 
     MockElasticsearchClient.inputs.clear()
@@ -180,7 +191,7 @@ def test_transformer_emits_no_items_when_instance_not_enriched(
     assert source["data"]["items"] == []
 
 
-def test_transformer_fails_when_items_store_is_missing(
+def test_transformer_fails_when_inventory_store_is_missing(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """A missing items table fails the transform loudly rather than silently
@@ -199,7 +210,9 @@ def test_transformer_fails_when_items_store_is_missing(
     def missing_table(**kwargs: object) -> AdapterStore:
         raise NoSuchTableError("folio items table does not exist")
 
-    monkeypatch.setattr("adapters.steps.transformer.build_items_store", missing_table)
+    monkeypatch.setattr(
+        "adapters.steps.transformer.build_inventory_store", missing_table
+    )
 
     with pytest.raises(NoSuchTableError):
         handler(
@@ -216,11 +229,8 @@ def test_transformer_fails_when_items_store_is_missing(
 # ---------------------------------------------------------------------------
 # Scale: the item lookup is id-scoped and batched, not a full-namespace load
 # ---------------------------------------------------------------------------
-def _one_item_instance(instance_id: str) -> FolioEnrichedInstance:
-    return FolioEnrichedInstance(
-        instance_id=instance_id,
-        items=[FolioEnrichedItem(id=f"item-{instance_id}")],
-    )
+def _one_item_instance(instance_id: str) -> dict:
+    return fixture_record(instance_id)
 
 
 def test_enrichment_fetches_only_requested_ids(
@@ -228,21 +238,21 @@ def test_enrichment_fetches_only_requested_ids(
 ) -> None:
     """The join reads items filtered by the ids being transformed (an `In` filter),
     not the whole namespace, and attaches only the matching content."""
-    items_store = make_items_store(
+    inventory_store = make_inventory_store(
         {iid: _one_item_instance(iid) for iid in ("inst-1", "inst-2", "inst-3")}
     )
 
     captured_filters = []
-    original = items_store.get_active_namespace_records
+    original = inventory_store.get_active_namespace_records
 
     def spy(*args: object, **kwargs: object) -> object:
         captured_filters.append(kwargs.get("iceberg_filter"))
         return original(*args, **kwargs)  # type: ignore[arg-type]
 
-    monkeypatch.setattr(items_store, "get_active_namespace_records", spy)
+    monkeypatch.setattr(inventory_store, "get_active_namespace_records", spy)
 
-    # adapter_store is unused by the enrichment join; pass the items store as a stand-in.
-    source = FolioStoreSource(items_store, [], items_store=items_store)
+    # adapter_store is unused by the enrichment join; pass the inventory store as a stand-in.
+    source = FolioStoreSource(inventory_store, [], inventory_store=inventory_store)
     rows = [{"id": "inst-1"}, {"id": "inst-3"}, {"id": "missing"}]
     enriched = list(source._process_rows(rows))
 
@@ -262,19 +272,21 @@ def test_enrichment_batches_lookups(monkeypatch: pytest.MonkeyPatch) -> None:
     row still gets its matching enrichment."""
     monkeypatch.setattr(folio_store_source, "ITEM_ENRICHMENT_BATCH_SIZE", 2)
     ids = [f"inst-{i}" for i in range(5)]
-    items_store = make_items_store({iid: _one_item_instance(iid) for iid in ids})
+    inventory_store = make_inventory_store(
+        {iid: _one_item_instance(iid) for iid in ids}
+    )
 
     call_count = 0
-    original = items_store.get_active_namespace_records
+    original = inventory_store.get_active_namespace_records
 
     def spy(*args: object, **kwargs: object) -> object:
         nonlocal call_count
         call_count += 1
         return original(*args, **kwargs)  # type: ignore[arg-type]
 
-    monkeypatch.setattr(items_store, "get_active_namespace_records", spy)
+    monkeypatch.setattr(inventory_store, "get_active_namespace_records", spy)
 
-    source = FolioStoreSource(items_store, [], items_store=items_store)
+    source = FolioStoreSource(inventory_store, [], inventory_store=inventory_store)
     enriched = list(source._process_rows([{"id": iid} for iid in ids]))
 
     assert len(enriched) == 5
