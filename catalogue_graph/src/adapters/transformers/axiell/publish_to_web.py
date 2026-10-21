@@ -1,7 +1,7 @@
 """
-Extract the publish-to-web marker from local field
-981 - Local field, emitted by the OAI stylesheet
-    $a - 'yes' or 'no', from the Axiell publish_to_web checkbox
+Extract the publish-to-web markers from local fields emitted by the OAI stylesheet
+981 - $a - 'yes' or 'no', from the Axiell publish_to_web checkbox
+983 - $a - 'x' when the "for deletion?" free checkbox is ticked, absent otherwise
 """
 
 from typing import Literal
@@ -34,3 +34,8 @@ def extract_publish_to_web(record: Record) -> PublishToWeb | None:
 def is_publishable(record: Record) -> bool:
     """Only an explicit 'yes' publishes; anything else, including an absent marker, fails closed."""
     return extract_publish_to_web(record) == "yes"
+
+
+def is_marked_for_deletion(record: Record) -> bool:
+    """A ticked "for deletion?" checkbox suppresses the record whatever 981 says."""
+    return bool(non_empty_subfields("983", "a", record))

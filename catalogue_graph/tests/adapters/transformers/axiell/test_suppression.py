@@ -45,6 +45,23 @@ def test_publish_to_web_without_explicit_yes_yields_deleted_work(
     assert isinstance(_transform(record), DeletedSourceWork)
 
 
+@pytest.mark.parametrize("marker", ["yes", "no", None])
+def test_for_deletion_checkbox_overrides_publish_to_web(
+    marker: str | None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A ticked "for deletion?" box suppresses without needing publish_to_web unticked."""
+    mock_logger = MagicMock()
+    monkeypatch.setattr(axiell_work_builder, "logger", mock_logger)
+    record = make_axiell_record(publish_to_web=marker, for_deletion=True)
+    assert isinstance(_transform(record), DeletedSourceWork)
+    mock_logger.warning.assert_not_called()
+
+
+def test_unticked_for_deletion_checkbox_leaves_work_visible() -> None:
+    record = make_axiell_record(publish_to_web="yes", for_deletion=False)
+    assert isinstance(_transform(record), VisibleSourceWork)
+
+
 @pytest.mark.parametrize(
     "status", ["catalogued", "draft", "partially complete", "in progress", None]
 )
