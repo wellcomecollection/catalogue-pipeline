@@ -1,7 +1,8 @@
 locals {
   neptune_clusters = [
     module.catalogue_graph_neptune_cluster_dev,
-    module.catalogue_graph_neptune_cluster_2026_09_30
+    module.catalogue_graph_neptune_cluster_2026_09_30,
+    module.catalogue_graph_neptune_cluster_2026_10_20
   ]
 
   production_cluster = module.catalogue_graph_neptune_cluster_2026_09_30
@@ -33,6 +34,23 @@ module "catalogue_graph_neptune_cluster_2026_09_30" {
   # The production cluster since the 2026-10-06 switch (wellcomecollection/platform#6743);
   # builds Axiell trees from the 982 parent link (wellcomecollection/platform#6725).
   graph_date                 = "2026-09-30"
+  namespace                  = local.namespace
+  vpc_id                     = local.vpc_id
+  private_subnets            = local.private_subnets
+  public_subnets             = local.public_subnets
+  bulk_loader_s3_bucket_name = aws_s3_bucket.catalogue_graph_bucket.bucket
+
+  providers = {
+    aws     = aws
+    aws.dns = aws.dns
+  }
+}
+
+module "catalogue_graph_neptune_cluster_2026_10_20" {
+  source = "./modules/catalogue_graph"
+
+  # The FOLIO pipeline environment's graph (wellcomecollection/platform#6534).
+  graph_date                 = "2026-10-20"
   namespace                  = local.namespace
   vpc_id                     = local.vpc_id
   private_subnets            = local.private_subnets

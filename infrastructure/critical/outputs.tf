@@ -3,6 +3,7 @@
 locals {
   id_minter_rds_instances = {
     "2026-07-03" = module.id_minter_rds_2026_07_03
+    "2026-10-20" = module.id_minter_rds_2026_10_20
   }
 }
 
