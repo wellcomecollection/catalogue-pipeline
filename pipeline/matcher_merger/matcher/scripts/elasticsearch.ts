@@ -20,14 +20,14 @@ const getSecret = async (id: string): Promise<string | undefined> => {
 
 export const getPipelineClient = async (pipelineDate: string): Promise<Client> => {
     const secretPrefix = `elasticsearch/pipeline_storage_${pipelineDate}`
-    // TODO use an API key
-    const [host, username, password] = await Promise.all([
+    // Serverless pipelines have no read_only user and listen on 443 only
+    const [host, port, apiKey] = await Promise.all([
         getSecret(`${secretPrefix}/public_host`),
-        getSecret(`${secretPrefix}/read_only/es_username`),
-        getSecret(`${secretPrefix}/read_only/es_password`),
+        getSecret(`${secretPrefix}/port`),
+        getSecret(`${secretPrefix}/read_only/api_key`),
     ])
     return new Client({
-        node: `https://${host}:9243`,
-        auth: { username, password }
+        node: `https://${host}:${port}`,
+        auth: { apiKey }
     });
 }
