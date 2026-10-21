@@ -26,12 +26,14 @@ class MergerSQSLambdaBatchedTest extends MergerSQSLambdaTest {
     val mergedIndex = mutable.Map[String, WorkOrImage]()
 
     // Fails any document with badWork's id and indexes the rest.
+    val calls = mutable.ListBuffer[Seq[WorkOrImage]]()
     val failingIndexer = new Indexer[WorkOrImage] {
       private val underlying = new MemoryIndexer[WorkOrImage](mergedIndex)
       def init(): Future[Unit] = Future.successful(())
       def apply(
         docs: Seq[WorkOrImage]
       ): Future[Either[Seq[WorkOrImage], Seq[WorkOrImage]]] = {
+        calls += docs
         val (bad, good) = docs.partition(
           doc => implicitly[Indexable[WorkOrImage]].id(doc) == badWork.id
         )
@@ -61,6 +63,11 @@ class MergerSQSLambdaBatchedTest extends MergerSQSLambdaTest {
               case failure: SQSLambdaMessageFailedRetryable => failure.messageId
             } shouldBe Seq(badId)
             mergedIndex.keySet shouldBe Set(okWork.id)
+
+            // Both messages' documents go to the indexer in one call
+            calls.map(
+              _.map(doc => implicitly[Indexable[WorkOrImage]].id(doc)).toSet
+            ) shouldBe Seq(Set(okWork.id, badWork.id))
         }
     }
   }
