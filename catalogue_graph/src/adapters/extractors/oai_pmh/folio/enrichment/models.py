@@ -92,21 +92,23 @@ class FolioInventoryRecord(BaseModel):
 
     @model_validator(mode="after")
     def _check_ids(self) -> FolioInventoryRecord:
-        if not self.data.get("instanceId"):
+        # Anything malformed raises ValueError, so pydantic turns it into a
+        # rejection of this record rather than an error that aborts the fetch.
+        instance_id = self.data.get("instanceId")
+        if not instance_id:
             raise ValueError("FOLIO items-and-holdings record is missing instanceId")
-        for item in self.data.get("items") or []:
-            if not item.get("id"):
-                raise ValueError(
-                    f"FOLIO item on instance {self.instance_id!r} is missing an id"
-                )
+        if not isinstance(instance_id, str):
+            raise ValueError(
+                "FOLIO items-and-holdings record has a non-string instanceId"
+            )
+
+        items = self._objects("items")
+        for item in items:
+            self._check_id(item.get("id"), "item")
 
         holdings_ids: set[str] = set()
-        for holdings in self.data.get("holdings") or []:
-            holdings_id = holdings.get("id")
-            if not holdings_id:
-                raise ValueError(
-                    f"FOLIO holdings on instance {self.instance_id!r} is missing an id"
-                )
+        for holdings in self._objects("holdings"):
+            holdings_id = self._check_id(holdings.get("id"), "holdings")
             if holdings_id in holdings_ids:
                 raise ValueError(
                     f"FOLIO holdings {holdings_id!r} appears twice on instance "
@@ -114,13 +116,33 @@ class FolioInventoryRecord(BaseModel):
                 )
             holdings_ids.add(holdings_id)
 
-        for item in self.data.get("items") or []:
-            if item.get("holdingsRecordId") not in holdings_ids:
+        for item in items:
+            link = item.get("holdingsRecordId")
+            if not isinstance(link, str) or link not in holdings_ids:
                 raise ValueError(
                     f"FOLIO item {item['id']!r} on instance {self.instance_id!r} "
                     "links to no holdings record in the response"
                 )
         return self
+
+    def _objects(self, key: str) -> list[dict[str, Any]]:
+        value = self.data.get(key) or []
+        if not isinstance(value, list) or not all(isinstance(v, dict) for v in value):
+            raise ValueError(
+                f"FOLIO {key} on instance {self.instance_id!r} is not a list of objects"
+            )
+        return value
+
+    def _check_id(self, value: Any, kind: str) -> str:
+        if not value:
+            raise ValueError(
+                f"FOLIO {kind} on instance {self.instance_id!r} is missing an id"
+            )
+        if not isinstance(value, str):
+            raise ValueError(
+                f"FOLIO {kind} on instance {self.instance_id!r} has a non-string id"
+            )
+        return value
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -163,6 +185,8 @@ def parse_inventory_records(raw: list[dict[str, Any]]) -> InventoryFetch:
         except ValidationError as e:
             reason = str(e.errors()[0]["msg"]).removeprefix("Value error, ")
             instance_id = data.get("instanceId") if isinstance(data, dict) else None
+            if not isinstance(instance_id, str):
+                instance_id = None
             fetch.rejected.append(
                 RejectedInventoryRecord(instance_id=instance_id, reason=reason)
             )

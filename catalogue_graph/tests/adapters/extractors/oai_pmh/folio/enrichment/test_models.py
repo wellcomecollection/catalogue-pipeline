@@ -1,4 +1,5 @@
 import json
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -130,3 +131,47 @@ def test_parse_inventory_records_rejects_each_bad_record_on_its_own() -> None:
         ("i-2", "FOLIO holdings on instance 'i-2' is missing an id"),
         (None, "FOLIO items-and-holdings record is missing instanceId"),
     ]
+
+
+@pytest.mark.parametrize(
+    "break_record, reason",
+    [
+        (
+            lambda r: r.update(holdings=[None]),
+            "holdings on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r.update(items=[None]),
+            "items on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r.update(items={"id": "a"}),
+            "items on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r["holdings"][0].update(id={"x": 1}),
+            "holdings on instance 'i-2' has a non-string id",
+        ),
+        (
+            lambda r: r["items"][0].update(id=7),
+            "item on instance 'i-2' has a non-string id",
+        ),
+        (
+            lambda r: r["items"][0].update(holdingsRecordId=["h"]),
+            "links to no holdings record",
+        ),
+        (lambda r: r.update(instanceId=["i-2"]), "non-string instanceId"),
+    ],
+)
+def test_malformed_record_is_rejected_not_raised(
+    break_record: Callable[[dict[str, Any]], None], reason: str
+) -> None:
+    """A wrongly shaped record must not abort the fetch for the records around it."""
+    broken = fixture_record("i-2")
+    break_record(broken)
+
+    fetch = parse_inventory_records([fixture_record("i-1"), broken])
+
+    assert [r.instance_id for r in fetch.records] == ["i-1"]
+    assert len(fetch.rejected) == 1
+    assert reason in fetch.rejected[0].reason
