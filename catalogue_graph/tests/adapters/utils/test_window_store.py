@@ -13,7 +13,7 @@ from adapters.utils.window_store import (
     WINDOW_STATUS_SCHEMA,
     WindowStore,
 )
-from adapters.utils.window_summary import WindowState, WindowSummary
+from adapters.utils.window_summary import WindowState, WindowStatus, WindowSummary
 from models.incremental_window import IncrementalWindow
 
 
@@ -203,6 +203,47 @@ def test_window_store_list_in_range(tmp_path: Path) -> None:
 
     # Both
     assert len(store.list_in_range(start_time=t2, end_time=t3)) == 1  # t2
+
+
+def test_window_store_list_status_in_range(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog.db"
+    warehouse_path = tmp_path / "warehouse"
+    catalog_uri = f"sqlite:///{catalog_path}"
+    table = _create_table(
+        catalog_uri=catalog_uri,
+        warehouse_path=warehouse_path,
+        namespace="harvest",
+        table_name=f"window_status_{uuid4().hex}",
+        catalog_name=f"catalog_{uuid4().hex}",
+    )
+    store = WindowStore(table)
+
+    t1 = datetime(2025, 1, 1, 10, 0, tzinfo=UTC)
+    store.upsert(
+        WindowSummary(
+            window_start=t1,
+            window_end=t1 + timedelta(minutes=15),
+            state="partial_success",
+            attempts=1,
+            last_error="boom",
+            record_ids=["id:1", "id:2"],
+            updated_at=datetime.now(UTC),
+            tags={"changeset_ids": '["cs-1"]'},
+        )
+    )
+
+    [summary] = store.list_in_range(start_time=t1)
+    assert summary.record_ids == ["id:1", "id:2"]
+
+    [status] = store.list_status_in_range(start_time=t1)
+    assert type(status) is WindowStatus
+    assert not hasattr(status, "record_ids")
+    assert status.window_key == summary.window_key
+    assert status.state == "partial_success"
+    assert status.attempts == 1
+    assert status.last_error == "boom"
+    assert status.tags == {"changeset_ids": '["cs-1"]'}
+    assert status.updated_at == summary.updated_at
 
 
 def test_load_status_map_filters_by_time_range(tmp_path: Path) -> None:
