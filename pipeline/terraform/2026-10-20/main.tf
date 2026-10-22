@@ -30,6 +30,11 @@ module "pipeline" {
   enable_graph_pipeline_schedule               = true
   enable_image_inferrer_schedule               = true
 
+  # FOLIO replaces Sierra here: both would mint a FOLIO instance and its Sierra
+  # bib to the same canonical id and overwrite each other.
+  enable_folio_transformer                       = true
+  disable_sierra_transformer_topic_subscriptions = true
+
   axiell_collection_path_source = "part_of"
 
   # One bulk request per SQS batch instead of one per matcher result: serverless
