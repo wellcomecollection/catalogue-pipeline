@@ -2,25 +2,35 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
+from typing import Any
 
 import pytest
 from pymarc.record import Record
 from pytest_bdd import parsers, then, when
 
+from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 from models.pipeline.source.work import VisibleSourceWork
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
+from tests.adapters.transformers.folio.BDD.inventory_steps import *
 from tests.gherkin_steps.logs import *
 from tests.gherkin_steps.marc import *
 from tests.gherkin_steps.work import *
 
 
 @when("I transform the MARC record", target_fixture="work")
-def do_transform(marc_record: Record) -> VisibleSourceWork:
+def do_transform(
+    marc_record: Record, folio_inventory: dict[str, Any]
+) -> VisibleSourceWork:
+    inventory = (
+        FolioEnrichedInstance.model_validate(folio_inventory)
+        if folio_inventory["items"]
+        else None
+    )
     return FolioWorkBuilder(
-        marc_record, last_modified=datetime(2020, 1, 1)
+        marc_record, last_modified=datetime(2020, 1, 1), inventory=inventory
     ).transform_visible_work()
 
 
