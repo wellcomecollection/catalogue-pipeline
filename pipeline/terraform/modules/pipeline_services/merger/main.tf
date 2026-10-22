@@ -34,9 +34,6 @@ module "merger_lambda" {
 
   ecr_repository_name = "uk.ac.wellcome/merger"
 
-  # The batched path reports per-message failures; without this Lambda deletes them
-  queue_config = merge(
-    var.queue_config,
-    var.batch_indexing ? { report_batch_item_failures = true } : {}
-  )
+  # The handler always returns per-message failures; without this Lambda deletes them
+  queue_config = merge(var.queue_config, { report_batch_item_failures = true })
 }
