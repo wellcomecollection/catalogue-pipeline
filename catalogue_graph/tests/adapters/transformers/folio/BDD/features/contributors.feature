@@ -85,6 +85,17 @@ Feature: contributors (MARC 1xx and 7xx names)
     Then the only contributor has the agent label "Shakespeare, William, 1564-1616. Hamlet."
     And it has the agent type "Agent"
 
+  Scenario: A main entry personal name with a title of a work also produces an Agent
+    From MarcContributorsTest.scala
+    Given the MARC record has a 700 field with subfield "a" value "Sæmundr fróði" and subfield "t" value "Codex Regius"
+    And the MARC record has a 100 field with subfield "a" value "Snorri Sturluson" and subfield "t" value "Gylfaginning"
+    When I transform the MARC record
+    Then the work has 2 contributors with agent type:
+      | Agent |
+      | Agent |
+    And the 1st contributor has the agent label "Snorri Sturluson Gylfaginning"
+    And it is primary
+
   Scenario: Main entry personal names come first, then added entries in document order
     Given the MARC record has a 700 field with subfield "a" value "Alison the Apple"
     And the MARC record has a 100 field with subfield "a" value "Alfie the Artichoke"
@@ -305,6 +316,16 @@ Feature: contributors (MARC 1xx and 7xx names)
     When I transform the MARC record
     Then the only contributor has the agent label "1 2 3 4"
     And it is primary
+
+  Scenario: A meeting name label leaves out the number of the meeting in ǂn
+    Based on Sierra b3062096x. The ǂn arguably belongs in the label, but a
+    meeting without a ǂ0 takes its identifier from its label, so including it
+    would re-mint thousands of label-derived concepts. The Scala behaviour is
+    kept for now.
+    Given the MARC record has a 711 field with subfield "a" value "International Medical Congress" and subfield "n" value "(17th :" and subfield "d" value "1913 :" and subfield "c" value "London, England)"
+    When I transform the MARC record
+    Then the only contributor has the agent label "International Medical Congress 1913 : London, England)"
+    And it has the agent type "Meeting"
 
   Scenario: A meeting name takes its roles from ǂj
     Given the MARC record has a 111 field with subfields:
