@@ -14,7 +14,6 @@ module "merger" {
     batching_window_seconds    = 120
     batch_size                 = 50
     maximum_concurrency        = 30
-    report_batch_item_failures = true
     topic_arns = [
       module.matcher.output_topic_arn,
     ]
