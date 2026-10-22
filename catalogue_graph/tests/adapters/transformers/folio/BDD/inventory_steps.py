@@ -60,7 +60,12 @@ def item_location(
 
 @given("that item has no location")
 def item_no_location(folio_item: dict[str, Any]) -> None:
-    folio_item["location"] = {}
+    # As items-and-holdings sends it when no location resolves.
+    folio_item["location"] = {
+        "location": {},
+        "permanentLocation": {},
+        "temporaryLocation": {},
+    }
 
 
 @given(parsers.parse('that item has the status "{status}"'))

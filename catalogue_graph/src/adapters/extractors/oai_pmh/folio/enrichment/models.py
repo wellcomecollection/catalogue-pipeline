@@ -30,6 +30,7 @@ from pydantic import (
     AfterValidator,
     AliasPath,
     BaseModel,
+    BeforeValidator,
     ConfigDict,
     Field,
     ValidationError,
@@ -59,6 +60,15 @@ class FolioLocation(FolioModel):
     library_name: StrippedText | None = None
 
 
+def _empty_to_none(value: Any) -> Any:
+    # The endpoint sends an unresolved location as {}: it builds the object from a
+    # LEFT JOIN and strips the null members.
+    return value or None
+
+
+OptionalLocation = Annotated[FolioLocation | None, BeforeValidator(_empty_to_none)]
+
+
 class FolioStatisticalCode(FolioModel):
     code: str
 
@@ -80,7 +90,7 @@ class FolioEnrichedItem(FolioModel):
     enumeration: StrippedText | None = None
     status: StrippedText | None = None
     # FOLIO resolves the effective location from temporary, permanent, then holdings.
-    effective_location: FolioLocation | None = Field(
+    effective_location: OptionalLocation = Field(
         default=None, validation_alias=AliasPath("location", "location")
     )
     # The effective call number, which FOLIO falls back to the holdings record for.
