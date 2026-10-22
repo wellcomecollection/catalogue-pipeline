@@ -32,6 +32,10 @@ module "pipeline" {
 
   axiell_collection_path_source = "part_of"
 
+  # One bulk request per SQS batch instead of one per matcher result: serverless
+  # charges about 260 ms per request whatever its size (wellcomecollection/platform#6714).
+  merger_batch_indexing = true
+
   pipeline_date = local.pipeline_date // namespaces services
   graph_date    = "2026-10-20"        // namespaces graph database
   rds_id_minter = "2026-10-20"        // a copy of production's registry from 2026-10-20 04:00

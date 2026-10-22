@@ -15,13 +15,17 @@ module "merger_lambda" {
   pipeline_date = var.pipeline_date
   vpc_config    = var.vpc_config
 
-  environment_variables = {
-    merger_images_topic_arn = module.merger_images_output_topic.arn
+  # The flag is left out entirely when off, so existing pipelines see no change.
+  environment_variables = merge(
+    {
+      merger_images_topic_arn = module.merger_images_output_topic.arn
 
-    es_identified_works_index   = var.es_works_identified_index
-    es_denormalised_works_index = var.es_works_denormalised_index
-    es_initial_images_index     = var.es_images_initial_index
-  }
+      es_identified_works_index   = var.es_works_identified_index
+      es_denormalised_works_index = var.es_works_denormalised_index
+      es_initial_images_index     = var.es_images_initial_index
+    },
+    var.batch_indexing ? { merger_batch_indexing = "true" } : {}
+  )
 
   secret_env_vars = merge(
     local.es_upstream_config,
@@ -30,5 +34,9 @@ module "merger_lambda" {
 
   ecr_repository_name = "uk.ac.wellcome/merger"
 
-  queue_config = var.queue_config
+  # The batched path reports per-message failures; without this Lambda deletes them
+  queue_config = merge(
+    var.queue_config,
+    var.batch_indexing ? { report_batch_item_failures = true } : {}
+  )
 }

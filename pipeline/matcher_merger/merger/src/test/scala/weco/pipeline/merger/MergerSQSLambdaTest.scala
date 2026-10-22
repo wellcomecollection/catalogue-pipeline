@@ -28,6 +28,9 @@ class MergerSQSLambdaTest
     with MergeCandidateGenerators
     with MergerFixtures {
 
+  // MergerSQSLambdaBatchedTest reruns every test here with batch indexing on.
+  protected val batched: Boolean = false
+
 
   it( "reads matcher result messages, retrieves the works and sends on the IDs") {
     val work1 = identifiedWork()
@@ -360,6 +363,7 @@ class MergerSQSLambdaTest
       identifiedIndex,
       mergedIndex,
       imageSender,
+      batched = batched,
     ) {
       mergerSQSLambda =>
         testWith((

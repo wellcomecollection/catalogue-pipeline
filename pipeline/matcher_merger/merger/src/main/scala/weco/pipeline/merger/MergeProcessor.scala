@@ -38,7 +38,12 @@ class MergeProcessor(
         }
     }
 
-  private def merge(
+  def index(
+    docs: Seq[WorkOrImage]
+  ): Future[Either[Seq[WorkOrImage], Seq[WorkOrImage]]] =
+    workOrImageIndexer(docs)
+
+  def merge(
     matcherResult: MatcherResult
   ): Future[List[WorkOrImage]] =
     for {

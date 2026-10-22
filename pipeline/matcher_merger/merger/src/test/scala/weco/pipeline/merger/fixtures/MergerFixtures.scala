@@ -11,6 +11,7 @@ import weco.lambda.helpers.MemoryDownstream
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.merger.{MergeProcessor, MergerSQSLambda}
 import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, PlatformMerger}
+import weco.pipeline_storage.Indexer
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.collection.mutable
@@ -61,13 +62,16 @@ trait MergerFixtures extends MemoryDownstream {
       identifiedIndex: MemoryRetriever[Work[Identified]],
       mergedIndex: mutable.Map[String, WorkOrImage] = mutable.Map.empty,
       imageSender: MemoryMessageSender,
+      batched: Boolean = false,
+      indexerOverride: Option[Indexer[WorkOrImage]] = None,
     )(
       testWith: TestWith[MergerSQSLambda[DummyConfig], R]
     ): R = {
       withMemoryWorkLookup(identifiedIndex) {
         retriever =>
           withMemoryIndexer(mergedIndex) {
-            indexer =>
+            memoryIndexer =>
+              val indexer = indexerOverride.getOrElse(memoryIndexer)
               withImageDownstream(imageSender) {
                 imageDownstream =>
                   testWith(new MergerSQSLambda[DummyConfig] {
@@ -82,6 +86,7 @@ trait MergerFixtures extends MemoryDownstream {
                       )(global)
                     }
                     override protected val imageMsgSender: Downstream = imageDownstream
+                    override protected val batchIndexing: Boolean = batched
                   })
               }
           }

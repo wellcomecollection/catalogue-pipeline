@@ -58,3 +58,9 @@ variable "queue_config" {
   })
   default = null
 }
+
+variable "batch_indexing" {
+  type        = bool
+  default     = false
+  description = "Index each SQS batch's merged documents in one call. Only set where the store pays a fixed latency per request."
+}
