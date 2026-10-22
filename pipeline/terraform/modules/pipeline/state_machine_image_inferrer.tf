@@ -112,10 +112,10 @@ module "image_inferrer" {
         AwsvpcConfiguration = {
           AssignPublicIp = "DISABLED"
           Subnets        = local.network_config.subnets
-          SecurityGroups = [
-            local.network_config.ec_privatelink_security_group_id,
-            aws_security_group.egress.id,
-          ]
+          SecurityGroups = concat(
+            local.network_config.ecs_privatelink_security_group_ids,
+            [aws_security_group.egress.id],
+          )
         }
       }
       Overrides = {

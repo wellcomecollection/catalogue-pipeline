@@ -39,6 +39,13 @@ module "id_minter_rds_2026_10_20" {
   # The FOLIO environment's registry, a copy of production that never becomes it.
   skip_final_snapshot = true
 
+  # Read through the Identifiers API's idDatabase alias, so the toggled FOLIO
+  # flows see it while unaliased requests stay on production (wellcomecollection/platform#6658).
+  data_api_consumer_role_arns = [
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-stage",
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-prod",
+  ]
+
   vpc_id             = local.vpc_id_new
   private_subnet_ids = local.private_subnets_new
   admin_cidr_ingress = local.admin_cidr_ingress
