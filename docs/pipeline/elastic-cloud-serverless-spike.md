@@ -1,6 +1,6 @@
 # Elastic Cloud Serverless for the FOLIO pipeline environment
 
-Results of the spike in [platform#6714](https://github.com/wellcomecollection/platform/issues/6714), run on 2026-10-14 against a throwaway serverless project in eu-west-1 carrying the real pipeline indices, with the hosted es-cluster-2026-07-03 as the comparator. The six checks from the issue all ran. The stack and harness are under `infrastructure/serverless_spike` and `catalogue_graph/src/es_bench`; the cost side, which carries billing figures, is in the private issue platform-infrastructure#560.
+Results of the spike in [platform#6714](https://github.com/wellcomecollection/platform/issues/6714), run on 2026-10-14 against a throwaway serverless project in eu-west-1 carrying the real pipeline indices, with the hosted es-cluster-2026-07-03 as the comparator. The six checks from the issue all ran. The stack was destroyed on 2026-10-20 and its code removed from main afterwards; it is preserved at merge commit d7afcbb (wellcomecollection/catalogue-pipeline#3781) under `infrastructure/serverless_spike` and `catalogue_graph/src/es_bench`. The cost side, which carries billing figures, is in the private issue platform-infrastructure#560.
 
 ## Recommendation
 
@@ -9,6 +9,8 @@ I think the FOLIO environment should run on a serverless project. Nothing in the
 I do not think these results decide production. The search side of the bill under the public API's query load was not measured and is the widest line in the cost estimate. The way forward for that decision is set out at the end.
 
 ## What was built
+
+All of this is at d7afcbb; none of it remains on main.
 
 - `infrastructure/serverless_spike/terraform`: an `ec_elasticsearch_project` in aws-eu-west-1, the existing `elastic_indices` module against it under pipeline date `2026-10-14-serverless` (eight indices, the `set-indexed-at` pipeline, sixteen per-service API keys, connection secrets in both accounts), a comparator index with the works-denormalised mapping on the hosted cluster, an interface endpoint, security group and private hosted zone for `private.eu-west-1.aws.elastic.cloud` in the delta VPC, a private connection policy and an operator IP policy, and a harness Lambda on the unified pipeline image in the delta private subnets.
 - `catalogue_graph/src/es_bench`: a Python harness that samples real documents by sliced point in time and writes them as `external_gte` bulks, with matrix, merger-shape, scroll, load, count and ping modes, run from the laptop and as the Lambda.

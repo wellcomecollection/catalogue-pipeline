@@ -18,7 +18,7 @@ from adapters.extractors.ebsco import helpers as ebsco_helpers
 from adapters.extractors.oai_pmh.axiell import config as axiell_config
 from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.extractors.oai_pmh.folio import config as folio_config
-from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_items_store
+from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_inventory_store
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
@@ -158,13 +158,13 @@ def build_transformer(
             adapter_store, event.changeset_ids, snapshot_id, ids=event.ids
         )
     if event.transformer_type == "folio":
-        # Join the enriched items store so FOLIO works carry items with stable
+        # Join the enriched inventory store so FOLIO works carry items with stable
         # `folio-item` identifiers.
-        # The transformer only reads the items store; the enrichment step creates it.
+        # The transformer only reads the inventory store; the enrichment step creates it.
         # A missing items table fails the transform (NoSuchTableError) rather than
         # silently emitting works without items. On a fresh environment, run one
         # enrichment pass before transforming.
-        items_store = build_items_store(
+        inventory_store = build_inventory_store(
             use_rest_api_table=use_rest_api_table, create_if_not_exists=False
         )
         return FolioTransformer(
@@ -172,7 +172,7 @@ def build_transformer(
             event.changeset_ids,
             snapshot_id,
             ids=event.ids,
-            items_store=items_store,
+            inventory_store=inventory_store,
         )
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 

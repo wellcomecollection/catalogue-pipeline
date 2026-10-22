@@ -1,6 +1,6 @@
 """Factories for the FOLIO item-enrichment runtime.
 
-Wires the config in ``folio.config`` to the items store and the
+Wires the config in ``folio.config`` to the inventory store and the
 mod-inventory-storage client used by the enrichment step. The inventory URL and OKAPI
 credentials come from env vars when set (handy for local runs) and otherwise from SSM.
 
@@ -15,7 +15,7 @@ from functools import cache
 import httpx
 
 from adapters.extractors.oai_pmh.folio import config
-from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioItemEnricher
+from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioInventoryEnricher
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
 )
@@ -25,10 +25,10 @@ from clients.folio_client import OkapiAuth
 from utils.aws import get_ssm_parameter
 
 
-def build_items_store(
+def build_inventory_store(
     *, use_rest_api_table: bool = True, create_if_not_exists: bool = True
 ) -> AdapterStore:
-    """Build the FOLIO items store (the ``folio_items_table``).
+    """Build the FOLIO inventory store (``folio_inventory_table``).
 
     The enrichment step is the writer and creates the table if needed
     (``create_if_not_exists=True``). The transformer is a reader and should pass
@@ -37,15 +37,15 @@ def build_items_store(
     """
     if use_rest_api_table:
         table = get_rest_api_table(
-            config.ITEMS_REST_API_ICEBERG_CONFIG,
+            config.INVENTORY_REST_API_ICEBERG_CONFIG,
             create_if_not_exists=create_if_not_exists,
         )
     else:
         table = get_local_table(
-            config.ITEMS_LOCAL_ICEBERG_CONFIG,
+            config.INVENTORY_LOCAL_ICEBERG_CONFIG,
             create_if_not_exists=create_if_not_exists,
         )
-    return AdapterStore(table, namespace=config.ITEMS_NAMESPACE)
+    return AdapterStore(table, namespace=config.INVENTORY_NAMESPACE)
 
 
 @cache
@@ -80,7 +80,7 @@ def _inventory_tenant() -> str:
 def build_inventory_http_client() -> httpx.Client:
     """Build an authenticated client for mod-inventory-storage.
 
-    ``enrichedInstances`` is an OKAPI/mod-inventory-storage endpoint. OKAPI tokens are
+    ``items-and-holdings`` is an OKAPI/mod-inventory-storage endpoint. OKAPI tokens are
     short-lived, so the client logs in itself (POST ``/authn/login-with-expiry`` with the
     username/password from ``FOLIO_INVENTORY_*``/SSM) and refreshes on 401, sending
     ``x-okapi-token`` plus ``x-okapi-tenant``. The URL, credentials and tenant all come
@@ -112,9 +112,9 @@ def build_inventory_client(
     )
 
 
-def build_enricher(*, use_rest_api_table: bool = True) -> FolioItemEnricher:
+def build_enricher(*, use_rest_api_table: bool = True) -> FolioInventoryEnricher:
     """Build a fully wired enricher for the enrichment step."""
-    return FolioItemEnricher(
+    return FolioInventoryEnricher(
         inventory_client=build_inventory_client(),
-        items_store=build_items_store(use_rest_api_table=use_rest_api_table),
+        inventory_store=build_inventory_store(use_rest_api_table=use_rest_api_table),
     )

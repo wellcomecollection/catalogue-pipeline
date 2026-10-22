@@ -1,12 +1,10 @@
+from typing import Any
 from uuid import uuid1
 
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioItemEnricher
-from adapters.extractors.oai_pmh.folio.enrichment.models import (
-    FolioEnrichedInstance,
-    FolioEnrichedItem,
-)
+from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioInventoryEnricher
+from adapters.extractors.oai_pmh.folio.enrichment.models import FolioInventoryRecord
 from adapters.steps.oai_pmh.folio_enrich import (
     EnrichmentEvent,
     collect_instance_ids,
@@ -15,19 +13,22 @@ from adapters.steps.oai_pmh.folio_enrich import (
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.iceberg import LocalIcebergTableConfig, get_local_table
 from tests.adapters.conftest import adapter_records_to_table
+from tests.adapters.transformers.folio.helpers import fixture_record
 
 BIB_NAMESPACE = "folio"
-ITEMS_NAMESPACE = "folio-items"
+INVENTORY_NAMESPACE = "folio-inventory"
 
 
 class FakeInventoryClient:
-    def __init__(self, responses: dict[str, FolioEnrichedInstance]) -> None:
+    def __init__(self, responses: dict[str, dict[str, Any]]) -> None:
         self.responses = responses
 
-    def enriched_instances(
-        self, instance_ids: list[str]
-    ) -> list[FolioEnrichedInstance]:
-        return [self.responses[i] for i in instance_ids if i in self.responses]
+    def items_and_holdings(self, instance_ids: list[str]) -> list[FolioInventoryRecord]:
+        return [
+            FolioInventoryRecord(data=self.responses[i])
+            for i in instance_ids
+            if i in self.responses
+        ]
 
 
 def _local_store(namespace: str) -> AdapterStore:
@@ -58,24 +59,20 @@ def test_collect_instance_ids_dedupes_across_changesets(
     assert sorted(ids) == ["inst-1", "inst-2", "inst-3"]
 
 
-def test_run_enrichment_populates_items_store(
+def test_run_enrichment_populates_inventory_store(
     temporary_table: IcebergTable,
 ) -> None:
     bib_store = AdapterStore(temporary_table, BIB_NAMESPACE)
     changeset_id = _seed_bib_changeset(bib_store, ["inst-1", "inst-2"])
 
-    items_store = _local_store(ITEMS_NAMESPACE)
+    inventory_store = _local_store(INVENTORY_NAMESPACE)
     client = FakeInventoryClient(
         {
-            "inst-1": FolioEnrichedInstance(
-                instance_id="inst-1", items=[FolioEnrichedItem(id="item-a")]
-            ),
-            "inst-2": FolioEnrichedInstance(
-                instance_id="inst-2", items=[FolioEnrichedItem(id="item-b")]
-            ),
+            "inst-1": fixture_record("inst-1"),
+            "inst-2": fixture_record("inst-2"),
         }
     )
-    enricher = FolioItemEnricher(client, items_store)  # type: ignore[arg-type]
+    enricher = FolioInventoryEnricher(client, inventory_store)  # type: ignore[arg-type]
 
     response = run_enrichment(
         EnrichmentEvent(job_id="job-1", changeset_ids=[changeset_id]),
@@ -87,7 +84,7 @@ def test_run_enrichment_populates_items_store(
     assert len(response.items_changeset_ids) == 1
 
     stored_ids = {
-        r["id"] for r in items_store.get_active_namespace_records().to_pylist()
+        r["id"] for r in inventory_store.get_active_namespace_records().to_pylist()
     }
     assert stored_ids == {"inst-1", "inst-2"}
 
@@ -96,8 +93,8 @@ def test_run_enrichment_with_no_changes_returns_empty_items_changeset(
     temporary_table: IcebergTable,
 ) -> None:
     bib_store = AdapterStore(temporary_table, BIB_NAMESPACE)
-    items_store = _local_store(ITEMS_NAMESPACE)
-    enricher = FolioItemEnricher(FakeInventoryClient({}), items_store)  # type: ignore[arg-type]
+    inventory_store = _local_store(INVENTORY_NAMESPACE)
+    enricher = FolioInventoryEnricher(FakeInventoryClient({}), inventory_store)  # type: ignore[arg-type]
 
     response = run_enrichment(
         EnrichmentEvent(job_id="job-1", changeset_ids=[]),
