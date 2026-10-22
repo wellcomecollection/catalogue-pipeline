@@ -134,7 +134,7 @@ def es_client(pipeline_date: str, profile: str | None = None) -> elasticsearch.E
 
     return elasticsearch.Elasticsearch(
         f"https://{secret('public_host')}:443",
-        basic_auth=(secret("read_only/es_username"), secret("read_only/es_password")),
+        api_key=secret("read_only/api_key"),
         request_timeout=60,
     )
 

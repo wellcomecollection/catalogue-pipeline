@@ -9,11 +9,16 @@ variable "es_cluster" {
     public_host        = string
     port               = string
     protocol           = string
-    read_only_username = string
-    read_only_password = string
+    read_only_username = optional(string)
+    read_only_password = optional(string)
   })
   sensitive   = true
   description = "Elasticsearch cluster connection details (from infrastructure/critical outputs)."
+
+  validation {
+    condition     = (var.es_cluster.read_only_username == null) == (var.es_cluster.read_only_password == null)
+    error_message = "read_only_username and read_only_password must be set together or both left null."
+  }
 }
 
 variable "allow_delete_indices" {

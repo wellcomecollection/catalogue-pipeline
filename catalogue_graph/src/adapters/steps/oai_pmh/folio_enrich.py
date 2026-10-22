@@ -2,12 +2,13 @@
 
 Runs between the loader and the publish event. Given the bib changeset(s) produced
 by the loader, it reads the changed instance ids, fetches their items/holdings from
-mod-inventory-storage, and upserts them into the ``folio_items_table`` store. It
+mod-inventory-storage, and upserts them into the ``folio_inventory_table``
+store. It
 passes both the bib changeset and the new items changeset forward so the publish
 event can carry them.
 
 Running here (rather than at transform time) preserves transformer purity: a full
-reindex never calls FOLIO, it just joins whatever is already in the items store.
+reindex never calls FOLIO, it just joins whatever is already in the inventory store.
 
 See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
 """
@@ -21,7 +22,7 @@ from typing import Any, cast
 import structlog
 from pydantic import BaseModel, Field
 
-from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioItemEnricher
+from adapters.extractors.oai_pmh.folio.enrichment.enricher import FolioInventoryEnricher
 from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_enricher
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.utils.adapter_store import AdapterStore
@@ -60,7 +61,7 @@ def collect_instance_ids(
 def run_enrichment(
     event: EnrichmentEvent,
     bib_store: AdapterStore,
-    enricher: FolioItemEnricher,
+    enricher: FolioInventoryEnricher,
 ) -> EnrichmentResponse:
     """Core enrichment logic: changed bib instances -> upserted item rows."""
     instance_ids = collect_instance_ids(bib_store, event.changeset_ids)

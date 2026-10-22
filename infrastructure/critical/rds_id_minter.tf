@@ -27,3 +27,29 @@ module "id_minter_rds_2026_07_03" {
     "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-prod",
   ]
 }
+
+module "id_minter_rds_2026_10_20" {
+  source = "./modules/id-minter-rds"
+
+  name_suffix = "2026-10-20"
+  # Restored from production's 2026-10-20 04:00 BST backup so FOLIO records can
+  # inherit their Sierra predecessors' canonical ids (wellcomecollection/platform#6534).
+  snapshot_identifier = "awsbackup:job-294e0ea6-fd81-88aa-e32e-2b4886b5f60d"
+
+  # The FOLIO environment's registry, a copy of production that never becomes it.
+  skip_final_snapshot = true
+
+  # Read through the Identifiers API's idDatabase alias, so the toggled FOLIO
+  # flows see it while unaliased requests stay on production (wellcomecollection/platform#6658).
+  data_api_consumer_role_arns = [
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-stage",
+    "arn:aws:iam::756629837203:role/lambda-role-identifiers-api-prod",
+  ]
+
+  vpc_id             = local.vpc_id_new
+  private_subnet_ids = local.private_subnets_new
+  admin_cidr_ingress = local.admin_cidr_ingress
+  engine_version     = "8.0.mysql_aurora.3.10.3"
+
+  master_username = data.aws_ssm_parameter.rds_username.value
+}

@@ -1,6 +1,7 @@
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
+from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.designation import extract_designation
 from adapters.transformers.marc.duration import extract_duration
@@ -23,7 +24,7 @@ from adapters.transformers.marc.subjects import (
     is_from_standard_thesaurus,
 )
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
-from models.pipeline.concept import Genre, Subject
+from models.pipeline.concept import Contributor, Genre, Subject
 from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
     Id,
@@ -116,6 +117,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
         return extract_former_frequency(self.record)
 
     @property
+    def contributors(self) -> list[Contributor]:
+        return extract_contributors(self.record)
+
+    @property
     def genres(self) -> list[Genre]:
         return extract_genres(self.record)
 
@@ -144,7 +149,7 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
         Each item carries a `folio-item` source identifier with its inventory UUID,
         so the id-minter can assign a stable canonical id. Without enrichment content
-        (e.g. an instance not yet enriched, or a full reindex before the items store
+        (e.g. an instance not yet enriched, or a full reindex before the inventory store
         is populated) this falls back to no items rather than guessing from MARC 952.
         """
         if not self.enrichment_content:

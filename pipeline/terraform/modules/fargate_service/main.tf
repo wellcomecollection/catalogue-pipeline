@@ -32,7 +32,9 @@ module "scaling_service" {
   elastic_cloud_vpce_sg_id = var.fargate_service_boilerplate["elastic_cloud_vpce_security_group_id"]
   security_group_ids = concat(
     var.security_group_ids,
-    lookup(var.fargate_service_boilerplate, "egress_security_group_id", "") != "" ? [var.fargate_service_boilerplate["egress_security_group_id"]] : []
+    lookup(var.fargate_service_boilerplate, "egress_security_group_id", "") != "" ? [var.fargate_service_boilerplate["egress_security_group_id"]] : [],
+    # The storage endpoint's group, when it differs from the logging one above
+    contains([null, var.fargate_service_boilerplate["elastic_cloud_vpce_security_group_id"]], var.fargate_service_boilerplate["storage_vpce_security_group_id"]) ? [] : [var.fargate_service_boilerplate["storage_vpce_security_group_id"]]
   )
 
   desired_task_count = var.desired_task_count

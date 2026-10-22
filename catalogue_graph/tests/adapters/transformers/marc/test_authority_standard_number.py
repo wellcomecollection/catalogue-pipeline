@@ -181,3 +181,28 @@ def test_no_subfield_0_gives_no_identifier_regardless_of_scheme(
     indicator2: str,
 ) -> None:
     assert extract_identifier(_field(indicator2), "Concept") is None
+
+
+@pytest.mark.parametrize("indicator2", ["0", "2", "7", " "])
+def test_a_given_scheme_applies_whatever_the_second_indicator(indicator2: str) -> None:
+    identifiable = extract_identifier(
+        _field(indicator2, "n84165387"), "Person", scheme="lc-names"
+    )
+    assert identifiable is not None
+    assert identifiable.source_identifier.identifier_type.id == "lc-names"
+    assert identifiable.source_identifier.value == "n84165387"
+
+
+@pytest.mark.parametrize("value", ["sh2009124405", "shsh85100861", "MONTIROH"])
+def test_a_given_loc_scheme_rejects_an_identifier_with_another_prefix(
+    value: str,
+) -> None:
+    with capture_logs() as logs:
+        assert (
+            extract_identifier(_field("0", value), "Person", scheme="lc-names") is None
+        )
+    assert [
+        entry
+        for entry in logs
+        if entry["event"] == "Could not determine LoC scheme from identifier"
+    ]

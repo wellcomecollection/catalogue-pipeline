@@ -115,6 +115,8 @@ jobs:
             axiell-adapter-mark-published,
             folio-adapter-mark-published,
             axiell-adapter-reconcile,
+            # Third-party API probes
+            catalogue-third-party-probe,
           ]
     steps:
       - uses: wellcomecollection/.github/.github/actions/deploy-lambda-image@main

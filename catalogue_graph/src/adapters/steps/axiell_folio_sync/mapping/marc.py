@@ -42,9 +42,12 @@ class CanonicalRecord:
     normal_location: str | None = None
     # 506$f — the standardized access term (OPEN, CLOSED, RESTRICTED, …).
     # Feeds the item's status; see config.ACCESS_ITEM_STATUS. It does not feed the
-    # loan type, which is a constant while Collection Information decides what
-    # should drive it. See config.DEFAULT_LOAN_TYPE.
+    # loan type, which comes from use_restriction.
     access_category: str | None = None
+    # 540$a: the use restriction, which says how the item can be requested
+    # (Online request, By appointment, ...). Feeds the item's permanent loan
+    # type; see config.USE_RESTRICTION_LOAN_TYPE.
+    use_restriction: str | None = None
     deleted: bool = False
 
 

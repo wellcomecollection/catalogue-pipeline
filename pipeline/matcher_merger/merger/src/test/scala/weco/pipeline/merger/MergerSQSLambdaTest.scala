@@ -9,14 +9,20 @@ import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
 import weco.fixtures.TestWith
-import weco.lambda.SQSLambdaMessage
+import weco.lambda.{
+  SQSLambdaMessage,
+  SQSLambdaMessageFailedRetryable,
+  SQSLambdaMessageProcessed
+}
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
 import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
-import weco.pipeline_storage.memory.MemoryRetriever
+import weco.pipeline_storage.{Indexable, Indexer}
+import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class MergerSQSLambdaTest
   extends AnyFunSpec
@@ -27,6 +33,9 @@ class MergerSQSLambdaTest
     with MatcherResultFixture
     with MergeCandidateGenerators
     with MergerFixtures {
+
+  // MergerSQSLambdaBatchedTest reruns every test here with batch indexing on.
+  protected val batched: Boolean = false
 
 
   it( "reads matcher result messages, retrieves the works and sends on the IDs") {
@@ -360,6 +369,7 @@ class MergerSQSLambdaTest
       identifiedIndex,
       mergedIndex,
       imageSender,
+      batched = batched,
     ) {
       mergerSQSLambda =>
         testWith((
@@ -370,5 +380,61 @@ class MergerSQSLambdaTest
         ))
     }
   }
-}
 
+  it("retries only the message whose document failed to index") {
+    val okWork = identifiedWork()
+    val badWork = identifiedWork()
+
+    val identifiedIndex = new MemoryRetriever[Work[WorkState.Identified]]()
+    identifiedIndex.index ++= Map(okWork.id -> okWork, badWork.id -> badWork)
+    val mergedIndex = mutable.Map[String, WorkOrImage]()
+
+    // Fails any document with badWork's id and indexes the rest.
+    val calls = mutable.ListBuffer[Seq[WorkOrImage]]()
+    val failingIndexer = new Indexer[WorkOrImage] {
+      private val underlying = new MemoryIndexer[WorkOrImage](mergedIndex)
+      def init(): Future[Unit] = Future.successful(())
+      def apply(
+        docs: Seq[WorkOrImage]
+      ): Future[Either[Seq[WorkOrImage], Seq[WorkOrImage]]] = {
+        calls.synchronized { calls += docs }
+        val (bad, good) = docs.partition(
+          doc => implicitly[Indexable[WorkOrImage]].id(doc) == badWork.id
+        )
+        underlying(good).map(_ => if (bad.isEmpty) Right(good) else Left(bad))
+      }
+    }
+
+    withMergerSQSLambda(
+      identifiedIndex,
+      mergedIndex,
+      new MemoryMessageSender(),
+      batched = batched,
+      indexerOverride = Some(failingIndexer)
+    ) {
+      mergerSQSLambda =>
+        val okId = randomUUID.toString
+        val badId = randomUUID.toString
+        val messages = List(
+          SQSLambdaMessage(okId, createMatcherResultWith(Set(Set(okWork)))),
+          SQSLambdaMessage(badId, createMatcherResultWith(Set(Set(badWork))))
+        )
+
+        whenReady(mergerSQSLambda.processMessages(messages)) {
+          results =>
+            results should contain(SQSLambdaMessageProcessed(okId))
+            results.collect {
+              case failure: SQSLambdaMessageFailedRetryable => failure.messageId
+            } shouldBe Seq(badId)
+            mergedIndex.keySet shouldBe Set(okWork.id)
+
+            // Batched, both messages' documents go to the indexer in one call
+            val indexedIds = calls.map(
+              _.map(doc => implicitly[Indexable[WorkOrImage]].id(doc)).toSet
+            )
+            if (batched) indexedIds shouldBe Seq(Set(okWork.id, badWork.id))
+            else indexedIds should contain theSameElementsAs Seq(Set(okWork.id), Set(badWork.id))
+        }
+    }
+  }
+}

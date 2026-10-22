@@ -11,6 +11,7 @@ from ingestor.models.neptune.query_result import ExtractedConcept
 from models.graph_node import SourceConcept
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import SourceIdentifier
+from utils.concept_types import get_most_specific_concept_type
 from utils.types import ConceptSource, ConceptType
 
 # Sources sorted by priority for querying purposes.
@@ -98,38 +99,6 @@ def get_priority_label(
     raise MissingLabelError(
         f"Concept {raw_concept.concept.properties.id} does not have a label."
     )
-
-
-def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
-    # Concepts which are not connected to any Works will not have any types associated with them. We periodically
-    # remove such concepts from the graph, but there might be a few of them at any given point.
-    if len(concept_types) == 0:
-        return "Concept"
-
-    # Prioritise concepts, with more specific ones (e.g. 'Person') above less specific ones (e.g. 'Agent').
-    # Sometimes a concept is classified under types which are mutually exclusive. For example, there are
-    # several hundred concepts categorised as both a 'Person' and an 'Organisation'. These inconsistencies arise
-    # upstream, and we cannot easily resolve them here. To mitigate this issue, the priority list below is ordered
-    # to maximise the probability of choosing the right type based on an analysis of current inconsistencies. (For
-    # example, when a concept is categorised as both an 'Organisation' and a 'Place', the 'Place' type is almost
-    # always the correct one, which is why 'Place' is higher in the priority list than 'Organisation').
-    concept_types_by_priority: list[ConceptType] = [
-        "Genre",
-        "Place",
-        "Person",
-        "Organisation",
-        "Period",
-        "Meeting",
-        "Agent",
-        "Subject",
-        "Concept",
-    ]
-
-    for concept_type in concept_types_by_priority:
-        if concept_type in concept_types:
-            return concept_type
-
-    raise ValueError(f"Invalid set of concept types: {concept_types}.")
 
 
 class RawNeptuneConcept:

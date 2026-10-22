@@ -15,7 +15,8 @@ count is 0 until the docs are reindexed under a mapping that indexes the field).
 
 A write (``_reindex``) needs more than read-only privileges, so this connects with the
 deployment superuser credentials (``.../es_username`` + ``.../es_password``), not the
-``read_only`` user used by get_reindex_status.py.
+``read_only`` API key used by get_reindex_status.py. Basic auth and task polling both
+work on serverless projects too (checked 2026-10-20).
 
 Usage (from reindexer/scripts/):
     uv run reindex_index.py --source-index SRC --dest-index DST

@@ -23,9 +23,12 @@ class Status(BaseModel):
 
 
 class Note(BaseModel):
-    # noteType is resolved to itemNoteTypeId later by upsert.entities._resolve_item_note_types.
+    # A typed FOLIO item note. The builders set itemNoteTypeId directly. A note
+    # carrying only a noteType name has it resolved later by
+    # upsert.entities._resolve_item_note_types.
     model_config = ConfigDict(extra="allow")
     note: str
+    itemNoteTypeId: str | None = None
     noteType: str | None = None
     staffOnly: bool = False
 
@@ -62,9 +65,8 @@ class Item(BaseModel):
     materialType: IdRef
     permanentLoanType: IdRef
     permanentLocation: IdRef
-    # Typed notes (each resolved to an itemNoteTypeId by
-    # upsert.entities._resolve_item_note_types). The mapping emits none today —
-    # the AxC current location goes to administrativeNotes instead.
+    # Typed notes: the Axiell Current Location and Axiell Normal Location notes.
+    # The upsert replaces notes of those types and keeps every other note.
     notes: list[Note] | None = None
     # Plain untyped strings; no tenant note type needed.
     administrativeNotes: list[str] | None = None

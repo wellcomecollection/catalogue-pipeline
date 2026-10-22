@@ -10,7 +10,7 @@ maps today, see
 | Mapping | State | Where |
 | --- | --- | --- |
 | **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 89.8% of records; 13,284 (7.2%) match no rule and fail. The only thing failing records today. | [Section 1](#1-permanent-location-incomplete-and-failing-13284-records), [questions 1 to 3](#location) |
-| **Loan type** | **Proposed, not agreed.** Constant `Can circulate` for every record today. The proposal derives it from `540$a` (use restriction): `Can circulate` for `Online request` and `Restricted` only, `Unavailable` for the rest. | [Section 2](#2-loan-type-proposed-not-agreed), [questions 4 and 5](#loan-type) |
+| **Loan type** | **Implemented** (mapping version 2.8.0). Derived from `540$a` (use restriction): `Can circulate` for `Online request` and `Restricted` only, `Unavailable` for the rest, including an absent or unlisted term. No access-category ceiling. | [Section 2](#2-loan-type-implemented), [questions 4 and 5](#loan-type) |
 | **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
 | **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
 | **Identifier format** (HRID) | **Implemented.** A 45 to 49 character string built from the AxC GUID. Whether that format is acceptable is open, and it cannot change after the first run. | [Question 10](#identifiers) |
@@ -104,10 +104,11 @@ rather than by anything agreed here.
 
 ---
 
-## 2. Loan type: proposed, not agreed
+## 2. Loan type: implemented
 
-Every item is written `Can circulate` today, undifferentiated, because no AxC
-field is mapped to the loan type. The tenant has six loan types and none needs
+The permanent loan type comes from `540$a`: `Online request` and `Restricted`
+map to `Can circulate`; all other or absent values map to `Unavailable`.
+The tenant has six loan types and none needs
 provisioning: `Can circulate`, `Course reserves`, `ILL`, `Reading room`,
 `Selected`, `Unavailable`.
 
@@ -215,10 +216,13 @@ should be known before implementing.
 Separately, 332 records say `Unavailable` in `540$a` while `506$f` says `OPEN`.
 A ceiling does not catch these; under the table above they take `Unavailable`.
 
-**Not implemented.** `DEFAULT_LOAN_TYPE` remains the constant `Can circulate`
-for every record. That coincides with what the proposal gives consultable
-material, but the 9,205 it would mark `Unavailable` are currently
-`Can circulate` too. Nothing changes in the code until CI confirms the table.
+**Implemented** in mapping version 2.8.0, as the table above
+(`USE_RESTRICTION_LOAN_TYPE` in `mapping/config.py`), tracked on
+wellcomecollection/platform#6774. `DEFAULT_LOAN_TYPE` is now `Unavailable`, and
+an unlisted term takes it rather than failing the record. The access-category
+ceiling is not implemented, so the 453-plus records discussed above circulate if
+their `540$a` says so. The loan policy behind `Can circulate` (question 4) is
+still unexamined.
 
 ---
 
@@ -402,5 +406,4 @@ should be confirmed against this tenant's FOLIO version.
 **On the FOLIO tenant**, none of these verified: that `Restricted` and
 `Withdrawn` are accepted by this FOLIO version; what loan policy the circulation
 rules attach to `Can circulate` and whether `Unavailable` genuinely prevents a
-loan; and that the three `AxC *` location names still resolve, last confirmed
-2026-09-29.
+loan; and that the three `AxC *` location names still resolve.

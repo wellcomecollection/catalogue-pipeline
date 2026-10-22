@@ -440,8 +440,6 @@ class WindowReporter:
             lookback_minutes = max(self.window_minutes * 2, 1440)
             search_start = start_bound - timedelta(minutes=lookback_minutes)
 
-        # Coverage only needs the window bounds and states; the per-window
-        # record id lists are large enough to exhaust the trigger's memory.
         rows = self.store.list_status_in_range(
             start_time=search_start, end_time=end_bound
         )

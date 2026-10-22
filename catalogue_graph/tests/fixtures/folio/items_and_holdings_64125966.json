@@ -1,0 +1,4148 @@
+{
+  "instanceId": "64125966-52e5-5a7f-9572-0bd80ea6980e",
+  "source": "MARC",
+  "modeOfIssuance": "serial",
+  "natureOfContent": [],
+  "holdings": [
+    {
+      "id": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364820",
+        "b13119382",
+        "i13364832",
+        "i13364844",
+        "i13364856",
+        "i13364868",
+        "i1336487x",
+        "i13364881",
+        "i13364893",
+        "i13364972",
+        "i13365095",
+        "i15976658",
+        "i16088463",
+        "i16857896",
+        "i16857902",
+        "i16857926",
+        "i16857938",
+        "i16857951",
+        "i16857963",
+        "i16857975",
+        "i16857987",
+        "i16857999",
+        "i16858013",
+        "i16858037",
+        "i16858049",
+        "i16858062",
+        "i16858074",
+        "i16858086",
+        "i16858098",
+        "i16858104",
+        "i16858116",
+        "i16858128",
+        "i1685813x",
+        "i16858141",
+        "i16858153",
+        "i16860871",
+        "c10333241"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Monograph",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [
+        {
+          "statement": "1.1 1-72 -1 1947-2017 -10"
+        },
+        {
+          "statement": "1.1 71 1 2017 10"
+        }
+      ],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "3c921560-6826-50d5-91af-1f9a06d9dc42",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i1336490x",
+        "b13119382",
+        "b14096614",
+        "b14096717",
+        "b14096808",
+        "b1409695x",
+        "b14263397",
+        "b14263555",
+        "b14266908",
+        "b14269235",
+        "b14269508",
+        "b14369679",
+        "b14376325",
+        "b14456667"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "2625a5cc-5b86-58c3-b270-0bae1aa78b3d",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364923",
+        "b13119382",
+        "b13820643",
+        "b14096626",
+        "b14096729",
+        "b14096821",
+        "b14264547",
+        "b14264584",
+        "b14269247"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "3033237e-f9c1-5b46-baf5-2ef732396d91",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364935",
+        "b13119382",
+        "b14096638",
+        "b14096973",
+        "b14265692",
+        "b1426691x",
+        "b14268048",
+        "b1445550x"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "a4a894c0-af69-5d60-9ae4-c813fcbd8c48",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364947",
+        "b13119382",
+        "b13822810",
+        "b14096730",
+        "b14096833",
+        "b14270559"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "bd66d2ad-c1ae-5157-a765-34f9b39deceb",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364959",
+        "b13119382",
+        "b1409664x",
+        "b14096742",
+        "b14096845",
+        "b14096985",
+        "b14264596"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "001c9852-3d76-52c9-9095-96165bd74eca",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364960",
+        "b13119382",
+        "b14365649",
+        "b14376209",
+        "b14447289",
+        "b14447459"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "1467c159-86b7-5f8b-8d64-c80dd7489031",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364984",
+        "b13119382",
+        "b13830259",
+        "b13835257",
+        "b13835804",
+        "b14374183"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "9680b0dc-1fa7-53bd-827e-0d39dccffa7a",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364996",
+        "b13119382",
+        "b14263373",
+        "b14365881",
+        "b14365972",
+        "b14368274",
+        "b14371789",
+        "b1437285x",
+        "b14375321",
+        "b14379430",
+        "b1444723x",
+        "b14455596"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "80a547a4-bc02-561f-bfa7-62e24a84d1d5",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365009",
+        "b13119382",
+        "b14365789",
+        "b14365893",
+        "b14447241",
+        "b14447460",
+        "b14449559",
+        "b14453484",
+        "b14455869"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "9c9ab5cb-3ac3-56bf-ae8f-ed6ced61251b",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365010",
+        "b13119382",
+        "b14365984",
+        "b14368535",
+        "b14369710",
+        "b14377846",
+        "b14447253",
+        "b14447290",
+        "b14447307",
+        "b14447381",
+        "b14447393",
+        "b14447472",
+        "b14450045"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "e8bf4695-9f3d-57cf-9cad-8dea078c6eae",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365022",
+        "b13119382",
+        "b14331561",
+        "b14365790",
+        "b14369618",
+        "b14371674",
+        "b14374031",
+        "b14377950",
+        "b14447265",
+        "b14457647"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "f116508c-7400-50f4-94b1-4559beea8744",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365034",
+        "b13119382",
+        "b14365650",
+        "b14424472",
+        "b1444740x",
+        "b14447484",
+        "b14465176",
+        "b14466909",
+        "b14466910",
+        "b14466922",
+        "b14466934",
+        "b14466946"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "345694a1-fb8f-560b-a9e8-e9d757508f61",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365046",
+        "b13119382",
+        "b14427710",
+        "b14427722",
+        "b14427758",
+        "b14428040",
+        "b14428052",
+        "b14443181",
+        "b1446892x",
+        "b14468931",
+        "b14468943",
+        "b1447122x",
+        "b14471231",
+        "b14471243"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "2659d17e-5f49-5e81-b95e-a22e0640f7d1",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365058",
+        "b13119382",
+        "b13812592",
+        "b14051898",
+        "b14051904",
+        "b14051916",
+        "b14249418",
+        "b1424942x",
+        "b14249431",
+        "b14249443",
+        "b14249455",
+        "b14432602",
+        "b14432626"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "6a410bee-f1da-5c15-93f1-4bbb31de8097",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i1336506x",
+        "b13119382",
+        "b13851512",
+        "b13851524",
+        "b13851536",
+        "b14075283",
+        "b14075295",
+        "b14075301",
+        "b14081544",
+        "b14081556",
+        "b14081568",
+        "b14485035"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "570a063e-c90b-532e-a78b-03ec6d2924ab",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365071",
+        "b13119382",
+        "b13817279",
+        "b13817280",
+        "b13817292",
+        "b13851846",
+        "b13851858",
+        "b1385186x",
+        "b14259047",
+        "b14259059",
+        "b14259060",
+        "b14442747",
+        "b14442759",
+        "b14489478",
+        "b14491096"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "76c467f7-1191-58fd-9377-bde03bf44b98",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365083",
+        "b13119382",
+        "b13823954",
+        "b13823966",
+        "b13823978",
+        "b1382398x",
+        "b13823991",
+        "b13824004",
+        "b13824016",
+        "b13824028",
+        "b1382403x",
+        "b1385902x",
+        "b13859031",
+        "b13859043",
+        "b13859055",
+        "b13859067",
+        "b13859079",
+        "b14090375",
+        "b14411039"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "65c72ae2-0cf6-56b3-a200-76ab03e469f6",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364911",
+        "b13119382",
+        "b13821635",
+        "b1409681x",
+        "b14096961",
+        "b14248852",
+        "b14265680",
+        "b14265813",
+        "b14267962"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "e2bded5e-7076-5d07-b04d-6eec3a43cb7d",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14198009",
+        "b13119382",
+        "b14971276",
+        "b1497213x",
+        "b14972141",
+        "b14972153",
+        "b14972177",
+        "b15280196",
+        "b15280226"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "843cd87d-3c25-5bd1-ae54-46b20282372d",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14569784",
+        "b13119382",
+        "b15269139",
+        "b15269140"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "9da0f609-1bfe-502b-b6aa-055510e1fb64",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14569796",
+        "b13119382",
+        "b15269152",
+        "b15269164",
+        "b1526936x",
+        "b15269371",
+        "b15269383",
+        "b15269395"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "f2aeeac5-d25a-55b2-a7f1-6ae41aa9ec56",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14569802",
+        "b13119382",
+        "b1526919x"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "7764208a-639b-51de-89f9-696e1c1a1676",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14614698",
+        "b13119382",
+        "b15334260",
+        "b15394876",
+        "b15457825",
+        "b15457837",
+        "b15457850",
+        "b15457862"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "2b02be3c-ff91-5374-bb60-fd9df6f4e84a",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14800287",
+        "b13119382",
+        "b15547541",
+        "b15547553",
+        "b15592145",
+        "b15592169",
+        "b15676596",
+        "b15676626"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "245efe03-34da-5ec1-8478-73c937ed102e",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14979901",
+        "b13119382",
+        "b15730396"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    },
+    {
+      "id": "fd283cef-f814-53a8-bde4-ff53e1ccd132",
+      "notes": [],
+      "location": {
+        "effectiveLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i15124514",
+        "b13119382",
+        "b15885896",
+        "b15885902",
+        "b15885914",
+        "b15911184",
+        "b15911196"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "holdingsType": "Boundwiths",
+      "electronicAccess": [],
+      "statisticalCodes": [],
+      "holdingsStatements": [],
+      "suppressFromDiscovery": false,
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": []
+    }
+  ],
+  "items": [
+    {
+      "id": "02738895-598f-5d5b-9b10-363d66da01f0",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 23 1969",
+      "barcode": "BARCODE-01",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858153"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "028a08a4-a4c0-5c8e-86d5-860d51dada1c",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 20 1966-67",
+      "barcode": "BARCODE-02",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858128"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "02dbb1ae-6b2b-5f1e-9e8d-a8d5cdce19bd",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 5 1951-52",
+      "barcode": "BARCODE-03",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857938"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "06e820ba-8176-53f3-b148-4477c5543850",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 39 1986",
+      "barcode": "BARCODE-04",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364972"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "08c22e5d-bebc-5533-b4ac-7dacf7ce82e4",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 40 1986",
+      "barcode": "BARCODE-05",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364984"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1467c159-86b7-5f8b-8d64-c80dd7489031",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "08ef0fd4-db8b-5eea-bb82-5506e3463242",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 45 1991",
+      "barcode": "BARCODE-06",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365034"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "f116508c-7400-50f4-94b1-4559beea8744",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "0ac250de-f535-519e-8964-e0a6625767ba",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 48 1994",
+      "barcode": "BARCODE-07",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i1336506x"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "6a410bee-f1da-5c15-93f1-4bbb31de8097",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "10858605-fbb8-5d74-ba8e-be8ce0cacf3e",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 19 1965-66",
+      "barcode": "BARCODE-08",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858116"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "11301e8e-a209-57b7-949f-43e88d9a29b2",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 30 1976",
+      "barcode": "BARCODE-09",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364881"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "15bf0ad1-be05-5028-81ec-9123b2956f47",
+      "notes": [],
+      "status": "Available",
+      "barcode": "BARCODE-10",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16860871"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "1ee28da0-ac21-5374-81ee-cd5f2c605c32",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 7 1953-54",
+      "barcode": "BARCODE-11",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857963"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "2045a505-d13a-543b-ae29-7ac55e0cbbe9",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 43 1989",
+      "barcode": "BARCODE-12",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365010"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "9c9ab5cb-3ac3-56bf-ae8f-ed6ced61251b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "20ea42f1-19d7-5503-9987-32e179802bbd",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 56 2002",
+      "barcode": "BARCODE-13",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14800287"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "2b02be3c-ff91-5374-bb60-fd9df6f4e84a",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "2469fbde-ddf0-5b5f-bbf5-89183271f8ef",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 35 1981",
+      "barcode": "BARCODE-14",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364935"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "3033237e-f9c1-5b46-baf5-2ef732396d91",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "24a45d7d-5650-597d-b9bd-1184513c72c8",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 51 1997",
+      "barcode": "BARCODE-15",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14569784"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "843cd87d-3c25-5bd1-ae54-46b20282372d",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "2693b7ae-724d-5802-9d0c-a635d6b87d69",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 22 1968",
+      "barcode": "BARCODE-16",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858141"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "2a0c4475-7d5f-5ada-84fe-e28c61221fc2",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 53 1999",
+      "barcode": "BARCODE-17",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14569802"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "f2aeeac5-d25a-55b2-a7f1-6ae41aa9ec56",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "2ef2826a-57ed-56b8-8963-bfe78ff79851",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 19 1964-65",
+      "barcode": "BARCODE-18",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858104"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "33ccf0ee-3498-5dd4-bf70-48a6e81bb7b9",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 37 1983",
+      "barcode": "BARCODE-19",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364959"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "bd66d2ad-c1ae-5157-a765-34f9b39deceb",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "37a2d533-fc1b-5469-9789-235fd34ad43d",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 57 2003 (incomp.)",
+      "barcode": "BARCODE-20",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14979901"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "245efe03-34da-5ec1-8478-73c937ed102e",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "38c5f1e9-2e13-5f80-8357-28fb9b092043",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 2 1948-49",
+      "barcode": "BARCODE-21",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857896"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "407c0f96-8552-5402-b819-40068516c42a",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 13 1959-60",
+      "barcode": "BARCODE-22",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858049"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "429c8ace-ffa9-5af7-ac54-16e6e16fe2fa",
+      "notes": [],
+      "status": "Available",
+      "barcode": "BARCODE-23",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365095"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "2",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "4642e13b-4fb0-548c-a1fb-045f328242fa",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 49 1995",
+      "barcode": "BARCODE-24",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365071"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "570a063e-c90b-532e-a78b-03ec6d2924ab",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "477f8c1a-9985-5baf-8111-31a1b8c2ee05",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 6 1952-53",
+      "barcode": "BARCODE-25",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857951"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "5248afef-0774-50b4-887a-c0363bb13eae",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 34 1980",
+      "barcode": "BARCODE-26",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364923"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "2625a5cc-5b86-58c3-b270-0bae1aa78b3d",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "5278cd0a-d691-56c7-8367-2e5fe7722c0a",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 41 1987",
+      "barcode": "BARCODE-27",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364996"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "9680b0dc-1fa7-53bd-827e-0d39dccffa7a",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "6083cdf0-62aa-5622-b8bb-80b32b090d4b",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 33 1979",
+      "barcode": "BARCODE-28",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364911"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "65c72ae2-0cf6-56b3-a200-76ab03e469f6",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "68e84f11-e855-5f2a-8d2d-84aabeaf3a1b",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 24 1970",
+      "barcode": "BARCODE-29",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364820"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "6caf72ab-f01f-57c0-a6b0-e525f89304ab",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 47 1993",
+      "barcode": "BARCODE-30",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365058"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "2659d17e-5f49-5e81-b95e-a22e0640f7d1",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "6e144834-8ab6-5765-846f-b7cc78512a10",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 59 2005",
+      "barcode": "BARCODE-31",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i15976658"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "70ef6ee2-f931-5435-affa-3fcea0020676",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 42 1988",
+      "barcode": "BARCODE-32",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365009"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "80a547a4-bc02-561f-bfa7-62e24a84d1d5",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "7152febe-8c8c-53a7-bc56-281487bf2862",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 60 2006",
+      "barcode": "BARCODE-33",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16088463"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "77f93f6b-afd2-59e3-9534-d4f071274d5b",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 50 1996",
+      "barcode": "BARCODE-34",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365083"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "76c467f7-1191-58fd-9377-bde03bf44b98",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "7a3400e2-f48b-5811-af07-05eac5ed1e4d",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 55 2001 (incomp.)",
+      "barcode": "BARCODE-35",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14614698"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "7764208a-639b-51de-89f9-696e1c1a1676",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "7b473ba1-1bb5-5ee0-b2ef-b0e85c0c0830",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 3 1949-50",
+      "barcode": "BARCODE-36",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857902"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "8195f7e9-4558-5e5b-b1d9-1c3effdef8b9",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 10 1956-57",
+      "barcode": "BARCODE-37",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857999"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "919dd7e5-ce9c-5647-91a0-9b80f69c7ff6",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 26 1972",
+      "barcode": "BARCODE-38",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364844"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "98924e0a-c4af-5f02-b3f9-99502f460b10",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 9 1955-56",
+      "barcode": "BARCODE-39",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857987"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "9893cd82-bcb0-5aec-a588-ecc53b4a7d0a",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 44 1990",
+      "barcode": "BARCODE-40",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365022"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "e8bf4695-9f3d-57cf-9cad-8dea078c6eae",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "9a20eb45-3040-54b5-a19a-5e914ac45b81",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 4 1950-51",
+      "barcode": "BARCODE-41",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857926"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "9a60bf9b-0ac8-5e26-b6be-ba4288c7ebdd",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 14 1960-61",
+      "barcode": "BARCODE-42",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858062"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "9b605f53-d06c-5d06-bfe8-4cddc436906f",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 36 1982",
+      "barcode": "BARCODE-43",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364947"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "a4a894c0-af69-5d60-9ae4-c813fcbd8c48",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "9cd0f8f0-e766-565e-af02-130e0db3f593",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 21 1967",
+      "barcode": "BARCODE-44",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i1685813x"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "a5f566f5-5a4b-531a-8790-71ba42eda1f5",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 54 2000",
+      "barcode": "BARCODE-45",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14198009"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "e2bded5e-7076-5d07-b04d-6eec3a43cb7d",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "ab6e1996-cc46-53a8-8f43-0bba95e6e17f",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 11 1957-58",
+      "barcode": "BARCODE-46",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858013"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "afe9ce25-3305-596b-8d67-02c2aacba201",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 12 1958-59",
+      "barcode": "BARCODE-47",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858037"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "b29bbae6-e243-5790-bb7c-035cf1348633",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 17 1963-64",
+      "barcode": "BARCODE-48",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858098"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "c1406d7e-7e05-52f0-9749-9ea181dcb607",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 52 1998",
+      "barcode": "BARCODE-49",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i14569796"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "9da0f609-1bfe-502b-b6aa-055510e1fb64",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "c9336201-7286-5cac-be1b-0c82ce368775",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 31 1977",
+      "barcode": "BARCODE-50",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364893"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "cae3ea6b-10a4-5f23-bbda-e624bea6e014",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 8 1954-55",
+      "barcode": "BARCODE-51",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16857975"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "cb420a62-7969-5f37-8bbd-d3ff1ffcc6d1",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 58 2004",
+      "barcode": "BARCODE-52",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i15124514"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "fd283cef-f814-53a8-bde4-ff53e1ccd132",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "d4efd585-ad72-5270-8541-f1f99cfaa581",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 46 1992",
+      "barcode": "BARCODE-53",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13365046"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "345694a1-fb8f-560b-a9e8-e9d757508f61",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "d5801c8f-ad1f-59c3-bc5b-4da077b33bfb",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 16 1962-63",
+      "barcode": "BARCODE-54",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858086"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "d80c06a8-62a5-5c05-aad4-70322e6ae2e7",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 29 1975",
+      "barcode": "BARCODE-55",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i1336487x"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "ddc87950-d795-5edb-8993-5b343d20c734",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 15 1961-62",
+      "barcode": "BARCODE-56",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i16858074"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "e05847f5-0cf3-56c2-b7d9-bc9da502c91b",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 38 1984",
+      "barcode": "BARCODE-57",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364960"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "001c9852-3d76-52c9-9095-96165bd74eca",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "e591328a-cebe-54d3-8b28-ac396e00a2bc",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 25 1971",
+      "barcode": "BARCODE-58",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364832"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "f3d4ad66-58ef-5ecb-8f6a-7c0ab7a72482",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 32 1978",
+      "barcode": "BARCODE-59",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i1336490x"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "3c921560-6826-50d5-91af-1f9a06d9dc42",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "f4b3c4af-0f9c-5d7e-a31d-1055f59ee7b3",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 27 1973",
+      "barcode": "BARCODE-60",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364856"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    },
+    {
+      "id": "f76e64b0-ac30-5ff6-8178-6e83877e89eb",
+      "notes": [],
+      "status": "Available",
+      "volume": "Vol. 28 1974",
+      "barcode": "BARCODE-61",
+      "location": {
+        "location": {
+          "id": "e22a0076-dd32-493c-a475-b9225706cab1",
+          "code": "sgser",
+          "name": "Closed stores journals",
+          "isActive": true,
+          "campusName": "EUSTON ROAD",
+          "libraryCode": "CLOSED",
+          "libraryName": "Closed stores",
+          "locationName": "Closed stores journals",
+          "institutionName": "Wellcome Collection"
+        },
+        "permanentLocation": {},
+        "temporaryLocation": {}
+      },
+      "formerIds": [
+        "i13364868"
+      ],
+      "callNumber": {
+        "callNumber": "S4970"
+      },
+      "copyNumber": "1",
+      "yearCaption": [],
+      "materialType": "serial",
+      "materialTypeId": "72d067ba-e1ad-45a9-93de-08d7aeed302b",
+      "electronicAccess": [],
+      "holdingsRecordId": "1cb4f725-fd1c-5615-8541-94f32ead3f8b",
+      "statisticalCodes": [
+        {
+          "id": "c7e911c6-92f8-413d-b1d2-f9a7819230e9",
+          "code": "MANUAL REQUEST",
+          "name": "Manual Request",
+          "source": "local",
+          "statisticalCodeType": "AccessStatus"
+        }
+      ],
+      "permanentLoanType": "Can circulate",
+      "suppressFromDiscovery": false
+    }
+  ]
+}
