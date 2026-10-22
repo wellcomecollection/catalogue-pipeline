@@ -74,31 +74,35 @@ class WindowStore:
         self.table = table
         self._lock = Lock()
 
+    def _rows(
+        self, expr: BooleanExpression, fields: tuple[str, ...] | None = None
+    ) -> list[dict[str, Any]]:
+        scan = self.table.scan().filter(expr)
+        if fields:
+            scan = scan.select(*fields)
+        return scan.to_arrow().to_pylist(maps_as_pydicts="lossy")
+
+    def _summaries(self, expr: BooleanExpression) -> list[WindowSummary]:
+        return [WindowSummary.model_validate(row) for row in self._rows(expr)]
+
     def list_in_range(
         self, start_time: datetime | None = None, end_time: datetime | None = None
     ) -> list[WindowSummary]:
         """Return rows within the given time range."""
-        arrow_table = self.table.scan().filter(_range_filter(start_time, end_time))
-        pylist = arrow_table.to_arrow().to_pylist(maps_as_pydicts="lossy")
-        return [WindowSummary.model_validate(row) for row in pylist]
+        return self._summaries(_range_filter(start_time, end_time))
 
     def list_status_in_range(
         self, start_time: datetime | None = None, end_time: datetime | None = None
     ) -> list[WindowStatus]:
         """Return rows within the given time range without reading their record ids."""
-        scan = self.table.scan().filter(_range_filter(start_time, end_time))
-        pylist = (
-            scan.select(*_STATUS_FIELDS).to_arrow().to_pylist(maps_as_pydicts="lossy")
-        )
-        return [WindowStatus.model_validate(row) for row in pylist]
+        rows = self._rows(_range_filter(start_time, end_time), _STATUS_FIELDS)
+        return [WindowStatus.model_validate(row) for row in rows]
 
     def list_by_keys(self, keys: list[str]) -> list[WindowSummary]:
         """Return rows whose window_key is in the given list."""
         if not keys:
             return []
-        arrow_table = self.table.scan().filter(In("window_key", keys)).to_arrow()
-        pylist = arrow_table.to_pylist(maps_as_pydicts="lossy")
-        return [WindowSummary.model_validate(row) for row in pylist]
+        return self._summaries(In("window_key", keys))
 
     def load_status_map(
         self,
@@ -146,6 +150,4 @@ class WindowStore:
 
     def list_by_state(self, state: str) -> list[dict[str, Any]]:
         """Return rows filtered by state (e.g. success, failed)."""
-        scan = self.table.scan().filter(EqualTo("state", state))
-        arrow_table = scan.to_arrow()
-        return arrow_table.to_pylist(maps_as_pydicts="lossy")
+        return self._rows(EqualTo("state", state))
