@@ -12,9 +12,10 @@ Feature: work type
   Axiell works will also reach FOLIO through the Axiell to FOLIO sync, but
   only item-level records are synced (see the selection gate in
   src/adapters/steps/axiell_folio_sync/mapping/builders.py), which always map
-  to Standard. In any case, the merger will merge the synced instance into
-  its Axiell work, whose type then wins, just as Sierra works harvested from
-  CALM were merged into their CALM work.
+  to Standard. In any case, once the merger handles FOLIO works (platform
+  issues #6438 and #6580) it will merge the synced instance into its Axiell
+  work, whose type then wins, just as Sierra works harvested from CALM were
+  merged into their CALM work.
 
   No other FOLIO record carries a 351 ǂc, so the scenario below only guards
   against the field appearing. The leader bibliographic level is likewise not
