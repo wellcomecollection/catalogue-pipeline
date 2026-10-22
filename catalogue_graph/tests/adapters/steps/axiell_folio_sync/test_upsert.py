@@ -9,6 +9,7 @@ from adapters.steps.axiell_folio_sync.mapping import (
     Instance,
     Item,
     MappedPayloads,
+    Note,
     PayloadMeta,
 )
 from adapters.steps.axiell_folio_sync.upsert import upsert_from_payloads
@@ -215,6 +216,95 @@ def test_update_preserves_foreign_admin_notes_and_replaces_the_axiell_one() -> N
         "  Do not reshelve  ",
         "Axiell Current Location: NEW/LOCATION/2",
     ]
+
+
+CURRENT_TYPE = "current-note-type-uuid"
+NORMAL_TYPE = "normal-note-type-uuid"
+CATALOGUER_TYPE = "general-note-type-uuid"
+
+
+def _item_notes_put(
+    existing_notes: list[dict[str, Any]] | None, incoming: list[Note] | None
+) -> list[dict[str, Any]] | None:
+    """Run one item update and return the item notes that were PUT, or None
+    when the PUT body carried no notes key."""
+    captured: list[dict[str, Any]] = []
+    existing_item: dict[str, Any] = {"id": "item-1", "hrid": "AxC-item-1"}
+    if existing_notes is not None:
+        existing_item["notes"] = existing_notes
+
+    class FakeInventory:
+        def get(
+            self, path: str, params: Mapping[str, Any] | None = None
+        ) -> dict[str, Any]:
+            if path == "/inventory/instances":
+                return {"instances": [{"id": "inst-1", "hrid": "AxC-instance-1"}]}
+            if path == "/holdings-storage/holdings":
+                return {"holdingsRecords": [{"id": "hold-1", "hrid": "AxC-holding-1"}]}
+            if path == "/inventory/items":
+                return {"items": [existing_item]}
+            return {}
+
+        def post(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+            raise AssertionError("nothing should be created in this test")
+
+        def put(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+            captured.append(dict(payload))
+            return {}
+
+        def delete(self, path: str) -> dict[str, Any]:
+            return {}
+
+    mapped = MAPPED.model_copy(
+        update={"item": MAPPED.item.model_copy(update={"notes": incoming})}
+    )
+    result = upsert_from_payloads(mapped, FakeInventory(), dry_run=False)
+    assert result.errors == []
+    item_put = next(body for body in captured if body["hrid"] == "AxC-item-1")
+    notes = item_put.get("notes")
+    return None if notes is None else list(notes)
+
+
+INCOMING_LOCATION_NOTES = [
+    Note(note="NEW/CURRENT", itemNoteTypeId=CURRENT_TYPE),
+    Note(note="NEW/NORMAL", itemNoteTypeId=NORMAL_TYPE),
+]
+
+
+def test_update_replaces_the_location_notes_and_keeps_other_typed_notes() -> None:
+    """Typed notes are identified by note type, so every existing note of a
+    location type is replaced, even one whose text was edited in FOLIO, and a
+    cataloguer's note of another type survives."""
+    notes = _item_notes_put(
+        [
+            {"note": "Fragile", "itemNoteTypeId": CATALOGUER_TYPE, "staffOnly": True},
+            {"note": "OLD/CURRENT", "itemNoteTypeId": CURRENT_TYPE},
+            {"note": "edited by hand", "itemNoteTypeId": NORMAL_TYPE},
+            {"note": "OLDER/CURRENT", "itemNoteTypeId": CURRENT_TYPE},
+        ],
+        INCOMING_LOCATION_NOTES,
+    )
+
+    assert notes == [
+        {"note": "Fragile", "itemNoteTypeId": CATALOGUER_TYPE, "staffOnly": True},
+        {"note": "NEW/CURRENT", "itemNoteTypeId": CURRENT_TYPE, "staffOnly": False},
+        {"note": "NEW/NORMAL", "itemNoteTypeId": NORMAL_TYPE, "staffOnly": False},
+    ]
+
+
+def test_location_notes_are_added_to_an_item_that_has_none() -> None:
+    notes = _item_notes_put(None, INCOMING_LOCATION_NOTES)
+
+    assert notes == [
+        {"note": "NEW/CURRENT", "itemNoteTypeId": CURRENT_TYPE, "staffOnly": False},
+        {"note": "NEW/NORMAL", "itemNoteTypeId": NORMAL_TYPE, "staffOnly": False},
+    ]
+
+
+def test_update_does_not_touch_item_notes_the_payload_does_not_set() -> None:
+    existing = [{"note": "Fragile", "itemNoteTypeId": CATALOGUER_TYPE}]
+
+    assert _item_notes_put(existing, None) == existing
 
 
 def test_update_does_not_touch_admin_notes_the_payload_does_not_set() -> None:

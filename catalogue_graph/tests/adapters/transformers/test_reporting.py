@@ -7,7 +7,7 @@ import adapters.extractors.oai_pmh.folio.config as adapter_config
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.steps.transformer import TransformerEvent, handler
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
-from tests.adapters.transformers.folio.helpers import make_items_store
+from tests.adapters.transformers.folio.helpers import make_inventory_store
 from tests.mocks import MockCloudwatchClient, MockSmartOpen
 
 FOLIO_NAMESPACE = FOLIO_CONFIG.config.adapter_namespace
@@ -36,10 +36,10 @@ def _run_transform(
     monkeypatch.setattr(adapter_config, "PIPELINE_DATE", pipeline_date)
     monkeypatch.setattr(adapter_config, "INDEX_DATE", None)
 
-    items_store = make_items_store({})
+    inventory_store = make_inventory_store({})
     monkeypatch.setattr(
-        "adapters.steps.transformer.build_items_store",
-        lambda **kwargs: items_store,
+        "adapters.steps.transformer.build_inventory_store",
+        lambda **kwargs: inventory_store,
     )
 
     event = TransformerEvent(
@@ -118,10 +118,10 @@ def test_transformer_run_writes_report_to_s3(
         namespace=FOLIO_NAMESPACE,
         transformer_type="folio",
     )
-    items_store = make_items_store({})
+    inventory_store = make_inventory_store({})
     monkeypatch.setattr(
-        "adapters.steps.transformer.build_items_store",
-        lambda **kwargs: items_store,
+        "adapters.steps.transformer.build_inventory_store",
+        lambda **kwargs: inventory_store,
     )
     monkeypatch.setattr(adapter_config, "PIPELINE_DATE", "2026-03-15")
     monkeypatch.setattr(adapter_config, "INDEX_DATE", None)

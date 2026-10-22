@@ -130,13 +130,14 @@ object TeiPhysicalDescription {
     */
   private def parseDim(unitStr: String, list: List[Node]) = {
     list
+      // The Calm export writes an empty <dim/> for a missing measurement
+      .filter(_.text.trim.nonEmpty)
       .map {
         dim =>
           val label = (dim \@ "type").trim
           val str = dim.text.trim
           appendUnit(s"$label $str".trim, unitStr)
       }
-      .filterNot(_.isEmpty)
       .mkString(", ")
   }
 

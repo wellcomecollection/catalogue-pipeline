@@ -156,8 +156,8 @@ def temporary_table() -> Generator[IcebergTable, None, None]:
 
 
 @pytest.fixture
-def items_temporary_table() -> Generator[IcebergTable, None, None]:
-    """A second adapter-schema table, for tests needing bib and items stores."""
+def inventory_temporary_table() -> Generator[IcebergTable, None, None]:
+    """A second adapter-schema table, for tests needing bib and inventory stores."""
     config = LocalIcebergTableConfig(
         table_name=str(uuid1()),
         namespace="test",

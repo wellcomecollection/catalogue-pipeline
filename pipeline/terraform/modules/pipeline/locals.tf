@@ -198,7 +198,15 @@ locals {
     vpc_id  = local.catalogue_vpcs["catalogue_vpc_delta_id"]
     subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
 
-    ec_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
+    ec_privatelink_security_group_id = coalesce(var.elastic_vpce_security_group_id, local.shared_infra["ec_platform_privatelink_sg_id"])
+
+    # ECS tasks ship logs to the hosted logging cluster through FireLens, so
+    # they keep the hosted endpoint's group alongside the storage one.
+    logging_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
+    ecs_privatelink_security_group_ids = distinct([
+      coalesce(var.elastic_vpce_security_group_id, local.shared_infra["ec_platform_privatelink_sg_id"]),
+      local.shared_infra["ec_platform_privatelink_sg_id"],
+    ])
 
     traffic_filters = [
       local.shared_infra["ec_platform_privatelink_traffic_filter_id"],
@@ -217,7 +225,8 @@ locals {
 
   fargate_service_boilerplate = {
     egress_security_group_id             = aws_security_group.egress.id
-    elastic_cloud_vpce_security_group_id = local.network_config.ec_privatelink_security_group_id
+    elastic_cloud_vpce_security_group_id = local.network_config.logging_privatelink_security_group_id
+    storage_vpce_security_group_id       = local.network_config.ec_privatelink_security_group_id
 
     cluster_name = aws_ecs_cluster.cluster.name
     cluster_arn  = aws_ecs_cluster.cluster.id

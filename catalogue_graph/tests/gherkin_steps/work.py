@@ -38,6 +38,7 @@ ATTR_ALIASES: dict[str, str] = {
     "note": "notes",
     "item": "items",
     "contributor": "contributors",
+    "role": "roles",
     "production": "production",
     "productions": "production",
     "date": "dates",
@@ -53,6 +54,11 @@ SUB_ATTR_ALIASES: dict[str, str] = {
     "source identifier type": "id.source_identifier.identifier_type.id",
     "source identifier ontology type": "id.source_identifier.ontology_type",
     "work type": "work_type",
+    "agent label": "agent.label",
+    "agent type": "agent.type",
+    "agent identifier value": "agent.id.source_identifier.value",
+    "agent identifier type": "agent.id.source_identifier.identifier_type.id",
+    "agent identifier ontology type": "agent.id.source_identifier.ontology_type",
 }
 
 
@@ -214,6 +220,33 @@ def its_nth_list_member_has(
     assert actual == value, (
         f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
     )
+
+
+def _assert_flag(obj: Any, negation: str, attr: str, where: str) -> None:
+    actual = drill_through_dots(obj, attr)
+    expected = not negation
+    assert actual is expected, (
+        f"Expected {where} to be {negation}{attr}, got {attr}={actual!r}"
+    )
+
+
+@then(parsers.re(r"it is (?P<negation>not )?(?P<attr>[\w.]+)"))
+def antecedent_is(antecedent: Any, negation: str | None, attr: str) -> None:
+    _assert_flag(antecedent, negation or "", attr, "it")
+
+
+@then(
+    parsers.re(
+        r"the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) is (?P<negation>not )?(?P<attr>[\w.]+)"
+    ),
+    target_fixture="antecedent",
+)
+def list_member_nth_is_flag(
+    work: SourceWork, index: str, attr_phrase: str, negation: str | None, attr: str
+) -> Any:
+    member = _list_member_nth(work, index, attr_phrase)
+    _assert_flag(member, negation or "", attr, f"{attr_phrase} at position {index}")
+    return member
 
 
 @then(parsers.parse("it has no {sub_attr}"))

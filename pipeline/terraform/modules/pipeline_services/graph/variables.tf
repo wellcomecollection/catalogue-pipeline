@@ -51,3 +51,9 @@ variable "enable_schedule" {
   type    = bool
   default = true
 }
+
+variable "elastic_vpce_security_group_id" {
+  type        = string
+  default     = null
+  description = "Security group of the Elasticsearch interface endpoint; null uses the hosted PrivateLink group."
+}

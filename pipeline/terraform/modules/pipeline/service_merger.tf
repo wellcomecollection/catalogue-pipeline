@@ -6,6 +6,8 @@ module "merger" {
   es_works_identified_index   = local.es_works_identified_index
   es_works_denormalised_index = local.es_works_denormalised_index
   es_images_initial_index     = local.es_images_initial_index
+
+  batch_indexing = var.merger_batch_indexing
   queue_config = {
     visibility_timeout_seconds = 90
     max_receive_count          = 10

@@ -94,23 +94,27 @@ locals {
     }
   })
 
-  transformer_types = {
-    ebsco = {
-      adapter_source       = "ebsco.adapter"
-      adapter_detail_type  = "ebsco.adapter.completed"
-      reindex_target_value = "ebsco"
-    }
-    axiell = {
-      adapter_source       = "axiell.adapter"
-      adapter_detail_type  = "axiell.adapter.completed"
-      reindex_target_value = "axiell"
-    }
-    #    folio = {
-    #      adapter_source       = "folio.adapter"
-    #      adapter_detail_type  = "folio.adapter.completed"
-    #      reindex_target_value = "folio"
-    #    }
-  }
+  transformer_types = merge(
+    {
+      ebsco = {
+        adapter_source       = "ebsco.adapter"
+        adapter_detail_type  = "ebsco.adapter.completed"
+        reindex_target_value = "ebsco"
+      }
+      axiell = {
+        adapter_source       = "axiell.adapter"
+        adapter_detail_type  = "axiell.adapter.completed"
+        reindex_target_value = "axiell"
+      }
+    },
+    var.enable_folio_transformer ? {
+      folio = {
+        adapter_source       = "folio.adapter"
+        adapter_detail_type  = "folio.adapter.completed"
+        reindex_target_value = "folio"
+      }
+    } : {}
+  )
 }
 
 

@@ -116,10 +116,14 @@ object TeiContributors extends LabelDerivedIdentifiers {
   private def getScribeContributor(n: Node) =
     for {
       maybeLabel <- parseScribeLabel(n)
-      contributor <- maybeLabel.map {
-        label =>
-          createContributor(label = label, role = ContributionRole("scribe"))
-      }.sequence
+      // The Calm export writes empty elements, e.g. <handNote scribe="sole"/>
+      contributor <- maybeLabel
+        .filter(_.nonEmpty)
+        .map {
+          label =>
+            createContributor(label = label, role = ContributionRole("scribe"))
+        }
+        .sequence
     } yield contributor
 
   /** If the scribe refers to a nested part or item, it will have a locus tag

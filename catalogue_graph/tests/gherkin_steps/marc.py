@@ -1,6 +1,6 @@
 import re
 
-from pymarc.record import Field, Indicators, Record, Subfield
+from pymarc.record import Field, Indicators, Leader, Record, Subfield
 from pytest_bdd import given, parsers
 
 # mypy: allow-untyped-calls
@@ -23,6 +23,11 @@ def marc_record_with_id(identifier: str) -> Record:
 def with_transaction_date(marc_record: Record, transaction_date: str) -> Record:
     marc_record.add_field(Field(tag="005", data=transaction_date))
     return marc_record
+
+
+@given(parsers.parse('the MARC record\'s leader is "{leader}"'))
+def with_leader(marc_record: Record, leader: str) -> None:
+    marc_record.leader = Leader(leader)
 
 
 # ------------------------------------------------------------------
