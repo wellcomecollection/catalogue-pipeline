@@ -38,7 +38,7 @@ variable "vpc_config" {
 
 variable "find_work_secret_read_policy_json" {
   type        = string
-  description = "IAM policy granting the find-work Lambda read access to its ES credentials."
+  description = "IAM policy granting the find-work Lambda read access to what it lists ids from: ES credentials, or the Iceberg tables."
 }
 
 variable "partition_s3_arns" {
@@ -83,6 +83,14 @@ variable "schedule" {
     cron    = string
     enabled = bool
   })
+  default     = null
+  description = "Run on a schedule. Leave null for a state machine started by EventBridge rules or by hand."
+}
+
+variable "state_machine_name" {
+  type        = string
+  default     = null
+  description = "Overrides the default `pipeline-<date>_<name>`, for a service adopting the module under an existing name."
 }
 
 variable "alarm_name_prefix" {

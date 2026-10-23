@@ -1,4 +1,4 @@
-# A scheduled scan-and-fan-out state machine:
+# A scan-and-fan-out state machine, started on a schedule or by EventBridge rules:
 #   ConstructEvent (build the window from the schedule, or pass through replay input)
 #     -> FindWork (Lambda: ids in scope, partitioned to S3)
 #       -> ProcessPartitions (Map: one worker per partition ref, bounded by max_concurrency)

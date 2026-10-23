@@ -1,10 +1,16 @@
-"""Tests for the shared find_work Lambda input normalisation."""
+"""Tests for the shared find_work input normalisation and partition hand-off."""
 
 from __future__ import annotations
 
 import pytest
+from pydantic import BaseModel
 
-from core.find_work import normalise_lambda_input
+from core.find_work import (
+    normalise_lambda_input,
+    plan_partitions,
+    write_partitions_to_s3,
+)
+from utils.aws import pydantic_from_s3_json
 
 DEFAULTS = {"pipeline_date": "dev", "graph_date": "dev"}
 
@@ -56,3 +62,46 @@ def test_input_identity_wins_over_defaults() -> None:
     )
     assert data["pipeline_date"] == "2026-07-03"
     assert data["graph_date"] == "dev"
+
+
+class _Partition(BaseModel):
+    ids: list[str]
+    job_id: str
+
+
+def test_plan_partitions_slices_ids_and_passes_each_index() -> None:
+    partitions = plan_partitions(
+        ["a", "b", "c", "d", "e"],
+        2,
+        lambda chunk, index: _Partition(ids=chunk, job_id=f"job-p{index:03d}"),
+    )
+
+    assert [p.ids for p in partitions] == [["a", "b"], ["c", "d"], ["e"]]
+    assert [p.job_id for p in partitions] == ["job-p000", "job-p001", "job-p002"]
+
+
+def test_plan_partitions_of_nothing_is_empty() -> None:
+    partitions = plan_partitions(
+        [], 10, lambda chunk, index: _Partition(ids=chunk, job_id="job")
+    )
+
+    assert partitions == []
+
+
+def test_write_partitions_to_s3_uses_the_callers_uris() -> None:
+    partitions = [
+        _Partition(ids=["a", "b"], job_id="job-p000"),
+        _Partition(ids=["c"], job_id="job-p001"),
+    ]
+
+    refs = write_partitions_to_s3(
+        partitions,
+        [2, 1],
+        lambda index: f"s3://test-bucket/plans/job/partition-{index}.json",
+    )
+
+    assert [(r.s3_uri, r.count) for r in refs] == [
+        ("s3://test-bucket/plans/job/partition-0.json", 2),
+        ("s3://test-bucket/plans/job/partition-1.json", 1),
+    ]
+    assert pydantic_from_s3_json(_Partition, refs[1].s3_uri) == partitions[1]
