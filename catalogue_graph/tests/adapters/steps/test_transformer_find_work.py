@@ -47,7 +47,7 @@ def test_changeset_event_plans_groups_of_whole_changesets_at_one_snapshot(
 ) -> None:
     store = _store(adapter_store_with_records)
 
-    partitions = plan(
+    partitions, row_counts = plan(
         _event(
             changeset_ids=["changeset-1", "changeset-2", "changeset-3"],
             partition_rows=6,
@@ -59,6 +59,7 @@ def test_changeset_event_plans_groups_of_whole_changesets_at_one_snapshot(
         ["changeset-1", "changeset-2"],
         ["changeset-3"],
     ]
+    assert row_counts == [6, 4]
     assert [p.job_id for p in partitions] == ["job-1-p000", "job-1-p001"]
     assert {p.snapshot_id for p in partitions} == {store.current_snapshot_id()}
     assert all(p.ids is None for p in partitions)
@@ -70,7 +71,7 @@ def test_reindex_plans_every_changeset_in_the_store(
 ) -> None:
     store = _store(adapter_store_with_records)
 
-    partitions = plan(_event(full=True), store)
+    partitions, _ = plan(_event(full=True), store)
 
     planned = [c for p in partitions for c in p.changeset_ids]
     assert planned == ["changeset-1", "changeset-2", "changeset-3"]
@@ -83,7 +84,7 @@ def test_reindex_skips_the_deletion_limits(
     def fail_count(changeset_ids: list[str]) -> int:
         raise AssertionError("a reindex must not count deletion facts")
 
-    partitions = plan(
+    partitions, _ = plan(
         _event(full=True, max_tombstones=0),
         _store(adapter_store_with_records),
         fail_count,
@@ -95,7 +96,10 @@ def test_reindex_skips_the_deletion_limits(
 def test_an_explicitly_empty_changeset_list_plans_nothing(
     adapter_store_with_records: AdapterStoreFactory,
 ) -> None:
-    assert plan(_event(changeset_ids=[]), _store(adapter_store_with_records)) == []
+    assert plan(_event(changeset_ids=[]), _store(adapter_store_with_records)) == (
+        [],
+        [],
+    )
 
 
 def test_a_changeset_with_no_rows_left_is_still_planned(
@@ -103,7 +107,7 @@ def test_a_changeset_with_no_rows_left_is_still_planned(
 ) -> None:
     store = _store(adapter_store_with_records)
 
-    partitions = plan(_event(changeset_ids=["changeset-gone"]), store)
+    partitions, _ = plan(_event(changeset_ids=["changeset-gone"]), store)
 
     assert [p.changeset_ids for p in partitions] == [["changeset-gone"]]
 
@@ -149,7 +153,7 @@ def test_too_many_deletion_facts_stops_before_fan_out(
     assert counted == [["changeset-1"]]
     assert plan(
         _event(changeset_ids=["changeset-1"], max_deletion_facts=3), store, count
-    )
+    )[0]
 
 
 def test_oversized_changesets_are_logged(
