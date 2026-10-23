@@ -61,8 +61,7 @@ def plan_partitions[PartitionT: BaseModel](
     partition_size: int,
     build_partition: Callable[[list[str], int], PartitionT],
 ) -> list[PartitionT]:
-    """Slice ids into partitions of at most partition_size, building each
-    worker event from its chunk and index."""
+    """Slice ids into worker events of at most partition_size ids each."""
     return [
         build_partition(list(chunk), index)
         for index, chunk in enumerate(batched(ids, partition_size))
@@ -89,6 +88,6 @@ def write_partitions_to_s3(
     logger.info(
         "Wrote partitions to S3",
         partition_count=len(refs),
-        s3_prefix=refs[0].s3_uri.rsplit("/", 1)[0] if refs else None,
+        s3_prefix=partition_s3_uri(0).rsplit("/", 1)[0],
     )
     return refs

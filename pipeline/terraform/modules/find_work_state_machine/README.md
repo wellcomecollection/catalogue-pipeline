@@ -17,7 +17,9 @@ date, index dates) comes from the Lambda's environment. Keeping this in Python
 makes the guards unit-testable instead of living as JSONata in the definition.
 
 `schedule` is optional. Leave it null for a planner started by EventBridge rules
-or by hand, which receives the rule's payload unchanged. `state_machine_name`
+or by hand. Each planner owns parsing its own trigger's payload: the
+schedule-driven ones use `normalise_lambda_input`, which rejects a payload with
+no scope. `state_machine_name`
 overrides the default `pipeline-<date>_<name>`, for a service adopting the
 module under an existing name. Planners list ids through
 `core.work_source.WorkSource` and share `core.find_work.plan_partitions` and

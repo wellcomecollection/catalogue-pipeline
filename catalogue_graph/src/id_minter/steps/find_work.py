@@ -21,6 +21,7 @@ from core.find_work import (
     plan_partitions,
     write_partitions_to_s3,
 )
+from core.work_source import WorkSource
 from id_minter.config import IdMinterConfig
 from id_minter.id_minting_source import MintingWorkIdsSource
 from id_minter.models.step_events import (
@@ -54,9 +55,8 @@ def handler(
         es_mode=es_mode,
     )
 
-    ids = list(
-        MintingWorkIdsSource(event, es_client, cfg.source_index_name).stream_ids()
-    )
+    source: WorkSource = MintingWorkIdsSource(event, es_client, cfg.source_index_name)
+    ids = list(source.stream_ids())
 
     # Distinct per-partition job ids: concurrent partitions would otherwise
     # collide on their S3 report names (generated ids are minute-granular).

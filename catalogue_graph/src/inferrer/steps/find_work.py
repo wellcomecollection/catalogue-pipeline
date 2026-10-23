@@ -20,6 +20,7 @@ from core.find_work import (
     plan_partitions,
     write_partitions_to_s3,
 )
+from core.work_source import WorkSource
 from inferrer.models import (
     DEFAULT_PARTITION_SIZE,
     FindWorkEvent,
@@ -47,7 +48,8 @@ def handler(
 
     es_client = get_client("inferrer", event.pipeline_date, es_mode)
 
-    ids = list(ImagesInitialSource(event, es_client).stream_ids())
+    source: WorkSource = ImagesInitialSource(event, es_client)
+    ids = list(source.stream_ids())
     partitions = plan_partitions(
         ids,
         event.partition_size,

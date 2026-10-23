@@ -1,7 +1,6 @@
 # A scan-and-fan-out state machine, started on a schedule or by EventBridge rules:
-#   ConstructEvent (build the window from the schedule, or pass through replay input)
-#     -> FindWork (Lambda: ids in scope, partitioned to S3)
-#       -> ProcessPartitions (Map: one worker per partition ref, bounded by max_concurrency)
+#   FindWork (Lambda: parse the input, find the ids in scope, partition to S3)
+#     -> ProcessPartitions (Map: one worker per partition ref, bounded by max_concurrency)
 #
 # The find-work Lambda only discovers and slices; the injected worker state
 # does the long-running processing, one bounded partition at a time.
