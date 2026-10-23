@@ -26,7 +26,7 @@ from pyiceberg.types import (
     TimestamptzType,
 )
 
-from .window_summary import WindowSummary
+from .window_summary import WindowStatus, WindowSummary
 
 WINDOW_STATUS_SCHEMA = Schema(
     NestedField(1, "window_key", StringType(), required=True),
@@ -51,6 +51,21 @@ WINDOW_STATUS_SCHEMA = Schema(
 )
 WINDOW_STATUS_ARROW_SCHEMA: pa.Schema = schema_to_pyarrow(WINDOW_STATUS_SCHEMA)
 
+# The columns a WindowStatus carries: everything but record_ids, which holds
+# every id harvested in the window and dominates the table's size.
+_STATUS_FIELDS = tuple(WindowStatus.model_fields)
+
+
+def _range_filter(
+    start_time: datetime | None, end_time: datetime | None
+) -> BooleanExpression:
+    expr: BooleanExpression = ALWAYS_TRUE
+    if start_time:
+        expr = And(expr, GreaterThanOrEqual("window_start", start_time))
+    if end_time:
+        expr = And(expr, LessThan("window_start", end_time))
+    return expr
+
 
 class WindowStore:
     """Persists harvesting window status rows in an Apache Iceberg table."""
@@ -59,27 +74,35 @@ class WindowStore:
         self.table = table
         self._lock = Lock()
 
+    def _rows(
+        self, expr: BooleanExpression, fields: tuple[str, ...] | None = None
+    ) -> list[dict[str, Any]]:
+        scan = self.table.scan().filter(expr)
+        if fields:
+            scan = scan.select(*fields)
+        return scan.to_arrow().to_pylist(maps_as_pydicts="lossy")
+
+    def _summaries(self, expr: BooleanExpression) -> list[WindowSummary]:
+        return [WindowSummary.model_validate(row) for row in self._rows(expr)]
+
     def list_in_range(
         self, start_time: datetime | None = None, end_time: datetime | None = None
     ) -> list[WindowSummary]:
         """Return rows within the given time range."""
-        expr: BooleanExpression = ALWAYS_TRUE
-        if start_time:
-            expr = And(expr, GreaterThanOrEqual("window_start", start_time))
-        if end_time:
-            expr = And(expr, LessThan("window_start", end_time))
+        return self._summaries(_range_filter(start_time, end_time))
 
-        arrow_table = self.table.scan().filter(expr).to_arrow()
-        pylist = arrow_table.to_pylist(maps_as_pydicts="lossy")
-        return [WindowSummary.model_validate(row) for row in pylist]
+    def list_status_in_range(
+        self, start_time: datetime | None = None, end_time: datetime | None = None
+    ) -> list[WindowStatus]:
+        """Return rows within the given time range without reading their record ids."""
+        rows = self._rows(_range_filter(start_time, end_time), _STATUS_FIELDS)
+        return [WindowStatus.model_validate(row) for row in rows]
 
     def list_by_keys(self, keys: list[str]) -> list[WindowSummary]:
         """Return rows whose window_key is in the given list."""
         if not keys:
             return []
-        arrow_table = self.table.scan().filter(In("window_key", keys)).to_arrow()
-        pylist = arrow_table.to_pylist(maps_as_pydicts="lossy")
-        return [WindowSummary.model_validate(row) for row in pylist]
+        return self._summaries(In("window_key", keys))
 
     def load_status_map(
         self,
@@ -127,6 +150,4 @@ class WindowStore:
 
     def list_by_state(self, state: str) -> list[dict[str, Any]]:
         """Return rows filtered by state (e.g. success, failed)."""
-        scan = self.table.scan().filter(EqualTo("state", state))
-        arrow_table = scan.to_arrow()
-        return arrow_table.to_pylist(maps_as_pydicts="lossy")
+        return self._rows(EqualTo("state", state))
