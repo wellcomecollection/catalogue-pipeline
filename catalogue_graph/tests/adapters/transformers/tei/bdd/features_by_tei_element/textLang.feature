@@ -77,6 +77,8 @@ Feature: <textLang>
         | btd  | Batak Dairi        | Batak    | Batak Dairi       |
         | gu   | (Old) Gujarati     | Gujarati | (Old) Gujarati    |
         | ms   | Middle Malay       | Malay    | Middle Malay      |
+        | pka  | Ardhamāgadhi Prakrit | Prakrit languages | Ardhamāgadhi Prakrit |
+        | pka  | Ardhamāgadhī Prākrit | Prakrit languages | Ardhamāgadhī Prākrit |
         | itk  | Judeo-Italian      | Italian  | Judeo-Italian     |
         | jv   | Java               | Javanese | Java              |
 
