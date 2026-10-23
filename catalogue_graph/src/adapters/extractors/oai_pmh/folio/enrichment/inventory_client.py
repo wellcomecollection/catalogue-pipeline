@@ -18,7 +18,10 @@ from typing import cast
 import httpx
 import structlog
 
-from adapters.extractors.oai_pmh.folio.enrichment.models import FolioInventoryRecord
+from adapters.extractors.oai_pmh.folio.enrichment.models import (
+    InventoryFetch,
+    parse_inventory_records,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -49,28 +52,30 @@ class FolioInventoryClient:
         self._batch_size = batch_size
         self._skip_suppressed = skip_suppressed
 
-    def items_and_holdings(
-        self, instance_ids: Iterable[str]
-    ) -> list[FolioInventoryRecord]:
+    def items_and_holdings(self, instance_ids: Iterable[str]) -> InventoryFetch:
         """Fetch the items-and-holdings records for the given instance ids.
 
         Instance ids missing from the response (e.g. deleted instances) are simply
-        absent from the result; callers should treat that as "no items".
+        absent from the result; callers should treat that as "no items". Records
+        that fail validation are returned as rejected rather than raised.
         """
         unique_ids = list(dict.fromkeys(i for i in instance_ids if i))
-        results: list[FolioInventoryRecord] = []
+        result = InventoryFetch()
 
         for batch in batched(unique_ids, self._batch_size):
-            results.extend(self._fetch_batch(list(batch)))
+            fetched = self._fetch_batch(list(batch))
+            result.records.extend(fetched.records)
+            result.rejected.extend(fetched.rejected)
 
         logger.info(
             "Fetched items and holdings",
             requested=len(unique_ids),
-            returned=len(results),
+            returned=len(result.records),
+            rejected=len(result.rejected),
         )
-        return results
+        return result
 
-    def _fetch_batch(self, instance_ids: list[str]) -> list[FolioInventoryRecord]:
+    def _fetch_batch(self, instance_ids: list[str]) -> InventoryFetch:
         response = self._client.post(
             f"{self._base_url}/{ITEMS_AND_HOLDINGS_PATH}",
             json={
@@ -79,8 +84,7 @@ class FolioInventoryClient:
             },
         )
         response.raise_for_status()
-        # A record missing its instance or an item id raises, failing the whole batch.
-        return [FolioInventoryRecord(data=r) for r in _parse_records(response)]
+        return parse_inventory_records(_parse_records(response))
 
 
 def _parse_records(response: httpx.Response) -> list[dict]:
