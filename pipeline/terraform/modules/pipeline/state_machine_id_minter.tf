@@ -66,7 +66,7 @@ module "id_minter" {
     ]
   }
 
-  find_work_secret_read_policy_json = data.aws_iam_policy_document.id_minter_find_work_secret_read.json
+  find_work_read_policy_json = data.aws_iam_policy_document.id_minter_find_work_secret_read.json
 
   partition_s3_arns = [
     "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/id_minter/*"
