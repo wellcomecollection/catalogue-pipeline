@@ -27,9 +27,14 @@ module "find_work_lambda" {
 }
 
 # ES credentials or Iceberg tables, depending on where the planner lists ids.
-resource "aws_iam_role_policy" "find_work_secret_read" {
+resource "aws_iam_role_policy" "find_work_read" {
   role   = module.find_work_lambda.lambda_role_name
   policy = var.find_work_read_policy_json
+}
+
+moved {
+  from = aws_iam_role_policy.find_work_secret_read
+  to   = aws_iam_role_policy.find_work_read
 }
 
 # find_work writes each partition's ids to S3 (pass-by-reference) so the state

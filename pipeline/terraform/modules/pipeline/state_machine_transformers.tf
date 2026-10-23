@@ -70,8 +70,8 @@ resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read"
 }
 
 locals {
-  # Concurrent bulk writers into the source index; raise once a FOLIO reindex
-  # shows headroom.
+  # Concurrent transformer Lambdas per execution; a reindex of several adapters
+  # runs one execution each, so the total is a multiple of this.
   transformer_max_concurrency = 4
 
   transformer_types = merge(
@@ -101,7 +101,7 @@ locals {
 # Adapter and reindex events on find_work: the planner groups the event's
 # changesets (or, for a reindex, every changeset) into partitions of about
 # 10,000 rows at one pinned snapshot, and each partition runs the transformer in
-# changeset mode, so a large event no longer runs into the Lambda timeout.
+# changeset mode. A changeset bigger than that runs as one partition.
 module "transformer" {
   source = "../find_work_state_machine"
 
