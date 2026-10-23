@@ -30,6 +30,7 @@ from adapters.transformers.source_work_transformer import (
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from core.sinks import ElasticsearchSink
+from utils.aws import pydantic_from_s3_json
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -254,7 +255,11 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         trace_id=get_trace_id(context),
         pipeline_step="adapter_transformer",
     )
-    transformer_event = TransformerEvent.model_validate(event)
+    if "s3_uri" in event:
+        # A partition ref from the find-work step; resolve the full event from S3
+        transformer_event = pydantic_from_s3_json(TransformerEvent, event["s3_uri"])
+    else:
+        transformer_event = TransformerEvent.model_validate(event)
     return handler(
         transformer_event, execution_context, use_rest_api_table=True
     ).model_dump(mode="json")
