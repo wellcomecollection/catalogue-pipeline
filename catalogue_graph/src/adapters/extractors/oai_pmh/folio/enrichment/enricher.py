@@ -5,10 +5,12 @@ publish event. Given the bib store ids that changed in a harvest window, it fetc
 their items and holdings from mod-inventory-storage and upserts them into the
 ``folio_inventory_table`` store.
 
-The bib changeset is the trigger: because the FOLIO adapter harvests
-``marc21_withholdings``, an item or holdings change advances the instance's OAI
-datestamp and so re-appears in the bib window (verified read-only against the live
-dev feed).
+The bib changeset is the trigger, and a bib row only joins one when its MARC
+changes. The ``marc21_withholdings`` 952 carries some item fields (location names,
+call number, material type, volume, barcode, copy number, permanent loan type) but
+not status, statistical codes, notes or anything on holdings, so changes to those
+aren't re-fetched until the next inventory rebuild. See
+wellcomecollection/platform#6815.
 
 Identifier keying: the bib store row ``id`` is the full OAI identifier
 (``oai:<host>:<set>/<instance-uuid>``), but ``items-and-holdings`` is queried by the

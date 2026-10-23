@@ -113,6 +113,43 @@ def test_run_enrichment_with_no_changes_returns_empty_items_changeset(
     assert response.items_changeset_ids == []
 
 
+def test_run_enrichment_reports_a_rejection_without_failing(
+    temporary_table: IcebergTable,
+) -> None:
+    """A single bad record is reported with failed=False, which is what the alarm and
+    the S3 report rely on, and the rest of the window is stored."""
+    bib_store = AdapterStore(temporary_table, BIB_NAMESPACE)
+    changeset_id = _seed_bib_changeset(bib_store, ["inst-1", "inst-2", "inst-3"])
+    broken = fixture_record("inst-2")
+    del broken["holdings"][0]["id"]
+    client = FakeInventoryClient(
+        {
+            "inst-1": fixture_record("inst-1"),
+            "inst-2": broken,
+            "inst-3": fixture_record("inst-3"),
+        }
+    )
+    inventory_store = _local_store(INVENTORY_NAMESPACE)
+    enricher = FolioInventoryEnricher(client, inventory_store)  # type: ignore[arg-type]
+    reports: list[tuple[int, list[str | None], bool]] = []
+
+    response = run_enrichment(
+        EnrichmentEvent(job_id="job-1", changeset_ids=[changeset_id]),
+        bib_store,
+        enricher,
+        lambda requested, rejected, failed: reports.append(
+            (requested, [r.instance_id for r in rejected], failed)
+        ),
+    )
+
+    assert reports == [(3, ["inst-2"], False)]
+    assert (response.requested_count, response.rejected_count) == (3, 1)
+    stored = {
+        r["id"] for r in inventory_store.get_active_namespace_records().to_pylist()
+    }
+    assert stored == {"inst-1", "inst-3"}
+
+
 def test_run_enrichment_reports_rejections_before_failing(
     temporary_table: IcebergTable,
 ) -> None:

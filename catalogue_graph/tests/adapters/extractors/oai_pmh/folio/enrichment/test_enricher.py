@@ -9,6 +9,7 @@ from adapters.extractors.oai_pmh.folio.enrichment.enricher import (
     REJECTED_FLOOR,
     FolioInventoryEnricher,
     SystemicRejectionError,
+    fetch_inventory_rows,
 )
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
@@ -252,3 +253,28 @@ def test_enrich_tolerates_rejections_up_to_the_floor(
 
     assert update is None
     assert len(rejected) == REJECTED_FLOOR
+
+
+@pytest.mark.parametrize("rejected, fails", [(20, False), (21, True)])
+def test_large_fetches_tolerate_up_to_one_percent(rejected: int, fails: bool) -> None:
+    """Above 1,000 records the share sets the limit, not the floor of 10: 20 of 2,000
+    is tolerated and 21 fails. Pinned as numbers, so changing REJECTED_SHARE fails."""
+    responses = {
+        f"inst-{n}": folio_record(f"inst-{n}", [{"id": f"item-{n}"}])
+        for n in range(2000)
+    }
+    for n in range(rejected):
+        responses[f"inst-{n}"] = {
+            "instanceId": f"inst-{n}",
+            "holdings": [],
+            "items": [{}],
+        }
+    client = FakeInventoryClient(responses)
+
+    if fails:
+        with pytest.raises(SystemicRejectionError):
+            fetch_inventory_rows(client, list(responses), namespace="ns")  # type: ignore[arg-type]
+    else:
+        rows, rejects = fetch_inventory_rows(client, list(responses), namespace="ns")  # type: ignore[arg-type]
+        assert rows is not None and rows.num_rows == 2000 - rejected
+        assert len(rejects) == rejected

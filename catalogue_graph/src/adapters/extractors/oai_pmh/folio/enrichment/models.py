@@ -175,8 +175,9 @@ class InventoryFetch(BaseModel):
 def parse_inventory_records(raw: list[dict[str, Any]]) -> InventoryFetch:
     """Validate each raw record on its own, so one bad record doesn't hold up the rest.
 
-    A rejected instance keeps its last stored row, and is fetched again once a fix
-    in FOLIO advances its OAI datestamp.
+    A rejected instance keeps its last stored row until it's fetched again: when its
+    MARC next changes, or at the next inventory rebuild. A fix in FOLIO that leaves
+    the MARC unchanged doesn't bring it back on its own (platform#6815).
     """
     fetch = InventoryFetch()
     for data in raw:
