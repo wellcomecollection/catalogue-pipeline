@@ -26,10 +26,10 @@ module "find_work_lambda" {
   vpc_config = var.vpc_config
 }
 
-# The Lambda reads ES credentials from Secrets Manager at runtime.
+# ES credentials or Iceberg tables, depending on where the planner lists ids.
 resource "aws_iam_role_policy" "find_work_secret_read" {
   role   = module.find_work_lambda.lambda_role_name
-  policy = var.find_work_secret_read_policy_json
+  policy = var.find_work_read_policy_json
 }
 
 # find_work writes each partition's ids to S3 (pass-by-reference) so the state
