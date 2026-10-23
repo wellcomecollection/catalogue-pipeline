@@ -1,8 +1,17 @@
 from datetime import UTC, datetime
+from typing import cast
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Or
+from pyiceberg.expressions import (
+    And,
+    BooleanExpression,
+    EqualTo,
+    GreaterThanOrEqual,
+    In,
+    IsNull,
+    Or,
+)
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 
@@ -107,6 +116,47 @@ class AdapterStore(PipelineStore):
         return self.get_namespace_records(
             And(non_deleted_filter, iceberg_filter), snapshot_id
         )
+
+    def count_rows_by_changeset(
+        self, changeset_ids: list[str] | None = None, snapshot_id: int | None = None
+    ) -> dict[str, tuple[int, int]]:
+        """Return (rows, tombstones) per changeset at one snapshot.
+
+        Reads only the changeset and deleted columns. With changeset_ids, counts
+        the rows `get_records_by_changesets` would read; without, every
+        changeset in the namespace.
+        """
+        if snapshot_id is None:
+            snapshot_id = self.current_snapshot_id()
+
+        row_filter: BooleanExpression = ALWAYS_TRUE
+        if changeset_ids is not None:
+            changeset_filter = In("changeset", changeset_ids)
+            min_last_modified = self._get_min_last_modified(
+                changeset_filter, snapshot_id
+            )
+            if min_last_modified is None:
+                return {}
+            row_filter = And(
+                changeset_filter,
+                GreaterThanOrEqual("last_modified", min_last_modified),
+            )
+
+        rows = self.table.scan(
+            row_filter=And(EqualTo("namespace", self.namespace), row_filter),
+            snapshot_id=snapshot_id,
+            selected_fields=("changeset", "deleted"),
+        ).to_arrow()
+
+        counts: dict[str, tuple[int, int]] = {}
+        for changeset, deleted in zip(
+            cast(list[str], rows.column("changeset").to_pylist()),
+            rows.column("deleted").to_pylist(),
+            strict=True,
+        ):
+            row_count, tombstones = counts.get(changeset, (0, 0))
+            counts[changeset] = (row_count + 1, tombstones + (1 if deleted else 0))
+        return counts
 
     def stream_active_namespace_records(
         self, snapshot_id: int | None = None
