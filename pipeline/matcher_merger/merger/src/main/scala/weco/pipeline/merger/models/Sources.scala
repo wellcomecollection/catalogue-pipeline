@@ -8,7 +8,7 @@ import grizzled.slf4j.Logging
 object Sources extends Logging {
   import WorkPredicates._
 
-  def findFirstLinkedDigitisedSierraWorkFor(
+  def findFirstLinkedDigitisedLmsWorkFor(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]
   ): Option[Work[Identified]] =
@@ -30,7 +30,7 @@ object Sources extends Logging {
       //
       // Note: the physical bib may have merge candidates to other works, so
       // we need to make sure we don't match this branch if that's the case.
-      case t if physicalSierra(t) && hasPhysicalDigitalMergeCandidate(t) =>
+      case t if physicalLmsWork(t) && hasPhysicalDigitalMergeCandidate(t) =>
         val digitisedLinkedIds = target.state.mergeCandidates
           .filter(_.reason.contains("Physical/digitised Sierra work"))
           .map(_.id.canonicalId)
@@ -56,7 +56,7 @@ object Sources extends Logging {
 
         if (linkedWork.isEmpty) {
           warn(
-            s"could not find digitised Sierra work for ${t.id}, expected candidates [${digitisedLinkedIds
+            s"could not find digitised LMS work for ${t.id}, expected candidates [${digitisedLinkedIds
                 .mkString(",")}], actual sources=[${sourcesByID.mkString(",")}]"
           )
         }
@@ -64,11 +64,11 @@ object Sources extends Logging {
 
       // Handle the case where the e-bib links to the physical bib, but not
       // the other way round.
-      case t if physicalSierra(t) =>
+      case t if physicalLmsWork(t) =>
         sources
           .filter {
             w =>
-              sierraWork(w) && allDigitalLocations(w)
+              lmsWork(w) && allDigitalLocations(w)
           }
           .find {
             w =>

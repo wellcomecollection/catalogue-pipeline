@@ -2,7 +2,7 @@ package weco.pipeline.merger.rules
 
 import cats.data.NonEmptyList
 import cats.implicits._
-import weco.pipeline.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
+import weco.pipeline.merger.models.Sources.findFirstLinkedDigitisedLmsWorkFor
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.identifiers.SourceIdentifier
@@ -13,9 +13,9 @@ import weco.pipeline.merger.models.FieldMergeResult
 /** Identifiers are merged as follows:
   *
   *   - All source identifiers are merged into Calm/Axiell works
-  *   - Miro identifiers are merged into single or zero item Sierra works
-  *   - Sierra works with linked digitised Sierra works have the first of these
-  *     linked IDs merged into them
+  *   - Miro identifiers are merged into single or zero item LMS works
+  *   - LMS works with linked digitised LMS works have the first of these linked
+  *     IDs merged into them
   *   - METS identifiers are not merged as they are not useful
   */
 object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
@@ -42,11 +42,11 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     sources: Seq[Work[Identified]]
   ): FieldMergeResult[FieldData] = {
     val ids = (
-      mergeDigitalIntoPhysicalSierraTarget(target, sources) |+|
+      mergeDigitalIntoPhysicalLmsWorkTarget(target, sources) |+|
         mergeIntoTeiTarget(target, sources)
           .orElse(mergeIntoCalmOrAxiellTarget(target, sources))
           .orElse(
-            mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
+            mergeSingleMiroIntoSingleOrZeroItemLmsWorkTarget(target, sources)
           )
           .orElse(
             mergeMiroIntoDigmiroTarget(target, sources)
@@ -58,12 +58,12 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         mergeIntoEbscoTarget,
         mergeIntoTeiTarget,
         mergeIntoCalmOrAxiellTarget,
-        mergeSingleMiroIntoSingleOrZeroItemSierraTarget,
+        mergeSingleMiroIntoSingleOrZeroItemLmsWorkTarget,
         mergeMiroIntoDigmiroTarget
       ).flatMap {
         rule =>
           rule.mergedSources(target, sources)
-      } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+      } ++ findFirstLinkedDigitisedLmsWorkFor(target, sources)
     ).distinct
     FieldMergeResult(
       data = ids,
@@ -89,10 +89,10 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
       )
   }
 
-  private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
+  private val mergeSingleMiroIntoSingleOrZeroItemLmsWorkTarget =
     new OtherIdentifiersMergeRule {
       val isDefinedForTarget: WorkPredicate =
-        (singleItemSierra or zeroItemSierra) and sierraPictureDigitalImageOr3DObject
+        (singleItemLmsWork or zeroItemLmsWork) and lmsWorkPictureDigitalImageOr3DObject
       val isDefinedForSource: WorkPredicate =
         singleDigitalItemMiroWork
       override val isDefinedForSourceList: Seq[Work[Identified]] => Boolean =
@@ -101,49 +101,49 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   private val mergeIntoEbscoTarget = new OtherIdentifiersMergeRule {
     val isDefinedForTarget: WorkPredicate = ebscoWork
-    val isDefinedForSource: WorkPredicate = sierraWork
+    val isDefinedForSource: WorkPredicate = lmsWork
   }
 
   private val mergeIntoTeiTarget = new OtherIdentifiersMergeRule {
     val isDefinedForTarget: WorkPredicate = teiWork
     val isDefinedForSource: WorkPredicate =
-      sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
+      lmsWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
   }
 
   private val mergeIntoCalmOrAxiellTarget = new OtherIdentifiersMergeRule {
     val isDefinedForTarget: WorkPredicate =
       singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork
     val isDefinedForSource: WorkPredicate =
-      singleDigitalItemMetsWork or sierraWork or singleDigitalItemMiroWork
+      singleDigitalItemMetsWork or lmsWork or singleDigitalItemMiroWork
   }
 
   private val mergeMiroIntoDigmiroTarget = new OtherIdentifiersMergeRule {
-    val isDefinedForTarget: WorkPredicate = sierraDigitisedMiro
+    val isDefinedForTarget: WorkPredicate = lmsWorkDigitisedMiro
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 
-  private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
+  private val mergeDigitalIntoPhysicalLmsWorkTarget = new PartialRule {
 
     // We don't merge physical/digitised audiovisual works, because the
     // original bib records often contain different data.
     //
-    // See the comment on Sources.findFirstLinkedDigitisedSierraWorkFor
+    // See the comment on Sources.findFirstLinkedDigitisedLmsWorkFor
     val isDefinedForTarget: WorkPredicate =
-      physicalSierra and not(isAudiovisual)
+      physicalLmsWork and not(isAudiovisual)
 
-    val isDefinedForSource: WorkPredicate = sierraWork
+    val isDefinedForSource: WorkPredicate = lmsWork
 
     def rule(
       target: Work.Visible[Identified],
       sources: NonEmptyList[Work[Identified]]
     ): FieldData = {
       val sourceIdentifiers =
-        findFirstLinkedDigitisedSierraWorkFor(target, sources.toList) match {
+        findFirstLinkedDigitisedLmsWorkFor(target, sources.toList) match {
           case Some(digitisedWork) =>
             target.data.otherIdentifiers ++ digitisedWork.identifiers
           case None =>
             warn(
-              s"Unable to find other digitised Sierra identifiers for target work ${target.id}"
+              s"Unable to find other digitised LMS identifiers for target work ${target.id}"
             )
             List()
         }
