@@ -99,7 +99,7 @@ locals {
 module "state_machine" {
   source = "../state_machine"
 
-  name                     = "pipeline-${var.pipeline_date}_${var.name}"
+  name                     = coalesce(var.state_machine_name, "pipeline-${var.pipeline_date}_${var.name}")
   state_machine_definition = local.state_machine_definition
 
   invokable_lambda_arns = concat([module.find_work_lambda.lambda_arn], var.worker_lambda_arns)
