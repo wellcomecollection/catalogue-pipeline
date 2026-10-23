@@ -29,8 +29,18 @@ def fixture_item_ids() -> list[str]:
 
 
 def folio_record(instance_id: str, items: list[dict[str, Any]]) -> dict[str, Any]:
-    """A minimal raw record, for edge cases the fixture doesn't cover."""
-    return {"instanceId": instance_id, "holdings": [], "items": items}
+    """A minimal raw record, for edge cases the fixture doesn't cover.
+
+    Items are linked to a single holdings record, as the endpoint returns them.
+    """
+    if not items:
+        return {"instanceId": instance_id, "holdings": [], "items": []}
+    holdings_id = f"holdings-{instance_id}"
+    return {
+        "instanceId": instance_id,
+        "holdings": [{"id": holdings_id}],
+        "items": [{"holdingsRecordId": holdings_id, **item} for item in items],
+    }
 
 
 def make_inventory_store(records: dict[str, dict[str, Any]]) -> AdapterStore:

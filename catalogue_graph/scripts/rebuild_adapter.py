@@ -303,19 +303,23 @@ def _download_inventory_to_snapshot(
     parquet snapshot, one row per instance. Atomic, like the bib snapshot.
     """
     total = 0
+    rejected_total = 0
     partial_path = f"{inventory_snapshot_path}.partial"
     with pq.ParquetWriter(partial_path, ADAPTER_STORE_ARROW_SCHEMA) as writer:
         for store_ids in bib_id_batches:
             if not store_ids:
                 continue
-            rows = fetch_inventory_rows(
+            rows, rejected = fetch_inventory_rows(
                 inventory_client, store_ids, namespace=namespace
             )
+            rejected_total += len(rejected)
             if rows is None:
                 continue
             writer.write_table(rows)
             total += rows.num_rows
-            logger.info("Inventory download progress", total=total)
+            logger.info(
+                "Inventory download progress", total=total, rejected=rejected_total
+            )
 
     if total == 0:
         os.remove(partial_path)
@@ -326,7 +330,10 @@ def _download_inventory_to_snapshot(
         )
     os.replace(partial_path, inventory_snapshot_path)
     logger.info(
-        "Inventory download complete", path=inventory_snapshot_path, total=total
+        "Inventory download complete",
+        path=inventory_snapshot_path,
+        total=total,
+        rejected=rejected_total,
     )
     return total
 

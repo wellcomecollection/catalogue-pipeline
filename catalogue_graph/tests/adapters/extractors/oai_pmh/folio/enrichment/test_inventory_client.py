@@ -1,7 +1,6 @@
 import json
 
 import httpx
-import pytest
 
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
@@ -28,8 +27,11 @@ def test_items_and_holdings_posts_instance_ids_and_parses_response() -> None:
     client = _client(handler)
     result = client.items_and_holdings(["i-1", "i-2"])
 
-    assert [r.instance_id for r in result] == ["i-1", "i-2"]
-    assert [r.data for r in result] == [fixture_record("i-1"), fixture_record("i-2")]
+    assert [r.instance_id for r in result.records] == ["i-1", "i-2"]
+    assert [r.data for r in result.records] == [
+        fixture_record("i-1"),
+        fixture_record("i-2"),
+    ]
 
     assert len(seen_requests) == 1
     request = seen_requests[0]
@@ -52,7 +54,7 @@ def test_items_and_holdings_batches_requests() -> None:
     result = client.items_and_holdings(["a", "b", "c", "d", "e"])
 
     assert batches == [["a", "b"], ["c", "d"], ["e"]]
-    assert [r.instance_id for r in result] == ["a", "b", "c", "d", "e"]
+    assert [r.instance_id for r in result.records] == ["a", "b", "c", "d", "e"]
 
 
 def test_items_and_holdings_deduplicates_ids() -> None:
@@ -72,7 +74,7 @@ def test_items_and_holdings_parses_ndjson() -> None:
 
     client = _client(handler)
     result = client.items_and_holdings(["i-1", "i-2"])
-    assert [r.instance_id for r in result] == ["i-1", "i-2"]
+    assert [r.instance_id for r in result.records] == ["i-1", "i-2"]
 
 
 def test_items_and_holdings_parses_concatenated_json_stream() -> None:
@@ -84,7 +86,10 @@ def test_items_and_holdings_parses_concatenated_json_stream() -> None:
 
     client = _client(handler)
     result = client.items_and_holdings(["i-1", "i-2"])
-    assert [r.data for r in result] == [fixture_record("i-1"), fixture_record("i-2")]
+    assert [r.data for r in result.records] == [
+        fixture_record("i-1"),
+        fixture_record("i-2"),
+    ]
 
 
 def test_items_and_holdings_empty_input_makes_no_request() -> None:
@@ -92,17 +97,20 @@ def test_items_and_holdings_empty_input_makes_no_request() -> None:
         raise AssertionError("should not be called")
 
     client = _client(handler)
-    assert client.items_and_holdings([]) == []
+    assert client.items_and_holdings([]).records == []
 
 
-def test_items_and_holdings_fails_the_batch_when_an_item_has_no_id() -> None:
-    """An item with no id cannot mint a stable identifier, so the fetch fails."""
-
+def test_items_and_holdings_rejects_only_the_bad_record() -> None:
+    """An item with no id cannot mint a stable identifier, so its record is left
+    out, and the rest of the batch still comes back."""
     broken = fixture_record("i-2")
     del broken["items"][3]["id"]
 
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=[fixture_record("i-1"), broken])
 
-    with pytest.raises(ValueError, match="missing an id"):
-        _client(handler).items_and_holdings(["i-1", "i-2"])
+    result = _client(handler).items_and_holdings(["i-1", "i-2"])
+
+    assert [r.instance_id for r in result.records] == ["i-1"]
+    assert [r.instance_id for r in result.rejected] == ["i-2"]
+    assert "missing an id" in result.rejected[0].reason

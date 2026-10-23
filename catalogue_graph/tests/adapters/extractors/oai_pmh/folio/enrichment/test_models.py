@@ -1,4 +1,5 @@
 import json
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -6,6 +7,7 @@ import pytest
 from adapters.extractors.oai_pmh.folio.enrichment.models import (
     FolioEnrichedInstance,
     FolioInventoryRecord,
+    parse_inventory_records,
 )
 from tests.adapters.transformers.folio.helpers import fixture_record
 
@@ -87,3 +89,89 @@ def test_record_raises_when_instance_missing_id() -> None:
     del record["instanceId"]
     with pytest.raises(ValueError, match="missing instanceId"):
         FolioInventoryRecord(data=record)
+
+
+def test_record_raises_when_holdings_missing_id() -> None:
+    record = fixture_record()
+    del record["holdings"][2]["id"]
+    with pytest.raises(ValueError, match="holdings on instance .* is missing an id"):
+        FolioInventoryRecord(data=record)
+
+
+def test_record_raises_when_holdings_id_repeats() -> None:
+    record = fixture_record()
+    record["holdings"][2]["id"] = record["holdings"][0]["id"]
+    with pytest.raises(ValueError, match="appears twice"):
+        FolioInventoryRecord(data=record)
+
+
+@pytest.mark.parametrize("holdings_record_id", [None, "not-in-this-response"])
+def test_record_raises_when_item_links_to_no_holdings(
+    holdings_record_id: str | None,
+) -> None:
+    record = fixture_record()
+    if holdings_record_id is None:
+        del record["items"][3]["holdingsRecordId"]
+    else:
+        record["items"][3]["holdingsRecordId"] = holdings_record_id
+    with pytest.raises(ValueError, match="links to no holdings record"):
+        FolioInventoryRecord(data=record)
+
+
+def test_parse_inventory_records_rejects_each_bad_record_on_its_own() -> None:
+    broken = fixture_record("i-2")
+    del broken["holdings"][1]["id"]
+    no_instance = fixture_record()
+    del no_instance["instanceId"]
+
+    fetch = parse_inventory_records([fixture_record("i-1"), broken, no_instance])
+
+    assert [r.instance_id for r in fetch.records] == ["i-1"]
+    assert [(r.instance_id, r.reason) for r in fetch.rejected] == [
+        ("i-2", "FOLIO holdings on instance 'i-2' is missing an id"),
+        (None, "FOLIO items-and-holdings record is missing instanceId"),
+    ]
+
+
+@pytest.mark.parametrize(
+    "break_record, reason",
+    [
+        (
+            lambda r: r.update(holdings=[None]),
+            "holdings on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r.update(items=[None]),
+            "items on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r.update(items={"id": "a"}),
+            "items on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r["holdings"][0].update(id={"x": 1}),
+            "holdings on instance 'i-2' has a non-string id",
+        ),
+        (
+            lambda r: r["items"][0].update(id=7),
+            "item on instance 'i-2' has a non-string id",
+        ),
+        (
+            lambda r: r["items"][0].update(holdingsRecordId=["h"]),
+            "links to no holdings record",
+        ),
+        (lambda r: r.update(instanceId=["i-2"]), "non-string instanceId"),
+    ],
+)
+def test_malformed_record_is_rejected_not_raised(
+    break_record: Callable[[dict[str, Any]], None], reason: str
+) -> None:
+    """A wrongly shaped record must not abort the fetch for the records around it."""
+    broken = fixture_record("i-2")
+    break_record(broken)
+
+    fetch = parse_inventory_records([fixture_record("i-1"), broken])
+
+    assert [r.instance_id for r in fetch.records] == ["i-1"]
+    assert len(fetch.rejected) == 1
+    assert reason in fetch.rejected[0].reason

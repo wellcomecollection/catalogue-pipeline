@@ -57,8 +57,12 @@ enrichment closes that gap:
    changeset, fetches their items/holdings from mod-inventory-storage's
    `inventory-hierarchy/items-and-holdings` (chosen in
    wellcomecollection/platform#6581), and upserts them into the store. The bib
-   changeset is the trigger: a `marc21_withholdings` item/holdings change advances the
-   instance's OAI datestamp, so it re-appears in the bib window.
+   changeset is the trigger, and a bib row only joins one when its MARC changes.
+   The `marc21_withholdings` 952 carries some item fields (location names, call
+   number, material type, volume, barcode, copy number, permanent loan type) but not
+   item status, statistical codes, notes or anything on holdings. Changes to those
+   don't reach the inventory store until the next `--folio-inventory-only` rebuild
+   (wellcomecollection/platform#6815).
 3. At **transform time** the FOLIO transformer joins the inventory store onto each bib
    record by instance id and parses the stored record with the models in
    `enrichment/models.py`; `FolioWorkBuilder` emits items carrying a `folio-item`
