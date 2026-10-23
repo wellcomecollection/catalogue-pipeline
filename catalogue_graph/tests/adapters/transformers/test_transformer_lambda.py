@@ -47,7 +47,8 @@ def test_lambda_handler_resolves_a_partition_ref_from_s3(
 
     assert received == [partition]
     assert output["job_id"] == "job-1-p000"
-    assert output["changeset_ids"] == ["changeset-1", "changeset-2"]
+    assert output["s3_uri"] == s3_uri
+    assert "changeset_ids" not in output
 
 
 def test_lambda_handler_still_accepts_an_inline_event(

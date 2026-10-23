@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import cached_property
+from typing import Any
 
 from adapters.utils.adapter_store import AdapterStore
 
@@ -32,18 +33,29 @@ class IcebergChangesetSource:
         )
 
     @cached_property
-    def _counts(self) -> dict[str, tuple[int, int]]:
-        return self.store.count_rows_by_changeset(self.changeset_ids, self.snapshot_id)
+    def _stats(self) -> list[dict[str, Any]]:
+        stats = self.store.changeset_stats(self.changeset_ids, self.snapshot_id)
+        rows = stats.to_pylist()
+        unassigned = [row["rows"] for row in rows if row["changeset"] is None]
+        if unassigned:
+            # Changeset mode cannot reach these rows, so a reindex would skip them
+            raise RuntimeError(
+                f"{unassigned[0]} adapter rows have no changeset id; a changeset "
+                "partitioned reindex cannot reach them"
+            )
+        return rows
 
     @cached_property
     def changesets(self) -> list[tuple[str, int]]:
-        """(changeset id, row count), in request order or sorted for a full scan."""
-        keys = (
-            self.changeset_ids
-            if self.changeset_ids is not None
-            else sorted(self._counts)
-        )
-        return [(key, self._counts.get(key, (0, 0))[0]) for key in keys]
+        """(changeset id, row count), in request order or, for a full listing,
+        by changeset id."""
+        if self.changeset_ids is not None:
+            rows_by_changeset = {row["changeset"]: row["rows"] for row in self._stats}
+            return [
+                (changeset_id, rows_by_changeset.get(changeset_id, 0))
+                for changeset_id in self.changeset_ids
+            ]
+        return sorted((row["changeset"], row["rows"]) for row in self._stats)
 
     def stream_ids(self) -> Iterator[str]:
         for changeset_id, _ in self.changesets:
@@ -51,8 +63,8 @@ class IcebergChangesetSource:
 
     @property
     def row_count(self) -> int:
-        return sum(rows for rows, _ in self._counts.values())
+        return sum(row["rows"] for row in self._stats)
 
     @property
     def tombstone_count(self) -> int:
-        return sum(tombstones for _, tombstones in self._counts.values())
+        return sum(row["tombstones"] for row in self._stats)
