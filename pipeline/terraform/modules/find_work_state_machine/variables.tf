@@ -36,9 +36,9 @@ variable "vpc_config" {
   })
 }
 
-variable "find_work_secret_read_policy_json" {
+variable "find_work_read_policy_json" {
   type        = string
-  description = "IAM policy granting the find-work Lambda read access to its ES credentials."
+  description = "IAM policy for what the find-work Lambda reads: ES credentials, or Iceberg tables for an Iceberg planner."
 }
 
 variable "partition_s3_arns" {
