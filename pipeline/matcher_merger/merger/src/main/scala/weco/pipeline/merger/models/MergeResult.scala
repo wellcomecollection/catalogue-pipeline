@@ -18,7 +18,7 @@ case class MergeResult(
 object TargetOnlyMergeResult extends WorkMergingOps {
   import weco.catalogue.internal_model.image.ParentWork._
   def apply(target: Work.Visible[Identified]): MergeResult = {
-    val items = ItemsRule.unmergedItems(target)
+    val items = ItemsRule.merge(target, Nil).data
     MergeResult(
       mergedTarget = target
         .mapData(_.copy[DataState.Identified](items = items))
