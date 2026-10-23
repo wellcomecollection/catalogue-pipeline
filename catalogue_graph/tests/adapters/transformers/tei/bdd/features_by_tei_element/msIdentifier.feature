@@ -1,9 +1,10 @@
 Feature: <msIdentifier> in msDesc
-  The only part of <msIdentifier> the catalogue reads is an
-  <altIdentifier type="Sierra"> holding the manuscript's Sierra b-number.
+  The only part of <msIdentifier> the catalogue reads is
+  <altIdentifier type="Sierra">, holding a Sierra b-number. A manuscript
+  catalogued in more than one Sierra record can have one for each.
 
-  If you give a b-number, the TEI catalogue entry and the Sierra catalogue
-  entry for the same manuscript are combined into one.
+  For each b-number you give, the TEI catalogue entry and that Sierra
+  catalogue entry are combined into one.
 
   Other altIdentifiers (e.g. type="former"), and settlement, repository and
   collection, are not used.
@@ -51,11 +52,17 @@ Feature: <msIdentifier> in msDesc
     Then the manuscript is not merged with any Sierra record
     And "WMS. Or. 1a" does not appear in the catalogue entry
 
-  Scenario: Only one Sierra b-number is allowed
+  Scenario: Several Sierra b-numbers link the manuscript to each Sierra record
+    A b-number given more than once is only used once. Any that are in the
+    wrong format are ignored, as above, without affecting the others.
     Given the <msIdentifier> contains:
       """xml
       <altIdentifier type="Sierra"><idno>b1234567x</idno></altIdentifier>
       <altIdentifier type="Sierra"><idno>b7654321x</idno></altIdentifier>
+      <altIdentifier type="Sierra"><idno>b1234567x</idno></altIdentifier>
+      <altIdentifier type="Sierra"><idno>b1234567</idno></altIdentifier>
       """
     When the TEI file is published to the catalogue
-    Then the TEI file is rejected with "More than one sierra bnumber node!"
+    Then the manuscript is merged with the Sierra records:
+      | b1234567x |
+      | b7654321x |

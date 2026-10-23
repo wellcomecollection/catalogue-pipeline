@@ -8,8 +8,14 @@ Feature: <textLang>
     - msItem/textLang             -> that item
     - msPart/msContents/textLang  -> that part
 
-  Write the IANA language code in mainLang or otherLangs (but not both), and
-  the language name as the element's text. The code can be in any case.
+  Write the IANA language code in mainLang and/or otherLangs, and the language
+  name as the element's text. otherLangs can hold several codes separated by
+  spaces. The codes can be in any case.
+
+  Every code on a textLang is checked against the same text. So one textLang
+  with several codes can only make the language whose name matches its text
+  filterable. If you want each language to be filterable, give each its own
+  textLang.
 
   The code AND the name together must be one of the recognised pairs below.
   If they are not, the language can't be used as a search filter. The name
@@ -139,14 +145,31 @@ Feature: <textLang>
       Then the manuscript has no filterable languages
       And the manuscript has no notes
 
-    Scenario: Using both mainLang and otherLangs on one textLang is rejected
-      Use a separate textLang for each language instead.
+  Rule: A textLang can have several codes
+
+    Scenario: A combined name matches none of the codes, so it becomes a Language note
       Given the <msContents> contains:
         """xml
         <textLang mainLang="ar" otherLangs="fa">Arabic and Persian</textLang>
         """
       When the TEI file is published to the catalogue
-      Then the TEI file is rejected with "Multiple language IDs"
+      Then the manuscript has no filterable languages
+      And the manuscript has a "Language note" reading "Arabic and Persian"
+
+    Scenario Outline: Only the code that matches the name becomes a language
+      The other codes are ignored, and no Language note is made.
+      Given the <msContents> contains:
+        """xml
+        <textLang <attributes>><name></textLang>
+        """
+      When the TEI file is published to the catalogue
+      Then the manuscript's languages are shown as "<filter>"
+      And the manuscript has no notes
+      Examples:
+        | attributes                    | name    | filter  |
+        | mainLang="ar" otherLangs="fa" | Arabic  | Arabic  |
+        | mainLang="ar" otherLangs="fa" | Persian | Persian |
+        | otherLangs="he FA"            | Persian | Persian |
 
   Rule: Items and parts can inherit the manuscript's languages
 

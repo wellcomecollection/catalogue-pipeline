@@ -7,9 +7,10 @@ Feature: <handNote> in physDesc/handDesc
   <persName role="scr">.
     - With a persName role="scr", the persName is the scribe's name.
     - With only a scribe attribute, the handNote's text is the scribe's name.
-      Its text is NOT also shown as a Hand note. So don't put a description of
-      the hand in a handNote with a scribe attribute unless it is in a persName
-      role="scr" (see below).
+  A handNote with a scribe attribute is never shown as a Hand note, even if
+  the name is in a persName role="scr". To name the scribe AND describe the
+  hand, leave out the scribe attribute and wrap just the name in
+  <persName role="scr"> (see "A handNote that names the scribe in a description").
 
   Which catalogue entry a scribe appears on:
     - no <locus target>          -> the manuscript
@@ -128,8 +129,8 @@ Feature: <handNote> in physDesc/handDesc
       And the manuscript has no notes
 
     Scenario: A description in a scribe handNote becomes the scribe's "name"
-      This is probably not what you want. Use persName role="scr" for the name
-      instead.
+      This is probably not what you want. Leave out the scribe attribute and wrap
+      just the name in persName role="scr" instead.
       Given the <msDesc> contains:
         """xml
         <physDesc><handDesc>
@@ -139,15 +140,24 @@ Feature: <handNote> in physDesc/handDesc
       When the TEI file is published to the catalogue
       Then the manuscript shows the contributor "Another hand, which uses the northern ta." with the role "scribe"
 
-    Scenario: A scribe attribute with no text is rejected
+    Scenario Outline: A scribe attribute with no name text is ignored
+      Records exported from Calm often contain empty handNotes like this. They
+      produce neither a scribe nor a Hand note.
       Given the <msDesc> contains:
         """xml
+        <msContents><msItem xml:id="Item_1"/></msContents>
         <physDesc><handDesc>
-          <handNote scribe="Scribe_A"><locus target="#Item_1">a 2-62</locus></handNote>
+          <empty_scribe_hand_note>
         </handDesc></physDesc>
         """
       When the TEI file is published to the catalogue
-      Then the TEI file is rejected with "The contributor label is empty!"
+      Then the manuscript has no contributors
+      And the catalogue entry for "Item_1" has no contributors
+      And the manuscript has no notes
+      Examples:
+        | empty_scribe_hand_note                                                     |
+        | <handNote scribe="sole"/>                                                  |
+        | <handNote scribe="Scribe_A"><locus target="#Item_1">a 2-62</locus></handNote> |
 
   Rule: Assigning scribes to items and parts with <locus target>
 
