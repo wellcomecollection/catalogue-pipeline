@@ -77,6 +77,12 @@ object WorkPredicates {
     allPhysicalLocations
   )
 
+  // Born-digital material has no physical copy, so its Axiell stub item is misleading.
+  val bornDigitalAxiellStubWork: WorkPredicate = satisfiesAll(
+    singlePhysicalItemAxiellWork,
+    format(Format.ArchivesDigital) _
+  )
+
   val singleDigitalItemMetsWork: WorkPredicate = satisfiesAll(
     metsIdentified,
     singleItem,
