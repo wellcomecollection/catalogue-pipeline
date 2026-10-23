@@ -2,6 +2,7 @@
 
 import pytest
 from pydantic import ValidationError
+from structlog.testing import capture_logs
 
 from adapters.steps import transformer_find_work
 from adapters.steps.transformer import TransformerEvent
@@ -61,6 +62,7 @@ def test_changeset_event_plans_groups_of_whole_changesets_at_one_snapshot(
     assert [p.job_id for p in partitions] == ["job-1-p000", "job-1-p001"]
     assert {p.snapshot_id for p in partitions} == {store.current_snapshot_id()}
     assert all(p.ids is None for p in partitions)
+    assert all(p.with_deletion_facts for p in partitions)
 
 
 def test_reindex_plans_every_changeset_in_the_store(
@@ -72,6 +74,28 @@ def test_reindex_plans_every_changeset_in_the_store(
 
     planned = [c for p in partitions for c in p.changeset_ids]
     assert planned == ["changeset-1", "changeset-2", "changeset-3"]
+    assert not any(p.with_deletion_facts for p in partitions)
+
+
+def test_reindex_skips_the_deletion_limits(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    def fail_count(changeset_ids: list[str]) -> int:
+        raise AssertionError("a reindex must not count deletion facts")
+
+    partitions = plan(
+        _event(full=True, max_tombstones=0),
+        _store(adapter_store_with_records),
+        fail_count,
+    )
+
+    assert partitions
+
+
+def test_an_explicitly_empty_changeset_list_plans_nothing(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    assert plan(_event(changeset_ids=[]), _store(adapter_store_with_records)) == []
 
 
 def test_a_changeset_with_no_rows_left_is_still_planned(
@@ -89,6 +113,7 @@ def test_a_changeset_with_no_rows_left_is_still_planned(
     [
         {},
         {"changeset_ids": ["changeset-1"], "full": True},
+        {"changeset_ids": [], "full": True},
         {"changeset_id": "changeset-1"},
         {"changeset_ids": ["changeset-1"], "partition_rows": 0},
     ],
@@ -105,6 +130,39 @@ def test_too_many_tombstones_stops_before_fan_out(
 
     with pytest.raises(RuntimeError, match="tombstones"):
         plan(_event(changeset_ids=["changeset-2"], max_tombstones=0), store)
+
+
+def test_too_many_deletion_facts_stops_before_fan_out(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    counted: list[list[str]] = []
+
+    def count(changeset_ids: list[str]) -> int:
+        counted.append(changeset_ids)
+        return 3
+
+    store = _store(adapter_store_with_records)
+    event = _event(changeset_ids=["changeset-1"], max_deletion_facts=2)
+
+    with pytest.raises(RuntimeError, match="deletion facts"):
+        plan(event, store, count)
+    assert counted == [["changeset-1"]]
+    assert plan(
+        _event(changeset_ids=["changeset-1"], max_deletion_facts=3), store, count
+    )
+
+
+def test_oversized_changesets_are_logged(
+    adapter_store_with_records: AdapterStoreFactory,
+) -> None:
+    with capture_logs() as logs:
+        plan(
+            _event(changeset_ids=["changeset-1", "changeset-3"], partition_rows=3),
+            _store(adapter_store_with_records),
+        )
+
+    warnings = [log for log in logs if log["log_level"] == "warning"]
+    assert [log["changeset_ids"] for log in warnings] == [["changeset-3"]]
 
 
 def test_parse_event_unwraps_the_rule_payload_and_ignores_extra_fields() -> None:

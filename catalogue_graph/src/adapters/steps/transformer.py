@@ -60,6 +60,9 @@ class TransformerEvent(BaseModel):
     changeset_ids; an explicitly empty list is rejected, not treated as
     none."""
     snapshot_id: int | None = None
+    with_deletion_facts: bool = True
+    """False for a planned reindex: it writes into a fresh index, where historic
+    Axiell deletion facts have nothing to overwrite."""
 
     @model_validator(mode="after")
     def _check_ids(self) -> "TransformerEvent":
@@ -152,8 +155,9 @@ def build_transformer(
             snapshot_id=snapshot_id,
             ids=event.ids,
             adapter_store=adapter_store,
+            with_deletion_facts=event.with_deletion_facts,
         )
-        return AxiellTransformer(reader)
+        return AxiellTransformer(reader, with_deletions=event.with_deletion_facts)
     if event.transformer_type == "ebsco":
         return EbscoTransformer(
             adapter_store, event.changeset_ids, snapshot_id, ids=event.ids
@@ -255,14 +259,20 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         trace_id=get_trace_id(context),
         pipeline_step="adapter_transformer",
     )
-    if "s3_uri" in event:
-        # A partition ref from the find-work step; resolve the full event from S3
-        transformer_event = pydantic_from_s3_json(TransformerEvent, event["s3_uri"])
-    else:
+    if "s3_uri" not in event:
         transformer_event = TransformerEvent.model_validate(event)
-    return handler(
-        transformer_event, execution_context, use_rest_api_table=True
-    ).model_dump(mode="json")
+        return handler(
+            transformer_event, execution_context, use_rest_api_table=True
+        ).model_dump(mode="json")
+
+    # A partition ref from the find-work step; resolve the full event from S3
+    transformer_event = pydantic_from_s3_json(TransformerEvent, event["s3_uri"])
+    result = handler(transformer_event, execution_context, use_rest_api_table=True)
+    # The Map collects every partition's output, so return the ref, not the ids
+    return {
+        **result.model_dump(mode="json", exclude={"changeset_ids"}),
+        "s3_uri": event["s3_uri"],
+    }
 
 
 def _read_ids(args: argparse.Namespace) -> list[str] | None:

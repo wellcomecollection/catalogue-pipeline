@@ -167,10 +167,12 @@ The Lambda also accepts `{"s3_uri": "..."}`, a partition written by the find-wor
 (`adapters.steps.transformer_find_work`). The planner splits an adapter event's changesets, or for a reindex
 (`"full": true`) every changeset in the store, into groups of about 10,000 rows, all read at one pinned snapshot,
 so no single invocation does unbounded work. Each partition runs in changeset mode, so tombstones and Axiell
-deletion facts are delivered exactly as a single changeset run delivers them. A planned reindex therefore also
-writes tombstones for deleted records and delivers deletion facts, which the unplanned reindex (no changeset ids)
-skips. The planner stops before any partition runs if an event carries more than 5,000 tombstones, which more
-likely means a faulty harvest than real deletions; replay with a raised `max_tombstones` once they are confirmed.
+deletion facts are delivered exactly as a single changeset run delivers them. A planned reindex also writes
+tombstones for deleted records, which the unplanned reindex (no changeset ids) skips, but delivers no deletion
+facts, as they have nothing to overwrite in a fresh index. An event naming no changesets (`"changeset_ids": []`)
+plans nothing. The planner stops before any partition runs if an event carries more than 5,000 tombstones or, for
+Axiell, more than 1,000 deletion facts, which more likely means a faulty harvest or reconcile than real deletions;
+replay with a raised `max_tombstones` or `max_deletion_facts` once they are confirmed.
 
 ## Output
 
