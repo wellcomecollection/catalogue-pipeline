@@ -165,8 +165,8 @@ To re-transform a specific set of already-stored records instead — e.g. after 
 
 The Lambda also accepts `{"s3_uri": "..."}`, a partition written by the find-work planner
 (`adapters.steps.transformer_find_work`). The planner splits an adapter event's changesets, or for a reindex
-(`"full": true`) every changeset in the store, into groups of about 10,000 rows, all read at one pinned snapshot,
-so no single invocation does unbounded work. Each partition runs in changeset mode, so tombstones and Axiell
+(`"full": true`) every changeset in the store, into groups of about 10,000 rows, all read at one pinned snapshot;
+a changeset bigger than that runs as a partition of its own. Each partition runs in changeset mode, so tombstones and Axiell
 deletion facts are delivered exactly as a single changeset run delivers them. A planned reindex also writes
 tombstones for deleted records, which the unplanned reindex (no changeset ids) skips, but delivers no deletion
 facts, as they have nothing to overwrite in a fresh index. An event naming no changesets (`"changeset_ids": []`)

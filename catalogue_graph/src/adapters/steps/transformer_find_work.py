@@ -1,12 +1,5 @@
-"""Work-discovery step for the adapter transformer state machine.
-
-Plans an adapter event into bounded transformer partitions, so no single
-transformer invocation does unbounded work. Partitions are groups of whole
-changesets, sized by row count, all read at one pinned snapshot: the transformer
-stays in changeset mode, so tombstones and Axiell deletion facts are delivered
-exactly as a single changeset run delivers them. A reindex (`full: true`)
-plans every changeset in the store.
-"""
+"""Plans an adapter event into groups of whole changesets, bounded by row count
+except where one changeset alone is bigger, at one pinned snapshot."""
 
 from __future__ import annotations
 
@@ -36,26 +29,17 @@ DEFAULT_PARTITION_ROWS = 10_000
 """About 35 s of FOLIO transforming, well inside the 600 s Lambda timeout."""
 
 MAX_TOMBSTONES_PER_EVENT = 5_000
-"""The most tombstones any changeset in the stores has carried is 129, so an
-event with thousands more likely comes from a faulty harvest than real deletions."""
+"""Far above the 129 any changeset has carried, so more means a faulty harvest."""
 
 MAX_DELETION_FACTS_PER_EVENT = 1_000
-"""Axiell's equivalent of the tombstone limit, for guid changes the reconcile step
-recorded against the event's changesets."""
+"""The tombstone limit's equivalent for Axiell's reconcile step."""
 
 MAX_CHANGESETS_PER_PARTITION = 500
-"""Keeps a partition's changeset filter, and the reindex of a store with many
-small changesets, to a bounded size."""
+"""Bounds the changeset filter when a store has many small changesets."""
 
 
 class TransformerFindWorkEvent(BaseModel):
-    """An adapter or reindex event as the planner reads it.
-
-    Unknown fields (for example FOLIO's items_changeset_ids) are ignored, but an
-    event must name its changesets or ask for `full: true`, so a malformed one
-    fails instead of planning nothing. An explicitly empty changeset_ids plans
-    nothing.
-    """
+    """An adapter or reindex event; one with no scope fails rather than plans nothing."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -84,12 +68,11 @@ def plan(
     event: TransformerFindWorkEvent,
     store: AdapterStore,
     count_deletion_facts: Callable[[list[str]], int] | None = None,
-) -> list[TransformerEvent]:
-    """Raises before any partition exists if the event carries more deletions
-    than its limits allow. count_deletion_facts is given for Axiell only."""
+) -> tuple[list[TransformerEvent], list[int]]:
+    """Partitions and their row counts; raises first if deletions exceed the limits."""
     if event.changeset_ids == []:
         logger.info("No changesets to plan", job_id=event.job_id)
-        return []
+        return [], []
 
     source = IcebergChangesetSource(
         store, changeset_ids=event.changeset_ids, snapshot_id=event.snapshot_id
@@ -131,7 +114,8 @@ def plan(
         partition_count=len(partitions),
         snapshot_id=source.snapshot_id,
     )
-    return partitions
+    rows = dict(source.changesets)
+    return partitions, [sum(rows[c] for c in group) for group in groups]
 
 
 def _check_deletions(
@@ -188,11 +172,11 @@ def lambda_handler(
     count_facts = (
         count_axiell_deletion_facts if parsed.transformer_type == "axiell" else None
     )
-    partitions = plan(parsed, store, count_facts)
+    partitions, row_counts = plan(parsed, store, count_facts)
 
     refs = write_partitions_to_s3(
         partitions,
-        [len(p.changeset_ids) for p in partitions],
+        row_counts,
         lambda index: partition_s3_uri(parsed, index),
     )
     return FindWorkRefsResult(partitions=refs).model_dump(mode="json")

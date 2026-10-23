@@ -109,7 +109,7 @@ def test_ebsco_partitions_index_the_same_works_and_tombstones(
             )
         ]
     )
-    partitions = plan(
+    partitions, _ = plan(
         parse_event(
             {
                 "transformer_type": "ebsco",
@@ -191,7 +191,7 @@ def test_axiell_partitions_index_the_same_works_and_deletion_facts(
             )
         ]
     )
-    partitions = plan(
+    partitions, _ = plan(
         parse_event(
             {
                 "transformer_type": "axiell",
