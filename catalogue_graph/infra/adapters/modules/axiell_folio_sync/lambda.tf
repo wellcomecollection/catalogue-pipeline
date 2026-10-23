@@ -1,14 +1,15 @@
 # The sync runs out of the shared unified_pipeline_lambda image with the
 # entrypoint overridden, deployed via the standard terraform-aws-lambda module
-# (same convention as the adapter trigger lambdas). Build/deploy with
-# scripts/deploy_lambda.sh axiell-folio-sync-adapter-lambda.
+# (same convention as the adapter trigger lambdas). CI builds the image from main
+# and the catalogue pipeline deploy workflow points this function at the `prod`
+# tag, alongside the other adapter lambdas.
 module "sync_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
   name         = "${var.namespace}-adapter-lambda"
   description  = "Axiell to FOLIO outbound sync (upserts changed records into FOLIO Inventory)"
   package_type = "Image"
-  image_uri    = "${var.repository_url}:dev"
+  image_uri    = "${var.repository_url}:prod"
   # CI deploys via `update-function-code --publish`; nothing consumes a versioned
   # ARN, so Terraform publishing only causes a perpetual version diff.
   publish = false
