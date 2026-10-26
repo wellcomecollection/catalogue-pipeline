@@ -9,6 +9,7 @@ from adapters.steps.transformer import TransformerEvent
 from adapters.steps.transformer_find_work import parse_event, plan
 from adapters.utils.adapter_store import AdapterStore
 from tests.adapters.conftest import AdapterStoreFactory
+from tests.mocks import MockSmartOpen
 from utils.aws import pydantic_from_s3_json
 
 
@@ -205,3 +206,27 @@ def test_lambda_handler_writes_partitions_to_s3_and_returns_refs(
     resolved = pydantic_from_s3_json(TransformerEvent, refs[0]["s3_uri"])
     assert resolved.changeset_ids == ["changeset-1", "changeset-2", "changeset-3"]
     assert resolved.snapshot_id == store.current_snapshot_id()
+
+
+def test_lambda_handler_with_nothing_planned_writes_nothing(
+    adapter_store_with_records: AdapterStoreFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _store(adapter_store_with_records)
+    monkeypatch.setattr(
+        transformer_find_work, "get_adapter_store", lambda *args, **kwargs: store
+    )
+
+    result = transformer_find_work.lambda_handler(
+        {
+            "detail": {
+                "transformer_type": "ebsco",
+                "job_id": "job-1",
+                "changeset_ids": [],
+            }
+        },
+        _LambdaContext(),
+    )
+
+    assert result["partitions"] == []
+    assert not [uri for uri in MockSmartOpen.file_lookup if "/find_work/" in uri]
