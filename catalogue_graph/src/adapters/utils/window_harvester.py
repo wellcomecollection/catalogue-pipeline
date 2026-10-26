@@ -3,8 +3,9 @@ from __future__ import annotations
 import itertools
 import json
 from collections.abc import Callable, Iterable, Sequence
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Protocol
+from zoneinfo import ZoneInfo
 
 import structlog
 from oai_pmh_client.client import OAIClient
@@ -21,6 +22,19 @@ from .window_summary import WindowState, WindowSummary, published_at_from_tags
 logger = structlog.get_logger(__name__)
 
 BATCH_SIZE = 10_000
+
+# Axiell compares OAI from/until in UK local time, not UTC.
+SOURCE_LOCAL_TIMEZONE = ZoneInfo("Europe/London")
+
+
+def request_range(window: IncrementalWindow) -> tuple[datetime, datetime]:
+    """Widen a window spanning the clocks going back to cover the repeated local hour."""
+    start, end = window.start_time_utc, window.end_time_utc
+    shift = start.astimezone(SOURCE_LOCAL_TIMEZONE).utcoffset() or timedelta(0)
+    shift -= end.astimezone(SOURCE_LOCAL_TIMEZONE).utcoffset() or timedelta(0)
+    if shift > timedelta(0):
+        return start - shift, end + shift
+    return start, end
 
 
 class WindowSummaryTags(BaseModel):
@@ -312,11 +326,19 @@ class WindowHarvestManager:
             )
             ids_to_skip = set()
 
+        from_date, until_date = request_range(window)
+        if (from_date, until_date) != (window.start_time_utc, window.end_time_utc):
+            logger.info(
+                "Widened request range across the clock change",
+                window=window.to_iso_string(),
+                from_date=from_date.isoformat(),
+                until_date=until_date.isoformat(),
+            )
         try:
             records_in_window = self.client.list_records(
                 metadata_prefix=self.metadata_prefix,
-                from_date=window.start_time_utc,
-                until_date=window.end_time_utc,
+                from_date=from_date,
+                until_date=until_date,
                 set_spec=self.set_spec,
             )
             records_in_window = (
