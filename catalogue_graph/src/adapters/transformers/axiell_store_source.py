@@ -16,8 +16,9 @@ class AxiellStoreSource(RecordSource):
     the reader's typed `iter_deletions()` directly.
     """
 
-    def __init__(self, reader: AxiellChangesetReader):
+    def __init__(self, reader: AxiellChangesetReader, with_deletions: bool = True):
         self.reader = reader
+        self.with_deletions = with_deletions
         self.snapshot_id = reader.snapshot_id
         self.unmatched_ids: list[str] = []
 
@@ -33,6 +34,8 @@ class AxiellStoreSource(RecordSource):
                 )
             yield row
         self.unmatched_ids = self.reader.unmatched_ids
+        if not self.with_deletions:
+            return
         for deletion in self.reader.iter_deletions():
             yield {
                 "id": deletion.fact_id,
