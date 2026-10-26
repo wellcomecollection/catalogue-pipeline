@@ -3,6 +3,7 @@ except where one changeset alone is bigger, at one pinned snapshot."""
 
 from __future__ import annotations
 
+import hashlib
 import typing
 from collections.abc import Callable
 
@@ -148,13 +149,19 @@ def count_axiell_deletion_facts(changeset_ids: list[str]) -> int:
     return facts.get_records_by_changesets(changeset_ids).num_rows
 
 
-def partition_s3_uri(event: TransformerFindWorkEvent, index: int) -> str:
-    """Next to the transformer's reports, keyed by job so a replay overwrites."""
+def partition_s3_uri(
+    event: TransformerFindWorkEvent, snapshot_id: int | None, index: int
+) -> str:
+    """Next to the transformer's reports. Events can share a job_id (one per
+    changeset from rebuild_adapter.py), so the path also hashes the scope and
+    snapshot: only plans with identical contents share files."""
     config = CONFIG_BY_TYPE[event.transformer_type]
+    scope = "full" if event.full else "_".join(event.changeset_ids or [])
+    plan_key = hashlib.sha256(f"{scope}@{snapshot_id}".encode()).hexdigest()[:12]
     return (
         f"s3://{config.S3_BUCKET}/pipeline-{config.PIPELINE_DATE}/"
         f"{event.transformer_type}/{config.S3_PREFIX}/find_work/{event.job_id}/"
-        f"partition-{index}.json"
+        f"{plan_key}/partition-{index}.json"
     )
 
 
@@ -173,10 +180,12 @@ def lambda_handler(
         count_axiell_deletion_facts if parsed.transformer_type == "axiell" else None
     )
     partitions, row_counts = plan(parsed, store, count_facts)
+    if not partitions:
+        return FindWorkRefsResult(partitions=[]).model_dump(mode="json")
 
     refs = write_partitions_to_s3(
         partitions,
         row_counts,
-        lambda index: partition_s3_uri(parsed, index),
+        lambda index: partition_s3_uri(parsed, partitions[index].snapshot_id, index),
     )
     return FindWorkRefsResult(partitions=refs).model_dump(mode="json")

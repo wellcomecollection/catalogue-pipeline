@@ -202,7 +202,8 @@ def test_lambda_handler_writes_partitions_to_s3_and_returns_refs(
 
     refs = result["partitions"]
     assert len(refs) == 1
-    assert refs[0]["s3_uri"].endswith("/ebsco/dev/find_work/job-1/partition-0.json")
+    assert "/ebsco/dev/find_work/job-1/" in refs[0]["s3_uri"]
+    assert refs[0]["s3_uri"].endswith("/partition-0.json")
     resolved = pydantic_from_s3_json(TransformerEvent, refs[0]["s3_uri"])
     assert resolved.changeset_ids == ["changeset-1", "changeset-2", "changeset-3"]
     assert resolved.snapshot_id == store.current_snapshot_id()
@@ -230,3 +231,34 @@ def test_lambda_handler_with_nothing_planned_writes_nothing(
 
     assert result["partitions"] == []
     assert not [uri for uri in MockSmartOpen.file_lookup if "/find_work/" in uri]
+
+
+def test_events_sharing_a_job_id_write_to_different_paths(
+    adapter_store_with_records: AdapterStoreFactory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _store(adapter_store_with_records)
+    monkeypatch.setattr(
+        transformer_find_work, "get_adapter_store", lambda *args, **kwargs: store
+    )
+
+    def first_uri(changeset_id: str) -> str:
+        result = transformer_find_work.lambda_handler(
+            {
+                "detail": {
+                    "transformer_type": "ebsco",
+                    "job_id": "rebuild-1",
+                    "changeset_ids": [changeset_id],
+                }
+            },
+            _LambdaContext(),
+        )
+        uri: str = result["partitions"][0]["s3_uri"]
+        return uri
+
+    one, two = first_uri("changeset-1"), first_uri("changeset-2")
+
+    assert one != two
+    assert pydantic_from_s3_json(TransformerEvent, one).changeset_ids == ["changeset-1"]
+    assert pydantic_from_s3_json(TransformerEvent, two).changeset_ids == ["changeset-2"]
+    assert first_uri("changeset-1") == one
