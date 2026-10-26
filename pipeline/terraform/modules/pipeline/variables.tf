@@ -78,6 +78,12 @@ variable "enable_adapter_transformer_trigger" {
   description = "Whether the EventBridge rule that starts the transformer on <adapter>.adapter.completed events is enabled."
 }
 
+variable "enable_folio_transformer" {
+  type        = bool
+  default     = false
+  description = "Whether FOLIO adapter and reindex events start this pipeline's transformer. Only the FOLIO environment sets it, so FOLIO works stay out of production."
+}
+
 variable "axiell_collection_path_source" {
   type        = string
   default     = "refno"
@@ -124,4 +130,16 @@ variable "image_inferrer_max_concurrency" {
     to 0 when idle, so this is only a ceiling, not a running cost. (During a full reindex,
     `reindexing_state.scale_up_tasks` overrides both to the larger fixed size.)
   EOT
+}
+
+variable "elastic_vpce_security_group_id" {
+  type        = string
+  default     = null
+  description = "Security group of the Elasticsearch interface endpoint; null uses the hosted PrivateLink group. Set for a serverless project."
+}
+
+variable "merger_batch_indexing" {
+  type        = bool
+  default     = false
+  description = "Have the merger index each batch in one call; see the batch_indexing variable of the merger service."
 }

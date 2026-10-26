@@ -51,6 +51,7 @@ variable "fargate_service_boilerplate" {
   type = object({
     egress_security_group_id             = optional(string, null)
     elastic_cloud_vpce_security_group_id = optional(string, null)
+    storage_vpce_security_group_id       = optional(string, null)
 
     cluster_name = optional(string, null)
     cluster_arn  = optional(string, null)

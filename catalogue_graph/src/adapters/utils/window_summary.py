@@ -28,12 +28,13 @@ def published_at_from_tags(tags: dict[str, str] | None) -> datetime | None:
         return None
 
 
-class WindowSummary(BaseModel):
+class WindowStatus(BaseModel):
+    """A window's bookkeeping row, without the ids it harvested."""
+
     window_start: datetime
     window_end: datetime
     state: WindowState
     attempts: int
-    record_ids: list[str]
     last_error: str | None
     updated_at: datetime
     tags: dict[str, str] | None
@@ -53,15 +54,6 @@ class WindowSummary(BaseModel):
         if isinstance(value, str):
             return ensure_datetime_utc(datetime.fromisoformat(value))
         raise TypeError(f"Unsupported datetime value: {value!r}")
-
-    @field_validator("record_ids", mode="before")
-    @classmethod
-    def _coerce_record_ids(cls, value: Any) -> list[str]:
-        if value is None:
-            return []
-        if isinstance(value, (list, tuple)):
-            return [str(item) for item in value]
-        return [str(value)]
 
     @field_validator("last_error", mode="before")
     @classmethod
@@ -83,3 +75,18 @@ class WindowSummary(BaseModel):
                 f"tags must be a dict or dict-like object, got {type(value).__name__}: {value!r}"
             ) from e
         return {str(key): str(val) for key, val in tags_items.items()}
+
+
+class WindowSummary(WindowStatus):
+    """A full window row, with the ids harvested so an incomplete window can resume."""
+
+    record_ids: list[str]
+
+    @field_validator("record_ids", mode="before")
+    @classmethod
+    def _coerce_record_ids(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, (list, tuple)):
+            return [str(item) for item in value]
+        return [str(value)]

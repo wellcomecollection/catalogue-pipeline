@@ -36,6 +36,7 @@ dependencies = [
     "nh3>=0.3",
     "pysbd==0.3.4",
     "httpx>=0.28",
+    "tzdata>=2025.2",
 ]
 
 [tool.uv]

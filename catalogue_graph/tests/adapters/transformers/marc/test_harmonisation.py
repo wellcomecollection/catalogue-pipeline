@@ -131,7 +131,7 @@ def test_contributor_takes_the_type_of_a_matching_subject() -> None:
 
 
 def test_subject_takes_the_type_of_a_matching_contributor() -> None:
-    """Scala only ever retypes the contributor; here the rule applies both ways."""
+    """Scala only ever retypes the contributor, to the subject's type, so it would demote this Person to a Concept."""
     subjects, contributors = harmonise_types(
         [_subject("Gall, F. J.", "Concept")], [_contributor("Gall, F. J.", "Person")]
     )

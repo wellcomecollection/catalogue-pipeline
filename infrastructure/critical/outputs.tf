@@ -3,6 +3,7 @@
 locals {
   id_minter_rds_instances = {
     "2026-07-03" = module.id_minter_rds_2026_07_03
+    "2026-10-20" = module.id_minter_rds_2026_10_20
   }
 }
 
@@ -53,4 +54,13 @@ output "es_cluster_2026_07_03" {
     read_only_username = module.es_cluster_2026_07_03.read_only_username
     read_only_password = module.es_cluster_2026_07_03.read_only_password
   }
+}
+
+output "es_cluster_2026_10_20" {
+  sensitive = true
+  value     = module.es_serverless_2026_10_20.es_cluster
+}
+
+output "es_serverless_vpce_security_group_id" {
+  value = aws_security_group.es_serverless_vpce.id
 }

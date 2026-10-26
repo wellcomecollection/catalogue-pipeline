@@ -48,23 +48,30 @@ The FOLIO OAI-PMH feed carries item/holdings data in MARC 952 but **no item UUID
 so on its own it cannot give the public catalogue a stable per-item id. Item
 enrichment closes that gap:
 
-1. A second Iceberg store, `folio_items_table` (namespace `folio-items`), mirrors the
-   adapter-store shape and is keyed by instance id. Its `content` is the items and
-   holdings (with UUIDs) for that instance.
+1. A second Iceberg store, `folio_inventory_table` (namespace
+   `folio-inventory`), mirrors the adapter-store shape and is keyed by instance
+   id. Its `content` is the instance's whole `items-and-holdings` record as FOLIO
+   returns it, so a mapping that needs another field can read it without a re-fetch.
 2. The **enrichment step** (`adapters.steps.oai_pmh.folio_enrich`) runs between the
    loader and the publish event. It reads the changed instance ids from the bib
    changeset, fetches their items/holdings from mod-inventory-storage's
-   `oai-pmh-view/enrichedInstances`, and upserts them into the items store. The bib
-   changeset is the trigger: a `marc21_withholdings` item/holdings change advances the
-   instance's OAI datestamp, so it re-appears in the bib window.
-3. At **transform time** the FOLIO transformer joins the items store onto each bib
-   record by instance id; `FolioWorkBuilder` emits items carrying a `folio-item`
+   `inventory-hierarchy/items-and-holdings` (chosen in
+   wellcomecollection/platform#6581), and upserts them into the store. The bib
+   changeset is the trigger, and a bib row only joins one when its MARC changes.
+   The `marc21_withholdings` 952 carries some item fields (location names, call
+   number, material type, volume, barcode, copy number, permanent loan type) but not
+   item status, statistical codes, notes or anything on holdings. Changes to those
+   don't reach the inventory store until the next `--folio-inventory-only` rebuild
+   (wellcomecollection/platform#6815).
+3. At **transform time** the FOLIO transformer joins the inventory store onto each bib
+   record by instance id and parses the stored record with the models in
+   `enrichment/models.py`; `FolioWorkBuilder` emits items carrying a `folio-item`
    source identifier with the inventory UUID. When an instance has not been enriched,
    it emits no items (it never guesses from MARC 952), so works stay valid.
 
 Enrichment is enabled in infra via the `enable_item_enrichment` module variable
 (FOLIO only). A full reindex never calls FOLIO; it just joins whatever is already in
-the items store, so transformer purity is preserved.
+the inventory store, so transformer purity is preserved.
 
 See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
 
@@ -114,4 +121,4 @@ The transformed works land in a local index you can browse in Kibana at `localho
 | `FOLIO_INVENTORY_USERNAME`   | None (SSM)            | OKAPI username override (item enrichment) |
 | `FOLIO_INVENTORY_PASSWORD`   | None (SSM)            | OKAPI password override (item enrichment) |
 | `FOLIO_INVENTORY_TENANT`     | None (SSM)            | OKAPI tenant (x-okapi-tenant) override (item enrichment) |
-| `FOLIO_ENRICH_BATCH_SIZE`    | 50                    | Instance ids per `enrichedInstances` request |
+| `FOLIO_ENRICH_BATCH_SIZE`    | 1000                  | Instance ids per `items-and-holdings` request |

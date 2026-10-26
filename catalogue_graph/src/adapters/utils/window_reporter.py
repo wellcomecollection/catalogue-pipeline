@@ -10,7 +10,7 @@ from utils.timezone import ensure_datetime_utc
 from .window_store import WindowStore
 from .window_summary import (
     WindowState,
-    WindowSummary,
+    WindowStatus,
     published_at_from_tags,
 )
 
@@ -243,7 +243,7 @@ class WindowReporter:
         of coverage, not 1.25 hours.
 
         Args:
-            successful_rows: List of successful WindowSummary objects, must be sorted by start time
+            successful_rows: List of successful WindowStatus objects, must be sorted by start time
             range_start: Start of the analysis range
             range_end: End of the analysis range
 
@@ -318,7 +318,7 @@ class WindowReporter:
         """Identify time periods with no successful processing.
 
         Args:
-            successful_rows: List of successful WindowSummary objects, must be sorted by start time
+            successful_rows: List of successful WindowStatus objects, must be sorted by start time
             range_start: Start of the analysis range
             range_end: End of the analysis range
 
@@ -395,7 +395,7 @@ class WindowReporter:
         """Extract failure details from all windows.
 
         Args:
-            sorted_rows: List of WindowSummary objects sorted by start time
+            sorted_rows: List of WindowStatus objects sorted by start time
 
         Returns:
             List of WindowFailure objects for non-successful windows
@@ -416,7 +416,7 @@ class WindowReporter:
         self,
         range_start: datetime | None,
         range_end: datetime | None,
-    ) -> list[WindowSummary]:
+    ) -> list[WindowStatus]:
         """Fetch windows that overlap with the requested time range.
 
         This method looks back further than the requested range_start to catch
@@ -428,7 +428,7 @@ class WindowReporter:
             range_end: Requested end of range (or None for unbounded end)
 
         Returns:
-            List of WindowSummary objects that overlap with the requested range
+            List of WindowStatus objects that overlap with the requested range
         """
         start_bound = ensure_datetime_utc(range_start) if range_start else None
         end_bound = ensure_datetime_utc(range_end) if range_end else None
@@ -440,7 +440,9 @@ class WindowReporter:
             lookback_minutes = max(self.window_minutes * 2, 1440)
             search_start = start_bound - timedelta(minutes=lookback_minutes)
 
-        rows = self.store.list_in_range(start_time=search_start, end_time=end_bound)
+        rows = self.store.list_status_in_range(
+            start_time=search_start, end_time=end_bound
+        )
         filtered_rows = []
         for row in rows:
             if self._within_range(

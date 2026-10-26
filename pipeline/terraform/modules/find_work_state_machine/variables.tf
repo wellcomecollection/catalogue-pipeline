@@ -83,6 +83,14 @@ variable "schedule" {
     cron    = string
     enabled = bool
   })
+  default     = null
+  description = "Run on a schedule. Leave null for a state machine started by EventBridge rules or by hand."
+}
+
+variable "state_machine_name" {
+  type        = string
+  default     = null
+  description = "Overrides the default `pipeline-<date>_<name>`, for a service adopting the module under an existing name."
 }
 
 variable "alarm_name_prefix" {

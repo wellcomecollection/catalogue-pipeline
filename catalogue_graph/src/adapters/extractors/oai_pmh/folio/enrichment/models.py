@@ -1,79 +1,56 @@
-"""Models for the FOLIO item-enrichment payload.
+"""Models for the FOLIO items-and-holdings enrichment payload.
 
 The FOLIO OAI-PMH feed (``marc21_withholdings``) carries item data in MARC 952
-datafields but no item UUID. To give the public catalogue a stable item id we enrich
-each harvested instance with item UUIDs fetched from mod-inventory-storage's
-``POST /oai-pmh-view/enrichedInstances`` endpoint.
+datafields but no item UUID, and few of the fields the item mappings need. Each
+harvested instance is enriched from mod-inventory-storage's
+``POST /inventory-hierarchy/items-and-holdings`` endpoint (chosen in
+wellcomecollection/platform#6581).
 
-Response contract (per the mod-inventory-storage API docs, oai-pmh-view): each record
-is ``{"instanceId": "<uuid>", "itemsAndHoldingsFields": {"items": [...]}}``. Each item
-carries ``id`` (the item UUID), ``volume``, ``enumeration``, ``materialType`` (string),
-and the **nested objects** ``callNumber`` (``{prefix, suffix, typeId, callNumber}``) and
-``location`` (``{location: {...names...}}``). ``from_api`` flattens those and stays
-tolerant of extra/missing fields so upstream variation does not break harvesting.
+Each response record is ``{"instanceId", "source", "modeOfIssuance",
+"natureOfContent", "holdings": [...], "items": [...]}`` with camelCase keys, ids
+already resolved to names and codes, and nulls stripped. The enrichment stores each
+record verbatim, so a mapping that needs another field can read it without a
+re-fetch.
 
-See https://github.com/wellcomecollection/catalogue-pipeline/pull/3438 for the design.
+``FolioInventoryRecord`` is the write side: it checks the ids the store depends
+on and serialises the record. ``FolioEnrichedInstance`` and ``FolioEnrichedItem``
+are the read side, parsed from the stored record at transform time.
+
+Only the fields the transform reads are modelled; add a field alongside the code
+that uses it. The view doesn't return ``hrId``, staff-only notes or
+``hrid`` will be returned by the view once https://github.com/folio-org/mod-inventory-storage/pull/1382 is released.
 """
 
 from __future__ import annotations
 
-from typing import Any
+import json
+from typing import Annotated, Any
 
-from pydantic import BaseModel, Field
-
-
-def _first_present(data: dict[str, Any], *keys: str) -> Any | None:
-    """Return the first non-null value among ``keys`` (case-insensitive).
-
-    Case-insensitive because the live ``enrichedInstances`` stream lowercases its
-    wrapper keys (``instanceid``, ``itemsandholdingsfields``) even though item fields
-    are camelCase, so callers pass the documented camelCase key and this matches both.
-    """
-    lowered = {k.lower(): v for k, v in data.items()}
-    for key in keys:
-        value = lowered.get(key.lower())
-        if value is not None:
-            return value
-    return None
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    computed_field,
+    model_validator,
+)
+from pydantic.alias_generators import to_camel
 
 
-def _opt_str(value: Any | None) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
+def _strip_to_none(value: str | None) -> str | None:
+    # A blank value must not mask a fallback, e.g. enumeration over volume.
+    return (value or "").strip() or None
 
 
-def _call_number(value: Any | None) -> str | None:
-    """Flatten the nested ``callNumber`` object to its call-number string.
-
-    The API returns ``callNumber`` as ``{prefix, suffix, typeId, callNumber}``; older
-    or simplified shapes may send a plain string. Handle both.
-    """
-    if isinstance(value, dict):
-        return _opt_str(_first_present(value, "callNumber"))
-    return _opt_str(value)
+OptionalText = Annotated[str | None, AfterValidator(_strip_to_none)]
 
 
-def _location_name(value: Any | None) -> str | None:
-    """Extract a readable location label from the nested ``location`` object.
-
-    Shape is ``{"location": {libraryName, institutionName, ...}, "name": ...}``; fall
-    back through the available name fields, or accept a plain string.
-    """
-    if isinstance(value, dict):
-        name = _first_present(value, "name")
-        if name is None:
-            inner = value.get("location")
-            if isinstance(inner, dict):
-                name = _first_present(
-                    inner, "libraryName", "campusName", "institutionName"
-                )
-        return _opt_str(name)
-    return _opt_str(value)
+class FolioModel(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
 
-class FolioEnrichedItem(BaseModel):
+class FolioEnrichedItem(FolioModel):
     """A single FOLIO item, keyed by its inventory UUID.
 
     ``id`` is the load-bearing field: it is the stable identifier the OAI-PMH 952
@@ -81,73 +58,137 @@ class FolioEnrichedItem(BaseModel):
     """
 
     id: str
-    barcode: str | None = None
-    volume: str | None = None
-    enumeration: str | None = None
-    material_type: str | None = None
-    call_number: str | None = None
-    location: str | None = None
-
-    @classmethod
-    def from_api(cls, data: dict[str, Any]) -> FolioEnrichedItem:
-        item_id = _first_present(data, "id")
-        if item_id is None:
-            # The id is the stable identifier the whole enrichment exists to provide;
-            # an item without one cannot mint a valid identifier. Reject it explicitly
-            # rather than emit an item identified by the literal string "None".
-            raise ValueError("FOLIO enriched item is missing an id")
-        return cls(
-            id=str(item_id),
-            barcode=_opt_str(_first_present(data, "barcode")),
-            volume=_opt_str(_first_present(data, "volume")),
-            enumeration=_opt_str(_first_present(data, "enumeration")),
-            material_type=_opt_str(_first_present(data, "materialType")),
-            call_number=_call_number(_first_present(data, "callNumber")),
-            location=_location_name(_first_present(data, "location")),
-        )
+    volume: OptionalText = None
+    enumeration: OptionalText = None
 
 
-class FolioEnrichedInstance(BaseModel):
-    """Items for a single FOLIO instance.
-
-    Keyed by ``instance_id`` so it joins directly onto a harvested bib row at transform
-    time. (The enricher re-keys this to the bib store's OAI identifier before storing —
-    see ``enricher.py`` — because the API is queried by bare instance UUID while the bib
-    store row id is the full OAI identifier.)
-    """
+class FolioEnrichedInstance(FolioModel):
+    """Items for a single FOLIO instance, parsed from its stored record."""
 
     instance_id: str
     items: list[FolioEnrichedItem] = Field(default_factory=list)
 
     @classmethod
-    def from_api(cls, data: dict[str, Any]) -> FolioEnrichedInstance:
-        """Parse one record from the ``enrichedInstances`` response."""
-        nested = _first_present(data, "itemsAndHoldingsFields") or {}
-        raw_items = (
-            _first_present(data, "items")
-            or (nested.get("items") if isinstance(nested, dict) else None)
-            or []
-        )
-        instance_id = _first_present(data, "instanceId")
-        if instance_id is None and isinstance(nested, dict):
-            instance_id = _first_present(nested, "instanceId")
-        if instance_id is None:
-            # Without an instance id the row cannot be keyed to a bib record. Fail
-            # loudly rather than store an unjoinable row keyed by the string "None".
-            raise ValueError("FOLIO enriched instance is missing instanceId")
+    def from_store_content(cls, content: str) -> FolioEnrichedInstance:
+        """Parse a row's stored ``content`` (the raw API record)."""
+        return cls.model_validate_json(content)
 
-        # A single unparseable item (e.g. one missing its id) raises and fails the whole
-        # batch — an item we cannot identify is a contract violation, not a skip.
-        return cls(
-            instance_id=str(instance_id),
-            items=[FolioEnrichedItem.from_api(i) for i in raw_items],
-        )
+
+class FolioInventoryRecord(BaseModel):
+    """A raw items-and-holdings record as stored, validated on construction.
+
+    Only the ids the store depends on are checked: a record without an instance
+    id cannot be keyed to a bib row, an item without an id cannot mint a stable
+    identifier, and an item must link to a holdings record in the same response
+    for the transform to fall back to it. A record that fails is rejected on its
+    own (see ``parse_inventory_records``). Everything else is stored as it comes
+    and parsed at transform time.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    # Wrapped rather than modelled, so the stored record is exactly what FOLIO sent.
+    data: dict[str, Any] = Field(repr=False)
+
+    @model_validator(mode="after")
+    def _check_ids(self) -> FolioInventoryRecord:
+        # Anything malformed raises ValueError, so pydantic turns it into a
+        # rejection of this record rather than an error that aborts the fetch.
+        instance_id = self.data.get("instanceId")
+        if not instance_id:
+            raise ValueError("FOLIO items-and-holdings record is missing instanceId")
+        if not isinstance(instance_id, str):
+            raise ValueError(
+                "FOLIO items-and-holdings record has a non-string instanceId"
+            )
+
+        items = self._objects("items")
+        for item in items:
+            self._check_id(item.get("id"), "item")
+
+        holdings_ids: set[str] = set()
+        for holdings in self._objects("holdings"):
+            holdings_id = self._check_id(holdings.get("id"), "holdings")
+            if holdings_id in holdings_ids:
+                raise ValueError(
+                    f"FOLIO holdings {holdings_id!r} appears twice on instance "
+                    f"{self.instance_id!r}"
+                )
+            holdings_ids.add(holdings_id)
+
+        for item in items:
+            link = item.get("holdingsRecordId")
+            if not isinstance(link, str) or link not in holdings_ids:
+                raise ValueError(
+                    f"FOLIO item {item['id']!r} on instance {self.instance_id!r} "
+                    "links to no holdings record in the response"
+                )
+        return self
+
+    def _objects(self, key: str) -> list[dict[str, Any]]:
+        value = self.data.get(key) or []
+        if not isinstance(value, list) or not all(isinstance(v, dict) for v in value):
+            raise ValueError(
+                f"FOLIO {key} on instance {self.instance_id!r} is not a list of objects"
+            )
+        return value
+
+    def _check_id(self, value: Any, kind: str) -> str:
+        if not value:
+            raise ValueError(
+                f"FOLIO {kind} on instance {self.instance_id!r} is missing an id"
+            )
+        if not isinstance(value, str):
+            raise ValueError(
+                f"FOLIO {kind} on instance {self.instance_id!r} has a non-string id"
+            )
+        return value
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def instance_id(self) -> str:
+        return str(self.data["instanceId"])
 
     def to_store_content(self) -> str:
-        """Serialise to the JSON stored in the ``folio_items_table`` content column."""
-        return self.model_dump_json()
+        """Serialise for the store's ``content`` column.
 
-    @classmethod
-    def from_store_content(cls, content: str) -> FolioEnrichedInstance:
-        """Parse a row's stored ``content`` back into an instance."""
-        return cls.model_validate_json(content)
+        Keys are sorted so an unchanged record serialises identically and
+        ``incremental_update`` skips it.
+        """
+        return json.dumps(self.data, sort_keys=True, separators=(",", ":"))
+
+
+class RejectedInventoryRecord(BaseModel):
+    """A response record left out of the store, and why."""
+
+    instance_id: str | None
+    reason: str
+
+
+class InventoryFetch(BaseModel):
+    """The records from an items-and-holdings fetch, split into stored and rejected."""
+
+    records: list[FolioInventoryRecord] = Field(default_factory=list)
+    rejected: list[RejectedInventoryRecord] = Field(default_factory=list)
+
+
+def parse_inventory_records(raw: list[dict[str, Any]]) -> InventoryFetch:
+    """Validate each raw record on its own, so one bad record doesn't hold up the rest.
+
+    A rejected instance keeps its last stored row until it's fetched again: when its
+    MARC next changes, or at the next inventory rebuild. A fix in FOLIO that leaves
+    the MARC unchanged doesn't bring it back on its own (platform#6815).
+    """
+    fetch = InventoryFetch()
+    for data in raw:
+        try:
+            fetch.records.append(FolioInventoryRecord(data=data))
+        except ValidationError as e:
+            reason = str(e.errors()[0]["msg"]).removeprefix("Value error, ")
+            instance_id = data.get("instanceId") if isinstance(data, dict) else None
+            if not isinstance(instance_id, str):
+                instance_id = None
+            fetch.rejected.append(
+                RejectedInventoryRecord(instance_id=instance_id, reason=reason)
+            )
+    return fetch

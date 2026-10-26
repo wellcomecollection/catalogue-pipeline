@@ -1,7 +1,7 @@
 # find_work state machine
 
-A scheduled scan-and-fan-out state machine for pipeline steps whose work volume
-per window is unbounded:
+A scan-and-fan-out state machine for pipeline steps whose work volume per run is
+unbounded:
 
 ```
 FindWork (Lambda: normalise the input, find the ids in scope, partition to S3)
@@ -15,6 +15,16 @@ a scheduled run's `scheduled_time` becomes the window end minus an indexing
 lag, replay input passes through, and deployment identity (pipeline date, graph
 date, index dates) comes from the Lambda's environment. Keeping this in Python
 makes the guards unit-testable instead of living as JSONata in the definition.
+
+`schedule` is optional. Leave it null for a planner started by EventBridge rules
+or by hand. Each planner owns parsing its own trigger's payload: the
+schedule-driven ones use `normalise_lambda_input`, which rejects a payload with
+no scope. `state_machine_name`
+overrides the default `pipeline-<date>_<name>`, for a service adopting the
+module under an existing name. Planners list ids through
+`core.work_source.WorkSource` and share `core.find_work.plan_partitions` and
+`write_partitions_to_s3`, which takes the caller's S3 key function, so the
+listing can come from Elasticsearch or Iceberg.
 
 The find-work Lambda only discovers ids and slices them, so its runtime does not
 depend on how much work the window matched. Each partition file on S3 holds the
