@@ -127,10 +127,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       Nil
     }
 
-  /** When records are harvested from Calm/Axiell, both a bib and an item record
-    * are created in Sierra. The Sierra item will have more interesting
-    * information about access status, hold count, etc. The Calm/Axiell items
-    * are just stubs.
+  /** When records are harvested from Calm/Axiell into the LMS, or synced from
+    * Axiell to FOLIO, both a bib and an item record are created in the LMS. The
+    * LMS item will have more interesting information about access status, hold
+    * count, etc. The Calm/Axiell items are just stubs.
     *
     * See CalmItems.scala and axiell_work_builder.py -- the Calm/Axiell item is
     * essentially a single item with a ClosedStores PhysicalLocation (and

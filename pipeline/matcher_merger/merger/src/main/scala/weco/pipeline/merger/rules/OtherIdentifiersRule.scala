@@ -29,12 +29,20 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   // - wellcome-digcode is present to persist digcode identifiers from
   //   Encore records onto Calm/Axiell target works if they are merged, because
   //   digcode identifiers are used as a tagging/classification system.
-  private val otherIdentifiersTypeAllowList =
+  private val otherIdentifiersTypeAllowList: Set[IdentifierType] =
     Set(
       IdentifierType.WellcomeDigcode,
       IdentifierType.SierraIdentifier,
       IdentifierType.CalmRefNo,
       IdentifierType.CalmAltRefNo
+    )
+
+  // A FOLIO work is identified by its instance UUID, so its HRID and Sierra
+  // b-number are other identifiers and have to be allowed explicitly.
+  private val folioIdentifiersTypeAllowList: Set[IdentifierType] =
+    Set(
+      IdentifierType.FolioInstanceHrid,
+      IdentifierType.SierraSystemNumber
     )
 
   override def merge(
@@ -73,11 +81,19 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   private def getAllowedIdentifiersFromSource(
     source: Work[Identified]
-  ): List[SourceIdentifier] =
+  ): List[SourceIdentifier] = {
+    val allowList =
+      if (
+        source.sourceIdentifier.identifierType == IdentifierType.FolioInstance
+      )
+        otherIdentifiersTypeAllowList ++ folioIdentifiersTypeAllowList
+      else otherIdentifiersTypeAllowList
+
     (source.sourceIdentifier +: source.data.otherIdentifiers.filter {
       id =>
-        otherIdentifiersTypeAllowList.exists(_ == id.identifierType)
+        allowList.contains(id.identifierType)
     }).distinct
+  }
 
   private trait OtherIdentifiersMergeRule extends PartialRule {
     override def rule(
