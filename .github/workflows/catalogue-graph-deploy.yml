@@ -115,6 +115,8 @@ jobs:
             axiell-adapter-mark-published,
             folio-adapter-mark-published,
             axiell-adapter-reconcile,
+            # Axiell to FOLIO outbound sync
+            axiell-folio-sync-adapter-lambda,
             # Third-party API probes
             catalogue-third-party-probe,
           ]

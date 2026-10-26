@@ -34,7 +34,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
           mergeSingleMiroIntoSingleOrZeroItemLmsWorkTarget(target, sources)
         )
         .orElse(mergeDigitalIntoPhysicalLmsWorkTarget(target, sources))
-        .getOrElse(target.data.items)
+        .getOrElse(unmergedItems(target))
 
     val mergedSources = (
       List(
@@ -54,6 +54,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       sources = mergedSources
     )
   }
+
+  /** The target's own items when no source replaces them. */
+  private def unmergedItems(target: Work.Visible[Identified]): FieldData =
+    if (bornDigitalArchiveStubWork(target)) Nil else target.data.items
 
   /** When there is only 1 LMS item, we assume that the METS work item is
     * associated with that and merge the locations onto the LMS item.

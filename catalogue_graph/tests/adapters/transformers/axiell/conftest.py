@@ -18,6 +18,7 @@ def make_axiell_record(
     ref_no: str | None = "TestRefNo",
     publish_to_web: str | None = "yes",
     part_of: str | None = None,
+    for_deletion: bool = False,
 ) -> Record:
     """Minimal valid Axiell MARC record with all required fields.
 
@@ -53,6 +54,8 @@ def make_axiell_record(
                 subfields=[Subfield(code="a", value=publish_to_web)],
             )
         )
+    if for_deletion:
+        record.add_field(Field(tag="985", subfields=[Subfield(code="a", value="x")]))
     if part_of is not None:
         # 982 is the parent link: $a parent priref, $b parent object number.
         record.add_field(

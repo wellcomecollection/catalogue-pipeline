@@ -1774,6 +1774,19 @@ class PlatformMergerTest
     mergedWork.data shouldBe axiellWork.data
   }
 
+  it("drops the stub item from a born-digital Axiell work on its own") {
+    val axiellWork = axiellIdentifiedWork().format(Format.ArchivesDigital)
+
+    val result = merger.merge(works = Seq(axiellWork))
+
+    val mergedWork =
+      result
+        .mergedWorksWithTime(now)
+        .loneElement
+        .asInstanceOf[Work.Visible[Merged]]
+    mergedWork.data.items shouldBe empty
+  }
+
   // See https://github.com/wellcomecollection/platform/issues/6750
   describe("bibs that link the same Miro work") {
     def redirectsIn(result: Seq[Work[Merged]]) =

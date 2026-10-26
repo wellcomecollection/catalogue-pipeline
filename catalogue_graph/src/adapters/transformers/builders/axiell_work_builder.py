@@ -20,6 +20,7 @@ from adapters.transformers.axiell.production import (
 )
 from adapters.transformers.axiell.publish_to_web import (
     extract_publish_to_web,
+    is_marked_for_deletion,
     is_publishable,
 )
 from adapters.transformers.axiell.subjects import extract_subjects
@@ -69,10 +70,13 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
     """Work builder for Axiell (MARC XML) records."""
 
     def _is_suppressed(self) -> bool:
-        # The publish_to_web checkbox is the sole publish authority (collections
-        # decision). Checked before anything touching collection_path: newly
-        # created records legitimately lack a RefNo, and suppressing them must
-        # not require one.
+        # Both checkboxes are collections decisions, checked before anything
+        # touching collection_path: newly created records legitimately lack a
+        # RefNo, and suppressing them must not require one.
+        if is_marked_for_deletion(self.record):
+            return True
+
+        # Otherwise the publish_to_web checkbox is the sole publish authority.
         if not is_publishable(self.record):
             # An absent or unrecognised marker is a stylesheet/harvest anomaly,
             # not a cataloguer's 'no': log it so a regression that stops

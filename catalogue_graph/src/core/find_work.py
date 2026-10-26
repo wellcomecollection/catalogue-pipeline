@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Iterable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from itertools import batched
 from typing import Any
 
 import structlog
 from pydantic import BaseModel
 
-from models.find_work import FindWorkEvent, PartitionRef
+from models.find_work import PartitionRef
 from utils.aws import pydantic_to_s3_json
 
 logger = structlog.get_logger(__name__)
@@ -55,17 +56,50 @@ def normalise_lambda_input(event: dict, defaults: dict[str, Any]) -> dict:
     return data
 
 
+def plan_partitions[PartitionT: BaseModel](
+    ids: Iterable[str],
+    partition_size: int,
+    build_partition: Callable[[list[str], int], PartitionT],
+) -> list[PartitionT]:
+    """Slice ids into worker events of at most partition_size ids each."""
+    return [
+        build_partition(list(chunk), index)
+        for index, chunk in enumerate(batched(ids, partition_size))
+    ]
+
+
+def group_by_weight(
+    weighted_ids: Iterable[tuple[str, int]], max_weight: int, max_items: int
+) -> list[list[str]]:
+    """Pack ids, in order, into groups weighing at most max_weight and holding at
+    most max_items; an id heavier than max_weight gets a group of its own."""
+    groups: list[list[str]] = []
+    current: list[str] = []
+    current_weight = 0
+    for item_id, weight in weighted_ids:
+        if current and (
+            current_weight + weight > max_weight or len(current) >= max_items
+        ):
+            groups.append(current)
+            current, current_weight = [], 0
+        current.append(item_id)
+        current_weight += weight
+    if current:
+        groups.append(current)
+    return groups
+
+
 def write_partitions_to_s3(
     partitions: Sequence[BaseModel],
     counts: Sequence[int],
-    event: FindWorkEvent,
+    partition_s3_uri: Callable[[int], str],
 ) -> list[PartitionRef]:
-    """Write each partition to S3 under the event's scope-keyed prefix and
+    """Write each partition to the S3 URI the caller derives from its index and
     return small refs for the state machine's Map to iterate."""
 
     def write_one(indexed: tuple[int, BaseModel]) -> PartitionRef:
         index, partition = indexed
-        s3_uri = event.partition_s3_uri(index)
+        s3_uri = partition_s3_uri(index)
         pydantic_to_s3_json(partition, s3_uri)
         return PartitionRef(s3_uri=s3_uri, count=counts[index])
 
@@ -75,6 +109,6 @@ def write_partitions_to_s3(
     logger.info(
         "Wrote partitions to S3",
         partition_count=len(refs),
-        s3_prefix="/".join(event.s3_prefix_parts),
+        s3_prefix=partition_s3_uri(0).rsplit("/", 1)[0],
     )
     return refs
