@@ -454,6 +454,13 @@ class ItemsRuleTest
     }
   }
 
+  it("drops the stub item from a born-digital Calm work") {
+    val bornDigitalCalmWork =
+      calmIdentifiedWork().format(Format.ArchivesDigital)
+
+    ItemsRule.merge(bornDigitalCalmWork, Nil).data shouldBe empty
+  }
+
   it("keeps the stub item on an Axiell work that is not born-digital") {
     ItemsRule.merge(axiellWork, Nil).data shouldBe axiellWork.data.items
   }

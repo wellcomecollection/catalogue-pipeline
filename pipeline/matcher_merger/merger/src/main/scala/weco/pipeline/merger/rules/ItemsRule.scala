@@ -57,7 +57,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
   /** The target's own items when no source replaces them. */
   private def unmergedItems(target: Work.Visible[Identified]): FieldData =
-    if (bornDigitalAxiellStubWork(target)) Nil else target.data.items
+    if (bornDigitalArchiveStubWork(target)) Nil else target.data.items
 
   /** When there is only 1 Sierra item, we assume that the METS work item is
     * associated with that and merge the locations onto the Sierra item.
