@@ -30,6 +30,24 @@ Feature: Axiell work format
     Then the work's format.id is "hdig"
     And the work's format.label is "Born-digital archives"
 
+  Scenario: 655 with "Sound - Non-digital" yields Archives and manuscripts
+    Given the MARC record has a 655 field with indicators " " "7" with subfield "a" value "Sound - Non-digital" and subfield "2" value "local"
+    When I transform the MARC record
+    Then the work's format.id is "h"
+    And the work's format.label is "Archives and manuscripts"
+
+  Scenario: 655 with "Moving Image - Non-digital" yields Archives and manuscripts
+    Given the MARC record has a 655 field with indicators " " "7" with subfield "a" value "Moving Image - Non-digital" and subfield "2" value "local"
+    When I transform the MARC record
+    Then the work's format.id is "h"
+    And the work's format.label is "Archives and manuscripts"
+
+  Scenario: 655 with "Archives - Hybrid" yields Archives and manuscripts
+    Given the MARC record has a 655 field with indicators " " "7" with subfield "a" value "Archives - Hybrid" and subfield "2" value "local"
+    When I transform the MARC record
+    Then the work's format.id is "h"
+    And the work's format.label is "Archives and manuscripts"
+
   Scenario: 655 with another local term yields Archives and manuscripts
     Given the MARC record has a 655 field with indicators " " "7" with subfield "a" value "Photographs" and subfield "2" value "local"
     When I transform the MARC record
