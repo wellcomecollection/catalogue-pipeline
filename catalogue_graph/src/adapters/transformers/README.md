@@ -248,9 +248,11 @@ Transformer-side behaviour to be aware of:
   works without items. On a fresh environment, run one enrichment pass before transforming.
 - An instance that has not been enriched emits no items; the transformer never guesses item identity from MARC 952.
 - Transformation never calls FOLIO. A full reindex joins whatever is already in the inventory store.
-- Items suppressed from discovery are left off the work. Every other item gets a physical location and an access
-  condition from `adapters/transformers/folio/` (`locations.py` and `access_conditions.py`), following the mappings in
-  [docs/folio](../../../docs/folio/). The access decision table itself is data, in `folio/access_rules/rules.csv`.
+- Items suppressed from discovery are left off the work. Every other item whose location resolves gets a physical
+  location and an access condition from `adapters/transformers/folio/` (`locations.py` and `access_conditions.py`),
+  following the mappings in [docs/folio](../../../docs/folio/). An item with an unmapped location, a no-location code
+  or an ambiguous bound-with host gets neither, and keeps any display note as its note. The access decision table
+  itself is data, in `folio/access_rules/rules.csv`.
 
 See [Item enrichment](../extractors/oai_pmh/folio/README.md#item-enrichment) in the FOLIO adapter README for the full
 design, including how the inventory store is populated and kept current.
