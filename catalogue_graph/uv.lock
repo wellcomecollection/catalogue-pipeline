@@ -152,6 +152,7 @@ dependencies = [
     { name = "types-python-dateutil" },
     { name = "types-requests" },
     { name = "types-tabulate" },
+    { name = "tzdata" },
     { name = "yoyo-migrations" },
 ]
 
@@ -203,6 +204,7 @@ requires-dist = [
     { name = "types-python-dateutil" },
     { name = "types-requests" },
     { name = "types-tabulate" },
+    { name = "tzdata", specifier = ">=2025.2" },
     { name = "yoyo-migrations", specifier = ">=8.2.0" },
 ]
 
