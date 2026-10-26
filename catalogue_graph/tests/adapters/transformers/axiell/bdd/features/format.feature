@@ -1,6 +1,7 @@
 Feature: Axiell work format
   The format field is derived from 655 $a where ind2=7 and $2=local.
-  If "Archives - Digital" appears, the work is "Born-digital archives";
+  If "Archives - Digital", "Sound - Digital" or "Moving Image - Digital" appears,
+  the work is "Born-digital archives";
   otherwise it defaults to "Archives and manuscripts".
 
   Background:
@@ -13,6 +14,18 @@ Feature: Axiell work format
 
   Scenario: 655 with "Archives - Digital" yields Born-digital archives
     Given the MARC record has a 655 field with indicators " " "7" with subfield "a" value "Archives - Digital" and subfield "2" value "local"
+    When I transform the MARC record
+    Then the work's format.id is "hdig"
+    And the work's format.label is "Born-digital archives"
+
+  Scenario: 655 with "Sound - Digital" yields Born-digital archives
+    Given the MARC record has a 655 field with indicators " " "7" with subfield "a" value "Sound - Digital" and subfield "2" value "local"
+    When I transform the MARC record
+    Then the work's format.id is "hdig"
+    And the work's format.label is "Born-digital archives"
+
+  Scenario: 655 with "Moving Image - Digital" yields Born-digital archives
+    Given the MARC record has a 655 field with indicators " " "7" with subfield "a" value "Moving Image - Digital" and subfield "2" value "local"
     When I transform the MARC record
     Then the work's format.id is "hdig"
     And the work's format.label is "Born-digital archives"

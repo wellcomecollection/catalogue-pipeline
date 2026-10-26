@@ -24,11 +24,18 @@ def extract_raw_formats(record: Record) -> list[str]:
     )
 
 
+BORN_DIGITAL_CATEGORIES = {
+    "Archives - Digital",
+    "Sound - Digital",
+    "Moving Image - Digital",
+}
+
+
 def extract_format(record: Record) -> Format:
     # Unlike CALM records, Axiell records can have more than one format
     raw_formats = extract_raw_formats(record)
 
-    if "Archives - Digital" in raw_formats:
+    if BORN_DIGITAL_CATEGORIES.intersection(raw_formats):
         return ArchivesDigital
 
     return ArchivesAndManuscripts
