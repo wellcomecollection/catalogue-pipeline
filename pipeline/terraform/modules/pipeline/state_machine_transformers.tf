@@ -160,6 +160,13 @@ module "transformer" {
         IntervalSeconds = 2
         MaxAttempts     = 3
         BackoffRate     = 2.0
+      },
+      # Timeouts, OOM and crashes; a partition re-run is idempotent. One retry,
+      # as a partition that genuinely times out would spend 600 s on each.
+      {
+        ErrorEquals     = ["Lambda.Unknown"]
+        IntervalSeconds = 5
+        MaxAttempts     = 1
       }
     ]
   }
