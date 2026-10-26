@@ -43,9 +43,6 @@ def upsert_from_payloads(
     meta = mapped.meta
     source_id: str = meta.source_id
     deleted: bool = meta.deleted
-    instance_hrid: str = meta.instance_hrid
-    holdings_hrid: str = meta.holdings_hrid
-    item_hrid: str = meta.item_hrid
 
     result = UpsertResult(
         source_id=source_id,
@@ -55,6 +52,9 @@ def upsert_from_payloads(
     created_instance_id: str | None = None
     created_holdings_id: str | None = None
 
+    # Every id, and each parent link (holdings.instanceId,
+    # item.holdingsRecordId), is derived from the AxC GUID by the builders, so
+    # nothing here depends on what an earlier step returned, dry run included.
     try:
         # ── Instance ────────────────────────────────────────────────────────
         action, instance_id = _upsert_entity(
@@ -62,35 +62,27 @@ def upsert_from_payloads(
             search_path="/inventory/instances",
             list_key="instances",
             write_path_prefix="/inventory/instances",
-            hrid=instance_hrid,
+            folio_id=mapped.instance.id,
             payload=mapped.instance.model_dump(exclude_none=True),
             dry_run=dry_run,
         )
         result.instance = EntityResult(action=action, id=instance_id)
         if action == "create" and not dry_run:
             created_instance_id = instance_id
-        if dry_run:
-            instance_id = f"dry-run:{instance_hrid}"
 
         # ── Holdings ────────────────────────────────────────────────────────
-        holdings_payload = {
-            **mapped.holdings.model_dump(exclude_none=True),
-            "instanceId": instance_id,
-        }
         action, holdings_id = _upsert_entity(
             folio,
             search_path="/holdings-storage/holdings",
             list_key="holdingsRecords",
             write_path_prefix="/holdings-storage/holdings",
-            hrid=holdings_hrid,
-            payload=holdings_payload,
+            folio_id=mapped.holdings.id,
+            payload=mapped.holdings.model_dump(exclude_none=True),
             dry_run=dry_run,
         )
         result.holdings = EntityResult(action=action, id=holdings_id)
         if action == "create" and not dry_run:
             created_holdings_id = holdings_id
-        if dry_run:
-            holdings_id = f"dry-run:{holdings_hrid}"
 
         # ── Item ────────────────────────────────────────────────────────────
         if deleted:
@@ -99,14 +91,11 @@ def upsert_from_payloads(
                 search_path="/inventory/items",
                 list_key="items",
                 write_path_prefix="/inventory/items",
-                hrid=item_hrid,
+                folio_id=mapped.item.id,
                 dry_run=dry_run,
             )
         else:
-            item_payload = {
-                **mapped.item.model_dump(exclude_none=True),
-                "holdingsRecordId": holdings_id,
-            }
+            item_payload = mapped.item.model_dump(exclude_none=True)
             # Resolve item note types if ref_cache is available
             if ref_cache:
                 item_payload = _resolve_item_note_types(item_payload, ref_cache)
@@ -115,7 +104,7 @@ def upsert_from_payloads(
                 search_path="/inventory/items",
                 list_key="items",
                 write_path_prefix="/inventory/items",
-                hrid=item_hrid,
+                folio_id=mapped.item.id,
                 payload=item_payload,
                 dry_run=dry_run,
                 stray_notes=result.stray_location_notes,

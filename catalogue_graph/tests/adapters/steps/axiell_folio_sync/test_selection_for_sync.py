@@ -60,7 +60,7 @@ def test_select_and_build_applies_the_same_gates() -> None:
 
     unflagged = (
         "<record>"
-        "<controlfield tag='001'>guid-1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
         "<datafield tag='984'><subfield code='b'>215/HOME</subfield></datafield>"

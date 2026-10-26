@@ -60,19 +60,23 @@ strips the `(AltRefNo)` prefix, using the same prefix parsing as
 `transformers.marc.other_identifiers.format_field`. A record with no `(AltRefNo)`
 035 gets no Local identifier at all, rather than being given the wrong one.
 
-## Shared HRIDs
+## Record ids
 
-Each of the three records gets a predictable HRID built from the AxC GUID (MARC
-`001`). This is what links the three records together and lets deletion facts
-find the right FOLIO records later.
+Each of the three records gets a FOLIO `id` from the AxC GUID (MARC `001`),
+which is itself a UUID (`config.py`). The sync sends the id on create and looks
+the record up by it on every later run, and deletion facts, which carry only the
+GUID, derive the same ids. The GUID is parsed as a UUID, so case and surrounding
+whitespace do not matter, and a `001` that is not a UUID fails the record.
 
-The AxC GUID is a 36-character UUID, so an HRID is 45 to 49 characters.
+| Record | `id` |
+| --- | --- |
+| Instance | the GUID itself |
+| Holdings | `uuid5(<001>, "holdings")` |
+| Item | `uuid5(<001>, "item")` |
 
-| Record | HRID pattern | Example |
-| --- | --- | --- |
-| Instance | `AxC-instance-<001>` | `AxC-instance-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
-| Holdings | `AxC-holding-<001>` | `AxC-holding-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
-| Item | `AxC-item-<001>` | `AxC-item-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
+The sync sends no `hrid`; FOLIO generates it. The names `holdings` and `item`
+must never change: a different name gives every holdings or item a new id, and
+the sync would create duplicates of everything it has written.
 
 ## Instance
 
@@ -82,7 +86,7 @@ FOLIO, with no linked SRS MARC record.
 
 | FOLIO field | Value | Source | Notes |
 | --- | --- | --- | --- |
-| `hrid` | `AxC-instance-<001>` | MARC `001` (GUID) | Required. |
+| `id` | Instance id, see [Record ids](#record-ids) | MARC `001` (GUID) | Required. |
 | `title` | Title text | MARC `245 $a` | Required. A mapping error is raised if it is missing. |
 | `source` | `FOLIO` | Constant | |
 | `instanceTypeId` | FOLIO instance-type UUID | Constant, via `RefCache.instance_type_id()` | |
@@ -96,8 +100,8 @@ contract.
 
 | FOLIO field | Value | Source | Notes |
 | --- | --- | --- | --- |
-| `hrid` | `AxC-holding-<001>` | MARC `001` | Required. |
-| `instanceId` | Parent instance UUID | Injected by the upsert orchestrator | Not set when the payload is built. |
+| `id` | Holdings id, see [Record ids](#record-ids) | MARC `001` | Required. |
+| `instanceId` | Parent instance id | MARC `001` | Derived the same way as the instance's own id. |
 | `sourceId` | Holdings-source UUID | Constant, via `resolve_holdings_source` (default `MARC`) | |
 | `permanentLocationId` | FOLIO location UUID | MARC `984 $b` (AxC **normal** location), via `resolve_location` | The location rules below apply. No default: a missing `984 $b`, or a location the tenant does not know, fails the record with a `MappingError`. |
 
@@ -107,8 +111,8 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 
 | FOLIO field | Value | Source | Notes |
 | --- | --- | --- | --- |
-| `hrid` | `AxC-item-<001>` | MARC `001` | Required. |
-| `holdingsRecordId` | Parent holdings UUID | Injected by the upsert orchestrator | Not set when the payload is built. |
+| `id` | Item id, see [Record ids](#record-ids) | MARC `001` | Required. |
+| `holdingsRecordId` | Parent holdings id | MARC `001` | Derived the same way as the holdings' own id. |
 | `status.name` | Item-status name | MARC `506 $f` (access category), via `ACCESS_ITEM_STATUS` (default `Unavailable`) | Table value is final; statuses are a fixed FOLIO enum, not tenant reference data. **Create-only**: mod-circulation owns the field once the item exists, so updates send FOLIO's own status back and an AxC access change does not propagate. See `_CREATE_ONLY_FIELDS` in `upsert/entities.py`. |
 | `materialType.id` | Material-type UUID | MARC `655 $a`, via `resolve_material_type` | Uses the normalization table below. No default: an absent or unmapped category fails the record. |
 | `permanentLoanType.id` | Loan-type UUID | MARC `540 $a` (use restriction), via `USE_RESTRICTION_LOAN_TYPE` and `resolve_loan_type` (default `Unavailable`) | See the loan type table below. An absent or unlisted term takes the default rather than failing the record. |
@@ -286,7 +290,7 @@ Taken from `config.FIELDS`.
 
 | CanonicalRecord field | MARC spec | Feeds |
 | --- | --- | --- |
-| `source_id` | `001` | HRIDs, `meta.source_id` |
+| `source_id` | `001` | record ids, `meta.source_id` |
 | `title` | `245$a` | instance title |
 | `object_number` | `035$a(AltRefNo)` | local identifier |
 | `object_category` | `655$a` | material type |

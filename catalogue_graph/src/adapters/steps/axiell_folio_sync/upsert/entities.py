@@ -1,5 +1,5 @@
 """
-Single-entity FOLIO operations: resolve-by-hrid, create/update, suppress, delete.
+Single-entity FOLIO operations: resolve-by-id, create/update, suppress, delete.
 
 These are the low-level building blocks shared by the two write paths — the
 create/update orchestration in ``writer.py`` and the guid-cascade reconciler in
@@ -59,7 +59,7 @@ def _payload_for_update(existing: dict, payload: dict) -> dict:
     fetched record that carries none, because these fields are required on update
     too and dropping the key outright would make the PUT invalid.
 
-    In practice the hrid lookup returns the whole record, since
+    In practice the id lookup returns the whole record, since
     ``GET /inventory/items`` answers with full ``item.json`` objects, so the
     backstop should never be the one that applies.
     """
@@ -147,12 +147,16 @@ def _stray_location_notes(existing: list) -> list[str]:
     ]
 
 
-def _find_by_hrid(
-    folio: FolioInventoryOps, path: str, hrid: str, list_key: str
+def _find_by_id(
+    folio: FolioInventoryOps, path: str, folio_id: str, list_key: str
 ) -> dict | None:
-    """Return the first FOLIO record matching hrid via CQL, or None.
+    """Return the FOLIO record with this id via CQL, or None.
 
-    ``None`` means an *empty result* — no record has this hrid. A lookup *failure*
+    A CQL search rather than ``GET {path}/{id}``, because the inventory client
+    raises on every 4xx: a missing record would then be indistinguishable from
+    an outage. A search answers a missing record with an empty list instead.
+
+    ``None`` means an *empty result* — no record has this id. A lookup *failure*
     (network/FOLIO error) is a different thing and always propagates: it must never
     be collapsed into "not found", because both callers key an irreversible
     decision on absence. The delete cascade would report a still-live record as a
@@ -161,7 +165,7 @@ def _find_by_hrid(
     callers already wrap this in a try/except that records the error and either
     aborts the cascade or rolls back, so a raised lookup slots straight in.
     """
-    result = folio.get(path, {"query": f'hrid=="{hrid}"', "limit": 1})
+    result = folio.get(path, {"query": f'id=="{folio_id}"', "limit": 1})
     records = result.get(list_key, [])
     return records[0] if records else None
 
@@ -172,10 +176,10 @@ def _suppress_entity(
     search_path: str,
     list_key: str,
     write_path_prefix: str,
-    hrid: str,
+    folio_id: str,
     dry_run: bool,
 ) -> EntityResult:
-    """Resolve an entity by hrid and set its suppression flags.
+    """Resolve an entity by id and set its suppression flags.
 
     discoverySuppress is set on every entity; staffSuppress only on instances,
     which are the only FOLIO inventory entity with that field. holdings-storage
@@ -184,14 +188,14 @@ def _suppress_entity(
 
     Not-found → ``skip`` (the record is already gone). Idempotent: re-suppressing
     a record whose flags are already true is a harmless PUT, so redelivered
-    deletion facts do not misbehave. A failed hrid lookup is not "already gone" —
-    it propagates (see :func:`_find_by_hrid`) so the cascade records it and aborts.
+    deletion facts do not misbehave. A failed id lookup is not "already gone":
+    it propagates (see :func:`_find_by_id`) so the cascade records it and aborts.
     """
-    existing = _find_by_hrid(folio, search_path, hrid, list_key)
+    existing = _find_by_id(folio, search_path, folio_id, list_key)
     if not existing:
         return EntityResult(action="skip")
 
-    folio_id: str = existing["id"]
+    folio_id = existing["id"]
     if not dry_run:
         suppression: dict[str, Any] = {"discoverySuppress": True}
         if write_path_prefix in _STAFF_SUPPRESS_PATHS:
@@ -200,7 +204,7 @@ def _suppress_entity(
             f"{write_path_prefix}/{folio_id}",
             {**_strip_readonly(existing), **suppression},
         )
-        logger.info("suppressed", hrid=hrid, folio_id=folio_id)
+        logger.info("suppressed", folio_id=folio_id)
     return EntityResult(action="suppress", id=folio_id)
 
 
@@ -210,28 +214,28 @@ def _delete_entity(
     search_path: str,
     list_key: str,
     write_path_prefix: str,
-    hrid: str,
+    folio_id: str,
     dry_run: bool,
 ) -> EntityResult:
-    """Resolve an entity by hrid and hard-delete it.
+    """Resolve an entity by id and hard-delete it.
 
     Not-found → ``skip`` (already gone); the inventory client also treats a 404
     on the DELETE as a no-op, so this is idempotent under redelivery/races. A
     non-404 error (e.g. FOLIO 400 because a child still references this record)
     raises, which aborts the parent's delete in :func:`delete_by_guid` — that is
     intentional, since deleting a parent while a child remains would orphan it. A
-    failed hrid lookup raises for the same reason (see :func:`_find_by_hrid`), so a
+    failed id lookup raises for the same reason (see :func:`_find_by_id`), so a
     swallowed outage cannot let the cascade proceed to the holdings/instance delete
     while the item may still exist.
     """
-    existing = _find_by_hrid(folio, search_path, hrid, list_key)
+    existing = _find_by_id(folio, search_path, folio_id, list_key)
     if not existing:
         return EntityResult(action="skip")
 
-    folio_id: str = existing["id"]
+    folio_id = existing["id"]
     if not dry_run:
         folio.delete(f"{write_path_prefix}/{folio_id}")
-        logger.info("deleted", hrid=hrid, folio_id=folio_id)
+        logger.info("deleted", folio_id=folio_id)
     return EntityResult(action="delete", id=folio_id)
 
 
@@ -266,24 +270,28 @@ def _upsert_entity(
     search_path: str,
     list_key: str,
     write_path_prefix: str,
-    hrid: str,
+    folio_id: str,
     payload: dict,
     dry_run: bool,
     stray_notes: list[str] | None = None,
-) -> tuple[str, str | None]:
+) -> tuple[str, str]:
     """
-    Resolve an entity by hrid and create or update it.
+    Resolve an entity by id and create or update it.
+
+    ``folio_id`` is the id derived from the AxC GUID. The payload carries the
+    same id, so a create keeps it and no re-resolve is needed afterwards.
 
     ``stray_notes`` is an optional sink: any existing administrative note that
     mentions Axiell but does not carry our label is appended to it, for the
     caller to record. Populated on dry runs too, so a dry run surfaces the same
     warning as a real one.
 
-    Returns (action, folio_id).
+    Returns (action, folio_id). On a dry run the id is the one a create would
+    use.
     """
-    existing = _find_by_hrid(folio, search_path, hrid, list_key)
+    existing = _find_by_id(folio, search_path, folio_id, list_key)
     if existing:
-        folio_id: str | None = existing["id"]
+        folio_id = existing["id"]
         existing_notes = existing.get("administrativeNotes") or []
         # Only meaningful for the entity the sync actually writes notes to.
         if "administrativeNotes" in payload:
@@ -291,7 +299,6 @@ def _upsert_entity(
             if strays:
                 logger.warning(
                     "stray_location_notes",
-                    hrid=hrid,
                     folio_id=folio_id,
                     notes=strays,
                 )
@@ -312,25 +319,23 @@ def _upsert_entity(
                     existing.get("notes") or [], payload["notes"]
                 )
             folio.put(f"{write_path_prefix}/{folio_id}", merged)
-            logger.info("updated hrid=%s folio_id=%s", hrid, folio_id)
+            logger.info("updated folio_id=%s", folio_id)
         return "update", folio_id
-    else:
-        if not dry_run:
-            created = folio.post(write_path_prefix, payload)
-            folio_id = created.get("id") if isinstance(created, dict) else None
-            if not folio_id:
-                # Some FOLIO inventory POSTs return 201 with an empty body — the
-                # new id comes back only in the Location header, which the
-                # folio_post callable drops. Re-resolve by the hrid we just wrote.
-                refetched = _find_by_hrid(folio, search_path, hrid, list_key)
-                folio_id = refetched["id"] if refetched else None
-            if not folio_id:
-                raise RuntimeError(
-                    f"created {write_path_prefix} hrid={hrid} but could not resolve its id"
-                )
-            logger.info("created hrid=%s folio_id=%s", hrid, folio_id)
-            return "create", folio_id
-        return "create", None
+
+    if not dry_run:
+        # Some FOLIO inventory POSTs return 201 with an empty body, but the id is
+        # the one the payload carries, so the response is not needed for it.
+        # When a body does come back, its id must be ours: a record FOLIO filed
+        # under another id could never be found again, and every later run would
+        # create another one.
+        created = folio.post(write_path_prefix, payload)
+        created_id = created.get("id") if isinstance(created, dict) else None
+        if created_id and created_id != folio_id:
+            raise RuntimeError(
+                f"created {write_path_prefix} with id {created_id}, expected {folio_id}"
+            )
+        logger.info("created folio_id=%s", folio_id)
+    return "create", folio_id
 
 
 def _best_effort_delete(

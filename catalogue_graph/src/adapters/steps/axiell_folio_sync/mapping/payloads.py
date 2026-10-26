@@ -42,7 +42,9 @@ class Identifier(BaseModel):
 
 class Instance(BaseModel):
     model_config = ConfigDict(extra="forbid")  # guard against typo'd keys in our code
-    hrid: str
+    # Derived from the AxC GUID (see config._instance_id) and sent on create. There
+    # is no hrid field: FOLIO generates it.
+    id: str
     title: str
     source: str = "FOLIO"
     instanceTypeId: str
@@ -51,16 +53,16 @@ class Instance(BaseModel):
 
 class Holdings(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    hrid: str
-    instanceId: str | None = None  # injected by the upsert orchestrator
+    id: str
+    instanceId: str  # the instance's derived id
     sourceId: str
     permanentLocationId: str
 
 
 class Item(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    hrid: str
-    holdingsRecordId: str | None = None  # injected by the upsert orchestrator
+    id: str
+    holdingsRecordId: str  # the holdings record's derived id
     status: Status = Field(default_factory=Status)
     materialType: IdRef
     permanentLoanType: IdRef
@@ -76,9 +78,6 @@ class PayloadMeta(BaseModel):
     """Metadata attached to a mapped payload set."""
 
     source_id: str
-    instance_hrid: str
-    holdings_hrid: str
-    item_hrid: str
     mapping_version: str
     deleted: bool = False
 

@@ -38,7 +38,7 @@ from adapters.utils.axiell_changeset_reader import SupersededGuid
 # 984 $b (normal location — required, the shelf location FOLIO is given).
 SELECTED = (
     "<record>"
-    "<controlfield tag='001'>guid-1</controlfield>"
+    "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
     "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
     "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
     "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
@@ -49,7 +49,7 @@ SELECTED = (
 # Item-level with a title but no 980 $a harvest flag -> not selected.
 UNSELECTED = (
     "<record>"
-    "<controlfield tag='001'>guid-2</controlfield>"
+    "<controlfield tag='001'>00000000-0000-4000-8000-000000000002</controlfield>"
     "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
     "<datafield tag='245'><subfield code='a'>Skip me</subfield></datafield>"
     "<datafield tag='655'><subfield code='a'>Archives - Non-digital</subfield></datafield>"
@@ -88,7 +88,7 @@ def _row(row_id: str, content: str) -> dict[str, Any]:
 
 
 def _folio_get(path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
-    # Nothing exists yet -> every hrid lookup returns no records -> plan "create".
+    # Nothing exists yet -> every id lookup returns no records -> plan "create".
     return {}
 
 
@@ -619,7 +619,10 @@ def test_deletions_suppress_and_are_reported() -> None:
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1"), _superseded("g2")],
+        deletions=[
+            _superseded("00000000-0000-4000-8000-000000000001"),
+            _superseded("00000000-0000-4000-8000-000000000002"),
+        ],
     )
 
     assert resp.total_deletions == 2
@@ -649,7 +652,7 @@ def test_deletion_failure_recorded_as_error_without_aborting() -> None:
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1")],
+        deletions=[_superseded("00000000-0000-4000-8000-000000000001")],
     )
 
     assert resp.counts["deletions"] == 1
@@ -703,7 +706,7 @@ def test_hard_delete_mode_deletes_instead_of_suppressing() -> None:
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1")],
+        deletions=[_superseded("00000000-0000-4000-8000-000000000001")],
         hard_delete=True,
     )
 
@@ -735,7 +738,7 @@ def test_partial_hard_delete_cascade_still_counts_the_executed_child() -> None:
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1")],
+        deletions=[_superseded("00000000-0000-4000-8000-000000000001")],
         hard_delete=True,
     )
 
@@ -771,7 +774,7 @@ def test_hard_delete_failure_is_reported_under_delete_stage(
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1")],
+        deletions=[_superseded("00000000-0000-4000-8000-000000000001")],
         hard_delete=True,
         manifest_bucket="bucket-1",
     )
@@ -846,7 +849,7 @@ def test_object_number_extracts_the_altrefno_035_stripped() -> None:
 
     xml = (
         "<record>"
-        "<controlfield tag='001'>g1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         "<datafield tag='035'><subfield code='a'>(accession number)Acc123</subfield></datafield>"
         "<datafield tag='035'><subfield code='a'>(AltRefNo)SA/BSI/A/1</subfield></datafield>"
         "<datafield tag='035'><subfield code='a'>(Bibliographic Number)b12345</subfield></datafield>"
@@ -862,7 +865,7 @@ def test_object_number_absent_when_no_altrefno_035() -> None:
 
     xml = (
         "<record>"
-        "<controlfield tag='001'>g1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         "<datafield tag='035'><subfield code='a'>(accession number)Acc123</subfield></datafield>"
         "<datafield tag='035'><subfield code='a'>(Bibliographic Number)b12345</subfield></datafield>"
         "</record>"
@@ -877,7 +880,11 @@ def test_object_number_maps_to_local_identifier() -> None:
         build_instance,
     )
 
-    rec = CanonicalRecord(source_id="g1", title="A Title", object_number=" AxC-12345 ")
+    rec = CanonicalRecord(
+        source_id="00000000-0000-4000-8000-000000000001",
+        title="A Title",
+        object_number=" AxC-12345 ",
+    )
     instance = build_instance(rec, FakeRefCache())  # type: ignore[arg-type]
 
     assert instance.identifiers is not None
@@ -896,7 +903,9 @@ def test_no_object_number_yields_no_identifiers() -> None:
 
     for object_number in (None, "", "   "):
         rec = CanonicalRecord(
-            source_id="g1", title="A Title", object_number=object_number
+            source_id="00000000-0000-4000-8000-000000000001",
+            title="A Title",
+            object_number=object_number,
         )
         instance = build_instance(rec, FakeRefCache())  # type: ignore[arg-type]
         assert instance.identifiers is None

@@ -13,7 +13,8 @@ maps today, see
 | **Loan type** | **Implemented** (mapping version 2.8.0). Derived from `540$a` (use restriction): `Can circulate` for `Online request` and `Restricted` only, `Unavailable` for the rest, including an absent or unlisted term. No access-category ceiling. | [Section 2](#2-loan-type-implemented), [questions 4 and 5](#loan-type) |
 | **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
 | **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
-| **Identifier format** (HRID) | **Implemented.** A 45 to 49 character string built from the AxC GUID. Whether that format is acceptable is open, and it cannot change after the first run. | [Question 10](#identifiers) |
+| **Statistical code** (access) | **Proposed, not implemented.** The sync writes none, so a synced item no status row catches reaches the access decision table's fallback. Proposal: one code from the migrated Sierra OPAC message vocabulary, taken from `506$f` (access category) where it names a coded state, otherwise from `540$a` (use restriction). | [Section 5](#5-statistical-code-proposed-not-implemented), [questions 12 and 13](#statistical-code) |
+| **Record identity** (HRID) | **Implemented in part** (mapping version 3.0.0). Records are found by an id derived from the AxC GUID (the GUID itself for the instance, a `uuid5` in it for the holdings and item), and the sync sends no HRID, so FOLIO generates it. Still to do: the GUID in `formerIds` on holdings and items, and the `AXIELL` statistical code. Tracked in wellcomecollection/platform#6805. | [Question 10](#identifiers) |
 | **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | [Question 9](#material-type-and-selection) |
 | **Deletion** of a Collect record | **Implemented, both ways.** Suppresses by default; `HARD_DELETE` switches it to an irreversible delete. Which one is policy, not development. | [Question 11](#deletion) |
 
@@ -42,6 +43,8 @@ and it is section 1.**
 | Location rule coverage | Same table, applying `LOCATION_RULES` to the leading code of every selectable `984$b` (normal location). Pure code, no FOLIO call | 2026-10-13 |
 | `540$a` and the loan-type mapping | Same table, applying the mapping in section 2 to every selectable record and cross-tabulating the result against `506$f`. Confirms 0 multi-valued records and the eight-term vocabulary | 2026-10-13 |
 | FOLIO reference data | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
+| Record identity | GUID format from the first 2,000 adapter rows (UUIDv4 in every `001`). Client-supplied ids and FOLIO-generated hrids on the dev sandbox (instance, holdings, item) and on prod (one instance, created then deleted). `AXIELL` code on the sandbox only. See [axiell-folio-record-identity.md](axiell-folio-record-identity.md) | 2026-10-20 |
+| Statistical code vocabulary | [decision-table.md](folio/access-conditions/decision-table.md) (platform#6589), from the prod tenant pull | 2026-10-01 |
 | AxC to MARC | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
 
 Counts are item-level only (record level `351$c == ITEM`), so percentages are of
@@ -293,7 +296,115 @@ should be confirmed against this tenant's FOLIO version.
 
 ---
 
-## 5. Decisions needed from Collection Information
+## 5. Statistical code: proposed, not implemented
+
+The access condition decision table for migrated Sierra items
+([decision-table.md](folio/access-conditions/decision-table.md), platform#6589)
+decides most outcomes on the item's statistical code, which is where the
+migration put the Sierra OPAC message, one code per value. The sync writes no
+such code, so a synced item that no status row catches reaches the table's
+`fallback` row: not requestable, with the contact note. This section proposes
+sending one code from the same vocabulary, so synced items go through the same
+rows as migrated ones.
+
+### The vocabulary
+
+The codes the migration created, as the tenant held them on 2026-10-01, and the
+row of the decision table each one drives:
+
+| Statistical code | Row | What the reader sees |
+| --- | --- | --- |
+| `ONLINE REQUEST` | `online-request`, closed stores only | online request, open |
+| `RESTRICTED` | `restricted`, closed stores only | online request, restricted |
+| `BY APPOINTMENT` | `by-appointment` | manual request, by appointment |
+| `MANUAL REQUEST` | `manual-request` | manual request, with the manual-request note |
+| `SAFEGUARDED` | `safeguarded` | not requestable, safeguarded |
+| `DIGITISATION` | `digitisation` | not requestable, temporarily unavailable |
+| `OPEN SHELVES` | `open-shelves`, open shelves only | open shelves |
+| `UNAVAILABLE` | none: the table keys unavailability on the item status | |
+| `AVAILABLE` | none: Collection Information lists it as an incorrect mapping meant for bound-with items | |
+
+Two more codes have rows but were not in the tenant: `CLOSED` (`closed`: not
+requestable, closed) and `DONOR PERMISSION` (`donor-permission`: manual request,
+permission required). Both would need provisioning before the sync could send
+them.
+
+### The proposal
+
+One code per item. `506$f` (access category) decides it where it names a state
+the table holds as a code. Otherwise `540$a` (use restriction) decides it,
+because it is the AxC field closest to the OPAC message: it says how a reader
+gets the item, and its terms are mostly the OPAC message terms already. This is
+a proposal to Collection Information, not something they have agreed.
+
+| AxC value | Records | Statistical code | Item status | Row reached |
+| --- | ---: | --- | --- | --- |
+| `506$f` `CLOSED` | 9,819 | `CLOSED` | `Unavailable`, unchanged | `closed` |
+| `506$f` `SAFEGUARDED` | in 357 | `SAFEGUARDED` | `Available`, was `Restricted` | `safeguarded` |
+| `506$f` `PERMISSIONREQUIRED` | in 357 | `DONOR PERMISSION` | `Available`, was `Restricted` | `donor-permission` |
+| otherwise `540$a` `Online request` | 143,787 | `ONLINE REQUEST` | from `506$f`, as today | `online-request` |
+| `540$a` `Restricted` | 5,144 | `RESTRICTED` | as today | `restricted` |
+| `540$a` `By appointment` | 21,314 | `BY APPOINTMENT` | as today | `by-appointment` |
+| `540$a` `By approval` | 345 | `DONOR PERMISSION` | as today | `donor-permission` |
+| `540$a` `Manual request` | 1 | `MANUAL REQUEST` | as today | `manual-request` |
+| `540$a` `Unavailable` | 9,192 | `UNAVAILABLE` | as today | `unavailable` if the status is `Unavailable`, otherwise `not-circulating` (contact note) |
+| `540$a` `Missing`, `Deaccessioned`, absent | 4,109 | none | as today | the status row, otherwise `not-circulating` |
+
+Counts are per source value over the 183,892 selectable records, from the
+2026-10-12 and 2026-10-13 scans. They overlap, because the three `506$f` rows
+take precedence over `540$a` (343 of the 345 `By approval` records are
+`PERMISSIONREQUIRED`, for instance), and the distribution after that precedence
+has not been measured.
+
+The table's status rows (`Missing`, `Withdrawn`, `Unknown`) still come first, as
+they do for migrated items. A `MISSING` item keeps the code from its `540$a`
+underneath, as 1,847 migrated `ONLINE REQUEST` items do, so once staff find it
+and set it `Available` it reaches the right row with nothing else changed.
+
+**The item status change.** Collection Information keeps migrated restricted, by
+appointment, safeguarded and donor permission items `Available`, so that staff
+can still request them, and lets the code carry the restriction. The proposal
+moves the 357 `SAFEGUARDED` and `PERMISSIONREQUIRED` records from `Restricted`
+to `Available` to match. On the item-status gate nothing changes, since
+`Restricted` is pageable like `Available` (question 5). What changes is that
+synced and migrated items look the same to staff, and that `Restricted`, not yet
+confirmed on this FOLIO version, drops out of the mapping.
+
+### What it depends on
+
+- **Location type.** `online-request` and `restricted` match closed stores only.
+  `AxC Euston Road` and `AxC Constantine London West` sit in the `Axiell sync`
+  libraries, which the location-type rule does not cover;
+  [location-mapping.md](folio/location-mapping.md) proposes closed stores for
+  them, pending. Until that lands, every `ONLINE REQUEST` and `RESTRICTED`
+  synced item outside `AxC Deepstore` reaches `fallback`.
+- **Loan type.** `not-circulating` reads a loan type of `Unavailable`, but sits
+  below the restricted states, so the `Unavailable` loan type that mapping 2.8.0
+  gives `By appointment`, `By approval` and `Manual request` does not change
+  what the reader sees. It does differ from migrated items, which Collection
+  Information keeps `Can circulate` so staff can request them. That is part of
+  question 4.
+- **Material type.** The table has no row for the audiovisual material types, so
+  a `Sound - Digital` or `Moving Image - Digital` item with `Online request` in
+  `540$a` would be offered online, whatever its `non-requestable` material type
+  says. Question 7 decides the material type; question 12 asks whether the code
+  should follow it.
+- **The `AXIELL` marker.** Question 10 adds a second statistical code. The table
+  has to read the access code and ignore the marker, and on update the sync
+  replaces only the code it owns from the access vocabulary, keeping the rest,
+  by the same merge rule as question 10.
+- **It is not create-only.** Circulation does not own statistical codes, so the
+  sync can send the code on every run, and an AxC access change reaches the
+  reader through it even though the status does not. That narrows question 6
+  without settling it: an item created `CLOSED` keeps the status `Unavailable`,
+  and the table's `unavailable` row then shows it as temporarily unavailable
+  whatever its new code.
+
+**To decide:** questions 12 and 13.
+
+---
+
+## 6. Decisions needed from Collection Information
 
 ### Location
 
@@ -349,30 +460,36 @@ should be confirmed against this tenant's FOLIO version.
 
 ### Identifiers
 
-10. **Is the FOLIO identifier format acceptable?** Each record gets a
-    predictable hrid built from the Axiell GUID in `001` (record identifier),
-    which is always a 36-character UUID:
+10. **Is the FOLIO identifier format acceptable?** Decided: no. Each record
+    used to get an hrid built from the Axiell GUID in `001` (for example
+    `AxC-instance-<guid>`), and that hrid was how the sync found its own records.
+    Instead (ids implemented in mapping 3.0.0; `formerIds` and marker still to do):
 
-    | FOLIO record | hrid | Length |
-    | --- | --- | ---: |
-    | Instance | `AxC-instance-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 49 |
-    | Holdings | `AxC-holding-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 48 |
-    | Item | `AxC-item-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 45 |
+    | | Instance | Holdings | Item |
+    | --- | --- | --- | --- |
+    | hrid | Generated by FOLIO; the sync sends none | Same | Same |
+    | `id` (the lookup key) | the GUID itself | `uuid5(<guid>, "holdings")` | `uuid5(<guid>, "item")` |
+    | GUID label for staff | none: the `id` is the GUID | `formerIds` | `formerIds` |
+    | Synced marker | `AXIELL` statistical code | Same | Same |
 
-    The `AxC-` prefix identifies the record as synced from Axiell; the hrid also
-    includes the record type and Axiell GUID, making each record easy to find
-    and identify. The human-readable archival reference is carried, but
-    as the instance's `Local identifier` (for example `WMS/Amer.147`, from
-    `035$a(AltRefNo)`, the object number), not as the hrid.
+    The `id` is recomputed from the GUID on every run, so nothing is stored and
+    deletion facts, which carry only the GUID, resolve the same way.
+    The names `holdings` and `item` must never change after the first run.
+    The GUID labels and the marker are for staff, not lookup, so an edit in
+    FOLIO does not break the sync.
 
-    **This needs settling before the first production run.** The hrid is how the
-    sync finds its own records again on every later run, and how the reconciler
-    resolves deletions, so changing the format afterwards would orphan every
-    record already written.
+    The instance needs no GUID label, because its `id` is the GUID; the
+    planned "Axiell GUID" identifier type is dropped.
 
-    Two smaller points. The prefixes are inconsistent: `AxC-holding-` is
-    singular where FOLIO's entity is a holdings record. And whether FOLIO
-    constrains hrid length or character set has not been verified.
+    `identifiers`, `formerIds` and `statisticalCodeIds` are merged on update,
+    keeping entries the sync does not own. Today `identifiers` is replaced
+    whole, which drops any identifier added in FOLIO.
+
+    The archival reference stays as the instance's `Local identifier` (for
+    example `WMS/Amer.147`, from `035$a(AltRefNo)`). Prod holds no synced
+    records, so only the dev sandbox needs clearing before the switch. Detail
+    and evidence: [axiell-folio-record-identity.md](axiell-folio-record-identity.md);
+    work: wellcomecollection/platform#6805.
 
 ### Deletion
 
@@ -399,6 +516,17 @@ should be confirmed against this tenant's FOLIO version.
     reaches FOLIO at all; here, Collect sends an actual deletion fact and the
     sync acts on it.
 
+### Statistical code
+
+12. Confirm the statistical code mapping in section 5, in particular:
+    `By approval` and `PERMISSIONREQUIRED` to `DONOR PERMISSION`; `CLOSED` and
+    `SAFEGUARDED` in `506$f` taking precedence over `540$a`; and no code for
+    `Missing`, `Deaccessioned` or an absent `540$a`. Should digital audiovisual
+    material with `Online request` get a non-requestable code instead, to match
+    its material type?
+13. Should `SAFEGUARDED` and `PERMISSIONREQUIRED` items be `Available`, as
+    migrated items with those restrictions are, rather than `Restricted`?
+
 ---
 
 ## Before implementing
@@ -406,4 +534,6 @@ should be confirmed against this tenant's FOLIO version.
 **On the FOLIO tenant**, none of these verified: that `Restricted` and
 `Withdrawn` are accepted by this FOLIO version; what loan policy the circulation
 rules attach to `Can circulate` and whether `Unavailable` genuinely prevents a
-loan; and that the three `AxC *` location names still resolve.
+loan; that the three `AxC *` location names still resolve; and that the
+`CLOSED` and `DONOR PERMISSION` statistical codes exist (neither did on
+2026-10-01).

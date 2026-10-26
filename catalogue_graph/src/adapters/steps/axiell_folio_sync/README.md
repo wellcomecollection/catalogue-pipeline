@@ -26,7 +26,10 @@ The design, record-selection rules and tombstone semantics are specified in
      UUIDs (locations, material types, loan types, …) are resolved via `RefCache`, loaded once per invocation from the
      FOLIO tenant and reused across warm Lambda starts.
    * **Upsert** (`upsert.py`): writes in Instance → Holdings → Item order via OKAPI, with best-effort rollback if a
-     later entity write fails.
+     later entity write fails. Each record's FOLIO id comes from its AxC GUID (MARC `001`, itself a UUID): the
+     instance takes the GUID as its id, and the holdings and item take a UUIDv5 in the GUID. The id is sent on
+     create, and the sync finds the record again by it on every later run. The sync sends no hrid, so FOLIO
+     generates it.
 5. **Pass 2 — reconciliation deletes** (see [Reconciliation deletes](#reconciliation-deletes) below): the deletion
    facts from `iter_deletions()` are actioned against FOLIO *after* the upsert pass.
 6. Results are published via a single `PipelineReport` (`report.py`): one JSON run report to S3 plus CloudWatch
@@ -45,7 +48,8 @@ invocation — no separate event or Lambda (see RFC 090 and
 [Axiell deletion reconciliation](../../transformers/README.md#axiell-deletion-reconciliation)). `iter_deletions()`
 re-checks each fact against the current reconciler mappings and drops any GUID reclaimed by a live record, so a
 revert/handoff never suppresses the wrong record. The remaining facts are actioned in Pass 2, keyed by
-`AxC-{entity}-{guid}` (the same HRID scheme the upsert path writes), child-first **item → holdings → instance**:
+the FOLIO ids derived from the GUID (the same derivation the upsert path uses), child-first
+**item → holdings → instance**:
 
 - **Soft-suppress (default, reversible).** `suppress_by_guid` sets `discoverySuppress` on all three entities and
   `staffSuppress` on the instance only — instances are the sole FOLIO inventory entity with a `staffSuppress` field
