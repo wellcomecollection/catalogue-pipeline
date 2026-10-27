@@ -163,6 +163,17 @@ To re-transform a specific set of already-stored records instead — e.g. after 
 }
 ```
 
+The Lambda also accepts `{"s3_uri": "..."}`, a partition written by the find-work planner
+(`adapters.steps.transformer_find_work`). The planner splits an adapter event's changesets, or for a reindex
+(`"full": true`) every changeset in the store, into groups of about 10,000 rows, all read at one pinned snapshot;
+a changeset bigger than that runs as a partition of its own. Each partition runs in changeset mode, so tombstones and Axiell
+deletion facts are delivered exactly as a single changeset run delivers them. A planned reindex also writes
+tombstones for deleted records, which the unplanned reindex (no changeset ids) skips, but delivers no deletion
+facts, as they have nothing to overwrite in a fresh index. An event naming no changesets (`"changeset_ids": []`)
+plans nothing. The planner stops before any partition runs if an event carries more than 5,000 tombstones or, for
+Axiell, more than 1,000 deletion facts, which more likely means a faulty harvest or reconcile than real deletions;
+replay with a raised `max_tombstones` or `max_deletion_facts` once they are confirmed.
+
 ## Output
 
 The transformer produces:
@@ -239,7 +250,7 @@ flowchart TD
 The FOLIO transformer differs from the others in that it reads *two* Iceberg tables. The FOLIO OAI-PMH bib record
 carries no item UUIDs, so a separate enrichment step (`adapters.steps.oai_pmh.folio_enrich`, running between the
 loader and the publish event) maintains an inventory store keyed by instance id. At transform time `FolioStoreSource`
-joins that store onto each bib row (in bounded batches, attached as `enrichment_content`), and `FolioWorkBuilder`
+joins that store onto each bib row (in bounded batches, attached as `inventory_content`), and `FolioWorkBuilder`
 emits items carrying a `folio-item` source identifier with the inventory UUID.
 
 Transformer-side behaviour to be aware of:
@@ -248,6 +259,11 @@ Transformer-side behaviour to be aware of:
   works without items. On a fresh environment, run one enrichment pass before transforming.
 - An instance that has not been enriched emits no items; the transformer never guesses item identity from MARC 952.
 - Transformation never calls FOLIO. A full reindex joins whatever is already in the inventory store.
+- Items suppressed from discovery are left off the work. Every other item whose location resolves gets a physical
+  location and an access condition from `adapters/transformers/folio/` (`locations.py` and `access_conditions.py`),
+  following the mappings in [docs/folio](../../../docs/folio/). An item with an unmapped location, a no-location code
+  or an ambiguous bound-with host gets neither, and keeps any display note as its note. The access decision table
+  itself is data, in `folio/access_rules/rules.csv`.
 
 See [Item enrichment](../extractors/oai_pmh/folio/README.md#item-enrichment) in the FOLIO adapter README for the full
 design, including how the inventory store is populated and kept current.

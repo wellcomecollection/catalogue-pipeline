@@ -6,6 +6,7 @@ import pytest
 from pydantic import BaseModel
 
 from core.find_work import (
+    group_by_weight,
     normalise_lambda_input,
     plan_partitions,
     write_partitions_to_s3,
@@ -105,3 +106,34 @@ def test_write_partitions_to_s3_uses_the_callers_uris() -> None:
         ("s3://test-bucket/plans/job/partition-1.json", 1),
     ]
     assert pydantic_from_s3_json(_Partition, refs[1].s3_uri) == partitions[1]
+
+
+def test_group_by_weight_packs_in_order_up_to_the_limit() -> None:
+    groups = group_by_weight(
+        [("a", 4), ("b", 4), ("c", 3), ("d", 0), ("e", 9)], max_weight=8, max_items=10
+    )
+
+    assert groups == [["a", "b"], ["c", "d"], ["e"]]
+
+
+def test_group_by_weight_gives_an_oversized_item_its_own_group() -> None:
+    assert group_by_weight(
+        [("a", 2), ("big", 50), ("b", 2)], max_weight=10, max_items=10
+    ) == [
+        ["a"],
+        ["big"],
+        ["b"],
+    ]
+
+
+def test_group_by_weight_of_nothing_is_empty() -> None:
+    assert group_by_weight([], max_weight=10, max_items=10) == []
+
+
+def test_group_by_weight_caps_the_items_per_group() -> None:
+    weighted = [(str(i), 0) for i in range(5)]
+    assert group_by_weight(weighted, max_weight=10, max_items=2) == [
+        ["0", "1"],
+        ["2", "3"],
+        ["4"],
+    ]

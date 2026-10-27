@@ -103,7 +103,7 @@ class TargetPrecedenceTest
     val works = Seq(multiItemPhysicalSierra, digitalSierra, miro)
     val nonPredicated = TargetPrecedence.getTarget(works)
     val singleItemPredicated =
-      TargetPrecedence.targetSatisfying(WorkPredicates.singleItemSierra)(works)
+      TargetPrecedence.targetSatisfying(WorkPredicates.singleItemLmsWork)(works)
 
     nonPredicated.value shouldBe multiItemPhysicalSierra
     singleItemPredicated.value shouldBe digitalSierra
