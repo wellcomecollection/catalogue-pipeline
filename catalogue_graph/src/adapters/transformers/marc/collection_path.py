@@ -9,6 +9,11 @@ sort in order. It is not a segment of its own, as there is no record for it.
 The host segment must be the identifier the host uses for itself, so that the
 two paths join up.
 
+A ǂw starts with the code of the organisation whose control number it is:
+(UkLW) for a Wellcome record, (OCoLC) for an OCLC record, and so on. Only a
+link to a Wellcome record can join up with a path, so links carrying any other
+organisation's code are ignored.
+
 https://www.loc.gov/marc/bibliographic/bd773.html
 https://www.loc.gov/marc/bibliographic/bd774.html
 """
@@ -25,9 +30,7 @@ from models.pipeline.collection_path import CollectionPath
 
 logger = structlog.get_logger(__name__)
 
-# Cataloguers prefix a local control number in ǂw with the Wellcome Library
-# organisation code, which says whose number it is when records are exported.
-LOCAL_IDENTIFIER_PREFIX = "(UkLW)"
+LOCAL_ORGANISATION_CODE = "(UkLW)"
 
 NON_TOKEN_CHARACTERS = re.compile(r"[^0-9a-zA-Z_]")
 
@@ -38,14 +41,18 @@ def extract_collection_path(
     """Build the collection path for a record linked by 773 ǂw or 774 ǂw.
 
     `own_identifier` is the identifier other records use for this one in their
-    ǂw. Returns None for a record with no ǂw links, no identifier of its own, or
-    whose only link is to itself.
+    ǂw. Returns None for a record with no links to Wellcome records, no
+    identifier of its own, or whose only link is to itself.
     """
-    host_fields = [f for f in record.get_fields("773") if non_blank_subfields(f, "w")]
+    host_links = [
+        (field, identifiers)
+        for field in record.get_fields("773")
+        if (identifiers := _local_identifiers(field))
+    ]
     has_constituent_link = any(
-        non_blank_subfields(f, "w") for f in record.get_fields("774")
+        _local_identifiers(field) for field in record.get_fields("774")
     )
-    if not host_fields and not has_constituent_link:
+    if not host_links and not has_constituent_link:
         return None
 
     if own_identifier is None:
@@ -55,9 +62,9 @@ def extract_collection_path(
         return None
     own_key = _path_key(own_identifier)
 
-    if host_fields:
-        host_field = host_fields[0]
-        host_key = _path_key(_host_identifier(host_field))
+    if host_links:
+        host_field, host_identifiers = host_links[0]
+        host_key = _path_key(_host_identifier(host_identifiers))
         if host_key == own_key:
             logger.error(
                 "Self-referential host link", field=str(host_field), identifier=own_key
@@ -72,21 +79,30 @@ def extract_collection_path(
     return None
 
 
-def _host_identifier(host_field: Field) -> str:
-    """The host's identifier from ǂw, preferring a unique identifier over a b-number.
+def _local_identifiers(field: Field) -> list[str]:
+    """The ǂw values that identify Wellcome records, without the (UkLW) code.
+
+    A value with no organisation code is taken to be a Wellcome identifier too.
+    """
+    identifiers = [w.strip() for w in non_blank_subfields(field, "w")]
+    return [
+        identifier.removeprefix(LOCAL_ORGANISATION_CODE).strip()
+        for identifier in identifiers
+        if identifier.startswith(LOCAL_ORGANISATION_CODE)
+        or not identifier.startswith("(")
+    ]
+
+
+def _host_identifier(identifiers: list[str]) -> str:
+    """The host's identifier, preferring a unique identifier over a b-number.
 
     A 773 may repeat ǂw with both, and the host identifies itself by its unique
     identifier when it has one.
     """
-    identifiers = [_strip_prefix(w) for w in non_blank_subfields(host_field, "w")]
     for identifier in identifiers:
         if not SIERRA_SYSTEM_NUMBER_RE.match(identifier):
             return identifier
     return identifiers[0]
-
-
-def _strip_prefix(identifier: str) -> str:
-    return identifier.strip().removeprefix(LOCAL_IDENTIFIER_PREFIX).strip()
 
 
 def _path_key(identifier: str) -> str:

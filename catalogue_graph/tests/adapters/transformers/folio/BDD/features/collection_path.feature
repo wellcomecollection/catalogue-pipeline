@@ -1,11 +1,13 @@
 Feature: collection path (MARC 773 and 774)
   A record with a 773 ǂw (link to its host) or a 774 ǂw (link to a constituent)
   is part of a hierarchy and gets a collection path: `host/own` for a part, or
-  `own` for a root. The host comes from the first 773 that has a ǂw, with any
-  (UkLW) prefix removed, and the 773 ǂg related part is folded into
-  the own segment as a token. The record's own identifier is its unique
-  identifier in 099 ǂa, falling back to its Sierra b-number in 907 ǂa. A record
-  that only links to itself, or has no identifier of its own, gets no path.
+  `own` for a root. The host comes from the first 773 whose ǂw identifies a
+  Wellcome record, with the (UkLW) organisation code removed, and the 773 ǂg
+  related part is folded into the own segment as a token. The record's own
+  identifier is its unique identifier in 099 ǂa, falling back to its Sierra
+  b-number in 907 ǂa. A record whose links all carry another organisation's
+  code, that only links to itself, or that has no identifier of its own, gets
+  no path.
 
   These scenarios mirror SierraCollectionPathTest.scala and
   MarcCollectionPathTest.scala, including their test data, with the record's
@@ -25,7 +27,7 @@ Feature: collection path (MARC 773 and 774)
   # "uses 099 when there is no 001" test is the same record as its 774 root
   # test once 001 is out of the picture, and its "773 consisting of ǂw and the
   # own id" test repeats its "773 with no 774" test, so each is ported once.
-  # Its (Wcat) prefix is replaced by (UkLW), see the divergences below.
+  # Its (Wcat) organisation code is replaced by (UkLW), see the divergences below.
 
   Scenario: A record with no 773 or 774 fields has no collection path
     Given the MARC record has a 500 field with subfield "a" value "banana"
@@ -160,14 +162,51 @@ Feature: collection path (MARC 773 and 774)
     When I transform the MARC record
     Then the work's collection path.path is "b33055919/EPB|T|248.1"
 
-  # The Scala strips the (Wcat) prefix from i-number links. No FOLIO record has
-  # one, since Pictures are not migrated, so the FOLIO transformer does not.
+  # Cataloguers link to a host we do not hold by its OCLC number, with the
+  # (OCoLC) code in any of several spellings. The Scala makes a path from any
+  # ǂw, so these records got paths pointing at nothing. Any organisation code
+  # other than (UkLW) marks a link to a record we do not hold, including the
+  # (Wcat) code the Scala strips from i-number links, which no FOLIO record
+  # carries since Pictures are not migrated.
 
-  Scenario: The (Wcat) prefix is not removed from the host identifier
+  Scenario Outline: A 773 whose ǂw carries another organisation's code gives no collection path
     Given the MARC record has a 099 field with subfield "a" value "56789i"
-    And the MARC record has a 773 field with subfield "t" value "A Host" and subfield "w" value "(Wcat)12345i"
+    And the MARC record has a 773 field with subfield "t" value "A Host" and subfield "w" value "<host>"
     When I transform the MARC record
-    Then the work's collection path.path is "(Wcat)12345i/56789i"
+    Then the work's collection path is absent
+
+    Examples:
+      | host             |
+      | (OCoLC)1481393   |
+      | (OcoLC)2352964   |
+      | (OCoLOC)11798106 |
+      | (Wcat)12345i     |
+
+  Scenario: A 774 whose ǂw carries another organisation's code does not make a root
+    Given the MARC record has a 099 field with subfield "a" value "12345i"
+    And the MARC record has a 774 field with subfield "t" value "A Constituent" and subfield "w" value "(OCoLC)1481393"
+    When I transform the MARC record
+    Then the work's collection path is absent
+
+  Scenario: A record with constituents whose host link carries another organisation's code is a root
+    Given the MARC record has a 099 field with subfield "a" value "12345i"
+    And the MARC record has a 773 field with subfield "t" value "A Host" and subfield "w" value "(OCoLC)1481393"
+    And the MARC record has a 774 field with subfield "t" value "A Constituent" and subfield "w" value "(UkLW)b17478297"
+    When I transform the MARC record
+    Then the work's collection path.path is "12345i"
+
+  Scenario: When ǂw is repeated with an OCLC number and a Wellcome identifier, the Wellcome identifier is the host
+    Given the MARC record has a 907 field with subfield "a" value "b13773847"
+    And the MARC record has a 773 field with subfield "t" value "Addresses and papers" and subfield "w" value "(OCoLC)18233655" and subfield "w" value "(UkLW)b1278526x"
+    When I transform the MARC record
+    Then the work's collection path.path is "b1278526x/b13773847"
+
+  Scenario: The first 773 whose ǂw identifies a Wellcome record is the host
+    Given the MARC record has a 099 field with subfield "a" value "56789i"
+    And the MARC record has a 773 field with subfield "t" value "Not this one" and subfield "w" value "(OCoLC)1481393"
+    And the MARC record has another 773 field with subfield "t" value "This one" and subfield "w" value "(UkLW)12345i"
+    When I transform the MARC record
+    Then the work's collection path.path is "12345i/56789i"
 
   # "/" separates path segments, so a shelfmark containing slashes must have
   # them replaced to stay one segment. "|" is used, as the Axiell transformer does.
