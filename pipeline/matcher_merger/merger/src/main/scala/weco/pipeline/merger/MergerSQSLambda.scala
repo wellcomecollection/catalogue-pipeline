@@ -47,7 +47,9 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
   ): SQSLambdaMessageResult =
     SQSLambdaMessageFailedRetryable(
       messageId = messageId,
-      error = new Error(s"Failed to merge: $message", cause)
+      // The handler logs only the message, so carry the cause's text in it
+      error =
+        new Error(s"Failed to merge: ${cause.getMessage}: $message", cause)
     )
 
   private def processBatched(
@@ -93,6 +95,19 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
                     messageDocs.map(notifyDownstream)
                     SQSLambdaMessageProcessed(messageId)
                   }
+              }
+          } recover {
+            // Every merged message has documents in the failed call, so retry each
+            case e =>
+              failedMerges ++ merged.map {
+                case (messageId, _) =>
+                  SQSLambdaMessageFailedRetryable(
+                    messageId = messageId,
+                    error = new Error(
+                      s"Failed to index merged documents for $messageId: ${e.getMessage}",
+                      e
+                    )
+                  )
               }
           }
       }
