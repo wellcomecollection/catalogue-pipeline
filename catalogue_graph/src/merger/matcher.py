@@ -18,9 +18,16 @@ def load_works(table: IcebergTable, snapshot_id: int) -> pl.DataFrame:
     """
     scan = table.scan(selected_fields=GRAPH_COLUMNS, snapshot_id=snapshot_id)
     works = pl.DataFrame(scan.to_arrow())
-    return works.sort(["version", "last_modified"], descending=True).unique(
-        "id", keep="first"
+    # Pick the current rows on the narrow columns, then gather them: sorting the
+    # strings and candidate lists too takes more memory than the frame itself.
+    keys = ["version", "last_modified"]
+    current = (
+        works.select("id", *keys)
+        .with_row_index()
+        .sort(keys, descending=True)
+        .unique("id", keep="first")
     )
+    return works[current["index"]]
 
 
 def match_works(works: pl.DataFrame) -> pl.DataFrame:

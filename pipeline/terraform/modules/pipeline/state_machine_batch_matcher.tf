@@ -52,8 +52,8 @@ module "batch_matcher_lambda" {
   }
 
   # Holds the graph columns of every row in the table while it resolves
-  # components; a full run peaks at about 3.2 GB.
-  memory_size = 6144
+  # components; a full run peaks at about 2 GB.
+  memory_size = 4096
   timeout     = 300
 
   environment_variables = {
