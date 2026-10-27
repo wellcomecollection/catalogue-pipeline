@@ -56,16 +56,16 @@ class WorkPredicatesTest
     sierraIdentifiedWork().format(Format.Music),
     sierraIdentifiedWork().otherIdentifiers(
       List(createDigcodeIdentifier("digaids"))
-    )
+    ),
+    identifiedWork(sourceIdentifier = createFolioSourceIdentifier)
   )
 
-  it("selects Sierra works") {
-    val filtered = works.filter(WorkPredicates.sierraWork)
-    filtered should not be empty
-    forAll(filtered) {
-      work =>
-        work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
-    }
+  it("selects Sierra and FOLIO works as LMS works") {
+    val filtered = works.filter(WorkPredicates.lmsWork)
+    filtered.map(_.sourceIdentifier.identifierType.id).toSet shouldBe Set(
+      "sierra-system-number",
+      "folio-instance"
+    )
   }
 
   it("selects singleDigitalItemMetsWork works") {
@@ -91,7 +91,7 @@ class WorkPredicatesTest
   }
 
   it("selects single-item Sierra works") {
-    val filtered = works.filter(WorkPredicates.singleItemSierra)
+    val filtered = works.filter(WorkPredicates.singleItemLmsWork)
     filtered should not be empty
     forAll(filtered) {
       work =>
@@ -101,7 +101,7 @@ class WorkPredicatesTest
   }
 
   it("selects physical Sierra works") {
-    val filtered = works.filter(WorkPredicates.physicalSierra)
+    val filtered = works.filter(WorkPredicates.physicalLmsWork)
     filtered should not be empty
     forAll(filtered) {
       work =>
@@ -114,7 +114,7 @@ class WorkPredicatesTest
 
   it("selects Picture/Digital Image/3D Object Sierra works") {
     val filtered =
-      works.filter(WorkPredicates.sierraPictureDigitalImageOr3DObject)
+      works.filter(WorkPredicates.lmsWorkPictureDigitalImageOr3DObject)
     filtered should not be empty
     forAll(filtered) {
       work =>
@@ -126,7 +126,7 @@ class WorkPredicatesTest
   }
 
   it("selects Sierra works with the `digaids` digcode") {
-    val filtered = works.filter(WorkPredicates.sierraDigitisedMiro)
+    val filtered = works.filter(WorkPredicates.lmsWorkDigitisedMiro)
     filtered should not be empty
     forAll(filtered) {
       work =>

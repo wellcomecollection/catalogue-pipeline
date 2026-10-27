@@ -23,7 +23,7 @@ trait WorkMergingOps {
     def withItemsInInternalWorks(
       items: List[Item[IdState.Minted]]
     ): Work.Visible[Identified] = {
-      // Internal works are in TEI works. If they are merged with Sierra, we want the Sierra
+      // Internal works are in TEI works. If they are merged with an LMS work, we want the LMS work's
       // items to be added to TEI internal works so that the user can request the item
       // containing that work without having to find the wrapping work.
       work
