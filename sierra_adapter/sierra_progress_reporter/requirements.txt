@@ -2,7 +2,7 @@
 #    uv pip compile --python-version 3.12 requirements.in -o requirements.txt
 attrs==26.1.0
     # via -r requirements.in
-certifi==2026.4.22
+certifi==2026.10.18
     # via requests
 charset-normalizer==3.4.7
     # via requests
