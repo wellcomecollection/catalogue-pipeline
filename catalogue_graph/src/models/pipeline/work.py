@@ -27,6 +27,7 @@ class InvisibleWork(Work):
 class DeletedWork(Work):
     type: WorkStatus = "Deleted"
     deleted_reason: DeletedReason
+    data: WorkData = Field(default_factory=WorkData, exclude=True)
 
 
 class RedirectedWork(SerialisableModel):

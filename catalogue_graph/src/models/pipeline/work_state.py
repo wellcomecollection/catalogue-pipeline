@@ -28,4 +28,6 @@ class WorkState(SerialisableModel):
         raise NotImplementedError()
 
     def predecessor_id(self) -> str | None:
-        raise NotImplementedError()
+        if self.predecessor_identifier is None:
+            return None
+        return str(self.predecessor_identifier)
