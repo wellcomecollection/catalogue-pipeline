@@ -23,8 +23,9 @@ resource "ec_deployment" "cluster" {
     }
   }
 
+  # Elastic recommends at least 2g per zone for Kibana 9.x.
   kibana = {
-    size       = "1g"
+    size       = "2g"
     zone_count = 1
   }
 
