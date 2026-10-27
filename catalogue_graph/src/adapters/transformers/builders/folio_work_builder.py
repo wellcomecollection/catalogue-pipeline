@@ -6,8 +6,8 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedIns
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.collection_path import extract_collection_identifier
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
-from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.folio.items import extract_items
+from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.designation import extract_designation
