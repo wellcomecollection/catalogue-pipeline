@@ -331,6 +331,14 @@ def _upsert_entity(
         created = folio.post(write_path_prefix, payload)
         created_id = created.get("id") if isinstance(created, dict) else None
         if created_id and created_id != folio_id:
+            try:
+                folio.delete(f"{write_path_prefix}/{created_id}")
+            except Exception as exc:
+                logger.warning(
+                    "rollback_delete_failed",
+                    path=f"{write_path_prefix}/{created_id}",
+                    error=str(exc),
+                )
             raise RuntimeError(
                 f"created {write_path_prefix} with id {created_id}, expected {folio_id}"
             )
