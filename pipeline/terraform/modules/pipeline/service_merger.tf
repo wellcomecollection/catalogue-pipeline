@@ -9,7 +9,9 @@ module "merger" {
 
   batch_indexing = var.merger_batch_indexing
   queue_config = {
-    visibility_timeout_seconds = 90
+    # AWS minimum: 6x the 30 s function timeout plus the batching window, so
+    # messages held while a batch fills are not redelivered before it runs.
+    visibility_timeout_seconds = 300
     max_receive_count          = 10
     batching_window_seconds    = 120
     batch_size                 = 50

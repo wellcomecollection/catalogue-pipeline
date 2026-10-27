@@ -40,17 +40,36 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
   private def docKey(doc: WorkOrImage): (Boolean, String) =
     (doc.isLeft, implicitly[Indexable[WorkOrImage]].id(doc))
 
+  private def retryable(
+    messageId: String,
+    message: MatcherResult,
+    cause: Throwable
+  ): SQSLambdaMessageResult =
+    SQSLambdaMessageFailedRetryable(
+      messageId = messageId,
+      error = new Error(s"Failed to merge: $message", cause)
+    )
+
   private def processBatched(
     messages: Seq[SQSLambdaMessage[MatcherResult]]
   ): Future[Seq[SQSLambdaMessageResult]] =
-    // A merge that fails fails the whole batch, as it does in processEach.
+    // A merge that fails retries only its own message; the rest index together.
     Future
       .sequence(messages.map {
         case SQSLambdaMessage(messageId, message) =>
-          mergeProcessor.merge(message).map(messageId -> _)
+          mergeProcessor
+            .merge(message)
+            .map[Either[SQSLambdaMessageResult, (String, List[WorkOrImage])]](
+              docs => Right(messageId -> docs)
+            )
+            .recover {
+              case e => Left(retryable(messageId, message, e))
+            }
       })
       .flatMap {
-        merged =>
+        outcomes =>
+          val failedMerges = outcomes.collect { case Left(failure) => failure }
+          val merged = outcomes.collect { case Right(m) => m }
           val docs = merged.flatMap(_._2)
           val indexed =
             if (docs.isEmpty) Future.successful(Right(Nil))
@@ -61,7 +80,7 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
                 case Left(failedDocs) => failedDocs.map(docKey).toSet
                 case Right(_)         => Set.empty[(Boolean, String)]
               }
-              merged.map {
+              failedMerges ++ merged.map {
                 case (messageId, messageDocs) =>
                   if (messageDocs.exists(doc => failed.contains(docKey(doc)))) {
                     SQSLambdaMessageFailedRetryable(
@@ -84,20 +103,26 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
 
     Future.sequence(messages.map {
       case SQSLambdaMessage(messageId, message) =>
-        mergeProcessor.process(message).map {
-          mergeProcessorResponse =>
-            if (mergeProcessorResponse.failures.isEmpty) {
-              // If there are no failures, we notify the downstream services
-              mergeProcessorResponse.successes.map(notifyDownstream)
-              SQSLambdaMessageProcessed(messageId)
-            } else {
-              // If there are any failures, we retry the message
-              SQSLambdaMessageFailedRetryable(
-                messageId = messageId,
-                error = new Error(s"Failed to merge: $message")
-              )
-            }
-        }
+        mergeProcessor
+          .process(message)
+          .map {
+            mergeProcessorResponse =>
+              if (mergeProcessorResponse.failures.isEmpty) {
+                // If there are no failures, we notify the downstream services
+                mergeProcessorResponse.successes.map(notifyDownstream)
+                SQSLambdaMessageProcessed(messageId)
+              } else {
+                // If there are any failures, we retry the message
+                SQSLambdaMessageFailedRetryable(
+                  messageId = messageId,
+                  error = new Error(s"Failed to merge: $message")
+                )
+              }
+          }
+          // A merge that throws retries only its own message, not the batch
+          .recover {
+            case e => retryable(messageId, message, e)
+          }
     })
   }
 }
