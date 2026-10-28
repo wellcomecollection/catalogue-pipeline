@@ -12,6 +12,7 @@ dependencies = [
     "backoff",
     "smart-open",
     "polars",
+    "numpy",
     "elasticsearch>=8.11,<8.13",
     "tabulate",
     "types-tabulate",
