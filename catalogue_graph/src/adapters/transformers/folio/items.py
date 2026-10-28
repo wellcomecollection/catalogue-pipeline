@@ -33,13 +33,16 @@ def extract_items(instance: FolioEnrichedInstance) -> list[Item]:
 def _build_item(
     item: FolioEnrichedItem, item_location: ResolvedLocation | None
 ) -> Item:
-    identifier = Identifiable.from_source_identifier(
-        SourceIdentifier(
+    predecessor = _sierra_predecessor(item)
+    identifier = Identifiable(
+        source_identifier=SourceIdentifier(
             identifier_type=FOLIO_ITEM_IDENTIFIER_TYPE,
             ontology_type="Item",
             value=item.id,
         ),
-        predecessor=_sierra_predecessor(item),
+        # Also an identifier, so the item can still be found by its Sierra number.
+        other_identifiers=[predecessor] if predecessor else [],
+        predecessor_identifier=predecessor,
     )
     title = item.enumeration or item.volume
     if item_location is None:

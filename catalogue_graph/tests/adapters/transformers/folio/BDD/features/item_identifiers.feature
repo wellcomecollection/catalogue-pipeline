@@ -1,8 +1,9 @@
 Feature: FOLIO item identifiers
   Each FOLIO item is identified by its item UUID. An item carried over from
-  Sierra keeps its Sierra item number in formerIds, and that number becomes the
-  item's predecessor so the id-minter gives it the canonical id the Sierra item
-  held (platform#6616).
+  Sierra keeps its Sierra item number in formerIds. That number is emitted as an
+  other identifier so the item can still be found by it (platform#6614), and as
+  the item's predecessor so the id-minter gives it the canonical id the Sierra
+  item held (platform#6616).
 
   Background:
     Given a MARC record with field 001 "abc123"
@@ -13,20 +14,24 @@ Feature: FOLIO item identifiers
   Scenario: An item is identified by its FOLIO item UUID
     When I transform the MARC record
     Then item "a" has the source identifier "Item[folio-item/a]"
+    And item "a" has no other identifiers
 
   Scenario: An item migrated from Sierra has its Sierra item number as predecessor
     Given that item has the former ids "i16858153"
     When I transform the MARC record
     Then item "a" has the predecessor "Item[sierra-system-number/i16858153]"
+    And item "a" has the other identifiers "Item[sierra-system-number/i16858153]"
 
   Scenario: An item repeating its Sierra item number has it as predecessor
     Given that item has the former ids "i1685813x, i1685813x"
     When I transform the MARC record
     Then item "a" has the predecessor "Item[sierra-system-number/i1685813x]"
+    And item "a" has the other identifiers "Item[sierra-system-number/i1685813x]"
 
   Scenario: An item created in FOLIO has no predecessor
     When I transform the MARC record
     Then item "a" has no predecessor
+    And item "a" has no other identifiers
 
   Scenario: An item with more than one Sierra item number fails the transform
     Given that item has the former ids "i16858153, i16858128"

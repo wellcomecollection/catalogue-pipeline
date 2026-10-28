@@ -44,15 +44,8 @@ class Identifiable(Identifiers):
     identifiedType: IdentifyType = "Identified"
 
     @staticmethod
-    def from_source_identifier(
-        identifier: SourceIdentifier,
-        predecessor: SourceIdentifier | None = None,
-    ) -> "Identifiable":
-        return Identifiable(
-            source_identifier=identifier,
-            other_identifiers=[],
-            predecessor_identifier=predecessor,
-        )
+    def from_source_identifier(identifier: SourceIdentifier) -> "Identifiable":
+        return Identifiable(source_identifier=identifier, other_identifiers=[])
 
     @staticmethod
     def identifier_from_text(label: str, ontology_type: str) -> "Identifiable":

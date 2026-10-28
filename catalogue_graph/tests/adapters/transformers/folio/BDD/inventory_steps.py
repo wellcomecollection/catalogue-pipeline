@@ -175,6 +175,19 @@ def item_has_no_predecessor(work: VisibleSourceWork, item_id: str) -> None:
     assert _identifiable(work, item_id).predecessor_identifier is None
 
 
+@then(parsers.parse('item "{item_id}" has the other identifiers "{expected}"'))
+def item_has_other_identifiers(
+    work: VisibleSourceWork, item_id: str, expected: str
+) -> None:
+    actual = [str(i) for i in _identifiable(work, item_id).other_identifiers]
+    assert actual == expected.split(", ")
+
+
+@then(parsers.parse('item "{item_id}" has no other identifiers'))
+def item_has_no_other_identifiers(work: VisibleSourceWork, item_id: str) -> None:
+    assert _identifiable(work, item_id).other_identifiers == []
+
+
 @then(parsers.parse('item "{item_id}" has no location'))
 def item_has_no_location(work: VisibleSourceWork, item_id: str) -> None:
     assert _item(work, item_id).locations == []

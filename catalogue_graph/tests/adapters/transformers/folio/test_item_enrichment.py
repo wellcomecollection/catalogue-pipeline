@@ -154,6 +154,18 @@ def test_transformer_attaches_enriched_items(
         ("folio-item", item_id) for item_id in fixture_item_ids()
     ]
 
+    assert [item["id"]["otherIdentifiers"] for item in source["data"]["items"]] == [
+        [
+            {
+                "identifierType": {"id": "sierra-system-number"},
+                "ontologyType": "Item",
+                "value": former_id,
+            }
+            for former_id in item["formerIds"]
+        ]
+        for item in fixture_record()["items"]
+    ]
+
     # Every fixture item predates the migration, so the minter gets each Sierra item number as its predecessor.
     item_requests = {
         sid.source_id: predecessor
