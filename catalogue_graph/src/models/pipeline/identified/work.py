@@ -1,7 +1,7 @@
 from pydantic import Field
 
 from ingestor.models.shared.merge_candidate import MergeCandidate
-from models.pipeline.identifier import SourceIdentifier
+from models.pipeline.identifier import Identified, SourceIdentifier
 from models.pipeline.serialisable import SerialisableModel
 from models.pipeline.work import DeletedWork, InvisibleWork, VisibleWork, Work
 from models.pipeline.work_data import WorkData
@@ -16,10 +16,16 @@ class InternalWorkStub(SerialisableModel):
     work_data: WorkData
 
 
+class IdentifiedMergeCandidate(MergeCandidate):
+    """A merge candidate whose work has been through the id minter."""
+
+    id: Identified
+
+
 class IdentifiedWorkState(WorkState):
     canonical_id: str
     modified_time: str | None = None
-    merge_candidates: list[MergeCandidate] = Field(default_factory=list)
+    merge_candidates: list[IdentifiedMergeCandidate] = Field(default_factory=list)
     internal_work_stubs: list[InternalWorkStub] = Field(default_factory=list)
     removed_internal_work_stubs: list[InternalWorkStub] = Field(default_factory=list)
 

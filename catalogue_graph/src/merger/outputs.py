@@ -12,6 +12,7 @@ from ingestor.models.merged.work import (
     RedirectedMergedWork,
     VisibleMergedWork,
 )
+from ingestor.models.shared.merge_candidate import MergeCandidate
 from merger.availabilities import availabilities
 from models.pipeline.identified.work import (
     DeletedIdentifiedWork,
@@ -91,6 +92,7 @@ def identified_id(work: IdentifiedWork) -> Identified:
 def _merged_state(
     work: IdentifiedWork, data: WorkData, merged_time: datetime
 ) -> MergedWorkState:
+    merge_candidates: list[MergeCandidate] = list(work.state.merge_candidates)
     return MergedWorkState(
         source_identifier=work.state.source_identifier,
         canonical_id=work.state.canonical_id,
@@ -98,5 +100,5 @@ def _merged_state(
         source_modified_time=work.state.source_modified_time,
         availabilities=availabilities(data),
         relations=work.state.relations,
-        merge_candidates=work.state.merge_candidates,
+        merge_candidates=merge_candidates,
     )

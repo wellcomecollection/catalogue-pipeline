@@ -1,8 +1,8 @@
-"""Predicates over identified works, ported from the Scala WorkPredicates.
+"""Predicates over identified works, from which the merge rules are built.
 
-The merge rules are built from these. Several describe the shape the transformers
-give works from a source, e.g. a METS work with a single digital item, and the rules
-rely on that shape. Predicates combine with `&`, `|` and `~`.
+Several describe the shape the transformers give works from a source, e.g. a METS
+work with a single digital item, and the rules rely on that shape. Predicates
+combine with `&`, `|` and `~`.
 """
 
 from collections.abc import Callable
@@ -10,6 +10,7 @@ from collections.abc import Callable
 from models import identifier_schemes as schemes
 from models.pipeline.format import (
     AUDIOVISUAL_FORMAT_IDS,
+    ArchivesDigital,
     DigitalImages,
     Ephemera,
     Format,
@@ -140,8 +141,11 @@ def is_audiovisual(work: IdentifiedWork) -> bool:
     )
 
 
-sierra_work = source(schemes.SIERRA_SYSTEM_NUMBER)
 ebsco_work = source(schemes.EBSCO_ALT_LOOKUP)
+miro_work = source(schemes.MIRO_IMAGE_NUMBER)
+# A library management system work. Sierra and FOLIO run in separate pipelines,
+# so the rules can treat them alike.
+lms_work = source(schemes.SIERRA_SYSTEM_NUMBER) | source(schemes.FOLIO_INSTANCE)
 
 tei_work = source(schemes.TEI_MANUSCRIPT_ID) & zero_item & is_visible
 single_physical_item_calm_work = (
@@ -153,26 +157,28 @@ single_physical_item_calm_work = (
 single_physical_item_axiell_work = (
     source(schemes.AXIELL_GUID) & single_item & single_location & all_physical_locations
 )
+# Born-digital material has no physical copy, so its Calm/Axiell stub item is misleading.
+born_digital_archive_stub_work = (
+    single_physical_item_calm_work | single_physical_item_axiell_work
+) & has_format(ArchivesDigital)
 single_digital_item_mets_work = (
     source(schemes.METS) & single_item & all_digital_locations
 )
-single_digital_item_miro_work = (
-    source(schemes.MIRO_IMAGE_NUMBER) & single_item & all_digital_locations
-)
+single_digital_item_miro_work = miro_work & single_item & all_digital_locations
 
-zero_item_sierra = sierra_work & zero_item
-single_item_sierra = sierra_work & single_item
-multi_item_sierra = sierra_work & multi_item
-physical_sierra = sierra_work & physical_location_exists
-sierra_picture_or_ephemera = sierra_work & has_format(Pictures, Ephemera)
-sierra_picture_digital_image_or_3d_object = sierra_work & has_format(
+zero_item_lms_work = lms_work & zero_item
+single_item_lms_work = lms_work & single_item
+multi_item_lms_work = lms_work & multi_item
+physical_lms_work = lms_work & physical_location_exists
+lms_work_picture_or_ephemera = lms_work & has_format(Pictures, Ephemera)
+lms_work_picture_digital_image_or_3d_object = lms_work & has_format(
     DigitalImages, ThreeDObjects, Pictures
 )
 
 # AIDS posters were re-digitised and marked `digaids`; later re-digitised Miro works
 # are marked `digmiro`.
-sierra_digitised_miro = sierra_work & (has_digcode("digaids") | has_digcode("digmiro"))
+lms_work_digitised_miro = lms_work & (has_digcode("digaids") | has_digcode("digmiro"))
 # Sierra AV bibs may carry unidentified items drawn from 856 links; those don't count.
-sierra_digitised_av = sierra_work & is_audiovisual & zero_identified_items
+lms_work_digitised_av = lms_work & is_audiovisual & zero_identified_items
 
 physical_digital = has_merge_reason(PHYSICAL_DIGITAL_REASON)
