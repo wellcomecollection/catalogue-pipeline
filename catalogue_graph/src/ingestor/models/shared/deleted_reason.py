@@ -15,3 +15,7 @@ class SuppressedFromSource(DeletedReason):
 class DeletedFromSource(DeletedReason):
     type: DeletedReasonType = "DeletedFromSource"
     info: str | None = "Marked as deleted from source"
+
+
+class TeiDeletedInMerger(DeletedReason):
+    type: DeletedReasonType = "TeiDeletedInMerger"
