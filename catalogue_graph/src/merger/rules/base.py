@@ -3,12 +3,13 @@
 A field rule computes one field of the merged target from the target and its sources,
 and reports which sources it drew on; those sources are redirected to the target. Most
 rules are built from partial rules, each applying only when the target and at least one
-source satisfy its predicates.
+source satisfy its predicates. Rules hold no state, so they are used as classes.
 """
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 from merger.rules.predicates import Predicate
 from models.pipeline.identified.work import IdentifiedWork, VisibleIdentifiedWork
@@ -21,62 +22,70 @@ class FieldMergeResult[T]:
 
 
 class FieldMergeRule[T](ABC):
+    @classmethod
     @abstractmethod
     def merge(
-        self, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> FieldMergeResult[T]: ...
-
-    def __call__(
-        self, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> FieldMergeResult[T]:
-        return self.merge(target, sources)
 
 
 class PartialRule[T](ABC):
-    is_defined_for_target: Predicate
-    is_defined_for_source: Predicate
+    accepts_target: Predicate
+    accepts_source: Predicate
 
-    def is_defined_for_source_list(self, sources: Sequence[IdentifiedWork]) -> bool:
-        return True
-
+    @classmethod
     @abstractmethod
-    def rule(self, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]) -> T:
+    def rule(cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]) -> T:
         """The merged field value; only called with a non-empty list of matching sources."""
 
+    @classmethod
     def merged_sources(
-        self, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> list[IdentifiedWork]:
-        if self.is_defined_for_source_list(sources) and self.is_defined_for_target(
-            target
-        ):
-            return [source for source in sources if self.is_defined_for_source(source)]
+        if cls.accepts_target(target):
+            return [source for source in sources if cls.accepts_source(source)]
         return []
 
-    def __call__(
-        self, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+    @classmethod
+    def apply(
+        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> T | None:
-        merged = self.merged_sources(target, sources)
-        return self.rule(target, merged) if merged else None
+        """The merged field value, or None when the rule does not apply."""
+        merged = cls.merged_sources(target, sources)
+        return cls.rule(target, merged) if merged else None
+
+
+class SingleSource[T](PartialRule[T]):
+    """Accepts a single source. Several accepted sources are ambiguous, so none is merged."""
+
+    @classmethod
+    def merged_sources(
+        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+    ) -> list[IdentifiedWork]:
+        merged = super().merged_sources(target, sources)
+        return merged if len(merged) == 1 else []
 
 
 def first_defined[T](
-    rules: Sequence[PartialRule[T]],
+    rules: Sequence[type[PartialRule[T]]],
     target: VisibleIdentifiedWork,
     sources: Sequence[IdentifiedWork],
 ) -> T | None:
     """The value of the first partial rule that applies."""
     for rule in rules:
-        value = rule(target, sources)
+        value = rule.apply(target, sources)
         if value is not None:
             return value
     return None
 
 
+def sources_used_by(
+    rules: Sequence[type[PartialRule[Any]]],
+    target: VisibleIdentifiedWork,
+    sources: Sequence[IdentifiedWork],
+) -> list[IdentifiedWork]:
+    return [s for rule in rules for s in rule.merged_sources(target, sources)]
+
+
 def distinct_works(works: Iterable[IdentifiedWork]) -> list[IdentifiedWork]:
-    seen: set[str] = set()
-    distinct = []
-    for work in works:
-        if work.state.canonical_id not in seen:
-            seen.add(work.state.canonical_id)
-            distinct.append(work)
-    return distinct
+    return list({work.state.canonical_id: work for work in works}.values())

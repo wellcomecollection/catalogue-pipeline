@@ -5,11 +5,15 @@ from merger.rules.predicates import any_work
 from tests.merger.works import miro_work, sierra_digital_work
 
 
+class AnyImages(FlatImageMergeRule):
+    accepts_target = any_work
+    accepts_source = any_work
+
+
 def test_images_from_every_source() -> None:
-    rule = FlatImageMergeRule(any_work, any_work)
     sources = [miro_work() for _ in range(5)]
 
-    images = rule(sierra_digital_work(), sources)
+    images = AnyImages.apply(sierra_digital_work(), sources)
 
     assert images is not None
     assert len(images) == 5

@@ -1,6 +1,6 @@
 """Merging the other identifiers of a target and its sources."""
 
-from merger.rules.other_identifiers import other_identifiers_rule
+from merger.rules.other_identifiers import OtherIdentifiersRule
 from merger.rules.predicates import PHYSICAL_DIGITAL_REASON
 from models import identifier_schemes as schemes
 from models.pipeline.format import Pictures
@@ -79,7 +79,7 @@ def with_other_identifiers(
 
 
 def test_mets_miro_calm_and_sierra_ids_into_a_tei_target() -> None:
-    result = other_identifiers_rule.merge(
+    result = OtherIdentifiersRule.merge(
         tei, [calm, physical_sierra, nothing, miro, *mets_works]
     )
 
@@ -97,7 +97,7 @@ def test_mets_miro_calm_and_sierra_ids_into_a_tei_target() -> None:
 
 
 def test_mets_miro_and_sierra_ids_into_a_calm_target() -> None:
-    result = other_identifiers_rule.merge(
+    result = OtherIdentifiersRule.merge(
         calm, [physical_sierra, nothing, miro, *mets_works]
     )
 
@@ -115,7 +115,7 @@ def test_mets_miro_and_sierra_ids_into_a_calm_target() -> None:
 
 
 def test_mets_miro_and_sierra_ids_into_an_axiell_target() -> None:
-    result = other_identifiers_rule.merge(
+    result = OtherIdentifiersRule.merge(
         axiell, [physical_sierra, nothing, miro, *mets_works]
     )
 
@@ -133,7 +133,7 @@ def test_mets_miro_and_sierra_ids_into_an_axiell_target() -> None:
 
 
 def test_mets_miro_axiell_and_sierra_ids_into_a_tei_target() -> None:
-    result = other_identifiers_rule.merge(
+    result = OtherIdentifiersRule.merge(
         tei, [axiell, physical_sierra, nothing, miro, *mets_works]
     )
 
@@ -159,14 +159,14 @@ folio = folio_work(
 
 
 def test_a_folio_work_keeps_its_hrid_and_b_number_on_a_tei_target() -> None:
-    result = other_identifiers_rule.merge(tei, [folio])
+    result = OtherIdentifiersRule.merge(tei, [folio])
 
     assert same_elements(result.data, [sid(folio), folio_hrid, folio_bnumber])
     assert result.sources == [folio]
 
 
 def test_a_folio_work_keeps_its_hrid_and_b_number_on_an_axiell_target() -> None:
-    result = other_identifiers_rule.merge(axiell, [folio])
+    result = OtherIdentifiersRule.merge(axiell, [folio])
 
     assert same_elements(
         result.data,
@@ -183,13 +183,13 @@ def test_a_b_number_is_not_kept_from_a_non_folio_source() -> None:
         ],
     )
 
-    result = other_identifiers_rule.merge(tei, [axiell_with_bnumber])
+    result = OtherIdentifiersRule.merge(tei, [axiell_with_bnumber])
 
     assert same_elements(result.data, [*axiell.data.other_identifiers, sid(axiell)])
 
 
 def test_a_single_miro_id_into_a_single_item_sierra_work_alongside_mets() -> None:
-    result = other_identifiers_rule.merge(physical_sierra, [nothing, miro, *mets_works])
+    result = OtherIdentifiersRule.merge(physical_sierra, [nothing, miro, *mets_works])
 
     assert same_elements(
         result.data, [sid(miro), *physical_sierra.data.other_identifiers]
@@ -198,7 +198,7 @@ def test_a_single_miro_id_into_a_single_item_sierra_work_alongside_mets() -> Non
 
 
 def test_no_miro_ids_when_there_is_more_than_one_miro_work() -> None:
-    result = other_identifiers_rule.merge(physical_sierra, [nothing, miro, miro_work()])
+    result = OtherIdentifiersRule.merge(physical_sierra, [nothing, miro, miro_work()])
 
     assert same_elements(result.data, physical_sierra.data.other_identifiers)
     assert result.sources == []
@@ -210,7 +210,7 @@ def test_several_miro_ids_into_a_digmiro_sierra_work() -> None:
         physical_sierra, [digcode_identifier("digmiro")]
     )
 
-    result = other_identifiers_rule.merge(digmiro_sierra, [nothing, miro, miro_2])
+    result = OtherIdentifiersRule.merge(digmiro_sierra, [nothing, miro, miro_2])
 
     assert same_elements(
         result.data, [sid(miro), sid(miro_2), *digmiro_sierra.data.other_identifiers]
@@ -219,7 +219,7 @@ def test_several_miro_ids_into_a_digmiro_sierra_work() -> None:
 
 
 def test_miro_ids_into_a_sierra_work_with_zero_items() -> None:
-    result = other_identifiers_rule.merge(zero_item_physical_sierra, [miro])
+    result = OtherIdentifiersRule.merge(zero_item_physical_sierra, [miro])
 
     assert same_elements(
         result.data, [sid(miro), *zero_item_physical_sierra.data.other_identifiers]
@@ -230,21 +230,21 @@ def test_miro_ids_into_a_sierra_work_with_zero_items() -> None:
 def test_a_sierra_work_merges_into_an_ebsco_work_without_adding_ids() -> None:
     sierra, ebsco = sierra_ebsco_pair()
 
-    result = other_identifiers_rule.merge(ebsco, [sierra])
+    result = OtherIdentifiersRule.merge(ebsco, [sierra])
 
     assert result.data == []
     assert result.sources == [sierra]
 
 
 def test_no_miro_ids_into_a_sierra_work_of_another_format() -> None:
-    result = other_identifiers_rule.merge(physical_maps_sierra, [nothing, miro])
+    result = OtherIdentifiersRule.merge(physical_maps_sierra, [nothing, miro])
 
     assert same_elements(result.data, physical_maps_sierra.data.other_identifiers)
     assert result.sources == []
 
 
 def test_the_ids_of_a_linked_digitised_sierra_work_are_appended() -> None:
-    result = other_identifiers_rule.merge(
+    result = OtherIdentifiersRule.merge(
         sierra_with_merge_candidate, [nothing, miro, linked_sierra]
     )
 
@@ -261,7 +261,7 @@ def test_the_ids_of_a_linked_digitised_sierra_work_are_appended() -> None:
 
 
 def test_only_digcodes_are_taken_from_a_source_s_other_identifiers() -> None:
-    result = other_identifiers_rule.merge(calm, [sierra_with_digcode])
+    result = OtherIdentifiersRule.merge(calm, [sierra_with_digcode])
 
     assert same_elements(
         result.data,
@@ -274,7 +274,7 @@ def test_only_digcodes_are_taken_from_a_source_s_other_identifiers() -> None:
 
 
 def test_only_digcodes_are_taken_onto_an_axiell_target() -> None:
-    result = other_identifiers_rule.merge(axiell, [sierra_with_digcode])
+    result = OtherIdentifiersRule.merge(axiell, [sierra_with_digcode])
 
     assert same_elements(
         result.data,
@@ -291,7 +291,7 @@ def test_only_the_miro_source_identifier_is_merged() -> None:
         miro, [source_identifier(schemes.MIRO_LIBRARY_REFERENCE)]
     )
 
-    result = other_identifiers_rule.merge(physical_sierra, [miro_with_others])
+    result = OtherIdentifiersRule.merge(physical_sierra, [miro_with_others])
 
     assert same_elements(
         result.data, [sid(miro), *physical_sierra.data.other_identifiers]
@@ -300,7 +300,7 @@ def test_only_the_miro_source_identifier_is_merged() -> None:
 
 
 def test_no_mets_ids_are_merged() -> None:
-    result = other_identifiers_rule.merge(physical_sierra, mets_works)
+    result = OtherIdentifiersRule.merge(physical_sierra, mets_works)
 
     assert all(i.identifier_type.id != "mets" for i in result.data)
     assert result.sources == []

@@ -4,6 +4,7 @@ from collections.abc import Sequence
 
 import structlog
 
+from merger.rules.base import PartialRule
 from merger.rules.predicates import (
     PHYSICAL_DIGITAL_REASON,
     all_digital_locations,
@@ -84,6 +85,23 @@ def _linked_from_digitised(
             ):
                 return source
     return None
+
+
+class DigitisedPairSource[T](PartialRule[T]):
+    """Merges the digitised pair of a physical LMS target, and nothing else.
+
+    Audiovisual pairs are not merged, as their bibs often hold different data.
+    """
+
+    accepts_source = lms_work
+
+    @classmethod
+    def merged_sources(
+        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+    ) -> list[IdentifiedWork]:
+        candidates = super().merged_sources(target, sources)
+        digitised = find_first_linked_digitised_lms_work(target, candidates)
+        return [digitised] if digitised is not None else []
 
 
 def append_locations_from(item: Item, sources: Sequence[IdentifiedWork]) -> Item:

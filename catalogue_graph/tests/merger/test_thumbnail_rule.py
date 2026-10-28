@@ -2,7 +2,7 @@
 
 import pytest
 
-from merger.rules.thumbnail import thumbnail_rule
+from merger.rules.thumbnail import ThumbnailRule
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.access_method import ManualRequest, ViewOnline
 from models.pipeline.access_status import Open, Restricted
@@ -80,7 +80,7 @@ restricted_digital_work = sierra_work(
 
 @pytest.mark.parametrize("target", [digital_sierra, calm, axiell, tei])
 def test_the_mets_thumbnail_is_chosen(target: VisibleIdentifiedWork) -> None:
-    result = thumbnail_rule.merge(target, [*miro_works, mets])
+    result = ThumbnailRule.merge(target, [*miro_works, mets])
 
     assert result.data is not None
     assert result.data == mets.data.thumbnail
@@ -88,14 +88,14 @@ def test_the_mets_thumbnail_is_chosen(target: VisibleIdentifiedWork) -> None:
 
 @pytest.mark.parametrize("target", [tei, digital_sierra, physical_sierra])
 def test_a_miro_thumbnail_is_chosen_without_mets(target: VisibleIdentifiedWork) -> None:
-    result = thumbnail_rule.merge(target, miro_works)
+    result = ThumbnailRule.merge(target, miro_works)
 
     assert result.data is not None
     assert result.data in [work.data.thumbnail for work in miro_works]
 
 
 def test_the_miro_thumbnail_comes_from_the_work_with_the_smallest_id() -> None:
-    result = thumbnail_rule.merge(physical_sierra, miro_works)
+    result = ThumbnailRule.merge(physical_sierra, miro_works)
 
     smallest = min(miro_works, key=lambda work: work.state.source_identifier.value)
     assert result.data is not None
@@ -108,7 +108,7 @@ def test_the_miro_thumbnail_comes_from_the_work_with_the_smallest_id() -> None:
 def test_a_restricted_digital_location_suppresses_the_thumbnail(
     target: VisibleIdentifiedWork,
 ) -> None:
-    assert thumbnail_rule.merge(target, [*miro_works, mets]).data is None
+    assert ThumbnailRule.merge(target, [*miro_works, mets]).data is None
 
 
 @pytest.mark.parametrize(
@@ -117,10 +117,10 @@ def test_a_restricted_digital_location_suppresses_the_thumbnail(
 def test_a_restriction_only_on_a_physical_location_does_not_suppress_it(
     target: VisibleIdentifiedWork,
 ) -> None:
-    assert thumbnail_rule.merge(target, [*miro_works, mets]).data is not None
+    assert ThumbnailRule.merge(target, [*miro_works, mets]).data is not None
 
 
 def test_the_works_whose_thumbnails_were_considered_are_merged_sources() -> None:
-    result = thumbnail_rule.merge(digital_sierra, [*miro_works, mets])
+    result = ThumbnailRule.merge(digital_sierra, [*miro_works, mets])
 
     assert same_elements(result.sources, [*miro_works, mets])

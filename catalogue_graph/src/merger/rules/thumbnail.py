@@ -12,6 +12,7 @@ from merger.rules.base import (
     FieldMergeRule,
     PartialRule,
     distinct_works,
+    sources_used_by,
 )
 from merger.rules.predicates import (
     lms_work,
@@ -27,33 +28,31 @@ from models.pipeline.location import DigitalLocation
 
 
 class MetsThumbnail(PartialRule[DigitalLocation | None]):
-    is_defined_for_target = lms_work | single_physical_item_cms_work | tei_work
-    is_defined_for_source = single_digital_item_mets_work
+    accepts_target = lms_work | single_physical_item_cms_work | tei_work
+    accepts_source = single_digital_item_mets_work
 
+    @classmethod
     def rule(
-        self, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
+        cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> DigitalLocation | None:
         return sources[0].data.thumbnail
 
 
 class MinMiroThumbnail(PartialRule[DigitalLocation | None]):
-    is_defined_for_target = (
+    accepts_target = (
         single_item_lms_work
         | zero_item_lms_work
         | single_physical_item_cms_work
         | tei_work
     )
-    is_defined_for_source = single_digital_item_miro_work
+    accepts_source = single_digital_item_miro_work
 
+    @classmethod
     def rule(
-        self, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
+        cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> DigitalLocation | None:
         first = min(sources, key=lambda source: source.state.source_identifier.value)
         return first.data.thumbnail
-
-
-mets_thumbnail = MetsThumbnail()
-min_miro_thumbnail = MinMiroThumbnail()
 
 
 def _has_restricted_digital_location(work: IdentifiedWork) -> bool:
@@ -65,17 +64,13 @@ def _has_restricted_digital_location(work: IdentifiedWork) -> bool:
 
 
 class ThumbnailRule(FieldMergeRule[DigitalLocation | None]):
+    @classmethod
     def merge(
-        self, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> FieldMergeResult[DigitalLocation | None]:
+        used = sources_used_by([MetsThumbnail, MinMiroThumbnail], target, sources)
         return FieldMergeResult(
-            data=self._thumbnail(target, sources),
-            sources=distinct_works(
-                [
-                    *mets_thumbnail.merged_sources(target, sources),
-                    *min_miro_thumbnail.merged_sources(target, sources),
-                ]
-            ),
+            data=cls._thumbnail(target, sources), sources=distinct_works(used)
         )
 
     @staticmethod
@@ -85,11 +80,8 @@ class ThumbnailRule(FieldMergeRule[DigitalLocation | None]):
         if any(_has_restricted_digital_location(w) for w in [target, *sources]):
             return None
         # A rule that applies decides the thumbnail even when its source has none.
-        for rule in (mets_thumbnail, min_miro_thumbnail):
+        for rule in (MetsThumbnail, MinMiroThumbnail):
             merged = rule.merged_sources(target, sources)
             if merged:
                 return rule.rule(target, merged)
         return target.data.thumbnail
-
-
-thumbnail_rule = ThumbnailRule()

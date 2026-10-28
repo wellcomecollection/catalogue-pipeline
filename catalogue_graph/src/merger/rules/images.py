@@ -13,9 +13,9 @@ from merger.rules.base import (
     FieldMergeRule,
     PartialRule,
     distinct_works,
+    sources_used_by,
 )
 from merger.rules.predicates import (
-    Predicate,
     lms_work,
     lms_work_digitised_miro,
     lms_work_picture_or_ephemera,
@@ -23,7 +23,7 @@ from merger.rules.predicates import (
     single_digital_item_miro_work,
 )
 from merger.rules.support import copy_licence_from
-from merger.rules.target_precedence import target_satisfying
+from merger.rules.target_precedence import choose_target
 from models.pipeline.identified.work import IdentifiedWork, VisibleIdentifiedWork
 from models.pipeline.image import ImageData
 
@@ -31,87 +31,82 @@ from models.pipeline.image import ImageData
 class FlatImageMergeRule(PartialRule[list[ImageData]]):
     """Every image of the target and the matching sources."""
 
-    def __init__(
-        self, is_defined_for_target: Predicate, is_defined_for_source: Predicate
-    ):
-        self.is_defined_for_target = is_defined_for_target
-        self.is_defined_for_source = is_defined_for_source
-
+    @classmethod
     def rule(
-        self, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
+        cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[ImageData]:
         return [image for work in [target, *sources] for image in work.data.image_data]
 
 
-# Miro images of a re-digitised work are superseded by the METS images.
-paired_miro_images = FlatImageMergeRule(
-    lms_work & ~lms_work_digitised_miro, single_digital_item_miro_work
-)
-# Only Pictures and Ephemera emit METS images; other formats such as Books have far
-# too many images for the image search.
-mets_picture_and_ephemera_images = FlatImageMergeRule(
-    lms_work_picture_or_ephemera, single_digital_item_mets_work
-)
+class PairedMiroImages(FlatImageMergeRule):
+    """Miro images of a re-digitised work are superseded by the METS images."""
+
+    accepts_target = lms_work & ~lms_work_digitised_miro
+    accepts_source = single_digital_item_miro_work
+
+
+class MetsPictureAndEphemeraImages(FlatImageMergeRule):
+    """Only Pictures and Ephemera emit METS images.
+
+    Other formats such as Books have far too many images for the image search.
+    """
+
+    accepts_target = lms_work_picture_or_ephemera
+    accepts_source = single_digital_item_mets_work
 
 
 class ImageRule(FieldMergeRule[list[ImageData]]):
+    @classmethod
     def merge(
-        self, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> FieldMergeResult[list[ImageData]]:
         participants = [
             target,
             *(s for s in sources if isinstance(s, VisibleIdentifiedWork)),
         ]
-        lms_target = target_satisfying(
-            lms_work_digitised_miro, participants
-        ) or target_satisfying(lms_work, participants)
+        lms_target = choose_target(
+            participants, satisfying=lms_work_digitised_miro
+        ) or choose_target(participants, satisfying=lms_work)
         if lms_target is None:
             return FieldMergeResult(data=[], sources=[])
-        return self.merge_lms_work_images(lms_target, sources)
+        return cls.merge_lms_work_images(lms_target, sources)
 
+    @classmethod
     @abstractmethod
     def merge_lms_work_images(
-        self, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+        cls, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> FieldMergeResult[list[ImageData]]: ...
 
 
 class ImageDataRule(ImageRule):
     """The images kept on the merged work: Miro only, as METS images are reached via its items."""
 
+    @classmethod
     def merge_lms_work_images(
-        self, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+        cls, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> FieldMergeResult[list[ImageData]]:
+        used = sources_used_by([PairedMiroImages], lms_target, sources)
         return FieldMergeResult(
-            data=paired_miro_images(lms_target, sources) or [],
-            sources=distinct_works(
-                paired_miro_images.merged_sources(lms_target, sources)
-            ),
+            data=PairedMiroImages.apply(lms_target, sources) or [],
+            sources=distinct_works(used),
         )
 
 
 class ImagesRule(ImageRule):
     """The images emitted as records: METS images, and Miro images with the METS licence."""
 
+    @classmethod
     def merge_lms_work_images(
-        self, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+        cls, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> FieldMergeResult[list[ImageData]]:
-        mets_images = mets_picture_and_ephemera_images(lms_target, sources) or []
+        mets_images = MetsPictureAndEphemeraImages.apply(lms_target, sources) or []
         miro_images = [
             copy_licence_from(image, mets_images)
-            for image in paired_miro_images(lms_target, sources) or []
+            for image in PairedMiroImages.apply(lms_target, sources) or []
         ]
-        return FieldMergeResult(
-            data=mets_images + miro_images,
-            sources=distinct_works(
-                [
-                    *mets_picture_and_ephemera_images.merged_sources(
-                        lms_target, sources
-                    ),
-                    *paired_miro_images.merged_sources(lms_target, sources),
-                ]
-            ),
+        used = sources_used_by(
+            [MetsPictureAndEphemeraImages, PairedMiroImages], lms_target, sources
         )
-
-
-image_data_rule = ImageDataRule()
-images_rule = ImagesRule()
+        return FieldMergeResult(
+            data=mets_images + miro_images, sources=distinct_works(used)
+        )

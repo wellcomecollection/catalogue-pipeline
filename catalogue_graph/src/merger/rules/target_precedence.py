@@ -25,16 +25,12 @@ PRECEDENCE = (
 )
 
 
-def target_satisfying(
-    predicate: Predicate, works: Sequence[IdentifiedWork]
+def choose_target(
+    works: Sequence[IdentifiedWork], satisfying: Predicate = any_work
 ) -> VisibleIdentifiedWork | None:
     """The first work, in precedence order, that also satisfies the predicate; only if visible."""
     for precedence in PRECEDENCE:
         for work in works:
-            if precedence(work) and predicate(work):
+            if precedence(work) and satisfying(work):
                 return work if isinstance(work, VisibleIdentifiedWork) else None
     return None
-
-
-def get_target(works: Sequence[IdentifiedWork]) -> VisibleIdentifiedWork | None:
-    return target_satisfying(any_work, works)
