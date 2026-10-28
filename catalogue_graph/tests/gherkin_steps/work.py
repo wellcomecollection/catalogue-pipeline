@@ -98,6 +98,11 @@ def the_work_is_invisible(work: SourceWork) -> None:
     assert work.type == "Invisible"
 
 
+@then("the work is deleted")
+def the_work_is_deleted(work: SourceWork) -> None:
+    assert work.type == "Deleted"
+
+
 @then("the work is visible")
 def the_work_is_visible(work: SourceWork) -> None:
     assert work.type == "Visible"

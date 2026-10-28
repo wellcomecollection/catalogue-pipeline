@@ -10,9 +10,10 @@ Feature: merge candidates
 
   Miro images come from 089 ǂa and 962 ǂu, as in Sierra.
 
-  The EBSCO e-resource id was in 001, flagged by 003 "EBZ", in Sierra. The
-  migration made 001 the FOLIO HRID and moved the EBSCO id into 035 ǂa as
-  `(EBZ)ebsNNNe`, so that is where it is read from.
+  In Sierra, an EBSCO stub bib held the EBSCO e-resource id in 001, flagged by
+  003 "EBZ". In FOLIO, 001 is the HRID, and the migrated stub instances carry
+  the EBSCO id in 035 ǂa as `(EBZ)ebsNNNe` (wellcomecollection/platform#6763),
+  so that is where it is read from.
 
   These scenarios mirror the unit tests of the Scala transformer this
   replaces (SierraMergeCandidatesTest.scala), including its test data, so the
@@ -73,6 +74,11 @@ Feature: merge candidates
     When I transform the MARC record
     Then there are no merge candidates
 
+  Scenario: Two different b-numbers in the same 776 are ambiguous, so neither is a merge candidate
+    Given the MARC record has a 776 field with subfield "w" value "(UkLW)b21414440" and subfield "w" value "(UkLW)b12345678"
+    When I transform the MARC record
+    Then there are no merge candidates
+
   Scenario: The same b-number repeated in 776 ǂw gives one merge candidate
     Given the MARC record has a 776 field with subfield "w" value "(UkLW)  b21414440"
     And the MARC record has another 776 field with subfield "w" value "(UkLW)  b21414440"
@@ -85,6 +91,13 @@ Feature: merge candidates
   Scenario: Other prefixes alongside a (UkLW) value are ignored
     Given the MARC record has a 776 field with subfield "w" value "(OCLC)123456789"
     And the MARC record has another 776 field with subfield "w" value "(UkLW)b21414440"
+    When I transform the MARC record
+    Then the work has the merge candidates:
+      | type                 | value     | reason                         |
+      | sierra-system-number | b21414440 | Physical/digitised Sierra work |
+
+  Scenario: A (UkLW) value after another prefix in the same 776 is a merge candidate
+    Given the MARC record has a 776 field with subfield "w" value "(OCoLC)14322288" and subfield "w" value "(UkLW)b21414440"
     When I transform the MARC record
     Then the work has the merge candidates:
       | type                 | value     | reason                         |
@@ -207,6 +220,18 @@ Feature: merge candidates
     Given the MARC record has a 035 field with subfield "a" value "(OCoLC)ebs12345e"
     When I transform the MARC record
     Then there are no merge candidates
+
+  # A suppressed stub becomes a deleted work, which carries no merge candidate,
+  # so its old Sierra work page would stop redirecting to the EBSCO work.
+  # This is why stubs with a live EBSCO record must not be suppressed
+  # (wellcomecollection/platform#6763).
+
+  Scenario: A suppressed EBSCO stub is a deleted work with no merge candidates
+    Given the MARC record has a 035 field with subfield "a" value "(EBZ)ebs12345e"
+    And the MARC record's only 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001" and subfield "t" value "1"
+    When I transform the MARC record
+    Then the work is deleted
+    And there are no merge candidates
 
   # Known divergences from the Scala.
   #
