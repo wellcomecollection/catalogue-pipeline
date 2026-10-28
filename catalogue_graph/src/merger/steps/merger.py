@@ -5,11 +5,7 @@ import typing
 import structlog
 
 from id_minter.iceberg import get_works_identified_table
-from merger.components import (
-    find_changed_components,
-    read_previous_components,
-    write_components,
-)
+from merger.components import find_changed_components, read_previous_components
 from merger.matcher import load_works, match_works
 from merger.models.step_events import MergerEvent, MergerResult
 from utils.argparse import add_pipeline_event_args
@@ -41,8 +37,7 @@ def handler(
     changed_components_s3_uri = event.get_s3_uri("changed_components")
     df_to_s3_parquet(changed, changed_components_s3_uri)
     # Written last, so a failed run leaves the previous baseline for the next one.
-    # Once merging is wired in, only the components actually emitted are written.
-    write_components(current, event.components_s3_uri)
+    df_to_s3_parquet(current, event.components_s3_uri)
 
     return MergerResult(
         job_id=event.job_id,

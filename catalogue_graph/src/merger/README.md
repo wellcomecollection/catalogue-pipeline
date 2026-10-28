@@ -23,8 +23,8 @@ over the same period. It does not write to a downstream index.
   `graph-{graph_date}/pipeline-{pipeline_date}/merger/full/job-{job_id}/changed_components.parquet`,
   then replaces `graph-{graph_date}/pipeline-{pipeline_date}/merger/components.parquet`
   with the full resolved graph. The first run has no baseline and reports every work as
-  changed. Runs must not overlap, as each reads the baseline at the start and writes it at
-  the end.
+  changed. Overlapping runs can report a work more than once, as each reads the baseline
+  at the start and writes it at the end, but never miss one.
 
 ## Running locally
 

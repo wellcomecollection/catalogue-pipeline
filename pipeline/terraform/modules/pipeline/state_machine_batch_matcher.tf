@@ -99,11 +99,19 @@ resource "aws_iam_role_policy" "batch_matcher_s3_read_write" {
 }
 
 data "aws_iam_policy_document" "batch_matcher_s3_read_write" {
+  # smart_open writes by multipart upload and aborts it when a write fails.
   statement {
-    actions = ["s3:GetObject", "s3:PutObject"]
+    actions = ["s3:GetObject", "s3:PutObject", "s3:AbortMultipartUpload"]
     resources = [
       "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/pipeline-${var.pipeline_date}/merger/*",
     ]
+  }
+
+  # Without list permission S3 answers a read of a missing key with 403, which
+  # the step could not tell from a refused read.
+  statement {
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::wellcomecollection-catalogue-graph"]
   }
 }
 

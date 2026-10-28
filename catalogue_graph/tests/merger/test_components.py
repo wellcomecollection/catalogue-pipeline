@@ -3,13 +3,19 @@
 import polars as pl
 import pytest
 
+from merger import components as storage
 from merger.components import (
     COMPONENTS_SCHEMA,
     find_changed_components,
     read_previous_components,
-    write_components,
 )
-from tests.merger.support import Components, Written, components, labelled
+from tests.merger.support import (
+    Components,
+    Written,
+    components,
+    labelled,
+    s3_read_error,
+)
 from tests.mocks import MockSmartOpen
 
 
@@ -97,19 +103,34 @@ def test_changed_works_carry_their_current_component_and_write_time() -> None:
 URI = "s3://bucket/components.parquet"
 
 
-def test_no_stored_baseline_is_empty() -> None:
+def refuse_read(monkeypatch: pytest.MonkeyPatch, code: str) -> None:
+    def raise_error(uri: str) -> pl.DataFrame:
+        raise s3_read_error(code)
+
+    monkeypatch.setattr(storage, "df_from_s3_parquet", raise_error)
+
+
+def test_no_stored_baseline_is_empty(monkeypatch: pytest.MonkeyPatch) -> None:
+    refuse_read(monkeypatch, "NoSuchKey")
+
     previous = read_previous_components(URI)
 
     assert previous.height == 0
     assert previous.schema == pl.Schema(COMPONENTS_SCHEMA)
 
 
-def test_stored_baseline_is_read_back() -> None:
-    write_components(components({"A": "AB", "C": "C"}, written={"B": 9}), URI)
+def test_a_refused_read_is_an_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    refuse_read(monkeypatch, "AccessDenied")
 
-    assert read_previous_components(URI).equals(
-        components({"A": "AB", "C": "C"}, written={"B": 9})
-    )
+    with pytest.raises(OSError, match="AccessDenied"):
+        read_previous_components(URI)
+
+
+def test_stored_baseline_is_read_back() -> None:
+    stored = components({"A": "AB", "C": "C"}, written={"B": 9})
+    MockSmartOpen.mock_s3_parquet_file(URI, stored)
+
+    assert read_previous_components(URI).equals(stored)
 
 
 def test_extra_stored_columns_are_dropped() -> None:

@@ -16,9 +16,9 @@ class MergerEvent(BasePipelineEvent):
 
     @property
     def components_s3_uri(self) -> str:
-        """The components emitted by the previous run, shared by every run of a pipeline."""
+        """The components resolved by the previous run, shared by every run of a pipeline."""
         parts = [
-            f"graph-{self.graph_date or 'prod'}",
+            f"graph-{self.graph_date}",
             f"pipeline-{self.pipeline_date}",
             config.MERGER_S3_PREFIX,
             "components.parquet",

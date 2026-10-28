@@ -1,15 +1,30 @@
 """The merger step: what it reads, writes and reports on each run."""
 
+import polars as pl
 import pytest
 
+from merger import components as storage
 from merger.models.step_events import MergerEvent
 from merger.steps import merger
-from tests.merger.support import components, iceberg_table, labelled, works
+from tests.merger.support import (
+    components,
+    iceberg_table,
+    labelled,
+    s3_read_error,
+    works,
+)
 from tests.mocks import MockSmartOpen
-from utils.aws import df_from_s3_parquet
+from utils.aws import df_from_s3_parquet, df_to_s3_parquet
 
 EVENT = MergerEvent(pipeline_date="2026-01-01", graph_date="2026-01-02", job_id="job-1")
 GRAPH = {"A": "B", "B": "", "C": "D", "D": "", "E": ""}
+
+
+def read_like_s3(uri: str) -> pl.DataFrame:
+    """The mock raises KeyError for a missing file; S3 reports a missing key."""
+    if uri not in MockSmartOpen.file_lookup:
+        raise s3_read_error("NoSuchKey")
+    return df_from_s3_parquet(uri)
 
 
 def run(
@@ -17,6 +32,7 @@ def run(
 ) -> merger.MergerResult:
     table = iceberg_table(works(GRAPH), snapshot_id)
     monkeypatch.setattr(merger, "get_works_identified_table", lambda use_rest: table)
+    monkeypatch.setattr(storage, "df_from_s3_parquet", read_like_s3)
     return merger.handler(event)
 
 
@@ -56,10 +72,12 @@ def test_every_run_replaces_the_baseline_with_the_whole_graph(
 def test_changed_works_are_written_before_the_baseline(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def refuse(*args: object) -> None:
-        raise OSError("S3 is down")
+    def refuse_baseline(frame: pl.DataFrame, uri: str) -> None:
+        if uri == EVENT.components_s3_uri:
+            raise OSError("S3 is down")
+        df_to_s3_parquet(frame, uri)
 
-    monkeypatch.setattr(merger, "write_components", refuse)
+    monkeypatch.setattr(merger, "df_to_s3_parquet", refuse_baseline)
 
     with pytest.raises(OSError):
         run(monkeypatch)

@@ -4,6 +4,9 @@ from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import polars as pl
+import pytest
+import smart_open.s3
+from botocore.exceptions import ClientError
 
 from merger.components import COMPONENTS_SCHEMA
 
@@ -65,6 +68,15 @@ def labelled(frame: pl.DataFrame) -> Components:
     """The {component id: members} view of a components frame."""
     grouped = frame.group_by("component_id").agg(pl.col("id").sort().str.join(""))
     return dict(grouped.iter_rows())
+
+
+def s3_read_error(code: str) -> OSError:
+    """The error smart_open itself raises when S3 answers a read with the given code."""
+    client = MagicMock()
+    client.get_object.side_effect = ClientError({"Error": {"Code": code}}, "GetObject")
+    with pytest.raises(OSError) as raised:
+        smart_open.s3.open("bucket", "components.parquet", "rb", client=client)
+    return raised.value
 
 
 def iceberg_table(rows: pl.DataFrame, snapshot_id: int = 7) -> MagicMock:
