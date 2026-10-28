@@ -10,6 +10,9 @@ from adapters.transformers.folio.access_conditions import (
     is_access_note,
 )
 from adapters.transformers.folio.locations import ResolvedLocation, resolve_locations
+from adapters.transformers.marc.predecessor_identifier import (
+    extract_sierra_item_predecessor_id,
+)
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from models.pipeline.item import Item
@@ -35,7 +38,8 @@ def _build_item(
             identifier_type=FOLIO_ITEM_IDENTIFIER_TYPE,
             ontology_type="Item",
             value=item.id,
-        )
+        ),
+        predecessor=_sierra_predecessor(item),
     )
     title = item.enumeration or item.volume
     if item_location is None:
@@ -72,6 +76,17 @@ def _build_item(
                 access_conditions=[access_condition],
             )
         ],
+    )
+
+
+def _sierra_predecessor(item: FolioEnrichedItem) -> SourceIdentifier | None:
+    # Keyed as the Sierra transformer keyed the item, so it keeps that canonical id.
+    if (value := extract_sierra_item_predecessor_id(item.former_ids)) is None:
+        return None
+    return SourceIdentifier(
+        identifier_type=Id(id="sierra-system-number"),
+        ontology_type="Item",
+        value=value,
     )
 
 

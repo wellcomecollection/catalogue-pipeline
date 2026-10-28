@@ -38,12 +38,21 @@ class Identifiers(SerialisableModel):
 
 class Identifiable(Identifiers):
     canonical_id: str | None = None
+    # Read by the id-minter on first mint, to inherit the predecessor's canonical id.
+    predecessor_identifier: SourceIdentifier | None = None
     type: IdentifyType = "Identifiable"
     identifiedType: IdentifyType = "Identified"
 
     @staticmethod
-    def from_source_identifier(identifier: SourceIdentifier) -> "Identifiable":
-        return Identifiable(source_identifier=identifier, other_identifiers=[])
+    def from_source_identifier(
+        identifier: SourceIdentifier,
+        predecessor: SourceIdentifier | None = None,
+    ) -> "Identifiable":
+        return Identifiable(
+            source_identifier=identifier,
+            other_identifiers=[],
+            predecessor_identifier=predecessor,
+        )
 
     @staticmethod
     def identifier_from_text(label: str, ontology_type: str) -> "Identifiable":

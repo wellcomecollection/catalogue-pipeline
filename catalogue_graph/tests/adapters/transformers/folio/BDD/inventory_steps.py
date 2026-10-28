@@ -8,6 +8,7 @@ import pytest
 from pytest_bdd import given, parsers, then
 
 from adapters.transformers.folio.access_conditions import notes
+from models.pipeline.identifier import Identifiable
 from models.pipeline.item import Item
 from models.pipeline.location import PhysicalLocation
 from models.pipeline.source.work import VisibleSourceWork
@@ -113,6 +114,11 @@ def item_display_note(folio_item: dict[str, Any], note: str) -> None:
     folio_item["notes"].append({"itemNoteTypeName": "Display note", "note": note})
 
 
+@given(parsers.parse('that item has the former ids "{former_ids}"'))
+def item_former_ids(folio_item: dict[str, Any], former_ids: str) -> None:
+    folio_item["formerIds"] = former_ids.split(", ")
+
+
 @given("that item is suppressed from discovery")
 def item_suppressed(folio_item: dict[str, Any]) -> None:
     folio_item["suppressFromDiscovery"] = True
@@ -144,6 +150,29 @@ def no_item(work: VisibleSourceWork, item_id: str) -> None:
         or i.id.source_identifier.value != item_id  # type: ignore[union-attr]
         for i in work.data.items
     )
+
+
+def _identifiable(work: VisibleSourceWork, item_id: str) -> Identifiable:
+    identifier = _item(work, item_id).id
+    assert isinstance(identifier, Identifiable)
+    return identifier
+
+
+@then(parsers.parse('item "{item_id}" has the source identifier "{expected}"'))
+def item_has_source_identifier(
+    work: VisibleSourceWork, item_id: str, expected: str
+) -> None:
+    assert str(_identifiable(work, item_id).source_identifier) == expected
+
+
+@then(parsers.parse('item "{item_id}" has the predecessor "{expected}"'))
+def item_has_predecessor(work: VisibleSourceWork, item_id: str, expected: str) -> None:
+    assert str(_identifiable(work, item_id).predecessor_identifier) == expected
+
+
+@then(parsers.parse('item "{item_id}" has no predecessor'))
+def item_has_no_predecessor(work: VisibleSourceWork, item_id: str) -> None:
+    assert _identifiable(work, item_id).predecessor_identifier is None
 
 
 @then(parsers.parse('item "{item_id}" has no location'))
