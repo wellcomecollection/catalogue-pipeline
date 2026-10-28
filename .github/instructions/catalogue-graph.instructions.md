@@ -81,7 +81,7 @@ go through `utils.manifests.ManifestWriter`. Subclass it and implement
 - `pydantic` is pinned `>=2.11.7,<2.12.0` because of a pyiceberg
   `TableMetadata` validation incompatibility — do not bump it without
   verifying pyiceberg compatibility.
-- `elasticsearch` is pinned `>=8.11,<8.13` — match the deployed cluster
+- `elasticsearch` is pinned `>=9.5,<10` — match the deployed cluster
   version.
 - `pyarrow` and `pyiceberg` are why the project stays on Python 3.12. Don't
   raise `requires-python` without checking wheel availability.
