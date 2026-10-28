@@ -2,7 +2,7 @@
 name = "palette_inferrer"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "inferrer-common",
     "joblib==1.2.0",
