@@ -5,6 +5,7 @@ import httpx
 from adapters.extractors.oai_pmh.folio.enrichment.inventory_client import (
     FolioInventoryClient,
 )
+from tests.adapters.transformers.folio.helpers import fixture_record
 
 
 def _client(handler: object, **kwargs: object) -> FolioInventoryClient:
@@ -16,95 +17,100 @@ def _client(handler: object, **kwargs: object) -> FolioInventoryClient:
     )
 
 
-def test_enriched_instances_posts_instance_ids_and_parses_response() -> None:
+def test_items_and_holdings_posts_instance_ids_and_parses_response() -> None:
     seen_requests: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
         seen_requests.append(request)
-        return httpx.Response(
-            200,
-            json=[
-                {"instanceId": "i-1", "items": [{"id": "item-1"}]},
-                {"instanceId": "i-2", "items": [{"id": "item-2"}]},
-            ],
-        )
+        return httpx.Response(200, json=[fixture_record("i-1"), fixture_record("i-2")])
 
     client = _client(handler)
-    result = client.enriched_instances(["i-1", "i-2"])
+    result = client.items_and_holdings(["i-1", "i-2"])
 
-    assert [i.instance_id for i in result] == ["i-1", "i-2"]
-    assert result[0].items[0].id == "item-1"
+    assert [r.instance_id for r in result.records] == ["i-1", "i-2"]
+    assert [r.data for r in result.records] == [
+        fixture_record("i-1"),
+        fixture_record("i-2"),
+    ]
 
     assert len(seen_requests) == 1
     request = seen_requests[0]
     assert request.method == "POST"
-    assert str(request.url).endswith("/oai-pmh-view/enrichedInstances")
+    assert str(request.url).endswith("/inventory-hierarchy/items-and-holdings")
     body = json.loads(request.content)
     assert body["instanceIds"] == ["i-1", "i-2"]
     assert body["skipSuppressedFromDiscoveryRecords"] is False
 
 
-def test_enriched_instances_batches_requests() -> None:
+def test_items_and_holdings_batches_requests() -> None:
     batches: list[list[str]] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
         ids = json.loads(request.content)["instanceIds"]
         batches.append(ids)
-        return httpx.Response(200, json=[{"instanceId": i} for i in ids])
+        return httpx.Response(200, json=[fixture_record(i) for i in ids])
 
     client = _client(handler, batch_size=2)
-    result = client.enriched_instances(["a", "b", "c", "d", "e"])
+    result = client.items_and_holdings(["a", "b", "c", "d", "e"])
 
     assert batches == [["a", "b"], ["c", "d"], ["e"]]
-    assert [i.instance_id for i in result] == ["a", "b", "c", "d", "e"]
+    assert [r.instance_id for r in result.records] == ["a", "b", "c", "d", "e"]
 
 
-def test_enriched_instances_deduplicates_ids() -> None:
+def test_items_and_holdings_deduplicates_ids() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         ids = json.loads(request.content)["instanceIds"]
         assert ids == ["a", "b"]
         return httpx.Response(200, json=[])
 
     client = _client(handler)
-    client.enriched_instances(["a", "b", "a", "", "b"])
+    client.items_and_holdings(["a", "b", "a", "", "b"])
 
 
-def test_enriched_instances_parses_ndjson() -> None:
+def test_items_and_holdings_parses_ndjson() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
-        body = "\n".join(
-            json.dumps(r) for r in [{"instanceId": "i-1"}, {"instanceId": "i-2"}]
-        )
+        body = "\n".join(json.dumps(fixture_record(i)) for i in ["i-1", "i-2"])
         return httpx.Response(200, text=body)
 
     client = _client(handler)
-    result = client.enriched_instances(["i-1", "i-2"])
-    assert [i.instance_id for i in result] == ["i-1", "i-2"]
+    result = client.items_and_holdings(["i-1", "i-2"])
+    assert [r.instance_id for r in result.records] == ["i-1", "i-2"]
 
 
-def test_enriched_instances_parses_concatenated_json_stream() -> None:
-    """The live endpoint streams concatenated objects with no array/newlines, and an
-    instance with no items sends ``itemsandholdingsfields: ""``."""
+def test_items_and_holdings_parses_concatenated_json_stream() -> None:
+    """The endpoint streams concatenated objects with no array or newlines."""
 
     def handler(request: httpx.Request) -> httpx.Response:
-        body = (
-            '{"instanceid":"i-1","itemsandholdingsfields":""}'
-            '{"instanceid":"i-2","itemsandholdingsfields":'
-            '{"items":[{"id":"item-9b59","barcode":"22501207789","materialType":"Books"}]}}'
-        )
+        body = json.dumps(fixture_record("i-1")) + json.dumps(fixture_record("i-2"))
         return httpx.Response(200, text=body)
 
     client = _client(handler)
-    result = client.enriched_instances(["i-1", "i-2"])
-    assert [i.instance_id for i in result] == ["i-1", "i-2"]
-    assert result[0].items == []  # empty-string itemsandholdingsfields
-    assert [it.id for it in result[1].items] == ["item-9b59"]
-    assert result[1].items[0].barcode == "22501207789"
-    assert result[1].items[0].material_type == "Books"
+    result = client.items_and_holdings(["i-1", "i-2"])
+    assert [r.data for r in result.records] == [
+        fixture_record("i-1"),
+        fixture_record("i-2"),
+    ]
 
 
-def test_enriched_instances_empty_input_makes_no_request() -> None:
+def test_items_and_holdings_empty_input_makes_no_request() -> None:
     def handler(request: httpx.Request) -> httpx.Response:  # pragma: no cover
         raise AssertionError("should not be called")
 
     client = _client(handler)
-    assert client.enriched_instances([]) == []
+    assert client.items_and_holdings([]).records == []
+
+
+def test_items_and_holdings_rejects_only_the_bad_record() -> None:
+    """An item with no id cannot mint a stable identifier, so its record is left
+    out, and the rest of the batch still comes back."""
+    broken = fixture_record("i-2")
+    del broken["items"][3]["id"]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=[fixture_record("i-1"), broken])
+
+    result = _client(handler).items_and_holdings(["i-1", "i-2"])
+
+    assert [r.instance_id for r in result.records] == ["i-1"]
+    assert [r.instance_id for r in result.rejected] == ["i-2"]
+    assert "missing an id" in result.rejected[0].reason

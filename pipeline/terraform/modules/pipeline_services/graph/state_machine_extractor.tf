@@ -23,10 +23,10 @@ module "catalogue_graph_extractor_state_machine" {
             AwsvpcConfiguration = {
               AssignPublicIp = "DISABLED"
               Subnets        = local.private_subnets
-              SecurityGroups = [
-                local.ec_privatelink_security_group_id,
-                aws_security_group.graph_pipeline_security_group.id,
-              ]
+              SecurityGroups = concat(
+                local.ecs_privatelink_security_group_ids,
+                [aws_security_group.graph_pipeline_security_group.id],
+              )
             }
           },
           Overrides = {

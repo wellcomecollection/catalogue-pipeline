@@ -1,7 +1,6 @@
-# A scheduled scan-and-fan-out state machine:
-#   ConstructEvent (build the window from the schedule, or pass through replay input)
-#     -> FindWork (Lambda: ids in scope, partitioned to S3)
-#       -> ProcessPartitions (Map: one worker per partition ref, bounded by max_concurrency)
+# A scan-and-fan-out state machine, started on a schedule or by EventBridge rules:
+#   FindWork (Lambda: parse the input, find the ids in scope, partition to S3)
+#     -> ProcessPartitions (Map: one worker per partition ref, bounded by max_concurrency)
 #
 # The find-work Lambda only discovers and slices; the injected worker state
 # does the long-running processing, one bounded partition at a time.
@@ -27,10 +26,15 @@ module "find_work_lambda" {
   vpc_config = var.vpc_config
 }
 
-# The Lambda reads ES credentials from Secrets Manager at runtime.
-resource "aws_iam_role_policy" "find_work_secret_read" {
+# ES credentials or Iceberg tables, depending on where the planner lists ids.
+resource "aws_iam_role_policy" "find_work_read" {
   role   = module.find_work_lambda.lambda_role_name
-  policy = var.find_work_secret_read_policy_json
+  policy = var.find_work_read_policy_json
+}
+
+moved {
+  from = aws_iam_role_policy.find_work_secret_read
+  to   = aws_iam_role_policy.find_work_read
 }
 
 # find_work writes each partition's ids to S3 (pass-by-reference) so the state

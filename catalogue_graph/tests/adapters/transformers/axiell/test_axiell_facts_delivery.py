@@ -64,6 +64,7 @@ def _run_transform(
     changeset_ids: list[str],
     facts_table: IcebergTable | None = None,
     reconciler_table: IcebergTable | None = None,
+    with_deletion_facts: bool = True,
 ) -> TransformerResult:
     if facts_table is not None:
         monkeypatch.setattr(
@@ -80,6 +81,7 @@ def _run_transform(
         transformer_type="axiell",
         job_id="test-job-id",
         changeset_ids=changeset_ids,
+        with_deletion_facts=with_deletion_facts,
     )
 
     return handler(event=event, es_mode="local", use_rest_api_table=False)
@@ -449,3 +451,31 @@ def test_adapter_row_with_guid_key_fails_loudly(
     )
     with pytest.raises(RuntimeError, match="reserved for deletion facts"):
         list(AxiellStoreSource(reader).stream_raw())
+
+
+def test_planned_reindex_partition_never_builds_or_reads_the_facts_store(
+    temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    changeset_id = prepare_changeset(
+        temporary_table,
+        monkeypatch,
+        {"collect-1": _marcxml("guid-new-1")},
+        namespace=AXIELL_NAMESPACE,
+        transformer_type="axiell",
+    )
+
+    def fail_build(**kwargs: Any) -> IcebergTable:
+        raise AssertionError("facts table must not be built for a planned reindex")
+
+    monkeypatch.setattr(
+        "adapters.steps.transformer.AXIELL_CONFIG.build_deletion_facts_table",
+        fail_build,
+    )
+
+    result = _run_transform(monkeypatch, [changeset_id], with_deletion_facts=False)
+
+    assert result.success_count == 1
+    assert [op["_id"] for op in MockElasticsearchClient.inputs] == [
+        "Work[axiell-guid/guid-new-1]"
+    ]

@@ -18,7 +18,7 @@ from adapters.extractors.ebsco import helpers as ebsco_helpers
 from adapters.extractors.oai_pmh.axiell import config as axiell_config
 from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
 from adapters.extractors.oai_pmh.folio import config as folio_config
-from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_items_store
+from adapters.extractors.oai_pmh.folio.enrichment.runtime import build_inventory_store
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
@@ -30,6 +30,7 @@ from adapters.transformers.source_work_transformer import (
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.axiell_changeset_reader import AxiellChangesetReader
 from core.sinks import ElasticsearchSink
+from utils.aws import pydantic_from_s3_json
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
@@ -59,6 +60,9 @@ class TransformerEvent(BaseModel):
     changeset_ids; an explicitly empty list is rejected, not treated as
     none."""
     snapshot_id: int | None = None
+    with_deletion_facts: bool = True
+    """False for a planned reindex: it writes into a fresh index, where historic
+    Axiell deletion facts have nothing to overwrite."""
 
     @model_validator(mode="after")
     def _check_ids(self) -> "TransformerEvent":
@@ -151,20 +155,21 @@ def build_transformer(
             snapshot_id=snapshot_id,
             ids=event.ids,
             adapter_store=adapter_store,
+            with_deletion_facts=event.with_deletion_facts,
         )
-        return AxiellTransformer(reader)
+        return AxiellTransformer(reader, with_deletions=event.with_deletion_facts)
     if event.transformer_type == "ebsco":
         return EbscoTransformer(
             adapter_store, event.changeset_ids, snapshot_id, ids=event.ids
         )
     if event.transformer_type == "folio":
-        # Join the enriched items store so FOLIO works carry items with stable
+        # Join the enriched inventory store so FOLIO works carry items with stable
         # `folio-item` identifiers.
-        # The transformer only reads the items store; the enrichment step creates it.
+        # The transformer only reads the inventory store; the enrichment step creates it.
         # A missing items table fails the transform (NoSuchTableError) rather than
         # silently emitting works without items. On a fresh environment, run one
         # enrichment pass before transforming.
-        items_store = build_items_store(
+        inventory_store = build_inventory_store(
             use_rest_api_table=use_rest_api_table, create_if_not_exists=False
         )
         return FolioTransformer(
@@ -172,7 +177,7 @@ def build_transformer(
             event.changeset_ids,
             snapshot_id,
             ids=event.ids,
-            items_store=items_store,
+            inventory_store=inventory_store,
         )
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
@@ -254,10 +259,20 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         trace_id=get_trace_id(context),
         pipeline_step="adapter_transformer",
     )
-    transformer_event = TransformerEvent.model_validate(event)
-    return handler(
-        transformer_event, execution_context, use_rest_api_table=True
-    ).model_dump(mode="json")
+    if "s3_uri" not in event:
+        transformer_event = TransformerEvent.model_validate(event)
+        return handler(
+            transformer_event, execution_context, use_rest_api_table=True
+        ).model_dump(mode="json")
+
+    # A partition ref from the find-work step; resolve the full event from S3
+    transformer_event = pydantic_from_s3_json(TransformerEvent, event["s3_uri"])
+    result = handler(transformer_event, execution_context, use_rest_api_table=True)
+    # The Map collects every partition's output, so return the ref, not the ids
+    return {
+        **result.model_dump(mode="json", exclude={"changeset_ids"}),
+        "s3_uri": event["s3_uri"],
+    }
 
 
 def _read_ids(args: argparse.Namespace) -> list[str] | None:

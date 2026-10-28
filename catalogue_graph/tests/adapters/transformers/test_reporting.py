@@ -6,8 +6,9 @@ from pyiceberg.table import Table as IcebergTable
 import adapters.extractors.oai_pmh.folio.config as adapter_config
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.steps.transformer import TransformerEvent, handler
+from adapters.transformers.reporting import TransformerReport
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
-from tests.adapters.transformers.folio.helpers import make_items_store
+from tests.adapters.transformers.folio.helpers import make_inventory_store
 from tests.mocks import MockCloudwatchClient, MockSmartOpen
 
 FOLIO_NAMESPACE = FOLIO_CONFIG.config.adapter_namespace
@@ -36,10 +37,10 @@ def _run_transform(
     monkeypatch.setattr(adapter_config, "PIPELINE_DATE", pipeline_date)
     monkeypatch.setattr(adapter_config, "INDEX_DATE", None)
 
-    items_store = make_items_store({})
+    inventory_store = make_inventory_store({})
     monkeypatch.setattr(
-        "adapters.steps.transformer.build_items_store",
-        lambda **kwargs: items_store,
+        "adapters.steps.transformer.build_inventory_store",
+        lambda **kwargs: inventory_store,
     )
 
     event = TransformerEvent(
@@ -118,10 +119,10 @@ def test_transformer_run_writes_report_to_s3(
         namespace=FOLIO_NAMESPACE,
         transformer_type="folio",
     )
-    items_store = make_items_store({})
+    inventory_store = make_inventory_store({})
     monkeypatch.setattr(
-        "adapters.steps.transformer.build_items_store",
-        lambda **kwargs: items_store,
+        "adapters.steps.transformer.build_inventory_store",
+        lambda **kwargs: inventory_store,
     )
     monkeypatch.setattr(adapter_config, "PIPELINE_DATE", "2026-03-15")
     monkeypatch.setattr(adapter_config, "INDEX_DATE", None)
@@ -147,3 +148,37 @@ def test_transformer_run_writes_report_to_s3(
     assert report["errors"] == []
     assert report["changeset_ids"] == [changeset_id]
     assert report["transformer_type"] == "folio"
+
+
+def _report(changeset_ids: list[str]) -> TransformerReport:
+    return TransformerReport(
+        pipeline_date="dev",
+        transformer_type="folio",
+        changeset_ids=changeset_ids,
+        ids=[],
+        job_id="job-1-p000",
+        successful_ids=[],
+        errors=[],
+        unmatched_ids=[],
+        s3_bucket="test-bucket",
+        s3_prefix="dev",
+    )
+
+
+def test_single_changeset_report_key_names_the_changeset() -> None:
+    assert _report(["changeset-1"]).s3_uri.endswith("/changeset-1__job-1-p000.json")
+
+
+def test_many_changesets_get_a_bounded_report_key() -> None:
+    changeset_ids = [f"00000000-0000-0000-0000-{i:012d}" for i in range(50)]
+    report = _report(changeset_ids)
+
+    key = report.s3_uri.removeprefix("s3://test-bucket/")
+    assert len(key.encode()) < 1024
+    assert "/50changesets-" in key
+    assert _report(changeset_ids[:-1]).s3_uri != report.s3_uri
+
+    report.publish()
+    with open(MockSmartOpen.file_lookup[report.s3_uri], encoding="utf-8") as f:
+        published = json.load(f)
+    assert published["changeset_ids"] == changeset_ids

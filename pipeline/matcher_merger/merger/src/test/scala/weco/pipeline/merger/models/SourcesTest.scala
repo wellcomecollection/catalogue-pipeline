@@ -18,11 +18,11 @@ class SourcesTest
     with MiroWorkGenerators
     with SierraWorkGenerators
     with MergeCandidateGenerators {
-  describe("findFirstLinkedDigitisedSierraWorkFor") {
+  describe("findFirstLinkedDigitisedLmsWorkFor") {
     it("returns None if there are no source Works") {
       val physicalWork = sierraPhysicalIdentifiedWork()
 
-      Sources.findFirstLinkedDigitisedSierraWorkFor(
+      Sources.findFirstLinkedDigitisedLmsWorkFor(
         physicalWork,
         sources = Seq.empty
       ) shouldBe None
@@ -42,7 +42,7 @@ class SourcesTest
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(
+        Sources.findFirstLinkedDigitisedLmsWorkFor(
           physicalWork,
           sources = Seq(digitisedWork1, digitisedWork2)
         )
@@ -62,7 +62,7 @@ class SourcesTest
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(
+        Sources.findFirstLinkedDigitisedLmsWorkFor(
           physicalWork,
           sources = Seq(digitisedWork)
         )
@@ -88,7 +88,7 @@ class SourcesTest
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(
+        Sources.findFirstLinkedDigitisedLmsWorkFor(
           physicalWork,
           sources = Seq(digitisedWork)
         )
@@ -114,7 +114,7 @@ class SourcesTest
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(
+        Sources.findFirstLinkedDigitisedLmsWorkFor(
           physicalWork,
           sources = Seq(digitisedWork)
         )
@@ -132,7 +132,7 @@ class SourcesTest
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(
+        Sources.findFirstLinkedDigitisedLmsWorkFor(
           physicalWork,
           sources = Seq(digitisedWork)
         )
@@ -150,7 +150,7 @@ class SourcesTest
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(
+        Sources.findFirstLinkedDigitisedLmsWorkFor(
           physicalWork,
           sources = Seq(digitisedWork)
         )
@@ -169,7 +169,7 @@ class SourcesTest
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(
+        Sources.findFirstLinkedDigitisedLmsWorkFor(
           physicalWork,
           sources = Seq(digitisedWork)
         )
@@ -194,7 +194,7 @@ class SourcesTest
             List(createSierraPairMergeCandidateFor(physicalWork))
           )
 
-      val result = Sources.findFirstLinkedDigitisedSierraWorkFor(
+      val result = Sources.findFirstLinkedDigitisedLmsWorkFor(
         physicalWork,
         sources = Seq(digitisedWork, miroWork)
       )

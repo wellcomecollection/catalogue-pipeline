@@ -79,13 +79,9 @@ def get_pipeline_storage_es_client(reindex_date):
     host = get_secret_string(session, secret_id=f"{secret_prefix}/public_host")
     port = get_secret_string(session, secret_id=f"{secret_prefix}/port")
     protocol = get_secret_string(session, secret_id=f"{secret_prefix}/protocol")
-    username = get_secret_string(
-        session, secret_id=f"{secret_prefix}/read_only/es_username"
-    )
-    password = get_secret_string(
-        session, secret_id=f"{secret_prefix}/read_only/es_password"
-    )
-    return Elasticsearch(f"{protocol}://{host}:{port}", basic_auth=(username, password))
+    # Every pipeline has a read_only API key; serverless projects have no read_only user.
+    api_key = get_secret_string(session, secret_id=f"{secret_prefix}/read_only/api_key")
+    return Elasticsearch(f"{protocol}://{host}:{port}", api_key=api_key)
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10))

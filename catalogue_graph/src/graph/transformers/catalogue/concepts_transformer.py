@@ -9,10 +9,10 @@ from graph.sources.catalogue.concepts_source import (
     ExtractedWorkConcept,
 )
 from graph.transformers.graph_transformer import GraphBaseTransformer
-from ingestor.transformers.raw_concept import get_most_specific_concept_type
 from models.events import BasePipelineEvent
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
+from utils.concept_types import get_most_specific_concept_type
 from utils.ontology import get_transformers_from_ontology
 from utils.types import ConceptType
 

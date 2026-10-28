@@ -57,6 +57,8 @@ object Main
     config.imageDownstreamTarget
   )
 
+  override protected val batchIndexing: Boolean = config.batchIndexing
+
   override protected val mergeProcessor = new MergeProcessor(
     sourceWorkLookup,
     mergerManager,

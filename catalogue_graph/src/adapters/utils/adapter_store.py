@@ -2,7 +2,16 @@ from datetime import UTC, datetime
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Or
+from pyiceberg.expressions import (
+    AlwaysFalse,
+    And,
+    BooleanExpression,
+    EqualTo,
+    GreaterThanOrEqual,
+    In,
+    IsNull,
+    Or,
+)
 from pyiceberg.table import ALWAYS_TRUE
 from pyiceberg.table import Table as IcebergTable
 
@@ -106,6 +115,49 @@ class AdapterStore(PipelineStore):
         non_deleted_filter = Or(EqualTo("deleted", False), IsNull("deleted"))
         return self.get_namespace_records(
             And(non_deleted_filter, iceberg_filter), snapshot_id
+        )
+
+    def changeset_stats(
+        self, changeset_ids: list[str] | None = None, snapshot_id: int | None = None
+    ) -> pa.Table:
+        """Return rows and tombstones per changeset at one snapshot, as columns
+        changeset, rows, tombstones.
+
+        Reads only two columns and aggregates in Arrow. With changeset_ids,
+        covers the rows `get_records_by_changesets` would read; without, every
+        changeset in the namespace (a null changeset comes back as a null key).
+        """
+        if snapshot_id is None:
+            snapshot_id = self.current_snapshot_id()
+
+        row_filter: BooleanExpression = ALWAYS_TRUE
+        if changeset_ids is not None:
+            changeset_filter = In("changeset", changeset_ids)
+            min_last_modified = self._get_min_last_modified(
+                changeset_filter, snapshot_id
+            )
+            if min_last_modified is None:
+                row_filter = AlwaysFalse()  # type: ignore[no-untyped-call]
+            else:
+                row_filter = And(
+                    changeset_filter,
+                    GreaterThanOrEqual("last_modified", min_last_modified),
+                )
+
+        rows = self.table.scan(
+            row_filter=And(EqualTo("namespace", self.namespace), row_filter),
+            snapshot_id=snapshot_id,
+            selected_fields=("changeset", "deleted"),
+        ).to_arrow()
+        stats = rows.group_by("changeset").aggregate(
+            [
+                ("changeset", "count", pc.CountOptions(mode="all")),
+                # A null deleted flag is a live row; min_count=0 sums those to 0
+                ("deleted", "sum", pc.ScalarAggregateOptions(min_count=0)),
+            ]
+        )
+        return stats.rename_columns(
+            {"changeset_count": "rows", "deleted_sum": "tombstones"}
         )
 
     def stream_active_namespace_records(

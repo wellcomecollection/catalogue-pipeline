@@ -1,133 +1,177 @@
+import json
+from collections.abc import Callable
+from typing import Any
+
 import pytest
 
 from adapters.extractors.oai_pmh.folio.enrichment.models import (
     FolioEnrichedInstance,
+    FolioInventoryRecord,
+    parse_inventory_records,
 )
+from tests.adapters.transformers.folio.helpers import fixture_record
 
-# A record shaped per the mod-inventory-storage oai-pmh-view enrichedInstances docs:
-# instanceId + itemsAndHoldingsFields.items, with nested callNumber / location objects.
-SAMPLE_RECORD = {
-    "instanceId": "3144420c-1111-2222-3333-444455556666",
-    "itemsAndHoldingsFields": {
-        "instanceid": "3144420c-1111-2222-3333-444455556666",
-        "items": [
-            {
-                "id": "aaa11111-0000-0000-0000-000000000001",
-                "volume": "v1",
-                "enumeration": "no. 1",
-                "materialType": "book",
-                "barcode": "1234567890",
-                "callNumber": {
-                    "prefix": "WZ",
-                    "suffix": None,
-                    "typeId": "ttt-0000",
-                    "callNumber": "WZ 100",
-                },
-                "location": {
-                    "name": "Closed stores",
-                    "location": {
-                        "libraryName": "Rare Materials Room",
-                        "institutionName": "Wellcome Collection",
-                    },
-                },
-            },
-            {
-                "id": "aaa11111-0000-0000-0000-000000000002",
-            },
-        ],
-    },
-}
+INSTANCE_ID = "64125966-52e5-5a7f-9572-0bd80ea6980e"
 
 
-def test_from_api_parses_documented_shape() -> None:
-    instance = FolioEnrichedInstance.from_api(SAMPLE_RECORD)
-
-    assert instance.instance_id == "3144420c-1111-2222-3333-444455556666"
-    assert [i.id for i in instance.items] == [
-        "aaa11111-0000-0000-0000-000000000001",
-        "aaa11111-0000-0000-0000-000000000002",
-    ]
-    first = instance.items[0]
-    assert first.barcode == "1234567890"
-    assert first.volume == "v1"
-    assert first.enumeration == "no. 1"
-    assert first.material_type == "book"
-    # callNumber is a nested object; we flatten to its call-number string.
-    assert first.call_number == "WZ 100"
-    # location is a nested object; we take a readable name.
-    assert first.location == "Closed stores"
-
-    # Missing fields are tolerated.
-    assert instance.items[1].barcode is None
-    assert instance.items[1].call_number is None
-    assert instance.items[1].location is None
-
-
-def test_from_api_flattens_location_from_nested_library_name() -> None:
-    instance = FolioEnrichedInstance.from_api(
-        {
-            "instanceId": "i-1",
-            "itemsAndHoldingsFields": {
-                "items": [
-                    {
-                        "id": "item-1",
-                        "location": {
-                            "location": {"libraryName": "History of Medicine"}
-                        },
-                    }
-                ]
-            },
-        }
+def _parsed() -> FolioEnrichedInstance:
+    return FolioEnrichedInstance.from_store_content(
+        FolioInventoryRecord(data=fixture_record()).to_store_content()
     )
-    assert instance.items[0].location == "History of Medicine"
 
 
-def test_from_api_handles_lowercase_wrapper_and_string_callnumber() -> None:
-    """Tolerate the lowercase ``itemsandholdingsfields`` and a plain-string callNumber."""
-    instance = FolioEnrichedInstance.from_api(
-        {
-            "instanceId": "i-1",
-            "itemsandholdingsfields": {
-                "items": [{"id": "item-1", "callNumber": "WZ 100"}]
-            },
-        }
+def test_parses_the_fixture() -> None:
+    instance = _parsed()
+
+    assert instance.instance_id == INSTANCE_ID
+    assert len(instance.items) == 61
+
+    item = next(
+        i for i in instance.items if i.id == "02738895-598f-5d5b-9b10-363d66da01f0"
     )
-    assert [i.id for i in instance.items] == ["item-1"]
-    assert instance.items[0].call_number == "WZ 100"
+    assert item.volume == "Vol. 23 1969"
+    assert item.enumeration is None
 
 
-def test_from_api_handles_no_items() -> None:
-    instance = FolioEnrichedInstance.from_api({"instanceId": "i-empty"})
+def test_store_content_keeps_the_whole_record() -> None:
+    record = fixture_record()
+    assert json.loads(FolioInventoryRecord(data=record).to_store_content()) == record
+
+
+def _reverse_keys(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _reverse_keys(value[k]) for k in reversed(value)}
+    if isinstance(value, list):
+        return [_reverse_keys(v) for v in value]
+    return value
+
+
+def test_store_content_is_independent_of_key_order() -> None:
+    record = fixture_record()
+    reordered = _reverse_keys(record)
+    assert json.dumps(reordered) != json.dumps(record)
+    assert (
+        FolioInventoryRecord(data=record).to_store_content()
+        == FolioInventoryRecord(data=reordered).to_store_content()
+    )
+
+
+def test_parses_record_with_no_items() -> None:
+    instance = FolioEnrichedInstance.from_store_content(
+        FolioInventoryRecord(
+            data={"instanceId": "i-empty", "holdings": [], "items": []}
+        ).to_store_content()
+    )
     assert instance.instance_id == "i-empty"
     assert instance.items == []
 
 
-def test_store_content_round_trips() -> None:
-    instance = FolioEnrichedInstance.from_api(SAMPLE_RECORD)
-    content = instance.to_store_content()
-    assert isinstance(content, str)
-
-    restored = FolioEnrichedInstance.from_store_content(content)
-    assert restored == instance
-    assert restored.items[0].id == "aaa11111-0000-0000-0000-000000000001"
+def test_record_exposes_instance_id() -> None:
+    assert FolioInventoryRecord(data=fixture_record()).instance_id == INSTANCE_ID
 
 
-def test_from_api_raises_when_item_missing_id() -> None:
-    """An item with no id cannot mint a stable identifier, so parsing fails loudly
-    rather than emitting an item identified by the literal string "None"."""
-    with pytest.raises(ValueError, match="item is missing an id"):
-        FolioEnrichedInstance.from_api(
-            {
-                "instanceId": "i-1",
-                "itemsAndHoldingsFields": {"items": [{"barcode": "123"}]},
-            }
-        )
+def test_record_raises_when_item_missing_id() -> None:
+    """An item with no id cannot mint a stable identifier, so the batch fails."""
+    record = fixture_record()
+    del record["items"][3]["id"]
+    with pytest.raises(ValueError, match="missing an id"):
+        FolioInventoryRecord(data=record)
 
 
-def test_from_api_raises_when_instance_missing_id() -> None:
-    """A record with no instanceId cannot be keyed to a bib row, so parsing fails
-    loudly rather than storing a row keyed by the literal string "None"."""
+def test_record_repr_shows_the_instance_id_not_the_record() -> None:
+    record = FolioInventoryRecord(data=fixture_record())
+    assert repr(record) == f"FolioInventoryRecord(instance_id='{INSTANCE_ID}')"
+
+
+def test_record_raises_when_instance_missing_id() -> None:
+    """A record with no instanceId cannot be keyed to a bib row, so the batch fails."""
+    record = fixture_record()
+    del record["instanceId"]
     with pytest.raises(ValueError, match="missing instanceId"):
-        FolioEnrichedInstance.from_api(
-            {"itemsAndHoldingsFields": {"items": [{"id": "item-1"}]}}
-        )
+        FolioInventoryRecord(data=record)
+
+
+def test_record_raises_when_holdings_missing_id() -> None:
+    record = fixture_record()
+    del record["holdings"][2]["id"]
+    with pytest.raises(ValueError, match="holdings on instance .* is missing an id"):
+        FolioInventoryRecord(data=record)
+
+
+def test_record_raises_when_holdings_id_repeats() -> None:
+    record = fixture_record()
+    record["holdings"][2]["id"] = record["holdings"][0]["id"]
+    with pytest.raises(ValueError, match="appears twice"):
+        FolioInventoryRecord(data=record)
+
+
+@pytest.mark.parametrize("holdings_record_id", [None, "not-in-this-response"])
+def test_record_raises_when_item_links_to_no_holdings(
+    holdings_record_id: str | None,
+) -> None:
+    record = fixture_record()
+    if holdings_record_id is None:
+        del record["items"][3]["holdingsRecordId"]
+    else:
+        record["items"][3]["holdingsRecordId"] = holdings_record_id
+    with pytest.raises(ValueError, match="links to no holdings record"):
+        FolioInventoryRecord(data=record)
+
+
+def test_parse_inventory_records_rejects_each_bad_record_on_its_own() -> None:
+    broken = fixture_record("i-2")
+    del broken["holdings"][1]["id"]
+    no_instance = fixture_record()
+    del no_instance["instanceId"]
+
+    fetch = parse_inventory_records([fixture_record("i-1"), broken, no_instance])
+
+    assert [r.instance_id for r in fetch.records] == ["i-1"]
+    assert [(r.instance_id, r.reason) for r in fetch.rejected] == [
+        ("i-2", "FOLIO holdings on instance 'i-2' is missing an id"),
+        (None, "FOLIO items-and-holdings record is missing instanceId"),
+    ]
+
+
+@pytest.mark.parametrize(
+    "break_record, reason",
+    [
+        (
+            lambda r: r.update(holdings=[None]),
+            "holdings on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r.update(items=[None]),
+            "items on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r.update(items={"id": "a"}),
+            "items on instance 'i-2' is not a list of objects",
+        ),
+        (
+            lambda r: r["holdings"][0].update(id={"x": 1}),
+            "holdings on instance 'i-2' has a non-string id",
+        ),
+        (
+            lambda r: r["items"][0].update(id=7),
+            "item on instance 'i-2' has a non-string id",
+        ),
+        (
+            lambda r: r["items"][0].update(holdingsRecordId=["h"]),
+            "links to no holdings record",
+        ),
+        (lambda r: r.update(instanceId=["i-2"]), "non-string instanceId"),
+    ],
+)
+def test_malformed_record_is_rejected_not_raised(
+    break_record: Callable[[dict[str, Any]], None], reason: str
+) -> None:
+    """A wrongly shaped record must not abort the fetch for the records around it."""
+    broken = fixture_record("i-2")
+    break_record(broken)
+
+    fetch = parse_inventory_records([fixture_record("i-1"), broken])
+
+    assert [r.instance_id for r in fetch.records] == ["i-1"]
+    assert len(fetch.rejected) == 1
+    assert reason in fetch.rejected[0].reason

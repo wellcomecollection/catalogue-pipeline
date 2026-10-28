@@ -75,7 +75,7 @@ module "image_inferrer" {
     ]
   }
 
-  find_work_secret_read_policy_json = data.aws_iam_policy_document.inference_manager_pipeline_storage_secret_read.json
+  find_work_read_policy_json = data.aws_iam_policy_document.inference_manager_pipeline_storage_secret_read.json
 
   partition_s3_arns = [
     "arn:aws:s3:::wellcomecollection-catalogue-graph/graph-*/*/inferrer/*"
@@ -112,10 +112,10 @@ module "image_inferrer" {
         AwsvpcConfiguration = {
           AssignPublicIp = "DISABLED"
           Subnets        = local.network_config.subnets
-          SecurityGroups = [
-            local.network_config.ec_privatelink_security_group_id,
-            aws_security_group.egress.id,
-          ]
+          SecurityGroups = concat(
+            local.network_config.ecs_privatelink_security_group_ids,
+            [aws_security_group.egress.id],
+          )
         }
       }
       Overrides = {

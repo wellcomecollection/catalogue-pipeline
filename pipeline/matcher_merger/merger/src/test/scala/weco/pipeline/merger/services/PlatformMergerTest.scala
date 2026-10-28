@@ -4,7 +4,8 @@ import org.scalatest.LoneElement
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.image.ParentWork
 import weco.catalogue.internal_model.image.ParentWork._
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.WorkFsm._
@@ -1558,6 +1559,207 @@ class PlatformMergerTest
     mergedWork.data shouldBe folioWork.data
   }
 
+  // FOLIO replaces Sierra in its own pipeline, so each Sierra case should merge
+  // the same way with its Sierra works swapped for FOLIO ones.
+  describe("FOLIO works merge as Sierra works do") {
+    def isSierra(work: Work[Identified]): Boolean =
+      work.sourceIdentifier.identifierType == IdentifierType.SierraSystemNumber
+
+    // A Sierra work is identified by its b-number and carries its
+    // sierra-identifier, but no other b-number.
+    def asSierra(work: Work[Identified]): Work[Identified] =
+      work match {
+        case w: Work.Visible[Identified] if isSierra(w) =>
+          w.otherIdentifiers(w.data.otherIdentifiers.filterNot {
+            _.identifierType == IdentifierType.SierraSystemNumber
+          })
+        case w => w
+      }
+
+    // A FOLIO work is identified by its instance UUID and carries its HRID and
+    // its Sierra b-number.
+    def asFolio(work: Work[Identified]): Work[Identified] =
+      asSierra(work) match {
+        case w: Work.Visible[Identified] if isSierra(w) =>
+          val bnumber = w.sourceIdentifier
+          w.copy(state =
+            w.state.copy(sourceIdentifier =
+              bnumber.copy(identifierType = IdentifierType.FolioInstance)
+            )
+          ).otherIdentifiers(
+            w.data.otherIdentifiers.filterNot {
+              _.identifierType == IdentifierType.SierraIdentifier
+            } ++ List(
+              bnumber.copy(identifierType = IdentifierType.FolioInstanceHrid),
+              bnumber
+            )
+          )
+        case w => w
+      }
+
+    // The two runs carry different record identifiers by design, so compare
+    // what's left once the UUID is mapped back to the b-number it replaces.
+    // A FOLIO work also lists its own b-number, which Sierra holds as its id.
+    def withoutRecordIds(work: Work.Visible[Merged]) =
+      work.data.copy(otherIdentifiers =
+        work.data.otherIdentifiers
+          .filterNot {
+            id =>
+              id.identifierType == IdentifierType.FolioInstanceHrid ||
+              id.identifierType == IdentifierType.SierraIdentifier ||
+              id == work.sourceIdentifier.copy(identifierType =
+                IdentifierType.SierraSystemNumber
+              )
+          }
+          .map {
+            id =>
+              if (id.identifierType == IdentifierType.FolioInstance)
+                id.copy(identifierType = IdentifierType.SierraSystemNumber)
+              else id
+          }
+          .distinct
+      )
+
+    def outcome(works: Seq[Work[Identified]]): (Set[Any], Set[Any]) = {
+      val result = merger.merge(works)
+      val mergedWorks: Set[Any] = result
+        .mergedWorksWithTime(now)
+        .map {
+          case w: Work.Visible[Merged] =>
+            (
+              w.state.canonicalId,
+              withoutRecordIds(w),
+              w.redirectSources.map(_.canonicalId)
+            )
+          case w: Work.Redirected[Merged] =>
+            (w.state.canonicalId, w.redirectTarget.canonicalId)
+          case w => (w.state.canonicalId, w.getClass.getSimpleName)
+        }
+        .toSet
+      val images: Set[Any] = result
+        .mergedImagesWithTime(now)
+        .map {
+          image =>
+            val parentId = image.source match {
+              case p: ParentWork => Some(p.id.canonicalId)
+              case _             => None
+            }
+            (image.state.canonicalId, image.locations, parentId)
+        }
+        .toSet
+      (mergedWorks, images)
+    }
+
+    val teiWork = teiIdentifiedWork()
+      .mergeCandidates(
+        List(createSierraPairMergeCandidateFor(sierraPhysicalWork))
+      )
+
+    val axiellWork = axiellIdentifiedWork()
+    val bibWithAxiell = sierraPhysicalIdentifiedWork()
+      .mergeCandidates(List(createAxiellMergeCandidateFor(axiellWork)))
+
+    val (ebibWithEbsco, ebscoWork) = sierraEbscoIdentifiedWorkPair()
+
+    val physicalVideo = sierraIdentifiedWork()
+      .format(Format.Film)
+      .items(List(createIdentifiedPhysicalItem))
+    val videoEbib = sierraIdentifiedWork()
+      .format(Format.Videos)
+      .mergeCandidates(List(createSierraPairMergeCandidateFor(physicalVideo)))
+    val videoMets = metsIdentifiedWork()
+      .mergeCandidates(List(createMetsMergeCandidateFor(videoEbib)))
+      .items(List(createDigitalItem))
+      .invisible()
+
+    val sharedMiro = miroIdentifiedWork()
+    def bibsSharing(miro: Work[Identified], format: Format) =
+      (1 to 2).map {
+        _ =>
+          sierraPhysicalIdentifiedWork()
+            .format(format)
+            .mergeCandidates(List(createMiroSierraMergeCandidateFor(miro)))
+      }.toList
+    val picturesSharingMiro = bibsSharing(sharedMiro, Format.Pictures)
+    val metsForPictures = picturesSharingMiro.map {
+      bib =>
+        metsIdentifiedWork()
+          .mergeCandidates(List(createMetsMergeCandidateFor(bib)))
+          .items(List(createDigitalItem))
+          .invisible()
+    }
+    val axiellForBibs = (1 to 2).map(_ => axiellIdentifiedWork()).toList
+    val bibsWithAxiellSharingMiro = axiellForBibs.map {
+      axiell =>
+        sierraPhysicalIdentifiedWork()
+          .mergeCandidates(
+            List(
+              createAxiellMergeCandidateFor(axiell),
+              createMiroSierraMergeCandidateFor(sharedMiro)
+            )
+          )
+    }
+
+    val examples = Table(
+      ("-works-", "-clue-"),
+      (Seq(sierraPhysicalWork, metsWork), "physical work and METS"),
+      (Seq(sierraPictureWork, metsWork), "picture and METS"),
+      (Seq(zeroItemSierraWork, miroWork), "zero-item picture and Miro"),
+      (Seq(sierraDigitalWork, miroWork), "digital image and Miro"),
+      (Seq(multipleItemsSierraWork, miroWork), "multi-item work and Miro"),
+      (
+        Seq(sierraDigitisedWork, sierraPhysicalWork, metsWork),
+        "physical/digitised pair and METS"
+      ),
+      (
+        Seq(sierraDigitisedWork, sierraPhysicalWork, metsWork, miroWork),
+        "physical/digitised pair, METS and Miro"
+      ),
+      (Seq(calmWork, sierraPhysicalWork, metsWork), "Calm, physical and METS"),
+      (Seq(teiWork, sierraPhysicalWork), "TEI and physical work"),
+      (Seq(axiellWork, bibWithAxiell, metsWork), "Axiell, physical and METS"),
+      (Seq(ebibWithEbsco, ebscoWork), "EBSCO and e-bib"),
+      (
+        Seq(physicalVideo, videoEbib, videoMets),
+        "audiovisual e-bib, physical video and METS"
+      ),
+      (
+        sharedMiro :: picturesSharingMiro ++ metsForPictures,
+        "bibs sharing a Miro, each with METS"
+      ),
+      (
+        sharedMiro :: axiellForBibs ++ bibsWithAxiellSharingMiro,
+        "bibs sharing a Miro, each with an Axiell work"
+      )
+    )
+
+    it("chooses the same target") {
+      forAll(examples) {
+        (works: Seq[Work[Identified]], clue: String) =>
+          withClue(clue) {
+            merger
+              .findTarget(works.map(asFolio))
+              .map(_.state.canonicalId) shouldBe merger
+              .findTarget(works.map(asSierra))
+              .map(_.state.canonicalId)
+          }
+      }
+    }
+
+    it("produces the same merged works and images") {
+      forAll(examples) {
+        (works: Seq[Work[Identified]], clue: String) =>
+          withClue(clue) {
+            val folioWorks = works.map(asFolio)
+            folioWorks.map(_.sourceIdentifier.identifierType) should contain(
+              IdentifierType.FolioInstance
+            )
+            outcome(folioWorks) shouldBe outcome(works.map(asSierra))
+          }
+      }
+    }
+  }
+
   it("passes an Axiell work through the merger unchanged") {
     val axiellWork = identifiedWork(
       sourceIdentifier = createAxiellSourceIdentifier
@@ -1570,6 +1772,19 @@ class PlatformMergerTest
 
     val mergedWork = mergedWorks.head.asInstanceOf[Work.Visible[Merged]]
     mergedWork.data shouldBe axiellWork.data
+  }
+
+  it("drops the stub item from a born-digital Axiell work on its own") {
+    val axiellWork = axiellIdentifiedWork().format(Format.ArchivesDigital)
+
+    val result = merger.merge(works = Seq(axiellWork))
+
+    val mergedWork =
+      result
+        .mergedWorksWithTime(now)
+        .loneElement
+        .asInstanceOf[Work.Visible[Merged]]
+    mergedWork.data.items shouldBe empty
   }
 
   // See https://github.com/wellcomecollection/platform/issues/6750

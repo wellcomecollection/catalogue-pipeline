@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterable
-from datetime import datetime
 from typing import Any
 
 import structlog
@@ -45,37 +44,30 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
             logger.warning("Skipping record with a missing or empty id field (001)")
             return
 
-        row_id, last_modified = row["id"], row["last_modified"]
-        # Item/holdings enrichment content joined on by FolioStoreSource
-        # (None for adapters without an items store).
-        enrichment_content = row.get("enrichment_content")
-
+        row_id = row["id"]
         try:
             work: SourceWork
             if row.get("deleted", False):
-                work = self.transform_deleted(marc_record, last_modified)
+                work = self.transform_deleted(marc_record, row)
             else:
-                work = self.transform_record(
-                    marc_record, last_modified, enrichment_content
-                )
+                work = self.transform_record(marc_record, row)
             yield self.document(row_id, work)
         except Exception as e:
             logger.error("Error transforming record", error=str(e))
             self._add_error(e, "transform", row_id)
 
-    def transform_record(
-        self,
-        marc_record: Record,
-        last_modified: datetime,
-        enrichment_content: str | None = None,
-    ) -> SourceWork:
-        builder = self.work_builder(
-            marc_record, last_modified, enrichment_content=enrichment_content
-        )
-        return builder.transform_work()
+    def _make_builder(
+        self, marc_record: Record, row: dict[str, Any]
+    ) -> MarcXmlWorkBuilder:
+        """Build the work builder for a row. Override to pass source-specific inputs."""
+        return self.work_builder(marc_record, row["last_modified"])
+
+    def transform_record(self, marc_record: Record, row: dict[str, Any]) -> SourceWork:
+        return self._make_builder(marc_record, row).transform_work()
 
     def transform_deleted(
-        self, marc_record: Record, last_modified: datetime
+        self, marc_record: Record, row: dict[str, Any]
     ) -> DeletedSourceWork:
-        builder = self.work_builder(marc_record, last_modified)
-        return builder.transform_deleted_work(deleted_reason=DeletedFromSource())
+        return self._make_builder(marc_record, row).transform_deleted_work(
+            deleted_reason=DeletedFromSource()
+        )
