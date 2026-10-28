@@ -9,6 +9,7 @@ import re
 import structlog
 from pymarc.record import Record
 
+from adapters.transformers.folio.identifier import extract_hrid
 from adapters.transformers.marc.common import all_non_empty_subfields, distinct
 from adapters.transformers.marc.predecessor_identifier import SIERRA_SYSTEM_NUMBER_RE
 from ingestor.models.shared.merge_candidate import MergeCandidate
@@ -133,9 +134,17 @@ def _ebsco_candidates(record: Record) -> list[MergeCandidate]:
     ]
 
 
+def _hrid_candidate(record: Record) -> MergeCandidate:
+    """The HRID, which a METS record digitised from FOLIO also names, so both meet on it."""
+    return _merge_candidate(
+        "folio-instance-hrid", extract_hrid(record), "FOLIO/METS work"
+    )
+
+
 def extract_merge_candidates(record: Record) -> list[MergeCandidate]:
     return (
-        _physical_digitised_candidates(record)
+        [_hrid_candidate(record)]
+        + _physical_digitised_candidates(record)
         + _miro_candidates(record)
         + _ebsco_candidates(record)
     )
