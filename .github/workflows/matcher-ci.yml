@@ -52,6 +52,16 @@ jobs:
       - name: Log in to private ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      # localstack and dynamodb-local come from ECR Public, where anonymous
+      # pulls hit the rate limit. run_sbt_task_in_docker.sh mounts ~/.docker,
+      # so docker compose inside the sbt container uses this login.
+      - name: Log in to ECR Public
+        uses: aws-actions/amazon-ecr-login@v2
+        env:
+          AWS_REGION: us-east-1
+        with:
+          registry-type: public
+
       - name: Restore the coursier cache
         uses: coursier/cache-action@v6
 
