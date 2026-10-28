@@ -11,6 +11,11 @@ def extract_collection_identifier(record: Record) -> str | None:
 
     Cataloguers link by the unique identifier in 099 ǂa, or by the Sierra
     b-number (907 ǂa in FOLIO) when the record has no unique identifier.
+
+    A record can only have one identifier here, so every part must link to its
+    host by the same one. A part that links to a host with a unique identifier
+    by its b-number alone stays detached. Agreed with Collections Information,
+    see wellcomecollection/platform#6562.
     """
     return first_non_empty_subfield(
         "099", "a", record
