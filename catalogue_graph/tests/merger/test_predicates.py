@@ -13,7 +13,6 @@ from tests.merger.works import (
     invisible,
     mets_work,
     miro_work,
-    physical_item,
     sierra_digital_work,
     sierra_physical_work,
     sierra_work,
@@ -115,17 +114,6 @@ def test_lms_works_with_the_digaids_digcode() -> None:
         assert "digaids" in [i.value for i in identifiers]
 
 
-def test_single_physical_item_axiell_work() -> None:
-    assert predicates.single_physical_item_axiell_work(axiell_work())
-
-
-def test_a_calm_work_is_not_a_single_physical_item_axiell_work() -> None:
-    work = calm_work(items=[physical_item(identified=False)])
-
-    assert not predicates.single_physical_item_axiell_work(work)
-
-
-def test_an_axiell_work_is_not_a_single_physical_item_calm_work() -> None:
-    work = axiell_work(items=[physical_item(identified=False)])
-
-    assert not predicates.single_physical_item_calm_work(work)
+def test_calm_and_axiell_works_are_single_physical_item_cms_works() -> None:
+    assert predicates.single_physical_item_cms_work(calm_work())
+    assert predicates.single_physical_item_cms_work(axiell_work())

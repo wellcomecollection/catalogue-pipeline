@@ -146,21 +146,18 @@ miro_work = source(schemes.MIRO_IMAGE_NUMBER)
 # A library management system work. Sierra and FOLIO run in separate pipelines,
 # so the rules can treat them alike.
 lms_work = source(schemes.SIERRA_SYSTEM_NUMBER) | source(schemes.FOLIO_INSTANCE)
+# A collections management system work. Axiell replaced CALM and both give works
+# the same shape, so the rules treat them alike.
+cms_work = source(schemes.CALM_RECORD_ID) | source(schemes.AXIELL_GUID)
 
 tei_work = source(schemes.TEI_MANUSCRIPT_ID) & zero_item & is_visible
-single_physical_item_calm_work = (
-    source(schemes.CALM_RECORD_ID)
-    & single_item
-    & single_location
-    & all_physical_locations
+single_physical_item_cms_work = (
+    cms_work & single_item & single_location & all_physical_locations
 )
-single_physical_item_axiell_work = (
-    source(schemes.AXIELL_GUID) & single_item & single_location & all_physical_locations
+# Born-digital material has no physical copy, so its CMS stub item is misleading.
+born_digital_archive_stub_work = single_physical_item_cms_work & has_format(
+    ArchivesDigital
 )
-# Born-digital material has no physical copy, so its Calm/Axiell stub item is misleading.
-born_digital_archive_stub_work = (
-    single_physical_item_calm_work | single_physical_item_axiell_work
-) & has_format(ArchivesDigital)
 single_digital_item_mets_work = (
     source(schemes.METS) & single_item & all_digital_locations
 )

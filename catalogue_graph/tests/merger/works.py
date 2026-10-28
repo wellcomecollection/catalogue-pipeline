@@ -1,10 +1,13 @@
 """Builders for identified works in the shapes the transformers produce."""
 
 import itertools
+from collections.abc import Sequence
 
 from ingestor.models.shared.deleted_reason import DeletedFromSource
 from ingestor.models.shared.invisible_reason import InvisibleReason
+from merger.rules.predicates import PHYSICAL_DIGITAL_REASON
 from models import identifier_schemes as schemes
+from models.pipeline.access_condition import AccessCondition
 from models.pipeline.format import Format
 from models.pipeline.id_label import Id
 from models.pipeline.identified.work import (
@@ -20,10 +23,23 @@ from models.pipeline.item import Item
 from models.pipeline.location import (
     ClosedStores,
     DigitalLocation,
+    LocationType,
     OnlineResource,
     PhysicalLocation,
 )
 from models.pipeline.work_data import WorkData
+
+EBSCO_SIERRA_REASON = "Ebsco/Sierra work"
+MIRO_SIERRA_REASON = "Miro/Sierra work"
+
+Maps = Format(id="e", label="Maps")
+
+CC_BY = Id(id="cc-by")
+IN_COPYRIGHT = Id(id="in-copyright")
+
+IIIFImage = LocationType(id="iiif-image")
+IIIFPresentation = LocationType(id="iiif-presentation")
+ThumbnailImage = LocationType(id="thumbnail-image")
 
 _counter = itertools.count(1)
 
@@ -46,42 +62,72 @@ def digcode_identifier(digcode: str) -> SourceIdentifier:
     return source_identifier(schemes.WELLCOME_DIGCODE, digcode)
 
 
-def physical_location() -> PhysicalLocation:
+def physical_location(
+    access_conditions: list[AccessCondition] | None = None,
+) -> PhysicalLocation:
     return PhysicalLocation(
-        location_type=ClosedStores, label="Closed stores", access_conditions=[]
+        location_type=ClosedStores,
+        label="Closed stores",
+        access_conditions=access_conditions or [],
     )
 
 
-def digital_location() -> DigitalLocation:
+def digital_location(
+    location_type: LocationType = IIIFPresentation,
+    license: Id | None = CC_BY,
+    access_conditions: list[AccessCondition] | None = None,
+) -> DigitalLocation:
     return DigitalLocation(
-        location_type=OnlineResource,
+        location_type=location_type,
         url=f"https://example.org/{_next('loc')}",
-        access_conditions=[],
+        license=license,
+        access_conditions=access_conditions or [],
     )
 
 
-def physical_item(identified: bool = True) -> Item:
+def online_location(
+    access_conditions: list[AccessCondition] | None = None,
+) -> DigitalLocation:
+    return digital_location(OnlineResource, access_conditions=access_conditions)
+
+
+def physical_item(
+    identified: bool = True, locations: list[PhysicalLocation] | None = None
+) -> Item:
     item_id: Identified | Unidentifiable = Unidentifiable()
     if identified:
         item_id = Identified(
             canonical_id=_next("item"),
             source_identifier=source_identifier(schemes.SIERRA_IDENTIFIER),
         )
-    return Item(id=item_id, locations=[physical_location()])
+    return Item(id=item_id, locations=[*(locations or [physical_location()])])
 
 
-def digital_item() -> Item:
-    return Item(id=Unidentifiable(), locations=[digital_location()])
+def digital_item(locations: list[DigitalLocation] | None = None) -> Item:
+    return Item(id=Unidentifiable(), locations=[*(locations or [digital_location()])])
 
 
-def image_data() -> ImageData:
+def miro_item() -> Item:
+    return digital_item([digital_location(IIIFImage)])
+
+
+def image_data(locations: list[DigitalLocation] | None = None) -> ImageData:
     return ImageData(
         id=Identified(
             canonical_id=_next("image"),
             source_identifier=source_identifier(schemes.MIRO_IMAGE_NUMBER),
         ),
         version=1,
-        locations=[digital_location()],
+        locations=locations or [digital_location(IIIFImage)],
+    )
+
+
+def mets_image_data(license: Id | None = CC_BY) -> ImageData:
+    return image_data(
+        [
+            digital_location(IIIFImage, license=license),
+            digital_location(IIIFPresentation, license=license),
+        ]
     )
 
 
@@ -99,6 +145,7 @@ def merge_candidate(
 
 def identified_work(
     scheme: schemes.IdentifierScheme,
+    title: str | None = None,
     items: list[Item] | None = None,
     format: Format | None = None,
     other_identifiers: list[SourceIdentifier] | None = None,
@@ -109,7 +156,7 @@ def identified_work(
     return VisibleIdentifiedWork(
         version=1,
         data=WorkData(
-            title=_next("Title "),
+            title=title or _next("Title "),
             items=items or [],
             format=format,
             other_identifiers=other_identifiers or [],
@@ -126,6 +173,14 @@ def identified_work(
 
 
 def sierra_work(**kwargs: object) -> VisibleIdentifiedWork:
+    """A Sierra work carries its b-number and i-number as other identifiers."""
+    kwargs.setdefault(
+        "other_identifiers",
+        [
+            source_identifier(schemes.SIERRA_SYSTEM_NUMBER),
+            source_identifier(schemes.SIERRA_IDENTIFIER),
+        ],
+    )
     return identified_work(schemes.SIERRA_SYSTEM_NUMBER, **kwargs)  # type: ignore[arg-type]
 
 
@@ -137,6 +192,24 @@ def sierra_digital_work(**kwargs: object) -> VisibleIdentifiedWork:
     return sierra_work(items=[digital_item()], **kwargs)
 
 
+def sierra_pair() -> tuple[VisibleIdentifiedWork, VisibleIdentifiedWork]:
+    """A digitised Sierra work and the physical one that links to it."""
+    digitised = sierra_digital_work()
+    physical = sierra_physical_work(
+        merge_candidates=[merge_candidate(digitised, PHYSICAL_DIGITAL_REASON)]
+    )
+    return digitised, physical
+
+
+def sierra_ebsco_pair() -> tuple[VisibleIdentifiedWork, VisibleIdentifiedWork]:
+    """A digital Sierra work and the EBSCO work it links to."""
+    ebsco = ebsco_work()
+    sierra = sierra_digital_work(
+        merge_candidates=[merge_candidate(ebsco, EBSCO_SIERRA_REASON)]
+    )
+    return sierra, ebsco
+
+
 def folio_work(**kwargs: object) -> VisibleIdentifiedWork:
     return identified_work(schemes.FOLIO_INSTANCE, **kwargs)  # type: ignore[arg-type]
 
@@ -146,19 +219,26 @@ def ebsco_work(**kwargs: object) -> VisibleIdentifiedWork:
 
 
 def miro_work(**kwargs: object) -> VisibleIdentifiedWork:
-    """A Miro work: one digital item, a thumbnail and one image."""
-    kwargs.setdefault("items", [digital_item()])
-    kwargs.setdefault("thumbnail", digital_location())
+    """A Miro work: one image item, a thumbnail and one image."""
+    kwargs.setdefault("items", [miro_item()])
+    kwargs.setdefault("thumbnail", digital_location(ThumbnailImage))
     kwargs.setdefault("images", [image_data()])
     return identified_work(schemes.MIRO_IMAGE_NUMBER, **kwargs)  # type: ignore[arg-type]
 
 
 def mets_work(**kwargs: object) -> VisibleIdentifiedWork:
-    """A METS work: one digital item, a thumbnail and one image."""
+    """A METS work: one digital item and one image."""
     kwargs.setdefault("items", [digital_item()])
-    kwargs.setdefault("thumbnail", digital_location())
-    kwargs.setdefault("images", [image_data()])
+    kwargs.setdefault("images", [mets_image_data()])
     return identified_work(schemes.METS, **kwargs)  # type: ignore[arg-type]
+
+
+def invisible_mets_work(
+    num_images: int, license: Id | None = CC_BY
+) -> InvisibleIdentifiedWork:
+    return invisible(
+        mets_work(images=[mets_image_data(license) for _ in range(num_images)])
+    )
 
 
 def calm_work(**kwargs: object) -> VisibleIdentifiedWork:
@@ -190,3 +270,13 @@ def deleted(work: VisibleIdentifiedWork) -> DeletedIdentifiedWork:
     return DeletedIdentifiedWork(
         version=work.version, state=work.state, deleted_reason=DeletedFromSource()
     )
+
+
+def same_elements(actual: Sequence[object], expected: Sequence[object]) -> bool:
+    """Equal as multisets, for values that are not hashable."""
+    remaining = list(expected)
+    for value in actual:
+        if value not in remaining:
+            return False
+        remaining.remove(value)
+    return not remaining
