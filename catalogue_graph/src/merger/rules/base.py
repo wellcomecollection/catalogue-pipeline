@@ -18,7 +18,7 @@ from models.pipeline.identified.work import IdentifiedWork, VisibleIdentifiedWor
 @dataclass(frozen=True)
 class FieldMergeResult[T]:
     data: T
-    sources: list[IdentifiedWork]
+    redirected_sources: list[IdentifiedWork]
 
 
 class FieldMergeRule[T](ABC):
@@ -66,7 +66,7 @@ class SingleSource[T](PartialRule[T]):
         return merged if len(merged) == 1 else []
 
 
-def first_defined[T](
+def apply_first_applicable[T](
     rules: Sequence[type[PartialRule[T]]],
     target: VisibleIdentifiedWork,
     sources: Sequence[IdentifiedWork],
@@ -79,7 +79,7 @@ def first_defined[T](
     return None
 
 
-def sources_used_by(
+def sources_to_redirect(
     rules: Sequence[type[PartialRule[Any]]],
     target: VisibleIdentifiedWork,
     sources: Sequence[IdentifiedWork],

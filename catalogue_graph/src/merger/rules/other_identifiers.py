@@ -16,9 +16,9 @@ from merger.rules.base import (
     FieldMergeRule,
     PartialRule,
     SingleSource,
+    apply_first_applicable,
     distinct_works,
-    first_defined,
-    sources_used_by,
+    sources_to_redirect,
 )
 from merger.rules.predicates import (
     ebsco_work,
@@ -77,12 +77,13 @@ def allowed_identifiers(source: IdentifiedWork) -> list[SourceIdentifier]:
 
 
 class AppendAllowedIdentifiers(PartialRule[list[SourceIdentifier]]):
+    """The identifiers the sources add to the target's own."""
+
     @classmethod
     def rule(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[SourceIdentifier]:
-        appended = [i for source in sources for i in allowed_identifiers(source)]
-        return target.data.other_identifiers + appended
+        return [i for source in sources for i in allowed_identifiers(source)]
 
 
 class MergeIntoEbscoTarget(AppendAllowedIdentifiers):
@@ -119,7 +120,7 @@ class MergeMiroIntoDigmiroTarget(AppendAllowedIdentifiers):
 
 
 class MergeDigitalIntoPhysicalLmsTarget(DigitisedPairSource[list[SourceIdentifier]]):
-    """The physical bib takes every identifier of its digitised pair."""
+    """The physical bib adds every identifier of its digitised pair."""
 
     accepts_target = physical_lms_work & ~is_audiovisual
 
@@ -128,11 +129,7 @@ class MergeDigitalIntoPhysicalLmsTarget(DigitisedPairSource[list[SourceIdentifie
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[SourceIdentifier]:
         (digitised,) = sources
-        return [
-            *target.data.other_identifiers,
-            digitised.state.source_identifier,
-            *digitised.data.other_identifiers,
-        ]
+        return [digitised.state.source_identifier, *digitised.data.other_identifiers]
 
 
 class OtherIdentifiersRule(FieldMergeRule[list[SourceIdentifier]]):
@@ -147,22 +144,23 @@ class OtherIdentifiersRule(FieldMergeRule[list[SourceIdentifier]]):
             MergeSingleMiroIntoSingleOrZeroItemLmsTarget,
             MergeMiroIntoDigmiroTarget,
         ]
+        # The pair's identifiers are added alongside the first of the others.
         from_pair = MergeDigitalIntoPhysicalLmsTarget.apply(target, sources)
-        from_sources = first_defined(contributing, target, sources)
-        # Both halves start from the target's own identifiers; the distinct step
-        # removes the repeat when both apply.
-        combined = [
-            *(from_pair or []),
-            *(from_sources or []),
-        ]
-        if from_pair is None and from_sources is None:
-            combined = target.data.other_identifiers
-        identifiers = distinct_identifiers(combined)
+        from_sources = apply_first_applicable(contributing, target, sources)
+        identifiers = distinct_identifiers(
+            [
+                *target.data.other_identifiers,
+                *(from_pair or []),
+                *(from_sources or []),
+            ]
+        )
 
-        claiming = [
+        redirecting = [
             MergeIntoEbscoTarget,
             *contributing,
             MergeDigitalIntoPhysicalLmsTarget,
         ]
-        used = sources_used_by(claiming, target, sources)
-        return FieldMergeResult(data=identifiers, sources=distinct_works(used))
+        redirected = sources_to_redirect(redirecting, target, sources)
+        return FieldMergeResult(
+            data=identifiers, redirected_sources=distinct_works(redirected)
+        )

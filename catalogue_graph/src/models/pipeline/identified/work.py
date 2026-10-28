@@ -3,7 +3,13 @@ from pydantic import Field
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.identifier import Identified, SourceIdentifier
 from models.pipeline.serialisable import SerialisableModel
-from models.pipeline.work import DeletedWork, InvisibleWork, VisibleWork, Work
+from models.pipeline.work import (
+    DeletedWork,
+    InvisibleWork,
+    RedirectedWork,
+    VisibleWork,
+    Work,
+)
 from models.pipeline.work_data import WorkData
 from models.pipeline.work_state import WorkState
 
@@ -44,6 +50,8 @@ class IdentifiedWork(Work):
             return InvisibleIdentifiedWork.model_validate(work)
         if work["type"] == "Deleted":
             return DeletedIdentifiedWork.model_validate(work)
+        if work["type"] == "Redirected":
+            return RedirectedIdentifiedWork.model_validate(work)
 
         raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
 
@@ -58,3 +66,7 @@ class InvisibleIdentifiedWork(InvisibleWork, IdentifiedWork):
 
 class DeletedIdentifiedWork(DeletedWork, IdentifiedWork):
     pass
+
+
+class RedirectedIdentifiedWork(RedirectedWork, IdentifiedWork):
+    data: WorkData = Field(default_factory=WorkData, exclude=True)

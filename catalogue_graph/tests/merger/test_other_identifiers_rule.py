@@ -93,7 +93,7 @@ def test_mets_miro_calm_and_sierra_ids_into_a_tei_target() -> None:
             sierra_identifier(physical_sierra),
         ],
     )
-    assert same_elements(result.sources, [physical_sierra, miro, calm])
+    assert same_elements(result.redirected_sources, [physical_sierra, miro, calm])
 
 
 def test_mets_miro_and_sierra_ids_into_a_calm_target() -> None:
@@ -111,7 +111,9 @@ def test_mets_miro_and_sierra_ids_into_a_calm_target() -> None:
             sierra_identifier(physical_sierra),
         ],
     )
-    assert same_elements(result.sources, [physical_sierra, miro, *mets_works])
+    assert same_elements(
+        result.redirected_sources, [physical_sierra, miro, *mets_works]
+    )
 
 
 def test_mets_miro_and_sierra_ids_into_an_axiell_target() -> None:
@@ -129,7 +131,9 @@ def test_mets_miro_and_sierra_ids_into_an_axiell_target() -> None:
             sierra_identifier(physical_sierra),
         ],
     )
-    assert same_elements(result.sources, [physical_sierra, miro, *mets_works])
+    assert same_elements(
+        result.redirected_sources, [physical_sierra, miro, *mets_works]
+    )
 
 
 def test_mets_miro_axiell_and_sierra_ids_into_a_tei_target() -> None:
@@ -147,7 +151,7 @@ def test_mets_miro_axiell_and_sierra_ids_into_a_tei_target() -> None:
             sierra_identifier(physical_sierra),
         ],
     )
-    assert same_elements(result.sources, [physical_sierra, miro, axiell])
+    assert same_elements(result.redirected_sources, [physical_sierra, miro, axiell])
 
 
 folio_hrid = source_identifier(schemes.FOLIO_INSTANCE_HRID)
@@ -162,7 +166,7 @@ def test_a_folio_work_keeps_its_hrid_and_b_number_on_a_tei_target() -> None:
     result = OtherIdentifiersRule.merge(tei, [folio])
 
     assert same_elements(result.data, [sid(folio), folio_hrid, folio_bnumber])
-    assert result.sources == [folio]
+    assert result.redirected_sources == [folio]
 
 
 def test_a_folio_work_keeps_its_hrid_and_b_number_on_an_axiell_target() -> None:
@@ -194,14 +198,14 @@ def test_a_single_miro_id_into_a_single_item_sierra_work_alongside_mets() -> Non
     assert same_elements(
         result.data, [sid(miro), *physical_sierra.data.other_identifiers]
     )
-    assert result.sources == [miro]
+    assert result.redirected_sources == [miro]
 
 
 def test_no_miro_ids_when_there_is_more_than_one_miro_work() -> None:
     result = OtherIdentifiersRule.merge(physical_sierra, [nothing, miro, miro_work()])
 
     assert same_elements(result.data, physical_sierra.data.other_identifiers)
-    assert result.sources == []
+    assert result.redirected_sources == []
 
 
 def test_several_miro_ids_into_a_digmiro_sierra_work() -> None:
@@ -215,7 +219,7 @@ def test_several_miro_ids_into_a_digmiro_sierra_work() -> None:
     assert same_elements(
         result.data, [sid(miro), sid(miro_2), *digmiro_sierra.data.other_identifiers]
     )
-    assert same_elements(result.sources, [miro, miro_2])
+    assert same_elements(result.redirected_sources, [miro, miro_2])
 
 
 def test_miro_ids_into_a_sierra_work_with_zero_items() -> None:
@@ -224,7 +228,7 @@ def test_miro_ids_into_a_sierra_work_with_zero_items() -> None:
     assert same_elements(
         result.data, [sid(miro), *zero_item_physical_sierra.data.other_identifiers]
     )
-    assert result.sources == [miro]
+    assert result.redirected_sources == [miro]
 
 
 def test_a_sierra_work_merges_into_an_ebsco_work_without_adding_ids() -> None:
@@ -233,14 +237,14 @@ def test_a_sierra_work_merges_into_an_ebsco_work_without_adding_ids() -> None:
     result = OtherIdentifiersRule.merge(ebsco, [sierra])
 
     assert result.data == []
-    assert result.sources == [sierra]
+    assert result.redirected_sources == [sierra]
 
 
 def test_no_miro_ids_into_a_sierra_work_of_another_format() -> None:
     result = OtherIdentifiersRule.merge(physical_maps_sierra, [nothing, miro])
 
     assert same_elements(result.data, physical_maps_sierra.data.other_identifiers)
-    assert result.sources == []
+    assert result.redirected_sources == []
 
 
 def test_the_ids_of_a_linked_digitised_sierra_work_are_appended() -> None:
@@ -257,7 +261,7 @@ def test_the_ids_of_a_linked_digitised_sierra_work_are_appended() -> None:
             *sierra_with_merge_candidate.data.other_identifiers,
         ],
     )
-    assert same_elements(result.sources, [miro, linked_sierra])
+    assert same_elements(result.redirected_sources, [miro, linked_sierra])
 
 
 def test_only_digcodes_are_taken_from_a_source_s_other_identifiers() -> None:
@@ -296,11 +300,11 @@ def test_only_the_miro_source_identifier_is_merged() -> None:
     assert same_elements(
         result.data, [sid(miro), *physical_sierra.data.other_identifiers]
     )
-    assert result.sources == [miro_with_others]
+    assert result.redirected_sources == [miro_with_others]
 
 
 def test_no_mets_ids_are_merged() -> None:
     result = OtherIdentifiersRule.merge(physical_sierra, mets_works)
 
     assert all(i.identifier_type.id != "mets" for i in result.data)
-    assert result.sources == []
+    assert result.redirected_sources == []

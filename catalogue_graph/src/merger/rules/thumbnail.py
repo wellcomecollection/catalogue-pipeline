@@ -12,7 +12,7 @@ from merger.rules.base import (
     FieldMergeRule,
     PartialRule,
     distinct_works,
-    sources_used_by,
+    sources_to_redirect,
 )
 from merger.rules.predicates import (
     lms_work,
@@ -68,9 +68,12 @@ class ThumbnailRule(FieldMergeRule[DigitalLocation | None]):
     def merge(
         cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> FieldMergeResult[DigitalLocation | None]:
-        used = sources_used_by([MetsThumbnail, MinMiroThumbnail], target, sources)
+        redirected = sources_to_redirect(
+            [MetsThumbnail, MinMiroThumbnail], target, sources
+        )
         return FieldMergeResult(
-            data=cls._thumbnail(target, sources), sources=distinct_works(used)
+            data=cls._thumbnail(target, sources),
+            redirected_sources=distinct_works(redirected),
         )
 
     @staticmethod

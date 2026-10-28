@@ -14,6 +14,7 @@ from models.pipeline.identified.work import (
     DeletedIdentifiedWork,
     IdentifiedMergeCandidate,
     IdentifiedWorkState,
+    InternalWorkStub,
     InvisibleIdentifiedWork,
     VisibleIdentifiedWork,
 )
@@ -31,10 +32,14 @@ from models.pipeline.work_data import WorkData
 
 EBSCO_SIERRA_REASON = "Ebsco/Sierra work"
 MIRO_SIERRA_REASON = "Miro/Sierra work"
+METS_REASON = "METS work"
+AXIELL_SIERRA_REASON = "CALM/Sierra harvest work"
+TEI_BNUMBER_REASON = "Bnumber present in TEI file"
 
 Maps = Format(id="e", label="Maps")
 
 CC_BY = Id(id="cc-by")
+CC_BY_NC = Id(id="cc-by-nc")
 IN_COPYRIGHT = Id(id="in-copyright")
 
 IIIFImage = LocationType(id="iiif-image")
@@ -143,6 +148,14 @@ def merge_candidate(
     )
 
 
+def internal_work_stub() -> InternalWorkStub:
+    return InternalWorkStub(
+        source_identifier=source_identifier(schemes.TEI_MANUSCRIPT_ID),
+        canonical_id=_next("inner"),
+        work_data=WorkData(title=_next("tei-inner-")),
+    )
+
+
 def identified_work(
     scheme: schemes.IdentifierScheme,
     title: str | None = None,
@@ -152,6 +165,9 @@ def identified_work(
     thumbnail: DigitalLocation | None = None,
     images: list[ImageData] | None = None,
     merge_candidates: list[IdentifiedMergeCandidate] | None = None,
+    internal_work_stubs: list[InternalWorkStub] | None = None,
+    removed_internal_work_stubs: list[InternalWorkStub] | None = None,
+    redirect_sources: list[Identified] | None = None,
 ) -> VisibleIdentifiedWork:
     return VisibleIdentifiedWork(
         version=1,
@@ -168,8 +184,16 @@ def identified_work(
             canonical_id=_next("work"),
             source_modified_time="2026-01-01T00:00:00Z",
             merge_candidates=merge_candidates or [],
+            internal_work_stubs=internal_work_stubs or [],
+            removed_internal_work_stubs=removed_internal_work_stubs or [],
         ),
+        redirect_sources=redirect_sources or [],
     )
+
+
+def other_work(**kwargs: object) -> VisibleIdentifiedWork:
+    """A work from a source no rule merges."""
+    return identified_work(schemes.NLM_MESH, **kwargs)  # type: ignore[arg-type]
 
 
 def sierra_work(**kwargs: object) -> VisibleIdentifiedWork:

@@ -123,4 +123,4 @@ def test_a_restriction_only_on_a_physical_location_does_not_suppress_it(
 def test_the_works_whose_thumbnails_were_considered_are_merged_sources() -> None:
     result = ThumbnailRule.merge(digital_sierra, [*miro_works, mets])
 
-    assert same_elements(result.sources, [*miro_works, mets])
+    assert same_elements(result.redirected_sources, [*miro_works, mets])

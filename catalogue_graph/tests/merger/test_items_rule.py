@@ -52,35 +52,35 @@ def test_a_digitised_sierra_work_is_a_merged_source_but_leaves_items_unchanged()
     result = ItemsRule.merge(physical, [digitised])
 
     assert result.data == physical.data.items
-    assert result.sources == [digitised]
+    assert result.redirected_sources == [digitised]
 
 
 def test_the_miro_item_is_merged_into_a_zero_item_sierra_work() -> None:
     result = ItemsRule.merge(zero_item_physical_sierra, [miro])
 
     assert result.data == [miro.data.items[0]]
-    assert result.sources == [miro]
+    assert result.redirected_sources == [miro]
 
 
 def test_sierra_items_are_merged_into_a_tei_work() -> None:
     result = ItemsRule.merge(tei, [multi_item_physical_sierra])
 
     assert result.data == multi_item_physical_sierra.data.items
-    assert result.sources == [multi_item_physical_sierra]
+    assert result.redirected_sources == [multi_item_physical_sierra]
 
 
 def test_the_sierra_item_replaces_the_calm_item_on_a_tei_work() -> None:
     result = ItemsRule.merge(tei, [physical_picture_sierra, calm])
 
     assert result.data == physical_picture_sierra.data.items
-    assert result.sources == [physical_picture_sierra]
+    assert result.redirected_sources == [physical_picture_sierra]
 
 
 def test_the_mets_item_is_merged_into_a_zero_item_sierra_work() -> None:
     result = ItemsRule.merge(zero_item_physical_sierra, [mets])
 
     assert result.data == mets.data.items
-    assert result.sources == [mets]
+    assert result.redirected_sources == [mets]
 
 
 def test_an_856_item_from_the_digitised_work_is_merged_into_the_physical_work() -> None:
@@ -93,7 +93,7 @@ def test_an_856_item_from_the_digitised_work_is_merged_into_the_physical_work() 
     result = ItemsRule.merge(physical, [digitised])
 
     assert same_elements(result.data, physical.data.items + digitised.data.items)
-    assert result.sources == [digitised]
+    assert result.redirected_sources == [digitised]
 
 
 def test_the_first_digital_work_is_chosen_among_non_digital_sierra_sources() -> None:
@@ -107,7 +107,7 @@ def test_the_first_digital_work_is_chosen_among_non_digital_sierra_sources() -> 
     result = ItemsRule.merge(physical, [other_physical, digitised])
 
     assert same_elements(result.data, physical.data.items + digitised.data.items)
-    assert result.sources == [digitised]
+    assert result.redirected_sources == [digitised]
 
 
 def test_the_physical_work_keeps_its_items_with_no_sources() -> None:
@@ -120,7 +120,7 @@ def test_the_physical_work_keeps_its_items_with_no_sources() -> None:
     result = ItemsRule.merge(physical, [])
 
     assert result.data == physical.data.items
-    assert result.sources == []
+    assert result.redirected_sources == []
 
 
 def test_the_physical_work_keeps_its_items_when_the_digitised_work_is_absent() -> None:
@@ -133,7 +133,7 @@ def test_the_physical_work_keeps_its_items_when_the_digitised_work_is_absent() -
     result = ItemsRule.merge(physical, [sierra_work()])
 
     assert result.data == physical.data.items
-    assert result.sources == []
+    assert result.redirected_sources == []
 
 
 def test_only_the_first_856_item_in_the_merge_candidates_is_merged() -> None:
@@ -152,14 +152,14 @@ def test_only_the_first_856_item_in_the_merge_candidates_is_merged() -> None:
     result = ItemsRule.merge(physical, [digitised_1, digitised_0])
 
     assert same_elements(result.data, [item] + digitised_0.data.items)
-    assert result.sources == [digitised_0]
+    assert result.redirected_sources == [digitised_0]
 
 
 def test_sierra_items_are_not_merged_into_a_target_without_a_digitised_pair() -> None:
     result = ItemsRule.merge(multi_item_physical_sierra, [miro, physical_maps_sierra])
 
     assert result.data == multi_item_physical_sierra.data.items
-    assert result.sources == []
+    assert result.redirected_sources == []
 
 
 def test_miro_locations_are_merged_into_the_single_sierra_item() -> None:
@@ -170,7 +170,7 @@ def test_miro_locations_are_merged_into_the_single_sierra_item() -> None:
         result.data[0].locations,
         physical_picture_sierra.data.items[0].locations + miro.data.items[0].locations,
     )
-    assert result.sources == [miro]
+    assert result.redirected_sources == [miro]
 
 
 def test_mets_locations_are_merged_into_the_single_sierra_item() -> None:
@@ -182,21 +182,21 @@ def test_mets_locations_are_merged_into_the_single_sierra_item() -> None:
         == physical_picture_sierra.data.items[0].locations
         + mets.data.items[0].locations
     )
-    assert result.sources == [mets]
+    assert result.redirected_sources == [mets]
 
 
 def test_no_miro_source_is_merged_when_there_are_several() -> None:
     result = ItemsRule.merge(physical_picture_sierra, [miro, miro_work()])
 
     assert result.data == physical_picture_sierra.data.items
-    assert result.sources == []
+    assert result.redirected_sources == []
 
 
 def test_a_miro_source_is_not_merged_into_a_sierra_work_of_another_format() -> None:
     result = ItemsRule.merge(physical_maps_sierra, [miro])
 
     assert result.data == physical_maps_sierra.data.items
-    assert result.sources == []
+    assert result.redirected_sources == []
 
 
 def test_mets_merging_overrides_miro_merging_into_the_single_sierra_item() -> None:
@@ -208,14 +208,14 @@ def test_mets_merging_overrides_miro_merging_into_the_single_sierra_item() -> No
         == physical_picture_sierra.data.items[0].locations
         + mets.data.items[0].locations
     )
-    assert same_elements(result.sources, [mets, miro])
+    assert same_elements(result.redirected_sources, [mets, miro])
 
 
 def test_miro_works_are_not_merged_into_multi_item_sierra_works() -> None:
     result = ItemsRule.merge(multi_item_physical_sierra, [miro])
 
     assert result.data == multi_item_physical_sierra.data.items
-    assert result.sources == []
+    assert result.redirected_sources == []
 
 
 def test_mets_items_are_added_to_multi_item_sierra_works() -> None:
@@ -224,7 +224,7 @@ def test_mets_items_are_added_to_multi_item_sierra_works() -> None:
     assert same_elements(
         result.data, multi_item_physical_sierra.data.items + mets.data.items
     )
-    assert result.sources == [mets]
+    assert result.redirected_sources == [mets]
 
 
 def test_miro_works_are_merged_sources_of_a_digaids_work_without_contributing() -> None:
@@ -236,7 +236,7 @@ def test_miro_works_are_merged_sources_of_a_digaids_work_without_contributing() 
     result = ItemsRule.merge(digaids, [miro, mets])
 
     assert result.data == digaids.data.items + mets.data.items
-    assert same_elements(result.sources, [miro, mets])
+    assert same_elements(result.redirected_sources, [miro, mets])
 
 
 def test_the_sierra_item_id_replaces_the_calm_item() -> None:
@@ -244,7 +244,7 @@ def test_the_sierra_item_id_replaces_the_calm_item() -> None:
 
     assert len(result.data) == 1
     assert result.data[0].id == physical_picture_sierra.data.items[0].id
-    assert result.sources == [physical_picture_sierra]
+    assert result.redirected_sources == [physical_picture_sierra]
 
 
 def test_sierra_locations_are_copied_onto_a_calm_work() -> None:
@@ -255,7 +255,7 @@ def test_sierra_locations_are_copied_onto_a_calm_work() -> None:
 
     assert len(result.data) == 1
     assert result.data[0].locations == [location]
-    assert result.sources == [sierra]
+    assert result.redirected_sources == [sierra]
 
 
 def test_sierra_and_mets_items_replace_the_calm_item() -> None:
@@ -269,7 +269,7 @@ def test_the_sierra_item_id_replaces_the_axiell_item() -> None:
 
     assert len(result.data) == 1
     assert result.data[0].id == physical_picture_sierra.data.items[0].id
-    assert result.sources == [physical_picture_sierra]
+    assert result.redirected_sources == [physical_picture_sierra]
 
 
 def test_sierra_locations_are_copied_onto_an_axiell_work() -> None:
@@ -280,7 +280,7 @@ def test_sierra_locations_are_copied_onto_an_axiell_work() -> None:
 
     assert len(result.data) == 1
     assert result.data[0].locations == [location]
-    assert result.sources == [sierra]
+    assert result.redirected_sources == [sierra]
 
 
 def test_sierra_and_mets_items_replace_the_axiell_item() -> None:

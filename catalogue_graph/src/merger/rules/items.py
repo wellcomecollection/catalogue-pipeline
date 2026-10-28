@@ -14,9 +14,9 @@ from merger.rules.base import (
     FieldMergeRule,
     PartialRule,
     SingleSource,
+    apply_first_applicable,
     distinct_works,
-    first_defined,
-    sources_used_by,
+    sources_to_redirect,
 )
 from merger.rules.predicates import (
     born_digital_archive_stub_work,
@@ -150,13 +150,15 @@ class ItemsRule(FieldMergeRule[list[Item]]):
             MergeSingleMiroIntoSingleOrZeroItemLmsTarget,
             MergeDigitalIntoPhysicalLmsTarget,
         ]
-        items = first_defined(contributing, target, sources)
+        items = apply_first_applicable(contributing, target, sources)
         if items is None:
             items = cls._unmerged_items(target)
 
-        used = sources_used_by(contributing, target, sources)
-        used += known_duplicate_sources(target, sources)
-        return FieldMergeResult(data=items, sources=distinct_works(used))
+        redirected = sources_to_redirect(contributing, target, sources)
+        redirected += known_duplicate_sources(target, sources)
+        return FieldMergeResult(
+            data=items, redirected_sources=distinct_works(redirected)
+        )
 
     @staticmethod
     def _unmerged_items(target: VisibleIdentifiedWork) -> list[Item]:

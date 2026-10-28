@@ -13,7 +13,7 @@ from merger.rules.base import (
     FieldMergeRule,
     PartialRule,
     distinct_works,
-    sources_used_by,
+    sources_to_redirect,
 )
 from merger.rules.predicates import (
     lms_work,
@@ -68,7 +68,7 @@ class ImageRule(FieldMergeRule[list[ImageData]]):
             participants, satisfying=lms_work_digitised_miro
         ) or choose_target(participants, satisfying=lms_work)
         if lms_target is None:
-            return FieldMergeResult(data=[], sources=[])
+            return FieldMergeResult(data=[], redirected_sources=[])
         return cls.merge_lms_work_images(lms_target, sources)
 
     @classmethod
@@ -85,10 +85,10 @@ class ImageDataRule(ImageRule):
     def merge_lms_work_images(
         cls, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> FieldMergeResult[list[ImageData]]:
-        used = sources_used_by([PairedMiroImages], lms_target, sources)
+        redirected = sources_to_redirect([PairedMiroImages], lms_target, sources)
         return FieldMergeResult(
             data=PairedMiroImages.apply(lms_target, sources) or [],
-            sources=distinct_works(used),
+            redirected_sources=distinct_works(redirected),
         )
 
 
@@ -104,9 +104,10 @@ class ImagesRule(ImageRule):
             copy_licence_from(image, mets_images)
             for image in PairedMiroImages.apply(lms_target, sources) or []
         ]
-        used = sources_used_by(
+        redirected = sources_to_redirect(
             [MetsPictureAndEphemeraImages, PairedMiroImages], lms_target, sources
         )
         return FieldMergeResult(
-            data=mets_images + miro_images, sources=distinct_works(used)
+            data=mets_images + miro_images,
+            redirected_sources=distinct_works(redirected),
         )
