@@ -214,8 +214,11 @@ Feature: merge candidates
   # record has a 003, and 001 is the FOLIO HRID.
   #
   # The Scala makes each Calm RecordID in 035 ǂa a "Calm/Sierra harvest"
-  # candidate. Calm has been replaced by Axiell, and the RecordIDs left in
-  # FOLIO 035 don't resolve to Axiell works, so none is emitted here.
+  # candidate. None is emitted here. The RecordIDs left in FOLIO 035 don't
+  # resolve to Axiell works, and none is among the legacy Calm records still
+  # ingested through the Calm transformer. A Calm record that was harvested
+  # into Sierra already links to its FOLIO work through its own BNumber
+  # candidate, which resolves via the 907 predecessor.
 
   Scenario: A Calm RecordID in 035 ǂa is not a merge candidate
     Given the MARC record has a 035 field with subfield "a" value "(UkLW)1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
