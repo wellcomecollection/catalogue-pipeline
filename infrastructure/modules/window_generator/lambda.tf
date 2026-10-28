@@ -6,6 +6,7 @@ module "window_generator_lambda" {
   s3_bucket   = var.infra_bucket
   s3_key      = "lambdas/common/window_generator.zip"
   module_name = "window_generator"
+  runtime     = "python3.12"
 
   description     = "Send an update window"
   alarm_topic_arn = var.lambda_error_alarm_arn
