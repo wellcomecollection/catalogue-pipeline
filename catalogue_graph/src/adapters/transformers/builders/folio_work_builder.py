@@ -1,6 +1,11 @@
+from datetime import datetime
+
+from pymarc.record import Record
+
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
+from adapters.transformers.folio.items import extract_items
 from adapters.transformers.folio.merge_candidates import extract_merge_candidates
 from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
@@ -29,7 +34,6 @@ from models.pipeline.concept import Contributor, Genre, Subject
 from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
     Id,
-    Identifiable,
     SourceIdentifier,
     WorkSourceIdentifier,
 )
@@ -42,10 +46,6 @@ from models.pipeline.source.work import (
 )
 from models.pipeline.work_state import WorkAncestor
 
-# The source-identifier type for a FOLIO item. The id-minter turns this plus the
-# item UUID into a stable canonical id for the public catalogue.
-FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
-
 # The Sierra API lists fields grouped by Sierra field tag (host item, series, uniform
 # title), so the works FOLIO replaces have their parents in this order rather than
 # in MARC tag order.
@@ -53,6 +53,16 @@ SIERRA_PARENT_TAG_ORDER = ("773", "440", "490", "830")
 
 
 class FolioWorkBuilder(MarcXmlWorkBuilder):
+    def __init__(
+        self,
+        record: Record,
+        last_modified: datetime,
+        inventory: FolioEnrichedInstance | None = None,
+    ) -> None:
+        # The instance's items-and-holdings record, joined on by FolioStoreSource.
+        self.inventory = inventory
+        super().__init__(record, last_modified)
+
     @property
     def source_identifier_type(self) -> Id:
         return Id(id="folio-instance")
@@ -158,28 +168,13 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     def items(self) -> list[Item]:
         """Build items from the joined enrichment payload.
 
-        Each item carries a `folio-item` source identifier with its inventory UUID,
-        so the id-minter can assign a stable canonical id. Without enrichment content
-        (e.g. an instance not yet enriched, or a full reindex before the inventory store
-        is populated) this falls back to no items rather than guessing from MARC 952.
+        Without an inventory record (e.g. an instance not yet enriched, or a full reindex
+        before the inventory store is populated) this falls back to no items rather than
+        guessing from MARC 952.
         """
-        if not self.enrichment_content:
+        if self.inventory is None:
             return []
-
-        enriched = FolioEnrichedInstance.from_store_content(self.enrichment_content)
-        return [
-            Item(
-                id=Identifiable.from_source_identifier(
-                    SourceIdentifier(
-                        identifier_type=FOLIO_ITEM_IDENTIFIER_TYPE,
-                        ontology_type="Item",
-                        value=item.id,
-                    )
-                ),
-                title=item.enumeration or item.volume,
-            )
-            for item in enriched.items
-        ]
+        return extract_items(self.inventory)
 
     def _is_suppressed(self) -> bool:
         """Check if a FOLIO Instance is marked as suppressed in its MARC data.

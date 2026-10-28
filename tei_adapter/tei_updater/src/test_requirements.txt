@@ -13,7 +13,7 @@ botocore==1.43.5
     #   boto3
     #   moto
     #   s3transfer
-certifi==2026.4.22
+certifi==2026.10.23
     # via
     #   -r requirements.txt
     #   requests
