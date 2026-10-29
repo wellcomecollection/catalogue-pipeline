@@ -4,19 +4,19 @@
 #
 #    pip-compile requirements.in
 #
-certifi==2026.4.22
+certifi==2026.10.23
     # via requests
-charset-normalizer==3.4.7
+charset-normalizer==3.5.2
     # via requests
 deepdiff==8.6.2
     # via -r requirements.in
-idna==3.13
+idna==3.20
     # via requests
 orderly-set==5.5.0
     # via deepdiff
 pytz==2026.2
     # via -r requirements.in
-requests==2.32.5
+requests==2.34.2
     # via -r requirements.in
 urllib3==2.8.0
     # via requests

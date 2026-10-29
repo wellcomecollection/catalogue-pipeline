@@ -132,7 +132,10 @@ def get_client(
         "Creating Elasticsearch client", es_mode=es_mode, host_config=host_config
     )
     return elasticsearch.Elasticsearch(
-        host_config, api_key=config.apikey, timeout=60, http_compress=http_compress
+        host_config,
+        api_key=config.apikey,
+        request_timeout=60,
+        http_compress=http_compress,
     )
 
 
