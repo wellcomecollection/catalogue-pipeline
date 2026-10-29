@@ -38,3 +38,11 @@ def check_transform_raises_error(marc_record: Record, message: str) -> None:
         _ = FolioWorkBuilder(
             marc_record, last_modified=datetime(2020, 1, 1)
         ).transform_visible_work()
+
+
+@then("the only merge candidate is the HRID")
+def only_hrid_merge_candidate(work: SourceWork, marc_record: Record) -> None:
+    assert [
+        (c.id.source_identifier.identifier_type.id, c.id.source_identifier.value)
+        for c in work.state.merge_candidates
+    ] == [("folio-instance-hrid", marc_record["001"].data)]

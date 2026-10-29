@@ -10,6 +10,7 @@ from adapters.transformers.folio.electronic_resources import (
 )
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.folio.items import extract_items
+from adapters.transformers.folio.merge_candidates import extract_merge_candidates
 from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
@@ -44,7 +45,11 @@ from models.pipeline.identifier import (
 )
 from models.pipeline.item import Item
 from models.pipeline.production import ProductionEvent
-from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
+from models.pipeline.source.work import (
+    DeletedSourceWork,
+    SourceWorkState,
+    VisibleSourceWork,
+)
 from models.pipeline.work_state import WorkAncestor
 
 # The Sierra API lists fields grouped by Sierra field tag (host item, series, uniform
@@ -115,6 +120,12 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
             )
 
         return None
+
+    @property
+    def visible_work_state(self) -> SourceWorkState:
+        return super().visible_work_state.model_copy(
+            update={"merge_candidates": extract_merge_candidates(self.record)}
+        )
 
     @property
     def designation(self) -> list[str]:
