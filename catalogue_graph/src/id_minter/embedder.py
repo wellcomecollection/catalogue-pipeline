@@ -80,6 +80,7 @@ def embed_canonical_ids(
 ) -> dict:
     """Add canonical IDs and promote minted nodes to the identified shape.
 
+    Minted nodes lose their ``predecessorIdentifier``.
     ``id_map`` maps SourceIdentifierKey -> canonical ID string.
     Nodes whose sourceIdentifier is not found in ``id_map`` are left unchanged.
     """
@@ -88,7 +89,12 @@ def embed_canonical_ids(
         key = make_key(node["sourceIdentifier"])
         canonical_id = id_map.get(key)
         if canonical_id is not None:
-            updated_node = {**node, "canonicalId": canonical_id}
+            # The predecessor is only a minting input, and left on a minted node it
+            # makes the node parse as Identifiable rather than Identified.
+            updated_node = {
+                **{k: v for k, v in node.items() if k != "predecessorIdentifier"},
+                "canonicalId": canonical_id,
+            }
 
             identified_type = updated_node.get("identifiedType")
             if isinstance(identified_type, str):

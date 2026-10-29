@@ -33,6 +33,8 @@ from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
     SourceIdentifierKey,
 )
+from models.pipeline.identifier import Identified
+from models.pipeline.item import Item
 
 IDENTIFIER_TYPES = [
     "miro-image-number",
@@ -245,6 +247,41 @@ class TestEmbedCanonicalIds:
         assert result["moreThings"][0]["type"] == "Identifiable"
         assert result["moreThings"][0]["identifiedType"] == "Identified"
         assert "canonicalId" not in result["moreThings"][0]
+
+    def test_drops_predecessor_from_minted_nodes_only(self) -> None:
+        si1 = create_source_identifier()
+        si2 = create_source_identifier()
+        pred1 = create_source_identifier(identifier_type="sierra-system-number")
+        pred2 = create_source_identifier(identifier_type="sierra-system-number")
+        doc = {
+            "sourceIdentifier": si1,
+            "predecessorIdentifier": pred1,
+            "moreThings": [{"sourceIdentifier": si2, "predecessorIdentifier": pred2}],
+        }
+
+        result = embed_canonical_ids(doc, {key_of(si1): create_canonical_id()})
+
+        assert "predecessorIdentifier" not in result
+        assert result["moreThings"][0]["predecessorIdentifier"] == pred2
+
+    def test_minted_item_with_predecessor_parses_as_identified(self) -> None:
+        si = create_source_identifier(ontology_type="Item")
+        pred = create_source_identifier(
+            identifier_type="sierra-system-number", ontology_type="Item"
+        )
+        doc = {
+            "id": {
+                "sourceIdentifier": si,
+                "otherIdentifiers": [pred],
+                "predecessorIdentifier": pred,
+                "type": "Identifiable",
+                "identifiedType": "Identified",
+            }
+        }
+
+        result = embed_canonical_ids(doc, {key_of(si): create_canonical_id()})
+
+        assert isinstance(Item.model_validate(result).id, Identified)
 
     def test_leaves_all_nodes_unchanged_with_empty_id_map(self) -> None:
         """With an empty id_map, no canonicalId is added to any node.
