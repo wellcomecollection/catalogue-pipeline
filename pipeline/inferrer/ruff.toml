@@ -2,7 +2,7 @@
 # Mirrors catalogue_graph/pyproject.toml.
 line-length = 88
 # Not inferred from the per-inferrer pyproject.toml files, so state it here.
-target-version = "py310"
+target-version = "py311"
 
 [lint]
 select = [

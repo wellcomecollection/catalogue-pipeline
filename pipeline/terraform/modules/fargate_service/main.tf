@@ -33,8 +33,9 @@ module "scaling_service" {
   security_group_ids = concat(
     var.security_group_ids,
     lookup(var.fargate_service_boilerplate, "egress_security_group_id", "") != "" ? [var.fargate_service_boilerplate["egress_security_group_id"]] : [],
-    # The storage endpoint's group, when it differs from the logging one above
-    contains([null, var.fargate_service_boilerplate["elastic_cloud_vpce_security_group_id"]], var.fargate_service_boilerplate["storage_vpce_security_group_id"]) ? [] : [var.fargate_service_boilerplate["storage_vpce_security_group_id"]]
+    # The storage endpoint's group, when set and different from the logging one
+    # above. contains() rejects a null value, which most callers pass.
+    var.fargate_service_boilerplate["storage_vpce_security_group_id"] == null || var.fargate_service_boilerplate["storage_vpce_security_group_id"] == var.fargate_service_boilerplate["elastic_cloud_vpce_security_group_id"] ? [] : [var.fargate_service_boilerplate["storage_vpce_security_group_id"]]
   )
 
   desired_task_count = var.desired_task_count

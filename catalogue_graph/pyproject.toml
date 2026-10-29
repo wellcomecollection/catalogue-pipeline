@@ -12,7 +12,7 @@ dependencies = [
     "backoff",
     "smart-open",
     "polars",
-    "elasticsearch>=8.11,<8.13",
+    "elasticsearch>=9.5,<10",
     "tabulate",
     "types-tabulate",
     "types-requests",
