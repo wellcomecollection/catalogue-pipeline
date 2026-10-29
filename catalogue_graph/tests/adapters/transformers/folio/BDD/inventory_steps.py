@@ -118,6 +118,11 @@ def item_suppressed(folio_item: dict[str, Any]) -> None:
     folio_item["suppressFromDiscovery"] = True
 
 
+@given("the instance has no inventory record", target_fixture="folio_inventory")
+def no_inventory() -> None:
+    return None
+
+
 def _item(work: VisibleSourceWork, item_id: str) -> Item:
     matching = [
         i

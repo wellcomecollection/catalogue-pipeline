@@ -13,6 +13,7 @@ OnlineResource = LocationType(id="online-resource")
 ClosedStores = LocationType(id="closed-stores")
 OpenShelves = LocationType(id="open-shelves")
 OnExhibition = LocationType(id="on-exhibition")
+OnOrder = LocationType(id="on-order")
 
 LocationDiscriminator = Literal["DigitalLocation", "PhysicalLocation"]
 
