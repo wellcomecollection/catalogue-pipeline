@@ -8,11 +8,6 @@ Feature: electronic resources (MARC 856)
   resource. The local 956 stays unmapped, and holdings and items carry no
   electronic access (platform#6766).
 
-  Deliberate divergences: a repeated ǂu takes the first valid URL and logs a
-  warning, where Sierra dropped the field; and only http and https count as
-  URLs, so the handful of ftp links are skipped. Skipped fields log a warning,
-  as the Scala did, since the few non-URL values are data to fix at source.
-
   Background:
     Given a MARC record with field 001 "abc123"
     And the MARC record has a 999 field with indicators "f" "f" with subfield "i" value "10000000-0000-0000-0000-000000000001"
@@ -128,13 +123,22 @@ Feature: electronic resources (MARC 856)
       | value                                          |
       | search for 'online journals'                   |
       | www.rcuk.ac.uk/documents/documents/report.pdf  |
-      | ftp://ftp.cordis.europa.eu/pub/docs/ss_en.pdf  |
 
   Scenario: An 856 without ǂu is skipped and logged
     Given the MARC record has a 856 field with subfield "a" value "https://example.org/journal"
     When I transform the MARC record
     Then there are no items
     And a warning "856 without a URL" is logged
+
+  Scenario: A suppressed instance with an 856 is deleted
+    Given the MARC record has another 999 field with subfield "t" value "1"
+    And the MARC record has a 856 field with subfield "u" value "https://example.org/journal"
+    When I transform the MARC record
+    Then the work is deleted
+
+  # Deliberate divergences: a repeated ǂu takes the first valid URL and logs a
+  # warning, where Sierra dropped the field; and only http and https count as
+  # URLs, so the handful of ftp links are skipped.
 
   Scenario: A repeated ǂu takes the first URL and logs a warning
     Given the MARC record has a 856 field with subfield "u" value "https://example.org/journal" and subfield "u" value "https://example.org/another-journal"
@@ -151,8 +155,8 @@ Feature: electronic resources (MARC 856)
     And a warning "Repeated 856 ǂu" is logged
     And a warning "856 ǂu is not a URL" is logged
 
-  Scenario: A suppressed instance with an 856 is deleted
-    Given the MARC record has another 999 field with subfield "t" value "1"
-    And the MARC record has a 856 field with subfield "u" value "https://example.org/journal"
+  Scenario: An ftp link is skipped and logged
+    Given the MARC record has a 856 field with subfield "u" value "ftp://ftp.cordis.europa.eu/pub/docs/ss_en.pdf" and subfield "z" value "View resource"
     When I transform the MARC record
-    Then the work is deleted
+    Then there are no items
+    And a warning "856 ǂu is not a URL" is logged
