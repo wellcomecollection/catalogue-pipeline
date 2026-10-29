@@ -22,11 +22,11 @@ from tests.gherkin_steps.work import *
 
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(
-    marc_record: Record, folio_inventory: dict[str, Any]
+    marc_record: Record, folio_inventory: dict[str, Any] | None
 ) -> VisibleSourceWork:
     inventory = (
         FolioEnrichedInstance.model_validate(folio_inventory)
-        if folio_inventory["items"]
+        if folio_inventory is not None
         else None
     )
     return FolioWorkBuilder(

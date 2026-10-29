@@ -7,6 +7,10 @@ from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuil
 from adapters.transformers.folio.collection_path import extract_collection_identifier
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.folio.items import extract_items
+from adapters.transformers.folio.on_order import (
+    awaiting_cataloguing_item,
+    is_uncatalogued,
+)
 from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
@@ -168,10 +172,11 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
         Without an inventory record (e.g. an instance not yet enriched, or a full reindex
         before the inventory store is populated) this falls back to no items rather than
-        guessing from MARC 952.
+        guessing from MARC 952. An instance with no items, suppressed or not, whose MARC
+        590 marks it as uncatalogued gets a placeholder awaiting-cataloguing item.
         """
-        if self.inventory is None:
-            return []
+        if self.inventory is None or not self.inventory.items:
+            return [awaiting_cataloguing_item()] if is_uncatalogued(self.record) else []
         return extract_items(self.inventory)
 
     def _is_suppressed(self) -> bool:
