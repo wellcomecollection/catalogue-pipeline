@@ -59,15 +59,17 @@ def match_works(works: pl.DataFrame) -> pl.DataFrame:
     dst = indexed_edges["index_dst"].to_numpy().astype(np.int64)
 
     # Each node ends up labelled with the smallest index in its component; map that back to an id.
-    labels = _connected_components(nodes.height, src, dst)
+    labels, passes = _connected_components(nodes.height, src, dst)
     components = nodes.select("id", component_id=nodes["id"].gather(labels))
 
+    # Passes grow with the longest path in a component when ids are not ordered along it.
     logger.info(
         "Matched works",
         works=works.height,
         placeholders=nodes.height - works.height,
         edges=edges.height,
         components=components["component_id"].n_unique(),
+        passes=passes,
     )
     # Placeholders drop out here: only real works are labelled and passed on.
     return works.select("id", "last_modified", "type").join(
@@ -77,15 +79,20 @@ def match_works(works: pl.DataFrame) -> pl.DataFrame:
 
 def _connected_components(
     node_count: int, src: np.ndarray, dst: np.ndarray
-) -> np.ndarray:
-    """Label propagation: each node takes the lowest label in its neighbourhood until stable."""
+) -> tuple[np.ndarray, int]:
+    """Label propagation: each node takes the lowest label in its neighbourhood until stable.
+
+    Returns the labels and the number of passes it took.
+    """
     labels = np.arange(node_count)
+    passes = 0
     while True:
+        passes += 1
         lowest = np.minimum(labels[src], labels[dst])
         updated = labels.copy()
         np.minimum.at(updated, src, lowest)
         np.minimum.at(updated, dst, lowest)
         updated = updated[updated]
         if np.array_equal(updated, labels):
-            return labels
+            return labels, passes
         labels = updated
