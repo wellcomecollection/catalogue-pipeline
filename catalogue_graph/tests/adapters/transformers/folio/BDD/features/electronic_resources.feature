@@ -123,6 +123,7 @@ Feature: electronic resources (MARC 856)
       | value                                          |
       | search for 'online journals'                   |
       | www.rcuk.ac.uk/documents/documents/report.pdf  |
+      | https://[example.org/resource                  |
 
   Scenario: An 856 without ǂu is skipped and logged
     Given the MARC record has a 856 field with subfield "a" value "https://example.org/journal"
