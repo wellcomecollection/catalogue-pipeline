@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from pytest_bdd import parsers, then
 
+from models.pipeline.item import Item
 from models.pipeline.location import PhysicalLocation
 from models.pipeline.source.work import SourceWork, VisibleSourceWork
 
@@ -59,6 +60,10 @@ SUB_ATTR_ALIASES: dict[str, str] = {
     "agent identifier value": "agent.id.source_identifier.value",
     "agent identifier type": "agent.id.source_identifier.identifier_type.id",
     "agent identifier ontology type": "agent.id.source_identifier.ontology_type",
+    "predecessor identifier": "id.predecessor_identifier",
+    "predecessor identifier value": "id.predecessor_identifier.value",
+    "predecessor identifier type": "id.predecessor_identifier.identifier_type.id",
+    "identifier type": "identifier_type.id",
 }
 
 
@@ -71,10 +76,13 @@ def _get_attr_list(parent: Any, attr_phrase: str) -> Any:
     """Resolve attribute phrase to list-like attribute.
 
     On a work, lists live on the data, except relations, which live on the state.
+    On an item, identifier lists live on its id.
     """
     attr_name = _normalise_attr_phrase(attr_phrase)
     if isinstance(parent, SourceWork):
         parent = parent if attr_name.startswith("state.") else parent.data
+    elif isinstance(parent, Item) and not hasattr(parent, attr_name.split(".")[0]):
+        parent = parent.id
     try:
         return drill_through_dots(parent, attr_name)
     except AttributeError:

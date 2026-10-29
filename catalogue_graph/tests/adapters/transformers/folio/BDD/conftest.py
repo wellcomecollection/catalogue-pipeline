@@ -34,21 +34,9 @@ def do_transform(
     ).transform_visible_work()
 
 
-@then(
-    parsers.parse(
-        'transforming the record with its items raises ValueError "{message}"'
-    )
-)
-def check_transform_with_items_raises_error(
+@then(parsers.parse('transforming the record raises ValueError "{message}"'))
+def check_transform_raises_error(
     marc_record: Record, folio_inventory: dict[str, Any], message: str
 ) -> None:
     with pytest.raises(ValueError, match=re.escape(message)):
         _ = do_transform(marc_record, folio_inventory)
-
-
-@then(parsers.parse('transforming the record raises ValueError "{message}"'))
-def check_transform_raises_error(marc_record: Record, message: str) -> None:
-    with pytest.raises(ValueError, match=re.escape(message)):
-        _ = FolioWorkBuilder(
-            marc_record, last_modified=datetime(2020, 1, 1)
-        ).transform_visible_work()

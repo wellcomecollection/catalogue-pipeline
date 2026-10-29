@@ -11,32 +11,34 @@ Feature: FOLIO item identifiers
     And the MARC record has a 245 field with subfield "a" value "Some Title"
     And a FOLIO item "a"
 
-  Scenario: An item is identified by its FOLIO item UUID
+  Scenario: An item created in FOLIO is identified by its item UUID alone
     When I transform the MARC record
-    Then item "a" has the source identifier "Item[folio-item/a]"
-    And item "a" has no other identifiers
+    Then the only item has the source identifier value "a"
+    And it has the source identifier type "folio-item"
+    And it has the source identifier ontology type "Item"
+    And it has 0 other identifiers
+    And it has no predecessor identifier
 
-  Scenario: An item migrated from Sierra has its Sierra item number as predecessor
-    Given that item has the former ids "i16858153"
+  Scenario Outline: An item migrated from Sierra carries its Sierra item number
+    Given that item has the former ids "<former_ids>"
     When I transform the MARC record
-    Then item "a" has the predecessor "Item[sierra-system-number/i16858153]"
-    And item "a" has the other identifiers "Item[sierra-system-number/i16858153]"
+    Then the only item has the source identifier value "a"
+    And it has the predecessor identifier type "sierra-system-number"
+    And it has the predecessor identifier value "<item_number>"
+    And it has 1 other identifier
+    And its only other identifier has the identifier type "sierra-system-number"
+    And it has the value "<item_number>"
 
-  Scenario: An item repeating its Sierra item number has it as predecessor
-    Given that item has the former ids "i1685813x, i1685813x"
-    When I transform the MARC record
-    Then item "a" has the predecessor "Item[sierra-system-number/i1685813x]"
-    And item "a" has the other identifiers "Item[sierra-system-number/i1685813x]"
+    Examples:
+      | former_ids           | item_number |
+      | i16858153            | i16858153   |
+      | i1685813x, i1685813x | i1685813x   |
 
-  Scenario: An item created in FOLIO has no predecessor
-    When I transform the MARC record
-    Then item "a" has no predecessor
-    And item "a" has no other identifiers
+  Scenario Outline: An item whose former ids are not one Sierra item number fails the transform
+    Given that item has the former ids "<former_ids>"
+    Then transforming the record raises ValueError "<message>"
 
-  Scenario: An item with more than one Sierra item number fails the transform
-    Given that item has the former ids "i16858153, i16858128"
-    Then transforming the record with its items raises ValueError "Multiple distinct instances of formerIds: ['i16858128', 'i16858153']"
-
-  Scenario: An item whose former id is not a Sierra item number fails the transform
-    Given that item has the former ids "b13119382"
-    Then transforming the record with its items raises ValueError "Predecessor identifier does not match Sierra item number format: 'b13119382'"
+    Examples:
+      | former_ids           | message                                                                         |
+      | i16858153, i16858128 | Multiple distinct instances of formerIds: ['i16858128', 'i16858153']            |
+      | b13119382            | Predecessor identifier does not match Sierra item number format: 'b13119382' |
