@@ -42,4 +42,8 @@ PermissionRequired = AccessStatus(type="PermissionRequired")
 #  rid of the whole thing?
 #  All EBSCO records are currently "Resource"
 Resource = AccessStatusRelationship(type="Resource")
+RelatedResource = AccessStatusRelationship(type="RelatedResource")
 LicensedResource = AccessStatus(type="LicensedResources", relationship=Resource)
+LicensedRelatedResource = AccessStatus(
+    type="LicensedResources", relationship=RelatedResource
+)
