@@ -35,12 +35,9 @@ Unavailable = AccessStatus(type="Unavailable")
 Closed = AccessStatus(type="Closed")
 PermissionRequired = AccessStatus(type="PermissionRequired")
 
-#  TODO: (Resource vs RelatedResource)
-#  Scala code says this is not exposed the public API,
-#  but we need it for the "available online" filter.
-#  I wonder if that is actually true, and we can get
-#  rid of the whole thing?
-#  All EBSCO records are currently "Resource"
+# Only a Resource makes the work available online. A RelatedResource links to
+# something about the work, such as a publisher page. The API shows both as
+# licensed-resources.
 Resource = AccessStatusRelationship(type="Resource")
 RelatedResource = AccessStatusRelationship(type="RelatedResource")
 LicensedResource = AccessStatus(type="LicensedResources", relationship=Resource)
