@@ -20,9 +20,6 @@ class WorkSourceIdentifier(SourceIdentifier):
     ontology_type: str = "Work"
 
 
-IdentifyType = Literal["Identifiable", "Identified", "Unidentifiable"]
-
-
 class Identifiers(SerialisableModel):
     source_identifier: SourceIdentifier
     other_identifiers: list[SourceIdentifier] = []
@@ -40,8 +37,10 @@ class Identifiable(Identifiers):
     canonical_id: str | None = None
     # Read by the id-minter on first mint, to inherit the predecessor's canonical id.
     predecessor_identifier: SourceIdentifier | None = None
-    type: IdentifyType = "Identifiable"
-    identifiedType: IdentifyType = "Identified"
+    # Narrow, so a minted id (type "Identified") can only parse as Identified.
+    type: Literal["Identifiable"] = "Identifiable"
+    # The type the id-minter promotes this to once it has a canonical id.
+    identifiedType: Literal["Identified"] = "Identified"
 
     @staticmethod
     def from_source_identifier(identifier: SourceIdentifier) -> "Identifiable":
@@ -84,12 +83,12 @@ class Identifiable(Identifiers):
 
 class Identified(Identifiers):
     canonical_id: str
-    type: IdentifyType = "Identified"
+    type: Literal["Identified"] = "Identified"
 
 
 class Unidentifiable(SerialisableModel):
     canonical_id: None = None
-    type: IdentifyType = "Unidentifiable"
+    type: Literal["Unidentifiable"] = "Unidentifiable"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield from []
