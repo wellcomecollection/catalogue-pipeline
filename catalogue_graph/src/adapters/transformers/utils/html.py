@@ -81,7 +81,11 @@ def is_url(maybe_url: str) -> bool:
     would allow jar:// and ftp:// urls, but in the data seen so far
     from EBSCO, all $u subfields are http urls.
     """
-    url = urlparse(maybe_url)
+    try:
+        url = urlparse(maybe_url)
+    except ValueError:
+        # e.g. an unbalanced bracket in the host, which urlparse rejects as a bad IPv6 address
+        return False
     # urlparse is very lenient in what it accepts and parses.
     # e.g. If it's not a fully qualified URL, it is interpreted as relative.
     #

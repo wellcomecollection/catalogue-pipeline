@@ -37,6 +37,8 @@ ATTR_ALIASES: dict[str, str] = {
     "other identifier": "other_identifiers",
     "note": "notes",
     "item": "items",
+    "location": "locations",
+    "access condition": "access_conditions",
     "contributor": "contributors",
     "role": "roles",
     "production": "production",
@@ -61,6 +63,12 @@ SUB_ATTR_ALIASES: dict[str, str] = {
     "agent identifier value": "agent.id.source_identifier.value",
     "agent identifier type": "agent.id.source_identifier.identifier_type.id",
     "agent identifier ontology type": "agent.id.source_identifier.ontology_type",
+    "id type": "id.type",
+    "location type": "location_type.id",
+    "link text": "link_text",
+    "access method": "method.type",
+    "access status": "status.type",
+    "access status relationship": "status.relationship.type",
 }
 
 
