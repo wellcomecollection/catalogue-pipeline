@@ -2,9 +2,20 @@ import elasticsearch
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
+# Bound at import, before the autouse fixture swaps in MockElasticsearchClient
+from elasticsearch import Elasticsearch as RealElasticsearch
+
 from models.events import BasePipelineEvent, PipelineIndexDates
 from utils import elasticsearch as es_utils
 from utils.elasticsearch import get_merged_index_name, index_es_batch, mget_es
+
+
+def test_get_client_arguments_are_accepted_by_the_real_client(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("elasticsearch.Elasticsearch", RealElasticsearch)
+    client = es_utils.get_client("test_api_key", "2020-01-01", es_mode="local")
+    assert isinstance(client, RealElasticsearch)
 
 
 def test_get_merged_index_name_uses_merged_date() -> None:

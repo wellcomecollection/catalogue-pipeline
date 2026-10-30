@@ -25,13 +25,13 @@ jobs:
           repositories: catalogue-api
 
       - name: Checkout catalogue-pipeline
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           sparse-checkout: catalogue_graph/document_generators/test_documents
 
       - name: Checkout catalogue-api
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: wellcomecollection/catalogue-api
           token: ${{ steps.app-token.outputs.token }}
