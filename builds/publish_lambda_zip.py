@@ -50,11 +50,10 @@ def create_zip(src, dst):
                 zf.write(absname, arcname)
 
 
-# The Python the pinned requirements were compiled for (see each lambda's
-# requirements.txt header); the build agent's own Python is older than some
-# of the pins allow. common/window_generator still runs on python3.9 but its
-# dependencies are pure Python, so the same wheels work there.
-PYTHON_IMAGE = "python:3.10"
+# The Python the tei and calm lambdas run on; the build agent's own Python is
+# older than some of the pins allow. common/window_generator runs on python3.12,
+# but its dependencies are pure Python, so the same wheels work there.
+PYTHON_IMAGE = "python:3.13"
 
 
 def install_requirements(reqs_file, target):
