@@ -34,6 +34,11 @@ class MarcXmlTransformer(SourceWorkTransformer, ABC):
     def _transform_row(self, row: dict[str, Any]) -> Generator[Document]:
         """Transform a single row, yielding at most one document.
         Subclasses override this to handle non-MARC rows (e.g. deletion facts)."""
+        # A tombstone first seen as deleted never had content, so never produced a work.
+        if row.get("deleted", False) and not row.get("content"):
+            logger.warning("Skipping deleted row with no content")
+            return
+
         marc_record = self._row_to_marc_record(row)
         if not marc_record:
             return

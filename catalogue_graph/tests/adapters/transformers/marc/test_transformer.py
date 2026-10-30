@@ -50,6 +50,33 @@ def test_transform_missing_content_logs_error(adapter_store: AdapterStore) -> No
     assert "Missing content" in result.errors[0].detail
 
 
+def test_transform_deleted_row_without_content_is_skipped(
+    adapter_store: AdapterStore,
+) -> None:
+    """A tombstone with no content is skipped without recording an error."""
+    transformer = MarcXmlTransformerForTests(adapter_store, [])
+
+    transformer.source = _StubSource(  # type: ignore[assignment]
+        [
+            {
+                "id": "work1",
+                "content": None,
+                "deleted": True,
+                "last_modified": datetime.now(),
+            }
+        ]
+    )
+    sink = ListSink()
+    with capture_logs() as logs:
+        result = transformer.stream_to(sink)
+
+    assert sink.documents == []
+    assert result.errors == []
+    assert [
+        log for log in logs if log["event"] == "Skipping deleted row with no content"
+    ]
+
+
 def test_transform_invalid_xml_records_error(adapter_store: AdapterStore) -> None:
     transformer = MarcXmlTransformerForTests(adapter_store, [])
 
