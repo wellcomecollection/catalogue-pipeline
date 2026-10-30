@@ -4,9 +4,9 @@ The reconciler delete path: suppress or hard-delete a superseded GUID's records.
 Both ``suppress_by_guid`` (reversible) and ``delete_by_guid`` (irreversible) walk
 the same child → parent cascade over a GUID's item / holdings / instance, applying
 a single-entity op from ``entities.py``. The cascade aborts on the first failure so
-a parent is never actioned while a failed child may still reference it. hrids map
-directly from the GUID (``AxC-{entity}-{guid}``) — the same scheme the write path
-uses — so no MARC parse or mapping is needed here.
+a parent is never actioned while a failed child may still reference it. FOLIO ids
+are derived from the GUID (``config._instance_id`` and its siblings), the same derivation the write
+path uses, so no MARC parse or mapping is needed here.
 """
 
 from __future__ import annotations
@@ -16,22 +16,22 @@ from collections.abc import Callable
 import structlog
 
 from ..folio import FolioInventoryOps
-from ..mapping import _holdings_hrid, _instance_hrid, _item_hrid
+from ..mapping import _holdings_id, _instance_id, _item_id
 from ..results import EntityResult, GuidCascadeResult, UpsertError
 from .entities import _delete_entity, _suppress_entity
 
 logger = structlog.get_logger(__name__)
 
-# The cascade order is child → parent: (attr, search_path, list_key, hrid builder).
+# The cascade order is child → parent: (attr, search_path, list_key, id builder).
 # For hard delete this order is mandatory — FOLIO refuses to delete a parent while
 # a child still references it; for suppress it mirrors the reverse of create order.
 _CASCADE_ENTITIES: list[tuple[str, str, str, Callable[[str], str]]] = [
-    ("item", "/inventory/items", "items", _item_hrid),
-    ("holdings", "/holdings-storage/holdings", "holdingsRecords", _holdings_hrid),
-    ("instance", "/inventory/instances", "instances", _instance_hrid),
+    ("item", "/inventory/items", "items", _item_id),
+    ("holdings", "/holdings-storage/holdings", "holdingsRecords", _holdings_id),
+    ("instance", "/inventory/instances", "instances", _instance_id),
 ]
 
-# An entity operation: resolve by hrid and apply an action (suppress / delete).
+# An entity operation: resolve by id and apply an action (suppress / delete).
 _EntityOp = Callable[..., EntityResult]
 
 
@@ -47,15 +47,15 @@ def _cascade_by_guid(
     The single try/except is load-bearing for hard delete: if a child op fails,
     the cascade stops before the parent, so a parent is never actioned while a
     failed child may still reference it. Records already gone are skipped, but a
-    *failed* hrid lookup is not a skip — it raises (see :func:`_find_by_hrid`) into
+    *failed* id lookup is not a skip: it raises (see :func:`_find_by_id`) into
     this handler, so an outage during the lookup aborts and records an error rather
-    than reporting a still-live record as a clean deletion. A hrid maps directly
-    from the GUID (``AxC-{entity}-{guid}``), the same scheme the upsert path writes,
-    so no MARC parse or mapping is needed here.
+    than reporting a still-live record as a clean deletion. Each id is derived from
+    the GUID, the same derivation the upsert path writes, so no MARC parse or
+    mapping is needed here.
     """
     result = GuidCascadeResult(guid=guid)
     try:
-        for attr, search_path, list_key, hrid_of in _CASCADE_ENTITIES:
+        for attr, search_path, list_key, id_of in _CASCADE_ENTITIES:
             setattr(
                 result,
                 attr,
@@ -64,7 +64,7 @@ def _cascade_by_guid(
                     search_path=search_path,
                     list_key=list_key,
                     write_path_prefix=search_path,
-                    hrid=hrid_of(guid),
+                    folio_id=id_of(guid),
                     dry_run=dry_run,
                 ),
             )

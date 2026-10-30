@@ -37,7 +37,7 @@ def _item_record(
         )
     return (
         "<record>"
-        "<controlfield tag='001'>guid-1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         # 980 $a is the harvest flag; without it nothing is selected.
         "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
@@ -187,7 +187,7 @@ def _record_with_locations(
         )
     return (
         "<record>"
-        "<controlfield tag='001'>guid-1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         # 980 $a is the harvest flag; without it nothing is selected.
         "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
@@ -314,7 +314,7 @@ def _record_with_access(
         )
     return (
         "<record>"
-        "<controlfield tag='001'>guid-1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         # 980 $a is the harvest flag; without it nothing is selected.
         "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
@@ -457,7 +457,7 @@ def _record_with_category(category: str | None) -> str:
     )
     return (
         "<record>"
-        "<controlfield tag='001'>guid-1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"

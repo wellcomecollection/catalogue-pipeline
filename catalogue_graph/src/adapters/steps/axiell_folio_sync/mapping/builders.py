@@ -31,9 +31,10 @@ from .config import (
     VERSION,
     FieldMap,
     _folio_location,
-    _holdings_hrid,
-    _instance_hrid,
-    _item_hrid,
+    _guid,
+    _holdings_id,
+    _instance_id,
+    _item_id,
 )
 from .marc import CanonicalRecord, MappingError, extract, parse_xml
 from .payloads import (
@@ -54,7 +55,8 @@ from .payloads import (
 def _extract_record(root: Record, *, deleted: bool) -> CanonicalRecord:
     """Build a :class:`CanonicalRecord` from an already-parsed MARC record via MARC_SOURCE.
 
-    Raises :class:`MappingError` if MARC 001 is absent (record cannot be identified).
+    Raises :class:`MappingError` if MARC 001 is absent or is not a UUID, since
+    the FOLIO ids are derived from it (record cannot be identified).
     """
     values = {field: extract(root, spec) for field, spec in MARC_SOURCE.items()}
 
@@ -63,6 +65,12 @@ def _extract_record(root: Record, *, deleted: bool) -> CanonicalRecord:
     source_id = values.pop("source_id")
     if not source_id:
         raise MappingError("Missing MARC 001 — cannot identify record")
+    try:
+        _guid(source_id)
+    except ValueError:
+        raise MappingError(
+            f"MARC 001 is not a UUID, so no FOLIO id can be derived: {source_id!r}"
+        ) from None
 
     return CanonicalRecord(
         source_id=source_id,
@@ -141,7 +149,7 @@ def build_instance(rec: CanonicalRecord, ref: RefCache) -> Instance:
             )
         ]
     return Instance(
-        hrid=_instance_hrid(rec.source_id),
+        id=_instance_id(rec.source_id),
         title=rec.title.strip(),
         # FOLIO-native: we create the instance via the Inventory API with no
         # linked SRS MARC record, so the source is FOLIO, not MARC.
@@ -153,7 +161,8 @@ def build_instance(rec: CanonicalRecord, ref: RefCache) -> Instance:
 
 def build_holdings(rec: CanonicalRecord, ref: RefCache) -> Holdings:
     return Holdings(
-        hrid=_holdings_hrid(rec.source_id),
+        id=_holdings_id(rec.source_id),
+        instanceId=_instance_id(rec.source_id),
         sourceId=_resolve(HOLDINGS_SOURCE_FIELD, rec, ref),
         permanentLocationId=_resolve(NORMAL_LOCATION_FIELD, rec, ref),
     )
@@ -202,7 +211,8 @@ def _location_notes(rec: CanonicalRecord, ref: RefCache) -> list[Note]:
 
 def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
     return Item(
-        hrid=_item_hrid(rec.source_id),
+        id=_item_id(rec.source_id),
+        holdingsRecordId=_holdings_id(rec.source_id),
         materialType=IdRef(id=_resolve(MATERIAL_TYPE_FIELD, rec, ref)),
         status=_item_status(rec),
         permanentLoanType=IdRef(id=_resolve(LOAN_TYPE_FIELD, rec, ref)),
@@ -236,9 +246,6 @@ def _assemble_payloads(
         item=build_item(rec, ref_cache),
         meta=PayloadMeta(
             source_id=rec.source_id,
-            instance_hrid=_instance_hrid(rec.source_id),
-            holdings_hrid=_holdings_hrid(rec.source_id),
-            item_hrid=_item_hrid(rec.source_id),
             mapping_version=VERSION,
             deleted=deleted,
         ),
