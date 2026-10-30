@@ -56,12 +56,12 @@ locals {
       },
       {
         rulePriority = 5
-        description  = "Expire other tagged images, keep only the last 50"
+        description  = "Expire other tagged images, keep only the last 10"
         selection = {
           tagStatus      = "tagged"
           tagPatternList = ["*"]
           countType      = "imageCountMoreThan"
-          countNumber    = 50
+          countNumber    = 10
         }
         action = { type = "expire" }
       },
