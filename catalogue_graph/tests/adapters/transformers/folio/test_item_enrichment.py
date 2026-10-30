@@ -22,6 +22,8 @@ from adapters.transformers import folio_store_source
 from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
 from adapters.transformers.folio_store_source import FolioStoreSource
 from adapters.utils.adapter_store import AdapterStore
+from id_minter.embedder import extract_source_identifiers
+from id_minter.models.identifier import SourceIdentifierKey
 from models.pipeline.identifier import Identifiable
 from tests.adapters.extractors.ebsco.helpers import prepare_changeset
 from tests.adapters.transformers.folio.helpers import (
@@ -151,6 +153,30 @@ def test_transformer_attaches_enriched_items(
     assert _item_identifiers(source) == [
         ("folio-item", item_id) for item_id in fixture_item_ids()
     ]
+
+    assert [item["id"]["otherIdentifiers"] for item in source["data"]["items"]] == [
+        [
+            {
+                "identifierType": {"id": "sierra-system-number"},
+                "ontologyType": "Item",
+                "value": former_id,
+            }
+            for former_id in item["formerIds"]
+        ]
+        for item in fixture_record()["items"]
+    ]
+
+    # Every fixture item predates the migration, so the minter gets each Sierra item number as its predecessor.
+    item_requests = {
+        sid.source_id: predecessor
+        for sid, predecessor in extract_source_identifiers(source)
+        if sid.ontology_type == "Item"
+    }
+    assert item_requests == {
+        item["id"]: SourceIdentifierKey("Item", "sierra-system-number", former_id)
+        for item in fixture_record()["items"]
+        for former_id in item["formerIds"]
+    }
 
 
 def test_transformer_emits_no_items_when_instance_not_enriched(
