@@ -63,7 +63,7 @@ jobs:
           registry-type: public
 
       - name: Restore the coursier cache
-        uses: coursier/cache-action@v8
+        uses: coursier/cache-action@v9
 
       # Starts the service containers through the host's Docker socket, which
       # run_sbt_task_in_docker.sh mounts into the sbt container.
