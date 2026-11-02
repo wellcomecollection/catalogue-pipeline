@@ -26,7 +26,7 @@ module "pipeline" {
 
   enable_adapter_transformer_trigger           = true
   disable_calm_transformer_topic_subscriptions = true
-  enable_id_minter_schedule                    = false
+  enable_id_minter_schedule                    = true
   enable_graph_pipeline_schedule               = true
   enable_image_inferrer_schedule               = true
 
