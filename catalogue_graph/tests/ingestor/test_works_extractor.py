@@ -275,11 +275,11 @@ def test_incremental_mode_fetches_related_works_in_batches(
         {"ids": ["a24esypq"]},
         [{"id": "a24esypq", "descendants": descendants}],
     )
-    for batch in [["a24esypq"], ["desc1", "desc2"], ["desc3"]]:
+    # Graph lookups for related works stay in one batch across the ES ids batches
+    for batch in [["a24esypq"], descendant_ids]:
         add_neptune_mock_response(WORK_ANCESTORS_QUERY, {"ids": batch}, [])
         add_neptune_mock_response(WORK_CHILDREN_QUERY, {"ids": batch}, [])
-    for batch in [["desc1", "desc2"], ["desc3"]]:
-        add_neptune_mock_response(WORK_DESCENDANTS_QUERY, {"ids": batch}, [])
+    add_neptune_mock_response(WORK_DESCENDANTS_QUERY, {"ids": descendant_ids}, [])
 
     extractor = get_incremental_extractor(["a24esypq"])
     extracted_ids = {item.work.state.canonical_id for item in extractor.extract_raw()}
