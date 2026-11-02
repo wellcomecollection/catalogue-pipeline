@@ -102,6 +102,8 @@ class FolioEnrichedItem(FolioModel):
     temporary_loan_type: StrippedText | None = None
     material_type: StrippedText | None = None
     notes: list[FolioItemNote] = Field(default_factory=list)
+    # The Sierra item number, for items carried over in the migration.
+    former_ids: list[str] = Field(default_factory=list)
     suppress_from_discovery: bool = False
 
     @property
