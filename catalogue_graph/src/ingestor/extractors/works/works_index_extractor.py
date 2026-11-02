@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from itertools import batched
 
 import structlog
 from elasticsearch import Elasticsearch
@@ -15,6 +16,7 @@ from ingestor.models.neptune.node import WorkNode
 from models.events import BasePipelineEvent
 
 from .base_works_extractor import (
+    MAX_IDS_PER_QUERY,
     ExtractedWork,
     GraphBaseWorksExtractor,
     get_works_by_id_query,
@@ -47,6 +49,10 @@ class WorksIndexExtractor(GraphBaseWorksExtractor, StreamingExtractor):
         # Remove `window` from event before retrieving related works. (All related works should be processed
         # even if they aren't part of the current window.)
         event = self.event.copy(update={"window": None, "ids": None})
+        # Reuse the main stream's PIT so each batch doesn't open its own
+        event.pit_ids = event.pit_ids.model_copy(
+            update={"merged": self.es_source.pit_id}
+        )
         return MergedWorksSource(
             event=event,
             query=get_works_by_id_query(related_ids),
@@ -89,8 +95,10 @@ class WorksIndexExtractor(GraphBaseWorksExtractor, StreamingExtractor):
         related_ids = self.related_ids.difference(self.streamed_ids)
         logger.info("Will process related works", count=len(related_ids))
 
-        related_works_source = self.get_related_works_source(list(related_ids))
+        # One stream across the ids batches, so graph lookups keep their full batch size
         related_works_stream = (
-            MergedWork.from_raw_document(w) for w in related_works_source.stream_raw()
+            MergedWork.from_raw_document(w)
+            for ids_batch in batched(sorted(related_ids), MAX_IDS_PER_QUERY)
+            for w in self.get_related_works_source(list(ids_batch)).stream_raw()
         )
         yield from self.process_es_works(related_works_stream)
