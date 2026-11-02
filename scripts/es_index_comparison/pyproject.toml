@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 dependencies = [
-  "elasticsearch>=8.11,<9",
+  "elasticsearch>=9.5,<10",
   "polars>=0.20.0",
   "pandas>=2.0.0",
   "pyarrow",

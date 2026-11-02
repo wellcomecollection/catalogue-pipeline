@@ -20,6 +20,9 @@ object WorkPredicates {
   private val sierraIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.SierraSystemNumber
   )
+  private val folioIdentified: WorkPredicate = identifierTypeId(
+    IdentifierType.FolioInstance
+  )
   private val metsIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.METS
   )
@@ -42,7 +45,9 @@ object WorkPredicates {
   )
 
   val ebscoWork: WorkPredicate = ebscoIdentified
-  val sierraWork: WorkPredicate = sierraIdentified
+  // A library management system work. Sierra and FOLIO run in separate
+  // pipelines, so rules can treat them alike.
+  val lmsWork: WorkPredicate = sierraIdentified or folioIdentified
   val miroWork: WorkPredicate = miroIdentified
   val zeroItem: WorkPredicate = work => work.data.items.isEmpty
   val singleItem: WorkPredicate = work => work.data.items.size == 1
@@ -95,22 +100,22 @@ object WorkPredicates {
     allDigitalLocations
   )
 
-  val zeroItemSierra: WorkPredicate = satisfiesAll(sierraWork, zeroItem)
-  val singleItemSierra: WorkPredicate = satisfiesAll(sierraWork, singleItem)
-  val multiItemSierra: WorkPredicate = satisfiesAll(sierraWork, multiItem)
+  val zeroItemLmsWork: WorkPredicate = satisfiesAll(lmsWork, zeroItem)
+  val singleItemLmsWork: WorkPredicate = satisfiesAll(lmsWork, singleItem)
+  val multiItemLmsWork: WorkPredicate = satisfiesAll(lmsWork, multiItem)
 
-  val physicalSierra: WorkPredicate =
-    satisfiesAll(sierraWork, physicalLocationExists)
+  val physicalLmsWork: WorkPredicate =
+    satisfiesAll(lmsWork, physicalLocationExists)
 
-  val sierraPictureOrEphemera: WorkPredicate =
+  val lmsWorkPictureOrEphemera: WorkPredicate =
     satisfiesAll(
-      sierraWork,
+      lmsWork,
       format(Format.Pictures) _ or format(Format.Ephemera)
     )
 
-  val sierraPictureDigitalImageOr3DObject: WorkPredicate =
+  val lmsWorkPictureDigitalImageOr3DObject: WorkPredicate =
     satisfiesAll(
-      sierraWork,
+      lmsWork,
       format(Format.DigitalImages) _ or
         format(Format.`3DObjects`) or
         format(Format.Pictures)
@@ -122,12 +127,12 @@ object WorkPredicates {
   // The AIDS posters (digaids) have all already been re-digitised
   // and marked with `digaids`, whereas going forward Miro works
   // that have been re-digitised will be marked as `digmiro`.
-  val sierraDigitisedMiro: WorkPredicate =
-    satisfiesAll(sierraWork, digaids or digmiro)
+  val lmsWorkDigitisedMiro: WorkPredicate =
+    satisfiesAll(lmsWork, digaids or digmiro)
 
-  val sierraDigitisedAv: WorkPredicate =
+  val lmsWorkDigitisedAv: WorkPredicate =
     satisfiesAll(
-      sierraWork,
+      lmsWork,
       isAudiovisual,
       // We may get unidentified items on Sierra bibs, drawn from
       // resources in field 856 -- we don't care about those here.
@@ -140,7 +145,7 @@ object WorkPredicates {
 
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
-  def sierraWorkWithId(id: SourceIdentifier)(work: Work[Identified]): Boolean =
+  def lmsWorkWithId(id: SourceIdentifier)(work: Work[Identified]): Boolean =
     work.sourceIdentifier == id
 
   private def physicalLocationExists(work: Work[Identified]): Boolean =

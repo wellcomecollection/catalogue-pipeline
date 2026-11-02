@@ -4,17 +4,17 @@
 #
 #    pip-compile test_requirements.in
 #
-boto3==1.42.97
+boto3==1.43.120
     # via
     #   -r requirements.txt
     #   moto
-botocore==1.42.97
+botocore==1.43.120
     # via
     #   -r requirements.txt
     #   boto3
     #   moto
     #   s3transfer
-certifi==2026.4.22
+certifi==2026.10.23
     # via requests
 cffi==2.0.0
     # via cryptography
@@ -68,7 +68,7 @@ requests==2.33.1
     #   responses
 responses==0.26.0
     # via moto
-s3transfer==0.16.1
+s3transfer==0.19.3
     # via
     #   -r requirements.txt
     #   boto3

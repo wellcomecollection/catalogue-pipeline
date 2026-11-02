@@ -18,9 +18,9 @@ import weco.pipeline.merger.models.{
 }
 import weco.pipeline.merger.rules._
 import weco.pipeline.merger.rules.WorkPredicates.{
-  miroWork,
-  sierraDigitisedAv,
-  sierraWork
+  lmsWork,
+  lmsWorkDigitisedAv,
+  miroWork
 }
 
 /*
@@ -160,11 +160,11 @@ trait Merger extends MergerLogging {
   private def partitionAudiovisual(
     works: Seq[Work[Identified]]
   ): Seq[Seq[Work[Identified]]] =
-    if (works.size < 2 || !findTarget(works).exists(sierraWork)) {
+    if (works.size < 2 || !findTarget(works).exists(lmsWork)) {
       Seq(works)
     } else {
-      val avEbibs = works.filter(sierraDigitisedAv)
-      val others = works.filterNot(sierraWork)
+      val avEbibs = works.filter(lmsWorkDigitisedAv)
+      val others = works.filterNot(lmsWork)
 
       val ownerOf: Map[CanonicalId, CanonicalId] = others.flatMap {
         other =>

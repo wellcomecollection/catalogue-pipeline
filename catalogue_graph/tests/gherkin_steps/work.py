@@ -46,6 +46,8 @@ ATTR_ALIASES: dict[str, str] = {
     "agent": "agents",
     "ancestor": "state.relations.ancestors",
     "ancestors": "state.relations.ancestors",
+    "merge candidate": "state.merge_candidates",
+    "merge candidates": "state.merge_candidates",
 }
 
 
@@ -94,6 +96,11 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
 @then("the work is invisible")
 def the_work_is_invisible(work: SourceWork) -> None:
     assert work.type == "Invisible"
+
+
+@then("the work is deleted")
+def the_work_is_deleted(work: SourceWork) -> None:
+    assert work.type == "Deleted"
 
 
 @then("the work is visible")
@@ -348,6 +355,20 @@ def child_list_member_with_datatable(
     )
     for member, row in zip(members, datatable, strict=True):
         assert member == row[0]
+
+
+@then("the work has the merge candidates:")
+def work_merge_candidates(work: SourceWork, datatable: list[list[str]]) -> None:
+    """Compare merge candidates against a table headed `type | value | reason`."""
+    actual = [
+        [
+            candidate.id.source_identifier.identifier_type.id,
+            candidate.id.source_identifier.value,
+            candidate.reason,
+        ]
+        for candidate in work.state.merge_candidates
+    ]
+    assert actual == datatable[1:]
 
 
 def _assert_work_attr(work: SourceWork, attr_phrase: str, expected: object) -> None:

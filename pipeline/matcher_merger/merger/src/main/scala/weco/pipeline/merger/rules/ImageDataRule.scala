@@ -7,9 +7,9 @@ import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.merger.models.{FieldMergeResult, ImageDataOps}
 import weco.pipeline.merger.rules.WorkPredicates.{
+  lmsWork,
+  lmsWorkDigitisedMiro,
   not,
-  sierraDigitisedMiro,
-  sierraWork,
   WorkPredicate
 }
 /*
@@ -22,41 +22,41 @@ trait ImageRule extends FieldMergeRule {
 
   type FieldData = List[ImageData[IdState.Identified]]
 
-  protected def mergeSierraImages(
+  protected def mergeLmsWorkImages(
     sources: Seq[Work[Identified]]
-  )(sierraTarget: Work.Visible[Identified]): FieldMergeResult[FieldData]
+  )(lmsWorkTarget: Work.Visible[Identified]): FieldMergeResult[FieldData]
 
   override def merge(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]] = Nil
   ): FieldMergeResult[FieldData] = {
-    // We merge images into Sierra targets, regardless of whether this is the principal
+    // We merge images into LMS targets, regardless of whether this is the principal
     // target of the graph we're currently merging.
-    // This is because the Sierra participant is the one that
+    // This is because the LMS participant is the one that
     // contains the best information to enable us to choose
     // which images to put where.
     // The resulting FieldMergeResult is still expected to be applied to the
     // actual target.
     val allParticipants =
       target +: sources.collect(TargetPrecedence.visibleWork)
-    val maybeSierraTarget: Option[Work.Visible[Identified]] =
+    val maybeLmsWorkTarget: Option[Work.Visible[Identified]] =
       TargetPrecedence
-        .targetSatisfying(sierraDigitisedMiro)(allParticipants)
-        .orElse(TargetPrecedence.targetSatisfying(sierraWork)(allParticipants))
+        .targetSatisfying(lmsWorkDigitisedMiro)(allParticipants)
+        .orElse(TargetPrecedence.targetSatisfying(lmsWork)(allParticipants))
 
-    maybeSierraTarget
-      .map(mergeSierraImages(sources))
+    maybeLmsWorkTarget
+      .map(mergeLmsWorkImages(sources))
       .getOrElse(FieldMergeResult(data = Nil, sources = Nil))
   }
 
   protected lazy val getPairedMiroImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate =
-      sierraWork and not(sierraDigitisedMiro)
+      lmsWork and not(lmsWorkDigitisedMiro)
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 
   protected lazy val getMetsPictureAndEphemeraImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
+    val isDefinedForTarget: WorkPredicate = lmsWorkPictureOrEphemera
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
   }
 
@@ -74,11 +74,11 @@ trait ImageRule extends FieldMergeRule {
 
 object ImageDataRule extends ImageRule {
 
-  override def mergeSierraImages(
+  override def mergeLmsWorkImages(
     sources: Seq[Work[Identified]]
-  )(sierraTarget: Work.Visible[Identified]): FieldMergeResult[FieldData] = {
+  )(lmsWorkTarget: Work.Visible[Identified]): FieldMergeResult[FieldData] = {
 
-    val miroImages = getPairedMiroImages(sierraTarget, sources).getOrElse(Nil)
+    val miroImages = getPairedMiroImages(lmsWorkTarget, sources).getOrElse(Nil)
 
     FieldMergeResult(
       // Only Miro images contribute to the imageData list in the target Work,
@@ -86,7 +86,7 @@ object ImageDataRule extends ImageRule {
       data = miroImages,
       sources = List(
         getPairedMiroImages
-      ).flatMap(_.mergedSources(sierraTarget, sources))
+      ).flatMap(_.mergedSources(lmsWorkTarget, sources))
     )
   }
 }
@@ -99,13 +99,13 @@ object ImagesRule extends ImageRule with ImageDataOps {
     miroImageData.map(_.copyLicenceFrom(metsImageData))
   }
 
-  override def mergeSierraImages(
+  override def mergeLmsWorkImages(
     sources: Seq[Work[Identified]]
-  )(sierraTarget: Work.Visible[Identified]): FieldMergeResult[FieldData] = {
+  )(lmsWorkTarget: Work.Visible[Identified]): FieldMergeResult[FieldData] = {
     val metsImages =
-      getMetsPictureAndEphemeraImages(sierraTarget, sources).getOrElse(Nil)
+      getMetsPictureAndEphemeraImages(lmsWorkTarget, sources).getOrElse(Nil)
     val miroImages = mergeMetsLicenceIntoMiroLocation(
-      getPairedMiroImages(sierraTarget, sources).getOrElse(Nil),
+      getPairedMiroImages(lmsWorkTarget, sources).getOrElse(Nil),
       metsImages
     )
 
@@ -114,7 +114,7 @@ object ImagesRule extends ImageRule with ImageDataOps {
       sources = List(
         getMetsPictureAndEphemeraImages,
         getPairedMiroImages
-      ).flatMap(_.mergedSources(sierraTarget, sources))
+      ).flatMap(_.mergedSources(lmsWorkTarget, sources))
     )
   }
 }

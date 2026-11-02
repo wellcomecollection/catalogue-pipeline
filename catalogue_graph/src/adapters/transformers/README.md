@@ -250,7 +250,7 @@ flowchart TD
 The FOLIO transformer differs from the others in that it reads *two* Iceberg tables. The FOLIO OAI-PMH bib record
 carries no item UUIDs, so a separate enrichment step (`adapters.steps.oai_pmh.folio_enrich`, running between the
 loader and the publish event) maintains an inventory store keyed by instance id. At transform time `FolioStoreSource`
-joins that store onto each bib row (in bounded batches, attached as `enrichment_content`), and `FolioWorkBuilder`
+joins that store onto each bib row (in bounded batches, attached as `inventory_content`), and `FolioWorkBuilder`
 emits items carrying a `folio-item` source identifier with the inventory UUID.
 
 Transformer-side behaviour to be aware of:
@@ -259,6 +259,11 @@ Transformer-side behaviour to be aware of:
   works without items. On a fresh environment, run one enrichment pass before transforming.
 - An instance that has not been enriched emits no items; the transformer never guesses item identity from MARC 952.
 - Transformation never calls FOLIO. A full reindex joins whatever is already in the inventory store.
+- Items suppressed from discovery are left off the work. Every other item whose location resolves gets a physical
+  location and an access condition from `adapters/transformers/folio/` (`locations.py` and `access_conditions.py`),
+  following the mappings in [docs/folio](../../../docs/folio/). An item with an unmapped location, a no-location code
+  or an ambiguous bound-with host gets neither, and keeps any display note as its note. The access decision table
+  itself is data, in `folio/access_rules/rules.csv`.
 
 See [Item enrichment](../extractors/oai_pmh/folio/README.md#item-enrichment) in the FOLIO adapter README for the full
 design, including how the inventory store is populated and kept current.

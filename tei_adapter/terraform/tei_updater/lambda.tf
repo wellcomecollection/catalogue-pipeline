@@ -3,7 +3,7 @@ module "tei_updater_lambda" {
   source = "../../../infrastructure/modules/lambda"
 
   name    = "tei_updater"
-  runtime = "python3.10"
+  runtime = "python3.13"
 
   s3_bucket   = var.infra_bucket
   s3_key      = "lambdas/tei_adapter/tei_updater.zip"

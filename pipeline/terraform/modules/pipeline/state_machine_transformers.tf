@@ -69,30 +69,10 @@ resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read"
   policy = data.aws_iam_policy_document.all_transformer_pipeline_storage_secrets.json
 }
 
-# State Machine Definition
 locals {
-  transformer_state_machine_definition = jsonencode({
-    StartAt = "Run transformer"
-    States = {
-      "Run transformer" = {
-        Type      = "Task"
-        Resource  = module.transformer_lambda.lambda.arn
-        InputPath = "$.detail"
-        Next      = "Success"
-        Retry = [
-          {
-            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
-            IntervalSeconds = 2
-            MaxAttempts     = 3
-            BackoffRate     = 2.0
-          }
-        ]
-      }
-      "Success" = {
-        Type = "Succeed"
-      }
-    }
-  })
+  # Concurrent transformer Lambdas per execution; a reindex of several adapters
+  # runs one execution each, so the total is a multiple of this.
+  transformer_max_concurrency = 4
 
   transformer_types = merge(
     {
@@ -118,32 +98,100 @@ locals {
 }
 
 
-module "transformer_state_machine" {
-  source = "../state_machine"
+# Adapter and reindex events on find_work: the planner groups the event's
+# changesets (or, for a reindex, every changeset) into partitions of about
+# 10,000 rows at one pinned snapshot, and each partition runs the transformer in
+# changeset mode. A changeset bigger than that runs as one partition.
+module "transformer" {
+  source = "../find_work_state_machine"
 
-  name                     = "transformer-${var.pipeline_date}"
-  state_machine_definition = local.transformer_state_machine_definition
-  invokable_lambda_arns = [
-    module.transformer_lambda.lambda.arn,
+  name               = "transformer"
+  state_machine_name = "transformer-${var.pipeline_date}"
+  pipeline_date      = var.pipeline_date
+  comment            = "Plan an adapter or reindex event into changeset partitions and transform each."
+
+  ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
+
+  find_work_lambda = {
+    service_name = "transformer-find-work"
+    description  = "Groups an adapter event's changesets into partitions for the transformer state machine."
+    command      = ["adapters.steps.transformer_find_work.lambda_handler"]
+    # A FOLIO reindex reads the changeset and deleted columns of ~1M rows.
+    memory_size = 2048
+    timeout     = 300
+    environment_variables = {
+      PIPELINE_DATE = var.pipeline_date
+      S3_PREFIX     = "prod"
+    }
+  }
+
+  vpc_config = {
+    subnet_ids         = local.network_config.subnets
+    security_group_ids = [aws_security_group.egress.id]
+  }
+
+  find_work_read_policy_json = data.aws_iam_policy_document.all_adapter_s3tables_read.json
+
+  partition_s3_arns = [
+    for bucket in values(local.adapter_buckets) :
+    "arn:aws:s3:::${bucket}/pipeline-${var.pipeline_date}/*/find_work/*"
   ]
 
-  policies_to_attach = {
+  max_concurrency             = local.transformer_max_concurrency
+  tolerate_partition_failures = false
+
+  worker_state_name = "TransformPartition"
+  worker_state = {
+    Type     = "Task"
+    Resource = "arn:aws:states:::lambda:invoke"
+    Arguments = {
+      FunctionName = module.transformer_lambda.lambda.arn
+      Payload      = "{% $states.input %}"
+    }
+    Output = "{% $states.result.Payload %}"
+    Retry = [
+      {
+        ErrorEquals = [
+          "Lambda.ServiceException",
+          "Lambda.AWSLambdaException",
+          "Lambda.SdkClientException",
+          "Lambda.TooManyRequestsException",
+        ]
+        IntervalSeconds = 2
+        MaxAttempts     = 3
+        BackoffRate     = 2.0
+      },
+      # Timeouts, OOM and crashes; a partition re-run is idempotent. One retry,
+      # as a partition that genuinely times out would spend 600 s on each.
+      {
+        ErrorEquals     = ["Lambda.Unknown"]
+        IntervalSeconds = 5
+        MaxAttempts     = 1
+      }
+    ]
+  }
+  worker_lambda_arns = [module.transformer_lambda.lambda.arn]
+
+  state_machine_policies = {
     "read_ebsco_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
     "read_axiell_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["axiell"].json
     "read_folio_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["folio"].json
   }
+
+  alarm_name_prefix = "transformer-state-machine"
+  alarm_topic_arn   = local.monitoring_infra["chatbot_topic_arn"]
 }
 
-module "transformer_state_machine_alarms" {
-  source = "../state_machine_alarms"
+# Keep the pre-module state machine and alarms updating in place; removable
+# once every stack using this module has applied.
+moved {
+  from = module.transformer_state_machine
+  to   = module.transformer.module.state_machine
+}
 
-  state_machine_arn = module.transformer_state_machine.state_machine_arn
-  alarm_name_prefix = "transformer-state-machine"
-  alarm_name_suffix = "-${var.pipeline_date}"
-
-  default_alarm_configuration = {
-    alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
-  }
+moved {
+  from = module.transformer_state_machine_alarms
+  to   = module.transformer.module.state_machine_alarms
 }
 
 
@@ -188,7 +236,7 @@ module "adapter_transformer_trigger" {
 
   name              = "${each.key}-transformer-${var.pipeline_date}"
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
-  state_machine_arn = module.transformer_state_machine.state_machine_arn
+  state_machine_arn = module.transformer.state_machine_arn
 
   enabled = var.enable_adapter_transformer_trigger
 
@@ -212,7 +260,7 @@ module "reindex_transformer_trigger" {
 
   name              = "${each.key}-reindex-${var.pipeline_date}"
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
-  state_machine_arn = module.transformer_state_machine.state_machine_arn
+  state_machine_arn = module.transformer.state_machine_arn
 
   enabled = var.reindexing_state.listen_to_reindexer
 
@@ -236,5 +284,6 @@ module "reindex_transformer_trigger" {
   input_paths = {
     job_id = "$.detail.job_id"
   }
-  input_template = "{\"detail\": {\"job_id\": <job_id>, \"transformer_type\": \"${each.key}\"}}"
+  # The planner needs an explicit full: true before it plans a whole store.
+  input_template = "{\"detail\": {\"job_id\": <job_id>, \"transformer_type\": \"${each.key}\", \"full\": true}}"
 }

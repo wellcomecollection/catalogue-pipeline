@@ -20,7 +20,7 @@ variable "memory" {
 
 variable "version_regex" {
   type    = string
-  default = "9.1.?"
+  default = "^9\\.5\\.\\d+$"
 }
 
 variable "traffic_filter_ids" {
