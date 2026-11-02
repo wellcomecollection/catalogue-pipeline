@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from itertools import batched
 
 import structlog
 from elasticsearch import Elasticsearch
@@ -15,6 +16,7 @@ from ingestor.models.neptune.node import WorkNode
 from models.events import BasePipelineEvent
 
 from .base_works_extractor import (
+    MAX_IDS_PER_QUERY,
     ExtractedWork,
     GraphBaseWorksExtractor,
     get_works_by_id_query,
@@ -89,8 +91,10 @@ class WorksIndexExtractor(GraphBaseWorksExtractor, StreamingExtractor):
         related_ids = self.related_ids.difference(self.streamed_ids)
         logger.info("Will process related works", count=len(related_ids))
 
-        related_works_source = self.get_related_works_source(list(related_ids))
-        related_works_stream = (
-            MergedWork.from_raw_document(w) for w in related_works_source.stream_raw()
-        )
-        yield from self.process_es_works(related_works_stream)
+        for ids_batch in batched(sorted(related_ids), MAX_IDS_PER_QUERY):
+            related_works_source = self.get_related_works_source(list(ids_batch))
+            related_works_stream = (
+                MergedWork.from_raw_document(w)
+                for w in related_works_source.stream_raw()
+            )
+            yield from self.process_es_works(related_works_stream)

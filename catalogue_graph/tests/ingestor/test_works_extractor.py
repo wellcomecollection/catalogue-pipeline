@@ -251,3 +251,44 @@ def test_full_mode_does_not_collect_related_ids(
     list(extractor.extract_raw())
 
     assert extractor.related_ids == set()
+
+
+def _work_node(work_id: str) -> dict:
+    properties = {"id": work_id, "label": "Descendant work", "type": "Work"}
+    return {**DESCENDANT_WORK_NODE, "~id": work_id, "~properties": properties}
+
+
+def test_incremental_mode_fetches_related_works_in_batches(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Related works are fetched in batches so no `ids` query exceeds the Elasticsearch limit."""
+    monkeypatch.setattr(
+        "ingestor.extractors.works.works_index_extractor.MAX_IDS_PER_QUERY", 2
+    )
+    descendant_ids = ["desc1", "desc2", "desc3"]
+    for work_id in ["a24esypq", *descendant_ids]:
+        mock_es_work(work_id)
+
+    descendants = [_work_node(work_id) for work_id in descendant_ids]
+    add_neptune_mock_response(
+        WORK_DESCENDANTS_QUERY,
+        {"ids": ["a24esypq"]},
+        [{"id": "a24esypq", "descendants": descendants}],
+    )
+    for batch in [["a24esypq"], ["desc1", "desc2"], ["desc3"]]:
+        add_neptune_mock_response(WORK_ANCESTORS_QUERY, {"ids": batch}, [])
+        add_neptune_mock_response(WORK_CHILDREN_QUERY, {"ids": batch}, [])
+    for batch in [["desc1", "desc2"], ["desc3"]]:
+        add_neptune_mock_response(WORK_DESCENDANTS_QUERY, {"ids": batch}, [])
+
+    extractor = get_incremental_extractor(["a24esypq"])
+    extracted_ids = {item.work.state.canonical_id for item in extractor.extract_raw()}
+
+    assert extracted_ids == {"a24esypq", *descendant_ids}
+    related_id_queries = {
+        tuple(clause["ids"]["values"])
+        for query in MockElasticsearchClient.queries
+        for clause in query.get("bool", {}).get("must", [])
+        if "ids" in clause and set(clause["ids"]["values"]) <= set(descendant_ids)
+    }
+    assert related_id_queries == {("desc1", "desc2"), ("desc3",)}
