@@ -28,10 +28,12 @@ from .config import (
     NORMAL_LOCATION_FIELD,
     NORMAL_LOCATION_NOTE_TYPE_FIELD,
     RECORD_TYPE_ITEM,
+    SYNCED_STATISTICAL_CODE_FIELD,
     VERSION,
     FieldMap,
     _folio_location,
     _guid,
+    _guid_label,
     _holdings_id,
     _instance_id,
     _item_id,
@@ -156,6 +158,7 @@ def build_instance(rec: CanonicalRecord, ref: RefCache) -> Instance:
         source="FOLIO",
         instanceTypeId=ref.instance_type_id(),
         identifiers=identifiers,
+        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
     )
 
 
@@ -165,6 +168,8 @@ def build_holdings(rec: CanonicalRecord, ref: RefCache) -> Holdings:
         instanceId=_instance_id(rec.source_id),
         sourceId=_resolve(HOLDINGS_SOURCE_FIELD, rec, ref),
         permanentLocationId=_resolve(NORMAL_LOCATION_FIELD, rec, ref),
+        formerIds=[_guid_label(rec.source_id)],
+        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
     )
 
 
@@ -230,6 +235,8 @@ def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
             f"{AXIELL_LOCATION_NOTE_PREFIX}: {rec.current_location or 'unknown'}"
         ],
         notes=_location_notes(rec, ref),
+        formerIds=[_guid_label(rec.source_id)],
+        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
     )
 
 

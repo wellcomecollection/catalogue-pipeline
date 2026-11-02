@@ -49,6 +49,9 @@ class Instance(BaseModel):
     source: str = "FOLIO"
     instanceTypeId: str
     identifiers: list[Identifier] | None = None
+    # The AXIELL synced marker. Merged on update, keeping the record's other
+    # codes, which the tenant uses for access status.
+    statisticalCodeIds: list[str] | None = None
 
 
 class Holdings(BaseModel):
@@ -57,6 +60,10 @@ class Holdings(BaseModel):
     instanceId: str  # the instance's derived id
     sourceId: str
     permanentLocationId: str
+    # The AxC GUID, as a label for staff: the holdings id is derived from it but
+    # is not it. Merged on update, keeping any other entries.
+    formerIds: list[str] | None = None
+    statisticalCodeIds: list[str] | None = None
 
 
 class Item(BaseModel):
@@ -72,6 +79,9 @@ class Item(BaseModel):
     notes: list[Note] | None = None
     # Plain untyped strings; no tenant note type needed.
     administrativeNotes: list[str] | None = None
+    # As on the holdings: the AxC GUID for staff, and the synced marker.
+    formerIds: list[str] | None = None
+    statisticalCodeIds: list[str] | None = None
 
 
 class PayloadMeta(BaseModel):

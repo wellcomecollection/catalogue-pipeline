@@ -5,6 +5,7 @@ from typing import Any
 
 from adapters.steps.axiell_folio_sync.mapping import (
     Holdings,
+    Identifier,
     IdRef,
     Instance,
     Item,
@@ -703,3 +704,138 @@ def test_a_dry_run_plans_the_derived_ids_and_writes_nothing() -> None:
     assert (result.holdings.action, result.holdings.id) == ("create", "hold-1")
     assert (result.item.action, result.item.id) == ("create", "item-1")
     assert inventory.post_calls == inventory.put_calls == []
+
+
+# -- list fields merged on update --
+
+GUID = "00000000-0000-4000-8000-000000000001"
+AXIELL_CODE = "axiell-code-uuid"
+ACCESS_CODE = "online-request-code-uuid"
+LOCAL_TYPE = "local-identifier-type-uuid"
+OTHER_TYPE = "isbn-type-uuid"
+
+LABELLED = MAPPED.model_copy(
+    update={
+        "instance": MAPPED.instance.model_copy(
+            update={
+                "identifiers": [
+                    Identifier(identifierTypeId=LOCAL_TYPE, value="WMS/NEW.1")
+                ],
+                "statisticalCodeIds": [AXIELL_CODE],
+            }
+        ),
+        "holdings": MAPPED.holdings.model_copy(
+            update={"formerIds": [GUID], "statisticalCodeIds": [AXIELL_CODE]}
+        ),
+        "item": MAPPED.item.model_copy(
+            update={"formerIds": [GUID], "statisticalCodeIds": [AXIELL_CODE]}
+        ),
+    }
+)
+
+
+def _puts_after_update(
+    instance: dict[str, Any], holdings: dict[str, Any], item: dict[str, Any]
+) -> dict[str, dict[str, Any]]:
+    inventory = _RecordingInventory(
+        existing={
+            "/inventory/instances": [{"id": "inst-1", **instance}],
+            "/holdings-storage/holdings": [{"id": "hold-1", **holdings}],
+            "/inventory/items": [{"id": "item-1", **item}],
+        }
+    )
+    result = upsert_from_payloads(LABELLED, inventory, dry_run=False)
+    assert result.errors == []
+    assert inventory.post_calls == []
+    return dict(inventory.put_calls)
+
+
+def test_create_sends_the_guid_labels_and_the_synced_marker() -> None:
+    inventory = _RecordingInventory()
+
+    result = upsert_from_payloads(LABELLED, inventory, dry_run=False)
+
+    assert result.errors == []
+    posts = dict(inventory.post_calls)
+    assert posts["/inventory/instances"]["statisticalCodeIds"] == [AXIELL_CODE]
+    for path in ("/holdings-storage/holdings", "/inventory/items"):
+        assert posts[path]["formerIds"] == [GUID]
+        assert posts[path]["statisticalCodeIds"] == [AXIELL_CODE]
+
+
+def test_update_keeps_other_statistical_codes_and_adds_the_marker() -> None:
+    """The tenant uses statistical codes for access status, so a record's other
+    codes must survive the update, and the marker is added only once."""
+    puts = _puts_after_update(
+        instance={"statisticalCodeIds": [ACCESS_CODE]},
+        holdings={"statisticalCodeIds": [ACCESS_CODE, AXIELL_CODE]},
+        item={},
+    )
+
+    assert puts["/inventory/instances/inst-1"]["statisticalCodeIds"] == [
+        ACCESS_CODE,
+        AXIELL_CODE,
+    ]
+    assert puts["/holdings-storage/holdings/hold-1"]["statisticalCodeIds"] == [
+        ACCESS_CODE,
+        AXIELL_CODE,
+    ]
+    assert puts["/inventory/items/item-1"]["statisticalCodeIds"] == [AXIELL_CODE]
+
+
+def test_update_keeps_other_former_ids_and_adds_the_guid_once() -> None:
+    """formerIds has no type, so the GUID is matched on its value, ignoring case,
+    and every other entry is kept."""
+    puts = _puts_after_update(
+        instance={},
+        holdings={"formerIds": ["b1234567"]},
+        item={"formerIds": ["i7654321", GUID.upper()]},
+    )
+
+    assert puts["/holdings-storage/holdings/hold-1"]["formerIds"] == [
+        "b1234567",
+        GUID,
+    ]
+    assert puts["/inventory/items/item-1"]["formerIds"] == [
+        "i7654321",
+        GUID.upper(),
+    ]
+
+
+def test_update_replaces_the_local_identifier_and_keeps_other_types() -> None:
+    puts = _puts_after_update(
+        instance={
+            "identifiers": [
+                {"identifierTypeId": OTHER_TYPE, "value": "9780000000000"},
+                {"identifierTypeId": LOCAL_TYPE, "value": "WMS/OLD.1"},
+            ]
+        },
+        holdings={},
+        item={},
+    )
+
+    assert puts["/inventory/instances/inst-1"]["identifiers"] == [
+        {"identifierTypeId": OTHER_TYPE, "value": "9780000000000"},
+        {"identifierTypeId": LOCAL_TYPE, "value": "WMS/NEW.1"},
+    ]
+
+
+def test_update_leaves_identifiers_alone_when_the_payload_has_none() -> None:
+    """A record with no object number sends no identifiers, so whatever the
+    instance holds is kept as it is."""
+    existing = [{"identifierTypeId": OTHER_TYPE, "value": "9780000000000"}]
+    inventory = _RecordingInventory(
+        existing={
+            "/inventory/instances": [{"id": "inst-1", "identifiers": existing}],
+            "/holdings-storage/holdings": [{"id": "hold-1"}],
+            "/inventory/items": [{"id": "item-1"}],
+        }
+    )
+
+    result = upsert_from_payloads(MAPPED, inventory, dry_run=False)
+
+    assert result.errors == []
+    assert (
+        dict(inventory.put_calls)["/inventory/instances/inst-1"]["identifiers"]
+        == existing
+    )

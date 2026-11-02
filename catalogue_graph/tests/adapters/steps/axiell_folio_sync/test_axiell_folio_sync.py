@@ -82,6 +82,9 @@ class FakeRefCache:
     def resolve_identifier_type(self, name: str | None) -> str:
         return "idtype-uuid"
 
+    def resolve_statistical_code(self, code: str | None) -> str:
+        return "statcode-uuid"
+
 
 def _row(row_id: str, content: str) -> dict[str, Any]:
     return {"id": row_id, "changeset": "cs1", "content": content, "deleted": False}

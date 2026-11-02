@@ -29,7 +29,9 @@ The design, record-selection rules and tombstone semantics are specified in
      later entity write fails. Each record's FOLIO id comes from its AxC GUID (MARC `001`, itself a UUID): the
      instance takes the GUID as its id, and the holdings and item take a UUIDv5 in the GUID. The id is sent on
      create, and the sync finds the record again by it on every later run. The sync sends no hrid, so FOLIO
-     generates it.
+     generates it. For staff, the holdings and item carry the GUID in `formerIds`, and all three carry the
+     `AXIELL` statistical code. On update, `identifiers`, `formerIds` and `statisticalCodeIds` are merged, so
+     entries added in FOLIO are kept.
 5. **Pass 2 — reconciliation deletes** (see [Reconciliation deletes](#reconciliation-deletes) below): the deletion
    facts from `iter_deletions()` are actioned against FOLIO *after* the upsert pass.
 6. Results are published via a single `PipelineReport` (`report.py`): one JSON run report to S3 plus CloudWatch

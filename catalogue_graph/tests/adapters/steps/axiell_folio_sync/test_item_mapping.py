@@ -79,6 +79,9 @@ class FakeRefCache:
     def resolve_identifier_type(self, name: str | None) -> str | None:
         return "idtype-uuid"
 
+    def resolve_statistical_code(self, code: str | None) -> str | None:
+        return "statcode-uuid"
+
 
 def _build_item(current_location: str | None = "215;ROOM 3") -> Item:
     mapped = select_and_build(_item_record(current_location), FakeRefCache())  # type: ignore[arg-type]

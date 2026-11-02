@@ -14,7 +14,7 @@ maps today, see
 | **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
 | **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
 | **Statistical code** (access) | **Proposed, not implemented.** The sync writes none, so a synced item no status row catches reaches the access decision table's fallback. Proposal: one code from the migrated Sierra OPAC message vocabulary, taken from `506$f` (access category) where it names a coded state, otherwise from `540$a` (use restriction). | [Section 5](#5-statistical-code-proposed-not-implemented), [questions 12 and 13](#statistical-code) |
-| **Record identity** (HRID) | **Implemented in part** (mapping version 3.0.0). Records are found by an id derived from the AxC GUID (the GUID itself for the instance, a `uuid5` in it for the holdings and item), and the sync sends no HRID, so FOLIO generates it. Still to do: the GUID in `formerIds` on holdings and items, and the `AXIELL` statistical code. Tracked in wellcomecollection/platform#6805. | [Question 10](#identifiers) |
+| **Record identity** (HRID) | **Implemented** (ids in mapping version 3.0.0, labels and marker in 3.1.0). Records are found by an id derived from the AxC GUID (the GUID itself for the instance, a `uuid5` in it for the holdings and item), and the sync sends no HRID, so FOLIO generates it. Holdings and items carry the GUID in `formerIds`, and all three carry the `AXIELL` statistical code, which still has to be created on prod. Tracked in wellcomecollection/platform#6805. | [Question 10](#identifiers) |
 | **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | [Question 9](#material-type-and-selection) |
 | **Deletion** of a Collect record | **Implemented, both ways.** Suppresses by default; `HARD_DELETE` switches it to an irreversible delete. Which one is policy, not development. | [Question 11](#deletion) |
 
@@ -463,7 +463,7 @@ confirmed on this FOLIO version, drops out of the mapping.
 10. **Is the FOLIO identifier format acceptable?** Decided: no. Each record
     used to get an hrid built from the Axiell GUID in `001` (for example
     `AxC-instance-<guid>`), and that hrid was how the sync found its own records.
-    Instead (ids implemented in mapping 3.0.0; `formerIds` and marker still to do):
+    Instead (ids implemented in mapping 3.0.0, `formerIds` and marker in 3.1.0):
 
     | | Instance | Holdings | Item |
     | --- | --- | --- | --- |
@@ -482,8 +482,8 @@ confirmed on this FOLIO version, drops out of the mapping.
     planned "Axiell GUID" identifier type is dropped.
 
     `identifiers`, `formerIds` and `statisticalCodeIds` are merged on update,
-    keeping entries the sync does not own. Today `identifiers` is replaced
-    whole, which drops any identifier added in FOLIO.
+    keeping entries the sync does not own: on `identifiers` only the
+    `Local identifier` is replaced, and the other two only ever gain an entry.
 
     The archival reference stays as the instance's `Local identifier` (for
     example `WMS/Amer.147`, from `035$a(AltRefNo)`). Prod holds no synced

@@ -10,6 +10,7 @@ roll back siblings — that is the callers' job.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 import structlog
@@ -121,6 +122,63 @@ def _merge_item_notes(existing: list, incoming: list) -> list:
         if not (isinstance(note, dict) and note.get("itemNoteTypeId") in owned_types)
     ]
     return kept + list(incoming)
+
+
+def _merge_identifiers(existing: list, incoming: list) -> list:
+    """Replace the identifiers of the types the payload carries, keeping the rest.
+
+    The same rule as :func:`_merge_item_notes`: an identifier names its own type,
+    so every existing identifier of an incoming type (today only "Local
+    identifier") is the sync's and is replaced. Identifiers of any other type,
+    such as one a cataloguer added in FOLIO, are kept in their original order,
+    the incoming ones appended last.
+    """
+    owned_types = {
+        identifier["identifierTypeId"]
+        for identifier in incoming
+        if isinstance(identifier, dict) and identifier.get("identifierTypeId")
+    }
+    kept = [
+        identifier
+        for identifier in existing
+        if not (
+            isinstance(identifier, dict)
+            and identifier.get("identifierTypeId") in owned_types
+        )
+    ]
+    return kept + list(incoming)
+
+
+def _same_value(value: object) -> object:
+    return value
+
+
+def _casefold(value: object) -> object:
+    return value.casefold() if isinstance(value, str) else value
+
+
+def _merge_unique(
+    existing: list,
+    incoming: list,
+    *,
+    key: Callable[[object], object] = _same_value,
+) -> list:
+    """Keep every existing entry and add each incoming one not already present.
+
+    For the plain lists the sync adds to but never takes from: the
+    ``statisticalCodeIds`` that carry the synced marker, and the ``formerIds``
+    that carry the AxC GUID. Neither entry ever changes for a given record, so
+    there is nothing of ours to remove, and the shallow payload-wins merge in
+    :func:`_upsert_entity` would otherwise drop every entry added in FOLIO.
+    ``key`` decides what counts as already present.
+    """
+    seen = {key(value) for value in existing}
+    merged = list(existing)
+    for value in incoming:
+        if key(value) not in seen:
+            seen.add(key(value))
+            merged.append(value)
+    return merged
 
 
 # Substring that makes a note *look* like a location note the sync wrote.
@@ -317,6 +375,23 @@ def _upsert_entity(
             if "notes" in payload:
                 merged["notes"] = _merge_item_notes(
                     existing.get("notes") or [], payload["notes"]
+                )
+            if "identifiers" in payload:
+                merged["identifiers"] = _merge_identifiers(
+                    existing.get("identifiers") or [], payload["identifiers"]
+                )
+            if "statisticalCodeIds" in payload:
+                merged["statisticalCodeIds"] = _merge_unique(
+                    existing.get("statisticalCodeIds") or [],
+                    payload["statisticalCodeIds"],
+                )
+            if "formerIds" in payload:
+                # Case-insensitive, so a GUID a cataloguer retyped in another
+                # case is not added a second time.
+                merged["formerIds"] = _merge_unique(
+                    existing.get("formerIds") or [],
+                    payload["formerIds"],
+                    key=_casefold,
                 )
             folio.put(f"{write_path_prefix}/{folio_id}", merged)
             logger.info("updated folio_id=%s", folio_id)
