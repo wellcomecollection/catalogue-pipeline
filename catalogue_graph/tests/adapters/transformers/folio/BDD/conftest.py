@@ -2,26 +2,34 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
+from typing import Any
 
 import pytest
 from pymarc.record import Record
 from pytest_bdd import parsers, then, when
 
+from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.folio_work_builder import FolioWorkBuilder
-from models.pipeline.source.work import VisibleSourceWork
+from models.pipeline.source.work import SourceWork
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
+from tests.adapters.transformers.folio.BDD.inventory_steps import *
 from tests.gherkin_steps.logs import *
 from tests.gherkin_steps.marc import *
 from tests.gherkin_steps.work import *
 
 
 @when("I transform the MARC record", target_fixture="work")
-def do_transform(marc_record: Record) -> VisibleSourceWork:
+def do_transform(marc_record: Record, folio_inventory: dict[str, Any]) -> SourceWork:
+    inventory = (
+        FolioEnrichedInstance.model_validate(folio_inventory)
+        if folio_inventory["items"]
+        else None
+    )
     return FolioWorkBuilder(
-        marc_record, last_modified=datetime(2020, 1, 1)
-    ).transform_visible_work()
+        marc_record, last_modified=datetime(2020, 1, 1), inventory=inventory
+    ).transform_work()
 
 
 @then(parsers.parse('transforming the record raises ValueError "{message}"'))
@@ -30,3 +38,11 @@ def check_transform_raises_error(marc_record: Record, message: str) -> None:
         _ = FolioWorkBuilder(
             marc_record, last_modified=datetime(2020, 1, 1)
         ).transform_visible_work()
+
+
+@then("the only merge candidate is the HRID")
+def only_hrid_merge_candidate(work: SourceWork, marc_record: Record) -> None:
+    assert [
+        (c.id.source_identifier.identifier_type.id, c.id.source_identifier.value)
+        for c in work.state.merge_candidates
+    ] == [("folio-instance-hrid", marc_record["001"].data)]

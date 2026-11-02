@@ -1,6 +1,6 @@
 package weco.pipeline.merger.rules
 
-import weco.pipeline.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
+import weco.pipeline.merger.models.Sources.findFirstLinkedDigitisedLmsWorkFor
 import cats.data.NonEmptyList
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Item, Work}
@@ -10,9 +10,9 @@ import weco.pipeline.merger.models.{FieldMergeResult, MergerItem}
 
 /** Items are merged as follows
   *
-  * * Sierra - Single items or zero items * METS works * Single Miro works, only
-  * if the Sierra work has format Picture/Digital Image/3D Object * Sierra -
-  * Multi item * METS works
+  * * LMS - Single items or zero items * METS works * Single Miro works, only if
+  * the LMS work has format Picture/Digital Image/3D Object * LMS - Multi item *
+  * METS works
   */
 object ItemsRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
@@ -29,23 +29,23 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val items =
       mergeIntoTeiTarget(target, sources)
         .orElse(mergeIntoCalmOrAxiellTarget(target, sources))
-        .orElse(mergeMetsIntoSierraTarget(target, sources))
+        .orElse(mergeMetsIntoLmsWorkTarget(target, sources))
         .orElse(
-          mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
+          mergeSingleMiroIntoSingleOrZeroItemLmsWorkTarget(target, sources)
         )
-        .orElse(mergeDigitalIntoPhysicalSierraTarget(target, sources))
-        .getOrElse(target.data.items)
+        .orElse(mergeDigitalIntoPhysicalLmsWorkTarget(target, sources))
+        .getOrElse(unmergedItems(target))
 
     val mergedSources = (
       List(
         mergeIntoTeiTarget,
         mergeIntoCalmOrAxiellTarget,
-        mergeMetsIntoSierraTarget,
-        mergeSingleMiroIntoSingleOrZeroItemSierraTarget
+        mergeMetsIntoLmsWorkTarget,
+        mergeSingleMiroIntoSingleOrZeroItemLmsWorkTarget
       ).flatMap {
         rule =>
           rule.mergedSources(target, sources)
-      } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+      } ++ findFirstLinkedDigitisedLmsWorkFor(target, sources)
         ++ knownDuplicateSources(target, sources)
     ).distinct
 
@@ -55,14 +55,18 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     )
   }
 
-  /** When there is only 1 Sierra item, we assume that the METS work item is
-    * associated with that and merge the locations onto the Sierra item.
+  /** The target's own items when no source replaces them. */
+  private def unmergedItems(target: Work.Visible[Identified]): FieldData =
+    if (bornDigitalArchiveStubWork(target)) Nil else target.data.items
+
+  /** When there is only 1 LMS item, we assume that the METS work item is
+    * associated with that and merge the locations onto the LMS item.
     *
-    * Otherwise (including if there are no Sierra items) we append the METS item
-    * to the Sierra items
+    * Otherwise (including if there are no LMS items) we append the METS item to
+    * the LMS items
     */
-  private val mergeMetsIntoSierraTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = sierraWork
+  private val mergeMetsIntoLmsWorkTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = lmsWork
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
     def rule(
@@ -70,30 +74,30 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       sources: NonEmptyList[Work[Identified]]
     ): FieldData =
       target.data.items match {
-        case List(sierraItem) =>
-          List(sierraItem.appendLocationsFrom(sources))
+        case List(lmsWorkItem) =>
+          List(lmsWorkItem.appendLocationsFrom(sources))
         case _ => target.data.items ++ sources.toList.flatMap(_.data.items)
       }
   }
 
-  /** When there is only 1 Sierra item and 1 Miro item, we assume that the Miro
-    * work item is associated with the Sierra item and merge the locations onto
-    * the Sierra item.
+  /** When there is only 1 LMS item and 1 Miro item, we assume that the Miro
+    * work item is associated with the LMS item and merge the locations onto the
+    * LMS item.
     *
-    * When there are no Sierra items, we add the Miro item.
+    * When there are no LMS items, we add the Miro item.
     *
-    * This is restricted to the case that the Sierra work is a Picture/Digital
+    * This is restricted to the case that the LMS work is a Picture/Digital
     * Image/3D Object
     *
-    * When there are multiple Sierra items, we assume the linked Miro work is
+    * When there are multiple LMS items, we assume the linked Miro work is
     * definitely associated with * one of them, but unsure of which. Thus we
-    * don't append it to the Sierra items to avoid certain duplication, and
-    * leave the works unmerged.
+    * don't append it to the LMS items to avoid certain duplication, and leave
+    * the works unmerged.
     */
-  private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
+  private val mergeSingleMiroIntoSingleOrZeroItemLmsWorkTarget =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
-        (singleItemSierra or zeroItemSierra) and sierraPictureDigitalImageOr3DObject
+        (singleItemLmsWork or zeroItemLmsWork) and lmsWorkPictureDigitalImageOr3DObject
       val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
       override val isDefinedForSourceList: Seq[Work[Identified]] => Boolean =
         _.count(singleDigitalItemMiroWork) == 1
@@ -103,13 +107,13 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         sources: NonEmptyList[Work[Identified]]
       ): FieldData =
         target.data.items match {
-          case List(sierraItem) =>
-            List(sierraItem.appendLocationsFrom(sources))
+          case List(lmsWorkItem) =>
+            List(lmsWorkItem.appendLocationsFrom(sources))
           case _ => sources.toList.flatMap(_.data.items)
         }
     }
 
-  // While we can't merge a Miro item into a Sierra work with multiple items (as described above),
+  // While we can't merge a Miro item into an LMS work with multiple items (as described above),
   // we know that in some cases the duplication is such that we can treat the Miro source as having
   // been entirely subsumed into the target despite not having used any of its data.
   //
@@ -120,17 +124,17 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     sources: Seq[Work[Identified]]
   ): Seq[Work[Identified]] =
     if (
-      sierraDigitisedMiro(target) && sources.exists(singleDigitalItemMetsWork)
+      lmsWorkDigitisedMiro(target) && sources.exists(singleDigitalItemMetsWork)
     ) {
       sources.filter(singleDigitalItemMiroWork)
     } else {
       Nil
     }
 
-  /** When records are harvested from Calm/Axiell, both a bib and an item record
-    * are created in Sierra. The Sierra item will have more interesting
-    * information about access status, hold count, etc. The Calm/Axiell items
-    * are just stubs.
+  /** When records are harvested from Calm/Axiell into the LMS, or synced from
+    * Axiell to FOLIO, both a bib and an item record are created in the LMS. The
+    * LMS item will have more interesting information about access status, hold
+    * count, etc. The Calm/Axiell items are just stubs.
     *
     * See CalmItems.scala and axiell_work_builder.py -- the Calm/Axiell item is
     * essentially a single item with a ClosedStores PhysicalLocation (and
@@ -140,7 +144,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     * accessConditions = [...] } ] }
     *
     * For this reason, we keep all the items *except* the Calm/Axiell item. This
-    * means we'll also pick up any items linked to the Sierra work from METS or
+    * means we'll also pick up any items linked to the LMS work from METS or
     * Miro.
     */
   private val mergeIntoCalmOrAxiellTarget = new PartialRule {
@@ -149,7 +153,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or
         singleDigitalItemMiroWork or
-        sierraWork
+        lmsWork
 
     def rule(
       target: Work.Visible[Identified],
@@ -163,7 +167,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or
         singleDigitalItemMiroWork or
-        sierraWork
+        lmsWork
 
     def rule(
       target: Work.Visible[Identified],
@@ -172,28 +176,27 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       sources.map(_.data.items).toList.flatten
   }
 
-  /** If we're merging a physical/digitised Sierra work pair, make sure we copy
-    * any items from the digitised bib that are stored in the 856 web link
-    * field.
+  /** If we're merging a physical/digitised LMS work pair, make sure we copy any
+    * items from the digitised bib that are stored in the 856 web link field.
     */
-  private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
+  private val mergeDigitalIntoPhysicalLmsWorkTarget = new PartialRule {
 
     // We don't merge physical/digitised audiovisual works, because the
     // original bib records often contain different data.
     //
-    // See the comment on Sources.findFirstLinkedDigitisedSierraWorkFor
+    // See the comment on Sources.findFirstLinkedDigitisedLmsWorkFor
     val isDefinedForTarget: WorkPredicate =
-      physicalSierra and physicalDigital and not(
+      physicalLmsWork and physicalDigital and not(
         isAudiovisual
       )
 
-    val isDefinedForSource: WorkPredicate = sierraWork
+    val isDefinedForSource: WorkPredicate = lmsWork
 
     def rule(
       target: Work.Visible[Identified],
       sources: NonEmptyList[Work[Identified]]
     ): FieldData =
-      findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
+      findFirstLinkedDigitisedLmsWorkFor(target, sources.toList)
         .map {
           digitisedWork =>
             val onlineItems =

@@ -282,6 +282,61 @@ def test_harvest_range_requires_valid_range(tmp_path: Path) -> None:
         )
 
 
+def _utc(year: int, month: int, day: int, hour: int, minute: int) -> datetime:
+    return datetime(year, month, day, hour, minute, tzinfo=UTC)
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [
+        (_utc(2026, 10, 25, 0, 30), _utc(2026, 10, 25, 0, 45)),  # before the change
+        (_utc(2026, 10, 25, 1, 0), _utc(2026, 10, 25, 1, 15)),  # after the change
+        (_utc(2026, 3, 29, 0, 45), _utc(2026, 3, 29, 1, 0)),  # clocks go forward
+        (_utc(2026, 7, 1, 12, 0), _utc(2026, 7, 1, 12, 15)),
+    ],
+)
+def test_request_range_is_the_window_outside_the_clock_change(
+    start: datetime, end: datetime
+) -> None:
+    window = IncrementalWindow(start_time=start, end_time=end)
+    assert harvester_mod.request_range(window) == (start, end)
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [
+        (_utc(2026, 10, 25, 0, 45), _utc(2026, 10, 25, 1, 0)),  # inverted locally
+        (_utc(2026, 10, 25, 0, 50), _utc(2026, 10, 25, 1, 5)),  # unaligned
+        (_utc(2026, 10, 25, 0, 0), _utc(2026, 10, 25, 2, 0)),  # longer than an hour
+    ],
+)
+def test_request_range_widens_window_spanning_the_clocks_going_back(
+    start: datetime, end: datetime
+) -> None:
+    window = IncrementalWindow(start_time=start, end_time=end)
+    assert harvester_mod.request_range(window) == (
+        start - timedelta(hours=1),
+        end + timedelta(hours=1),
+    )
+
+
+def test_harvest_range_requests_widened_range_but_keeps_window_key(
+    tmp_path: Path,
+) -> None:
+    harvester = _build_harvester(tmp_path, [_make_record("id:1")])
+    window = IncrementalWindow(
+        start_time=_utc(2026, 10, 25, 0, 45), end_time=_utc(2026, 10, 25, 1, 0)
+    )
+
+    summaries = harvester.harvest_range(time_range=window)
+
+    client = cast(StubOAIClient, harvester.client)
+    assert client.calls[0]["from_date"] == _utc(2026, 10, 24, 23, 45)
+    assert client.calls[0]["until_date"] == _utc(2026, 10, 25, 2, 0)
+    assert [s.window_key for s in summaries] == [window.to_iso_string()]
+    assert summaries[0].state == "success"
+
+
 def test_harvest_range_skips_successful_windows_by_default(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)

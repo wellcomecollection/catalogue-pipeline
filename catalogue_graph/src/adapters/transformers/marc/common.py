@@ -42,6 +42,17 @@ def non_empty_subfields(
     )
 
 
+def all_non_empty_subfields(
+    field_code: str, subfield_code: str, record: Record
+) -> list[str]:
+    """Like `non_empty_subfields`, but takes every repeat of the subfield in each field, not just the first."""
+    return non_empty(
+        value.strip()
+        for field in record.get_fields(field_code)
+        for value in field.get_subfields(subfield_code)
+    )
+
+
 def first_non_empty_subfield(
     field_code: str, subfield_code: str, record: Record
 ) -> str | None:

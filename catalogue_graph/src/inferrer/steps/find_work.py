@@ -12,11 +12,15 @@ from __future__ import annotations
 import os
 import typing
 from argparse import ArgumentParser
-from itertools import batched
 
 import structlog
 
-from core.find_work import normalise_lambda_input, write_partitions_to_s3
+from core.find_work import (
+    normalise_lambda_input,
+    plan_partitions,
+    write_partitions_to_s3,
+)
+from core.work_source import WorkSource
 from inferrer.models import (
     DEFAULT_PARTITION_SIZE,
     FindWorkEvent,
@@ -44,16 +48,18 @@ def handler(
 
     es_client = get_client("inferrer", event.pipeline_date, es_mode)
 
-    ids = list(ImagesInitialSource(event, es_client).stream_raw())
-    partitions = [
-        InferenceManagerEvent(
-            ids=list(chunk),
+    source: WorkSource = ImagesInitialSource(event, es_client)
+    ids = list(source.stream_ids())
+    partitions = plan_partitions(
+        ids,
+        event.partition_size,
+        lambda chunk, _: InferenceManagerEvent(
+            ids=chunk,
             pipeline_date=event.pipeline_date,
             index_dates=event.index_dates,
             graph_date=event.graph_date,
-        )
-        for chunk in batched(ids, event.partition_size)
-    ]
+        ),
+    )
 
     logger.info(
         "Found work",
@@ -92,7 +98,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
     refs = write_partitions_to_s3(
         result.partitions,
         [len(p.ids or []) for p in result.partitions],
-        parsed_event,
+        parsed_event.partition_s3_uri,
     )
     return FindWorkRefsResult(partitions=refs).model_dump(mode="json")
 

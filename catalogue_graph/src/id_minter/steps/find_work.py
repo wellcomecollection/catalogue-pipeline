@@ -13,11 +13,15 @@ from __future__ import annotations
 import os
 import typing
 from argparse import ArgumentParser
-from itertools import batched
 
 import structlog
 
-from core.find_work import normalise_lambda_input, write_partitions_to_s3
+from core.find_work import (
+    normalise_lambda_input,
+    plan_partitions,
+    write_partitions_to_s3,
+)
+from core.work_source import WorkSource
 from id_minter.config import IdMinterConfig
 from id_minter.id_minting_source import MintingWorkIdsSource
 from id_minter.models.step_events import (
@@ -51,20 +55,20 @@ def handler(
         es_mode=es_mode,
     )
 
-    ids = list(
-        MintingWorkIdsSource(event, es_client, cfg.source_index_name).stream_raw()
-    )
+    source: WorkSource = MintingWorkIdsSource(event, es_client, cfg.source_index_name)
+    ids = list(source.stream_ids())
 
     # Distinct per-partition job ids: concurrent partitions would otherwise
     # collide on their S3 report names (generated ids are minute-granular).
     base_job_id = event.job_id or create_job_id()
-    partitions = [
-        StepFunctionMintingRequest(
-            source_identifiers=list(chunk),
+    partitions = plan_partitions(
+        ids,
+        event.partition_size,
+        lambda chunk, index: StepFunctionMintingRequest(
+            source_identifiers=chunk,
             job_id=f"{base_job_id}-p{index:03d}",
-        )
-        for index, chunk in enumerate(batched(ids, event.partition_size))
-    ]
+        ),
+    )
 
     logger.info(
         "Found work",
@@ -98,7 +102,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
     refs = write_partitions_to_s3(
         result.partitions,
         [len(p.source_identifiers or []) for p in result.partitions],
-        parsed_event,
+        parsed_event.partition_s3_uri,
     )
     return FindWorkRefsResult(partitions=refs).model_dump(mode="json")
 

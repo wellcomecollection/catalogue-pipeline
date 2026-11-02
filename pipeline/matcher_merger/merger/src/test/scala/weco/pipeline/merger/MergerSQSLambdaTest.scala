@@ -108,10 +108,14 @@ class MergerSQSLambdaTest
           message = matcherResult
         ))
 
-        whenReady(mergerSQSLambda.processMessages(messages).failed) {
-          exc =>
-            exc shouldBe a[java.lang.RuntimeException]
-            exc.getMessage shouldBe s"Works not found: Map(${work.id} -> weco.pipeline_storage.RetrieverNotFoundException: Nothing found with ID ${work.id}!)"
+        whenReady(mergerSQSLambda.processMessages(messages)) {
+          results =>
+            val failure = results.collectFirst {
+              case f: SQSLambdaMessageFailedRetryable => f
+            }.get
+            failure.messageId shouldBe messages.head.messageId
+            failure.error.getMessage should include("Works not found")
+            failure.error.getCause.getMessage shouldBe s"Works not found: Map(${work.id} -> weco.pipeline_storage.RetrieverNotFoundException: Nothing found with ID ${work.id}!)"
         }
     }
   }
@@ -348,6 +352,69 @@ class MergerSQSLambdaTest
     }
   }
 
+
+  it("retries only the message whose works are missing") {
+    val goodWork = identifiedWork()
+    val missingWork = identifiedWork()
+
+    withMergerSQSLambdaFixtures {
+      case (mergerSQSLambda, identifiedIndex, mergedIndex, _) =>
+        identifiedIndex.index ++= Map(goodWork.id -> goodWork)
+
+        val goodId = randomUUID.toString
+        val missingId = randomUUID.toString
+        val messages = List(
+          SQSLambdaMessage(goodId, createMatcherResultWith(Set(Set(goodWork)))),
+          SQSLambdaMessage(
+            missingId,
+            createMatcherResultWith(Set(Set(missingWork)))
+          )
+        )
+
+        whenReady(mergerSQSLambda.processMessages(messages)) {
+          results =>
+            results should contain(SQSLambdaMessageProcessed(goodId))
+            results.collect {
+              case failure: SQSLambdaMessageFailedRetryable => failure.messageId
+            } shouldBe Seq(missingId)
+            mergedIndex.keySet shouldBe Set(goodWork.id)
+        }
+    }
+  }
+
+  it("retries every message when the indexer throws") {
+    val works = (1 to 2).map(_ => identifiedWork())
+    val identifiedIndex = new MemoryRetriever[Work[WorkState.Identified]]()
+    identifiedIndex.index ++= works.map(w => w.id -> w).toMap
+
+    val throwingIndexer = new Indexer[WorkOrImage] {
+      def init(): Future[Unit] = Future.successful(())
+      def apply(
+        docs: Seq[WorkOrImage]
+      ): Future[Either[Seq[WorkOrImage], Seq[WorkOrImage]]] =
+        Future.failed(new RuntimeException("index unavailable"))
+    }
+
+    withMergerSQSLambda(
+      identifiedIndex,
+      mutable.Map[String, WorkOrImage](),
+      new MemoryMessageSender(),
+      batched = batched,
+      indexerOverride = Some(throwingIndexer)
+    ) {
+      mergerSQSLambda =>
+        val messages = works.map(
+          w => SQSLambdaMessage(randomUUID.toString, createMatcherResultWith(Set(Set(w))))
+        )
+
+        whenReady(mergerSQSLambda.processMessages(messages)) {
+          results =>
+            results.collect {
+              case failure: SQSLambdaMessageFailedRetryable => failure.messageId
+            } should contain theSameElementsAs messages.map(_.messageId)
+        }
+    }
+  }
 
   def withMergerSQSLambdaFixtures[R](
     testWith: TestWith[

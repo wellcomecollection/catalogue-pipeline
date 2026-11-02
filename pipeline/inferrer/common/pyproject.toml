@@ -2,14 +2,14 @@
 name = "inferrer-common"
 version = "0.1.0"
 description = "Common code for the catalogue pipeline image inferrers"
-requires-python = ">=3.10,<3.20"
+requires-python = ">=3.11,<3.20"
 dependencies = [
     "fastapi==0.133.0",
     "gunicorn==22.0.0",
     "uvicorn==0.40.0",
     "aiofile>=3.8.8",
-    "aiohttp[speedups]>=3.14.3",
-    "Pillow>=12.3.0",
+    "aiohttp[speedups]>=3.14.4",
+    "Pillow>=13.0.0",
     "piffle>=0.5.0",
     "async-timeout==4.0.3",
 ]

@@ -13,7 +13,9 @@ from pyiceberg.expressions import In
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.extractors.oai_pmh.folio.config as adapter_config
-from adapters.extractors.oai_pmh.folio.enrichment.models import FolioInventoryRecord
+from adapters.extractors.oai_pmh.folio.enrichment.models import (
+    FolioEnrichedInstance,
+)
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.steps.transformer import TransformerEvent, handler
 from adapters.transformers import folio_store_source
@@ -53,7 +55,7 @@ def test_work_builder_emits_items_with_folio_item_identifier() -> None:
     builder = FolioWorkBuilder(
         record,
         datetime.now(UTC),
-        enrichment_content=FolioInventoryRecord(data=enriched).to_store_content(),
+        inventory=FolioEnrichedInstance.model_validate(enriched),
     )
 
     items = builder.items
@@ -86,9 +88,7 @@ def test_work_builder_title_ignores_blank_and_padded_values(
     builder = FolioWorkBuilder(
         record,
         datetime.now(UTC),
-        enrichment_content=FolioInventoryRecord(
-            data=folio_record("inst-1", [item])
-        ).to_store_content(),
+        inventory=FolioEnrichedInstance.model_validate(folio_record("inst-1", [item])),
     )
     assert builder.items[0].title == title
 
@@ -260,7 +260,7 @@ def test_enrichment_fetches_only_requested_ids(
     assert len(captured_filters) == 1
     assert isinstance(captured_filters[0], In)
 
-    by_id = {row["id"]: row["enrichment_content"] for row in enriched}
+    by_id = {row["id"]: row["inventory_content"] for row in enriched}
     assert by_id["inst-1"] is not None and by_id["inst-3"] is not None
     assert by_id["missing"] is None
     # inst-2 was never requested, so its content is not present anywhere.
@@ -290,5 +290,5 @@ def test_enrichment_batches_lookups(monkeypatch: pytest.MonkeyPatch) -> None:
     enriched = list(source._process_rows([{"id": iid} for iid in ids]))
 
     assert len(enriched) == 5
-    assert all(row["enrichment_content"] is not None for row in enriched)
+    assert all(row["inventory_content"] is not None for row in enriched)
     assert call_count == 3  # 5 rows, batch size 2 -> 3 chunks

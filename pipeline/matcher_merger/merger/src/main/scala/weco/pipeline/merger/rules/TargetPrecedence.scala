@@ -11,9 +11,9 @@ object TargetPrecedence {
     ebscoWork,
     teiWork,
     singlePhysicalItemCalmWork or singlePhysicalItemAxiellWork,
-    sierraDigitisedAv,
-    physicalSierra,
-    sierraWork
+    lmsWorkDigitisedAv,
+    physicalLmsWork,
+    lmsWork
   )
 
   def targetSatisfying(

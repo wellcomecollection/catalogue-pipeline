@@ -187,6 +187,60 @@ class OtherIdentifiersRuleTest
         )
     }
   }
+  describe("FOLIO sources") {
+    val folioHrid =
+      createSourceIdentifierWith(identifierType =
+        IdentifierType.FolioInstanceHrid
+      )
+    val folioBnumber = createSierraSystemSourceIdentifier
+    val folioWork: Work.Visible[WorkState.Identified] =
+      identifiedWork(sourceIdentifier = createFolioSourceIdentifier)
+        .items(List(createIdentifiedPhysicalItem))
+        .otherIdentifiers(
+          List(
+            folioHrid,
+            folioBnumber,
+            createSourceIdentifierWith(identifierType = IdentifierType.ISBN)
+          )
+        )
+
+    it("keeps a FOLIO work's HRID and b-number on a TEI target") {
+      inside(OtherIdentifiersRule.merge(teiWork, List(folioWork))) {
+        case FieldMergeResult(otherIdentifiers, mergedSources) =>
+          otherIdentifiers should contain theSameElementsAs List(
+            folioWork.sourceIdentifier,
+            folioHrid,
+            folioBnumber
+          )
+          mergedSources.loneElement shouldBe folioWork
+      }
+    }
+
+    it("keeps a FOLIO work's HRID and b-number on an Axiell target") {
+      inside(OtherIdentifiersRule.merge(axiellWork, List(folioWork))) {
+        case FieldMergeResult(otherIdentifiers, _) =>
+          otherIdentifiers should contain theSameElementsAs
+            axiellWork.data.otherIdentifiers ++ List(
+              folioWork.sourceIdentifier,
+              folioHrid,
+              folioBnumber
+            )
+      }
+    }
+
+    it("does not keep a b-number from a non-FOLIO source's identifiers") {
+      val axiellWithBnumber = axiellWork.otherIdentifiers(
+        axiellWork.data.otherIdentifiers :+ createSierraSystemSourceIdentifier
+      )
+
+      inside(OtherIdentifiersRule.merge(teiWork, List(axiellWithBnumber))) {
+        case FieldMergeResult(otherIdentifiers, _) =>
+          otherIdentifiers should contain theSameElementsAs
+            axiellWork.data.otherIdentifiers :+ axiellWork.sourceIdentifier
+      }
+    }
+  }
+
   describe("Miro into Sierra") {
     info("There are two ways for a Miro Work to merge into a Sierra Work:")
     info("1. There is a 1:1 relationship between Miro and Sierra")

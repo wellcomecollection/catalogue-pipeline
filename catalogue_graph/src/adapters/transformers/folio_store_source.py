@@ -17,7 +17,7 @@ class FolioStoreSource(AdapterStoreSource):
 
     FOLIO-specific: the OAI-PMH bib record cannot carry the stable item/holdings
     UUIDs, so the enrichment step stores them separately and this source attaches
-    them (as `enrichment_content`) via a point lookup keyed by id (the instance id).
+    them (as `inventory_content`) via a point lookup keyed by id (the instance id).
     """
 
     def __init__(
@@ -46,7 +46,7 @@ class FolioStoreSource(AdapterStoreSource):
         for chunk in batched(rows, ITEM_ENRICHMENT_BATCH_SIZE):
             items_by_id = self._items_by_id([row["id"] for row in chunk])
             for row in chunk:
-                row["enrichment_content"] = items_by_id.get(row["id"])
+                row["inventory_content"] = items_by_id.get(row["id"])
                 yield row
 
     def _items_by_id(self, ids: list[str]) -> dict[str, Any]:

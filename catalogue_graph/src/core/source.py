@@ -4,7 +4,7 @@ import gzip
 import json
 import os
 import time
-from collections.abc import Generator
+from collections.abc import Generator, Iterator
 from queue import Queue
 from threading import Thread
 from typing import Any
@@ -197,6 +197,10 @@ class ElasticSource(BaseSource):
 
 class ElasticIdsSource(ElasticSource):
     """An ElasticSource streaming only document _ids (construct with fields=[])."""
+
+    def stream_ids(self) -> Iterator[str]:
+        """The WorkSource interface: the _ids in scope."""
+        yield from self.stream_raw()
 
     def worker_target(self, slice_index: int, queue: Queue) -> None:
         search_after = None

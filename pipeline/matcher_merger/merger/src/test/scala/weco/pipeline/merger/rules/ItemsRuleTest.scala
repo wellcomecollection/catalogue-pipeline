@@ -432,4 +432,36 @@ class ItemsRuleTest
         items shouldBe physicalPictureSierra.data.items ++ metsWork.data.items
     }
   }
+
+  describe("a born-digital Axiell work") {
+    val bornDigitalAxiellWork =
+      axiellIdentifiedWork().format(Format.ArchivesDigital)
+
+    it("drops the stub item when no source replaces it") {
+      ItemsRule.merge(bornDigitalAxiellWork, Nil).data shouldBe empty
+    }
+
+    it("takes the METS item when merged with METS") {
+      ItemsRule
+        .merge(bornDigitalAxiellWork, List(metsWork))
+        .data shouldBe metsWork.data.items
+    }
+
+    it("takes the Sierra items when merged with Sierra") {
+      ItemsRule
+        .merge(bornDigitalAxiellWork, List(physicalPictureSierra))
+        .data shouldBe physicalPictureSierra.data.items
+    }
+  }
+
+  it("drops the stub item from a born-digital Calm work") {
+    val bornDigitalCalmWork =
+      calmIdentifiedWork().format(Format.ArchivesDigital)
+
+    ItemsRule.merge(bornDigitalCalmWork, Nil).data shouldBe empty
+  }
+
+  it("keeps the stub item on an Axiell work that is not born-digital") {
+    ItemsRule.merge(axiellWork, Nil).data shouldBe axiellWork.data.items
+  }
 }

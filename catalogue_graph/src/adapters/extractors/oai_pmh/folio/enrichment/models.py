@@ -28,7 +28,9 @@ from typing import Annotated, Any
 
 from pydantic import (
     AfterValidator,
+    AliasPath,
     BaseModel,
+    BeforeValidator,
     ConfigDict,
     Field,
     ValidationError,
@@ -38,16 +40,42 @@ from pydantic import (
 from pydantic.alias_generators import to_camel
 
 
-def _strip_to_none(value: str | None) -> str | None:
-    # A blank value must not mask a fallback, e.g. enumeration over volume.
-    return (value or "").strip() or None
+def _strip_to_none(value: str) -> str | None:
+    """Trim, and treat blank as missing, so a blank field never stands in for a real one."""
+    return value.strip() or None
 
 
-OptionalText = Annotated[str | None, AfterValidator(_strip_to_none)]
+StrippedText = Annotated[str, AfterValidator(_strip_to_none)]
 
 
 class FolioModel(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class FolioLocation(FolioModel):
+    """A resolved FOLIO location. ``name`` is the discovery display name, falling back to the name."""
+
+    code: str
+    name: StrippedText | None = None
+    library_name: StrippedText | None = None
+
+
+def _empty_to_none(value: Any) -> Any:
+    # The endpoint sends an unresolved location as {}: it builds the object from a
+    # LEFT JOIN and strips the null members.
+    return value or None
+
+
+OptionalLocation = Annotated[FolioLocation | None, BeforeValidator(_empty_to_none)]
+
+
+class FolioStatisticalCode(FolioModel):
+    code: str
+
+
+class FolioItemNote(FolioModel):
+    item_note_type_name: str | None = None
+    note: StrippedText | None = None
 
 
 class FolioEnrichedItem(FolioModel):
@@ -58,8 +86,32 @@ class FolioEnrichedItem(FolioModel):
     """
 
     id: str
-    volume: OptionalText = None
-    enumeration: OptionalText = None
+    volume: StrippedText | None = None
+    enumeration: StrippedText | None = None
+    status: StrippedText | None = None
+    # FOLIO resolves the effective location from temporary, permanent, then holdings.
+    effective_location: OptionalLocation = Field(
+        default=None, validation_alias=AliasPath("location", "location")
+    )
+    # The effective call number, which FOLIO falls back to the holdings record for.
+    call_number: StrippedText | None = Field(
+        default=None, validation_alias=AliasPath("callNumber", "callNumber")
+    )
+    statistical_codes: list[FolioStatisticalCode] = Field(default_factory=list)
+    permanent_loan_type: StrippedText | None = None
+    temporary_loan_type: StrippedText | None = None
+    material_type: StrippedText | None = None
+    notes: list[FolioItemNote] = Field(default_factory=list)
+    suppress_from_discovery: bool = False
+
+    @property
+    def display_note(self) -> str | None:
+        notes = [
+            n.note
+            for n in self.notes
+            if n.item_note_type_name == "Display note" and n.note
+        ]
+        return "\n\n".join(notes) or None
 
 
 class FolioEnrichedInstance(FolioModel):

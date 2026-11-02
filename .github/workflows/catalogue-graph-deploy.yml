@@ -154,6 +154,7 @@ jobs:
           # Work-discovery lambdas for the scheduled state machines.
           - image-inference-find-work
           - id-minter-find-work
+          - transformer-find-work
 
 
     steps:
