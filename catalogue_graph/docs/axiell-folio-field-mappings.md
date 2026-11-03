@@ -14,7 +14,7 @@ Holdings record, and an Item. It does this through the FOLIO Inventory API.
 | MARC extraction primitive | `src/adapters/steps/axiell_folio_sync/mapping/marc.py` |
 | Payload contracts | `src/adapters/steps/axiell_folio_sync/mapping/payloads.py` |
 
-Mapping version: **2.8.0** (`config.VERSION`), stamped into every payload's
+Mapping version: **3.2.0** (`config.VERSION`), stamped into every payload's
 `meta` block so you can tell which rules produced a given record.
 
 ## What gets synced
@@ -60,19 +60,23 @@ strips the `(AltRefNo)` prefix, using the same prefix parsing as
 `transformers.marc.other_identifiers.format_field`. A record with no `(AltRefNo)`
 035 gets no Local identifier at all, rather than being given the wrong one.
 
-## Shared HRIDs
+## Record ids
 
-Each of the three records gets a predictable HRID built from the AxC GUID (MARC
-`001`). This is what links the three records together and lets deletion facts
-find the right FOLIO records later.
+Each of the three records gets a FOLIO `id` from the AxC GUID (MARC `001`),
+which is itself a UUID (`config.py`). The sync sends the id on create and looks
+the record up by it on every later run, and deletion facts, which carry only the
+GUID, derive the same ids. The GUID is parsed as a UUID, so case and surrounding
+whitespace do not matter, and a `001` that is not a UUID fails the record.
 
-The AxC GUID is a 36-character UUID, so an HRID is 45 to 49 characters.
+| Record | `id` |
+| --- | --- |
+| Instance | the GUID itself |
+| Holdings | `uuid5(<001>, "holdings")` |
+| Item | `uuid5(<001>, "item")` |
 
-| Record | HRID pattern | Example |
-| --- | --- | --- |
-| Instance | `AxC-instance-<001>` | `AxC-instance-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
-| Holdings | `AxC-holding-<001>` | `AxC-holding-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
-| Item | `AxC-item-<001>` | `AxC-item-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` |
+The sync sends no `hrid`; FOLIO generates it. The names `holdings` and `item`
+must never change: a different name gives every holdings or item a new id, and
+the sync would create duplicates of everything it has written.
 
 ## Instance
 
@@ -82,12 +86,13 @@ FOLIO, with no linked SRS MARC record.
 
 | FOLIO field | Value | Source | Notes |
 | --- | --- | --- | --- |
-| `hrid` | `AxC-instance-<001>` | MARC `001` (GUID) | Required. |
+| `id` | Instance id, see [Record ids](#record-ids) | MARC `001` (GUID) | Required. |
 | `title` | Title text | MARC `245 $a` | Required. A mapping error is raised if it is missing. |
 | `source` | `FOLIO` | Constant | |
 | `instanceTypeId` | FOLIO instance-type UUID | Constant, via `RefCache.instance_type_id()` | |
-| `identifiers[].identifierTypeId` | `Local identifier` UUID | Constant, via `resolve_identifier_type` | The whole `identifiers` list is left out when there is no object_number. |
+| `identifiers[].identifierTypeId` | `Local identifier` UUID | Constant, via `resolve_identifier_type` | The whole `identifiers` list is left out when there is no object_number, and the instance's identifiers are then left as they are. On update the existing `Local identifier` is replaced and identifiers of other types are kept. |
 | `identifiers[].value` | The object_number, with its prefix removed | MARC `035 $a(AltRefNo)` | For example `(AltRefNo)SA/BSI` becomes `SA/BSI`. |
+| `statisticalCodeIds[]` | `AXIELL` statistical code UUID | Constant, via `resolve_statistical_code` | Marks the record as synced. The code must exist in the tenant; an unknown code fails the record. On update the code is added if missing and the record's other codes are kept. |
 
 ## Holdings
 
@@ -96,10 +101,12 @@ contract.
 
 | FOLIO field | Value | Source | Notes |
 | --- | --- | --- | --- |
-| `hrid` | `AxC-holding-<001>` | MARC `001` | Required. |
-| `instanceId` | Parent instance UUID | Injected by the upsert orchestrator | Not set when the payload is built. |
+| `id` | Holdings id, see [Record ids](#record-ids) | MARC `001` | Required. |
+| `instanceId` | Parent instance id | MARC `001` | Derived the same way as the instance's own id. |
 | `sourceId` | Holdings-source UUID | Constant, via `resolve_holdings_source` (default `MARC`) | |
 | `permanentLocationId` | FOLIO location UUID | MARC `984 $b` (AxC **normal** location), via `resolve_location` | The location rules below apply. No default: a missing `984 $b`, or a location the tenant does not know, fails the record with a `MappingError`. |
+| `formerIds[]` | The AxC GUID, lowercase | MARC `001` | A label for staff, searchable with `formerIds="<guid>"`. Not how the sync finds the record. On update the GUID is added if missing, ignoring case, and every other entry is kept. |
+| `statisticalCodeIds[]` | `AXIELL` statistical code UUID | Constant, via `resolve_statistical_code` | Marks the record as synced. The code must exist in the tenant; an unknown code fails the record. On update the code is added if missing and the record's other codes are kept. |
 
 ## Item
 
@@ -107,8 +114,8 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 
 | FOLIO field | Value | Source | Notes |
 | --- | --- | --- | --- |
-| `hrid` | `AxC-item-<001>` | MARC `001` | Required. |
-| `holdingsRecordId` | Parent holdings UUID | Injected by the upsert orchestrator | Not set when the payload is built. |
+| `id` | Item id, see [Record ids](#record-ids) | MARC `001` | Required. |
+| `holdingsRecordId` | Parent holdings id | MARC `001` | Derived the same way as the holdings' own id. |
 | `status.name` | Item-status name | MARC `506 $f` (access category), via `ACCESS_ITEM_STATUS` (default `Unavailable`) | Table value is final; statuses are a fixed FOLIO enum, not tenant reference data. **Create-only**: mod-circulation owns the field once the item exists, so updates send FOLIO's own status back and an AxC access change does not propagate. See `_CREATE_ONLY_FIELDS` in `upsert/entities.py`. |
 | `materialType.id` | Material-type UUID | MARC `655 $a`, via `resolve_material_type` | Uses the normalization table below. No default: an absent or unmapped category fails the record. |
 | `permanentLoanType.id` | Loan-type UUID | MARC `540 $a` (use restriction), via `USE_RESTRICTION_LOAN_TYPE` and `resolve_loan_type` (default `Unavailable`) | See the loan type table below. An absent or unlisted term takes the default rather than failing the record. |
@@ -116,6 +123,7 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 | `notes[]` | `Axiell Current Location` note: `<852 $b>` | MARC `852 $b`, or `unknown` when absent | A typed item note, `staffOnly: false`, so the FOLIO enrichment endpoint can read it. The note type is resolved via `resolve_item_note_type` and must exist in the tenant; an unknown type fails the record. Always written. On update the upsert replaces every existing note of this type and keeps notes of other types. |
 | `notes[]` | `Axiell Normal Location` note: `<984 $b>` | MARC `984 $b` | Same rules as the current location note. The raw AxC value, not the resolved FOLIO location. Never absent, because `984 $b` is required. |
 | `administrativeNotes[]` | `"Axiell Current Location: <852 $b>"` | MARC `852 $b`, or `unknown` when absent | Keeps the raw AxC current location as an administrative note as well as the typed note. The label is in the string because an administrative note carries no type, and is also what the upsert matches on to reclaim the note. Always written, so an update cannot leave a stale location behind. |
+| `statisticalCodeIds[]` | `AXIELL` statistical code UUID | Constant, via `resolve_statistical_code` | Marks the record as synced. The code must exist in the tenant; an unknown code fails the record. On update the code is added if missing and the record's other codes are kept. |
 
 ## How values are resolved to FOLIO UUIDs
 
@@ -273,6 +281,7 @@ Used when the record has no value for a resolved field.
 | Identifier type | `Local identifier` |
 | Administrative note label | `Axiell Current Location` |
 | Item note types | `Axiell Current Location`, `Axiell Normal Location`, constants that must exist in the tenant |
+| Statistical code | `AXIELL`, a constant that must exist in the tenant |
 | **Location** | **None, the record fails instead** |
 
 The location is deliberately the exception. It used to default to
@@ -286,7 +295,7 @@ Taken from `config.FIELDS`.
 
 | CanonicalRecord field | MARC spec | Feeds |
 | --- | --- | --- |
-| `source_id` | `001` | HRIDs, `meta.source_id` |
+| `source_id` | `001` | record ids, `meta.source_id` |
 | `title` | `245$a` | instance title |
 | `object_number` | `035$a(AltRefNo)` | local identifier |
 | `object_category` | `655$a` | material type |
@@ -304,4 +313,4 @@ Taken from `config.FIELDS`.
 - MARC extraction: `src/adapters/steps/axiell_folio_sync/mapping/marc.py`
 - payload contracts: `src/adapters/steps/axiell_folio_sync/mapping/payloads.py`
 
-Mapping version: `2.8.0` (`config.VERSION`).
+Mapping version: `3.2.0` (`config.VERSION`).
