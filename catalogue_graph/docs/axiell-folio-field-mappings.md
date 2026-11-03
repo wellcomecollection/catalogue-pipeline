@@ -31,14 +31,38 @@ suppressed, and not counted as an error.
 
 **The un-flag case is undecided.** Unticking Harvest on a record that has
 already synced leaves its FOLIO instance, holdings and item in place,
-unsuppressed and no longer updated. The only delete path is the reconciler,
-which works from superseded GUIDs, so a flag removal is not a delete signal and
-nothing reclaims the record. Whether it should instead suppress them is open
+unsuppressed and no longer updated. The delete paths work from superseded GUIDs
+and Collections tombstones (see [Deletion](#deletion)), so a flag removal is not
+a delete signal and nothing reclaims the record. Whether it should instead
+suppress them is open
 with Collection Information on wellcomecollection/platform#6663. This is the
 current behaviour, not an agreed rule.
 
 Both gates live in `_passes_selection_gates`, which `is_selected_for_sync` and
 `select_and_build` share so the two cannot disagree.
+
+## Deletion
+
+A record hard deleted in Collections has its FOLIO item, holdings and instance
+hard deleted, in that order, as agreed with Collection Information
+(wellcomecollection/platform#6833). The deletion reaches the sync in one of two
+ways, and both end in `delete_by_guid` in the second pass of a run:
+
+| Signal | When | GUID deleted |
+| --- | --- | --- |
+| Superseded GUID | The collectId is reused for a new record. The reconcile step writes a deletion fact for the old GUID. | The GUID in the fact |
+| Tombstone | The collectId is not reused. The record arrives as an OAI-PMH tombstone (`deleted=true`) with its content preserved. | The `001` of the preserved content |
+
+A tombstone is acted on only when no other record holds its GUID in the
+reconciler store, since deleting it would remove that record's FOLIO records.
+A tombstone with no content, or for a record never synced, does nothing.
+
+The delete is child first, stops before the parent if a child delete fails, and
+treats a record already gone as done. `HARD_DELETE` (set to `true` in Terraform)
+or the event's `hard_delete` field chooses it; with it off, the same records are
+suppressed instead. A record restored in Collections after its FOLIO records
+were deleted is created again under the same ids, with new HRIDs and none of
+its FOLIO history.
 
 ## How MARC fields are read
 
