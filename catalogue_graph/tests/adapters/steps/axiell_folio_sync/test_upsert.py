@@ -673,6 +673,25 @@ def test_a_create_filed_under_another_id_is_an_error() -> None:
     assert result.errors
     assert "expected inst-1" in result.errors[0].detail
     assert [path for path, _ in inventory.post_calls] == ["/inventory/instances"]
+    assert inventory.delete_paths == ["/inventory/instances/not-ours"]
+
+
+def test_a_failed_cleanup_of_a_misfiled_create_still_fails_the_record() -> None:
+    """The cleanup delete is best effort: if it fails, the id mismatch is still
+    the error reported, not the delete failure."""
+
+    class FailingDeleteInventory(_RecordingInventory):
+        def delete(self, path: str) -> dict[str, Any]:
+            super().delete(path)
+            raise RuntimeError("delete refused")
+
+    inventory = FailingDeleteInventory(post_response={"id": "not-ours"})
+
+    result = upsert_from_payloads(MAPPED, inventory, dry_run=False)
+
+    assert result.errors
+    assert "expected inst-1" in result.errors[0].detail
+    assert inventory.delete_paths == ["/inventory/instances/not-ours"]
 
 
 def test_an_update_keeps_the_hrid_folio_generated() -> None:
@@ -727,9 +746,7 @@ LABELLED = MAPPED.model_copy(
         "holdings": MAPPED.holdings.model_copy(
             update={"formerIds": [GUID], "statisticalCodeIds": [AXIELL_CODE]}
         ),
-        "item": MAPPED.item.model_copy(
-            update={"formerIds": [GUID], "statisticalCodeIds": [AXIELL_CODE]}
-        ),
+        "item": MAPPED.item.model_copy(update={"statisticalCodeIds": [AXIELL_CODE]}),
     }
 )
 
@@ -758,8 +775,9 @@ def test_create_sends_the_guid_labels_and_the_synced_marker() -> None:
     assert result.errors == []
     posts = dict(inventory.post_calls)
     assert posts["/inventory/instances"]["statisticalCodeIds"] == [AXIELL_CODE]
+    assert posts["/holdings-storage/holdings"]["formerIds"] == [GUID]
+    assert "formerIds" not in posts["/inventory/items"]
     for path in ("/holdings-storage/holdings", "/inventory/items"):
-        assert posts[path]["formerIds"] == [GUID]
         assert posts[path]["statisticalCodeIds"] == [AXIELL_CODE]
 
 
@@ -788,18 +806,15 @@ def test_update_keeps_other_former_ids_and_adds_the_guid_once() -> None:
     and every other entry is kept."""
     puts = _puts_after_update(
         instance={},
-        holdings={"formerIds": ["b1234567"]},
-        item={"formerIds": ["i7654321", GUID.upper()]},
+        holdings={"formerIds": ["b1234567", GUID.upper()]},
+        item={"formerIds": ["i7654321"]},
     )
 
     assert puts["/holdings-storage/holdings/hold-1"]["formerIds"] == [
         "b1234567",
-        GUID,
-    ]
-    assert puts["/inventory/items/item-1"]["formerIds"] == [
-        "i7654321",
         GUID.upper(),
     ]
+    assert puts["/inventory/items/item-1"]["formerIds"] == ["i7654321"]
 
 
 def test_update_replaces_the_local_identifier_and_keeps_other_types() -> None:

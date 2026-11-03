@@ -14,7 +14,7 @@ Holdings record, and an Item. It does this through the FOLIO Inventory API.
 | MARC extraction primitive | `src/adapters/steps/axiell_folio_sync/mapping/marc.py` |
 | Payload contracts | `src/adapters/steps/axiell_folio_sync/mapping/payloads.py` |
 
-Mapping version: **3.1.0** (`config.VERSION`), stamped into every payload's
+Mapping version: **3.2.0** (`config.VERSION`), stamped into every payload's
 `meta` block so you can tell which rules produced a given record.
 
 ## What gets synced
@@ -123,7 +123,6 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 | `notes[]` | `Axiell Current Location` note: `<852 $b>` | MARC `852 $b`, or `unknown` when absent | A typed item note, `staffOnly: false`, so the FOLIO enrichment endpoint can read it. The note type is resolved via `resolve_item_note_type` and must exist in the tenant; an unknown type fails the record. Always written. On update the upsert replaces every existing note of this type and keeps notes of other types. |
 | `notes[]` | `Axiell Normal Location` note: `<984 $b>` | MARC `984 $b` | Same rules as the current location note. The raw AxC value, not the resolved FOLIO location. Never absent, because `984 $b` is required. |
 | `administrativeNotes[]` | `"Axiell Current Location: <852 $b>"` | MARC `852 $b`, or `unknown` when absent | Keeps the raw AxC current location as an administrative note as well as the typed note. The label is in the string because an administrative note carries no type, and is also what the upsert matches on to reclaim the note. Always written, so an update cannot leave a stale location behind. |
-| `formerIds[]` | The AxC GUID, lowercase | MARC `001` | A label for staff, searchable with `formerIds="<guid>"`. Not how the sync finds the record. On update the GUID is added if missing, ignoring case, and every other entry is kept. |
 | `statisticalCodeIds[]` | `AXIELL` statistical code UUID | Constant, via `resolve_statistical_code` | Marks the record as synced. The code must exist in the tenant; an unknown code fails the record. On update the code is added if missing and the record's other codes are kept. |
 
 ## How values are resolved to FOLIO UUIDs
@@ -314,4 +313,4 @@ Taken from `config.FIELDS`.
 - MARC extraction: `src/adapters/steps/axiell_folio_sync/mapping/marc.py`
 - payload contracts: `src/adapters/steps/axiell_folio_sync/mapping/payloads.py`
 
-Mapping version: `3.1.0` (`config.VERSION`).
+Mapping version: `3.2.0` (`config.VERSION`).

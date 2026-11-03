@@ -17,7 +17,7 @@ import uuid
 from dataclasses import dataclass
 
 # Bumped whenever the mapping rules change; stamped into every payload's meta.
-VERSION = "3.1.0"
+VERSION = "3.2.0"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────

@@ -235,7 +235,6 @@ def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
             f"{AXIELL_LOCATION_NOTE_PREFIX}: {rec.current_location or 'unknown'}"
         ],
         notes=_location_notes(rec, ref),
-        formerIds=[_guid_label(rec.source_id)],
         statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
     )
 

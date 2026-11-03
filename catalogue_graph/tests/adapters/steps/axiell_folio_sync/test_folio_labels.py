@@ -1,7 +1,8 @@
 """The labels the sync puts on its FOLIO records for staff.
 
-The AxC GUID goes in ``formerIds`` on the holdings and item (the instance id is
-the GUID itself), and every record carries the ``AXIELL`` statistical code that
+The AxC GUID goes in ``formerIds`` on the holdings only (the instance id is the
+GUID itself, and the FOLIO transformer reads an item's ``formerIds`` as its
+Sierra item number), and every record carries the ``AXIELL`` statistical code that
 marks it as synced. Neither is how the sync finds a record; see test_folio_ids.
 """
 
@@ -24,12 +25,20 @@ from .test_item_mapping import FakeRefCache, _item_record
 GUID = "00000000-0000-4000-8000-000000000001"
 
 
-def test_holdings_and_item_carry_the_guid_in_former_ids() -> None:
+def test_the_holdings_carries_the_guid_in_former_ids() -> None:
     mapped = select_and_build(_item_record(), FakeRefCache())  # type: ignore[arg-type]
     assert mapped is not None
 
     assert mapped.holdings.formerIds == [GUID]
-    assert mapped.item.formerIds == [GUID]
+
+
+def test_the_item_carries_no_former_ids() -> None:
+    """The FOLIO transformer reads an item's formerIds as its Sierra item
+    number and fails on anything else, so the GUID must not go there."""
+    mapped = select_and_build(_item_record(), FakeRefCache())  # type: ignore[arg-type]
+    assert mapped is not None
+
+    assert "formerIds" not in mapped.item.model_dump(exclude_none=True)
 
 
 def test_the_former_id_is_the_guid_in_its_canonical_spelling() -> None:
@@ -38,7 +47,6 @@ def test_the_former_id_is_the_guid_in_its_canonical_spelling() -> None:
     assert mapped is not None
 
     assert mapped.holdings.formerIds == [GUID]
-    assert mapped.item.formerIds == [GUID]
 
 
 def test_every_record_carries_the_synced_marker() -> None:

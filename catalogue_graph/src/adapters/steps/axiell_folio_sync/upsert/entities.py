@@ -166,8 +166,8 @@ def _merge_unique(
     """Keep every existing entry and add each incoming one not already present.
 
     For the plain lists the sync adds to but never takes from: the
-    ``statisticalCodeIds`` that carry the synced marker, and the ``formerIds``
-    that carry the AxC GUID. Neither entry ever changes for a given record, so
+    ``statisticalCodeIds`` that carry the synced marker, and the holdings
+    ``formerIds`` that carry the AxC GUID. Neither entry ever changes for a given record, so
     there is nothing of ours to remove, and the shallow payload-wins merge in
     :func:`_upsert_entity` would otherwise drop every entry added in FOLIO.
     ``key`` decides what counts as already present.

@@ -79,8 +79,8 @@ class Item(BaseModel):
     notes: list[Note] | None = None
     # Plain untyped strings; no tenant note type needed.
     administrativeNotes: list[str] | None = None
-    # As on the holdings: the AxC GUID for staff, and the synced marker.
-    formerIds: list[str] | None = None
+    # The synced marker, as on the holdings. No formerIds: the FOLIO transformer
+    # reads an item's formerIds as its Sierra item number.
     statisticalCodeIds: list[str] | None = None
 
 
