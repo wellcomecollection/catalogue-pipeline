@@ -1,5 +1,5 @@
 ARG PYTHON_IMAGE_VERSION=3.12
-FROM python:${PYTHON_IMAGE_VERSION} AS base
+FROM python:${PYTHON_IMAGE_VERSION}-slim AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
@@ -11,7 +11,7 @@ COPY pyproject.toml uv.lock ./
 
 # Install uv and pip-system-certs
 # pip-system-certs allows using system CA certificates when making HTTPS requests
-RUN pip install uv==0.12.6
+RUN pip install uv==0.13.7
 
 # Install git and clean up apt cache
 RUN apt-get update && apt-get install -y ca-certificates git && rm -rf /var/lib/apt/lists/*
