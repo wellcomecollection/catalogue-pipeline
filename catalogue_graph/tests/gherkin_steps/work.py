@@ -2,10 +2,11 @@ from collections.abc import Sequence
 from typing import Any
 
 import pytest
+from pytest_bdd import parsers, then
+
 from models.pipeline.item import Item
 from models.pipeline.location import PhysicalLocation
 from models.pipeline.source.work import SourceWork, VisibleSourceWork
-from pytest_bdd import parsers, then
 
 
 @pytest.fixture
@@ -65,8 +66,6 @@ SUB_ATTR_ALIASES: dict[str, str] = {
     "agent identifier value": "agent.id.source_identifier.value",
     "agent identifier type": "agent.id.source_identifier.identifier_type.id",
     "agent identifier ontology type": "agent.id.source_identifier.ontology_type",
-    "id type": "id.type",
-    "location type": "location_type.id",
     "link text": "link_text",
     "access method": "method.type",
     "access status": "status.type",
@@ -103,9 +102,9 @@ def _get_attr_list(parent: Any, attr_phrase: str) -> Any:
 def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
     idx = int(index) - 1
     values: Sequence[Any] = _get_attr_list(parent, attr_phrase)
-    assert (
-        0 <= idx < len(values)
-    ), f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
+    assert 0 <= idx < len(values), (
+        f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
+    )
     member = values[idx]
     return member
 
@@ -160,9 +159,9 @@ def one_list_member(work: SourceWork, attr_phrase: str) -> None:
 @then(parsers.parse("there are {count:d} {attr_phrase}"))
 def list_member_count(work: SourceWork, count: int, attr_phrase: str) -> None:
     values: Sequence[Any] = _get_attr_list(work, attr_phrase)
-    assert (
-        len(values) == count
-    ), f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
+    assert len(values) == count, (
+        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
+    )
 
 
 @then(parsers.parse("there are no {attr_phrase}"))
@@ -173,9 +172,9 @@ def list_member_empty(work: SourceWork, attr_phrase: str) -> None:
 @then(parsers.parse("it has {count:d} {attr_phrase}"))
 def child_list_member_count(antecedent: Any, count: int, attr_phrase: str) -> None:
     values: Sequence[Any] = _get_attr_list(antecedent, attr_phrase)
-    assert (
-        len(values) == count
-    ), f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
+    assert len(values) == count, (
+        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
+    )
 
 
 @then(parsers.parse('it has the {sub_attr} "{value}"'))
@@ -225,9 +224,9 @@ def its_only_list_member_has(
     child_list_member_count(antecedent, 1, attr_phrase)
     member = _list_member_nth(antecedent, 1, attr_phrase)
     actual = drill_through_dots(member, sub_attr)
-    assert (
-        actual == value
-    ), f"Expected only {attr_phrase}.{sub_attr} == {value!r}, got {actual!r}"
+    assert actual == value, (
+        f"Expected only {attr_phrase}.{sub_attr} == {value!r}, got {actual!r}"
+    )
     context[attr_phrase.strip().lower()] = member
     return member
 
@@ -242,17 +241,17 @@ def its_nth_list_member_has(
 ) -> None:
     member = _list_member_nth(antecedent, index, attr_phrase)
     actual = drill_through_dots(member, sub_attr)
-    assert (
-        actual == value
-    ), f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
+    assert actual == value, (
+        f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
+    )
 
 
 def _assert_flag(obj: Any, negation: str, attr: str, where: str) -> None:
     actual = drill_through_dots(obj, attr)
     expected = not negation
-    assert (
-        actual is expected
-    ), f"Expected {where} to be {negation}{attr}, got {attr}={actual!r}"
+    assert actual is expected, (
+        f"Expected {where} to be {negation}{attr}, got {attr}={actual!r}"
+    )
 
 
 @then(parsers.re(r"it is (?P<negation>not )?(?P<attr>[\w.]+)"))
@@ -290,9 +289,9 @@ def its_nth_list_member_lacks(
 ) -> None:
     member = _list_member_nth(antecedent, index, attr_phrase)
     actual = drill_through_dots(member, sub_attr)
-    assert (
-        actual is None
-    ), f"Expected {attr_phrase}.{sub_attr} at position {index} to be absent, got {actual!r}"
+    assert actual is None, (
+        f"Expected {attr_phrase}.{sub_attr} at position {index} to be absent, got {actual!r}"
+    )
 
 
 @then(parsers.parse("its only {attr_phrase} has no {sub_attr}"))
@@ -302,9 +301,9 @@ def its_only_list_member_lacks(
     child_list_member_count(antecedent, 1, attr_phrase)
     member = _list_member_nth(antecedent, 1, attr_phrase)
     actual = drill_through_dots(member, sub_attr)
-    assert (
-        actual is None
-    ), f"Expected only {attr_phrase}.{sub_attr} to be absent, got {actual!r}"
+    assert actual is None, (
+        f"Expected only {attr_phrase}.{sub_attr} to be absent, got {actual!r}"
+    )
 
 
 @then(
@@ -316,9 +315,9 @@ def list_member_nth_is(
     work: SourceWork, index: str | int, attr_phrase: str, value: str
 ) -> Any:
     nth_member = _list_member_nth(work, index, attr_phrase)
-    assert (
-        nth_member == value
-    ), f"Expected {attr_phrase} at position {index} == {value!r}, got {nth_member!r}"
+    assert nth_member == value, (
+        f"Expected {attr_phrase} at position {index} == {value!r}, got {nth_member!r}"
+    )
     return nth_member
 
 
@@ -333,9 +332,9 @@ def list_member_nth_has(
 ) -> Any:
     nth_member = _list_member_nth(work, index, attr_phrase)
     actual = drill_through_dots(nth_member, sub_attr)
-    assert (
-        actual == value
-    ), f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
+    assert actual == value, (
+        f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
+    )
     return nth_member
 
 
@@ -356,9 +355,9 @@ def child_list_member_has_with_datatable(
     sub_attr: str,
 ) -> None:
     members: Sequence[Any] = _get_attr_list(work, attr_phrase)
-    assert (
-        len(members) == count
-    ), f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
+    assert len(members) == count, (
+        f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
+    )
     for member, row in zip(members, datatable, strict=True):
         actual = drill_through_dots(member, sub_attr)
         assert actual == row[0]
@@ -369,9 +368,9 @@ def child_list_member_with_datatable(
     work: SourceWork, datatable: list[list[str]], count: str, attr_phrase: str
 ) -> None:
     members: Sequence[Any] = _get_attr_list(work, attr_phrase)
-    assert len(members) == int(
-        count
-    ), f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
+    assert len(members) == int(count), (
+        f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
+    )
     for member, row in zip(members, datatable, strict=True):
         assert member == row[0]
 
@@ -394,9 +393,9 @@ def _assert_work_attr(work: SourceWork, attr_phrase: str, expected: object) -> N
     """Assert that a work attribute equals expected."""
     attr = _normalise_attr_phrase(attr_phrase)
     actual = drill_through_dots(work.data, attr)
-    assert (
-        actual == expected
-    ), f"Expected work.data.{attr} == {expected!r}, got {actual!r}"
+    assert actual == expected, (
+        f"Expected work.data.{attr} == {expected!r}, got {actual!r}"
+    )
 
 
 @then(parsers.parse('the work\'s {attr} is "{value}"'))
