@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
         with:
-          version: "0.12.6"
+          version: "0.13.7"
       - name: Check uv.lock matches pyproject.toml
         working-directory: catalogue_graph
         run: uv lock --check
@@ -70,6 +70,14 @@ jobs:
           # Only main publishes: the role is scoped to main, so PR images are not pushed.
           push: ${{ github.ref == 'refs/heads/main' }}
           publish_latest: true
+      # The image is built FROM python:-slim, so check the native dependencies load without the full Debian image
+      - name: Check the task image imports its native dependencies
+        run: |
+          docker run --rm unified_pipeline_task:${{ github.sha }} -c "
+          import sqlite3, ssl, zoneinfo
+          import cryptography.hazmat.backends, lxml.etree, polars, pyarrow.parquet, pyiceberg.catalog.sql, pymysql
+          zoneinfo.ZoneInfo('Europe/London')
+          print('native dependencies load')"
 
   build-unified-pipeline-lambda-image:
     runs-on: ubuntu-latest

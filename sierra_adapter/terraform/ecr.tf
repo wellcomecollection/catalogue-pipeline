@@ -61,6 +61,11 @@ resource "aws_ecr_repository" "sierra_adapter_services" {
   for_each = toset(local.sierra_adapter_images)
 
   name = "uk.ac.wellcome/${each.key}"
+
+  # Names who builds these images, for owners on Inspector findings
+  tags = {
+    "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+  }
 }
 
 resource "aws_ecr_lifecycle_policy" "sierra_adapter_services" {
