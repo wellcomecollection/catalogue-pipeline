@@ -59,13 +59,13 @@ SUB_ATTR_ALIASES: dict[str, str] = {
     "source identifier type": "id.source_identifier.identifier_type.id",
     "source identifier ontology type": "id.source_identifier.ontology_type",
     "work type": "work_type",
+    "location type": "location_type.id",
+    "id type": "id.type",
     "agent label": "agent.label",
     "agent type": "agent.type",
     "agent identifier value": "agent.id.source_identifier.value",
     "agent identifier type": "agent.id.source_identifier.identifier_type.id",
     "agent identifier ontology type": "agent.id.source_identifier.ontology_type",
-    "id type": "id.type",
-    "location type": "location_type.id",
     "link text": "link_text",
     "access method": "method.type",
     "access status": "status.type",
@@ -221,6 +221,7 @@ def its_only_list_member_has(
     sub_attr: str,
     value: str,
 ) -> Any:
+    child_list_member_count(antecedent, 1, attr_phrase)
     member = _list_member_nth(antecedent, 1, attr_phrase)
     actual = drill_through_dots(member, sub_attr)
     assert actual == value, (
@@ -297,6 +298,7 @@ def its_nth_list_member_lacks(
 def its_only_list_member_lacks(
     antecedent: Any, attr_phrase: str, sub_attr: str
 ) -> None:
+    child_list_member_count(antecedent, 1, attr_phrase)
     member = _list_member_nth(antecedent, 1, attr_phrase)
     actual = drill_through_dots(member, sub_attr)
     assert actual is None, (
