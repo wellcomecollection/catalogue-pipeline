@@ -6,7 +6,7 @@ Split into focused modules; this package re-exports the public surface so
 
   • marc       MARCXML reading primitives + the CanonicalRecord model
   • config     the declarative AxC ⇄ FOLIO field table (FIELDS / FieldMap),
-               normalization tables, defaults, hrid scheme
+               normalization tables, defaults, FOLIO id scheme
   • payloads   the typed FOLIO payload contracts (Instance / Holdings / Item …)
   • builders   the mapping logic (selection, extraction, _resolve, select_and_build)
 
@@ -40,7 +40,9 @@ from .config import (
     DEFAULT_LOAN_TYPE,
     FIELDS,
     HARVEST_FLAG_SPEC,
+    HOLDINGS_ID_NAME,
     HOLDINGS_SOURCE_FIELD,
+    ITEM_ID_NAME,
     LOAN_TYPE_FIELD,
     LOCAL_IDENTIFIER_FIELD,
     LOCAL_IDENTIFIER_TYPE,
@@ -51,14 +53,16 @@ from .config import (
     NORMAL_LOCATION_FIELD,
     NORMAL_LOCATION_NOTE_TYPE_FIELD,
     RECORD_TYPE_ITEM,
+    SYNCED_STATISTICAL_CODE,
+    SYNCED_STATISTICAL_CODE_FIELD,
     USE_RESTRICTION_LOAN_TYPE,
     VERSION,
     FieldMap,
     LocationRule,
     _folio_location,
-    _holdings_hrid,
-    _instance_hrid,
-    _item_hrid,
+    _holdings_id,
+    _instance_id,
+    _item_id,
 )
 from .marc import CanonicalRecord, MappingError, extract, parse_xml
 from .payloads import (
@@ -75,6 +79,8 @@ from .payloads import (
 
 __all__ = [
     "AXIELL_CURRENT_LOCATION_NOTE_TYPE",
+    "HOLDINGS_ID_NAME",
+    "ITEM_ID_NAME",
     "AXIELL_LOCATION_NOTE_PREFIX",
     "AXIELL_NORMAL_LOCATION_NOTE_TYPE",
     "DEFAULT_HOLDINGS_SOURCE",
@@ -87,6 +93,8 @@ __all__ = [
     "LOAN_TYPE_FIELD",
     "LOCAL_IDENTIFIER_FIELD",
     "LOCAL_IDENTIFIER_TYPE",
+    "SYNCED_STATISTICAL_CODE",
+    "SYNCED_STATISTICAL_CODE_FIELD",
     "CURRENT_LOCATION_FIELD",
     "CURRENT_LOCATION_NOTE_TYPE_FIELD",
     "LOCATION_RULES",
@@ -115,9 +123,9 @@ __all__ = [
     "_extract_record",
     "_folio_location",
     "_item_status",
-    "_holdings_hrid",
-    "_instance_hrid",
-    "_item_hrid",
+    "_holdings_id",
+    "_instance_id",
+    "_item_id",
     "_resolve",
     "build_holdings",
     "build_instance",

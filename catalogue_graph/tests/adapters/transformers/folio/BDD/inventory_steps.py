@@ -113,9 +113,19 @@ def item_display_note(folio_item: dict[str, Any], note: str) -> None:
     folio_item["notes"].append({"itemNoteTypeName": "Display note", "note": note})
 
 
+@given(parsers.parse('that item has the former ids "{former_ids}"'))
+def item_former_ids(folio_item: dict[str, Any], former_ids: str) -> None:
+    folio_item["formerIds"] = former_ids.split(", ")
+
+
 @given("that item is suppressed from discovery")
 def item_suppressed(folio_item: dict[str, Any]) -> None:
     folio_item["suppressFromDiscovery"] = True
+
+
+@given("the instance has no inventory record", target_fixture="folio_inventory")
+def no_inventory() -> None:
+    return None
 
 
 def _item(work: VisibleSourceWork, item_id: str) -> Item:

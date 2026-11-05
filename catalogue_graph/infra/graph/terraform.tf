@@ -32,6 +32,12 @@ provider "aws" {
   assume_role {
     role_arn = "arn:aws:iam::267269328833:role/wellcomecollection-assume_role_hosted_zone_update"
   }
+
+  default_tags {
+    tags = {
+      "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    }
+  }
 }
 
 provider "aws" {
@@ -39,5 +45,11 @@ provider "aws" {
 
   assume_role {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+  }
+
+  default_tags {
+    tags = {
+      "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    }
   }
 }
