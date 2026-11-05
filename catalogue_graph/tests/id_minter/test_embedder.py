@@ -33,6 +33,8 @@ from id_minter.models.identifier import (
     TYPES_NORMALIZED_TO_CONCEPT,
     SourceIdentifierKey,
 )
+from models.pipeline.identifier import Identified
+from models.pipeline.item import Item
 
 IDENTIFIER_TYPES = [
     "miro-image-number",
@@ -245,6 +247,26 @@ class TestEmbedCanonicalIds:
         assert result["moreThings"][0]["type"] == "Identifiable"
         assert result["moreThings"][0]["identifiedType"] == "Identified"
         assert "canonicalId" not in result["moreThings"][0]
+
+    def test_minted_item_with_predecessor_parses_as_identified(self) -> None:
+        si = create_source_identifier(ontology_type="Item")
+        pred = create_source_identifier(
+            identifier_type="sierra-system-number", ontology_type="Item"
+        )
+        doc = {
+            "id": {
+                "sourceIdentifier": si,
+                "otherIdentifiers": [pred],
+                "predecessorIdentifier": pred,
+                "type": "Identifiable",
+                "identifiedType": "Identified",
+            }
+        }
+
+        result = embed_canonical_ids(doc, {key_of(si): create_canonical_id()})
+
+        assert result["id"]["predecessorIdentifier"] == pred
+        assert isinstance(Item.model_validate(result).id, Identified)
 
     def test_leaves_all_nodes_unchanged_with_empty_id_map(self) -> None:
         """With an empty id_map, no canonicalId is added to any node.
