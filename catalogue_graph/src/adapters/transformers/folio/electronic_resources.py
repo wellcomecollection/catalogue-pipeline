@@ -49,7 +49,7 @@ LINK_TEXT_FIXES = {
 }
 
 
-def extract_electronic_resources(record: Record) -> list[Item]:
+def extract_digital_items(record: Record) -> list[Item]:
     return non_empty(_to_item(field) for field in record.get_fields("856"))
 
 

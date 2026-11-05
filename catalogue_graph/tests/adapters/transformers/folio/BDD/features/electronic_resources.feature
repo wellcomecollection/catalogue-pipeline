@@ -83,29 +83,30 @@ Feature: electronic resources (MARC 856)
     And its only location has no link text
 
   Scenario Outline: Link text is tidied
-    Given the MARC record has a 856 field with subfield "u" value "https://example.org/resource" and subfield "3" value "<label>"
+    Given the MARC record has a 856 field with subfield "u" value "https://example.org/resource" and subfield "3" value <label>
     When I transform the MARC record
     Then the only item has the id type "Unidentifiable"
     And it has no title
-    And its only location has the link text "<link text>"
+    And its only location has the link text <link text>
 
     Examples: Whitespace is trimmed and trailing punctuation stripped
-      | label           | link text     |
-      | View resource   | View resource |
-      | View resource.  | View resource |
-      | View resource:  | View resource |
+      | label             | link text       |
+      | "View resource "  | "View resource" |
+      | " View resource"  | "View resource" |
+      | "View resource."  | "View resource" |
+      | "View resource:"  | "View resource" |
 
     Examples: "view" is capitalised only at the start of the label
-      | label                             | link text                         |
-      | view resource                     | View resource                     |
-      | You can view this resource online | You can view this resource online |
+      | label                               | link text                           |
+      | "view resource"                     | "View resource"                     |
+      | "You can view this resource online" | "You can view this resource online" |
 
     Examples: Known odd records are fixed
-      | label                   | link text               |
-      | VIEW FULL TEXT          | View full text          |
-      | View resource {PDF      | View resource [PDF      |
-      | View resource 613.7 KB] | View resource [613.7 KB] |
-      | View on youtube         | View on YouTube         |
+      | label                     | link text                  |
+      | "VIEW FULL TEXT"          | "View full text"           |
+      | "View resource {PDF"      | "View resource [PDF"       |
+      | "View resource 613.7 KB]" | "View resource [613.7 KB]" |
+      | "View on youtube"         | "View on YouTube"          |
 
   Scenario: A record with no 856 has no items
     Given the MARC record has a 855 field with subfield "u" value "https://example.org/journal"
