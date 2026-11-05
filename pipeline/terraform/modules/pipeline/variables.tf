@@ -113,10 +113,10 @@ variable "enable_id_minter_schedule" {
   description = "Whether the id-minter sweep schedule and its id-generator id-pool top-up schedule are enabled."
 }
 
-variable "enable_id_minter_iceberg_writes" {
+variable "enable_experimental_merger" {
   type        = bool
   default     = false
-  description = "Whether the id-minter also appends each work it mints to the experimental works_identified Iceberg table."
+  description = "Whether the id-minter also appends each work it mints to the experimental works_identified Iceberg table, and the batch matcher resolves that table after each id-minter execution."
 }
 
 variable "image_inferrer_max_concurrency" {
