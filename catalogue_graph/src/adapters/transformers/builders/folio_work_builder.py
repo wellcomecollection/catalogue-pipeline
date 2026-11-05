@@ -5,8 +5,9 @@ from pymarc.record import Record
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.collection_path import extract_collection_identifier
+from adapters.transformers.folio.electronic_resources import extract_digital_items
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
-from adapters.transformers.folio.items import extract_items
+from adapters.transformers.folio.items import extract_physical_items
 from adapters.transformers.folio.merge_candidates import extract_merge_candidates
 from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.marc.contributors import extract_contributors
@@ -175,15 +176,16 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def items(self) -> list[Item]:
-        """Build items from the joined enrichment payload.
+        """Physical items from the joined enrichment payload, then digital items from 856.
 
         Without an inventory record (e.g. an instance not yet enriched, or a full reindex
-        before the inventory store is populated) this falls back to no items rather than
-        guessing from MARC 952.
+        before the inventory store is populated) there are no physical items rather than
+        a guess from MARC 952.
         """
-        if self.inventory is None:
-            return []
-        return extract_items(self.inventory)
+        physical = (
+            [] if self.inventory is None else extract_physical_items(self.inventory)
+        )
+        return physical + extract_digital_items(self.record)
 
     def _is_suppressed(self) -> bool:
         """Check if a FOLIO Instance is marked as suppressed in its MARC data.
