@@ -1,7 +1,7 @@
 import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
-  lazy val defaultVersion = "32.45.0"
+  lazy val defaultVersion = "32.45.1"
   lazy val versions = new {
     val typesafe = defaultVersion
     val fixtures = defaultVersion
@@ -102,7 +102,7 @@ object ExternalDependencies {
     val enumeratum = "1.7.4"
     val enumeratumScalacheck = "1.7.4"
     val jsoup = "1.23.2"
-    val logback = "1.5.8"
+    val logback = "1.5.38"
     val scalatestPlus = "3.2.12.0"
     val scalatestPlusMockitoArtifactId = "mockito-4-5"
     val uPickle = "3.3.1"

@@ -15,7 +15,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 # Install uv
-RUN pip install uv==0.12.6
+RUN pip install uv==0.13.7
 
 # Install ca-certificates and git
 RUN dnf install -y ca-certificates git && dnf clean all
