@@ -13,8 +13,9 @@ record verbatim, so a mapping that needs another field can read it without a
 re-fetch.
 
 ``FolioInventoryRecord`` is the write side: it checks the ids the store depends
-on and serialises the record. ``FolioEnrichedInstance`` and ``FolioEnrichedItem``
-are the read side, parsed from the stored record at transform time.
+on and serialises the record. ``FolioEnrichedInstance``, ``FolioEnrichedHoldings``
+and ``FolioEnrichedItem`` are the read side, parsed from the stored record at
+transform time.
 
 Only the fields the transform reads are modelled; add a field alongside the code
 that uses it. The view doesn't return ``hrId``, staff-only notes or
@@ -116,10 +117,30 @@ class FolioEnrichedItem(FolioModel):
         return "\n\n".join(notes) or None
 
 
+class FolioHoldingsStatement(FolioModel):
+    statement: StrippedText | None = None
+
+
+class FolioEnrichedHoldings(FolioModel):
+    """A single FOLIO holdings record."""
+
+    id: str
+    holdings_type: StrippedText | None = None
+    effective_location: OptionalLocation = Field(
+        default=None, validation_alias=AliasPath("location", "effectiveLocation")
+    )
+    call_number: StrippedText | None = Field(
+        default=None, validation_alias=AliasPath("callNumber", "callNumber")
+    )
+    holdings_statements: list[FolioHoldingsStatement] = Field(default_factory=list)
+    suppress_from_discovery: bool = False
+
+
 class FolioEnrichedInstance(FolioModel):
-    """Items for a single FOLIO instance, parsed from its stored record."""
+    """Items and holdings for a single FOLIO instance, parsed from its stored record."""
 
     instance_id: str
+    holdings: list[FolioEnrichedHoldings] = Field(default_factory=list)
     items: list[FolioEnrichedItem] = Field(default_factory=list)
 
     @classmethod
