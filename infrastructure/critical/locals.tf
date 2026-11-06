@@ -6,7 +6,6 @@ locals {
 
   read_principles = [
     "arn:aws:iam::269807742353:root",
-    "arn:aws:iam::964279923020:role/datascience_ec2",
     "arn:aws:iam::964279923020:root",
   ]
 

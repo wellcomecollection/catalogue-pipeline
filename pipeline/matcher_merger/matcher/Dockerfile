@@ -1,4 +1,4 @@
-FROM public.ecr.aws/l7a1d1z4/jvm_container_lambda:v1 AS base
+FROM public.ecr.aws/l7a1d1z4/jvm_container_lambda:c7fce243693adf778a5bf985f3ad1b9813e03bde AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 

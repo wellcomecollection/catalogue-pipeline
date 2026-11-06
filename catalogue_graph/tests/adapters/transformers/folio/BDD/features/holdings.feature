@@ -50,6 +50,7 @@ Feature: FOLIO work-level holdings
     And the holdings have no shelfmark
 
   Scenario: A work without an inventory record has no holdings
+    Given the instance has no inventory record
     When I transform the MARC record
     Then there are no holdings
 

@@ -21,11 +21,12 @@ from tests.gherkin_steps.work import *
 
 
 @when("I transform the MARC record", target_fixture="work")
-def do_transform(marc_record: Record, folio_inventory: dict[str, Any]) -> SourceWork:
-    # The default fixture has one empty holdings record, so more means a step added one.
+def do_transform(
+    marc_record: Record, folio_inventory: dict[str, Any] | None
+) -> SourceWork:
     inventory = (
         FolioEnrichedInstance.model_validate(folio_inventory)
-        if folio_inventory["items"] or len(folio_inventory["holdings"]) > 1
+        if folio_inventory is not None
         else None
     )
     return FolioWorkBuilder(

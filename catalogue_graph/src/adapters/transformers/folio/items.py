@@ -23,7 +23,7 @@ from models.pipeline.location import PhysicalLocation
 FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
 
 
-def extract_items(instance: FolioEnrichedInstance) -> list[Item]:
+def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
     # Suppressed items are never shown, nor do they type a bound-with item.
     items = [item for item in instance.items if not item.suppress_from_discovery]
     locations = resolve_locations(items)
