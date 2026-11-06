@@ -5,7 +5,10 @@ from dataclasses import dataclass
 
 import structlog
 
-from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedItem
+from adapters.extractors.oai_pmh.folio.enrichment.models import (
+    FolioEnrichedItem,
+    FolioLocation,
+)
 from ingestor.models.display.location_type import LOCATION_LABEL_MAPPING
 from models.pipeline.location import (
     ClosedStores,
@@ -50,7 +53,13 @@ def is_bound_with(item: FolioEnrichedItem) -> bool:
 
 def resolve_own_location(item: FolioEnrichedItem) -> ResolvedLocation | None:
     """The type and label of an item's effective location."""
-    location = item.effective_location
+    return resolve_location(item.effective_location, item_id=item.id)
+
+
+def resolve_location(
+    location: FolioLocation | None, **log_context: str
+) -> ResolvedLocation | None:
+    """The type and label of a FOLIO location; log_context identifies its record in warnings."""
     if location is None or location.code in NO_LOCATION_CODES:
         return None
 
@@ -60,7 +69,7 @@ def resolve_own_location(item: FolioEnrichedItem) -> ResolvedLocation | None:
     if location_type is None:
         logger.warning(
             "Unmapped FOLIO location",
-            item_id=item.id,
+            **log_context,
             location_code=location.code,
             library=location.library_name,
         )
@@ -70,7 +79,7 @@ def resolve_own_location(item: FolioEnrichedItem) -> ResolvedLocation | None:
         return ResolvedLocation(location_type, LOCATION_LABEL_MAPPING[ClosedStores.id])
     if location.name is None:
         logger.warning(
-            "FOLIO location has no name", item_id=item.id, location_code=location.code
+            "FOLIO location has no name", **log_context, location_code=location.code
         )
         return None
     return ResolvedLocation(location_type, location.name)
