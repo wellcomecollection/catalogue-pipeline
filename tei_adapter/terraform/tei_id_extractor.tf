@@ -21,11 +21,13 @@ module "tei_id_extractor_w" {
   }
 
   secret_env_vars = {
-    db_host      = "rds/tei-adapter-cluster-serverless/endpoint"
-    db_port      = "rds/tei-adapter-cluster-serverless/port"
-    db_username  = "catalogue/tei_id_extractor/rds_user"
-    db_password  = "catalogue/tei_id_extractor/rds_password"
-    github_token = "catalogue/tei_id_extractor/github_token"
+    db_host                    = "rds/tei-adapter-cluster-serverless/endpoint"
+    db_port                    = "rds/tei-adapter-cluster-serverless/port"
+    db_username                = "catalogue/tei_id_extractor/rds_user"
+    db_password                = "catalogue/tei_id_extractor/rds_password"
+    github_app_id              = "catalogue/tei_adapter/github_app:app_id"
+    github_app_installation_id = "catalogue/tei_adapter/github_app:installation_id"
+    github_app_private_key     = "catalogue/tei_adapter/github_app:private_key"
   }
 
   // The total number of connections to RDS across all tasks

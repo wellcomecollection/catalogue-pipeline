@@ -1,3 +1,4 @@
 deepdiff>=8.6.1,<9
 requests
 pytz
+pyjwt[crypto]
