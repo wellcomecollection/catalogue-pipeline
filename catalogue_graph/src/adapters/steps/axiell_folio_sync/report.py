@@ -64,6 +64,10 @@ class AxiellFolioSyncReport(PipelineReport):
             PipelineMetric(
                 name="deletions_processed", value=self.counts.get("deletions", 0)
             ),
+            PipelineMetric(
+                name="tombstone_deletions_processed",
+                value=self.counts.get("tombstone_deletions", 0),
+            ),
             PipelineMetric(name="records_skipped", value=self.counts.get("skipped", 0)),
             PipelineMetric(
                 name="records_tombstoned", value=self.counts.get("tombstone", 0)
