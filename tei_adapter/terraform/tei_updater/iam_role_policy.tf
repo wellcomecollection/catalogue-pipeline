@@ -17,6 +17,6 @@ resource "aws_iam_role_policy" "tei_updater_read_github_token_secret" {
 data "aws_iam_policy_document" "allow_secret_read" {
   statement {
     actions   = ["secretsmanager:GetSecretValue"]
-    resources = ["${var.github_token_secret}*"]
+    resources = [var.github_app_secret]
   }
 }
