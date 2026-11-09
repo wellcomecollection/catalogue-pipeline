@@ -20,9 +20,12 @@ def _source(es_client: MagicMock, pit_id: str | None = None) -> ElasticIdsSource
     )
 
 
-def _client_with_hits(ids: list[str]) -> MagicMock:
+def _client_with_hits(ids: list[str], failed_shards: int = 0) -> MagicMock:
     client = MagicMock()
-    client.count.return_value = {"count": len(ids)}
+    client.count.return_value = {
+        "count": len(ids),
+        "_shards": {"failed": failed_shards},
+    }
     client.open_point_in_time.return_value = {"id": "test-pit"}
     hits = [{"_id": _id, "sort": [i]} for i, _id in enumerate(ids)]
 
@@ -52,6 +55,15 @@ def test_empty_scope_is_one_count_and_no_pit_or_search() -> None:
     client.count.assert_called_once_with(index="test-index", query=QUERY)
     client.open_point_in_time.assert_not_called()
     client.search.assert_not_called()
+
+
+def test_partial_empty_count_still_scans() -> None:
+    client = _client_with_hits([], failed_shards=1)
+
+    assert list(_source(client).stream_ids()) == []
+
+    client.open_point_in_time.assert_called_once()
+    client.search.assert_called()
 
 
 def test_streams_ids_then_closes_its_pit() -> None:

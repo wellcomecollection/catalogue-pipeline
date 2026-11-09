@@ -18,6 +18,10 @@ def es_client(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     return client
 
 
+def _count(count: int, failed_shards: int = 0) -> dict:
+    return {"count": count, "_shards": {"failed": failed_shards}}
+
+
 def _event(**kwargs: object) -> BasePipelineEvent:
     return BasePipelineEvent.model_validate(
         {"pipeline_date": "dev", "graph_date": "dev", **kwargs}
@@ -25,7 +29,7 @@ def _event(**kwargs: object) -> BasePipelineEvent:
 
 
 def test_skips_pits_when_nothing_changed_in_window(es_client: MagicMock) -> None:
-    es_client.count.return_value = {"count": 0}
+    es_client.count.return_value = _count(0)
 
     result = pit_opener.handler(_event(window=WINDOW))
 
@@ -38,7 +42,7 @@ def test_skips_pits_when_nothing_changed_in_window(es_client: MagicMock) -> None
 def test_opens_pits_when_works_or_images_changed(
     es_client: MagicMock, counts: list[int], count_calls: int
 ) -> None:
-    es_client.count.side_effect = [{"count": c} for c in counts]
+    es_client.count.side_effect = [_count(c) for c in counts]
 
     result = pit_opener.handler(_event(window=WINDOW))
 
@@ -49,10 +53,19 @@ def test_opens_pits_when_works_or_images_changed(
     assert es_client.count.call_count == count_calls
 
 
+def test_partial_empty_count_opens_pits(es_client: MagicMock) -> None:
+    es_client.count.return_value = _count(0, failed_shards=1)
+
+    result = pit_opener.handler(_event(window=WINDOW))
+
+    assert result["has_changes"] is True
+    assert es_client.open_point_in_time.call_count == 2
+
+
 def test_counts_use_the_window_on_each_index_time_field(
     es_client: MagicMock,
 ) -> None:
-    es_client.count.return_value = {"count": 0}
+    es_client.count.return_value = _count(0)
 
     pit_opener.handler(_event(window=WINDOW))
 

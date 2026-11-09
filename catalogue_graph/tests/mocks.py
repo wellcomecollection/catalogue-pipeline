@@ -502,7 +502,7 @@ class MockElasticsearchClient:
                 if (ids is None or d["_id"] in ids)
                 and self._matches_range_filters(query, d)
             ]
-        return {"count": len(documents)}
+        return {"count": len(documents), "_shards": {"failed": 0}}
 
     def open_point_in_time(self, index: str, keep_alive: str) -> dict:  # noqa: D401
         self.pit_index = index

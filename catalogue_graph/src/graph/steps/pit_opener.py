@@ -4,6 +4,7 @@ import typing
 import structlog
 from elasticsearch import Elasticsearch
 
+from core.source import count_has_matches
 from graph.sources.augmented_images_source import AUGMENTED_TIME_FIELD
 from graph.sources.merged_works_source import MERGED_TIME_FIELD
 from models.events import BasePipelineEvent
@@ -30,14 +31,13 @@ def open_pit(es_client: Elasticsearch, index_name: str) -> str:
     return pit_id
 
 
-def count_in_window(
+def changed_in_window(
     es_client: Elasticsearch, event: BasePipelineEvent, index_name: str, field: str
-) -> int:
+) -> bool:
     response = es_client.count(
         index=index_name, query=event.to_elasticsearch_query(field)
     )
-    count: int = response["count"]
-    return count
+    return count_has_matches(response)
 
 
 def handler(
@@ -54,12 +54,9 @@ def handler(
     augmented_index = get_images_augmented_index_name(event)
 
     if event.window is not None:
-        merged = count_in_window(es_client, event, merged_index, MERGED_TIME_FIELD)
-        has_changes = (
-            merged > 0
-            or count_in_window(es_client, event, augmented_index, AUGMENTED_TIME_FIELD)
-            > 0
-        )
+        has_changes = changed_in_window(
+            es_client, event, merged_index, MERGED_TIME_FIELD
+        ) or changed_in_window(es_client, event, augmented_index, AUGMENTED_TIME_FIELD)
         if not has_changes:
             logger.info(
                 "No works or images changed in the window, skipping the run",

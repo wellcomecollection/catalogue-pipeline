@@ -81,6 +81,12 @@ def _on_request_backoff(backoff_details: Any) -> None:
     )
 
 
+def count_has_matches(response: Any) -> bool:
+    """Whether a _count response may have matches."""
+    # Failed shards can under-report, so only a complete zero means there's nothing
+    return bool(response["count"] > 0 or response["_shards"]["failed"] > 0)
+
+
 class ElasticSource(BaseSource):
     # Subclasses that open their own PIT just before streaming set this
     open_pit_on_init = True
@@ -207,8 +213,8 @@ class ElasticIdsSource(ElasticSource):
     def stream_ids(self) -> Iterator[str]:
         """The WorkSource interface: the _ids in scope."""
         # One count instead of a PIT and a sliced scan when there's nothing in scope
-        count = self.es_client.count(index=self.index_name, query=self.query)["count"]
-        if count == 0:
+        count = self.es_client.count(index=self.index_name, query=self.query)
+        if not count_has_matches(count):
             return
 
         yield from self.stream_raw()
