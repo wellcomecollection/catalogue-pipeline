@@ -363,6 +363,19 @@ def child_list_member_has_with_datatable(
         assert actual == row[0]
 
 
+@then(parsers.parse("the work has {count:d} {attr_phrase} with no {sub_attr}"))
+def child_list_members_lack(
+    work: SourceWork, count: int, attr_phrase: str, sub_attr: str
+) -> None:
+    members: Sequence[Any] = _get_attr_list(work, attr_phrase)
+    assert len(members) == count, (
+        f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
+    )
+    for member in members:
+        actual = drill_through_dots(member, sub_attr)
+        assert actual is None, f"Expected {sub_attr} to be absent, got {actual!r}"
+
+
 @then(parsers.re(r"the work has (?P<count>\d+) (?P<attr_phrase>(?!.*\bwith\b).*):"))
 def child_list_member_with_datatable(
     work: SourceWork, datatable: list[list[str]], count: str, attr_phrase: str

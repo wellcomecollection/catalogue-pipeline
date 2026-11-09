@@ -30,7 +30,7 @@ def test_parses_the_fixture() -> None:
         i for i in instance.items if i.id == "02738895-598f-5d5b-9b10-363d66da01f0"
     )
     assert item.volume == "Vol. 23 1969"
-    assert item.enumeration is None
+    assert item.copy_number == "1"
 
 
 def test_store_content_keeps_the_whole_record() -> None:

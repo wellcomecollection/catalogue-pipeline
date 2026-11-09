@@ -108,6 +108,16 @@ def item_no_call_number(folio_item: dict[str, Any]) -> None:
     folio_item["callNumber"] = {}
 
 
+@given(parsers.parse('that item has the volume "{volume}"'))
+def item_volume(folio_item: dict[str, Any], volume: str) -> None:
+    folio_item["volume"] = volume
+
+
+@given(parsers.parse('that item has the copy number "{copy_number}"'))
+def item_copy_number(folio_item: dict[str, Any], copy_number: str) -> None:
+    folio_item["copyNumber"] = copy_number
+
+
 @given(parsers.parse('that item has the display note "{note}"'))
 def item_display_note(folio_item: dict[str, Any], note: str) -> None:
     folio_item["notes"].append({"itemNoteTypeName": "Display note", "note": note})
