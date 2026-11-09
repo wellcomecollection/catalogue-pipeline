@@ -26,7 +26,11 @@ class AccessStatus(SerialisableModel):
 
     @property
     def is_available(self) -> bool:
-        """Open, or a licensed resource that is the item itself rather than a related one."""
+        """Whether the status counts as available online.
+
+        Open statuses do. A licensed resource does when its URL is the content itself,
+        not when it points to a page about the item, such as a publisher's description.
+        """
         if self.type in ("Open", "OpenWithAdvisory"):
             return True
         return (

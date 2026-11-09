@@ -69,4 +69,4 @@ class DeletedIdentifiedWork(DeletedWork, IdentifiedWork):
 
 
 class RedirectedIdentifiedWork(RedirectedWork, IdentifiedWork):
-    data: WorkData = Field(default_factory=WorkData, exclude=True)
+    pass
