@@ -67,6 +67,12 @@ provider "aws" {
   assume_role {
     role_arn = "arn:aws:iam::760097843905:role/platform-admin"
   }
+
+  default_tags {
+    tags = {
+      "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    }
+  }
 }
 
 provider "aws" {
@@ -75,6 +81,12 @@ provider "aws" {
 
   assume_role {
     role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
+  }
+
+  default_tags {
+    tags = {
+      "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    }
   }
 }
 

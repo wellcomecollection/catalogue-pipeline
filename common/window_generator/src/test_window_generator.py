@@ -2,6 +2,7 @@
 
 import datetime as dt
 import os
+from types import SimpleNamespace
 from unittest import mock
 
 from window_generator import build_window, main
@@ -28,9 +29,10 @@ def test_end_to_end(test_topic_arn, get_test_topic_messages, mock_sns_client):
     env = {"WINDOW_LENGTH_MINUTES": "25", "TOPIC_ARN": test_topic_arn}
     os.environ["WINDOW_LENGTH_MINUTES"] = "25"
 
-    with mock.patch.dict(os.environ, env), mock.patch(
-        "datetime.datetime", patched_datetime
-    ):
+    # Patch only window_generator's clock: patching datetime globally also moves
+    # moto's, and on Python 3.12 the published message then never reaches the queue.
+    fake_dt = SimpleNamespace(datetime=patched_datetime, timedelta=dt.timedelta)
+    with mock.patch.dict(os.environ, env), mock.patch("window_generator.dt", fake_dt):
         # This Lambda doesn't read anything from its event or context
         main(sns_client=mock_sns_client)
 

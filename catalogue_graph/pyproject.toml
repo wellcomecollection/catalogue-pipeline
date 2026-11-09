@@ -13,7 +13,7 @@ dependencies = [
     "smart-open",
     "polars",
     "numpy",
-    "elasticsearch>=8.11,<8.13",
+    "elasticsearch>=9.5,<10",
     "tabulate",
     "types-tabulate",
     "types-requests",

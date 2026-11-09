@@ -1,6 +1,7 @@
 locals {
   default_tags = {
     TerraformConfigurationURL = "https://github.com/wellcomecollection/catalogue-pipeline/tree/main/reindexer/terraform"
+    "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
   }
 }
 

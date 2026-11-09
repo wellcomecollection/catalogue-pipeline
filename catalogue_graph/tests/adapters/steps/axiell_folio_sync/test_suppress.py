@@ -1,7 +1,7 @@
 """Tests for the reconciler delete paths (``suppress_by_guid`` / ``delete_by_guid``).
 
 A superseded GUID from the reconciler is an authoritative delete: the three
-FOLIO records keyed on ``AxC-{entity}-{guid}`` are either soft-suppressed
+FOLIO records whose ids derive from the GUID are either soft-suppressed
 (``discoverySuppress`` on all three, plus ``staffSuppress`` on the instance) or
 hard-deleted, child-first.
 """
@@ -13,14 +13,14 @@ from typing import Any
 
 from adapters.steps.axiell_folio_sync.upsert import delete_by_guid, suppress_by_guid
 
-GUID = "1234"
+GUID = "00000000-0000-4000-8000-000000001234"
 
 
 class FakeInventory:
-    """Records write order and returns a stored record for each entity hrid."""
+    """Records write order and returns a stored record for each entity id."""
 
     def __init__(self, existing: dict[str, dict[str, Any]] | None = None) -> None:
-        # search_path -> the record to return for any hrid lookup (None = absent)
+        # search_path -> the record to return for any id lookup (None = absent)
         self.existing = existing if existing is not None else {}
         self.put_calls: list[tuple[str, dict[str, Any]]] = []
         self.delete_paths: list[str] = []
@@ -134,7 +134,7 @@ def test_dry_run_plans_without_writing() -> None:
 
     result = suppress_by_guid(GUID, folio, dry_run=True)
 
-    # Actions are still planned (resolved by hrid) but no PUT is issued.
+    # Actions are still planned (resolved by id) but no PUT is issued.
     assert result.item.action == "suppress"
     assert result.instance.action == "suppress"
     assert folio.put_calls == []
