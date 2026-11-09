@@ -4,7 +4,7 @@ import typing
 import structlog
 from elasticsearch import Elasticsearch
 
-from core.source import count_has_matches
+from core.source import may_have_matches
 from graph.sources.augmented_images_source import AUGMENTED_TIME_FIELD
 from graph.sources.merged_works_source import MERGED_TIME_FIELD
 from models.events import BasePipelineEvent
@@ -34,10 +34,7 @@ def open_pit(es_client: Elasticsearch, index_name: str) -> str:
 def changed_in_window(
     es_client: Elasticsearch, event: BasePipelineEvent, index_name: str, field: str
 ) -> bool:
-    response = es_client.count(
-        index=index_name, query=event.to_elasticsearch_query(field)
-    )
-    return count_has_matches(response)
+    return may_have_matches(es_client, index_name, event.to_elasticsearch_query(field))
 
 
 def handler(

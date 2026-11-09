@@ -81,8 +81,18 @@ def _on_request_backoff(backoff_details: Any) -> None:
     )
 
 
-def count_has_matches(response: Any) -> bool:
-    """Whether a _count response may have matches."""
+@backoff.on_exception(
+    backoff.expo,
+    (TransportError, ApiError),
+    max_time=ES_REQUESTS_BACKOFF_MAX_TIME,
+    max_value=ES_REQUESTS_BACKOFF_MAX_INTERVAL,
+    giveup=_giveup_es_request,
+    on_backoff=_on_request_backoff,
+    jitter=backoff.full_jitter,
+)
+def may_have_matches(es_client: Elasticsearch, index: str, query: dict) -> bool:
+    """Whether a _count on the query may have matches, retried like search."""
+    response = es_client.count(index=index, query=query)
     # Failed shards can under-report, so only a complete zero means there's nothing
     return bool(response["count"] > 0 or response["_shards"]["failed"] > 0)
 
@@ -213,8 +223,7 @@ class ElasticIdsSource(ElasticSource):
     def stream_ids(self) -> Iterator[str]:
         """The WorkSource interface: the _ids in scope."""
         # One count instead of a PIT and a sliced scan when there's nothing in scope
-        count = self.es_client.count(index=self.index_name, query=self.query)
-        if not count_has_matches(count):
+        if not may_have_matches(self.es_client, self.index_name, self.query):
             return
 
         yield from self.stream_raw()
