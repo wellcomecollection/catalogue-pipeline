@@ -70,6 +70,12 @@ def handler(
 
     es_remover = ElasticsearchRemover(event, es_mode)
     ids_to_delete = set(event.ids) if event.ids else get_ids_to_delete(event)
+
+    # Nothing to delete: skip the count and delete_by_query, which would keep a serverless project awake
+    if not ids_to_delete:
+        DeletionReport(**event.model_dump(), deleted_count=0).publish()
+        return
+
     current_id_count = es_remover.get_document_count()
 
     # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
