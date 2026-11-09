@@ -34,9 +34,9 @@ def test_skips_pits_when_nothing_changed_in_window(es_client: MagicMock) -> None
     es_client.open_point_in_time.assert_not_called()
 
 
-@pytest.mark.parametrize("counts", [[1, 0], [0, 1]])
+@pytest.mark.parametrize(("counts", "count_calls"), [([1], 1), ([0, 1], 2)])
 def test_opens_pits_when_works_or_images_changed(
-    es_client: MagicMock, counts: list[int]
+    es_client: MagicMock, counts: list[int], count_calls: int
 ) -> None:
     es_client.count.side_effect = [{"count": c} for c in counts]
 
@@ -45,6 +45,8 @@ def test_opens_pits_when_works_or_images_changed(
     assert result["has_changes"] is True
     assert set(result["pit_ids"]) == {"merged", "augmented"}
     assert es_client.open_point_in_time.call_count == 2
+    # Images aren't counted once works have changed
+    assert es_client.count.call_count == count_calls
 
 
 def test_counts_use_the_window_on_each_index_time_field(

@@ -63,6 +63,15 @@ def test_streams_ids_then_closes_its_pit() -> None:
     client.close_point_in_time.assert_called_once_with(body={"id": "test-pit"})
 
 
+def test_stream_raw_opens_and_closes_its_own_pit() -> None:
+    client = _client_with_hits(["a"])
+
+    assert list(_source(client).stream_raw()) == ["a"]
+
+    client.open_point_in_time.assert_called_once()
+    client.close_point_in_time.assert_called_once_with(body={"id": "test-pit"})
+
+
 def test_leaves_a_pit_it_was_given_open() -> None:
     client = _client_with_hits(["a"])
 

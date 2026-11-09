@@ -45,11 +45,7 @@ def handler(
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
 ) -> dict:
-    """Create points in time (PITs) on the merged and augmented indexes.
-
-    In window mode, returns `has_changes: False` without opening PITs when neither
-    index has documents in the window, so the state machine can skip the run.
-    """
+    """Open PITs on the merged and augmented indexes, unless a window has no changes."""
     setup_logging(execution_context)
 
     es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
@@ -58,13 +54,13 @@ def handler(
     augmented_index = get_images_augmented_index_name(event)
 
     if event.window is not None:
-        merged_count = count_in_window(
-            es_client, event, merged_index, MERGED_TIME_FIELD
+        merged = count_in_window(es_client, event, merged_index, MERGED_TIME_FIELD)
+        has_changes = (
+            merged > 0
+            or count_in_window(es_client, event, augmented_index, AUGMENTED_TIME_FIELD)
+            > 0
         )
-        augmented_count = count_in_window(
-            es_client, event, augmented_index, AUGMENTED_TIME_FIELD
-        )
-        if merged_count == 0 and augmented_count == 0:
+        if not has_changes:
             logger.info(
                 "No works or images changed in the window, skipping the run",
                 window=event.window.to_formatted_string(),

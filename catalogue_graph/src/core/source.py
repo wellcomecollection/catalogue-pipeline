@@ -211,11 +211,15 @@ class ElasticIdsSource(ElasticSource):
         if count == 0:
             return
 
+        yield from self.stream_raw()
+
+    def stream_raw(self) -> Generator[Any]:
+        # Opened here rather than on construction, and closed after, as it's never passed on
         owns_pit = self.pit_id is None
         if self.pit_id is None:
             self.pit_id = self.open_pit()
         try:
-            yield from self.stream_raw()
+            yield from super().stream_raw()
         finally:
             if owns_pit:
                 self.close_pit()
