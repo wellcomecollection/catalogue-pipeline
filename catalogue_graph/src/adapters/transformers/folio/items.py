@@ -28,8 +28,8 @@ def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
     items = [item for item in instance.items if not item.suppress_from_discovery]
     locations = resolve_locations(items)
     built = [_build_item(item, locations[item.id]) for item in items]
-    # A generated title only earns its place by telling items apart, so the same one
-    # on every item says nothing and is removed. That includes a lone "Copy 1".
+    # A generated title is only useful for telling items apart. When every item has
+    # the same one it adds nothing, so it is removed. That includes a lone "Copy 1".
     if (
         built
         and all(_has_generated_title(item) for item in items)
