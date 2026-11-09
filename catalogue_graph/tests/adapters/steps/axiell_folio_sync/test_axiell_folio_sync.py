@@ -130,7 +130,8 @@ def _run(rows: list[dict[str, Any]]) -> Any:
 
 def test_skips_records_without_the_harvest_flag() -> None:
     # The 980 $a harvest flag is the opt-in. The record that carries no flag is
-    # skipped entirely: not created, not updated, not suppressed, and not an error.
+    # not created or updated, and with nothing in FOLIO to suppress it is
+    # skipped, not an error. See test_harvest_untick for one that has synced.
     resp = _run([_row("sel", SELECTED), _row("unsel", UNSELECTED)])
 
     assert resp.counts["total"] == 2

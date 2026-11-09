@@ -22,7 +22,10 @@ The design, record-selection rules and tombstone semantics are specified in
    the batch's tombstones; both are consumed by the reconciliation pass below.
 4. **Pass 1 — upsert.** Each record is selected, mapped, and upserted:
    * **Selection** (`is_selected_for_sync`): a record is synced only if it carries the harvest flag (MARC `980 $a`
-     present) and is item-level (MARC `351 $c` == `ITEM`). Everything else is skipped.
+     present) and is item-level (MARC `351 $c` == `ITEM`). An item-level record without the flag has its FOLIO
+     records suppressed (`unflagged_guid`, then `suppress_by_guid`), never hard deleted, so unticking Harvest takes
+     it out of FOLIO and ticking it again restores it: every upsert sends the suppression flags cleared. A record
+     that is not item-level is skipped.
    * **Mapping** (`mapping.py`): MARCXML → typed Pydantic payloads for Instance, Holdings and Item. FOLIO reference
      UUIDs (locations, material types, loan types, …) are resolved via `RefCache`, loaded once per invocation from the
      FOLIO tenant and reused across warm Lambda starts.
@@ -69,6 +72,8 @@ the FOLIO ids derived from the GUID (the same derivation the upsert path uses), 
 
 A per-GUID failure is recorded as an error entry and does not abort the run. Each manifest deletion entry carries a
 `reason`, `superseded` or `tombstone`, and `tombstone_deletions` counts the tombstoned GUIDs within `deletions`.
+Records suppressed in Pass 1 for want of the harvest flag appear in the same list with the reason `unflagged`, and
+are counted in `unflagged` rather than `deletions`.
 
 ## Module layout
 

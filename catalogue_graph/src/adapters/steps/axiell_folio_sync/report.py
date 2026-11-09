@@ -70,6 +70,13 @@ class AxiellFolioSyncReport(PipelineReport):
             ),
             PipelineMetric(name="records_skipped", value=self.counts.get("skipped", 0)),
             PipelineMetric(
+                name="records_unflagged", value=self.counts.get("unflagged", 0)
+            ),
+            PipelineMetric(
+                name="records_unflagged_never_synced",
+                value=self.counts.get("unflagged_never_synced", 0),
+            ),
+            PipelineMetric(
                 name="records_tombstoned", value=self.counts.get("tombstone", 0)
             ),
             PipelineMetric(name="records_failed", value=self.counts.get("failed", 0)),

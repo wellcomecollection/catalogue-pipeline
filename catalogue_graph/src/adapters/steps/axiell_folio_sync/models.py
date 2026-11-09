@@ -38,9 +38,10 @@ class SyncErrorEntry(BaseModel):
 
 
 # Why a GUID's FOLIO records were deleted or suppressed: its collectId moved to
-# a new GUID (a reconciler deletion fact), or the record arrived as an OAI-PMH
-# tombstone.
-DeletionReason = Literal["superseded", "tombstone"]
+# a new GUID (a reconciler deletion fact), the record arrived as an OAI-PMH
+# tombstone, or it is item-level without the 980 $a harvest flag. An unflagged
+# record is always suppressed, never deleted, so ticking Harvest again restores it.
+DeletionReason = Literal["superseded", "tombstone", "unflagged"]
 
 
 class SyncDeletionEntry(BaseModel):

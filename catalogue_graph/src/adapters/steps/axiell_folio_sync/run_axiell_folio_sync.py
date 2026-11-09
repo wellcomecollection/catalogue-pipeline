@@ -1,7 +1,8 @@
 """Core sync loop for the Axiell to Folio sync step.
 
 Extracted from ``axiell_folio_sync.py`` for readability. Contains:
-- ``run_sync`` — the select → map → upsert loop over adapter rows
+- ``run_sync`` — the select → map → upsert loop over adapter rows, which also
+  suppresses item-level rows that have lost the harvest flag
 
 OKAPI credential resolution lives in ``folio.okapi.load_okapi_config``.
 
@@ -21,6 +22,7 @@ from adapters.steps.axiell_folio_sync.folio import FolioInventoryOps, RefCache
 from adapters.steps.axiell_folio_sync.mapping import (
     MappingError,
     select_and_build,
+    unflagged_guid,
 )
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
@@ -136,53 +138,87 @@ def _run_reconcile_deletions(
         if reason == "tombstone":
             counts["tombstone_deletions"] += 1
         result = action_by_guid(target.guid, folio, dry_run=dry_run)
-
-        # Tally and record whatever was actually actioned, even when the cascade
-        # later failed: a partial hard-delete may have already removed a child
-        # (irreversibly) before erroring on its parent, and that must not vanish
-        # from the counts or the manifest. Entities that never ran carry a null
-        # action, so nothing is over-counted.
-        _tally_entity_actions(result, counts)
-        if any(
-            getattr(result, entity).action
-            for entity in ("instance", "holdings", "item")
-        ):
-            entries.append(
-                SyncDeletionEntry(
-                    guid=target.guid,
-                    record_id=target.record_id,
-                    changeset_id=target.changeset_id,
-                    reason=reason,
-                    instance_action=result.instance.action,
-                    holdings_action=result.holdings.action,
-                    item_action=result.item.action,
-                    timestamp=utc_now_iso(),
-                )
-            )
-
-        if result.errors:
-            error_count += 1
-            errors_list.append(
-                _build_error(
-                    target.guid,
-                    target.changeset_id,
-                    stage,
-                    [e.model_dump() for e in result.errors],
-                )
-            )
-
-        logger.info(
-            "reconcile_delete_result",
-            mode="delete" if hard_delete else "suppress",
+        if _record_cascade(
+            result,
+            record_id=target.record_id,
+            changeset_id=target.changeset_id,
             reason=reason,
-            guid=target.guid,
-            instance=result.instance.action or "skip",
-            holdings=result.holdings.action or "skip",
-            item=result.item.action or "skip",
-            errors=len(result.errors),
-        )
+            stage=stage,
+            counts=counts,
+            entries=entries,
+            errors_list=errors_list,
+        ):
+            error_count += 1
 
     return entries, error_count
+
+
+def _actioned(result: GuidCascadeResult) -> bool:
+    """Whether a cascade found and actioned at least one entity."""
+    return any(
+        getattr(result, entity).action not in (None, "skip")
+        for entity in ("instance", "holdings", "item")
+    )
+
+
+def _record_cascade(
+    result: GuidCascadeResult,
+    *,
+    record_id: str,
+    changeset_id: str,
+    reason: DeletionReason,
+    stage: str,
+    counts: dict[str, int],
+    entries: list[SyncDeletionEntry],
+    errors_list: list[SyncErrorEntry],
+) -> bool:
+    """Tally a suppress or delete cascade and add it to the run report.
+
+    Returns whether the cascade errored.
+    """
+    # Tally and record whatever was actually actioned, even when the cascade
+    # later failed: a partial hard-delete may have already removed a child
+    # (irreversibly) before erroring on its parent, and that must not vanish
+    # from the counts or the manifest. Entities that never ran carry a null
+    # action, so nothing is over-counted.
+    _tally_entity_actions(result, counts)
+    if any(
+        getattr(result, entity).action for entity in ("instance", "holdings", "item")
+    ):
+        entries.append(
+            SyncDeletionEntry(
+                guid=result.guid,
+                record_id=record_id,
+                changeset_id=changeset_id,
+                reason=reason,
+                instance_action=result.instance.action,
+                holdings_action=result.holdings.action,
+                item_action=result.item.action,
+                timestamp=utc_now_iso(),
+            )
+        )
+
+    if result.errors:
+        errors_list.append(
+            _build_error(
+                result.guid,
+                changeset_id,
+                stage,
+                [e.model_dump() for e in result.errors],
+            )
+        )
+
+    logger.info(
+        "reconcile_delete_result",
+        mode=stage,
+        reason=reason,
+        guid=result.guid,
+        instance=result.instance.action or "skip",
+        holdings=result.holdings.action or "skip",
+        item=result.item.action or "skip",
+        errors=len(result.errors),
+    )
+    return bool(result.errors)
 
 
 # ── core ──────────────────────────────────────────────────────────────────────
@@ -202,6 +238,11 @@ def run_sync(
     hard_delete: bool = False,
 ) -> AxiellFolioSyncResponse:
     """Select, map, and upsert pre-read adapter rows to FOLIO.
+
+    An item-level row without the harvest flag is suppressed in FOLIO instead,
+    in the same pass, and never hard deleted whatever ``hard_delete`` says: a
+    record unticked in Collections comes back when Harvest is ticked again,
+    because the upsert clears the suppression on the same derived ids.
 
     Dependencies (rows, ref cache, FOLIO client) are injected so the loop is
     unit-testable without SSM / Iceberg / FOLIO; ``handler`` builds the real ones.
@@ -227,6 +268,7 @@ def run_sync(
 
     successful: list[SyncSuccessEntry] = []
     errors_list: list[SyncErrorEntry] = []
+    unflagged_entries: list[SyncDeletionEntry] = []
     total_successful = 0
     total_errors = 0
     counts: dict[str, int] = {
@@ -234,6 +276,8 @@ def run_sync(
         "updated": 0,
         "suppressed": 0,
         "deleted": 0,
+        # Records left untouched: not item-level, or unflagged with nothing in
+        # FOLIO to suppress.
         "skipped": 0,
         "tombstone": 0,
         # Tombstoned GUIDs actioned in the second pass, also counted in
@@ -244,6 +288,13 @@ def run_sync(
         # GUIDs processed in the second pass: superseded GUIDs (reconciler
         # deletions) and tombstoned GUIDs.
         "deletions": 0,
+        # Item-level records without the 980 $a harvest flag. Each costs a
+        # suppress lookup on all three FOLIO records. Those that found records
+        # count their entities in "suppressed" and the record as successful.
+        "unflagged": 0,
+        # Unflagged records with nothing in FOLIO, so the lookups found nothing
+        # to suppress. Also counted in "skipped".
+        "unflagged_never_synced": 0,
         # Records whose item carried a location note the sync could no longer
         # claim, so a duplicate was left behind. Not an error: nothing failed and
         # nothing was lost, but each one needs reconciling by hand in FOLIO.
@@ -295,10 +346,48 @@ def run_sync(
             continue
 
         if mapped is None:
-            counts["skipped"] += 1
-            logger.info(
-                "skipped_not_selected", source_id=source_id, changeset_id=changeset_id
-            )
+            # An item-level record without the harvest flag has its FOLIO
+            # records suppressed, so unticking Harvest takes it out of FOLIO.
+            # The content parsed in select_and_build, so this parse cannot fail.
+            guid = unflagged_guid(row["content"])
+            if guid is None:
+                counts["skipped"] += 1
+                logger.info(
+                    "skipped_not_selected",
+                    source_id=source_id,
+                    changeset_id=changeset_id,
+                )
+                continue
+
+            counts["unflagged"] += 1
+            unflagged = suppress_by_guid(guid, folio, dry_run=dry_run)
+            if not unflagged.errors and not _actioned(unflagged):
+                # Never synced, or already removed: three lookups for nothing,
+                # and kept out of the manifest, which would otherwise list every
+                # record that has never carried the flag.
+                counts["unflagged_never_synced"] += 1
+                counts["skipped"] += 1
+                logger.info(
+                    "skipped_unflagged_never_synced",
+                    source_id=source_id,
+                    changeset_id=changeset_id,
+                )
+                continue
+
+            if _record_cascade(
+                unflagged,
+                record_id=source_id,
+                changeset_id=changeset_id,
+                reason="unflagged",
+                stage="suppress",
+                counts=counts,
+                entries=unflagged_entries,
+                errors_list=errors_list,
+            ):
+                counts["failed"] += 1
+                total_errors += 1
+            else:
+                total_successful += 1
             continue
 
         result = upsert_from_payloads(
@@ -371,7 +460,7 @@ def run_sync(
         counts=counts,
         successful=successful,
         errors=errors_list,
-        deletions=deletion_entries,
+        deletions=unflagged_entries + deletion_entries,
         s3_bucket=manifest_bucket,
         # The S3 report is written even on dry runs (it is how dry runs are
         # validated); only CloudWatch metrics are suppressed.
