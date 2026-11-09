@@ -12,10 +12,10 @@ Feature: FOLIO item titles
   titles on one item; it dropped blank and duplicate ones and took the first
   with a warning. The migration joined them all into one FOLIO volume,
   separated by semicolons. Splitting on the semicolon would restore the Sierra
-  title on the roughly 15 affected items, but it would also cut in half any
-  volume later entered directly in FOLIO in case it contains a semicolon. That
-  risk to every future item is not worth parity on 15, so the joined value is
-  shown whole.
+  title on the few affected items. But cataloguers have often written a
+  semicolon inside a single volume title in Sierra, and if they do the same in
+  FOLIO, splitting would cut that title in half. That risk to every future
+  item is not worth parity on a handful, so the joined value is shown whole.
 
   Background:
     Given a MARC record with field 001 "abc123"
