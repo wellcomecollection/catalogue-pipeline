@@ -82,6 +82,9 @@ def _on_request_backoff(backoff_details: Any) -> None:
 
 
 class ElasticSource(BaseSource):
+    # Subclasses that open their own PIT just before streaming set this
+    open_pit_on_init = True
+
     def __init__(
         self,
         es_client: Elasticsearch,
@@ -101,13 +104,14 @@ class ElasticSource(BaseSource):
         self.slice_count = slice_count
         self.parallelism = parallelism
 
-        if pit_id is not None:
-            self.pit_id = pit_id
-        else:
-            pit = self.es_client.open_point_in_time(
-                index=self.index_name, keep_alive="15m"
-            )
-            self.pit_id = pit["id"]
+        self.pit_id: str | None = pit_id
+        if self.pit_id is None and self.open_pit_on_init:
+            self.pit_id = self.open_pit()
+
+    def open_pit(self) -> str:
+        pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="15m")
+        pit_id: str = pit["id"]
+        return pit_id
 
     @backoff.on_exception(
         backoff.expo,
@@ -198,9 +202,31 @@ class ElasticSource(BaseSource):
 class ElasticIdsSource(ElasticSource):
     """An ElasticSource streaming only document _ids (construct with fields=[])."""
 
+    open_pit_on_init = False
+
     def stream_ids(self) -> Iterator[str]:
         """The WorkSource interface: the _ids in scope."""
-        yield from self.stream_raw()
+        # One count instead of a PIT and a sliced scan when there's nothing in scope
+        count = self.es_client.count(index=self.index_name, query=self.query)["count"]
+        if count == 0:
+            return
+
+        owns_pit = self.pit_id is None
+        if self.pit_id is None:
+            self.pit_id = self.open_pit()
+        try:
+            yield from self.stream_raw()
+        finally:
+            if owns_pit:
+                self.close_pit()
+
+    def close_pit(self) -> None:
+        try:
+            self.es_client.close_point_in_time(body={"id": self.pit_id})
+        except (TransportError, ApiError) as e:
+            # The PIT expires on its own after its keep-alive
+            logger.warning("Could not close point in time", error=str(e))
+        self.pit_id = None
 
     def worker_target(self, slice_index: int, queue: Queue) -> None:
         search_after = None

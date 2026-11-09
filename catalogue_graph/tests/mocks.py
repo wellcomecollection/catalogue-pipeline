@@ -435,6 +435,7 @@ class MockElasticsearchClient:
     inputs: list[dict] = []
     pit_index: str
     queries: list[dict] = []
+    counts: list[str] = []
     bulk_errors: list[dict] = []
     # Off by default because many fixtures fall outside the windows their tests use
     apply_range_filters: bool = False
@@ -470,6 +471,7 @@ class MockElasticsearchClient:
         cls.inputs = []
         cls.indexed_documents = defaultdict(dict[str, dict])
         cls.queries = []
+        cls.counts = []
         cls.bulk_errors = []
         cls.apply_range_filters = False
 
@@ -489,8 +491,18 @@ class MockElasticsearchClient:
         self.indexed_documents[index] = new_indexed_documents
         return {"deleted": deleted_count}
 
-    def count(self, index: str) -> dict:
-        return {"count": len(self.indexed_documents.get(index, {}).values())}
+    def count(self, index: str, query: dict | None = None) -> dict:
+        self.counts.append(index)
+        documents = self.indexed_documents.get(index, {}).values()
+        if query is not None:
+            ids = self._get_id_filter_from_query(query)
+            documents = [
+                d
+                for d in documents
+                if (ids is None or d["_id"] in ids)
+                and self._matches_range_filters(query, d)
+            ]
+        return {"count": len(documents)}
 
     def open_point_in_time(self, index: str, keep_alive: str) -> dict:  # noqa: D401
         self.pit_index = index
