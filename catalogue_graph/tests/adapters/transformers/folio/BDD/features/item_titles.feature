@@ -9,8 +9,13 @@ Feature: FOLIO item titles
   them. A lone item is the simplest case: its "Copy 1" says nothing.
 
   Mirrors the title cases in SierraItemsTest. Sierra could hold several volume
-  titles on one item and took the first with a warning. The migration joined
-  those into one FOLIO volume, separated by semicolons, which is shown whole.
+  titles on one item; it dropped blank and duplicate ones and took the first
+  with a warning. The migration joined them all into one FOLIO volume,
+  separated by semicolons. Splitting on the semicolon would restore the Sierra
+  title on the roughly 15 affected items, but it would also cut in half any
+  volume later entered directly in FOLIO in case it contains a semicolon. That
+  risk to every future item is not worth parity on 15, so the joined value is
+  shown whole.
 
   Background:
     Given a MARC record with field 001 "abc123"
@@ -23,6 +28,12 @@ Feature: FOLIO item titles
     And that item has the copy number "1"
     When I transform the MARC record
     Then the only item has the title "Vol. 1"
+
+  Scenario: A semicolon-joined volume is shown whole
+    Given a FOLIO item "a"
+    And that item has the volume "Vol. 1;Vol. 1-6 and 8"
+    When I transform the MARC record
+    Then the only item has the title "Vol. 1;Vol. 1-6 and 8"
 
   Scenario: An item with neither a volume nor a copy number has no title
     Given a FOLIO item "a"

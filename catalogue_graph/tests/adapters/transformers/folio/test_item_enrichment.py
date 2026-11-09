@@ -75,22 +75,30 @@ def test_work_builder_emits_items_with_folio_item_identifier() -> None:
 
 
 @pytest.mark.parametrize(
-    "item, title",
+    "items, titles",
     [
-        ({"id": "a", "volume": " Vol. 1 ", "copyNumber": "1"}, "Vol. 1"),
-        ({"id": "a", "volume": "  ", "copyNumber": "  "}, None),
+        ([{"id": "a", "volume": " Vol. 1 ", "copyNumber": "1"}], ["Vol. 1"]),
+        # A second item keeps a blank copy number from being tidied away as a lone
+        # generated title, so a blank must be treated as missing to pass.
+        (
+            [
+                {"id": "a", "volume": "  ", "copyNumber": "  "},
+                {"id": "b", "copyNumber": "2"},
+            ],
+            [None, "Copy 2"],
+        ),
     ],
 )
 def test_work_builder_title_ignores_blank_and_padded_values(
-    item: dict, title: str | None
+    items: list[dict], titles: list[str | None]
 ) -> None:
     record = parse_single_marc_record(BIB_RECORD.format(id="inst-1"))
     builder = FolioWorkBuilder(
         record,
         datetime.now(UTC),
-        inventory=FolioEnrichedInstance.model_validate(folio_record("inst-1", [item])),
+        inventory=FolioEnrichedInstance.model_validate(folio_record("inst-1", items)),
     )
-    assert builder.items[0].title == title
+    assert [item.title for item in builder.items] == titles
 
 
 def test_work_builder_strips_the_copy_number_title() -> None:
