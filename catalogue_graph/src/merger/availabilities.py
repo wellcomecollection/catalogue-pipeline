@@ -1,4 +1,4 @@
-"""Which of online, open shelves and closed stores a work's locations make it available from."""
+"""Derives a work's availabilities (online, open shelves, closed stores) from its locations."""
 
 from models.pipeline.id_label import Id
 from models.pipeline.note import Note
