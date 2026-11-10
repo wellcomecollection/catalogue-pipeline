@@ -43,7 +43,7 @@ module "pipeline" {
 
   pipeline_date = local.pipeline_date // namespaces services
   graph_date    = "2026-10-20"        // namespaces graph database
-  rds_id_minter = "2026-10-20"        // a copy of production's registry from 2026-10-20 04:00
+  rds_id_minter = "2026-10-20"        // a copy of production's registry from 2026-11-02 03:24 UTC
   release_label = local.pipeline_date
 
   elastic                        = module.elastic

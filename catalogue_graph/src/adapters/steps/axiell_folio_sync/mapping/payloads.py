@@ -42,25 +42,34 @@ class Identifier(BaseModel):
 
 class Instance(BaseModel):
     model_config = ConfigDict(extra="forbid")  # guard against typo'd keys in our code
-    hrid: str
+    # Derived from the AxC GUID (see config._instance_id) and sent on create. There
+    # is no hrid field: FOLIO generates it.
+    id: str
     title: str
     source: str = "FOLIO"
     instanceTypeId: str
     identifiers: list[Identifier] | None = None
+    # The AXIELL synced marker. Merged on update, keeping the record's other
+    # codes, which the tenant uses for access status.
+    statisticalCodeIds: list[str] | None = None
 
 
 class Holdings(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    hrid: str
-    instanceId: str | None = None  # injected by the upsert orchestrator
+    id: str
+    instanceId: str  # the instance's derived id
     sourceId: str
     permanentLocationId: str
+    # The AxC GUID, as a label for staff: the holdings id is derived from it but
+    # is not it. Merged on update, keeping any other entries.
+    formerIds: list[str] | None = None
+    statisticalCodeIds: list[str] | None = None
 
 
 class Item(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    hrid: str
-    holdingsRecordId: str | None = None  # injected by the upsert orchestrator
+    id: str
+    holdingsRecordId: str  # the holdings record's derived id
     status: Status = Field(default_factory=Status)
     materialType: IdRef
     permanentLoanType: IdRef
@@ -70,15 +79,15 @@ class Item(BaseModel):
     notes: list[Note] | None = None
     # Plain untyped strings; no tenant note type needed.
     administrativeNotes: list[str] | None = None
+    # The synced marker, as on the holdings. No formerIds: the FOLIO transformer
+    # reads an item's formerIds as its Sierra item number.
+    statisticalCodeIds: list[str] | None = None
 
 
 class PayloadMeta(BaseModel):
     """Metadata attached to a mapped payload set."""
 
     source_id: str
-    instance_hrid: str
-    holdings_hrid: str
-    item_hrid: str
     mapping_version: str
     deleted: bool = False
 

@@ -26,7 +26,11 @@ class AccessStatus(SerialisableModel):
 
     @property
     def is_available(self) -> bool:
-        """Open, or a licensed resource that is the item itself rather than a related one."""
+        """Whether the status counts as available online.
+
+        Open statuses do. A licensed resource does when its URL is the content itself,
+        not when it points to a page about the item, such as a publisher's description.
+        """
         if self.type in ("Open", "OpenWithAdvisory"):
             return True
         return (
@@ -57,11 +61,12 @@ Unavailable = AccessStatus(type="Unavailable")
 Closed = AccessStatus(type="Closed")
 PermissionRequired = AccessStatus(type="PermissionRequired")
 
-#  TODO: (Resource vs RelatedResource)
-#  Scala code says this is not exposed the public API,
-#  but we need it for the "available online" filter.
-#  I wonder if that is actually true, and we can get
-#  rid of the whole thing?
-#  All EBSCO records are currently "Resource"
+# Only a Resource makes the work available online. A RelatedResource links to
+# something about the work, such as a publisher page. The API shows both as
+# licensed-resources.
 Resource = AccessStatusRelationship(type="Resource")
+RelatedResource = AccessStatusRelationship(type="RelatedResource")
 LicensedResource = AccessStatus(type="LicensedResources", relationship=Resource)
+LicensedRelatedResource = AccessStatus(
+    type="LicensedResources", relationship=RelatedResource
+)

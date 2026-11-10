@@ -31,6 +31,9 @@ module "reindex_worker" {
     cluster_name = var.cluster_name
     cluster_arn  = var.cluster_arn
 
+    # fargate_service's optional namespace now defaults to null; "" keeps the unprefixed names.
+    namespace = ""
+
     subnets = var.private_subnets
 
     dlq_alarm_topic_arn = var.dlq_alarm_arn

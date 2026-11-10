@@ -5,10 +5,15 @@
 # via ecs:runTask.waitForTaskToken; the manager command is set by the state
 # machine through container overrides.
 
+data "aws_ssm_parameter" "fluentbit_tag" {
+  name = "/platform/sidecars/fluentbit/${var.sidecar_tier}"
+}
+
 module "log_router_container" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v4.3.1"
   namespace = var.task_name
 
+  container_tag            = coalesce(var.fluentbit_tag_override, data.aws_ssm_parameter.fluentbit_tag.insecure_value)
   use_privatelink_endpoint = true
 }
 
