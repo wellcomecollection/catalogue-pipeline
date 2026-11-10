@@ -2,35 +2,31 @@
 
 import json
 from collections.abc import Iterator
-from datetime import datetime
-from typing import cast
 
 import polars as pl
-import pyarrow as pa
-import pyarrow.compute as pc
 import structlog
-from pyiceberg.io.pyarrow import ArrowScan
 from pyiceberg.table import Table as IcebergTable
 
 from models.pipeline.identified.work import IdentifiedWork
 
 logger = structlog.get_logger(__name__)
 
-# Works whose documents are held in memory at once. Each group costs one pass over
-# the table, which is cheaper than filtering it: an id filter over random ids still
-# decodes every file.
-GROUP_SIZE = 200_000
+# Works whose documents are held in memory at once.
+GROUP_SIZE = 50_000
+
+DOCUMENT_COLUMNS = ("id", "version", "last_modified", "content")
 
 
 def fetch_components(
     table: IcebergTable, snapshot_id: int, changed: pl.DataFrame
 ) -> Iterator[list[IdentifiedWork]]:
-    """Yield the works of each changed component, whole, reading the table once per group."""
+    """Yield the works of each changed component, whole, fetching a group of documents at a time."""
     members = changed.group_by("component_id").agg(pl.col("id")).sort("component_id")
     components = [list(ids) for ids in members["id"]]
+    files = _data_files(table, snapshot_id)
 
     for group in _groups(components):
-        documents = _read_documents(table, snapshot_id, {i for c in group for i in c})
+        documents = _read_documents(files, {i for c in group for i in c})
         for component in group:
             works = [
                 IdentifiedWork.from_raw_document(json.loads(documents[work_id]))
@@ -58,37 +54,37 @@ def _groups(components: list[list[str]]) -> Iterator[list[list[str]]]:
         yield group
 
 
-def _read_documents(
-    table: IcebergTable, snapshot_id: int, wanted: set[str]
-) -> dict[str, str]:
-    """The current document of every wanted work, from one file-by-file pass over the table."""
-    scan = table.scan(
-        selected_fields=("id", "version", "last_modified", "content"),
-        snapshot_id=snapshot_id,
-    )
-    arrow_scan = ArrowScan(
-        table.metadata,
-        table.io,
-        scan.projection(),
-        scan.row_filter,
-        scan.case_sensitive,
-    )
-    wanted_ids = pa.array(sorted(wanted))
+def _data_files(table: IcebergTable, snapshot_id: int) -> list[str]:
+    """The snapshot's data files, as paths polars can scan."""
+    files = []
+    for task in table.scan(snapshot_id=snapshot_id).plan_files():
+        if task.delete_files:
+            raise ValueError("The works_identified table is read as append-only")
+        files.append(task.file.file_path.removeprefix("file://"))
+    return files
 
-    # Same rule as load_works: highest source version, then latest write.
-    latest: dict[str, tuple[tuple[int, datetime], str]] = {}
-    for task in scan.plan_files():
-        for batch in arrow_scan.to_record_batches([task]):
-            matches = batch.filter(pc.is_in(batch.column("id"), value_set=wanted_ids))
-            for work_id, version, modified, content in zip(
-                cast(list[str], matches.column("id").to_pylist()),
-                cast(list[int], matches.column("version").to_pylist()),
-                cast(list[datetime], matches.column("last_modified").to_pylist()),
-                cast(list[str], matches.column("content").to_pylist()),
-                strict=True,
-            ):
-                if work_id not in latest or (version, modified) > latest[work_id][0]:
-                    latest[work_id] = ((version, modified), content)
 
-    logger.info("Read documents", wanted=len(wanted), found=len(latest))
-    return {work_id: content for work_id, (_, content) in latest.items()}
+def _read_documents(files: list[str], wanted: set[str]) -> dict[str, str]:
+    """The current document of every wanted work.
+
+    The files are sorted by id and the compacted ones carry a page index, so a
+    filtered scan reads only the pages holding wanted ids instead of every document.
+    """
+    rows = (
+        pl.scan_parquet(files)
+        .select(DOCUMENT_COLUMNS)
+        .filter(pl.col("id").is_in(list(wanted)))
+        .collect(engine="streaming")
+    )
+    # Same rule as load_works: highest source version, then latest write. Picked on
+    # the narrow columns, as sorting the documents too costs more than reading them.
+    keys = ["version", "last_modified"]
+    current = (
+        rows.select("id", *keys)
+        .with_row_index()
+        .sort(keys, descending=True)
+        .unique("id", keep="first")
+    )
+    rows = rows[current["index"]]
+    logger.info("Read documents", wanted=len(wanted), found=rows.height)
+    return dict(zip(rows["id"], rows["content"], strict=True))
