@@ -85,3 +85,16 @@ def test_for_snapshot_reads_the_pinned_snapshot(tmp_path: Path) -> None:
         "first",
         "second",
     ]
+
+
+def test_for_snapshot_rejects_an_unknown_snapshot(tmp_path: Path) -> None:
+    catalog = SqlCatalog(
+        "test", uri=f"sqlite:///{tmp_path}/catalog.db", warehouse=f"file://{tmp_path}"
+    )
+    catalog.create_namespace("ns")
+    table = catalog.create_table(
+        "ns.t", schema=pa.table({"id": ["aaaaaaaa"], "content": ["x"]}).schema
+    )
+
+    with pytest.raises(ValueError, match="no snapshot 123"):
+        IcebergTableLookup.for_snapshot(table, key="id", snapshot_id=123)
