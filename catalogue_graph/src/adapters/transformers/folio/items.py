@@ -10,6 +10,7 @@ from adapters.transformers.folio.access_conditions import (
     is_access_note,
 )
 from adapters.transformers.folio.locations import ResolvedLocation, resolve_locations
+from adapters.transformers.folio.on_order import on_order_label, on_order_location
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_item_predecessor_id,
 )
@@ -45,6 +46,14 @@ def _build_item(
         predecessor_identifier=predecessor,
     )
     title = item.enumeration or item.volume
+    if (label := on_order_label(item.status)) is not None:
+        # Still being acquired, so its location and access condition don't apply yet.
+        return Item(
+            id=identifier,
+            title=title,
+            note=item.display_note,
+            locations=[on_order_location(label)],
+        )
     if item_location is None:
         # No location to carry an access condition, so the display note stays on the item.
         return Item(id=identifier, title=title, note=item.display_note)
