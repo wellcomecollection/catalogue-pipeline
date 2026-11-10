@@ -27,7 +27,16 @@ def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
     # Suppressed items are never shown, nor do they type a bound-with item.
     items = [item for item in instance.items if not item.suppress_from_discovery]
     locations = resolve_locations(items)
-    return [_build_item(item, locations[item.id]) for item in items]
+    built = [_build_item(item, locations[item.id]) for item in items]
+    # A generated title is only useful for telling items apart. When every item has
+    # the same one it adds nothing, so it is removed. That includes a lone "Copy 1".
+    if (
+        built
+        and all(_has_generated_title(item) for item in items)
+        and len({item.title for item in built}) == 1
+    ):
+        return [item.model_copy(update={"title": None}) for item in built]
+    return built
 
 
 def _build_item(
@@ -44,7 +53,7 @@ def _build_item(
         other_identifiers=[predecessor] if predecessor else [],
         predecessor_identifier=predecessor,
     )
-    title = item.enumeration or item.volume
+    title = _item_title(item)
     if item_location is None:
         # No location to carry an access condition, so the display note stays on the item.
         return Item(id=identifier, title=title, note=item.display_note)
@@ -80,6 +89,19 @@ def _build_item(
             )
         ],
     )
+
+
+def _item_title(item: FolioEnrichedItem) -> str | None:
+    # The cataloguer-written volume title, else one generated from the copy number.
+    if item.volume is not None:
+        return item.volume
+    if item.copy_number is not None:
+        return f"Copy {item.copy_number}"
+    return None
+
+
+def _has_generated_title(item: FolioEnrichedItem) -> bool:
+    return item.volume is None and item.copy_number is not None
 
 
 def _sierra_predecessor(item: FolioEnrichedItem) -> SourceIdentifier | None:

@@ -37,7 +37,7 @@ module "folio" {
   steps_namespace        = "oai_pmh"
   s3_bucket_name         = "wellcomecollection-platform-folio-adapter"
   schedule_expression    = "rate(15 minutes)"
-  schedule_enabled       = true
+  schedule_enabled       = false # Paused for the store rebuild (platform#6846 phase 5)
   repository_url         = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
   event_bus_name         = aws_cloudwatch_event_bus.event_bus.name
   ecs_cluster_arn        = aws_ecs_cluster.adapters.arn
@@ -79,6 +79,10 @@ module "axiell_folio_sync" {
   # clamped in the module so this can only ever write while the target is dev.
   folio_default_target = "dev"
   dry_run_default      = false
+
+  # A record hard deleted in Collections is hard deleted in FOLIO too, as agreed
+  # with Collection Information (wellcomecollection/platform#6833).
+  hard_delete_default = true
 
   # The sandbox is stopped out of hours by folio-dev-server, and the Axiell
   # adapter publishes every 15 minutes, so the trigger is confined to the
