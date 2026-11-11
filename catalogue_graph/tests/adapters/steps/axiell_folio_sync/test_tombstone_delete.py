@@ -184,6 +184,8 @@ def test_tombstone_is_suppressed_when_hard_delete_is_off() -> None:
     assert folio.deleted == []
     assert len(folio.put_paths) == 3
     assert resp.counts["suppressed"] == 3
+    # A second-pass suppression is not attributed to an untick.
+    assert resp.counts["unflagged_suppressed"] == 0
 
 
 def test_guid_both_superseded_and_tombstoned_is_actioned_once() -> None:

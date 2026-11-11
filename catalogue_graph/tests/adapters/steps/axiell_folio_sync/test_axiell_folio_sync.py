@@ -640,6 +640,7 @@ def test_deletions_suppress_and_are_reported() -> None:
     assert resp.counts["deletions"] == 2
     # 2 guids x 3 entities each suppressed.
     assert resp.counts["suppressed"] == 6
+    assert resp.counts["unflagged_suppressed"] == 0
     assert resp.total_errors == 0
     # 2 guids x 3 entities each PUT back suppressed.
     assert len(folio.put_paths) == 6

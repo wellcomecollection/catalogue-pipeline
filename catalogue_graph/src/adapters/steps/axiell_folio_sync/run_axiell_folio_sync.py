@@ -295,6 +295,10 @@ def run_sync(
         # Unflagged records with nothing in FOLIO, so the lookups found nothing
         # to suppress. Also counted in "skipped".
         "unflagged_never_synced": 0,
+        # Entities suppressed for unflagged records, also counted in
+        # "suppressed". Kept apart so a rise in "suppressed" can be told apart
+        # from the superseded and tombstone suppressions of the second pass.
+        "unflagged_suppressed": 0,
         # Records whose item carried a location note the sync could no longer
         # claim, so a duplicate was left behind. Not an error: nothing failed and
         # nothing was lost, but each one needs reconciling by hand in FOLIO.
@@ -374,6 +378,10 @@ def run_sync(
                 )
                 continue
 
+            counts["unflagged_suppressed"] += sum(
+                getattr(unflagged, entity).action == "suppress"
+                for entity in ("instance", "holdings", "item")
+            )
             if _record_cascade(
                 unflagged,
                 record_id=source_id,

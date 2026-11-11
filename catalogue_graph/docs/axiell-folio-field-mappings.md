@@ -37,7 +37,9 @@ without `980 $a` has its FOLIO records suppressed with `suppress_by_guid`:
 the instance. It is suppressed whatever `HARD_DELETE` says, so it can come back.
 The sync cannot tell an unticked record from one never ticked without looking,
 so each costs three lookups. One with nothing in FOLIO is a no-op, counted in
-`unflagged_never_synced` and `skipped`; `unflagged` counts them all.
+`unflagged_never_synced` and `skipped`; `unflagged` counts them all. The
+entities suppressed this way are counted in `unflagged_suppressed`, as well as
+in `suppressed`.
 
 A selected record carries `discoverySuppress: false` on all three payloads and
 `staffSuppress: false` on the instance, so ticking Harvest again updates the

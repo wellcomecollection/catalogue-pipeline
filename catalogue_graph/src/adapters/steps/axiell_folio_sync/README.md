@@ -73,7 +73,8 @@ the FOLIO ids derived from the GUID (the same derivation the upsert path uses), 
 A per-GUID failure is recorded as an error entry and does not abort the run. Each manifest deletion entry carries a
 `reason`, `superseded` or `tombstone`, and `tombstone_deletions` counts the tombstoned GUIDs within `deletions`.
 Records suppressed in Pass 1 for want of the harvest flag appear in the same list with the reason `unflagged`, and
-are counted in `unflagged` rather than `deletions`.
+are counted in `unflagged` rather than `deletions`. Their suppressed entities are counted in `suppressed` along with
+the second pass's, and also in `unflagged_suppressed`, so the two causes can be told apart.
 
 ## Module layout
 

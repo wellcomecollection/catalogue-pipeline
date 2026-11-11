@@ -11,6 +11,7 @@ These run against an in-memory FOLIO fake, not the sandbox.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
@@ -22,7 +23,9 @@ from adapters.steps.axiell_folio_sync.mapping import (
     unflagged_guid,
 )
 from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
+from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
 from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
+from adapters.utils.axiell_changeset_reader import SupersededGuid
 
 from .test_axiell_folio_sync import FakeRefCache
 
@@ -158,12 +161,60 @@ def test_untick_suppresses_all_three_records() -> None:
     _assert_suppressed(folio)
     assert resp.counts["unflagged"] == 1
     assert resp.counts["suppressed"] == 3
+    assert resp.counts["unflagged_suppressed"] == 3
     assert resp.counts["unflagged_never_synced"] == 0
     assert resp.counts["skipped"] == 0
     assert resp.total_successful == 1
     assert resp.total_errors == 0
     # Suppressed in place: nothing created, nothing deleted.
     assert folio.count() == 3
+
+
+def test_untick_suppressions_are_counted_apart_from_second_pass_ones(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, Any] = {}
+    monkeypatch.setattr(
+        "utils.reporting.pydantic_to_s3_json",
+        lambda model, s3_uri: captured.update(model=model),
+    )
+    other = "00000000-0000-4000-8000-000000000002"
+    folio = _synced()
+    _sync(folio, _record(flagged=True, guid=other))
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        [
+            {
+                "id": "rec-1",
+                "changeset": "cs1",
+                "content": _record(flagged=False),
+                "deleted": False,
+            }
+        ],
+        FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+        manifest_bucket="bucket-1",
+        deletions=[
+            SupersededGuid(
+                fact_id="rec-2/cs1",
+                record_id="rec-2",
+                guid=other,
+                changeset_id="cs1",
+                last_modified=datetime(2026, 1, 1, tzinfo=UTC),
+            )
+        ],
+    )
+
+    # Both causes land in "suppressed"; only the untick's in
+    # "unflagged_suppressed".
+    assert resp.counts["suppressed"] == 6
+    assert resp.counts["unflagged_suppressed"] == 3
+    report: AxiellFolioSyncReport = captured["model"]
+    metrics = {metric.name: metric.value for metric in report.metrics}
+    assert metrics["records_suppressed"] == 6
+    assert metrics["records_unflagged_suppressed"] == 3
 
 
 def test_untick_is_reported_in_the_manifest(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -213,6 +264,7 @@ def test_untick_on_a_record_that_never_synced_is_a_no_op() -> None:
     assert resp.counts["unflagged_never_synced"] == 1
     assert resp.counts["skipped"] == 1
     assert resp.counts["suppressed"] == 0
+    assert resp.counts["unflagged_suppressed"] == 0
     assert resp.total_successful == 0
     assert resp.total_errors == 0
 
