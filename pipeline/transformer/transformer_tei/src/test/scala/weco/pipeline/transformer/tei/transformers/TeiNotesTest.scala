@@ -494,12 +494,16 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
                 handNotes(
                   label = "Written by several hands",
                   scribe = Some("multiple")
-                )
+                ),
+                handNotes(label = "Two hands", scribe = Some("Multiple"))
               )
             )
           )
         )
-      ) shouldBe List(Note(NoteType.HandNote, "Written by several hands"))
+      ) shouldBe List(
+        Note(NoteType.HandNote, "Written by several hands"),
+        Note(NoteType.HandNote, "Two hands")
+      )
     }
 
     it("adds the script to the hand note") {
@@ -527,12 +531,16 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
             physDesc(handNotes =
               List(
                 <handNote script="testscript">Script: neat Testscript</handNote>,
+                <handNote script="test">Testing hand</handNote>,
                 <handNote script=""/>
               )
             )
           )
         )
-      ) shouldBe List(Note(NoteType.HandNote, "Script: neat Testscript"))
+      ) shouldBe List(
+        Note(NoteType.HandNote, "Script: neat Testscript"),
+        Note(NoteType.HandNote, "Script: test<br/>Testing hand")
+      )
     }
   }
 
@@ -591,6 +599,54 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
         NoteType.LayoutNote,
         NoteType.CollationNote,
         NoteType.FoliationNote
+      )
+    }
+
+    it("describes the layout from its attributes, locus and text") {
+      val layoutPhysDesc =
+        <physDesc>
+          <objectDesc>
+            <layoutDesc>
+              <layout writtenLines="30">30 written lines</layout>
+              <layout columns="1" ruledLines="12">
+                <locus>1a-9b</locus>
+                <dimensions type="line-height" unit="mm"><height>8</height></dimensions>
+              </layout>
+              <layout writtenLines="18"><note>Ruled in red.</note><measure unit="mm">90</measure></layout>
+              <layout columns="1 2" writtenLines="20 24"/>
+              <layout writtenLines="16 18">16-18 lines to a page</layout>
+            </layoutDesc>
+          </objectDesc>
+        </physDesc>
+
+      TeiNotes(teiXml(physDesc = Some(layoutPhysDesc))) shouldBe List(
+        Note(NoteType.LayoutNote, "30 written lines"),
+        Note(NoteType.LayoutNote, "1a-9b: 1 column; 12 ruled lines"),
+        Note(NoteType.LayoutNote, "18 written lines; Ruled in red."),
+        Note(NoteType.LayoutNote, "1 to 2 columns; 20 to 24 written lines"),
+        Note(NoteType.LayoutNote, "16-18 lines to a page")
+      )
+    }
+
+    it("makes a note for each binding, and reads decoDesc paragraphs") {
+      val physDescWithParagraphs =
+        <physDesc>
+          <decoDesc>
+            <p>Headings in red.</p>
+          </decoDesc>
+          <bindingDesc>
+            <binding><p>Original leather.</p></binding><binding><p><seg><dimensions unit="mm"><height>100</height></dimensions>Rebacked.</seg></p></binding>
+          </bindingDesc>
+          <bindingDesc>
+            <p>Limp vellum.</p>
+          </bindingDesc>
+        </physDesc>
+
+      TeiNotes(teiXml(physDesc = Some(physDescWithParagraphs))) shouldBe List(
+        Note(NoteType.BindingInformation, "Original leather."),
+        Note(NoteType.BindingInformation, "Rebacked."),
+        Note(NoteType.BindingInformation, "Limp vellum."),
+        Note(NoteType.DecorationNote, "Headings in red.")
       )
     }
 

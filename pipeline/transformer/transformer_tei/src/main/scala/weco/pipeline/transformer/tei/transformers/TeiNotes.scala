@@ -133,22 +133,20 @@ object TeiNotes {
         } else None
     }.toList
 
-  /** <handNote script="naskh"/> names the kind of script. Skipped when the hand
-    * note text already names it, e.g. "Script: Beautiful Naskh".
-    */
+  // Skipped when the text already names the script, e.g. "Script: Beautiful Naskh"
   private def getScript(handNote: Node, text: String): Option[String] =
     (handNote \@ "script").trim match {
-      case ""                                                      => None
-      case script if text.toLowerCase.contains(script.toLowerCase) => None
+      case ""                                                           => None
+      case script if TeiPhysicalDescriptionNotes.mentions(text, script) => None
       case script => Some(s"Script: $script")
     }
 
   /** <filiation> sits directly under msItem. */
   private def getFiliation(nodeSeq: NodeSeq): List[Note] =
-    (nodeSeq \ "filiation")
-      .flatMap(n => NormaliseText(n.text))
-      .map(Note(NoteType.FiliationNote, _))
-      .toList
+    TeiPhysicalDescriptionNotes.notes(
+      nodeSeq \ "filiation",
+      NoteType.FiliationNote
+    )
 
   /** Extract the contents of `<history/>` that result in Notes.
     *

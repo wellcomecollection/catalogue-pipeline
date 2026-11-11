@@ -186,7 +186,7 @@ object TeiContributors extends LabelDerivedIdentifiers {
     * the hands rather than naming a scribe, so it stays a hand note.
     */
   def writtenByMultipleHands(handNote: Node): Boolean =
-    (handNote \@ "scribe").trim == "multiple"
+    (handNote \@ "scribe").trim.equalsIgnoreCase("multiple")
 
   /** Very annoyingly if the scribe is in this form: <handNote scope="minor"
     * scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1
