@@ -33,7 +33,7 @@ def send(target, failed_entry_count=0, **kwargs):
     return client, job_id
 
 
-@pytest.mark.parametrize("target", ["ebsco", "axiell"])
+@pytest.mark.parametrize("target", ["ebsco", "axiell", "folio"])
 def test_sends_a_matching_event_for_each_adapter_source(target):
     client, job_id = send(target)
 
@@ -66,8 +66,8 @@ def test_generated_job_id_names_the_target():
 def test_rejects_an_unknown_target_without_sending():
     client = FakeEventsClient()
 
-    with pytest.raises(ValueError, match="folio"):
-        send_eventbridge_reindex_event(FakeSession(client), "folio")
+    with pytest.raises(ValueError, match="sierra"):
+        send_eventbridge_reindex_event(FakeSession(client), "sierra")
 
     assert client.entries is None
 
@@ -77,5 +77,6 @@ def test_raises_when_the_event_is_not_accepted():
         send("axiell", failed_entry_count=1)
 
 
-def test_axiell_is_a_reindex_target():
-    assert "axiell" in EVENTBRIDGE_REINDEX_TARGETS
+@pytest.mark.parametrize("target", ["axiell", "folio"])
+def test_is_a_reindex_target(target):
+    assert target in EVENTBRIDGE_REINDEX_TARGETS
