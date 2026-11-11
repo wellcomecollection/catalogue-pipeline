@@ -2,7 +2,7 @@
 Extract notes from 5xx MARC fields.
 """
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 
 import structlog
 from pymarc.field import Field
@@ -54,11 +54,6 @@ ARRANGEMENT_NOTE = IdLabel(id="arrangement-note", label="Arrangement")
 
 
 NON_PRIVATE_NOTES = (OWNERSHIP_NOTE, APPRAISAL_NOTE, ACQUISITION_NOTE)
-
-
-# TODO: The Scala notes transformer (MarcNotes.scala) had custom logic removing all references to Codebreakers.
-# Do we need to reimplement this logic here? To be confirmed once we start validating Python transformed source works
-# against Scala transformed source works.
 
 
 def _extract_note_contents(
@@ -145,18 +140,18 @@ _NOTES_FIELDS: dict[str, Callable[[Field], Note | None]] = {
 
 
 def extract_notes(
-    record: Record, exclude_fields: Iterable[str] | None = None
+    record: Record,
+    exclude_fields: Iterable[str] | None = None,
+    extra_fields: Mapping[str, Callable[[Field], Note | None]] | None = None,
 ) -> list[Note]:
-    notes: list[Note] = []
-
+    """Notes from the standard tags and any extra_fields, in record order."""
+    fields = {**_NOTES_FIELDS, **(extra_fields or {})}
     excluded: set[str] = set(exclude_fields or [])
-    note_fields = [tag for tag in _NOTES_FIELDS if tag not in excluded]
+    note_fields = [tag for tag in fields if tag not in excluded]
 
+    notes: list[Note] = []
     for field in record.get_fields(*note_fields):
-        create = _NOTES_FIELDS.get(field.tag)
-        if create is None:
-            continue
-        note = create(field)
+        note = fields[field.tag](field)
         if note is not None and note.contents.strip():
             notes.append(note)
     return notes
