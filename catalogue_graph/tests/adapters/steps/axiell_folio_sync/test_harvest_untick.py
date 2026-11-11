@@ -269,6 +269,99 @@ def test_untick_on_a_record_that_never_synced_is_a_no_op() -> None:
     assert resp.total_errors == 0
 
 
+def test_editing_an_unticked_record_does_not_suppress_it_again(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, Any] = {}
+    monkeypatch.setattr(
+        "utils.reporting.pydantic_to_s3_json",
+        lambda model, s3_uri: captured.update(model=model),
+    )
+    folio = _synced()
+    _sync(folio, _record(flagged=False))
+    puts_before = len(folio.puts)
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs2"]),
+        [
+            {
+                "id": "rec-1",
+                "changeset": "cs2",
+                "content": _record(flagged=False),
+                "deleted": False,
+            }
+        ],
+        FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+        manifest_bucket="bucket-1",
+    )
+
+    assert len(folio.puts) == puts_before
+    _assert_suppressed(folio)
+    assert resp.counts["unflagged"] == 1
+    assert resp.counts["unflagged_already_suppressed"] == 1
+    assert resp.counts["skipped"] == 1
+    assert resp.counts["suppressed"] == 0
+    assert resp.counts["unflagged_suppressed"] == 0
+    assert resp.counts["unflagged_never_synced"] == 0
+    assert resp.total_successful == 0
+    assert resp.total_errors == 0
+    assert captured["model"].deletions == []
+
+
+def test_an_unticked_record_unsuppressed_by_hand_is_suppressed_again() -> None:
+    # FOLIO does not record who cleared the flags, so while the record stays
+    # unticked in Collections its next edit suppresses it again.
+    folio = _synced()
+    _sync(folio, _record(flagged=False))
+    folio.instance()["discoverySuppress"] = False
+    folio.instance()["staffSuppress"] = False
+
+    resp = _sync(folio, _record(flagged=False))
+
+    _assert_suppressed(folio)
+    assert resp.counts["unflagged_suppressed"] == 1
+    assert resp.counts["unflagged_already_suppressed"] == 0
+
+
+def test_a_redelivered_deletion_fact_is_not_suppressed_again(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, Any] = {}
+    monkeypatch.setattr(
+        "utils.reporting.pydantic_to_s3_json",
+        lambda model, s3_uri: captured.update(model=model),
+    )
+    folio = _synced()
+    _sync(folio, _record(flagged=False))
+    puts_before = len(folio.puts)
+
+    resp = run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs2"]),
+        [],
+        FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+        manifest_bucket="bucket-1",
+        deletions=[
+            SupersededGuid(
+                fact_id="rec-1/cs2",
+                record_id="rec-1",
+                guid=GUID,
+                changeset_id="cs2",
+                last_modified=datetime(2026, 1, 1, tzinfo=UTC),
+            )
+        ],
+    )
+
+    assert len(folio.puts) == puts_before
+    assert resp.counts["deletions"] == 1
+    assert resp.counts["suppressed"] == 0
+    assert resp.total_errors == 0
+    assert captured["model"].deletions == []
+
+
 def test_untick_suppresses_even_in_hard_delete_mode() -> None:
     # HARD_DELETE governs superseded GUIDs and tombstones. An untick is always
     # reversible, so the record can come back when Harvest is ticked again.

@@ -41,6 +41,13 @@ so each costs three lookups. One with nothing in FOLIO is a no-op, counted in
 entities suppressed this way are counted in `unflagged_suppressed`, as well as
 in `suppressed`.
 
+An entity whose flags are already set is not written again, so editing a record
+in Collections after it was unticked does not count as a fresh suppression. When
+all three are already suppressed the record is counted in
+`unflagged_already_suppressed` and `skipped`, and gets no manifest entry. A
+record unsuppressed by hand in FOLIO while it is still unticked is suppressed
+again on its next edit, because its flags are no longer set.
+
 A selected record carries `discoverySuppress: false` on all three payloads and
 `staffSuppress: false` on the instance, so ticking Harvest again updates the
 same three records, found by the ids derived from the GUID, and clears the

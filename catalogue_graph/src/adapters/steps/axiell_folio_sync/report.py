@@ -77,6 +77,10 @@ class AxiellFolioSyncReport(PipelineReport):
                 value=self.counts.get("unflagged_never_synced", 0),
             ),
             PipelineMetric(
+                name="records_unflagged_already_suppressed",
+                value=self.counts.get("unflagged_already_suppressed", 0),
+            ),
+            PipelineMetric(
                 name="records_unflagged_suppressed",
                 value=self.counts.get("unflagged_suppressed", 0),
             ),

@@ -161,6 +161,22 @@ def _actioned(result: GuidCascadeResult) -> bool:
     )
 
 
+def _already_suppressed(result: GuidCascadeResult) -> bool:
+    """Whether a clean cascade found records but had nothing left to suppress.
+
+    True when no entity was written and at least one was already suppressed, so
+    the cascade repeated an earlier suppression rather than making a new one.
+    """
+    actions = [
+        getattr(result, entity).action for entity in ("instance", "holdings", "item")
+    ]
+    return (
+        not result.errors
+        and "already_suppressed" in actions
+        and not any(action in _ACTION_COUNT_KEY for action in actions)
+    )
+
+
 def _record_cascade(
     result: GuidCascadeResult,
     *,
@@ -180,9 +196,11 @@ def _record_cascade(
     # later failed: a partial hard-delete may have already removed a child
     # (irreversibly) before erroring on its parent, and that must not vanish
     # from the counts or the manifest. Entities that never ran carry a null
-    # action, so nothing is over-counted.
+    # action, so nothing is over-counted. A cascade that only found records
+    # already suppressed changed nothing, so it is left out of the manifest
+    # rather than reading as a fresh suppression.
     _tally_entity_actions(result, counts)
-    if any(
+    if not _already_suppressed(result) and any(
         getattr(result, entity).action for entity in ("instance", "holdings", "item")
     ):
         entries.append(
@@ -295,6 +313,9 @@ def run_sync(
         # Unflagged records with nothing in FOLIO, so the lookups found nothing
         # to suppress. Also counted in "skipped".
         "unflagged_never_synced": 0,
+        # Unflagged records whose FOLIO records were all already suppressed, by
+        # an earlier untick, so nothing was written. Also counted in "skipped".
+        "unflagged_already_suppressed": 0,
         # Entities suppressed for unflagged records, also counted in
         # "suppressed". Kept apart so a rise in "suppressed" can be told apart
         # from the superseded and tombstone suppressions of the second pass.
@@ -373,6 +394,19 @@ def run_sync(
                 counts["skipped"] += 1
                 logger.info(
                     "skipped_unflagged_never_synced",
+                    source_id=source_id,
+                    changeset_id=changeset_id,
+                )
+                continue
+
+            if _already_suppressed(unflagged):
+                # Unticked earlier and edited in Collections since: the lookups
+                # found the records already suppressed, so there was no write
+                # and no manifest entry.
+                counts["unflagged_already_suppressed"] += 1
+                counts["skipped"] += 1
+                logger.info(
+                    "skipped_unflagged_already_suppressed",
                     source_id=source_id,
                     changeset_id=changeset_id,
                 )

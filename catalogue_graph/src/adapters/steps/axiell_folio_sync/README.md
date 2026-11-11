@@ -64,7 +64,8 @@ the FOLIO ids derived from the GUID (the same derivation the upsert path uses), 
 
 - **Soft-suppress (code default, reversible).** `suppress_by_guid` sets `discoverySuppress` on all three entities and
   `staffSuppress` on the instance only — instances are the sole FOLIO inventory entity with a `staffSuppress` field
-  (holdings-storage rejects it with a 422; items silently drop it). Idempotent under redelivery.
+  (holdings-storage rejects it with a 422; items silently drop it). An entity whose flags are already set is reported
+  as `already_suppressed` and not written, so a redelivered fact or a repeat untick does not bump `updatedDate`.
 - **Hard-delete (irreversible, set in Terraform).** `delete_by_guid`, selected by the event's `hard_delete` field or
   the `HARD_DELETE` env var, which Terraform sets to `true`. The child-first order is mandatory (FOLIO enforces referential integrity) and the cascade
   aborts before the parent if a child delete fails, so a parent is never orphaned. A 404 is treated as a no-op, so
@@ -74,7 +75,9 @@ A per-GUID failure is recorded as an error entry and does not abort the run. Eac
 `reason`, `superseded` or `tombstone`, and `tombstone_deletions` counts the tombstoned GUIDs within `deletions`.
 Records suppressed in Pass 1 for want of the harvest flag appear in the same list with the reason `unflagged`, and
 are counted in `unflagged` rather than `deletions`. Their suppressed entities are counted in `suppressed` along with
-the second pass's, and also in `unflagged_suppressed`, so the two causes can be told apart.
+the second pass's, and also in `unflagged_suppressed`, so the two causes can be told apart. A cascade that only found
+records already suppressed is left out of the manifest; in Pass 1 it is counted in `unflagged_already_suppressed` and
+`skipped`.
 
 ## Module layout
 
