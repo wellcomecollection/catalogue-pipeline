@@ -24,13 +24,11 @@ module "pipeline" {
   # Base AMI for ECS instances
   ami_id = "resolve:ssm:arn:aws:ssm:eu-west-1:760097843905:parameter/imagebuilder/weco-al2023-ecs-optimised-x86_64/latest"
 
-  # Quiesced while the pipeline state is cleared (platform#6846).
-  enable_adapter_transformer_trigger           = false
-  enable_id_minter_schedule                    = false
-  enable_graph_pipeline_schedule               = false
-  enable_image_inferrer_schedule               = false
+  enable_adapter_transformer_trigger           = true
   disable_calm_transformer_topic_subscriptions = true
-
+  enable_id_minter_schedule                    = true
+  enable_graph_pipeline_schedule               = true
+  enable_image_inferrer_schedule               = true
 
   # FOLIO replaces Sierra here: both would mint a FOLIO instance and its Sierra
   # bib to the same canonical id and overwrite each other.
