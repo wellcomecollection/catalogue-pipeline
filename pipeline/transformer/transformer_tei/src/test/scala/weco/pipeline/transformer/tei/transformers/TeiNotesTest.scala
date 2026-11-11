@@ -541,6 +541,8 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
                 <handNote script="test">Testing hand</handNote>,
                 <handNote script="te_st"><p><label>Script:</label> teʿśt</p></handNote>,
                 <handNote script="other">Square script</handNote>,
+                <handNote script="testSquare">Neat test square</handNote>,
+                <handNote script="test">The script is small and neat</handNote>,
                 <handNote script="other"><p><label>Ink:</label> Black</p><seg type="density">300</seg><seg type="ratio">1:1</seg></handNote>,
                 <handNote script=""/>
               )
@@ -551,7 +553,12 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
         Note(NoteType.HandNote, "Script: neat Testscript"),
         Note(NoteType.HandNote, "Script: Test<br/>Testing hand"),
         Note(NoteType.HandNote, "Script: teʿśt"),
-        Note(NoteType.HandNote, "Square script"),
+        Note(NoteType.HandNote, "Script: Other<br/>Square script"),
+        Note(NoteType.HandNote, "Neat test square"),
+        Note(
+          NoteType.HandNote,
+          "Script: Test<br/>The script is small and neat"
+        ),
         Note(NoteType.HandNote, "Script: Other<br/>Ink: Black")
       )
     }
@@ -630,6 +637,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
               <layout writtenLines="16 18">16-18 lines to a page</layout>
               <layout columns="1" writtenLines="18" ruledLines="18"> 1 column, 18 lines. </layout>
               <layout writtenLines="20">Ruling changes on folio 20.</layout>
+              <layout writtenLines="20" ruledLines="20">20 ruled lines</layout>
               <layout writtenLines="20 24">20 lines on the first leaf.</layout>
               <layout ruledLines="6"><locus>f. 2r:</locus> 6 lines.</layout>
               <layout>(drypoint)<locus>(f. 3)</locus>, ink <locus>(f. 4)</locus>.</layout>
@@ -649,6 +657,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
           NoteType.LayoutNote,
           "20 written lines; Ruling changes on folio 20."
         ),
+        Note(NoteType.LayoutNote, "20 written lines; 20 ruled lines"),
         Note(
           NoteType.LayoutNote,
           "20 to 24 written lines; 20 lines on the first leaf."

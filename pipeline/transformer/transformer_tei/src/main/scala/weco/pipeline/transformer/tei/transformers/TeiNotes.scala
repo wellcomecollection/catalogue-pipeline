@@ -138,9 +138,10 @@ object TeiNotes {
     TeiPhysicalDescriptionNotes.attribute(handNote, "script") match {
       case "" => None
       case script
-          if Seq("script", script).exists(
-            TeiPhysicalDescriptionNotes.mentions(text, _)
-          ) =>
+          if "(?i)\\bscript\\s*:".r.findFirstIn(text).nonEmpty ||
+            Seq(script, readableScript(script)).exists(
+              TeiPhysicalDescriptionNotes.mentions(text, _)
+            ) =>
         None
       case script => Some(s"Script: ${readableScript(script)}")
     }

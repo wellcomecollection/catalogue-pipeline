@@ -157,8 +157,10 @@ object TeiPhysicalDescriptionNotes {
     val restated = values.nonEmpty && text.exists {
       t =>
         val number = values.map(Pattern.quote).mkString("\\s*(?:-|–|to)\\s*")
+        // "20 lines" restates either count, "20 ruled lines" only ruledLines
+        val qualifier = noun.split(" ").init.map(q => s"(?:$q\\s+)?").mkString
         val word = noun.split(" ").last
-        s"(?iU)(?<![\\d.])$number\\s+(?:\\w+\\s+)?$word".r
+        s"(?iU)(?<![\\d.])$number\\s+$qualifier$word".r
           .findFirstIn(t)
           .nonEmpty
     }
