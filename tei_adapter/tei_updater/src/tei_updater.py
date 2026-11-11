@@ -3,10 +3,12 @@ import datetime
 import dateutil.parser as parser
 import decimal
 import json
+import jwt
 import logging
 import os
 import pytz
 import requests
+import time as _time
 
 import boto3
 from botocore.exceptions import ClientError
@@ -90,14 +92,37 @@ def diff_trees(old_tree, new_tree, time):
     return messages
 
 
-def get_authenticated_session(github_token_secret):
+def get_installation_token(app_id, installation_id, private_key, session=None):
+    session = session or requests.Session()
+    # GitHub caps App JWTs at 10 minutes; backdate iat to allow for clock skew.
+    now = int(_time.time())
+    app_jwt = jwt.encode(
+        {"iat": now - 60, "exp": now + 540, "iss": str(app_id)},
+        private_key,
+        algorithm="RS256",
+    )
+    response = session.post(
+        f"https://api.github.com/app/installations/{installation_id}/access_tokens",
+        headers={
+            "Authorization": f"Bearer {app_jwt}",
+            "Accept": "application/vnd.github+json",
+        },
+    )
+    response.raise_for_status()
+    return response.json()["token"]
+
+
+def get_authenticated_session(github_app_secret):
     session = requests.Session()
-    if github_token_secret:
+    if github_app_secret:
         secrets = boto3.client("secretsmanager")
-        github_token = secrets.get_secret_value(SecretId=github_token_secret)[
-            "SecretString"
-        ]
-        session.headers.update({"Authorization": f"Bearer {github_token}"})
+        app = json.loads(
+            secrets.get_secret_value(SecretId=github_app_secret)["SecretString"]
+        )
+        token = get_installation_token(
+            app["app_id"], app["installation_id"], app["private_key"]
+        )
+        session.headers.update({"Authorization": f"Bearer {token}"})
     return session
 
 
@@ -140,11 +165,11 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
     bucket_name = os.environ["BUCKET_NAME"]
     key = os.environ["TREE_FILE_KEY"]
     github_api_url = os.environ["GITHUB_API_URL"]
-    github_token_secret = os.environ.get("GITHUB_TOKEN_SECRET", None)
+    github_app_secret = os.environ.get("GITHUB_APP_SECRET", None)
 
     s3_client = s3_client or boto3.client("s3")
     sns_client = sns_client or boto3.client("sns")
-    authenticated_session = session or get_authenticated_session(github_token_secret)
+    authenticated_session = session or get_authenticated_session(github_app_secret)
 
     old_tree = get_stored_tree(s3_client, bucket_name, key)
     new_tree, time = get_new_tree(github_api_url, authenticated_session)

@@ -14,11 +14,11 @@ module "tei_updater_lambda" {
   timeout         = 60
 
   environment_variables = {
-    TOPIC_ARN           = module.tei_adapter_topic.arn
-    BUCKET_NAME         = aws_s3_bucket.tei_adapter.id
-    TREE_FILE_KEY       = var.tei_tree_key
-    GITHUB_API_URL      = var.github_url
-    GITHUB_TOKEN_SECRET = var.github_token_secret
+    TOPIC_ARN         = module.tei_adapter_topic.arn
+    BUCKET_NAME       = aws_s3_bucket.tei_adapter.id
+    TREE_FILE_KEY     = var.tei_tree_key
+    GITHUB_API_URL    = var.github_url
+    GITHUB_APP_SECRET = var.github_app_secret
   }
   memory_size           = 1024
   log_retention_in_days = 30

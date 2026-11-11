@@ -208,6 +208,7 @@ locals {
         "Lambda.SdkClientException",
         "Lambda.TooManyRequestsException",
         "ECS.ServerException",
+        "ECS.SdkClientException",
         "ECS.ThrottlingException",
         "ECS.TaskFailedToStartException",
         "ECS.CannotPullContainerErrorException",

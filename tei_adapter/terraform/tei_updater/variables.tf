@@ -4,7 +4,7 @@ variable "lambda_error_alarm_arn" {}
 
 variable "infra_bucket" {}
 
-variable "github_token_secret" {}
+variable "github_app_secret" {}
 
 variable "tei_tree_key" {
 }

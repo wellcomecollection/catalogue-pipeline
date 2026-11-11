@@ -69,9 +69,24 @@ def item_no_location(folio_item: dict[str, Any]) -> None:
     }
 
 
-@given(parsers.parse('that item has the status "{status}"'))
-def item_status(folio_item: dict[str, Any], status: str) -> None:
-    folio_item["status"] = status
+# Plain string fields on an item, keyed by the phrase a feature uses for them.
+ITEM_FIELDS = {
+    "status": "status",
+    "loan type": "permanentLoanType",
+    "temporary loan type": "temporaryLoanType",
+    "material type": "materialType",
+    "volume": "volume",
+    "copy number": "copyNumber",
+}
+
+
+@given(
+    parsers.re(
+        rf'that item has the (?P<field>{"|".join(ITEM_FIELDS)}) "(?P<value>[^"]*)"'
+    )
+)
+def item_field(folio_item: dict[str, Any], field: str, value: str) -> None:
+    folio_item[ITEM_FIELDS[field]] = value
 
 
 @given(parsers.parse('that item has the statistical code "{code}"'))
@@ -82,21 +97,6 @@ def item_statistical_code(folio_item: dict[str, Any], code: str) -> None:
 @given("that item has no statistical code")
 def item_no_statistical_code(folio_item: dict[str, Any]) -> None:
     folio_item["statisticalCodes"] = []
-
-
-@given(parsers.parse('that item has the loan type "{loan_type}"'))
-def item_loan_type(folio_item: dict[str, Any], loan_type: str) -> None:
-    folio_item["permanentLoanType"] = loan_type
-
-
-@given(parsers.parse('that item has the temporary loan type "{loan_type}"'))
-def item_temporary_loan_type(folio_item: dict[str, Any], loan_type: str) -> None:
-    folio_item["temporaryLoanType"] = loan_type
-
-
-@given(parsers.parse('that item has the material type "{material_type}"'))
-def item_material_type(folio_item: dict[str, Any], material_type: str) -> None:
-    folio_item["materialType"] = material_type
 
 
 @given(parsers.parse('that item has the call number "{call_number}"'))

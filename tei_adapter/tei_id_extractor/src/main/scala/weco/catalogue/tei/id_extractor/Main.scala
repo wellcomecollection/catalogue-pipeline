@@ -14,7 +14,10 @@ import weco.catalogue.tei.id_extractor.database.{
 }
 import weco.typesafe.config.builders.EnrichConfig.RichConfig
 import weco.http.client.PekkoHttpClient
-import weco.catalogue.tei.id_extractor.github.GitHubAuthenticatedHttpClient
+import weco.catalogue.tei.id_extractor.github.{
+  GitHubAppTokenProvider,
+  GitHubAuthenticatedHttpClient
+}
 
 import scala.concurrent.ExecutionContext
 
@@ -37,9 +40,16 @@ object Main extends WellcomeTypesafeApp {
         SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor")
       val store = S3TypedStore[String]
 
+      val underlyingHttpClient = new PekkoHttpClient()
+      val tokenProvider = new GitHubAppTokenProvider(
+        underlying = underlyingHttpClient,
+        appId = config.requireString("tei.github.app.id"),
+        installationId = config.requireString("tei.github.app.installation_id"),
+        privateKeyPem = config.requireString("tei.github.app.private_key")
+      )
       val httpClient = new GitHubAuthenticatedHttpClient(
-        underlying = new PekkoHttpClient(),
-        token = config.requireString("tei.github.token")
+        underlying = underlyingHttpClient,
+        token = () => tokenProvider.token()
       )
 
       new TeiIdExtractorWorkerService(

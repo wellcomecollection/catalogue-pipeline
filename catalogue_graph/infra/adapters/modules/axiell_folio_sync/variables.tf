@@ -51,6 +51,12 @@ variable "dry_run_default" {
   default     = true
 }
 
+variable "hard_delete_default" {
+  description = "Default hard_delete value for the Lambda. When true, superseded GUIDs and Collections tombstones delete their FOLIO records; when false, they are suppressed."
+  type        = bool
+  default     = false
+}
+
 # FOLIO dev server target. Enabling it attaches the Lambda to the VPC and adds a
 # second OKAPI SecureString, read only by folio_target="dev" runs.
 # See docs/axiell-folio-sync-lambda-dev-instance.md.

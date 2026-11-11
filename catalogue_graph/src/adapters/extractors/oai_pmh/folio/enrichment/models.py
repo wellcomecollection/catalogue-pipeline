@@ -88,7 +88,7 @@ class FolioEnrichedItem(FolioModel):
 
     id: str
     volume: StrippedText | None = None
-    enumeration: StrippedText | None = None
+    copy_number: StrippedText | None = None
     status: StrippedText | None = None
     # FOLIO resolves the effective location from temporary, permanent, then holdings.
     effective_location: OptionalLocation = Field(

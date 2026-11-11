@@ -87,6 +87,9 @@ steps:
         tei_adapter \
         tei_id_extractor
 
+      # Terraform ignores s3_object_version, so the published zip only goes live here.
+      ./builds/deploy_lambda_zip.sh tei_adapter/tei_updater tei_updater
+
     plugins:
       - wellcomecollection/aws-assume-role#v0.2.2:
           role: "arn:aws:iam::760097843905:role/platform-ci"
