@@ -114,7 +114,7 @@ object TeiNotes {
         if (
           (n \@ "scribe").isEmpty || TeiContributors.writtenByMultipleHands(n)
         ) {
-          val label = n.text
+          val label = TeiPhysicalDescriptionNotes.textOf(n)
           // scribes can also appear in handNote as <persName role="scr">someone</persName>.
           // Sometimes the persName tags are the only thing in the handNote tag and in that case, and in that case because
           // they are already extracted as contributors, there's no need to extract them again as notes.
@@ -133,13 +133,25 @@ object TeiNotes {
         } else None
     }.toList
 
-  // Skipped when the text already names the script, e.g. "Script: Beautiful Naskh"
+  // Skipped when the text already gives the script, e.g. "Script: Naskh"
   private def getScript(handNote: Node, text: String): Option[String] =
-    (handNote \@ "script").trim match {
-      case ""                                                           => None
-      case script if TeiPhysicalDescriptionNotes.mentions(text, script) => None
-      case script => Some(s"Script: $script")
+    TeiPhysicalDescriptionNotes.attribute(handNote, "script") match {
+      case "" => None
+      case script
+          if Seq("script", script).exists(
+            TeiPhysicalDescriptionNotes.mentions(text, _)
+          ) =>
+        None
+      case script => Some(s"Script: ${readableScript(script)}")
     }
+
+  // The attribute holds codes, e.g. "ruq_ah" or "capitalsSquare"
+  private def readableScript(script: String): String =
+    script
+      .replace("_", "")
+      .replaceAll("(?<=\\p{Ll})(?=\\p{Lu})", " ")
+      .toLowerCase
+      .capitalize
 
   /** <filiation> sits directly under msItem. */
   private def getFiliation(nodeSeq: NodeSeq): List[Note] =

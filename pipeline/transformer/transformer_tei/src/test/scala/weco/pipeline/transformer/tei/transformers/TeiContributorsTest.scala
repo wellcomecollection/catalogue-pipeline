@@ -524,7 +524,9 @@ class TeiContributorsTest
       result.value shouldBe Map.empty
     }
 
-    it("does not make a scribe from handNote scribe=\"multiple\"") {
+    it(
+      "does not make a scribe from handNote scribe=\"multiple\" or \"various\""
+    ) {
       val result = TeiContributors.scribes(
         teiXml(
           id,
@@ -534,7 +536,8 @@ class TeiContributorsTest
                 handNotes(
                   label = "Written by several hands",
                   scribe = Some("multiple")
-                )
+                ),
+                handNotes(label = "Many hands", scribe = Some("various"))
               )
             )
           )

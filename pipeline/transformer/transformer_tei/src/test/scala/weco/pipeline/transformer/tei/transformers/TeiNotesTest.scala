@@ -495,14 +495,16 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
                   label = "Written by several hands",
                   scribe = Some("multiple")
                 ),
-                handNotes(label = "Two hands", scribe = Some("Multiple"))
+                handNotes(label = "Two hands", scribe = Some("Multiple")),
+                handNotes(label = "Many hands", scribe = Some("various"))
               )
             )
           )
         )
       ) shouldBe List(
         Note(NoteType.HandNote, "Written by several hands"),
-        Note(NoteType.HandNote, "Two hands")
+        Note(NoteType.HandNote, "Two hands"),
+        Note(NoteType.HandNote, "Many hands")
       )
     }
 
@@ -513,14 +515,19 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
             physDesc(handNotes =
               List(
                 <handNote script="testscript">A small, neat hand</handNote>,
-                <handNote script="otherscript"/>
+                <handNote script="otherscript"/>,
+                <handNote script="test_script"/>,
+                <handNote script="testSquare"/>,
+                <handNote script="&lt;!-- Insert script name --&gt;"/>
               )
             )
           )
         )
       ) shouldBe List(
-        Note(NoteType.HandNote, "Script: testscript<br/>A small, neat hand"),
-        Note(NoteType.HandNote, "Script: otherscript")
+        Note(NoteType.HandNote, "Script: Testscript<br/>A small, neat hand"),
+        Note(NoteType.HandNote, "Script: Otherscript"),
+        Note(NoteType.HandNote, "Script: Testscript"),
+        Note(NoteType.HandNote, "Script: Test square")
       )
     }
 
@@ -532,6 +539,9 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
               List(
                 <handNote script="testscript">Script: neat Testscript</handNote>,
                 <handNote script="test">Testing hand</handNote>,
+                <handNote script="te_st"><p><label>Script:</label> teʿśt</p></handNote>,
+                <handNote script="other">Square script</handNote>,
+                <handNote script="other"><p><label>Ink:</label> Black</p><seg type="density">300</seg><seg type="ratio">1:1</seg></handNote>,
                 <handNote script=""/>
               )
             )
@@ -539,7 +549,10 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
         )
       ) shouldBe List(
         Note(NoteType.HandNote, "Script: neat Testscript"),
-        Note(NoteType.HandNote, "Script: test<br/>Testing hand")
+        Note(NoteType.HandNote, "Script: Test<br/>Testing hand"),
+        Note(NoteType.HandNote, "Script: teʿśt"),
+        Note(NoteType.HandNote, "Square script"),
+        Note(NoteType.HandNote, "Script: Other<br/>Ink: Black")
       )
     }
   }
@@ -615,6 +628,12 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
               <layout writtenLines="18"><note>Ruled in red.</note><measure unit="mm">90</measure></layout>
               <layout columns="1 2" writtenLines="20 24"/>
               <layout writtenLines="16 18">16-18 lines to a page</layout>
+              <layout columns="1" writtenLines="18" ruledLines="18"> 1 column, 18 lines. </layout>
+              <layout writtenLines="20">Ruling changes on folio 20.</layout>
+              <layout writtenLines="20 24">20 lines on the first leaf.</layout>
+              <layout ruledLines="6"><locus>f. 2r:</locus> 6 lines.</layout>
+              <layout>(drypoint)<locus>(f. 3)</locus>, ink <locus>(f. 4)</locus>.</layout>
+              <layout writtenLines="&lt;!-- Insert number here --&gt;"/>
             </layoutDesc>
           </objectDesc>
         </physDesc>
@@ -624,7 +643,59 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
         Note(NoteType.LayoutNote, "1a-9b: 1 column; 12 ruled lines"),
         Note(NoteType.LayoutNote, "18 written lines; Ruled in red."),
         Note(NoteType.LayoutNote, "1 to 2 columns; 20 to 24 written lines"),
-        Note(NoteType.LayoutNote, "16-18 lines to a page")
+        Note(NoteType.LayoutNote, "16-18 lines to a page"),
+        Note(NoteType.LayoutNote, "1 column, 18 lines."),
+        Note(
+          NoteType.LayoutNote,
+          "20 written lines; Ruling changes on folio 20."
+        ),
+        Note(
+          NoteType.LayoutNote,
+          "20 to 24 written lines; 20 lines on the first leaf."
+        ),
+        Note(NoteType.LayoutNote, "f. 2r: 6 lines."),
+        Note(NoteType.LayoutNote, "(drypoint) (f. 3), ink (f. 4).")
+      )
+    }
+
+    it("reads layoutDesc paragraphs") {
+      val layoutPhysDesc =
+        <physDesc>
+          <objectDesc>
+            <layoutDesc><p>Written in two columns.</p></layoutDesc>
+          </objectDesc>
+        </physDesc>
+
+      TeiNotes(teiXml(physDesc = Some(layoutPhysDesc))) shouldBe List(
+        Note(NoteType.LayoutNote, "Written in two columns.")
+      )
+    }
+
+    it("separates phrases in nested elements and keeps measures with words") {
+      val nestedPhysDesc =
+        <physDesc>
+          <decoDesc>
+            <decoNote type="illustration"><locus>f. 1<hi>r</hi></locus>Test drawing</decoNote>
+            <decoNote type="unwan">ʿUnwān in red</decoNote>
+            <decoNote type="rubrication">Occasional rubrication</decoNote>
+          </decoDesc>
+          <bindingDesc>
+            <binding><p>Leather</p><p>Rebacked</p></binding>
+            <binding><p>unbound<note>Test folder</note></p></binding>
+            <binding><p>Chain distance ca. <measure>26 mm</measure>, <measure>90</measure>no watermark</p></binding>
+          </bindingDesc>
+        </physDesc>
+
+      TeiNotes(teiXml(physDesc = Some(nestedPhysDesc))) shouldBe List(
+        Note(NoteType.BindingInformation, "Leather Rebacked"),
+        Note(NoteType.BindingInformation, "unbound Test folder"),
+        Note(
+          NoteType.BindingInformation,
+          "Chain distance ca. 26 mm, no watermark"
+        ),
+        Note(NoteType.DecorationNote, "Illustration: f. 1r Test drawing"),
+        Note(NoteType.DecorationNote, "ʿUnwān in red"),
+        Note(NoteType.DecorationNote, "Occasional rubrication")
       )
     }
 
