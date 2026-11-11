@@ -2,10 +2,15 @@
 import argparse
 import typing
 
+import polars as pl
 import structlog
 
 from id_minter.iceberg import get_works_identified_table
-from merger.components import find_changed_components, read_previous_components
+from merger.components import (
+    COMPONENTS_SCHEMA,
+    find_changed_components,
+    read_previous_components,
+)
 from merger.matcher import load_works, match_works
 from merger.models.step_events import MergerEvent, MergerResult
 from utils.argparse import add_pipeline_event_args
@@ -25,12 +30,19 @@ def handler(
 
     table = get_works_identified_table(use_rest_api_table)
     snapshot = table.current_snapshot()
-    if snapshot is None:
-        raise ValueError("The works identified table is empty")
-    snapshot_id = event.iceberg_snapshot_id or snapshot.snapshot_id
+    snapshot_id = event.iceberg_snapshot_id or (
+        snapshot.snapshot_id if snapshot else None
+    )
 
-    works = load_works(table, snapshot_id)
-    current = match_works(works)
+    if snapshot_id is None:
+        # A new pipeline's table has no snapshot until the id minter first writes.
+        logger.info("The works identified table is empty")
+        work_count = 0
+        current = pl.DataFrame(schema=COMPONENTS_SCHEMA)
+    else:
+        works = load_works(table, snapshot_id)
+        work_count = works.height
+        current = match_works(works)
     previous = read_previous_components(event.components_s3_uri)
     changed = find_changed_components(current, previous)
 
@@ -42,7 +54,7 @@ def handler(
     return MergerResult(
         job_id=event.job_id,
         iceberg_snapshot_id=snapshot_id,
-        work_count=works.height,
+        work_count=work_count,
         changed_work_count=changed.height,
         changed_component_count=changed["component_id"].n_unique(),
         changed_components_s3_uri=changed_components_s3_uri,

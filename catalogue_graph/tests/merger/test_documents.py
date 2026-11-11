@@ -1,12 +1,14 @@
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import polars as pl
 import pytest
 
 from adapters.utils.iceberg_lookup import IcebergTableLookup
 from merger import documents
-from merger.documents import _groups, _read_documents
+from merger.components import COMPONENTS_SCHEMA
+from merger.documents import _groups, _read_documents, fetch_components
 
 
 def test_read_documents_maps_each_wanted_work_to_its_current_document(
@@ -35,6 +37,15 @@ def test_read_documents_maps_each_wanted_work_to_its_current_document(
     found = _read_documents(lookup, {"aaaaaaaa", "bbbbbbbb", "dddddddd"})
 
     assert found == {"aaaaaaaa": "a v2", "bbbbbbbb": "b v1 late"}
+
+
+def test_fetch_components_with_nothing_changed_reads_nothing() -> None:
+    table = MagicMock()
+
+    works = list(fetch_components(table, 7, pl.DataFrame(schema=COMPONENTS_SCHEMA)))
+
+    assert works == []
+    table.scan.assert_not_called()
 
 
 def test_groups_keep_components_whole(monkeypatch: pytest.MonkeyPatch) -> None:

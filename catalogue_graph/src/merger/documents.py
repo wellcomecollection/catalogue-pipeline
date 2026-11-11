@@ -20,6 +20,8 @@ def fetch_components(
     table: IcebergTable, snapshot_id: int, changed: pl.DataFrame
 ) -> Iterator[list[IdentifiedWork]]:
     """Yield the works of each changed component, whole, fetching a group of documents at a time."""
+    if changed.is_empty():
+        return
     members = changed.group_by("component_id").agg(pl.col("id")).sort("component_id")
     components = [list(ids) for ids in members["id"]]
     lookup = IcebergTableLookup.for_snapshot(table, key="id", snapshot_id=snapshot_id)
