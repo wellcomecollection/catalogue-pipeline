@@ -483,4 +483,151 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
 
     result shouldBe Nil
   }
+
+  describe("hand notes") {
+    it("keeps the text of a handNote with scribe=\"multiple\"") {
+      TeiNotes(
+        teiXml(
+          physDesc = Some(
+            physDesc(handNotes =
+              List(
+                handNotes(
+                  label = "Written by several hands",
+                  scribe = Some("multiple")
+                )
+              )
+            )
+          )
+        )
+      ) shouldBe List(Note(NoteType.HandNote, "Written by several hands"))
+    }
+
+    it("adds the script to the hand note") {
+      TeiNotes(
+        teiXml(
+          physDesc = Some(
+            physDesc(handNotes =
+              List(
+                <handNote script="testscript">A small, neat hand</handNote>,
+                <handNote script="otherscript"/>
+              )
+            )
+          )
+        )
+      ) shouldBe List(
+        Note(NoteType.HandNote, "Script: testscript<br/>A small, neat hand"),
+        Note(NoteType.HandNote, "Script: otherscript")
+      )
+    }
+
+    it("does not repeat a script the hand note already names") {
+      TeiNotes(
+        teiXml(
+          physDesc = Some(
+            physDesc(handNotes =
+              List(
+                <handNote script="testscript">Script: neat Testscript</handNote>,
+                <handNote script=""/>
+              )
+            )
+          )
+        )
+      ) shouldBe List(Note(NoteType.HandNote, "Script: neat Testscript"))
+    }
+  }
+
+  describe("physical description notes") {
+    val fullPhysDesc =
+      <physDesc>
+        <objectDesc>
+          <supportDesc>
+            <support>Paper</support>
+            <foliation>Foliated in pencil.</foliation>
+            <collation><formula>1-4 (8)</formula></collation>
+            <condition>Some
+              water damage.</condition>
+          </supportDesc>
+          <layoutDesc>
+            <layout columns="2" writtenLines="20">20</layout>
+            <layout columns="1">
+              <dimensions type="line-height" unit="mm"><height>9</height></dimensions>
+            </layout>
+            <layout>Ruled in drypoint.</layout>
+          </layoutDesc>
+        </objectDesc>
+        <decoDesc>
+          <decoNote type="rubrication">Headings in red.</decoNote>
+          <decoNote type="border">Border on the first leaf.</decoNote>
+          <decoNote type="other">A test decoration.</decoNote>
+        </decoDesc>
+        <bindingDesc>
+          <binding><p>Leather over boards.</p></binding>
+        </bindingDesc>
+      </physDesc>
+
+    it(
+      "makes notes for binding, decoration, condition, layout, collation and foliation"
+    ) {
+      TeiNotes(teiXml(physDesc = Some(fullPhysDesc))) shouldBe List(
+        Note(NoteType.BindingInformation, "Leather over boards."),
+        Note(NoteType.DecorationNote, "Rubrication: Headings in red."),
+        Note(NoteType.DecorationNote, "Border on the first leaf."),
+        Note(NoteType.DecorationNote, "A test decoration."),
+        Note(NoteType.ConditionNote, "Some water damage."),
+        Note(NoteType.LayoutNote, "2 columns; 20 written lines"),
+        Note(NoteType.LayoutNote, "1 column"),
+        Note(NoteType.LayoutNote, "Ruled in drypoint."),
+        Note(NoteType.CollationNote, "1-4 (8)"),
+        Note(NoteType.FoliationNote, "Foliated in pencil.")
+      )
+    }
+
+    it("makes the notes for an msPart") {
+      val part = msPart(id = "part_1", physDesc = Some(fullPhysDesc))
+      TeiNotes(List(part)).map(_.noteType) should contain allOf (
+        NoteType.BindingInformation,
+        NoteType.DecorationNote,
+        NoteType.ConditionNote,
+        NoteType.LayoutNote,
+        NoteType.CollationNote,
+        NoteType.FoliationNote
+      )
+    }
+
+    it("ignores elements left empty from the template") {
+      val emptyPhysDesc =
+        <physDesc>
+          <objectDesc>
+            <supportDesc>
+              <foliation><!-- delete if not required --></foliation>
+              <collation><formula/><signatures><!-- insert --></signatures></collation>
+              <condition/>
+            </supportDesc>
+            <layoutDesc>
+              <layout writtenLines=""><!-- delete if not required --></layout>
+            </layoutDesc>
+          </objectDesc>
+          <decoDesc>
+            <decoNote type="illustration"/>
+            <decoNote type="marginal"><!-- delete if not required --></decoNote>
+          </decoDesc>
+          <bindingDesc>
+            <binding><p><!-- Insert binding information here --></p></binding>
+          </bindingDesc>
+        </physDesc>
+
+      TeiNotes(teiXml(physDesc = Some(emptyPhysDesc))) shouldBe Nil
+    }
+  }
+
+  it("makes a filiation note for an msItem") {
+    val item =
+      <msItem xml:id="item_1">
+        <filiation>Also copied in <ref target="test_ref">another manuscript</ref>.</filiation>
+      </msItem>
+
+    TeiNotes(List(item)) shouldBe List(
+      Note(NoteType.FiliationNote, "Also copied in another manuscript.")
+    )
+  }
 }
