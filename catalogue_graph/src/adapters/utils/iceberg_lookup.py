@@ -40,6 +40,8 @@ class IcebergTableLookup:
             if task.delete_files:
                 raise ValueError(f"{'.'.join(table.name())} has delete files")
             files.append(task.file.file_path.removeprefix("file://"))
+        if not files:
+            raise ValueError(f"{'.'.join(table.name())} has no data files")
         return cls(files, key)
 
     def fetch(

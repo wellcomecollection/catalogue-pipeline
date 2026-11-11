@@ -98,3 +98,16 @@ def test_for_snapshot_rejects_an_unknown_snapshot(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="no snapshot 123"):
         IcebergTableLookup.for_snapshot(table, key="id", snapshot_id=123)
+
+
+def test_for_snapshot_rejects_a_table_without_data(tmp_path: Path) -> None:
+    catalog = SqlCatalog(
+        "test", uri=f"sqlite:///{tmp_path}/catalog.db", warehouse=f"file://{tmp_path}"
+    )
+    catalog.create_namespace("ns")
+    table = catalog.create_table(
+        "ns.t", schema=pa.table({"id": ["aaaaaaaa"], "content": ["x"]}).schema
+    )
+
+    with pytest.raises(ValueError, match="no data files"):
+        IcebergTableLookup.for_snapshot(table, key="id")
