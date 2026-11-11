@@ -524,6 +524,27 @@ class TeiContributorsTest
       result.value shouldBe Map.empty
     }
 
+    it("does not make a scribe from handNote scribe=\"multiple\"") {
+      val result = TeiContributors.scribes(
+        teiXml(
+          id,
+          physDesc = Some(
+            physDesc(handNotes =
+              List(
+                handNotes(
+                  label = "Written by several hands",
+                  scribe = Some("multiple")
+                )
+              )
+            )
+          )
+        ),
+        id
+      )
+
+      result.value shouldBe Map.empty
+    }
+
     it("ignores a scribe with an empty name") {
       val result = TeiContributors.scribes(
         teiXml(
