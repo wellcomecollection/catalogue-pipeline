@@ -130,7 +130,8 @@ def _run(rows: list[dict[str, Any]]) -> Any:
 
 def test_skips_records_without_the_harvest_flag() -> None:
     # The 980 $a harvest flag is the opt-in. The record that carries no flag is
-    # skipped entirely: not created, not updated, not suppressed, and not an error.
+    # not created or updated, and with nothing in FOLIO to suppress it is
+    # skipped, not an error. See test_harvest_untick for one that has synced.
     resp = _run([_row("sel", SELECTED), _row("unsel", UNSELECTED)])
 
     assert resp.counts["total"] == 2
@@ -639,6 +640,7 @@ def test_deletions_suppress_and_are_reported() -> None:
     assert resp.counts["deletions"] == 2
     # 2 guids x 3 entities each suppressed.
     assert resp.counts["suppressed"] == 6
+    assert resp.counts["unflagged_suppressed"] == 0
     assert resp.total_errors == 0
     # 2 guids x 3 entities each PUT back suppressed.
     assert len(folio.put_paths) == 6
