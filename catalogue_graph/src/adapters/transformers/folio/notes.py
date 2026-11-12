@@ -41,9 +41,9 @@ def _local_note(field: Field) -> Note | None:
 
 def extract_notes(record: Record) -> list[Note]:
     """Shared MARC notes plus the local 591/593 notes and 787 related material."""
-    return base_extract_notes(
+    notes = base_extract_notes(
         record,
-        # Excluded to match the Sierra transformer, which never produced these notes
+        # Excluded to match the Sierra transformer, which does not produce these notes
         exclude_fields=["541", "583", "584"],
         extra_fields={
             "787": _related_material_note,
@@ -51,3 +51,6 @@ def extract_notes(record: Record) -> list[Note]:
             "593": lambda field: _create_note(field, COPYRIGHT_NOTE),
         },
     )
+    for note in notes:
+        note.contents = note.contents.strip()
+    return notes

@@ -8,7 +8,7 @@ import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.transformers.utils.html import format_as_html_link
+from adapters.transformers.utils.html import format_as_html_link, sanitise_html
 from models.pipeline.id_label import IdLabel
 from models.pipeline.note import Note
 
@@ -155,3 +155,10 @@ def extract_notes(
         if note is not None and note.contents.strip():
             notes.append(note)
     return notes
+
+
+def sanitise_notes(notes: list[Note]) -> list[Note]:
+    """Sanitise the HTML of each note, dropping any left with no contents."""
+    for note in notes:
+        note.contents = sanitise_html(note.contents)
+    return [note for note in notes if note.contents]

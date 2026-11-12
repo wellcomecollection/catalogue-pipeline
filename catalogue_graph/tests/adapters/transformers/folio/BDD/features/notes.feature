@@ -239,20 +239,17 @@ Feature: notes (MARC 5xx and 787)
     And the only note has the contents "Lettering continues: Comment va  le malade? Hélas Monsieur, il est mort ce matin à six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
 
   # Known divergences from the Scala.
-  #
-  # The Scala suppressed 591 ǂ9, which held the item barcode in Sierra. The
-  # FOLIO migration moved every 591 ǂ9 to ǂ0, so both are left out here.
-  #
-  # The Scala gave no note from 514 on visual material (Sierra material type
-  # "k", Pictures), where the 514 continued the work's lettering instead.
-  # Pictures are not in FOLIO, so 514 is a lettering note regardless of
-  # material type. See wellcomecollection/platform#6570.
 
+  # The Scala suppressed 591 ǂ9, which held the item barcode in Sierra. The
+  # FOLIO migration moved every 591 ǂ9 to ǂ0, so both are left out.
   Scenario: The barcode in 591 ǂ0 is left out
     Given the MARC record has a 591 field with subfield "z" value "Copy 1." and subfield "e" value "Note: The author's presentation inscription on verso of 2nd leaf." and subfield "0" value "X8253"
     When I transform the MARC record
     Then the only note has the contents "Copy 1. Note: The author's presentation inscription on verso of 2nd leaf."
 
+  # The Scala gave no note from 514 on Pictures (Sierra material type "k"),
+  # where the 514 continued the lettering instead. Pictures are not in FOLIO.
+  # See wellcomecollection/platform#6570.
   Scenario: A 514 on visual material is still a lettering note
     Given the MARC record has a 998 field with subfield "d" value "k  "
     And the MARC record has a 514 field with subfield "a" value "Lettering continues: Comment va  le malade? Hélas Monsieur, il est mort ce matin à six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
@@ -260,17 +257,34 @@ Feature: notes (MARC 5xx and 787)
     When I transform the MARC record
     Then the only note has the note_type.label "Lettering note"
 
+  # The Scala left a 787 ǂu as text.
+  Scenario: A 787 ǂu that is a URL becomes a link
+    Given the MARC record has a 787 field with subfield "t" value "Daily telegraph." and subfield "u" value "https://example.org/telegraph"
+    When I transform the MARC record
+    Then the only note has the contents "Daily telegraph. <a href="https://example.org/telegraph">https://example.org/telegraph</a>"
+
+  # The Scala removed five sentences about the Codebreakers digitisation
+  # programme. They occur only on Sierra archive bibs, none of which is in FOLIO.
+  Scenario: A Codebreakers sentence is kept
+    Given the MARC record has a 535 field with indicators "1" "" with subfield "a" value "Keep me. This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics. And keep me too."
+    When I transform the MARC record
+    Then the only note has the contents "Keep me. This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics. And keep me too."
+
   # Not in the Scala tests.
-  #
+
   # The Sierra transformer never produced notes from 541, 583 or 584, although
   # the shared MARC extractor does for Axiell.
-
   Scenario: 541, 583 and 584 give no notes
     Given the MARC record has a 541 field with indicators "1" "" with subfield "a" value "Donation; DrugScope; 2016; 2266 (SA/DRS)."
     And the MARC record has a 583 field with indicators "1" "" with subfield "a" value "Appraised"
     And the MARC record has a 584 field with indicators "1" "" with subfield "a" value "Further accruals are expected"
     When I transform the MARC record
     Then there are no notes
+
+  Scenario: Surrounding whitespace is stripped from a note
+    Given the MARC record has a 591 field with subfield "z" value "Copy 1" and subfield "e" value "Note: 1912 printing "
+    When I transform the MARC record
+    Then the only note has the contents "Copy 1 Note: 1912 printing"
 
   Scenario: Notes keep record order across shared and local note fields
     Given the MARC record has a 500 field with subfield "a" value "first"
