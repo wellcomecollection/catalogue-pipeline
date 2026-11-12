@@ -28,7 +28,7 @@ PRECEDENCE = (
 def choose_target(
     works: Sequence[IdentifiedWork], satisfying: Predicate = any_work
 ) -> VisibleIdentifiedWork | None:
-    """The first work, in precedence order, that also satisfies the predicate; only if visible."""
+    """The first visible work, in precedence order, that also satisfies the predicate"""
     for precedence in PRECEDENCE:
         for work in works:
             if precedence(work) and satisfying(work):

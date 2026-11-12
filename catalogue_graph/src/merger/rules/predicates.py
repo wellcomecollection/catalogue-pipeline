@@ -1,8 +1,6 @@
 """Predicates over identified works, from which the merge rules are built.
 
-Several describe the shape the transformers give works from a source, e.g. a METS
-work with a single digital item, and the rules rely on that shape. Predicates
-combine with `&`, `|` and `~`.
+Predicates combine with `&`, `|` and `~`.
 """
 
 from collections.abc import Callable

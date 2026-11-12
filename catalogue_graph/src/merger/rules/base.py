@@ -1,9 +1,12 @@
 """The shape of a merge rule.
 
 A field rule computes one field of the merged target from the target and its sources,
-and reports which sources it drew on; those sources are redirected to the target. Most
-rules are built from partial rules, each applying only when the target and at least one
-source satisfy its predicates. Rules hold no state, so they are used as classes.
+and reports which sources it drew on; those sources are redirected to the target.
+
+A field rule is usually assembled from partial rules. A partial rule is partial in the
+mathematical sense: it is defined only for some inputs, namely a target and at least
+one source that satisfy its predicates, and has no value for any other. Rules hold no
+state, so they are used as classes.
 """
 
 from abc import ABC, abstractmethod
