@@ -123,7 +123,8 @@ def get_client(
     api_key_name: str,
     pipeline_date: str,
     es_mode: ElasticsearchMode = "private",
-    http_compress: bool = False,
+    # Serverless bills response bytes as data out, PrivateLink included
+    http_compress: bool = True,
 ) -> elasticsearch.Elasticsearch:
     config = get_pipeline_config(pipeline_date, es_mode, api_key_name)
 

@@ -52,6 +52,12 @@ class Instance(BaseModel):
     # The AXIELL synced marker. Merged on update, keeping the record's other
     # codes, which the tenant uses for access status.
     statisticalCodeIds: list[str] | None = None
+    # A selected record is never suppressed. Sending both flags on every write
+    # is what restores a record suppressed when Harvest was unticked, and it
+    # also clears a suppression set by hand in FOLIO, since FOLIO does not
+    # record who set it. The instance is the only entity with staffSuppress.
+    discoverySuppress: bool = False
+    staffSuppress: bool = False
 
 
 class Holdings(BaseModel):
@@ -64,6 +70,8 @@ class Holdings(BaseModel):
     # is not it. Merged on update, keeping any other entries.
     formerIds: list[str] | None = None
     statisticalCodeIds: list[str] | None = None
+    # Cleared on every write, as on the instance.
+    discoverySuppress: bool = False
 
 
 class Item(BaseModel):
@@ -82,6 +90,8 @@ class Item(BaseModel):
     # The synced marker, as on the holdings. No formerIds: the FOLIO transformer
     # reads an item's formerIds as its Sierra item number.
     statisticalCodeIds: list[str] | None = None
+    # Cleared on every write, as on the instance.
+    discoverySuppress: bool = False
 
 
 class PayloadMeta(BaseModel):

@@ -15,7 +15,14 @@ from models.pipeline.access_condition import (
 from models.pipeline.access_method import ViewOnline
 from models.pipeline.access_status import LicensedResource
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Concept, Contributor, Genre, Subject
+from models.pipeline.concept import (
+    Concept,
+    Contributor,
+    DateTimeRange,
+    Genre,
+    Period,
+    Subject,
+)
 from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Id, IdLabel, Language
@@ -59,6 +66,11 @@ def maximal_work_data() -> WorkData:
     # Populate each field with at least one or a non-empty value
     concept_min = Concept(
         id=example_identified(10), label="Concept Label", type="Concept"
+    )
+    period_min = Period(
+        id=example_identified(14),
+        label="1900-1910",
+        range=DateTimeRange(**{"from": "1900-01-01", "to": "1910-12-31"}),
     )
     subject_min = Subject(
         id=example_identified(11), label="Subject Label", concepts=[], type="Subject"
@@ -107,7 +119,7 @@ def maximal_work_data() -> WorkData:
         description="Description",
         physical_description="Physical",
         lettering="Lettering",
-        created_date=concept_min,
+        created_date=period_min,
         subjects=[subject_min],
         genres=[genre_min],
         contributors=[contributor_min],
@@ -153,10 +165,9 @@ def maximal_work_data() -> WorkData:
         ),
         DeletedWork(
             version=3,
-            data=maximal_work_data(),
             deleted_reason=DeletedReason(type="DeletedFromSource", info="Info"),
         ),
-        RedirectedWork(redirect_target=example_identified(30)),
+        RedirectedWork(version=4, redirect_target=example_identified(30)),
     ],
 )
 def test_work_variant_roundtrip_exhaustive(
@@ -171,7 +182,9 @@ def test_work_variant_roundtrip_exhaustive(
     assert model2.model_dump() == work_instance.model_dump()
 
     # Ensure top-level alias keys are camelCase for fields with underscores
-    for field_name in work_instance.model_fields:
+    for field_name, field in work_instance.model_fields.items():
+        if field.exclude:
+            continue
         alias = to_camel(field_name)
         if "_" in field_name:
             assert alias in dumped
@@ -190,8 +203,8 @@ def test_work_variant_roundtrip_exhaustive(
     if isinstance(work_instance, RedirectedWork):
         assert "redirectTarget" in dumped
 
-    # Check all WorkData fields present under camelCase
-    if hasattr(work_instance, "data"):
+    # Check all WorkData fields present under camelCase; Deleted works serialise none
+    if "data" in dumped:
         data_dump = dumped["data"]
         for field_name in WorkData.model_fields:
             alias = to_camel(field_name)
@@ -266,6 +279,8 @@ deleted_work_strategy = st.builds(
 
 redirected_work_strategy = st.builds(
     RedirectedWork,
+    version=st.integers(min_value=1, max_value=10),
+    data=work_data_strategy,
     redirect_target=identified_strategy,
 )
 
@@ -283,7 +298,9 @@ def assert_roundtrip_alias(
     model2 = type(model).model_validate_json(json_str)
     assert model2.model_dump() == model.model_dump()
     # verify alias presence for top-level fields
-    for field_name in model.model_fields:
+    for field_name, field in model.model_fields.items():
+        if field.exclude:
+            continue
         alias = to_camel(field_name)
         if "_" in field_name:
             assert alias in dumped
@@ -334,9 +351,7 @@ def test_minimal_vs_maximal_visible_work_roundtrip() -> None:
 # Ensure all WorkStatus literals are represented
 @pytest.mark.parametrize("status_cls", ALL_WORK_STATUSES)
 def test_work_status_literal_values(status_cls: Any) -> None:
-    instance_kwargs = (
-        {"version": 1, "data": WorkData()} if status_cls is not RedirectedWork else {}
-    )
+    instance_kwargs: dict[str, Any] = {"version": 1, "data": WorkData()}
     # Provide required variant-specific fields minimally
     if status_cls is VisibleWork:
         instance_kwargs["redirect_sources"] = []

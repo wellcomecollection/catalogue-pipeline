@@ -32,7 +32,7 @@ class MergerEvent(BasePipelineEvent):
 
 class MergerResult(BaseModel):
     job_id: str
-    iceberg_snapshot_id: int
+    iceberg_snapshot_id: int | None
     work_count: int
     changed_work_count: int
     changed_component_count: int

@@ -27,11 +27,13 @@ class InvisibleWork(Work):
 class DeletedWork(Work):
     type: WorkStatus = "Deleted"
     deleted_reason: DeletedReason
+    data: WorkData = Field(default_factory=WorkData, exclude=True)
 
 
-class RedirectedWork(SerialisableModel):
+class RedirectedWork(Work):
     type: WorkStatus = "Redirected"
     redirect_target: Identified
+    data: WorkData = Field(default_factory=WorkData, exclude=True)
 
 
 ALL_WORK_STATUSES = (
