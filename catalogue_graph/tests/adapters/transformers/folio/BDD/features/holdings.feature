@@ -6,9 +6,9 @@ Feature: FOLIO work-level holdings
   record in the real location. The location type and label follow the item
   location rule from platform#6584.
 
-  A Holdings never has a note: FOLIO returns no holdings notes, and which note
-  type would qualify is still open on platform#6591. FOLIO has no
-  librarian-written description separate from the statements, so the
+  A Holdings never has a note. The holdings note is
+  part of the statements in FOLIO, confirmed by Collection Information (platform#6800). 
+  FOLIO has no librarian-written description separate from the statements, so the
   enumeration is the statements in FOLIO's order.
 
   Background:
