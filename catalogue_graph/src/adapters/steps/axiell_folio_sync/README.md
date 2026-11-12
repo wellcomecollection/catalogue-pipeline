@@ -18,7 +18,8 @@ The design, record-selection rules and tombstone semantics are specified in
    (entrypoint `adapters.steps.axiell_folio_sync.axiell_folio_sync.lambda_handler`).
 3. The step reads the changed rows for the event's `changeset_ids` through `AxiellChangesetReader` (using the same
    `AXIELL_CONFIG` as the Axiell adapter, so S3 Tables in Lambda and a local sqlite catalog for local runs). The
-   reader also exposes the adapter's deletion facts via `iter_deletions()`, consumed by the reconciliation pass below.
+   reader also exposes the adapter's deletion facts via `iter_deletions()`, and the read step derives the GUIDs of
+   the batch's tombstones; both are consumed by the reconciliation pass below.
 4. **Pass 1 — upsert.** Each record is selected, mapped, and upserted:
    * **Selection** (`is_selected_for_sync`): a record is synced only if it carries the harvest flag (MARC `980 $a`
      present) and is item-level (MARC `351 $c` == `ITEM`). Everything else is skipped.
@@ -26,36 +27,48 @@ The design, record-selection rules and tombstone semantics are specified in
      UUIDs (locations, material types, loan types, …) are resolved via `RefCache`, loaded once per invocation from the
      FOLIO tenant and reused across warm Lambda starts.
    * **Upsert** (`upsert.py`): writes in Instance → Holdings → Item order via OKAPI, with best-effort rollback if a
-     later entity write fails.
+     later entity write fails. Each record's FOLIO id comes from its AxC GUID (MARC `001`, itself a UUID): the
+     instance takes the GUID as its id, and the holdings and item take a UUIDv5 in the GUID. The id is sent on
+     create, and the sync finds the record again by it on every later run. The sync sends no hrid, so FOLIO
+     generates it. For staff, the holdings carries the GUID in `formerIds` (not the item, whose `formerIds` the
+     FOLIO transformer reads as a Sierra item number), and all three carry the `AXIELL` statistical code. On
+     update, `identifiers`, `formerIds` and `statisticalCodeIds` are merged, so entries added in FOLIO are kept.
 5. **Pass 2 — reconciliation deletes** (see [Reconciliation deletes](#reconciliation-deletes) below): the deletion
-   facts from `iter_deletions()` are actioned against FOLIO *after* the upsert pass.
+   facts from `iter_deletions()` and the tombstoned GUIDs are actioned against FOLIO *after* the upsert pass.
 6. Results are published via a single `PipelineReport` (`report.py`): one JSON run report to S3 plus CloudWatch
    metrics (namespace `catalogue_adapters`; metrics are suppressed on dry runs, the S3 report is not).
 
 ## Reconciliation deletes
 
-Two distinct delete signals reach this step; only one is authoritative.
+A record hard deleted in Collections reaches this step in one of two ways, and both are actioned in Pass 2
+(wellcomecollection/platform#6833).
 
-**Loader tombstones (`deleted=true`) are advisory only and ignored.** The loader's `deleted` flag is unreliable, so we
-record and metric the signal but never suppress or remove a FOLIO record based on it.
+**A tombstone, when the collectId is not reused.** The adapter writes `deleted=true` only when the OAI-PMH server
+reports the record deleted, and keeps its last content. The read step (`tombstoned_guids`) takes the GUID from that
+content's `001`, with the reconcile step's own `compute_guid`, and drops any GUID that another record still holds in
+the reconciler store (`guids_held_by_other_records`), since acting on it would delete that record's FOLIO records. A
+tombstone with no content cannot have been synced and is passed over. The tombstone row itself is never upserted.
 
-**Authoritative deletes come from the adapter-side reconcile step's deletion facts.** The reconcile step writes
+**A deletion fact, when the collectId is reused for a new record.** The reconcile step writes
 superseded-GUID facts to Iceberg *before* `axiell.adapter.completed` fires, so the sync consumes them in the same
 invocation — no separate event or Lambda (see RFC 090 and
 [Axiell deletion reconciliation](../../transformers/README.md#axiell-deletion-reconciliation)). `iter_deletions()`
 re-checks each fact against the current reconciler mappings and drops any GUID reclaimed by a live record, so a
-revert/handoff never suppresses the wrong record. The remaining facts are actioned in Pass 2, keyed by
-`AxC-{entity}-{guid}` (the same HRID scheme the upsert path writes), child-first **item → holdings → instance**:
+revert/handoff never suppresses the wrong record. The remaining facts, then the tombstoned GUIDs not already among
+them, are actioned in Pass 2, keyed by
+the FOLIO ids derived from the GUID (the same derivation the upsert path uses), child-first
+**item → holdings → instance**:
 
-- **Soft-suppress (default, reversible).** `suppress_by_guid` sets `discoverySuppress` on all three entities and
+- **Soft-suppress (code default, reversible).** `suppress_by_guid` sets `discoverySuppress` on all three entities and
   `staffSuppress` on the instance only — instances are the sole FOLIO inventory entity with a `staffSuppress` field
   (holdings-storage rejects it with a 422; items silently drop it). Idempotent under redelivery.
-- **Hard-delete (opt-in, irreversible).** `delete_by_guid`, selected by the event's `hard_delete` field or the
-  `HARD_DELETE` env var. The child-first order is mandatory (FOLIO enforces referential integrity) and the cascade
+- **Hard-delete (irreversible, set in Terraform).** `delete_by_guid`, selected by the event's `hard_delete` field or
+  the `HARD_DELETE` env var, which Terraform sets to `true`. The child-first order is mandatory (FOLIO enforces referential integrity) and the cascade
   aborts before the parent if a child delete fails, so a parent is never orphaned. A 404 is treated as a no-op, so
   redelivered facts and races are safe.
 
-A per-GUID failure is recorded as an error entry and does not abort the run.
+A per-GUID failure is recorded as an error entry and does not abort the run. Each manifest deletion entry carries a
+`reason`, `superseded` or `tombstone`, and `tombstone_deletions` counts the tombstoned GUIDs within `deletions`.
 
 ## Module layout
 
@@ -91,6 +104,7 @@ Environment variables (injected by Terraform in Lambda):
 | `OKAPI_SECRET_PARAM` | SSM path to the OKAPI credentials SecureString                       |
 | `MANIFEST_S3_BUCKET` | Bucket for JSON run reports                                          |
 | `DRY_RUN`            | Default dry-run behaviour (`true` unless overridden by the event)    |
+| `HARD_DELETE`        | Delete rather than suppress in Pass 2 (`false` in code, `true` in Terraform; the event overrides) |
 
 For local runs, `OKAPI_URL` / `OKAPI_TENANT` / `OKAPI_USERNAME` / `OKAPI_PASSWORD` override the corresponding SSM
 fields (and skip SSM entirely if all four are set).

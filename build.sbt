@@ -1,6 +1,5 @@
 import java.io.File
 import java.util.UUID
-import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
 // At the root of the repository is a directory containing index configurations
 // In "Real Life" the indices are configured at deploy time, so the applications
@@ -29,7 +28,6 @@ def setupProject(
   project
     .in(new File(folder))
     .settings(Common.settings: _*)
-    .enablePlugins(DockerComposePlugin)
     .enablePlugins(JavaAppPackaging)
     .dependsOn(dependsOn: _*)
     .settings(libraryDependencies ++= externalDependencies)

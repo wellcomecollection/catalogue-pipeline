@@ -3,7 +3,7 @@ from datetime import datetime
 
 EVENTBUS_NAME = "catalogue-pipeline-adapter-event-bus"
 EVENTBRIDGE_SOURCE = "weco.pipeline.reindex"
-EVENTBRIDGE_REINDEX_TARGETS = ["ebsco", "axiell"]
+EVENTBRIDGE_REINDEX_TARGETS = ["ebsco", "axiell", "folio"]
 EVENT_REQUESTED_DETAIL_TYPE = "weco.pipeline.reindex.requested"
 
 
@@ -17,7 +17,7 @@ def send_eventbridge_reindex_event(session, reindex_target, job_id=None):
     Send an AWS EventBridge event to trigger a re-index
 
     Not all re-indexes are triggered by EventBridge events. The adapter
-    sources (EBSCO, Axiell) use this path; the rest go through the reindexer
+    sources (EBSCO, Axiell, FOLIO) use this path; the rest go through the reindexer
     itself.
 
     Returns the job_id the event carried, which is how the resulting

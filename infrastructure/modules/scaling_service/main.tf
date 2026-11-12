@@ -82,10 +82,15 @@ module "task_definition" {
   depends_on = [null_resource.task_replacement_trigger]
 }
 
+data "aws_ssm_parameter" "fluentbit_tag" {
+  name = "/platform/sidecars/fluentbit/${var.sidecar_tier}"
+}
+
 module "log_router_container" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v4.3.1"
   namespace = var.name
 
+  container_tag            = coalesce(var.fluentbit_tag_override, data.aws_ssm_parameter.fluentbit_tag.insecure_value)
   use_privatelink_endpoint = true
 }
 

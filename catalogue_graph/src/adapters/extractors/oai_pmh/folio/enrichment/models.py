@@ -87,7 +87,7 @@ class FolioEnrichedItem(FolioModel):
 
     id: str
     volume: StrippedText | None = None
-    enumeration: StrippedText | None = None
+    copy_number: StrippedText | None = None
     status: StrippedText | None = None
     # FOLIO resolves the effective location from temporary, permanent, then holdings.
     effective_location: OptionalLocation = Field(
@@ -102,6 +102,8 @@ class FolioEnrichedItem(FolioModel):
     temporary_loan_type: StrippedText | None = None
     material_type: StrippedText | None = None
     notes: list[FolioItemNote] = Field(default_factory=list)
+    # The Sierra item number, for items carried over in the migration.
+    former_ids: list[str] = Field(default_factory=list)
     suppress_from_discovery: bool = False
 
     @property

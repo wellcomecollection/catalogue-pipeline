@@ -4,8 +4,16 @@ from pymarc.record import Record
 
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
+from adapters.transformers.folio.collection_path import extract_collection_identifier
+from adapters.transformers.folio.electronic_resources import extract_digital_items
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
-from adapters.transformers.folio.items import extract_items
+from adapters.transformers.folio.items import extract_physical_items
+from adapters.transformers.folio.merge_candidates import extract_merge_candidates
+from adapters.transformers.folio.on_order import (
+    awaiting_cataloguing_item,
+    is_uncatalogued,
+)
+from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
 from adapters.transformers.marc.designation import extract_designation
@@ -29,6 +37,7 @@ from adapters.transformers.marc.subjects import (
     is_from_standard_thesaurus,
 )
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
+from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Genre, Subject
 from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
@@ -38,7 +47,11 @@ from models.pipeline.identifier import (
 )
 from models.pipeline.item import Item
 from models.pipeline.production import ProductionEvent
-from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
+from models.pipeline.source.work import (
+    DeletedSourceWork,
+    SourceWorkState,
+    VisibleSourceWork,
+)
 from models.pipeline.work_state import WorkAncestor
 
 # The Sierra API lists fields grouped by Sierra field tag (host item, series, uniform
@@ -111,12 +124,24 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
         return None
 
     @property
+    def visible_work_state(self) -> SourceWorkState:
+        return super().visible_work_state.model_copy(
+            update={"merge_candidates": extract_merge_candidates(self.record)}
+        )
+
+    @property
     def designation(self) -> list[str]:
         return extract_designation(self.record)
 
     @property
     def ancestors(self) -> list[WorkAncestor]:
         return get_parents(self.record, tag_order=SIERRA_PARENT_TAG_ORDER)
+
+    @property
+    def collection_path(self) -> CollectionPath | None:
+        return extract_collection_path(
+            self.record, own_identifier=extract_collection_identifier(self.record)
+        )
 
     @property
     def current_frequency(self) -> str | None:
@@ -155,15 +180,20 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def items(self) -> list[Item]:
-        """Build items from the joined enrichment payload.
+        """Physical items from the joined enrichment payload, then digital items from 856.
 
         Without an inventory record (e.g. an instance not yet enriched, or a full reindex
-        before the inventory store is populated) this falls back to no items rather than
-        guessing from MARC 952.
+        before the inventory store is populated) there are no physical items rather than
+        a guess from MARC 952. An instance with no items, suppressed or not, whose MARC
+        590 marks it as uncatalogued gets a placeholder awaiting-cataloguing item.
         """
-        if self.inventory is None:
-            return []
-        return extract_items(self.inventory)
+        physical = []
+        if self.inventory and self.inventory.items:
+            physical = extract_physical_items(self.inventory)
+        elif is_uncatalogued(self.record):
+            physical = [awaiting_cataloguing_item()]
+
+        return physical + extract_digital_items(self.record)
 
     def _is_suppressed(self) -> bool:
         """Check if a FOLIO Instance is marked as suppressed in its MARC data.

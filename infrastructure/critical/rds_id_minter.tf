@@ -32,9 +32,9 @@ module "id_minter_rds_2026_10_20" {
   source = "./modules/id-minter-rds"
 
   name_suffix = "2026-10-20"
-  # Restored from production's 2026-10-20 04:00 BST backup so FOLIO records can
-  # inherit their Sierra predecessors' canonical ids (wellcomecollection/platform#6534).
-  snapshot_identifier = "awsbackup:job-294e0ea6-fd81-88aa-e32e-2b4886b5f60d"
+  # Restored from production's November 10, 2026, 03:22 backup so FOLIO records can
+  # inherit their Sierra predecessors' canonical ids.
+  snapshot_identifier = "awsbackup:job-d47977c6-e715-45d4-49dd-ba374077f60b"
 
   # The FOLIO environment's registry, a copy of production that never becomes it.
   skip_final_snapshot = true

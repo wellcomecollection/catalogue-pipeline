@@ -167,7 +167,7 @@ def maximal_work_data() -> WorkData:
             version=3,
             deleted_reason=DeletedReason(type="DeletedFromSource", info="Info"),
         ),
-        RedirectedWork(redirect_target=example_identified(30)),
+        RedirectedWork(version=4, redirect_target=example_identified(30)),
     ],
 )
 def test_work_variant_roundtrip_exhaustive(
@@ -279,6 +279,8 @@ deleted_work_strategy = st.builds(
 
 redirected_work_strategy = st.builds(
     RedirectedWork,
+    version=st.integers(min_value=1, max_value=10),
+    data=work_data_strategy,
     redirect_target=identified_strategy,
 )
 
@@ -349,9 +351,7 @@ def test_minimal_vs_maximal_visible_work_roundtrip() -> None:
 # Ensure all WorkStatus literals are represented
 @pytest.mark.parametrize("status_cls", ALL_WORK_STATUSES)
 def test_work_status_literal_values(status_cls: Any) -> None:
-    instance_kwargs = (
-        {"version": 1, "data": WorkData()} if status_cls is not RedirectedWork else {}
-    )
+    instance_kwargs: dict[str, Any] = {"version": 1, "data": WorkData()}
     # Provide required variant-specific fields minimally
     if status_cls is VisibleWork:
         instance_kwargs["redirect_sources"] = []

@@ -10,6 +10,9 @@ from adapters.transformers.folio.access_conditions import (
     is_access_note,
 )
 from adapters.transformers.folio.locations import ResolvedLocation, resolve_locations
+from adapters.transformers.marc.predecessor_identifier import (
+    extract_sierra_item_predecessor_id,
+)
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from models.pipeline.item import Item
@@ -20,24 +23,37 @@ from models.pipeline.location import PhysicalLocation
 FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
 
 
-def extract_items(instance: FolioEnrichedInstance) -> list[Item]:
+def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
     # Suppressed items are never shown, nor do they type a bound-with item.
     items = [item for item in instance.items if not item.suppress_from_discovery]
     locations = resolve_locations(items)
-    return [_build_item(item, locations[item.id]) for item in items]
+    built = [_build_item(item, locations[item.id]) for item in items]
+    # A generated title is only useful for telling items apart. When every item has
+    # the same one it adds nothing, so it is removed. That includes a lone "Copy 1".
+    if (
+        built
+        and all(_has_generated_title(item) for item in items)
+        and len({item.title for item in built}) == 1
+    ):
+        return [item.model_copy(update={"title": None}) for item in built]
+    return built
 
 
 def _build_item(
     item: FolioEnrichedItem, item_location: ResolvedLocation | None
 ) -> Item:
-    identifier = Identifiable.from_source_identifier(
-        SourceIdentifier(
+    predecessor = _sierra_predecessor(item)
+    identifier = Identifiable(
+        source_identifier=SourceIdentifier(
             identifier_type=FOLIO_ITEM_IDENTIFIER_TYPE,
             ontology_type="Item",
             value=item.id,
-        )
+        ),
+        # Also an identifier, so the item can still be found by its Sierra number.
+        other_identifiers=[predecessor] if predecessor else [],
+        predecessor_identifier=predecessor,
     )
-    title = item.enumeration or item.volume
+    title = _item_title(item)
     if item_location is None:
         # No location to carry an access condition, so the display note stays on the item.
         return Item(id=identifier, title=title, note=item.display_note)
@@ -72,6 +88,30 @@ def _build_item(
                 access_conditions=[access_condition],
             )
         ],
+    )
+
+
+def _item_title(item: FolioEnrichedItem) -> str | None:
+    # The cataloguer-written volume title, else one generated from the copy number.
+    if item.volume is not None:
+        return item.volume
+    if item.copy_number is not None:
+        return f"Copy {item.copy_number}"
+    return None
+
+
+def _has_generated_title(item: FolioEnrichedItem) -> bool:
+    return item.volume is None and item.copy_number is not None
+
+
+def _sierra_predecessor(item: FolioEnrichedItem) -> SourceIdentifier | None:
+    # Keyed as the Sierra transformer keyed the item, so it keeps that canonical id.
+    if (value := extract_sierra_item_predecessor_id(item.former_ids)) is None:
+        return None
+    return SourceIdentifier(
+        identifier_type=Id(id="sierra-system-number"),
+        ontology_type="Item",
+        value=value,
     )
 
 
