@@ -31,6 +31,7 @@ from tests.merger.works import (
     mets_work,
     miro_work,
     physical_item,
+    physical_location,
     sierra_digital_work,
     sierra_pair,
     sierra_physical_work,
@@ -270,6 +271,16 @@ DIGITISED, PHYSICAL = sierra_pair()
             calm_work(items=[digital_item()]),
             False,
             id="a CMS work with a digital item is not a single physical item CMS work",
+        ),
+        pytest.param(
+            predicates.single_physical_item_cms_work,
+            calm_work(
+                items=[
+                    physical_item(locations=[physical_location(), physical_location()])
+                ]
+            ),
+            False,
+            id="a CMS work with an item in two locations is not a single physical item CMS work",
         ),
         pytest.param(
             predicates.single_physical_item_cms_work,
