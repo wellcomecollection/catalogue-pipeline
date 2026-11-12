@@ -1,7 +1,7 @@
 from pydantic import Field
 
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Concept, Contributor, Genre, Subject
+from models.pipeline.concept import Contributor, Genre, Period, Subject
 from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Language
@@ -23,7 +23,7 @@ class WorkData(SerialisableModel):
     description: str | None = None
     physical_description: str | None = None
     lettering: str | None = None
-    created_date: Concept | None = None
+    created_date: Period | None = None
     subjects: list[Subject] = Field(default_factory=list)
     genres: list[Genre] = Field(default_factory=list)
     contributors: list[Contributor] = Field(default_factory=list)

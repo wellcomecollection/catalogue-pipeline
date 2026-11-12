@@ -1,3 +1,5 @@
+from pydantic import Field
+
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.id_label import Id
 from models.pipeline.work import (
@@ -7,6 +9,7 @@ from models.pipeline.work import (
     VisibleWork,
     Work,
 )
+from models.pipeline.work_data import WorkData
 from models.pipeline.work_state import WorkState
 
 
@@ -50,4 +53,4 @@ class DeletedMergedWork(DeletedWork, MergedWork):
 
 
 class RedirectedMergedWork(RedirectedWork, MergedWork):
-    pass
+    data: WorkData = Field(default_factory=WorkData, exclude=True)

@@ -1,8 +1,12 @@
 """The merger step: what it reads, writes and reports on each run."""
 
+from pathlib import Path
+
 import polars as pl
 import pytest
+from pyiceberg.catalog.sql import SqlCatalog
 
+from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from merger import components as storage
 from merger.models.step_events import MergerEvent
 from merger.steps import merger
@@ -99,13 +103,28 @@ def test_reads_the_current_snapshot_unless_one_is_given(
     assert run(monkeypatch, pinned, snapshot_id=7).iceberg_snapshot_id == 5
 
 
-def test_an_empty_table_is_an_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    table = iceberg_table(works({}))
-    table.current_snapshot.return_value = None
+@pytest.mark.parametrize("appended", [False, True])
+def test_an_empty_table_reports_nothing_changed(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, appended: bool
+) -> None:
+    """A new pipeline's table has no snapshot; an append of no rows gives one with no files."""
+    catalog = SqlCatalog(
+        "test", uri=f"sqlite:///{tmp_path}/catalog.db", warehouse=f"file://{tmp_path}"
+    )
+    catalog.create_namespace("ns")
+    table = catalog.create_table("ns.works", schema=WORKS_IDENTIFIED_ICEBERG_SCHEMA)
+    if appended:
+        table.append(table.schema().as_arrow().empty_table())
     monkeypatch.setattr(merger, "get_works_identified_table", lambda use_rest: table)
+    monkeypatch.setattr(storage, "df_from_s3_parquet", read_like_s3)
 
-    with pytest.raises(ValueError, match="empty"):
-        merger.handler(EVENT)
+    result = merger.handler(EVENT)
+
+    assert (result.iceberg_snapshot_id is None) == (not appended)
+    assert (result.work_count, result.changed_work_count) == (0, 0)
+    assert result.changed_component_count == 0
+    assert written(result.changed_components_s3_uri) == {}
+    assert df_from_s3_parquet(EVENT.components_s3_uri).height == 0
 
 
 def test_the_baseline_is_shared_by_jobs_and_the_changed_file_is_not() -> None:

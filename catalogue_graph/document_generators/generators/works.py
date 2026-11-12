@@ -17,7 +17,7 @@ from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from models.graph_node import Work
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Concept, Contributor, Genre, Subject
+from models.pipeline.concept import Contributor, Genre, Period, Subject
 from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Id, Language
@@ -40,7 +40,7 @@ def create_work_data(
     description: str | None = None,
     physical_description: str | None = None,
     reference_number: str | None = None,
-    created_date: Concept | None = None,
+    created_date: Period | None = None,
     current_frequency: str | None = None,
     contributors: list[Contributor] | None = None,
     genres: list[Genre] | None = None,
@@ -110,7 +110,7 @@ def create_visible_merged_work(
     description: str | None = None,
     physical_description: str | None = None,
     reference_number: str | None = None,
-    created_date: Concept | None = None,
+    created_date: Period | None = None,
     current_frequency: str | None = None,
     contributors: list[Contributor] | None = None,
     genres: list[Genre] | None = None,
