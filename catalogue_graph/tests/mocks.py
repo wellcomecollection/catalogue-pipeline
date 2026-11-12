@@ -530,13 +530,20 @@ class MockElasticsearchClient:
     def _matches_range_filters(self, query: dict, document: dict) -> bool:
         if not self.apply_range_filters:
             return True
+        return self._evaluate(query, document["_source"]) is not False
 
-        clauses = [query, *query.get("bool", {}).get("must", [])]
-        for clause in clauses:
-            for field, bounds in clause.get("range", {}).items():
-                value: Any = document["_source"]
-                for key in field.split("."):
-                    value = value.get(key) if isinstance(value, dict) else None
+    @staticmethod
+    def _field_value(source: dict, field: str) -> Any:
+        value: Any = source
+        for key in field.split("."):
+            value = value.get(key) if isinstance(value, dict) else None
+        return value
+
+    def _evaluate(self, clause: dict, source: dict) -> bool | None:
+        """Evaluates range, exists and bool clauses; None for clause types the mock doesn't model."""
+        if "range" in clause:
+            for field, bounds in clause["range"].items():
+                value = self._field_value(source, field)
                 if value is None:
                     return False
                 parsed = self._parse_utc(value)
@@ -544,7 +551,30 @@ class MockElasticsearchClient:
                     return False
                 if "lte" in bounds and parsed > self._parse_utc(bounds["lte"]):
                     return False
-        return True
+            return True
+        if "exists" in clause:
+            return self._field_value(source, clause["exists"]["field"]) is not None
+        if "bool" in clause:
+
+            def as_list(value: Any) -> list[dict]:
+                return value if isinstance(value, list) else [value]
+
+            bool_query = clause["bool"]
+            required = as_list(bool_query.get("must", [])) + as_list(
+                bool_query.get("filter", [])
+            )
+            if any(self._evaluate(c, source) is False for c in required):
+                return False
+            if any(
+                self._evaluate(c, source) is True
+                for c in as_list(bool_query.get("must_not", []))
+            ):
+                return False
+            should = as_list(bool_query.get("should", []))
+            return not should or any(
+                self._evaluate(c, source) is not False for c in should
+            )
+        return None
 
     def search(self, body: dict) -> dict:  # noqa: D401
         self.queries.append(body["query"])

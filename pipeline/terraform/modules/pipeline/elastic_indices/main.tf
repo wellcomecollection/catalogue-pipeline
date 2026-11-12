@@ -1,5 +1,10 @@
 locals {
   es_config_path = "${path.root}/../../../index_config"
+  mapping_has_indexed_at = {
+    for name in distinct(flatten([
+      for date, cfg in var.index_config : [try(cfg.works.denormalised, ""), try(cfg.images.initial, "")]
+    ])) : name => contains(keys(jsondecode(file("${local.es_config_path}/mappings.${name}.json")).properties), "indexed_at") if name != ""
+  }
   index_config_dates = [
     for date, cfg in var.index_config : {
       date     = date
@@ -25,6 +30,8 @@ locals {
     for cfg in local.index_config_dates : {
       name          = "works-denormalised-${cfg.date}"
       mappings_name = cfg.works.denormalised
+      # Stamped only where the mapping has indexed_at; windows fall back to the matcher's time without it
+      default_pipeline = local.mapping_has_indexed_at[cfg.works.denormalised] ? elasticstack_elasticsearch_ingest_pipeline.set_indexed_at.name : null
     } if try(cfg.works.denormalised, null) != null && cfg.works.denormalised != ""
   ]
   works_indexed_list = [
@@ -37,6 +44,8 @@ locals {
     for cfg in local.index_config_dates : {
       name          = "images-initial-${cfg.date}"
       mappings_name = cfg.images.initial
+      # Stamped only where the mapping has indexed_at; windows fall back to the matcher's time without it
+      default_pipeline = local.mapping_has_indexed_at[cfg.images.initial] ? elasticstack_elasticsearch_ingest_pipeline.set_indexed_at.name : null
     } if try(cfg.images.initial, null) != null && cfg.images.initial != ""
   ]
   images_augmented_list = [
