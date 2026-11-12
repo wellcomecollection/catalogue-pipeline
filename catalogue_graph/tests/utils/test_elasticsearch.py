@@ -18,6 +18,17 @@ def test_get_client_arguments_are_accepted_by_the_real_client(
     assert isinstance(client, RealElasticsearch)
 
 
+def test_get_client_compresses_by_default(monkeypatch: MonkeyPatch) -> None:
+    captured: dict = {}
+
+    def fake_client(*args: object, **kwargs: object) -> None:
+        captured.update(kwargs)
+
+    monkeypatch.setattr("elasticsearch.Elasticsearch", fake_client)
+    es_utils.get_client("test_api_key", "2020-01-01", es_mode="local")
+    assert captured["http_compress"] is True
+
+
 def test_get_merged_index_name_uses_merged_date() -> None:
     event = BasePipelineEvent(
         pipeline_date="2023-01-01",
