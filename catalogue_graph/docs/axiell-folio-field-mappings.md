@@ -14,7 +14,7 @@ Holdings record, and an Item. It does this through the FOLIO Inventory API.
 | MARC extraction primitive | `src/adapters/steps/axiell_folio_sync/mapping/marc.py` |
 | Payload contracts | `src/adapters/steps/axiell_folio_sync/mapping/payloads.py` |
 
-Mapping version: **3.2.0** (`config.VERSION`), stamped into every payload's
+Mapping version: **3.3.0** (`config.VERSION`), stamped into every payload's
 `meta` block so you can tell which rules produced a given record.
 
 ## What gets synced
@@ -26,20 +26,40 @@ Two gates, and a record has to pass both:
 | Harvest flag | `980 $a` | Present and non-empty. This is the curator-facing opt-in to the FOLIO sync. |
 | Record level | `351 $c` | Equals `ITEM`, case-insensitive. |
 
-A record failing either gate is skipped: not created, not updated, not
-suppressed, and not counted as an error.
+A record that is not item-level is skipped: not created, not updated, not
+suppressed, and not counted as an error. That includes one that synced as an
+item and has since changed level.
 
-**The un-flag case is undecided.** Unticking Harvest on a record that has
-already synced leaves its FOLIO instance, holdings and item in place,
-unsuppressed and no longer updated. The delete paths work from superseded GUIDs
-and Collections tombstones (see [Deletion](#deletion)), so a flag removal is not
-a delete signal and nothing reclaims the record. Whether it should instead
-suppress them is open
-with Collection Information on wellcomecollection/platform#6663. This is the
-current behaviour, not an agreed rule.
+**Unticking Harvest suppresses; ticking it again restores**, as agreed with
+Collection Information (wellcomecollection/platform#6663). An item-level record
+without `980 $a` has its FOLIO records suppressed with `suppress_by_guid`:
+`discoverySuppress` on the item, holdings and instance, and `staffSuppress` on
+the instance. It is suppressed whatever `HARD_DELETE` says, so it can come back.
+The sync cannot tell an unticked record from one never ticked without looking,
+so each costs three lookups. One with nothing in FOLIO is a no-op, counted in
+`unflagged_never_synced` and `skipped`; `unflagged` counts them all. The
+entities suppressed this way are counted in `unflagged_suppressed`, as well as
+in `suppressed`.
 
-Both gates live in `_passes_selection_gates`, which `is_selected_for_sync` and
-`select_and_build` share so the two cannot disagree.
+An entity whose flags are already set is not written again, so editing a record
+in Collections after it was unticked does not count as a fresh suppression. When
+all three are already suppressed the record is counted in
+`unflagged_already_suppressed` and `skipped`, and gets no manifest entry. A
+record unsuppressed by hand in FOLIO while it is still unticked is suppressed
+again on its next edit, because its flags are no longer set.
+
+A selected record carries `discoverySuppress: false` on all three payloads and
+`staffSuppress: false` on the instance, so ticking Harvest again updates the
+same three records, found by the ids derived from the GUID, and clears the
+suppression. FOLIO does not record who suppressed a record, so this also clears
+a suppression set by hand in FOLIO on the next update of a selected record.
+
+A record unticked and then hard deleted in Collections is hard deleted from
+FOLIO as usual (see [Deletion](#deletion)). Ticked again after that, it would
+be created afresh under the same ids.
+
+The gates live in `builders._selection`, which `is_selected_for_sync`,
+`select_and_build` and `unflagged_guid` share so they cannot disagree.
 
 ## Deletion
 
