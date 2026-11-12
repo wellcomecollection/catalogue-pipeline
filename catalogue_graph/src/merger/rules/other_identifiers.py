@@ -12,13 +12,11 @@ from collections.abc import Sequence
 import structlog
 
 from merger.rules.base import (
-    FieldMergeResult,
-    FieldMergeRule,
-    PartialRule,
+    MergedField,
+    Rule,
     SingleSource,
-    apply_first_applicable,
-    distinct_works,
-    sources_to_redirect,
+    claimed_by,
+    first_applicable,
 )
 from merger.rules.predicates import (
     ebsco_work,
@@ -76,11 +74,11 @@ def allowed_identifiers(source: IdentifiedWork) -> list[SourceIdentifier]:
     return distinct_identifiers([source.state.source_identifier, *others])
 
 
-class AppendAllowedIdentifiers(PartialRule[list[SourceIdentifier]]):
+class AppendAllowedIdentifiers(Rule[list[SourceIdentifier]]):
     """The identifiers the sources add to the target's own."""
 
     @classmethod
-    def rule(
+    def value(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[SourceIdentifier]:
         return [i for source in sources for i in allowed_identifiers(source)]
@@ -125,42 +123,36 @@ class MergeDigitalIntoPhysicalLmsTarget(DigitisedPairSource[list[SourceIdentifie
     accepts_target = physical_lms_work & ~is_audiovisual
 
     @classmethod
-    def rule(
+    def value(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[SourceIdentifier]:
         (digitised,) = sources
         return [digitised.state.source_identifier, *digitised.data.other_identifiers]
 
 
-class OtherIdentifiersRule(FieldMergeRule[list[SourceIdentifier]]):
-    @classmethod
-    def merge(
-        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> FieldMergeResult[list[SourceIdentifier]]:
-        # The EBSCO rule claims its sources without changing the target's identifiers.
-        contributing = [
-            MergeIntoTeiTarget,
-            MergeIntoCmsTarget,
-            MergeSingleMiroIntoSingleOrZeroItemLmsTarget,
-            MergeMiroIntoDigmiroTarget,
+def merge_other_identifiers(
+    target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+) -> MergedField[list[SourceIdentifier]]:
+    # The EBSCO rule claims its sources without changing the target's identifiers.
+    contributing: list[type[Rule[list[SourceIdentifier]]]] = [
+        MergeIntoTeiTarget,
+        MergeIntoCmsTarget,
+        MergeSingleMiroIntoSingleOrZeroItemLmsTarget,
+        MergeMiroIntoDigmiroTarget,
+    ]
+    # The pair's identifiers are added alongside the first of the others.
+    from_pair = MergeDigitalIntoPhysicalLmsTarget.apply(target, sources)
+    from_sources = first_applicable(contributing, target, sources)
+    identifiers = distinct_identifiers(
+        [
+            *target.data.other_identifiers,
+            *(from_pair.value if from_pair else []),
+            *(from_sources.value if from_sources else []),
         ]
-        # The pair's identifiers are added alongside the first of the others.
-        from_pair = MergeDigitalIntoPhysicalLmsTarget.apply(target, sources)
-        from_sources = apply_first_applicable(contributing, target, sources)
-        identifiers = distinct_identifiers(
-            [
-                *target.data.other_identifiers,
-                *(from_pair or []),
-                *(from_sources or []),
-            ]
-        )
-
-        redirecting = [
-            MergeIntoEbscoTarget,
-            *contributing,
-            MergeDigitalIntoPhysicalLmsTarget,
-        ]
-        redirected = sources_to_redirect(redirecting, target, sources)
-        return FieldMergeResult(
-            data=identifiers, redirected_sources=distinct_works(redirected)
-        )
+    )
+    claiming: list[type[Rule[list[SourceIdentifier]]]] = [
+        MergeIntoEbscoTarget,
+        *contributing,
+        MergeDigitalIntoPhysicalLmsTarget,
+    ]
+    return MergedField(identifiers, claimed_by(claiming, target, sources))

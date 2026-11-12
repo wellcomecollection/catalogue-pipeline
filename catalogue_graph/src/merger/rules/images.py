@@ -5,16 +5,9 @@ target of the merge, because it holds the information that decides which images 
 where. The result is still applied to the actual target.
 """
 
-from abc import abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
-from merger.rules.base import (
-    FieldMergeResult,
-    FieldMergeRule,
-    PartialRule,
-    distinct_works,
-    sources_to_redirect,
-)
+from merger.rules.base import MergedField, Rule, claimed_by
 from merger.rules.predicates import (
     lms_work,
     lms_work_digitised_miro,
@@ -28,24 +21,24 @@ from models.pipeline.identified.work import IdentifiedWork, VisibleIdentifiedWor
 from models.pipeline.image import ImageData
 
 
-class FlatImageMergeRule(PartialRule[list[ImageData]]):
-    """Every image of the target and the matching sources."""
+class AllImages(Rule[list[ImageData]]):
+    """Every image of the target and the claimed sources."""
 
     @classmethod
-    def rule(
+    def value(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[ImageData]:
         return [image for work in [target, *sources] for image in work.data.image_data]
 
 
-class PairedMiroImages(FlatImageMergeRule):
+class PairedMiroImages(AllImages):
     """Miro images of a re-digitised work are superseded by the METS images."""
 
     accepts_target = lms_work & ~lms_work_digitised_miro
     accepts_source = single_digital_item_miro_work
 
 
-class MetsPictureAndEphemeraImages(FlatImageMergeRule):
+class MetsPictureAndEphemeraImages(AllImages):
     """Only Pictures and Ephemera emit METS images.
 
     Other formats such as Books have far too many images for the image search.
@@ -55,59 +48,55 @@ class MetsPictureAndEphemeraImages(FlatImageMergeRule):
     accepts_source = single_digital_item_mets_work
 
 
-class ImageRule(FieldMergeRule[list[ImageData]]):
-    @classmethod
-    def merge(
-        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> FieldMergeResult[list[ImageData]]:
-        participants = [
-            target,
-            *(s for s in sources if isinstance(s, VisibleIdentifiedWork)),
-        ]
-        lms_target = choose_target(
-            participants, satisfying=lms_work_digitised_miro
-        ) or choose_target(participants, satisfying=lms_work)
-        if lms_target is None:
-            return FieldMergeResult(data=[], redirected_sources=[])
-        return cls.merge_lms_work_images(lms_target, sources)
-
-    @classmethod
-    @abstractmethod
-    def merge_lms_work_images(
-        cls, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> FieldMergeResult[list[ImageData]]: ...
+type ImageMerge = Callable[
+    [VisibleIdentifiedWork, Sequence[IdentifiedWork]], MergedField[list[ImageData]]
+]
 
 
-class ImageDataRule(ImageRule):
+def merge_image_data(
+    target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+) -> MergedField[list[ImageData]]:
     """The images kept on the merged work: Miro only, as METS images are reached via its items."""
-
-    @classmethod
-    def merge_lms_work_images(
-        cls, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> FieldMergeResult[list[ImageData]]:
-        redirected = sources_to_redirect([PairedMiroImages], lms_target, sources)
-        return FieldMergeResult(
-            data=PairedMiroImages.apply(lms_target, sources) or [],
-            redirected_sources=distinct_works(redirected),
-        )
+    return _on_lms_participant(target, sources, _image_data)
 
 
-class ImagesRule(ImageRule):
+def merge_images(
+    target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+) -> MergedField[list[ImageData]]:
     """The images emitted as records: METS images, and Miro images with the METS licence."""
+    return _on_lms_participant(target, sources, _images)
 
-    @classmethod
-    def merge_lms_work_images(
-        cls, lms_target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> FieldMergeResult[list[ImageData]]:
-        mets_images = MetsPictureAndEphemeraImages.apply(lms_target, sources) or []
-        miro_images = [
-            copy_licence_from(image, mets_images)
-            for image in PairedMiroImages.apply(lms_target, sources) or []
-        ]
-        redirected = sources_to_redirect(
-            [MetsPictureAndEphemeraImages, PairedMiroImages], lms_target, sources
-        )
-        return FieldMergeResult(
-            data=mets_images + miro_images,
-            redirected_sources=distinct_works(redirected),
-        )
+
+def _on_lms_participant(
+    target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork], merge: ImageMerge
+) -> MergedField[list[ImageData]]:
+    participants = [
+        target,
+        *(s for s in sources if isinstance(s, VisibleIdentifiedWork)),
+    ]
+    lms = choose_target(participants, satisfying=lms_work_digitised_miro) or (
+        choose_target(participants, satisfying=lms_work)
+    )
+    return merge(lms, sources) if lms else MergedField([], [])
+
+
+def _image_data(
+    lms: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+) -> MergedField[list[ImageData]]:
+    return PairedMiroImages.apply(lms, sources) or MergedField([], [])
+
+
+def _images(
+    lms: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+) -> MergedField[list[ImageData]]:
+    rules: list[type[Rule[list[ImageData]]]] = [
+        MetsPictureAndEphemeraImages,
+        PairedMiroImages,
+    ]
+    mets = MetsPictureAndEphemeraImages.apply(lms, sources)
+    mets_images = mets.value if mets else []
+    miro = PairedMiroImages.apply(lms, sources)
+    miro_images = [
+        copy_licence_from(image, mets_images) for image in (miro.value if miro else [])
+    ]
+    return MergedField(mets_images + miro_images, claimed_by(rules, lms, sources))

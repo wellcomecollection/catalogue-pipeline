@@ -1,12 +1,10 @@
 """The shape of a merge rule.
 
-A field rule computes one field of the merged target from the target and its sources,
-and reports which sources it drew on; those sources are redirected to the target.
-
-A field rule is usually assembled from partial rules. A partial rule is partial in the
-mathematical sense: it is defined only for some inputs, namely a target and at least
-one source that satisfy its predicates, and has no value for any other. Rules hold no
-state, so they are used as classes.
+A rule merges some sources into some targets. It names the targets and sources it
+accepts, claims the acceptable sources of a merge, and computes one field's value from
+them. Claimed sources are redirected to the target whether or not that rule's value is
+the one used, so a field is merged by asking every rule what it claims and taking the
+value of the first rule that applies. Rules hold no state, so they are used as classes.
 """
 
 from abc import ABC, abstractmethod
@@ -19,75 +17,71 @@ from models.pipeline.identified.work import IdentifiedWork, VisibleIdentifiedWor
 
 
 @dataclass(frozen=True)
-class FieldMergeResult[T]:
-    data: T
-    redirected_sources: list[IdentifiedWork]
+class MergedField[T]:
+    """A field's merged value, and the sources it was drawn from."""
+
+    value: T
+    claimed: list[IdentifiedWork]
 
 
-class FieldMergeRule[T](ABC):
-    @classmethod
-    @abstractmethod
-    def merge(
-        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> FieldMergeResult[T]: ...
-
-
-class PartialRule[T](ABC):
+class Rule[T](ABC):
     accepts_target: Predicate
     accepts_source: Predicate
 
     @classmethod
-    @abstractmethod
-    def rule(cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]) -> T:
-        """The merged field value; only called with a non-empty list of matching sources."""
-
-    @classmethod
-    def merged_sources(
+    def claims(
         cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> list[IdentifiedWork]:
+        """The sources this rule would merge into this target."""
         if cls.accepts_target(target):
             return [source for source in sources if cls.accepts_source(source)]
         return []
 
     @classmethod
-    def apply(
-        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> T | None:
-        """The merged field value, or None when the rule does not apply."""
-        merged = cls.merged_sources(target, sources)
-        return cls.rule(target, merged) if merged else None
-
-
-class SingleSource[T](PartialRule[T]):
-    """Accepts a single source. Several accepted sources are ambiguous, so none is merged."""
+    @abstractmethod
+    def value(cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]) -> T:
+        """The field value from the claimed sources; never called without any."""
 
     @classmethod
-    def merged_sources(
+    def apply(
+        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+    ) -> MergedField[T] | None:
+        """The merged field, or None when the rule claims nothing."""
+        claimed = cls.claims(target, sources)
+        return MergedField(cls.value(target, claimed), claimed) if claimed else None
+
+
+class SingleSource[T](Rule[T]):
+    """Claims a single source. Several acceptable sources are ambiguous, so none is claimed."""
+
+    @classmethod
+    def claims(
         cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
     ) -> list[IdentifiedWork]:
-        merged = super().merged_sources(target, sources)
-        return merged if len(merged) == 1 else []
+        claimed = super().claims(target, sources)
+        return claimed if len(claimed) == 1 else []
 
 
-def apply_first_applicable[T](
-    rules: Sequence[type[PartialRule[T]]],
+def first_applicable[T](
+    rules: Sequence[type[Rule[T]]],
     target: VisibleIdentifiedWork,
     sources: Sequence[IdentifiedWork],
-) -> T | None:
-    """The value of the first partial rule that applies."""
+) -> MergedField[T] | None:
+    """The merged field of the first rule that applies."""
     for rule in rules:
-        value = rule.apply(target, sources)
-        if value is not None:
-            return value
+        merged = rule.apply(target, sources)
+        if merged is not None:
+            return merged
     return None
 
 
-def sources_to_redirect(
-    rules: Sequence[type[PartialRule[Any]]],
+def claimed_by(
+    rules: Sequence[type[Rule[Any]]],
     target: VisibleIdentifiedWork,
     sources: Sequence[IdentifiedWork],
 ) -> list[IdentifiedWork]:
-    return [s for rule in rules for s in rule.merged_sources(target, sources)]
+    """The sources claimed by any of the rules."""
+    return distinct_works(s for rule in rules for s in rule.claims(target, sources))
 
 
 def distinct_works(works: Iterable[IdentifiedWork]) -> list[IdentifiedWork]:

@@ -10,13 +10,12 @@
 from collections.abc import Sequence
 
 from merger.rules.base import (
-    FieldMergeResult,
-    FieldMergeRule,
-    PartialRule,
+    MergedField,
+    Rule,
     SingleSource,
-    apply_first_applicable,
+    claimed_by,
     distinct_works,
-    sources_to_redirect,
+    first_applicable,
 )
 from merger.rules.predicates import (
     born_digital_archive_stub_work,
@@ -46,14 +45,14 @@ def _source_items(sources: Sequence[IdentifiedWork]) -> list[Item]:
     return [item for source in sources for item in source.data.items]
 
 
-class MergeMetsIntoLmsTarget(PartialRule[list[Item]]):
+class MergeMetsIntoLmsTarget(Rule[list[Item]]):
     """A lone LMS item takes the METS locations; otherwise the METS items are appended."""
 
     accepts_target = lms_work
     accepts_source = single_digital_item_mets_work
 
     @classmethod
-    def rule(
+    def value(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[Item]:
         if len(target.data.items) == 1:
@@ -74,7 +73,7 @@ class MergeSingleMiroIntoSingleOrZeroItemLmsTarget(SingleSource[list[Item]]):
     accepts_source = single_digital_item_miro_work
 
     @classmethod
-    def rule(
+    def value(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[Item]:
         if len(target.data.items) == 1:
@@ -82,7 +81,7 @@ class MergeSingleMiroIntoSingleOrZeroItemLmsTarget(SingleSource[list[Item]]):
         return _source_items(sources)
 
 
-class ReplaceTargetItems(PartialRule[list[Item]]):
+class ReplaceTargetItems(Rule[list[Item]]):
     """The sources' items replace the target's own.
 
     CMS items are stubs: the LMS item created when the record was harvested holds the
@@ -95,7 +94,7 @@ class ReplaceTargetItems(PartialRule[list[Item]]):
     )
 
     @classmethod
-    def rule(
+    def value(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[Item]:
         return _source_items(sources)
@@ -115,7 +114,7 @@ class MergeDigitalIntoPhysicalLmsTarget(DigitisedPairSource[list[Item]]):
     accepts_target = physical_lms_work & physical_digital & ~is_audiovisual
 
     @classmethod
-    def rule(
+    def value(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[Item]:
         (digitised,) = sources
@@ -138,29 +137,24 @@ def known_duplicate_sources(
     return []
 
 
-class ItemsRule(FieldMergeRule[list[Item]]):
-    @classmethod
-    def merge(
-        cls, target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-    ) -> FieldMergeResult[list[Item]]:
-        contributing: list[type[PartialRule[list[Item]]]] = [
-            MergeIntoTeiTarget,
-            MergeIntoCmsTarget,
-            MergeMetsIntoLmsTarget,
-            MergeSingleMiroIntoSingleOrZeroItemLmsTarget,
-            MergeDigitalIntoPhysicalLmsTarget,
-        ]
-        items = apply_first_applicable(contributing, target, sources)
-        if items is None:
-            items = cls._unmerged_items(target)
+def merge_items(
+    target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
+) -> MergedField[list[Item]]:
+    rules: list[type[Rule[list[Item]]]] = [
+        MergeIntoTeiTarget,
+        MergeIntoCmsTarget,
+        MergeMetsIntoLmsTarget,
+        MergeSingleMiroIntoSingleOrZeroItemLmsTarget,
+        MergeDigitalIntoPhysicalLmsTarget,
+    ]
+    applied = first_applicable(rules, target, sources)
+    items = applied.value if applied else _unmerged_items(target)
+    claimed = distinct_works(
+        [*claimed_by(rules, target, sources), *known_duplicate_sources(target, sources)]
+    )
+    return MergedField(items, claimed)
 
-        redirected = sources_to_redirect(contributing, target, sources)
-        redirected += known_duplicate_sources(target, sources)
-        return FieldMergeResult(
-            data=items, redirected_sources=distinct_works(redirected)
-        )
 
-    @staticmethod
-    def _unmerged_items(target: VisibleIdentifiedWork) -> list[Item]:
-        """The target's own items when no source replaces them."""
-        return [] if born_digital_archive_stub_work(target) else target.data.items
+def _unmerged_items(target: VisibleIdentifiedWork) -> list[Item]:
+    """The target's own items when no source replaces them."""
+    return [] if born_digital_archive_stub_work(target) else target.data.items

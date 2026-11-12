@@ -2,7 +2,7 @@
 
 import pytest
 
-from merger.rules.images import ImageDataRule, ImagesRule
+from merger.rules.images import merge_image_data, merge_images
 from models.pipeline.format import (
     FORMAT_LABEL_MAPPING,
     Books,
@@ -27,11 +27,11 @@ from tests.merger.works import (
 def test_one_image_per_miro_work_merged_with_a_sierra_work() -> None:
     miro_works = [miro_work() for _ in range(3)]
 
-    result = ImageDataRule.merge(sierra_digital_work(), miro_works)
+    result = merge_image_data(sierra_digital_work(), miro_works)
 
-    assert len(result.data) == 3
+    assert len(result.value) == 3
     assert same_elements(
-        [i.locations for i in result.data],
+        [i.locations for i in result.value],
         [w.data.image_data[0].locations for w in miro_works],
     )
 
@@ -40,11 +40,11 @@ def test_one_image_per_miro_work_merged_with_a_sierra_work() -> None:
 def test_every_mets_image_for_a_sierra_picture_or_ephemera_work(format: Format) -> None:
     mets = invisible_mets_work(num_images=5)
 
-    result = ImagesRule.merge(sierra_work(format=format), [mets])
+    result = merge_images(sierra_work(format=format), [mets])
 
-    assert len(result.data) == 5
+    assert len(result.value) == 5
     assert same_elements(
-        [i.locations for i in result.data], [i.locations for i in mets.data.image_data]
+        [i.locations for i in result.value], [i.locations for i in mets.data.image_data]
     )
 
 
@@ -55,11 +55,11 @@ def test_mets_and_miro_images_for_a_sierra_picture_or_ephemera_work(
     miro_works = [miro_work() for _ in range(4)]
     mets = invisible_mets_work(num_images=3)
 
-    result = ImagesRule.merge(sierra_work(format=format), [*miro_works, mets])
+    result = merge_images(sierra_work(format=format), [*miro_works, mets])
 
-    assert len(result.data) == 7
+    assert len(result.value) == 7
     assert same_elements(
-        [i.locations for i in result.data],
+        [i.locations for i in result.value],
         [i.locations for i in mets.data.image_data]
         + [w.data.image_data[0].locations for w in miro_works],
     )
@@ -74,11 +74,11 @@ def test_the_mets_licence_overrides_the_miro_licence() -> None:
     ]
     mets = invisible_mets_work(num_images=3, license=IN_COPYRIGHT)
 
-    result = ImagesRule.merge(sierra_work(format=Ephemera), [*miro_works, mets])
+    result = merge_images(sierra_work(format=Ephemera), [*miro_works, mets])
 
-    assert len(result.data) == 7
+    assert len(result.value) == 7
     assert same_elements(
-        [i.locations for i in result.data],
+        [i.locations for i in result.value],
         [i.locations for i in mets.data.image_data] + expected_miro_locations,
     )
 
@@ -87,11 +87,11 @@ def test_mets_images_are_ignored_for_other_formats_but_miro_images_are_used() ->
     mets = invisible_mets_work(num_images=3)
     miro_works = [miro_work() for _ in range(3)]
 
-    result = ImagesRule.merge(sierra_digital_work(), [*miro_works, mets])
+    result = merge_images(sierra_digital_work(), [*miro_works, mets])
 
-    assert len(result.data) == 3
+    assert len(result.value) == 3
     assert same_elements(
-        [i.locations for i in result.data],
+        [i.locations for i in result.value],
         [w.data.image_data[0].locations for w in miro_works],
     )
 
@@ -105,9 +105,9 @@ def test_miro_images_are_dropped_when_a_re_digitised_work_has_a_mets_image(
         format=Pictures, other_identifiers=[digcode_identifier(digcode)]
     )
 
-    result = ImagesRule.merge(sierra, [miro_work(), mets])
+    result = merge_images(sierra, [miro_work(), mets])
 
-    assert same_elements(result.data, mets.data.image_data)
+    assert same_elements(result.value, mets.data.image_data)
 
 
 def test_no_images_are_kept_on_a_re_digitised_work_with_several_mets_images() -> None:
@@ -116,7 +116,7 @@ def test_no_images_are_kept_on_a_re_digitised_work_with_several_mets_images() ->
         format=Books, other_identifiers=[digcode_identifier("digmiro")]
     )
 
-    assert ImageDataRule.merge(sierra, [miro_work(), mets]).data == []
+    assert merge_image_data(sierra, [miro_work(), mets]).value == []
 
 
 def test_miro_images_are_dropped_when_several_miro_and_mets_images_are_present() -> (
@@ -127,9 +127,9 @@ def test_miro_images_are_dropped_when_several_miro_and_mets_images_are_present()
         format=Pictures, other_identifiers=[digcode_identifier("digmiro")]
     )
 
-    result = ImagesRule.merge(sierra, [miro_work(), miro_work(), miro_work(), mets])
+    result = merge_images(sierra, [miro_work(), miro_work(), miro_work(), mets])
 
-    assert same_elements(result.data, mets.data.image_data)
+    assert same_elements(result.value, mets.data.image_data)
 
 
 def test_miro_images_are_kept_without_a_re_digitised_digcode() -> None:
@@ -139,10 +139,10 @@ def test_miro_images_are_kept_without_a_re_digitised_digcode() -> None:
         format=Pictures, other_identifiers=[digcode_identifier("digicon")]
     )
 
-    result = ImagesRule.merge(sierra, [miro, mets])
+    result = merge_images(sierra, [miro, mets])
 
-    assert len(result.data) == 2
-    assert same_elements(result.data, mets.data.image_data + miro.data.image_data)
+    assert len(result.value) == 2
+    assert same_elements(result.value, mets.data.image_data + miro.data.image_data)
 
 
 def test_a_re_digitised_work_is_recognised_among_other_digcodes() -> None:
@@ -156,9 +156,9 @@ def test_a_re_digitised_work_is_recognised_among_other_digcodes() -> None:
         ],
     )
 
-    result = ImagesRule.merge(sierra, [miro_work(), mets])
+    result = merge_images(sierra, [miro_work(), mets])
 
-    assert same_elements(result.data, mets.data.image_data)
+    assert same_elements(result.value, mets.data.image_data)
 
 
 def test_a_re_digitised_work_is_recognised_when_an_unmarked_sierra_work_is_the_target() -> (
@@ -169,9 +169,9 @@ def test_a_re_digitised_work_is_recognised_when_an_unmarked_sierra_work_is_the_t
         format=Pictures, other_identifiers=[digcode_identifier("digmiro")]
     )
 
-    result = ImagesRule.merge(sierra_work(), [miro_work(), sierra_digmiro, mets])
+    result = merge_images(sierra_work(), [miro_work(), sierra_digmiro, mets])
 
-    assert same_elements(result.data, mets.data.image_data)
+    assert same_elements(result.value, mets.data.image_data)
 
 
 ALL_FORMATS = [Format(id=i, label=label) for i, label in FORMAT_LABEL_MAPPING.items()]
@@ -191,8 +191,8 @@ def test_a_re_digitised_work_of_any_format_takes_no_images_from_miro_alone(
 ) -> None:
     sierra = re_digitised_sierra(format)
 
-    assert ImageDataRule.merge(sierra, [miro_work()]).data == []
-    assert ImagesRule.merge(sierra, [miro_work()]).data == []
+    assert merge_image_data(sierra, [miro_work()]).value == []
+    assert merge_images(sierra, [miro_work()]).value == []
 
 
 @pytest.mark.parametrize("format", ALL_FORMATS, ids=[f.id for f in ALL_FORMATS])
@@ -203,6 +203,6 @@ def test_a_re_digitised_work_emits_mets_images_only_for_pictures_and_ephemera(
     mets = invisible_mets_work(num_images=1)
     sources = [miro_work(), mets, miro_work()]
 
-    assert ImageDataRule.merge(sierra, sources).data == []
+    assert merge_image_data(sierra, sources).value == []
     expected = mets.data.image_data if format.id in (Pictures.id, Ephemera.id) else []
-    assert same_elements(ImagesRule.merge(sierra, sources).data, expected)
+    assert same_elements(merge_images(sierra, sources).value, expected)

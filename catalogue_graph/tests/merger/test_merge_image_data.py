@@ -2,7 +2,7 @@
 
 import pytest
 
-from merger.rules.images import ImageDataRule
+from merger.rules.images import merge_image_data
 from tests.merger.works import (
     calm_work,
     digcode_identifier,
@@ -15,16 +15,16 @@ from tests.merger.works import (
 
 
 def test_no_images_without_sources() -> None:
-    assert ImageDataRule.merge(sierra_digital_work(), []).data == []
+    assert merge_image_data(sierra_digital_work(), []).value == []
 
 
 def test_images_from_miro() -> None:
     miro_works = [miro_work() for _ in range(5)]
 
-    result = ImageDataRule.merge(sierra_digital_work(), miro_works)
+    result = merge_image_data(sierra_digital_work(), miro_works)
 
     assert same_elements(
-        result.data, [i for w in miro_works for i in w.data.image_data]
+        result.value, [i for w in miro_works for i in w.data.image_data]
     )
 
 
@@ -32,11 +32,11 @@ def test_no_images_from_mets() -> None:
     miro_works = [miro_work() for _ in range(5)]
     mets = invisible_mets_work(num_images=3)
 
-    result = ImageDataRule.merge(sierra_digital_work(), [*miro_works, mets])
+    result = merge_image_data(sierra_digital_work(), [*miro_works, mets])
 
-    assert len(result.data) == 5
+    assert len(result.value) == 5
     assert same_elements(
-        [i.locations for i in result.data],
+        [i.locations for i in result.value],
         [w.data.image_data[0].locations for w in miro_works],
     )
 
@@ -46,7 +46,7 @@ def test_miro_images_are_discarded_for_a_re_digitised_sierra_work(digcode: str) 
     sierra = sierra_digital_work(other_identifiers=[digcode_identifier(digcode)])
     miro_works = [miro_work() for _ in range(5)]
 
-    assert ImageDataRule.merge(sierra, miro_works).data == []
+    assert merge_image_data(sierra, miro_works).value == []
 
 
 def test_re_digitised_miro_images_are_discarded_for_a_tei_target() -> None:
@@ -54,26 +54,26 @@ def test_re_digitised_miro_images_are_discarded_for_a_tei_target() -> None:
     miro_works = [miro_work() for _ in range(5)]
     mets = invisible_mets_work(num_images=3)
 
-    result = ImageDataRule.merge(tei_work(), [*miro_works, sierra, mets])
+    result = merge_image_data(tei_work(), [*miro_works, sierra, mets])
 
-    assert result.data == []
+    assert result.value == []
 
 
 def test_re_digitised_miro_images_are_discarded_for_a_calm_target() -> None:
     sierra = sierra_digital_work(other_identifiers=[digcode_identifier("digmiro")])
     miro_works = [miro_work() for _ in range(5)]
 
-    assert ImageDataRule.merge(calm_work(), [*miro_works, sierra]).data == []
+    assert merge_image_data(calm_work(), [*miro_works, sierra]).value == []
 
 
 def test_miro_images_are_kept_for_a_sierra_work_with_other_digcodes() -> None:
     sierra = sierra_digital_work(other_identifiers=[digcode_identifier("digicon")])
     miro_works = [miro_work() for _ in range(5)]
 
-    result = ImageDataRule.merge(sierra, miro_works)
+    result = merge_image_data(sierra, miro_works)
 
     assert same_elements(
-        result.data, [i for w in miro_works for i in w.data.image_data]
+        result.value, [i for w in miro_works for i in w.data.image_data]
     )
 
 
@@ -89,4 +89,4 @@ def test_miro_images_are_discarded_when_a_re_digitised_digcode_is_among_others()
     )
     miro_works = [miro_work() for _ in range(5)]
 
-    assert ImageDataRule.merge(sierra, miro_works).data == []
+    assert merge_image_data(sierra, miro_works).value == []
