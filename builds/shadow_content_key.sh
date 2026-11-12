@@ -38,16 +38,18 @@ then
   fi
   echo "$KEY" > "$KEY_FILE"
 
-  EXISTING=$(aws ecr describe-images \
-    --repository-name "$ECR_REPOSITORY" \
-    --image-ids imageTag="content.$KEY" \
-    --query 'imageDetails[0].imageDigest' --output text 2>/dev/null) || EXISTING=""
-
-  if [[ -n "$EXISTING" && "$EXISTING" != "None" ]]
+  # Only a missing image is a miss; any other error is logged as unknown so it can't skew the count
+  if EXISTING=$(aws ecr describe-images \
+      --repository-name "$ECR_REPOSITORY" \
+      --image-ids imageTag="content.$KEY" \
+      --query 'imageDetails[0].imageDigest' --output text 2>&1)
   then
     echo "content-key: $PROJECT $KEY would reuse $EXISTING"
-  else
+  elif grep -q ImageNotFoundException <<< "$EXISTING"
+  then
     echo "content-key: $PROJECT $KEY would push a new image"
+  else
+    echo "content-key: $PROJECT $KEY lookup failed: $EXISTING"
   fi
 elif [[ "$MODE" == "tag" ]]
 then
