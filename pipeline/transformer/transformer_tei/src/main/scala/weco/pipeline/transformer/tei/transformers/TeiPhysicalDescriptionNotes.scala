@@ -51,6 +51,8 @@ object TeiPhysicalDescriptionNotes {
         e.child
           .map(c => (textOf(c), separateElements(c.label)))
           .foldLeft(("", false)) {
+            // Comments and dropped measurements leave no trace
+            case ((acc, prevSeparate), ("", _)) => (acc, prevSeparate)
             case ((acc, prevSeparate), (text, separate)) =>
               val needsSpace = (prevSeparate || separate) &&
                 acc.lastOption.exists(c => !c.isWhitespace && c != '(') &&
@@ -126,7 +128,7 @@ object TeiPhysicalDescriptionNotes {
         val (locus, rest) =
           layout.child.dropWhile(_.text.trim.isEmpty).toList match {
             case first :: rest if first.label == "locus" =>
-              (NormaliseText(textOf(first).stripSuffix(":")), rest)
+              (NormaliseText(textOf(first).trim.stripSuffix(":")), rest)
             case children => (None, children)
           }
         val text = NormaliseText(

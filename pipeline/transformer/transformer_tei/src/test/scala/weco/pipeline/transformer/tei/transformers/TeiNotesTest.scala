@@ -640,6 +640,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
               <layout writtenLines="20" ruledLines="20">20 ruled lines</layout>
               <layout writtenLines="20 24">20 lines on the first leaf.</layout>
               <layout ruledLines="6"><locus>f. 2r:</locus> 6 lines.</layout>
+              <layout ruledLines="6"><locus>f. 3r: </locus> 6 lines.</layout>
               <layout>(drypoint)<locus>(f. 3)</locus>, ink <locus>(f. 4)</locus>.</layout>
               <layout writtenLines="&lt;!-- Insert number here --&gt;"/>
             </layoutDesc>
@@ -663,6 +664,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
           "20 to 24 written lines; 20 lines on the first leaf."
         ),
         Note(NoteType.LayoutNote, "f. 2r: 6 lines."),
+        Note(NoteType.LayoutNote, "f. 3r: 6 lines."),
         Note(NoteType.LayoutNote, "(drypoint) (f. 3), ink (f. 4).")
       )
     }
@@ -685,6 +687,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
         <physDesc>
           <decoDesc>
             <decoNote type="illustration"><locus>f. 1<hi>r</hi></locus>Test drawing</decoNote>
+            <decoNote type="border"><locus>f. 2r</locus><!-- insert description --><measure>90</measure>Test frame</decoNote>
             <decoNote type="unwan">ʿUnwān in red</decoNote>
             <decoNote type="rubrication">Occasional rubrication</decoNote>
           </decoDesc>
@@ -703,6 +706,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
           "Chain distance ca. 26 mm, no watermark"
         ),
         Note(NoteType.DecorationNote, "Illustration: f. 1r Test drawing"),
+        Note(NoteType.DecorationNote, "Border: f. 2r Test frame"),
         Note(NoteType.DecorationNote, "ʿUnwān in red"),
         Note(NoteType.DecorationNote, "Occasional rubrication")
       )
