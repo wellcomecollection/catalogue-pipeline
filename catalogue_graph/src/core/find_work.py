@@ -68,6 +68,27 @@ def plan_partitions[PartitionT: BaseModel](
     ]
 
 
+def group_by_weight(
+    weighted_ids: Iterable[tuple[str, int]], max_weight: int, max_items: int
+) -> list[list[str]]:
+    """Pack ids, in order, into groups weighing at most max_weight and holding at
+    most max_items; an id heavier than max_weight gets a group of its own."""
+    groups: list[list[str]] = []
+    current: list[str] = []
+    current_weight = 0
+    for item_id, weight in weighted_ids:
+        if current and (
+            current_weight + weight > max_weight or len(current) >= max_items
+        ):
+            groups.append(current)
+            current, current_weight = [], 0
+        current.append(item_id)
+        current_weight += weight
+    if current:
+        groups.append(current)
+    return groups
+
+
 def write_partitions_to_s3(
     partitions: Sequence[BaseModel],
     counts: Sequence[int],

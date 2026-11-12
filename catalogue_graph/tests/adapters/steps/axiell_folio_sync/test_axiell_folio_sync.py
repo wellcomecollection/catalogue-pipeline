@@ -17,6 +17,7 @@ from pydantic import ValidationError
 import adapters.steps.axiell_folio_sync.axiell_folio_sync as sync_mod
 import adapters.steps.axiell_folio_sync.folio.okapi as okapi_mod
 import adapters.steps.axiell_folio_sync.run_axiell_folio_sync as run_sync_mod
+from adapters.steps.axiell_folio_sync.axiell_adapter_read import TombstonedGuid
 from adapters.steps.axiell_folio_sync.folio.okapi import (
     load_okapi_config,
     resolve_folio_target,
@@ -38,7 +39,7 @@ from adapters.utils.axiell_changeset_reader import SupersededGuid
 # 984 $b (normal location — required, the shelf location FOLIO is given).
 SELECTED = (
     "<record>"
-    "<controlfield tag='001'>guid-1</controlfield>"
+    "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
     "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
     "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
     "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
@@ -49,7 +50,7 @@ SELECTED = (
 # Item-level with a title but no 980 $a harvest flag -> not selected.
 UNSELECTED = (
     "<record>"
-    "<controlfield tag='001'>guid-2</controlfield>"
+    "<controlfield tag='001'>00000000-0000-4000-8000-000000000002</controlfield>"
     "<datafield tag='351'><subfield code='c'>ITEM</subfield></datafield>"
     "<datafield tag='245'><subfield code='a'>Skip me</subfield></datafield>"
     "<datafield tag='655'><subfield code='a'>Archives - Non-digital</subfield></datafield>"
@@ -82,13 +83,16 @@ class FakeRefCache:
     def resolve_identifier_type(self, name: str | None) -> str:
         return "idtype-uuid"
 
+    def resolve_statistical_code(self, code: str | None) -> str:
+        return "statcode-uuid"
+
 
 def _row(row_id: str, content: str) -> dict[str, Any]:
     return {"id": row_id, "changeset": "cs1", "content": content, "deleted": False}
 
 
 def _folio_get(path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
-    # Nothing exists yet -> every hrid lookup returns no records -> plan "create".
+    # Nothing exists yet -> every id lookup returns no records -> plan "create".
     return {}
 
 
@@ -126,7 +130,8 @@ def _run(rows: list[dict[str, Any]]) -> Any:
 
 def test_skips_records_without_the_harvest_flag() -> None:
     # The 980 $a harvest flag is the opt-in. The record that carries no flag is
-    # skipped entirely: not created, not updated, not suppressed, and not an error.
+    # not created or updated, and with nothing in FOLIO to suppress it is
+    # skipped, not an error. See test_harvest_untick for one that has synced.
     resp = _run([_row("sel", SELECTED), _row("unsel", UNSELECTED)])
 
     assert resp.counts["total"] == 2
@@ -144,14 +149,17 @@ def test_malformed_xml_recorded_as_error() -> None:
     assert resp.counts["skipped"] == 0
 
 
-def test_loader_tombstone_is_advisory_not_suppressed() -> None:
-    # deleted=true is recorded as an advisory signal, not suppressed/upserted.
+def test_tombstone_row_is_counted_and_never_upserted() -> None:
+    # A tombstone row is counted in the upsert pass but never upserted. Its FOLIO
+    # records are actioned in the second pass, from the tombstones the read step
+    # derives, so with none passed nothing is written.
     tombstone = {**_row("tomb", SELECTED), "deleted": True}
     resp = _run([tombstone])
 
     assert resp.counts["tombstone"] == 1
     assert resp.counts["suppressed"] == 0
     assert resp.counts["created"] == 0  # no upsert happened
+    assert resp.counts["tombstone_deletions"] == 0
     assert resp.total_successful == 0
     assert resp.total_errors == 0
 
@@ -356,7 +364,8 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
     monkeypatch.setattr(sync_mod, "FolioInventoryClient", lambda client: client)
     monkeypatch.setattr(sync_mod, "ssl_context_from_env", lambda: None)
     monkeypatch.setattr(sync_mod, "RefCache", FakeRefCache)
-    monkeypatch.setattr(sync_mod, "read_rows", lambda *a, **kw: ([], []))
+    tombstone = TombstonedGuid("rec-1", "00000000-0000-4000-8000-000000000001", "cs1")
+    monkeypatch.setattr(sync_mod, "read_rows", lambda *a, **kw: ([], [], [tombstone]))
 
     ran: dict[str, Any] = {}
 
@@ -379,6 +388,8 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
     assert ran["folio_target"] == folio_target
     # ...and comes back in the response the caller sees.
     assert response.folio_target == folio_target
+    # The read step's tombstones reach the second pass.
+    assert ran["tombstones"] == [tombstone]
 
 
 def _run_local_handler(
@@ -619,13 +630,17 @@ def test_deletions_suppress_and_are_reported() -> None:
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1"), _superseded("g2")],
+        deletions=[
+            _superseded("00000000-0000-4000-8000-000000000001"),
+            _superseded("00000000-0000-4000-8000-000000000002"),
+        ],
     )
 
     assert resp.total_deletions == 2
     assert resp.counts["deletions"] == 2
     # 2 guids x 3 entities each suppressed.
     assert resp.counts["suppressed"] == 6
+    assert resp.counts["unflagged_suppressed"] == 0
     assert resp.total_errors == 0
     # 2 guids x 3 entities each PUT back suppressed.
     assert len(folio.put_paths) == 6
@@ -649,7 +664,7 @@ def test_deletion_failure_recorded_as_error_without_aborting() -> None:
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1")],
+        deletions=[_superseded("00000000-0000-4000-8000-000000000001")],
     )
 
     assert resp.counts["deletions"] == 1
@@ -703,7 +718,7 @@ def test_hard_delete_mode_deletes_instead_of_suppressing() -> None:
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1")],
+        deletions=[_superseded("00000000-0000-4000-8000-000000000001")],
         hard_delete=True,
     )
 
@@ -735,7 +750,7 @@ def test_partial_hard_delete_cascade_still_counts_the_executed_child() -> None:
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1")],
+        deletions=[_superseded("00000000-0000-4000-8000-000000000001")],
         hard_delete=True,
     )
 
@@ -771,7 +786,7 @@ def test_hard_delete_failure_is_reported_under_delete_stage(
         FakeRefCache(),  # type: ignore[arg-type]
         folio,
         dry_run=False,
-        deletions=[_superseded("g1")],
+        deletions=[_superseded("00000000-0000-4000-8000-000000000001")],
         hard_delete=True,
         manifest_bucket="bucket-1",
     )
@@ -846,7 +861,7 @@ def test_object_number_extracts_the_altrefno_035_stripped() -> None:
 
     xml = (
         "<record>"
-        "<controlfield tag='001'>g1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         "<datafield tag='035'><subfield code='a'>(accession number)Acc123</subfield></datafield>"
         "<datafield tag='035'><subfield code='a'>(AltRefNo)SA/BSI/A/1</subfield></datafield>"
         "<datafield tag='035'><subfield code='a'>(Bibliographic Number)b12345</subfield></datafield>"
@@ -862,7 +877,7 @@ def test_object_number_absent_when_no_altrefno_035() -> None:
 
     xml = (
         "<record>"
-        "<controlfield tag='001'>g1</controlfield>"
+        "<controlfield tag='001'>00000000-0000-4000-8000-000000000001</controlfield>"
         "<datafield tag='035'><subfield code='a'>(accession number)Acc123</subfield></datafield>"
         "<datafield tag='035'><subfield code='a'>(Bibliographic Number)b12345</subfield></datafield>"
         "</record>"
@@ -877,7 +892,11 @@ def test_object_number_maps_to_local_identifier() -> None:
         build_instance,
     )
 
-    rec = CanonicalRecord(source_id="g1", title="A Title", object_number=" AxC-12345 ")
+    rec = CanonicalRecord(
+        source_id="00000000-0000-4000-8000-000000000001",
+        title="A Title",
+        object_number=" AxC-12345 ",
+    )
     instance = build_instance(rec, FakeRefCache())  # type: ignore[arg-type]
 
     assert instance.identifiers is not None
@@ -896,7 +915,9 @@ def test_no_object_number_yields_no_identifiers() -> None:
 
     for object_number in (None, "", "   "):
         rec = CanonicalRecord(
-            source_id="g1", title="A Title", object_number=object_number
+            source_id="00000000-0000-4000-8000-000000000001",
+            title="A Title",
+            object_number=object_number,
         )
         instance = build_instance(rec, FakeRefCache())  # type: ignore[arg-type]
         assert instance.identifiers is None

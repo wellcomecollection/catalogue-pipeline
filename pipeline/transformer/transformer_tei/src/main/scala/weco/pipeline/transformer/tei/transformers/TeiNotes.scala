@@ -3,7 +3,7 @@ package weco.pipeline.transformer.tei.transformers
 import weco.catalogue.internal_model.work.{Note, NoteType}
 import weco.pipeline.transformer.tei.NormaliseText
 
-import scala.xml.{Elem, NodeSeq}
+import scala.xml.{Elem, Node, NodeSeq}
 
 object TeiNotes {
 
@@ -13,11 +13,14 @@ object TeiNotes {
   def apply(node: NodeSeq): List[Note] =
     getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(
       node
-    ) ++ getHandNotes(node)
+    ) ++ getHandNotes(node) ++ TeiPhysicalDescriptionNotes(node) ++
+      getFiliation(node)
 
   private def getDescLevelNotes(xml: Elem): Seq[Note] = {
     val msDesc = xml \\ "msDesc"
-    getHandNotes(msDesc) ++ getHistory(msDesc)
+    getHandNotes(msDesc) ++ TeiPhysicalDescriptionNotes(msDesc) ++ getHistory(
+      msDesc
+    )
   }
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.
@@ -108,8 +111,10 @@ object TeiNotes {
     (nodeSeq \ "physDesc" \ "handDesc" \ "handNote").flatMap {
       n =>
         // if the handNote has a scribe attribute, then it's being extracted as a contributor. No need to extract it again as a note
-        if ((n \@ "scribe").isEmpty) {
-          val label = n.text
+        if (
+          (n \@ "scribe").isEmpty || TeiContributors.writtenByMultipleHands(n)
+        ) {
+          val label = TeiPhysicalDescriptionNotes.textOf(n)
           // scribes can also appear in handNote as <persName role="scr">someone</persName>.
           // Sometimes the persName tags are the only thing in the handNote tag and in that case, and in that case because
           // they are already extracted as contributors, there's no need to extract them again as notes.
@@ -120,13 +125,41 @@ object TeiNotes {
             .filterNot(n => n.label == "persName" && (n \@ "role") == "scr")
             .text
             .trim
-          if (labelNoScribes.nonEmpty) {
-            NormaliseText(label).map(Note(NoteType.HandNote, _))
-          } else {
-            None
-          }
+          val text =
+            if (labelNoScribes.nonEmpty) NormaliseText(label) else None
+          val contents =
+            (getScript(n, text.getOrElse("")).toList ++ text).mkString("<br/>")
+          NormaliseText(contents).map(Note(NoteType.HandNote, _))
         } else None
     }.toList
+
+  // Skipped when the text already gives the script, e.g. "Script: Naskh"
+  private def getScript(handNote: Node, text: String): Option[String] =
+    TeiPhysicalDescriptionNotes.attribute(handNote, "script") match {
+      case "" => None
+      case script
+          if "(?i)\\bscript\\s*:".r.findFirstIn(text).nonEmpty ||
+            Seq(script, readableScript(script)).exists(
+              TeiPhysicalDescriptionNotes.mentions(text, _)
+            ) =>
+        None
+      case script => Some(s"Script: ${readableScript(script)}")
+    }
+
+  // The attribute holds codes, e.g. "ruq_ah" or "capitalsSquare"
+  private def readableScript(script: String): String =
+    script
+      .replace("_", "")
+      .replaceAll("(?<=\\p{Ll})(?=\\p{Lu})", " ")
+      .toLowerCase
+      .capitalize
+
+  /** <filiation> sits directly under msItem. */
+  private def getFiliation(nodeSeq: NodeSeq): List[Note] =
+    TeiPhysicalDescriptionNotes.notes(
+      nodeSeq \ "filiation",
+      NoteType.FiliationNote
+    )
 
   /** Extract the contents of `<history/>` that result in Notes.
     *

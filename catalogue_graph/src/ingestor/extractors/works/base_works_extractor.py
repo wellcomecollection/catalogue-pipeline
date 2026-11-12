@@ -24,6 +24,9 @@ logger = structlog.get_logger(__name__)
 
 WORKS_BATCH_SIZE = 40_000
 
+# Elasticsearch rejects an `ids` query with more values than the index's max result window.
+MAX_IDS_PER_QUERY = 10_000
+
 
 def extract_identified_concept_ids(work_data: WorkData) -> list[str]:
     work_concepts = extract_identified_concepts(work_data)

@@ -13,10 +13,11 @@ https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass
 
 # Bumped whenever the mapping rules change; stamped into every payload's meta.
-VERSION = "2.8.0"
+VERSION = "3.3.0"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────
@@ -117,6 +118,10 @@ AXIELL_NORMAL_LOCATION_NOTE_TYPE = "Axiell Normal Location"
 # FOLIO instance identifier type used for the AxC object_number
 # (the (AltRefNo)-prefixed 035$a).
 LOCAL_IDENTIFIER_TYPE = "Local identifier"
+# FOLIO statistical code, matched on its code, that marks a record as written by
+# this sync. Set on the instance, holdings and item. It must exist in the tenant
+# (Settings, Inventory, Statistical codes), or every record fails to map.
+SYNCED_STATISTICAL_CODE = "AXIELL"
 
 # AxC normal-location (MARC 984$b) codes that map to fixed FOLIO locations.
 # FOLIO's location hierarchy is institution → campus → library → location, but the
@@ -205,16 +210,43 @@ def _folio_location(location: str | None) -> str | None:
     return code
 
 
-def _instance_hrid(source_id: str) -> str:
-    return f"AxC-instance-{source_id}"
+# The FOLIO record ids come from the AxC GUID (MARC 001), which is itself a UUID.
+# The instance takes the GUID as its id, and the holdings and item take a UUIDv5
+# derived in the GUID as namespace, so each id is a pure function of the GUID.
+# That is how the sync and the deletion cascade find a record again with nothing
+# stored. The entity names below must never change: a different name gives every
+# holdings or item a new id, so the sync would no longer find any record it has
+# written and would create duplicates. FOLIO generates the hrid; the sync sends
+# none.
+HOLDINGS_ID_NAME = "holdings"
+ITEM_ID_NAME = "item"
 
 
-def _holdings_hrid(source_id: str) -> str:
-    return f"AxC-holding-{source_id}"
+def _guid(source_id: str) -> uuid.UUID:
+    """The AxC GUID as a UUID.
+
+    Parsing ignores case and surrounding whitespace, so a change of either in 001
+    cannot move a record to a new id. Raises ``ValueError`` if 001 is not a UUID;
+    ``_extract_record`` rejects such a record before any id is derived.
+    """
+    return uuid.UUID(source_id.strip())
 
 
-def _item_hrid(source_id: str) -> str:
-    return f"AxC-item-{source_id}"
+def _guid_label(source_id: str) -> str:
+    """The AxC GUID in its canonical spelling, as staff see it in ``formerIds``."""
+    return str(_guid(source_id))
+
+
+def _instance_id(source_id: str) -> str:
+    return str(_guid(source_id))
+
+
+def _holdings_id(source_id: str) -> str:
+    return str(uuid.uuid5(_guid(source_id), HOLDINGS_ID_NAME))
+
+
+def _item_id(source_id: str) -> str:
+    return str(uuid.uuid5(_guid(source_id), ITEM_ID_NAME))
 
 
 # ── the AxC ⇄ FOLIO field map (single source of truth) ──────────────────────────
@@ -344,6 +376,14 @@ LOCAL_IDENTIFIER_FIELD = FieldMap(
     resolver="resolve_identifier_type",
     default=LOCAL_IDENTIFIER_TYPE,
     label="identifier type",
+)
+
+# The synced marker is a constant too: every record gets the same code.
+SYNCED_STATISTICAL_CODE_FIELD = FieldMap(
+    None,
+    resolver="resolve_statistical_code",
+    default=SYNCED_STATISTICAL_CODE,
+    label="statistical code",
 )
 
 # The full AxC-source table. Resolved rows are the named constants above; the

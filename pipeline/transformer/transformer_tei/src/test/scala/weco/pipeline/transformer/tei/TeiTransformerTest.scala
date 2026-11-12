@@ -96,10 +96,31 @@ class TeiTransformerTest
               contents =
                 "Script: Beautiful Naskh Ink: Black; headings and dividers highlighted in red",
               noteType = NoteType.HandNote
+            ),
+            Note(
+              contents =
+                "Original, Oriental type; slightly worn, blind tooling. On the spine is pasted a library tag with words: طبّ حطى عربى.",
+              noteType = NoteType.BindingInformation
+            ),
+            Note(
+              contents =
+                "Good; traces of worms and occasionally water-stained.",
+              noteType = NoteType.ConditionNote
+            ),
+            Note(contents = "1 column", noteType = NoteType.LayoutNote),
+            Note(
+              contents =
+                "Due to the binding and the subsequent restoration, collation could not be established exactly.",
+              noteType = NoteType.CollationNote
+            ),
+            Note(
+              contents =
+                "Arabic, original. Catchwords are written underneath the text block.",
+              noteType = NoteType.FoliationNote
             )
           ),
           physicalDescription = Some(
-            "Oriental paper of two colours: 'beige' and 'biscuit' and thickness of 0.10 mm.; Material: chart; 529 ff.; leaf dimensions: width 215mm, height 336mm; written dimensions: width 125mm, height 220mm"
+            "Oriental paper of two colours: 'beige' and 'biscuit' and thickness of 0.10 mm.<br/>Material: chart<br/>529 ff.<br/>leaf dimensions: width 215mm, height 336mm<br/>written dimensions: width 125mm, height 220mm"
           )
         ),
         state = Source(

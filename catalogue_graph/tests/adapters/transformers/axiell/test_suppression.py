@@ -45,6 +45,38 @@ def test_publish_to_web_without_explicit_yes_yields_deleted_work(
     assert isinstance(_transform(record), DeletedSourceWork)
 
 
+@pytest.mark.parametrize("marker", ["yes", "no", None])
+def test_for_deletion_checkbox_overrides_publish_to_web(
+    marker: str | None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A ticked "for deletion?" box suppresses without needing publish_to_web unticked."""
+    mock_logger = MagicMock()
+    monkeypatch.setattr(axiell_work_builder, "logger", mock_logger)
+    record = make_axiell_record(publish_to_web=marker, for_deletion=True)
+    assert isinstance(_transform(record), DeletedSourceWork)
+    mock_logger.warning.assert_not_called()
+
+
+def test_unticked_for_deletion_checkbox_leaves_work_visible() -> None:
+    record = make_axiell_record(publish_to_web="yes", for_deletion=False)
+    assert isinstance(_transform(record), VisibleSourceWork)
+
+
+def test_parts_child_links_are_not_a_deletion_marker() -> None:
+    """983 carries child links; a parent with children must stay visible."""
+    record = make_axiell_record(publish_to_web="yes")
+    record.add_field(
+        Field(
+            tag="983",
+            subfields=[
+                Subfield(code="a", value="100002"),
+                Subfield(code="b", value="TEST/1/1"),
+            ],
+        )
+    )
+    assert isinstance(_transform(record), VisibleSourceWork)
+
+
 @pytest.mark.parametrize(
     "status", ["catalogued", "draft", "partially complete", "in progress", None]
 )

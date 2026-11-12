@@ -13,9 +13,10 @@ maps today, see
 | **Loan type** | **Implemented** (mapping version 2.8.0). Derived from `540$a` (use restriction): `Can circulate` for `Online request` and `Restricted` only, `Unavailable` for the rest, including an absent or unlisted term. No access-category ceiling. | [Section 2](#2-loan-type-implemented), [questions 4 and 5](#loan-type) |
 | **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
 | **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
-| **Identifier format** (HRID) | **Implemented.** A 45 to 49 character string built from the AxC GUID. Whether that format is acceptable is open, and it cannot change after the first run. | [Question 10](#identifiers) |
-| **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | [Question 9](#material-type-and-selection) |
-| **Deletion** of a Collect record | **Implemented, both ways.** Suppresses by default; `HARD_DELETE` switches it to an irreversible delete. Which one is policy, not development. | [Question 11](#deletion) |
+| **Statistical code** (access) | **Proposed, not implemented.** The sync writes none, so a synced item no status row catches reaches the access decision table's fallback. Proposal: one code from the migrated Sierra OPAC message vocabulary, taken from `506$f` (access category) where it names a coded state, otherwise from `540$a` (use restriction). | [Section 5](#5-statistical-code-proposed-not-implemented), [questions 12 and 13](#statistical-code) |
+| **Record identity** (HRID) | **Implemented** (ids in mapping version 3.0.0, labels and marker in 3.1.0, item GUID label dropped in 3.2.0). Records are found by an id derived from the AxC GUID (the GUID itself for the instance, a `uuid5` in it for the holdings and item), and the sync sends no HRID, so FOLIO generates it. Holdings carry the GUID in `formerIds`, and all three carry the `AXIELL` statistical code, which still has to be created on prod. Tracked in wellcomecollection/platform#6805. | [Question 10](#identifiers) |
+| **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Decided and implemented** (mapping version 3.3.0). Unticking Harvest suppresses an item-level record's FOLIO records; ticking it again restores the same records. Tracked in wellcomecollection/platform#6834. | [Question 9](#material-type-and-selection) |
+| **Deletion** of a Collect record | **Decided and implemented: hard delete.** Both a superseded GUID and a Collections tombstone delete the item, holdings and instance, child first. `HARD_DELETE` is `true` in Terraform. Tracked in wellcomecollection/platform#6833. | [Question 11](#deletion) |
 
 Nothing in this document is implemented beyond what the State column says is
 implemented. The code is unchanged pending these answers.
@@ -42,6 +43,8 @@ and it is section 1.**
 | Location rule coverage | Same table, applying `LOCATION_RULES` to the leading code of every selectable `984$b` (normal location). Pure code, no FOLIO call | 2026-10-13 |
 | `540$a` and the loan-type mapping | Same table, applying the mapping in section 2 to every selectable record and cross-tabulating the result against `506$f`. Confirms 0 multi-valued records and the eight-term vocabulary | 2026-10-13 |
 | FOLIO reference data | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
+| Record identity | GUID format from the first 2,000 adapter rows (UUIDv4 in every `001`). Client-supplied ids and FOLIO-generated hrids on the dev sandbox (instance, holdings, item) and on prod (one instance, created then deleted). `AXIELL` code on the sandbox only. See [axiell-folio-record-identity.md](axiell-folio-record-identity.md) | 2026-10-20 |
+| Statistical code vocabulary | [decision-table.md](folio/access-conditions/decision-table.md) (platform#6589), from the prod tenant pull | 2026-10-01 |
 | AxC to MARC | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
 
 Counts are item-level only (record level `351$c == ITEM`), so percentages are of
@@ -293,7 +296,115 @@ should be confirmed against this tenant's FOLIO version.
 
 ---
 
-## 5. Decisions needed from Collection Information
+## 5. Statistical code: proposed, not implemented
+
+The access condition decision table for migrated Sierra items
+([decision-table.md](folio/access-conditions/decision-table.md), platform#6589)
+decides most outcomes on the item's statistical code, which is where the
+migration put the Sierra OPAC message, one code per value. The sync writes no
+such code, so a synced item that no status row catches reaches the table's
+`fallback` row: not requestable, with the contact note. This section proposes
+sending one code from the same vocabulary, so synced items go through the same
+rows as migrated ones.
+
+### The vocabulary
+
+The codes the migration created, as the tenant held them on 2026-10-01, and the
+row of the decision table each one drives:
+
+| Statistical code | Row | What the reader sees |
+| --- | --- | --- |
+| `ONLINE REQUEST` | `online-request`, closed stores only | online request, open |
+| `RESTRICTED` | `restricted`, closed stores only | online request, restricted |
+| `BY APPOINTMENT` | `by-appointment` | manual request, by appointment |
+| `MANUAL REQUEST` | `manual-request` | manual request, with the manual-request note |
+| `SAFEGUARDED` | `safeguarded` | not requestable, safeguarded |
+| `DIGITISATION` | `digitisation` | not requestable, temporarily unavailable |
+| `OPEN SHELVES` | `open-shelves`, open shelves only | open shelves |
+| `UNAVAILABLE` | none: the table keys unavailability on the item status | |
+| `AVAILABLE` | none: Collection Information lists it as an incorrect mapping meant for bound-with items | |
+
+Two more codes have rows but were not in the tenant: `CLOSED` (`closed`: not
+requestable, closed) and `DONOR PERMISSION` (`donor-permission`: manual request,
+permission required). Both would need provisioning before the sync could send
+them.
+
+### The proposal
+
+One code per item. `506$f` (access category) decides it where it names a state
+the table holds as a code. Otherwise `540$a` (use restriction) decides it,
+because it is the AxC field closest to the OPAC message: it says how a reader
+gets the item, and its terms are mostly the OPAC message terms already. This is
+a proposal to Collection Information, not something they have agreed.
+
+| AxC value | Records | Statistical code | Item status | Row reached |
+| --- | ---: | --- | --- | --- |
+| `506$f` `CLOSED` | 9,819 | `CLOSED` | `Unavailable`, unchanged | `closed` |
+| `506$f` `SAFEGUARDED` | in 357 | `SAFEGUARDED` | `Available`, was `Restricted` | `safeguarded` |
+| `506$f` `PERMISSIONREQUIRED` | in 357 | `DONOR PERMISSION` | `Available`, was `Restricted` | `donor-permission` |
+| otherwise `540$a` `Online request` | 143,787 | `ONLINE REQUEST` | from `506$f`, as today | `online-request` |
+| `540$a` `Restricted` | 5,144 | `RESTRICTED` | as today | `restricted` |
+| `540$a` `By appointment` | 21,314 | `BY APPOINTMENT` | as today | `by-appointment` |
+| `540$a` `By approval` | 345 | `DONOR PERMISSION` | as today | `donor-permission` |
+| `540$a` `Manual request` | 1 | `MANUAL REQUEST` | as today | `manual-request` |
+| `540$a` `Unavailable` | 9,192 | `UNAVAILABLE` | as today | `unavailable` if the status is `Unavailable`, otherwise `not-circulating` (contact note) |
+| `540$a` `Missing`, `Deaccessioned`, absent | 4,109 | none | as today | the status row, otherwise `not-circulating` |
+
+Counts are per source value over the 183,892 selectable records, from the
+2026-10-12 and 2026-10-13 scans. They overlap, because the three `506$f` rows
+take precedence over `540$a` (343 of the 345 `By approval` records are
+`PERMISSIONREQUIRED`, for instance), and the distribution after that precedence
+has not been measured.
+
+The table's status rows (`Missing`, `Withdrawn`, `Unknown`) still come first, as
+they do for migrated items. A `MISSING` item keeps the code from its `540$a`
+underneath, as 1,847 migrated `ONLINE REQUEST` items do, so once staff find it
+and set it `Available` it reaches the right row with nothing else changed.
+
+**The item status change.** Collection Information keeps migrated restricted, by
+appointment, safeguarded and donor permission items `Available`, so that staff
+can still request them, and lets the code carry the restriction. The proposal
+moves the 357 `SAFEGUARDED` and `PERMISSIONREQUIRED` records from `Restricted`
+to `Available` to match. On the item-status gate nothing changes, since
+`Restricted` is pageable like `Available` (question 5). What changes is that
+synced and migrated items look the same to staff, and that `Restricted`, not yet
+confirmed on this FOLIO version, drops out of the mapping.
+
+### What it depends on
+
+- **Location type.** `online-request` and `restricted` match closed stores only.
+  `AxC Euston Road` and `AxC Constantine London West` sit in the `Axiell sync`
+  libraries, which the location-type rule does not cover;
+  [location-mapping.md](folio/location-mapping.md) proposes closed stores for
+  them, pending. Until that lands, every `ONLINE REQUEST` and `RESTRICTED`
+  synced item outside `AxC Deepstore` reaches `fallback`.
+- **Loan type.** `not-circulating` reads a loan type of `Unavailable`, but sits
+  below the restricted states, so the `Unavailable` loan type that mapping 2.8.0
+  gives `By appointment`, `By approval` and `Manual request` does not change
+  what the reader sees. It does differ from migrated items, which Collection
+  Information keeps `Can circulate` so staff can request them. That is part of
+  question 4.
+- **Material type.** The table has no row for the audiovisual material types, so
+  a `Sound - Digital` or `Moving Image - Digital` item with `Online request` in
+  `540$a` would be offered online, whatever its `non-requestable` material type
+  says. Question 7 decides the material type; question 12 asks whether the code
+  should follow it.
+- **The `AXIELL` marker.** Question 10 adds a second statistical code. The table
+  has to read the access code and ignore the marker, and on update the sync
+  replaces only the code it owns from the access vocabulary, keeping the rest,
+  by the same merge rule as question 10.
+- **It is not create-only.** Circulation does not own statistical codes, so the
+  sync can send the code on every run, and an AxC access change reaches the
+  reader through it even though the status does not. That narrows question 6
+  without settling it: an item created `CLOSED` keeps the status `Unavailable`,
+  and the table's `unavailable` row then shows it as temporarily unavailable
+  whatever its new code.
+
+**To decide:** questions 12 and 13.
+
+---
+
+## 6. Decisions needed from Collection Information
 
 ### Location
 
@@ -337,57 +448,84 @@ should be confirmed against this tenant's FOLIO version.
 8. Is failing the right behaviour for the 115 records with no `655$a` (object
    category), or would you rather they defaulted to `archive` and synced?
 9. **When the Harvest flag is unticked on a record that has already synced,
-   should its FOLIO records be suppressed, or left?** Today they are left: the
-   record stops passing the selection gate, so it is skipped and never updated
-   again, while its instance, holdings and item stay in FOLIO unsuppressed with
-   whatever data they last had. Nothing reclaims them, because the only delete
-   path is the reconciler working from superseded GUIDs and a flag removal is
-   not a delete signal. That is current behaviour rather than an agreed rule,
-   and it is the less safe reading: if curators untick Harvest to withdraw
-   something from the LMS, that intent is silently dropped. Tracked in
-   wellcomecollection/platform#6663.
+   should its FOLIO records be suppressed, or left?** Decided: suppressed, and
+   restored when the flag is ticked again. Agreed with Collection Information on
+   wellcomecollection/platform#6663, implemented in mapping 3.3.0
+   (wellcomecollection/platform#6834). An item-level record without `980$a`
+   has `discoverySuppress` set on its item, holdings and instance and
+   `staffSuppress` on the instance, never a hard delete. Ticked again, it updates
+   the same three records and clears the flags. Two consequences were settled
+   in the implementation rather than with Collection Information, and are
+   worth confirming:
+
+   - The flags are cleared on every update of a selected record, because FOLIO
+     does not record who suppressed it. A suppression set by hand in FOLIO on a
+     record that is still ticked is undone on its next update.
+   - A record that stops being item-level (`351$c`) is skipped, not suppressed.
 
 ### Identifiers
 
-10. **Is the FOLIO identifier format acceptable?** Each record gets a
-    predictable hrid built from the Axiell GUID in `001` (record identifier),
-    which is always a 36-character UUID:
+10. **Is the FOLIO identifier format acceptable?** Decided: no. Each record
+    used to get an hrid built from the Axiell GUID in `001` (for example
+    `AxC-instance-<guid>`), and that hrid was how the sync found its own records.
+    Instead (ids implemented in mapping 3.0.0, `formerIds` and marker in 3.1.0, item `formerIds` dropped in 3.2.0):
 
-    | FOLIO record | hrid | Length |
-    | --- | --- | ---: |
-    | Instance | `AxC-instance-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 49 |
-    | Holdings | `AxC-holding-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 48 |
-    | Item | `AxC-item-44c350e7-79d9-4e87-aa1b-ea14ecc22dc8` | 45 |
+    | | Instance | Holdings | Item |
+    | --- | --- | --- | --- |
+    | hrid | Generated by FOLIO; the sync sends none | Same | Same |
+    | `id` (the lookup key) | the GUID itself | `uuid5(<guid>, "holdings")` | `uuid5(<guid>, "item")` |
+    | GUID label | none needed for lookup, since the `id` is the GUID; an `(AxC)` System control number is planned (platform#6771) | `formerIds` | none: the FOLIO transformer reads an item's `formerIds` as its Sierra item number, and the item id is recomputable from the GUID |
+    | Synced marker | `AXIELL` statistical code | Same | Same |
 
-    The `AxC-` prefix identifies the record as synced from Axiell; the hrid also
-    includes the record type and Axiell GUID, making each record easy to find
-    and identify. The human-readable archival reference is carried, but
-    as the instance's `Local identifier` (for example `WMS/Amer.147`, from
-    `035$a(AltRefNo)`, the object number), not as the hrid.
+    The `id` is recomputed from the GUID on every run, so nothing is stored and
+    deletion facts, which carry only the GUID, resolve the same way.
+    The names `holdings` and `item` must never change after the first run.
+    The GUID labels and the marker are for staff, not lookup, so an edit in
+    FOLIO does not break the sync.
 
-    **This needs settling before the first production run.** The hrid is how the
-    sync finds its own records again on every later run, and how the reconciler
-    resolves deletions, so changing the format afterwards would orphan every
-    record already written.
+    The instance needs no GUID label for lookup, because its `id` is the
+    GUID, so the planned "Axiell GUID" identifier type is dropped. It still
+    takes the GUID as an `(AxC)` System control number under change 3 of
+    wellcomecollection/platform#6771, so the harvested MARC carries the 035
+    `(AxC)` that marks it as Axiell-mastered.
 
-    Two smaller points. The prefixes are inconsistent: `AxC-holding-` is
-    singular where FOLIO's entity is a holdings record. And whether FOLIO
-    constrains hrid length or character set has not been verified.
+    `identifiers`, holdings `formerIds` and `statisticalCodeIds` are merged on update,
+    keeping entries the sync does not own: on `identifiers` only the
+    `Local identifier` is replaced, and the other two only ever gain an entry.
+
+    The archival reference stays as the instance's `Local identifier` (for
+    example `WMS/Amer.147`, from `035$a(AltRefNo)`). Prod holds no synced
+    records, so only the dev sandbox needs clearing before the switch. Detail
+    and evidence: [axiell-folio-record-identity.md](axiell-folio-record-identity.md);
+    work: wellcomecollection/platform#6805.
 
 ### Deletion
 
 11. **When a Collect record is deleted, should its FOLIO records be suppressed
-    or hard deleted?** Both paths are implemented and the choice is a runtime
-    flag, so this is a policy decision rather than development work.
+    or hard deleted?** Decided: hard deleted. Agreed with Collection
+    Information and conveyed in the weekly sync meeting, recorded on
+    wellcomecollection/platform#6833 (2026-10-28) in answer to #6664.
+    Implemented 2026-11-03: `HARD_DELETE` is `true` in Terraform, and the sync
+    now acts on Collections tombstones as well as superseded GUIDs.
 
     | | What happens | Reversible |
     | --- | --- | --- |
     | **Suppress** (default) | `discoverySuppress` set on the instance, holdings and item; `staffSuppress` on the instance as well, since it is the only entity FOLIO gives that field | Yes. The records stay, out of discovery, and can be unsuppressed |
     | **Hard delete** | the item, then the holdings, then the instance are DELETEd | **No** |
 
-    Today it suppresses. `HARD_DELETE` defaults to `false`, and the per-run
-    `hard_delete` flag on the event overrides it, so switching is a
-    configuration change.
+    The code default for `HARD_DELETE` is still `false`; Terraform sets it to
+    `true`, and the per-run `hard_delete` flag on the event overrides both.
+
+    Before the decision, only the superseded-GUID path reached FOLIO. A record
+    whose collectId was not reused arrived as an OAI-PMH tombstone, which the
+    sync logged and ignored, following RFC 090's description of the loader's
+    `deleted` flag as unreliable. On inspection that unreliability is a missed
+    delete rather than a false one: the adapter writes a tombstone only when the
+    OAI-PMH server reports `status="deleted"` (an id-mode run never writes one,
+    and the missing-from-snapshot marking is EBSCO's alone), but a reused
+    collectId never produces one, which is why the reconciler exists. The one
+    false-positive case found is a GUID another record also holds, so the sync
+    checks the reconciler store and skips such a tombstone.
 
     Points worth weighing. Suppression keeps an audit trail but can leave
     deleted records visible to cataloguers. Hard delete avoids orphaning parent
@@ -395,9 +533,29 @@ should be confirmed against this tenant's FOLIO version.
     is issued in error, the sync would only recreate the records if the AxC
     record reappeared and passed the harvest gate again.
 
+    Checked on the dev sandbox on 2026-11-03: FOLIO does not refuse the delete
+    when the item has an open loan (written to loan-storage, as the sandbox
+    service point has no calendar for a check-out) or an open Page request. All
+    three records are deleted and the loan or request stays open, pointing at an
+    item that no longer exists. The sync does not check for either. Not yet
+    checked against the production tenant. A record restored in
+    Collections after its FOLIO records were deleted is recreated under the same
+    ids by the next sync, with new HRIDs and none of the FOLIO-side history.
+
     This is different from question 9: there, unticking Harvest means nothing
-    reaches FOLIO at all; here, Collect sends an actual deletion fact and the
-    sync acts on it.
+    reaches FOLIO at all; here, Collect sends an actual deletion and the sync
+    acts on it.
+
+### Statistical code
+
+12. Confirm the statistical code mapping in section 5, in particular:
+    `By approval` and `PERMISSIONREQUIRED` to `DONOR PERMISSION`; `CLOSED` and
+    `SAFEGUARDED` in `506$f` taking precedence over `540$a`; and no code for
+    `Missing`, `Deaccessioned` or an absent `540$a`. Should digital audiovisual
+    material with `Online request` get a non-requestable code instead, to match
+    its material type?
+13. Should `SAFEGUARDED` and `PERMISSIONREQUIRED` items be `Available`, as
+    migrated items with those restrictions are, rather than `Restricted`?
 
 ---
 
@@ -406,4 +564,6 @@ should be confirmed against this tenant's FOLIO version.
 **On the FOLIO tenant**, none of these verified: that `Restricted` and
 `Withdrawn` are accepted by this FOLIO version; what loan policy the circulation
 rules attach to `Can circulate` and whether `Unavailable` genuinely prevents a
-loan; and that the three `AxC *` location names still resolve.
+loan; that the three `AxC *` location names still resolve; and that the
+`CLOSED` and `DONOR PERMISSION` statistical codes exist (neither did on
+2026-10-01).

@@ -80,7 +80,10 @@ recovery from recorded failures is a deliberate, human-started replay.
 Do not redrive a failed execution. The Map state itself never fails (the catch
 records partition failures), so a redrive restarts from `FailPartitions`,
 re-evaluates the same aggregate and fails again. Replay with a fresh
-`StartExecution` as described below.
+`StartExecution` as described below. This matters more for consumers whose
+partitions pin an Iceberg snapshot, such as the adapter transformer: an old
+partition file names a snapshot that table maintenance may since have expired,
+and a fresh execution plans against the current one.
 
 Alerting rides on the module's state machine alarms (`ExecutionsFailed`,
 `ExecutionsAborted`, `ExecutionsTimedOut`, threshold 0, wired to the chatbot

@@ -1,7 +1,18 @@
+from datetime import datetime
+
+from pymarc.record import Record
+
 from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedInstance
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.collection_path import extract_collection_identifier
+from adapters.transformers.folio.electronic_resources import extract_digital_items
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
+from adapters.transformers.folio.items import extract_physical_items
+from adapters.transformers.folio.merge_candidates import extract_merge_candidates
+from adapters.transformers.folio.on_order import (
+    awaiting_cataloguing_item,
+    is_uncatalogued,
+)
 from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
@@ -31,18 +42,17 @@ from models.pipeline.concept import Contributor, Genre, Subject
 from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
     Id,
-    Identifiable,
     SourceIdentifier,
     WorkSourceIdentifier,
 )
 from models.pipeline.item import Item
 from models.pipeline.production import ProductionEvent
-from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
+from models.pipeline.source.work import (
+    DeletedSourceWork,
+    SourceWorkState,
+    VisibleSourceWork,
+)
 from models.pipeline.work_state import WorkAncestor
-
-# The source-identifier type for a FOLIO item. The id-minter turns this plus the
-# item UUID into a stable canonical id for the public catalogue.
-FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
 
 # The Sierra API lists fields grouped by Sierra field tag (host item, series, uniform
 # title), so the works FOLIO replaces have their parents in this order rather than
@@ -51,6 +61,16 @@ SIERRA_PARENT_TAG_ORDER = ("773", "440", "490", "830")
 
 
 class FolioWorkBuilder(MarcXmlWorkBuilder):
+    def __init__(
+        self,
+        record: Record,
+        last_modified: datetime,
+        inventory: FolioEnrichedInstance | None = None,
+    ) -> None:
+        # The instance's items-and-holdings record, joined on by FolioStoreSource.
+        self.inventory = inventory
+        super().__init__(record, last_modified)
+
     @property
     def source_identifier_type(self) -> Id:
         return Id(id="folio-instance")
@@ -104,6 +124,12 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
         return None
 
     @property
+    def visible_work_state(self) -> SourceWorkState:
+        return super().visible_work_state.model_copy(
+            update={"merge_candidates": extract_merge_candidates(self.record)}
+        )
+
+    @property
     def designation(self) -> list[str]:
         return extract_designation(self.record)
 
@@ -154,30 +180,20 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def items(self) -> list[Item]:
-        """Build items from the joined enrichment payload.
+        """Physical items from the joined enrichment payload, then digital items from 856.
 
-        Each item carries a `folio-item` source identifier with its inventory UUID,
-        so the id-minter can assign a stable canonical id. Without enrichment content
-        (e.g. an instance not yet enriched, or a full reindex before the inventory store
-        is populated) this falls back to no items rather than guessing from MARC 952.
+        Without an inventory record (e.g. an instance not yet enriched, or a full reindex
+        before the inventory store is populated) there are no physical items rather than
+        a guess from MARC 952. An instance with no items, suppressed or not, whose MARC
+        590 marks it as uncatalogued gets a placeholder awaiting-cataloguing item.
         """
-        if not self.enrichment_content:
-            return []
+        physical = []
+        if self.inventory and self.inventory.items:
+            physical = extract_physical_items(self.inventory)
+        elif is_uncatalogued(self.record):
+            physical = [awaiting_cataloguing_item()]
 
-        enriched = FolioEnrichedInstance.from_store_content(self.enrichment_content)
-        return [
-            Item(
-                id=Identifiable.from_source_identifier(
-                    SourceIdentifier(
-                        identifier_type=FOLIO_ITEM_IDENTIFIER_TYPE,
-                        ontology_type="Item",
-                        value=item.id,
-                    )
-                ),
-                title=item.enumeration or item.volume,
-            )
-            for item in enriched.items
-        ]
+        return physical + extract_digital_items(self.record)
 
     def _is_suppressed(self) -> bool:
         """Check if a FOLIO Instance is marked as suppressed in its MARC data.

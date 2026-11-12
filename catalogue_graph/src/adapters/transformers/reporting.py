@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from pathlib import PurePosixPath
 from typing import ClassVar
 
@@ -50,7 +51,7 @@ class TransformerReport(PipelineReport):
 
     @property
     def s3_uri(self) -> str:
-        run_label = "idload" if self.ids else "_".join(self.changeset_ids) or "reindex"
+        run_label = "idload" if self.ids else self._changeset_label() or "reindex"
         file_name = f"{run_label}__{self.job_id}.json"
         path = PurePosixPath(
             f"pipeline-{self.pipeline_date}",
@@ -59,3 +60,10 @@ class TransformerReport(PipelineReport):
             file_name,
         )
         return f"s3://{self.s3_bucket}/{path}"
+
+    def _changeset_label(self) -> str:
+        # Joining many ids would pass S3's 1,024-byte key limit; the body lists them all
+        if len(self.changeset_ids) <= 1:
+            return "".join(self.changeset_ids)
+        digest = hashlib.sha256("_".join(self.changeset_ids).encode()).hexdigest()
+        return f"{len(self.changeset_ids)}changesets-{digest[:12]}"

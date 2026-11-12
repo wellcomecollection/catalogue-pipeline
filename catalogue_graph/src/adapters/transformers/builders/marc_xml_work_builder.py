@@ -11,7 +11,7 @@ from adapters.transformers.marc.other_identifiers import extract_other_identifie
 from adapters.transformers.marc.parents import get_parents
 from adapters.transformers.marc.title import extract_title
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Concept, Contributor, Genre, Subject
+from models.pipeline.concept import Contributor, Genre, Period, Subject
 from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Language
@@ -34,16 +34,8 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
     work field properties, which can be overridden by adapter-specific subclasses.
     """
 
-    def __init__(
-        self,
-        record: Record,
-        last_modified: datetime,
-        enrichment_content: str | None = None,
-    ) -> None:
+    def __init__(self, record: Record, last_modified: datetime) -> None:
         self.record = record
-        # Optional serialised item/holdings enrichment (with UUIDs) joined on by the
-        # source. Generic builders ignore it; FolioWorkBuilder reads it to emit items.
-        self.enrichment_content = enrichment_content
         super().__init__(self.source_identifier_value, last_modified)
 
     @property
@@ -86,7 +78,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
         return None
 
     @property
-    def created_date(self) -> Concept | None:
+    def created_date(self) -> Period | None:
         return None
 
     @property

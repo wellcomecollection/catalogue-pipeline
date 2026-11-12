@@ -68,18 +68,22 @@ def handler(
         index_date=event.index_date,
     )
 
-    es_remover = ElasticsearchRemover(event, es_mode)
     ids_to_delete = set(event.ids) if event.ids else get_ids_to_delete(event)
-    current_id_count = es_remover.get_document_count()
 
-    # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
-    # (set to 5%), an exception will be raised.
-    validate_fractional_change(
-        modified_size=len(ids_to_delete),
-        total_size=current_id_count,
-        force_pass=event.force_pass,
-    )
-    deleted_count = es_remover.delete_documents(ids_to_delete)
+    # Nothing to delete: skip the count and delete_by_query, which would keep a serverless project awake
+    deleted_count = 0
+    if ids_to_delete:
+        es_remover = ElasticsearchRemover(event, es_mode)
+        current_id_count = es_remover.get_document_count()
+
+        # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
+        # (set to 5%), an exception will be raised.
+        validate_fractional_change(
+            modified_size=len(ids_to_delete),
+            total_size=current_id_count,
+            force_pass=event.force_pass,
+        )
+        deleted_count = es_remover.delete_documents(ids_to_delete)
 
     report = DeletionReport(**event.model_dump(), deleted_count=deleted_count)
     report.publish()

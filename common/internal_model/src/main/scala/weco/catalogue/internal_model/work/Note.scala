@@ -66,6 +66,17 @@ case object NoteType {
   val EndsNote: NoteType = NoteType(id = "ends-note", label = "Ends")
   val LocusNote: NoteType = NoteType(id = "locus-note", label = "Locus")
   val HandNote: NoteType = NoteType(id = "hand-note", label = "Hand note")
+  val DecorationNote: NoteType =
+    NoteType(id = "decoration-note", label = "Decoration")
+  val ConditionNote: NoteType =
+    NoteType(id = "condition-note", label = "Condition")
+  val LayoutNote: NoteType = NoteType(id = "layout-note", label = "Layout")
+  val CollationNote: NoteType =
+    NoteType(id = "collation-note", label = "Collation")
+  val FoliationNote: NoteType =
+    NoteType(id = "foliation-note", label = "Foliation")
+  val FiliationNote: NoteType =
+    NoteType(id = "filiation-note", label = "Filiation")
 }
 
 case object Note {

@@ -17,9 +17,12 @@ logger = structlog.get_logger(__name__)
 
 
 class AxiellTransformer(MarcXmlTransformer):
-    def __init__(self, reader: AxiellChangesetReader) -> None:
+    def __init__(
+        self, reader: AxiellChangesetReader, with_deletions: bool = True
+    ) -> None:
         # Stored before super().__init__, which builds the source via _build_source.
         self._reader = reader
+        self._with_deletions = with_deletions
         super().__init__(
             adapter_store=reader.adapter_store,
             changeset_ids=reader.changeset_ids,
@@ -34,7 +37,7 @@ class AxiellTransformer(MarcXmlTransformer):
         snapshot_id: int | None,
         ids: list[str] | None = None,
     ) -> RecordSource:
-        return AxiellStoreSource(self._reader)
+        return AxiellStoreSource(self._reader, self._with_deletions)
 
     @property
     def work_builder(self) -> type[AxiellWorkBuilder]:

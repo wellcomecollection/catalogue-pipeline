@@ -52,22 +52,22 @@ jobs:
       - name: Log in to private ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Restore the coursier cache
-        uses: coursier/cache-action@v6
+      # localstack and dynamodb-local come from ECR Public, where anonymous
+      # pulls hit the rate limit; run_sbt_tests.sh pulls them on the runner.
+      - name: Log in to ECR Public
+        uses: aws-actions/amazon-ecr-login@v2
+        env:
+          AWS_REGION: us-east-1
+        with:
+          registry-type: public
 
-      # Starts the service containers through the host's Docker socket, which
-      # run_sbt_task_in_docker.sh mounts into the sbt container.
+      - name: Restore the coursier cache
+        uses: coursier/cache-action@v8
+
+      # Starts the service containers with Docker Compose on the runner, prints
+      # their logs if the tests fail, and takes them down.
       - name: Run tests
         run: ./builds/run_sbt_tests.sh matcher
-
-      - name: Show the service containers if the tests failed
-        if: failure()
-        run: |
-          docker ps -a --format '{{.Names}} {{.Image}} {{.Status}}'
-          for name in $(docker ps -aq); do
-            echo "=== $name"
-            docker logs --tail 40 "$name" 2>&1 || true
-          done
 
       - name: Build the image
         run: ./builds/build_sbt_image.sh matcher "$GITHUB_SHA"

@@ -141,6 +141,8 @@ jobs:
           # ID Minter V2
           - id-minter
           - id-generator
+          # Experimental batch matcher
+          - batch-matcher
           # Transformer lambdas
           - transformer
           # Graph subsystem lambdas
@@ -154,6 +156,7 @@ jobs:
           # Work-discovery lambdas for the scheduled state machines.
           - image-inference-find-work
           - id-minter-find-work
+          - transformer-find-work
 
 
     steps:

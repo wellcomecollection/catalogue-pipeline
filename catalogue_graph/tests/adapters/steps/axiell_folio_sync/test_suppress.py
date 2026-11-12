@@ -1,7 +1,7 @@
 """Tests for the reconciler delete paths (``suppress_by_guid`` / ``delete_by_guid``).
 
 A superseded GUID from the reconciler is an authoritative delete: the three
-FOLIO records keyed on ``AxC-{entity}-{guid}`` are either soft-suppressed
+FOLIO records whose ids derive from the GUID are either soft-suppressed
 (``discoverySuppress`` on all three, plus ``staffSuppress`` on the instance) or
 hard-deleted, child-first.
 """
@@ -13,14 +13,14 @@ from typing import Any
 
 from adapters.steps.axiell_folio_sync.upsert import delete_by_guid, suppress_by_guid
 
-GUID = "1234"
+GUID = "00000000-0000-4000-8000-000000001234"
 
 
 class FakeInventory:
-    """Records write order and returns a stored record for each entity hrid."""
+    """Records write order and returns a stored record for each entity id."""
 
     def __init__(self, existing: dict[str, dict[str, Any]] | None = None) -> None:
-        # search_path -> the record to return for any hrid lookup (None = absent)
+        # search_path -> the record to return for any id lookup (None = absent)
         self.existing = existing if existing is not None else {}
         self.put_calls: list[tuple[str, dict[str, Any]]] = []
         self.delete_paths: list[str] = []
@@ -134,9 +134,71 @@ def test_dry_run_plans_without_writing() -> None:
 
     result = suppress_by_guid(GUID, folio, dry_run=True)
 
-    # Actions are still planned (resolved by hrid) but no PUT is issued.
+    # Actions are still planned (resolved by id) but no PUT is issued.
     assert result.item.action == "suppress"
     assert result.instance.action == "suppress"
+    assert folio.put_calls == []
+
+
+def _all_suppressed() -> FakeInventory:
+    return FakeInventory(
+        {
+            "/inventory/items": {"id": "item-1", "discoverySuppress": True},
+            "/holdings-storage/holdings": {"id": "hold-1", "discoverySuppress": True},
+            "/inventory/instances": {
+                "id": "inst-1",
+                "discoverySuppress": True,
+                "staffSuppress": True,
+            },
+        }
+    )
+
+
+def test_already_suppressed_records_are_not_written_again() -> None:
+    folio = _all_suppressed()
+
+    result = suppress_by_guid(GUID, folio, dry_run=False)
+
+    assert result.item.action == "already_suppressed"
+    assert result.holdings.action == "already_suppressed"
+    assert result.instance.action == "already_suppressed"
+    assert result.instance.id == "inst-1"
+    assert folio.put_calls == []
+    assert not result.errors
+
+
+def test_an_instance_without_staff_suppress_is_still_written() -> None:
+    # The instance carries both flags, so discoverySuppress alone is not enough.
+    folio = _all_suppressed()
+    folio.existing["/inventory/instances"]["staffSuppress"] = False
+
+    result = suppress_by_guid(GUID, folio, dry_run=False)
+
+    assert result.item.action == "already_suppressed"
+    assert result.holdings.action == "already_suppressed"
+    assert result.instance.action == "suppress"
+    assert [path for path, _ in folio.put_calls] == ["/inventory/instances/inst-1"]
+
+
+def test_only_the_entities_left_unsuppressed_are_written() -> None:
+    # An earlier cascade that failed part-way is finished, not repeated.
+    folio = _all_suppressed()
+    folio.existing["/holdings-storage/holdings"]["discoverySuppress"] = False
+
+    result = suppress_by_guid(GUID, folio, dry_run=False)
+
+    assert result.holdings.action == "suppress"
+    assert [path for path, _ in folio.put_calls] == [
+        "/holdings-storage/holdings/hold-1"
+    ]
+
+
+def test_dry_run_reports_already_suppressed_records() -> None:
+    folio = _all_suppressed()
+
+    result = suppress_by_guid(GUID, folio, dry_run=True)
+
+    assert result.item.action == "already_suppressed"
     assert folio.put_calls == []
 
 
