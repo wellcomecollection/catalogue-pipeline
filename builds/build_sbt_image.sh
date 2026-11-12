@@ -49,4 +49,4 @@ docker build \
   "$PROJECT_DIRECTORY"
 
 # Shadow mode for publishing by content: logs whether this image is already published, changes nothing
-./builds/shadow_content_key.sh "$PROJECT_NAME"
+./builds/shadow_content_key.sh check "$PROJECT_NAME" "$PROJECT_DIRECTORY"
