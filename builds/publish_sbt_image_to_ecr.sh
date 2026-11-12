@@ -42,4 +42,4 @@ docker tag "$PROJECT_NAME:$IMAGE_TAG" "$ECR_REGISTRY/$PROJECT_NAME:latest"
 docker push "$ECR_REGISTRY/$PROJECT_NAME:latest"
 
 # Shadow mode for publishing by content: tags the pushed image content.<key> for later builds to find
-./builds/shadow_content_key.sh "$PROJECT_NAME" "$IMAGE_TAG"
+./builds/shadow_content_key.sh tag "$PROJECT_NAME" "$IMAGE_TAG"
