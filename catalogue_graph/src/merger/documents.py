@@ -7,6 +7,7 @@ import polars as pl
 import structlog
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.utils.iceberg_lookup import IcebergTableLookup
 from models.pipeline.identified.work import IdentifiedWork
 
 logger = structlog.get_logger(__name__)
@@ -14,19 +15,19 @@ logger = structlog.get_logger(__name__)
 # Works whose documents are held in memory at once.
 GROUP_SIZE = 50_000
 
-DOCUMENT_COLUMNS = ("id", "version", "last_modified", "content")
-
 
 def fetch_components(
     table: IcebergTable, snapshot_id: int, changed: pl.DataFrame
 ) -> Iterator[list[IdentifiedWork]]:
     """Yield the works of each changed component, whole, fetching a group of documents at a time."""
+    if changed.is_empty():
+        return
     members = changed.group_by("component_id").agg(pl.col("id")).sort("component_id")
     components = [list(ids) for ids in members["id"]]
-    files = _data_files(table, snapshot_id)
+    lookup = IcebergTableLookup.for_snapshot(table, key="id", snapshot_id=snapshot_id)
 
     for group in _groups(components):
-        documents = _read_documents(files, {i for c in group for i in c})
+        documents = _read_documents(lookup, {i for c in group for i in c})
         for component in group:
             works = [
                 IdentifiedWork.from_raw_document(json.loads(documents[work_id]))
@@ -54,37 +55,10 @@ def _groups(components: list[list[str]]) -> Iterator[list[list[str]]]:
         yield group
 
 
-def _data_files(table: IcebergTable, snapshot_id: int) -> list[str]:
-    """The snapshot's data files, as paths polars can scan."""
-    files = []
-    for task in table.scan(snapshot_id=snapshot_id).plan_files():
-        if task.delete_files:
-            raise ValueError("The works_identified table is read as append-only")
-        files.append(task.file.file_path.removeprefix("file://"))
-    return files
-
-
-def _read_documents(files: list[str], wanted: set[str]) -> dict[str, str]:
-    """The current document of every wanted work.
-
-    The files are sorted by id and the compacted ones carry a page index, so a
-    filtered scan reads only the pages holding wanted ids instead of every document.
-    """
-    rows = (
-        pl.scan_parquet(files)
-        .select(DOCUMENT_COLUMNS)
-        .filter(pl.col("id").is_in(list(wanted)))
-        .collect(engine="streaming")
+def _read_documents(lookup: IcebergTableLookup, wanted: set[str]) -> dict[str, str]:
+    """The current document of every wanted work: highest source version, then latest write."""
+    rows = lookup.fetch(
+        wanted, columns=("id", "content"), latest_by=("version", "last_modified")
     )
-    # Same rule as load_works: highest source version, then latest write. Picked on
-    # the narrow columns, as sorting the documents too costs more than reading them.
-    keys = ["version", "last_modified"]
-    current = (
-        rows.select("id", *keys)
-        .with_row_index()
-        .sort(keys, descending=True)
-        .unique("id", keep="first")
-    )
-    rows = rows[current["index"]]
     logger.info("Read documents", wanted=len(wanted), found=rows.height)
     return dict(zip(rows["id"], rows["content"], strict=True))

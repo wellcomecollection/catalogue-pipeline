@@ -6,7 +6,7 @@ from elastic_transport import ApiResponseMeta, HttpHeaders
 from elasticsearch.exceptions import ApiError
 from elasticsearch.exceptions import ConnectionError as ESConnectionError
 
-from core.source import ElasticSource, _giveup_es_request
+from core.source import ElasticSource, _giveup_es_request, may_have_matches
 
 
 def _api_error(status: int) -> ApiError:
@@ -115,3 +115,24 @@ def test_search_refreshes_pit_id_from_response() -> None:
     source.search(slice_index=0)
 
     assert source.pit_id == "pit-456"
+
+
+def test_count_retries_transient_error_then_succeeds() -> None:
+    es_client = MagicMock()
+    es_client.count.side_effect = [
+        _api_error(503),
+        {"count": 1, "_shards": {"failed": 0}},
+    ]
+
+    assert may_have_matches(es_client, "works-x", {"match_all": {}}) is True
+    assert es_client.count.call_count == 2
+
+
+def test_count_gives_up_immediately_on_non_retriable_status() -> None:
+    es_client = MagicMock()
+    es_client.count.side_effect = _api_error(400)
+
+    with pytest.raises(ApiError):
+        may_have_matches(es_client, "works-x", {"match_all": {}})
+
+    assert es_client.count.call_count == 1

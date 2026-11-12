@@ -16,6 +16,7 @@ from typing import Any, cast
 
 import structlog
 
+from adapters.steps.axiell_folio_sync.axiell_adapter_read import TombstonedGuid
 from adapters.steps.axiell_folio_sync.folio import FolioInventoryOps, RefCache
 from adapters.steps.axiell_folio_sync.mapping import (
     MappingError,
@@ -24,6 +25,7 @@ from adapters.steps.axiell_folio_sync.mapping import (
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
+    DeletionReason,
     FolioTarget,
     SyncDeletionEntry,
     SyncErrorEntry,
@@ -85,8 +87,28 @@ def _tally_entity_actions(
             counts[key] += 1
 
 
+def _deletion_targets(
+    deletions: list[SupersededGuid], tombstones: list[TombstonedGuid]
+) -> list[tuple[SupersededGuid | TombstonedGuid, DeletionReason]]:
+    """Superseded GUIDs, then tombstoned GUIDs, each GUID once.
+
+    A GUID can only be actioned once per run, so a tombstone whose GUID is also
+    a deletion fact in the same batch is dropped rather than counted twice.
+    """
+    targets: list[tuple[SupersededGuid | TombstonedGuid, DeletionReason]] = [
+        (superseded, "superseded") for superseded in deletions
+    ]
+    seen = {superseded.guid for superseded in deletions}
+    for tombstone in tombstones:
+        if tombstone.guid in seen:
+            continue
+        seen.add(tombstone.guid)
+        targets.append((tombstone, "tombstone"))
+    return targets
+
+
 def _run_reconcile_deletions(
-    deletions: list[SupersededGuid],
+    targets: list[tuple[SupersededGuid | TombstonedGuid, DeletionReason]],
     folio: FolioInventoryOps,
     counts: dict[str, int],
     errors_list: list[SyncErrorEntry],
@@ -94,7 +116,7 @@ def _run_reconcile_deletions(
     dry_run: bool,
     hard_delete: bool,
 ) -> tuple[list[SyncDeletionEntry], int]:
-    """Action each superseded GUID's FOLIO records (item → holdings → instance).
+    """Action each target GUID's FOLIO records (item → holdings → instance).
 
     ``hard_delete`` selects irreversible DELETE; otherwise the records are
     soft-suppressed (the reversible default). A per-GUID FOLIO failure is recorded
@@ -109,9 +131,11 @@ def _run_reconcile_deletions(
     entries: list[SyncDeletionEntry] = []
     error_count = 0
 
-    for superseded in deletions:
+    for target, reason in targets:
         counts["deletions"] += 1
-        result = action_by_guid(superseded.guid, folio, dry_run=dry_run)
+        if reason == "tombstone":
+            counts["tombstone_deletions"] += 1
+        result = action_by_guid(target.guid, folio, dry_run=dry_run)
 
         # Tally and record whatever was actually actioned, even when the cascade
         # later failed: a partial hard-delete may have already removed a child
@@ -125,9 +149,10 @@ def _run_reconcile_deletions(
         ):
             entries.append(
                 SyncDeletionEntry(
-                    guid=superseded.guid,
-                    record_id=superseded.record_id,
-                    changeset_id=superseded.changeset_id,
+                    guid=target.guid,
+                    record_id=target.record_id,
+                    changeset_id=target.changeset_id,
+                    reason=reason,
                     instance_action=result.instance.action,
                     holdings_action=result.holdings.action,
                     item_action=result.item.action,
@@ -139,8 +164,8 @@ def _run_reconcile_deletions(
             error_count += 1
             errors_list.append(
                 _build_error(
-                    superseded.guid,
-                    superseded.changeset_id,
+                    target.guid,
+                    target.changeset_id,
                     stage,
                     [e.model_dump() for e in result.errors],
                 )
@@ -149,7 +174,8 @@ def _run_reconcile_deletions(
         logger.info(
             "reconcile_delete_result",
             mode="delete" if hard_delete else "suppress",
-            guid=superseded.guid,
+            reason=reason,
+            guid=target.guid,
             instance=result.instance.action or "skip",
             holdings=result.holdings.action or "skip",
             item=result.item.action or "skip",
@@ -172,6 +198,7 @@ def run_sync(
     folio_target: FolioTarget = "prod",
     manifest_bucket: str | None = None,
     deletions: list[SupersededGuid] | None = None,
+    tombstones: list[TombstonedGuid] | None = None,
     hard_delete: bool = False,
 ) -> AxiellFolioSyncResponse:
     """Select, map, and upsert pre-read adapter rows to FOLIO.
@@ -183,8 +210,13 @@ def run_sync(
     batch. They are actioned in a second pass *after* the upsert pass so a record
     re-created and superseded in the same batch is handled in write order; the
     reader has already dropped any GUID reclaimed by a current mapping, so a live
-    record is never touched here. ``hard_delete`` selects irreversible DELETE for
-    that pass; the default is reversible soft-suppression.
+    record is never touched here.
+
+    ``tombstones`` carries the GUIDs of records hard deleted in Collections,
+    already checked against the reconciler mappings (see
+    ``axiell_adapter_read.tombstoned_guids``). They are actioned in the same
+    second pass. ``hard_delete`` selects irreversible DELETE for that pass; the
+    default is reversible soft-suppression.
     """
     logger.info(
         "axiell_folio_sync start",
@@ -204,9 +236,13 @@ def run_sync(
         "deleted": 0,
         "skipped": 0,
         "tombstone": 0,
+        # Tombstoned GUIDs actioned in the second pass, also counted in
+        # "deletions".
+        "tombstone_deletions": 0,
         "failed": 0,
         "total": 0,
-        # Superseded GUIDs (reconciler deletions) processed in the second pass.
+        # GUIDs processed in the second pass: superseded GUIDs (reconciler
+        # deletions) and tombstoned GUIDs.
         "deletions": 0,
         # Records whose item carried a location note the sync could no longer
         # claim, so a duplicate was left behind. Not an error: nothing failed and
@@ -219,14 +255,12 @@ def run_sync(
         changeset_id = cast(str, row["changeset"])
         counts["total"] += 1
 
-        # Loader tombstones are advisory only (RFC 090): the loader's deleted=true is
-        # unreliable, so we record and metric the signal but do NOT suppress/remove.
-        # Authoritative deletes come from the reconciler, not this path.
+        # A tombstone is never upserted. Its FOLIO records are actioned in the
+        # second pass, from ``tombstones``, which holds its GUID once the read
+        # step has checked that no other record still holds it.
         if row.get("deleted"):
             counts["tombstone"] += 1
-            logger.info(
-                "tombstone_advisory", source_id=source_id, changeset_id=changeset_id
-            )
+            logger.info("tombstone", source_id=source_id, changeset_id=changeset_id)
             continue
 
         if not row.get("content"):
@@ -312,9 +346,9 @@ def run_sync(
             errors=len(result.errors),
         )
 
-    # ── Pass 2: authoritative deletes (reconciler superseded GUIDs) ────────────
+    # ── Pass 2: deletes (superseded GUIDs, then tombstoned GUIDs) ──────────────
     deletion_entries, deletion_errors = _run_reconcile_deletions(
-        deletions or [],
+        _deletion_targets(deletions or [], tombstones or []),
         folio,
         counts,
         errors_list,

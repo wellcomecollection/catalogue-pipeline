@@ -5,9 +5,9 @@ module "pipeline" {
   # registry, graph and serverless Elasticsearch, so FOLIO ids are never minted
   # into the registry that production uses.
   reindexing_state = {
-    listen_to_reindexer = false
-    scale_up_tasks      = false
-    scale_up_matcher_db = false
+    listen_to_reindexer = true
+    scale_up_tasks      = true
+    scale_up_matcher_db = true
   }
 
   index_dates = {
