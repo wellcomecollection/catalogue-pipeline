@@ -21,6 +21,7 @@ import hashlib
 import io
 import os
 import re
+import struct
 import subprocess
 import sys
 import zipfile
@@ -30,17 +31,72 @@ def normalise(data, build_root):
     return data.replace(build_root, b"BUILD_ROOT")
 
 
+# Size of each constant pool entry after its tag byte, by tag; Utf8 (1) is length-prefixed
+CONSTANT_SIZES = {
+    3: 4,
+    4: 4,
+    5: 8,
+    6: 8,
+    7: 2,
+    8: 2,
+    9: 4,
+    10: 4,
+    11: 4,
+    12: 4,
+    15: 3,
+    16: 2,
+    17: 4,
+    18: 4,
+    19: 2,
+    20: 2,
+}
+
+
+def normalise_class(data, build_root):
+    """
+    Rewrite a class file's UTF-8 constants with the build directory replaced, length prefixes included,
+    so classes built under checkout paths of different lengths compare equal.
+    """
+    if data[:4] != b"\xca\xfe\xba\xbe":
+        return normalise(data, build_root)
+    out = bytearray(data[:10])
+    count = struct.unpack(">H", data[8:10])[0]
+    i, pos = 1, 10
+    while i < count:
+        tag = data[pos]
+        if tag == 1:
+            length = struct.unpack(">H", data[pos + 1 : pos + 3])[0]
+            value = normalise(data[pos + 3 : pos + 3 + length], build_root)
+            out += bytes([1]) + struct.pack(">H", len(value)) + value
+            pos += 3 + length
+        elif tag in CONSTANT_SIZES:
+            out += data[pos : pos + 1 + CONSTANT_SIZES[tag]]
+            pos += 1 + CONSTANT_SIZES[tag]
+        else:
+            # An unknown tag means a format this parser doesn't know, so fall back to replacing raw bytes
+            return normalise(data, build_root)
+        # Long and Double constants take two slots
+        i += 2 if tag in (5, 6) else 1
+    return bytes(out) + normalise(data[pos:], build_root)
+
+
+def hash_entry(name, data, build_root):
+    if name.endswith(".class"):
+        return hashlib.sha256(normalise_class(data, build_root)).digest()
+    return hashlib.sha256(normalise(data, build_root)).digest()
+
+
 def hash_file(path, build_root):
     with open(path, "rb") as f:
         data = f.read()
     if not path.endswith(".jar"):
-        return hashlib.sha256(normalise(data, build_root)).hexdigest()
+        return hash_entry(path, data, build_root).hex()
     # Hash entry names and contents, not the zip bytes, so the result does not depend on how the jar was written
     h = hashlib.sha256()
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         for name in sorted(z.namelist()):
             h.update(name.encode() + b"\0")
-            h.update(hashlib.sha256(normalise(z.read(name), build_root)).digest())
+            h.update(hash_entry(name, z.read(name), build_root))
     return h.hexdigest()
 
 
