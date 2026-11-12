@@ -6,9 +6,13 @@ from models.pipeline.format import Videos
 from tests.merger.works import (
     axiell_work,
     calm_work,
+    deleted,
+    ebsco_work,
+    invisible,
     miro_work,
     physical_item,
     sierra_digital_work,
+    sierra_physical_work,
     sierra_work,
     tei_work,
 )
@@ -73,3 +77,30 @@ def test_an_additional_predicate_narrows_the_choice() -> None:
 
     assert choose_target(works) == multi_item_physical_sierra
     assert choose_target(works, satisfying=single_item_lms_work) == digital_sierra
+
+
+def test_an_ebsco_work_before_all_others() -> None:
+    ebsco = ebsco_work()
+    works = [calm, video_sierra, tei, multi_item_physical_sierra, digital_sierra, miro]
+
+    assert choose_target([*works, ebsco]) == ebsco
+
+
+def test_nothing_when_the_first_matching_work_is_invisible() -> None:
+    # Only the chosen work is checked for visibility, as in the Scala merger.
+    invisible_physical_sierra = invisible(sierra_physical_work())
+    invisible_digital_sierra = invisible(sierra_digital_work())
+
+    assert choose_target([invisible_physical_sierra, digital_sierra]) is None
+    assert choose_target([digital_sierra, invisible_physical_sierra]) is None
+    assert choose_target([invisible_digital_sierra, digital_sierra]) is None
+    assert choose_target([digital_sierra, invisible_digital_sierra]) == digital_sierra
+
+
+def test_nothing_when_the_first_matching_work_is_deleted() -> None:
+    deleted_ebsco = deleted(ebsco_work())
+    deleted_digital_sierra = deleted(sierra_digital_work())
+
+    assert choose_target([tei, deleted_ebsco]) is None
+    assert choose_target([deleted_digital_sierra, digital_sierra]) is None
+    assert choose_target([digital_sierra, deleted_digital_sierra]) == digital_sierra
