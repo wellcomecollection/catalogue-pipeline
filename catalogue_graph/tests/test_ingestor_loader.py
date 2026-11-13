@@ -59,6 +59,7 @@ from tests.mocks import (
     MockCloudwatchClient,
     MockElasticsearchClient,
     MockRequest,
+    MockS3Client,
     MockSmartOpen,
     add_neptune_mock_response,
     mock_es_secrets,
@@ -626,6 +627,29 @@ def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> 
     assert MockCloudwatchClient.metrics_reported == _get_expected_metrics(
         loader_event, record_count=0, total_file_size=0
     )
+
+
+@freeze_time("2025-01-02")
+def test_ingestor_loader_deletes_previous_run_files() -> None:
+    mock_neptune_secrets(MOCK_PIPELINE_DATE)
+    mock_es_secrets(service_name="concepts_ingestor", pipeline_date=MOCK_PIPELINE_DATE)
+    loader_event = make_loader_event(pass_objects_to_index=False)
+
+    # A replayed window finds the earlier run's chunks and report under the same prefix
+    prefix = loader_event.get_path_prefix()
+    stale_chunk = f"{prefix}/00000000-00000312.parquet"
+    stale_report = f"{prefix}/report.loader.json"
+    MockS3Client.add_list_objects_response(
+        config.CATALOGUE_GRAPH_S3_BUCKET,
+        f"{prefix}/",
+        [{"Key": stale_chunk}, {"Key": stale_report}],
+    )
+
+    handler(loader_event)
+
+    assert MockS3Client.deleted_keys == [
+        (config.CATALOGUE_GRAPH_S3_BUCKET, stale_chunk)
+    ]
 
 
 def test_ingestor_loader_bad_neptune_response() -> None:

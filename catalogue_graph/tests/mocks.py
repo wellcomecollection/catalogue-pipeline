@@ -158,11 +158,18 @@ class MockS3Paginator:
 class MockS3Client(MockAwsService):
     list_objects_v2_pages: dict[tuple[str, str], list[dict]] = {}
     list_objects_v2_calls: list[tuple[str, str]] = []
+    deleted_keys: list[tuple[str, str]] = []
 
     @classmethod
     def reset_mocks(cls) -> None:
         cls.list_objects_v2_pages = {}
         cls.list_objects_v2_calls = []
+        cls.deleted_keys = []
+
+    def delete_objects(self, Bucket: str, Delete: dict) -> dict:  # noqa: N803
+        for s3_object in Delete["Objects"]:
+            MockS3Client.deleted_keys.append((Bucket, s3_object["Key"]))
+        return {}
 
     @classmethod
     def add_list_objects_response(
