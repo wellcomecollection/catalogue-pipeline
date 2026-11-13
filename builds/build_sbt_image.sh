@@ -47,3 +47,6 @@ docker build \
   --label "org.opencontainers.image.revision=$SOURCE_REVISION" \
   --label "org.wellcomecollection.dockerfile=$PROJECT_DIRECTORY/Dockerfile" \
   "$PROJECT_DIRECTORY"
+
+# Shadow mode for publishing by content: logs whether this image is already published, changes nothing
+./builds/shadow_content_key.sh check "$PROJECT_NAME" "$PROJECT_DIRECTORY"
