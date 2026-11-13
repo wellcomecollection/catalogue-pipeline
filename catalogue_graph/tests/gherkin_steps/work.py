@@ -402,6 +402,16 @@ def work_merge_candidates(work: SourceWork, datatable: list[list[str]]) -> None:
     assert actual == datatable[1:]
 
 
+@then("the work has the other identifiers:")
+def work_other_identifiers(work: SourceWork, datatable: list[list[str]]) -> None:
+    """Compare other identifiers against a table headed `type | value`."""
+    actual = [
+        [identifier.identifier_type.id, identifier.value]
+        for identifier in work.data.other_identifiers
+    ]
+    assert actual == datatable[1:]
+
+
 def _assert_work_attr(work: SourceWork, attr_phrase: str, expected: object) -> None:
     """Assert that a work attribute equals expected."""
     attr = _normalise_attr_phrase(attr_phrase)
