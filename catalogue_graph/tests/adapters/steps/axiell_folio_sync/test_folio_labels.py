@@ -15,6 +15,7 @@ import pytest
 
 from adapters.steps.axiell_folio_sync.folio import RefCache
 from adapters.steps.axiell_folio_sync.mapping import (
+    ACCESS_STATISTICAL_CODES,
     SYNCED_STATISTICAL_CODE,
     MappingError,
     select_and_build,
@@ -67,7 +68,10 @@ def test_the_marker_is_resolved_from_its_code() -> None:
 
     select_and_build(_item_record(), RecordingRefCache())  # type: ignore[arg-type]
 
-    assert asked and set(asked) == {SYNCED_STATISTICAL_CODE}
+    # The marker is looked up by its code. The only other lookups are the access
+    # codes, which the upsert needs in order to replace an old one on update.
+    assert SYNCED_STATISTICAL_CODE in asked
+    assert set(asked) - {SYNCED_STATISTICAL_CODE} <= ACCESS_STATISTICAL_CODES
 
 
 def test_a_tenant_without_the_marker_code_fails_the_record() -> None:

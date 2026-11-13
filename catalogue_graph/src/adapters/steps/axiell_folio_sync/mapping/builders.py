@@ -9,6 +9,7 @@ FOLIO payloads consumed by
 
 from __future__ import annotations
 
+import dataclasses
 from collections.abc import Callable
 from typing import Literal
 
@@ -17,6 +18,9 @@ from pymarc.record import Record
 from ..folio import RefCache
 from .config import (
     ACCESS_ITEM_STATUS,
+    ACCESS_STATISTICAL_CODE,
+    ACCESS_STATISTICAL_CODE_FIELD,
+    ACCESS_STATISTICAL_CODES,
     AXIELL_LOCATION_NOTE_PREFIX,
     CURRENT_LOCATION_NOTE_TYPE_FIELD,
     DEFAULT_ITEM_STATUS,
@@ -219,6 +223,48 @@ def _location_notes(rec: CanonicalRecord, ref: RefCache) -> list[Note]:
     ]
 
 
+def _access_statistical_code(rec: CanonicalRecord) -> str | None:
+    """The access statistical code for the record's 506$f and 540$a, or None.
+
+    None when either field is absent or the pair is not one of the agreed rows
+    in ACCESS_STATISTICAL_CODE. A missing code does not fail the record: the
+    item still syncs, without an access code, as it did before codes existed.
+    """
+    category = (rec.access_category or "").strip().upper()
+    term = (rec.use_restriction or "").strip().casefold()
+    by_term = ACCESS_STATISTICAL_CODE.get(category, {})
+    for known, code in by_term.items():
+        if known.casefold() == term:
+            return code
+    return None
+
+
+def _item_statistical_codes(rec: CanonicalRecord, ref: RefCache) -> list[str]:
+    """The synced marker, then the access code when the record maps to one."""
+    codes = [_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)]
+    access = _access_statistical_code(rec)
+    if access is not None:
+        # Resolved like any constant, so a code the tenant lacks fails the record
+        # rather than being dropped.
+        field = dataclasses.replace(ACCESS_STATISTICAL_CODE_FIELD, default=access)
+        access_id = _resolve(field, rec, ref)
+        if access_id not in codes:
+            codes.append(access_id)
+    return codes
+
+
+def _access_statistical_code_ids(rec: CanonicalRecord, ref: RefCache) -> list[str]:
+    """The tenant ids of every access code the mapping can set.
+
+    For the upsert, which replaces whichever of these the item already carries.
+    A code the tenant does not have is left out: nothing can carry it. The
+    synced marker is never among them, even if a tenant gave both one id.
+    """
+    marker = _resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)
+    ids = {ref.resolve_statistical_code(code) for code in ACCESS_STATISTICAL_CODES}
+    return sorted(code_id for code_id in ids if code_id and code_id != marker)
+
+
 def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
     return Item(
         id=_item_id(rec.source_id),
@@ -240,7 +286,7 @@ def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
             f"{AXIELL_LOCATION_NOTE_PREFIX}: {rec.current_location or 'unknown'}"
         ],
         notes=_location_notes(rec, ref),
-        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
+        statisticalCodeIds=_item_statistical_codes(rec, ref),
     )
 
 
@@ -259,6 +305,7 @@ def _assemble_payloads(
             source_id=rec.source_id,
             mapping_version=VERSION,
             deleted=deleted,
+            access_statistical_code_ids=_access_statistical_code_ids(rec, ref_cache),
         ),
     )
 
