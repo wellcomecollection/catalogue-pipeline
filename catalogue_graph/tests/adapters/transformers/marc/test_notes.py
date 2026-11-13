@@ -259,3 +259,18 @@ def test_strips_whitespace_from_subfield_u() -> None:
     assert notes[0].contents == (
         '<a href="https://example.com/works/a65fex5m">https://example.com/works/a65fex5m</a>'
     )
+
+
+def test_extra_fields_are_extracted_in_record_order() -> None:
+    record = _record_with_fields(
+        _simple_field("500", "first"),
+        _simple_field("599", "second"),
+        _simple_field("500", "third"),
+    )
+    notes = extract_notes(
+        record,
+        extra_fields={
+            "599": lambda field: Note(contents=field["a"], note_type=GENERAL_NOTE)
+        },
+    )
+    assert [note.contents for note in notes] == ["first", "second", "third"]

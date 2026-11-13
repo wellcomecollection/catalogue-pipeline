@@ -10,14 +10,16 @@ import structlog
 from pymarc.record import Record
 
 from adapters.transformers.folio.identifier import extract_hrid
-from adapters.transformers.marc.common import all_non_empty_subfields, distinct
+from adapters.transformers.marc.common import (
+    UKLW_PREFIX_RE,
+    all_non_empty_subfields,
+    distinct,
+)
 from adapters.transformers.marc.predecessor_identifier import SIERRA_SYSTEM_NUMBER_RE
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.identifier import Id, Identifiable, WorkSourceIdentifier
 
 logger = structlog.get_logger(__name__)
-
-UKLW_PREFIX_RE = re.compile(r"\((?i:UkLW)\)\s*(.+)")
 
 # The migration moved the EBSCO id from 001 (with 003 "EBZ") into 035.
 EBZ_PREFIX_RE = re.compile(r"\(EBZ\)(ebs\d+e)")

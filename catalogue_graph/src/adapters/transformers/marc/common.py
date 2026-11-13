@@ -1,3 +1,4 @@
+import re
 from collections.abc import Callable, Iterable
 
 import structlog
@@ -5,6 +6,9 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 logger = structlog.get_logger(__name__)
+
+# A Wellcome catalogue reference such as "(UkLW)b12345678", capturing the identifier
+UKLW_PREFIX_RE = re.compile(r"\((?i:UkLW)\)\s*(.+)")
 
 
 def mandatory_field(marc_code: str, field_name: str) -> Callable:
