@@ -97,6 +97,17 @@ class TeiTransformerTest
                 "Script: Beautiful Naskh Ink: Black; headings and dividers highlighted in red",
               noteType = NoteType.HandNote
             ),
+            Note(contents = "1 column", noteType = NoteType.LayoutNote),
+            Note(
+              contents =
+                "Arabic, original. Catchwords are written underneath the text block.",
+              noteType = NoteType.FoliationNote
+            ),
+            Note(
+              contents =
+                "Due to the binding and the subsequent restoration, collation could not be established exactly.",
+              noteType = NoteType.CollationNote
+            ),
             Note(
               contents =
                 "Original, Oriental type; slightly worn, blind tooling. On the spine is pasted a library tag with words: طبّ حطى عربى.",
@@ -106,17 +117,6 @@ class TeiTransformerTest
               contents =
                 "Good; traces of worms and occasionally water-stained.",
               noteType = NoteType.ConditionNote
-            ),
-            Note(contents = "1 column", noteType = NoteType.LayoutNote),
-            Note(
-              contents =
-                "Due to the binding and the subsequent restoration, collation could not be established exactly.",
-              noteType = NoteType.CollationNote
-            ),
-            Note(
-              contents =
-                "Arabic, original. Catchwords are written underneath the text block.",
-              noteType = NoteType.FoliationNote
             )
           ),
           physicalDescription = Some(

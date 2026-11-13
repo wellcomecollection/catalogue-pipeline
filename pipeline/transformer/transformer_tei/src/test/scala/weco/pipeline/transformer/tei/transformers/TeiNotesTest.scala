@@ -594,19 +594,19 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
       </physDesc>
 
     it(
-      "makes notes for binding, decoration, condition, layout, collation and foliation"
+      "makes notes for layout, foliation, collation, decoration, binding and condition, in that order"
     ) {
       TeiNotes(teiXml(physDesc = Some(fullPhysDesc))) shouldBe List(
-        Note(NoteType.BindingInformation, "Leather over boards."),
-        Note(NoteType.DecorationNote, "Rubrication: Headings in red."),
-        Note(NoteType.DecorationNote, "Border on the first leaf."),
-        Note(NoteType.DecorationNote, "A test decoration."),
-        Note(NoteType.ConditionNote, "Some water damage."),
         Note(NoteType.LayoutNote, "2 columns; 20 written lines"),
         Note(NoteType.LayoutNote, "1 column"),
         Note(NoteType.LayoutNote, "Ruled in drypoint."),
+        Note(NoteType.FoliationNote, "Foliated in pencil."),
         Note(NoteType.CollationNote, "1-4 (8)"),
-        Note(NoteType.FoliationNote, "Foliated in pencil.")
+        Note(NoteType.DecorationNote, "Rubrication: Headings in red."),
+        Note(NoteType.DecorationNote, "Border on the first leaf."),
+        Note(NoteType.DecorationNote, "A test decoration."),
+        Note(NoteType.BindingInformation, "Leather over boards."),
+        Note(NoteType.ConditionNote, "Some water damage.")
       )
     }
 
@@ -699,16 +699,16 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
         </physDesc>
 
       TeiNotes(teiXml(physDesc = Some(nestedPhysDesc))) shouldBe List(
+        Note(NoteType.DecorationNote, "Illustration: f. 1r Test drawing"),
+        Note(NoteType.DecorationNote, "Border: f. 2r Test frame"),
+        Note(NoteType.DecorationNote, "ʿUnwān in red"),
+        Note(NoteType.DecorationNote, "Occasional rubrication"),
         Note(NoteType.BindingInformation, "Leather Rebacked"),
         Note(NoteType.BindingInformation, "unbound Test folder"),
         Note(
           NoteType.BindingInformation,
           "Chain distance ca. 26 mm, no watermark"
-        ),
-        Note(NoteType.DecorationNote, "Illustration: f. 1r Test drawing"),
-        Note(NoteType.DecorationNote, "Border: f. 2r Test frame"),
-        Note(NoteType.DecorationNote, "ʿUnwān in red"),
-        Note(NoteType.DecorationNote, "Occasional rubrication")
+        )
       )
     }
 
@@ -727,10 +727,10 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
         </physDesc>
 
       TeiNotes(teiXml(physDesc = Some(physDescWithParagraphs))) shouldBe List(
+        Note(NoteType.DecorationNote, "Headings in red."),
         Note(NoteType.BindingInformation, "Original leather."),
         Note(NoteType.BindingInformation, "Rebacked."),
-        Note(NoteType.BindingInformation, "Limp vellum."),
-        Note(NoteType.DecorationNote, "Headings in red.")
+        Note(NoteType.BindingInformation, "Limp vellum.")
       )
     }
 
@@ -767,7 +767,7 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
       </msItem>
 
     TeiNotes(List(item)) shouldBe List(
-      Note(NoteType.FiliationNote, "Also copied in another manuscript.")
+      Note(NoteType.RelatedMaterial, "Also copied in another manuscript.")
     )
   }
 }

@@ -75,8 +75,6 @@ case object NoteType {
     NoteType(id = "collation-note", label = "Collation")
   val FoliationNote: NoteType =
     NoteType(id = "foliation-note", label = "Foliation")
-  val FiliationNote: NoteType =
-    NoteType(id = "filiation-note", label = "Filiation")
 }
 
 case object Note {
