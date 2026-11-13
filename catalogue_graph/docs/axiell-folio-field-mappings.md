@@ -14,7 +14,7 @@ Holdings record, and an Item. It does this through the FOLIO Inventory API.
 | MARC extraction primitive | `src/adapters/steps/axiell_folio_sync/mapping/marc.py` |
 | Payload contracts | `src/adapters/steps/axiell_folio_sync/mapping/payloads.py` |
 
-Mapping version: **3.3.0** (`config.VERSION`), stamped into every payload's
+Mapping version: **3.4.0** (`config.VERSION`), stamped into every payload's
 `meta` block so you can tell which rules produced a given record.
 
 ## What gets synced
@@ -160,7 +160,7 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 | --- | --- | --- | --- |
 | `id` | Item id, see [Record ids](#record-ids) | MARC `001` | Required. |
 | `holdingsRecordId` | Parent holdings id | MARC `001` | Derived the same way as the holdings' own id. |
-| `status.name` | Item-status name | MARC `506 $f` (access category), via `ACCESS_ITEM_STATUS` (default `Unavailable`) | Table value is final; statuses are a fixed FOLIO enum, not tenant reference data. **Create-only**: mod-circulation owns the field once the item exists, so updates send FOLIO's own status back and an AxC access change does not propagate. See `_CREATE_ONLY_FIELDS` in `upsert/entities.py`. |
+| `status.name` | Item-status name | MARC `506 $f` (access category), via `ACCESS_ITEM_STATUS` (default `Unavailable`) | Table value is final; statuses are a fixed FOLIO enum, not tenant reference data. On update the status follows AxC only while FOLIO holds a status the sync itself sets (`SYNC_ITEM_STATUSES`); a circulation status such as `Checked out` is sent back unchanged. See `_payload_for_update` in `upsert/entities.py`. |
 | `materialType.id` | Material-type UUID | MARC `655 $a`, via `resolve_material_type` | Uses the normalization table below. No default: an absent or unmapped category fails the record. |
 | `permanentLoanType.id` | Loan-type UUID | MARC `540 $a` (use restriction), via `USE_RESTRICTION_LOAN_TYPE` and `resolve_loan_type` (default `Unavailable`) | See the loan type table below. An absent or unlisted term takes the default rather than failing the record. |
 | `permanentLocation.id` | FOLIO location UUID | MARC `984 $b` (AxC **normal** location), via `resolve_location` | Same source and rules as the holdings location above, so the two always agree. |
@@ -168,6 +168,7 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 | `notes[]` | `Axiell Normal Location` note: `<984 $b>` | MARC `984 $b` | Same rules as the current location note. The raw AxC value, not the resolved FOLIO location. Never absent, because `984 $b` is required. |
 | `administrativeNotes[]` | `"Axiell Current Location: <852 $b>"` | MARC `852 $b`, or `unknown` when absent | Keeps the raw AxC current location as an administrative note as well as the typed note. The label is in the string because an administrative note carries no type, and is also what the upsert matches on to reclaim the note. Always written, so an update cannot leave a stale location behind. |
 | `statisticalCodeIds[]` | `AXIELL` statistical code UUID | Constant, via `resolve_statistical_code` | Marks the record as synced. The code must exist in the tenant; an unknown code fails the record. On update the code is added if missing and the record's other codes are kept. |
+| `statisticalCodeIds[]` | Access statistical code UUID | MARC `506 $f` and `540 $a` together, via `ACCESS_STATISTICAL_CODE` and `resolve_statistical_code` | See the access statistical code table below. A pair outside the table gets no access code. The code must exist in the tenant; an unknown code fails the record. On update any access code already on the item is replaced, and the marker and every other code are kept. |
 
 ## How values are resolved to FOLIO UUIDs
 
@@ -234,7 +235,8 @@ Values are FOLIO's fixed enum, so nothing is resolved against the tenant.
 | --- | --- |
 | `OPEN`, `OPENWITHADVISORY` | `Available` |
 | `RESTRICTED` | `Available` (see below) |
-| `PERMISSIONREQUIRED`, `SAFEGUARDED`, `CLOSED` | `Restricted` |
+| `PERMISSIONREQUIRED`, `SAFEGUARDED` | `Restricted` |
+| `CLOSED` | `Unavailable` |
 | `MISSING` | `Missing` |
 | `DEACCESSIONED` | `Withdrawn` |
 | `DATAISSUES` | `Unknown` |
@@ -247,12 +249,19 @@ reader signs to agree to the conditions of viewing restricted material, and they
 do that before the material is handed over, so it does not affect whether the
 item can be requested or produced.
 
-Three caveats. `Restricted` and `Withdrawn` are unconfirmed on this tenant's
-FOLIO version. The status is create-only, so a later access change in AxC does
-not reach an existing item. And **`Restricted` does not stop a request on the
-status gate**: in mod-circulation's `RequestTypeItemStatusWhiteList`,
-`Restricted` permits page, hold and recall just as `Available` does for paging,
-so mapping `CLOSED`,
+**On update the status follows AxC, within limits.** The sync replaces the
+status only while FOLIO holds one the sync itself sets: `Available`,
+`Restricted`, `Unavailable`, `Unknown`, `Missing` or `Withdrawn`
+(`SYNC_ITEM_STATUSES`, derived from the table). Once circulation has moved the
+item to any other status, such as `Checked out`, `Paged`, `Awaiting pickup`,
+`In transit` or `Long missing`, FOLIO's status is sent back unchanged, so an
+update cannot undo a live loan or request. A status set by hand in FOLIO to one
+of the sync's own values, such as `Missing`, is overwritten on the next update.
+
+Two caveats. `Restricted` and `Withdrawn` are unconfirmed on this tenant's
+FOLIO version. And **`Restricted` does not stop a request on the status gate**:
+in mod-circulation's `RequestTypeItemStatusWhiteList`, `Restricted` permits
+page, hold and recall just as `Available` does for paging, so mapping
 `PERMISSIONREQUIRED` and `SAFEGUARDED` to `Restricted` changes what FOLIO
 displays without changing what that gate permits. The whitelist does block
 elsewhere: `Unavailable`, `Unknown` and `Withdrawn` permit no request type, and
@@ -273,17 +282,48 @@ can be requested. Matching is case-insensitive.
 
 An unlisted term does not fail the record and is never passed to the tenant as a
 loan type name (`unmapped_to_default` on the `FieldMap`). The access category
-(`506 $f`) does not reach the loan type; it drives the item status only.
-
-Items with access note *"This item is closed and cannot be accessed"* are not
-blocked by the status gate alone: `Restricted` permits paging. Their loan type
-now depends on `540 $a`, and requestability also depends on the request policy.
+(`506 $f`) does not reach the loan type; it drives the item status and, with
+`540 $a`, the access statistical code.
 
 Requests must pass both the item-status whitelist and the request policy.
 mod-circulation selects that policy from circulation rules, which include
 `loanTypeId`. Loan type also affects loan period and renewability through the
 loan policy. This tenant's rules and policies have not been examined, so its
 effect here is unknown. See the options document, section 2.
+
+### Access statistical code: from the access category and the use restriction
+
+The item carries one access statistical code alongside the `AXIELL` marker,
+chosen by `506 $f` and `540 $a` together (`ACCESS_STATISTICAL_CODE`). These are
+the agreed rows of the Access and Ordering status mapping
+(wellcomecollection/platform#6862). Both fields match case-insensitively. The
+instance and holdings carry the marker only.
+
+| `506 $f` (access category) | `540 $a` (use restriction) | Statistical code |
+| --- | --- | --- |
+| `OPEN` | `Online request`, `Manual request`, `By appointment` | `ONLINE REQUEST`, `MANUAL REQUEST`, `BY APPOINTMENT` |
+| `OPENWITHADVISORY` | as `OPEN`, plus `Unavailable` | as `OPEN`, plus `UNAVAILABLE` |
+| `RESTRICTED` | `Restricted` or `Online request` | `RESTRICTED` |
+| `RESTRICTED` | `By appointment`, `Unavailable` | `BY APPOINTMENT`, `UNAVAILABLE` |
+| `PERMISSIONREQUIRED` | `By approval`, `By appointment` | `DONOR PERMISSION` |
+| `SAFEGUARDED` | `By approval`, `By appointment` | `SAFEGUARDED` |
+| `CLOSED` | `Unavailable` | `CLOSED` |
+| `DATAISSUES`, `MISSING` | `Online request`, `Manual request`, `By appointment`, `Unavailable` | `ONLINE REQUEST`, `MANUAL REQUEST`, `BY APPOINTMENT`, `UNAVAILABLE` |
+| `DATAISSUES`, `MISSING` | `By approval` | `DONOR PERMISSION` |
+| `DATAISSUES`, `MISSING` | `Restricted` | `ONLINE REQUEST` |
+| any other pair, or either field absent | | none |
+
+A pair outside the table gets no access code and the record still syncs. That
+includes the rows still under discussion: `OPEN` with `Unavailable`, `MISSING`
+with `Missing`, and `DEACCESSIONED`. The use restriction `Restricted` is being
+replaced in AxC by `Online request`, so the two are paired the same way.
+
+Each code is matched on its FOLIO code and must exist in the tenant; a code the
+tenant lacks fails the record. On update the upsert removes any access code
+already on the item, using the ids of every code in the table that the tenant
+holds (`PayloadMeta.access_statistical_code_ids`), and adds the new one. The
+marker and codes added in FOLIO are kept, so an access change in AxC moves the
+item from one code to another.
 
 ### Location rules
 
@@ -326,6 +366,7 @@ Used when the record has no value for a resolved field.
 | Administrative note label | `Axiell Current Location` |
 | Item note types | `Axiell Current Location`, `Axiell Normal Location`, constants that must exist in the tenant |
 | Statistical code | `AXIELL`, a constant that must exist in the tenant |
+| Access statistical code | None: a pair outside the table gets no access code |
 | **Location** | **None, the record fails instead** |
 
 The location is deliberately the exception. It used to default to
@@ -345,8 +386,8 @@ Taken from `config.FIELDS`.
 | `object_category` | `655$a` | material type |
 | `current_location` | `852$b` | admin note, Axiell Current Location item note |
 | `normal_location` | `984$b` | holdings/item permanent location, Axiell Normal Location item note |
-| `access_category` | `506$f` | item status |
-| `use_restriction` | `540$a` | item permanent loan type |
+| `access_category` | `506$f` | item status, access statistical code |
+| `use_restriction` | `540$a` | item permanent loan type, access statistical code |
 | record selection | `351$c` | must be `ITEM` |
 | harvest flag | `980$a` | must be present and non-empty |
 
@@ -357,4 +398,4 @@ Taken from `config.FIELDS`.
 - MARC extraction: `src/adapters/steps/axiell_folio_sync/mapping/marc.py`
 - payload contracts: `src/adapters/steps/axiell_folio_sync/mapping/payloads.py`
 
-Mapping version: `3.2.0` (`config.VERSION`).
+Mapping version: `3.4.0` (`config.VERSION`).

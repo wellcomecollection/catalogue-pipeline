@@ -87,8 +87,9 @@ class Item(BaseModel):
     notes: list[Note] | None = None
     # Plain untyped strings; no tenant note type needed.
     administrativeNotes: list[str] | None = None
-    # The synced marker, as on the holdings. No formerIds: the FOLIO transformer
-    # reads an item's formerIds as its Sierra item number.
+    # The synced marker, as on the holdings, and the access statistical code
+    # from 506$f and 540$a when the pair maps to one. No formerIds: the FOLIO
+    # transformer reads an item's formerIds as its Sierra item number.
     statisticalCodeIds: list[str] | None = None
     # Cleared on every write, as on the instance.
     discoverySuppress: bool = False
@@ -100,6 +101,10 @@ class PayloadMeta(BaseModel):
     source_id: str
     mapping_version: str
     deleted: bool = False
+    # The tenant ids of every access statistical code the mapping can set (see
+    # config.ACCESS_STATISTICAL_CODES). The upsert replaces any of these already
+    # on the item with the one the payload carries, and keeps every other code.
+    access_statistical_code_ids: list[str] = Field(default_factory=list)
 
 
 class MappedPayloads(BaseModel):

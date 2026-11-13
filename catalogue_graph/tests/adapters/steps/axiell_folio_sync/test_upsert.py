@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
+import pytest
+
 from adapters.steps.axiell_folio_sync.mapping import (
     Holdings,
     Identifier,
@@ -12,6 +14,7 @@ from adapters.steps.axiell_folio_sync.mapping import (
     MappedPayloads,
     Note,
     PayloadMeta,
+    Status,
 )
 from adapters.steps.axiell_folio_sync.upsert import upsert_from_payloads
 
@@ -375,8 +378,8 @@ def test_item_status_is_sent_on_create() -> None:
 
 
 def test_update_leaves_the_folio_item_status_alone() -> None:
-    """mod-circulation owns item.status once the item exists: an update must not
-    reset a checked-out (or missing, or withdrawn) item to Available."""
+    """mod-circulation owns item.status once it moves the item into circulation:
+    an update must not reset a checked-out item to Available."""
     put_bodies: list[dict[str, Any]] = []
     circulation_status = {
         "name": "Checked out",
@@ -454,6 +457,65 @@ def test_update_falls_back_to_our_status_when_folio_sends_none() -> None:
 
     item_put = next(body for body in put_bodies if body["id"] == "item-1")
     assert item_put["status"] == {"name": "Available"}
+
+
+def _item_status_after_update(
+    existing_status: dict[str, Any], incoming: str
+) -> dict[str, Any]:
+    """Run one item update and return the status that was PUT."""
+    mapped = MAPPED.model_copy(
+        update={
+            "item": MAPPED.item.model_copy(update={"status": Status(name=incoming)})
+        }
+    )
+    inventory = _RecordingInventory(
+        existing={
+            "/inventory/instances": [{"id": "inst-1"}],
+            "/holdings-storage/holdings": [{"id": "hold-1"}],
+            "/inventory/items": [{"id": "item-1", "status": existing_status}],
+        }
+    )
+    result = upsert_from_payloads(mapped, inventory, dry_run=False)
+    assert result.errors == []
+    status: dict[str, Any] = dict(inventory.put_calls)["/inventory/items/item-1"][
+        "status"
+    ]
+    return status
+
+
+@pytest.mark.parametrize(
+    "current",
+    ["Available", "Restricted", "Unavailable", "Unknown", "Missing", "Withdrawn"],
+)
+def test_update_moves_a_status_the_sync_sets(current: str) -> None:
+    """An AxC access change reaches an item that already exists, as long as
+    FOLIO still holds a status the sync itself sets."""
+    incoming = "Unavailable" if current != "Unavailable" else "Available"
+
+    status = _item_status_after_update({"name": current}, incoming)
+
+    assert status == {"name": incoming}
+
+
+@pytest.mark.parametrize(
+    "current",
+    ["Checked out", "Paged", "Awaiting pickup", "In transit", "Long missing"],
+)
+def test_update_leaves_a_circulation_status_alone(current: str) -> None:
+    existing = {"name": current, "date": "2026-09-30T09:00:00.000+00:00"}
+
+    status = _item_status_after_update(existing, "Unavailable")
+
+    assert status == existing
+
+
+def test_update_keeps_folio_s_status_when_the_name_is_unchanged() -> None:
+    """Sending the same name back as FOLIO's own object keeps its date."""
+    existing = {"name": "Available", "date": "2026-09-30T09:00:00.000+00:00"}
+
+    status = _item_status_after_update(existing, "Available")
+
+    assert status == existing
 
 
 def _put_bodies_for(existing_notes: list[str], incoming_note: str) -> list[str]:
@@ -799,6 +861,100 @@ def test_update_keeps_other_statistical_codes_and_adds_the_marker() -> None:
         AXIELL_CODE,
     ]
     assert puts["/inventory/items/item-1"]["statisticalCodeIds"] == [AXIELL_CODE]
+
+
+OLD_ACCESS = "manual-request-code-uuid"
+NEW_ACCESS = "online-request-code-uuid"
+HAND_CODE = "added-in-folio-code-uuid"
+
+
+def _item_codes_after_update(
+    existing_codes: list[str], incoming_codes: list[str]
+) -> list[str]:
+    """Run one item update with access codes owned, and return the item's codes."""
+    mapped = MAPPED.model_copy(
+        update={
+            "item": MAPPED.item.model_copy(
+                update={"statisticalCodeIds": incoming_codes}
+            ),
+            "meta": MAPPED.meta.model_copy(
+                update={"access_statistical_code_ids": [OLD_ACCESS, NEW_ACCESS]}
+            ),
+        }
+    )
+    inventory = _RecordingInventory(
+        existing={
+            "/inventory/instances": [{"id": "inst-1"}],
+            "/holdings-storage/holdings": [{"id": "hold-1"}],
+            "/inventory/items": [
+                {"id": "item-1", "statisticalCodeIds": existing_codes}
+            ],
+        }
+    )
+    result = upsert_from_payloads(mapped, inventory, dry_run=False)
+    assert result.errors == []
+    codes: list[str] = dict(inventory.put_calls)["/inventory/items/item-1"][
+        "statisticalCodeIds"
+    ]
+    return codes
+
+
+def test_update_replaces_the_old_access_code_and_keeps_the_rest() -> None:
+    """An access change in AxC moves the item to the new code, rather than
+    leaving it with two. The marker and a code added in FOLIO are kept."""
+    codes = _item_codes_after_update(
+        existing_codes=[HAND_CODE, OLD_ACCESS, AXIELL_CODE],
+        incoming_codes=[AXIELL_CODE, NEW_ACCESS],
+    )
+
+    assert codes == [HAND_CODE, AXIELL_CODE, NEW_ACCESS]
+
+
+def test_update_removes_an_access_code_the_record_no_longer_maps_to() -> None:
+    codes = _item_codes_after_update(
+        existing_codes=[OLD_ACCESS, AXIELL_CODE, HAND_CODE],
+        incoming_codes=[AXIELL_CODE],
+    )
+
+    assert codes == [AXIELL_CODE, HAND_CODE]
+
+
+def test_update_keeps_an_access_code_that_has_not_changed() -> None:
+    codes = _item_codes_after_update(
+        existing_codes=[AXIELL_CODE, NEW_ACCESS],
+        incoming_codes=[AXIELL_CODE, NEW_ACCESS],
+    )
+
+    assert codes == [AXIELL_CODE, NEW_ACCESS]
+
+
+def test_the_access_codes_are_replaced_on_the_item_only() -> None:
+    """The instance and holdings carry the marker only, so an access code found
+    there was not written by the sync and is kept."""
+    mapped = LABELLED.model_copy(
+        update={
+            "meta": MAPPED.meta.model_copy(
+                update={"access_statistical_code_ids": [OLD_ACCESS]}
+            )
+        }
+    )
+    inventory = _RecordingInventory(
+        existing={
+            "/inventory/instances": [
+                {"id": "inst-1", "statisticalCodeIds": [OLD_ACCESS]}
+            ],
+            "/holdings-storage/holdings": [
+                {"id": "hold-1", "statisticalCodeIds": [OLD_ACCESS]}
+            ],
+            "/inventory/items": [{"id": "item-1"}],
+        }
+    )
+
+    upsert_from_payloads(mapped, inventory, dry_run=False)
+
+    puts = dict(inventory.put_calls)
+    for path in ("/inventory/instances/inst-1", "/holdings-storage/holdings/hold-1"):
+        assert puts[path]["statisticalCodeIds"] == [OLD_ACCESS, AXIELL_CODE]
 
 
 def test_update_keeps_other_former_ids_and_adds_the_guid_once() -> None:
