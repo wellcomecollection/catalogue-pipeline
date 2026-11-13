@@ -59,6 +59,7 @@
 * [Adapters](adapters/README.md)
   * [Adapter lifecycle](adapters/adapter_lifecycle.md)
   * [Fetching records from Sierra](adapters/fetching_records_from_sierra.md)
+  * [Adapters runbook](adapters/runbook.md)
 * [Sierra](sierra/README.md)
   * [Sierra IDs](sierra/sierra_ids.md)
 * [Pipeline](pipeline/README.md)
