@@ -177,6 +177,30 @@ Feature: FOLIO work-level holdings
     When I transform the MARC record
     Then the holdings have a location of type "closed-stores" labelled "Closed stores"
 
+  Scenario: Other holdings in open shelves locations with different names give no location
+    Given a FOLIO holdings record "checkin"
+    And that holdings record has the statement "Complete set"
+    And that holdings record is in the location "migration" named "migration" in the library "Migration"
+    And a FOLIO holdings record "journals"
+    And that holdings record is in the location "wgser" named "Open shelves journals" in the library "Open shelves"
+    And a FOLIO holdings record "history"
+    And that holdings record is in the location "wghxg" named "History of Medicine" in the library "Open shelves"
+    When I transform the MARC record
+    Then the holdings have no location
+
+  # A bound-with location says where the volume is bound, not where this instance's run is.
+  Scenario: Other holdings in a bound-with location are left out without a warning
+    Given a FOLIO holdings record "checkin"
+    And that holdings record has the statement "Complete set"
+    And that holdings record is in the location "migration" named "migration" in the library "Migration"
+    And a FOLIO holdings record "journals"
+    And a FOLIO holdings record "bound"
+    And that holdings record has the holdings type "Physical"
+    And that holdings record is in the location "bwith" named "Bound in above" in the library "bwith"
+    When I transform the MARC record
+    Then the holdings have a location of type "closed-stores" labelled "Closed stores"
+    And no warning "Unmapped FOLIO location" is logged
+
   Scenario: A holdings record in an unmapped location gives no location and a warning
     Given a FOLIO holdings record "checkin"
     And that holdings record has the statement "Complete set"
