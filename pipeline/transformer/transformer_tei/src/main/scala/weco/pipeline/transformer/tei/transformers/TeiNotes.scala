@@ -14,13 +14,13 @@ object TeiNotes {
     getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(
       node
     ) ++ getHandNotes(node) ++ TeiPhysicalDescriptionNotes(node) ++
-      getFiliation(node)
+      getFiliation(node) ++ TeiBibliography(node)
 
   private def getDescLevelNotes(xml: Elem): Seq[Note] = {
     val msDesc = xml \\ "msDesc"
     getHandNotes(msDesc) ++ TeiPhysicalDescriptionNotes(msDesc) ++ getHistory(
       msDesc
-    )
+    ) ++ TeiBibliography(msDesc)
   }
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.

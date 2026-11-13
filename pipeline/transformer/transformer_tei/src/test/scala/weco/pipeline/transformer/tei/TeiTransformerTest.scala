@@ -117,6 +117,11 @@ class TeiTransformerTest
               contents =
                 "Arabic, original. Catchwords are written underneath the text block.",
               noteType = NoteType.FoliationNote
+            ),
+            Note(
+              contents =
+                "Ullmann Medizin p. 152, Iskandar Catalogue p. 162 (Shelf-mark: WMS Or. 1a)",
+              noteType = NoteType.BibliographicalInformation
             )
           ),
           physicalDescription = Some(
