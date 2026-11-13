@@ -14,6 +14,7 @@ from adapters.transformers.folio.on_order import (
     awaiting_cataloguing_item,
     is_uncatalogued,
 )
+from adapters.transformers.folio.other_identifiers import extract_digcodes
 from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
@@ -24,6 +25,10 @@ from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.genres import extract_genres
 from adapters.transformers.marc.languages import extract_languages
 from adapters.transformers.marc.lettering import extract_lettering
+from adapters.transformers.marc.other_identifiers import (
+    extract_estc_references,
+    extract_international_standard_numbers,
+)
 from adapters.transformers.marc.parents import get_parents
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
@@ -100,11 +105,15 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
 
     @property
     def other_identifiers(self) -> list[SourceIdentifier]:
-        identifiers = super().other_identifiers + [
+        identifiers = [
+            *super().other_identifiers,
+            *extract_international_standard_numbers(self.record),
+            *extract_digcodes(self.record),
+            *extract_estc_references(self.record),
             WorkSourceIdentifier(
                 identifier_type=Id(id="folio-instance-hrid"),
                 value=extract_hrid(self.record),
-            )
+            ),
         ]
         if (bnumber := extract_sierra_predecessor_id(self.record)) is not None:
             identifiers.append(

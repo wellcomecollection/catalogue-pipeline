@@ -1,24 +1,31 @@
 """
-Extracting other identifiers from
-https://www.loc.gov/marc/bibliographic/bd035.html
+Other identifiers on a MARC work.
 
-The origin codes for Axiell records from the Mimsy dataset correspond to the
-identifier types that were stored there
-
+- 035: control numbers, classified by their origin code. The origin codes for
+  Axiell records from the Mimsy dataset correspond to the identifier types that
+  were stored there. https://www.loc.gov/marc/bibliographic/bd035.html
+- 020, 022: ISBN and ISSN from ǂa.
+  https://www.loc.gov/marc/bibliographic/bd020.html
+  https://www.loc.gov/marc/bibliographic/bd022.html
+- 510: English Short Title Catalogue citation numbers.
+  https://www.loc.gov/marc/bibliographic/bd510.html
 """
+
+import re
 
 import structlog
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.transformers.marc.common import all_non_empty_subfields, distinct
 from models import identifier_schemes
 from models.identifier_schemes import IdentifierScheme
-from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.identifier import Id, SourceIdentifier, WorkSourceIdentifier
 
 logger = structlog.get_logger(__name__)
 
 
-def extract_other_identifiers(record: Record) -> list[SourceIdentifier]:
+def extract_system_control_numbers(record: Record) -> list[SourceIdentifier]:
     return [
         source_id
         for source_id in (format_field(field) for field in record.get_fields("035"))
@@ -58,6 +65,8 @@ def format_field(field: Field) -> SourceIdentifier | None:
         logger.error("035 field without subfield 'a'", field=str(field))
         return None
     prefix, rpar, id_value = a_subfield[1:].partition(")")
+    # Stray whitespace stops the matcher linking on the value (platform#6585).
+    id_value = id_value.strip()
     if not rpar:
         logger.error("Identifier without namespace prefix", identifier_value=a_subfield)
         return None
@@ -99,3 +108,37 @@ def which_identifier_type(prefix: str, id_value: str) -> IdentifierScheme | None
             return identifier_schemes.CALM_ALTREF_NO
         return identifier_schemes.ICONOGRAPHIC_NUMBER
     return ORIGIN_CODE_TO_ID_TYPE.get(prefix)
+
+
+INTERNATIONAL_STANDARD_NUMBER_TAGS = {
+    "020": identifier_schemes.ISBN,
+    "022": identifier_schemes.ISSN,
+}
+
+
+def extract_international_standard_numbers(record: Record) -> list[SourceIdentifier]:
+    return distinct(
+        WorkSourceIdentifier(identifier_type=Id(id=scheme.id), value=value)
+        for tag, scheme in INTERNATIONAL_STANDARD_NUMBER_TAGS.items()
+        for value in all_non_empty_subfields(tag, "a", record)
+    )
+
+
+ESTC_NUMBER_RE = re.compile(r"[TWRNPS][0-9]+")
+
+
+def extract_estc_references(record: Record) -> list[SourceIdentifier]:
+    """ESTC numbers from 510s that are exactly `ǂa ESTC ǂc <number>`.
+
+    Other shapes, such as a second ǂc, cite other bibliographies and stay notes only.
+    """
+    return [
+        WorkSourceIdentifier(
+            identifier_type=Id(id=identifier_schemes.BL_ESTC_CITATION_NO.id),
+            value=value,
+        )
+        for field in record.get_fields("510")
+        if [code for code, _ in field] == ["a", "c"]
+        and field["a"] == "ESTC"
+        and ESTC_NUMBER_RE.fullmatch(value := field["c"])
+    ]
