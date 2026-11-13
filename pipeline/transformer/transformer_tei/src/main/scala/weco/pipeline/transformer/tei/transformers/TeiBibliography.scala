@@ -12,10 +12,18 @@ import scala.xml.{Comment, Elem, Node, NodeSeq}
   */
 object TeiBibliography {
   def apply(nodeSeq: NodeSeq): List[Note] =
-    ((nodeSeq \ "additional" \ "listBibl" \ "bibl") ++
-      (nodeSeq \ "listBibl" \ "bibl") ++ (nodeSeq \ "bibl")).toList
+    ((nodeSeq \ "additional" \ "listBibl").flatMap(bibls) ++
+      (nodeSeq \ "listBibl").flatMap(bibls) ++ (nodeSeq \ "bibl")).toList
       .flatMap(reference)
       .map(Note(NoteType.BibliographicalInformation, _))
+
+  // The TEI template allows a listBibl to hold further listBibl elements
+  private def bibls(listBibl: Node): Seq[Node] =
+    listBibl.child.flatMap {
+      case n if n.label == "bibl"     => Seq(n)
+      case n if n.label == "listBibl" => bibls(n)
+      case _                          => Nil
+    }
 
   private val citationFields = List(
     "abbr",

@@ -25,6 +25,28 @@ class TeiBibliographyTest extends AnyFunSpec with Matchers {
     )
   }
 
+  it("reads references in nested bibliography lists") {
+    val msDesc =
+      <msDesc>
+        <additional>
+          <listBibl>
+            <bibl>Test catalogue, p. 1</bibl>
+            <listBibl>
+              <head>Test heading</head>
+              <bibl>Nested test catalogue, p. 2</bibl>
+            </listBibl>
+            <bibl>Test catalogue, p. 3</bibl>
+          </listBibl>
+        </additional>
+      </msDesc>
+
+    TeiBibliography(msDesc) shouldBe bibliography(
+      "Test catalogue, p. 1",
+      "Nested test catalogue, p. 2",
+      "Test catalogue, p. 3"
+    )
+  }
+
   it("reads the bibliography of an item") {
     val msItem =
       <msItem xml:id="item_1">
