@@ -43,13 +43,18 @@ class SourceScope(BaseModel):
         return "full"
 
     def to_elasticsearch_query(
-        self, range_filter_field_name: str, query: dict | None = None
+        self,
+        range_filter_field_name: str,
+        query: dict | None = None,
+        fallback_field_name: str | None = None,
     ) -> dict:
         query_clauses = []
         if query:
             query_clauses.append(query)
         if self.window:
-            range_filter = self.window.to_elasticsearch_query(range_filter_field_name)
+            range_filter = self.window.to_elasticsearch_query(
+                range_filter_field_name, fallback_field_name=fallback_field_name
+            )
             query_clauses.append(range_filter)
         if self.ids:
             id_filter = {"ids": {"values": self.ids}}

@@ -26,13 +26,13 @@ locals {
         // id_minter - matcher_merger
         identified = "works_identified.2023-05-26"
         // matcher_merger - graph/ingestor/indexer
-        denormalised = "works_denormalised.2025-08-14"
+        denormalised = "works_denormalised.2026-11-12"
         // graph/ingestor/indexer - API
         indexed = "works_indexed.2026-07-03"
       }
       images = {
         // matcher_merger - images_inferrer
-        initial = "images_initial.2026-06-15"
+        initial = "images_initial.2026-11-12"
         // images_inferrer - graph/ingestor/indexer
         augmented = "images_augmented.2026-04-29"
         // graph/ingestor/indexer - API

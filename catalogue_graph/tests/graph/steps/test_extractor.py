@@ -215,16 +215,25 @@ def test_incremental_mode() -> None:
 
     # We expect two ES queries. The second returns no results, after which the loop inside `search_with_pit` stops.
     assert len(MockElasticsearchClient.queries) == 2
+    WINDOW_BOUNDS = {"gte": "2025-05-05T15:15:00", "lte": "2025-05-05T15:30:00"}
     assert MockElasticsearchClient.queries[0] == {
         "bool": {
             "must": [
                 {"match": {"type": "Visible"}},
                 {
-                    "range": {
-                        "state.mergedTime": {
-                            "gte": "2025-05-05T15:15:00",
-                            "lte": "2025-05-05T15:30:00",
-                        }
+                    "bool": {
+                        "should": [
+                            {"range": {"indexed_at": WINDOW_BOUNDS}},
+                            {
+                                "bool": {
+                                    "must_not": {"exists": {"field": "indexed_at"}},
+                                    "filter": {
+                                        "range": {"state.mergedTime": WINDOW_BOUNDS}
+                                    },
+                                }
+                            },
+                        ],
+                        "minimum_should_match": 1,
                     }
                 },
             ]

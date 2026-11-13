@@ -35,7 +35,7 @@ def _seed_initial_images(ids: list[str]) -> None:
         MockElasticsearchClient.index(
             index=index,
             id=image_id,
-            document={"modifiedTime": "2026-06-10T12:00:00Z"},
+            document={"indexed_at": "2026-06-10T12:00:00Z"},
         )
 
 
@@ -101,14 +101,14 @@ def test_lambda_handler_accepts_scheduled_time(
     _seed_initial_images(["a"])
 
     # scheduled_time - 5min lag = window end 12:05; start defaults to 11:50,
-    # covering the seeded modifiedTime of 12:00.
+    # covering the seeded indexed_at of 12:00.
     result = find_work.lambda_handler(
         {"scheduled_time": "2026-06-10T12:10:00Z"}, _LambdaContext()
     )
     assert len(result["partitions"]) == 1
 
 
-def test_handler_builds_window_query_on_modified_time() -> None:
+def test_handler_builds_window_query_on_indexed_at() -> None:
     mock_es_secrets("inferrer", PIPELINE_DATE)
     _seed_initial_images(["a"])
 
@@ -121,12 +121,19 @@ def test_handler_builds_window_query_on_modified_time() -> None:
     )
     find_work.handler(event, es_mode="private")
 
-    # The discovery query must range over the top-level `modifiedTime` field.
+    # indexed_at, falling back to modifiedTime for images written before the index stamped it
+    bounds = {"gte": "2026-06-10T11:45:00+00:00", "lte": "2026-06-10T12:00:00+00:00"}
     assert MockElasticsearchClient.queries[-1] == {
-        "range": {
-            "modifiedTime": {
-                "gte": "2026-06-10T11:45:00+00:00",
-                "lte": "2026-06-10T12:00:00+00:00",
-            }
+        "bool": {
+            "should": [
+                {"range": {"indexed_at": bounds}},
+                {
+                    "bool": {
+                        "must_not": {"exists": {"field": "indexed_at"}},
+                        "filter": {"range": {"modifiedTime": bounds}},
+                    }
+                },
+            ],
+            "minimum_should_match": 1,
         }
     }

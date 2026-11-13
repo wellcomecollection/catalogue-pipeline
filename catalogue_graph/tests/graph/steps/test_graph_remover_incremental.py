@@ -431,7 +431,7 @@ OUTSIDE_WINDOW = "2024-12-01T00:00:00Z"
 
 
 def add_path_work(
-    work_id: str, path: str, identifier: str, merged_time: str | None = IN_WINDOW
+    work_id: str, path: str, identifier: str, indexed_at: str | None = IN_WINDOW
 ) -> None:
     MockElasticsearchClient.index(
         "works-denormalised-dev",
@@ -445,8 +445,8 @@ def add_path_work(
                     "ontologyType": "Work",
                     "value": f"priref-{work_id}",
                 },
-                **({"mergedTime": merged_time} if merged_time else {}),
             },
+            **({"indexed_at": indexed_at} if indexed_at else {}),
             "data": {
                 "collectionPath": {"path": path},
                 "otherIdentifiers": [
@@ -586,10 +586,10 @@ def test_work_identifiers_moved_record_removes_stale_parent_edge() -> None:
     check_work_identifiers_deleted_edges(set(edges_to_remove))
 
 
-def test_work_identifiers_window_excludes_works_without_merged_time() -> None:
+def test_work_identifiers_window_excludes_works_without_indexed_at() -> None:
     # An Elasticsearch range query never matches a document missing the field
     add_path_work("refno001", "PP/ABC", "PP/ABC")
-    add_path_work("notime01", "PP/XYZ", "PP/XYZ", merged_time=None)
+    add_path_work("notime01", "PP/XYZ", "PP/XYZ", indexed_at=None)
 
     mock_neptune_get_edges_response(
         ["refno001"],
@@ -646,9 +646,9 @@ def test_work_identifiers_shared_node_keeps_edges_of_works_outside_window(
     add_path_work("inwindow", "axiell:NEW/axiell:S", "S")
     add_path_work("inwind02", "axiell:NEW2/axiell:S", "S")
     # Shares node axiell:S but was last merged outside the window
-    add_path_work("outside1", "axiell:OTHER/axiell:S", "S", merged_time=OUTSIDE_WINDOW)
+    add_path_work("outside1", "axiell:OTHER/axiell:S", "S", indexed_at=OUTSIDE_WINDOW)
     # Still linked to axiell:S in the graph, but its current path points elsewhere
-    add_path_work("outside2", "axiell:Z/axiell:T", "T", merged_time=OUTSIDE_WINDOW)
+    add_path_work("outside2", "axiell:Z/axiell:T", "T", indexed_at=OUTSIDE_WINDOW)
 
     mock_neptune_get_edges_response(
         ["inwind02", "inwindow"],
@@ -843,10 +843,10 @@ def check_work_identifiers_deleted_nodes(expected_ids: set[str]) -> None:
 def test_work_identifiers_nodes_keeps_disconnected_node_with_visible_work() -> None:
     # Merged after the window, so its Work node and HAS_PATH_IDENTIFIER edge are not in the graph yet
     add_path_work(
-        "future01", "axiell:P/axiell:C", "C", merged_time="2025-01-01T12:10:00Z"
+        "future01", "axiell:P/axiell:C", "C", indexed_at="2025-01-01T12:10:00Z"
     )
     # RefNo mode: the full path is the path identifier
-    add_path_work("refno001", "PP/ABC/1", "PP/ABC/1", merged_time=OUTSIDE_WINDOW)
+    add_path_work("refno001", "PP/ABC/1", "PP/ABC/1", indexed_at=OUTSIDE_WINDOW)
     mock_work_identifiers_node_removal(
         disconnected_ids=["axiell:C", "PP/ABC/1", "axiell:GONE"],
         nodes_to_remove=["axiell:GONE"],
@@ -859,7 +859,7 @@ def test_work_identifiers_nodes_keeps_disconnected_node_with_visible_work() -> N
 
 def test_work_identifiers_nodes_removes_node_left_behind_by_moved_record() -> None:
     # The work now maps to axiell:A2, so nothing maps to its old node axiell:A
-    add_path_work("moved001", "axiell:NEW/axiell:A2", "A2", merged_time=OUTSIDE_WINDOW)
+    add_path_work("moved001", "axiell:NEW/axiell:A2", "A2", indexed_at=OUTSIDE_WINDOW)
     mock_work_identifiers_node_removal(
         disconnected_ids=["axiell:A"], nodes_to_remove=["axiell:A"]
     )

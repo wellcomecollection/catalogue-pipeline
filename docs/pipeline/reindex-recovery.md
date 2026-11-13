@@ -4,7 +4,7 @@ What to do when parts of a reindex fail or go missing. Everything here was learn
 
 ## How work reaches the index
 
-Works flow through works-source, works-identified (id-minter), matcher, merger and works-denormalised, then ingest windows carry them into works-indexed. The id-minter and the graph ingest are windowed: a scheduled tick covers a recent time slice (`indexed_at` in works-source for the id-minter, `state.mergedTime` in works-denormalised for ingest). Windows only ever cover the recent past, so a document whose timestamp falls in a span the ticks have already passed (a late transform, a redrive, a quiesce period) is never picked up, and nothing fails or alarms because no stage saw an error. Compare stage counts (source vs identified, denormalised vs indexed) to find gaps; do not rely on alarms.
+Works flow through works-source, works-identified (id-minter), matcher, merger and works-denormalised, then ingest windows carry them into works-indexed. The id-minter and the graph ingest are windowed: a scheduled tick covers a recent time slice (`indexed_at` in works-source for the id-minter; for the graph, ingest and inferrer, `indexed_at` in works-denormalised and images-initial where those indices stamp it, otherwise the matcher's `state.mergedTime` or `modifiedTime`). Windows only ever cover the recent past, so a document whose timestamp falls in a span the ticks have already passed (a late transform, a redrive, a quiesce period) is never picked up, and nothing fails or alarms because no stage saw an error. Compare stage counts (source vs identified, denormalised vs indexed) to find gaps; do not rely on alarms.
 
 ## Rules that hold everywhere
 
@@ -28,11 +28,13 @@ Pass an explicit `job_id`: the generated one is minute-granular, and concurrent 
 
 ## Failed graph ingest windows: check before replaying
 
-A FAILED ingest execution has usually already written its batch, because the bulk write happens before version-conflict errors raise. Sample ids from works-denormalised within the window's `mergedTime` range and count them in works-indexed before replaying anything; in the 2026-07-31 recovery, 14 of 16 failed windows turned out to be complete.
+A FAILED ingest execution has usually already written its batch, because the bulk write happens before version-conflict errors raise. Sample ids from works-denormalised within the window's time range and count them in works-indexed before replaying anything; in the 2026-07-31 recovery, 14 of 16 failed windows turned out to be complete.
 
-## Redriven merges miss ingest windows
+## Late and redriven merges
 
-works-denormalised documents carry the `mergedTime` of their original matcher batch, not the redrive time. So after a merger DLQ redrive, the ingest windows that would cover those documents have already run, and nothing later covers them. The fix is to re-match rather than re-ingest: re-inject the affected work ids on the id-minter output topic, which feeds the matcher (`pipeline_inject_messages.py`), producing a fresh merge with a current `mergedTime` that the scheduled windows then pick up.
+`state.mergedTime` is the time the matcher matched a work, and it versions works-denormalised writes so an older merge never overwrites a newer one. It is not when the work became visible: a merger backlog or a DLQ redrive can write a work long after its `mergedTime`, past the windows that would cover it. Windows therefore select on `indexed_at` where an index stamps it on every write, so a late or redriven merge lands in the window it was actually written in. An index stamps `indexed_at` when its mapping declares the field: the `set-indexed-at` ingest pipeline is attached to works-denormalised and images-initial only then. Documents without `indexed_at` (every document in an index whose mapping lacks it, and those written before the field was added) are windowed on the matcher's time instead. In the 2026-10-20 reindex (wellcomecollection/platform#6585), a merger backlog of about 15 minutes left 41 Visible and 108 non-visible works out of the served index this way.
+
+Where works are windowed on the matcher's time, a late or redriven merge can still miss its window. Re-inject their ids on the id-minter output topic, which feeds the matcher (`pipeline_inject_messages.py`), so they are merged afresh with a current `state.mergedTime`.
 
 ## Searchability traps when verifying
 

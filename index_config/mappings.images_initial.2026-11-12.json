@@ -1,0 +1,11 @@
+{
+  "dynamic": false,
+  "properties": {
+    "modifiedTime": {
+      "type": "date"
+    },
+    "indexed_at": {
+      "type": "date"
+    }
+  }
+}

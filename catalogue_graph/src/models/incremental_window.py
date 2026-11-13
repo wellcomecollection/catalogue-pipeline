@@ -85,8 +85,24 @@ class IncrementalWindow(BaseModel):
             end_time=datetime.fromisoformat(end_str),
         )
 
-    def to_elasticsearch_query(self, field_name: str, lower_bound: bool = True) -> dict:
+    def to_elasticsearch_query(
+        self,
+        field_name: str,
+        lower_bound: bool = True,
+        fallback_field_name: str | None = None,
+    ) -> dict:
         bounds = {"lte": self.end_time.isoformat()}
         if lower_bound:
             bounds["gte"] = self.start_time.isoformat()
-        return {"range": {field_name: bounds}}
+        query = {"range": {field_name: bounds}}
+        if fallback_field_name is None:
+            return query
+
+        # Documents without field_name, such as those in an index that doesn't stamp it, use the fallback
+        without_field = {
+            "bool": {
+                "must_not": {"exists": {"field": field_name}},
+                "filter": {"range": {fallback_field_name: bounds}},
+            }
+        }
+        return {"bool": {"should": [query, without_field], "minimum_should_match": 1}}
