@@ -8,16 +8,16 @@ import scala.xml.{Comment, Elem, Node, NodeSeq}
 /** The bibliography of a manuscript, part or item: one note per <bibl>.
   *
   * nodeSeq is an msDesc or msPart (bibliography in additional/listBibl) or an
-  * msItem (bibliography in listBibl).
+  * msItem (bibliography in listBibl, or a bibl directly under it).
   */
 object TeiBibliography {
   def apply(nodeSeq: NodeSeq): List[Note] =
     ((nodeSeq \ "additional" \ "listBibl" \ "bibl") ++
-      (nodeSeq \ "listBibl" \ "bibl")).toList
+      (nodeSeq \ "listBibl" \ "bibl") ++ (nodeSeq \ "bibl")).toList
       .flatMap(reference)
       .map(Note(NoteType.BibliographicalInformation, _))
 
-  private val citationFields = Set(
+  private val citationFields = List(
     "abbr",
     "author",
     "editor",
@@ -36,47 +36,59 @@ object TeiBibliography {
     if (isWrittenAsFields(bibl)) citation(bibl)
     else NormaliseText(TeiPhysicalDescriptionNotes.textOf(bibl))
 
-  private def isWrittenAsFields(bibl: Node): Boolean = {
-    val fields = bibl.child.collect { case e: Elem => e.label }
-    fields.exists(Set("author", "editor", "title", "publisher")) &&
-    fields.forall(citationFields) &&
-    bibl.child.forall {
-      case _: Elem | _: Comment => true
-      case n                    => n.text.trim.isEmpty
-    }
-  }
+  private def isWrittenAsFields(bibl: Node): Boolean =
+    bibl.child.exists(
+      n => Set("author", "editor", "title", "publisher")(n.label)
+    ) &&
+      bibl.child.forall {
+        case _: Elem | _: Comment => true
+        case n                    => n.text.trim.isEmpty
+      }
 
   // e.g. "NCC: A. Editor (ed.), Title (Place: Publisher, 1949), pp. 1-2"
   private def citation(bibl: Node): Option[String] = {
+    def text(n: Node): Option[String] =
+      NormaliseText(TeiPhysicalDescriptionNotes.textOf(n))
     def values(label: String): List[String] =
-      (bibl \ label).toList.flatMap(
-        n => NormaliseText(TeiPhysicalDescriptionNotes.textOf(n))
-      )
+      (bibl \ label).toList.flatMap(text)
     def joined(labels: String*): Option[String] =
       Some(labels.flatMap(values).mkString(", ")).filter(_.nonEmpty)
 
-    val names = (values("author"), values("editor")) match {
-      case (Nil, Nil)     => None
-      case (Nil, editors) => Some(s"${editors.mkString(" and ")} (ed.)")
-      case (authors, _)   => Some(authors.mkString(" and "))
+    val names = (values("author") match {
+      case Nil     => Nil
+      case authors => List(authors.mkString(" and "))
+    }) ++ (values("editor") match {
+      case Nil     => Nil
+      case editors => List(s"${editors.mkString(" and ")} (ed.)")
+    })
+    val nameAndTitle = (names ++ joined("title")).mkString(", ")
+    val imprint = List(
+      Some(
+        List(joined("placeName", "pubPlace"), joined("publisher")).flatten
+          .mkString(": ")
+      ).filter(_.nonEmpty),
+      joined("date")
+    ).flatten.mkString(", ")
+    val work = (nameAndTitle, imprint) match {
+      case ("", _) => imprint
+      case (_, "") => nameAndTitle
+      case _       => s"$nameAndTitle ($imprint)"
     }
-    val publication =
-      List(joined("placeName", "pubPlace"), joined("publisher")).flatten
-        .mkString(": ")
-    val imprint =
-      List(Some(publication).filter(_.nonEmpty), joined("date")).flatten
-        .mkString(", ")
-    val work = List(names, joined("title")).flatten.mkString(", ") +
-      (if (imprint.isEmpty) "" else s" ($imprint)")
-    val reference = (Some(work.trim).filter(_.nonEmpty).toList ++
-      joined("biblScope", "note")).mkString(", ")
-
-    NormaliseText(
-      (joined("abbr"), reference) match {
-        case (Some(abbr), "") => abbr
-        case (Some(abbr), _)  => s"$abbr: $reference"
-        case (None, _)        => reference
+    // Fields we don't name, e.g. <ref> or <extent>, go at the end
+    val others = bibl.child
+      .collect {
+        case e: Elem if !citationFields.contains(e.label) => e
       }
-    )
+      .flatMap(text)
+    val details =
+      (Some(work).filter(_.nonEmpty).toList ++ joined("biblScope", "note") ++
+        others).mkString(", ")
+
+    (joined("abbr"), details) match {
+      case (Some(abbr), "") => Some(abbr)
+      case (Some(abbr), _)  => Some(s"$abbr: $details")
+      case (None, "")       => None
+      case (None, _)        => Some(details)
+    }
   }
 }

@@ -29,9 +29,13 @@ class TeiBibliographyTest extends AnyFunSpec with Matchers {
     val msItem =
       <msItem xml:id="item_1">
         <listBibl><bibl>Test author, p. 3</bibl></listBibl>
+        <bibl>Test author, p. 4</bibl>
       </msItem>
 
-    TeiBibliography(msItem) shouldBe bibliography("Test author, p. 3")
+    TeiBibliography(msItem) shouldBe bibliography(
+      "Test author, p. 3",
+      "Test author, p. 4"
+    )
   }
 
   it("puts a reference written as fields together as a citation") {
@@ -57,6 +61,13 @@ class TeiBibliographyTest extends AnyFunSpec with Matchers {
             </bibl>
             <bibl><!-- template --><title>Only a title</title></bibl>
             <bibl><abbr>TB</abbr><publisher>Test Press</publisher></bibl>
+            <bibl>
+              <author>C. Author</author>
+              <editor>D. Editor</editor>
+              <title>Edited test works</title>
+              <extent>2 vols</extent>
+              <ref target="test_ref">Online</ref>
+            </bibl>
           </listBibl>
         </additional>
       </msPart>
@@ -65,7 +76,8 @@ class TeiBibliographyTest extends AnyFunSpec with Matchers {
       "TC: A. Editor, et al. (ed.), A test catalogue (Testville: Test Press, 1949), Vol. 9, pp. 1-2",
       "A. Author and B. Author, Another test book (1929)",
       "Only a title",
-      "TB: (Test Press)"
+      "TB: Test Press",
+      "C. Author, D. Editor (ed.), Edited test works, 2 vols, Online"
     )
   }
 
