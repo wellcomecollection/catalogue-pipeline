@@ -152,7 +152,7 @@ export AWS_PROFILE=platform-read_only AWS_REGION=eu-west-1
 - **Symptom:** `ebsco-adapter-failed`, `-timeout` or `-aborted` in #wc-platform-alerts.
 - **Confirm:** open the latest execution of the `ebsco-adapter` state machine in the Step Functions console and find the failed step. The `third_party_probes` metrics for `Vendor=ebsco_ftp` show whether the FTP service was reachable.
 - **Cause:** the FTP service being unavailable, or a fault in a step.
-- **Fix:** once the cause is fixed, start a fresh execution with the same input the schedule uses. Do not use Step Functions redrive, which resumes a stale execution with stale inputs ([reindex-recovery.md](https://github.com/wellcomecollection/catalogue-pipeline/blob/main/docs/pipeline/reindex-recovery.md#rules-that-hold-everywhere)):
+- **Fix:** check which step failed. If it failed before the loader committed to the store, fix the cause and start a fresh execution with the same input the schedule uses. Do not use Step Functions redrive, which resumes a stale execution with stale inputs ([reindex-recovery.md](https://github.com/wellcomecollection/catalogue-pipeline/blob/main/docs/pipeline/reindex-recovery.md#rules-that-hold-everywhere)):
 
   ```console
   ARN=$(aws stepfunctions list-state-machines --query "stateMachines[?name=='ebsco-adapter'].stateMachineArn" --output text)
@@ -160,6 +160,8 @@ export AWS_PROFILE=platform-read_only AWS_REGION=eu-west-1
   ```
 
   Missing one night is not urgent. Each run compares the whole incoming EBSCO file with the stored records, so the next scheduled run also covers the missed night.
+
+  If it failed at or after `Publish event`, the store already holds the changes, so a fresh run can find nothing new and the changes never reach the pipeline. Ask the platform team to republish that changeset's completion event; its id is in the loader step's output.
 - **Watch out:** the same alarms exist for `axiell-adapter` and `folio-adapter`, which run every 15 minutes; their harvest specifics are in the [OAI-PMH README](https://github.com/wellcomecollection/catalogue-pipeline/blob/main/catalogue_graph/src/adapters/extractors/oai_pmh/README.md).
 - **Seen in:** first draft; no retro yet.
 
