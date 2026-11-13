@@ -8,6 +8,9 @@ metadata:
   description: The data pipeline services extracting and transforming catalogue data
   annotations:
     github.com/project-slug: wellcomecollection/catalogue-pipeline
+  links:
+    - title: Runbook
+      url: https://github.com/wellcomecollection/catalogue-pipeline/blob/main/docs/adapters/runbook.md
 spec:
   owner: team:default/digital-platform
 ---
@@ -21,6 +24,9 @@ metadata:
     backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/catalogue_graph/
     wellcomecollection.org/deploy-tracker: catalogue_graph/.deploy-tracker.yml
     backplane/dora-paths: catalogue_graph
+  links:
+    - title: Runbook
+      url: https://github.com/wellcomecollection/catalogue-pipeline/blob/main/docs/adapters/runbook.md
 spec:
   type: service
   lifecycle: production
