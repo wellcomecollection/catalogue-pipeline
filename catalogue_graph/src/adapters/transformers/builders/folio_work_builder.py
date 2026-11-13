@@ -6,6 +6,7 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedIns
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.collection_path import extract_collection_identifier
 from adapters.transformers.folio.electronic_resources import extract_digital_items
+from adapters.transformers.folio.holdings import extract_holdings
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.folio.items import extract_physical_items
 from adapters.transformers.folio.merge_candidates import extract_merge_candidates
@@ -39,6 +40,7 @@ from adapters.transformers.marc.subjects import (
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Genre, Subject
+from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
     Id,
@@ -194,6 +196,12 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
             physical = [awaiting_cataloguing_item()]
 
         return physical + extract_digital_items(self.record)
+
+    @property
+    def holdings(self) -> list[Holdings]:
+        if self.inventory is None:
+            return []
+        return extract_holdings(self.inventory)
 
     def _is_suppressed(self) -> bool:
         """Check if a FOLIO Instance is marked as suppressed in its MARC data.
