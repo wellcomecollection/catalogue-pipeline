@@ -544,6 +544,8 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
                 <handNote script="testSquare">Neat test square</handNote>,
                 <handNote script="test">The script is small and neat</handNote>,
                 <handNote script="other"><p><label>Ink:</label> Black</p><seg type="density">300</seg><seg type="ratio">1:1</seg></handNote>,
+                <handNote script="test"><p><label>Script:</label> Test</p>
+                  <p><label>Ink:</label> Brown</p> Neat hand.</handNote>,
                 <handNote script=""/>
               )
             )
@@ -559,7 +561,8 @@ class TeiNotesTest extends AnyFunSpec with Matchers with TeiGenerators {
           NoteType.HandNote,
           "Script: Test<br/>The script is small and neat"
         ),
-        Note(NoteType.HandNote, "Script: Other<br/>Ink: Black")
+        Note(NoteType.HandNote, "Script: Other<br/>Ink: Black"),
+        Note(NoteType.HandNote, "Script: Test<br/>Ink: Brown<br/>Neat hand.")
       )
     }
   }

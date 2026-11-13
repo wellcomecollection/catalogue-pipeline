@@ -94,7 +94,7 @@ class TeiTransformerTest
           notes = List(
             Note(
               contents =
-                "Script: Beautiful Naskh Ink: Black; headings and dividers highlighted in red",
+                "Script: Beautiful Naskh<br/>Ink: Black; headings and dividers highlighted in red",
               noteType = NoteType.HandNote
             ),
             Note(
