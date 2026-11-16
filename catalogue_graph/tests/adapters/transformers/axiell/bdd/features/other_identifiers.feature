@@ -21,6 +21,14 @@ Feature: Other Identifiers extraction from MARC records
       | (Library Reference Number)20385i.3 | iconographic-number       | 20385i.3         |
       | (Library Reference Number)20385i   | iconographic-number       | 20385i           |
       | (Library Reference Number)BA/NA/NA | calm-altref-no            | BA/NA/NA         |
+      | (Bibliographic Number)b34019431    | sierra-system-number      | b34019431        |
+
+  # Two records in Axiell carry a trailing space after their b number
+  # (platform#6585), which stopped the matcher linking them to the FOLIO work.
+  Scenario: Whitespace around an identifier value is stripped
+    Given the MARC record has a 035 field with subfield "a" value "(Bibliographic Number)b34019431 "
+    When I transform the MARC record
+    Then the 2nd other identifier has the value "b34019431"
 
   Scenario: multiple other identifiers
     Given the MARC record has a 035 field with subfield "a" value "(Bibliographic Number)b11839053"

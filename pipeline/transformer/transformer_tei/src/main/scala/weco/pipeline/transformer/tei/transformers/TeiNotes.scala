@@ -14,13 +14,13 @@ object TeiNotes {
     getLocus(node) ++ getColophon(node).toList ++ getIncipitAndExplicit(
       node
     ) ++ getHandNotes(node) ++ TeiPhysicalDescriptionNotes(node) ++
-      getFiliation(node)
+      getFiliation(node) ++ TeiBibliography(node)
 
   private def getDescLevelNotes(xml: Elem): Seq[Note] = {
     val msDesc = xml \\ "msDesc"
     getHandNotes(msDesc) ++ TeiPhysicalDescriptionNotes(msDesc) ++ getHistory(
       msDesc
-    )
+    ) ++ TeiBibliography(msDesc)
   }
 
   /** The colophon is in `colophon` nodes under `msContents` or `msItem`.
@@ -114,7 +114,7 @@ object TeiNotes {
         if (
           (n \@ "scribe").isEmpty || TeiContributors.writtenByMultipleHands(n)
         ) {
-          val label = TeiPhysicalDescriptionNotes.textOf(n)
+          val label = TeiPhysicalDescriptionNotes.paragraphs(n).getOrElse("")
           // scribes can also appear in handNote as <persName role="scr">someone</persName>.
           // Sometimes the persName tags are the only thing in the handNote tag and in that case, and in that case because
           // they are already extracted as contributors, there's no need to extract them again as notes.
@@ -158,7 +158,7 @@ object TeiNotes {
   private def getFiliation(nodeSeq: NodeSeq): List[Note] =
     TeiPhysicalDescriptionNotes.notes(
       nodeSeq \ "filiation",
-      NoteType.FiliationNote
+      NoteType.RelatedMaterial
     )
 
   /** Extract the contents of `<history/>` that result in Notes.

@@ -31,6 +31,9 @@ Pass an explicit `job_id`: the generated one is minute-granular, and concurrent 
 A FAILED ingest execution has usually already written its batch, because the bulk write happens before version-conflict errors raise. Sample ids from works-denormalised within the window's time range and count them in works-indexed before replaying anything; in the 2026-07-31 recovery, 14 of 16 failed windows turned out to be complete.
 
 ## Late and redriven merges
+Before replaying a window, check that no `graph-pipeline-ingestor` execution for it is still running. The replay's loader deletes the window's parquet files before writing its own, so an earlier indexer still reading them would fail on missing objects.
+
+## Redriven merges miss ingest windows
 
 `state.mergedTime` is the time the matcher matched a work, and it versions works-denormalised writes so an older merge never overwrites a newer one. It is not when the work became visible: a merger backlog or a DLQ redrive can write a work long after its `mergedTime`, past the windows that would cover it. Windows therefore select on `indexed_at` where an index stamps it on every write, so a late or redriven merge lands in the window it was actually written in. An index stamps `indexed_at` when its mapping declares the field: the `set-indexed-at` ingest pipeline is attached to works-denormalised and images-initial only then. Documents without `indexed_at` (every document in an index whose mapping lacks it, and those written before the field was added) are windowed on the matcher's time instead. In the 2026-10-20 reindex (wellcomecollection/platform#6585), a merger backlog of about 15 minutes left 41 Visible and 108 non-visible works out of the served index this way.
 

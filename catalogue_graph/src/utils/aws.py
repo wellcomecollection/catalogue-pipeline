@@ -109,6 +109,30 @@ def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str) -> None:
         df.write_parquet(f)
 
 
+def delete_s3_objects(bucket: str, prefix: str, suffix: str) -> int:
+    """Delete every object under the prefix whose key ends with the suffix, returning the count."""
+    s3_client = boto3.client("s3")
+    keys = [
+        s3_object["Key"]
+        for page in s3_client.get_paginator("list_objects_v2").paginate(
+            Bucket=bucket, Prefix=prefix
+        )
+        for s3_object in page.get("Contents", [])
+        if s3_object["Key"].endswith(suffix)
+    ]
+
+    # DeleteObjects takes at most 1000 keys per request.
+    for i in range(0, len(keys), 1000):
+        response = s3_client.delete_objects(
+            Bucket=bucket,
+            Delete={"Objects": [{"Key": k} for k in keys[i : i + 1000]], "Quiet": True},
+        )
+        if response.get("Errors"):
+            raise RuntimeError(f"Failed to delete S3 objects: {response['Errors']}")
+
+    return len(keys)
+
+
 def dicts_from_s3_jsonl(s3_uri: str) -> list[dict]:
     """Read a JSONL file from S3 and return its contents as a list of dictionaries"""
     transport_params = {"client": boto3.client("s3")}

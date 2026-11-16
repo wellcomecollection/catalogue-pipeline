@@ -19,15 +19,16 @@ object TeiPhysicalDescriptionNotes {
     val supportDesc = objectDesc \ "supportDesc"
     val layoutDesc = objectDesc \ "layoutDesc"
 
+    // The order Collections Information asked for on the website
     List(
-      binding(physDesc \ "bindingDesc"),
-      decoration(physDesc \ "decoDesc"),
-      notes(supportDesc \ "condition", NoteType.ConditionNote),
       notes(layoutDesc \ "summary", NoteType.LayoutNote),
       notes(layoutDesc \ "p", NoteType.LayoutNote),
       layout(layoutDesc \ "layout"),
+      notes(supportDesc \ "foliation", NoteType.FoliationNote),
       notes(supportDesc \ "collation", NoteType.CollationNote),
-      notes(supportDesc \ "foliation", NoteType.FoliationNote)
+      decoration(physDesc \ "decoDesc"),
+      binding(physDesc \ "bindingDesc"),
+      notes(supportDesc \ "condition", NoteType.ConditionNote)
     ).flatten
   }
 
@@ -64,6 +65,21 @@ object TeiPhysicalDescriptionNotes {
       case e: EntityRef => e.text
       case _            => ""
     }
+
+  // Each <p> on its own line, as the website renders notes as HTML
+  def paragraphs(node: Node): Option[String] = {
+    val chunks = node.child.foldLeft(List(List.empty[Node])) {
+      case (acc, p) if p.label == "p" => Nil :: List(p) :: acc
+      case (current :: rest, other)   => (other :: current) :: rest
+      case (Nil, other)               => List(List(other))
+    }
+    chunks.reverse.flatMap {
+      chunk => NormaliseText(textOf(<chunk>{chunk.reverse}</chunk>))
+    } match {
+      case Nil   => None
+      case lines => Some(lines.mkString("<br/>"))
+    }
+  }
 
   private def isMeasurement(e: Elem): Boolean =
     e.label == "dimensions" ||
