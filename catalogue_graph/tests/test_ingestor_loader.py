@@ -630,9 +630,13 @@ def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> 
 
 
 @freeze_time("2025-01-02")
-def test_ingestor_loader_deletes_previous_run_files() -> None:
+def test_ingestor_loader_deletes_previous_run_files(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     mock_neptune_secrets(MOCK_PIPELINE_DATE)
     mock_es_secrets(service_name="concepts_ingestor", pipeline_date=MOCK_PIPELINE_DATE)
+    mock_merged_work()
+    mock_neptune_responses([])
     loader_event = make_loader_event(pass_objects_to_index=False)
 
     # A replayed window finds the earlier run's chunks and report under the same prefix
@@ -645,11 +649,26 @@ def test_ingestor_loader_deletes_previous_run_files() -> None:
         [{"Key": stale_chunk}, {"Key": stale_report}],
     )
 
-    handler(loader_event)
+    # Deleting after the write loop would delete this run's own chunks
+    output_prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/"
+    delete_objects = MockS3Client.delete_objects
+
+    def delete_before_write(self: MockS3Client, Bucket: str, Delete: dict) -> dict:  # noqa: N803
+        assert not [
+            uri for uri in MockSmartOpen.file_lookup if uri.startswith(output_prefix)
+        ]
+        return delete_objects(self, Bucket, Delete)
+
+    monkeypatch.setattr(MockS3Client, "delete_objects", delete_before_write)
+
+    result = handler(loader_event)
 
     assert MockS3Client.deleted_keys == [
         (config.CATALOGUE_GRAPH_S3_BUCKET, stale_chunk)
     ]
+    assert _get_result_s3_uri(result, loader_event) == (
+        f"{output_prefix}00000000-00000001.parquet"
+    )
 
 
 def test_ingestor_loader_bad_neptune_response() -> None:
