@@ -86,8 +86,8 @@ def suppress_by_guid(
     """Soft-suppress the FOLIO records for a superseded GUID, child-first.
 
     Reversible and auditable: sets discoverySuppress (and staffSuppress on the
-    instance) rather than hard-deleting. Idempotent — a redelivered fact re-sets
-    flags already true.
+    instance) rather than hard-deleting. Idempotent: an entity whose flags are
+    already set is reported as ``already_suppressed`` and not written again.
     """
     return _cascade_by_guid(guid, folio, _suppress_entity, dry_run=dry_run)
 

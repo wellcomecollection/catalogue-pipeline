@@ -61,7 +61,18 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
         },
         Output = "{% $merge([$states.context.Execution.Input, $states.result.Payload ]) %}",
         Retry  = local.state_function_default_retry,
-        Next   = "Extractors"
+        Next   = "Check for changes"
+      },
+      # The PIT opener reports has_changes = false when no works or images changed in the window
+      "Check for changes" = {
+        Type = "Choice",
+        Choices = [
+          {
+            Condition = "{% $exists($states.input.has_changes) and $states.input.has_changes = false %}",
+            Next      = "Success"
+          }
+        ],
+        Default = "Extractors"
       },
       "Extractors" = {
         Type     = "Task"

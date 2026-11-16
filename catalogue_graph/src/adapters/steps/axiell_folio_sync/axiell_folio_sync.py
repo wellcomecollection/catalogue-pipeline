@@ -30,7 +30,8 @@ Environment variables (injected by Terraform):
   MANIFEST_S3_BUCKET     — S3 bucket name for JSON run reports
   AWS_REGION             — e.g. eu-west-1 (set automatically in Lambda)
   DRY_RUN                — default "true"; event.dry_run overrides
-  HARD_DELETE            — default "false" (suppress); event.hard_delete overrides
+  HARD_DELETE            — default "false" (suppress), set "true" by Terraform;
+                           event.hard_delete overrides
   FOLIO_TARGET           — default "prod"; event.folio_target overrides. "dev"
                            targets the sandbox, and reaching it needs the Lambda
                            VPC-attached to the sandbox subnet (see
@@ -109,12 +110,17 @@ def handler(
     inventory = FolioInventoryClient(client)
     ref_cache = RefCache(inventory).load()
 
-    rows, deletions = read_rows(
+    rows, deletions, tombstones = read_rows(
         event.changeset_ids or None,
         event.sample_limit,
         use_rest_api_table=use_rest_api_table,
     )
-    logger.info("adapter_read complete", rows=len(rows), deletions=len(deletions))
+    logger.info(
+        "adapter_read complete",
+        rows=len(rows),
+        deletions=len(deletions),
+        tombstones=len(tombstones),
+    )
 
     return run_sync(
         event,
@@ -125,6 +131,7 @@ def handler(
         folio_target=folio_target,
         manifest_bucket=manifest_bucket,
         deletions=deletions,
+        tombstones=tombstones,
         hard_delete=hard_delete,
     )
 
@@ -177,7 +184,10 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--hard-delete",
         action="store_true",
-        help="Hard-delete (not suppress) FOLIO records for reconciler deletions",
+        help=(
+            "Hard-delete (not suppress) FOLIO records for superseded GUIDs and "
+            "tombstones"
+        ),
     )
     parser.add_argument(
         "--use-rest-api-table",

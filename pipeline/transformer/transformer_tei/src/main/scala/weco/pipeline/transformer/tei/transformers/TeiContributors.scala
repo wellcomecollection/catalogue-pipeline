@@ -170,6 +170,7 @@ object TeiContributors extends LabelDerivedIdentifiers {
     val persNameNodes =
       (handNote \ "persName").filter(n => (n \@ "role") == "scr").toList
     (handNote.attribute("scribe"), persNameNodes) match {
+      case (Some(_), Nil) if writtenByMultipleHands(handNote) => Right(None)
       case (Some(_), Nil)      => parseLabelFromHandNode(handNote)
       case (_, List(persName)) => Right(Some(persName.text.trim))
       case (_, list @ _ :: _) =>
@@ -180,6 +181,12 @@ object TeiContributors extends LabelDerivedIdentifiers {
       case (None, Nil) => Right(None)
     }
   }
+
+  /** <handNote scribe="multiple">Written by various hands</handNote> describes
+    * the hands rather than naming a scribe, so it stays a hand note.
+    */
+  def writtenByMultipleHands(handNote: Node): Boolean =
+    Set("multiple", "various").contains((handNote \@ "scribe").trim.toLowerCase)
 
   /** Very annoyingly if the scribe is in this form: <handNote scope="minor"
     * scribe="Scribe_A"> <locus target="#Wellcome_Batak_36801_1

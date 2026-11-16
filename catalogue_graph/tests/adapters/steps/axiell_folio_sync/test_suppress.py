@@ -140,6 +140,68 @@ def test_dry_run_plans_without_writing() -> None:
     assert folio.put_calls == []
 
 
+def _all_suppressed() -> FakeInventory:
+    return FakeInventory(
+        {
+            "/inventory/items": {"id": "item-1", "discoverySuppress": True},
+            "/holdings-storage/holdings": {"id": "hold-1", "discoverySuppress": True},
+            "/inventory/instances": {
+                "id": "inst-1",
+                "discoverySuppress": True,
+                "staffSuppress": True,
+            },
+        }
+    )
+
+
+def test_already_suppressed_records_are_not_written_again() -> None:
+    folio = _all_suppressed()
+
+    result = suppress_by_guid(GUID, folio, dry_run=False)
+
+    assert result.item.action == "already_suppressed"
+    assert result.holdings.action == "already_suppressed"
+    assert result.instance.action == "already_suppressed"
+    assert result.instance.id == "inst-1"
+    assert folio.put_calls == []
+    assert not result.errors
+
+
+def test_an_instance_without_staff_suppress_is_still_written() -> None:
+    # The instance carries both flags, so discoverySuppress alone is not enough.
+    folio = _all_suppressed()
+    folio.existing["/inventory/instances"]["staffSuppress"] = False
+
+    result = suppress_by_guid(GUID, folio, dry_run=False)
+
+    assert result.item.action == "already_suppressed"
+    assert result.holdings.action == "already_suppressed"
+    assert result.instance.action == "suppress"
+    assert [path for path, _ in folio.put_calls] == ["/inventory/instances/inst-1"]
+
+
+def test_only_the_entities_left_unsuppressed_are_written() -> None:
+    # An earlier cascade that failed part-way is finished, not repeated.
+    folio = _all_suppressed()
+    folio.existing["/holdings-storage/holdings"]["discoverySuppress"] = False
+
+    result = suppress_by_guid(GUID, folio, dry_run=False)
+
+    assert result.holdings.action == "suppress"
+    assert [path for path, _ in folio.put_calls] == [
+        "/holdings-storage/holdings/hold-1"
+    ]
+
+
+def test_dry_run_reports_already_suppressed_records() -> None:
+    folio = _all_suppressed()
+
+    result = suppress_by_guid(GUID, folio, dry_run=True)
+
+    assert result.item.action == "already_suppressed"
+    assert folio.put_calls == []
+
+
 def test_put_failure_is_captured_as_error() -> None:
     folio = _all_present()
 

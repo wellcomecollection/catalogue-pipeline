@@ -9,6 +9,8 @@ object TeiPhysicalDescription {
     apply(xml \\ "sourceDesc" \ "msDesc")
   def apply(nodeSeq: NodeSeq): Option[String] = physicalDescription(nodeSeq)
 
+  private val lineBreak = "<br/>"
+
   /** The physical description can exist in msDesc for the wrapper work like in:
     * <TEI xml:id="id" xmlns="http://www.tei-c.org/ns/1.0"> <teiHeader>
     * <fileDesc> <sourceDesc> <msDesc xml:lang="en" xml:id="MS_Arabic_1">
@@ -30,8 +32,9 @@ object TeiPhysicalDescription {
           )
         val support = parseSupport(supportDesc)
         val extent = parseExtent(supportDesc)
+        // The website renders this as HTML, so each part gets its own line
         val physicalDescriptionStr =
-          List(support, material, extent).flatten.mkString("; ")
+          List(support, material, extent).flatten.mkString(lineBreak)
         NormaliseText(physicalDescriptionStr)
     }.headOption
 
@@ -48,7 +51,7 @@ object TeiPhysicalDescription {
         .mkString(" ")
         .trim
       val dimensions = parseDimensions(extent).flatten
-      (extentLabel +: dimensions).filterNot(_.isEmpty).mkString("; ")
+      (extentLabel +: dimensions).filterNot(_.isEmpty).mkString(lineBreak)
     } else extent.text.trim
     NormaliseText(extentStr)
   }
@@ -81,7 +84,7 @@ object TeiPhysicalDescription {
         supportLabel,
         if (watermarkStr.nonEmpty) s"Watermarks: $watermarkStr" else ""
       )
-      parts.filterNot(_.isEmpty).mkString("; ")
+      parts.filterNot(_.isEmpty).mkString(lineBreak)
     } else support.text.trim
     NormaliseText(supportStr)
   }

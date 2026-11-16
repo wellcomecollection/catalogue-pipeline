@@ -9,7 +9,7 @@ deletions are filtered through the reclaimed-guid check, and facts are only
 read for incremental runs.
 """
 
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Protocol, cast
@@ -148,7 +148,7 @@ class AxiellChangesetReader:
 
         Includes soft-deleted rows (`deleted=True` with content preserved):
         the pipeline transformer needs them to overwrite documents, and the
-        FOLIO sync treats them as advisory. With NO changeset ids this is a
+        FOLIO sync deletes the records it made for them. With NO changeset ids this is a
         lazily-streamed full scan of every active record (the transformer's
         reindex mode) — consumers that only want a sample must break early.
         """
@@ -203,6 +203,34 @@ class AxiellChangesetReader:
                     changeset_id=row["changeset"],
                     last_modified=row["last_modified"],
                 )
+
+    def guids_held_by_other_records(
+        self, guid_by_record_id: Mapping[str, str]
+    ) -> set[str]:
+        """Guids that a reconciler mapping holds under a different record id.
+
+        A source tombstone keeps its preserved content, so its own mapping
+        stays in the reconciler store; that one is expected and ignored. Any
+        other record holding the same guid means the guid is still live
+        elsewhere, and a consumer acting on the tombstone would delete that
+        live record. Raises if the reader was built without the reconciler
+        store, so a consumer cannot skip the check by accident.
+        """
+        if not guid_by_record_id:
+            return set()
+        if self.reconciler_store is None:
+            raise RuntimeError(
+                "this reader was built without the reconciler store; rebuild "
+                "it with deletion facts to check tombstoned guids"
+            )
+        mapped = self.reconciler_store.get_namespace_records(
+            In("guid", sorted(set(guid_by_record_id.values())))
+        )
+        return {
+            row["guid"]
+            for row in mapped.select(["id", "guid"]).to_pylist()
+            if guid_by_record_id.get(row["id"]) != row["guid"]
+        }
 
     def _reclaimed_guids(self, facts: pa.Table) -> set[str]:
         """Fact guids that are currently active reconciler mappings again."""

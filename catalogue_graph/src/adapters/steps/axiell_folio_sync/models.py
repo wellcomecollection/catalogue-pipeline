@@ -37,12 +37,20 @@ class SyncErrorEntry(BaseModel):
     timestamp: str
 
 
+# Why a GUID's FOLIO records were deleted or suppressed: its collectId moved to
+# a new GUID (a reconciler deletion fact), the record arrived as an OAI-PMH
+# tombstone, or it is item-level without the 980 $a harvest flag. An unflagged
+# record is always suppressed, never deleted, so ticking Harvest again restores it.
+DeletionReason = Literal["superseded", "tombstone", "unflagged"]
+
+
 class SyncDeletionEntry(BaseModel):
-    """One superseded-GUID action (suppress or hard-delete) in the run report."""
+    """One GUID action (suppress or hard-delete) in the run report."""
 
     guid: str
     record_id: str
     changeset_id: str
+    reason: DeletionReason
     instance_action: str | None
     holdings_action: str | None
     item_action: str | None
@@ -58,7 +66,8 @@ class AxiellFolioSyncEvent(BaseModel):
     # ``None`` means "fall back to the DRY_RUN env var" (default true).
     dry_run: bool | None = None
     # ``None`` means "fall back to the HARD_DELETE env var" (default false). When
-    # true, reconciler deletions hard-delete FOLIO records instead of suppressing.
+    # true, superseded GUIDs and tombstones hard-delete FOLIO records instead of
+    # suppressing them.
     hard_delete: bool | None = None
     # Which FOLIO instance to write to: "prod" (EBSCO SaaS) or "dev" (the
     # folio-dev-server sandbox). ``None`` falls back to the FOLIO_TARGET env var,

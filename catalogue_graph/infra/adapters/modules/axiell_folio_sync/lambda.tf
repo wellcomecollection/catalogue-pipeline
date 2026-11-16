@@ -37,6 +37,9 @@ module "sync_lambda" {
         # The adapter table is read via AXIELL_CONFIG/AdapterStore, so no
         # Iceberg-specific env vars are needed here.
         DRY_RUN = tostring(local.dry_run_default)
+        # Scheduled events carry no hard_delete, so this decides whether a
+        # Collections delete removes the FOLIO records or only suppresses them.
+        HARD_DELETE = tostring(var.hard_delete_default)
         # Used when an event does not name a target. The event still wins.
         FOLIO_TARGET = local.folio_default_target
       },

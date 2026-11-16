@@ -82,8 +82,13 @@ def test_ingestor_deletions_incremental_mode() -> None:
     assert set(indexed_concepts) == {"q5a7uqkz", "s8f6cxcf", "someid12"}
 
 
-def test_ingestor_deletions_empty_ids_file() -> None:
+def test_ingestor_deletions_empty_ids_file(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_es_secrets("concepts_ingestor", "dev")
+    monkeypatch.setattr(
+        MockElasticsearchClient,
+        "delete_by_query",
+        lambda *_args, **_kwargs: pytest.fail("delete_by_query called"),
+    )
 
     # Mock an empty dataframe
     mock_deleted_ids_log_file([], "dev")
@@ -93,8 +98,9 @@ def test_ingestor_deletions_empty_ids_file() -> None:
 
     lambda_handler(MOCK_EVENT, None)
 
-    # No concept IDs should be removed
+    # No concept IDs should be removed, and Elasticsearch isn't called at all
     assert len(get_indexed_concept_ids()) == 5
+    assert MockElasticsearchClient.counts == []
 
 
 def test_ingestor_deletions_line_safety_check() -> None:

@@ -244,20 +244,26 @@ def _suppress_entity(
     rejects an unknown staffSuppress with a 422, and items silently drop it, so
     sending it there is at best a no-op and at worst breaks the cascade.
 
-    Not-found → ``skip`` (the record is already gone). Idempotent: re-suppressing
-    a record whose flags are already true is a harmless PUT, so redelivered
-    deletion facts do not misbehave. A failed id lookup is not "already gone":
-    it propagates (see :func:`_find_by_id`) so the cascade records it and aborts.
+    Not-found → ``skip`` (the record is already gone). A record whose flags are
+    all already true → ``already_suppressed``, with no PUT. Rewriting it would
+    bump its updatedDate and count it as a fresh suppression each time an
+    unticked record is edited in Collections, or a deletion fact is redelivered.
+    The check reads the record the lookup already returned, so it costs no call.
+    A failed id lookup is not "already gone": it propagates (see
+    :func:`_find_by_id`) so the cascade records it and aborts.
     """
     existing = _find_by_id(folio, search_path, folio_id, list_key)
     if not existing:
         return EntityResult(action="skip")
 
     folio_id = existing["id"]
+    suppression: dict[str, Any] = {"discoverySuppress": True}
+    if write_path_prefix in _STAFF_SUPPRESS_PATHS:
+        suppression["staffSuppress"] = True
+    if all(existing.get(flag) is True for flag in suppression):
+        return EntityResult(action="already_suppressed", id=folio_id)
+
     if not dry_run:
-        suppression: dict[str, Any] = {"discoverySuppress": True}
-        if write_path_prefix in _STAFF_SUPPRESS_PATHS:
-            suppression["staffSuppress"] = True
         folio.put(
             f"{write_path_prefix}/{folio_id}",
             {**_strip_readonly(existing), **suppression},

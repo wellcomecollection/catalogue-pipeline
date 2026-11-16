@@ -68,7 +68,7 @@ class TeiPhysicalDescriptionTest
       )
     )
     result shouldBe Some(
-      "Multiple manuscript parts collected in one volume.; Watermarks: Blih bluh blah"
+      "Multiple manuscript parts collected in one volume.<br/>Watermarks: Blih bluh blah"
     )
   }
 
@@ -103,7 +103,7 @@ class TeiPhysicalDescriptionTest
     )
 
     result shouldBe Some(
-      "3 pages; leaf dimensions: width 300 mm, height 100 mm"
+      "3 pages<br/>leaf dimensions: width 300 mm, height 100 mm"
     )
   }
 
@@ -144,7 +144,7 @@ class TeiPhysicalDescriptionTest
     )
 
     result shouldBe Some(
-      "3 pages; leaf dimensions: width 300 mm, height 100 mm; text dimensions: width 290 mm, height 90 mm"
+      "3 pages<br/>leaf dimensions: width 300 mm, height 100 mm<br/>text dimensions: width 290 mm, height 90 mm"
     )
   }
 
@@ -203,7 +203,9 @@ class TeiPhysicalDescriptionTest
       )
     )
 
-    result shouldBe Some("3 pages; leaf dimensions: width 300mm, height 100mm")
+    result shouldBe Some(
+      "3 pages<br/>leaf dimensions: width 300mm, height 100mm"
+    )
   }
 
   it("normalises the extent text") {
@@ -357,6 +359,6 @@ class TeiPhysicalDescriptionTest
       )
     )
 
-    result shouldBe Some("3 pages; leaf dimensions: width 35 cm")
+    result shouldBe Some("3 pages<br/>leaf dimensions: width 35 cm")
   }
 }

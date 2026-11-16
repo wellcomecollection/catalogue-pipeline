@@ -12,6 +12,7 @@ from botocore.exceptions import ClientError
 
 from tei_updater import main
 from tei_updater import diff_trees
+from tei_updater import get_installation_token
 
 with Betamax.configure() as config:
     config.cassette_library_dir = "."
@@ -163,3 +164,31 @@ def test_more_types_of_diff_is_error():
     }
     with pytest.raises(AssertionError):
         diff_trees(old_tree, new_tree, "2021-06-11T15:34:45Z")
+
+
+def test_get_installation_token_signs_app_jwt():
+    import jwt
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    pem = key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.TraditionalOpenSSL,
+        serialization.NoEncryption(),
+    ).decode()
+
+    fake_session = mock.Mock()
+    fake_session.post.return_value.json.return_value = {"token": "ghs_example"}
+
+    token = get_installation_token("123", "456", pem, session=fake_session)
+
+    assert token == "ghs_example"
+    url = fake_session.post.call_args.args[0]
+    assert url == "https://api.github.com/app/installations/456/access_tokens"
+    auth = fake_session.post.call_args.kwargs["headers"]["Authorization"]
+    claims = jwt.decode(
+        auth.removeprefix("Bearer "), key.public_key(), algorithms=["RS256"]
+    )
+    assert claims["iss"] == "123"
+    assert claims["exp"] - claims["iat"] <= 600

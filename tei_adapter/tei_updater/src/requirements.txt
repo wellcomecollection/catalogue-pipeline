@@ -6,17 +6,29 @@
 #
 certifi==2026.10.23
     # via requests
+cffi==2.1.1
+    # via cryptography
 charset-normalizer==3.5.2
     # via requests
+cryptography==50.0.2
+    # via pyjwt
 deepdiff==8.6.2
     # via -r requirements.in
 idna==3.20
     # via requests
 orderly-set==5.5.0
     # via deepdiff
+pycparser==3.11
+    # via cffi
+pyjwt[crypto]==2.15.1
+    # via -r requirements.in
 pytz==2026.2
     # via -r requirements.in
 requests==2.34.2
     # via -r requirements.in
+typing-extensions==4.16.0
+    # via
+    #   cryptography
+    #   pyjwt
 urllib3==2.8.0
     # via requests

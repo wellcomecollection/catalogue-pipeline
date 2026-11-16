@@ -8,6 +8,7 @@ import pytest
 from pytest_bdd import given, parsers, then
 
 from adapters.transformers.folio.access_conditions import notes
+from models.pipeline.holdings import Holdings
 from models.pipeline.item import Item
 from models.pipeline.location import PhysicalLocation
 from models.pipeline.source.work import VisibleSourceWork
@@ -68,9 +69,24 @@ def item_no_location(folio_item: dict[str, Any]) -> None:
     }
 
 
-@given(parsers.parse('that item has the status "{status}"'))
-def item_status(folio_item: dict[str, Any], status: str) -> None:
-    folio_item["status"] = status
+# Plain string fields on an item, keyed by the phrase a feature uses for them.
+ITEM_FIELDS = {
+    "status": "status",
+    "loan type": "permanentLoanType",
+    "temporary loan type": "temporaryLoanType",
+    "material type": "materialType",
+    "volume": "volume",
+    "copy number": "copyNumber",
+}
+
+
+@given(
+    parsers.re(
+        rf'that item has the (?P<field>{"|".join(ITEM_FIELDS)}) "(?P<value>[^"]*)"'
+    )
+)
+def item_field(folio_item: dict[str, Any], field: str, value: str) -> None:
+    folio_item[ITEM_FIELDS[field]] = value
 
 
 @given(parsers.parse('that item has the statistical code "{code}"'))
@@ -81,21 +97,6 @@ def item_statistical_code(folio_item: dict[str, Any], code: str) -> None:
 @given("that item has no statistical code")
 def item_no_statistical_code(folio_item: dict[str, Any]) -> None:
     folio_item["statisticalCodes"] = []
-
-
-@given(parsers.parse('that item has the loan type "{loan_type}"'))
-def item_loan_type(folio_item: dict[str, Any], loan_type: str) -> None:
-    folio_item["permanentLoanType"] = loan_type
-
-
-@given(parsers.parse('that item has the temporary loan type "{loan_type}"'))
-def item_temporary_loan_type(folio_item: dict[str, Any], loan_type: str) -> None:
-    folio_item["temporaryLoanType"] = loan_type
-
-
-@given(parsers.parse('that item has the material type "{material_type}"'))
-def item_material_type(folio_item: dict[str, Any], material_type: str) -> None:
-    folio_item["materialType"] = material_type
 
 
 @given(parsers.parse('that item has the call number "{call_number}"'))
@@ -221,3 +222,113 @@ def item_has_note(work: VisibleSourceWork, item_id: str, note: str) -> None:
 @then(parsers.parse('item "{item_id}" has no note'))
 def item_has_no_note(work: VisibleSourceWork, item_id: str) -> None:
     assert _item(work, item_id).note is None
+
+
+@given(
+    parsers.parse('a FOLIO holdings record "{holdings_id}"'),
+    target_fixture="folio_holdings",
+)
+def folio_holdings(folio_inventory: dict[str, Any], holdings_id: str) -> dict[str, Any]:
+    """An unsuppressed holdings record with no statements in closed stores journals, which steps then vary."""
+    holdings: dict[str, Any] = {
+        "id": holdings_id,
+        "holdingsType": "Serial",
+        "location": {
+            "effectiveLocation": {
+                "code": "sgser",
+                "name": "Closed stores journals",
+                "libraryName": "Closed stores",
+            }
+        },
+        "callNumber": {},
+        "holdingsStatements": [],
+        "suppressFromDiscovery": False,
+    }
+    folio_inventory["holdings"].append(holdings)
+    return holdings
+
+
+@given(parsers.parse('that holdings record has the statement "{statement}"'))
+def holdings_statement(folio_holdings: dict[str, Any], statement: str) -> None:
+    folio_holdings["holdingsStatements"].append({"statement": statement})
+
+
+@given(
+    parsers.parse(
+        'that holdings record is in the location "{code}" named "{name}" in the library "{library}"'
+    )
+)
+def holdings_location(
+    folio_holdings: dict[str, Any], code: str, name: str, library: str
+) -> None:
+    folio_holdings["location"] = {
+        "effectiveLocation": {"code": code, "name": name, "libraryName": library}
+    }
+
+
+@given(parsers.parse('that holdings record has the call number "{call_number}"'))
+def holdings_call_number(folio_holdings: dict[str, Any], call_number: str) -> None:
+    folio_holdings["callNumber"] = {"callNumber": call_number}
+
+
+@given(parsers.parse('that holdings record has the holdings type "{holdings_type}"'))
+def holdings_type(folio_holdings: dict[str, Any], holdings_type: str) -> None:
+    folio_holdings["holdingsType"] = holdings_type
+
+
+@given("that holdings record is suppressed from discovery")
+def holdings_suppressed(folio_holdings: dict[str, Any]) -> None:
+    folio_holdings["suppressFromDiscovery"] = True
+
+
+def _only_holdings(work: VisibleSourceWork) -> Holdings:
+    assert len(work.data.holdings) == 1, (
+        f"Expected one holdings, got {work.data.holdings}"
+    )
+    return work.data.holdings[0]
+
+
+def _holdings_location(work: VisibleSourceWork) -> PhysicalLocation:
+    location = _only_holdings(work).location
+    assert isinstance(location, PhysicalLocation), (
+        f"Expected a location, got {location}"
+    )
+    return location
+
+
+@then(parsers.parse('the holdings have the enumeration "{enumeration}"'))
+def holdings_have_enumeration(work: VisibleSourceWork, enumeration: str) -> None:
+    # Entries separated by " | ", since statements contain commas.
+    assert _only_holdings(work).enumeration == enumeration.split(" | ")
+
+
+@then("the holdings have no note")
+def holdings_have_no_note(work: VisibleSourceWork) -> None:
+    assert _only_holdings(work).note is None
+
+
+@then(
+    parsers.parse(
+        'the holdings have a location of type "{location_type}" labelled "{label}"'
+    )
+)
+def holdings_have_location(
+    work: VisibleSourceWork, location_type: str, label: str
+) -> None:
+    location = _holdings_location(work)
+    assert (location.location_type.id, location.label) == (location_type, label)
+
+
+@then(parsers.parse('the holdings have the shelfmark "{shelfmark}"'))
+def holdings_have_shelfmark(work: VisibleSourceWork, shelfmark: str) -> None:
+    assert _holdings_location(work).shelfmark == shelfmark
+
+
+@then("the holdings have no shelfmark")
+def holdings_have_no_shelfmark(work: VisibleSourceWork) -> None:
+    assert _holdings_location(work).shelfmark is None
+
+
+@then("the holdings have no location")
+def holdings_have_no_location(work: VisibleSourceWork) -> None:
+    assert _only_holdings(work).location is None

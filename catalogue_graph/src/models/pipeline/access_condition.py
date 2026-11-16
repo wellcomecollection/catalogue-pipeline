@@ -8,3 +8,11 @@ class AccessCondition(SerialisableModel):
     status: AccessStatus | None = None
     terms: str | None = None
     note: str | None = None
+
+    @property
+    def is_available(self) -> bool:
+        return self.status is not None and self.status.is_available
+
+    @property
+    def has_restrictions(self) -> bool:
+        return self.status is not None and self.status.has_restrictions

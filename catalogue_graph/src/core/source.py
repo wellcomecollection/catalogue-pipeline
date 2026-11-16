@@ -81,7 +81,28 @@ def _on_request_backoff(backoff_details: Any) -> None:
     )
 
 
+@backoff.on_exception(
+    backoff.expo,
+    (TransportError, ApiError),
+    max_time=ES_REQUESTS_BACKOFF_MAX_TIME,
+    max_value=ES_REQUESTS_BACKOFF_MAX_INTERVAL,
+    giveup=_giveup_es_request,
+    on_backoff=_on_request_backoff,
+    jitter=backoff.full_jitter,
+)
+def may_have_matches(es_client: Elasticsearch, index: str, query: dict) -> bool:
+    """Whether a _count on the query may have matches, retried like search."""
+    response = es_client.count(index=index, query=query)
+    # Failed shards can under-report, so only a complete zero means there's nothing
+    return bool(response["count"] > 0 or response["_shards"]["failed"] > 0)
+
+
 class ElasticSource(BaseSource):
+    # Subclasses that open their own PIT just before streaming set this
+    open_pit_on_init = True
+    # Subclasses that only need _ids clear this
+    fetch_source = True
+
     def __init__(
         self,
         es_client: Elasticsearch,
@@ -101,13 +122,14 @@ class ElasticSource(BaseSource):
         self.slice_count = slice_count
         self.parallelism = parallelism
 
-        if pit_id is not None:
-            self.pit_id = pit_id
-        else:
-            pit = self.es_client.open_point_in_time(
-                index=self.index_name, keep_alive="15m"
-            )
-            self.pit_id = pit["id"]
+        self.pit_id: str | None = pit_id
+        if self.pit_id is None and self.open_pit_on_init:
+            self.pit_id = self.open_pit()
+
+    def open_pit(self) -> str:
+        pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="15m")
+        pit_id: str = pit["id"]
+        return pit_id
 
     @backoff.on_exception(
         backoff.expo,
@@ -130,7 +152,9 @@ class ElasticSource(BaseSource):
 
         if self.slice_count > 1:
             body["slice"] = {"id": slice_index, "max": self.slice_count}
-        if self.fields is not None:
+        if not self.fetch_source:
+            body["_source"] = False
+        elif self.fields is not None:
             body["_source"] = self.fields
         if search_after is not None:
             body["search_after"] = search_after
@@ -196,11 +220,37 @@ class ElasticSource(BaseSource):
 
 
 class ElasticIdsSource(ElasticSource):
-    """An ElasticSource streaming only document _ids (construct with fields=[])."""
+    """An ElasticSource streaming only document _ids."""
+
+    open_pit_on_init = False
+    fetch_source = False
 
     def stream_ids(self) -> Iterator[str]:
         """The WorkSource interface: the _ids in scope."""
+        # One count instead of a PIT and a sliced scan when there's nothing in scope
+        if not may_have_matches(self.es_client, self.index_name, self.query):
+            return
+
         yield from self.stream_raw()
+
+    def stream_raw(self) -> Generator[Any]:
+        # Opened here rather than on construction, and closed after, as it's never passed on
+        owns_pit = self.pit_id is None
+        if self.pit_id is None:
+            self.pit_id = self.open_pit()
+        try:
+            yield from super().stream_raw()
+        finally:
+            if owns_pit:
+                self.close_pit()
+
+    def close_pit(self) -> None:
+        try:
+            self.es_client.close_point_in_time(body={"id": self.pit_id})
+        except (TransportError, ApiError) as e:
+            # The PIT expires on its own after its keep-alive
+            logger.warning("Could not close point in time", error=str(e))
+        self.pit_id = None
 
     def worker_target(self, slice_index: int, queue: Queue) -> None:
         search_after = None

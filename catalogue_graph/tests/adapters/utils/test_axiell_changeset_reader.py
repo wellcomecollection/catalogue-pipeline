@@ -289,3 +289,43 @@ def test_build_threads_ids_onto_reader(temporary_table: IcebergTable) -> None:
     )
     assert reader.ids == ["collect-1", "collect-2"]
     assert reader.changeset_ids == []
+
+
+def test_guids_held_by_other_records_ignores_the_tombstones_own_mapping(
+    temporary_table: IcebergTable,
+    deletion_facts_temporary_table: IcebergTable,
+    reconciler_temporary_table: IcebergTable,
+) -> None:
+    ReconcilerStore(reconciler_temporary_table, namespace=NAMESPACE).incremental_update(
+        reconciler_records_to_table(
+            [
+                # The tombstone's own mapping, kept because its content is.
+                {"id": "collect-1", "guid": "guid-own"},
+                # A different record holding the second tombstone's guid.
+                {"id": "collect-9", "guid": "guid-shared"},
+            ],
+            namespace=NAMESPACE,
+        )
+    )
+    reader = _reader(
+        temporary_table,
+        ["cs-1"],
+        facts_table=deletion_facts_temporary_table,
+        reconciler_table=reconciler_temporary_table,
+    )
+
+    held = reader.guids_held_by_other_records(
+        {"collect-1": "guid-own", "collect-2": "guid-shared", "collect-3": "guid-new"}
+    )
+
+    assert held == {"guid-shared"}
+
+
+def test_guids_held_by_other_records_needs_the_reconciler_store(
+    temporary_table: IcebergTable,
+) -> None:
+    reader = _reader(temporary_table, ["cs-1"])
+
+    assert reader.guids_held_by_other_records({}) == set()
+    with pytest.raises(RuntimeError, match="reconciler store"):
+        reader.guids_held_by_other_records({"collect-1": "guid-own"})

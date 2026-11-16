@@ -27,6 +27,7 @@ from .builders import (
     build_item,
     is_selected_for_sync,
     select_and_build,
+    unflagged_guid,
 )
 from .config import (
     ACCESS_ITEM_STATUS,
@@ -134,4 +135,5 @@ __all__ = [
     "is_selected_for_sync",
     "parse_xml",
     "select_and_build",
+    "unflagged_guid",
 ]

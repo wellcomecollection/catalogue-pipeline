@@ -4,6 +4,9 @@ import typing
 import structlog
 from elasticsearch import Elasticsearch
 
+from core.source import may_have_matches
+from graph.sources.augmented_images_source import AUGMENTED_TIME_FIELD
+from graph.sources.merged_works_source import MERGED_TIME_FIELD
 from models.events import BasePipelineEvent
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import (
@@ -28,27 +31,45 @@ def open_pit(es_client: Elasticsearch, index_name: str) -> str:
     return pit_id
 
 
+def changed_in_window(
+    es_client: Elasticsearch, event: BasePipelineEvent, index_name: str, field: str
+) -> bool:
+    return may_have_matches(es_client, index_name, event.to_elasticsearch_query(field))
+
+
 def handler(
     event: BasePipelineEvent,
     execution_context: ExecutionContext | None = None,
     es_mode: ElasticsearchMode = "private",
 ) -> dict:
-    """Create points in time (PITs) on the merged and augmented indexes."""
+    """Open PITs on the merged and augmented indexes, unless a window has no changes."""
     setup_logging(execution_context)
 
     es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
 
     merged_index = get_merged_index_name(event)
-    merged_pit_id = open_pit(es_client, merged_index)
-
     augmented_index = get_images_augmented_index_name(event)
+
+    if event.window is not None:
+        has_changes = changed_in_window(
+            es_client, event, merged_index, MERGED_TIME_FIELD
+        ) or changed_in_window(es_client, event, augmented_index, AUGMENTED_TIME_FIELD)
+        if not has_changes:
+            logger.info(
+                "No works or images changed in the window, skipping the run",
+                window=event.window.to_formatted_string(),
+            )
+            return {"has_changes": False}
+
+    merged_pit_id = open_pit(es_client, merged_index)
     augmented_pit_id = open_pit(es_client, augmented_index)
 
     return {
+        "has_changes": True,
         "pit_ids": {
             "merged": merged_pit_id,
             "augmented": augmented_pit_id,
-        }
+        },
     }
 
 
@@ -74,7 +95,7 @@ def local_handler() -> None:
         pipeline_step="graph_pit_opener",
     )
     result = handler(event, execution_context, es_mode=args.es_mode)
-    logger.info("PITs opened", pit_ids=result["pit_ids"])
+    logger.info("PIT opener finished", result=result)
 
 
 if __name__ == "__main__":

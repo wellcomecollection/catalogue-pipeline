@@ -13,23 +13,29 @@ import org.apache.pekko.http.scaladsl.model.headers.{
 }
 import weco.http.client.HttpClient
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class GitHubAuthenticatedHttpClient(underlying: HttpClient, token: String)
+class GitHubAuthenticatedHttpClient(
+  underlying: HttpClient,
+  token: () => Future[String]
+)(implicit ec: ExecutionContext)
     extends HttpClient {
   override def singleRequest(request: HttpRequest): Future[HttpResponse] =
-    underlying.singleRequest(
-      request.withHeaders(
-        request.headers ++ List(
-          // Send the version of GitHub API we expect as per https://docs.github.com/en/rest/overview/media-types
-          Accept(
-            MediaType.applicationWithFixedCharset(
-              "vnd.github.v3+json",
-              HttpCharsets.`UTF-8`
+    token().flatMap {
+      t =>
+        underlying.singleRequest(
+          request.withHeaders(
+            request.headers ++ List(
+              // Send the version of GitHub API we expect as per https://docs.github.com/en/rest/overview/media-types
+              Accept(
+                MediaType.applicationWithFixedCharset(
+                  "vnd.github.v3+json",
+                  HttpCharsets.`UTF-8`
+                )
+              ),
+              Authorization(OAuth2BearerToken(t))
             )
-          ),
-          Authorization(OAuth2BearerToken(token))
+          )
         )
-      )
-    )
+    }
 }

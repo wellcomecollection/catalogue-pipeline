@@ -80,6 +80,10 @@ module "axiell_folio_sync" {
   folio_default_target = "dev"
   dry_run_default      = false
 
+  # A record hard deleted in Collections is hard deleted in FOLIO too, as agreed
+  # with Collection Information (wellcomecollection/platform#6833).
+  hard_delete_default = true
+
   # The sandbox is stopped out of hours by folio-dev-server, and the Axiell
   # adapter publishes every 15 minutes, so the trigger is confined to the
   # working day. Starts an hour after the sandbox does, to let Kong come up.

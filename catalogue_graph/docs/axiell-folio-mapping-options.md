@@ -15,8 +15,8 @@ maps today, see
 | **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
 | **Statistical code** (access) | **Proposed, not implemented.** The sync writes none, so a synced item no status row catches reaches the access decision table's fallback. Proposal: one code from the migrated Sierra OPAC message vocabulary, taken from `506$f` (access category) where it names a coded state, otherwise from `540$a` (use restriction). | [Section 5](#5-statistical-code-proposed-not-implemented), [questions 12 and 13](#statistical-code) |
 | **Record identity** (HRID) | **Implemented** (ids in mapping version 3.0.0, labels and marker in 3.1.0, item GUID label dropped in 3.2.0). Records are found by an id derived from the AxC GUID (the GUID itself for the instance, a `uuid5` in it for the holdings and item), and the sync sends no HRID, so FOLIO generates it. Holdings carry the GUID in `formerIds`, and all three carry the `AXIELL` statistical code, which still has to be created on prod. Tracked in wellcomecollection/platform#6805. | [Question 10](#identifiers) |
-| **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Implemented.** What should happen when the flag is unticked on an already-synced record is current behaviour rather than an agreed rule. | [Question 9](#material-type-and-selection) |
-| **Deletion** of a Collect record | **Implemented, both ways.** Suppresses by default; `HARD_DELETE` switches it to an irreversible delete. Which one is policy, not development. | [Question 11](#deletion) |
+| **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Decided and implemented** (mapping version 3.3.0). Unticking Harvest suppresses an item-level record's FOLIO records; ticking it again restores the same records. Tracked in wellcomecollection/platform#6834. | [Question 9](#material-type-and-selection) |
+| **Deletion** of a Collect record | **Decided and implemented: hard delete.** Both a superseded GUID and a Collections tombstone delete the item, holdings and instance, child first. `HARD_DELETE` is `true` in Terraform. Tracked in wellcomecollection/platform#6833. | [Question 11](#deletion) |
 
 Nothing in this document is implemented beyond what the State column says is
 implemented. The code is unchanged pending these answers.
@@ -448,15 +448,20 @@ confirmed on this FOLIO version, drops out of the mapping.
 8. Is failing the right behaviour for the 115 records with no `655$a` (object
    category), or would you rather they defaulted to `archive` and synced?
 9. **When the Harvest flag is unticked on a record that has already synced,
-   should its FOLIO records be suppressed, or left?** Today they are left: the
-   record stops passing the selection gate, so it is skipped and never updated
-   again, while its instance, holdings and item stay in FOLIO unsuppressed with
-   whatever data they last had. Nothing reclaims them, because the only delete
-   path is the reconciler working from superseded GUIDs and a flag removal is
-   not a delete signal. That is current behaviour rather than an agreed rule,
-   and it is the less safe reading: if curators untick Harvest to withdraw
-   something from the LMS, that intent is silently dropped. Tracked in
-   wellcomecollection/platform#6663.
+   should its FOLIO records be suppressed, or left?** Decided: suppressed, and
+   restored when the flag is ticked again. Agreed with Collection Information on
+   wellcomecollection/platform#6663, implemented in mapping 3.3.0
+   (wellcomecollection/platform#6834). An item-level record without `980$a`
+   has `discoverySuppress` set on its item, holdings and instance and
+   `staffSuppress` on the instance, never a hard delete. Ticked again, it updates
+   the same three records and clears the flags. Two consequences were settled
+   in the implementation rather than with Collection Information, and are
+   worth confirming:
+
+   - The flags are cleared on every update of a selected record, because FOLIO
+     does not record who suppressed it. A suppression set by hand in FOLIO on a
+     record that is still ticked is undone on its next update.
+   - A record that stops being item-level (`351$c`) is skipped, not suppressed.
 
 ### Identifiers
 
@@ -497,17 +502,30 @@ confirmed on this FOLIO version, drops out of the mapping.
 ### Deletion
 
 11. **When a Collect record is deleted, should its FOLIO records be suppressed
-    or hard deleted?** Both paths are implemented and the choice is a runtime
-    flag, so this is a policy decision rather than development work.
+    or hard deleted?** Decided: hard deleted. Agreed with Collection
+    Information and conveyed in the weekly sync meeting, recorded on
+    wellcomecollection/platform#6833 (2026-10-28) in answer to #6664.
+    Implemented 2026-11-03: `HARD_DELETE` is `true` in Terraform, and the sync
+    now acts on Collections tombstones as well as superseded GUIDs.
 
     | | What happens | Reversible |
     | --- | --- | --- |
     | **Suppress** (default) | `discoverySuppress` set on the instance, holdings and item; `staffSuppress` on the instance as well, since it is the only entity FOLIO gives that field | Yes. The records stay, out of discovery, and can be unsuppressed |
     | **Hard delete** | the item, then the holdings, then the instance are DELETEd | **No** |
 
-    Today it suppresses. `HARD_DELETE` defaults to `false`, and the per-run
-    `hard_delete` flag on the event overrides it, so switching is a
-    configuration change.
+    The code default for `HARD_DELETE` is still `false`; Terraform sets it to
+    `true`, and the per-run `hard_delete` flag on the event overrides both.
+
+    Before the decision, only the superseded-GUID path reached FOLIO. A record
+    whose collectId was not reused arrived as an OAI-PMH tombstone, which the
+    sync logged and ignored, following RFC 090's description of the loader's
+    `deleted` flag as unreliable. On inspection that unreliability is a missed
+    delete rather than a false one: the adapter writes a tombstone only when the
+    OAI-PMH server reports `status="deleted"` (an id-mode run never writes one,
+    and the missing-from-snapshot marking is EBSCO's alone), but a reused
+    collectId never produces one, which is why the reconciler exists. The one
+    false-positive case found is a GUID another record also holds, so the sync
+    checks the reconciler store and skips such a tombstone.
 
     Points worth weighing. Suppression keeps an audit trail but can leave
     deleted records visible to cataloguers. Hard delete avoids orphaning parent
@@ -515,9 +533,18 @@ confirmed on this FOLIO version, drops out of the mapping.
     is issued in error, the sync would only recreate the records if the AxC
     record reappeared and passed the harvest gate again.
 
+    Checked on the dev sandbox on 2026-11-03: FOLIO does not refuse the delete
+    when the item has an open loan (written to loan-storage, as the sandbox
+    service point has no calendar for a check-out) or an open Page request. All
+    three records are deleted and the loan or request stays open, pointing at an
+    item that no longer exists. The sync does not check for either. Not yet
+    checked against the production tenant. A record restored in
+    Collections after its FOLIO records were deleted is recreated under the same
+    ids by the next sync, with new HRIDs and none of the FOLIO-side history.
+
     This is different from question 9: there, unticking Harvest means nothing
-    reaches FOLIO at all; here, Collect sends an actual deletion fact and the
-    sync acts on it.
+    reaches FOLIO at all; here, Collect sends an actual deletion and the sync
+    acts on it.
 
 ### Statistical code
 

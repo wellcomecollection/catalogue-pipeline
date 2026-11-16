@@ -10,6 +10,7 @@ FOLIO payloads consumed by
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import Literal
 
 from pymarc.record import Record
 
@@ -50,6 +51,10 @@ from .payloads import (
     PayloadMeta,
     Status,
 )
+
+# Which selection gate a record passes or fails, from :func:`_selection`.
+Selection = Literal["selected", "unflagged", "not_item_level"]
+
 
 # ── extraction ──────────────────────────────────────────────────────────────────
 
@@ -263,33 +268,55 @@ def is_selected_for_sync(xml_content: str) -> bool:
 
     Two gates, both read from the harvested MARCXML, and both have to pass:
 
-    1. the harvest flag (``980 $a``) is present and non-empty, meaning the record
-       is opted in to the FOLIO sync, and
-    2. the record is item-level (``351 $c`` == "ITEM", case-insensitive).
+    1. the record is item-level (``351 $c`` == "ITEM", case-insensitive), and
+    2. the harvest flag (``980 $a``) is present and non-empty, meaning the record
+       is opted in to the FOLIO sync.
 
-    A record failing either gate is skipped: not created, not updated, not
-    suppressed, and not counted as an error.
+    A selected record is created or updated, and any suppression is cleared, so
+    ticking Harvest again restores the FOLIO records unticking it suppressed
+    (see :func:`unflagged_guid`). The ids derive from the GUID, so the sync
+    re-attaches to the same records rather than creating new ones.
 
-    The un-flag case is undecided. Unticking Harvest on a record that has
-    already synced leaves its FOLIO instance, holdings and item in place,
-    unsuppressed and no longer updated: the only delete path is the reconciler,
-    which works from superseded GUIDs, so a flag removal is not a delete signal
-    and nothing reclaims the record. Whether it should instead suppress them is
-    open with Collection Information on wellcomecollection/platform#6663. This
-    is the current behaviour, not an agreed rule.
+    An item-level record without the flag is suppressed in FOLIO, which is a
+    no-op for one that never synced. A record that is not item-level is skipped:
+    not created, not updated, not suppressed, and not counted as an error. That
+    includes one that synced as an item and has since changed level.
     """
     root = parse_xml(xml_content)
-    return _passes_selection_gates(root)
+    return _selection(root) == "selected"
 
 
-def _passes_selection_gates(root: Record) -> bool:
-    """The selection gates, shared by :func:`is_selected_for_sync` and
-    :func:`select_and_build` so the two can never disagree."""
+def _selection(root: Record) -> Selection:
+    """The selection gates, shared by :func:`is_selected_for_sync`,
+    :func:`select_and_build` and :func:`unflagged_guid` so they can never
+    disagree."""
+    record_type = (extract(root, "351$c") or "").strip().upper()
+    if record_type != RECORD_TYPE_ITEM:
+        return "not_item_level"
     harvest_flag = (extract(root, HARVEST_FLAG_SPEC) or "").strip()
     if not harvest_flag:
-        return False
-    record_type = (extract(root, "351$c") or "").strip().upper()
-    return record_type == RECORD_TYPE_ITEM
+        return "unflagged"
+    return "selected"
+
+
+def unflagged_guid(xml_content: str) -> str | None:
+    """The GUID of an item-level record without the harvest flag, or None.
+
+    These are the records whose FOLIO records are suppressed: Harvest has been
+    unticked, or was never ticked, and the sync cannot tell which without
+    looking in FOLIO. None for a selected record, one that is not item-level, or
+    one whose 001 is not a UUID, which cannot have synced because no FOLIO id
+    derives from it.
+    """
+    root = parse_xml(xml_content)
+    if _selection(root) != "unflagged":
+        return None
+    source_id = (extract(root, MARC_SOURCE["source_id"]) or "").strip()
+    try:
+        _guid(source_id)
+    except ValueError:
+        return None
+    return source_id
 
 
 def select_and_build(
@@ -300,12 +327,12 @@ def select_and_build(
 ) -> MappedPayloads | None:
     """Select and build in one pass — parses XML only once.
 
-    Returns ``None`` when the record fails either selection gate: no ``980 $a``
-    harvest flag, or not item-level. Raises on malformed XML or mapping errors.
+    Returns ``None`` when the record fails either selection gate: not
+    item-level, or no ``980 $a`` harvest flag. Raises on malformed XML or mapping errors.
     """
     root = parse_xml(xml_content)
 
-    if not _passes_selection_gates(root):
+    if _selection(root) != "selected":
         return None
 
     rec = _extract_record(root, deleted=deleted)

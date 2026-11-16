@@ -72,7 +72,8 @@ module "transformers" {
       ) ? [] : local.adapter_config[each.key].topics
     }
   )
-  listen_to_reindexer = var.reindexing_state.listen_to_reindexer
+  # Calm keeps its reindex subscription (its subset only arrives that way); a disabled Sierra takes nothing.
+  listen_to_reindexer = var.reindexing_state.listen_to_reindexer && !(var.disable_sierra_transformer_topic_subscriptions && each.key == "sierra")
 
   queue_visibility_timeout_seconds = lookup(each.value, "queue_visibility_timeout_seconds", 30)
 
