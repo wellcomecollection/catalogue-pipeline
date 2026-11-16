@@ -1,9 +1,10 @@
 locals {
   es_config_path = "${path.root}/../../../index_config"
   mapping_has_indexed_at = {
-    for name in distinct(flatten([
-      for date, cfg in var.index_config : [try(cfg.works.denormalised, ""), try(cfg.images.initial, "")]
-    ])) : name => contains(keys(jsondecode(file("${local.es_config_path}/mappings.${name}.json")).properties), "indexed_at") if name != ""
+    # compact drops the null and empty names of indices a pipeline doesn't define
+    for name in distinct(compact(flatten([
+      for date, cfg in var.index_config : [try(cfg.works.denormalised, null), try(cfg.images.initial, null)]
+    ]))) : name => contains(keys(jsondecode(file("${local.es_config_path}/mappings.${name}.json")).properties), "indexed_at")
   }
   index_config_dates = [
     for date, cfg in var.index_config : {

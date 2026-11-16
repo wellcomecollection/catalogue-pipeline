@@ -431,7 +431,11 @@ OUTSIDE_WINDOW = "2024-12-01T00:00:00Z"
 
 
 def add_path_work(
-    work_id: str, path: str, identifier: str, indexed_at: str | None = IN_WINDOW
+    work_id: str,
+    path: str,
+    identifier: str,
+    indexed_at: str | None = IN_WINDOW,
+    merged_time: str | None = None,
 ) -> None:
     MockElasticsearchClient.index(
         "works-denormalised-dev",
@@ -445,6 +449,7 @@ def add_path_work(
                     "ontologyType": "Work",
                     "value": f"priref-{work_id}",
                 },
+                **({"mergedTime": merged_time} if merged_time else {}),
             },
             **({"indexed_at": indexed_at} if indexed_at else {}),
             "data": {
@@ -586,26 +591,41 @@ def test_work_identifiers_moved_record_removes_stale_parent_edge() -> None:
     check_work_identifiers_deleted_edges(set(edges_to_remove))
 
 
-def test_work_identifiers_window_excludes_works_without_indexed_at() -> None:
-    # An Elasticsearch range query never matches a document missing the field
-    add_path_work("refno001", "PP/ABC", "PP/ABC")
-    add_path_work("notime01", "PP/XYZ", "PP/XYZ", indexed_at=None)
+def test_work_identifiers_window_falls_back_to_merged_time_without_indexed_at() -> None:
+    # Written before its index stamped indexed_at, so windowed on the matcher's time
+    add_path_work(
+        "legacy01", "PP/XYZ", "PP/XYZ", indexed_at=None, merged_time=IN_WINDOW
+    )
+    add_path_work(
+        "legacy02", "PP/QRS", "PP/QRS", indexed_at=None, merged_time=OUTSIDE_WINDOW
+    )
 
     mock_neptune_get_edges_response(
-        ["refno001"],
+        ["legacy01"],
         edge_label="HAS_PATH_IDENTIFIER",
         results=[
-            {"id": "refno001", "edge_ids": ["HAS_PATH_IDENTIFIER:refno001-->PP/ABC"]}
+            {
+                "id": "legacy01",
+                "edge_ids": [
+                    "HAS_PATH_IDENTIFIER:legacy01-->PP/XYZ",
+                    "HAS_PATH_IDENTIFIER:legacy01-->PP/OLD",
+                ],
+            }
         ],
     )
     mock_neptune_get_parent_edges_response(
-        ["PP/ABC"], results=[{"id": "PP/ABC", "edge_ids": ["HAS_PARENT:PP/ABC-->PP"]}]
+        ["PP/XYZ"], results=[{"id": "PP/XYZ", "edge_ids": ["HAS_PARENT:PP/XYZ-->PP"]}]
     )
-    mock_work_identifiers_edge_removal([])
+    mock_neptune_get_path_identifier_works_response(
+        ["PP/XYZ"], results=[{"id": "PP/XYZ", "source_ids": ["legacy01"]}]
+    )
+    # Removed only if the in-window work is picked up
+    edges_to_remove = ["HAS_PATH_IDENTIFIER:legacy01-->PP/OLD"]
+    mock_work_identifiers_edge_removal(edges_to_remove)
 
     run_work_identifiers_edge_remover()
 
-    check_work_identifiers_deleted_edges(set())
+    check_work_identifiers_deleted_edges(set(edges_to_remove))
 
 
 def test_work_identifiers_unchanged_records_remove_nothing() -> None:
