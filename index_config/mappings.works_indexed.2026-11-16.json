@@ -958,11 +958,6 @@
               "type": "text",
               "analyzer": "persian"
             },
-            "sort": {
-              "type": "keyword",
-              "normalizer": "title_sort",
-              "ignore_above": 1024
-            },
             "spanish": {
               "type": "text",
               "analyzer": "spanish"
@@ -973,7 +968,16 @@
             }
           },
           "analyzer": "lowercase",
-          "search_analyzer": "lowercase_token_limited"
+          "search_analyzer": "lowercase_token_limited",
+          "copy_to": [
+            "query.titleSort"
+          ]
+        },
+        "titleSort": {
+          "type": "keyword",
+          "normalizer": "title_sort",
+          "ignore_above": 1024,
+          "index": false
         }
       }
     },

@@ -43,7 +43,7 @@ locals {
         indexed = "concepts_indexed.2025-06-17"
       }
     }
-    // Adds query.title.sort for sorting works by title (wellcomecollection/platform#6853).
+    // Adds query.titleSort for sorting works by title (wellcomecollection/platform#6853).
     "2026-11-16" = {
       works = {
         indexed = "works_indexed.2026-11-16"
