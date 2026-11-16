@@ -116,7 +116,7 @@ class TeiBibliographyTest extends AnyFunSpec with Matchers {
 
     TeiBibliography(msDesc) shouldBe bibliography(
       "A test title (2:594)",
-      "First test reference. Second test reference."
+      "First test reference.<br/>Second test reference."
     )
   }
 

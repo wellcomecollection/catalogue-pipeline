@@ -42,7 +42,7 @@ object TeiBibliography {
   // citation is put together here; anything else keeps its own text.
   private def reference(bibl: Node): Option[String] =
     if (isWrittenAsFields(bibl)) citation(bibl)
-    else NormaliseText(TeiPhysicalDescriptionNotes.textOf(bibl))
+    else TeiPhysicalDescriptionNotes.paragraphs(bibl)
 
   private def isWrittenAsFields(bibl: Node): Boolean =
     bibl.child.exists(
