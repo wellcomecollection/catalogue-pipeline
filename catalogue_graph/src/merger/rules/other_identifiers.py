@@ -39,8 +39,9 @@ from models.pipeline.identifier import SourceIdentifier
 
 logger = structlog.get_logger(__name__)
 
-# The identifier schemes a source's other identifiers may carry onto the target.
-# Digcodes are kept because they are used as a tagging and classification system.
+# A merged source's own identifier is always added to the target. Of the source's
+# other identifiers, only those in these schemes are added. Digcodes are allowed
+# because they are used as a tagging and classification system.
 ALLOWED_SCHEMES = {
     schemes.WELLCOME_DIGCODE.id,
     schemes.SIERRA_IDENTIFIER.id,
@@ -62,7 +63,8 @@ def distinct_identifiers(
 
 
 def allowed_identifiers(source: IdentifiedWork) -> list[SourceIdentifier]:
-    """The source's own identifier plus those of its other identifiers in an allowed scheme."""
+    """The source's own identifier, plus those of its other identifiers in an allowed
+    scheme."""
     allowed = ALLOWED_SCHEMES
     if source.state.source_identifier.identifier_type.id == schemes.FOLIO_INSTANCE.id:
         allowed = ALLOWED_SCHEMES | FOLIO_ALLOWED_SCHEMES
@@ -118,7 +120,10 @@ class MergeMiroIntoDigmiroTarget(AppendAllowedIdentifiers):
 
 
 class MergeDigitalIntoPhysicalLmsTarget(DigitisedPairSource[list[SourceIdentifier]]):
-    """The physical bib adds every identifier of its digitised pair."""
+    """The physical bib adds all of its digitised bib's identifiers, not only the
+    allowed schemes. Unlike a Miro or METS work, whose identifiers identify a
+    photograph or a scan of the book, the digitised bib is a catalogue record of the
+    book itself, so its identifiers all identify the book."""
 
     accepts_target = physical_lms_work & ~is_audiovisual
 

@@ -1,8 +1,12 @@
-"""The images of a merge: those kept on the target, and those emitted as image records.
+"""The images of a merge: those listed on the merged work, and those emitted as records.
+
+Every image listed on the work is also emitted as a record; METS page scans are
+emitted but never listed, since the work reaches them through the IIIF manifest on
+its item.
 
 Which images go where is decided by the LMS work in the group, whether or not it is
 the target: its digcodes say whether its Miro images have been re-digitised, and its
-format whether its METS images are wanted. The result is applied to the target.
+format whether its METS scans are wanted. The result is applied to the target.
 """
 
 from collections.abc import Sequence
@@ -23,7 +27,8 @@ from models.pipeline.image import ImageData
 
 
 class AllImages(Rule[list[ImageData]]):
-    """The images of the claimed sources, for a group whose LMS work passes the condition.
+    """The images of the claimed sources, for a group whose LMS work passes the
+    condition.
 
     The LMS work never carries images of its own: only METS and Miro works do.
     """
@@ -55,16 +60,17 @@ class AllImages(Rule[list[ImageData]]):
 
 
 class PairedMiroImages(AllImages):
-    """Miro images of a re-digitised work are superseded by the METS images."""
+    """The Miro images, unless the LMS work was re-digitised and the METS scans
+    supersede them."""
 
     accepts_lms_work = lms_work & ~lms_work_digitised_miro
     accepts_source = single_digital_item_miro_work
 
 
 class MetsPictureAndEphemeraImages(AllImages):
-    """Only Pictures and Ephemera emit METS images.
+    """Only Pictures and Ephemera emit METS scans.
 
-    Other formats such as Books have far too many images for the image search.
+    Other formats such as Books have far too many pages for the image search.
     """
 
     accepts_lms_work = lms_work_picture_or_ephemera
@@ -74,14 +80,22 @@ class MetsPictureAndEphemeraImages(AllImages):
 def merge_image_data(
     target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
 ) -> MergedField[list[ImageData]]:
-    """The images kept on the merged work: Miro only, as METS images are reached via its items."""
+    """The images listed on the merged work: its Miro images, unless re-digitised.
+
+    The works API serves the list as image ids, and the work page uses it only for a
+    "View N images" link into image search.
+    """
     return PairedMiroImages.apply(target, sources) or MergedField([], [])
 
 
 def merge_images(
     target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
 ) -> MergedField[list[ImageData]]:
-    """The images emitted as records: METS images, and Miro images with the METS licence."""
+    """The image records emitted: METS scans for pictures and ephemera, and the Miro
+    images with the METS licence copied onto them.
+
+    The records become the images index.
+    """
     rules: list[type[Rule[list[ImageData]]]] = [
         MetsPictureAndEphemeraImages,
         PairedMiroImages,
