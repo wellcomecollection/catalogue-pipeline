@@ -20,8 +20,14 @@ metadata:
     github.com/project-slug: wellcomecollection/catalogue-pipeline
     backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/catalogue_graph/
     wellcomecollection.org/deploy-tracker: catalogue_graph/.deploy-tracker.yml
+    backplane/dora-paths: catalogue_graph
 spec:
   type: service
   lifecycle: production
   owner: team:default/digital-platform
   system: system:catalogue-pipeline
+  environments:
+    - name: prod
+      tier: production
+      github:
+        task: "deploy:catalogue_graph"

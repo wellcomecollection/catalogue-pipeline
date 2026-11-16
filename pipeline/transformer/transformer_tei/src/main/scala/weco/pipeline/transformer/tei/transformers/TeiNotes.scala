@@ -114,7 +114,7 @@ object TeiNotes {
         if (
           (n \@ "scribe").isEmpty || TeiContributors.writtenByMultipleHands(n)
         ) {
-          val label = TeiPhysicalDescriptionNotes.textOf(n)
+          val label = TeiPhysicalDescriptionNotes.paragraphs(n).getOrElse("")
           // scribes can also appear in handNote as <persName role="scr">someone</persName>.
           // Sometimes the persName tags are the only thing in the handNote tag and in that case, and in that case because
           // they are already extracted as contributors, there's no need to extract them again as notes.
