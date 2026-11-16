@@ -7,7 +7,7 @@ from adapters.transformers.marc.alternative_titles import extract_alternative_ti
 from adapters.transformers.marc.description import extract_description
 from adapters.transformers.marc.harmonisation import harmonise_work_data
 from adapters.transformers.marc.identifier import extract_id
-from adapters.transformers.marc.other_identifiers import extract_other_identifiers
+from adapters.transformers.marc.other_identifiers import extract_system_control_numbers
 from adapters.transformers.marc.parents import get_parents
 from adapters.transformers.marc.title import extract_title
 from models.pipeline.collection_path import CollectionPath
@@ -59,7 +59,7 @@ class MarcXmlWorkBuilder(SourceWorkBuilder):
 
     @property
     def other_identifiers(self) -> list[SourceIdentifier]:
-        return extract_other_identifiers(self.record)
+        return extract_system_control_numbers(self.record)
 
     @property
     def format(self) -> Format | None:
