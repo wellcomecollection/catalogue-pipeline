@@ -10,6 +10,7 @@ from adapters.transformers.folio.holdings import extract_holdings
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.folio.items import extract_physical_items
 from adapters.transformers.folio.merge_candidates import extract_merge_candidates
+from adapters.transformers.folio.notes import extract_notes
 from adapters.transformers.folio.on_order import (
     awaiting_cataloguing_item,
     is_uncatalogued,
@@ -48,6 +49,7 @@ from models.pipeline.identifier import (
     WorkSourceIdentifier,
 )
 from models.pipeline.item import Item
+from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
 from models.pipeline.source.work import (
     DeletedSourceWork,
@@ -97,6 +99,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def lettering(self) -> str | None:
         return extract_lettering(self.record)
+
+    @property
+    def notes(self) -> list[Note]:
+        return extract_notes(self.record)
 
     @property
     def other_identifiers(self) -> list[SourceIdentifier]:
