@@ -94,8 +94,19 @@ class TeiTransformerTest
           notes = List(
             Note(
               contents =
-                "Script: Beautiful Naskh Ink: Black; headings and dividers highlighted in red",
+                "Script: Beautiful Naskh<br/>Ink: Black; headings and dividers highlighted in red",
               noteType = NoteType.HandNote
+            ),
+            Note(contents = "1 column", noteType = NoteType.LayoutNote),
+            Note(
+              contents =
+                "Arabic, original. Catchwords are written underneath the text block.",
+              noteType = NoteType.FoliationNote
+            ),
+            Note(
+              contents =
+                "Due to the binding and the subsequent restoration, collation could not be established exactly.",
+              noteType = NoteType.CollationNote
             ),
             Note(
               contents =
@@ -106,17 +117,6 @@ class TeiTransformerTest
               contents =
                 "Good; traces of worms and occasionally water-stained.",
               noteType = NoteType.ConditionNote
-            ),
-            Note(contents = "1 column", noteType = NoteType.LayoutNote),
-            Note(
-              contents =
-                "Due to the binding and the subsequent restoration, collation could not be established exactly.",
-              noteType = NoteType.CollationNote
-            ),
-            Note(
-              contents =
-                "Arabic, original. Catchwords are written underneath the text block.",
-              noteType = NoteType.FoliationNote
             ),
             Note(
               contents =
