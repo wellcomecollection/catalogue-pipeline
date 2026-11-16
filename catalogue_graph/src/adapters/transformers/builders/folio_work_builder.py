@@ -6,13 +6,17 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedIns
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.collection_path import extract_collection_identifier
 from adapters.transformers.folio.electronic_resources import extract_digital_items
+from adapters.transformers.folio.format import extract_format
+from adapters.transformers.folio.holdings import extract_holdings
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.folio.items import extract_physical_items
 from adapters.transformers.folio.merge_candidates import extract_merge_candidates
+from adapters.transformers.folio.notes import extract_notes
 from adapters.transformers.folio.on_order import (
     awaiting_cataloguing_item,
     is_uncatalogued,
 )
+from adapters.transformers.folio.other_identifiers import extract_digcodes
 from adapters.transformers.marc.collection_path import extract_collection_path
 from adapters.transformers.marc.contributors import extract_contributors
 from adapters.transformers.marc.current_frequency import extract_current_frequency
@@ -23,6 +27,10 @@ from adapters.transformers.marc.former_frequency import extract_former_frequency
 from adapters.transformers.marc.genres import extract_genres
 from adapters.transformers.marc.languages import extract_languages
 from adapters.transformers.marc.lettering import extract_lettering
+from adapters.transformers.marc.other_identifiers import (
+    extract_estc_references,
+    extract_international_standard_numbers,
+)
 from adapters.transformers.marc.parents import get_parents
 from adapters.transformers.marc.physical_description import (
     extract_physical_description,
@@ -39,6 +47,8 @@ from adapters.transformers.marc.subjects import (
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Genre, Subject
+from models.pipeline.format import Format
+from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
     Id,
@@ -46,6 +56,7 @@ from models.pipeline.identifier import (
     WorkSourceIdentifier,
 )
 from models.pipeline.item import Item
+from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
 from models.pipeline.source.work import (
     DeletedSourceWork,
@@ -81,6 +92,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
         return value
 
     @property
+    def format(self) -> Format | None:
+        return extract_format(self.record)
+
+    @property
     def physical_description(self) -> str | None:
         return extract_physical_description(self.record)
 
@@ -97,12 +112,20 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
         return extract_lettering(self.record)
 
     @property
+    def notes(self) -> list[Note]:
+        return extract_notes(self.record)
+
+    @property
     def other_identifiers(self) -> list[SourceIdentifier]:
-        identifiers = super().other_identifiers + [
+        identifiers = [
+            *super().other_identifiers,
+            *extract_international_standard_numbers(self.record),
+            *extract_digcodes(self.record),
+            *extract_estc_references(self.record),
             WorkSourceIdentifier(
                 identifier_type=Id(id="folio-instance-hrid"),
                 value=extract_hrid(self.record),
-            )
+            ),
         ]
         if (bnumber := extract_sierra_predecessor_id(self.record)) is not None:
             identifiers.append(
@@ -194,6 +217,12 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
             physical = [awaiting_cataloguing_item()]
 
         return physical + extract_digital_items(self.record)
+
+    @property
+    def holdings(self) -> list[Holdings]:
+        if self.inventory is None:
+            return []
+        return extract_holdings(self.inventory)
 
     def _is_suppressed(self) -> bool:
         """Check if a FOLIO Instance is marked as suppressed in its MARC data.

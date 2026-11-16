@@ -14,7 +14,6 @@ def _source(es_client: MagicMock, pit_id: str | None = None) -> ElasticIdsSource
         index_name="test-index",
         query=QUERY,
         pit_id=pit_id,
-        fields=[],
         slice_count=2,
         parallelism=2,
     )
@@ -108,3 +107,13 @@ def test_a_failed_close_does_not_fail_the_stream() -> None:
     client.close_point_in_time.side_effect = TransportError("closed")
 
     assert list(_source(client).stream_ids()) == ["a"]
+
+
+def test_searches_without_the_document_source() -> None:
+    client = _client_with_hits(["a"])
+
+    list(_source(client).stream_ids())
+
+    assert all(
+        call.kwargs["body"]["_source"] is False for call in client.search.call_args_list
+    )

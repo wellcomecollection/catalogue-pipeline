@@ -100,6 +100,8 @@ def may_have_matches(es_client: Elasticsearch, index: str, query: dict) -> bool:
 class ElasticSource(BaseSource):
     # Subclasses that open their own PIT just before streaming set this
     open_pit_on_init = True
+    # Subclasses that only need _ids clear this
+    fetch_source = True
 
     def __init__(
         self,
@@ -150,7 +152,9 @@ class ElasticSource(BaseSource):
 
         if self.slice_count > 1:
             body["slice"] = {"id": slice_index, "max": self.slice_count}
-        if self.fields is not None:
+        if not self.fetch_source:
+            body["_source"] = False
+        elif self.fields is not None:
             body["_source"] = self.fields
         if search_after is not None:
             body["search_after"] = search_after
@@ -216,9 +220,10 @@ class ElasticSource(BaseSource):
 
 
 class ElasticIdsSource(ElasticSource):
-    """An ElasticSource streaming only document _ids (construct with fields=[])."""
+    """An ElasticSource streaming only document _ids."""
 
     open_pit_on_init = False
+    fetch_source = False
 
     def stream_ids(self) -> Iterator[str]:
         """The WorkSource interface: the _ids in scope."""

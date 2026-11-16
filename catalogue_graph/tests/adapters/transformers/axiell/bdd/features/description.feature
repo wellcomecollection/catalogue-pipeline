@@ -1,7 +1,7 @@
 Feature: Description extraction from Axiell MARC records
   Description is derived from MARC 520 $a (Summary, etc.).
   Multiple 520 fields are joined with spaces.
-  HTML is sanitised via normalise_text.
+  HTML is sanitised via sanitise_html.
   - https://www.loc.gov/marc/bibliographic/bd520.html
 
   Background:

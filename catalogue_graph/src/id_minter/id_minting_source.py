@@ -35,7 +35,6 @@ class MintingWorkIdsSource(ElasticIdsSource):
             query=source_scope.to_elasticsearch_query(
                 range_filter_field_name="indexed_at"
             ),
-            fields=[],
             batch_size=config.ES_SOURCE_BATCH_SIZE,
             slice_count=source_scope.slice_count,
             parallelism=config.ES_SOURCE_PARALLELISM,
