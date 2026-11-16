@@ -33,6 +33,12 @@ Feature: FOLIO items on order
     When I transform the MARC record
     Then the work has no item "a"
 
+  Scenario: An item whose order was closed before it arrived is not shown
+    Given that item is in the location "ACQL" named "Acquisitions Temporary Location" in the library "Acquisitions"
+    And that item has the status "Order closed"
+    When I transform the MARC record
+    Then the work has no item "a"
+
   Scenario Outline: An item at <status> is not on order
     "In process (non-requestable)" is used for digitisation, not acquisitions.
     Given that item has the status "<status>"

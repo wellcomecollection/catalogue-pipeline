@@ -17,6 +17,8 @@ ON_ORDER_STATUS_LABELS = {
     "On order": ORDERED_LABEL,
     "In process": AWAITING_CATALOGUING_LABEL,
 }
+# FOLIO's status for an ordered item whose order was closed before it arrived.
+ORDER_CLOSED_STATUS = "Order closed"
 
 
 def on_order_location(label: str) -> PhysicalLocation:

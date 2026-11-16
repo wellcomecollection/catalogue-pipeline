@@ -10,7 +10,11 @@ from adapters.transformers.folio.access_conditions import (
     is_access_note,
 )
 from adapters.transformers.folio.locations import ResolvedLocation, resolve_locations
-from adapters.transformers.folio.on_order import on_order_label, on_order_location
+from adapters.transformers.folio.on_order import (
+    ORDER_CLOSED_STATUS,
+    on_order_label,
+    on_order_location,
+)
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_item_predecessor_id,
 )
@@ -25,8 +29,8 @@ FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
 
 
 def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
-    # Suppressed items are never shown, nor do they type a bound-with item.
-    items = [item for item in instance.items if not item.suppress_from_discovery]
+    # Hidden items are also left out when working out a bound-with item's location.
+    items = [item for item in instance.items if _is_shown(item)]
     locations = resolve_locations(items)
     built = [_build_item(item, locations[item.id]) for item in items]
     # A generated title is only useful for telling items apart. When every item has
@@ -38,6 +42,11 @@ def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
     ):
         return [item.model_copy(update={"title": None}) for item in built]
     return built
+
+
+def _is_shown(item: FolioEnrichedItem) -> bool:
+    # Suppressed items and items that will never arrive are not shown.
+    return not item.suppress_from_discovery and item.status != ORDER_CLOSED_STATUS
 
 
 def _build_item(
