@@ -301,13 +301,13 @@ DIGITISED, PHYSICAL = sierra_pair()
             id="a CMS work of another format",
         ),
         pytest.param(
-            predicates.physical_digital,
+            predicates.has_physical_digitised_link,
             PHYSICAL,
             True,
             id="the physical side of a digitised pair",
         ),
         pytest.param(
-            predicates.physical_digital,
+            predicates.has_physical_digitised_link,
             DIGITISED,
             False,
             id="the digitised side of a digitised pair",

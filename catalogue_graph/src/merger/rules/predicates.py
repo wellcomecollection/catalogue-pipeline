@@ -176,4 +176,4 @@ lms_work_digitised_miro = lms_work & (has_digcode("digaids") | has_digcode("digm
 # Sierra AV bibs may carry unidentified items drawn from 856 links; those don't count.
 lms_work_digitised_av = lms_work & is_audiovisual & zero_identified_items
 
-physical_digital = has_merge_reason(PHYSICAL_DIGITAL_REASON)
+has_physical_digitised_link = has_merge_reason(PHYSICAL_DIGITAL_REASON)

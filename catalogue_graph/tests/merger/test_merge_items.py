@@ -96,6 +96,19 @@ def test_an_856_item_from_the_digitised_work_is_merged_into_the_physical_work() 
     assert result.claimed == [digitised]
 
 
+def test_a_digitised_work_holding_the_link_is_claimed_but_its_items_are_not() -> None:
+    physical = sierra_work(items=[physical_item()])
+    digitised = sierra_work(
+        items=[mergeable_digital_item()],
+        merge_candidates=[merge_candidate(physical, PHYSICAL_DIGITAL_REASON)],
+    )
+
+    result = merge_items(physical, [digitised])
+
+    assert result.value == physical.data.items
+    assert result.claimed == [digitised]
+
+
 def test_the_first_digital_work_is_chosen_among_non_digital_sierra_sources() -> None:
     digitised = sierra_work(items=[mergeable_digital_item()])
     physical = sierra_work(

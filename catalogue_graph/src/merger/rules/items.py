@@ -19,11 +19,11 @@ from merger.rules.base import (
 )
 from merger.rules.predicates import (
     born_digital_archive_stub_work,
+    has_physical_digitised_link,
     is_audiovisual,
     lms_work,
     lms_work_digitised_miro,
     lms_work_picture_digital_image_or_3d_object,
-    physical_digital,
     physical_lms_work,
     single_digital_item_mets_work,
     single_digital_item_miro_work,
@@ -109,14 +109,21 @@ class MergeIntoCmsTarget(ReplaceTargetItems):
 
 
 class MergeDigitalIntoPhysicalLmsTarget(DigitisedPairSource[list[Item]]):
-    """The 856 items of the digitised pair are appended to the physical bib's."""
+    """The 856 items of the digitised pair are appended to the physical bib's.
 
-    accepts_target = physical_lms_work & physical_digital & ~is_audiovisual
+    The pair is claimed whichever bib holds the link, but its items are appended only
+    when the physical bib does.
+    """
+
+    accepts_target = physical_lms_work & ~is_audiovisual
 
     @classmethod
     def value(
         cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
     ) -> list[Item]:
+        # The link is on the digitised work, since the pair was found at all.
+        if not has_physical_digitised_link(target):
+            return target.data.items
         (digitised,) = sources
         online = [item for item in digitised.data.items if is_available_online(item)]
         return target.data.items + online

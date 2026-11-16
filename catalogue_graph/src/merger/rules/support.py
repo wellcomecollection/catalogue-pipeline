@@ -8,9 +8,9 @@ from merger.rules.base import Rule
 from merger.rules.predicates import (
     PHYSICAL_DIGITAL_REASON,
     all_digital_locations,
+    has_physical_digitised_link,
     is_audiovisual,
     lms_work,
-    physical_digital,
     physical_lms_work,
 )
 from models.pipeline.id_label import Id
@@ -34,7 +34,7 @@ def find_first_linked_digitised_lms_work(
     if is_audiovisual(target) or not physical_lms_work(target):
         return None
 
-    if physical_digital(target):
+    if has_physical_digitised_link(target):
         return _linked_from_physical(target, sources)
     return _linked_from_digitised(target, sources)
 
@@ -88,7 +88,7 @@ def _linked_from_digitised(
 
 
 class DigitisedPairSource[T](Rule[T]):
-    """Merges the digitised pair of a physical LMS target, and nothing else.
+    """Merges the digitised pair of a physical LMS target.
 
     Audiovisual pairs are not merged, as their bibs often hold different data.
     """
