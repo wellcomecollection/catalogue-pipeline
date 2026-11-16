@@ -6,10 +6,12 @@ from adapters.extractors.oai_pmh.folio.enrichment.models import FolioEnrichedIns
 from adapters.transformers.builders.marc_xml_work_builder import MarcXmlWorkBuilder
 from adapters.transformers.folio.collection_path import extract_collection_identifier
 from adapters.transformers.folio.electronic_resources import extract_digital_items
+from adapters.transformers.folio.format import extract_format
 from adapters.transformers.folio.holdings import extract_holdings
 from adapters.transformers.folio.identifier import extract_hrid, extract_instance_uuid
 from adapters.transformers.folio.items import extract_physical_items
 from adapters.transformers.folio.merge_candidates import extract_merge_candidates
+from adapters.transformers.folio.notes import extract_notes
 from adapters.transformers.folio.on_order import (
     awaiting_cataloguing_item,
     is_uncatalogued,
@@ -40,6 +42,7 @@ from adapters.transformers.marc.subjects import (
 from ingestor.models.shared.deleted_reason import SuppressedFromSource
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Contributor, Genre, Subject
+from models.pipeline.format import Format
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Language
 from models.pipeline.identifier import (
@@ -48,6 +51,7 @@ from models.pipeline.identifier import (
     WorkSourceIdentifier,
 )
 from models.pipeline.item import Item
+from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
 from models.pipeline.source.work import (
     DeletedSourceWork,
@@ -83,6 +87,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
         return value
 
     @property
+    def format(self) -> Format | None:
+        return extract_format(self.record)
+
+    @property
     def physical_description(self) -> str | None:
         return extract_physical_description(self.record)
 
@@ -97,6 +105,10 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
     @property
     def lettering(self) -> str | None:
         return extract_lettering(self.record)
+
+    @property
+    def notes(self) -> list[Note]:
+        return extract_notes(self.record)
 
     @property
     def other_identifiers(self) -> list[SourceIdentifier]:
