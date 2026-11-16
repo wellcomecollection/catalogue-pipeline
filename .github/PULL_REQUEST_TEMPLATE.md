@@ -6,13 +6,9 @@
 
 - [ ] Does this change the display model the catalogue API returns? If so, regenerate the test documents under `catalogue_graph/document_generators/test_documents`. After merge, `sync-test-documents.yml` copies them into `wellcomecollection/catalogue-api` as an auto-PR, where OpenAPI contract tests validate the published spec against them; expect that PR to fail CI until the spec (`catalogue-api/reference/catalogue.yaml`) documents the new shape.
 
-## How to test
-
-<!-- Provide instructions to help others verify the change. This could take the form of "On PROD, do X and witness Y. On this branch, do X and witness Z." -->
-
 ## How was this tested?
 
-<!-- What you ran and where, with links. For a routine change, passing CI and a sentence on what you checked locally or in stage is enough. -->
+<!-- What you ran and where, what you saw, and links, so a reviewer can repeat it. For a routine change, passing CI and a sentence on what you checked locally or in stage is enough. Anything that can only be checked in production goes under "How will we check it after deploy?". -->
 
 ## How can we measure success?
 
