@@ -64,6 +64,5 @@ def merge_thumbnail(
     claimed = claimed_by(rules, target, sources)
     if any(_has_restricted_digital_location(w) for w in [target, *sources]):
         return MergedField(None, claimed)
-    # A rule that applies decides the thumbnail even when its source has none.
     applied = first_applicable(rules, target, sources)
     return MergedField(applied.value if applied else target.data.thumbnail, claimed)

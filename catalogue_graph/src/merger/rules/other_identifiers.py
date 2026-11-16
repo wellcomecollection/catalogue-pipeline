@@ -86,9 +86,18 @@ class AppendAllowedIdentifiers(Rule[list[SourceIdentifier]]):
         return [i for source in sources for i in allowed_identifiers(source)]
 
 
-class MergeIntoEbscoTarget(AppendAllowedIdentifiers):
+class MergeIntoEbscoTarget(Rule[list[SourceIdentifier]]):
+    """An e-bib merged into an EBSCO work is redirected to it, but none of its
+    identifiers are added."""
+
     accepts_target = ebsco_work
     accepts_source = lms_work
+
+    @classmethod
+    def value(
+        cls, target: VisibleIdentifiedWork, sources: list[IdentifiedWork]
+    ) -> list[SourceIdentifier]:
+        return []
 
 
 class MergeIntoTeiTarget(AppendAllowedIdentifiers):
@@ -138,16 +147,17 @@ class MergeDigitalIntoPhysicalLmsTarget(DigitisedPairSource[list[SourceIdentifie
 def merge_other_identifiers(
     target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
 ) -> MergedField[list[SourceIdentifier]]:
-    # The EBSCO rule claims its sources without changing the target's identifiers.
-    contributing: list[type[Rule[list[SourceIdentifier]]]] = [
+    rules: list[type[Rule[list[SourceIdentifier]]]] = [
+        MergeIntoEbscoTarget,
         MergeIntoTeiTarget,
         MergeIntoCmsTarget,
         MergeSingleMiroIntoSingleOrZeroItemLmsTarget,
         MergeMiroIntoDigmiroTarget,
     ]
-    # The pair's identifiers are added alongside the first of the others.
+    # A physical bib with a digitised pair can also match one of the rules above, so
+    # the pair rule is applied as well as, not instead of, the first that applies.
     from_pair = MergeDigitalIntoPhysicalLmsTarget.apply(target, sources)
-    from_sources = first_applicable(contributing, target, sources)
+    from_sources = first_applicable(rules, target, sources)
     identifiers = distinct_identifiers(
         [
             *target.data.other_identifiers,
@@ -155,9 +165,5 @@ def merge_other_identifiers(
             *(from_sources.value if from_sources else []),
         ]
     )
-    claiming: list[type[Rule[list[SourceIdentifier]]]] = [
-        MergeIntoEbscoTarget,
-        *contributing,
-        MergeDigitalIntoPhysicalLmsTarget,
-    ]
-    return MergedField(identifiers, claimed_by(claiming, target, sources))
+    claimed = claimed_by([*rules, MergeDigitalIntoPhysicalLmsTarget], target, sources)
+    return MergedField(identifiers, claimed)
