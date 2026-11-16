@@ -130,6 +130,19 @@ data "aws_iam_policy_document" "ingestor_s3_write" {
   }
 }
 
+# The ingestor loader clears a replayed window's previous files before writing its own
+data "aws_iam_policy_document" "ingestor_s3_delete" {
+  statement {
+    actions = [
+      "s3:DeleteObject",
+    ]
+
+    resources = [
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph-*/*/ingestor*"
+    ]
+  }
+}
+
 data "aws_iam_policy_document" "s3_bulk_load_read" {
   statement {
     actions = [
