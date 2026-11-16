@@ -19,15 +19,16 @@ object TeiPhysicalDescriptionNotes {
     val supportDesc = objectDesc \ "supportDesc"
     val layoutDesc = objectDesc \ "layoutDesc"
 
+    // The order Collections Information asked for on the website
     List(
-      binding(physDesc \ "bindingDesc"),
-      decoration(physDesc \ "decoDesc"),
-      notes(supportDesc \ "condition", NoteType.ConditionNote),
       notes(layoutDesc \ "summary", NoteType.LayoutNote),
       notes(layoutDesc \ "p", NoteType.LayoutNote),
       layout(layoutDesc \ "layout"),
+      notes(supportDesc \ "foliation", NoteType.FoliationNote),
       notes(supportDesc \ "collation", NoteType.CollationNote),
-      notes(supportDesc \ "foliation", NoteType.FoliationNote)
+      decoration(physDesc \ "decoDesc"),
+      binding(physDesc \ "bindingDesc"),
+      notes(supportDesc \ "condition", NoteType.ConditionNote)
     ).flatten
   }
 

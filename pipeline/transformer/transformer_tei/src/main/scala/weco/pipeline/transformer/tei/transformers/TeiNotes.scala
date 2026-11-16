@@ -158,7 +158,7 @@ object TeiNotes {
   private def getFiliation(nodeSeq: NodeSeq): List[Note] =
     TeiPhysicalDescriptionNotes.notes(
       nodeSeq \ "filiation",
-      NoteType.FiliationNote
+      NoteType.RelatedMaterial
     )
 
   /** Extract the contents of `<history/>` that result in Notes.
