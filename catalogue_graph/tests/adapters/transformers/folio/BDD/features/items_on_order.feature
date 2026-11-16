@@ -33,6 +33,9 @@ Feature: FOLIO items on order
     When I transform the MARC record
     Then the work has no item "a"
 
+  # Everything below is a deliberate divergence from the Scala implementation, or
+  # logic it has no counterpart for.
+
   Scenario Outline: An item at <status> is not on order
     "In process (non-requestable)" is used for digitisation, not acquisitions.
     Given that item has the status "<status>"
@@ -47,7 +50,13 @@ Feature: FOLIO items on order
       | Available                    | OnlineRequest  | Open                   | no note                |
       | In process (non-requestable) | NotRequestable | TemporarilyUnavailable | the "digitisation" note |
 
-  # Everything below is a deliberate divergence from the Scala implementation.
+  Scenario: An item whose order was closed before it arrived is not shown
+    FOLIO sets Order closed when an order is closed before the item arrives, so
+    the copy isn't coming. Sierra skips cancelled orders the same way.
+    Given that item is in the location "ACQL" named "Acquisitions Temporary Location" in the library "Acquisitions"
+    And that item has the status "Order closed"
+    When I transform the MARC record
+    Then the work has no item "a"
 
   Scenario: An item on order is shown alongside catalogued items
     A Sierra order is a separate record from the item it becomes, so
