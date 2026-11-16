@@ -44,7 +44,7 @@ These locations hold almost nothing today, so they don't affect the migrated ite
 | `axcd` | AxC Deepstore | Offsite (DS) | 0 | Closed stores, through the rule. Same as above. |
 | `hicon` | Offsite Closed stores CLW | Axiell sync | 0 | Closed stores, as Sierra does. Iconographic material moves to Axiell Collections, so this may never hold items. |
 | `ILL` | Interlibrary Loan | Interlibrary Loan | 0 | No location. Items borrowed from other libraries aren't part of the collection. |
-| `ACQL` | Acquisitions Temporary Location | Acquisitions | 2 | No location. Items still being acquired. On-order items belong to platform#6592. |
+| `ACQL` | Acquisitions Temporary Location | Acquisitions | 2 | No location. Items still being acquired. Items at status On order or In process get the on-order location instead (platform#6798). |
 | `enhal` | Enquiry Hall | Laptops | 8 | No location. Laptops for readers, not collection items. |
 | `LED` | Library Enquiries Desk | Open shelves | 3 | Open shelves, through the rule, unless these are staff copies. |
 
