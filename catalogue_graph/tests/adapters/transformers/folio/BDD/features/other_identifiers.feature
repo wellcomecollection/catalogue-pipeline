@@ -73,6 +73,7 @@ Feature: other identifiers
 
   Scenario: 759 values that are not digcodes are ignored, and digcodes are deduplicated
     Given the MARC record has a 759 field with subfield "a" value "elecco"
+    And the MARC record has another 759 field with subfield "a" value "notadigcode"
     And the MARC record has another 759 field with subfield "a" value "dig"
     And the MARC record has another 759 field with subfield "a" value "digmhl(cushing)"
     And the MARC record has another 759 field with subfield "a" value "digmhl(nlm)"
@@ -109,6 +110,7 @@ Feature: other identifiers
       | a          | c             |
       | ESTC       | Cf. Moore 451 |
       | ESTC       | 360           |
+      | ESTC       | T5132.        |
       | Garrison   | T5132         |
 
   Scenario: Identifiers from every source appear together, in order
