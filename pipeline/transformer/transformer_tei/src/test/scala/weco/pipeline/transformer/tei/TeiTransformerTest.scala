@@ -117,6 +117,11 @@ class TeiTransformerTest
               contents =
                 "Good; traces of worms and occasionally water-stained.",
               noteType = NoteType.ConditionNote
+            ),
+            Note(
+              contents =
+                "Ullmann Medizin p. 152, Iskandar Catalogue p. 162 (Shelf-mark: WMS Or. 1a)",
+              noteType = NoteType.BibliographicalInformation
             )
           ),
           physicalDescription = Some(
