@@ -10,6 +10,7 @@ import smart_open
 import structlog
 from pydantic import BaseModel
 
+import config
 from ingestor.extractors.base_extractor import StreamingExtractor
 from ingestor.models.indexable.concept import IndexableConcept
 from ingestor.models.indexable.image import IndexableImage
@@ -21,6 +22,7 @@ from ingestor.models.indexable.work import (
 )
 from ingestor.models.step_events import IngestorIndexerObject, IngestorLoaderLambdaEvent
 from utils.arrow import pydantic_to_pyarrow_schema
+from utils.aws import delete_s3_objects
 from utils.types import IngestorType
 
 logger = structlog.get_logger(__name__)
@@ -104,6 +106,21 @@ class IngestorBaseTransformer:
 
         return full_path
 
+    def _delete_previous_files(self, event: IngestorLoaderLambdaEvent) -> None:
+        # A replayed window reuses this prefix, and the indexer indexes every file under it,
+        # so an earlier run's chunks whose ranges differ from this run's would be re-indexed.
+        deleted_count = delete_s3_objects(
+            config.CATALOGUE_GRAPH_S3_BUCKET,
+            f"{event.get_path_prefix()}/",
+            f".{event.load_format}",
+        )
+        if deleted_count:
+            logger.info(
+                "Deleted files from a previous run",
+                count=deleted_count,
+                prefix=event.get_path_prefix(),
+            )
+
     def load_documents(
         self,
         event: IngestorLoaderLambdaEvent,
@@ -114,6 +131,7 @@ class IngestorBaseTransformer:
         transport_params = None
         if destination == "s3":
             transport_params = {"client": boto3.client("s3")}
+            self._delete_previous_files(event)
 
         for i, batch in enumerate(self.stream_batches()):
             file_name = f"{str(i * S3_BATCH_SIZE).zfill(8)}-{str(i * S3_BATCH_SIZE + len(batch)).zfill(8)}"

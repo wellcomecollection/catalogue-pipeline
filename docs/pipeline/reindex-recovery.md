@@ -30,6 +30,8 @@ Pass an explicit `job_id`: the generated one is minute-granular, and concurrent 
 
 A FAILED ingest execution has usually already written its batch, because the bulk write happens before version-conflict errors raise. Sample ids from works-denormalised within the window's `mergedTime` range and count them in works-indexed before replaying anything; in the 2026-07-31 recovery, 14 of 16 failed windows turned out to be complete.
 
+Before replaying a window, check that no `graph-pipeline-ingestor` execution for it is still running. The replay's loader deletes the window's parquet files before writing its own, so an earlier indexer still reading them would fail on missing objects.
+
 ## Redriven merges miss ingest windows
 
 works-denormalised documents carry the `mergedTime` of their original matcher batch, not the redrive time. So after a merger DLQ redrive, the ingest windows that would cover those documents have already run, and nothing later covers them. The fix is to re-match rather than re-ingest: re-inject the affected work ids on the id-minter output topic, which feeds the matcher (`pipeline_inject_messages.py`), producing a fresh merge with a current `mergedTime` that the scheduled windows then pick up.
