@@ -108,6 +108,7 @@ def upsert_from_payloads(
                 payload=item_payload,
                 dry_run=dry_run,
                 stray_notes=result.stray_location_notes,
+                owned_statistical_codes=frozenset(meta.access_statistical_code_ids),
             )
             result.item = EntityResult(action=action, id=item_id)
 
