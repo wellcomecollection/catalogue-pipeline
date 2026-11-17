@@ -1,5 +1,5 @@
-"""Applying the field rules to a merge target, and turning what comes out into the
-merged works and initial images the merger writes."""
+"""Apply the field rules to a merge target, and build the merged works and initial
+images that the merger writes."""
 
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -23,7 +23,7 @@ from models.pipeline.image import ImageData
 
 @dataclass(frozen=True)
 class ImageWithSource:
-    """An image to emit, and the work it is attributed to."""
+    """An image record to write, and the work it belongs to."""
 
     image: ImageData
     source: ParentWork
@@ -31,7 +31,7 @@ class ImageWithSource:
 
 @dataclass(frozen=True)
 class MergeResult:
-    """The target with its fields merged, and the images created along the way."""
+    """The target with its fields merged, and the image records to write."""
 
     merged_target: VisibleIdentifiedWork
     images: list[ImageWithSource]
@@ -40,7 +40,8 @@ class MergeResult:
 def merge_fields(
     target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
 ) -> tuple[list[IdentifiedWork], MergeResult]:
-    """The sources the field rules drew on, which are redirected to the target, and the result."""
+    """Merge every field of the target from its sources. Returns the sources the rules
+    claimed, which are redirected to the target, and the result."""
     items = merge_items(target, sources)
     thumbnail = merge_thumbnail(target, sources)
     other_identifiers = merge_other_identifiers(target, sources)
@@ -67,8 +68,8 @@ def merge_fields(
 
 
 def target_only_merge_result(target: VisibleIdentifiedWork) -> MergeResult:
-    """A target with no sources. Its items still go through the items rule, and a
-    single-image Miro work emits its image."""
+    """Merge a target that has no sources. The items rule still applies, and a
+    single-image Miro work still emits its image."""
     items = merge_items(target, []).value
     data = target.data.model_copy(update={"items": items})
     merged_target = with_items_in_internal_works(
@@ -81,8 +82,8 @@ def target_only_merge_result(target: VisibleIdentifiedWork) -> MergeResult:
 
 
 def parent_work(work: VisibleIdentifiedWork) -> ParentWork:
-    """The work an image is attributed to. Its own images are left out, as they would
-    bloat every image document."""
+    """The work an image belongs to. Its image data is omitted to keep image documents
+    small."""
     return ParentWork(
         id=Identified(
             canonical_id=work.state.canonical_id,
@@ -102,8 +103,7 @@ def _attributed_to(
 
 @dataclass(frozen=True)
 class MergerOutcome:
-    """Everything a merge produces: the merged target, redirects, untouched works and
-    internal works, plus the images, all stamped with one merged time on the way out."""
+    """The works and image records that a merge produces."""
 
     works: list[IdentifiedWork]
     images: list[ImageWithSource]

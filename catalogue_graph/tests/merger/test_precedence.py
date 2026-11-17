@@ -1,4 +1,5 @@
-"""Choosing the target of a merge group."""
+"""The order in which a merge group's works are preferred, shown by choosing its
+target."""
 
 from merger.rules.precedence import first_by_precedence
 from merger.rules.predicates import single_item_lms_work

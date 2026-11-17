@@ -12,6 +12,7 @@ from models.pipeline.format import (
 )
 from models.pipeline.identified.work import VisibleIdentifiedWork
 from tests.merger.works import (
+    CC_BY_NC,
     IN_COPYRIGHT,
     digcode_identifier,
     digital_item,
@@ -81,6 +82,19 @@ def test_the_mets_licence_overrides_the_miro_licence() -> None:
         [i.locations for i in result.value],
         [i.locations for i in mets.data.image_data] + expected_miro_locations,
     )
+
+
+def test_the_miro_licence_is_kept_when_the_mets_licences_disagree() -> None:
+    miro = miro_work()
+    mets_works = [
+        invisible_mets_work(num_images=1, license=IN_COPYRIGHT),
+        invisible_mets_work(num_images=1, license=CC_BY_NC),
+    ]
+
+    result = merge_images(sierra_work(format=Pictures), [miro, *mets_works])
+
+    miro_images = [i for i in result.value if i.id == miro.data.image_data[0].id]
+    assert miro_images == miro.data.image_data
 
 
 def test_mets_images_are_ignored_for_other_formats_but_miro_images_are_used() -> None:

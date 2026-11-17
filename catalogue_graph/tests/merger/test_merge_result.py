@@ -2,6 +2,7 @@
 
 from datetime import UTC, datetime
 
+from ingestor.models.merged.work import VisibleMergedWork
 from merger.merge_result import (
     ImageWithSource,
     MergerOutcome,
@@ -9,7 +10,6 @@ from merger.merge_result import (
     parent_work,
     target_only_merge_result,
 )
-from merger.outputs import to_initial_image, to_merged_work
 from models.pipeline.format import ArchivesDigital, ThreeDObjects
 from models.pipeline.identified.work import VisibleIdentifiedWork
 from tests.merger.works import (
@@ -109,11 +109,18 @@ def test_the_outcome_stamps_the_merged_time_on_works_and_images() -> None:
     result = target_only_merge_result(miro)
     outcome = MergerOutcome(works=[result.merged_target], images=result.images)
 
-    assert outcome.merged_works(MERGED_AT) == [to_merged_work(miro, MERGED_AT)]
-    assert outcome.initial_images(MERGED_AT) == [
-        to_initial_image(image, parent_work(miro), MERGED_AT)
-        for image in miro.data.image_data
-    ]
+    [merged] = outcome.merged_works(MERGED_AT)
+    assert isinstance(merged, VisibleMergedWork)
+    assert merged.state.canonical_id == miro.state.canonical_id
+    assert merged.state.merged_time == "2026-11-11T09:30:00Z"
+    assert merged.data == miro.data
+
+    [image] = outcome.initial_images(MERGED_AT)
+    [image_data] = miro.data.image_data
+    assert image.state.canonical_id == image_data.id.canonical_id
+    assert image.locations == image_data.locations
+    assert image.source.id.canonical_id == miro.state.canonical_id
+    assert image.modified_time == "2026-11-11T09:30:00Z"
 
 
 def test_works_passed_through_are_merged_as_they_are() -> None:
@@ -121,7 +128,10 @@ def test_works_passed_through_are_merged_as_they_are() -> None:
 
     outcome = MergerOutcome.pass_through(works)
 
-    assert outcome.merged_works(MERGED_AT) == [
-        to_merged_work(work, MERGED_AT) for work in works
+    merged = outcome.merged_works(MERGED_AT)
+    assert [w.state.canonical_id for w in merged] == [
+        w.state.canonical_id for w in works
     ]
+    assert [w.data for w in merged] == [w.data for w in works]
+    assert all(w.state.merged_time == "2026-11-11T09:30:00Z" for w in merged)
     assert outcome.initial_images(MERGED_AT) == []

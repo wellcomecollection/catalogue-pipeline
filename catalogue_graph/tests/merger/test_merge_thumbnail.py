@@ -95,7 +95,7 @@ def test_a_miro_thumbnail_is_chosen_without_mets(target: VisibleIdentifiedWork) 
 
 
 def test_the_miro_thumbnail_comes_from_the_work_with_the_smallest_id() -> None:
-    result = merge_thumbnail(physical_sierra, miro_works)
+    result = merge_thumbnail(physical_sierra, list(reversed(miro_works)))
 
     smallest = min(miro_works, key=lambda work: work.state.source_identifier.value)
     assert result.value is not None
@@ -118,6 +118,23 @@ def test_a_restriction_only_on_a_physical_location_does_not_suppress_it(
     target: VisibleIdentifiedWork,
 ) -> None:
     assert merge_thumbnail(target, [*miro_works, mets]).value is not None
+
+
+def test_a_mets_work_without_a_thumbnail_leaves_the_target_with_none() -> None:
+    target = sierra_digital_work(thumbnail=digital_location(ThumbnailImage))
+
+    result = merge_thumbnail(target, [mets_work()])
+
+    assert result.value is None
+
+
+def test_the_target_keeps_its_own_thumbnail_when_no_rule_applies() -> None:
+    target = sierra_digital_work(thumbnail=digital_location(ThumbnailImage))
+
+    result = merge_thumbnail(target, [])
+
+    assert result.value == target.data.thumbnail
+    assert result.claimed == []
 
 
 def test_the_works_whose_thumbnails_were_considered_are_claimed() -> None:
