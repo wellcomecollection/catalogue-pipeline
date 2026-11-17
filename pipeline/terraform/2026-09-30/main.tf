@@ -1,5 +1,5 @@
 locals {
-  # Trial of the works_identified Iceberg table and the batch matcher and merger
+  # Trial of the works_identified Iceberg table and the batch merger
   # that read it (wellcomecollection/platform#6742, #6857). Also creates the
   # indices the merger writes to, in elastic.tf.
   enable_experimental_merger = true

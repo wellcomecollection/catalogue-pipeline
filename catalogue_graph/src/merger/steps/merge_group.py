@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Merges one group of a run's changed components and writes the merged works and
 initial images to the batch merger's own indices."""
 
@@ -16,7 +15,7 @@ from core.document import Document
 from core.sinks import ElasticsearchSink
 from id_minter.iceberg import get_works_identified_table
 from merger.documents import fetch_components
-from merger.merge import merge_component
+from merger.merge import merge
 from merger.merge_result import MergerOutcome
 from merger.models.step_events import MergeGroupEvent, MergeGroupResult
 from models.pipeline.identified.work import IdentifiedWork
@@ -128,7 +127,11 @@ def _merge(
     components: Iterable[tuple[list[str], list[IdentifiedWork]]], counts: _Counts
 ) -> Iterator[MergerOutcome]:
     for ids, works in components:
-        outcome = merge_component(ids, works)
+        # A component with a work missing from the table is written unmerged.
+        if len(works) < len(ids):
+            outcome = MergerOutcome.pass_through(works)
+        else:
+            outcome = merge(works)
         counts.components += 1
         counts.works += len(works)
         counts.merged_works += len(outcome.works)
@@ -146,7 +149,7 @@ def _document(canonical_id: str, model: typing.Any, version: int) -> Document:
 def lambda_handler(event: dict, context: typing.Any) -> dict:
     execution_context = ExecutionContext(
         trace_id=get_trace_id(context),
-        pipeline_step="merger",
+        pipeline_step="batch_merger_group",
     )
     return handler(MergeGroupEvent.model_validate(event), execution_context).model_dump(
         mode="json"

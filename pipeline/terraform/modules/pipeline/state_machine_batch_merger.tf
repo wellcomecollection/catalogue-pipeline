@@ -1,4 +1,4 @@
-# Experimental batch matcher and merger (wellcomecollection/platform#6742,
+# Experimental batch merger (wellcomecollection/platform#6742,
 # #6857). After every id-minter run it resolves the matcher graph from the
 # works_identified Iceberg table, merges every component that changed and
 # writes the results to indices of their own, so they can be checked against
@@ -9,14 +9,14 @@
 # baseline is replaced last, so a failed group is merged again on the next run.
 
 locals {
-  batch_matcher_s3_tables_bucket_arn = "arn:aws:s3tables:eu-west-1:${data.aws_caller_identity.current.account_id}:bucket/${local.infra_critical.catalogue_pipeline_table_bucket_name}"
-  batch_merger_bucket                = "wellcomecollection-catalogue-graph"
+  batch_merger_s3_tables_bucket_arn = "arn:aws:s3tables:eu-west-1:${data.aws_caller_identity.current.account_id}:bucket/${local.infra_critical.catalogue_pipeline_table_bucket_name}"
+  batch_merger_bucket               = "wellcomecollection-catalogue-graph"
 
   # Each group reads the whole content column of the table, and the merge
   # writes to the shared cluster.
   batch_merger_max_concurrency = 5
 
-  batch_matcher_lambda_retry = [
+  batch_merger_lambda_retry = [
     {
       ErrorEquals = [
         "Lambda.ServiceException",
@@ -30,7 +30,7 @@ locals {
     }
   ]
 
-  batch_matcher_state_machine_definition = jsonencode({
+  batch_merger_state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Resolve the matcher graph from the works_identified table, merge the changed components and replace the components baseline."
     StartAt       = "Match"
@@ -39,14 +39,14 @@ locals {
         Type     = "Task"
         Resource = "arn:aws:states:::lambda:invoke"
         Arguments = {
-          FunctionName = module.batch_matcher_lambda.lambda_arn
+          FunctionName = module.batch_merger_match_lambda.lambda_arn
           Payload      = "{% $states.input %}"
         }
         Assign = {
           match = "{% $states.result.Payload %}"
         }
         Output = "{% $states.result.Payload %}"
-        Retry  = local.batch_matcher_lambda_retry
+        Retry  = local.batch_merger_lambda_retry
         Next   = "Merge"
       }
       Merge = {
@@ -63,13 +63,13 @@ locals {
               Type     = "Task"
               Resource = "arn:aws:states:::lambda:invoke"
               Arguments = {
-                FunctionName = module.batch_merger_lambda.lambda_arn
+                FunctionName = module.batch_merger_group_lambda.lambda_arn
                 Payload      = "{% $states.input %}"
               }
               Output = "{% $states.result.Payload %}"
               # Lambda.Unknown covers timeouts and out-of-memory; a group's
               # writes are versioned by the snapshot time, so a re-run is safe.
-              Retry = concat(local.batch_matcher_lambda_retry, [
+              Retry = concat(local.batch_merger_lambda_retry, [
                 {
                   ErrorEquals     = ["Lambda.Unknown"]
                   IntervalSeconds = 5
@@ -108,17 +108,17 @@ locals {
   })
 }
 
-module "batch_matcher_lambda" {
+module "batch_merger_match_lambda" {
   source = "../pipeline_lambda"
 
-  service_name = "batch-matcher"
-  description  = "Resolves the matcher graph from the works_identified Iceberg table and records the changed components."
+  service_name = "batch-merger-match"
+  description  = "Resolves the matcher graph from the works_identified Iceberg table and splits the changed components into groups to merge."
 
   pipeline_date       = var.pipeline_date
   ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
 
   image_config = {
-    command = ["merger.steps.merger.lambda_handler"]
+    command = ["merger.steps.match.lambda_handler"]
   }
 
   # Holds the graph columns of every row in the table while it resolves
@@ -132,17 +132,17 @@ module "batch_matcher_lambda" {
   }
 }
 
-module "batch_merger_lambda" {
+module "batch_merger_group_lambda" {
   source = "../pipeline_lambda"
 
-  service_name = "batch-merger"
-  description  = "Merges one group of the components the batch matcher found changed, and writes the merged works and images to the batch merger's indices."
+  service_name = "batch-merger-group"
+  description  = "Merges one group of the changed components, and writes the merged works and images to the batch merger's indices."
 
   pipeline_date       = var.pipeline_date
   ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
 
   image_config = {
-    command = ["merger.steps.merge.lambda_handler"]
+    command = ["merger.steps.merge_group.lambda_handler"]
   }
 
   # A group's documents are fetched in one read of the table's content column,
@@ -158,17 +158,17 @@ module "batch_merger_lambda" {
   }
 }
 
-resource "aws_iam_role_policy" "batch_merger_s3_tables_read" {
-  role   = module.batch_merger_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.batch_matcher_s3_tables_read.json
+resource "aws_iam_role_policy" "batch_merger_group_s3_tables_read" {
+  role   = module.batch_merger_group_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.batch_merger_s3_tables_read.json
 }
 
-resource "aws_iam_role_policy" "batch_merger_read" {
-  role   = module.batch_merger_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.batch_merger_read.json
+resource "aws_iam_role_policy" "batch_merger_group_read" {
+  role   = module.batch_merger_group_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.batch_merger_group_read.json
 }
 
-data "aws_iam_policy_document" "batch_merger_read" {
+data "aws_iam_policy_document" "batch_merger_group_read" {
   # The changed components of the run.
   statement {
     actions = ["s3:GetObject"]
@@ -186,12 +186,12 @@ data "aws_iam_policy_document" "batch_merger_read" {
   }
 }
 
-resource "aws_iam_role_policy" "batch_matcher_s3_tables_read" {
-  role   = module.batch_matcher_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.batch_matcher_s3_tables_read.json
+resource "aws_iam_role_policy" "batch_merger_match_s3_tables_read" {
+  role   = module.batch_merger_match_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.batch_merger_s3_tables_read.json
 }
 
-data "aws_iam_policy_document" "batch_matcher_s3_tables_read" {
+data "aws_iam_policy_document" "batch_merger_s3_tables_read" {
   statement {
     actions = [
       "s3tables:GetNamespace",
@@ -201,8 +201,8 @@ data "aws_iam_policy_document" "batch_matcher_s3_tables_read" {
       "s3tables:GetTableMetadataLocation",
     ]
     resources = [
-      local.batch_matcher_s3_tables_bucket_arn,
-      "${local.batch_matcher_s3_tables_bucket_arn}/*",
+      local.batch_merger_s3_tables_bucket_arn,
+      "${local.batch_merger_s3_tables_bucket_arn}/*",
     ]
   }
 
@@ -212,17 +212,17 @@ data "aws_iam_policy_document" "batch_matcher_s3_tables_read" {
       "s3tables:GetTable",
       "s3tables:GetTableData",
     ]
-    resources = ["${local.batch_matcher_s3_tables_bucket_arn}/table/*"]
+    resources = ["${local.batch_merger_s3_tables_bucket_arn}/table/*"]
   }
 }
 
 # The changed components of each run, and the baseline every run reads and replaces.
-resource "aws_iam_role_policy" "batch_matcher_s3_read_write" {
-  role   = module.batch_matcher_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.batch_matcher_s3_read_write.json
+resource "aws_iam_role_policy" "batch_merger_match_s3_read_write" {
+  role   = module.batch_merger_match_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.batch_merger_match_s3_read_write.json
 }
 
-data "aws_iam_policy_document" "batch_matcher_s3_read_write" {
+data "aws_iam_policy_document" "batch_merger_match_s3_read_write" {
   # smart_open writes by multipart upload and aborts it when a write fails.
   statement {
     actions = ["s3:GetObject", "s3:PutObject", "s3:AbortMultipartUpload"]
@@ -239,22 +239,22 @@ data "aws_iam_policy_document" "batch_matcher_s3_read_write" {
   }
 }
 
-module "batch_matcher_state_machine" {
+module "batch_merger_state_machine" {
   source = "../state_machine"
 
-  name                     = "pipeline-${var.pipeline_date}_batch_matcher"
-  state_machine_definition = local.batch_matcher_state_machine_definition
+  name                     = "pipeline-${var.pipeline_date}_batch_merger"
+  state_machine_definition = local.batch_merger_state_machine_definition
   invokable_lambda_arns = [
-    module.batch_matcher_lambda.lambda_arn,
-    module.batch_merger_lambda.lambda_arn,
+    module.batch_merger_match_lambda.lambda_arn,
+    module.batch_merger_group_lambda.lambda_arn,
   ]
   policies_to_attach = {
-    "components-copy" = data.aws_iam_policy_document.batch_matcher_components_copy.json
+    "components-copy" = data.aws_iam_policy_document.batch_merger_components_copy.json
   }
 }
 
 # The last states copy the run's components over the baseline and delete the job's copy.
-data "aws_iam_policy_document" "batch_matcher_components_copy" {
+data "aws_iam_policy_document" "batch_merger_components_copy" {
   statement {
     actions = ["s3:GetObject", "s3:GetObjectTagging", "s3:PutObject", "s3:PutObjectTagging", "s3:DeleteObject"]
     resources = [
@@ -263,11 +263,11 @@ data "aws_iam_policy_document" "batch_matcher_components_copy" {
   }
 }
 
-module "batch_matcher_state_machine_alarms" {
+module "batch_merger_state_machine_alarms" {
   source = "../state_machine_alarms"
 
-  state_machine_arn = module.batch_matcher_state_machine.state_machine_arn
-  alarm_name_prefix = "batch-matcher"
+  state_machine_arn = module.batch_merger_state_machine.state_machine_arn
+  alarm_name_prefix = "batch-merger"
   alarm_name_suffix = "-${var.pipeline_date}"
 
   default_alarm_configuration = {
@@ -277,12 +277,12 @@ module "batch_matcher_state_machine_alarms" {
 
 # Runs once per successful id-minter execution, so every run sees a snapshot
 # with all of that execution's partitions committed.
-module "batch_matcher_trigger" {
+module "batch_merger_trigger" {
   source = "../state_machine_trigger"
 
-  name              = "batch-matcher-${var.pipeline_date}"
+  name              = "batch-merger-${var.pipeline_date}"
   event_bus_name    = "default"
-  state_machine_arn = module.batch_matcher_state_machine.state_machine_arn
+  state_machine_arn = module.batch_merger_state_machine.state_machine_arn
 
   enabled = var.enable_experimental_merger
 

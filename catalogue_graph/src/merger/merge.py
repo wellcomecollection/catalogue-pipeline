@@ -31,21 +31,11 @@ from models.pipeline.identifier import Identified
 logger = structlog.get_logger(__name__)
 
 
-def merge_component(
-    ids: Sequence[str], works: Sequence[IdentifiedWork]
-) -> MergerOutcome:
-    """Merges the works of a component, or passes them through unmerged when any
-    of its works could not be read."""
-    if len(works) < len(ids):
-        return MergerOutcome.pass_through(works)
-    return merge(works)
-
-
 def merge(works: Sequence[IdentifiedWork]) -> MergerOutcome:
     outcomes = [
-        _merge_group(group)
-        for miro_group in _partition_shared_miro(works)
-        for group in _partition_audiovisual(miro_group)
+        _merge_part(part)
+        for miro_part in _partition_shared_miro(works)
+        for part in _partition_audiovisual(miro_part)
     ]
     result_works = [work for outcome in outcomes for work in outcome.works]
     return MergerOutcome(
@@ -62,28 +52,26 @@ def _partition_shared_miro(
     miro_works = [work for work in works if miro_work(work)]
     others = [work for work in works if not miro_work(work)]
 
-    # Group the other works by their direct links to each other.
-    components: list[list[IdentifiedWork]] = []
+    # Cluster the other works by their direct links to each other.
+    clusters: list[list[IdentifiedWork]] = []
     for work in others:
         touching = [
-            c
-            for c in components
-            if any(_linked(w, work) or _linked(work, w) for w in c)
+            c for c in clusters if any(_linked(w, work) or _linked(work, w) for w in c)
         ]
-        apart = [c for c in components if not any(c is t for t in touching)]
-        components = [[w for c in touching for w in c] + [work], *apart]
+        apart = [c for c in clusters if not any(c is t for t in touching)]
+        clusters = [[w for c in touching for w in c] + [work], *apart]
 
-    def links_to(component: list[IdentifiedWork], miro: IdentifiedWork) -> bool:
-        return any(_linked(work, miro) for work in component)
+    def links_to(cluster: list[IdentifiedWork], miro: IdentifiedWork) -> bool:
+        return any(_linked(work, miro) for work in cluster)
 
-    # Works the matcher grouped without a direct link stay with the target.
-    bridged = [c for c in components if any(links_to(c, m) for m in miro_works)]
+    # Clusters that link to no Miro work stay with the target.
+    bridged = [c for c in clusters if any(links_to(c, m) for m in miro_works)]
     target = first_by_precedence(works)
     if target is None or len(bridged) <= 1:
         return [list(works)]
 
     carved = [c for c in bridged if not _contains(c, target)]
-    # A Miro work goes to whichever group linking it wins target precedence.
+    # A Miro work goes to whichever cluster linking it wins target precedence.
     miro_owner: dict[str, list[IdentifiedWork]] = {}
     for miro in miro_works:
         linking = [c for c in bridged if links_to(c, miro)]
@@ -94,20 +82,20 @@ def _partition_shared_miro(
         if owner is not None:
             miro_owner[miro.state.canonical_id] = owner
 
-    group_of: dict[str, int] = {}
-    for index, component in enumerate(carved):
+    part_of: dict[str, int] = {}
+    for index, cluster in enumerate(carved):
         own_miro = [
-            m for m in miro_works if miro_owner.get(m.state.canonical_id) is component
+            m for m in miro_works if miro_owner.get(m.state.canonical_id) is cluster
         ]
-        for work in [*component, *own_miro]:
-            group_of[work.state.canonical_id] = index
+        for work in [*cluster, *own_miro]:
+            part_of[work.state.canonical_id] = index
 
-    remainder = [w for w in works if w.state.canonical_id not in group_of]
-    groups = [
-        [w for w in works if group_of.get(w.state.canonical_id) == index]
+    remainder = [w for w in works if w.state.canonical_id not in part_of]
+    parts = [
+        [w for w in works if part_of.get(w.state.canonical_id) == index]
         for index in range(len(carved))
     ]
-    return [remainder, *groups]
+    return [remainder, *parts]
 
 
 def _partition_audiovisual(
@@ -130,12 +118,12 @@ def _partition_audiovisual(
             owner_of[other.state.canonical_id] = linked[0].state.canonical_id
         elif len(linked) > 1:
             logger.warning(
-                "Work is linked to several audiovisual e-bibs, leaving it in the main group",
+                "Work is linked to several audiovisual e-bibs, leaving it in the main part",
                 work=other.state.canonical_id,
                 ebibs=[e.state.canonical_id for e in linked],
             )
 
-    groups = []
+    parts = []
     for ebib in av_ebibs:
         attached = [
             o
@@ -143,14 +131,14 @@ def _partition_audiovisual(
             if owner_of.get(o.state.canonical_id) == ebib.state.canonical_id
         ]
         if attached:
-            groups.append([ebib, *attached])
+            parts.append([ebib, *attached])
 
-    carved = {work.state.canonical_id for group in groups for work in group}
+    carved = {work.state.canonical_id for part in parts for work in part}
     remainder = [work for work in works if work.state.canonical_id not in carved]
-    return [*groups, remainder] if remainder else groups
+    return [*parts, remainder] if remainder else parts
 
 
-def _merge_group(works: Sequence[IdentifiedWork]) -> MergerOutcome:
+def _merge_part(works: Sequence[IdentifiedWork]) -> MergerOutcome:
     if len(works) == 1 and isinstance(works[0], VisibleIdentifiedWork):
         result = target_only_merge_result(works[0])
         return MergerOutcome(

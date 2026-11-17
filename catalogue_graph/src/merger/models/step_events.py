@@ -7,7 +7,7 @@ import config
 from models.events import BasePipelineEvent
 
 
-class MergerEvent(BasePipelineEvent):
+class MatchEvent(BasePipelineEvent):
     job_id: str
     iceberg_snapshot_id: int | None = None
 
@@ -31,7 +31,7 @@ class MergerEvent(BasePipelineEvent):
         return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{PurePosixPath(*parts)}"
 
 
-class MergeGroupEvent(MergerEvent):
+class MergeGroupEvent(MatchEvent):
     """One group of a run's changed components, merged in its own invocation."""
 
     iceberg_snapshot_id: int
@@ -40,7 +40,7 @@ class MergeGroupEvent(MergerEvent):
     merged_time: datetime
 
 
-class MergerResult(BaseModel):
+class MatchResult(BaseModel):
     job_id: str
     iceberg_snapshot_id: int | None
     work_count: int

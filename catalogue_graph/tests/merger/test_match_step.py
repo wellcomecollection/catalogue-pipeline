@@ -1,4 +1,4 @@
-"""The merger step: what it reads, writes and reports on each run."""
+"""The match step: what it reads, writes and reports on each run."""
 
 from pathlib import Path
 
@@ -8,8 +8,9 @@ from pyiceberg.catalog.sql import SqlCatalog
 
 from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from merger import components as storage
-from merger.models.step_events import MergerEvent
-from merger.steps import merger
+from merger.__main__ import commit_components
+from merger.models.step_events import MatchEvent
+from merger.steps import match
 from tests.merger.support import (
     SNAPSHOT_TIME,
     components,
@@ -21,7 +22,7 @@ from tests.merger.support import (
 from tests.mocks import MockS3Client, MockSmartOpen
 from utils.aws import df_from_s3_parquet, df_to_s3_parquet
 
-EVENT = MergerEvent(pipeline_date="2026-01-01", graph_date="2026-01-02", job_id="job-1")
+EVENT = MatchEvent(pipeline_date="2026-01-01", graph_date="2026-01-02", job_id="job-1")
 GRAPH = {"A": "B", "B": "", "C": "D", "D": "", "E": ""}
 
 
@@ -33,12 +34,12 @@ def read_like_s3(uri: str) -> pl.DataFrame:
 
 
 def run(
-    monkeypatch: pytest.MonkeyPatch, event: MergerEvent = EVENT, snapshot_id: int = 7
-) -> merger.MergerResult:
+    monkeypatch: pytest.MonkeyPatch, event: MatchEvent = EVENT, snapshot_id: int = 7
+) -> match.MatchResult:
     table = iceberg_table(works(GRAPH), snapshot_id)
-    monkeypatch.setattr(merger, "get_works_identified_table", lambda use_rest: table)
+    monkeypatch.setattr(match, "get_works_identified_table", lambda use_rest: table)
     monkeypatch.setattr(storage, "df_from_s3_parquet", read_like_s3)
-    return merger.handler(event)
+    return match.handler(event)
 
 
 def written(uri: str) -> dict[str, str]:
@@ -82,7 +83,7 @@ def test_commit_replaces_the_baseline_and_deletes_the_jobs_copy(
     MockSmartOpen.mock_s3_parquet_file(EVENT.components_s3_uri, components({"Z": "Z"}))
 
     result = run(monkeypatch)
-    merger.commit_components(result)
+    commit_components(result)
 
     assert written(EVENT.components_s3_uri) == {"A": "AB", "C": "CD", "E": "E"}
     deleted = [f"s3://{bucket}/{key}" for bucket, key in MockS3Client.deleted_keys]
@@ -94,7 +95,7 @@ def test_returns_one_merge_event_per_group_at_the_snapshot_time(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        merger,
+        match,
         "assign_groups",
         lambda changed: storage.assign_groups(changed, group_size=2),
     )
@@ -144,10 +145,10 @@ def test_an_empty_table_reports_nothing_changed(
     table = catalog.create_table("ns.works", schema=WORKS_IDENTIFIED_ICEBERG_SCHEMA)
     if appended:
         table.append(table.schema().as_arrow().empty_table())
-    monkeypatch.setattr(merger, "get_works_identified_table", lambda use_rest: table)
+    monkeypatch.setattr(match, "get_works_identified_table", lambda use_rest: table)
     monkeypatch.setattr(storage, "df_from_s3_parquet", read_like_s3)
 
-    result = merger.handler(EVENT)
+    result = match.handler(EVENT)
 
     assert (result.iceberg_snapshot_id is None) == (not appended)
     assert (result.work_count, result.changed_work_count) == (0, 0)

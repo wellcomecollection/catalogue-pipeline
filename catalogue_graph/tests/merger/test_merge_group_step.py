@@ -1,4 +1,4 @@
-"""The merge step: merges one group of changed components and writes the results."""
+"""The merge group step: merges one group of changed components and writes the results."""
 
 from datetime import UTC, datetime
 from typing import cast
@@ -9,7 +9,7 @@ import pytest
 from elasticsearch import Elasticsearch
 
 from merger.models.step_events import MergeGroupEvent
-from merger.steps import merge as merge_step
+from merger.steps import merge_group
 from models.pipeline.format import ThreeDObjects
 from models.pipeline.identified.work import IdentifiedWork
 from tests.merger.works import (
@@ -57,7 +57,7 @@ def changed_components(*groups: tuple[int, str, list[IdentifiedWork]]) -> None:
 
 def run(
     monkeypatch: pytest.MonkeyPatch, missing: set[str] | None = None
-) -> tuple[merge_step.MergeGroupResult, list[pl.DataFrame]]:
+) -> tuple[merge_group.MergeGroupResult, list[pl.DataFrame]]:
     """Runs the step with the given works in the table, less any missing ones."""
     fetched: list[pl.DataFrame] = []
 
@@ -72,10 +72,10 @@ def run(
             for ids in members["id"]
         ]
 
-    monkeypatch.setattr(merge_step, "get_works_identified_table", MagicMock())
-    monkeypatch.setattr(merge_step, "fetch_components", fetch)
+    monkeypatch.setattr(merge_group, "get_works_identified_table", MagicMock())
+    monkeypatch.setattr(merge_group, "fetch_components", fetch)
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
-    return merge_step.handler(EVENT, es_client=es_client), fetched
+    return merge_group.handler(EVENT, es_client=es_client), fetched
 
 
 def written(index: str) -> dict[str, dict]:

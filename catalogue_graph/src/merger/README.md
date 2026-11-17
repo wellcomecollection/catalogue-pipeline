@@ -23,17 +23,17 @@ compared with what the Scala merger wrote over the same period.
   Miro work, and audiovisual e-bibs with the works linked to them, then chooses a target
   in each part and merges every field into it with the rules in `rules/`. Sources a rule
   claimed are redirected to the target. A TEI work's internal works are emitted beside
-  it, and deleted when their stub goes. A component with a work missing from the table
-  is written unmerged.
+  it, and deleted when their stub goes.
 
-The batch matcher state machine runs three steps after every id-minter run:
+The batch merger state machine runs these steps after every id-minter run:
 
-1. `steps/merger.py` (Match) writes the changed components, with their group, to
+1. `steps/match.py` (Match) writes the changed components, with their group, to
    `graph-{graph_date}/pipeline-{pipeline_date}/merger/full/job-{job_id}/changed_components.parquet`
    and this run's components to `components.parquet` beside it, and returns one merge
    event per group.
-2. `steps/merge.py` (Merge, one invocation per group) merges the group's components and
-   writes the results. Every document is versioned by the time of the snapshot the run
+2. `steps/merge_group.py` (MergeGroup, one invocation per group) merges the group's
+   components and writes the results. A component with a work missing from the table
+   is written unmerged. Every document is versioned by the time of the snapshot the run
    read, with `external_gte`, so a run never overwrites one at a later snapshot.
 3. CommitComponents copies the run's components over
    `graph-{graph_date}/pipeline-{pipeline_date}/merger/components.parquet`, the baseline
@@ -47,10 +47,10 @@ component more than once, as each reads the baseline at the start, but never mis
 ## Running locally
 
 ```bash
-uv run python -m merger.steps.merger --pipeline-date dev --graph-date dev
+uv run python -m merger --pipeline-date dev --graph-date dev
 ```
 
-This reads the id minter's local Iceberg table `matcher.works_identified`, merges every
+`merger/__main__.py` runs the same steps in order. It reads the id minter's local Iceberg table `matcher.works_identified`, merges every
 changed group into a local Elasticsearch, and replaces the baseline under the dev prefix
 in S3. Pass `--match-only` to stop after finding the changed components, `--es-mode
 public` to write to the pipeline cluster, and `--use-rest-api-table` to read the S3

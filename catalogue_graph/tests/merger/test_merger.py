@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import pytest
 
 from merger import merge as merge_module
-from merger.merge import merge, merge_component
+from merger.merge import merge
 from merger.merge_result import MergeResult, MergerOutcome
 from models import identifier_schemes as schemes
 from models.pipeline.identified.work import (
@@ -137,30 +137,4 @@ def test_existing_redirect_sources_on_the_target_are_kept() -> None:
 def test_a_single_work_is_merged_on_its_own() -> None:
     work = identified_work(schemes.SIERRA_SYSTEM_NUMBER)
 
-    assert merge_component([work.state.canonical_id], [work]).works == [work]
-
-
-def test_a_component_is_merged_when_every_work_was_found() -> None:
-    works = [identified_work(schemes.SIERRA_SYSTEM_NUMBER) for _ in range(4)]
-    ids = [w.state.canonical_id for w in works]
-
-    result = merge_component(ids, works)
-
-    assert result.works[-1].state.canonical_id == ids[0]
-    assert same_elements(
-        [
-            w.state.canonical_id
-            for w in result.works
-            if isinstance(w, RedirectedIdentifiedWork)
-        ],
-        ids[2:],
-    )
-
-
-def test_a_component_with_a_missing_work_is_passed_through_unmerged() -> None:
-    works = [identified_work(schemes.SIERRA_SYSTEM_NUMBER) for _ in range(3)]
-    ids = [w.state.canonical_id for w in works] + ["missing"]
-
-    result = merge_component(ids, works)
-
-    assert result == MergerOutcome.pass_through(works)
+    assert merge([work]).works == [work]

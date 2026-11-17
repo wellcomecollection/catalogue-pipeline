@@ -1,4 +1,4 @@
-"""Merging groups of works from every source with the platform's rules."""
+"""Merging components of works from every source with the platform's rules."""
 
 import json
 from collections.abc import Sequence
