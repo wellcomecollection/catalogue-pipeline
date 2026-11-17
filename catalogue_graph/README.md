@@ -41,8 +41,8 @@ The state machine is scheduled to run on a monthly basis, but can be triggered m
 
 The incremental pipeline populates final works and concepts indexes using data from the catalogue graph and from
 the denormalised index (`works_denormalised`). The pipeline uses an incremental approach, only processing works
-and concepts which changed within a given time window (as determined by the `state.mergedTime` timestamp in the
-denormalised index).
+and concepts which changed within a given time window (as determined by the `indexed_at` timestamp, which the
+denormalised index's ingest pipeline sets when a work is written, or `state.mergedTime` for works without it).
 
 The `catalogue-pipeline-incremental` state machine consists of the following steps:
 

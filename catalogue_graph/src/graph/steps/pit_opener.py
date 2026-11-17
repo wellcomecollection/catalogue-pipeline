@@ -6,7 +6,10 @@ from elasticsearch import Elasticsearch
 
 from core.source import may_have_matches
 from graph.sources.augmented_images_source import AUGMENTED_TIME_FIELD
-from graph.sources.merged_works_source import MERGED_TIME_FIELD
+from graph.sources.merged_works_source import (
+    MERGED_WINDOW_FALLBACK_FIELD,
+    MERGED_WINDOW_FIELD,
+)
 from models.events import BasePipelineEvent
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import (
@@ -32,9 +35,17 @@ def open_pit(es_client: Elasticsearch, index_name: str) -> str:
 
 
 def changed_in_window(
-    es_client: Elasticsearch, event: BasePipelineEvent, index_name: str, field: str
+    es_client: Elasticsearch,
+    event: BasePipelineEvent,
+    index_name: str,
+    field: str,
+    fallback_field: str | None = None,
 ) -> bool:
-    return may_have_matches(es_client, index_name, event.to_elasticsearch_query(field))
+    return may_have_matches(
+        es_client,
+        index_name,
+        event.to_elasticsearch_query(field, fallback_field_name=fallback_field),
+    )
 
 
 def handler(
@@ -52,7 +63,11 @@ def handler(
 
     if event.window is not None:
         has_changes = changed_in_window(
-            es_client, event, merged_index, MERGED_TIME_FIELD
+            es_client,
+            event,
+            merged_index,
+            MERGED_WINDOW_FIELD,
+            MERGED_WINDOW_FALLBACK_FIELD,
         ) or changed_in_window(es_client, event, augmented_index, AUGMENTED_TIME_FIELD)
         if not has_changes:
             logger.info(
