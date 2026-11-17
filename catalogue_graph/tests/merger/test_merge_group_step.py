@@ -1,5 +1,6 @@
 """The merge group step: merges one group of changed components and writes the results."""
 
+from datetime import datetime
 from typing import cast
 from unittest.mock import MagicMock
 
@@ -7,6 +8,7 @@ import polars as pl
 import pytest
 from elasticsearch import Elasticsearch
 
+from ingestor.models.merged.work import MergedWork
 from merger.merge import MergedComponent
 from merger.models.step_events import MergeGroupEvent
 from merger.steps import merge_group
@@ -103,8 +105,7 @@ def test_merges_only_the_components_of_its_group(
     result, read = run(monkeypatch)
 
     assert read == {w.state.canonical_id for w in (sierra, miro, lone)}
-    assert (result.component_count, result.work_count, result.image_count) == (2, 3, 1)
-    assert (result.superseded_count, result.failed_component_count) == (0, 0)
+    assert (result.component_count, result.failed_component_count) == (2, 0)
     assert failed_components() == []
 
 
@@ -183,7 +184,6 @@ def test_a_component_that_fails_to_merge_does_not_stop_the_group(
     assert lone.state.canonical_id not in written(
         "works-denormalised-python-2026-01-01"
     )
-    assert result.work_count == 2
     assert failed_components() == ["c2"]
 
 
@@ -201,7 +201,26 @@ def test_a_document_written_by_a_later_run_is_not_a_failure(
 
     result, _ = run(monkeypatch)
 
-    assert (result.work_count, result.superseded_count) == (2, 1)
+    assert result.failed_component_count == 0
+
+
+def test_a_component_that_fails_to_convert_does_not_stop_the_group(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def to_merged_work(work: IdentifiedWork, merged_time: datetime) -> MergedWork:
+        if work.state.canonical_id == lone.state.canonical_id:
+            raise ValueError("a field did not validate")
+        return original(work, merged_time)
+
+    original = merge_group.to_merged_work
+    monkeypatch.setattr(merge_group, "to_merged_work", to_merged_work)
+
+    result, _ = run(monkeypatch)
+
+    assert lone.state.canonical_id not in written(
+        "works-denormalised-python-2026-01-01"
+    )
+    assert failed_components() == ["c2"]
 
 
 def test_a_document_elasticsearch_refuses_fails_its_component(
@@ -218,7 +237,7 @@ def test_a_document_elasticsearch_refuses_fails_its_component(
 
     result, _ = run(monkeypatch)
 
-    assert (result.work_count, result.failed_component_count) == (2, 1)
+    assert result.failed_component_count == 1
     assert failed_components() == ["c2"]
 
 
@@ -230,3 +249,27 @@ def test_a_group_whose_snapshot_has_expired_fails(
 
     with pytest.raises(ValueError, match="Snapshot 7 not found"):
         run(monkeypatch, table=table)
+
+
+def test_components_are_written_a_batch_at_a_time(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(merge_group, "WRITE_BATCH_SIZE", 1)
+    MockElasticsearchClient.bulk_errors = [
+        {
+            "index": {
+                "_id": sierra.state.canonical_id,
+                "error": {"type": "mapper_parsing_exception"},
+            }
+        }
+    ]
+
+    result, _ = run(monkeypatch)
+
+    assert set(written("works-denormalised-python-2026-01-01")) == {
+        sierra.state.canonical_id,
+        miro.state.canonical_id,
+        lone.state.canonical_id,
+    }
+    assert result.component_count == 2
+    assert failed_components() == ["c1"]

@@ -65,11 +65,6 @@ class MatchResult(BaseModel):
 class MergeGroupResult(BaseModel):
     group: int
     component_count: int
-    # Documents Elasticsearch accepted, and those it rejected because a run at a later
-    # snapshot had already written them.
-    work_count: int
-    image_count: int
-    superseded_count: int
     # Components that could not be read, merged or indexed; the next run retries them.
     failed_component_count: int
 
