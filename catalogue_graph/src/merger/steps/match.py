@@ -48,9 +48,8 @@ def handler(
 
     changed_components_s3_uri = event.get_s3_uri("changed_components")
     df_to_s3_parquet(changed, changed_components_s3_uri)
-    # The baseline is replaced with these once every group is merged.
-    job_components_s3_uri = event.get_s3_uri("components")
-    df_to_s3_parquet(current, job_components_s3_uri)
+    # The commit step replaces the baseline with these once every group is merged.
+    df_to_s3_parquet(current, event.get_s3_uri("components"))
 
     return MatchResult(
         job_id=event.job_id,
@@ -60,8 +59,6 @@ def handler(
         changed_component_count=changed["component_id"].n_unique(),
         group_count=changed["group"].n_unique(),
         changed_components_s3_uri=changed_components_s3_uri,
-        job_components_s3_uri=job_components_s3_uri,
-        components_s3_uri=event.components_s3_uri,
     )
 
 

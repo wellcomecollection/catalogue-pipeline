@@ -144,6 +144,7 @@ jobs:
           # Experimental batch merger
           - batch-merger-match
           - batch-merger-group
+          - batch-merger-commit
           # Transformer lambdas
           - transformer
           # Graph subsystem lambdas

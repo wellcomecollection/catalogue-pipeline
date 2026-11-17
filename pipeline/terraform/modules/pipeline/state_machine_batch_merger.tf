@@ -5,8 +5,9 @@
 # what the Scala matcher and merger did.
 #
 # Match records the changed components in groups; each group is merged in its
-# own invocation, so a full reindex fits the Lambda limits. The components
-# baseline is replaced last, so a failed group is merged again on the next run.
+# own invocation, so a full reindex fits the Lambda limits. Commit replaces the
+# components baseline last, leaving out components that failed, so the next run
+# merges them again without holding up the rest.
 
 locals {
   batch_merger_s3_tables_bucket_arn = "arn:aws:s3tables:eu-west-1:${data.aws_caller_identity.current.account_id}:bucket/${local.infra_critical.catalogue_pipeline_table_bucket_name}"
@@ -94,28 +95,38 @@ locals {
             }
           }
         }
-        Next = "CommitComponents"
+        Next = "Commit"
       }
-      CommitComponents = {
+      Commit = {
         Type     = "Task"
-        Resource = "arn:aws:states:::aws-sdk:s3:copyObject"
+        Resource = "arn:aws:states:::lambda:invoke"
         Arguments = {
-          Bucket     = local.batch_merger_bucket
-          CopySource = "{% $substringAfter($match.job_components_s3_uri, 's3://') %}"
-          Key        = "{% $substringAfter($match.components_s3_uri, 's3://${local.batch_merger_bucket}/') %}"
+          FunctionName = module.batch_merger_commit_lambda.lambda_arn
+          Payload      = "{% $merge([$states.context.Execution.Input, {'job_id': $match.job_id, 'group_count': $match.group_count}]) %}"
         }
-        Next = "DeleteJobComponents"
+        Output = "{% $merge([$match, $states.result.Payload]) %}"
+        Retry  = local.batch_merger_lambda_retry
+        Next   = "CheckFailures"
       }
-      # The job's copy is the whole graph; its changed components are kept.
-      DeleteJobComponents = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::aws-sdk:s3:deleteObject"
-        Arguments = {
-          Bucket = local.batch_merger_bucket
-          Key    = "{% $substringAfter($match.job_components_s3_uri, 's3://${local.batch_merger_bucket}/') %}"
-        }
-        Output = "{% $match %}"
-        End    = true
+      # Failed components were left out of the baseline, so the next run retries them;
+      # failing the run raises the alarm while they keep failing.
+      CheckFailures = {
+        Type = "Choice"
+        Choices = [
+          {
+            Condition = "{% $states.input.failed_component_count > 0 %}"
+            Next      = "ComponentsFailed"
+          }
+        ]
+        Default = "Done"
+      }
+      ComponentsFailed = {
+        Type  = "Fail"
+        Error = "ComponentsFailed"
+        Cause = "{% $string($states.input.failed_component_count) & ' components failed to merge; see the failed_components files in the job folder' %}"
+      }
+      Done = {
+        Type = "Succeed"
       }
     }
   })
@@ -176,15 +187,16 @@ resource "aws_iam_role_policy" "batch_merger_group_s3_tables_read" {
   policy = data.aws_iam_policy_document.batch_merger_s3_tables_read.json
 }
 
-resource "aws_iam_role_policy" "batch_merger_group_read" {
+resource "aws_iam_role_policy" "batch_merger_group_access" {
   role   = module.batch_merger_group_lambda.lambda_role_name
-  policy = data.aws_iam_policy_document.batch_merger_group_read.json
+  policy = data.aws_iam_policy_document.batch_merger_group_access.json
 }
 
-data "aws_iam_policy_document" "batch_merger_group_read" {
-  # The changed components of the run.
+data "aws_iam_policy_document" "batch_merger_group_access" {
+  # Reads the run's changed components and writes the ones that failed. smart_open
+  # writes by multipart upload and aborts it when a write fails.
   statement {
-    actions = ["s3:GetObject"]
+    actions = ["s3:GetObject", "s3:PutObject", "s3:AbortMultipartUpload"]
     resources = [
       "arn:aws:s3:::${local.batch_merger_bucket}/graph-*/pipeline-${var.pipeline_date}/merger/*",
     ]
@@ -195,6 +207,39 @@ data "aws_iam_policy_document" "batch_merger_group_read" {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
       "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/*",
+    ]
+  }
+}
+
+module "batch_merger_commit_lambda" {
+  source = "../pipeline_lambda"
+
+  service_name = "batch-merger-commit"
+  description  = "Replaces the batch merger's components baseline with the run's components, leaving out those that failed to merge."
+
+  pipeline_date       = var.pipeline_date
+  ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
+
+  image_config = {
+    command = ["merger.steps.commit.lambda_handler"]
+  }
+
+  # Reads and writes the components of the whole graph, about 3 million rows.
+  memory_size = 2048
+  timeout     = 300
+}
+
+resource "aws_iam_role_policy" "batch_merger_commit_s3" {
+  role   = module.batch_merger_commit_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.batch_merger_commit_s3.json
+}
+
+data "aws_iam_policy_document" "batch_merger_commit_s3" {
+  # Reads the run's components and failures, writes the baseline and deletes the run's copy.
+  statement {
+    actions = ["s3:GetObject", "s3:PutObject", "s3:AbortMultipartUpload", "s3:DeleteObject"]
+    resources = [
+      "arn:aws:s3:::${local.batch_merger_bucket}/graph-*/pipeline-${var.pipeline_date}/merger/*",
     ]
   }
 }
@@ -229,7 +274,7 @@ data "aws_iam_policy_document" "batch_merger_s3_tables_read" {
   }
 }
 
-# The changed components of each run, and the baseline every run reads and replaces.
+# The run's files, and the baseline every run reads.
 resource "aws_iam_role_policy" "batch_merger_match_s3_read_write" {
   role   = module.batch_merger_match_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.batch_merger_match_s3_read_write.json
@@ -260,20 +305,8 @@ module "batch_merger_state_machine" {
   invokable_lambda_arns = [
     module.batch_merger_match_lambda.lambda_arn,
     module.batch_merger_group_lambda.lambda_arn,
+    module.batch_merger_commit_lambda.lambda_arn,
   ]
-  policies_to_attach = {
-    "components-copy" = data.aws_iam_policy_document.batch_merger_components_copy.json
-  }
-}
-
-# The last states copy the run's components over the baseline and delete the job's copy.
-data "aws_iam_policy_document" "batch_merger_components_copy" {
-  statement {
-    actions = ["s3:GetObject", "s3:GetObjectTagging", "s3:PutObject", "s3:PutObjectTagging", "s3:DeleteObject"]
-    resources = [
-      "arn:aws:s3:::${local.batch_merger_bucket}/graph-*/pipeline-${var.pipeline_date}/merger/*",
-    ]
-  }
 }
 
 module "batch_merger_state_machine_alarms" {

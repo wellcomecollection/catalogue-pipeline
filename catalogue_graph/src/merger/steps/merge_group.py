@@ -2,8 +2,7 @@
 initial images to the batch merger's own indices."""
 
 import typing
-from collections.abc import Iterable, Iterator
-from dataclasses import dataclass
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from itertools import batched
 
@@ -18,12 +17,11 @@ from core.sinks import ElasticsearchSink
 from id_minter.iceberg import get_works_identified_table
 from inferrer.models import InitialImage
 from ingestor.models.merged.work import MergedWork
-from merger.documents import fetch_components
+from merger.documents import read_documents, take_works
 from merger.merge import MergedComponent, merge_component
 from merger.models.step_events import MergeGroupEvent, MergeGroupResult
 from merger.outputs import to_initial_image, to_merged_work
-from models.pipeline.identified.work import IdentifiedWork
-from utils.aws import df_from_s3_parquet
+from utils.aws import df_from_s3_parquet, df_to_s3_parquet
 from utils.elasticsearch import (
     ElasticsearchMode,
     get_client,
@@ -36,14 +34,6 @@ logger = structlog.get_logger(__name__)
 
 # Components whose merged works and images go to Elasticsearch in one bulk write each.
 WRITE_BATCH_SIZE = 1_000
-
-
-@dataclass
-class _Counts:
-    components: int = 0
-    works: int = 0
-    merged_works: int = 0
-    images: int = 0
 
 
 def handler(
@@ -69,49 +59,64 @@ def handler(
     merged_time = _snapshot_time(table, event.iceberg_snapshot_id)
     version = version_from_datetime(merged_time)
 
-    counts = _Counts()
-    merged = _merge(fetch_components(table, event.iceberg_snapshot_id, changed), counts)
-    failed: list[tuple[Document, typing.Any]] = []
-    superseded = 0
-    for batch in batched(merged, WRITE_BATCH_SIZE):
-        works = [
-            _document(to_merged_work(work, merged_time), version)
-            for component in batch
-            for work in component.works
-        ]
-        images = [
-            _document(to_initial_image(i.image, i.source, merged_time), version)
-            for component in batch
-            for i in component.images
-        ]
-        for sink, documents in ((works_sink, works), (images_sink, images)):
-            if documents:
-                result = sink.write(documents)
-                failed += result.failed
-                superseded += len(result.superseded)
+    documents = read_documents(table, event.iceberg_snapshot_id, set(changed["id"]))
+    members = changed.group_by("component_id").agg("id").sort("component_id")
+    merged = (
+        (component_id, _merge(component_id, ids, documents))
+        for component_id, ids in members.iter_rows()
+    )
 
+    failed: set[str] = set()
+    component_count = work_count = image_count = superseded_count = 0
+    for batch in batched(merged, WRITE_BATCH_SIZE):
+        works: list[tuple[str, MergedWork]] = []
+        images: list[tuple[str, InitialImage]] = []
+        for component_id, component in batch:
+            if component is None:
+                failed.add(component_id)
+                continue
+            for work in component.works:
+                works.append((component_id, to_merged_work(work, merged_time)))
+            for image in component.images:
+                initial_image = to_initial_image(image.image, image.source, merged_time)
+                images.append((component_id, initial_image))
+        works_result = works_sink.write(_documents(works, version))
+        images_result = images_sink.write(_documents(images, version))
+        for document, error in works_result.failed + images_result.failed:
+            logger.warning(
+                "Document refused",
+                component=document.source_id,
+                document=document.target_id,
+                error=error,
+            )
+            failed.add(document.source_id)
+        component_count += len(batch)
+        work_count += len(works_result.accepted)
+        image_count += len(images_result.accepted)
+        superseded_count += len(works_result.superseded) + len(images_result.superseded)
+
+    df_to_s3_parquet(
+        pl.DataFrame(
+            {"component_id": sorted(failed)}, schema={"component_id": pl.Utf8}
+        ),
+        event.failed_components_s3_uri(event.group),
+    )
     logger.info(
         "Merged group",
         group=event.group,
-        components=counts.components,
-        works=counts.works,
-        merged_works=counts.merged_works,
-        images=counts.images,
-        superseded=superseded,
-        failed=len(failed),
+        components=component_count,
+        works=work_count,
+        images=image_count,
+        superseded=superseded_count,
+        failed_components=len(failed),
     )
-    if failed:
-        document, error = failed[0]
-        raise RuntimeError(
-            f"{len(failed)} documents failed to index, first {document.target_id}: {error}"
-        )
-
     return MergeGroupResult(
         group=event.group,
-        component_count=counts.components,
-        work_count=counts.works,
-        merged_work_count=counts.merged_works,
-        image_count=counts.images,
+        component_count=component_count,
+        work_count=work_count,
+        image_count=image_count,
+        superseded_count=superseded_count,
+        failed_component_count=len(failed),
     )
 
 
@@ -133,27 +138,31 @@ def _snapshot_time(table: IcebergTable, snapshot_id: int) -> datetime:
 
 
 def _merge(
-    components: Iterable[tuple[list[str], list[IdentifiedWork]]], counts: _Counts
-) -> Iterator[MergedComponent]:
-    for ids, works in components:
-        # A component with a work missing from the table is written unmerged.
-        if len(works) < len(ids):
-            component = MergedComponent(works=list(works), images=[])
-        else:
-            component = merge_component(works)
-        counts.components += 1
-        counts.works += len(works)
-        counts.merged_works += len(component.works)
-        counts.images += len(component.images)
-        yield component
+    component_id: str, ids: list[str], documents: dict[str, str]
+) -> MergedComponent | None:
+    """The merged component, or None when it could not be read or merged, so one bad
+    component does not stop the rest of the group."""
+    try:
+        return merge_component(take_works(documents, ids))
+    except Exception:
+        logger.exception("Component failed to merge", component=component_id, ids=ids)
+        return None
 
 
-def _document(model: MergedWork | InitialImage, version: int) -> Document:
-    canonical_id = model.state.canonical_id
-    body = model.model_dump(exclude_none=True, mode="json")
-    return Document(
-        source_id=canonical_id, target_id=canonical_id, body=body, version=version
-    )
+def _documents(
+    models: Sequence[tuple[str, MergedWork | InitialImage]], version: int
+) -> list[Document]:
+    """Each merged work or image as a document, read under its component, so a document
+    Elasticsearch refuses can be traced back to it."""
+    return [
+        Document(
+            source_id=component_id,
+            target_id=model.state.canonical_id,
+            body=model.model_dump(exclude_none=True, mode="json"),
+            version=version,
+        )
+        for component_id, model in models
+    ]
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:

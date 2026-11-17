@@ -3,22 +3,17 @@ changed group, then replaces the baseline."""
 
 import argparse
 
-from merger.models.step_events import MatchEvent, MatchResult, MergeGroupEvent
-from merger.steps import match, merge_group
+from merger.models.step_events import (
+    CommitEvent,
+    MatchEvent,
+    MatchResult,
+    MergeGroupEvent,
+)
+from merger.steps import commit, match, merge_group
 from utils.argparse import add_pipeline_event_args
-from utils.aws import delete_s3_object, df_from_s3_parquet, df_to_s3_parquet
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id
 from utils.steps import create_job_id
-
-
-def commit_components(result: MatchResult) -> None:
-    """Replace the baseline with this run's components and delete the job's copy, as
-    the state machine's last two states do once every group is merged."""
-    df_to_s3_parquet(
-        df_from_s3_parquet(result.job_components_s3_uri), result.components_s3_uri
-    )
-    delete_s3_object(result.job_components_s3_uri)
 
 
 def group_events(event: MatchEvent, result: MatchResult) -> list[MergeGroupEvent]:
@@ -85,7 +80,10 @@ def main() -> None:
             group_event, execution_context, es_mode, args.use_rest_api_table
         )
         print(group_result.model_dump_json())
-    commit_components(result)
+    commit_event = CommitEvent.model_validate(
+        {**event.model_dump(), "group_count": result.group_count}
+    )
+    print(commit.handler(commit_event, execution_context).model_dump_json())
 
 
 if __name__ == "__main__":

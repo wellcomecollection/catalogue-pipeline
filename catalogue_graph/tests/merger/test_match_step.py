@@ -9,7 +9,6 @@ from pyiceberg.catalog.sql import SqlCatalog
 
 from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from merger import components as storage
-from merger.__main__ import commit_components
 from merger.models.step_events import MatchEvent, MergeGroupEvent
 from merger.steps import match
 from tests.merger.support import (
@@ -19,7 +18,7 @@ from tests.merger.support import (
     s3_read_error,
     works,
 )
-from tests.mocks import MockS3Client, MockSmartOpen
+from tests.mocks import MockSmartOpen
 from utils.aws import df_from_s3_parquet, df_to_s3_parquet
 
 EVENT = MatchEvent(pipeline_date="2026-01-01", graph_date="2026-01-02", job_id="job-1")
@@ -71,24 +70,10 @@ def test_writes_the_whole_graph_for_the_job_and_leaves_the_baseline(
     # Written rather than mocked, so the test can read it after the step has.
     df_to_s3_parquet(components({"Z": "Z"}), EVENT.components_s3_uri)
 
-    result = run(monkeypatch)
+    run(monkeypatch)
 
-    assert written(result.job_components_s3_uri) == {"A": "AB", "C": "CD", "E": "E"}
+    assert written(EVENT.get_s3_uri("components")) == {"A": "AB", "C": "CD", "E": "E"}
     assert written(EVENT.components_s3_uri) == {"Z": "Z"}
-
-
-def test_commit_replaces_the_baseline_and_deletes_the_jobs_copy(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    MockSmartOpen.mock_s3_parquet_file(EVENT.components_s3_uri, components({"Z": "Z"}))
-
-    result = run(monkeypatch)
-    commit_components(result)
-
-    assert written(EVENT.components_s3_uri) == {"A": "AB", "C": "CD", "E": "E"}
-    deleted = [f"s3://{bucket}/{key}" for bucket, key in MockS3Client.deleted_keys]
-    assert deleted == [result.job_components_s3_uri]
-    assert written(result.changed_components_s3_uri) != {}
 
 
 def test_numbers_the_groups_of_changed_components(
@@ -151,7 +136,7 @@ def test_an_empty_table_reports_nothing_changed(
     assert (result.work_count, result.changed_work_count) == (0, 0)
     assert result.changed_component_count == 0
     assert written(result.changed_components_s3_uri) == {}
-    assert df_from_s3_parquet(result.job_components_s3_uri).height == 0
+    assert df_from_s3_parquet(EVENT.get_s3_uri("components")).height == 0
     assert result.group_count == 0
 
 
@@ -180,8 +165,6 @@ def test_the_snapshot_id_survives_numbers_read_as_doubles() -> None:
         changed_component_count=0,
         group_count=0,
         changed_components_s3_uri="",
-        job_components_s3_uri="",
-        components_s3_uri="",
     )
     event = MergeGroupEvent(
         pipeline_date="2026-01-01",

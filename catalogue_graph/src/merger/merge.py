@@ -254,21 +254,18 @@ def _deleted_internal_works(
     re-emits them on every merge; an id that moved to another manuscript flips between
     deleted and visible depending on which parent was touched last.
     """
+    deletes: list[IdentifiedWork] = []
+    for parent in result_works:
+        if isinstance(parent, DeletedIdentifiedWork):
+            deletes += [
+                _delete_child(parent, s) for s in parent.state.internal_work_stubs
+            ]
+    for parent in works:
+        deletes += [
+            _delete_child(parent, s) for s in parent.state.removed_internal_work_stubs
+        ]
     emitted = {work.state.canonical_id for work in result_works}
-    deleted_parents = [
-        _delete_child(parent, stub)
-        for parent in result_works
-        if isinstance(parent, DeletedIdentifiedWork)
-        for stub in parent.state.internal_work_stubs
-    ]
-    removed = [
-        _delete_child(parent, stub)
-        for parent in works
-        for stub in parent.state.removed_internal_work_stubs
-    ]
-    return distinct_works(
-        d for d in deleted_parents + removed if d.state.canonical_id not in emitted
-    )
+    return distinct_works(d for d in deletes if d.state.canonical_id not in emitted)
 
 
 def _delete_child(

@@ -33,14 +33,19 @@ The batch merger state machine runs these steps after every id-minter run:
    of groups, and the Map state builds each group's event from the run's input, the job
    id and the snapshot id.
 2. `steps/merge_group.py` (MergeGroup, one invocation per group) merges the group's
-   components and writes the results. A component with a work missing from the table
-   is written unmerged. Every document is versioned by the commit time of the snapshot
-   the run read, with `external_gte`, so a run never overwrites one at a later snapshot.
-3. CommitComponents copies the run's components over
+   components and writes the results. Every document is versioned by the commit time of
+   the snapshot the run read, with `external_gte`, so a run never overwrites one at a
+   later snapshot. A component that cannot be read, merged or indexed fails on its own
+   and the rest of the group carries on; the failed ones are listed in
+   `failed_components-{group}.parquet` in the job folder.
+3. `steps/commit.py` (Commit) replaces
    `graph-{graph_date}/pipeline-{pipeline_date}/merger/components.parquet`, the baseline
-   the next run compares with, and DeleteJobComponents deletes the job's copy. They run
-   only once every group is merged, so a failed group is merged again on the next run.
-   A failed run's copy is left in its job folder.
+   the next run compares with, with the run's components less the failed ones, and
+   deletes the run's copy. A failed component is then missing from the baseline, so the
+   next run sees it as changed and merges it again. If any failed, the execution fails
+   after the commit, so the alarm reports them while the rest of the catalogue moves on.
+   An error that is not about one component, such as Elasticsearch being unreachable,
+   fails the run before the commit, and the next run merges everything again.
 
 The first run has no baseline and merges every component. Overlapping runs can merge a
 component more than once, as each reads the baseline at the start, but never miss one.

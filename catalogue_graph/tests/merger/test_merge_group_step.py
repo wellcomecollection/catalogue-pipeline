@@ -7,6 +7,7 @@ import polars as pl
 import pytest
 from elasticsearch import Elasticsearch
 
+from merger.merge import MergedComponent
 from merger.models.step_events import MergeGroupEvent
 from merger.steps import merge_group
 from models.pipeline.format import ThreeDObjects
@@ -20,6 +21,7 @@ from tests.merger.works import (
     sierra_work,
 )
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
+from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import version_from_datetime
 
 EVENT = MergeGroupEvent(
@@ -55,30 +57,31 @@ def changed_components(*groups: tuple[int, str, list[IdentifiedWork]]) -> None:
 
 def run(
     monkeypatch: pytest.MonkeyPatch,
-    missing: set[str] | None = None,
+    documents: dict[str, str] | None = None,
     table: MagicMock | None = None,
-) -> tuple[merge_group.MergeGroupResult, list[pl.DataFrame]]:
-    """Runs the step with the given works in the table, less any missing ones."""
-    fetched: list[pl.DataFrame] = []
+) -> tuple[merge_group.MergeGroupResult, set[str]]:
+    """Runs the step against the table's documents, by default those of every work.
+    Returns the result and the ids it read."""
+    documents = documents or {i: w.model_dump_json() for i, w in WORKS.items()}
+    read: set[str] = set()
 
-    def fetch(
-        table: object, snapshot_id: int, changed: pl.DataFrame
-    ) -> list[tuple[list[str], list[IdentifiedWork]]]:
+    def read_documents(table: object, snapshot_id: int, ids: set[str]) -> dict:
         assert snapshot_id == EVENT.iceberg_snapshot_id
-        fetched.append(changed)
-        members = changed.group_by("component_id", maintain_order=True).agg("id")
-        return [
-            (list(ids), [WORKS[i] for i in ids if i not in (missing or set())])
-            for ids in members["id"]
-        ]
+        read.update(ids)
+        return {i: documents[i] for i in ids if i in documents}
 
     table = table or iceberg_table(pl.DataFrame(), EVENT.iceberg_snapshot_id)
     monkeypatch.setattr(
         merge_group, "get_works_identified_table", lambda use_rest: table
     )
-    monkeypatch.setattr(merge_group, "fetch_components", fetch)
+    monkeypatch.setattr(merge_group, "read_documents", read_documents)
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
-    return merge_group.handler(EVENT, es_client=es_client), fetched
+    return merge_group.handler(EVENT, es_client=es_client), read
+
+
+def failed_components() -> list[str]:
+    uri = EVENT.failed_components_s3_uri(EVENT.group)
+    return df_from_s3_parquet(uri)["component_id"].to_list()
 
 
 def written(index: str) -> dict[str, dict]:
@@ -97,12 +100,12 @@ def changed() -> None:
 def test_merges_only_the_components_of_its_group(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    result, fetched = run(monkeypatch)
+    result, read = run(monkeypatch)
 
-    [frame] = fetched
-    assert set(frame["component_id"]) == {"c1", "c2"}
-    assert (result.component_count, result.work_count) == (2, 3)
-    assert (result.merged_work_count, result.image_count) == (3, 1)
+    assert read == {w.state.canonical_id for w in (sierra, miro, lone)}
+    assert (result.component_count, result.work_count, result.image_count) == (2, 3, 1)
+    assert (result.superseded_count, result.failed_component_count) == (0, 0)
+    assert failed_components() == []
 
 
 def test_writes_merged_works_and_images_to_their_own_indices(
@@ -141,18 +144,47 @@ def test_every_document_is_versioned_by_the_snapshot_time(
     }
 
 
-def test_a_component_with_a_missing_work_is_written_unmerged(
+@pytest.mark.parametrize(
+    "documents",
+    [
+        {i: w.model_dump_json() for i, w in WORKS.items() if w != miro},
+        {
+            **{i: w.model_dump_json() for i, w in WORKS.items()},
+            miro.state.canonical_id: "{",
+        },
+    ],
+    ids=["a work missing from the table", "a document that does not parse"],
+)
+def test_a_component_that_cannot_be_read_fails_without_stopping_the_group(
+    monkeypatch: pytest.MonkeyPatch, documents: dict[str, str]
+) -> None:
+    result, _ = run(monkeypatch, documents=documents)
+
+    assert set(written("works-denormalised-python-2026-01-01")) == {
+        lone.state.canonical_id
+    }
+    assert result.failed_component_count == 1
+    assert failed_components() == ["c1"]
+
+
+def test_a_component_that_fails_to_merge_does_not_stop_the_group(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    run(monkeypatch, missing={miro.state.canonical_id})
+    def merge_component(works: list[IdentifiedWork]) -> MergedComponent:
+        if lone in works:
+            raise RuntimeError("a rule failed")
+        return original(works)
 
-    works = written("works-denormalised-python-2026-01-01")
-    assert set(works) == {sierra.state.canonical_id, lone.state.canonical_id}
-    assert (
-        works[sierra.state.canonical_id]["_source"]["data"]["items"]
-        == (sierra.model_dump(mode="json", exclude_none=True)["data"]["items"])
+    original = merge_group.merge_component
+    monkeypatch.setattr(merge_group, "merge_component", merge_component)
+
+    result, _ = run(monkeypatch)
+
+    assert lone.state.canonical_id not in written(
+        "works-denormalised-python-2026-01-01"
     )
-    assert written("images-initial-python-2026-01-01") == {}
+    assert result.work_count == 2
+    assert failed_components() == ["c2"]
 
 
 def test_a_document_written_by_a_later_run_is_not_a_failure(
@@ -169,10 +201,12 @@ def test_a_document_written_by_a_later_run_is_not_a_failure(
 
     result, _ = run(monkeypatch)
 
-    assert result.merged_work_count == 3
+    assert (result.work_count, result.superseded_count) == (2, 1)
 
 
-def test_a_failed_write_fails_the_group(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_a_document_elasticsearch_refuses_fails_its_component(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     MockElasticsearchClient.bulk_errors = [
         {
             "index": {
@@ -182,8 +216,10 @@ def test_a_failed_write_fails_the_group(monkeypatch: pytest.MonkeyPatch) -> None
         }
     ]
 
-    with pytest.raises(RuntimeError, match="1 documents failed to index"):
-        run(monkeypatch)
+    result, _ = run(monkeypatch)
+
+    assert (result.work_count, result.failed_component_count) == (2, 1)
+    assert failed_components() == ["c2"]
 
 
 def test_a_group_whose_snapshot_has_expired_fails(

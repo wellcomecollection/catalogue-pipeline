@@ -724,11 +724,9 @@ def test_a_tei_work_takes_the_items_of_every_sierra_bib_merged_into_it() -> None
 
     outcome = merge_component([tei, *sierra_works])
 
-    visible = list(visible_works(outcome).values())
-    assert len(visible) == 1
-    assert same_elements(
-        visible[0].data.items, [i for w in sierra_works for i in w.data.items]
-    )
+    [target] = visible_works(outcome).values()
+    sierra_items = [item for work in sierra_works for item in work.data.items]
+    assert same_elements(target.data.items, sierra_items)
 
 
 def test_the_thumbnail_is_copied_to_the_inner_works() -> None:

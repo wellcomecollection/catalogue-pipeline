@@ -34,12 +34,21 @@ class MatchEvent(BasePipelineEvent):
         parts = [*self.s3_prefix_parts, f"job-{self.job_id}", f"{file_name}.parquet"]
         return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{PurePosixPath(*parts)}"
 
+    def failed_components_s3_uri(self, group: int) -> str:
+        return self.get_s3_uri(f"failed_components-{group}")
+
 
 class MergeGroupEvent(MatchEvent):
     """One group of a run's changed components, merged in its own invocation."""
 
     iceberg_snapshot_id: SnapshotId
     group: int
+
+
+class CommitEvent(MatchEvent):
+    """Replaces the baseline once every group of a run is merged."""
+
+    group_count: int
 
 
 class MatchResult(BaseModel):
@@ -51,14 +60,19 @@ class MatchResult(BaseModel):
     # The changed components are merged in groups numbered from 0.
     group_count: int
     changed_components_s3_uri: str
-    # This run's components, which replace the baseline once every group is merged.
-    job_components_s3_uri: str
-    components_s3_uri: str
 
 
 class MergeGroupResult(BaseModel):
     group: int
     component_count: int
+    # Documents Elasticsearch accepted, and those it rejected because a run at a later
+    # snapshot had already written them.
     work_count: int
-    merged_work_count: int
     image_count: int
+    superseded_count: int
+    # Components that could not be read, merged or indexed; the next run retries them.
+    failed_component_count: int
+
+
+class CommitResult(BaseModel):
+    failed_component_count: int
