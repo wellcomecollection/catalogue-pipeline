@@ -93,9 +93,13 @@ ACCESS_ITEM_STATUS: dict[str, str] = {
 # code. Rows still under discussion (Open with Unavailable, Missing with
 # Missing, Deaccessioned) are left out on purpose.
 #
-# The use restriction "Restricted" is being replaced in AxC by "Online request",
-# so the two are paired the same way: RESTRICTED on restricted material, ONLINE
-# REQUEST otherwise.
+# The table holds the spreadsheet's rows and nothing inferred from them, with one
+# exception: Restricted with Online request, which the spreadsheet's comment on
+# its Restricted with Restricted row supplies, since AxC is replacing the use
+# restriction "Restricted" with "Online request". Elsewhere "Restricted" appears
+# only where the spreadsheet has a row for it, under Data issues and Missing.
+# Open and Open with advisory have no such row, so an Open item whose 540$a is
+# still Restricted gets no access code.
 ACCESS_STATISTICAL_CODE: dict[str, dict[str, str]] = {
     "OPEN": {
         "Online request": "ONLINE REQUEST",

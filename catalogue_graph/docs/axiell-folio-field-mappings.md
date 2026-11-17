@@ -315,8 +315,11 @@ instance and holdings carry the marker only.
 
 A pair outside the table gets no access code and the record still syncs. That
 includes the rows still under discussion: `OPEN` with `Unavailable`, `MISSING`
-with `Missing`, and `DEACCESSIONED`. The use restriction `Restricted` is being
-replaced in AxC by `Online request`, so the two are paired the same way.
+with `Missing`, and `DEACCESSIONED`. The table lists the spreadsheet's rows and
+infers none, except `RESTRICTED` with `Online request`, which the spreadsheet's
+comment supplies because AxC is replacing the use restriction `Restricted` with
+`Online request`. `OPEN` and `OPENWITHADVISORY` have no `Restricted` row, so an
+open item whose `540 $a` is still `Restricted` gets no access code.
 
 Each code is matched on its FOLIO code and must exist in the tenant; a code the
 tenant lacks fails the record. On update the upsert removes any access code
