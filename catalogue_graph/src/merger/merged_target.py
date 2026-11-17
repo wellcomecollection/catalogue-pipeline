@@ -1,14 +1,9 @@
-"""Apply the field rules to a merge target, and build the merged works and initial
-images that the merger writes."""
+"""Apply the field rules to a merge target."""
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import datetime
 
-from inferrer.models import InitialImage
 from ingestor.models.augmented.image import ParentWork
-from ingestor.models.merged.work import MergedWork
-from merger.outputs import to_initial_image, to_merged_work
 from merger.rules.base import distinct_works
 from merger.rules.images import merge_image_data, merge_images
 from merger.rules.items import merge_items
@@ -30,18 +25,19 @@ class ImageWithSource:
 
 
 @dataclass(frozen=True)
-class MergeResult:
-    """The target with its fields merged, and the image records to write."""
+class MergedTarget:
+    """The target with its fields merged, the sources the rules claimed, and the image
+    records to write."""
 
     merged_target: VisibleIdentifiedWork
+    claimed: list[IdentifiedWork]
     images: list[ImageWithSource]
 
 
 def merge_fields(
     target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-) -> tuple[list[IdentifiedWork], MergeResult]:
-    """Merge every field of the target from its sources. Returns the sources the rules
-    claimed, which are redirected to the target, and the result."""
+) -> MergedTarget:
+    """Merge every field of the target from its sources."""
     items = merge_items(target, sources)
     thumbnail = merge_thumbnail(target, sources)
     other_identifiers = merge_other_identifiers(target, sources)
@@ -60,14 +56,14 @@ def merge_fields(
         target.model_copy(update={"data": data}), items.value
     )
     fields = [items, thumbnail, other_identifiers, target_images, separate_images]
-    claimed = distinct_works(source for field in fields for source in field.claimed)
-    return claimed, MergeResult(
+    return MergedTarget(
         merged_target=merged_target,
+        claimed=distinct_works(s for field in fields for s in field.claimed),
         images=_attributed_to(merged_target, separate_images.value),
     )
 
 
-def target_only_merge_result(target: VisibleIdentifiedWork) -> MergeResult:
+def merge_lone_target(target: VisibleIdentifiedWork) -> MergedTarget:
     """Merge a target that has no sources. The items rule still applies, and a
     single-image Miro work still emits its image."""
     items = merge_items(target, []).value
@@ -76,8 +72,10 @@ def target_only_merge_result(target: VisibleIdentifiedWork) -> MergeResult:
         target.model_copy(update={"data": data}), items
     )
     images = target.data.image_data if single_digital_item_miro_work(target) else []
-    return MergeResult(
-        merged_target=merged_target, images=_attributed_to(merged_target, images)
+    return MergedTarget(
+        merged_target=merged_target,
+        claimed=[],
+        images=_attributed_to(merged_target, images),
     )
 
 
@@ -99,24 +97,3 @@ def _attributed_to(
 ) -> list[ImageWithSource]:
     parent = parent_work(work)
     return [ImageWithSource(image=image, source=parent) for image in images]
-
-
-@dataclass(frozen=True)
-class MergerOutcome:
-    """The works and image records that a merge produces."""
-
-    works: list[IdentifiedWork]
-    images: list[ImageWithSource]
-
-    @staticmethod
-    def pass_through(works: Sequence[IdentifiedWork]) -> "MergerOutcome":
-        return MergerOutcome(works=list(works), images=[])
-
-    def merged_works(self, merged_time: datetime) -> list[MergedWork]:
-        return [to_merged_work(work, merged_time) for work in self.works]
-
-    def initial_images(self, merged_time: datetime) -> list[InitialImage]:
-        return [
-            to_initial_image(image.image, image.source, merged_time)
-            for image in self.images
-        ]

@@ -5,8 +5,8 @@ from collections.abc import Sequence
 
 import pytest
 
-from merger.merge import merge
-from merger.merge_result import ImageWithSource, MergerOutcome, parent_work
+from merger.merge import MergedComponent, merge_component
+from merger.merged_target import ImageWithSource, parent_work
 from merger.rules.precedence import first_by_precedence
 from merger.rules.predicates import PHYSICAL_DIGITAL_REASON
 from models import identifier_schemes as schemes
@@ -116,7 +116,7 @@ def identifiers(work: IdentifiedWork) -> list[SourceIdentifier]:
     return [work.state.source_identifier, *work.data.other_identifiers]
 
 
-def visible_works(outcome: MergerOutcome) -> dict[str, VisibleIdentifiedWork]:
+def visible_works(outcome: MergedComponent) -> dict[str, VisibleIdentifiedWork]:
     return {
         w.state.canonical_id: w
         for w in outcome.works
@@ -124,7 +124,7 @@ def visible_works(outcome: MergerOutcome) -> dict[str, VisibleIdentifiedWork]:
     }
 
 
-def redirects(outcome: MergerOutcome) -> dict[str, str]:
+def redirects(outcome: MergedComponent) -> dict[str, str]:
     return {
         w.state.canonical_id: w.redirect_target.canonical_id
         for w in outcome.works
@@ -132,11 +132,11 @@ def redirects(outcome: MergerOutcome) -> dict[str, str]:
     }
 
 
-def deleted_works(outcome: MergerOutcome) -> list[DeletedIdentifiedWork]:
+def deleted_works(outcome: MergedComponent) -> list[DeletedIdentifiedWork]:
     return [w for w in outcome.works if isinstance(w, DeletedIdentifiedWork)]
 
 
-def invisible_works(outcome: MergerOutcome) -> list[InvisibleIdentifiedWork]:
+def invisible_works(outcome: MergedComponent) -> list[InvisibleIdentifiedWork]:
     return [w for w in outcome.works if isinstance(w, InvisibleIdentifiedWork)]
 
 
@@ -188,7 +188,7 @@ def images(
 
 
 def assert_merged(
-    outcome: MergerOutcome,
+    outcome: MergedComponent,
     expected: VisibleIdentifiedWork,
     redirected: Sequence[IdentifiedWork],
 ) -> None:
@@ -256,7 +256,7 @@ def test_the_target_is_calm_then_physical_sierra_then_sierra_then_nothing(
 def test_a_sierra_work_merges_with_a_miro_work(
     sierra: VisibleIdentifiedWork, items: list[Item]
 ) -> None:
-    outcome = merge([sierra, miro])
+    outcome = merge_component([sierra, miro])
 
     expected = merged(
         sierra,
@@ -271,7 +271,7 @@ def test_a_sierra_work_merges_with_a_miro_work(
 
 
 def test_a_multi_item_sierra_work_takes_only_the_images_of_a_miro_work() -> None:
-    outcome = merge([multiple_items_sierra, miro])
+    outcome = merge_component([multiple_items_sierra, miro])
 
     expected = merged(multiple_items_sierra, [miro], image_data=miro.data.image_data)
     assert same_elements(
@@ -289,7 +289,7 @@ class TestNonPictureSierraWorkWithMets:
     expected_redirect = redirect(mets, sierra_physical)
 
     def test_the_two_works_merge(self) -> None:
-        outcome = merge([sierra_physical, mets])
+        outcome = merge_component([sierra_physical, mets])
 
         assert same_elements(outcome.works, [self.expected, self.expected_redirect])
         assert outcome.images == []
@@ -297,7 +297,7 @@ class TestNonPictureSierraWorkWithMets:
     def test_a_deleted_work_is_ignored_when_merging_the_others(self) -> None:
         deleted_work = deleted(other_work())
 
-        outcome = merge([sierra_physical, mets, deleted_work])
+        outcome = merge_component([sierra_physical, mets, deleted_work])
 
         assert same_elements(
             outcome.works, [self.expected, self.expected_redirect, deleted_work]
@@ -306,7 +306,7 @@ class TestNonPictureSierraWorkWithMets:
 
 
 def test_a_picture_sierra_work_merges_with_a_mets_work() -> None:
-    outcome = merge([sierra_picture, mets])
+    outcome = merge_component([sierra_picture, mets])
 
     expected = merged(
         sierra_picture,
@@ -322,7 +322,7 @@ def test_a_picture_sierra_work_merges_with_a_mets_work() -> None:
 def test_a_physical_3d_object_merges_with_its_digitised_pair_a_miro_and_a_mets_work() -> (
     None
 ):
-    outcome = merge([sierra_physical, sierra_digitised, miro, mets])
+    outcome = merge_component([sierra_physical, sierra_digitised, miro, mets])
 
     expected = merged(
         sierra_physical,
@@ -340,7 +340,7 @@ def test_a_physical_3d_object_merges_with_its_digitised_pair_a_miro_and_a_mets_w
 
 
 def test_a_multi_item_physical_sierra_work_merges_with_a_mets_work() -> None:
-    outcome = merge([multiple_items_sierra, mets])
+    outcome = merge_component([multiple_items_sierra, mets])
 
     expected = merged(
         multiple_items_sierra,
@@ -357,7 +357,7 @@ def test_a_multi_item_physical_sierra_work_merges_with_a_mets_work() -> None:
 def test_a_multi_item_physical_sierra_work_merges_with_its_pair_and_a_mets_work() -> (
     None
 ):
-    outcome = merge([multiple_items_sierra, sierra_digitised, mets])
+    outcome = merge_component([multiple_items_sierra, sierra_digitised, mets])
 
     expected = merged(
         multiple_items_sierra,
@@ -372,7 +372,7 @@ def test_a_multi_item_physical_sierra_work_merges_with_its_pair_and_a_mets_work(
 
 
 def test_a_lone_miro_work_emits_its_image() -> None:
-    outcome = merge([miro])
+    outcome = merge_component([miro])
 
     assert outcome.works == [miro]
     assert outcome.images == images(miro, miro)
@@ -385,7 +385,7 @@ def test_sierra_audiovisual_works_are_not_merged() -> None:
         merge_candidates=[merge_candidate(digitised_video, PHYSICAL_DIGITAL_REASON)],
     )
 
-    outcome = merge([digitised_video, physical_video])
+    outcome = merge_component([digitised_video, physical_video])
 
     assert same_elements(outcome.works, [physical_video, digitised_video])
 
@@ -394,7 +394,7 @@ def test_both_works_are_unmodified_if_one_is_deleted() -> None:
     visible = other_work()
     deleted_work = deleted(other_work())
 
-    outcome = merge([visible, deleted_work])
+    outcome = merge_component([visible, deleted_work])
 
     assert same_elements(outcome.works, [visible, deleted_work])
 
@@ -420,7 +420,7 @@ def test_digitised_videos_from_mets_merge_into_the_e_bib() -> None:
     )
     sierra_works = [physical_formats, ebib, film_reel]
 
-    outcome = merge([*sierra_works, mets_for_ebib])
+    outcome = merge_component([*sierra_works, mets_for_ebib])
 
     works = visible_works(outcome)
     assert same_elements(list(works), [w.state.canonical_id for w in sierra_works])
@@ -444,7 +444,7 @@ def test_digitised_audio_from_mets_merges_into_the_e_bib() -> None:
     ebib = sierra_work(title="A work for an e-bib", format=Audio)
     mets_for_ebib = mets_for()
 
-    outcome = merge([cassette, ebib, mets_for_ebib])
+    outcome = merge_component([cassette, ebib, mets_for_ebib])
 
     works = visible_works(outcome)
     assert same_elements(
@@ -466,7 +466,7 @@ def test_a_mets_work_naming_the_physical_bib_still_merges_into_the_e_bib() -> No
     )
     mets_for_cassette = mets_for(cassette)
 
-    outcome = merge([cassette, ebib, mets_for_cassette])
+    outcome = merge_component([cassette, ebib, mets_for_cassette])
 
     assert redirects(outcome) == {
         mets_for_cassette.state.canonical_id: ebib.state.canonical_id
@@ -493,7 +493,7 @@ def test_a_mets_work_naming_the_physical_bib_merges_into_it_once_the_e_bibs_are_
     mets_for_ebibs = [mets_for(ebib) for ebib in ebibs]
     mets_for_physical = mets_for(physical)
 
-    outcome = merge([physical, *ebibs, *mets_for_ebibs, mets_for_physical])
+    outcome = merge_component([physical, *ebibs, *mets_for_ebibs, mets_for_physical])
 
     assert redirects(outcome) == {
         mets_for_ebibs[0].state.canonical_id: ebibs[0].state.canonical_id,
@@ -514,7 +514,7 @@ def test_a_mets_work_linked_to_several_av_e_bibs_goes_to_the_one_not_carved_out(
     ambiguous_mets = mets_for(*ebibs)
     mets_for_first = mets_for(ebibs[0])
 
-    outcome = merge([physical, *ebibs, ambiguous_mets, mets_for_first])
+    outcome = merge_component([physical, *ebibs, ambiguous_mets, mets_for_first])
 
     result = redirects(outcome)
     assert result[mets_for_first.state.canonical_id] == ebibs[0].state.canonical_id
@@ -529,7 +529,7 @@ def test_a_mets_work_linked_to_several_av_e_bibs_goes_to_the_physical_bib_once_e
     mets_for_ebibs = [mets_for(ebib) for ebib in ebibs]
     ambiguous_mets = mets_for(*ebibs)
 
-    outcome = merge([physical, *ebibs, *mets_for_ebibs, ambiguous_mets])
+    outcome = merge_component([physical, *ebibs, *mets_for_ebibs, ambiguous_mets])
 
     assert redirects(outcome) == {
         mets_for_ebibs[0].state.canonical_id: ebibs[0].state.canonical_id,
@@ -568,7 +568,7 @@ mets_for_side_b = mets_for(side_b)
     ids=["in order", "shuffled"],
 )
 def test_each_av_e_bib_gets_its_own_mets_work(works: list[IdentifiedWork]) -> None:
-    outcome = merge(works)
+    outcome = merge_component(works)
 
     visible = visible_works(outcome)
     assert same_elements(
@@ -598,7 +598,7 @@ def test_online_resources_are_ignored_by_the_physical_digital_rules() -> None:
     )
     mets_for_video = mets_work(merge_candidates=[merge_candidate(e_video, METS_REASON)])
 
-    outcome = merge([e_video, physical_video, mets_for_video])
+    outcome = merge_component([e_video, physical_video, mets_for_video])
 
     assert invisible_works(outcome) == []
     assert redirects(outcome) == {
@@ -616,7 +616,7 @@ def test_the_856_web_link_item_is_kept_when_merging_a_physical_digitised_pair() 
         merge_candidates=[merge_candidate(digitised, PHYSICAL_DIGITAL_REASON)],
     )
 
-    outcome = merge([digitised, physical])
+    outcome = merge_component([digitised, physical])
 
     assert len(redirects(outcome)) == 1
     visible = list(visible_works(outcome).values())
@@ -646,7 +646,7 @@ def test_identifiers_are_kept_when_the_e_bib_holds_the_link() -> None:
         )
     )
 
-    outcome = merge([mets_for_electronic, electronic, physical])
+    outcome = merge_component([mets_for_electronic, electronic, physical])
 
     visible = list(visible_works(outcome).values())
     assert visible[0].state.canonical_id == physical.state.canonical_id
@@ -668,7 +668,7 @@ def test_a_physical_digitised_pair_keeps_its_identifiers_with_an_unrelated_miro_
         merge_candidates=[merge_candidate(physical, PHYSICAL_DIGITAL_REASON)]
     )
 
-    outcome = merge([unrelated_miro, physical, digitised])
+    outcome = merge_component([unrelated_miro, physical, digitised])
 
     visible = list(visible_works(outcome).values())
     assert same_elements(
@@ -679,7 +679,7 @@ def test_a_physical_digitised_pair_keeps_its_identifiers_with_an_unrelated_miro_
 def test_a_digital_sierra_work_merges_into_an_ebsco_work() -> None:
     sierra, ebsco = sierra_ebsco_pair()
 
-    outcome = merge([sierra, ebsco])
+    outcome = merge_component([sierra, ebsco])
 
     assert len(redirects(outcome)) == 1
     assert list(visible_works(outcome)) == [ebsco.state.canonical_id]
@@ -691,7 +691,7 @@ def test_a_physical_sierra_work_merges_into_a_tei_work() -> None:
         merge_candidates=[merge_candidate(physical, PHYSICAL_DIGITAL_REASON)]
     )
 
-    outcome = merge([tei, physical])
+    outcome = merge_component([tei, physical])
 
     assert len(redirects(outcome)) == 1
     assert list(visible_works(outcome)) == [tei.state.canonical_id]
@@ -706,7 +706,7 @@ def test_several_sierra_bibs_and_their_calm_records_merge_into_one_tei_work() ->
         merge_candidates=[merge_candidate(w, TEI_BNUMBER_REASON) for w in sierra_works]
     )
 
-    outcome = merge([tei, *sierra_works, *calm_works])
+    outcome = merge_component([tei, *sierra_works, *calm_works])
 
     assert list(visible_works(outcome)) == [tei.state.canonical_id]
     result = redirects(outcome)
@@ -722,7 +722,7 @@ def test_a_tei_work_takes_the_items_of_every_sierra_bib_merged_into_it() -> None
         merge_candidates=[merge_candidate(w, TEI_BNUMBER_REASON) for w in sierra_works]
     )
 
-    outcome = merge([tei, *sierra_works])
+    outcome = merge_component([tei, *sierra_works])
 
     visible = list(visible_works(outcome).values())
     assert len(visible) == 1
@@ -736,7 +736,7 @@ def test_the_thumbnail_is_copied_to_the_inner_works() -> None:
     sierra = sierra_physical_work()
     mets_with_thumbnail = mets_work(thumbnail=digital_location())
 
-    outcome = merge([tei, sierra, mets_with_thumbnail])
+    outcome = merge_component([tei, sierra, mets_with_thumbnail])
 
     for work in visible_works(outcome).values():
         assert work.data.thumbnail == mets_with_thumbnail.data.thumbnail
@@ -746,7 +746,7 @@ def test_the_inner_works_of_a_deleted_tei_work_are_deleted() -> None:
     stubs = [internal_work_stub(), internal_work_stub()]
     deleted_tei = deleted(tei_work(internal_work_stubs=stubs))
 
-    outcome = merge([deleted_tei])
+    outcome = merge_component([deleted_tei])
 
     assert len(outcome.works) == 3
     result = deleted_works(outcome)
@@ -771,7 +771,7 @@ def test_the_inner_works_of_a_deleted_tei_work_are_deleted_alongside_a_visible_t
     deleted_tei = deleted(tei_work(internal_work_stubs=stubs))
     sierra = sierra_physical_work()
 
-    outcome = merge([sierra, deleted_tei])
+    outcome = merge_component([sierra, deleted_tei])
 
     assert len(outcome.works) == 4
     assert list(visible_works(outcome)) == [sierra.state.canonical_id]
@@ -786,7 +786,7 @@ def test_an_inner_work_whose_stub_was_removed_is_deleted() -> None:
     removed = internal_work_stub()
     tei = tei_work(internal_work_stubs=[kept], removed_internal_work_stubs=[removed])
 
-    outcome = merge([tei])
+    outcome = merge_component([tei])
 
     assert same_elements(
         list(visible_works(outcome)), [tei.state.canonical_id, kept.canonical_id]
@@ -803,7 +803,7 @@ def test_removed_inner_works_of_a_tei_work_that_loses_the_merge_are_deleted() ->
     tei = tei_work(removed_internal_work_stubs=[removed])
     ebsco = identified_work(schemes.EBSCO_ALT_LOOKUP)
 
-    outcome = merge([ebsco, tei])
+    outcome = merge_component([ebsco, tei])
 
     assert [w.state.canonical_id for w in deleted_works(outcome)] == [
         removed.canonical_id
@@ -817,7 +817,7 @@ def test_an_inner_work_just_emitted_is_never_deleted() -> None:
         internal_work_stubs=[contested], removed_internal_work_stubs=[contested]
     )
 
-    outcome = merge([tei])
+    outcome = merge_component([tei])
 
     assert deleted_works(outcome) == []
     assert contested.canonical_id in visible_works(outcome)
@@ -826,7 +826,7 @@ def test_an_inner_work_just_emitted_is_never_deleted() -> None:
 def test_a_folio_work_passes_through_unchanged() -> None:
     folio = folio_work()
 
-    outcome = merge([folio])
+    outcome = merge_component([folio])
 
     assert len(outcome.works) == 1
     assert visible_works(outcome)[folio.state.canonical_id].data == folio.data
@@ -835,7 +835,7 @@ def test_a_folio_work_passes_through_unchanged() -> None:
 def test_an_axiell_work_passes_through_unchanged() -> None:
     axiell = identified_work(schemes.AXIELL_GUID)
 
-    outcome = merge([axiell])
+    outcome = merge_component([axiell])
 
     assert len(outcome.works) == 1
     assert visible_works(outcome)[axiell.state.canonical_id].data == axiell.data
@@ -844,7 +844,7 @@ def test_an_axiell_work_passes_through_unchanged() -> None:
 def test_a_born_digital_axiell_work_on_its_own_drops_its_stub_item() -> None:
     axiell = axiell_work(format=ArchivesDigital)
 
-    outcome = merge([axiell])
+    outcome = merge_component([axiell])
 
     assert visible_works(outcome)[axiell.state.canonical_id].data.items == []
 
@@ -932,7 +932,7 @@ def without_record_ids(work: VisibleIdentifiedWork) -> str:
 
 
 def normalised_outcome(works: Sequence[IdentifiedWork]) -> tuple[list[str], list[str]]:
-    outcome = merge(works)
+    outcome = merge_component(works)
     merged_works = []
     for w in outcome.works:
         if isinstance(w, VisibleIdentifiedWork):
@@ -1070,7 +1070,7 @@ def test_each_bib_sharing_a_miro_work_gets_its_own_mets_work() -> None:
     target = first_by_precedence(works)
     assert target is not None
 
-    outcome = merge(works)
+    outcome = merge_component(works)
 
     assert redirects(outcome) == {
         mets_for_bibs[0].state.canonical_id: bibs[0].state.canonical_id,
@@ -1088,7 +1088,7 @@ def test_a_bib_sharing_a_miro_work_without_its_own_mets_work_is_unchanged() -> N
     bibs = bibs_sharing(miro_shared, Books)
     mets_for_second = mets_for(bibs[1])
 
-    outcome = merge([miro_shared, *bibs, mets_for_second])
+    outcome = merge_component([miro_shared, *bibs, mets_for_second])
 
     assert redirects(outcome)[mets_for_second.state.canonical_id] == (
         bibs[1].state.canonical_id
@@ -1115,7 +1115,7 @@ def test_a_bib_gets_the_miro_work_that_only_it_links() -> None:
     works = [target_bib, other_bib, miro_shared, own_miro]
     assert first_by_precedence(works) == target_bib
 
-    outcome = merge(works)
+    outcome = merge_component(works)
 
     assert redirects(outcome) == {
         miro_shared.state.canonical_id: target_bib.state.canonical_id,
@@ -1139,7 +1139,7 @@ def test_the_target_never_gets_a_miro_work_it_does_not_link() -> None:
     works = [bib_a, bib_b, bib_c, miro_ab, miro_bc]
     assert first_by_precedence(works) == bib_a
 
-    outcome = merge(works)
+    outcome = merge_component(works)
 
     assert redirects(outcome) == {
         miro_ab.state.canonical_id: bib_a.state.canonical_id,
@@ -1153,7 +1153,7 @@ def test_each_axiell_work_gets_only_its_own_bib() -> None:
     target = first_by_precedence(works)
     assert target is not None
 
-    outcome = merge(works)
+    outcome = merge_component(works)
 
     assert redirects(outcome) == {
         bibs[0].state.canonical_id: axiell_works[0].state.canonical_id,

@@ -6,14 +6,15 @@ internal works are emitted alongside it, and deleted when their stub goes.
 """
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 
 import structlog
 
 from ingestor.models.shared.deleted_reason import TeiDeletedInMerger
-from merger.merge_result import (
-    MergerOutcome,
+from merger.merged_target import (
+    ImageWithSource,
     merge_fields,
-    target_only_merge_result,
+    merge_lone_target,
 )
 from merger.rules.base import distinct_works
 from merger.rules.precedence import first_by_precedence
@@ -31,16 +32,25 @@ from models.pipeline.identifier import Identified
 logger = structlog.get_logger(__name__)
 
 
-def merge(works: Sequence[IdentifiedWork]) -> MergerOutcome:
-    outcomes = [
+@dataclass(frozen=True)
+class MergedComponent:
+    """Every work and image record a component's merge produces."""
+
+    works: list[IdentifiedWork]
+    images: list[ImageWithSource]
+
+
+def merge_component(works: Sequence[IdentifiedWork]) -> MergedComponent:
+    """Merges the works of one component, splitting it into parts first where needed."""
+    merged_parts = [
         _merge_part(part)
         for miro_part in _partition_shared_miro(works)
         for part in _partition_audiovisual(miro_part)
     ]
-    result_works = [work for outcome in outcomes for work in outcome.works]
-    return MergerOutcome(
+    result_works = [work for merged in merged_parts for work in merged.works]
+    return MergedComponent(
         works=result_works + _deleted_internal_works(works, result_works),
-        images=[image for outcome in outcomes for image in outcome.images],
+        images=[image for merged in merged_parts for image in merged.images],
     )
 
 
@@ -138,17 +148,17 @@ def _partition_audiovisual(
     return [*parts, remainder] if remainder else parts
 
 
-def _merge_part(works: Sequence[IdentifiedWork]) -> MergerOutcome:
+def _merge_part(works: Sequence[IdentifiedWork]) -> MergedComponent:
     if len(works) == 1 and isinstance(works[0], VisibleIdentifiedWork):
-        result = target_only_merge_result(works[0])
-        return MergerOutcome(
+        result = merge_lone_target(works[0])
+        return MergedComponent(
             works=[*_internal_works(result.merged_target), result.merged_target],
             images=result.images,
         )
 
     target = first_by_precedence(works)
     if target is None:
-        return MergerOutcome.pass_through(works)
+        return MergedComponent(works=list(works), images=[])
     deleted = [w for w in works if isinstance(w, DeletedIdentifiedWork)]
     sources = [
         w
@@ -157,12 +167,12 @@ def _merge_part(works: Sequence[IdentifiedWork]) -> MergerOutcome:
         and w.state.source_identifier != target.state.source_identifier
     ]
 
-    redirected, result = merge_fields(target, sources)
-    remaining = [s for s in sources if not _contains(redirected, s)]
+    result = merge_fields(target, sources)
+    remaining = [s for s in sources if not _contains(result.claimed, s)]
     logger.info(
         "Merged works",
         target=target.state.canonical_id,
-        redirected=[s.state.canonical_id for s in redirected],
+        redirected=[s.state.canonical_id for s in result.claimed],
         remaining=[s.state.canonical_id for s in remaining],
         images=len(result.images),
     )
@@ -171,12 +181,12 @@ def _merge_part(works: Sequence[IdentifiedWork]) -> MergerOutcome:
     target_work = merged.model_copy(
         update={
             "redirect_sources": merged.redirect_sources
-            + [_identified(s) for s in redirected]
+            + [_identified(s) for s in result.claimed]
         }
     )
-    return MergerOutcome(
+    return MergedComponent(
         works=[
-            *(_redirect(s, target) for s in redirected),
+            *(_redirect(s, target) for s in result.claimed),
             *remaining,
             *deleted,
             *_internal_works(merged),

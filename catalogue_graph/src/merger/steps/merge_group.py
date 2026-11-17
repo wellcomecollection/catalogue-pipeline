@@ -14,10 +14,12 @@ import config
 from core.document import Document
 from core.sinks import ElasticsearchSink
 from id_minter.iceberg import get_works_identified_table
+from inferrer.models import InitialImage
+from ingestor.models.merged.work import MergedWork
 from merger.documents import fetch_components
-from merger.merge import merge
-from merger.merge_result import MergerOutcome
+from merger.merge import MergedComponent, merge_component
 from merger.models.step_events import MergeGroupEvent, MergeGroupResult
+from merger.outputs import to_initial_image, to_merged_work
 from models.pipeline.identified.work import IdentifiedWork
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import (
@@ -66,21 +68,19 @@ def handler(
     version = version_from_datetime(merged_time)
 
     counts = _Counts()
-    outcomes = _merge(
-        fetch_components(table, event.iceberg_snapshot_id, changed), counts
-    )
+    merged = _merge(fetch_components(table, event.iceberg_snapshot_id, changed), counts)
     failed: list[tuple[Document, typing.Any]] = []
     superseded = 0
-    for batch in batched(outcomes, WRITE_BATCH_SIZE):
+    for batch in batched(merged, WRITE_BATCH_SIZE):
         works = [
-            _document(work.state.canonical_id, work, version)
-            for outcome in batch
-            for work in outcome.merged_works(merged_time)
+            _document(to_merged_work(work, merged_time), version)
+            for component in batch
+            for work in component.works
         ]
         images = [
-            _document(image.state.canonical_id, image, version)
-            for outcome in batch
-            for image in outcome.initial_images(merged_time)
+            _document(to_initial_image(i.image, i.source, merged_time), version)
+            for component in batch
+            for i in component.images
         ]
         for sink, documents in ((works_sink, works), (images_sink, images)):
             if documents:
@@ -125,21 +125,22 @@ def images_index_name(event: MergeGroupEvent) -> str:
 
 def _merge(
     components: Iterable[tuple[list[str], list[IdentifiedWork]]], counts: _Counts
-) -> Iterator[MergerOutcome]:
+) -> Iterator[MergedComponent]:
     for ids, works in components:
         # A component with a work missing from the table is written unmerged.
         if len(works) < len(ids):
-            outcome = MergerOutcome.pass_through(works)
+            component = MergedComponent(works=list(works), images=[])
         else:
-            outcome = merge(works)
+            component = merge_component(works)
         counts.components += 1
         counts.works += len(works)
-        counts.merged_works += len(outcome.works)
-        counts.images += len(outcome.images)
-        yield outcome
+        counts.merged_works += len(component.works)
+        counts.images += len(component.images)
+        yield component
 
 
-def _document(canonical_id: str, model: typing.Any, version: int) -> Document:
+def _document(model: MergedWork | InitialImage, version: int) -> Document:
+    canonical_id = model.state.canonical_id
     body = model.model_dump(exclude_none=True, mode="json")
     return Document(
         source_id=canonical_id, target_id=canonical_id, body=body, version=version

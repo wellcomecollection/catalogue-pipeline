@@ -5,8 +5,8 @@ from collections.abc import Sequence
 import pytest
 
 from merger import merge as merge_module
-from merger.merge import merge
-from merger.merge_result import MergeResult, MergerOutcome
+from merger.merge import MergedComponent, merge_component
+from merger.merged_target import MergedTarget
 from models import identifier_schemes as schemes
 from models.pipeline.identified.work import (
     IdentifiedWork,
@@ -43,7 +43,7 @@ def first_work(works: Sequence[IdentifiedWork]) -> VisibleIdentifiedWork | None:
 
 def copy_fields(
     target: VisibleIdentifiedWork, sources: Sequence[IdentifiedWork]
-) -> tuple[list[IdentifiedWork], MergeResult]:
+) -> MergedTarget:
     """Items claim the second source, other identifiers the third onwards."""
     data = target.data.model_copy(
         update={
@@ -52,7 +52,7 @@ def copy_fields(
         }
     )
     merged = target.model_copy(update={"data": data})
-    return [sources[1], *sources[2:]], MergeResult(merged, [])
+    return MergedTarget(merged, claimed=[sources[1], *sources[2:]], images=[])
 
 
 @pytest.fixture(autouse=True)
@@ -62,8 +62,8 @@ def merge_into_the_first_work(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def outcome() -> MergerOutcome:
-    return merge(input_works)
+def outcome() -> MergedComponent:
+    return merge_component(input_works)
 
 
 def identified(work: IdentifiedWork) -> Identified:
@@ -73,7 +73,7 @@ def identified(work: IdentifiedWork) -> Identified:
     )
 
 
-def visible(outcome: MergerOutcome, work: IdentifiedWork) -> VisibleIdentifiedWork:
+def visible(outcome: MergedComponent, work: IdentifiedWork) -> VisibleIdentifiedWork:
     return next(
         w
         for w in outcome.works
@@ -82,7 +82,7 @@ def visible(outcome: MergerOutcome, work: IdentifiedWork) -> VisibleIdentifiedWo
     )
 
 
-def test_the_target_has_the_merged_fields(outcome: MergerOutcome) -> None:
+def test_the_target_has_the_merged_fields(outcome: MergedComponent) -> None:
     merged = visible(outcome, input_works[0])
 
     assert merged.data == input_works[0].data.model_copy(
@@ -93,7 +93,7 @@ def test_the_target_has_the_merged_fields(outcome: MergerOutcome) -> None:
     )
 
 
-def test_the_target_lists_its_redirect_sources(outcome: MergerOutcome) -> None:
+def test_the_target_lists_its_redirect_sources(outcome: MergedComponent) -> None:
     merged = visible(outcome, input_works[0])
 
     assert same_elements(
@@ -101,7 +101,7 @@ def test_the_target_lists_its_redirect_sources(outcome: MergerOutcome) -> None:
     )
 
 
-def test_every_source_claimed_by_a_rule_is_redirected(outcome: MergerOutcome) -> None:
+def test_every_source_claimed_by_a_rule_is_redirected(outcome: MergedComponent) -> None:
     redirected = [
         w.state.source_identifier
         for w in outcome.works
@@ -113,7 +113,7 @@ def test_every_source_claimed_by_a_rule_is_redirected(outcome: MergerOutcome) ->
     )
 
 
-def test_an_unclaimed_source_is_left_untouched(outcome: MergerOutcome) -> None:
+def test_an_unclaimed_source_is_left_untouched(outcome: MergedComponent) -> None:
     assert input_works[1] in outcome.works
 
 
@@ -128,7 +128,7 @@ def test_existing_redirect_sources_on_the_target_are_kept() -> None:
     target = identified_work(schemes.SIERRA_SYSTEM_NUMBER, redirect_sources=existing)
     sources = [identified_work(schemes.SIERRA_SYSTEM_NUMBER) for _ in range(5)]
 
-    merged = visible(merge([target, *sources]), target)
+    merged = visible(merge_component([target, *sources]), target)
 
     assert all(i in merged.redirect_sources for i in existing)
     assert all(identified(s) in merged.redirect_sources for s in sources[1:])
@@ -137,4 +137,4 @@ def test_existing_redirect_sources_on_the_target_are_kept() -> None:
 def test_a_single_work_is_merged_on_its_own() -> None:
     work = identified_work(schemes.SIERRA_SYSTEM_NUMBER)
 
-    assert merge([work]).works == [work]
+    assert merge_component([work]).works == [work]
