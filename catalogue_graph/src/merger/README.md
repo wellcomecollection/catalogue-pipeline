@@ -54,10 +54,10 @@ skips itself, and the next run picks up whatever changed in the meantime.
 ## Running locally
 
 ```bash
-uv run python -m merger --pipeline-date dev --graph-date dev
+uv run python -m merger.run_local --pipeline-date dev --graph-date dev
 ```
 
-`merger/__main__.py` runs the same steps in order. It reads the id minter's local Iceberg
+`merger/run_local.py` runs the same steps in order. It reads the id minter's local Iceberg
 table `matcher.works_identified`, merges every changed group into a local Elasticsearch,
 and replaces the baseline under the dev prefix in S3. Pass `--match-only` to stop after
 finding the changed components.

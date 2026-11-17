@@ -4,7 +4,7 @@ import argparse
 
 import pytest
 
-from merger.__main__ import environment_error
+from merger.run_local import environment_error
 
 
 def args(**overrides: object) -> argparse.Namespace:
