@@ -21,13 +21,13 @@ compared with what the Scala merger wrote over the same period.
 * `documents.py` reads the documents of a group's works in one pass over the table.
 * `merge.py` merges one component. It first splits off bibs linked only through a shared
   Miro work, and audiovisual e-bibs with the works linked to them, then chooses a target
-  in each part and merges every field into it with the rules in `rules/`. Sources a rule
-  claimed are redirected to the target. A TEI work's internal works are emitted beside
+  in each part and merges every field into it with the rules in `rules/`. Source works claimed
+  by a rule are redirected to the target. A TEI work's internal works are emitted beside
   it, and deleted when their stub goes.
 
 The batch merger state machine runs these steps after every id-minter run:
 
-1. `steps/match.py` (Match) writes the changed components, with their group, to
+1. `steps/match.py` (Match) writes the changed components, with their group numbers, to
    `graph-{graph_date}/pipeline-{pipeline_date}/merger/full/job-{job_id}/changed_components.parquet`
    and this run's components to `components.parquet` beside it. It returns the number
    of groups, and the Map state builds each group's event from the run's input, the job
@@ -40,8 +40,8 @@ The batch merger state machine runs these steps after every id-minter run:
    `failed_components-{group}.parquet` in the job folder.
 3. `steps/commit.py` (Commit) replaces
    `graph-{graph_date}/pipeline-{pipeline_date}/merger/components.parquet`, the baseline
-   the next run compares with, with the run's components less the failed ones, and
-   deletes the run's copy. A failed component is then missing from the baseline, so the
+   read by the next run, with the run's components (excluding failed ones), and
+   deletes the run's copy. A failed component ends up missing from the baseline, so the
    next run sees it as changed and merges it again. If any failed, the execution fails
    after the commit, so the alarm reports them while the rest of the catalogue moves on.
    An error that is not about one component, such as Elasticsearch being unreachable,
@@ -49,7 +49,7 @@ The batch merger state machine runs these steps after every id-minter run:
 
 A pipeline without a baseline merges every component on its first run; delete the
 baseline to merge everything again. A run that starts while another is still going
-skips itself, and the next run picks up whatever changed in the meantime.
+is skipped, and the next run picks up whatever changed in the meantime.
 
 ## Running locally
 
