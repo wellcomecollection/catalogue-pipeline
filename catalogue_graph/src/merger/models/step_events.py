@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import PurePosixPath
 
 from pydantic import BaseModel
@@ -16,7 +17,7 @@ class MergerEvent(BasePipelineEvent):
 
     @property
     def components_s3_uri(self) -> str:
-        """The components resolved by the previous run, shared by every run of a pipeline."""
+        """The components of the last run whose merged works were all written."""
         parts = [
             f"graph-{self.graph_date}",
             f"pipeline-{self.pipeline_date}",
@@ -30,6 +31,15 @@ class MergerEvent(BasePipelineEvent):
         return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{PurePosixPath(*parts)}"
 
 
+class MergeGroupEvent(MergerEvent):
+    """One group of a run's changed components, merged in its own invocation."""
+
+    iceberg_snapshot_id: int
+    group: int
+    # The snapshot's commit time, so a run never overwrites one at a later snapshot.
+    merged_time: datetime
+
+
 class MergerResult(BaseModel):
     job_id: str
     iceberg_snapshot_id: int | None
@@ -37,3 +47,15 @@ class MergerResult(BaseModel):
     changed_work_count: int
     changed_component_count: int
     changed_components_s3_uri: str
+    # This run's components, which replace the baseline once every group is merged.
+    job_components_s3_uri: str
+    components_s3_uri: str
+    merge_groups: list[MergeGroupEvent]
+
+
+class MergeGroupResult(BaseModel):
+    group: int
+    component_count: int
+    work_count: int
+    merged_work_count: int
+    image_count: int

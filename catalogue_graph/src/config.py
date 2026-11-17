@@ -48,6 +48,10 @@ INCREMENTAL_GRAPH_REMOVER_S3_PREFIX = os.environ.get(
 
 MERGER_S3_PREFIX_DEFAULT = "merger"
 MERGER_S3_PREFIX = os.environ.get("MERGER_S3_PREFIX", MERGER_S3_PREFIX_DEFAULT)
+# The batch merger writes beside the Scala merger's indices until it replaces them.
+MERGER_WORKS_INDEX_NAME = "works-denormalised-python"
+MERGER_IMAGES_INDEX_NAME = "images-initial-python"
+MERGER_ES_API_KEY_NAME = "batch_merger"
 
 INGESTOR_SHARD_SIZE_DEFAULT = 10000
 INGESTOR_SHARD_SIZE = int(

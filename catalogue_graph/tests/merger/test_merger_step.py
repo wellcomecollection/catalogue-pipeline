@@ -11,13 +11,14 @@ from merger import components as storage
 from merger.models.step_events import MergerEvent
 from merger.steps import merger
 from tests.merger.support import (
+    SNAPSHOT_TIME,
     components,
     iceberg_table,
     labelled,
     s3_read_error,
     works,
 )
-from tests.mocks import MockSmartOpen
+from tests.mocks import MockS3Client, MockSmartOpen
 from utils.aws import df_from_s3_parquet, df_to_s3_parquet
 
 EVENT = MergerEvent(pipeline_date="2026-01-01", graph_date="2026-01-02", job_id="job-1")
@@ -63,35 +64,63 @@ def test_later_run_reports_only_changed_works(monkeypatch: pytest.MonkeyPatch) -
     assert written(result.changed_components_s3_uri) == {"C": "CD"}
 
 
-def test_every_run_replaces_the_baseline_with_the_whole_graph(
+def test_writes_the_whole_graph_for_the_job_and_leaves_the_baseline(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Written rather than mocked, so the test can read it after the step has.
+    df_to_s3_parquet(components({"Z": "Z"}), EVENT.components_s3_uri)
+
+    result = run(monkeypatch)
+
+    assert written(result.job_components_s3_uri) == {"A": "AB", "C": "CD", "E": "E"}
+    assert written(EVENT.components_s3_uri) == {"Z": "Z"}
+
+
+def test_commit_replaces_the_baseline_and_deletes_the_jobs_copy(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     MockSmartOpen.mock_s3_parquet_file(EVENT.components_s3_uri, components({"Z": "Z"}))
 
-    run(monkeypatch)
+    result = run(monkeypatch)
+    merger.commit_components(result)
 
     assert written(EVENT.components_s3_uri) == {"A": "AB", "C": "CD", "E": "E"}
+    deleted = [f"s3://{bucket}/{key}" for bucket, key in MockS3Client.deleted_keys]
+    assert deleted == [result.job_components_s3_uri]
+    assert written(result.changed_components_s3_uri) != {}
 
 
-def test_changed_works_are_written_before_the_baseline(
+def test_returns_one_merge_event_per_group_at_the_snapshot_time(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def refuse_baseline(frame: pl.DataFrame, uri: str) -> None:
-        if uri == EVENT.components_s3_uri:
-            raise OSError("S3 is down")
-        df_to_s3_parquet(frame, uri)
+    monkeypatch.setattr(
+        merger,
+        "assign_groups",
+        lambda changed: storage.assign_groups(changed, group_size=2),
+    )
 
-    monkeypatch.setattr(merger, "df_to_s3_parquet", refuse_baseline)
+    result = run(monkeypatch)
 
-    with pytest.raises(OSError):
-        run(monkeypatch)
+    changed = df_from_s3_parquet(result.changed_components_s3_uri)
+    groups = changed.group_by("group").agg(pl.col("id").sort().str.join(""))
+    assert dict(groups.sort("group").iter_rows()) == {0: "AB", 1: "CD", 2: "E"}
+    assert [e.group for e in result.merge_groups] == [0, 1, 2]
+    assert {e.merged_time for e in result.merge_groups} == {SNAPSHOT_TIME}
+    assert {e.iceberg_snapshot_id for e in result.merge_groups} == {7}
+    assert {e.job_id for e in result.merge_groups} == {EVENT.job_id}
 
-    assert written(EVENT.get_s3_uri("changed_components")) == {
-        "A": "AB",
-        "C": "CD",
-        "E": "E",
-    }
-    assert EVENT.components_s3_uri not in MockSmartOpen.file_lookup
+
+def test_nothing_changed_gives_no_merge_events(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    MockSmartOpen.mock_s3_parquet_file(
+        EVENT.components_s3_uri, components({"A": "AB", "C": "CD", "E": "E"})
+    )
+
+    result = run(monkeypatch)
+
+    assert result.changed_work_count == 0
+    assert result.merge_groups == []
 
 
 def test_reads_the_current_snapshot_unless_one_is_given(
@@ -124,7 +153,8 @@ def test_an_empty_table_reports_nothing_changed(
     assert (result.work_count, result.changed_work_count) == (0, 0)
     assert result.changed_component_count == 0
     assert written(result.changed_components_s3_uri) == {}
-    assert df_from_s3_parquet(EVENT.components_s3_uri).height == 0
+    assert df_from_s3_parquet(result.job_components_s3_uri).height == 0
+    assert result.merge_groups == []
 
 
 def test_the_baseline_is_shared_by_jobs_and_the_changed_file_is_not() -> None:

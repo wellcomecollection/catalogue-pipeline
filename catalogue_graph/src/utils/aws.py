@@ -109,6 +109,11 @@ def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str) -> None:
         df.write_parquet(f)
 
 
+def delete_s3_object(s3_uri: str) -> None:
+    uri = smart_open.parse_uri(s3_uri)
+    boto3.client("s3").delete_object(Bucket=uri.bucket_id, Key=uri.key_id)
+
+
 def delete_s3_objects(bucket: str, prefix: str, suffix: str) -> int:
     """Delete every object under the prefix whose key ends with the suffix, returning the count."""
     s3_client = boto3.client("s3")

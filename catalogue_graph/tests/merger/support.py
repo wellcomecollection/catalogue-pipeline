@@ -79,9 +79,16 @@ def s3_read_error(code: str) -> OSError:
     return raised.value
 
 
+SNAPSHOT_TIME = datetime(2026, 11, 17, 9, 30, tzinfo=UTC)
+
+
 def iceberg_table(rows: pl.DataFrame, snapshot_id: int = 7) -> MagicMock:
-    """A works_identified table whose scan returns the given rows at the given snapshot."""
+    """A works_identified table whose scan returns the given rows at the given snapshot,
+    committed at SNAPSHOT_TIME."""
     table = MagicMock()
     table.current_snapshot.return_value.snapshot_id = snapshot_id
+    table.snapshot_by_id.return_value.timestamp_ms = int(
+        SNAPSHOT_TIME.timestamp() * 1000
+    )
     table.scan.return_value.to_arrow.return_value = rows.to_arrow()
     return table

@@ -55,6 +55,8 @@ module "elastic" {
   index_config               = local.index_config
   catalogue_account_services = ["catalogue_api", "snapshot_generator", "concepts_api"]
 
+  enable_experimental_merger = local.enable_experimental_merger
+
   providers = {
     aws           = aws
     aws.catalogue = aws.catalogue

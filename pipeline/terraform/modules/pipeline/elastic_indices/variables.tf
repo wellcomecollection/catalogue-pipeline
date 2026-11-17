@@ -50,3 +50,9 @@ variable "catalogue_account_services" {
   type    = set(string)
   default = []
 }
+
+variable "enable_experimental_merger" {
+  type        = bool
+  default     = false
+  description = "Whether to create the batch merger's works-denormalised-python and images-initial-python indices, and an API key that writes to them. Set it with the pipeline module's variable of the same name."
+}

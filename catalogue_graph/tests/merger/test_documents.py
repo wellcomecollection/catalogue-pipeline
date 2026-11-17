@@ -8,7 +8,8 @@ import pytest
 from adapters.utils.iceberg_lookup import IcebergTableLookup
 from merger import documents
 from merger.components import COMPONENTS_SCHEMA
-from merger.documents import _groups, _read_documents, fetch_components
+from merger.documents import _read_documents, fetch_components
+from tests.merger.works import sierra_work
 
 
 def test_read_documents_maps_each_wanted_work_to_its_current_document(
@@ -48,10 +49,54 @@ def test_fetch_components_with_nothing_changed_reads_nothing() -> None:
     table.scan.assert_not_called()
 
 
-def test_groups_keep_components_whole(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(documents, "GROUP_SIZE", 3)
-    components = [["a", "b"], ["c", "d"], ["e"], ["f", "g", "h", "i"], ["j"]]
+def test_fetch_components_yields_each_component_with_the_works_found(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    a, b, c = sierra_work(), sierra_work(), sierra_work()
+    content = {w.state.canonical_id: w.model_dump_json() for w in (a, b, c)}
+    changed = pl.DataFrame(
+        {
+            "id": [
+                a.state.canonical_id,
+                b.state.canonical_id,
+                c.state.canonical_id,
+                "gone",
+            ],
+            "component_id": ["1", "1", "2", "2"],
+        }
+    )
+    reads: list[set[str]] = []
 
-    groups = list(_groups(components))
+    def read(lookup: IcebergTableLookup, wanted: set[str]) -> dict[str, str]:
+        reads.append(wanted)
+        return {i: content[i] for i in wanted if i in content}
 
-    assert groups == [[["a", "b"], ["c", "d"]], [["e"], ["f", "g", "h", "i"]], [["j"]]]
+    monkeypatch.setattr(documents, "_read_documents", read)
+    monkeypatch.setattr(IcebergTableLookup, "for_snapshot", MagicMock())
+
+    fetched = list(fetch_components(MagicMock(), 7, changed))
+
+    assert len(reads) == 1
+    assert fetched == [
+        ([a.state.canonical_id, b.state.canonical_id], [a, b]),
+        ([c.state.canonical_id, "gone"], [c]),
+    ]
+
+
+def test_fetch_components_drops_each_document_once_parsed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    a, b = sierra_work(), sierra_work()
+    read = {w.state.canonical_id: w.model_dump_json() for w in (a, b)}
+    changed = pl.DataFrame(
+        {"id": [a.state.canonical_id, b.state.canonical_id], "component_id": ["1", "2"]}
+    )
+    monkeypatch.setattr(documents, "_read_documents", lambda lookup, wanted: read)
+    monkeypatch.setattr(IcebergTableLookup, "for_snapshot", MagicMock())
+
+    fetched = fetch_components(MagicMock(), 7, changed)
+
+    next(fetched)
+    assert list(read) == [b.state.canonical_id]
+    next(fetched)
+    assert read == {}
