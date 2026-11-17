@@ -1,5 +1,6 @@
 """The match step: what it reads, writes and reports on each run."""
 
+import json
 from pathlib import Path
 
 import polars as pl
@@ -9,10 +10,9 @@ from pyiceberg.catalog.sql import SqlCatalog
 from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from merger import components as storage
 from merger.__main__ import commit_components
-from merger.models.step_events import MatchEvent
+from merger.models.step_events import MatchEvent, MergeGroupEvent
 from merger.steps import match
 from tests.merger.support import (
-    SNAPSHOT_TIME,
     components,
     iceberg_table,
     labelled,
@@ -91,7 +91,7 @@ def test_commit_replaces_the_baseline_and_deletes_the_jobs_copy(
     assert written(result.changed_components_s3_uri) != {}
 
 
-def test_returns_one_merge_event_per_group_at_the_snapshot_time(
+def test_numbers_the_groups_of_changed_components(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
@@ -105,13 +105,10 @@ def test_returns_one_merge_event_per_group_at_the_snapshot_time(
     changed = df_from_s3_parquet(result.changed_components_s3_uri)
     groups = changed.group_by("group").agg(pl.col("id").sort().str.join(""))
     assert dict(groups.sort("group").iter_rows()) == {0: "AB", 1: "CD", 2: "E"}
-    assert [e.group for e in result.merge_groups] == [0, 1, 2]
-    assert {e.merged_time for e in result.merge_groups} == {SNAPSHOT_TIME}
-    assert {e.iceberg_snapshot_id for e in result.merge_groups} == {7}
-    assert {e.job_id for e in result.merge_groups} == {EVENT.job_id}
+    assert result.group_count == 3
 
 
-def test_nothing_changed_gives_no_merge_events(
+def test_nothing_changed_gives_no_groups(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     MockSmartOpen.mock_s3_parquet_file(
@@ -121,7 +118,7 @@ def test_nothing_changed_gives_no_merge_events(
     result = run(monkeypatch)
 
     assert result.changed_work_count == 0
-    assert result.merge_groups == []
+    assert result.group_count == 0
 
 
 def test_reads_the_current_snapshot_unless_one_is_given(
@@ -155,7 +152,7 @@ def test_an_empty_table_reports_nothing_changed(
     assert result.changed_component_count == 0
     assert written(result.changed_components_s3_uri) == {}
     assert df_from_s3_parquet(result.job_components_s3_uri).height == 0
-    assert result.merge_groups == []
+    assert result.group_count == 0
 
 
 def test_the_baseline_is_shared_by_jobs_and_the_changed_file_is_not() -> None:
@@ -169,3 +166,32 @@ def test_the_baseline_is_shared_by_jobs_and_the_changed_file_is_not() -> None:
         "/graph-2026-01-02/pipeline-2026-01-01/merger/full/job-job-1/changed_components.parquet"
     )
     assert EVENT.get_s3_uri("x") != other_job.get_s3_uri("x")
+
+
+def test_the_snapshot_id_survives_numbers_read_as_doubles() -> None:
+    """Step Functions' JSONata reads JSON numbers as doubles, which round a typical
+    Iceberg snapshot id."""
+    snapshot_id = 9085339146097452536
+    result = match.MatchResult(
+        job_id="job-1",
+        iceberg_snapshot_id=snapshot_id,
+        work_count=0,
+        changed_work_count=0,
+        changed_component_count=0,
+        group_count=0,
+        changed_components_s3_uri="",
+        job_components_s3_uri="",
+        components_s3_uri="",
+    )
+    event = MergeGroupEvent(
+        pipeline_date="2026-01-01",
+        graph_date="2026-01-02",
+        job_id="job-1",
+        iceberg_snapshot_id=snapshot_id,
+        group=0,
+    )
+
+    as_doubles = json.loads(result.model_dump_json(), parse_int=float)
+    assert as_doubles["iceberg_snapshot_id"] == str(snapshot_id)
+    passed_on = json.loads(event.model_dump_json(), parse_int=float)
+    assert MergeGroupEvent.model_validate(passed_on).iceberg_snapshot_id == snapshot_id

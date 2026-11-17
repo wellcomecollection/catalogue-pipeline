@@ -29,7 +29,7 @@ class MergedTarget:
     """The target with its fields merged, the sources the rules claimed, and the image
     records to write."""
 
-    merged_target: VisibleIdentifiedWork
+    target: VisibleIdentifiedWork
     claimed: list[IdentifiedWork]
     images: list[ImageWithSource]
 
@@ -57,7 +57,7 @@ def merge_fields(
     )
     fields = [items, thumbnail, other_identifiers, target_images, separate_images]
     return MergedTarget(
-        merged_target=merged_target,
+        target=merged_target,
         claimed=distinct_works(s for field in fields for s in field.claimed),
         images=_attributed_to(merged_target, separate_images.value),
     )
@@ -73,7 +73,7 @@ def merge_lone_target(target: VisibleIdentifiedWork) -> MergedTarget:
     )
     images = target.data.image_data if single_digital_item_miro_work(target) else []
     return MergedTarget(
-        merged_target=merged_target,
+        target=merged_target,
         claimed=[],
         images=_attributed_to(merged_target, images),
     )

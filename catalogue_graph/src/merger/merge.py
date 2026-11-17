@@ -85,15 +85,13 @@ def _partition_shared_miro(
     if target is None or len(bridged) <= 1:
         return [list(works)]
 
-    carved = [c for c in bridged if not _contains(c, target)]
+    carved = [c for c in bridged if target not in c]
     # A Miro work goes to whichever cluster linking it wins target precedence.
     miro_owner: dict[str, list[IdentifiedWork]] = {}
     for miro in miro_works:
         linking = [c for c in bridged if links_to(c, miro)]
-        winner = first_by_precedence(
-            [w for w in works if any(_contains(c, w) for c in linking)]
-        )
-        owner = next((c for c in linking if _contains(c, winner)), None)
+        winner = first_by_precedence([w for w in works if any(w in c for c in linking)])
+        owner = next((c for c in linking if winner in c), None)
         if owner is not None:
             miro_owner[miro.state.canonical_id] = owner
 
@@ -157,7 +155,7 @@ def _merge_part(works: Sequence[IdentifiedWork]) -> MergedComponent:
     if len(works) == 1 and isinstance(works[0], VisibleIdentifiedWork):
         result = merge_lone_target(works[0])
         return MergedComponent(
-            works=[*_internal_works(result.merged_target), result.merged_target],
+            works=[*_internal_works(result.target), result.target],
             images=result.images,
         )
 
@@ -173,7 +171,7 @@ def _merge_part(works: Sequence[IdentifiedWork]) -> MergedComponent:
     ]
 
     result = merge_fields(target, sources)
-    remaining = [s for s in sources if not _contains(result.claimed, s)]
+    remaining = [s for s in sources if s not in result.claimed]
     logger.info(
         "Merged works",
         target=target.state.canonical_id,
@@ -182,7 +180,7 @@ def _merge_part(works: Sequence[IdentifiedWork]) -> MergedComponent:
         images=len(result.images),
     )
 
-    merged = result.merged_target
+    merged = result.target
     target_work = merged.model_copy(
         update={
             "redirect_sources": merged.redirect_sources
@@ -212,12 +210,6 @@ def _linked(a: IdentifiedWork, b: IdentifiedWork) -> bool:
     return any(
         candidate.id.canonical_id == b.state.canonical_id
         for candidate in a.state.merge_candidates
-    )
-
-
-def _contains(works: Sequence[IdentifiedWork], work: IdentifiedWork | None) -> bool:
-    return work is not None and any(
-        w.state.canonical_id == work.state.canonical_id for w in works
     )
 
 

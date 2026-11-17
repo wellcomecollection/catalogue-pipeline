@@ -30,7 +30,7 @@ def test_a_sierra_3d_object_physical_work_merged_with_a_miro_work() -> None:
     result = merge_fields(sierra, [miro])
 
     assert result.claimed == [miro]
-    merged = result.merged_target
+    merged = result.target
     assert merged.state == sierra.state
     assert merged.redirect_sources == []
     assert merged.data.other_identifiers == [
@@ -63,9 +63,9 @@ def test_the_items_merged_into_a_tei_work_reach_its_inner_works() -> None:
     result = merge_fields(tei, sierra_works)
 
     assert same_elements(result.claimed, sierra_works)
-    items = result.merged_target.data.items
+    items = result.target.data.items
     assert same_elements(items, [i for w in sierra_works for i in w.data.items])
-    for stub in result.merged_target.state.internal_work_stubs:
+    for stub in result.target.state.internal_work_stubs:
         assert stub.work_data.items == items
 
 
@@ -74,7 +74,7 @@ def test_a_single_miro_target_emits_its_image() -> None:
 
     result = merge_lone_target(miro)
 
-    assert result.merged_target == miro
+    assert result.target == miro
     assert result.images == [
         ImageWithSource(image=image, source=parent_work(miro))
         for image in miro.data.image_data
@@ -86,7 +86,7 @@ def test_a_born_digital_axiell_work_on_its_own_drops_its_stub_item() -> None:
 
     result = merge_lone_target(axiell)
 
-    assert result.merged_target.data.items == []
+    assert result.target.data.items == []
     assert result.images == []
 
 

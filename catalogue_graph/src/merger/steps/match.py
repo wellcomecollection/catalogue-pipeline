@@ -1,11 +1,9 @@
 """Finds the components that changed since the last run and splits them into groups."""
 
 import typing
-from datetime import UTC, datetime
 
 import polars as pl
 import structlog
-from pyiceberg.table import Table as IcebergTable
 
 from id_minter.iceberg import get_works_identified_table
 from merger.components import (
@@ -15,7 +13,7 @@ from merger.components import (
     read_previous_components,
 )
 from merger.matcher import load_works, match_works
-from merger.models.step_events import MatchEvent, MatchResult, MergeGroupEvent
+from merger.models.step_events import MatchEvent, MatchResult
 from utils.aws import df_to_s3_parquet
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
 from utils.steps import create_job_id
@@ -54,37 +52,17 @@ def handler(
     job_components_s3_uri = event.get_s3_uri("components")
     df_to_s3_parquet(current, job_components_s3_uri)
 
-    merge_groups = []
-    if snapshot_id is not None:
-        merged_time = _snapshot_time(table, snapshot_id)
-        merge_groups = [
-            MergeGroupEvent(
-                **event.model_dump(exclude={"iceberg_snapshot_id"}),
-                iceberg_snapshot_id=snapshot_id,
-                group=group,
-                merged_time=merged_time,
-            )
-            for group in sorted(changed["group"].unique())
-        ]
-
     return MatchResult(
         job_id=event.job_id,
         iceberg_snapshot_id=snapshot_id,
         work_count=work_count,
         changed_work_count=changed.height,
         changed_component_count=changed["component_id"].n_unique(),
+        group_count=changed["group"].n_unique(),
         changed_components_s3_uri=changed_components_s3_uri,
         job_components_s3_uri=job_components_s3_uri,
         components_s3_uri=event.components_s3_uri,
-        merge_groups=merge_groups,
     )
-
-
-def _snapshot_time(table: IcebergTable, snapshot_id: int) -> datetime:
-    snapshot = table.snapshot_by_id(snapshot_id)
-    if snapshot is None:
-        raise ValueError(f"Snapshot {snapshot_id} not found")
-    return datetime.fromtimestamp(snapshot.timestamp_ms / 1000, UTC)
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:

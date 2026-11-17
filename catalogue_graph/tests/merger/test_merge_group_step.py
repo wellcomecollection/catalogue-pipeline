@@ -1,6 +1,5 @@
 """The merge group step: merges one group of changed components and writes the results."""
 
-from datetime import UTC, datetime
 from typing import cast
 from unittest.mock import MagicMock
 
@@ -12,6 +11,7 @@ from merger.models.step_events import MergeGroupEvent
 from merger.steps import merge_group
 from models.pipeline.format import ThreeDObjects
 from models.pipeline.identified.work import IdentifiedWork
+from tests.merger.support import SNAPSHOT_TIME, iceberg_table
 from tests.merger.works import (
     MIRO_SIERRA_REASON,
     merge_candidate,
@@ -22,14 +22,12 @@ from tests.merger.works import (
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 from utils.elasticsearch import version_from_datetime
 
-MERGED_TIME = datetime(2026, 11, 17, 9, 30, tzinfo=UTC)
 EVENT = MergeGroupEvent(
     pipeline_date="2026-01-01",
     graph_date="2026-01-02",
     job_id="job-1",
     iceberg_snapshot_id=7,
     group=1,
-    merged_time=MERGED_TIME,
 )
 
 miro = miro_work()
@@ -56,7 +54,9 @@ def changed_components(*groups: tuple[int, str, list[IdentifiedWork]]) -> None:
 
 
 def run(
-    monkeypatch: pytest.MonkeyPatch, missing: set[str] | None = None
+    monkeypatch: pytest.MonkeyPatch,
+    missing: set[str] | None = None,
+    table: MagicMock | None = None,
 ) -> tuple[merge_group.MergeGroupResult, list[pl.DataFrame]]:
     """Runs the step with the given works in the table, less any missing ones."""
     fetched: list[pl.DataFrame] = []
@@ -72,7 +72,10 @@ def run(
             for ids in members["id"]
         ]
 
-    monkeypatch.setattr(merge_group, "get_works_identified_table", MagicMock())
+    table = table or iceberg_table(pl.DataFrame(), EVENT.iceberg_snapshot_id)
+    monkeypatch.setattr(
+        merge_group, "get_works_identified_table", lambda use_rest: table
+    )
     monkeypatch.setattr(merge_group, "fetch_components", fetch)
     es_client = cast(Elasticsearch, MockElasticsearchClient({}, ""))
     return merge_group.handler(EVENT, es_client=es_client), fetched
@@ -131,7 +134,7 @@ def test_every_document_is_versioned_by_the_snapshot_time(
     run(monkeypatch)
 
     assert {op["_version"] for op in MockElasticsearchClient.inputs} == {
-        version_from_datetime(MERGED_TIME)
+        version_from_datetime(SNAPSHOT_TIME)
     }
     assert {op["_version_type"] for op in MockElasticsearchClient.inputs} == {
         "external_gte"
@@ -181,3 +184,13 @@ def test_a_failed_write_fails_the_group(monkeypatch: pytest.MonkeyPatch) -> None
 
     with pytest.raises(RuntimeError, match="1 documents failed to index"):
         run(monkeypatch)
+
+
+def test_a_group_whose_snapshot_has_expired_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    table = iceberg_table(pl.DataFrame(), EVENT.iceberg_snapshot_id)
+    table.snapshot_by_id.return_value = None
+
+    with pytest.raises(ValueError, match="Snapshot 7 not found"):
+        run(monkeypatch, table=table)

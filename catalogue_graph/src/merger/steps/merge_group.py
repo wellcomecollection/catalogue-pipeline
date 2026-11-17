@@ -4,11 +4,13 @@ initial images to the batch merger's own indices."""
 import typing
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from itertools import batched
 
 import polars as pl
 import structlog
 from elasticsearch import Elasticsearch
+from pyiceberg.table import Table as IcebergTable
 
 import config
 from core.document import Document
@@ -62,9 +64,9 @@ def handler(
     )
     works_sink = ElasticsearchSink(es_client, works_index_name(event))
     images_sink = ElasticsearchSink(es_client, images_index_name(event))
-    # Every document is versioned by the snapshot time, so a run never overwrites
-    # the output of a run at a later snapshot.
-    merged_time = event.merged_time
+    # Every document is versioned by the snapshot's commit time, so every group of a
+    # run writes the same version and a run never overwrites a run at a later snapshot.
+    merged_time = _snapshot_time(table, event.iceberg_snapshot_id)
     version = version_from_datetime(merged_time)
 
     counts = _Counts()
@@ -121,6 +123,13 @@ def works_index_name(event: MergeGroupEvent) -> str:
 def images_index_name(event: MergeGroupEvent) -> str:
     index_date = event.index_dates.initial or event.pipeline_date
     return get_standard_index_name(config.MERGER_IMAGES_INDEX_NAME, index_date)
+
+
+def _snapshot_time(table: IcebergTable, snapshot_id: int) -> datetime:
+    snapshot = table.snapshot_by_id(snapshot_id)
+    if snapshot is None:
+        raise ValueError(f"Snapshot {snapshot_id} not found")
+    return datetime.fromtimestamp(snapshot.timestamp_ms / 1000, UTC)
 
 
 def _merge(

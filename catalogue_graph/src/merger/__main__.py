@@ -3,7 +3,7 @@ changed group, then replaces the baseline."""
 
 import argparse
 
-from merger.models.step_events import MatchEvent, MatchResult
+from merger.models.step_events import MatchEvent, MatchResult, MergeGroupEvent
 from merger.steps import match, merge_group
 from utils.argparse import add_pipeline_event_args
 from utils.aws import delete_s3_object, df_from_s3_parquet, df_to_s3_parquet
@@ -19,6 +19,20 @@ def commit_components(result: MatchResult) -> None:
         df_from_s3_parquet(result.job_components_s3_uri), result.components_s3_uri
     )
     delete_s3_object(result.job_components_s3_uri)
+
+
+def group_events(event: MatchEvent, result: MatchResult) -> list[MergeGroupEvent]:
+    """Each group's event, built from the run's event."""
+    return [
+        MergeGroupEvent.model_validate(
+            {
+                **event.model_dump(),
+                "iceberg_snapshot_id": result.iceberg_snapshot_id,
+                "group": group,
+            }
+        )
+        for group in range(result.group_count)
+    ]
 
 
 def main() -> None:
@@ -61,12 +75,12 @@ def main() -> None:
         pipeline_step="batch_merger",
     )
     result = match.handler(event, execution_context, args.use_rest_api_table)
-    print(result.model_dump_json(exclude={"merge_groups"}))
+    print(result.model_dump_json())
     if args.match_only:
         return
 
     es_mode: ElasticsearchMode = args.es_mode
-    for group_event in result.merge_groups:
+    for group_event in group_events(event, result):
         group_result = merge_group.handler(
             group_event, execution_context, es_mode, args.use_rest_api_table
         )

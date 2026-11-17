@@ -50,8 +50,21 @@ locals {
         Next   = "Merge"
       }
       Merge = {
-        Type           = "Map"
-        Items          = "{% $states.input.merge_groups %}"
+        Type  = "Map"
+        Items = "{% [0..$match.group_count - 1] %}"
+        # The run's input, with the job and snapshot the Match step settled on.
+        # Trimmed, as Step Functions reads a string as JSONata only between {% and %}.
+        ItemSelector = trimspace(<<-EOT
+          {% $merge([
+            $states.context.Execution.Input,
+            {
+              'job_id': $match.job_id,
+              'iceberg_snapshot_id': $match.iceberg_snapshot_id,
+              'group': $states.context.Map.Item.Value
+            }
+          ]) %}
+        EOT
+        )
         MaxConcurrency = local.batch_merger_max_concurrency
         ItemProcessor = {
           ProcessorConfig = {

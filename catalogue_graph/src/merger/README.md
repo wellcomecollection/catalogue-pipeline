@@ -29,12 +29,13 @@ The batch merger state machine runs these steps after every id-minter run:
 
 1. `steps/match.py` (Match) writes the changed components, with their group, to
    `graph-{graph_date}/pipeline-{pipeline_date}/merger/full/job-{job_id}/changed_components.parquet`
-   and this run's components to `components.parquet` beside it, and returns one merge
-   event per group.
+   and this run's components to `components.parquet` beside it. It returns the number
+   of groups, and the Map state builds each group's event from the run's input, the job
+   id and the snapshot id.
 2. `steps/merge_group.py` (MergeGroup, one invocation per group) merges the group's
    components and writes the results. A component with a work missing from the table
-   is written unmerged. Every document is versioned by the time of the snapshot the run
-   read, with `external_gte`, so a run never overwrites one at a later snapshot.
+   is written unmerged. Every document is versioned by the commit time of the snapshot
+   the run read, with `external_gte`, so a run never overwrites one at a later snapshot.
 3. CommitComponents copies the run's components over
    `graph-{graph_date}/pipeline-{pipeline_date}/merger/components.parquet`, the baseline
    the next run compares with, and DeleteJobComponents deletes the job's copy. They run
