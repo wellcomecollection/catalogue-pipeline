@@ -34,8 +34,46 @@ locals {
   batch_merger_state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Resolve the matcher graph from the works_identified table, merge the changed components and replace the components baseline."
-    StartAt       = "Match"
+    StartAt       = "CheckRunning"
     States = {
+      # A run that starts while another is still going stops here, so a long run,
+      # such as a full merge, is not repeated by every trigger meanwhile. Nothing is
+      # lost: the next run compares the whole graph with the baseline. As in the
+      # adapters, a skipped run succeeds rather than alarming.
+      CheckRunning = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::aws-sdk:sfn:listExecutions"
+        Arguments = {
+          StateMachineArn = "{% $states.context.StateMachine.Id %}"
+          StatusFilter    = "RUNNING"
+        }
+        Assign = {
+          others_running = "{% $count($states.result.Executions[ExecutionArn != $states.context.Execution.Id]) %}"
+        }
+        Output = "{% $states.input %}"
+        Retry = [
+          {
+            ErrorEquals     = ["States.ALL"]
+            IntervalSeconds = 2
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          }
+        ]
+        Next = "SkipIfRunning"
+      }
+      SkipIfRunning = {
+        Type = "Choice"
+        Choices = [
+          {
+            Condition = "{% $others_running > 0 %}"
+            Next      = "AlreadyRunning"
+          }
+        ]
+        Default = "Match"
+      }
+      AlreadyRunning = {
+        Type = "Succeed"
+      }
       Match = {
         Type     = "Task"
         Resource = "arn:aws:states:::lambda:invoke"
@@ -81,11 +119,12 @@ locals {
                 Payload      = "{% $states.input %}"
               }
               Output = "{% $states.result.Payload %}"
-              # Lambda.Unknown covers timeouts and out-of-memory; a group's
-              # writes are versioned by the snapshot time, so a re-run is safe.
+              # Timeouts are Sandbox.Timedout on newer runtimes and Lambda.Unknown,
+              # like out-of-memory, on older ones. A group's writes are versioned
+              # by the snapshot time, so a re-run is safe.
               Retry = concat(local.batch_merger_lambda_retry, [
                 {
-                  ErrorEquals     = ["Lambda.Unknown"]
+                  ErrorEquals     = ["Lambda.Unknown", "Sandbox.Timedout"]
                   IntervalSeconds = 5
                   MaxAttempts     = 2
                   BackoffRate     = 2.0
@@ -307,6 +346,19 @@ module "batch_merger_state_machine" {
     module.batch_merger_group_lambda.lambda_arn,
     module.batch_merger_commit_lambda.lambda_arn,
   ]
+}
+
+# Lets CheckRunning list this machine's own executions.
+resource "aws_iam_role_policy" "batch_merger_list_executions" {
+  role   = module.batch_merger_state_machine.state_machine_role_name
+  policy = data.aws_iam_policy_document.batch_merger_list_executions.json
+}
+
+data "aws_iam_policy_document" "batch_merger_list_executions" {
+  statement {
+    actions   = ["states:ListExecutions"]
+    resources = [module.batch_merger_state_machine.state_machine_arn]
+  }
 }
 
 module "batch_merger_state_machine_alarms" {

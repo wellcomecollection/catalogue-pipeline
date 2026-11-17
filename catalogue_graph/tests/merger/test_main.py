@@ -1,0 +1,57 @@
+"""The local run: which combinations of table, cluster and baseline it accepts."""
+
+import argparse
+
+import pytest
+
+from merger.__main__ import environment_error
+
+
+def args(**overrides: object) -> argparse.Namespace:
+    defaults = {
+        "pipeline_date": "dev",
+        "graph_date": "dev",
+        "es_mode": "local",
+        "use_rest_api_table": False,
+        "match_only": False,
+    }
+    return argparse.Namespace(**{**defaults, **overrides})
+
+
+@pytest.mark.parametrize(
+    "run",
+    [
+        args(),
+        args(
+            pipeline_date="2026-09-30",
+            graph_date="2026-09-30",
+            es_mode="public",
+            use_rest_api_table=True,
+        ),
+        args(pipeline_date="2026-09-30", graph_date="2026-09-30", match_only=True),
+    ],
+    ids=["all local", "all the pipeline's", "matching only"],
+)
+def test_runs_within_one_environment_are_allowed(run: argparse.Namespace) -> None:
+    assert environment_error(run) is None
+
+
+@pytest.mark.parametrize(
+    "run",
+    [
+        args(
+            pipeline_date="2026-09-30",
+            graph_date="2026-09-30",
+            use_rest_api_table=True,
+        ),
+        args(es_mode="public"),
+        args(pipeline_date="2026-09-30", graph_date="2026-09-30"),
+    ],
+    ids=[
+        "the pipeline's table into local Elasticsearch",
+        "the local table into the pipeline's cluster",
+        "the local table into the pipeline's baseline",
+    ],
+)
+def test_runs_mixing_environments_are_refused(run: argparse.Namespace) -> None:
+    assert environment_error(run) is not None

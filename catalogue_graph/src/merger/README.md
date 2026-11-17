@@ -47,8 +47,9 @@ The batch merger state machine runs these steps after every id-minter run:
    An error that is not about one component, such as Elasticsearch being unreachable,
    fails the run before the commit, and the next run merges everything again.
 
-The first run has no baseline and merges every component. Overlapping runs can merge a
-component more than once, as each reads the baseline at the start, but never miss one.
+A pipeline without a baseline merges every component on its first run; delete the
+baseline to merge everything again. A run that starts while another is still going
+skips itself, and the next run picks up whatever changed in the meantime.
 
 ## Running locally
 
@@ -56,8 +57,12 @@ component more than once, as each reads the baseline at the start, but never mis
 uv run python -m merger --pipeline-date dev --graph-date dev
 ```
 
-`merger/__main__.py` runs the same steps in order. It reads the id minter's local Iceberg table `matcher.works_identified`, merges every
-changed group into a local Elasticsearch, and replaces the baseline under the dev prefix
-in S3. Pass `--match-only` to stop after finding the changed components, `--es-mode
-public` to write to the pipeline cluster, and `--use-rest-api-table` to read the S3
-Tables table instead; its name is set per pipeline with `WORKS_IDENTIFIED_TABLE_NAME`.
+`merger/__main__.py` runs the same steps in order. It reads the id minter's local Iceberg
+table `matcher.works_identified`, merges every changed group into a local Elasticsearch,
+and replaces the baseline under the dev prefix in S3. Pass `--match-only` to stop after
+finding the changed components.
+
+To run against a pipeline instead, pass its dates with `--use-rest-api-table` and
+`--es-mode public` together, so the run reads that pipeline's table (named with
+`WORKS_IDENTIFIED_TABLE_NAME`), writes to its cluster and replaces its baseline. Other
+combinations are refused, as the baseline would record merges written somewhere else.

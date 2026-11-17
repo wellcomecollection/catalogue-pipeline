@@ -30,6 +30,23 @@ def group_events(event: MatchEvent, result: MatchResult) -> list[MergeGroupEvent
     ]
 
 
+def environment_error(args: argparse.Namespace) -> str | None:
+    """Why the arguments mix environments, if they do. A run reads one table, writes one
+    cluster and replaces one baseline, and all three must belong to the same environment,
+    or the baseline would record merges that were written somewhere else."""
+    if args.match_only:
+        return None
+    if args.use_rest_api_table:
+        if args.es_mode == "local":
+            return "--use-rest-api-table needs --es-mode public, to write to that pipeline's cluster"
+        return None
+    if args.es_mode != "local":
+        return "--es-mode public needs --use-rest-api-table, to merge that pipeline's works"
+    if args.pipeline_date != "dev" or args.graph_date != "dev":
+        return "the local table needs --pipeline-date dev and --graph-date dev, to keep the baseline local"
+    return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Merge the components that changed since the last run."
@@ -58,6 +75,8 @@ def main() -> None:
         help="Find the changed components without merging them or replacing the baseline.",
     )
     args = parser.parse_args()
+    if error := environment_error(args):
+        parser.error(error)
 
     event = MatchEvent(
         pipeline_date=args.pipeline_date,
