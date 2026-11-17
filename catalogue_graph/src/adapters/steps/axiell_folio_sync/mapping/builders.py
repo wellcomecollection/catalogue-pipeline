@@ -33,12 +33,11 @@ from .config import (
     NORMAL_LOCATION_FIELD,
     NORMAL_LOCATION_NOTE_TYPE_FIELD,
     RECORD_TYPE_ITEM,
-    SYNCED_STATISTICAL_CODE_FIELD,
+    SYNCED_INSTANCE_STATUS_FIELD,
     VERSION,
     FieldMap,
     _folio_location,
     _guid,
-    _guid_label,
     _holdings_id,
     _instance_id,
     _item_id,
@@ -167,7 +166,7 @@ def build_instance(rec: CanonicalRecord, ref: RefCache) -> Instance:
         source="FOLIO",
         instanceTypeId=ref.instance_type_id(),
         identifiers=identifiers,
-        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
+        statusId=_resolve(SYNCED_INSTANCE_STATUS_FIELD, rec, ref),
     )
 
 
@@ -177,8 +176,6 @@ def build_holdings(rec: CanonicalRecord, ref: RefCache) -> Holdings:
         instanceId=_instance_id(rec.source_id),
         sourceId=_resolve(HOLDINGS_SOURCE_FIELD, rec, ref),
         permanentLocationId=_resolve(NORMAL_LOCATION_FIELD, rec, ref),
-        formerIds=[_guid_label(rec.source_id)],
-        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
     )
 
 
@@ -240,29 +237,28 @@ def _access_statistical_code(rec: CanonicalRecord) -> str | None:
 
 
 def _item_statistical_codes(rec: CanonicalRecord, ref: RefCache) -> list[str]:
-    """The synced marker, then the access code when the record maps to one."""
-    codes = [_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)]
-    access = _access_statistical_code(rec)
-    if access is not None:
-        # Resolved like any constant, so a code the tenant lacks fails the record
-        # rather than being dropped.
-        field = dataclasses.replace(ACCESS_STATISTICAL_CODE_FIELD, default=access)
-        access_id = _resolve(field, rec, ref)
-        if access_id not in codes:
-            codes.append(access_id)
-    return codes
+    """The access code when the record maps to one, otherwise empty.
 
-
-def _access_statistical_code_ids(rec: CanonicalRecord, ref: RefCache) -> list[str]:
-    """The tenant ids of every access code the mapping can set.
-
-    For the upsert, which replaces whichever of these the item already carries.
-    A code the tenant does not have is left out: nothing can carry it. The
-    synced marker is never among them, even if a tenant gave both one id.
+    Empty rather than absent, so the upsert still removes an access code the
+    item no longer maps to.
     """
-    marker = _resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)
-    ids = {ref.resolve_statistical_code(code) for code in ACCESS_STATISTICAL_CODES}
-    return sorted(code_id for code_id in ids if code_id and code_id != marker)
+    access = _access_statistical_code(rec)
+    if access is None:
+        return []
+    # Resolved like any constant, so a code the tenant lacks fails the record
+    # rather than being dropped.
+    field = dataclasses.replace(ACCESS_STATISTICAL_CODE_FIELD, default=access)
+    return [_resolve(field, rec, ref)]
+
+
+def _statistical_code_ids(codes: frozenset[str], ref: RefCache) -> list[str]:
+    """The tenant ids of ``codes``, leaving out any the tenant does not have.
+
+    For the upsert, which removes whichever of these a record already carries.
+    A code the tenant does not have is left out: nothing can carry it.
+    """
+    ids = {ref.resolve_statistical_code(code) for code in codes}
+    return sorted(code_id for code_id in ids if code_id)
 
 
 def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
@@ -305,7 +301,9 @@ def _assemble_payloads(
             source_id=rec.source_id,
             mapping_version=VERSION,
             deleted=deleted,
-            access_statistical_code_ids=_access_statistical_code_ids(rec, ref_cache),
+            access_statistical_code_ids=_statistical_code_ids(
+                ACCESS_STATISTICAL_CODES, ref_cache
+            ),
         ),
     )
 
