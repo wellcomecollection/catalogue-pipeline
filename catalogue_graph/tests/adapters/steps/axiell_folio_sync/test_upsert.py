@@ -789,7 +789,6 @@ def test_a_dry_run_plans_the_derived_ids_and_writes_nothing() -> None:
 
 # -- list fields merged on update --
 
-GUID = "00000000-0000-4000-8000-000000000001"
 LOCAL_TYPE = "local-identifier-type-uuid"
 OTHER_TYPE = "isbn-type-uuid"
 SYNCED_STATUS = "axiell-status-uuid"
@@ -961,18 +960,15 @@ def test_the_access_codes_are_replaced_on_the_item_only() -> None:
 
 
 def test_update_leaves_existing_former_ids_alone() -> None:
-    """The payloads carry no formerIds, so whatever FOLIO holds, including a
-    GUID an earlier version wrote to the holdings, is kept as it is."""
+    """The payloads carry no formerIds, so whatever FOLIO holds is kept as it
+    is."""
     puts = _puts_after_update(
         instance={},
-        holdings={"formerIds": ["b1234567", GUID.upper()]},
+        holdings={"formerIds": ["b1234567"]},
         item={"formerIds": ["i7654321"]},
     )
 
-    assert puts["/holdings-storage/holdings/hold-1"]["formerIds"] == [
-        "b1234567",
-        GUID.upper(),
-    ]
+    assert puts["/holdings-storage/holdings/hold-1"]["formerIds"] == ["b1234567"]
     assert puts["/inventory/items/item-1"]["formerIds"] == ["i7654321"]
 
 

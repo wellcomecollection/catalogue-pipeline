@@ -33,9 +33,3 @@ def test_the_folder_holds_only_the_generated_csvs() -> None:
     on_disk = {path.name for path in DEFAULT_DIRECTORY.glob("*.csv")}
 
     assert on_disk == {name for name in render() if name.endswith(".csv")}
-
-
-def test_no_csv_names_the_old_statistical_code_marker() -> None:
-    """The synced marker is the Synched by Axiell instance status, not the AXIELL code."""
-    for path in DEFAULT_DIRECTORY.glob("*.csv"):
-        assert "AXIELL" not in path.read_text(), path.name

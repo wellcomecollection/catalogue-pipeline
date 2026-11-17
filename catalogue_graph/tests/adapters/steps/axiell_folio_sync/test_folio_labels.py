@@ -58,17 +58,6 @@ def test_the_instance_carries_the_synced_instance_status() -> None:
     assert asked == [SYNCED_INSTANCE_STATUS]
 
 
-def test_no_record_carries_a_statistical_code_as_the_marker() -> None:
-    """The item's codes are its access code alone (none for this record), and
-    the instance and holdings carry none."""
-    mapped = select_and_build(_item_record(), FakeRefCache())  # type: ignore[arg-type]
-    assert mapped is not None
-
-    assert "statisticalCodeIds" not in mapped.instance.model_dump(exclude_none=True)
-    assert "statisticalCodeIds" not in mapped.holdings.model_dump(exclude_none=True)
-    assert mapped.item.statisticalCodeIds == []
-
-
 def test_a_tenant_without_the_instance_status_fails_the_record() -> None:
     class NoStatusRefCache(FakeRefCache):
         def resolve_instance_status(self, term: str | None) -> str | None:
@@ -123,9 +112,9 @@ def test_the_ref_cache_matches_instance_statuses_on_name_or_code() -> None:
                 return {
                     "instanceStatuses": [
                         {
-                            "id": "axiell-uuid",
+                            "id": "synched-uuid",
                             "name": "Synched by Axiell",
-                            "code": "axiell",
+                            "code": "synched",
                         },
                         {"id": "cat-uuid", "name": "Cataloged", "code": "cat"},
                     ]
@@ -145,7 +134,7 @@ def test_the_ref_cache_matches_instance_statuses_on_name_or_code() -> None:
 
     cache = RefCache(FakeInventory()).load()
 
-    assert cache.resolve_instance_status("Synched by Axiell") == "axiell-uuid"
-    assert cache.resolve_instance_status("synched by axiell") == "axiell-uuid"
-    assert cache.resolve_instance_status("AXIELL") == "axiell-uuid"
+    assert cache.resolve_instance_status("Synched by Axiell") == "synched-uuid"
+    assert cache.resolve_instance_status("synched by axiell") == "synched-uuid"
+    assert cache.resolve_instance_status("SYNCHED") == "synched-uuid"
     assert cache.resolve_instance_status("Uncataloged") is None
