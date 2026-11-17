@@ -41,7 +41,12 @@ class MergedComponent:
 
 
 def merge_component(works: Sequence[IdentifiedWork]) -> MergedComponent:
-    """Merges the works of one component, splitting it into parts first where needed."""
+    """Merges the works of one component, splitting it into parts first where needed.
+
+    The rules take the first of several equally good works, so the works are sorted by
+    canonical id first, to give the same result whatever order they arrive in.
+    """
+    works = sorted(works, key=lambda work: work.state.canonical_id)
     merged_parts = [
         _merge_part(part)
         for miro_part in _partition_shared_miro(works)

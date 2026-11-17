@@ -1164,3 +1164,28 @@ def test_each_axiell_work_gets_only_its_own_bib() -> None:
     for a, bib in zip(axiell_works, bibs, strict=True):
         item_ids = [i.id for i in visible[a.state.canonical_id].data.items]
         assert bib.data.items[0].id in item_ids
+
+
+physical_with_two_ebibs = sierra_physical_work()
+ebibs_of_one_physical = [
+    sierra_work(
+        merge_candidates=[
+            merge_candidate(physical_with_two_ebibs, PHYSICAL_DIGITAL_REASON)
+        ]
+    )
+    for _ in range(2)
+]
+
+
+@pytest.mark.parametrize(
+    "works",
+    [
+        [physical_with_two_ebibs, *ebibs_of_one_physical],
+        [shared_miro, *pictures_sharing_miro],
+    ],
+    ids=["a physical bib with two e-bibs", "picture bibs sharing a Miro work"],
+)
+def test_the_result_does_not_depend_on_the_order_of_the_works(
+    works: list[IdentifiedWork],
+) -> None:
+    assert merge_component(works) == merge_component(list(reversed(works)))
