@@ -36,7 +36,7 @@ from models.pipeline.identified.work import (
 )
 from models.pipeline.identifier import Identified, SourceIdentifier, Unidentifiable
 from models.pipeline.item import Item
-from models.pipeline.location import DigitalLocation, OnlineResource
+from models.pipeline.location import DigitalLocation, Location, OnlineResource
 from tests.merger.works import (
     AXIELL_SIERRA_REASON,
     CC_BY,
@@ -169,9 +169,63 @@ def redirect(
     )
 
 
+def locations(*works: IdentifiedWork) -> list[Location]:
+    return [loc for w in works for item in w.data.items for loc in item.locations]
+
+
 def with_locations(item: Item, *sources: IdentifiedWork) -> Item:
-    locations = [loc for s in sources for i in s.data.items for loc in i.locations]
-    return item.model_copy(update={"locations": item.locations + locations})
+    return item.model_copy(update={"locations": item.locations + locations(*sources)})
+
+
+def images(
+    source: IdentifiedWork, parent: VisibleIdentifiedWork
+) -> list[ImageWithSource]:
+    """The source's images, belonging to the work they were merged into."""
+    return [
+        ImageWithSource(image=image, source=parent_work(parent))
+        for image in source.data.image_data
+    ]
+
+
+def assert_merged(
+    outcome: MergerOutcome,
+    expected: VisibleIdentifiedWork,
+    redirected: Sequence[IdentifiedWork],
+) -> None:
+    """The target has the expected data and redirect sources, and every source
+    redirects to it."""
+    target = visible_works(outcome)[expected.state.canonical_id]
+    assert target.data == expected.data
+    assert same_elements(target.redirect_sources, expected.redirect_sources)
+    assert same_elements(
+        [w for w in outcome.works if isinstance(w, RedirectedIdentifiedWork)],
+        [redirect(w, expected) for w in redirected],
+    )
+
+
+def mets_for(*works: VisibleIdentifiedWork) -> InvisibleIdentifiedWork:
+    return invisible(
+        mets_work(
+            merge_candidates=[merge_candidate(w, METS_REASON) for w in works],
+            items=[digital_item()],
+            images=[],
+        )
+    )
+
+
+def online_resource_item(url: str) -> Item:
+    return Item(
+        id=Unidentifiable(),
+        locations=[
+            DigitalLocation(
+                url=url,
+                location_type=OnlineResource,
+                access_conditions=[
+                    AccessCondition(method=ViewOnline, status=LicensedResource)
+                ],
+            )
+        ],
+    )
 
 
 @pytest.mark.parametrize(
@@ -190,55 +244,30 @@ def test_the_target_is_calm_then_physical_sierra_then_sierra_then_nothing(
     assert first_by_precedence(works) == target
 
 
-def test_a_physical_sierra_picture_or_3d_object_merges_with_a_miro_work() -> None:
-    outcome = merge([sierra_physical, miro])
+@pytest.mark.parametrize(
+    ("sierra", "items"),
+    [
+        (sierra_physical, [with_locations(sierra_physical.data.items[0], miro)]),
+        (zero_item_sierra, miro.data.items),
+        (sierra_digital, [with_locations(sierra_digital.data.items[0], miro)]),
+    ],
+    ids=["physical picture or 3D object", "zero items", "digital picture or 3D object"],
+)
+def test_a_sierra_work_merges_with_a_miro_work(
+    sierra: VisibleIdentifiedWork, items: list[Item]
+) -> None:
+    outcome = merge([sierra, miro])
 
     expected = merged(
-        sierra_physical,
+        sierra,
         [miro],
-        other_identifiers=sierra_physical.data.other_identifiers + identifiers(miro),
+        other_identifiers=sierra.data.other_identifiers + identifiers(miro),
         thumbnail=miro.data.thumbnail,
-        items=[with_locations(sierra_physical.data.items[0], miro)],
+        items=items,
         image_data=miro.data.image_data,
     )
-    assert same_elements(outcome.works, [expected, redirect(miro, sierra_physical)])
-    assert outcome.images == [
-        ImageWithSource(image=miro.data.image_data[0], source=parent_work(expected))
-    ]
-
-
-def test_a_zero_item_sierra_work_merges_with_a_miro_work() -> None:
-    outcome = merge([zero_item_sierra, miro])
-
-    expected = merged(
-        zero_item_sierra,
-        [miro],
-        other_identifiers=zero_item_sierra.data.other_identifiers + identifiers(miro),
-        thumbnail=miro.data.thumbnail,
-        items=miro.data.items,
-        image_data=miro.data.image_data,
-    )
-    assert same_elements(outcome.works, [expected, redirect(miro, zero_item_sierra)])
-    assert outcome.images == [
-        ImageWithSource(image=miro.data.image_data[0], source=parent_work(expected))
-    ]
-
-
-def test_a_digital_sierra_picture_or_3d_object_merges_with_a_miro_work() -> None:
-    outcome = merge([sierra_digital, miro])
-
-    expected = merged(
-        sierra_digital,
-        [miro],
-        other_identifiers=sierra_digital.data.other_identifiers + identifiers(miro),
-        thumbnail=miro.data.thumbnail,
-        items=[with_locations(sierra_digital.data.items[0], miro)],
-        image_data=miro.data.image_data,
-    )
-    assert same_elements(outcome.works, [expected, redirect(miro, sierra_digital)])
-    assert outcome.images == [
-        ImageWithSource(image=miro.data.image_data[0], source=parent_work(expected))
-    ]
+    assert same_elements(outcome.works, [expected, redirect(miro, sierra)])
+    assert outcome.images == images(miro, expected)
 
 
 def test_a_multi_item_sierra_work_takes_only_the_images_of_a_miro_work() -> None:
@@ -287,9 +316,7 @@ def test_a_picture_sierra_work_merges_with_a_mets_work() -> None:
         thumbnail=mets.data.thumbnail,
     )
     assert same_elements(outcome.works, [expected, redirect(mets, sierra_picture)])
-    assert outcome.images == [
-        ImageWithSource(image=mets.data.image_data[0], source=parent_work(expected))
-    ]
+    assert outcome.images == images(mets, expected)
 
 
 def test_a_physical_3d_object_merges_with_its_digitised_pair_a_miro_and_a_mets_work() -> (
@@ -307,24 +334,9 @@ def test_a_physical_3d_object_merges_with_its_digitised_pair_a_miro_and_a_mets_w
         items=[with_locations(sierra_physical.data.items[0], mets)],
         image_data=miro.data.image_data,
     )
-    works = visible_works(outcome)
-    assert list(works) == [sierra_physical.state.canonical_id]
-    assert works[sierra_physical.state.canonical_id].data == expected.data
-    assert same_elements(
-        works[sierra_physical.state.canonical_id].redirect_sources,
-        expected.redirect_sources,
-    )
-    assert same_elements(
-        [w for w in outcome.works if isinstance(w, RedirectedIdentifiedWork)],
-        [
-            redirect(sierra_digitised, sierra_physical),
-            redirect(miro, sierra_physical),
-            redirect(mets, sierra_physical),
-        ],
-    )
-    assert outcome.images == [
-        ImageWithSource(image=miro.data.image_data[0], source=parent_work(expected))
-    ]
+    assert list(visible_works(outcome)) == [sierra_physical.state.canonical_id]
+    assert_merged(outcome, expected, [sierra_digitised, miro, mets])
+    assert outcome.images == images(miro, expected)
 
 
 def test_a_multi_item_physical_sierra_work_merges_with_a_mets_work() -> None:
@@ -355,19 +367,7 @@ def test_a_multi_item_physical_sierra_work_merges_with_its_pair_and_a_mets_work(
         thumbnail=mets.data.thumbnail,
         items=multiple_items_sierra.data.items + mets.data.items,
     )
-    works = visible_works(outcome)
-    assert works[multiple_items_sierra.state.canonical_id].data == expected.data
-    assert same_elements(
-        works[multiple_items_sierra.state.canonical_id].redirect_sources,
-        expected.redirect_sources,
-    )
-    assert same_elements(
-        [w for w in outcome.works if isinstance(w, RedirectedIdentifiedWork)],
-        [
-            redirect(sierra_digitised, multiple_items_sierra),
-            redirect(mets, multiple_items_sierra),
-        ],
-    )
+    assert_merged(outcome, expected, [sierra_digitised, mets])
     assert outcome.images == []
 
 
@@ -375,9 +375,7 @@ def test_a_lone_miro_work_emits_its_image() -> None:
     outcome = merge([miro])
 
     assert outcome.works == [miro]
-    assert outcome.images == [
-        ImageWithSource(image=miro.data.image_data[0], source=parent_work(miro))
-    ]
+    assert outcome.images == images(miro, miro)
 
 
 def test_sierra_audiovisual_works_are_not_merged() -> None:
@@ -414,14 +412,7 @@ def test_digitised_videos_from_mets_merge_into_the_e_bib() -> None:
         format=Videos,
         merge_candidates=[merge_candidate(physical_formats, PHYSICAL_DIGITAL_REASON)],
     )
-    mets_for_ebib = invisible(
-        mets_work(
-            title="A METS work",
-            merge_candidates=[merge_candidate(ebib, METS_REASON)],
-            items=[digital_item()],
-            images=[],
-        )
-    )
+    mets_for_ebib = mets_for(ebib)
     film_reel = sierra_work(
         title="Work for film reel",
         format=Videos,
@@ -451,13 +442,7 @@ def test_digitised_audio_from_mets_merges_into_the_e_bib() -> None:
         title="A physical cassette tape", format=Audio, items=[physical_item()]
     )
     ebib = sierra_work(title="A work for an e-bib", format=Audio)
-    mets_for_ebib = invisible(
-        mets_work(
-            title="The digital copy of the audio cassette",
-            items=[digital_item()],
-            images=[],
-        )
-    )
+    mets_for_ebib = mets_for()
 
     outcome = merge([cassette, ebib, mets_for_ebib])
 
@@ -479,13 +464,7 @@ def test_a_mets_work_naming_the_physical_bib_still_merges_into_the_e_bib() -> No
         format=Audio,
         merge_candidates=[merge_candidate(cassette, PHYSICAL_DIGITAL_REASON)],
     )
-    mets_for_cassette = invisible(
-        mets_work(
-            merge_candidates=[merge_candidate(cassette, METS_REASON)],
-            items=[digital_item()],
-            images=[],
-        )
-    )
+    mets_for_cassette = mets_for(cassette)
 
     outcome = merge([cassette, ebib, mets_for_cassette])
 
@@ -506,16 +485,6 @@ def av_ebibs_for(
     ]
 
 
-def mets_for(*works: VisibleIdentifiedWork) -> InvisibleIdentifiedWork:
-    return invisible(
-        mets_work(
-            merge_candidates=[merge_candidate(w, METS_REASON) for w in works],
-            items=[digital_item()],
-            images=[],
-        )
-    )
-
-
 def test_a_mets_work_naming_the_physical_bib_merges_into_it_once_the_e_bibs_are_carved_out() -> (
     None
 ):
@@ -531,19 +500,9 @@ def test_a_mets_work_naming_the_physical_bib_merges_into_it_once_the_e_bibs_are_
         mets_for_ebibs[1].state.canonical_id: ebibs[1].state.canonical_id,
         mets_for_physical.state.canonical_id: physical.state.canonical_id,
     }
-    locations = [
-        loc
-        for item in visible_works(outcome)[physical.state.canonical_id].data.items
-        for loc in item.locations
-    ]
     assert same_elements(
-        locations,
-        [
-            loc
-            for w in (physical, mets_for_physical)
-            for item in w.data.items
-            for loc in item.locations
-        ],
+        locations(visible_works(outcome)[physical.state.canonical_id]),
+        locations(physical, mets_for_physical),
     )
 
 
@@ -626,26 +585,12 @@ def test_each_av_e_bib_gets_its_own_mets_work(works: list[IdentifiedWork]) -> No
     assert visible[side_b.state.canonical_id].data.items == mets_for_side_b.data.items
 
 
-def online_resource_item() -> Item:
-    return Item(
-        id=Unidentifiable(),
-        title="Scope: UK Disability Charity",
-        locations=[
-            DigitalLocation(
-                url="http://www.scope.org.uk",
-                location_type=OnlineResource,
-                access_conditions=[
-                    AccessCondition(method=ViewOnline, status=LicensedResource)
-                ],
-            )
-        ],
-    )
-
-
 def test_online_resources_are_ignored_by_the_physical_digital_rules() -> None:
     # Based on a real example where the METS work was merged into the physical
     # video rather than the e-bib it belonged to.
-    e_video = sierra_work(format=Videos, items=[online_resource_item()])
+    e_video = sierra_work(
+        format=Videos, items=[online_resource_item("http://www.scope.org.uk")]
+    )
     physical_video = sierra_work(
         format=Videos,
         items=[physical_item()],
@@ -664,18 +609,7 @@ def test_online_resources_are_ignored_by_the_physical_digital_rules() -> None:
 def test_the_856_web_link_item_is_kept_when_merging_a_physical_digitised_pair() -> None:
     # Based on a real example: links to digitised journals in the Internet Archive
     # live in the 856 field of the digitised record and must survive the merge.
-    item = Item(
-        id=Unidentifiable(),
-        locations=[
-            DigitalLocation(
-                url="https://example.org/b12345678",
-                location_type=OnlineResource,
-                access_conditions=[
-                    AccessCondition(method=ViewOnline, status=LicensedResource)
-                ],
-            )
-        ],
-    )
+    item = online_resource_item("https://example.org/b12345678")
     digitised = sierra_work(items=[item])
     physical = sierra_work(
         items=[physical_item()],
@@ -1131,10 +1065,8 @@ def test_folio_works_produce_the_same_merged_works_and_images_as_sierra_works(
 
 
 def test_each_bib_sharing_a_miro_work_gets_its_own_mets_work() -> None:
-    miro_shared = miro_work()
-    bibs = bibs_sharing(miro_shared, Pictures)
-    mets_for_bibs = [mets_for(bib) for bib in bibs]
-    works = [miro_shared, *bibs, *mets_for_bibs]
+    bibs, mets_for_bibs = pictures_sharing_miro, mets_for_pictures
+    works = [shared_miro, *bibs, *mets_for_bibs]
     target = first_by_precedence(works)
     assert target is not None
 
@@ -1143,19 +1075,12 @@ def test_each_bib_sharing_a_miro_work_gets_its_own_mets_work() -> None:
     assert redirects(outcome) == {
         mets_for_bibs[0].state.canonical_id: bibs[0].state.canonical_id,
         mets_for_bibs[1].state.canonical_id: bibs[1].state.canonical_id,
-        miro_shared.state.canonical_id: target.state.canonical_id,
+        shared_miro.state.canonical_id: target.state.canonical_id,
     }
     visible = visible_works(outcome)
     for bib, bib_mets in zip(bibs, mets_for_bibs, strict=True):
-        locations = [
-            loc
-            for item in visible[bib.state.canonical_id].data.items
-            for loc in item.locations
-        ]
-        for expected in (
-            loc for w in (bib, bib_mets) for i in w.data.items for loc in i.locations
-        ):
-            assert expected in locations
+        merged_locations = locations(visible[bib.state.canonical_id])
+        assert all(loc in merged_locations for loc in locations(bib, bib_mets))
 
 
 def test_a_bib_sharing_a_miro_work_without_its_own_mets_work_is_unchanged() -> None:
@@ -1223,18 +1148,8 @@ def test_the_target_never_gets_a_miro_work_it_does_not_link() -> None:
 
 
 def test_each_axiell_work_gets_only_its_own_bib() -> None:
-    miro_shared = miro_work()
-    axiell_works = [axiell_work() for _ in range(2)]
-    bibs = [
-        sierra_physical_work(
-            merge_candidates=[
-                merge_candidate(a, AXIELL_SIERRA_REASON),
-                merge_candidate(miro_shared, MIRO_SIERRA_REASON),
-            ]
-        )
-        for a in axiell_works
-    ]
-    works = [miro_shared, *axiell_works, *bibs]
+    axiell_works, bibs = axiell_for_bibs, bibs_with_axiell_sharing_miro
+    works = [shared_miro, *axiell_works, *bibs]
     target = first_by_precedence(works)
     assert target is not None
 
@@ -1243,7 +1158,7 @@ def test_each_axiell_work_gets_only_its_own_bib() -> None:
     assert redirects(outcome) == {
         bibs[0].state.canonical_id: axiell_works[0].state.canonical_id,
         bibs[1].state.canonical_id: axiell_works[1].state.canonical_id,
-        miro_shared.state.canonical_id: target.state.canonical_id,
+        shared_miro.state.canonical_id: target.state.canonical_id,
     }
     visible = visible_works(outcome)
     for a, bib in zip(axiell_works, bibs, strict=True):
