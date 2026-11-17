@@ -14,7 +14,7 @@ Holdings record, and an Item. It does this through the FOLIO Inventory API.
 | MARC extraction primitive | `src/adapters/steps/axiell_folio_sync/mapping/marc.py` |
 | Payload contracts | `src/adapters/steps/axiell_folio_sync/mapping/payloads.py` |
 
-Mapping version: **3.4.0** (`config.VERSION`), stamped into every payload's
+Mapping version: **3.5.0** (`config.VERSION`), stamped into every payload's
 `meta` block so you can tell which rules produced a given record.
 
 ## What gets synced
@@ -136,7 +136,7 @@ FOLIO, with no linked SRS MARC record.
 | `instanceTypeId` | FOLIO instance-type UUID | Constant, via `RefCache.instance_type_id()` | |
 | `identifiers[].identifierTypeId` | `Local identifier` UUID | Constant, via `resolve_identifier_type` | The whole `identifiers` list is left out when there is no object_number, and the instance's identifiers are then left as they are. On update the existing `Local identifier` is replaced and identifiers of other types are kept. |
 | `identifiers[].value` | The object_number, with its prefix removed | MARC `035 $a(AltRefNo)` | For example `(AltRefNo)SA/BSI` becomes `SA/BSI`. |
-| `statisticalCodeIds[]` | `AXIELL` statistical code UUID | Constant, via `resolve_statistical_code` | Marks the record as synced. The code must exist in the tenant; an unknown code fails the record. On update the code is added if missing and the record's other codes are kept. |
+| `statusId` | `Synched by Axiell` instance status UUID | Constant, via `resolve_instance_status` | Marks the instance as synced. Matched on the status term's name or code, and must exist in the tenant (Settings, Inventory, Instances, Instance status types); an unknown term fails the record. On update it overwrites any other status, because FOLIO allows only one. |
 
 ## Holdings
 
@@ -149,8 +149,6 @@ contract.
 | `instanceId` | Parent instance id | MARC `001` | Derived the same way as the instance's own id. |
 | `sourceId` | Holdings-source UUID | Constant, via `resolve_holdings_source` (default `MARC`) | |
 | `permanentLocationId` | FOLIO location UUID | MARC `984 $b` (AxC **normal** location), via `resolve_location` | The location rules below apply. No default: a missing `984 $b`, or a location the tenant does not know, fails the record with a `MappingError`. |
-| `formerIds[]` | The AxC GUID, lowercase | MARC `001` | A label for staff, searchable with `formerIds="<guid>"`. Not how the sync finds the record. On update the GUID is added if missing, ignoring case, and every other entry is kept. |
-| `statisticalCodeIds[]` | `AXIELL` statistical code UUID | Constant, via `resolve_statistical_code` | Marks the record as synced. The code must exist in the tenant; an unknown code fails the record. On update the code is added if missing and the record's other codes are kept. |
 
 ## Item
 
@@ -167,8 +165,7 @@ Built by `build_item` in `builders.py`, against the `payloads.Item` contract.
 | `notes[]` | `Axiell Current Location` note: `<852 $b>` | MARC `852 $b`, or `unknown` when absent | A typed item note, `staffOnly: false`, so the FOLIO enrichment endpoint can read it. The note type is resolved via `resolve_item_note_type` and must exist in the tenant; an unknown type fails the record. Always written. On update the upsert replaces every existing note of this type and keeps notes of other types. |
 | `notes[]` | `Axiell Normal Location` note: `<984 $b>` | MARC `984 $b` | Same rules as the current location note. The raw AxC value, not the resolved FOLIO location. Never absent, because `984 $b` is required. |
 | `administrativeNotes[]` | `"Axiell Current Location: <852 $b>"` | MARC `852 $b`, or `unknown` when absent | Keeps the raw AxC current location as an administrative note as well as the typed note. The label is in the string because an administrative note carries no type, and is also what the upsert matches on to reclaim the note. Always written, so an update cannot leave a stale location behind. |
-| `statisticalCodeIds[]` | `AXIELL` statistical code UUID | Constant, via `resolve_statistical_code` | Marks the record as synced. The code must exist in the tenant; an unknown code fails the record. On update the code is added if missing and the record's other codes are kept. |
-| `statisticalCodeIds[]` | Access statistical code UUID | MARC `506 $f` and `540 $a` together, via `ACCESS_STATISTICAL_CODE` and `resolve_statistical_code` | See the access statistical code table below. A pair outside the table gets no access code. The code must exist in the tenant; an unknown code fails the record. On update any access code already on the item is replaced, and the marker and every other code are kept. |
+| `statisticalCodeIds[]` | Access statistical code UUID | MARC `506 $f` and `540 $a` together, via `ACCESS_STATISTICAL_CODE` and `resolve_statistical_code` | See the access statistical code table below. A pair outside the table gets no access code. The code must exist in the tenant; an unknown code fails the record. On update any access code already on the item is replaced and every other code is kept. |
 
 ## How values are resolved to FOLIO UUIDs
 
@@ -197,7 +194,7 @@ silently substituted.
 ### Material type
 
 AxC `object_category` (`655 $a`) maps to a FOLIO material-type name. Matching is
-case-insensitive.
+case-insensitive. CSV: [`material-type.csv`](axiell-folio-mappings/material-type.csv).
 
 | AxC object_category (`655 $a`) | FOLIO material type |
 | --- | --- |
@@ -229,7 +226,8 @@ distribution behind this table, see
 ### Access category to item status
 
 `access_category` (`506 $f`) maps to a FOLIO item status. Case-insensitive.
-Values are FOLIO's fixed enum, so nothing is resolved against the tenant.
+Values are FOLIO's fixed enum, so nothing is resolved against the tenant. CSV:
+[`item-status.csv`](axiell-folio-mappings/item-status.csv).
 
 | AxC access category (`506 $f`) | FOLIO item status |
 | --- | --- |
@@ -272,7 +270,8 @@ settles requestability. See the options document, question 5.
 ### Loan type: from the use restriction
 
 The loan type comes from `540 $a`, the use restriction, which says how the item
-can be requested. Matching is case-insensitive.
+can be requested. Matching is case-insensitive. CSV:
+[`loan-type.csv`](axiell-folio-mappings/loan-type.csv).
 
 | `540 $a` (use restriction) | Loan type |
 | --- | --- |
@@ -293,11 +292,12 @@ effect here is unknown. See the options document, section 2.
 
 ### Access statistical code: from the access category and the use restriction
 
-The item carries one access statistical code alongside the `AXIELL` marker,
-chosen by `506 $f` and `540 $a` together (`ACCESS_STATISTICAL_CODE`). These are
+The item carries at most one access statistical code, chosen by `506 $f` and
+`540 $a` together (`ACCESS_STATISTICAL_CODE`). CSV:
+[`statistical-code.csv`](axiell-folio-mappings/statistical-code.csv). These are
 the agreed rows of the Access and Ordering status mapping
 (wellcomecollection/platform#6862). Both fields match case-insensitively. The
-instance and holdings carry the marker only.
+instance and holdings carry no statistical code from the sync.
 
 | `506 $f` (access category) | `540 $a` (use restriction) | Statistical code |
 | --- | --- | --- |
@@ -324,11 +324,19 @@ open item whose `540 $a` is still `Restricted` gets no access code.
 Each code is matched on its FOLIO code and must exist in the tenant; a code the
 tenant lacks fails the record. On update the upsert removes any access code
 already on the item, using the ids of every code in the table that the tenant
-holds (`PayloadMeta.access_statistical_code_ids`), and adds the new one. The
-marker and codes added in FOLIO are kept, so an access change in AxC moves the
-item from one code to another.
+holds (`PayloadMeta.access_statistical_code_ids`), and adds the new one. Codes added in FOLIO
+are kept, so an access change in AxC moves the item from one code to another.
+
+### The synced marker
+
+The instance carries the `Synched by Axiell` instance status (`SYNCED_INSTANCE_STATUS`),
+which is how staff and searches tell a synced instance apart. Holdings and items
+carry no marker of their own: they are reached through their instance, and the
+sync finds all three by the ids derived from the AxC GUID, not by the marker.
 
 ### Location rules
+
+CSV: [`locations.csv`](axiell-folio-mappings/locations.csv).
 
 The AxC normal location (`984 $b`) maps to a FOLIO location by the **leading code**
 of its hierarchy. AxC nests two ways at once: the path is `/`-separated and each
@@ -368,7 +376,7 @@ Used when the record has no value for a resolved field.
 | Identifier type | `Local identifier` |
 | Administrative note label | `Axiell Current Location` |
 | Item note types | `Axiell Current Location`, `Axiell Normal Location`, constants that must exist in the tenant |
-| Statistical code | `AXIELL`, a constant that must exist in the tenant |
+| Instance status | `Synched by Axiell`, a constant that must exist in the tenant |
 | Access statistical code | None: a pair outside the table gets no access code |
 | **Location** | **None, the record fails instead** |
 
@@ -401,4 +409,8 @@ Taken from `config.FIELDS`.
 - MARC extraction: `src/adapters/steps/axiell_folio_sync/mapping/marc.py`
 - payload contracts: `src/adapters/steps/axiell_folio_sync/mapping/payloads.py`
 
-Mapping version: `3.4.0` (`config.VERSION`).
+- mapping CSVs: `docs/axiell-folio-mappings/`, generated by
+  `src/adapters/steps/axiell_folio_sync/mapping/csv_export.py` (see
+  [Mapping CSVs](#mapping-csvs))
+
+Mapping version: `3.5.0` (`config.VERSION`).

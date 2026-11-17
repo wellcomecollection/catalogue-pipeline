@@ -1,0 +1,6 @@
+AxC normal location leading code (984$b),Institution,Campus,Library,FOLIO location (resolved),Notes
+215 or 183,Wellcome Collection,Euston Road (Axiell),Axiell sync,AxC Euston Road,Case-insensitive. First match wins.
+Deepstore,Wellcome Collection,Deepstore,Offsite (DS),AxC Deepstore,Case-insensitive. First match wins.
+starts with CLW,Wellcome Collection,Constantine London West,Axiell sync,AxC Constantine London West,Case-insensitive. First match wins.
+(any other code),,,,tenant location with that code or name,Record fails if the tenant does not know it.
+(absent),,,,,"Record fails: required, no default."
