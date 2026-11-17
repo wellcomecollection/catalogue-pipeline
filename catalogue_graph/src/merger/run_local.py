@@ -10,6 +10,7 @@ from merger.models.step_events import (
     MergeGroupEvent,
 )
 from merger.steps import commit, match, merge_group
+from models.pipeline_scope import PipelineIndexDates
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id
@@ -39,6 +40,8 @@ def environment_error(args: argparse.Namespace) -> str | None:
     if args.use_rest_api_table:
         if args.es_mode == "local":
             return "--use-rest-api-table needs --es-mode public, to write to that pipeline's cluster"
+        if not (args.index_date_merged and args.index_date_initial):
+            return "--use-rest-api-table needs --index-date-merged and --index-date-initial, the dates of the batch merger's indices"
         return None
     if args.es_mode != "local":
         return "--es-mode public needs --use-rest-api-table, to merge that pipeline's works"
@@ -51,7 +54,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Merge the components that changed since the last run."
     )
-    add_pipeline_event_args(parser, {"pipeline_date", "graph_date", "es_mode"})
+    add_pipeline_event_args(
+        parser,
+        {
+            "pipeline_date",
+            "graph_date",
+            "es_mode",
+            "index_date_merged",
+            "index_date_initial",
+        },
+    )
     parser.add_argument(
         "--job-id",
         type=str,
@@ -81,6 +93,9 @@ def main() -> None:
     event = MatchEvent(
         pipeline_date=args.pipeline_date,
         graph_date=args.graph_date,
+        index_dates=PipelineIndexDates(
+            merged=args.index_date_merged, initial=args.index_date_initial
+        ),
         job_id=args.job_id or create_job_id(),
         iceberg_snapshot_id=args.iceberg_snapshot_id,
     )

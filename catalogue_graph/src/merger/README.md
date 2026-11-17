@@ -6,9 +6,10 @@ reads the graph columns of every row in the `works_identified` Iceberg table (th
 append-only table the id minter writes to, defined in `id_minter/schemata.py`), computes
 connected components over merge-candidate links, and compares them with the components
 the previous run stored in S3. Every component that changed is merged again, and the
-merged works and initial images are written to indices of their own,
-`works-denormalised-python-{date}` and `images-initial-python-{date}`, so they can be
-compared with what the Scala merger wrote over the same period.
+merged works and initial images are written to dated `works-denormalised` and
+`images-initial` indices of their own, so they can be compared with what the Scala merger
+wrote over the same period. The pipeline passes their date in `index_dates`, and the
+batch merger's API key can write to those two indices only.
 
 * `matcher.py` loads the graph columns, keeps the current row of every work (highest
   `version`, then latest `last_modified`) and labels every work with its component id,
@@ -62,7 +63,8 @@ table `matcher.works_identified`, merges every changed group into a local Elasti
 and replaces the baseline under the dev prefix in S3. Pass `--match-only` to stop after
 finding the changed components.
 
-To run against a pipeline instead, pass its dates with `--use-rest-api-table` and
-`--es-mode public` together, so the run reads that pipeline's table (named with
+To run against a pipeline instead, pass its dates with `--use-rest-api-table`,
+`--es-mode public` and the batch merger's index dates (`--index-date-merged`,
+`--index-date-initial`), so the run reads that pipeline's table (named with
 `WORKS_IDENTIFIED_TABLE_NAME`), writes to its cluster and replaces its baseline. Other
 combinations are refused, as the baseline would record merges written somewhere else.

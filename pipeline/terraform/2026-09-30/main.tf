@@ -1,8 +1,9 @@
 locals {
   # Trial of the works_identified Iceberg table and the batch merger
-  # that read it (wellcomecollection/platform#6742, #6857). Also creates the
-  # indices the merger writes to, in elastic.tf.
+  # that read it (wellcomecollection/platform#6742, #6857).
   enable_experimental_merger = true
+  # The indices the batch merger writes to, defined in elastic.tf.
+  batch_merger_index_date = "2026-11-17"
 }
 
 module "pipeline" {
@@ -36,6 +37,7 @@ module "pipeline" {
   enable_image_inferrer_schedule               = true
 
   enable_experimental_merger = local.enable_experimental_merger
+  batch_merger_index_date    = local.batch_merger_index_date
 
   axiell_collection_path_source = "part_of"
 

@@ -67,16 +67,7 @@ locals {
       mappings_name = cfg.concepts.indexed
     } if try(cfg.concepts.indexed, null) != null && cfg.concepts.indexed != ""
   ]
-  # The batch merger's output, kept apart from the Scala merger's so the two can be compared
-  batch_merger_works_list = [
-    for idx in local.works_denormalised_list : merge(idx, { name = replace(idx.name, "works-denormalised-", "works-denormalised-python-") })
-  ]
-  batch_merger_images_list = [
-    for idx in local.images_initial_list : merge(idx, { name = replace(idx.name, "images-initial-", "images-initial-python-") })
-  ]
-  batch_merger_index_list = var.enable_experimental_merger ? concat(local.batch_merger_works_list, local.batch_merger_images_list) : []
-
-  index_list        = concat(local.works_source_list, local.works_denormalised_list, local.works_identified_list, local.works_indexed_list, local.images_initial_list, local.images_augmented_list, local.images_indexed_list, local.concepts_indexed_list, local.batch_merger_index_list)
+  index_list        = concat(local.works_source_list, local.works_denormalised_list, local.works_identified_list, local.works_indexed_list, local.images_initial_list, local.images_augmented_list, local.images_indexed_list, local.concepts_indexed_list)
   index_definitions = { for i in local.index_list : i.name => i }
 }
 
@@ -91,13 +82,13 @@ module "indices" {
 }
 
 locals {
+  # The batch merger writes only to its own dated indices while it is compared with the
+  # Scala merger, so it can never overwrite the indices the rest of the pipeline reads.
   batch_merger_permissions = {
-    for name, permissions in {
-      batch_merger = {
-        read  = []
-        write = [for idx in local.batch_merger_index_list : idx.name]
-      }
-    } : name => permissions if var.enable_experimental_merger
+    for date in compact([var.batch_merger_index_date]) : "batch_merger" => {
+      read  = []
+      write = ["works-denormalised-${date}", "images-initial-${date}"]
+    }
   }
 
   service_index_permissions = merge(local.batch_merger_permissions, {

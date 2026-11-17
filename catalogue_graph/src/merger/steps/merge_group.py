@@ -25,7 +25,8 @@ from utils.aws import df_from_s3_parquet, df_to_s3_parquet
 from utils.elasticsearch import (
     ElasticsearchMode,
     get_client,
-    get_standard_index_name,
+    get_images_initial_index_name,
+    get_merged_index_name,
     version_from_datetime,
 )
 from utils.logger import ExecutionContext, get_trace_id, setup_logging
@@ -54,8 +55,8 @@ def handler(
     es_client = es_client or get_client(
         config.MERGER_ES_API_KEY_NAME, event.pipeline_date, es_mode
     )
-    works_sink = ElasticsearchSink(es_client, works_index_name(event))
-    images_sink = ElasticsearchSink(es_client, images_index_name(event))
+    works_sink = ElasticsearchSink(es_client, get_merged_index_name(event))
+    images_sink = ElasticsearchSink(es_client, get_images_initial_index_name(event))
 
     members = changed.group_by("component_id").agg("id").sort("component_id")
     failed: set[str] = set()
@@ -88,16 +89,6 @@ def handler(
     )
     logger.info("Merged group", **result.model_dump())
     return result
-
-
-def works_index_name(event: MergeGroupEvent) -> str:
-    index_date = event.index_dates.merged or event.pipeline_date
-    return get_standard_index_name(config.MERGER_WORKS_INDEX_NAME, index_date)
-
-
-def images_index_name(event: MergeGroupEvent) -> str:
-    index_date = event.index_dates.initial or event.pipeline_date
-    return get_standard_index_name(config.MERGER_IMAGES_INDEX_NAME, index_date)
 
 
 def _snapshot_time(table: IcebergTable, snapshot_id: int) -> datetime:

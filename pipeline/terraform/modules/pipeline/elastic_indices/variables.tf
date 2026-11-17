@@ -51,8 +51,8 @@ variable "catalogue_account_services" {
   default = []
 }
 
-variable "enable_experimental_merger" {
-  type        = bool
-  default     = false
-  description = "Whether to create the batch merger's works-denormalised-python and images-initial-python indices, and an API key that writes to them. Set it with the pipeline module's variable of the same name."
+variable "batch_merger_index_date" {
+  type        = string
+  default     = null
+  description = "The date of the works-denormalised and images-initial indices the batch merger writes to, which index_config must define. Gives the batch merger an API key that writes to those two only."
 }

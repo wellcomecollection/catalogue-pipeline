@@ -119,6 +119,12 @@ variable "enable_experimental_merger" {
   description = "Whether the id-minter also appends each work it mints to the experimental works_identified Iceberg table, and the batch merger matches and merges from that table after each id-minter execution."
 }
 
+variable "batch_merger_index_date" {
+  type        = string
+  default     = null
+  description = "The date of the works-denormalised and images-initial indices the batch merger writes to. Set with the elastic_indices variable of the same name."
+}
+
 variable "image_inferrer_max_concurrency" {
   type        = number
   default     = 10

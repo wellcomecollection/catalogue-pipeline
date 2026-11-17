@@ -119,9 +119,6 @@ locals {
                 Payload      = "{% $states.input %}"
               }
               Output = "{% $states.result.Payload %}"
-              # Timeouts are Sandbox.Timedout on newer runtimes and Lambda.Unknown,
-              # like out-of-memory, on older ones. A group's writes are versioned
-              # by the snapshot time, so a re-run is safe.
               Retry = concat(local.batch_merger_lambda_retry, [
                 {
                   ErrorEquals     = ["Lambda.Unknown", "Sandbox.Timedout"]
@@ -241,11 +238,13 @@ data "aws_iam_policy_document" "batch_merger_group_access" {
     ]
   }
 
-  # The connection details and API key the Lambda reads at start-up.
+  # Only the cluster's address and the batch merger's own API key, so it can never pick
+  # up broader credentials.
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/*",
+      for name in ["private_host", "port", "protocol", "batch_merger/api_key"] :
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/${name}*"
     ]
   }
 }
@@ -393,5 +392,12 @@ module "batch_merger_trigger" {
     }
   }
 
-  input_template = "{\"pipeline_date\": \"${var.pipeline_date}\", \"graph_date\": \"${var.graph_date}\"}"
+  input_template = jsonencode({
+    pipeline_date = var.pipeline_date
+    graph_date    = var.graph_date
+    index_dates = {
+      merged  = var.batch_merger_index_date
+      initial = var.batch_merger_index_date
+    }
+  })
 }

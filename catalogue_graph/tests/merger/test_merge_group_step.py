@@ -14,6 +14,7 @@ from merger.models.step_events import MergeGroupEvent
 from merger.steps import merge_group
 from models.pipeline.format import ThreeDObjects
 from models.pipeline.identified.work import IdentifiedWork
+from models.pipeline_scope import PipelineIndexDates
 from tests.merger.support import SNAPSHOT_TIME, iceberg_table
 from tests.merger.works import (
     MIRO_SIERRA_REASON,
@@ -29,6 +30,7 @@ from utils.elasticsearch import version_from_datetime
 EVENT = MergeGroupEvent(
     pipeline_date="2026-01-01",
     graph_date="2026-01-02",
+    index_dates=PipelineIndexDates(merged="2026-11-17", initial="2026-11-17"),
     job_id="job-1",
     iceberg_snapshot_id=7,
     group=1,
@@ -114,7 +116,7 @@ def test_writes_merged_works_and_images_to_their_own_indices(
 ) -> None:
     run(monkeypatch)
 
-    works = written("works-denormalised-python-2026-01-01")
+    works = written("works-denormalised-2026-11-17")
     assert set(works) == {
         sierra.state.canonical_id,
         miro.state.canonical_id,
@@ -124,7 +126,7 @@ def test_writes_merged_works_and_images_to_their_own_indices(
     assert works[sierra.state.canonical_id]["_source"]["state"]["mergedTime"] == (
         "2026-11-17T09:30:00Z"
     )
-    images = written("images-initial-python-2026-01-01")
+    images = written("images-initial-2026-11-17")
     [image] = miro.data.image_data
     assert set(images) == {image.id.canonical_id}
     assert images[image.id.canonical_id]["_source"]["source"]["id"]["canonicalId"] == (
@@ -161,9 +163,7 @@ def test_a_component_that_cannot_be_read_fails_without_stopping_the_group(
 ) -> None:
     result, _ = run(monkeypatch, documents=documents)
 
-    assert set(written("works-denormalised-python-2026-01-01")) == {
-        lone.state.canonical_id
-    }
+    assert set(written("works-denormalised-2026-11-17")) == {lone.state.canonical_id}
     assert result.failed_component_count == 1
     assert failed_components() == ["c1"]
 
@@ -181,9 +181,7 @@ def test_a_component_that_fails_to_merge_does_not_stop_the_group(
 
     result, _ = run(monkeypatch)
 
-    assert lone.state.canonical_id not in written(
-        "works-denormalised-python-2026-01-01"
-    )
+    assert lone.state.canonical_id not in written("works-denormalised-2026-11-17")
     assert failed_components() == ["c2"]
 
 
@@ -217,9 +215,7 @@ def test_a_component_that_fails_to_convert_does_not_stop_the_group(
 
     result, _ = run(monkeypatch)
 
-    assert lone.state.canonical_id not in written(
-        "works-denormalised-python-2026-01-01"
-    )
+    assert lone.state.canonical_id not in written("works-denormalised-2026-11-17")
     assert failed_components() == ["c2"]
 
 
@@ -266,7 +262,7 @@ def test_components_are_written_a_batch_at_a_time(
 
     result, _ = run(monkeypatch)
 
-    assert set(written("works-denormalised-python-2026-01-01")) == {
+    assert set(written("works-denormalised-2026-11-17")) == {
         sierra.state.canonical_id,
         miro.state.canonical_id,
         lone.state.canonical_id,
