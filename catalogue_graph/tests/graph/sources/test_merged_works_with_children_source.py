@@ -269,9 +269,9 @@ def _matches(pattern: str, value: str) -> bool:
 WINDOW = {"start_time": "2025-01-01T11:45", "end_time": "2025-01-01T12:00"}
 
 
-def _index_work(work_id: str, path: str, merged_time: str) -> None:
+def _index_work(work_id: str, path: str, indexed_at: str) -> None:
     work = _make_work(work_id, path=path)
-    work["state"]["mergedTime"] = merged_time
+    work["indexed_at"] = indexed_at
     MockElasticsearchClient.index("works-denormalised-dev", work_id, work)
 
 
@@ -293,7 +293,7 @@ def _index_parent_and_children() -> None:
     _index_work("newchild", "A/Z", "2025-01-01T12:05:00Z")
 
 
-def test_window_child_query_bounds_merged_time_by_window_end() -> None:
+def test_window_child_query_bounds_indexed_at_by_window_end() -> None:
     event = BasePipelineEvent(
         pipeline_date="dev",
         graph_date="dev",
@@ -304,10 +304,24 @@ def test_window_child_query_bounds_merged_time_by_window_end() -> None:
     source = MergedWorksWithChildrenSource(event=event, es_client=es_client)
 
     must = source._get_child_source({"A"}).query["bool"]["must"]
-    assert must[2] == {"range": {"state.mergedTime": {"lte": "2025-01-01T12:00:00"}}}
+    bounds = {"lte": "2025-01-01T12:00:00"}
+    assert must[2] == {
+        "bool": {
+            "should": [
+                {"range": {"indexed_at": bounds}},
+                {
+                    "bool": {
+                        "must_not": {"exists": {"field": "indexed_at"}},
+                        "filter": {"range": {"state.mergedTime": bounds}},
+                    }
+                },
+            ],
+            "minimum_should_match": 1,
+        }
+    }
 
 
-def test_window_child_lookup_excludes_children_merged_after_window_end() -> None:
+def test_window_child_lookup_excludes_children_written_after_window_end() -> None:
     # The mock ignores the regexp, so every in-range work is treated as a child
     _index_parent_and_children()
     assert _stream_ids(window=WINDOW) == ["parent01", "oldchild"]
@@ -322,3 +336,49 @@ def test_child_lookup_unbounded_outside_window_mode(scope: dict) -> None:
 
     assert "newchild" in streamed_ids
     assert not any("range" in str(q) for q in MockElasticsearchClient.queries)
+
+
+def _index_timed_work(
+    work_id: str, merged_time: str, indexed_at: str | None = None
+) -> None:
+    work = _make_work(work_id)
+    work["state"]["mergedTime"] = merged_time
+    if indexed_at is not None:
+        work["indexed_at"] = indexed_at
+    MockElasticsearchClient.index("works-denormalised-dev", work_id, work)
+
+
+def _stream_window_ids() -> list[str]:
+    MockElasticsearchClient.apply_range_filters = True
+    event = BasePipelineEvent(
+        pipeline_date="dev",
+        graph_date="dev",
+        window=IncrementalWindow.model_validate(WINDOW),
+    )
+    source = MergedWorksSource(event, es_client=MockElasticsearchClient({}, ""))  # type: ignore[arg-type]
+    return sorted(w["state"]["canonicalId"] for w in source.stream_raw())
+
+
+def test_window_uses_merged_time_for_works_without_indexed_at() -> None:
+    # As in an index that doesn't stamp indexed_at
+    _index_timed_work("inside01", merged_time="2025-01-01T11:50:00Z")
+    _index_timed_work("outside1", merged_time="2025-01-01T11:00:00Z")
+
+    assert _stream_window_ids() == ["inside01"]
+
+
+def test_window_uses_indexed_at_over_merged_time() -> None:
+    # Matched before the window but written inside it, as after a merger backlog
+    _index_timed_work(
+        "latemrg1",
+        merged_time="2025-01-01T11:00:00Z",
+        indexed_at="2025-01-01T11:50:00Z",
+    )
+    # Matched inside the window but written before it, so an earlier window took it
+    _index_timed_work(
+        "earlywrt",
+        merged_time="2025-01-01T11:50:00Z",
+        indexed_at="2025-01-01T11:40:00Z",
+    )
+
+    assert _stream_window_ids() == ["latemrg1"]

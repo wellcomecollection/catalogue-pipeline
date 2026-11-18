@@ -18,6 +18,7 @@ https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync
 """
 
 from .builders import (
+    _access_statistical_code,
     _assemble_payloads,
     _extract_record,
     _item_status,
@@ -31,6 +32,9 @@ from .builders import (
 )
 from .config import (
     ACCESS_ITEM_STATUS,
+    ACCESS_STATISTICAL_CODE,
+    ACCESS_STATISTICAL_CODE_FIELD,
+    ACCESS_STATISTICAL_CODES,
     AXIELL_CURRENT_LOCATION_NOTE_TYPE,
     AXIELL_LOCATION_NOTE_PREFIX,
     AXIELL_NORMAL_LOCATION_NOTE_TYPE,
@@ -54,6 +58,7 @@ from .config import (
     NORMAL_LOCATION_FIELD,
     NORMAL_LOCATION_NOTE_TYPE_FIELD,
     RECORD_TYPE_ITEM,
+    SYNC_ITEM_STATUSES,
     SYNCED_STATISTICAL_CODE,
     SYNCED_STATISTICAL_CODE_FIELD,
     USE_RESTRICTION_LOAN_TYPE,
@@ -91,11 +96,15 @@ __all__ = [
     "HARVEST_FLAG_SPEC",
     "HOLDINGS_SOURCE_FIELD",
     "ACCESS_ITEM_STATUS",
+    "ACCESS_STATISTICAL_CODE",
+    "ACCESS_STATISTICAL_CODE_FIELD",
+    "ACCESS_STATISTICAL_CODES",
     "LOAN_TYPE_FIELD",
     "LOCAL_IDENTIFIER_FIELD",
     "LOCAL_IDENTIFIER_TYPE",
     "SYNCED_STATISTICAL_CODE",
     "SYNCED_STATISTICAL_CODE_FIELD",
+    "SYNC_ITEM_STATUSES",
     "CURRENT_LOCATION_FIELD",
     "CURRENT_LOCATION_NOTE_TYPE_FIELD",
     "LOCATION_RULES",
@@ -120,6 +129,7 @@ __all__ = [
     "Note",
     "PayloadMeta",
     "Status",
+    "_access_statistical_code",
     "_assemble_payloads",
     "_extract_record",
     "_folio_location",
