@@ -11,13 +11,17 @@ alarms for aborted, failed, and timed-out executions and supports shared default
 | `alarm_name_prefix` | Prefix used when constructing alarm names. | `string` | n/a |
 | `alarm_name_suffix` | Suffix appended to each alarm name. | `string` | `""` |
 | `default_alarm_configuration` | Map containing default values shared by all alarms. Supports `alarm_actions`, `period`, and `actions_enabled`. | `map(any)` | `{}` |
-| `alarm_overrides` | Map keyed by alarm type (`aborted`, `failed`, `timed_out`) providing overrides for the same keys accepted by `default_alarm_configuration`, plus `alarm_description`. | `map(any)` | `{}` |
+| `alarm_overrides` | Map keyed by alarm type (`aborted`, `failed`, `timed_out`) providing overrides for the same keys accepted by `default_alarm_configuration`, plus `alarm_description` and `severity`. | `map(any)` | `{}` |
+| `alarm_component` | Backplane Component name, set as the `backplane:component` tag and in the description prefix. | `string` | `"catalogue-graph"` |
+| `alarm_repository` | Owning repository, set as the `github.com/project-slug` tag. | `string` | `"wellcomecollection/catalogue-pipeline"` |
 
 Default alarm settings fall back to:
 
 - `alarm_actions = []`
 - `period = 300`
 - `actions_enabled = true`
+
+Severity follows the alert routing ADR: `failed` and `timed_out` are `medium`, `aborted` is `low`. Each alarm's description starts with `[component=NAME severity=LEVEL]`.
 
 ## Outputs
 

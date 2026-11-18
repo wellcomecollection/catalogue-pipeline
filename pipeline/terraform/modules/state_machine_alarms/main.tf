@@ -10,16 +10,19 @@ locals {
       alarm_suffix      = "aborted"
       metric_name       = "ExecutionsAborted"
       alarm_description = "ExecutionsAborted detected"
+      severity          = "low"
     }
     failed = {
       alarm_suffix      = "failed"
       metric_name       = "ExecutionsFailed"
       alarm_description = "ExecutionsFailed detected"
+      severity          = "medium"
     }
     timed_out = {
       alarm_suffix      = "timeout"
       metric_name       = "ExecutionsTimedOut"
       alarm_description = "ExecutionsTimedOut detected"
+      severity          = "medium"
     }
   }
 
@@ -29,6 +32,7 @@ locals {
       alarm_suffix      = alarm_definition.alarm_suffix
       metric_name       = alarm_definition.metric_name
       alarm_description = try(var.alarm_overrides[alarm_key]["alarm_description"], alarm_definition.alarm_description)
+      severity          = try(var.alarm_overrides[alarm_key]["severity"], alarm_definition.severity)
       alarm_actions     = try(var.alarm_overrides[alarm_key]["alarm_actions"], local.default_alarm_settings.alarm_actions)
       period            = try(var.alarm_overrides[alarm_key]["period"], local.default_alarm_settings.period)
       actions_enabled   = try(var.alarm_overrides[alarm_key]["actions_enabled"], local.default_alarm_settings.actions_enabled)
@@ -48,11 +52,17 @@ resource "aws_cloudwatch_metric_alarm" "state_machine" {
   statistic           = "Sum"
   threshold           = 0
   actions_enabled     = each.value.actions_enabled
-  alarm_description   = each.value.alarm_description
+  alarm_description   = "[component=${var.alarm_component} severity=${each.value.severity}] ${each.value.alarm_description}"
 
   dimensions = {
     StateMachineArn = var.state_machine_arn
   }
 
   alarm_actions = each.value.alarm_actions
+
+  tags = {
+    "backplane:component"     = var.alarm_component
+    "github.com/project-slug" = var.alarm_repository
+    severity                  = each.value.severity
+  }
 }

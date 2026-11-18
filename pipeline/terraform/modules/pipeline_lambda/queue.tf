@@ -4,7 +4,7 @@ locals {
 
 module "input_queue" {
   count  = local.create_queue ? 1 : 0
-  source = "github.com/wellcomecollection/terraform-aws-sqs.git//queue?ref=v1.5.1"
+  source = "github.com/wellcomecollection/terraform-aws-sqs.git//queue?ref=v1.6.0"
 
   queue_name = local.queue_name
 
@@ -13,6 +13,14 @@ module "input_queue" {
   max_receive_count          = var.queue_config.max_receive_count
   message_retention_seconds  = var.queue_config.message_retention_seconds
   alarm_topic_arn            = var.queue_config.dlq_alarm_arn
+
+  # Alarm tags and description prefix from the alert routing ADR (wellcomecollection/docs adr/alert_routing.md)
+  alarm_component  = "catalogue-graph"
+  alarm_repository = "wellcomecollection/catalogue-pipeline"
+
+  # Pipeline DLQs pass no topic; their alarm is kept, and says why it has no action
+  enable_dlq_not_empty_alarm = true
+  dlq_alarm_description      = var.queue_config.dlq_alarm_arn == null ? "Deliberately unrouted: the team treats catalogue pipeline DLQ messages as noise (adr/alert_routing.md)" : null
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_sqs_role_policy" {
