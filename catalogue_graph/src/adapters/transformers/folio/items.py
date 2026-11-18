@@ -31,8 +31,10 @@ FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
 def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
     # Hidden items are also left out when working out a bound-with item's location.
     items = [item for item in instance.items if _is_shown(item)]
-    locations = resolve_locations(items)
-    built = [_build_item(item, locations[item.id]) for item in items]
+    # So are items on order, whose own location is not shown.
+    shelved = [item for item in items if on_order_label(item.status) is None]
+    locations = resolve_locations(shelved)
+    built = [_build_item(item, locations.get(item.id)) for item in items]
     # A generated title is only useful for telling items apart. When every item has
     # the same one it adds nothing, so it is removed. That includes a lone "Copy 1".
     if (

@@ -70,6 +70,17 @@ Feature: FOLIO items on order
     And item "a" has the access method "OnlineRequest", the status "Open" and no note
     And item "b" has a location of type "on-order" labelled "Awaiting cataloguing for Wellcome Collection"
 
+  Scenario: An item on order does not decide a bound-with item's location
+    Given that item is in the location "bwith" named "bound in above" in the library "bwith"
+    And a FOLIO item "host"
+    And a FOLIO item "ordered"
+    And that item is in the location "wslom" named "Student Coll. (Med Lit)" in the library "Open shelves"
+    And that item has the status "On order"
+    When I transform the MARC record
+    Then item "a" has a location of type "closed-stores" labelled "Closed stores"
+    And item "a" has the access method "NotRequestable", no status and the "top-item" note
+    And item "ordered" has a location of type "on-order" labelled "Ordered for Wellcome Collection"
+
   Scenario: Every item on order is shown
     Sierra's order items have no identifier, so identical ones were merged. Each
     FOLIO item is a copy with its own identifier, so none is merged.
