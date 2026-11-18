@@ -127,7 +127,19 @@ locals {
                   BackoffRate     = 2.0
                 }
               ])
+              # A failed group must not stop the others reaching the baseline; Commit
+              # counts its components as failed.
+              Catch = [
+                {
+                  ErrorEquals = ["States.ALL"]
+                  Next        = "GroupFailed"
+                }
+              ]
               End = true
+            }
+            GroupFailed = {
+              Type = "Pass"
+              End  = true
             }
           }
         }

@@ -20,7 +20,7 @@ class MatchEvent(BasePipelineEvent):
         return [config.MERGER_S3_PREFIX]
 
     @property
-    def components_s3_uri(self) -> str:
+    def baseline_s3_uri(self) -> str:
         """The components of the last run whose merged works were all written."""
         parts = [
             f"graph-{self.graph_date}",

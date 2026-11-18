@@ -1,5 +1,5 @@
-"""Replaces the components baseline with the run's components once every group is
-merged. Components that failed are left out, so the next run sees them as changed and
+"""Replaces the components baseline with the run's components once every group has
+run. Components that failed are left out, so the next run sees them as changed and
 merges them again."""
 
 import typing
@@ -21,12 +21,11 @@ def handler(
 
     failed: list[str] = []
     for group in range(event.group_count):
-        frame = df_from_s3_parquet(event.failed_components_s3_uri(group))
-        failed += frame["component_id"].to_list()
+        failed += _failed_components(event, group)
     components = df_from_s3_parquet(event.get_s3_uri("components"))
     df_to_s3_parquet(
         components.filter(~pl.col("component_id").is_in(failed)),
-        event.components_s3_uri,
+        event.baseline_s3_uri,
     )
     # Every run writes a copy of the whole graph, which nothing reads once it is the
     # baseline, and the bucket has no lifecycle rule to expire them. The run's small
@@ -35,6 +34,18 @@ def handler(
 
     logger.info("Committed components", failed_components=len(failed))
     return CommitResult(failed_component_count=len(failed))
+
+
+def _failed_components(event: CommitEvent, group: int) -> list[str]:
+    """The group's failed components. A group without a failed_components file did not
+    finish, so all of its components count as failed."""
+    try:
+        frame = df_from_s3_parquet(event.failed_components_s3_uri(group))
+    except OSError:
+        logger.warning("Group did not finish", group=group)
+        changed = df_from_s3_parquet(event.get_s3_uri("changed_components"))
+        frame = changed.filter(pl.col("group") == group)
+    return frame["component_id"].unique().to_list()
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:

@@ -2,7 +2,8 @@
 
 One work becomes the target and takes fields from the others. The sources a rule
 claimed are redirected to the target; the rest are left untouched. A TEI work's
-internal works are emitted alongside it, and deleted when their stub goes.
+internal works are returned alongside it, and deleted when the TEI work is deleted
+or no longer lists them.
 """
 
 from collections.abc import Sequence

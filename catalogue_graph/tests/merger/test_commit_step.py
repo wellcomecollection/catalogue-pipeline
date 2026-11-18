@@ -1,10 +1,11 @@
 """The commit step: replaces the baseline with the run's components, less the failed ones."""
 
 import polars as pl
+import pytest
 
 from merger.models.step_events import CommitEvent
 from merger.steps import commit
-from tests.merger.support import components, labelled
+from tests.merger.support import components, labelled, s3_read_error
 from tests.mocks import MockS3Client, MockSmartOpen
 from utils.aws import df_from_s3_parquet, df_to_s3_parquet
 
@@ -28,7 +29,7 @@ def run(failed: dict[int, list[str]]) -> commit.CommitResult:
 def test_replaces_the_baseline_with_the_runs_components() -> None:
     result = run({})
 
-    baseline = df_from_s3_parquet(EVENT.components_s3_uri)
+    baseline = df_from_s3_parquet(EVENT.baseline_s3_uri)
     assert labelled(baseline) == {"A": "AB", "C": "CD", "E": "E"}
     assert result.failed_component_count == 0
 
@@ -36,9 +37,31 @@ def test_replaces_the_baseline_with_the_runs_components() -> None:
 def test_leaves_failed_components_out_so_the_next_run_retries_them() -> None:
     result = run({0: ["A"], 1: ["E"]})
 
-    baseline = df_from_s3_parquet(EVENT.components_s3_uri)
+    baseline = df_from_s3_parquet(EVENT.baseline_s3_uri)
     assert labelled(baseline) == {"C": "CD"}
     assert result.failed_component_count == 2
+
+
+def test_leaves_out_every_component_of_a_group_that_did_not_finish(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    changed = pl.DataFrame(
+        {"id": ["A", "B", "E"], "component_id": ["A", "A", "E"], "group": [0, 0, 1]}
+    )
+    df_to_s3_parquet(changed, EVENT.get_s3_uri("changed_components"))
+    unfinished = EVENT.failed_components_s3_uri(1)
+
+    def read(uri: str) -> pl.DataFrame:
+        if uri == unfinished:
+            raise s3_read_error("NoSuchKey")
+        return df_from_s3_parquet(uri)
+
+    monkeypatch.setattr(commit, "df_from_s3_parquet", read)
+    result = run({})
+
+    baseline = df_from_s3_parquet(EVENT.baseline_s3_uri)
+    assert labelled(baseline) == {"A": "AB", "C": "CD"}
+    assert result.failed_component_count == 1
 
 
 def test_deletes_the_runs_copy_of_the_components() -> None:
@@ -54,5 +77,5 @@ def test_a_run_with_no_groups_commits_its_components() -> None:
 
     commit.handler(no_groups)
 
-    assert labelled(df_from_s3_parquet(no_groups.components_s3_uri)) == {"A": "A"}
-    assert no_groups.components_s3_uri in MockSmartOpen.file_lookup
+    assert labelled(df_from_s3_parquet(no_groups.baseline_s3_uri)) == {"A": "A"}
+    assert no_groups.baseline_s3_uri in MockSmartOpen.file_lookup

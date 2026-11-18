@@ -23,8 +23,8 @@ batch merger's API key can write to those two indices only.
 * `merge.py` merges one component. It first splits off bibs linked only through a shared
   Miro work, and audiovisual e-bibs with the works linked to them, then chooses a target
   in each part and merges every field into it with the rules in `rules/`. Source works claimed
-  by a rule are redirected to the target. A TEI work's internal works are emitted beside
-  it, and deleted when their stub goes.
+  by a rule are redirected to the target. A TEI work's internal works are output
+  alongside it, and deleted when the TEI work is deleted or no longer lists them.
 
 The batch merger state machine runs these steps after every id-minter run:
 
@@ -45,8 +45,9 @@ The batch merger state machine runs these steps after every id-minter run:
    deletes the run's copy. A failed component ends up missing from the baseline, so the
    next run sees it as changed and merges it again. If any failed, the execution fails
    after the commit, so the alarm reports them while the rest of the catalogue moves on.
-   An error that is not about one component, such as Elasticsearch being unreachable,
-   fails the run before the commit, and the next run merges everything again.
+   A group that fails as a whole, for example because it timed out or Elasticsearch
+   was unreachable, writes no `failed_components` file, so all of its components count
+   as failed.
 
 A pipeline without a baseline merges every component on its first run; delete the
 baseline to merge everything again. A run that starts while another is still going
@@ -66,5 +67,10 @@ finding the changed components.
 To run against a pipeline instead, pass its dates with `--use-rest-api-table`,
 `--es-mode public` and the batch merger's index dates (`--index-date-merged`,
 `--index-date-initial`), so the run reads that pipeline's table (named with
-`WORKS_IDENTIFIED_TABLE_NAME`), writes to its cluster and replaces its baseline. Other
-combinations are refused, as the baseline would record merges written somewhere else.
+`WORKS_IDENTIFIED_TABLE_NAME`), writes to its cluster and replaces its baseline. With
+`--use-rest-api-table` alone, the pipeline's works are merged into a local Elasticsearch
+and the baseline stays under the dev prefix.
+
+The local table is never written to the public cluster, and a pipeline's baseline is
+only replaced by a run that read its table and wrote to its cluster. Otherwise the
+pipeline's next run would skip changes that never reached its indices.
