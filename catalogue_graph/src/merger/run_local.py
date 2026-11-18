@@ -1,5 +1,5 @@
-"""Runs the batch merger locally, as its state machine does: matches, merges every
-changed group, then replaces the baseline."""
+"""Runs the batch merger's steps locally, in the order its state machine runs them in
+AWS: match, merge every changed group, then replace the baseline."""
 
 import argparse
 

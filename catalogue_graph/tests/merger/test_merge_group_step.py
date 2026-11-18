@@ -250,7 +250,7 @@ def test_a_group_whose_snapshot_has_expired_fails(
 def test_components_are_written_a_batch_at_a_time(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(merge_group, "WRITE_BATCH_SIZE", 1)
+    monkeypatch.setattr(merge_group, "COMPONENTS_PER_WRITE", 1)
     MockElasticsearchClient.bulk_errors = [
         {
             "index": {

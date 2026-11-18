@@ -28,7 +28,9 @@ def handler(
         components.filter(~pl.col("component_id").is_in(failed)),
         event.components_s3_uri,
     )
-    # The run's copy holds the whole graph; its changed components are kept.
+    # Every run writes a copy of the whole graph, which nothing reads once it is the
+    # baseline, and the bucket has no lifecycle rule to expire them. The run's small
+    # changed_components.parquet stays, as a record of what it merged.
     delete_s3_object(event.get_s3_uri("components"))
 
     logger.info("Committed components", failed_components=len(failed))

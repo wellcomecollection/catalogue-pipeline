@@ -33,8 +33,9 @@ from utils.logger import ExecutionContext, get_trace_id, setup_logging
 
 logger = structlog.get_logger(__name__)
 
-# Components whose merged works and images go to Elasticsearch in one bulk write each.
-WRITE_BATCH_SIZE = 1_000
+# How many components are merged before their documents are sent to Elasticsearch,
+# which the client splits into bulk requests of 500.
+COMPONENTS_PER_WRITE = 1_000
 
 
 def handler(
@@ -60,7 +61,7 @@ def handler(
 
     members = changed.group_by("component_id").agg("id").sort("component_id")
     failed: set[str] = set()
-    for batch in batched(members.iter_rows(), WRITE_BATCH_SIZE):
+    for batch in batched(members.iter_rows(), COMPONENTS_PER_WRITE):
         works: dict[str, list[Document]] = {}
         images: dict[str, list[Document]] = {}
         for component_id, ids in batch:
