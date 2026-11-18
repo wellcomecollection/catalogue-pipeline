@@ -1,4 +1,5 @@
-"""Which work in a merge group becomes the target the others are merged into."""
+"""The order in which a merge group's works are preferred, as the target the others
+are merged into or for any other role."""
 
 from collections.abc import Sequence
 
@@ -14,7 +15,6 @@ from merger.rules.predicates import (
 )
 from models.pipeline.identified.work import IdentifiedWork, VisibleIdentifiedWork
 
-# The order in which target works are tried.
 PRECEDENCE = (
     ebsco_work,
     tei_work,
@@ -25,7 +25,7 @@ PRECEDENCE = (
 )
 
 
-def choose_target(
+def first_by_precedence(
     works: Sequence[IdentifiedWork], satisfying: Predicate = any_work
 ) -> VisibleIdentifiedWork | None:
     """The first work in precedence order that satisfies the predicate, if it is visible"""
