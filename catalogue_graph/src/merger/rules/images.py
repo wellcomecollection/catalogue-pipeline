@@ -21,7 +21,7 @@ from merger.rules.predicates import (
     single_digital_item_mets_work,
     single_digital_item_miro_work,
 )
-from merger.rules.support import copy_licence_from
+from merger.rules.support import single_licence, with_licence
 from models.pipeline.identified.work import IdentifiedWork, VisibleIdentifiedWork
 from models.pipeline.image import ImageData
 
@@ -103,7 +103,8 @@ def merge_images(
     mets = MetsPictureAndEphemeraImages.apply(target, sources)
     mets_images = mets.value if mets else []
     miro = PairedMiroImages.apply(target, sources)
-    miro_images = [
-        copy_licence_from(image, mets_images) for image in (miro.value if miro else [])
-    ]
+    miro_images = miro.value if miro else []
+    licence = single_licence(mets_images) if miro_images else None
+    if licence is not None:
+        miro_images = [with_licence(image, licence) for image in miro_images]
     return MergedField(mets_images + miro_images, claimed_by(rules, target, sources))
