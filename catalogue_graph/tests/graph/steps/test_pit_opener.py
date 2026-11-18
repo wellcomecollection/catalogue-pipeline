@@ -69,11 +69,13 @@ def test_counts_use_the_window_on_each_index_time_field(
 
     pit_opener.handler(_event(window=WINDOW))
 
-    fields = [
-        next(iter(call.kwargs["query"]["range"]))
-        for call in es_client.count.call_args_list
-    ]
-    assert fields == ["state.mergedTime", "state.augmentedTime"]
+    merged_query, augmented_query = (
+        call.kwargs["query"] for call in es_client.count.call_args_list
+    )
+    indexed_at_range, without_indexed_at = merged_query["bool"]["should"]
+    assert list(indexed_at_range["range"]) == ["indexed_at"]
+    assert list(without_indexed_at["bool"]["filter"]["range"]) == ["state.mergedTime"]
+    assert list(augmented_query["range"]) == ["state.augmentedTime"]
 
 
 def test_opens_pits_without_counting_outside_window_mode(
