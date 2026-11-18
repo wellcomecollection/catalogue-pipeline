@@ -1081,6 +1081,20 @@ def create_work_with_rarely_populated_fields() -> None:
     )
 
 
+def create_works_without_titles() -> None:
+    """Create works that pin where `sort=title` puts works without a usable title."""
+    untitled = create_visible_merged_work()
+    untitled.data.title = None
+    empty_title = create_visible_merged_work()
+    empty_title.data.title = ""
+
+    save_works(
+        [untitled, empty_title],
+        description="works with no title and with an empty title",
+        doc_id="works.title-sort-untitled",
+    )
+
+
 def generate_all() -> None:
     reset()
 
@@ -1110,6 +1124,8 @@ def generate_all() -> None:
     create_archive_works()
     create_works_with_sortable_collection_paths()
     create_work_with_rarely_populated_fields()
+    # Last, so the seeded RNG leaves every earlier document unchanged.
+    create_works_without_titles()
 
     print(f"Test documents written to {TEST_DOCUMENTS_DIR}")
 
