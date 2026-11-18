@@ -120,25 +120,27 @@ def is_available_online(item: Item) -> bool:
     )
 
 
-def copy_licence_from(image: ImageData, sources: list[ImageData]) -> ImageData:
-    """The image with the sources' licence, when they agree on exactly one."""
+def single_licence(images: Sequence[ImageData]) -> Id | None:
+    """The one licence the images share. Returns None when they carry none, or more
+    than one."""
     licences: list[Id] = []
-    for source in sources:
-        for location in source.locations:
+    for image in images:
+        for location in image.locations:
             if location.license is not None and location.license not in licences:
                 licences.append(location.license)
 
-    if len(licences) != 1:
-        if licences:
-            logger.warning(
-                "Multiple source licences present, leaving the original licence",
-                licences=[licence.id for licence in licences],
-            )
-        return image
+    if len(licences) > 1:
+        logger.warning(
+            "Multiple source licences present, leaving the original licence",
+            licences=[licence.id for licence in licences],
+        )
+        return None
+    return licences[0] if licences else None
 
+
+def with_licence(image: ImageData, licence: Id) -> ImageData:
     locations = [
-        location.model_copy(update={"license": licences[0]})
-        for location in image.locations
+        location.model_copy(update={"license": licence}) for location in image.locations
     ]
     return image.model_copy(update={"locations": locations})
 

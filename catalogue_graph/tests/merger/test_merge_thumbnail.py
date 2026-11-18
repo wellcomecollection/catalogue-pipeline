@@ -108,7 +108,10 @@ def test_the_miro_thumbnail_comes_from_the_work_with_the_smallest_id() -> None:
 def test_a_restricted_digital_location_suppresses_the_thumbnail(
     target: VisibleIdentifiedWork,
 ) -> None:
-    assert merge_thumbnail(target, [*miro_works, mets]).value is None
+    result = merge_thumbnail(target, [*miro_works, mets])
+
+    assert result.value is None
+    assert same_elements(result.claimed, [*miro_works, mets])
 
 
 @pytest.mark.parametrize(
