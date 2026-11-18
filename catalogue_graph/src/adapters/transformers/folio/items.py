@@ -10,6 +10,11 @@ from adapters.transformers.folio.access_conditions import (
     is_access_note,
 )
 from adapters.transformers.folio.locations import ResolvedLocation, resolve_locations
+from adapters.transformers.folio.on_order import (
+    ORDER_CLOSED_STATUS,
+    on_order_label,
+    on_order_location,
+)
 from adapters.transformers.marc.predecessor_identifier import (
     extract_sierra_item_predecessor_id,
 )
@@ -24,10 +29,12 @@ FOLIO_ITEM_IDENTIFIER_TYPE = Id(id="folio-item")
 
 
 def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
-    # Suppressed items are never shown, nor do they type a bound-with item.
-    items = [item for item in instance.items if not item.suppress_from_discovery]
-    locations = resolve_locations(items)
-    built = [_build_item(item, locations[item.id]) for item in items]
+    # Hidden items are also left out when working out a bound-with item's location.
+    items = [item for item in instance.items if _is_shown(item)]
+    # So are items on order, whose own location is not shown.
+    shelved = [item for item in items if on_order_label(item.status) is None]
+    locations = resolve_locations(shelved)
+    built = [_build_item(item, locations.get(item.id)) for item in items]
     # A generated title is only useful for telling items apart. When every item has
     # the same one it adds nothing, so it is removed. That includes a lone "Copy 1".
     if (
@@ -37,6 +44,11 @@ def extract_physical_items(instance: FolioEnrichedInstance) -> list[Item]:
     ):
         return [item.model_copy(update={"title": None}) for item in built]
     return built
+
+
+def _is_shown(item: FolioEnrichedItem) -> bool:
+    # Suppressed items and items that will never arrive are not shown.
+    return not item.suppress_from_discovery and item.status != ORDER_CLOSED_STATUS
 
 
 def _build_item(
@@ -54,6 +66,15 @@ def _build_item(
         predecessor_identifier=predecessor,
     )
     title = _item_title(item)
+    if (label := on_order_label(item.status)) is not None:
+        # Still being acquired, so its location and access condition don't apply yet.
+        return Item(
+            id=identifier,
+            title=title,
+            note=item.display_note,
+            locations=[on_order_location(label)],
+        )
+
     if item_location is None:
         # No location to carry an access condition, so the display note stays on the item.
         return Item(id=identifier, title=title, note=item.display_note)
