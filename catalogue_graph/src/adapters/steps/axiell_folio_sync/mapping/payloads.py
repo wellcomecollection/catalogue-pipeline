@@ -49,9 +49,9 @@ class Instance(BaseModel):
     source: str = "FOLIO"
     instanceTypeId: str
     identifiers: list[Identifier] | None = None
-    # The AXIELL synced marker. Merged on update, keeping the record's other
-    # codes, which the tenant uses for access status.
-    statisticalCodeIds: list[str] | None = None
+    # The Synched by Axiell instance status, the synced marker. Overwritten on update:
+    # FOLIO allows one status, so a status set by hand is replaced.
+    statusId: str
     # A selected record is never suppressed. Sending both flags on every write
     # is what restores a record suppressed when Harvest was unticked, and it
     # also clears a suppression set by hand in FOLIO, since FOLIO does not
@@ -66,10 +66,8 @@ class Holdings(BaseModel):
     instanceId: str  # the instance's derived id
     sourceId: str
     permanentLocationId: str
-    # The AxC GUID, as a label for staff: the holdings id is derived from it but
-    # is not it. Merged on update, keeping any other entries.
-    formerIds: list[str] | None = None
-    statisticalCodeIds: list[str] | None = None
+    # No formerIds: the sync finds the holdings by its derived id, and staff
+    # reach the GUID through the instance, whose id it is.
     # Cleared on every write, as on the instance.
     discoverySuppress: bool = False
 
@@ -87,9 +85,10 @@ class Item(BaseModel):
     notes: list[Note] | None = None
     # Plain untyped strings; no tenant note type needed.
     administrativeNotes: list[str] | None = None
-    # The synced marker, as on the holdings, and the access statistical code
-    # from 506$f and 540$a when the pair maps to one. No formerIds: the FOLIO
-    # transformer reads an item's formerIds as its Sierra item number.
+    # The access statistical code from 506$f and 540$a when the pair maps to
+    # one, otherwise empty. Merged on update, keeping codes set in FOLIO. No
+    # formerIds: the FOLIO transformer reads an item's formerIds as its Sierra
+    # item number.
     statisticalCodeIds: list[str] | None = None
     # Cleared on every write, as on the instance.
     discoverySuppress: bool = False

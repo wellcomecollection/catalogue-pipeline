@@ -1,0 +1,12 @@
+AxC access category (506$f),FOLIO item status,Notes
+OPEN,Available,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+OPENWITHADVISORY,Available,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+RESTRICTED,Available,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+PERMISSIONREQUIRED,Restricted,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+SAFEGUARDED,Restricted,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+CLOSED,Unavailable,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+MISSING,Missing,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+DEACCESSIONED,Withdrawn,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+DATAISSUES,Unknown,"Case-insensitive. On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+(absent),Unavailable,"On update, applied only while FOLIO holds a status the sync sets; a circulation status is kept."
+(unlisted),,Record fails.

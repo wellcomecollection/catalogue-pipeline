@@ -1,0 +1,10 @@
+AxC use restriction (540$a),FOLIO loan type,Notes
+Online request,Can circulate,Case-insensitive.
+Restricted,Can circulate,Case-insensitive.
+By appointment,Unavailable,Case-insensitive.
+Unavailable,Unavailable,Case-insensitive.
+By approval,Unavailable,Case-insensitive.
+Missing,Unavailable,Case-insensitive.
+Deaccessioned,Unavailable,Case-insensitive.
+Manual request,Unavailable,Case-insensitive.
+(absent or unlisted),Unavailable,The raw AxC term is never passed to the tenant.

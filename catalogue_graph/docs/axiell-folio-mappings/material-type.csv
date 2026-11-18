@@ -1,0 +1,12 @@
+AxC object category (655$a),FOLIO material type,Notes
+Archives - Non-digital,archive,Case-insensitive.
+Archives - Digital,archive,Case-insensitive.
+Archives - Hybrid,archive,Case-insensitive.
+Moving Image - Non-digital,film,Case-insensitive.
+Moving Image - Digital,video format non-requestable,Case-insensitive.
+Sound - Non-digital,audio format requestable,Case-insensitive.
+Sound - Digital,audio format non-requestable,Case-insensitive.
+Visual Material,non-projected graphic,Case-insensitive.
+Pictures,non-projected graphic,Case-insensitive.
+(absent),,"Record fails: required, no default."
+(unlisted),,Record fails: the table is the agreed vocabulary.

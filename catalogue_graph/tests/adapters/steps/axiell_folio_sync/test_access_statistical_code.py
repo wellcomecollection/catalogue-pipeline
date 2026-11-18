@@ -1,8 +1,8 @@
 """The access statistical code on the item, from 506$f and 540$a together.
 
 The agreed rows of the Access and Ordering status mapping
-(wellcomecollection/platform#6862). The item also keeps the AXIELL marker; the
-instance and holdings carry the marker only.
+(wellcomecollection/platform#6862). The instance and holdings carry no
+statistical code.
 """
 
 from __future__ import annotations
@@ -19,8 +19,6 @@ from adapters.steps.axiell_folio_sync.mapping.payloads import MappedPayloads
 
 from .test_item_mapping import FakeRefCache, _record_with_access
 
-MARKER_ID = "axiell-uuid"
-
 
 class TenantRefCache(FakeRefCache):
     """Resolves statistical codes the way the tenant would: each code its own id,
@@ -32,8 +30,6 @@ class TenantRefCache(FakeRefCache):
     def resolve_statistical_code(self, code: str | None) -> str | None:
         if code is None or code in self.missing:
             return None
-        if code == "AXIELL":
-            return MARKER_ID
         return f"{code.lower().replace(' ', '-')}-uuid"
 
 
@@ -94,7 +90,7 @@ AGREED = [
 def test_an_agreed_pair_gives_its_access_code(
     category: str, use_restriction: str, code: str
 ) -> None:
-    assert _item_codes(category, use_restriction) == [MARKER_ID, _id(code)]
+    assert _item_codes(category, use_restriction) == [_id(code)]
 
 
 def test_the_table_holds_exactly_the_agreed_pairs() -> None:
@@ -107,10 +103,7 @@ def test_the_table_holds_exactly_the_agreed_pairs() -> None:
 
 
 def test_matching_is_case_insensitive_on_both_fields() -> None:
-    assert _item_codes("Restricted", "ONLINE REQUEST") == [
-        MARKER_ID,
-        _id("RESTRICTED"),
-    ]
+    assert _item_codes("Restricted", "ONLINE REQUEST") == [_id("RESTRICTED")]
 
 
 @pytest.mark.parametrize(
@@ -127,17 +120,21 @@ def test_matching_is_case_insensitive_on_both_fields() -> None:
         (None, "Online request"),
     ],
 )
-def test_a_pair_outside_the_table_gets_the_marker_only(
+def test_a_pair_outside_the_table_gets_no_code(
     category: str | None, use_restriction: str | None
 ) -> None:
-    assert _item_codes(category, use_restriction) == [MARKER_ID]
+    """Empty rather than absent, so the upsert still removes an old access code."""
+    item = _mapped(category, use_restriction).item
+
+    assert item.statisticalCodeIds == []
+    assert item.model_dump(exclude_none=True)["statisticalCodeIds"] == []
 
 
-def test_the_instance_and_holdings_carry_the_marker_only() -> None:
+def test_the_instance_and_holdings_carry_no_statistical_codes() -> None:
     mapped = _mapped("OPEN", "Online request")
 
-    assert mapped.instance.statisticalCodeIds == [MARKER_ID]
-    assert mapped.holdings.statisticalCodeIds == [MARKER_ID]
+    assert "statisticalCodeIds" not in mapped.instance.model_dump(exclude_none=True)
+    assert "statisticalCodeIds" not in mapped.holdings.model_dump(exclude_none=True)
 
 
 def test_an_access_code_the_tenant_lacks_fails_the_record() -> None:
@@ -149,7 +146,7 @@ def test_an_access_code_the_tenant_lacks_fails_the_record() -> None:
 
 def test_the_meta_lists_every_access_code_the_tenant_has() -> None:
     """The upsert replaces any of these already on the item. A code the tenant
-    lacks is left out, and the marker is never among them."""
+    lacks is left out."""
     ref = TenantRefCache(missing=frozenset({"DONOR PERMISSION"}))
 
     ids = _mapped("OPEN", "Online request", ref).meta.access_statistical_code_ids
@@ -157,4 +154,3 @@ def test_the_meta_lists_every_access_code_the_tenant_has() -> None:
     assert set(ids) == {
         _id(code) for code in ACCESS_STATISTICAL_CODES - {"DONOR PERMISSION"}
     }
-    assert MARKER_ID not in ids

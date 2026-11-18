@@ -1,0 +1,30 @@
+AxC access category (506$f),AxC use restriction (540$a),FOLIO statistical code,Notes
+OPEN,Online request,ONLINE REQUEST,Item only. Both case-insensitive.
+OPEN,Manual request,MANUAL REQUEST,Item only. Both case-insensitive.
+OPEN,By appointment,BY APPOINTMENT,Item only. Both case-insensitive.
+OPENWITHADVISORY,Online request,ONLINE REQUEST,Item only. Both case-insensitive.
+OPENWITHADVISORY,Manual request,MANUAL REQUEST,Item only. Both case-insensitive.
+OPENWITHADVISORY,By appointment,BY APPOINTMENT,Item only. Both case-insensitive.
+OPENWITHADVISORY,Unavailable,UNAVAILABLE,Item only. Both case-insensitive.
+RESTRICTED,Restricted,RESTRICTED,Item only. Both case-insensitive.
+RESTRICTED,Online request,RESTRICTED,Item only. Both case-insensitive.
+RESTRICTED,By appointment,BY APPOINTMENT,Item only. Both case-insensitive.
+RESTRICTED,Unavailable,UNAVAILABLE,Item only. Both case-insensitive.
+PERMISSIONREQUIRED,By approval,DONOR PERMISSION,Item only. Both case-insensitive.
+PERMISSIONREQUIRED,By appointment,DONOR PERMISSION,Item only. Both case-insensitive.
+SAFEGUARDED,By approval,SAFEGUARDED,Item only. Both case-insensitive.
+SAFEGUARDED,By appointment,SAFEGUARDED,Item only. Both case-insensitive.
+CLOSED,Unavailable,CLOSED,Item only. Both case-insensitive.
+DATAISSUES,Online request,ONLINE REQUEST,Item only. Both case-insensitive.
+DATAISSUES,Manual request,MANUAL REQUEST,Item only. Both case-insensitive.
+DATAISSUES,By appointment,BY APPOINTMENT,Item only. Both case-insensitive.
+DATAISSUES,Unavailable,UNAVAILABLE,Item only. Both case-insensitive.
+DATAISSUES,By approval,DONOR PERMISSION,Item only. Both case-insensitive.
+DATAISSUES,Restricted,ONLINE REQUEST,Item only. Both case-insensitive.
+MISSING,Online request,ONLINE REQUEST,Item only. Both case-insensitive.
+MISSING,Manual request,MANUAL REQUEST,Item only. Both case-insensitive.
+MISSING,By appointment,BY APPOINTMENT,Item only. Both case-insensitive.
+MISSING,Unavailable,UNAVAILABLE,Item only. Both case-insensitive.
+MISSING,By approval,DONOR PERMISSION,Item only. Both case-insensitive.
+MISSING,Restricted,ONLINE REQUEST,Item only. Both case-insensitive.
+"(any other pair, or either absent)",,,No access code. The record still syncs.

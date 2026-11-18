@@ -10,7 +10,6 @@ roll back siblings — that is the callers' job.
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import Any
 
 import structlog
@@ -150,14 +149,6 @@ def _merge_identifiers(existing: list, incoming: list) -> list:
     return kept + list(incoming)
 
 
-def _same_value(value: object) -> object:
-    return value
-
-
-def _casefold(value: object) -> object:
-    return value.casefold() if isinstance(value, str) else value
-
-
 def _merge_statistical_codes(
     existing: list, incoming: list, owned: frozenset[str]
 ) -> list:
@@ -173,27 +164,18 @@ def _merge_statistical_codes(
     return _merge_unique(kept, incoming)
 
 
-def _merge_unique(
-    existing: list,
-    incoming: list,
-    *,
-    key: Callable[[object], object] = _same_value,
-) -> list:
+def _merge_unique(existing: list, incoming: list) -> list:
     """Keep every existing entry and add each incoming one not already present.
 
-    For the plain lists the sync adds to but never takes from: the
-    ``statisticalCodeIds`` that carry the synced marker (with the access code
-    replaced first, see :func:`_merge_statistical_codes`), and the holdings
-    ``formerIds`` that carry the AxC GUID. Neither entry ever changes for a given record, so
-    there is nothing of ours to remove, and the shallow payload-wins merge in
-    :func:`_upsert_entity` would otherwise drop every entry added in FOLIO.
-    ``key`` decides what counts as already present.
+    For ``statisticalCodeIds`` once the codes the sync owns have been dropped
+    (see :func:`_merge_statistical_codes`). The shallow payload-wins merge in
+    :func:`_upsert_entity` would otherwise drop every code added in FOLIO.
     """
-    seen = {key(value) for value in existing}
+    seen = set(existing)
     merged = list(existing)
     for value in incoming:
-        if key(value) not in seen:
-            seen.add(key(value))
+        if value not in seen:
+            seen.add(value)
             merged.append(value)
     return merged
 
@@ -412,14 +394,6 @@ def _upsert_entity(
                     existing.get("statisticalCodeIds") or [],
                     payload["statisticalCodeIds"],
                     owned_statistical_codes,
-                )
-            if "formerIds" in payload:
-                # Case-insensitive, so a GUID a cataloguer retyped in another
-                # case is not added a second time.
-                merged["formerIds"] = _merge_unique(
-                    existing.get("formerIds") or [],
-                    payload["formerIds"],
-                    key=_casefold,
                 )
             folio.put(f"{write_path_prefix}/{folio_id}", merged)
             logger.info("updated folio_id=%s", folio_id)

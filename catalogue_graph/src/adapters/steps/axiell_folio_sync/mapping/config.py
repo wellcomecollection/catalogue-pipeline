@@ -17,7 +17,7 @@ import uuid
 from dataclasses import dataclass
 
 # Bumped whenever the mapping rules change; stamped into every payload's meta.
-VERSION = "3.4.0"
+VERSION = "3.5.0"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────
@@ -202,10 +202,13 @@ AXIELL_NORMAL_LOCATION_NOTE_TYPE = "Axiell Normal Location"
 # FOLIO instance identifier type used for the AxC object_number
 # (the (AltRefNo)-prefixed 035$a).
 LOCAL_IDENTIFIER_TYPE = "Local identifier"
-# FOLIO statistical code, matched on its code, that marks a record as written by
-# this sync. Set on the instance, holdings and item. It must exist in the tenant
-# (Settings, Inventory, Statistical codes), or every record fails to map.
-SYNCED_STATISTICAL_CODE = "AXIELL"
+# FOLIO instance status term, matched on its name or code, that marks an instance
+# as written by this sync. It must exist in the tenant (Settings, Inventory,
+# Instances, Instance status types), or every record fails to map. FOLIO allows
+# one status per instance, so a status set by hand is replaced on update.
+# Holdings and items carry no marker: they are found through their instance, and
+# the sync finds all three by the ids derived from the AxC GUID.
+SYNCED_INSTANCE_STATUS = "Synched by Axiell"
 
 # AxC normal-location (MARC 984$b) codes that map to fixed FOLIO locations.
 # FOLIO's location hierarchy is institution → campus → library → location, but the
@@ -242,6 +245,10 @@ class LocationRule:
             return True
         return any(folded.startswith(prefix.casefold()) for prefix in self.prefixes)
 
+
+# The FOLIO institution every rule below sits under. Reference only, like a
+# rule's campus and library.
+LOCATION_INSTITUTION = "Wellcome Collection"
 
 # The agreed AxC → FOLIO location mapping. First match wins.
 LOCATION_RULES: tuple[LocationRule, ...] = (
@@ -314,11 +321,6 @@ def _guid(source_id: str) -> uuid.UUID:
     ``_extract_record`` rejects such a record before any id is derived.
     """
     return uuid.UUID(source_id.strip())
-
-
-def _guid_label(source_id: str) -> str:
-    """The AxC GUID in its canonical spelling, as staff see it in ``formerIds``."""
-    return str(_guid(source_id))
 
 
 def _instance_id(source_id: str) -> str:
@@ -461,13 +463,13 @@ LOCAL_IDENTIFIER_FIELD = FieldMap(
     default=LOCAL_IDENTIFIER_TYPE,
     label="identifier type",
 )
-
-# The synced marker is a constant too: every record gets the same code.
-SYNCED_STATISTICAL_CODE_FIELD = FieldMap(
+# instance.statusId, the synced marker, is a constant too: every instance gets
+# the same term.
+SYNCED_INSTANCE_STATUS_FIELD = FieldMap(
     None,
-    resolver="resolve_statistical_code",
-    default=SYNCED_STATISTICAL_CODE,
-    label="statistical code",
+    resolver="resolve_instance_status",
+    default=SYNCED_INSTANCE_STATUS,
+    label="instance status",
 )
 # The item's access statistical code. It reads two AxC fields, which a FieldMap
 # cannot express, so builders._access_statistical_code picks the code from
