@@ -14,7 +14,7 @@ module "pipeline" {
     merged     = "2026-09-30"
     initial    = "2026-09-30"
     augmented  = "2026-09-30"
-    works      = "2026-09-30"
+    works      = "2026-11-16"
     concepts   = "2026-09-30"
     images     = "2026-09-30"
   }
