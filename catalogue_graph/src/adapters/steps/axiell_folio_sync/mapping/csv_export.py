@@ -82,7 +82,7 @@ def _loan_type() -> str:
         [
             "(absent or unlisted)",
             DEFAULT_LOAN_TYPE,
-            "Never passed to the tenant as a loan type name.",
+            "The raw AxC term is never passed to the tenant.",
         ]
     )
     return _csv(rows)

@@ -7,4 +7,4 @@ By approval,Unavailable,Case-insensitive.
 Missing,Unavailable,Case-insensitive.
 Deaccessioned,Unavailable,Case-insensitive.
 Manual request,Unavailable,Case-insensitive.
-(absent or unlisted),Unavailable,Never passed to the tenant as a loan type name.
+(absent or unlisted),Unavailable,The raw AxC term is never passed to the tenant.
