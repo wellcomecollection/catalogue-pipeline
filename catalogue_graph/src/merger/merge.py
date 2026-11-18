@@ -1,7 +1,7 @@
 """Merges the works of one component.
 
 One work becomes the target and takes fields from the others. The sources a rule
-claimed are redirected to the target; the rest are left untouched. A TEI work's
+claimed are redirected to the target, and the rest are left untouched. A TEI work's
 internal works are returned alongside it, and deleted when the TEI work is deleted
 or no longer lists them.
 """
@@ -66,50 +66,27 @@ def _partition_shared_miro(
     """Bibs linked only through a shared Miro image must not pool their METS or
     Axiell works on one target. See platform issue 6750."""
     miro_works = [work for work in works if miro_work(work)]
-    others = [work for work in works if not miro_work(work)]
-
-    # Cluster the other works by their direct links to each other.
-    clusters: list[list[IdentifiedWork]] = []
-    for work in others:
-        touching = [
-            c for c in clusters if any(_linked(w, work) or _linked(work, w) for w in c)
-        ]
-        apart = [c for c in clusters if not any(c is t for t in touching)]
-        clusters = [[w for c in touching for w in c] + [work], *apart]
-
-    def links_to(cluster: list[IdentifiedWork], miro: IdentifiedWork) -> bool:
-        return any(_linked(work, miro) for work in cluster)
-
-    # Clusters that link to no Miro work stay with the target.
-    bridged = [c for c in clusters if any(links_to(c, m) for m in miro_works)]
+    clusters = _linked_clusters([work for work in works if not miro_work(work)])
+    # Clusters that list no Miro work stay with the target.
+    miro_clusters = [
+        c for c in clusters if any(_cluster_points_to(c, m) for m in miro_works)
+    ]
     target = first_by_precedence(works)
-    if target is None or len(bridged) <= 1:
+    if target is None or len(miro_clusters) <= 1:
         return [list(works)]
 
-    carved = [c for c in bridged if target not in c]
-    # A Miro work goes to whichever cluster linking it wins target precedence.
-    miro_owner: dict[str, list[IdentifiedWork]] = {}
-    for miro in miro_works:
-        linking = [c for c in bridged if links_to(c, miro)]
-        winner = first_by_precedence([w for w in works if any(w in c for c in linking)])
-        owner = next((c for c in linking if winner in c), None)
-        if owner is not None:
-            miro_owner[miro.state.canonical_id] = owner
-
-    part_of: dict[str, int] = {}
-    for index, cluster in enumerate(carved):
-        own_miro = [
-            m for m in miro_works if miro_owner.get(m.state.canonical_id) is cluster
-        ]
-        for work in [*cluster, *own_miro]:
-            part_of[work.state.canonical_id] = index
-
-    remainder = [w for w in works if w.state.canonical_id not in part_of]
-    parts = [
-        [w for w in works if part_of.get(w.state.canonical_id) == index]
-        for index in range(len(carved))
-    ]
-    return [remainder, *parts]
+    parts = []
+    for cluster in miro_clusters:
+        if target not in cluster:
+            owned = [
+                m
+                for m in miro_works
+                if _owning_cluster(works, miro_clusters, m) is cluster
+            ]
+            members = {w.state.canonical_id for w in [*cluster, *owned]}
+            # In the component's order, which breaks precedence ties.
+            parts.append([w for w in works if w.state.canonical_id in members])
+    return [_unassigned(works, parts), *parts]
 
 
 def _partition_audiovisual(
@@ -123,33 +100,60 @@ def _partition_audiovisual(
         return [list(works)]
 
     av_ebibs = [work for work in works if lms_work_digitised_av(work)]
-    others = [work for work in works if not lms_work(work)]
-
-    owner_of: dict[str, str] = {}
-    for other in others:
-        linked = [e for e in av_ebibs if _linked(other, e) or _linked(e, other)]
+    attached: dict[str, list[IdentifiedWork]] = {
+        ebib.state.canonical_id: [] for ebib in av_ebibs
+    }
+    for work in works:
+        if lms_work(work):
+            continue
+        linked = [ebib for ebib in av_ebibs if _linked(work, ebib)]
         if len(linked) == 1:
-            owner_of[other.state.canonical_id] = linked[0].state.canonical_id
+            attached[linked[0].state.canonical_id].append(work)
         elif len(linked) > 1:
             logger.warning(
                 "Work is linked to several audiovisual e-bibs, leaving it in the main part",
-                work=other.state.canonical_id,
-                ebibs=[e.state.canonical_id for e in linked],
+                work=work.state.canonical_id,
+                ebibs=[ebib.state.canonical_id for ebib in linked],
             )
 
     parts = []
     for ebib in av_ebibs:
-        attached = [
-            o
-            for o in others
-            if owner_of.get(o.state.canonical_id) == ebib.state.canonical_id
-        ]
-        if attached:
-            parts.append([ebib, *attached])
+        if attached[ebib.state.canonical_id]:
+            parts.append([ebib, *attached[ebib.state.canonical_id]])
+    unassigned = _unassigned(works, parts)
+    return [*parts, unassigned] if unassigned else parts
 
-    carved = {work.state.canonical_id for part in parts for work in part}
-    remainder = [work for work in works if work.state.canonical_id not in carved]
-    return [*parts, remainder] if remainder else parts
+
+def _linked_clusters(works: Sequence[IdentifiedWork]) -> list[list[IdentifiedWork]]:
+    """The works grouped so that two works share a cluster when a chain of direct
+    links joins them."""
+    clusters: list[list[IdentifiedWork]] = []
+    for work in works:
+        joined = [c for c in clusters if any(_linked(w, work) for w in c)]
+        separate = [c for c in clusters if not any(c is j for j in joined)]
+        clusters = [[w for c in joined for w in c] + [work], *separate]
+    return clusters
+
+
+def _owning_cluster(
+    works: Sequence[IdentifiedWork],
+    clusters: list[list[IdentifiedWork]],
+    miro: IdentifiedWork,
+) -> list[IdentifiedWork] | None:
+    """Of the clusters listing the Miro work, the one holding the work that wins
+    target precedence."""
+    listing = [c for c in clusters if _cluster_points_to(c, miro)]
+    listed = {w.state.canonical_id for c in listing for w in c}
+    winner = first_by_precedence([w for w in works if w.state.canonical_id in listed])
+    return next((c for c in listing if winner in c), None)
+
+
+def _unassigned(
+    works: Sequence[IdentifiedWork], parts: list[list[IdentifiedWork]]
+) -> list[IdentifiedWork]:
+    """The works in none of the parts."""
+    assigned = {work.state.canonical_id for part in parts for work in part}
+    return [work for work in works if work.state.canonical_id not in assigned]
 
 
 def _merge_part(works: Sequence[IdentifiedWork]) -> MergedComponent:
@@ -207,11 +211,22 @@ def _identified(work: IdentifiedWork) -> Identified:
     )
 
 
-def _linked(a: IdentifiedWork, b: IdentifiedWork) -> bool:
+def _points_to(a: IdentifiedWork, b: IdentifiedWork) -> bool:
+    """Whether a lists b as a merge candidate."""
     return any(
         candidate.id.canonical_id == b.state.canonical_id
         for candidate in a.state.merge_candidates
     )
+
+
+def _linked(a: IdentifiedWork, b: IdentifiedWork) -> bool:
+    """Whether either work lists the other as a merge candidate."""
+    return _points_to(a, b) or _points_to(b, a)
+
+
+def _cluster_points_to(cluster: Sequence[IdentifiedWork], work: IdentifiedWork) -> bool:
+    """Whether any work in the cluster lists the work as a merge candidate."""
+    return any(_points_to(member, work) for member in cluster)
 
 
 def _redirect(
@@ -252,7 +267,7 @@ def _deleted_internal_works(
 
     Removals are read from the works going in, as a TEI work that loses the merge is
     redirected and its stubs dropped on the way. They are never pruned, so a parent
-    re-emits them on every merge; an id that moved to another manuscript flips between
+    re-emits them on every merge. An id that moved to another manuscript flips between
     deleted and visible depending on which parent was touched last.
     """
     deletes: list[IdentifiedWork] = []

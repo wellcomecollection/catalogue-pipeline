@@ -14,6 +14,21 @@ from utils.logger import ExecutionContext, get_trace_id, setup_logging
 logger = structlog.get_logger(__name__)
 
 
+def _failed_components(event: CommitEvent, group: int) -> list[str]:
+    """The group's failed components. A group without a failed_components file did not
+    finish, so all of its components count as failed."""
+    try:
+        frame = df_from_s3_parquet(event.failed_components_s3_uri(group))
+    except OSError:
+        logger.warning(
+            "No failed_components file, counting all the group's components as failed",
+            group=group,
+        )
+        changed = df_from_s3_parquet(event.get_s3_uri("changed_components"))
+        frame = changed.filter(pl.col("group") == group)
+    return frame["component_id"].unique().to_list()
+
+
 def handler(
     event: CommitEvent, execution_context: ExecutionContext | None = None
 ) -> CommitResult:
@@ -34,18 +49,6 @@ def handler(
 
     logger.info("Committed components", failed_components=len(failed))
     return CommitResult(failed_component_count=len(failed))
-
-
-def _failed_components(event: CommitEvent, group: int) -> list[str]:
-    """The group's failed components. A group without a failed_components file did not
-    finish, so all of its components count as failed."""
-    try:
-        frame = df_from_s3_parquet(event.failed_components_s3_uri(group))
-    except OSError:
-        logger.warning("Group did not finish", group=group)
-        changed = df_from_s3_parquet(event.get_s3_uri("changed_components"))
-        frame = changed.filter(pl.col("group") == group)
-    return frame["component_id"].unique().to_list()
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:

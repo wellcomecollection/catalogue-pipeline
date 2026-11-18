@@ -65,7 +65,7 @@ class MatchResult(BaseModel):
 class MergeGroupResult(BaseModel):
     group: int
     component_count: int
-    # Components that could not be read, merged or indexed; the next run retries them.
+    # Components that could not be read, merged or indexed. The next run retries them.
     failed_component_count: int
 
 

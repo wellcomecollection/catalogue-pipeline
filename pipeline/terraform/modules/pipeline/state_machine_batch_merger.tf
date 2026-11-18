@@ -1,20 +1,11 @@
-# Experimental batch merger (wellcomecollection/platform#6742,
-# #6857). After every id-minter run it resolves the matcher graph from the
-# works_identified Iceberg table, merges every component that changed and
-# writes the results to indices of their own, so they can be checked against
-# what the Scala matcher and merger did.
-#
-# Match records the changed components in groups; each group is merged in its
-# own invocation, so a full reindex fits the Lambda limits. Commit replaces the
-# components baseline last, leaving out components that failed, so the next run
-# merges them again without holding up the rest.
+# Experimental batch merger (wellcomecollection/platform#6742). Its steps are
+# described in catalogue_graph/src/merger/README.md.
 
 locals {
   batch_merger_s3_tables_bucket_arn = "arn:aws:s3tables:eu-west-1:${data.aws_caller_identity.current.account_id}:bucket/${local.infra_critical.catalogue_pipeline_table_bucket_name}"
   batch_merger_bucket               = "wellcomecollection-catalogue-graph"
 
-  # Each group reads the whole content column of the table, and the merge
-  # writes to the shared cluster.
+  # Every group writes to the cluster that serves production.
   batch_merger_max_concurrency = 5
 
   batch_merger_lambda_retry = [
@@ -127,7 +118,7 @@ locals {
                   BackoffRate     = 2.0
                 }
               ])
-              # A failed group must not stop the others reaching the baseline; Commit
+              # A failed group must not stop the others reaching the baseline. Commit
               # counts its components as failed.
               Catch = [
                 {
@@ -156,8 +147,8 @@ locals {
         Retry  = local.batch_merger_lambda_retry
         Next   = "CheckFailures"
       }
-      # Failed components were left out of the baseline, so the next run retries them;
-      # failing the run raises the alarm while they keep failing.
+      # Failed components were left out of the baseline, so the next run retries them.
+      # Failing the run raises the alarm while they keep failing.
       CheckFailures = {
         Type = "Choice"
         Choices = [
@@ -171,7 +162,7 @@ locals {
       ComponentsFailed = {
         Type  = "Fail"
         Error = "ComponentsFailed"
-        Cause = "{% $string($states.input.failed_component_count) & ' components failed to merge; see the failed_components files in the job folder' %}"
+        Cause = "{% $string($states.input.failed_component_count) & ' components failed to merge, see the failed_components files in the job folder' %}"
       }
       Done = {
         Type = "Succeed"

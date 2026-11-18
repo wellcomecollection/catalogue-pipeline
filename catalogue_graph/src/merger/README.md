@@ -37,7 +37,7 @@ The batch merger state machine runs these steps after every id-minter run:
    components and writes the results. Every document is versioned by the commit time of
    the snapshot the run read, with `external_gte`, so a run never overwrites one at a
    later snapshot. A component that cannot be read, merged or indexed fails on its own
-   and the rest of the group carries on; the failed ones are listed in
+   and the rest of the group carries on. The failed ones are listed in
    `failed_components-{group}.parquet` in the job folder.
 3. `steps/commit.py` (Commit) replaces
    `graph-{graph_date}/pipeline-{pipeline_date}/merger/components.parquet`, the baseline
@@ -49,7 +49,7 @@ The batch merger state machine runs these steps after every id-minter run:
    was unreachable, writes no `failed_components` file, so all of its components count
    as failed.
 
-A pipeline without a baseline merges every component on its first run; delete the
+A pipeline without a baseline merges every component on its first run. Delete the
 baseline to merge everything again. A run that starts while another is still going
 is skipped, and the next run picks up whatever changed in the meantime.
 
@@ -70,7 +70,3 @@ To run against a pipeline instead, pass its dates with `--use-rest-api-table`,
 `WORKS_IDENTIFIED_TABLE_NAME`), writes to its cluster and replaces its baseline. With
 `--use-rest-api-table` alone, the pipeline's works are merged into a local Elasticsearch
 and the baseline stays under the dev prefix.
-
-The local table is never written to the public cluster, and a pipeline's baseline is
-only replaced by a run that read its table and wrote to its cluster. Otherwise the
-pipeline's next run would skip changes that never reached its indices.
