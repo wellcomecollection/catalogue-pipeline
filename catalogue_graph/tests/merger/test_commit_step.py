@@ -28,7 +28,7 @@ def run(failed: dict[int, list[str]]) -> commit.CommitResult:
 def test_replaces_the_baseline_with_the_runs_components() -> None:
     result = run({})
 
-    baseline = df_from_s3_parquet(EVENT.components_s3_uri)
+    baseline = df_from_s3_parquet(EVENT.baseline_s3_uri)
     assert labelled(baseline) == {"A": "AB", "C": "CD", "E": "E"}
     assert result.failed_component_count == 0
 
@@ -36,7 +36,7 @@ def test_replaces_the_baseline_with_the_runs_components() -> None:
 def test_leaves_failed_components_out_so_the_next_run_retries_them() -> None:
     result = run({0: ["A"], 1: ["E"]})
 
-    baseline = df_from_s3_parquet(EVENT.components_s3_uri)
+    baseline = df_from_s3_parquet(EVENT.baseline_s3_uri)
     assert labelled(baseline) == {"C": "CD"}
     assert result.failed_component_count == 2
 
@@ -54,5 +54,5 @@ def test_a_run_with_no_groups_commits_its_components() -> None:
 
     commit.handler(no_groups)
 
-    assert labelled(df_from_s3_parquet(no_groups.components_s3_uri)) == {"A": "A"}
-    assert no_groups.components_s3_uri in MockSmartOpen.file_lookup
+    assert labelled(df_from_s3_parquet(no_groups.baseline_s3_uri)) == {"A": "A"}
+    assert no_groups.baseline_s3_uri in MockSmartOpen.file_lookup

@@ -26,7 +26,7 @@ def handler(
     components = df_from_s3_parquet(event.get_s3_uri("components"))
     df_to_s3_parquet(
         components.filter(~pl.col("component_id").is_in(failed)),
-        event.components_s3_uri,
+        event.baseline_s3_uri,
     )
     # Every run writes a copy of the whole graph, which nothing reads once it is the
     # baseline, and the bucket has no lifecycle rule to expire them. The run's small

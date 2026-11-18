@@ -43,7 +43,7 @@ def handler(
         works = load_works(table, snapshot_id)
         work_count = works.height
         current = match_works(works)
-    previous = read_previous_components(event.components_s3_uri)
+    previous = read_previous_components(event.baseline_s3_uri)
     changed = assign_groups(find_changed_components(current, previous))
 
     changed_components_s3_uri = event.get_s3_uri("changed_components")
@@ -51,7 +51,7 @@ def handler(
     # The commit step replaces the baseline with these once every group is merged.
     df_to_s3_parquet(current, event.get_s3_uri("components"))
 
-    return MatchResult(
+    result = MatchResult(
         job_id=event.job_id,
         iceberg_snapshot_id=snapshot_id,
         work_count=work_count,
@@ -60,6 +60,8 @@ def handler(
         group_count=changed["group"].n_unique(),
         changed_components_s3_uri=changed_components_s3_uri,
     )
+    logger.info("Matched components", **result.model_dump())
+    return result
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:

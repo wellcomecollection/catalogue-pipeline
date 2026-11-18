@@ -10,7 +10,6 @@ from merger.models.step_events import (
     MergeGroupEvent,
 )
 from merger.steps import commit, match, merge_group
-from models.pipeline_scope import PipelineIndexDates
 from utils.argparse import add_pipeline_event_args
 from utils.elasticsearch import ElasticsearchMode
 from utils.logger import ExecutionContext, get_trace_id
@@ -32,21 +31,26 @@ def group_events(event: MatchEvent, result: MatchResult) -> list[MergeGroupEvent
 
 
 def environment_error(args: argparse.Namespace) -> str | None:
-    """Why the arguments mix environments, if they do. A run reads one table, writes one
-    cluster and replaces one baseline, and all three must belong to the same environment,
-    or the baseline would record merges that were written somewhere else."""
+    """Why the combination of arguments is not allowed, if it is not. A match-only run
+    writes neither documents nor a baseline, so any combination is allowed."""
     if args.match_only:
         return None
-    if args.use_rest_api_table:
-        if args.es_mode == "local":
-            return "--use-rest-api-table needs --es-mode public, to write to that pipeline's cluster"
-        if not (args.index_date_merged and args.index_date_initial):
-            return "--use-rest-api-table needs --index-date-merged and --index-date-initial, the dates of the batch merger's indices"
-        return None
-    if args.es_mode != "local":
-        return "--es-mode public needs --use-rest-api-table, to merge that pipeline's works"
-    if args.pipeline_date != "dev" or args.graph_date != "dev":
-        return "the local table needs --pipeline-date dev and --graph-date dev, to keep the baseline local"
+    local_table = not args.use_rest_api_table
+    local_es = args.es_mode == "local"
+    pipeline_baseline = args.pipeline_date != "dev"
+
+    if local_table and not local_es:
+        return "Works from the local table cannot be written to the public cluster."
+    if local_table and pipeline_baseline:
+        return (
+            "A pipeline's baseline cannot be replaced from the local table, as the "
+            "pipeline's own changes would then be skipped by its next run."
+        )
+    if local_es and pipeline_baseline:
+        return (
+            "A pipeline's baseline cannot be replaced after writing to a local "
+            "Elasticsearch, as the merged works would never reach the pipeline's index."
+        )
     return None
 
 
@@ -67,7 +71,7 @@ def main() -> None:
     parser.add_argument(
         "--job-id",
         type=str,
-        required=False,
+        default=create_job_id(),
         help="Optional job id (defaults to the current time).",
     )
     parser.add_argument(
@@ -90,34 +94,24 @@ def main() -> None:
     if error := environment_error(args):
         parser.error(error)
 
-    event = MatchEvent(
-        pipeline_date=args.pipeline_date,
-        graph_date=args.graph_date,
-        index_dates=PipelineIndexDates(
-            merged=args.index_date_merged, initial=args.index_date_initial
-        ),
-        job_id=args.job_id or create_job_id(),
-        iceberg_snapshot_id=args.iceberg_snapshot_id,
-    )
+    event = MatchEvent.from_argparser(args)
     execution_context = ExecutionContext(
         trace_id=get_trace_id(),
         pipeline_step="batch_merger",
     )
     result = match.handler(event, execution_context, args.use_rest_api_table)
-    print(result.model_dump_json())
     if args.match_only:
         return
 
     es_mode: ElasticsearchMode = args.es_mode
     for group_event in group_events(event, result):
-        group_result = merge_group.handler(
+        merge_group.handler(
             group_event, execution_context, es_mode, args.use_rest_api_table
         )
-        print(group_result.model_dump_json())
     commit_event = CommitEvent.model_validate(
         {**event.model_dump(), "group_count": result.group_count}
     )
-    print(commit.handler(commit_event, execution_context).model_dump_json())
+    commit.handler(commit_event, execution_context)
 
 
 if __name__ == "__main__":
