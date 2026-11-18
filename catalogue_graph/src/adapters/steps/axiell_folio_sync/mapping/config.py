@@ -17,7 +17,7 @@ import uuid
 from dataclasses import dataclass
 
 # Bumped whenever the mapping rules change; stamped into every payload's meta.
-VERSION = "3.3.0"
+VERSION = "3.5.0"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────
@@ -69,7 +69,10 @@ ACCESS_ITEM_STATUS: dict[str, str] = {
     "RESTRICTED": "Available",
     "PERMISSIONREQUIRED": "Restricted",
     "SAFEGUARDED": "Restricted",
-    "CLOSED": "Restricted",
+    # Unavailable, as agreed with Collection Information
+    # (wellcomecollection/platform#6862). Permission required and Safeguarded
+    # stay Restricted until their rows are agreed.
+    "CLOSED": "Unavailable",
     "MISSING": "Missing",
     "DEACCESSIONED": "Withdrawn",
     # The record's own data is known to be wrong, so the item's real state is
@@ -77,6 +80,80 @@ ACCESS_ITEM_STATUS: dict[str, str] = {
     # about the item that nobody has established.
     "DATAISSUES": "Unknown",
 }
+
+# The access statistical code on the item, from the access category (506$f) and
+# the use restriction (540$a) together: the agreed rows of the Access and
+# Ordering status mapping (wellcomecollection/platform#6862). Keyed by access
+# category, matched case-insensitively like ACCESS_ITEM_STATUS, then by use
+# restriction, matched case-insensitively like USE_RESTRICTION_LOAN_TYPE. Values
+# are FOLIO statistical codes, matched on their code, and each must exist in the
+# tenant or the record fails.
+#
+# A pair not listed here, including either field being absent, gets no access
+# code. Rows still under discussion (Open with Unavailable, Missing with
+# Missing, Deaccessioned) are left out on purpose.
+#
+# The table holds the spreadsheet's rows and nothing inferred from them, with one
+# exception: Restricted with Online request, which the spreadsheet's comment on
+# its Restricted with Restricted row supplies, since AxC is replacing the use
+# restriction "Restricted" with "Online request". Elsewhere "Restricted" appears
+# only where the spreadsheet has a row for it, under Data issues and Missing.
+# Open and Open with advisory have no such row, so an Open item whose 540$a is
+# still Restricted gets no access code.
+ACCESS_STATISTICAL_CODE: dict[str, dict[str, str]] = {
+    "OPEN": {
+        "Online request": "ONLINE REQUEST",
+        "Manual request": "MANUAL REQUEST",
+        "By appointment": "BY APPOINTMENT",
+    },
+    "OPENWITHADVISORY": {
+        "Online request": "ONLINE REQUEST",
+        "Manual request": "MANUAL REQUEST",
+        "By appointment": "BY APPOINTMENT",
+        "Unavailable": "UNAVAILABLE",
+    },
+    "RESTRICTED": {
+        "Restricted": "RESTRICTED",
+        "Online request": "RESTRICTED",
+        "By appointment": "BY APPOINTMENT",
+        "Unavailable": "UNAVAILABLE",
+    },
+    # The access category takes precedence for these three.
+    "PERMISSIONREQUIRED": {
+        "By approval": "DONOR PERMISSION",
+        "By appointment": "DONOR PERMISSION",
+    },
+    "SAFEGUARDED": {
+        "By approval": "SAFEGUARDED",
+        "By appointment": "SAFEGUARDED",
+    },
+    "CLOSED": {
+        "Unavailable": "CLOSED",
+    },
+    "DATAISSUES": {
+        "Online request": "ONLINE REQUEST",
+        "Manual request": "MANUAL REQUEST",
+        "By appointment": "BY APPOINTMENT",
+        "Unavailable": "UNAVAILABLE",
+        "By approval": "DONOR PERMISSION",
+        "Restricted": "ONLINE REQUEST",
+    },
+    "MISSING": {
+        "Online request": "ONLINE REQUEST",
+        "Manual request": "MANUAL REQUEST",
+        "By appointment": "BY APPOINTMENT",
+        "Unavailable": "UNAVAILABLE",
+        "By approval": "DONOR PERMISSION",
+        "Restricted": "ONLINE REQUEST",
+    },
+}
+
+# Every code the table can produce. On update the upsert replaces any of these
+# already on the item and keeps every other code, so a change in AxC moves the
+# item from one access code to another without touching codes set in FOLIO.
+ACCESS_STATISTICAL_CODES: frozenset[str] = frozenset(
+    code for by_term in ACCESS_STATISTICAL_CODE.values() for code in by_term.values()
+)
 
 # AxC use restriction (MARC 540$a) to FOLIO loan type name. Keys are the terms
 # AxC sends, matched case-insensitively. Only the two terms whose material can be
@@ -104,6 +181,13 @@ DEFAULT_LOAN_TYPE = "Unavailable"
 # Item status defaults to "Unavailable"; unrecognised access categories raise
 # instead of silently falling through.
 DEFAULT_ITEM_STATUS = "Unavailable"
+# The item statuses the sync itself sets. On update the item status follows AxC
+# only while FOLIO holds one of these. Any other status (Checked out, Paged,
+# Awaiting pickup, In transit and so on) belongs to circulation and is left
+# alone, or the sync would undo a live loan or request.
+SYNC_ITEM_STATUSES: frozenset[str] = frozenset(
+    {*ACCESS_ITEM_STATUS.values(), DEFAULT_ITEM_STATUS}
+)
 DEFAULT_HOLDINGS_SOURCE = "MARC"
 # Prefix for AxC's current location (852$b) in administrativeNotes. It identifies
 # the note for replacement on updates. If changed after syncing begins, continue
@@ -118,10 +202,13 @@ AXIELL_NORMAL_LOCATION_NOTE_TYPE = "Axiell Normal Location"
 # FOLIO instance identifier type used for the AxC object_number
 # (the (AltRefNo)-prefixed 035$a).
 LOCAL_IDENTIFIER_TYPE = "Local identifier"
-# FOLIO statistical code, matched on its code, that marks a record as written by
-# this sync. Set on the instance, holdings and item. It must exist in the tenant
-# (Settings, Inventory, Statistical codes), or every record fails to map.
-SYNCED_STATISTICAL_CODE = "AXIELL"
+# FOLIO instance status term, matched on its name or code, that marks an instance
+# as written by this sync. It must exist in the tenant (Settings, Inventory,
+# Instances, Instance status types), or every record fails to map. FOLIO allows
+# one status per instance, so a status set by hand is replaced on update.
+# Holdings and items carry no marker: they are found through their instance, and
+# the sync finds all three by the ids derived from the AxC GUID.
+SYNCED_INSTANCE_STATUS = "Synched by Axiell"
 
 # AxC normal-location (MARC 984$b) codes that map to fixed FOLIO locations.
 # FOLIO's location hierarchy is institution → campus → library → location, but the
@@ -158,6 +245,10 @@ class LocationRule:
             return True
         return any(folded.startswith(prefix.casefold()) for prefix in self.prefixes)
 
+
+# The FOLIO institution every rule below sits under. Reference only, like a
+# rule's campus and library.
+LOCATION_INSTITUTION = "Wellcome Collection"
 
 # The agreed AxC → FOLIO location mapping. First match wins.
 LOCATION_RULES: tuple[LocationRule, ...] = (
@@ -230,11 +321,6 @@ def _guid(source_id: str) -> uuid.UUID:
     ``_extract_record`` rejects such a record before any id is derived.
     """
     return uuid.UUID(source_id.strip())
-
-
-def _guid_label(source_id: str) -> str:
-    """The AxC GUID in its canonical spelling, as staff see it in ``formerIds``."""
-    return str(_guid(source_id))
 
 
 def _instance_id(source_id: str) -> str:
@@ -377,13 +463,21 @@ LOCAL_IDENTIFIER_FIELD = FieldMap(
     default=LOCAL_IDENTIFIER_TYPE,
     label="identifier type",
 )
-
-# The synced marker is a constant too: every record gets the same code.
-SYNCED_STATISTICAL_CODE_FIELD = FieldMap(
+# instance.statusId, the synced marker, is a constant too: every instance gets
+# the same term.
+SYNCED_INSTANCE_STATUS_FIELD = FieldMap(
+    None,
+    resolver="resolve_instance_status",
+    default=SYNCED_INSTANCE_STATUS,
+    label="instance status",
+)
+# The item's access statistical code. It reads two AxC fields, which a FieldMap
+# cannot express, so builders._access_statistical_code picks the code from
+# ACCESS_STATISTICAL_CODE and passes it here as the default to resolve.
+ACCESS_STATISTICAL_CODE_FIELD = FieldMap(
     None,
     resolver="resolve_statistical_code",
-    default=SYNCED_STATISTICAL_CODE,
-    label="statistical code",
+    label="access statistical code",
 )
 
 # The full AxC-source table. Resolved rows are the named constants above; the
@@ -397,8 +491,12 @@ FIELDS: tuple[FieldMap, ...] = (
     MATERIAL_TYPE_FIELD,  # → item.materialType
     CURRENT_LOCATION_FIELD,  # → Axiell Current Location admin and item notes
     NORMAL_LOCATION_FIELD,  # → permanent locations + Axiell Normal Location note
-    FieldMap("access_category", marc="506$f"),  # → item.status, via ACCESS_ITEM_STATUS
-    LOAN_TYPE_FIELD,  # → item.permanentLoanType, via USE_RESTRICTION_LOAN_TYPE
+    # → item.status, via ACCESS_ITEM_STATUS, and with 540$a the item's access
+    # statistical code, via ACCESS_STATISTICAL_CODE
+    FieldMap("access_category", marc="506$f"),
+    # → item.permanentLoanType, via USE_RESTRICTION_LOAN_TYPE, and with 506$f
+    # the item's access statistical code
+    LOAN_TYPE_FIELD,
 )
 
 # Inbound extraction map derived from FIELDS: CanonicalRecord attr → MARC spec.

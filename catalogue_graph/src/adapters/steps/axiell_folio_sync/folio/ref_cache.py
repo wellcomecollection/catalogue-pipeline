@@ -2,8 +2,8 @@
 FOLIO reference data cache.
 
 Fetches location codes, material types, loan types, holdings sources, item note
-types, identifier types, statistical codes, and the instance type UUID once at startup from a live
-FOLIO tenant and caches them for the lifetime of the process. All lookups are
+types, identifier types, statistical codes, instance statuses, and the instance
+type UUID once at startup from a live FOLIO tenant and caches them for the lifetime of the process. All lookups are
 case-insensitive.
 
 Usage
@@ -15,7 +15,8 @@ Usage
     holdings_source_uuid = cache.resolve_holdings_source("MARC")
     item_note_type_uuid = cache.resolve_item_note_type("Note")
     identifier_type_uuid = cache.resolve_identifier_type("Local identifier")
-    statistical_code_uuid = cache.resolve_statistical_code("AXIELL")
+    statistical_code_uuid = cache.resolve_statistical_code("ONLINE REQUEST")
+    instance_status_uuid = cache.resolve_instance_status("Synched by Axiell")
 """
 
 from __future__ import annotations
@@ -50,6 +51,8 @@ class RefCache:
         self._item_note_types: dict[str, str] = {}  # name.lower() → UUID
         self._identifier_types: dict[str, str] = {}  # name.lower() → UUID
         self._statistical_codes: dict[str, str] = {}  # code.lower() → UUID
+        self._instance_statuses: dict[str, str] = {}  # name.lower() → UUID
+        self._instance_status_codes: dict[str, str] = {}  # code.lower() → UUID
         self._instance_type_id: str | None = None
         self._loaded = False
 
@@ -94,6 +97,15 @@ class RefCache:
         )
         self._statistical_codes = self._build_map(statistical_code_records, key="code")
         logger.info("RefCache: %d statistical codes", len(self._statistical_codes))
+
+        instance_status_records = self._fetch_records(
+            "/instance-statuses", "instanceStatuses"
+        )
+        self._instance_statuses = self._build_map(instance_status_records, key="name")
+        self._instance_status_codes = self._build_map(
+            instance_status_records, key="code"
+        )
+        logger.info("RefCache: %d instance statuses", len(self._instance_statuses))
 
         self._instance_type_id = self._fetch_instance_type_id()
         logger.info("RefCache: instance type id = %s", self._instance_type_id)
@@ -153,6 +165,11 @@ class RefCache:
     def resolve_statistical_code(self, code: str | None) -> str | None:
         """Return the FOLIO UUID for a statistical code, matched on its code."""
         return self._statistical_codes.get((code or "").lower())
+
+    def resolve_instance_status(self, term: str | None) -> str | None:
+        """Return the FOLIO UUID for an instance status, by name or code, or None."""
+        key = (term or "").lower()
+        return self._instance_statuses.get(key) or self._instance_status_codes.get(key)
 
     def instance_type_id(self) -> str:
         if not self._instance_type_id:

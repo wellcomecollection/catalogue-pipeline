@@ -82,6 +82,9 @@ class FakeRefCache:
     def resolve_statistical_code(self, code: str | None) -> str | None:
         return "statcode-uuid"
 
+    def resolve_instance_status(self, term: str | None) -> str | None:
+        return "status-uuid"
+
 
 def _build_item(current_location: str | None = "215;ROOM 3") -> Item:
     mapped = select_and_build(_item_record(current_location), FakeRefCache())  # type: ignore[arg-type]
@@ -385,7 +388,7 @@ def test_the_access_category_does_not_reach_the_loan_type() -> None:
     """The loan type reads 540$a only. A CLOSED item that AxC marks for online
     request still circulates, and its restriction shows in the item status."""
     assert _loan_type_for("Online request", category="CLOSED") == "Can circulate"
-    assert _status_from(category="CLOSED") == "Restricted"
+    assert _status_from(category="CLOSED") == "Unavailable"
 
 
 def test_unrecognised_access_category_still_raises() -> None:
@@ -423,7 +426,8 @@ def _status_from(category: str | None) -> str:
         ("RESTRICTED", "Available"),
         ("PERMISSIONREQUIRED", "Restricted"),
         ("SAFEGUARDED", "Restricted"),
-        ("CLOSED", "Restricted"),
+        # Unavailable, as agreed on wellcomecollection/platform#6862.
+        ("CLOSED", "Unavailable"),
         ("MISSING", "Missing"),
         ("DEACCESSIONED", "Withdrawn"),
         # Unknown, not Unavailable: the record's data is wrong, so the item's
@@ -441,7 +445,7 @@ def test_absent_access_category_gives_an_unavailable_status() -> None:
 
 
 def test_item_status_matching_is_case_insensitive() -> None:
-    assert _status_from(category="Closed") == "Restricted"
+    assert _status_from(category="Permissionrequired") == "Restricted"
 
 
 # ── material type: required, with no default ──────────────────────────────────

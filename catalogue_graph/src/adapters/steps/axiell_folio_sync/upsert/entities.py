@@ -10,13 +10,12 @@ roll back siblings — that is the callers' job.
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import Any
 
 import structlog
 
 from ..folio import FolioInventoryOps, RefCache
-from ..mapping import AXIELL_LOCATION_NOTE_PREFIX
+from ..mapping import AXIELL_LOCATION_NOTE_PREFIX, SYNC_ITEM_STATUSES
 from ..results import EntityResult
 
 logger = structlog.get_logger(__name__)
@@ -42,10 +41,6 @@ _READONLY_FIELDS: frozenset[str] = frozenset(
 # instances do; holdings-storage 422s on it and items silently drop it.
 _STAFF_SUPPRESS_PATHS: frozenset[str] = frozenset({"/inventory/instances"})
 
-# Fields required on create whose values FOLIO or another module owns after
-# creation. Updates preserve FOLIO's current value; see :func:`_payload_for_update`.
-_CREATE_ONLY_FIELDS: frozenset[str] = frozenset({"status"})
-
 
 def _strip_readonly(record: dict) -> dict:
     """Remove computed read-only fields that FOLIO rejects on PUT."""
@@ -55,19 +50,24 @@ def _strip_readonly(record: dict) -> dict:
 def _payload_for_update(existing: dict, payload: dict) -> dict:
     """The payload as it should be applied to a record FOLIO already holds.
 
-    Create-only fields take the value read back from FOLIO, so an update cannot
-    overwrite state another module owns. Ours stays only as a backstop for a
-    fetched record that carries none, because these fields are required on update
-    too and dropping the key outright would make the PUT invalid.
+    The item status follows AxC only while FOLIO holds a status the sync itself
+    sets (``SYNC_ITEM_STATUSES``). Once circulation has moved the item to any
+    other status, such as Checked out or Awaiting pickup, FOLIO's status is sent
+    back unchanged, so an update cannot undo a live loan or request. FOLIO's
+    status is also kept when the name is unchanged, which keeps its date.
 
-    In practice the id lookup returns the whole record, since
+    Ours stays as a backstop for a fetched record that carries no status,
+    because the field is required on update too and dropping it would make the
+    PUT invalid. In practice the id lookup returns the whole record, since
     ``GET /inventory/items`` answers with full ``item.json`` objects, so the
     backstop should never be the one that applies.
     """
     updated = dict(payload)
-    for field in _CREATE_ONLY_FIELDS & payload.keys():
-        if field in existing:
-            updated[field] = existing[field]
+    current = existing.get("status")
+    if "status" in payload and isinstance(current, dict):
+        name = current.get("name")
+        if name not in SYNC_ITEM_STATUSES or name == payload["status"].get("name"):
+            updated["status"] = current
     return updated
 
 
@@ -149,34 +149,33 @@ def _merge_identifiers(existing: list, incoming: list) -> list:
     return kept + list(incoming)
 
 
-def _same_value(value: object) -> object:
-    return value
-
-
-def _casefold(value: object) -> object:
-    return value.casefold() if isinstance(value, str) else value
-
-
-def _merge_unique(
-    existing: list,
-    incoming: list,
-    *,
-    key: Callable[[object], object] = _same_value,
+def _merge_statistical_codes(
+    existing: list, incoming: list, owned: frozenset[str]
 ) -> list:
+    """Replace the codes the sync owns, keeping every other code.
+
+    ``owned`` holds the ids of the access codes the mapping can set. Any of them
+    on the record is the sync's, from an earlier run, and is dropped, so an
+    access change in AxC replaces the old code instead of adding a second one.
+    Every other code, such as one added in FOLIO, is kept in its original order,
+    and the incoming codes are added once each.
+    """
+    kept = [code for code in existing if code not in owned]
+    return _merge_unique(kept, incoming)
+
+
+def _merge_unique(existing: list, incoming: list) -> list:
     """Keep every existing entry and add each incoming one not already present.
 
-    For the plain lists the sync adds to but never takes from: the
-    ``statisticalCodeIds`` that carry the synced marker, and the holdings
-    ``formerIds`` that carry the AxC GUID. Neither entry ever changes for a given record, so
-    there is nothing of ours to remove, and the shallow payload-wins merge in
-    :func:`_upsert_entity` would otherwise drop every entry added in FOLIO.
-    ``key`` decides what counts as already present.
+    For ``statisticalCodeIds`` once the codes the sync owns have been dropped
+    (see :func:`_merge_statistical_codes`). The shallow payload-wins merge in
+    :func:`_upsert_entity` would otherwise drop every code added in FOLIO.
     """
-    seen = {key(value) for value in existing}
+    seen = set(existing)
     merged = list(existing)
     for value in incoming:
-        if key(value) not in seen:
-            seen.add(key(value))
+        if value not in seen:
+            seen.add(value)
             merged.append(value)
     return merged
 
@@ -338,6 +337,7 @@ def _upsert_entity(
     payload: dict,
     dry_run: bool,
     stray_notes: list[str] | None = None,
+    owned_statistical_codes: frozenset[str] = frozenset(),
 ) -> tuple[str, str]:
     """
     Resolve an entity by id and create or update it.
@@ -349,6 +349,9 @@ def _upsert_entity(
     mentions Axiell but does not carry our label is appended to it, for the
     caller to record. Populated on dry runs too, so a dry run surfaces the same
     warning as a real one.
+
+    ``owned_statistical_codes`` are the code ids the sync replaces on update;
+    see :func:`_merge_statistical_codes`.
 
     Returns (action, folio_id). On a dry run the id is the one a create would
     use.
@@ -387,17 +390,10 @@ def _upsert_entity(
                     existing.get("identifiers") or [], payload["identifiers"]
                 )
             if "statisticalCodeIds" in payload:
-                merged["statisticalCodeIds"] = _merge_unique(
+                merged["statisticalCodeIds"] = _merge_statistical_codes(
                     existing.get("statisticalCodeIds") or [],
                     payload["statisticalCodeIds"],
-                )
-            if "formerIds" in payload:
-                # Case-insensitive, so a GUID a cataloguer retyped in another
-                # case is not added a second time.
-                merged["formerIds"] = _merge_unique(
-                    existing.get("formerIds") or [],
-                    payload["formerIds"],
-                    key=_casefold,
+                    owned_statistical_codes,
                 )
             folio.put(f"{write_path_prefix}/{folio_id}", merged)
             logger.info("updated folio_id=%s", folio_id)

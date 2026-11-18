@@ -12,9 +12,9 @@ maps today, see
 | **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 89.8% of records; 13,284 (7.2%) match no rule and fail. The only thing failing records today. | [Section 1](#1-permanent-location-incomplete-and-failing-13284-records), [questions 1 to 3](#location) |
 | **Loan type** | **Implemented** (mapping version 2.8.0). Derived from `540$a` (use restriction): `Can circulate` for `Online request` and `Restricted` only, `Unavailable` for the rest, including an absent or unlisted term. No access-category ceiling. | [Section 2](#2-loan-type-implemented), [questions 4 and 5](#loan-type) |
 | **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
-| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Create-only, so an AxC access change never reaches an existing item. | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
-| **Statistical code** (access) | **Proposed, not implemented.** The sync writes none, so a synced item no status row catches reaches the access decision table's fallback. Proposal: one code from the migrated Sierra OPAC message vocabulary, taken from `506$f` (access category) where it names a coded state, otherwise from `540$a` (use restriction). | [Section 5](#5-statistical-code-proposed-not-implemented), [questions 12 and 13](#statistical-code) |
-| **Record identity** (HRID) | **Implemented** (ids in mapping version 3.0.0, labels and marker in 3.1.0, item GUID label dropped in 3.2.0). Records are found by an id derived from the AxC GUID (the GUID itself for the instance, a `uuid5` in it for the holdings and item), and the sync sends no HRID, so FOLIO generates it. Holdings carry the GUID in `formerIds`, and all three carry the `AXIELL` statistical code, which still has to be created on prod. Tracked in wellcomecollection/platform#6805. | [Question 10](#identifiers) |
+| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Since mapping version 3.4.0 an AxC access change reaches an existing item while FOLIO holds a status the sync sets, and circulation statuses are left alone (wellcomecollection/platform#6862). | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
+| **Statistical code** (access) | **Agreed rows implemented** (mapping version 3.4.0, wellcomecollection/platform#6862). One code on the item from the `506$f` and `540$a` pair, as an explicit table of the rows Collection Information agreed; any other pair gets no code. `CLOSED` and `DONOR PERMISSION` were not in the prod tenant when last checked, and a code the tenant lacks fails the record. | [Section 5](#5-statistical-code-agreed-rows-implemented), [questions 12 and 13](#statistical-code) |
+| **Record identity** (HRID) | **Implemented** (ids in mapping version 3.0.0, labels and marker in 3.1.0, item GUID label dropped in 3.2.0, marker moved to the instance status and holdings GUID label dropped in 3.5.0). Records are found by an id derived from the AxC GUID (the GUID itself for the instance, a `uuid5` in it for the holdings and item), and the sync sends no HRID, so FOLIO generates it. The instance carries the `Synched by Axiell` instance status as the synced marker, which still has to be created on prod. Tracked in wellcomecollection/platform#6805 and wellcomecollection/platform#6863. | [Question 10](#identifiers) |
 | **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Decided and implemented** (mapping version 3.3.0). Unticking Harvest suppresses an item-level record's FOLIO records; ticking it again restores the same records. Tracked in wellcomecollection/platform#6834. | [Question 9](#material-type-and-selection) |
 | **Deletion** of a Collect record | **Decided and implemented: hard delete.** Both a superseded GUID and a Collections tombstone delete the item, holdings and instance, child first. `HARD_DELETE` is `true` in Terraform. Tracked in wellcomecollection/platform#6833. | [Question 11](#deletion) |
 
@@ -43,7 +43,7 @@ and it is section 1.**
 | Location rule coverage | Same table, applying `LOCATION_RULES` to the leading code of every selectable `984$b` (normal location). Pure code, no FOLIO call | 2026-10-13 |
 | `540$a` and the loan-type mapping | Same table, applying the mapping in section 2 to every selectable record and cross-tabulating the result against `506$f`. Confirms 0 multi-valued records and the eight-term vocabulary | 2026-10-13 |
 | FOLIO reference data | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
-| Record identity | GUID format from the first 2,000 adapter rows (UUIDv4 in every `001`). Client-supplied ids and FOLIO-generated hrids on the dev sandbox (instance, holdings, item) and on prod (one instance, created then deleted). `AXIELL` code on the sandbox only. See [axiell-folio-record-identity.md](axiell-folio-record-identity.md) | 2026-10-20 |
+| Record identity | GUID format from the first 2,000 adapter rows (UUIDv4 in every `001`). Client-supplied ids and FOLIO-generated hrids on the dev sandbox (instance, holdings, item) and on prod (one instance, created then deleted). `AXIELL` code on the sandbox only (the marker became the `Synched by Axiell` instance status in mapping 3.5.0). See [axiell-folio-record-identity.md](axiell-folio-record-identity.md) | 2026-10-20 |
 | Statistical code vocabulary | [decision-table.md](folio/access-conditions/decision-table.md) (platform#6589), from the prod tenant pull | 2026-10-01 |
 | AxC to MARC | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
 
@@ -284,19 +284,31 @@ available and can be requested online. The restriction is that the reader signs
 to agree to the viewing conditions, which happens before the material is handed
 over, so it does not affect whether the item can be requested or produced.
 
-The status is **create-only**: the sync sends it on create, and on later runs
-reads the item back and sends FOLIO's own status unchanged, because circulation
-owns the field once the item exists. An AxC access change therefore never
-reaches an existing item. That is question 6.
+Until mapping version 3.4.0 the status was **create-only**, so an AxC access
+change never reached an existing item. Question 6 was settled on
+wellcomecollection/platform#6862 with split ownership: on update the sync
+replaces the status only while FOLIO holds one the sync itself sets
+(`Available`, `Restricted`, `Unavailable`, `Unknown`, `Missing`, `Withdrawn`),
+and leaves circulation statuses such as `Checked out` alone.
 
 `Restricted` and `Withdrawn` did not appear in a 5,000-item prod sample and
 should be confirmed against this tenant's FOLIO version.
 
-**To decide:** questions 5 and 6.
+**To decide:** question 5.
 
 ---
 
-## 5. Statistical code: proposed, not implemented
+## 5. Statistical code: agreed rows implemented
+
+**Implemented in mapping version 3.4.0** (wellcomecollection/platform#6862), as
+an explicit table of the `506$f` and `540$a` pairs Collection Information
+agreed, rather than the precedence rules proposed below. A pair outside that
+table, including `OPEN` with `Unavailable`, `MISSING` with `Missing` and
+`DEACCESSIONED`, gets no access code. The code goes on the item and is replaced
+on every run. The proposal below is kept as the
+reasoning behind it. See
+[axiell-folio-field-mappings.md](axiell-folio-field-mappings.md) for what the
+sync does.
 
 The access condition decision table for migrated Sierra items
 ([decision-table.md](folio/access-conditions/decision-table.md), platform#6589)
@@ -389,10 +401,10 @@ confirmed on this FOLIO version, drops out of the mapping.
   `540$a` would be offered online, whatever its `non-requestable` material type
   says. Question 7 decides the material type; question 12 asks whether the code
   should follow it.
-- **The `AXIELL` marker.** Question 10 adds a second statistical code. The table
-  has to read the access code and ignore the marker, and on update the sync
-  replaces only the code it owns from the access vocabulary, keeping the rest,
-  by the same merge rule as question 10.
+- **The synced marker.** Since mapping 3.5.0 the marker is the instance status
+  (question 10), not a statistical code, so the access code is the only code the
+  sync puts on the item. On update the sync replaces only the code it owns from
+  the access vocabulary and keeps the rest.
 - **It is not create-only.** Circulation does not own statistical codes, so the
   sync can send the code on every run, and an AxC access change reaches the
   reader through it even though the status does not. That narrows question 6
@@ -434,7 +446,9 @@ confirmed on this FOLIO version, drops out of the mapping.
    circulation rules. `Unavailable`, `Unknown` and `Withdrawn` block requests,
    while `Missing` allows holds only.
 
-6. Is "set the item status once, when the item is created" good enough? The cost
+6. **Settled on wellcomecollection/platform#6862, split ownership, implemented
+   in mapping version 3.4.0.** Is "set the item status once, when the item is
+   created" good enough? The cost
    is that an AxC access change never reaches an existing item. If that is not
    acceptable, the proposal is split ownership: the sync overwrites only the
    statuses it derives (`Available`, `Restricted`, `Missing`, `Withdrawn`,
@@ -468,20 +482,20 @@ confirmed on this FOLIO version, drops out of the mapping.
 10. **Is the FOLIO identifier format acceptable?** Decided: no. Each record
     used to get an hrid built from the Axiell GUID in `001` (for example
     `AxC-instance-<guid>`), and that hrid was how the sync found its own records.
-    Instead (ids implemented in mapping 3.0.0, `formerIds` and marker in 3.1.0, item `formerIds` dropped in 3.2.0):
+    Instead (ids implemented in mapping 3.0.0, `formerIds` and marker in 3.1.0, item `formerIds` dropped in 3.2.0, holdings `formerIds` dropped and the marker moved to the instance status in 3.5.0):
 
     | | Instance | Holdings | Item |
     | --- | --- | --- | --- |
     | hrid | Generated by FOLIO; the sync sends none | Same | Same |
     | `id` (the lookup key) | the GUID itself | `uuid5(<guid>, "holdings")` | `uuid5(<guid>, "item")` |
-    | GUID label | none needed for lookup, since the `id` is the GUID; an `(AxC)` System control number is planned (platform#6771) | `formerIds` | none: the FOLIO transformer reads an item's `formerIds` as its Sierra item number, and the item id is recomputable from the GUID |
-    | Synced marker | `AXIELL` statistical code | Same | Same |
+    | GUID label | none needed for lookup, since the `id` is the GUID; an `(AxC)` System control number is planned (platform#6771) | none: staff reach the GUID through the instance, whose id it is | none: the FOLIO transformer reads an item's `formerIds` as its Sierra item number, and the item id is recomputable from the GUID |
+    | Synced marker | `Synched by Axiell` instance status | none: reached through the instance | none: reached through the instance |
 
     The `id` is recomputed from the GUID on every run, so nothing is stored and
     deletion facts, which carry only the GUID, resolve the same way.
     The names `holdings` and `item` must never change after the first run.
-    The GUID labels and the marker are for staff, not lookup, so an edit in
-    FOLIO does not break the sync.
+    The marker is for staff, not lookup, so an edit in FOLIO does not break the
+    sync.
 
     The instance needs no GUID label for lookup, because its `id` is the
     GUID, so the planned "Axiell GUID" identifier type is dropped. It still
@@ -489,9 +503,10 @@ confirmed on this FOLIO version, drops out of the mapping.
     wellcomecollection/platform#6771, so the harvested MARC carries the 035
     `(AxC)` that marks it as Axiell-mastered.
 
-    `identifiers`, holdings `formerIds` and `statisticalCodeIds` are merged on update,
+    `identifiers` and the item's `statisticalCodeIds` are merged on update,
     keeping entries the sync does not own: on `identifiers` only the
-    `Local identifier` is replaced, and the other two only ever gain an entry.
+    `Local identifier` is replaced, and on `statisticalCodeIds` only the access
+    code. The sync sends no `formerIds`, so those are left as FOLIO holds them.
 
     The archival reference stays as the instance's `Local identifier` (for
     example `WMS/Amer.147`, from `035$a(AltRefNo)`). Prod holds no synced

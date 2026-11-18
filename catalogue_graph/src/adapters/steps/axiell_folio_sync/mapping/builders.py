@@ -9,6 +9,7 @@ FOLIO payloads consumed by
 
 from __future__ import annotations
 
+import dataclasses
 from collections.abc import Callable
 from typing import Literal
 
@@ -17,6 +18,9 @@ from pymarc.record import Record
 from ..folio import RefCache
 from .config import (
     ACCESS_ITEM_STATUS,
+    ACCESS_STATISTICAL_CODE,
+    ACCESS_STATISTICAL_CODE_FIELD,
+    ACCESS_STATISTICAL_CODES,
     AXIELL_LOCATION_NOTE_PREFIX,
     CURRENT_LOCATION_NOTE_TYPE_FIELD,
     DEFAULT_ITEM_STATUS,
@@ -29,12 +33,11 @@ from .config import (
     NORMAL_LOCATION_FIELD,
     NORMAL_LOCATION_NOTE_TYPE_FIELD,
     RECORD_TYPE_ITEM,
-    SYNCED_STATISTICAL_CODE_FIELD,
+    SYNCED_INSTANCE_STATUS_FIELD,
     VERSION,
     FieldMap,
     _folio_location,
     _guid,
-    _guid_label,
     _holdings_id,
     _instance_id,
     _item_id,
@@ -163,7 +166,7 @@ def build_instance(rec: CanonicalRecord, ref: RefCache) -> Instance:
         source="FOLIO",
         instanceTypeId=ref.instance_type_id(),
         identifiers=identifiers,
-        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
+        statusId=_resolve(SYNCED_INSTANCE_STATUS_FIELD, rec, ref),
     )
 
 
@@ -173,8 +176,6 @@ def build_holdings(rec: CanonicalRecord, ref: RefCache) -> Holdings:
         instanceId=_instance_id(rec.source_id),
         sourceId=_resolve(HOLDINGS_SOURCE_FIELD, rec, ref),
         permanentLocationId=_resolve(NORMAL_LOCATION_FIELD, rec, ref),
-        formerIds=[_guid_label(rec.source_id)],
-        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
     )
 
 
@@ -219,6 +220,47 @@ def _location_notes(rec: CanonicalRecord, ref: RefCache) -> list[Note]:
     ]
 
 
+def _access_statistical_code(rec: CanonicalRecord) -> str | None:
+    """The access statistical code for the record's 506$f and 540$a, or None.
+
+    None when either field is absent or the pair is not one of the agreed rows
+    in ACCESS_STATISTICAL_CODE. A missing code does not fail the record: the
+    item still syncs, without an access code, as it did before codes existed.
+    """
+    category = (rec.access_category or "").strip().upper()
+    term = (rec.use_restriction or "").strip().casefold()
+    by_term = ACCESS_STATISTICAL_CODE.get(category, {})
+    for known, code in by_term.items():
+        if known.casefold() == term:
+            return code
+    return None
+
+
+def _item_statistical_codes(rec: CanonicalRecord, ref: RefCache) -> list[str]:
+    """The access code when the record maps to one, otherwise empty.
+
+    Empty rather than absent, so the upsert still removes an access code the
+    item no longer maps to.
+    """
+    access = _access_statistical_code(rec)
+    if access is None:
+        return []
+    # Resolved like any constant, so a code the tenant lacks fails the record
+    # rather than being dropped.
+    field = dataclasses.replace(ACCESS_STATISTICAL_CODE_FIELD, default=access)
+    return [_resolve(field, rec, ref)]
+
+
+def _statistical_code_ids(codes: frozenset[str], ref: RefCache) -> list[str]:
+    """The tenant ids of ``codes``, leaving out any the tenant does not have.
+
+    For the upsert, which removes whichever of these a record already carries.
+    A code the tenant does not have is left out: nothing can carry it.
+    """
+    ids = {ref.resolve_statistical_code(code) for code in codes}
+    return sorted(code_id for code_id in ids if code_id)
+
+
 def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
     return Item(
         id=_item_id(rec.source_id),
@@ -240,7 +282,7 @@ def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
             f"{AXIELL_LOCATION_NOTE_PREFIX}: {rec.current_location or 'unknown'}"
         ],
         notes=_location_notes(rec, ref),
-        statisticalCodeIds=[_resolve(SYNCED_STATISTICAL_CODE_FIELD, rec, ref)],
+        statisticalCodeIds=_item_statistical_codes(rec, ref),
     )
 
 
@@ -259,6 +301,9 @@ def _assemble_payloads(
             source_id=rec.source_id,
             mapping_version=VERSION,
             deleted=deleted,
+            access_statistical_code_ids=_statistical_code_ids(
+                ACCESS_STATISTICAL_CODES, ref_cache
+            ),
         ),
     )
 

@@ -86,6 +86,9 @@ class FakeRefCache:
     def resolve_statistical_code(self, code: str | None) -> str:
         return "statcode-uuid"
 
+    def resolve_instance_status(self, term: str | None) -> str:
+        return "status-uuid"
+
 
 def _row(row_id: str, content: str) -> dict[str, Any]:
     return {"id": row_id, "changeset": "cs1", "content": content, "deleted": False}

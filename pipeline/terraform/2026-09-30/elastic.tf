@@ -43,6 +43,12 @@ locals {
         indexed = "concepts_indexed.2025-06-17"
       }
     }
+    // Adds query.titleSort for sorting works by title (wellcomecollection/platform#6853).
+    "2026-11-16" = {
+      works = {
+        indexed = "works_indexed.2026-11-16"
+      }
+    }
     // batch merger, compared with the Scala merger's output above
     (local.batch_merger_index_date) = {
       works = {
