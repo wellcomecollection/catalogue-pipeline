@@ -30,6 +30,8 @@ KEY_FILE="$ROOT/.content_key.$PROJECT"
 
 if [[ "$MODE" == "check" ]]
 then
+  # A reused checkout may hold the last build's key; a failed calculation must leave none for tag
+  rm -f "$KEY_FILE"
   # The caller passes the directory it already resolved, which saves starting sbt again
   if ! KEY=$(python3 "$ROOT/builds/image_content_key.py" "$3" "$ROOT")
   then
