@@ -57,6 +57,12 @@ def format_path(keys: list[str | int]) -> str:
     return "".join(f"[{key}]" if isinstance(key, int) else f".{key}" for key in keys).lstrip(".")
 
 
+def path_sort_key(path: str) -> list[tuple[int, str]]:
+    """Return a key that sorts list indexes as numbers, so `items[2]` precedes `items[10]`."""
+    parts = re.split(r"(\d+)", path)
+    return [(int(part), "") if part.isdigit() else (-1, part) for part in parts]
+
+
 def deep_diff(
     a: Any,
     b: Any,
@@ -68,13 +74,16 @@ def deep_diff(
     Anything at a path matching `ignore` is left out of the comparison. Lists at
     paths matching `unordered`, and lists nested inside them, are compared
     regardless of order. Each difference has the DeepDiff change type, such as
-    values_changed or iterable_item_added.
+    values_changed or iterable_item_added. A repetition_change has the repeated
+    item and its count on each side.
     """
     a, b = clean(a, ignore or []), clean(b, ignore or [])
-    if a == b:
+    # Compared as JSON text, because 1 == 1.0 and True == 1 in Python.
+    if json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True):
         return []
 
-    options: dict[str, Any] = {}
+    # A threshold of 0 reports objects key by key, however few keys they share.
+    options: dict[str, Any] = {"threshold_to_diff_deeper": 0}
     if unordered:
         options["report_repetition"] = True
         options["ignore_order_func"] = lambda level: path_matches(
@@ -88,7 +97,8 @@ def deep_diff(
             left, right = change.t1, change.t2
             if change_type == "repetition_change":
                 repetition = change.additional["repetition"]
-                left, right = repetition["old_repeat"], repetition["new_repeat"]
+                left = {"value": change.t1, "count": repetition["old_repeat"]}
+                right = {"value": change.t1, "count": repetition["new_repeat"]}
             diffs.append(
                 {
                     "path": format_path(change.path(output_format="list")),
@@ -97,4 +107,4 @@ def deep_diff(
                     "right": None if right is notpresent else right,
                 }
             )
-    return sorted(diffs, key=lambda diff: (diff["path"], diff["type"]))
+    return sorted(diffs, key=lambda diff: (path_sort_key(diff["path"]), diff["type"]))

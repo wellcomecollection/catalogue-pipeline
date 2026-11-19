@@ -14,7 +14,9 @@ from .source_config import load_source_configuration
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "configs" / "analysis.yaml"
 
 app = typer.Typer(
-    help="Deep diff two Elasticsearch indices (read-only) with reproducible artifacts."
+    help="Deep diff two Elasticsearch indices (read-only) with reproducible artifacts.",
+    # Local variables can hold API keys.
+    pretty_exceptions_show_locals=False,
 )
 console = Console()
 
@@ -43,17 +45,6 @@ def _load_and_prepare(config: Path, source_config: Path | None):
     return cfg, dirs, sources
 
 
-def _parse_bucket_filter(buckets: list[int] | None, hash_bucket_count: int) -> set[int] | None:
-    if not buckets:
-        return None
-    invalid = sorted(b for b in set(buckets) if not 0 <= b < hash_bucket_count)
-    if invalid:
-        raise typer.BadParameter(
-            f"Bucket IDs {invalid} are outside the valid range 0-{hash_bucket_count - 1}"
-        )
-    return set(buckets)
-
-
 def _fail(message: str) -> typer.Exit:
     console.print(message, style="red")
     return typer.Exit(code=1)
@@ -65,7 +56,7 @@ def _fetch(cfg, dirs, sources) -> None:
 
 
 def _compare(cfg, dirs, sources, bucket: list[int] | None) -> None:
-    bucket_filter = _parse_bucket_filter(bucket, cfg.hash_bucket_count)
+    bucket_filter = set(bucket) if bucket else None
     compare_indices(cfg, sources[0], sources[1], dirs["docs"], dirs["diffs"], bucket_filter)
 
 

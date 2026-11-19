@@ -8,7 +8,6 @@ import yaml
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
-
 # Validation errors must not print their input, which holds API keys. The setting
 # of the outermost model being validated is the one that applies.
 HIDE_INPUT = ConfigDict(hide_input_in_errors=True)
@@ -28,10 +27,10 @@ class Cluster(BaseModel):
         return self
 
     def connect(self) -> Elasticsearch:
-        api_key = self.api_key.get_secret_value()
+        # The key is not held in a local variable, which a traceback could print.
         if self.host:
-            return Elasticsearch(self.host, api_key=api_key)
-        return Elasticsearch(cloud_id=self.cloud_id, api_key=api_key)
+            return Elasticsearch(self.host, api_key=self.api_key.get_secret_value())
+        return Elasticsearch(cloud_id=self.cloud_id, api_key=self.api_key.get_secret_value())
 
 
 @dataclass(frozen=True)

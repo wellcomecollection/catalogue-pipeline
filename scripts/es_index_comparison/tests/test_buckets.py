@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from es_index_comparison.buckets import BucketWriter, bucket_files, bucket_for_id, read_bucket
 
 
@@ -28,3 +30,16 @@ def test_writing_again_replaces_earlier_bucket_files(tmp_path):
 
     assert len(bucket_files(tmp_path)) == 2
     assert read_bucket(tmp_path, 0) | read_bucket(tmp_path, 1) == {"new": {}}
+
+
+def test_a_failed_write_leaves_the_earlier_bucket_files(tmp_path):
+    folder = tmp_path / "index"
+    with BucketWriter(folder, 2) as writer:
+        writer.write("old", {})
+
+    with pytest.raises(RuntimeError), BucketWriter(folder, 2) as writer:
+        writer.write("new", {})
+        raise RuntimeError("fetch failed")
+
+    assert read_bucket(folder, 0) | read_bucket(folder, 1) == {"old": {}}
+    assert list(tmp_path.iterdir()) == [folder]

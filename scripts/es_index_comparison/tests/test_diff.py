@@ -77,7 +77,7 @@ def test_a_slightly_changed_item_is_paired_with_its_counterpart():
 
 def test_a_repeated_item_in_an_unordered_list_is_reported_with_its_counts():
     assert diff({"tags": ["a", "a", "b"]}, {"tags": ["b", "a"]}, ["tags"]) == [
-        ("repetition_change", "tags[0]", 2, 1)
+        ("repetition_change", "tags[0]", {"value": "a", "count": 2}, {"value": "a", "count": 1})
     ]
 
 
@@ -88,3 +88,24 @@ def test_ignored_paths_are_left_out_of_the_comparison():
 
     assert deep_diff(left, right, ignore=ignore) == []
     assert deep_diff(left, right, ignore=ignore[:2])
+
+
+def test_a_type_change_alone_is_a_difference():
+    assert [d["type"] for d in deep_diff({"x": 1}, {"x": 1.0})] == ["type_changes"]
+    assert [d["type"] for d in deep_diff({"x": True}, {"x": 1})] == ["type_changes"]
+
+
+def test_objects_with_few_shared_keys_are_compared_key_by_key():
+    assert diff({"a": 1, "b": 2, "c": 3}, {"d": 4}) == [
+        ("dictionary_item_removed", "a", 1, None),
+        ("dictionary_item_removed", "b", 2, None),
+        ("dictionary_item_removed", "c", 3, None),
+        ("dictionary_item_added", "d", None, 4),
+    ]
+
+
+def test_differences_are_listed_in_list_index_order():
+    left = {"items": [str(i) for i in range(11)]}
+    right = {"items": [f"{i}!" if i in (2, 10) else str(i) for i in range(11)]}
+
+    assert [d["path"] for d in deep_diff(left, right)] == ["items[2]", "items[10]"]

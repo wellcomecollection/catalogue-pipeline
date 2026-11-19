@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Regenerate the ids file for the 6507 Axiell-CALM comparison config.
 
 Scrolls the round 2 works-identified index (the `new-works-identified` source

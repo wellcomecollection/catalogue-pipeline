@@ -22,6 +22,7 @@ from .source_config import ResolvedIndexSource
 console = Console()
 
 MAX_DIFFS_SHOWN = 500
+OUTPUT_FILES = ("diffs.jsonl", "summary.json", "field_frequency.json", "sample_diffs.md")
 
 
 def field_name(path: str, depth: int) -> str:
@@ -31,7 +32,10 @@ def field_name(path: str, depth: int) -> str:
 
 def load_normaliser(path: Path) -> Callable[[dict, dict], tuple[dict, dict] | None]:
     """Return the `normalise` function defined in a normaliser file."""
-    return runpy.run_path(str(path))["normalise"]
+    normalise = runpy.run_path(str(path)).get("normalise")
+    if normalise is None:
+        raise ValueError(f"Normaliser file {path} does not define a `normalise` function.")
+    return normalise
 
 
 def compare_bucket(bucket_id: int, cfg: AppConfig, folder_a: Path, folder_b: Path) -> dict:
@@ -48,7 +52,10 @@ def compare_bucket(bucket_id: int, cfg: AppConfig, folder_a: Path, folder_b: Pat
     for doc_id in sorted(docs_a.keys() & docs_b.keys()):
         doc_a, doc_b = docs_a[doc_id], docs_b[doc_id]
         if normalise:
-            pair = normalise(doc_a, doc_b)
+            try:
+                pair = normalise(doc_a, doc_b)
+            except Exception as error:
+                raise RuntimeError(f"Normaliser failed on document {doc_id}: {error!r}") from error
             if pair is None:
                 counts["skipped"] += 1
                 continue
@@ -91,7 +98,16 @@ def compare_indices(
             "Run fetch for both indices with the same hash_bucket_count."
         )
 
+    if cfg.normaliser:
+        load_normaliser(cfg.normaliser)
+
     bucket_ids = sorted(bucket_filter) if bucket_filter is not None else list(range(bucket_count))
+    missing = [bucket_id for bucket_id in bucket_ids if not 0 <= bucket_id < bucket_count]
+    if missing:
+        raise ValueError(
+            f"Buckets {missing} do not exist. "
+            f"The fetched data has {bucket_count} buckets (0 to {bucket_count - 1})."
+        )
     label_a, label_b = escape(source_a.label), escape(source_b.label)
     compare = partial(compare_bucket, cfg=cfg, folder_a=folder_a, folder_b=folder_b)
 
@@ -101,6 +117,8 @@ def compare_indices(
     field_counts: Counter[str] = Counter()
 
     base_diff_folder.mkdir(parents=True, exist_ok=True)
+    for name in OUTPUT_FILES:
+        (base_diff_folder / name).unlink(missing_ok=True)
     with (
         (base_diff_folder / "diffs.jsonl").open("w") as jsonl,
         ProcessPoolExecutor(cfg.workers) as pool,
@@ -179,8 +197,8 @@ def write_sample(
             record = json.loads(line)
             md.write(f"## Document `{record['_id']}`\n\n")
             for d in record["diffs"][:MAX_DIFFS_SHOWN]:
-                left = truncate_val(d["left"]).replace("`", "​`")
-                right = truncate_val(d["right"]).replace("`", "​`")
+                left = truncate_val(d["left"]).replace("`", "\u200b`")
+                right = truncate_val(d["right"]).replace("`", "\u200b`")
                 md.write(f"- **{d['type']}** @ `{d['path']}`\n")
                 md.write(f"  - {source_a.label}: `{left}`\n")
                 md.write(f"  - {source_b.label}: `{right}`\n")

@@ -3,8 +3,8 @@ from __future__ import annotations
 import pytest
 import yaml
 
-from es_index_comparison.analysis import load_normaliser
 from es_index_comparison import config
+from es_index_comparison.analysis import load_normaliser
 from es_index_comparison.config import load_config
 
 
@@ -176,3 +176,10 @@ def test_long_ids_file_is_split_into_batches(tmp_path, monkeypatch):
         {"query": {"ids": {"values": ["c", "d"]}}},
         {"query": {"ids": {"values": ["e"]}}},
     ]
+
+
+def test_unknown_setting_fails_at_load(tmp_path):
+    path = _write_config(tmp_path, {"index_sources": ["a", "b"], "ignore_field": ["title"]})
+
+    with pytest.raises(ValueError, match="ignore_field"):
+        load_config(path)

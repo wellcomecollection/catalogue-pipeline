@@ -110,7 +110,9 @@ ignore_fields:
 # OPTIONAL: lists to compare as unordered, in the same pattern language as
 # ignore_fields. In a matching list, and every list nested inside it, equal items
 # are matched wherever they sit, similar items are paired and diffed, and the rest
-# are reported as added or removed. Use "**" for every list.
+# are reported as added or removed. Two items that differ a lot are not paired, and
+# show as one removed and one added. Use "**" for every list. Matching items
+# takes time that grows with the square of the list's length.
 ignore_list_order:
   - data.contributors
   - data.subjects[].concepts

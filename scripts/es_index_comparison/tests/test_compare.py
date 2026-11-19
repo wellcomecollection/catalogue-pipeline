@@ -63,6 +63,14 @@ def test_compare_respects_bucket_filter(tmp_path):
     assert result["differing"] == in_bucket_1
 
 
+def test_compare_refuses_a_bucket_that_was_not_fetched(tmp_path):
+    write_index(tmp_path, SOURCE_A, {"doc-1": {}})
+    write_index(tmp_path, SOURCE_B, {"doc-1": {}})
+
+    with pytest.raises(ValueError, match=r"Buckets \[10\] do not exist.*4 buckets \(0 to 3\)"):
+        compare(tmp_path, bucket_filter={1, 10})
+
+
 def test_compare_applies_normaliser(tmp_path):
     write_index(tmp_path, SOURCE_A, {"doc-1": {"title": "Title "}})
     write_index(tmp_path, SOURCE_B, {"doc-1": {"title": "Title"}})
@@ -106,3 +114,35 @@ def test_field_name_keeps_the_first_segments_without_list_indexes():
     assert field_name("data.production[0].dates[1].label", 2) == "data.production"
     assert field_name("data.production[0].dates[1].label", 3) == "data.production.dates"
     assert field_name("type", 2) == "type"
+
+
+def test_compare_removes_the_outputs_of_an_earlier_run(tmp_path):
+    write_index(tmp_path, SOURCE_A, {"doc-1": {"title": "Original"}})
+    write_index(tmp_path, SOURCE_B, {"doc-1": {"title": "Changed"}})
+    compare(tmp_path)
+    assert (tmp_path / "diffs/sample_diffs.md").exists()
+
+    write_index(tmp_path, SOURCE_B, {"doc-1": {"title": "Original"}})
+    compare(tmp_path)
+
+    assert not (tmp_path / "diffs/sample_diffs.md").exists()
+
+
+def test_compare_names_the_document_a_normaliser_fails_on(tmp_path):
+    write_index(tmp_path, SOURCE_A, {"doc-1": {}})
+    write_index(tmp_path, SOURCE_B, {"doc-1": {}})
+    failing = tmp_path / "failing.py"
+    failing.write_text("def normalise(a, b):\n    return a['title'], b\n")
+
+    with pytest.raises(RuntimeError, match="doc-1"):
+        compare(tmp_path, normaliser=failing)
+
+
+def test_compare_needs_a_normalise_function_in_the_normaliser_file(tmp_path):
+    write_index(tmp_path, SOURCE_A, {"doc-1": {}})
+    write_index(tmp_path, SOURCE_B, {"doc-1": {}})
+    empty = tmp_path / "empty.py"
+    empty.write_text("")
+
+    with pytest.raises(ValueError, match="does not define"):
+        compare(tmp_path, normaliser=empty)

@@ -5,13 +5,15 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field, FilePath, PositiveInt, model_validator
+from pydantic import BaseModel, ConfigDict, Field, FilePath, PositiveInt, model_validator
 
 MATCH_ALL: dict[str, Any] = {"query": {"match_all": {}}}
 IDS_BATCH_SIZE = 1000
 
 
 class AppConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     index_sources: list[str] = Field(min_length=2, max_length=2)
     filter_query: dict[str, Any] | None = None
     filter_queries: dict[str, dict[str, Any]] = {}

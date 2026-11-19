@@ -145,7 +145,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "deepdiff", specifier = ">=8" },
+    { name = "deepdiff", specifier = ">=9.2" },
     { name = "elasticsearch", specifier = ">=9.5,<10" },
     { name = "pydantic", specifier = ">=2" },
     { name = "pyyaml", specifier = ">=6.0" },
