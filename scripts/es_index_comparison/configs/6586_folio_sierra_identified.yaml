@@ -29,6 +29,8 @@ ignore_fields:
   - state.sourceIdentifier
   - state.predecessorIdentifier
   - state.removedInternalWorkStubs
+  # The text a date range was parsed from. Nothing downstream reads it.
+  - data.production[].dates[].range.label
   # Items and holdings are compared under milestone 80.
   - data.items
   - data.holdings

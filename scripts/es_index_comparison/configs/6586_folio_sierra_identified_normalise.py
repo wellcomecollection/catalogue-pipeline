@@ -30,24 +30,33 @@ def normalise(sierra: dict, folio: dict) -> tuple[dict, dict] | None:
 
     for work in (sierra, folio):
         fill_missing_lists(work)
+        work["data"] = clean_text(work["data"])
+        work["state"]["relations"] = clean_text(work["state"]["relations"])
         work["data"]["otherIdentifiers"] = [
             identifier
             for identifier in work["data"]["otherIdentifiers"]
             if identifier["identifierType"]["id"] not in OWN_IDENTIFIER_TYPES
         ]
         work["state"]["mergeCandidates"] = merge_candidate_keys(work)
-        for subject in work["data"]["subjects"]:
-            subject["label"] = nfc(subject["label"])
-            for concept in subject["concepts"]:
-                concept["label"] = nfc(concept["label"])
 
     normalise_sierra(sierra)
     normalise_folio(sierra, folio)
     return drop_empty(sierra), drop_empty(folio)
 
 
-def nfc(text: str) -> str:
-    return unicodedata.normalize("NFC", text)
+def clean_text(value):
+    """Return a copy with every string in NFC, backslashes as spaces and whitespace collapsed.
+
+    Sierra stores a mix of Unicode forms, the Scala transformer does not trim,
+    and the migration to FOLIO turned backslashes into spaces.
+    """
+    if isinstance(value, dict):
+        return {key: clean_text(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [clean_text(item) for item in value]
+    if isinstance(value, str):
+        return " ".join(unicodedata.normalize("NFC", value).replace("\\", " ").split())
+    return value
 
 
 def fill_missing_lists(work: dict) -> None:
@@ -71,43 +80,49 @@ def merge_candidate_keys(work: dict) -> list[str]:
 def normalise_sierra(sierra: dict) -> None:
     data = sierra["data"]
 
-    # Sierra stores a mix of Unicode forms, and the Scala transformer does not trim.
-    for name in ("title", "edition", "description", "lettering"):
-        if data.get(name) is not None:
-            data[name] = nfc(data[name])
-    data["alternativeTitles"] = [nfc(title).strip() for title in data["alternativeTitles"]]
-    if data.get("physicalDescription") is not None:
-        data["physicalDescription"] = data["physicalDescription"].rstrip()
-    for note in data["notes"]:
-        note["contents"] = nfc(note["contents"])
+    # The Python transformer trims every trailing comma.
     for contributor in data["contributors"]:
-        contributor["agent"]["label"] = nfc(contributor["agent"]["label"])
-    for ancestor in sierra["state"]["relations"]["ancestors"]:
-        ancestor["title"] = nfc(ancestor["title"])
+        contributor["agent"]["label"] = contributor["agent"]["label"].rstrip(",")
 
     for genre in data["genres"]:
         for concept in genre["concepts"]:
             if concept["label"] == "Electronic Books":
                 concept["label"] = "Electronic books"
 
+    # The Python transformer always stores a type on concepts.
     for production in data["production"]:
-        production["label"] = nfc(production["label"]).rstrip()
-        # The Python transformer always stores a type on concepts.
         for place in production.get("places") or []:
             place["type"] = "Place"
-            place["label"] = nfc(place["label"]).strip()
         if production.get("function"):
             production["function"]["type"] = "Concept"
-        for agent in production.get("agents") or []:
-            agent["label"] = nfc(agent["label"]).strip()
-        for date in production.get("dates") or []:
-            date_range = date.get("range")
-            if date_range and date_range["from"] == "-9999-01-01T00:00:00Z":
-                date_range["from"] = "0001-01-01T00:00:00Z"
+
+    # The Python period parser starts an open range at year 1.
+    for period in periods(sierra):
+        date_range = period.get("range")
+        if date_range and date_range["from"] == "-9999-01-01T00:00:00Z":
+            date_range["from"] = "0001-01-01T00:00:00Z"
+
+    # The Python transformer strips the organisation prefix from a host identifier.
+    if data.get("collectionPath"):
+        path = data["collectionPath"]["path"]
+        data["collectionPath"]["path"] = path.removeprefix("(UkLW)")
 
     # Works no longer store siblings or children.
     for name in ("siblingsPreceding", "siblingsSucceeding", "children"):
         sierra["state"]["relations"].pop(name, None)
+
+
+def periods(work: dict) -> list[dict]:
+    """Return every production date and every subject and genre concept of a work."""
+    data = work["data"]
+    dates = [date for production in data["production"] for date in production.get("dates") or []]
+    concepts = [
+        concept
+        for name in ("subjects", "genres")
+        for entity in data[name]
+        for concept in entity["concepts"]
+    ]
+    return dates + concepts
 
 
 def normalise_folio(sierra: dict, folio: dict) -> None:
@@ -120,20 +135,20 @@ def normalise_folio(sierra: dict, folio: dict) -> None:
 
     # The Python period parser handles more patterns, so a date range the Sierra
     # concept lacks is not a difference.
-    sierra_concepts = {
-        (identity(subject), identity(concept)): concept
-        for subject in sierra["data"]["subjects"]
-        for concept in subject["concepts"]
-    }
-    for subject in folio["data"]["subjects"]:
-        for concept in subject["concepts"]:
-            sierra_concept = sierra_concepts.get((identity(subject), identity(concept)))
-            if sierra_concept is not None and sierra_concept.get("range") is None:
-                concept.pop("range", None)
+    for name in ("subjects", "genres"):
+        sierra_concepts = {}
+        for entity in sierra["data"][name]:
+            for concept in entity["concepts"]:
+                sierra_concepts[identity(entity), identity(concept)] = concept
+        for entity in folio["data"][name]:
+            for concept in entity["concepts"]:
+                sierra_concept = sierra_concepts.get((identity(entity), identity(concept)))
+                if sierra_concept is not None and sierra_concept.get("range") is None:
+                    concept.pop("range", None)
 
 
 def identity(entity: dict) -> tuple:
-    identifier = entity["id"].get("sourceIdentifier")
+    identifier = entity.get("id", {}).get("sourceIdentifier")
     if identifier is None:
         return ("label", entity["label"])
     return (identifier["identifierType"]["id"], identifier["ontologyType"], identifier["value"])
