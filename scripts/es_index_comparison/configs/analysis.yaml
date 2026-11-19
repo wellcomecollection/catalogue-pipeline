@@ -25,10 +25,10 @@ index_sources:
 ignore_fields:
   # - some_field
 
-# Number of differing documents to sample for console display
+# Number of differing documents written to sample_diffs.md
 sample_size: 10
 
-# Rows per Parquet shard flush during conversion
+# Documents read into memory at a time during conversion
 loading_chunk_size: 100000
 
 # Number of hash buckets for Parquet partitioning (controls compare-memory usage)

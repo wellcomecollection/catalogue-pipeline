@@ -4,7 +4,8 @@
 # credentials and index definitions. The real file is ignored by
 # Git so that secrets remain local.
 #
-# clusters: Named Elastic Cloud deployments (or logical groups)
+# clusters: Named Elastic Cloud deployments (or logical groups). Give cloud_id,
+#   or host (a full https URL) for a Serverless project, which has no cloud id.
 # index_sources: Elastic index references tied to a cluster
 # ------------------------------------------------------------
 
@@ -15,6 +16,9 @@ clusters:
   staging:
     cloud_id: "<staging-cloud-id>"
     api_key: "<staging-api-key>"
+  serverless:
+    host: "https://<project>.es.<region>.aws.elastic.cloud:443"
+    api_key: "<serverless-api-key>"
 
 index_sources:
   prod-works-source:

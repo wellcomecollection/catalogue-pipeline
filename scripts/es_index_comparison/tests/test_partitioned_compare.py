@@ -5,7 +5,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-import pyarrow.parquet as pq
+import polars as pl
 
 from es_index_comparison.parquet_io import (
     MANIFEST_FILENAME,
@@ -85,7 +85,7 @@ def test_convert_flushes_global_chunks(tmp_path, monkeypatch):
     bucket_dir = parquet_root / "sample-index" / "bucket_00000"
     parts = sorted(bucket_dir.glob("part-*.parquet"))
     assert len(parts) == 3  # 2 + 2 + 1 rows flushed sequentially
-    row_counts = [pq.read_table(part).num_rows for part in parts]
+    row_counts = [pl.read_parquet(part).height for part in parts]
     assert row_counts == [2, 2, 1]
 
 

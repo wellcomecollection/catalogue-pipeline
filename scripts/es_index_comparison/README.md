@@ -3,30 +3,29 @@
 A Python CLI (uv project) to fetch documents from two Elasticsearch indices, materialize them locally (NDJSON gzip + Parquet shards), and compute deep, field-level diffs with flexible ignore patterns. Multiple analyses can be run side by side, each with its own YAML config and output namespace.
 
 ## Features
-- Fetch only (read-only) from Elasticsearch using cloud_id + api_key (never writes back).
+- Fetch only (read-only) from Elasticsearch using an api_key with a cloud_id, or a host URL for Serverless projects (never writes back).
 - Optional filter query to restrict scanned documents.
-- Hash-bucketed Parquet materialization (polars + pyarrow) so comparisons stream one bucket at a time, with streaming NDJSON ingestion during convert and optional bucket filters for targeted reruns.
-- Deep recursive diff (dicts, lists, scalars, numpy arrays) with null-vs-missing equivalence.
+- Hash-bucketed Parquet files (polars), so the comparison loads one bucket at a time and single buckets can be rerun.
+- Deep recursive diff (dicts, lists, scalars) with null-vs-missing equivalence.
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
-- Export artifacts: JSONL diffs, CSV summary, field frequency JSON, and diff metadata.
-- Sampled human-readable diff display & per-document diff inspection.
-- Streaming compare phase with per-bucket, human-readable progress logs and incremental artifact writes.
+- Output files: every diff as JSONL, a count of differing documents per top-level field, and a Markdown sample of differing documents.
+- Per-document diff inspection with `show-diff`.
+- One progress log line per bucket during compare.
 - Multiple independent analyses distinguished by namespace (auto or user-provided).
 
 ## Installation (using uv)
 
 ```bash
-cd es_index_comparison
-uv sync  
+cd scripts/es_index_comparison
+uv sync
 uv run es-index-compare --help
 ```
 
 ## Quick Start
 ```bash
 # 1. Copy the example source configuration and fill in secrets locally
-cp es_index_comparison/configs/source_configuration.example.yaml \
-  es_index_comparison/configs/source_configuration.yaml
-#   Edit the new file with cluster cloud IDs and API keys (never committed)
+cp configs/source_configuration.example.yaml configs/source_configuration.yaml
+#   Edit the new file with cluster cloud IDs or host URLs, and API keys (never committed)
 
 # 2. Run full pipeline with the default analysis config (configs/analysis.yaml)
 uv run es-index-compare run-all
@@ -47,7 +46,7 @@ uv run es-index-compare compare --namespace pipeline-reindex-audit
 ```
 
 ## Source Configuration
-All cluster credentials now live in `configs/source_configuration.yaml`, which is deliberately
+All cluster credentials live in `configs/source_configuration.yaml`, which is deliberately
 ignored by Git. The example file `source_configuration.example.yaml` shows the structure:
 
 ```yaml
@@ -55,6 +54,9 @@ clusters:
   production:
     cloud_id: "<prod-cloud-id>"
     api_key: "<prod-api-key>"
+  serverless:
+    host: "https://<project>.es.<region>.aws.elastic.cloud:443"
+    api_key: "<serverless-api-key>"
 
 index_sources:
   prod-works-source:
@@ -111,9 +113,9 @@ ignore_fields:
   - data.production[].dates[].range.to
 
 # OPTIONAL settings
-sample_size: 10                # number of docs to sample when printing diffs
-loading_chunk_size: 100000     # max docs buffered (across all buckets) before flushing Parquet shards
-hash_bucket_count: 6           # number of deterministic hash buckets for Parquet layout
+sample_size: 10                # number of differing docs written to sample_diffs.md
+loading_chunk_size: 100000     # docs read into memory at a time during convert
+hash_bucket_count: 6           # number of hash buckets the Parquet files are split into
 namespace: pipeline-comparison-ebsco # If omitted, auto: <basename>-<YYYYMMDD-HHMMSS>
 output_dir: data               # base output root (default: data)
 ```
@@ -130,23 +132,22 @@ Any match also ignores deeper descendants beneath that path.
 ```
 <output_dir>/<namespace>/
   raw/
-    <index>.ndjson.gz
+    <index source>.ndjson.gz
   parquet/
-    <index>/
-      bucket_0000/
+    <index source>/
+      bucket_00000/
         part-00000.parquet
-      bucket_0001/
+      bucket_00001/
         part-00000.parquet
       manifest.json
   diffs/
     diffs.jsonl
-    diff_summary.csv
     field_frequency.json
-    diff_meta.parquet
+    sample_diffs.md
 ```
 
 ## Commands
-All commands require a config file. Use `run-all` for the full pipeline.
+Every command reads a config file, `configs/analysis.yaml` unless `--config` says otherwise. Use `run-all` for the full pipeline.
 
 ```bash
 es-index-compare run-all  # uses configs/analysis.yaml and sibling source_configuration.yaml by default
@@ -179,10 +180,9 @@ es-index-compare compare --bucket 3 --bucket 4
 The tool only calls Elasticsearch `GET`/`_search` via scan/scroll helpers; it performs no writes, index creations, or updates.
 
 ## Performance Tips
-- Adjust `loading_chunk_size` to control peak memory: smaller values flush more often (more files, less RAM), larger values reduce file counts at the cost of more buffering.
-- Tune `hash_bucket_count` to balance on-disk fan-out vs. in-memory chunk size during compare (higher bucket counts mean fewer docs per chunk). The default is now 6 buckets, which keeps artifact counts reasonable while still enabling efficient streaming.
+- `loading_chunk_size` controls peak memory during convert: smaller values use less memory and write more files.
+- `hash_bucket_count` controls peak memory during compare: more buckets mean fewer documents loaded at a time. The default is 6.
 - Use `-b/--bucket` to rerun only the partitions that matter (ideal for debugging or partial rechecks).
-- Polars operations are columnar; ensure adequate disk space for Parquet.
 - Re-run `compare` without `fetch`/`convert` after adjusting ignore patterns.
 
 ## Methodology notes from the migration testing rounds
@@ -214,19 +214,3 @@ A work that is `Deleted` in both clusters can still diff on `state.internalWorkS
 ### Size buckets for the corpus
 
 The compare loads one hash bucket per side into memory. On the METS works-source corpus (~365k docs of full pipeline `_source`) the default `hash_bucket_count: 6` repeatedly exhausted memory and stalled for hours; raise the bucket count for large corpora so each bucket fits comfortably. Membership counts (`only_in_a`/`only_in_b`) stream in the progress log per bucket, so a killed run still yields a usable membership verdict.
-
-## Exit Codes
-- `0` success
-- `1` configuration / validation error
-- `2` runtime/IO error
-
-## License
-Apache-2.0
-
-## Future Enhancements (Ideas)
-- Optional bloom/fast sets for very large ID comparisons.
-- Parallel shard fetch.
-- Output HTML diff report.
-
----
-Happy comparing! 🧪

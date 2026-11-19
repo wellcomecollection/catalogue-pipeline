@@ -15,7 +15,6 @@ from pathlib import Path
 
 from elasticsearch import helpers
 
-from es_index_comparison.es_client import build_client
 from es_index_comparison.source_config import load_source_configuration
 
 HERE = Path(__file__).parent
@@ -24,7 +23,7 @@ SOURCE_ID = "new-works-identified"
 
 source_config = load_source_configuration(HERE / "configs" / "source_configuration.yaml")
 source = source_config.resolve_index_sources([SOURCE_ID])[0]
-client = build_client(source.cloud_id, source.api_key)
+client = source.connect()
 
 count = 0
 with OUT.open("w") as f:
