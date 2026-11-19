@@ -10,7 +10,7 @@ PATTERN_TOKENS = {"[]": r"\[\d+\]", "**": ".*", "*": r"[^.\[]+"}
 
 
 def compile_ignore_patterns(patterns: list[str]) -> list[re.Pattern[str]]:
-    """Compile ignore patterns, where `[]` is any list index, `*` one segment and `**` any depth."""
+    """Compile path patterns, where `[]` is any list index, `*` one segment and `**` any depth."""
     compiled = []
     for pattern in patterns:
         parts = re.split(r"(\[\]|\*\*|\*)", pattern)
@@ -19,13 +19,26 @@ def compile_ignore_patterns(patterns: list[str]) -> list[re.Pattern[str]]:
     return compiled
 
 
-def path_ignored(path: str, compiled: list[re.Pattern[str]]) -> bool:
+def path_matches(path: str, compiled: list[re.Pattern[str]]) -> bool:
     return bool(path) and any(regex.match(path) for regex in compiled)
 
 
 def truncate_val(value: Any) -> str:
     text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
     return text[:TRUNCATE_LEN] + "…" if len(text) > TRUNCATE_LEN else text
+
+
+def sort_lists(value: Any, unordered: list[re.Pattern[str]], path: str = "") -> Any:
+    """Return a copy in which every list at or below a path matching the patterns is sorted."""
+    if isinstance(value, dict):
+        prefix = f"{path}." if path else ""
+        return {key: sort_lists(item, unordered, prefix + key) for key, item in value.items()}
+    if isinstance(value, list):
+        items = [sort_lists(item, unordered, f"{path}[{i}]") for i, item in enumerate(value)]
+        if path_matches(path, unordered):
+            items.sort(key=lambda item: json.dumps(item, sort_keys=True))
+        return items
+    return value
 
 
 def deep_diff(a: Any, b: Any, path: str = "") -> list[dict[str, Any]]:

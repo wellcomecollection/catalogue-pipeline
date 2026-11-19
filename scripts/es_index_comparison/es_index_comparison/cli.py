@@ -121,6 +121,7 @@ def _compare(cfg, dirs, sources, bucket: list[int] | None) -> None:
         dirs["diffs"],
         cfg.sample_size,
         bucket_filter=bucket_filter,
+        ignore_list_order=cfg.ignore_list_order,
     )
 
 

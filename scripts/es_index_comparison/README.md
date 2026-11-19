@@ -7,6 +7,7 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 - Optional filter query to restrict scanned documents.
 - Hash-bucketed Parquet files (polars), so the comparison loads one bucket at a time and single buckets can be rerun.
 - Deep recursive diff (dicts, lists, scalars) with null-vs-missing equivalence.
+- Order-insensitive comparison for chosen lists (`ignore_list_order`).
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
 - Output files: every diff as JSONL, a count of differing documents per top-level field, and a Markdown sample of differing documents.
 - Per-document diff inspection with `show-diff`.
@@ -111,6 +112,13 @@ ignore_fields:
   - state.sourceModifiedTime
   - data.production[].dates[].range.from
   - data.production[].dates[].range.to
+
+# OPTIONAL: lists to compare as unordered, in the same pattern language as
+# ignore_fields. A matching list, and every list nested inside it, is sorted on
+# both sides before the diff. Use "**" for every list.
+ignore_list_order:
+  - data.contributors
+  - data.subjects[].concepts
 
 # OPTIONAL settings
 sample_size: 10                # number of differing docs written to sample_diffs.md

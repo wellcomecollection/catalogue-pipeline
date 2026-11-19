@@ -25,6 +25,10 @@ index_sources:
 ignore_fields:
   # - some_field
 
+# Lists to compare as unordered (same pattern language as ignore_fields, "**" for all)
+# ignore_list_order:
+#   - data.contributors
+
 # Number of differing documents written to sample_diffs.md
 sample_size: 10
 

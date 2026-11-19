@@ -16,6 +16,7 @@ class AppConfig:
     ids_file: Path | None = None
     ids_format: str | None = None
     ignore_fields: list[str] = field(default_factory=list)
+    ignore_list_order: list[str] = field(default_factory=list)
     sample_size: int = 10
     loading_chunk_size: int = 100_000
     hash_bucket_count: int = 6

@@ -10,7 +10,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.markup import escape
 
-from .diff import compile_ignore_patterns, deep_diff, path_ignored, truncate_val
+from .diff import compile_ignore_patterns, deep_diff, path_matches, sort_lists, truncate_val
 from .parquet_io import PartitionedIndex
 from .source_config import ResolvedIndexSource
 
@@ -39,6 +39,7 @@ def compare_indices(
     base_diff_folder: Path,
     sample_size: int,
     bucket_filter: set[int] | None = None,
+    ignore_list_order: list[str] | None = None,
 ) -> dict:
     reader_a = PartitionedIndex(parquet_root / source_a.storage_key)
     reader_b = PartitionedIndex(parquet_root / source_b.storage_key)
@@ -49,6 +50,7 @@ def compare_indices(
 
     bucket_ids = sorted(bucket_filter) if bucket_filter is not None else reader_a.iter_bucket_ids()
     ignore = compile_ignore_patterns(ignore_fields)
+    unordered = compile_ignore_patterns(ignore_list_order or [])
     label_a, label_b = escape(source_a.label), escape(source_b.label)
 
     only_in_a: list[str] = []
@@ -65,8 +67,11 @@ def compare_indices(
             only_in_b += docs_b.keys() - docs_a.keys()
 
             for doc_id in sorted(docs_a.keys() & docs_b.keys()):
-                all_diffs = deep_diff(docs_a[doc_id], docs_b[doc_id])
-                diffs = [d for d in all_diffs if not path_ignored(d["path"], ignore)]
+                doc_a, doc_b = docs_a[doc_id], docs_b[doc_id]
+                if unordered:
+                    doc_a, doc_b = sort_lists(doc_a, unordered), sort_lists(doc_b, unordered)
+                all_diffs = deep_diff(doc_a, doc_b)
+                diffs = [d for d in all_diffs if not path_matches(d["path"], ignore)]
                 if not all_diffs:
                     counts["identical_raw"] += 1
                 elif not diffs:
