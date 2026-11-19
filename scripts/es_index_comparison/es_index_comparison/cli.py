@@ -60,25 +60,13 @@ def _fail(message: str) -> typer.Exit:
 
 
 def _fetch(cfg, dirs, sources) -> None:
-    queries = {source.id: cfg.effective_filter_query(source.id) for source in sources}
+    queries = {source.id: cfg.fetch_queries(source.id) for source in sources}
     fetch_both(sources, dirs["docs"], queries, cfg.hash_bucket_count)
 
 
 def _compare(cfg, dirs, sources, bucket: list[int] | None) -> None:
     bucket_filter = _parse_bucket_filter(bucket, cfg.hash_bucket_count)
-    compare_indices(
-        sources[0],
-        sources[1],
-        dirs["docs"],
-        cfg.ignore_fields,
-        dirs["diffs"],
-        cfg.sample_size,
-        bucket_filter=bucket_filter,
-        ignore_list_order=cfg.ignore_list_order,
-        normaliser=cfg.normaliser,
-        workers=cfg.workers,
-        field_depth=cfg.field_depth,
-    )
+    compare_indices(cfg, sources[0], sources[1], dirs["docs"], dirs["diffs"], bucket_filter)
 
 
 @app.command()

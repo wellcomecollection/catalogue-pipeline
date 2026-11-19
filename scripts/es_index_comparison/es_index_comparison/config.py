@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+from itertools import batched
 from pathlib import Path
 from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field, FilePath, PositiveInt, model_validator
+
+MATCH_ALL: dict[str, Any] = {"query": {"match_all": {}}}
+IDS_BATCH_SIZE = 1000
 
 
 class AppConfig(BaseModel):
@@ -32,24 +36,26 @@ class AppConfig(BaseModel):
             raise ValueError("ids_format requires ids_file")
         return self
 
-    def effective_filter_query(self, source_id: str) -> dict[str, Any] | None:
-        """Resolve the fetch query for one index source.
+    def fetch_queries(self, source_id: str) -> list[dict[str, Any]]:
+        """Return the search bodies that fetch one index source.
 
         A per-source entry in filter_queries takes precedence over the shared
-        filter_query. An ids_file constraint applies to both sources and is
-        ANDed with whichever filter applies.
+        filter_query. With an ids_file there is one body per batch of ids, each
+        ANDed with the filter, because a long id list does not fit in one request.
         """
-        per_source = self.filter_queries.get(source_id)
-        base = per_source if per_source is not None else self.filter_query
+        base = self.filter_queries.get(source_id, self.filter_query)
         ids = self._load_ids()
         if ids is None:
-            return base
-        ids_clause: dict[str, Any] = {"ids": {"values": ids}}
-        if base is None:
-            return {"query": ids_clause}
-        # Configs give filters as a full search body ({"query": ...}).
-        inner = base.get("query", base)
-        return {"query": {"bool": {"filter": [ids_clause, inner]}}}
+            return [base or MATCH_ALL]
+
+        bodies = []
+        for batch in batched(ids, IDS_BATCH_SIZE):
+            clause: dict[str, Any] = {"ids": {"values": list(batch)}}
+            if base is not None:
+                # Configs give filters as a full search body ({"query": ...}).
+                clause = {"bool": {"filter": [clause, base.get("query", base)]}}
+            bodies.append({"query": clause})
+        return bodies
 
     def _load_ids(self) -> list[str] | None:
         if self.ids_file is None:

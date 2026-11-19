@@ -15,6 +15,7 @@ from rich.console import Console
 from rich.markup import escape
 
 from .buckets import bucket_files, read_bucket
+from .config import AppConfig
 from .diff import compile_ignore_patterns, deep_diff, truncate_val
 from .source_config import ResolvedIndexSource
 
@@ -33,21 +34,13 @@ def load_normaliser(path: Path) -> Callable[[dict, dict], tuple[dict, dict] | No
     return runpy.run_path(str(path))["normalise"]
 
 
-def compare_bucket(
-    bucket_id: int,
-    folder_a: Path,
-    folder_b: Path,
-    ignore_fields: list[str],
-    ignore_list_order: list[str],
-    normaliser: Path | None,
-    field_depth: int,
-) -> dict:
+def compare_bucket(bucket_id: int, cfg: AppConfig, folder_a: Path, folder_b: Path) -> dict:
     """Diff the documents of one hash bucket."""
     docs_a = read_bucket(folder_a, bucket_id)
     docs_b = read_bucket(folder_b, bucket_id)
-    ignore = compile_ignore_patterns(ignore_fields)
-    unordered = compile_ignore_patterns(ignore_list_order)
-    normalise = load_normaliser(normaliser) if normaliser else None
+    ignore = compile_ignore_patterns(cfg.ignore_fields)
+    unordered = compile_ignore_patterns(cfg.ignore_list_order)
+    normalise = load_normaliser(cfg.normaliser) if cfg.normaliser else None
 
     counts: Counter[str] = Counter()
     field_counts: Counter[str] = Counter()
@@ -66,7 +59,7 @@ def compare_bucket(
         else:
             counts["differing"] += 1
             counts["diff_entries"] += len(diffs)
-            field_counts.update({field_name(d["path"], field_depth) for d in diffs})
+            field_counts.update({field_name(d["path"], cfg.field_depth) for d in diffs})
             lines.append(json.dumps({"_id": doc_id, "diffs": diffs}, ensure_ascii=False))
 
     return {
@@ -81,17 +74,12 @@ def compare_bucket(
 
 
 def compare_indices(
+    cfg: AppConfig,
     source_a: ResolvedIndexSource,
     source_b: ResolvedIndexSource,
     docs_dir: Path,
-    ignore_fields: list[str],
     base_diff_folder: Path,
-    sample_size: int,
     bucket_filter: set[int] | None = None,
-    ignore_list_order: list[str] | None = None,
-    normaliser: Path | None = None,
-    field_depth: int = 2,
-    workers: int = 1,
 ) -> dict:
     """Diff two fetched indices, one hash bucket per worker process at a time."""
     folder_a = docs_dir / source_a.storage_key
@@ -105,15 +93,7 @@ def compare_indices(
 
     bucket_ids = sorted(bucket_filter) if bucket_filter is not None else list(range(bucket_count))
     label_a, label_b = escape(source_a.label), escape(source_b.label)
-    compare = partial(
-        compare_bucket,
-        folder_a=folder_a,
-        folder_b=folder_b,
-        ignore_fields=ignore_fields,
-        ignore_list_order=ignore_list_order or [],
-        normaliser=normaliser,
-        field_depth=field_depth,
-    )
+    compare = partial(compare_bucket, cfg=cfg, folder_a=folder_a, folder_b=folder_b)
 
     only_in_a: list[str] = []
     only_in_b: list[str] = []
@@ -123,7 +103,7 @@ def compare_indices(
     base_diff_folder.mkdir(parents=True, exist_ok=True)
     with (
         (base_diff_folder / "diffs.jsonl").open("w") as jsonl,
-        ProcessPoolExecutor(workers) as pool,
+        ProcessPoolExecutor(cfg.workers) as pool,
     ):
         results = zip(bucket_ids, pool.map(compare, bucket_ids))
         for position, (bucket_id, result) in enumerate(results, 1):
@@ -166,7 +146,7 @@ def compare_indices(
         console.log(f"  {escape(field)}: {count}")
 
     if counts["differing"]:
-        write_sample(base_diff_folder, summary, field_counts, sample_size, source_a, source_b)
+        write_sample(base_diff_folder, summary, field_counts, cfg.sample_size, source_a, source_b)
     console.log(f"Wrote diff artifacts -> {base_diff_folder}")
 
     return summary

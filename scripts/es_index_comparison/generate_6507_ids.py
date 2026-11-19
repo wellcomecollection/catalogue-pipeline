@@ -23,7 +23,7 @@ SOURCE_ID = "new-works-identified"
 
 source_config = load_source_configuration(HERE / "configs" / "source_configuration.yaml")
 source = source_config.resolve_index_sources([SOURCE_ID])[0]
-client = source.connect()
+client = source.cluster.connect()
 
 count = 0
 with OUT.open("w") as f:

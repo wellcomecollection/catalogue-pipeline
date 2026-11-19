@@ -6,11 +6,12 @@ import pytest
 
 from es_index_comparison.analysis import compare_indices, field_name
 from es_index_comparison.buckets import BucketWriter, bucket_for_id
-from es_index_comparison.source_config import ResolvedIndexSource
+from es_index_comparison.config import AppConfig
+from es_index_comparison.source_config import Cluster, ResolvedIndexSource
 
+CLUSTER = Cluster.model_validate({"api_key": "key", "host": "https://example.test:443"})
 SOURCE_A, SOURCE_B = [
-    ResolvedIndexSource(id=name, index=name, cluster_id="cluster", api_key="key")
-    for name in ("source-a", "source-b")
+    ResolvedIndexSource(name, name, "cluster", CLUSTER) for name in ("source-a", "source-b")
 ]
 BUCKET_COUNT = 4
 
@@ -21,8 +22,11 @@ def write_index(tmp_path, source, docs: dict[str, dict], bucket_count: int = BUC
             writer.write(doc_id, body)
 
 
-def compare(tmp_path, name: str = "diffs", **options) -> dict:
-    return compare_indices(SOURCE_A, SOURCE_B, tmp_path / "docs", [], tmp_path / name, 1, **options)
+def compare(tmp_path, name: str = "diffs", bucket_filter=None, **settings) -> dict:
+    cfg = AppConfig(index_sources=["source-a", "source-b"], namespace="test", **settings)
+    return compare_indices(
+        cfg, SOURCE_A, SOURCE_B, tmp_path / "docs", tmp_path / name, bucket_filter=bucket_filter
+    )
 
 
 def test_compare_reports_differences_and_membership(tmp_path):

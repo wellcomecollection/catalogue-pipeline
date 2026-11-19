@@ -6,7 +6,32 @@ from pathlib import Path
 
 import yaml
 from elasticsearch import Elasticsearch
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
+
+
+# Validation errors must not print their input, which holds API keys. The setting
+# of the outermost model being validated is the one that applies.
+HIDE_INPUT = ConfigDict(hide_input_in_errors=True)
+
+
+class Cluster(BaseModel):
+    model_config = HIDE_INPUT
+
+    api_key: SecretStr = Field(min_length=1)
+    cloud_id: str | None = None
+    host: str | None = None
+
+    @model_validator(mode="after")
+    def check_address(self) -> Cluster:
+        if not (self.cloud_id or self.host):
+            raise ValueError("a cluster needs a cloud_id or host")
+        return self
+
+    def connect(self) -> Elasticsearch:
+        api_key = self.api_key.get_secret_value()
+        if self.host:
+            return Elasticsearch(self.host, api_key=api_key)
+        return Elasticsearch(cloud_id=self.cloud_id, api_key=api_key)
 
 
 @dataclass(frozen=True)
@@ -14,9 +39,7 @@ class ResolvedIndexSource:
     id: str
     index: str
     cluster_id: str
-    api_key: str
-    cloud_id: str | None = None
-    host: str | None = None
+    cluster: Cluster
 
     @property
     def storage_key(self) -> str:
@@ -26,29 +49,6 @@ class ResolvedIndexSource:
     @property
     def label(self) -> str:
         return f"{self.id} ({self.cluster_id}/{self.index})"
-
-    def connect(self) -> Elasticsearch:
-        if self.host:
-            return Elasticsearch(self.host, api_key=self.api_key)
-        return Elasticsearch(cloud_id=self.cloud_id, api_key=self.api_key)
-
-
-# Validation errors must not print the configuration, which holds API keys.
-HIDE_INPUT = ConfigDict(hide_input_in_errors=True)
-
-
-class Cluster(BaseModel):
-    model_config = HIDE_INPUT
-
-    api_key: str = Field(min_length=1)
-    cloud_id: str | None = None
-    host: str | None = None
-
-    @model_validator(mode="after")
-    def check_address(self) -> Cluster:
-        if not (self.cloud_id or self.host):
-            raise ValueError("a cluster needs a cloud_id or host")
-        return self
 
 
 class IndexSource(BaseModel):
@@ -78,16 +78,7 @@ class SourceConfiguration(BaseModel):
                 raise KeyError(f"Index source '{source_id}' not found in source configuration.")
             source = self.index_sources[source_id]
             cluster = self.clusters[source.cluster]
-            resolved.append(
-                ResolvedIndexSource(
-                    id=source_id,
-                    index=source.index,
-                    cluster_id=source.cluster,
-                    api_key=cluster.api_key,
-                    cloud_id=cluster.cloud_id,
-                    host=cluster.host,
-                )
-            )
+            resolved.append(ResolvedIndexSource(source_id, source.index, source.cluster, cluster))
         return resolved
 
 
