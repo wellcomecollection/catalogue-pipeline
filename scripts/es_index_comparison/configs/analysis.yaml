@@ -35,10 +35,7 @@ ignore_fields:
 # Number of differing documents written to sample_diffs.md
 sample_size: 10
 
-# Documents read into memory at a time during conversion
-loading_chunk_size: 100000
-
-# Number of hash buckets for Parquet partitioning (controls compare-memory usage)
+# Number of hash buckets the fetched documents are split into (controls compare-memory usage)
 hash_bucket_count: 6
 
 # Processes used by compare, each holding one bucket of both indices in memory

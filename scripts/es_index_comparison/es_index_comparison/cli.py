@@ -9,7 +9,6 @@ from rich.console import Console
 from .analysis import compare_indices, show_single_diff
 from .config import ensure_dirs, load_config
 from .fetch import fetch_both
-from .parquet_io import ndjson_gz_to_parquet_shards
 from .source_config import load_source_configuration
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "configs" / "analysis.yaml"
@@ -62,35 +61,15 @@ def _fail(message: str) -> typer.Exit:
 
 def _fetch(cfg, dirs, sources) -> None:
     queries = {source.id: cfg.effective_filter_query(source.id) for source in sources}
-    fetch_both(sources, dirs["raw"], queries)
-
-
-def _convert(cfg, dirs, sources, bucket: list[int] | None) -> None:
-    bucket_filter = _parse_bucket_filter(bucket, cfg.hash_bucket_count)
-    for source in sources:
-        ndjson_file = dirs["raw"] / f"{source.storage_key}.ndjson.gz"
-        if not ndjson_file.exists():
-            raise _fail(f"Missing raw file {ndjson_file}. Run fetch first.")
-        ndjson_gz_to_parquet_shards(
-            source.storage_key,
-            ndjson_file,
-            dirs["parquet"],
-            cfg.loading_chunk_size,
-            cfg.hash_bucket_count,
-            bucket_filter=bucket_filter,
-        )
+    fetch_both(sources, dirs["docs"], queries, cfg.hash_bucket_count)
 
 
 def _compare(cfg, dirs, sources, bucket: list[int] | None) -> None:
     bucket_filter = _parse_bucket_filter(bucket, cfg.hash_bucket_count)
-    for source in sources:
-        folder = dirs["parquet"] / source.storage_key
-        if not folder.exists():
-            raise _fail(f"Parquet folder missing {folder}. Run convert stage.")
     compare_indices(
         sources[0],
         sources[1],
-        dirs["parquet"],
+        dirs["docs"],
         cfg.ignore_fields,
         dirs["diffs"],
         cfg.sample_size,
@@ -107,22 +86,10 @@ def fetch(
     config: ConfigOption = DEFAULT_CONFIG_PATH,
     source_config: SourceConfigOption = None,
 ):
-    """Fetch documents from both indices into gzip NDJSON files."""
+    """Fetch documents from both indices into hash-bucketed gzip NDJSON files."""
     cfg, dirs, sources = _load_and_prepare(config, source_config)
     _fetch(cfg, dirs, sources)
     console.print(f"Fetch complete namespace={cfg.namespace}")
-
-
-@app.command()
-def convert(
-    config: ConfigOption = DEFAULT_CONFIG_PATH,
-    source_config: SourceConfigOption = None,
-    bucket: BucketOption = None,
-):
-    """Convert fetched NDJSON gzip files into Parquet shards (one folder per index)."""
-    cfg, dirs, sources = _load_and_prepare(config, source_config)
-    _convert(cfg, dirs, sources, bucket)
-    console.print(f"Convert complete namespace={cfg.namespace}")
 
 
 @app.command()
@@ -131,7 +98,7 @@ def compare(
     source_config: SourceConfigOption = None,
     bucket: BucketOption = None,
 ):
-    """Run diff comparison on existing Parquet shards and write artifacts."""
+    """Diff the fetched documents and write the results."""
     cfg, dirs, sources = _load_and_prepare(config, source_config)
     _compare(cfg, dirs, sources, bucket)
     console.print(f"Compare complete namespace={cfg.namespace}")
@@ -143,10 +110,9 @@ def run_all(
     source_config: SourceConfigOption = None,
     bucket: BucketOption = None,
 ):
-    """Execute fetch -> convert -> compare sequentially."""
+    """Execute fetch then compare."""
     cfg, dirs, sources = _load_and_prepare(config, source_config)
     _fetch(cfg, dirs, sources)
-    _convert(cfg, dirs, sources, bucket)
     _compare(cfg, dirs, sources, bucket)
     console.print(f"Run-all complete namespace={cfg.namespace}")
 

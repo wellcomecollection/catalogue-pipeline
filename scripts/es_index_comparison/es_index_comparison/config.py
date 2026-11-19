@@ -18,7 +18,6 @@ class AppConfig(BaseModel):
     normaliser: FilePath | None = None
     field_depth: PositiveInt = 2
     sample_size: PositiveInt = 10
-    loading_chunk_size: PositiveInt = 100_000
     hash_bucket_count: PositiveInt = 6
     workers: PositiveInt = 1
     namespace: str
@@ -83,7 +82,7 @@ def load_config(path: str | Path) -> AppConfig:
 
 def ensure_dirs(base_output: Path, namespace: str) -> dict[str, Path]:
     root = base_output / namespace
-    dirs = {name: root / name for name in ("raw", "parquet", "diffs")}
+    dirs = {name: root / name for name in ("docs", "diffs")}
     for directory in dirs.values():
         directory.mkdir(parents=True, exist_ok=True)
     return dirs

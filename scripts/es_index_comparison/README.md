@@ -1,11 +1,11 @@
 # es_index_comparison
 
-A Python CLI (uv project) to fetch documents from two Elasticsearch indices, materialize them locally (NDJSON gzip + Parquet shards), and compute deep, field-level diffs with flexible ignore patterns. Multiple analyses can be run side by side, each with its own YAML config and output namespace.
+A Python CLI (uv project) to fetch documents from two Elasticsearch indices, store them locally (gzipped JSON lines), and compute deep, field-level diffs with flexible ignore patterns. Multiple analyses can be run side by side, each with its own YAML config and output namespace.
 
 ## Features
 - Fetch only (read-only) from Elasticsearch using an api_key with a cloud_id, or a host URL for Serverless projects (never writes back).
 - Optional filter query to restrict scanned documents.
-- Hash-bucketed Parquet files (polars), so the comparison loads one bucket at a time and single buckets can be rerun.
+- Documents are stored in hash buckets, so the comparison loads one bucket at a time and single buckets can be rerun.
 - Field-level diff of every document pair using [DeepDiff](https://github.com/seperman/deepdiff), with a missing key and null treated as equal.
 - Compare stage runs hash buckets in parallel (`workers`).
 - Order-insensitive comparison for chosen lists (`ignore_list_order`).
@@ -123,8 +123,7 @@ normaliser: my_analysis_normalise.py
 # OPTIONAL settings
 field_depth: 2                 # path segments per field in field_frequency.json (2 gives data.title)
 sample_size: 10                # number of differing docs written to sample_diffs.md
-loading_chunk_size: 100000     # docs read into memory at a time during convert
-hash_bucket_count: 6           # number of hash buckets the Parquet files are split into
+hash_bucket_count: 6           # number of hash buckets the fetched documents are split into
 workers: 1                     # processes used by compare, each holding one bucket of both indices
 namespace: pipeline-comparison-ebsco # output folder name (default: the config file's name)
 output_dir: data               # base output root (default: data)
@@ -147,26 +146,21 @@ import unicodedata
 
 def normalise(doc_a: dict, doc_b: dict) -> tuple[dict, dict] | None:
     """Receive the two _source documents and return the pair to diff, or None to skip it."""
-    title = doc_a["data"]["title"]
+    title = doc_a["data"].get("title")
     if title is not None:
         doc_a["data"]["title"] = unicodedata.normalize("NFC", title).strip()
     return doc_a, doc_b
 ```
 
-The documents are in the order of `index_sources` and may be changed in place. Return `None` to leave a pair out of the comparison, for example when one side is deleted. Skipped pairs are counted as `skipped` in `summary.json`. A field that is missing from a document in Elasticsearch is usually present here with the value `None`, because of how the documents are stored in Parquet, so check for `None` before using a value.
+The documents are in the order of `index_sources` and may be changed in place. Return `None` to leave a pair out of the comparison, for example when one side is deleted. Skipped pairs are counted as `skipped` in `summary.json`.
 
 ## Generated Directory Layout
 ```
 <output_dir>/<namespace>/
-  raw/
-    <index source>.ndjson.gz
-  parquet/
+  docs/
     <index source>/
-      bucket_00000/
-        part-00000.parquet
-      bucket_00001/
-        part-00000.parquet
-      manifest.json
+      bucket_00000.ndjson.gz   # one document per line: _id and _source
+      bucket_00001.ndjson.gz
   diffs/
     diffs.jsonl            # one line per differing document: _id and its diffs (path, type, left, right),
                            # where type is a DeepDiff change type such as values_changed
@@ -183,14 +177,12 @@ es-index-compare run-all  # uses configs/analysis.yaml and sibling source_config
 
 # Individual stages
 es-index-compare fetch
-es-index-compare convert
 es-index-compare compare
 
 # Show diff for a single doc id (after compare)
 es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 
-# Convert/compare only specific hash buckets (speeds up targeted reruns)
-es-index-compare convert --bucket 3
+# Compare only specific hash buckets (speeds up targeted reruns)
 es-index-compare compare --bucket 3 --bucket 4
 ```
 
@@ -199,17 +191,16 @@ Every other setting lives in the config file. Running a stage again writes over 
 
 - `--config PATH` (optional; defaults to `configs/analysis.yaml` located beside the CLI project)
 - `--source-config PATH` (optional override; defaults to `<config-dir>/source_configuration.yaml`)
-- `-b/--bucket` (repeatable; restrict convert/compare/run-all to one or more bucket IDs)
+- `-b/--bucket` (repeatable; restrict compare to one or more bucket IDs)
 
 ## Safety & Read-Only Assurance
 The tool only calls Elasticsearch `GET`/`_search` via scan/scroll helpers; it performs no writes, index creations, or updates.
 
 ## Performance Tips
 - `workers` sets how many buckets compare diffs at once. Each worker loads one bucket of both indices, so memory grows with it.
-- `loading_chunk_size` controls peak memory during convert: smaller values use less memory and write more files.
-- `hash_bucket_count` controls peak memory during compare: more buckets mean fewer documents loaded at a time. The default is 6.
+- `hash_bucket_count` controls peak memory during compare: more buckets mean fewer documents loaded at a time. The default is 6. Changing it needs a new fetch.
 - Use `-b/--bucket` to rerun only the partitions that matter (ideal for debugging or partial rechecks).
-- Re-run `compare` without `fetch`/`convert` after adjusting ignore patterns.
+- Re-run `compare` without `fetch` after adjusting ignore patterns or the normaliser.
 
 ## Methodology notes from the migration testing rounds
 

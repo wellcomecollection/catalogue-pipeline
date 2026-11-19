@@ -14,8 +14,8 @@ from pathlib import Path
 from rich.console import Console
 from rich.markup import escape
 
+from .buckets import bucket_files, read_bucket
 from .diff import compile_ignore_patterns, deep_diff, truncate_val
-from .parquet_io import PartitionedIndex
 from .source_config import ResolvedIndexSource
 
 console = Console()
@@ -26,14 +26,6 @@ MAX_DIFFS_SHOWN = 500
 def field_name(path: str, depth: int) -> str:
     """Return the first `depth` segments of a diff path, without list indexes."""
     return ".".join(re.sub(r"\[\d+\]", "", path).split(".")[:depth])
-
-
-def load_sources(reader: PartitionedIndex, bucket_id: int) -> dict[str, dict]:
-    """Return the documents of one bucket as a mapping of _id to _source."""
-    df = reader.read_bucket(bucket_id)
-    if df.height == 0:
-        return {}
-    return dict(df.select("_id", "_source").iter_rows())
 
 
 def load_normaliser(path: Path) -> Callable[[dict, dict], tuple[dict, dict] | None]:
@@ -51,8 +43,8 @@ def compare_bucket(
     field_depth: int,
 ) -> dict:
     """Diff the documents of one hash bucket."""
-    docs_a = load_sources(PartitionedIndex(folder_a), bucket_id)
-    docs_b = load_sources(PartitionedIndex(folder_b), bucket_id)
+    docs_a = read_bucket(folder_a, bucket_id)
+    docs_b = read_bucket(folder_b, bucket_id)
     ignore = compile_ignore_patterns(ignore_fields)
     unordered = compile_ignore_patterns(ignore_list_order)
     normalise = load_normaliser(normaliser) if normaliser else None
@@ -91,7 +83,7 @@ def compare_bucket(
 def compare_indices(
     source_a: ResolvedIndexSource,
     source_b: ResolvedIndexSource,
-    parquet_root: Path,
+    docs_dir: Path,
     ignore_fields: list[str],
     base_diff_folder: Path,
     sample_size: int,
@@ -101,16 +93,17 @@ def compare_indices(
     field_depth: int = 2,
     workers: int = 1,
 ) -> dict:
-    """Diff two converted indices, one hash bucket per worker process at a time."""
-    folder_a = parquet_root / source_a.storage_key
-    folder_b = parquet_root / source_b.storage_key
-    reader_a, reader_b = PartitionedIndex(folder_a), PartitionedIndex(folder_b)
-    if reader_a.hash_bucket_count != reader_b.hash_bucket_count:
+    """Diff two fetched indices, one hash bucket per worker process at a time."""
+    folder_a = docs_dir / source_a.storage_key
+    folder_b = docs_dir / source_b.storage_key
+    bucket_count = len(bucket_files(folder_a))
+    if bucket_count == 0 or bucket_count != len(bucket_files(folder_b)):
         raise ValueError(
-            "Hash bucket count mismatch between indices. Re-run convert stage so both indices use the same partitioning."
+            f"{folder_a} and {folder_b} must hold the same number of bucket files. "
+            "Run fetch for both indices with the same hash_bucket_count."
         )
 
-    bucket_ids = sorted(bucket_filter) if bucket_filter is not None else reader_a.iter_bucket_ids()
+    bucket_ids = sorted(bucket_filter) if bucket_filter is not None else list(range(bucket_count))
     label_a, label_b = escape(source_a.label), escape(source_b.label)
     compare = partial(
         compare_bucket,
