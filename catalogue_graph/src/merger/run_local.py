@@ -2,6 +2,7 @@
 AWS: match, merge every changed group, then replace the baseline."""
 
 import argparse
+import sys
 
 from merger.models.step_events import (
     CommitEvent,
@@ -71,7 +72,7 @@ def main() -> None:
     parser.add_argument(
         "--job-id",
         type=str,
-        default=create_job_id(),
+        default=create_job_id(include_seconds=True),
         help="Optional job id (defaults to the current time).",
     )
     parser.add_argument(
@@ -111,7 +112,9 @@ def main() -> None:
     commit_event = CommitEvent.model_validate(
         {**event.model_dump(), "group_count": result.group_count}
     )
-    commit.handler(commit_event, execution_context)
+    commit_result = commit.handler(commit_event, execution_context)
+    if commit_result.failed_component_count:
+        sys.exit(f"{commit_result.failed_component_count} components failed to merge")
 
 
 if __name__ == "__main__":

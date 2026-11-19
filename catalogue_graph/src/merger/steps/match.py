@@ -70,7 +70,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
         pipeline_step="batch_merger_match",
     )
     if "job_id" not in event:
-        event["job_id"] = create_job_id()
+        event["job_id"] = create_job_id(include_seconds=True)
 
     return handler(MatchEvent.model_validate(event), execution_context).model_dump(
         mode="json"

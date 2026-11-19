@@ -111,11 +111,11 @@ locals {
               }
               Output = "{% $states.result.Payload %}"
               Retry = concat(local.batch_merger_lambda_retry, [
+                # Platform faults. A timed-out group is left to the next run.
                 {
-                  ErrorEquals     = ["Lambda.Unknown", "Sandbox.Timedout"]
+                  ErrorEquals     = ["Lambda.Unknown"]
                   IntervalSeconds = 5
-                  MaxAttempts     = 2
-                  BackoffRate     = 2.0
+                  MaxAttempts     = 1
                 }
               ])
               # A failed group must not stop the others reaching the baseline. Commit
