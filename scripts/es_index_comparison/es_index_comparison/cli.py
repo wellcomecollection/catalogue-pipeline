@@ -122,7 +122,8 @@ def _compare(cfg, dirs, sources, bucket: list[int] | None) -> None:
         cfg.sample_size,
         bucket_filter=bucket_filter,
         ignore_list_order=cfg.ignore_list_order,
-        normalise=cfg.load_normaliser(),
+        normaliser=cfg.normaliser,
+        workers=cfg.workers,
         field_depth=cfg.field_depth,
     )
 

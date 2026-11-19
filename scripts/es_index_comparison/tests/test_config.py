@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 import yaml
 
+from es_index_comparison.analysis import load_normaliser
 from es_index_comparison.config import load_config
 
 
@@ -103,7 +104,7 @@ def test_ids_file_resolves_relative_to_config_dir(tmp_path):
 def test_missing_ids_file_fails_at_load(tmp_path):
     config = _write_config(tmp_path, {**BASE, "ids_file": "absent.txt"})
 
-    with pytest.raises(ValueError, match="ids_file not found"):
+    with pytest.raises(ValueError, match="ids_file"):
         load_config(config)
 
 
@@ -118,17 +119,34 @@ def test_normaliser_resolves_relative_to_config_dir(tmp_path):
     (tmp_path / "rules.py").write_text("def normalise(a, b):\n    return {**a, 'seen': True}, b\n")
 
     cfg = load_config(_write_config(tmp_path, {**BASE, "normaliser": "rules.py"}))
-    normalise = cfg.load_normaliser()
+    normalise = load_normaliser(cfg.normaliser)
 
     assert normalise({"x": 1}, {"x": 2}) == ({"x": 1, "seen": True}, {"x": 2})
 
 
 def test_no_normaliser_by_default(tmp_path):
-    assert load_config(_write_config(tmp_path, BASE)).load_normaliser() is None
+    assert load_config(_write_config(tmp_path, BASE)).normaliser is None
 
 
 def test_missing_normaliser_fails_at_load(tmp_path):
     config = _write_config(tmp_path, {**BASE, "normaliser": "missing.py"})
 
-    with pytest.raises(ValueError, match="normaliser not found"):
+    with pytest.raises(ValueError, match="normaliser"):
         load_config(config)
+
+
+def test_wrong_types_fail_at_load(tmp_path):
+    for bad in ({"sample_size": "ten"}, {"ignore_fields": "version"}, {"workers": 0}):
+        with pytest.raises(ValueError, match=next(iter(bad))):
+            load_config(_write_config(tmp_path, {**BASE, **bad}))
+
+
+def test_index_sources_must_be_exactly_two(tmp_path):
+    with pytest.raises(ValueError, match="index_sources"):
+        load_config(_write_config(tmp_path, {"index_sources": ["side-a"]}))
+
+
+def test_key_with_no_value_takes_its_default(tmp_path):
+    cfg = load_config(_write_config(tmp_path, {**BASE, "ignore_fields": None}))
+
+    assert cfg.ignore_fields == []

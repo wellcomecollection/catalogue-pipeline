@@ -262,21 +262,44 @@ def test_compare_indices_applies_normaliser(tmp_path):
         for name in ("source-a", "source-b")
     ]
 
-    def strip_titles(doc_a, doc_b):
-        return {"title": doc_a["title"].strip()}, {"title": doc_b["title"].strip()}
-
-    plain = compare_indices(source_a, source_b, parquet_root, [], tmp_path / "plain", 1)
-    normalised = compare_indices(
-        source_a, source_b, parquet_root, [], tmp_path / "normalised", 1, normalise=strip_titles
+    strip_titles = tmp_path / "strip_titles.py"
+    strip_titles.write_text(
+        "def normalise(a, b):\n"
+        "    return {'title': a['title'].strip()}, {'title': b['title'].strip()}\n"
     )
+    skip_all = tmp_path / "skip_all.py"
+    skip_all.write_text("def normalise(a, b):\n    return None\n")
 
-    assert plain["differing"] == 1
-    assert normalised["differing"] == 0
+    def compare(name, normaliser=None):
+        return compare_indices(
+            source_a, source_b, parquet_root, [], tmp_path / name, 1, normaliser=normaliser
+        )
 
-    skipped = compare_indices(
-        source_a, source_b, parquet_root, [], tmp_path / "skipped", 1, normalise=lambda a, b: None
-    )
+    assert compare("plain")["differing"] == 1
+    assert compare("normalised", strip_titles)["differing"] == 0
+    skipped = compare("skipped", skip_all)
     assert (skipped["skipped"], skipped["compared"], skipped["differing"]) == (1, 0, 0)
+
+
+def test_compare_indices_gives_the_same_result_with_several_workers(tmp_path):
+    parquet_root = tmp_path / "parquet"
+    for name, suffix in (("source-a", "a"), ("source-b", "b")):
+        raw = tmp_path / f"{name}.ndjson.gz"
+        _write_docs(raw, [_hit(f"doc-{i}", {"title": f"{i}{suffix}"}) for i in range(20)])
+        ndjson_gz_to_parquet_shards(name, raw, parquet_root, chunk_size=50, hash_bucket_count=4)
+    source_a, source_b = [
+        ResolvedIndexSource(id=name, index=name, cluster_id="cluster", api_key="key")
+        for name in ("source-a", "source-b")
+    ]
+
+    one = compare_indices(source_a, source_b, parquet_root, [], tmp_path / "one", 1, workers=1)
+    three = compare_indices(source_a, source_b, parquet_root, [], tmp_path / "three", 1, workers=3)
+
+    assert one == three
+    assert one["differing"] == 20
+    assert (tmp_path / "one/diffs.jsonl").read_text() == (
+        tmp_path / "three/diffs.jsonl"
+    ).read_text()
 
 
 def test_field_name_keeps_the_first_segments_without_list_indexes():

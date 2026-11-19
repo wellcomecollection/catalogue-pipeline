@@ -41,6 +41,9 @@ loading_chunk_size: 100000
 # Number of hash buckets for Parquet partitioning (controls compare-memory usage)
 hash_bucket_count: 6
 
+# Processes used by compare, each holding one bucket of both indices in memory
+# workers: 4
+
 # Optional namespace override; if omitted a timestamped one is generated from filename
 # namespace: pipeline-comparison-ebsco
 

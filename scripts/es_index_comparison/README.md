@@ -6,7 +6,8 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 - Fetch only (read-only) from Elasticsearch using an api_key with a cloud_id, or a host URL for Serverless projects (never writes back).
 - Optional filter query to restrict scanned documents.
 - Hash-bucketed Parquet files (polars), so the comparison loads one bucket at a time and single buckets can be rerun.
-- Deep recursive diff (dicts, lists, scalars) with null-vs-missing equivalence.
+- Field-level diff of every document pair using [DeepDiff](https://github.com/seperman/deepdiff), with a missing key and null treated as equal.
+- Compare stage runs hash buckets in parallel (`workers`).
 - Order-insensitive comparison for chosen lists (`ignore_list_order`).
 - Optional Python hook to normalise each pair of documents before the diff (`normaliser`).
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
@@ -115,8 +116,9 @@ ignore_fields:
   - data.production[].dates[].range.to
 
 # OPTIONAL: lists to compare as unordered, in the same pattern language as
-# ignore_fields. A matching list, and every list nested inside it, is sorted on
-# both sides before the diff. Use "**" for every list.
+# ignore_fields. In a matching list, and every list nested inside it, equal items
+# are matched wherever they sit, similar items are paired and diffed, and the rest
+# are reported as added or removed. Use "**" for every list.
 ignore_list_order:
   - data.contributors
   - data.subjects[].concepts
@@ -131,6 +133,7 @@ field_depth: 2                 # path segments per field in field_frequency.json
 sample_size: 10                # number of differing docs written to sample_diffs.md
 loading_chunk_size: 100000     # docs read into memory at a time during convert
 hash_bucket_count: 6           # number of hash buckets the Parquet files are split into
+workers: 1                     # processes used by compare, each holding one bucket of both indices
 namespace: pipeline-comparison-ebsco # If omitted, auto: <basename>-<YYYYMMDD-HHMMSS>
 output_dir: data               # base output root (default: data)
 ```
@@ -173,7 +176,8 @@ The documents are in the order of `index_sources` and may be changed in place. R
         part-00000.parquet
       manifest.json
   diffs/
-    diffs.jsonl            # one line per differing document: _id and its diffs (path, type, left, right)
+    diffs.jsonl            # one line per differing document: _id and its diffs (path, type, left, right),
+                           # where type is a DeepDiff change type such as values_changed
     field_frequency.json   # differing documents per field, most frequent first
     summary.json           # totals, and the ids present in only one index
     sample_diffs.md        # random sample of differing documents
@@ -213,6 +217,7 @@ es-index-compare compare --bucket 3 --bucket 4
 The tool only calls Elasticsearch `GET`/`_search` via scan/scroll helpers; it performs no writes, index creations, or updates.
 
 ## Performance Tips
+- `workers` sets how many buckets compare diffs at once. Each worker loads one bucket of both indices, so memory grows with it.
 - `loading_chunk_size` controls peak memory during convert: smaller values use less memory and write more files.
 - `hash_bucket_count` controls peak memory during compare: more buckets mean fewer documents loaded at a time. The default is 6.
 - Use `-b/--bucket` to rerun only the partitions that matter (ideal for debugging or partial rechecks).

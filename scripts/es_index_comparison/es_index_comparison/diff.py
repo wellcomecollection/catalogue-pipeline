@@ -4,6 +4,9 @@ import json
 import re
 from typing import Any
 
+from deepdiff import DeepDiff
+from deepdiff.helper import notpresent
+
 TRUNCATE_LEN = 300
 
 PATTERN_TOKENS = {"[]": r"\[\d+\]", "**": ".*", "*": r"[^.\[]+"}
@@ -28,51 +31,70 @@ def truncate_val(value: Any) -> str:
     return text[:TRUNCATE_LEN] + "…" if len(text) > TRUNCATE_LEN else text
 
 
-def sort_lists(value: Any, unordered: list[re.Pattern[str]], path: str = "") -> Any:
-    """Return a copy in which every list at or below a path matching the patterns is sorted."""
+def clean(value: Any, ignore: list[re.Pattern[str]], path: str = "") -> Any:
+    """Return a copy without anything at an ignored path and without null-valued keys.
+
+    Dropping null-valued keys makes a missing key and null equal.
+    """
     if isinstance(value, dict):
         prefix = f"{path}." if path else ""
-        return {key: sort_lists(item, unordered, prefix + key) for key, item in value.items()}
+        return {
+            key: clean(item, ignore, prefix + key)
+            for key, item in value.items()
+            if item is not None and not path_matches(prefix + key, ignore)
+        }
     if isinstance(value, list):
-        items = [sort_lists(item, unordered, f"{path}[{i}]") for i, item in enumerate(value)]
-        if path_matches(path, unordered):
-            items.sort(key=lambda item: json.dumps(item, sort_keys=True))
-        return items
+        return [
+            clean(item, ignore, f"{path}[{i}]")
+            for i, item in enumerate(value)
+            if not path_matches(f"{path}[{i}]", ignore)
+        ]
     return value
 
 
-def deep_diff(a: Any, b: Any, path: str = "") -> list[dict[str, Any]]:
-    """List the differences between two JSON values, treating a missing key and null as equal."""
-    if type(a) is not type(b):
-        return [{"path": path, "type": "type_mismatch", "left": a, "right": b}]
+def format_path(keys: list[str | int]) -> str:
+    """Join DeepDiff path elements into a path such as `data.items[0].id`."""
+    return "".join(f"[{key}]" if isinstance(key, int) else f".{key}" for key in keys).lstrip(".")
+
+
+def deep_diff(
+    a: Any,
+    b: Any,
+    unordered: list[re.Pattern[str]] | None = None,
+    ignore: list[re.Pattern[str]] | None = None,
+) -> list[dict]:
+    """List the differences between two JSON values, as found by DeepDiff.
+
+    Anything at a path matching `ignore` is left out of the comparison. Lists at
+    paths matching `unordered`, and lists nested inside them, are compared
+    regardless of order. Each difference has the DeepDiff change type, such as
+    values_changed or iterable_item_added.
+    """
+    a, b = clean(a, ignore or []), clean(b, ignore or [])
     if a == b:
         return []
 
-    diffs: list[dict[str, Any]] = []
-    if isinstance(a, dict):
-        prefix = f"{path}." if path else ""
-        for key in sorted(a.keys() - b.keys()):
-            if a[key] is not None:
-                diffs.append(
-                    {
-                        "path": prefix + key,
-                        "type": "dict_key_removed",
-                        "left": a[key],
-                        "right": None,
-                    }
-                )
-        for key in sorted(b.keys() - a.keys()):
-            if b[key] is not None:
-                diffs.append(
-                    {"path": prefix + key, "type": "dict_key_added", "left": None, "right": b[key]}
-                )
-        for key in sorted(a.keys() & b.keys()):
-            diffs += deep_diff(a[key], b[key], prefix + key)
-    elif isinstance(a, list):
-        if len(a) != len(b):
-            diffs.append({"path": path, "type": "list_length", "left": len(a), "right": len(b)})
-        for i, (left, right) in enumerate(zip(a, b)):
-            diffs += deep_diff(left, right, f"{path}[{i}]")
-    else:
-        diffs.append({"path": path, "type": "scalar_change", "left": a, "right": b})
-    return diffs
+    options: dict[str, Any] = {}
+    if unordered:
+        options["report_repetition"] = True
+        options["ignore_order_func"] = lambda level: path_matches(
+            format_path(level.path(output_format="list")), unordered
+        )
+
+    diffs = []
+    tree = DeepDiff(a, b, view="tree", **options)
+    for change_type, changes in tree.items():
+        for change in changes:
+            left, right = change.t1, change.t2
+            if change_type == "repetition_change":
+                repetition = change.additional["repetition"]
+                left, right = repetition["old_repeat"], repetition["new_repeat"]
+            diffs.append(
+                {
+                    "path": format_path(change.path(output_format="list")),
+                    "type": change_type,
+                    "left": None if left is notpresent else left,
+                    "right": None if right is notpresent else right,
+                }
+            )
+    return sorted(diffs, key=lambda diff: (diff["path"], diff["type"]))

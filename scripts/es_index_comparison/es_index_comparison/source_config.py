@@ -6,6 +6,7 @@ from pathlib import Path
 
 import yaml
 from elasticsearch import Elasticsearch
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 @dataclass(frozen=True)
@@ -32,10 +33,43 @@ class ResolvedIndexSource:
         return Elasticsearch(cloud_id=self.cloud_id, api_key=self.api_key)
 
 
-@dataclass(frozen=True)
-class SourceConfiguration:
-    clusters: dict[str, dict]
-    index_sources: dict[str, dict]
+# Validation errors must not print the configuration, which holds API keys.
+HIDE_INPUT = ConfigDict(hide_input_in_errors=True)
+
+
+class Cluster(BaseModel):
+    model_config = HIDE_INPUT
+
+    api_key: str = Field(min_length=1)
+    cloud_id: str | None = None
+    host: str | None = None
+
+    @model_validator(mode="after")
+    def check_address(self) -> Cluster:
+        if not (self.cloud_id or self.host):
+            raise ValueError("a cluster needs a cloud_id or host")
+        return self
+
+
+class IndexSource(BaseModel):
+    cluster: str
+    index: str
+
+
+class SourceConfiguration(BaseModel):
+    model_config = HIDE_INPUT
+
+    clusters: dict[str, Cluster]
+    index_sources: dict[str, IndexSource]
+
+    @model_validator(mode="after")
+    def check_clusters_are_defined(self) -> SourceConfiguration:
+        for source_id, source in self.index_sources.items():
+            if source.cluster not in self.clusters:
+                raise ValueError(
+                    f"Index source '{source_id}' refers to undefined cluster '{source.cluster}'."
+                )
+        return self
 
     def resolve_index_sources(self, ids: list[str]) -> list[ResolvedIndexSource]:
         resolved = []
@@ -43,15 +77,15 @@ class SourceConfiguration:
             if source_id not in self.index_sources:
                 raise KeyError(f"Index source '{source_id}' not found in source configuration.")
             source = self.index_sources[source_id]
-            cluster = self.clusters[source["cluster"]]
+            cluster = self.clusters[source.cluster]
             resolved.append(
                 ResolvedIndexSource(
                     id=source_id,
-                    index=source["index"],
-                    cluster_id=source["cluster"],
-                    api_key=cluster["api_key"],
-                    cloud_id=cluster.get("cloud_id"),
-                    host=cluster.get("host"),
+                    index=source.index,
+                    cluster_id=source.cluster,
+                    api_key=cluster.api_key,
+                    cloud_id=cluster.cloud_id,
+                    host=cluster.host,
                 )
             )
         return resolved
@@ -64,21 +98,4 @@ def load_source_configuration(path: str | Path) -> SourceConfiguration:
             f"Source configuration file not found: {path}. "
             "Create it from configs/source_configuration.example.yaml."
         )
-    raw = yaml.safe_load(path.read_text()) or {}
-    clusters = raw.get("clusters") or {}
-    index_sources = raw.get("index_sources") or {}
-
-    for cluster_id, cluster in clusters.items():
-        if not cluster.get("api_key") or not (cluster.get("cloud_id") or cluster.get("host")):
-            raise ValueError(
-                f"Cluster '{cluster_id}' must provide an api_key and either cloud_id or host."
-            )
-    for source_id, source in index_sources.items():
-        if not source.get("cluster") or not source.get("index"):
-            raise ValueError(f"Index source '{source_id}' must specify both 'cluster' and 'index'.")
-        if source["cluster"] not in clusters:
-            raise ValueError(
-                f"Index source '{source_id}' refers to undefined cluster '{source['cluster']}'."
-            )
-
-    return SourceConfiguration(clusters=clusters, index_sources=index_sources)
+    return SourceConfiguration.model_validate(yaml.safe_load(path.read_text()) or {})

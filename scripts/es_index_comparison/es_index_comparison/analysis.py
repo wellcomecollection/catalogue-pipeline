@@ -3,15 +3,18 @@ from __future__ import annotations
 import json
 import random
 import re
+import runpy
 from collections import Counter
 from collections.abc import Callable
+from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
+from functools import partial
 from pathlib import Path
 
 from rich.console import Console
 from rich.markup import escape
 
-from .diff import compile_ignore_patterns, deep_diff, path_matches, sort_lists, truncate_val
+from .diff import compile_ignore_patterns, deep_diff, truncate_val
 from .parquet_io import PartitionedIndex
 from .source_config import ResolvedIndexSource
 
@@ -33,6 +36,58 @@ def load_sources(reader: PartitionedIndex, bucket_id: int) -> dict[str, dict]:
     return dict(df.select("_id", "_source").iter_rows())
 
 
+def load_normaliser(path: Path) -> Callable[[dict, dict], tuple[dict, dict] | None]:
+    """Return the `normalise` function defined in a normaliser file."""
+    return runpy.run_path(str(path))["normalise"]
+
+
+def compare_bucket(
+    bucket_id: int,
+    folder_a: Path,
+    folder_b: Path,
+    ignore_fields: list[str],
+    ignore_list_order: list[str],
+    normaliser: Path | None,
+    field_depth: int,
+) -> dict:
+    """Diff the documents of one hash bucket."""
+    docs_a = load_sources(PartitionedIndex(folder_a), bucket_id)
+    docs_b = load_sources(PartitionedIndex(folder_b), bucket_id)
+    ignore = compile_ignore_patterns(ignore_fields)
+    unordered = compile_ignore_patterns(ignore_list_order)
+    normalise = load_normaliser(normaliser) if normaliser else None
+
+    counts: Counter[str] = Counter()
+    field_counts: Counter[str] = Counter()
+    lines = []
+    for doc_id in sorted(docs_a.keys() & docs_b.keys()):
+        doc_a, doc_b = docs_a[doc_id], docs_b[doc_id]
+        if normalise:
+            pair = normalise(doc_a, doc_b)
+            if pair is None:
+                counts["skipped"] += 1
+                continue
+            doc_a, doc_b = pair
+        diffs = deep_diff(doc_a, doc_b, unordered, ignore)
+        if not diffs:
+            counts["identical"] += 1
+        else:
+            counts["differing"] += 1
+            counts["diff_entries"] += len(diffs)
+            field_counts.update({field_name(d["path"], field_depth) for d in diffs})
+            lines.append(json.dumps({"_id": doc_id, "diffs": diffs}, ensure_ascii=False))
+
+    return {
+        "docs_a": len(docs_a),
+        "docs_b": len(docs_b),
+        "only_in_a": list(docs_a.keys() - docs_b.keys()),
+        "only_in_b": list(docs_b.keys() - docs_a.keys()),
+        "counts": counts,
+        "field_counts": field_counts,
+        "lines": lines,
+    }
+
+
 def compare_indices(
     source_a: ResolvedIndexSource,
     source_b: ResolvedIndexSource,
@@ -42,20 +97,30 @@ def compare_indices(
     sample_size: int,
     bucket_filter: set[int] | None = None,
     ignore_list_order: list[str] | None = None,
-    normalise: Callable[[dict, dict], tuple[dict, dict] | None] | None = None,
+    normaliser: Path | None = None,
     field_depth: int = 2,
+    workers: int = 1,
 ) -> dict:
-    reader_a = PartitionedIndex(parquet_root / source_a.storage_key)
-    reader_b = PartitionedIndex(parquet_root / source_b.storage_key)
+    """Diff two converted indices, one hash bucket per worker process at a time."""
+    folder_a = parquet_root / source_a.storage_key
+    folder_b = parquet_root / source_b.storage_key
+    reader_a, reader_b = PartitionedIndex(folder_a), PartitionedIndex(folder_b)
     if reader_a.hash_bucket_count != reader_b.hash_bucket_count:
         raise ValueError(
             "Hash bucket count mismatch between indices. Re-run convert stage so both indices use the same partitioning."
         )
 
     bucket_ids = sorted(bucket_filter) if bucket_filter is not None else reader_a.iter_bucket_ids()
-    ignore = compile_ignore_patterns(ignore_fields)
-    unordered = compile_ignore_patterns(ignore_list_order or [])
     label_a, label_b = escape(source_a.label), escape(source_b.label)
+    compare = partial(
+        compare_bucket,
+        folder_a=folder_a,
+        folder_b=folder_b,
+        ignore_fields=ignore_fields,
+        ignore_list_order=ignore_list_order or [],
+        normaliser=normaliser,
+        field_depth=field_depth,
+    )
 
     only_in_a: list[str] = []
     only_in_b: list[str] = []
@@ -63,52 +128,31 @@ def compare_indices(
     field_counts: Counter[str] = Counter()
 
     base_diff_folder.mkdir(parents=True, exist_ok=True)
-    with (base_diff_folder / "diffs.jsonl").open("w") as jsonl:
-        for position, bucket_id in enumerate(bucket_ids, 1):
-            docs_a = load_sources(reader_a, bucket_id)
-            docs_b = load_sources(reader_b, bucket_id)
-            only_in_a += docs_a.keys() - docs_b.keys()
-            only_in_b += docs_b.keys() - docs_a.keys()
-
-            for doc_id in sorted(docs_a.keys() & docs_b.keys()):
-                doc_a, doc_b = docs_a[doc_id], docs_b[doc_id]
-                if normalise:
-                    pair = normalise(doc_a, doc_b)
-                    if pair is None:
-                        counts["skipped"] += 1
-                        continue
-                    doc_a, doc_b = pair
-                if unordered:
-                    doc_a, doc_b = sort_lists(doc_a, unordered), sort_lists(doc_b, unordered)
-                all_diffs = deep_diff(doc_a, doc_b)
-                diffs = [d for d in all_diffs if not path_matches(d["path"], ignore)]
-                if not all_diffs:
-                    counts["identical_raw"] += 1
-                elif not diffs:
-                    counts["identical_after_ignore"] += 1
-                else:
-                    counts["differing"] += 1
-                    counts["diff_entries"] += len(diffs)
-                    field_counts.update({field_name(d["path"], field_depth) for d in diffs})
-                    record = {"_id": doc_id, "diffs": diffs}
-                    jsonl.write(json.dumps(record, ensure_ascii=False) + "\n")
-
+    with (
+        (base_diff_folder / "diffs.jsonl").open("w") as jsonl,
+        ProcessPoolExecutor(workers) as pool,
+    ):
+        results = zip(bucket_ids, pool.map(compare, bucket_ids))
+        for position, (bucket_id, result) in enumerate(results, 1):
+            only_in_a += result["only_in_a"]
+            only_in_b += result["only_in_b"]
+            counts += result["counts"]
+            field_counts += result["field_counts"]
+            jsonl.writelines(line + "\n" for line in result["lines"])
             console.log(
                 f"[{position}/{len(bucket_ids)}] bucket={bucket_id:04d} "
-                f"{label_a} docs={len(docs_a)} | {label_b} docs={len(docs_b)} | "
+                f"{label_a} docs={result['docs_a']} | {label_b} docs={result['docs_b']} | "
                 f"differing={counts['differing']} | "
                 f"only_in_a={len(only_in_a)} | only_in_b={len(only_in_b)}"
             )
 
-    compared = counts["identical_raw"] + counts["identical_after_ignore"] + counts["differing"]
     summary = {
         "index_a": source_a.label,
         "index_b": source_b.label,
         "buckets": bucket_ids,
         "skipped": counts["skipped"],
-        "compared": compared,
-        "identical_raw": counts["identical_raw"],
-        "identical_after_ignore": counts["identical_after_ignore"],
+        "compared": counts["identical"] + counts["differing"],
+        "identical": counts["identical"],
         "differing": counts["differing"],
         "diff_entries": counts["diff_entries"],
         "only_in_a": sorted(only_in_a),
@@ -120,8 +164,7 @@ def compare_indices(
         json.dump(dict(field_counts.most_common()), f, ensure_ascii=False, indent=2)
 
     console.log(
-        f"Identical raw: {counts['identical_raw']} | "
-        f"Identical after ignore: {counts['identical_after_ignore']} | "
+        f"Identical: {counts['identical']} | "
         f"Differing: {counts['differing']} ({counts['diff_entries']} diff entries)"
     )
     console.log(f"Only in {label_a}: {len(only_in_a)} sample={escape(str(only_in_a[:10]))}")
@@ -177,7 +220,7 @@ def show_single_diff(doc_id: str, diff_dir: Path, label_a: str, label_b: str) ->
         records = map(json.loads, jsonl)
         diffs = next((r["diffs"] for r in records if r["_id"] == doc_id), None)
     if diffs is None:
-        console.print(f"Doc {escape(doc_id)} not found in diff set or is identical post-filter.")
+        console.print(f"Doc {escape(doc_id)} not found in diff set or is identical.")
         return False
 
     console.print(f"Total diffs for {escape(doc_id)}: {len(diffs)}")

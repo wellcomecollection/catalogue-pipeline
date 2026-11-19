@@ -1,31 +1,38 @@
 from __future__ import annotations
 
-import runpy
 import time
-from collections.abc import Callable
-from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
 import yaml
+from pydantic import BaseModel, Field, FilePath, PositiveInt, model_validator
 
 
-@dataclass
-class AppConfig:
-    index_sources: list[str] = field(default_factory=list)
+class AppConfig(BaseModel):
+    index_sources: list[str] = Field(min_length=2, max_length=2)
     filter_query: dict[str, Any] | None = None
-    filter_queries: dict[str, dict[str, Any]] | None = None
-    ids_file: Path | None = None
+    filter_queries: dict[str, dict[str, Any]] = {}
+    ids_file: FilePath | None = None
     ids_format: str | None = None
-    ignore_fields: list[str] = field(default_factory=list)
-    ignore_list_order: list[str] = field(default_factory=list)
-    normaliser: Path | None = None
-    field_depth: int = 2
-    sample_size: int = 10
-    loading_chunk_size: int = 100_000
-    hash_bucket_count: int = 6
+    ignore_fields: list[str] = []
+    ignore_list_order: list[str] = []
+    normaliser: FilePath | None = None
+    field_depth: PositiveInt = 2
+    sample_size: PositiveInt = 10
+    loading_chunk_size: PositiveInt = 100_000
+    hash_bucket_count: PositiveInt = 6
+    workers: PositiveInt = 1
     namespace: str | None = None
     output_dir: str = "data"
+
+    @model_validator(mode="after")
+    def check_related_settings(self) -> AppConfig:
+        unknown = sorted(set(self.filter_queries) - set(self.index_sources))
+        if unknown:
+            raise ValueError(f"filter_queries keys {unknown} do not match any index source.")
+        if self.ids_format and self.ids_file is None:
+            raise ValueError("ids_format requires ids_file")
+        return self
 
     def effective_namespace(self, config_path: Path) -> str:
         return self.namespace or f"{config_path.stem}-{time.strftime('%Y%m%d-%H%M%S')}"
@@ -37,7 +44,7 @@ class AppConfig:
         filter_query. An ids_file constraint applies to both sources and is
         ANDed with whichever filter applies.
         """
-        per_source = (self.filter_queries or {}).get(source_id)
+        per_source = self.filter_queries.get(source_id)
         base = per_source if per_source is not None else self.filter_query
         ids = self._load_ids()
         if ids is None:
@@ -60,28 +67,6 @@ class AppConfig:
             return [self.ids_format.format(value) for value in ids]
         return ids
 
-    def load_normaliser(self) -> Callable[[dict, dict], tuple[dict, dict] | None] | None:
-        """Return the `normalise` function defined in the normaliser file, if one is configured."""
-        if self.normaliser is None:
-            return None
-        return runpy.run_path(str(self.normaliser))["normalise"]
-
-    def validate(self) -> None:
-        if len(self.index_sources) != 2:
-            raise ValueError("Config 'index_sources' must contain exactly two identifiers.")
-        unknown = sorted(set(self.filter_queries or {}) - set(self.index_sources))
-        if unknown:
-            raise ValueError(f"filter_queries keys {unknown} do not match any index source.")
-        if self.ids_format and self.ids_file is None:
-            raise ValueError("ids_format requires ids_file")
-        if self.ids_file is not None and not self.ids_file.exists():
-            raise ValueError(f"ids_file not found: {self.ids_file}")
-        if self.normaliser is not None and not self.normaliser.exists():
-            raise ValueError(f"normaliser not found: {self.normaliser}")
-        for name in ("field_depth", "sample_size", "loading_chunk_size", "hash_bucket_count"):
-            if getattr(self, name) <= 0:
-                raise ValueError(f"{name} must be > 0")
-
 
 def load_config(path: str | Path, overrides: dict[str, Any] | None = None) -> AppConfig:
     """Load an analysis config, with any override that is not None replacing the YAML value."""
@@ -91,16 +76,13 @@ def load_config(path: str | Path, overrides: dict[str, Any] | None = None) -> Ap
     raw = yaml.safe_load(path.read_text()) or {}
     raw.update({key: value for key, value in (overrides or {}).items() if value is not None})
 
-    known = {f.name for f in fields(AppConfig)}
-    values = {key: value for key, value in raw.items() if key in known and value is not None}
+    # A key with nothing under it loads as None and takes its default.
+    values = {key: value for key, value in raw.items() if value is not None}
     # Relative file paths resolve against the config file's directory.
     for key in ("ids_file", "normaliser"):
         if key in values:
             values[key] = (path.parent / values[key]).resolve()
-
-    cfg = AppConfig(**values)
-    cfg.validate()
-    return cfg
+    return AppConfig(**values)
 
 
 def ensure_dirs(base_output: Path, namespace: str) -> dict[str, Path]:

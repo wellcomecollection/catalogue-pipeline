@@ -41,3 +41,12 @@ def test_cluster_needs_cloud_id_or_host(tmp_path):
 
     with pytest.raises(ValueError, match="cloud_id or host"):
         load_source_configuration(path)
+
+
+def test_validation_errors_do_not_print_api_keys(tmp_path):
+    path = _write_source_config(tmp_path, {"a": {"api_key": "very-secret"}})
+
+    with pytest.raises(ValueError) as error:
+        load_source_configuration(path)
+
+    assert "very-secret" not in str(error.value)
