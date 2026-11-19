@@ -19,6 +19,7 @@ module "merger" {
     topic_arns = [
       module.matcher.output_topic_arn,
     ]
+    dlq_alarm_arn = local.monitoring_config.dlq_alarm_arn
   }
   vpc_config = {
     subnet_ids = local.network_config.subnets

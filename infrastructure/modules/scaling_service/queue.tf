@@ -15,9 +15,8 @@ module "input_queue" {
   alarm_component  = "catalogue-graph"
   alarm_repository = "wellcomecollection/catalogue-pipeline"
 
-  # Pipeline DLQs pass no topic; their alarm is kept, and says why it has no action
-  enable_dlq_not_empty_alarm = true
-  dlq_alarm_description      = var.queue_config.dlq_alarm_arn == null ? "Deliberately unrouted: the team treats catalogue pipeline DLQ messages as noise (adr/alert_routing.md)" : null
+  # Pipeline DLQ messages are information only, so these alarms post to Amazon Q at low
+  dlq_alarm_severity = "low"
 }
 
 resource "aws_iam_role_policy" "read_from_q" {
