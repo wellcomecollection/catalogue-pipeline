@@ -15,8 +15,8 @@ resource "aws_ssm_parameter" "okapi_credentials" {
   }
 }
 
-# The same, for the EBSCO FOLIO test environment the test environment holds production data, 
-# so only its own parameter must ever point a run at it. It is public SaaS like prod, 
+# The same, for the EBSCO FOLIO test environment. The test environment holds production data,
+# so only its own parameter must ever point a run at it. It is public SaaS like prod,
 # so it needs no VPC and is not gated on a flag.
 resource "aws_ssm_parameter" "okapi_credentials_test" {
   name        = "/catalogue_pipeline/${var.namespace}/okapi_credentials_test"
