@@ -7,9 +7,12 @@ Feature: FOLIO work-level holdings
   location rule from platform#6584.
 
   A Holdings never has a note. The holdings note is
-  part of the statements in FOLIO, confirmed by Collection Information (platform#6800). 
+  part of the statements in FOLIO, confirmed by Collection Information (platform#6800).
   FOLIO has no librarian-written description separate from the statements, so the
-  enumeration is the statements in FOLIO's order.
+  enumeration is the statements. Free text statements keep FOLIO's order. Coded
+  statements start with Sierra's 863 $8 (link.sequence, such as "2.21"), which
+  gives their order but isn't for readers (platform#6800), so they follow the
+  free text, sorted by it and without it, as the Sierra transformer ordered them.
 
   Background:
     Given a MARC record with field 001 "abc123"
@@ -27,7 +30,7 @@ Feature: FOLIO work-level holdings
     And the holdings have the shelfmark "S7946"
     And the holdings have no note
 
-  Scenario: Statements keep FOLIO's order
+  Scenario: Free text statements keep FOLIO's order
     Given a FOLIO holdings record "checkin"
     And that holdings record has the statement "v. 3 (1946)"
     And that holdings record has the statement "Vol. 1 only"
@@ -40,6 +43,46 @@ Feature: FOLIO work-level holdings
     And that holdings record has the statement "Vol. 1 (1876)-v. 16 (1891) ; ;v. 24, no. 96 (Oct. 1915);  "
     When I transform the MARC record
     Then the holdings have the enumeration "Vol. 1 (1876)-v. 16 (1891) | v. 24, no. 96 (Oct. 1915)"
+
+  Scenario: Coded statements are sorted by their prefix and shown without it
+    Given a FOLIO holdings record "checkin"
+    And that holdings record has the statement "1.1 1-385 1-9969 1823-2015;2.21 396 10252-10252 2020;2.2 388 10067-10072 2017 n"
+    And that holdings record has the statement "2.1 385-388 9972-10063 2015-2016 n"
+    When I transform the MARC record
+    Then the holdings have the enumeration "1-385 1-9969 1823-2015 | 385-388 9972-10063 2015-2016 n | 388 10067-10072 2017 n | 396 10252-10252 2020"
+
+  Scenario: Free text statements come before coded statements
+    Given a FOLIO holdings record "checkin"
+    And that holdings record has the statement "1.2 47 3-4 2017 09-12"
+    And that holdings record has the statement "Vol. 3 (1969)"
+    And that holdings record has the statement "1.1 9-48 -3 1975-2014"
+    And that holdings record has the statement "Lacks v. 6"
+    When I transform the MARC record
+    Then the holdings have the enumeration "Vol. 3 (1969) | Lacks v. 6 | 9-48 -3 1975-2014 | 47 3-4 2017 09-12"
+
+  # Repeated prefixes are mostly statements the catalogue doesn't show today;
+  # the sort keeps them in FOLIO's order after the first with the same prefix.
+  Scenario: A repeated prefix keeps FOLIO's order
+    Given a FOLIO holdings record "checkin"
+    And that holdings record has the statement "1.1 1-47 -1 1967-2017 -03"
+    And that holdings record has the statement "1.2 47 3-4 2017 09-12"
+    And that holdings record has the statement "1.1 51 2 2021 06"
+    When I transform the MARC record
+    Then the holdings have the enumeration "1-47 -1 1967-2017 -03 | 51 2 2021 06 | 47 3-4 2017 09-12"
+
+  Scenario: A coded statement that is only a prefix is left out
+    Given a FOLIO holdings record "checkin"
+    And that holdings record has the statement "1.4 63-63 2-1 2020 24-23 n"
+    And that holdings record has the statement "1.5"
+    When I transform the MARC record
+    Then the holdings have the enumeration "63-63 2-1 2020 24-23 n"
+
+  Scenario: A statement that starts with a number but no prefix is free text
+    Given a FOLIO holdings record "checkin"
+    And that holdings record has the statement "1.1 2004-2014"
+    And that holdings record has the statement "2. Bd., 1-3 Lief. only."
+    When I transform the MARC record
+    Then the holdings have the enumeration "2. Bd., 1-3 Lief. only. | 2004-2014"
 
   Scenario: A holdings record in an open shelves location is labelled with its name
     Given a FOLIO holdings record "checkin"
