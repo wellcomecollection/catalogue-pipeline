@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import runpy
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any
@@ -17,6 +19,7 @@ class AppConfig:
     ids_format: str | None = None
     ignore_fields: list[str] = field(default_factory=list)
     ignore_list_order: list[str] = field(default_factory=list)
+    normaliser: Path | None = None
     sample_size: int = 10
     loading_chunk_size: int = 100_000
     hash_bucket_count: int = 6
@@ -56,6 +59,12 @@ class AppConfig:
             return [self.ids_format.format(value) for value in ids]
         return ids
 
+    def load_normaliser(self) -> Callable[[dict, dict], tuple[dict, dict]] | None:
+        """Return the `normalise` function defined in the normaliser file, if one is configured."""
+        if self.normaliser is None:
+            return None
+        return runpy.run_path(str(self.normaliser))["normalise"]
+
     def validate(self) -> None:
         if len(self.index_sources) != 2:
             raise ValueError("Config 'index_sources' must contain exactly two identifiers.")
@@ -66,6 +75,8 @@ class AppConfig:
             raise ValueError("ids_format requires ids_file")
         if self.ids_file is not None and not self.ids_file.exists():
             raise ValueError(f"ids_file not found: {self.ids_file}")
+        if self.normaliser is not None and not self.normaliser.exists():
+            raise ValueError(f"normaliser not found: {self.normaliser}")
         for name in ("sample_size", "loading_chunk_size", "hash_bucket_count"):
             if getattr(self, name) <= 0:
                 raise ValueError(f"{name} must be > 0")
@@ -81,9 +92,10 @@ def load_config(path: str | Path, overrides: dict[str, Any] | None = None) -> Ap
 
     known = {f.name for f in fields(AppConfig)}
     values = {key: value for key, value in raw.items() if key in known and value is not None}
-    if "ids_file" in values:
-        # Relative ids_file paths resolve against the config file's directory.
-        values["ids_file"] = (path.parent / values["ids_file"]).resolve()
+    # Relative file paths resolve against the config file's directory.
+    for key in ("ids_file", "normaliser"):
+        if key in values:
+            values[key] = (path.parent / values[key]).resolve()
 
     cfg = AppConfig(**values)
     cfg.validate()

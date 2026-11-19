@@ -51,9 +51,7 @@ def test_ids_file_builds_ids_query(tmp_path):
     ids.write_text("one\n\n# comment\ntwo\n")
     cfg = load_config(_write_config(tmp_path, {**BASE, "ids_file": "ids.txt"}))
 
-    assert cfg.effective_filter_query("side-a") == {
-        "query": {"ids": {"values": ["one", "two"]}}
-    }
+    assert cfg.effective_filter_query("side-a") == {"query": {"ids": {"values": ["one", "two"]}}}
 
 
 def test_ids_format_wraps_each_line(tmp_path):
@@ -113,4 +111,24 @@ def test_ids_format_without_ids_file_fails(tmp_path):
     config = _write_config(tmp_path, {**BASE, "ids_format": "Work[{}]"})
 
     with pytest.raises(ValueError, match="ids_format requires ids_file"):
+        load_config(config)
+
+
+def test_normaliser_resolves_relative_to_config_dir(tmp_path):
+    (tmp_path / "rules.py").write_text("def normalise(a, b):\n    return {**a, 'seen': True}, b\n")
+
+    cfg = load_config(_write_config(tmp_path, {**BASE, "normaliser": "rules.py"}))
+    normalise = cfg.load_normaliser()
+
+    assert normalise({"x": 1}, {"x": 2}) == ({"x": 1, "seen": True}, {"x": 2})
+
+
+def test_no_normaliser_by_default(tmp_path):
+    assert load_config(_write_config(tmp_path, BASE)).load_normaliser() is None
+
+
+def test_missing_normaliser_fails_at_load(tmp_path):
+    config = _write_config(tmp_path, {**BASE, "normaliser": "missing.py"})
+
+    with pytest.raises(ValueError, match="normaliser not found"):
         load_config(config)

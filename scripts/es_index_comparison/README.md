@@ -8,6 +8,7 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 - Hash-bucketed Parquet files (polars), so the comparison loads one bucket at a time and single buckets can be rerun.
 - Deep recursive diff (dicts, lists, scalars) with null-vs-missing equivalence.
 - Order-insensitive comparison for chosen lists (`ignore_list_order`).
+- Optional Python hook to normalise each pair of documents before the diff (`normaliser`).
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
 - Output files: every diff as JSONL, a count of differing documents per top-level field, and a Markdown sample of differing documents.
 - Per-document diff inspection with `show-diff`.
@@ -120,6 +121,11 @@ ignore_list_order:
   - data.contributors
   - data.subjects[].concepts
 
+# OPTIONAL: a Python file defining normalise(doc_a, doc_b), which returns the two
+# documents to diff. See "Normaliser" below. Relative paths resolve against this
+# config's directory.
+normaliser: my_analysis_normalise.py
+
 # OPTIONAL settings
 sample_size: 10                # number of differing docs written to sample_diffs.md
 loading_chunk_size: 100000     # docs read into memory at a time during convert
@@ -135,6 +141,23 @@ Token examples:
 - `state.**.modifiedTime` multi-depth wildcard
 - `data.production[].dates[].range.from` list index insensitive
 Any match also ignores deeper descendants beneath that path.
+
+## Normaliser
+Use a normaliser for differences that are expected and that `ignore_fields` cannot express, such as trimming whitespace on one side or removing some values from a list. The file defines one function, called once per document id present in both indices, before `ignore_list_order` and the diff are applied:
+
+```python
+import unicodedata
+
+
+def normalise(doc_a: dict, doc_b: dict) -> tuple[dict, dict]:
+    """Receive the two _source documents and return the pair to diff."""
+    title = doc_a["data"]["title"]
+    if title is not None:
+        doc_a["data"]["title"] = unicodedata.normalize("NFC", title).strip()
+    return doc_a, doc_b
+```
+
+The documents are in the order of `index_sources` and may be changed in place. A field that is missing from a document in Elasticsearch is usually present here with the value `None`, because of how the documents are stored in Parquet, so check for `None` before using a value.
 
 ## Generated Directory Layout
 ```

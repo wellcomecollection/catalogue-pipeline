@@ -4,6 +4,7 @@ import json
 import random
 import re
 from collections import Counter
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -40,6 +41,7 @@ def compare_indices(
     sample_size: int,
     bucket_filter: set[int] | None = None,
     ignore_list_order: list[str] | None = None,
+    normalise: Callable[[dict, dict], tuple[dict, dict]] | None = None,
 ) -> dict:
     reader_a = PartitionedIndex(parquet_root / source_a.storage_key)
     reader_b = PartitionedIndex(parquet_root / source_b.storage_key)
@@ -68,6 +70,8 @@ def compare_indices(
 
             for doc_id in sorted(docs_a.keys() & docs_b.keys()):
                 doc_a, doc_b = docs_a[doc_id], docs_b[doc_id]
+                if normalise:
+                    doc_a, doc_b = normalise(doc_a, doc_b)
                 if unordered:
                     doc_a, doc_b = sort_lists(doc_a, unordered), sort_lists(doc_b, unordered)
                 all_diffs = deep_diff(doc_a, doc_b)

@@ -244,3 +244,26 @@ def test_compare_indices_respects_bucket_filter(tmp_path, monkeypatch):
     assert len(diffs_jsonl) == 1
     diff_record = json.loads(diffs_jsonl[0])
     assert diff_record["_id"] == "doc-1"
+
+
+def test_compare_indices_applies_normaliser(tmp_path):
+    parquet_root = tmp_path / "parquet"
+    for name, title in (("source-a", "Title "), ("source-b", "Title")):
+        raw = tmp_path / f"{name}.ndjson.gz"
+        _write_docs(raw, [_hit("doc-1", {"title": title})])
+        ndjson_gz_to_parquet_shards(name, raw, parquet_root, chunk_size=1, hash_bucket_count=2)
+    source_a, source_b = [
+        ResolvedIndexSource(id=name, index=name, cluster_id="cluster", api_key="key")
+        for name in ("source-a", "source-b")
+    ]
+
+    def strip_titles(doc_a, doc_b):
+        return {"title": doc_a["title"].strip()}, {"title": doc_b["title"].strip()}
+
+    plain = compare_indices(source_a, source_b, parquet_root, [], tmp_path / "plain", 1)
+    normalised = compare_indices(
+        source_a, source_b, parquet_root, [], tmp_path / "normalised", 1, normalise=strip_titles
+    )
+
+    assert plain["diff_results_count"] == 1
+    assert normalised["diff_results_count"] == 0

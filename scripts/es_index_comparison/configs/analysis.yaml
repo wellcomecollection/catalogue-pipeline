@@ -29,6 +29,9 @@ ignore_fields:
 # ignore_list_order:
 #   - data.contributors
 
+# Python file defining normalise(doc_a, doc_b), run on each pair before the diff
+# normaliser: my_analysis_normalise.py
+
 # Number of differing documents written to sample_diffs.md
 sample_size: 10
 
