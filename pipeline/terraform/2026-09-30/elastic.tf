@@ -49,6 +49,15 @@ locals {
         indexed = "works_indexed.2026-11-16"
       }
     }
+    // batch merger, compared with the Scala merger's output above
+    (local.batch_merger_index_date) = {
+      works = {
+        denormalised = "works_denormalised.2025-08-14"
+      }
+      images = {
+        initial = "images_initial.2026-06-15"
+      }
+    }
   }
 }
 
@@ -60,6 +69,8 @@ module "elastic" {
   allow_delete_indices       = false
   index_config               = local.index_config
   catalogue_account_services = ["catalogue_api", "snapshot_generator", "concepts_api"]
+
+  batch_merger_index_date = local.batch_merger_index_date
 
   providers = {
     aws           = aws

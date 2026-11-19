@@ -82,7 +82,16 @@ module "indices" {
 }
 
 locals {
-  service_index_permissions = {
+  # The batch merger writes only to its own dated indices while it is compared with the
+  # Scala merger, so it can never overwrite the indices the rest of the pipeline reads.
+  batch_merger_permissions = {
+    for date in compact([var.batch_merger_index_date]) : "batch_merger" => {
+      read  = []
+      write = ["works-denormalised-${date}", "images-initial-${date}"]
+    }
+  }
+
+  service_index_permissions = merge(local.batch_merger_permissions, {
     read_only = {
       read  = ["*"]
       write = []
@@ -169,7 +178,7 @@ locals {
       read  = [for idx in local.concepts_indexed_list : idx.name]
       write = []
     }
-  }
+  })
 
   es_host_secret_name     = "elasticsearch/pipeline_storage_${var.pipeline_date}/private_host"
   es_port_secret_name     = "elasticsearch/pipeline_storage_${var.pipeline_date}/port"

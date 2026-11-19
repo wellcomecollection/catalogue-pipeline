@@ -50,3 +50,9 @@ variable "catalogue_account_services" {
   type    = set(string)
   default = []
 }
+
+variable "batch_merger_index_date" {
+  type        = string
+  default     = null
+  description = "The date of the works-denormalised and images-initial indices the batch merger writes to, which index_config must define. Gives the batch merger an API key that writes to those two only."
+}

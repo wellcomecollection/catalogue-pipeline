@@ -4,6 +4,7 @@ import polars as pl
 import structlog
 from botocore.exceptions import ClientError
 
+import config
 from utils.aws import df_from_s3_parquet
 
 logger = structlog.get_logger(__name__)
@@ -63,3 +64,19 @@ def _signatures(components: pl.DataFrame) -> pl.DataFrame:
     return components.group_by("component_id").agg(
         member.sort().str.join(",").alias("signature")
     )
+
+
+def assign_groups(
+    changed: pl.DataFrame, group_size: int = config.MERGER_GROUP_SIZE
+) -> pl.DataFrame:
+    """Number the group of each changed component, keeping components whole.
+
+    A component goes in the group where its first work falls when the works are laid
+    out in groups of `group_size`, so a group can run over by less than one component.
+    """
+    sizes = changed.group_by("component_id").len().sort("component_id")
+    start = (pl.col("len").cum_sum() - pl.col("len")) // group_size
+    groups = sizes.select(
+        "component_id", group=(start.rank("dense") - 1).cast(pl.Int32)
+    )
+    return changed.join(groups, on="component_id")

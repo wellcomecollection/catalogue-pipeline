@@ -141,8 +141,10 @@ jobs:
           # ID Minter V2
           - id-minter
           - id-generator
-          # Experimental batch matcher
-          - batch-matcher
+          # Experimental batch merger
+          - batch-merger-match
+          - batch-merger-group
+          - batch-merger-commit
           # Transformer lambdas
           - transformer
           # Graph subsystem lambdas

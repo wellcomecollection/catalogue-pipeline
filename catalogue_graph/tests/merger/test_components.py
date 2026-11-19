@@ -6,6 +6,7 @@ import pytest
 from merger import components as storage
 from merger.components import (
     COMPONENTS_SCHEMA,
+    assign_groups,
     find_changed_components,
     read_previous_components,
 )
@@ -138,3 +139,12 @@ def test_extra_stored_columns_are_dropped() -> None:
     MockSmartOpen.mock_s3_parquet_file(URI, stored)
 
     assert read_previous_components(URI).columns == list(COMPONENTS_SCHEMA)
+
+
+def test_groups_keep_components_whole() -> None:
+    frame = components({"A": "AB", "C": "CD", "E": "E", "F": "FGHI", "J": "J"})
+
+    grouped = assign_groups(frame, group_size=3)
+
+    by_group = grouped.group_by("group").agg(pl.col("id").sort().str.join(""))
+    assert dict(by_group.sort("group").iter_rows()) == {0: "ABCD", 1: "EFGHI", 2: "J"}

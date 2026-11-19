@@ -184,6 +184,9 @@ def ecs_handler[EventModel: BaseModel, ResultModel: BaseModel, **Params](
         raise
 
 
-def create_job_id() -> str:
-    """Generate a job_id based on the current time using an iso8601 format like 20210701T1300"""
-    return datetime.now().strftime("%Y%m%dT%H%M")
+def create_job_id(include_seconds: bool = False) -> str:
+    """Generate a job_id based on the current time using an iso8601 format like 20210701T1300,
+    or 20210701T130005 with seconds, so runs that start in the same minute get their own ids."""
+    return datetime.now().strftime(
+        "%Y%m%dT%H%M%S" if include_seconds else "%Y%m%dT%H%M"
+    )

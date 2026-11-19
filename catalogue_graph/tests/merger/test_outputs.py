@@ -14,7 +14,8 @@ from ingestor.models.merged.work import (
 from ingestor.models.shared.deleted_reason import DeletedFromSource
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from merger.availabilities import availabilities
-from merger.outputs import to_merged_work
+from merger.merged_target import parent_work
+from merger.outputs import to_initial_image, to_merged_work
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.access_method import OnlineRequest, ViewOnline
 from models.pipeline.access_status import (
@@ -49,6 +50,7 @@ from models.pipeline.location import (
 )
 from models.pipeline.note import Note
 from models.pipeline.work_data import WorkData
+from tests.merger.works import miro_work
 
 MERGED_AT = datetime(2026, 11, 11, 9, 30, tzinfo=UTC)
 
@@ -411,3 +413,19 @@ def test_from_raw_document_rejects_an_unknown_type() -> None:
         IdentifiedWork.from_raw_document(
             {"type": "Merged", "version": 1, "state": RAW_STATE}
         )
+
+
+def test_to_initial_image_stamps_the_merged_time_on_an_image() -> None:
+    miro = miro_work()
+    [image_data] = miro.data.image_data
+
+    image = to_initial_image(
+        image_data, parent_work(miro), datetime(2026, 11, 11, 9, 30, tzinfo=UTC)
+    )
+
+    assert image.state.canonical_id == image_data.id.canonical_id
+    assert image.state.source_identifier == image_data.id.source_identifier
+    assert image.version == image_data.version
+    assert image.locations == image_data.locations
+    assert image.source == parent_work(miro)
+    assert image.modified_time == "2026-11-11T09:30:00Z"

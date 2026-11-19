@@ -166,6 +166,10 @@ class MockS3Client(MockAwsService):
         cls.list_objects_v2_calls = []
         cls.deleted_keys = []
 
+    def delete_object(self, Bucket: str, Key: str) -> dict:  # noqa: N803
+        MockS3Client.deleted_keys.append((Bucket, Key))
+        return {}
+
     def delete_objects(self, Bucket: str, Delete: dict) -> dict:  # noqa: N803
         for s3_object in Delete["Objects"]:
             MockS3Client.deleted_keys.append((Bucket, s3_object["Key"]))

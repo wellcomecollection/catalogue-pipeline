@@ -1,5 +1,6 @@
-"""The merger step: what it reads, writes and reports on each run."""
+"""The match step: what it reads, writes and reports on each run."""
 
+import json
 from pathlib import Path
 
 import polars as pl
@@ -8,8 +9,8 @@ from pyiceberg.catalog.sql import SqlCatalog
 
 from id_minter.schemata import WORKS_IDENTIFIED_ICEBERG_SCHEMA
 from merger import components as storage
-from merger.models.step_events import MergerEvent
-from merger.steps import merger
+from merger.models.step_events import MatchEvent, MergeGroupEvent
+from merger.steps import match
 from tests.merger.support import (
     components,
     iceberg_table,
@@ -20,7 +21,7 @@ from tests.merger.support import (
 from tests.mocks import MockSmartOpen
 from utils.aws import df_from_s3_parquet, df_to_s3_parquet
 
-EVENT = MergerEvent(pipeline_date="2026-01-01", graph_date="2026-01-02", job_id="job-1")
+EVENT = MatchEvent(pipeline_date="2026-01-01", graph_date="2026-01-02", job_id="job-1")
 GRAPH = {"A": "B", "B": "", "C": "D", "D": "", "E": ""}
 
 
@@ -32,12 +33,12 @@ def read_like_s3(uri: str) -> pl.DataFrame:
 
 
 def run(
-    monkeypatch: pytest.MonkeyPatch, event: MergerEvent = EVENT, snapshot_id: int = 7
-) -> merger.MergerResult:
+    monkeypatch: pytest.MonkeyPatch, event: MatchEvent = EVENT, snapshot_id: int = 7
+) -> match.MatchResult:
     table = iceberg_table(works(GRAPH), snapshot_id)
-    monkeypatch.setattr(merger, "get_works_identified_table", lambda use_rest: table)
+    monkeypatch.setattr(match, "get_works_identified_table", lambda use_rest: table)
     monkeypatch.setattr(storage, "df_from_s3_parquet", read_like_s3)
-    return merger.handler(event)
+    return match.handler(event)
 
 
 def written(uri: str) -> dict[str, str]:
@@ -54,7 +55,7 @@ def test_first_run_reports_every_work(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_later_run_reports_only_changed_works(monkeypatch: pytest.MonkeyPatch) -> None:
     MockSmartOpen.mock_s3_parquet_file(
-        EVENT.components_s3_uri, components({"A": "AB", "C": "C", "D": "D", "E": "E"})
+        EVENT.baseline_s3_uri, components({"A": "AB", "C": "C", "D": "D", "E": "E"})
     )
 
     result = run(monkeypatch)
@@ -63,35 +64,46 @@ def test_later_run_reports_only_changed_works(monkeypatch: pytest.MonkeyPatch) -
     assert written(result.changed_components_s3_uri) == {"C": "CD"}
 
 
-def test_every_run_replaces_the_baseline_with_the_whole_graph(
+def test_writes_the_whole_graph_for_the_job_and_leaves_the_baseline(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    MockSmartOpen.mock_s3_parquet_file(EVENT.components_s3_uri, components({"Z": "Z"}))
+    # Written rather than mocked, so the test can read it after the step has.
+    df_to_s3_parquet(components({"Z": "Z"}), EVENT.baseline_s3_uri)
 
     run(monkeypatch)
 
-    assert written(EVENT.components_s3_uri) == {"A": "AB", "C": "CD", "E": "E"}
+    assert written(EVENT.get_s3_uri("components")) == {"A": "AB", "C": "CD", "E": "E"}
+    assert written(EVENT.baseline_s3_uri) == {"Z": "Z"}
 
 
-def test_changed_works_are_written_before_the_baseline(
+def test_numbers_the_groups_of_changed_components(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def refuse_baseline(frame: pl.DataFrame, uri: str) -> None:
-        if uri == EVENT.components_s3_uri:
-            raise OSError("S3 is down")
-        df_to_s3_parquet(frame, uri)
+    monkeypatch.setattr(
+        match,
+        "assign_groups",
+        lambda changed: storage.assign_groups(changed, group_size=2),
+    )
 
-    monkeypatch.setattr(merger, "df_to_s3_parquet", refuse_baseline)
+    result = run(monkeypatch)
 
-    with pytest.raises(OSError):
-        run(monkeypatch)
+    changed = df_from_s3_parquet(result.changed_components_s3_uri)
+    groups = changed.group_by("group").agg(pl.col("id").sort().str.join(""))
+    assert dict(groups.sort("group").iter_rows()) == {0: "AB", 1: "CD", 2: "E"}
+    assert result.group_count == 3
 
-    assert written(EVENT.get_s3_uri("changed_components")) == {
-        "A": "AB",
-        "C": "CD",
-        "E": "E",
-    }
-    assert EVENT.components_s3_uri not in MockSmartOpen.file_lookup
+
+def test_nothing_changed_gives_no_groups(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    MockSmartOpen.mock_s3_parquet_file(
+        EVENT.baseline_s3_uri, components({"A": "AB", "C": "CD", "E": "E"})
+    )
+
+    result = run(monkeypatch)
+
+    assert result.changed_work_count == 0
+    assert result.group_count == 0
 
 
 def test_reads_the_current_snapshot_unless_one_is_given(
@@ -115,26 +127,54 @@ def test_an_empty_table_reports_nothing_changed(
     table = catalog.create_table("ns.works", schema=WORKS_IDENTIFIED_ICEBERG_SCHEMA)
     if appended:
         table.append(table.schema().as_arrow().empty_table())
-    monkeypatch.setattr(merger, "get_works_identified_table", lambda use_rest: table)
+    monkeypatch.setattr(match, "get_works_identified_table", lambda use_rest: table)
     monkeypatch.setattr(storage, "df_from_s3_parquet", read_like_s3)
 
-    result = merger.handler(EVENT)
+    result = match.handler(EVENT)
 
     assert (result.iceberg_snapshot_id is None) == (not appended)
     assert (result.work_count, result.changed_work_count) == (0, 0)
     assert result.changed_component_count == 0
     assert written(result.changed_components_s3_uri) == {}
-    assert df_from_s3_parquet(EVENT.components_s3_uri).height == 0
+    assert df_from_s3_parquet(EVENT.get_s3_uri("components")).height == 0
+    assert result.group_count == 0
 
 
 def test_the_baseline_is_shared_by_jobs_and_the_changed_file_is_not() -> None:
     other_job = EVENT.model_copy(update={"job_id": "job-2"})
 
-    assert EVENT.components_s3_uri == other_job.components_s3_uri
-    assert EVENT.components_s3_uri.endswith(
+    assert EVENT.baseline_s3_uri == other_job.baseline_s3_uri
+    assert EVENT.baseline_s3_uri.endswith(
         "/graph-2026-01-02/pipeline-2026-01-01/merger/components.parquet"
     )
     assert EVENT.get_s3_uri("changed_components").endswith(
         "/graph-2026-01-02/pipeline-2026-01-01/merger/full/job-job-1/changed_components.parquet"
     )
     assert EVENT.get_s3_uri("x") != other_job.get_s3_uri("x")
+
+
+def test_the_snapshot_id_survives_numbers_read_as_doubles() -> None:
+    """Step Functions' JSONata reads JSON numbers as doubles, which round a typical
+    Iceberg snapshot id."""
+    snapshot_id = 9085339146097452536
+    result = match.MatchResult(
+        job_id="job-1",
+        iceberg_snapshot_id=snapshot_id,
+        work_count=0,
+        changed_work_count=0,
+        changed_component_count=0,
+        group_count=0,
+        changed_components_s3_uri="",
+    )
+    event = MergeGroupEvent(
+        pipeline_date="2026-01-01",
+        graph_date="2026-01-02",
+        job_id="job-1",
+        iceberg_snapshot_id=snapshot_id,
+        group=0,
+    )
+
+    as_doubles = json.loads(result.model_dump_json(), parse_int=float)
+    assert as_doubles["iceberg_snapshot_id"] == str(snapshot_id)
+    passed_on = json.loads(event.model_dump_json(), parse_int=float)
+    assert MergeGroupEvent.model_validate(passed_on).iceberg_snapshot_id == snapshot_id
