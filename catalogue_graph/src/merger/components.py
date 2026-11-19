@@ -4,12 +4,10 @@ import polars as pl
 import structlog
 from botocore.exceptions import ClientError
 
+import config
 from utils.aws import df_from_s3_parquet
 
 logger = structlog.get_logger(__name__)
-
-# Works whose documents one merge invocation holds in memory at once.
-GROUP_SIZE = 50_000
 
 COMPONENTS_SCHEMA: dict = {
     "id": pl.Utf8,
@@ -68,7 +66,9 @@ def _signatures(components: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def assign_groups(changed: pl.DataFrame, group_size: int = GROUP_SIZE) -> pl.DataFrame:
+def assign_groups(
+    changed: pl.DataFrame, group_size: int = config.MERGER_GROUP_SIZE
+) -> pl.DataFrame:
     """Number the group of each changed component, keeping components whole.
 
     A component goes in the group where its first work falls when the works are laid

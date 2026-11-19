@@ -64,6 +64,10 @@ table `matcher.works_identified`, merges every changed group into a local Elasti
 and replaces the baseline under the dev prefix in S3. Pass `--match-only` to stop after
 finding the changed components.
 
+The groups run one after another, and each one reads the table again. Set
+`MERGER_GROUP_SIZE` (default 50,000 works) to merge in fewer, larger groups, as long
+as one group's documents fit in memory.
+
 To run against a pipeline instead, pass its dates with `--use-rest-api-table`,
 `--es-mode public` and the batch merger's index dates (`--index-date-merged`,
 `--index-date-initial`), so the run reads that pipeline's table (named with
