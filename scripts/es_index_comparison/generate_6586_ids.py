@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Regenerate the ids file for the 6586 FOLIO-Sierra comparison config.
 
 Scrolls works-identified on the FOLIO pipeline (the `folio-works-identified`

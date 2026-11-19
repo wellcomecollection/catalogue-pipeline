@@ -29,6 +29,11 @@ ignore_fields:
   - state.sourceIdentifier
   - state.predecessorIdentifier
   - state.removedInternalWorkStubs
+  # The text a date range was parsed from: the catalogued date, or the 008 date
+  # when the catalogued date cannot be parsed. The Python period parser reads
+  # dates the Scala one cannot (#3729), so the two often reach the same range
+  # from different text. Nothing downstream reads this label.
+  - data.production[].dates[].range.label
   # Items and holdings are compared under milestone 80.
   - data.items
   - data.holdings
