@@ -13,7 +13,7 @@ from es_index_comparison.parquet_io import (
     _hash_bucket_for_id,
     ndjson_gz_to_parquet_shards,
 )
-from es_index_comparison.analysis import compare_indices
+from es_index_comparison.analysis import compare_indices, field_name
 from es_index_comparison.source_config import ResolvedIndexSource
 
 
@@ -138,7 +138,7 @@ def test_compare_indices_streams_partitions(tmp_path):
 
     assert result["only_in_a"] == ["doc-2"]
     assert result["only_in_b"] == ["doc-3"]
-    assert result["diff_results_count"] == 1
+    assert result["differing"] == 1
 
     diffs_jsonl = (diff_dir / "diffs.jsonl").read_text().strip().splitlines()
     assert len(diffs_jsonl) == 1
@@ -146,6 +146,11 @@ def test_compare_indices_streams_partitions(tmp_path):
     assert diff_record["_id"] == "doc-1"
     assert diff_record["diffs"], "diff payload should be present"
     assert any(d["path"].startswith("title") for d in diff_record["diffs"])
+
+    summary = json.loads((diff_dir / "summary.json").read_text())
+    assert summary == result
+    assert summary["compared"] == 1
+    assert json.loads((diff_dir / "field_frequency.json").read_text()) == {"title": 1}
 
 
 def test_convert_respects_bucket_filter(tmp_path, monkeypatch):
@@ -236,7 +241,7 @@ def test_compare_indices_respects_bucket_filter(tmp_path, monkeypatch):
         bucket_filter=bucket_filter,
     )
 
-    assert result["diff_results_count"] == 1
+    assert result["differing"] == 1
     assert result["only_in_a"] == []
     assert result["only_in_b"] == []
 
@@ -265,5 +270,16 @@ def test_compare_indices_applies_normaliser(tmp_path):
         source_a, source_b, parquet_root, [], tmp_path / "normalised", 1, normalise=strip_titles
     )
 
-    assert plain["diff_results_count"] == 1
-    assert normalised["diff_results_count"] == 0
+    assert plain["differing"] == 1
+    assert normalised["differing"] == 0
+
+    skipped = compare_indices(
+        source_a, source_b, parquet_root, [], tmp_path / "skipped", 1, normalise=lambda a, b: None
+    )
+    assert (skipped["skipped"], skipped["compared"], skipped["differing"]) == (1, 0, 0)
+
+
+def test_field_name_keeps_the_first_segments_without_list_indexes():
+    assert field_name("data.production[0].dates[1].label", 2) == "data.production"
+    assert field_name("data.production[0].dates[1].label", 3) == "data.production.dates"
+    assert field_name("type", 2) == "type"

@@ -10,7 +10,7 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 - Order-insensitive comparison for chosen lists (`ignore_list_order`).
 - Optional Python hook to normalise each pair of documents before the diff (`normaliser`).
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
-- Output files: every diff as JSONL, a count of differing documents per top-level field, and a Markdown sample of differing documents.
+- Output files: every diff as JSONL, a count of differing documents per field, a summary with totals and the ids found in only one index, and a Markdown sample of differing documents.
 - Per-document diff inspection with `show-diff`.
 - One progress log line per bucket during compare.
 - Multiple independent analyses distinguished by namespace (auto or user-provided).
@@ -127,6 +127,7 @@ ignore_list_order:
 normaliser: my_analysis_normalise.py
 
 # OPTIONAL settings
+field_depth: 2                 # path segments per field in field_frequency.json (2 gives data.title)
 sample_size: 10                # number of differing docs written to sample_diffs.md
 loading_chunk_size: 100000     # docs read into memory at a time during convert
 hash_bucket_count: 6           # number of hash buckets the Parquet files are split into
@@ -149,15 +150,15 @@ Use a normaliser for differences that are expected and that `ignore_fields` cann
 import unicodedata
 
 
-def normalise(doc_a: dict, doc_b: dict) -> tuple[dict, dict]:
-    """Receive the two _source documents and return the pair to diff."""
+def normalise(doc_a: dict, doc_b: dict) -> tuple[dict, dict] | None:
+    """Receive the two _source documents and return the pair to diff, or None to skip it."""
     title = doc_a["data"]["title"]
     if title is not None:
         doc_a["data"]["title"] = unicodedata.normalize("NFC", title).strip()
     return doc_a, doc_b
 ```
 
-The documents are in the order of `index_sources` and may be changed in place. A field that is missing from a document in Elasticsearch is usually present here with the value `None`, because of how the documents are stored in Parquet, so check for `None` before using a value.
+The documents are in the order of `index_sources` and may be changed in place. Return `None` to leave a pair out of the comparison, for example when one side is deleted. Skipped pairs are counted as `skipped` in `summary.json`. A field that is missing from a document in Elasticsearch is usually present here with the value `None`, because of how the documents are stored in Parquet, so check for `None` before using a value.
 
 ## Generated Directory Layout
 ```
@@ -172,9 +173,10 @@ The documents are in the order of `index_sources` and may be changed in place. A
         part-00000.parquet
       manifest.json
   diffs/
-    diffs.jsonl
-    field_frequency.json
-    sample_diffs.md
+    diffs.jsonl            # one line per differing document: _id and its diffs (path, type, left, right)
+    field_frequency.json   # differing documents per field, most frequent first
+    summary.json           # totals, and the ids present in only one index
+    sample_diffs.md        # random sample of differing documents
 ```
 
 ## Commands

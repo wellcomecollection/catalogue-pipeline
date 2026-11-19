@@ -20,8 +20,9 @@ console = Console()
 MAX_DIFFS_SHOWN = 500
 
 
-def top_level_field(path: str) -> str:
-    return re.split(r"[.\[]", path)[0]
+def field_name(path: str, depth: int) -> str:
+    """Return the first `depth` segments of a diff path, without list indexes."""
+    return ".".join(re.sub(r"\[\d+\]", "", path).split(".")[:depth])
 
 
 def load_sources(reader: PartitionedIndex, bucket_id: int) -> dict[str, dict]:
@@ -41,7 +42,8 @@ def compare_indices(
     sample_size: int,
     bucket_filter: set[int] | None = None,
     ignore_list_order: list[str] | None = None,
-    normalise: Callable[[dict, dict], tuple[dict, dict]] | None = None,
+    normalise: Callable[[dict, dict], tuple[dict, dict] | None] | None = None,
+    field_depth: int = 2,
 ) -> dict:
     reader_a = PartitionedIndex(parquet_root / source_a.storage_key)
     reader_b = PartitionedIndex(parquet_root / source_b.storage_key)
@@ -71,7 +73,11 @@ def compare_indices(
             for doc_id in sorted(docs_a.keys() & docs_b.keys()):
                 doc_a, doc_b = docs_a[doc_id], docs_b[doc_id]
                 if normalise:
-                    doc_a, doc_b = normalise(doc_a, doc_b)
+                    pair = normalise(doc_a, doc_b)
+                    if pair is None:
+                        counts["skipped"] += 1
+                        continue
+                    doc_a, doc_b = pair
                 if unordered:
                     doc_a, doc_b = sort_lists(doc_a, unordered), sort_lists(doc_b, unordered)
                 all_diffs = deep_diff(doc_a, doc_b)
@@ -83,7 +89,7 @@ def compare_indices(
                 else:
                     counts["differing"] += 1
                     counts["diff_entries"] += len(diffs)
-                    field_counts.update({top_level_field(d["path"]) for d in diffs})
+                    field_counts.update({field_name(d["path"], field_depth) for d in diffs})
                     record = {"_id": doc_id, "diffs": diffs}
                     jsonl.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -94,11 +100,24 @@ def compare_indices(
                 f"only_in_a={len(only_in_a)} | only_in_b={len(only_in_b)}"
             )
 
-    only_in_a.sort()
-    only_in_b.sort()
-
+    compared = counts["identical_raw"] + counts["identical_after_ignore"] + counts["differing"]
+    summary = {
+        "index_a": source_a.label,
+        "index_b": source_b.label,
+        "buckets": bucket_ids,
+        "skipped": counts["skipped"],
+        "compared": compared,
+        "identical_raw": counts["identical_raw"],
+        "identical_after_ignore": counts["identical_after_ignore"],
+        "differing": counts["differing"],
+        "diff_entries": counts["diff_entries"],
+        "only_in_a": sorted(only_in_a),
+        "only_in_b": sorted(only_in_b),
+    }
+    with (base_diff_folder / "summary.json").open("w") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
     with (base_diff_folder / "field_frequency.json").open("w") as f:
-        json.dump(dict(field_counts), f, ensure_ascii=False, indent=2)
+        json.dump(dict(field_counts.most_common()), f, ensure_ascii=False, indent=2)
 
     console.log(
         f"Identical raw: {counts['identical_raw']} | "
@@ -111,28 +130,22 @@ def compare_indices(
         console.log(f"  {escape(field)}: {count}")
 
     if counts["differing"]:
-        write_sample(base_diff_folder, counts, field_counts, sample_size, source_a, source_b)
+        write_sample(base_diff_folder, summary, field_counts, sample_size, source_a, source_b)
     console.log(f"Wrote diff artifacts -> {base_diff_folder}")
 
-    return {
-        "only_in_a": only_in_a,
-        "only_in_b": only_in_b,
-        "diff_results_count": counts["differing"],
-        "identical_raw": counts["identical_raw"],
-        "identical_after_ignore": counts["identical_after_ignore"],
-    }
+    return summary
 
 
 def write_sample(
     diff_dir: Path,
-    counts: Counter[str],
+    summary: dict,
     field_counts: Counter[str],
     sample_size: int,
     source_a: ResolvedIndexSource,
     source_b: ResolvedIndexSource,
 ) -> None:
     """Write a random sample of the differing documents to sample_diffs.md."""
-    differing = counts["differing"]
+    differing = summary["differing"]
     chosen = set(random.sample(range(differing), min(sample_size, differing)))
 
     with (diff_dir / "diffs.jsonl").open() as jsonl, (diff_dir / "sample_diffs.md").open("w") as md:
@@ -140,8 +153,8 @@ def write_sample(
         md.write(f"Compared indices: `{source_a.label}` vs `{source_b.label}`\n\n")
         md.write(f"Run timestamp: {datetime.now(UTC):%Y-%m-%dT%H:%M:%SZ}\n\n")
         md.write(f"Total differing documents: {differing}\n")
-        md.write(f"Total diff entries: {counts['diff_entries']}\n")
-        md.write(f"Top-level changed fields: {', '.join(sorted(field_counts))}\n")
+        md.write(f"Total diff entries: {summary['diff_entries']}\n")
+        md.write(f"Changed fields: {', '.join(sorted(field_counts))}\n")
         md.write(f"Sample size: {len(chosen)} (configured: {sample_size})\n\n")
 
         for line_number, line in enumerate(jsonl):

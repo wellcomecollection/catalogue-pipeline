@@ -20,6 +20,7 @@ class AppConfig:
     ignore_fields: list[str] = field(default_factory=list)
     ignore_list_order: list[str] = field(default_factory=list)
     normaliser: Path | None = None
+    field_depth: int = 2
     sample_size: int = 10
     loading_chunk_size: int = 100_000
     hash_bucket_count: int = 6
@@ -59,7 +60,7 @@ class AppConfig:
             return [self.ids_format.format(value) for value in ids]
         return ids
 
-    def load_normaliser(self) -> Callable[[dict, dict], tuple[dict, dict]] | None:
+    def load_normaliser(self) -> Callable[[dict, dict], tuple[dict, dict] | None] | None:
         """Return the `normalise` function defined in the normaliser file, if one is configured."""
         if self.normaliser is None:
             return None
@@ -77,7 +78,7 @@ class AppConfig:
             raise ValueError(f"ids_file not found: {self.ids_file}")
         if self.normaliser is not None and not self.normaliser.exists():
             raise ValueError(f"normaliser not found: {self.normaliser}")
-        for name in ("sample_size", "loading_chunk_size", "hash_bucket_count"):
+        for name in ("field_depth", "sample_size", "loading_chunk_size", "hash_bucket_count"):
             if getattr(self, name) <= 0:
                 raise ValueError(f"{name} must be > 0")
 
