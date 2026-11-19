@@ -1,7 +1,7 @@
 # Example configuration for es_index_comparison
 # ------------------------------------------------------------
 # Copy this file and modify values to create independent analyses.
-# Each run produces its own namespace directory under output_dir.
+# Each config writes to its own namespace directory under output_dir.
 # ------------------------------------------------------------
 
 # Exactly TWO index sources to compare (required)
@@ -44,7 +44,7 @@ hash_bucket_count: 6
 # Processes used by compare, each holding one bucket of both indices in memory
 # workers: 4
 
-# Optional namespace override; if omitted a timestamped one is generated from filename
+# Output folder name under output_dir (default: this file's name)
 # namespace: pipeline-comparison-ebsco
 
 # Base output directory (created if missing)

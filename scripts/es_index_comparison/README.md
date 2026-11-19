@@ -14,7 +14,7 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 - Output files: every diff as JSONL, a count of differing documents per field, a summary with totals and the ids found in only one index, and a Markdown sample of differing documents.
 - Per-document diff inspection with `show-diff`.
 - One progress log line per bucket during compare.
-- Multiple independent analyses distinguished by namespace (auto or user-provided).
+- Each analysis writes to its own namespace folder, named after its config file unless the config says otherwise.
 
 ## Installation (using uv)
 
@@ -38,14 +38,6 @@ uv run es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 
 # 4. Change ignore fields or add patterns in YAML then re-run only compare
 uv run es-index-compare compare
-
-# If fetch/convert already generated a namespace and you want to reuse it:
-uv run es-index-compare compare --namespace analysis-20250115-103000
-
-# Or set a custom namespace up front so every stage shares the same directory:
-uv run es-index-compare fetch --namespace pipeline-reindex-audit
-uv run es-index-compare convert --namespace pipeline-reindex-audit
-uv run es-index-compare compare --namespace pipeline-reindex-audit
 ```
 
 ## Source Configuration
@@ -134,7 +126,7 @@ sample_size: 10                # number of differing docs written to sample_diff
 loading_chunk_size: 100000     # docs read into memory at a time during convert
 hash_bucket_count: 6           # number of hash buckets the Parquet files are split into
 workers: 1                     # processes used by compare, each holding one bucket of both indices
-namespace: pipeline-comparison-ebsco # If omitted, auto: <basename>-<YYYYMMDD-HHMMSS>
+namespace: pipeline-comparison-ebsco # output folder name (default: the config file's name)
 output_dir: data               # base output root (default: data)
 ```
 
@@ -194,9 +186,6 @@ es-index-compare fetch
 es-index-compare convert
 es-index-compare compare
 
-# Reuse artifacts from a previous fetch/convert run
-es-index-compare compare --namespace analysis-20250115-103000
-
 # Show diff for a single doc id (after compare)
 es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 
@@ -205,12 +194,11 @@ es-index-compare convert --bucket 3
 es-index-compare compare --bucket 3 --bucket 4
 ```
 
-### Flags (common)
+### Flags
+Every other setting lives in the config file. Running a stage again writes over that stage's earlier output for the same namespace.
+
 - `--config PATH` (optional; defaults to `configs/analysis.yaml` located beside the CLI project)
 - `--source-config PATH` (optional override; defaults to `<config-dir>/source_configuration.yaml`)
-- `--namespace` (override YAML / auto)
-- `--output-dir` (override YAML)
-- `--hash-buckets` (override YAML `hash_bucket_count` when running fetch/convert/compare)
 - `-b/--bucket` (repeatable; restrict convert/compare/run-all to one or more bucket IDs)
 
 ## Safety & Read-Only Assurance

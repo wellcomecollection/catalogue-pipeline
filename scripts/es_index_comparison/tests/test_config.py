@@ -150,3 +150,8 @@ def test_key_with_no_value_takes_its_default(tmp_path):
     cfg = load_config(_write_config(tmp_path, {**BASE, "ignore_fields": None}))
 
     assert cfg.ignore_fields == []
+
+
+def test_namespace_defaults_to_the_config_file_name(tmp_path):
+    assert load_config(_write_config(tmp_path, BASE)).namespace == "analysis"
+    assert load_config(_write_config(tmp_path, {**BASE, "namespace": "x"})).namespace == "x"

@@ -27,11 +27,11 @@ def test_convert_accepts_multiple_bucket_flags(tmp_path, monkeypatch):
     storage_key = "source-a"
     _make_dummy_raw(raw_dir, storage_key)
 
-    cfg = SimpleNamespace(hash_bucket_count=8, loading_chunk_size=10)
+    cfg = SimpleNamespace(namespace="ns", hash_bucket_count=8, loading_chunk_size=10)
     dirs = {"raw": raw_dir, "parquet": parquet_dir, "diffs": tmp_path / "diffs"}
     sources = [SimpleNamespace(storage_key=storage_key)]
 
-    monkeypatch.setattr(cli, "_load_and_prepare", lambda *a, **k: (cfg, "ns", dirs, sources))
+    monkeypatch.setattr(cli, "_load_and_prepare", lambda *a, **k: (cfg, dirs, sources))
 
     captured: dict[str, Any] = {}
 
@@ -57,10 +57,10 @@ def test_convert_accepts_multiple_bucket_flags(tmp_path, monkeypatch):
 
 
 def test_convert_rejects_out_of_range_bucket(tmp_path, monkeypatch):
-    cfg = SimpleNamespace(hash_bucket_count=2, loading_chunk_size=10)
+    cfg = SimpleNamespace(namespace="ns", hash_bucket_count=2, loading_chunk_size=10)
     dirs = {"raw": tmp_path / "raw", "parquet": tmp_path / "parquet", "diffs": tmp_path / "diffs"}
     sources = [SimpleNamespace(storage_key="source-a")]
-    monkeypatch.setattr(cli, "_load_and_prepare", lambda *a, **k: (cfg, "ns", dirs, sources))
+    monkeypatch.setattr(cli, "_load_and_prepare", lambda *a, **k: (cfg, dirs, sources))
 
     result = runner.invoke(cli.app, ["convert", "--bucket", "10"])
 

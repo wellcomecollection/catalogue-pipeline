@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import time
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +21,7 @@ class AppConfig(BaseModel):
     loading_chunk_size: PositiveInt = 100_000
     hash_bucket_count: PositiveInt = 6
     workers: PositiveInt = 1
-    namespace: str | None = None
+    namespace: str
     output_dir: str = "data"
 
     @model_validator(mode="after")
@@ -33,9 +32,6 @@ class AppConfig(BaseModel):
         if self.ids_format and self.ids_file is None:
             raise ValueError("ids_format requires ids_file")
         return self
-
-    def effective_namespace(self, config_path: Path) -> str:
-        return self.namespace or f"{config_path.stem}-{time.strftime('%Y%m%d-%H%M%S')}"
 
     def effective_filter_query(self, source_id: str) -> dict[str, Any] | None:
         """Resolve the fetch query for one index source.
@@ -68,16 +64,16 @@ class AppConfig(BaseModel):
         return ids
 
 
-def load_config(path: str | Path, overrides: dict[str, Any] | None = None) -> AppConfig:
-    """Load an analysis config, with any override that is not None replacing the YAML value."""
+def load_config(path: str | Path) -> AppConfig:
+    """Load an analysis config, with the namespace defaulting to the name of the file."""
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
     raw = yaml.safe_load(path.read_text()) or {}
-    raw.update({key: value for key, value in (overrides or {}).items() if value is not None})
 
     # A key with nothing under it loads as None and takes its default.
     values = {key: value for key, value in raw.items() if value is not None}
+    values.setdefault("namespace", path.stem)
     # Relative file paths resolve against the config file's directory.
     for key in ("ids_file", "normaliser"):
         if key in values:

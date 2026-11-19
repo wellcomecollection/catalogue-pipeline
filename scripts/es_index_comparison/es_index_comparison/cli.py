@@ -28,16 +28,6 @@ SourceConfigOption = Annotated[
         "(default: source_configuration.yaml beside the config).",
     ),
 ]
-NamespaceOption = Annotated[
-    str | None, typer.Option("--namespace", help="Override namespace output directory name.")
-]
-OutputDirOption = Annotated[
-    Path | None, typer.Option("--output-dir", help="Override base output directory.")
-]
-HashBucketsOption = Annotated[
-    int | None,
-    typer.Option("--hash-buckets", help="Override the config's hash bucket count."),
-]
 BucketOption = Annotated[
     list[int] | None,
     typer.Option(
@@ -46,28 +36,12 @@ BucketOption = Annotated[
 ]
 
 
-def _load_and_prepare(
-    config: Path,
-    source_config: Path | None,
-    namespace: str | None,
-    output_dir: Path | None,
-    hash_buckets: int | None = None,
-):
-    overrides = {
-        "namespace": namespace,
-        "output_dir": str(output_dir.resolve()) if output_dir else None,
-        "hash_bucket_count": hash_buckets,
-    }
-    cfg = load_config(config, overrides)
-    eff_ns = cfg.effective_namespace(config)
-    if cfg.namespace is None:
-        console.print(
-            f"[bold cyan]Generated namespace[/]: {eff_ns}  (reuse with --namespace {eff_ns})"
-        )
-    dirs = ensure_dirs(Path(cfg.output_dir), eff_ns)
+def _load_and_prepare(config: Path, source_config: Path | None):
+    cfg = load_config(config)
+    dirs = ensure_dirs(Path(cfg.output_dir), cfg.namespace)
     source_config_path = source_config or config.parent / "source_configuration.yaml"
     sources = load_source_configuration(source_config_path).resolve_index_sources(cfg.index_sources)
-    return cfg, eff_ns, dirs, sources
+    return cfg, dirs, sources
 
 
 def _parse_bucket_filter(buckets: list[int] | None, hash_bucket_count: int) -> set[int] | None:
@@ -132,69 +106,49 @@ def _compare(cfg, dirs, sources, bucket: list[int] | None) -> None:
 def fetch(
     config: ConfigOption = DEFAULT_CONFIG_PATH,
     source_config: SourceConfigOption = None,
-    namespace: NamespaceOption = None,
-    output_dir: OutputDirOption = None,
-    hash_buckets: HashBucketsOption = None,
 ):
     """Fetch documents from both indices into gzip NDJSON files."""
-    cfg, eff_ns, dirs, sources = _load_and_prepare(
-        config, source_config, namespace, output_dir, hash_buckets
-    )
+    cfg, dirs, sources = _load_and_prepare(config, source_config)
     _fetch(cfg, dirs, sources)
-    console.print(f"Fetch complete namespace={eff_ns}")
+    console.print(f"Fetch complete namespace={cfg.namespace}")
 
 
 @app.command()
 def convert(
     config: ConfigOption = DEFAULT_CONFIG_PATH,
     source_config: SourceConfigOption = None,
-    namespace: NamespaceOption = None,
-    output_dir: OutputDirOption = None,
-    hash_buckets: HashBucketsOption = None,
     bucket: BucketOption = None,
 ):
     """Convert fetched NDJSON gzip files into Parquet shards (one folder per index)."""
-    cfg, eff_ns, dirs, sources = _load_and_prepare(
-        config, source_config, namespace, output_dir, hash_buckets
-    )
+    cfg, dirs, sources = _load_and_prepare(config, source_config)
     _convert(cfg, dirs, sources, bucket)
-    console.print(f"Convert complete namespace={eff_ns}")
+    console.print(f"Convert complete namespace={cfg.namespace}")
 
 
 @app.command()
 def compare(
     config: ConfigOption = DEFAULT_CONFIG_PATH,
     source_config: SourceConfigOption = None,
-    namespace: NamespaceOption = None,
-    output_dir: OutputDirOption = None,
-    hash_buckets: HashBucketsOption = None,
     bucket: BucketOption = None,
 ):
     """Run diff comparison on existing Parquet shards and write artifacts."""
-    cfg, eff_ns, dirs, sources = _load_and_prepare(
-        config, source_config, namespace, output_dir, hash_buckets
-    )
+    cfg, dirs, sources = _load_and_prepare(config, source_config)
     _compare(cfg, dirs, sources, bucket)
-    console.print(f"Compare complete namespace={eff_ns}")
+    console.print(f"Compare complete namespace={cfg.namespace}")
 
 
 @app.command("run-all")
 def run_all(
     config: ConfigOption = DEFAULT_CONFIG_PATH,
     source_config: SourceConfigOption = None,
-    namespace: NamespaceOption = None,
-    output_dir: OutputDirOption = None,
-    hash_buckets: HashBucketsOption = None,
     bucket: BucketOption = None,
 ):
     """Execute fetch -> convert -> compare sequentially."""
-    cfg, eff_ns, dirs, sources = _load_and_prepare(
-        config, source_config, namespace, output_dir, hash_buckets
-    )
+    cfg, dirs, sources = _load_and_prepare(config, source_config)
     _fetch(cfg, dirs, sources)
     _convert(cfg, dirs, sources, bucket)
     _compare(cfg, dirs, sources, bucket)
-    console.print(f"Run-all complete namespace={eff_ns}")
+    console.print(f"Run-all complete namespace={cfg.namespace}")
 
 
 @app.command("show-diff")
@@ -202,11 +156,9 @@ def show_diff(
     id: Annotated[str, typer.Option("--id", help="Document ID to display diffs for.")],
     config: ConfigOption = DEFAULT_CONFIG_PATH,
     source_config: SourceConfigOption = None,
-    namespace: NamespaceOption = None,
-    output_dir: OutputDirOption = None,
 ):
     """Show diffs for a specific document ID (after compare stage)."""
-    _, _, dirs, sources = _load_and_prepare(config, source_config, namespace, output_dir)
+    _, dirs, sources = _load_and_prepare(config, source_config)
     if not (dirs["diffs"] / "diffs.jsonl").exists():
         raise _fail(f"No diffs.jsonl in {dirs['diffs']}. Did you run compare?")
     found = show_single_diff(id, dirs["diffs"], sources[0].label, sources[1].label)
