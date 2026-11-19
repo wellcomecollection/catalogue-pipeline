@@ -48,5 +48,9 @@ docker build \
   --label "org.wellcomecollection.dockerfile=$PROJECT_DIRECTORY/Dockerfile" \
   "$PROJECT_DIRECTORY"
 
-# Shadow mode for publishing by content: logs whether this image is already published, changes nothing
-./builds/shadow_content_key.sh check "$PROJECT_NAME" "$PROJECT_DIRECTORY"
+# Shadow mode for publishing by content: logs whether this image is already published, changes nothing.
+# Buildkite only: it is what publishes, and the GitHub Actions role cannot describe ECR images.
+if [[ -n "${BUILDKITE:-}" ]]
+then
+  ./builds/shadow_content_key.sh check "$PROJECT_NAME" "$PROJECT_DIRECTORY"
+fi
