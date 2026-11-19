@@ -31,9 +31,11 @@ module "sync_lambda" {
   environment = {
     variables = merge(
       {
-        # url/tenant/username/password all come from this SSM SecureString.
-        OKAPI_SECRET_PARAM = aws_ssm_parameter.okapi_credentials.name
-        MANIFEST_S3_BUCKET = aws_s3_bucket.axiell_folio_sync_manifests.bucket
+        # url/tenant/username/password all come from an SSM SecureString, one
+        # per target.
+        OKAPI_SECRET_PARAM      = aws_ssm_parameter.okapi_credentials.name
+        OKAPI_TEST_SECRET_PARAM = aws_ssm_parameter.okapi_credentials_test.name
+        MANIFEST_S3_BUCKET      = aws_s3_bucket.axiell_folio_sync_manifests.bucket
         # The adapter table is read via AXIELL_CONFIG/AdapterStore, so no
         # Iceberg-specific env vars are needed here.
         DRY_RUN = tostring(local.dry_run_default)

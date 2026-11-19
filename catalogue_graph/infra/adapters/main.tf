@@ -74,22 +74,21 @@ module "axiell_folio_sync" {
   folio_dev_subnets            = local.folio_dev_target_enabled ? local.private_subnets : []
   folio_dev_security_group_ids = [aws_security_group.folio_sync_dev.id]
 
-  # Scheduled runs target the sandbox and write for real, so the whole pipeline
-  # is exercised end to end before any of it writes to production. dry_run is
-  # clamped in the module so this can only ever write while the target is dev.
-  folio_default_target = "dev"
-  dry_run_default      = false
+  # Scheduled runs target the FOLIO test environment, a copy of the production
+  # tenant, so the whole pipeline is exercised end to end before any of it writes
+  # to production. The sandbox stays available to runs that name
+  # folio_target="dev". dry_run is clamped in the module so this can only ever
+  # write while the target is test or dev.
+  #
+  # Dry run until a one-record live run against the test environment has
+  # passed (wellcomecollection/platform#6849), then set this to false.
+  folio_default_target = "test"
+  dry_run_default      = true
 
   # A record hard deleted in Collections is hard deleted in FOLIO too, as agreed
   # with Collection Information (wellcomecollection/platform#6833).
   hard_delete_default = true
 
-  # The sandbox is stopped out of hours by folio-dev-server, and the Axiell
-  # adapter publishes every 15 minutes, so the trigger is confined to the
-  # working day. Starts an hour after the sandbox does, to let Kong come up.
-  trigger_window = local.folio_dev_target_enabled ? {
-    start_expression = "cron(0 9 ? * MON-FRI *)"
-    stop_expression  = "cron(30 17 ? * MON-FRI *)"
-    timezone         = "Europe/London"
-  } : null
+  # No trigger_window: the test environment is always up, unlike the sandbox,
+  # so scheduled runs are not confined to the working day.
 }

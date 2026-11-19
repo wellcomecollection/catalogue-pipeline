@@ -61,7 +61,7 @@ variable "hard_delete_default" {
 # second OKAPI SecureString, read only by folio_target="dev" runs.
 # See docs/axiell-folio-sync-lambda-dev-instance.md.
 variable "folio_dev_target_enabled" {
-  description = "Attach the Lambda to the FOLIO dev server's subnets and give it a dev OKAPI parameter. Runs still default to prod; a run opts in with folio_target=\"dev\"."
+  description = "Attach the Lambda to the FOLIO dev server's subnets and give it a dev OKAPI parameter. A run opts in with folio_target=\"dev\"."
   type        = bool
   default     = false
 }
@@ -78,12 +78,13 @@ variable "folio_dev_security_group_ids" {
   default     = []
 }
 
-# Sets FOLIO_TARGET, and the target the state machine falls back to. "dev"
-# points the scheduled runs at the sandbox and requires folio_dev_target_enabled.
+# Sets FOLIO_TARGET, and the target the state machine falls back to. Defaults to
+# the test environment until production switch-on, so a run that names no target
+# cannot write to production.
 variable "folio_default_target" {
-  description = "FOLIO instance to use when an event does not specify one: \"prod\" (EBSCO SaaS) or \"dev\" (the sandbox). \"dev\" is ignored unless folio_dev_target_enabled is also set. An unrecognised value fails at runtime in resolve_folio_target."
+  description = "FOLIO instance to use when an event does not specify one: \"prod\" (EBSCO SaaS), \"test\" (the EBSCO test environment) or \"dev\" (the sandbox). \"dev\" falls back to \"test\" unless folio_dev_target_enabled is also set. An unrecognised value fails at runtime in resolve_folio_target."
   type        = string
-  default     = "prod"
+  default     = "test"
 }
 
 # Confines the EventBridge trigger to a daily window. Null leaves it enabled all

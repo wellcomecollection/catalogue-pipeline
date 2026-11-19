@@ -111,6 +111,9 @@ Environment variables (injected by Terraform in Lambda):
 | Env var              | Description                                                          |
 | -------------------- | -------------------------------------------------------------------- |
 | `OKAPI_SECRET_PARAM` | SSM path to the OKAPI credentials SecureString                       |
+| `OKAPI_TEST_SECRET_PARAM` | The same, for the EBSCO FOLIO test environment                  |
+| `OKAPI_DEV_SECRET_PARAM` | The same, for the FOLIO dev sandbox (set only when it is enabled in Terraform) |
+| `FOLIO_TARGET`       | `prod`, `test` or `dev` when the event names none; `test` in code and in Terraform |
 | `MANIFEST_S3_BUCKET` | Bucket for JSON run reports                                          |
 | `DRY_RUN`            | Default dry-run behaviour (`true` unless overridden by the event)    |
 | `HARD_DELETE`        | Delete rather than suppress in Pass 2 (`false` in code, `true` in Terraform; the event overrides) |
@@ -123,6 +126,8 @@ fields (and skip SSM entirely if all four are set).
 | Parameter                                              | Description                                        |
 | ------------------------------------------------------ | -------------------------------------------------- |
 | `/catalogue_pipeline/axiell-folio-sync/okapi_credentials` | SecureString JSON: `url`, `tenant`, `username`, `password` |
+| `/catalogue_pipeline/axiell-folio-sync/okapi_credentials_test` | The same, for the test environment |
+| `/catalogue_pipeline/axiell-folio-sync/okapi_credentials_dev` | The same, for the dev sandbox |
 
 The parameter is seeded with placeholders by Terraform; real values are set out-of-band.
 

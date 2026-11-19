@@ -5,7 +5,8 @@
 #
 # The sandbox OKAPI SecureString is created as a placeholder by
 # modules/axiell_folio_sync/ssm.tf and filled in by hand. Pass
-# {"folio_target": "dev"} to target the sandbox; otherwise runs use prod.
+# {"folio_target": "dev"} to target the sandbox; otherwise runs use the
+# default target set in main.tf.
 #
 # See docs/axiell-folio-sync-lambda-dev-instance.md.
 locals {

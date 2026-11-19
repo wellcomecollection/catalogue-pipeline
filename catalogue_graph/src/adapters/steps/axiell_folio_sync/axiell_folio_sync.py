@@ -25,6 +25,7 @@ so no Iceberg-specific env vars.
 
 Environment variables (injected by Terraform):
   OKAPI_SECRET_PARAM     — SSM path to {"url":…, "tenant":…, "username":…, "password":…}
+  OKAPI_TEST_SECRET_PARAM  the same, for the EBSCO test environment
   OKAPI_DEV_SECRET_PARAM — the same, for the folio-dev-server sandbox (only set
                            when the dev target is enabled in Terraform)
   MANIFEST_S3_BUCKET     — S3 bucket name for JSON run reports
@@ -32,7 +33,7 @@ Environment variables (injected by Terraform):
   DRY_RUN                — default "true"; event.dry_run overrides
   HARD_DELETE            — default "false" (suppress), set "true" by Terraform;
                            event.hard_delete overrides
-  FOLIO_TARGET           — default "prod"; event.folio_target overrides. "dev"
+  FOLIO_TARGET           — default "test"; event.folio_target overrides. "dev"
                            targets the sandbox, and reaching it needs the Lambda
                            VPC-attached to the sandbox subnet (see
                            docs/axiell-folio-sync-lambda-dev-instance.md).
@@ -196,12 +197,12 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--folio-target",
-        choices=["prod", "dev"],
+        choices=["prod", "test", "dev"],
         default=None,
         help=(
-            "FOLIO instance to target: 'prod' (EBSCO SaaS) or 'dev' (the "
-            "folio-dev-server sandbox). Defaults to the FOLIO_TARGET env var, "
-            "then 'prod'."
+            "FOLIO instance to target: 'prod' (EBSCO SaaS), 'test' (the EBSCO "
+            "test environment) or 'dev' (the folio-dev-server sandbox). Defaults "
+            "to the FOLIO_TARGET env var, then 'test'."
         ),
     )
     args = parser.parse_args()
