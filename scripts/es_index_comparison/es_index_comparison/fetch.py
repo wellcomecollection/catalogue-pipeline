@@ -1,72 +1,42 @@
 from __future__ import annotations
 
-import gzip
-import json
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
-from elasticsearch import helpers, Elasticsearch
+from typing import Any
+
+from elasticsearch import Elasticsearch, helpers
 from rich.console import Console
 
-from .es_client import build_client
+from .buckets import BucketWriter
 from .source_config import ResolvedIndexSource
 
 console = Console()
 
 
 def fetch_index(
-    es: Elasticsearch,
-    index: str,
-    out_file: Path,
-    query: Dict[str, Any] | None,
-    scroll: str = "30m",
+    es: Elasticsearch, index: str, folder: Path, queries: list[dict[str, Any]], bucket_count: int
 ) -> int:
-    """Stream documents from index into a gzip'd NDJSON file.
-
-    Returns number of hits written.
-    """
-    q = query if query else {"query": {"match_all": {}}}
+    """Write every document matching any of the queries into bucket files and return the count."""
     count = 0
-    with gzip.open(out_file, "wt") as fh:
-        for doc in helpers.scan(es, index=index, query=q, scroll=scroll):
-            fh.write(json.dumps(doc) + "\n")
-            count += 1
-            if count % 50_000 == 0:
-                console.log(f"{index}: wrote {count} docs ...")
-    console.log(f"Completed fetch {index}: total {count} docs -> {out_file}")
+    with BucketWriter(folder, bucket_count) as writer:
+        for query in queries:
+            for hit in helpers.scan(es, index=index, query=query, scroll="30m"):
+                writer.write(hit["_id"], hit["_source"])
+                count += 1
+                if count % 50_000 == 0:
+                    console.log(f"{index}: wrote {count} docs ...")
+    console.log(f"Completed fetch {index}: total {count} docs -> {folder}")
     return count
 
 
 def fetch_both(
-    sources: List[ResolvedIndexSource],
-    raw_dir: Path,
-    queries: Dict[str, Dict[str, Any] | None],
-) -> Dict[str, Path]:
-    """Fetch documents for each index source, instantiating clients per cluster.
-
-    queries maps index-source id to the fetch query for that side (or None).
-    """
-
-    results: Dict[str, Path] = {}
-    clients: Dict[Tuple[str, str, str], Elasticsearch] = {}
-
-    try:
-        for source in sources:
-            client_key = (source.cluster_id, source.cloud_id, source.api_key)
-            if client_key not in clients:
-                clients[client_key] = build_client(source.cloud_id, source.api_key)
-            es = clients[client_key]
-
-            out_file = raw_dir / f"{source.storage_key}.ndjson.gz"
-            console.log(
-                f"Fetching index {source.index} (source={source.id}, cluster={source.cluster_id}) to {out_file}"
-            )
-            fetch_index(es, source.index, out_file, queries.get(source.id))
-            results[source.id] = out_file
-    finally:
-        for es in clients.values():
-            try:
-                es.close()
-            except Exception:
-                pass
-
-    return results
+    sources: list[ResolvedIndexSource],
+    docs_dir: Path,
+    queries: dict[str, list[dict[str, Any]]],
+    bucket_count: int,
+) -> None:
+    """Fetch each index source, using the queries given for its id."""
+    for source in sources:
+        folder = docs_dir / source.storage_key
+        console.log(f"Fetching {source.label} to {folder}")
+        with source.cluster.connect() as es:
+            fetch_index(es, source.index, folder, queries[source.id], bucket_count)

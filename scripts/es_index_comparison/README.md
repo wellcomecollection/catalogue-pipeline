@@ -1,32 +1,34 @@
 # es_index_comparison
 
-A Python CLI (uv project) to fetch documents from two Elasticsearch indices, materialize them locally (NDJSON gzip + Parquet shards), and compute deep, field-level diffs with flexible ignore patterns. Multiple analyses can be run side by side, each with its own YAML config and output namespace.
+A Python CLI (uv project) to fetch documents from two Elasticsearch indices, store them locally (gzipped JSON lines), and compute deep, field-level diffs with flexible ignore patterns. Multiple analyses can be run side by side, each with its own YAML config and output namespace.
 
 ## Features
-- Fetch only (read-only) from Elasticsearch using cloud_id + api_key (never writes back).
+- Fetch only (read-only) from Elasticsearch using an api_key with a cloud_id, or a host URL for Serverless projects (never writes back).
 - Optional filter query to restrict scanned documents.
-- Hash-bucketed Parquet materialization (polars + pyarrow) so comparisons stream one bucket at a time, with streaming NDJSON ingestion during convert and optional bucket filters for targeted reruns.
-- Deep recursive diff (dicts, lists, scalars, numpy arrays) with null-vs-missing equivalence.
+- Documents are stored in hash buckets, so the comparison loads one bucket at a time and single buckets can be rerun.
+- Field-level diff of every document pair using [DeepDiff](https://github.com/seperman/deepdiff), with a missing key and null treated as equal.
+- Compare stage runs hash buckets in parallel (`workers`).
+- Order-insensitive comparison for chosen lists (`ignore_list_order`).
+- Optional Python hook to normalise each pair of documents before the diff (`normaliser`).
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
-- Export artifacts: JSONL diffs, CSV summary, field frequency JSON, and diff metadata.
-- Sampled human-readable diff display & per-document diff inspection.
-- Streaming compare phase with per-bucket, human-readable progress logs and incremental artifact writes.
-- Multiple independent analyses distinguished by namespace (auto or user-provided).
+- Output files: every diff as JSONL, a count of differing documents per field, a summary with totals and the ids found in only one index, and a Markdown sample of differing documents.
+- Per-document diff inspection with `show-diff`.
+- One progress log line per bucket during compare.
+- Each analysis writes to its own namespace folder, named after its config file unless the config says otherwise.
 
 ## Installation (using uv)
 
 ```bash
-cd es_index_comparison
-uv sync  
+cd scripts/es_index_comparison
+uv sync
 uv run es-index-compare --help
 ```
 
 ## Quick Start
 ```bash
 # 1. Copy the example source configuration and fill in secrets locally
-cp es_index_comparison/configs/source_configuration.example.yaml \
-  es_index_comparison/configs/source_configuration.yaml
-#   Edit the new file with cluster cloud IDs and API keys (never committed)
+cp configs/source_configuration.example.yaml configs/source_configuration.yaml
+#   Edit the new file with cluster cloud IDs or host URLs, and API keys (never committed)
 
 # 2. Run full pipeline with the default analysis config (configs/analysis.yaml)
 uv run es-index-compare run-all
@@ -36,18 +38,10 @@ uv run es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 
 # 4. Change ignore fields or add patterns in YAML then re-run only compare
 uv run es-index-compare compare
-
-# If fetch/convert already generated a namespace and you want to reuse it:
-uv run es-index-compare compare --namespace analysis-20250115-103000
-
-# Or set a custom namespace up front so every stage shares the same directory:
-uv run es-index-compare fetch --namespace pipeline-reindex-audit
-uv run es-index-compare convert --namespace pipeline-reindex-audit
-uv run es-index-compare compare --namespace pipeline-reindex-audit
 ```
 
 ## Source Configuration
-All cluster credentials now live in `configs/source_configuration.yaml`, which is deliberately
+All cluster credentials live in `configs/source_configuration.yaml`, which is deliberately
 ignored by Git. The example file `source_configuration.example.yaml` shows the structure:
 
 ```yaml
@@ -55,6 +49,9 @@ clusters:
   production:
     cloud_id: "<prod-cloud-id>"
     api_key: "<prod-api-key>"
+  serverless:
+    host: "https://<project>.es.<region>.aws.elastic.cloud:443"
+    api_key: "<serverless-api-key>"
 
 index_sources:
   prod-works-source:
@@ -110,11 +107,27 @@ ignore_fields:
   - data.production[].dates[].range.from
   - data.production[].dates[].range.to
 
+# OPTIONAL: lists to compare as unordered, in the same pattern language as
+# ignore_fields. In a matching list, and every list nested inside it, equal items
+# are matched wherever they sit, similar items are paired and diffed, and the rest
+# are reported as added or removed. Two items that differ a lot are not paired, and
+# show as one removed and one added. Use "**" for every list. Matching items
+# takes time that grows with the square of the list's length.
+ignore_list_order:
+  - data.contributors
+  - data.subjects[].concepts
+
+# OPTIONAL: a Python file defining normalise(doc_a, doc_b), which returns the two
+# documents to diff. See "Normaliser" below. Relative paths resolve against this
+# config's directory.
+normaliser: my_analysis_normalise.py
+
 # OPTIONAL settings
-sample_size: 10                # number of docs to sample when printing diffs
-loading_chunk_size: 100000     # max docs buffered (across all buckets) before flushing Parquet shards
-hash_bucket_count: 6           # number of deterministic hash buckets for Parquet layout
-namespace: pipeline-comparison-ebsco # If omitted, auto: <basename>-<YYYYMMDD-HHMMSS>
+field_depth: 2                 # path segments per field in field_frequency.json (2 gives data.title)
+sample_size: 10                # number of differing docs written to sample_diffs.md
+hash_bucket_count: 6           # number of hash buckets the fetched documents are split into
+workers: 1                     # processes used by compare, each holding one bucket of both indices
+namespace: pipeline-comparison-ebsco # output folder name (default: the config file's name)
 output_dir: data               # base output root (default: data)
 ```
 
@@ -126,64 +139,70 @@ Token examples:
 - `data.production[].dates[].range.from` list index insensitive
 Any match also ignores deeper descendants beneath that path.
 
+## Normaliser
+Use a normaliser for differences that are expected and that `ignore_fields` cannot express, such as trimming whitespace on one side or removing some values from a list. The file defines one function, called once per document id present in both indices, before `ignore_list_order` and the diff are applied:
+
+```python
+import unicodedata
+
+
+def normalise(doc_a: dict, doc_b: dict) -> tuple[dict, dict] | None:
+    """Receive the two _source documents and return the pair to diff, or None to skip it."""
+    title = doc_a["data"].get("title")
+    if title is not None:
+        doc_a["data"]["title"] = unicodedata.normalize("NFC", title).strip()
+    return doc_a, doc_b
+```
+
+The documents are in the order of `index_sources` and may be changed in place. Return `None` to leave a pair out of the comparison, for example when one side is deleted. Skipped pairs are counted as `skipped` in `summary.json`.
+
 ## Generated Directory Layout
 ```
 <output_dir>/<namespace>/
-  raw/
-    <index>.ndjson.gz
-  parquet/
-    <index>/
-      bucket_0000/
-        part-00000.parquet
-      bucket_0001/
-        part-00000.parquet
-      manifest.json
+  docs/
+    <index source>/
+      bucket_00000.ndjson.gz   # one document per line: _id and _source
+      bucket_00001.ndjson.gz
   diffs/
-    diffs.jsonl
-    diff_summary.csv
-    field_frequency.json
-    diff_meta.parquet
+    diffs.jsonl            # one line per differing document: _id and its diffs (path, type, left, right),
+                           # where type is a DeepDiff change type such as values_changed
+    field_frequency.json   # differing documents per field, most frequent first
+    summary.json           # totals, and the ids present in only one index
+    sample_diffs.md        # random sample of differing documents
 ```
 
 ## Commands
-All commands require a config file. Use `run-all` for the full pipeline.
+Every command reads a config file, `configs/analysis.yaml` unless `--config` says otherwise. Use `run-all` for the full pipeline.
 
 ```bash
 es-index-compare run-all  # uses configs/analysis.yaml and sibling source_configuration.yaml by default
 
 # Individual stages
 es-index-compare fetch
-es-index-compare convert
 es-index-compare compare
-
-# Reuse artifacts from a previous fetch/convert run
-es-index-compare compare --namespace analysis-20250115-103000
 
 # Show diff for a single doc id (after compare)
 es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 
-# Convert/compare only specific hash buckets (speeds up targeted reruns)
-es-index-compare convert --bucket 3
+# Compare only specific hash buckets (speeds up targeted reruns)
 es-index-compare compare --bucket 3 --bucket 4
 ```
 
-### Flags (common)
+### Flags
+Every other setting lives in the config file. Running a stage again writes over that stage's earlier output for the same namespace.
+
 - `--config PATH` (optional; defaults to `configs/analysis.yaml` located beside the CLI project)
 - `--source-config PATH` (optional override; defaults to `<config-dir>/source_configuration.yaml`)
-- `--namespace` (override YAML / auto)
-- `--output-dir` (override YAML)
-- `--hash-buckets` (override YAML `hash_bucket_count` when running fetch/convert/compare)
-- `-b/--bucket` (repeatable; restrict convert/compare/run-all to one or more bucket IDs)
+- `-b/--bucket` (repeatable; restrict compare to one or more bucket IDs)
 
 ## Safety & Read-Only Assurance
 The tool only calls Elasticsearch `GET`/`_search` via scan/scroll helpers; it performs no writes, index creations, or updates.
 
 ## Performance Tips
-- Adjust `loading_chunk_size` to control peak memory: smaller values flush more often (more files, less RAM), larger values reduce file counts at the cost of more buffering.
-- Tune `hash_bucket_count` to balance on-disk fan-out vs. in-memory chunk size during compare (higher bucket counts mean fewer docs per chunk). The default is now 6 buckets, which keeps artifact counts reasonable while still enabling efficient streaming.
+- `workers` sets how many buckets compare diffs at once. Each worker loads one bucket of both indices, so memory grows with it.
+- `hash_bucket_count` controls peak memory during compare: more buckets mean fewer documents loaded at a time. The default is 6. Changing it needs a new fetch.
 - Use `-b/--bucket` to rerun only the partitions that matter (ideal for debugging or partial rechecks).
-- Polars operations are columnar; ensure adequate disk space for Parquet.
-- Re-run `compare` without `fetch`/`convert` after adjusting ignore patterns.
+- Re-run `compare` without `fetch` after adjusting ignore patterns or the normaliser.
 
 ## Methodology notes from the migration testing rounds
 
@@ -214,19 +233,3 @@ A work that is `Deleted` in both clusters can still diff on `state.internalWorkS
 ### Size buckets for the corpus
 
 The compare loads one hash bucket per side into memory. On the METS works-source corpus (~365k docs of full pipeline `_source`) the default `hash_bucket_count: 6` repeatedly exhausted memory and stalled for hours; raise the bucket count for large corpora so each bucket fits comfortably. Membership counts (`only_in_a`/`only_in_b`) stream in the progress log per bucket, so a killed run still yields a usable membership verdict.
-
-## Exit Codes
-- `0` success
-- `1` configuration / validation error
-- `2` runtime/IO error
-
-## License
-Apache-2.0
-
-## Future Enhancements (Ideas)
-- Optional bloom/fast sets for very large ID comparisons.
-- Parallel shard fetch.
-- Output HTML diff report.
-
----
-Happy comparing! 🧪
