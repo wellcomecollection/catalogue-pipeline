@@ -21,7 +21,7 @@ next person's apply, taking the hand-filled dev SecureString with it.
 
 Highest precedence first:
 
-1. `folio_target` on the event, either `"prod"` or `"dev"`
+1. `folio_target` on the event: `"prod"`, `"test"` or `"dev"`
 2. the `FOLIO_TARGET` environment variable on the Lambda
 3. `"test"`, so a run that names no target cannot write to production
 
@@ -37,6 +37,10 @@ The two entry points take their default from different places:
 Each target has its own SSM SecureString, and there is no fallback between them. A run whose
 parameter is missing or incomplete fails instead of writing to another instance.
 
+A run that resolves to `prod` is always a dry run, whatever `dry_run` on the event or `DRY_RUN`
+on the Lambda says, until production writes are switched on. For `test` and `dev`, `dry_run` on
+the event wins, then `DRY_RUN`.
+
 ## What is deployed
 
 | Where | What |
@@ -47,8 +51,8 @@ parameter is missing or incomplete fails instead of writing to another instance.
 | `modules/axiell_folio_sync/lambda.tf` | `vpc_config` when the flag is set and `null` otherwise, plus `FOLIO_TARGET` and `OKAPI_DEV_SECRET_PARAM` in the environment |
 | `modules/axiell_folio_sync/ssm.tf` | `…/okapi_credentials_dev`, seeded with placeholders |
 | `modules/axiell_folio_sync/iam.tf` | `ssm:GetParameter` extended to the dev parameter, and `cloudwatch:PutMetricData` scoped to the `catalogue_adapters` namespace the report publishes to |
-| `modules/axiell_folio_sync/locals.tf` | `folio_default_target` clamped to `prod` unless `folio_dev_target_enabled` is set, so the two cannot combine into a deployment where every run fails |
-| `modules/axiell_folio_sync/state_machine.tf` | `folio_target` and `hard_delete` mapped into the Lambda payload |
+| `modules/axiell_folio_sync/locals.tf` | `folio_default_target` falling back from `dev` to `test` unless `folio_dev_target_enabled` is set, so the two cannot combine into a deployment where every run fails, and `dry_run_default` clamped to `true` unless the default target is `test` or `dev` |
+| `modules/axiell_folio_sync/state_machine.tf` | `folio_target`, `dry_run` and `hard_delete` mapped into the Lambda payload. `dry_run` is passed as null when the event leaves it out, so the Lambda's `DRY_RUN` supplies the default |
 | `folio/okapi.py` | `resolve_folio_target`, and `load_okapi_config(target)` choosing the parameter |
 | `models.py` | `FolioTarget`, `folio_target` on the event, and the resolved target on the response |
 | `report.py` | the resolved target on the run manifest |
