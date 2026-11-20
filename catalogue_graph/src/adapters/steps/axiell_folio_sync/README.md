@@ -101,7 +101,8 @@ to FOLIO. Note that dry runs still *read* from FOLIO (reference data and existen
 required either way.
 
 The default comes from the `DRY_RUN` env var (Terraform `dry_run_default`, currently `true`); an explicit `dry_run`
-field on the event overrides it per run. Flip `dry_run_default` to `false` in Terraform only after validating a dry
+field on the event overrides it per run. A run that targets `prod` is always a dry run, whatever the event or `DRY_RUN`
+says, until production writes are switched on. Flip `dry_run_default` to `false` in Terraform only after validating a dry
 run's manifest.
 
 ## Configuration

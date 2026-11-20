@@ -427,7 +427,9 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
 
     monkeypatch.setattr(sync_mod, "run_sync", fake_run_sync)
 
-    event = AxiellFolioSyncEvent(job_id="j1", folio_target=folio_target)
+    # dry_run=false is asked for on every target, so the prod case shows the
+    # handler, not only resolve_dry_run, keeps production dry.
+    event = AxiellFolioSyncEvent(job_id="j1", folio_target=folio_target, dry_run=False)
     response = sync_mod.handler(event, use_rest_api_table=False)
 
     assert built["url"] == expected_url
@@ -440,6 +442,40 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
     assert response.folio_target == folio_target
     # The read step's tombstones reach the second pass.
     assert ran["tombstones"] == [tombstone]
+    assert ran["dry_run"] is (folio_target == "prod")
+
+
+@pytest.mark.parametrize(
+    ("event_dry_run", "folio_target", "env_dry_run", "expected"),
+    [
+        # Prod is always dry, whatever the event or DRY_RUN says.
+        (None, "prod", "false", True),
+        (None, "prod", None, True),
+        (False, "prod", "false", True),
+        (False, "prod", "true", True),
+        (True, "prod", "false", True),
+        # Other targets fall back to DRY_RUN, which defaults to true.
+        (None, "test", "false", False),
+        (None, "dev", "false", False),
+        (None, "test", "true", True),
+        (None, "test", None, True),
+        (True, "test", "false", True),
+        (False, "test", "true", False),
+        (False, "dev", "true", False),
+    ],
+)
+def test_resolve_dry_run(
+    monkeypatch: pytest.MonkeyPatch,
+    event_dry_run: bool | None,
+    folio_target: FolioTarget,
+    env_dry_run: str | None,
+    expected: bool,
+) -> None:
+    if env_dry_run is None:
+        monkeypatch.delenv("DRY_RUN", raising=False)
+    else:
+        monkeypatch.setenv("DRY_RUN", env_dry_run)
+    assert sync_mod.resolve_dry_run(event_dry_run, folio_target) is expected
 
 
 def _run_local_handler(

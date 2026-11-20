@@ -63,7 +63,8 @@ class AxiellFolioSyncEvent(BaseModel):
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
     transformer_type: str | None = None
-    # ``None`` means "fall back to the DRY_RUN env var" (default true).
+    # ``None`` means "fall back to the DRY_RUN env var" (default true). Ignored
+    # for prod, which is always a dry run.
     dry_run: bool | None = None
     # ``None`` means "fall back to the HARD_DELETE env var" (default false). When
     # true, superseded GUIDs and tombstones hard-delete FOLIO records instead of
