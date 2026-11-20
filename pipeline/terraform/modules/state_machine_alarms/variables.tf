@@ -21,7 +21,20 @@ variable "default_alarm_configuration" {
 }
 
 variable "alarm_overrides" {
-  description = "Per-alarm override map keyed by alarm type (aborted, failed, timed_out) allowing custom alarm_actions, period, actions_enabled, and alarm_description."
+  description = "Per-alarm override map keyed by alarm type (aborted, failed, timed_out) allowing custom alarm_actions, period, actions_enabled, alarm_description, and severity."
   type        = map(any)
   default     = {}
+}
+
+# Alarm tags and description prefix from the alert routing ADR (wellcomecollection/docs adr/alert_routing.md)
+variable "alarm_component" {
+  description = "Backplane Component name (metadata.name in manifest.yml) for the backplane:component tag and description prefix."
+  type        = string
+  default     = "catalogue-graph"
+}
+
+variable "alarm_repository" {
+  description = "Owning repository, for the github.com/project-slug tag."
+  type        = string
+  default     = "wellcomecollection/catalogue-pipeline"
 }

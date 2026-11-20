@@ -30,6 +30,7 @@ module "matcher" {
     topic_arns = [
       module.id_minter_lambda.id_minter_output_topic_arn,
     ]
+    dlq_alarm_arn = local.monitoring_config.dlq_alarm_arn
   }
 
   # A full 100-message batch takes close to 30 s at steady state

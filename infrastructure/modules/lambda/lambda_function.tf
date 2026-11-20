@@ -42,6 +42,13 @@ resource "aws_cloudwatch_metric_alarm" "lambda_alarm" {
     FunctionName = var.name
   }
 
-  alarm_description = "This metric monitors lambda errors for function: ${var.name}"
+  alarm_description = "[component=catalogue-graph severity=medium] This metric monitors lambda errors for function: ${var.name}"
   alarm_actions     = [var.alarm_topic_arn]
+
+  # Tags from the alert routing ADR (wellcomecollection/docs adr/alert_routing.md)
+  tags = {
+    "backplane:component"     = "catalogue-graph"
+    "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    severity                  = "medium"
+  }
 }

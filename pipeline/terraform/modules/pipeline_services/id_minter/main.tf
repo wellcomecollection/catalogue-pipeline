@@ -186,7 +186,7 @@ resource "aws_cloudwatch_metric_alarm" "id_minter_failures" {
   period              = 300
   statistic           = "Sum"
   threshold           = 0
-  alarm_description   = "ID minter${local.dash_namespace} Lambda reported minting failures"
+  alarm_description   = "[component=catalogue-graph severity=medium] ID minter${local.dash_namespace} Lambda reported minting failures"
 
   dimensions = {
     pipeline_date = var.pipeline_date
@@ -194,4 +194,10 @@ resource "aws_cloudwatch_metric_alarm" "id_minter_failures" {
   }
 
   alarm_actions = [var.alarm_topic_arn]
+
+  tags = {
+    "backplane:component"     = "catalogue-graph"
+    "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    severity                  = "medium"
+  }
 }

@@ -217,7 +217,7 @@ resource "aws_cloudwatch_metric_alarm" "image_inferrer_download_failures" {
   period              = 300
   statistic           = "Sum"
   threshold           = 0
-  alarm_description   = "The image inferrer skipped images whose assets permanently failed to download"
+  alarm_description   = "[component=catalogue-graph severity=medium] The image inferrer skipped images whose assets permanently failed to download"
 
   dimensions = {
     pipeline_date = var.pipeline_date
@@ -225,4 +225,10 @@ resource "aws_cloudwatch_metric_alarm" "image_inferrer_download_failures" {
   }
 
   alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+
+  tags = {
+    "backplane:component"     = "catalogue-graph"
+    "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    severity                  = "medium"
+  }
 }
