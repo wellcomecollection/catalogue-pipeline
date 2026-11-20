@@ -25,14 +25,16 @@ so no Iceberg-specific env vars.
 
 Environment variables (injected by Terraform):
   OKAPI_SECRET_PARAM     — SSM path to {"url":…, "tenant":…, "username":…, "password":…}
+  OKAPI_TEST_SECRET_PARAM  the same, for the EBSCO test environment
   OKAPI_DEV_SECRET_PARAM — the same, for the folio-dev-server sandbox (only set
                            when the dev target is enabled in Terraform)
   MANIFEST_S3_BUCKET     — S3 bucket name for JSON run reports
   AWS_REGION             — e.g. eu-west-1 (set automatically in Lambda)
-  DRY_RUN                — default "true"; event.dry_run overrides
+  DRY_RUN                — default "true"; event.dry_run overrides. Neither
+                           applies to prod, which is always a dry run
   HARD_DELETE            — default "false" (suppress), set "true" by Terraform;
                            event.hard_delete overrides
-  FOLIO_TARGET           — default "prod"; event.folio_target overrides. "dev"
+  FOLIO_TARGET           — default "test"; event.folio_target overrides. "dev"
                            targets the sandbox, and reaching it needs the Lambda
                            VPC-attached to the sandbox subnet (see
                            docs/axiell-folio-sync-lambda-dev-instance.md).
@@ -59,6 +61,7 @@ from adapters.steps.axiell_folio_sync.folio.okapi import (
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
+    FolioTarget,
 )
 from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
 from clients.folio_client import FolioClient, FolioInventoryClient, ssl_context_from_env
@@ -68,6 +71,23 @@ from utils.steps import ecs_handler
 logger = structlog.get_logger(__name__)
 
 PIPELINE_STEP = "axiell_folio_sync"
+
+
+def resolve_dry_run(event_dry_run: bool | None, folio_target: FolioTarget) -> bool:
+    """Whether the run is a dry run. Production is always a dry run. Other
+    targets use the event's value if it sets one, else the DRY_RUN env var
+    (default true).
+
+    Production writes are not switched on yet, so neither the event nor
+    DRY_RUN can turn them on. Remove the prod check at production switch-on.
+    """
+    if folio_target == "prod":
+        if event_dry_run is False:
+            logger.warning("dry_run=false ignored for prod; prod is always a dry run")
+        return True
+    if event_dry_run is not None:
+        return event_dry_run
+    return os.environ.get("DRY_RUN", "true").lower() not in ("false", "0", "no")
 
 
 # ── entry points ──────────────────────────────────────────────────────────────
@@ -84,8 +104,8 @@ def handler(
     """
     setup_logging(execution_context)
 
-    env_dry_run = os.environ.get("DRY_RUN", "true").lower() not in ("false", "0", "no")
-    dry_run = event.dry_run if event.dry_run is not None else env_dry_run
+    folio_target = resolve_folio_target(event.folio_target)
+    dry_run = resolve_dry_run(event.dry_run, folio_target)
     env_hard_delete = os.environ.get("HARD_DELETE", "false").lower() in (
         "true",
         "1",
@@ -96,7 +116,6 @@ def handler(
     )
     manifest_bucket = os.environ.get("MANIFEST_S3_BUCKET")
 
-    folio_target = resolve_folio_target(event.folio_target)
     okapi = load_okapi_config(folio_target)
     # Logged so a run's manifest can always be tied back to the instance it hit.
     logger.info("folio target resolved", folio_target=folio_target, url=okapi["url"])
@@ -196,12 +215,12 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--folio-target",
-        choices=["prod", "dev"],
+        choices=["prod", "test", "dev"],
         default=None,
         help=(
-            "FOLIO instance to target: 'prod' (EBSCO SaaS) or 'dev' (the "
-            "folio-dev-server sandbox). Defaults to the FOLIO_TARGET env var, "
-            "then 'prod'."
+            "FOLIO instance to target: 'prod' (EBSCO SaaS), 'test' (the EBSCO "
+            "test environment) or 'dev' (the folio-dev-server sandbox). Defaults "
+            "to the FOLIO_TARGET env var, then 'test'."
         ),
     )
     args = parser.parse_args()

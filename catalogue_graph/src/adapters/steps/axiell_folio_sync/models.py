@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 # The FOLIO instances a run can target. This is the single definition: the
 # registry mapping each one to its SSM parameter env var (``okapi.py``) is typed
 # by it, so adding a target there without adding it here is a type error.
-FolioTarget = Literal["prod", "dev"]
+FolioTarget = Literal["prod", "test", "dev"]
 
 
 class SyncSuccessEntry(BaseModel):
@@ -63,15 +63,16 @@ class AxiellFolioSyncEvent(BaseModel):
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
     transformer_type: str | None = None
-    # ``None`` means "fall back to the DRY_RUN env var" (default true).
+    # ``None`` means "fall back to the DRY_RUN env var" (default true). Ignored
+    # for prod, which is always a dry run.
     dry_run: bool | None = None
     # ``None`` means "fall back to the HARD_DELETE env var" (default false). When
     # true, superseded GUIDs and tombstones hard-delete FOLIO records instead of
     # suppressing them.
     hard_delete: bool | None = None
-    # Which FOLIO instance to write to: "prod" (EBSCO SaaS) or "dev" (the
-    # folio-dev-server sandbox). ``None`` falls back to the FOLIO_TARGET env var,
-    # which itself defaults to "prod".
+    # Which FOLIO instance to write to: "prod" (EBSCO SaaS), "test" (the EBSCO
+    # test environment) or "dev" (the folio-dev-server sandbox). ``None`` falls
+    # back to the FOLIO_TARGET env var, which itself defaults to "test".
     folio_target: FolioTarget | None = None
     # Dev/smoke-test only: cap records processed when no changeset_ids are given.
     sample_limit: int | None = None
@@ -85,7 +86,8 @@ class AxiellFolioSyncResponse(BaseModel):
     # The instance actually written to, resolved rather than as requested. This
     # is the caller's confirmation of where a run went: an image too old to know
     # about folio_target omits the field entirely, so a run that silently fell
-    # back to prod shows up in the response rather than only in the logs.
+    # back to another instance shows up in the response rather than only in
+    # the logs.
     folio_target: FolioTarget
     manifest_s3_path: str | None = None
     counts: dict[str, int] = Field(default_factory=dict)

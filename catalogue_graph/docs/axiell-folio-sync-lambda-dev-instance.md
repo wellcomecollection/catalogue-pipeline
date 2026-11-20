@@ -1,11 +1,15 @@
 # Connecting the sync Lambda to the FOLIO dev server
 
-The `axiell_folio_sync` Lambda can write to either FOLIO instance:
+The `axiell_folio_sync` Lambda can write to three FOLIO instances:
 
 | Target | Instance | Reached over |
 | --- | --- | --- |
-| `prod` (default) | EBSCO SaaS, `api-wellcome.folio.ebsco.com` | public internet |
+| `prod` | EBSCO SaaS, `api-wellcome.folio.ebsco.com` | public internet |
+| `test` (default) | the EBSCO test environment, a copy of the production tenant | public internet |
 | `dev` | the `folio-sandbox` EC2 instance, Kong on `:8000` | the catalogue VPC |
+
+Scheduled runs go to `test`. The sandbox is for runs started by hand, which name
+`"folio_target": "dev"` on the event. This document covers the sandbox.
 
 The sandbox has no public IP and no inbound ports, so the Lambda has to be attached to the VPC to
 reach it. That is gated behind the `folio_dev_target_enabled` local in
@@ -17,9 +21,9 @@ next person's apply, taking the hand-filled dev SecureString with it.
 
 Highest precedence first:
 
-1. `folio_target` on the event, either `"prod"` or `"dev"`
+1. `folio_target` on the event: `"prod"`, `"test"` or `"dev"`
 2. the `FOLIO_TARGET` environment variable on the Lambda
-3. `"prod"`
+3. `"test"`, so a run that names no target cannot write to production
 
 The two entry points take their default from different places:
 
@@ -30,8 +34,12 @@ The two entry points take their default from different places:
   from `folio_default_target`. Naming `folio_target` on the event is the usual way to reach the
   sandbox, and avoids depending on that default.
 
-Each target has its own SSM SecureString, and there is no fallback between them. A `dev` run whose
-parameter is missing or incomplete fails instead of writing to production.
+Each target has its own SSM SecureString, and there is no fallback between them. A run whose
+parameter is missing or incomplete fails instead of writing to another instance.
+
+A run that resolves to `prod` is always a dry run, whatever `dry_run` on the event or `DRY_RUN`
+on the Lambda says, until production writes are switched on. For `test` and `dev`, `dry_run` on
+the event wins, then `DRY_RUN`.
 
 ## What is deployed
 
@@ -43,8 +51,8 @@ parameter is missing or incomplete fails instead of writing to production.
 | `modules/axiell_folio_sync/lambda.tf` | `vpc_config` when the flag is set and `null` otherwise, plus `FOLIO_TARGET` and `OKAPI_DEV_SECRET_PARAM` in the environment |
 | `modules/axiell_folio_sync/ssm.tf` | `…/okapi_credentials_dev`, seeded with placeholders |
 | `modules/axiell_folio_sync/iam.tf` | `ssm:GetParameter` extended to the dev parameter, and `cloudwatch:PutMetricData` scoped to the `catalogue_adapters` namespace the report publishes to |
-| `modules/axiell_folio_sync/locals.tf` | `folio_default_target` clamped to `prod` unless `folio_dev_target_enabled` is set, so the two cannot combine into a deployment where every run fails |
-| `modules/axiell_folio_sync/state_machine.tf` | `folio_target` and `hard_delete` mapped into the Lambda payload |
+| `modules/axiell_folio_sync/locals.tf` | `folio_default_target` falling back from `dev` to `test` unless `folio_dev_target_enabled` is set, so the two cannot combine into a deployment where every run fails, and `dry_run_default` clamped to `true` unless the default target is `test` or `dev` |
+| `modules/axiell_folio_sync/state_machine.tf` | `folio_target`, `dry_run` and `hard_delete` mapped into the Lambda payload. `dry_run` is passed as null when the event leaves it out, so the Lambda's `DRY_RUN` supplies the default |
 | `folio/okapi.py` | `resolve_folio_target`, and `load_okapi_config(target)` choosing the parameter |
 | `models.py` | `FolioTarget`, `folio_target` on the event, and the resolved target on the response |
 | `report.py` | the resolved target on the run manifest |
@@ -163,6 +171,12 @@ To finish, stop the instance and follow the Rollback steps below.
 The response carries `folio_target`, and a successful run logs `folio target resolved` with the
 url it chose. Either one confirms which instance was written to. If `folio_target` is missing
 from the response, the deployed image predates the field and the run went to prod.
+
+The test environment needs no network changes: the NAT gateway that carries the
+Lambda's traffic to EBSCO SaaS reaches it too. Its SecureString,
+`…/okapi_credentials_test`, is filled in by hand in the same way as step 4, with
+the test environment's url and tenant and a sync service account that exists only
+there.
 
 ## Credentials
 

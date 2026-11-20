@@ -173,6 +173,7 @@ OKAPI_ENV_VARS = (
     "OKAPI_USERNAME",
     "OKAPI_PASSWORD",
     "OKAPI_SECRET_PARAM",
+    "OKAPI_TEST_SECRET_PARAM",
     "OKAPI_DEV_SECRET_PARAM",
     "FOLIO_TARGET",
 )
@@ -249,11 +250,49 @@ def test_load_okapi_config_dev_target_does_not_fall_back_to_prod(
         load_okapi_config("dev")
 
 
-def test_folio_target_defaults_to_prod_and_env_var_is_a_fallback(
+def test_load_okapi_config_test_target_does_not_fall_back_to_prod(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # The test environment is a copy of the production tenant, so a test run that
+    # picked up the prod parameter would write to production with no other sign.
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("OKAPI_SECRET_PARAM", "/prod/okapi")
+
+    with pytest.raises(ValueError, match="OKAPI_TEST_SECRET_PARAM"):
+        load_okapi_config("test")
+
+
+def test_load_okapi_config_with_no_target_never_reads_the_prod_parameter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Until production switch-on, a run that names no target must not reach
+    # production, even where the prod parameter is configured.
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("OKAPI_SECRET_PARAM", "/prod/okapi")
+    monkeypatch.setenv("OKAPI_TEST_SECRET_PARAM", "/test/okapi")
+    fetched = _stub_ssm(
+        monkeypatch,
+        {
+            "/test/okapi": {
+                "url": "https://folio-test.example.org",
+                "tenant": "wellcome-test",
+                "username": "sync-user",
+                "password": "test-pw",
+            },
+        },
+    )
+
+    config = load_okapi_config()
+
+    assert config["url"] == "https://folio-test.example.org"
+    assert fetched == ["/test/okapi"]
+
+
+def test_folio_target_defaults_to_test_and_env_var_is_a_fallback(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _clear_okapi_env(monkeypatch)
-    assert resolve_folio_target() == "prod"
+    assert resolve_folio_target() == "test"
     assert resolve_folio_target("dev") == "dev"
 
     monkeypatch.setenv("FOLIO_TARGET", "dev")
@@ -293,14 +332,14 @@ def test_folio_target_is_normalised(
 
 
 @pytest.mark.parametrize("blank", ["", "   "])
-def test_blank_folio_target_falls_back_to_prod(
+def test_blank_folio_target_falls_back_to_test(
     monkeypatch: pytest.MonkeyPatch, blank: str
 ) -> None:
     # An empty env var is treated as unset rather than as an unknown target.
     _clear_okapi_env(monkeypatch)
     monkeypatch.setenv("FOLIO_TARGET", blank)
-    assert resolve_folio_target() == "prod"
-    assert resolve_folio_target(blank) == "prod"
+    assert resolve_folio_target() == "test"
+    assert resolve_folio_target(blank) == "test"
 
 
 def test_event_rejects_an_unknown_folio_target() -> None:
@@ -312,6 +351,7 @@ def test_event_rejects_an_unknown_folio_target() -> None:
     ("folio_target", "expected_url", "expected_param"),
     [
         ("prod", "https://folio.example.org", "/prod/okapi"),
+        ("test", "https://folio-test.example.org", "/test/okapi"),
         ("dev", "http://sandbox.internal:8000", "/dev/okapi"),
     ],
 )
@@ -329,6 +369,7 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
     """
     _clear_okapi_env(monkeypatch)
     monkeypatch.setenv("OKAPI_SECRET_PARAM", "/prod/okapi")
+    monkeypatch.setenv("OKAPI_TEST_SECRET_PARAM", "/test/okapi")
     monkeypatch.setenv("OKAPI_DEV_SECRET_PARAM", "/dev/okapi")
     fetched = _stub_ssm(
         monkeypatch,
@@ -338,6 +379,12 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
                 "tenant": "wellcome",
                 "username": "prod-user",
                 "password": "prod-pw",
+            },
+            "/test/okapi": {
+                "url": "https://folio-test.example.org",
+                "tenant": "wellcome-test",
+                "username": "sync-user",
+                "password": "test-pw",
             },
             "/dev/okapi": {
                 "url": "http://sandbox.internal:8000",
@@ -380,7 +427,9 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
 
     monkeypatch.setattr(sync_mod, "run_sync", fake_run_sync)
 
-    event = AxiellFolioSyncEvent(job_id="j1", folio_target=folio_target)
+    # dry_run=false is asked for on every target, so the prod case shows the
+    # handler, not only resolve_dry_run, keeps production dry.
+    event = AxiellFolioSyncEvent(job_id="j1", folio_target=folio_target, dry_run=False)
     response = sync_mod.handler(event, use_rest_api_table=False)
 
     assert built["url"] == expected_url
@@ -393,6 +442,40 @@ def test_handler_builds_the_client_for_the_target_on_the_event(
     assert response.folio_target == folio_target
     # The read step's tombstones reach the second pass.
     assert ran["tombstones"] == [tombstone]
+    assert ran["dry_run"] is (folio_target == "prod")
+
+
+@pytest.mark.parametrize(
+    ("event_dry_run", "folio_target", "env_dry_run", "expected"),
+    [
+        # Prod is always dry, whatever the event or DRY_RUN says.
+        (None, "prod", "false", True),
+        (None, "prod", None, True),
+        (False, "prod", "false", True),
+        (False, "prod", "true", True),
+        (True, "prod", "false", True),
+        # Other targets fall back to DRY_RUN, which defaults to true.
+        (None, "test", "false", False),
+        (None, "dev", "false", False),
+        (None, "test", "true", True),
+        (None, "test", None, True),
+        (True, "test", "false", True),
+        (False, "test", "true", False),
+        (False, "dev", "true", False),
+    ],
+)
+def test_resolve_dry_run(
+    monkeypatch: pytest.MonkeyPatch,
+    event_dry_run: bool | None,
+    folio_target: FolioTarget,
+    env_dry_run: str | None,
+    expected: bool,
+) -> None:
+    if env_dry_run is None:
+        monkeypatch.delenv("DRY_RUN", raising=False)
+    else:
+        monkeypatch.setenv("DRY_RUN", env_dry_run)
+    assert sync_mod.resolve_dry_run(event_dry_run, folio_target) is expected
 
 
 def _run_local_handler(
@@ -427,7 +510,7 @@ def test_cli_folio_target_flag_reaches_the_event(
 def test_cli_folio_target_defaults_to_none_so_the_env_var_applies(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # None rather than "prod": the CLI must not override FOLIO_TARGET by default.
+    # None rather than a target: the CLI must not override FOLIO_TARGET by default.
     event = _run_local_handler(monkeypatch, ["--job-id", "j1"])
 
     assert event.folio_target is None
