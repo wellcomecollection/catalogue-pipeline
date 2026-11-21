@@ -62,7 +62,7 @@ jobs:
           registry-type: public
 
       - name: Restore the coursier cache
-        uses: coursier/cache-action@v8
+        uses: coursier/cache-action@v9
 
       # Starts the service containers with Docker Compose on the runner, prints
       # their logs if the tests fail, and takes them down.
