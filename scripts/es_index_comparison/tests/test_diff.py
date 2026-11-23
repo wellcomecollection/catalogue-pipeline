@@ -109,3 +109,7 @@ def test_differences_are_listed_in_list_index_order():
     right = {"items": [f"{i}!" if i in (2, 10) else str(i) for i in range(11)]}
 
     assert [d["path"] for d in deep_diff(left, right)] == ["items[2]", "items[10]"]
+
+
+def test_keys_starting_with_underscores_are_compared():
+    assert diff({"__x": 1}, {"__x": 2}) == [("values_changed", "__x", 1, 2)]

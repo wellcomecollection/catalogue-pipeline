@@ -82,8 +82,12 @@ def deep_diff(
     if json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True):
         return []
 
-    # A threshold of 0 reports objects key by key, however few keys they share.
-    options: dict[str, Any] = {"threshold_to_diff_deeper": 0}
+    options: dict[str, Any] = {
+        # Report objects key by key, however few keys they share.
+        "threshold_to_diff_deeper": 0,
+        # Compare keys starting with two underscores, which DeepDiff skips by default.
+        "ignore_private_variables": False,
+    }
     if unordered:
         options["report_repetition"] = True
         options["ignore_order_func"] = lambda level: path_matches(

@@ -139,6 +139,8 @@ Token examples:
 - `data.production[].dates[].range.from` list index insensitive
 Any match also ignores deeper descendants beneath that path.
 
+Ignored fields are removed from both documents before the diff. A pattern with a specific list index, such as `items[0]`, removes that item, so later items are reported one index lower: a change in the second item shows at `items[0]`. `[]` and fields inside list items (`items[].seen`) do not shift anything.
+
 ## Normaliser
 Use a normaliser for differences that are expected and that `ignore_fields` cannot express, such as trimming whitespace on one side or removing some values from a list. The file defines one function, called once per document id present in both indices, before `ignore_list_order` and the diff are applied:
 
