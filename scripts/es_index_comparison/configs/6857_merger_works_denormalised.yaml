@@ -12,9 +12,15 @@ index_sources:
 # Expected differences between the two mergers that ignore_fields cannot express.
 normaliser: 6857_merger_works_denormalised_normalise.py
 
-# Neither merger promises an order within a field.
+# Lists the merger builds from several works. Python builds them from the works
+# sorted by canonical id, a stable but arbitrary order. Scala follows the order its
+# matcher returns the works in, which isn't stable, so the orderings can't be compared.
 ignore_list_order:
-  - "**"
+  - redirectSources
+  - data.otherIdentifiers
+  - data.items
+  - data.imageData
+  - state.availabilities
 
 ignore_fields:
   # Scala uses the matcher's time, Python the commit time of the snapshot it read.
