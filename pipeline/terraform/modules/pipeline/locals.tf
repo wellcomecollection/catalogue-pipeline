@@ -190,7 +190,7 @@ locals {
   monitoring_config = {
     shared_logging_secrets       = local.shared_infra["shared_secrets_logging"]
     logging_cluster_id           = local.shared_infra["logging_cluster_id"]
-    dlq_alarm_arn                = null
+    dlq_alarm_arn                = local.monitoring_infra["chatbot_topic_arn"]
     main_q_age_alarm_action_arns = [local.monitoring_infra["chatbot_topic_arn"]]
   }
 

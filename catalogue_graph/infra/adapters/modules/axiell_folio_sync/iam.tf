@@ -18,7 +18,10 @@ data "aws_iam_policy_document" "sync_ssm_read" {
     effect  = "Allow"
     actions = ["ssm:GetParameter"]
     resources = concat(
-      [aws_ssm_parameter.okapi_credentials.arn],
+      [
+        aws_ssm_parameter.okapi_credentials.arn,
+        aws_ssm_parameter.okapi_credentials_test.arn,
+      ],
       aws_ssm_parameter.okapi_credentials_dev[*].arn,
     )
   }

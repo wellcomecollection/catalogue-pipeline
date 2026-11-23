@@ -24,7 +24,7 @@ resource "aws_cloudwatch_metric_alarm" "enrichment_rejected_records" {
   statistic           = "Sum"
   threshold           = 0
   treat_missing_data  = "notBreaching"
-  alarm_description   = "${var.namespace} enrichment left out inventory records that failed validation; check the step's report under reports/${var.namespace}/adapter_enrichment/ in the adapter bucket"
+  alarm_description   = "[component=catalogue-graph severity=medium] ${var.namespace} enrichment left out inventory records that failed validation; check the step's report under reports/${var.namespace}/adapter_enrichment/ in the adapter bucket"
 
   dimensions = {
     adapter_type  = var.namespace
@@ -32,4 +32,10 @@ resource "aws_cloudwatch_metric_alarm" "enrichment_rejected_records" {
   }
 
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
+
+  tags = {
+    "backplane:component"     = "catalogue-graph"
+    "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    severity                  = "medium"
+  }
 }

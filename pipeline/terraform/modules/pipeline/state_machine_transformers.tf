@@ -218,7 +218,7 @@ resource "aws_cloudwatch_metric_alarm" "transformer_failures" {
   period              = 300
   statistic           = "Sum"
   threshold           = 0
-  alarm_description   = "${each.key} adapter transformer Lambda reported transformation failures"
+  alarm_description   = "[component=catalogue-graph severity=medium] ${each.key} adapter transformer Lambda reported transformation failures"
 
   dimensions = {
     pipeline_date    = var.pipeline_date
@@ -227,6 +227,12 @@ resource "aws_cloudwatch_metric_alarm" "transformer_failures" {
   }
 
   alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]
+
+  tags = {
+    "backplane:component"     = "catalogue-graph"
+    "github.com/project-slug" = "wellcomecollection/catalogue-pipeline"
+    severity                  = "medium"
+  }
 }
 
 # Trigger State Machine on adapter completed events

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 #
-# Run the Axiell -> FOLIO sync locally. Targets prod (EBSCO) FOLIO by default;
-# set FOLIO_TARGET=dev to target the folio-dev-server sandbox instead.
+# Run the Axiell -> FOLIO sync locally. Targets the EBSCO test environment by
+# default; set FOLIO_TARGET=dev for the folio-dev-server sandbox, or
+# FOLIO_TARGET=prod for production.
 #
-# For prod, fetches the OKAPI credentials SecureString from SSM. For dev, points
-# at the sandbox over the SSM tunnel and reads diku_admin from Secrets Manager.
+# For test and prod, fetches that target's OKAPI credentials SecureString from
+# SSM. For dev, points at the sandbox over the SSM tunnel and reads diku_admin
+# from Secrets Manager.
 # Either way it runs adapters.steps.axiell_folio_sync.axiell_folio_sync via uv.
 #
 # By default this is a DRY RUN (no writes to FOLIO). Pass --live to write.
@@ -14,7 +16,7 @@
 # records (no changesets — a smoke test that reads no deletion facts).
 # CHANGESET_IDS wins if both are set. Any extra args are forwarded to the module:
 #   CHANGESET_IDS=<changeset_id> ./run_axiell_folio_sync_local.sh              # Dry run (default)
-#   CHANGESET_IDS=<changeset_id> ./run_axiell_folio_sync_local.sh --live       # Write to prod FOLIO
+#   CHANGESET_IDS=<changeset_id> ./run_axiell_folio_sync_local.sh --live       # Write to test FOLIO
 #   CHANGESET_IDS="<changeset_id> <changeset_id2>" ./run_axiell_folio_sync_local.sh     # Multiple changesets
 #   SAMPLE_LIMIT=10 ./run_axiell_folio_sync_local.sh --live            # Sample 10 active records
 #   FOLIO_TARGET=dev CHANGESET_IDS=<changeset_id> ./run_axiell_folio_sync_local.sh  # Target dev FOLIO
@@ -27,8 +29,9 @@ set -euo pipefail
 
 AWS_PROFILE="${AWS_PROFILE:-platform-developer}"
 AWS_REGION="${AWS_REGION:-eu-west-1}"
-FOLIO_TARGET="${FOLIO_TARGET:-prod}"
+FOLIO_TARGET="${FOLIO_TARGET:-test}"
 OKAPI_SECRET_PARAM="${OKAPI_SECRET_PARAM:-/catalogue_pipeline/axiell-folio-sync/okapi_credentials}"
+OKAPI_TEST_SECRET_PARAM="${OKAPI_TEST_SECRET_PARAM:-/catalogue_pipeline/axiell-folio-sync/okapi_credentials_test}"
 JOB_ID="${JOB_ID:-local-test-$(date +%s)}"
 CHANGESET_IDS="${CHANGESET_IDS:-}"
 SAMPLE_LIMIT="${SAMPLE_LIMIT:-}"
@@ -47,10 +50,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CATALOGUE_GRAPH_DIR="$(dirname "$SCRIPT_DIR")"
 
 case "$FOLIO_TARGET" in
-  prod)
-    echo "Fetching OKAPI credentials from SSM: $OKAPI_SECRET_PARAM (profile=$AWS_PROFILE region=$AWS_REGION)" >&2
+  prod | test)
+    if [[ "$FOLIO_TARGET" == "prod" ]]; then
+      SECRET_PARAM="$OKAPI_SECRET_PARAM"
+    else
+      SECRET_PARAM="$OKAPI_TEST_SECRET_PARAM"
+    fi
+    echo "Fetching OKAPI credentials from SSM: $SECRET_PARAM (profile=$AWS_PROFILE region=$AWS_REGION)" >&2
     CREDS="$(aws ssm get-parameter \
-      --name "$OKAPI_SECRET_PARAM" \
+      --name "$SECRET_PARAM" \
       --with-decryption \
       --query 'Parameter.Value' \
       --output text)"
@@ -80,7 +88,7 @@ case "$FOLIO_TARGET" in
     echo "NOTE: dev target needs an SSM tunnel to the sandbox exposing $OKAPI_URL (scripts/tunnel.sh)." >&2
     ;;
   *)
-    echo "Unknown FOLIO_TARGET '$FOLIO_TARGET' (expected 'prod' or 'dev')." >&2
+    echo "Unknown FOLIO_TARGET '$FOLIO_TARGET' (expected 'prod', 'test' or 'dev')." >&2
     exit 2
     ;;
 esac

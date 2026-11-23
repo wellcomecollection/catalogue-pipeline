@@ -1,5 +1,5 @@
 module "input_queue" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.5.1"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.6.0"
 
   queue_name = var.queue_config.name
 
@@ -10,6 +10,13 @@ module "input_queue" {
   alarm_topic_arn            = var.queue_config.dlq_alarm_arn
 
   main_q_age_alarm_action_arns = var.queue_config.main_q_age_alarm_action_arns
+
+  # Alarm tags and description prefix from the alert routing ADR (wellcomecollection/docs adr/alert_routing.md)
+  alarm_component  = "catalogue-graph"
+  alarm_repository = "wellcomecollection/catalogue-pipeline"
+
+  # Pipeline DLQ messages are information only, so these alarms post to Amazon Q at low
+  dlq_alarm_severity = "low"
 }
 
 resource "aws_iam_role_policy" "read_from_q" {
@@ -18,7 +25,7 @@ resource "aws_iam_role_policy" "read_from_q" {
 }
 
 module "scaling_alarm" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.5.1"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.6.0"
 
   queue_name = module.input_queue.name
 

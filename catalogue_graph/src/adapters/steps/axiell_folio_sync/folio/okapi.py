@@ -4,10 +4,12 @@ FOLIO OKAPI credential resolution.
 Kept separate from the sync loop so ``run_sync`` stays free of environment / SSM
 concerns: the handler resolves config here, then injects the built FOLIO client.
 
-Two FOLIO instances can be targeted: ``prod`` (the EBSCO SaaS tenant, the
+Three FOLIO instances can be targeted: ``prod`` (the EBSCO SaaS tenant),
+``test`` (the EBSCO test environment, a copy of the production tenant, and the
 default) and ``dev`` (the folio-dev-server sandbox). Each has its own SSM
-SecureString, named by ``OKAPI_SECRET_PARAM`` and ``OKAPI_DEV_SECRET_PARAM``
-respectively, so pointing a run at the sandbox never touches the prod config.
+SecureString, named by ``OKAPI_SECRET_PARAM``, ``OKAPI_TEST_SECRET_PARAM`` and
+``OKAPI_DEV_SECRET_PARAM`` respectively, so pointing a run at one instance never
+touches another's config.
 """
 
 from __future__ import annotations
@@ -36,14 +38,17 @@ def _ssm() -> Any:
 # valid target fails type checking rather than at runtime, on a dev-targeted run.
 SECRET_PARAM_ENV_VARS: dict[FolioTarget, str] = {
     "prod": "OKAPI_SECRET_PARAM",
+    "test": "OKAPI_TEST_SECRET_PARAM",
     "dev": "OKAPI_DEV_SECRET_PARAM",
 }
-DEFAULT_FOLIO_TARGET: FolioTarget = "prod"
+# Not prod until production switch-on, so a run that names no target cannot
+# write to production.
+DEFAULT_FOLIO_TARGET: FolioTarget = "test"
 
 
 def resolve_folio_target(target: str | None = None) -> FolioTarget:
     """Which FOLIO instance to talk to: the explicit argument, else FOLIO_TARGET,
-    else prod.
+    else DEFAULT_FOLIO_TARGET.
     """
     resolved = (target or os.environ.get("FOLIO_TARGET") or "").strip().lower()
     resolved = resolved or DEFAULT_FOLIO_TARGET
@@ -62,9 +67,10 @@ def load_okapi_config(target: str | None = None) -> dict[str, str]:
     """FOLIO OKAPI url/tenant/username/password from env and/or SSM.
 
     ``target`` selects the FOLIO instance (see :func:`resolve_folio_target`) and
-    therefore which SSM SecureString is read. A dev-targeted run never falls back
-    to the prod parameter: if OKAPI_DEV_SECRET_PARAM is unset and the OKAPI_* env
-    vars are incomplete, it fails rather than quietly writing to production.
+    therefore which SSM SecureString is read. A run never falls back to another
+    target's parameter: if, say, OKAPI_DEV_SECRET_PARAM is unset and the OKAPI_*
+    env vars are incomplete, a dev run fails rather than quietly writing to
+    another instance.
 
     Per-field env overrides (OKAPI_URL / OKAPI_TENANT / OKAPI_USERNAME /
     OKAPI_PASSWORD) let local runs skip SSM entirely; in Lambda these usually
