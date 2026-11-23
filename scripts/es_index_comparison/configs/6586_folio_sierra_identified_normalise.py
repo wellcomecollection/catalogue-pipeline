@@ -1,17 +1,13 @@
 """Normaliser for platform#6586: Sierra works in production against the FOLIO works replacing them.
 
-Each rule removes a difference that is expected between the Scala Sierra
-transformer and the Python FOLIO transformer.
+Each rule removes a difference that is expected and accepted, so that it is not counted.
 """
 
+import re
 import unicodedata
 
-OWN_IDENTIFIER_TYPES = {
-    "sierra-system-number",
-    "sierra-identifier",
-    "folio-instance",
-    "folio-instance-hrid",
-}
+# FOLIO works list their HRID, and Sierra works their seven-digit Sierra identifier.
+OWN_RECORD_SCHEMES = {"folio-instance-hrid", "sierra-identifier"}
 LIST_FIELDS = [
     "alternativeTitles",
     "contributors",
@@ -25,56 +21,78 @@ LIST_FIELDS = [
 
 
 def normalise(sierra: dict, folio: dict) -> tuple[dict, dict] | None:
-    if sierra["type"] != "Visible" or folio["type"] != "Visible":
-        return None
+    # Two works of different types are compared on type alone.
+    if sierra["type"] != folio["type"]:
+        return {"type": sierra["type"]}, {"type": folio["type"]}
 
+    # Only the Scala transformer keeps these on a suppressed record. They have no
+    # effect, because the matcher drops every link to or from a Deleted work.
+    if sierra["type"] == "Deleted":
+        sierra["state"]["relations"] = None
+        sierra["state"]["mergeCandidates"] = []
+
+    # The deleted reason names the source system.
+    if folio.get("deletedReason", {}).get("info") == "Folio":
+        folio["deletedReason"]["info"] = "Sierra"
+
+    sierra_number = sierra["state"]["sourceIdentifier"]["value"]
     for work in (sierra, folio):
         fill_missing_lists(work)
         work["data"] = clean_text(work["data"])
         work["state"]["relations"] = clean_text(work["state"]["relations"])
-        work["data"]["otherIdentifiers"] = [
-            identifier
-            for identifier in work["data"]["otherIdentifiers"]
-            if identifier["identifierType"]["id"] not in OWN_IDENTIFIER_TYPES
-        ]
-        work["state"]["mergeCandidates"] = merge_candidate_keys(work)
+        # Only the Python transformer trims the start of a description.
+        if work["data"].get("description"):
+            work["data"]["description"] = re.sub(r"<p>\s+", "<p>", work["data"]["description"])
+        work["data"]["otherIdentifiers"] = other_identifiers(work, sierra_number)
+        work["state"]["mergeCandidates"] = merge_candidates(work)
 
     normalise_sierra(sierra)
     normalise_folio(sierra, folio)
-    return drop_empty(sierra), drop_empty(folio)
+    return sierra, folio
 
 
 def clean_text(value):
-    """Return a copy with every string in NFC, backslashes as spaces and whitespace collapsed.
-
-    Sierra stores a mix of Unicode forms, the Scala transformer does not trim,
-    and the migration to FOLIO turned backslashes into spaces.
-    """
+    """Return a copy of a value with every string in it cleaned."""
     if isinstance(value, dict):
         return {key: clean_text(item) for key, item in value.items()}
     if isinstance(value, list):
         return [clean_text(item) for item in value]
     if isinstance(value, str):
+        # Sierra mixes Unicode forms, Scala does not trim, and the migration
+        # turned backslashes into spaces.
         return " ".join(unicodedata.normalize("NFC", value).replace("\\", " ").split())
     return value
 
 
+def other_identifiers(work: dict, sierra_number: str) -> list[dict]:
+    """Return a work's other identifiers without those of its own source record."""
+    kept = []
+    for identifier in work["data"]["otherIdentifiers"]:
+        own_scheme = identifier["identifierType"]["id"] in OWN_RECORD_SCHEMES
+        # A FOLIO work also lists the number of the Sierra work it replaces.
+        if not own_scheme and identifier["value"] != sierra_number:
+            kept.append(identifier)
+    return kept
+
+
 def fill_missing_lists(work: dict) -> None:
+    """Give a work an empty list for each list field it lacks."""
+    # A Deleted work has no data.
+    data = work.setdefault("data", {})
     for name in LIST_FIELDS:
-        work["data"][name] = work["data"].get(name) or []
+        data[name] = data.get(name) or []
     relations = work["state"].get("relations") or {}
     relations["ancestors"] = relations.get("ancestors") or []
     work["state"]["relations"] = relations
 
 
-def merge_candidate_keys(work: dict) -> list[str]:
-    """Reduce merge candidates to their source identifiers, leaving out FOLIO HRID candidates."""
-    keys = []
+def merge_candidates(work: dict) -> list[dict]:
+    """Return a work's merge candidates without the one a FOLIO work has for its own HRID."""
+    kept = []
     for candidate in work["state"].get("mergeCandidates") or []:
-        identifier = candidate["id"]["sourceIdentifier"]
-        if identifier["identifierType"]["id"] != "folio-instance-hrid":
-            keys.append(f"{identifier['identifierType']['id']}/{identifier['value']}")
-    return keys
+        if candidate["id"]["sourceIdentifier"]["identifierType"]["id"] != "folio-instance-hrid":
+            kept.append(candidate)
+    return kept
 
 
 def normalise_sierra(sierra: dict) -> None:
@@ -84,17 +102,22 @@ def normalise_sierra(sierra: dict) -> None:
     for contributor in data["contributors"]:
         contributor["agent"]["label"] = contributor["agent"]["label"].rstrip(",")
 
+    # The two transformers capitalise this genre differently.
     for genre in data["genres"]:
         for concept in genre["concepts"]:
             if concept["label"] == "Electronic Books":
                 concept["label"] = "Electronic books"
 
-    # The Python transformer always stores a type on concepts.
+    # The Python transformer stores a type where the Scala one stores none.
+    for subject in data["subjects"]:
+        subject.setdefault("type", "Subject")
     for production in data["production"]:
         for place in production.get("places") or []:
-            place["type"] = "Place"
+            place.setdefault("type", "Place")
+        for date in production.get("dates") or []:
+            date.setdefault("type", "Period")
         if production.get("function"):
-            production["function"]["type"] = "Concept"
+            production["function"].setdefault("type", "Concept")
 
     # The Python period parser starts an open range at year 1.
     for period in periods(sierra):
@@ -106,10 +129,6 @@ def normalise_sierra(sierra: dict) -> None:
     if data.get("collectionPath"):
         path = data["collectionPath"]["path"]
         data["collectionPath"]["path"] = path.removeprefix("(UkLW)")
-
-    # Works no longer store siblings or children.
-    for name in ("siblingsPreceding", "siblingsSucceeding", "children"):
-        sierra["state"]["relations"].pop(name, None)
 
 
 def periods(work: dict) -> list[dict]:
@@ -126,15 +145,8 @@ def periods(work: dict) -> list[dict]:
 
 
 def normalise_folio(sierra: dict, folio: dict) -> None:
-    # The Scala transformer leaves these types out.
-    for subject in folio["data"]["subjects"]:
-        subject.pop("type", None)
-    for production in folio["data"]["production"]:
-        for date in production.get("dates") or []:
-            date.pop("type", None)
-
-    # The Python period parser handles more patterns, so a date range the Sierra
-    # concept lacks is not a difference.
+    # The Python period parser reads more dates, so a range the Sierra concept
+    # lacks is not a difference.
     for name in ("subjects", "genres"):
         sierra_concepts = {}
         for entity in sierra["data"][name]:
@@ -152,13 +164,3 @@ def identity(entity: dict) -> tuple:
     if identifier is None:
         return ("label", entity["label"])
     return (identifier["identifierType"]["id"], identifier["ontologyType"], identifier["value"])
-
-
-def drop_empty(value):
-    """Drop null and empty dictionary members, so that a missing key equals an empty one."""
-    if isinstance(value, dict):
-        members = {key: drop_empty(item) for key, item in value.items()}
-        return {key: item for key, item in members.items() if item not in (None, [], {})}
-    if isinstance(value, list):
-        return [drop_empty(item) for item in value]
-    return value

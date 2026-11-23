@@ -28,7 +28,10 @@ ignore_fields:
   # The source swap itself.
   - state.sourceIdentifier
   - state.predecessorIdentifier
-  - state.removedInternalWorkStubs
+  # Works no longer store siblings or children.
+  - state.relations.siblingsPreceding
+  - state.relations.siblingsSucceeding
+  - state.relations.children
   # The text a date range was parsed from: the catalogued date, or the 008 date
   # when the catalogued date cannot be parsed. The Python period parser reads
   # dates the Scala one cannot (#3729), so the two often reach the same range

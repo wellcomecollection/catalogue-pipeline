@@ -6,10 +6,10 @@ Round 1 comparison for [platform#6586](https://github.com/wellcomecollection/pla
 
 - **Production:** `works-identified` on pipeline `2026-09-30` (Scala transformer on Sierra records).
 - **FOLIO:** `works-identified` on pipeline `2026-10-20` (Python transformer on FOLIO records), after the full reindex of 18 November 2026.
-- **Population:** 738,858 pairs of Visible works. A FOLIO work has the canonical id of the Sierra work it replaces, so pairs are matched by id.
-- **Normalisation:** the steps of the transformer validation notebook (`standardise_works_permanent`), which remove the differences already agreed as structural, such as Period ranges that only Python produces. On top of those, differences in text that follow one mechanical rule are removed, and they are listed under [Removed by normalisation](#removed-by-normalisation).
+- **Population:** 1,039,077 pairs of works with the same canonical id. 738,858 pairs are Visible on both sides, and 300,215 are suppressed on both sides, which means Deleted works with no data. The other 4 pairs have a different type on each side, and only the type is compared.
+- **Normalisation:** differences that are expected and accepted are removed before counting. The rules are in [the normaliser](../configs/6586_folio_sierra_identified_normalise.py) and the ignored fields in [the config](../configs/6586_folio_sierra_identified.yaml).
 
-10,473 pairs (1.4%) differ in at least one field after normalisation. Counts ignore the order of values within a field. Items and holdings are out of scope for this round.
+10,476 pairs (1.0%) differ after normalisation. All but 4 of them are Visible pairs, which is 1.4% of the Visible pairs. No suppressed pair differs. Counts ignore the order of values within a field. Items and holdings are out of scope for this round.
 
 ## How to read the tables
 
@@ -28,25 +28,14 @@ Each row is one kind of difference, with the number of works it affects.
 | Status | Meaning |
 |:---:|---|
 | ✅ | Explained and needs no action |
-| ⚠️ | Needs investigation or a decision. The row is in bold |
+| ⚠️ | Needs investigation or a decision |
 
-## Removed by normalisation
+## Work type
 
-These differences are explained by one rule each, so the comparison removes them before counting. The counts are works per field, from a run with and without the rules. Without them, 16,560 pairs differ.
-
-| Works | Rule | Fields | Reason |
-|---:|---|---|---|
-| 6,090 | The text stored on a date range is not compared. The catalogued date and the years of the range are | Production | The Python period parser reads dates the Scala one cannot, such as `Anno 1665`. Scala then takes the range from 008 and stores the 008 year as the text ([#3729](https://github.com/wellcomecollection/catalogue-pipeline/pull/3729)). Nothing downstream reads this text |
-| 53 | A backslash equals a space | Physical description 22, notes 16, title 5, description 4, production 3, alternative titles 2, contributors 1 | The migration turned backslashes into spaces |
-| 18 | The `(UkLW)` prefix is removed from the production path | Collection path | FOLIO strips it ([#3825](https://github.com/wellcomecollection/catalogue-pipeline/pull/3825)) |
-| 5 | Runs of spaces equal one space, and spaces at either end are removed | Contributors 2, current frequency 2, lettering 1 | Python strips whitespace around subfield values |
-| 3 | Trailing commas are removed from production contributor labels | Contributors | Python trims every trailing comma ([#3787](https://github.com/wellcomecollection/catalogue-pipeline/pull/3787)) |
-| 2 | A range starting at year -9999 starts at year 1 | Subjects | Period parser ([#3766](https://github.com/wellcomecollection/catalogue-pipeline/pull/3766)) |
-| 2 | A date range on a FOLIO Period that production's Period lacks is not compared | Genres | Python parses a period Scala does not ([#3667](https://github.com/wellcomecollection/catalogue-pipeline/pull/3667)) |
-
-Strings are also compared in Unicode NFC form, since Sierra stores a mix of forms.
-
-A work stays in the tables below when one of these rules made two labels equal but the contributor or subject still has a different canonical id.
+| Works | Difference | Cause | Reference | Status |
+|---:|---|---|---|:---:|
+| **3** | **Visible in production, Deleted in FOLIO as suppressed (`pg58x66j`, `aqhcpsvh`, `anycpaqb`)** | **Source: the records were suppressed in Sierra on 28 September, migrated as suppressed, and unsuppressed in Sierra on 22 October, after the final migration. They are still suppressed in FOLIO (checked in both adapter stores on 23 November)** | | ⚠️ |
+| 1 | Invisible in production, Visible in FOLIO (`hzg28phe`) | Transformer: the record repeats a subfield ǂa that should appear once. Scala refuses to transform it, and Python uses the first | | ✅ |
 
 ## Contributors
 
@@ -107,7 +96,7 @@ Reference: [#3639](https://github.com/wellcomecollection/catalogue-pipeline/pull
 | Works | Difference | Cause | Reference | Status |
 |---:|---|---|---|:---:|
 | 3,854 | Production has a language, FOLIO has none. 2,168 of them are journals | Transformer: FOLIO reads 008, which is blank, fill characters, `und`, `mul` or `zxx`. Production reads the Sierra LANG field, which has a language | #3639, 008 uninformative | ✅ |
-| **864** | **Production has a language, FOLIO has none. 646 of them are ephemera** | **Source: the Sierra record has no 008, and the migration created one that says `und`. The Sierra language survives only in 998 ǂf, which the transformer does not read** | **#3639 flagged the earlier placeholder 008, which said `eng`** | ⚠️ |
+| **864** | **Production has a language, FOLIO has none. 646 of them are ephemera** | **Source: the Sierra record has no 008, and the migration created one that says `und`. Production reads the Sierra LANG field, which says English on 823 of them and another language on 41** | **#3639 flagged the earlier placeholder 008, which said `eng`** | ⚠️ |
 | 572 | The two have different languages | Transformer: 008 and the Sierra LANG field name different languages | #3639, both set | ✅ |
 | 382 | FOLIO has a language, production has none | Transformer: 008 has a language, the Sierra LANG field is blank or unrecognised, such as `n/a` | #3639, LANG blank | ✅ |
 | 14 | Production lists a language twice, once under an obsolete code (`scc` on 13, `snh` on 1) | Transformer: Python keeps one language per label and prefers the current code | | ✅ |
@@ -137,9 +126,11 @@ Reference: [#3896](https://github.com/wellcomecollection/catalogue-pipeline/pull
 
 ## Relations
 
+Reference: [#3775](https://github.com/wellcomecollection/catalogue-pipeline/pull/3775).
+
 | Works | Difference | Cause | Reference | Status |
 |---:|---|---|---|:---:|
-| 8 | Production lists the same series twice, FOLIO once | Source: Sierra stores the title in two Unicode forms in 490 and 830, so they do not deduplicate. FOLIO stores both in NFC | #3628, NFC normalisation | ✅ |
+| 8 | Production lists the same series twice, FOLIO once | Source: Sierra stores the title in two Unicode forms in 490 and 830, so they do not deduplicate. FOLIO stores both in NFC | #3775 describes the mixed Unicode forms but not this effect | ✅ |
 
 ## Title
 
@@ -148,14 +139,6 @@ Reference: [#3628](https://github.com/wellcomecollection/catalogue-pipeline/pull
 | Works | Difference | Cause | Reference | Status |
 |---:|---|---|---|:---:|
 | 1 | `Metamorphosis.` in production, `Metamorphasis.` in FOLIO | Source: the Sierra record was edited on 18 November, after the migration | | ✅ |
-
-## Description
-
-Reference: [#3640](https://github.com/wellcomecollection/catalogue-pipeline/pull/3640).
-
-| Works | Difference | Cause | Reference | Status |
-|---:|---|---|---|:---:|
-| 1 | Production has a backslash before a quotation mark, FOLIO has neither a backslash nor a space | Source: the FOLIO record has no backslash there | | ✅ |
 
 ## Merge candidates
 
@@ -183,23 +166,12 @@ Reference: [#3897](https://github.com/wellcomecollection/catalogue-pipeline/pull
 |---:|---|---|---|:---:|
 | 1 | Books in production, Journals in FOLIO | Source: the Sierra material type was changed on 29 October, after the migration | | ✅ |
 
-## Fields with no differences
-
-| Field | Note |
-|---|---|
-| Edition | 9 pairs differ before normalisation, all by Unicode form |
-| Physical description | 22 pairs differ before normalisation, all by a backslash |
-| Current frequency | 2 pairs differ before normalisation, by a double space |
-| Lettering | 1 pair differs before normalisation, by a trailing space |
-| Other identifiers | Compared as sets, leaving out each system's own identifiers (`sierra-system-number`, `sierra-identifier`, `folio-instance`, `folio-instance-hrid`) |
-| Designation | |
-| Former frequency | |
-| Work type | |
-
 ## Open questions
 
 | Field | Works | Question |
 |---|---:|---|
 | Subjects, contributors | 50 | **Two ǂ0 in one field.** The work loses its authority identifier in FOLIO. 49 works are affected in subjects and 3 in contributors, and 2 of them are in both. Either the records are fixed at source, or the transformer picks the ǂ0 that looks like an authority identifier. |
 | Production | 47 | **Truncated years read as three-digit years.** A catalogued date such as `[199]` or `905` becomes the year 199 or 905 in FOLIO, which affects date filters and sorting. Production avoids it on 28 of them by taking the year from 008. The period parser could refuse a bare three-digit year when 008 has a four-digit one. |
-| Languages | 864 | **Language lost on records with no 008 in Sierra.** The migration gave them an 008 that says `und`, so the work has no language in FOLIO. The Sierra language is still in 998 ǂf. Either the 008 is corrected at source, or the transformer falls back to 998 ǂf when 008 is uninformative. |
+| Languages | 864 | **No language on records with no 008 in Sierra.** The migration gave them an 008 that says `und`, so the work has no language in FOLIO. This may be deliberate: without an 008, Sierra's LANG field says English on 823 of the 864, which looks like a default more than a catalogued fact, and 710 of the records have no cataloguing date. The other 41 have a language that looks catalogued, such as Italian or Latin. To confirm with the migration team. If it was deliberate, the 41 can be corrected in 008 by hand. A fallback to 998 ǂf in the transformer is not a good fix either way: 998 is a copy of Sierra's fixed fields that nobody maintains in FOLIO, so a language a cataloguer removes from 008 would come back from it. |
+| Work type | 3 | **Visible works that are suppressed in FOLIO.** `pg58x66j`, `aqhcpsvh` and `anycpaqb` (b16641437, b33972230, b33972199) would disappear from the website. They were unsuppressed in Sierra after the final migration, so the same change is needed in FOLIO. |
+| Other identifiers | all | **Seven-digit Sierra identifier.** Every Sierra work lists it (for example `1211199`) and no FOLIO work does. A FOLIO work lists only the full system number (`b12111995`). The seven-digit number is searchable in production today: searching for `1211199` returns that work first. This difference is removed by normalisation, so it is in none of the tables above. Is the seven-digit form still needed? |
