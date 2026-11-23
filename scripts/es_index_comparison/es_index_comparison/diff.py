@@ -1,161 +1,114 @@
 from __future__ import annotations
 
-import re
 import json
-from typing import Any, Dict, List
-import numpy as np
-from collections import Counter
+import re
+from typing import Any
+
+from deepdiff import DeepDiff
+from deepdiff.helper import notpresent
 
 TRUNCATE_LEN = 300
 
-# ---------------- Ignore Pattern Handling ----------------
+PATTERN_TOKENS = {"[]": r"\[\d+\]", "**": ".*", "*": r"[^.\[]+"}
 
 
-def compile_ignore_patterns(patterns: list[str]):
+def compile_ignore_patterns(patterns: list[str]) -> list[re.Pattern[str]]:
+    """Compile path patterns, where `[]` is any list index, `*` one segment and `**` any depth."""
     compiled = []
-    for p in patterns:
-        esc = ""
-        i = 0
-        while i < len(p):
-            if p.startswith("[]", i):
-                esc += r"\[\d+\]"
-                i += 2
-                continue
-            ch = p[i]
-            if ch == "*":
-                if i + 1 < len(p) and p[i + 1] == "*":
-                    esc += ".*"
-                    i += 2
-                else:
-                    esc += r"[^.\[]+"
-                    i += 1
-            else:
-                esc += re.escape(ch)
-                i += 1
-        regex = re.compile(r"^" + esc + r"(?:$|[.\[])")
-        compiled.append((p, regex))
+    for pattern in patterns:
+        parts = re.split(r"(\[\]|\*\*|\*)", pattern)
+        regex = "".join(PATTERN_TOKENS.get(part) or re.escape(part) for part in parts)
+        compiled.append(re.compile(rf"^{regex}(?:$|[.\[])"))
     return compiled
 
 
-def path_ignored(path: str, compiled) -> bool:
-    if not path:
-        return False
-    for raw, rgx in compiled:
-        if rgx.match(path):
-            return True
-    return False
+def path_matches(path: str, compiled: list[re.Pattern[str]]) -> bool:
+    return bool(path) and any(regex.match(path) for regex in compiled)
 
 
-# ---------------- Deep Diff ----------------
+def truncate_val(value: Any) -> str:
+    text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
+    return text[:TRUNCATE_LEN] + "…" if len(text) > TRUNCATE_LEN else text
 
 
-def normalize_value(v: Any) -> Any:
-    if isinstance(v, np.ndarray):
-        return [normalize_value(x) for x in v.tolist()]
-    if isinstance(v, list):
-        return [normalize_value(x) for x in v]
-    if isinstance(v, dict):
-        return {k: normalize_value(val) for k, val in v.items()}
-    return v
+def clean(value: Any, ignore: list[re.Pattern[str]], path: str = "") -> Any:
+    """Return a copy without anything at an ignored path and without null-valued keys.
+
+    Dropping null-valued keys makes a missing key and null equal.
+    """
+    if isinstance(value, dict):
+        prefix = f"{path}." if path else ""
+        return {
+            key: clean(item, ignore, prefix + key)
+            for key, item in value.items()
+            if item is not None and not path_matches(prefix + key, ignore)
+        }
+    if isinstance(value, list):
+        return [
+            clean(item, ignore, f"{path}[{i}]")
+            for i, item in enumerate(value)
+            if not path_matches(f"{path}[{i}]", ignore)
+        ]
+    return value
 
 
-def truncate_val(v: Any) -> str:
-    v = normalize_value(v)
-    if not isinstance(v, str):
-        try:
-            s = json.dumps(v, ensure_ascii=False)
-        except TypeError:
-            s = str(v)
-    else:
-        s = v
-    return (s[:TRUNCATE_LEN] + "…") if len(s) > TRUNCATE_LEN else s
+def format_path(keys: list[str | int]) -> str:
+    """Join DeepDiff path elements into a path such as `data.items[0].id`."""
+    return "".join(f"[{key}]" if isinstance(key, int) else f".{key}" for key in keys).lstrip(".")
 
 
-def deep_diff(a: Any, b: Any, path: str = "") -> List[Dict[str, Any]]:
-    diffs: List[Dict[str, Any]] = []
-    a = normalize_value(a)
-    b = normalize_value(b)
-
-    if type(a) is not type(b):
-        diffs.append({"path": path, "type": "type_mismatch", "left": a, "right": b})
-        return diffs
-
-    if isinstance(a, dict):
-        a_keys = set(a.keys())
-        b_keys = set(b.keys())
-        for k in sorted(a_keys - b_keys):
-            val = a[k]
-            if val is None:
-                continue
-            diffs.append(
-                {
-                    "path": f"{path}.{k}" if path else k,
-                    "type": "dict_key_removed",
-                    "left": val,
-                    "right": None,
-                }
-            )
-        for k in sorted(b_keys - a_keys):
-            val = b[k]
-            if val is None:
-                continue
-            diffs.append(
-                {
-                    "path": f"{path}.{k}" if path else k,
-                    "type": "dict_key_added",
-                    "left": None,
-                    "right": val,
-                }
-            )
-        for k in sorted(a_keys & b_keys):
-            diffs.extend(deep_diff(a[k], b[k], f"{path}.{k}" if path else k))
-        return diffs
-
-    if isinstance(a, list):
-        if len(a) != len(b):
-            diffs.append({"path": path, "type": "list_length", "left": len(a), "right": len(b)})
-        for i, (av, bv) in enumerate(zip(a, b)):
-            diffs.extend(deep_diff(av, bv, f"{path}[{i}]"))
-        return diffs
-
-    if a != b:
-        diffs.append({"path": path, "type": "scalar_change", "left": a, "right": b})
-    return diffs
+def path_sort_key(path: str) -> list[tuple[int, str]]:
+    """Return a key that sorts list indexes as numbers, so `items[2]` precedes `items[10]`."""
+    parts = re.split(r"(\d+)", path)
+    return [(int(part), "") if part.isdigit() else (-1, part) for part in parts]
 
 
-# ---------------- Aggregation ----------------
+def deep_diff(
+    a: Any,
+    b: Any,
+    unordered: list[re.Pattern[str]] | None = None,
+    ignore: list[re.Pattern[str]] | None = None,
+) -> list[dict]:
+    """List the differences between two JSON values, as found by DeepDiff.
 
+    Anything at a path matching `ignore` is left out of the comparison. Lists at
+    paths matching `unordered`, and lists nested inside them, are compared
+    regardless of order. Each difference has the DeepDiff change type, such as
+    values_changed or iterable_item_added. A repetition_change has the repeated
+    item and its count on each side.
+    """
+    a, b = clean(a, ignore or []), clean(b, ignore or [])
+    # Compared as JSON text, because 1 == 1.0 and True == 1 in Python.
+    if json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True):
+        return []
 
-def aggregate_diffs(common_ids, sources_a, sources_b, ignore_compiled):
-    diff_results: Dict[str, list[dict]] = {}
-    field_change_counter = Counter()
-    identical_raw = 0
-    identical_after_ignore = 0
-
-    for _id in common_ids:
-        src_a = sources_a.get(_id)
-        src_b = sources_b.get(_id)
-        if src_a is None or src_b is None:
-            diff_results[_id] = [
-                {"path": "_source", "type": "missing", "left": src_a, "right": src_b}
-            ]
-            continue
-        raw = deep_diff(src_a, src_b)
-        if not raw:
-            identical_raw += 1
-            continue
-        filtered = [d for d in raw if not path_ignored(d.get("path", ""), ignore_compiled)]
-        if not filtered:
-            identical_after_ignore += 1
-            continue
-        diff_results[_id] = filtered
-        top_fields = set(d["path"].split(".")[0].split("[")[0] for d in filtered if d.get("path"))
-        for f in top_fields:
-            field_change_counter[f] += 1
-
-    return {
-        "diff_results": diff_results,
-        "field_change_counter": field_change_counter,
-        "identical_raw": identical_raw,
-        "identical_after_ignore": identical_after_ignore,
+    options: dict[str, Any] = {
+        # Report objects key by key, however few keys they share.
+        "threshold_to_diff_deeper": 0,
+        # Compare keys starting with two underscores, which DeepDiff skips by default.
+        "ignore_private_variables": False,
     }
+    if unordered:
+        options["report_repetition"] = True
+        options["ignore_order_func"] = lambda level: path_matches(
+            format_path(level.path(output_format="list")), unordered
+        )
+
+    diffs = []
+    tree = DeepDiff(a, b, view="tree", **options)
+    for change_type, changes in tree.items():
+        for change in changes:
+            left, right = change.t1, change.t2
+            if change_type == "repetition_change":
+                repetition = change.additional["repetition"]
+                left = {"value": change.t1, "count": repetition["old_repeat"]}
+                right = {"value": change.t1, "count": repetition["new_repeat"]}
+            diffs.append(
+                {
+                    "path": format_path(change.path(output_format="list")),
+                    "type": change_type,
+                    "left": None if left is notpresent else left,
+                    "right": None if right is notpresent else right,
+                }
+            )
+    return sorted(diffs, key=lambda diff: (path_sort_key(diff["path"]), diff["type"]))

@@ -1,7 +1,7 @@
 # Example configuration for es_index_comparison
 # ------------------------------------------------------------
 # Copy this file and modify values to create independent analyses.
-# Each run produces its own namespace directory under output_dir.
+# Each config writes to its own namespace directory under output_dir.
 # ------------------------------------------------------------
 
 # Exactly TWO index sources to compare (required)
@@ -25,16 +25,23 @@ index_sources:
 ignore_fields:
   # - some_field
 
-# Number of differing documents to sample for console display
+# Lists to compare as unordered (same pattern language as ignore_fields, "**" for all)
+# ignore_list_order:
+#   - data.contributors
+
+# Python file defining normalise(doc_a, doc_b), run on each pair before the diff
+# normaliser: my_analysis_normalise.py
+
+# Number of differing documents written to sample_diffs.md
 sample_size: 10
 
-# Rows per Parquet shard flush during conversion
-loading_chunk_size: 100000
-
-# Number of hash buckets for Parquet partitioning (controls compare-memory usage)
+# Number of hash buckets the fetched documents are split into (controls compare-memory usage)
 hash_bucket_count: 6
 
-# Optional namespace override; if omitted a timestamped one is generated from filename
+# Processes used by compare, each holding one bucket of both indices in memory
+# workers: 4
+
+# Output folder name under output_dir (default: this file's name)
 # namespace: pipeline-comparison-ebsco
 
 # Base output directory (created if missing)

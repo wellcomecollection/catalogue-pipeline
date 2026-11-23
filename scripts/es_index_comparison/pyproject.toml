@@ -1,34 +1,18 @@
 [project]
 name = "es_index_comparison"
 version = "0.1.0"
-authors = [ { name = "Your Name", email = "you@example.com" } ]
-description = "CLI tool to fetch, materialize, and deeply diff Elasticsearch indices into reproducible artifacts."
+description = "CLI tool to fetch two Elasticsearch indices and diff their documents field by field."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-license = { text = "Apache-2.0" }
-keywords = ["elasticsearch", "diff", "data-quality", "index-comparison"]
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: Apache Software License",
-  "Intended Audience :: Developers",
-  "Intended Audience :: Information Technology",
-  "Topic :: Utilities",
-]
 
 dependencies = [
   "elasticsearch>=9.5,<10",
-  "polars>=0.20.0",
-  "pandas>=2.0.0",
-  "pyarrow",
-  "numpy>=1.24,<3",
-  "tqdm",
   "PyYAML>=6.0",
   "typer>=0.12.0",
   "rich>=13.0.0",
+  "deepdiff>=9.2",
+  "pydantic>=2",
 ]
-
-[project.optional-dependencies]
-dev = ["pytest", "ruff", "mypy"]
 
 [project.scripts]
 es-index-compare = "es_index_comparison.cli:app"
@@ -37,8 +21,6 @@ es-index-compare = "es_index_comparison.cli:app"
 requires = ["hatchling>=1.21.0"]
 build-backend = "hatchling.build"
 
-[tool.uv]
-# Allow uv to resolve and build
 [tool.ruff]
 line-length = 100
 
@@ -50,7 +32,6 @@ strict_optional = true
 
 [dependency-groups]
 dev = [
-  "ipywidgets>=8.1.8",
   "pytest>=8.3.3",
   "mypy>=1.18.2",
   "ruff>=0.14.2",
