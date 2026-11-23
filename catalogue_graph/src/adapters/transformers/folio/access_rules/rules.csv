@@ -1,8 +1,8 @@
 rule_id,item_status,statistical_code,loan_type,library,location_type,location_code,material_type,open_request,method,status,note,display_note,data_state,baseline_equivalent,rationale
-missing,Missing,,,,,,,,NotRequestable,Unavailable,missing,condition-note-wins,today,missing,Status overrides the statistical code as in Sierra
+missing,Missing|Long missing,,,,,,,,NotRequestable,Unavailable,missing,condition-note-wins,today,missing,Status overrides the statistical code as in Sierra; Long missing is Sierra missing and Missing is Sierra on search (platform#6799)
 withdrawn,Withdrawn,,,,,,,,NotRequestable,Unavailable,withdrawn,condition-note-wins,today,withdrawn,Status overrides the statistical code as in Sierra
 data-issues,Unknown,,,,,,,,NotRequestable,,contact,condition-note-wins,today,unmapped-fallback,Collection Information maps Sierra data issues to status Unknown with a hardcoded statement
-on-search,Declared lost,,,,,,,,NotRequestable,,contact,condition-note-wins,pending-migration,unmapped-fallback,Collection Information maps Sierra on search to Declared lost; no item has it yet
+declared-lost,Declared lost,,,,,,,,NotRequestable,,contact,condition-note-wins,no-items,unmapped-fallback,Policy guard; Sierra on search became Missing (platform#6799) and no item has this status
 bound-with,Intellectual item,,,,,,,,NotRequestable,,top-item,condition-note-wins,today,request-top-item,Collection Information target for bound-with and contained-in items; today only cwith has the status
 bound-with-interim,,,,bwith|cwith,,,,,NotRequestable,,top-item,condition-note-wins,today,request-top-item,Catches bwith items still Available until they get status Intellectual item; keyed on library because their codes are unreliable
 digitisation,,DIGITISATION,,,,,,,NotRequestable,TemporarilyUnavailable,digitisation,condition-note-wins,today,unavailable-digitisation,Before unavailable because today's digitisation items have status Unavailable

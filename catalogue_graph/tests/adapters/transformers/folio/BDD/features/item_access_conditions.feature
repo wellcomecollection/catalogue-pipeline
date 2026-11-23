@@ -28,7 +28,7 @@ Feature: FOLIO item access conditions
       | missing                      | Missing                      | OPEN SHELVES     | Can circulate   | wslom         | Student Coll. (Med Lit) | Open shelves  | book           | NotRequestable  | the status "Unavailable"          | the "missing" note          |
       | withdrawn                    | Withdrawn                    | UNAVAILABLE      | Can circulate   | sepbb         | Closed stores EPB / B   | Closed stores | book           | NotRequestable  | the status "Unavailable"          | the "withdrawn" note        |
       | data-issues                  | Unknown                      | ONLINE REQUEST   | Can circulate   | sepbb         | Closed stores EPB / B   | Closed stores | book           | NotRequestable  | no status                         | the "contact" note          |
-      | on-search                    | Declared lost                | ONLINE REQUEST   | Can circulate   | sepbb         | Closed stores EPB / B   | Closed stores | book           | NotRequestable  | no status                         | the "contact" note          |
+      | declared-lost                | Declared lost                | ONLINE REQUEST   | Can circulate   | sepbb         | Closed stores EPB / B   | Closed stores | book           | NotRequestable  | no status                         | the "contact" note          |
       | bound-with                   | Intellectual item            | ONLINE REQUEST   | Can circulate   | sepbb         | Closed stores EPB / B   | Closed stores | book           | NotRequestable  | no status                         | the "top-item" note         |
       | digitisation                 | Unavailable                  | DIGITISATION     | Can circulate   | sepbb         | Closed stores EPB / B   | Closed stores | book           | NotRequestable  | the status "TemporarilyUnavailable" | the "digitisation" note   |
       | digitisation-status          | In process (non-requestable) | ONLINE REQUEST   | Can circulate   | sepbb         | Closed stores EPB / B   | Closed stores | book           | NotRequestable  | the status "TemporarilyUnavailable" | the "digitisation" note   |
@@ -56,6 +56,15 @@ Feature: FOLIO item access conditions
     When I transform the MARC record
     Then item "a" has the access method "NotRequestable", no status and the "top-item" note
     And item "host" has the access method "OnlineRequest", the status "Open" and no note
+
+  # FOLIO's Long missing is Sierra's missing, and FOLIO's Missing is Sierra's
+  # on search. Both are unavailable to readers (platform#6799).
+  Scenario: A Long missing item is unavailable, as a Missing item is
+    Given that item has the status "Long missing"
+    And that item has the statistical code "OPEN SHELVES"
+    And that item is in the location "wslom" named "Student Coll. (Med Lit)" in the library "Open shelves"
+    When I transform the MARC record
+    Then item "a" has the access method "NotRequestable", the status "Unavailable" and the "missing" note
 
   # Precedence between rows.
 
