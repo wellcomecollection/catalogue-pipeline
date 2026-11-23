@@ -23,7 +23,8 @@ metadata:
     github.com/project-slug: wellcomecollection/catalogue-pipeline
     backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/catalogue_graph/
     wellcomecollection.org/deploy-tracker: catalogue_graph/.deploy-tracker.yml
-    backplane/dora-paths: catalogue_graph
+    # What the two Dockerfiles copy, so tests, docs, notebooks and unapplied Terraform are not reported as shipped.
+    backplane/dora-paths: catalogue_graph/src,catalogue_graph/pyproject.toml,catalogue_graph/uv.lock,catalogue_graph/certs,catalogue_graph/infra/lambda_extensions/secrets_extension.py,catalogue_graph/lambda.Dockerfile,catalogue_graph/task.Dockerfile
   links:
     - title: Runbook
       url: https://github.com/wellcomecollection/catalogue-pipeline/blob/main/docs/adapters/runbook.md
