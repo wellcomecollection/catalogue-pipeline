@@ -9,7 +9,7 @@ Round 1 comparison for [platform#6586](https://github.com/wellcomecollection/pla
 - **Population:** 1,039,077 pairs of works with the same canonical id. 738,858 pairs are Visible on both sides, and 300,215 are suppressed on both sides, which means Deleted works with no data. The other 4 pairs have a different type on each side, and only the type is compared.
 - **Normalisation:** differences that are expected and accepted are removed before counting. The rules are in [the normaliser](../configs/6586_folio_sierra_identified_normalise.py) and the ignored fields in [the config](../configs/6586_folio_sierra_identified.yaml).
 
-10,476 pairs (1.0%) differ after normalisation. All but 4 of them are Visible pairs, which is 1.4% of the Visible pairs. No suppressed pair differs. Counts ignore the order of values within a field. Items and holdings are out of scope for this round.
+10,476 pairs (1.0%) differ after normalisation. All but 4 of them are Visible pairs, which is 1.4% of the Visible pairs. No suppressed pair differs. Counts ignore the order of values within a field, which is covered in [Order of values](#order-of-values). Items and holdings are out of scope for this round.
 
 ## Sierra works with no FOLIO work
 
@@ -30,7 +30,17 @@ Production has 1,823,753 Sierra works. 1,039,077 of them are compared in this re
 | 3-D Objects | 152 |
 | Journals | 1 |
 
-The one journal is BMJ (b2043277x). It is unsuppressed in Sierra, with 586 items and 6 holdings, and has no FOLIO record.
+The one journal is BMJ (b2043277x), which has 586 items in Sierra. FOLIO has a BMJ record with 586 items (`in00008808112`), but it has no Sierra number, so its work has a new canonical id. The record holds only a title and a language.
+
+## FOLIO works with no production work
+
+19 FOLIO works have a canonical id that production does not have:
+
+- 11 are new records created in FOLIO, with no Sierra number.
+- 4 are Sierra records that are unsuppressed in Sierra but have no work in production (b20646525, b2882068x, b10282993, b17268941).
+- 2 are suppressed.
+- 1 is a test record.
+- 1 is the BMJ record described above.
 
 ## How to read the tables
 
@@ -191,6 +201,15 @@ Reference: [#3897](https://github.com/wellcomecollection/catalogue-pipeline/pull
 |---:|---|---|---|:---:|
 | 1 | Books in production, Journals in FOLIO | Source: the Sierra material type was changed on 29 October, after the migration. FOLIO reads 998 ǂd, which still holds the old value | | 📝 |
 
+## Order of values
+
+The comparison ignores the order of values within a field. On 31 works a field has the same values on both sides in a different order. These are not counted in the tables above.
+
+| Works | Field | Difference | Cause | Status |
+|---:|---|---|---|:---:|
+| 22 | Languages | A different language comes first, for example Turkish then English in production, and English then Turkish in FOLIO | Transformer: the first language is the Sierra LANG field in production and the 008 language in FOLIO, and the two name different languages | ✅ |
+| 9 | Notes | A copyright note and a related material note are in the opposite order | Source: both transformers list notes in the order of the record's fields. The Sierra record has field 787 before 542, and the FOLIO record has 542 before 787 | ✅ |
+
 ## Open questions
 
 | Field | Works | Question |
@@ -198,5 +217,5 @@ Reference: [#3897](https://github.com/wellcomecollection/catalogue-pipeline/pull
 | Subjects, contributors | 50 | **Two ǂ0 in one field.** The work loses its authority identifier in FOLIO. The records could be corrected in FOLIO, or the transformer could pick the ǂ0 that looks like an authority identifier. |
 | Languages | 864 | **No language on records with no 008 in Sierra.** The migration gave them an 008 that says `und`, so the work has no language in FOLIO. This may be deliberate. Sierra's LANG field says English on 823 of them, which looks like a default: 710 have no cataloguing date. The other 41 have another language, such as Italian or Latin, and could be corrected in 008 by hand. To confirm with the migration team. Falling back to 998 ǂf in the transformer is not a good fix, because nobody maintains 998 in FOLIO, so a language removed from 008 would still show on the work. |
 | Several | 12 | **Changes made in Sierra that are not in FOLIO.** These are the 📝 rows: three works unsuppressed (b16641437, b33972230, b33972199), a title spelling (b33853137), two notes (b19689718, b14587452), a material type (b16082497), a wrong 776 link removed (b12720604), a Miro link added (b20461896) and three trailing full stops (b10823803, b10001566, b1217967x). Should the same changes be made in FOLIO? |
-| Sierra works with no FOLIO work | 1 | **A journal that is not in FOLIO.** BMJ (b2043277x) is Visible in production and has no FOLIO record. Every other Visible Sierra work without a FOLIO work is in a format that was not migrated. Was it left out on purpose? |
+| Sierra works with no FOLIO work | 1 | **A journal that lost its record in the migration.** The FOLIO record for BMJ (`in00008808112`, created on 14 October) has its 586 items but only a title and a language. It has no Sierra number (b2043277x), so the work gets a new canonical id and the current work page would stop working. Can the full record be loaded again? |
 | Other identifiers | all | **Seven-digit Sierra identifier.** Every Sierra work lists it (for example `1211199`) and no FOLIO work does. A FOLIO work lists only the full system number (`b12111995`). The seven-digit number is searchable in production today: searching for `1211199` returns that work first. This difference is removed by normalisation, so it is in none of the tables above. Is the seven-digit form still needed? |
