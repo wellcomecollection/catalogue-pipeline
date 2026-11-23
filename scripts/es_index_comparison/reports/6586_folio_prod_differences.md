@@ -17,19 +17,19 @@ Each row is one kind of difference, with the number of works it affects.
 
 **Cause** says where the difference comes from:
 
-- **Transformer:** the Python extractor gives the FOLIO result from the Sierra record too, so the two pipelines disagree on the same data.
-- **Source:** the Python extractor gives the production result from the Sierra record, so the FOLIO record itself differs from Sierra's.
+- **Transformer:** the Sierra and FOLIO records hold the same data, and the two transformers handle it differently.
+- **Source:** the FOLIO record differs from the Sierra record.
 - **Stale production:** production holds a value from before a Scala fix, and would match after the Sierra work is transformed again.
 
 **Reference** points to the PR description that names the difference, where there is one.
 
-**Status** says whether the difference needs attention, whether or not it was already known:
+**Status** says whether the difference needs attention:
 
 | Status | Meaning |
 |:---:|---|
 | ✅ | Explained and needs no action |
 | ⚠️ | Needs investigation or a decision |
-| 📝 | Changed in Sierra but not in FOLIO. Cataloguers need to decide whether to make the same change in FOLIO |
+| 📝 | Changed in Sierra but not in FOLIO. Cataloguers may want to make the same change in FOLIO |
 
 ## Work type
 
@@ -46,11 +46,11 @@ Reference: [#3787](https://github.com/wellcomecollection/catalogue-pipeline/pull
 |---:|---|---|---|:---:|
 | 259 | Identifier scheme is `nlm-mesh` in production and `lc-names` in FOLIO. On 10 of them the contributor is also an Agent in production and a Person in FOLIO | Transformer: Scala reads the second indicator of an analytical 7xx entry as a thesaurus | #3787, analytical added entries | ✅ |
 | 101 | `primary` flag differs | Source: FOLIO records were edited to keep one main entry where Sierra has several | | ✅ |
-| 63 | Type differs, for example Concept in production and Person in FOLIO | Transformer: Python gives a name used as both contributor and subject the more specific type | #3787, ontology type harmonisation | ✅ |
+| 63 | Type differs, for example Concept in production and Person in FOLIO | Transformer: the same name is a contributor and a subject, with a different type on each. Scala gives the contributor the subject's type. Python gives both the more specific type | #3787, ontology type harmonisation | ✅ |
 | 55 | Contributor has a different canonical id. Its identifier is made from the label, which has a backslash in production and a space in FOLIO | Source: the migration turned backslashes into spaces | | ✅ |
 | 29 | Contributor has a different canonical id. Its identifier is made from the label, which has a double space in production | Transformer: Python strips whitespace around subfield values | #3787, subfield whitespace | ✅ |
 | **3** | **Production has an `lc-names` identifier, FOLIO a label-derived one** | **Source: the Sierra ǂ9 local code became a second ǂ0 in FOLIO, and the transformer drops the identifier when a field has two** | | ⚠️ |
-| 3 | Trailing full stop missing from the FOLIO label, for example `A. B` | Source: the full stop was added in Sierra between 6 and 8 October and is not in FOLIO | | 📝 |
+| 3 | Trailing full stop missing from the FOLIO label, for example `Kail, Robert V.` in production and `Kail, Robert V` in FOLIO | Source: the full stop was added in Sierra between 6 and 8 October and is not in FOLIO | | 📝 |
 | 3 | Production has a contributor with an empty or `.` label | Source: the FOLIO record has no such field | | ✅ |
 | 2 | Production has one more contributor, a duplicate with an `nlm-mesh` identifier | Transformer: a knock-on of the analytical entry misreading, which stops Scala merging the duplicate | #3787 names the misreading but not this effect | ✅ |
 
@@ -61,9 +61,9 @@ Reference: [#3766](https://github.com/wellcomecollection/catalogue-pipeline/pull
 | Works | Difference | Cause | Reference | Status |
 |---:|---|---|---|:---:|
 | 80 | Label-derived identifier of a name concept differs, for example `lara rivera, jorge, (1961-)` in production and `lara rivera, jorge,` in FOLIO | Transformer: the sole concept of a name heading keeps its own identifier in Python | #3766, name concept identifiers | ✅ |
-| 63 | Type differs, for example Concept in production and Person in FOLIO. These are the same 63 works as in contributors | Transformer: Python gives a name used as both contributor and subject the more specific type | #3787, ontology type harmonisation | ✅ |
+| 63 | Type differs, for example Concept in production and Person in FOLIO. These are the same 63 works as in contributors | Transformer: the same name is a contributor and a subject, with a different type on each. Scala keeps the subject's type. Python gives both the more specific type | #3787, ontology type harmonisation | ✅ |
 | **49** | **Production has an `lc-subjects`, `lc-names` or `nlm-mesh` identifier, FOLIO a label-derived one** | **Source: the Sierra ǂ9 local code became a second ǂ0 in FOLIO, and the transformer drops the identifier when a field has two** | **#3766 calls it a data quality issue and leaves it open** | ⚠️ |
-| 8 | Production label repeats a date, for example `Folie et déraison, 1926-1984.` | Transformer: Python drops a repeated subfield that duplicates an earlier value | #3766, duplicated subfield | ✅ |
+| 8 | Production label repeats the author's dates after the title, for example `Foucault, Michel, 1926-1984. Folie et déraison, 1926-1984.` | Transformer: Python drops a repeated subfield that duplicates an earlier value | #3766, duplicated subfield | ✅ |
 | 1 | Production identifier reads `inuenza epidemic, 1918-1919`, and the Period has no range | Transformer: Scala strips `fl` from inside `Influenza` | #3766, period identifiers | ✅ |
 | 1 | Both concepts of a subject have the identifier `otology - ear` in production. In FOLIO they have `otology` and `ear` | Transformer: a 650 with two ǂa, where Python gives each concept its own identifier | #3766, two ǂa in one 650 | ✅ |
 | 1 | Subject has a different canonical id. Its identifier is made from the label, which has a backslash in production and a space in FOLIO | Source: the migration turned backslashes into spaces | | ✅ |
@@ -83,7 +83,7 @@ Reference: [#3729](https://github.com/wellcomecollection/catalogue-pipeline/pull
 
 | Works | Difference | Cause | Reference | Status |
 |---:|---|---|---|:---:|
-| 1,723 | Date range differs, for example `1538 [colophon 1537]` is 1538 in production and 1537 to 1538 in FOLIO | Transformer: Python parses the catalogued date, where Scala took the range from 008 or parsed it differently. Neither parser reads every date correctly. On at least 27 of these, FOLIO has the wrong range, for example where the date gives a Hijri year next to the AD year. This is a known limitation | #3729, period parser | ✅ |
+| 1,723 | Date range differs, for example `1538 [colophon 1537]` is 1538 in production and 1537 to 1538 in FOLIO | Transformer: expected. Python uses a new period parser, which reads more dates and reads them more accurately than Scala's. A few forms are still read wrongly, such as a Hijri year next to the AD year (at least 27 works) | #3704, #3729 | ✅ |
 | 950 | FOLIO has a date range, production has the date label only, for example `1975,` | Transformer: Python parses a catalogued date Scala cannot | #3729, period parser | ✅ |
 | 459 | FOLIO has a date, production has none, for example `1900-1970` | Transformer: Python reads 008 dates that Scala rejects, with unknown digits such as `19uu` or a second date that does not fit the date type | #3729, 008 date parser | ✅ |
 | 9 | The record has several dates in one field. Production keeps a single date, and FOLIO keeps all of them | Transformer: Scala cannot parse any of the dates, so it takes one from 008. Python can parse at least one, so it keeps them all | | ✅ |
