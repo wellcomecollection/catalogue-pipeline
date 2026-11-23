@@ -53,7 +53,10 @@ def _enumeration(record: FolioEnrichedHoldings) -> list[str]:
         (m for s in statements if (m := CODED_PREFIX.match(s))),
         key=lambda m: (int(m["link"]), int(m["sequence"])),
     )
-    return free_text + [rest for m in coded if (rest := m.string[m.end() :])]
+    # Deduplicated after rendering, as the Sierra transformer did.
+    return free_text + list(
+        dict.fromkeys(rest for m in coded if (rest := m.string[m.end() :]))
+    )
 
 
 def _location_code(record: FolioEnrichedHoldings) -> str | None:

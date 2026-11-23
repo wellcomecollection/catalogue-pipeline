@@ -48,8 +48,9 @@ Feature: FOLIO work-level holdings
     Given a FOLIO holdings record "checkin"
     And that holdings record has the statement "1.1 1-385 1-9969 1823-2015;2.21 396 10252-10252 2020;2.2 388 10067-10072 2017 n"
     And that holdings record has the statement "2.1 385-388 9972-10063 2015-2016 n"
+    And that holdings record has the statement "2.10 295 10226-10226 2020;2.9 10318-10321 2021-2022"
     When I transform the MARC record
-    Then the holdings have the enumeration "1-385 1-9969 1823-2015 | 385-388 9972-10063 2015-2016 n | 388 10067-10072 2017 n | 396 10252-10252 2020"
+    Then the holdings have the enumeration "1-385 1-9969 1823-2015 | 385-388 9972-10063 2015-2016 n | 388 10067-10072 2017 n | 10318-10321 2021-2022 | 295 10226-10226 2020 | 396 10252-10252 2020"
 
   Scenario: Free text statements come before coded statements
     Given a FOLIO holdings record "checkin"
@@ -69,6 +70,14 @@ Feature: FOLIO work-level holdings
     And that holdings record has the statement "1.1 51 2 2021 06"
     When I transform the MARC record
     Then the holdings have the enumeration "1-47 -1 1967-2017 -03 | 51 2 2021 06 | 47 3-4 2017 09-12"
+
+  Scenario: A coded statement repeated after its prefix is shown once
+    Given a FOLIO holdings record "checkin"
+    And that holdings record has the statement "1.1 38-38 4-4 2015"
+    And that holdings record has the statement "1.2 39 1 2016"
+    And that holdings record has the statement "1.1 38-38 4-4 2015;1.3 38-38 4-4 2015"
+    When I transform the MARC record
+    Then the holdings have the enumeration "38-38 4-4 2015 | 39 1 2016"
 
   Scenario: A coded statement that is only a prefix is left out
     Given a FOLIO holdings record "checkin"
