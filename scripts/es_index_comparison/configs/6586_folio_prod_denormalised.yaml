@@ -1,0 +1,45 @@
+# platform#6586: every work in production against the same work in the FOLIO
+# pipeline, at works-denormalised, to find what differs after merging.
+#
+# Differences that already exist at works-identified are removed afterwards.
+# See merged_differences_6586.py for the steps.
+
+index_sources:
+  - prod-works-denormalised
+  - folio-works-denormalised
+
+normaliser: 6586_folio_prod_merged_normalise.py
+
+ignore_list_order:
+  - "**"
+
+ignore_fields:
+  # Per-run stamps and counters.
+  - indexed_at
+  - version
+  - state.modifiedTime
+  - state.sourceModifiedTime
+  - state.mergedTime
+  # The source swap itself.
+  - state.sourceIdentifier
+  - state.predecessorIdentifier
+  # Parts of TEI manuscripts, which are works of their own after merging.
+  - state.internalWorkStubs
+  - state.removedInternalWorkStubs
+  # Works no longer store siblings or children.
+  - state.relations.siblingsPreceding
+  - state.relations.siblingsSucceeding
+  - state.relations.children
+  # See 6586_folio_sierra_identified.yaml.
+  - data.production[].dates[].range.label
+  # Items and holdings are compared under milestone 80. Availabilities are
+  # derived from them.
+  - data.items
+  - data.holdings
+  - state.availabilities
+
+sample_size: 40
+hash_bucket_count: 64
+workers: 8
+namespace: 6586-folio-prod-denormalised
+output_dir: data

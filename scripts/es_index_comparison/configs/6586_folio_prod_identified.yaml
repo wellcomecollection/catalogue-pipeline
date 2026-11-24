@@ -1,0 +1,42 @@
+# platform#6586: the works that differ at works-denormalised, compared at
+# works-identified with the same rules, so that differences from before
+# merging can be removed.
+#
+# The ids file is gitignored. Write it with
+# `uv run python merged_differences_6586.py ids` after the denormalised run.
+
+index_sources:
+  - prod-works-identified
+  - folio-works-identified
+
+ids_file: ../data/6586_merged_differing_ids.txt
+
+normaliser: 6586_folio_prod_merged_normalise.py
+
+ignore_list_order:
+  - "**"
+
+# The same list as 6586_folio_prod_denormalised.yaml.
+ignore_fields:
+  - indexed_at
+  - version
+  - state.modifiedTime
+  - state.sourceModifiedTime
+  - state.mergedTime
+  - state.sourceIdentifier
+  - state.predecessorIdentifier
+  - state.internalWorkStubs
+  - state.removedInternalWorkStubs
+  - state.relations.siblingsPreceding
+  - state.relations.siblingsSucceeding
+  - state.relations.children
+  - data.production[].dates[].range.label
+  - data.items
+  - data.holdings
+  - state.availabilities
+
+sample_size: 40
+hash_bucket_count: 64
+workers: 8
+namespace: 6586-folio-prod-identified
+output_dir: data
