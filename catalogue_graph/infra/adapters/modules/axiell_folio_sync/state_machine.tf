@@ -30,6 +30,16 @@ locals {
         Output = "{% $states.result.Payload %}"
         Next   = "Success"
         Retry = [
+          # A run that hits the Lambda timeout is not retried. Each attempt
+          # starts the changeset from the beginning and rewrites the same
+          # leading records, so a retry only times out again. Retriers are
+          # matched in order, and States.TaskFailed below would otherwise catch
+          # it. The execution fails instead. Remove this once large changesets
+          # are batched.
+          {
+            ErrorEquals = ["Sandbox.Timedout"]
+            MaxAttempts = 0
+          },
           {
             ErrorEquals = [
               "Lambda.ServiceException",

@@ -17,7 +17,7 @@ import uuid
 from dataclasses import dataclass
 
 # Bumped whenever the mapping rules change; stamped into every payload's meta.
-VERSION = "3.5.0"
+VERSION = "3.6.0"
 
 
 # ── record selection (RFC 090 §Record selection) ─────────────────────────────
@@ -43,9 +43,9 @@ MATERIAL_TYPE: dict[str, str] = {
     "Archives - Digital": "archive",
     "Archives - Hybrid": "archive",
     "Moving Image - Non-digital": "film",
-    "Moving Image - Digital": "video format non-requestable",
-    "Sound - Non-digital": "audio format requestable",
-    "Sound - Digital": "audio format non-requestable",
+    "Moving Image - Digital": "video - digital",
+    "Sound - Non-digital": "audio",
+    "Sound - Digital": "audio - digital",
     # AxC says plain "Visual Material", never "Visual Material - Non-digital".
     # The old key was a near-miss, so the agreed non-projected graphic rule had
     # never once fired.
@@ -56,8 +56,8 @@ MATERIAL_TYPE: dict[str, str] = {
 
 # Map Axiell access categories (MARC 506$f) to FOLIO item statuses.
 # Values are FOLIO's fixed item-status values and need no resolver.
-# "Restricted" and "Withdrawn" have not been seen in use on the prod tenant and
-# should be confirmed against its FOLIO version before this is relied on.
+# "Withdrawn" has not been seen in use on the prod tenant and should be
+# confirmed against its FOLIO version before this is relied on.
 ACCESS_ITEM_STATUS: dict[str, str] = {
     "OPEN": "Available",
     "OPENWITHADVISORY": "Available",
@@ -67,11 +67,13 @@ ACCESS_ITEM_STATUS: dict[str, str] = {
     # the material is handed over, so it does not affect whether the item can be
     # requested or produced.
     "RESTRICTED": "Available",
-    "PERMISSIONREQUIRED": "Restricted",
-    "SAFEGUARDED": "Restricted",
+    # Available, as Collection Information keeps migrated safeguarded and donor
+    # permission items, so staff can still request them. The access statistical
+    # code carries the restriction.
+    "PERMISSIONREQUIRED": "Available",
+    "SAFEGUARDED": "Available",
     # Unavailable, as agreed with Collection Information
-    # (wellcomecollection/platform#6862). Permission required and Safeguarded
-    # stay Restricted until their rows are agreed.
+    # (wellcomecollection/platform#6862).
     "CLOSED": "Unavailable",
     "MISSING": "Missing",
     "DEACCESSIONED": "Withdrawn",
