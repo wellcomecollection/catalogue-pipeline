@@ -14,7 +14,7 @@ Holdings record, and an Item. It does this through the FOLIO Inventory API.
 | MARC extraction primitive | `src/adapters/steps/axiell_folio_sync/mapping/marc.py` |
 | Payload contracts | `src/adapters/steps/axiell_folio_sync/mapping/payloads.py` |
 
-Mapping version: **3.5.0** (`config.VERSION`), stamped into every payload's
+Mapping version: **3.6.0** (`config.VERSION`), stamped into every payload's
 `meta` block so you can tell which rules produced a given record.
 
 ## What gets synced
@@ -202,9 +202,9 @@ case-insensitive. CSV: [`material-type.csv`](axiell-folio-mappings/material-type
 | `Archives - Digital` | `archive` |
 | `Archives - Hybrid` | `archive` |
 | `Moving Image - Non-digital` | `film` |
-| `Moving Image - Digital` | `video format non-requestable` |
-| `Sound - Non-digital` | `audio format requestable` |
-| `Sound - Digital` | `audio format non-requestable` |
+| `Moving Image - Digital` | `video - digital` |
+| `Sound - Non-digital` | `audio` |
+| `Sound - Digital` | `audio - digital` |
 | `Visual Material` | `non-projected graphic` |
 | `Pictures` | `non-projected graphic` |
 | Anything else | `MappingError`: the table is the agreed vocabulary, so a value outside it is rejected before the tenant is consulted |
@@ -233,7 +233,7 @@ Values are FOLIO's fixed enum, so nothing is resolved against the tenant. CSV:
 | --- | --- |
 | `OPEN`, `OPENWITHADVISORY` | `Available` |
 | `RESTRICTED` | `Available` (see below) |
-| `PERMISSIONREQUIRED`, `SAFEGUARDED` | `Restricted` |
+| `PERMISSIONREQUIRED`, `SAFEGUARDED` | `Available` (see below) |
 | `CLOSED` | `Unavailable` |
 | `MISSING` | `Missing` |
 | `DEACCESSIONED` | `Withdrawn` |
@@ -249,23 +249,18 @@ item can be requested or produced.
 
 **On update the status follows AxC, within limits.** The sync replaces the
 status only while FOLIO holds one the sync itself sets: `Available`,
-`Restricted`, `Unavailable`, `Unknown`, `Missing` or `Withdrawn`
-(`SYNC_ITEM_STATUSES`, derived from the table). Once circulation has moved the
-item to any other status, such as `Checked out`, `Paged`, `Awaiting pickup`,
-`In transit` or `Long missing`, FOLIO's status is sent back unchanged, so an
+`Unavailable`, `Unknown`, `Missing` or `Withdrawn` (`SYNC_ITEM_STATUSES`,
+derived from the table). Once circulation has moved the item to any other
+status, such as `Checked out`, `Paged`, `Awaiting pickup`, `In transit` or
+`Long missing`, FOLIO's status is sent back unchanged, so an
 update cannot undo a live loan or request. A status set by hand in FOLIO to one
 of the sync's own values, such as `Missing`, is overwritten on the next update.
 
-Two caveats. `Restricted` and `Withdrawn` are unconfirmed on this tenant's
-FOLIO version. And **`Restricted` does not stop a request on the status gate**:
-in mod-circulation's `RequestTypeItemStatusWhiteList`, `Restricted` permits
-page, hold and recall just as `Available` does for paging, so mapping
-`PERMISSIONREQUIRED` and `SAFEGUARDED` to `Restricted` changes what FOLIO
-displays without changing what that gate permits. The whitelist does block
-elsewhere: `Unavailable`, `Unknown` and `Withdrawn` permit no request type, and
-`Missing` permits only holds. The status is one of two gates, the other being
-the request policy selected by the circulation rules, so neither gate alone
-settles requestability. See the options document, question 5.
+`Withdrawn` is unconfirmed on this tenant's FOLIO version. The status is one
+of two gates on a request, the other being the request policy selected by the
+circulation rules: in mod-circulation's `RequestTypeItemStatusWhiteList`,
+`Unavailable`, `Unknown` and `Withdrawn` permit no request type, and `Missing`
+permits only holds.
 
 ### Loan type: from the use restriction
 
@@ -412,4 +407,4 @@ Taken from `config.FIELDS`.
   `src/adapters/steps/axiell_folio_sync/mapping/csv_export.py` (see
   [the CSVs' README](axiell-folio-mappings/README.md))
 
-Mapping version: `3.5.0` (`config.VERSION`).
+Mapping version: `3.6.0` (`config.VERSION`).

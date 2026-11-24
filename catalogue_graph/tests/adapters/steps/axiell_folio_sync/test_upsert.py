@@ -485,7 +485,7 @@ def _item_status_after_update(
 
 @pytest.mark.parametrize(
     "current",
-    ["Available", "Restricted", "Unavailable", "Unknown", "Missing", "Withdrawn"],
+    ["Available", "Unavailable", "Unknown", "Missing", "Withdrawn"],
 )
 def test_update_moves_a_status_the_sync_sets(current: str) -> None:
     """An AxC access change reaches an item that already exists, as long as
@@ -499,7 +499,14 @@ def test_update_moves_a_status_the_sync_sets(current: str) -> None:
 
 @pytest.mark.parametrize(
     "current",
-    ["Checked out", "Paged", "Awaiting pickup", "In transit", "Long missing"],
+    [
+        "Checked out",
+        "Paged",
+        "Awaiting pickup",
+        "In transit",
+        "Long missing",
+        "Restricted",
+    ],
 )
 def test_update_leaves_a_circulation_status_alone(current: str) -> None:
     existing = {"name": current, "date": "2026-09-30T09:00:00.000+00:00"}
