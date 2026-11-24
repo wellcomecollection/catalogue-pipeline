@@ -7,6 +7,22 @@ import polars as pl
 from pyiceberg.table import Table as IcebergTable
 
 
+def latest_row_index(
+    rows: pl.DataFrame, key: str, latest_by: Sequence[str]
+) -> pl.Series:
+    """The index of one row per key: the one sorting highest on the `latest_by`
+    columns. Of rows that tie, the first is taken."""
+    # Sorted on the narrow columns only: sorting whole rows costs more than
+    # gathering them afterwards.
+    latest = (
+        rows.select(key, *latest_by)
+        .with_row_index()
+        .sort(latest_by, descending=True, nulls_last=True, maintain_order=True)
+        .unique(key, keep="first")
+    )
+    return latest["index"]
+
+
 class IcebergTableLookup:
     """Reads rows by key with a filtered polars scan over a snapshot's data files.
 
@@ -61,15 +77,7 @@ class IcebergTableLookup:
             for files in batched(self.files, self.FILES_PER_SCAN)
         )
         if latest_by:
-            # Picked on the narrow columns, then gathered: sorting the whole rows
-            # costs more than reading them.
-            current = (
-                rows.select(self.key, *latest_by)
-                .with_row_index()
-                .sort(latest_by, descending=True, nulls_last=True)
-                .unique(self.key, keep="first")
-            )
-            rows = rows[current["index"]]
+            rows = rows[latest_row_index(rows, self.key, latest_by)]
         return rows.select(columns)
 
     def _scan(

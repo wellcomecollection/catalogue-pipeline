@@ -50,6 +50,9 @@ WORKS_IDENTIFIED_SORT_ORDER = SortOrder(
     SortField(source_id=1, transform=IdentityTransform())
 )
 
+# The current row of a work has the highest of these, in this order.
+WORKS_IDENTIFIED_CURRENT_ROW_ORDER = ("version", "last_modified")
+
 
 def works_identified_row(document: Document, last_modified: datetime) -> dict:
     """A table row for one identified work, versioned like its index write."""

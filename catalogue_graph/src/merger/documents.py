@@ -6,6 +6,7 @@ import structlog
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.iceberg_lookup import IcebergTableLookup
+from id_minter.schemata import WORKS_IDENTIFIED_CURRENT_ROW_ORDER
 from models.pipeline.identified.work import IdentifiedWork
 
 logger = structlog.get_logger(__name__)
@@ -20,7 +21,7 @@ def read_documents(
         return {}
     lookup = IcebergTableLookup.for_snapshot(table, key="id", snapshot_id=snapshot_id)
     rows = lookup.fetch(
-        ids, columns=("id", "content"), latest_by=("version", "last_modified")
+        ids, columns=("id", "content"), latest_by=WORKS_IDENTIFIED_CURRENT_ROW_ORDER
     )
     logger.info("Read documents", wanted=len(ids), found=rows.height)
     return dict(zip(rows["id"], rows["content"], strict=True))

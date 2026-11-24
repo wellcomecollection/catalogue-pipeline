@@ -19,6 +19,7 @@ from adapters.utils.iceberg_lookup import IcebergTableLookup
 from id_minter.pruner import COMMIT_BACKOFF_MAX_TIME, prune
 from id_minter.reporting import PrunerReport
 from id_minter.schemata import (
+    WORKS_IDENTIFIED_CURRENT_ROW_ORDER,
     WORKS_IDENTIFIED_ICEBERG_SCHEMA,
     WORKS_IDENTIFIED_SORT_ORDER,
 )
@@ -112,6 +113,16 @@ class TestPrune:
 
         assert _rows(table) == [_row("aaaa0001", version=1, minutes=5)]
 
+    def test_keeps_the_later_write_of_the_same_version_appended_first(
+        self, table: IcebergTable
+    ) -> None:
+        _append(table, _row("aaaa0001", version=1, minutes=5))
+        _append(table, _row("aaaa0001", version=1))
+
+        prune(table, threshold=0)
+
+        assert _rows(table) == [_row("aaaa0001", version=1, minutes=5)]
+
     def test_removes_an_older_version_written_later(self, table: IcebergTable) -> None:
         _append(table, _row("aaaa0001", version=2))
         _append(table, _row("aaaa0001", version=1, minutes=5))
@@ -133,7 +144,9 @@ class TestPrune:
                 table, key="id", snapshot_id=snapshot.snapshot_id
             )
             documents = lookup.fetch(
-                ids, columns=("id", "content"), latest_by=("version", "last_modified")
+                ids,
+                columns=("id", "content"),
+                latest_by=WORKS_IDENTIFIED_CURRENT_ROW_ORDER,
             )
             return (
                 load_works(table, snapshot.snapshot_id).sort("id"),

@@ -22,6 +22,9 @@ from pyiceberg.io.pyarrow import (
 from pyiceberg.manifest import DataFile, DataFileContent, FileFormat
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.utils.iceberg_lookup import latest_row_index
+from id_minter.schemata import WORKS_IDENTIFIED_CURRENT_ROW_ORDER
+
 logger = structlog.get_logger(__name__)
 
 # The table is pruned once this share of its rows is superseded.
@@ -31,9 +34,6 @@ SUPERSEDED_THRESHOLD = float(os.getenv("PRUNER_SUPERSEDED_THRESHOLD", "0.05"))
 # document averages about 10 KB.
 ROWS_PER_BATCH = 1_000
 ROWS_PER_ROW_GROUP = 10_000
-
-# The current row of a work has the highest of these, in this order.
-CURRENT_ROW_ORDER = ["version", "last_modified"]
 
 # A document is unique to its row, and a dictionary of them is held in full by
 # every reader that matches one row of the file.
@@ -67,7 +67,7 @@ def prune(table: IcebergTable, threshold: float = SUPERSEDED_THRESHOLD) -> Prune
 
     files = _data_files(table, snapshot.snapshot_id)
     rows = _read_row_keys(table, files)
-    current = _current_rows(rows)
+    current = rows[latest_row_index(rows, "id", WORKS_IDENTIFIED_CURRENT_ROW_ORDER)]
     row_count = rows.height
     superseded = row_count - current.height
     result = PruneResult(
@@ -128,16 +128,12 @@ def _read_row_keys(table: IcebergTable, files: list[DataFile]) -> pl.DataFrame:
     frames = []
     for index, file in enumerate(files):
         with _open(table, file) as source:
-            keys = pq.ParquetFile(source).read(columns=["id", *CURRENT_ROW_ORDER])
+            keys = pq.ParquetFile(source).read(
+                columns=["id", *WORKS_IDENTIFIED_CURRENT_ROW_ORDER]
+            )
         frame = pl.DataFrame(keys).with_row_index("position")
         frames.append(frame.with_columns(file=pl.lit(index)))
     return pl.concat(frames)
-
-
-def _current_rows(rows: pl.DataFrame) -> pl.DataFrame:
-    """One row per work: the one sorting highest on the ordering columns."""
-    ordered = rows.sort(CURRENT_ROW_ORDER, descending=True, maintain_order=True)
-    return ordered.unique("id", keep="first", maintain_order=True)
 
 
 def _rewrite_file(table: IcebergTable, file: DataFile, kept: np.ndarray) -> DataFile:
