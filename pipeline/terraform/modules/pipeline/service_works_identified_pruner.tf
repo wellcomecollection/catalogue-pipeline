@@ -4,7 +4,7 @@
 locals {
   works_identified_pruner_s3_tables_bucket_arn = "arn:aws:s3tables:eu-west-1:${data.aws_caller_identity.current.account_id}:bucket/${local.infra_critical.catalogue_pipeline_table_bucket_name}"
 
-  # Matches PRUNER_SUPERSEDED_THRESHOLD, the share of superseded rows a run prunes at.
+  # The share of superseded rows a run prunes at, and the alarm's threshold.
   works_identified_pruner_threshold = 0.05
 
   works_identified_pruner_alarm_tags = {
@@ -34,6 +34,7 @@ module "works_identified_pruner_lambda" {
 
   environment_variables = {
     PIPELINE_DATE               = var.pipeline_date
+    PRUNER_SUPERSEDED_THRESHOLD = tostring(local.works_identified_pruner_threshold)
     WORKS_IDENTIFIED_TABLE_NAME = "works_identified_${replace(var.pipeline_date, "-", "_")}"
     S3_TABLES_BUCKET            = local.infra_critical.catalogue_pipeline_table_bucket_name
   }
@@ -164,16 +165,16 @@ resource "aws_cloudwatch_metric_alarm" "works_identified_pruner_errors" {
 
 # A run that prunes reports no superseded rows, and one below the threshold
 # reports fewer than the threshold. Three runs at or above it mean the table is
-# growing and the pruner is not keeping up.
+# growing and the pruner is not keeping up. An hour without a run counts too.
 resource "aws_cloudwatch_metric_alarm" "works_identified_superseded_rows" {
   count = var.enable_experimental_merger ? 1 : 0
 
   alarm_name          = "works-identified-superseded-rows-${var.pipeline_date}"
-  alarm_description   = "[component=catalogue-graph severity=medium] Superseded rows in the works_identified table have stayed above the pruner's threshold for three runs"
+  alarm_description   = "[component=catalogue-graph severity=medium] Superseded rows in the works_identified table have stayed above the pruner's threshold for three hours, or the pruner has not reported for three hours"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 3
   threshold           = local.works_identified_pruner_threshold
-  treat_missing_data  = "missing"
+  treat_missing_data  = "breaching"
 
   metric_query {
     id          = "superseded_share"

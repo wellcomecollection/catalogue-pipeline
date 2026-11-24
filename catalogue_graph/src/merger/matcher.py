@@ -13,8 +13,8 @@ GRAPH_COLUMNS = ("id", "version", "last_modified", "type", "merge_candidate_ids"
 def load_works(table: IcebergTable, snapshot_id: int) -> pl.DataFrame:
     """The current row of every identified work, graph columns only.
 
-    The table is append-only, so a work has one row per write. The current one has
-    the highest source version, then the latest write time.
+    The id minter appends a row per write, so a work can have several. The current
+    one has the highest source version, then the latest write time.
     """
     scan = table.scan(selected_fields=GRAPH_COLUMNS, snapshot_id=snapshot_id)
     works = pl.DataFrame(scan.to_arrow())

@@ -21,7 +21,6 @@ from pyiceberg.io.pyarrow import (
 )
 from pyiceberg.manifest import DataFile, DataFileContent, FileFormat
 from pyiceberg.table import Table as IcebergTable
-from pyiceberg.typedef import Record
 
 logger = structlog.get_logger(__name__)
 
@@ -40,7 +39,9 @@ CURRENT_ROW_ORDER = ["version", "last_modified"]
 # every reader that matches one row of the file.
 DICTIONARY_COLUMNS = ["type", "source_identifier_type"]
 
-COMMIT_BACKOFF_MAX_TIME = 120
+# A run that gives up discards the files it copied, so this is longer than the
+# id minter's two minutes.
+COMMIT_BACKOFF_MAX_TIME = 300
 COMMIT_BACKOFF_MAX_INTERVAL = 10
 
 
@@ -53,7 +54,7 @@ class PruneResult(BaseModel):
     removed_row_count: int = 0
 
 
-class ReplacedFilesMissing(Exception):
+class FileReplaced(Exception):
     """Another writer replaced a file the pruner read."""
 
 
@@ -86,11 +87,15 @@ def prune(table: IcebergTable, threshold: float = SUPERSEDED_THRESHOLD) -> Prune
         if len(kept) > 0:
             added.append(_rewrite_file(table, file, kept))
 
+    # A run that is left writes nothing to the table. The files it wrote are
+    # unreferenced, and S3 Tables removes them.
     try:
-        _commit(table, replaced, added)
-    except ReplacedFilesMissing:
-        # The files written are unreferenced, and S3 Tables removes them.
+        _commit(table, files, replaced, added)
+    except FileReplaced:
         logger.warning("A file was replaced during the rewrite, leaving this run")
+        return result
+    except CommitFailedException:
+        logger.warning("The commit kept being refused, leaving this run")
         return result
 
     result = PruneResult(
@@ -165,10 +170,10 @@ def _rewrite_file(table: IcebergTable, file: DataFile, kept: np.ndarray) -> Data
         content=DataFileContent.DATA,
         file_path=path,
         file_format=FileFormat.PARQUET,
-        partition=Record(),
+        partition=file.partition,
         file_size_in_bytes=len(output),
-        sort_order_id=None,
-        spec_id=table.metadata.default_spec_id,
+        sort_order_id=file.sort_order_id,
+        spec_id=file.spec_id,
         equality_ids=None,
         key_metadata=None,
         **statistics.to_serialized_dict(),
@@ -210,18 +215,22 @@ def _on_commit_backoff(backoff_details: Any) -> None:
     on_backoff=_on_commit_backoff,
 )
 def _commit(
-    table: IcebergTable, replaced: list[DataFile], added: list[DataFile]
+    table: IcebergTable,
+    read: list[DataFile],
+    replaced: list[DataFile],
+    added: list[DataFile],
 ) -> None:
     """Swaps the replaced files for the added ones in the table's current snapshot.
 
     Files appended since the pruner read the table are left in place. Raises
-    ReplacedFilesMissing when a replaced file is no longer in the table, as
-    pyiceberg would otherwise add the new files beside whatever replaced it.
+    FileReplaced when a file the pruner read is no longer in the table: the rows
+    it kept may be gone, and pyiceberg would add the new files beside whatever
+    replaced an old one.
     """
     table.refresh()
     current = {task.file.file_path for task in table.scan().plan_files()}
-    if any(file.file_path not in current for file in replaced):
-        raise ReplacedFilesMissing()
+    if any(file.file_path not in current for file in read):
+        raise FileReplaced()
 
     with (
         table.transaction() as transaction,
