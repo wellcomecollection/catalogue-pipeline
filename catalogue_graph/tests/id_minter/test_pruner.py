@@ -9,7 +9,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 from freezegun import freeze_time
-from pyiceberg.exceptions import CommitFailedException
+from pyiceberg.expressions import EqualTo
 from pyiceberg.io.pyarrow import schema_to_pyarrow
 from pyiceberg.table import Table as IcebergTable
 
@@ -240,7 +240,6 @@ class TestPruneAgainstOtherWriters:
     def test_keeps_rows_appended_during_the_rewrite(
         self, table: IcebergTable, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        monkeypatch.setattr("time.sleep", lambda seconds: None)
         _append(table, _row("aaaa0001", version=1), _row("aaaa0002", version=1))
         _append(table, _row("aaaa0001", version=2, minutes=1))
         rewrite_file = pruner._rewrite_file
@@ -260,6 +259,57 @@ class TestPruneAgainstOtherWriters:
             _row("aaaa0002", version=1),
             _row("aaaa0002", version=2, minutes=2),
         ]
+
+    def test_retries_a_commit_refused_for_an_append(
+        self, table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        _append(table, _row("aaaa0001", version=1), _row("aaaa0002", version=1))
+        _append(table, _row("aaaa0001", version=2, minutes=1))
+        refresh = table.refresh
+        late = [_row("aaaa0002", version=2, minutes=2)]
+
+        def refresh_then_append() -> IcebergTable:
+            refresh()
+            if late:
+                _append(_second_handle(table), late.pop())
+            return table
+
+        monkeypatch.setattr(table, "refresh", refresh_then_append)
+        sleeps: list[float] = []
+        monkeypatch.setattr("time.sleep", sleeps.append)
+
+        result = prune(table, threshold=0)
+
+        assert len(sleeps) == 1
+        assert result.pruned is True
+        assert _rows(table) == [
+            _row("aaaa0001", version=2, minutes=1),
+            _row("aaaa0002", version=1),
+            _row("aaaa0002", version=2, minutes=2),
+        ]
+
+    def test_stops_when_a_file_it_did_not_copy_was_replaced(
+        self, table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        _append(table, _row("aaaa0001", version=1), _row("aaaa0002", version=1))
+        _append(table, _row("aaaa0001", version=2, minutes=1))
+        _append(table, _row("aaaa0003", version=1))
+        rows_before = _rows(table)
+        rewrite_file = pruner._rewrite_file
+
+        def rewrite_then_compact(*args: Any) -> Any:
+            rewritten = rewrite_file(*args)
+            other = _second_handle(table)
+            uncopied = other.scan(row_filter=EqualTo("id", "aaaa0003")).to_arrow()
+            other.overwrite(uncopied, overwrite_filter=EqualTo("id", "aaaa0003"))
+            return rewritten
+
+        monkeypatch.setattr(pruner, "_rewrite_file", rewrite_then_compact)
+
+        result = prune(table, threshold=0)
+
+        assert result.pruned is False
+        assert _rows(table) == rows_before
 
     def test_stops_when_a_file_it_read_was_replaced(
         self, table: IcebergTable, monkeypatch: pytest.MonkeyPatch
@@ -283,7 +333,7 @@ class TestPruneAgainstOtherWriters:
         assert result.superseded_row_count == 1
         assert _rows(table) == rows_before
 
-    def test_raises_when_the_commit_keeps_being_refused(
+    def test_stops_when_the_commit_keeps_being_refused(
         self, table: IcebergTable, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         _append(table, _row("aaaa0001", version=1))
@@ -301,9 +351,10 @@ class TestPruneAgainstOtherWriters:
 
         with freeze_time() as clock:
             monkeypatch.setattr("time.sleep", sleep)
-            with pytest.raises(CommitFailedException):
-                prune(table, threshold=0)
+            result = prune(table, threshold=0)
 
+        assert result.pruned is False
+        assert result.superseded_row_count == 1
         assert sum(sleeps) == pytest.approx(COMMIT_BACKOFF_MAX_TIME)
         assert _rows(_second_handle(table)) == rows_before
 
@@ -329,6 +380,38 @@ class TestPrunerStep:
             "row_count": 2,
             "superseded_row_count": 0,
         }
+
+    def test_publishes_the_metrics_the_alarm_reads(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        published: list[tuple[str, dict[str, Any]]] = []
+
+        class Reporter:
+            def __init__(self, namespace: str) -> None:
+                self.namespace = namespace
+
+            def put_metric_data(self, **metric: Any) -> None:
+                published.append((self.namespace, metric))
+
+        monkeypatch.setattr("utils.reporting.MetricReporter", Reporter)
+
+        PrunerReport(
+            pipeline_date="2026-09-30",
+            row_count=10,
+            superseded_row_count=1,
+            publish_to_s3=False,
+        ).publish()
+
+        dimensions = {
+            "pipeline_date": "2026-09-30",
+            "pipeline_step": "works_identified_pruner",
+        }
+        assert len(published) == 2
+        for namespace, metric in published:
+            assert namespace == "catalogue_graph_pipeline"
+            assert metric["dimensions"] == dimensions
+        values = {metric["metric_name"]: metric["value"] for _, metric in published}
+        assert values == {"row_count": 10, "superseded_row_count": 1}
 
     def test_does_not_publish_metrics_for_a_dev_pipeline(self) -> None:
         report = PrunerReport(pipeline_date="dev", row_count=1, superseded_row_count=0)
