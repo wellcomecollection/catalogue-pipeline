@@ -185,8 +185,8 @@ module "batch_merger_match_lambda" {
   }
 
   # Holds the graph columns of every row in the table while it resolves
-  # components; a full run peaks at about 2 GB.
-  memory_size = 4096
+  # components, about 3.5 GB at 3.3 million rows.
+  memory_size = 6144
   timeout     = 300
 
   environment_variables = {
