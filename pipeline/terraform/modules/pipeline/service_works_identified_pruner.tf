@@ -173,46 +173,16 @@ resource "aws_cloudwatch_metric_alarm" "works_identified_superseded_rows" {
   alarm_description   = "[component=catalogue-graph severity=medium] Superseded rows in the works_identified table have stayed above the pruner's threshold for three hours, or the pruner has not reported for three hours"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 3
+  metric_name         = "superseded_share"
+  namespace           = "catalogue_graph_pipeline"
+  period              = 3600
+  statistic           = "Maximum"
   threshold           = local.works_identified_pruner_threshold
   treat_missing_data  = "breaching"
 
-  metric_query {
-    id          = "superseded_share"
-    expression  = "superseded / rows"
-    label       = "Share of rows that are superseded"
-    return_data = true
-  }
-
-  metric_query {
-    id = "superseded"
-
-    metric {
-      metric_name = "superseded_row_count"
-      namespace   = "catalogue_graph_pipeline"
-      period      = 3600
-      stat        = "Maximum"
-
-      dimensions = {
-        pipeline_date = var.pipeline_date
-        pipeline_step = "works_identified_pruner"
-      }
-    }
-  }
-
-  metric_query {
-    id = "rows"
-
-    metric {
-      metric_name = "row_count"
-      namespace   = "catalogue_graph_pipeline"
-      period      = 3600
-      stat        = "Maximum"
-
-      dimensions = {
-        pipeline_date = var.pipeline_date
-        pipeline_step = "works_identified_pruner"
-      }
-    }
+  dimensions = {
+    pipeline_date = var.pipeline_date
+    pipeline_step = "works_identified_pruner"
   }
 
   alarm_actions = [local.monitoring_infra["chatbot_topic_arn"]]

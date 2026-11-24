@@ -231,7 +231,7 @@ A run reads the `id`, `version` and `last_modified` of every row and works out w
 
 The id minter can append while the pruner is copying. Its new file is not one of the files being swapped, so it stays in the table, and any row it supersedes is removed by a later run. The pruner reloads the table just before it commits, and the commit is refused if another writer commits in between. It then reloads the table and commits the same swap again, for up to five minutes. If a file it read is no longer in the table, because S3 Tables compaction replaced it, or if the commit is still refused after five minutes, the run stops without changing anything and the next run starts afresh.
 
-Each run publishes the table's `row_count` and `superseded_row_count` metrics under the `works_identified_pruner` pipeline step. To run it locally against the local table, or with `--use-rest-api-table` against the table named by `WORKS_IDENTIFIED_TABLE_NAME`:
+Each run publishes the table's `row_count`, `superseded_row_count` and `superseded_share` metrics under the `works_identified_pruner` pipeline step. To run it locally against the local table, or with `--use-rest-api-table` against the table named by `WORKS_IDENTIFIED_TABLE_NAME`:
 
 ```bash
 uv run python -m id_minter.steps.pruner

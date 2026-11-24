@@ -73,10 +73,17 @@ class PrunerReport(PipelineReport):
         return {"pipeline_date": self.pipeline_date}
 
     @property
+    def superseded_share(self) -> float:
+        if self.row_count == 0:
+            return 0.0
+        return self.superseded_row_count / self.row_count
+
+    @property
     def metrics(self) -> list[PipelineMetric]:
         return [
             PipelineMetric(name="row_count", value=self.row_count),
             PipelineMetric(
                 name="superseded_row_count", value=self.superseded_row_count
             ),
+            PipelineMetric(name="superseded_share", value=self.superseded_share),
         ]

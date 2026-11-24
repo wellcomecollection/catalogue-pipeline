@@ -379,6 +379,7 @@ class TestPrunerStep:
         assert {metric.name: metric.value for metric in report.metrics} == {
             "row_count": 2,
             "superseded_row_count": 0,
+            "superseded_share": 0,
         }
 
     def test_publishes_the_metrics_the_alarm_reads(
@@ -406,12 +407,23 @@ class TestPrunerStep:
             "pipeline_date": "2026-09-30",
             "pipeline_step": "works_identified_pruner",
         }
-        assert len(published) == 2
+        assert len(published) == 3
         for namespace, metric in published:
             assert namespace == "catalogue_graph_pipeline"
             assert metric["dimensions"] == dimensions
         values = {metric["metric_name"]: metric["value"] for _, metric in published}
-        assert values == {"row_count": 10, "superseded_row_count": 1}
+        assert values == {
+            "row_count": 10,
+            "superseded_row_count": 1,
+            "superseded_share": 0.1,
+        }
+
+    def test_reports_no_superseded_share_for_an_empty_table(self) -> None:
+        report = PrunerReport(
+            pipeline_date="2026-09-30", row_count=0, superseded_row_count=0
+        )
+
+        assert report.superseded_share == 0
 
     def test_does_not_publish_metrics_for_a_dev_pipeline(self) -> None:
         report = PrunerReport(pipeline_date="dev", row_count=1, superseded_row_count=0)
