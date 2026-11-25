@@ -39,6 +39,8 @@ module "transformer_lambda" {
       S3_PREFIX     = "prod"
       # One Lambda serves every transformer type; only Axiell reads this.
       AXIELL_COLLECTION_PATH_SOURCE = var.axiell_collection_path_source
+      # Links Axiell works to the FOLIO works synced from them, where those exist.
+      AXIELL_FOLIO_MERGE_CANDIDATES = tostring(var.enable_folio_transformer)
     }
   }
 }
