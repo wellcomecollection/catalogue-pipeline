@@ -55,13 +55,19 @@ def write_ids() -> None:
 
 
 def subtract() -> None:
-    before = {doc["_id"]: {key(diff) for diff in doc["diffs"]} for doc in read(IDENTIFIED)}
+    before = {doc["_id"]: Counter(key(diff) for diff in doc["diffs"]) for doc in read(IDENTIFIED)}
     works_per_field: Counter[str] = Counter()
     works = 0
     with OUT.open("w") as f:
         for doc in read(DENORMALISED):
-            known = before.get(doc["_id"], set())
-            rest = [diff for diff in doc["diffs"] if key(diff) not in known]
+            # Each earlier difference removes one matching difference.
+            known = Counter(before.get(doc["_id"]))
+            rest = []
+            for diff in doc["diffs"]:
+                if known[key(diff)] > 0:
+                    known[key(diff)] -= 1
+                else:
+                    rest.append(diff)
             if not rest:
                 continue
             works += 1
