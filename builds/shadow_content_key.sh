@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 <<EOF_USAGE
-Shadow mode for publishing by content (wellcomecollection/catalogue-pipeline#3858).
-Changes nothing about what is built, published or deployed, and never fails the build.
+Publishing by content (wellcomecollection/catalogue-pipeline#3858).
+Never fails the build: anything it cannot do falls back to pushing the image as before.
 
 After a build:  shadow_content_key.sh check PROJECT PROJECT_DIRECTORY
     Works out the content key of the image just built and logs whether an
     image with the same content is already in ECR.
+
+Before a publish: shadow_content_key.sh reuse PROJECT IMAGE_TAG
+    If an image with the same content is in ECR, tags it IMAGE_TAG and latest
+    and exits 0, so the caller skips the push. Exits 1 if the caller should push.
 
 After a publish: shadow_content_key.sh tag PROJECT IMAGE_TAG
     Tags the image just pushed as content.<key>, so later builds can find it.
@@ -15,9 +19,13 @@ EOF_USAGE
 
 set -o nounset
 
+USAGE="Usage: shadow_content_key.sh check <PROJECT> <PROJECT_DIRECTORY> | reuse <PROJECT> <IMAGE_TAG> | tag <PROJECT> <IMAGE_TAG>"
+
 if (( $# != 3 ))
 then
-  echo "Usage: shadow_content_key.sh check <PROJECT> <PROJECT_DIRECTORY> | tag <PROJECT> <IMAGE_TAG>" >&2
+  echo "$USAGE" >&2
+  # A bad reuse call must not let the caller skip its push
+  [[ "${1:-}" == "reuse" ]] && exit 1
   exit 0
 fi
 
@@ -55,6 +63,30 @@ then
   else
     echo "content-key: $BRANCH $PROJECT $KEY lookup failed: $EXISTING"
   fi
+elif [[ "$MODE" == "reuse" ]]
+then
+  IMAGE_TAG="$3"
+  [[ -f "$KEY_FILE" ]] || exit 1
+  KEY=$(cat "$KEY_FILE")
+  MANIFEST=$(aws ecr batch-get-image \
+    --repository-name "$ECR_REPOSITORY" \
+    --image-ids imageTag="content.$KEY" --output json 2>/dev/null \
+    | jq --raw-output --join-output '.images[0].imageManifest') || MANIFEST=""
+  [[ -n "$MANIFEST" && "$MANIFEST" != "null" ]] || exit 1
+  # The commit tag first: if latest fails after it, the caller's push moves both tags to the new image
+  for TAG in "$IMAGE_TAG" latest
+  do
+    if ! OUT=$(aws ecr put-image \
+        --repository-name "$ECR_REPOSITORY" \
+        --image-tag "$TAG" \
+        --image-manifest "$MANIFEST" 2>&1) && ! grep -q ImageAlreadyExistsException <<< "$OUT"
+    then
+      echo "content-key: $BRANCH $PROJECT could not tag $TAG on content.$KEY, pushing instead: $OUT"
+      exit 1
+    fi
+  done
+  echo "content-key: $BRANCH $PROJECT $KEY reused for $IMAGE_TAG, nothing pushed"
+  exit 0
 elif [[ "$MODE" == "tag" ]]
 then
   IMAGE_TAG="$3"
@@ -84,6 +116,6 @@ then
     echo "content-key: $BRANCH $PROJECT could not tag content.$KEY: $OUT"
   fi
 else
-  echo "Usage: shadow_content_key.sh check <PROJECT> <PROJECT_DIRECTORY> | tag <PROJECT> <IMAGE_TAG>" >&2
+  echo "$USAGE" >&2
 fi
 exit 0
