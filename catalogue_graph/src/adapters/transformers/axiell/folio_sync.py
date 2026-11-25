@@ -8,7 +8,7 @@ from adapters.transformers.marc.common import first_non_empty_subfield
 def extract_synced_folio_instance_id(record: Record) -> str | None:
     """The id of the FOLIO instance the Axiell to FOLIO sync writes for this record.
 
-    Mirrors `_selection_state` and `_instance_id` in `steps/axiell_folio_sync/mapping`:
+    Mirrors `_selection` and `_instance_id` in `steps/axiell_folio_sync/mapping`:
     only flagged, item-level records are synced, and the instance id is the GUID.
     """
     record_type = (first_non_empty_subfield("351", "c", record) or "").upper()

@@ -136,7 +136,7 @@ AXIELL_COLLECTION_PATH_SOURCE = _parse_collection_path_source(
 
 
 def _parse_flag(name: str, default: str) -> bool:
-    value = os.getenv(name, default)
+    value = os.getenv(name, default).strip().lower()
     if value not in ("true", "false"):
         raise ValueError(f'{name} must be "true" or "false", got {value!r}')
     return value == "true"
