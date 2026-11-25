@@ -9,10 +9,10 @@ maps today, see
 
 | Mapping | State | Where |
 | --- | --- | --- |
-| **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 89.8% of records; 13,284 (7.2%) match no rule and fail. The only thing failing records today. | [Section 1](#1-permanent-location-incomplete-and-failing-13284-records), [questions 1 to 3](#location) |
+| **Permanent location**, from `984$b` (normal location) | **Mapped, incomplete.** Three rules cover 96.0% of selectable records; 3,470 (1.9%) match no rule and fail, and 3,672 (2.0%) have no `984$b` at all. The only thing failing records today, bar two. | [Section 1](#1-permanent-location-incomplete-and-failing-3470-records), [questions 1 to 3](#location) |
 | **Loan type** | **Implemented** (mapping version 2.8.0). Derived from `540$a` (use restriction): `Can circulate` for `Online request` and `Restricted` only, `Unavailable` for the rest, including an absent or unlisted term. No access-category ceiling. | [Section 2](#2-loan-type-implemented), [questions 4 and 5](#loan-type) |
 | **Material type**, from `655$a` (object category) | **Implemented and exhaustive** over the corpus, with no default. The three digital rows were decided on our own reasoning and need confirming. | [Section 3](#3-material-type-three-rows-need-a-decision), [questions 7 and 8](#material-type-and-selection) |
-| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. `Restricted` does not block a request on the status gate, though the request policy is a second gate and is unchecked. Since mapping version 3.4.0 an AxC access change reaches an existing item while FOLIO holds a status the sync sets, and circulation statuses are left alone (wellcomecollection/platform#6862). | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
+| **Item status**, from `506$f` (access category) | **Implemented.** Needs confirming. Since mapping version 3.6.0 `PERMISSIONREQUIRED` and `SAFEGUARDED` give `Available`, as on migrated items, so the sync no longer sets `Restricted`. Since mapping version 3.4.0 an AxC access change reaches an existing item while FOLIO holds a status the sync sets, and circulation statuses are left alone (wellcomecollection/platform#6862). | [Section 4](#4-item-status-implemented-needs-confirming), [questions 5 and 6](#item-status) |
 | **Statistical code** (access) | **Agreed rows implemented** (mapping version 3.4.0, wellcomecollection/platform#6862). One code on the item from the `506$f` and `540$a` pair, as an explicit table of the rows Collection Information agreed; any other pair gets no code. `CLOSED` and `DONOR PERMISSION` were not in the prod tenant when last checked, and a code the tenant lacks fails the record. | [Section 5](#5-statistical-code-agreed-rows-implemented), [questions 12 and 13](#statistical-code) |
 | **Record identity** (HRID) | **Implemented** (ids in mapping version 3.0.0, labels and marker in 3.1.0, item GUID label dropped in 3.2.0, marker moved to the instance status and holdings GUID label dropped in 3.5.0). Records are found by an id derived from the AxC GUID (the GUID itself for the instance, a `uuid5` in it for the holdings and item), and the sync sends no HRID, so FOLIO generates it. The instance carries the `Synched by Axiell` instance status as the synced marker, which still has to be created on prod. Tracked in wellcomecollection/platform#6805 and wellcomecollection/platform#6863. | [Question 10](#identifiers) |
 | **Selection**, from `980$a` (harvest flag) and `351$c` (record level) | **Decided and implemented** (mapping version 3.3.0). Unticking Harvest suppresses an item-level record's FOLIO records; ticking it again restores the same records. Tracked in wellcomecollection/platform#6834. | [Question 9](#material-type-and-selection) |
@@ -25,43 +25,84 @@ implemented. The code is unchanged pending these answers.
 
 | | Records | of selectable |
 | --- | ---: | --- |
-| would sync | 165,220 | 89.8% |
-| fails: no `984$b` (normal location) at all | 5,388 | 2.9% |
-| fails: `984$b` matches no location rule | 13,284 | 7.2% |
-| **total failures** | **18,672** | **10.2%** |
+| would sync | 171,985 | 96.0% |
+| fails: no `984$b` (normal location) at all | 3,672 | 2.0% |
+| fails: `984$b` matches no location rule | 3,470 | 1.9% |
+| fails: access category with no item status | 2 | |
+| **total failures** | **7,144** | **4.0%** |
 
-Of 188,019 item-level records, 4,127 (2.2%) carry no harvest flag and are
-skipped, leaving 183,892 selectable. Nothing fails on material type, title,
-identifier or access category. **The location is the only thing failing records,
-and it is section 1.**
+Of 188,083 item-level records, 8,954 (4.8%) carry no harvest flag, leaving
+179,129 selectable. Nothing fails on material type, loan type, statistical
+code, title or identifier. **The location is what fails records, and it is
+section 1.**
+
+## What to expect from a run
+
+The scheduled sync targets the FOLIO test environment
+(`api-wellcome-test.folio.ebsco.com`), a copy of the production tenant, and
+writes to it once `dry_run_default = false` is applied in Terraform. A run that
+targets prod is always a dry run, whatever the event or Terraform says, until
+production writes are switched on.
+
+**Each run is incremental.** It processes only the records in the changesets of
+its `axiell.adapter.completed` event, so a run sends what changed in that
+harvest, not the whole table. The table above is what a full backfill would
+produce: about 172,000 records created, each as an instance, a holdings record
+and an item, with about 7,100 failures reported in the run manifest.
+
+**Per record**, a run does one of the following:
+
+| Record | What happens |
+| --- | --- |
+| item-level, harvest flag set, maps | created, or updated if it already exists |
+| item-level, harvest flag set, fails to map | reported as an error; nothing is written for it |
+| item-level, no harvest flag | its FOLIO records are suppressed if they exist; otherwise skipped |
+| not item-level | skipped |
+| deleted in Collections, or its GUID superseded | its item, holdings and instance are hard deleted |
+
+**The test tenant has the reference data the mapping needs.** The `Synched by
+Axiell` instance status and the `Axiell Current Location` and `Axiell Normal
+Location` item note types were added on 2026-11-20. With them in place, the
+only failures are the location and access-category ones above. Prod does not
+have them yet, and needs the same three values before it is switched on.
+
+**A one-record live run has passed.** Record `collect:110098305` created an
+instance, holdings record and item on the test tenant, with status `Available`,
+loan type `Can circulate`, location `AxC Euston Road` and material type
+`archive`. A dry run straight after planned three updates rather than creates,
+so a second run finds the same records rather than duplicating them. This is the
+check wellcomecollection/platform#6849 asked for before `dry_run_default` was
+switched to `false`.
 
 ## Provenance
 
 | | Source | Date |
 | --- | --- | --- |
-| All AxC counts | Full scan of `axiell_adapter_table`: 209,374 rows, 131 deleted, 188,019 item-level, 0 parse errors, 183,892 passing both selection gates | 2026-10-12 |
-| Location rule coverage | Same table, applying `LOCATION_RULES` to the leading code of every selectable `984$b` (normal location). Pure code, no FOLIO call | 2026-10-13 |
+| Readiness table and section 1 | Full read-only scan of `axiell_adapter_table`: 209,374 rows, 103 deleted, 188,083 item-level, 0 parse errors, 179,129 passing both selection gates. Each record mapped with `select_and_build` against the test tenant's reference data, loaded with GETs only | 2026-11-23 |
+| Test tenant reference data | Read-only GETs against `api-wellcome-test.folio.ebsco.com`, tenant `fs00001190`: the three `AxC *` locations, `Synched by Axiell`, both Axiell item note types and the `CLOSED` and `DONOR PERMISSION` statistical codes all present | 2026-11-23 |
+| One-record live run | `collect:110098305` created on the test tenant, then a dry run planned updates | 2026-11-20 |
+| Section 2 to 5 counts | Full scan of `axiell_adapter_table`: 209,374 rows, 131 deleted, 188,019 item-level, 0 parse errors, 183,892 passing both selection gates | 2026-10-12 |
 | `540$a` and the loan-type mapping | Same table, applying the mapping in section 2 to every selectable record and cross-tabulating the result against `506$f`. Confirms 0 multi-valued records and the eight-term vocabulary | 2026-10-13 |
 | FOLIO reference data | Read-only GETs against prod (`api-wellcome.folio.ebsco.com`, tenant `fs00001190`) on the endpoints `RefCache.load()` uses | 2026-09-29 |
 | Record identity | GUID format from the first 2,000 adapter rows (UUIDv4 in every `001`). Client-supplied ids and FOLIO-generated hrids on the dev sandbox (instance, holdings, item) and on prod (one instance, created then deleted). `AXIELL` code on the sandbox only (the marker became the `Synched by Axiell` instance status in mapping 3.5.0). See [axiell-folio-record-identity.md](axiell-folio-record-identity.md) | 2026-10-20 |
 | Statistical code vocabulary | [decision-table.md](folio/access-conditions/decision-table.md) (platform#6589), from the prod tenant pull | 2026-10-01 |
 | AxC to MARC | `axiell-collections-xslt`, `axc_to_marcxml_collect.xsl` at `d19f42d` | 2026-06-11 |
 
-Counts are item-level only (record level `351$c == ITEM`), so percentages are of
-188,019 unless they are stated against the 183,892 selectable. `984$b` (normal
+Counts are item-level only (record level `351$c == ITEM`). The readiness table
+and section 1 are from 2026-11-23, with percentages of the 179,129 selectable.
+Sections 2 to 5 are still from the October scans, with percentages of 188,019
+item-level records unless they are stated against the 183,892 selectable. `984$b` (normal
 location) and `540$a` (use restriction) only began arriving on 2026-10-06 and
 reached their current coverage by 2026-10-08, so any figure for them dated
 earlier is superseded.
 
-One caveat on the readiness table: the 2026-10-12 scan ran against a reference
-cache that resolved every tenant lookup, so it could not see a value FOLIO would
-reject and reported 5,388 failures. The 2026-10-13 location scan supplies the
-13,284 it could not see. The material-type figures are unaffected, because that
-table is checked before the resolver.
+The 2026-11-23 scan resolved every lookup against the test tenant, so a value
+the tenant lacks shows up as a failure. It does not check prod, which still
+lacks the values listed under [What to expect from a run](#what-to-expect-from-a-run).
 
 ---
 
-## 1. Permanent location: incomplete, and failing 13,284 records
+## 1. Permanent location: incomplete, and failing 3,470 records
 
 `984$b` (the AxC normal location) is the sole source of the FOLIO location on
 both the holdings and the item, required with no default. Three rules map it,
@@ -70,23 +111,26 @@ match wins. A `984$b` of `215/215;B11/215;B11;MR/...` matches on `215`.
 
 | Rule | Matches | FOLIO location | Records | |
 | --- | --- | --- | ---: | --- |
-| 1 | codes `215`, `183` | `AxC Euston Road` | 165,118 | 89.8% |
-| 2 | code `Deepstore` | `AxC Deepstore` | 94 | |
+| 1 | codes `215`, `183` | `AxC Euston Road` | 167,235 | 93.4% |
+| 2 | code `Deepstore` | `AxC Deepstore` | 4,744 | 2.6% |
 | 3 | prefix `CLW` | `AxC Constantine London West` | 8 | |
-| | **no rule matches** | bare code sent to FOLIO | **13,284** | **7.2%** |
-| | *(no usable `984$b`)* | fails today | 5,388 | 2.9% |
+| | **no rule matches** | bare code sent to FOLIO | **3,470** | **1.9%** |
+| | *(no usable `984$b`)* | fails today | 3,672 | 2.0% |
 
-One rule does almost all the work. Rule 1 carries 89.8% of selectable records
-through its two codes, `215` on 141,967 and `183` on 23,151. Rules 2 and 3 match
-102 records between them.
+One rule does almost all the work. Rule 1 carries 93.4% of selectable records
+through its two codes, `215` on 143,247 and `183` on 23,988. Rule 2 has grown
+from 94 records in October to 4,744, and rule 3 matches 8.
 
-**The 13,284 fall-throughs span 2,460 distinct codes, and most are not
+**The 3,470 fall-throughs span 2,431 distinct codes, and most are not
 locations:**
 
-| | Records | Example `984$b` |
+| | Records | Example leading code |
 | --- | ---: | --- |
-| the born-digital storage service | 5,056 | `wellcomecollection-storage/born-digital` |
-| box numbers and shelfmarks | 8,228 | `Box 489: B000002594886`, `Box O/S 123`, `7/1/Box 208`, `MIS/Box 2` |
+| box numbers | 3,017 | `Box 336: B000003172212`, `Box A0089` |
+| the born-digital storage service | 404 | `wellcomecollection-storage` |
+| other shelfmarks | 49 | `S 41`, `RTO`, `AMS` |
+
+None of them resolves on the test tenant.
 
 The box-number group is the more revealing: those records carry no site prefix
 at all, so the leading component is the box itself. `984$b` is not uniformly
@@ -94,7 +138,7 @@ shaped and the leading-code rule assumes it is, which no amount of rule-adding
 fixes cleanly.
 
 The born-digital group is a different problem. `wellcomecollection-storage` is a
-storage service, not a shelf, so 5,056 items have no physical location to map.
+storage service, not a shelf, so 404 items have no physical location to map.
 
 **What happens to an unmatched code.** It is not rejected by the mapping. The
 bare leading code is passed to FOLIO, which syncs the record if the tenant knows
@@ -231,24 +275,29 @@ still unexamined.
 
 ## 3. Material type: three rows need a decision
 
-Implemented and exhaustive over the corpus. The tenant has 29 material types and
-every target already exists.
+Implemented and exhaustive over the corpus. The test tenant had 29 material
+types on 2026-11-23, and every target existed under its old name. Mapping
+version 3.6.0 uses the renamed audio and video types (`audio - digital`,
+`audio`, `video - digital`, and `video` with no row mapping to it), which were
+not yet on the test tenant that day, so the 3,839 audio and video records fail
+until the types are renamed there.
 
 | `655$a` (object category) | Records | | Maps to | |
 | --- | ---: | --- | --- | --- |
 | `Archives - Non-digital` | 176,133 | 93.7% | `archive` | |
 | `Visual Material` | 4,347 | 2.3% | `non-projected graphic` | |
-| **`Sound - Digital`** | 2,860 | 1.5% | `audio format non-requestable` | **needs CI** |
+| **`Sound - Digital`** | 2,860 | 1.5% | `audio - digital` | **needs CI** |
 | **`Archives - Digital`** | 2,535 | 1.3% | `archive` | **needs CI** |
 | `Moving Image - Non-digital` | 1,048 | 0.6% | `film` | |
-| `Sound - Non-digital` | 894 | 0.5% | `audio format requestable` | |
-| **`Moving Image - Digital`** | 85 | | `video format non-requestable` | **needs CI** |
+| `Sound - Non-digital` | 894 | 0.5% | `audio` | |
+| **`Moving Image - Digital`** | 85 | | `video - digital` | **needs CI** |
 | `Pictures` | 1 | | `non-projected graphic` | |
 | `Archives - Hybrid` | 1 | | `archive` | |
 | *(absent)* | 115 | | nothing: the record fails | |
 
-**This tenant encodes requestability in the material type** (note the
-`requestable` / `non-requestable` pairs). So the three digital rows also decide
+**This tenant encodes requestability in the material type** (the old names
+were `requestable` / `non-requestable` pairs, and the new ones are plain and
+`- digital` pairs). So the three digital rows also decide
 whether a reader can request that material, which is why they need an answer
 rather than a default. The reasoning applied is that a digital surrogate is not
 the carrier a reader requests, and that no digital-archive type exists so
@@ -272,7 +321,7 @@ Every value is in FOLIO's fixed item-status enum, so nothing needs provisioning.
 | --- | ---: | --- |
 | `OPEN`, `OPENWITHADVISORY` | 171,830 | `Available` |
 | `RESTRICTED` | 5,496 | `Available` |
-| `PERMISSIONREQUIRED`, `SAFEGUARDED` | 357 | `Restricted` |
+| `PERMISSIONREQUIRED`, `SAFEGUARDED` | 357 | `Available` |
 | `CLOSED` | 9,819 | `Unavailable` |
 | `MISSING` | 160 | `Missing` |
 | `DATAISSUES` | 24 | `Unknown` |
@@ -284,17 +333,22 @@ available and can be requested online. The restriction is that the reader signs
 to agree to the viewing conditions, which happens before the material is handed
 over, so it does not affect whether the item can be requested or produced.
 
+`PERMISSIONREQUIRED` and `SAFEGUARDED` map to `Available` since mapping version
+3.6.0, as Collection Information asked: migrated safeguarded and donor
+permission items are `Available`, and the access statistical code carries the
+restriction. They were `Restricted` before.
+
 Until mapping version 3.4.0 the status was **create-only**, so an AxC access
 change never reached an existing item. Question 6 was settled on
 wellcomecollection/platform#6862 with split ownership: on update the sync
 replaces the status only while FOLIO holds one the sync itself sets
-(`Available`, `Restricted`, `Unavailable`, `Unknown`, `Missing`, `Withdrawn`),
-and leaves circulation statuses such as `Checked out` alone.
+(`Available`, `Unavailable`, `Unknown`, `Missing`, `Withdrawn`), and leaves
+circulation statuses such as `Checked out` alone.
 
-`Restricted` and `Withdrawn` did not appear in a 5,000-item prod sample and
-should be confirmed against this tenant's FOLIO version.
+`Withdrawn` did not appear in a 5,000-item prod sample and should be confirmed
+against this tenant's FOLIO version.
 
-**To decide:** question 5.
+Question 5 is settled by the 3.6.0 change.
 
 ---
 
@@ -352,8 +406,8 @@ a proposal to Collection Information, not something they have agreed.
 | AxC value | Records | Statistical code | Item status | Row reached |
 | --- | ---: | --- | --- | --- |
 | `506$f` `CLOSED` | 9,819 | `CLOSED` | `Unavailable`, unchanged | `closed` |
-| `506$f` `SAFEGUARDED` | in 357 | `SAFEGUARDED` | `Available`, was `Restricted` | `safeguarded` |
-| `506$f` `PERMISSIONREQUIRED` | in 357 | `DONOR PERMISSION` | `Available`, was `Restricted` | `donor-permission` |
+| `506$f` `SAFEGUARDED` | in 357 | `SAFEGUARDED` | `Available` (3.6.0), was `Restricted` | `safeguarded` |
+| `506$f` `PERMISSIONREQUIRED` | in 357 | `DONOR PERMISSION` | `Available` (3.6.0), was `Restricted` | `donor-permission` |
 | otherwise `540$a` `Online request` | 143,787 | `ONLINE REQUEST` | from `506$f`, as today | `online-request` |
 | `540$a` `Restricted` | 5,144 | `RESTRICTED` | as today | `restricted` |
 | `540$a` `By appointment` | 21,314 | `BY APPOINTMENT` | as today | `by-appointment` |
@@ -398,7 +452,7 @@ confirmed on this FOLIO version, drops out of the mapping.
   question 4.
 - **Material type.** The table has no row for the audiovisual material types, so
   a `Sound - Digital` or `Moving Image - Digital` item with `Online request` in
-  `540$a` would be offered online, whatever its `non-requestable` material type
+  `540$a` would be offered online, whatever its non-requestable material type
   says. Question 7 decides the material type; question 12 asks whether the code
   should follow it.
 - **The synced marker.** Since mapping 3.5.0 the marker is the instance status
@@ -423,9 +477,9 @@ confirmed on this FOLIO version, drops out of the mapping.
 1. Should a `984$b` (normal location) whose leading code matches no rule fail
    the record outright, as the material type now does, rather than being passed
    to FOLIO to land wherever it happens to match?
-2. What location should the 5,056 born-digital items take, if any? Should they
+2. What location should the 404 born-digital items take, if any? Should they
    be in this sync at all?
-3. Do the 8,228 box-number records need more rules, or a stylesheet fix so that
+3. Do the 3,017 box-number records need more rules, or a stylesheet fix so that
    `984$b` always carries its site prefix?
 
 ### Loan type
@@ -439,7 +493,8 @@ confirmed on this FOLIO version, drops out of the mapping.
 
 
 ### Item status
-5. **Is `Restricted` meant to stop a request?** On the item-status gate alone,
+5. **Settled in mapping version 3.6.0: `PERMISSIONREQUIRED` and `SAFEGUARDED`
+   give `Available`.** Is `Restricted` meant to stop a request? On the item-status gate alone,
    it does not: `Restricted` is pageable in mod-circulation, like `Available`.
    The 357 `Restricted` records (`PERMISSIONREQUIRED` and `SAFEGUARDED`) are
    therefore fully pageable, subject to the tenant's request policy and
@@ -569,7 +624,8 @@ confirmed on this FOLIO version, drops out of the mapping.
     `Missing`, `Deaccessioned` or an absent `540$a`. Should digital audiovisual
     material with `Online request` get a non-requestable code instead, to match
     its material type?
-13. Should `SAFEGUARDED` and `PERMISSIONREQUIRED` items be `Available`, as
+13. **Settled in mapping version 3.6.0: yes.** Should `SAFEGUARDED` and
+    `PERMISSIONREQUIRED` items be `Available`, as
     migrated items with those restrictions are, rather than `Restricted`?
 
 ---
@@ -579,6 +635,6 @@ confirmed on this FOLIO version, drops out of the mapping.
 **On the FOLIO tenant**, none of these verified: that `Restricted` and
 `Withdrawn` are accepted by this FOLIO version; what loan policy the circulation
 rules attach to `Can circulate` and whether `Unavailable` genuinely prevents a
-loan; that the three `AxC *` location names still resolve; and that the
-`CLOSED` and `DONOR PERMISSION` statistical codes exist (neither did on
-2026-10-01).
+loan; that the three `AxC *` location names resolve on prod; and that the
+`CLOSED` and `DONOR PERMISSION` statistical codes exist on prod (neither did on
+2026-10-01). Both hold on the test tenant (2026-11-23).

@@ -1,5 +1,7 @@
 """Build work-level holdings from a FOLIO instance's holdings records (platform#6591, platform#6611)."""
 
+import re
+
 from adapters.extractors.oai_pmh.folio.enrichment.models import (
     FolioEnrichedHoldings,
     FolioEnrichedInstance,
@@ -18,6 +20,9 @@ ONLINE_LOCATION_CODE = "elro"
 # Holdings that put a bound volume on other linked instances, not this instance's own copies.
 BOUND_WITH_HOLDINGS_TYPE = "Boundwiths"
 
+# Sierra's 863 $8 (link.sequence) on coded statements: it gives their order but isn't for readers (platform#6800).
+CODED_PREFIX = re.compile(r"^(?P<link>\d+)\.(?P<sequence>\d+)(?:\s+|$)")
+
 
 def extract_holdings(instance: FolioEnrichedInstance) -> list[Holdings]:
     visible = [h for h in instance.holdings if not h.suppress_from_discovery]
@@ -35,13 +40,23 @@ def extract_holdings(instance: FolioEnrichedInstance) -> list[Holdings]:
 
 def _enumeration(record: FolioEnrichedHoldings) -> list[str]:
     # The migration joins several statements into one with ";" (platform#6800).
-    return [
+    statements = [
         part.strip()
         for s in record.holdings_statements
         if s.statement
         for part in s.statement.split(";")
         if part.strip()
     ]
+    free_text = [s for s in statements if not CODED_PREFIX.match(s)]
+    # Free text before coded statements, as the Sierra transformer ordered them.
+    coded = sorted(
+        (m for s in statements if (m := CODED_PREFIX.match(s))),
+        key=lambda m: (int(m["link"]), int(m["sequence"])),
+    )
+    # Deduplicated after rendering, as the Sierra transformer did.
+    return free_text + list(
+        dict.fromkeys(rest for m in coded if (rest := m.string[m.end() :]))
+    )
 
 
 def _location_code(record: FolioEnrichedHoldings) -> str | None:

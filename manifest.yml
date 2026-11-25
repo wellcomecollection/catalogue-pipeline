@@ -37,3 +37,8 @@ spec:
       tier: production
       github:
         task: "deploy:catalogue_graph"
+  # Removed at this repo's cutover from deploy-tracker, which labels and comments on PRs until then
+  notifications:
+    deployments:
+      labels: false
+      prComments: false

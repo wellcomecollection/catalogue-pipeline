@@ -14,7 +14,7 @@ The table reads five fields of the FOLIO item, plus one live input.
 
 | FOLIO field | Table column | Values in the tenant today |
 |---|---|---|
-| Item status | `item_status` | Available, Missing, Intellectual item, Unavailable, Withdrawn, Unknown, Awaiting pickup, Paged, In transit, Checked out |
+| Item status | `item_status` | Available, Missing, Long missing, Intellectual item, Unavailable, Withdrawn, Unknown, Awaiting pickup, Paged, In transit, Checked out. Long missing first appeared in the read of 2026-11-04. |
 | Statistical code, the migrated Sierra OPAC message | `statistical_code` | ONLINE REQUEST, OPEN SHELVES, AVAILABLE, MANUAL REQUEST, BY APPOINTMENT, DIGITISATION, UNAVAILABLE, RESTRICTED, SAFEGUARDED, or none |
 | Loan type: the temporary loan type when one is set, otherwise the permanent one | `loan_type` | Can circulate, Unavailable. A temporary loan type is set on one item. |
 | Effective location | `library`, `location_code`, `location_type` | 198 locations in six libraries: Closed stores, Open shelves, Offsite (DS), `bwith`, `cwith`, Laptops |
@@ -52,10 +52,10 @@ First match wins, so order matters. A blank cell matches anything, and `|` separ
 
 | Rule | When | Method | Status | Note | Baseline | Data |
 |---|---|---|---|---|---|---|
-| `missing` | status Missing | not requestable | unavailable | missing | `missing` | today |
+| `missing` | status Missing or Long missing | not requestable | unavailable | missing | `missing` | today |
 | `withdrawn` | status Withdrawn | not requestable | unavailable | withdrawn | `withdrawn` | today |
 | `data-issues` | status Unknown | not requestable | | contact | `unmapped-fallback` | today |
-| `on-search` | status Declared lost | not requestable | | contact | `unmapped-fallback` | pending migration |
+| `declared-lost` | status Declared lost | not requestable | | contact | `unmapped-fallback` | no items; kept as a policy guard |
 | `bound-with` | status Intellectual item | not requestable | | top item | `request-top-item` | today for `cwith`, pending migration for `bwith` |
 | `bound-with-interim` | library `bwith` or `cwith` | not requestable | | top item | `request-top-item` | today only |
 | `digitisation` | code DIGITISATION, or status In process (non-requestable) | not requestable | temporarily unavailable | digitisation | `unavailable-digitisation` | today, and pending migration for the new status |
@@ -125,7 +125,7 @@ In Sierra, `SierraRulesForRequesting.scala` is an intermediate step. It turns fi
 
 | Rule group, by the Sierra field it reads | Where it went |
 |---|---|
-| Item status (fixed field 88): missing, on search, withdrawn, unavailable, closed, safeguarded, data issues, bound-with | the status rows: `missing`, `withdrawn`, `on-search`, `unavailable`, `data-issues`, `bound-with`; closed and safeguarded via their statistical codes |
+| Item status (fixed field 88): missing, on search, withdrawn, unavailable, closed, safeguarded, data issues, bound-with | the status rows: `missing` (for both missing and on search), `withdrawn`, `unavailable`, `data-issues`, `bound-with`; closed and safeguarded via their statistical codes |
 | Loan rule (fixed field 87) and the on-holdshelf status: in use by another reader | the circulation rows for what the item status shows, and `open-request` for holds, live only (platform#6654) |
 | OPAC message (fixed field 108): manual request, unavailable, at digitisation | the statistical code rows: `manual-request`, `by-appointment`, `digitisation` |
 | Item type (fixed field 61): exhibition reserve, no public message, manual request | material type: `on-exhibition-material`, `computer-media`; nothing for audiovisual material, which doesn't migrate |
@@ -179,13 +179,18 @@ In the served index, 4,305 items have a display note moved onto the access condi
 
 Collection Information has settled these on PR #3736:
 
-- **Open shelves.** Open-shelves items show no access status, as today. "Open shelves" is a statistical code in FOLIO, not an item status, and the item status of an open-shelves item is Available by default. A status of Missing, Declared Lost (On Search), Unknown or Withdrawn goes through the table like any other item.
+- **Open shelves.** Open-shelves items show no access status, as today. "Open shelves" is a statistical code in FOLIO, not an item status, and the item status of an open-shelves item is Available by default. A status of Missing, Long missing, Declared lost, Unknown or Withdrawn goes through the table like any other item.
 
   Collection Information's answer:
 
   > As discussed, there doesn't need to be any change to how `open-shelves` items look online. We spoke about "Status" online, doesn't actually mean Item Status nor is it coming from STATUS (Sierra) - "open shelves" is an OPAC MSG and will be a Statistical Code (Item) in Folio.
   >
   > The default Item Status = Available when Stat Code = Open Shelves. If the Item Status is Missing, Declared Lost (On Search), Unknown or Withdrawn this will be determined by the decision table.
+- **Missing and Long missing.** Sierra's missing became Long missing in FOLIO, and Sierra's on search became Missing. Both are unavailable to readers, so `missing` matches both statuses and gives both the missing note. No item had the status Declared lost in the read of 2026-11-04, and `declared-lost` stays as a guard, so that an item given that status is never offered for request.
+
+  Collection Information's answer on platform#6799:
+
+  > Yes. Missing in Sierra = Long missing in Folio. On search in Sierra = Missing in Folio. Both options should be unavailable to readers.
 - **Audiovisual material types.** Item types 15, 17 and 18 (moving image and sound) aren't in the tenant and won't be: audiovisual material moves from Sierra to Axiell Collections, not to FOLIO. It reaches FOLIO only through the Axiell sync, so the table has no audiovisual row and leaves its access to the sync's mapping (see "Axiell-synced items" below).
 
   Collection Information's answer:

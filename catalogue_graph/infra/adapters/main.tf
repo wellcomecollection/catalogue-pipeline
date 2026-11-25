@@ -80,14 +80,21 @@ module "axiell_folio_sync" {
   # folio_target="dev". dry_run is clamped in the module so this can only ever
   # write while the target is test or dev.
   #
-  # Dry run until a one-record live run against the test environment has
-  # passed (wellcomecollection/platform#6849), then set this to false.
+  # Live writes to the test environment, now that a one-record live run there
+  # has passed (wellcomecollection/platform#6849). Prod runs stay dry whatever
+  # this says, because the Lambda forces them.
   folio_default_target = "test"
-  dry_run_default      = true
+  dry_run_default      = false
 
   # A record hard deleted in Collections is hard deleted in FOLIO too, as agreed
   # with Collection Information (wellcomecollection/platform#6833).
   hard_delete_default = true
+
+  # The Lambda maximum. Records are written one at a time, and a timed-out run
+  # is retried from the start, so the default of 300 leaves too little room
+  # for the larger changesets a 15-minute harvest produces. A bulk change of
+  # thousands of records still needs batching, not a longer timeout.
+  lambda_timeout_seconds = 900
 
   # No trigger_window: the test environment is always up, unlike the sandbox,
   # so scheduled runs are not confined to the working day.

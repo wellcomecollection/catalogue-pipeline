@@ -1,0 +1,48 @@
+# platform#6586 round 1: FOLIO works against the Sierra works they replace,
+# at works-identified, where a FOLIO work has its Sierra predecessor's
+# canonical id.
+#
+# The population is every folio-instance work and its production counterpart,
+# pinned by ids_file. The file is gitignored. Regenerate it with
+# `uv run python generate_6586_ids.py` before running.
+
+index_sources:
+  - prod-works-identified
+  - folio-works-identified
+
+ids_file: ../data/6586_folio_canonical_ids.txt
+
+# Expected differences between the two transformers are removed in code.
+normaliser: 6586_folio_sierra_identified_normalise.py
+
+# The order of values within a field is not compared in this round.
+ignore_list_order:
+  - "**"
+
+ignore_fields:
+  # Per-run stamps and counters.
+  - indexed_at
+  - version
+  - state.modifiedTime
+  - state.sourceModifiedTime
+  # The source swap itself.
+  - state.sourceIdentifier
+  - state.predecessorIdentifier
+  # Works no longer store siblings or children.
+  - state.relations.siblingsPreceding
+  - state.relations.siblingsSucceeding
+  - state.relations.children
+  # The text a date range was parsed from: the catalogued date, or the 008 date
+  # when the catalogued date cannot be parsed. The Python period parser reads
+  # dates the Scala one cannot (#3729), so the two often reach the same range
+  # from different text. Nothing downstream reads this label.
+  - data.production[].dates[].range.label
+  # Items and holdings are compared under milestone 80.
+  - data.items
+  - data.holdings
+
+sample_size: 40
+hash_bucket_count: 64
+workers: 8
+namespace: 6586-folio-sierra-identified
+output_dir: data
