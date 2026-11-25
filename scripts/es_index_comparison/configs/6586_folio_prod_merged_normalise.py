@@ -11,7 +11,8 @@ from pathlib import Path
 ROUND_1 = Path(__file__).parent / "6586_folio_sierra_identified_normalise.py"
 round_1_normalise = runpy.run_path(str(ROUND_1))["normalise"]
 
-# Identifiers of the source record itself, which the source swap changes.
+# Identifiers of the Sierra or FOLIO record, which the source swap changes. A work
+# that merges with a Sierra or FOLIO work lists them too.
 RECORD_SCHEMES = {"sierra-identifier", "folio-instance", "folio-instance-hrid"}
 
 

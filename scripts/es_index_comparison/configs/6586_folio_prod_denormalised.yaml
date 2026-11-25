@@ -4,6 +4,9 @@
 # Differences that already exist at works-identified are removed afterwards.
 # See merged_differences_6586.py for the steps.
 
+# works-denormalised-2026-09-30 on the production cluster and
+# works-denormalised-2026-10-20 on the FOLIO cluster. Add both to
+# source_configuration.yaml before running.
 index_sources:
   - prod-works-denormalised
   - folio-works-denormalised

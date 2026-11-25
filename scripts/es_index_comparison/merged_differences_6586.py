@@ -3,9 +3,9 @@
 Compares works-denormalised, then removes the differences that already exist
 at works-identified. Steps, from scripts/es_index_comparison:
 
-    uv run es-index-compare run --config configs/6586_folio_prod_denormalised.yaml
+    uv run es-index-compare run-all --config configs/6586_folio_prod_denormalised.yaml
     uv run python merged_differences_6586.py ids
-    uv run es-index-compare run --config configs/6586_folio_prod_identified.yaml
+    uv run es-index-compare run-all --config configs/6586_folio_prod_identified.yaml
     uv run python merged_differences_6586.py subtract
 
 `ids` writes the ids of the works that differ at works-denormalised.
