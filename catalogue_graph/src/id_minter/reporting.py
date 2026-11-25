@@ -51,3 +51,39 @@ class IdMinterReport(PipelineReport):
             f"{self.job_id}.json",
         )
         return f"s3://{self.s3_bucket}/{path}"
+
+
+class PrunerReport(PipelineReport):
+    label: ClassVar[str] = "works_identified_pruner"
+
+    pipeline_date: str
+    row_count: int
+    superseded_row_count: int
+
+    @property
+    def publish_to_cloudwatch(self) -> bool:
+        return self.pipeline_date != "dev"
+
+    @property
+    def metric_namespace(self) -> str:
+        return "catalogue_graph_pipeline"
+
+    @property
+    def metric_dimensions(self) -> dict:
+        return {"pipeline_date": self.pipeline_date}
+
+    @property
+    def superseded_share(self) -> float:
+        if self.row_count == 0:
+            return 0.0
+        return self.superseded_row_count / self.row_count
+
+    @property
+    def metrics(self) -> list[PipelineMetric]:
+        return [
+            PipelineMetric(name="row_count", value=self.row_count),
+            PipelineMetric(
+                name="superseded_row_count", value=self.superseded_row_count
+            ),
+            PipelineMetric(name="superseded_share", value=self.superseded_share),
+        ]

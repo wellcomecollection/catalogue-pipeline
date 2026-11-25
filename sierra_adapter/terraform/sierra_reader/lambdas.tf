@@ -26,6 +26,9 @@ module "lambda" {
   runtime = "python3.12"
 
   timeout = local.timeout_in_minutes * 60
+
+  # Runs at the 128 MB default regularly stalled until timeout (catalogue-pipeline#3925)
+  memory_size = 256
 }
 
 resource "aws_lambda_permission" "allow_sns_trigger" {
