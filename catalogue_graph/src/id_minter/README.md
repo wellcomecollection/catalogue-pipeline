@@ -223,6 +223,20 @@ Documents are written to `works-identified` with `external_gte` versioning on `s
 
 With `ENABLE_ICEBERG_WRITES=true` (locally `--enable-iceberg-writes`), every minted document is also appended to the `works_identified` Iceberg table defined in `id_minter/schemata.py`, one row per write, whether or not the index accepted it. The table is never updated in place: each row's `version` is the one the index write was guarded on (`sourceModifiedTime` in milliseconds), so a reader takes the row with the highest `version`, then the latest `last_modified`. A commit that loses to another writer is retried against the new snapshot. Table name, namespace and S3 Tables bucket come from the `WORKS_IDENTIFIED_*` and `S3_TABLES_BUCKET` variables read in `id_minter/iceberg.py`; the table is created on first use. If the table can't be loaded or created, or an append fails, the error is logged and minting carries on.
 
+### works_identified pruner
+
+The Lambda entry point is `id_minter.steps.pruner.lambda_handler`. Every write to the `works_identified` table adds a row, so a work that has been written several times has several rows, and only one of them is current. The pruner removes the others once they make up 5% of the table (`PRUNER_SUPERSEDED_THRESHOLD`).
+
+A run reads the `id`, `version` and `last_modified` of every row and works out which row of each work is current, the same way the readers do. Below the threshold it stops there. Otherwise it copies every data file that holds a superseded row to a new file without those rows, and then commits one change to the table that swaps the old files for the new ones. The rows it keeps are copied as they are, so readers see the same works before and after.
+
+The id minter can append while the pruner is copying. Its new file is not one of the files being swapped, so it stays in the table, and any row it supersedes is removed by a later run. The pruner reloads the table just before it commits, and the commit is refused if another writer commits in between. It then reloads the table and commits the same swap again, for up to five minutes. If a file it read is no longer in the table, because S3 Tables compaction replaced it, or if the commit is still refused after five minutes, the run stops without changing anything and the next run starts afresh.
+
+Each run publishes the table's `row_count`, `superseded_row_count` and `superseded_share` metrics under the `works_identified_pruner` pipeline step. To run it locally against the local table, or with `--use-rest-api-table` against the table named by `WORKS_IDENTIFIED_TABLE_NAME`:
+
+```bash
+uv run python -m id_minter.steps.pruner
+```
+
 ### id_minter find_work
 
 The Lambda entry point is `id_minter.steps.find_work.lambda_handler`. It runs at the start of each state machine execution: it scans `works-source` for the ids indexed within the window (or ids/full scope), partitions them into `StepFunctionMintingRequest`s of `partition_size` work ids (default 10,000), writes each partition to S3 and returns small refs for the Map to fan out. An optional `job_id` in the input becomes the base for per-partition job ids (`-p000`, `-p001`, ...).

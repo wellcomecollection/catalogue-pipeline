@@ -424,8 +424,10 @@ def _status_from(category: str | None) -> str:
         # online, and the reader signs to accept the viewing conditions before
         # it is handed over.
         ("RESTRICTED", "Available"),
-        ("PERMISSIONREQUIRED", "Restricted"),
-        ("SAFEGUARDED", "Restricted"),
+        # Available, as migrated items are: the access statistical code
+        # carries the restriction.
+        ("PERMISSIONREQUIRED", "Available"),
+        ("SAFEGUARDED", "Available"),
         # Unavailable, as agreed on wellcomecollection/platform#6862.
         ("CLOSED", "Unavailable"),
         ("MISSING", "Missing"),
@@ -445,7 +447,7 @@ def test_absent_access_category_gives_an_unavailable_status() -> None:
 
 
 def test_item_status_matching_is_case_insensitive() -> None:
-    assert _status_from(category="Permissionrequired") == "Restricted"
+    assert _status_from(category="Deaccessioned") == "Withdrawn"
 
 
 # ── material type: required, with no default ──────────────────────────────────
@@ -513,9 +515,9 @@ def test_a_mapped_material_type_still_resolves() -> None:
         ("Archives - Digital", "archive"),
         ("Archives - Hybrid", "archive"),
         ("Moving Image - Non-digital", "film"),
-        ("Moving Image - Digital", "video format non-requestable"),
-        ("Sound - Non-digital", "audio format requestable"),
-        ("Sound - Digital", "audio format non-requestable"),
+        ("Moving Image - Digital", "video - digital"),
+        ("Sound - Non-digital", "audio"),
+        ("Sound - Digital", "audio - digital"),
         # AxC says plain "Visual Material", never "Visual Material - Non-digital".
         ("Visual Material", "non-projected graphic"),
         ("Pictures", "non-projected graphic"),
@@ -584,7 +586,8 @@ def test_the_retired_spaced_keys_are_gone() -> None:
 
 
 class TenantRefCache(FakeRefCache):
-    """Resolves only the material types the prod tenant actually carries.
+    """Resolves only the material types the prod tenant carries, with the audio
+    and video types under their new names.
 
     FakeRefCache resolves everything, which hides this class of bug: the point
     here is a value the tenant knows but the mapping table does not.
@@ -592,15 +595,16 @@ class TenantRefCache(FakeRefCache):
 
     TENANT_MATERIAL_TYPES = {
         "archive",
-        "audio format non-requestable",
-        "audio format requestable",
+        "audio",
+        "audio - digital",
         "book",
         "computer media",
         "film",
         "migration",
         "non-projected graphic",
         "serial",
-        "video format non-requestable",
+        "video",
+        "video - digital",
     }
 
     def resolve_material_type(self, name: str | None) -> str | None:
