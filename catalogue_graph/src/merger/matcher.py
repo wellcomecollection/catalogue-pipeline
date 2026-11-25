@@ -5,6 +5,9 @@ import polars as pl
 import structlog
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.utils.iceberg_lookup import latest_row_index
+from id_minter.schemata import WORKS_IDENTIFIED_CURRENT_ROW_ORDER
+
 logger = structlog.get_logger(__name__)
 
 GRAPH_COLUMNS = ("id", "version", "last_modified", "type", "merge_candidate_ids")
@@ -13,21 +16,12 @@ GRAPH_COLUMNS = ("id", "version", "last_modified", "type", "merge_candidate_ids"
 def load_works(table: IcebergTable, snapshot_id: int) -> pl.DataFrame:
     """The current row of every identified work, graph columns only.
 
-    The table is append-only, so a work has one row per write. The current one has
-    the highest source version, then the latest write time.
+    The id minter appends a row per write, so a work can have several. The current
+    one has the highest source version, then the latest write time.
     """
     scan = table.scan(selected_fields=GRAPH_COLUMNS, snapshot_id=snapshot_id)
     works = pl.DataFrame(scan.to_arrow())
-    # Pick the current rows on the narrow columns, then gather them: sorting the
-    # strings and candidate lists too takes more memory than the frame itself.
-    keys = ["version", "last_modified"]
-    current = (
-        works.select("id", *keys)
-        .with_row_index()
-        .sort(keys, descending=True)
-        .unique("id", keep="first")
-    )
-    return works[current["index"]]
+    return works[latest_row_index(works, "id", WORKS_IDENTIFIED_CURRENT_ROW_ORDER)]
 
 
 def match_works(works: pl.DataFrame) -> pl.DataFrame:

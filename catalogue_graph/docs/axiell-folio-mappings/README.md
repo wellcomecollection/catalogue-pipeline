@@ -1,4 +1,4 @@
-Mapping version 3.5.0 (`mapping/config.py`). One CSV per mapping.
+Mapping version 3.6.0 (`mapping/config.py`). One CSV per mapping.
 
 Generated from `config.py` by `mapping/csv_export.py`, so do not edit them
 by hand:

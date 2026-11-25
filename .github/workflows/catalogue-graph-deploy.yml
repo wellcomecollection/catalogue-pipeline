@@ -141,6 +141,7 @@ jobs:
           # ID Minter V2
           - id-minter
           - id-generator
+          - works-identified-pruner
           # Experimental batch merger
           - batch-merger-match
           - batch-merger-group

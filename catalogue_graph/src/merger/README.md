@@ -3,7 +3,7 @@
 An experiment in matching and merging works as a scheduled batch step. It runs alongside
 the Scala matcher and merger, which continue to be authoritative in production. Every run
 reads the graph columns of every row in the `works_identified` Iceberg table (the
-append-only table the id minter writes to, defined in `id_minter/schemata.py`), computes
+table the id minter appends to, defined in `id_minter/schemata.py`), computes
 connected components over merge-candidate links, and compares them with the components
 the previous run stored in S3. Every component that changed is merged again, and the
 merged works and initial images are written to dated `works-denormalised` and
