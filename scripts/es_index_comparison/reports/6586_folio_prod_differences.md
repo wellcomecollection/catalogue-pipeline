@@ -223,21 +223,21 @@ A second comparison covers `works-denormalised`, the output of the matcher and m
 
 ### Archive works
 
-In production an archive work merges with the Sierra record for the same item. The Sierra record also links it to its digitised copy (a METS work) and to Miro images.
+In production an archive work merges with the Sierra record for the same item. The Sierra record is also what connects it to its digitised copy (a METS work) and to Miro images.
 
 | Works | Difference | Cause | Status |
 |---:|---|---|:---:|
-| 197,402 | The archive work no longer merges with a Sierra work. Nothing else in its merge group changes (194,579 Axiell, 2,751 Calm, 72 TEI) | The Sierra work contributed only its items, which will come from the Axiell to FOLIO sync (RFC 090) | ✅ |
+| 197,402 | The archive work no longer merges with a Sierra work. Nothing else in its merge group changes (194,579 Axiell, 2,751 Calm, 72 TEI) | The Sierra record was not migrated. It contributed items, which are out of scope here, and on some works the b number | ✅ |
 | 29,622 | A Calm work loses its digitised copy, and the METS work becomes Invisible. Example: `a3js8n64` (RET/3/2/5/3, METS b24955590) | A METS work links to a b number. Axiell works had theirs imported ([platform#6525](https://github.com/wellcomecollection/platform/issues/6525)). Calm works have none | ⚠️ |
-| 9,250 | An Axiell work loses its Miro images, which become 9,427 separate Visible works. Example: `b9qv8p7q` (Miro M0009975) | Only the Sierra record (b33331777) holds the Miro link | ⚠️ |
-| 383 | An Axiell work loses its digitised copy, and the METS work becomes Invisible | The Axiell record has no b number | ⚠️ |
-| 101 | A METS work becomes Invisible. In production it redirects to a Sierra archive record that is not merged with an Axiell or Calm work | The Sierra record is not in FOLIO | ⚠️ |
+| 9,250 | An Axiell work loses its Miro images, which become 9,427 separate Visible works. Example: `b9qv8p7q` (Miro M0009975) | The Axiell work and the Miro work merge through the Sierra record (b33331777), which links to both | ⚠️ |
+| 383 | An Axiell work loses its digitised copy, and the METS work becomes Invisible | The Axiell work and the METS work merge through the Sierra record. Without it they merge only if the Axiell record lists the b number, and these do not | ⚠️ |
+| 101 | A METS work becomes Invisible, so the digitised copy is not in the catalogue. In production it redirects to its Sierra work, an archive record with no Axiell or Calm work | The Sierra work was not migrated | ⚠️ |
 
-Most Axiell works hold the b number in their own record and keep it. 54,585 works lose it as an identifier, so a b number search no longer finds them: all 32,373 Calm works, 22,138 Axiell works with no b number in the record, and 74 TEI works. 5,978 lose their thumbnail.
+Most Axiell works still list the b number as an identifier, because it is in the Axiell record itself. 54,585 works no longer list it, so a b number search does not find them: all 32,373 Calm works, 22,138 Axiell works with no b number in the record, and 74 TEI works. 5,978 lose their thumbnail. 18 Axiell works lose both their digitised copy and their Miro images, and are counted once under each.
 
 ### Pictures and audiovisual works
 
-These Sierra records are due to move to Axiell. Until then:
+These Sierra records are due to move to Axiell. Whether the Axiell records will carry the b number, which the METS merges depend on, is an open question in [RFC 090](https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync#open-questions). The Miro merges depend on a link in the Sierra record, which the RFC does not cover.
 
 | Works | Difference | Cause | Status |
 |---:|---|---|:---:|
@@ -248,16 +248,19 @@ These Sierra records are due to move to Axiell. Until then:
 
 | Works | Difference | Cause | Status |
 |---:|---|---|:---:|
-| 2,016 | 672 physical records have two or more digitised records, and each pipeline merges a different one. The one that is not merged stays a separate Visible work | The merger takes the first digitised record that links to the physical record. The order comes from an unordered set, so the choice is arbitrary | ✅ |
-| 413 | Parts of TEI manuscripts differ in notes or physical description | Stale FOLIO pipeline: its TEI works were transformed before the TEI transformer changes of 12 to 16 November | ✅ |
-| 384 | Works with the same links in both pipelines merge in one and not in the other. 158 of them are METS works that merge in FOLIO and stay Invisible in production | Matcher bug: the matcher graph is inconsistent or incomplete for these groups, in production for 371 works and in FOLIO for 13. The new Python merger does not have this issue ([platform#6861](https://github.com/wellcomecollection/platform/issues/6861)) | ✅ |
+| 2,016 | 672 physical records have two or more digitised records, and each pipeline merges a different one. The one that is not merged stays a separate Visible work | The merger takes the first digitised record that links to the physical record. The order comes from an unordered set, so the choice is arbitrary. The new Python merger sorts the works first, so its choice is stable ([platform#6861](https://github.com/wellcomecollection/platform/issues/6861)) | ✅ |
+| 413 | TEI works differ in notes or physical description (412 parts of manuscripts and 1 whole manuscript) | Stale FOLIO pipeline: its TEI works were transformed before the TEI transformer changes of 12 to 16 November | ✅ |
+| 351 | Works with the same links in both pipelines merge differently. 141 of them are METS works that merge in FOLIO and stay Invisible in production | Matcher bug: the matcher graph is inconsistent or incomplete for these groups, in production for 338 works, in FOLIO for 8 and in both for 5. The new Python merger does not have this issue ([platform#6861](https://github.com/wellcomecollection/platform/issues/6861)) | ✅ |
 | 129 | A work merges with a METS or TEI work that has a different canonical id in each pipeline. It is the same record on both sides | Expected: the two pipelines have separate id minter databases, so each minted its own id for a new record | ✅ |
-| 42 | Two library works are linked to each other and to a METS work, and the METS work merges into a different one in each pipeline | The works and links are the same on both sides. Likely the same arbitrary order as in the first row | ✅ |
-| 27 | A merge group includes a work that is in only one pipeline, so the rest of the group merges differently | 22 groups include a Sierra work that was not migrated. 5 include another work missing on one side | ✅ |
+| 37 | Two works are linked through a Sierra record that is Deleted in production and has no work in FOLIO. They are matched in FOLIO and not in production. 17 of them are METS works that become digitised copies of archive or library works | In production the Sierra record is Deleted, and the matcher never matches through a Deleted work. In FOLIO the record does not exist, so the two works match through its identifier. Are these merges wanted? | ⚠️ |
+| 34 | The works, links and matcher graph are the same in both pipelines, but a METS work merges into a different library work (30), or a different thumbnail is chosen (4) | Two works qualify equally and the merger takes the first, from the same unordered set as in the first row | ✅ |
+| 24 | A merge group includes a work that is in only one pipeline, so the rest of the group merges differently | 22 works are in groups with a Sierra work that was not migrated. 2 are in a group with a FOLIO work that has no work in production | ✅ |
 | 16 | A work merges differently because of a difference described above | BMJ, `hzg28phe` and b17268941, the three suppressed works, the two EBSCO candidates, the Miro link on b20461896 and the 776 link on b12720604 | ✅ |
-| 10 | A part of a TEI manuscript belongs to a different manuscript in each pipeline, for example `a4b3d3d9` to `manuscript_15781` in production and `manuscript_15782` in FOLIO | Source: two TEI manuscripts use the same part id (`WMS_Arabic_134`), so both produce the same work and one overwrites the other | ⚠️ |
+| 10 | A part of a TEI manuscript belongs to a different manuscript in each pipeline, for example `a4b3d3d9` to `manuscript_15781` in production and `manuscript_15782` in FOLIO | Source: in each case two TEI manuscripts use the same part id (`WMS_Arabic_134` in the example), so both produce the same work and one overwrites the other | ⚠️ |
+| 4 | Two library works share a Miro image, and production gives one work's digitised copy to the other | Stale production: the works were last merged on 3 October, before the merger change of 14 October ([#3768](https://github.com/wellcomecollection/catalogue-pipeline/pull/3768)) | ✅ |
+| 3 | A Sierra work redirects to a different TEI work in each pipeline (`gwzjvxhb`) | Source: two TEI manuscripts, `Tamil_3` and `Tamil_ MS 3`, link to the same b number | ⚠️ |
 | 3 | A contributor on a part of a TEI manuscript has a different canonical id (`af9gjz5y`, `ahrmmhjn`, `anhw29e2`) | Expected: separate id minter databases, as above | ✅ |
-| 1 | A FOLIO work gains a METS work (`ng4xj2g8`) | Not traced | ⚠️ |
+| 1 | A part of a TEI manuscript is Deleted in production and Visible in FOLIO (`wwqjyg5n`) | Known merger limitation: another manuscript once used this part id and still lists it as removed, so the part is Deleted or Visible depending on which manuscript was merged last | ✅ |
 
 ## Open questions
 
