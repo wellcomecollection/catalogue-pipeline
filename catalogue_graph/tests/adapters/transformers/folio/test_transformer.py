@@ -229,6 +229,11 @@ def test_transformer_includes_predecessor_identifier(
             "ontologyType": "Work",
             "value": "b12345679",
         },
+        {
+            "identifierType": {"id": "sierra-identifier"},
+            "ontologyType": "Work",
+            "value": "1234567",
+        },
     ]
 
 

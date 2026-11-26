@@ -174,11 +174,15 @@ def test_transformer_attaches_enriched_items(
     assert [item["id"]["otherIdentifiers"] for item in source["data"]["items"]] == [
         [
             {
-                "identifierType": {"id": "sierra-system-number"},
+                "identifierType": {"id": scheme},
                 "ontologyType": "Item",
-                "value": former_id,
+                "value": value,
             }
             for former_id in item["formerIds"]
+            for scheme, value in (
+                ("sierra-system-number", former_id),
+                ("sierra-identifier", former_id[1:8]),
+            )
         ]
         for item in fixture_record()["items"]
     ]
