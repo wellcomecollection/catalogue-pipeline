@@ -11,9 +11,10 @@ tracked in [wellcomecollection/platform#6525](https://github.com/wellcomecollect
 
 1. `extract_pairs.py` reads the production pipeline's `works-source` index and
    emits `pairs.csv`: one row per Sierra bib carrying a `calm-record-id` merge
-   candidate (the bib's 035, the same link the merger uses). The candidates
-   are not indexed, so the script scrolls all Sierra source works and filters
-   client side.
+   candidate (the bib's 035, the same link the merger uses). Bibs that are
+   deleted or suppressed in Sierra are skipped, because the matcher does not
+   link works through them. The candidates are not indexed, so the script
+   scrolls all Sierra source works and filters client side.
 
    ```
    AWS_PROFILE=platform-developer uv run --project catalogue_graph \
@@ -118,4 +119,7 @@ already in an earlier CSV, for incremental imports.
 
 After an import lands and a harvest completes, re-running step 2 should show
 the imported rows move from "to import" to "already present", which is the
-verification step on platform#6525.
+verification step on platform#6525. Step 2 reports only on
+the pairs from step 1, so a b number that an Axiell record holds from a
+deleted or suppressed bib is not in its report. Step 3 lists those as
+`deleted`.

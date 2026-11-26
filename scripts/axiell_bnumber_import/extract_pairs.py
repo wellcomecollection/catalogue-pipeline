@@ -43,6 +43,8 @@ def extract(es, index: str) -> tuple[set[tuple[str, str]], int, int, int]:
         preserve_order=False,
     ):
         scanned += 1
+        if scanned % 200_000 == 0:
+            print(f"...{scanned} scanned, {len(pairs)} pairs", file=sys.stderr)
         if hit["_source"].get("type") == "Deleted":
             deleted += 1
             continue
@@ -56,8 +58,6 @@ def extract(es, index: str) -> tuple[set[tuple[str, str]], int, int, int]:
                 found = True
         if found:
             with_candidate += 1
-        if scanned % 200_000 == 0:
-            print(f"...{scanned} scanned, {len(pairs)} pairs", file=sys.stderr)
     return pairs, scanned, with_candidate, deleted
 
 
