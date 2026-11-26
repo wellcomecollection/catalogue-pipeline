@@ -3,16 +3,16 @@
 Publishing by content (wellcomecollection/catalogue-pipeline#3858).
 Never fails the build: anything it cannot do falls back to pushing the image as before.
 
-After a build:  shadow_content_key.sh check PROJECT PROJECT_DIRECTORY
+After a build:  content_key.sh check PROJECT PROJECT_DIRECTORY
     Works out the content key of the image just built and logs it.
 
-Before a publish: shadow_content_key.sh reuse PROJECT IMAGE_TAG
+Before a publish: content_key.sh reuse PROJECT IMAGE_TAG
     If an image with the same content is in ECR, tags it IMAGE_TAG, and latest
     while the branch head is still IMAGE_TAG, and exits 0 so the caller skips the push.
     Exits 1, with the reason logged, if the caller should push.
     PUBLISH_FORCE_PUSH=true always pushes, for getting an OS fix out the same day.
 
-After a publish: shadow_content_key.sh tag PROJECT IMAGE_TAG
+After a publish: content_key.sh tag PROJECT IMAGE_TAG
     Tags the image just pushed as content.<key>, so later builds can find it.
 
 Log lines start with "content-key: BRANCH PROJECT" so they can be collected from build logs.
@@ -20,7 +20,7 @@ EOF_USAGE
 
 set -o nounset
 
-USAGE="Usage: shadow_content_key.sh check <PROJECT> <PROJECT_DIRECTORY> | reuse <PROJECT> <IMAGE_TAG> | tag <PROJECT> <IMAGE_TAG>"
+USAGE="Usage: content_key.sh check <PROJECT> <PROJECT_DIRECTORY> | reuse <PROJECT> <IMAGE_TAG> | tag <PROJECT> <IMAGE_TAG>"
 
 if (( $# != 3 ))
 then

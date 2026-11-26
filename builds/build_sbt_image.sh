@@ -53,5 +53,5 @@ docker build --pull --no-cache \
 # Buildkite only: it is what publishes.
 if [[ -n "${BUILDKITE:-}" ]]
 then
-  ./builds/shadow_content_key.sh check "$PROJECT_NAME" "$PROJECT_DIRECTORY"
+  ./builds/content_key.sh check "$PROJECT_NAME" "$PROJECT_DIRECTORY"
 fi
