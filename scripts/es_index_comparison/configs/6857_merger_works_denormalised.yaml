@@ -1,0 +1,47 @@
+# platform#6857: works merged by the Scala merger against works merged by the
+# Python merger, both at works-denormalised in the 2026-09-30 pipeline.
+#
+# The documents come from dumps of both indices taken on 19 November 2026,
+# written into the bucket files directly rather than by the fetch stage. Run
+# compare.
+
+index_sources:
+  - scala-works-denormalised
+  - python-works-denormalised
+
+# Expected differences between the two mergers that ignore_fields cannot express.
+normaliser: 6857_merger_works_denormalised_normalise.py
+
+# Lists the merger builds from several works. Python builds them from the works
+# sorted by canonical id, a stable but arbitrary order. Scala follows the order its
+# matcher returns the works in, which isn't stable, so the orderings can't be compared.
+ignore_list_order:
+  - redirectSources
+  - data.otherIdentifiers
+  - data.items
+  - data.imageData
+  - state.availabilities
+
+ignore_fields:
+  # Scala uses the matcher's time, Python the commit time of the snapshot it read.
+  - state.mergedTime
+  # Relations other than ancestors are only written by Scala, as empty lists.
+  - state.relations.children
+  - state.relations.siblingsPreceding
+  - state.relations.siblingsSucceeding
+  # The Python models write the `type` property in places the Scala pipeline leaves it out.
+  - redirectTarget.type
+  - redirectSources[].type
+  - state.mergeCandidates[].id.type
+  - data.thumbnail.type
+  - data.createdDate.type
+  - data.subjects[].type
+  - data.production[].function.type
+  - data.production[].dates[].type
+  - data.production[].places[].type
+  - data.imageData[].id.type
+  - data.imageData[].locations[].type
+
+sample_size: 40
+hash_bucket_count: 64
+workers: 8
