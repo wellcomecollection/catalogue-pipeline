@@ -4,8 +4,7 @@ Publishing by content (wellcomecollection/catalogue-pipeline#3858).
 Never fails the build: anything it cannot do falls back to pushing the image as before.
 
 After a build:  shadow_content_key.sh check PROJECT PROJECT_DIRECTORY
-    Works out the content key of the image just built and logs whether an
-    image with the same content is already in ECR.
+    Works out the content key of the image just built and logs it.
 
 Before a publish: shadow_content_key.sh reuse PROJECT IMAGE_TAG
     If an image with the same content is in ECR, tags it IMAGE_TAG, and latest
@@ -51,20 +50,7 @@ then
     exit 0
   fi
   echo "$KEY" > "$KEY_FILE"
-
-  # Only a missing image is a miss; any other error is logged as unknown so it can't skew the count
-  if EXISTING=$(aws ecr describe-images \
-      --repository-name "$ECR_REPOSITORY" \
-      --image-ids imageTag="content.$KEY" \
-      --query 'imageDetails[0].imageDigest' --output text 2>&1)
-  then
-    echo "content-key: $BRANCH $PROJECT $KEY would reuse $EXISTING"
-  elif grep -q ImageNotFoundException <<< "$EXISTING"
-  then
-    echo "content-key: $BRANCH $PROJECT $KEY would push a new image"
-  else
-    echo "content-key: $BRANCH $PROJECT $KEY lookup failed: $EXISTING"
-  fi
+  echo "content-key: $BRANCH $PROJECT $KEY"
 elif [[ "$MODE" == "reuse" ]]
 then
   IMAGE_TAG="$3"
@@ -88,6 +74,8 @@ then
     exit 1
   fi
   MANIFEST=$(jq --raw-output --join-output '.images[0].imageManifest' <<< "$OUT")
+  # Stored with the type it was read with, so put-image keeps the same digest
+  MEDIA_TYPE=$(jq --raw-output '.images[0].imageManifestMediaType // empty' <<< "$OUT")
   if [[ -z "$MANIFEST" || "$MANIFEST" == "null" ]]
   then
     echo "content-key: $BRANCH $PROJECT $KEY no image with this content, pushing"
@@ -114,7 +102,8 @@ then
     if ! OUT=$(aws ecr put-image \
         --repository-name "$ECR_REPOSITORY" \
         --image-tag "$TAG" \
-        --image-manifest "$MANIFEST" 2>&1) && ! grep -q ImageAlreadyExistsException <<< "$OUT"
+        --image-manifest "$MANIFEST" \
+        ${MEDIA_TYPE:+--image-manifest-media-type "$MEDIA_TYPE"} 2>&1) && ! grep -q ImageAlreadyExistsException <<< "$OUT"
     then
       echo "content-key: $BRANCH $PROJECT could not tag $TAG on content.$KEY, pushing instead: $OUT"
       exit 1
