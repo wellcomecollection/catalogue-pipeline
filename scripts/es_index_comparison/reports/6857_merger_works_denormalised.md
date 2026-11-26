@@ -30,7 +30,7 @@ Each cluster has exactly one cause. The checks run in the order of the sections 
 | Two e-bibs, a different one merged | 696 | 2,088 | 8,605 | | Either |
 | Two physical Sierra bibs linked as a digitised pair | 1 | 2 | 9 | | Either |
 | Miro work linked to several targets | 117 | 379 | 1,656 | | Either |
-| METS work linked to two Sierra works | 11 | 33 | 110 | | Neither |
+| Digitised pair not merged | 11 | 33 | 110 | | Neither |
 | Thumbnail from a different METS work | 63 | 63 | 93 | | Either |
 | **Total** | **1,170** | **3,104** | **13,121** | **11** | |
 
@@ -171,9 +171,9 @@ Python: a5qg94r7 (Sierra) ← kuw9t86g (Miro)
 
 The Miro work brings its image, so these clusters also differ in `imageData`, `thumbnail` and items.
 
-### METS work linked to two Sierra works
+### Digitised pair not merged
 
-A METS work lists only the Sierra bib it digitises as a merge candidate. When that bib is linked to a second Sierra bib and the two aren't merged, the METS work should go to the bib it lists. Neither merger checks this. Each merges it into the target it picked, which was the right bib for Scala in 8 of the 11 and for Python in 3:
+A physical bib and its e-bib list each other, and the e-bib's METS work lists the e-bib. Normally both are merged into the physical bib. Here the physical bib has no item with a location, mostly because its copy is bound into a volume catalogued on another bib, so neither merger treats it as physical and the pair isn't merged. The METS work then goes to whichever of the two bibs the merger takes first:
 
 ```
 Scala:  the5j2hb (Sierra) ← b9ae464p (METS)
@@ -181,6 +181,8 @@ Scala:  the5j2hb (Sierra) ← b9ae464p (METS)
 Python: maw7cjxh (Sierra) ← b9ae464p (METS)
         the5j2hb (Sierra)
 ```
+
+Neither result is right, because the two bibs should be one work.
 
 ### Thumbnail from a different METS work
 
