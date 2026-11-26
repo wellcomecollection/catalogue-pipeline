@@ -3,7 +3,8 @@
 
 Reads the production pipeline's works-source index and emits one CSV row per
 Sierra bib that carries a calm-record-id merge candidate (the bib's 035, i.e.
-the exact link the merger uses today). See README.md; tracked in
+the exact link the merger uses today). Deleted bibs are skipped, because the
+matcher does not link works through them. See README.md; tracked in
 wellcomecollection/platform#6525.
 
 Run from the repo root with the catalogue_graph environment:
@@ -25,13 +26,14 @@ from utils.elasticsearch import get_client
 SIERRA_FILTER = {
     "term": {"state.sourceIdentifier.identifierType.id": "sierra-system-number"}
 }
-SOURCE_FIELDS = ["state.sourceIdentifier.value", "state.mergeCandidates"]
+SOURCE_FIELDS = ["type", "state.sourceIdentifier.value", "state.mergeCandidates"]
 
 
-def extract(es, index: str) -> tuple[set[tuple[str, str]], int, int]:
+def extract(es, index: str) -> tuple[set[tuple[str, str]], int, int, int]:
     pairs: set[tuple[str, str]] = set()
     scanned = 0
     with_candidate = 0
+    deleted = 0
     for hit in scan(
         es,
         index=index,
@@ -41,6 +43,9 @@ def extract(es, index: str) -> tuple[set[tuple[str, str]], int, int]:
         preserve_order=False,
     ):
         scanned += 1
+        if hit["_source"].get("type") == "Deleted":
+            deleted += 1
+            continue
         state = hit["_source"]["state"]
         b_number = state["sourceIdentifier"]["value"]
         found = False
@@ -53,7 +58,7 @@ def extract(es, index: str) -> tuple[set[tuple[str, str]], int, int]:
             with_candidate += 1
         if scanned % 200_000 == 0:
             print(f"...{scanned} scanned, {len(pairs)} pairs", file=sys.stderr)
-    return pairs, scanned, with_candidate
+    return pairs, scanned, with_candidate, deleted
 
 
 def main() -> None:
@@ -69,7 +74,7 @@ def main() -> None:
 
     es = get_client("read_only", args.pipeline_date, args.es_mode)
     index = f"works-source-{args.pipeline_date}"
-    pairs, scanned, with_candidate = extract(es, index)
+    pairs, scanned, with_candidate, deleted = extract(es, index)
 
     with args.output.open("w", newline="") as f:
         writer = csv.writer(f)
@@ -79,7 +84,8 @@ def main() -> None:
     uuids = {u for u, _ in pairs}
     multi = len(pairs) - len(uuids)
     print(
-        f"Scanned {scanned} Sierra source works in {index}: "
+        f"Scanned {scanned} Sierra source works in {index}, "
+        f"skipped {deleted} Deleted: "
         f"{with_candidate} carry a calm-record-id merge candidate, "
         f"{len(pairs)} pairs over {len(uuids)} distinct RecordIDs "
         f"({multi} extra rows from RecordIDs with multiple bibs)."
