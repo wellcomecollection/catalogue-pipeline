@@ -134,6 +134,13 @@ class FolioWorkBuilder(MarcXmlWorkBuilder):
                     value=bnumber,
                 )
             )
+            # The b-number without its prefix and check digit, as on Sierra works.
+            identifiers.append(
+                WorkSourceIdentifier(
+                    identifier_type=Id(id="sierra-identifier"),
+                    value=bnumber[1:8],
+                )
+            )
         return identifiers
 
     @property

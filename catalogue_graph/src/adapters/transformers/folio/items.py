@@ -61,8 +61,8 @@ def _build_item(
             ontology_type="Item",
             value=item.id,
         ),
-        # Also an identifier, so the item can still be found by its Sierra number.
-        other_identifiers=[predecessor] if predecessor else [],
+        # Also identifiers, so the item can still be found by its Sierra numbers.
+        other_identifiers=_sierra_identifiers(predecessor) if predecessor else [],
         predecessor_identifier=predecessor,
     )
     title = _item_title(item)
@@ -134,6 +134,18 @@ def _sierra_predecessor(item: FolioEnrichedItem) -> SourceIdentifier | None:
         ontology_type="Item",
         value=value,
     )
+
+
+def _sierra_identifiers(item_number: SourceIdentifier) -> list[SourceIdentifier]:
+    # The item number, then its seven digits without the prefix and check digit.
+    return [
+        item_number,
+        SourceIdentifier(
+            identifier_type=Id(id="sierra-identifier"),
+            ontology_type="Item",
+            value=item_number.value[1:8],
+        ),
+    ]
 
 
 def _item_note(display_note: str | None, condition: AccessCondition) -> str | None:

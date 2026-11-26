@@ -3,7 +3,8 @@ Feature: FOLIO item identifiers
   Sierra keeps its Sierra item number in formerIds. That number is emitted as an
   other identifier so the item can still be found by it (platform#6614), and as
   the item's predecessor so the id-minter gives it the canonical id the Sierra
-  item held (platform#6616).
+  item held (platform#6616). Its seven digits, without the prefix and check
+  digit, are a second other identifier, as on Sierra items (platform#6911).
 
   Background:
     Given a MARC record with field 001 "abc123"
@@ -25,14 +26,16 @@ Feature: FOLIO item identifiers
     Then the only item has the source identifier value "a"
     And it has the predecessor identifier type "sierra-system-number"
     And it has the predecessor identifier value "<item_number>"
-    And it has 1 other identifier
-    And its only other identifier has the identifier type "sierra-system-number"
-    And it has the value "<item_number>"
+    And it has 2 other identifiers
+    And its 1st other identifier has the identifier type "sierra-system-number"
+    And its 1st other identifier has the value "<item_number>"
+    And its 2nd other identifier has the identifier type "sierra-identifier"
+    And its 2nd other identifier has the value "<seven_digits>"
 
     Examples:
-      | former_ids           | item_number |
-      | i16858153            | i16858153   |
-      | i1685813x, i1685813x | i1685813x   |
+      | former_ids           | item_number | seven_digits |
+      | i16858153            | i16858153   | 1685815      |
+      | i1685813x, i1685813x | i1685813x   | 1685813      |
 
   Scenario Outline: An item whose former ids are not one Sierra item number fails the transform
     Given that item has the former ids "<former_ids>"

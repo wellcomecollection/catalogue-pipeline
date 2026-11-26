@@ -2,7 +2,8 @@ Feature: other identifiers
   A FOLIO work's other identifiers are, in order: those classified from MARC
   035, ISBNs from 020 ǂa, ISSNs from 022 ǂa, Wellcome digcodes from 759 ǂa,
   ESTC citation numbers from 510, the instance HRID from 001, and the Sierra
-  b number from 907 ǂa where the record was migrated from Sierra.
+  b number from 907 ǂa where the record was migrated from Sierra, followed by
+  its seven digits without the prefix and check digit.
 
   The 020, 022, 759 and 510 rules mirror the Sierra transformer this replaces
   (SierraIdentifiers.scala, MarcInternationalStandardIdentifiers.scala).
@@ -22,13 +23,18 @@ Feature: other identifiers
       | type                | value         |
       | folio-instance-hrid | in00000000001 |
 
-  Scenario: A record migrated from Sierra also has its b number
-    Given the MARC record has a 907 field with subfield "a" value ".b11839053"
+  Scenario Outline: A record migrated from Sierra also has its b number and seven-digit Sierra identifier
+    Given the MARC record has a 907 field with subfield "a" value "<907a>"
     When I transform the MARC record
     Then the work has the other identifiers:
       | type                 | value         |
       | folio-instance-hrid  | in00000000001 |
-      | sierra-system-number | b11839053     |
+      | sierra-system-number | <bnumber>     |
+      | sierra-identifier    | <seven>       |
+    Examples:
+      | 907a       | bnumber   | seven   |
+      | .b11839053 | b11839053 | 1183905 |
+      | b1161044x  | b1161044x | 1161044 |
 
   Scenario: ISBNs and ISSNs are taken from 020 ǂa and 022 ǂa
     Given the MARC record has a 020 field with subfield "a" value "978-1-890159-02-3"
@@ -130,3 +136,4 @@ Feature: other identifiers
       | bl-estc-citation-no  | T5132         |
       | folio-instance-hrid  | in00000000001 |
       | sierra-system-number | b11839053     |
+      | sierra-identifier    | 1183905       |

@@ -893,16 +893,12 @@ def as_folio(work: IdentifiedWork) -> IdentifiedWork:
             )
         }
     )
-    others = [
-        i
-        for i in work.data.other_identifiers
-        if i.identifier_type.id != schemes.SIERRA_IDENTIFIER.id
-    ]
     hrid = bnumber.model_copy(
         update={"identifier_type": Id(id=schemes.FOLIO_INSTANCE_HRID.id)}
     )
     return with_other_identifiers(
-        work.model_copy(update={"state": state}), [*others, hrid, bnumber]
+        work.model_copy(update={"state": state}),
+        [*work.data.other_identifiers, hrid, bnumber],
     )
 
 
@@ -913,10 +909,7 @@ def without_record_ids(work: VisibleIdentifiedWork) -> str:
     )
     kept = []
     for i in work.data.other_identifiers:
-        if i.identifier_type.id in (
-            schemes.FOLIO_INSTANCE_HRID.id,
-            schemes.SIERRA_IDENTIFIER.id,
-        ):
+        if i.identifier_type.id == schemes.FOLIO_INSTANCE_HRID.id:
             continue
         if i == own_bnumber:
             continue
