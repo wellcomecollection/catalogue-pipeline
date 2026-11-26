@@ -25,11 +25,12 @@ Each cluster has exactly one cause. The checks run in the order of the sections 
 | Axiell work left out of its cluster | 23 | 54 | 264 | | Python |
 | Sierra work left out of its cluster | 16 | 39 | 147 | | Python |
 | Target doesn't list all works redirected to it | 63 | 65 | 297 | | Python |
+| Merged before the fix for platform#6750 | 8 | 36 | 142 | | Python |
 | **Different choice between equal works** | | | | | |
 | Two e-bibs, a different one merged | 696 | 2,088 | 8,605 | | Either |
 | Two physical Sierra bibs linked as a digitised pair | 1 | 2 | 9 | | Either |
-| Miro work linked to several targets | 125 | 415 | 1,798 | | Either |
-| METS work linked to two Sierra works | 11 | 33 | 110 | | Either |
+| Miro work linked to several targets | 117 | 379 | 1,656 | | Either |
+| METS work linked to two Sierra works | 11 | 33 | 110 | | Neither |
 | Thumbnail from a different METS work | 63 | 63 | 93 | | Either |
 | **Total** | **1,170** | **3,104** | **13,121** | **11** | |
 
@@ -65,7 +66,7 @@ The Python merger matches Scala here. Writing the internal works of every Visibl
 
 ## Scala pipeline faults
 
-In the first cause below, the Scala index holds an older version of a work than the index it is built from. The others come from a race condition in the Scala matcher.
+In the first cause below, the Scala index holds an older version of a work than the index it is built from. In the last, Scala hasn't merged the works again since a fix to its merger. The others come from a race condition in the Scala matcher.
 
 The matcher's reads of its graph can lag behind recent writes. When two linked works are processed moments apart, as they were during the reindex on 1 October, the second can read the graph before the first work's node is visible. It then saves a component without the first work. What that breaks depends on which work lists the other as a merge candidate:
 
@@ -110,9 +111,26 @@ Scala left a Sierra work unmerged that Python merged into a linked Sierra work, 
 
 78 works are Redirected to a target in the Scala index whose `redirectSources` doesn't list them. Scala merged them into the target on 1 October, and later merged the target again without them. It writes only the works the matcher sends it, so the old redirects were never updated. Python lists all 78, along with their items and identifiers.
 
+### Merged before the fix for platform#6750
+
+Bibs linked only through a shared Miro work used to be merged as one group, so a Miro or METS work could end up on a bib that doesn't list it. Scala fixed this on 9 October, and Python has the same fix. Scala last merged these clusters on 1–3 October and hasn't merged them again since:
+
+```
+Scala:  b5jkqq2x (Sierra) ← dhd7v633 (Miro), fxptt359 (Miro)
+        bn2wphft (Sierra)
+Python: b5jkqq2x (Sierra) ← dhd7v633 (Miro)
+        bn2wphft (Sierra) ← fxptt359 (Miro)
+```
+
+Both bibs list `dhd7v633`, but only `bn2wphft` lists `fxptt359`.
+
 ## Different choice between equal works
 
 In these clusters, both mergers had the same works, and the Scala graph holds them in one component. Several of the works were equally good candidates. The Python merger sorts a component's works by canonical id before merging, so it takes the candidate with the lowest id, a stable but arbitrary choice. The Scala merger takes the first candidate in the order its matcher returns the works, which isn't stable. Only the clusters where the two happened to differ appear here.
+
+Switching to the Python merger changes the target in these clusters. A work that is Visible today becomes Redirected and the other way round, and some images and digitised items move to another bib. Old URLs still resolve through the redirects. This is not new: the same change happens in production today whenever Scala merges one of these clusters again in a different order. Python makes the choice stable.
+
+The order of merged lists, such as items and identifiers, differs for the same reason. The comparison ignores list order, and about 54,000 more works would differ if it didn't.
 
 ### Two e-bibs, a different one merged
 
@@ -142,7 +160,7 @@ The rules are the same in both mergers, and only the order differs.
 
 ### Miro work linked to several targets
 
-A Miro work listed by several Sierra or Axiell works is merged into one of them. For 141 of the 150 Miro works involved, both mergers pick the work that wins target precedence, but they break ties differently. Python takes the lowest id, and Scala takes the first in the matcher's order:
+A Miro work listed by several Sierra or Axiell works is merged into one of them. Both mergers pick the work that wins target precedence, but they break ties differently. Python takes the lowest id, and Scala takes the first in the matcher's order:
 
 ```
 Scala:  h2bqrjya (Sierra) ← kuw9t86g (Miro)
@@ -151,13 +169,11 @@ Python: a5qg94r7 (Sierra) ← kuw9t86g (Miro)
         h2bqrjya (Sierra)
 ```
 
-The other 9 Miro works are each listed by only one bib, and Python merges them into that bib. Scala merged them into a different bib on 1–3 Oct, before its fix for platform#6750 was deployed, and hasn't merged them again since. In one more cluster from before the fix, Scala put the METS works of two bibs on one of them and left the other bib unmerged, where Python merges each bib with its own METS work.
-
 The Miro work brings its image, so these clusters also differ in `imageData`, `thumbnail` and items.
 
 ### METS work linked to two Sierra works
 
-A METS work's identifier is the b-number of the Sierra bib it digitises. When it's linked to two Sierra works, Python always merged it into the one with the lower id. Scala chose the METS work's own bib in 8 of the 11, Python in 3:
+A METS work lists only the Sierra bib it digitises as a merge candidate. When that bib is linked to a second Sierra bib and the two aren't merged, the METS work should go to the bib it lists. Neither merger checks this. Each merges it into the target it picked, which was the right bib for Scala in 8 of the 11 and for Python in 3:
 
 ```
 Scala:  the5j2hb (Sierra) ← b9ae464p (METS)
