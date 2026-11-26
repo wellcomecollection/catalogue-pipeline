@@ -416,5 +416,5 @@ catalogue_graph/.context
 # Ignore scratch files
 .scratch
 
-# Content key for an image, written by builds/shadow_content_key.sh
+# Content key for an image, written by builds/content_key.sh
 .content_key.*
