@@ -9,11 +9,11 @@ The key covers:
     and those change with the CI agent's checkout path;
   - the Dockerfile;
   - the digest of the base image the build used;
-  - the ISO week, so every app is rebuilt at least weekly and picks up the
-    `apk upgrade` in its Dockerfile.
+  - the UTC date, so every app is rebuilt at least daily and picks up the
+    `apk upgrade` in its Dockerfile within a day of a security fix.
 
 Usage: image_content_key.py PROJECT_DIRECTORY BUILD_ROOT [BASE_IMAGE_DIGEST]
-If BASE_IMAGE_DIGEST is omitted it is read from the local Docker daemon.
+If BASE_IMAGE_DIGEST is omitted it is read from the registry, which is what a --pull build uses.
 """
 
 import datetime
@@ -117,21 +117,7 @@ def base_image_digest(dockerfile):
         if "@sha256:" in image:
             digests.append(image)
             continue
-        # BuildKit may not keep the base image in the local store, so fall back to asking the registry
-        local = subprocess.run(
-            ["docker", "image", "inspect", "--format", "{{json .RepoDigests}}", image],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        found = (
-            re.findall(r"@(sha256:[0-9a-f]{64})", local.stdout)
-            if local.returncode == 0
-            else []
-        )
-        if found:
-            digests.append(f"{image}={found[0]}")
-            continue
+        # The build runs with --pull, so it used the registry's current base; a local tag can be stale
         raw = subprocess.run(
             ["docker", "buildx", "imagetools", "inspect", "--raw", image],
             check=True,
@@ -161,8 +147,8 @@ def content_key(project_directory, build_root, base_digest):
         h.update(b"Dockerfile\0" + hashlib.sha256(f.read()).digest())
     h.update(f"base\0{base_digest}\n".encode())
 
-    year, week, _ = datetime.datetime.now(datetime.timezone.utc).isocalendar()
-    h.update(f"week\0{year}-W{week:02d}\n".encode())
+    today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+    h.update(f"date\0{today}\n".encode())
     return h.hexdigest()
 
 

@@ -35,11 +35,17 @@ fi
 echo "*** Publishing Docker image to ECR"
 # Login to ECR in the platform account is handled by the Buildkite runner
 
+# An image with the same content is already in ECR: tag it rather than push a new digest for Inspector to scan
+if ./builds/content_key.sh reuse "$PROJECT_NAME" "$IMAGE_TAG"
+then
+  exit 0
+fi
+
 docker tag "$PROJECT_NAME:$IMAGE_TAG" "$ECR_REGISTRY/$PROJECT_NAME:$IMAGE_TAG"
 docker push "$ECR_REGISTRY/$PROJECT_NAME:$IMAGE_TAG"
 
 docker tag "$PROJECT_NAME:$IMAGE_TAG" "$ECR_REGISTRY/$PROJECT_NAME:latest"
 docker push "$ECR_REGISTRY/$PROJECT_NAME:latest"
 
-# Shadow mode for publishing by content: tags the pushed image content.<key> for later builds to find
-./builds/shadow_content_key.sh tag "$PROJECT_NAME" "$IMAGE_TAG"
+# Tags the pushed image content.<key> for later builds to find
+./builds/content_key.sh tag "$PROJECT_NAME" "$IMAGE_TAG"

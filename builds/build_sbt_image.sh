@@ -40,7 +40,8 @@ echo "*** Building Docker image for sbt app"
 SOURCE_REPOSITORY=$(git config --get remote.origin.url | sed -E 's#^.*github\.com(:[0-9]+)?[:/]##; s#\.git$##')
 SOURCE_REVISION=$(git rev-parse HEAD)
 
-docker build \
+# --pull and --no-cache so a new image always has the current base and the day's apk upgrade
+docker build --pull --no-cache \
   --file "$PROJECT_DIRECTORY/Dockerfile" \
   --tag "$PROJECT_NAME:$IMAGE_TAG" \
   --label "org.opencontainers.image.source=https://github.com/$SOURCE_REPOSITORY" \
@@ -48,9 +49,9 @@ docker build \
   --label "org.wellcomecollection.dockerfile=$PROJECT_DIRECTORY/Dockerfile" \
   "$PROJECT_DIRECTORY"
 
-# Shadow mode for publishing by content: logs whether this image is already published, changes nothing.
-# Buildkite only: it is what publishes, and the GitHub Actions role cannot describe ECR images.
+# Works out the content key that publish_sbt_image_to_ecr.sh uses to reuse an already published image.
+# Buildkite only: it is what publishes.
 if [[ -n "${BUILDKITE:-}" ]]
 then
-  ./builds/shadow_content_key.sh check "$PROJECT_NAME" "$PROJECT_DIRECTORY"
+  ./builds/content_key.sh check "$PROJECT_NAME" "$PROJECT_DIRECTORY"
 fi
