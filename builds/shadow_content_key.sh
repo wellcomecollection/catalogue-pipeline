@@ -8,8 +8,10 @@ After a build:  shadow_content_key.sh check PROJECT PROJECT_DIRECTORY
     image with the same content is already in ECR.
 
 Before a publish: shadow_content_key.sh reuse PROJECT IMAGE_TAG
-    If an image with the same content is in ECR, tags it IMAGE_TAG and latest
-    and exits 0, so the caller skips the push. Exits 1 if the caller should push.
+    If an image with the same content is in ECR, tags it IMAGE_TAG, and latest
+    while the branch head is still IMAGE_TAG, and exits 0 so the caller skips the push.
+    Exits 1, with the reason logged, if the caller should push.
+    PUBLISH_FORCE_PUSH=true always pushes, for getting an OS fix out the same day.
 
 After a publish: shadow_content_key.sh tag PROJECT IMAGE_TAG
     Tags the image just pushed as content.<key>, so later builds can find it.
@@ -66,15 +68,48 @@ then
 elif [[ "$MODE" == "reuse" ]]
 then
   IMAGE_TAG="$3"
-  [[ -f "$KEY_FILE" ]] || exit 1
+  if [[ "${PUBLISH_FORCE_PUSH:-}" == "true" ]]
+  then
+    echo "content-key: $BRANCH $PROJECT PUBLISH_FORCE_PUSH is set, pushing"
+    exit 1
+  fi
+  if [[ ! -f "$KEY_FILE" ]]
+  then
+    echo "content-key: $BRANCH $PROJECT has no key from the build step, pushing"
+    exit 1
+  fi
   KEY=$(cat "$KEY_FILE")
-  MANIFEST=$(aws ecr batch-get-image \
-    --repository-name "$ECR_REPOSITORY" \
-    --image-ids imageTag="content.$KEY" --output json 2>/dev/null \
-    | jq --raw-output --join-output '.images[0].imageManifest') || MANIFEST=""
-  [[ -n "$MANIFEST" && "$MANIFEST" != "null" ]] || exit 1
+  # Only a missing image is a miss; any other error is logged, so a broken lookup can't pass for misses
+  if ! OUT=$(aws ecr batch-get-image \
+      --repository-name "$ECR_REPOSITORY" \
+      --image-ids imageTag="content.$KEY" --output json 2>&1)
+  then
+    echo "content-key: $BRANCH $PROJECT $KEY lookup failed, pushing: $OUT"
+    exit 1
+  fi
+  MANIFEST=$(jq --raw-output --join-output '.images[0].imageManifest' <<< "$OUT")
+  if [[ -z "$MANIFEST" || "$MANIFEST" == "null" ]]
+  then
+    echo "content-key: $BRANCH $PROJECT $KEY no image with this content, pushing"
+    exit 1
+  fi
+  TAGS=("$IMAGE_TAG")
+  LS_REMOTE=$(git ls-remote origin "refs/heads/$BRANCH" 2>/dev/null) || LS_REMOTE=""
+  HEAD=$(cut -f1 <<< "$LS_REMOTE")
+  if [[ -z "$HEAD" ]]
+  then
+    echo "content-key: $BRANCH $PROJECT could not read the head of $BRANCH, pushing"
+    exit 1
+  fi
+  # An older commit must not move latest back after a newer build has set it
+  if [[ "$HEAD" == "$IMAGE_TAG" ]]
+  then
+    TAGS+=(latest)
+  else
+    echo "content-key: $BRANCH $PROJECT $BRANCH has moved past $IMAGE_TAG, leaving latest"
+  fi
   # The commit tag first: if latest fails after it, the caller's push moves both tags to the new image
-  for TAG in "$IMAGE_TAG" latest
+  for TAG in "${TAGS[@]}"
   do
     if ! OUT=$(aws ecr put-image \
         --repository-name "$ECR_REPOSITORY" \

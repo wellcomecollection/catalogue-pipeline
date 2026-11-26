@@ -48,7 +48,7 @@ docker build \
   --label "org.wellcomecollection.dockerfile=$PROJECT_DIRECTORY/Dockerfile" \
   "$PROJECT_DIRECTORY"
 
-# Shadow mode for publishing by content: logs whether this image is already published, changes nothing.
+# Works out the content key that publish_sbt_image_to_ecr.sh uses to reuse an already published image.
 # Buildkite only: it is what publishes, and the GitHub Actions role cannot describe ECR images.
 if [[ -n "${BUILDKITE:-}" ]]
 then

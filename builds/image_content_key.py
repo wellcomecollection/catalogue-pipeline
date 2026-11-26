@@ -9,8 +9,8 @@ The key covers:
     and those change with the CI agent's checkout path;
   - the Dockerfile;
   - the digest of the base image the build used;
-  - the ISO week, so every app is rebuilt at least weekly and picks up the
-    `apk upgrade` in its Dockerfile.
+  - the UTC date, so every app is rebuilt at least daily and picks up the
+    `apk upgrade` in its Dockerfile within a day of a security fix.
 
 Usage: image_content_key.py PROJECT_DIRECTORY BUILD_ROOT [BASE_IMAGE_DIGEST]
 If BASE_IMAGE_DIGEST is omitted it is read from the local Docker daemon.
@@ -161,8 +161,8 @@ def content_key(project_directory, build_root, base_digest):
         h.update(b"Dockerfile\0" + hashlib.sha256(f.read()).digest())
     h.update(f"base\0{base_digest}\n".encode())
 
-    year, week, _ = datetime.datetime.now(datetime.timezone.utc).isocalendar()
-    h.update(f"week\0{year}-W{week:02d}\n".encode())
+    today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+    h.update(f"date\0{today}\n".encode())
     return h.hexdigest()
 
 
