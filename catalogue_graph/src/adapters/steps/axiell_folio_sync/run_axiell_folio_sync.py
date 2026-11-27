@@ -384,13 +384,15 @@ def run_sync(
                     logger.error("unmapped_hide_capped", source_id=source_id)
                     continue
                 hidden = hide_by_guid(hide_guid, folio, dry_run=dry_run)
-                if any(
-                    getattr(hidden, entity).action == "suppress"
+                actions = {
+                    getattr(hidden, entity).action
                     for entity in ("instance", "holdings", "item")
-                ):
+                }
+                if "suppress" in actions:
                     counts["unmapped_hidden"] += 1
-                    if not withheld:
-                        missing_field_hides += 1
+                # Already-hidden records count too, so a retried run cannot hide 50 more.
+                if not withheld and actions & {"suppress", "already_suppressed"}:
+                    missing_field_hides += 1
                 _record_cascade(
                     hidden,
                     record_id=source_id,

@@ -268,6 +268,22 @@ def test_missing_field_hides_stop_at_the_cap(monkeypatch: pytest.MonkeyPatch) ->
     assert resp.counts["failed"] == 2
 
 
+def test_a_retried_run_does_not_hide_past_the_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(run_axiell_folio_sync, "MAX_MISSING_FIELD_HIDES", 1)
+    other = _record(flagged=True, guid=OTHER_GUID)
+    folio = StatefulInventory()
+    _sync_rows(folio, PUBLISHED, other)
+    _sync_rows(folio, _unmapped(PUBLISHED), _unmapped(other))
+
+    resp = _sync_rows(folio, _unmapped(PUBLISHED), _unmapped(other))
+
+    assert folio.instance(OTHER_GUID)["discoverySuppress"] is False
+    assert resp.counts["unmapped_hidden"] == 0
+    assert resp.counts["unmapped_hide_capped"] == 1
+
+
 def test_the_cap_does_not_apply_to_withheld_records(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
