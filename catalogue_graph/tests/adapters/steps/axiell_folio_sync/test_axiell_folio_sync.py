@@ -542,7 +542,7 @@ def test_report_written_to_s3_on_dry_run(monkeypatch: pytest.MonkeyPatch) -> Non
         manifest_bucket="bucket-1",
     )
 
-    assert captured["s3_uri"] == "s3://bucket-1/manifests/job-1.json"
+    assert captured["s3_uri"] == "s3://bucket-1/manifests/axiell/job-1.json"
     assert resp.manifest_s3_path == captured["s3_uri"]
 
     report = captured["model"]

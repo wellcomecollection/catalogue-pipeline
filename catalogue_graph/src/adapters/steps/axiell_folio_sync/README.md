@@ -144,7 +144,7 @@ The parameter is seeded with placeholders by Terraform; real values are set out-
 Each run writes a single JSON report to the manifest bucket (`wellcomecollection-axiell-folio-sync-manifests`,
 expiring after `manifest_retention_days`, default 90):
 
-* `manifests/<job_id>.json` — counts, the successfully synced records with per-entity actions (`successful`), and
+* `manifests/<source>/<job_id>.json` (source `axiell` or `axiell_uat`, because the two adapters' runs share job ids) — counts, the successfully synced records with per-entity actions (`successful`), and
   per-record errors with the failing stage (`errors`)
 
 The report is written on dry runs too, so a dry run can be validated before flipping `dry_run_default`. This uses the

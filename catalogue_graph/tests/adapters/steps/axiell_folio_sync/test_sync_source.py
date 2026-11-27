@@ -24,6 +24,7 @@ from adapters.steps.axiell_folio_sync.models import (
     FolioTarget,
     SyncSource,
 )
+from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
 
 from .test_axiell_folio_sync import _clear_okapi_env, _stub_ssm
 
@@ -185,3 +186,33 @@ def test_handler_reads_the_source_and_builds_its_client(
     assert ran["folio_target"] == (
         "test" if expected_source == "axiell_uat" else "prod"
     )
+
+
+def test_live_and_uat_reports_with_the_same_job_id_do_not_collide(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Both adapters derive job_id from the trigger minute, so a live run and a
+    UAT run can share one. Each must keep its own manifest."""
+    written: list[str] = []
+    monkeypatch.setattr(
+        "utils.reporting.pydantic_to_s3_json",
+        lambda model, s3_uri: written.append(s3_uri),
+    )
+
+    for source in ("axiell", "axiell_uat"):
+        run_sync(
+            AxiellFolioSyncEvent(
+                job_id="20261127T1015", changeset_ids=[], transformer_type=source
+            ),
+            [],
+            None,  # type: ignore[arg-type]
+            None,  # type: ignore[arg-type]
+            dry_run=True,
+            folio_target="test",
+            manifest_bucket="bucket-1",
+        )
+
+    assert written == [
+        "s3://bucket-1/manifests/axiell/20261127T1015.json",
+        "s3://bucket-1/manifests/axiell_uat/20261127T1015.json",
+    ]

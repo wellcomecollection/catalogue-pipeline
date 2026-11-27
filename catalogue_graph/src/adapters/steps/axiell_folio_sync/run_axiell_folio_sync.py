@@ -496,6 +496,7 @@ def run_sync(
 
     report = AxiellFolioSyncReport(
         job_id=event.job_id,
+        source=event.transformer_type or "axiell",
         changeset_ids=event.changeset_ids,
         dry_run=dry_run,
         folio_target=folio_target,
