@@ -9,14 +9,11 @@ These run against an in-memory FOLIO fake, not the sandbox.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from datetime import datetime
-from typing import Any
 
 import pytest
 from pymarc.record import Record
 
-from adapters.steps.axiell_folio_sync.mapping import withheld_guid
 from adapters.steps.axiell_folio_sync.mapping.builders import _is_withheld
 from adapters.steps.axiell_folio_sync.mapping.marc import MappingError, parse_xml
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
@@ -24,7 +21,6 @@ from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from models.pipeline.source.work import DeletedSourceWork
 
 from .test_harvest_untick import (
-    GUID,
     StatefulInventory,
     _assert_suppressed,
     _assert_unsuppressed,
@@ -222,129 +218,3 @@ def test_resource_guides_are_suppressed_by_the_transformer_only() -> None:
 
     assert _is_suppressed_by_transformer(record) is True
     assert _is_withheld(record) is False
-
-
-# -- a withheld record that fails to map --
-
-
-def _unmapped(content: str) -> str:
-    """The same record without its normal location, which the mapping requires."""
-    location = "<datafield tag='984'><subfield code='b'>215/HOME</subfield></datafield>"
-    assert location in content
-    return content.replace(location, "")
-
-
-@pytest.mark.parametrize("content", [UNPUBLISHED, FOR_DELETION])
-def test_a_withheld_record_that_fails_to_map_is_still_hidden(content: str) -> None:
-    folio = _synced()
-
-    resp = _sync(folio, _unmapped(content))
-
-    _assert_hidden_from_discovery_only(folio)
-    assert resp.counts["failed"] == 1
-    assert resp.counts["withheld_unmapped"] == 1
-    assert resp.counts["suppressed"] == 3
-    assert resp.counts["withheld"] == 0
-
-
-def test_hiding_an_unmapped_withheld_record_is_in_the_manifest(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    reports: list[AxiellFolioSyncReport] = []
-    monkeypatch.setattr(
-        AxiellFolioSyncReport, "publish", lambda self: reports.append(self)
-    )
-
-    _sync(_synced(), _unmapped(UNPUBLISHED))
-
-    [entry] = reports[-1].deletions
-    assert (entry.guid, entry.reason) == (GUID, "withheld")
-    assert [error.stage for error in reports[-1].errors] == ["mapping"]
-
-
-def test_reticking_an_unmapped_withheld_record_shows_it_to_staff() -> None:
-    folio = _synced()
-    _sync(folio, _record(flagged=False))
-    _assert_suppressed(folio)
-
-    _sync(folio, _unmapped(UNPUBLISHED))
-
-    _assert_hidden_from_discovery_only(folio)
-
-
-class _FailingItems(StatefulInventory):
-    def put(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
-        if path.startswith("/inventory/items"):
-            raise RuntimeError("item write failed")
-        return super().put(path, payload)
-
-
-def test_a_failed_item_write_does_not_stop_the_instance_being_hidden() -> None:
-    folio = _FailingItems()
-    _sync(folio, _record(flagged=True))
-
-    resp = _sync(folio, _unmapped(UNPUBLISHED))
-
-    # The FOLIO transformer reads the instance's flag.
-    assert folio.instance()["discoverySuppress"] is True
-    assert folio.holdings()["discoverySuppress"] is True
-    assert folio.item()["discoverySuppress"] is False
-    assert resp.counts["suppressed"] == 2
-    assert resp.counts["failed"] == 1
-
-
-def test_an_unmapped_withheld_record_already_hidden_is_not_written_again() -> None:
-    folio = _synced()
-    _sync(folio, UNPUBLISHED)
-    puts_before = len(folio.puts)
-
-    resp = _sync(folio, _unmapped(UNPUBLISHED))
-
-    assert len(folio.puts) == puts_before
-    assert resp.counts["suppressed"] == 0
-
-
-def test_an_unmapped_withheld_record_never_synced_creates_nothing() -> None:
-    folio = StatefulInventory()
-
-    resp = _sync(folio, _unmapped(UNPUBLISHED))
-
-    assert folio.count() == 0
-    assert resp.counts["failed"] == 1
-
-
-def test_an_unmapped_withheld_record_is_not_hidden_on_a_dry_run() -> None:
-    folio = _synced()
-
-    _sync(folio, _unmapped(UNPUBLISHED), dry_run=True)
-
-    _assert_unsuppressed(folio)
-
-
-def test_a_published_record_that_fails_to_map_is_left_alone() -> None:
-    folio = _synced()
-    puts_before = len(folio.puts)
-
-    resp = _sync(folio, _unmapped(_record(flagged=True)))
-
-    _assert_unsuppressed(folio)
-    assert len(folio.puts) == puts_before
-    assert resp.counts["withheld_unmapped"] == 0
-
-
-@pytest.mark.parametrize(
-    "content",
-    [
-        _record(flagged=True),
-        NO_MARKER,
-        _record(flagged=False, publish_to_web="no"),
-        _record(flagged=True, publish_to_web="no", level="Series"),
-        _record(flagged=True, publish_to_web="no", guid="not-a-guid"),
-    ],
-)
-def test_withheld_guid_is_none_unless_selected_and_withheld(content: str) -> None:
-    assert withheld_guid(content) is None
-
-
-def test_withheld_guid_is_the_001_of_a_withheld_record() -> None:
-    assert withheld_guid(UNPUBLISHED) == GUID

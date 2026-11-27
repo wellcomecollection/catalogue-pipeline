@@ -43,8 +43,8 @@ class SyncErrorEntry(BaseModel):
 # a new GUID (a reconciler deletion fact), the record arrived as an OAI-PMH
 # tombstone, or it is item-level without the 980 $a harvest flag. An unflagged
 # record is always suppressed, never deleted, so ticking Harvest again restores it.
-# "withheld" is a withheld record that failed to map, hidden from discovery.
-DeletionReason = Literal["superseded", "tombstone", "unflagged", "withheld"]
+# "unmapped" is a selected record that failed to map, hidden from discovery.
+DeletionReason = Literal["superseded", "tombstone", "unflagged", "unmapped"]
 
 
 class SyncDeletionEntry(BaseModel):

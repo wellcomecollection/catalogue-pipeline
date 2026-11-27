@@ -23,7 +23,7 @@ from adapters.steps.axiell_folio_sync.mapping import (
     MappingError,
     select_and_build,
     unflagged_guid,
-    withheld_guid,
+    unmapped_guid,
 )
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
@@ -324,8 +324,9 @@ def run_sync(
         "unflagged_suppressed": 0,
         # Selected records written hidden from discovery, as Collections asked.
         "withheld": 0,
-        # Withheld records that failed to map. Also counted in "failed".
-        "withheld_unmapped": 0,
+        # Records hidden from discovery because they failed to map, so stale
+        # FOLIO data is not public. Also counted in "failed".
+        "unmapped_hidden": 0,
         # Records whose item carried a location note the sync could no longer
         # claim, so a duplicate was left behind. Not an error: nothing failed and
         # nothing was lost, but each one needs reconciling by hand in FOLIO.
@@ -366,15 +367,21 @@ def run_sync(
             errors_list.append(
                 _build_error(source_id, changeset_id, "mapping", str(exc))
             )
-            # A withheld record must not stay public because it failed to map.
-            guid = withheld_guid(row["content"])
+            # FOLIO still holds the last good sync, which may now be wrong
+            # (closed or withheld since), so it is hidden until the record maps.
+            guid = unmapped_guid(row["content"])
             if guid is not None:
-                counts["withheld_unmapped"] += 1
+                hidden = hide_by_guid(guid, folio, dry_run=dry_run)
+                if any(
+                    getattr(hidden, entity).action == "suppress"
+                    for entity in ("instance", "holdings", "item")
+                ):
+                    counts["unmapped_hidden"] += 1
                 _record_cascade(
-                    hide_by_guid(guid, folio, dry_run=dry_run),
+                    hidden,
                     record_id=source_id,
                     changeset_id=changeset_id,
-                    reason="withheld",
+                    reason="unmapped",
                     stage="suppress",
                     counts=counts,
                     entries=unflagged_entries,

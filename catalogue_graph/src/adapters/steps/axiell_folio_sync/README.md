@@ -30,11 +30,14 @@ The design, record-selection rules and tombstone semantics are specified in
      `no`) or is ticked for deletion (MARC `985 $a`) is still synced, with `discoverySuppress` set on all three
      FOLIO records and `staffSuppress` left clear, so staff can work with it and the public catalogue does not show
      it. The two checkbox rules are the Axiell transformer's own (`transformers/axiell/publish_to_web.py`).
-     Publishing the record clears the flag on the next run. These records are counted in `withheld`. If a withheld
-     record fails to map, its existing FOLIO records are still hidden from discovery (`hide_by_guid`); it is counted
-     in `failed` and `withheld_unmapped`, and listed in the manifest's deletions with the reason `withheld`.
+     Publishing the record clears the flag on the next run. These records are counted in `withheld`.
+   * **Records that fail to map** (`unmapped_guid`): a selected record with a mapping error is not written, so FOLIO
+     would keep the last good sync, which may no longer be true: the record may have been closed or withheld in the
+     same edit. Its existing FOLIO records are hidden from discovery (`hide_by_guid`) and stay visible to staff, and
+     the next run that maps the record clears the flag. It is counted in `failed`, and in `unmapped_hidden` when
+     something was hidden, and listed in the manifest's deletions with the reason `unmapped`.
    * **Where the sync and the Axiell transformer differ.** A record with no recognisable `981 $a` fails with a
-     mapping error and its FOLIO records are left as they were: the stylesheet emits the marker on every record, so
+     mapping error and its FOLIO records are left as they were, the one mapping failure that hides nothing: the stylesheet emits the marker on every record, so
      its absence is a harvest fault, and hiding on it could hide every synced record. The transformer suppresses
      such a record. The transformer also suppresses `AMSG` resource guides, which the sync does not check for.
    * **Mapping** (`mapping.py`): MARCXML → typed Pydantic payloads for Instance, Holdings and Item. FOLIO reference

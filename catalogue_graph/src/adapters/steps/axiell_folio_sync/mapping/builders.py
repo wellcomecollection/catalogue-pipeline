@@ -374,17 +374,16 @@ def _is_withheld(root: Record) -> bool:
     return not is_publishable(root)
 
 
-def withheld_guid(xml_content: str) -> str | None:
-    """The GUID of a selected, withheld record, or None.
+def unmapped_guid(xml_content: str) -> str | None:
+    """The GUID of a selected record whose FOLIO records to hide after it failed to map.
 
-    For a record that failed to map: its FOLIO records must still be hidden.
+    None without a publish marker: that is a harvest fault, so FOLIO is left alone.
     """
     root = parse_xml(xml_content)
     if _selection(root) != "selected":
         return None
     try:
-        if not _is_withheld(root):
-            return None
+        _is_withheld(root)
         source_id = (extract(root, MARC_SOURCE["source_id"]) or "").strip()
         _guid(source_id)
     except ValueError:
