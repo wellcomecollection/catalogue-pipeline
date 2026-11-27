@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # One GitHub Deployment per run, for the deploy tracker: the tag is the
+  # One GitHub Deployment per run, for Backplane: the tag is the
   # commit being deployed. Task names the catalogue_graph unit.
   start-deployment:
     # The role only trusts main, so skip rather than fail a dispatch from elsewhere.
