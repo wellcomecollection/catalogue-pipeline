@@ -28,8 +28,8 @@ trait WorksIndexFixtures extends IndexFixturesBase {
   def withLocalWorksIndex[R]: Fixture[Index, R] = {
     withLocalElasticSearchIndex[R](config =
       getConfig(
-        mappings = "mappings.works_indexed.2026-07-03.json",
-        analysis = "analysis.works_indexed.2026-07-03.json"
+        mappings = "mappings.works_indexed.2026-11-16.json",
+        analysis = "analysis.works_indexed.2026-11-16.json"
       )
     )
   }

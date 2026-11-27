@@ -27,8 +27,6 @@ locals {
         identified = "works_identified.2023-05-26"
         // matcher_merger - graph/ingestor/indexer
         denormalised = "works_denormalised.2025-08-14"
-        // graph/ingestor/indexer - API
-        indexed = "works_indexed.2026-07-03"
       }
       images = {
         // matcher_merger - images_inferrer
@@ -43,7 +41,7 @@ locals {
         indexed = "concepts_indexed.2025-06-17"
       }
     }
-    // Adds query.titleSort for sorting works by title (wellcomecollection/platform#6853).
+    // graph/ingestor/indexer - API
     "2026-11-16" = {
       works = {
         indexed = "works_indexed.2026-11-16"
