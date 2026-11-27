@@ -115,6 +115,10 @@ jobs:
             axiell-adapter-mark-published,
             folio-adapter-mark-published,
             axiell-adapter-reconcile,
+            # Axiell UAT adapter lambdas
+            axiell_uat-adapter-trigger,
+            axiell_uat-adapter-mark-published,
+            axiell_uat-adapter-reconcile,
             # Axiell to FOLIO outbound sync
             axiell-folio-sync-adapter-lambda,
             # Third-party API probes

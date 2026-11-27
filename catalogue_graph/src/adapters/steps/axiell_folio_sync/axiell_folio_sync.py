@@ -1,8 +1,9 @@
 """Axiell to Folio sync step.
 
-Triggered by ``axiell.adapter.completed`` EventBridge events. Reads changed
-records from the Axiell Iceberg adapter table, maps them via MARCXML → FOLIO
-Inventory payloads, and upserts (Instance → Holdings → Item) via OKAPI.
+Triggered by ``axiell.adapter.completed`` and ``axiell_uat.adapter.completed``
+EventBridge events. Reads changed records from the Iceberg adapter table of the
+adapter that sent the event, maps them via MARCXML → FOLIO Inventory payloads,
+and upserts (Instance → Holdings → Item) via OKAPI.
 
 This is the FOLIO *outbound* (write) path and is distinct from the FOLIO adapter
 enrichment step (``oai_pmh/folio_enrich.py``), which reads FOLIO into an internal
@@ -18,10 +19,11 @@ Event shape (from EventBridge axiell.adapter.completed event):
     "folio_target": "dev"
   }
 
-The adapter table is read via the shared ``AXIELL_CONFIG`` /
-``AxiellChangesetReader`` (same config as the Axiell adapter), which selects
-the S3 Tables catalog in the Lambda and a local sqlite catalog for local runs,
-so no Iceberg-specific env vars.
+``transformer_type`` names the source: "axiell" (the live system, the default)
+or "axiell_uat". The adapter table is read via that adapter's own config and
+``AxiellChangesetReader``, which selects the S3 Tables catalog in the Lambda and
+a local sqlite catalog for local runs, so no Iceberg-specific env vars. A UAT run
+always targets the test environment (see ``resolve_source_target``).
 
 Environment variables (injected by Terraform):
   OKAPI_SECRET_PARAM     — SSM path to {"url":…, "tenant":…, "username":…, "password":…}
@@ -62,6 +64,7 @@ from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
     AxiellFolioSyncResponse,
     FolioTarget,
+    SyncSource,
 )
 from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
 from clients.folio_client import FolioClient, FolioInventoryClient, ssl_context_from_env
@@ -71,6 +74,33 @@ from utils.steps import ecs_handler
 logger = structlog.get_logger(__name__)
 
 PIPELINE_STEP = "axiell_folio_sync"
+
+# Sources held to one FOLIO target whatever the event or FOLIO_TARGET say. UAT
+# records share GUIDs with live ones, so they must only ever reach the test
+# environment. A source not listed here resolves its target as usual.
+SOURCE_FOLIO_TARGETS: dict[SyncSource, FolioTarget] = {"axiell_uat": "test"}
+
+
+def resolve_source_target(
+    source: SyncSource, event_folio_target: FolioTarget | None
+) -> FolioTarget:
+    """The FOLIO target for a run from ``source``.
+
+    A source in SOURCE_FOLIO_TARGETS always gets its fixed target, and an event
+    asking for another one is logged and ignored. Any other source falls back to
+    :func:`resolve_folio_target`.
+    """
+    fixed = SOURCE_FOLIO_TARGETS.get(source)
+    if fixed is None:
+        return resolve_folio_target(event_folio_target)
+    if event_folio_target is not None and event_folio_target != fixed:
+        logger.warning(
+            "folio_target ignored; this source has a fixed target",
+            source=source,
+            requested=event_folio_target,
+            folio_target=fixed,
+        )
+    return fixed
 
 
 def resolve_dry_run(event_dry_run: bool | None, folio_target: FolioTarget) -> bool:
@@ -104,7 +134,17 @@ def handler(
     """
     setup_logging(execution_context)
 
-    folio_target = resolve_folio_target(event.folio_target)
+    source: SyncSource = event.transformer_type or "axiell"
+    if source == "axiell_uat" and any(
+        os.environ.get(name)
+        for name in ("OKAPI_URL", "OKAPI_TENANT", "OKAPI_USERNAME", "OKAPI_PASSWORD")
+    ):
+        raise ValueError(
+            "UAT syncs cannot use unscoped OKAPI credential overrides; "
+            "unset OKAPI_URL, OKAPI_TENANT, OKAPI_USERNAME and OKAPI_PASSWORD "
+            "and configure OKAPI_TEST_SECRET_PARAM instead."
+        )
+    folio_target = resolve_source_target(source, event.folio_target)
     dry_run = resolve_dry_run(event.dry_run, folio_target)
     env_hard_delete = os.environ.get("HARD_DELETE", "false").lower() in (
         "true",
@@ -118,7 +158,12 @@ def handler(
 
     okapi = load_okapi_config(folio_target)
     # Logged so a run's manifest can always be tied back to the instance it hit.
-    logger.info("folio target resolved", folio_target=folio_target, url=okapi["url"])
+    logger.info(
+        "folio target resolved",
+        source=source,
+        folio_target=folio_target,
+        url=okapi["url"],
+    )
     client = FolioClient(
         okapi["url"].rstrip("/"),
         okapi["tenant"],
@@ -133,6 +178,7 @@ def handler(
         event.changeset_ids or None,
         event.sample_limit,
         use_rest_api_table=use_rest_api_table,
+        source=source,
     )
     logger.info(
         "adapter_read complete",
@@ -214,6 +260,15 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         help="Read from the S3 Tables catalog instead of the local sqlite catalog",
     )
     parser.add_argument(
+        "--source",
+        choices=["axiell", "axiell_uat"],
+        default=None,
+        help=(
+            "Adapter table to read: 'axiell' (the live system, the default) or "
+            "'axiell_uat' (always synced to the test environment)."
+        ),
+    )
+    parser.add_argument(
         "--folio-target",
         choices=["prod", "test", "dev"],
         default=None,
@@ -232,6 +287,7 @@ def local_handler(parser: argparse.ArgumentParser) -> None:
         dry_run=not args.live,
         hard_delete=args.hard_delete,
         folio_target=args.folio_target,
+        transformer_type=args.source,
     )
     response = handler(
         event,

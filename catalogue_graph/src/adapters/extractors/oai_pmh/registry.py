@@ -5,14 +5,15 @@ from __future__ import annotations
 from functools import cache
 from typing import Literal
 
-from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
+from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG, AXIELL_UAT_CONFIG
 from adapters.extractors.oai_pmh.folio.runtime import FOLIO_CONFIG
 from adapters.extractors.oai_pmh.runtime import OAIPMHRuntimeConfig
 
-AdapterType = Literal["axiell", "folio"]
+AdapterType = Literal["axiell", "axiell_uat", "folio"]
 
 _CONFIGS: dict[str, OAIPMHRuntimeConfig] = {
     "axiell": AXIELL_CONFIG,
+    "axiell_uat": AXIELL_UAT_CONFIG,
     "folio": FOLIO_CONFIG,
 }
 

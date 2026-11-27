@@ -14,7 +14,12 @@ from typing import Any
 
 import structlog
 
-from adapters.extractors.oai_pmh.axiell.runtime import AXIELL_CONFIG
+from adapters.extractors.oai_pmh.axiell.runtime import (
+    AXIELL_CONFIG,
+    AXIELL_UAT_CONFIG,
+    AxiellRuntimeConfig,
+)
+from adapters.steps.axiell_folio_sync.models import SyncSource
 from adapters.steps.oai_pmh.guid_mapping import compute_guid
 from adapters.utils.axiell_changeset_reader import (
     AxiellChangesetReader,
@@ -22,6 +27,12 @@ from adapters.utils.axiell_changeset_reader import (
 )
 
 logger = structlog.get_logger(__name__)
+
+# The adapter config, and so the tables, each source reads.
+SOURCE_CONFIGS: Mapping[SyncSource, AxiellRuntimeConfig] = {
+    "axiell": AXIELL_CONFIG,
+    "axiell_uat": AXIELL_UAT_CONFIG,
+}
 
 
 @dataclass(frozen=True)
@@ -83,11 +94,13 @@ def read_rows(
     sample_limit: int | None,
     *,
     use_rest_api_table: bool,
+    source: SyncSource = "axiell",
 ) -> tuple[list[dict], list[SupersededGuid], list[TombstonedGuid]]:
     """Read changed Axiell adapter rows, superseded-GUID deletions and
     tombstoned GUIDs.
 
-    Uses the same ``AXIELL_CONFIG`` as the Axiell adapter, so it works against
+    Uses the same config as the adapter that ``source`` names (``AXIELL_CONFIG``
+    for the live system, ``AXIELL_UAT_CONFIG`` for UAT), so it works against
     S3 Tables (``use_rest_api_table=True``, production) or the local sqlite
     catalog (``use_rest_api_table=False``, local dev) with no code changes.
     Read-only: the tables are never created.
@@ -105,7 +118,7 @@ def read_rows(
     tombstones, and the reader is built without the facts/reconciler tables.
     """
     reader = AxiellChangesetReader.build(
-        AXIELL_CONFIG,
+        SOURCE_CONFIGS[source],
         changeset_ids or [],
         use_rest_api_table=use_rest_api_table,
         with_deletion_facts=bool(changeset_ids),

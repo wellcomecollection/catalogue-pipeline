@@ -20,6 +20,7 @@ from adapters.steps.axiell_folio_sync.models import (
     FolioTarget,
     SyncDeletionEntry,
     SyncErrorEntry,
+    SyncSource,
     SyncSuccessEntry,
 )
 from utils.reporting import PipelineMetric, PipelineReport
@@ -30,6 +31,10 @@ PIPELINE_STEP = "axiell_folio_sync"
 class AxiellFolioSyncReport(PipelineReport):
     label: ClassVar[str] = PIPELINE_STEP
     job_id: str
+    # The Axiell adapter the run read from. Part of the S3 key, because the live
+    # and UAT adapters derive job_id from the same minute-resolution timestamp,
+    # so their runs share ids.
+    source: SyncSource = "axiell"
     changeset_ids: list[str] = Field(default_factory=list)
     dry_run: bool
     # Ties a stored manifest to the FOLIO instance it describes.
@@ -106,4 +111,4 @@ class AxiellFolioSyncReport(PipelineReport):
             raise ValueError("No S3 bucket configured for the sync report")
         # The manifests/ prefix is load-bearing: the bucket's Terraform lifecycle
         # rule expires objects under it after manifest_retention_days.
-        return f"s3://{self.s3_bucket}/manifests/{self.job_id}.json"
+        return f"s3://{self.s3_bucket}/manifests/{self.source}/{self.job_id}.json"

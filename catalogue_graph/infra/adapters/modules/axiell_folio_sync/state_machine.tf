@@ -16,15 +16,22 @@ locals {
             job_id           = "{% $states.input.detail.job_id %}"
             transformer_type = "{% $exists($states.input.detail.transformer_type) ? $states.input.detail.transformer_type : null %}"
             sample_limit     = "{% $exists($states.input.detail.sample_limit) ? $states.input.detail.sample_limit : null %}"
-            # Passed as null when absent, so the Lambda's DRY_RUN env var (set
-            # from dry_run_default) supplies the default. The Lambda keeps every
-            # prod run dry whatever this says.
-            dry_run     = "{% $exists($states.input.detail.dry_run) ? $states.input.detail.dry_run : null %}"
+            # A UAT run (transformer_type "axiell_uat") is passed false, so it
+            # writes to the test environment, where the Lambda holds it. Any
+            # other run is passed null when the event sets nothing, so the
+            # Lambda's DRY_RUN env var (from dry_run_default, kept true) applies.
+            # A live run is therefore dry by DRY_RUN as well as by the Lambda's
+            # prod check, and stays dry if that check is removed at production
+            # switch-on until dry_run_default is changed too.
+            dry_run     = "{% $exists($states.input.detail.dry_run) ? $states.input.detail.dry_run : ($states.input.detail.transformer_type = 'axiell_uat' ? false : null) %}"
             hard_delete = "{% $exists($states.input.detail.hard_delete) ? $states.input.detail.hard_delete : null %}"
             # Baked in at apply time rather than read from the Lambda's
             # FOLIO_TARGET, so scheduled runs keep their target even if that env
-            # var is changed out of band for hand-driven testing.
-            folio_target = "{% $exists($states.input.detail.folio_target) ? $states.input.detail.folio_target : '${local.folio_default_target}' %}"
+            # var is changed out of band for hand-driven testing. folio_default_target
+            # is the live adapter's target; a run from the UAT adapter
+            # (transformer_type "axiell_uat") falls back to "test", and the
+            # Lambda holds it there whatever this says.
+            folio_target = "{% $exists($states.input.detail.folio_target) ? $states.input.detail.folio_target : ($states.input.detail.transformer_type = 'axiell_uat' ? 'test' : '${local.folio_default_target}') %}"
           }
         }
         Output = "{% $states.result.Payload %}"

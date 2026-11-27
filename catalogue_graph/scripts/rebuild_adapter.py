@@ -116,6 +116,10 @@ slow on every attempt."""
 
 EVENT_BUS_NAME = "catalogue-pipeline-adapter-event-bus"
 
+RECONCILED_ADAPTER_TYPES: frozenset[str] = frozenset({"axiell", "axiell_uat"})
+"""Adapters whose rebuild also rebuilds the reconciler and deletion facts
+stores: the Axiell adapters, live and UAT."""
+
 
 def _iter_snapshot_batches(snapshot_path: str) -> Iterator[pa.Table]:
     """Yield Arrow tables in batches from a parquet snapshot file."""
@@ -746,7 +750,7 @@ def rebuild_adapter(
                 build_inventory_store(use_rest_api_table=use_rest_api_table),
                 store_name="inventory store",
             )
-        if adapter_type == "axiell":
+        if adapter_type in RECONCILED_ADAPTER_TYPES:
             reconcile_runtime = build_reconcile_runtime(
                 adapter_type, use_rest_api_table=use_rest_api_table
             )
@@ -824,7 +828,7 @@ def rebuild_adapter(
             folio_inventory.store, folio_inventory.snapshot_path
         )
 
-    if adapter_type == "axiell":
+    if adapter_type in RECONCILED_ADAPTER_TYPES:
         # Build the reconcile runtime after the load: a pyiceberg handle is
         # pinned to the snapshot it opened at, so one built earlier would read
         # nothing and reconcile would write an empty baseline.
