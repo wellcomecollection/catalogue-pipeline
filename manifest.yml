@@ -21,7 +21,8 @@ metadata:
   annotations:
     github.com/project-slug: wellcomecollection/catalogue-pipeline
     backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/catalogue_graph/
-    backplane/dora-paths: catalogue_graph
+    # What the two Dockerfiles copy, so tests, docs, notebooks and unapplied Terraform are not reported as shipped.
+    backplane/dora-paths: catalogue_graph/src,catalogue_graph/pyproject.toml,catalogue_graph/uv.lock,catalogue_graph/certs,catalogue_graph/infra/lambda_extensions/secrets_extension.py,catalogue_graph/lambda.Dockerfile,catalogue_graph/task.Dockerfile
   links:
     - title: Runbook
       url: https://github.com/wellcomecollection/catalogue-pipeline/blob/main/docs/adapters/runbook.md
@@ -30,8 +31,119 @@ spec:
   lifecycle: production
   owner: team:default/digital-platform
   system: system:catalogue-pipeline
+  dependsOn:
+    - ref: resource:catalogue-pipeline-elasticsearch
+      description: Ingestors write works, images and concepts indexes
+    - ref: resource:catalogue-pipeline-id-registry
+      description: The id minter
+    - ref: resource:axiell-collections
+      description: Axiell adapter, OAI-PMH harvest every 15 minutes
+    - ref: resource:ebsco
+      description: EBSCO adapter, daily FTP pull
+    - ref: resource:folio
+      criticality: soft
+      description: FOLIO adapter, preview pipeline only
   environments:
     - name: prod
       tier: production
       github:
         task: "deploy:catalogue_graph"
+---
+apiVersion: backplane/v1
+kind: Resource
+metadata:
+  name: catalogue-pipeline-elasticsearch
+  description: Hosted Elastic Cloud pipeline-storage cluster the catalogue APIs read, a dated deployment (es-cluster-2026-07-03)
+spec:
+  type: search-index
+  owner: team:default/digital-platform
+  system: system:catalogue-pipeline
+---
+apiVersion: backplane/v1
+kind: Resource
+metadata:
+  name: catalogue-pipeline-id-registry
+  description: Aurora MySQL registry of canonical ids, a dated cluster (2026-07-03)
+spec:
+  type: database
+  owner: team:default/digital-platform
+  system: system:catalogue-pipeline
+---
+apiVersion: backplane/v1
+kind: Component
+metadata:
+  name: catalogue-pipeline-sierra-adapter
+  description: Reads Sierra into the Sierra VHS and indexes it for reporting
+  annotations:
+    github.com/project-slug: wellcomecollection/catalogue-pipeline
+    backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/sierra_adapter/
+spec:
+  type: pipeline
+  lifecycle: production
+  owner: team:default/digital-platform
+  system: system:catalogue-pipeline
+  dependsOn:
+    - resource:sierra
+    - ref: resource:reporting-elasticsearch
+      type: data
+      description: The Sierra indexer writes the reporting cluster
+---
+apiVersion: backplane/v1
+kind: Component
+metadata:
+  name: catalogue-pipeline-mets-adapter
+  description: Records METS locations for bags the storage service registers
+  annotations:
+    github.com/project-slug: wellcomecollection/catalogue-pipeline
+    backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/mets_adapter/
+spec:
+  type: pipeline
+  lifecycle: production
+  owner: team:default/digital-platform
+  system: system:catalogue-pipeline
+  dependsOn:
+    - ref: component:storage-bag-register
+      type: data
+      description: Registered-bag notifications
+    - component:storage-bags-api
+    - resource:api-wellcomecollection-org-cloudfront
+---
+apiVersion: backplane/v1
+kind: Component
+metadata:
+  name: catalogue-pipeline-transformers
+  description: Scala transformers that turn Sierra, METS, TEI, Calm and Miro records into works
+  annotations:
+    github.com/project-slug: wellcomecollection/catalogue-pipeline
+    backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/pipeline/transformer/
+spec:
+  type: pipeline
+  lifecycle: production
+  owner: team:default/digital-platform
+  system: system:catalogue-pipeline
+  dependsOn:
+    - ref: resource:catalogue-pipeline-elasticsearch
+      description: Writes works-source
+    - ref: component:catalogue-pipeline-sierra-adapter
+      type: data
+    - ref: component:catalogue-pipeline-mets-adapter
+      type: data
+    - ref: resource:storage-replica-primary
+      type: data
+      description: The METS transformer reads METS files
+---
+apiVersion: backplane/v1
+kind: Component
+metadata:
+  name: catalogue-pipeline-matcher-merger
+  description: Matches and merges identified works into denormalised works and initial images
+  annotations:
+    github.com/project-slug: wellcomecollection/catalogue-pipeline
+    backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/pipeline/matcher_merger/
+spec:
+  type: pipeline
+  lifecycle: production
+  owner: team:default/digital-platform
+  system: system:catalogue-pipeline
+  dependsOn:
+    - resource:catalogue-pipeline-elasticsearch
