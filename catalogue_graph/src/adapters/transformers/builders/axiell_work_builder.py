@@ -6,6 +6,7 @@ from adapters.extractors.oai_pmh.axiell import config as axiell_config
 from adapters.transformers.axiell.access_status import extract_access_status
 from adapters.transformers.axiell.contributors import extract_contributors
 from adapters.transformers.axiell.description import extract_description
+from adapters.transformers.axiell.folio_sync import extract_synced_folio_instance_id
 from adapters.transformers.axiell.format import extract_format
 from adapters.transformers.axiell.languages import extract_languages
 from adapters.transformers.axiell.notes import extract_notes
@@ -259,6 +260,20 @@ class AxiellWorkBuilder(MarcXmlWorkBuilder):
                         reason="Archivematica work",
                     )
                 )
+
+        if axiell_config.AXIELL_FOLIO_MERGE_CANDIDATES and (
+            instance_id := extract_synced_folio_instance_id(self.record)
+        ):
+            merge_candidates.append(
+                MergeCandidate(
+                    id=Identifiable.from_source_identifier(
+                        WorkSourceIdentifier(
+                            identifier_type=Id(id="folio-instance"), value=instance_id
+                        )
+                    ),
+                    reason="Axiell/FOLIO sync work",
+                )
+            )
 
         return super().visible_work_state.model_copy(
             update={"merge_candidates": merge_candidates}

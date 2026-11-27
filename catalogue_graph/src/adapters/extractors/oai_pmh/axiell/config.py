@@ -134,6 +134,18 @@ AXIELL_COLLECTION_PATH_SOURCE = _parse_collection_path_source(
     os.getenv("AXIELL_COLLECTION_PATH_SOURCE", "refno")
 )
 
+
+def _parse_flag(name: str, default: str) -> bool:
+    value = os.getenv(name, default).strip().lower()
+    if value not in ("true", "false"):
+        raise ValueError(f'{name} must be "true" or "false", got {value!r}')
+    return value == "true"
+
+
+# Only set where FOLIO works exist: the id minter mints an id for every merge
+# candidate, and FOLIO ids must stay out of production's registry.
+AXIELL_FOLIO_MERGE_CANDIDATES = _parse_flag("AXIELL_FOLIO_MERGE_CANDIDATES", "false")
+
 # Manifest storage configuration
 S3_BUCKET = os.getenv(
     "S3_BUCKET",
