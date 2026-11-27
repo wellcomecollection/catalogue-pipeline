@@ -38,17 +38,34 @@ _LIST_KEYS = {
 }
 
 
-def _record(*, flagged: bool, level: str = "ITEM", guid: str = GUID) -> str:
+def _record(
+    *,
+    flagged: bool,
+    level: str = "ITEM",
+    guid: str = GUID,
+    publish_to_web: str | None = "yes",
+    for_deletion: bool = False,
+) -> str:
     """An Axiell record that maps cleanly, with or without the harvest flag."""
     flag = (
         "<datafield tag='980'><subfield code='a'>Y</subfield></datafield>"
         if flagged
         else ""
     )
+    publish = (
+        f"<datafield tag='981'><subfield code='a'>{publish_to_web}</subfield></datafield>"
+        if publish_to_web is not None
+        else ""
+    )
+    deletion = (
+        "<datafield tag='985'><subfield code='a'>x</subfield></datafield>"
+        if for_deletion
+        else ""
+    )
     return (
         "<record>"
         f"<controlfield tag='001'>{guid}</controlfield>"
-        f"{flag}"
+        f"{flag}{publish}{deletion}"
         f"<datafield tag='351'><subfield code='c'>{level}</subfield></datafield>"
         "<datafield tag='245'><subfield code='a'>A Title</subfield></datafield>"
         "<datafield tag='655'><subfield code='a'>Archives - Non-digital</subfield></datafield>"

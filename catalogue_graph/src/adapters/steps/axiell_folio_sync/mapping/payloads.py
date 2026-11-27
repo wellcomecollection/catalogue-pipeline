@@ -56,6 +56,7 @@ class Instance(BaseModel):
     # is what restores a record suppressed when Harvest was unticked, and it
     # also clears a suppression set by hand in FOLIO, since FOLIO does not
     # record who set it. The instance is the only entity with staffSuppress.
+    # The exception is discoverySuppress on a record Collections withholds.
     discoverySuppress: bool = False
     staffSuppress: bool = False
 
@@ -100,6 +101,8 @@ class PayloadMeta(BaseModel):
     source_id: str
     mapping_version: str
     deleted: bool = False
+    # Not published to the web, or ticked for deletion, in Collections.
+    withheld: bool = False
     # The tenant ids of every access statistical code the mapping can set (see
     # config.ACCESS_STATISTICAL_CODES). The upsert replaces any of these already
     # on the item with the one the payload carries, and keeps every other code.

@@ -92,6 +92,36 @@ def suppress_by_guid(
     return _cascade_by_guid(guid, folio, _suppress_entity, dry_run=dry_run)
 
 
+def hide_by_guid(
+    guid: str,
+    folio: FolioInventoryOps,
+    *,
+    dry_run: bool = False,
+) -> GuidCascadeResult:
+    """Hide a GUID's FOLIO records from discovery, leaving them visible to staff."""
+    result = GuidCascadeResult(guid=guid)
+    for attr, search_path, list_key, id_of in _CASCADE_ENTITIES:
+        # Hiding has no child-first constraint, so one failure must not stop the rest.
+        try:
+            setattr(
+                result,
+                attr,
+                _suppress_entity(
+                    folio,
+                    search_path=search_path,
+                    list_key=list_key,
+                    write_path_prefix=search_path,
+                    folio_id=id_of(guid),
+                    dry_run=dry_run,
+                    staff=False,
+                ),
+            )
+        except Exception as exc:
+            result.errors.append(UpsertError(type="api", detail=str(exc)))
+            logger.error("hide error", guid=guid, error=str(exc), exc_info=True)
+    return result
+
+
 def delete_by_guid(
     guid: str,
     folio: FolioInventoryOps,

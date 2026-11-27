@@ -23,6 +23,7 @@ from adapters.steps.axiell_folio_sync.mapping import (
     MappingError,
     select_and_build,
     unflagged_guid,
+    withheld_guid,
 )
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
@@ -40,6 +41,7 @@ from adapters.steps.axiell_folio_sync.results import (
 )
 from adapters.steps.axiell_folio_sync.upsert import (
     delete_by_guid,
+    hide_by_guid,
     suppress_by_guid,
     upsert_from_payloads,
 )
@@ -320,6 +322,10 @@ def run_sync(
         # "suppressed". Kept apart so a rise in "suppressed" can be told apart
         # from the superseded and tombstone suppressions of the second pass.
         "unflagged_suppressed": 0,
+        # Selected records written hidden from discovery, as Collections asked.
+        "withheld": 0,
+        # Withheld records that failed to map. Also counted in "failed".
+        "withheld_unmapped": 0,
         # Records whose item carried a location note the sync could no longer
         # claim, so a duplicate was left behind. Not an error: nothing failed and
         # nothing was lost, but each one needs reconciling by hand in FOLIO.
@@ -360,6 +366,20 @@ def run_sync(
             errors_list.append(
                 _build_error(source_id, changeset_id, "mapping", str(exc))
             )
+            # A withheld record must not stay public because it failed to map.
+            guid = withheld_guid(row["content"])
+            if guid is not None:
+                counts["withheld_unmapped"] += 1
+                _record_cascade(
+                    hide_by_guid(guid, folio, dry_run=dry_run),
+                    record_id=source_id,
+                    changeset_id=changeset_id,
+                    reason="withheld",
+                    stage="suppress",
+                    counts=counts,
+                    entries=unflagged_entries,
+                    errors_list=errors_list,
+                )
             continue
         except Exception as exc:
             counts["failed"] += 1
@@ -463,8 +483,11 @@ def run_sync(
                     item_action=result.item.action,
                     timestamp=utc_now_iso(),
                     stray_location_notes=result.stray_location_notes,
+                    withheld=mapped.meta.withheld,
                 )
             )
+            if mapped.meta.withheld:
+                counts["withheld"] += 1
             if result.stray_location_notes:
                 counts["stray_location_notes"] += 1
 

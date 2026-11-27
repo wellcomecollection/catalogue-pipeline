@@ -25,6 +25,8 @@ class SyncSuccessEntry(BaseModel):
     # our label, so a duplicate was left behind. Empty for almost every record;
     # non-empty means someone should reconcile that item by hand.
     stray_location_notes: list[str] = Field(default_factory=list)
+    # Written hidden from discovery, because Collections withholds the record.
+    withheld: bool = False
 
 
 class SyncErrorEntry(BaseModel):
@@ -41,7 +43,8 @@ class SyncErrorEntry(BaseModel):
 # a new GUID (a reconciler deletion fact), the record arrived as an OAI-PMH
 # tombstone, or it is item-level without the 980 $a harvest flag. An unflagged
 # record is always suppressed, never deleted, so ticking Harvest again restores it.
-DeletionReason = Literal["superseded", "tombstone", "unflagged"]
+# "withheld" is a withheld record that failed to map, hidden from discovery.
+DeletionReason = Literal["superseded", "tombstone", "unflagged", "withheld"]
 
 
 class SyncDeletionEntry(BaseModel):

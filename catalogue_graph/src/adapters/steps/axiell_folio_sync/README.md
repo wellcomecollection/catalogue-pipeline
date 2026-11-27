@@ -26,6 +26,17 @@ The design, record-selection rules and tombstone semantics are specified in
      records suppressed (`unflagged_guid`, then `suppress_by_guid`), never hard deleted, so unticking Harvest takes
      it out of FOLIO and ticking it again restores it: every upsert sends the suppression flags cleared. A record
      that is not item-level is skipped.
+   * **Withheld records** (`_is_withheld`): a selected record that is not published to the web (MARC `981 $a` is
+     `no`) or is ticked for deletion (MARC `985 $a`) is still synced, with `discoverySuppress` set on all three
+     FOLIO records and `staffSuppress` left clear, so staff can work with it and the public catalogue does not show
+     it. The two checkbox rules are the Axiell transformer's own (`transformers/axiell/publish_to_web.py`).
+     Publishing the record clears the flag on the next run. These records are counted in `withheld`. If a withheld
+     record fails to map, its existing FOLIO records are still hidden from discovery (`hide_by_guid`); it is counted
+     in `failed` and `withheld_unmapped`, and listed in the manifest's deletions with the reason `withheld`.
+   * **Where the sync and the Axiell transformer differ.** A record with no recognisable `981 $a` fails with a
+     mapping error and its FOLIO records are left as they were: the stylesheet emits the marker on every record, so
+     its absence is a harvest fault, and hiding on it could hide every synced record. The transformer suppresses
+     such a record. The transformer also suppresses `AMSG` resource guides, which the sync does not check for.
    * **Mapping** (`mapping.py`): MARCXML → typed Pydantic payloads for Instance, Holdings and Item. FOLIO reference
      UUIDs (locations, material types, loan types, …) are resolved via `RefCache`, loaded once per invocation from the
      FOLIO tenant and reused across warm Lambda starts.
