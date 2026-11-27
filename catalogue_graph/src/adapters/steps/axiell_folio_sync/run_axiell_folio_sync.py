@@ -320,6 +320,10 @@ def run_sync(
         # "suppressed". Kept apart so a rise in "suppressed" can be told apart
         # from the superseded and tombstone suppressions of the second pass.
         "unflagged_suppressed": 0,
+        # Selected records Collections withholds from the public (not
+        # published to the web, or ticked for deletion), written hidden from
+        # discovery. Their entities count as created or updated, not suppressed.
+        "withheld": 0,
         # Records whose item carried a location note the sync could no longer
         # claim, so a duplicate was left behind. Not an error: nothing failed and
         # nothing was lost, but each one needs reconciling by hand in FOLIO.
@@ -463,8 +467,11 @@ def run_sync(
                     item_action=result.item.action,
                     timestamp=utc_now_iso(),
                     stray_location_notes=result.stray_location_notes,
+                    withheld=mapped.meta.withheld,
                 )
             )
+            if mapped.meta.withheld:
+                counts["withheld"] += 1
             if result.stray_location_notes:
                 counts["stray_location_notes"] += 1
 

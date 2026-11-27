@@ -52,10 +52,11 @@ class Instance(BaseModel):
     # The Synched by Axiell instance status, the synced marker. Overwritten on update:
     # FOLIO allows one status, so a status set by hand is replaced.
     statusId: str
-    # A selected record is never suppressed. Sending both flags on every write
-    # is what restores a record suppressed when Harvest was unticked, and it
-    # also clears a suppression set by hand in FOLIO, since FOLIO does not
-    # record who set it. The instance is the only entity with staffSuppress.
+    # Sent on every write, which is what restores a record suppressed when
+    # Harvest was unticked. It also clears a suppression set by hand in FOLIO,
+    # since FOLIO does not record who set it. discoverySuppress is true only
+    # for a record Collections withholds from the public; staffSuppress is
+    # never set here. The instance is the only entity with staffSuppress.
     discoverySuppress: bool = False
     staffSuppress: bool = False
 
@@ -68,7 +69,7 @@ class Holdings(BaseModel):
     permanentLocationId: str
     # No formerIds: the sync finds the holdings by its derived id, and staff
     # reach the GUID through the instance, whose id it is.
-    # Cleared on every write, as on the instance.
+    # Sent on every write, as on the instance.
     discoverySuppress: bool = False
 
 
@@ -90,7 +91,7 @@ class Item(BaseModel):
     # formerIds: the FOLIO transformer reads an item's formerIds as its Sierra
     # item number.
     statisticalCodeIds: list[str] | None = None
-    # Cleared on every write, as on the instance.
+    # Sent on every write, as on the instance.
     discoverySuppress: bool = False
 
 
@@ -100,6 +101,8 @@ class PayloadMeta(BaseModel):
     source_id: str
     mapping_version: str
     deleted: bool = False
+    # Not published to the web, or ticked for deletion, in Collections.
+    withheld: bool = False
     # The tenant ids of every access statistical code the mapping can set (see
     # config.ACCESS_STATISTICAL_CODES). The upsert replaces any of these already
     # on the item with the one the payload carries, and keeps every other code.

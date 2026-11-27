@@ -25,6 +25,8 @@ class SyncSuccessEntry(BaseModel):
     # our label, so a duplicate was left behind. Empty for almost every record;
     # non-empty means someone should reconcile that item by hand.
     stray_location_notes: list[str] = Field(default_factory=list)
+    # Written hidden from discovery, because Collections withholds the record.
+    withheld: bool = False
 
 
 class SyncErrorEntry(BaseModel):

@@ -15,6 +15,12 @@ from typing import Literal
 
 from pymarc.record import Record
 
+from adapters.transformers.axiell.publish_to_web import (
+    extract_publish_to_web,
+    is_marked_for_deletion,
+    is_publishable,
+)
+
 from ..folio import RefCache
 from .config import (
     ACCESS_ITEM_STATUS,
@@ -290,17 +296,27 @@ def build_item(rec: CanonicalRecord, ref: RefCache) -> Item:
 
 
 def _assemble_payloads(
-    rec: CanonicalRecord, ref_cache: RefCache, *, deleted: bool
+    rec: CanonicalRecord,
+    ref_cache: RefCache,
+    *,
+    deleted: bool,
+    withheld: bool = False,
 ) -> MappedPayloads:
-    """Build the three FOLIO payloads + meta from an already-extracted record."""
+    """Build the three FOLIO payloads + meta from an already-extracted record.
+
+    A withheld record is hidden from discovery on all three, and left visible
+    to staff.
+    """
+    hidden = {"discoverySuppress": withheld}
     return MappedPayloads(
-        instance=build_instance(rec, ref_cache),
-        holdings=build_holdings(rec, ref_cache),
-        item=build_item(rec, ref_cache),
+        instance=build_instance(rec, ref_cache).model_copy(update=hidden),
+        holdings=build_holdings(rec, ref_cache).model_copy(update=hidden),
+        item=build_item(rec, ref_cache).model_copy(update=hidden),
         meta=PayloadMeta(
             source_id=rec.source_id,
             mapping_version=VERSION,
             deleted=deleted,
+            withheld=withheld,
             access_statistical_code_ids=_statistical_code_ids(
                 ACCESS_STATISTICAL_CODES, ref_cache
             ),
@@ -319,7 +335,9 @@ def is_selected_for_sync(xml_content: str) -> bool:
 
     A selected record is created or updated, and any suppression is cleared, so
     ticking Harvest again restores the FOLIO records unticking it suppressed
-    (see :func:`unflagged_guid`). The ids derive from the GUID, so the sync
+    (see :func:`unflagged_guid`). The exception is a record Collections
+    withholds from the public, which is written hidden from discovery (see
+    :func:`_is_withheld`). The ids derive from the GUID, so the sync
     re-attaches to the same records rather than creating new ones.
 
     An item-level record without the flag is suppressed in FOLIO, which is a
@@ -342,6 +360,24 @@ def _selection(root: Record) -> Selection:
     if not harvest_flag:
         return "unflagged"
     return "selected"
+
+
+def _is_withheld(root: Record) -> bool:
+    """Whether Collections withholds the record from the public.
+
+    Uses the Axiell transformer's own rules, so a record it suppresses is never
+    public in FOLIO. Raises :class:`MappingError` when the publish marker is
+    missing: the stylesheet emits it on every record, so its absence is a
+    harvest fault, and suppressing on it could hide every synced record.
+    """
+    if is_marked_for_deletion(root):
+        return True
+    if extract_publish_to_web(root) is None:
+        raise MappingError(
+            "Missing or unrecognised 981$a (publish to web), so the record "
+            "cannot be told apart from a withheld one"
+        )
+    return not is_publishable(root)
 
 
 def unflagged_guid(xml_content: str) -> str | None:
@@ -374,6 +410,10 @@ def select_and_build(
 
     Returns ``None`` when the record fails either selection gate: not
     item-level, or no ``980 $a`` harvest flag. Raises on malformed XML or mapping errors.
+
+    A selected record that is not published to the web, or is ticked for
+    deletion, is still built, with ``discoverySuppress`` set (see
+    :func:`_is_withheld`).
     """
     root = parse_xml(xml_content)
 
@@ -381,4 +421,6 @@ def select_and_build(
         return None
 
     rec = _extract_record(root, deleted=deleted)
-    return _assemble_payloads(rec, ref_cache, deleted=deleted)
+    return _assemble_payloads(
+        rec, ref_cache, deleted=deleted, withheld=_is_withheld(root)
+    )
