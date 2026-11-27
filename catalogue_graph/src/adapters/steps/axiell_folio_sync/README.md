@@ -107,8 +107,9 @@ The step is dry-run by default: payloads are built and upsert actions are planne
 to FOLIO. Note that dry runs still *read* from FOLIO (reference data and existence lookups), so valid credentials are
 required either way.
 
-The default comes from the `DRY_RUN` env var (Terraform `dry_run_default`, currently `false`, so scheduled UAT runs write to the test environment); an explicit `dry_run`
-field on the event overrides it per run. A run that targets `prod` is always a dry run, whatever the event or `DRY_RUN`
+The default comes from the `DRY_RUN` env var (Terraform `dry_run_default`, currently `true`); an explicit `dry_run`
+field on the event overrides it per run. Scheduled UAT runs write to the test environment because the state machine passes
+them `dry_run = false`; live runs get no `dry_run`, so `DRY_RUN` keeps them dry. A run that targets `prod` is always a dry run, whatever the event or `DRY_RUN`
 says, until production writes are switched on. Flip `dry_run_default` to `false` in Terraform only after validating a dry
 run's manifest.
 

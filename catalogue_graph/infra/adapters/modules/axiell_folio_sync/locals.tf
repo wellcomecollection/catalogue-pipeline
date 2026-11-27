@@ -10,4 +10,11 @@ locals {
     ? "test"
     : var.folio_default_target
   )
+
+  # Allow live writes only to the test environment and the sandbox during
+  # validation. This prevents a misconfiguration from enabling production
+  # writes.
+  #
+  # Remove this when production writes are wanted.
+  dry_run_default = contains(["test", "dev"], local.folio_default_target) ? var.dry_run_default : true
 }

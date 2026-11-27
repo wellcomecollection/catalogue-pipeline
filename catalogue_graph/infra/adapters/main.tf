@@ -114,11 +114,12 @@ module "axiell_folio_sync" {
 
   # Each Axiell system syncs to its FOLIO counterpart: live to production, UAT
   # to the test environment, where the Lambda holds every UAT run. Production
-  # writes are not switched on, so the Lambda keeps every prod run dry whatever
-  # dry_run_default or the event say; dry_run_default = false lets the UAT runs
-  # write to test.
+  # writes are not switched on, so a live run is kept dry twice: DRY_RUN stays
+  # true here (the module also forces it while the default target is prod), and
+  # the Lambda keeps every prod run dry whatever DRY_RUN or the event say. UAT
+  # runs write to test because the state machine passes them dry_run = false.
   folio_default_target = "prod"
-  dry_run_default      = false
+  dry_run_default      = true
 
   # A record hard deleted in Collections is hard deleted in FOLIO too, as agreed
   # with Collection Information (wellcomecollection/platform#6833).

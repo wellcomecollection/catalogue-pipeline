@@ -38,11 +38,7 @@ module "sync_lambda" {
         MANIFEST_S3_BUCKET      = aws_s3_bucket.axiell_folio_sync_manifests.bucket
         # The adapter table is read via AXIELL_CONFIG/AdapterStore, so no
         # Iceberg-specific env vars are needed here.
-        # Not clamped by the default target: DRY_RUN applies to every run, so
-        # a prod default would also make the UAT runs to test dry. The Lambda
-        # keeps every prod run dry whatever DRY_RUN or the event say
-        # (resolve_dry_run).
-        DRY_RUN = tostring(var.dry_run_default)
+        DRY_RUN = tostring(local.dry_run_default)
         # Scheduled events carry no hard_delete, so this decides whether a
         # Collections delete removes the FOLIO records or only suppresses them.
         HARD_DELETE = tostring(var.hard_delete_default)
