@@ -135,6 +135,15 @@ def handler(
     setup_logging(execution_context)
 
     source: SyncSource = event.transformer_type or "axiell"
+    if source == "axiell_uat" and any(
+        os.environ.get(name)
+        for name in ("OKAPI_URL", "OKAPI_TENANT", "OKAPI_USERNAME", "OKAPI_PASSWORD")
+    ):
+        raise ValueError(
+            "UAT syncs cannot use unscoped OKAPI credential overrides; "
+            "unset OKAPI_URL, OKAPI_TENANT, OKAPI_USERNAME and OKAPI_PASSWORD "
+            "and configure OKAPI_TEST_SECRET_PARAM instead."
+        )
     folio_target = resolve_source_target(source, event.folio_target)
     dry_run = resolve_dry_run(event.dry_run, folio_target)
     env_hard_delete = os.environ.get("HARD_DELETE", "false").lower() in (
