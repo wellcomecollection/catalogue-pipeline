@@ -3,9 +3,10 @@
 # (module.sync_lambda.lambda_role), matching the adapter trigger lambdas.
 
 locals {
-  s3tables_bucket_arn  = trimsuffix(var.s3_table_bucket_arn, "/")
-  s3tables_bucket_name = split("/", local.s3tables_bucket_arn)[1]
-  s3_bucket_arn        = "arn:aws:s3:::${local.s3tables_bucket_name}"
+  s3tables_bucket_arns = [for arn in var.s3_table_bucket_arns : trimsuffix(arn, "/")]
+  s3_bucket_arns = [
+    for arn in local.s3tables_bucket_arns : "arn:aws:s3:::${split("/", arn)[1]}"
+  ]
 }
 
 # SSM: read the OKAPI credentials SecureString and decrypt with the default SSM KMS key.
@@ -80,23 +81,23 @@ data "aws_iam_policy_document" "sync_s3tables" {
       "s3tables:ListNamespaces",
       "s3tables:ListTables",
     ]
-    resources = [
-      local.s3tables_bucket_arn,
-      "${local.s3tables_bucket_arn}/*",
-    ]
+    resources = concat(
+      local.s3tables_bucket_arns,
+      [for arn in local.s3tables_bucket_arns : "${arn}/*"],
+    )
   }
 
   # pyiceberg (PyArrow FileIO) reads parquet files directly from the S3-managed bucket.
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
-    resources = [local.s3_bucket_arn]
+    resources = local.s3_bucket_arns
   }
 
   statement {
     effect    = "Allow"
     actions   = ["s3:GetObject"]
-    resources = ["${local.s3_bucket_arn}/*"]
+    resources = [for arn in local.s3_bucket_arns : "${arn}/*"]
   }
 }
 

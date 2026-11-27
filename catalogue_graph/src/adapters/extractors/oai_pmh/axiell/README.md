@@ -15,10 +15,23 @@ This adapter ingests records from the Axiell Collections OAI-PMH feed. It extend
 
 ## SSM Parameters
 
-| Parameter                                  | Description                 |
-| ------------------------------------------ | --------------------------- |
-| `/catalogue_pipeline/axiell/oai_api_token` | Axiell OAI API token        |
-| `/catalogue_pipeline/axiell/oai_api_url`   | Axiell OAI-PMH endpoint URL |
+| Parameter                                              | Description                 |
+| ------------------------------------------------------ | --------------------------- |
+| `/catalogue_pipeline/axiell_collections/oai_api_token` | Axiell OAI API token        |
+| `/catalogue_pipeline/axiell_collections/oai_api_url`   | Axiell OAI-PMH endpoint URL |
+
+## UAT adapter
+
+`axiell_uat` (`AXIELL_UAT_CONFIG`) harvests the Collections UAT system with the same code and
+format. UAT is a copy of the live system, so its records share GUIDs and keys with live ones, and nothing is shared
+with the live adapter: its tables are in the `wellcomecollection-platform-axiell-uat-adapter` S3 Tables bucket, its
+window status in `axiell_uat_window_status`, and it reads its own SSM parameters under `/catalogue_pipeline/axiell_uat/`
+(`oai_api_url`, `oai_api_token`, `oai_username`, `oai_password`). It does not feed the catalogue pipeline. The FOLIO
+sync reads it and writes only to the FOLIO test environment. Use `--adapter-type axiell_uat`.
+
+The UAT endpoint (`/oaitest/oai.ashx`) sits behind IIS Windows authentication, so the token alone gets a 401. The UAT
+client does an NTLM login with `oai_username` and `oai_password` (via `httpx-ntlm`) and sends the `Token` header as
+well; both are needed. Live needs the token only.
 
 ## Quick start
 

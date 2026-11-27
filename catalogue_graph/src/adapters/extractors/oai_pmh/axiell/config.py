@@ -254,3 +254,110 @@ DELETION_FACTS_LOCAL_CONFIG = LocalIcebergTableConfig(
     iceberg_schema=DELETION_FACTS_ICEBERG_SCHEMA,
     db_name=LOCAL_DB_NAME,
 )
+
+# ---------------------------------------------------------------------------
+# Axiell UAT
+# ---------------------------------------------------------------------------
+# A second Axiell adapter that harvests the Collections UAT system into its own
+# S3 Tables bucket, so that test edits never mix with live records.
+# Every table, the window status namespace and the SSM parameters are separate.
+# The SSM parameters sit under /catalogue_pipeline/axiell_uat, the prefix the
+# adapter module's IAM policy grants for this namespace.
+UAT_S3_TABLES_BUCKET = os.getenv(
+    "AXIELL_UAT_S3_TABLES_BUCKET", "wellcomecollection-platform-axiell-uat-adapter"
+)
+UAT_REST_API_TABLE_NAME = os.getenv(
+    "AXIELL_UAT_REST_API_TABLE_NAME", "axiell_uat_adapter_table"
+)
+UAT_WINDOW_STATUS_NAMESPACE = os.getenv(
+    "AXIELL_UAT_WINDOW_STATUS_NAMESPACE", "axiell_uat_window_status"
+)
+UAT_RECONCILER_REST_API_TABLE_NAME = os.getenv(
+    "AXIELL_UAT_RECONCILER_REST_API_TABLE_NAME", "axiell_uat_reconciler_table"
+)
+UAT_DELETION_FACTS_REST_API_TABLE_NAME = os.getenv(
+    "AXIELL_UAT_DELETION_FACTS_REST_API_TABLE_NAME",
+    "axiell_uat_deletion_facts_table",
+)
+UAT_LOCAL_NAMESPACE = os.getenv("AXIELL_UAT_LOCAL_NAMESPACE", "axiell_uat_local")
+UAT_LOCAL_DB_NAME = os.getenv("AXIELL_UAT_LOCAL_DB_NAME", "axiell_uat_catalog")
+UAT_SSM_OAI_TOKEN = os.getenv(
+    "AXIELL_UAT_SSM_OAI_TOKEN", "/catalogue_pipeline/axiell_uat/oai_api_token"
+)
+UAT_SSM_OAI_URL = os.getenv(
+    "AXIELL_UAT_SSM_OAI_URL", "/catalogue_pipeline/axiell_uat/oai_api_url"
+)
+# UAT sits behind IIS Windows authentication as well as the token check, so it
+# also needs an NTLM login. Live needs the token only.
+UAT_SSM_OAI_NTLM_USERNAME = os.getenv(
+    "AXIELL_UAT_SSM_OAI_NTLM_USERNAME", "/catalogue_pipeline/axiell_uat/oai_username"
+)
+UAT_SSM_OAI_NTLM_PASSWORD = os.getenv(
+    "AXIELL_UAT_SSM_OAI_NTLM_PASSWORD", "/catalogue_pipeline/axiell_uat/oai_password"
+)
+UAT_OAI_SET_SPEC = os.getenv("AXIELL_UAT_OAI_SET_SPEC", "collect")
+UAT_S3_BUCKET = os.getenv(
+    "AXIELL_UAT_S3_BUCKET", "wellcomecollection-platform-axiell-uat-adapter"
+)
+
+AXIELL_UAT_ADAPTER_CONFIG = AXIELL_ADAPTER_CONFIG.model_copy(
+    update={
+        "adapter_name": "axiell_uat",
+        "adapter_namespace": "axiell_uat",
+        "pipeline_step_prefix": "axiell_uat_adapter",
+        "oai_set_spec": UAT_OAI_SET_SPEC,
+        "rest_api_iceberg_config": AXIELL_ADAPTER_CONFIG.rest_api_iceberg_config.model_copy(
+            update={
+                "table_name": UAT_REST_API_TABLE_NAME,
+                "s3_tables_bucket": UAT_S3_TABLES_BUCKET,
+            }
+        ),
+        "rest_api_window_status_iceberg_config": AXIELL_ADAPTER_CONFIG.rest_api_window_status_iceberg_config.model_copy(
+            update={
+                "namespace": UAT_WINDOW_STATUS_NAMESPACE,
+                "s3_tables_bucket": UAT_S3_TABLES_BUCKET,
+            }
+        ),
+        "local_iceberg_config": AXIELL_ADAPTER_CONFIG.local_iceberg_config.model_copy(
+            update={
+                "table_name": "axiell_uat_local_table",
+                "namespace": UAT_LOCAL_NAMESPACE,
+                "db_name": UAT_LOCAL_DB_NAME,
+            }
+        ),
+        "local_window_status_iceberg_config": AXIELL_ADAPTER_CONFIG.local_window_status_iceberg_config.model_copy(
+            update={
+                "namespace": UAT_WINDOW_STATUS_NAMESPACE,
+                "db_name": "axiell_uat_window_status",
+            }
+        ),
+        "report_s3_bucket": UAT_S3_BUCKET,
+    }
+)
+
+UAT_RECONCILER_REST_API_CONFIG = RECONCILER_REST_API_CONFIG.model_copy(
+    update={
+        "table_name": UAT_RECONCILER_REST_API_TABLE_NAME,
+        "s3_tables_bucket": UAT_S3_TABLES_BUCKET,
+    }
+)
+UAT_RECONCILER_LOCAL_CONFIG = RECONCILER_LOCAL_CONFIG.model_copy(
+    update={
+        "table_name": "axiell_uat_local_reconciler_table",
+        "namespace": UAT_LOCAL_NAMESPACE,
+        "db_name": UAT_LOCAL_DB_NAME,
+    }
+)
+UAT_DELETION_FACTS_REST_API_CONFIG = DELETION_FACTS_REST_API_CONFIG.model_copy(
+    update={
+        "table_name": UAT_DELETION_FACTS_REST_API_TABLE_NAME,
+        "s3_tables_bucket": UAT_S3_TABLES_BUCKET,
+    }
+)
+UAT_DELETION_FACTS_LOCAL_CONFIG = DELETION_FACTS_LOCAL_CONFIG.model_copy(
+    update={
+        "table_name": "axiell_uat_local_deletion_facts_table",
+        "namespace": UAT_LOCAL_NAMESPACE,
+        "db_name": UAT_LOCAL_DB_NAME,
+    }
+)

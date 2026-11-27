@@ -11,6 +11,10 @@ from pydantic import BaseModel, Field
 # by it, so adding a target there without adding it here is a type error.
 FolioTarget = Literal["prod", "test", "dev"]
 
+# The Axiell adapter a run reads from: the live system or UAT.
+# Arrives as ``transformer_type`` on the adapter's completed event.
+SyncSource = Literal["axiell", "axiell_uat"]
+
 
 class SyncSuccessEntry(BaseModel):
     """One successfully synced record in the run report."""
@@ -62,7 +66,10 @@ class AxiellFolioSyncEvent(BaseModel):
 
     job_id: str
     changeset_ids: list[str] = Field(default_factory=list)
-    transformer_type: str | None = None
+    # Which Axiell adapter's table to read. ``None`` means the live "axiell"
+    # adapter. An unknown value fails validation rather than reading the wrong
+    # table.
+    transformer_type: SyncSource | None = None
     # ``None`` means "fall back to the DRY_RUN env var" (default true). Ignored
     # for prod, which is always a dry run.
     dry_run: bool | None = None

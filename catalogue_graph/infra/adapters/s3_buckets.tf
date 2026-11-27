@@ -40,6 +40,27 @@ resource "aws_s3_bucket_lifecycle_configuration" "axiell_adapter" {
   }
 }
 
+resource "aws_s3_bucket" "axiell_uat_adapter" {
+  bucket = "wellcomecollection-platform-axiell-uat-adapter"
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "axiell_uat_adapter" {
+  bucket = aws_s3_bucket.axiell_uat_adapter.id
+
+  rule {
+    id     = "delete_objects_after_6_months"
+    status = "Enabled"
+
+    expiration {
+      days = 180
+    }
+  }
+}
+
 resource "aws_s3_bucket" "folio_adapter" {
   bucket = "wellcomecollection-platform-folio-adapter"
 

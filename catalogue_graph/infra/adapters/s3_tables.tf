@@ -24,6 +24,21 @@ resource "aws_s3tables_namespace" "axiell_namespace" {
   table_bucket_arn = aws_s3tables_table_bucket.axiell_table_bucket.arn
 }
 
+# The Axiell UAT adapter. A bucket of its own, so that test records, which share
+# GUIDs and keys with live ones, never reach the live tables.
+resource "aws_s3tables_table_bucket" "axiell_uat_table_bucket" {
+  name = "wellcomecollection-platform-axiell-uat-adapter"
+  encryption_configuration = {
+    sse_algorithm = "AES256"
+    kms_key_arn   = null
+  }
+}
+
+resource "aws_s3tables_namespace" "axiell_uat_namespace" {
+  namespace        = "wellcomecollection_catalogue"
+  table_bucket_arn = aws_s3tables_table_bucket.axiell_uat_table_bucket.arn
+}
+
 resource "aws_s3tables_table_bucket" "folio_table_bucket" {
   name = "wellcomecollection-platform-folio-adapter"
   encryption_configuration = {

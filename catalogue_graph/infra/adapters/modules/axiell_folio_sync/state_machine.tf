@@ -23,8 +23,11 @@ locals {
             hard_delete = "{% $exists($states.input.detail.hard_delete) ? $states.input.detail.hard_delete : null %}"
             # Baked in at apply time rather than read from the Lambda's
             # FOLIO_TARGET, so scheduled runs keep their target even if that env
-            # var is changed out of band for hand-driven testing.
-            folio_target = "{% $exists($states.input.detail.folio_target) ? $states.input.detail.folio_target : '${local.folio_default_target}' %}"
+            # var is changed out of band for hand-driven testing. folio_default_target
+            # is the live adapter's target; a run from the UAT adapter
+            # (transformer_type "axiell_uat") falls back to "test", and the
+            # Lambda holds it there whatever this says.
+            folio_target = "{% $exists($states.input.detail.folio_target) ? $states.input.detail.folio_target : ($states.input.detail.transformer_type = 'axiell_uat' ? 'test' : '${local.folio_default_target}') %}"
           }
         }
         Output = "{% $states.result.Payload %}"

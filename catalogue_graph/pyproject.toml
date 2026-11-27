@@ -38,6 +38,7 @@ dependencies = [
     "pysbd==0.3.4",
     "httpx>=0.28",
     "tzdata>=2025.2",
+    "httpx-ntlm>=1.4",
 ]
 
 [tool.uv]
@@ -117,5 +118,5 @@ exclude = ["build/.*"]
 
 # Ignore untyped imports for external libraries without stubs
 [[tool.mypy.overrides]]
-module = ["pyarrow.*", "boto3.*", "smart_open.*", "pymarc.*", "oai_pmh_client.*", "pymysql.*", "yoyo.*", "pysbd.*"]
+module = ["pyarrow.*", "boto3.*", "smart_open.*", "pymarc.*", "oai_pmh_client.*", "pymysql.*", "yoyo.*", "pysbd.*", "httpx_ntlm.*"]
 ignore_missing_imports = true

@@ -9,9 +9,9 @@ variable "repository_url" {
   type        = string
 }
 
-variable "s3_table_bucket_arn" {
-  description = "ARN of the Axiell adapter S3 Tables bucket (bucket scope, not table ARN); used to scope IAM read access"
-  type        = string
+variable "s3_table_bucket_arns" {
+  description = "ARNs of the Axiell adapter S3 Tables buckets the sync reads, live and UAT (bucket scope, not table ARNs); used to scope IAM read access"
+  type        = list(string)
 }
 
 variable "lambda_timeout_seconds" {
@@ -76,6 +76,14 @@ variable "folio_dev_security_group_ids" {
   description = "Security groups for the sync Lambda's ENIs when folio_dev_target_enabled is true; must be VPC-scoped to the catalogue VPC"
   type        = list(string)
   default     = []
+}
+
+# Off removes the live adapter's trigger, so nothing it harvests is synced. The
+# UAT adapter's trigger is not affected.
+variable "live_sync_enabled" {
+  description = "Trigger the sync from the live Axiell adapter's completed events. False stops live syncs; UAT syncs carry on."
+  type        = bool
+  default     = true
 }
 
 # Sets FOLIO_TARGET, and the target the state machine falls back to. Defaults to

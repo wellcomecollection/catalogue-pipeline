@@ -24,6 +24,62 @@ resource "aws_ssm_parameter" "axiell_collections_oai_api_url" {
   }
 }
 
+# The Axiell UAT OAI-PMH feed, filled in by hand. Under
+# /catalogue_pipeline/axiell_uat, the prefix the adapter module grants the
+# axiell_uat namespace.
+resource "aws_ssm_parameter" "axiell_uat_oai_api_token" {
+  name        = "/catalogue_pipeline/axiell_uat/oai_api_token"
+  description = "The API token for the Axiell Collections UAT OAI-PMH endpoint"
+  type        = "SecureString"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
+
+resource "aws_ssm_parameter" "axiell_uat_oai_api_url" {
+  name        = "/catalogue_pipeline/axiell_uat/oai_api_url"
+  description = "The URL for the Axiell Collections UAT OAI-PMH endpoint"
+  type        = "String"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
+
+# The UAT endpoint is behind IIS Windows authentication as well as the token
+# check, so the adapter also does an NTLM login with these. Live needs no login.
+resource "aws_ssm_parameter" "axiell_uat_oai_username" {
+  name        = "/catalogue_pipeline/axiell_uat/oai_username"
+  description = "The Windows (NTLM) username for the Axiell Collections UAT OAI-PMH endpoint"
+  type        = "SecureString"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
+
+resource "aws_ssm_parameter" "axiell_uat_oai_password" {
+  name        = "/catalogue_pipeline/axiell_uat/oai_password"
+  description = "The Windows (NTLM) password for the Axiell Collections UAT OAI-PMH endpoint"
+  type        = "SecureString"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
 
 resource "aws_ssm_parameter" "folio_oai_api_token" {
   name        = "/catalogue_pipeline/folio/oai_api_token"

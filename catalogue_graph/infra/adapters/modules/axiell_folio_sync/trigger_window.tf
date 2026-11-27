@@ -11,7 +11,8 @@
 # evening disable fires.
 
 locals {
-  trigger_window_enabled = var.trigger_window != null
+  # The window toggles the live rule, which only exists while live_sync_enabled.
+  trigger_window_enabled = var.trigger_window != null && var.live_sync_enabled
 }
 
 data "aws_iam_policy_document" "scheduler_assume_role" {
@@ -40,7 +41,7 @@ data "aws_iam_policy_document" "scheduler_toggle_rule" {
   statement {
     effect    = "Allow"
     actions   = ["events:EnableRule", "events:DisableRule"]
-    resources = [aws_cloudwatch_event_rule.axiell_adapter_completed.arn]
+    resources = [aws_cloudwatch_event_rule.axiell_adapter_completed[0].arn]
   }
 }
 
@@ -55,7 +56,7 @@ resource "aws_iam_role_policy" "scheduler_toggle_rule" {
 # enableRule and disableRule take the rule name and bus, not an ARN.
 locals {
   trigger_rule_input = local.trigger_window_enabled ? jsonencode({
-    Name         = aws_cloudwatch_event_rule.axiell_adapter_completed.name
+    Name         = aws_cloudwatch_event_rule.axiell_adapter_completed[0].name
     EventBusName = var.event_bus_name
   }) : null
 }

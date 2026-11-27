@@ -13,11 +13,18 @@ The design, record-selection rules and tombstone semantics are specified in
 
 ## How it works
 
-1. The Axiell adapter finishes a run and emits an `axiell.adapter.completed` EventBridge event.
-2. An EventBridge rule starts the sync Step Function, which invokes the Lambda
-   (entrypoint `adapters.steps.axiell_folio_sync.axiell_folio_sync.lambda_handler`).
-3. The step reads the changed rows for the event's `changeset_ids` through `AxiellChangesetReader` (using the same
-   `AXIELL_CONFIG` as the Axiell adapter, so S3 Tables in Lambda and a local sqlite catalog for local runs). The
+1. An Axiell adapter finishes a run and emits its completed EventBridge event: `axiell.adapter.completed` from the
+   live adapter, or `axiell_uat.adapter.completed` from the UAT adapter. The event's
+   `transformer_type` (`axiell` or `axiell_uat`) is the run's source.
+2. An EventBridge rule per source starts the sync Step Function, which invokes the Lambda
+   (entrypoint `adapters.steps.axiell_folio_sync.axiell_folio_sync.lambda_handler`). UAT runs go to the FOLIO test
+   environment, and their rule is always enabled. Live runs are currently off (Terraform `live_sync_enabled = false`, which
+   removes their rule), so nothing from the live system is synced. When on, they go to FOLIO production
+   (`folio_default_target = "prod"`), as dry runs until production writes are switched on.
+3. The step reads the changed rows for the event's `changeset_ids` through `AxiellChangesetReader`, using the
+   source adapter's own config (`AXIELL_CONFIG` or `AXIELL_UAT_CONFIG`, so S3 Tables in Lambda and a local sqlite
+   catalog for local runs). A UAT run always writes to the FOLIO test environment, whatever `folio_target` or
+   `FOLIO_TARGET` say, because UAT records share GUIDs with live ones (`SOURCE_FOLIO_TARGETS`). The
    reader also exposes the adapter's deletion facts via `iter_deletions()`, and the read step derives the GUIDs of
    the batch's tombstones; both are consumed by the reconciliation pass below.
 4. **Pass 1 — upsert.** Each record is selected, mapped, and upserted:
@@ -100,7 +107,7 @@ The step is dry-run by default: payloads are built and upsert actions are planne
 to FOLIO. Note that dry runs still *read* from FOLIO (reference data and existence lookups), so valid credentials are
 required either way.
 
-The default comes from the `DRY_RUN` env var (Terraform `dry_run_default`, currently `false`, so scheduled runs write to the test environment); an explicit `dry_run`
+The default comes from the `DRY_RUN` env var (Terraform `dry_run_default`, currently `false`, so scheduled UAT runs write to the test environment); an explicit `dry_run`
 field on the event overrides it per run. A run that targets `prod` is always a dry run, whatever the event or `DRY_RUN`
 says, until production writes are switched on. Flip `dry_run_default` to `false` in Terraform only after validating a dry
 run's manifest.
@@ -114,7 +121,7 @@ Environment variables (injected by Terraform in Lambda):
 | `OKAPI_SECRET_PARAM` | SSM path to the OKAPI credentials SecureString                       |
 | `OKAPI_TEST_SECRET_PARAM` | The same, for the EBSCO FOLIO test environment                  |
 | `OKAPI_DEV_SECRET_PARAM` | The same, for the FOLIO dev sandbox (set only when it is enabled in Terraform) |
-| `FOLIO_TARGET`       | `prod`, `test` or `dev` when the event names none; `test` in code and in Terraform |
+| `FOLIO_TARGET`       | `prod`, `test` or `dev` when the event names none; `test` in code, `prod` in Terraform |
 | `MANIFEST_S3_BUCKET` | Bucket for JSON run reports                                          |
 | `DRY_RUN`            | Default dry-run behaviour (`true` unless overridden by the event)    |
 | `HARD_DELETE`        | Delete rather than suppress in Pass 2 (`false` in code, `true` in Terraform; the event overrides) |
@@ -155,6 +162,10 @@ AWS_PROFILE=platform-developer uv run python -m adapters.steps.axiell_folio_sync
 # Specific changesets; pass --live to disable dry run and write to FOLIO
 AWS_PROFILE=platform-developer uv run python -m adapters.steps.axiell_folio_sync.axiell_folio_sync \
   --use-cli --job-id my-job-123 --changeset-ids <changeset-id> --use-rest-api-table
+
+# From the UAT adapter's table, always to the FOLIO test environment
+AWS_PROFILE=platform-developer uv run python -m adapters.steps.axiell_folio_sync.axiell_folio_sync \
+  --use-cli --job-id uat-test-1 --source axiell_uat --sample-limit 5 --use-rest-api-table
 ```
 
 Set the `OKAPI_*` environment variables first (see Configuration above).
